@@ -8,6 +8,7 @@ import { ValidateStateService } from '../processing/validate-state.service';
 import { of } from 'rxjs';
 import { EntityConflict, OpType, Operation } from '../operation.types';
 import { SyncSafetyBackupService } from '../../../../imex/sync/sync-safety-backup.service';
+import { BACKUP_TIMEOUT_MS } from '../operation-log.const';
 
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
@@ -69,6 +70,8 @@ describe('ConflictResolutionService', () => {
         { provide: SnackService, useValue: mockSnackService },
         { provide: ValidateStateService, useValue: mockValidateStateService },
         { provide: SyncSafetyBackupService, useValue: mockSyncSafetyBackupService },
+        // Use a short timeout for tests to speed them up
+        { provide: BACKUP_TIMEOUT_MS, useValue: 50 },
       ],
     });
     service = TestBed.inject(ConflictResolutionService);
@@ -1549,7 +1552,7 @@ describe('ConflictResolutionService', () => {
         appliedOps: [conflicts[0].remoteOps[0]],
       });
 
-      // This should complete within timeout (10 seconds), not hang forever
+      // This should complete within timeout (50ms from BACKUP_TIMEOUT_MS provider)
       const resultPromise = service.autoResolveConflictsLWW(conflicts);
 
       // Wait for the result - should complete due to backup timeout
@@ -1568,6 +1571,6 @@ describe('ConflictResolutionService', () => {
 
       // Should have shown error snack
       expect(mockSnackService.open).toHaveBeenCalled();
-    }, 15000); // Allow 15 seconds for the test (10s timeout + buffer)
+    });
   });
 });

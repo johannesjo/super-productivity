@@ -124,6 +124,23 @@ export const RETRY_DELAY_BASE_MS = new InjectionToken<number>('RETRY_DELAY_BASE_
 });
 
 /**
+ * Default timeout for creating safety backup before conflict resolution (milliseconds).
+ * If backup takes longer than this, sync continues without waiting.
+ * Default: 10 seconds
+ */
+export const DEFAULT_BACKUP_TIMEOUT_MS = 10000;
+
+/**
+ * Injection token for backup timeout value (milliseconds).
+ * Use this token to inject a shorter timeout in tests for faster execution.
+ * Defaults to DEFAULT_BACKUP_TIMEOUT_MS if not provided.
+ */
+export const BACKUP_TIMEOUT_MS = new InjectionToken<number>('BACKUP_TIMEOUT_MS', {
+  providedIn: 'root',
+  factory: () => DEFAULT_BACKUP_TIMEOUT_MS,
+});
+
+/**
  * Duration in milliseconds to suppress selector-based effects after sync completes.
  * This prevents "repair" effects from creating redundant operations based on
  * freshly-synced state that looks like it needs repair.

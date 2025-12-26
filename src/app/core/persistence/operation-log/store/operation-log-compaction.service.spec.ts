@@ -95,30 +95,32 @@ describe('OperationLogCompactionService', () => {
       expect(mockStoreDelegate.getAllSyncModelDataFromStore).toHaveBeenCalled();
     });
 
-    it(
-      'should log metrics if compaction is slow',
-      async () => {
-        // Mock one of the async operations to take longer than threshold
-        mockOpLogStore.saveStateCache.and.callFake(async () => {
-          await new Promise((resolve) =>
-            setTimeout(resolve, SLOW_COMPACTION_THRESHOLD_MS + 100),
-          );
-        });
+    it('should log metrics if compaction is slow', async () => {
+      // Use jasmine.clock to control Date.now() without actual delays
+      jasmine.clock().install();
+      const baseTime = new Date(2024, 0, 1).getTime();
+      jasmine.clock().mockDate(new Date(baseTime));
 
-        await service.compact();
+      // Mock saveStateCache to advance the clock, simulating slow operation
+      mockOpLogStore.saveStateCache.and.callFake(async () => {
+        // Advance the mocked Date.now() to simulate time passing
+        jasmine.clock().mockDate(new Date(baseTime + SLOW_COMPACTION_THRESHOLD_MS + 100));
+      });
 
-        expect(OpLog.normal).toHaveBeenCalledWith(
-          'OperationLogCompactionService: Compaction completed',
-          jasmine.objectContaining({
-            durationMs: jasmine.any(Number),
-            isEmergency: false,
-          }),
-        );
-        const args = (OpLog.normal as jasmine.Spy).calls.mostRecent().args;
-        expect(args[1].durationMs).toBeGreaterThan(SLOW_COMPACTION_THRESHOLD_MS);
-      },
-      SLOW_COMPACTION_THRESHOLD_MS + 2000,
-    );
+      await service.compact();
+
+      jasmine.clock().uninstall();
+
+      expect(OpLog.normal).toHaveBeenCalledWith(
+        'OperationLogCompactionService: Compaction completed',
+        jasmine.objectContaining({
+          durationMs: jasmine.any(Number),
+          isEmergency: false,
+        }),
+      );
+      const args = (OpLog.normal as jasmine.Spy).calls.mostRecent().args;
+      expect(args[1].durationMs).toBeGreaterThan(SLOW_COMPACTION_THRESHOLD_MS);
+    });
 
     it('should not log metrics if compaction is fast', async () => {
       await service.compact();
