@@ -532,10 +532,13 @@ describe('TaskArchiveService', () => {
 
       await service.removeRepeatCfgFromArchiveTasks('repeat1');
 
-      expect(service.updateTasks).toHaveBeenCalledWith([
-        { id: 'task1', changes: { repeatCfgId: undefined } },
-        { id: 'task2', changes: { repeatCfgId: undefined } },
-      ]);
+      expect(service.updateTasks).toHaveBeenCalledWith(
+        [
+          { id: 'task1', changes: { repeatCfgId: undefined } },
+          { id: 'task2', changes: { repeatCfgId: undefined } },
+        ],
+        { isSkipDispatch: true },
+      );
     });
 
     it('should not call updateTasks if no tasks have the repeatCfgId', async () => {
@@ -550,6 +553,84 @@ describe('TaskArchiveService', () => {
       spyOn(service, 'updateTasks').and.returnValue(Promise.resolve());
 
       await service.removeRepeatCfgFromArchiveTasks('repeat1');
+
+      expect(service.updateTasks).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unlinkIssueProviderFromArchiveTasks', () => {
+    it('should unlink issue provider from all tasks with matching issueProviderId and pass isSkipDispatch', async () => {
+      const task1 = createMockTask('task1', {
+        issueProviderId: 'provider1',
+        issueId: 'issue1',
+        issueType: 'GITHUB' as any,
+      });
+      const task2 = createMockTask('task2', {
+        issueProviderId: 'provider1',
+        issueId: 'issue2',
+        issueType: 'GITHUB' as any,
+      });
+      const task3 = createMockTask('task3', {
+        issueProviderId: 'provider2',
+        issueId: 'issue3',
+        issueType: 'JIRA' as any,
+      });
+
+      const youngArchive = createMockArchiveModel([task1, task2]);
+      const oldArchive = createMockArchiveModel([task3]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(oldArchive));
+
+      spyOn(service, 'updateTasks').and.returnValue(Promise.resolve());
+
+      await service.unlinkIssueProviderFromArchiveTasks('provider1');
+
+      expect(service.updateTasks).toHaveBeenCalledWith(
+        [
+          {
+            id: 'task1',
+            changes: {
+              issueId: undefined,
+              issueProviderId: undefined,
+              issueType: undefined,
+              issueWasUpdated: undefined,
+              issueLastUpdated: undefined,
+              issueAttachmentNr: undefined,
+              issueTimeTracked: undefined,
+              issuePoints: undefined,
+            },
+          },
+          {
+            id: 'task2',
+            changes: {
+              issueId: undefined,
+              issueProviderId: undefined,
+              issueType: undefined,
+              issueWasUpdated: undefined,
+              issueLastUpdated: undefined,
+              issueAttachmentNr: undefined,
+              issueTimeTracked: undefined,
+              issuePoints: undefined,
+            },
+          },
+        ],
+        { isSkipDispatch: true },
+      );
+    });
+
+    it('should not call updateTasks if no tasks have the issueProviderId', async () => {
+      const task1 = createMockTask('task1', { issueProviderId: 'provider2' });
+      const task2 = createMockTask('task2', { issueProviderId: undefined });
+
+      const mockArchive = createMockArchiveModel([task1, task2]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(mockArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      spyOn(service, 'updateTasks').and.returnValue(Promise.resolve());
+
+      await service.unlinkIssueProviderFromArchiveTasks('provider1');
 
       expect(service.updateTasks).not.toHaveBeenCalled();
     });
