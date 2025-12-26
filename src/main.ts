@@ -55,6 +55,7 @@ import {
   taskSharedSchedulingMetaReducer,
 } from './app/root-store/meta/task-shared-meta-reducers';
 import { OperationCaptureService } from './app/core/persistence/operation-log/processing/operation-capture.service';
+import { bulkHydrationMetaReducer } from './app/core/persistence/operation-log/bulk-hydration.meta-reducer';
 import { ImmediateUploadService } from './app/core/persistence/operation-log/sync/immediate-upload.service';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -118,6 +119,8 @@ bootstrapApplication(AppComponent, {
           // original state BEFORE any other meta-reducer modifies it.
           // NgRx composes meta-reducers such that FIRST in array = OUTERMOST in call chain.
           operationCaptureMetaReducer,
+          // bulkHydrationMetaReducer applies multiple ops in one dispatch for fast startup
+          bulkHydrationMetaReducer,
           undoTaskDeleteMetaReducer,
           taskSharedCrudMetaReducer,
           taskBatchUpdateMetaReducer,

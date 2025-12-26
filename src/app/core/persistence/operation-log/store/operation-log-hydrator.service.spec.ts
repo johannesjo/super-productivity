@@ -15,8 +15,10 @@ import { ValidateStateService } from '../processing/validate-state.service';
 import { RepairOperationService } from '../processing/repair-operation.service';
 import { VectorClockService } from '../sync/vector-clock.service';
 import { OperationApplierService } from '../processing/operation-applier.service';
+import { HydrationStateService } from '../processing/hydration-state.service';
 import { Operation, OperationLogEntry, OpType } from '../operation.types';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { bulkApplyHydrationOperations } from '../bulk-hydration.action';
 
 describe('OperationLogHydratorService', () => {
   let service: OperationLogHydratorService;
@@ -31,6 +33,7 @@ describe('OperationLogHydratorService', () => {
   let mockRepairOperationService: jasmine.SpyObj<RepairOperationService>;
   let mockVectorClockService: jasmine.SpyObj<VectorClockService>;
   let mockOperationApplierService: jasmine.SpyObj<OperationApplierService>;
+  let mockHydrationStateService: jasmine.SpyObj<HydrationStateService>;
 
   const mockState = {
     task: { entities: {}, ids: [] },
@@ -133,6 +136,10 @@ describe('OperationLogHydratorService', () => {
     mockOperationApplierService = jasmine.createSpyObj('OperationApplierService', [
       'applyOperations',
     ]);
+    mockHydrationStateService = jasmine.createSpyObj('HydrationStateService', [
+      'startApplyingRemoteOps',
+      'endApplyingRemoteOps',
+    ]);
 
     // Default mock implementations
     mockOpLogStore.getVectorClock.and.returnValue(Promise.resolve(null));
@@ -182,6 +189,7 @@ describe('OperationLogHydratorService', () => {
         { provide: RepairOperationService, useValue: mockRepairOperationService },
         { provide: VectorClockService, useValue: mockVectorClockService },
         { provide: OperationApplierService, useValue: mockOperationApplierService },
+        { provide: HydrationStateService, useValue: mockHydrationStateService },
       ],
     });
 
@@ -339,13 +347,15 @@ describe('OperationLogHydratorService', () => {
 
         await service.hydrateStore();
 
-        // First dispatch is snapshot
-        expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
-        // Then tail ops are replayed via applier service with isLocalHydration=true
-        expect(mockOperationApplierService.applyOperations).toHaveBeenCalledWith(
-          tailOps.map((e) => e.op),
-          { isLocalHydration: true },
+        // First dispatch is snapshot, second is bulk hydration
+        expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
+        // Tail ops are replayed via bulk dispatch for performance
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          bulkApplyHydrationOperations({ operations: tailOps.map((e) => e.op) }),
         );
+        // Hydration state is managed around the dispatch
+        expect(mockHydrationStateService.startApplyingRemoteOps).toHaveBeenCalled();
+        expect(mockHydrationStateService.endApplyingRemoteOps).toHaveBeenCalled();
       });
 
       it('should request ops after snapshot sequence', async () => {
@@ -635,8 +645,10 @@ describe('OperationLogHydratorService', () => {
         // Both snapshot and operations should be migrated
         expect(mockSchemaMigrationService.migrateStateIfNeeded).toHaveBeenCalled();
         expect(mockSchemaMigrationService.migrateOperations).toHaveBeenCalled();
-        // Operations should be applied via applier service
-        expect(mockOperationApplierService.applyOperations).toHaveBeenCalled();
+        // Operations should be applied via bulk dispatch
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          bulkApplyHydrationOperations({ operations: migratedOps }),
+        );
       });
 
       it('should handle mixed schema versions in tail operations', async () => {
@@ -828,13 +840,13 @@ describe('OperationLogHydratorService', () => {
 
         await service.hydrateStore();
 
-        // No snapshot dispatch
-        expect(mockStore.dispatch).not.toHaveBeenCalled();
-        // Replay all ops via applier service with isLocalHydration=true
-        expect(mockOperationApplierService.applyOperations).toHaveBeenCalledWith(
-          allOps.map((e) => e.op),
-          { isLocalHydration: true },
+        // Replay all ops via bulk dispatch for performance
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          bulkApplyHydrationOperations({ operations: allOps.map((e) => e.op) }),
         );
+        // Hydration state is managed around the dispatch
+        expect(mockHydrationStateService.startApplyingRemoteOps).toHaveBeenCalled();
+        expect(mockHydrationStateService.endApplyingRemoteOps).toHaveBeenCalled();
       });
 
       it('should save snapshot after full replay', async () => {

@@ -23,6 +23,8 @@ import { ValidateStateService } from '../processing/validate-state.service';
 // DISABLED: Repair system is non-functional
 // import { RepairOperationService } from '../processing/repair-operation.service';
 import { OperationApplierService } from '../processing/operation-applier.service';
+import { HydrationStateService } from '../processing/hydration-state.service';
+import { bulkApplyHydrationOperations } from '../bulk-hydration.action';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { VectorClockService } from '../sync/vector-clock.service';
 import {
@@ -53,6 +55,7 @@ export class OperationLogHydratorService {
   // private repairOperationService = inject(RepairOperationService);
   private vectorClockService = inject(VectorClockService);
   private operationApplierService = inject(OperationApplierService);
+  private hydrationStateService = inject(HydrationStateService);
 
   // Mutex to prevent concurrent repair operations and re-validation during repair
   private _repairMutex: Promise<void> | null = null;
@@ -206,16 +209,14 @@ export class OperationLogHydratorService {
               `OperationLogHydratorService: Replaying ${opsToReplay.length} tail ops ` +
                 `(${droppedCount} dropped during migration).`,
             );
-            // Use OperationApplierService with isLocalHydration=true to skip dependency
-            // checks and archive handling. These operations were already validated when
-            // created, and archive data is already persisted from original execution.
-            const tailReplayResult = await this.operationApplierService.applyOperations(
-              opsToReplay,
-              { isLocalHydration: true },
+            // PERF: Use bulk dispatch to apply all operations in a single NgRx update.
+            // This reduces 500 dispatches to 1, dramatically improving startup performance.
+            // The bulkHydrationMetaReducer iterates through ops and applies each action.
+            this.hydrationStateService.startApplyingRemoteOps();
+            this.store.dispatch(
+              bulkApplyHydrationOperations({ operations: opsToReplay }),
             );
-            if (tailReplayResult.failedOp) {
-              throw tailReplayResult.failedOp.error;
-            }
+            this.hydrationStateService.endApplyingRemoteOps();
 
             // Merge replayed ops' clocks into local clock
             // This ensures subsequent ops have clocks that dominate these tail ops
@@ -292,16 +293,12 @@ export class OperationLogHydratorService {
             `OperationLogHydratorService: Replaying all ${opsToReplay.length} ops ` +
               `(${droppedCount} dropped during migration).`,
           );
-          // Use OperationApplierService with isLocalHydration=true to skip dependency
-          // checks and archive handling. These operations were already validated when
-          // created, and archive data is already persisted from original execution.
-          const fullReplayResult = await this.operationApplierService.applyOperations(
-            opsToReplay,
-            { isLocalHydration: true },
-          );
-          if (fullReplayResult.failedOp) {
-            throw fullReplayResult.failedOp.error;
-          }
+          // PERF: Use bulk dispatch to apply all operations in a single NgRx update.
+          // This reduces 500 dispatches to 1, dramatically improving startup performance.
+          // The bulkHydrationMetaReducer iterates through ops and applies each action.
+          this.hydrationStateService.startApplyingRemoteOps();
+          this.store.dispatch(bulkApplyHydrationOperations({ operations: opsToReplay }));
+          this.hydrationStateService.endApplyingRemoteOps();
 
           // Merge replayed ops' clocks into local clock
           await this.opLogStore.mergeRemoteOpClocks(opsToReplay);
