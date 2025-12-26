@@ -324,7 +324,7 @@ export class TaskArchiveService {
           },
         };
       });
-      await this.updateTasks(updates);
+      await this.updateTasks(updates, { isSkipDispatch: true });
     }
   }
 
@@ -349,7 +349,7 @@ export class TaskArchiveService {
           issuePoints: undefined,
         },
       }));
-      await this.updateTasks(updates);
+      await this.updateTasks(updates, { isSkipDispatch: true });
     }
   }
 
