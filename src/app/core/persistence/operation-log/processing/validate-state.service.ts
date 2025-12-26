@@ -1,5 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { inject, Injectable } from '@angular/core';
 import { IValidation } from 'typia';
 import { validateFull } from '../../../../pfapi/validate/validation-fn';
 // TEMPORARILY DISABLED - repair is disabled for debugging
@@ -8,85 +7,32 @@ import { validateFull } from '../../../../pfapi/validate/validation-fn';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { RepairSummary } from '../operation.types';
 import { OpLog } from '../../../log';
-import { RepairOperationService } from './repair-operation.service';
+// DISABLED: Repair system is non-functional
+// import { RepairOperationService } from './repair-operation.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
-import { PfapiService } from '../../../../pfapi/pfapi.service';
-import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+// DISABLED: Repair system is non-functional
+// import { PfapiService } from '../../../../pfapi/pfapi.service';
+// import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 
-/**
- * Type representing an NgRx entity state slice.
- */
-interface EntityState<T = unknown> {
-  ids: string[];
-  entities: Record<string, T>;
-}
+/* DISABLED: Repair system helper types and functions - unused while repair is disabled
+interface EntityState<T = unknown> { ids: string[]; entities: Record<string, T>; }
 
-/**
- * Helper to safely access entity state with proper typing.
- */
 const getEntityState = (
   state: AppDataCompleteNew,
   model: 'task' | 'project' | 'tag' | 'note' | 'simpleCounter',
-): EntityState | undefined => {
-  const slice = state[model];
-  if (
-    slice &&
-    typeof slice === 'object' &&
-    'ids' in slice &&
-    'entities' in slice &&
-    Array.isArray(slice.ids)
-  ) {
-    return slice as EntityState;
-  }
-  return undefined;
-};
+): EntityState | undefined => { ... };
 
-/**
- * Helper to get archive entity state.
- */
 const getArchiveEntityState = (
   state: AppDataCompleteNew,
   archiveType: 'archiveYoung' | 'archiveOld',
-): EntityState | undefined => {
-  const archive = state[archiveType];
-  if (!archive || typeof archive !== 'object') return undefined;
+): EntityState | undefined => { ... };
 
-  const taskState = (archive as unknown as Record<string, unknown>).task;
-  if (
-    taskState &&
-    typeof taskState === 'object' &&
-    'ids' in taskState &&
-    Array.isArray((taskState as EntityState).ids)
-  ) {
-    return taskState as EntityState;
-  }
-  return undefined;
-};
+interface TaskEntity { id: string; projectId?: string; tagIds?: string[]; }
 
-/**
- * Interface for task entity in the state (minimal fields needed for validation).
- */
-interface TaskEntity {
-  id: string;
-  projectId?: string;
-  tagIds?: string[];
-}
+const getTaskEntities = (state: AppDataCompleteNew): Record<string, TaskEntity> => { ... };
 
-/**
- * Helper to get tasks from entity state.
- */
-const getTaskEntities = (state: AppDataCompleteNew): Record<string, TaskEntity> => {
-  const taskState = getEntityState(state, 'task');
-  return (taskState?.entities as Record<string, TaskEntity>) || {};
-};
-
-/**
- * Interface for menu tree state (matches actual MenuTreeState).
- */
-interface MenuTreeStateLocal {
-  projectTree?: unknown[];
-  tagTree?: unknown[];
-}
+interface MenuTreeStateLocal { projectTree?: unknown[]; tagTree?: unknown[]; }
+*/
 
 /**
  * Result of validating application state.
@@ -122,10 +68,12 @@ export interface ValidateAndRepairResult {
   providedIn: 'root',
 })
 export class ValidateStateService {
-  private store = inject(Store);
+  // DISABLED: Repair system is non-functional
+  // private store = inject(Store);
   private storeDelegateService = inject(PfapiStoreDelegateService);
-  private repairOperationService = inject(RepairOperationService);
-  private injector = inject(Injector);
+  // DISABLED: Repair system is non-functional
+  // private repairOperationService = inject(RepairOperationService);
+  // private injector = inject(Injector);
 
   /**
    * Validates current state from NgRx store, repairs if needed, creates a REPAIR operation,
@@ -138,7 +86,7 @@ export class ValidateStateService {
    */
   async validateAndRepairCurrentState(
     context: string,
-    options?: { callerHoldsLock?: boolean },
+    _options?: { callerHoldsLock?: boolean },
   ): Promise<boolean> {
     OpLog.normal(
       `[ValidateStateService:${context}] Running post-operation validation...`,
@@ -167,23 +115,25 @@ export class ValidateStateService {
       return false;
     }
 
-    // Create REPAIR operation
-    const pfapiService = this.injector.get(PfapiService);
-    const clientId = await pfapiService.pf.metaModel.loadClientId();
-    await this.repairOperationService.createRepairOperation(
-      result.repairedState,
-      result.repairSummary,
-      clientId,
-      { skipLock: options?.callerHoldsLock },
-    );
+    // DISABLED: Repair system is non-functional - this code path is unreachable
+    // because validateAndRepair() returns early without setting repairedState
+    //
+    // const pfapiService = this.injector.get(PfapiService);
+    // const clientId = await pfapiService.pf.metaModel.loadClientId();
+    // await this.repairOperationService.createRepairOperation(
+    //   result.repairedState,
+    //   result.repairSummary,
+    //   clientId,
+    //   { skipLock: options?.callerHoldsLock },
+    // );
+    // this.store.dispatch(
+    //   loadAllData({ appDataComplete: result.repairedState as AppDataCompleteNew }),
+    // );
+    // OpLog.log(`[ValidateStateService:${context}] Created REPAIR operation`);
+    // return true;
 
-    // Dispatch repaired state to NgRx
-    this.store.dispatch(
-      loadAllData({ appDataComplete: result.repairedState as AppDataCompleteNew }),
-    );
-
-    OpLog.log(`[ValidateStateService:${context}] Created REPAIR operation`);
-    return true;
+    // Should never reach here while repair is disabled
+    return false;
   }
 
   /**
@@ -326,190 +276,38 @@ export class ValidateStateService {
     */
   }
 
-  /**
-   * Creates a repair summary by analyzing what changed between original and repaired state.
-   * This is an approximation based on what we can detect changed.
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * DISABLED: The following repair helper methods are currently unused.
+   * The repair system is disabled for debugging archive subtask loss.
+   * Kept for potential future use.
+   * ═══════════════════════════════════════════════════════════════════════════
+   *
+   * private _createRepairSummary(
+   *   validationResult: StateValidationResult,
+   *   original: AppDataCompleteNew,
+   *   repaired: AppDataCompleteNew,
+   * ): RepairSummary {
+   *   const summary: RepairSummary = {
+   *     entityStateFixed: 0,
+   *     orphanedEntitiesRestored: 0,
+   *     invalidReferencesRemoved: 0,
+   *     relationshipsFixed: 0,
+   *     structureRepaired: 0,
+   *     typeErrorsFixed: 0,
+   *   };
+   *   summary.typeErrorsFixed = validationResult.typiaErrors.length;
+   *   summary.entityStateFixed = this._countEntityStateChanges(original, repaired);
+   *   summary.relationshipsFixed = this._countRelationshipChanges(original, repaired);
+   *   summary.orphanedEntitiesRestored = this._countOrphanedEntityChanges(original, repaired);
+   *   summary.invalidReferencesRemoved = this._countInvalidReferenceRemovals(original, repaired);
+   *   summary.structureRepaired = this._countStructureRepairs(original, repaired);
+   *   return summary;
+   * }
+   *
+   * private _countEntityStateChanges(original: AppDataCompleteNew, repaired: AppDataCompleteNew): number { ... }
+   * private _countRelationshipChanges(original: AppDataCompleteNew, repaired: AppDataCompleteNew): number { ... }
+   * private _countOrphanedEntityChanges(original: AppDataCompleteNew, repaired: AppDataCompleteNew): number { ... }
+   * private _countInvalidReferenceRemovals(original: AppDataCompleteNew, repaired: AppDataCompleteNew): number { ... }
+   * private _countStructureRepairs(original: AppDataCompleteNew, repaired: AppDataCompleteNew): number { ... }
    */
-  private _createRepairSummary(
-    validationResult: StateValidationResult,
-    original: AppDataCompleteNew,
-    repaired: AppDataCompleteNew,
-  ): RepairSummary {
-    const summary = RepairOperationService.createEmptyRepairSummary();
-
-    // Count typia errors as type errors fixed
-    summary.typeErrorsFixed = validationResult.typiaErrors.length;
-
-    // Detect entity state changes (ids array sync)
-    summary.entityStateFixed = this._countEntityStateChanges(original, repaired);
-
-    // Detect relationship fixes by looking at task/project/tag counts
-    summary.relationshipsFixed = this._countRelationshipChanges(original, repaired);
-
-    // Detect orphaned entity changes
-    summary.orphanedEntitiesRestored = this._countOrphanedEntityChanges(
-      original,
-      repaired,
-    );
-
-    // Detect invalid reference removals
-    summary.invalidReferencesRemoved = this._countInvalidReferenceRemovals(
-      original,
-      repaired,
-    );
-
-    // Structure repairs (menu tree, inbox project)
-    summary.structureRepaired = this._countStructureRepairs(original, repaired);
-
-    return summary;
-  }
-
-  /**
-   * Counts changes in entity state consistency (ids array matching entities object).
-   */
-  private _countEntityStateChanges(
-    original: AppDataCompleteNew,
-    repaired: AppDataCompleteNew,
-  ): number {
-    let count = 0;
-    const models = ['task', 'project', 'tag', 'note', 'simpleCounter'] as const;
-
-    for (const model of models) {
-      const origState = getEntityState(original, model);
-      const repairedState = getEntityState(repaired, model);
-      const origIds = origState?.ids?.length || 0;
-      const repairedIds = repairedState?.ids?.length || 0;
-      if (origIds !== repairedIds) {
-        count += Math.abs(origIds - repairedIds);
-      }
-    }
-
-    return count;
-  }
-
-  /**
-   * Counts relationship changes (task-project, task-tag assignments).
-   */
-  private _countRelationshipChanges(
-    original: AppDataCompleteNew,
-    repaired: AppDataCompleteNew,
-  ): number {
-    let count = 0;
-
-    // Check if task-project assignments changed
-    const origTasks = getTaskEntities(original);
-    const repairedTasks = getTaskEntities(repaired);
-
-    for (const origTask of Object.values(origTasks)) {
-      const repairedTask = repairedTasks[origTask.id];
-      if (repairedTask) {
-        if (origTask.projectId !== repairedTask.projectId) {
-          count++;
-        }
-        // Check tag changes
-        const origTags = origTask.tagIds || [];
-        const repairedTags = repairedTask.tagIds || [];
-        if (origTags.length !== repairedTags.length) {
-          count++;
-        }
-      }
-    }
-
-    return count;
-  }
-
-  /**
-   * Counts orphaned entity restorations.
-   */
-  private _countOrphanedEntityChanges(
-    original: AppDataCompleteNew,
-    repaired: AppDataCompleteNew,
-  ): number {
-    let count = 0;
-
-    // Check archive changes
-    const origYoungArchive = getArchiveEntityState(original, 'archiveYoung');
-    const origOldArchive = getArchiveEntityState(original, 'archiveOld');
-    const repairedYoungArchive = getArchiveEntityState(repaired, 'archiveYoung');
-    const repairedOldArchive = getArchiveEntityState(repaired, 'archiveOld');
-
-    const origArchiveCount =
-      (origYoungArchive?.ids?.length || 0) + (origOldArchive?.ids?.length || 0);
-    const repairedArchiveCount =
-      (repairedYoungArchive?.ids?.length || 0) + (repairedOldArchive?.ids?.length || 0);
-
-    if (origArchiveCount !== repairedArchiveCount) {
-      count += Math.abs(origArchiveCount - repairedArchiveCount);
-    }
-
-    return count;
-  }
-
-  /**
-   * Counts invalid reference removals.
-   * Checks for tasks where projectId or tagIds were cleaned up (set to null/undefined
-   * or removed from array) because the referenced entity no longer exists.
-   */
-  private _countInvalidReferenceRemovals(
-    original: AppDataCompleteNew,
-    repaired: AppDataCompleteNew,
-  ): number {
-    let count = 0;
-
-    const origTasks = getTaskEntities(original);
-    const repairedTasks = getTaskEntities(repaired);
-
-    for (const origTask of Object.values(origTasks)) {
-      const repairedTask = repairedTasks[origTask.id];
-      if (repairedTask) {
-        // Check if projectId was removed (invalid reference cleaned)
-        if (origTask.projectId && !repairedTask.projectId) {
-          count++;
-        }
-        // Check if tagIds were reduced (invalid references cleaned)
-        const origTagCount = origTask.tagIds?.length || 0;
-        const repairedTagCount = repairedTask.tagIds?.length || 0;
-        if (origTagCount > repairedTagCount) {
-          count += origTagCount - repairedTagCount;
-        }
-      }
-    }
-
-    return count;
-  }
-
-  /**
-   * Counts structure repairs (menu tree, inbox project creation).
-   */
-  private _countStructureRepairs(
-    original: AppDataCompleteNew,
-    repaired: AppDataCompleteNew,
-  ): number {
-    let count = 0;
-
-    // Check if inbox project was created
-    const origProjectState = getEntityState(original, 'project');
-    const repairedProjectState = getEntityState(repaired, 'project');
-    const origProjectCount = origProjectState?.ids?.length || 0;
-    const repairedProjectCount = repairedProjectState?.ids?.length || 0;
-    if (repairedProjectCount > origProjectCount) {
-      count++;
-    }
-
-    // Check menu tree changes
-    const origMenuTree = original.menuTree as unknown as MenuTreeStateLocal | undefined;
-    const repairedMenuTree = repaired.menuTree as unknown as
-      | MenuTreeStateLocal
-      | undefined;
-    const origMenuItems =
-      (origMenuTree?.projectTree?.length || 0) + (origMenuTree?.tagTree?.length || 0);
-    const repairedMenuItems =
-      (repairedMenuTree?.projectTree?.length || 0) +
-      (repairedMenuTree?.tagTree?.length || 0);
-    if (origMenuItems !== repairedMenuItems) {
-      count++;
-    }
-
-    return count;
-  }
 }

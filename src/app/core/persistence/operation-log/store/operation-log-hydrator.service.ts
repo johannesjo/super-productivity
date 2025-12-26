@@ -20,7 +20,8 @@ import {
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { ValidateStateService } from '../processing/validate-state.service';
-import { RepairOperationService } from '../processing/repair-operation.service';
+// DISABLED: Repair system is non-functional
+// import { RepairOperationService } from '../processing/repair-operation.service';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { VectorClockService } from '../sync/vector-clock.service';
@@ -48,7 +49,8 @@ export class OperationLogHydratorService {
   private storeDelegateService = inject(PfapiStoreDelegateService);
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
-  private repairOperationService = inject(RepairOperationService);
+  // DISABLED: Repair system is non-functional
+  // private repairOperationService = inject(RepairOperationService);
   private vectorClockService = inject(VectorClockService);
   private operationApplierService = inject(OperationApplierService);
 
@@ -793,34 +795,30 @@ export class OperationLogHydratorService {
       return { wasRepaired: false };
     }
 
-    // Create REPAIR operation to persist the repaired state
-    // Use mutex to prevent concurrent repairs
-    const repairPromise = (async () => {
-      try {
-        const clientId = await this.pfapiService.pf.metaModel.loadClientId();
-        await this.repairOperationService.createRepairOperation(
-          result.repairedState!,
-          result.repairSummary!,
-          clientId,
-        );
-        OpLog.log(
-          `[OperationLogHydratorService] Created REPAIR operation for ${context}`,
-        );
-      } catch (e) {
-        OpLog.err(
-          `[OperationLogHydratorService] Failed to create REPAIR operation for ${context}:`,
-          e,
-        );
-        throw e;
-      } finally {
-        this._repairMutex = null;
-      }
-    })();
+    // DISABLED: Repair system is non-functional - this code path is unreachable
+    // because validateAndRepair() always returns wasRepaired: false
+    //
+    // const repairPromise = (async () => {
+    //   try {
+    //     const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    //     await this.repairOperationService.createRepairOperation(
+    //       result.repairedState!,
+    //       result.repairSummary!,
+    //       clientId,
+    //     );
+    //     OpLog.log(`[OperationLogHydratorService] Created REPAIR operation for ${context}`);
+    //   } catch (e) {
+    //     OpLog.err(`[OperationLogHydratorService] Failed to create REPAIR operation for ${context}:`, e);
+    //     throw e;
+    //   } finally {
+    //     this._repairMutex = null;
+    //   }
+    // })();
+    // this._repairMutex = repairPromise;
+    // await repairPromise;
 
-    this._repairMutex = repairPromise;
-    await repairPromise;
-
-    return { wasRepaired: true, repairedState: result.repairedState };
+    // Should never reach here while repair is disabled
+    return { wasRepaired: false };
   }
 
   /**
@@ -1055,33 +1053,24 @@ export class OperationLogHydratorService {
           return;
         }
 
-        if (result.wasRepaired && result.repairedState && result.repairSummary) {
-          OpLog.warn(
-            'OperationLogHydratorService: Deferred validation found and repaired issues',
-            result.repairSummary,
-          );
-
-          // Create REPAIR operation to persist the fix
-          const clientId = await this.pfapiService.pf.metaModel.loadClientId();
-          await this.repairOperationService.createRepairOperation(
-            result.repairedState,
-            result.repairSummary,
-            clientId,
-          );
-
-          // Dispatch repaired state to NgRx
-          this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
-
-          // Warn user about the issue
-          this.snackService.open({
-            type: 'ERROR',
-            msg: T.F.SYNC.S.INTEGRITY_CHECK_FAILED,
-            actionStr: T.PS.RELOAD,
-            actionFn: (): void => {
-              window.location.reload();
-            },
-          });
-        } else if (!result.isValid) {
+        // DISABLED: Repair system is non-functional - this code path is unreachable
+        // because validateAndRepair() always returns wasRepaired: false
+        //
+        // if (result.wasRepaired && result.repairedState && result.repairSummary) {
+        //   OpLog.warn('OperationLogHydratorService: Deferred validation found and repaired issues', result.repairSummary);
+        //   const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+        //   await this.repairOperationService.createRepairOperation(
+        //     result.repairedState, result.repairSummary, clientId,
+        //   );
+        //   this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
+        //   this.snackService.open({
+        //     type: 'ERROR',
+        //     msg: T.F.SYNC.S.INTEGRITY_CHECK_FAILED,
+        //     actionStr: T.PS.RELOAD,
+        //     actionFn: (): void => { window.location.reload(); },
+        //   });
+        // } else
+        if (!result.isValid) {
           // Repair failed or wasn't possible
           OpLog.err(
             'OperationLogHydratorService: Deferred validation found issues but repair failed',
