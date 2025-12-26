@@ -24,18 +24,19 @@ const TASK_SEL = 'task';
 const TASK_DONE_BTN = '.task-done-btn';
 const FINISH_DAY_BTN = '.e2e-finish-day';
 const SAVE_AND_GO_HOME_BTN = 'button[mat-flat-button][color="primary"]:last-of-type';
-const WELCOME_DIALOG_CLOSE_BTN =
-  'button:has-text("No thanks"), button:has-text("Close Tour")';
 
 /**
  * Helper to dismiss welcome tour dialog if present
  */
 const dismissWelcomeDialog = async (page: Page): Promise<void> => {
   try {
-    const closeBtn = page.locator(WELCOME_DIALOG_CLOSE_BTN).first();
-    await closeBtn.waitFor({ state: 'visible', timeout: 3000 });
-    await closeBtn.click();
-    await page.waitForTimeout(500);
+    // Try multiple selectors for the close button
+    const closeBtn = page.locator('button:has-text("No thanks")').first();
+    const isVisible = await closeBtn.isVisible().catch(() => false);
+    if (isVisible) {
+      await closeBtn.click();
+      await page.waitForTimeout(500);
+    }
   } catch {
     // Dialog not present, ignore
   }
@@ -69,31 +70,48 @@ const readDownloadedFile = async (download: Download): Promise<string> => {
 
 /**
  * Helper to mark all visible tasks as done
+ * Uses hover → wait for done button → click pattern from task-crud tests
  */
 const markAllTasksDone = async (page: Page): Promise<void> => {
   // Wait for tasks to be visible
   await page.waitForSelector(TASK_SEL, { state: 'visible', timeout: 10000 });
 
-  // Keep marking the first task as done until no undone tasks remain
   let attempts = 0;
-  const maxAttempts = 10;
+  const maxAttempts = 6;
 
   while (attempts < maxAttempts) {
-    const undoneCount = await page.locator('task:not(.isDone)').count();
+    // Check for and dismiss welcome dialog if it appeared
+    await dismissWelcomeDialog(page);
+
+    const undoneLocator = page.locator('task:not(.isDone)');
+    const undoneCount = await undoneLocator.count();
+    console.log(
+      `[markAllTasksDone] Attempt ${attempts + 1}: ${undoneCount} undone tasks`,
+    );
+
     if (undoneCount === 0) break;
 
-    // Hover and click done on first undone task
-    const firstUndone = page.locator('task:not(.isDone)').first();
-    await firstUndone.hover();
-    await page.waitForTimeout(200);
+    // Get the first undone task using Playwright locator
+    const firstUndone = undoneLocator.first();
+    // Must hover over .first-line to trigger hover controls
+    // Use .first() because parent tasks contain nested subtask .first-lines
+    const firstLine = firstUndone.locator('.first-line').first();
+    await firstLine.hover();
 
-    const doneBtn = firstUndone.locator(TASK_DONE_BTN);
-    if (await doneBtn.isVisible()) {
-      await doneBtn.click();
-      await page.waitForTimeout(300);
-    }
+    // Wait for the done button to become visible after hover
+    // Use .first() for same reason - parent has nested subtask done buttons
+    const doneBtn = firstUndone.locator(TASK_DONE_BTN).first();
+    await doneBtn.waitFor({ state: 'visible', timeout: 2000 });
+
+    // Click the done button
+    await doneBtn.click();
+    await page.waitForTimeout(500);
+
     attempts++;
   }
+
+  const finalCount = await page.locator('task:not(.isDone)').count();
+  console.log(`[markAllTasksDone] Finished: ${finalCount} undone tasks remain`);
 };
 
 /**
@@ -118,6 +136,18 @@ const finishDay = async (page: Page): Promise<void> => {
 
 test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
   test.beforeEach(async ({ page }) => {
+    // Capture console logs from the browser
+    page.on('console', (msg) => {
+      const text = msg.text();
+      if (
+        text.includes('[DailySummary]') ||
+        text.includes('[ArchiveService]') ||
+        text.includes('[PfapiStoreDelegateService]')
+      ) {
+        console.log(`[Browser] ${text}`);
+      }
+    });
+
     // Start with fresh state
     await page.goto('/#/tag/TODAY/tasks');
     await page.waitForLoadState('networkidle');
@@ -173,8 +203,8 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
 
     // Step 5: Export and verify
     console.log('[Legacy Archive Test] Step 5: Exporting data...');
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Wait for IndexedDB writes to complete before navigation
+    await page.waitForTimeout(2000);
     await importPage.navigateToImportPage();
     const download = await captureDownload(page);
     const exportedContent = await readDownloadedFile(download);
@@ -247,9 +277,8 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
     // Finish day
     await finishDay(page);
 
-    // Export
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Export - wait for IndexedDB writes
+    await page.waitForTimeout(2000);
     await importPage.navigateToImportPage();
     const download = await captureDownload(page);
     const exportedContent = await readDownloadedFile(download);
@@ -294,9 +323,8 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
     await markAllTasksDone(page);
     await finishDay(page);
 
-    // Export
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Export - wait for IndexedDB writes
+    await page.waitForTimeout(2000);
     await importPage.navigateToImportPage();
     const download = await captureDownload(page);
     const exportedContent = await readDownloadedFile(download);

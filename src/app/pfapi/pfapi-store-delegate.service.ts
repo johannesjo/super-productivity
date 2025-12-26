@@ -66,16 +66,6 @@ export class PfapiStoreDelegateService {
       this.pfapiService.m.archiveOld.load(),
     ]);
 
-    // Debug logging for E2E tests
-    console.log(
-      '[PfapiStoreDelegateService] archiveYoung task IDs:',
-      archiveYoung?.task?.ids,
-    );
-    console.log(
-      '[PfapiStoreDelegateService] archiveYoung task count:',
-      archiveYoung?.task?.ids?.length,
-    );
-
     // All other models are read from NgRx store (persisted via OperationLogEffects)
     const ngRxData = await firstValueFrom(
       combineLatest([
