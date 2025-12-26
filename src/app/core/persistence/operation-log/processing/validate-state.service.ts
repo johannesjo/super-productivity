@@ -2,8 +2,9 @@ import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { IValidation } from 'typia';
 import { validateFull } from '../../../../pfapi/validate/validation-fn';
-import { dataRepair } from '../../../../pfapi/repair/data-repair';
-import { isDataRepairPossible } from '../../../../pfapi/repair/is-data-repair-possible.util';
+// TEMPORARILY DISABLED - repair is disabled for debugging
+// import { dataRepair } from '../../../../pfapi/repair/data-repair';
+// import { isDataRepairPossible } from '../../../../pfapi/repair/is-data-repair-possible.util';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { RepairSummary } from '../operation.types';
 import { OpLog } from '../../../log';
@@ -225,6 +226,9 @@ export class ValidateStateService {
   /**
    * Validates state and repairs if necessary.
    * Returns the (possibly repaired) state and repair summary.
+   *
+   * TEMPORARILY DISABLED: Repair is disabled to help debug archive subtask loss.
+   * Instead of repairing, we show an error alert to expose what validation fails.
    */
   validateAndRepair(state: AppDataCompleteNew): ValidateAndRepairResult {
     // First, validate the state
@@ -237,6 +241,32 @@ export class ValidateStateService {
       };
     }
 
+    // TEMPORARILY DISABLED: Show error instead of repairing
+    // This helps debug archive subtask loss by exposing what validation actually fails
+    const errorDetails = {
+      typiaErrorCount: validationResult.typiaErrors.length,
+      typiaErrors: validationResult.typiaErrors.slice(0, 10), // First 10 errors
+      crossModelError: validationResult.crossModelError,
+    };
+
+    const errorMsg =
+      `State validation failed - repair disabled for debugging.\n` +
+      `Typia errors: ${validationResult.typiaErrors.length}\n` +
+      `Cross-model error: ${validationResult.crossModelError || 'none'}`;
+
+    OpLog.err('[ValidateStateService] ' + errorMsg, errorDetails);
+
+    // Show alert so user knows something is wrong
+    alert(`[DEBUG] ${errorMsg}\n\nCheck console for details.`);
+
+    return {
+      isValid: false,
+      wasRepaired: false,
+      error: errorMsg,
+      crossModelError: validationResult.crossModelError,
+    };
+
+    /* ORIGINAL REPAIR LOGIC - TEMPORARILY DISABLED
     // State is invalid - attempt repair
     OpLog.log('[ValidateStateService] State invalid, attempting repair...');
 
@@ -293,6 +323,7 @@ export class ValidateStateService {
         error: `Repair failed: ${e instanceof Error ? e.message : String(e)}`,
       };
     }
+    */
   }
 
   /**
