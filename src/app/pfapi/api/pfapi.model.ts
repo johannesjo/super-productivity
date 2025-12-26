@@ -28,6 +28,13 @@ export interface ModelCfg<T extends ModelBase> {
   debounceDbWrite?: number;
   isMainFileModel?: boolean;
 
+  /**
+   * When true, ModelCtrl.load() will cache the result from IndexedDB
+   * in memory for subsequent reads. Useful for frequently-read models.
+   * Default: false (current behavior - no caching on load).
+   */
+  cacheOnLoad?: boolean;
+
   validate?: <R>(data: R | T) => IValidation<R | T>;
   repair?: <R>(data: R | unknown | any) => T;
 

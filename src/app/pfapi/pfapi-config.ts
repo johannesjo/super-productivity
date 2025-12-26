@@ -196,6 +196,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
         task: fixEntityStateConsistency(d.task),
       };
     },
+    cacheOnLoad: true,
   },
   archiveOld: {
     defaultData: {

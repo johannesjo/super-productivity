@@ -128,11 +128,22 @@ export class ModelCtrl<MT extends ModelBase> {
     PFLog.verbose(`${ModelCtrl.L}.${this.load.name}():${this.modelId}`, {
       inMemoryData: this._inMemoryData,
     });
-    return (
-      this._inMemoryData ||
-      ((await this._db.load(this.modelId)) as Promise<MT>) ||
-      (this.modelCfg.defaultData as MT)
-    );
+
+    // Return cached data if available
+    if (this._inMemoryData) {
+      return this._inMemoryData;
+    }
+
+    // Load from database
+    const dbData = (await this._db.load(this.modelId)) as MT | undefined;
+    const result = dbData || (this.modelCfg.defaultData as MT);
+
+    // Cache if configured
+    if (this.modelCfg.cacheOnLoad && result) {
+      this._inMemoryData = result;
+    }
+
+    return result;
   }
 
   /**
