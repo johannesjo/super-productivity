@@ -76,6 +76,11 @@ describe('isArchiveAffectingAction', () => {
     expect(isArchiveAffectingAction(action)).toBe(true);
   });
 
+  it('should return true for updateTasks action (batch)', () => {
+    const action = { type: TaskSharedActions.updateTasks.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
   it('should return true for loadAllData action (SYNC_IMPORT/BACKUP_IMPORT)', () => {
     const action = { type: loadAllData.type };
     expect(isArchiveAffectingAction(action)).toBe(true);
@@ -120,6 +125,7 @@ describe('ArchiveOperationHandler', () => {
     mockTaskArchiveService = jasmine.createSpyObj('TaskArchiveService', [
       'deleteTasks',
       'updateTask',
+      'updateTasks',
       'hasTask',
       'removeAllArchiveTasksForProject',
       'removeTagsFromAllTasks',
@@ -373,6 +379,83 @@ describe('ArchiveOperationHandler', () => {
       });
     });
 
+    describe('updateTasks action (batch)', () => {
+      it('should update multiple archived tasks for remote operations', async () => {
+        const action = {
+          type: TaskSharedActions.updateTasks.type,
+          tasks: [
+            { id: 'task-1', changes: { title: 'Updated 1' } },
+            { id: 'task-2', changes: { title: 'Updated 2' } },
+          ],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.updateTasks).toHaveBeenCalledWith(
+          [
+            { id: 'task-1', changes: { title: 'Updated 1' } },
+            { id: 'task-2', changes: { title: 'Updated 2' } },
+          ],
+          { isSkipDispatch: true, isIgnoreDBLock: true },
+        );
+      });
+
+      it('should NOT update archive for local operations (already done by TaskArchiveService)', async () => {
+        const action = {
+          type: TaskSharedActions.updateTasks.type,
+          tasks: [{ id: 'task-1', changes: { title: 'Updated 1' } }],
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.updateTasks).not.toHaveBeenCalled();
+      });
+
+      it('should only update tasks that exist in archive', async () => {
+        // Only task-1 is in archive, task-2 is not
+        mockTaskArchiveService.hasTask.and.callFake((id: string) =>
+          Promise.resolve(id === 'task-1'),
+        );
+
+        const action = {
+          type: TaskSharedActions.updateTasks.type,
+          tasks: [
+            { id: 'task-1', changes: { title: 'Updated 1' } },
+            { id: 'task-2', changes: { title: 'Updated 2' } },
+          ],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        // Only task-1 should be updated
+        expect(mockTaskArchiveService.updateTasks).toHaveBeenCalledWith(
+          [{ id: 'task-1', changes: { title: 'Updated 1' } }],
+          { isSkipDispatch: true, isIgnoreDBLock: true },
+        );
+      });
+
+      it('should not call updateTasks if no tasks exist in archive', async () => {
+        // No tasks are in archive
+        mockTaskArchiveService.hasTask.and.returnValue(Promise.resolve(false));
+
+        const action = {
+          type: TaskSharedActions.updateTasks.type,
+          tasks: [
+            { id: 'task-1', changes: { title: 'Updated 1' } },
+            { id: 'task-2', changes: { title: 'Updated 2' } },
+          ],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.updateTasks).not.toHaveBeenCalled();
+      });
+    });
+
     // Note: flushYoungToOld tests require module mocking which is complex in Jasmine.
     // The core functionality is tested through integration tests.
     // These tests verify the handler recognizes the action type.
@@ -400,7 +483,7 @@ describe('ArchiveOperationHandler', () => {
     });
 
     describe('deleteProject action', () => {
-      it('should remove all archive tasks for the deleted project', async () => {
+      it('should remove all archive tasks for the deleted project with isIgnoreDBLock for remote ops', async () => {
         const action = {
           type: TaskSharedActions.deleteProject.type,
           projectId: 'project-1',
@@ -413,10 +496,26 @@ describe('ArchiveOperationHandler', () => {
 
         expect(
           mockTaskArchiveService.removeAllArchiveTasksForProject,
-        ).toHaveBeenCalledWith('project-1');
+        ).toHaveBeenCalledWith('project-1', { isIgnoreDBLock: true });
         expect(
           mockTimeTrackingService.cleanupDataEverywhereForProject,
         ).toHaveBeenCalledWith('project-1');
+      });
+
+      it('should NOT pass isIgnoreDBLock for local operations', async () => {
+        const action = {
+          type: TaskSharedActions.deleteProject.type,
+          projectId: 'project-1',
+          noteIds: [],
+          allTaskIds: ['task-1'],
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
+        ).toHaveBeenCalledWith('project-1', undefined);
       });
 
       it('should not call other handlers for deleteProject', async () => {
@@ -438,7 +537,7 @@ describe('ArchiveOperationHandler', () => {
     });
 
     describe('deleteTag action', () => {
-      it('should remove tag from all archive tasks for single tag deletion', async () => {
+      it('should remove tag from all archive tasks with isIgnoreDBLock for remote ops', async () => {
         const action = {
           type: deleteTag.type,
           id: 'tag-1',
@@ -447,15 +546,31 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith([
-          'tag-1',
-        ]);
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith(
+          ['tag-1'],
+          { isIgnoreDBLock: true },
+        );
         expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledWith(
           'tag-1',
         );
       });
 
-      it('should remove multiple tags for deleteTags action', async () => {
+      it('should NOT pass isIgnoreDBLock for local operations', async () => {
+        const action = {
+          type: deleteTag.type,
+          id: 'tag-1',
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith(
+          ['tag-1'],
+          undefined,
+        );
+      });
+
+      it('should remove multiple tags for deleteTags action with isIgnoreDBLock for remote ops', async () => {
         const action = {
           type: deleteTags.type,
           ids: ['tag-1', 'tag-2', 'tag-3'],
@@ -464,11 +579,10 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith([
-          'tag-1',
-          'tag-2',
-          'tag-3',
-        ]);
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith(
+          ['tag-1', 'tag-2', 'tag-3'],
+          { isIgnoreDBLock: true },
+        );
         expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledTimes(3);
         expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledWith(
           'tag-1',
@@ -501,7 +615,7 @@ describe('ArchiveOperationHandler', () => {
     });
 
     describe('deleteTaskRepeatCfg action', () => {
-      it('should remove repeatCfgId from all archive tasks', async () => {
+      it('should remove repeatCfgId from all archive tasks with isIgnoreDBLock for remote ops', async () => {
         const action = {
           type: TaskSharedActions.deleteTaskRepeatCfg.type,
           taskRepeatCfgId: 'repeat-cfg-1',
@@ -513,7 +627,22 @@ describe('ArchiveOperationHandler', () => {
 
         expect(
           mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
-        ).toHaveBeenCalledWith('repeat-cfg-1');
+        ).toHaveBeenCalledWith('repeat-cfg-1', { isIgnoreDBLock: true });
+      });
+
+      it('should NOT pass isIgnoreDBLock for local operations', async () => {
+        const action = {
+          type: TaskSharedActions.deleteTaskRepeatCfg.type,
+          taskRepeatCfgId: 'repeat-cfg-1',
+          taskIdsToUnlink: ['task-1'],
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(
+          mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
+        ).toHaveBeenCalledWith('repeat-cfg-1', undefined);
       });
 
       it('should not call other handlers for deleteTaskRepeatCfg', async () => {
@@ -538,7 +667,7 @@ describe('ArchiveOperationHandler', () => {
     });
 
     describe('deleteIssueProvider action', () => {
-      it('should unlink issue provider from all archive tasks', async () => {
+      it('should unlink issue provider from all archive tasks with isIgnoreDBLock for remote ops', async () => {
         const action = {
           type: TaskSharedActions.deleteIssueProvider.type,
           issueProviderId: 'provider-1',
@@ -550,7 +679,22 @@ describe('ArchiveOperationHandler', () => {
 
         expect(
           mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
-        ).toHaveBeenCalledWith('provider-1');
+        ).toHaveBeenCalledWith('provider-1', { isIgnoreDBLock: true });
+      });
+
+      it('should NOT pass isIgnoreDBLock for local operations', async () => {
+        const action = {
+          type: TaskSharedActions.deleteIssueProvider.type,
+          issueProviderId: 'provider-1',
+          taskIdsToUnlink: ['task-1'],
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledWith('provider-1', undefined);
       });
 
       it('should not call other handlers for deleteIssueProvider', async () => {
@@ -578,7 +722,7 @@ describe('ArchiveOperationHandler', () => {
     });
 
     describe('deleteIssueProviders action', () => {
-      it('should unlink multiple issue providers from all archive tasks', async () => {
+      it('should unlink multiple issue providers with isIgnoreDBLock for remote ops', async () => {
         const action = {
           type: TaskSharedActions.deleteIssueProviders.type,
           ids: ['provider-1', 'provider-2', 'provider-3'],
@@ -592,13 +736,30 @@ describe('ArchiveOperationHandler', () => {
         ).toHaveBeenCalledTimes(3);
         expect(
           mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
-        ).toHaveBeenCalledWith('provider-1');
+        ).toHaveBeenCalledWith('provider-1', { isIgnoreDBLock: true });
         expect(
           mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
-        ).toHaveBeenCalledWith('provider-2');
+        ).toHaveBeenCalledWith('provider-2', { isIgnoreDBLock: true });
         expect(
           mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
-        ).toHaveBeenCalledWith('provider-3');
+        ).toHaveBeenCalledWith('provider-3', { isIgnoreDBLock: true });
+      });
+
+      it('should NOT pass isIgnoreDBLock for local operations', async () => {
+        const action = {
+          type: TaskSharedActions.deleteIssueProviders.type,
+          ids: ['provider-1', 'provider-2'],
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledWith('provider-1', undefined);
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledWith('provider-2', undefined);
       });
 
       it('should not call other handlers for deleteIssueProviders', async () => {

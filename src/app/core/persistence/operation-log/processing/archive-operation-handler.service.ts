@@ -1,6 +1,8 @@
 import { inject, Injectable, Injector } from '@angular/core';
+import { Update } from '@ngrx/entity';
 import { Action } from '@ngrx/store';
 import { PersistentAction } from '../persistent-action.interface';
+import { Task } from '../../../../features/tasks/task.model';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import {
   compressArchive,
@@ -26,6 +28,7 @@ const ARCHIVE_AFFECTING_ACTION_TYPES: string[] = [
   TaskSharedActions.moveToArchive.type,
   TaskSharedActions.restoreTask.type,
   TaskSharedActions.updateTask.type,
+  TaskSharedActions.updateTasks.type,
   flushYoungToOld.type,
   compressArchive.type,
   TaskSharedActions.deleteProject.type,
@@ -140,6 +143,10 @@ export class ArchiveOperationHandler {
         await this._handleUpdateTask(action);
         break;
 
+      case TaskSharedActions.updateTasks.type:
+        await this._handleUpdateTasks(action);
+        break;
+
       case flushYoungToOld.type:
         await this._handleFlushYoungToOld(action);
         break;
@@ -230,6 +237,37 @@ export class ArchiveOperationHandler {
       isSkipDispatch: true,
       isIgnoreDBLock: true,
     });
+  }
+
+  /**
+   * Updates multiple archived tasks in archive storage (batch operation).
+   *
+   * @localBehavior SKIP - Archive written by TaskArchiveService.updateTasks() before dispatch
+   * @remoteBehavior Executes - Updates tasks in archive if they exist there
+   */
+  private async _handleUpdateTasks(action: PersistentAction): Promise<void> {
+    if (!action.meta.isRemote) {
+      return; // Local: already written by TaskArchiveService before dispatch
+    }
+
+    const taskUpdates = (action as ReturnType<typeof TaskSharedActions.updateTasks>)
+      .tasks;
+    const taskArchiveService = this._getTaskArchiveService();
+
+    // Filter to only tasks that exist in archive
+    const archiveUpdates: Update<Task>[] = [];
+    for (const update of taskUpdates) {
+      if (await taskArchiveService.hasTask(update.id as string)) {
+        archiveUpdates.push(update);
+      }
+    }
+
+    if (archiveUpdates.length > 0) {
+      await taskArchiveService.updateTasks(archiveUpdates, {
+        isSkipDispatch: true,
+        isIgnoreDBLock: true,
+      });
+    }
   }
 
   /**
@@ -354,12 +392,16 @@ export class ArchiveOperationHandler {
    * Removes all archived tasks for a deleted project.
    *
    * @localBehavior Executes (cleans up archive for deleted project)
-   * @remoteBehavior Executes (same behavior)
+   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleDeleteProject(action: PersistentAction): Promise<void> {
     const projectId = (action as ReturnType<typeof TaskSharedActions.deleteProject>)
       .projectId;
-    await this._getTaskArchiveService().removeAllArchiveTasksForProject(projectId);
+    const isRemote = !!action.meta?.isRemote;
+    await this._getTaskArchiveService().removeAllArchiveTasksForProject(
+      projectId,
+      isRemote ? { isIgnoreDBLock: true } : undefined,
+    );
     await this._getTimeTrackingService().cleanupDataEverywhereForProject(projectId);
   }
 
@@ -367,7 +409,7 @@ export class ArchiveOperationHandler {
    * Removes tag references from archived tasks and deletes orphaned tasks.
    *
    * @localBehavior Executes (cleans up archive for deleted tags)
-   * @remoteBehavior Executes (same behavior)
+   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleDeleteTags(action: PersistentAction): Promise<void> {
     const tagIdsToRemove =
@@ -375,7 +417,11 @@ export class ArchiveOperationHandler {
         ? (action as ReturnType<typeof deleteTags>).ids
         : [(action as ReturnType<typeof deleteTag>).id];
 
-    await this._getTaskArchiveService().removeTagsFromAllTasks(tagIdsToRemove);
+    const isRemote = !!action.meta?.isRemote;
+    await this._getTaskArchiveService().removeTagsFromAllTasks(
+      tagIdsToRemove,
+      isRemote ? { isIgnoreDBLock: true } : undefined,
+    );
 
     for (const tagId of tagIdsToRemove) {
       await this._getTimeTrackingService().cleanupArchiveDataForTag(tagId);
@@ -386,27 +432,33 @@ export class ArchiveOperationHandler {
    * Removes repeatCfgId from archived tasks.
    *
    * @localBehavior Executes (cleans up archive for deleted repeat config)
-   * @remoteBehavior Executes (same behavior)
+   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleDeleteTaskRepeatCfg(action: PersistentAction): Promise<void> {
     const repeatCfgId = (
       action as ReturnType<typeof TaskSharedActions.deleteTaskRepeatCfg>
     ).taskRepeatCfgId;
-    await this._getTaskArchiveService().removeRepeatCfgFromArchiveTasks(repeatCfgId);
+    const isRemote = !!action.meta?.isRemote;
+    await this._getTaskArchiveService().removeRepeatCfgFromArchiveTasks(
+      repeatCfgId,
+      isRemote ? { isIgnoreDBLock: true } : undefined,
+    );
   }
 
   /**
    * Unlinks issue data from archived tasks for a deleted issue provider.
    *
    * @localBehavior Executes (cleans up archive for deleted provider)
-   * @remoteBehavior Executes (same behavior)
+   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleDeleteIssueProvider(action: PersistentAction): Promise<void> {
     const issueProviderId = (
       action as ReturnType<typeof TaskSharedActions.deleteIssueProvider>
     ).issueProviderId;
+    const isRemote = !!action.meta?.isRemote;
     await this._getTaskArchiveService().unlinkIssueProviderFromArchiveTasks(
       issueProviderId,
+      isRemote ? { isIgnoreDBLock: true } : undefined,
     );
   }
 
@@ -414,13 +466,15 @@ export class ArchiveOperationHandler {
    * Unlinks issue data from archived tasks for multiple deleted issue providers.
    *
    * @localBehavior Executes (cleans up archive for deleted providers)
-   * @remoteBehavior Executes (same behavior)
+   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleDeleteIssueProviders(action: PersistentAction): Promise<void> {
     const ids = (action as ReturnType<typeof TaskSharedActions.deleteIssueProviders>).ids;
+    const isRemote = !!action.meta?.isRemote;
     for (const issueProviderId of ids) {
       await this._getTaskArchiveService().unlinkIssueProviderFromArchiveTasks(
         issueProviderId,
+        isRemote ? { isIgnoreDBLock: true } : undefined,
       );
     }
   }

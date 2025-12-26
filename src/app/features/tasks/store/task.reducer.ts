@@ -212,6 +212,11 @@ export const taskReducer = createReducer<TaskState>(
     return taskAdapter.updateOne(task, state);
   }),
 
+  // Bulk task updates - used for archive task batch operations
+  on(TaskSharedActions.updateTasks, (state, { tasks }) => {
+    return taskAdapter.updateMany(tasks, state);
+  }),
+
   // TODO simplify
   on(toggleTaskHideSubTasks, (state, { taskId, isShowLess, isEndless }) => {
     const task = getTaskById(taskId, state);

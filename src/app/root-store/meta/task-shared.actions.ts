@@ -185,6 +185,19 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
+    // Bulk task update - creates single operation instead of N operations
+    // Critical for repeating task config updates that affect many archived instances
+    updateTasks: (taskProps: { tasks: Update<Task>[] }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityIds: taskProps.tasks.map((t) => t.id as string),
+        opType: OpType.Update,
+        isBulk: true,
+      } satisfies PersistentActionMeta,
+    }),
+
     // Project Management
     moveToOtherProject: (taskProps: {
       task: TaskWithSubTasks;

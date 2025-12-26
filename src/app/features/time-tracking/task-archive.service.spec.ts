@@ -397,15 +397,15 @@ describe('TaskArchiveService', () => {
 
       await service.updateTasks(updates);
 
-      expect(storeMock.dispatch).toHaveBeenCalledTimes(2);
+      // Should dispatch a SINGLE batch action (not individual actions)
+      // This is critical for performance - prevents 470 operations for repeating task updates
+      expect(storeMock.dispatch).toHaveBeenCalledTimes(1);
       expect(storeMock.dispatch).toHaveBeenCalledWith(
-        TaskSharedActions.updateTask({
-          task: { id: 'task1', changes: { title: 'Updated 1' } },
-        }),
-      );
-      expect(storeMock.dispatch).toHaveBeenCalledWith(
-        TaskSharedActions.updateTask({
-          task: { id: 'task2', changes: { title: 'Updated 2' } },
+        TaskSharedActions.updateTasks({
+          tasks: [
+            { id: 'task1', changes: { title: 'Updated 1' } },
+            { id: 'task2', changes: { title: 'Updated 2' } },
+          ],
         }),
       );
     });
@@ -537,7 +537,7 @@ describe('TaskArchiveService', () => {
           { id: 'task1', changes: { repeatCfgId: undefined } },
           { id: 'task2', changes: { repeatCfgId: undefined } },
         ],
-        { isSkipDispatch: true },
+        { isSkipDispatch: true, isIgnoreDBLock: undefined },
       );
     });
 
@@ -615,7 +615,7 @@ describe('TaskArchiveService', () => {
             },
           },
         ],
-        { isSkipDispatch: true },
+        { isSkipDispatch: true, isIgnoreDBLock: undefined },
       );
     });
 
@@ -658,7 +658,7 @@ describe('TaskArchiveService', () => {
 
       await service.removeAllArchiveTasksForProject('project1');
 
-      expect(service.deleteTasks).toHaveBeenCalledWith(['task1', 'task2']);
+      expect(service.deleteTasks).toHaveBeenCalledWith(['task1', 'task2'], undefined);
     });
   });
 
@@ -772,7 +772,10 @@ describe('TaskArchiveService', () => {
       // parent1 has no tags and no project after removal, so it and its subtasks are orphaned
       // task1 still has other tags, so it's not orphaned
       // task3 has a project, so it's not orphaned
-      expect(service.deleteTasks).toHaveBeenCalledWith(['task2', 'parent1', 'sub1']);
+      expect(service.deleteTasks).toHaveBeenCalledWith(
+        ['task2', 'parent1', 'sub1'],
+        undefined,
+      );
     });
   });
 

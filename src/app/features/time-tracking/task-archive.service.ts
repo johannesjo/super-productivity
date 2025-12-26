@@ -257,16 +257,20 @@ export class TaskArchiveService {
       );
     }
 
-    // Dispatch persistent actions for sync (skip for remote handler calls)
+    // Dispatch batch action for sync (skip for remote handler calls)
+    // Using updateTasks (batch) instead of individual updateTask to create
+    // a single operation instead of N operations. This is critical for
+    // repeating task config updates that affect many archived instances.
     if (!options?.isSkipDispatch) {
-      for (const upd of updates) {
-        this.store.dispatch(TaskSharedActions.updateTask({ task: upd }));
-      }
+      this.store.dispatch(TaskSharedActions.updateTasks({ tasks: updates }));
     }
   }
 
   // -----------------------------------------
-  async removeAllArchiveTasksForProject(projectIdToDelete: string): Promise<void> {
+  async removeAllArchiveTasksForProject(
+    projectIdToDelete: string,
+    options?: { isIgnoreDBLock?: boolean },
+  ): Promise<void> {
     const taskArchiveState: TaskArchive = await this.load();
     const archiveTaskIdsToDelete = !!taskArchiveState
       ? (taskArchiveState.ids as string[]).filter((id) => {
@@ -277,13 +281,19 @@ export class TaskArchiveService {
           return t.projectId === projectIdToDelete;
         })
       : [];
-    await this.deleteTasks(archiveTaskIdsToDelete);
+    await this.deleteTasks(archiveTaskIdsToDelete, options);
   }
 
-  async removeTagsFromAllTasks(tagIdsToRemove: string[]): Promise<void> {
+  async removeTagsFromAllTasks(
+    tagIdsToRemove: string[],
+    options?: { isIgnoreDBLock?: boolean },
+  ): Promise<void> {
     const taskArchiveState: TaskArchive = await this.load();
     await this._execActionBoth(
       TaskSharedActions.removeTagsForAllTasks({ tagIdsToRemove }),
+      {
+        isIgnoreDBLock: options?.isIgnoreDBLock,
+      },
     );
 
     const isOrphanedParentTask = (t: Task): boolean =>
@@ -301,10 +311,16 @@ export class TaskArchiveService {
       }
     });
     // TODO check to maybe update to today tag instead
-    await this.deleteTasks([...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete]);
+    await this.deleteTasks(
+      [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
+      options,
+    );
   }
 
-  async removeRepeatCfgFromArchiveTasks(repeatConfigId: string): Promise<void> {
+  async removeRepeatCfgFromArchiveTasks(
+    repeatConfigId: string,
+    options?: { isIgnoreDBLock?: boolean },
+  ): Promise<void> {
     const taskArchive = await this.load();
 
     const newState = { ...taskArchive };
@@ -324,11 +340,17 @@ export class TaskArchiveService {
           },
         };
       });
-      await this.updateTasks(updates, { isSkipDispatch: true });
+      await this.updateTasks(updates, {
+        isSkipDispatch: true,
+        isIgnoreDBLock: options?.isIgnoreDBLock,
+      });
     }
   }
 
-  async unlinkIssueProviderFromArchiveTasks(issueProviderId: string): Promise<void> {
+  async unlinkIssueProviderFromArchiveTasks(
+    issueProviderId: string,
+    options?: { isIgnoreDBLock?: boolean },
+  ): Promise<void> {
     const taskArchive = await this.load();
 
     const tasksWithIssueProvider = (taskArchive.ids as string[])
@@ -349,7 +371,10 @@ export class TaskArchiveService {
           issuePoints: undefined,
         },
       }));
-      await this.updateTasks(updates, { isSkipDispatch: true });
+      await this.updateTasks(updates, {
+        isSkipDispatch: true,
+        isIgnoreDBLock: options?.isIgnoreDBLock,
+      });
     }
   }
 
@@ -437,8 +462,9 @@ export class TaskArchiveService {
 
   private async _execActionBoth(
     action: TaskArchiveAction,
-    isUpdateRevAndLastUpdate = true,
+    options?: { isUpdateRevAndLastUpdate?: boolean; isIgnoreDBLock?: boolean },
   ): Promise<void> {
+    const isUpdateRevAndLastUpdate = options?.isUpdateRevAndLastUpdate ?? true;
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const newTaskState = this._reduceForArchive(archiveYoung, action);
 
@@ -450,14 +476,14 @@ export class TaskArchiveService {
         ...archiveYoung,
         task: newTaskState,
       },
-      { isUpdateRevAndLastUpdate },
+      { isUpdateRevAndLastUpdate, isIgnoreDBLock: options?.isIgnoreDBLock },
     );
     await this.pfapiService.m.archiveOld.save(
       {
         ...archiveOld,
         task: newTaskStateArchiveOld,
       },
-      { isUpdateRevAndLastUpdate },
+      { isUpdateRevAndLastUpdate, isIgnoreDBLock: options?.isIgnoreDBLock },
     );
   }
 
