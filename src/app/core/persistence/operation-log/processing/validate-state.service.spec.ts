@@ -74,7 +74,9 @@ describe('ValidateStateService', () => {
     }
   });
 
-  it('should repair orphaned menu tree nodes', () => {
+  // TEMPORARILY SKIPPED: Repair functionality is disabled for debugging archive subtask loss
+  // See commit 5138b4654 - re-enable this test when repair is re-enabled
+  xit('should repair orphaned menu tree nodes', () => {
     // Force non-production environment to ensure devError throws
     const originalEnvProduction = environment.production;
     (environment as any).production = false;
