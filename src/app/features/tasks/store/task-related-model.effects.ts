@@ -13,6 +13,7 @@ import { Store } from '@ngrx/store';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -62,7 +63,10 @@ export class TaskRelatedModelEffects {
         // trigger planTasksForToday, not just the last one. switchMap would cancel
         // previous inner subscriptions when new actions arrive quickly.
         mergeMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
-        filter((task: Task) => !!task && !task.parentId),
+        // Skip if task is already scheduled for today (avoids no-op dispatch)
+        filter(
+          (task: Task) => !!task && !task.parentId && task.dueDay !== getDbDateStr(),
+        ),
         map((task) =>
           TaskSharedActions.planTasksForToday({
             taskIds: [task.id],

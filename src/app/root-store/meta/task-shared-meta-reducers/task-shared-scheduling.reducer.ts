@@ -171,8 +171,19 @@ const handlePlanTasksForToday = (
     return !parentId || !todayTag.taskIds.includes(parentId);
   });
 
-  // First, update the task entities with dueDay
-  const taskUpdates: Update<Task>[] = taskIds.map((taskId) => {
+  // Filter out tasks that already have dueDay set to today
+  const tasksNeedingDueDayUpdate = taskIds.filter((taskId) => {
+    const task = state[TASK_FEATURE_NAME].entities[taskId] as Task;
+    return task && task.dueDay !== today;
+  });
+
+  // Early return if no actual changes needed
+  if (newTasksForToday.length === 0 && tasksNeedingDueDayUpdate.length === 0) {
+    return state;
+  }
+
+  // Only create updates for tasks that need dueDay change
+  const taskUpdates: Update<Task>[] = tasksNeedingDueDayUpdate.map((taskId) => {
     const task = state[TASK_FEATURE_NAME].entities[taskId] as Task;
 
     // Preserve dueWithTime if it matches today's date

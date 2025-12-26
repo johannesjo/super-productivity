@@ -282,6 +282,70 @@ describe('taskSharedSchedulingMetaReducer', () => {
       expect(updatedTask.dueDay).toBeDefined();
     });
 
+    it('should return unchanged state when task is already in today tag AND has dueDay set to today', () => {
+      const today = getDbDateStr();
+      const testState = createStateWithExistingTasks([], [], [], ['task1']);
+      // Task is already in today tag AND has dueDay === today
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueDay: today,
+        dueWithTime: undefined,
+      });
+
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      // Should pass unchanged state to reducer (no modifications)
+      expect(mockReducer).toHaveBeenCalledWith(testState, action);
+    });
+
+    it('should update dueDay when task is in today tag but dueDay is not set', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1']);
+      // Task is in today tag but dueDay is NOT set
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueDay: undefined,
+        dueWithTime: undefined,
+      });
+
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
+
+      // Should update dueDay even though task is already in today tag
+      expect(updatedTask.dueDay).toBe(getDbDateStr());
+    });
+
+    it('should update dueDay when task is in today tag but dueDay is different', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1']);
+      // Task is in today tag but dueDay is set to a different day
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueDay: '2024-01-01', // Different day
+        dueWithTime: undefined,
+      });
+
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
+
+      // Should update dueDay to today
+      expect(updatedTask.dueDay).toBe(getDbDateStr());
+    });
+
     it('should preserve dueWithTime for multiple tasks scheduled for today', () => {
       const now = Date.now();
       const testState = createStateWithExistingTasks([], [], [], []);
