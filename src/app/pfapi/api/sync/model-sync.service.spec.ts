@@ -15,9 +15,15 @@ interface TestModel {
   data?: any;
 }
 
+interface ArchiveModel {
+  tasks: any[];
+}
+
 type TestModelCfgs = {
   mainModel: ModelCfg<TestModel>;
   singleModel: ModelCfg<TestModel>;
+  archiveYoung: ModelCfg<ArchiveModel>;
+  archiveOld: ModelCfg<ArchiveModel>;
 };
 
 describe('ModelSyncService', () => {
@@ -44,6 +50,18 @@ describe('ModelSyncService', () => {
         },
         save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
       },
+      archiveYoung: {
+        modelCfg: {
+          isMainFileModel: true,
+        },
+        save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
+      },
+      archiveOld: {
+        modelCfg: {
+          isMainFileModel: true,
+        },
+        save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
+      },
     };
 
     // Setup mock PFAPI
@@ -52,6 +70,8 @@ describe('ModelSyncService', () => {
         Promise.resolve({
           mainModel: { data: 'main-data' },
           singleModel: { data: 'single-data' },
+          archiveYoung: { tasks: [] },
+          archiveOld: { tasks: [] },
         }),
       ),
     } as unknown as Pfapi<TestModelCfgs>;
@@ -259,13 +279,14 @@ describe('ModelSyncService', () => {
   });
 
   describe('updateLocalFromRemoteMetaFile', () => {
-    it('should update local models from main model data in meta file', async () => {
+    it('should only save archiveYoung and archiveOld from meta file', async () => {
       const remoteMeta = {
         revMap: {},
         lastUpdate: 1000,
         crossModelVersion: 1,
         mainModelData: {
-          mainModel: { data: 'meta-main-model-data' },
+          archiveYoung: { tasks: [{ id: 'task1' }] },
+          archiveOld: { tasks: [{ id: 'task2' }] },
         },
       };
 
@@ -273,19 +294,68 @@ describe('ModelSyncService', () => {
         ...remoteMeta,
       } as RemoteMeta);
 
-      expect(mockModelControllers.mainModel.save).toHaveBeenCalledWith(
-        {
-          data: 'meta-main-model-data',
-        },
+      expect(mockModelControllers.archiveYoung.save).toHaveBeenCalledWith(
+        { tasks: [{ id: 'task1' }] },
         {
           isUpdateRevAndLastUpdate: false,
           isIgnoreDBLock: true,
         },
       );
-      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.archiveOld.save).toHaveBeenCalledWith(
+        { tasks: [{ id: 'task2' }] },
+        {
+          isUpdateRevAndLastUpdate: false,
+          isIgnoreDBLock: true,
+        },
+      );
     });
 
-    it('should do nothing if no main model data is present', async () => {
+    it('should NOT save entity models (tasks, tags, projects, etc.) - only archive models', async () => {
+      const remoteMeta = {
+        revMap: {},
+        lastUpdate: 1000,
+        crossModelVersion: 1,
+        mainModelData: {
+          mainModel: { data: 'entity-data-should-be-skipped' },
+          singleModel: { data: 'another-entity-should-be-skipped' },
+          archiveYoung: { tasks: [] },
+        },
+      };
+
+      await service.updateLocalMainModelsFromRemoteMetaFile({
+        ...remoteMeta,
+      } as RemoteMeta);
+
+      // Entity models should NOT be saved
+      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+      // Only archive should be saved
+      expect(mockModelControllers.archiveYoung.save).toHaveBeenCalled();
+    });
+
+    it('should do nothing if no archive data is present (even with entity data)', async () => {
+      const remoteMeta = {
+        revMap: {},
+        lastUpdate: 1000,
+        crossModelVersion: 1,
+        mainModelData: {
+          mainModel: { data: 'entity-data' },
+          singleModel: { data: 'more-entity-data' },
+        },
+      };
+
+      await service.updateLocalMainModelsFromRemoteMetaFile({
+        ...remoteMeta,
+      } as RemoteMeta);
+
+      // No saves should be called for entity models
+      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.archiveYoung.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.archiveOld.save).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing if mainModelData is empty', async () => {
       const remoteMeta = {
         revMap: {},
         lastUpdate: 1000,
@@ -299,91 +369,109 @@ describe('ModelSyncService', () => {
 
       expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
       expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.archiveYoung.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.archiveOld.save).not.toHaveBeenCalled();
     });
 
-    it('should throw error for unregistered models to prevent data loss', async () => {
+    it('should NOT throw for unregistered entity models (they are filtered out)', async () => {
       const remoteMeta = {
         revMap: {},
         lastUpdate: 1000,
         crossModelVersion: 1,
         mainModelData: {
           unknownModel: { data: 'unknown-model-data' },
+          anotherUnknown: { data: 'more-unknown-data' },
         },
       };
 
-      // Should throw ModelIdWithoutCtrlError
+      // Should NOT throw because unknown models are filtered out (not in ALLOWED_DB_WRITE_KEYS)
+      await expectAsync(
+        service.updateLocalMainModelsFromRemoteMetaFile({
+          ...remoteMeta,
+        } as RemoteMeta),
+      ).toBeResolved();
+
+      // No saves should have been called
+      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.archiveYoung.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw error if archive key exists but controller is not registered', async () => {
+      // Temporarily remove archiveYoung controller to simulate missing controller
+      const originalArchiveYoung = mockModelControllers.archiveYoung;
+      delete mockModelControllers.archiveYoung;
+
+      const remoteMeta = {
+        revMap: {},
+        lastUpdate: 1000,
+        crossModelVersion: 1,
+        mainModelData: {
+          archiveYoung: { tasks: [] },
+        },
+      };
+
+      // Should throw because archiveYoung is in ALLOWED_DB_WRITE_KEYS but not registered
       await expectAsync(
         service.updateLocalMainModelsFromRemoteMetaFile({
           ...remoteMeta,
         } as RemoteMeta),
       ).toBeRejectedWithError(/Remote metadata contains models not registered locally/);
 
-      // No saves should have been called due to early error
-      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
-      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+      // Restore
+      mockModelControllers.archiveYoung = originalArchiveYoung;
     });
 
-    it('should throw error listing all unregistered models', async () => {
+    it('should handle mix of archive and entity data correctly', async () => {
       const remoteMeta = {
         revMap: {},
         lastUpdate: 1000,
         crossModelVersion: 1,
         mainModelData: {
-          unknownModel1: { data: 'unknown-1' },
-          unknownModel2: { data: 'unknown-2' },
-          unknownModel3: { data: 'unknown-3' },
+          mainModel: { data: 'entity-should-skip' },
+          archiveYoung: { tasks: [{ id: 'archived-task' }] },
+          singleModel: { data: 'also-should-skip' },
+          unknownModel: { data: 'unknown-should-skip' },
+          archiveOld: { tasks: [] },
         },
       };
 
-      // Should throw with all model IDs listed
-      await expectAsync(
-        service.updateLocalMainModelsFromRemoteMetaFile({
-          ...remoteMeta,
-        } as RemoteMeta),
-      ).toBeRejectedWithError(/unknownModel1, unknownModel2, unknownModel3/);
+      await service.updateLocalMainModelsFromRemoteMetaFile({
+        ...remoteMeta,
+      } as RemoteMeta);
 
-      // No saves should have been called
-      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
-      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when mix of valid and invalid models to prevent partial sync', async () => {
-      const remoteMeta = {
-        revMap: {},
-        lastUpdate: 1000,
-        crossModelVersion: 1,
-        mainModelData: {
-          mainModel: { data: 'valid-main-model' },
-          unknownModel: { data: 'unknown-model-data' },
-          singleModel: { data: 'valid-single-model' },
-        },
-      };
-
-      // Should throw error even with valid models present
-      await expectAsync(
-        service.updateLocalMainModelsFromRemoteMetaFile({
-          ...remoteMeta,
-        } as RemoteMeta),
-      ).toBeRejectedWithError(/unknownModel/);
-
-      // No saves should have been called to prevent partial data sync
+      // Only archive models should be saved
+      expect(mockModelControllers.archiveYoung.save).toHaveBeenCalledWith(
+        { tasks: [{ id: 'archived-task' }] },
+        jasmine.any(Object),
+      );
+      expect(mockModelControllers.archiveOld.save).toHaveBeenCalledWith(
+        { tasks: [] },
+        jasmine.any(Object),
+      );
+      // Entity models should NOT be saved
       expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
       expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
     });
   });
 
   describe('getMainFileModelDataForUpload', () => {
-    it('should collect all main model data', async () => {
+    it('should collect all main model data (including archives)', async () => {
       const allData = {
         mainModel: { data: 'main-data-for-upload' },
         singleModel: { data: 'single-data-for-upload' },
+        archiveYoung: { tasks: [{ id: 'young-task' }] },
+        archiveOld: { tasks: [{ id: 'old-task' }] },
       };
 
       const result = await service.getMainFileModelDataForUpload(allData);
 
+      // All isMainFileModel models should be included
       expect(result).toEqual({
         mainModel: { data: 'main-data-for-upload' },
+        archiveYoung: { tasks: [{ id: 'young-task' }] },
+        archiveOld: { tasks: [{ id: 'old-task' }] },
       });
+      // singleModel is NOT isMainFileModel, so should be excluded
       expect(result.singleModel).toBeUndefined();
     });
 

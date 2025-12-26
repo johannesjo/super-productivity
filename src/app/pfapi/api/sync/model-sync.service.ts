@@ -24,7 +24,7 @@ import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler
 import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { Pfapi } from '../pfapi';
-import { SyncProviderId } from '../pfapi.const';
+import { ALLOWED_DB_WRITE_KEYS_DURING_SYNC, SyncProviderId } from '../pfapi.const';
 
 export class ModelSyncService<MD extends ModelCfgs> {
   private static readonly L = 'ModelSyncService';
@@ -196,25 +196,34 @@ export class ModelSyncService<MD extends ModelCfgs> {
   }
 
   /**
-   * Updates local models from remote metadata
+   * Updates local archive models from remote metadata.
+   *
+   * Only keys listed in `ALLOWED_DB_WRITE_KEYS_DURING_SYNC` are written to IndexedDB.
+   * Entity models are filtered out - see constant documentation for architectural details.
    *
    * @param remote - Remote metadata containing model data
    */
   async updateLocalMainModelsFromRemoteMetaFile(remote: RemoteMeta): Promise<void> {
     const mainModelData = remote.mainModelData;
     if (typeof mainModelData === 'object' && mainModelData !== null) {
-      PFLog.normal(
-        `${ModelSyncService.L}.${this.updateLocalMainModelsFromRemoteMetaFile.name}() updating (main) models`,
-        Object.keys(mainModelData),
+      // Filter to only archive keys - entity models are reconstructed from operation logs
+      // See ALLOWED_DB_WRITE_KEYS_DURING_SYNC documentation for architectural details
+      const keysToWrite = Object.keys(mainModelData).filter((modelId) =>
+        ALLOWED_DB_WRITE_KEYS_DURING_SYNC.includes(modelId as any),
       );
 
-      // Check for unregistered models before processing to prevent data loss
-      const unregisteredModels: string[] = [];
-      Object.keys(mainModelData).forEach((modelId) => {
-        if (!this.m[modelId]) {
-          unregisteredModels.push(modelId);
-        }
-      });
+      PFLog.normal(
+        `${ModelSyncService.L}.${this.updateLocalMainModelsFromRemoteMetaFile.name}() updating archive models`,
+        keysToWrite,
+        '(skipped entity models:',
+        Object.keys(mainModelData).filter(
+          (modelId) => !ALLOWED_DB_WRITE_KEYS_DURING_SYNC.includes(modelId as any),
+        ),
+        ')',
+      );
+
+      // Check for unregistered models in the keys we're about to write
+      const unregisteredModels = keysToWrite.filter((modelId) => !this.m[modelId]);
 
       if (unregisteredModels.length > 0) {
         throw new ModelIdWithoutCtrlError(
@@ -226,18 +235,16 @@ export class ModelSyncService<MD extends ModelCfgs> {
       }
 
       await Promise.all(
-        Object.keys(mainModelData)
-          .filter((modelId) => modelId in mainModelData)
-          .map((modelId) =>
-            this.m[modelId].save(
-              mainModelData[modelId] as ExtractModelCfgType<MD[string]>,
-              {
-                isUpdateRevAndLastUpdate: false,
-                // NOTE: this is during sync, so we ignore the DB lock
-                isIgnoreDBLock: true,
-              },
-            ),
+        keysToWrite.map((modelId) =>
+          this.m[modelId].save(
+            mainModelData[modelId] as ExtractModelCfgType<MD[string]>,
+            {
+              isUpdateRevAndLastUpdate: false,
+              // NOTE: this is during sync, so we ignore the DB lock
+              isIgnoreDBLock: true,
+            },
           ),
+        ),
       );
     } else {
       throw new ImpossibleError('No remote.mainModelData!!! Is this correct?');
