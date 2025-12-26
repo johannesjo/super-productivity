@@ -53,6 +53,11 @@ npm run test:file <filepath>
     - Example: `npm run e2e:playwright:file tests/work-view/work-view.spec.ts`
   - `npm run e2e:supersync:file <path>` - Run SuperSync E2E tests (auto-starts the server)
     - Example: `npm run e2e:supersync:file e2e/tests/sync/supersync.spec.ts`
+  - **IMPORTANT for Claude**: When running E2E tests:
+    - Use `--retries=0` to avoid long waits: `npm run e2e:file <path> -- --retries=0`
+    - Use `--grep "test name"` to run a single test: `npm run e2e:file <path> -- --grep "test name" --retries=0`
+    - Tests take ~20s each, don't use excessive timeouts
+    - Each test run includes a fresh server start (~5s overhead)
 - Linting: `npm run lint` - ESLint for TypeScript, Stylelint for SCSS
 
 ## Architecture Overview
