@@ -202,6 +202,7 @@
     "@typescript-eslint/types": "^8.17.0",
     "@typescript-eslint/utils": "^8.41.0",
     "angular-material-css-vars": "^9.1.1",
+    "baseline-browser-mapping": "^2.9.11",
     "canvas-confetti": "^1.9.4",
     "chai": "^5.1.2",
     "chart.js": "^4.4.7",
