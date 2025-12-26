@@ -656,23 +656,37 @@ export class OperationLogHydratorService {
   /**
    * Handles hydration after a remote sync download.
    * This method:
-   * 1. Reads the newly synced data directly from 'pf' database (ModelCtrl caches)
+   * 1. Merges passed mainModelData (entity models) with IndexedDB data (archive models)
    * 2. Creates a SYNC_IMPORT operation to persist it to SUP_OPS
    * 3. Saves a new state cache (snapshot) for crash safety
    * 4. Dispatches loadAllData to update NgRx
    *
    * This is called instead of hydrateStore() after sync downloads to ensure
    * the synced data is persisted to SUP_OPS and loaded into NgRx.
+   *
+   * @param downloadedMainModelData - Entity models from remote meta file.
+   *   These are NOT stored in IndexedDB (only archives are) so must be passed explicitly.
    */
-  async hydrateFromRemoteSync(): Promise<void> {
+  async hydrateFromRemoteSync(
+    downloadedMainModelData?: Record<string, unknown>,
+  ): Promise<void> {
     OpLog.normal('OperationLogHydratorService: Hydrating from remote sync...');
 
     try {
-      // 1. Read synced data directly from 'pf' database (bypassing NgRx delegate)
-      const syncedData = this._stripLocalOnlySettings(
-        await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls(),
+      // 1. Read archive data from IndexedDB and merge with passed entity data
+      // Entity models (task, tag, project, etc.) come from downloadedMainModelData
+      // Archive models (archiveYoung, archiveOld) come from IndexedDB
+      const dbData = await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls();
+      const mergedData = downloadedMainModelData
+        ? { ...dbData, ...downloadedMainModelData }
+        : dbData;
+      const syncedData = this._stripLocalOnlySettings(mergedData);
+      OpLog.normal(
+        'OperationLogHydratorService: Loaded synced data',
+        downloadedMainModelData
+          ? '(merged passed entity models with archive data from DB)'
+          : '(from pf database only)',
       );
-      OpLog.normal('OperationLogHydratorService: Loaded synced data from pf database');
 
       // 2. Get client ID for vector clock
       const clientId = await this.pfapiService.pf.metaModel.loadClientId();

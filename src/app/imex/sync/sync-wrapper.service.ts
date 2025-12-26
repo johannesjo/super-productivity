@@ -201,7 +201,7 @@ export class SyncWrapperService {
           // The data has already been downloaded and saved to the database at this point.
           // Future improvement: modify the pfapi sync service to support pre-download callbacks.
 
-          await this._reInitAppAfterDataModelChange();
+          await this._reInitAppAfterDataModelChange(r.downloadedMainModelData);
 
           // PERF: After downloading remote data, sync the vector clock from pf.META_MODEL
           // to SUP_OPS.vector_clock. This ensures subsequent syncs correctly detect local
@@ -508,14 +508,16 @@ export class SyncWrapperService {
       });
   }
 
-  private async _reInitAppAfterDataModelChange(): Promise<void> {
+  private async _reInitAppAfterDataModelChange(
+    downloadedMainModelData?: Record<string, unknown>,
+  ): Promise<void> {
     SyncLog.log('Starting data re-initialization after sync...');
 
     try {
       await Promise.all([
-        // Use reInitFromRemoteSync() which reads from 'pf' database, persists to SUP_OPS,
-        // and updates NgRx - ensuring synced data is not lost
-        this._dataInitService.reInitFromRemoteSync(),
+        // Use reInitFromRemoteSync() which now uses the passed downloaded data
+        // instead of reading from IndexedDB (entity models aren't stored there)
+        this._dataInitService.reInitFromRemoteSync(downloadedMainModelData),
       ]);
       // wait an extra frame to potentially avoid follow up problems
       await promiseTimeout(SYNC_REINIT_DELAY_MS);

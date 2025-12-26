@@ -2,6 +2,7 @@ import {
   ConflictData,
   EncryptAndCompressCfg,
   LocalMeta,
+  MainModelData,
   ModelCfgs,
   ModelCfgToModelCtrl,
   RemoteMeta,
@@ -88,9 +89,13 @@ export class SyncService<const MD extends ModelCfgs> {
   /**
    * Synchronizes data between local and remote storage
    * Determines sync direction based on timestamps and data state
-   * @returns Promise containing sync status and optional conflict data
+   * @returns Promise containing sync status, optional conflict data, and downloaded main model data
    */
-  async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
+  async sync(): Promise<{
+    status: SyncStatus;
+    conflictData?: ConflictData;
+    downloadedMainModelData?: MainModelData;
+  }> {
     try {
       const isReady = await this._isReadyForSync();
       if (!isReady) {
@@ -226,7 +231,10 @@ export class SyncService<const MD extends ModelCfgs> {
               case ModelVersionCheckResult.MajorUpdate:
                 PFLog.normal('Downloading all since model version changed');
                 await this.downloadAll();
-                return { status: SyncStatus.UpdateLocalAll };
+                return {
+                  status: SyncStatus.UpdateLocalAll,
+                  downloadedMainModelData: remoteMeta.mainModelData,
+                };
               case ModelVersionCheckResult.RemoteMajorAhead:
                 throw new ModelVersionToImportNewerThanLocalError({
                   localMeta,
@@ -237,7 +245,7 @@ export class SyncService<const MD extends ModelCfgs> {
           }
           // NOTE: also fallthrough for case ModelVersionCheckResult.RemoteModelEqualOrMinorUpdateOnly:
           await this.downloadToLocal(remoteMeta, localMeta, remoteMetaRev);
-          return { status };
+          return { status, downloadedMainModelData: remoteMeta.mainModelData };
 
         case SyncStatus.UpdateRemote:
           await this.uploadToRemote(remoteMeta, localMeta, remoteMetaRev);

@@ -4,6 +4,7 @@ import {
   ConflictData,
   EncryptAndCompressCfg,
   ExtractModelCfgType,
+  MainModelData,
   ModelBase,
   ModelCfgs,
   ModelCfgToModelCtrl,
@@ -136,7 +137,11 @@ export class Pfapi<const MD extends ModelCfgs> {
     this.wasDataMigratedInitiallyPromise = this.migrationService.checkAndMigrateLocalDB();
   }
 
-  async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
+  async sync(): Promise<{
+    status: SyncStatus;
+    conflictData?: ConflictData;
+    downloadedMainModelData?: MainModelData;
+  }> {
     return await this._wrapSyncAction(`${this.sync.name}()`, () =>
       this._syncService.sync(),
     );
