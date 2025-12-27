@@ -5,6 +5,16 @@ import { SyncProviderId } from '../../../pfapi.const';
 import { MissingCredentialsSPError } from '../../../errors/errors';
 import { SyncOperation } from '../../sync-provider.interface';
 
+// Helper to decompress gzip Uint8Array to string
+const decompressGzip = async (compressed: Uint8Array): Promise<string> => {
+  const stream = new DecompressionStream('gzip');
+  const writer = stream.writable.getWriter();
+  writer.write(compressed);
+  writer.close();
+  const decompressed = await new Response(stream.readable).arrayBuffer();
+  return new TextDecoder().decode(decompressed);
+};
+
 describe('SuperSyncProvider', () => {
   let provider: SuperSyncProvider;
   let mockPrivateCfgStore: jasmine.SpyObj<
@@ -251,7 +261,8 @@ describe('SuperSyncProvider', () => {
       expect(options.headers.get('Authorization')).toBe('Bearer test-access-token');
       expect(options.headers.get('Content-Type')).toBe('application/json');
 
-      const body = JSON.parse(options.body);
+      const bodyJson = await decompressGzip(options.body);
+      const body = JSON.parse(bodyJson);
       expect(body.ops).toEqual(ops);
       expect(body.clientId).toBe('client-1');
     });
@@ -275,7 +286,8 @@ describe('SuperSyncProvider', () => {
 
       await provider.uploadOps([createMockOperation()], 'client-1', 2);
 
-      const body = JSON.parse(fetchSpy.calls.mostRecent().args[1].body);
+      const bodyJson = await decompressGzip(fetchSpy.calls.mostRecent().args[1].body);
+      const body = JSON.parse(bodyJson);
       expect(body.lastKnownServerSeq).toBe(2);
     });
 
