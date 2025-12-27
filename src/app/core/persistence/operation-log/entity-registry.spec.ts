@@ -410,5 +410,29 @@ describe('entity-registry', () => {
         expect(REGULAR_ENTITY_TYPES).toContain(key as EntityType);
       }
     });
+
+    /**
+     * CANARY TEST: This test ensures test arrays stay in sync with EntityType union.
+     * If you add a new entity type to EntityType in operation.types.ts, you MUST also:
+     * 1. Add it to REGULAR_ENTITY_TYPES or SPECIAL_OPERATION_TYPES above
+     * 2. Add it to the appropriate category array (ADAPTER_ENTITIES, SINGLETON_ENTITIES, etc.)
+     * 3. Update the expected count below
+     *
+     * See docs/ai/adding-new-entity-type-checklist.md for full checklist.
+     */
+    it('test arrays should cover all EntityType union members (canary)', () => {
+      const ALL_TESTED: EntityType[] = [
+        ...REGULAR_ENTITY_TYPES,
+        ...SPECIAL_OPERATION_TYPES,
+      ];
+
+      // Update this count when adding new entity types to EntityType union
+      // Current: 17 regular + 3 special = 20 total
+      expect(ALL_TESTED.length).toBe(20);
+
+      // Verify no duplicates
+      const uniqueTypes = new Set(ALL_TESTED);
+      expect(uniqueTypes.size).toBe(ALL_TESTED.length);
+    });
   });
 });
