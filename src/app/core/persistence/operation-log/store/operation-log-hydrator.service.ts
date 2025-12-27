@@ -67,16 +67,17 @@ export class OperationLogHydratorService {
     OpLog.normal('OperationLogHydratorService: Starting hydration...');
 
     try {
-      // Check for pending remote ops from crashed sync
-      await this._recoverPendingRemoteOps();
-
-      // Migrate vector clock from pf.META_MODEL to SUP_OPS.vector_clock if needed.
-      // This is a one-time migration when upgrading from DB version 1 to 2.
-      // The vector_clock store in SUP_OPS is now the source of truth for performance.
-      await this._migrateVectorClockFromPfapiIfNeeded();
-
-      // A.7.12: Check for interrupted migration (backup exists)
-      const hasBackup = await this.opLogStore.hasStateCacheBackup();
+      // PERF: Parallel startup operations - all access different IndexedDB stores
+      // and don't depend on each other's results, so they can run concurrently.
+      const [, , hasBackup] = await Promise.all([
+        // Check for pending remote ops from crashed sync (touches 'ops' store)
+        this._recoverPendingRemoteOps(),
+        // Migrate vector clock from pf.META_MODEL to SUP_OPS.vector_clock if needed
+        // (touches 'vector_clock' store). One-time migration for DB version 1 to 2.
+        this._migrateVectorClockFromPfapiIfNeeded(),
+        // A.7.12: Check for interrupted migration (touches 'state_cache' store)
+        this.opLogStore.hasStateCacheBackup(),
+      ]);
       if (hasBackup) {
         OpLog.warn(
           'OperationLogHydratorService: Found migration backup - previous migration may have crashed. Restoring...',
