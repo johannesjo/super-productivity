@@ -373,4 +373,130 @@ base.describe('@supersync Network Failure Recovery', () => {
       }
     },
   );
+
+  /**
+   * Test: Partial batch upload failure followed by successful retry
+   *
+   * This tests a more realistic failure scenario where:
+   * 1. Client A creates 10 tasks rapidly
+   * 2. First sync starts - first few ops may succeed, then failure
+   * 3. Retry sync - all remaining ops should upload
+   * 4. Client B receives ALL 10 tasks (no duplicates, no missing)
+   *
+   * This verifies that the operation log correctly tracks which ops
+   * have been synced vs pending, and retry doesn't create duplicates.
+   */
+  base(
+    'partial batch upload failure followed by retry uploads all without duplicates',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(180000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      // Track how many POST requests we've seen
+      const state = {
+        requestCount: 0,
+        failAfter: 2, // Fail after 2 successful requests
+      };
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        // Create 10 tasks rapidly
+        const taskCount = 10;
+        const taskNames: string[] = [];
+        for (let i = 0; i < taskCount; i++) {
+          const taskName = `Task-${testRunId}-batch-${i.toString().padStart(2, '0')}`;
+          taskNames.push(taskName);
+          await clientA.workView.addTask(taskName);
+          await waitForTask(clientA.page, taskName);
+        }
+        console.log(`[PartialBatch] Created ${taskCount} tasks on Client A`);
+
+        // Verify all tasks exist locally
+        for (const taskName of taskNames) {
+          const taskLocator = clientA.page.locator(`task:has-text("${taskName}")`);
+          await expect(taskLocator).toBeVisible();
+        }
+
+        // Set up route interception to fail after first few requests
+        await clientA.page.route('**/api/sync/ops/**', async (route) => {
+          if (route.request().method() === 'POST') {
+            state.requestCount++;
+            if (state.requestCount > state.failAfter) {
+              console.log(
+                `[PartialBatch] Failing request #${state.requestCount} (after ${state.failAfter} successes)`,
+              );
+              await route.abort('failed');
+            } else {
+              console.log(`[PartialBatch] Allowing request #${state.requestCount}`);
+              await route.continue();
+            }
+          } else {
+            await route.continue();
+          }
+        });
+
+        // First sync attempt - will partially succeed then fail
+        console.log('[PartialBatch] Starting first sync (will partially fail)');
+        try {
+          await clientA.sync.triggerSync();
+          await clientA.page.waitForTimeout(3000);
+        } catch {
+          console.log('[PartialBatch] First sync failed as expected');
+        }
+
+        // Remove the failing route and reset counter
+        await clientA.page.unroute('**/api/sync/ops/**');
+        await clientA.page.waitForTimeout(500);
+        console.log('[PartialBatch] Route interception removed');
+
+        // Retry sync - should succeed and upload remaining ops
+        console.log('[PartialBatch] Retrying sync');
+        await clientA.sync.syncAndWait();
+        console.log('[PartialBatch] Retry sync completed');
+
+        // Verify all tasks still exist on Client A (no data loss)
+        for (const taskName of taskNames) {
+          await waitForTask(clientA.page, taskName);
+        }
+        console.log('[PartialBatch] All tasks still present on Client A');
+
+        // Set up Client B
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+
+        // Verify ALL tasks present on Client B (no missing, no duplicates)
+        for (const taskName of taskNames) {
+          await waitForTask(clientB.page, taskName);
+          const taskLocator = clientB.page.locator(`task:has-text("${taskName}")`);
+          await expect(taskLocator).toBeVisible();
+        }
+
+        // Verify exact count (no duplicates)
+        const countB = await clientB.page
+          .locator(`task:has-text("${testRunId}-batch")`)
+          .count();
+        expect(countB).toBe(taskCount);
+        console.log(
+          `[PartialBatch] ✓ Client B has exactly ${taskCount} tasks (no duplicates)`,
+        );
+
+        console.log('[PartialBatch] ✓ Partial batch failure + retry test PASSED!');
+      } finally {
+        // Ensure routes are cleaned up
+        if (clientA) {
+          await clientA.page.unroute('**/api/sync/ops/**').catch(() => {});
+        }
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });

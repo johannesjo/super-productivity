@@ -330,4 +330,159 @@ base.describe('@supersync @cleanslate Import Clean Slate Semantics', () => {
       }
     },
   );
+
+  /**
+   * Scenario: Import invalidates PENDING (unsynced) operations from other clients
+   *
+   * This tests the critical case where Client B has pending operations that
+   * haven't been uploaded yet when Client A imports a backup. These pending
+   * ops are CONCURRENT to the import (no knowledge of import) and should be
+   * filtered out.
+   *
+   * Setup: Client A and B with shared SuperSync account
+   *
+   * Actions:
+   * 1. Client A and B both sync (empty state, both know each other)
+   * 2. Client B creates task "Task-B-Pending" but does NOT sync (pending locally)
+   * 3. Client A imports backup (doesn't know about B's pending task)
+   * 4. Client A syncs (uploads SYNC_IMPORT)
+   * 5. Client B syncs (receives SYNC_IMPORT, B's pending ops are CONCURRENT)
+   *
+   * Verify:
+   * - Client B does NOT have "Task-B-Pending" after sync
+   * - Client B ONLY has imported tasks
+   * - B's pending task is correctly filtered due to clean slate semantics
+   *
+   * Why: The import creates a SYNC_IMPORT operation. Client B's pending ops
+   * have a vector clock that is CONCURRENT with the import (created without
+   * knowledge of the import). These must be dropped per clean slate semantics.
+   */
+  base(
+    'Import invalidates PENDING (unsynced) operations from other clients',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const uniqueId = Date.now();
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // ============ PHASE 1: Setup Both Clients with Initial Sync ============
+        console.log(
+          '[Pending Invalidation] Phase 1: Setting up both clients with initial sync',
+        );
+
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+        await clientA.sync.syncAndWait(); // Initial sync to establish vector clock
+
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait(); // Initial sync to establish vector clock
+
+        console.log('[Pending Invalidation] Both clients synced initially');
+
+        // ============ PHASE 2: Client B Creates Task but Does NOT Sync ============
+        console.log(
+          '[Pending Invalidation] Phase 2: Client B creates task (pending, not synced)',
+        );
+
+        const taskBPending = `Task-B-Pending-${uniqueId}`;
+        await clientB.workView.addTask(taskBPending);
+        await waitForTask(clientB.page, taskBPending);
+        console.log(
+          `[Pending Invalidation] Client B created: ${taskBPending} (NOT synced)`,
+        );
+
+        // Verify task exists locally on B
+        const taskBLocator = clientB.page.locator(`task:has-text("${taskBPending}")`);
+        await expect(taskBLocator).toBeVisible();
+
+        // ============ PHASE 3: Client A Imports Backup ============
+        console.log('[Pending Invalidation] Phase 3: Client A importing backup');
+
+        // Navigate to import page
+        const importPage = new ImportPage(clientA.page);
+        await importPage.navigateToImportPage();
+
+        // Import the backup file (contains "E2E Import Test" tasks)
+        const backupPath = ImportPage.getFixturePath('test-backup.json');
+        await importPage.importBackupFile(backupPath);
+        console.log('[Pending Invalidation] Client A imported backup');
+
+        // Re-enable sync after import (import overwrites globalConfig)
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        // Wait for imported task to be visible
+        await waitForTask(clientA.page, 'E2E Import Test - Active Task With Subtask');
+        console.log('[Pending Invalidation] Client A has imported tasks');
+
+        // ============ PHASE 4: Sync to Propagate SYNC_IMPORT ============
+        console.log('[Pending Invalidation] Phase 4: Syncing to propagate SYNC_IMPORT');
+
+        // Client A syncs (uploads SYNC_IMPORT)
+        await clientA.sync.syncAndWait();
+        console.log('[Pending Invalidation] Client A synced (SYNC_IMPORT uploaded)');
+
+        // ============ PHASE 5: Client B Syncs (Pending Ops Should Be Invalidated) ============
+        console.log(
+          '[Pending Invalidation] Phase 5: Client B syncs (pending ops invalidated)',
+        );
+
+        // This is the CRITICAL sync - B's pending task was created BEFORE the import
+        // but B hasn't synced it yet. When B syncs now:
+        // 1. B tries to upload Task-B-Pending (has old vector clock)
+        // 2. B receives SYNC_IMPORT
+        // 3. B's pending ops are CONCURRENT to SYNC_IMPORT
+        // 4. Clean slate semantics: B's pending ops are filtered/dropped
+        await clientB.sync.syncAndWait();
+        console.log('[Pending Invalidation] Client B synced (received SYNC_IMPORT)');
+
+        // Wait for state to settle - allow UI to update
+        await clientB.page.waitForTimeout(1000);
+
+        // ============ PHASE 6: Verify Clean Slate on Client B ============
+        console.log('[Pending Invalidation] Phase 6: Verifying clean slate');
+
+        // Navigate back to work view to see tasks
+        await clientB.page.goto('/#/work-view');
+        await clientB.page.waitForLoadState('networkidle');
+
+        // Wait for imported task to appear
+        await waitForTask(clientB.page, 'E2E Import Test - Active Task With Subtask');
+
+        // CRITICAL VERIFICATION: B's pending task should be GONE
+        console.log('[Pending Invalidation] Verifying pending task is gone...');
+
+        const taskBPendingOnB = clientB.page.locator(`task:has-text("${taskBPending}")`);
+        await expect(taskBPendingOnB).not.toBeVisible({ timeout: 5000 });
+        console.log(
+          '[Pending Invalidation] ✓ Task-B-Pending is GONE (correctly invalidated)',
+        );
+
+        // Verify imported task is present on B
+        const importedTaskOnB = clientB.page.locator(
+          'task:has-text("E2E Import Test - Active Task With Subtask")',
+        );
+        await expect(importedTaskOnB).toBeVisible({ timeout: 5000 });
+        console.log('[Pending Invalidation] ✓ Client B has imported tasks');
+
+        // Also verify on Client A - should NOT have B's pending task
+        await clientA.page.goto('/#/work-view');
+        await clientA.page.waitForLoadState('networkidle');
+        const taskBPendingOnA = clientA.page.locator(`task:has-text("${taskBPending}")`);
+        await expect(taskBPendingOnA).not.toBeVisible({ timeout: 5000 });
+        console.log(
+          "[Pending Invalidation] ✓ Client A also does not have B's pending task",
+        );
+
+        console.log('[Pending Invalidation] ✓ Pending invalidation test PASSED!');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });

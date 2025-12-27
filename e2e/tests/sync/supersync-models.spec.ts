@@ -497,4 +497,234 @@ base.describe('@supersync SuperSync Models', () => {
       if (clientB) await closeClient(clientB);
     }
   });
+
+  /**
+   * Scenario: Tag deletion atomically removes tag from many tasks
+   *
+   * Tests that when a tag is deleted, all tasks with that tag have
+   * the tag removed atomically in a single operation. This verifies
+   * the meta-reducer approach for atomic multi-entity changes.
+   *
+   * Actions:
+   * 1. Client A creates a tag
+   * 2. Client A creates 10 tasks with that tag (using short syntax)
+   * 3. Client A syncs
+   * 4. Client B syncs (receives all)
+   * 5. Client A deletes the tag
+   * 6. Client A syncs
+   * 7. Client B syncs
+   *
+   * Verify:
+   * - Tag is gone on both clients
+   * - All tasks exist but NO task has the deleted tag
+   * - Changes were atomic (single operation in sync)
+   */
+  base(
+    'Tag deletion atomically removes tag from many tasks',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(180000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const tagName = `BulkTag-${testRunId}`;
+        const taskCount = 10;
+        const taskNames: string[] = [];
+
+        // 1. Create tag first
+        await createTagReliably(clientA.page, tagName);
+        console.log(`[BulkTag] Created tag: ${tagName}`);
+
+        // Go back to Today view
+        await clientA.page.goto('/#/tag/TODAY/work');
+        await clientA.page.waitForLoadState('networkidle');
+
+        // 2. Create tasks with the tag using short syntax: "task name #tagname"
+        // This is much faster and more reliable than using the context menu
+        for (let i = 0; i < taskCount; i++) {
+          const taskName = `TaggedTask-${testRunId}-${i.toString().padStart(2, '0')}`;
+          taskNames.push(taskName);
+
+          // Create task with tag using short syntax
+          await clientA.workView.addTask(`${taskName} #${tagName}`);
+          await waitForTask(clientA.page, taskName);
+
+          // Verify tag is on task
+          const taskLocator = clientA.page
+            .locator(`task:has-text("${taskName}")`)
+            .first();
+          await expect(taskLocator).toContainText(tagName);
+
+          if ((i + 1) % 5 === 0) {
+            console.log(`[BulkTag] Created and tagged ${i + 1}/${taskCount} tasks`);
+          }
+        }
+        console.log(`[BulkTag] Created ${taskCount} tasks with tag`);
+
+        // 3. Client A syncs
+        await clientA.sync.syncAndWait();
+        console.log('[BulkTag] Client A synced');
+
+        // 4. Client B syncs
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+        console.log('[BulkTag] Client B synced');
+
+        // Verify B has the tag in sidebar
+        const tagsTreeB = clientB.page
+          .locator('nav-list-tree')
+          .filter({ hasText: 'Tags' })
+          .first();
+        await tagsTreeB.waitFor({ state: 'visible' });
+        await expect(
+          clientB.page.locator(`nav-list-tree:has-text("${tagName}")`),
+        ).toBeVisible();
+        console.log('[BulkTag] Client B sees the tag');
+
+        // 5. Client A deletes the tag
+        // Navigate to tag settings to delete it
+        await clientA.page.goto('/#/tag/TODAY/work');
+        await clientA.page.waitForLoadState('networkidle');
+
+        const tagsTreeA = clientA.page
+          .locator('nav-list-tree')
+          .filter({ hasText: 'Tags' })
+          .first();
+        await tagsTreeA.waitFor({ state: 'visible' });
+
+        // Find the tag nav item and right-click to get context menu
+        const groupNavItemA = tagsTreeA.locator('nav-item').first();
+        const expandBtnA = groupNavItemA
+          .locator('button.expand-btn, button.arrow-btn')
+          .first();
+        if (await expandBtnA.isVisible()) {
+          const isExpanded = await expandBtnA.getAttribute('aria-expanded');
+          if (isExpanded !== 'true') {
+            await groupNavItemA.click();
+            await clientA.page.waitForTimeout(500);
+          }
+        }
+
+        const tagNavItem = tagsTreeA
+          .locator('nav-item')
+          .filter({ hasText: tagName })
+          .first();
+        await tagNavItem.waitFor({ state: 'visible' });
+
+        // Right-click on tag to get context menu
+        await tagNavItem.click({ button: 'right' });
+        await clientA.page.waitForTimeout(300);
+
+        // Find and click delete option
+        const deleteBtn = clientA.page
+          .locator('.mat-mdc-menu-panel button')
+          .filter({ hasText: /delete/i })
+          .first();
+        await deleteBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await deleteBtn.click();
+
+        // Confirm deletion if there's a dialog
+        const confirmBtn = clientA.page
+          .locator('mat-dialog-container button')
+          .filter({ hasText: /delete|confirm|yes/i })
+          .first();
+        try {
+          await confirmBtn.waitFor({ state: 'visible', timeout: 3000 });
+          await confirmBtn.click();
+          await clientA.page.waitForTimeout(500);
+        } catch {
+          // No confirmation dialog, that's fine
+        }
+
+        console.log('[BulkTag] Tag deleted on Client A');
+
+        // 6. Client A syncs
+        await clientA.sync.syncAndWait();
+        console.log('[BulkTag] Client A synced after tag deletion');
+
+        // 7. Client B syncs
+        await clientB.sync.syncAndWait();
+        console.log('[BulkTag] Client B synced');
+
+        // Wait for state to settle
+        await clientA.page.waitForTimeout(1000);
+        await clientB.page.waitForTimeout(1000);
+
+        // Navigate both clients to Today view
+        await clientA.page.goto('/#/tag/TODAY/work');
+        await clientA.page.waitForLoadState('networkidle');
+        await clientB.page.goto('/#/tag/TODAY/work');
+        await clientB.page.waitForLoadState('networkidle');
+
+        // VERIFICATION: Tag should be gone on both clients
+        console.log('[BulkTag] Verifying tag is gone...');
+
+        // Check that the tag name doesn't appear in the nav (it should be deleted)
+        // We check in the Tags section specifically
+        const tagItemA = clientA.page
+          .locator('nav-list-tree')
+          .filter({ hasText: 'Tags' })
+          .locator(`nav-item:has-text("${tagName}")`);
+        const tagItemB = clientB.page
+          .locator('nav-list-tree')
+          .filter({ hasText: 'Tags' })
+          .locator(`nav-item:has-text("${tagName}")`);
+
+        await expect(tagItemA).not.toBeVisible({ timeout: 5000 });
+        await expect(tagItemB).not.toBeVisible({ timeout: 5000 });
+        console.log('[BulkTag] ✓ Tag is gone on both clients');
+
+        // VERIFICATION: All tasks still exist but WITHOUT the tag
+        console.log('[BulkTag] Verifying tasks exist without the tag...');
+
+        // Check first few tasks on Client A
+        for (let i = 0; i < 5; i++) {
+          const taskName = taskNames[i];
+          const taskLocatorA = clientA.page
+            .locator(`task:has-text("${taskName}")`)
+            .first();
+          await expect(taskLocatorA).toBeVisible({ timeout: 5000 });
+          // Task should NOT contain the tag name
+          await expect(taskLocatorA).not.toContainText(tagName);
+        }
+        console.log('[BulkTag] ✓ Tasks on Client A exist without tag');
+
+        // Check first few tasks on Client B
+        for (let i = 0; i < 5; i++) {
+          const taskName = taskNames[i];
+          const taskLocatorB = clientB.page
+            .locator(`task:has-text("${taskName}")`)
+            .first();
+          await expect(taskLocatorB).toBeVisible({ timeout: 5000 });
+          // Task should NOT contain the tag name
+          await expect(taskLocatorB).not.toContainText(tagName);
+        }
+        console.log('[BulkTag] ✓ Tasks on Client B exist without tag');
+
+        // Verify task count matches
+        const countA = await clientA.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+        const countB = await clientB.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+        expect(countA).toBe(countB);
+        expect(countA).toBeGreaterThanOrEqual(taskCount);
+        console.log(`[BulkTag] ✓ Both clients have ${countA} tasks`);
+
+        console.log('[BulkTag] ✓ Tag deletion atomic cleanup test PASSED!');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });

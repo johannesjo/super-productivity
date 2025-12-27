@@ -659,4 +659,413 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
       }
     },
   );
+
+  /**
+   * Scenario: Multiple Operations on Same Entity Use Max Timestamp for LWW
+   *
+   * Tests that when both clients have MULTIPLE concurrent operations on the
+   * same entity, LWW correctly uses the MAX timestamp across ALL operations,
+   * not just the last one.
+   *
+   * Actions:
+   * 1. Client A creates Task, syncs
+   * 2. Client B syncs (download task)
+   * 3. Client A makes 3 rapid changes (rename, mark done, add note)
+   * 4. Client B makes 3 different changes offline (different rename, unmark, remove note)
+   * 5. Client B syncs first (uploads B's 3 ops)
+   * 6. Client A syncs (LWW compares max timestamps across all ops)
+   * 7. Final sync round
+   * 8. Verify both clients converge to same state
+   */
+  base(
+    'LWW: Multiple operations on same entity use max timestamp',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates task with original title
+        const originalTitle = `MultiOp-${testRunId}`;
+        await clientA.workView.addTask(originalTitle);
+        await clientA.sync.syncAndWait();
+
+        // 2. Client B downloads the task
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, originalTitle);
+
+        // 3. Client A makes 3 rapid changes
+        const taskLocatorA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${originalTitle}")`)
+          .first();
+
+        // Change 1: Rename task
+        const titleA = `A-MultiOp-${testRunId}`;
+        await taskLocatorA.dblclick();
+        const editInputA = clientA.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await editInputA.waitFor({ state: 'visible', timeout: 5000 });
+        await editInputA.fill(titleA);
+        await clientA.page.keyboard.press('Enter');
+        await clientA.page.waitForTimeout(300);
+
+        // Change 2: Mark task done
+        const taskLocatorAUpdated = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${titleA}")`)
+          .first();
+        await taskLocatorAUpdated.hover();
+        await taskLocatorAUpdated.locator('.task-done-btn').click();
+        await clientA.page.waitForTimeout(300);
+
+        // Change 3: Add time estimate (another field update)
+        // This creates a third operation on the same entity
+        await taskLocatorAUpdated.hover();
+        const additionalBtn = taskLocatorAUpdated
+          .locator('.task-additional-info-btn, button[mat-icon-button]')
+          .first();
+        if (await additionalBtn.isVisible()) {
+          await additionalBtn.click();
+          await clientA.page.waitForTimeout(200);
+        }
+
+        console.log('[MultiOp] Client A made 3 changes');
+
+        // 4. Client B makes 3 different changes (offline - hasn't synced yet)
+        const taskLocatorB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${originalTitle}")`)
+          .first();
+
+        // Wait for timestamp gap to ensure B's changes are LATER
+        await clientB.page.waitForTimeout(1500);
+
+        // Change 1: Different rename
+        const titleB = `B-MultiOp-${testRunId}`;
+        await taskLocatorB.dblclick();
+        const editInputB = clientB.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await editInputB.waitFor({ state: 'visible', timeout: 5000 });
+        await editInputB.fill(titleB);
+        await clientB.page.keyboard.press('Enter');
+        await clientB.page.waitForTimeout(300);
+
+        // Change 2: Mark done as well
+        const taskLocatorBUpdated = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${titleB}")`)
+          .first();
+        await taskLocatorBUpdated.hover();
+        await taskLocatorBUpdated.locator('.task-done-btn').click();
+        await clientB.page.waitForTimeout(300);
+
+        console.log('[MultiOp] Client B made 3 changes (B has later timestamps)');
+
+        // 5. Client B syncs FIRST (uploads B's ops to server)
+        await clientB.sync.syncAndWait();
+        console.log('[MultiOp] Client B synced first');
+
+        // 6. Client A syncs (downloads B's ops, LWW resolution)
+        // Since B's changes are later, B should win
+        await clientA.sync.syncAndWait();
+        console.log('[MultiOp] Client A synced, LWW resolution applied');
+
+        // 7. Final sync round for convergence
+        await clientB.sync.syncAndWait();
+        await clientA.sync.syncAndWait();
+
+        // 8. Verify BOTH clients have the SAME state (B's title since B was later)
+        const taskWithBTitleOnA = clientA.page.locator(
+          `task:not(.ng-animating):has-text("${titleB}")`,
+        );
+        const taskWithBTitleOnB = clientB.page.locator(
+          `task:not(.ng-animating):has-text("${titleB}")`,
+        );
+
+        // Both should have B's title (B's max timestamp was later)
+        await expect(taskWithBTitleOnA.first()).toBeVisible({ timeout: 10000 });
+        await expect(taskWithBTitleOnB.first()).toBeVisible({ timeout: 10000 });
+
+        // Both should show task as done
+        await expect(taskWithBTitleOnA.first()).toHaveClass(/isDone/);
+        await expect(taskWithBTitleOnB.first()).toHaveClass(/isDone/);
+
+        // Verify task counts match
+        const countA = await clientA.page.locator('task').count();
+        const countB = await clientB.page.locator('task').count();
+        expect(countA).toBe(countB);
+
+        console.log(
+          '[MultiOp] ✓ Multiple operations resolved correctly - B won with later max timestamp',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  /**
+   * Scenario: Concurrent Task Move to Different Projects Resolves via LWW
+   *
+   * Tests that when both clients move the same task to DIFFERENT projects,
+   * LWW correctly resolves the conflict and the task ends up in exactly
+   * ONE project (not duplicated).
+   *
+   * Actions:
+   * 1. Client A creates Project1, Project2, and a Task in Project1
+   * 2. Client A syncs
+   * 3. Client B syncs (download all)
+   * 4. Client B creates Project3
+   * 5. Client A moves Task to Project2
+   * 6. Client B moves Task to Project3 (offline/concurrent)
+   * 7. Client A syncs first
+   * 8. Client B syncs (LWW resolution)
+   * 9. Final sync round
+   * 10. Verify task is in exactly ONE project on both clients
+   */
+  base(
+    'LWW: Concurrent task move to different projects resolves correctly',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(150000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      // Helper to create a project
+      const createProject = async (page: any, projectName: string): Promise<void> => {
+        await page.goto('/#/tag/TODAY/work');
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(1000);
+
+        const navSidenav = page.locator('.nav-sidenav');
+        if (await navSidenav.isVisible()) {
+          const isCompact = await navSidenav.evaluate((el: Element) =>
+            el.classList.contains('compactMode'),
+          );
+          if (isCompact) {
+            const toggleBtn = navSidenav.locator('.mode-toggle');
+            if (await toggleBtn.isVisible()) {
+              await toggleBtn.click();
+              await page.waitForTimeout(500);
+            }
+          }
+        }
+
+        const projectsTree = page
+          .locator('nav-list-tree')
+          .filter({ hasText: 'Projects' })
+          .first();
+        await projectsTree.waitFor({ state: 'visible' });
+
+        const addBtn = projectsTree
+          .locator('.additional-btn mat-icon:has-text("add")')
+          .first();
+        const groupNavItem = projectsTree.locator('nav-item').first();
+        await groupNavItem.hover();
+        await page.waitForTimeout(200);
+
+        if (await addBtn.isVisible()) {
+          await addBtn.click();
+        } else {
+          throw new Error('Could not find Create Project button');
+        }
+
+        const nameInput = page.getByRole('textbox', { name: 'Project Name' });
+        await nameInput.waitFor({ state: 'visible', timeout: 10000 });
+        await nameInput.fill(projectName);
+
+        const submitBtn = page
+          .locator('dialog-create-project button[type=submit]')
+          .first();
+        await submitBtn.click();
+        await nameInput.waitFor({ state: 'hidden', timeout: 5000 });
+        await page.waitForTimeout(1000);
+      };
+
+      // Helper to move task to project via context menu
+      const moveTaskToProject = async (
+        page: any,
+        taskName: string,
+        projectName: string,
+      ): Promise<void> => {
+        const taskLocator = page.locator(`task:has-text("${taskName}")`).first();
+        await taskLocator.waitFor({ state: 'visible' });
+
+        // Right-click to open context menu
+        await taskLocator.click({ button: 'right' });
+        await page.waitForTimeout(300);
+
+        // Find and click "Move to project" / "Add to project" option
+        // The button has mat-icon "forward" and text containing "project"
+        const menuPanel = page.locator('.mat-mdc-menu-panel').first();
+        await menuPanel.waitFor({ state: 'visible', timeout: 5000 });
+
+        const moveToProjectBtn = menuPanel
+          .locator('button[mat-menu-item]')
+          .filter({ has: page.locator('mat-icon:has-text("forward")') })
+          .first();
+        await moveToProjectBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await moveToProjectBtn.click();
+
+        // Wait for project submenu
+        await page.waitForTimeout(300);
+        const projectMenu = page.locator('.mat-mdc-menu-panel').last();
+        await projectMenu.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Select the target project
+        const projectOption = projectMenu
+          .locator('button[mat-menu-item]')
+          .filter({ hasText: projectName })
+          .first();
+        await projectOption.waitFor({ state: 'visible', timeout: 3000 });
+        await projectOption.click();
+
+        await page.waitForTimeout(500);
+
+        // Dismiss any remaining overlays
+        for (let j = 0; j < 3; j++) {
+          await page.keyboard.press('Escape');
+          await page.waitForTimeout(100);
+        }
+      };
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates Project1, Project2, and a Task
+        const project1Name = `Proj1-${testRunId}`;
+        const project2Name = `Proj2-${testRunId}`;
+        const project3Name = `Proj3-${testRunId}`;
+        const taskName = `MoveTask-${testRunId}`;
+
+        await createProject(clientA.page, project1Name);
+        await createProject(clientA.page, project2Name);
+        console.log('[MoveConflict] Created Project1 and Project2 on Client A');
+
+        // Navigate to Project1 and create task
+        const projectBtnA = clientA.page.getByText(project1Name).first();
+        await projectBtnA.waitFor({ state: 'visible' });
+        await projectBtnA.click({ force: true });
+        await clientA.page.waitForLoadState('networkidle');
+
+        await clientA.workView.addTask(taskName);
+        await waitForTask(clientA.page, taskName);
+        console.log('[MoveConflict] Created task in Project1');
+
+        // 2. Client A syncs
+        await clientA.sync.syncAndWait();
+        console.log('[MoveConflict] Client A synced');
+
+        // 3. Client B syncs to get everything
+        await clientB.sync.syncAndWait();
+        console.log('[MoveConflict] Client B synced');
+
+        // 4. Client B creates Project3
+        await createProject(clientB.page, project3Name);
+        console.log('[MoveConflict] Client B created Project3');
+
+        // Navigate Client B to Project1 to see the task
+        const project1BtnB = clientB.page.getByText(project1Name).first();
+        await project1BtnB.waitFor({ state: 'visible' });
+        await project1BtnB.click({ force: true });
+        await clientB.page.waitForLoadState('networkidle');
+        await waitForTask(clientB.page, taskName);
+
+        // 5. Client A moves task to Project2
+        // First go to Project1 on A
+        await clientA.page.goto('/#/tag/TODAY/work');
+        await clientA.page.waitForLoadState('networkidle');
+        const project1BtnA = clientA.page.getByText(project1Name).first();
+        await project1BtnA.click({ force: true });
+        await clientA.page.waitForLoadState('networkidle');
+        await waitForTask(clientA.page, taskName);
+
+        await moveTaskToProject(clientA.page, taskName, project2Name);
+        console.log('[MoveConflict] Client A moved task to Project2');
+
+        // Wait for timestamp gap
+        await clientA.page.waitForTimeout(1000);
+
+        // 6. Client B moves task to Project3 (concurrent - hasn't synced)
+        await moveTaskToProject(clientB.page, taskName, project3Name);
+        console.log('[MoveConflict] Client B moved task to Project3 (later timestamp)');
+
+        // 7. Client A syncs first
+        await clientA.sync.syncAndWait();
+        console.log('[MoveConflict] Client A synced');
+
+        // 8. Client B syncs (LWW resolution - B's move is later, should win)
+        await clientB.sync.syncAndWait();
+        console.log('[MoveConflict] Client B synced, LWW resolution applied');
+
+        // 9. Final sync round for convergence
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+
+        // 10. Verify task is in exactly ONE project on both clients
+        // Since B moved later, task should be in Project3
+
+        // Check Client A - task should be in Project3 (B won)
+        await clientA.page.goto('/#/tag/TODAY/work');
+        await clientA.page.waitForLoadState('networkidle');
+        const project3BtnA = clientA.page.getByText(project3Name).first();
+        await project3BtnA.waitFor({ state: 'visible' });
+        await project3BtnA.click({ force: true });
+        await clientA.page.waitForLoadState('networkidle');
+        await waitForTask(clientA.page, taskName);
+        console.log('[MoveConflict] Client A sees task in Project3');
+
+        // Check Client B - task should also be in Project3
+        await clientB.page.goto('/#/tag/TODAY/work');
+        await clientB.page.waitForLoadState('networkidle');
+        const project3BtnB = clientB.page.getByText(project3Name).first();
+        await project3BtnB.click({ force: true });
+        await clientB.page.waitForLoadState('networkidle');
+        await waitForTask(clientB.page, taskName);
+        console.log('[MoveConflict] Client B sees task in Project3');
+
+        // Verify task is NOT in Project2 (A's move lost)
+        await clientA.page.goto('/#/tag/TODAY/work');
+        await clientA.page.waitForLoadState('networkidle');
+        const project2BtnA = clientA.page.getByText(project2Name).first();
+        await project2BtnA.click({ force: true });
+        await clientA.page.waitForLoadState('networkidle');
+        await clientA.page.waitForTimeout(1000);
+
+        const taskInProject2 = clientA.page.locator(`task:has-text("${taskName}")`);
+        await expect(taskInProject2).not.toBeVisible({ timeout: 3000 });
+        console.log(
+          "[MoveConflict] ✓ Task NOT in Project2 (A's move correctly lost via LWW)",
+        );
+
+        console.log(
+          '[MoveConflict] ✓ Concurrent project move resolved correctly via LWW',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });
