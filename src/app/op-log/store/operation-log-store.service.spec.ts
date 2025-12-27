@@ -1,7 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { Operation, OpType, EntityType, VectorClock } from '../core/operation.types';
+import {
+  ActionType,
+  Operation,
+  OpType,
+  EntityType,
+  VectorClock,
+} from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
 
 describe('OperationLogStoreService', () => {
@@ -11,7 +17,7 @@ describe('OperationLogStoreService', () => {
   // Helper to create test operations
   const createTestOperation = (overrides: Partial<Operation> = {}): Operation => ({
     id: uuidv7(),
-    actionType: '[Task] Update',
+    actionType: '[Task] Update' as ActionType,
     opType: OpType.Update,
     entityType: 'TASK' as EntityType,
     entityId: 'task1',
@@ -292,19 +298,21 @@ describe('OperationLogStoreService', () => {
 
   describe('deleteOpsWhere', () => {
     it('should delete operations matching predicate', async () => {
-      const op1 = createTestOperation({ actionType: '[Task] Create' });
-      const op2 = createTestOperation({ actionType: '[Task] Update' });
-      const op3 = createTestOperation({ actionType: '[Task] Create' });
+      const op1 = createTestOperation({ actionType: '[Task] Create' as ActionType });
+      const op2 = createTestOperation({ actionType: '[Task] Update' as ActionType });
+      const op3 = createTestOperation({ actionType: '[Task] Create' as ActionType });
 
       await service.append(op1);
       await service.append(op2);
       await service.append(op3);
 
-      await service.deleteOpsWhere((entry) => entry.op.actionType === '[Task] Create');
+      await service.deleteOpsWhere(
+        (entry) => entry.op.actionType === ('[Task] Create' as ActionType),
+      );
 
       const remaining = await service.getOpsAfterSeq(0);
       expect(remaining.length).toBe(1);
-      expect(remaining[0].op.actionType).toBe('[Task] Update');
+      expect(remaining[0].op.actionType).toBe('[Task] Update' as ActionType);
     });
   });
 

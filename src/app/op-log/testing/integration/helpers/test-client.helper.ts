@@ -3,6 +3,7 @@ import {
   OpType,
   EntityType,
   VectorClock,
+  ActionType,
 } from '../../../core/operation.types';
 import { mergeVectorClocks } from '../../../../core/util/vector-clock';
 import { CURRENT_SCHEMA_VERSION } from '../../../store/schema-migration.service';
@@ -66,7 +67,7 @@ export class TestClient {
 
     return {
       id: testUuid(),
-      actionType: params.actionType,
+      actionType: params.actionType as ActionType,
       opType: params.opType,
       entityType: params.entityType,
       entityId: params.entityId,

@@ -16,7 +16,7 @@ import { PfapiService } from '../../../pfapi/pfapi.service';
 import { OperationLogUploadService } from '../../sync/operation-log-upload.service';
 import { OperationLogDownloadService } from '../../sync/operation-log-download.service';
 import { provideMockStore } from '@ngrx/store/testing';
-import { Operation, OpType } from '../../core/operation.types';
+import { ActionType, Operation, OpType } from '../../core/operation.types';
 import { T } from '../../../t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { UserInputWaitStateService } from '../../../imex/sync/user-input-wait-state.service';
@@ -136,7 +136,7 @@ describe('Migration Handling Integration', () => {
     const createOp = (version: number): Operation => ({
       id: `op-v${version}`,
       clientId: 'remoteClientId',
-      actionType: '[Test] Action',
+      actionType: '[Test] Action' as ActionType,
       opType: OpType.Update,
       entityType: 'TASK',
       entityId: 'task-1',
@@ -207,7 +207,7 @@ describe('Migration Handling Integration', () => {
     const createOp = (id: string): Operation => ({
       id,
       clientId: 'remoteClientId',
-      actionType: '[Test] Action',
+      actionType: '[Test] Action' as ActionType,
       opType: OpType.Update,
       entityType: 'TASK',
       entityId: 'task-1',

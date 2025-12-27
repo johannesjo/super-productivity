@@ -6,7 +6,7 @@ import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { of } from 'rxjs';
-import { EntityConflict, OpType, Operation } from '../core/operation.types';
+import { ActionType, EntityConflict, OpType, Operation } from '../core/operation.types';
 import { SyncSafetyBackupService } from '../../imex/sync/sync-safety-backup.service';
 import { BACKUP_TIMEOUT_MS } from '../core/operation-log.const';
 
@@ -22,7 +22,7 @@ describe('ConflictResolutionService', () => {
   const createMockOp = (id: string, clientId: string): Operation => ({
     id,
     clientId,
-    actionType: 'test',
+    actionType: 'test' as ActionType,
     opType: OpType.Update,
     entityType: 'TASK',
     entityId: 'task-1',
@@ -327,7 +327,7 @@ describe('ConflictResolutionService', () => {
     ): Operation => ({
       id,
       clientId,
-      actionType: 'test',
+      actionType: 'test' as ActionType,
       opType,
       entityType: 'TASK',
       entityId,
@@ -886,7 +886,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'local-config',
                 clientId: 'clientA',
-                actionType: 'updateGlobalConfig',
+                actionType: 'updateGlobalConfig' as ActionType,
                 opType: OpType.Update,
                 entityType: 'GLOBAL_CONFIG',
                 entityId: 'GLOBAL_CONFIG',
@@ -900,7 +900,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'remote-config',
                 clientId: 'clientB',
-                actionType: 'updateGlobalConfig',
+                actionType: 'updateGlobalConfig' as ActionType,
                 opType: OpType.Update,
                 entityType: 'GLOBAL_CONFIG',
                 entityId: 'GLOBAL_CONFIG',
@@ -932,7 +932,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'local-planner',
                 clientId: 'clientA',
-                actionType: 'updatePlanner',
+                actionType: 'updatePlanner' as ActionType,
                 opType: OpType.Update,
                 entityType: 'PLANNER',
                 entityId: dayId,
@@ -946,7 +946,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'remote-planner',
                 clientId: 'clientB',
-                actionType: 'updatePlanner',
+                actionType: 'updatePlanner' as ActionType,
                 opType: OpType.Update,
                 entityType: 'PLANNER',
                 entityId: dayId,
@@ -985,7 +985,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'local-board',
                 clientId: 'clientA',
-                actionType: 'updateBoard',
+                actionType: 'updateBoard' as ActionType,
                 opType: OpType.Update,
                 entityType: 'BOARD',
                 entityId: 'board-1',
@@ -999,7 +999,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'remote-board',
                 clientId: 'clientB',
-                actionType: 'updateBoard',
+                actionType: 'updateBoard' as ActionType,
                 opType: OpType.Update,
                 entityType: 'BOARD',
                 entityId: 'board-1',
@@ -1030,7 +1030,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'local-reminder',
                 clientId: 'clientA',
-                actionType: 'updateReminder',
+                actionType: 'updateReminder' as ActionType,
                 opType: OpType.Update,
                 entityType: 'REMINDER',
                 entityId: 'reminder-1',
@@ -1044,7 +1044,7 @@ describe('ConflictResolutionService', () => {
               {
                 id: 'remote-reminder',
                 clientId: 'clientB',
-                actionType: 'updateReminder',
+                actionType: 'updateReminder' as ActionType,
                 opType: OpType.Update,
                 entityType: 'REMINDER',
                 entityId: 'reminder-1',
@@ -1202,7 +1202,7 @@ describe('ConflictResolutionService', () => {
       const createMockLocalWinOp = (entityId: string): Operation => ({
         id: `lww-update-${entityId}`,
         clientId: 'client-a',
-        actionType: '[TASK] LWW Update',
+        actionType: '[TASK] LWW Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId,
@@ -1398,7 +1398,7 @@ describe('ConflictResolutionService', () => {
         const mockLocalWinOp: Operation = {
           id: 'lww-update-task-1',
           clientId: 'client-a',
-          actionType: '[TASK] LWW Update',
+          actionType: '[TASK] LWW Update' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -1418,7 +1418,7 @@ describe('ConflictResolutionService', () => {
         expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
           jasmine.objectContaining({
             id: 'lww-update-task-1',
-            actionType: '[TASK] LWW Update',
+            actionType: '[TASK] LWW Update' as ActionType,
           }),
           'local',
         );
@@ -1533,7 +1533,7 @@ describe('ConflictResolutionService', () => {
 
     const createOp = (partial: Partial<Operation>): Operation => ({
       id: 'op-1',
-      actionType: '[Test] Action',
+      actionType: '[Test] Action' as ActionType,
       opType: OpType.Update,
       entityType: 'TASK',
       entityId: 'entity-1',

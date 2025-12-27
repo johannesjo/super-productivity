@@ -1,10 +1,10 @@
 import { convertOpToAction, ACTION_TYPE_ALIASES } from './operation-converter.util';
-import { Operation, OpType } from '../core/operation.types';
+import { ActionType, Operation, OpType } from '../core/operation.types';
 
 describe('operation-converter utility', () => {
   const createMockOperation = (overrides: Partial<Operation> = {}): Operation => ({
     id: 'op-123',
-    actionType: '[Task] Update Task',
+    actionType: '[Task] Update Task' as ActionType,
     opType: OpType.Update,
     entityType: 'TASK',
     entityId: 'task-456',
@@ -18,7 +18,7 @@ describe('operation-converter utility', () => {
 
   describe('convertOpToAction', () => {
     it('should convert operation to action with correct type', () => {
-      const op = createMockOperation({ actionType: '[Task] Add Task' });
+      const op = createMockOperation({ actionType: '[Task] Add Task' as ActionType });
       const action = convertOpToAction(op);
 
       expect(action.type).toBe('[Task] Add Task');
@@ -83,7 +83,7 @@ describe('operation-converter utility', () => {
     it('should handle Create operation', () => {
       const op = createMockOperation({
         opType: OpType.Create,
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         payload: { id: 'new-task', title: 'New Task' },
       });
       const action = convertOpToAction(op);
@@ -96,7 +96,7 @@ describe('operation-converter utility', () => {
     it('should handle Update operation', () => {
       const op = createMockOperation({
         opType: OpType.Update,
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         payload: { id: 'task-1', changes: { title: 'Updated' } },
       });
       const action = convertOpToAction(op);
@@ -109,7 +109,7 @@ describe('operation-converter utility', () => {
     it('should handle Delete operation', () => {
       const op = createMockOperation({
         opType: OpType.Delete,
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
         entityId: 'task-to-delete',
         payload: { id: 'task-to-delete' },
       });
@@ -122,7 +122,7 @@ describe('operation-converter utility', () => {
     it('should handle Move operation', () => {
       const op = createMockOperation({
         opType: OpType.Move,
-        actionType: '[Task] Move Task',
+        actionType: '[Task] Move Task' as ActionType,
         payload: { taskId: 'task-1', newProjectId: 'project-2' },
       });
       const action = convertOpToAction(op);
@@ -134,7 +134,7 @@ describe('operation-converter utility', () => {
     it('should handle Batch operation', () => {
       const op = createMockOperation({
         opType: OpType.Batch,
-        actionType: '[Task] Batch Update',
+        actionType: '[Task] Batch Update' as ActionType,
         entityIds: ['t1', 't2', 't3'],
         payload: { ids: ['t1', 't2', 't3'], changes: { done: true } },
       });
@@ -154,7 +154,7 @@ describe('operation-converter utility', () => {
         const op = createMockOperation({
           opType: OpType.SyncImport,
           entityType: 'ALL',
-          actionType: '[SP_ALL] Load(import) all data',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
           payload: fullState, // NOT wrapped in appDataComplete
         });
         const action = convertOpToAction(op);
@@ -178,7 +178,7 @@ describe('operation-converter utility', () => {
         const op = createMockOperation({
           opType: OpType.SyncImport,
           entityType: 'ALL',
-          actionType: '[SP_ALL] Load(import) all data',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
           payload: { appDataComplete: fullState }, // Already wrapped
         });
         const action = convertOpToAction(op);
@@ -196,7 +196,7 @@ describe('operation-converter utility', () => {
         const op = createMockOperation({
           opType: OpType.BackupImport,
           entityType: 'ALL',
-          actionType: '[SP_ALL] Load(import) backup file',
+          actionType: '[SP_ALL] Load(import) backup file' as ActionType,
           payload: fullState,
         });
         const action = convertOpToAction(op);
@@ -212,7 +212,7 @@ describe('operation-converter utility', () => {
         const op = createMockOperation({
           opType: OpType.Repair,
           entityType: 'ALL',
-          actionType: '[Repair] Apply Repair',
+          actionType: '[Repair] Apply Repair' as ActionType,
           payload: fullState,
         });
         const action = convertOpToAction(op);
@@ -224,7 +224,7 @@ describe('operation-converter utility', () => {
         const op = createMockOperation({
           opType: OpType.SyncImport,
           entityType: 'ALL',
-          actionType: '[SP_ALL] Load(import) all data',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
           payload: { task: {} },
         });
         const action = convertOpToAction(op);
@@ -252,7 +252,7 @@ describe('operation-converter utility', () => {
         const op = createMockOperation({
           opType: OpType.SyncImport,
           entityType: 'ALL',
-          actionType: '[SP_ALL] Load(import) all data',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
           payload: fullState,
         });
         const action = convertOpToAction(op);
@@ -331,7 +331,7 @@ describe('operation-converter utility', () => {
     });
 
     it('should use current action type when no alias exists', () => {
-      const op = createMockOperation({ actionType: '[Task] Some Action' });
+      const op = createMockOperation({ actionType: '[Task] Some Action' as ActionType });
       const action = convertOpToAction(op);
 
       expect(action.type).toBe('[Task] Some Action');
@@ -344,7 +344,9 @@ describe('operation-converter utility', () => {
         '[New] Current Action';
 
       try {
-        const op = createMockOperation({ actionType: '[Old] Legacy Action' });
+        const op = createMockOperation({
+          actionType: '[Old] Legacy Action' as ActionType,
+        });
         const action = convertOpToAction(op);
 
         expect(action.type).toBe('[New] Current Action');

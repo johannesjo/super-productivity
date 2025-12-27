@@ -16,7 +16,7 @@
 import { ActionReducer, Action } from '@ngrx/store';
 import { lwwUpdateMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
 import { convertOpToAction } from '../../apply/operation-converter.util';
-import { Operation, OpType, EntityType } from '../../core/operation.types';
+import { ActionType, Operation, OpType, EntityType } from '../../core/operation.types';
 
 describe('LWW Update Store Application Integration', () => {
   // Feature names matching actual NgRx feature names
@@ -74,7 +74,7 @@ describe('LWW Update Store Application Integration', () => {
     payload: Record<string, unknown>,
   ): Operation => ({
     id: `lww-op-${Date.now()}`,
-    actionType: `[${entityType}] LWW Update`,
+    actionType: `[${entityType}] LWW Update` as ActionType,
     opType: OpType.Update,
     entityType,
     entityId,

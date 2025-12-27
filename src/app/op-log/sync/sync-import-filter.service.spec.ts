@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SyncImportFilterService } from './sync-import-filter.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
-import { Operation, OpType } from '../core/operation.types';
+import { ActionType, Operation, OpType } from '../core/operation.types';
 
 describe('SyncImportFilterService', () => {
   let service: SyncImportFilterService;
@@ -10,7 +10,7 @@ describe('SyncImportFilterService', () => {
   // Helper to create operations with UUIDv7-style IDs (lexicographically sortable by time)
   const createOp = (partial: Partial<Operation>): Operation => ({
     id: '019afd68-0000-7000-0000-000000000000', // Default UUIDv7 format
-    actionType: '[Test] Action',
+    actionType: '[Test] Action' as ActionType,
     opType: OpType.Update,
     entityType: 'TASK',
     entityId: 'entity-1',
@@ -256,7 +256,7 @@ describe('SyncImportFilterService', () => {
       // Set up the store to have a SYNC_IMPORT from a previous sync
       const existingSyncImport: Operation = {
         id: '019afd68-0050-7000-0000-000000000000',
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: 'import-1',
@@ -276,7 +276,7 @@ describe('SyncImportFilterService', () => {
       const oldOpsFromClientA: Operation[] = [
         {
           id: '019afd60-0001-7000-0000-000000000000',
-          actionType: '[Task] Update Task',
+          actionType: '[Task] Update Task' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -288,7 +288,7 @@ describe('SyncImportFilterService', () => {
         },
         {
           id: '019afd60-0002-7000-0000-000000000000',
-          actionType: '[Task] Update Task',
+          actionType: '[Task] Update Task' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-2',
@@ -312,7 +312,7 @@ describe('SyncImportFilterService', () => {
     it('should keep post-import ops when SYNC_IMPORT was downloaded in a PREVIOUS sync cycle', async () => {
       const existingSyncImport: Operation = {
         id: '019afd68-0050-7000-0000-000000000000',
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: 'import-1',
@@ -331,7 +331,7 @@ describe('SyncImportFilterService', () => {
       const newOpsFromClientA: Operation[] = [
         {
           id: '019afd70-0001-7000-0000-000000000000',
-          actionType: '[Task] Update Task',
+          actionType: '[Task] Update Task' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -355,7 +355,7 @@ describe('SyncImportFilterService', () => {
         const ops: Operation[] = [
           {
             id: '019afd70-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -367,7 +367,7 @@ describe('SyncImportFilterService', () => {
           },
           {
             id: '019afd68-0050-7000-0000-000000000000',
-            actionType: '[SP_ALL] Load(import) all data',
+            actionType: '[SP_ALL] Load(import) all data' as ActionType,
             opType: OpType.SyncImport,
             entityType: 'ALL',
             entityId: 'import-1',
@@ -391,7 +391,7 @@ describe('SyncImportFilterService', () => {
         const ops: Operation[] = [
           {
             id: '019afd60-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -403,7 +403,7 @@ describe('SyncImportFilterService', () => {
           },
           {
             id: '019afd68-0050-7000-0000-000000000000',
-            actionType: '[SP_ALL] Load(import) all data',
+            actionType: '[SP_ALL] Load(import) all data' as ActionType,
             opType: OpType.SyncImport,
             entityType: 'ALL',
             entityId: 'import-1',
@@ -426,7 +426,7 @@ describe('SyncImportFilterService', () => {
         const ops: Operation[] = [
           {
             id: '019afd68-0050-7000-0000-000000000000',
-            actionType: '[SP_ALL] Load(import) all data',
+            actionType: '[SP_ALL] Load(import) all data' as ActionType,
             opType: OpType.SyncImport,
             entityType: 'ALL',
             entityId: 'import-1',
@@ -438,7 +438,7 @@ describe('SyncImportFilterService', () => {
           },
           {
             id: '019afd70-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -460,7 +460,7 @@ describe('SyncImportFilterService', () => {
         const ops: Operation[] = [
           {
             id: '019afd68-0050-7000-0000-000000000000',
-            actionType: '[SP_ALL] Load(import) all data',
+            actionType: '[SP_ALL] Load(import) all data' as ActionType,
             opType: OpType.SyncImport,
             entityType: 'ALL',
             entityId: 'import-1',
@@ -472,7 +472,7 @@ describe('SyncImportFilterService', () => {
           },
           {
             id: '019afd68-0051-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -495,7 +495,7 @@ describe('SyncImportFilterService', () => {
           {
             // UUIDv7 timestamp is AFTER the import (client clock was ahead!)
             id: '019afd80-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -507,7 +507,7 @@ describe('SyncImportFilterService', () => {
           },
           {
             id: '019afd68-0050-7000-0000-000000000000',
-            actionType: '[SP_ALL] Load(import) all data',
+            actionType: '[SP_ALL] Load(import) all data' as ActionType,
             opType: OpType.SyncImport,
             entityType: 'ALL',
             entityId: 'import-1',
@@ -532,7 +532,7 @@ describe('SyncImportFilterService', () => {
         const ops: Operation[] = [
           {
             id: '019afd60-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -544,7 +544,7 @@ describe('SyncImportFilterService', () => {
           },
           {
             id: '019afd68-0050-7000-0000-000000000000',
-            actionType: '[OpLog] Repair',
+            actionType: '[OpLog] Repair' as ActionType,
             opType: OpType.Repair,
             entityType: 'ALL',
             entityId: 'repair-1',
@@ -590,7 +590,7 @@ describe('SyncImportFilterService', () => {
 
         const existingSyncImport: Operation = {
           id: '019afd68-0050-7000-0000-000000000000',
-          actionType: '[SP_ALL] Load(import) all data',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
           opType: OpType.SyncImport,
           entityType: 'ALL',
           entityId: 'import-1',
@@ -609,7 +609,7 @@ describe('SyncImportFilterService', () => {
         const postMergeOp: Operation[] = [
           {
             id: '019afd70-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -639,7 +639,7 @@ describe('SyncImportFilterService', () => {
 
         const existingSyncImport: Operation = {
           id: '019afd68-0050-7000-0000-000000000000',
-          actionType: '[SP_ALL] Load(import) all data',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
           opType: OpType.SyncImport,
           entityType: 'ALL',
           entityId: 'import-1',
@@ -658,7 +658,7 @@ describe('SyncImportFilterService', () => {
         const unknownClientOp: Operation[] = [
           {
             id: '019afd70-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -686,7 +686,7 @@ describe('SyncImportFilterService', () => {
 
         const existingSyncImport: Operation = {
           id: '019afd68-0050-7000-0000-000000000000',
-          actionType: '[SP_ALL] Load(import) all data',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
           opType: OpType.SyncImport,
           entityType: 'ALL',
           entityId: 'import-1',
@@ -704,7 +704,7 @@ describe('SyncImportFilterService', () => {
         const opsFromMultipleClients: Operation[] = [
           {
             id: '019afd70-0001-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -716,7 +716,7 @@ describe('SyncImportFilterService', () => {
           },
           {
             id: '019afd70-0002-7000-0000-000000000000',
-            actionType: '[Task] Update Task',
+            actionType: '[Task] Update Task' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-2',

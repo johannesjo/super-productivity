@@ -5,7 +5,7 @@ import { OperationLogMigrationService } from './operation-log-migration.service'
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { OpLog } from '../../core/log';
-import { OpType } from '../core/operation.types';
+import { ActionType, OpType } from '../core/operation.types';
 
 describe('OperationLogMigrationService', () => {
   let service: OperationLogMigrationService;
@@ -94,7 +94,7 @@ describe('OperationLogMigrationService', () => {
             op: {
               id: 'genesis-op',
               entityType: 'MIGRATION',
-              actionType: '[Migration] Genesis Import',
+              actionType: '[Migration] Genesis Import' as ActionType,
               opType: OpType.Batch,
               clientId: 'client1',
               vectorClock: { client1: 1 },
@@ -127,7 +127,7 @@ describe('OperationLogMigrationService', () => {
             op: {
               id: 'recovery-op',
               entityType: 'RECOVERY',
-              actionType: '[Recovery] Data Recovery Import',
+              actionType: '[Recovery] Data Recovery Import' as ActionType,
               opType: OpType.Batch,
               clientId: 'client1',
               vectorClock: { client1: 1 },
@@ -156,7 +156,7 @@ describe('OperationLogMigrationService', () => {
             op: {
               id: 'orphan-op-1',
               entityType: 'TASK',
-              actionType: '[Task] Update Task',
+              actionType: '[Task] Update Task' as ActionType,
               opType: OpType.Update,
               clientId: 'client1',
               vectorClock: { client1: 1 },
@@ -172,7 +172,7 @@ describe('OperationLogMigrationService', () => {
             op: {
               id: 'orphan-op-2',
               entityType: 'TAG',
-              actionType: '[Tag] Update Tag',
+              actionType: '[Tag] Update Tag' as ActionType,
               opType: OpType.Update,
               clientId: 'client1',
               vectorClock: { client1: 2 },
@@ -263,7 +263,7 @@ describe('OperationLogMigrationService', () => {
         const appendCallArgs = mockOpLogStore.append.calls.first().args[0];
         expect(appendCallArgs).toEqual(
           jasmine.objectContaining({
-            actionType: '[Migration] Genesis Import',
+            actionType: '[Migration] Genesis Import' as ActionType,
             entityType: 'MIGRATION',
             clientId: clientId,
             payload: legacyData,

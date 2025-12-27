@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
+  ActionType,
   EntityConflict,
   EntityType,
   Operation,
@@ -589,7 +590,7 @@ export class ConflictResolutionService {
     // Create the update operation
     const op: Operation = {
       id: uuidv7(),
-      actionType: `[${conflict.entityType}] LWW Update`,
+      actionType: `[${conflict.entityType}] LWW Update` as ActionType,
       opType: OpType.Update,
       entityType: conflict.entityType,
       entityId: conflict.entityId,

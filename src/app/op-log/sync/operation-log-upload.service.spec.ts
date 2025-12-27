@@ -7,7 +7,7 @@ import {
   OperationSyncCapable,
 } from '../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../pfapi/api/pfapi.const';
-import { OpType, OperationLogEntry } from '../core/operation.types';
+import { ActionType, OpType, OperationLogEntry } from '../core/operation.types';
 import { SnackService } from '../../core/snack/snack.service';
 import { provideMockStore } from '@ngrx/store/testing';
 
@@ -26,7 +26,7 @@ describe('OperationLogUploadService', () => {
     op: {
       id,
       clientId,
-      actionType: '[Task] Add',
+      actionType: '[Task] Add' as ActionType,
       opType: OpType.Create,
       entityType: 'TASK',
       entityId: `task-${id}`,
@@ -226,7 +226,7 @@ describe('OperationLogUploadService', () => {
         const piggybackedOp = {
           id: 'remote-op',
           clientId: 'otherClient',
-          actionType: '[Task] Update',
+          actionType: '[Task] Update' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -313,7 +313,7 @@ describe('OperationLogUploadService', () => {
                   op: {
                     id: 'remote-1',
                     clientId: 'other',
-                    actionType: '[Task] Update',
+                    actionType: '[Task] Update' as ActionType,
                     opType: OpType.Update,
                     entityType: 'TASK',
                     entityId: 't1',
@@ -329,7 +329,7 @@ describe('OperationLogUploadService', () => {
                   op: {
                     id: 'remote-2',
                     clientId: 'other',
-                    actionType: '[Task] Update',
+                    actionType: '[Task] Update' as ActionType,
                     opType: OpType.Update,
                     entityType: 'TASK',
                     entityId: 't2',
@@ -374,7 +374,7 @@ describe('OperationLogUploadService', () => {
                     op: {
                       id: 'remote-1',
                       clientId: 'other',
-                      actionType: '[Task] Update',
+                      actionType: '[Task] Update' as ActionType,
                       opType: OpType.Update,
                       entityType: 'TASK',
                       entityId: 't1',
@@ -434,7 +434,7 @@ describe('OperationLogUploadService', () => {
                     op: {
                       id: 'remote-1',
                       clientId: 'other',
-                      actionType: '[Task] Update',
+                      actionType: '[Task] Update' as ActionType,
                       opType: OpType.Update,
                       entityType: 'TASK',
                       entityId: 't1',
@@ -450,7 +450,7 @@ describe('OperationLogUploadService', () => {
                     op: {
                       id: 'remote-2',
                       clientId: 'other',
-                      actionType: '[Task] Update',
+                      actionType: '[Task] Update' as ActionType,
                       opType: OpType.Update,
                       entityType: 'TASK',
                       entityId: 't2',
@@ -475,7 +475,7 @@ describe('OperationLogUploadService', () => {
                     op: {
                       id: 'remote-3',
                       clientId: 'other',
-                      actionType: '[Task] Update',
+                      actionType: '[Task] Update' as ActionType,
                       opType: OpType.Update,
                       entityType: 'TASK',
                       entityId: 't3',
@@ -519,7 +519,7 @@ describe('OperationLogUploadService', () => {
         op: {
           id,
           clientId,
-          actionType: '[Sync] Import',
+          actionType: '[Sync] Import' as ActionType,
           opType,
           entityType: 'ALL',
           entityId: undefined,
@@ -784,7 +784,7 @@ describe('OperationLogUploadService', () => {
           op: {
             id: 'op-1',
             clientId: 'client-1',
-            actionType: '[Sync] Import',
+            actionType: '[Sync] Import' as ActionType,
             opType: OpType.BackupImport,
             entityType: 'ALL',
             entityId: undefined,

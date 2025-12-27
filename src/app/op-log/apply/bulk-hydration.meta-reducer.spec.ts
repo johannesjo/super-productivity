@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 import { bulkHydrationMetaReducer } from './bulk-hydration.meta-reducer';
 import { bulkApplyHydrationOperations } from './bulk-hydration.action';
-import { Operation, OpType } from '../core/operation.types';
+import { ActionType, Operation, OpType } from '../core/operation.types';
 import { RootState } from '../../root-store/root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
@@ -114,7 +114,7 @@ describe('bulkHydrationMetaReducer', () => {
     opType: OpType.Update,
     entityType: 'TASK',
     entityId: TASK_ID,
-    actionType: '[Task] Update Task',
+    actionType: '[Task] Update Task' as ActionType,
     payload: { task: { id: TASK_ID, changes: { title: 'Updated Title' } } },
     vectorClock: { client1: 1 },
     clientId: 'client1',
@@ -301,7 +301,7 @@ describe('bulkHydrationMetaReducer', () => {
         id: 'op-create',
         opType: OpType.Create,
         entityId: TASK_ID_2,
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         payload: { task: newTask },
       });
       const action = bulkApplyHydrationOperations({ operations: [operation] });
@@ -374,11 +374,11 @@ describe('bulkHydrationMetaReducer', () => {
       const operations = [
         createMockOperation({
           id: 'op-1',
-          actionType: '[Task] Update Task',
+          actionType: '[Task] Update Task' as ActionType,
         }),
         createMockOperation({
           id: 'op-2',
-          actionType: '[Task] Delete Task',
+          actionType: '[Task] Delete Task' as ActionType,
           opType: OpType.Delete,
         }),
       ];

@@ -1,4 +1,4 @@
-import { Operation } from '../core/operation.types';
+import { ActionType, Operation } from '../core/operation.types';
 import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
@@ -25,7 +25,7 @@ export const syncOpToOperation = (syncOp: SyncOperation): Operation => {
   return {
     id: syncOp.id,
     clientId: syncOp.clientId,
-    actionType: syncOp.actionType,
+    actionType: syncOp.actionType as ActionType,
     opType: syncOp.opType as Operation['opType'],
     entityType: syncOp.entityType as Operation['entityType'],
     entityId: syncOp.entityId,

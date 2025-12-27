@@ -2,6 +2,7 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
 import {
+  ActionType,
   OpType,
   Operation,
   RepairPayload,
@@ -96,7 +97,7 @@ describe('Repair + Sync Integration', () => {
       };
 
       const repairOp: Operation = testClient.createOperation({
-        actionType: '[Repair] Auto Repair',
+        actionType: '[Repair] Auto Repair' as ActionType,
         opType: OpType.Repair,
         entityType: 'ALL',
         entityId: 'repair', // REPAIR doesn't target specific entity, but field is required
@@ -128,7 +129,7 @@ describe('Repair + Sync Integration', () => {
 
       // First create a regular operation
       testClient.createOperation({
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -137,7 +138,7 @@ describe('Repair + Sync Integration', () => {
 
       // Then create a repair operation
       const repairOp = testClient.createOperation({
-        actionType: '[Repair] Auto Repair',
+        actionType: '[Repair] Auto Repair' as ActionType,
         opType: OpType.Repair,
         entityType: 'ALL',
         entityId: 'repair',

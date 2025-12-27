@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
-import { OpType } from '../../core/operation.types';
+import { ActionType, OpType } from '../../core/operation.types';
 import {
   compareVectorClocks,
   VectorClockComparison,
@@ -45,7 +45,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A creates older operation
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -56,7 +56,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B creates newer operation
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -81,7 +81,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A creates newer operation (local)
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -91,7 +91,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B creates older operation (remote)
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -115,7 +115,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Both clients create operations at same timestamp
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -124,7 +124,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (opA as any).timestamp = now;
 
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -148,7 +148,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Both clients start from "no knowledge of each other"
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -156,7 +156,7 @@ describe('LWW Conflict Resolution Integration', () => {
       });
 
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -174,7 +174,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A creates operation
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -186,7 +186,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B then creates its own operation (with knowledge of A's)
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -206,7 +206,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Simulate: Client A has local ops, Client B has remote ops
       const localOp = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -214,7 +214,7 @@ describe('LWW Conflict Resolution Integration', () => {
       });
 
       const remoteOp = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -235,7 +235,7 @@ describe('LWW Conflict Resolution Integration', () => {
       const clientB = new TestClient('client-b-test');
 
       const localOp = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -243,7 +243,7 @@ describe('LWW Conflict Resolution Integration', () => {
       });
 
       const remoteOp = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -323,7 +323,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Local has older first op, newer second op
       const localOp1 = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -332,7 +332,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (localOp1 as any).timestamp = now - 10000;
 
       const localOp2 = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -342,7 +342,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Remote has one op in between
       const remoteOp = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -369,7 +369,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // All three clients edit same entity concurrently
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -378,7 +378,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (opA as any).timestamp = now - 2000;
 
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -387,7 +387,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (opB as any).timestamp = now - 1000;
 
       const opC = clientC.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -421,7 +421,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A deletes task (newer timestamp)
       const deleteOp = clientA.createOperation({
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
         opType: OpType.Delete,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -431,7 +431,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates task (older timestamp)
       const updateOp = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -455,7 +455,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A updates task (newer timestamp)
       const updateOp = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -465,7 +465,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B deletes task (older timestamp)
       const deleteOp = clientB.createOperation({
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
         opType: OpType.Delete,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -547,7 +547,7 @@ describe('LWW Conflict Resolution Integration', () => {
       const newClock = incrementVectorClock(mergedClock, clientA.clientId);
 
       const newUpdateOp = clientA.createOperation({
-        actionType: '[Task] LWW Update',
+        actionType: '[Task] LWW Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -634,7 +634,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Operations with only 1ms difference
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -643,7 +643,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (opA as any).timestamp = now;
 
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -665,7 +665,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Remote op only
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -690,7 +690,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Local op only
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -720,7 +720,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A deletes (newer)
       const deleteOp = clientA.createOperation({
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
         opType: OpType.Delete,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -730,7 +730,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates (older)
       const updateOp = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -765,7 +765,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A updates (newer)
       const updateOp = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -775,7 +775,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B deletes (older)
       const deleteOp = clientB.createOperation({
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
         opType: OpType.Delete,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -806,7 +806,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A deletes (older, local)
       const deleteOp = clientA.createOperation({
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
         opType: OpType.Delete,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -816,7 +816,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates (newer, remote)
       const updateOp = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -853,7 +853,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A creates (older)
       const createA = clientA.createOperation({
-        actionType: '[Task] Create Task',
+        actionType: '[Task] Create Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK',
         entityId: sharedEntityId,
@@ -863,7 +863,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B creates same ID (newer)
       const createB = clientB.createOperation({
-        actionType: '[Task] Create Task',
+        actionType: '[Task] Create Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK',
         entityId: sharedEntityId,
@@ -903,7 +903,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A moves task (newer, local)
       const movA = clientA.createOperation({
-        actionType: '[Task] Move Task',
+        actionType: '[Task] Move Task' as ActionType,
         opType: OpType.Move,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -913,7 +913,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B moves same task (older, remote)
       const movB = clientB.createOperation({
-        actionType: '[Task] Move Task',
+        actionType: '[Task] Move Task' as ActionType,
         opType: OpType.Move,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -947,7 +947,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A batch updates (older, local)
       const batchA = clientA.createOperation({
-        actionType: '[Task] Batch Update',
+        actionType: '[Task] Batch Update' as ActionType,
         opType: OpType.Batch,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -958,7 +958,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B batch updates (newer, remote)
       const batchB = clientB.createOperation({
-        actionType: '[Task] Batch Update',
+        actionType: '[Task] Batch Update' as ActionType,
         opType: OpType.Batch,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -992,7 +992,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A batch affects tasks 1, 2, 3
       const batchA = clientA.createOperation({
-        actionType: '[Task] Batch Update',
+        actionType: '[Task] Batch Update' as ActionType,
         opType: OpType.Batch,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -1003,7 +1003,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B batch affects tasks 2, 3, 4 (overlap on 2, 3)
       const batchB = clientB.createOperation({
-        actionType: '[Task] Batch Update',
+        actionType: '[Task] Batch Update' as ActionType,
         opType: OpType.Batch,
         entityType: 'TASK',
         entityId: 'task-2',
@@ -1039,7 +1039,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A updates config (newer, local)
       const configA = clientA.createOperation({
-        actionType: '[GlobalConfig] Update',
+        actionType: '[GlobalConfig] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'GLOBAL_CONFIG',
         entityId: 'GLOBAL_CONFIG',
@@ -1049,7 +1049,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates config (older, remote)
       const configB = clientB.createOperation({
-        actionType: '[GlobalConfig] Update',
+        actionType: '[GlobalConfig] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'GLOBAL_CONFIG',
         entityId: 'GLOBAL_CONFIG',
@@ -1086,7 +1086,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A updates planner day (older, remote)
       const plannerA = clientA.createOperation({
-        actionType: '[Planner] Update Day',
+        actionType: '[Planner] Update Day' as ActionType,
         opType: OpType.Update,
         entityType: 'PLANNER',
         entityId: dayId,
@@ -1096,7 +1096,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates same day (newer, local)
       const plannerB = clientB.createOperation({
-        actionType: '[Planner] Update Day',
+        actionType: '[Planner] Update Day' as ActionType,
         opType: OpType.Update,
         entityType: 'PLANNER',
         entityId: dayId,
@@ -1130,7 +1130,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A updates board (newer, remote)
       const boardA = clientA.createOperation({
-        actionType: '[Boards] Update Board',
+        actionType: '[Boards] Update Board' as ActionType,
         opType: OpType.Update,
         entityType: 'BOARD',
         entityId: 'board-1',
@@ -1140,7 +1140,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates board (older, local)
       const boardB = clientB.createOperation({
-        actionType: '[Boards] Update Board',
+        actionType: '[Boards] Update Board' as ActionType,
         opType: OpType.Update,
         entityType: 'BOARD',
         entityId: 'board-1',
@@ -1174,7 +1174,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A updates reminder (older)
       const reminderA = clientA.createOperation({
-        actionType: '[Reminder] Update',
+        actionType: '[Reminder] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'REMINDER',
         entityId: 'reminder-1',
@@ -1184,7 +1184,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates reminder (newer)
       const reminderB = clientB.createOperation({
-        actionType: '[Reminder] Update',
+        actionType: '[Reminder] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'REMINDER',
         entityId: 'reminder-1',
@@ -1220,7 +1220,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Create operations with exact same timestamp
       const opA = clientA.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-tie',
@@ -1229,7 +1229,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (opA as any).timestamp = exactTimestamp;
 
       const opB = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-tie',
@@ -1261,7 +1261,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client A deletes task
       const deleteOp = clientA.createOperation({
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
         opType: OpType.Delete,
         entityType: 'TASK',
         entityId: 'task-conflict',
@@ -1271,7 +1271,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Client B updates same task
       const updateOp = clientB.createOperation({
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-conflict',
@@ -1305,7 +1305,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Both clients create task with same ID (very rare edge case)
       const createA = clientA.createOperation({
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK',
         entityId: sameEntityId,
@@ -1314,7 +1314,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (createA as any).timestamp = sameTime;
 
       const createB = clientB.createOperation({
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK',
         entityId: sameEntityId,
@@ -1346,7 +1346,7 @@ describe('LWW Conflict Resolution Integration', () => {
       // Create 5 rapid updates (might have same ms timestamp)
       for (let i = 0; i < 5; i++) {
         const op = client.createOperation({
-          actionType: '[Task] Update Task',
+          actionType: '[Task] Update Task' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'rapid-task',
@@ -1376,7 +1376,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Task conflict: remote wins
       const taskA = clientA.createOperation({
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -1385,7 +1385,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (taskA as any).timestamp = now - 1000;
 
       const taskB = clientB.createOperation({
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -1395,7 +1395,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Project conflict: local wins
       const projectA = clientA.createOperation({
-        actionType: '[Project] Update',
+        actionType: '[Project] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'PROJECT',
         entityId: 'project-1',
@@ -1404,7 +1404,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (projectA as any).timestamp = now;
 
       const projectB = clientB.createOperation({
-        actionType: '[Project] Update',
+        actionType: '[Project] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'PROJECT',
         entityId: 'project-1',
@@ -1414,7 +1414,7 @@ describe('LWW Conflict Resolution Integration', () => {
 
       // Tag conflict: tie (remote wins)
       const tagA = clientA.createOperation({
-        actionType: '[Tag] Update',
+        actionType: '[Tag] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TAG',
         entityId: 'tag-1',
@@ -1423,7 +1423,7 @@ describe('LWW Conflict Resolution Integration', () => {
       (tagA as any).timestamp = now - 500;
 
       const tagB = clientB.createOperation({
-        actionType: '[Tag] Update',
+        actionType: '[Tag] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TAG',
         entityId: 'tag-1',

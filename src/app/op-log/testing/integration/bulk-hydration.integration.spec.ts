@@ -13,7 +13,7 @@ import { ActionReducer, Action } from '@ngrx/store';
 import { bulkHydrationMetaReducer } from '../../apply/bulk-hydration.meta-reducer';
 import { bulkApplyHydrationOperations } from '../../apply/bulk-hydration.action';
 import { convertOpToAction } from '../../apply/operation-converter.util';
-import { Operation, OpType } from '../../core/operation.types';
+import { ActionType, Operation, OpType } from '../../core/operation.types';
 import { lwwUpdateMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
 
 describe('Bulk Hydration Integration', () => {
@@ -57,7 +57,7 @@ describe('Bulk Hydration Integration', () => {
     entityId?: string,
   ): Operation => ({
     id,
-    actionType,
+    actionType: actionType as ActionType,
     opType,
     entityType: 'TASK',
     entityId,

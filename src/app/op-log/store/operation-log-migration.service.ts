@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
-import { Operation, OpType } from '../core/operation.types';
+import { ActionType, Operation, OpType } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
 import { OpLog } from '../../core/log';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
@@ -90,7 +90,7 @@ export class OperationLogMigrationService {
     // Create Genesis Operation
     const genesisOp: Operation = {
       id: uuidv7(),
-      actionType: '[Migration] Genesis Import',
+      actionType: ActionType.MIGRATION_GENESIS_IMPORT,
       opType: OpType.Batch,
       entityType: 'MIGRATION',
       entityId: '*',

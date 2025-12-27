@@ -36,7 +36,7 @@ import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-
 import { PFLog } from '../core/log';
 import { PfapiStoreDelegateService } from './pfapi-store-delegate.service';
 import { OperationLogStoreService } from '../op-log/store/operation-log-store.service';
-import { Operation, OpType } from '../op-log/core/operation.types';
+import { Operation, OpType, ActionType } from '../op-log/core/operation.types';
 import { CURRENT_SCHEMA_VERSION } from '../op-log/store/schema-migration.service';
 import { incrementVectorClock } from './api/util/vector-clock';
 import { uuidv7 } from '../util/uuid-v7';
@@ -267,7 +267,7 @@ export class PfapiService {
     const opId = uuidv7();
     const op: Operation = {
       id: opId,
-      actionType: '[SP_ALL] Load(import) all data',
+      actionType: ActionType.LOAD_ALL_DATA,
       opType: OpType.SyncImport,
       entityType: 'ALL',
       entityId: opId, // Use opId as entityId to ensure uniqueness for conflict resolution

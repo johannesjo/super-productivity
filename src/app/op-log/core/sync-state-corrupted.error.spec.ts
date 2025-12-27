@@ -1,10 +1,11 @@
 import { SyncStateCorruptedError } from './sync-state-corrupted.error';
+import { ActionType } from './action-types.enum';
 
 describe('SyncStateCorruptedError', () => {
   it('should create error with message and context', () => {
     const error = new SyncStateCorruptedError('Test error message', {
       opId: 'op-123',
-      actionType: '[Task] Add Task',
+      actionType: '[Task] Add Task' as ActionType,
       missingDependencies: ['project-1', 'tag-2'],
     });
 
@@ -18,7 +19,7 @@ describe('SyncStateCorruptedError', () => {
   it('should be instanceof Error', () => {
     const error = new SyncStateCorruptedError('Test', {
       opId: 'op-1',
-      actionType: 'test',
+      actionType: 'test' as ActionType,
       missingDependencies: [],
     });
 
@@ -29,7 +30,7 @@ describe('SyncStateCorruptedError', () => {
   it('should have proper stack trace', () => {
     const error = new SyncStateCorruptedError('Stack test', {
       opId: 'op-1',
-      actionType: 'test',
+      actionType: 'test' as ActionType,
       missingDependencies: [],
     });
 
@@ -40,7 +41,7 @@ describe('SyncStateCorruptedError', () => {
   it('should handle empty missing dependencies', () => {
     const error = new SyncStateCorruptedError('No deps', {
       opId: 'op-1',
-      actionType: 'test',
+      actionType: 'test' as ActionType,
       missingDependencies: [],
     });
 

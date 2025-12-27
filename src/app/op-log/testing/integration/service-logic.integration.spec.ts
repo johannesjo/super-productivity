@@ -23,6 +23,7 @@ import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
 import { SuperSyncPrivateCfg } from '../../../pfapi/api/sync/providers/super-sync/super-sync.model';
 import { provideMockStore } from '@ngrx/store/testing';
 import {
+  ActionType,
   EntityConflict,
   OpType,
   Operation,
@@ -363,7 +364,7 @@ describe('Service Logic Integration', () => {
       const op: Operation = {
         id: 'op-1',
         clientId: 'local-client',
-        actionType: 'TEST',
+        actionType: 'TEST' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 't1',
@@ -402,7 +403,7 @@ describe('Service Logic Integration', () => {
       const remoteOp: SyncOperation = {
         id: 'op-remote-1',
         clientId: 'remote-client', // Different client
-        actionType: 'TEST',
+        actionType: 'TEST' as ActionType,
         opType: OpType.Update as any,
         entityType: 'TASK' as any,
         entityId: 't1',
@@ -440,7 +441,7 @@ describe('Service Logic Integration', () => {
       const localOp: Operation = {
         id: 'op-local-1',
         clientId: 'local-client',
-        actionType: 'TEST',
+        actionType: 'TEST' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 't1',
@@ -455,7 +456,7 @@ describe('Service Logic Integration', () => {
       const remoteOp: SyncOperation = {
         id: 'op-remote-1',
         clientId: 'remote-client',
-        actionType: 'TEST',
+        actionType: 'TEST' as ActionType,
         opType: OpType.Update as any,
         entityType: 'TASK' as any,
         entityId: 't1', // Same entity
@@ -511,7 +512,7 @@ describe('Service Logic Integration', () => {
       const importOp: Operation = {
         id: 'import-op-1',
         clientId: 'client-a',
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: 'import-entity',
@@ -527,7 +528,7 @@ describe('Service Logic Integration', () => {
       const offlineOp1: SyncOperation = {
         id: 'offline-op-1',
         clientId: 'client-b',
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update as any,
         entityType: 'TASK' as any,
         entityId: 'task-1',
@@ -540,7 +541,7 @@ describe('Service Logic Integration', () => {
       const offlineOp2: SyncOperation = {
         id: 'offline-op-2',
         clientId: 'client-b',
-        actionType: '[Task] Create Task',
+        actionType: '[Task] Create Task' as ActionType,
         opType: OpType.Create as any,
         entityType: 'TASK' as any,
         entityId: 'task-2',
@@ -591,7 +592,7 @@ describe('Service Logic Integration', () => {
       const importOp: Operation = {
         id: 'import-op-2',
         clientId: 'client-a',
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: 'import-entity-2',
@@ -607,7 +608,7 @@ describe('Service Logic Integration', () => {
       const postImportOp: SyncOperation = {
         id: 'post-import-op-1',
         clientId: 'client-b',
-        actionType: '[Task] Create Task',
+        actionType: '[Task] Create Task' as ActionType,
         opType: OpType.Create as any,
         entityType: 'TASK' as any,
         entityId: 'new-task-1',
@@ -649,7 +650,7 @@ describe('Service Logic Integration', () => {
       const importOp: Operation = {
         id: 'import-clock-drift',
         clientId: 'client-a',
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: 'import-drift',
@@ -667,7 +668,7 @@ describe('Service Logic Integration', () => {
         // This UUIDv7 would be in the "future" due to clock drift
         id: '019afd90-0001-7000-0000-000000000000',
         clientId: 'client-b',
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update as any,
         entityType: 'TASK' as any,
         entityId: 'task-drift',

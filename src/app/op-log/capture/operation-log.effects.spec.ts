@@ -11,7 +11,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { Injector } from '@angular/core';
 import { ImmediateUploadService } from '../sync/immediate-upload.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
-import { OpType } from '../core/operation.types';
+import { ActionType, OpType } from '../core/operation.types';
 import { PersistentAction } from '../core/persistent-action.interface';
 import { COMPACTION_THRESHOLD } from '../core/operation-log.const';
 import {
@@ -138,7 +138,7 @@ describe('OperationLogEffects', () => {
         complete: () => {
           expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
             jasmine.objectContaining({
-              actionType: '[Task] Update Task',
+              actionType: '[Task] Update Task' as ActionType,
               opType: OpType.Update,
               entityType: 'TASK',
               clientId: 'testClient',
@@ -209,7 +209,7 @@ describe('OperationLogEffects', () => {
             complete: () => {
               expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
                 jasmine.objectContaining({
-                  actionType: '[Task] Action After Sync',
+                  actionType: '[Task] Action After Sync' as ActionType,
                 }),
                 'local',
               );
@@ -241,7 +241,7 @@ describe('OperationLogEffects', () => {
           expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(1);
           expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
             jasmine.objectContaining({
-              actionType: '[Task] Second Action',
+              actionType: '[Task] Second Action' as ActionType,
             }),
             'local',
           );
@@ -677,7 +677,7 @@ describe('OperationLogEffects', () => {
 
       expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          actionType: '[Task] Deferred Action',
+          actionType: '[Task] Deferred Action' as ActionType,
           clientId: 'testClient',
         }),
         'local',

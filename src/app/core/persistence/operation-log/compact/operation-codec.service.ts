@@ -3,6 +3,7 @@ import {
   OperationLogEntry,
   OpType,
   EntityType,
+  ActionType,
 } from '../../../../op-log/core/operation.types';
 import { CompactOperation, CompactOperationLogEntry } from './compact-operation.types';
 import { encodeActionType, decodeActionType } from './action-type-codes';
@@ -43,7 +44,9 @@ export const encodeOperation = (op: Operation): CompactOperation => {
 export const decodeOperation = (compact: CompactOperation): Operation => {
   const op: Operation = {
     id: compact.id,
-    actionType: decodeActionType(compact.a),
+    // Type assertion: We trust the data was encoded with a valid ActionType.
+    // Unknown action types from future versions are handled by decodeActionType's fallback.
+    actionType: decodeActionType(compact.a) as ActionType,
     opType: compact.o as OpType,
     entityType: compact.e as EntityType,
     payload: compact.p,

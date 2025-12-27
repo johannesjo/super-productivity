@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention, no-mixed-operators */
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
-import { OpType, Operation } from '../../core/operation.types';
+import { ActionType, OpType, Operation } from '../../core/operation.types';
 import { resetTestUuidCounter, TestClient } from './helpers/test-client.helper';
 import { MockSyncServer } from './helpers/mock-sync-server.helper';
 import { SimulatedClient } from './helpers/simulated-client.helper';
@@ -104,7 +104,7 @@ describe('Import + Sync Integration', () => {
 
       // Create the SyncImport operation (mimicking PfapiService behavior)
       const importOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -141,7 +141,7 @@ describe('Import + Sync Integration', () => {
 
       // Create an import operation
       const importOp = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -395,7 +395,7 @@ describe('Import + Sync Integration', () => {
 
       // Create a BackupImport operation (from file import)
       const backupImportOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) backup file',
+        actionType: '[SP_ALL] Load(import) backup file' as ActionType,
         opType: OpType.BackupImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -404,7 +404,7 @@ describe('Import + Sync Integration', () => {
 
       // Create a SyncImport operation (from sync download)
       const syncImportOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -435,7 +435,7 @@ describe('Import + Sync Integration', () => {
       const importOp: Operation = {
         id: uuidv7(),
         clientId: 'test-client',
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),

@@ -3,7 +3,7 @@ import { RepairOperationService } from './repair-operation.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from '../sync/lock.service';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { RepairSummary, OpType } from '../core/operation.types';
+import { ActionType, RepairSummary, OpType } from '../core/operation.types';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -97,7 +97,7 @@ describe('RepairOperationService', () => {
 
       expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          actionType: '[Repair] Auto Repair',
+          actionType: '[Repair] Auto Repair' as ActionType,
           opType: OpType.Repair,
           entityType: 'ALL',
           clientId: 'test-client',

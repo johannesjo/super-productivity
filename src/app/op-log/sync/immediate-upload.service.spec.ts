@@ -2,7 +2,7 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ImmediateUploadService } from './immediate-upload.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { OperationLogSyncService } from './operation-log-sync.service';
-import { Operation, OpType } from '../core/operation.types';
+import { ActionType, Operation, OpType } from '../core/operation.types';
 
 describe('ImmediateUploadService', () => {
   let service: ImmediateUploadService;
@@ -13,7 +13,7 @@ describe('ImmediateUploadService', () => {
   const createMockOp = (id: string): Operation => ({
     id,
     clientId: 'clientA',
-    actionType: '[Task] Add',
+    actionType: '[Task] Add' as ActionType,
     opType: OpType.Create,
     entityType: 'TASK',
     entityId: `task-${id}`,

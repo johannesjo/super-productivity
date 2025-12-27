@@ -11,7 +11,7 @@ import {
 import { uuidv7 } from '../../util/uuid-v7';
 import { devError } from '../../util/dev-error';
 import { incrementVectorClock } from '../../core/util/vector-clock';
-import { MultiEntityPayload, Operation } from '../core/operation.types';
+import { MultiEntityPayload, Operation, ActionType } from '../core/operation.types';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
 import { OpLog } from '../../core/log';
 import { SnackService } from '../../core/snack/snack.service';
@@ -127,7 +127,8 @@ export class OperationLogEffects {
 
         const op: Operation = {
           id: uuidv7(),
-          actionType: action.type,
+          // NgRx action.type is string, but it matches ActionType enum values
+          actionType: action.type as ActionType,
           opType,
           entityType: action.meta.entityType,
           entityId: action.meta.entityId,

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
-import { OpType, Operation } from '../../core/operation.types';
+import { ActionType, OpType, Operation } from '../../core/operation.types';
 import { resetTestUuidCounter, TestClient } from './helpers/test-client.helper';
 import { createMinimalTaskPayload } from './helpers/operation-factory.helper';
 import { CURRENT_SCHEMA_VERSION } from '../../store/schema-migration.service';
@@ -182,7 +182,7 @@ describe('Legacy Archive Subtasks Integration', () => {
 
       // Create import operation (simulating what PfapiService does)
       const importOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -231,7 +231,7 @@ describe('Legacy Archive Subtasks Integration', () => {
 
       // Create and store import operation
       const importOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -288,7 +288,7 @@ describe('Legacy Archive Subtasks Integration', () => {
 
       // Step 1: Import (create SyncImport operation)
       const importOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -349,7 +349,7 @@ describe('Legacy Archive Subtasks Integration', () => {
       // First import with subtasks
       const firstData = createLegacyArchiveData();
       const firstImportOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -368,7 +368,7 @@ describe('Legacy Archive Subtasks Integration', () => {
 
       // Second import (same data, simulating re-import)
       const secondImportOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),
@@ -403,7 +403,7 @@ describe('Legacy Archive Subtasks Integration', () => {
       const legacyData = createLegacyArchiveData();
 
       const importOp: Operation = testClient.createOperation({
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: '[SP_ALL] Load(import) all data' as ActionType,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: uuidv7(),

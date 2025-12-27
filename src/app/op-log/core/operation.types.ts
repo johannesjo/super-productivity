@@ -1,5 +1,6 @@
 import { VectorClock } from '../../core/util/vector-clock';
-export { VectorClock };
+import { ActionType } from './action-types.enum';
+export { VectorClock, ActionType };
 
 export enum OpType {
   Create = 'CRT',
@@ -46,8 +47,9 @@ export interface Operation {
   /**
    * The specific NgRx Action type (e.g., '[Task] Update').
    * Used to replay the operation against the store during application or testing.
+   * Must be a value from the ActionType enum to ensure type safety.
    */
-  actionType: string;
+  actionType: ActionType;
 
   /**
    * High-level operation category (Create, Update, Delete, etc.).

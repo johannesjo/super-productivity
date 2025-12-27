@@ -11,7 +11,7 @@ import {
 import { OpLog } from '../../core/log';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../pfapi/pfapi-store-delegate.service';
-import { Operation, OpType, RepairPayload } from '../core/operation.types';
+import { Operation, OpType, RepairPayload, ActionType } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
 import { incrementVectorClock, mergeVectorClocks } from '../../core/util/vector-clock';
 import { SnackService } from '../../core/snack/snack.service';
@@ -496,7 +496,7 @@ export class OperationLogHydratorService {
     // Create recovery operation
     const recoveryOp: Operation = {
       id: uuidv7(),
-      actionType: '[Recovery] Data Recovery Import',
+      actionType: ActionType.RECOVERY_DATA_IMPORT,
       opType: OpType.Batch,
       entityType: 'RECOVERY',
       entityId: '*',
@@ -714,7 +714,7 @@ export class OperationLogHydratorService {
 
       const op: Operation = {
         id: uuidv7(),
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: ActionType.LOAD_ALL_DATA,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         payload: syncedData,

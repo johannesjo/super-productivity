@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
-import { Operation, OpType, VectorClock } from '../core/operation.types';
+import { ActionType, Operation, OpType, VectorClock } from '../core/operation.types';
 import { incrementVectorClock, mergeVectorClocks } from '../../core/util/vector-clock';
 import { OpLog } from '../../core/log';
 import { ConflictResolutionService } from './conflict-resolution.service';
@@ -143,7 +143,7 @@ export class StaleOperationResolverService {
       // This ensures the operation is properly applied on remote clients.
       const newOp: Operation = {
         id: uuidv7(),
-        actionType: `[${entityType}] LWW Update`,
+        actionType: `[${entityType}] LWW Update` as ActionType,
         opType: OpType.Update,
         entityType,
         entityId,

@@ -1,10 +1,11 @@
 import { validateOperationPayload } from './validate-operation-payload';
-import { Operation, OpType, EntityType } from '../core/operation.types';
+import { Operation, OpType, EntityType, ActionType } from '../core/operation.types';
 
 describe('validateOperationPayload', () => {
   const createTestOperation = (overrides: Partial<Operation> = {}): Operation => ({
     id: 'opId123',
-    actionType: '[Task] Update',
+    // Cast: Using test placeholder action type
+    actionType: '[Task] Update' as ActionType as ActionType,
     opType: OpType.Update,
     entityType: 'TASK' as EntityType,
     entityId: 'task1',

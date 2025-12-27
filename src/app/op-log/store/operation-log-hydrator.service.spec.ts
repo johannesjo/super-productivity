@@ -16,7 +16,12 @@ import { RepairOperationService } from '../validation/repair-operation.service';
 import { VectorClockService } from '../sync/vector-clock.service';
 import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
-import { Operation, OperationLogEntry, OpType } from '../core/operation.types';
+import {
+  ActionType,
+  Operation,
+  OperationLogEntry,
+  OpType,
+} from '../core/operation.types';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { bulkApplyHydrationOperations } from '../apply/bulk-hydration.action';
 
@@ -58,7 +63,7 @@ describe('OperationLogHydratorService', () => {
     overrides: Partial<Operation> = {},
   ): Operation => ({
     id,
-    actionType: '[Task] Update Task',
+    actionType: '[Task] Update Task' as ActionType,
     opType,
     entityType: 'TASK',
     entityId: 'task-123',

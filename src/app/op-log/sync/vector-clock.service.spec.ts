@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { VectorClockService } from './vector-clock.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import {
+  ActionType,
   Operation,
   OperationLogEntry,
   OpType,
@@ -21,7 +22,7 @@ describe('VectorClockService', () => {
     entityIds?: string[],
   ): Operation => ({
     id,
-    actionType: '[Test] Action',
+    actionType: '[Test] Action' as ActionType,
     opType: OpType.Update,
     entityType,
     entityId,

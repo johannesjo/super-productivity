@@ -11,12 +11,13 @@ import {
   Operation,
   OperationLogEntry,
   OpType,
+  ActionType,
 } from '../../../../op-log/core/operation.types';
 
 describe('operation-codec.service', () => {
   const mockOperation: Operation = {
     id: 'op-123',
-    actionType: '[Task Shared] addTask',
+    actionType: ActionType.TASK_SHARED_ADD,
     opType: OpType.Create,
     entityType: 'TASK',
     entityId: 'task-456',

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { OperationEncryptionService } from './operation-encryption.service';
 import { SyncOperation } from '../../pfapi/api/sync/sync-provider.interface';
 import { DecryptError } from '../../pfapi/api/errors/errors';
+import { ActionType } from '../core/operation.types';
 
 describe('OperationEncryptionService', () => {
   let service: OperationEncryptionService;
@@ -11,7 +12,7 @@ describe('OperationEncryptionService', () => {
   const createMockSyncOp = (payload: unknown): SyncOperation => ({
     id: 'test-op-id',
     clientId: 'testClient',
-    actionType: 'UPDATE_TASK',
+    actionType: 'UPDATE_TASK' as ActionType,
     opType: 'UPDATE',
     entityType: 'TASK',
     entityId: 'task-123',

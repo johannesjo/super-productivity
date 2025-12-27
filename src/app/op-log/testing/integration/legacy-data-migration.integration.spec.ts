@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { OperationLogMigrationService } from '../../store/operation-log-migration.service';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
 import { PfapiService } from '../../../pfapi/pfapi.service';
-import { OpType } from '../../core/operation.types';
+import { ActionType, OpType } from '../../core/operation.types';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
 
 /**
@@ -226,7 +226,7 @@ describe('Legacy Data Migration Integration', () => {
       // Pre-create a Genesis operation (simulating snapshot loss)
       await opLogStore.append({
         id: 'genesis-existing',
-        actionType: '[Migration] Genesis Import',
+        actionType: '[Migration] Genesis Import' as ActionType,
         opType: OpType.Batch,
         entityType: 'MIGRATION',
         entityId: '*',
@@ -253,7 +253,7 @@ describe('Legacy Data Migration Integration', () => {
     it('should skip migration if Recovery operation exists', async () => {
       await opLogStore.append({
         id: 'recovery-existing',
-        actionType: '[Recovery] Data Recovery',
+        actionType: '[Recovery] Data Recovery' as ActionType,
         opType: OpType.Batch,
         entityType: 'RECOVERY',
         entityId: '*',
@@ -277,7 +277,7 @@ describe('Legacy Data Migration Integration', () => {
       // Pre-create orphan operations (e.g., from effects that ran before migration)
       await opLogStore.append({
         id: 'orphan-op-1',
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -289,7 +289,7 @@ describe('Legacy Data Migration Integration', () => {
       });
       await opLogStore.append({
         id: 'orphan-op-2',
-        actionType: '[Tag] Update Tag',
+        actionType: '[Tag] Update Tag' as ActionType,
         opType: OpType.Update,
         entityType: 'TAG',
         entityId: 'tag-1',
@@ -335,7 +335,7 @@ describe('Legacy Data Migration Integration', () => {
       // Pre-create a Genesis operation followed by normal operations
       await opLogStore.append({
         id: 'genesis-valid',
-        actionType: '[Migration] Genesis Import',
+        actionType: '[Migration] Genesis Import' as ActionType,
         opType: OpType.Batch,
         entityType: 'MIGRATION',
         entityId: '*',
@@ -347,7 +347,7 @@ describe('Legacy Data Migration Integration', () => {
       });
       await opLogStore.append({
         id: 'normal-op',
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',

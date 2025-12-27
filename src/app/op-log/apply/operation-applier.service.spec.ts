@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { OperationApplierService } from './operation-applier.service';
-import { Operation, OpType, EntityType } from '../core/operation.types';
+import { Operation, OpType, EntityType, ActionType } from '../core/operation.types';
 import { ArchiveOperationHandler } from './archive-operation-handler.service';
 import { HydrationStateService } from './hydration-state.service';
-import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { remoteArchiveDataApplied } from '../../features/time-tracking/store/archive.actions';
 import { bulkApplyOperations } from './bulk-hydration.action';
 import { OperationLogEffects } from '../capture/operation-log.effects';
@@ -24,7 +23,8 @@ describe('OperationApplierService', () => {
     entityId?: string,
   ): Operation => ({
     id,
-    actionType: '[Test] Action',
+    // Cast: Using test placeholder action type
+    actionType: '[Test] Action' as ActionType as ActionType,
     opType,
     entityType,
     entityId,
@@ -133,7 +133,7 @@ describe('OperationApplierService', () => {
       const op: Operation = {
         id: 'sync-import-1',
         clientId: 'remoteClient',
-        actionType: '[SP_ALL] Load(import) all data',
+        actionType: ActionType.LOAD_ALL_DATA,
         opType: OpType.SyncImport,
         entityType: 'ALL',
         entityId: 'sync-import-1',
@@ -264,7 +264,7 @@ describe('OperationApplierService', () => {
       const op: Operation = {
         id: 'op-1',
         clientId: 'testClient',
-        actionType: TaskSharedActions.moveToArchive.type,
+        actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -305,7 +305,7 @@ describe('OperationApplierService', () => {
       const op: Operation = {
         id: 'op-1',
         clientId: 'testClient',
-        actionType: TaskSharedActions.moveToArchive.type,
+        actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -331,7 +331,7 @@ describe('OperationApplierService', () => {
         {
           id: 'op-2',
           clientId: 'testClient',
-          actionType: TaskSharedActions.moveToArchive.type,
+          actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -488,7 +488,7 @@ describe('OperationApplierService', () => {
         {
           id: 'op-1',
           clientId: 'testClient',
-          actionType: TaskSharedActions.moveToArchive.type,
+          actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -501,7 +501,7 @@ describe('OperationApplierService', () => {
         {
           id: 'op-3',
           clientId: 'testClient',
-          actionType: TaskSharedActions.restoreTask.type,
+          actionType: ActionType.TASK_SHARED_RESTORE,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-2',

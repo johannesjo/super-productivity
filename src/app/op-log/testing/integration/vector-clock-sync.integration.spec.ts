@@ -1,7 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
 import { VectorClockService } from '../../sync/vector-clock.service';
-import { Operation, OpType, EntityType, VectorClock } from '../../core/operation.types';
+import {
+  ActionType,
+  Operation,
+  OpType,
+  EntityType,
+  VectorClock,
+} from '../../core/operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
 
@@ -26,7 +32,7 @@ describe('Vector Clock Sync Integration', () => {
   // Helper to create test operations
   const createTestOperation = (overrides: Partial<Operation> = {}): Operation => ({
     id: uuidv7(),
-    actionType: '[Task] Update',
+    actionType: '[Task] Update' as ActionType,
     opType: OpType.Update,
     entityType: 'TASK' as EntityType,
     entityId: 'task1',

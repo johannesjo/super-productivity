@@ -5,7 +5,7 @@ import {
   SyncOperation,
 } from '../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../pfapi/api/pfapi.const';
-import { OpType } from '../core/operation.types';
+import { ActionType, OpType } from '../core/operation.types';
 
 describe('operation-sync utility', () => {
   describe('isOperationSyncCapable', () => {
@@ -46,7 +46,7 @@ describe('operation-sync utility', () => {
     const createMockSyncOp = (overrides: Partial<SyncOperation> = {}): SyncOperation => ({
       id: 'sync-op-123',
       clientId: 'test-client',
-      actionType: '[Task] Add Task',
+      actionType: '[Task] Add Task' as ActionType,
       opType: OpType.Create,
       entityType: 'TASK',
       entityId: 'task-456',
@@ -117,7 +117,7 @@ describe('operation-sync utility', () => {
     it('should handle Update operation type', () => {
       const syncOp = createMockSyncOp({
         opType: OpType.Update,
-        actionType: '[Task] Update Task',
+        actionType: '[Task] Update Task' as ActionType,
         payload: { id: 'task-456', changes: { title: 'Updated' } },
       });
       const op = syncOpToOperation(syncOp);
@@ -129,7 +129,7 @@ describe('operation-sync utility', () => {
     it('should handle Delete operation type', () => {
       const syncOp = createMockSyncOp({
         opType: OpType.Delete,
-        actionType: '[Task] Delete Task',
+        actionType: '[Task] Delete Task' as ActionType,
       });
       const op = syncOpToOperation(syncOp);
 
@@ -139,7 +139,7 @@ describe('operation-sync utility', () => {
     it('should handle Move operation type', () => {
       const syncOp = createMockSyncOp({
         opType: OpType.Move,
-        actionType: '[Task] Move Task',
+        actionType: '[Task] Move Task' as ActionType,
         payload: { taskId: 'task-1', targetProjectId: 'proj-2' },
       });
       const op = syncOpToOperation(syncOp);
@@ -151,7 +151,7 @@ describe('operation-sync utility', () => {
       const syncOp = createMockSyncOp({
         opType: OpType.SyncImport,
         entityType: 'ALL',
-        actionType: '[Sync] Import State',
+        actionType: '[Sync] Import State' as ActionType,
       });
       const op = syncOpToOperation(syncOp);
 

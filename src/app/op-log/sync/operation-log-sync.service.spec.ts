@@ -21,7 +21,13 @@ import { SyncImportFilterService } from './sync-import-filter.service';
 import { ServerMigrationService } from './server-migration.service';
 import { StaleOperationResolverService } from './stale-operation-resolver.service';
 import { provideMockStore } from '@ngrx/store/testing';
-import { EntityConflict, Operation, OpType, VectorClock } from '../core/operation.types';
+import {
+  ActionType,
+  EntityConflict,
+  Operation,
+  OpType,
+  VectorClock,
+} from '../core/operation.types';
 import {
   compareVectorClocks,
   mergeVectorClocks,
@@ -433,7 +439,7 @@ describe('OperationLogSyncService', () => {
   describe('_detectConflicts - fresh client scenarios', () => {
     const createOp = (partial: Partial<Operation>): Operation => ({
       id: 'op-1',
-      actionType: '[Test] Action',
+      actionType: '[Test] Action' as ActionType,
       opType: OpType.Update,
       entityType: 'TASK',
       entityId: 'entity-1',
@@ -670,7 +676,7 @@ describe('OperationLogSyncService', () => {
       // Remote op is OLD (clientA: 5 < local's clientA: 10)
       const staleRemoteOp: Operation = {
         id: 'stale-remote-op',
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -714,7 +720,7 @@ describe('OperationLogSyncService', () => {
       // Remote op has EQUAL clock - it's a duplicate
       const duplicateRemoteOp: Operation = {
         id: 'duplicate-remote-op',
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -758,7 +764,7 @@ describe('OperationLogSyncService', () => {
       // Remote op is NEWER (clientA: 6 > local's clientA: 5)
       const newerRemoteOp: Operation = {
         id: 'newer-remote-op',
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',
@@ -814,7 +820,7 @@ describe('OperationLogSyncService', () => {
       // if compared against snapshot clock (clientB: 6 < snapshot's clientB: 10)
       const remoteOp: Operation = {
         id: 'create-new-task',
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK',
         entityId: 'new-task-from-clientB', // NOT in snapshotEntityKeys
@@ -856,7 +862,7 @@ describe('OperationLogSyncService', () => {
       // Remote sends STALE op (clientA: 5 < snapshot's clientA: 10)
       const staleRemoteOp: Operation = {
         id: 'stale-update',
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'existing-task', // IS in snapshotEntityKeys
@@ -899,7 +905,7 @@ describe('OperationLogSyncService', () => {
       // Remote op with clock that would be stale against snapshot
       const remoteOp: Operation = {
         id: 'some-op',
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'some-task',
@@ -938,7 +944,7 @@ describe('OperationLogSyncService', () => {
       // Stale op for existing entity
       const staleOp: Operation = {
         id: 'stale-op',
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'old-task', // IN snapshotEntityKeys
@@ -952,7 +958,7 @@ describe('OperationLogSyncService', () => {
       // Valid op for new entity
       const validOp: Operation = {
         id: 'valid-op',
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK',
         entityId: 'new-task', // NOT in snapshotEntityKeys
@@ -995,7 +1001,7 @@ describe('OperationLogSyncService', () => {
     // Helper to create operations
     const createFullStateOp = (partial: Partial<Operation>): Operation => ({
       id: '019afd68-0000-7000-0000-000000000000',
-      actionType: '[Test] Action',
+      actionType: '[Test] Action' as ActionType,
       opType: OpType.Update,
       entityType: 'TASK',
       entityId: 'entity-1',
@@ -1231,7 +1237,7 @@ describe('OperationLogSyncService', () => {
         const piggybackedOp: Operation = {
           id: 'piggybacked-1',
           clientId: 'client-B',
-          actionType: 'test',
+          actionType: 'test' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -1286,7 +1292,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1347,7 +1353,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -1388,7 +1394,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1447,7 +1453,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1508,7 +1514,7 @@ describe('OperationLogSyncService', () => {
           const concurrentOp: Operation = {
             id: 'op-concurrent',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1521,7 +1527,7 @@ describe('OperationLogSyncService', () => {
           const permanentOp: Operation = {
             id: 'op-permanent',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-2',
@@ -1648,7 +1654,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1723,7 +1729,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1801,7 +1807,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1866,7 +1872,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TAG',
             entityId: 'TODAY',
@@ -1947,7 +1953,7 @@ describe('OperationLogSyncService', () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TIME_TRACKING', // Different entity type than downloaded op
             entityId: 'tt-123',
@@ -2039,7 +2045,7 @@ describe('OperationLogSyncService', () => {
         const remoteOp: Operation = {
           id: 'remote-1',
           clientId: 'client-B',
-          actionType: 'test',
+          actionType: 'test' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -2107,7 +2113,7 @@ describe('OperationLogSyncService', () => {
           const remoteOp: Operation = {
             id: 'remote-1',
             clientId: 'client-B',
-            actionType: 'test',
+            actionType: 'test' as ActionType,
             opType: OpType.Update,
             entityType: 'TASK',
             entityId: 'task-1',
@@ -2251,7 +2257,7 @@ describe('OperationLogSyncService', () => {
       const remoteOps: Operation[] = [
         {
           id: '019afd68-0001-7000-0000-000000000000',
-          actionType: '[Task] Update',
+          actionType: '[Task] Update' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -2263,7 +2269,7 @@ describe('OperationLogSyncService', () => {
         },
         {
           id: '019afd68-0002-7000-0000-000000000000',
-          actionType: '[Task] Update',
+          actionType: '[Task] Update' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-2',
@@ -2309,7 +2315,7 @@ describe('OperationLogSyncService', () => {
       const remoteOps: Operation[] = [
         {
           id: '019afd68-0001-7000-0000-000000000000',
-          actionType: '[Task] Update',
+          actionType: '[Task] Update' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
@@ -2321,7 +2327,7 @@ describe('OperationLogSyncService', () => {
         },
         {
           id: '019afd68-0002-7000-0000-000000000000',
-          actionType: '[Task] Update',
+          actionType: '[Task] Update' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-2',
@@ -2333,7 +2339,7 @@ describe('OperationLogSyncService', () => {
         },
         {
           id: '019afd68-0003-7000-0000-000000000000',
-          actionType: '[Task] Update',
+          actionType: '[Task] Update' as ActionType,
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-3',
@@ -2382,7 +2388,7 @@ describe('OperationLogSyncService', () => {
 
       const remoteOp: Operation = {
         id: '019afd68-0001-7000-0000-000000000000',
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task-1',

@@ -1,4 +1,9 @@
-import { Operation, OperationLogEntry, OpType } from '../../../core/operation.types';
+import {
+  ActionType,
+  Operation,
+  OperationLogEntry,
+  OpType,
+} from '../../../core/operation.types';
 import { OperationLogStoreService } from '../../../store/operation-log-store.service';
 import {
   SyncOperation,
@@ -223,7 +228,7 @@ export class SimulatedClient {
       const op: Operation = {
         id: serverOp.op.id,
         clientId: serverOp.op.clientId,
-        actionType: serverOp.op.actionType,
+        actionType: serverOp.op.actionType as ActionType,
         opType: serverOp.op.opType as OpType,
         entityType: serverOp.op.entityType as any,
         entityId: serverOp.op.entityId,

@@ -19,7 +19,7 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
-import { Operation, OpType, EntityType } from '../../core/operation.types';
+import { ActionType, Operation, OpType, EntityType } from '../../core/operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 
 // Increase timeout for stress tests
@@ -48,7 +48,7 @@ xdescribe('OperationLog Performance Benchmarks', () => {
     for (let i = 0; i < COUNT; i++) {
       ops.push({
         id: uuidv7(),
-        actionType: '[Task] Update',
+        actionType: '[Task] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK' as EntityType,
         entityId: `task-${i}`,
@@ -84,7 +84,7 @@ xdescribe('OperationLog Performance Benchmarks', () => {
     for (let i = 0; i < COUNT; i++) {
       ops.push({
         id: uuidv7(),
-        actionType: '[Note] Update',
+        actionType: '[Note] Update' as ActionType,
         opType: OpType.Update,
         entityType: 'NOTE' as EntityType,
         entityId: `note-${i}`,
@@ -125,7 +125,7 @@ xdescribe('OperationLog Performance Benchmarks', () => {
     for (let i = 0; i < NOISE_COUNT; i++) {
       ops.push({
         id: uuidv7(),
-        actionType: '[Task] Noise',
+        actionType: '[Task] Noise' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK' as EntityType,
         entityId: `noise-${i}`,
@@ -144,7 +144,7 @@ xdescribe('OperationLog Performance Benchmarks', () => {
     for (let i = 0; i < 100; i++) {
       delOps.push({
         id: uuidv7(),
-        actionType: '[Task] DeleteMe',
+        actionType: '[Task] DeleteMe' as ActionType,
         opType: OpType.Update,
         entityType: 'TASK' as EntityType,
         entityId: `del-${i}`,
@@ -162,7 +162,9 @@ xdescribe('OperationLog Performance Benchmarks', () => {
 
     const startDelete = performance.now();
     // Delete ops with actionType '[Task] DeleteMe' - requires scanning everything
-    await service.deleteOpsWhere((entry) => entry.op.actionType === '[Task] DeleteMe');
+    await service.deleteOpsWhere(
+      (entry) => entry.op.actionType === ('[Task] DeleteMe' as ActionType),
+    );
     const endDelete = performance.now();
 
     const deleteTime = endDelete - startDelete;

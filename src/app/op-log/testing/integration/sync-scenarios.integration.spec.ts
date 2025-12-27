@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
-import { OpType } from '../../core/operation.types';
+import { ActionType, OpType } from '../../core/operation.types';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
 import { MockSyncServer } from './helpers/mock-sync-server.helper';
 import { SimulatedClient } from './helpers/simulated-client.helper';
@@ -713,7 +713,7 @@ describe('Sync Scenarios Integration', () => {
       const testOp = {
         id: 'crash-test-op',
         clientId: 'otherClient',
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK' as const,
         entityId: 'crash-task',
@@ -748,7 +748,7 @@ describe('Sync Scenarios Integration', () => {
       const testOp = {
         id: 'fail-test-op',
         clientId: 'otherClient',
-        actionType: '[Task] Add Task',
+        actionType: '[Task] Add Task' as ActionType,
         opType: OpType.Create,
         entityType: 'TASK' as const,
         entityId: 'fail-task',

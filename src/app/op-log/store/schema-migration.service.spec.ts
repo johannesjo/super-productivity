@@ -4,7 +4,7 @@ import {
   MigratableStateCache,
   CURRENT_SCHEMA_VERSION,
 } from './schema-migration.service';
-import { Operation, OpType } from '../core/operation.types';
+import { ActionType, Operation, OpType } from '../core/operation.types';
 
 describe('SchemaMigrationService', () => {
   let service: SchemaMigrationService;
@@ -25,7 +25,7 @@ describe('SchemaMigrationService', () => {
     schemaVersion: number = CURRENT_SCHEMA_VERSION,
   ): Operation => ({
     id,
-    actionType: '[Test] Action',
+    actionType: '[Test] Action' as ActionType,
     opType: OpType.Update,
     entityType: 'TASK',
     entityId: 'task-123',
