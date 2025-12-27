@@ -1257,7 +1257,7 @@ When local state is newer, we can't just reject the remote ops - that would caus
 2. **Create a new UPDATE operation** with:
    - Current entity state from NgRx store
    - Merged vector clock (local + remote) + increment
-   - Current timestamp
+   - **Preserved maximum timestamp from local ops** (critical for correct LWW semantics - using `Date.now()` would give unfair advantage in future conflicts)
 3. **This new op will be uploaded** on next sync cycle, propagating local state to server
 
 A warning-level log is emitted: `OpLog.warn('LWW local wins - creating update op for ${entityType}:${entityId}')`
@@ -1292,61 +1292,71 @@ interface OperationDependency {
 // After MAX_RETRY_ATTEMPTS (3), they're marked as permanently failed
 ```
 
-## C.7 Late-Joiner Replay (SYNC_IMPORT Handling)
+## C.7 SYNC_IMPORT Filtering (Clean Slate Semantics)
 
-When a client receives a `SYNC_IMPORT` (full state from another client), local synced operations must be replayed on top of the imported state to preserve work that was already accepted by the server.
+When a `SYNC_IMPORT` or `BACKUP_IMPORT` operation is received, it represents an explicit user action to restore **all clients** to a specific point in time. Operations created without knowledge of the import are filtered out.
+
+**Implementation:** `SyncImportFilterService.filterOpsInvalidatedBySyncImport()`
 
 ### The Problem
 
 Consider this scenario:
 
-1. Client B uploads ops to server (Op3, Op4)
-2. Client B goes offline
-3. Client A uploads a SYNC_IMPORT (full state snapshot)
-4. Client B comes online and downloads the SYNC_IMPORT
-5. **Without replay**: Client B loses Op3 and Op4's changes
+1. Client A creates Op1, Op2 (offline)
+2. Client B does a SYNC_IMPORT (restores from backup)
+3. Client B uploads the SYNC_IMPORT to server
+4. Client A comes online, uploads Op1, Op2, then downloads SYNC_IMPORT
+5. **Problem**: Op1, Op2 reference entities that were WIPED by the import
 
-### The Solution: Vector Clock Dominance Filtering
+### The Solution: Clean Slate Semantics
 
-When replaying local synced ops after a SYNC_IMPORT, we filter out ops that are **dominated** by the SYNC_IMPORT's vector clock:
+SYNC_IMPORT/BACKUP_IMPORT are explicit user actions to restore to a specific state. **ALL operations without knowledge of the import are dropped** - this ensures a true "restore to point in time" semantic.
+
+We use **vector clock comparison** (not UUIDv7 timestamps) because vector clocks track **causality** ("did the client know about the import?") rather than wall-clock time (which can be affected by clock drift).
 
 ```typescript
-// In OperationLogSyncService._replayLocalSyncedOpsAfterImport()
-const localSyncedOps = allEntries.filter((entry) => {
-  // Must be created by this client
-  if (entry.op.clientId !== clientId) return false;
-  // Must be synced (accepted by server)
-  if (!entry.syncedAt) return false;
-  // Must NOT be a full-state op itself
-  if (entry.op.opType === OpType.SyncImport || entry.op.opType === OpType.BackupImport)
-    return false;
-
-  // Must NOT be dominated by the SYNC_IMPORT's vector clock
-  const comparison = compareVectorClocks(entry.op.vectorClock, syncImportClock);
-  if (comparison === VectorClockComparison.LESS_THAN) {
-    return false; // Skip - state already captured in SYNC_IMPORT
+// In SyncImportFilterService.filterOpsInvalidatedBySyncImport()
+for (const op of ops) {
+  // Full state import operations themselves are always valid
+  if (op.opType === OpType.SyncImport || op.opType === OpType.BackupImport) {
+    validOps.push(op);
+    continue;
   }
-  return true;
-});
+
+  // Use VECTOR CLOCK comparison to determine causality
+  const comparison = compareVectorClocks(op.vectorClock, latestImport.vectorClock);
+
+  if (
+    comparison === VectorClockComparison.GREATER_THAN ||
+    comparison === VectorClockComparison.EQUAL
+  ) {
+    // Op was created by a client that had knowledge of the import
+    validOps.push(op);
+  } else {
+    // CONCURRENT or LESS_THAN: Op was created without knowledge of import
+    // Filter it to ensure clean slate semantics
+    invalidatedOps.push(op);
+  }
+}
 ```
 
-### Vector Clock Dominance
+### Vector Clock Comparison Results
 
-An operation is "dominated" if its vector clock is `LESS_THAN` the SYNC_IMPORT's clock:
-
-| Comparison     | Meaning                        | Replay?                         |
-| -------------- | ------------------------------ | ------------------------------- |
-| `LESS_THAN`    | Op happened-before SYNC_IMPORT | No (state captured in snapshot) |
-| `EQUAL`        | Same causal history            | Yes (edge case)                 |
-| `GREATER_THAN` | Op happened-after SYNC_IMPORT  | Yes (newer than snapshot)       |
-| `CONCURRENT`   | Independent changes            | Yes (may have unique changes)   |
+| Comparison     | Meaning                                | Action                     |
+| -------------- | -------------------------------------- | -------------------------- |
+| `GREATER_THAN` | Op created after seeing import         | ✅ Keep (has knowledge)    |
+| `EQUAL`        | Same causal history as import          | ✅ Keep                    |
+| `LESS_THAN`    | Op dominated by import                 | ❌ Drop (already captured) |
+| `CONCURRENT`   | Op created without knowledge of import | ❌ Drop (clean slate)      |
 
 **Example:**
 
 - SYNC_IMPORT clock: `{A: 10, B: 5}`
-- Local op clock: `{B: 3}` → `LESS_THAN` → Skip (dominated)
-- Local op clock: `{B: 6}` → `GREATER_THAN` → Replay (not dominated)
-- Local op clock: `{A: 10, B: 5, C: 1}` → `CONCURRENT` → Replay (not dominated)
+- Op clock: `{A: 11, B: 5}` → `GREATER_THAN` → ✅ Keep (client A saw the import)
+- Op clock: `{B: 3}` → `LESS_THAN` → ❌ Drop (dominated by import)
+- Op clock: `{C: 1}` → `CONCURRENT` → ❌ Drop (client C didn't know about import)
+
+**Why Drop CONCURRENT?** An operation from a client that never saw the import may reference entities that no longer exist in the imported state. Dropping ensures the import truly restores all clients to the same point in time.
 
 See [operation-log-architecture-diagrams.md](./operation-log-architecture-diagrams.md) Section 2c for visual diagrams.
 
