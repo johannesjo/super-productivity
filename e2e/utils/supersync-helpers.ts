@@ -209,9 +209,23 @@ export const createSimulatedClient = async (
 
 /**
  * Close a simulated client and clean up resources.
+ * Safely handles already-closed contexts.
  */
 export const closeClient = async (client: SimulatedE2EClient): Promise<void> => {
-  await client.context.close();
+  try {
+    // Check if page is still open before trying to close context
+    if (!client.page.isClosed()) {
+      await client.context.close();
+    }
+  } catch (error) {
+    // Ignore errors if context is already closed
+    if (
+      error instanceof Error &&
+      !error.message.includes('Target page, context or browser has been closed')
+    ) {
+      throw error;
+    }
+  }
 };
 
 /**
