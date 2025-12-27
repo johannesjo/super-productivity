@@ -116,14 +116,26 @@ export class SuperSyncProvider
     SyncLog.debug(this.logLabel, 'uploadOps', { opsCount: ops.length, clientId });
     const cfg = await this._cfgOrError();
 
-    const response = await this._fetchApi<OpUploadResponse>(cfg, '/api/sync/ops', {
-      method: 'POST',
-      body: JSON.stringify({
-        ops,
-        clientId,
-        lastKnownServerSeq,
-      }),
+    // Compress the payload to reduce upload size
+    const jsonPayload = JSON.stringify({
+      ops,
+      clientId,
+      lastKnownServerSeq,
     });
+
+    const compressedPayload = await compressWithGzip(jsonPayload);
+
+    SyncLog.debug(this.logLabel, 'uploadOps compressed', {
+      originalSize: jsonPayload.length,
+      compressedSize: compressedPayload.length,
+      ratio: ((compressedPayload.length / jsonPayload.length) * 100).toFixed(1) + '%',
+    });
+
+    const response = await this._fetchApiCompressed<OpUploadResponse>(
+      cfg,
+      '/api/sync/ops',
+      compressedPayload,
+    );
 
     return response;
   }

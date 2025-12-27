@@ -7,6 +7,12 @@ import {
   VectorClock,
 } from '../core/operation.types';
 import { toEntityKey } from '../util/entity-key.util';
+import {
+  encodeOperation,
+  decodeOperation,
+  isCompactOperation,
+} from '../../core/persistence/operation-log/compact/operation-codec.service';
+import { CompactOperation } from '../../core/persistence/operation-log/compact/compact-operation.types';
 
 const DB_NAME = 'SUP_OPS';
 const DB_VERSION = 3;
@@ -20,10 +26,51 @@ interface VectorClockEntry {
   lastUpdate: number;
 }
 
+/**
+ * Stored operation log entry that can hold either compact or full operation format.
+ * Used internally for backwards compatibility with existing data.
+ */
+interface StoredOperationLogEntry {
+  seq: number;
+  op: Operation | CompactOperation;
+  appliedAt: number;
+  source: 'local' | 'remote';
+  syncedAt?: number;
+  rejectedAt?: number;
+  applicationStatus?: 'pending' | 'applied' | 'failed';
+  retryCount?: number;
+}
+
+/**
+ * Decodes a stored entry to a full OperationLogEntry.
+ * Handles both compact and full operation formats for backwards compatibility.
+ */
+const decodeStoredEntry = (stored: StoredOperationLogEntry): OperationLogEntry => {
+  const op = isCompactOperation(stored.op) ? decodeOperation(stored.op) : stored.op;
+  return {
+    seq: stored.seq,
+    op,
+    appliedAt: stored.appliedAt,
+    source: stored.source,
+    syncedAt: stored.syncedAt,
+    rejectedAt: stored.rejectedAt,
+    applicationStatus: stored.applicationStatus,
+    retryCount: stored.retryCount,
+  };
+};
+
+/**
+ * Extracts the operation ID from either compact or full format.
+ * Both formats use 'id' as the key for IndexedDB index compatibility.
+ */
+const getOpId = (op: Operation | CompactOperation): string => {
+  return op.id;
+};
+
 interface OpLogDB extends DBSchema {
   ops: {
     key: number; // seq
-    value: OperationLogEntry;
+    value: StoredOperationLogEntry;
     indexes: {
       byId: string;
       bySyncedAt: number;
@@ -150,8 +197,10 @@ export class OperationLogStoreService {
     options?: { pendingApply?: boolean },
   ): Promise<number> {
     await this._ensureInit();
-    const entry: Omit<OperationLogEntry, 'seq'> = {
-      op,
+    // Encode operation to compact format for storage efficiency
+    const compactOp = encodeOperation(op);
+    const entry: Omit<StoredOperationLogEntry, 'seq'> = {
+      op: compactOp,
       appliedAt: Date.now(),
       source,
       syncedAt: source === 'remote' ? Date.now() : undefined,
@@ -160,7 +209,7 @@ export class OperationLogStoreService {
         source === 'remote' ? (options?.pendingApply ? 'pending' : 'applied') : undefined,
     };
     // seq is auto-incremented, returned for later reference
-    return this.db.add('ops', entry as OperationLogEntry);
+    return this.db.add('ops', entry as StoredOperationLogEntry);
   }
 
   async appendBatch(
@@ -174,8 +223,10 @@ export class OperationLogStoreService {
     const seqs: number[] = [];
 
     for (const op of ops) {
-      const entry: Omit<OperationLogEntry, 'seq'> = {
-        op,
+      // Encode operation to compact format for storage efficiency
+      const compactOp = encodeOperation(op);
+      const entry: Omit<StoredOperationLogEntry, 'seq'> = {
+        op: compactOp,
         appliedAt: Date.now(),
         source,
         syncedAt: source === 'remote' ? Date.now() : undefined,
@@ -186,7 +237,7 @@ export class OperationLogStoreService {
               : 'applied'
             : undefined,
       };
-      const seq = await store.add(entry as OperationLogEntry);
+      const seq = await store.add(entry as StoredOperationLogEntry);
       seqs.push(seq as number);
     }
 
@@ -225,10 +276,11 @@ export class OperationLogStoreService {
    */
   async getPendingRemoteOps(): Promise<OperationLogEntry[]> {
     await this._ensureInit();
+    let storedEntries: StoredOperationLogEntry[];
     try {
       // Type assertion needed for compound index key - idb's types don't fully support this
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
+      storedEntries = await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
         'remote',
         'pending',
       ] as any);
@@ -239,10 +291,12 @@ export class OperationLogStoreService {
         'OperationLogStoreService: bySourceAndStatus index not found, using fallback scan',
       );
       const allOps = await this.db.getAll('ops');
-      return allOps.filter(
+      storedEntries = allOps.filter(
         (entry) => entry.source === 'remote' && entry.applicationStatus === 'pending',
       );
     }
+    // Decode compact operations for backwards compatibility
+    return storedEntries.map(decodeStoredEntry);
   }
 
   async hasOp(id: string): Promise<boolean> {
@@ -268,12 +322,14 @@ export class OperationLogStoreService {
    */
   async getOpById(id: string): Promise<OperationLogEntry | undefined> {
     await this._ensureInit();
-    return this.db.getFromIndex('ops', 'byId', id);
+    const stored = await this.db.getFromIndex('ops', 'byId', id);
+    return stored ? decodeStoredEntry(stored) : undefined;
   }
 
   async getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]> {
     await this._ensureInit();
-    return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
+    const storedEntries = await this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
+    return storedEntries.map(decodeStoredEntry);
   }
 
   /**
@@ -291,22 +347,24 @@ export class OperationLogStoreService {
 
     // Scan all ops to find full-state operations
     // Note: We scan backwards from the end since the latest is most likely near the end
-    const allOps = await this.db.getAll('ops');
+    const storedOps = await this.db.getAll('ops');
 
-    // Filter to full-state ops and find the one with the latest UUIDv7 timestamp
-    const fullStateOps = allOps.filter(
-      (entry) =>
-        entry.op.opType === OpType.SyncImport ||
-        entry.op.opType === OpType.BackupImport ||
-        entry.op.opType === OpType.Repair,
-    );
+    // Decode and filter to full-state ops
+    const fullStateEntries = storedOps
+      .map(decodeStoredEntry)
+      .filter(
+        (entry) =>
+          entry.op.opType === OpType.SyncImport ||
+          entry.op.opType === OpType.BackupImport ||
+          entry.op.opType === OpType.Repair,
+      );
 
-    if (fullStateOps.length === 0) {
+    if (fullStateEntries.length === 0) {
       return undefined;
     }
 
     // Find the latest by UUIDv7 (lexicographic comparison works for UUIDv7)
-    return fullStateOps.reduce((latest, entry) =>
+    return fullStateEntries.reduce((latest, entry) =>
       entry.op.id > latest.op.id ? entry : latest,
     ).op;
   }
@@ -323,11 +381,13 @@ export class OperationLogStoreService {
 
     // If cache exists but is stale (new ops added), incrementally add new unsynced ops
     if (this._unsyncedCache && this._unsyncedCacheLastSeq > 0) {
-      const newEntries = await this.db.getAll(
+      const newStoredEntries = await this.db.getAll(
         'ops',
         IDBKeyRange.lowerBound(this._unsyncedCacheLastSeq, true),
       );
-      const newUnsynced = newEntries.filter((e) => !e.syncedAt && !e.rejectedAt);
+      const newUnsynced = newStoredEntries
+        .filter((e) => !e.syncedAt && !e.rejectedAt)
+        .map(decodeStoredEntry);
       this._unsyncedCache.push(...newUnsynced);
       this._unsyncedCacheLastSeq = currentLastSeq;
       return [...this._unsyncedCache];
@@ -335,7 +395,9 @@ export class OperationLogStoreService {
 
     // Initial cache build - full scan required
     const all = await this.db.getAll('ops');
-    this._unsyncedCache = all.filter((e) => !e.syncedAt && !e.rejectedAt);
+    this._unsyncedCache = all
+      .filter((e) => !e.syncedAt && !e.rejectedAt)
+      .map(decodeStoredEntry);
     this._unsyncedCacheLastSeq = currentLastSeq;
 
     return [...this._unsyncedCache];
@@ -381,7 +443,8 @@ export class OperationLogStoreService {
         IDBKeyRange.lowerBound(this._cacheLastSeq, true),
       );
       for (const entry of newEntries) {
-        this._appliedOpIdsCache.add(entry.op.id);
+        // Handle both compact and full operation formats
+        this._appliedOpIdsCache.add(getOpId(entry.op));
       }
       this._cacheLastSeq = currentLastSeq;
       return new Set(this._appliedOpIdsCache);
@@ -389,7 +452,8 @@ export class OperationLogStoreService {
 
     // Initial cache build - full scan required
     const entries = await this.db.getAll('ops');
-    this._appliedOpIdsCache = new Set(entries.map((e) => e.op.id));
+    // Handle both compact and full operation formats
+    this._appliedOpIdsCache = new Set(entries.map((e) => getOpId(e.op)));
     this._cacheLastSeq = currentLastSeq;
 
     return new Set(this._appliedOpIdsCache);
@@ -468,11 +532,11 @@ export class OperationLogStoreService {
    */
   async getFailedRemoteOps(): Promise<OperationLogEntry[]> {
     await this._ensureInit();
-    let failedOps: OperationLogEntry[];
+    let storedEntries: StoredOperationLogEntry[];
     try {
       // Type assertion needed for compound index key - idb's types don't fully support this
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      failedOps = await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
+      storedEntries = await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
         'remote',
         'failed',
       ] as any);
@@ -482,11 +546,12 @@ export class OperationLogStoreService {
         'OperationLogStoreService: bySourceAndStatus index not found, using fallback scan',
       );
       const allOps = await this.db.getAll('ops');
-      failedOps = allOps.filter(
+      storedEntries = allOps.filter(
         (entry) => entry.source === 'remote' && entry.applicationStatus === 'failed',
       );
     }
-    return failedOps.filter((e) => !e.rejectedAt);
+    // Decode and filter out rejected ops
+    return storedEntries.filter((e) => !e.rejectedAt).map(decodeStoredEntry);
   }
 
   async deleteOpsWhere(predicate: (entry: OperationLogEntry) => boolean): Promise<void> {
@@ -500,7 +565,9 @@ export class OperationLogStoreService {
     let cursor = await store.openCursor();
     let deletedCount = 0;
     while (cursor) {
-      if (predicate(cursor.value)) {
+      // Decode stored entry before applying predicate
+      const decoded = decodeStoredEntry(cursor.value);
+      if (predicate(decoded)) {
         await cursor.delete();
         deletedCount++;
       }
@@ -896,16 +963,17 @@ export class OperationLogStoreService {
     const opsStore = tx.objectStore('ops');
     const vcStore = tx.objectStore('vector_clock');
 
-    // 1. Append operation to ops store
-    const entry: Omit<OperationLogEntry, 'seq'> = {
-      op,
+    // 1. Append operation to ops store (encoded to compact format)
+    const compactOp = encodeOperation(op);
+    const entry: Omit<StoredOperationLogEntry, 'seq'> = {
+      op: compactOp,
       appliedAt: Date.now(),
       source,
       syncedAt: source === 'remote' ? Date.now() : undefined,
       applicationStatus:
         source === 'remote' ? (options?.pendingApply ? 'pending' : 'applied') : undefined,
     };
-    const seq = await opsStore.add(entry as OperationLogEntry);
+    const seq = await opsStore.add(entry as StoredOperationLogEntry);
 
     // 2. Update vector clock to match the operation's clock (only for local ops)
     // The op.vectorClock already contains the incremented value from the caller.

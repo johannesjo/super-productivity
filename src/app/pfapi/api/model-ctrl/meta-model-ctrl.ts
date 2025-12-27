@@ -458,23 +458,26 @@ export class MetaModelCtrl {
     return newClientId;
   }
 
+  /**
+   * Generates a compact 6-char client ID.
+   * Format: {platform}_{4-char-base62-random}
+   * Examples: "B_a7Kx", "E_m2Pq", "A_x9Yz"
+   */
   private _generateClientId(): string {
     PFLog.normal(`${MetaModelCtrl.L}.${this._generateClientId.name}()`);
 
-    const now = new Date();
-    const prefix = getEnvironmentId(); // e.g., "BCL"
-    const monthDay = `${now.getMonth() + 1}_${now.getDate()}`;
+    const prefix = getEnvironmentId(); // Single char: B, E, A, or I
+    const randomPart = this._generateBase62(4);
 
-    const millisSinceEpoch = now.getTime();
-    const base36Ts = millisSinceEpoch.toString(36); // precise + compact
-
-    return `${prefix}${base36Ts}${monthDay}`;
+    return `${prefix}_${randomPart}`;
   }
 
-  // decoder for real timestamp
-  // function decodeBase36ClientId(id: string): Date {
-  //   const base36Ts = id.slice(-10); // or regex if format varies
-  //   const millis = parseInt(base36Ts, 36);
-  //   return new Date(millis);
-  // }
+  private _generateBase62(length: number): string {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
 }
