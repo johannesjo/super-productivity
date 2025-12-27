@@ -23,6 +23,7 @@ import {
   mergeVectorClocks,
   VectorClockComparison,
 } from '../../../../pfapi/api/util/vector-clock';
+import { devError } from '../../../../util/dev-error';
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 import { CLIENT_ID_PROVIDER } from '../client-id.provider';
@@ -846,6 +847,13 @@ export class ConflictResolutionService {
     const entityHasPendingOps = ctx.localOpsForEntity.length > 0;
     const potentialCorruption =
       entityHasPendingOps && ctx.hasNoSnapshotClock && ctx.localFrontierIsEmpty;
+
+    if (potentialCorruption) {
+      devError(
+        `Clock corruption detected for entity ${entityKey}: ` +
+          `has ${ctx.localOpsForEntity.length} pending ops but no snapshot clock and empty local frontier`,
+      );
+    }
 
     if (potentialCorruption && comparison === VectorClockComparison.LESS_THAN) {
       OpLog.warn(
