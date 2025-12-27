@@ -16,6 +16,13 @@ import { convertOpToAction } from './operation-converter.util';
  * 3. Final state is returned after all operations are applied
  *
  * Performance impact: 500 dispatches → 1 dispatch = ~10-50x faster hydration
+ *
+ * IMPORTANT considerations:
+ * - Meta-reducer order is critical: this MUST be positioned FIRST in the
+ *   metaReducers array (see main.ts) so downstream meta-reducers process
+ *   each operation's converted action correctly.
+ * - The synchronous loop could block the main thread for 10,000+ operations.
+ *   Not tested at that scale. If needed, consider chunking with requestIdleCallback.
  */
 export const bulkHydrationMetaReducer = <T>(
   reducer: ActionReducer<T>,
