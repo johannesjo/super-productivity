@@ -10,3 +10,4 @@ export { RateLimitService } from './rate-limit.service';
 export { RequestDeduplicationService } from './request-deduplication.service';
 export { DeviceService } from './device.service';
 export { OperationDownloadService } from './operation-download.service';
+export { StorageQuotaService } from './storage-quota.service';
