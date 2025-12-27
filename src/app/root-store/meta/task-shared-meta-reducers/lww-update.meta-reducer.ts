@@ -6,12 +6,98 @@ import {
   getEntityConfig,
   isAdapterEntity,
 } from '../../../core/persistence/operation-log/entity-registry';
+import {
+  PROJECT_FEATURE_NAME,
+  projectAdapter,
+} from '../../../features/project/store/project.reducer';
+import { Project } from '../../../features/project/project.model';
+import { unique } from '../../../util/unique';
 
 /**
  * Regex to match LWW Update action types.
  * Matches patterns like '[TASK] LWW Update', '[PROJECT] LWW Update', etc.
  */
 const LWW_UPDATE_REGEX = /^\[([A-Z_]+)\] LWW Update$/;
+
+/**
+ * Updates project.taskIds arrays when a task's projectId changes via LWW Update.
+ *
+ * When LWW conflict resolution updates a task's projectId, we must also update
+ * the corresponding project.taskIds arrays to maintain bidirectional consistency:
+ * - Remove task from old project's taskIds (if it exists there)
+ * - Add task to new project's taskIds (if not already there)
+ *
+ * This is necessary because the original moveToOtherProject action updates both
+ * the task and project entities atomically, but LWW Update only syncs the TASK
+ * entity state.
+ */
+const syncProjectTaskIds = (
+  state: RootState,
+  taskId: string,
+  oldProjectId: string | undefined,
+  newProjectId: string | undefined,
+  isSubTask: boolean,
+): RootState => {
+  // Don't add subtasks to project.taskIds - only parent tasks should be there
+  if (isSubTask) {
+    return state;
+  }
+
+  // If projectId didn't change, nothing to do
+  if (oldProjectId === newProjectId) {
+    return state;
+  }
+
+  let projectState = state[PROJECT_FEATURE_NAME];
+
+  // Remove from old project's taskIds
+  if (oldProjectId && projectState.entities[oldProjectId]) {
+    const oldProject = projectState.entities[oldProjectId] as Project;
+    const filteredTaskIds = oldProject.taskIds.filter((id) => id !== taskId);
+    const filteredBacklogTaskIds = oldProject.backlogTaskIds.filter(
+      (id) => id !== taskId,
+    );
+
+    // Only update if the task was actually in the list
+    if (
+      filteredTaskIds.length !== oldProject.taskIds.length ||
+      filteredBacklogTaskIds.length !== oldProject.backlogTaskIds.length
+    ) {
+      projectState = projectAdapter.updateOne(
+        {
+          id: oldProjectId,
+          changes: {
+            taskIds: filteredTaskIds,
+            backlogTaskIds: filteredBacklogTaskIds,
+          },
+        },
+        projectState,
+      );
+    }
+  }
+
+  // Add to new project's taskIds
+  if (newProjectId && projectState.entities[newProjectId]) {
+    const newProject = projectState.entities[newProjectId] as Project;
+    // Only add if not already present
+    if (!newProject.taskIds.includes(taskId)) {
+      projectState = projectAdapter.updateOne(
+        {
+          id: newProjectId,
+          changes: {
+            taskIds: unique([...newProject.taskIds, taskId]),
+          },
+        },
+        projectState,
+      );
+    }
+  }
+
+  return {
+    ...state,
+    [PROJECT_FEATURE_NAME]: projectState,
+  };
+};
 
 /**
  * Meta-reducer that handles LWW (Last-Write-Wins) Update actions.
@@ -120,10 +206,25 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       );
     }
 
-    const updatedState: RootState = {
+    let updatedState: RootState = {
       ...rootState,
       [featureName]: updatedFeatureState,
     };
+
+    // For TASK entities, sync project.taskIds when projectId changes
+    if (entityType === 'TASK') {
+      const oldProjectId = existingEntity?.projectId as string | undefined;
+      const newProjectId = entityData['projectId'] as string | undefined;
+      const isSubTask = !!(entityData['parentId'] || existingEntity?.parentId);
+
+      updatedState = syncProjectTaskIds(
+        updatedState,
+        entityId,
+        oldProjectId,
+        newProjectId,
+        isSubTask,
+      );
+    }
 
     return reducer(updatedState, action);
   };
