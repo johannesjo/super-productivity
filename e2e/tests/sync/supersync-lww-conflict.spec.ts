@@ -1304,4 +1304,336 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
       }
     },
   );
+
+  /**
+   * Scenario: Delete vs Update Race
+   *
+   * Tests that when one client deletes a task while another updates it,
+   * LWW correctly picks the winner based on timestamps.
+   *
+   * Actions:
+   * 1. Client A creates task, syncs
+   * 2. Client B syncs (download task)
+   * 3. Client A deletes the task
+   * 4. Client B (with later timestamp) updates the task
+   * 5. Client A syncs (uploads delete)
+   * 6. Client B syncs (LWW: B's update wins, task should be recreated)
+   * 7. Verify task exists on both clients with B's updates
+   */
+  base(
+    'LWW: Delete vs Update race resolves correctly',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates task
+        const taskName = `DeleteRace-${testRunId}`;
+        await clientA.workView.addTask(taskName);
+        await waitForTask(clientA.page, taskName);
+        console.log('[DeleteRace] Created task on Client A');
+
+        // 2. Both sync
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, taskName);
+        console.log('[DeleteRace] Both clients have the task');
+
+        // 3. Client A deletes the task
+        const taskLocatorA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await taskLocatorA.click({ button: 'right' });
+        await clientA.page.waitForTimeout(300);
+
+        const deleteBtn = clientA.page
+          .locator('.mat-mdc-menu-panel')
+          .locator('button[mat-menu-item]')
+          .filter({ hasText: /delete/i })
+          .first();
+        await deleteBtn.click();
+        await clientA.page.waitForTimeout(500);
+        console.log('[DeleteRace] Client A deleted task');
+
+        // 4. Client B updates the task (with later timestamp)
+        await clientB.page.waitForTimeout(1000); // Ensure later timestamp
+
+        const taskLocatorB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await taskLocatorB.dblclick();
+        const titleInputB = clientB.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await titleInputB.waitFor({ state: 'visible', timeout: 5000 });
+        await titleInputB.fill(`${taskName}-Updated`);
+        await clientB.page.keyboard.press('Enter');
+        await clientB.page.waitForTimeout(300);
+        console.log('[DeleteRace] Client B updated task title');
+
+        // 5. Client A syncs (uploads delete)
+        await clientA.sync.syncAndWait();
+        console.log('[DeleteRace] Client A synced delete');
+
+        // 6. Client B syncs (LWW: B's update has later timestamp, should win)
+        await clientB.sync.syncAndWait();
+        console.log('[DeleteRace] Client B synced, LWW applied');
+
+        // 7. Final sync
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        console.log('[DeleteRace] Final sync complete');
+
+        // Verify: Task should exist with B's updated title (update won over delete)
+        const updatedTaskA = clientA.page.locator(`task:has-text("${taskName}-Updated")`);
+        const updatedTaskB = clientB.page.locator(`task:has-text("${taskName}-Updated")`);
+
+        await expect(updatedTaskB).toBeVisible({ timeout: 10000 });
+        await expect(updatedTaskA).toBeVisible({ timeout: 10000 });
+
+        console.log('[DeleteRace] ✓ Update won over delete via LWW');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  /**
+   * LWW: Subtask conflicts resolve independently from parent
+   *
+   * Tests that parent and subtask are separate entities with independent LWW resolution.
+   * Changes to one don't affect the other's conflict resolution.
+   *
+   * Scenario:
+   * 1. Client A creates parent task with subtask
+   * 2. Both clients sync
+   * 3. Client A updates parent title (concurrent with B)
+   * 4. Client B marks subtask as done (later timestamp)
+   * 5. Both sync
+   * 6. Verify: Both parent title change AND subtask done status applied
+   */
+  base(
+    'LWW: Subtask conflicts resolve independently from parent',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates parent task
+        const parentName = `Parent-${testRunId}`;
+        const subtaskName = `Subtask-${testRunId}`;
+        await clientA.workView.addTask(parentName);
+        await waitForTask(clientA.page, parentName);
+
+        // Add subtask using keyboard shortcut
+        const parentTask = clientA.page.locator(`task:has-text("${parentName}")`).first();
+        await parentTask.focus();
+        await clientA.page.waitForTimeout(100);
+        await parentTask.press('a'); // Add subtask shortcut
+
+        // Wait for textarea and fill subtask name
+        const textarea = clientA.page.locator('task-title textarea');
+        await textarea.waitFor({ state: 'visible', timeout: 5000 });
+        await textarea.fill(subtaskName);
+        await clientA.page.keyboard.press('Enter');
+        await waitForTask(clientA.page, subtaskName);
+        await clientA.page.waitForTimeout(300);
+        console.log('[SubtaskLWW] Created parent with subtask on Client A');
+
+        // 2. Both sync
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, parentName);
+        console.log('[SubtaskLWW] Both clients have parent and subtask');
+
+        // 3. Client A updates parent title
+        // Must click on task-title specifically, not the whole task
+        // (dblclick on parent task with subtasks expands/collapses them)
+        const parentLocatorA = clientA.page
+          .locator(
+            `task:not(.hasNoSubTasks):not(.ng-animating):has-text("${parentName}")`,
+          )
+          .first();
+        const titleElementA = parentLocatorA.locator('.task-title').first();
+        await titleElementA.dblclick();
+        await clientA.page.waitForTimeout(200);
+
+        // Wait for inline edit input
+        const inputA = clientA.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await inputA.waitFor({ state: 'visible', timeout: 5000 });
+        const newParentName = `UpdatedParent-${testRunId}`;
+        await inputA.fill(newParentName);
+        await clientA.page.keyboard.press('Enter');
+        await clientA.page.waitForTimeout(300);
+        console.log('[SubtaskLWW] Client A updated parent title');
+
+        // 4. Client B marks subtask as done (later timestamp)
+        await clientB.page.waitForTimeout(500);
+
+        // Find the parent and expand to see subtask
+        const parentLocatorB = clientB.page
+          .locator(
+            `task:not(.hasNoSubTasks):not(.ng-animating):has-text("${parentName}")`,
+          )
+          .first();
+        await parentLocatorB.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Click the expand button or the task itself to show subtasks
+        // First check if subtasks are already visible
+        const subtaskVisible = await clientB.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first()
+          .isVisible()
+          .catch(() => false);
+
+        if (!subtaskVisible) {
+          // Try clicking expand button
+          const expandBtn = parentLocatorB.locator('.expand-btn').first();
+          if (await expandBtn.isVisible().catch(() => false)) {
+            await expandBtn.click();
+            await clientB.page.waitForTimeout(500);
+          } else {
+            // Try toggle-sub-tasks-btn
+            const toggleBtn = parentLocatorB.locator('.toggle-sub-tasks-btn').first();
+            if (await toggleBtn.isVisible().catch(() => false)) {
+              await toggleBtn.click();
+              await clientB.page.waitForTimeout(500);
+            } else {
+              // Click on parent to toggle
+              await parentLocatorB.click();
+              await clientB.page.waitForTimeout(500);
+            }
+          }
+        }
+
+        // Verify subtask is now visible
+        const subtaskLocatorB = clientB.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first();
+        await subtaskLocatorB.waitFor({ state: 'visible', timeout: 10000 });
+
+        // Mark subtask done using keyboard shortcut
+        await subtaskLocatorB.focus();
+        await clientB.page.waitForTimeout(100);
+        await subtaskLocatorB.press('d'); // Toggle done shortcut
+        await clientB.page.waitForTimeout(300);
+        console.log('[SubtaskLWW] Client B marked subtask done');
+
+        // 5. Both sync
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        console.log('[SubtaskLWW] Final sync complete');
+
+        // 6. Verify both changes applied
+
+        // Parent should have updated title on both clients
+        await waitForTask(clientA.page, newParentName);
+        await waitForTask(clientB.page, newParentName);
+        console.log('[SubtaskLWW] Parent title updated on both clients');
+
+        // Expand to see subtasks on Client A
+        const updatedParentA = clientA.page
+          .locator(`task:not(.hasNoSubTasks):has-text("${newParentName}")`)
+          .first();
+        await updatedParentA.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Check if subtask is already visible
+        const subtaskVisibleA = await clientA.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first()
+          .isVisible()
+          .catch(() => false);
+
+        if (!subtaskVisibleA) {
+          // Try clicking expand button
+          const expandBtnA = updatedParentA.locator('.expand-btn').first();
+          if (await expandBtnA.isVisible().catch(() => false)) {
+            await expandBtnA.click();
+          } else {
+            // Click parent to toggle
+            await updatedParentA.click();
+          }
+          await clientA.page.waitForTimeout(500);
+        }
+
+        // Expand to see subtasks on Client B
+        const updatedParentB = clientB.page
+          .locator(`task:not(.hasNoSubTasks):has-text("${newParentName}")`)
+          .first();
+        await updatedParentB.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Check if subtask is already visible
+        const subtaskVisibleB = await clientB.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first()
+          .isVisible()
+          .catch(() => false);
+
+        if (!subtaskVisibleB) {
+          // Try clicking expand button
+          const expandBtnB = updatedParentB.locator('.expand-btn').first();
+          if (await expandBtnB.isVisible().catch(() => false)) {
+            await expandBtnB.click();
+          } else {
+            // Click parent to toggle
+            await updatedParentB.click();
+          }
+          await clientB.page.waitForTimeout(500);
+        }
+
+        // Wait for subtasks to be visible
+        const doneSubtaskA = clientA.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first();
+        const doneSubtaskB = clientB.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first();
+
+        await doneSubtaskA.waitFor({ state: 'visible', timeout: 10000 });
+        await doneSubtaskB.waitFor({ state: 'visible', timeout: 10000 });
+
+        // Subtask should be marked done on both clients
+        await expect(doneSubtaskA).toHaveClass(/isDone/, { timeout: 10000 });
+        await expect(doneSubtaskB).toHaveClass(/isDone/, { timeout: 10000 });
+
+        console.log(
+          '[SubtaskLWW] ✓ Parent title change and subtask done status synced independently',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });

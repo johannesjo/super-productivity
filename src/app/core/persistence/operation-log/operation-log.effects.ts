@@ -6,6 +6,7 @@ import { LockService } from './sync/lock.service';
 import { OperationLogStoreService } from './store/operation-log-store.service';
 import { isPersistentAction, PersistentAction } from './persistent-action.interface';
 import { uuidv7 } from '../../../util/uuid-v7';
+import { devError } from '../../../util/dev-error';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
 import { MultiEntityPayload, Operation } from './operation.types';
 import { PfapiService } from '../../../pfapi/pfapi.service';
@@ -236,11 +237,16 @@ export class OperationLogEffects {
       })
       .catch((e) => {
         OpLog.err('OperationLogEffects: Compaction failed', e);
+        devError('Compaction failed: ' + e);
         this.compactionFailures++;
         if (this.compactionFailures >= MAX_COMPACTION_FAILURES) {
           this.snackService.open({
             type: 'ERROR',
             msg: T.F.SYNC.S.COMPACTION_FAILED,
+            actionStr: T.PS.RELOAD,
+            actionFn: (): void => {
+              window.location.reload();
+            },
           });
         }
       });
