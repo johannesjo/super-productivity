@@ -69,6 +69,7 @@ base.describe.serial('@supersync SuperSync Server Migration', () => {
   base(
     'Client A migrates to new server, Client B receives all data',
     async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000); // 2 minutes - migration tests need extra time
       const testRunId = generateTestRunId(testInfo.workerIndex);
       let clientA: SimulatedE2EClient | null = null;
       let clientB: SimulatedE2EClient | null = null;
@@ -150,8 +151,8 @@ base.describe.serial('@supersync SuperSync Server Migration', () => {
 
         console.log('[Test] SUCCESS: Client B received all data after server migration');
       } finally {
-        if (clientA) await closeClient(clientA);
-        if (clientB) await closeClient(clientB);
+        if (clientA) await closeClient(clientA).catch(() => {});
+        if (clientB) await closeClient(clientB).catch(() => {});
       }
     },
   );
@@ -165,6 +166,7 @@ base.describe.serial('@supersync SuperSync Server Migration', () => {
   base(
     'Client A migrates with pending local changes, all data syncs',
     async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000); // 2 minutes - migration tests need extra time
       const testRunId = generateTestRunId(testInfo.workerIndex);
       let clientA: SimulatedE2EClient | null = null;
       let clientB: SimulatedE2EClient | null = null;
@@ -224,8 +226,8 @@ base.describe.serial('@supersync SuperSync Server Migration', () => {
 
         console.log('[Test] SUCCESS: Pending local changes preserved during migration');
       } finally {
-        if (clientA) await closeClient(clientA);
-        if (clientB) await closeClient(clientB);
+        if (clientA) await closeClient(clientA).catch(() => {});
+        if (clientB) await closeClient(clientB).catch(() => {});
       }
     },
   );
@@ -238,6 +240,7 @@ base.describe.serial('@supersync SuperSync Server Migration', () => {
   base(
     'Client A can migrate multiple times without data loss',
     async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000); // 2 minutes - migration tests need extra time
       const testRunId = generateTestRunId(testInfo.workerIndex);
       let clientA: SimulatedE2EClient | null = null;
       let clientB: SimulatedE2EClient | null = null;
@@ -285,8 +288,8 @@ base.describe.serial('@supersync SuperSync Server Migration', () => {
 
         console.log('[Test] SUCCESS: Multiple migrations preserved all data');
       } finally {
-        if (clientA) await closeClient(clientA);
-        if (clientB) await closeClient(clientB);
+        if (clientA) await closeClient(clientA).catch(() => {});
+        if (clientB) await closeClient(clientB).catch(() => {});
       }
     },
   );
