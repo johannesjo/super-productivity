@@ -207,22 +207,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           hideExpression: (m, v, field) =>
             field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
           resetOnHide: true,
-          key: 'baseUrl',
-          type: 'input',
-          className: 'e2e-baseUrl',
-          templateOptions: {
-            label: T.F.SYNC.FORM.SUPER_SYNC.L_SERVER_URL,
-            description: T.F.SYNC.FORM.SUPER_SYNC.SERVER_URL_DESCRIPTION,
-          },
-          expressions: {
-            'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.SuperSync,
-          },
-        },
-        {
-          hideExpression: (m, v, field) =>
-            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
-          resetOnHide: true,
           key: 'accessToken',
           type: 'textarea',
           className: 'e2e-accessToken',
@@ -236,46 +220,64 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.SuperSync,
           },
         },
-        // E2E Encryption for SuperSync
+        // Advanced settings for SuperSync
         {
+          type: 'collapsible',
           hideExpression: (m, v, field) =>
             field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
-          key: 'isEncryptionEnabled',
-          type: 'checkbox',
-          className: 'e2e-isEncryptionEnabled',
-          templateOptions: {
-            label: T.F.SYNC.FORM.SUPER_SYNC.L_ENABLE_E2E_ENCRYPTION,
-            description: T.F.SYNC.FORM.SUPER_SYNC.E2E_ENCRYPTION_DESCRIPTION,
-          },
-        },
-        {
-          hideExpression: (model: any, v: any, field: any) =>
-            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync ||
-            !model.isEncryptionEnabled,
-          type: 'tpl',
-          className: 'tpl warn-text',
-          templateOptions: {
-            tag: 'div',
-            text: T.F.SYNC.FORM.SUPER_SYNC.ENCRYPTION_WARNING,
-          },
-        },
-        {
-          hideExpression: (model: any, v: any, field: any) =>
-            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync ||
-            !model.isEncryptionEnabled,
-          resetOnHide: true,
-          key: 'encryptKey',
-          type: 'input',
-          className: 'e2e-encryptKey',
-          templateOptions: {
-            type: 'password',
-            label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
-          },
-          expressions: {
-            'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider ===
-                LegacySyncProvider.SuperSync && field?.model?.isEncryptionEnabled,
-          },
+          props: { label: T.G.ADVANCED_CFG },
+          fieldGroup: [
+            // E2E Encryption for SuperSync
+            {
+              key: 'isEncryptionEnabled',
+              type: 'checkbox',
+              className: 'e2e-isEncryptionEnabled',
+              templateOptions: {
+                label: T.F.SYNC.FORM.SUPER_SYNC.L_ENABLE_E2E_ENCRYPTION,
+                description: T.F.SYNC.FORM.SUPER_SYNC.E2E_ENCRYPTION_DESCRIPTION,
+              },
+            },
+            {
+              hideExpression: (model: any) => !model.isEncryptionEnabled,
+              type: 'tpl',
+              className: 'tpl warn-text',
+              templateOptions: {
+                tag: 'div',
+                text: T.F.SYNC.FORM.SUPER_SYNC.ENCRYPTION_WARNING,
+              },
+            },
+            {
+              hideExpression: (model: any) => !model.isEncryptionEnabled,
+              resetOnHide: true,
+              key: 'encryptKey',
+              type: 'input',
+              className: 'e2e-encryptKey',
+              templateOptions: {
+                type: 'password',
+                label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
+              },
+              expressions: {
+                'props.required': (field: FormlyFieldConfig) =>
+                  field?.parent?.parent?.parent?.model?.syncProvider ===
+                    LegacySyncProvider.SuperSync && field?.model?.isEncryptionEnabled,
+              },
+            },
+            // Server URL
+            {
+              key: 'baseUrl',
+              type: 'input',
+              className: 'e2e-baseUrl',
+              templateOptions: {
+                label: T.F.SYNC.FORM.SUPER_SYNC.L_SERVER_URL,
+                description: T.F.SYNC.FORM.SUPER_SYNC.SERVER_URL_DESCRIPTION,
+              },
+              expressions: {
+                'props.required': (field: FormlyFieldConfig) =>
+                  field?.parent?.parent?.parent?.model?.syncProvider ===
+                  LegacySyncProvider.SuperSync,
+              },
+            },
+          ],
         },
       ],
     },
