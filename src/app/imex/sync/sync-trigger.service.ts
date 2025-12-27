@@ -38,6 +38,7 @@ import { Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../features/tasks/store/task.selectors';
 import { SyncLog } from '../../core/log';
 import { SyncWrapperService } from './sync-wrapper.service';
+import { SyncProviderId } from '../../pfapi/api';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -151,7 +152,18 @@ export class SyncTriggerService {
   );
   private _isInitialSyncDone$: Observable<boolean> = this._isInitialSyncEnabled$.pipe(
     switchMap((isActive) => {
-      return isActive ? this._isInitialSyncDoneManual$.asObservable() : of(true);
+      if (!isActive) {
+        return of(true);
+      }
+      // SuperSync has data locally - no need to wait for initial sync
+      return this._syncWrapperService.syncProviderId$.pipe(
+        take(1),
+        switchMap((providerId) =>
+          providerId === SyncProviderId.SuperSync
+            ? of(true)
+            : this._isInitialSyncDoneManual$.asObservable(),
+        ),
+      );
     }),
   );
   private _afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> =
