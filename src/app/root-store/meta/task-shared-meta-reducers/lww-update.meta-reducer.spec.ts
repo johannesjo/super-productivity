@@ -770,5 +770,332 @@ describe('lwwUpdateMetaReducer', () => {
       expect(tagA.taskIds).not.toContain(TASK_ID);
       expect(tagB.taskIds).not.toContain(TASK_ID);
     });
+
+    it('should preserve tag.taskIds order when adding task to tag', () => {
+      // Tag A already has some tasks in specific order
+      const existingTasks = ['existing-1', 'existing-2', 'existing-3'];
+      const state = {
+        ...createStateWithTags([], [], []),
+        [TAG_FEATURE_NAME]: {
+          ids: [TAG_A],
+          entities: {
+            [TAG_A]: createMockTag({
+              id: TAG_A,
+              title: 'Tag A',
+              taskIds: existingTasks,
+            }),
+          },
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        tagIds: [TAG_A], // Adding task to TAG_A
+        title: 'Updated Task',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const tagA = updatedState[TAG_FEATURE_NAME]?.entities[TAG_A] as Tag;
+
+      // Original order should be preserved, new task appended at end
+      expect(tagA.taskIds).toEqual([...existingTasks, TASK_ID]);
+    });
+
+    it('should preserve tag.taskIds order when removing task from tag', () => {
+      // Tag A has tasks in specific order, including TASK_ID
+      const state = {
+        ...createStateWithTags([TAG_A], [], []),
+        [TAG_FEATURE_NAME]: {
+          ids: [TAG_A],
+          entities: {
+            [TAG_A]: createMockTag({
+              id: TAG_A,
+              title: 'Tag A',
+              taskIds: ['first', TASK_ID, 'last'],
+            }),
+          },
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        tagIds: [], // Removing TAG_A from task
+        title: 'Updated Task',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const tagA = updatedState[TAG_FEATURE_NAME]?.entities[TAG_A] as Tag;
+
+      // Order should be preserved after removal
+      expect(tagA.taskIds).toEqual(['first', 'last']);
+    });
+  });
+
+  describe('subtask edge cases', () => {
+    const PARENT_TASK = 'parent-task';
+    const SUBTASK_ID = 'subtask-1';
+    const PROJECT_A = 'project-a';
+
+    it('should handle subtask with parentId referencing deleted parent gracefully', () => {
+      // Subtask references a parent that no longer exists in state
+      const state = {
+        [TASK_FEATURE_NAME]: {
+          ids: [SUBTASK_ID],
+          entities: {
+            [SUBTASK_ID]: createMockTask({
+              id: SUBTASK_ID,
+              parentId: PARENT_TASK, // Parent no longer exists
+              projectId: PROJECT_A,
+            }),
+          },
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [PROJECT_A],
+          entities: {
+            [PROJECT_A]: createMockProject({ id: PROJECT_A, taskIds: [] }),
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: SUBTASK_ID,
+        parentId: PARENT_TASK, // Still references deleted parent
+        projectId: PROJECT_A,
+        title: 'Updated Subtask',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: SUBTASK_ID },
+      };
+
+      // Should not throw
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const subtask = updatedState[TASK_FEATURE_NAME]?.entities[SUBTASK_ID] as Task;
+      const projectA = updatedState[PROJECT_FEATURE_NAME]?.entities[PROJECT_A] as Project;
+
+      // Subtask should be updated
+      expect(subtask.title).toBe('Updated Subtask');
+      expect(subtask.parentId).toBe(PARENT_TASK);
+
+      // Subtask should NOT be added to project.taskIds (subtasks are excluded)
+      expect(projectA.taskIds).not.toContain(SUBTASK_ID);
+    });
+
+    it('should handle subtask becoming orphan (parentId removed via LWW)', () => {
+      // Subtask loses its parent via LWW update
+      const state = {
+        [TASK_FEATURE_NAME]: {
+          ids: [SUBTASK_ID],
+          entities: {
+            [SUBTASK_ID]: createMockTask({
+              id: SUBTASK_ID,
+              parentId: PARENT_TASK,
+              projectId: PROJECT_A,
+            }),
+          },
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [PROJECT_A],
+          entities: {
+            [PROJECT_A]: createMockProject({ id: PROJECT_A, taskIds: [] }),
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: SUBTASK_ID,
+        parentId: null, // Parent removed - becomes top-level task
+        projectId: PROJECT_A,
+        title: 'Now a top-level task',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: SUBTASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const subtask = updatedState[TASK_FEATURE_NAME]?.entities[SUBTASK_ID] as Task;
+      const projectA = updatedState[PROJECT_FEATURE_NAME]?.entities[PROJECT_A] as Project;
+
+      // Task should now be a top-level task
+      expect(subtask.parentId).toBeNull();
+      // Since it's no longer a subtask and wasn't before in project.taskIds,
+      // and it's changing projectId (even though it's the same), it should be added
+      // Actually - it WAS a subtask (existingEntity.parentId exists) so isSubTask = true
+      // Therefore it still won't be added
+      expect(projectA.taskIds).not.toContain(SUBTASK_ID);
+    });
+
+    it('should recognize task as subtask based on existing parentId even if new data has no parentId', () => {
+      // This tests the isSubTask check: (entityData['parentId'] || existingEntity?.parentId)
+      const state = {
+        [TASK_FEATURE_NAME]: {
+          ids: [SUBTASK_ID],
+          entities: {
+            [SUBTASK_ID]: createMockTask({
+              id: SUBTASK_ID,
+              parentId: PARENT_TASK, // Has parent in existing state
+              projectId: undefined,
+            }),
+          },
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [PROJECT_A],
+          entities: {
+            [PROJECT_A]: createMockProject({ id: PROJECT_A, taskIds: [] }),
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: SUBTASK_ID,
+        // Note: parentId not included in LWW update payload
+        projectId: PROJECT_A,
+        title: 'Subtask moved to project',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: SUBTASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const projectA = updatedState[PROJECT_FEATURE_NAME]?.entities[PROJECT_A] as Project;
+
+      // Should still be treated as subtask because existingEntity has parentId
+      // Therefore NOT added to project.taskIds
+      expect(projectA.taskIds).not.toContain(SUBTASK_ID);
+    });
+  });
+
+  describe('project.taskIds ordering', () => {
+    const PROJECT_A = 'project-a';
+
+    it('should preserve project.taskIds order when adding task', () => {
+      const existingTasks = ['task-a', 'task-b', 'task-c'];
+      const state = {
+        [TASK_FEATURE_NAME]: {
+          ids: [TASK_ID],
+          entities: {
+            [TASK_ID]: createMockTask({ projectId: undefined }), // Moving to project A
+          },
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [PROJECT_A],
+          entities: {
+            [PROJECT_A]: createMockProject({
+              id: PROJECT_A,
+              taskIds: existingTasks,
+            }),
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        projectId: PROJECT_A,
+        title: 'Task moving to project',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const projectA = updatedState[PROJECT_FEATURE_NAME]?.entities[PROJECT_A] as Project;
+
+      // Original order should be preserved, new task appended at end
+      expect(projectA.taskIds).toEqual([...existingTasks, TASK_ID]);
+    });
+
+    it('should preserve project.taskIds order when removing task', () => {
+      const PROJECT_B = 'project-b';
+      const state = {
+        [TASK_FEATURE_NAME]: {
+          ids: [TASK_ID],
+          entities: {
+            [TASK_ID]: createMockTask({ projectId: PROJECT_A }),
+          },
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [PROJECT_A, PROJECT_B],
+          entities: {
+            [PROJECT_A]: createMockProject({
+              id: PROJECT_A,
+              taskIds: ['first', TASK_ID, 'last'],
+            }),
+            [PROJECT_B]: createMockProject({ id: PROJECT_B, taskIds: [] }),
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        projectId: PROJECT_B, // Moving to different project
+        title: 'Task moving between projects',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const projectA = updatedState[PROJECT_FEATURE_NAME]?.entities[PROJECT_A] as Project;
+
+      // Order should be preserved after removal
+      expect(projectA.taskIds).toEqual(['first', 'last']);
+    });
   });
 });
