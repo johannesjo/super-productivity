@@ -391,4 +391,134 @@ describe('OperationApplierService', () => {
       expect(setTimeoutCalledWithZero).toBe(true);
     });
   });
+
+  describe('partial archive failure', () => {
+    it('should return partial success when archive fails midway through batch', async () => {
+      const ops = [
+        createMockOperation('op-1', 'TASK', OpType.Update, { title: 'First' }),
+        createMockOperation('op-2', 'TASK', OpType.Update, { title: 'Second' }),
+        createMockOperation('op-3', 'TASK', OpType.Update, { title: 'Third' }),
+        createMockOperation('op-4', 'TASK', OpType.Update, { title: 'Fourth' }),
+        createMockOperation('op-5', 'TASK', OpType.Update, { title: 'Fifth' }),
+      ];
+
+      const archiveError = new Error('Archive write failed on op-3');
+      let callCount = 0;
+      mockArchiveOperationHandler.handleOperation.and.callFake(() => {
+        callCount++;
+        if (callCount === 3) {
+          return Promise.reject(archiveError);
+        }
+        return Promise.resolve();
+      });
+
+      const result = await service.applyOperations(ops);
+
+      // Bulk dispatch succeeded (all ops applied to NgRx state)
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+
+      // But archive handling failed on op-3
+      expect(result.appliedOps.length).toBe(2); // op-1 and op-2 succeeded
+      expect(result.failedOp).toBeDefined();
+      expect(result.failedOp!.op.id).toBe('op-3');
+      expect(result.failedOp!.error).toBe(archiveError);
+
+      // Archive handler was called 3 times (op-1, op-2, op-3)
+      expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('effects isolation (key architectural benefit)', () => {
+    it('should only dispatch bulkApplyOperations, not individual action types', async () => {
+      const ops = [
+        createMockOperation('op-1', 'TASK', OpType.Update, { title: 'First' }),
+        createMockOperation('op-2', 'TASK', OpType.Update, { title: 'Second' }),
+      ];
+
+      await service.applyOperations(ops);
+
+      // Only ONE dispatch call with bulkApplyOperations
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+
+      const dispatchedAction = mockStore.dispatch.calls.first().args[0] as unknown as {
+        type: string;
+      };
+
+      // The dispatched action is bulkApplyOperations, NOT individual [Test] Action
+      expect(dispatchedAction.type).toBe(bulkApplyOperations.type);
+      expect(dispatchedAction.type).not.toBe('[Test] Action');
+
+      // This means effects listening for '[Test] Action' will NOT fire
+      // Only effects listening for '[OperationLog] Bulk Apply Operations' would fire
+      // (and no effect should listen for that)
+    });
+
+    it('should dispatch all operations in single bulk action', async () => {
+      const ops = [
+        createMockOperation('op-1', 'TASK', OpType.Update, { title: 'A' }),
+        createMockOperation('op-2', 'PROJECT', OpType.Create, { name: 'B' }),
+        createMockOperation('op-3', 'TAG', OpType.Delete, {}),
+      ];
+
+      await service.applyOperations(ops);
+
+      const dispatchedAction = mockStore.dispatch.calls.first().args[0] as unknown as {
+        type: string;
+        operations: Operation[];
+      };
+
+      // All 3 operations bundled in single dispatch
+      expect(dispatchedAction.operations.length).toBe(3);
+      expect(dispatchedAction.operations[0].entityType).toBe('TASK');
+      expect(dispatchedAction.operations[1].entityType).toBe('PROJECT');
+      expect(dispatchedAction.operations[2].entityType).toBe('TAG');
+    });
+  });
+
+  describe('multiple archive-affecting operations', () => {
+    it('should handle multiple archive-affecting ops and dispatch remoteArchiveDataApplied once', async () => {
+      const ops: Operation[] = [
+        {
+          id: 'op-1',
+          clientId: 'testClient',
+          actionType: TaskSharedActions.moveToArchive.type,
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { tasks: [] },
+          vectorClock: { testClient: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+        createMockOperation('op-2', 'TASK', OpType.Update, { title: 'Non-archive' }),
+        {
+          id: 'op-3',
+          clientId: 'testClient',
+          actionType: TaskSharedActions.restoreTask.type,
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-2',
+          payload: { task: {}, subTasks: [] },
+          vectorClock: { testClient: 2 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ];
+
+      await service.applyOperations(ops);
+
+      // Bulk dispatch + ONE remoteArchiveDataApplied (not two)
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
+
+      const dispatchCalls = mockStore.dispatch.calls.allArgs();
+      const archiveDataAppliedCalls = dispatchCalls.filter(
+        (args) =>
+          (args[0] as unknown as { type: string }).type === remoteArchiveDataApplied.type,
+      );
+      expect(archiveDataAppliedCalls.length).toBe(1);
+
+      // Archive handler called for all 3 ops
+      expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(3);
+    });
+  });
 });
