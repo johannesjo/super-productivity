@@ -719,24 +719,43 @@ Remote Storage (WebDAV/Dropbox folder):
 ## File Reference
 
 ```
-src/app/core/persistence/operation-log/
-├── operation.types.ts                    # Type definitions
-├── operation-log.const.ts                # Constants
-├── operation-log.effects.ts              # Write path effect
-├── store/
+src/app/op-log/
+├── core/                                 # Types, constants, errors
+│   ├── operation.types.ts                # Type definitions
+│   ├── operation-log.const.ts            # Constants
+│   ├── persistent-action.interface.ts    # Action interface
+│   └── entity-registry.ts                # Entity type registry
+├── capture/                              # Write path: Actions → Operations
+│   ├── operation-capture.meta-reducer.ts # Captures persistent actions
+│   ├── operation-capture.service.ts      # FIFO queue
+│   └── operation-log.effects.ts          # Writes to IndexedDB
+├── apply/                                # Read path: Operations → State
+│   ├── bulk-hydration.action.ts          # Bulk apply action
+│   ├── bulk-hydration.meta-reducer.ts    # Applies ops in single pass
+│   ├── operation-applier.service.ts      # Apply ops to NgRx
+│   ├── operation-converter.util.ts       # Op → Action conversion
+│   ├── hydration-state.service.ts        # Tracks hydration state
+│   └── archive-operation-handler.service.ts # Archive side effects
+├── store/                                # IndexedDB persistence
 │   ├── operation-log-store.service.ts    # IndexedDB wrapper
-│   ├── operation-log-hydrator.service.ts # Hydration
+│   ├── operation-log-hydrator.service.ts # Startup hydration
+│   ├── operation-log-compaction.service.ts # Snapshot + GC
 │   └── schema-migration.service.ts       # Schema migrations
-├── sync/
+├── sync/                                 # Server sync (SuperSync)
 │   ├── operation-log-sync.service.ts     # Sync orchestration
 │   ├── operation-log-upload.service.ts   # Upload logic
 │   ├── operation-log-download.service.ts # Download logic
 │   ├── conflict-resolution.service.ts    # LWW resolution
 │   ├── sync-import-filter.service.ts     # SYNC_IMPORT filtering
-│   └── vector-clock.service.ts           # Clock management
-└── processing/
-    ├── operation-applier.service.ts      # Apply ops to NgRx
-    ├── operation-capture.meta-reducer.ts # Capture actions
-    ├── operation-capture.service.ts      # FIFO queue
-    └── archive-operation-handler.service.ts # Archive side effects
+│   ├── vector-clock.service.ts           # Clock management
+│   └── operation-encryption.service.ts   # E2E encryption
+├── validation/                           # State validation
+│   ├── validate-state.service.ts         # State consistency checks
+│   └── validate-operation-payload.ts     # Operation validation
+├── util/                                 # Shared utilities
+│   ├── entity-key.util.ts                # Entity key helpers
+│   └── client-id.provider.ts             # Client ID management
+└── testing/                              # Test infrastructure
+    ├── integration/                      # Integration tests
+    └── benchmarks/                       # Performance tests
 ```

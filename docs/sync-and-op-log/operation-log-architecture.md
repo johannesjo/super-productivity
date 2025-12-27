@@ -556,7 +556,7 @@ When Super Productivity's data model changes (new fields, renamed properties, re
 
 ### Configuration
 
-`CURRENT_SCHEMA_VERSION` is defined in `src/app/core/persistence/operation-log/schema-migration.service.ts`:
+`CURRENT_SCHEMA_VERSION` is defined in `src/app/op-log/store/schema-migration.service.ts`:
 
 ```typescript
 export const CURRENT_SCHEMA_VERSION = 1;
@@ -730,7 +730,7 @@ async handleFullStateImport(payload: { appDataComplete: AppDataComplete }): Prom
 
 ### A.7.5 Migration Implementation
 
-Migrations are defined in `src/app/core/persistence/operation-log/schema-migration.service.ts`.
+Migrations are defined in `src/app/op-log/store/schema-migration.service.ts`.
 
 **How to Create a New Migration:**
 
@@ -1986,7 +1986,7 @@ When adding new entities or relationships:
 # File Reference
 
 ```
-src/app/core/persistence/operation-log/
+src/app/op-log/
 ├── operation.types.ts                    # Type definitions (Operation, OpType, EntityType)
 ├── operation-log.const.ts                # Constants (thresholds, timeouts, limits)
 ├── operation-log.effects.ts              # Action capture + META_MODEL bridge

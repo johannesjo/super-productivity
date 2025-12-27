@@ -51,7 +51,7 @@ import { Log, PluginLog } from '../core/log';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
-import { MAX_BATCH_OPERATIONS_SIZE } from '../core/persistence/operation-log/operation-log.const';
+import { MAX_BATCH_OPERATIONS_SIZE } from '../op-log/core/operation-log.const';
 
 // New imports for simple counters
 import { selectAllSimpleCounters } from '../features/simple-counter/store/simple-counter.reducer';

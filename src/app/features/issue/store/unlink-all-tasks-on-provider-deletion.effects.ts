@@ -6,7 +6,7 @@
  * @see ArchiveOperationHandler._handleDeleteIssueProvider
  * @see ArchiveOperationHandler._handleDeleteIssueProviders
  * @see ArchiveOperationHandlerEffects at:
- * src/app/core/persistence/operation-log/processing/archive-operation-handler.effects.ts
+ * src/app/op-log/apply/archive-operation-handler.effects.ts
  *
  * All archive-affecting operations are now routed through ArchiveOperationHandler,
  * which is the SINGLE SOURCE OF TRUTH for archive storage operations.

@@ -21,7 +21,7 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskLog } from '../../../core/log';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { environment } from '../../../../environments/environment';
-import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 
 @Injectable()
 export class TaskDueEffects {

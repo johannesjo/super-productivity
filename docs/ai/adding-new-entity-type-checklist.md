@@ -4,11 +4,11 @@ This checklist ensures new entity types integrate properly with the operation lo
 
 ## When adding a new entity type:
 
-### 1. Type Definition (`src/app/core/persistence/operation-log/operation.types.ts`)
+### 1. Type Definition (`src/app/op-log/core/operation.types.ts`)
 
 - [ ] Add to `EntityType` union (line ~15)
 
-### 2. Entity Registry (`src/app/core/persistence/operation-log/entity-registry.ts`)
+### 2. Entity Registry (`src/app/op-log/core/entity-registry.ts`)
 
 - [ ] Add entry to `ENTITY_CONFIGS` with:
   - `storagePattern`: 'adapter' | 'singleton' | 'map' | 'array' | 'virtual'
@@ -21,7 +21,7 @@ This checklist ensures new entity types integrate properly with the operation lo
     - **array**: `selectState`, `arrayKey`
     - **virtual**: just `payloadKey`
 
-### 3. Test Arrays (`src/app/core/persistence/operation-log/entity-registry.spec.ts`)
+### 3. Test Arrays (`src/app/op-log/core/entity-registry.spec.ts`)
 
 - [ ] Add to `REGULAR_ENTITY_TYPES` array (line ~17) OR `SPECIAL_OPERATION_TYPES` if special
 - [ ] Add to appropriate category array:
@@ -64,11 +64,11 @@ updateTasks: (taskProps: { tasks: Update<Task>[] }) => ({
 
 ```bash
 # Check the modified files
-npm run checkFile src/app/core/persistence/operation-log/entity-registry.ts
-npm run checkFile src/app/core/persistence/operation-log/operation.types.ts
+npm run checkFile src/app/op-log/core/entity-registry.ts
+npm run checkFile src/app/op-log/core/operation.types.ts
 
 # Run the entity registry tests
-npm run test:file src/app/core/persistence/operation-log/entity-registry.spec.ts
+npm run test:file src/app/op-log/core/entity-registry.spec.ts
 ```
 
 ## Why this matters

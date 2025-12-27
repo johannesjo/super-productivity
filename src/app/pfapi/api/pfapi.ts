@@ -37,7 +37,7 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 import { MigrationService } from './migration/migration.service';
 import { IValidation } from 'typia';
-import { OperationLogSyncService } from '../../core/persistence/operation-log/sync/operation-log-sync.service';
+import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { inject } from '@angular/core'; // Inject is used here
 

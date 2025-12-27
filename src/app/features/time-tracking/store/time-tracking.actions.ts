@@ -3,8 +3,8 @@ import { createAction, createActionGroup, props } from '@ngrx/store';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TimeTrackingState, TTWorkContextData } from '../time-tracking.model';
 import { Task } from '../../tasks/task.model';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 // Standalone persistent action for updating work context data (manual worklog edits)
 export const updateWorkContextData = createAction(

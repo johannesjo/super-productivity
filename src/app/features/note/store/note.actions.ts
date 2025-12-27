@@ -2,8 +2,8 @@ import { createAction } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Note } from '../note.model';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 export const updateNoteOrder = createAction(
   '[Note] Update Note Order',

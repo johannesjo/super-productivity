@@ -5,7 +5,7 @@
 > This plan has been fully implemented. For the current implementation details, see:
 >
 > - [supersync-encryption-architecture.md](../supersync-encryption-architecture.md) - Implementation documentation with diagrams
-> - `src/app/core/persistence/operation-log/sync/operation-encryption.service.ts` - Core encryption service
+> - `src/app/op-log/sync/operation-encryption.service.ts` - Core encryption service
 
 ## Summary
 
@@ -86,7 +86,7 @@ export interface SuperSyncPrivateCfg extends SyncProviderPrivateCfgBase {
 
 ### Phase 2: Client-Side Encryption Service
 
-**New file:** `src/app/core/persistence/operation-log/sync/operation-encryption.service.ts`
+**New file:** `src/app/op-log/sync/operation-encryption.service.ts`
 
 ```typescript
 import { inject, Injectable } from '@angular/core';
@@ -154,7 +154,7 @@ export class OperationEncryptionService {
 
 ### Phase 3: Upload Integration
 
-**File:** `src/app/core/persistence/operation-log/sync/operation-log-upload.service.ts`
+**File:** `src/app/op-log/sync/operation-log-upload.service.ts`
 
 Modify `_uploadPendingOpsViaApi()`:
 
@@ -188,7 +188,7 @@ if (response.newOps && response.newOps.length > 0) {
 
 ### Phase 4: Download Integration
 
-**File:** `src/app/core/persistence/operation-log/sync/operation-log-download.service.ts`
+**File:** `src/app/op-log/sync/operation-log-download.service.ts`
 
 Modify `_downloadRemoteOpsViaApi()`:
 
@@ -304,22 +304,22 @@ Simple dialog to prompt for encryption password when needed:
 
 ### New Files
 
-| File                                                                          | Purpose                    |
-| ----------------------------------------------------------------------------- | -------------------------- |
-| `src/app/core/persistence/operation-log/sync/operation-encryption.service.ts` | Encrypt/decrypt operations |
-| `src/app/imex/sync/dialog-encryption-password/`                               | Password prompt dialog     |
+| File                                                  | Purpose                    |
+| ----------------------------------------------------- | -------------------------- |
+| `src/app/op-log/sync/operation-encryption.service.ts` | Encrypt/decrypt operations |
+| `src/app/imex/sync/dialog-encryption-password/`       | Password prompt dialog     |
 
 ### Modified Files
 
-| File                                                                            | Changes                                   |
-| ------------------------------------------------------------------------------- | ----------------------------------------- |
-| `src/app/pfapi/api/sync/sync-provider.interface.ts`                             | Add `isPayloadEncrypted` to SyncOperation |
-| `src/app/pfapi/api/sync/providers/super-sync/super-sync.model.ts`               | Add `isEncryptionEnabled` flag            |
-| `src/app/core/persistence/operation-log/sync/operation-log-upload.service.ts`   | Encrypt before upload                     |
-| `src/app/core/persistence/operation-log/sync/operation-log-download.service.ts` | Decrypt after download                    |
-| `src/app/features/config/form-cfgs/sync-form.const.ts`                          | Add encryption toggle + password field    |
-| `src/app/t.const.ts`                                                            | Add translation keys                      |
-| `src/assets/i18n/en.json`                                                       | Add translation strings                   |
+| File                                                              | Changes                                   |
+| ----------------------------------------------------------------- | ----------------------------------------- |
+| `src/app/pfapi/api/sync/sync-provider.interface.ts`               | Add `isPayloadEncrypted` to SyncOperation |
+| `src/app/pfapi/api/sync/providers/super-sync/super-sync.model.ts` | Add `isEncryptionEnabled` flag            |
+| `src/app/op-log/sync/operation-log-upload.service.ts`             | Encrypt before upload                     |
+| `src/app/op-log/sync/operation-log-download.service.ts`           | Decrypt after download                    |
+| `src/app/features/config/form-cfgs/sync-form.const.ts`            | Add encryption toggle + password field    |
+| `src/app/t.const.ts`                                              | Add translation keys                      |
+| `src/assets/i18n/en.json`                                         | Add translation strings                   |
 
 ### No Server Changes Required
 

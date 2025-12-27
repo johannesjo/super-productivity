@@ -12,4 +12,4 @@ export { lwwUpdateMetaReducer } from './lww-update.meta-reducer';
 export {
   operationCaptureMetaReducer,
   setOperationCaptureService,
-} from '../../../core/persistence/operation-log/processing/operation-capture.meta-reducer';
+} from '../../../op-log/capture/operation-capture.meta-reducer';

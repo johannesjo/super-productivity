@@ -1,4 +1,4 @@
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
 import {
   __updateMultipleTaskSimple,
   addSubTask,

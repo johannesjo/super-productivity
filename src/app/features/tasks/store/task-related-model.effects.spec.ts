@@ -7,7 +7,7 @@ import { Action } from '@ngrx/store';
 import { TaskRelatedModelEffects } from './task-related-model.effects';
 import { TaskService } from '../task.service';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { DEFAULT_TASK, Task } from '../task.model';

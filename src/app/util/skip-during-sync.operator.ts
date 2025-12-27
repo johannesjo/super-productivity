@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { MonoTypeOperatorFunction } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { HydrationStateService } from '../core/persistence/operation-log/processing/hydration-state.service';
+import { HydrationStateService } from '../op-log/apply/hydration-state.service';
 
 /**
  * RxJS operator that skips emissions during remote operation application

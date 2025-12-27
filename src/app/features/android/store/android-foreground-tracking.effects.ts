@@ -19,7 +19,7 @@ import { DateService } from '../../../core/date/date.service';
 import { Task } from '../../tasks/task.model';
 import { selectTimer } from '../../focus-mode/store/focus-mode.selectors';
 import { combineLatest } from 'rxjs';
-import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 
 @Injectable()
 export class AndroidForegroundTrackingEffects {

@@ -70,7 +70,7 @@ export enum DBNames {
  * - `ModelSyncService.updateLocalMainModelsFromRemoteMetaFile()`: Uses this filter
  *
  * @see src/app/pfapi/pfapi-store-delegate.service.ts
- * @see src/app/core/persistence/operation-log/processing/operation-applier.service.ts
- * @see src/app/core/persistence/operation-log/processing/archive-operation-handler.service.ts
+ * @see src/app/op-log/apply/operation-applier.service.ts
+ * @see src/app/op-log/apply/archive-operation-handler.service.ts
  */
 export const ALLOWED_DB_WRITE_KEYS_DURING_SYNC = ['archiveYoung', 'archiveOld'] as const;

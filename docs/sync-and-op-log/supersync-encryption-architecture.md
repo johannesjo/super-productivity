@@ -159,7 +159,7 @@ SuperSync uses **AES-256-GCM** encryption with **Argon2id** key derivation for e
 
 ### 1. OperationEncryptionService
 
-**Location**: `src/app/core/persistence/operation-log/sync/operation-encryption.service.ts`
+**Location**: `src/app/op-log/sync/operation-encryption.service.ts`
 
 ```typescript
 // Encrypt before upload
@@ -189,7 +189,7 @@ async decryptOperation(op: SyncOperation, encryptKey: string): Promise<SyncOpera
 
 ### 3. Upload Integration
 
-**Location**: `src/app/core/persistence/operation-log/sync/operation-log-upload.service.ts`
+**Location**: `src/app/op-log/sync/operation-log-upload.service.ts`
 
 ```typescript
 // Check if encryption is enabled
@@ -204,7 +204,7 @@ if (isEncryptionEnabled && encryptKey) {
 
 ### 4. Download Integration
 
-**Location**: `src/app/core/persistence/operation-log/sync/operation-log-download.service.ts`
+**Location**: `src/app/op-log/sync/operation-log-download.service.ts`
 
 ```typescript
 // Decrypt if encrypted

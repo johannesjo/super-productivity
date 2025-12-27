@@ -4,8 +4,8 @@ import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { IssueDataReduced } from '../../features/issue/issue.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { BatchOperation } from '@super-productivity/plugin-api';
-import { PersistentActionMeta } from '../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../op-log/core/persistent-action.interface';
+import { OpType } from '../../op-log/core/operation.types';
 
 /**
  * Shared actions that affect multiple reducers (tasks, projects, tags)

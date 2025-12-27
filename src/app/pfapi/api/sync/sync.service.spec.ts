@@ -13,7 +13,7 @@ import {
   RevMismatchForModelError,
 } from '../errors/errors';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
-import { OperationLogSyncService } from '../../../core/persistence/operation-log/sync/operation-log-sync.service';
+import { OperationLogSyncService } from '../../../op-log/sync/operation-log-sync.service';
 
 interface FakeModel {
   id: string;

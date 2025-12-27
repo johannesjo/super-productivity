@@ -2,8 +2,8 @@
 import { createAction } from '@ngrx/store';
 import { DropListModelSource } from '../../tasks/task.model';
 import { WorkContextType } from '../work-context.model';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 export const moveTaskInTodayList = createAction(
   '[WorkContextMeta] Move Task in Today',

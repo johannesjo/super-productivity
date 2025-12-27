@@ -6,7 +6,7 @@ import { TagEffects } from './tag.effects';
 import { updateTag } from './tag.actions';
 import { TODAY_TAG } from '../tag.const';
 import { selectTodayTagRepair } from '../../work-context/store/work-context.selectors';
-import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { TagService } from '../tag.service';
 import { WorkContextService } from '../../work-context/work-context.service';

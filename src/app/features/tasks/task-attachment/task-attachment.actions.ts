@@ -1,8 +1,8 @@
 import { Update } from '@ngrx/entity';
 import { TaskAttachment } from './task-attachment.model';
 import { createAction } from '@ngrx/store';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 // NOTE: all is handled in task reducer too
 export const addTaskAttachment = createAction(

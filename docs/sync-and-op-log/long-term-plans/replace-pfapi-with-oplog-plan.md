@@ -38,7 +38,7 @@ Simplify the codebase by removing PFAPI's model-by-model sync and using operatio
 
 **New file:**
 
-- `src/app/core/persistence/operation-log/migration/pfapi-migration.service.ts`
+- `src/app/op-log/migration/pfapi-migration.service.ts`
 
 **Migration flow:**
 
@@ -93,10 +93,10 @@ src/app/pfapi/api/sync/providers/local-file-sync/local-file-sync-base.ts
 ### Operation Log Sync
 
 ```
-src/app/core/persistence/operation-log/sync/operation-log-upload.service.ts
-src/app/core/persistence/operation-log/sync/operation-log-download.service.ts
-src/app/core/persistence/operation-log/sync/operation-log-manifest.service.ts
-src/app/core/persistence/operation-log/sync/operation-log-sync.service.ts
+src/app/op-log/sync/operation-log-upload.service.ts
+src/app/op-log/sync/operation-log-download.service.ts
+src/app/op-log/sync/operation-log-manifest.service.ts
+src/app/op-log/sync/operation-log-sync.service.ts
 ```
 
 ### PFAPI (to simplify/remove)

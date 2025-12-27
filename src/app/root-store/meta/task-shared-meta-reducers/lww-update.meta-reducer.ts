@@ -1,11 +1,8 @@
 import { Action, ActionReducer, MetaReducer } from '@ngrx/store';
 import { EntityAdapter } from '@ngrx/entity';
 import { RootState } from '../../root-state';
-import { EntityType } from '../../../core/persistence/operation-log/operation.types';
-import {
-  getEntityConfig,
-  isAdapterEntity,
-} from '../../../core/persistence/operation-log/entity-registry';
+import { EntityType } from '../../../op-log/core/operation.types';
+import { getEntityConfig, isAdapterEntity } from '../../../op-log/core/entity-registry';
 import {
   PROJECT_FEATURE_NAME,
   projectAdapter,

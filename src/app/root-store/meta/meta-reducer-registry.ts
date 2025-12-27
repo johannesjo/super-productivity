@@ -1,6 +1,6 @@
 import { MetaReducer } from '@ngrx/store';
-import { operationCaptureMetaReducer } from '../../core/persistence/operation-log/processing/operation-capture.meta-reducer';
-import { bulkOperationsMetaReducer } from '../../core/persistence/operation-log/bulk-hydration.meta-reducer';
+import { operationCaptureMetaReducer } from '../../op-log/capture/operation-capture.meta-reducer';
+import { bulkOperationsMetaReducer } from '../../op-log/apply/bulk-hydration.meta-reducer';
 import { undoTaskDeleteMetaReducer } from './undo-task-delete.meta-reducer';
 import { taskSharedCrudMetaReducer } from './task-shared-meta-reducers/task-shared-crud.reducer';
 import { taskBatchUpdateMetaReducer } from './task-shared-meta-reducers/task-batch-update.reducer';

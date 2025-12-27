@@ -34,7 +34,7 @@ import {
   updateSimpleCounter,
   upsertSimpleCounter,
 } from './simple-counter.actions';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 

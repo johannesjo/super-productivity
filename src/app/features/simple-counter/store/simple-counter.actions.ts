@@ -1,8 +1,8 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { SimpleCounter } from '../simple-counter.model';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 export const addSimpleCounter = createAction(
   '[SimpleCounter] Add SimpleCounter',

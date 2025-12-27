@@ -49,9 +49,9 @@ import { devError } from '../../util/dev-error';
 import { UserInputWaitStateService } from './user-input-wait-state.service';
 import { LegacySyncProvider } from './legacy-sync-provider.model';
 import { SYNC_WAIT_TIMEOUT_MS, SYNC_REINIT_DELAY_MS } from './sync.const';
-import { SuperSyncStatusService } from '../../core/persistence/operation-log/sync/super-sync-status.service';
+import { SuperSyncStatusService } from '../../op-log/sync/super-sync-status.service';
 import { IS_ELECTRON } from '../../app.constants';
-import { OperationLogStoreService } from '../../core/persistence/operation-log/store/operation-log-store.service';
+import { OperationLogStoreService } from '../../op-log/store/operation-log-store.service';
 
 /**
  * Converts LegacySyncProvider to SyncProviderId.

@@ -1,8 +1,8 @@
 import { createActionGroup } from '@ngrx/store';
 import { ADD_TASK_PANEL_ID } from '../planner.model';
 import { TaskCopy } from '../../tasks/task.model';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 

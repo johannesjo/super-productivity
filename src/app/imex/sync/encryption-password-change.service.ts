@@ -1,16 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../pfapi/pfapi-store-delegate.service';
-import { OperationEncryptionService } from '../../core/persistence/operation-log/sync/operation-encryption.service';
-import { VectorClockService } from '../../core/persistence/operation-log/sync/vector-clock.service';
+import { OperationEncryptionService } from '../../op-log/sync/operation-encryption.service';
+import { VectorClockService } from '../../op-log/sync/vector-clock.service';
 import {
   CLIENT_ID_PROVIDER,
   ClientIdProvider,
-} from '../../core/persistence/operation-log/client-id.provider';
-import { isOperationSyncCapable } from '../../core/persistence/operation-log/sync/operation-sync.util';
+} from '../../op-log/util/client-id.provider';
+import { isOperationSyncCapable } from '../../op-log/sync/operation-sync.util';
 import { SyncProviderId } from '../../pfapi/api/pfapi.const';
 import { SuperSyncPrivateCfg } from '../../pfapi/api/sync/providers/super-sync/super-sync.model';
-import { CURRENT_SCHEMA_VERSION } from '../../core/persistence/operation-log/store/schema-migration.service';
+import { CURRENT_SCHEMA_VERSION } from '../../op-log/store/schema-migration.service';
 import { SyncLog } from '../../core/log';
 
 /**

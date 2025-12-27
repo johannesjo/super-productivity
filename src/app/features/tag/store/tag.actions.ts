@@ -2,8 +2,8 @@ import { createAction } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Tag } from '../tag.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 export const addTag = createAction('[Tag] Add Tag', (tagProps: { tag: Tag }) => ({
   ...tagProps,

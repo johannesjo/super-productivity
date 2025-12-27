@@ -3,8 +3,8 @@ import { Update } from '@ngrx/entity';
 import { Project } from '../project.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 import { DropListModelSource } from '../../tasks/task.model';
-import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { PersistentActionMeta } from '../../../op-log/core/persistent-action.interface';
+import { OpType } from '../../../op-log/core/operation.types';
 
 export const setCurrentProject = createAction(
   '[Project] SetCurrentProject',

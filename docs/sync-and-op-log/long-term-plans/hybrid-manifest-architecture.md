@@ -615,7 +615,7 @@ The following questions were resolved during implementation:
 ### Code Files
 
 ```
-src/app/core/persistence/operation-log/
+src/app/op-log/
 ├── operation.types.ts                   # HybridManifest, SnapshotReference types
 ├── store/
 │   └── operation-log-manifest.service.ts    # Manifest management

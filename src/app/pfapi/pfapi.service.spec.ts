@@ -7,8 +7,8 @@ import { DataInitStateService } from '../core/data-init/data-init-state.service'
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 import { ImexViewService } from '../imex/imex-meta/imex-view.service';
 import { PfapiStoreDelegateService } from './pfapi-store-delegate.service';
-import { OperationLogStoreService } from '../core/persistence/operation-log/store/operation-log-store.service';
-import { VectorClockService } from '../core/persistence/operation-log/sync/vector-clock.service';
+import { OperationLogStoreService } from '../op-log/store/operation-log-store.service';
+import { VectorClockService } from '../op-log/sync/vector-clock.service';
 import { loadAllData } from '../root-store/meta/load-all-data.action';
 import { AppDataCompleteNew, CROSS_MODEL_VERSION } from './pfapi-config';
 import { of, Observable, BehaviorSubject } from 'rxjs';

@@ -12,7 +12,7 @@ import {
 } from '../simple-counter.model';
 import { EMPTY_SIMPLE_COUNTER, DEFAULT_SIMPLE_COUNTERS } from '../simple-counter.const';
 import { AppDataCompleteLegacy } from '../../../imex/sync/sync.model';
-import { OpType } from '../../../core/persistence/operation-log/operation.types';
+import { OpType } from '../../../op-log/core/operation.types';
 
 const createCounter = (
   id: string,

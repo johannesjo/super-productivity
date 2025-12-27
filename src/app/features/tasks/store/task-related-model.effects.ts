@@ -12,7 +12,7 @@ import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.act
 import { Store } from '@ngrx/store';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
-import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 
 @Injectable()

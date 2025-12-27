@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { EncryptionPasswordChangeService } from './encryption-password-change.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../pfapi/pfapi-store-delegate.service';
-import { OperationEncryptionService } from '../../core/persistence/operation-log/sync/operation-encryption.service';
-import { VectorClockService } from '../../core/persistence/operation-log/sync/vector-clock.service';
-import { CLIENT_ID_PROVIDER } from '../../core/persistence/operation-log/client-id.provider';
+import { OperationEncryptionService } from '../../op-log/sync/operation-encryption.service';
+import { VectorClockService } from '../../op-log/sync/vector-clock.service';
+import { CLIENT_ID_PROVIDER } from '../../op-log/util/client-id.provider';
 import { SyncProviderId } from '../../pfapi/api/pfapi.const';
 
 describe('EncryptionPasswordChangeService', () => {

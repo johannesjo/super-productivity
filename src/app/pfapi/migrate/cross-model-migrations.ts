@@ -19,7 +19,7 @@ import { crossModelMigration4_5 } from './cross-model-4_5';
  * ⚠️ DO NOT ADD NEW MIGRATIONS HERE ⚠️
  *
  * For all new schema changes, use the Operation Log's `SchemaMigrationService`
- * located in `src/app/core/persistence/operation-log/schema-migration.service.ts`.
+ * located in `src/app/op-log/store/schema-migration.service.ts`.
  */
 export const CROSS_MODEL_MIGRATIONS: CrossModelMigrations = {
   2: crossModelMigration2,

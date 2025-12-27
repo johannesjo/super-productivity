@@ -17,7 +17,7 @@ import { selectCurrentTask, selectCurrentTaskId } from '../../tasks/store/task.s
 import { combineLatest } from 'rxjs';
 import { FocusModeMode, TimerState } from '../../focus-mode/focus-mode.model';
 import { DroidLog } from '../../../core/log';
-import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 
 @Injectable()
 export class AndroidFocusModeEffects {
