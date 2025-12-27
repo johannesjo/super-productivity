@@ -15,9 +15,11 @@ import { isToday } from '../../../util/is-today.util';
 import {
   ActionHandlerMap,
   addTaskToPlannerDay,
+  filterOutTodayTag,
   getProject,
   getProjectOrUndefined,
   getTag,
+  hasInvalidTodayTag,
   removeTaskFromPlannerDays,
   removeTasksFromList,
   updateProject,
@@ -285,7 +287,7 @@ const handlePlanForDay = (
   const todayTag = getTag(updatedState, TODAY_TAG.id);
   const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
   const currentTagIds = currentTask?.tagIds || [];
-  const hasTaskTodayTag = currentTagIds.includes(TODAY_TAG.id);
+  const hasTaskTodayTag = hasInvalidTodayTag(currentTagIds);
 
   if (isForToday) {
     // Adding to today - update TODAY_TAG.taskIds for ordering
@@ -306,7 +308,7 @@ const handlePlanForDay = (
 
     // Ensure TODAY_TAG is NOT in task.tagIds (cleanup if present from legacy data)
     if (hasTaskTodayTag) {
-      additionalChanges.tagIds = currentTagIds.filter((id) => id !== TODAY_TAG.id);
+      additionalChanges.tagIds = filterOutTodayTag(currentTagIds);
     }
 
     // Remove from planner days if present
@@ -325,7 +327,7 @@ const handlePlanForDay = (
 
     // Ensure TODAY_TAG is NOT in task.tagIds (cleanup if present from legacy data)
     if (hasTaskTodayTag) {
-      additionalChanges.tagIds = currentTagIds.filter((id) => id !== TODAY_TAG.id);
+      additionalChanges.tagIds = filterOutTodayTag(currentTagIds);
     }
 
     // Add to planner for the target day

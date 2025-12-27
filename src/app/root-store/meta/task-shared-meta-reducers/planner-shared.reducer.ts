@@ -5,7 +5,13 @@ import { Task } from '../../../features/tasks/task.model';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
-import { ActionHandlerMap, getTag, updateTags } from './task-shared-helpers';
+import {
+  ActionHandlerMap,
+  filterOutTodayTag,
+  getTag,
+  hasInvalidTodayTag,
+  updateTags,
+} from './task-shared-helpers';
 import {
   TASK_FEATURE_NAME,
   taskAdapter,
@@ -86,7 +92,7 @@ const handleTransferTask = (
   // Get current task's tagIds from the updated state
   const currentTask = state[TASK_FEATURE_NAME].entities[task.id] as Task;
   const currentTagIds = currentTask?.tagIds || [];
-  const hasTaskTodayTag = currentTagIds.includes(TODAY_TAG.id);
+  const hasTaskTodayTag = hasInvalidTodayTag(currentTagIds);
 
   if (prevDay === today && newDay !== today) {
     // Moving away from today - update both tag.taskIds and task.tagIds (board-style pattern)
@@ -106,7 +112,7 @@ const handleTransferTask = (
         [TASK_FEATURE_NAME]: taskAdapter.updateOne(
           {
             id: task.id,
-            changes: { tagIds: currentTagIds.filter((id) => id !== TODAY_TAG.id) },
+            changes: { tagIds: filterOutTodayTag(currentTagIds) },
           },
           state[TASK_FEATURE_NAME],
         ),
@@ -142,7 +148,7 @@ const handleTransferTask = (
         [TASK_FEATURE_NAME]: taskAdapter.updateOne(
           {
             id: task.id,
-            changes: { tagIds: currentTagIds.filter((id) => id !== TODAY_TAG.id) },
+            changes: { tagIds: filterOutTodayTag(currentTagIds) },
           },
           state[TASK_FEATURE_NAME],
         ),
@@ -165,7 +171,7 @@ const handlePlanTaskForDay = (
   const todayTag = getTag(state, TODAY_TAG.id);
   const currentTask = state[TASK_FEATURE_NAME].entities[task.id] as Task;
   const currentTagIds = currentTask?.tagIds || [];
-  const hasTaskTodayTag = currentTagIds.includes(TODAY_TAG.id);
+  const hasTaskTodayTag = hasInvalidTodayTag(currentTagIds);
 
   if (day === todayStr) {
     // Adding to today - update TODAY_TAG.taskIds for ordering
@@ -193,7 +199,7 @@ const handlePlanTaskForDay = (
         [TASK_FEATURE_NAME]: taskAdapter.updateOne(
           {
             id: task.id,
-            changes: { tagIds: currentTagIds.filter((id) => id !== TODAY_TAG.id) },
+            changes: { tagIds: filterOutTodayTag(currentTagIds) },
           },
           state[TASK_FEATURE_NAME],
         ),
@@ -220,7 +226,7 @@ const handlePlanTaskForDay = (
         [TASK_FEATURE_NAME]: taskAdapter.updateOne(
           {
             id: task.id,
-            changes: { tagIds: currentTagIds.filter((id) => id !== TODAY_TAG.id) },
+            changes: { tagIds: filterOutTodayTag(currentTagIds) },
           },
           state[TASK_FEATURE_NAME],
         ),

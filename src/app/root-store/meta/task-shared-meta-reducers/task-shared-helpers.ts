@@ -10,6 +10,7 @@ import {
 import { TAG_FEATURE_NAME, tagAdapter } from '../../../features/tag/store/tag.reducer';
 import { plannerFeatureKey } from '../../../features/planner/store/planner.reducer';
 import { unique } from '../../../util/unique';
+import { TODAY_TAG } from '../../../features/tag/tag.const';
 
 // =============================================================================
 // TYPES
@@ -230,3 +231,30 @@ export const addTaskToPlannerDay = (
     },
   };
 };
+
+// =============================================================================
+// TODAY_TAG HELPERS
+// =============================================================================
+
+/**
+ * Removes TODAY_TAG from a task's tagIds if present.
+ *
+ * TODAY_TAG is a virtual tag where membership is determined by task.dueDay,
+ * not by task.tagIds. This helper cleans up legacy data and ensures the
+ * invariant that TODAY_TAG should NEVER be in task.tagIds.
+ *
+ * See: docs/ai/today-tag-architecture.md
+ *
+ * @param tagIds Current task tagIds
+ * @returns Updated tagIds with TODAY_TAG removed, or original if not present
+ */
+export const filterOutTodayTag = (tagIds: string[]): string[] =>
+  tagIds.filter((id) => id !== TODAY_TAG.id);
+
+/**
+ * Checks if a task has TODAY_TAG in its tagIds (legacy/incorrect data).
+ * @param tagIds Current task tagIds
+ * @returns true if TODAY_TAG is incorrectly present
+ */
+export const hasInvalidTodayTag = (tagIds: string[]): boolean =>
+  tagIds.includes(TODAY_TAG.id);
