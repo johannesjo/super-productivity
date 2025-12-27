@@ -1161,6 +1161,7 @@
           "L_ACCESS_TOKEN": "Access Token",
           "ACCESS_TOKEN_DESCRIPTION": "Paste the token you copied from the server login page",
           "L_ENABLE_E2E_ENCRYPTION": "Enable end-to-end encryption",
+          "E2E_ENCRYPTION_DESCRIPTION": "Will be slower, but more secure",
           "ENCRYPTION_WARNING": "WARNING: If you forget your encryption password, your data cannot be recovered. This password is separate from your login password. You must use the same password on all devices.",
           "COST_WARNING": "⚠️ Please note that this service is free for now, but will likely cost money in the future.",
           "L_CHANGE_ENCRYPTION_PASSWORD": "Change Encryption Password",

@@ -255,6 +255,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           className: 'e2e-isEncryptionEnabled',
           templateOptions: {
             label: T.F.SYNC.FORM.SUPER_SYNC.L_ENABLE_E2E_ENCRYPTION,
+            description: T.F.SYNC.FORM.SUPER_SYNC.E2E_ENCRYPTION_DESCRIPTION,
           },
         },
         {
