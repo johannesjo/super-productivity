@@ -412,13 +412,13 @@ flowchart TB
 2. **Efficiency**: Snapshot endpoint is designed for large payloads and stores state directly
 3. **Server-Side Handling**: Server creates a synthetic operation record for audit purposes
 
-## 2c. Late-Joiner Replay with UUIDv7 Timestamp Filter ✅ IMPLEMENTED
+## 2c. SYNC_IMPORT Filtering with Clean Slate Semantics ✅ IMPLEMENTED
 
-When a client receives a SYNC_IMPORT (full state from another client), it must replay any local synced operations created **after** the import (by UUIDv7 timestamp). This ensures local work isn't lost when receiving a full state snapshot.
+When a SYNC_IMPORT or BACKUP_IMPORT operation is received, it represents an explicit user action to restore **all clients** to a specific point in time. Operations created without knowledge of the import are filtered out using vector clock comparison.
 
-**Implementation Status:** Complete. See `OperationLogSyncService._replayLocalSyncedOpsAfterImport()`.
+**Implementation Status:** Complete. See `SyncImportFilterService.filterOpsInvalidatedBySyncImport()`.
 
-### The Late-Joiner Problem
+### The Problem: Stale Operations After Import
 
 ```mermaid
 sequenceDiagram
@@ -428,100 +428,118 @@ sequenceDiagram
 
     Note over A,B: Both start synced
 
-    A->>S: Upload Op1 (task created)
-    A->>S: Upload Op2 (task updated)
+    A->>A: Create Op1, Op2 (offline)
 
-    Note over B: Client B is offline
+    Note over B: Client B does SYNC_IMPORT<br/>(restores from backup)
 
-    B->>B: Make local changes (Op3, Op4)
-    B->>S: Upload Op3, Op4
+    B->>S: Upload SYNC_IMPORT
 
-    Note over B: Client B comes online, receives SYNC_IMPORT from A
+    Note over A: Client A comes online
 
-    S->>B: SYNC_IMPORT (A's full state)
+    A->>S: Upload Op1, Op2
+    A->>A: Download SYNC_IMPORT
 
-    Note over B: Problem: Op3, Op4 were already synced!<br/>If we just apply SYNC_IMPORT, we lose B's work
+    Note over A: Problem: Op1, Op2 reference<br/>entities that were WIPED by import
 ```
 
-### The Solution: UUIDv7 Timestamp Filter
+### The Solution: Clean Slate Semantics
 
-Before replaying local synced ops after a SYNC_IMPORT, we filter out ops that were created **before** the SYNC_IMPORT (by comparing UUIDv7 IDs, which embed timestamps). Ops created before the import are already captured in the imported snapshot.
+SYNC_IMPORT/BACKUP_IMPORT are explicit user actions to restore to a specific state. **ALL operations without knowledge of the import are dropped** - this ensures a true "restore to point in time" semantic.
+
+We use **vector clock comparison** (not UUIDv7 timestamps) because vector clocks track **causality** ("did the client know about the import?") rather than wall-clock time (which can be affected by clock drift).
 
 ```mermaid
 flowchart TD
-    subgraph Input["SYNC_IMPORT Received"]
-        SI["SYNC_IMPORT<br/>id: 019abc... (T=1702900000)"]
+    subgraph Input["Remote Operations Received"]
+        Ops["Op1, Op2, SYNC_IMPORT, Op3, Op4"]
     end
 
-    subgraph LocalOps["Local Synced Operations"]
-        Op1["Op1: id=019aa...<br/>T=1702890000 → BEFORE"]
-        Op2["Op2: id=019ab...<br/>T=1702895000 → BEFORE"]
-        Op3["Op3: id=019abd...<br/>T=1702905000 → AFTER"]
-        Op4["Op4: id=019abe...<br/>T=1702910000 → AFTER"]
+    subgraph Filter["SyncImportFilterService"]
+        FindImport["Find latest SYNC_IMPORT<br/>(in batch or local store)"]
+        Compare["Compare each op's vector clock<br/>against import's vector clock"]
     end
 
-    subgraph Filter["UUIDv7 Timestamp Comparison"]
-        Check["Compare each op.id<br/>with SYNC_IMPORT.id"]
+    subgraph Results["Vector Clock Comparison"]
+        GT["GREATER_THAN<br/>Op created AFTER seeing import"]
+        EQ["EQUAL<br/>Same causal history"]
+        LT["LESS_THAN<br/>Op dominated by import"]
+        CC["CONCURRENT<br/>Op created WITHOUT<br/>knowledge of import"]
     end
 
-    subgraph Result["Ops to Replay"]
-        Replay["Only Op3 and Op4<br/>created after import"]
+    subgraph Outcome["Outcome"]
+        Keep["✅ KEEP"]
+        Drop["❌ DROP"]
     end
 
-    SI --> Check
-    LocalOps --> Check
-    Check --> |"op.id < import.id"| Skip["Skip - created before import"]
-    Check --> |"op.id >= import.id"| Replay
+    Input --> FindImport
+    FindImport --> Compare
+    Compare --> GT
+    Compare --> EQ
+    Compare --> LT
+    Compare --> CC
 
-    style Op1 fill:#ffcdd2,stroke:#c62828
-    style Op2 fill:#ffcdd2,stroke:#c62828
-    style Op3 fill:#c8e6c9,stroke:#2e7d32
-    style Op4 fill:#c8e6c9,stroke:#2e7d32
-    style Skip fill:#ffebee,stroke:#c62828
-    style Replay fill:#e8f5e9,stroke:#2e7d32
+    GT --> Keep
+    EQ --> Keep
+    LT --> Drop
+    CC --> Drop
+
+    style GT fill:#c8e6c9,stroke:#2e7d32
+    style EQ fill:#c8e6c9,stroke:#2e7d32
+    style LT fill:#ffcdd2,stroke:#c62828
+    style CC fill:#ffcdd2,stroke:#c62828
+    style Keep fill:#e8f5e9,stroke:#2e7d32
+    style Drop fill:#ffebee,stroke:#c62828
 ```
 
-### UUIDv7 Comparison Results
+### Vector Clock Comparison Results
 
-| Comparison           | Meaning                          | Action                                |
-| -------------------- | -------------------------------- | ------------------------------------- |
-| `op.id < import.id`  | Op created before SYNC_IMPORT    | Skip (state already captured)         |
-| `op.id >= import.id` | Op created at same time or after | Replay (newer than or equal snapshot) |
+| Comparison     | Meaning                                | Action                     |
+| -------------- | -------------------------------------- | -------------------------- |
+| `GREATER_THAN` | Op created after seeing import         | ✅ Keep (has knowledge)    |
+| `EQUAL`        | Same causal history as import          | ✅ Keep                    |
+| `LESS_THAN`    | Op dominated by import                 | ❌ Drop (already captured) |
+| `CONCURRENT`   | Op created without knowledge of import | ❌ Drop (clean slate)      |
 
 ### Implementation Details
 
 ```typescript
-// In OperationLogSyncService._replayLocalSyncedOpsAfterImport()
-const localSyncedOps = allEntries.filter((entry) => {
-  // Must be created by this client
-  if (entry.op.clientId !== clientId) return false;
-  // Must be synced (accepted by server)
-  if (!entry.syncedAt) return false;
-  // Must NOT be a full-state op itself
-  if (entry.op.opType === OpType.SyncImport || entry.op.opType === OpType.BackupImport)
-    return false;
-
-  // Must be created AFTER the SYNC_IMPORT (by UUIDv7 timestamp)
-  // NOTE: We use UUIDv7 comparison instead of vector clock comparison
-  // because imports with isForceConflict=true create a fresh vector clock
-  // with a new client ID, breaking vector clock causality detection.
-  if (entry.op.id < syncImportOp.id) {
-    return false; // Skip - created before SYNC_IMPORT
+// In SyncImportFilterService.filterOpsInvalidatedBySyncImport()
+for (const op of ops) {
+  // Full state import operations themselves are always valid
+  if (op.opType === OpType.SyncImport || op.opType === OpType.BackupImport) {
+    validOps.push(op);
+    continue;
   }
-  return true;
-});
+
+  // Use VECTOR CLOCK comparison to determine causality
+  // Vector clocks track "did this client know about the import?"
+  // rather than wall-clock time, making them immune to clock drift.
+  const comparison = compareVectorClocks(op.vectorClock, latestImport.vectorClock);
+
+  if (
+    comparison === VectorClockComparison.GREATER_THAN ||
+    comparison === VectorClockComparison.EQUAL
+  ) {
+    // Op was created by a client that had knowledge of the import
+    validOps.push(op);
+  } else {
+    // CONCURRENT or LESS_THAN: Op was created without knowledge of import
+    // Filter it to ensure clean slate semantics
+    invalidatedOps.push(op);
+  }
+}
 ```
 
 **Key Points:**
 
-- Only filters local ops (created by this client)
-- Only considers synced ops (accepted by server)
-- Uses **UUIDv7 ID comparison** (not vector clocks) to determine temporal order
-- Ops with ID < import ID are skipped (created before import)
+- Uses **vector clock comparison** (not UUIDv7 timestamps) for causality tracking
+- CONCURRENT ops are dropped even from "unknown" clients
+- Import can be in current batch OR from previous sync cycle (checks both)
+- This is the correct behavior: import is an explicit user action to restore state
 
-**Why UUIDv7 Instead of Vector Clocks?**
+**Why Vector Clocks Instead of UUIDv7?**
 
-SYNC_IMPORT operations with `isForceConflict=true` create a fresh vector clock with a new client ID. This breaks vector clock causality detection because the import's clock has no causal relationship with existing local operations. UUIDv7 IDs embed millisecond-precision timestamps, providing reliable "created before/after" comparison that works regardless of vector clock semantics.
+Vector clocks track **causality** - whether a client "knew about" the import when it created an operation. UUIDv7 timestamps only track wall-clock time, which is unreliable due to clock drift between devices. An operation created 5 seconds after an import (by timestamp) may still reference entities that no longer exist if the client hadn't seen the import yet.
 
 ---
 
