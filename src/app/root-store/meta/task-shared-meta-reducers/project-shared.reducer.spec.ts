@@ -16,6 +16,23 @@ import {
   expectStateUpdate,
   expectTagUpdates,
 } from './test-utils';
+import { TASK_REPEAT_CFG_FEATURE_NAME } from '../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+  TaskRepeatCfgState,
+} from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
+
+const createMockTaskRepeatCfg = (
+  overrides: Partial<TaskRepeatCfg> = {},
+): TaskRepeatCfg => ({
+  ...DEFAULT_TASK_REPEAT_CFG,
+  id: 'cfg1',
+  title: 'Repeat Config',
+  projectId: null,
+  tagIds: [],
+  ...overrides,
+});
 
 describe('projectSharedMetaReducer', () => {
   let mockReducer: jasmine.Spy;
@@ -510,6 +527,144 @@ describe('projectSharedMetaReducer', () => {
 
       // No time tracking state set
       testState[TIME_TRACKING_FEATURE_KEY] = undefined;
+
+      const mockProject = createMockProject({ id: 'project1' });
+      const action = TaskSharedActions.deleteProject({
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
+        allTaskIds: ['task1'],
+      });
+
+      // Should not throw
+      expect(() => metaReducer(testState, action)).not.toThrow();
+    });
+
+    it('should delete orphaned task repeat configs when project is deleted', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []) as any;
+
+      // Add task repeat configs: one linked to the project (no tags = orphaned), one not
+      testState[TASK_REPEAT_CFG_FEATURE_NAME] = {
+        ids: ['cfg-project', 'cfg-other'],
+        entities: {
+          'cfg-project': createMockTaskRepeatCfg({
+            id: 'cfg-project',
+            projectId: 'project1',
+            tagIds: [],
+          }),
+          'cfg-other': createMockTaskRepeatCfg({
+            id: 'cfg-other',
+            projectId: 'other-project',
+            tagIds: [],
+          }),
+        },
+      } as TaskRepeatCfgState;
+
+      const mockProject = createMockProject({ id: 'project1' });
+      const action = TaskSharedActions.deleteProject({
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
+        allTaskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+      const passedState = mockReducer.calls.mostRecent().args[0];
+
+      // cfg-project should be deleted (orphaned: no tags, project deleted)
+      expect(
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-project'],
+      ).toBeUndefined();
+      // cfg-other should remain
+      expect(
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-other'],
+      ).toBeDefined();
+    });
+
+    it('should clear projectId but keep task repeat config if it has tags', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []) as any;
+
+      // Add task repeat config linked to project AND has tags
+      testState[TASK_REPEAT_CFG_FEATURE_NAME] = {
+        ids: ['cfg-with-tags'],
+        entities: {
+          'cfg-with-tags': createMockTaskRepeatCfg({
+            id: 'cfg-with-tags',
+            projectId: 'project1',
+            tagIds: ['tag1', 'tag2'],
+          }),
+        },
+      } as TaskRepeatCfgState;
+
+      const mockProject = createMockProject({ id: 'project1' });
+      const action = TaskSharedActions.deleteProject({
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
+        allTaskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+      const passedState = mockReducer.calls.mostRecent().args[0];
+
+      // cfg-with-tags should exist but with projectId = null
+      const cfg = passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-with-tags'];
+      expect(cfg).toBeDefined();
+      expect(cfg.projectId).toBeNull();
+      expect(cfg.tagIds).toEqual(['tag1', 'tag2']);
+    });
+
+    it('should handle mixed task repeat configs during project deletion', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []) as any;
+
+      // Mix of configs: orphaned, has tags, unrelated
+      testState[TASK_REPEAT_CFG_FEATURE_NAME] = {
+        ids: ['cfg-orphan', 'cfg-with-tags', 'cfg-unrelated'],
+        entities: {
+          'cfg-orphan': createMockTaskRepeatCfg({
+            id: 'cfg-orphan',
+            projectId: 'project1',
+            tagIds: [],
+          }),
+          'cfg-with-tags': createMockTaskRepeatCfg({
+            id: 'cfg-with-tags',
+            projectId: 'project1',
+            tagIds: ['tag1'],
+          }),
+          'cfg-unrelated': createMockTaskRepeatCfg({
+            id: 'cfg-unrelated',
+            projectId: 'other-project',
+            tagIds: ['tag2'],
+          }),
+        },
+      } as TaskRepeatCfgState;
+
+      const mockProject = createMockProject({ id: 'project1' });
+      const action = TaskSharedActions.deleteProject({
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
+        allTaskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+      const passedState = mockReducer.calls.mostRecent().args[0];
+
+      // cfg-orphan should be deleted
+      expect(
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-orphan'],
+      ).toBeUndefined();
+      // cfg-with-tags should exist with null projectId
+      expect(
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-with-tags'].projectId,
+      ).toBeNull();
+      // cfg-unrelated should remain unchanged
+      expect(
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-unrelated'].projectId,
+      ).toBe('other-project');
+    });
+
+    it('should handle deleting project without task repeat cfg state', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []) as any;
+
+      // No task repeat cfg state set
+      testState[TASK_REPEAT_CFG_FEATURE_NAME] = undefined;
 
       const mockProject = createMockProject({ id: 'project1' });
       const action = TaskSharedActions.deleteProject({
