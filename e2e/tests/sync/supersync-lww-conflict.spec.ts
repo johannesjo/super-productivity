@@ -1088,9 +1088,7 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
    * 9. Final sync round
    * 10. Verify task has correct tags on both clients
    */
-  // TODO: Re-enable when dialog dismissal is fixed - has environmental issues
-  // with mat-dialog intercepting clicks during test setup
-  base.skip(
+  base(
     'LWW: Concurrent tag changes on same task resolves correctly',
     async ({ browser, baseURL }, testInfo) => {
       testInfo.setTimeout(150000);
@@ -1099,8 +1097,9 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
       let clientA: SimulatedE2EClient | null = null;
       let clientB: SimulatedE2EClient | null = null;
 
-      // Helper to add a tag to task via context menu
-      const addTagToTask = async (
+      // Helper to toggle a tag on task via context menu "Toggle Tags" submenu
+      // Used for both adding and removing tags (it's a toggle)
+      const toggleTagOnTask = async (
         page: any,
         taskName: string,
         tagName: string,
@@ -1112,24 +1111,20 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
         await taskLocator.click({ button: 'right' });
         await page.waitForTimeout(300);
 
-        // Find and click "Add tag" option
+        // Find and click "Toggle Tags" submenu trigger (has label icon and class e2e-edit-tags-btn)
         const menuPanel = page.locator('.mat-mdc-menu-panel').first();
         await menuPanel.waitFor({ state: 'visible', timeout: 5000 });
 
-        const addTagBtn = menuPanel
-          .locator('button[mat-menu-item]')
-          .filter({ has: page.locator('mat-icon:has-text("label")') })
-          .filter({ hasText: /tag/i })
-          .first();
-        await addTagBtn.waitFor({ state: 'visible', timeout: 5000 });
-        await addTagBtn.click();
+        const toggleTagsBtn = menuPanel.locator('.e2e-edit-tags-btn').first();
+        await toggleTagsBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await toggleTagsBtn.click();
 
         // Wait for tag submenu
         await page.waitForTimeout(300);
         const tagMenu = page.locator('.mat-mdc-menu-panel').last();
         await tagMenu.waitFor({ state: 'visible', timeout: 5000 });
 
-        // Select the target tag
+        // Select the target tag to toggle
         const tagOption = tagMenu
           .locator('button[mat-menu-item]')
           .filter({ hasText: tagName })
@@ -1146,50 +1141,26 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
         }
       };
 
-      // Helper to remove a tag from task via context menu
-      const removeTagFromTask = async (
-        page: any,
-        taskName: string,
-        tagName: string,
+      // Helper to add task with tag using short syntax and handle creation dialog
+      const addTaskWithTag = async (
+        client: SimulatedE2EClient,
+        taskTitle: string,
       ): Promise<void> => {
-        const taskLocator = page.locator(`task:has-text("${taskName}")`).first();
-        await taskLocator.waitFor({ state: 'visible' });
+        // Use skipClose=true because tag creation dialog may block backdrop click
+        await client.workView.addTask(taskTitle, true);
 
-        // Right-click to open context menu
-        await taskLocator.click({ button: 'right' });
-        await page.waitForTimeout(300);
-
-        // Find and click "Remove from tag" option
-        const menuPanel = page.locator('.mat-mdc-menu-panel').first();
-        await menuPanel.waitFor({ state: 'visible', timeout: 5000 });
-
-        const removeTagBtn = menuPanel
-          .locator('button[mat-menu-item]')
-          .filter({ has: page.locator('mat-icon:has-text("label_off")') })
-          .first();
-        await removeTagBtn.waitFor({ state: 'visible', timeout: 5000 });
-        await removeTagBtn.click();
-
-        // Wait for tag submenu
-        await page.waitForTimeout(300);
-        const tagMenu = page.locator('.mat-mdc-menu-panel').last();
-        await tagMenu.waitFor({ state: 'visible', timeout: 5000 });
-
-        // Select the target tag
-        const tagOption = tagMenu
-          .locator('button[mat-menu-item]')
-          .filter({ hasText: tagName })
-          .first();
-        await tagOption.waitFor({ state: 'visible', timeout: 3000 });
-        await tagOption.click();
-
-        await page.waitForTimeout(500);
-
-        // Dismiss any remaining overlays
-        for (let j = 0; j < 3; j++) {
-          await page.keyboard.press('Escape');
-          await page.waitForTimeout(100);
+        // Handle tag creation confirmation dialog if it appears
+        const confirmBtn = client.page.locator('button[e2e="confirmBtn"]');
+        if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await confirmBtn.click();
         }
+
+        // Close the add task bar manually if it's still open
+        if (await client.workView.backdrop.isVisible().catch(() => false)) {
+          await client.workView.backdrop.click();
+        }
+
+        await client.page.waitForTimeout(300);
       };
 
       try {
@@ -1208,30 +1179,12 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
         const tagCName = `TagC-${testRunId}`;
         const taskName = `TagTask-${testRunId}`;
 
-        // Dismiss any dialogs that might be open
-        const dismissDialog = async (page: any): Promise<void> => {
-          // Try clicking any close button in a dialog
-          const closeBtn = page.locator('mat-dialog-actions button').first();
-          if (await closeBtn.isVisible().catch(() => false)) {
-            await closeBtn.click().catch(() => {});
-            await page.waitForTimeout(300);
-          }
-          // Press Escape multiple times as fallback
-          for (let i = 0; i < 5; i++) {
-            await page.keyboard.press('Escape');
-            await page.waitForTimeout(100);
-          }
-        };
-        await dismissDialog(clientA.page);
-        await dismissDialog(clientB.page);
-        await clientA.page.waitForTimeout(500);
-
         // 1. Client A creates task with TagA and another with TagB using short syntax
-        await clientA.workView.addTask(`${taskName} #${tagAName}`);
+        await addTaskWithTag(clientA, `${taskName} #${tagAName}`);
         await waitForTask(clientA.page, taskName);
         console.log('[TagConflict] Created task with TagA on Client A');
 
-        await clientA.workView.addTask(`TempTask-${testRunId} #${tagBName}`);
+        await addTaskWithTag(clientA, `TempTask-${testRunId} #${tagBName}`);
         await clientA.page.waitForTimeout(500);
         console.log('[TagConflict] Created TagB on Client A');
 
@@ -1243,46 +1196,32 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
         await clientB.sync.syncAndWait();
         console.log('[TagConflict] Client B synced');
 
-        // Verify Client B has the task - look in TagA
-        const tagABtnB = clientB.page
-          .locator('.nav-sidenav')
-          .locator('nav-item')
-          .filter({ hasText: tagAName })
-          .first();
-        await tagABtnB.waitFor({ state: 'visible', timeout: 10000 });
-        await tagABtnB.click();
-        await clientB.page.waitForLoadState('networkidle');
+        // Verify Client B has the task in Today view (tasks are created with TODAY tag)
         await waitForTask(clientB.page, taskName);
-        console.log('[TagConflict] Client B has the task');
+        console.log('[TagConflict] Client B has the task in Today view');
 
         // 4. Client B creates TagC using short syntax
-        await clientB.workView.addTask(`TempTask2-${testRunId} #${tagCName}`);
+        await addTaskWithTag(clientB, `TempTask2-${testRunId} #${tagCName}`);
         await clientB.page.waitForTimeout(500);
         console.log('[TagConflict] Created TagC on Client B');
 
-        // 5. Client A: Navigate to TagA and modify the task
-        const tagABtnA = clientA.page
-          .locator('.nav-sidenav')
-          .locator('nav-item')
-          .filter({ hasText: tagAName })
-          .first();
-        await tagABtnA.waitFor({ state: 'visible', timeout: 10000 });
-        await tagABtnA.click();
-        await clientA.page.waitForLoadState('networkidle');
+        // 5. Verify task is visible in both clients' Today view before tag operations
         await waitForTask(clientA.page, taskName);
+        await waitForTask(clientB.page, taskName);
+        console.log('[TagConflict] Task visible in Today view on both clients');
 
-        // Client A: Remove TagA and add TagB to task
-        await removeTagFromTask(clientA.page, taskName, tagAName);
-        console.log('[TagConflict] Client A removed TagA from task');
-        await addTagToTask(clientA.page, taskName, tagBName);
-        console.log('[TagConflict] Client A added TagB to task');
+        // Client A: Toggle TagA off and toggle TagB on (in Today view)
+        await toggleTagOnTask(clientA.page, taskName, tagAName);
+        console.log('[TagConflict] Client A toggled TagA off');
+        await toggleTagOnTask(clientA.page, taskName, tagBName);
+        console.log('[TagConflict] Client A toggled TagB on');
 
-        // 6. Client B: Remove TagA and add TagC to task (concurrent with step 5)
+        // 6. Client B: Toggle TagA off and toggle TagC on (concurrent with step 5)
         await clientB.page.waitForTimeout(1000); // Ensure later timestamp
-        await removeTagFromTask(clientB.page, taskName, tagAName);
-        console.log('[TagConflict] Client B removed TagA from task');
-        await addTagToTask(clientB.page, taskName, tagCName);
-        console.log('[TagConflict] Client B added TagC to task');
+        await toggleTagOnTask(clientB.page, taskName, tagAName);
+        console.log('[TagConflict] Client B toggled TagA off');
+        await toggleTagOnTask(clientB.page, taskName, tagCName);
+        console.log('[TagConflict] Client B toggled TagC on');
 
         // 7. Client A syncs first
         await clientA.sync.syncAndWait();
@@ -1329,7 +1268,12 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
         console.log('[TagConflict] Client B sees task in TagC');
 
         // Verify task is NOT in TagA on both clients (both removed it)
-        await tagABtnA.click();
+        const tagABtnAVerify = clientA.page
+          .locator('.nav-sidenav')
+          .locator('nav-item')
+          .filter({ hasText: tagAName })
+          .first();
+        await tagABtnAVerify.click();
         await clientA.page.waitForLoadState('networkidle');
         await clientA.page.waitForTimeout(1000);
 
