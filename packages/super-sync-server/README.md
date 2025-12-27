@@ -6,7 +6,7 @@ A custom, high-performance synchronization server for Super Productivity.
 
 > **Related Documentation:**
 >
-> - [Operation Log Architecture](/src/app/core/persistence/operation-log/docs/operation-log-architecture.md) - Client-side architecture
+> - [Operation Log Architecture](/docs/op-log/operation-log-architecture.md) - Client-side architecture
 > - [Server Architecture Diagrams](./sync-server-architecture-diagrams.md) - Visual diagrams
 
 ## Architecture

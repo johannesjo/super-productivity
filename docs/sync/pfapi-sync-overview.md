@@ -151,6 +151,6 @@ The PFAPI sync system is **stable but not receiving new features**. New sync fea
 
 ## Related Documentation
 
-- [Vector Clocks](../../../docs/sync/vector-clocks.md) - Conflict detection implementation
+- [Vector Clocks](./vector-clocks.md) - Conflict detection implementation
 - [Operation Log Architecture](/docs/op-log/operation-log-architecture.md) - Newer operation-based sync
 - [Hybrid Manifest Architecture](/docs/op-log/hybrid-manifest-architecture.md) - File-based Operation Log sync
