@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Operation } from '../operation.types';
 import { convertOpToAction } from '../operation-converter.util';
@@ -10,6 +10,7 @@ import {
 import { HydrationStateService } from './hydration-state.service';
 import { remoteArchiveDataApplied } from '../../../../features/time-tracking/store/archive.actions';
 import { bulkApplyOperations } from '../bulk-hydration.action';
+import { OperationLogEffects } from '../operation-log.effects';
 
 /**
  * Result of applying operations to the NgRx store.
@@ -69,6 +70,9 @@ export class OperationApplierService {
   private store = inject(Store);
   private archiveOperationHandler = inject(ArchiveOperationHandler);
   private hydrationState = inject(HydrationStateService);
+  // Use Injector to avoid circular dependency: OperationLogEffects depends on services
+  // that may depend on this service indirectly through the Store.
+  private injector = inject(Injector);
 
   /**
    * Apply operations to the NgRx store using bulk dispatch.
@@ -131,6 +135,11 @@ export class OperationApplierService {
       }
     } finally {
       this.hydrationState.endApplyingRemoteOps();
+
+      // Process any user actions that were buffered during sync replay.
+      // These get fresh vector clocks that include the newly-applied remote ops.
+      // Do this before cooldown starts so deferred actions are persisted promptly.
+      await this.injector.get(OperationLogEffects).processDeferredActions();
 
       // Start post-sync cooldown to suppress selector-based effects
       // that might fire due to freshly-synced state changes.

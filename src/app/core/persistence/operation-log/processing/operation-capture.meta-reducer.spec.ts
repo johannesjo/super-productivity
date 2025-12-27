@@ -4,6 +4,9 @@ import {
   setOperationCaptureService,
   getOperationCaptureService,
   setIsApplyingRemoteOps,
+  bufferDeferredAction,
+  getDeferredActions,
+  clearDeferredActions,
 } from './operation-capture.meta-reducer';
 import { OperationCaptureService } from './operation-capture.service';
 import { Action } from '@ngrx/store';
@@ -58,13 +61,15 @@ describe('operationCaptureMetaReducer', () => {
     mockReducer = jasmine.createSpy('reducer').and.returnValue(mockModifiedState);
 
     setOperationCaptureService(mockCaptureService);
-    // Reset sync state to prevent test pollution
+    // Reset sync state and deferred buffer to prevent test pollution
     setIsApplyingRemoteOps(false);
+    clearDeferredActions();
   });
 
   afterEach(() => {
-    // Ensure sync state is reset after each test
+    // Ensure sync state and deferred buffer are reset after each test
     setIsApplyingRemoteOps(false);
+    clearDeferredActions();
   });
 
   describe('setOperationCaptureService', () => {
@@ -211,57 +216,159 @@ describe('operationCaptureMetaReducer', () => {
     });
   });
 
-  describe('sync blocking (user interaction during sync)', () => {
-    /**
-     * BUG FIX TEST: When remote operations are being applied (sync replay),
-     * user interactions should NOT create new local operations.
-     *
-     * The problem:
-     * 1. User syncs after 12 hours, many operations need to be applied
-     * 2. User interacts with the app during sync (creates a task, clicks done, etc.)
-     * 3. These interactions are captured as local operations
-     * 4. The local operations have stale vector clocks (not including remote ops being applied)
-     * 5. When uploaded, these ops conflict with recently-downloaded remote ops
-     *
-     * The fix:
-     * Check HydrationStateService.isApplyingRemoteOps() in the meta-reducer
-     * and skip capturing when it returns true.
-     */
-    it('should NOT capture local operations when applying remote operations (sync in progress)', () => {
-      // This requires mocking the HydrationStateService
-      // The meta-reducer needs to check isApplyingRemoteOps() before capturing
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      const action = createMockAction();
+  describe('deferred action buffer', () => {
+    describe('bufferDeferredAction', () => {
+      it('should add action to the buffer', () => {
+        const action = createMockAction();
 
-      // Simulate sync in progress by setting hydration state
-      // The fix should add a check for this in the meta-reducer
-      setIsApplyingRemoteOps(true);
+        bufferDeferredAction(action);
 
-      wrappedReducer(mockState, action);
+        const buffered = getDeferredActions();
+        expect(buffered).toEqual([action]);
+      });
 
-      // Should NOT capture - sync is in progress
-      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+      it('should preserve order when buffering multiple actions', () => {
+        const action1 = createMockAction({ type: '[TaskShared] Add Task' });
+        const action2 = createMockAction({ type: '[TaskShared] Update Task' });
+        const action3 = createMockAction({ type: '[TaskShared] Delete Task' });
 
-      // Reset for other tests
-      setIsApplyingRemoteOps(false);
+        bufferDeferredAction(action1);
+        bufferDeferredAction(action2);
+        bufferDeferredAction(action3);
+
+        const buffered = getDeferredActions();
+        expect(buffered).toEqual([action1, action2, action3]);
+      });
     });
 
-    it('should resume capturing local operations after sync completes', () => {
+    describe('getDeferredActions', () => {
+      it('should return empty array when buffer is empty', () => {
+        const buffered = getDeferredActions();
+        expect(buffered).toEqual([]);
+      });
+
+      it('should clear buffer after returning actions', () => {
+        const action = createMockAction();
+        bufferDeferredAction(action);
+
+        const firstCall = getDeferredActions();
+        const secondCall = getDeferredActions();
+
+        expect(firstCall).toEqual([action]);
+        expect(secondCall).toEqual([]);
+      });
+    });
+
+    describe('clearDeferredActions', () => {
+      it('should empty the buffer', () => {
+        const action = createMockAction();
+        bufferDeferredAction(action);
+
+        clearDeferredActions();
+
+        expect(getDeferredActions()).toEqual([]);
+      });
+    });
+  });
+
+  describe('sync buffering (user interaction during sync)', () => {
+    /**
+     * When remote operations are being applied (sync replay), user interactions
+     * should be BUFFERED (not immediately captured) so they can be processed
+     * after sync completes with fresh vector clocks.
+     *
+     * The problem being solved:
+     * 1. User syncs after 12 hours, many operations need to be applied
+     * 2. User interacts with the app during sync (creates a task, clicks done, etc.)
+     * 3. If captured immediately, these operations have stale vector clocks
+     * 4. When uploaded, these ops conflict with recently-downloaded remote ops
+     *
+     * The solution:
+     * Buffer actions during sync and process them after sync completes.
+     * This gives them fresh vector clocks that include the remote operations.
+     */
+    it('should BUFFER (not capture) local operations when applying remote operations', () => {
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       const action = createMockAction();
 
-      // Start sync
+      // Simulate sync in progress
       setIsApplyingRemoteOps(true);
 
       wrappedReducer(mockState, action);
+
+      // Should NOT immediately capture - sync is in progress
       expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
 
-      // End sync
-      setIsApplyingRemoteOps(false);
+      // But action should be buffered for later processing
+      const buffered = getDeferredActions();
+      expect(buffered).toEqual([action]);
+    });
 
-      // Now actions should be captured again
-      wrappedReducer(mockState, action);
-      expect(mockCaptureService.enqueue).toHaveBeenCalled();
+    it('should buffer multiple actions during sync', () => {
+      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
+      const action1 = createMockAction({ type: '[TaskShared] Add Task' });
+      const action2 = createMockAction({ type: '[TaskShared] Update Task' });
+
+      setIsApplyingRemoteOps(true);
+
+      wrappedReducer(mockState, action1);
+      wrappedReducer(mockState, action2);
+
+      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+
+      const buffered = getDeferredActions();
+      expect(buffered).toEqual([action1, action2]);
+    });
+
+    it('should resume immediate capturing after sync completes', () => {
+      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
+      const syncAction = createMockAction({ type: '[TaskShared] Add Task' });
+      const normalAction = createMockAction({ type: '[TaskShared] Update Task' });
+
+      // During sync - action is buffered
+      setIsApplyingRemoteOps(true);
+      wrappedReducer(mockState, syncAction);
+      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+
+      // After sync - actions are captured immediately
+      setIsApplyingRemoteOps(false);
+      wrappedReducer(mockState, normalAction);
+      expect(mockCaptureService.enqueue).toHaveBeenCalledWith(normalAction);
+
+      // Verify the sync action was buffered
+      const buffered = getDeferredActions();
+      expect(buffered).toEqual([syncAction]);
+    });
+
+    it('should NOT buffer remote actions (they are already from sync)', () => {
+      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
+      const remoteAction = createMockAction({
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK' as EntityType,
+          entityId: 'task-1',
+          opType: OpType.Update,
+          isRemote: true,
+        },
+      });
+
+      setIsApplyingRemoteOps(true);
+      wrappedReducer(mockState, remoteAction);
+
+      // Should not be buffered - remote actions are from sync, not user
+      expect(getDeferredActions()).toEqual([]);
+    });
+
+    it('should still allow reducer to process state changes during sync', () => {
+      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
+      const action = createMockAction();
+
+      setIsApplyingRemoteOps(true);
+      const result = wrappedReducer(mockState, action);
+
+      // State should still be modified even though operation is buffered
+      expect(mockReducer).toHaveBeenCalledWith(mockState, action);
+      expect(result).toBe(mockModifiedState);
     });
   });
 });

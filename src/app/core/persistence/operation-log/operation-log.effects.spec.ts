@@ -14,6 +14,10 @@ import { HydrationStateService } from './processing/hydration-state.service';
 import { OpType } from './operation.types';
 import { PersistentAction } from './persistent-action.interface';
 import { COMPACTION_THRESHOLD } from './operation-log.const';
+import {
+  bufferDeferredAction,
+  clearDeferredActions,
+} from './processing/operation-capture.meta-reducer';
 
 describe('OperationLogEffects', () => {
   let effects: OperationLogEffects;
@@ -115,6 +119,14 @@ describe('OperationLogEffects', () => {
     });
 
     effects = TestBed.inject(OperationLogEffects);
+
+    // Clear deferred actions buffer to ensure test isolation
+    clearDeferredActions();
+  });
+
+  afterEach(() => {
+    // Clean up deferred actions buffer after each test
+    clearDeferredActions();
   });
 
   describe('persistOperation$', () => {
@@ -640,6 +652,111 @@ describe('OperationLogEffects', () => {
           }, 20);
         },
       });
+    });
+  });
+
+  describe('processDeferredActions', () => {
+    /**
+     * Tests for processing deferred actions that were buffered during sync.
+     * When users interact with the app during sync replay, those actions
+     * are buffered by the meta-reducer. This method processes them after
+     * sync completes with fresh vector clocks.
+     */
+
+    it('should do nothing when no deferred actions are buffered', async () => {
+      await effects.processDeferredActions();
+
+      expect(mockOpLogStore.appendWithVectorClockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should process a single deferred action', async () => {
+      const action = createPersistentAction('[Task] Deferred Action');
+      bufferDeferredAction(action);
+
+      await effects.processDeferredActions();
+
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          actionType: '[Task] Deferred Action',
+          clientId: 'testClient',
+        }),
+        'local',
+      );
+    });
+
+    it('should process multiple deferred actions in order', async () => {
+      const action1 = createPersistentAction('[Task] First Action');
+      const action2 = createPersistentAction('[Task] Second Action');
+      const action3 = createPersistentAction('[Task] Third Action');
+
+      bufferDeferredAction(action1);
+      bufferDeferredAction(action2);
+      bufferDeferredAction(action3);
+
+      await effects.processDeferredActions();
+
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(3);
+
+      const calls = mockOpLogStore.appendWithVectorClockUpdate.calls.all();
+      expect(calls[0].args[0].actionType).toBe('[Task] First Action');
+      expect(calls[1].args[0].actionType).toBe('[Task] Second Action');
+      expect(calls[2].args[0].actionType).toBe('[Task] Third Action');
+    });
+
+    it('should clear buffer after processing', async () => {
+      const action = createPersistentAction('[Task] Deferred Action');
+      bufferDeferredAction(action);
+
+      await effects.processDeferredActions();
+
+      // Call again - should not process anything (buffer cleared)
+      mockOpLogStore.appendWithVectorClockUpdate.calls.reset();
+      await effects.processDeferredActions();
+
+      expect(mockOpLogStore.appendWithVectorClockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should continue processing remaining actions when one fails', async () => {
+      const action1 = createPersistentAction('[Task] Will Fail');
+      const action2 = createPersistentAction('[Task] Will Succeed');
+
+      bufferDeferredAction(action1);
+      bufferDeferredAction(action2);
+
+      // First action fails, second succeeds
+      let callCount = 0;
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.reject(new Error('First action failed'));
+        }
+        return Promise.resolve(1);
+      });
+
+      // Should not throw - errors are logged but don't stop processing
+      await expectAsync(effects.processDeferredActions()).toBeResolved();
+
+      // Both actions should have been attempted
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(2);
+    });
+
+    it('should use fresh vector clock for deferred actions', async () => {
+      // Set up vector clock to return a specific value
+      mockVectorClockService.getCurrentVectorClock.and.returnValue(
+        Promise.resolve({ testClient: 100, otherClient: 50 }),
+      );
+
+      const action = createPersistentAction('[Task] Deferred Action');
+      bufferDeferredAction(action);
+
+      await effects.processDeferredActions();
+
+      const appendCall = mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
+      const operation = appendCall.args[0];
+
+      // Vector clock should be incremented from current value (includes remote ops)
+      expect(operation.vectorClock['testClient']).toBe(101);
+      expect(operation.vectorClock['otherClient']).toBe(50);
     });
   });
 });

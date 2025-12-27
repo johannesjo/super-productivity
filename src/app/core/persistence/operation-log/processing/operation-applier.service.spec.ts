@@ -7,12 +7,14 @@ import { HydrationStateService } from './hydration-state.service';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { remoteArchiveDataApplied } from '../../../../features/time-tracking/store/archive.actions';
 import { bulkApplyOperations } from '../bulk-hydration.action';
+import { OperationLogEffects } from '../operation-log.effects';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
   let mockStore: jasmine.SpyObj<Store>;
   let mockArchiveOperationHandler: jasmine.SpyObj<ArchiveOperationHandler>;
   let mockHydrationState: jasmine.SpyObj<HydrationStateService>;
+  let mockOperationLogEffects: jasmine.SpyObj<OperationLogEffects>;
 
   const createMockOperation = (
     id: string,
@@ -43,8 +45,12 @@ describe('OperationApplierService', () => {
       'endApplyingRemoteOps',
       'startPostSyncCooldown',
     ]);
+    mockOperationLogEffects = jasmine.createSpyObj('OperationLogEffects', [
+      'processDeferredActions',
+    ]);
 
     mockArchiveOperationHandler.handleOperation.and.returnValue(Promise.resolve());
+    mockOperationLogEffects.processDeferredActions.and.returnValue(Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
@@ -52,6 +58,7 @@ describe('OperationApplierService', () => {
         { provide: Store, useValue: mockStore },
         { provide: ArchiveOperationHandler, useValue: mockArchiveOperationHandler },
         { provide: HydrationStateService, useValue: mockHydrationState },
+        { provide: OperationLogEffects, useValue: mockOperationLogEffects },
       ],
     });
 
@@ -519,6 +526,87 @@ describe('OperationApplierService', () => {
 
       // Archive handler called for all 3 ops
       expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('deferred actions processing', () => {
+    /**
+     * When users interact with the app during sync (creating tasks, etc.),
+     * those actions are buffered by the meta-reducer. After sync completes,
+     * we need to process those buffered actions so they get persisted with
+     * fresh vector clocks.
+     */
+    it('should call processDeferredActions after sync completes', async () => {
+      const op = createMockOperation('op-1');
+
+      await service.applyOperations([op]);
+
+      expect(mockOperationLogEffects.processDeferredActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call processDeferredActions after endApplyingRemoteOps', async () => {
+      const callOrder: string[] = [];
+
+      mockHydrationState.endApplyingRemoteOps.and.callFake(() => {
+        callOrder.push('endApplyingRemoteOps');
+      });
+
+      mockOperationLogEffects.processDeferredActions.and.callFake(() => {
+        callOrder.push('processDeferredActions');
+        return Promise.resolve();
+      });
+
+      const op = createMockOperation('op-1');
+      await service.applyOperations([op]);
+
+      expect(callOrder).toEqual(['endApplyingRemoteOps', 'processDeferredActions']);
+    });
+
+    it('should call processDeferredActions before startPostSyncCooldown', async () => {
+      const callOrder: string[] = [];
+
+      mockOperationLogEffects.processDeferredActions.and.callFake(() => {
+        callOrder.push('processDeferredActions');
+        return Promise.resolve();
+      });
+
+      mockHydrationState.startPostSyncCooldown.and.callFake(() => {
+        callOrder.push('startPostSyncCooldown');
+      });
+
+      const op = createMockOperation('op-1');
+      await service.applyOperations([op]);
+
+      expect(callOrder).toEqual(['processDeferredActions', 'startPostSyncCooldown']);
+    });
+
+    it('should call processDeferredActions even when archive handling fails', async () => {
+      const op = createMockOperation('op-1');
+      const archiveError = new Error('Archive write failed');
+
+      mockArchiveOperationHandler.handleOperation.and.rejectWith(archiveError);
+
+      await service.applyOperations([op]);
+
+      // Even though archive failed, deferred actions should still be processed
+      expect(mockOperationLogEffects.processDeferredActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call processDeferredActions for local hydration', async () => {
+      const op = createMockOperation('op-1');
+
+      await service.applyOperations([op], { isLocalHydration: true });
+
+      // Even for local hydration, deferred actions should be processed
+      // (though there usually won't be any during startup)
+      expect(mockOperationLogEffects.processDeferredActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call processDeferredActions when no operations are applied', async () => {
+      await service.applyOperations([]);
+
+      // No operations means we don't enter the try block at all
+      expect(mockOperationLogEffects.processDeferredActions).not.toHaveBeenCalled();
     });
   });
 });

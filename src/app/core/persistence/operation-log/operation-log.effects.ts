@@ -24,6 +24,7 @@ import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 import { OperationCaptureService } from './processing/operation-capture.service';
 import { ImmediateUploadService } from './sync/immediate-upload.service';
 import { HydrationStateService } from './processing/hydration-state.service';
+import { getDeferredActions } from './processing/operation-capture.meta-reducer';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -325,5 +326,47 @@ export class OperationLogEffects {
         },
       });
     });
+  }
+
+  /**
+   * Processes actions that were buffered during sync replay.
+   *
+   * When users interact with the app during sync (creating tasks, marking done, etc.),
+   * the meta-reducer buffers these actions instead of capturing them immediately.
+   * This is because immediate capture would create operations with stale vector clocks
+   * that don't include the newly-applied remote operations.
+   *
+   * After sync completes, this method is called to:
+   * 1. Retrieve buffered actions from the meta-reducer
+   * 2. Create operations for each action with fresh vector clocks
+   * 3. Persist them to IndexedDB
+   *
+   * The fresh vector clocks include all remote operations just applied, preventing
+   * immediate conflicts when these operations are uploaded.
+   *
+   * Called by OperationApplierService after sync operations are applied.
+   */
+  async processDeferredActions(): Promise<void> {
+    const deferredActions = getDeferredActions();
+    if (deferredActions.length === 0) {
+      return;
+    }
+
+    OpLog.normal(
+      `OperationLogEffects: Processing ${deferredActions.length} deferred action(s) from sync window`,
+    );
+
+    for (const action of deferredActions) {
+      try {
+        await this.writeOperation(action);
+      } catch (e) {
+        // Log error but continue processing remaining actions.
+        // Each action is independent - failure of one shouldn't block others.
+        OpLog.err('OperationLogEffects: Failed to process deferred action', {
+          actionType: action.type,
+          error: e,
+        });
+      }
+    }
   }
 }

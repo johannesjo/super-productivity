@@ -54,17 +54,26 @@ const MAX_CONSECUTIVE_FAILURES_BEFORE_WARNING = 3;
 
 /**
  * Flag indicating whether remote operations are currently being applied.
- * When true, local user interactions should NOT be captured as new operations.
+ * When true, local user interactions are buffered instead of immediately captured.
  *
  * This prevents the "slow device cascade" problem where:
  * 1. User syncs after a long time, many operations need to be applied
  * 2. User interacts with the app during sync (creates a task, clicks done, etc.)
- * 3. These interactions are captured as local operations with stale vector clocks
- * 4. When uploaded, these ops conflict with the remote ops just downloaded
+ * 3. These interactions would be captured with stale vector clocks
+ * 4. When uploaded, these ops would conflict with the remote ops just downloaded
+ *
+ * Instead, actions are buffered and processed after sync completes with fresh
+ * vector clocks that include the newly-applied remote operations.
  *
  * Set by HydrationStateService via setIsApplyingRemoteOps().
  */
 let isApplyingRemoteOps = false;
+
+/**
+ * Buffer for actions that arrive during sync replay.
+ * These are processed after sync completes to ensure they get fresh vector clocks.
+ */
+let deferredActions: PersistentAction[] = [];
 
 /**
  * Sets the service instance for the meta-reducer.
@@ -101,6 +110,32 @@ export const getIsApplyingRemoteOps = (): boolean => {
 };
 
 /**
+ * Buffers an action for processing after sync completes.
+ * Called by the meta-reducer when a persistent action arrives during sync.
+ */
+export const bufferDeferredAction = (action: PersistentAction): void => {
+  deferredActions.push(action);
+};
+
+/**
+ * Gets and clears the deferred actions buffer.
+ * Called after sync completes to process buffered actions.
+ */
+export const getDeferredActions = (): PersistentAction[] => {
+  const actions = deferredActions;
+  deferredActions = [];
+  return actions;
+};
+
+/**
+ * Clears the deferred actions buffer without processing.
+ * Used for cleanup during testing or error recovery.
+ */
+export const clearDeferredActions = (): void => {
+  deferredActions = [];
+};
+
+/**
  * Meta-reducer that enqueues actions for operation logging.
  *
  * PERFORMANCE OPTIMIZATION: This meta-reducer no longer performs state diffing.
@@ -123,15 +158,16 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
     const afterState = reducer(state, action);
 
     // Only process persistent, non-remote actions
-    // Also skip if remote operations are being applied (prevents stale vector clocks)
     if (isPersistentAction(action) && !(action as PersistentAction).meta.isRemote) {
-      // Skip capturing if remote operations are being applied (sync in progress)
-      // This prevents user interactions during sync from creating operations with stale clocks
+      // Buffer actions during sync replay - they'll be processed after sync completes
+      // with fresh vector clocks that include the newly-applied remote operations.
+      // This prevents stale operations that would immediately conflict.
       if (isApplyingRemoteOps) {
         OpLog.verbose(
-          'operationCaptureMetaReducer: Skipping capture during remote op application',
+          'operationCaptureMetaReducer: Buffering action for post-sync processing',
           { actionType: action.type },
         );
+        bufferDeferredAction(action as PersistentAction);
         return afterState;
       }
 
