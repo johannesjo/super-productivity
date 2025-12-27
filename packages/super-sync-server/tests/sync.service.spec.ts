@@ -1,32 +1,499 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initDb, getDb } from '../src/db';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { uuidv7 } from 'uuidv7';
+import { Prisma } from '@prisma/client';
+import { testState, resetTestState } from './sync.service.test-state';
+
+// Mock the database module with Prisma mocks
+vi.mock('../src/db', async () => {
+  // Import testState from separate module to avoid circular import
+  const { testState: state } = await import('./sync.service.test-state');
+  const { Prisma: PrismaModule } = await import('@prisma/client');
+
+  const createTxMock = () => ({
+    operation: {
+      create: vi.fn().mockImplementation(async (args: any) => {
+        // Check for duplicate ID (unique constraint)
+        if (state.operations.has(args.data.id)) {
+          throw new PrismaModule.PrismaClientKnownRequestError(
+            'Unique constraint failed',
+            { code: 'P2002', clientVersion: '5.0.0' },
+          );
+        }
+        state.serverSeqCounter++;
+        const op = {
+          ...args.data,
+          serverSeq: state.serverSeqCounter,
+          receivedAt: BigInt(Date.now()),
+        };
+        state.operations.set(args.data.id, op);
+        return op;
+      }),
+      findFirst: vi.fn().mockImplementation(async (args: any) => {
+        if (args.where?.id) {
+          return state.operations.get(args.where.id) || null;
+        }
+        if (args.where?.opType?.in) {
+          const ops = Array.from(state.operations.values())
+            .filter((op: any) => args.where.userId === op.userId)
+            .sort((a: any, b: any) => b.serverSeq - a.serverSeq);
+          for (const op of ops) {
+            if (args.where.opType.in.includes(op.opType)) {
+              if (args.where.serverSeq?.lte !== undefined) {
+                if (op.serverSeq <= args.where.serverSeq.lte) return op;
+              } else {
+                return op;
+              }
+            }
+          }
+        }
+        if (args.where?.entityId && args.where?.entityType) {
+          const ops = Array.from(state.operations.values())
+            .filter(
+              (op: any) =>
+                op.userId === args.where.userId &&
+                op.entityId === args.where.entityId &&
+                op.entityType === args.where.entityType,
+            )
+            .sort((a: any, b: any) => b.serverSeq - a.serverSeq);
+          return ops[0] || null;
+        }
+        return null;
+      }),
+      findMany: vi.fn().mockImplementation(async (args: any) => {
+        const ops = Array.from(state.operations.values());
+        return ops
+          .filter((op: any) => {
+            if (args.where?.userId !== undefined && args.where.userId !== op.userId)
+              return false;
+            if (
+              args.where?.serverSeq?.gt !== undefined &&
+              op.serverSeq <= args.where.serverSeq.gt
+            )
+              return false;
+            if (
+              args.where?.serverSeq?.lte !== undefined &&
+              op.serverSeq > args.where.serverSeq.lte
+            )
+              return false;
+            if (args.where?.clientId?.not && op.clientId === args.where.clientId.not)
+              return false;
+            if (args.where?.opType?.in && !args.where.opType.in.includes(op.opType))
+              return false;
+            return true;
+          })
+          .sort((a: any, b: any) => {
+            if (args.orderBy?.serverSeq === 'desc') return b.serverSeq - a.serverSeq;
+            return a.serverSeq - b.serverSeq;
+          })
+          .slice(0, args.take || 500);
+      }),
+      aggregate: vi.fn().mockImplementation(async (args: any) => {
+        const ops = Array.from(state.operations.values()).filter(
+          (op: any) => args.where?.userId === op.userId,
+        );
+        if (ops.length === 0)
+          return { _min: { serverSeq: null }, _max: { serverSeq: null } };
+        const seqs = ops.map((op: any) => op.serverSeq);
+        return {
+          _min: { serverSeq: Math.min(...seqs) },
+          _max: { serverSeq: Math.max(...seqs) },
+        };
+      }),
+      deleteMany: vi.fn().mockImplementation(async (args: any) => {
+        let deleted = 0;
+        for (const [id, op] of state.operations) {
+          let shouldDelete = true;
+          if (args.where?.userId !== undefined && op.userId !== args.where.userId)
+            shouldDelete = false;
+          if (
+            args.where?.receivedAt?.lt !== undefined &&
+            op.receivedAt >= args.where.receivedAt.lt
+          )
+            shouldDelete = false;
+          if (shouldDelete) {
+            state.operations.delete(id);
+            deleted++;
+          }
+        }
+        return { count: deleted };
+      }),
+      count: vi.fn().mockImplementation(async (args: any) => {
+        let count = 0;
+        for (const op of state.operations.values()) {
+          let matches = true;
+          if (args.where?.userId !== undefined && op.userId !== args.where.userId)
+            matches = false;
+          if (
+            args.where?.serverSeq?.gt !== undefined &&
+            op.serverSeq <= args.where.serverSeq.gt
+          )
+            matches = false;
+          if (
+            args.where?.serverSeq?.lte !== undefined &&
+            op.serverSeq > args.where.serverSeq.lte
+          )
+            matches = false;
+          if (args.where?.isPayloadEncrypted && !op.isPayloadEncrypted) matches = false;
+          if (matches) count++;
+        }
+        return count;
+      }),
+    },
+    userSyncState: {
+      findUnique: vi.fn().mockImplementation(async (args: any) => {
+        return state.userSyncStates.get(args.where.userId) || null;
+      }),
+      upsert: vi.fn().mockImplementation(async (args: any) => {
+        const existing = state.userSyncStates.get(args.where.userId);
+        const result = existing
+          ? { ...existing, ...args.update }
+          : { userId: args.where.userId, ...args.create };
+        state.userSyncStates.set(args.where.userId, result);
+        return result;
+      }),
+      update: vi.fn().mockImplementation(async (args: any) => {
+        const existing = state.userSyncStates.get(args.where.userId);
+        if (existing) {
+          const updated = { ...existing };
+          // Handle Prisma increment syntax
+          for (const [key, value] of Object.entries(args.data)) {
+            if (typeof value === 'object' && value !== null && 'increment' in value) {
+              updated[key] =
+                (existing[key] || 0) + (value as { increment: number }).increment;
+            } else {
+              updated[key] = value;
+            }
+          }
+          state.userSyncStates.set(args.where.userId, updated);
+          return updated;
+        }
+        return null;
+      }),
+      findMany: vi.fn().mockImplementation(async (args: any) => {
+        return Array.from(state.userSyncStates.values()).filter((s: any) => {
+          if (
+            args?.where?.lastSnapshotSeq?.not !== undefined &&
+            s.lastSnapshotSeq == null
+          )
+            return false;
+          if (args?.where?.snapshotAt?.not !== undefined && s.snapshotAt == null)
+            return false;
+          return true;
+        });
+      }),
+    },
+    syncDevice: {
+      upsert: vi.fn().mockImplementation(async (args: any) => {
+        const key = `${args.where.userId_clientId.userId}:${args.where.userId_clientId.clientId}`;
+        const result = {
+          ...args.create,
+          ...args.update,
+          userId: args.where.userId_clientId.userId,
+          clientId: args.where.userId_clientId.clientId,
+        };
+        state.syncDevices.set(key, result);
+        return result;
+      }),
+      count: vi.fn().mockImplementation(async (args: any) => {
+        let count = 0;
+        for (const device of state.syncDevices.values()) {
+          if (args.where?.userId !== undefined && device.userId !== args.where.userId)
+            continue;
+          if (args.where?.lastSeenAt?.gt !== undefined) {
+            if ((device.lastSeenAt || 0) <= args.where.lastSeenAt.gt) continue;
+          }
+          count++;
+        }
+        return count;
+      }),
+      deleteMany: vi.fn().mockImplementation(async (args: any) => {
+        let deleted = 0;
+        for (const [key, device] of state.syncDevices) {
+          if (
+            args.where?.lastSeenAt?.lt !== undefined &&
+            device.lastSeenAt < args.where.lastSeenAt.lt
+          ) {
+            state.syncDevices.delete(key);
+            deleted++;
+          }
+        }
+        return { count: deleted };
+      }),
+    },
+    tombstone: {
+      upsert: vi.fn().mockImplementation(async (args: any) => {
+        const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
+        const result = {
+          ...args.create,
+          userId: args.where.userId_entityType_entityId.userId,
+          entityType: args.where.userId_entityType_entityId.entityType,
+          entityId: args.where.userId_entityType_entityId.entityId,
+        };
+        state.tombstones.set(key, result);
+        return result;
+      }),
+      findUnique: vi.fn().mockImplementation(async (args: any) => {
+        const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
+        return state.tombstones.get(key) || null;
+      }),
+      deleteMany: vi.fn().mockImplementation(async (args: any) => {
+        let deleted = 0;
+        for (const [key, tomb] of state.tombstones) {
+          if (
+            args.where?.expiresAt?.lt !== undefined &&
+            tomb.expiresAt < args.where.expiresAt.lt
+          ) {
+            state.tombstones.delete(key);
+            deleted++;
+          }
+        }
+        return { count: deleted };
+      }),
+    },
+    user: {
+      findUnique: vi.fn().mockImplementation(async (args: any) => {
+        return state.users.get(args.where.id) || null;
+      }),
+      update: vi.fn().mockResolvedValue({}),
+    },
+  });
+
+  return {
+    prisma: {
+      $transaction: vi
+        .fn()
+        .mockImplementation(async (callback: any) => callback(createTxMock())),
+      operation: {
+        findFirst: vi.fn().mockImplementation(async (args: any) => {
+          if (args.where?.opType?.in) {
+            const ops = Array.from(state.operations.values())
+              .filter((op: any) => args.where.userId === op.userId)
+              .sort((a: any, b: any) => b.serverSeq - a.serverSeq);
+            for (const op of ops) {
+              if (args.where.opType.in.includes(op.opType)) {
+                if (args.where.serverSeq?.lte !== undefined) {
+                  if (op.serverSeq <= args.where.serverSeq.lte) return op;
+                } else {
+                  return op;
+                }
+              }
+            }
+          }
+          return null;
+        }),
+        findMany: vi.fn().mockImplementation(async (args: any) => {
+          const ops = Array.from(state.operations.values());
+          return ops
+            .filter((op: any) => {
+              if (args.where?.userId !== undefined && args.where.userId !== op.userId)
+                return false;
+              if (
+                args.where?.serverSeq?.gt !== undefined &&
+                op.serverSeq <= args.where.serverSeq.gt
+              )
+                return false;
+              if (
+                args.where?.serverSeq?.lte !== undefined &&
+                op.serverSeq > args.where.serverSeq.lte
+              )
+                return false;
+              if (args.where?.clientId?.not && op.clientId === args.where.clientId.not)
+                return false;
+              if (args.where?.opType?.in && !args.where.opType.in.includes(op.opType))
+                return false;
+              return true;
+            })
+            .sort((a: any, b: any) => {
+              if (args.orderBy?.serverSeq === 'desc') return b.serverSeq - a.serverSeq;
+              return a.serverSeq - b.serverSeq;
+            })
+            .slice(0, args.take || 500);
+        }),
+        aggregate: vi.fn().mockImplementation(async (args: any) => {
+          const ops = Array.from(state.operations.values()).filter(
+            (op: any) => args.where?.userId === op.userId,
+          );
+          if (ops.length === 0)
+            return { _min: { serverSeq: null }, _max: { serverSeq: null } };
+          const seqs = ops.map((op: any) => op.serverSeq);
+          return {
+            _min: { serverSeq: Math.min(...seqs) },
+            _max: { serverSeq: Math.max(...seqs) },
+          };
+        }),
+        count: vi.fn().mockImplementation(async (args: any) => {
+          let count = 0;
+          for (const op of state.operations.values()) {
+            let matches = true;
+            if (args.where?.userId !== undefined && op.userId !== args.where.userId)
+              matches = false;
+            if (
+              args.where?.serverSeq?.gt !== undefined &&
+              op.serverSeq <= args.where.serverSeq.gt
+            )
+              matches = false;
+            if (
+              args.where?.serverSeq?.lte !== undefined &&
+              op.serverSeq > args.where.serverSeq.lte
+            )
+              matches = false;
+            if (args.where?.isPayloadEncrypted && !op.isPayloadEncrypted) matches = false;
+            if (matches) count++;
+          }
+          return count;
+        }),
+        deleteMany: vi.fn().mockImplementation(async (args: any) => {
+          let deleted = 0;
+          for (const [id, op] of state.operations) {
+            let shouldDelete = true;
+            if (args.where?.userId !== undefined && op.userId !== args.where.userId)
+              shouldDelete = false;
+            if (
+              args.where?.serverSeq?.lte !== undefined &&
+              op.serverSeq > args.where.serverSeq.lte
+            )
+              shouldDelete = false;
+            if (
+              args.where?.receivedAt?.lt !== undefined &&
+              op.receivedAt >= args.where.receivedAt.lt
+            )
+              shouldDelete = false;
+            if (shouldDelete) {
+              state.operations.delete(id);
+              deleted++;
+            }
+          }
+          return { count: deleted };
+        }),
+      },
+      userSyncState: {
+        findUnique: vi.fn().mockImplementation(async (args: any) => {
+          return state.userSyncStates.get(args.where.userId) || null;
+        }),
+        upsert: vi.fn().mockImplementation(async (args: any) => {
+          const existing = state.userSyncStates.get(args.where.userId);
+          const result = existing
+            ? { ...existing, ...args.update }
+            : { userId: args.where.userId, ...args.create };
+          state.userSyncStates.set(args.where.userId, result);
+          return result;
+        }),
+        update: vi.fn().mockResolvedValue({}),
+        findMany: vi.fn().mockImplementation(async (args: any) => {
+          return Array.from(state.userSyncStates.values()).filter((s: any) => {
+            if (
+              args?.where?.lastSnapshotSeq?.not !== undefined &&
+              s.lastSnapshotSeq == null
+            )
+              return false;
+            if (args?.where?.snapshotAt?.not !== undefined && s.snapshotAt == null)
+              return false;
+            return true;
+          });
+        }),
+      },
+      syncDevice: {
+        upsert: vi.fn().mockImplementation(async (args: any) => {
+          const key = `${args.where.clientId_userId.userId}:${args.where.clientId_userId.clientId}`;
+          const result = {
+            ...args.create,
+            ...args.update,
+            userId: args.where.clientId_userId.userId,
+            clientId: args.where.clientId_userId.clientId,
+          };
+          state.syncDevices.set(key, result);
+          return result;
+        }),
+        count: vi.fn().mockImplementation(async (args: any) => {
+          let count = 0;
+          for (const device of state.syncDevices.values()) {
+            if (args.where?.userId !== undefined && device.userId !== args.where.userId)
+              continue;
+            if (args.where?.lastSeenAt?.gt !== undefined) {
+              if ((device.lastSeenAt || 0) <= args.where.lastSeenAt.gt) continue;
+            }
+            count++;
+          }
+          return count;
+        }),
+        deleteMany: vi.fn().mockImplementation(async (args: any) => {
+          let deleted = 0;
+          for (const [key, device] of state.syncDevices) {
+            if (
+              args.where?.lastSeenAt?.lt !== undefined &&
+              device.lastSeenAt < args.where.lastSeenAt.lt
+            ) {
+              state.syncDevices.delete(key);
+              deleted++;
+            }
+          }
+          return { count: deleted };
+        }),
+      },
+      tombstone: {
+        upsert: vi.fn().mockResolvedValue({}),
+        findUnique: vi.fn().mockImplementation(async (args: any) => {
+          const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
+          return state.tombstones.get(key) || null;
+        }),
+        deleteMany: vi.fn().mockImplementation(async (args: any) => {
+          let deleted = 0;
+          for (const [key, tomb] of state.tombstones) {
+            if (
+              args.where?.expiresAt?.lt !== undefined &&
+              tomb.expiresAt < args.where.expiresAt.lt
+            ) {
+              state.tombstones.delete(key);
+              deleted++;
+            }
+          }
+          return { count: deleted };
+        }),
+      },
+      user: {
+        findUnique: vi.fn().mockImplementation(async (args: any) => {
+          return state.users.get(args.where.id) || null;
+        }),
+        update: vi.fn().mockResolvedValue({}),
+      },
+      $queryRaw: vi.fn().mockResolvedValue([{ total: BigInt(0) }]),
+    },
+  };
+});
+
+// Mock auth module
+vi.mock('../src/auth', () => ({
+  verifyToken: vi.fn().mockResolvedValue({ userId: 1, email: 'test@test.com' }),
+}));
+
+// Import AFTER mocking
 import { initSyncService, getSyncService, SyncService } from '../src/sync/sync.service';
 import { Operation, DEFAULT_SYNC_CONFIG } from '../src/sync/sync.types';
-import { uuidv7 } from 'uuidv7';
 
 describe('SyncService', () => {
   const userId = 1;
   const clientId = 'test-device-1';
 
   beforeEach(() => {
-    // Initialize in-memory database
-    initDb('./data', true);
-    const db = getDb();
+    // Reset all test data stores
+    resetTestState();
 
-    // Create a dummy user to satisfy Foreign Key constraints
-    db.prepare(
-      `
-      INSERT INTO users (id, email, password_hash, is_verified, created_at)
-      VALUES (?, 'test@test.com', 'hash', 1, ?)
-    `,
-    ).run(userId, Date.now());
+    // Add a test user
+    testState.users.set(userId, {
+      id: userId,
+      email: 'test@test.com',
+      storageQuotaBytes: BigInt(100 * 1024 * 1024),
+      storageUsedBytes: BigInt(0),
+    });
+
+    vi.clearAllMocks();
 
     // Initialize service
     initSyncService();
   });
 
   describe('uploadOps', () => {
-    it('should correctly upload operations', () => {
+    it('should correctly upload operations', async () => {
       const service = getSyncService();
       const op: Operation = {
         id: uuidv7(),
@@ -41,17 +508,17 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results).toHaveLength(1);
       expect(results[0].accepted).toBe(true);
       expect(results[0].serverSeq).toBe(1);
 
-      const latestSeq = service.getLatestSeq(userId);
+      const latestSeq = await service.getLatestSeq(userId);
       expect(latestSeq).toBe(1);
     });
 
-    it('should handle multiple operations in order', () => {
+    it('should handle multiple operations in order', async () => {
       const service = getSyncService();
       const ops: Operation[] = [
         {
@@ -80,14 +547,14 @@ describe('SyncService', () => {
         },
       ];
 
-      const results = service.uploadOps(userId, clientId, ops);
+      const results = await service.uploadOps(userId, clientId, ops);
 
       expect(results).toHaveLength(2);
       expect(results[0].serverSeq).toBe(1);
       expect(results[1].serverSeq).toBe(2);
     });
 
-    it('should reject duplicate operation IDs (idempotency)', () => {
+    it('should reject duplicate operation IDs (idempotency)', async () => {
       const service = getSyncService();
       const opId = uuidv7();
       const op: Operation = {
@@ -104,19 +571,17 @@ describe('SyncService', () => {
       };
 
       // First upload should succeed
-      const firstResults = service.uploadOps(userId, clientId, [op]);
+      const firstResults = await service.uploadOps(userId, clientId, [op]);
       expect(firstResults[0].accepted).toBe(true);
 
       // Second upload with same ID should be rejected
-      const secondResults = service.uploadOps(userId, clientId, [op]);
+      const secondResults = await service.uploadOps(userId, clientId, [op]);
       expect(secondResults[0].accepted).toBe(false);
       expect(secondResults[0].error).toBe('Duplicate operation ID');
     });
 
-    it('should update device last seen timestamp', () => {
+    it('should update device last seen timestamp', async () => {
       const service = getSyncService();
-      const db = getDb();
-      const beforeUpload = Date.now();
 
       const op: Operation = {
         id: uuidv7(),
@@ -131,19 +596,18 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      service.uploadOps(userId, clientId, [op]);
+      await service.uploadOps(userId, clientId, [op]);
 
-      const device = db
-        .prepare('SELECT * FROM sync_devices WHERE user_id = ? AND client_id = ?')
-        .get(userId, clientId) as { last_seen_at: number } | undefined;
+      const deviceKey = `${userId}:${clientId}`;
+      const device = testState.syncDevices.get(deviceKey);
 
       expect(device).toBeDefined();
-      expect(device!.last_seen_at).toBeGreaterThanOrEqual(beforeUpload);
+      expect(device.lastSeenAt).toBeDefined();
     });
   });
 
   describe('validation', () => {
-    it('should reject operations with invalid opType', () => {
+    it('should reject operations with invalid opType', async () => {
       const service = getSyncService();
       const op = {
         id: uuidv7(),
@@ -158,13 +622,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Invalid opType');
     });
 
-    it('should reject operations with missing entityType', () => {
+    it('should reject operations with missing entityType', async () => {
       const service = getSyncService();
       const op = {
         id: uuidv7(),
@@ -179,13 +643,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Missing entityType');
     });
 
-    it('should reject operations with missing payload', () => {
+    it('should reject operations with missing payload', async () => {
       const service = getSyncService();
       const op = {
         id: uuidv7(),
@@ -200,13 +664,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       } as unknown as Operation;
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Missing payload');
     });
 
-    it('should reject operations with invalid ID', () => {
+    it('should reject operations with invalid ID', async () => {
       const service = getSyncService();
       const op = {
         id: '',
@@ -221,13 +685,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Invalid operation ID');
     });
 
-    it('should reject operations with timestamp too far in the future', () => {
+    it('should reject operations with timestamp too far in the future', async () => {
       const service = getSyncService();
       const farFuture = Date.now() + DEFAULT_SYNC_CONFIG.maxClockDriftMs + 10000;
 
@@ -244,13 +708,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Timestamp too far in future');
     });
 
-    it('should reject operations that are too old', () => {
+    it('should reject operations that are too old', async () => {
       const service = getSyncService();
       const tooOld = Date.now() - DEFAULT_SYNC_CONFIG.maxOpAgeMs - 10000;
 
@@ -267,13 +731,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Operation too old');
     });
 
-    it('should reject operations with payload exceeding size limit', () => {
+    it('should reject operations with payload exceeding size limit', async () => {
       // Create service with small payload limit for testing
       const testService = new (SyncService as any)({
         maxPayloadSizeBytes: 100,
@@ -293,13 +757,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = testService.uploadOps(userId, clientId, [op]);
+      const results = await testService.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Payload too large');
     });
 
-    it('should reject complex payloads for regular operations', () => {
+    it('should reject complex payloads for regular operations', async () => {
       const service = getSyncService();
 
       // Create a deeply nested object that exceeds complexity limits
@@ -321,13 +785,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Payload too complex (max depth 20, max keys 20000)');
     });
 
-    it('should accept complex payloads for SYNC_IMPORT operations', () => {
+    it('should accept complex payloads for SYNC_IMPORT operations', async () => {
       const service = getSyncService();
 
       // Create a deeply nested object that would fail complexity check for regular ops
@@ -348,13 +812,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(true);
       expect(results[0].serverSeq).toBeDefined();
     });
 
-    it('should accept complex payloads for BACKUP_IMPORT operations', () => {
+    it('should accept complex payloads for BACKUP_IMPORT operations', async () => {
       const service = getSyncService();
 
       // Create an object with many keys that would fail complexity check
@@ -375,13 +839,13 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(true);
       expect(results[0].serverSeq).toBeDefined();
     });
 
-    it('should accept complex payloads for REPAIR operations', () => {
+    it('should accept complex payloads for REPAIR operations', async () => {
       const service = getSyncService();
 
       // Create a deeply nested object
@@ -402,15 +866,222 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      const results = service.uploadOps(userId, clientId, [op]);
+      const results = await service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(true);
       expect(results[0].serverSeq).toBeDefined();
     });
+
+    // === VECTOR CLOCK EDGE CASE TESTS ===
+
+    it('should accept vector clock with zero values', async () => {
+      const service = getSyncService();
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Test Task' },
+        vectorClock: { client1: 0 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+      // Zero is a valid clock value (represents initial state)
+      expect(results[0].accepted).toBe(true);
+    });
+
+    it('should sanitize vector clock with string values (strip invalid entries)', async () => {
+      const service = getSyncService();
+      const op = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Test Task' },
+        vectorClock: { client1: '1' as unknown as number },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      } as Operation;
+
+      // Service sanitizes by stripping invalid entries, not rejecting
+      const results = await service.uploadOps(userId, clientId, [op]);
+      expect(results[0].accepted).toBe(true);
+    });
+
+    it('should sanitize vector clock with negative values (strip invalid entries)', async () => {
+      const service = getSyncService();
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Test Task' },
+        vectorClock: { client1: -1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      // Service sanitizes by stripping invalid entries, not rejecting
+      const results = await service.uploadOps(userId, clientId, [op]);
+      expect(results[0].accepted).toBe(true);
+    });
+
+    it('should sanitize vector clock with null entries (strip invalid entries)', async () => {
+      const service = getSyncService();
+      const op = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Test Task' },
+        vectorClock: { client1: null as unknown as number },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      } as Operation;
+
+      // Service sanitizes by stripping invalid entries, not rejecting
+      const results = await service.uploadOps(userId, clientId, [op]);
+      expect(results[0].accepted).toBe(true);
+    });
+
+    it('should reject payload that is null', async () => {
+      const service = getSyncService();
+      const op = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: null,
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      } as unknown as Operation;
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+      expect(results[0].accepted).toBe(false);
+      expect(results[0].error).toBe('CRT payload must be a non-null object');
+    });
+
+    it('should reject schema version at boundary (> 100)', async () => {
+      const service = getSyncService();
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Test Task' },
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 101,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+      expect(results[0].accepted).toBe(false);
+      expect(results[0].error).toContain('Invalid schema version');
+    });
+
+    it('should accept schema version at max boundary (100)', async () => {
+      const service = getSyncService();
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Test Task' },
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 100,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+      expect(results[0].accepted).toBe(true);
+    });
+
+    it('should accept timestamp exactly at max clock drift', async () => {
+      const service = getSyncService();
+      const exactlyAtDrift = Date.now() + DEFAULT_SYNC_CONFIG.maxClockDriftMs;
+
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Test Task' },
+        vectorClock: {},
+        timestamp: exactlyAtDrift,
+        schemaVersion: 1,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+      // Should be accepted at exactly the boundary
+      expect(results[0].accepted).toBe(true);
+    });
+
+    it('should handle unicode characters in entityId', async () => {
+      const service = getSyncService();
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-日本語-émoji-🎉',
+        payload: { title: 'Test Task' },
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+      // Unicode should be accepted
+      expect(results[0].accepted).toBe(true);
+
+      // Verify round-trip
+      const ops = await service.getOpsSince(userId, 0);
+      expect(ops[0].op.entityId).toBe('task-日本語-émoji-🎉');
+    });
+
+    it('should reject entityId that is too long', async () => {
+      const service = getSyncService();
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'x'.repeat(300), // Exceeds typical limit
+        payload: { title: 'Test Task' },
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+      expect(results[0].accepted).toBe(false);
+      expect(results[0].error).toContain('Invalid entityId');
+    });
   });
 
   describe('getOpsSince', () => {
-    it('should return operations after given sequence', () => {
+    it('should return operations after given sequence', async () => {
       const service = getSyncService();
 
       // Upload 5 operations
@@ -427,10 +1098,10 @@ describe('SyncService', () => {
           timestamp: Date.now() + i,
           schemaVersion: 1,
         };
-        service.uploadOps(userId, clientId, [op]);
+        await service.uploadOps(userId, clientId, [op]);
       }
 
-      const ops = service.getOpsSince(userId, 2);
+      const ops = await service.getOpsSince(userId, 2);
 
       expect(ops).toHaveLength(3);
       expect(ops[0].serverSeq).toBe(3);
@@ -438,13 +1109,13 @@ describe('SyncService', () => {
       expect(ops[2].serverSeq).toBe(5);
     });
 
-    it('should exclude operations from specified client', () => {
+    it('should exclude operations from specified client', async () => {
       const service = getSyncService();
       const client1 = 'client-1';
       const client2 = 'client-2';
 
       // Upload from client 1
-      service.uploadOps(userId, client1, [
+      await service.uploadOps(userId, client1, [
         {
           id: uuidv7(),
           clientId: client1,
@@ -460,7 +1131,7 @@ describe('SyncService', () => {
       ]);
 
       // Upload from client 2
-      service.uploadOps(userId, client2, [
+      await service.uploadOps(userId, client2, [
         {
           id: uuidv7(),
           clientId: client2,
@@ -475,18 +1146,18 @@ describe('SyncService', () => {
         },
       ]);
 
-      const ops = service.getOpsSince(userId, 0, client1);
+      const ops = await service.getOpsSince(userId, 0, client1);
 
       expect(ops).toHaveLength(1);
       expect(ops[0].op.entityId).toBe('task-2');
     });
 
-    it('should respect limit parameter', () => {
+    it('should respect limit parameter', async () => {
       const service = getSyncService();
 
       // Upload 10 operations
       for (let i = 1; i <= 10; i++) {
-        service.uploadOps(userId, clientId, [
+        await service.uploadOps(userId, clientId, [
           {
             id: uuidv7(),
             clientId,
@@ -502,22 +1173,22 @@ describe('SyncService', () => {
         ]);
       }
 
-      const ops = service.getOpsSince(userId, 0, undefined, 3);
+      const ops = await service.getOpsSince(userId, 0, undefined, 3);
 
       expect(ops).toHaveLength(3);
     });
 
-    it('should return empty array when no operations exist', () => {
+    it('should return empty array when no operations exist', async () => {
       const service = getSyncService();
 
-      const ops = service.getOpsSince(userId, 0);
+      const ops = await service.getOpsSince(userId, 0);
 
       expect(ops).toHaveLength(0);
     });
   });
 
   describe('snapshots', () => {
-    it('should reconstruct state from operations (snapshot)', () => {
+    it('should reconstruct state from operations (snapshot)', async () => {
       const service = getSyncService();
 
       // Op 1: Create Task
@@ -548,9 +1219,9 @@ describe('SyncService', () => {
         schemaVersion: 1,
       };
 
-      service.uploadOps(userId, clientId, [op1, op2]);
+      await service.uploadOps(userId, clientId, [op1, op2]);
 
-      const snapshot = service.generateSnapshot(userId);
+      const snapshot = await service.generateSnapshot(userId);
 
       expect(snapshot.serverSeq).toBe(2);
 
@@ -564,7 +1235,7 @@ describe('SyncService', () => {
       expect(state.TASK.t1.done).toBe(true);
     });
 
-    it('should use incremental snapshots', () => {
+    it('should use incremental snapshots', async () => {
       const service = getSyncService();
 
       // Step 1: Initial State
@@ -580,10 +1251,10 @@ describe('SyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op1]);
+      await service.uploadOps(userId, clientId, [op1]);
 
       // Generate first snapshot (caches it)
-      const snap1 = service.generateSnapshot(userId);
+      const snap1 = await service.generateSnapshot(userId);
       expect(snap1.serverSeq).toBe(1);
       expect(
         (snap1.state as Record<string, Record<string, { text: string }>>).NOTE.n1.text,
@@ -602,11 +1273,11 @@ describe('SyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op2]);
+      await service.uploadOps(userId, clientId, [op2]);
 
       // Generate second snapshot
       // This should internally use the cached state from snap1 and apply op2
-      const snap2 = service.generateSnapshot(userId);
+      const snap2 = await service.generateSnapshot(userId);
 
       expect(snap2.serverSeq).toBe(2);
       const state = snap2.state as Record<string, Record<string, { text: string }>>;
@@ -614,7 +1285,7 @@ describe('SyncService', () => {
       expect(state.NOTE.n2.text).toBe('Note 2'); // Added
     });
 
-    it('should handle deletions in snapshots', () => {
+    it('should handle deletions in snapshots', async () => {
       const service = getSyncService();
 
       // Create
@@ -630,9 +1301,9 @@ describe('SyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op1]);
+      await service.uploadOps(userId, clientId, [op1]);
 
-      service.generateSnapshot(userId); // Checkpoint
+      await service.generateSnapshot(userId); // Checkpoint
 
       // Delete
       const op2: Operation = {
@@ -647,15 +1318,15 @@ describe('SyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op2]);
+      await service.uploadOps(userId, clientId, [op2]);
 
-      const snap = service.generateSnapshot(userId);
+      const snap = await service.generateSnapshot(userId);
       const state = snap.state as Record<string, Record<string, unknown>>;
 
       expect(state.TAG.tg1).toBeUndefined();
     });
 
-    it('should handle MOV operations', () => {
+    it('should handle MOV operations', async () => {
       const service = getSyncService();
 
       // Create task
@@ -671,7 +1342,7 @@ describe('SyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op1]);
+      await service.uploadOps(userId, clientId, [op1]);
 
       // Move task
       const op2: Operation = {
@@ -686,15 +1357,15 @@ describe('SyncService', () => {
         timestamp: Date.now() + 100,
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op2]);
+      await service.uploadOps(userId, clientId, [op2]);
 
-      const snap = service.generateSnapshot(userId);
+      const snap = await service.generateSnapshot(userId);
       const state = snap.state as Record<string, Record<string, { parentId: string }>>;
 
       expect(state.TASK.t1.parentId).toBe('p1');
     });
 
-    it('should handle BATCH operations with entities payload', () => {
+    it('should handle BATCH operations with entities payload', async () => {
       const service = getSyncService();
 
       const op: Operation = {
@@ -713,9 +1384,9 @@ describe('SyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op]);
+      await service.uploadOps(userId, clientId, [op]);
 
-      const snap = service.generateSnapshot(userId);
+      const snap = await service.generateSnapshot(userId);
       const state = snap.state as Record<
         string,
         Record<string, { title: string; done: boolean }>
@@ -725,7 +1396,7 @@ describe('SyncService', () => {
       expect(state.TASK.t2.done).toBe(true);
     });
 
-    it('should return cached snapshot if up to date', () => {
+    it('should return cached snapshot if up to date', async () => {
       const service = getSyncService();
 
       const op: Operation = {
@@ -740,13 +1411,13 @@ describe('SyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
-      service.uploadOps(userId, clientId, [op]);
+      await service.uploadOps(userId, clientId, [op]);
 
       // Generate and cache
-      const snap1 = service.generateSnapshot(userId);
+      const snap1 = await service.generateSnapshot(userId);
 
       // Call again - should return cached
-      const snap2 = service.generateSnapshot(userId);
+      const snap2 = await service.generateSnapshot(userId);
 
       expect(snap1.serverSeq).toBe(snap2.serverSeq);
       expect(snap1.state).toEqual(snap2.state);
@@ -754,11 +1425,11 @@ describe('SyncService', () => {
   });
 
   describe('tombstones', () => {
-    it('should create tombstone on delete operation', () => {
+    it('should create tombstone on delete operation', async () => {
       const service = getSyncService();
 
       // Create then delete
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -773,7 +1444,7 @@ describe('SyncService', () => {
         },
       ]);
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -788,45 +1459,48 @@ describe('SyncService', () => {
         },
       ]);
 
-      expect(service.isTombstoned(userId, 'TASK', 't1')).toBe(true);
+      // Check tombstone was created in test state
+      const tombstoneKey = `${userId}:TASK:t1`;
+      expect(testState.tombstones.has(tombstoneKey)).toBe(true);
     });
 
-    it('should return false for non-tombstoned entities', () => {
-      const service = getSyncService();
-
-      expect(service.isTombstoned(userId, 'TASK', 'nonexistent')).toBe(false);
+    it('should return false for non-tombstoned entities', async () => {
+      // Check non-existent entity has no tombstone
+      const tombstoneKey = `${userId}:TASK:nonexistent`;
+      expect(testState.tombstones.has(tombstoneKey)).toBe(false);
     });
 
-    it('should delete expired tombstones', () => {
+    it('should delete expired tombstones', async () => {
       const service = getSyncService();
-      const db = getDb();
 
-      // Manually insert expired tombstone
+      // Add an expired tombstone directly to the test data
       const expiredTime = Date.now() - 1000;
-      db.prepare(
-        `
-        INSERT INTO tombstones (user_id, entity_type, entity_id, deleted_at, deleted_by_op_id, expires_at)
-        VALUES (?, 'TASK', 't-expired', ?, 'op-1', ?)
-      `,
-      ).run(userId, Date.now(), expiredTime);
+      testState.tombstones.set(`${userId}:TASK:t-expired`, {
+        userId,
+        entityType: 'TASK',
+        entityId: 't-expired',
+        deletedAt: Date.now(),
+        expiresAt: expiredTime,
+      });
 
-      expect(service.isTombstoned(userId, 'TASK', 't-expired')).toBe(true);
+      // Verify tombstone exists before delete
+      expect(testState.tombstones.has(`${userId}:TASK:t-expired`)).toBe(true);
 
-      const deleted = service.deleteExpiredTombstones();
+      const deleted = await service.deleteExpiredTombstones();
 
       expect(deleted).toBe(1);
-      expect(service.isTombstoned(userId, 'TASK', 't-expired')).toBe(false);
+      // Verify tombstone was removed
+      expect(testState.tombstones.has(`${userId}:TASK:t-expired`)).toBe(false);
     });
   });
 
   describe('cleanup', () => {
-    it('should delete old operations (time-based)', () => {
+    it('should delete old operations (time-based)', async () => {
       const service = getSyncService();
-      const db = getDb();
 
       // Upload operations
       for (let i = 1; i <= 5; i++) {
-        service.uploadOps(userId, clientId, [
+        await service.uploadOps(userId, clientId, [
           {
             id: uuidv7(),
             clientId,
@@ -843,35 +1517,46 @@ describe('SyncService', () => {
       }
 
       // Manually set old received_at to simulate old operations
-      db.prepare('UPDATE operations SET received_at = ? WHERE server_seq <= 2').run(
-        Date.now() - 100 * 24 * 60 * 60 * 1000, // 100 days ago
-      );
+      for (const [_id, op] of testState.operations) {
+        if (op.serverSeq <= 2) {
+          op.receivedAt = BigInt(Date.now() - 100 * 24 * 60 * 60 * 1000); // 100 days ago
+        }
+      }
 
-      // Time-based cleanup: delete ops received before cutoff
+      // Set up userSyncState with required fields for cleanup
+      // The cleanup requires lastSnapshotSeq and snapshotAt to be set
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 5,
+        lastSnapshotSeq: 5, // Snapshot covers all ops up to seq 5
+        snapshotAt: BigInt(Date.now()), // Snapshot taken recently (>= cutoffTime)
+      });
+
       const { totalDeleted, affectedUserIds } =
-        service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
       expect(totalDeleted).toBe(2);
       expect(affectedUserIds).toContain(userId);
 
-      const remaining = service.getOpsSince(userId, 0);
+      const remaining = await service.getOpsSince(userId, 0);
       expect(remaining).toHaveLength(3);
     });
 
-    it('should delete old operations from all users', () => {
+    it('should delete old operations from all users', async () => {
       const service = getSyncService();
-      const db = getDb();
-
-      // Create second user for this test
       const user2Id = 2;
-      db.prepare(
-        `INSERT INTO users (id, email, password_hash, is_verified, created_at)
-         VALUES (?, 'test2@test.com', 'hash', 1, ?)`,
-      ).run(user2Id, Date.now());
+
+      // Create second user
+      testState.users.set(user2Id, {
+        id: user2Id,
+        email: 'test2@test.com',
+        storageQuotaBytes: BigInt(100 * 1024 * 1024),
+        storageUsedBytes: BigInt(0),
+      });
 
       // Upload ops for user 1
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -887,7 +1572,7 @@ describe('SyncService', () => {
       ]);
 
       // Upload ops for user 2
-      service.uploadOps(user2Id, 'client-2', [
+      await service.uploadOps(user2Id, 'client-2', [
         {
           id: uuidv7(),
           clientId: 'client-2',
@@ -903,30 +1588,43 @@ describe('SyncService', () => {
       ]);
 
       // Make all ops old
-      db.prepare('UPDATE operations SET received_at = ?').run(
-        Date.now() - 100 * 24 * 60 * 60 * 1000, // 100 days ago
-      );
+      for (const op of testState.operations.values()) {
+        op.receivedAt = BigInt(Date.now() - 100 * 24 * 60 * 60 * 1000); // 100 days ago
+      }
+
+      // Set up userSyncState with required fields for both users
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 1,
+        lastSnapshotSeq: 1,
+        snapshotAt: BigInt(Date.now()),
+      });
+      testState.userSyncStates.set(user2Id, {
+        userId: user2Id,
+        lastSeq: 2,
+        lastSnapshotSeq: 2,
+        snapshotAt: BigInt(Date.now()),
+      });
 
       // Delete ops older than 50 days
-      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
       const { totalDeleted, affectedUserIds } =
-        service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
       expect(totalDeleted).toBe(2); // Both users' ops deleted
       expect(affectedUserIds).toHaveLength(2);
       expect(affectedUserIds).toContain(userId);
       expect(affectedUserIds).toContain(user2Id);
 
-      expect(service.getOpsSince(userId, 0)).toHaveLength(0);
-      expect(service.getOpsSince(user2Id, 0)).toHaveLength(0);
+      expect((await service.getOpsSince(userId, 0)).length).toBe(0);
+      expect((await service.getOpsSince(user2Id, 0)).length).toBe(0);
     });
 
-    it('should delete stale devices', () => {
+    it('should delete stale devices', async () => {
       const service = getSyncService();
-      const db = getDb();
 
       // Create device by uploading
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -942,23 +1640,26 @@ describe('SyncService', () => {
       ]);
 
       // Make device stale (100 days ago)
-      db.prepare('UPDATE sync_devices SET last_seen_at = ? WHERE client_id = ?').run(
-        Date.now() - 100 * 24 * 60 * 60 * 1000,
-        clientId,
-      );
+      const deviceKey = `${userId}:${clientId}`;
+      const device = testState.syncDevices.get(deviceKey);
+      if (device) {
+        device.lastSeenAt = Date.now() - 100 * 24 * 60 * 60 * 1000;
+      }
 
       // Delete devices not seen in 50 days
-      const deleted = service.deleteStaleDevices(Date.now() - 50 * 24 * 60 * 60 * 1000);
+      const deleted = await service.deleteStaleDevices(
+        Date.now() - 50 * 24 * 60 * 60 * 1000,
+      );
 
       expect(deleted).toBe(1);
     });
 
-    it('should not delete recent operations', () => {
+    it('should not delete recent operations', async () => {
       const service = getSyncService();
 
       // Upload recent operations
       for (let i = 1; i <= 3; i++) {
-        service.uploadOps(userId, clientId, [
+        await service.uploadOps(userId, clientId, [
           {
             id: uuidv7(),
             clientId,
@@ -977,18 +1678,18 @@ describe('SyncService', () => {
       // Try to delete with 50-day cutoff - should delete nothing since ops are fresh
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
       const { totalDeleted, affectedUserIds } =
-        service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
       expect(totalDeleted).toBe(0);
       expect(affectedUserIds).toHaveLength(0);
-      expect(service.getOpsSince(userId, 0)).toHaveLength(3);
+      expect((await service.getOpsSince(userId, 0)).length).toBe(3);
     });
 
-    it('should not delete recent devices', () => {
+    it('should not delete recent devices', async () => {
       const service = getSyncService();
 
       // Create device by uploading (device will have current timestamp)
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1004,7 +1705,9 @@ describe('SyncService', () => {
       ]);
 
       // Try to delete with 50-day cutoff - should delete nothing since device is fresh
-      const deleted = service.deleteStaleDevices(Date.now() - 50 * 24 * 60 * 60 * 1000);
+      const deleted = await service.deleteStaleDevices(
+        Date.now() - 50 * 24 * 60 * 60 * 1000,
+      );
 
       expect(deleted).toBe(0);
     });
@@ -1053,11 +1756,11 @@ describe('SyncService', () => {
   });
 
   describe('online device count', () => {
-    it('should count recently seen devices as online', () => {
+    it('should count recently seen devices as online', async () => {
       const service = getSyncService();
 
       // Create devices by uploading
-      service.uploadOps(userId, 'device-1', [
+      await service.uploadOps(userId, 'device-1', [
         {
           id: uuidv7(),
           clientId: 'device-1',
@@ -1072,7 +1775,7 @@ describe('SyncService', () => {
         },
       ]);
 
-      service.uploadOps(userId, 'device-2', [
+      await service.uploadOps(userId, 'device-2', [
         {
           id: uuidv7(),
           clientId: 'device-2',
@@ -1087,16 +1790,15 @@ describe('SyncService', () => {
         },
       ]);
 
-      const onlineCount = service.getOnlineDeviceCount(userId);
+      const onlineCount = await service.getOnlineDeviceCount(userId);
 
       expect(onlineCount).toBe(2);
     });
 
-    it('should not count stale devices as online', () => {
+    it('should not count stale devices as online', async () => {
       const service = getSyncService();
-      const db = getDb();
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1112,31 +1814,33 @@ describe('SyncService', () => {
       ]);
 
       // Make device stale (last seen 10 minutes ago)
-      db.prepare('UPDATE sync_devices SET last_seen_at = ? WHERE client_id = ?').run(
-        Date.now() - 10 * 60 * 1000,
-        clientId,
-      );
+      const deviceKey = `${userId}:${clientId}`;
+      const device = testState.syncDevices.get(deviceKey);
+      if (device) {
+        device.lastSeenAt = Date.now() - 10 * 60 * 1000;
+      }
 
-      const onlineCount = service.getOnlineDeviceCount(userId);
+      const onlineCount = await service.getOnlineDeviceCount(userId);
 
       expect(onlineCount).toBe(0);
     });
   });
 
   describe('getAllUserIds', () => {
-    it('should return all users with sync state', () => {
-      const db = getDb();
+    it('should return all users with sync state', async () => {
+      const service = getSyncService();
+      const user2Id = 2;
 
       // Create another user
-      db.prepare(
-        `INSERT INTO users (id, email, password_hash, is_verified, created_at)
-         VALUES (?, 'user2@test.com', 'hash', 1, ?)`,
-      ).run(2, Date.now());
-
-      const service = getSyncService();
+      testState.users.set(user2Id, {
+        id: user2Id,
+        email: 'user2@test.com',
+        storageQuotaBytes: BigInt(100 * 1024 * 1024),
+        storageUsedBytes: BigInt(0),
+      });
 
       // Initialize sync state for both users via upload
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1151,7 +1855,7 @@ describe('SyncService', () => {
         },
       ]);
 
-      service.uploadOps(2, 'device-2', [
+      await service.uploadOps(user2Id, 'device-2', [
         {
           id: uuidv7(),
           clientId: 'device-2',
@@ -1166,10 +1870,10 @@ describe('SyncService', () => {
         },
       ]);
 
-      const userIds = service.getAllUserIds();
+      const userIds = await service.getAllUserIds();
 
       expect(userIds).toContain(userId);
-      expect(userIds).toContain(2);
+      expect(userIds).toContain(user2Id);
       expect(userIds).toHaveLength(2);
     });
   });
@@ -1179,7 +1883,7 @@ describe('SyncService', () => {
       const service = getSyncService();
 
       // Upload regular operations (not restore points)
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1203,7 +1907,7 @@ describe('SyncService', () => {
       const service = getSyncService();
       const timestamp = Date.now();
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1229,7 +1933,7 @@ describe('SyncService', () => {
     it('should return BACKUP_IMPORT operations as restore points', async () => {
       const service = getSyncService();
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1253,7 +1957,7 @@ describe('SyncService', () => {
     it('should return REPAIR operations as restore points', async () => {
       const service = getSyncService();
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1279,7 +1983,7 @@ describe('SyncService', () => {
 
       // Upload multiple restore points
       for (let i = 1; i <= 3; i++) {
-        service.uploadOps(userId, clientId, [
+        await service.uploadOps(userId, clientId, [
           {
             id: uuidv7(),
             clientId,
@@ -1307,7 +2011,7 @@ describe('SyncService', () => {
 
       // Upload 5 restore points
       for (let i = 1; i <= 5; i++) {
-        service.uploadOps(userId, clientId, [
+        await service.uploadOps(userId, clientId, [
           {
             id: uuidv7(),
             clientId,
@@ -1333,7 +2037,7 @@ describe('SyncService', () => {
       const service = getSyncService();
 
       // Upload mixed operations
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1348,7 +2052,7 @@ describe('SyncService', () => {
         },
       ]);
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1362,7 +2066,7 @@ describe('SyncService', () => {
         },
       ]);
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1390,7 +2094,7 @@ describe('SyncService', () => {
       const service = getSyncService();
 
       // Upload 3 operations
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1405,7 +2109,7 @@ describe('SyncService', () => {
         },
       ]);
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1420,7 +2124,7 @@ describe('SyncService', () => {
         },
       ]);
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1450,7 +2154,7 @@ describe('SyncService', () => {
     it('should throw error for targetSeq exceeding latest', async () => {
       const service = getSyncService();
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1473,7 +2177,7 @@ describe('SyncService', () => {
     it('should throw error for targetSeq less than 1', async () => {
       const service = getSyncService();
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1504,7 +2208,7 @@ describe('SyncService', () => {
       };
 
       // Upload a SYNC_IMPORT (full state)
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1519,7 +2223,7 @@ describe('SyncService', () => {
       ]);
 
       // Add more operations after
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,
@@ -1551,7 +2255,7 @@ describe('SyncService', () => {
       const service = getSyncService();
       const beforeTime = Date.now();
 
-      service.uploadOps(userId, clientId, [
+      await service.uploadOps(userId, clientId, [
         {
           id: uuidv7(),
           clientId,

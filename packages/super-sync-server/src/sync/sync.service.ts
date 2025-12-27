@@ -6,14 +6,10 @@ import {
   UploadResult,
   SyncConfig,
   DEFAULT_SYNC_CONFIG,
-  OP_TYPES,
   ONLINE_DEVICE_THRESHOLD_MS,
-  validatePayload,
   compareVectorClocks,
-  sanitizeVectorClock,
   VectorClock,
   SYNC_ERROR_CODES,
-  SyncErrorCode,
 } from './sync.types';
 import { Logger } from '../logger';
 import {
@@ -24,34 +20,12 @@ import {
   type OperationLike,
 } from '@sp/shared-schema';
 import { Prisma } from '@prisma/client';
-
-/**
- * Valid entity types for operations.
- * Must match the EntityType union in the client's operation.types.ts.
- * Operations with unknown entity types will be rejected.
- */
-const ALLOWED_ENTITY_TYPES = new Set([
-  'TASK',
-  'PROJECT',
-  'TAG',
-  'NOTE',
-  'GLOBAL_CONFIG',
-  'TIME_TRACKING',
-  'SIMPLE_COUNTER',
-  'WORK_CONTEXT',
-  'TASK_REPEAT_CFG',
-  'ISSUE_PROVIDER',
-  'PLANNER',
-  'MENU_TREE',
-  'METRIC',
-  'BOARD',
-  'REMINDER',
-  'MIGRATION',
-  'RECOVERY',
-  'ALL',
-  'PLUGIN_USER_DATA',
-  'PLUGIN_METADATA',
-]);
+import {
+  ValidationService,
+  ALLOWED_ENTITY_TYPES,
+  RateLimitService,
+  RequestDeduplicationService,
+} from './services';
 
 /**
  * Maximum operations to process during snapshot generation.
@@ -77,12 +51,6 @@ const DEFAULT_STORAGE_QUOTA_BYTES = 100 * 1024 * 1024;
 const MAX_SNAPSHOT_DECOMPRESSED_BYTES = 100 * 1024 * 1024;
 
 /**
- * Maximum entries in caches to prevent unbounded memory growth.
- * With ~200 bytes per entry, 10000 entries = ~2MB max memory per cache.
- */
-const MAX_CACHE_SIZE = 10000;
-
-/**
  * Maximum state size during replay (100MB).
  * Prevents memory exhaustion from malicious or corrupted data.
  */
@@ -93,26 +61,11 @@ const MAX_REPLAY_STATE_SIZE_BYTES = 100 * 1024 * 1024;
  */
 const REPLAY_SIZE_CHECK_INTERVAL = 1000;
 
-/**
- * Tracks recently processed request IDs for deduplication.
- * Key format: "userId:requestId"
- */
-interface RequestDeduplicationEntry {
-  processedAt: number;
-  results: UploadResult[];
-}
-
 export class SyncService {
   private config: SyncConfig;
-  private rateLimitCounters: Map<number, { count: number; resetAt: number }> = new Map();
-
-  /**
-   * Cache of recently processed request IDs for deduplication.
-   * Prevents duplicate processing when clients retry failed uploads.
-   * Entries expire after 5 minutes.
-   */
-  private requestDeduplicationCache: Map<string, RequestDeduplicationEntry> = new Map();
-  private readonly REQUEST_DEDUP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+  private validationService: ValidationService;
+  private rateLimitService: RateLimitService;
+  private requestDeduplicationService: RequestDeduplicationService;
 
   /**
    * FIX 1.7: In-memory lock to prevent concurrent snapshot generation for the same user.
@@ -131,6 +84,9 @@ export class SyncService {
 
   constructor(config: Partial<SyncConfig> = {}) {
     this.config = { ...DEFAULT_SYNC_CONFIG, ...config };
+    this.validationService = new ValidationService(this.config);
+    this.rateLimitService = new RateLimitService(this.config);
+    this.requestDeduplicationService = new RequestDeduplicationService();
   }
 
   // === Conflict Detection ===
@@ -375,7 +331,7 @@ export class SyncService {
   ): Promise<UploadResult> {
     try {
       // Validate operation (including clientId match)
-      const validation = this.validateOp(op, clientId);
+      const validation = this.validationService.validateOp(op, clientId);
       if (!validation.valid) {
         Logger.audit({
           event: 'OP_REJECTED',
@@ -1338,69 +1294,26 @@ export class SyncService {
   }
 
   // === Rate Limiting & Deduplication ===
-  // (Logic remains largely same, just memory structures)
+  // Delegated to extracted services
 
   isRateLimited(userId: number): boolean {
-    const now = Date.now();
-    const counter = this.rateLimitCounters.get(userId);
-    const limit = this.config.uploadRateLimit;
-
-    if (!counter || now > counter.resetAt) {
-      if (this.rateLimitCounters.size >= MAX_CACHE_SIZE) {
-        const firstKey = this.rateLimitCounters.keys().next().value;
-        if (firstKey !== undefined) this.rateLimitCounters.delete(firstKey);
-      }
-      this.rateLimitCounters.set(userId, { count: 1, resetAt: now + limit.windowMs });
-      return false;
-    }
-
-    if (counter.count >= limit.max) return true;
-    counter.count++;
-    return false;
+    return this.rateLimitService.isRateLimited(userId);
   }
 
   cleanupExpiredRateLimitCounters(): number {
-    const now = Date.now();
-    let cleaned = 0;
-    for (const [userId, counter] of this.rateLimitCounters) {
-      if (now > counter.resetAt) {
-        this.rateLimitCounters.delete(userId);
-        cleaned++;
-      }
-    }
-    return cleaned;
+    return this.rateLimitService.cleanupExpiredCounters();
   }
 
   checkRequestDeduplication(userId: number, requestId: string): UploadResult[] | null {
-    const key = `${userId}:${requestId}`;
-    const entry = this.requestDeduplicationCache.get(key);
-    if (!entry) return null;
-    if (Date.now() - entry.processedAt > this.REQUEST_DEDUP_TTL_MS) {
-      this.requestDeduplicationCache.delete(key);
-      return null;
-    }
-    return entry.results;
+    return this.requestDeduplicationService.checkDeduplication(userId, requestId);
   }
 
   cacheRequestResults(userId: number, requestId: string, results: UploadResult[]): void {
-    const key = `${userId}:${requestId}`;
-    if (this.requestDeduplicationCache.size >= MAX_CACHE_SIZE) {
-      const firstKey = this.requestDeduplicationCache.keys().next().value;
-      if (firstKey) this.requestDeduplicationCache.delete(firstKey);
-    }
-    this.requestDeduplicationCache.set(key, { processedAt: Date.now(), results });
+    this.requestDeduplicationService.cacheResults(userId, requestId, results);
   }
 
   cleanupExpiredRequestDedupEntries(): number {
-    const now = Date.now();
-    let cleaned = 0;
-    for (const [key, entry] of this.requestDeduplicationCache) {
-      if (now - entry.processedAt > this.REQUEST_DEDUP_TTL_MS) {
-        this.requestDeduplicationCache.delete(key);
-        cleaned++;
-      }
-    }
-    return cleaned;
+    return this.requestDeduplicationService.cleanupExpiredEntries();
   }
 
   // === Storage Quota ===
@@ -1766,7 +1679,7 @@ export class SyncService {
     });
 
     // Clear caches
-    this.rateLimitCounters.delete(userId);
+    this.rateLimitService.clearForUser(userId);
     this.snapshotGenerationLocks.delete(userId);
   }
 
@@ -1794,181 +1707,6 @@ export class SyncService {
       },
     });
     return count;
-  }
-
-  // === Validation ===
-
-  private validateOp(
-    op: Operation,
-    requestClientId: string,
-  ): {
-    valid: boolean;
-    error?: string;
-    errorCode?: SyncErrorCode;
-  } {
-    // Validate clientId matches request
-    if (op.clientId !== requestClientId) {
-      return {
-        valid: false,
-        error: `Operation clientId "${op.clientId}" does not match request clientId "${requestClientId}"`,
-        errorCode: SYNC_ERROR_CODES.INVALID_CLIENT_ID,
-      };
-    }
-
-    if (!op.id || typeof op.id !== 'string') {
-      return {
-        valid: false,
-        error: 'Invalid operation ID',
-        errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-      };
-    }
-    if (op.id.length > 255) {
-      return {
-        valid: false,
-        error: 'Operation ID too long',
-        errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-      };
-    }
-    if (!op.opType || !OP_TYPES.includes(op.opType)) {
-      return {
-        valid: false,
-        error: 'Invalid opType',
-        errorCode: SYNC_ERROR_CODES.INVALID_OP_TYPE,
-      };
-    }
-    if (!op.entityType) {
-      return {
-        valid: false,
-        error: 'Missing entityType',
-        errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
-      };
-    }
-    if (!ALLOWED_ENTITY_TYPES.has(op.entityType)) {
-      return {
-        valid: false,
-        error: `Invalid entityType: ${op.entityType}`,
-        errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
-      };
-    }
-    if (op.entityId !== undefined && op.entityId !== null) {
-      if (typeof op.entityId !== 'string' || op.entityId.length > 255) {
-        return {
-          valid: false,
-          error: 'Invalid entityId format or length',
-          errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_ID,
-        };
-      }
-    }
-    if (op.opType === 'DEL' && !op.entityId) {
-      return {
-        valid: false,
-        error: 'DEL operation requires entityId',
-        errorCode: SYNC_ERROR_CODES.MISSING_ENTITY_ID,
-      };
-    }
-    if (op.payload === undefined) {
-      return {
-        valid: false,
-        error: 'Missing payload',
-        errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
-      };
-    }
-    if (op.schemaVersion !== undefined) {
-      if (op.schemaVersion < 1 || op.schemaVersion > 100) {
-        return {
-          valid: false,
-          error: `Invalid schema version: ${op.schemaVersion}`,
-          errorCode: SYNC_ERROR_CODES.INVALID_SCHEMA_VERSION,
-        };
-      }
-    }
-
-    const clockValidation = sanitizeVectorClock(op.vectorClock);
-    if (!clockValidation.valid) {
-      return {
-        valid: false,
-        error: clockValidation.error,
-        errorCode: SYNC_ERROR_CODES.INVALID_VECTOR_CLOCK,
-      };
-    }
-    op.vectorClock = clockValidation.clock;
-
-    const isFullStateOp =
-      op.opType === 'SYNC_IMPORT' ||
-      op.opType === 'BACKUP_IMPORT' ||
-      op.opType === 'REPAIR';
-    if (!isFullStateOp && !this.validatePayloadComplexity(op.payload)) {
-      return {
-        valid: false,
-        error: 'Payload too complex (max depth 20, max keys 20000)',
-        errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
-      };
-    }
-
-    const payloadSize = JSON.stringify(op.payload).length;
-    if (payloadSize > this.config.maxPayloadSizeBytes) {
-      return {
-        valid: false,
-        error: 'Payload too large',
-        errorCode: SYNC_ERROR_CODES.PAYLOAD_TOO_LARGE,
-      };
-    }
-
-    const payloadValidation = validatePayload(op.opType, op.payload);
-    if (!payloadValidation.valid) {
-      return {
-        valid: false,
-        error: payloadValidation.error,
-        errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
-      };
-    }
-
-    const now = Date.now();
-    if (op.timestamp > now + this.config.maxClockDriftMs) {
-      return {
-        valid: false,
-        error: 'Timestamp too far in future',
-        errorCode: SYNC_ERROR_CODES.INVALID_TIMESTAMP,
-      };
-    }
-    if (op.timestamp < now - this.config.maxOpAgeMs) {
-      return {
-        valid: false,
-        error: 'Operation too old',
-        errorCode: SYNC_ERROR_CODES.INVALID_TIMESTAMP,
-      };
-    }
-
-    return { valid: true };
-  }
-
-  private validatePayloadComplexity(
-    payload: unknown,
-    maxDepth: number = 20,
-    maxKeys: number = 20000,
-  ): boolean {
-    let totalKeys = 0;
-
-    const checkDepth = (obj: unknown, depth: number): boolean => {
-      if (depth > maxDepth) return false;
-      if (obj === null || typeof obj !== 'object') return true;
-
-      if (Array.isArray(obj)) {
-        totalKeys += obj.length;
-        if (totalKeys > maxKeys) return false;
-        return obj.every((item) => checkDepth(item, depth + 1));
-      }
-
-      const keys = Object.keys(obj);
-      totalKeys += keys.length;
-      if (totalKeys > maxKeys) return false;
-
-      return keys.every((key) =>
-        checkDepth((obj as Record<string, unknown>)[key], depth + 1),
-      );
-    };
-
-    return checkDepth(payload, 0);
   }
 }
 
