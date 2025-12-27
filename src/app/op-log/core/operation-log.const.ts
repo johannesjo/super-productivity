@@ -3,6 +3,16 @@ import { InjectionToken } from '@angular/core';
 /**
  * Configuration constants for the Operation Log system.
  * Centralizes all tunable parameters for easier maintenance and documentation.
+ *
+ * ## Related Timing Constants in Other Files
+ *
+ * **Sync Configuration** (`src/app/imex/sync/sync.const.ts`):
+ * - SYNC_MIN_INTERVAL (5s) - Minimum interval between sync operations
+ * - SYNC_WAIT_TIMEOUT_MS (40s) - Max wait for ongoing sync to complete
+ * - INITIAL_SYNC_DELAY_MS (500ms) - Delay before triggering initial sync
+ *
+ * **Meta Sync Lock** (`src/app/pfapi/api/sync/meta-sync.service.ts`):
+ * - LOCK_TTL_MS (5 min) - Lock TTL for distributed lock on remote metadata
  */
 
 /**
