@@ -55,9 +55,17 @@ describe('Migration Handling Integration', () => {
         { provide: OperationApplierService, useValue: operationApplierSpy },
         {
           provide: ConflictResolutionService,
-          useValue: jasmine.createSpyObj('ConflictResolutionService', [
-            'autoResolveConflictsLWW',
-          ]),
+          useFactory: () => {
+            const spy = jasmine.createSpyObj('ConflictResolutionService', [
+              'autoResolveConflictsLWW',
+              'checkOpForConflicts',
+            ]);
+            spy.checkOpForConflicts.and.returnValue({
+              isStaleOrDuplicate: false,
+              conflict: null,
+            });
+            return spy;
+          },
         },
         {
           provide: ValidateStateService,

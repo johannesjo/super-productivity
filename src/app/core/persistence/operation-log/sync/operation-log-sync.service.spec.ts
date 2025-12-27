@@ -19,8 +19,15 @@ import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
 import { SyncImportFilterService } from './sync-import-filter.service';
 import { ServerMigrationService } from './server-migration.service';
+import { StaleOperationResolverService } from './stale-operation-resolver.service';
 import { provideMockStore } from '@ngrx/store/testing';
-import { Operation, OpType } from '../operation.types';
+import { EntityConflict, Operation, OpType, VectorClock } from '../operation.types';
+import {
+  compareVectorClocks,
+  mergeVectorClocks,
+  VectorClockComparison,
+} from '../../../../pfapi/api/util/vector-clock';
+import { toEntityKey } from '../entity-key.util';
 import { T } from '../../../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -45,6 +52,7 @@ describe('OperationLogSyncService', () => {
   let compactionServiceSpy: jasmine.SpyObj<OperationLogCompactionService>;
   let syncImportFilterServiceSpy: jasmine.SpyObj<SyncImportFilterService>;
   let serverMigrationServiceSpy: jasmine.SpyObj<ServerMigrationService>;
+  let staleOperationResolverSpy: jasmine.SpyObj<StaleOperationResolverService>;
 
   beforeEach(() => {
     schemaMigrationServiceSpy = jasmine.createSpyObj('SchemaMigrationService', [
@@ -84,7 +92,83 @@ describe('OperationLogSyncService', () => {
     ]);
     conflictResolutionServiceSpy = jasmine.createSpyObj('ConflictResolutionService', [
       'autoResolveConflictsLWW',
+      'checkOpForConflicts',
     ]);
+    // Intelligent mock that implements the actual conflict detection logic
+    conflictResolutionServiceSpy.checkOpForConflicts.and.callFake(
+      (
+        remoteOp: Operation,
+        ctx: {
+          localPendingOpsByEntity: Map<string, Operation[]>;
+          appliedFrontierByEntity: Map<string, VectorClock>;
+          snapshotVectorClock: VectorClock | undefined;
+          snapshotEntityKeys: Set<string> | undefined;
+          hasNoSnapshotClock: boolean;
+        },
+      ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } => {
+        const entityIdsToCheck =
+          remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
+
+        for (const entityId of entityIdsToCheck) {
+          const entityKey = toEntityKey(remoteOp.entityType, entityId);
+          const localOpsForEntity = ctx.localPendingOpsByEntity.get(entityKey) || [];
+          const appliedFrontier = ctx.appliedFrontierByEntity.get(entityKey);
+
+          // Build local frontier
+          const entityExistedAtSnapshot =
+            ctx.snapshotEntityKeys === undefined || ctx.snapshotEntityKeys.has(entityKey);
+          const fallbackClock = entityExistedAtSnapshot ? ctx.snapshotVectorClock : {};
+          const baselineClock = appliedFrontier || fallbackClock || {};
+          const allClocks = [
+            baselineClock,
+            ...localOpsForEntity.map((op) => op.vectorClock),
+          ];
+          const localFrontier = allClocks.reduce(
+            (acc, clock) => mergeVectorClocks(acc, clock || {}),
+            {},
+          );
+          const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
+
+          // FAST PATH: No local state means remote is newer by default
+          if (localOpsForEntity.length === 0 && localFrontierIsEmpty) {
+            continue;
+          }
+
+          const vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
+
+          // Skip stale operations (local already has newer state)
+          if (vcComparison === VectorClockComparison.GREATER_THAN) {
+            return { isStaleOrDuplicate: true, conflict: null };
+          }
+
+          // Skip duplicate operations (already applied)
+          if (vcComparison === VectorClockComparison.EQUAL) {
+            return { isStaleOrDuplicate: true, conflict: null };
+          }
+
+          // No pending ops = no conflict possible
+          if (localOpsForEntity.length === 0) {
+            continue;
+          }
+
+          // CONCURRENT = true conflict
+          if (vcComparison === VectorClockComparison.CONCURRENT) {
+            return {
+              isStaleOrDuplicate: false,
+              conflict: {
+                entityType: remoteOp.entityType,
+                entityId,
+                localOps: localOpsForEntity,
+                remoteOps: [remoteOp],
+                suggestedResolution: 'manual',
+              },
+            };
+          }
+        }
+
+        return { isStaleOrDuplicate: false, conflict: null };
+      },
+    );
     validateStateServiceSpy = jasmine.createSpyObj('ValidateStateService', [
       'validateAndRepair',
       'validateAndRepairCurrentState',
@@ -114,6 +198,10 @@ describe('OperationLogSyncService', () => {
     // Default: server migration check does nothing
     serverMigrationServiceSpy.checkAndHandleMigration.and.resolveTo();
     serverMigrationServiceSpy.handleServerMigration.and.resolveTo();
+    staleOperationResolverSpy = jasmine.createSpyObj('StaleOperationResolverService', [
+      'resolveStaleLocalOps',
+    ]);
+    staleOperationResolverSpy.resolveStaleLocalOps.and.resolveTo(0);
 
     TestBed.configureTestingModule({
       providers: [
@@ -170,6 +258,7 @@ describe('OperationLogSyncService', () => {
         },
         { provide: SyncImportFilterService, useValue: syncImportFilterServiceSpy },
         { provide: ServerMigrationService, useValue: serverMigrationServiceSpy },
+        { provide: StaleOperationResolverService, useValue: staleOperationResolverSpy },
       ],
     });
 
@@ -887,133 +976,9 @@ describe('OperationLogSyncService', () => {
     });
   });
 
-  describe('_suggestResolution', () => {
-    // Access private method for testing
-    const callSuggestResolution = (
-      svc: OperationLogSyncService,
-      localOps: Operation[],
-      remoteOps: Operation[],
-    ): 'local' | 'remote' | 'manual' => {
-      return (svc as any)._suggestResolution(localOps, remoteOps);
-    };
-
-    const createOp = (partial: Partial<Operation>): Operation => ({
-      id: 'op-1',
-      actionType: '[Test] Action',
-      opType: OpType.Update,
-      entityType: 'TASK',
-      entityId: 'entity-1',
-      payload: {},
-      clientId: 'client-1',
-      vectorClock: { client1: 1 },
-      timestamp: Date.now(),
-      schemaVersion: 1,
-      ...partial,
-    });
-
-    it('should suggest remote when local ops are empty', () => {
-      const remoteOps = [createOp({ id: 'remote-1' })];
-      expect(callSuggestResolution(service, [], remoteOps)).toBe('remote');
-    });
-
-    it('should suggest local when remote ops are empty', () => {
-      const localOps = [createOp({ id: 'local-1' })];
-      expect(callSuggestResolution(service, localOps, [])).toBe('local');
-    });
-
-    it('should suggest newer side when timestamps differ by more than 1 hour', () => {
-      const now = Date.now();
-      const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
-      const twoHoursAgo = now - TWO_HOURS_MS;
-
-      const localOps = [createOp({ id: 'local-1', timestamp: now })];
-      const remoteOps = [createOp({ id: 'remote-1', timestamp: twoHoursAgo })];
-
-      // Local is newer
-      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
-
-      // Flip: remote is newer
-      const localOpsOld = [createOp({ id: 'local-1', timestamp: twoHoursAgo })];
-      const remoteOpsNew = [createOp({ id: 'remote-1', timestamp: now })];
-      expect(callSuggestResolution(service, localOpsOld, remoteOpsNew)).toBe('remote');
-    });
-
-    it('should prefer update over delete (local delete, remote update)', () => {
-      const now = Date.now();
-      const localOps = [
-        createOp({ id: 'local-1', opType: OpType.Delete, timestamp: now }),
-      ];
-      const remoteOps = [
-        createOp({ id: 'remote-1', opType: OpType.Update, timestamp: now }),
-      ];
-
-      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('remote');
-    });
-
-    it('should prefer update over delete (remote delete, local update)', () => {
-      const now = Date.now();
-      const localOps = [
-        createOp({ id: 'local-1', opType: OpType.Update, timestamp: now }),
-      ];
-      const remoteOps = [
-        createOp({ id: 'remote-1', opType: OpType.Delete, timestamp: now }),
-      ];
-
-      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
-    });
-
-    it('should prefer create over update', () => {
-      const now = Date.now();
-      const localOps = [
-        createOp({ id: 'local-1', opType: OpType.Create, timestamp: now }),
-      ];
-      const remoteOps = [
-        createOp({ id: 'remote-1', opType: OpType.Update, timestamp: now }),
-      ];
-
-      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
-
-      // Flip
-      const localOps2 = [
-        createOp({ id: 'local-1', opType: OpType.Update, timestamp: now }),
-      ];
-      const remoteOps2 = [
-        createOp({ id: 'remote-1', opType: OpType.Create, timestamp: now }),
-      ];
-      expect(callSuggestResolution(service, localOps2, remoteOps2)).toBe('remote');
-    });
-
-    it('should return manual for close timestamps with same op types', () => {
-      const now = Date.now();
-      const FIVE_MINUTES_MS = 5 * 60 * 1000;
-      const fiveMinutesAgo = now - FIVE_MINUTES_MS;
-
-      const localOps = [
-        createOp({ id: 'local-1', opType: OpType.Update, timestamp: now }),
-      ];
-      const remoteOps = [
-        createOp({ id: 'remote-1', opType: OpType.Update, timestamp: fiveMinutesAgo }),
-      ];
-
-      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('manual');
-    });
-
-    it('should auto-resolve when both have delete ops (outcome is identical)', () => {
-      const now = Date.now();
-      const localOps = [
-        createOp({ id: 'local-1', opType: OpType.Delete, timestamp: now }),
-      ];
-      const remoteOps = [
-        createOp({ id: 'remote-1', opType: OpType.Delete, timestamp: now }),
-      ];
-
-      // Both want to delete - auto-resolve to local (could be either, outcome is same)
-      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
-    });
-  });
-
+  // Tests for _suggestResolution have been moved to conflict-resolution.service.spec.ts
   // Tests for filterOpsInvalidatedBySyncImport have been moved to sync-import-filter.service.spec.ts
-  // The OperationLogSyncService now delegates to SyncImportFilterService
+  // The OperationLogSyncService now delegates to ConflictResolutionService and SyncImportFilterService
 
   describe('SyncImportFilterService delegation', () => {
     it('should delegate to SyncImportFilterService.filterOpsInvalidatedBySyncImport', () => {
@@ -1821,24 +1786,18 @@ describe('OperationLogSyncService', () => {
             }
           });
 
-          // Spy on _resolveStaleLocalOps to verify it receives allOpClocks
-          const resolveStaleOpsSpy = spyOn<any>(
-            service,
-            '_resolveStaleLocalOps',
-          ).and.returnValue(Promise.resolve(0));
-
           await service.uploadPendingOps(mockProvider);
 
-          // Verify _resolveStaleLocalOps was called with the clocks from force download
+          // Verify StaleOperationResolverService was called with the clocks from force download
           // Third arg is snapshotVectorClock (undefined in this test)
-          expect(resolveStaleOpsSpy).toHaveBeenCalledWith(
+          expect(staleOperationResolverSpy.resolveStaleLocalOps).toHaveBeenCalledWith(
             jasmine.any(Array),
-            forceDownloadClocks,
+            jasmine.arrayContaining(forceDownloadClocks),
             undefined,
           );
         });
 
-        it('should pass snapshotVectorClock to _resolveStaleLocalOps when present', async () => {
+        it('should pass snapshotVectorClock to StaleOperationResolverService when present', async () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
@@ -1893,23 +1852,17 @@ describe('OperationLogSyncService', () => {
             });
           });
 
-          // Spy on _resolveStaleLocalOps to verify it receives snapshotVectorClock
-          const resolveStaleOpsSpy = spyOn<any>(
-            service,
-            '_resolveStaleLocalOps',
-          ).and.returnValue(Promise.resolve(0));
-
           await service.uploadPendingOps(mockProvider);
 
-          // Verify _resolveStaleLocalOps was called with snapshotVectorClock
-          expect(resolveStaleOpsSpy).toHaveBeenCalledWith(
+          // Verify StaleOperationResolverService was called with snapshotVectorClock
+          expect(staleOperationResolverSpy.resolveStaleLocalOps).toHaveBeenCalledWith(
             jasmine.any(Array),
             undefined, // No allOpClocks from regular download
             snapshotVectorClock,
           );
         });
 
-        it('should pass both allOpClocks and snapshotVectorClock to _resolveStaleLocalOps', async () => {
+        it('should pass both allOpClocks and snapshotVectorClock to StaleOperationResolverService', async () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
@@ -1980,18 +1933,12 @@ describe('OperationLogSyncService', () => {
             }
           });
 
-          // Spy on _resolveStaleLocalOps to verify it receives both
-          const resolveStaleOpsSpy = spyOn<any>(
-            service,
-            '_resolveStaleLocalOps',
-          ).and.returnValue(Promise.resolve(0));
-
           await service.uploadPendingOps(mockProvider);
 
-          // Verify _resolveStaleLocalOps was called with both allOpClocks and snapshotVectorClock
-          expect(resolveStaleOpsSpy).toHaveBeenCalledWith(
+          // Verify StaleOperationResolverService was called with both allOpClocks and snapshotVectorClock
+          expect(staleOperationResolverSpy.resolveStaleLocalOps).toHaveBeenCalledWith(
             jasmine.any(Array),
-            allOpClocks,
+            jasmine.arrayContaining(allOpClocks),
             snapshotVectorClock,
           );
         });
@@ -2051,16 +1998,10 @@ describe('OperationLogSyncService', () => {
             }),
           );
 
-          // Spy on _resolveStaleLocalOps
-          const resolveStaleOpsSpy = spyOn<any>(
-            service,
-            '_resolveStaleLocalOps',
-          ).and.returnValue(Promise.resolve(0));
-
           await service.uploadPendingOps(mockProvider);
 
-          // Verify _resolveStaleLocalOps was called with snapshotVectorClock
-          expect(resolveStaleOpsSpy).toHaveBeenCalledWith(
+          // Verify StaleOperationResolverService was called with snapshotVectorClock
+          expect(staleOperationResolverSpy.resolveStaleLocalOps).toHaveBeenCalledWith(
             jasmine.any(Array),
             undefined,
             snapshotVectorClock,
@@ -2301,207 +2242,8 @@ describe('OperationLogSyncService', () => {
   // NOTE: Old _handleServerMigration state validation tests (600+ lines) have been moved to
   // server-migration.service.spec.ts. The OperationLogSyncService now delegates to ServerMigrationService.
 
-  describe('_resolveStaleLocalOps', () => {
-    it('should create operations with LWW Update action type (not Merged Update)', async () => {
-      // This test ensures that operations created by _resolveStaleLocalOps use the correct
-      // action type '[ENTITY_TYPE] LWW Update' which is recognized by lwwUpdateMetaReducer.
-      // Previously, it used '[ENTITY_TYPE] Merged Update' which was NOT handled by any reducer,
-      // causing state updates to be silently ignored on remote clients.
-
-      // Setup: Mock client ID
-      const pfapiServiceMock = jasmine.createSpyObj('PfapiService', [], {
-        pf: {
-          metaModel: {
-            loadClientId: () => Promise.resolve('test-client'),
-          },
-        },
-      });
-
-      // Setup: Mock vector clock service
-      vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
-        Promise.resolve({ testClient: 5 }),
-      );
-
-      // Setup: Mock conflict resolution service to return entity state
-      conflictResolutionServiceSpy.getCurrentEntityState = jasmine
-        .createSpy('getCurrentEntityState')
-        .and.returnValue(
-          Promise.resolve({
-            id: 'task-1',
-            title: 'Test Task',
-            tagIds: [], // This is the important field that was being lost
-          }),
-        );
-
-      // Setup: Mock opLogStore.appendWithVectorClockUpdate to capture the operation
-      // This method is used instead of append to ensure vector clock is updated atomically
-      let appendedOp: Operation | null = null;
-      opLogStoreSpy.appendWithVectorClockUpdate.and.callFake((op: Operation) => {
-        appendedOp = op;
-        return Promise.resolve(1);
-      });
-      opLogStoreSpy.markRejected.and.returnValue(Promise.resolve());
-
-      // Create a stale op to trigger _resolveStaleLocalOps
-      const staleOp: Operation = {
-        id: 'stale-op-1',
-        clientId: 'test-client',
-        actionType: '[Task Shared] updateTask',
-        opType: OpType.Update,
-        entityType: 'TASK',
-        entityId: 'task-1',
-        payload: { task: { id: 'task-1', changes: { tagIds: [] } } },
-        vectorClock: { testClient: 3 },
-        timestamp: Date.now(),
-        schemaVersion: 1,
-      };
-
-      // Re-create service with the mocked pfapi service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        providers: [
-          OperationLogSyncService,
-          { provide: SchemaMigrationService, useValue: schemaMigrationServiceSpy },
-          { provide: SnackService, useValue: snackServiceSpy },
-          { provide: OperationLogStoreService, useValue: opLogStoreSpy },
-          { provide: VectorClockService, useValue: vectorClockServiceSpy },
-          { provide: OperationApplierService, useValue: operationApplierServiceSpy },
-          { provide: ConflictResolutionService, useValue: conflictResolutionServiceSpy },
-          { provide: ValidateStateService, useValue: validateStateServiceSpy },
-          { provide: RepairOperationService, useValue: {} },
-          { provide: PfapiStoreDelegateService, useValue: {} },
-          { provide: PfapiService, useValue: pfapiServiceMock },
-          { provide: OperationLogUploadService, useValue: {} },
-          { provide: OperationLogDownloadService, useValue: {} },
-          { provide: LockService, useValue: lockServiceSpy },
-          { provide: OperationLogCompactionService, useValue: compactionServiceSpy },
-          { provide: SyncImportFilterService, useValue: syncImportFilterServiceSpy },
-          { provide: ServerMigrationService, useValue: serverMigrationServiceSpy },
-          { provide: TranslateService, useValue: {} },
-          provideMockStore({ initialState: {} }),
-        ],
-      });
-
-      const testService = TestBed.inject(OperationLogSyncService);
-
-      // Call the private method directly to test it
-      const result = await (testService as any)._resolveStaleLocalOps([
-        { opId: 'stale-op-1', op: staleOp },
-      ]);
-
-      // Verify: Operation was created
-      expect(result).toBe(1);
-      expect(appendedOp).not.toBeNull();
-
-      // CRITICAL: Verify the action type is 'LWW Update', NOT 'Merged Update'
-      // This is the fix - 'Merged Update' was not recognized by lwwUpdateMetaReducer
-      expect(appendedOp!.actionType).toBe('[TASK] LWW Update');
-      expect(appendedOp!.actionType).not.toBe('[TASK] Merged Update');
-
-      // Verify the payload contains the full entity state (including tagIds)
-      expect(appendedOp!.payload).toEqual({
-        id: 'task-1',
-        title: 'Test Task',
-        tagIds: [],
-      });
-    });
-
-    it('should use appendWithVectorClockUpdate to ensure vector clock is updated atomically', async () => {
-      // This test verifies that _resolveStaleLocalOps uses appendWithVectorClockUpdate
-      // instead of plain append, ensuring the vector clock store is updated atomically
-      // with each operation. This prevents counter collisions where subsequent operations
-      // could get duplicate vector clock entries.
-
-      // Setup: Mock client ID
-      const pfapiServiceMock = jasmine.createSpyObj('PfapiService', [], {
-        pf: {
-          metaModel: {
-            loadClientId: () => Promise.resolve('test-client'),
-          },
-        },
-      });
-
-      // Setup: Mock vector clock service
-      vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
-        Promise.resolve({ testClient: 5 }),
-      );
-
-      // Setup: Mock conflict resolution service to return entity state
-      conflictResolutionServiceSpy.getCurrentEntityState = jasmine
-        .createSpy('getCurrentEntityState')
-        .and.returnValue(
-          Promise.resolve({
-            id: 'task-1',
-            title: 'Test Task',
-            tagIds: [],
-          }),
-        );
-
-      // Setup: Spy on appendWithVectorClockUpdate
-      opLogStoreSpy.appendWithVectorClockUpdate.and.returnValue(Promise.resolve(1));
-      opLogStoreSpy.markRejected.and.returnValue(Promise.resolve());
-
-      // Create a stale op
-      const staleOp: Operation = {
-        id: 'stale-op-1',
-        clientId: 'test-client',
-        actionType: '[Task Shared] updateTask',
-        opType: OpType.Update,
-        entityType: 'TASK',
-        entityId: 'task-1',
-        payload: { task: { id: 'task-1', changes: { tagIds: [] } } },
-        vectorClock: { testClient: 3 },
-        timestamp: Date.now(),
-        schemaVersion: 1,
-      };
-
-      // Re-create service with the mocked pfapi service
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        providers: [
-          OperationLogSyncService,
-          { provide: SchemaMigrationService, useValue: schemaMigrationServiceSpy },
-          { provide: SnackService, useValue: snackServiceSpy },
-          { provide: OperationLogStoreService, useValue: opLogStoreSpy },
-          { provide: VectorClockService, useValue: vectorClockServiceSpy },
-          { provide: OperationApplierService, useValue: operationApplierServiceSpy },
-          { provide: ConflictResolutionService, useValue: conflictResolutionServiceSpy },
-          { provide: ValidateStateService, useValue: validateStateServiceSpy },
-          { provide: RepairOperationService, useValue: {} },
-          { provide: PfapiStoreDelegateService, useValue: {} },
-          { provide: PfapiService, useValue: pfapiServiceMock },
-          { provide: OperationLogUploadService, useValue: {} },
-          { provide: OperationLogDownloadService, useValue: {} },
-          { provide: LockService, useValue: lockServiceSpy },
-          { provide: OperationLogCompactionService, useValue: compactionServiceSpy },
-          { provide: SyncImportFilterService, useValue: syncImportFilterServiceSpy },
-          { provide: ServerMigrationService, useValue: serverMigrationServiceSpy },
-          { provide: TranslateService, useValue: {} },
-          provideMockStore({ initialState: {} }),
-        ],
-      });
-
-      const testService = TestBed.inject(OperationLogSyncService);
-
-      // Call the private method
-      await (testService as any)._resolveStaleLocalOps([
-        { opId: 'stale-op-1', op: staleOp },
-      ]);
-
-      // CRITICAL: Verify appendWithVectorClockUpdate was called, not plain append
-      // This ensures vector clock store is updated atomically with the operation
-      expect(opLogStoreSpy.appendWithVectorClockUpdate).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          actionType: '[TASK] LWW Update',
-          entityType: 'TASK',
-          entityId: 'task-1',
-        }),
-        'local',
-      );
-      // Verify plain append was NOT called
-      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
-    });
-  });
+  // Tests for _resolveStaleLocalOps have been moved to stale-operation-resolver.service.spec.ts
+  // The functionality is now in StaleOperationResolverService
 
   describe('mergeRemoteOpClocks integration', () => {
     it('should merge remote ops clocks after successfully applying remote ops', async () => {

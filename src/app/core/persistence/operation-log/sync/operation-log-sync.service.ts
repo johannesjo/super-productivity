@@ -9,12 +9,6 @@ import {
   OpType,
   VectorClock,
 } from '../operation.types';
-import {
-  compareVectorClocks,
-  incrementVectorClock,
-  mergeVectorClocks,
-  VectorClockComparison,
-} from '../../../../pfapi/api/util/vector-clock';
 import { OpLog } from '../../../log';
 import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
@@ -25,9 +19,7 @@ import { ValidateStateService } from '../processing/validate-state.service';
 import { OperationLogUploadService, UploadResult } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { VectorClockService } from './vector-clock.service';
-import { toEntityKey } from '../entity-key.util';
 import {
-  CURRENT_SCHEMA_VERSION,
   MAX_VERSION_SKIP,
   SchemaMigrationService,
 } from '../store/schema-migration.service';
@@ -35,7 +27,6 @@ import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
-import { uuidv7 } from '../../../../util/uuid-v7';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { LOCK_NAMES, MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 import { CLIENT_ID_PROVIDER } from '../client-id.provider';
@@ -45,6 +36,7 @@ import { SuperSyncStatusService } from './super-sync-status.service';
 import { SyncImportFilterService } from './sync-import-filter.service';
 import { ServerMigrationService } from './server-migration.service';
 import { OperationWriteFlushService } from './operation-write-flush.service';
+import { StaleOperationResolverService } from './stale-operation-resolver.service';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -131,6 +123,7 @@ export class OperationLogSyncService {
   private syncImportFilterService = inject(SyncImportFilterService);
   private serverMigrationService = inject(ServerMigrationService);
   private writeFlushService = inject(OperationWriteFlushService);
+  private staleOperationResolver = inject(StaleOperationResolverService);
   private clientIdProvider = inject(CLIENT_ID_PROVIDER);
 
   // Lazy injection to break circular dependency for getActiveSyncProvider():
@@ -400,21 +393,23 @@ export class OperationLogSyncService {
                 OpLog.normal(
                   `OperationLogSyncService: Got ${forceDownloadResult.allOpClocks.length} clocks from force download`,
                 );
-                mergedOpsCreated += await this._resolveStaleLocalOps(
-                  stillPendingOps,
-                  forceDownloadResult.allOpClocks,
-                  forceDownloadResult.snapshotVectorClock,
-                );
+                mergedOpsCreated +=
+                  await this.staleOperationResolver.resolveStaleLocalOps(
+                    stillPendingOps,
+                    forceDownloadResult.allOpClocks,
+                    forceDownloadResult.snapshotVectorClock,
+                  );
               } else if (forceDownloadResult.snapshotVectorClock) {
                 // Force download returned no individual clocks but we have snapshot clock
                 OpLog.normal(
                   `OperationLogSyncService: Using snapshotVectorClock from force download`,
                 );
-                mergedOpsCreated += await this._resolveStaleLocalOps(
-                  stillPendingOps,
-                  undefined,
-                  forceDownloadResult.snapshotVectorClock,
-                );
+                mergedOpsCreated +=
+                  await this.staleOperationResolver.resolveStaleLocalOps(
+                    stillPendingOps,
+                    undefined,
+                    forceDownloadResult.snapshotVectorClock,
+                  );
               } else {
                 // Force download returned no clocks but we have concurrent ops.
                 // This is an unrecoverable edge case - cannot safely resolve without server clocks.
@@ -443,7 +438,7 @@ export class OperationLogSyncService {
                 `OperationLogSyncService: Download got ${downloadResult.newOpsCount} ops but ${stillPendingOps.length} ` +
                   `concurrent ops still pending. Resolving locally with merged clocks...`,
               );
-              mergedOpsCreated += await this._resolveStaleLocalOps(
+              mergedOpsCreated += await this.staleOperationResolver.resolveStaleLocalOps(
                 stillPendingOps,
                 undefined,
                 downloadResult.snapshotVectorClock,
@@ -460,166 +455,6 @@ export class OperationLogSyncService {
     }
 
     return mergedOpsCreated;
-  }
-
-  /**
-   * Resolves stale local ops that were rejected due to concurrent modification.
-   *
-   * When the server rejects ops because of concurrent clocks, but download returns nothing
-   * (we already have the conflicting remote ops), we need to:
-   * 1. Mark the old pending ops as rejected (their clocks are stale)
-   * 2. Create NEW ops with the current entity state and merged vector clocks
-   * 3. The new ops will be uploaded on next sync cycle
-   *
-   * @param staleOps - Operations that were rejected due to concurrent modification
-   * @param extraClocks - Additional clocks to merge (from force download)
-   * @param snapshotVectorClock - Aggregated clock from snapshot optimization (if available)
-   * @returns Number of merged ops created
-   */
-  private async _resolveStaleLocalOps(
-    staleOps: Array<{ opId: string; op: Operation }>,
-    extraClocks?: VectorClock[],
-    snapshotVectorClock?: VectorClock,
-  ): Promise<number> {
-    const clientId = await this.clientIdProvider.loadClientId();
-    if (!clientId) {
-      OpLog.err('OperationLogSyncService: Cannot resolve stale ops - no client ID');
-      return 0;
-    }
-
-    // Get the GLOBAL vector clock which includes snapshot + all ops after
-    // This ensures we have all known clocks, not just entity-specific ones
-    let globalClock = await this.vectorClockService.getCurrentVectorClock();
-
-    // Merge snapshot vector clock if available (from server's snapshot optimization)
-    // This ensures we have the clocks from ops that were skipped during download
-    if (snapshotVectorClock && Object.keys(snapshotVectorClock).length > 0) {
-      OpLog.normal(
-        `OperationLogSyncService: Merging snapshotVectorClock with ${Object.keys(snapshotVectorClock).length} entries`,
-      );
-      globalClock = mergeVectorClocks(globalClock, snapshotVectorClock);
-    }
-
-    // If extra clocks were provided (from force download), merge them all
-    // This helps recover from situations where our local clock is missing entries
-    if (extraClocks && extraClocks.length > 0) {
-      OpLog.normal(
-        `OperationLogSyncService: Merging ${extraClocks.length} clocks from force download`,
-      );
-      for (const clock of extraClocks) {
-        globalClock = mergeVectorClocks(globalClock, clock);
-      }
-    }
-
-    // Group ops by entity to handle multiple ops for the same entity
-    const opsByEntity = new Map<string, Array<{ opId: string; op: Operation }>>();
-    for (const item of staleOps) {
-      // Skip ops without entityId (shouldn't happen for entity-level ops)
-      if (!item.op.entityId) {
-        OpLog.warn(
-          `OperationLogSyncService: Skipping stale op ${item.opId} - no entityId`,
-        );
-        continue;
-      }
-      const entityKey = toEntityKey(item.op.entityType, item.op.entityId);
-      if (!opsByEntity.has(entityKey)) {
-        opsByEntity.set(entityKey, []);
-      }
-      opsByEntity.get(entityKey)!.push(item);
-    }
-
-    const opsToReject: string[] = [];
-    const newOpsCreated: Operation[] = [];
-
-    for (const [entityKey, entityOps] of opsByEntity) {
-      // Get the first op to determine entity type and ID
-      const firstOp = entityOps[0].op;
-      const entityType = firstOp.entityType;
-      const entityId = firstOp.entityId!; // Non-null - we filtered out ops without entityId above
-
-      // Start with the global clock to ensure we dominate ALL known ops
-      // Then merge in the local pending ops' clocks
-      let mergedClock: VectorClock = { ...globalClock };
-      for (const { op } of entityOps) {
-        mergedClock = mergeVectorClocks(mergedClock, op.vectorClock);
-      }
-
-      // Increment to create a clock that dominates everything
-      const newClock = incrementVectorClock(mergedClock, clientId);
-
-      // Get current entity state from NgRx store
-      const entityState = await this.conflictResolutionService.getCurrentEntityState(
-        entityType,
-        entityId,
-      );
-      if (entityState === undefined) {
-        OpLog.warn(
-          `OperationLogSyncService: Cannot create update op - entity not found: ${entityKey}`,
-        );
-        // Still mark the ops as rejected
-        opsToReject.push(...entityOps.map((e) => e.opId));
-        continue;
-      }
-
-      // Preserve the maximum timestamp from the stale ops being replaced.
-      // This is critical for LWW conflict resolution: if we use Date.now(), the new op
-      // would have a later timestamp than the original user action, causing it to
-      // incorrectly win against concurrent ops that were actually made earlier.
-      const preservedTimestamp = Math.max(...entityOps.map((e) => e.op.timestamp));
-
-      // Create new UPDATE op with current state and merged clock
-      // IMPORTANT: Use 'LWW Update' action type to match lwwUpdateMetaReducer pattern.
-      // This ensures the operation is properly applied on remote clients.
-      const newOp: Operation = {
-        id: uuidv7(),
-        actionType: `[${entityType}] LWW Update`,
-        opType: OpType.Update,
-        entityType,
-        entityId,
-        payload: entityState,
-        clientId,
-        vectorClock: newClock,
-        timestamp: preservedTimestamp,
-        schemaVersion: CURRENT_SCHEMA_VERSION,
-      };
-
-      newOpsCreated.push(newOp);
-      opsToReject.push(...entityOps.map((e) => e.opId));
-
-      OpLog.normal(
-        `OperationLogSyncService: Created LWW update op for ${entityKey}, ` +
-          `replacing ${entityOps.length} stale op(s). New clock: ${JSON.stringify(newClock)}`,
-      );
-    }
-
-    // Mark old ops as rejected
-    if (opsToReject.length > 0) {
-      await this.opLogStore.markRejected(opsToReject);
-      OpLog.normal(
-        `OperationLogSyncService: Marked ${opsToReject.length} stale ops as rejected`,
-      );
-    }
-
-    // Append new ops to the log (will be uploaded on next sync)
-    // Uses appendWithVectorClockUpdate to ensure vector clock store stays in sync
-    for (const op of newOpsCreated) {
-      await this.opLogStore.appendWithVectorClockUpdate(op, 'local');
-      OpLog.normal(
-        `OperationLogSyncService: Appended LWW update op ${op.id} for ${op.entityType}:${op.entityId}`,
-      );
-    }
-
-    if (newOpsCreated.length > 0) {
-      this.snackService.open({
-        msg: T.F.SYNC.S.LWW_CONFLICTS_AUTO_RESOLVED,
-        translateParams: {
-          localWins: newOpsCreated.length,
-          remoteWins: 0,
-        },
-      });
-    }
-
-    return newOpsCreated.length;
   }
 
   /**
@@ -1079,7 +914,7 @@ export class OperationLogSyncService {
     const CONFLICT_CHECK_BATCH_SIZE = 100;
     for (let i = 0; i < remoteOps.length; i++) {
       const remoteOp = remoteOps[i];
-      const result = this._checkOpForConflicts(remoteOp, {
+      const result = this.conflictResolutionService.checkOpForConflicts(remoteOp, {
         localPendingOpsByEntity,
         appliedFrontierByEntity,
         snapshotVectorClock,
@@ -1116,190 +951,6 @@ export class OperationLogSyncService {
   }
 
   /**
-   * Context needed for conflict detection.
-   */
-  private _checkOpForConflicts(
-    remoteOp: Operation,
-    ctx: {
-      localPendingOpsByEntity: Map<string, Operation[]>;
-      appliedFrontierByEntity: Map<string, VectorClock>;
-      snapshotVectorClock: VectorClock | undefined;
-      snapshotEntityKeys: Set<string> | undefined;
-      hasNoSnapshotClock: boolean;
-    },
-  ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } {
-    const entityIdsToCheck =
-      remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
-
-    for (const entityId of entityIdsToCheck) {
-      const entityKey = toEntityKey(remoteOp.entityType, entityId);
-      const localOpsForEntity = ctx.localPendingOpsByEntity.get(entityKey) || [];
-
-      const result = this._checkEntityForConflict(remoteOp, entityId, entityKey, {
-        localOpsForEntity,
-        appliedFrontier: ctx.appliedFrontierByEntity.get(entityKey),
-        snapshotVectorClock: ctx.snapshotVectorClock,
-        snapshotEntityKeys: ctx.snapshotEntityKeys,
-        hasNoSnapshotClock: ctx.hasNoSnapshotClock,
-      });
-
-      if (result.isStaleOrDuplicate) {
-        return { isStaleOrDuplicate: true, conflict: null };
-      }
-      if (result.conflict) {
-        return { isStaleOrDuplicate: false, conflict: result.conflict };
-      }
-    }
-
-    return { isStaleOrDuplicate: false, conflict: null };
-  }
-
-  /**
-   * Checks a single entity for conflict with a remote operation.
-   */
-  private _checkEntityForConflict(
-    remoteOp: Operation,
-    entityId: string,
-    entityKey: string,
-    ctx: {
-      localOpsForEntity: Operation[];
-      appliedFrontier: VectorClock | undefined;
-      snapshotVectorClock: VectorClock | undefined;
-      snapshotEntityKeys: Set<string> | undefined;
-      hasNoSnapshotClock: boolean;
-    },
-  ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } {
-    const localFrontier = this._buildEntityFrontier(entityKey, ctx);
-    const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
-
-    // FAST PATH: No local state means remote is newer by default
-    if (ctx.localOpsForEntity.length === 0 && localFrontierIsEmpty) {
-      return { isStaleOrDuplicate: false, conflict: null };
-    }
-
-    let vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
-
-    // Handle potential per-entity clock corruption
-    vcComparison = this._adjustForClockCorruption(vcComparison, entityKey, {
-      localOpsForEntity: ctx.localOpsForEntity,
-      hasNoSnapshotClock: ctx.hasNoSnapshotClock,
-      localFrontierIsEmpty,
-    });
-
-    // Skip stale operations (local already has newer state)
-    if (vcComparison === VectorClockComparison.GREATER_THAN) {
-      OpLog.verbose(
-        `OperationLogSyncService: Skipping stale remote op (local dominates): ${remoteOp.id}`,
-      );
-      return { isStaleOrDuplicate: true, conflict: null };
-    }
-
-    // Skip duplicate operations (already applied)
-    if (vcComparison === VectorClockComparison.EQUAL) {
-      OpLog.verbose(
-        `OperationLogSyncService: Skipping duplicate remote op: ${remoteOp.id}`,
-      );
-      return { isStaleOrDuplicate: true, conflict: null };
-    }
-
-    // No pending ops = no conflict possible
-    if (ctx.localOpsForEntity.length === 0) {
-      return { isStaleOrDuplicate: false, conflict: null };
-    }
-
-    // CONCURRENT = true conflict
-    if (vcComparison === VectorClockComparison.CONCURRENT) {
-      return {
-        isStaleOrDuplicate: false,
-        conflict: {
-          entityType: remoteOp.entityType,
-          entityId,
-          localOps: ctx.localOpsForEntity,
-          remoteOps: [remoteOp],
-          suggestedResolution: this._suggestResolution(ctx.localOpsForEntity, [remoteOp]),
-        },
-      };
-    }
-
-    return { isStaleOrDuplicate: false, conflict: null };
-  }
-
-  /**
-   * Builds the local frontier vector clock for an entity.
-   * Merges applied frontier + pending ops clocks.
-   */
-  private _buildEntityFrontier(
-    entityKey: string,
-    ctx: {
-      localOpsForEntity: Operation[];
-      appliedFrontier: VectorClock | undefined;
-      snapshotVectorClock: VectorClock | undefined;
-      snapshotEntityKeys: Set<string> | undefined;
-    },
-  ): VectorClock {
-    // Use snapshot clock only for entities that existed at snapshot time
-    const entityExistedAtSnapshot =
-      ctx.snapshotEntityKeys === undefined || ctx.snapshotEntityKeys.has(entityKey);
-    const fallbackClock = entityExistedAtSnapshot ? ctx.snapshotVectorClock : {};
-    const baselineClock = ctx.appliedFrontier || fallbackClock || {};
-
-    const allClocks = [
-      baselineClock,
-      ...ctx.localOpsForEntity.map((op) => op.vectorClock),
-    ];
-    return allClocks.reduce((acc, clock) => mergeVectorClocks(acc, clock), {});
-  }
-
-  /**
-   * Adjusts comparison result for potential per-entity clock corruption.
-   * Converts LESS_THAN or GREATER_THAN to CONCURRENT if corruption is suspected.
-   *
-   * ## Corruption Detection
-   * Potential corruption is detected when:
-   * - Entity has pending local ops (we made changes)
-   * - But has no snapshot clock AND empty local frontier
-   * - This suggests the clock data was lost/corrupted
-   *
-   * ## Safety Behavior
-   * When corruption is suspected:
-   * - LESS_THAN → CONCURRENT: Prevents incorrectly skipping local ops
-   * - GREATER_THAN → CONCURRENT: Prevents incorrectly skipping remote ops
-   *
-   * Converting to CONCURRENT forces conflict resolution, which is safer than
-   * silently skipping either local or remote operations.
-   */
-  private _adjustForClockCorruption(
-    comparison: VectorClockComparison,
-    entityKey: string,
-    ctx: {
-      localOpsForEntity: Operation[];
-      hasNoSnapshotClock: boolean;
-      localFrontierIsEmpty: boolean;
-    },
-  ): VectorClockComparison {
-    const entityHasPendingOps = ctx.localOpsForEntity.length > 0;
-    const potentialCorruption =
-      entityHasPendingOps && ctx.hasNoSnapshotClock && ctx.localFrontierIsEmpty;
-
-    if (potentialCorruption && comparison === VectorClockComparison.LESS_THAN) {
-      OpLog.warn(
-        `OperationLogSyncService: Converting LESS_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption`,
-      );
-      return VectorClockComparison.CONCURRENT;
-    }
-
-    if (potentialCorruption && comparison === VectorClockComparison.GREATER_THAN) {
-      OpLog.warn(
-        `OperationLogSyncService: Converting GREATER_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption. ` +
-          `Remote op will be processed via conflict resolution instead of being skipped.`,
-      );
-      return VectorClockComparison.CONCURRENT;
-    }
-
-    return comparison;
-  }
-
-  /**
    * CHECKPOINT D: Validates state after applying remote operations.
    * If validation fails, attempts repair and creates a REPAIR operation.
    *
@@ -1310,63 +961,5 @@ export class OperationLogSyncService {
     await this.validateStateService.validateAndRepairCurrentState('sync', {
       callerHoldsLock,
     });
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CONFLICT RESOLUTION HEURISTICS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Suggests a conflict resolution based on heuristics.
-   *
-   * ## Heuristics (in priority order)
-   * 1. **Large time gap (>1 hour)**: Newer wins - user likely made sequential changes
-   * 2. **Delete vs Update**: Update wins - preserve data over deletion
-   * 3. **Create vs other**: Create wins - entity creation is more significant
-   * 4. **Default**: Manual - let user decide
-   *
-   * @returns 'local' | 'remote' | 'manual' suggestion for the conflict dialog
-   */
-  private _suggestResolution(
-    localOps: Operation[],
-    remoteOps: Operation[],
-  ): 'local' | 'remote' | 'manual' {
-    // Edge case: no ops on one side = clear winner
-    if (localOps.length === 0) return 'remote';
-    if (remoteOps.length === 0) return 'local';
-
-    const latestLocal = Math.max(...localOps.map((op) => op.timestamp));
-    const latestRemote = Math.max(...remoteOps.map((op) => op.timestamp));
-    const timeDiffMs = Math.abs(latestLocal - latestRemote);
-
-    // Heuristic 1: Large time gap (>1 hour) = newer wins
-    // Rationale: User likely made changes in sequence, not concurrently
-    const ONE_HOUR_MS = 60 * 60 * 1000;
-    if (timeDiffMs > ONE_HOUR_MS) {
-      return latestLocal > latestRemote ? 'local' : 'remote';
-    }
-
-    // Heuristic 2: Delete conflicts
-    const hasLocalDelete = localOps.some((op) => op.opType === OpType.Delete);
-    const hasRemoteDelete = remoteOps.some((op) => op.opType === OpType.Delete);
-
-    // Heuristic 2a: Both delete - auto-resolve (outcome is identical either way)
-    // Rationale: Both clients want the entity deleted, no conflict to resolve
-    if (hasLocalDelete && hasRemoteDelete) return 'local';
-
-    // Heuristic 2b: Delete vs Update - prefer Update (preserve data)
-    // Rationale: Users generally prefer not to lose work
-    if (hasLocalDelete && !hasRemoteDelete) return 'remote';
-    if (hasRemoteDelete && !hasLocalDelete) return 'local';
-
-    // Heuristic 3: Create vs anything else - Create wins
-    // Rationale: If one side created entity, that's more significant
-    const hasLocalCreate = localOps.some((op) => op.opType === OpType.Create);
-    const hasRemoteCreate = remoteOps.some((op) => op.opType === OpType.Create);
-    if (hasLocalCreate && !hasRemoteCreate) return 'local';
-    if (hasRemoteCreate && !hasLocalCreate) return 'remote';
-
-    // Default: manual - let user decide
-    return 'manual';
   }
 }

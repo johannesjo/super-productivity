@@ -18,8 +18,10 @@ import { ValidateStateService } from '../processing/validate-state.service';
 import { BACKUP_TIMEOUT_MS, MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
 import { SyncSafetyBackupService } from '../../../../imex/sync/sync-safety-backup.service';
 import {
+  compareVectorClocks,
   incrementVectorClock,
   mergeVectorClocks,
+  VectorClockComparison,
 } from '../../../../pfapi/api/util/vector-clock';
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
@@ -669,5 +671,255 @@ export class ConflictResolutionService {
       );
       return undefined;
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONFLICT DETECTION
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Checks a remote operation for conflicts with local pending operations.
+   *
+   * @param remoteOp - The remote operation to check
+   * @param ctx - Context containing local state for conflict detection
+   * @returns Object indicating if op is stale/duplicate and any detected conflict
+   */
+  checkOpForConflicts(
+    remoteOp: Operation,
+    ctx: {
+      localPendingOpsByEntity: Map<string, Operation[]>;
+      appliedFrontierByEntity: Map<string, VectorClock>;
+      snapshotVectorClock: VectorClock | undefined;
+      snapshotEntityKeys: Set<string> | undefined;
+      hasNoSnapshotClock: boolean;
+    },
+  ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } {
+    const entityIdsToCheck =
+      remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
+
+    for (const entityId of entityIdsToCheck) {
+      const entityKey = toEntityKey(remoteOp.entityType, entityId);
+      const localOpsForEntity = ctx.localPendingOpsByEntity.get(entityKey) || [];
+
+      const result = this._checkEntityForConflict(remoteOp, entityId, entityKey, {
+        localOpsForEntity,
+        appliedFrontier: ctx.appliedFrontierByEntity.get(entityKey),
+        snapshotVectorClock: ctx.snapshotVectorClock,
+        snapshotEntityKeys: ctx.snapshotEntityKeys,
+        hasNoSnapshotClock: ctx.hasNoSnapshotClock,
+      });
+
+      if (result.isStaleOrDuplicate) {
+        return { isStaleOrDuplicate: true, conflict: null };
+      }
+      if (result.conflict) {
+        return { isStaleOrDuplicate: false, conflict: result.conflict };
+      }
+    }
+
+    return { isStaleOrDuplicate: false, conflict: null };
+  }
+
+  /**
+   * Checks a single entity for conflict with a remote operation.
+   */
+  private _checkEntityForConflict(
+    remoteOp: Operation,
+    entityId: string,
+    entityKey: string,
+    ctx: {
+      localOpsForEntity: Operation[];
+      appliedFrontier: VectorClock | undefined;
+      snapshotVectorClock: VectorClock | undefined;
+      snapshotEntityKeys: Set<string> | undefined;
+      hasNoSnapshotClock: boolean;
+    },
+  ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } {
+    const localFrontier = this._buildEntityFrontier(entityKey, ctx);
+    const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
+
+    // FAST PATH: No local state means remote is newer by default
+    if (ctx.localOpsForEntity.length === 0 && localFrontierIsEmpty) {
+      return { isStaleOrDuplicate: false, conflict: null };
+    }
+
+    let vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
+
+    // Handle potential per-entity clock corruption
+    vcComparison = this._adjustForClockCorruption(vcComparison, entityKey, {
+      localOpsForEntity: ctx.localOpsForEntity,
+      hasNoSnapshotClock: ctx.hasNoSnapshotClock,
+      localFrontierIsEmpty,
+    });
+
+    // Skip stale operations (local already has newer state)
+    if (vcComparison === VectorClockComparison.GREATER_THAN) {
+      OpLog.verbose(
+        `ConflictResolutionService: Skipping stale remote op (local dominates): ${remoteOp.id}`,
+      );
+      return { isStaleOrDuplicate: true, conflict: null };
+    }
+
+    // Skip duplicate operations (already applied)
+    if (vcComparison === VectorClockComparison.EQUAL) {
+      OpLog.verbose(
+        `ConflictResolutionService: Skipping duplicate remote op: ${remoteOp.id}`,
+      );
+      return { isStaleOrDuplicate: true, conflict: null };
+    }
+
+    // No pending ops = no conflict possible
+    if (ctx.localOpsForEntity.length === 0) {
+      return { isStaleOrDuplicate: false, conflict: null };
+    }
+
+    // CONCURRENT = true conflict
+    if (vcComparison === VectorClockComparison.CONCURRENT) {
+      return {
+        isStaleOrDuplicate: false,
+        conflict: {
+          entityType: remoteOp.entityType,
+          entityId,
+          localOps: ctx.localOpsForEntity,
+          remoteOps: [remoteOp],
+          suggestedResolution: this._suggestResolution(ctx.localOpsForEntity, [remoteOp]),
+        },
+      };
+    }
+
+    return { isStaleOrDuplicate: false, conflict: null };
+  }
+
+  /**
+   * Builds the local frontier vector clock for an entity.
+   * Merges applied frontier + pending ops clocks.
+   */
+  private _buildEntityFrontier(
+    entityKey: string,
+    ctx: {
+      localOpsForEntity: Operation[];
+      appliedFrontier: VectorClock | undefined;
+      snapshotVectorClock: VectorClock | undefined;
+      snapshotEntityKeys: Set<string> | undefined;
+    },
+  ): VectorClock {
+    // Use snapshot clock only for entities that existed at snapshot time
+    const entityExistedAtSnapshot =
+      ctx.snapshotEntityKeys === undefined || ctx.snapshotEntityKeys.has(entityKey);
+    const fallbackClock = entityExistedAtSnapshot ? ctx.snapshotVectorClock : {};
+    const baselineClock = ctx.appliedFrontier || fallbackClock || {};
+
+    const allClocks = [
+      baselineClock,
+      ...ctx.localOpsForEntity.map((op) => op.vectorClock),
+    ];
+    return allClocks.reduce((acc, clock) => mergeVectorClocks(acc, clock), {});
+  }
+
+  /**
+   * Adjusts comparison result for potential per-entity clock corruption.
+   * Converts LESS_THAN or GREATER_THAN to CONCURRENT if corruption is suspected.
+   *
+   * ## Corruption Detection
+   * Potential corruption is detected when:
+   * - Entity has pending local ops (we made changes)
+   * - But has no snapshot clock AND empty local frontier
+   * - This suggests the clock data was lost/corrupted
+   *
+   * ## Safety Behavior
+   * When corruption is suspected:
+   * - LESS_THAN → CONCURRENT: Prevents incorrectly skipping local ops
+   * - GREATER_THAN → CONCURRENT: Prevents incorrectly skipping remote ops
+   *
+   * Converting to CONCURRENT forces conflict resolution, which is safer than
+   * silently skipping either local or remote operations.
+   */
+  private _adjustForClockCorruption(
+    comparison: VectorClockComparison,
+    entityKey: string,
+    ctx: {
+      localOpsForEntity: Operation[];
+      hasNoSnapshotClock: boolean;
+      localFrontierIsEmpty: boolean;
+    },
+  ): VectorClockComparison {
+    const entityHasPendingOps = ctx.localOpsForEntity.length > 0;
+    const potentialCorruption =
+      entityHasPendingOps && ctx.hasNoSnapshotClock && ctx.localFrontierIsEmpty;
+
+    if (potentialCorruption && comparison === VectorClockComparison.LESS_THAN) {
+      OpLog.warn(
+        `ConflictResolutionService: Converting LESS_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption`,
+      );
+      return VectorClockComparison.CONCURRENT;
+    }
+
+    if (potentialCorruption && comparison === VectorClockComparison.GREATER_THAN) {
+      OpLog.warn(
+        `ConflictResolutionService: Converting GREATER_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption. ` +
+          `Remote op will be processed via conflict resolution instead of being skipped.`,
+      );
+      return VectorClockComparison.CONCURRENT;
+    }
+
+    return comparison;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONFLICT RESOLUTION HEURISTICS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Suggests a conflict resolution based on heuristics.
+   *
+   * ## Heuristics (in priority order)
+   * 1. **Large time gap (>1 hour)**: Newer wins - user likely made sequential changes
+   * 2. **Delete vs Update**: Update wins - preserve data over deletion
+   * 3. **Create vs other**: Create wins - entity creation is more significant
+   * 4. **Default**: Manual - let user decide
+   *
+   * @returns 'local' | 'remote' | 'manual' suggestion for the conflict dialog
+   */
+  private _suggestResolution(
+    localOps: Operation[],
+    remoteOps: Operation[],
+  ): 'local' | 'remote' | 'manual' {
+    // Edge case: no ops on one side = clear winner
+    if (localOps.length === 0) return 'remote';
+    if (remoteOps.length === 0) return 'local';
+
+    const latestLocal = Math.max(...localOps.map((op) => op.timestamp));
+    const latestRemote = Math.max(...remoteOps.map((op) => op.timestamp));
+    const timeDiffMs = Math.abs(latestLocal - latestRemote);
+
+    // Heuristic 1: Large time gap (>1 hour) = newer wins
+    // Rationale: User likely made changes in sequence, not concurrently
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+    if (timeDiffMs > ONE_HOUR_MS) {
+      return latestLocal > latestRemote ? 'local' : 'remote';
+    }
+
+    // Heuristic 2: Delete conflicts
+    const hasLocalDelete = localOps.some((op) => op.opType === OpType.Delete);
+    const hasRemoteDelete = remoteOps.some((op) => op.opType === OpType.Delete);
+
+    // Heuristic 2a: Both delete - auto-resolve (outcome is identical either way)
+    // Rationale: Both clients want the entity deleted, no conflict to resolve
+    if (hasLocalDelete && hasRemoteDelete) return 'local';
+
+    // Heuristic 2b: Delete vs Update - prefer Update (preserve data)
+    // Rationale: Users generally prefer not to lose work
+    if (hasLocalDelete && !hasRemoteDelete) return 'remote';
+    if (hasRemoteDelete && !hasLocalDelete) return 'local';
+
+    // Heuristic 3: Create vs anything else - Create wins
+    // Rationale: If one side created entity, that's more significant
+    const hasLocalCreate = localOps.some((op) => op.opType === OpType.Create);
+    const hasRemoteCreate = remoteOps.some((op) => op.opType === OpType.Create);
+    if (hasLocalCreate && !hasRemoteCreate) return 'local';
+    if (hasRemoteCreate && !hasLocalCreate) return 'remote';
+
+    // Default: manual - let user decide
+    return 'manual';
   }
 }

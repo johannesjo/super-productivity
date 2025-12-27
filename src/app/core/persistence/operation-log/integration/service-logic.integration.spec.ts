@@ -22,7 +22,13 @@ import {
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
 import { provideMockStore } from '@ngrx/store/testing';
-import { OpType, Operation } from '../operation.types';
+import { EntityConflict, OpType, Operation, VectorClock } from '../operation.types';
+import {
+  compareVectorClocks,
+  mergeVectorClocks,
+  VectorClockComparison,
+} from '../../../../pfapi/api/util/vector-clock';
+import { toEntityKey } from '../entity-key.util';
 import { MatDialog } from '@angular/material/dialog';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 import { SnackService } from '../../../snack/snack.service';
@@ -177,9 +183,85 @@ describe('Service Logic Integration', () => {
     // Spies for dependencies we don't want to execute fully
     conflictServiceSpy = jasmine.createSpyObj('ConflictResolutionService', [
       'autoResolveConflictsLWW',
+      'checkOpForConflicts',
     ]);
     conflictServiceSpy.autoResolveConflictsLWW.and.returnValue(
       Promise.resolve({ localWinOpsCreated: 0 }),
+    );
+    // Intelligent mock that implements the actual conflict detection logic
+    conflictServiceSpy.checkOpForConflicts.and.callFake(
+      (
+        remoteOp: Operation,
+        ctx: {
+          localPendingOpsByEntity: Map<string, Operation[]>;
+          appliedFrontierByEntity: Map<string, VectorClock>;
+          snapshotVectorClock: VectorClock | undefined;
+          snapshotEntityKeys: Set<string> | undefined;
+          hasNoSnapshotClock: boolean;
+        },
+      ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } => {
+        const entityIdsToCheck =
+          remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
+
+        for (const entityId of entityIdsToCheck) {
+          const entityKey = toEntityKey(remoteOp.entityType, entityId);
+          const localOpsForEntity = ctx.localPendingOpsByEntity.get(entityKey) || [];
+          const appliedFrontier = ctx.appliedFrontierByEntity.get(entityKey);
+
+          // Build local frontier
+          const entityExistedAtSnapshot =
+            ctx.snapshotEntityKeys === undefined || ctx.snapshotEntityKeys.has(entityKey);
+          const fallbackClock = entityExistedAtSnapshot ? ctx.snapshotVectorClock : {};
+          const baselineClock = appliedFrontier || fallbackClock || {};
+          const allClocks = [
+            baselineClock,
+            ...localOpsForEntity.map((op) => op.vectorClock),
+          ];
+          const localFrontier = allClocks.reduce(
+            (acc, clock) => mergeVectorClocks(acc, clock || {}),
+            {},
+          );
+          const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
+
+          // FAST PATH: No local state means remote is newer by default
+          if (localOpsForEntity.length === 0 && localFrontierIsEmpty) {
+            continue;
+          }
+
+          const vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
+
+          // Skip stale operations (local already has newer state)
+          if (vcComparison === VectorClockComparison.GREATER_THAN) {
+            return { isStaleOrDuplicate: true, conflict: null };
+          }
+
+          // Skip duplicate operations (already applied)
+          if (vcComparison === VectorClockComparison.EQUAL) {
+            return { isStaleOrDuplicate: true, conflict: null };
+          }
+
+          // No pending ops = no conflict possible
+          if (localOpsForEntity.length === 0) {
+            continue;
+          }
+
+          // CONCURRENT = true conflict
+          if (vcComparison === VectorClockComparison.CONCURRENT) {
+            return {
+              isStaleOrDuplicate: false,
+              conflict: {
+                entityType: remoteOp.entityType,
+                entityId,
+                localOps: localOpsForEntity,
+                remoteOps: [remoteOp],
+                suggestedResolution: 'manual',
+              },
+            };
+          }
+        }
+
+        return { isStaleOrDuplicate: false, conflict: null };
+      },
     );
     applierSpy = jasmine.createSpyObj('OperationApplierService', ['applyOperations']);
     applierSpy.applyOperations.and.returnValue(Promise.resolve({ appliedOps: [] }));
