@@ -37,6 +37,7 @@ The write path captures user actions and persists them as operations to IndexedD
 ```
 
 **Key Files:**
+
 - `operation-capture.meta-reducer.ts` - Captures persistent actions
 - `operation-capture.service.ts` - FIFO queue
 - `operation-log.effects.ts` - Writes to IndexedDB
@@ -85,6 +86,7 @@ The read path loads application state at startup by combining a snapshot with ta
 ```
 
 **Key Files:**
+
 - `operation-log-hydrator.service.ts` - Orchestrates hydration
 - `schema-migration.service.ts` - Schema migrations
 - `bulk-hydration.meta-reducer.ts` - Bulk operation application
@@ -130,6 +132,7 @@ SuperSync exchanges individual operations with a centralized server.
 ```
 
 **Key Files:**
+
 - `operation-log-sync.service.ts` - Sync orchestration
 - `operation-log-upload.service.ts` - Upload logic
 - `operation-log-download.service.ts` - Download logic
@@ -184,16 +187,17 @@ Conflict detection uses vector clocks to determine causal relationships.
 
 **Comparison Results:**
 
-| Comparison | Meaning | Has Local Pending? | Action |
-|------------|---------|-------------------|--------|
-| `EQUAL` | Same operation | N/A | Skip (duplicate) |
-| `GREATER_THAN` | Local is newer | N/A | Skip (stale remote) |
-| `LESS_THAN` | Remote is newer | No | Apply remote |
-| `LESS_THAN` | Remote is newer | Yes | Apply (remote dominates) |
-| `CONCURRENT` | Neither dominates | No | Apply remote |
-| `CONCURRENT` | Neither dominates | Yes | **TRUE CONFLICT** |
+| Comparison     | Meaning           | Has Local Pending? | Action                   |
+| -------------- | ----------------- | ------------------ | ------------------------ |
+| `EQUAL`        | Same operation    | N/A                | Skip (duplicate)         |
+| `GREATER_THAN` | Local is newer    | N/A                | Skip (stale remote)      |
+| `LESS_THAN`    | Remote is newer   | No                 | Apply remote             |
+| `LESS_THAN`    | Remote is newer   | Yes                | Apply (remote dominates) |
+| `CONCURRENT`   | Neither dominates | No                 | Apply remote             |
+| `CONCURRENT`   | Neither dominates | Yes                | **TRUE CONFLICT**        |
 
 **Key Files:**
+
 - `vector-clock.service.ts` - Vector clock management
 - `conflict-resolution.service.ts` - Conflict detection logic
 - `src/app/pfapi/api/util/vector-clock.ts` - Clock comparison
@@ -241,15 +245,16 @@ Last-Write-Wins automatically resolves conflicts using timestamps.
 
 **Key Invariants:**
 
-| Invariant | Reason |
-|-----------|--------|
-| Preserve original timestamp | Prevents unfair advantage in future conflicts |
-| Merge ALL clocks | New op dominates everything known |
-| Reject ALL pending ops for entity | Prevents stale ops from being uploaded |
-| Mark rejected BEFORE applying | Crash safety |
-| Remote wins on tie | Server-authoritative |
+| Invariant                         | Reason                                        |
+| --------------------------------- | --------------------------------------------- |
+| Preserve original timestamp       | Prevents unfair advantage in future conflicts |
+| Merge ALL clocks                  | New op dominates everything known             |
+| Reject ALL pending ops for entity | Prevents stale ops from being uploaded        |
+| Mark rejected BEFORE applying     | Crash safety                                  |
+| Remote wins on tie                | Server-authoritative                          |
 
 **Key Files:**
+
 - `conflict-resolution.service.ts` - LWW resolution
 - `stale-operation-resolver.service.ts` - Stale op handling
 
@@ -290,12 +295,13 @@ Clean slate semantics ensure imports restore all clients to the same state.
 
 **Why Vector Clocks, Not UUIDv7 Timestamps?**
 
-| Approach | Problem |
-|----------|---------|
-| UUIDv7 Timestamps | Affected by clock drift |
-| Vector Clocks | Track **causality** - immune to clock drift |
+| Approach          | Problem                                     |
+| ----------------- | ------------------------------------------- |
+| UUIDv7 Timestamps | Affected by clock drift                     |
+| Vector Clocks     | Track **causality** - immune to clock drift |
 
 **Key Files:**
+
 - `sync-import-filter.service.ts` - Filtering logic
 
 ---
@@ -335,27 +341,378 @@ Archive data bypasses NgRx and is stored directly in IndexedDB.
 
 **Why This Architecture?**
 
-| Concern | Solution |
-|---------|----------|
-| Archive size | Don't sync archive data in operations |
-| Consistency | Deterministic replay produces same result |
-| Performance | Local writes, no network overhead |
-| Sync safety | Operations carry timestamps for reproducibility |
+| Concern      | Solution                                        |
+| ------------ | ----------------------------------------------- |
+| Archive size | Don't sync archive data in operations           |
+| Consistency  | Deterministic replay produces same result       |
+| Performance  | Local writes, no network overhead               |
+| Sync safety  | Operations carry timestamps for reproducibility |
 
 **Key Files:**
+
 - `archive-operation-handler.service.ts` - Unified handler
 - `archive-operation-handler.effects.ts` - Local action routing
 - `operation-applier.service.ts` - Calls handler for remote ops
 
 ---
 
-## Areas 8-12: Coming Soon
+## Area 8: Meta-Reducers
 
-- **Area 8: Meta-Reducers** - Atomic multi-entity changes
-- **Area 9: Compaction** - Snapshot creation, old op deletion
-- **Area 10: Bulk Application** - Performance optimization
-- **Area 11: Encryption (E2E)** - AES-256-GCM + Argon2id
-- **Area 12: Legacy PFAPI Bridge** - WebDAV/Dropbox sync
+Meta-reducers enable atomic multi-entity changes in a single reducer pass.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   META-REDUCER CHAIN                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Action Dispatched                                              │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Phase 1: operationCaptureMetaReducer                    │   │
+│  │          Captures persistent actions → FIFO queue       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Phase 2: bulkOperationsMetaReducer                      │   │
+│  │          Applies bulk ops during sync/hydration         │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Phase 3: lwwUpdateMetaReducer                           │   │
+│  │          Handles LWW Update actions (conflict wins)     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Phase 4: Tag/Project/IssueProvider Shared Reducers      │   │
+│  │          Cascade deletions across entities              │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Phase 5: Planner/ShortSyntax Shared Reducers            │   │
+│  │          Handle task movements and parsing              │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Phase 6: Feature Reducers (task, project, tag, etc.)    │   │
+│  │          Core state updates                             │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Phase 7: validateAndFixDataConsistency                  │   │
+│  │          Repair any inconsistencies                     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│        │                                                        │
+│        ▼                                                        │
+│  Final State                                                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Why Meta-Reducers for Multi-Entity Changes?**
+
+| Approach      | Problem                                                  |
+| ------------- | -------------------------------------------------------- |
+| Effects       | Multiple dispatches = multiple operations = partial sync |
+| Meta-reducers | Single pass = single operation = atomic sync             |
+
+**Example: Tag Deletion Cascade**
+
+```
+deleteTag({ id: 'tag-1' })
+       │
+       ▼ (tag-shared.reducer.ts)
+┌─────────────────────────────────────────┐
+│ 1. Remove tag from tag.ids              │
+│ 2. Remove tag from task.tagIds (all)    │
+│ 3. Remove tag from planner references   │
+│ 4. Update TODAY_TAG.taskIds if needed   │
+└─────────────────────────────────────────┘
+       │
+       ▼
+Single operation logged with all changes
+```
+
+**Key Files:**
+
+- `meta-reducer-registry.ts` - Ordering documentation
+- `tag-shared.reducer.ts` - Tag deletion cascade
+- `project-shared.reducer.ts` - Project deletion cascade
+- `planner-shared.reducer.ts` - Planner updates
+
+---
+
+## Area 9: Compaction
+
+Compaction prevents the operation log from growing indefinitely.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    COMPACTION PIPELINE                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  TRIGGER                                                        │
+│  ───────                                                        │
+│  Every 500 operations (COMPACTION_THRESHOLD)                    │
+│  OR Emergency (storage quota exceeded)                          │
+│                                                                 │
+│  STEPS (all within OPERATION_LOG lock)                          │
+│  ─────                                                          │
+│  1. Get current state from NgRx store                           │
+│                   │                                             │
+│  2. Get current vector clock                                    │
+│                   │                                             │
+│  3. Get lastSeq IMMEDIATELY before saving                       │
+│                   │                                             │
+│  4. Extract snapshotEntityKeys from state                       │
+│     (for conflict detection post-compaction)                    │
+│                   │                                             │
+│  5. Save snapshot to IndexedDB (state_cache):                   │
+│     {                                                           │
+│       state: currentState,                                      │
+│       lastAppliedOpSeq: lastSeq,                                │
+│       vectorClock: currentVectorClock,                          │
+│       compactedAt: Date.now(),                                  │
+│       schemaVersion: CURRENT_SCHEMA_VERSION,                    │
+│       snapshotEntityKeys: [...]                                 │
+│     }                                                           │
+│                   │                                             │
+│  6. Reset compaction counter                                    │
+│                   │                                             │
+│  7. Delete old operations WHERE:                                │
+│     ├─ syncedAt IS SET (never drop unsynced ops!)              │
+│     ├─ appliedAt < cutoff (7 days, or 1 day emergency)         │
+│     └─ seq <= lastSeq (keep tail for conflict frontier)         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Constants:**
+
+| Constant                            | Value      | Purpose                   |
+| ----------------------------------- | ---------- | ------------------------- |
+| `COMPACTION_THRESHOLD`              | 500 ops    | Triggers compaction       |
+| `COMPACTION_RETENTION_MS`           | 7 days     | Keep synced ops           |
+| `EMERGENCY_COMPACTION_RETENTION_MS` | 1 day      | Aggressive cleanup        |
+| `COMPACTION_TIMEOUT_MS`             | 25 seconds | Abort before lock expires |
+
+**Safety Rules:**
+
+| Rule                      | Why                       |
+| ------------------------- | ------------------------- |
+| Never delete unsynced ops | Would lose user data      |
+| Get lastSeq BEFORE saving | Race window safety        |
+| Keep ops within retention | Allow conflict resolution |
+
+**Key Files:**
+
+- `operation-log-compaction.service.ts` - Compaction logic
+- `operation-log.effects.ts` - Trigger and counter
+- `operation-log.const.ts` - Configuration constants
+
+---
+
+## Area 10: Bulk Application
+
+Bulk application optimizes performance by applying many operations in a single dispatch.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   BULK APPLICATION FLOW                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  WITHOUT BULK (naive):                                          │
+│  Op1 → dispatch → update → effects                              │
+│  Op2 → dispatch → update → effects                              │
+│  ...                                                            │
+│  Op500 → dispatch → update → effects                            │
+│  Result: 500 updates, 500 effect evaluations                    │
+│                                                                 │
+│  ─────────────────────────────────────────────────────────────  │
+│                                                                 │
+│  WITH BULK (optimized):                                         │
+│  [Op1, Op2, ..., Op500]                                        │
+│           │                                                     │
+│           ▼                                                     │
+│  dispatch(bulkApplyOperations({ operations }))                  │
+│           │                                                     │
+│           ▼ (in bulkOperationsMetaReducer)                     │
+│  ┌────────────────────────────────────────┐                    │
+│  │  for (op of operations) {              │                    │
+│  │    action = convertOpToAction(op)      │                    │
+│  │    state = reducer(state, action)      │                    │
+│  │  }                                     │                    │
+│  │  return state                          │                    │
+│  └────────────────────────────────────────┘                    │
+│           │                                                     │
+│           ▼                                                     │
+│  Single store update                                            │
+│  Effects see only: '[OperationLog] Bulk Apply Operations'       │
+│                                                                 │
+│  Result: 1 update, 0 individual effect triggers (10-50x faster) │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Why Effects Don't Fire:**
+
+| Effect Type    | Behavior                                                    |
+| -------------- | ----------------------------------------------------------- |
+| Action-based   | Only see `bulkApplyOperations` (no listener)                |
+| Selector-based | Suppressed by `HydrationStateService.isApplyingRemoteOps()` |
+
+**Key Files:**
+
+- `bulk-hydration.meta-reducer.ts` - Core loop
+- `bulk-hydration.action.ts` - Action definition
+- `operation-converter.util.ts` - Op → Action conversion
+- `operation-applier.service.ts` - Orchestration
+
+---
+
+## Area 11: Encryption (E2E)
+
+End-to-end encryption ensures the server never sees plaintext data.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   ENCRYPTION ARCHITECTURE                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  CLIENT A                    SERVER               CLIENT B      │
+│  ─────────                   ──────               ─────────     │
+│                                                                 │
+│  { task: "secret" }                                             │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────┐                                                │
+│  │  Argon2id   │ ← User password                               │
+│  │  Key Derive │   (64MB memory-hard)                          │
+│  └─────────────┘                                                │
+│        │                                                        │
+│        ▼                                                        │
+│  ┌─────────────┐                                                │
+│  │  AES-256    │                                                │
+│  │  GCM Encrypt│                                                │
+│  └─────────────┘                                                │
+│        │                                                        │
+│        ▼                                                        │
+│  "base64..." ──────────► [Encrypted blob] ─────────►            │
+│                          (server stores)            │           │
+│                                                     ▼           │
+│                                            ┌─────────────┐      │
+│                                            │  AES-256    │      │
+│                                            │  GCM Decrypt│      │
+│                                            └─────────────┘      │
+│                                                     │           │
+│                                                     ▼           │
+│                                            { task: "secret" }   │
+│                                                                 │
+│  SERVER SEES: Encrypted base64 blobs only                       │
+│  ZERO KNOWLEDGE: Server cannot read operation payloads          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Encryption Parameters:**
+
+| Parameter         | Value             |
+| ----------------- | ----------------- |
+| Algorithm         | AES-256-GCM       |
+| Key derivation    | Argon2id          |
+| Salt length       | 16 bytes (random) |
+| IV length         | 12 bytes (random) |
+| Argon2 memory     | 64 MB             |
+| Argon2 iterations | 3                 |
+
+**Encrypted Blob Format:**
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ Salt (16B) │ IV (12B) │ Ciphertext + GCM Auth Tag       │
+└──────────────────────────────────────────────────────────┘
+                    → Encoded as base64 for transport
+```
+
+**Key Files:**
+
+- `operation-encryption.service.ts` - High-level API
+- `pfapi/api/encryption/encryption.ts` - AES-GCM + Argon2id
+- `operation-log-upload.service.ts` - Encryption during upload
+- `operation-log-download.service.ts` - Decryption during download
+
+---
+
+## Area 12: Legacy PFAPI Bridge (File-Based Sync)
+
+PFAPI provides file-based sync for WebDAV, Dropbox, and LocalFile providers.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   SYNC PROVIDER ARCHITECTURE                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │                   SyncService                            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                            │                                    │
+│              ┌─────────────┴─────────────┐                     │
+│              ▼                           ▼                      │
+│  ┌────────────────────┐     ┌────────────────────────────────┐ │
+│  │  FILE-BASED SYNC   │     │  OPERATION-BASED SYNC          │ │
+│  │  (Legacy PFAPI)    │     │  (SuperSync)                   │ │
+│  │                    │     │                                │ │
+│  │  ├─ getFileRev()   │     │  ├─ uploadOps()                │ │
+│  │  ├─ downloadFile() │     │  ├─ downloadOps()              │ │
+│  │  ├─ uploadFile()   │     │  └─ uploadSnapshot()           │ │
+│  │  └─ removeFile()   │     │                                │ │
+│  └────────────────────┘     └────────────────────────────────┘ │
+│              │                           │                      │
+│  ┌───────┬───┴───┬──────────┐           │                      │
+│  ▼       ▼       ▼          ▼           ▼                      │
+│ WebDAV Dropbox LocalFile  ...     SuperSyncProvider            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**File-Based Sync Model:**
+
+```
+Remote Storage (WebDAV/Dropbox folder):
+
+/superProductivity/
+├── meta.json           ← Global metadata + vector clock
+├── task.json           ← Task entity state
+├── project.json        ← Project entity state
+├── tag.json            ← Tag entity state
+├── globalConfig.json   ← Global configuration
+└── ...                 ← Other model files
+```
+
+**SuperSync vs PFAPI Comparison:**
+
+| Aspect        | PFAPI (File)      | SuperSync (Ops)       |
+| ------------- | ----------------- | --------------------- |
+| Granularity   | Whole model files | Individual operations |
+| Conflict Unit | Entire model      | Single entity         |
+| Resolution    | User choice       | Automatic (LWW)       |
+| Bandwidth     | High (full state) | Low (deltas only)     |
+| History       | None              | Full op log           |
+
+**Key Files:**
+
+- `sync-provider.interface.ts` - Provider interfaces
+- `sync.service.ts` - Main sync orchestration
+- `model-sync.service.ts` - Model file upload/download
+- `providers/webdav/webdav.ts` - WebDAV implementation
+- `providers/dropbox/dropbox.ts` - Dropbox implementation
+- `providers/super-sync/super-sync.ts` - Operation-based provider
 
 ---
 
