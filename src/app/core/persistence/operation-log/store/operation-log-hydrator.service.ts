@@ -123,7 +123,8 @@ export class OperationLogHydratorService {
         // Skip synchronous validation if schema version matches current - the snapshot
         // was validated before being saved in the previous session. Only validate
         // synchronously if a migration ran (schema changed).
-        // A deferred background validation runs after hydration to catch any corruption.
+        // TODO: Consider removing this validation after ops-log testing phase.
+        // Checkpoint C validates the final state anyway, making this redundant.
         let stateToLoad = snapshot.state as AppDataCompleteNew;
         const snapshotSchemaVersion = (snapshot as { schemaVersion?: number })
           .schemaVersion;
@@ -326,10 +327,6 @@ export class OperationLogHydratorService {
       // Retry any failed remote ops from previous conflict resolution attempts
       // Now that state is fully hydrated, dependencies might be resolved
       await this.retryFailedRemoteOps();
-
-      // Schedule deferred background validation to catch any corruption
-      // that wasn't detected during synchronous validation (schema trust optimization)
-      this._scheduleDeferredValidation();
     } catch (e) {
       OpLog.err('OperationLogHydratorService: Error during hydration', e);
       try {
@@ -1032,74 +1029,6 @@ export class OperationLogHydratorService {
         },
       },
     };
-  }
-
-  /**
-   * Schedules a deferred background validation to run after hydration completes.
-   * This catches any corruption that wasn't detected during synchronous validation
-   * (when we trusted the snapshot due to schema version match).
-   *
-   * If corruption is found, we attempt auto-repair and show a warning to the user.
-   * This runs 5 seconds after hydration to avoid blocking startup.
-   */
-  private _scheduleDeferredValidation(): void {
-    const DEFERRED_VALIDATION_DELAY_MS = 5000;
-
-    setTimeout(async () => {
-      try {
-        OpLog.normal(
-          'OperationLogHydratorService: Running deferred background validation...',
-        );
-
-        const currentState =
-          (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
-
-        const result = this.validateStateService.validateAndRepair(currentState);
-
-        if (result.isValid && !result.wasRepaired) {
-          OpLog.normal(
-            'OperationLogHydratorService: Deferred validation passed - no issues found',
-          );
-          return;
-        }
-
-        // DISABLED: Repair system is non-functional - this code path is unreachable
-        // because validateAndRepair() always returns wasRepaired: false
-        //
-        // if (result.wasRepaired && result.repairedState && result.repairSummary) {
-        //   OpLog.warn('OperationLogHydratorService: Deferred validation found and repaired issues', result.repairSummary);
-        //   const clientId = await this.pfapiService.pf.metaModel.loadClientId();
-        //   await this.repairOperationService.createRepairOperation(
-        //     result.repairedState, result.repairSummary, clientId,
-        //   );
-        //   this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
-        //   this.snackService.open({
-        //     type: 'ERROR',
-        //     msg: T.F.SYNC.S.INTEGRITY_CHECK_FAILED,
-        //     actionStr: T.PS.RELOAD,
-        //     actionFn: (): void => { window.location.reload(); },
-        //   });
-        // } else
-        if (!result.isValid) {
-          // Repair failed or wasn't possible
-          OpLog.err(
-            'OperationLogHydratorService: Deferred validation found issues but repair failed',
-            result.error,
-          );
-          this.snackService.open({
-            type: 'ERROR',
-            msg: T.F.SYNC.S.INTEGRITY_CHECK_FAILED,
-            actionStr: T.PS.RELOAD,
-            actionFn: (): void => {
-              window.location.reload();
-            },
-          });
-        }
-      } catch (e) {
-        // Don't crash the app if deferred validation fails
-        OpLog.err('OperationLogHydratorService: Deferred validation error', e);
-      }
-    }, DEFERRED_VALIDATION_DELAY_MS);
   }
 
   /**
