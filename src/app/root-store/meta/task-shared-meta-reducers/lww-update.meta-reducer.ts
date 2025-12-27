@@ -11,6 +11,8 @@ import {
   projectAdapter,
 } from '../../../features/project/store/project.reducer';
 import { Project } from '../../../features/project/project.model';
+import { TAG_FEATURE_NAME, tagAdapter } from '../../../features/tag/store/tag.reducer';
+import { Tag } from '../../../features/tag/tag.model';
 import { unique } from '../../../util/unique';
 
 /**
@@ -96,6 +98,80 @@ const syncProjectTaskIds = (
   return {
     ...state,
     [PROJECT_FEATURE_NAME]: projectState,
+  };
+};
+
+/**
+ * Updates tag.taskIds arrays when a task's tagIds changes via LWW Update.
+ *
+ * When LWW conflict resolution updates a task's tagIds, we must also update
+ * the corresponding tag.taskIds arrays to maintain bidirectional consistency:
+ * - Remove task from tags that were removed from the task's tagIds
+ * - Add task to tags that were added to the task's tagIds
+ *
+ * This is necessary because the original updateTags action updates both
+ * the task and tag entities atomically, but LWW Update only syncs the TASK
+ * entity state.
+ */
+const syncTagTaskIds = (
+  state: RootState,
+  taskId: string,
+  oldTagIds: string[],
+  newTagIds: string[],
+): RootState => {
+  // Find tags that were removed and added
+  const oldTagSet = new Set(oldTagIds);
+  const newTagSet = new Set(newTagIds);
+
+  const removedTags = oldTagIds.filter((id) => !newTagSet.has(id));
+  const addedTags = newTagIds.filter((id) => !oldTagSet.has(id));
+
+  // If no changes, nothing to do
+  if (removedTags.length === 0 && addedTags.length === 0) {
+    return state;
+  }
+
+  let tagState = state[TAG_FEATURE_NAME];
+
+  // Remove task from removed tags' taskIds
+  for (const tagId of removedTags) {
+    if (tagState.entities[tagId]) {
+      const tag = tagState.entities[tagId] as Tag;
+      if (tag.taskIds.includes(taskId)) {
+        tagState = tagAdapter.updateOne(
+          {
+            id: tagId,
+            changes: {
+              taskIds: tag.taskIds.filter((id) => id !== taskId),
+            },
+          },
+          tagState,
+        );
+      }
+    }
+  }
+
+  // Add task to added tags' taskIds
+  for (const tagId of addedTags) {
+    if (tagState.entities[tagId]) {
+      const tag = tagState.entities[tagId] as Tag;
+      if (!tag.taskIds.includes(taskId)) {
+        tagState = tagAdapter.updateOne(
+          {
+            id: tagId,
+            changes: {
+              taskIds: unique([...tag.taskIds, taskId]),
+            },
+          },
+          tagState,
+        );
+      }
+    }
+  }
+
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagState,
   };
 };
 
@@ -211,8 +287,9 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       [featureName]: updatedFeatureState,
     };
 
-    // For TASK entities, sync project.taskIds when projectId changes
+    // For TASK entities, sync related entities when relationships change
     if (entityType === 'TASK') {
+      // Sync project.taskIds when projectId changes
       const oldProjectId = existingEntity?.projectId as string | undefined;
       const newProjectId = entityData['projectId'] as string | undefined;
       const isSubTask = !!(entityData['parentId'] || existingEntity?.parentId);
@@ -224,6 +301,12 @@ export const lwwUpdateMetaReducer: MetaReducer = (
         newProjectId,
         isSubTask,
       );
+
+      // Sync tag.taskIds when tagIds changes
+      const oldTagIds = (existingEntity?.tagIds as string[]) || [];
+      const newTagIds = (entityData['tagIds'] as string[]) || [];
+
+      updatedState = syncTagTaskIds(updatedState, entityId, oldTagIds, newTagIds);
     }
 
     return reducer(updatedState, action);
