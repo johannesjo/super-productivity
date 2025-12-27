@@ -1164,7 +1164,7 @@
           "E2E_ENCRYPTION_DESCRIPTION": "Will be slower, but more secure",
           "ENCRYPTION_WARNING": "WARNING: If you forget your encryption password, your data cannot be recovered. This password is separate from your login password. You must use the same password on all devices.",
           "L_CHANGE_ENCRYPTION_PASSWORD": "Change Encryption Password",
-          "CHANGE_PASSWORD_WARNING": "Changing your encryption password will delete ALL sync data on the server and upload your current data with the new password. All other devices will need to enter the new password. This cannot be undone.",
+          "CHANGE_PASSWORD_WARNING": "WARNING: This will permanently delete ALL sync history and backups on the server. Previous versions cannot be recovered. Your current data will be re-uploaded with the new password. All other devices will need the new password.",
           "CHANGE_PASSWORD_SUCCESS": "Encryption password changed successfully",
           "L_NEW_PASSWORD": "New Encryption Password",
           "L_CONFIRM_PASSWORD": "Confirm Password",
