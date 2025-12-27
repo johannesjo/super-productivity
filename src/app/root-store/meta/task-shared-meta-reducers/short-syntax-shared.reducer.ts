@@ -12,12 +12,13 @@ import { TODAY_TAG } from '../../../features/tag/tag.const';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
 import { isToday } from '../../../util/is-today.util';
-import { plannerFeatureKey } from '../../../features/planner/store/planner.reducer';
 import {
   ActionHandlerMap,
+  addTaskToPlannerDay,
   getProject,
   getProjectOrUndefined,
   getTag,
+  removeTaskFromPlannerDays,
   removeTasksFromList,
   updateProject,
   updateTags,
@@ -309,7 +310,7 @@ const handlePlanForDay = (
     }
 
     // Remove from planner days if present
-    updatedState = removeFromPlannerDays(updatedState, task.id);
+    updatedState = removeTaskFromPlannerDays(updatedState, task.id);
   } else {
     // Moving away from today or scheduling for future
     if (isCurrentlyInToday) {
@@ -328,68 +329,10 @@ const handlePlanForDay = (
     }
 
     // Add to planner for the target day
-    updatedState = addToPlannerDay(updatedState, task.id, day);
+    updatedState = addTaskToPlannerDay(updatedState, task.id, day);
   }
 
   return { state: updatedState, additionalChanges };
-};
-
-/**
- * Remove task from all planner days.
- */
-const removeFromPlannerDays = (state: RootState, taskId: string): RootState => {
-  if (!state.planner?.days) {
-    return state;
-  }
-
-  const plannerDaysCopy = { ...state.planner.days };
-  let hasChanges = false;
-
-  Object.keys(plannerDaysCopy).forEach((day) => {
-    const filtered = plannerDaysCopy[day].filter((id) => id !== taskId);
-    if (filtered.length !== plannerDaysCopy[day].length) {
-      plannerDaysCopy[day] = filtered;
-      hasChanges = true;
-    }
-  });
-
-  if (!hasChanges) {
-    return state;
-  }
-
-  return {
-    ...state,
-    [plannerFeatureKey]: {
-      ...state.planner,
-      days: plannerDaysCopy,
-    },
-  };
-};
-
-/**
- * Add task to a specific planner day.
- */
-const addToPlannerDay = (state: RootState, taskId: string, day: string): RootState => {
-  const plannerState = state[plannerFeatureKey as keyof RootState] as any;
-  const daysCopy = { ...(plannerState?.days || {}) };
-
-  // First remove from all days
-  Object.keys(daysCopy).forEach((d) => {
-    if (daysCopy[d].includes(taskId)) {
-      daysCopy[d] = daysCopy[d].filter((id: string) => id !== taskId);
-    }
-  });
-
-  // Add to target day
-  daysCopy[day] = unique([taskId, ...(daysCopy[day] || [])]);
-
-  return {
-    ...state,
-    [plannerFeatureKey]: {
-      ...plannerState,
-      days: daysCopy,
-    },
-  };
 };
 
 // =============================================================================

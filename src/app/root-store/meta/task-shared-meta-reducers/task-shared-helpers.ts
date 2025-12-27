@@ -8,6 +8,8 @@ import {
   projectAdapter,
 } from '../../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME, tagAdapter } from '../../../features/tag/store/tag.reducer';
+import { plannerFeatureKey } from '../../../features/planner/store/planner.reducer';
+import { unique } from '../../../util/unique';
 
 // =============================================================================
 // TYPES
@@ -104,4 +106,127 @@ export const removeTasksFromList = (taskIds: string[], toRemove: string[]): stri
   // This changes overall complexity from O(n*m) to O(n+m)
   const removeSet = new Set(toRemove);
   return taskIds.filter((id) => !removeSet.has(id));
+};
+
+// =============================================================================
+// PLANNER DAY HELPERS
+// =============================================================================
+
+/**
+ * Removes a single task from all planner days.
+ * @param state Root state
+ * @param taskId Task ID to remove
+ * @returns Updated state, or original state if no changes
+ */
+export const removeTaskFromPlannerDays = (
+  state: RootState,
+  taskId: string,
+): RootState => {
+  if (!state.planner?.days) {
+    return state;
+  }
+
+  const plannerDaysCopy = { ...state.planner.days };
+  let hasChanges = false;
+
+  Object.keys(plannerDaysCopy).forEach((day) => {
+    const filtered = plannerDaysCopy[day].filter((id) => id !== taskId);
+    if (filtered.length !== plannerDaysCopy[day].length) {
+      plannerDaysCopy[day] = filtered;
+      hasChanges = true;
+    }
+  });
+
+  if (!hasChanges) {
+    return state;
+  }
+
+  return {
+    ...state,
+    [plannerFeatureKey]: {
+      ...state.planner,
+      days: plannerDaysCopy,
+    },
+  };
+};
+
+/**
+ * Removes multiple tasks from all planner days.
+ * @param state Root state
+ * @param taskIds Task IDs to remove
+ * @returns Updated state, or original state if no changes
+ */
+export const removeTasksFromPlannerDays = (
+  state: RootState,
+  taskIds: string[],
+): RootState => {
+  if (!state.planner?.days || taskIds.length === 0) {
+    return state;
+  }
+
+  const taskIdSet = new Set(taskIds);
+  const plannerDaysCopy = { ...state.planner.days };
+  let hasChanges = false;
+
+  Object.keys(plannerDaysCopy).forEach((day) => {
+    const filtered = plannerDaysCopy[day].filter((id) => !taskIdSet.has(id));
+    if (filtered.length !== plannerDaysCopy[day].length) {
+      plannerDaysCopy[day] = filtered;
+      hasChanges = true;
+    }
+  });
+
+  if (!hasChanges) {
+    return state;
+  }
+
+  return {
+    ...state,
+    [plannerFeatureKey]: {
+      ...state.planner,
+      days: plannerDaysCopy,
+    },
+  };
+};
+
+/**
+ * Adds a task to a specific planner day.
+ * Removes the task from all other days first (task can only be in one day).
+ * @param state Root state
+ * @param taskId Task ID to add
+ * @param day Target day (date string)
+ * @param position Optional position index (default: top of list)
+ * @returns Updated state
+ */
+export const addTaskToPlannerDay = (
+  state: RootState,
+  taskId: string,
+  day: string,
+  position: number = 0,
+): RootState => {
+  const plannerState = state[plannerFeatureKey as keyof RootState] as any;
+  const daysCopy = { ...(plannerState?.days || {}) };
+
+  // First remove from all days
+  Object.keys(daysCopy).forEach((d) => {
+    if (daysCopy[d].includes(taskId)) {
+      daysCopy[d] = daysCopy[d].filter((id: string) => id !== taskId);
+    }
+  });
+
+  // Add to target day at position
+  const targetDays = daysCopy[day] || [];
+  daysCopy[day] = unique([
+    ...targetDays.slice(0, position),
+    taskId,
+    ...targetDays.slice(position),
+  ]);
+
+  return {
+    ...state,
+    [plannerFeatureKey]: {
+      ...plannerState,
+      days: daysCopy,
+    },
+  };
 };
