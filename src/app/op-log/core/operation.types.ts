@@ -1,4 +1,4 @@
-import { VectorClock } from '../../pfapi/api/util/vector-clock';
+import { VectorClock } from '../../core/util/vector-clock';
 export { VectorClock };
 
 export enum OpType {

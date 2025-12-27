@@ -26,7 +26,7 @@ import {
   compareVectorClocks,
   mergeVectorClocks,
   VectorClockComparison,
-} from '../../pfapi/api/util/vector-clock';
+} from '../../core/util/vector-clock';
 import { toEntityKey } from '../util/entity-key.util';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';

@@ -4,7 +4,7 @@ import {
   EntityType,
   VectorClock,
 } from '../../../core/operation.types';
-import { mergeVectorClocks } from '../../../../pfapi/api/util/vector-clock';
+import { mergeVectorClocks } from '../../../../core/util/vector-clock';
 import { CURRENT_SCHEMA_VERSION } from '../../../store/schema-migration.service';
 
 /**

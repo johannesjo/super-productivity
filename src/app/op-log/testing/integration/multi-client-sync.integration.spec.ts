@@ -5,7 +5,7 @@ import { OpType } from '../../core/operation.types';
 import {
   compareVectorClocks,
   VectorClockComparison,
-} from '../../../pfapi/api/util/vector-clock';
+} from '../../../core/util/vector-clock';
 import { TestClient, resetTestUuidCounter } from './helpers/test-client.helper';
 import {
   createTaskOperation,

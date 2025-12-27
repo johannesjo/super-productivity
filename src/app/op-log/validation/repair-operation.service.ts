@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { Operation, OpType, RepairPayload, RepairSummary } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
-import { incrementVectorClock } from '../../pfapi/api/util/vector-clock';
+import { incrementVectorClock } from '../../core/util/vector-clock';
 import { LockService } from '../sync/lock.service';
 import { T } from '../../t.const';
 import { OpLog } from '../../core/log';

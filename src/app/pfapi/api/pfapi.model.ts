@@ -5,6 +5,8 @@ import { DropboxPrivateCfg } from './sync/providers/dropbox/dropbox';
 import { IValidation } from 'typia';
 import { WebdavPrivateCfg } from './sync/providers/webdav/webdav.model';
 import { SuperSyncPrivateCfg } from './sync/providers/super-sync/super-sync.model';
+import { VectorClock } from './util/vector-clock';
+export { VectorClock };
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -103,10 +105,6 @@ export interface MetaFileBase {
   // Vector clock fields for improved conflict detection
   vectorClock?: VectorClock;
   lastSyncedVectorClock?: VectorClock | null;
-}
-
-export interface VectorClock {
-  [clientId: string]: number;
 }
 
 export interface RemoteMeta extends MetaFileBase {

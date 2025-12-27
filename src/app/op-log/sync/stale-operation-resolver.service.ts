@@ -1,10 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { Operation, OpType, VectorClock } from '../core/operation.types';
-import {
-  incrementVectorClock,
-  mergeVectorClocks,
-} from '../../pfapi/api/util/vector-clock';
+import { incrementVectorClock, mergeVectorClocks } from '../../core/util/vector-clock';
 import { OpLog } from '../../core/log';
 import { ConflictResolutionService } from './conflict-resolution.service';
 import { VectorClockService } from './vector-clock.service';

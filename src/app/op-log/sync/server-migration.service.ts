@@ -5,7 +5,7 @@ import { SyncProviderId } from '../../pfapi/api/pfapi.const';
 import { isOperationSyncCapable } from './operation-sync.util';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { VectorClockService } from './vector-clock.service';
-import { incrementVectorClock } from '../../pfapi/api/util/vector-clock';
+import { incrementVectorClock } from '../../core/util/vector-clock';
 import { PfapiStoreDelegateService } from '../../pfapi/pfapi-store-delegate.service';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';

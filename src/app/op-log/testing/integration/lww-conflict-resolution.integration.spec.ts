@@ -6,7 +6,7 @@ import {
   VectorClockComparison,
   mergeVectorClocks,
   incrementVectorClock,
-} from '../../../pfapi/api/util/vector-clock';
+} from '../../../core/util/vector-clock';
 import { TestClient, resetTestUuidCounter } from './helpers/test-client.helper';
 import { createTaskOperation } from './helpers/operation-factory.helper';
 

@@ -20,7 +20,7 @@ import {
   compareVectorClocks,
   VectorClockComparison,
   vectorClockToString,
-} from '../../../pfapi/api/util/vector-clock';
+} from '../../../core/util/vector-clock';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 

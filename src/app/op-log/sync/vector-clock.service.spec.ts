@@ -7,7 +7,7 @@ import {
   OpType,
   EntityType,
 } from '../core/operation.types';
-import { VectorClock } from '../../pfapi/api/util/vector-clock';
+import { VectorClock } from '../../core/util/vector-clock';
 
 describe('VectorClockService', () => {
   let service: VectorClockService;

@@ -25,7 +25,7 @@ import {
   incrementVectorClock,
   mergeVectorClocks,
   VectorClockComparison,
-} from '../../pfapi/api/util/vector-clock';
+} from '../../core/util/vector-clock';
 import { devError } from '../../util/dev-error';
 import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';

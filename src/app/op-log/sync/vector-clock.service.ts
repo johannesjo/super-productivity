@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { VectorClock, EntityType } from '../core/operation.types';
-import { mergeVectorClocks } from '../../pfapi/api/util/vector-clock';
+import { mergeVectorClocks } from '../../core/util/vector-clock';
 import { toEntityKey } from '../util/entity-key.util';
 
 /**

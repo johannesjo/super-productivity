@@ -32,7 +32,7 @@ import {
   compareVectorClocks,
   mergeVectorClocks,
   VectorClockComparison,
-} from '../../../pfapi/api/util/vector-clock';
+} from '../../../core/util/vector-clock';
 import { toEntityKey } from '../../util/entity-key.util';
 import { MatDialog } from '@angular/material/dialog';
 import { UserInputWaitStateService } from '../../../imex/sync/user-input-wait-state.service';

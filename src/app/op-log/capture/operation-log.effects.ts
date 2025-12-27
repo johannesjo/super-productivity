@@ -10,7 +10,7 @@ import {
 } from '../core/persistent-action.interface';
 import { uuidv7 } from '../../util/uuid-v7';
 import { devError } from '../../util/dev-error';
-import { incrementVectorClock } from '../../pfapi/api/util/vector-clock';
+import { incrementVectorClock } from '../../core/util/vector-clock';
 import { MultiEntityPayload, Operation } from '../core/operation.types';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';

@@ -1,4 +1,4 @@
-import { VectorClock } from '../../../../pfapi/api/util/vector-clock';
+import { VectorClock } from '../../../util/vector-clock';
 
 /**
  * Compact operation format for storage and network transfer.

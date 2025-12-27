@@ -13,10 +13,7 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../pfapi/pfapi-store-delegate.service';
 import { Operation, OpType, RepairPayload } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
-import {
-  incrementVectorClock,
-  mergeVectorClocks,
-} from '../../pfapi/api/util/vector-clock';
+import { incrementVectorClock, mergeVectorClocks } from '../../core/util/vector-clock';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { ValidateStateService } from '../validation/validate-state.service';
