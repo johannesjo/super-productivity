@@ -15,7 +15,11 @@ import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { validateOperationPayload } from './processing/validate-operation-payload';
 import { VectorClockService } from './sync/vector-clock.service';
-import { COMPACTION_THRESHOLD, MAX_COMPACTION_FAILURES } from './operation-log.const';
+import {
+  COMPACTION_THRESHOLD,
+  LOCK_NAMES,
+  MAX_COMPACTION_FAILURES,
+} from './operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 import { OperationCaptureService } from './processing/operation-capture.service';
 import { ImmediateUploadService } from './sync/immediate-upload.service';
@@ -114,7 +118,7 @@ export class OperationLogEffects {
     const opType = action.meta.opType;
 
     try {
-      await this.lockService.request('sp_op_log', async () => {
+      await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
         const currentClock = await this.vectorClockService.getCurrentVectorClock();
         const newClock = incrementVectorClock(currentClock, clientId);
 

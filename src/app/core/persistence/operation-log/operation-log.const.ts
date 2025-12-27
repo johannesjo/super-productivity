@@ -6,6 +6,38 @@ import { InjectionToken } from '@angular/core';
  */
 
 /**
+ * Lock names for cross-tab synchronization via LockService.
+ *
+ * These locks prevent race conditions when multiple tabs or operations
+ * try to access shared resources (IndexedDB, sync endpoints) simultaneously.
+ *
+ * IMPORTANT: These names are also used in tests - update tests if renaming.
+ */
+export const LOCK_NAMES = {
+  /**
+   * Main operation log lock. Used for:
+   * - Writing operations to IndexedDB
+   * - Compaction (snapshot + cleanup)
+   * - Conflict resolution and state application
+   * - Repair operations
+   * - Flush pending writes before sync
+   */
+  OPERATION_LOG: 'sp_op_log',
+
+  /**
+   * Upload-specific lock. Used to prevent concurrent uploads.
+   * Separate from main lock to allow reads during upload.
+   */
+  UPLOAD: 'sp_op_log_upload',
+
+  /**
+   * Download-specific lock. Used to prevent concurrent downloads.
+   * Separate from main lock to allow reads during download.
+   */
+  DOWNLOAD: 'sp_op_log_download',
+} as const;
+
+/**
  * Number of operations before triggering automatic compaction.
  * Compaction reduces storage size by snapshotting state and removing old operations.
  */

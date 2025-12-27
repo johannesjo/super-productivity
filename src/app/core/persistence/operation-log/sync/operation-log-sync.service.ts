@@ -37,7 +37,7 @@ import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { lazyInject } from '../../../../util/lazy-inject';
-import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
+import { LOCK_NAMES, MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 import { CLIENT_ID_PROVIDER } from '../client-id.provider';
 import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
@@ -893,7 +893,7 @@ export class OperationLogSyncService {
     // reading the frontier but before conflict resolution/application completes,
     // causing the new write to be based on stale state.
     let result!: { localWinOpsCreated: number };
-    await this.lockService.request('sp_op_log', async () => {
+    await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
       const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
       const conflictResult = await this._detectConflicts(
         validOps,

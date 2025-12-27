@@ -37,25 +37,9 @@ import {
 } from '@angular/router';
 import { APP_ROUTES } from './app/app.routes';
 import { StoreModule } from '@ngrx/store';
-import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delete.meta-reducer';
-import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
-import {
-  issueProviderSharedMetaReducer,
-  lwwUpdateMetaReducer,
-  operationCaptureMetaReducer,
-  plannerSharedMetaReducer,
-  projectSharedMetaReducer,
-  setOperationCaptureService,
-  shortSyntaxSharedMetaReducer,
-  tagSharedMetaReducer,
-  taskBatchUpdateMetaReducer,
-  taskRepeatCfgSharedMetaReducer,
-  taskSharedCrudMetaReducer,
-  taskSharedLifecycleMetaReducer,
-  taskSharedSchedulingMetaReducer,
-} from './app/root-store/meta/task-shared-meta-reducers';
+import { META_REDUCERS } from './app/root-store/meta/meta-reducer-registry';
+import { setOperationCaptureService } from './app/root-store/meta/task-shared-meta-reducers';
 import { OperationCaptureService } from './app/core/persistence/operation-log/processing/operation-capture.service';
-import { bulkOperationsMetaReducer } from './app/core/persistence/operation-log/bulk-hydration.meta-reducer';
 import { ImmediateUploadService } from './app/core/persistence/operation-log/sync/immediate-upload.service';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -113,30 +97,9 @@ bootstrapApplication(AppComponent, {
       // External
       BrowserModule,
       // NOTE: both need to be present to use forFeature stores
+      // Meta-reducers are defined in meta-reducer-registry.ts with detailed phase documentation
       StoreModule.forRoot(undefined, {
-        metaReducers: [
-          // IMPORTANT: operationCaptureMetaReducer must be FIRST (outermost) to capture
-          // original state BEFORE any other meta-reducer modifies it.
-          // NgRx composes meta-reducers such that FIRST in array = OUTERMOST in call chain.
-          operationCaptureMetaReducer,
-          // bulkOperationsMetaReducer applies multiple ops in one dispatch for:
-          // - Fast startup (local hydration)
-          // - Remote sync (operations from other clients don't trigger effects)
-          bulkOperationsMetaReducer,
-          undoTaskDeleteMetaReducer,
-          taskSharedCrudMetaReducer,
-          taskBatchUpdateMetaReducer,
-          taskSharedLifecycleMetaReducer,
-          taskSharedSchedulingMetaReducer,
-          projectSharedMetaReducer,
-          tagSharedMetaReducer,
-          issueProviderSharedMetaReducer,
-          taskRepeatCfgSharedMetaReducer,
-          plannerSharedMetaReducer,
-          shortSyntaxSharedMetaReducer,
-          lwwUpdateMetaReducer, // Handles [ENTITY_TYPE] LWW Update actions from conflict resolution
-          actionLoggerReducer,
-        ],
+        metaReducers: META_REDUCERS,
         ...(environment.production
           ? {
               runtimeChecks: {

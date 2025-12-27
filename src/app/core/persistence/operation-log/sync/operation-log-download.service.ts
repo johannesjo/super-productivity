@@ -13,6 +13,7 @@ import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import {
+  LOCK_NAMES,
   MAX_DOWNLOAD_OPS_IN_MEMORY,
   MAX_DOWNLOAD_ITERATIONS,
   CLOCK_DRIFT_THRESHOLD_MS,
@@ -126,7 +127,7 @@ export class OperationLogDownloadService {
       (await syncProvider.privateCfg.load()) as SuperSyncPrivateCfg | null;
     const encryptKey = privateCfg?.encryptKey;
 
-    await this.lockService.request('sp_op_log_download', async () => {
+    await this.lockService.request(LOCK_NAMES.DOWNLOAD, async () => {
       const lastServerSeq = forceFromSeq0 ? 0 : await syncProvider.getLastServerSeq();
       const appliedOpIds = await this.opLogStore.getAppliedOpIds();
 

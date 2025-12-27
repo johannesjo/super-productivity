@@ -3,6 +3,7 @@ import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
 import { Operation, OperationLogEntry, OpType } from '../operation.types';
 import { OpLog } from '../../../log';
+import { LOCK_NAMES } from '../operation-log.const';
 import { chunkArray } from '../../../../util/chunk-array';
 import {
   SyncProviderServiceInterface,
@@ -112,7 +113,7 @@ export class OperationLogUploadService {
     let rejectedCount = 0;
     let hasMorePiggyback = false;
 
-    await this.lockService.request('sp_op_log_upload', async () => {
+    await this.lockService.request(LOCK_NAMES.UPLOAD, async () => {
       // Execute pre-upload callback INSIDE the lock, BEFORE checking for pending ops.
       // This ensures operations like server migration checks are atomic with the upload.
       if (options?.preUploadCallback) {

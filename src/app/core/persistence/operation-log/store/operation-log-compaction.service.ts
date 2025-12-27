@@ -4,6 +4,7 @@ import {
   COMPACTION_RETENTION_MS,
   COMPACTION_TIMEOUT_MS,
   EMERGENCY_COMPACTION_RETENTION_MS,
+  LOCK_NAMES,
   SLOW_COMPACTION_THRESHOLD_MS,
 } from '../operation-log.const';
 import { OperationLogStoreService } from './operation-log-store.service';
@@ -54,7 +55,7 @@ export class OperationLogCompactionService {
    * @param isEmergency - Whether this is an emergency compaction (for logging)
    */
   private async _doCompact(retentionMs: number, isEmergency: boolean): Promise<void> {
-    await this.lockService.request('sp_op_log', async () => {
+    await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
       const startTime = Date.now();
       const label = isEmergency ? 'emergency ' : '';
 

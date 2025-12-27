@@ -10,6 +10,7 @@ import { VectorClockService } from '../sync/vector-clock.service';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 import { devError } from '../../../../util/dev-error';
 import { TranslateService } from '@ngx-translate/core';
+import { LOCK_NAMES } from '../operation-log.const';
 
 /**
  * Service responsible for creating REPAIR operations.
@@ -92,7 +93,7 @@ export class RepairOperationService {
     if (options?.skipLock) {
       await doCreateOperation();
     } else {
-      await this.lockService.request('sp_op_log', doCreateOperation);
+      await this.lockService.request(LOCK_NAMES.OPERATION_LOG, doCreateOperation);
     }
 
     // Notify user that repair happened

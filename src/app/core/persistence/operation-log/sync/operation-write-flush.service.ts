@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { LockService } from './lock.service';
 import { OperationCaptureService } from '../processing/operation-capture.service';
 import { OpLog } from '../../../log';
+import { LOCK_NAMES } from '../operation-log.const';
 
 /**
  * Service to ensure all pending operation writes have completed.
@@ -100,7 +101,7 @@ export class OperationWriteFlushService {
     // Phase 2: Acquire the write lock to ensure the final write is complete
     // The effect uses this lock when writing to IndexedDB, so acquiring it
     // guarantees all prior writes have finished their IndexedDB transactions.
-    await this.lockService.request('sp_op_log', async () => {
+    await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
       // No-op - acquiring the lock ensures the final write has completed
     });
 
