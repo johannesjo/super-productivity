@@ -8,8 +8,8 @@ Super Productivity uses vector clocks to provide accurate conflict detection and
 
 > **Related Documentation:**
 >
-> - [Operation Log Architecture](/docs/op-log/operation-log-architecture.md) - How vector clocks are used in the operation log
-> - [Operation Log Diagrams](/docs/op-log/operation-log-architecture-diagrams.md) - Visual diagrams including conflict detection
+> - [Operation Log Architecture](/docs/sync-and-op-log/operation-log-architecture.md) - How vector clocks are used in the operation log
+> - [Operation Log Diagrams](/docs/sync-and-op-log/operation-log-architecture-diagrams.md) - Visual diagrams including conflict detection
 
 ## Table of Contents
 
@@ -302,4 +302,4 @@ The Operation Log system uses vector clocks in several ways:
 3. **Conflict Detection**: `detectConflicts()` compares clocks between pending local ops and remote ops
 4. **SYNC_IMPORT Handling**: Vector clock dominance filtering determines which ops to replay after full state imports
 
-For detailed information, see [Operation Log Architecture - Part C: Server Sync](/docs/op-log/operation-log-architecture.md#part-c-server-sync).
+For detailed information, see [Operation Log Architecture - Part C: Server Sync](/docs/sync-and-op-log/operation-log-architecture.md#part-c-server-sync).

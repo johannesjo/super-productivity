@@ -9,7 +9,7 @@ This directory contains the **legacy PFAPI** synchronization implementation for 
 > 1. **PFAPI Sync** (this directory) - File-based sync via Dropbox/WebDAV
 > 2. **Operation Log Sync** - Operation-based sync via SuperSync Server
 >
-> See [Operation Log Architecture](/docs/op-log/operation-log-architecture.md) for the newer operation-based system.
+> See [Operation Log Architecture](/docs/sync-and-op-log/operation-log-architecture.md) for the newer operation-based system.
 
 ## Key Components
 
@@ -152,5 +152,5 @@ The PFAPI sync system is **stable but not receiving new features**. New sync fea
 ## Related Documentation
 
 - [Vector Clocks](../../../docs/sync/vector-clocks.md) - Conflict detection implementation
-- [Operation Log Architecture](/docs/op-log/operation-log-architecture.md) - Newer operation-based sync
-- [Hybrid Manifest Architecture](/docs/op-log/hybrid-manifest-architecture.md) - File-based Operation Log sync
+- [Operation Log Architecture](/docs/sync-and-op-log/operation-log-architecture.md) - Newer operation-based sync
+- [Hybrid Manifest Architecture](/docs/sync-and-op-log/long-term-plans/hybrid-manifest-architecture.md) - File-based Operation Log sync

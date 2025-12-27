@@ -113,7 +113,7 @@ This prevents duplicate side effects when syncing operations from other clients.
 
 | Location                                                               | Content                             |
 | ---------------------------------------------------------------------- | ----------------------------------- |
-| [/docs/sync/vector-clocks.md](/docs/sync/vector-clocks.md)             | Vector clock implementation details |
+| [/docs/sync/vector-clocks.md](/docs/sync-and-op-log/vector-clocks.md)  | Vector clock implementation details |
 | [/docs/ai/sync/](/android/sync/)                                       | Historical planning documents       |
 | [/packages/super-sync-server/](/packages/super-sync-server/)           | SuperSync server implementation     |
 | [/src/app/pfapi/api/sync/README.md](/src/app/pfapi/api/sync/README.md) | PFAPI sync overview                 |
