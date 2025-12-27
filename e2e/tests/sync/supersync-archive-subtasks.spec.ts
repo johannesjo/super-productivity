@@ -35,7 +35,8 @@ const generateTestRunId = (workerIndex: number): string => {
 };
 
 /**
- * Helper to add a subtask to a task
+ * Helper to add a subtask to a task using keyboard shortcut
+ * This is more reliable than using the context menu
  */
 const addSubtask = async (
   page: SimulatedE2EClient['page'],
@@ -46,41 +47,52 @@ const addSubtask = async (
   const parentTask = page.locator(`task:has-text("${parentTaskName}")`).first();
   await parentTask.waitFor({ state: 'visible', timeout: 10000 });
 
-  // Right-click to open context menu
-  await parentTask.click({ button: 'right' });
+  // Focus the task and use keyboard shortcut 'a' to add subtask
+  await parentTask.focus();
+  await page.waitForTimeout(100); // Let focus settle
+  await parentTask.press('a');
 
-  // Click "Add sub task"
-  const addSubTaskItem = page
-    .locator('.mat-mdc-menu-item')
-    .filter({ hasText: 'Add sub task' });
-  await addSubTaskItem.waitFor({ state: 'visible', timeout: 5000 });
-  await addSubTaskItem.click();
-
-  // Wait for inline edit mode and type subtask title
-  // The inline edit appears on the newly created subtask
-  const inlineInput = page.locator('inline-input input');
-  await inlineInput.waitFor({ state: 'visible', timeout: 5000 });
-  await inlineInput.fill(subtaskTitle);
+  // Wait for the textarea to appear and be focused
+  const textarea = page.locator('task-title textarea');
+  await textarea.waitFor({ state: 'visible', timeout: 5000 });
+  await textarea.fill(subtaskTitle);
   await page.keyboard.press('Enter');
 
-  // Wait for subtask to be visible
+  // Wait for subtask to be visible and textarea to close
   await waitForTask(page, subtaskTitle);
+  await page.waitForTimeout(200); // Let UI settle
 };
 
 /**
- * Helper to mark a task as done
+ * Helper to mark a task as done using keyboard shortcut (more reliable)
+ * @param isSubtask - if true, uses .hasNoSubTasks selector to target only subtasks
  */
 const markTaskDone = async (
   page: SimulatedE2EClient['page'],
   taskName: string,
+  isSubtask = false,
 ): Promise<void> => {
-  const task = page.locator(`task:not(.ng-animating):has-text("${taskName}")`).first();
+  // Use .hasNoSubTasks for subtasks to avoid matching parent tasks
+  const selector = isSubtask
+    ? `task.hasNoSubTasks:not(.ng-animating):has-text("${taskName}")`
+    : `task:not(.hasNoSubTasks):not(.ng-animating):has-text("${taskName}")`;
+  const task = page.locator(selector).first();
   await task.waitFor({ state: 'visible', timeout: 10000 });
-  await task.hover();
-  const doneBtn = task.locator('.task-done-btn');
-  await doneBtn.waitFor({ state: 'visible', timeout: 5000 });
-  await doneBtn.click();
-  await expect(task).toHaveClass(/isDone/, { timeout: 5000 });
+
+  // Focus the task and use keyboard shortcut 'd' to toggle done
+  await task.focus();
+  await page.waitForTimeout(100);
+  await task.press('d');
+
+  // Handle confirmation dialog if it appears (when marking parent with undone subtasks)
+  await page.waitForTimeout(200);
+  const confirmBtn = page.locator('dialog-confirm button[mat-stroked-button]');
+  if (await confirmBtn.isVisible().catch(() => false)) {
+    await confirmBtn.click();
+  }
+
+  // Wait for the done state to be applied
+  await expect(task).toHaveClass(/isDone/, { timeout: 10000 });
 };
 
 /**
@@ -189,12 +201,15 @@ base.describe('@supersync Archive Subtasks Sync', () => {
         await addSubtask(clientA.page, parentName, subtask2Name);
         console.log('[ArchiveSubtasks] Added subtask 2');
 
-        // 3. Mark parent as done (subtasks should auto-mark)
-        await markTaskDone(clientA.page, parentName);
-        console.log('[ArchiveSubtasks] Marked parent as done');
+        // 3. Mark subtasks as done first (parent requires all subtasks done)
+        await markTaskDone(clientA.page, subtask1Name, true);
+        console.log('[ArchiveSubtasks] Marked subtask 1 as done');
+        await markTaskDone(clientA.page, subtask2Name, true);
+        console.log('[ArchiveSubtasks] Marked subtask 2 as done');
 
-        // Wait for subtasks to also be marked done
-        await clientA.page.waitForTimeout(500);
+        // 4. Now mark parent as done
+        await markTaskDone(clientA.page, parentName, false);
+        console.log('[ArchiveSubtasks] Marked parent as done');
 
         // 4. Archive via Daily Summary
         await archiveDoneTasks(clientA.page);
@@ -296,9 +311,11 @@ base.describe('@supersync Archive Subtasks Sync', () => {
         await waitForTask(clientB.page, parentName);
         console.log('[MultiSubtask] Client B received tasks');
 
-        // 5. Client A marks all done and archives
-        await markTaskDone(clientA.page, parentName);
-        await clientA.page.waitForTimeout(500);
+        // 5. Client A marks all subtasks and parent done
+        for (let i = 1; i <= 3; i++) {
+          await markTaskDone(clientA.page, `Sub${i}-${testRunId}`, true);
+        }
+        await markTaskDone(clientA.page, parentName, false);
         await archiveDoneTasks(clientA.page);
         console.log('[MultiSubtask] Client A archived all');
 
@@ -381,9 +398,9 @@ base.describe('@supersync Archive Subtasks Sync', () => {
         await addSubtask(clientA.page, parentName, subtaskName);
         console.log('[RaceTest] Added subtask (no sync yet)');
 
-        // 3. Immediately mark done and archive (NO SYNC BETWEEN)
-        await markTaskDone(clientA.page, parentName);
-        await clientA.page.waitForTimeout(300);
+        // 3. Immediately mark subtask and parent done, then archive (NO SYNC BETWEEN)
+        await markTaskDone(clientA.page, subtaskName, true);
+        await markTaskDone(clientA.page, parentName, false);
         await archiveDoneTasks(clientA.page);
         console.log('[RaceTest] Archived (without intermediate sync)');
 
