@@ -267,7 +267,11 @@ export class MetaModelCtrl {
     }
 
     // Validate clientId format to catch corruption
-    if (clientId.length < 10) {
+    // Accept both old format (10+ chars like "BCL1pq4d2j11_27")
+    // and new compact format (6 chars like "B_a7Kx")
+    const isOldFormat = clientId.length >= 10;
+    const isNewFormat = /^[BEAI]_[a-zA-Z0-9]{4}$/.test(clientId);
+    if (!isOldFormat && !isNewFormat) {
       PFLog.critical(`${MetaModelCtrl.L}.loadClientId() Invalid clientId loaded:`, {
         clientId,
         length: clientId.length,
