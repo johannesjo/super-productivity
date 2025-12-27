@@ -187,11 +187,20 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           hideExpression: (m, v, field) =>
             field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
-          type: 'tpl',
-          className: 'tpl warn-text',
+          type: 'btn',
           templateOptions: {
-            tag: 'div',
-            text: T.F.SYNC.FORM.SUPER_SYNC.COST_WARNING,
+            text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
+            tooltip: T.F.SYNC.FORM.SUPER_SYNC.LOGIN_INSTRUCTIONS,
+            btnType: 'primary',
+            centerBtn: true,
+            onClick: (field: any) => {
+              const baseUrl = field.model.baseUrl;
+              if (baseUrl) {
+                window.open(baseUrl, '_blank');
+              } else {
+                alert('Please enter a Server URL first');
+              }
+            },
           },
         },
         {
@@ -208,25 +217,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
               field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.SuperSync,
-          },
-        },
-        {
-          hideExpression: (m, v, field) =>
-            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
-          type: 'btn',
-          templateOptions: {
-            text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
-            tooltip: T.F.SYNC.FORM.SUPER_SYNC.LOGIN_INSTRUCTIONS,
-            btnType: 'primary',
-            centerBtn: true,
-            onClick: (field: any) => {
-              const baseUrl = field.model.baseUrl;
-              if (baseUrl) {
-                window.open(baseUrl, '_blank');
-              } else {
-                alert('Please enter a Server URL first');
-              }
-            },
           },
         },
         {
