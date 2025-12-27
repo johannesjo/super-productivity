@@ -75,6 +75,12 @@
           }
         </section>
 
+        @if (showSyncSafetyBackups()) {
+          <section class="config-section">
+            <config-section [section]="syncSafetyBackupsSection"></config-section>
+          </section>
+        }
+
         @for (section of globalImexFormCfg; track section.key) {
           <section class="config-section imex-section">
             <config-section

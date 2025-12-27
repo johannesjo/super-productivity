@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   effect,
   inject,
   OnDestroy,
   OnInit,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
   GLOBAL_CONFIG_FORM_CONFIG,
@@ -31,6 +33,7 @@ import { ConfigSectionComponent } from '../../features/config/config-section/con
 import { ConfigSoundFormComponent } from '../../features/config/config-sound-form/config-sound-form.component';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SYNC_FORM } from '../../features/config/form-cfgs/sync-form.const';
+import { SYNC_SAFETY_BACKUPS_FORM } from '../../features/config/form-cfgs/sync-safety-backups-form.const';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { map, tap } from 'rxjs/operators';
 import { SyncConfigService } from '../../imex/sync/sync-config.service';
@@ -86,6 +89,18 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   globalImexFormCfg: ConfigFormConfig;
   globalProductivityConfigFormCfg: ConfigFormConfig;
   globalSyncConfigFormCfg = this._buildSyncFormConfig();
+  syncSafetyBackupsSection = SYNC_SAFETY_BACKUPS_FORM;
+
+  private readonly _syncSettings = toSignal(this.syncSettingsService.syncSettingsForm$);
+  readonly showSyncSafetyBackups = computed(() => {
+    const settings = this._syncSettings();
+    if (!settings) return false;
+    return (
+      settings.isEnabled &&
+      settings.syncProvider !== null &&
+      settings.syncProvider !== LegacySyncProvider.SuperSync
+    );
+  });
 
   globalCfg?: GlobalConfigState;
 
