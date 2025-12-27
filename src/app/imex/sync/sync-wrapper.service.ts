@@ -94,7 +94,12 @@ export class SyncWrapperService {
     map((cfg) => toSyncProviderId(cfg.syncProvider)),
   );
 
-  syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
+  // SuperSync always uses 1 minute interval; other providers use configured value
+  syncInterval$: Observable<number> = this.syncCfg$.pipe(
+    map((cfg) =>
+      cfg.syncProvider === LegacySyncProvider.SuperSync ? 60000 : cfg.syncInterval,
+    ),
+  );
 
   isEnabledAndReady$: Observable<boolean> =
     this._pfapiService.isSyncProviderEnabledAndReady$.pipe();

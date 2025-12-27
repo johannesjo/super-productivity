@@ -294,6 +294,10 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       type: 'duration',
       // NOTE: we don't hide because model updates don't seem to work properly for this
       // hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
+      // Hide for SuperSync - always uses 1 minute interval
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider === LegacySyncProvider.SuperSync,
+      resetOnHide: true,
       templateOptions: {
         required: true,
         isAllowSeconds: true,
@@ -303,8 +307,11 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
 
     // COMMON SETTINGS
+    // Hide for SuperSync - uses fixed settings (no compression config, encryption handled separately)
     {
       type: 'collapsible',
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider === LegacySyncProvider.SuperSync,
       props: { label: T.G.ADVANCED_CFG },
       fieldGroup: [
         {
