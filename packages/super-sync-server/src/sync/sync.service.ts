@@ -6,7 +6,6 @@ import {
   UploadResult,
   SyncConfig,
   DEFAULT_SYNC_CONFIG,
-  ONLINE_DEVICE_THRESHOLD_MS,
   compareVectorClocks,
   VectorClock,
   SYNC_ERROR_CODES,
@@ -25,6 +24,8 @@ import {
   ALLOWED_ENTITY_TYPES,
   RateLimitService,
   RequestDeduplicationService,
+  DeviceService,
+  OperationDownloadService,
 } from './services';
 
 /**
@@ -66,6 +67,8 @@ export class SyncService {
   private validationService: ValidationService;
   private rateLimitService: RateLimitService;
   private requestDeduplicationService: RequestDeduplicationService;
+  private deviceService: DeviceService;
+  private operationDownloadService: OperationDownloadService;
 
   /**
    * FIX 1.7: In-memory lock to prevent concurrent snapshot generation for the same user.
@@ -87,6 +90,8 @@ export class SyncService {
     this.validationService = new ValidationService(this.config);
     this.rateLimitService = new RateLimitService(this.config);
     this.requestDeduplicationService = new RequestDeduplicationService();
+    this.deviceService = new DeviceService();
+    this.operationDownloadService = new OperationDownloadService();
   }
 
   // === Conflict Detection ===
@@ -510,6 +515,7 @@ export class SyncService {
   }
 
   // === Download Operations ===
+  // Delegated to OperationDownloadService
 
   async getOpsSince(
     userId: number,
@@ -517,46 +523,14 @@ export class SyncService {
     excludeClient?: string,
     limit: number = 500,
   ): Promise<ServerOperation[]> {
-    const ops = await prisma.operation.findMany({
-      where: {
-        userId,
-        serverSeq: { gt: sinceSeq },
-        ...(excludeClient ? { clientId: { not: excludeClient } } : {}),
-      },
-      orderBy: {
-        serverSeq: 'asc',
-      },
-      take: limit,
-    });
-
-    return ops.map((row) => ({
-      serverSeq: row.serverSeq,
-      op: {
-        id: row.id,
-        clientId: row.clientId,
-        actionType: row.actionType,
-        opType: row.opType as Operation['opType'],
-        entityType: row.entityType,
-        entityId: row.entityId ?? undefined,
-        payload: row.payload,
-        vectorClock: row.vectorClock as unknown as VectorClock,
-        schemaVersion: row.schemaVersion,
-        timestamp: Number(row.clientTimestamp),
-        parentOpId: row.parentOpId ?? undefined,
-        isPayloadEncrypted: row.isPayloadEncrypted,
-      },
-      receivedAt: Number(row.receivedAt),
-    }));
+    return this.operationDownloadService.getOpsSince(
+      userId,
+      sinceSeq,
+      excludeClient,
+      limit,
+    );
   }
 
-  /**
-   * Get operations and latest sequence atomically with gap detection.
-   *
-   * OPTIMIZATION: When sinceSeq is before the latest full-state operation (SYNC_IMPORT,
-   * BACKUP_IMPORT, REPAIR), we skip to that operation's sequence instead. This prevents
-   * sending operations that will be filtered out by the client anyway, saving bandwidth
-   * and processing time.
-   */
   async getOpsSinceWithSeq(
     userId: number,
     sinceSeq: number,
@@ -569,166 +543,16 @@ export class SyncService {
     latestSnapshotSeq?: number;
     snapshotVectorClock?: VectorClock;
   }> {
-    return prisma.$transaction(async (tx) => {
-      // Find the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
-      // These operations supersede all previous operations
-      const latestFullStateOp = await tx.operation.findFirst({
-        where: {
-          userId,
-          opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
-        },
-        orderBy: { serverSeq: 'desc' },
-        select: { serverSeq: true },
-      });
-
-      const latestSnapshotSeq = latestFullStateOp?.serverSeq ?? undefined;
-
-      // OPTIMIZATION: If client is requesting ops from before the latest full-state op,
-      // start from the full-state op instead. Pre-import ops are superseded and will
-      // be filtered out by the client anyway.
-      let effectiveSinceSeq = sinceSeq;
-      let snapshotVectorClock: VectorClock | undefined;
-
-      if (latestSnapshotSeq !== undefined && sinceSeq < latestSnapshotSeq) {
-        // Start from one before the snapshot so it's included in results
-        effectiveSinceSeq = latestSnapshotSeq - 1;
-        Logger.info(
-          `[user:${userId}] Optimized download: skipping from sinceSeq=${sinceSeq} to ${effectiveSinceSeq} ` +
-            `(latest snapshot at seq ${latestSnapshotSeq})`,
-        );
-
-        // Compute aggregated vector clock from all ops up to and including the snapshot.
-        // This ensures clients know about all clock entries from skipped ops.
-        const skippedOps = await tx.operation.findMany({
-          where: {
-            userId,
-            serverSeq: { lte: latestSnapshotSeq },
-          },
-          select: { vectorClock: true },
-        });
-
-        snapshotVectorClock = {};
-        for (const op of skippedOps) {
-          const clock = op.vectorClock as unknown as VectorClock;
-          if (clock && typeof clock === 'object') {
-            for (const [clientId, value] of Object.entries(clock)) {
-              if (typeof value === 'number') {
-                snapshotVectorClock[clientId] = Math.max(
-                  snapshotVectorClock[clientId] ?? 0,
-                  value,
-                );
-              }
-            }
-          }
-        }
-
-        Logger.info(
-          `[user:${userId}] Computed snapshotVectorClock from ${skippedOps.length} ops: ${JSON.stringify(snapshotVectorClock)}`,
-        );
-      }
-
-      const ops = await tx.operation.findMany({
-        where: {
-          userId,
-          serverSeq: { gt: effectiveSinceSeq },
-          ...(excludeClient ? { clientId: { not: excludeClient } } : {}),
-        },
-        orderBy: {
-          serverSeq: 'asc',
-        },
-        take: limit,
-      });
-
-      const seqRow = await tx.userSyncState.findUnique({
-        where: { userId },
-        select: { lastSeq: true },
-      });
-
-      // Get min sequence efficiently
-      const minSeqAgg = await tx.operation.aggregate({
-        where: { userId },
-        _min: { serverSeq: true },
-      });
-
-      const latestSeq = seqRow?.lastSeq ?? 0;
-      const minSeq = minSeqAgg._min.serverSeq ?? null;
-
-      // Gap detection logic
-      let gapDetected = false;
-
-      // Case 1: Client has history but server is empty
-      if (sinceSeq > 0 && latestSeq === 0) {
-        gapDetected = true;
-        Logger.warn(
-          `[user:${userId}] Gap detected: client at sinceSeq=${sinceSeq} but server is empty (latestSeq=0)`,
-        );
-      }
-
-      // Case 2: Client is ahead of server
-      if (sinceSeq > latestSeq && latestSeq > 0) {
-        gapDetected = true;
-        Logger.warn(
-          `[user:${userId}] Gap detected: client ahead sinceSeq=${sinceSeq} > latestSeq=${latestSeq}`,
-        );
-      }
-
-      if (sinceSeq > 0 && latestSeq > 0) {
-        // Case 3: Requested seq is purged
-        if (minSeq !== null && sinceSeq < minSeq - 1) {
-          gapDetected = true;
-          Logger.warn(
-            `[user:${userId}] Gap detected: sinceSeq=${sinceSeq} but minSeq=${minSeq}`,
-          );
-        }
-
-        // Case 4: Gap in returned operations (use original sinceSeq for gap detection)
-        if (
-          !excludeClient &&
-          ops.length > 0 &&
-          ops[0].serverSeq > effectiveSinceSeq + 1
-        ) {
-          gapDetected = true;
-          Logger.warn(
-            `[user:${userId}] Gap detected: expected seq ${effectiveSinceSeq + 1} but got ${ops[0].serverSeq}`,
-          );
-        }
-      }
-
-      const mappedOps = ops.map((row) => ({
-        serverSeq: row.serverSeq,
-        op: {
-          id: row.id,
-          clientId: row.clientId,
-          actionType: row.actionType,
-          opType: row.opType as Operation['opType'],
-          entityType: row.entityType,
-          entityId: row.entityId ?? undefined,
-          payload: row.payload,
-          vectorClock: row.vectorClock as unknown as VectorClock,
-          schemaVersion: row.schemaVersion,
-          timestamp: Number(row.clientTimestamp),
-          parentOpId: row.parentOpId ?? undefined,
-          isPayloadEncrypted: row.isPayloadEncrypted,
-        },
-        receivedAt: Number(row.receivedAt),
-      }));
-
-      return {
-        ops: mappedOps,
-        latestSeq,
-        gapDetected,
-        latestSnapshotSeq,
-        snapshotVectorClock,
-      };
-    });
+    return this.operationDownloadService.getOpsSinceWithSeq(
+      userId,
+      sinceSeq,
+      excludeClient,
+      limit,
+    );
   }
 
   async getLatestSeq(userId: number): Promise<number> {
-    const row = await prisma.userSyncState.findUnique({
-      where: { userId },
-      select: { lastSeq: true },
-    });
-    return row?.lastSeq ?? 0;
+    return this.operationDownloadService.getLatestSeq(userId);
   }
 
   // === Snapshot Management ===
@@ -1684,29 +1508,15 @@ export class SyncService {
   }
 
   async isDeviceOwner(userId: number, clientId: string): Promise<boolean> {
-    const count = await prisma.syncDevice.count({
-      where: { userId, clientId },
-    });
-    return count > 0;
+    return this.deviceService.isDeviceOwner(userId, clientId);
   }
 
   async getAllUserIds(): Promise<number[]> {
-    const users = await prisma.userSyncState.findMany({
-      select: { userId: true },
-      distinct: ['userId'],
-    });
-    return users.map((u) => u.userId);
+    return this.deviceService.getAllUserIds();
   }
 
   async getOnlineDeviceCount(userId: number): Promise<number> {
-    const threshold = Date.now() - ONLINE_DEVICE_THRESHOLD_MS;
-    const count = await prisma.syncDevice.count({
-      where: {
-        userId,
-        lastSeenAt: { gt: BigInt(threshold) },
-      },
-    });
-    return count;
+    return this.deviceService.getOnlineDeviceCount(userId);
   }
 }
 
