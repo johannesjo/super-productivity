@@ -1,5 +1,12 @@
 # E2E Encryption for SuperSync Server
 
+> **Status:** ✅ **Implemented** (December 2025)
+>
+> This plan has been fully implemented. For the current implementation details, see:
+>
+> - [supersync-encryption-architecture.md](../supersync-encryption-architecture.md) - Implementation documentation with diagrams
+> - `src/app/core/persistence/operation-log/sync/operation-encryption.service.ts` - Core encryption service
+
 ## Summary
 
 Add end-to-end encryption to SuperSync where the server cannot read operation payloads. Users provide a separate encryption password which is used to derive an encryption key client-side. This is the same approach used by legacy sync providers (Dropbox, WebDAV, Local File).

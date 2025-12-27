@@ -2,7 +2,7 @@
 
 **Status:** Parts A, B, C, D Complete (single-version; cross-version sync requires A.7.11)
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 12, 2025
+**Last Updated:** December 27, 2025
 
 ---
 
@@ -1904,6 +1904,11 @@ When adding new entities or relationships:
 - Bounded memory during download (`MAX_DOWNLOAD_OPS_IN_MEMORY = 50,000`)
 - Integration test suite (`sync-scenarios.integration.spec.ts`)
 - E2E test infrastructure (`supersync.spec.ts` with Playwright)
+- **End-to-end encryption** (December 2025):
+  - `OperationEncryptionService` for payload encryption/decryption
+  - AES-256-GCM with Argon2id key derivation
+  - Optional per-provider encryption password
+  - See [supersync-encryption-architecture.md](./supersync-encryption-architecture.md)
 - **Server-side security hardening** (December 2025):
   - Structured audit logging for security events
   - Structured error codes (`SYNC_ERROR_CODES`) for upload results
@@ -1945,6 +1950,7 @@ When adding new entities or relationships:
 > **Recently Completed (December 2025):**
 >
 > - **Server Sync (SuperSync)**: Full upload/download infrastructure with conflict detection, user resolution UI, and integration tests
+> - **End-to-End Encryption**: AES-256-GCM payload encryption with Argon2id key derivation via `OperationEncryptionService`
 > - **Server Security Hardening**: Audit logging, structured error codes, request deduplication, transaction isolation, input validation, rate limiting
 > - **Unified Archive Handling**: `ArchiveOperationHandler` is now the single source of truth for all archive operations, used by both local effects and remote operation application
 > - **Simplified OperationCaptureService**: Refactored to FIFO queue with reference equality optimization for detecting changed feature states
@@ -1988,16 +1994,21 @@ src/app/core/persistence/operation-log/
 │   ├── operation-log-sync.service.ts         # Orchestration (Part C)
 │   ├── operation-log-download.service.ts     # Download ops (API + file fallback)
 │   ├── operation-log-upload.service.ts       # Upload ops (API + file fallback)
+│   ├── operation-encryption.service.ts       # E2EE payload encryption (AES-256-GCM)
 │   ├── vector-clock.service.ts               # Global/entity frontier tracking
 │   ├── lock.service.ts                       # Cross-tab locking (Web Locks + fallback)
-│   ├── multi-tab-coordinator.service.ts      # BroadcastChannel coordination
-│   ├── dependency-resolver.service.ts        # Extract/check dependencies
-│   ├── conflict-resolution.service.ts        # Conflict UI presentation
+│   ├── conflict-resolution.service.ts        # LWW conflict resolution + user notification
+│   ├── sync-import-filter.service.ts         # Filter ops invalidated by SYNC_IMPORT
+│   ├── immediate-upload.service.ts           # Trigger immediate sync on critical ops
+│   ├── super-sync-status.service.ts          # SuperSync connection status tracking
+│   ├── server-migration.service.ts           # Server-side schema migration handling
+│   ├── operation-write-flush.service.ts      # Batch write operations with flush
 │   └── operation-sync.util.ts                # Sync helper utilities
 ├── processing/
 │   ├── operation-applier.service.ts          # Apply ops with fail-fast dependency handling
 │   ├── operation-capture.service.ts          # FIFO queue for capturing entity changes
 │   ├── operation-capture.meta-reducer.ts     # Meta-reducer for before/after state capture
+│   ├── hydration-state.service.ts            # Track hydration/remote ops application state
 │   ├── archive-operation-handler.service.ts  # Unified handler for archive side effects
 │   ├── archive-operation-handler.effects.ts  # Routes local actions to ArchiveOperationHandler
 │   ├── validate-state.service.ts             # Typia + cross-model validation
@@ -2034,5 +2045,7 @@ e2e/
 # References
 
 - [PFAPI Architecture](./pfapi-sync-persistence-architecture.md) - Legacy sync system
-- [Multi-Entity Operations Plan](./multi-entity-operations-plan.md) - Multi-entity operation design
 - [Operation Rules](./operation-rules.md) - Payload and validation rules
+- [SuperSync Encryption](./supersync-encryption-architecture.md) - End-to-end encryption implementation
+- [Hybrid Manifest Architecture](./long-term-plans/hybrid-manifest-architecture.md) - File-based sync optimization
+- [Vector Clocks](./vector-clocks.md) - Vector clock implementation details

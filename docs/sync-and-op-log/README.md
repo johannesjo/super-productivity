@@ -6,13 +6,14 @@ This directory contains the architectural documentation for Super Productivity's
 
 ## Quick Start
 
-| If you want to...                   | Read this                                                                          |
-| ----------------------------------- | ---------------------------------------------------------------------------------- |
-| Understand the overall architecture | [operation-log-architecture.md](./operation-log-architecture.md)                   |
-| See visual diagrams                 | [operation-log-architecture-diagrams.md](./operation-log-architecture-diagrams.md) |
-| Learn the design rules              | [operation-rules.md](./operation-rules.md)                                         |
-| Understand file-based sync          | [hybrid-manifest-architecture.md](./hybrid-manifest-architecture.md)               |
-| Understand legacy PFAPI sync        | [pfapi-sync-persistence-architecture.md](./pfapi-sync-persistence-architecture.md) |
+| If you want to...                   | Read this                                                                            |
+| ----------------------------------- | ------------------------------------------------------------------------------------ |
+| Understand the overall architecture | [operation-log-architecture.md](./operation-log-architecture.md)                     |
+| See visual diagrams                 | [operation-log-architecture-diagrams.md](./operation-log-architecture-diagrams.md)   |
+| Learn the design rules              | [operation-rules.md](./operation-rules.md)                                           |
+| Understand file-based sync          | [hybrid-manifest-architecture.md](./long-term-plans/hybrid-manifest-architecture.md) |
+| Understand SuperSync encryption     | [supersync-encryption-architecture.md](./supersync-encryption-architecture.md)       |
+| Understand legacy PFAPI sync        | [pfapi-sync-persistence-architecture.md](./pfapi-sync-persistence-architecture.md)   |
 
 ## Documentation Overview
 
@@ -26,18 +27,19 @@ This directory contains the architectural documentation for Super Productivity's
 
 ### Sync Architecture
 
-| Document                                                                           | Description                                                                                  | Status         |
-| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------- |
-| [hybrid-manifest-architecture.md](./hybrid-manifest-architecture.md)               | File-based sync optimization using embedded operations buffer and snapshots (WebDAV/Dropbox) | ✅ Implemented |
-| [pfapi-sync-persistence-architecture.md](./pfapi-sync-persistence-architecture.md) | Legacy PFAPI sync system that coexists with operation log                                    | ✅ Active      |
+| Document                                                                             | Description                                                                                  | Status         |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | -------------- |
+| [hybrid-manifest-architecture.md](./long-term-plans/hybrid-manifest-architecture.md) | File-based sync optimization using embedded operations buffer and snapshots (WebDAV/Dropbox) | ✅ Implemented |
+| [supersync-encryption-architecture.md](./supersync-encryption-architecture.md)       | End-to-end encryption for SuperSync (AES-256-GCM + Argon2id)                                 | ✅ Implemented |
+| [pfapi-sync-persistence-architecture.md](./pfapi-sync-persistence-architecture.md)   | Legacy PFAPI sync system that coexists with operation log                                    | ✅ Active      |
 
 ### Planning & Proposals
 
-| Document                                                                                       | Description                                   | Status        |
-| ---------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------- |
-| [e2e-encryption-plan.md](./e2e-encryption-plan.md)                                             | End-to-end encryption design proposal         | 📋 Planned    |
-| [tiered-archive-proposal.md](./tiered-archive-proposal.md)                                     | Multi-tier archive storage proposal           | 📋 Planned    |
-| [operation-payload-optimization-discussion.md](./operation-payload-optimization-discussion.md) | Discussion on payload optimization strategies | 📋 Historical |
+| Document                                                                                       | Description                                              | Status                    |
+| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------- |
+| [replace-pfapi-with-oplog-plan.md](./long-term-plans/replace-pfapi-with-oplog-plan.md)         | Plan to unify sync by replacing PFAPI with operation log | 📋 Planned                |
+| [e2e-encryption-plan.md](./long-term-plans/e2e-encryption-plan.md)                             | Original E2EE design (see supersync-encryption for impl) | ✅ Implemented (Dec 2025) |
+| [operation-payload-optimization-discussion.md](./operation-payload-optimization-discussion.md) | Discussion on payload optimization strategies            | 📋 Historical             |
 
 ## Architecture at a Glance
 
@@ -111,12 +113,11 @@ This prevents duplicate side effects when syncing operations from other clients.
 
 ## Related Documentation
 
-| Location                                                               | Content                             |
-| ---------------------------------------------------------------------- | ----------------------------------- |
-| [/docs/sync/vector-clocks.md](/docs/sync-and-op-log/vector-clocks.md)  | Vector clock implementation details |
-| [/docs/ai/sync/](/android/sync/)                                       | Historical planning documents       |
-| [/packages/super-sync-server/](/packages/super-sync-server/)           | SuperSync server implementation     |
-| [/src/app/pfapi/api/sync/README.md](/src/app/pfapi/api/sync/README.md) | PFAPI sync overview                 |
+| Location                                                         | Content                               |
+| ---------------------------------------------------------------- | ------------------------------------- |
+| [vector-clocks.md](./vector-clocks.md)                           | Vector clock implementation details   |
+| [packages/super-sync-server/](../../packages/super-sync-server/) | SuperSync server implementation       |
+| [background-info/](./background-info/)                           | Research and best practices documents |
 
 ## Implementation Status
 
@@ -126,6 +127,7 @@ This prevents duplicate side effects when syncing operations from other clients.
 | Legacy Sync Bridge (Part B)  | ✅ Complete                                         |
 | Server Sync (Part C)         | ✅ Complete (single-version)                        |
 | Validation & Repair (Part D) | ✅ Complete                                         |
+| End-to-End Encryption        | ✅ Complete (AES-256-GCM + Argon2id)                |
 | Cross-version Sync (A.7.11)  | ⚠️ Not implemented                                  |
 | Schema Migrations            | ✅ Infrastructure ready (no migrations defined yet) |
 
