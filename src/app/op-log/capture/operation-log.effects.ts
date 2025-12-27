@@ -1,4 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { ALL_ACTIONS } from '../../util/local-actions.token';
 import { concatMap, filter } from 'rxjs/operators';
@@ -12,7 +12,6 @@ import { uuidv7 } from '../../util/uuid-v7';
 import { devError } from '../../util/dev-error';
 import { incrementVectorClock } from '../../core/util/vector-clock';
 import { MultiEntityPayload, Operation } from '../core/operation.types';
-import { PfapiService } from '../../pfapi/pfapi.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
 import { OpLog } from '../../core/log';
 import { SnackService } from '../../core/snack/snack.service';
@@ -29,6 +28,7 @@ import { OperationCaptureService } from './operation-capture.service';
 import { ImmediateUploadService } from '../sync/immediate-upload.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { getDeferredActions } from './operation-capture.meta-reducer';
+import { ClientIdService } from '../../core/util/client-id.service';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -57,7 +57,7 @@ export class OperationLogEffects {
   private lockService = inject(LockService);
   private opLogStore = inject(OperationLogStoreService);
   private vectorClockService = inject(VectorClockService);
-  private injector = inject(Injector);
+  private clientIdService = inject(ClientIdService);
   private compactionService = inject(OperationLogCompactionService);
   private snackService = inject(SnackService);
   private operationCaptureService = inject(OperationCaptureService);
@@ -93,10 +93,8 @@ export class OperationLogEffects {
   );
 
   private async writeOperation(action: PersistentAction): Promise<void> {
-    const pfapiService = this.injector.get(PfapiService);
-
     if (!this.clientId) {
-      this.clientId = await pfapiService.pf.metaModel.loadClientId();
+      this.clientId = (await this.clientIdService.loadClientId()) ?? undefined;
     }
     if (!this.clientId) {
       throw new Error('Failed to load clientId - cannot persist operation');

@@ -10,12 +10,14 @@ import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { download } from '../../util/download';
 import { T } from '../../t.const';
+import { ClientIdService } from '../../core/util/client-id.service';
 
 @Injectable({ providedIn: 'root' })
 export class OperationLogMigrationService {
   private opLogStore = inject(OperationLogStoreService);
   private pfapiService = inject(PfapiService);
   private matDialog = inject(MatDialog);
+  private clientIdService = inject(ClientIdService);
 
   async checkAndMigrate(): Promise<void> {
     // Check if there's a state cache (snapshot) - this indicates a proper migration happened
@@ -80,7 +82,10 @@ export class OperationLogMigrationService {
       'OperationLogMigrationService: Legacy data found. Creating Genesis Operation.',
     );
 
-    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    const clientId = await this.clientIdService.loadClientId();
+    if (!clientId) {
+      throw new Error('Failed to load clientId - cannot create Genesis operation');
+    }
 
     // Create Genesis Operation
     const genesisOp: Operation = {

@@ -1,5 +1,5 @@
-import { inject, InjectionToken, Injector } from '@angular/core';
-import { PfapiService } from '../../pfapi/pfapi.service';
+import { inject, InjectionToken } from '@angular/core';
+import { ClientIdService } from '../../core/util/client-id.service';
 
 /**
  * Interface for providing the sync client ID.
@@ -11,8 +11,8 @@ import { PfapiService } from '../../pfapi/pfapi.service';
  *
  * By injecting this token instead, the dependency graph is cleaner:
  * - Operation-log services depend on CLIENT_ID_PROVIDER (a simple interface)
- * - CLIENT_ID_PROVIDER is implemented by a factory that uses PfapiService
- * - No circular dependency because PfapiService is resolved lazily at call time
+ * - CLIENT_ID_PROVIDER delegates to ClientIdService
+ * - ClientIdService handles lazy PfapiService resolution
  */
 export interface ClientIdProvider {
   loadClientId(): Promise<string | null>;
@@ -21,9 +21,7 @@ export interface ClientIdProvider {
 /**
  * Injection token for the client ID provider.
  *
- * Uses lazy injection via Injector.get() to break the circular dependency.
- * PfapiService is only resolved when loadClientId() is called, not at
- * provider creation time.
+ * Delegates to ClientIdService which handles lazy injection and caching.
  *
  * Usage:
  * ```typescript
@@ -37,17 +35,9 @@ export const CLIENT_ID_PROVIDER = new InjectionToken<ClientIdProvider>(
   {
     providedIn: 'root',
     factory: () => {
-      const injector = inject(Injector);
-      let pfapiService: PfapiService | null = null;
-
+      const clientIdService = inject(ClientIdService);
       return {
-        loadClientId: () => {
-          // Lazy injection: only resolve PfapiService when actually needed
-          if (!pfapiService) {
-            pfapiService = injector.get(PfapiService);
-          }
-          return pfapiService.pf.metaModel.loadClientId();
-        },
+        loadClientId: () => clientIdService.loadClientId(),
       };
     },
   },

@@ -28,6 +28,7 @@ import {
   MAX_CONFLICT_RETRY_ATTEMPTS,
   PENDING_OPERATION_EXPIRY_MS,
 } from '../core/operation-log.const';
+import { ClientIdService } from '../../core/util/client-id.service';
 
 type StateCache = MigratableStateCache;
 
@@ -53,6 +54,7 @@ export class OperationLogHydratorService {
   private vectorClockService = inject(VectorClockService);
   private operationApplierService = inject(OperationApplierService);
   private hydrationStateService = inject(HydrationStateService);
+  private clientIdService = inject(ClientIdService);
 
   // Mutex to prevent concurrent repair operations and re-validation during repair
   private _repairMutex: Promise<void> | null = null;
@@ -486,7 +488,10 @@ export class OperationLogHydratorService {
   private async _recoverFromLegacyData(
     legacyData: Record<string, unknown>,
   ): Promise<void> {
-    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    const clientId = await this.clientIdService.loadClientId();
+    if (!clientId) {
+      throw new Error('Failed to load clientId - cannot create recovery operation');
+    }
 
     // Create recovery operation
     const recoveryOp: Operation = {
@@ -682,7 +687,10 @@ export class OperationLogHydratorService {
       );
 
       // 2. Get client ID for vector clock
-      const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+      const clientId = await this.clientIdService.loadClientId();
+      if (!clientId) {
+        throw new Error('Failed to load clientId - cannot create SYNC_IMPORT operation');
+      }
 
       // 3. Create SYNC_IMPORT operation with merged clock
       // CRITICAL: The SYNC_IMPORT's clock must include ALL known clients, not just local ones.
