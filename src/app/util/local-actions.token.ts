@@ -7,9 +7,22 @@ import { filter, share } from 'rxjs/operators';
 /**
  * DEFAULT: Injection token for Actions stream filtered to local user actions only.
  *
- * This should be used by ALL effects as the standard replacement for `inject(LOCAL_ACTIONS)`.
+ * This should be used by ALL effects as the standard replacement for `inject(Actions)`.
  *
- * Why? When actions come from remote sync or hydration:
+ * ## How It Works
+ *
+ * Remote sync operations are applied via `bulkApplyOperations`, which is intercepted
+ * by `bulkOperationsMetaReducer`. This means:
+ * - Effects don't see individual remote actions (they only see `bulkApplyOperations`)
+ * - Most effects naturally don't trigger because they filter by specific action types
+ *
+ * However, some effects might still be triggered by `bulkApplyOperations` itself
+ * (if they listen for that action type), so this token provides an additional
+ * safety layer by filtering out actions marked with `meta.isRemote`.
+ *
+ * ## Why Filter Remote Actions?
+ *
+ * When actions come from remote sync or hydration:
  * - Reducers should run (to update state) ✓
  * - Effects should NOT run because:
  *   1. UI side effects (snacks, sounds) already happened on original client

@@ -6,6 +6,7 @@ import { ArchiveOperationHandler } from './archive-operation-handler.service';
 import { HydrationStateService } from './hydration-state.service';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { remoteArchiveDataApplied } from '../../../../features/time-tracking/store/archive.actions';
+import { bulkApplyOperations } from '../bulk-hydration.action';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
@@ -57,28 +58,27 @@ describe('OperationApplierService', () => {
     service = TestBed.inject(OperationApplierService);
   });
 
-  describe('applyOperations', () => {
-    it('should dispatch action for operation', async () => {
+  describe('applyOperations with bulk dispatch', () => {
+    it('should dispatch bulkApplyOperations with single operation', async () => {
       const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
 
       const result = await service.applyOperations([op]);
 
+      // One bulk dispatch (no remoteArchiveDataApplied since Update is not archive-affecting)
       expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          type: '[Test] Action',
-          title: 'Test',
-          meta: jasmine.objectContaining({
-            isPersistent: true,
-            isRemote: true,
-          }),
-        }),
-      );
+
+      const dispatchedAction = mockStore.dispatch.calls.first().args[0] as unknown as {
+        type: string;
+        operations: Operation[];
+      };
+      expect(dispatchedAction.type).toBe(bulkApplyOperations.type);
+      expect(dispatchedAction.operations).toEqual([op]);
+
       expect(result.appliedOps).toEqual([op]);
       expect(result.failedOp).toBeUndefined();
     });
 
-    it('should dispatch actions for multiple operations in order', async () => {
+    it('should dispatch bulkApplyOperations with multiple operations', async () => {
       const ops = [
         createMockOperation('op-1', 'TASK', OpType.Update, { title: 'First' }),
         createMockOperation('op-2', 'TASK', OpType.Update, { title: 'Second' }),
@@ -87,12 +87,16 @@ describe('OperationApplierService', () => {
 
       const result = await service.applyOperations(ops);
 
-      expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
+      // One bulk dispatch (no remoteArchiveDataApplied since Updates are not archive-affecting)
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
 
-      const calls = mockStore.dispatch.calls.all();
-      expect((calls[0].args[0] as any).title).toBe('First');
-      expect((calls[1].args[0] as any).title).toBe('Second');
-      expect((calls[2].args[0] as any).title).toBe('Third');
+      const dispatchedAction = mockStore.dispatch.calls.first().args[0] as unknown as {
+        type: string;
+        operations: Operation[];
+      };
+      expect(dispatchedAction.type).toBe(bulkApplyOperations.type);
+      expect(dispatchedAction.operations).toEqual(ops);
+      expect(dispatchedAction.operations.length).toBe(3);
 
       expect(result.appliedOps).toEqual(ops);
       expect(result.failedOp).toBeUndefined();
@@ -106,15 +110,16 @@ describe('OperationApplierService', () => {
       expect(result.failedOp).toBeUndefined();
     });
 
-    it('should call archiveOperationHandler after dispatching', async () => {
+    it('should process archive operations after bulk dispatch', async () => {
       const op = createMockOperation('op-1');
 
       await service.applyOperations([op]);
 
+      // Archive handler is called after bulk dispatch
       expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(1);
     });
 
-    it('should call archiveOperationHandler with loadAllData action for SYNC_IMPORT operations', async () => {
+    it('should handle SYNC_IMPORT operations correctly', async () => {
       const archiveYoungData = { task: { ids: ['t1'], entities: {} } };
       const archiveOldData = { task: { ids: ['t2'], entities: {} } };
 
@@ -138,15 +143,15 @@ describe('OperationApplierService', () => {
 
       await service.applyOperations([op]);
 
-      // Verify store.dispatch was called with loadAllData action and remoteArchiveDataApplied
-      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
-      const dispatchedAction = mockStore.dispatch.calls.first().args[0] as any;
-      expect(dispatchedAction.type).toBe('[SP_ALL] Load(import) all data');
-      expect(dispatchedAction.appDataComplete.archiveYoung).toEqual(archiveYoungData);
-      expect(dispatchedAction.appDataComplete.archiveOld).toEqual(archiveOldData);
-      expect(dispatchedAction.meta.isRemote).toBe(true);
+      // Verify bulk dispatch contains the operation
+      const bulkAction = mockStore.dispatch.calls.first().args[0] as unknown as {
+        type: string;
+        operations: Operation[];
+      };
+      expect(bulkAction.type).toBe(bulkApplyOperations.type);
+      expect(bulkAction.operations[0].id).toBe('sync-import-1');
 
-      // Verify archiveOperationHandler was called with the action
+      // Verify archiveOperationHandler was called
       expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(1);
       const handlerAction = mockArchiveOperationHandler.handleOperation.calls.first()
         .args[0] as any;
@@ -164,6 +169,8 @@ describe('OperationApplierService', () => {
 
       const result = await service.applyOperations([op]);
 
+      // Bulk dispatch succeeded, archive handling failed
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
       expect(result.appliedOps).toEqual([]);
       expect(result.failedOp).toBeDefined();
       expect(result.failedOp!.op).toBe(op);
@@ -193,7 +200,7 @@ describe('OperationApplierService', () => {
       expect(mockHydrationState.endApplyingRemoteOps).toHaveBeenCalledTimes(1);
     });
 
-    it('should call endApplyingRemoteOps after all ops', async () => {
+    it('should call hydration state methods correctly for multiple ops', async () => {
       const ops = [
         createMockOperation('op-1'),
         createMockOperation('op-2'),
@@ -204,7 +211,8 @@ describe('OperationApplierService', () => {
 
       expect(mockHydrationState.startApplyingRemoteOps).toHaveBeenCalledTimes(1);
       expect(mockHydrationState.endApplyingRemoteOps).toHaveBeenCalledTimes(1);
-      expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
+      // Single bulk dispatch
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -224,6 +232,22 @@ describe('OperationApplierService', () => {
       await service.applyOperations([op], { isLocalHydration: false });
 
       expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not start post-sync cooldown when isLocalHydration is true', async () => {
+      const op = createMockOperation('op-1');
+
+      await service.applyOperations([op], { isLocalHydration: true });
+
+      expect(mockHydrationState.startPostSyncCooldown).not.toHaveBeenCalled();
+    });
+
+    it('should start post-sync cooldown when isLocalHydration is false', async () => {
+      const op = createMockOperation('op-1');
+
+      await service.applyOperations([op], { isLocalHydration: false });
+
+      expect(mockHydrationState.startPostSyncCooldown).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -245,7 +269,8 @@ describe('OperationApplierService', () => {
 
       await service.applyOperations([op]);
 
-      // Check that remoteArchiveDataApplied action was dispatched
+      // Bulk dispatch + remoteArchiveDataApplied
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
       const dispatchCalls = mockStore.dispatch.calls.allArgs();
       const archiveDataAppliedCalls = dispatchCalls.filter(
         (args) =>
@@ -324,7 +349,7 @@ describe('OperationApplierService', () => {
   });
 
   describe('event loop yield after dispatch', () => {
-    it('should yield to event loop after dispatching operations', async () => {
+    it('should yield to event loop after bulk dispatch', async () => {
       const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
 
       let setTimeoutCalledWithZero = false;

@@ -24,7 +24,7 @@ import { ValidateStateService } from '../processing/validate-state.service';
 // import { RepairOperationService } from '../processing/repair-operation.service';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { HydrationStateService } from '../processing/hydration-state.service';
-import { bulkApplyHydrationOperations } from '../bulk-hydration.action';
+import { bulkApplyOperations } from '../bulk-hydration.action';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { VectorClockService } from '../sync/vector-clock.service';
 import {
@@ -213,9 +213,7 @@ export class OperationLogHydratorService {
             // This reduces 500 dispatches to 1, dramatically improving startup performance.
             // The bulkHydrationMetaReducer iterates through ops and applies each action.
             this.hydrationStateService.startApplyingRemoteOps();
-            this.store.dispatch(
-              bulkApplyHydrationOperations({ operations: opsToReplay }),
-            );
+            this.store.dispatch(bulkApplyOperations({ operations: opsToReplay }));
             this.hydrationStateService.endApplyingRemoteOps();
 
             // Merge replayed ops' clocks into local clock
@@ -297,7 +295,7 @@ export class OperationLogHydratorService {
           // This reduces 500 dispatches to 1, dramatically improving startup performance.
           // The bulkHydrationMetaReducer iterates through ops and applies each action.
           this.hydrationStateService.startApplyingRemoteOps();
-          this.store.dispatch(bulkApplyHydrationOperations({ operations: opsToReplay }));
+          this.store.dispatch(bulkApplyOperations({ operations: opsToReplay }));
           this.hydrationStateService.endApplyingRemoteOps();
 
           // Merge replayed ops' clocks into local clock
