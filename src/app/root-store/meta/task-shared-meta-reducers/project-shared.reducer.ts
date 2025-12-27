@@ -22,10 +22,7 @@ import {
   updateTags,
 } from './task-shared-helpers';
 import { TASK_REPEAT_CFG_FEATURE_NAME } from '../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
-import {
-  TaskRepeatCfg,
-  TaskRepeatCfgState,
-} from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
+import { TaskRepeatCfgState } from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { adapter as taskRepeatCfgAdapter } from '../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 
 /**
@@ -114,9 +111,9 @@ const cleanupTimeTrackingForProject = (
 };
 
 /**
- * Cleans up task repeat configs when a project is deleted.
- * - Configs with the deleted projectId AND no tags are deleted (orphaned)
- * - Configs with the deleted projectId AND tags have projectId set to null
+ * Deletes all task repeat configs when their project is deleted.
+ * Repeat configs are always deleted regardless of whether they have tags,
+ * because they are tied to the project's workflow.
  */
 const cleanupTaskRepeatCfgsForProject = (
   taskRepeatCfgState: TaskRepeatCfgState | undefined,
@@ -125,36 +122,17 @@ const cleanupTaskRepeatCfgsForProject = (
   if (!taskRepeatCfgState) return taskRepeatCfgState;
 
   const cfgIdsToDelete: string[] = [];
-  const cfgUpdates: Update<TaskRepeatCfg>[] = [];
 
   Object.values(taskRepeatCfgState.entities).forEach((cfg) => {
     if (!cfg || cfg.projectId !== projectId) return;
-
-    if (!cfg.tagIds || cfg.tagIds.length === 0) {
-      // Config becomes orphaned (no project, no tags) - delete it
-      cfgIdsToDelete.push(cfg.id as string);
-    } else {
-      // Config still has tags - keep it but remove project reference
-      cfgUpdates.push({
-        id: cfg.id as string,
-        changes: { projectId: null },
-      });
-    }
+    cfgIdsToDelete.push(cfg.id as string);
   });
 
-  if (cfgIdsToDelete.length === 0 && cfgUpdates.length === 0) {
+  if (cfgIdsToDelete.length === 0) {
     return taskRepeatCfgState;
   }
 
-  let updatedState = taskRepeatCfgState;
-  if (cfgIdsToDelete.length > 0) {
-    updatedState = taskRepeatCfgAdapter.removeMany(cfgIdsToDelete, updatedState);
-  }
-  if (cfgUpdates.length > 0) {
-    updatedState = taskRepeatCfgAdapter.updateMany(cfgUpdates, updatedState);
-  }
-
-  return updatedState;
+  return taskRepeatCfgAdapter.removeMany(cfgIdsToDelete, taskRepeatCfgState);
 };
 
 const handleDeleteProject = (

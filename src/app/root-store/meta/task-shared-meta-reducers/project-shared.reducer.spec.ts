@@ -579,7 +579,7 @@ describe('projectSharedMetaReducer', () => {
       ).toBeDefined();
     });
 
-    it('should clear projectId but keep task repeat config if it has tags', () => {
+    it('should delete task repeat config even if it has tags', () => {
       const testState = createStateWithExistingTasks(['task1'], [], []) as any;
 
       // Add task repeat config linked to project AND has tags
@@ -604,22 +604,21 @@ describe('projectSharedMetaReducer', () => {
       metaReducer(testState, action);
       const passedState = mockReducer.calls.mostRecent().args[0];
 
-      // cfg-with-tags should exist but with projectId = null
-      const cfg = passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-with-tags'];
-      expect(cfg).toBeDefined();
-      expect(cfg.projectId).toBeNull();
-      expect(cfg.tagIds).toEqual(['tag1', 'tag2']);
+      // cfg-with-tags should be deleted (repeat configs are always deleted with project)
+      expect(
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-with-tags'],
+      ).toBeUndefined();
     });
 
-    it('should handle mixed task repeat configs during project deletion', () => {
+    it('should delete all project repeat configs but leave unrelated configs', () => {
       const testState = createStateWithExistingTasks(['task1'], [], []) as any;
 
-      // Mix of configs: orphaned, has tags, unrelated
+      // Mix of configs: some linked to project (with/without tags), some unrelated
       testState[TASK_REPEAT_CFG_FEATURE_NAME] = {
-        ids: ['cfg-orphan', 'cfg-with-tags', 'cfg-unrelated'],
+        ids: ['cfg-no-tags', 'cfg-with-tags', 'cfg-unrelated'],
         entities: {
-          'cfg-orphan': createMockTaskRepeatCfg({
-            id: 'cfg-orphan',
+          'cfg-no-tags': createMockTaskRepeatCfg({
+            id: 'cfg-no-tags',
             projectId: 'project1',
             tagIds: [],
           }),
@@ -646,14 +645,13 @@ describe('projectSharedMetaReducer', () => {
       metaReducer(testState, action);
       const passedState = mockReducer.calls.mostRecent().args[0];
 
-      // cfg-orphan should be deleted
+      // All project1 configs should be deleted
       expect(
-        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-orphan'],
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-no-tags'],
       ).toBeUndefined();
-      // cfg-with-tags should exist with null projectId
       expect(
-        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-with-tags'].projectId,
-      ).toBeNull();
+        passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-with-tags'],
+      ).toBeUndefined();
       // cfg-unrelated should remain unchanged
       expect(
         passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities['cfg-unrelated'].projectId,
