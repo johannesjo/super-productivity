@@ -6,6 +6,7 @@ A custom, high-performance synchronization server for Super Productivity.
 
 > **Related Documentation:**
 >
+> - [Authentication Architecture](./docs/authentication.md) - Auth design decisions and security features
 > - [Operation Log Architecture](/docs/sync-and-op-log/operation-log-architecture.md) - Client-side architecture
 > - [Server Architecture Diagrams](./sync-server-architecture-diagrams.md) - Visual diagrams
 
