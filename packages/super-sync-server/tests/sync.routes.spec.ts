@@ -838,6 +838,92 @@ describe('Gzip Compressed Snapshot Upload', () => {
     expect(response.statusCode).toBe(400);
     expect(response.json().error).toBe('Validation failed');
   });
+
+  it('should accept base64-encoded gzip snapshot from Android clients', async () => {
+    const zlib = await import('zlib');
+    const { promisify } = await import('util');
+    const gzipAsync = promisify(zlib.gzip);
+
+    const payload = {
+      state: { task: { t1: { title: 'Android Task' } } },
+      clientId: 'android-client',
+      reason: 'initial',
+      vectorClock: { 'android-client': 1 },
+      schemaVersion: 1,
+    };
+
+    const jsonPayload = JSON.stringify(payload);
+    const compressedPayload = await gzipAsync(Buffer.from(jsonPayload, 'utf-8'));
+    // Base64 encode the gzip data (as Android CapacitorHttp does)
+    const base64Payload = compressedPayload.toString('base64');
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+        'content-transfer-encoding': 'base64',
+      },
+      payload: base64Payload,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.accepted).toBe(true);
+    expect(body.serverSeq).toBe(1);
+  });
+
+  it('should accept base64-encoded gzip ops upload from Android clients', async () => {
+    const zlib = await import('zlib');
+    const { promisify } = await import('util');
+    const gzipAsync = promisify(zlib.gzip);
+
+    const payload = {
+      ops: [createOp('android-client')],
+      clientId: 'android-client',
+    };
+
+    const jsonPayload = JSON.stringify(payload);
+    const compressedPayload = await gzipAsync(Buffer.from(jsonPayload, 'utf-8'));
+    const base64Payload = compressedPayload.toString('base64');
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/ops',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+        'content-transfer-encoding': 'base64',
+      },
+      payload: base64Payload,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].accepted).toBe(true);
+  });
+
+  it('should return 400 for invalid base64 gzip data', async () => {
+    // Send non-base64 data with the base64 header
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+        'content-transfer-encoding': 'base64',
+      },
+      payload: 'this is not valid base64 gzip!!!@#$%',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error).toContain('decompress');
+  });
 });
 
 describe('Concurrent Operations', () => {

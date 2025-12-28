@@ -73,6 +73,27 @@ const UploadSnapshotSchema = z.object({
 const errorMessage = (err: unknown): string =>
   err instanceof Error ? err.message : 'Unknown error';
 
+/**
+ * Decompress gzip body, handling base64 encoding from Android clients.
+ * Android WebView can't send binary fetch bodies, so the client sends
+ * base64-encoded gzip data with Content-Transfer-Encoding: base64 header.
+ */
+const decompressBody = async (
+  rawBody: Buffer,
+  contentTransferEncoding: string | undefined,
+): Promise<Buffer> => {
+  // Check if body is base64-encoded (from Android CapacitorHttp)
+  if (contentTransferEncoding === 'base64') {
+    // Body is base64 string encoded as buffer - decode it first
+    const base64String = rawBody.toString('utf-8');
+    const binaryData = Buffer.from(base64String, 'base64');
+    return gunzipAsync(binaryData);
+  }
+
+  // Standard binary gzip body
+  return gunzipAsync(rawBody);
+};
+
 export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
   // Add content type parser for gzip-encoded JSON
   // This allows clients to send compressed request bodies with Content-Encoding: gzip
@@ -132,7 +153,11 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           }
 
           try {
-            const decompressed = await gunzipAsync(rawBody);
+            // Handle base64-encoded gzip from Android clients
+            const contentTransferEncoding = req.headers['content-transfer-encoding'] as
+              | string
+              | undefined;
+            const decompressed = await decompressBody(rawBody, contentTransferEncoding);
             if (decompressed.length > MAX_DECOMPRESSED_SIZE) {
               Logger.warn(
                 `[user:${userId}] Decompressed upload too large: ${decompressed.length} bytes (max ${MAX_DECOMPRESSED_SIZE})`,
@@ -143,7 +168,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             }
             body = JSON.parse(decompressed.toString('utf-8'));
             Logger.debug(
-              `[user:${userId}] Ops upload decompressed: ${rawBody.length} -> ${decompressed.length} bytes`,
+              `[user:${userId}] Ops upload decompressed: ${rawBody.length} -> ${decompressed.length} bytes (base64: ${contentTransferEncoding === 'base64'})`,
             );
           } catch (decompressErr) {
             Logger.warn(
@@ -526,7 +551,11 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           }
 
           try {
-            const decompressed = await gunzipAsync(rawBody);
+            // Handle base64-encoded gzip from Android clients
+            const contentTransferEncoding = req.headers['content-transfer-encoding'] as
+              | string
+              | undefined;
+            const decompressed = await decompressBody(rawBody, contentTransferEncoding);
             if (decompressed.length > MAX_DECOMPRESSED_SIZE) {
               Logger.warn(
                 `[user:${userId}] Decompressed snapshot too large: ${decompressed.length} bytes (max ${MAX_DECOMPRESSED_SIZE})`,
@@ -537,7 +566,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             }
             body = JSON.parse(decompressed.toString('utf-8'));
             Logger.debug(
-              `[user:${userId}] Snapshot decompressed: ${rawBody.length} -> ${decompressed.length} bytes`,
+              `[user:${userId}] Snapshot decompressed: ${rawBody.length} -> ${decompressed.length} bytes (base64: ${contentTransferEncoding === 'base64'})`,
             );
           } catch (decompressErr) {
             Logger.warn(

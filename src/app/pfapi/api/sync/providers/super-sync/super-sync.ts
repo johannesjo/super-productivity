@@ -1,3 +1,4 @@
+import { CapacitorHttp } from '@capacitor/core';
 import { SyncProviderId } from '../../../pfapi.const';
 import {
   SyncProviderServiceInterface,
@@ -17,7 +18,11 @@ import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-sto
 import { SuperSyncPrivateCfg } from './super-sync.model';
 import { MissingCredentialsSPError } from '../../../errors/errors';
 import { SyncLog } from '../../../../../core/log';
-import { compressWithGzip } from '../../../compression/compression-handler';
+import {
+  compressWithGzip,
+  compressWithGzipToString,
+} from '../../../compression/compression-handler';
+import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
 
 const LAST_SERVER_SEQ_KEY_PREFIX = 'super_sync_last_server_seq_';
 
@@ -52,6 +57,11 @@ export class SuperSyncProvider
 
   private get logLabel(): string {
     return 'SuperSyncProvider';
+  }
+
+  // Make IS_ANDROID_WEB_VIEW testable by using a getter that can be overridden
+  protected get isAndroidWebView(): boolean {
+    return IS_ANDROID_WEB_VIEW;
   }
 
   async isReady(): Promise<boolean> {
@@ -122,6 +132,16 @@ export class SuperSyncProvider
       clientId,
       lastKnownServerSeq,
     });
+
+    // On Android, use CapacitorHttp with base64-encoded gzip
+    // (Android WebView's fetch() corrupts binary Uint8Array bodies)
+    if (this.isAndroidWebView) {
+      return this._fetchApiCompressedAndroid<OpUploadResponse>(
+        cfg,
+        '/api/sync/ops',
+        jsonPayload,
+      );
+    }
 
     const compressedPayload = await compressWithGzip(jsonPayload);
 
@@ -201,6 +221,16 @@ export class SuperSyncProvider
       schemaVersion,
       isPayloadEncrypted,
     });
+
+    // On Android, use CapacitorHttp with base64-encoded gzip
+    // (Android WebView's fetch() corrupts binary Uint8Array bodies)
+    if (this.isAndroidWebView) {
+      return this._fetchApiCompressedAndroid<SnapshotUploadResponse>(
+        cfg,
+        '/api/sync/snapshot',
+        jsonPayload,
+      );
+    }
 
     const compressedPayload = await compressWithGzip(jsonPayload);
 
@@ -383,5 +413,53 @@ export class SuperSyncProvider
     }
 
     return response.json() as Promise<T>;
+  }
+
+  /**
+   * Sends a gzip-compressed request body from Android.
+   * Android WebView's fetch() corrupts binary Uint8Array bodies, so we use
+   * CapacitorHttp with base64-encoded gzip data instead.
+   */
+  private async _fetchApiCompressedAndroid<T>(
+    cfg: SuperSyncPrivateCfg,
+    path: string,
+    jsonPayload: string,
+  ): Promise<T> {
+    const base64Gzip = await compressWithGzipToString(jsonPayload);
+    const baseUrl = cfg.baseUrl.replace(/\/$/, '');
+    const url = `${baseUrl}${path}`;
+
+    // Sanitize token - remove any non-ASCII characters that may have been
+    // accidentally copied (e.g., zero-width spaces, smart quotes)
+    const sanitizedToken = cfg.accessToken.replace(/[^\x20-\x7E]/g, '');
+
+    SyncLog.debug(this.logLabel, '_fetchApiCompressedAndroid', {
+      path,
+      originalSize: jsonPayload.length,
+      compressedBase64Size: base64Gzip.length,
+    });
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${sanitizedToken}`,
+    };
+    // HTTP headers with hyphens don't match naming convention - use bracket notation
+    headers['Content-Type'] = 'application/json';
+    headers['Content-Encoding'] = 'gzip';
+    headers['Content-Transfer-Encoding'] = 'base64';
+
+    const response = await CapacitorHttp.request({
+      url,
+      method: 'POST',
+      headers,
+      data: base64Gzip,
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      const errorData =
+        typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      throw new Error(`SuperSync API error: ${response.status} - ${errorData}`);
+    }
+
+    return response.data as T;
   }
 }
