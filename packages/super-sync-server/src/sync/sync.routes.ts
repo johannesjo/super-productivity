@@ -496,29 +496,16 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
   );
 
   // GET /api/sync/snapshot - Get full state snapshot
+  // generateSnapshot() handles caching internally via sequence-based freshness:
+  // returns cached snapshot if up-to-date, only replays ops when new ones exist.
   fastify.get('/snapshot', async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       const userId = getAuthUser(req).userId;
       const syncService = getSyncService();
 
       Logger.info(`[user:${userId}] Snapshot requested`);
-
-      // Check if we have a cached snapshot
-      const cached = await syncService.getCachedSnapshot(userId);
-      if (
-        cached &&
-        Date.now() - cached.generatedAt < DEFAULT_SYNC_CONFIG.snapshotCacheTtlMs
-      ) {
-        Logger.info(
-          `[user:${userId}] Returning cached snapshot (seq=${cached.serverSeq}, age=${Math.round((Date.now() - cached.generatedAt) / 1000)}s)`,
-        );
-        return reply.send(cached as SnapshotResponse);
-      }
-
-      // Generate fresh snapshot by replaying ops
-      Logger.info(`[user:${userId}] Generating fresh snapshot...`);
       const snapshot = await syncService.generateSnapshot(userId);
-      Logger.info(`[user:${userId}] Snapshot generated (seq=${snapshot.serverSeq})`);
+      Logger.info(`[user:${userId}] Snapshot ready (seq=${snapshot.serverSeq})`);
       return reply.send(snapshot as SnapshotResponse);
     } catch (err) {
       Logger.error(`Get snapshot error: ${errorMessage(err)}`);

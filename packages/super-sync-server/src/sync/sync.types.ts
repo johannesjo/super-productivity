@@ -357,7 +357,6 @@ export interface SyncConfig {
   downloadRateLimit: { max: number; windowMs: number };
   tombstoneRetentionMs: number;
   opRetentionMs: number;
-  snapshotCacheTtlMs: number;
   maxClockDriftMs: number;
   maxOpAgeMs: number;
 }
@@ -379,7 +378,6 @@ export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   downloadRateLimit: { max: 200, windowMs: MS_PER_MINUTE },
   tombstoneRetentionMs: 45 * MS_PER_DAY, // 45 days
   opRetentionMs: 45 * MS_PER_DAY, // 45 days
-  snapshotCacheTtlMs: 5 * MS_PER_MINUTE, // 5 minutes
   maxClockDriftMs: MS_PER_MINUTE, // 60 seconds
   maxOpAgeMs: 30 * MS_PER_DAY, // 30 days
 };
