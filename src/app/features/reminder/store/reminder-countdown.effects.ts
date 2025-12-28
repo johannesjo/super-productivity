@@ -14,7 +14,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { skipDuringSync } from '../../../util/skip-during-sync.operator';
+import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
@@ -49,7 +49,8 @@ export class ReminderCountdownEffects {
     () =>
       this._dataInitStateService.isAllDataLoadedInitially$.pipe(
         concatMap(() => this._store.select(selectReminderConfig)),
-        skipDuringSync(),
+        // Outer guard: skip config changes during sync
+        skipWhileApplyingRemoteOps(),
         switchMap((reminderCfg) =>
           reminderCfg.isCountdownBannerEnabled
             ? combineLatest([
@@ -67,15 +68,14 @@ export class ReminderCountdownEffects {
                   );
                 }),
                 switchMap((dueTasks) =>
-                  this._store
-                    .select(selectCurrentTaskId)
-                    .pipe(distinctUntilChanged())
-                    .pipe(
-                      map((currentId) => ({
-                        currentId,
-                        dueTasks: dueTasks.filter((t) => t.id !== currentId),
-                      })),
-                    ),
+                  this._store.select(selectCurrentTaskId).pipe(
+                    // currentTaskId is local UI state (not synced), so distinctUntilChanged is sufficient
+                    distinctUntilChanged(),
+                    map((currentId) => ({
+                      currentId,
+                      dueTasks: dueTasks.filter((t) => t.id !== currentId),
+                    })),
+                  ),
                 ),
                 tap(({ dueTasks }) => this._showBanner(dueTasks)),
               )

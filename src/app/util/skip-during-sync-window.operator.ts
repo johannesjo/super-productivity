@@ -9,7 +9,7 @@ import { HydrationStateService } from '../op-log/apply/hydration-state.service';
  *
  * ## Why This Exists
  *
- * `skipDuringSync()` only blocks during `isApplyingRemoteOps()` - the window
+ * `skipWhileApplyingRemoteOps()` only blocks during `isApplyingRemoteOps()` - the window
  * when operations are being applied to the store. However, there's a timing gap:
  *
  * 1. Tab gains focus → sync triggers
@@ -23,7 +23,7 @@ import { HydrationStateService } from '../op-log/apply/hydration-state.service';
  *
  * ## When to Use
  *
- * Use this operator instead of `skipDuringSync()` for selector-based effects that:
+ * Use this operator instead of `skipWhileApplyingRemoteOps()` for selector-based effects that:
  * - Modify frequently-synced entities (TODAY_TAG, etc.)
  * - Perform "repair" or "consistency" operations
  * - Could create operations that immediately conflict with remote changes
@@ -44,11 +44,11 @@ import { HydrationStateService } from '../op-log/apply/hydration-state.service';
  * }
  * ```
  *
- * ## Comparison with skipDuringSync()
+ * ## Comparison with skipWhileApplyingRemoteOps()
  *
  * | Operator | Suppresses during | Use case |
  * |----------|-------------------|----------|
- * | skipDuringSync() | isApplyingRemoteOps only | General selector-based effects |
+ * | skipWhileApplyingRemoteOps() | isApplyingRemoteOps only | General selector-based effects |
  * | skipDuringSyncWindow() | isApplyingRemoteOps + cooldown | Effects that modify shared entities |
  */
 export const skipDuringSyncWindow = <T>(): MonoTypeOperatorFunction<T> => {

@@ -26,7 +26,19 @@ ruleTester.run('require-hydration-guard', rule, {
       `,
     },
 
-    // Selector with skipDuringSync guard - should NOT flag
+    // Selector with skipWhileApplyingRemoteOps guard (preferred) - should NOT flag
+    {
+      code: `
+        createEffect(() =>
+          this._store$.select(mySelector).pipe(
+            skipWhileApplyingRemoteOps(),
+            tap(() => this.doSomething())
+          )
+        )
+      `,
+    },
+
+    // Selector with skipDuringSync guard (deprecated alias) - should NOT flag
     {
       code: `
         createEffect(() =>

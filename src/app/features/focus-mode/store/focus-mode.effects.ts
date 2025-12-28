@@ -3,7 +3,7 @@ import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { Store } from '@ngrx/store';
 import { combineLatest, EMPTY, of } from 'rxjs';
-import { skipDuringSync } from '../../../util/skip-during-sync.operator';
+import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import {
   distinctUntilChanged,
   filter,
@@ -61,12 +61,12 @@ export class FocusModeEffects {
       this.store.select(selectFocusModeConfig),
       this.store.select(selectIsFocusModeEnabled),
     ]).pipe(
-      // Prevent auto-showing overlay during sync - config/task state changes from
-      // remote ops would otherwise trigger the overlay unexpectedly
-      skipDuringSync(),
+      // Outer guard: skip config changes during sync
+      skipWhileApplyingRemoteOps(),
       switchMap(([cfg, isFocusModeEnabled]) =>
         isFocusModeEnabled && cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
           ? this.taskService.currentTaskId$.pipe(
+              // currentTaskId$ is local UI state (not synced), so distinctUntilChanged is sufficient
               distinctUntilChanged(),
               filter((id) => !!id),
               map(() => actions.showFocusOverlay()),
@@ -83,12 +83,12 @@ export class FocusModeEffects {
       this.store.select(selectFocusModeConfig),
       this.store.select(selectIsFocusModeEnabled),
     ]).pipe(
-      // Prevent auto-starting/unpausing focus session during sync - currentTaskId
-      // changes from remote ops would otherwise start sessions unexpectedly
-      skipDuringSync(),
+      // Outer guard: skip config changes during sync
+      skipWhileApplyingRemoteOps(),
       switchMap(([cfg, isFocusModeEnabled]) =>
         isFocusModeEnabled && cfg?.isSyncSessionWithTracking
           ? this.taskService.currentTaskId$.pipe(
+              // currentTaskId$ is local UI state (not synced), so distinctUntilChanged is sufficient
               distinctUntilChanged(),
               filter((taskId) => !!taskId),
               withLatestFrom(
@@ -123,7 +123,7 @@ export class FocusModeEffects {
       // CRITICAL: Prevent cascading dispatches during sync that cause app freeze.
       // Without this, rapid currentTaskId changes from remote ops trigger pairwise()
       // which dispatches pauseFocusSession repeatedly, overwhelming the store.
-      skipDuringSync(),
+      skipWhileApplyingRemoteOps(),
       pairwise(),
       withLatestFrom(
         this.store.select(selectFocusModeConfig),
@@ -219,7 +219,7 @@ export class FocusModeEffects {
   // Only triggers when timer STOPS (isRunning becomes false) with elapsed >= duration
   detectSessionCompletion$ = createEffect(() =>
     this.store.select(selectors.selectTimer).pipe(
-      skipDuringSync(),
+      skipWhileApplyingRemoteOps(),
       withLatestFrom(this.store.select(selectors.selectMode)),
       // Only consider emissions where timer just stopped running
       distinctUntilChanged(
@@ -241,7 +241,7 @@ export class FocusModeEffects {
   detectBreakTimeUp$ = createEffect(
     () =>
       this.store.select(selectors.selectTimer).pipe(
-        skipDuringSync(),
+        skipWhileApplyingRemoteOps(),
         filter(
           (timer) =>
             timer.purpose === 'break' &&
@@ -518,7 +518,7 @@ export class FocusModeEffects {
     createEffect(
       () =>
         this.store.select(selectors.selectProgress).pipe(
-          skipDuringSync(),
+          skipWhileApplyingRemoteOps(),
           withLatestFrom(this.store.select(selectors.selectIsRunning)),
           tap(([progress, isRunning]) => {
             window.ea.setProgressBar({
@@ -559,7 +559,7 @@ export class FocusModeEffects {
         this.store.select(selectFocusModeConfig),
         this.store.select(selectIsFocusModeEnabled),
       ]).pipe(
-        skipDuringSync(),
+        skipWhileApplyingRemoteOps(),
         tap(
           ([
             isSessionRunning,
@@ -798,7 +798,7 @@ export class FocusModeEffects {
   playTickSound$ = createEffect(
     () =>
       this.store.select(selectors.selectTimer).pipe(
-        skipDuringSync(),
+        skipWhileApplyingRemoteOps(),
         filter(
           (timer) => timer.isRunning && timer.purpose === 'work' && timer.elapsed > 0,
         ),

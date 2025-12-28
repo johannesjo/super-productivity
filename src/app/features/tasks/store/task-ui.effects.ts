@@ -30,7 +30,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { playDoneSound } from '../util/play-done-sound';
 import { Task } from '../task.model';
 import { EMPTY } from 'rxjs';
-import { skipDuringSync } from '../../../util/skip-during-sync.operator';
+import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { Router } from '@angular/router';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
@@ -122,13 +122,13 @@ export class TaskUiEffects {
   timeEstimateExceeded$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
-        // Prevent spurious notifications during sync - currentTask state changes
-        // from remote ops would otherwise trigger "time estimate exceeded" alerts
-        skipDuringSync(),
+        // Outer guard: skip config changes during sync
+        skipWhileApplyingRemoteOps(),
         switchMap((globalCfg) =>
           globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? // reset whenever the current taskId changes (but no the task data, which is polled afterwards)
               this._store$.pipe(select(selectCurrentTaskId)).pipe(
+                // currentTaskId is local UI state (not synced), so distinctUntilChanged is sufficient
                 distinctUntilChanged(),
                 switchMap(() =>
                   this._store$.pipe(
@@ -156,9 +156,8 @@ export class TaskUiEffects {
   timeEstimateExceededDismissBanner$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
-        // Prevent unexpected banner dismissal during sync - currentTaskId changes
-        // from remote ops would otherwise dismiss the time estimate exceeded banner
-        skipDuringSync(),
+        // Outer guard: skip config changes during sync
+        skipWhileApplyingRemoteOps(),
         switchMap((globalCfg) =>
           globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? this._bannerService.activeBanner$.pipe(
@@ -166,6 +165,7 @@ export class TaskUiEffects {
                   activeBanner?.id === BannerId.TimeEstimateExceeded
                     ? this._store$.pipe(
                         select(selectCurrentTaskId),
+                        // currentTaskId is local UI state (not synced), so distinctUntilChanged is sufficient
                         distinctUntilChanged(),
                         skip(1),
                       )

@@ -14,7 +14,8 @@
  * ## Solution
  *
  * Effects that USE SELECTORS AS THE PRIMARY SOURCE should include one of:
- * - `skipDuringSync()` operator
+ * - `skipWhileApplyingRemoteOps()` operator (preferred)
+ * - `skipDuringSync()` operator (deprecated alias)
  * - `filter(() => !this.hydrationState.isApplyingRemoteOps())`
  *
  * ## What This Rule Does NOT Flag
@@ -57,7 +58,7 @@ module.exports = {
     },
     messages: {
       missingHydrationGuard:
-        'Selector-based effect is missing hydration guard. Add skipDuringSync() or filter with isApplyingRemoteOps() to prevent duplicate operations during sync replay.',
+        'Selector-based effect is missing hydration guard. Add skipWhileApplyingRemoteOps() or filter with isApplyingRemoteOps() to prevent duplicate operations during sync replay.',
     },
     schema: [],
   },
@@ -267,7 +268,9 @@ module.exports = {
 
       // Check for hydration guards
       return (
-        chainText.includes('skipDuringSync') || chainText.includes('isApplyingRemoteOps')
+        chainText.includes('skipWhileApplyingRemoteOps') ||
+        chainText.includes('skipDuringSync') ||
+        chainText.includes('isApplyingRemoteOps')
       );
     };
 

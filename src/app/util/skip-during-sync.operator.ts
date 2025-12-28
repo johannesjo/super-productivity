@@ -4,8 +4,8 @@ import { filter } from 'rxjs/operators';
 import { HydrationStateService } from '../op-log/apply/hydration-state.service';
 
 /**
- * RxJS operator that skips emissions during remote operation application
- * (hydration/sync replay).
+ * RxJS operator that skips emissions while remote operations are being applied
+ * to the store (during hydration/sync replay).
  *
  * ## Why This Exists
  *
@@ -22,13 +22,13 @@ import { HydrationStateService } from '../op-log/apply/hydration-state.service';
  * ## Usage
  *
  * ```typescript
- * import { skipDuringSync } from '../../../util/skip-during-sync.operator';
+ * import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
  *
  * @Injectable()
  * export class MyEffects {
  *   myEffect$ = createEffect(() =>
  *     this.store.select(mySelector).pipe(
- *       skipDuringSync(),  // <-- Add this to guard selector-based effects
+ *       skipWhileApplyingRemoteOps(),  // <-- Add this to guard selector-based effects
  *       tap(...),
  *     )
  *   );
@@ -48,7 +48,12 @@ import { HydrationStateService } from '../op-log/apply/hydration-state.service';
  * `createEffect()` is called during class field initialization, which is still
  * within an injection context.
  */
-export const skipDuringSync = <T>(): MonoTypeOperatorFunction<T> => {
+export const skipWhileApplyingRemoteOps = <T>(): MonoTypeOperatorFunction<T> => {
   const hydrationState = inject(HydrationStateService);
   return filter(() => !hydrationState.isApplyingRemoteOps());
 };
+
+/**
+ * @deprecated Use `skipWhileApplyingRemoteOps` instead. This alias exists for backwards compatibility.
+ */
+export const skipDuringSync = skipWhileApplyingRemoteOps;
