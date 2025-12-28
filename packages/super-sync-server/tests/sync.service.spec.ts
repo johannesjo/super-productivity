@@ -641,9 +641,10 @@ describe('SyncService', () => {
       expect(results[0].error).toBe('Invalid operation ID');
     });
 
-    it('should reject operations with timestamp too far in the future', async () => {
+    it('should clamp operations with timestamp too far in the future', async () => {
       const service = getSyncService();
-      const farFuture = Date.now() + DEFAULT_SYNC_CONFIG.maxClockDriftMs + 10000;
+      const now = Date.now();
+      const farFuture = now + DEFAULT_SYNC_CONFIG.maxClockDriftMs + 10000; // 10s beyond limit
 
       const op: Operation = {
         id: uuidv7(),
@@ -660,8 +661,79 @@ describe('SyncService', () => {
 
       const results = await service.uploadOps(userId, clientId, [op]);
 
-      expect(results[0].accepted).toBe(false);
-      expect(results[0].error).toBe('Timestamp too far in future');
+      // Should be accepted with clamped timestamp (not rejected)
+      expect(results[0].accepted).toBe(true);
+      expect(results[0].serverSeq).toBeDefined();
+
+      // Verify the stored timestamp was clamped
+      const storedOp = testState.operations.get(op.id);
+      expect(storedOp).toBeDefined();
+      // clientTimestamp should be clamped to approximately now + maxClockDriftMs
+      const storedTimestamp = Number(storedOp.clientTimestamp);
+      expect(storedTimestamp).toBeLessThanOrEqual(
+        now + DEFAULT_SYNC_CONFIG.maxClockDriftMs + 100,
+      ); // 100ms tolerance
+      expect(storedTimestamp).toBeLessThan(farFuture); // Must be less than original
+    });
+
+    it('should NOT clamp timestamp exactly at max clock drift boundary', async () => {
+      const service = getSyncService();
+      const now = Date.now();
+      const exactlyAtLimit = now + DEFAULT_SYNC_CONFIG.maxClockDriftMs;
+
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-2',
+        payload: { title: 'Boundary Test' },
+        vectorClock: {},
+        timestamp: exactlyAtLimit,
+        schemaVersion: 1,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+
+      expect(results[0].accepted).toBe(true);
+
+      // Timestamp at exactly the boundary should NOT be clamped
+      const storedOp = testState.operations.get(op.id);
+      const storedTimestamp = Number(storedOp.clientTimestamp);
+      expect(storedTimestamp).toBe(exactlyAtLimit);
+    });
+
+    it('should clamp timestamp just 1ms over max clock drift boundary', async () => {
+      const service = getSyncService();
+      const now = Date.now();
+      const justOverLimit = now + DEFAULT_SYNC_CONFIG.maxClockDriftMs + 1;
+
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TASK',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'task-3',
+        payload: { title: 'Just Over Boundary' },
+        vectorClock: {},
+        timestamp: justOverLimit,
+        schemaVersion: 1,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [op]);
+
+      expect(results[0].accepted).toBe(true);
+
+      // Timestamp just over the boundary should be clamped
+      const storedOp = testState.operations.get(op.id);
+      const storedTimestamp = Number(storedOp.clientTimestamp);
+      expect(storedTimestamp).toBeLessThan(justOverLimit);
+      // Should be clamped to maxClockDriftMs (within small tolerance for test execution time)
+      expect(storedTimestamp).toBeLessThanOrEqual(
+        now + DEFAULT_SYNC_CONFIG.maxClockDriftMs + 50,
+      );
     });
 
     it('should reject operations that are too old', async () => {

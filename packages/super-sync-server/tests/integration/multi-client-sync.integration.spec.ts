@@ -887,7 +887,7 @@ describe('Multi-Client Sync Integration', () => {
   });
 
   describe('Error Cases', () => {
-    it('should reject ops with timestamp too far in future', async () => {
+    it('should clamp ops with timestamp too far in future', async () => {
       const client = new SimulatedClient(app, userId);
 
       const futureOp: Operation = {
@@ -914,8 +914,9 @@ describe('Multi-Client Sync Integration', () => {
       });
 
       const body = response.json() as UploadOpsResponse;
-      expect(body.results[0].accepted).toBe(false);
-      expect(body.results[0].error).toContain('future');
+      // Future timestamps are clamped, not rejected (prevents silent data loss)
+      expect(body.results[0].accepted).toBe(true);
+      expect(body.results[0].serverSeq).toBeDefined();
     });
 
     it('should reject ops with invalid entity type', async () => {

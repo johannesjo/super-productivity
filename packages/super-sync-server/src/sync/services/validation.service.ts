@@ -173,14 +173,9 @@ export class ValidationService {
       };
     }
 
+    // Note: Future timestamp check removed - clamping is handled in SyncService.processOperation()
+    // to preserve data instead of rejecting. Only "too old" check remains.
     const now = Date.now();
-    if (op.timestamp > now + this.config.maxClockDriftMs) {
-      return {
-        valid: false,
-        error: 'Timestamp too far in future',
-        errorCode: SYNC_ERROR_CODES.INVALID_TIMESTAMP,
-      };
-    }
     if (op.timestamp < now - this.config.retentionMs) {
       return {
         valid: false,

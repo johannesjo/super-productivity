@@ -285,6 +285,23 @@ export class SyncService {
     tx: Prisma.TransactionClient,
   ): Promise<UploadResult> {
     try {
+      // Clamp future timestamps instead of rejecting them (prevents silent data loss)
+      const maxAllowedTimestamp = now + this.config.maxClockDriftMs;
+      if (op.timestamp > maxAllowedTimestamp) {
+        const originalTimestamp = op.timestamp;
+        op.timestamp = maxAllowedTimestamp;
+        Logger.audit({
+          event: 'TIMESTAMP_CLAMPED',
+          userId,
+          clientId,
+          opId: op.id,
+          entityType: op.entityType,
+          originalTimestamp,
+          clampedTo: maxAllowedTimestamp,
+          driftMs: originalTimestamp - now,
+        });
+      }
+
       // Validate operation (including clientId match)
       const validation = this.validationService.validateOp(op, clientId);
       if (!validation.valid) {
