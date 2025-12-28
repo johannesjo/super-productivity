@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { filter, map, tap, withLatestFrom, startWith } from 'rxjs/operators';
+import { skipDuringSync } from '../../../util/skip-during-sync.operator';
 import { setSelectedTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { BannerId } from '../../../core/banner/banner.model';
@@ -46,6 +47,7 @@ export class WorkContextEffects {
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       map((event) => event.urlAfterRedirects),
       startWith(this._router.url), // Handle initial page load
+      skipDuringSync(),
       filter(
         (url) =>
           !!url.match(/(schedule)$/) ||
