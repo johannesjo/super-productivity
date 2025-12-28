@@ -39,20 +39,149 @@ describe('TimeTracking Reducer', () => {
     expect(result).toEqual(newState);
   });
 
-  it('should add time spent', () => {
-    const task = { projectId: '1', tagIds: ['2'] } as Partial<TaskCopy> as TaskCopy;
-    const date = '2023-01-01';
-    const action = TimeTrackingActions.addTimeSpent({
-      task,
-      date,
-      duration: 223,
-      isFromTrackingReminder: false,
+  describe('addTimeSpent', () => {
+    it('should add time spent for project and single tag', () => {
+      const task = { projectId: '1', tagIds: ['2'] } as Partial<TaskCopy> as TaskCopy;
+      const date = '2023-01-01';
+      const action = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 223,
+        isFromTrackingReminder: false,
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+      expect(result.project['1'][date].s).toBeDefined();
+      expect(result.project['1'][date].e).toBeDefined();
+      expect(result.tag['2'][date].s).toBeDefined();
+      expect(result.tag['2'][date].e).toBeDefined();
     });
-    const result = timeTrackingReducer(initialTimeTrackingState, action);
-    expect(result.project['1'][date].s).toBeDefined();
-    expect(result.project['1'][date].e).toBeDefined();
-    expect(result.tag['2'][date].s).toBeDefined();
-    expect(result.tag['2'][date].e).toBeDefined();
+
+    it('should add time spent for multiple tags (including TODAY_TAG)', () => {
+      const task = {
+        projectId: 'proj-1',
+        tagIds: ['tag-1', 'tag-2', 'tag-3'],
+      } as Partial<TaskCopy> as TaskCopy;
+      const date = '2024-01-15';
+      const action = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 300,
+        isFromTrackingReminder: false,
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+
+      // Project should have entry
+      expect(result.project['proj-1'][date].s).toBeDefined();
+      expect(result.project['proj-1'][date].e).toBeDefined();
+
+      // All tags should have entries
+      expect(result.tag['tag-1'][date].s).toBeDefined();
+      expect(result.tag['tag-2'][date].s).toBeDefined();
+      expect(result.tag['tag-3'][date].s).toBeDefined();
+
+      // TODAY_TAG should also have entry (id is 'TODAY')
+      expect(result.tag['TODAY'][date].s).toBeDefined();
+      expect(result.tag['TODAY'][date].e).toBeDefined();
+    });
+
+    it('should handle empty tagIds array gracefully', () => {
+      const task = {
+        projectId: 'proj-1',
+        tagIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const date = '2024-01-15';
+      const action = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 100,
+        isFromTrackingReminder: false,
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+
+      // Project should have entry
+      expect(result.project['proj-1'][date].s).toBeDefined();
+
+      // Only TODAY_TAG should have entry (no other tags)
+      expect(result.tag['TODAY'][date].s).toBeDefined();
+      expect(Object.keys(result.tag)).toEqual(['TODAY']);
+    });
+
+    it('should handle null/undefined tagIds defensively', () => {
+      // This tests the defensive coding for corrupted data
+      const task = {
+        projectId: 'proj-1',
+        tagIds: null as unknown as string[],
+      } as Partial<TaskCopy> as TaskCopy;
+      const date = '2024-01-15';
+      const action = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 100,
+        isFromTrackingReminder: false,
+      });
+
+      // Should not throw - defensive coding handles null
+      expect(() => timeTrackingReducer(initialTimeTrackingState, action)).not.toThrow();
+
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+      expect(result.project['proj-1'][date].s).toBeDefined();
+      expect(result.tag['TODAY'][date].s).toBeDefined();
+    });
+
+    it('should merge time when called multiple times for same task/date', () => {
+      const task = {
+        projectId: 'proj-1',
+        tagIds: ['tag-1'],
+      } as Partial<TaskCopy> as TaskCopy;
+      const date = '2024-01-15';
+
+      // First call
+      const action1 = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 100,
+        isFromTrackingReminder: false,
+      });
+      const state1 = timeTrackingReducer(initialTimeTrackingState, action1);
+      const firstStartTime = state1.project['proj-1'][date].s;
+      expect(firstStartTime).toBeDefined();
+
+      // Second call (simulating continued work)
+      const action2 = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 200,
+        isFromTrackingReminder: false,
+      });
+      const state2 = timeTrackingReducer(state1, action2);
+
+      // Start time should be preserved from first call
+      expect(state2.project['proj-1'][date].s).toBe(firstStartTime);
+      // End time should be updated (greater than or equal to start)
+      expect(state2.project['proj-1'][date].e).toBeGreaterThanOrEqual(firstStartTime!);
+    });
+
+    it('should work for task without projectId (only tags)', () => {
+      const task = {
+        projectId: null as unknown as string,
+        tagIds: ['tag-1'],
+      } as Partial<TaskCopy> as TaskCopy;
+      const date = '2024-01-15';
+      const action = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 100,
+        isFromTrackingReminder: false,
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+
+      // Project should NOT have entry (no projectId)
+      expect(result.project).toEqual({});
+
+      // Tags should have entries
+      expect(result.tag['tag-1'][date].s).toBeDefined();
+      expect(result.tag['TODAY'][date].s).toBeDefined();
+    });
   });
 
   it('should update work context data', () => {

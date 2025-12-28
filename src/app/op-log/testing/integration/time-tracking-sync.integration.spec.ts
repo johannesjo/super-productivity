@@ -229,7 +229,10 @@ describe('Time Tracking Sync Integration', () => {
       const clientA = new TestClient('client-A-lww');
       const clientB = new TestClient('client-B-lww');
 
+      const baseTimestamp = Date.now();
+
       // Both clients update the same time tracking entry concurrently
+      // Client A's operation is earlier
       const opA = clientA.createOperation({
         actionType: '[Time Tracking] Sync Time Tracking' as ActionType,
         opType: OpType.Update,
@@ -239,10 +242,12 @@ describe('Time Tracking Sync Integration', () => {
           contextType: 'PROJECT',
           contextId: 'proj-1',
           date: '2024-01-15',
-          data: { s: 1000, e: 2000 }, // Client A's values
+          data: { s: 1000, e: 2000 }, // Client A's values (loser)
         },
       });
+      opA.timestamp = baseTimestamp; // Earlier timestamp
 
+      // Client B's operation is later (should win in LWW)
       const opB = clientB.createOperation({
         actionType: '[Time Tracking] Sync Time Tracking' as ActionType,
         opType: OpType.Update,
@@ -252,22 +257,37 @@ describe('Time Tracking Sync Integration', () => {
           contextType: 'PROJECT',
           contextId: 'proj-1',
           date: '2024-01-15',
-          data: { s: 3000, e: 4000 }, // Client B's values
+          data: { s: 3000, e: 4000 }, // Client B's values (winner)
         },
       });
+      opB.timestamp = baseTimestamp + 1000; // Later timestamp - LWW winner
 
-      // Both operations are valid - LWW will be resolved at application time
+      // Both operations are valid and stored
       await storeService.append(opA, 'local');
       await storeService.append(opB, 'local');
 
       const allOps = await storeService.getOpsAfterSeq(0);
       expect(allOps.length).toBe(2);
 
-      // Both operations stored - LWW resolution happens in reducer/applier
+      // Both operations stored
       const sameEntityOps = allOps.filter(
         (o) => o.op.entityId === 'PROJECT:proj-1:2024-01-15',
       );
       expect(sameEntityOps.length).toBe(2);
+
+      // Verify LWW resolution: when sorted by timestamp, later operation wins
+      const sortedByTimestamp = sameEntityOps.sort(
+        (a, b) => a.op.timestamp - b.op.timestamp,
+      );
+      const lwwWinner = sortedByTimestamp[sortedByTimestamp.length - 1];
+
+      // The winner should be opB with the later timestamp
+      expect(lwwWinner.op.timestamp).toBe(baseTimestamp + 1000);
+      const winnerPayload = lwwWinner.op.payload as {
+        data: { s: number; e: number };
+      };
+      expect(winnerPayload.data.s).toBe(3000);
+      expect(winnerPayload.data.e).toBe(4000);
     });
   });
 

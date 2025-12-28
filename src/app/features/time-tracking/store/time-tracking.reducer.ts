@@ -53,7 +53,7 @@ export const timeTrackingReducer = createReducer(
         : {}),
       tag: {
         ...state.tag,
-        ...([TODAY_TAG.id, ...task.tagIds] as string[]).reduce((acc, tagId) => {
+        ...([TODAY_TAG.id, ...(task.tagIds || [])] as string[]).reduce((acc, tagId) => {
           acc[tagId] = {
             ...state.tag[tagId],
             [date]: {
