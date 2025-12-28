@@ -135,6 +135,24 @@ describe('MetricReducer', () => {
 
         expect(result.entities['2024-01-01']!.notes).toBe('test notes');
       });
+
+      it('should create new metric with defaults when updating non-existent entity', () => {
+        const action = MetricActions.updateMetric({
+          metric: {
+            id: '2024-01-01',
+            changes: { focusSessions: [1000, 2000] },
+          },
+        });
+        const result = metricReducer(initialMetricState, action);
+
+        expect(result.ids).toContain('2024-01-01');
+        expect(result.entities['2024-01-01']!.id).toBe('2024-01-01');
+        expect(result.entities['2024-01-01']!.focusSessions).toEqual([1000, 2000]);
+        // Should have default values for other properties
+        expect(result.entities['2024-01-01']!.remindTomorrow).toBe(
+          DEFAULT_METRIC_FOR_DAY.remindTomorrow,
+        );
+      });
     });
 
     describe('upsertMetric', () => {
