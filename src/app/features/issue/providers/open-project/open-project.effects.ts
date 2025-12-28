@@ -6,7 +6,7 @@ import { concatMap, filter, map, take, tap, withLatestFrom } from 'rxjs/operator
 import { select, Store } from '@ngrx/store';
 import { OPEN_PROJECT_TYPE } from '../../issue.const';
 import { MatDialog } from '@angular/material/dialog';
-import { Task } from '../../../tasks/task.model';
+import { Task, TaskCopy } from '../../../tasks/task.model';
 import { OpenProjectCfg, OpenProjectTransitionOption } from './open-project.model';
 import { EMPTY, Observable, of, timer } from 'rxjs';
 import { DialogOpenProjectTrackTimeComponent } from './open-project-view-components/dialog-open-project-track-time/dialog-open-project-track-time.component';
@@ -96,8 +96,8 @@ export class OpenProjectEffects {
         filter(({ id }) => !!id),
         withLatestFrom(this._store$.pipe(select(selectCurrentTaskParentOrCurrent))),
         filter(
-          ([, currentTaskOrParent]) =>
-            currentTaskOrParent && currentTaskOrParent.issueType === OPEN_PROJECT_TYPE,
+          (input): input is [(typeof input)[0], Readonly<TaskCopy>] =>
+            input[1] != null && input[1].issueType === OPEN_PROJECT_TYPE,
         ),
         concatMap(([, currentTaskOrParent]) => {
           if (!currentTaskOrParent.issueProviderId) {
