@@ -52,6 +52,10 @@ export type VectorClock = Record<string, number>;
 
 /**
  * Compare two vector clocks.
+ *
+ * SYNC NOTE: This algorithm must match the client implementation at:
+ * src/app/core/util/vector-clock.ts - compareVectorClocks()
+ *
  * Returns:
  * - 'LESS_THAN': a happened before b
  * - 'GREATER_THAN': b happened before a
@@ -116,6 +120,10 @@ export const sanitizeVectorClock = (
   return { valid: true, clock: sanitized };
 };
 
+/**
+ * SYNC NOTE: This algorithm must match the client implementation at:
+ * src/app/core/util/vector-clock.ts - compareVectorClocks()
+ */
 export const compareVectorClocks = (
   a: VectorClock,
   b: VectorClock,

@@ -114,6 +114,9 @@ export const sanitizeVectorClock = (clock: any): VectorClock => {
 /**
  * Compare two vector clocks to determine their relationship
  *
+ * SYNC NOTE: This algorithm must match the server implementation at:
+ * packages/super-sync-server/src/sync/sync.types.ts - compareVectorClocks()
+ *
  * @param a First vector clock
  * @param b Second vector clock
  * @returns The comparison result
