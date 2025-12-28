@@ -176,4 +176,30 @@ export class MockSyncServer {
   setForceGapDetected(value: boolean): void {
     this.forceGapDetected = value;
   }
+
+  /**
+   * Convenience method to receive uploaded operations.
+   * Simulates a client uploading ops without needing clientId/lastKnownServerSeq.
+   */
+  receiveUpload(ops: SyncOperation[]): void {
+    for (const op of ops) {
+      const isDuplicate = this.ops.some((stored) => stored.op.id === op.id);
+      if (!isDuplicate) {
+        const serverSeq = this.nextSeq++;
+        this.ops.push({
+          serverSeq,
+          op,
+          receivedAt: Date.now(),
+        });
+      }
+    }
+  }
+
+  /**
+   * Get operations since a given sequence number.
+   * Convenience alias for test assertions.
+   */
+  getOpsSince(sinceSeq: number): ServerSyncOperation[] {
+    return this.ops.filter((stored) => stored.serverSeq > sinceSeq);
+  }
 }

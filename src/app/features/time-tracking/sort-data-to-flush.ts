@@ -9,6 +9,36 @@ import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 
 const TIME_TRACKING_CATEGORIES = ['project', 'tag'] as const;
 
+/**
+ * Moves non-today time tracking data from active state to archiveYoung.
+ *
+ * Called daily when finishing work. Separates "today's" time tracking
+ * (which stays in active state) from older data (which moves to archiveYoung).
+ *
+ * ## Date Handling:
+ * - Only entries matching `todayStr` exactly stay in active timeTracking
+ * - All other dates (past AND future) move to archiveYoung
+ * - todayStr format: 'YYYY-MM-DD' (from getWorklogStr())
+ *
+ * ## Data Flow:
+ * ```
+ * Active TimeTracking:                    ArchiveYoung:
+ * ┌──────────────────────┐               ┌──────────────────────┐
+ * │ today: {...}         │  ──keep──►    │ (unchanged)          │
+ * │ yesterday: {...}     │  ──move──►    │ yesterday: {...}     │
+ * │ last_week: {...}     │  ──move──►    │ last_week: {...}     │
+ * └──────────────────────┘               └──────────────────────┘
+ * ```
+ *
+ * ## Merge Behavior:
+ * - Preserves existing data in archiveYoung (doesn't overwrite)
+ * - New data from timeTracking is added to existing archiveYoung entries
+ *
+ * @param timeTracking - Active TimeTrackingState from NgRx store
+ * @param archiveYoung - Current archiveYoung model
+ * @param todayStr - Today's date string in 'YYYY-MM-DD' format
+ * @returns Object with updated timeTracking (only today) and archiveYoung (with moved data)
+ */
 export const sortTimeTrackingDataToArchiveYoung = ({
   timeTracking,
   archiveYoung,
@@ -59,6 +89,40 @@ export const sortTimeTrackingDataToArchiveYoung = ({
   };
 };
 
+/**
+ * Flushes data from archiveYoung to archiveOld based on age threshold.
+ *
+ * Called periodically (every ~14 days) to move older data from archiveYoung
+ * to archiveOld, reducing sync payload size for daily operations.
+ *
+ * ## Task Movement (Threshold-Based):
+ * - Tasks with `doneOn` older than threshold move to archiveOld
+ * - Subtasks always move with their parent (atomic unit)
+ * - Legacy tasks without `doneOn` are treated as old (moved)
+ * - Task IDs are sorted for deterministic ordering across clients
+ *
+ * ## TimeTracking Movement (Complete Transfer):
+ * - ALL timeTracking data moves from archiveYoung to archiveOld
+ * - archiveYoung.timeTracking is completely cleared after flush
+ * - This is intentional: timeTracking doesn't need the young/old split
+ *
+ * ## Determinism (Critical for Sync):
+ * - Given same inputs, produces identical output on all clients
+ * - Task IDs sorted alphabetically
+ * - No random or time-dependent logic (uses provided `now`)
+ *
+ * ## Sync Flow:
+ * 1. Local client executes flush, writes to IndexedDB
+ * 2. `flushYoungToOld` action is dispatched (captured in op-log)
+ * 3. Remote clients receive operation via sync
+ * 4. `ArchiveOperationHandler` executes same deterministic flush
+ *
+ * @param archiveYoung - Current archiveYoung model
+ * @param archiveOld - Current archiveOld model
+ * @param threshold - Age threshold in milliseconds (typically 21 days)
+ * @param now - Current timestamp (for deterministic calculation)
+ * @returns Object with updated archiveYoung (cleared timeTracking) and archiveOld (merged data)
+ */
 export const sortTimeTrackingAndTasksFromArchiveYoungToOld = ({
   archiveYoung,
   archiveOld,
@@ -112,6 +176,21 @@ export const sortTimeTrackingAndTasksFromArchiveYoungToOld = ({
   };
 };
 
+/**
+ * Merges time tracking data from source into target for a single category.
+ *
+ * Used internally by `sortTimeTrackingAndTasksFromArchiveYoungToOld` to merge
+ * archiveYoung timeTracking into archiveOld.
+ *
+ * ## Merge Behavior:
+ * - Source entries overwrite target entries for same context/date (LWW)
+ * - New contexts/dates from source are added to result
+ * - Existing target data is preserved for non-overlapping entries
+ *
+ * @param source - TTWorkContextSessionMap to merge FROM (e.g., archiveYoung)
+ * @param target - TTWorkContextSessionMap to merge INTO (e.g., archiveOld)
+ * @returns Merged TTWorkContextSessionMap with source overwriting target on conflicts
+ */
 const mergeTimeTrackingCategory = (
   source: TTWorkContextSessionMap,
   target: TTWorkContextSessionMap,
@@ -131,6 +210,33 @@ const mergeTimeTrackingCategory = (
   return result;
 };
 
+/**
+ * Splits archived tasks between young and old archives based on doneOn timestamp.
+ *
+ * Tasks older than the threshold are moved from archiveYoung to archiveOld.
+ * This is the task-specific portion of the young→old flush operation.
+ *
+ * ## Selection Criteria:
+ * - Only parent tasks (no parentId) are evaluated for threshold
+ * - Subtasks always move with their parent
+ * - Tasks without `doneOn` (legacy) are treated as old (moved)
+ * - Formula: `now - task.doneOn > threshold` → move to old
+ *
+ * ## Determinism (Critical for Sync):
+ * - Task IDs are sorted alphabetically in returned arrays
+ * - UUIDv7 IDs are lexicographically sortable by creation time
+ * - All clients produce identical output given same inputs
+ *
+ * ## Error Handling:
+ * - Throws ImpossibleError if task entity is undefined (data corruption)
+ *
+ * @param youngTaskState - Current TaskArchive from archiveYoung
+ * @param oldTaskState - Current TaskArchive from archiveOld
+ * @param threshold - Age threshold in milliseconds (typically 21 days)
+ * @param now - Current timestamp for deterministic calculation
+ * @returns Object with updated youngTaskState and oldTaskState (sorted IDs)
+ * @throws ImpossibleError if a task entity is undefined
+ */
 export const splitArchiveTasksByDoneOnThreshold = ({
   youngTaskState,
   oldTaskState,

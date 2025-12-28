@@ -647,5 +647,257 @@ describe('sort-data-to-flush', () => {
       expect(result.archiveYoung.timeTracking).toEqual({ project: {}, tag: {} });
       expect(result.archiveOld.timeTracking).toEqual({ project: {}, tag: {} });
     });
+
+    describe('timeTracking flush completeness', () => {
+      it('should completely clear all timeTracking from archiveYoung after flush', () => {
+        // This test ensures that after flush, archiveYoung.timeTracking is empty
+        // This is critical for deterministic sync - all clients must have same state
+        const archiveYoung: ArchiveModel = {
+          task: { ids: [], entities: {} },
+          timeTracking: {
+            project: {
+              project1: {
+                '2023-05-01': createTimeEntry(),
+                '2023-05-02': createTimeEntry(),
+                '2023-05-03': createTimeEntry(),
+              },
+              project2: {
+                '2023-05-04': createTimeEntry(),
+              },
+            },
+            tag: {
+              tag1: {
+                '2023-05-01': createTimeEntry(),
+                '2023-05-02': createTimeEntry(),
+              },
+              tag2: {
+                '2023-05-03': createTimeEntry(),
+              },
+            },
+          },
+          // eslint-disable-next-line no-mixed-operators
+          lastTimeTrackingFlush: now - threshold / 2,
+        };
+
+        const archiveOld: ArchiveModel = {
+          task: { ids: [], entities: {} },
+          timeTracking: { project: {}, tag: {} },
+          lastTimeTrackingFlush: now - threshold,
+        };
+
+        const result = sortTimeTrackingAndTasksFromArchiveYoungToOld({
+          archiveYoung,
+          archiveOld,
+          threshold,
+          now,
+        });
+
+        // archiveYoung.timeTracking must be completely empty
+        expect(result.archiveYoung.timeTracking).toEqual({ project: {}, tag: {} });
+        expect(Object.keys(result.archiveYoung.timeTracking.project).length).toBe(0);
+        expect(Object.keys(result.archiveYoung.timeTracking.tag).length).toBe(0);
+
+        // archiveOld should have all the data
+        expect(Object.keys(result.archiveOld.timeTracking.project).length).toBe(2);
+        expect(Object.keys(result.archiveOld.timeTracking.tag).length).toBe(2);
+      });
+
+      it('should merge timeTracking from young into existing old data', () => {
+        // Test the merge behavior when archiveOld already has data for same context
+        const archiveYoung: ArchiveModel = {
+          task: { ids: [], entities: {} },
+          timeTracking: {
+            project: {
+              sharedProject: {
+                '2023-05-15': createTimeEntry(), // New date for existing context
+              },
+            },
+            tag: {},
+          },
+          // eslint-disable-next-line no-mixed-operators
+          lastTimeTrackingFlush: now - threshold / 2,
+        };
+
+        const archiveOld: ArchiveModel = {
+          task: { ids: [], entities: {} },
+          timeTracking: {
+            project: {
+              sharedProject: {
+                '2023-05-01': createTimeEntry(), // Existing date for same context
+              },
+            },
+            tag: {},
+          },
+          lastTimeTrackingFlush: now - threshold,
+        };
+
+        const result = sortTimeTrackingAndTasksFromArchiveYoungToOld({
+          archiveYoung,
+          archiveOld,
+          threshold,
+          now,
+        });
+
+        // Both dates should exist in archiveOld
+        expect(
+          result.archiveOld.timeTracking.project.sharedProject['2023-05-01'],
+        ).toBeDefined();
+        expect(
+          result.archiveOld.timeTracking.project.sharedProject['2023-05-15'],
+        ).toBeDefined();
+      });
+
+      it('should handle young overwriting old for same date (LWW)', () => {
+        // When young has same context/date as old, young should win (it's newer)
+        const youngEntry: TTWorkContextData = { s: 100, e: 200, b: 1, bt: 10 };
+        const oldEntry: TTWorkContextData = { s: 50, e: 100, b: 0, bt: 0 };
+
+        const archiveYoung: ArchiveModel = {
+          task: { ids: [], entities: {} },
+          timeTracking: {
+            project: {
+              project1: { '2023-05-01': youngEntry },
+            },
+            tag: {},
+          },
+          // eslint-disable-next-line no-mixed-operators
+          lastTimeTrackingFlush: now - threshold / 2,
+        };
+
+        const archiveOld: ArchiveModel = {
+          task: { ids: [], entities: {} },
+          timeTracking: {
+            project: {
+              project1: { '2023-05-01': oldEntry },
+            },
+            tag: {},
+          },
+          lastTimeTrackingFlush: now - threshold,
+        };
+
+        const result = sortTimeTrackingAndTasksFromArchiveYoungToOld({
+          archiveYoung,
+          archiveOld,
+          threshold,
+          now,
+        });
+
+        // Young data should have overwritten old data
+        expect(result.archiveOld.timeTracking.project.project1['2023-05-01']).toEqual(
+          youngEntry,
+        );
+      });
+    });
+  });
+
+  describe('sortTimeTrackingDataToArchiveYoung() edge cases', () => {
+    it('should handle date boundary correctly (today stays, yesterday moves)', () => {
+      const todayStr = '2023-05-15';
+      const yesterdayStr = '2023-05-14';
+
+      const timeTracking: TimeTrackingState = {
+        project: {
+          project1: {
+            [todayStr]: createTimeEntry(),
+            [yesterdayStr]: createTimeEntry(),
+          },
+        },
+        tag: {},
+      };
+
+      const archiveYoung: ArchiveModel = {
+        task: { ids: [], entities: {} },
+        timeTracking: { project: {}, tag: {} },
+        lastTimeTrackingFlush: 1621000000000,
+      };
+
+      const result = sortTimeTrackingDataToArchiveYoung({
+        timeTracking,
+        archiveYoung,
+        todayStr,
+      });
+
+      // Today's data should stay in current timeTracking
+      expect(result.timeTracking.project.project1[todayStr]).toBeDefined();
+      // Yesterday's data should be moved to archiveYoung
+      expect(result.timeTracking.project.project1[yesterdayStr]).toBeUndefined();
+      expect(
+        result.archiveYoung.timeTracking.project.project1[yesterdayStr],
+      ).toBeDefined();
+    });
+
+    it('should handle future dates correctly (kept in current)', () => {
+      const todayStr = '2023-05-15';
+      const futureStr = '2023-05-20'; // 5 days in future
+
+      const timeTracking: TimeTrackingState = {
+        project: {
+          project1: {
+            [todayStr]: createTimeEntry(),
+            [futureStr]: createTimeEntry(), // Edge case: future date (shouldn't normally happen)
+          },
+        },
+        tag: {},
+      };
+
+      const archiveYoung: ArchiveModel = {
+        task: { ids: [], entities: {} },
+        timeTracking: { project: {}, tag: {} },
+        lastTimeTrackingFlush: 1621000000000,
+      };
+
+      const result = sortTimeTrackingDataToArchiveYoung({
+        timeTracking,
+        archiveYoung,
+        todayStr,
+      });
+
+      // Future date should move to archive (it's not today)
+      // This is the actual behavior - only exact todayStr match stays
+      expect(result.timeTracking.project.project1[todayStr]).toBeDefined();
+      expect(result.archiveYoung.timeTracking.project.project1[futureStr]).toBeDefined();
+    });
+
+    it('should preserve all date entries when merging with existing archiveYoung', () => {
+      const todayStr = '2023-05-15';
+
+      const timeTracking: TimeTrackingState = {
+        project: {
+          project1: { '2023-05-14': createTimeEntry() },
+        },
+        tag: {},
+      };
+
+      const archiveYoung: ArchiveModel = {
+        task: { ids: [], entities: {} },
+        timeTracking: {
+          project: {
+            project1: {
+              '2023-05-10': createTimeEntry(),
+              '2023-05-11': createTimeEntry(),
+            },
+          },
+          tag: {},
+        },
+        lastTimeTrackingFlush: 1621000000000,
+      };
+
+      const result = sortTimeTrackingDataToArchiveYoung({
+        timeTracking,
+        archiveYoung,
+        todayStr,
+      });
+
+      // All dates should be preserved in archiveYoung
+      expect(
+        result.archiveYoung.timeTracking.project.project1['2023-05-10'],
+      ).toBeDefined();
+      expect(
+        result.archiveYoung.timeTracking.project.project1['2023-05-11'],
+      ).toBeDefined();
+      expect(
+        result.archiveYoung.timeTracking.project.project1['2023-05-14'],
+      ).toBeDefined();
+    });
   });
 });

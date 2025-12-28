@@ -5,7 +5,11 @@ import { EMPTY, Observable, of } from 'rxjs';
 import { TagEffects } from './tag.effects';
 import { updateTag } from './tag.actions';
 import { TODAY_TAG } from '../tag.const';
-import { selectTodayTagRepair } from '../../work-context/store/work-context.selectors';
+import {
+  selectTodayTagRepair,
+  selectTodayTaskIds,
+} from '../../work-context/store/work-context.selectors';
+import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { TagService } from '../tag.service';
@@ -15,9 +19,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { PlannerService } from '../../planner/planner.service';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { WorkContextType } from '../../work-context/work-context.model';
+import { TaskWithDueDay } from '../../tasks/task.model';
 
 /**
- * Tests for TagEffects, specifically the repairTodayTagConsistency$ effect.
+ * Tests for TagEffects, specifically the selector-based effects.
  *
  * The effect repairs TODAY_TAG.taskIds when it becomes inconsistent with
  * tasks' dueDay values, typically after sync conflict resolution.
@@ -66,6 +71,14 @@ describe('TagEffects', () => {
             {
               selector: selectTodayTagRepair,
               value: null, // Default: no repair needed
+            },
+            {
+              selector: selectTodayTaskIds,
+              value: [], // Default: empty today list
+            },
+            {
+              selector: selectAllTasksDueToday,
+              value: [], // Default: no tasks due today
             },
           ],
         }),
@@ -179,6 +192,145 @@ describe('TagEffects', () => {
             tag: {
               id: TODAY_TAG.id,
               changes: { taskIds: [] },
+            },
+            isSkipSnack: true,
+          }),
+        );
+        done();
+      });
+    });
+  });
+
+  describe('preventParentAndSubTaskInTodayList$', () => {
+    const createTask = (id: string, parentId?: string): TaskWithDueDay =>
+      ({
+        id,
+        parentId: parentId || null,
+        subTaskIds: [],
+        tagIds: [],
+        projectId: null,
+        dueDay: '2024-01-15', // Required for TaskWithDueDay
+      }) as unknown as TaskWithDueDay;
+
+    it('should remove subtask when parent is also in today list', (done) => {
+      const parent = createTask('parent-1');
+      const child = createTask('child-1', 'parent-1');
+
+      // Today list has both parent and child
+      store.overrideSelector(selectTodayTaskIds, ['parent-1', 'child-1']);
+      store.overrideSelector(selectAllTasksDueToday, [parent, child]);
+      store.refreshState();
+
+      effects.preventParentAndSubTaskInTodayList$.subscribe((action) => {
+        expect(action).toEqual(
+          updateTag({
+            tag: {
+              id: TODAY_TAG.id,
+              changes: { taskIds: ['parent-1'] }, // Child removed
+            },
+            isSkipSnack: true,
+          }),
+        );
+        done();
+      });
+    });
+
+    it('should add task with dueDay=today that is not in list', (done) => {
+      const existingTask = createTask('task-1');
+      const newDueTask = createTask('task-2');
+
+      // Today list only has task-1, but task-2 is also due today
+      store.overrideSelector(selectTodayTaskIds, ['task-1']);
+      store.overrideSelector(selectAllTasksDueToday, [existingTask, newDueTask]);
+      store.refreshState();
+
+      effects.preventParentAndSubTaskInTodayList$.subscribe((action) => {
+        expect(action).toEqual(
+          updateTag({
+            tag: {
+              id: TODAY_TAG.id,
+              changes: { taskIds: ['task-1', 'task-2'] }, // task-2 added
+            },
+            isSkipSnack: true,
+          }),
+        );
+        done();
+      });
+    });
+
+    it('should not dispatch when no changes needed', (done) => {
+      const task = createTask('task-1');
+
+      // Today list has task-1, allTasksDueToday also has task-1 - no change needed
+      store.overrideSelector(selectTodayTaskIds, ['task-1']);
+      store.overrideSelector(selectAllTasksDueToday, [task]);
+      store.refreshState();
+
+      let emitted = false;
+      effects.preventParentAndSubTaskInTodayList$.subscribe(() => {
+        emitted = true;
+      });
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should not dispatch during sync window', (done) => {
+      hydrationStateServiceSpy.isInSyncWindow.and.returnValue(true);
+
+      const parent = createTask('parent-1');
+      const child = createTask('child-1', 'parent-1');
+
+      store.overrideSelector(selectTodayTaskIds, ['parent-1', 'child-1']);
+      store.overrideSelector(selectAllTasksDueToday, [parent, child]);
+      store.refreshState();
+
+      let emitted = false;
+      effects.preventParentAndSubTaskInTodayList$.subscribe(() => {
+        emitted = true;
+      });
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should not dispatch when todayTaskIds is empty', (done) => {
+      // Empty today list should not trigger the effect
+      store.overrideSelector(selectTodayTaskIds, []);
+      store.overrideSelector(selectAllTasksDueToday, []);
+      store.refreshState();
+
+      let emitted = false;
+      effects.preventParentAndSubTaskInTodayList$.subscribe(() => {
+        emitted = true;
+      });
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should handle both adding new tasks and removing subtasks', (done) => {
+      const parent = createTask('parent-1');
+      const child = createTask('child-1', 'parent-1');
+      const newTask = createTask('new-task');
+
+      // Today list has parent and child, but newTask is also due
+      store.overrideSelector(selectTodayTaskIds, ['parent-1', 'child-1']);
+      store.overrideSelector(selectAllTasksDueToday, [parent, child, newTask]);
+      store.refreshState();
+
+      effects.preventParentAndSubTaskInTodayList$.subscribe((action) => {
+        expect(action).toEqual(
+          updateTag({
+            tag: {
+              id: TODAY_TAG.id,
+              changes: { taskIds: ['parent-1', 'new-task'] }, // child removed, new-task added
             },
             isSkipSnack: true,
           }),

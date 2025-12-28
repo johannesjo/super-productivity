@@ -1705,6 +1705,96 @@ All archive operations MUST be idempotent:
 
 **Edge cases:** Missing entities (deleted/out-of-order) → queue for retry or skip. Out-of-order flush → idempotent no-op if Young is empty.
 
+## E.6 Time Tracking Sync Semantics
+
+Time tracking data follows a special sync pattern that differs from regular entities.
+
+### E.6.1 TimeTrackingState Structure
+
+```typescript
+interface TimeTrackingState {
+  project: {
+    [projectId: string]: {
+      [dateStr: string]: { s?: number; e?: number; b?: number; bt?: number };
+    };
+  };
+  tag: {
+    [tagId: string]: {
+      [dateStr: string]: { s?: number; e?: number; b?: number; bt?: number };
+    };
+  };
+}
+// s = start time, e = end time, b = break count, bt = break time
+```
+
+This is a 3-level nested structure: `category → contextId → date → data`.
+
+### E.6.2 Three-Tier Storage Model
+
+Time tracking data exists in three locations:
+
+| Location         | Contents                    | Sync Frequency       |
+| ---------------- | --------------------------- | -------------------- |
+| **Active State** | Today's time tracking only  | Every sync (small)   |
+| **archiveYoung** | Recent data (< 21 days)     | Daily (medium)       |
+| **archiveOld**   | Historical data (≥ 21 days) | On flush only (rare) |
+
+This split reduces sync payload size significantly.
+
+### E.6.3 Data Flow
+
+```
+Daily (finish work):
+  Active TimeTracking → archiveYoung
+  (Only today's data stays in active)
+
+Every ~14 days (flush):
+  archiveYoung → archiveOld
+  (ALL timeTracking data moves, not threshold-based)
+```
+
+### E.6.4 Merge Behavior
+
+When merging time tracking from multiple sources (e.g., during import):
+
+**Priority**: `current > archiveYoung > archiveOld`
+
+**Deep Merge at Field Level**:
+
+```typescript
+// If current has {s: 100}, archiveYoung has {e: 200}, archiveOld has {b: 5}
+// Result: {s: 100, e: 200, b: 5}
+```
+
+This ensures no data loss when fields are partially populated across sources.
+
+### E.6.5 Conflict Resolution
+
+Time tracking uses **Last-Write-Wins (LWW)** for conflicts:
+
+- If Client A and B both modify `project[id][date]`, the last operation wins
+- This is intentional: later accurate measurement should override earlier estimate
+- No user conflict dialog - LWW is automatically applied
+
+### E.6.6 Fresh Client Hydration
+
+Fresh clients receive time tracking via SYNC_IMPORT:
+
+1. Server finds latest SYNC_IMPORT operation (snapshot skip optimization)
+2. SYNC_IMPORT contains complete `timeTracking` + `archiveYoung.timeTracking` + `archiveOld.timeTracking`
+3. Client applies SYNC_IMPORT → all time tracking data populated in one operation
+
+**Without SYNC_IMPORT**: Client replays all individual `syncTimeTracking` operations incrementally (slower but correct).
+
+### E.6.7 Key Implementation Files
+
+| File                                   | Purpose                           |
+| -------------------------------------- | --------------------------------- |
+| `merge-time-tracking-states.ts`        | Three-source merge with priority  |
+| `sort-data-to-flush.ts`                | Archive flush logic (young→old)   |
+| `time-tracking.reducer.ts`             | NgRx reducer for syncTimeTracking |
+| `archive-operation-handler.service.ts` | Handles flushYoungToOld remotely  |
+
 ---
 
 # Part F: Atomic State Consistency

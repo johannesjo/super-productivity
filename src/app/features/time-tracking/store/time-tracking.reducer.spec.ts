@@ -163,5 +163,153 @@ describe('TimeTracking Reducer', () => {
       expect(result.project['proj-1']['2024-01-14']).toEqual({ s: 100, e: 200 });
       expect(result.project['proj-1']['2024-01-15']).toEqual({ s: 9000, e: 10000 });
     });
+
+    it('should preserve other contexts when syncing', () => {
+      // Ensure syncing one context does not affect other contexts
+      const customInitialState = {
+        ...initialTimeTrackingState,
+        project: {
+          'proj-1': { '2024-01-15': { s: 100, e: 200 } },
+          'proj-2': { '2024-01-15': { s: 300, e: 400 } },
+        },
+        tag: {
+          'tag-1': { '2024-01-15': { s: 500, e: 600 } },
+        },
+      };
+
+      const action = syncTimeTracking({
+        contextType: 'PROJECT',
+        contextId: 'proj-1',
+        date: '2024-01-15',
+        data: { s: 9999, e: 9999 },
+      });
+      const result = timeTrackingReducer(customInitialState, action);
+
+      // proj-1 should be updated
+      expect(result.project['proj-1']['2024-01-15']).toEqual({ s: 9999, e: 9999 });
+      // proj-2 should be unchanged
+      expect(result.project['proj-2']['2024-01-15']).toEqual({ s: 300, e: 400 });
+      // tag-1 should be unchanged
+      expect(result.tag['tag-1']['2024-01-15']).toEqual({ s: 500, e: 600 });
+    });
+
+    it('should create new context if it does not exist', () => {
+      const action = syncTimeTracking({
+        contextType: 'PROJECT',
+        contextId: 'new-proj',
+        date: '2024-01-15',
+        data: { s: 1000, e: 2000 },
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+
+      expect(result.project['new-proj']).toBeDefined();
+      expect(result.project['new-proj']['2024-01-15']).toEqual({ s: 1000, e: 2000 });
+    });
+
+    it('should create new date for existing context', () => {
+      const customInitialState = {
+        ...initialTimeTrackingState,
+        project: {
+          'proj-1': { '2024-01-14': { s: 100, e: 200 } },
+        },
+      };
+
+      const action = syncTimeTracking({
+        contextType: 'PROJECT',
+        contextId: 'proj-1',
+        date: '2024-01-16', // New date
+        data: { s: 500, e: 600 },
+      });
+      const result = timeTrackingReducer(customInitialState, action);
+
+      // Both dates should exist
+      expect(result.project['proj-1']['2024-01-14']).toEqual({ s: 100, e: 200 });
+      expect(result.project['proj-1']['2024-01-16']).toEqual({ s: 500, e: 600 });
+    });
+  });
+
+  describe('immutability', () => {
+    it('should not mutate the original state when syncing', () => {
+      const originalState = {
+        ...initialTimeTrackingState,
+        project: {
+          'proj-1': { '2024-01-15': { s: 100, e: 200 } },
+        },
+      };
+      const originalProjectData = originalState.project['proj-1']['2024-01-15'];
+
+      const action = syncTimeTracking({
+        contextType: 'PROJECT',
+        contextId: 'proj-1',
+        date: '2024-01-15',
+        data: { s: 9999, e: 9999 },
+      });
+      const result = timeTrackingReducer(originalState, action);
+
+      // Original should be unchanged
+      expect(originalProjectData).toEqual({ s: 100, e: 200 });
+      // Result should be different
+      expect(result.project['proj-1']['2024-01-15']).toEqual({ s: 9999, e: 9999 });
+      // Result should be a new object
+      expect(result).not.toBe(originalState);
+      expect(result.project).not.toBe(originalState.project);
+    });
+
+    it('should not mutate original state when updating work context data', () => {
+      const originalState = {
+        ...initialTimeTrackingState,
+        tag: { 'tag-1': { '2024-01-15': { s: 100, e: 200 } } },
+      };
+
+      const action = updateWorkContextData({
+        ctx: { id: 'tag-1', type: 'TAG' as WorkContextType },
+        date: '2024-01-15',
+        updates: { b: 5, bt: 50 },
+      });
+      const result = timeTrackingReducer(originalState, action);
+
+      // Original should be unchanged
+      expect(originalState.tag['tag-1']['2024-01-15']).toEqual({ s: 100, e: 200 });
+      // Result should have merged values
+      expect(result.tag['tag-1']['2024-01-15']).toEqual({ s: 100, e: 200, b: 5, bt: 50 });
+    });
+  });
+
+  describe('updateWorkContextData deep structure', () => {
+    it('should merge updates with existing data (not replace)', () => {
+      const customInitialState = {
+        ...initialTimeTrackingState,
+        project: {
+          'proj-1': { '2024-01-15': { s: 100, e: 200, b: 1 } },
+        },
+      };
+
+      const action = updateWorkContextData({
+        ctx: { id: 'proj-1', type: 'PROJECT' as WorkContextType },
+        date: '2024-01-15',
+        updates: { bt: 50 }, // Only updating bt
+      });
+      const result = timeTrackingReducer(customInitialState, action);
+
+      // All fields should be present
+      expect(result.project['proj-1']['2024-01-15']).toEqual({
+        s: 100,
+        e: 200,
+        b: 1,
+        bt: 50,
+      });
+    });
+
+    it('should create context and date if they do not exist for updateWorkContextData', () => {
+      const action = updateWorkContextData({
+        ctx: { id: 'new-proj', type: 'PROJECT' as WorkContextType },
+        date: '2024-01-20',
+        updates: { s: 500 },
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+
+      expect(result.project['new-proj']).toBeDefined();
+      expect(result.project['new-proj']['2024-01-20']).toEqual({ s: 500 });
+    });
   });
 });

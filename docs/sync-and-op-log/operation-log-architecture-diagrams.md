@@ -1188,6 +1188,118 @@ Vector clocks track **causality via counters**, not wall-clock time. A client th
 
 ---
 
+## 2g. Gap Detection ✅ IMPLEMENTED
+
+Gap detection identifies situations where the client cannot reliably sync incrementally and must take corrective action. When `gapDetected: true` is returned, the client resets to `sinceSeq=0` and re-downloads all operations.
+
+### 2g.1 The Four Gap Cases
+
+The server checks for gaps in `OperationDownloadService.getOpsSinceWithSeq()`:
+
+| Case | Condition                         | Meaning                             | Typical Cause                          |
+| ---- | --------------------------------- | ----------------------------------- | -------------------------------------- |
+| 1    | `sinceSeq > 0 && latestSeq === 0` | Client has history, server is empty | Server was reset/migrated              |
+| 2    | `sinceSeq > latestSeq`            | Client is ahead of server           | Server DB restored from old backup     |
+| 3    | `sinceSeq < minSeq - 1`           | Requested ops were purged           | Retention policy deleted old ops       |
+| 4    | `firstOpSeq > sinceSeq + 1`       | Gap in sequence numbers             | Database corruption or manual deletion |
+
+**Case 3 Math Explained:**
+
+- If `sinceSeq = 5` and `minSeq = 7` → `5 < 6` = **gap** (op 6 was purged)
+- If `sinceSeq = 5` and `minSeq = 6` → `5 < 5` = **no gap** (op 6 exists)
+
+### 2g.2 Client-Side Handling
+
+```mermaid
+flowchart TD
+    Download["Download ops from server"]
+    GapCheck{gapDetected?}
+    Reset["Reset sinceSeq = 0<br/>Clear accumulated ops"]
+    ReDownload["Re-download from beginning"]
+    HasReset{Already reset<br/>this session?}
+    ServerEmpty{Server empty?<br/>latestSeq === 0}
+    Migration["Server Migration:<br/>Create SYNC_IMPORT<br/>with full local state"]
+    Continue["Process downloaded ops normally"]
+
+    Download --> GapCheck
+    GapCheck -->|Yes| HasReset
+    HasReset -->|No| Reset
+    Reset --> ReDownload
+    ReDownload --> GapCheck
+    HasReset -->|Yes| ServerEmpty
+    GapCheck -->|No| Continue
+    ServerEmpty -->|Yes| Migration
+    ServerEmpty -->|No| Continue
+    Migration --> Continue
+
+    style Migration fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Reset fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+```
+
+**Key behaviors:**
+
+- **All gap cases**: Client resets to `sinceSeq=0` and re-downloads everything
+- **Infinite loop prevention**: `hasResetForGap` flag ensures reset only happens once per sync session
+- **Case 1 special handling**: If gap detected AND server is empty → trigger server migration
+
+### 2g.3 Server Migration Flow
+
+When a client with existing data connects to an empty server (Case 1), it must seed the server with its state:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant DB
+
+    Note over Client: Has local data,<br/>lastServerSeq = 100
+
+    Client->>Server: GET /api/sync/ops?sinceSeq=100
+    Server->>DB: Check latestSeq
+    DB-->>Server: latestSeq = 0 (empty)
+    Server-->>Client: {ops: [], latestSeq: 0, gapDetected: true}
+
+    Note over Client: Gap detected!<br/>Reset sinceSeq = 0
+
+    Client->>Server: GET /api/sync/ops?sinceSeq=0
+    Server-->>Client: {ops: [], latestSeq: 0, gapDetected: false}
+
+    Note over Client: Server still empty<br/>after reset = migration!
+
+    Client->>Client: Create SYNC_IMPORT op<br/>with full local state
+    Client->>Server: POST /api/sync/snapshot
+    Server->>DB: Store SYNC_IMPORT
+    Server-->>Client: {serverSeq: 1}
+
+    Note over Client,Server: New server is now seeded<br/>Other clients can sync
+```
+
+**What SYNC_IMPORT contains:**
+
+- Full application state (tasks, projects, tags, etc.)
+- Vector clock incremented for the creating client
+- `opType: 'SYNC_IMPORT'`, `entityType: 'ALL'`
+
+### 2g.4 Code References
+
+| Component                | File                                                                         | Lines   |
+| ------------------------ | ---------------------------------------------------------------------------- | ------- |
+| Server gap detection     | `packages/super-sync-server/src/sync/services/operation-download.service.ts` | 157-196 |
+| Client gap handling      | `src/app/op-log/sync/operation-log-download.service.ts`                      | 169-182 |
+| Server migration service | `src/app/op-log/sync/server-migration.service.ts`                            | -       |
+| Server migration trigger | `src/app/op-log/sync/operation-log-sync.service.ts`                          | 245-252 |
+
+### 2g.5 Testing
+
+Gap detection is comprehensively tested:
+
+- **Server tests**: `packages/super-sync-server/tests/gap-detection.spec.ts` (~15 tests)
+- **Client download tests**: `src/app/op-log/sync/operation-log-download.service.spec.ts` (6 gap-specific tests)
+- **Migration service tests**: `src/app/op-log/sync/server-migration.service.spec.ts` (~20 tests)
+- **Integration tests**: `src/app/op-log/testing/integration/server-migration.integration.spec.ts` (8 tests)
+
+---
+
 ## 3. Conflict-Aware Migration Strategy (The Migration Shield)
 
 > **Note:** Sections 3, 4.1, and 4.2 describe the **cross-version migration strategy** (A.7.8) which is designed but not yet implemented. Currently `CURRENT_SCHEMA_VERSION = 1`, so all clients are on the same version. State cache snapshots are migrated via `SchemaMigrationService.migrateIfNeeded()`. Individual operation migration will be needed when schema versions diverge between clients.

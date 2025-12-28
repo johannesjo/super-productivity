@@ -108,16 +108,19 @@ export const selectLastCurrentTask = createSelector(selectTaskFeatureState, (s) 
 export const selectCurrentTaskOrParentWithData = createSelector(
   selectTaskFeatureState,
   (s): TaskWithSubTasks | null => {
-    const t =
-      (s.currentTaskId &&
-        s.entities[s.currentTaskId] &&
-        // @ts-ignore
-        s.entities[s.currentTaskId].parentId &&
-        // @ts-ignore
-        s.entities[s.entities[s.currentTaskId].parentId]) ||
-      // @ts-ignore
-      s.entities[s.currentTaskId];
-    return mapSubTasksToTask(t as Task, s);
+    if (!s.currentTaskId) return null;
+    const currentTask = s.entities[s.currentTaskId];
+    if (!currentTask) return null;
+
+    // If current task has a parent, return the parent with its subtasks
+    if (currentTask.parentId) {
+      const parentTask = s.entities[currentTask.parentId];
+      if (parentTask) {
+        return mapSubTasksToTask(parentTask, s);
+      }
+    }
+    // Otherwise return the current task
+    return mapSubTasksToTask(currentTask, s);
   },
 );
 
@@ -254,15 +257,18 @@ export const selectSelectedTask = createSelector(
 
 export const selectCurrentTaskParentOrCurrent = createSelector(
   selectTaskFeatureState,
-  (s): Task =>
-    (s.currentTaskId &&
-      s.entities[s.currentTaskId] &&
-      // @ts-ignore
-      s.entities[s.currentTaskId].parentId &&
-      // @ts-ignore
-      s.entities[s.entities[s.currentTaskId].parentId]) ||
-    // @ts-ignore
-    s.entities[s.currentTaskId],
+  (s): Task | undefined => {
+    if (!s.currentTaskId) return undefined;
+    const currentTask = s.entities[s.currentTaskId];
+    if (!currentTask) return undefined;
+
+    // If current task has a parent, return the parent
+    if (currentTask.parentId) {
+      const parentTask = s.entities[currentTask.parentId];
+      if (parentTask) return parentTask;
+    }
+    return currentTask;
+  },
 );
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
@@ -534,14 +540,9 @@ export const selectTasksByRepeatConfigId = createSelector(
   selectTaskFeatureState,
   (state: TaskState, props: { repeatCfgId: string }): Task[] => {
     const ids = state.ids as string[];
-    const taskIds = ids.filter(
-      (idIN) =>
-        state.entities[idIN] &&
-        // @ts-ignore
-        state.entities[idIN].repeatCfgId === props.repeatCfgId,
-    );
-
-    return taskIds.map((id) => state.entities[id] as Task);
+    return ids
+      .map((id) => state.entities[id])
+      .filter((task): task is Task => !!task && task.repeatCfgId === props.repeatCfgId);
   },
 );
 
