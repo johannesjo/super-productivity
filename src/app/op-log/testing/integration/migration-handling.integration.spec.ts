@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { OperationLogSyncService } from '../../sync/operation-log-sync.service';
+import { RemoteOpsProcessingService } from '../../sync/remote-ops-processing.service';
 import { OperationLogStoreService } from '../../store/operation-log-store.service';
 import {
   SchemaMigrationService,
@@ -10,27 +10,22 @@ import { VectorClockService } from '../../sync/vector-clock.service';
 import { OperationApplierService } from '../../apply/operation-applier.service';
 import { ConflictResolutionService } from '../../sync/conflict-resolution.service';
 import { ValidateStateService } from '../../validation/validate-state.service';
-import { RepairOperationService } from '../../validation/repair-operation.service';
-import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
-import { OperationLogUploadService } from '../../sync/operation-log-upload.service';
-import { OperationLogDownloadService } from '../../sync/operation-log-download.service';
 import { provideMockStore } from '@ngrx/store/testing';
 import { ActionType, Operation, OpType } from '../../core/operation.types';
 import { T } from '../../../t.const';
-import { MatDialog } from '@angular/material/dialog';
-import { UserInputWaitStateService } from '../../../imex/sync/user-input-wait-state.service';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
-import { TranslateService } from '@ngx-translate/core';
+import { LockService } from '../../sync/lock.service';
+import { OperationLogCompactionService } from '../../store/operation-log-compaction.service';
+import { SyncImportFilterService } from '../../sync/sync-import-filter.service';
 
 /**
  * Integration tests for Schema Migration Handling in Sync.
  *
- * Verifies that OperationLogSyncService correctly integrates with
+ * Verifies that RemoteOpsProcessingService correctly integrates with
  * SchemaMigrationService to handle version mismatches during sync.
  */
 describe('Migration Handling Integration', () => {
-  let service: OperationLogSyncService;
+  let service: RemoteOpsProcessingService;
   let snackServiceSpy: jasmine.SpyObj<SnackService>;
   let opLogStore: OperationLogStoreService;
   let operationApplierSpy: jasmine.SpyObj<OperationApplierService>;
@@ -46,7 +41,7 @@ describe('Migration Handling Integration', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        OperationLogSyncService,
+        RemoteOpsProcessingService,
         OperationLogStoreService,
         VectorClockService,
         SchemaMigrationService, // Use REAL service
@@ -74,57 +69,34 @@ describe('Migration Handling Integration', () => {
           ]),
         },
         {
-          provide: RepairOperationService,
-          useValue: jasmine.createSpyObj('RepairOperationService', [
-            'createRepairOperation',
-          ]),
-        },
-        {
-          provide: PfapiStoreDelegateService,
-          useValue: jasmine.createSpyObj('PfapiStoreDelegateService', [
-            'getAllSyncModelDataFromStore',
-          ]),
-        },
-        {
-          provide: PfapiService,
+          provide: LockService,
           useValue: {
-            pf: {
-              metaModel: {
-                loadClientId: jasmine
-                  .createSpy('loadClientId')
-                  .and.returnValue(Promise.resolve('test-client-id')),
-              },
-            },
+            request: async (_name: string, fn: () => Promise<void>) => fn(),
           },
         },
         {
-          provide: OperationLogUploadService,
-          useValue: jasmine.createSpyObj('OperationLogUploadService', [
-            'uploadPendingOps',
-          ]),
+          provide: OperationLogCompactionService,
+          useFactory: () => {
+            const spy = jasmine.createSpyObj('OperationLogCompactionService', [
+              'compact',
+            ]);
+            spy.compact.and.returnValue(Promise.resolve());
+            return spy;
+          },
         },
         {
-          provide: OperationLogDownloadService,
-          useValue: jasmine.createSpyObj('OperationLogDownloadService', [
-            'downloadRemoteOps',
-          ]),
-        },
-        {
-          provide: MatDialog,
-          useValue: jasmine.createSpyObj('MatDialog', ['open']),
-        },
-        {
-          provide: UserInputWaitStateService,
-          useValue: jasmine.createSpyObj('UserInputWaitStateService', ['startWaiting']),
-        },
-        {
-          provide: TranslateService,
-          useValue: jasmine.createSpyObj('TranslateService', ['instant']),
+          provide: SyncImportFilterService,
+          useValue: {
+            filterOpsInvalidatedBySyncImport: async (ops: Operation[]) => ({
+              validOps: ops,
+              invalidatedOps: [],
+            }),
+          },
         },
       ],
     });
 
-    service = TestBed.inject(OperationLogSyncService);
+    service = TestBed.inject(RemoteOpsProcessingService);
     opLogStore = TestBed.inject(OperationLogStoreService);
 
     await opLogStore.init();
@@ -150,7 +122,7 @@ describe('Migration Handling Integration', () => {
       const currentVersion = 1; // Assuming CURRENT_SCHEMA_VERSION is 1
       const op = createOp(currentVersion);
 
-      await (service as any)._processRemoteOps([op]);
+      await service.processRemoteOps([op]);
 
       // Should be applied (no error snackbar)
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
@@ -165,7 +137,7 @@ describe('Migration Handling Integration', () => {
       const compatibleVersion = 1 + MAX_VERSION_SKIP;
       const op = createOp(compatibleVersion);
 
-      await (service as any)._processRemoteOps([op]);
+      await service.processRemoteOps([op]);
 
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
       expect(operationApplierSpy.applyOperations).toHaveBeenCalled();
@@ -176,7 +148,7 @@ describe('Migration Handling Integration', () => {
       const incompatibleVersion = 1 + MAX_VERSION_SKIP + 1;
       const op = createOp(incompatibleVersion);
 
-      await (service as any)._processRemoteOps([op]);
+      await service.processRemoteOps([op]);
 
       // Should trigger error snackbar
       expect(snackServiceSpy.open).toHaveBeenCalledWith(
@@ -194,7 +166,7 @@ describe('Migration Handling Integration', () => {
       const op = createOp(1);
       delete (op as any).schemaVersion; // Simulate legacy op
 
-      await (service as any)._processRemoteOps([op]);
+      await service.processRemoteOps([op]);
 
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
       expect(operationApplierSpy.applyOperations).toHaveBeenCalledWith([
@@ -233,7 +205,7 @@ describe('Migration Handling Integration', () => {
       spyOn(opLogStore, 'markFailed').and.callThrough();
 
       try {
-        await (service as any)._processRemoteOps([op]);
+        await service.processRemoteOps([op]);
         fail('Should have thrown error');
       } catch (e) {
         expect((e as Error).message).toBe('Simulated Apply Error');
