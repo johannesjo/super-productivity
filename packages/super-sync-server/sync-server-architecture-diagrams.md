@@ -20,7 +20,7 @@ flowchart TB
         API[Fastify API]
         Auth[JWT Auth]
         Sync[Sync Service]
-        DB[(SQLite DB)]
+        DB[(PostgreSQL)]
         Jobs[Cleanup Jobs]
     end
 
@@ -57,7 +57,7 @@ flowchart TB
         CleanupS[Cleanup Service<br/>- Tombstone expiry<br/>- Old ops deletion<br/>- Stale device removal]
     end
 
-    subgraph Database["SQLite Database"]
+    subgraph Database["PostgreSQL Database"]
         Users[(users)]
         Ops[(operations)]
         SyncState[(user_sync_state)]
@@ -157,7 +157,7 @@ erDiagram
 sequenceDiagram
     participant Client
     participant Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
     participant Email as SMTP
 
     Note over Client,Email: Registration
@@ -306,7 +306,7 @@ flowchart TB
 sequenceDiagram
     participant Client
     participant Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
 
     Client->>Server: POST /api/sync/ops<br/>{ops[], clientId, deviceName, requestId}
 
@@ -343,7 +343,7 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
 
     Client->>Server: GET /api/sync/ops<br/>?sinceSeq=N&limit=1000&excludeClient=myId
 
@@ -368,7 +368,7 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
 
     Client->>Server: GET /api/sync/snapshot
 
@@ -403,7 +403,7 @@ Full-state operations (BackupImport, Repair, SyncImport) are uploaded via the sn
 sequenceDiagram
     participant Client
     participant Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
 
     Client->>Server: POST /api/sync/snapshot<br/>{state, clientId, reason, vectorClock, schemaVersion}
 
@@ -451,7 +451,7 @@ flowchart TB
 sequenceDiagram
     participant Client
     participant Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
 
     Client->>Server: GET /api/sync/status
 
@@ -863,7 +863,7 @@ sequenceDiagram
     participant OpLog as Operation Log
     participant IDB as IndexedDB
     participant Server as Sync Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
 
     User->>NgRx: Dispatch action<br/>isPersistent: true
     NgRx->>NgRx: Reducer updates state
@@ -904,7 +904,7 @@ sequenceDiagram
 sequenceDiagram
     participant OpLog as Operation Log
     participant Server as Sync Server
-    participant DB as SQLite
+    participant DB as PostgreSQL
     participant IDB as IndexedDB
     participant NgRx as NgRx Store
     participant DepRes as Dependency Resolver
