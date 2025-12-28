@@ -75,7 +75,6 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
             prisma.operation.deleteMany({ where: { userId } }),
             prisma.syncDevice.deleteMany({ where: { userId } }),
             prisma.userSyncState.deleteMany({ where: { userId } }),
-            prisma.tombstone.deleteMany({ where: { userId } }),
           ]);
         } else {
           // Create user with isVerified=1 (skip email verification)
@@ -134,7 +133,6 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
           prisma.operation.deleteMany(),
           prisma.syncDevice.deleteMany(),
           prisma.userSyncState.deleteMany(),
-          prisma.tombstone.deleteMany(),
           prisma.user.deleteMany(),
         ]);
 

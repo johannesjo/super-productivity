@@ -464,7 +464,6 @@ describe('Sync Routes', () => {
       const body = response.json();
       expect(body.latestSeq).toBeDefined();
       expect(body.devicesOnline).toBeDefined();
-      expect(body.pendingOps).toBeDefined();
     });
 
     it('should return 401 without authorization', async () => {

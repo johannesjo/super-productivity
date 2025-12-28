@@ -10,13 +10,7 @@ export const prisma = new PrismaClient({
 });
 
 // Re-export types for convenience
-export type {
-  User,
-  Operation,
-  UserSyncState,
-  SyncDevice,
-  Tombstone,
-} from '@prisma/client';
+export type { User, Operation, UserSyncState, SyncDevice } from '@prisma/client';
 
 // Helper to disconnect on shutdown
 export const disconnectDb = async (): Promise<void> => {

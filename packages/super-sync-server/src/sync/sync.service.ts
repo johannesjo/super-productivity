@@ -388,11 +388,6 @@ export class SyncService {
         },
       });
 
-      // Create tombstone for delete operations
-      if (op.opType === 'DEL' && op.entityId) {
-        await this.createTombstoneSync(userId, op.entityType, op.entityId, op.id, tx);
-      }
-
       return {
         opId: op.id,
         accepted: true,
@@ -425,42 +420,6 @@ export class SyncService {
       // Re-throw unexpected errors to trigger transaction rollback
       throw err;
     }
-  }
-
-  private async createTombstoneSync(
-    userId: number,
-    entityType: string,
-    entityId: string,
-    deletedByOpId: string,
-    tx: Prisma.TransactionClient,
-  ): Promise<void> {
-    const now = Date.now();
-    const expiresAt = now + this.config.tombstoneRetentionMs;
-
-    await tx.tombstone.upsert({
-      where: {
-        // Prisma composite key naming uses underscores; allow it here
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        userId_entityType_entityId: {
-          userId,
-          entityType,
-          entityId,
-        },
-      },
-      create: {
-        userId,
-        entityType,
-        entityId,
-        deletedAt: BigInt(now),
-        deletedByOpId,
-        expiresAt: BigInt(expiresAt),
-      },
-      update: {
-        deletedAt: BigInt(now),
-        deletedByOpId,
-        expiresAt: BigInt(expiresAt),
-      },
-    });
   }
 
   // === Download Operations ===
@@ -608,15 +567,6 @@ export class SyncService {
   }
 
   // === Cleanup ===
-
-  async deleteExpiredTombstones(): Promise<number> {
-    const result = await prisma.tombstone.deleteMany({
-      where: {
-        expiresAt: { lt: BigInt(Date.now()) },
-      },
-    });
-    return result.count;
-  }
 
   async deleteOldSyncedOpsForAllUsers(
     cutoffTime: number,
@@ -860,15 +810,12 @@ export class SyncService {
 
   /**
    * Delete ALL sync data for a user. Used for encryption password changes.
-   * Deletes operations, tombstones, devices, and resets sync state.
+   * Deletes operations, devices, and resets sync state.
    */
   async deleteAllUserData(userId: number): Promise<void> {
     await prisma.$transaction(async (tx) => {
       // Delete all operations
       await tx.operation.deleteMany({ where: { userId } });
-
-      // Delete all tombstones
-      await tx.tombstone.deleteMany({ where: { userId } });
 
       // Delete all devices
       await tx.syncDevice.deleteMany({ where: { userId } });

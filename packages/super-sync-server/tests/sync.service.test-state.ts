@@ -7,7 +7,6 @@
 export const testState = {
   operations: new Map<string, any>(),
   syncDevices: new Map<string, any>(),
-  tombstones: new Map<string, any>(),
   userSyncStates: new Map<number, any>(),
   users: new Map<number, any>(),
   serverSeqCounter: 0,
@@ -16,7 +15,6 @@ export const testState = {
 export function resetTestState(): void {
   testState.operations = new Map();
   testState.syncDevices = new Map();
-  testState.tombstones = new Map();
   testState.userSyncStates = new Map();
   testState.users = new Map();
   testState.serverSeqCounter = 0;

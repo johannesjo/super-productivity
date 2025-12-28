@@ -106,10 +106,6 @@ vi.mock('../src/db', () => {
             upsert: vi.fn().mockResolvedValue({}),
             count: vi.fn().mockResolvedValue(1),
           },
-          tombstone: {
-            upsert: vi.fn().mockResolvedValue({}),
-            findUnique: vi.fn().mockResolvedValue(null),
-          },
         };
         return callback(tx);
       }),
@@ -188,11 +184,6 @@ vi.mock('../src/db', () => {
       syncDevice: {
         upsert: vi.fn().mockResolvedValue({}),
         count: vi.fn().mockResolvedValue(1),
-        deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
-      },
-      tombstone: {
-        upsert: vi.fn().mockResolvedValue({}),
-        findUnique: vi.fn().mockResolvedValue(null),
         deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
       },
       user: {

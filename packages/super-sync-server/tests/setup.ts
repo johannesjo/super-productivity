@@ -12,7 +12,6 @@ interface TestData {
   operations: Map<string, any>;
   syncDevices: Map<string, any>;
   userSyncStates: Map<number, any>;
-  tombstones: Map<string, any>;
 }
 
 let testData: TestData = {
@@ -20,7 +19,6 @@ let testData: TestData = {
   operations: new Map(),
   syncDevices: new Map(),
   userSyncStates: new Map(),
-  tombstones: new Map(),
 };
 
 let serverSeqCounter = 0;
@@ -42,15 +40,6 @@ const createMockDb = () => {
             return { changes: 1 };
           }
           if (sql.includes('UPDATE sync_devices SET last_seen_at')) {
-            return { changes: 1 };
-          }
-          if (sql.includes('INSERT INTO tombstones')) {
-            const [userId, entityType, entityId] = args;
-            testData.tombstones.set(`${userId}:${entityType}:${entityId}`, {
-              userId,
-              entityType,
-              entityId,
-            });
             return { changes: 1 };
           }
           return { changes: 0 };
@@ -86,7 +75,6 @@ export const initDb = (dataPath: string, inMemory: boolean = false) => {
     operations: new Map(),
     syncDevices: new Map(),
     userSyncStates: new Map(),
-    tombstones: new Map(),
   };
   serverSeqCounter = 0;
   mockDb = createMockDb();
@@ -173,18 +161,6 @@ vi.mock('../src/db', () => {
           count: vi.fn().mockResolvedValue(1),
           deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
         },
-        tombstone: {
-          upsert: vi.fn().mockImplementation(async (args: any) => {
-            const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
-            testData.tombstones.set(key, args.create);
-            return args.create;
-          }),
-          findUnique: vi.fn().mockImplementation(async (args: any) => {
-            const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
-            return testData.tombstones.get(key) || null;
-          }),
-          deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
-        },
         user: {
           findUnique: vi.fn().mockImplementation(async (args: any) => {
             return testData.users.get(args.where.id) || null;
@@ -217,11 +193,6 @@ vi.mock('../src/db', () => {
       count: vi.fn().mockResolvedValue(1),
       deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
     },
-    tombstone: {
-      upsert: vi.fn(),
-      findUnique: vi.fn(),
-      deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
-    },
     user: {
       findUnique: vi.fn(),
       update: vi.fn(),
@@ -238,7 +209,6 @@ vi.mock('../src/db', () => {
         operations: new Map(),
         syncDevices: new Map(),
         userSyncStates: new Map(),
-        tombstones: new Map(),
       };
       serverSeqCounter = 0;
       mockDb = createMockDb();
@@ -264,7 +234,6 @@ beforeEach(() => {
     operations: new Map(),
     syncDevices: new Map(),
     userSyncStates: new Map(),
-    tombstones: new Map(),
   };
   serverSeqCounter = 0;
   vi.clearAllMocks();

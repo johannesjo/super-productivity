@@ -29,7 +29,6 @@ model User {
   operations                 Operation[]
   syncState                  UserSyncState?
   devices                    SyncDevice[]
-  tombstones                 Tombstone[]
 
   @@index([verificationToken])
   @@map("users")
@@ -89,17 +88,3 @@ model SyncDevice {
   @@map("sync_devices")
 }
 
-model Tombstone {
-  userId        Int    @map("user_id")
-  entityType    String @map("entity_type")
-  entityId      String @map("entity_id")
-  deletedAt     BigInt @map("deleted_at")
-  deletedByOpId String @map("deleted_by_op_id")
-  expiresAt     BigInt @map("expires_at")
-
-  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([userId, entityType, entityId])
-  @@index([expiresAt])
-  @@map("tombstones")
-}

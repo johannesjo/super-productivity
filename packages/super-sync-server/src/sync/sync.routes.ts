@@ -695,7 +695,6 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       const response: SyncStatusResponse = {
         latestSeq,
         devicesOnline,
-        pendingOps: 0, // Deprecated: ACK-based tracking removed
         snapshotAge,
         storageUsedBytes: storageInfo.storageUsedBytes,
         storageQuotaBytes: storageInfo.storageQuotaBytes,

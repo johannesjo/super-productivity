@@ -120,19 +120,6 @@ vi.mock('../src/db', async () => {
         return result;
       }),
     },
-    tombstone: {
-      upsert: vi.fn().mockImplementation(async (args: any) => {
-        const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
-        const result = {
-          ...args.create,
-          userId: args.where.userId_entityType_entityId.userId,
-          entityType: args.where.userId_entityType_entityId.entityType,
-          entityId: args.where.userId_entityType_entityId.entityId,
-        };
-        state.tombstones.set(key, result);
-        return result;
-      }),
-    },
     user: {
       findUnique: vi.fn().mockImplementation(async (args: any) => {
         return state.users.get(args.where.id) || null;
@@ -185,10 +172,6 @@ vi.mock('../src/db', async () => {
       },
       syncDevice: {
         findMany: vi.fn().mockImplementation(async () => []),
-      },
-      tombstone: {
-        findMany: vi.fn().mockImplementation(async () => []),
-        deleteMany: vi.fn().mockImplementation(async () => ({ count: 0 })),
       },
       user: {
         findUnique: vi.fn().mockImplementation(async (args: any) => {

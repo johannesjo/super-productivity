@@ -884,18 +884,6 @@ describe('Multi-Client Sync Integration', () => {
       expect(ops[0].op.opType).toBe('CRT');
       expect(ops[1].op.opType).toBe('DEL');
     });
-
-    it('should track tombstones for deleted entities', async () => {
-      const client = new SimulatedClient(app, userId);
-
-      client.createOp('CRT', 'TASK', 'task-1', { title: 'Will Delete' });
-      client.createOp('DEL', 'TASK', 'task-1', null);
-      await client.upload();
-
-      const service = getSyncService();
-      const isTombstoned = service.isTombstoned(userId, 'TASK', 'task-1');
-      expect(isTombstoned).toBe(true);
-    });
   });
 
   describe('Error Cases', () => {

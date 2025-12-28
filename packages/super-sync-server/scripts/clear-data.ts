@@ -58,11 +58,8 @@ async function main() {
         prisma.operation.deleteMany(),
         prisma.userSyncState.deleteMany(),
         prisma.syncDevice.deleteMany(),
-        prisma.tombstone.deleteMany(),
       ]);
-      Logger.info(
-        'Deleted all rows from sync tables (operations, sync_state, devices, tombstones)',
-      );
+      Logger.info('Deleted all rows from sync tables (operations, sync_state, devices)');
     } catch (err) {
       Logger.error('Failed to clear database tables:', err);
       process.exit(1);
@@ -123,7 +120,6 @@ async function main() {
         prisma.operation.deleteMany({ where: { userId: user.id } }),
         prisma.userSyncState.deleteMany({ where: { userId: user.id } }),
         prisma.syncDevice.deleteMany({ where: { userId: user.id } }),
-        prisma.tombstone.deleteMany({ where: { userId: user.id } }),
       ]);
       Logger.info(`Deleted sync data for user ${user.id}`);
     } catch (err) {
