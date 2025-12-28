@@ -96,6 +96,11 @@ export class SuperSyncPage extends BasePage {
       .filter({ hasText: 'SuperSync' });
 
     for (let i = 0; i < 5; i++) {
+      // Check if page is still open before each attempt
+      if (this.page.isClosed()) {
+        throw new Error('Page was closed during SuperSync setup');
+      }
+
       try {
         // Use shorter timeout for click to fail fast and retry
         await this.providerSelect.click({ timeout: 5000 });
@@ -108,10 +113,16 @@ export class SuperSyncPage extends BasePage {
         } else {
           console.log(`[SuperSyncPage] Dropdown not open attempt ${i + 1}, retrying...`);
           // If not visible, close any partial dropdown and wait before retry
-          await this.page.keyboard.press('Escape');
-          await this.page.waitForTimeout(300);
+          if (!this.page.isClosed()) {
+            await this.page.keyboard.press('Escape');
+            await this.page.waitForTimeout(300);
+          }
         }
       } catch (e) {
+        // Check if page is closed before trying to recover
+        if (this.page.isClosed()) {
+          throw new Error('Page was closed during SuperSync setup');
+        }
         console.log(`[SuperSyncPage] Error opening dropdown attempt ${i + 1}: ${e}`);
         // On click timeout, try to dismiss any blocking overlays
         await this.page.keyboard.press('Escape');
@@ -120,6 +131,10 @@ export class SuperSyncPage extends BasePage {
     }
 
     if (!dropdownOpen) {
+      // Check if page is still open
+      if (this.page.isClosed()) {
+        throw new Error('Page was closed during SuperSync setup');
+      }
       // Last ditch effort - force click
       console.log('[SuperSyncPage] Last attempt - force clicking provider select');
       await this.providerSelect.click({ force: true, timeout: 10000 });
@@ -132,12 +147,25 @@ export class SuperSyncPage extends BasePage {
     // Wait for the dropdown overlay to close
     await this.page.locator('.mat-mdc-select-panel').waitFor({ state: 'detached' });
 
-    // Fill configuration
-    await this.baseUrlInput.waitFor({ state: 'visible' });
-    await this.baseUrlInput.fill(config.baseUrl);
+    // Fill Access Token first (it's outside the collapsible)
+    await this.accessTokenInput.waitFor({ state: 'visible' });
     await this.accessTokenInput.fill(config.accessToken);
 
-    // Handle Encryption
+    // Expand "Advanced settings" collapsible to access baseUrl and encryption fields
+    // Use text-based locator to find the correct collapsible (there may be others on the page)
+    const advancedCollapsible = this.page.locator(
+      '.collapsible-header:has-text("Advanced")',
+    );
+    await advancedCollapsible.waitFor({ state: 'visible', timeout: 5000 });
+    await advancedCollapsible.click();
+    // Wait for baseUrl input to be visible (confirms collapsible is expanded)
+    await this.baseUrlInput.waitFor({ state: 'visible', timeout: 3000 });
+
+    // Now fill baseUrl (inside the collapsible)
+    await this.baseUrlInput.waitFor({ state: 'visible' });
+    await this.baseUrlInput.fill(config.baseUrl);
+
+    // Handle Encryption (also inside the collapsible)
     if (config.isEncryptionEnabled) {
       // Check if already checked (mat-checkbox structure)
       // We check the native input checked state
@@ -258,6 +286,11 @@ export class SuperSyncPage extends BasePage {
 
     // Poll for completion while handling dialogs
     while (Date.now() - startTime < timeout) {
+      // Check if page is still open
+      if (this.page.isClosed()) {
+        throw new Error('Page was closed while waiting for sync to complete');
+      }
+
       // Check if fresh client confirmation dialog appeared
       if (await this.freshClientDialog.isVisible()) {
         console.log('[SuperSyncPage] Fresh client dialog detected, confirming...');

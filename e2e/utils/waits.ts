@@ -120,7 +120,10 @@ export const waitForAppReady = async (
   await waitForAngularStability(page).catch(() => {});
 
   // Small buffer to ensure animations settle.
-  await page.waitForTimeout(200);
+  // Check if page is still open before waiting (handles test timeout scenarios)
+  if (!page.isClosed()) {
+    await page.waitForTimeout(200);
+  }
 };
 
 /**
@@ -133,6 +136,10 @@ export const waitForAppReady = async (
  * completes before operations like page reload.
  */
 export const waitForStatePersistence = async (page: Page): Promise<void> => {
+  // Check if page is still open
+  if (page.isClosed()) {
+    return;
+  }
   // Wait for Angular to become stable (async operations complete)
   await waitForAngularStability(page, 3000).catch(() => {});
   // Wait for any pending network requests to complete
@@ -140,5 +147,7 @@ export const waitForStatePersistence = async (page: Page): Promise<void> => {
   // Additional delay for IndexedDB writes to complete (they happen outside Angular zone)
   // The operation log effects use concatMap which serializes writes, but the actual
   // IndexedDB transaction may still be pending when Angular reports stability.
-  await page.waitForTimeout(500);
+  if (!page.isClosed()) {
+    await page.waitForTimeout(500);
+  }
 };

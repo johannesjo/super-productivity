@@ -243,6 +243,11 @@ export const waitForTask = async (
 
   // Retry loop to handle DOM update delays
   while (Date.now() - startTime < timeout) {
+    // Check if page is still open before each iteration
+    if (page.isClosed()) {
+      throw new Error(`Page was closed while waiting for task "${taskName}"`);
+    }
+
     try {
       await page.waitForSelector(`task:has-text("${escapedName}")`, {
         timeout: 5000,
@@ -250,12 +255,19 @@ export const waitForTask = async (
       });
       return; // Success
     } catch {
+      // Check if page is closed before waiting
+      if (page.isClosed()) {
+        throw new Error(`Page was closed while waiting for task "${taskName}"`);
+      }
       // Wait a bit and retry
       await page.waitForTimeout(300);
     }
   }
 
   // Final attempt with full remaining timeout
+  if (page.isClosed()) {
+    throw new Error(`Page was closed while waiting for task "${taskName}"`);
+  }
   const remaining = Math.max(timeout - (Date.now() - startTime), 1000);
   await page.waitForSelector(`task:has-text("${escapedName}")`, {
     timeout: remaining,

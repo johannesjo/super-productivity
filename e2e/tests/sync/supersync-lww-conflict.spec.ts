@@ -1359,11 +1359,15 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
         await taskLocatorA.click({ button: 'right' });
         await clientA.page.waitForTimeout(300);
 
-        const deleteBtn = clientA.page
+        // Wait for menu to be fully visible
+        await clientA.page
           .locator('.mat-mdc-menu-panel')
-          .locator('button[mat-menu-item]')
-          .filter({ hasText: /delete/i })
-          .first();
+          .waitFor({ state: 'visible', timeout: 5000 });
+
+        const deleteBtn = clientA.page
+          .locator('.mat-mdc-menu-item')
+          .filter({ hasText: 'Delete' });
+        await deleteBtn.waitFor({ state: 'visible', timeout: 5000 });
         await deleteBtn.click();
         await clientA.page.waitForTimeout(500);
         console.log('[DeleteRace] Client A deleted task');
@@ -1629,6 +1633,228 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
 
         console.log(
           '[SubtaskLWW] ✓ Parent title change and subtask done status synced independently',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  /**
+   * LWW: Subtask edit wins over parent delete when subtask is edited later
+   *
+   * This is a critical edge case for LWW conflict resolution. When a parent
+   * task is deleted on one client while the subtask is edited on another,
+   * if the subtask edit has a later timestamp, it should win. The subtask
+   * survives but becomes an orphan (references a deleted parentId).
+   *
+   * The lwwUpdateMetaReducer must handle this gracefully without crashing.
+   *
+   * Scenario:
+   * 1. Client A creates parent task with subtask
+   * 2. Both clients sync
+   * 3. Client A deletes the parent task (which deletes parent and subtask locally)
+   * 4. Wait for timestamp gap
+   * 5. Client B marks subtask as done (later timestamp, doesn't know parent is deleted)
+   * 6. Client A syncs (uploads delete operations)
+   * 7. Client B syncs (LWW: B's subtask update has later timestamp)
+   * 8. Verify: Subtask survives with B's changes (orphaned but functional)
+   *
+   * NOTE: This test is skipped because the expected behavior (subtask surviving
+   * parent delete via LWW) is not yet implemented. Currently, when a parent is
+   * deleted, all its subtasks are also deleted regardless of later edits.
+   */
+  base.skip(
+    'LWW: Subtask edit survives when parent is deleted concurrently',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates parent task with subtask
+        const parentName = `ParentDel-${testRunId}`;
+        const subtaskName = `SubtaskSurvive-${testRunId}`;
+        await clientA.workView.addTask(parentName);
+        await waitForTask(clientA.page, parentName);
+
+        // Add subtask using keyboard shortcut
+        const parentTask = clientA.page.locator(`task:has-text("${parentName}")`).first();
+        await parentTask.focus();
+        await clientA.page.waitForTimeout(100);
+        await parentTask.press('a'); // Add subtask shortcut
+
+        // Wait for textarea and fill subtask name
+        const textarea = clientA.page.locator('task-title textarea');
+        await textarea.waitFor({ state: 'visible', timeout: 5000 });
+        await textarea.fill(subtaskName);
+        await clientA.page.keyboard.press('Enter');
+        await waitForTask(clientA.page, subtaskName);
+        await clientA.page.waitForTimeout(300);
+        console.log('[OrphanSubtask] Created parent with subtask on Client A');
+
+        // 2. Both sync
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, parentName);
+        console.log('[OrphanSubtask] Both clients have parent and subtask');
+
+        // Expand parent on Client B to see subtask before we delete on A
+        const parentLocatorB = clientB.page
+          .locator(`task:not(.hasNoSubTasks):has-text("${parentName}")`)
+          .first();
+        await parentLocatorB.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Check if subtask is already visible, if not expand
+        const subtaskVisibleB = await clientB.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first()
+          .isVisible()
+          .catch(() => false);
+
+        if (!subtaskVisibleB) {
+          const expandBtn = parentLocatorB.locator('.expand-btn').first();
+          if (await expandBtn.isVisible().catch(() => false)) {
+            await expandBtn.click();
+          } else {
+            await parentLocatorB.click();
+          }
+          await clientB.page.waitForTimeout(500);
+        }
+
+        // Verify subtask is visible on Client B
+        const subtaskLocatorB = clientB.page
+          .locator(`task.hasNoSubTasks:has-text("${subtaskName}")`)
+          .first();
+        await subtaskLocatorB.waitFor({ state: 'visible', timeout: 10000 });
+        console.log('[OrphanSubtask] Subtask visible on Client B');
+
+        // 3. Client A deletes the parent task
+        // First, click elsewhere to clear any focus/selection
+        await clientA.page.locator('body').click({ position: { x: 10, y: 10 } });
+        await clientA.page.waitForTimeout(200);
+
+        // Find the parent task - use more specific selector targeting the parent (not subtask)
+        // Parent tasks have the parent name but subtasks don't
+        const parentLocatorA = clientA.page
+          .locator(`task:has-text("${parentName}")`)
+          .first();
+        await parentLocatorA.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Scroll it into view and wait for any animations
+        await parentLocatorA.scrollIntoViewIfNeeded();
+        await clientA.page.waitForTimeout(200);
+
+        // Open context menu with retry logic
+        let menuOpened = false;
+        for (let attempt = 0; attempt < 3 && !menuOpened; attempt++) {
+          // Click on the task title area specifically
+          await parentLocatorA.locator('task-title').first().click({ button: 'right' });
+          await clientA.page.waitForTimeout(500);
+
+          try {
+            await clientA.page
+              .locator('.mat-mdc-menu-panel')
+              .waitFor({ state: 'visible', timeout: 3000 });
+            menuOpened = true;
+          } catch {
+            // Menu didn't open, escape any partial state and retry
+            await clientA.page.keyboard.press('Escape');
+            await clientA.page.waitForTimeout(300);
+          }
+        }
+
+        if (!menuOpened) {
+          throw new Error('Failed to open context menu on parent task');
+        }
+
+        const deleteBtn = clientA.page
+          .locator('.mat-mdc-menu-item')
+          .filter({ hasText: 'Delete' });
+        await deleteBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await deleteBtn.click();
+        await clientA.page.waitForTimeout(500);
+        console.log('[OrphanSubtask] Client A deleted parent task');
+
+        // Verify parent (and subtask) are gone on Client A
+        const parentGoneA = await clientA.page
+          .locator(`task:has-text("${parentName}")`)
+          .count();
+        expect(parentGoneA).toBe(0);
+        console.log('[OrphanSubtask] Parent and subtasks gone from Client A');
+
+        // 4. Wait for timestamp gap (ensures B's edit is later)
+        await clientB.page.waitForTimeout(1500);
+
+        // 5. Client B edits subtask (marks it done) - doesn't know parent was deleted
+        // Subtask should still be visible on B
+        await subtaskLocatorB.focus();
+        await clientB.page.waitForTimeout(100);
+        await subtaskLocatorB.press('d'); // Toggle done shortcut
+        await clientB.page.waitForTimeout(300);
+
+        // Verify subtask is marked done on B
+        await expect(subtaskLocatorB).toHaveClass(/isDone/, { timeout: 5000 });
+        console.log('[OrphanSubtask] Client B marked subtask done (later timestamp)');
+
+        // 6. Client A syncs (uploads delete operations)
+        await clientA.sync.syncAndWait();
+        console.log('[OrphanSubtask] Client A synced delete');
+
+        // 7. Client B syncs (LWW resolution happens)
+        // B's subtask update has later timestamp, should win over A's delete
+        await clientB.sync.syncAndWait();
+        console.log('[OrphanSubtask] Client B synced, LWW applied');
+
+        // 8. Final sync round
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+
+        // 9. Verify: Subtask should survive on Client B (it won via LWW)
+        // The subtask becomes orphaned (parentId references deleted parent)
+        // but the lwwUpdateMetaReducer handles this gracefully
+
+        // On Client B: subtask should still exist and be marked done
+        // It may appear as a top-level task now (orphaned)
+        const survivedSubtaskB = clientB.page.locator(`task:has-text("${subtaskName}")`);
+        await expect(survivedSubtaskB.first()).toBeVisible({ timeout: 10000 });
+        await expect(survivedSubtaskB.first()).toHaveClass(/isDone/, { timeout: 5000 });
+        console.log('[OrphanSubtask] Subtask survived on Client B with done status');
+
+        // On Client A: subtask should also appear (synced from B's winning state)
+        const survivedSubtaskA = clientA.page.locator(`task:has-text("${subtaskName}")`);
+        await expect(survivedSubtaskA.first()).toBeVisible({ timeout: 10000 });
+        await expect(survivedSubtaskA.first()).toHaveClass(/isDone/, { timeout: 5000 });
+        console.log('[OrphanSubtask] Subtask also visible on Client A');
+
+        // Parent should still be gone (its delete was not contested)
+        const parentCountA = await clientA.page
+          .locator(`task:has-text("${parentName}")`)
+          .count();
+        const parentCountB = await clientB.page
+          .locator(`task:has-text("${parentName}")`)
+          .count();
+
+        // Parent should be gone (or if subtask title contains parent name, count should be 1 for subtask only)
+        // We use a unique parent name, so count should be 0
+        expect(parentCountA).toBe(0);
+        expect(parentCountB).toBe(0);
+
+        console.log(
+          '[OrphanSubtask] ✓ Subtask edit won over parent delete via LWW - orphaned subtask handled gracefully',
         );
       } finally {
         if (clientA) await closeClient(clientA);
