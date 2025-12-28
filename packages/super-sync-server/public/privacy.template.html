@@ -50,6 +50,13 @@
       .back-link:hover {
         color: var(--primary);
       }
+      address {
+        font-style: normal;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0.5rem;
+      }
     </style>
   </head>
   <body>
@@ -121,8 +128,24 @@
         changes by posting the new Privacy Policy on this page.
       </p>
 
-      <h2>8. Contact Us</h2>
-      <p>If you have any questions about this Privacy Policy, please contact us.</p>
+      <h2>8. Data Controller</h2>
+      <p>The data controller responsible for your personal data is:</p>
+      <address>
+        {{ PRIVACY_CONTACT_NAME }}<br />
+        {{ PRIVACY_ADDRESS_STREET }}<br />
+        {{ PRIVACY_ADDRESS_CITY }}<br />
+        {{ PRIVACY_ADDRESS_COUNTRY }}<br />
+        <br />
+        Email:
+        <a href="mailto:{{ PRIVACY_CONTACT_EMAIL }}">{{ PRIVACY_CONTACT_EMAIL }}</a>
+      </address>
+
+      <h2>9. Contact Us</h2>
+      <p>
+        If you have any questions about this Privacy Policy, please contact us at
+        <a href="mailto:{{ PRIVACY_CONTACT_EMAIL }}">{{ PRIVACY_CONTACT_EMAIL }}</a
+        >.
+      </p>
     </div>
   </body>
 </html>

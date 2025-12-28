@@ -4,6 +4,14 @@ import { Logger } from './logger';
 /** CORS origin can be a string or RegExp for pattern matching (e.g., localhost with any port) */
 export type CorsOrigin = string | RegExp;
 
+export interface PrivacyConfig {
+  contactName: string;
+  addressStreet: string;
+  addressCity: string;
+  addressCountry: string;
+  contactEmail: string;
+}
+
 export interface ServerConfig {
   port: number;
   dataDir: string;
@@ -24,6 +32,11 @@ export interface ServerConfig {
     pass?: string;
     from: string;
   };
+  /**
+   * Privacy policy contact information.
+   * Required for German legal compliance (Impressum).
+   */
+  privacy?: PrivacyConfig;
   /**
    * Test mode configuration. When enabled, provides endpoints for E2E testing.
    * NEVER enable in production!
@@ -139,6 +152,17 @@ export const loadConfigFromEnv = (
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
       from: process.env.SMTP_FROM || '"SuperSync" <noreply@example.com>',
+    };
+  }
+
+  // Privacy policy configuration (for German legal requirements)
+  if (process.env.PRIVACY_CONTACT_NAME) {
+    config.privacy = {
+      contactName: process.env.PRIVACY_CONTACT_NAME,
+      addressStreet: process.env.PRIVACY_ADDRESS_STREET || '',
+      addressCity: process.env.PRIVACY_ADDRESS_CITY || '',
+      addressCountry: process.env.PRIVACY_ADDRESS_COUNTRY || '',
+      contactEmail: process.env.PRIVACY_CONTACT_EMAIL || '',
     };
   }
 

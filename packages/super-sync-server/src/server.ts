@@ -5,13 +5,46 @@ import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import fastifyStatic from '@fastify/static';
 import * as path from 'path';
-import { loadConfigFromEnv, ServerConfig } from './config';
+import { loadConfigFromEnv, ServerConfig, PrivacyConfig } from './config';
 import { Logger } from './logger';
 import { prisma, disconnectDb } from './db';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
 import { syncRoutes, startCleanupJobs, stopCleanupJobs } from './sync';
 import { testRoutes } from './test-routes';
+
+const generatePrivacyHtml = (privacy?: PrivacyConfig): void => {
+  const publicDir = path.join(__dirname, '../../public');
+  const templatePath = path.join(publicDir, 'privacy.template.html');
+  const outputPath = path.join(publicDir, 'privacy.html');
+
+  if (!fs.existsSync(templatePath)) {
+    Logger.warn('privacy.template.html not found, skipping generation');
+    return;
+  }
+
+  let template = fs.readFileSync(templatePath, 'utf-8');
+
+  // Replace placeholders with values from config (allow optional whitespace)
+  template = template
+    .replace(
+      /\{\{\s*PRIVACY_CONTACT_NAME\s*\}\}/g,
+      privacy?.contactName || '[Contact Name]',
+    )
+    .replace(
+      /\{\{\s*PRIVACY_ADDRESS_STREET\s*\}\}/g,
+      privacy?.addressStreet || '[Street Address]',
+    )
+    .replace(/\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g, privacy?.addressCity || '[City]')
+    .replace(
+      /\{\{\s*PRIVACY_ADDRESS_COUNTRY\s*\}\}/g,
+      privacy?.addressCountry || '[Country]',
+    )
+    .replace(/\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g, privacy?.contactEmail || '[Email]');
+
+  fs.writeFileSync(outputPath, template);
+  Logger.info('Generated privacy.html from template');
+};
 
 export { ServerConfig, loadConfigFromEnv };
 
@@ -29,6 +62,9 @@ export const createServer = (
     fs.mkdirSync(fullConfig.dataDir, { recursive: true });
     Logger.info(`Created data directory: ${fullConfig.dataDir}`);
   }
+
+  // Generate privacy.html from template with env vars
+  generatePrivacyHtml(fullConfig.privacy);
 
   let fastifyServer: FastifyInstance | undefined;
 
