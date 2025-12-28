@@ -1,0 +1,266 @@
+import { TestBed } from '@angular/core/testing';
+import {
+  RejectedOpsHandlerService,
+  DownloadCallback,
+  DownloadResultForRejection,
+} from './rejected-ops-handler.service';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { StaleOperationResolverService } from './stale-operation-resolver.service';
+import { Operation, OpType, ActionType } from '../core/operation.types';
+import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../core/operation-log.const';
+import { T } from '../../t.const';
+
+describe('RejectedOpsHandlerService', () => {
+  let service: RejectedOpsHandlerService;
+  let opLogStoreSpy: jasmine.SpyObj<OperationLogStoreService>;
+  let snackServiceSpy: jasmine.SpyObj<SnackService>;
+  let staleOperationResolverSpy: jasmine.SpyObj<StaleOperationResolverService>;
+
+  const createOp = (partial: Partial<Operation>): Operation => ({
+    id: 'op-1',
+    actionType: '[Test] Action' as ActionType,
+    opType: OpType.Update,
+    entityType: 'TASK',
+    entityId: 'entity-1',
+    payload: {},
+    clientId: 'client-1',
+    vectorClock: { client1: 1 },
+    timestamp: Date.now(),
+    schemaVersion: 1,
+    ...partial,
+  });
+
+  const mockEntry = (op: Operation): any => ({
+    seq: 1,
+    op,
+    appliedAt: Date.now(),
+    source: 'local' as const,
+  });
+
+  beforeEach(() => {
+    opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
+      'getOpById',
+      'markRejected',
+    ]);
+    snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+    staleOperationResolverSpy = jasmine.createSpyObj('StaleOperationResolverService', [
+      'resolveStaleLocalOps',
+    ]);
+    staleOperationResolverSpy.resolveStaleLocalOps.and.resolveTo(0);
+
+    TestBed.configureTestingModule({
+      providers: [
+        RejectedOpsHandlerService,
+        { provide: OperationLogStoreService, useValue: opLogStoreSpy },
+        { provide: SnackService, useValue: snackServiceSpy },
+        { provide: StaleOperationResolverService, useValue: staleOperationResolverSpy },
+      ],
+    });
+
+    service = TestBed.inject(RejectedOpsHandlerService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  describe('handleRejectedOps', () => {
+    it('should return 0 when no rejected ops provided', async () => {
+      const result = await service.handleRejectedOps([]);
+      expect(result).toBe(0);
+    });
+
+    it('should skip already synced ops', async () => {
+      const op = createOp({ id: 'op-1' });
+      opLogStoreSpy.getOpById.and.returnValue(
+        Promise.resolve({ ...mockEntry(op), syncedAt: Date.now() }),
+      );
+
+      await service.handleRejectedOps([{ opId: 'op-1', error: 'test error' }]);
+
+      expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    it('should skip already rejected ops', async () => {
+      const op = createOp({ id: 'op-1' });
+      opLogStoreSpy.getOpById.and.returnValue(
+        Promise.resolve({ ...mockEntry(op), rejectedAt: Date.now() }),
+      );
+
+      await service.handleRejectedOps([{ opId: 'op-1', error: 'test error' }]);
+
+      expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    it('should skip ops that no longer exist', async () => {
+      opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(undefined));
+
+      await service.handleRejectedOps([{ opId: 'op-1', error: 'test error' }]);
+
+      expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    it('should mark permanent rejections as rejected', async () => {
+      const op = createOp({ id: 'op-1' });
+      opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+      opLogStoreSpy.markRejected.and.resolveTo();
+
+      await service.handleRejectedOps([
+        { opId: 'op-1', error: 'validation error', errorCode: 'VALIDATION_ERROR' },
+      ]);
+
+      expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['op-1']);
+    });
+
+    it('should show snack warning when many ops are rejected', async () => {
+      const rejectedOps: Array<{ opId: string; error: string }> = [];
+      for (let i = 0; i < MAX_REJECTED_OPS_BEFORE_WARNING; i++) {
+        const op = createOp({ id: `op-${i}` });
+        opLogStoreSpy.getOpById
+          .withArgs(`op-${i}`)
+          .and.returnValue(Promise.resolve(mockEntry(op)));
+        rejectedOps.push({ opId: `op-${i}`, error: 'error' });
+      }
+      opLogStoreSpy.markRejected.and.resolveTo();
+
+      await service.handleRejectedOps(rejectedOps);
+
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.UPLOAD_OPS_REJECTED,
+        }),
+      );
+    });
+
+    it('should NOT mark INTERNAL_ERROR rejections (transient - will retry)', async () => {
+      const op = createOp({ id: 'op-1' });
+      opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+
+      await service.handleRejectedOps([
+        { opId: 'op-1', error: 'server error', errorCode: 'INTERNAL_ERROR' },
+      ]);
+
+      expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    it('should show alert for STORAGE_QUOTA_EXCEEDED and not mark as rejected', async () => {
+      // Use existing spy or create new one (alert may be spied in other tests)
+      const alertSpy = jasmine.isSpy(window.alert)
+        ? (window.alert as jasmine.Spy)
+        : spyOn(window, 'alert');
+      alertSpy.calls.reset();
+
+      const op = createOp({ id: 'op-1' });
+      opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+
+      await service.handleRejectedOps([
+        { opId: 'op-1', error: 'quota exceeded', errorCode: 'STORAGE_QUOTA_EXCEEDED' },
+      ]);
+
+      expect(alertSpy).toHaveBeenCalled();
+      expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    describe('concurrent modification handling', () => {
+      let downloadCallback: jasmine.Spy<DownloadCallback>;
+
+      beforeEach(() => {
+        downloadCallback = jasmine.createSpy('downloadCallback');
+      });
+
+      it('should trigger download for CONFLICT_CONCURRENT rejections', async () => {
+        const op = createOp({ id: 'op-1' });
+        opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+        downloadCallback.and.returnValue(
+          Promise.resolve({ newOpsCount: 1 } as DownloadResultForRejection),
+        );
+
+        await service.handleRejectedOps(
+          [{ opId: 'op-1', error: 'concurrent', errorCode: 'CONFLICT_CONCURRENT' }],
+          downloadCallback,
+        );
+
+        expect(downloadCallback).toHaveBeenCalled();
+      });
+
+      it('should trigger force download when normal download returns no ops', async () => {
+        const op = createOp({ id: 'op-1' });
+        opLogStoreSpy.getOpById.and.callFake(async (opId: string) => {
+          if (opId === 'op-1') return mockEntry(op);
+          return undefined;
+        });
+        downloadCallback.and.callFake(async (options) => {
+          if (options?.forceFromSeq0) {
+            return {
+              newOpsCount: 0,
+              allOpClocks: [{ remoteClient: 2 }],
+            } as DownloadResultForRejection;
+          }
+          return { newOpsCount: 0 } as DownloadResultForRejection;
+        });
+
+        await service.handleRejectedOps(
+          [{ opId: 'op-1', error: 'concurrent', errorCode: 'CONFLICT_CONCURRENT' }],
+          downloadCallback,
+        );
+
+        // Should have called twice: normal then forced
+        expect(downloadCallback).toHaveBeenCalledTimes(2);
+        expect(downloadCallback).toHaveBeenCalledWith({ forceFromSeq0: true });
+      });
+
+      it('should use stale operation resolver when force download returns clocks', async () => {
+        const op = createOp({ id: 'op-1' });
+        opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+        const remoteClock = { remoteClient: 2 };
+        downloadCallback.and.callFake(async (options) => {
+          if (options?.forceFromSeq0) {
+            return {
+              newOpsCount: 0,
+              allOpClocks: [remoteClock],
+              snapshotVectorClock: { snapshot: 1 },
+            } as DownloadResultForRejection;
+          }
+          return { newOpsCount: 0 } as DownloadResultForRejection;
+        });
+        staleOperationResolverSpy.resolveStaleLocalOps.and.resolveTo(1);
+
+        const result = await service.handleRejectedOps(
+          [{ opId: 'op-1', error: 'concurrent', errorCode: 'CONFLICT_CONCURRENT' }],
+          downloadCallback,
+        );
+
+        expect(staleOperationResolverSpy.resolveStaleLocalOps).toHaveBeenCalledWith(
+          jasmine.arrayContaining([jasmine.objectContaining({ opId: 'op-1' })]),
+          [remoteClock],
+          { snapshot: 1 },
+        );
+        expect(result).toBe(1);
+      });
+
+      it('should mark ops as rejected when force download returns no clocks', async () => {
+        const op = createOp({ id: 'op-1' });
+        opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+        downloadCallback.and.callFake(async () => {
+          return { newOpsCount: 0 } as DownloadResultForRejection;
+        });
+        opLogStoreSpy.markRejected.and.resolveTo();
+
+        await service.handleRejectedOps(
+          [{ opId: 'op-1', error: 'concurrent', errorCode: 'CONFLICT_CONCURRENT' }],
+          downloadCallback,
+        );
+
+        expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['op-1']);
+        expect(snackServiceSpy.open).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
+          }),
+        );
+      });
+    });
+  });
+});
