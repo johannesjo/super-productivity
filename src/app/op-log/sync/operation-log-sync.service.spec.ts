@@ -1390,6 +1390,180 @@ describe('OperationLogSyncService', () => {
           expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['local-op-1']);
         });
 
+        it('should show alert and NOT mark op as rejected for STORAGE_QUOTA_EXCEEDED', async () => {
+          // Use existing spy or create new one (alert may be spied in other tests)
+          const alertSpy = jasmine.isSpy(window.alert)
+            ? (window.alert as jasmine.Spy)
+            : spyOn(window, 'alert');
+          alertSpy.calls.reset();
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [
+                {
+                  opId: 'local-op-1',
+                  error: 'Storage quota exceeded',
+                  errorCode: 'STORAGE_QUOTA_EXCEEDED',
+                },
+              ],
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should show alert to user
+          expect(alertSpy).toHaveBeenCalledWith(
+            jasmine.stringContaining('Sync storage is full'),
+          );
+          // Should NOT mark the op as rejected (user needs to fix storage)
+          expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+          // Should NOT look up the op (early exit for this error type)
+          expect(opLogStoreSpy.getOpById).not.toHaveBeenCalled();
+        });
+
+        it('should NOT mark op as rejected for INTERNAL_ERROR (transient)', async () => {
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [
+                {
+                  opId: 'local-op-1',
+                  error: 'Transaction rolled back due to database error',
+                  errorCode: 'INTERNAL_ERROR',
+                },
+              ],
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should NOT mark the op as rejected (transient error, will retry)
+          expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+          // Should NOT look up the op (early exit for this error type)
+          expect(opLogStoreSpy.getOpById).not.toHaveBeenCalled();
+        });
+
+        it('should handle mixed error codes correctly (CONFLICT_CONCURRENT, STORAGE_QUOTA_EXCEEDED, INTERNAL_ERROR, permanent)', async () => {
+          // Use existing spy or create new one (alert may be spied in other tests)
+          const alertSpy = jasmine.isSpy(window.alert)
+            ? (window.alert as jasmine.Spy)
+            : spyOn(window, 'alert');
+          alertSpy.calls.reset();
+
+          const localOp: Operation = {
+            id: 'concurrent-op',
+            clientId: 'client-A',
+            actionType: 'test' as ActionType,
+            opType: OpType.Update,
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: { taskIds: ['task-1'] },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+          const permanentOp: Operation = {
+            id: 'permanent-op',
+            clientId: 'client-A',
+            actionType: 'test' as ActionType,
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-2',
+            payload: { title: 'Test' },
+            vectorClock: { clientA: 2 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 4,
+              rejectedOps: [
+                {
+                  opId: 'concurrent-op',
+                  error: 'Concurrent modification',
+                  errorCode: 'CONFLICT_CONCURRENT',
+                },
+                {
+                  opId: 'quota-op',
+                  error: 'Storage quota exceeded',
+                  errorCode: 'STORAGE_QUOTA_EXCEEDED',
+                },
+                {
+                  opId: 'internal-op',
+                  error: 'Internal error',
+                  errorCode: 'INTERNAL_ERROR',
+                },
+                {
+                  opId: 'permanent-op',
+                  error: 'Validation failed',
+                  errorCode: 'VALIDATION_ERROR',
+                },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.callFake((opId: string) => {
+            if (opId === 'concurrent-op') {
+              return Promise.resolve({
+                seq: 1,
+                op: localOp,
+                appliedAt: Date.now(),
+                source: 'local' as const,
+              });
+            }
+            if (opId === 'permanent-op') {
+              return Promise.resolve({
+                seq: 2,
+                op: permanentOp,
+                appliedAt: Date.now(),
+                source: 'local' as const,
+              });
+            }
+            return Promise.resolve(undefined);
+          });
+          opLogStoreSpy.getUnsynced.and.returnValue(
+            Promise.resolve([
+              {
+                seq: 1,
+                op: localOp,
+                appliedAt: Date.now(),
+                source: 'local' as const,
+              },
+            ]),
+          );
+
+          spyOn(service, 'downloadRemoteOps').and.returnValue(
+            Promise.resolve({
+              serverMigrationHandled: false,
+              localWinOpsCreated: 0,
+              newOpsCount: 0,
+            }),
+          );
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should show alert for STORAGE_QUOTA_EXCEEDED
+          expect(alertSpy).toHaveBeenCalledWith(
+            jasmine.stringContaining('Sync storage is full'),
+          );
+          // Should mark only the permanent error as rejected (not quota, internal, or concurrent)
+          expect(opLogStoreSpy.markRejected).toHaveBeenCalled();
+          const rejectedOps = opLogStoreSpy.markRejected.calls.allArgs().flat(2);
+          expect(rejectedOps).toContain('permanent-op');
+          expect(rejectedOps).not.toContain('quota-op');
+          expect(rejectedOps).not.toContain('internal-op');
+        });
+
         it('should handle CONFLICT_CONCURRENT errorCode as concurrent modification', async () => {
           const localOp: Operation = {
             id: 'local-op-1',

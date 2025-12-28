@@ -73,6 +73,13 @@ export class SnapshotService {
   private snapshotGenerationLocks: Map<number, Promise<SnapshotResult>> = new Map();
 
   /**
+   * Clear any cached state for a user (e.g., when user data is deleted).
+   */
+  clearForUser(userId: number): void {
+    this.snapshotGenerationLocks.delete(userId);
+  }
+
+  /**
    * Get cached snapshot for a user.
    */
   async getCachedSnapshot(userId: number): Promise<SnapshotResult | null> {

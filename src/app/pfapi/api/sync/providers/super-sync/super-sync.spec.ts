@@ -512,6 +512,212 @@ describe('SuperSyncProvider', () => {
         'SuperSync API error: 500 Internal Server Error - Unknown error',
       );
     });
+
+    it('should throw error on 429 Rate Limited response', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 429,
+          statusText: 'Too Many Requests',
+          text: () =>
+            Promise.resolve('{"error":"Rate limited","errorCode":"RATE_LIMITED"}'),
+        } as Response),
+      );
+
+      await expectAsync(
+        provider.uploadOps([createMockOperation()], 'client-1'),
+      ).toBeRejectedWithError(/SuperSync API error: 429 Too Many Requests/);
+    });
+
+    it('should throw error on 413 Storage Quota Exceeded response', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 413,
+          statusText: 'Payload Too Large',
+          text: () =>
+            Promise.resolve(
+              '{"error":"Storage quota exceeded","errorCode":"STORAGE_QUOTA_EXCEEDED","storageUsedBytes":100000000,"storageQuotaBytes":100000000}',
+            ),
+        } as Response),
+      );
+
+      await expectAsync(
+        provider.uploadSnapshot({}, 'client-1', 'recovery', {}, 1),
+      ).toBeRejectedWithError(/SuperSync API error: 413.*Storage quota exceeded/);
+    });
+  });
+
+  describe('upload response with rejected ops', () => {
+    it('should return response with CONFLICT_CONCURRENT rejection', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      const mockResponse = {
+        results: [
+          {
+            opId: 'op-123',
+            accepted: false,
+            error: 'Concurrent modification detected for TASK:task-1',
+            errorCode: 'CONFLICT_CONCURRENT',
+          },
+        ],
+        latestSeq: 5,
+        newOps: [{ serverSeq: 3, op: createMockOperation(), receivedAt: Date.now() }],
+      };
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        } as Response),
+      );
+
+      const result = await provider.uploadOps([createMockOperation()], 'client-1', 2);
+
+      expect(result.results.length).toBe(1);
+      expect(result.results[0].accepted).toBe(false);
+      expect(result.results[0].errorCode).toBe('CONFLICT_CONCURRENT');
+      expect(result.results[0].error).toContain('Concurrent modification');
+      expect(result.newOps).toBeDefined();
+      expect(result.newOps!.length).toBe(1);
+    });
+
+    it('should return response with CONFLICT_STALE rejection', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      const mockResponse = {
+        results: [
+          {
+            opId: 'op-123',
+            accepted: false,
+            error: 'Stale operation: server has newer version of TASK:task-1',
+            errorCode: 'CONFLICT_STALE',
+          },
+        ],
+        latestSeq: 5,
+      };
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        } as Response),
+      );
+
+      const result = await provider.uploadOps([createMockOperation()], 'client-1');
+
+      expect(result.results[0].accepted).toBe(false);
+      expect(result.results[0].errorCode).toBe('CONFLICT_STALE');
+    });
+
+    it('should return response with DUPLICATE_OPERATION rejection', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      const mockResponse = {
+        results: [
+          {
+            opId: 'op-123',
+            accepted: false,
+            error: 'Duplicate operation ID',
+            errorCode: 'DUPLICATE_OPERATION',
+          },
+        ],
+        latestSeq: 5,
+      };
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        } as Response),
+      );
+
+      const result = await provider.uploadOps([createMockOperation()], 'client-1');
+
+      expect(result.results[0].accepted).toBe(false);
+      expect(result.results[0].errorCode).toBe('DUPLICATE_OPERATION');
+    });
+
+    it('should return mixed accept/reject results correctly', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      const mockResponse = {
+        results: [
+          { opId: 'op-1', accepted: true, serverSeq: 10 },
+          {
+            opId: 'op-2',
+            accepted: false,
+            error: 'Concurrent modification',
+            errorCode: 'CONFLICT_CONCURRENT',
+          },
+          { opId: 'op-3', accepted: true, serverSeq: 11 },
+        ],
+        latestSeq: 11,
+      };
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        } as Response),
+      );
+
+      const ops = [
+        createMockOperation({ id: 'op-1' }),
+        createMockOperation({ id: 'op-2' }),
+        createMockOperation({ id: 'op-3' }),
+      ];
+      const result = await provider.uploadOps(ops, 'client-1');
+
+      expect(result.results.length).toBe(3);
+      expect(result.results[0].accepted).toBe(true);
+      expect(result.results[1].accepted).toBe(false);
+      expect(result.results[1].errorCode).toBe('CONFLICT_CONCURRENT');
+      expect(result.results[2].accepted).toBe(true);
+    });
+
+    it('should include piggybacked ops even when upload has rejections', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      const piggybackedOp = {
+        serverSeq: 5,
+        op: createMockOperation({ id: 'remote-op', entityId: 'task-2' }),
+        receivedAt: Date.now(),
+      };
+
+      const mockResponse = {
+        results: [
+          {
+            opId: 'op-123',
+            accepted: false,
+            error: 'Concurrent modification',
+            errorCode: 'CONFLICT_CONCURRENT',
+          },
+        ],
+        latestSeq: 10,
+        newOps: [piggybackedOp],
+        hasMorePiggyback: true,
+      };
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        } as Response),
+      );
+
+      const result = await provider.uploadOps([createMockOperation()], 'client-1', 4);
+
+      expect(result.results[0].accepted).toBe(false);
+      expect(result.newOps).toBeDefined();
+      expect(result.newOps!.length).toBe(1);
+      expect(result.newOps![0].op.id).toBe('remote-op');
+      expect(result.hasMorePiggyback).toBe(true);
+    });
   });
 
   describe('server URL key generation', () => {
