@@ -38,7 +38,13 @@ export class TaskElectronEffects {
   // -----------------------------------------------------------------------------------
 
   constructor() {
-    // Listen for overlay request and send current task state
+    /**
+     * SYNC-SAFE: This IPC listener is safe during sync/hydration because:
+     * - Read-only operation - only reads current state and sends to Electron
+     * - No store mutations or action dispatches
+     * - Responds to explicit IPC request, not store-change driven
+     * - take(1) ensures single response per request
+     */
     window.ea.on(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY, () => {
       this._store$
         .pipe(

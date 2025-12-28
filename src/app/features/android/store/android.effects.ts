@@ -57,8 +57,15 @@ export class AndroidEffects {
       },
     );
 
-  // Use native reminder scheduling with BroadcastReceiver for actions
-  // This allows snooze/done to work without opening the app
+  /**
+   * Schedule native Android reminders for tasks with remindAt set.
+   *
+   * SYNC-SAFE: This effect is intentionally safe during sync/hydration because:
+   * - dispatch: false - no store mutations, only native Android API calls
+   * - We WANT notifications scheduled for synced tasks (user-facing functionality)
+   * - Native AlarmManager calls are idempotent - rescheduling the same reminder is harmless
+   * - Cancellation of removed reminders correctly handles tasks deleted via sync
+   */
   scheduleNotifications$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(

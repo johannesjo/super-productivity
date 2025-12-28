@@ -1,4 +1,5 @@
 import { MetaReducer } from '@ngrx/store';
+import { isDevMode } from '@angular/core';
 import { operationCaptureMetaReducer } from '../../op-log/capture/operation-capture.meta-reducer';
 import { bulkOperationsMetaReducer } from '../../op-log/apply/bulk-hydration.meta-reducer';
 import { undoTaskDeleteMetaReducer } from './undo-task-delete.meta-reducer';
@@ -118,3 +119,51 @@ export const META_REDUCERS: MetaReducer[] = [
   // ═══════════════════════════════════════════════════════════════════════════
   actionLoggerReducer,
 ];
+
+/**
+ * Validates critical meta-reducer ordering constraints in development mode.
+ * Throws an error if constraints are violated to catch issues during development.
+ *
+ * Critical constraints:
+ * 1. operationCaptureMetaReducer MUST be at index 0 (captures state BEFORE any modifications)
+ * 2. bulkOperationsMetaReducer MUST be at index 1 (unwraps bulk dispatches early)
+ * 3. actionLoggerReducer MUST be last (pure logging after all modifications)
+ */
+const validateMetaReducerOrdering = (): void => {
+  if (!isDevMode()) {
+    return;
+  }
+
+  const errors: string[] = [];
+
+  // Check operationCaptureMetaReducer is first
+  if (META_REDUCERS[0] !== operationCaptureMetaReducer) {
+    errors.push(
+      'operationCaptureMetaReducer MUST be at index 0 to capture state before modifications',
+    );
+  }
+
+  // Check bulkOperationsMetaReducer is second
+  if (META_REDUCERS[1] !== bulkOperationsMetaReducer) {
+    errors.push(
+      'bulkOperationsMetaReducer MUST be at index 1 to unwrap bulk dispatches early',
+    );
+  }
+
+  // Check actionLoggerReducer is last
+  if (META_REDUCERS[META_REDUCERS.length - 1] !== actionLoggerReducer) {
+    errors.push(
+      'actionLoggerReducer MUST be last for pure logging after all modifications',
+    );
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Meta-reducer ordering validation failed:\n${errors.map((e) => `  - ${e}`).join('\n')}\n\n` +
+        'See meta-reducer-registry.ts for ordering documentation.',
+    );
+  }
+};
+
+// Run validation when module loads (development mode only)
+validateMetaReducerOrdering();
