@@ -1,101 +1,83 @@
 import { getSyncService } from './sync.service';
 import { Logger } from '../logger';
-import {
-  DEFAULT_SYNC_CONFIG,
-  STALE_DEVICE_THRESHOLD_MS,
-  MS_PER_HOUR,
-  MS_PER_DAY,
-} from './sync.types';
+import { DEFAULT_SYNC_CONFIG, MS_PER_DAY } from './sync.types';
 
-interface CleanupJob {
-  name: string;
-  interval: number;
-  run: () => Promise<number> | number;
-}
+let cleanupTimer: NodeJS.Timeout | null = null;
 
-const CLEANUP_JOBS: CleanupJob[] = [
-  {
-    name: 'tombstones',
-    interval: MS_PER_DAY,
-    run: () => getSyncService().deleteExpiredTombstones(),
-  },
-  {
-    name: 'old-ops',
-    interval: MS_PER_DAY,
-    run: async () => {
-      const cutoffTime = Date.now() - DEFAULT_SYNC_CONFIG.opRetentionMs;
-      const syncService = getSyncService();
-      const { totalDeleted, affectedUserIds } =
-        await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
+/**
+ * Runs all cleanup tasks in a single daily job.
+ * Uses the unified retentionMs for all time-based cleanup.
+ */
+const runDailyCleanup = async (): Promise<void> => {
+  const syncService = getSyncService();
+  const cutoffTime = Date.now() - DEFAULT_SYNC_CONFIG.retentionMs;
 
-      // Update storage usage for affected users to prevent stale quota checks
-      for (const userId of affectedUserIds) {
-        await syncService.updateStorageUsage(userId);
-      }
-
-      return totalDeleted;
-    },
-  },
-  {
-    name: 'stale-devices',
-    interval: MS_PER_HOUR,
-    run: () => {
-      const staleThreshold = Date.now() - STALE_DEVICE_THRESHOLD_MS;
-      return getSyncService().deleteStaleDevices(staleThreshold);
-    },
-  },
-  {
-    name: 'rate-limits',
-    interval: MS_PER_HOUR,
-    run: () => getSyncService().cleanupExpiredRateLimitCounters(),
-  },
-  {
-    name: 'request-dedup',
-    interval: MS_PER_HOUR,
-    run: () => getSyncService().cleanupExpiredRequestDedupEntries(),
-  },
-];
-
-const timers: Map<string, NodeJS.Timeout> = new Map();
-
-const runJob = async (job: CleanupJob): Promise<void> => {
+  // 1. Delete old operations (covered by snapshots)
   try {
-    const deleted = await job.run();
-    if (deleted > 0) {
-      Logger.info(`Cleanup [${job.name}]: removed ${deleted} entries`);
+    const { totalDeleted, affectedUserIds } =
+      await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    if (totalDeleted > 0) {
+      Logger.info(`Cleanup [old-ops]: removed ${totalDeleted} entries`);
+    }
+    // Update storage usage for affected users
+    for (const userId of affectedUserIds) {
+      await syncService.updateStorageUsage(userId);
     }
   } catch (error) {
-    Logger.error(`Cleanup [${job.name}] failed: ${error}`);
+    Logger.error(`Cleanup [old-ops] failed: ${error}`);
+  }
+
+  // 2. Delete stale devices (not seen within retention period)
+  try {
+    const deleted = await syncService.deleteStaleDevices(cutoffTime);
+    if (deleted > 0) {
+      Logger.info(`Cleanup [stale-devices]: removed ${deleted} entries`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [stale-devices] failed: ${error}`);
+  }
+
+  // 3. Clean up expired rate limit counters
+  try {
+    const deleted = syncService.cleanupExpiredRateLimitCounters();
+    if (deleted > 0) {
+      Logger.info(`Cleanup [rate-limits]: removed ${deleted} entries`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [rate-limits] failed: ${error}`);
+  }
+
+  // 4. Clean up expired request deduplication entries
+  try {
+    const deleted = syncService.cleanupExpiredRequestDedupEntries();
+    if (deleted > 0) {
+      Logger.info(`Cleanup [request-dedup]: removed ${deleted} entries`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [request-dedup] failed: ${error}`);
   }
 };
 
 export const startCleanupJobs = (): void => {
-  Logger.info('Starting sync cleanup jobs...');
+  Logger.info('Starting daily cleanup job...');
 
   // Run initial cleanup after a short delay
   setTimeout(() => {
-    for (const job of CLEANUP_JOBS) {
-      void runJob(job);
-    }
+    void runDailyCleanup();
   }, 10_000);
 
-  // Schedule recurring jobs
-  for (const job of CLEANUP_JOBS) {
-    timers.set(
-      job.name,
-      setInterval(() => {
-        void runJob(job);
-      }, job.interval),
-    );
-  }
+  // Schedule recurring daily cleanup
+  cleanupTimer = setInterval(() => {
+    void runDailyCleanup();
+  }, MS_PER_DAY);
 
-  Logger.info('Cleanup jobs scheduled');
+  Logger.info('Daily cleanup job scheduled');
 };
 
 export const stopCleanupJobs = (): void => {
-  for (const [name, timer] of timers) {
-    clearInterval(timer);
-    timers.delete(name);
+  if (cleanupTimer) {
+    clearInterval(cleanupTimer);
+    cleanupTimer = null;
   }
   Logger.info('Cleanup jobs stopped');
 };

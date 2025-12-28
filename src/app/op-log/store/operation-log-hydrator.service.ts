@@ -5,32 +5,24 @@ import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { OperationLogMigrationService } from './operation-log-migration.service';
 import {
   CURRENT_SCHEMA_VERSION,
-  MigratableStateCache,
   SchemaMigrationService,
 } from './schema-migration.service';
+import { OperationLogSnapshotService } from './operation-log-snapshot.service';
+import { OperationLogRecoveryService } from './operation-log-recovery.service';
+import { SyncHydrationService } from './sync-hydration.service';
 import { OpLog } from '../../core/log';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../pfapi/pfapi-store-delegate.service';
-import { Operation, OpType, RepairPayload, ActionType } from '../core/operation.types';
-import { uuidv7 } from '../../util/uuid-v7';
-import { incrementVectorClock, mergeVectorClocks } from '../../core/util/vector-clock';
+import { Operation, OpType, RepairPayload } from '../core/operation.types';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { ValidateStateService } from '../validation/validate-state.service';
-// DISABLED: Repair system is non-functional
-// import { RepairOperationService } from '../validation/repair-operation.service';
 import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { bulkApplyOperations } from '../apply/bulk-hydration.action';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 import { VectorClockService } from '../sync/vector-clock.service';
-import {
-  MAX_CONFLICT_RETRY_ATTEMPTS,
-  PENDING_OPERATION_EXPIRY_MS,
-} from '../core/operation-log.const';
-import { ClientIdService } from '../../core/util/client-id.service';
-
-type StateCache = MigratableStateCache;
+import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../core/operation-log.const';
 
 /**
  * Handles the hydration (loading) of the application state from the operation log
@@ -49,12 +41,14 @@ export class OperationLogHydratorService {
   private storeDelegateService = inject(PfapiStoreDelegateService);
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
-  // DISABLED: Repair system is non-functional
-  // private repairOperationService = inject(RepairOperationService);
   private vectorClockService = inject(VectorClockService);
   private operationApplierService = inject(OperationApplierService);
   private hydrationStateService = inject(HydrationStateService);
-  private clientIdService = inject(ClientIdService);
+
+  // Extracted services
+  private snapshotService = inject(OperationLogSnapshotService);
+  private recoveryService = inject(OperationLogRecoveryService);
+  private syncHydrationService = inject(SyncHydrationService);
 
   // Mutex to prevent concurrent repair operations and re-validation during repair
   private _repairMutex: Promise<void> | null = null;
@@ -70,7 +64,7 @@ export class OperationLogHydratorService {
       // and don't depend on each other's results, so they can run concurrently.
       const [, , hasBackup] = await Promise.all([
         // Check for pending remote ops from crashed sync (touches 'ops' store)
-        this._recoverPendingRemoteOps(),
+        this.recoveryService.recoverPendingRemoteOps(),
         // Migrate vector clock from pf.META_MODEL to SUP_OPS.vector_clock if needed
         // (touches 'vector_clock' store). One-time migration for DB version 1 to 2.
         this._migrateVectorClockFromPfapiIfNeeded(),
@@ -100,16 +94,16 @@ export class OperationLogHydratorService {
 
       // 2. Run schema migration if needed (A.7.12: with backup safety)
       if (snapshot && this.schemaMigrationService.needsMigration(snapshot)) {
-        snapshot = await this._migrateSnapshotWithBackup(snapshot);
+        snapshot = await this.snapshotService.migrateSnapshotWithBackup(snapshot);
         this._migrationRanDuringHydration = true;
       }
 
       // 3. Validate snapshot if it exists
-      if (snapshot && !this._isValidSnapshot(snapshot)) {
+      if (snapshot && !this.snapshotService.isValidSnapshot(snapshot)) {
         OpLog.warn(
           'OperationLogHydratorService: Snapshot is invalid/corrupted. Attempting recovery...',
         );
-        await this._attemptRecovery();
+        await this.recoveryService.attemptRecovery();
         return;
       }
 
@@ -233,7 +227,7 @@ export class OperationLogHydratorService {
               OpLog.normal(
                 `OperationLogHydratorService: Saving new snapshot after replaying ${opsToReplay.length} ops`,
               );
-              await this._saveCurrentStateAsSnapshot();
+              await this.snapshotService.saveCurrentStateAsSnapshot();
             }
           }
         }
@@ -313,7 +307,7 @@ export class OperationLogHydratorService {
           OpLog.normal(
             `OperationLogHydratorService: Saving snapshot after replaying ${opsToReplay.length} ops`,
           );
-          await this._saveCurrentStateAsSnapshot();
+          await this.snapshotService.saveCurrentStateAsSnapshot();
         }
 
         OpLog.normal('OperationLogHydratorService: Full replay complete.');
@@ -329,7 +323,7 @@ export class OperationLogHydratorService {
     } catch (e) {
       OpLog.err('OperationLogHydratorService: Error during hydration', e);
       try {
-        await this._attemptRecovery();
+        await this.recoveryService.attemptRecovery();
       } catch (recoveryErr) {
         OpLog.err('OperationLogHydratorService: Recovery also failed', recoveryErr);
         this.snackService.open({
@@ -343,36 +337,6 @@ export class OperationLogHydratorService {
         throw recoveryErr;
       }
     }
-  }
-
-  /**
-   * Validates that a snapshot has the expected structure and data.
-   */
-  private _isValidSnapshot(snapshot: StateCache): boolean {
-    // Check required properties exist
-    if (!snapshot.state || typeof snapshot.lastAppliedOpSeq !== 'number') {
-      return false;
-    }
-
-    // Check state is an object with expected structure
-    const state = snapshot.state as Record<string, unknown>;
-    if (typeof state !== 'object' || state === null) {
-      return false;
-    }
-
-    // Check for at least some core models (task, project, globalConfig)
-    // These should always exist even if empty
-    const coreModels = ['task', 'project', 'globalConfig'];
-    for (const model of coreModels) {
-      if (!(model in state)) {
-        OpLog.warn(
-          `OperationLogHydratorService: Missing core model in snapshot: ${model}`,
-        );
-        return false;
-      }
-    }
-
-    return true;
   }
 
   /**
@@ -416,216 +380,9 @@ export class OperationLogHydratorService {
     return undefined;
   }
 
-  /**
-   * Attempts to recover from a corrupted or missing SUP_OPS database.
-   * Recovery strategy:
-   * 1. Try to load data from legacy 'pf' database (ModelCtrl caches)
-   * 2. If found, run genesis migration with that data
-   * 3. If no legacy data, log error (user will need to sync or restore from backup)
-   */
-  private async _attemptRecovery(): Promise<void> {
-    OpLog.normal('OperationLogHydratorService: Attempting disaster recovery...');
-
-    try {
-      // 1. Try to load from legacy 'pf' database
-      const legacyData = await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls();
-
-      // Check if legacy data has any actual content
-      const hasData = this._hasUsableData(legacyData);
-
-      if (hasData) {
-        OpLog.normal(
-          'OperationLogHydratorService: Found data in legacy database. Recovering...',
-        );
-        await this._recoverFromLegacyData(legacyData);
-        return;
-      }
-
-      // 2. No legacy data found
-      // App will start with NgRx initial state (empty).
-      // User can sync or import a backup to restore their data.
-      OpLog.warn(
-        'OperationLogHydratorService: No legacy data found. ' +
-          'If you have sync enabled, please trigger a sync to restore your data. ' +
-          'Otherwise, you may need to restore from a backup.',
-      );
-    } catch (e) {
-      OpLog.err('OperationLogHydratorService: Recovery failed', e);
-      // App will start with NgRx initial state (empty).
-      // User can sync or restore from backup.
-    }
-  }
-
-  /**
-   * Checks if the data has any usable content (not just empty/default state).
-   */
-  private _hasUsableData(data: Record<string, unknown>): boolean {
-    // Check if there are any tasks (the most important data)
-    const taskState = data['task'] as { ids?: string[] } | undefined;
-    if (taskState?.ids && taskState.ids.length > 0) {
-      return true;
-    }
-
-    // Check if there are any projects beyond the default
-    const projectState = data['project'] as { ids?: string[] } | undefined;
-    if (projectState?.ids && projectState.ids.length > 1) {
-      return true;
-    }
-
-    // Check if there's any configuration that suggests user has used the app
-    const globalConfig = data['globalConfig'] as Record<string, unknown> | undefined;
-    if (globalConfig && Object.keys(globalConfig).length > 0) {
-      // Has some configuration - might be worth recovering
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Recovers from legacy data by creating a new genesis snapshot.
-   */
-  private async _recoverFromLegacyData(
-    legacyData: Record<string, unknown>,
-  ): Promise<void> {
-    const clientId = await this.clientIdService.loadClientId();
-    if (!clientId) {
-      throw new Error('Failed to load clientId - cannot create recovery operation');
-    }
-
-    // Create recovery operation
-    const recoveryOp: Operation = {
-      id: uuidv7(),
-      actionType: ActionType.RECOVERY_DATA_IMPORT,
-      opType: OpType.Batch,
-      entityType: 'RECOVERY',
-      entityId: '*',
-      payload: legacyData,
-      clientId: clientId,
-      vectorClock: { [clientId]: 1 },
-      timestamp: Date.now(),
-      schemaVersion: CURRENT_SCHEMA_VERSION,
-    };
-
-    // Write recovery operation
-    await this.opLogStore.append(recoveryOp);
-
-    // Create state cache
-    const lastSeq = await this.opLogStore.getLastSeq();
-    await this.opLogStore.saveStateCache({
-      state: legacyData,
-      lastAppliedOpSeq: lastSeq,
-      vectorClock: recoveryOp.vectorClock,
-      compactedAt: Date.now(),
-    });
-
-    // Dispatch to NgRx
-    this.store.dispatch(
-      loadAllData({ appDataComplete: legacyData as AppDataCompleteNew }),
-    );
-
-    // Sync PFAPI vector clock to match the recovery operation
-    // This ensures that the meta model knows about the new clock state
-    await this.pfapiService.pf.metaModel.syncVectorClock(recoveryOp.vectorClock);
-
-    OpLog.normal(
-      'OperationLogHydratorService: Recovery complete. Data restored from legacy database.',
-    );
-  }
-
-  /**
-   * Saves the current NgRx state as a snapshot for faster future loads.
-   * Called after replaying many operations to optimize next startup.
-   */
-  private async _saveCurrentStateAsSnapshot(): Promise<void> {
-    try {
-      // Get current state from NgRx
-      const currentState = await this.storeDelegateService.getAllSyncModelDataFromStore();
-
-      // Get current vector clock and last seq
-      const vectorClock = await this.vectorClockService.getCurrentVectorClock();
-      const lastSeq = await this.opLogStore.getLastSeq();
-
-      // Save snapshot
-      await this.opLogStore.saveStateCache({
-        state: currentState,
-        lastAppliedOpSeq: lastSeq,
-        vectorClock,
-        compactedAt: Date.now(),
-        schemaVersion: CURRENT_SCHEMA_VERSION,
-      });
-
-      OpLog.normal('OperationLogHydratorService: Saved new snapshot after replay');
-    } catch (e) {
-      // Don't fail hydration if snapshot save fails
-      OpLog.warn('OperationLogHydratorService: Failed to save snapshot after replay', e);
-    }
-  }
-
   // ============================================================
-  // A.7.12 Migration Safety & A.7.13 Tail Ops Migration
+  // A.7.13 Tail Ops Migration
   // ============================================================
-
-  /**
-   * Migrates a snapshot with backup safety (A.7.12).
-   * Creates a backup before migration and restores it if migration fails.
-   *
-   * @param snapshot - The snapshot to migrate
-   * @returns The migrated snapshot
-   * @throws If migration fails and rollback also fails
-   */
-  private async _migrateSnapshotWithBackup(snapshot: StateCache): Promise<StateCache> {
-    OpLog.normal(
-      'OperationLogHydratorService: Running schema migration with backup safety...',
-    );
-
-    // 1. Create backup before migration
-    await this.opLogStore.saveStateCacheBackup();
-    OpLog.normal('OperationLogHydratorService: Created pre-migration backup.');
-
-    try {
-      // 2. Run migration
-      const migratedSnapshot = this.schemaMigrationService.migrateStateIfNeeded(snapshot);
-
-      // 3. Save migrated snapshot
-      await this.opLogStore.saveStateCache(migratedSnapshot);
-
-      // 4. Clear backup on success
-      await this.opLogStore.clearStateCacheBackup();
-      OpLog.normal(
-        'OperationLogHydratorService: Schema migration complete. Backup cleared.',
-      );
-
-      return migratedSnapshot;
-    } catch (e) {
-      OpLog.err(
-        'OperationLogHydratorService: Schema migration failed. Restoring backup...',
-        e,
-      );
-
-      try {
-        // Restore backup
-        await this.opLogStore.restoreStateCacheFromBackup();
-        OpLog.normal(
-          'OperationLogHydratorService: Backup restored after migration failure.',
-        );
-      } catch (restoreErr) {
-        OpLog.err(
-          'OperationLogHydratorService: CRITICAL - Failed to restore backup after migration failure!',
-          restoreErr,
-        );
-        // Both migration and restore failed - this is a critical error
-        throw new Error(
-          `Schema migration failed and backup restore also failed. ` +
-            `Original error: ${e instanceof Error ? e.message : String(e)}. ` +
-            `Restore error: ${restoreErr instanceof Error ? restoreErr.message : String(restoreErr)}`,
-        );
-      }
-
-      // Re-throw original error after successful restore
-      throw e;
-    }
-  }
 
   /**
    * Migrates tail operations to current schema version (A.7.13).
@@ -653,14 +410,7 @@ export class OperationLogHydratorService {
 
   /**
    * Handles hydration after a remote sync download.
-   * This method:
-   * 1. Merges passed mainModelData (entity models) with IndexedDB data (archive models)
-   * 2. Creates a SYNC_IMPORT operation to persist it to SUP_OPS
-   * 3. Saves a new state cache (snapshot) for crash safety
-   * 4. Dispatches loadAllData to update NgRx
-   *
-   * This is called instead of hydrateStore() after sync downloads to ensure
-   * the synced data is persisted to SUP_OPS and loaded into NgRx.
+   * Delegates to SyncHydrationService.
    *
    * @param downloadedMainModelData - Entity models from remote meta file.
    *   These are NOT stored in IndexedDB (only archives are) so must be passed explicitly.
@@ -668,111 +418,7 @@ export class OperationLogHydratorService {
   async hydrateFromRemoteSync(
     downloadedMainModelData?: Record<string, unknown>,
   ): Promise<void> {
-    OpLog.normal('OperationLogHydratorService: Hydrating from remote sync...');
-
-    try {
-      // 1. Read archive data from IndexedDB and merge with passed entity data
-      // Entity models (task, tag, project, etc.) come from downloadedMainModelData
-      // Archive models (archiveYoung, archiveOld) come from IndexedDB
-      const dbData = await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls();
-      const mergedData = downloadedMainModelData
-        ? { ...dbData, ...downloadedMainModelData }
-        : dbData;
-      const syncedData = this._stripLocalOnlySettings(mergedData);
-      OpLog.normal(
-        'OperationLogHydratorService: Loaded synced data',
-        downloadedMainModelData
-          ? '(merged passed entity models with archive data from DB)'
-          : '(from pf database only)',
-      );
-
-      // 2. Get client ID for vector clock
-      const clientId = await this.clientIdService.loadClientId();
-      if (!clientId) {
-        throw new Error('Failed to load clientId - cannot create SYNC_IMPORT operation');
-      }
-
-      // 3. Create SYNC_IMPORT operation with merged clock
-      // CRITICAL: The SYNC_IMPORT's clock must include ALL known clients, not just local ones.
-      // If we only use the local clock, ops from other clients will be CONCURRENT with
-      // this import and get filtered out by SyncImportFilterService.
-      // By merging the PFAPI meta model's clock (which includes synced clients),
-      // we ensure ops created AFTER this sync point are GREATER_THAN the import.
-      const localClock = await this.vectorClockService.getCurrentVectorClock();
-      const pfapiMetaModel = await this.pfapiService.pf.metaModel.load();
-      const pfapiClock = pfapiMetaModel?.vectorClock || {};
-      const mergedClock = mergeVectorClocks(localClock, pfapiClock);
-      const newClock = incrementVectorClock(mergedClock, clientId);
-      OpLog.normal(
-        'OperationLogHydratorService: Creating SYNC_IMPORT with merged clock',
-        {
-          localClockSize: Object.keys(localClock).length,
-          pfapiClockSize: Object.keys(pfapiClock).length,
-          mergedClockSize: Object.keys(mergedClock).length,
-        },
-      );
-
-      const op: Operation = {
-        id: uuidv7(),
-        actionType: ActionType.LOAD_ALL_DATA,
-        opType: OpType.SyncImport,
-        entityType: 'ALL',
-        payload: syncedData,
-        clientId: clientId,
-        vectorClock: newClock,
-        timestamp: Date.now(),
-        schemaVersion: CURRENT_SCHEMA_VERSION,
-      };
-
-      // 4. Append operation to SUP_OPS
-      await this.opLogStore.append(op, 'remote');
-      OpLog.normal('OperationLogHydratorService: Persisted SYNC_IMPORT operation');
-
-      // 5. Get the sequence number of the operation we just wrote
-      const lastSeq = await this.opLogStore.getLastSeq();
-
-      // 6. Validate and repair synced data before dispatching
-      // This fixes stale task references (e.g., tags/projects referencing deleted tasks)
-      let dataToLoad = syncedData as AppDataCompleteNew;
-      if (!this._repairMutex) {
-        const validationResult = await this._validateAndRepairState(
-          dataToLoad,
-          'remote-sync',
-        );
-        if (validationResult.wasRepaired && validationResult.repairedState) {
-          dataToLoad = validationResult.repairedState;
-          OpLog.normal(
-            'OperationLogHydratorService: Repaired synced data before loading',
-          );
-        }
-      }
-
-      // 7. Save new state cache (snapshot) for crash safety
-      await this.opLogStore.saveStateCache({
-        state: dataToLoad,
-        lastAppliedOpSeq: lastSeq,
-        vectorClock: newClock,
-        compactedAt: Date.now(),
-      });
-      OpLog.normal('OperationLogHydratorService: Saved state cache after sync');
-
-      // 8. Update vector clock store to match the new clock
-      // This is critical because:
-      // - The SYNC_IMPORT was appended with source='remote', so store wasn't updated
-      // - If user creates new ops in this session, incrementAndStoreVectorClock reads from store
-      // - Without this, new ops would have clocks missing entries from the SYNC_IMPORT
-      await this.opLogStore.setVectorClock(newClock);
-      OpLog.normal('OperationLogHydratorService: Updated vector clock store after sync');
-
-      // 9. Dispatch loadAllData to update NgRx
-      this.store.dispatch(loadAllData({ appDataComplete: dataToLoad }));
-      OpLog.normal(
-        'OperationLogHydratorService: Dispatched loadAllData with synced data',
-      );
-    } catch (e) {
-      OpLog.err('OperationLogHydratorService: Error during hydrateFromRemoteSync', e);
-      throw e;
-    }
+    return this.syncHydrationService.hydrateFromRemoteSync(downloadedMainModelData);
   }
 
   /**
@@ -889,57 +535,6 @@ export class OperationLogHydratorService {
         OpLog.warn('OperationLogHydratorService: Failed to sync PFAPI vector clock', e);
       }
     }
-  }
-
-  /**
-   * Recovers from pending remote ops that were stored but not applied (crash recovery).
-   * These ops are in the log and will be replayed during normal hydration, so we just
-   * need to mark them as applied to prevent them appearing as orphaned.
-   *
-   * Operations pending for longer than PENDING_OPERATION_EXPIRY_MS are considered
-   * stale (likely due to data corruption or repeated failures) and are rejected
-   * instead of replayed.
-   */
-  private async _recoverPendingRemoteOps(): Promise<void> {
-    const pendingOps = await this.opLogStore.getPendingRemoteOps();
-
-    if (pendingOps.length === 0) {
-      return;
-    }
-
-    const now = Date.now();
-    const validOps = pendingOps.filter(
-      (e) => now - e.appliedAt < PENDING_OPERATION_EXPIRY_MS,
-    );
-    const expiredOps = pendingOps.filter(
-      (e) => now - e.appliedAt >= PENDING_OPERATION_EXPIRY_MS,
-    );
-
-    // Reject expired ops - they've been pending too long
-    if (expiredOps.length > 0) {
-      const expiredIds = expiredOps.map((e) => e.op.id);
-      await this.opLogStore.markRejected(expiredIds);
-      OpLog.warn(
-        `OperationLogHydratorService: Rejected ${expiredOps.length} expired pending remote ops ` +
-          `(pending > ${PENDING_OPERATION_EXPIRY_MS / (60 * 60 * 1000)}h). ` +
-          `Oldest was ${Math.round((now - Math.min(...expiredOps.map((e) => e.appliedAt))) / (60 * 60 * 1000))}h old.`,
-      );
-    }
-
-    // Mark valid ops as applied - they'll be replayed during normal hydration
-    if (validOps.length > 0) {
-      const seqs = validOps.map((e) => e.seq);
-      await this.opLogStore.markApplied(seqs);
-      OpLog.warn(
-        `OperationLogHydratorService: Found ${validOps.length} pending remote ops from previous crash. ` +
-          `Marking as applied (they will be replayed during hydration).`,
-      );
-    }
-
-    OpLog.normal(
-      `OperationLogHydratorService: Recovered ${validOps.length} pending remote ops, ` +
-        `rejected ${expiredOps.length} expired ops.`,
-    );
   }
 
   /**

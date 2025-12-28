@@ -242,7 +242,6 @@ export interface UploadSnapshotRequest {
 export interface SyncStatusResponse {
   latestSeq: number;
   devicesOnline: number;
-  pendingOps: number;
   snapshotAge?: number;
   storageUsedBytes: number;
   storageQuotaBytes: number;
@@ -354,10 +353,8 @@ export interface SyncConfig {
   downloadLimit: number;
   uploadRateLimit: { max: number; windowMs: number };
   downloadRateLimit: { max: number; windowMs: number };
-  tombstoneRetentionMs: number;
-  opRetentionMs: number;
+  retentionMs: number; // Unified retention period for ops, devices, and validation
   maxClockDriftMs: number;
-  maxOpAgeMs: number;
 }
 
 // Time constants (in milliseconds)
@@ -365,9 +362,12 @@ export const MS_PER_MINUTE = 60 * 1000;
 export const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 export const MS_PER_DAY = 24 * MS_PER_HOUR;
 
+// Retention period
+export const RETENTION_DAYS = 45;
+export const RETENTION_MS = RETENTION_DAYS * MS_PER_DAY;
+
 // Device thresholds
 export const ONLINE_DEVICE_THRESHOLD_MS = 5 * MS_PER_MINUTE; // 5 minutes
-export const STALE_DEVICE_THRESHOLD_MS = 50 * MS_PER_DAY; // 50 days
 
 export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   maxOpsPerUpload: 100,
@@ -375,8 +375,6 @@ export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   downloadLimit: 1000,
   uploadRateLimit: { max: 100, windowMs: MS_PER_MINUTE },
   downloadRateLimit: { max: 200, windowMs: MS_PER_MINUTE },
-  tombstoneRetentionMs: 45 * MS_PER_DAY, // 45 days
-  opRetentionMs: 45 * MS_PER_DAY, // 45 days
+  retentionMs: RETENTION_MS, // 45 days - used for ops, devices, and validation
   maxClockDriftMs: MS_PER_MINUTE, // 60 seconds
-  maxOpAgeMs: 30 * MS_PER_DAY, // 30 days
 };

@@ -181,7 +181,7 @@ export class ValidationService {
         errorCode: SYNC_ERROR_CODES.INVALID_TIMESTAMP,
       };
     }
-    if (op.timestamp < now - this.config.maxOpAgeMs) {
+    if (op.timestamp < now - this.config.retentionMs) {
       return {
         valid: false,
         error: 'Operation too old',

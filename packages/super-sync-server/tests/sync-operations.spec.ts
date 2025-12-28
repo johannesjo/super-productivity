@@ -156,36 +156,6 @@ vi.mock('../src/db', async () => {
         return { count };
       }),
     },
-    tombstone: {
-      upsert: vi.fn().mockImplementation(async (args: any) => {
-        const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
-        const result = {
-          ...args.create,
-          userId: args.where.userId_entityType_entityId.userId,
-          entityType: args.where.userId_entityType_entityId.entityType,
-          entityId: args.where.userId_entityType_entityId.entityId,
-        };
-        state.tombstones.set(key, result);
-        return result;
-      }),
-      findUnique: vi.fn().mockImplementation(async (args: any) => {
-        const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
-        return state.tombstones.get(key) || null;
-      }),
-      deleteMany: vi.fn().mockImplementation(async (args: any) => {
-        let count = 0;
-        for (const [key, tombstone] of state.tombstones.entries()) {
-          if (
-            args.where?.expiresAt?.lt !== undefined &&
-            (tombstone as any).expiresAt >= args.where.expiresAt.lt
-          )
-            continue;
-          state.tombstones.delete(key);
-          count++;
-        }
-        return { count };
-      }),
-    },
     user: {
       findUnique: vi.fn().mockImplementation(async (args: any) => {
         return state.users.get(args.where.id) || null;
@@ -295,28 +265,6 @@ vi.mock('../src/db', async () => {
           return { count };
         }),
       },
-      tombstone: {
-        findMany: vi.fn().mockImplementation(async () => {
-          return Array.from(state.tombstones.values());
-        }),
-        findUnique: vi.fn().mockImplementation(async (args: any) => {
-          const key = `${args.where.userId_entityType_entityId.userId}:${args.where.userId_entityType_entityId.entityType}:${args.where.userId_entityType_entityId.entityId}`;
-          return state.tombstones.get(key) || null;
-        }),
-        deleteMany: vi.fn().mockImplementation(async (args: any) => {
-          let count = 0;
-          for (const [key, tombstone] of state.tombstones.entries()) {
-            if (
-              args.where?.expiresAt?.lt !== undefined &&
-              (tombstone as any).expiresAt >= args.where.expiresAt.lt
-            )
-              continue;
-            state.tombstones.delete(key);
-            count++;
-          }
-          return { count };
-        }),
-      },
       user: {
         findUnique: vi.fn().mockImplementation(async (args: any) => {
           return state.users.get(args.where.id) || null;
@@ -361,16 +309,6 @@ describe('Sync Operations', () => {
     });
     initSyncService();
   });
-
-  // Helper to check if tombstone exists
-  const isTombstoned = (
-    userId: number,
-    entityType: string,
-    entityId: string,
-  ): boolean => {
-    const key = `${userId}:${entityType}:${entityId}`;
-    return testState.tombstones.has(key);
-  };
 
   describe('Snapshot Generation', () => {
     it('should generate empty snapshot for user with no operations', async () => {
@@ -630,94 +568,6 @@ describe('Sync Operations', () => {
       const cleaned = service.cleanupExpiredRateLimitCounters();
       // With fresh counters, nothing should be expired yet
       expect(cleaned).toBe(0);
-    });
-  });
-
-  describe('Tombstone Management', () => {
-    it('should create tombstone on DEL operation', async () => {
-      const service = getSyncService();
-
-      // Create and delete a task
-      await service.uploadOps(userId, clientId, [
-        createOp('task-1', 'CRT'),
-        createOp('task-1', 'DEL'),
-      ]);
-
-      // Check tombstone exists
-      expect(isTombstoned(userId, 'TASK', 'task-1')).toBe(true);
-    });
-
-    it('should not create tombstone for non-DEL operations', async () => {
-      const service = getSyncService();
-
-      // Create a task
-      await service.uploadOps(userId, clientId, [createOp('task-1', 'CRT')]);
-
-      // No tombstone should exist
-      expect(isTombstoned(userId, 'TASK', 'task-1')).toBe(false);
-    });
-
-    it('should track tombstones per user', async () => {
-      const service = getSyncService();
-      const userId2 = 2;
-
-      // Create second user
-      testState.users.set(userId2, {
-        id: userId2,
-        email: 'test2@test.com',
-        passwordHash: 'hash',
-        isVerified: true,
-        createdAt: new Date(),
-      });
-
-      // Delete task for user 1
-      await service.uploadOps(userId, clientId, [
-        createOp('shared-id', 'CRT'),
-        createOp('shared-id', 'DEL'),
-      ]);
-
-      // Tombstone should exist for user 1
-      expect(isTombstoned(userId, 'TASK', 'shared-id')).toBe(true);
-
-      // Tombstone should NOT exist for user 2
-      expect(isTombstoned(userId2, 'TASK', 'shared-id')).toBe(false);
-    });
-
-    it('should delete expired tombstones', async () => {
-      const service = getSyncService();
-
-      // Create a tombstone manually with expired time
-      const hundredDaysMs = MS_PER_DAY * 100;
-      const oneDayMs = MS_PER_DAY;
-      const oldTombstoneKey = `${userId}:TASK:old-task`;
-      testState.tombstones.set(oldTombstoneKey, {
-        userId,
-        entityType: 'TASK',
-        entityId: 'old-task',
-        deletedAt: BigInt(Date.now() - hundredDaysMs),
-        deletedByOpId: 'op-123',
-        expiresAt: BigInt(Date.now() - oneDayMs), // Expired yesterday
-      });
-
-      // Also create a non-expired tombstone
-      const ninetyDaysMs = MS_PER_DAY * 90;
-      const newTombstoneKey = `${userId}:TASK:new-task`;
-      testState.tombstones.set(newTombstoneKey, {
-        userId,
-        entityType: 'TASK',
-        entityId: 'new-task',
-        deletedAt: BigInt(Date.now()),
-        deletedByOpId: 'op-456',
-        expiresAt: BigInt(Date.now() + ninetyDaysMs), // Expires in 90 days
-      });
-
-      // Cleanup should delete the expired one
-      const deleted = await service.deleteExpiredTombstones();
-      expect(deleted).toBe(1);
-
-      // Verify correct tombstone was deleted
-      expect(isTombstoned(userId, 'TASK', 'old-task')).toBe(false);
-      expect(isTombstoned(userId, 'TASK', 'new-task')).toBe(true);
     });
   });
 

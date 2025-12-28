@@ -240,7 +240,7 @@ describe('ValidationService', () => {
     });
 
     it('should reject timestamps too old', () => {
-      const oldTime = Date.now() - 40 * 24 * 60 * 60 * 1000; // 40 days ago
+      const oldTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago (beyond 45-day retention)
       const op = createValidOp({ timestamp: oldTime });
       const result = validationService.validateOp(op, clientId);
       expect(result.valid).toBe(false);
