@@ -116,6 +116,7 @@ export class FocusModeEffects {
   // Only triggers when focus mode feature is enabled
   syncTrackingStopToSession$ = createEffect(() =>
     this.taskService.currentTaskId$.pipe(
+      skipDuringSync(),
       pairwise(),
       withLatestFrom(
         this.store.select(selectFocusModeConfig),
