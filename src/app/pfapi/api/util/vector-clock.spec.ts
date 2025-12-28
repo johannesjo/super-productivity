@@ -654,6 +654,64 @@ describe('Vector Clock', () => {
       // client99 should be included even with low value
       expect(limited['client99']).toBe(901);
     });
+
+    it('should handle pruned client reappearing after merge', () => {
+      // Simulate: local clock was pruned, then merges with remote that has the pruned client
+      const prunedClientId = 'oldDevice';
+      const currentClientId = 'currentDevice';
+
+      // Create a large local clock that triggers pruning
+      const localClock: VectorClock = { [currentClientId]: 100 };
+      for (let i = 0; i < 20; i++) {
+        localClock[`highActivity${i}`] = 200 + i; // High values that will be kept
+      }
+      localClock[prunedClientId] = 5; // Low value that will be pruned
+
+      const limitedLocal = limitVectorClockSize(localClock, currentClientId);
+      expect(limitedLocal[prunedClientId]).toBeUndefined(); // Confirm it was pruned
+
+      // Remote clock has the pruned client with a higher value
+      const remoteClock: VectorClock = {
+        [currentClientId]: 50,
+        [prunedClientId]: 25, // Higher than original value
+        highActivity0: 210, // Higher than local's 200
+      };
+
+      // Merge should reintroduce the pruned client
+      const merged = mergeVectorClocks(limitedLocal, remoteClock);
+
+      // The pruned client should be back in the merged clock
+      expect(merged[prunedClientId]).toBe(25);
+      expect(merged[currentClientId]).toBe(100); // Local value is higher
+      // highActivity0 in local is 200, remote is 210, so merged should be 210 (max)
+      expect(merged['highActivity0']).toBe(210);
+    });
+
+    it('should handle comparison correctly after pruning', () => {
+      // This tests that pruning doesn't break causality detection for kept clients
+      const currentClientId = 'currentDevice';
+
+      // Clock A: large, will be pruned
+      const clockA: VectorClock = { [currentClientId]: 50 };
+      for (let i = 0; i < 20; i++) {
+        clockA[`client${i}`] = i + 1;
+      }
+
+      // Clock B: derived from clock A, then incremented
+      const clockB: VectorClock = { ...clockA };
+      clockB[currentClientId] = 51; // Incremented
+
+      const limitedA = limitVectorClockSize(clockA, currentClientId);
+      const limitedB = limitVectorClockSize(clockB, currentClientId);
+
+      // B should still be GREATER_THAN A for the kept components
+      expect(compareVectorClocks(limitedA, limitedB)).toBe(
+        VectorClockComparison.LESS_THAN,
+      );
+      expect(compareVectorClocks(limitedB, limitedA)).toBe(
+        VectorClockComparison.GREATER_THAN,
+      );
+    });
   });
 
   describe('Vector Clock Metrics', () => {

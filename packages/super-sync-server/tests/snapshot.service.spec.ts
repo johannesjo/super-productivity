@@ -217,6 +217,112 @@ describe('SnapshotService', () => {
     });
   });
 
+  describe('clearForUser', () => {
+    it('should remove pending lock for a user', async () => {
+      // Create a pending lock by starting a generation that never resolves
+      let resolveGeneration: (value: any) => void;
+      const pendingPromise = new Promise((resolve) => {
+        resolveGeneration = resolve;
+      });
+
+      const mockTransaction = vi.mocked(prisma.$transaction);
+      mockTransaction.mockImplementation(() => pendingPromise as any);
+
+      // Start generation (creates a lock)
+      const gen1 = service.generateSnapshot(1);
+
+      // Clear the lock for user 1
+      service.clearForUser(1);
+
+      // Start another generation - should create a new transaction call
+      // because the lock was cleared
+      let secondCallCount = 0;
+      mockTransaction.mockImplementation(async (fn) => {
+        secondCallCount++;
+        const mockTx = {
+          userSyncState: {
+            findUnique: vi.fn().mockResolvedValue({ lastSeq: 0 }),
+            update: vi.fn().mockResolvedValue({}),
+          },
+          operation: {
+            findMany: vi.fn().mockResolvedValue([]),
+          },
+        };
+        return fn(mockTx as any);
+      });
+
+      const gen2 = service.generateSnapshot(1);
+      const result2 = await gen2;
+
+      // Second generation should have started a new transaction
+      expect(secondCallCount).toBe(1);
+      expect(result2).toBeDefined();
+
+      // Resolve the first one to clean up (avoid unhandled promise rejection)
+      resolveGeneration!({
+        state: {},
+        serverSeq: 0,
+        generatedAt: Date.now(),
+        schemaVersion: 1,
+      });
+      await gen1.catch(() => {}); // Ignore any errors from the orphaned promise
+    });
+
+    it('should not affect locks for other users', async () => {
+      // Create locks for users 1 and 2
+      let resolveUser1: (value: any) => void;
+      let resolveUser2: (value: any) => void;
+      const user1Promise = new Promise((resolve) => {
+        resolveUser1 = resolve;
+      });
+      const user2Promise = new Promise((resolve) => {
+        resolveUser2 = resolve;
+      });
+
+      const mockTransaction = vi.mocked(prisma.$transaction);
+      let callCount = 0;
+      mockTransaction.mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1) return user1Promise;
+        if (callCount === 2) return user2Promise;
+        throw new Error('Unexpected call');
+      });
+
+      // Start generations for both users
+      const gen1 = service.generateSnapshot(1);
+      const gen2 = service.generateSnapshot(2);
+
+      // Clear lock for user 1 only
+      service.clearForUser(1);
+
+      // User 2's lock should still be active - a new call should wait for it
+      const gen2b = service.generateSnapshot(2);
+
+      // Resolve user 2's generation
+      const result2 = {
+        state: { user: 2 },
+        serverSeq: 10,
+        generatedAt: Date.now(),
+        schemaVersion: 1,
+      };
+      resolveUser2!(result2);
+
+      // Both gen2 and gen2b should get the same result (waited for same lock)
+      const [result2a, result2bResult] = await Promise.all([gen2, gen2b]);
+      expect(result2a).toEqual(result2);
+      expect(result2bResult).toEqual(result2);
+
+      // Clean up user 1's pending promise
+      resolveUser1!({
+        state: {},
+        serverSeq: 0,
+        generatedAt: Date.now(),
+        schemaVersion: 1,
+      });
+      await gen1.catch(() => {});
+    });
+  });
+
   describe('getRestorePoints', () => {
     it('should return empty array when no restore points exist', async () => {
       vi.mocked(prisma.operation.findMany).mockResolvedValue([]);
