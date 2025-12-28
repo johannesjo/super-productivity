@@ -595,43 +595,6 @@ export class OperationLogHydratorService {
   }
 
   /**
-   * Strips local-only settings from synced data to prevent them from being
-   * overwritten by remote data. These settings should remain local to each client.
-   *
-   * Currently strips:
-   * - globalConfig.sync.syncProvider: Each client chooses its own sync provider
-   */
-  private _stripLocalOnlySettings(data: unknown): unknown {
-    if (!data || typeof data !== 'object') {
-      return data;
-    }
-
-    const typedData = data as Record<string, unknown>;
-    if (!typedData['globalConfig']) {
-      return data;
-    }
-
-    const globalConfig = typedData['globalConfig'] as Record<string, unknown>;
-    if (!globalConfig['sync']) {
-      return data;
-    }
-
-    const sync = globalConfig['sync'] as Record<string, unknown>;
-
-    // Return data with syncProvider nulled out
-    return {
-      ...typedData,
-      globalConfig: {
-        ...globalConfig,
-        sync: {
-          ...sync,
-          syncProvider: null, // Local-only setting, don't overwrite from remote
-        },
-      },
-    };
-  }
-
-  /**
    * Migrates the vector clock from pf.META_MODEL to SUP_OPS.vector_clock if needed.
    * This is a one-time migration when upgrading from DB version 1 to 2.
    */
