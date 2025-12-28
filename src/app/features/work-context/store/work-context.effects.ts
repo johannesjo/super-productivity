@@ -47,6 +47,8 @@ export class WorkContextEffects {
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       map((event) => event.urlAfterRedirects),
       startWith(this._router.url), // Handle initial page load
+      // Prevent dispatching setActiveWorkContext during sync - startWith() emits
+      // immediately on subscription which could interfere with sync state hydration
       skipDuringSync(),
       filter(
         (url) =>

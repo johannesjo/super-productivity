@@ -61,6 +61,8 @@ export class FocusModeEffects {
       this.store.select(selectFocusModeConfig),
       this.store.select(selectIsFocusModeEnabled),
     ]).pipe(
+      // Prevent auto-showing overlay during sync - config/task state changes from
+      // remote ops would otherwise trigger the overlay unexpectedly
       skipDuringSync(),
       switchMap(([cfg, isFocusModeEnabled]) =>
         isFocusModeEnabled && cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
@@ -81,6 +83,8 @@ export class FocusModeEffects {
       this.store.select(selectFocusModeConfig),
       this.store.select(selectIsFocusModeEnabled),
     ]).pipe(
+      // Prevent auto-starting/unpausing focus session during sync - currentTaskId
+      // changes from remote ops would otherwise start sessions unexpectedly
       skipDuringSync(),
       switchMap(([cfg, isFocusModeEnabled]) =>
         isFocusModeEnabled && cfg?.isSyncSessionWithTracking
@@ -116,6 +120,9 @@ export class FocusModeEffects {
   // Only triggers when focus mode feature is enabled
   syncTrackingStopToSession$ = createEffect(() =>
     this.taskService.currentTaskId$.pipe(
+      // CRITICAL: Prevent cascading dispatches during sync that cause app freeze.
+      // Without this, rapid currentTaskId changes from remote ops trigger pairwise()
+      // which dispatches pauseFocusSession repeatedly, overwhelming the store.
       skipDuringSync(),
       pairwise(),
       withLatestFrom(
