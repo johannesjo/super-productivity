@@ -31,9 +31,6 @@ export const encodeOperation = (op: Operation): CompactOperation => {
   if (op.entityIds !== undefined) {
     compact.ds = op.entityIds;
   }
-  if (op.parentOpId !== undefined) {
-    compact.r = op.parentOpId;
-  }
 
   return compact;
 };
@@ -61,9 +58,6 @@ export const decodeOperation = (compact: CompactOperation): Operation => {
   }
   if (compact.ds !== undefined) {
     op.entityIds = compact.ds;
-  }
-  if (compact.r !== undefined) {
-    op.parentOpId = compact.r;
   }
 
   return op;

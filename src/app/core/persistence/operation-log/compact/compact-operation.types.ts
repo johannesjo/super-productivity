@@ -16,7 +16,6 @@ import { VectorClock } from '../../../util/vector-clock';
  * - v = vectorClock
  * - t = timestamp
  * - s = schemaVersion
- * - r = parentOpId
  */
 export interface CompactOperation {
   /** id - UUID string (kept as 'id' for IndexedDB index compatibility) */
@@ -51,9 +50,6 @@ export interface CompactOperation {
 
   /** schemaVersion */
   s: number;
-
-  /** parentOpId (optional) */
-  r?: string;
 }
 
 /**

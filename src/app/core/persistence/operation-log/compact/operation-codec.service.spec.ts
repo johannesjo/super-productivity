@@ -31,7 +31,6 @@ describe('operation-codec.service', () => {
   const mockOperationWithOptionals: Operation = {
     ...mockOperation,
     entityIds: ['task-1', 'task-2'],
-    parentOpId: 'parent-op-123',
   };
 
   describe('encodeOperation', () => {
@@ -49,14 +48,12 @@ describe('operation-codec.service', () => {
       expect(compact.t).toBe(1703700000000);
       expect(compact.s).toBe(1);
       expect(compact.ds).toBeUndefined();
-      expect(compact.r).toBeUndefined();
     });
 
     it('should encode optional fields when present', () => {
       const compact = encodeOperation(mockOperationWithOptionals);
 
       expect(compact.ds).toEqual(['task-1', 'task-2']);
-      expect(compact.r).toBe('parent-op-123');
     });
   });
 

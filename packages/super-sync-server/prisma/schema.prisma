@@ -49,7 +49,6 @@ model Operation {
   schemaVersion      Int     @map("schema_version")
   clientTimestamp    BigInt  @map("client_timestamp")
   receivedAt         BigInt  @map("received_at")
-  parentOpId         String? @map("parent_op_id")
   isPayloadEncrypted Boolean @default(false) @map("is_payload_encrypted")
 
   user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)

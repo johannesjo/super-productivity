@@ -111,12 +111,6 @@ export interface Operation {
    * Allows the system to migrate or transform payloads if the data structure changes in the future.
    */
   schemaVersion: number;
-
-  /**
-   * The ID of the direct parent operation, if this op is a resolution to a conflict.
-   * Helps in tracing the history of a conflict resolution chain.
-   */
-  parentOpId?: string;
 }
 
 export interface OperationLogEntry {

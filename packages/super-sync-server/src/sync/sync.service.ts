@@ -384,7 +384,6 @@ export class SyncService {
           schemaVersion: op.schemaVersion,
           clientTimestamp: BigInt(op.timestamp),
           receivedAt: BigInt(now),
-          parentOpId: op.parentOpId ?? null,
           isPayloadEncrypted: op.isPayloadEncrypted ?? false,
         },
       });
@@ -886,7 +885,7 @@ export class SyncService {
 
     // Clear caches
     this.rateLimitService.clearForUser(userId);
-    this.snapshotGenerationLocks.delete(userId);
+    this.snapshotService.clearForUser(userId);
   }
 
   async isDeviceOwner(userId: number, clientId: string): Promise<boolean> {

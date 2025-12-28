@@ -43,7 +43,6 @@ const OperationSchema = z.object({
   vectorClock: z.record(z.string(), z.number()),
   timestamp: z.number(),
   schemaVersion: z.number(),
-  parentOpId: z.string().max(255).optional(), // For conflict resolution chain tracking
   isPayloadEncrypted: z.boolean().optional(), // True if payload is E2E encrypted
 });
 
