@@ -54,7 +54,7 @@ flowchart TB
     subgraph Services
         AuthS[Auth Service<br/>- Register/Login<br/>- Email verification<br/>- Account lockout]
         SyncS[Sync Service<br/>- Upload/Download ops<br/>- Conflict detection<br/>- Snapshot generation]
-        CleanupS[Cleanup Service<br/>- Tombstone expiry<br/>- Old ops deletion<br/>- Stale device removal]
+        CleanupS[Cleanup Service<br/>- Old ops deletion<br/>- Stale device removal]
     end
 
     subgraph Database["PostgreSQL Database"]
@@ -62,7 +62,6 @@ flowchart TB
         Ops[(operations)]
         SyncState[(user_sync_state)]
         Devices[(sync_devices)]
-        Tombstones[(tombstones)]
     end
 
     Routes --> Middleware
@@ -71,10 +70,8 @@ flowchart TB
     SyncS --> Ops
     SyncS --> SyncState
     SyncS --> Devices
-    SyncS --> Tombstones
     CleanupS --> Ops
     CleanupS --> Devices
-    CleanupS --> Tombstones
 ```
 
 ## 1.3 Database Schema
@@ -84,7 +81,6 @@ erDiagram
     users ||--o{ operations : has
     users ||--o| user_sync_state : has
     users ||--o{ sync_devices : owns
-    users ||--o{ tombstones : has
 
     users {
         int id PK
@@ -130,15 +126,6 @@ erDiagram
         text user_agent
         int last_seen_at
         int created_at
-    }
-
-    tombstones {
-        int user_id PK
-        text entity_type PK
-        text entity_id PK
-        int deleted_at
-        text deleted_by_op_id
-        int expires_at
     }
 ```
 
@@ -511,12 +498,10 @@ flowchart TB
     subgraph Cleanup["Cleanup Tasks"]
         StaleDevices[Remove stale devices<br/>not seen in 50 days]
         OldOps[Delete old operations<br/>older than 45 days<br/>AND covered by snapshot]
-        ExpiredTombstones[Delete expired tombstones<br/>older than 45 days]
     end
 
     Hourly --> StaleDevices
     Daily --> OldOps
-    Daily --> ExpiredTombstones
 ```
 
 **Operation deletion constraint:**

@@ -1,3 +1,5 @@
+import { Logger } from '../logger';
+
 // Structured error codes for client handling
 export const SYNC_ERROR_CODES = {
   // Validation errors (400)
@@ -112,7 +114,7 @@ export const sanitizeVectorClock = (
   }
 
   if (strippedCount > 0) {
-    console.warn(
+    Logger.warn(
       `sanitizeVectorClock: Stripped ${strippedCount} invalid entries from vector clock`,
     );
   }

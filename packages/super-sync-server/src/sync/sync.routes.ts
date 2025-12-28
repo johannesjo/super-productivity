@@ -22,7 +22,11 @@ const gunzipAsync = promisify(zlib.gunzip);
 // Validation constants
 const CLIENT_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
 const MAX_CLIENT_ID_LENGTH = 255;
-const MAX_DECOMPRESSED_SIZE = 100 * 1024 * 1024; // 100MB - prevents zip bombs
+// Two-stage protection against zip bombs:
+// 1. Pre-check: Reject compressed data > 10MB (typical ratio ~10:1, so protects against ~100MB)
+// 2. Post-check: Reject decompressed data > 100MB (catches edge cases)
+const MAX_COMPRESSED_SIZE = 10 * 1024 * 1024; // 10MB - prevents memory exhaustion during decompression
+const MAX_DECOMPRESSED_SIZE = 100 * 1024 * 1024; // 100MB - catches malicious high-ratio compression
 
 // Zod Schemas
 const ClientIdSchema = z
@@ -156,7 +160,20 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             const contentTransferEncoding = req.headers['content-transfer-encoding'] as
               | string
               | undefined;
+
+            // Pre-check: reject if compressed size exceeds limit (prevents memory exhaustion)
+            if (rawBody.length > MAX_COMPRESSED_SIZE) {
+              Logger.warn(
+                `[user:${userId}] Compressed upload too large: ${rawBody.length} bytes (max ${MAX_COMPRESSED_SIZE})`,
+              );
+              return reply.status(413).send({
+                error: 'Compressed payload too large',
+              });
+            }
+
             const decompressed = await decompressBody(rawBody, contentTransferEncoding);
+
+            // Post-check: reject if decompressed size exceeds limit (catches high-ratio attacks)
             if (decompressed.length > MAX_DECOMPRESSED_SIZE) {
               Logger.warn(
                 `[user:${userId}] Decompressed upload too large: ${decompressed.length} bytes (max ${MAX_DECOMPRESSED_SIZE})`,
@@ -541,7 +558,20 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             const contentTransferEncoding = req.headers['content-transfer-encoding'] as
               | string
               | undefined;
+
+            // Pre-check: reject if compressed size exceeds limit (prevents memory exhaustion)
+            if (rawBody.length > MAX_COMPRESSED_SIZE) {
+              Logger.warn(
+                `[user:${userId}] Compressed snapshot too large: ${rawBody.length} bytes (max ${MAX_COMPRESSED_SIZE})`,
+              );
+              return reply.status(413).send({
+                error: 'Compressed payload too large',
+              });
+            }
+
             const decompressed = await decompressBody(rawBody, contentTransferEncoding);
+
+            // Post-check: reject if decompressed size exceeds limit (catches high-ratio attacks)
             if (decompressed.length > MAX_DECOMPRESSED_SIZE) {
               Logger.warn(
                 `[user:${userId}] Decompressed snapshot too large: ${decompressed.length} bytes (max ${MAX_DECOMPRESSED_SIZE})`,
