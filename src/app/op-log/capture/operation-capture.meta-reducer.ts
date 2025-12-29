@@ -5,6 +5,7 @@ import {
 } from '../core/persistent-action.interface';
 import { OperationCaptureService } from './operation-capture.service';
 import { OpLog } from '../../core/log';
+import { devError } from '../../util/dev-error';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ARCHITECTURAL DEBT: Module-Level State for Meta-Reducer Service Injection
@@ -113,11 +114,24 @@ export const getIsApplyingRemoteOps = (): boolean => {
 };
 
 /**
+ * Maximum number of deferred actions before warning.
+ * If exceeded, sync may be stuck or taking too long.
+ */
+const MAX_DEFERRED_ACTIONS_WARNING = 10;
+
+/**
  * Buffers an action for processing after sync completes.
  * Called by the meta-reducer when a persistent action arrives during sync.
  */
 export const bufferDeferredAction = (action: PersistentAction): void => {
   deferredActions.push(action);
+
+  // Warn if buffer is growing unusually large - may indicate sync is stuck
+  if (deferredActions.length > MAX_DEFERRED_ACTIONS_WARNING) {
+    devError(
+      `[operationCaptureMetaReducer] Deferred actions buffer has ${deferredActions.length} items - sync may be stuck or taking too long`,
+    );
+  }
 };
 
 /**

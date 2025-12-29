@@ -101,6 +101,15 @@ export class OperationLogEffects {
     }
     const clientId = this.clientId;
 
+    // Validate that at least one entity identifier exists
+    // This catches programming errors early - all persistent actions must have entity identifiers
+    if (!action.meta.entityId && !action.meta.entityIds?.length) {
+      devError(
+        `[OperationLogEffects] Action ${action.type} is missing entityId/entityIds - skipping persistence`,
+      );
+      return;
+    }
+
     // Extract payload (everything except type and meta)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { type, meta, ...actionPayload } = action;
@@ -119,6 +128,16 @@ export class OperationLogEffects {
     // some operations have different semantic meaning than their state changes suggest.
     // E.g., moveToArchive is UPDATE (tasks moved, not deleted) but shows as DELETE in state.
     const opType = action.meta.opType;
+
+    // Validate action type exists in ActionType enum
+    // This catches mismatches during development when new actions are added but not registered
+    if (!Object.values(ActionType).includes(action.type as ActionType)) {
+      devError(
+        `[OperationLogEffects] Unknown action type: ${action.type} - not in ActionType enum`,
+      );
+      // Continue anyway - the action will still be persisted and may work
+      // This is a warning, not a blocker, since the enum may not be exhaustive
+    }
 
     try {
       await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
