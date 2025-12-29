@@ -110,8 +110,36 @@ export class SyncService<const MD extends ModelCfgs> {
       if (currentSyncProvider && this._supportsOpLogSync(currentSyncProvider)) {
         const uploadResult =
           await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
-        const downloadResult =
-          await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+
+        // OPTIMIZATION: Skip download if all remote ops were already piggybacked during upload.
+        // This reduces sync to a single round-trip when remote changes are small (≤500 ops).
+        // When hasMorePiggyback=true, we still need to download remaining ops.
+        let downloadResult: {
+          serverMigrationHandled: boolean;
+          localWinOpsCreated: number;
+          newOpsCount: number;
+        };
+
+        // OPTIMIZATION: Skip download ONLY when server explicitly confirms no more ops.
+        // hasMorePiggyback === false means: we uploaded something AND server returned the flag.
+        // hasMorePiggyback === undefined means: no upload happened (nothing to upload) - MUST download.
+        // hasMorePiggyback === true means: server has more ops beyond the piggyback limit.
+        if (uploadResult && uploadResult.hasMorePiggyback === false) {
+          // Server confirmed all remote ops fit in piggyback - no download needed
+          const opCount = uploadResult.piggybackedOps.length;
+          PFLog.normal(
+            `${SyncService.L}.${this.sync.name}(): All ops piggybacked (${opCount}), skip download`,
+          );
+          downloadResult = {
+            serverMigrationHandled: false,
+            localWinOpsCreated: 0,
+            newOpsCount: 0,
+          };
+        } else {
+          // Need to download remaining ops
+          downloadResult =
+            await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+        }
 
         // Track if we need a re-upload:
         // 1. Server migration created a SYNC_IMPORT that needs uploading

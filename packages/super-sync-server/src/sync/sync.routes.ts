@@ -255,7 +255,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             let newOps: import('./sync.types').ServerOperation[] | undefined;
             let latestSeq: number;
             let hasMorePiggyback = false;
-            const PIGGYBACK_LIMIT = 100;
+            const PIGGYBACK_LIMIT = 500;
 
             if (lastKnownServerSeq !== undefined) {
               const opsResult = await syncService.getOpsSinceWithSeq(
@@ -380,7 +380,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         let newOps: import('./sync.types').ServerOperation[] | undefined;
         let latestSeq: number;
         let hasMorePiggyback = false;
-        const PIGGYBACK_LIMIT = 100;
+        const PIGGYBACK_LIMIT = 500;
 
         if (lastKnownServerSeq !== undefined) {
           // Use atomic read to get ops and latestSeq together

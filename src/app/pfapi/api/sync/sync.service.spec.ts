@@ -931,4 +931,103 @@ describe('SyncService', () => {
       expect(result.conflictData).toBeDefined();
     });
   });
+
+  describe('operation log sync', () => {
+    beforeEach(() => {
+      // Enable operation log sync for the mock provider
+      mockSyncProvider.supportsOperationSync = true;
+    });
+
+    it('should skip download when hasMorePiggyback is false (all ops fit in piggyback)', async () => {
+      // Configure upload to return no more piggyback ops
+      mockOperationLogSyncService.uploadPendingOps.and.returnValue(
+        Promise.resolve({
+          uploadedCount: 5,
+          piggybackedOps: [], // Piggybacked ops processed internally
+          rejectedCount: 0,
+          rejectedOps: [],
+          hasMorePiggyback: false, // No more ops on server
+        }),
+      );
+
+      await service.sync();
+
+      // Upload should be called
+      expect(mockOperationLogSyncService.uploadPendingOps).toHaveBeenCalledWith(
+        mockSyncProvider,
+      );
+      // Download should NOT be called because hasMorePiggyback is false
+      expect(mockOperationLogSyncService.downloadRemoteOps).not.toHaveBeenCalled();
+    });
+
+    it('should call download when hasMorePiggyback is undefined (no upload happened)', async () => {
+      // When nothing was uploaded, hasMorePiggyback is undefined.
+      // We MUST download to check for remote ops.
+      mockOperationLogSyncService.uploadPendingOps.and.returnValue(
+        Promise.resolve({
+          uploadedCount: 0,
+          piggybackedOps: [],
+          rejectedCount: 0,
+          rejectedOps: [],
+          // hasMorePiggyback is undefined - no API call was made
+        }),
+      );
+
+      await service.sync();
+
+      // Download SHOULD be called because hasMorePiggyback is undefined (not explicitly false)
+      expect(mockOperationLogSyncService.downloadRemoteOps).toHaveBeenCalledWith(
+        mockSyncProvider,
+      );
+    });
+
+    it('should call download when hasMorePiggyback is true (more ops on server)', async () => {
+      // Configure upload to indicate more ops available
+      mockOperationLogSyncService.uploadPendingOps.and.returnValue(
+        Promise.resolve({
+          uploadedCount: 5,
+          piggybackedOps: [], // Ops processed internally
+          rejectedCount: 0,
+          rejectedOps: [],
+          hasMorePiggyback: true, // More ops exist on server
+        }),
+      );
+
+      await service.sync();
+
+      // Upload should be called
+      expect(mockOperationLogSyncService.uploadPendingOps).toHaveBeenCalled();
+      // Download SHOULD be called because hasMorePiggyback is true
+      expect(mockOperationLogSyncService.downloadRemoteOps).toHaveBeenCalledWith(
+        mockSyncProvider,
+      );
+    });
+
+    it('should call download when upload returns null (fresh client)', async () => {
+      // Fresh clients return null from upload
+      mockOperationLogSyncService.uploadPendingOps.and.returnValue(Promise.resolve(null));
+
+      await service.sync();
+
+      // Download SHOULD be called for fresh clients
+      expect(mockOperationLogSyncService.downloadRemoteOps).toHaveBeenCalledWith(
+        mockSyncProvider,
+      );
+    });
+
+    it('should return InSync status after operation log sync completes', async () => {
+      mockOperationLogSyncService.uploadPendingOps.and.returnValue(
+        Promise.resolve({
+          uploadedCount: 0,
+          piggybackedOps: [],
+          rejectedCount: 0,
+          rejectedOps: [],
+        }),
+      );
+
+      const result = await service.sync();
+
+      expect(result.status).toBe(SyncStatus.InSync);
+    });
+  });
 });
