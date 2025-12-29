@@ -10,6 +10,7 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
+import { EMPTY, of } from 'rxjs';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Store } from '@ngrx/store';
@@ -90,18 +91,21 @@ export class TaskDueEffects {
           filter((overdue) => !!overdue.length),
           withLatestFrom(this._store$.select(selectTodayTaskIds)),
           // we do this to maintain the order of tasks
-          map(([overdue, todayTaskIds]) => {
+          switchMap(([overdue, todayTaskIds]) => {
             const overdueIds = todayTaskIds.filter(
               (id) => !!overdue.find((oT) => oT.id === id),
             );
-            if (overdueIds.length > 0) {
-              TaskLog.log('[TaskDueEffects] Removing overdue tasks from today', {
-                overdueCount: overdueIds.length,
-              });
+            if (overdueIds.length === 0) {
+              return EMPTY;
             }
-            return TaskSharedActions.removeTasksFromTodayTag({
-              taskIds: overdueIds,
+            TaskLog.log('[TaskDueEffects] Removing overdue tasks from today', {
+              overdueCount: overdueIds.length,
             });
+            return of(
+              TaskSharedActions.removeTasksFromTodayTag({
+                taskIds: overdueIds,
+              }),
+            );
           }),
         ),
       ),

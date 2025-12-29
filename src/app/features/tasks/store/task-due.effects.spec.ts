@@ -244,6 +244,34 @@ xdescribe('TaskDueEffects', () => {
         done();
       }, 1500);
     });
+
+    it('should not emit when overdue tasks exist but none are in todayTaskIds', (done) => {
+      // This tests the fix for the bug where removeTasksFromTodayTag was dispatched
+      // with empty taskIds, causing "missing entityId/entityIds" error during sync
+      const overdueTask = createTask('overdue-1', {
+        dueDay: '2024-01-01', // Past date
+      });
+
+      store.overrideSelector(selectOverdueTasksOnToday, [overdueTask]);
+      // todayTaskIds does NOT contain overdue-1, so overdueIds will be empty
+      store.overrideSelector(selectTodayTaskIds, ['task-2', 'task-3']);
+      store.refreshState();
+
+      let emitted = false;
+      const subscription = effects.removeOverdueFormToday$.subscribe(() => {
+        emitted = true;
+      });
+
+      globalTrackingIntervalService.todayDateStr$.next(todayStr);
+      syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$.next(true);
+
+      // Wait for potential emission - should not emit because no matching tasks
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        subscription.unsubscribe();
+        done();
+      }, 1500);
+    });
   });
 
   describe('ensureTasksDueTodayInTodayTag$', () => {
