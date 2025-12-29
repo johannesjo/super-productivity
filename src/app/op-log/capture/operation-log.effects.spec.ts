@@ -131,14 +131,14 @@ describe('OperationLogEffects', () => {
 
   describe('persistOperation$', () => {
     it('should persist operation for persistent action', (done) => {
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
         complete: () => {
           expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
             jasmine.objectContaining({
-              actionType: '[Task] Update Task' as ActionType,
+              actionType: ActionType.TASK_SHARED_UPDATE,
               opType: OpType.Update,
               entityType: 'TASK',
               clientId: 'testClient',
@@ -151,7 +151,7 @@ describe('OperationLogEffects', () => {
     });
 
     it('should skip remote actions', (done) => {
-      const action = createPersistentAction('[Task] Update Task', true);
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE, true);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -178,7 +178,7 @@ describe('OperationLogEffects', () => {
       // This is the critical fix: user actions during sync replay should NOT be persisted
       // because the meta-reducer skips enqueueing entity changes, resulting in corrupted ops
       mockHydrationStateService.isApplyingRemoteOps.and.returnValue(true);
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -193,7 +193,7 @@ describe('OperationLogEffects', () => {
     it('should persist actions when isApplyingRemoteOps becomes false after sync', (done) => {
       // First action during sync - should be skipped
       mockHydrationStateService.isApplyingRemoteOps.and.returnValue(true);
-      const action1 = createPersistentAction('[Task] Action During Sync');
+      const action1 = createPersistentAction(ActionType.TASK_SHARED_ADD);
       actions$ = of(action1);
 
       effects.persistOperation$.subscribe({
@@ -202,14 +202,14 @@ describe('OperationLogEffects', () => {
 
           // Second action after sync completes - should be persisted
           mockHydrationStateService.isApplyingRemoteOps.and.returnValue(false);
-          const action2 = createPersistentAction('[Task] Action After Sync');
+          const action2 = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
           actions$ = of(action2);
 
           effects.persistOperation$.subscribe({
             complete: () => {
               expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
                 jasmine.objectContaining({
-                  actionType: '[Task] Action After Sync' as ActionType,
+                  actionType: ActionType.TASK_SHARED_UPDATE,
                 }),
                 'local',
               );
@@ -229,8 +229,8 @@ describe('OperationLogEffects', () => {
         return callCount === 1;
       });
 
-      const action1 = createPersistentAction('[Task] First Action');
-      const action2 = createPersistentAction('[Task] Second Action');
+      const action1 = createPersistentAction(ActionType.TASK_SHARED_ADD);
+      const action2 = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action1, action2);
 
       effects.persistOperation$.subscribe({
@@ -241,7 +241,7 @@ describe('OperationLogEffects', () => {
           expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(1);
           expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
             jasmine.objectContaining({
-              actionType: '[Task] Second Action' as ActionType,
+              actionType: ActionType.TASK_SHARED_UPDATE,
             }),
             'local',
           );
@@ -251,7 +251,7 @@ describe('OperationLogEffects', () => {
     });
 
     it('should acquire lock before writing operation', (done) => {
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -266,7 +266,7 @@ describe('OperationLogEffects', () => {
     });
 
     it('should increment vector clock', (done) => {
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -289,7 +289,7 @@ describe('OperationLogEffects', () => {
       mockOpLogStore.getCompactionCounter.and.returnValue(
         Promise.resolve(COMPACTION_THRESHOLD - 1),
       );
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -308,7 +308,7 @@ describe('OperationLogEffects', () => {
       mockOpLogStore.getCompactionCounter.and.returnValue(
         Promise.resolve(COMPACTION_THRESHOLD - 2),
       );
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -320,7 +320,7 @@ describe('OperationLogEffects', () => {
     });
 
     it('should include payload from action', (done) => {
-      const action = createPersistentAction('[Task] Update Task', false, {
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE, false, {
         title: 'Updated Title',
         done: true,
       });
@@ -345,7 +345,7 @@ describe('OperationLogEffects', () => {
       mockOpLogStore.appendWithVectorClockUpdate.and.rejectWith(
         new Error('Write failed'),
       );
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -371,7 +371,7 @@ describe('OperationLogEffects', () => {
         }
         return Promise.resolve(1);
       });
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -392,8 +392,8 @@ describe('OperationLogEffects', () => {
       mockPfapiService.pf.metaModel.loadClientId.calls.reset();
 
       // Emit two actions
-      const action1 = createPersistentAction('[Task] Action 1');
-      const action2 = createPersistentAction('[Task] Action 2');
+      const action1 = createPersistentAction(ActionType.TASK_SHARED_ADD);
+      const action2 = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
 
       // Subscribe and emit first action
       actions$ = of(action1);
@@ -418,7 +418,7 @@ describe('OperationLogEffects', () => {
       mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
         Promise.reject(quotaError),
       );
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -444,7 +444,7 @@ describe('OperationLogEffects', () => {
       mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
         return Promise.reject(quotaError);
       });
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -469,7 +469,7 @@ describe('OperationLogEffects', () => {
       );
       // Emergency compaction fails
       mockCompactionService.emergencyCompact.and.returnValue(Promise.resolve(false));
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -503,7 +503,7 @@ describe('OperationLogEffects', () => {
         }
         return Promise.resolve(1);
       });
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -534,7 +534,7 @@ describe('OperationLogEffects', () => {
         }
         return Promise.resolve(1);
       });
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -553,7 +553,7 @@ describe('OperationLogEffects', () => {
       mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
         Promise.reject(regularError),
       );
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -583,7 +583,7 @@ describe('OperationLogEffects', () => {
         }
         return Promise.resolve(1);
       });
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -610,7 +610,7 @@ describe('OperationLogEffects', () => {
       );
       mockCompactionService.compact.and.returnValue(Promise.reject(new Error('Failed')));
 
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -630,7 +630,7 @@ describe('OperationLogEffects', () => {
       );
       mockCompactionService.compact.and.returnValue(Promise.resolve());
 
-      const action = createPersistentAction('[Task] Update Task');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
@@ -670,14 +670,14 @@ describe('OperationLogEffects', () => {
     });
 
     it('should process a single deferred action', async () => {
-      const action = createPersistentAction('[Task] Deferred Action');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       bufferDeferredAction(action);
 
       await effects.processDeferredActions();
 
       expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          actionType: '[Task] Deferred Action' as ActionType,
+          actionType: ActionType.TASK_SHARED_UPDATE,
           clientId: 'testClient',
         }),
         'local',
@@ -685,9 +685,9 @@ describe('OperationLogEffects', () => {
     });
 
     it('should process multiple deferred actions in order', async () => {
-      const action1 = createPersistentAction('[Task] First Action');
-      const action2 = createPersistentAction('[Task] Second Action');
-      const action3 = createPersistentAction('[Task] Third Action');
+      const action1 = createPersistentAction(ActionType.TASK_SHARED_ADD);
+      const action2 = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
+      const action3 = createPersistentAction(ActionType.TASK_SHARED_DELETE);
 
       bufferDeferredAction(action1);
       bufferDeferredAction(action2);
@@ -698,13 +698,13 @@ describe('OperationLogEffects', () => {
       expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(3);
 
       const calls = mockOpLogStore.appendWithVectorClockUpdate.calls.all();
-      expect(calls[0].args[0].actionType).toBe('[Task] First Action');
-      expect(calls[1].args[0].actionType).toBe('[Task] Second Action');
-      expect(calls[2].args[0].actionType).toBe('[Task] Third Action');
+      expect(calls[0].args[0].actionType).toBe(ActionType.TASK_SHARED_ADD);
+      expect(calls[1].args[0].actionType).toBe(ActionType.TASK_SHARED_UPDATE);
+      expect(calls[2].args[0].actionType).toBe(ActionType.TASK_SHARED_DELETE);
     });
 
     it('should clear buffer after processing', async () => {
-      const action = createPersistentAction('[Task] Deferred Action');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       bufferDeferredAction(action);
 
       await effects.processDeferredActions();
@@ -717,8 +717,8 @@ describe('OperationLogEffects', () => {
     });
 
     it('should continue processing remaining actions when one fails', async () => {
-      const action1 = createPersistentAction('[Task] Will Fail');
-      const action2 = createPersistentAction('[Task] Will Succeed');
+      const action1 = createPersistentAction(ActionType.TASK_SHARED_ADD);
+      const action2 = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
 
       bufferDeferredAction(action1);
       bufferDeferredAction(action2);
@@ -746,7 +746,7 @@ describe('OperationLogEffects', () => {
         Promise.resolve({ testClient: 100, otherClient: 50 }),
       );
 
-      const action = createPersistentAction('[Task] Deferred Action');
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       bufferDeferredAction(action);
 
       await effects.processDeferredActions();
