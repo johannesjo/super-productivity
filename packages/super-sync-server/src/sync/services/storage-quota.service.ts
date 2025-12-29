@@ -71,6 +71,17 @@ export class StorageQuotaService {
   /**
    * Update the cached storage usage for a user.
    * Called after successful uploads to keep the cache accurate.
+   *
+   * NOTE: This is intentionally NOT wrapped in a transaction with calculateStorageUsage().
+   * While this creates a theoretical race condition where another process could modify
+   * storage between calculate and update, this is acceptable because:
+   *
+   * 1. Storage quota is recalculated from scratch before each upload in checkStorageQuota()
+   * 2. The cached value is only used for performance optimization, not hard enforcement
+   * 3. Wrapping in a transaction would add unnecessary overhead for a non-critical cache
+   * 4. The worst case is a slightly stale cache value that gets corrected on next upload
+   *
+   * If strict accuracy becomes important, wrap both calls in a SERIALIZABLE transaction.
    */
   async updateStorageUsage(userId: number): Promise<void> {
     const { totalBytes } = await this.calculateStorageUsage(userId);

@@ -165,6 +165,55 @@ ruleTester.run('require-hydration-guard', rule, {
         )
       `,
     },
+
+    // combineLatest at ROOT with guard on the combineLatest result - should NOT flag
+    // This is the key fix: guards applied to combineLatest protect all inner selectors
+    {
+      code: `
+        createEffect(() =>
+          combineLatest([
+            this._store$.select(selectorA),
+            this._store$.select(selectorB)
+          ]).pipe(
+            skipWhileApplyingRemoteOps(),
+            map(([a, b]) => someAction({ a, b }))
+          )
+        )
+      `,
+    },
+
+    // combineLatest at ROOT with isApplyingRemoteOps guard - should NOT flag
+    {
+      code: `
+        createEffect(() =>
+          combineLatest([
+            this.store.select(selectFocusModeConfig),
+            this.store.select(selectIsFocusModeEnabled),
+          ]).pipe(
+            filter(() => !this.hydrationState.isApplyingRemoteOps()),
+            switchMap(([cfg, enabled]) => enabled ? of(action()) : EMPTY)
+          )
+        )
+      `,
+    },
+
+    // Many selectors in combineLatest with guard - should NOT flag any
+    {
+      code: `
+        createEffect(() =>
+          combineLatest([
+            this.store.select(selectA),
+            this.store.select(selectB),
+            this.store.select(selectC),
+            this.store.select(selectD),
+            this.store.select(selectE),
+          ]).pipe(
+            skipDuringSync(),
+            tap(([a, b, c, d, e]) => this.doSomething())
+          )
+        )
+      `,
+    },
   ],
 
   invalid: [

@@ -8,6 +8,7 @@ import {
   isServerHealthy,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
+import { waitForUISettle } from '../../utils/waits';
 
 /**
  * SuperSync Cross-Entity Operations E2E Tests
@@ -64,7 +65,7 @@ base.describe('@supersync Cross-Entity Operations Sync', () => {
         const taskName = `BatchTask${i}-${uniqueId}`;
         taskNames.push(taskName);
         await clientA.workView.addTask(taskName);
-        await clientA.page.waitForTimeout(200);
+        await waitForUISettle(clientA.page);
       }
       console.log('[Multi Task Test] Client A created 5 tasks');
 

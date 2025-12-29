@@ -22,10 +22,16 @@ const gunzipAsync = promisify(zlib.gunzip);
 // Validation constants
 const CLIENT_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
 const MAX_CLIENT_ID_LENGTH = 255;
+
 // Two-stage protection against zip bombs:
-// 1. Pre-check: Reject compressed data > 10MB (typical ratio ~10:1, so protects against ~100MB)
-// 2. Post-check: Reject decompressed data > 100MB (catches edge cases)
-const MAX_COMPRESSED_SIZE = 10 * 1024 * 1024; // 10MB - prevents memory exhaustion during decompression
+// 1. Pre-check: Reject compressed data > limit (typical ratio ~10:1)
+// 2. Post-check: Reject decompressed data > limit (catches edge cases)
+//
+// Different limits for ops vs snapshots:
+// - Ops uploads are incremental and smaller
+// - Snapshots can be larger for backup/repair imports
+const MAX_COMPRESSED_SIZE_OPS = 10 * 1024 * 1024; // 10MB for /ops
+const MAX_COMPRESSED_SIZE_SNAPSHOT = 30 * 1024 * 1024; // 30MB for /snapshot (matches bodyLimit)
 const MAX_DECOMPRESSED_SIZE = 100 * 1024 * 1024; // 100MB - catches malicious high-ratio compression
 
 // Zod Schemas
@@ -162,9 +168,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
               | undefined;
 
             // Pre-check: reject if compressed size exceeds limit (prevents memory exhaustion)
-            if (rawBody.length > MAX_COMPRESSED_SIZE) {
+            if (rawBody.length > MAX_COMPRESSED_SIZE_OPS) {
               Logger.warn(
-                `[user:${userId}] Compressed upload too large: ${rawBody.length} bytes (max ${MAX_COMPRESSED_SIZE})`,
+                `[user:${userId}] Compressed upload too large: ${rawBody.length} bytes (max ${MAX_COMPRESSED_SIZE_OPS})`,
               );
               return reply.status(413).send({
                 error: 'Compressed payload too large',
@@ -560,9 +566,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
               | undefined;
 
             // Pre-check: reject if compressed size exceeds limit (prevents memory exhaustion)
-            if (rawBody.length > MAX_COMPRESSED_SIZE) {
+            if (rawBody.length > MAX_COMPRESSED_SIZE_SNAPSHOT) {
               Logger.warn(
-                `[user:${userId}] Compressed snapshot too large: ${rawBody.length} bytes (max ${MAX_COMPRESSED_SIZE})`,
+                `[user:${userId}] Compressed snapshot too large: ${rawBody.length} bytes (max ${MAX_COMPRESSED_SIZE_SNAPSHOT})`,
               );
               return reply.status(413).send({
                 error: 'Compressed payload too large',

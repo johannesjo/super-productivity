@@ -229,7 +229,11 @@ module.exports = {
     };
 
     /**
-     * Find the full pipe chain starting from a selector and check for guards
+     * Find the full pipe chain starting from a selector and check for guards.
+     *
+     * IMPORTANT: When a selector is inside combineLatest([sel1, sel2]).pipe(...),
+     * the guard is on the combineLatest result, not the individual selector.
+     * We need to walk up through the array and combineLatest call to find the full chain.
      */
     const hasGuardInChain = (selectorNode) => {
       const sourceCode = context.getSourceCode();
@@ -237,9 +241,26 @@ module.exports = {
       // Walk up from selector to find the full pipe chain
       let current = selectorNode;
 
-      // Follow the chain: select().pipe().pipe()...
+      // First, walk up through any combineLatest/forkJoin/zip wrappers
+      // This handles: combineLatest([sel1, sel2]).pipe(guard, ...)
       while (current.parent) {
         const parent = current.parent;
+
+        // If we're inside an array that's an argument to combineLatest/forkJoin/zip,
+        // move up to the call expression
+        if (parent.type === 'ArrayExpression') {
+          const arrayParent = parent.parent;
+          if (arrayParent && arrayParent.type === 'CallExpression') {
+            const callee = arrayParent.callee;
+            if (
+              callee.type === 'Identifier' &&
+              ['combineLatest', 'forkJoin', 'zip'].includes(callee.name)
+            ) {
+              current = arrayParent;
+              continue;
+            }
+          }
+        }
 
         // Check if parent is a member access for .pipe
         if (

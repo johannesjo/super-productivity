@@ -196,4 +196,82 @@ describe('HydrationStateService', () => {
       }, 100);
     });
   });
+
+  describe('edge cases', () => {
+    it('should handle concurrent start calls without issues', () => {
+      // Multiple starts should just keep it true
+      service.startApplyingRemoteOps();
+      service.startApplyingRemoteOps();
+      service.startApplyingRemoteOps();
+
+      expect(service.isApplyingRemoteOps()).toBeTrue();
+      expect(getIsApplyingRemoteOps()).toBeTrue();
+
+      // Single end should clear it
+      service.endApplyingRemoteOps();
+      expect(service.isApplyingRemoteOps()).toBeFalse();
+    });
+
+    it('should handle multiple rapid cooldown starts', (done) => {
+      // Start multiple cooldowns in rapid succession - only the last one matters
+      service.startPostSyncCooldown(50);
+      service.startPostSyncCooldown(100);
+      service.startPostSyncCooldown(50); // Last one: 50ms
+
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      // After 75ms, should still be in window (last cooldown was 50ms, but timer restarted)
+      setTimeout(() => {
+        expect(service.isInSyncWindow()).toBeFalse();
+        done();
+      }, 100);
+    });
+
+    it('should properly cleanup when clearPostSyncCooldown is called during active cooldown', (done) => {
+      service.startPostSyncCooldown(200);
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      // Clear immediately
+      service.clearPostSyncCooldown();
+      expect(service.isInSyncWindow()).toBeFalse();
+
+      // Wait past the original timeout - should still be false (timer was cleared)
+      setTimeout(() => {
+        expect(service.isInSyncWindow()).toBeFalse();
+        done();
+      }, 250);
+    });
+
+    it('should handle interleaved start/end/cooldown calls', () => {
+      // Complex sequence that might occur during rapid sync operations
+      service.startApplyingRemoteOps();
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      service.startPostSyncCooldown(1000);
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      service.endApplyingRemoteOps();
+      // Should still be in window due to cooldown
+      expect(service.isInSyncWindow()).toBeTrue();
+      expect(service.isApplyingRemoteOps()).toBeFalse();
+
+      service.clearPostSyncCooldown();
+      // Now should be fully out of window
+      expect(service.isInSyncWindow()).toBeFalse();
+    });
+
+    it('should handle clearPostSyncCooldown when no cooldown is active', () => {
+      // Should not throw or cause issues
+      expect(() => service.clearPostSyncCooldown()).not.toThrow();
+      expect(service.isInSyncWindow()).toBeFalse();
+    });
+
+    it('should handle endApplyingRemoteOps when not started', () => {
+      // Should not throw or cause issues
+      expect(service.isApplyingRemoteOps()).toBeFalse();
+      expect(() => service.endApplyingRemoteOps()).not.toThrow();
+      expect(service.isApplyingRemoteOps()).toBeFalse();
+      expect(getIsApplyingRemoteOps()).toBeFalse();
+    });
+  });
 });
