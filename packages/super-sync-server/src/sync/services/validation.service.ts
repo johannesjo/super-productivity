@@ -143,14 +143,19 @@ export class ValidationService {
     }
     op.vectorClock = clockValidation.clock;
 
+    // Validate payload complexity to prevent DoS attacks via deeply nested objects.
+    // Full-state ops (SYNC_IMPORT, BACKUP_IMPORT, REPAIR) get higher thresholds
+    // since they legitimately contain more data.
     const isFullStateOp =
       op.opType === 'SYNC_IMPORT' ||
       op.opType === 'BACKUP_IMPORT' ||
       op.opType === 'REPAIR';
-    if (!isFullStateOp && !this.validatePayloadComplexity(op.payload)) {
+    const maxDepth = isFullStateOp ? 50 : 20;
+    const maxKeys = isFullStateOp ? 100000 : 20000;
+    if (!this.validatePayloadComplexity(op.payload, maxDepth, maxKeys)) {
       return {
         valid: false,
-        error: 'Payload too complex (max depth 20, max keys 20000)',
+        error: `Payload too complex (max depth ${maxDepth}, max keys ${maxKeys})`,
         errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
       };
     }

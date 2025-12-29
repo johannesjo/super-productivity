@@ -182,7 +182,7 @@ export class OperationDownloadService {
           );
         }
 
-        // Case 4: Gap in returned operations (use original sinceSeq for gap detection)
+        // Case 4: Gap in returned operations (use effectiveSinceSeq which accounts for snapshot skip)
         if (
           !excludeClient &&
           ops.length > 0 &&

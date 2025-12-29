@@ -255,9 +255,10 @@ export class OperationLogEffects {
   }
 
   /**
-   * Notifies the user that persistence failed and offers to reload the app.
-   * This is called when writing to IndexedDB fails, leaving the app state
-   * potentially inconsistent with persisted data.
+   * Shows a persistent error notification when persistence fails.
+   * Uses duration: 0 to make the snackbar sticky until user acts.
+   * This is critical because the user needs to reload - their state
+   * has diverged from what's persisted to disk.
    */
   private notifyUserAndTriggerRollback(): void {
     this.snackService.open({
@@ -266,6 +267,9 @@ export class OperationLogEffects {
       actionStr: T.PS.RELOAD,
       actionFn: (): void => {
         window.location.reload();
+      },
+      config: {
+        duration: 0, // Sticky - don't auto-dismiss critical errors
       },
     });
   }
