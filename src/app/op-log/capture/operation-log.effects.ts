@@ -26,7 +26,6 @@ import {
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 import { OperationCaptureService } from './operation-capture.service';
 import { ImmediateUploadService } from '../sync/immediate-upload.service';
-import { HydrationStateService } from '../apply/hydration-state.service';
 import { getDeferredActions } from './operation-capture.meta-reducer';
 import { ClientIdService } from '../../core/util/client-id.service';
 
@@ -62,7 +61,6 @@ export class OperationLogEffects {
   private snackService = inject(SnackService);
   private operationCaptureService = inject(OperationCaptureService);
   private immediateUploadService = inject(ImmediateUploadService);
-  private hydrationState = inject(HydrationStateService);
 
   /**
    * Effect that persists local user actions to the operation log.
@@ -70,22 +68,23 @@ export class OperationLogEffects {
    * Filters out:
    * 1. Non-persistent actions (actions without PersistentActionMeta)
    * 2. Remote actions (actions replayed from sync, marked with isRemote: true)
-   * 3. Actions during sync replay (when isApplyingRemoteOps is true)
    *
-   * The third filter is critical: if a user somehow dispatches an action while
-   * sync is replaying remote operations, the meta-reducer will skip enqueueing
-   * entity changes (see operation-capture.meta-reducer.ts). Without this filter,
-   * we'd create an operation with empty entityChanges but valid actionPayload,
-   * which is corrupted and wastes a vector clock counter.
+   * Note: We intentionally do NOT filter by `isApplyingRemoteOps()` here.
+   * The meta-reducer handles sync timing by BUFFERING actions during sync
+   * (not enqueueing them). If an action reaches this effect and was enqueued,
+   * it means the meta-reducer determined it should be processed.
+   *
+   * Previously there was a filter here that caused a race condition:
+   * 1. Meta-reducer enqueues action (isApplyingRemoteOps = false)
+   * 2. Before effect runs, sync starts (isApplyingRemoteOps = true)
+   * 3. Effect filters out action, but it's already in queue
+   * 4. flushPendingWrites() times out waiting for queue to drain
    */
   persistOperation$ = createEffect(
     () =>
       this.actions$.pipe(
         filter((action) => isPersistentAction(action)),
         filter((action) => !(action as PersistentAction).meta.isRemote),
-        // Skip actions during sync replay - meta-reducer also skips enqueueing,
-        // so we'd create operations with empty entityChanges (corrupted)
-        filter(() => !this.hydrationState.isApplyingRemoteOps()),
         // Use concatMap for sequential processing to maintain FIFO queue order
         concatMap((action) => this.writeOperation(action as PersistentAction)),
       ),
@@ -101,9 +100,13 @@ export class OperationLogEffects {
     }
     const clientId = this.clientId;
 
-    // Validate that at least one entity identifier exists
+    // Validate that at least one entity identifier exists for non-bulk operations
+    // Bulk operations with entityType 'ALL' don't need specific entity IDs
     // This catches programming errors early - all persistent actions must have entity identifiers
-    if (!action.meta.entityId && !action.meta.entityIds?.length) {
+    const isBulkAllOperation = action.meta.entityType === 'ALL';
+    if (!isBulkAllOperation && !action.meta.entityId && !action.meta.entityIds?.length) {
+      // IMPORTANT: Dequeue first to prevent queue from getting stuck
+      this.operationCaptureService.dequeue();
       devError(
         `[OperationLogEffects] Action ${action.type} is missing entityId/entityIds - skipping persistence`,
       );

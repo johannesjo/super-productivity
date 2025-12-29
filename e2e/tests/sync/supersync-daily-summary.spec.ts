@@ -132,8 +132,8 @@ base.describe('@supersync Daily Summary Sync', () => {
         await saveAndGoHomeBtn.click();
 
         // Wait for Work View (Archived)
-        // Accept either active/tasks or tag/TODAY/tasks
-        await clientA.page.waitForURL(/(active\/tasks|tag\/TODAY\/tasks)/);
+        // Accept either active/tasks or tag/TODAY (with or without /tasks suffix)
+        await clientA.page.waitForURL(/(active\/tasks|tag\/TODAY)/);
         console.log('Client A archived tasks.');
 
         // Sync A (upload archive)
@@ -253,7 +253,7 @@ base.describe('@supersync Daily Summary Sync', () => {
         await saveAndGoHomeBtn.click();
 
         // Wait for navigation back to work view
-        await client.page.waitForURL(/(active\/tasks|tag\/TODAY\/tasks)/);
+        await client.page.waitForURL(/(active\/tasks|tag\/TODAY)/);
 
         // Wait a moment for any async effects to complete
         await client.page.waitForTimeout(1000);
