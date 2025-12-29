@@ -107,8 +107,6 @@ export class IdleEffects {
   // while the dialog is open, preventing the flickering between two different values.
   triggerIdleWhenEnabled$ = createEffect(() =>
     this._store.select(selectIdleConfig).pipe(
-      // Outer guard: skip config changes during sync
-      skipWhileApplyingRemoteOps(),
       switchMap(
         ({
           isEnableIdleTimeTracking,

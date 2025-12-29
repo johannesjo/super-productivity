@@ -61,8 +61,6 @@ export class FocusModeEffects {
       this.store.select(selectFocusModeConfig),
       this.store.select(selectIsFocusModeEnabled),
     ]).pipe(
-      // Outer guard: skip config changes during sync
-      skipWhileApplyingRemoteOps(),
       switchMap(([cfg, isFocusModeEnabled]) =>
         isFocusModeEnabled && cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
           ? this.taskService.currentTaskId$.pipe(
@@ -518,7 +516,6 @@ export class FocusModeEffects {
     createEffect(
       () =>
         this.store.select(selectors.selectProgress).pipe(
-          skipWhileApplyingRemoteOps(),
           withLatestFrom(this.store.select(selectors.selectIsRunning)),
           tap(([progress, isRunning]) => {
             window.ea.setProgressBar({
@@ -559,7 +556,6 @@ export class FocusModeEffects {
         this.store.select(selectFocusModeConfig),
         this.store.select(selectIsFocusModeEnabled),
       ]).pipe(
-        skipWhileApplyingRemoteOps(),
         tap(
           ([
             isSessionRunning,
@@ -798,7 +794,6 @@ export class FocusModeEffects {
   playTickSound$ = createEffect(
     () =>
       this.store.select(selectors.selectTimer).pipe(
-        skipWhileApplyingRemoteOps(),
         filter(
           (timer) => timer.isRunning && timer.purpose === 'work' && timer.elapsed > 0,
         ),

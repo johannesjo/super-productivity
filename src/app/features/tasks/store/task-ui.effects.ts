@@ -30,7 +30,6 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { playDoneSound } from '../util/play-done-sound';
 import { Task } from '../task.model';
 import { EMPTY } from 'rxjs';
-import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { Router } from '@angular/router';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
@@ -122,8 +121,6 @@ export class TaskUiEffects {
   timeEstimateExceeded$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
-        // Outer guard: skip config changes during sync
-        skipWhileApplyingRemoteOps(),
         switchMap((globalCfg) =>
           globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? // reset whenever the current taskId changes (but no the task data, which is polled afterwards)
@@ -156,8 +153,6 @@ export class TaskUiEffects {
   timeEstimateExceededDismissBanner$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
-        // Outer guard: skip config changes during sync
-        skipWhileApplyingRemoteOps(),
         switchMap((globalCfg) =>
           globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? this._bannerService.activeBanner$.pipe(

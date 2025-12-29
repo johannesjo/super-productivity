@@ -3,7 +3,6 @@ import { createEffect } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { EMPTY, Observable, timer } from 'rxjs';
 import { distinctUntilChanged, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { Store } from '@ngrx/store';
 import { selectIsDominaModeConfig } from '../../config/store/global-config.reducer';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
@@ -17,8 +16,6 @@ export class DominaModeEffects {
   dominaMode$: Observable<unknown> = createEffect(
     () =>
       this._store$.select(selectIsDominaModeConfig).pipe(
-        // Outer guard: skip config changes during sync
-        skipWhileApplyingRemoteOps(),
         distinctUntilChanged(),
         switchMap((cfg) =>
           cfg.isEnabled && cfg.voice
