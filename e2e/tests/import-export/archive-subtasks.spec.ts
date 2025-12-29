@@ -177,9 +177,11 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
     // Dismiss welcome dialog if present
     await dismissWelcomeDialog(page);
 
-    // Step 2: Navigate to TODAY tag to see tasks
-    console.log('[Legacy Archive Test] Step 2: Navigating to TODAY tag...');
-    await page.goto('/#/tag/TODAY/tasks');
+    // Step 2: Navigate to INBOX project to see tasks
+    // Note: We navigate to INBOX project because the backup has dueDay in the past,
+    // and TODAY tag only shows tasks with dueDay === today (virtual tag pattern)
+    console.log('[Legacy Archive Test] Step 2: Navigating to INBOX project...');
+    await page.goto('/#/project/INBOX_PROJECT/tasks');
     await page.waitForLoadState('networkidle');
     await dismissWelcomeDialog(page);
     await page.waitForTimeout(1000);
@@ -196,13 +198,28 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
     await markAllTasksDone(page);
     console.log('[Legacy Archive Test] All tasks marked as done');
 
-    // Step 4: Finish day to archive tasks
-    console.log('[Legacy Archive Test] Step 4: Finishing day...');
+    // Step 4: Navigate to TODAY tag to access Finish Day button
+    // Note: Finish Day button is only visible on TODAY tag view when not in planning mode
+    console.log('[Legacy Archive Test] Step 4: Navigating to TODAY for Finish Day...');
+    await page.goto('/#/tag/TODAY/tasks');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+
+    // Exit planning mode if we're in it (planning mode hides the Finish Day button)
+    const readyToWorkBtn = page.locator('button:has-text("Ready to work!")');
+    if (await readyToWorkBtn.isVisible().catch(() => false)) {
+      console.log('[Legacy Archive Test] Exiting planning mode...');
+      await readyToWorkBtn.click();
+      await page.waitForTimeout(500);
+    }
+
+    // Step 5: Finish day to archive tasks
+    console.log('[Legacy Archive Test] Step 5: Finishing day...');
     await finishDay(page);
     console.log('[Legacy Archive Test] Finish day completed');
 
-    // Step 5: Export and verify
-    console.log('[Legacy Archive Test] Step 5: Exporting data...');
+    // Step 6: Export and verify
+    console.log('[Legacy Archive Test] Step 6: Exporting data...');
     // Wait for IndexedDB writes to complete before navigation
     await page.waitForTimeout(2000);
     await importPage.navigateToImportPage();
@@ -210,8 +227,8 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
     const exportedContent = await readDownloadedFile(download);
     const exportedData = JSON.parse(exportedContent);
 
-    // Step 6: Verify archived tasks
-    console.log('[Legacy Archive Test] Step 6: Verifying exported data...');
+    // Step 7: Verify archived tasks
+    console.log('[Legacy Archive Test] Step 7: Verifying exported data...');
     expect(exportedData).toHaveProperty('data');
     expect(exportedData.data).toHaveProperty('archiveYoung');
 
@@ -267,12 +284,25 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
     await expect(page).toHaveURL(/.*tag.*TODAY.*tasks/);
     await dismissWelcomeDialog(page);
 
-    // Navigate to TODAY tag and mark all done
-    await page.goto('/#/tag/TODAY/tasks');
+    // Navigate to INBOX project and mark all done
+    // Note: We navigate to INBOX project because the backup has dueDay in the past
+    await page.goto('/#/project/INBOX_PROJECT/tasks');
     await page.waitForLoadState('networkidle');
     await dismissWelcomeDialog(page);
     await page.waitForTimeout(1000);
     await markAllTasksDone(page);
+
+    // Navigate to TODAY tag to access Finish Day button
+    await page.goto('/#/tag/TODAY/tasks');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+
+    // Exit planning mode if we're in it (planning mode hides the Finish Day button)
+    const readyToWorkBtn = page.locator('button:has-text("Ready to work!")');
+    if (await readyToWorkBtn.isVisible().catch(() => false)) {
+      await readyToWorkBtn.click();
+      await page.waitForTimeout(500);
+    }
 
     // Finish day
     await finishDay(page);
@@ -316,11 +346,24 @@ test.describe('@legacy-archive Legacy Archive Subtasks via Finish Day', () => {
     await expect(page).toHaveURL(/.*tag.*TODAY.*tasks/);
     await dismissWelcomeDialog(page);
 
-    await page.goto('/#/tag/TODAY/tasks');
+    // Navigate to INBOX project because backup has dueDay in the past
+    await page.goto('/#/project/INBOX_PROJECT/tasks');
     await page.waitForLoadState('networkidle');
     await dismissWelcomeDialog(page);
     await page.waitForTimeout(1000);
     await markAllTasksDone(page);
+
+    // Navigate to TODAY tag to access Finish Day button
+    await page.goto('/#/tag/TODAY/tasks');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+
+    // Exit planning mode if we're in it (planning mode hides the Finish Day button)
+    const readyToWorkBtn = page.locator('button:has-text("Ready to work!")');
+    if (await readyToWorkBtn.isVisible().catch(() => false)) {
+      await readyToWorkBtn.click();
+      await page.waitForTimeout(500);
+    }
     await finishDay(page);
 
     // Export - wait for IndexedDB writes
