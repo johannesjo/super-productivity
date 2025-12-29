@@ -70,7 +70,9 @@ export const updateAllSimpleCounters = createAction(
     meta: {
       isPersistent: true,
       entityType: 'SIMPLE_COUNTER',
+      entityIds: counterProps.items.map((item) => item.id),
       opType: OpType.Update,
+      isBulk: true,
     } satisfies PersistentActionMeta,
   }),
 );

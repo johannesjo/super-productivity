@@ -110,40 +110,51 @@ const _reducer = createReducer<SimpleCounterState>(
     return newState;
   }),
 
-  on(setSimpleCounterCounterToday, (state, { id, newVal, today }) =>
-    adapter.updateOne(
+  on(setSimpleCounterCounterToday, (state, { id, newVal, today }) => {
+    const entity = state.entities[id];
+    if (!entity) {
+      return state;
+    }
+    return adapter.updateOne(
       {
         id,
         changes: {
           countOnDay: {
-            ...(state.entities[id] as SimpleCounter).countOnDay,
+            ...entity.countOnDay,
             [today]: newVal,
           },
         },
       },
       state,
-    ),
-  ),
+    );
+  }),
 
-  on(setSimpleCounterCounterForDate, (state, { id, newVal, date }) =>
-    adapter.updateOne(
+  on(setSimpleCounterCounterForDate, (state, { id, newVal, date }) => {
+    const entity = state.entities[id];
+    if (!entity) {
+      return state;
+    }
+    return adapter.updateOne(
       {
         id,
         changes: {
           countOnDay: {
-            ...(state.entities[id] as SimpleCounter).countOnDay,
+            ...entity.countOnDay,
             [date]: newVal,
           },
         },
       },
       state,
-    ),
-  ),
+    );
+  }),
 
   // Non-persistent local UI update for ClickCounter
   // Sync happens via setSimpleCounterCounterToday with absolute value
   on(increaseSimpleCounterCounterToday, (state, { id, increaseBy, today }) => {
-    const oldEntity = state.entities[id] as SimpleCounter;
+    const oldEntity = state.entities[id];
+    if (!oldEntity) {
+      return state;
+    }
     const currentTotalCount = oldEntity.countOnDay || {};
     const currentVal = currentTotalCount[today] || 0;
     const newValForToday = currentVal + increaseBy;
@@ -163,7 +174,10 @@ const _reducer = createReducer<SimpleCounterState>(
 
   // Non-persistent local UI update for ClickCounter
   on(decreaseSimpleCounterCounterToday, (state, { id, decreaseBy, today }) => {
-    const oldEntity = state.entities[id] as SimpleCounter;
+    const oldEntity = state.entities[id];
+    if (!oldEntity) {
+      return state;
+    }
     const currentTotalCount = oldEntity.countOnDay || {};
     const currentVal = currentTotalCount[today] || 0;
     const newValForToday = Math.max(0, currentVal - decreaseBy);
@@ -183,7 +197,10 @@ const _reducer = createReducer<SimpleCounterState>(
 
   // Non-persistent local tick for StopWatch - immediate UI update
   on(tickSimpleCounterLocal, (state, { id, increaseBy, today }) => {
-    const oldEntity = state.entities[id] as SimpleCounter;
+    const oldEntity = state.entities[id];
+    if (!oldEntity) {
+      return state;
+    }
     const currentTotalCount = oldEntity.countOnDay || {};
     const currentVal = currentTotalCount[today] || 0;
     const newValForToday = currentVal + increaseBy;
@@ -230,15 +247,19 @@ const _reducer = createReducer<SimpleCounterState>(
     );
   }),
 
-  on(toggleSimpleCounterCounter, (state, { id }) =>
-    adapter.updateOne(
+  on(toggleSimpleCounterCounter, (state, { id }) => {
+    const entity = state.entities[id];
+    if (!entity) {
+      return state;
+    }
+    return adapter.updateOne(
       {
         id,
-        changes: { isOn: !(state.entities[id] as SimpleCounter).isOn },
+        changes: { isOn: !entity.isOn },
       },
       state,
-    ),
-  ),
+    );
+  }),
 
   on(setSimpleCounterCounterOn, (state, { id }) =>
     adapter.updateOne(

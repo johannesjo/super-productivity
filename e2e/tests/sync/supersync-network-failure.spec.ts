@@ -617,12 +617,20 @@ base.describe('@supersync Network Failure Recovery', () => {
         clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
         await clientA.sync.setupSuperSync(syncConfig);
 
-        const taskName = `Task-${testRunId}-quota`;
-        await clientA.workView.addTask(taskName);
-        await waitForTask(clientA.page, taskName);
+        // Set up dialog handler to dismiss any alerts BEFORE setting up route
+        let alertShown = false;
+        clientA.page.on('dialog', async (dialog) => {
+          console.log(`[Test] Alert shown: ${dialog.message()}`);
+          alertShown = true;
+          await dialog.accept();
+        });
 
-        // Intercept and return storage quota exceeded
-        await clientA.page.route('**/api/sync/ops/**', async (route) => {
+        // Wait for initial sync to complete so we have a baseline
+        await clientA.sync.syncAndWait();
+
+        // Intercept and return storage quota exceeded BEFORE creating task
+        // so the immediate upload service gets the error
+        await clientA.page.route('**/api/sync/ops', async (route) => {
           if (route.request().method() === 'POST') {
             console.log('[Test] Simulating storage quota exceeded');
             await route.fulfill({
@@ -645,15 +653,12 @@ base.describe('@supersync Network Failure Recovery', () => {
           }
         });
 
-        // Set up dialog handler to dismiss any alerts
-        let alertShown = false;
-        clientA.page.on('dialog', async (dialog) => {
-          console.log(`[Test] Alert shown: ${dialog.message()}`);
-          alertShown = true;
-          await dialog.accept();
-        });
+        // Now create a task - the immediate upload will get 413
+        const taskName = `Task-${testRunId}-quota`;
+        await clientA.workView.addTask(taskName);
+        await waitForTask(clientA.page, taskName);
 
-        // Sync - should fail with quota exceeded
+        // Wait for immediate upload to trigger and hit the 413
         try {
           await clientA.sync.triggerSync();
           await clientA.page.waitForTimeout(3000);
@@ -672,7 +677,7 @@ base.describe('@supersync Network Failure Recovery', () => {
         console.log('[StorageQuota] ✓ Server quota exceeded handling test PASSED');
       } finally {
         if (clientA) {
-          await clientA.page.unroute('**/api/sync/ops/**').catch(() => {});
+          await clientA.page.unroute('**/api/sync/ops').catch(() => {});
         }
         if (clientA) await closeClient(clientA);
       }

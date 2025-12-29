@@ -48,6 +48,7 @@ npm run test:file <filepath>
 - Unit tests: `npm test` - Uses Jasmine/Karma, tests are co-located with source files (`.spec.ts`)
 - E2E tests: `npm run e2e` - Uses Nightwatch, located in `/e2e/src/`
 - Playwright E2E tests: Located in `/e2e/`
+
   - `npm run e2e:playwright` - Run all tests with minimal output (shows failures clearly)
   - `npm run e2e:playwright:file <path>` - Run a single test file with detailed output
     - Example: `npm run e2e:playwright:file tests/work-view/work-view.spec.ts`
@@ -58,6 +59,21 @@ npm run test:file <filepath>
     - Use `--grep "test name"` to run a single test: `npm run e2e:file <path> -- --grep "test name" --retries=0`
     - Tests take ~20s each, don't use excessive timeouts
     - Each test run includes a fresh server start (~5s overhead)
+  - **IMPORTANT for Claude**: When running the full supersync suite, use playwright directly with a line reporter for real-time output (the `npm run e2e:supersync` script buffers output):
+
+    ```bash
+    # Start the server first
+    docker compose -f docker-compose.yaml -f docker-compose.e2e.yaml up -d supersync && \
+    until curl -s http://localhost:1901/health > /dev/null 2>&1; do sleep 1; done && \
+    echo 'Server ready!'
+
+    # Run with line reporter for real-time output
+    npx playwright test --config e2e/playwright.config.ts --grep @supersync --reporter=line
+
+    # Stop server when done
+    docker compose -f docker-compose.yaml -f docker-compose.e2e.yaml down supersync
+    ```
+
 - Linting: `npm run lint` - ESLint for TypeScript, Stylelint for SCSS
 
 ## Architecture Overview
