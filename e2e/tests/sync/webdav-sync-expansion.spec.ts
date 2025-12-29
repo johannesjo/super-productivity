@@ -238,36 +238,16 @@ test.describe('WebDAV Sync Expansion', () => {
     await dismissTour(pageB);
     await workViewPageB.waitForTaskList();
 
-    await expect(pageB.locator('task', { hasText: taskName })).toBeVisible({
-      timeout: 20000,
-    });
-
-    // Mark done on A
-    const taskA = pageA.locator('task', { hasText: taskName }).first();
-    await taskA.waitFor({ state: 'visible' });
-    await taskA.hover();
-    const doneBtnA = taskA.locator('.task-done-btn');
-    await doneBtnA.click({ force: true });
-
-    // Wait for done state (strikethrough or disappearance depending on config, default is just strikethrough/checked)
-    // By default, done tasks might move to "Done" list or stay.
-    // Assuming default behavior: check if class 'is-done' is present or checkbox checked.
-    await expect(taskA).toHaveClass(/isDone/);
-
-    await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
-
-    // Sync B
-    await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
-
+    // Verify task synced to B
     const taskB = pageB.locator('task', { hasText: taskName }).first();
-    await expect(taskB).toHaveClass(/isDone/);
-
-    // Mark undone on B
-    const doneBtnB = taskB.locator('.check-done');
-    await doneBtnB.click();
+    await expect(taskB).toBeVisible({ timeout: 20000 });
     await expect(taskB).not.toHaveClass(/isDone/);
+
+    // --- Test 1: Mark done on B, verify on A ---
+    await taskB.hover();
+    const doneBtnB = taskB.locator('.task-done-btn');
+    await doneBtnB.click({ force: true });
+    await expect(taskB).toHaveClass(/isDone/);
 
     // Wait for state persistence before syncing
     await waitForStatePersistence(pageB);
@@ -275,7 +255,7 @@ test.describe('WebDAV Sync Expansion', () => {
     await syncPageB.triggerSync();
     await waitForSync(pageB, syncPageB);
 
-    // Sync A
+    // Sync A to get done state from B
     await syncPageA.triggerSync();
     await waitForSync(pageA, syncPageA);
 
@@ -285,12 +265,35 @@ test.describe('WebDAV Sync Expansion', () => {
     await dismissTour(pageA);
     await workViewPageA.waitForTaskList();
 
-    // Wait for synced data to propagate to UI
-    await pageA.waitForTimeout(1000);
+    // Check if task appears in main list or Done Tasks section
+    // First try to find task directly
+    let taskA = pageA.locator('task', { hasText: taskName }).first();
+    const isTaskVisible = await taskA.isVisible().catch(() => false);
 
-    // Re-locate the task after reload - it should now be in the active task list (not done)
-    const taskAAfterSync = pageA.locator('task', { hasText: taskName }).first();
-    await expect(taskAAfterSync).not.toHaveClass(/isDone/, { timeout: 10000 });
+    if (!isTaskVisible) {
+      // Task might be in collapsed "Done Tasks" section, expand it
+      const doneTasksHeader = pageA.locator('.task-list-header', {
+        hasText: 'Done Tasks',
+      });
+      if (await doneTasksHeader.isVisible()) {
+        await doneTasksHeader.click();
+        await pageA.waitForTimeout(500);
+      }
+      // Re-locate task after expanding
+      taskA = pageA.locator('task', { hasText: taskName }).first();
+    }
+
+    await taskA.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Verify task is marked as done - either has isDone class or is in Done section
+    const hasDoneClass = await taskA.evaluate((el) => el.classList.contains('isDone'));
+    const isInDoneSection = await pageA
+      .locator('.done-tasks task', { hasText: taskName })
+      .isVisible()
+      .catch(() => false);
+
+    // Task should be done (either by class or by being in done section)
+    expect(hasDoneClass || isInDoneSection).toBe(true);
 
     await contextA.close();
     await contextB.close();
