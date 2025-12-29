@@ -71,8 +71,8 @@ export class SyncPage extends BasePage {
     // Click on provider select to open dropdown with retry
     const webdavOption = this.page.locator('mat-option').filter({ hasText: 'WebDAV' });
 
-    // Try using role-based selector for the combobox
-    const combobox = this.page.getByRole('combobox', { name: 'Sync Provider' });
+    // Use the providerSelect locator that was already validated above
+    const combobox = this.providerSelect;
 
     for (let attempt = 0; attempt < 5; attempt++) {
       // Ensure the select is in view
