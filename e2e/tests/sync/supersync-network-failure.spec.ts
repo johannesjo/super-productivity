@@ -499,4 +499,487 @@ base.describe('@supersync Network Failure Recovery', () => {
       }
     },
   );
+
+  /**
+   * Test: Rate limit exceeded (429) response handling
+   *
+   * Scenario:
+   * 1. Client A creates a task
+   * 2. First sync returns 429 (rate limit exceeded)
+   * 3. Client waits briefly and retries
+   * 4. Second sync succeeds
+   * 5. Client B receives the task
+   *
+   * This tests that the client properly handles rate limiting and retries.
+   */
+  base(
+    'handles rate limit exceeded (429) and retries after delay',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      const state = { returnRateLimitError: true };
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const taskName = `Task-${testRunId}-rate-limit`;
+        await clientA.workView.addTask(taskName);
+        await waitForTask(clientA.page, taskName);
+
+        // Intercept and return 429 rate limit error on first request
+        await clientA.page.route('**/api/sync/ops/**', async (route) => {
+          if (state.returnRateLimitError && route.request().method() === 'POST') {
+            state.returnRateLimitError = false;
+            console.log('[Test] Simulating 429 rate limit exceeded');
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const headers = { 'Retry-After': '1' }; // Suggest retry after 1 second
+            await route.fulfill({
+              status: 429,
+              contentType: 'application/json',
+              headers,
+              body: JSON.stringify({
+                error: 'Too Many Requests',
+                code: 'RATE_LIMIT_EXCEEDED',
+                retryAfter: 1,
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        // First sync - rate limited
+        try {
+          await clientA.sync.triggerSync();
+          await clientA.page.waitForTimeout(3000);
+        } catch {
+          console.log('[Test] First sync got rate limit error as expected');
+        }
+
+        // Remove interception before retry
+        await clientA.page.unroute('**/api/sync/ops/**');
+        await clientA.page.waitForTimeout(1500); // Wait longer than Retry-After
+
+        // Retry - should succeed now
+        await clientA.sync.syncAndWait();
+        console.log('[Test] Retry sync succeeded after rate limit');
+
+        // Verify with Client B
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+
+        await waitForTask(clientB.page, taskName);
+        const taskLocator = clientB.page.locator(`task:has-text("${taskName}")`);
+        await expect(taskLocator).toBeVisible();
+
+        console.log('[RateLimit] ✓ Rate limit handling test PASSED');
+      } finally {
+        if (clientA) {
+          await clientA.page.unroute('**/api/sync/ops/**').catch(() => {});
+        }
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  /**
+   * Test: Server quota exceeded response handling
+   *
+   * Scenario:
+   * 1. Client A creates a task
+   * 2. Server returns STORAGE_QUOTA_EXCEEDED error
+   * 3. Client shows an appropriate error message (alert)
+   * 4. Operation is NOT marked as rejected (user needs to free space)
+   *
+   * This tests that quota exceeded is treated as a transient error
+   * that requires user action, not a permanent rejection.
+   */
+  base(
+    'handles server storage quota exceeded gracefully',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(60000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const taskName = `Task-${testRunId}-quota`;
+        await clientA.workView.addTask(taskName);
+        await waitForTask(clientA.page, taskName);
+
+        // Intercept and return storage quota exceeded
+        await clientA.page.route('**/api/sync/ops/**', async (route) => {
+          if (route.request().method() === 'POST') {
+            console.log('[Test] Simulating storage quota exceeded');
+            await route.fulfill({
+              status: 413, // Payload too large is typical for quota
+              contentType: 'application/json',
+              body: JSON.stringify({
+                error: 'Storage quota exceeded',
+                code: 'STORAGE_QUOTA_EXCEEDED',
+                rejectedOps: [
+                  {
+                    opId: 'mock-op-id',
+                    error: 'Storage quota exceeded',
+                    errorCode: 'STORAGE_QUOTA_EXCEEDED',
+                  },
+                ],
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        // Set up dialog handler to dismiss any alerts
+        let alertShown = false;
+        clientA.page.on('dialog', async (dialog) => {
+          console.log(`[Test] Alert shown: ${dialog.message()}`);
+          alertShown = true;
+          await dialog.accept();
+        });
+
+        // Sync - should fail with quota exceeded
+        try {
+          await clientA.sync.triggerSync();
+          await clientA.page.waitForTimeout(3000);
+        } catch {
+          console.log('[Test] Sync failed with quota exceeded as expected');
+        }
+
+        // Task should still exist locally (not lost)
+        await waitForTask(clientA.page, taskName);
+        const taskLocator = clientA.page.locator(`task:has-text("${taskName}")`);
+        await expect(taskLocator).toBeVisible();
+
+        // Verify an alert was shown (quota exceeded shows window.alert)
+        expect(alertShown).toBe(true);
+
+        console.log('[StorageQuota] ✓ Server quota exceeded handling test PASSED');
+      } finally {
+        if (clientA) {
+          await clientA.page.unroute('**/api/sync/ops/**').catch(() => {});
+        }
+        if (clientA) await closeClient(clientA);
+      }
+    },
+  );
+
+  /**
+   * Test: Long offline period simulation
+   *
+   * Scenario:
+   * 1. Client A creates multiple tasks
+   * 2. Client A syncs
+   * 3. Client B is "offline" for a simulated long period
+   * 4. Multiple changes happen on Client A
+   * 5. Client B comes back online and syncs
+   * 6. Client B receives all accumulated changes
+   *
+   * This tests that clients can sync after extended offline periods
+   * and receive all accumulated operations without issues.
+   */
+  base(
+    'syncs correctly after simulated long offline period',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(180000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Set up both clients
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // Initial sync for both
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+
+        // Simulate Client B going offline
+        console.log('[LongOffline] Client B goes offline...');
+        await clientB.page.route('**/api/sync/**', async (route) => {
+          await route.abort('failed');
+        });
+
+        // Client A creates many tasks while B is offline
+        const taskCount = 15;
+        const taskNames: string[] = [];
+        for (let i = 0; i < taskCount; i++) {
+          const taskName = `Offline-Task-${testRunId}-${i.toString().padStart(2, '0')}`;
+          taskNames.push(taskName);
+          await clientA.workView.addTask(taskName);
+          await waitForTask(clientA.page, taskName);
+
+          // Sync after each few tasks to simulate real usage over time
+          if ((i + 1) % 3 === 0) {
+            await clientA.sync.syncAndWait();
+            console.log(`[LongOffline] Client A synced ${i + 1} tasks`);
+          }
+        }
+
+        // Final sync for Client A
+        await clientA.sync.syncAndWait();
+        console.log(`[LongOffline] Client A finished syncing all ${taskCount} tasks`);
+
+        // Verify all tasks on Client A
+        for (const taskName of taskNames) {
+          await waitForTask(clientA.page, taskName);
+        }
+
+        // Client B comes back online after "long" period
+        console.log('[LongOffline] Client B comes back online...');
+        await clientB.page.unroute('**/api/sync/**');
+        await clientB.page.waitForTimeout(500);
+
+        // Client B syncs - should receive all accumulated operations
+        await clientB.sync.syncAndWait();
+
+        // May need multiple syncs if there are many operations (pagination)
+        await clientB.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+
+        // Verify ALL tasks are now on Client B
+        for (const taskName of taskNames) {
+          await waitForTask(clientB.page, taskName);
+          const taskLocator = clientB.page.locator(`task:has-text("${taskName}")`);
+          await expect(taskLocator).toBeVisible();
+        }
+
+        // Verify exact count
+        const countB = await clientB.page
+          .locator(`task:has-text("Offline-Task-${testRunId}")`)
+          .count();
+        expect(countB).toBe(taskCount);
+
+        console.log(
+          `[LongOffline] ✓ Client B received all ${taskCount} tasks after coming back online`,
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) {
+          await clientB.page.unroute('**/api/sync/**').catch(() => {});
+          await closeClient(clientB);
+        }
+      }
+    },
+  );
+
+  /**
+   * Test: Malformed JSON response handling
+   *
+   * Scenario:
+   * 1. Client A creates and syncs a task
+   * 2. Client B's first download returns malformed JSON
+   * 3. Client B retries and succeeds
+   * 4. Verify Client B correctly receives the data
+   *
+   * This tests that the client handles JSON parsing failures gracefully.
+   */
+  base(
+    'handles malformed JSON response gracefully',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      const state = { returnMalformedJson: true };
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Client A creates and syncs a task
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const taskName = `Task-${testRunId}-malformed`;
+        await clientA.workView.addTask(taskName);
+        await clientA.sync.syncAndWait();
+        await waitForTask(clientA.page, taskName);
+
+        // Client B setup
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // Intercept and return malformed JSON on first GET
+        await clientB.page.route('**/api/sync/ops/**', async (route) => {
+          if (state.returnMalformedJson && route.request().method() === 'GET') {
+            state.returnMalformedJson = false;
+            console.log('[Test] Simulating malformed JSON response');
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: '{ "ops": [ { "id": "op-1", "malformed', // Intentionally broken JSON
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        // First sync - should fail due to JSON parse error
+        try {
+          await clientB.sync.triggerSync();
+          await clientB.page.waitForTimeout(2000);
+        } catch {
+          console.log('[Test] First sync failed due to malformed JSON as expected');
+        }
+
+        // Remove interception and retry
+        await clientB.page.unroute('**/api/sync/ops/**');
+        await clientB.page.waitForTimeout(500);
+
+        // Retry - should succeed
+        await clientB.sync.syncAndWait();
+
+        // Verify task was received
+        await waitForTask(clientB.page, taskName);
+        const taskLocator = clientB.page.locator(`task:has-text("${taskName}")`);
+        await expect(taskLocator).toBeVisible();
+
+        console.log('[MalformedJSON] ✓ Malformed JSON handling test PASSED');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) {
+          await clientB.page.unroute('**/api/sync/ops/**').catch(() => {});
+          await closeClient(clientB);
+        }
+      }
+    },
+  );
+
+  /**
+   * Test: Invalid operation structure from server
+   *
+   * Scenario:
+   * 1. Client A creates a task
+   * 2. Server returns operations with missing required fields
+   * 3. Client should skip invalid operations and continue
+   * 4. Verify local state remains intact
+   *
+   * This tests that invalid/corrupted operations from the server
+   * are gracefully skipped without crashing the sync process.
+   */
+  base(
+    'skips corrupted operations from server without crashing',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      const state = { injectCorruptedOps: true };
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Client A creates and syncs a task
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const taskName = `Task-${testRunId}-corrupted-test`;
+        await clientA.workView.addTask(taskName);
+        await clientA.sync.syncAndWait();
+
+        // Setup Client B
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // Intercept and inject corrupted operations
+        await clientB.page.route('**/api/sync/ops/**', async (route) => {
+          if (route.request().method() === 'GET' && state.injectCorruptedOps) {
+            state.injectCorruptedOps = false;
+            console.log('[Test] Injecting corrupted operations into response');
+
+            // Get real response then modify it
+            const response = await route.fetch();
+            const json = await response.json();
+
+            // Add corrupted operations to the response
+            if (json.ops) {
+              json.ops.push(
+                // Missing required fields
+                {
+                  id: 'corrupt-1',
+                  opType: 'UPD' /* missing entityType, payload, etc. */,
+                },
+                // Null payload
+                {
+                  id: 'corrupt-2',
+                  opType: 'UPD',
+                  entityType: 'TASK',
+                  entityId: 'bad-entity',
+                  payload: null,
+                  vectorClock: { bad: 1 },
+                  timestamp: Date.now(),
+                },
+                // Invalid opType
+                {
+                  id: 'corrupt-3',
+                  opType: 'INVALID_TYPE',
+                  entityType: 'TASK',
+                  entityId: 'bad-entity',
+                  payload: {},
+                  vectorClock: { bad: 1 },
+                  timestamp: Date.now(),
+                },
+              );
+            }
+
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(json),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        // Sync - should handle corrupted ops gracefully
+        await clientB.sync.syncAndWait();
+
+        // Verify valid task was still received (corrupted ops didn't break sync)
+        await waitForTask(clientB.page, taskName);
+        const taskLocator = clientB.page.locator(`task:has-text("${taskName}")`);
+        await expect(taskLocator).toBeVisible();
+
+        // Remove interception
+        await clientB.page.unroute('**/api/sync/ops/**');
+
+        // Final sync should work normally
+        await clientB.sync.syncAndWait();
+
+        console.log('[CorruptedOps] ✓ Corrupted operation handling test PASSED');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) {
+          await clientB.page.unroute('**/api/sync/ops/**').catch(() => {});
+          await closeClient(clientB);
+        }
+      }
+    },
+  );
 });
