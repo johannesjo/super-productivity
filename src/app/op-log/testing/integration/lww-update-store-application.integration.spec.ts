@@ -513,6 +513,7 @@ describe('LWW Update Store Application Integration', () => {
         type: '[UNKNOWN_TYPE] LWW Update',
         id: 'unknown1',
         title: 'Unknown',
+        // eslint-disable-next-line local-rules/require-entity-registry -- intentionally testing unknown entity type handling
         meta: { isPersistent: true, entityType: 'UNKNOWN_TYPE', entityId: 'unknown1' },
       };
 

@@ -307,6 +307,7 @@ describe('lwwUpdateMetaReducer', () => {
         type: '[UNKNOWN_ENTITY] LWW Update',
         id: 'unknown-1',
         title: 'Updated Title',
+        // eslint-disable-next-line local-rules/require-entity-registry -- intentionally testing unknown entity type handling
         meta: { isPersistent: true, entityType: 'UNKNOWN_ENTITY', entityId: 'unknown-1' },
       };
 

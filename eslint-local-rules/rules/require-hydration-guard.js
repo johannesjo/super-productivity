@@ -24,6 +24,8 @@
  *   `withLatestFrom(this.store.select(...))` to get current state
  * - Selectors inside operator callbacks (e.g., inside `switchMap`)
  * - Selectors passed to `withLatestFrom`, `combineLatest`, etc. as secondary sources
+ * - Effects with `{ dispatch: false }` option - they only perform side effects (audio, UI)
+ *   and never dispatch actions that could create duplicate operations during sync
  *
  * ## Examples
  *
@@ -353,11 +355,40 @@ module.exports = {
     };
 
     /**
+     * Check if the createEffect options object has dispatch: false
+     */
+    const hasDispatchFalse = (node) => {
+      // node is a CallExpression for createEffect()
+      // Second argument is the options object: createEffect(() => ..., { dispatch: false })
+      if (node.arguments.length < 2) return false;
+
+      const options = node.arguments[1];
+      if (!options || options.type !== 'ObjectExpression') return false;
+
+      for (const prop of options.properties) {
+        if (
+          prop.type === 'Property' &&
+          prop.key.type === 'Identifier' &&
+          prop.key.name === 'dispatch' &&
+          prop.value.type === 'Literal' &&
+          prop.value.value === false
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+
+    /**
      * Check if a createEffect call contains unguarded selector usage
      */
     const checkCreateEffect = (node) => {
       // node is a CallExpression for createEffect()
       if (node.arguments.length === 0) return;
+
+      // Skip effects with { dispatch: false } - they don't dispatch actions during sync
+      if (hasDispatchFalse(node)) return;
 
       const effectFn = node.arguments[0];
       if (!effectFn) return;
