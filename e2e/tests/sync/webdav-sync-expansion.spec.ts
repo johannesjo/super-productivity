@@ -7,6 +7,9 @@ import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
 
 test.describe('WebDAV Sync Expansion', () => {
+  // Run sync tests serially to avoid WebDAV server contention
+  test.describe.configure({ mode: 'serial' });
+
   const WEBDAV_CONFIG_TEMPLATE = {
     baseUrl: 'http://127.0.0.1:2345/',
     username: 'admin',
@@ -280,8 +283,12 @@ test.describe('WebDAV Sync Expansion', () => {
     await pageA.reload();
     await waitForAppReady(pageA);
     await dismissTour(pageA);
+    await workViewPageA.waitForTaskList();
 
-    // Re-locate the task after reload
+    // Wait for synced data to propagate to UI
+    await pageA.waitForTimeout(1000);
+
+    // Re-locate the task after reload - it should now be in the active task list (not done)
     const taskAAfterSync = pageA.locator('task', { hasText: taskName }).first();
     await expect(taskAAfterSync).not.toHaveClass(/isDone/, { timeout: 10000 });
 

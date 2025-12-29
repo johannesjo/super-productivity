@@ -6,6 +6,9 @@ import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
 
 test.describe('WebDAV Sync Advanced Features', () => {
+  // Run sync tests serially to avoid WebDAV server contention
+  test.describe.configure({ mode: 'serial' });
+
   const WEBDAV_CONFIG_TEMPLATE = {
     baseUrl: 'http://127.0.0.1:2345/',
     username: 'admin',

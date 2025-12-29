@@ -6,6 +6,9 @@ import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
 
 test.describe('WebDAV Sync Full Flow', () => {
+  // Run sync tests serially to avoid WebDAV server contention
+  test.describe.configure({ mode: 'serial' });
+
   // Use a unique folder for each test run to avoid collisions
   const SYNC_FOLDER_NAME = `e2e-test-${Date.now()}`;
 
