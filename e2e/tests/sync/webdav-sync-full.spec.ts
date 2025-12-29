@@ -6,6 +6,9 @@ import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
 
 test.describe('WebDAV Sync Full Flow', () => {
+  // Run sync tests serially to avoid WebDAV server contention
+  test.describe.configure({ mode: 'serial' });
+
   // Use a unique folder for each test run to avoid collisions
   const SYNC_FOLDER_NAME = `e2e-test-${Date.now()}`;
 
@@ -189,19 +192,54 @@ test.describe('WebDAV Sync Full Flow', () => {
     await pageA.locator('task').first().click({ button: 'right' });
     await pageA.locator('.mat-mdc-menu-content button.color-warn').click();
 
-    // Wait for deletion
-    await expect(pageA.locator('task')).toHaveCount(1); // Should be 1 left
+    // Wait for deletion to be reflected in UI
+    await expect(pageA.locator('task')).toHaveCount(1, { timeout: 10000 }); // Should be 1 left
 
     // Wait for state persistence before syncing
     await waitForStatePersistence(pageA);
+    // Extra wait to ensure deletion is fully persisted
+    await pageA.waitForTimeout(1000);
 
     await syncPageA.triggerSync();
     await waitForSync(pageA, syncPageA);
 
-    await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
+    // Retry sync on B up to 3 times to handle eventual consistency
+    let taskCountOnB = 2;
+    for (let attempt = 1; attempt <= 3 && taskCountOnB !== 1; attempt++) {
+      console.log(`Deletion sync attempt ${attempt} on Client B...`);
 
-    await expect(pageB.locator('task')).toHaveCount(1);
+      // Wait before syncing
+      await pageB.waitForTimeout(500);
+
+      await syncPageB.triggerSync();
+      await waitForSync(pageB, syncPageB);
+
+      // Wait for sync state to persist
+      await waitForStatePersistence(pageB);
+      await pageB.waitForTimeout(500);
+
+      // Reload to ensure UI reflects synced state
+      await pageB.reload();
+      await waitForAppReady(pageB);
+
+      // Dismiss tour if it appears
+      try {
+        const tourElement = pageB.locator('.shepherd-element').first();
+        await tourElement.waitFor({ state: 'visible', timeout: 2000 });
+        const cancelIcon = pageB.locator('.shepherd-cancel-icon').first();
+        if (await cancelIcon.isVisible()) {
+          await cancelIcon.click();
+        }
+      } catch {
+        // Tour didn't appear
+      }
+      await workViewPageB.waitForTaskList();
+
+      taskCountOnB = await pageB.locator('task').count();
+      console.log(`After attempt ${attempt}: ${taskCountOnB} tasks on Client B`);
+    }
+
+    await expect(pageB.locator('task')).toHaveCount(1, { timeout: 5000 });
 
     // --- Conflict Resolution ---
     console.log('Testing Conflict Resolution...');

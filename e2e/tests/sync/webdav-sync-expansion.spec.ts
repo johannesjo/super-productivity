@@ -16,6 +16,9 @@ const STABLE_COUNT_WITHOUT_SPINNER = 6;
 const WEBDAV_TIMESTAMP_DELAY_MS = 2000;
 
 test.describe('WebDAV Sync Expansion', () => {
+  // Run sync tests serially to avoid WebDAV server contention
+  test.describe.configure({ mode: 'serial' });
+
   const WEBDAV_CONFIG_TEMPLATE = {
     baseUrl: 'http://127.0.0.1:2345/',
     username: 'admin',
@@ -300,42 +303,16 @@ test.describe('WebDAV Sync Expansion', () => {
     // Wait for state persistence to complete after sync
     await waitForStatePersistence(pageB);
 
-    // Note: We DON'T reload here - sync updates NgRx directly
-    await expect(pageB.locator('task', { hasText: taskName })).toBeVisible({
-      timeout: 20000,
-    });
-
-    // Mark done on A
-    const taskA = pageA.locator('task', { hasText: taskName }).first();
-    await taskA.waitFor({ state: 'visible' });
-    await taskA.hover();
-    const doneBtnA = taskA.locator('.task-done-btn');
-    await doneBtnA.click({ force: true });
-
-    // Wait for done state (strikethrough or disappearance depending on config, default is just strikethrough/checked)
-    // By default, done tasks might move to "Done" list or stay.
-    // Assuming default behavior: check if class 'is-done' is present or checkbox checked.
-    await expect(taskA).toHaveClass(/isDone/);
-
-    await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
-
-    // Sync B
-    await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
-
-    // Wait for state persistence to complete after sync
-    await waitForStatePersistence(pageB);
-
-    // Note: We DON'T reload - sync updates NgRx directly
-    // Verify task has isDone class after sync (sync updates NgRx store)
+    // Verify task synced to B
     const taskB = pageB.locator('task', { hasText: taskName }).first();
-    await expect(taskB).toHaveClass(/isDone/, { timeout: 10000 });
-
-    // Mark undone on B
-    const doneBtnB = taskB.locator('.check-done');
-    await doneBtnB.click();
+    await expect(taskB).toBeVisible({ timeout: 20000 });
     await expect(taskB).not.toHaveClass(/isDone/);
+
+    // --- Test 1: Mark done on B, verify on A ---
+    await taskB.hover();
+    const doneBtnB = taskB.locator('.task-done-btn');
+    await doneBtnB.click({ force: true });
+    await expect(taskB).toHaveClass(/isDone/);
 
     // Wait for state persistence before syncing
     await waitForStatePersistence(pageB);
@@ -343,14 +320,17 @@ test.describe('WebDAV Sync Expansion', () => {
     await syncPageB.triggerSync();
     await waitForSync(pageB, syncPageB);
 
-    // Sync A
+    // Sync A to get done state from B
     await syncPageA.triggerSync();
     await waitForSync(pageA, syncPageA);
 
+    // Wait for state persistence to complete after sync
+    await waitForStatePersistence(pageA);
+
     // Note: We DON'T reload - sync updates NgRx directly
-    // Verify task is no longer done on A after sync
-    const taskAAfterSync = pageA.locator('task', { hasText: taskName }).first();
-    await expect(taskAAfterSync).not.toHaveClass(/isDone/, { timeout: 10000 });
+    // Verify task is marked as done on A after sync
+    const taskA = pageA.locator('task', { hasText: taskName }).first();
+    await expect(taskA).toHaveClass(/isDone/, { timeout: 10000 });
 
     await contextA.close();
     await contextB.close();

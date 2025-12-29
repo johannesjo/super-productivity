@@ -143,9 +143,17 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
     }
 
     // Strip script and style tags with their content
-    const cleanBody = body
-      .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, '')
-      .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, '');
+    // Apply repeatedly to handle nested/crafted inputs like <scri<script>pt>
+    let cleanBody = body;
+    let previousBody: string;
+    do {
+      previousBody = cleanBody;
+      cleanBody = cleanBody
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gim, '')
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gim, '')
+        .replace(/<script\b/gim, '')
+        .replace(/<style\b/gim, '');
+    } while (cleanBody !== previousBody);
 
     // Strip HTML tags for plain text
     const withoutTags = cleanBody
