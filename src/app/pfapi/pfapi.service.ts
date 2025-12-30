@@ -32,7 +32,6 @@ import {
 } from 'rxjs/operators';
 import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
-import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 import { PFLog } from '../core/log';
 import { PfapiStoreDelegateService } from './pfapi-store-delegate.service';
 import { OperationLogStoreService } from '../op-log/store/operation-log-store.service';
@@ -50,7 +49,6 @@ import { SnackService } from '../core/snack/snack.service';
 export class PfapiService {
   private _translateService = inject(TranslateService);
   private _dataInitStateService = inject(DataInitStateService);
-  private _globalProgressBarService = inject(GlobalProgressBarService);
   private _imexViewService = inject(ImexViewService);
   private _store = inject(Store);
   private _storeDelegateService = inject(PfapiStoreDelegateService);
@@ -118,17 +116,6 @@ export class PfapiService {
   );
 
   constructor() {
-    // TODO check why it gets triggered twice always
-    // this.syncState$.subscribe((v) => PFLog.log(`syncState$`, v));
-    this._isSyncInProgress$.subscribe((v) => {
-      // PFLog.log('isSyncInProgress$', v);
-      if (v) {
-        this._globalProgressBarService.countUp('SYNC');
-      } else {
-        this._globalProgressBarService.countDown();
-      }
-    });
-
     this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       try {
         const newProviderId = cfg.isEnabled
