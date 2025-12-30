@@ -50,7 +50,9 @@ describe('ConflictResolutionService', () => {
       'markFailed',
       'getUnsyncedByEntity',
       'filterNewOps',
+      'mergeRemoteOpClocks',
     ]);
+    mockOpLogStore.mergeRemoteOpClocks.and.resolveTo(undefined);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockValidateStateService = jasmine.createSpyObj('ValidateStateService', [
       'validateAndRepairCurrentState',
@@ -1422,6 +1424,70 @@ describe('ConflictResolutionService', () => {
           }),
           'local',
         );
+      });
+
+      it('should call mergeRemoteOpClocks after applying remote ops (remote wins case)', async () => {
+        // REGRESSION TEST: Bug where remote ops applied via conflict resolution
+        // didn't have their clocks merged into the local clock store.
+        // Without clock merge, subsequent local ops would have clocks that are
+        // CONCURRENT with the applied remote ops instead of GREATER_THAN.
+        const now = Date.now();
+        const remoteOp = createOpWithTimestamp('remote-1', 'client-b', now);
+        const conflicts: EntityConflict[] = [
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now - 1000)],
+            [remoteOp],
+          ),
+        ];
+
+        mockOpLogStore.hasOp.and.resolveTo(false);
+        mockOpLogStore.append.and.resolveTo(1);
+        mockOperationApplier.applyOperations.and.resolveTo({
+          appliedOps: [remoteOp],
+        });
+        mockOpLogStore.markApplied.and.resolveTo(undefined);
+        mockOpLogStore.markRejected.and.resolveTo(undefined);
+
+        await service.autoResolveConflictsLWW(conflicts);
+
+        // CRITICAL: mergeRemoteOpClocks must be called with applied remote ops
+        expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([remoteOp]);
+      });
+
+      it('should call mergeRemoteOpClocks for non-conflicting ops piggybacked through conflict resolution', async () => {
+        const now = Date.now();
+        const conflictRemoteOp = createOpWithTimestamp('remote-1', 'client-b', now);
+        const nonConflictingOp = createOpWithTimestamp(
+          'nc-1',
+          'client-c',
+          now,
+          OpType.Update,
+          'other-task',
+        );
+        const conflicts: EntityConflict[] = [
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now - 1000)],
+            [conflictRemoteOp],
+          ),
+        ];
+
+        mockOpLogStore.hasOp.and.resolveTo(false);
+        mockOpLogStore.append.and.resolveTo(1);
+        mockOperationApplier.applyOperations.and.resolveTo({
+          appliedOps: [conflictRemoteOp, nonConflictingOp],
+        });
+        mockOpLogStore.markApplied.and.resolveTo(undefined);
+        mockOpLogStore.markRejected.and.resolveTo(undefined);
+
+        await service.autoResolveConflictsLWW(conflicts, [nonConflictingOp]);
+
+        // Both conflict-winning remote ops AND non-conflicting ops should be merged
+        expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([
+          conflictRemoteOp,
+          nonConflictingOp,
+        ]);
       });
     });
   });

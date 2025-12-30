@@ -130,6 +130,10 @@ export class OperationLogRecoveryService {
       compactedAt: Date.now(),
     });
 
+    // Persist vector clock to IndexedDB store for immediate availability
+    // Without this, getVectorClock() returns stale clock until cache is populated
+    await this.opLogStore.setVectorClock(recoveryOp.vectorClock);
+
     // Dispatch to NgRx
     this.store.dispatch(
       loadAllData({ appDataComplete: legacyData as AppDataCompleteNew }),

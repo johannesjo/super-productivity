@@ -426,6 +426,15 @@ export class ConflictResolutionService {
 
       if (appliedSeqs.length > 0) {
         await this.opLogStore.markApplied(appliedSeqs);
+
+        // CRITICAL: Merge remote ops' vector clocks into local clock.
+        // This ensures subsequent local operations have clocks that "dominate"
+        // the applied remote ops (GREATER_THAN instead of CONCURRENT).
+        // Without this, ops created after conflict resolution would have clocks
+        // that are CONCURRENT with the applied ops, causing them to be incorrectly
+        // filtered by SyncImportFilterService or rejected as conflicts on next sync.
+        await this.opLogStore.mergeRemoteOpClocks(applyResult.appliedOps);
+
         OpLog.normal(
           `ConflictResolutionService: Successfully applied ${appliedSeqs.length} ops`,
         );

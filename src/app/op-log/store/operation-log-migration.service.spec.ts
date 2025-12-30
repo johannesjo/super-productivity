@@ -22,7 +22,9 @@ describe('OperationLogMigrationService', () => {
       'deleteOpsWhere',
       'append',
       'saveStateCache',
+      'setVectorClock',
     ]);
+    mockOpLogStore.setVectorClock.and.resolveTo(undefined);
 
     // Mock PfapiService with deep structure
     mockPfapiService = {
@@ -286,6 +288,24 @@ describe('OperationLogMigrationService', () => {
         expect(OpLog.normal).toHaveBeenCalledWith(
           jasmine.stringContaining('Migration complete'),
         );
+      });
+
+      it('should persist vector clock to IndexedDB store after migration', async () => {
+        const legacyData = {
+          task: { ids: ['t1'] },
+          project: { ids: ['p1'] },
+        };
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls.and.resolveTo(legacyData);
+        const clientId = 'test-client-id';
+        mockPfapiService.pf.metaModel.loadClientId.and.resolveTo(clientId);
+        mockOpLogStore.append.and.resolveTo();
+        mockOpLogStore.saveStateCache.and.resolveTo();
+
+        await service.checkAndMigrate();
+
+        expect(mockOpLogStore.setVectorClock).toHaveBeenCalledWith({
+          [clientId]: 1,
+        });
       });
 
       it('should skip migration when only non-task entities have data', async () => {

@@ -112,6 +112,10 @@ export class OperationLogMigrationService {
       compactedAt: Date.now(),
     });
 
+    // Persist vector clock to IndexedDB store for immediate availability
+    // Without this, getVectorClock() returns stale clock until cache is populated
+    await this.opLogStore.setVectorClock(genesisOp.vectorClock);
+
     OpLog.normal(
       'OperationLogMigrationService: Migration complete. Genesis Operation created.',
     );

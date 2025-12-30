@@ -25,10 +25,12 @@ describe('OperationLogRecoveryService', () => {
       'append',
       'getLastSeq',
       'saveStateCache',
+      'setVectorClock',
       'getPendingRemoteOps',
       'markRejected',
       'markApplied',
     ]);
+    mockOpLogStore.setVectorClock.and.resolveTo(undefined);
     mockPfapiService = {
       pf: {
         getAllSyncModelDataFromModelCtrls: jasmine.createSpy().and.resolveTo({}),
@@ -202,6 +204,18 @@ describe('OperationLogRecoveryService', () => {
       expect(mockPfapiService.pf.metaModel.syncVectorClock).toHaveBeenCalledWith({
         testClient: 1,
       });
+    });
+
+    it('should persist vector clock to IndexedDB store after recovery', async () => {
+      const legacyData = { task: { ids: ['task1'] } };
+      mockClientIdService.loadClientId.and.resolveTo('testClient');
+      mockOpLogStore.append.and.resolveTo(undefined);
+      mockOpLogStore.getLastSeq.and.resolveTo(1);
+      mockOpLogStore.saveStateCache.and.resolveTo(undefined);
+
+      await service.recoverFromLegacyData(legacyData);
+
+      expect(mockOpLogStore.setVectorClock).toHaveBeenCalledWith({ testClient: 1 });
     });
   });
 
