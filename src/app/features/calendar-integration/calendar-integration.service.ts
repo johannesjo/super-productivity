@@ -210,7 +210,7 @@ export class CalendarIntegrationService {
         },
       })
       .pipe(
-        map((icalStrData) =>
+        switchMap((icalStrData) =>
           getRelevantEventsForCalendarIntegrationFromIcal(
             icalStrData,
             calProvider.id,

@@ -1,7 +1,6 @@
-// @ts-ignore
-import ICAL from 'ical.js';
 import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-integration.model';
 import { Log } from '../../../core/log';
+import { loadIcalModule } from './ical-lazy-loader';
 
 // NOTE: this sucks and is slow, but writing a new ical parser would be very hard... :(
 
@@ -87,14 +86,16 @@ const buildExceptionMap = (vevents: any[]): ExceptionMap => {
   return exceptionMap;
 };
 
-export const getRelevantEventsForCalendarIntegrationFromIcal = (
+export const getRelevantEventsForCalendarIntegrationFromIcal = async (
   icalData: string,
   calProviderId: string,
   startTimestamp: number,
   endTimestamp: number,
-): CalendarIntegrationEvent[] => {
+): Promise<CalendarIntegrationEvent[]> => {
+  const ICAL = await loadIcalModule();
   let calendarIntegrationEvents: CalendarIntegrationEvent[] = [];
   const allPossibleFutureEvents = getAllPossibleEventsAfterStartFromIcal(
+    ICAL,
     icalData,
     new Date(startTimestamp),
   );
@@ -347,7 +348,12 @@ const convertVEventToCalendarIntegrationEvent = (
   };
 };
 
-const getAllPossibleEventsAfterStartFromIcal = (icalData: string, start: Date): any[] => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getAllPossibleEventsAfterStartFromIcal = (
+  ICAL: any,
+  icalData: string,
+  start: Date,
+): any[] => {
   const c = ICAL.parse(icalData);
   const comp = new ICAL.Component(c);
   const tzAdded: string[] = [];
