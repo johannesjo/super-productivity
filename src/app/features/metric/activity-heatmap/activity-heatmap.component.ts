@@ -58,7 +58,6 @@ export class ActivityHeatmapComponent {
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _snackService = inject(SnackService);
   private readonly _shareService = inject(ShareService);
-  private selectedPeriod: 'last365' | 'currentYear' = 'currentYear'; // Defaul to current year
   private readonly _periodChange$ = new Subject<void>();
   private readonly _dateAdapter = inject(DateAdapter);
 
@@ -148,19 +147,10 @@ export class ActivityHeatmapComponent {
   } | null {
     const dayMap = new Map<string, DayData>();
     const now = new Date();
-    const period = this.selectedPeriod;
-    // Depending on the selected period, start dates are calculated differently
-    // but end dates is always today
-    let startDate: Date;
-    if (period === 'currentYear') {
-      const currentYear = now.getFullYear();
-      startDate = new Date(currentYear, 0, 1);
-    } else {
-      // start date is one year ago from today
-      startDate = new Date(now);
-      startDate.setFullYear(now.getFullYear() - 1);
-    }
-    // Initialize all days in the past year
+    const currentYear = now.getFullYear();
+    const startDate = new Date(currentYear, 0, 1);
+
+    // Initialize all days in the current year
     const currentDate = new Date(startDate);
     while (currentDate <= now) {
       const dateStr = this._getDateStr(currentDate);
@@ -457,14 +447,6 @@ export class ActivityHeatmapComponent {
     return `${minutes}m`;
   }
 
-  getSelectedPeriod(): 'last365' | 'currentYear' {
-    return this.selectedPeriod;
-  }
-
-  onPeriodChange(period: 'last365' | 'currentYear'): void {
-    this.selectedPeriod = period;
-    this._periodChange$.next();
-  }
   async shareHeatmap(): Promise<void> {
     const data = this.heatmapData();
     if (!data) {
