@@ -150,6 +150,7 @@ export class SyncTriggerService {
   private _isInitialSyncDoneManual$: ReplaySubject<boolean> = new ReplaySubject<boolean>(
     1,
   );
+  private _isInitialSyncDoneSync = false;
   private _isInitialSyncDone$: Observable<boolean> = this._isInitialSyncEnabled$.pipe(
     switchMap((isActive) => {
       if (!isActive) {
@@ -240,6 +241,16 @@ export class SyncTriggerService {
   }
 
   setInitialSyncDone(val: boolean): void {
+    this._isInitialSyncDoneSync = val;
     this._isInitialSyncDoneManual$.next(val);
+  }
+
+  /**
+   * Synchronous getter for initial sync done state.
+   * Used by operators like skipDuringSyncWindow() that need
+   * to check state synchronously in filter callbacks.
+   */
+  isInitialSyncDoneSync(): boolean {
+    return this._isInitialSyncDoneSync;
   }
 }

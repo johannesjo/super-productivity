@@ -11,6 +11,7 @@ import {
 } from '../../work-context/store/work-context.selectors';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
+import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { TagService } from '../tag.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -32,6 +33,7 @@ describe('TagEffects', () => {
   let actions$: Observable<any>;
   let store: MockStore;
   let hydrationStateServiceSpy: jasmine.SpyObj<HydrationStateService>;
+  let syncTriggerServiceSpy: jasmine.SpyObj<SyncTriggerService>;
 
   beforeEach(() => {
     actions$ = EMPTY;
@@ -43,6 +45,12 @@ describe('TagEffects', () => {
     // Default: not applying remote ops (so effect should fire)
     hydrationStateServiceSpy.isApplyingRemoteOps.and.returnValue(false);
     hydrationStateServiceSpy.isInSyncWindow.and.returnValue(false);
+
+    syncTriggerServiceSpy = jasmine.createSpyObj('SyncTriggerService', [
+      'isInitialSyncDoneSync',
+    ]);
+    // Default: initial sync is done (so effect should fire)
+    syncTriggerServiceSpy.isInitialSyncDoneSync.and.returnValue(true);
 
     const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     const tagServiceSpy = jasmine.createSpyObj('TagService', ['updateTag']);
@@ -83,6 +91,7 @@ describe('TagEffects', () => {
           ],
         }),
         { provide: HydrationStateService, useValue: hydrationStateServiceSpy },
+        { provide: SyncTriggerService, useValue: syncTriggerServiceSpy },
         { provide: SnackService, useValue: snackServiceSpy },
         { provide: TagService, useValue: tagServiceSpy },
         { provide: WorkContextService, useValue: workContextServiceSpy },
@@ -161,6 +170,27 @@ describe('TagEffects', () => {
     it('should not dispatch during sync window (skipDuringSyncWindow)', (done) => {
       // Simulate being in sync window (either applying ops or in post-sync cooldown)
       hydrationStateServiceSpy.isInSyncWindow.and.returnValue(true);
+
+      store.overrideSelector(selectTodayTagRepair, {
+        needsRepair: true,
+        repairedTaskIds: ['task1'],
+      });
+      store.refreshState();
+
+      let emitted = false;
+      effects.repairTodayTagConsistency$.subscribe(() => {
+        emitted = true;
+      });
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should not dispatch when initial sync is not done', (done) => {
+      // Simulate app startup before first sync
+      syncTriggerServiceSpy.isInitialSyncDoneSync.and.returnValue(false);
 
       store.overrideSelector(selectTodayTagRepair, {
         needsRepair: true,
@@ -279,6 +309,27 @@ describe('TagEffects', () => {
 
     it('should not dispatch during sync window', (done) => {
       hydrationStateServiceSpy.isInSyncWindow.and.returnValue(true);
+
+      const parent = createTask('parent-1');
+      const child = createTask('child-1', 'parent-1');
+
+      store.overrideSelector(selectTodayTaskIds, ['parent-1', 'child-1']);
+      store.overrideSelector(selectAllTasksDueToday, [parent, child]);
+      store.refreshState();
+
+      let emitted = false;
+      effects.preventParentAndSubTaskInTodayList$.subscribe(() => {
+        emitted = true;
+      });
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should not dispatch when initial sync is not done', (done) => {
+      syncTriggerServiceSpy.isInitialSyncDoneSync.and.returnValue(false);
 
       const parent = createTask('parent-1');
       const child = createTask('child-1', 'parent-1');

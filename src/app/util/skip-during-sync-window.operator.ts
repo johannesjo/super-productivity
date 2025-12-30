@@ -2,24 +2,34 @@ import { inject } from '@angular/core';
 import { MonoTypeOperatorFunction } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { HydrationStateService } from '../op-log/apply/hydration-state.service';
+import { SyncTriggerService } from '../imex/sync/sync-trigger.service';
 
 /**
  * RxJS operator that skips emissions during the full sync window,
- * including the post-sync cooldown period.
+ * including:
+ * - Initial app startup (before first sync completes)
+ * - While remote operations are being applied
+ * - Post-sync cooldown period
  *
  * ## Why This Exists
  *
- * `skipWhileApplyingRemoteOps()` only blocks during `isApplyingRemoteOps()` - the window
- * when operations are being applied to the store. However, there's a timing gap:
+ * There are two timing gaps where selector-based effects could fire and
+ * create operations that conflict with sync:
  *
+ * ### Gap 1: Initial Startup
+ * 1. App loads → data loaded from IndexedDB
+ * 2. Selectors evaluate → effects fire before sync happens
+ * 3. Operations created with stale vector clocks
+ * 4. First sync happens → conflicts with remote operations
+ *
+ * ### Gap 2: Post-Sync
  * 1. Tab gains focus → sync triggers
  * 2. Remote ops applied (isApplyingRemoteOps = true)
  * 3. Sync finishes, isApplyingRemoteOps = false
  * 4. Selectors immediately re-evaluate with new state
  * 5. Effects fire and create operations that conflict with just-synced state
  *
- * This operator extends the suppression window to include a cooldown period
- * after sync, preventing step 5.
+ * This operator blocks during both gaps.
  *
  * ## When to Use
  *
@@ -49,9 +59,12 @@ import { HydrationStateService } from '../op-log/apply/hydration-state.service';
  * | Operator | Suppresses during | Use case |
  * |----------|-------------------|----------|
  * | skipWhileApplyingRemoteOps() | isApplyingRemoteOps only | General selector-based effects |
- * | skipDuringSyncWindow() | isApplyingRemoteOps + cooldown | Effects that modify shared entities |
+ * | skipDuringSyncWindow() | startup + isApplyingRemoteOps + cooldown | Effects that modify shared entities |
  */
 export const skipDuringSyncWindow = <T>(): MonoTypeOperatorFunction<T> => {
   const hydrationState = inject(HydrationStateService);
-  return filter(() => !hydrationState.isInSyncWindow());
+  const syncTrigger = inject(SyncTriggerService);
+  return filter(
+    () => syncTrigger.isInitialSyncDoneSync() && !hydrationState.isInSyncWindow(),
+  );
 };
