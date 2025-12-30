@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { Subject } from 'rxjs';
@@ -153,7 +153,7 @@ describe('ProjectEffects', () => {
       );
     });
 
-    it('should NOT dispatch when backlog is enabled', (done) => {
+    it('should NOT dispatch when backlog is enabled', fakeAsync(() => {
       let emitted = false;
       effects.moveAllProjectToTodayListWhenBacklogIsDisabled$.subscribe(() => {
         emitted = true;
@@ -168,13 +168,11 @@ describe('ProjectEffects', () => {
         }),
       );
 
-      setTimeout(() => {
-        expect(emitted).toBe(false);
-        done();
-      }, 50);
-    });
+      tick(100);
+      expect(emitted).toBe(false);
+    }));
 
-    it('should NOT dispatch when isEnableBacklog is not in changes', (done) => {
+    it('should NOT dispatch when isEnableBacklog is not in changes', fakeAsync(() => {
       let emitted = false;
       effects.moveAllProjectToTodayListWhenBacklogIsDisabled$.subscribe(() => {
         emitted = true;
@@ -189,10 +187,8 @@ describe('ProjectEffects', () => {
         }),
       );
 
-      setTimeout(() => {
-        expect(emitted).toBe(false);
-        done();
-      }, 50);
-    });
+      tick(100);
+      expect(emitted).toBe(false);
+    }));
   });
 });

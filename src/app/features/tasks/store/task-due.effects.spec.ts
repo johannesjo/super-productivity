@@ -12,10 +12,14 @@ import { selectOverdueTasksOnToday, selectTasksDueForDay } from './task.selector
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { DEFAULT_TASK, Task, TaskWithDueDay } from '../task.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 
-// These tests are skipped because they require SyncTriggerService which pulls in
-// Dropbox SDK that isn't properly mocked in the test environment.
-// TODO: Fix Dropbox SDK mocking in test configuration to enable these tests.
+// These tests are skipped because TaskDueEffects imports SyncTriggerService which
+// imports PfapiService which imports pfapi-config.ts. That file eagerly instantiates
+// PFAPI_SYNC_PROVIDERS (including Dropbox) at module load time, which fails in the
+// test environment. This requires architectural changes to lazy-load sync providers.
+// See also: src/app/imex/sync/sync.effects.spec.ts for similar pattern.
+// TODO: Refactor pfapi-config.ts to lazy-load sync providers to enable these tests.
 xdescribe('TaskDueEffects', () => {
   const actions$: Observable<Action> = of();
   let effects: TaskDueEffects;
@@ -67,6 +71,11 @@ xdescribe('TaskDueEffects', () => {
     );
     addTasksForTomorrowServiceSpy.addAllDueToday.and.returnValue(of(undefined));
 
+    const hydrationStateServiceSpy = jasmine.createSpyObj('HydrationStateService', [
+      'isApplyingRemoteOps',
+    ]);
+    hydrationStateServiceSpy.isApplyingRemoteOps.and.returnValue(false);
+
     TestBed.configureTestingModule({
       providers: [
         TaskDueEffects,
@@ -92,6 +101,10 @@ xdescribe('TaskDueEffects', () => {
         {
           provide: SyncTriggerService,
           useValue: { afterInitialSyncDoneAndDataLoadedInitially$ },
+        },
+        {
+          provide: HydrationStateService,
+          useValue: hydrationStateServiceSpy,
         },
       ],
     });
@@ -407,6 +420,11 @@ xdescribe('TaskDueEffects', () => {
       const delayedSyncTrigger$ = new Subject<boolean>();
       const emptyActions$: Observable<Action> = of();
 
+      const hydrationStateServiceSpy2 = jasmine.createSpyObj('HydrationStateService', [
+        'isApplyingRemoteOps',
+      ]);
+      hydrationStateServiceSpy2.isApplyingRemoteOps.and.returnValue(false);
+
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         providers: [
@@ -437,6 +455,10 @@ xdescribe('TaskDueEffects', () => {
             useValue: {
               afterInitialSyncDoneAndDataLoadedInitially$: delayedSyncTrigger$,
             },
+          },
+          {
+            provide: HydrationStateService,
+            useValue: hydrationStateServiceSpy2,
           },
         ],
       });

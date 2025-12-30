@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action, Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
@@ -206,7 +206,7 @@ describe('OperationLogEffects', () => {
     // Note: Tests for incrementVectorClockForLocalChange have been removed.
     // Vector clock updates are now handled atomically within appendWithVectorClockUpdate.
 
-    it('should trigger compaction when threshold reached', (done) => {
+    it('should trigger compaction when threshold reached', fakeAsync(() => {
       // Counter starts at threshold - 1, after increment it reaches threshold
       mockOpLogStore.getCompactionCounter.and.returnValue(
         Promise.resolve(COMPACTION_THRESHOLD - 1),
@@ -214,16 +214,11 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          // Allow async compaction to be triggered
-          setTimeout(() => {
-            expect(mockCompactionService.compact).toHaveBeenCalled();
-            done();
-          }, 10);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
+
+      tick(100);
+      expect(mockCompactionService.compact).toHaveBeenCalled();
+    }));
 
     it('should not trigger compaction when below threshold', (done) => {
       // Counter starts at threshold - 2, after increment it's still below threshold
@@ -282,7 +277,7 @@ describe('OperationLogEffects', () => {
       });
     });
 
-    it('should handle quota exceeded error with emergency compaction and retry', (done) => {
+    it('should handle quota exceeded error with emergency compaction and retry', fakeAsync(() => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       // First call fails with quota error, second call (retry) succeeds
       let callCount = 0;
@@ -296,18 +291,13 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          // Quota exceeded triggers emergency compaction and retry
-          setTimeout(() => {
-            expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
-            // Should have tried to append twice (initial + retry after compaction)
-            expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(2);
-            done();
-          }, 10);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
+
+      tick(100);
+      expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
+      // Should have tried to append twice (initial + retry after compaction)
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(2);
+    }));
 
     it('should cache clientId after first load', (done) => {
       // Reset the spy counter
@@ -334,7 +324,7 @@ describe('OperationLogEffects', () => {
       });
     });
 
-    it('should show error when retry after emergency compaction fails with quota error', (done) => {
+    it('should show error when retry after emergency compaction fails with quota error', fakeAsync(() => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       // All attempts fail with quota error (nested quota failure)
       mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
@@ -343,24 +333,20 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            // Emergency compaction should be attempted
-            expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
-            // User should be notified of quota exceeded
-            expect(mockSnackService.open).toHaveBeenCalledWith(
-              jasmine.objectContaining({
-                type: 'ERROR',
-              }),
-            );
-            done();
-          }, 20);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
 
-    it('should abort immediately when quota error during retry (circuit breaker)', (done) => {
+      tick(100);
+      // Emergency compaction should be attempted
+      expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
+      // User should be notified of quota exceeded
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+        }),
+      );
+    }));
+
+    it('should abort immediately when quota error during retry (circuit breaker)', fakeAsync(() => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       // First call fails with quota, emergency compaction succeeds, retry also fails with quota
       mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
@@ -369,22 +355,18 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            // Should have tried twice (initial + one retry after compaction)
-            expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(2);
-            // Should not trigger recursive compaction
-            expect(mockCompactionService.emergencyCompact).toHaveBeenCalledTimes(1);
-            // User should see error snackbar
-            expect(mockSnackService.open).toHaveBeenCalled();
-            done();
-          }, 20);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
 
-    it('should show error when emergency compaction itself fails', (done) => {
+      tick(100);
+      // Should have tried twice (initial + one retry after compaction)
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(2);
+      // Should not trigger recursive compaction
+      expect(mockCompactionService.emergencyCompact).toHaveBeenCalledTimes(1);
+      // User should see error snackbar
+      expect(mockSnackService.open).toHaveBeenCalled();
+    }));
+
+    it('should show error when emergency compaction itself fails', fakeAsync(() => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
         Promise.reject(quotaError),
@@ -394,25 +376,21 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
-            // No retry after failed compaction
-            expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(1);
-            // User should be notified
-            expect(mockSnackService.open).toHaveBeenCalledWith(
-              jasmine.objectContaining({
-                type: 'ERROR',
-              }),
-            );
-            done();
-          }, 20);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
 
-    it('should handle Firefox-style quota error name', (done) => {
+      tick(100);
+      expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
+      // No retry after failed compaction
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(1);
+      // User should be notified
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+        }),
+      );
+    }));
+
+    it('should handle Firefox-style quota error name', fakeAsync(() => {
       const firefoxQuotaError = new DOMException(
         'Quota exceeded',
         'NS_ERROR_DOM_QUOTA_REACHED',
@@ -428,18 +406,14 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            // Should recognize Firefox quota error and trigger compaction
-            expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
-            done();
-          }, 20);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
 
-    it('should handle legacy Safari quota error code', (done) => {
+      tick(100);
+      // Should recognize Firefox quota error and trigger compaction
+      expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
+    }));
+
+    it('should handle legacy Safari quota error code', fakeAsync(() => {
       // Create a mock error object that simulates legacy Safari's quota error
       // DOMException.code is read-only, so we create a custom error object
       const safariQuotaError = Object.create(DOMException.prototype, {
@@ -459,18 +433,14 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            // Should recognize Safari quota error and trigger compaction
-            expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
-            done();
-          }, 20);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
 
-    it('should not treat regular DOMException as quota error', (done) => {
+      tick(100);
+      // Should recognize Safari quota error and trigger compaction
+      expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
+    }));
+
+    it('should not treat regular DOMException as quota error', fakeAsync(() => {
       const regularError = new DOMException('Read failed', 'NotReadableError');
       mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
         Promise.reject(regularError),
@@ -478,24 +448,20 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            // Should NOT trigger emergency compaction for non-quota errors
-            expect(mockCompactionService.emergencyCompact).not.toHaveBeenCalled();
-            // Should still show error snackbar
-            expect(mockSnackService.open).toHaveBeenCalledWith(
-              jasmine.objectContaining({
-                type: 'ERROR',
-              }),
-            );
-            done();
-          }, 10);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
 
-    it('should show success message after recovery from quota exceeded', (done) => {
+      tick(100);
+      // Should NOT trigger emergency compaction for non-quota errors
+      expect(mockCompactionService.emergencyCompact).not.toHaveBeenCalled();
+      // Should still show error snackbar
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+        }),
+      );
+    }));
+
+    it('should show success message after recovery from quota exceeded', fakeAsync(() => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       let callCount = 0;
       mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
@@ -508,20 +474,16 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            // Should show success message after recovery
-            expect(mockSnackService.open).toHaveBeenCalledWith(
-              jasmine.objectContaining({
-                type: 'SUCCESS',
-              }),
-            );
-            done();
-          }, 20);
-        },
-      });
-    });
+      effects.persistOperation$.subscribe();
+
+      tick(100);
+      // Should show success message after recovery
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'SUCCESS',
+        }),
+      );
+    }));
   });
 
   describe('compaction failures', () => {
@@ -537,15 +499,16 @@ describe('OperationLogEffects', () => {
 
       effects.persistOperation$.subscribe({
         complete: () => {
+          // Wait for async compaction to be triggered - devError throws so we need async check
           setTimeout(() => {
             expect(mockCompactionService.compact).toHaveBeenCalled();
             done();
-          }, 20);
+          }, 50);
         },
       });
     });
 
-    it('should reset failure count on successful compaction', (done) => {
+    it('should reset failure count on successful compaction', fakeAsync(() => {
       // Counter starts at threshold - 1, after increment it reaches threshold
       mockOpLogStore.getCompactionCounter.and.returnValue(
         Promise.resolve(COMPACTION_THRESHOLD - 1),
@@ -555,26 +518,19 @@ describe('OperationLogEffects', () => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
       actions$ = of(action);
 
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          setTimeout(() => {
-            // No snackbar for successful compaction
-            const allCalls = mockSnackService.open.calls.all();
-            const errorCalls = allCalls.filter((call) => {
-              const arg = call.args[0];
-              return (
-                typeof arg === 'object' &&
-                arg !== null &&
-                'type' in arg &&
-                arg.type === 'ERROR'
-              );
-            });
-            expect(errorCalls.length).toBe(0);
-            done();
-          }, 20);
-        },
+      effects.persistOperation$.subscribe();
+
+      tick(100);
+      // No snackbar for successful compaction
+      const allCalls = mockSnackService.open.calls.all();
+      const errorCalls = allCalls.filter((call) => {
+        const arg = call.args[0];
+        return (
+          typeof arg === 'object' && arg !== null && 'type' in arg && arg.type === 'ERROR'
+        );
       });
-    });
+      expect(errorCalls.length).toBe(0);
+    }));
   });
 
   describe('processDeferredActions', () => {

@@ -127,7 +127,7 @@ describe('ShortSyntaxEffects', () => {
   });
 
   describe('shortSyntax$', () => {
-    it('should NOT emit when isIgnoreShortSyntax is true', (done) => {
+    it('should NOT emit when isIgnoreShortSyntax is true', fakeAsync(() => {
       const task = createTask('task-1', { title: '#newtag some task' });
       taskServiceMock.getByIdOnce$.and.returnValue(of(task));
 
@@ -147,11 +147,9 @@ describe('ShortSyntaxEffects', () => {
         }),
       );
 
-      setTimeout(() => {
-        expect(emitted).toBe(false);
-        done();
-      }, 100);
-    });
+      tick(100);
+      expect(emitted).toBe(false);
+    }));
 
     it('should apply existing tag when using short syntax', fakeAsync(() => {
       const task = createTask('task-1', { title: '#existingTag some task' });
@@ -180,7 +178,7 @@ describe('ShortSyntaxEffects', () => {
       }
     }));
 
-    it('should NOT process update actions that do not change title', (done) => {
+    it('should NOT process update actions that do not change title', fakeAsync(() => {
       const task = createTask('task-1', { title: 'some task' });
       taskServiceMock.getByIdOnce$.and.returnValue(of(task));
 
@@ -198,11 +196,9 @@ describe('ShortSyntaxEffects', () => {
         }),
       );
 
-      setTimeout(() => {
-        expect(emitted).toBe(false);
-        done();
-      }, 100);
-    });
+      tick(100);
+      expect(emitted).toBe(false);
+    }));
   });
 
   describe('shortSyntaxAddNewTags$', () => {
