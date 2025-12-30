@@ -112,12 +112,17 @@ export class RejectedOpsHandlerService {
         continue;
       }
 
-      // Check if this is a concurrent modification rejection
+      // Check if this is a conflict that needs resolution via merge
       // These happen when another client uploaded a conflicting operation.
       // Use errorCode for reliable detection (string matching is fragile).
-      const isConcurrentModification = rejected.errorCode === 'CONFLICT_CONCURRENT';
+      // FIX: Also handle CONFLICT_STALE the same as CONFLICT_CONCURRENT.
+      // CONFLICT_STALE occurs when operations have incomplete vector clocks
+      // (e.g., due to stale clock bug) and should be resolved via merge, not rejected.
+      const needsConflictResolution =
+        rejected.errorCode === 'CONFLICT_CONCURRENT' ||
+        rejected.errorCode === 'CONFLICT_STALE';
 
-      if (isConcurrentModification) {
+      if (needsConflictResolution) {
         concurrentModificationOps.push({
           opId: rejected.opId,
           op: entry.op,

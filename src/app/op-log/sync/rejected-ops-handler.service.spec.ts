@@ -163,6 +163,63 @@ describe('RejectedOpsHandlerService', () => {
       expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
     });
 
+    describe('CONFLICT_STALE handling', () => {
+      let downloadCallback: jasmine.Spy<DownloadCallback>;
+
+      beforeEach(() => {
+        downloadCallback = jasmine.createSpy('downloadCallback');
+      });
+
+      it('should resolve CONFLICT_STALE via merge logic, NOT permanent rejection (regression test)', async () => {
+        // REGRESSION TEST: Bug where CONFLICT_STALE was treated as permanent rejection
+        // instead of triggering staleOperationResolver like CONFLICT_CONCURRENT.
+        //
+        // Scenario:
+        // 1. Operation created with stale clock (missing entries from SYNC_IMPORT)
+        // 2. Server rejects as CONFLICT_STALE
+        // 3. Client should resolve via merge (like CONFLICT_CONCURRENT), NOT permanently reject
+        //
+        // Fix: Handle CONFLICT_STALE the same as CONFLICT_CONCURRENT
+        const op = createOp({ id: 'stale-op-1' });
+        opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+        downloadCallback.and.callFake(async (options) => {
+          if (options?.forceFromSeq0) {
+            return {
+              newOpsCount: 0,
+              allOpClocks: [{ serverClient: 10 }],
+              snapshotVectorClock: { serverClient: 10 },
+            } as DownloadResultForRejection;
+          }
+          return { newOpsCount: 0 } as DownloadResultForRejection;
+        });
+        staleOperationResolverSpy.resolveStaleLocalOps.and.resolveTo(1);
+
+        await service.handleRejectedOps(
+          [{ opId: 'stale-op-1', error: 'Stale operation', errorCode: 'CONFLICT_STALE' }],
+          downloadCallback,
+        );
+
+        // CRITICAL: CONFLICT_STALE should trigger resolution, NOT permanent rejection
+        expect(staleOperationResolverSpy.resolveStaleLocalOps).toHaveBeenCalled();
+        expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+      });
+
+      it('should trigger download for CONFLICT_STALE rejections', async () => {
+        const op = createOp({ id: 'stale-op-1' });
+        opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));
+        downloadCallback.and.returnValue(
+          Promise.resolve({ newOpsCount: 1 } as DownloadResultForRejection),
+        );
+
+        await service.handleRejectedOps(
+          [{ opId: 'stale-op-1', error: 'Stale operation', errorCode: 'CONFLICT_STALE' }],
+          downloadCallback,
+        );
+
+        expect(downloadCallback).toHaveBeenCalled();
+      });
+    });
+
     describe('concurrent modification handling', () => {
       let downloadCallback: jasmine.Spy<DownloadCallback>;
 

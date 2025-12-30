@@ -184,15 +184,19 @@ export class OperationLogHydratorService {
                 validationResult.wasRepaired && validationResult.repairedState
                   ? validationResult.repairedState
                   : (appData as AppDataCompleteNew);
+              // FIX: Merge vector clock BEFORE dispatching loadAllData
+              // This ensures any operations created synchronously during loadAllData
+              // (e.g., TODAY_TAG repair) will have the correct merged clock.
+              // Without this, those operations get stale clocks and are rejected by the server.
+              await this.opLogStore.mergeRemoteOpClocks([lastOp]);
               this.store.dispatch(loadAllData({ appDataComplete: tailStateToLoad }));
             } else {
+              // FIX: Same fix for the else branch
+              await this.opLogStore.mergeRemoteOpClocks([lastOp]);
               this.store.dispatch(
                 loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
               );
             }
-            // Merge the full-state op's clock into local clock
-            // This ensures subsequent ops have clocks that dominate this SYNC_IMPORT
-            await this.opLogStore.mergeRemoteOpClocks([lastOp]);
             // No snapshot save needed - full state ops already contain complete state
             // Snapshot will be saved after next batch of regular operations
           } else {
@@ -268,14 +272,17 @@ export class OperationLogHydratorService {
               validationResult.wasRepaired && validationResult.repairedState
                 ? validationResult.repairedState
                 : (appData as AppDataCompleteNew);
+            // FIX: Merge vector clock BEFORE dispatching loadAllData
+            // Same fix as the tail ops branch - prevents stale clock bug
+            await this.opLogStore.mergeRemoteOpClocks([lastOp]);
             this.store.dispatch(loadAllData({ appDataComplete: stateToLoad }));
           } else {
+            // FIX: Same fix for the else branch
+            await this.opLogStore.mergeRemoteOpClocks([lastOp]);
             this.store.dispatch(
               loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
             );
           }
-          // Merge the full-state op's clock into local clock
-          await this.opLogStore.mergeRemoteOpClocks([lastOp]);
           // No snapshot save needed - full state ops already contain complete state
         } else {
           // A.7.13: Migrate all operations before replay

@@ -513,6 +513,182 @@ describe('OperationLogHydratorService', () => {
 
         expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([syncImportOp]);
       });
+
+      it('should merge SYNC_IMPORT clock BEFORE dispatching loadAllData (regression test for stale clock bug)', async () => {
+        // REGRESSION TEST: Bug where operations created during loadAllData got stale clocks
+        // because mergeRemoteOpClocks was called AFTER store.dispatch(loadAllData).
+        //
+        // Scenario:
+        // 1. Snapshot has old clock {clientA: 5}
+        // 2. SYNC_IMPORT has newer clock {clientA: 5, clientB: 10}
+        // 3. loadAllData triggers reducer that creates operation
+        // 4. Operation should have clock from SYNC_IMPORT (with clientB), not snapshot
+        //
+        // Fix: mergeRemoteOpClocks must be called BEFORE store.dispatch(loadAllData)
+        const snapshot = createMockSnapshot({
+          lastAppliedOpSeq: 5,
+          vectorClock: { clientA: 5 }, // Old clock
+        });
+        const syncImportPayload = { task: {}, project: {} };
+        const syncClock = { clientA: 5, clientB: 10 }; // Newer clock with clientB
+        const syncImportOp = createMockOperation('sync-op', OpType.SyncImport, {
+          payload: { appDataComplete: syncImportPayload },
+          entityType: 'ALL',
+          vectorClock: syncClock,
+        });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(
+          Promise.resolve([createMockEntry(6, syncImportOp)]),
+        );
+
+        // Track order of operations using a shared counter
+        let callSequence = 0;
+        let mergeClockSequence = -1;
+        let loadAllDataSyncImportSequence = -1;
+
+        mockOpLogStore.mergeRemoteOpClocks.and.callFake(async () => {
+          mergeClockSequence = callSequence++;
+        });
+
+        // Track dispatch order for the specific loadAllData call we care about
+        mockStore.dispatch.and.callFake(((action: any) => {
+          if (
+            action &&
+            action.type === loadAllData.type &&
+            action.appDataComplete === syncImportPayload
+          ) {
+            loadAllDataSyncImportSequence = callSequence++;
+          }
+        }) as any);
+
+        await service.hydrateStore();
+
+        // CRITICAL: mergeRemoteOpClocks MUST be called BEFORE loadAllData with SYNC_IMPORT payload
+        expect(mergeClockSequence).toBeGreaterThanOrEqual(
+          0,
+          'mergeRemoteOpClocks should have been called',
+        );
+        expect(loadAllDataSyncImportSequence).toBeGreaterThanOrEqual(
+          0,
+          'loadAllData with SYNC_IMPORT should have been called',
+        );
+        expect(mergeClockSequence).toBeLessThan(
+          loadAllDataSyncImportSequence,
+          `mergeRemoteOpClocks (seq ${mergeClockSequence}) should be called BEFORE ` +
+            `loadAllData (seq ${loadAllDataSyncImportSequence}) to prevent stale clock bug`,
+        );
+      });
+
+      it('should merge clock BEFORE loadAllData in NO-SNAPSHOT branch (regression test)', async () => {
+        // REGRESSION TEST: Same bug as above, but in the no-snapshot code path.
+        // When there's no snapshot and we load a SYNC_IMPORT from the log directly,
+        // the clock merge must happen BEFORE loadAllData.
+        //
+        // This tests the fix at lines 275-285 in operation-log-hydrator.service.ts
+        const syncImportPayload = { task: {}, project: {} };
+        const syncClock = { clientA: 5, clientB: 10 };
+        const syncImportOp = createMockOperation('sync-op', OpType.SyncImport, {
+          payload: { appDataComplete: syncImportPayload },
+          entityType: 'ALL',
+          vectorClock: syncClock,
+        });
+
+        // No snapshot - triggers the no-snapshot branch
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
+        // Return ops from getOpsAfterSeq(0) - simulating a log with just a SYNC_IMPORT
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(
+          Promise.resolve([createMockEntry(1, syncImportOp)]),
+        );
+
+        let callSequence = 0;
+        let mergeClockSequence = -1;
+        let loadAllDataSequence = -1;
+
+        mockOpLogStore.mergeRemoteOpClocks.and.callFake(async () => {
+          mergeClockSequence = callSequence++;
+        });
+
+        mockStore.dispatch.and.callFake(((action: any) => {
+          if (
+            action &&
+            action.type === loadAllData.type &&
+            action.appDataComplete === syncImportPayload
+          ) {
+            loadAllDataSequence = callSequence++;
+          }
+        }) as any);
+
+        await service.hydrateStore();
+
+        expect(mergeClockSequence).toBeGreaterThanOrEqual(
+          0,
+          'mergeRemoteOpClocks should have been called',
+        );
+        expect(loadAllDataSequence).toBeGreaterThanOrEqual(
+          0,
+          'loadAllData should have been called',
+        );
+        expect(mergeClockSequence).toBeLessThan(
+          loadAllDataSequence,
+          `mergeRemoteOpClocks (seq ${mergeClockSequence}) should be called BEFORE ` +
+            `loadAllData (seq ${loadAllDataSequence}) in no-snapshot branch`,
+        );
+      });
+
+      it('should merge BACKUP_IMPORT clock BEFORE loadAllData (regression test)', async () => {
+        // REGRESSION TEST: Same fix applies to BACKUP_IMPORT operations.
+        // BACKUP_IMPORT is a full-state operation like SYNC_IMPORT and has the same
+        // stale clock bug if mergeRemoteOpClocks happens after loadAllData.
+        const snapshot = createMockSnapshot({
+          lastAppliedOpSeq: 5,
+          vectorClock: { clientA: 5 },
+        });
+        const backupImportPayload = { task: {}, project: {} };
+        const backupClock = { clientA: 5, clientB: 10 };
+        const backupImportOp = createMockOperation('backup-op', OpType.BackupImport, {
+          payload: { appDataComplete: backupImportPayload },
+          entityType: 'ALL',
+          vectorClock: backupClock,
+        });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(
+          Promise.resolve([createMockEntry(6, backupImportOp)]),
+        );
+
+        let callSequence = 0;
+        let mergeClockSequence = -1;
+        let loadAllDataSequence = -1;
+
+        mockOpLogStore.mergeRemoteOpClocks.and.callFake(async () => {
+          mergeClockSequence = callSequence++;
+        });
+
+        mockStore.dispatch.and.callFake(((action: any) => {
+          if (
+            action &&
+            action.type === loadAllData.type &&
+            action.appDataComplete === backupImportPayload
+          ) {
+            loadAllDataSequence = callSequence++;
+          }
+        }) as any);
+
+        await service.hydrateStore();
+
+        expect(mergeClockSequence).toBeGreaterThanOrEqual(
+          0,
+          'mergeRemoteOpClocks should have been called for BACKUP_IMPORT',
+        );
+        expect(loadAllDataSequence).toBeGreaterThanOrEqual(
+          0,
+          'loadAllData should have been called for BACKUP_IMPORT',
+        );
+        expect(mergeClockSequence).toBeLessThan(
+          loadAllDataSequence,
+          `mergeRemoteOpClocks (seq ${mergeClockSequence}) should be called BEFORE ` +
+            `loadAllData (seq ${loadAllDataSequence}) for BACKUP_IMPORT`,
+        );
+      });
     });
 
     describe('schema migration', () => {
@@ -931,6 +1107,56 @@ describe('OperationLogHydratorService', () => {
         await service.hydrateStore();
 
         expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([syncImportOp]);
+      });
+
+      it('should merge SYNC_IMPORT clock BEFORE loadAllData in full replay (no snapshot) - stale clock regression', async () => {
+        // Same regression test as the snapshot branch, but for the no-snapshot path
+        // This ensures the fix is applied to both code paths (lines 187-195 AND 277-278)
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
+        const syncImportPayload = { task: {}, project: {} };
+        const syncClock = { clientA: 5, clientB: 10 };
+        const syncImportOp = createMockOperation('sync-op', OpType.SyncImport, {
+          payload: { appDataComplete: syncImportPayload },
+          entityType: 'ALL',
+          vectorClock: syncClock,
+        });
+        const allOps = [createMockEntry(1, syncImportOp)];
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(allOps));
+
+        // Track order of operations using a shared counter
+        let callSequence = 0;
+        let mergeClockSequence = -1;
+        let loadAllDataSyncImportSequence = -1;
+
+        mockOpLogStore.mergeRemoteOpClocks.and.callFake(async () => {
+          mergeClockSequence = callSequence++;
+        });
+
+        mockStore.dispatch.and.callFake(((action: any) => {
+          if (
+            action &&
+            action.type === loadAllData.type &&
+            action.appDataComplete === syncImportPayload
+          ) {
+            loadAllDataSyncImportSequence = callSequence++;
+          }
+        }) as any);
+
+        await service.hydrateStore();
+
+        expect(mergeClockSequence).toBeGreaterThanOrEqual(
+          0,
+          'mergeRemoteOpClocks should have been called',
+        );
+        expect(loadAllDataSyncImportSequence).toBeGreaterThanOrEqual(
+          0,
+          'loadAllData with SYNC_IMPORT should have been called',
+        );
+        expect(mergeClockSequence).toBeLessThan(
+          loadAllDataSyncImportSequence,
+          `mergeRemoteOpClocks (seq ${mergeClockSequence}) should be called BEFORE ` +
+            `loadAllData (seq ${loadAllDataSyncImportSequence}) in full replay path`,
+        );
       });
     });
   });
