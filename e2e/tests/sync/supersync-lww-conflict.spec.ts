@@ -1417,6 +1417,135 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
   );
 
   /**
+   * Scenario: Delete vs Update Race with TODAY_TAG (dueDay)
+   *
+   * Tests that when a task scheduled for today is deleted on one client
+   * while updated on another, the recreated task (via LWW Update) correctly
+   * appears in the TODAY view. This validates that syncTodayTagTaskIds
+   * properly updates TODAY_TAG.taskIds during LWW conflict resolution.
+   *
+   * Actions:
+   * 1. Client A creates task for today (sd:today), syncs
+   * 2. Client B syncs (download task)
+   * 3. Client A deletes the task
+   * 4. Client B (with later timestamp) updates the task title
+   * 5. Client A syncs (uploads delete)
+   * 6. Client B syncs (uploads update, which wins via LWW)
+   * 7. Client A syncs (receives LWW Update, task is recreated)
+   * 8. Verify task appears in TODAY view on Client A
+   *
+   * This test specifically validates the fix for the bug where TODAY_TAG.taskIds
+   * wasn't updated when a task was recreated via LWW Update with dueDay = today.
+   */
+  base(
+    'LWW: Recreated task with dueDay=today appears in TODAY view',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates task for TODAY (sd:today sets dueDay)
+        const taskName = `TodayDeleteRace-${testRunId}`;
+        await clientA.workView.addTask(`${taskName} sd:today`);
+        await waitForTask(clientA.page, taskName);
+        console.log('[TodayDeleteRace] Created task for today on Client A');
+
+        // Verify task is in TODAY view (URL should contain TODAY)
+        const urlA = clientA.page.url();
+        expect(urlA).toContain('TODAY');
+
+        // 2. Both sync
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, taskName);
+        console.log('[TodayDeleteRace] Both clients have the task');
+
+        // 3. Client A deletes the task
+        const taskLocatorA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await taskLocatorA.click({ button: 'right' });
+        await clientA.page.waitForTimeout(300);
+
+        await clientA.page
+          .locator('.mat-mdc-menu-panel')
+          .waitFor({ state: 'visible', timeout: 5000 });
+
+        const deleteBtn = clientA.page
+          .locator('.mat-mdc-menu-item')
+          .filter({ hasText: 'Delete' });
+        await deleteBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await deleteBtn.click();
+        await clientA.page.waitForTimeout(500);
+        console.log('[TodayDeleteRace] Client A deleted task');
+
+        // 4. Client B updates the task (with later timestamp)
+        await clientB.page.waitForTimeout(1000); // Ensure later timestamp
+
+        const taskLocatorB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await taskLocatorB.dblclick();
+        const titleInputB = clientB.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await titleInputB.waitFor({ state: 'visible', timeout: 5000 });
+        await titleInputB.fill(`${taskName}-Updated`);
+        await clientB.page.keyboard.press('Enter');
+        await clientB.page.waitForTimeout(300);
+        console.log('[TodayDeleteRace] Client B updated task title');
+
+        // 5. Client A syncs (uploads delete)
+        await clientA.sync.syncAndWait();
+        console.log('[TodayDeleteRace] Client A synced delete');
+
+        // 6. Client B syncs (uploads update, which should win via LWW)
+        await clientB.sync.syncAndWait();
+        console.log('[TodayDeleteRace] Client B synced update');
+
+        // 7. Client A syncs (receives LWW Update, task should be recreated)
+        await clientA.sync.syncAndWait();
+        console.log('[TodayDeleteRace] Client A synced, LWW applied');
+
+        // 8. CRITICAL ASSERTION: Task should appear in TODAY view on Client A
+        // This validates that syncTodayTagTaskIds properly updated TODAY_TAG.taskIds
+        const recreatedTaskA = clientA.page.locator(
+          `task:has-text("${taskName}-Updated")`,
+        );
+        await expect(recreatedTaskA).toBeVisible({ timeout: 10000 });
+
+        // Also verify we're still in TODAY context
+        const finalUrlA = clientA.page.url();
+        expect(finalUrlA).toContain('TODAY');
+
+        // Verify task also visible on Client B
+        const updatedTaskB = clientB.page.locator(`task:has-text("${taskName}-Updated")`);
+        await expect(updatedTaskB).toBeVisible({ timeout: 10000 });
+
+        console.log(
+          '[TodayDeleteRace] ✓ Recreated task with dueDay=today appears in TODAY view',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  /**
    * LWW: Subtask conflicts resolve independently from parent
    *
    * Tests that parent and subtask are separate entities with independent LWW resolution.
