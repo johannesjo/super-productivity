@@ -828,16 +828,14 @@ END:VEVENT
 END:VCALENDAR`;
 
       // Should not throw an error
-      expect(() => {
-        const events = await getRelevantEventsForCalendarIntegrationFromIcal(
-          icalData,
-          calProviderId,
-          startTimestamp,
-          endTimestamp,
-        );
-        expect(events.length).toBe(1);
-        expect(events[0].title).toBe('Office 365 Meeting');
-      }).not.toThrow();
+      const events = await getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+      expect(events.length).toBe(1);
+      expect(events[0].title).toBe('Office 365 Meeting');
     });
 
     it('should handle iCal with TZID reference to unknown timezone gracefully', async () => {
