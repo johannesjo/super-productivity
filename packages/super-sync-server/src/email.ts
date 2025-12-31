@@ -94,3 +94,60 @@ export const sendVerificationEmail = async (
     return false;
   }
 };
+
+export const sendPasswordResetEmail = async (
+  to: string,
+  token: string,
+): Promise<boolean> => {
+  try {
+    const mailTransporter = await getTransporter();
+    const config = loadConfigFromEnv();
+    const from = config.smtp?.from || '"SuperSync" <noreply@example.com>';
+
+    const resetLink = `${config.publicUrl}/reset-password?token=${token}`;
+
+    const info = await mailTransporter.sendMail({
+      from,
+      to,
+      subject: 'Reset your SuperSync password',
+      text:
+        `You requested to reset your password. Click the following link to set a new password: ${resetLink}\n\n` +
+        `If you did not request this, please ignore this email.\n\n` +
+        `This link will expire in 1 hour.`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Password Reset Request</h2>
+          <p>You requested to reset your password. Click the button below to set a new password:</p>
+          <a
+            href="${resetLink}"
+            style="display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;"
+          >
+            Reset Password
+          </a>
+          <p style="margin-top: 20px; font-size: 12px; color: #666;">
+            If you did not request this, please ignore this email.
+          </p>
+          <p style="font-size: 12px; color: #666;">
+            This link will expire in 1 hour.
+          </p>
+          <p style="margin-top: 20px; font-size: 12px; color: #666;">
+            If the button doesn't work, copy and paste this link into your browser:
+          </p>
+          <p style="font-size: 12px; color: #666;">${resetLink}</p>
+        </div>
+      `,
+    });
+
+    Logger.info(`Password reset email sent to ${to}: ${info.messageId}`);
+
+    // If using Ethereal, log the preview URL
+    if (nodemailer.getTestMessageUrl(info)) {
+      Logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+
+    return true;
+  } catch (err) {
+    Logger.error('Failed to send password reset email:', err);
+    return false;
+  }
+};

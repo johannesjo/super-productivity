@@ -13,6 +13,16 @@ import { pageRoutes } from './pages';
 import { syncRoutes, startCleanupJobs, stopCleanupJobs } from './sync';
 import { testRoutes } from './test-routes';
 
+// HTML escape to prevent XSS in generated HTML
+const escapeHtml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 const generatePrivacyHtml = (privacy?: PrivacyConfig): void => {
   const publicDir = path.join(__dirname, '../../public');
   const templatePath = path.join(publicDir, 'privacy.template.html');
@@ -25,22 +35,28 @@ const generatePrivacyHtml = (privacy?: PrivacyConfig): void => {
 
   let template = fs.readFileSync(templatePath, 'utf-8');
 
-  // Replace placeholders with values from config (allow optional whitespace)
+  // Replace placeholders with HTML-escaped values from config (prevent XSS)
   template = template
     .replace(
       /\{\{\s*PRIVACY_CONTACT_NAME\s*\}\}/g,
-      privacy?.contactName || '[Contact Name]',
+      escapeHtml(privacy?.contactName || '[Contact Name]'),
     )
     .replace(
       /\{\{\s*PRIVACY_ADDRESS_STREET\s*\}\}/g,
-      privacy?.addressStreet || '[Street Address]',
+      escapeHtml(privacy?.addressStreet || '[Street Address]'),
     )
-    .replace(/\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g, privacy?.addressCity || '[City]')
+    .replace(
+      /\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g,
+      escapeHtml(privacy?.addressCity || '[City]'),
+    )
     .replace(
       /\{\{\s*PRIVACY_ADDRESS_COUNTRY\s*\}\}/g,
-      privacy?.addressCountry || '[Country]',
+      escapeHtml(privacy?.addressCountry || '[Country]'),
     )
-    .replace(/\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g, privacy?.contactEmail || '[Email]');
+    .replace(
+      /\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g,
+      escapeHtml(privacy?.contactEmail || '[Email]'),
+    );
 
   fs.writeFileSync(outputPath, template);
   Logger.info('Generated privacy.html from template');
@@ -80,7 +96,19 @@ export const createServer = (
 
       // Security Headers
       await fastifyServer.register(helmet, {
-        contentSecurityPolicy: false,
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"], // Inline styles for HTML pages
+            imgSrc: ["'self'", 'data:'],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            frameAncestors: ["'none'"], // Prevent clickjacking
+            formAction: ["'self'"],
+            baseUri: ["'self'"],
+          },
+        },
       });
 
       // Rate Limiting (prevent brute force)

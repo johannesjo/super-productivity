@@ -3,7 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { Logger } from './logger';
 import { randomBytes } from 'crypto';
-import { sendVerificationEmail } from './email';
+import { sendVerificationEmail, sendPasswordResetEmail } from './email';
 import { Prisma } from '@prisma/client';
 
 // Auth constants
@@ -11,6 +11,7 @@ const MIN_JWT_SECRET_LENGTH = 32;
 const BCRYPT_ROUNDS = 12;
 const JWT_EXPIRY = '7d';
 const VERIFICATION_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+const RESET_PASSWORD_TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
 // Account lockout constants
 const MAX_FAILED_LOGIN_ATTEMPTS = 5;
@@ -356,4 +357,116 @@ export const verifyToken = async (
   } catch (err) {
     return null;
   }
+};
+
+/**
+ * Request a password reset for the given email.
+ * Generates a reset token, stores it in the database, and sends an email.
+ * Always returns success message to prevent email enumeration.
+ */
+export const requestPasswordReset = async (
+  email: string,
+): Promise<{ message: string }> => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  // Always return the same message to prevent email enumeration
+  const successMessage = {
+    message: 'If an account with that email exists, a password reset link has been sent.',
+  };
+
+  if (!user) {
+    // Don't reveal that the email doesn't exist
+    Logger.debug(`Password reset requested for non-existent email`);
+    return successMessage;
+  }
+
+  if (user.isVerified === 0) {
+    // Don't reveal that the account is unverified
+    Logger.debug(`Password reset requested for unverified account (ID: ${user.id})`);
+    return successMessage;
+  }
+
+  const resetToken = randomBytes(32).toString('hex');
+  const expiresAt = BigInt(Date.now() + RESET_PASSWORD_TOKEN_EXPIRY_MS);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      resetPasswordToken: resetToken,
+      resetPasswordTokenExpiresAt: expiresAt,
+    },
+  });
+
+  const emailSent = await sendPasswordResetEmail(email, resetToken);
+  if (!emailSent) {
+    // Clear the token if email failed
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: null,
+        resetPasswordTokenExpiresAt: null,
+      },
+    });
+    throw new Error('Failed to send password reset email. Please try again later.');
+  }
+
+  Logger.info(`Password reset requested (ID: ${user.id})`);
+  return successMessage;
+};
+
+/**
+ * Reset password using a reset token.
+ * Validates the token, updates the password, and revokes all existing tokens.
+ */
+export const resetPassword = async (
+  token: string,
+  newPassword: string,
+): Promise<{ message: string }> => {
+  const user = await prisma.user.findFirst({
+    where: { resetPasswordToken: token },
+  });
+
+  if (!user) {
+    throw new Error('Invalid or expired reset token');
+  }
+
+  if (
+    user.resetPasswordTokenExpiresAt &&
+    user.resetPasswordTokenExpiresAt < BigInt(Date.now())
+  ) {
+    // Clear expired token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: null,
+        resetPasswordTokenExpiresAt: null,
+      },
+    });
+    throw new Error('Invalid or expired reset token');
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+
+  // Update password, clear reset token, increment token version to invalidate all sessions
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash,
+      resetPasswordToken: null,
+      resetPasswordTokenExpiresAt: null,
+      tokenVersion: { increment: 1 },
+      // Also clear any lockout
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+    },
+  });
+
+  Logger.info(`Password reset completed (ID: ${user.id})`);
+
+  return {
+    message:
+      'Password has been reset successfully. Please log in with your new password.',
+  };
 };

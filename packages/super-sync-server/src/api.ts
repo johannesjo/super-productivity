@@ -1,6 +1,13 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { registerUser, loginUser, verifyEmail, replaceToken } from './auth';
+import {
+  registerUser,
+  loginUser,
+  verifyEmail,
+  replaceToken,
+  requestPasswordReset,
+  resetPassword,
+} from './auth';
 import { authenticate, getAuthUser } from './middleware';
 import { Logger } from './logger';
 
@@ -22,9 +29,20 @@ const VerifyEmailSchema = z.object({
   token: z.string().min(1, 'Token is required'),
 });
 
+const ForgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email format'),
+});
+
+const ResetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token is required'),
+  password: z.string().min(12, 'Password must be at least 12 characters long'),
+});
+
 type RegisterBody = z.infer<typeof RegisterSchema>;
 type LoginBody = z.infer<typeof LoginSchema>;
 type VerifyEmailBody = z.infer<typeof VerifyEmailSchema>;
+type ForgotPasswordBody = z.infer<typeof ForgotPasswordSchema>;
+type ResetPasswordBody = z.infer<typeof ResetPasswordSchema>;
 
 // Known safe error messages that can be shown to clients
 const SAFE_ERROR_MESSAGES = new Set([
@@ -35,6 +53,10 @@ const SAFE_ERROR_MESSAGES = new Set([
   'Registration successful. Please check your email to verify your account.',
   'Failed to send verification email. Please try again later.',
   'Account temporarily locked due to too many failed login attempts. Please try again later.',
+  'If an account with that email exists, a password reset link has been sent.',
+  'Failed to send password reset email. Please try again later.',
+  'Invalid or expired reset token',
+  'Password has been reset successfully. Please log in with your new password.',
 ]);
 
 // Returns a safe error message for clients (hides internal details)
@@ -173,6 +195,77 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
         Logger.error(`Token replacement error: ${errMsg}`);
         return reply.status(500).send({
           error: 'Failed to replace token. Please try again.',
+        });
+      }
+    },
+  );
+
+  // Request password reset (rate limited to prevent abuse)
+  fastify.post<{ Body: ForgotPasswordBody }>(
+    '/forgot-password',
+    {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        const parseResult = ForgotPasswordSchema.safeParse(req.body);
+        if (!parseResult.success) {
+          return reply.status(400).send({
+            error: 'Validation failed',
+            details: parseResult.error.issues,
+          });
+        }
+        const { email } = parseResult.data;
+
+        const result = await requestPasswordReset(email);
+        return reply.send(result);
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
+        Logger.error(`Password reset request error: ${errMsg}`);
+        return reply.status(400).send({
+          error: getSafeErrorMessage(
+            err,
+            'Password reset request failed. Please try again.',
+          ),
+        });
+      }
+    },
+  );
+
+  // Reset password with token (rate limited to prevent brute force)
+  fastify.post<{ Body: ResetPasswordBody }>(
+    '/reset-password',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        const parseResult = ResetPasswordSchema.safeParse(req.body);
+        if (!parseResult.success) {
+          return reply.status(400).send({
+            error: 'Validation failed',
+            details: parseResult.error.issues,
+          });
+        }
+        const { token, password } = parseResult.data;
+
+        const result = await resetPassword(token, password);
+        return reply.send(result);
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
+        Logger.error(`Password reset error: ${errMsg}`);
+        return reply.status(400).send({
+          error: getSafeErrorMessage(err, 'Password reset failed. Please try again.'),
         });
       }
     },

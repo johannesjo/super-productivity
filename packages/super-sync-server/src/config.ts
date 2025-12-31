@@ -126,8 +126,14 @@ export const loadConfigFromEnv = (
   }
   if (process.env.CORS_ORIGINS) {
     const origins = process.env.CORS_ORIGINS.split(',').map((o) => o.trim());
-    // Warn if wildcard is used
+    // Block wildcard in production - this is a security vulnerability
     if (origins.includes('*')) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(
+          'CORS_ORIGINS wildcard (*) is not allowed in production. ' +
+            'Specify explicit allowed origins for security.',
+        );
+      }
       Logger.warn(
         'CORS_ORIGINS contains wildcard (*). This is insecure and not recommended for production.',
       );

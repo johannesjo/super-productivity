@@ -18,6 +18,8 @@ model User {
   verificationToken          String?   @map("verification_token")
   verificationTokenExpiresAt BigInt?   @map("verification_token_expires_at")
   verificationResendCount    Int       @default(0) @map("verification_resend_count")
+  resetPasswordToken         String?   @map("reset_password_token")
+  resetPasswordTokenExpiresAt BigInt?  @map("reset_password_token_expires_at")
   failedLoginAttempts        Int       @default(0) @map("failed_login_attempts")
   lockedUntil                BigInt?   @map("locked_until")
   tokenVersion               Int       @default(0) @map("token_version")
@@ -31,6 +33,7 @@ model User {
   devices                    SyncDevice[]
 
   @@index([verificationToken])
+  @@index([resetPasswordToken])
   @@map("users")
 }
 

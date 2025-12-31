@@ -74,7 +74,8 @@ describe('Retention Configuration', () => {
 
     it('should accept operation at retention boundary (45 days old exactly)', () => {
       // At exactly 45 days, should still be valid (not yet expired)
-      const exactlyRetentionMs = Date.now() - DEFAULT_SYNC_CONFIG.retentionMs;
+      // Add 100ms buffer to avoid flakiness from timing between Date.now() calls
+      const exactlyRetentionMs = Date.now() - DEFAULT_SYNC_CONFIG.retentionMs + 100;
       const result = validationService.validateOp(createOp(exactlyRetentionMs), clientId);
       expect(result.valid).toBe(true);
     });
