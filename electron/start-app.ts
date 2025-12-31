@@ -233,7 +233,7 @@ export const startApp = (): void => {
           `threshold=${CONFIG.MIN_IDLE_TIME}ms`,
           `action=${actionSummary}`,
         ];
-        log(`🕘 Idle check (${logParts.join(', ')})`);
+        electronLog.debug(`🕘 Idle check (${logParts.join(', ')})`);
       } catch (error) {
         consecutiveFailures += 1;
         log('💥 Error getting idle time, falling back to powerMonitor:', error);
