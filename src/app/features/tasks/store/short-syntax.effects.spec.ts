@@ -173,9 +173,8 @@ describe('ShortSyntaxEffects', () => {
       tick(100);
 
       // The effect should emit an applyShortSyntax action
-      if (emittedAction) {
-        expect(emittedAction.type).toBe(TaskSharedActions.applyShortSyntax.type);
-      }
+      expect(emittedAction).toBeDefined();
+      expect(emittedAction.type).toBe(TaskSharedActions.applyShortSyntax.type);
     }));
 
     it('should NOT process update actions that do not change title', fakeAsync(() => {
