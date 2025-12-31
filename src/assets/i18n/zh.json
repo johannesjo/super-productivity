@@ -31,7 +31,7 @@
     "SHOW_ISSUE_PANEL": "显示问题看板",
     "SHOW_NOTES": "显示项目备注",
     "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "显示筛选/分组/排序看板"
-  },  
+  },
   "CONFIRM": {
     "AUTO_FIX": "您的数据似乎已损坏（“{{validityError}}”）。您想尝试自动修复吗？这可能会导致部分数据丢失。",
     "RELOAD_AFTER_IDB_ERROR": "无法访问数据库 :( 可能的原因是在后台更新了应用或磁盘空间不足。如果您在 Linux 上将应用安装为 snap，您还需要启用刷新感知 'snap set core experimental.refresh-app-awareness=true'，直到他们在他们那边修复此问题。按 OK 重新加载应用（在某些平台上可能需要手动重新启动应用）。",
@@ -217,9 +217,14 @@
       "ADD_TIME_MINUTE": "增加一分钟",
       "B": {
         "BREAK_RUNNING": "休息正在进行",
-        "POMODORO_SESSION_RUNNING": "番茄会话 #{{cycleNr}} 正在进行",
+        "END_BREAK": "休息结束",
+        "END_SESSION": "结束会话",
+        "PAUSE": "暂停",
         "POMODORO_BREAK_RUNNING": "休息 #{{cycleNr}} 正在进行",
+        "POMODORO_SESSION_RUNNING": "番茄会话 #{{cycleNr}} 正在进行",
+        "RESUME": "恢复",
         "SESSION_RUNNING": "专注会话正在进行",
+        "START": "开始",
         "TO_FOCUS_OVERLAY": "到专注覆盖"
       },
       "BACK_TO_PLANNING": "返回规划",
@@ -234,7 +239,7 @@
       "COUNTDOWN_HINT": "专注直到时钟归零",
       "CURRENT_SESSION_TIME_TOOLTIP": "当前会话时间",
       "FINISH_TASK_AND_SELECT_NEXT": "完成任务并选择下一个",
-      "FLOWTIME": "Flowtime",
+      "FLOWTIME": "流程时间",
       "FLOWTIME_HINT": "无严格计时器的灵活节奏",
       "FOCUS_TIME_TOOLTIP": "专注时间",
       "FOR_TASK": "对于任务",
@@ -1136,11 +1141,15 @@
         "TITLE": "同步",
         "WEB_DAV": {
           "CORS_INFO": "<strong>使其在浏览器中工作：</strong> 要使其在浏览器中工作，您需要将超级生产力加入 WebDAV 服务器的跨域资源共享请求白名单。这可能会带来负面的安全影响！对于 nextcloud，请 <a href='https://github.com/nextcloud/server/issues/3131 '>参考此线程以获取更多信息</a>。一种在移动设备上实现此目的的方法是通过 nextcloud 应用 <a href='https://apps.nextcloud.com/apps/webapppassword '>webapppassword<a> 将 \"https://app.super-productivity.com \" 加入白名单。使用风险自负！</p>",
+          "D_SYNC_FOLDER_PATH": "同步文件在WebDAV服务器根目录下的相对存储路径（例如，'/super-productivity' 或 '/'）。请注意，这不是您服务器内部的文件目录路径。",
           "INFO": "WebDAV 实现差异很大。众所周知，Super Productivity 与 Nextcloud 配合良好，<strong>但它可能不适用于您的提供者</strong>。",
           "L_BASE_URL": "基本 URL",
           "L_PASSWORD": "密码",
           "L_SYNC_FOLDER_PATH": "同步文件夹路径",
-          "L_USER_NAME": "用户名"
+          "L_TEST_CONNECTION": "测试链接",
+          "L_USER_NAME": "用户名",
+          "S_TEST_FAIL": "连接测试失败：{{error}} - 目标URL：{{url}}",
+          "S_TEST_SUCCESS": "连接测试成功！目标URL：{{url}}"
         }
       },
       "S": {
@@ -1150,6 +1159,9 @@
         "BTN_FORCE_OVERWRITE": "强制覆盖",
         "ERROR_CORS": "WebDAV 同步错误: 网络请求失败。\n\n这可能是一个跨域资源共享问题。请确保：\n• 您的 WebDAV 服务器允许跨源请求\n• 服务器 URL 正确且可访问\n• 您有有效的互联网连接",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "远程数据当前正在写入",
+        "ERROR_PERMISSION": "文件访问被拒绝。如果正在使用 Flatpak/Snap ，请通过 Flatseal 授予文件系统权限，或者使用 ~/.var/app/ 目录内的路径。",
+        "ERROR_PERMISSION_FLATPAK": "文件访问被拒绝。请通过Flatseal授予文件系统权限，或使用路径 ~/.var/app/ 内的目录。",
+        "ERROR_PERMISSION_SNAP": "文件访问被拒绝。请运行命令 'snap connect super-productivity:home'，或使用路径 ~/snap/super-productivity/common/ 内的目录。",
         "ERROR_FALLBACK_TO_BACKUP": "导入数据时出错。回退到本地备份。",
         "ERROR_INVALID_DATA": "同步时出错。数据无效",
         "ERROR_NO_REV": "远程文件没有有效的修订",
@@ -1751,6 +1763,10 @@
       "HELP": "专注模式打开一个无干扰的屏幕，以帮助您专注于当前任务。",
       "L_ALWAYS_OPEN_FOCUS_MODE": "始终在跟踪时打开专注模式",
       "L_SKIP_PREPARATION_SCREEN": "跳过准备屏幕（拉伸等）",
+      "L_IS_PLAY_TICK": "专注时播放滴答声",
+      "L_PAUSE_TRACKING_DURING_BREAK": "休息期间暂停任务跟踪",
+      "L_SKIP_PREPARATION_SCREEN": "跳过准备界面（火箭动画）",
+      "L_START_IN_BACKGROUND": "仅以横幅开始专注时段（无覆盖层）",
       "TITLE": "专注模式"
     },
     "IDLE": {
@@ -1887,8 +1903,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "在托盘/状态菜单中显示当前倒计时（仅限桌面 Mac）",
       "IS_TRAY_SHOW_CURRENT_TASK": "在托盘/状态菜单中显示当前任务（仅限桌面 Mac/Windows）",
       "IS_TURN_OFF_MARKDOWN": "关闭任务描述的 Markdown 解析",
-      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Use custom title bar (Windows/Linux only)",
-      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Requires restart to take effect",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "使用自定义标题栏（仅限Windows/Linux）",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "需要重启方可生效",
       "START_OF_NEXT_DAY": "下一天的开始时间",
       "START_OF_NEXT_DAY_HINT": "从何时（小时）开始计算下一天已经开始。默认是午夜，即 0。",
       "TASK_NOTES_TPL": "任务描述模板",

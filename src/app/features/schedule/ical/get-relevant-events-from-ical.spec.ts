@@ -827,7 +827,7 @@ SUMMARY:Office 365 Meeting
 END:VEVENT
 END:VCALENDAR`;
 
-      // Should not throw an error - the test will fail if it throws
+      // Should not throw an error
       const events = await getRelevantEventsForCalendarIntegrationFromIcal(
         icalData,
         calProviderId,
