@@ -43,13 +43,13 @@
           <div class="tabs">
             <button
               class="tab-btn active"
-              onclick="switchTab('login')"
+              id="tab-login"
             >
               Login
             </button>
             <button
               class="tab-btn"
-              onclick="switchTab('register')"
+              id="tab-register"
             >
               Register
             </button>
@@ -172,12 +172,10 @@
             <textarea
               id="token-area"
               readonly
-              onclick="this.select()"
             ></textarea>
             <button
               id="copy-btn"
               class="btn primary"
-              onclick="copyToken()"
             >
               Copy Token
             </button>
@@ -204,13 +202,12 @@
           <div class="action-buttons">
             <button
               id="refresh-btn"
-              onclick="refreshToken()"
               class="btn text-only"
             >
               Refresh Token
             </button>
             <button
-              onclick="logout()"
+              id="logout-btn"
               class="btn text-only"
             >
               Log Out

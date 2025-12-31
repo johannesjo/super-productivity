@@ -13,8 +13,28 @@ const tokenDisplay = document.getElementById('token-display');
 const tokenArea = document.getElementById('token-area');
 const messageArea = document.getElementById('message-area');
 const copyBtn = document.getElementById('copy-btn');
+const refreshBtn = document.getElementById('refresh-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const tabLoginBtn = document.getElementById('tab-login');
+const tabRegisterBtn = document.getElementById('tab-register');
 
 // --- Event Listeners ---
+
+// Tab switching
+tabLoginBtn.addEventListener('click', () => switchTab('login'));
+tabRegisterBtn.addEventListener('click', () => switchTab('register'));
+
+// Token area - select all on click
+tokenArea.addEventListener('click', () => tokenArea.select());
+
+// Copy token button
+copyBtn.addEventListener('click', copyToken);
+
+// Refresh token button
+refreshBtn.addEventListener('click', refreshToken);
+
+// Logout button
+logoutBtn.addEventListener('click', logout);
 
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -154,7 +174,6 @@ async function refreshToken() {
 
   if (!confirmed) return;
 
-  const refreshBtn = document.getElementById('refresh-btn');
   setLoading(true);
   hideMessage();
 
