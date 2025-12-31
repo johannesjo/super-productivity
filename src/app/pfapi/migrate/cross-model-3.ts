@@ -49,7 +49,10 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
       const task = copy.task.entities[taskId];
       if (task && !task.dueDay) {
         if (task.dueWithTime) {
-          if (!isToday(task.dueWithTime)) {
+          if (isToday(task.dueWithTime)) {
+            // @ts-ignore
+            task.dueDay = getDbDateStr();
+          } else {
             idsToRemove.push(taskId);
           }
         } else {

@@ -77,17 +77,46 @@ describe('taskSharedSchedulingMetaReducer', () => {
     it('should not change state when task is already correctly scheduled', () => {
       const now = Date.now();
       const testState = createStateWithExistingTasks([], [], [], ['task1']);
-      // Update the task to already have the correct dueWithTime
+      // Update the task to already have the correct dueWithTime and dueDay
       const task1 = testState[TASK_FEATURE_NAME].entities.task1 as Task;
       testState[TASK_FEATURE_NAME].entities.task1 = {
         ...task1,
         dueWithTime: now,
-        dueDay: undefined,
+        dueDay: getDbDateStr(),
       } as Task;
       const action = createScheduleAction({}, now);
 
       metaReducer(testState, action);
       expect(mockReducer).toHaveBeenCalledWith(testState, action);
+    });
+
+    it('should set dueDay to today when scheduling for today', () => {
+      const now = Date.now();
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const action = createScheduleAction({}, now);
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        expectTaskUpdate('task1', { dueWithTime: now, dueDay: getDbDateStr() }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should set dueDay to undefined when scheduling for a different day', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], ['task1']);
+      // eslint-disable-next-line no-mixed-operators
+      const tomorrowTimestamp = Date.now() + 24 * 60 * 60 * 1000;
+      const action = createScheduleAction({}, tomorrowTimestamp);
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        expectTaskUpdate('task1', { dueWithTime: tomorrowTimestamp, dueDay: undefined }),
+        action,
+        mockReducer,
+        testState,
+      );
     });
   });
 
