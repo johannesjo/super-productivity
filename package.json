@@ -194,7 +194,7 @@
     "@types/file-saver": "^2.0.5",
     "@types/jasmine": "^3.10.2",
     "@types/jasminewd2": "~2.0.13",
-    "@types/node": "20.12.4",
+    "@types/node": "^20.19.0",
     "@types/node-fetch": "^2.6.6",
     "@types/object-path": "^0.11.4",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
