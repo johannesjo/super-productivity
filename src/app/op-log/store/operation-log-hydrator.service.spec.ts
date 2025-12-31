@@ -16,6 +16,9 @@ import { RepairOperationService } from '../validation/repair-operation.service';
 import { VectorClockService } from '../sync/vector-clock.service';
 import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
+import { OperationLogSnapshotService } from './operation-log-snapshot.service';
+import { OperationLogRecoveryService } from './operation-log-recovery.service';
+import { SyncHydrationService } from './sync-hydration.service';
 import {
   ActionType,
   Operation,
@@ -39,6 +42,9 @@ describe('OperationLogHydratorService', () => {
   let mockVectorClockService: jasmine.SpyObj<VectorClockService>;
   let mockOperationApplierService: jasmine.SpyObj<OperationApplierService>;
   let mockHydrationStateService: jasmine.SpyObj<HydrationStateService>;
+  let mockSnapshotService: jasmine.SpyObj<OperationLogSnapshotService>;
+  let mockRecoveryService: jasmine.SpyObj<OperationLogRecoveryService>;
+  let mockSyncHydrationService: jasmine.SpyObj<SyncHydrationService>;
 
   const mockState = {
     task: { entities: {}, ids: [] },
@@ -145,6 +151,19 @@ describe('OperationLogHydratorService', () => {
       'startApplyingRemoteOps',
       'endApplyingRemoteOps',
     ]);
+    mockSnapshotService = jasmine.createSpyObj('OperationLogSnapshotService', [
+      'isValidSnapshot',
+      'migrateSnapshotWithBackup',
+      'saveCurrentStateAsSnapshot',
+    ]);
+    mockRecoveryService = jasmine.createSpyObj('OperationLogRecoveryService', [
+      'recoverPendingRemoteOps',
+      'cleanupCorruptOps',
+      'attemptRecovery',
+    ]);
+    mockSyncHydrationService = jasmine.createSpyObj('SyncHydrationService', [
+      'hydrateFromRemoteSync',
+    ]);
 
     // Default mock implementations
     mockOpLogStore.getVectorClock.and.returnValue(Promise.resolve(null));
@@ -179,6 +198,13 @@ describe('OperationLogHydratorService', () => {
     mockVectorClockService.getCurrentVectorClock.and.returnValue(
       Promise.resolve({ clientA: 5 }),
     );
+    mockSnapshotService.isValidSnapshot.and.returnValue(true);
+    mockSnapshotService.migrateSnapshotWithBackup.and.callFake(async (s) => s);
+    mockSnapshotService.saveCurrentStateAsSnapshot.and.returnValue(Promise.resolve());
+    mockRecoveryService.recoverPendingRemoteOps.and.returnValue(Promise.resolve());
+    mockRecoveryService.cleanupCorruptOps.and.returnValue(Promise.resolve());
+    mockRecoveryService.attemptRecovery.and.returnValue(Promise.resolve());
+    mockSyncHydrationService.hydrateFromRemoteSync.and.returnValue(Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
@@ -195,6 +221,9 @@ describe('OperationLogHydratorService', () => {
         { provide: VectorClockService, useValue: mockVectorClockService },
         { provide: OperationApplierService, useValue: mockOperationApplierService },
         { provide: HydrationStateService, useValue: mockHydrationStateService },
+        { provide: OperationLogSnapshotService, useValue: mockSnapshotService },
+        { provide: OperationLogRecoveryService, useValue: mockRecoveryService },
+        { provide: SyncHydrationService, useValue: mockSyncHydrationService },
       ],
     });
 
@@ -384,7 +413,7 @@ describe('OperationLogHydratorService', () => {
 
         await service.hydrateStore();
 
-        expect(mockOpLogStore.saveStateCache).toHaveBeenCalled();
+        expect(mockSnapshotService.saveCurrentStateAsSnapshot).toHaveBeenCalled();
       });
 
       it('should not save snapshot after replaying few ops', async () => {
@@ -398,7 +427,7 @@ describe('OperationLogHydratorService', () => {
 
         await service.hydrateStore();
 
-        expect(mockOpLogStore.saveStateCache).not.toHaveBeenCalled();
+        expect(mockSnapshotService.saveCurrentStateAsSnapshot).not.toHaveBeenCalled();
       });
 
       it('should merge tail ops clocks into local clock after replay', async () => {
@@ -437,14 +466,14 @@ describe('OperationLogHydratorService', () => {
           callOrder.push('validate');
           return { isValid: true, wasRepaired: false };
         });
-        mockOpLogStore.saveStateCache.and.callFake(() => {
+        mockSnapshotService.saveCurrentStateAsSnapshot.and.callFake(() => {
           callOrder.push('saveSnapshot');
           return Promise.resolve();
         });
 
         await service.hydrateStore();
 
-        // Validate should be called before saveStateCache
+        // Validate should be called before saveSnapshot
         const validateIndex = callOrder.indexOf('validate');
         const saveIndex = callOrder.indexOf('saveSnapshot');
         expect(validateIndex).toBeGreaterThanOrEqual(0);
@@ -692,63 +721,62 @@ describe('OperationLogHydratorService', () => {
     });
 
     describe('schema migration', () => {
-      it('should migrate snapshot if needed', async () => {
+      it('should call snapshotService.migrateSnapshotWithBackup if migration needed', async () => {
         const oldSnapshot = createMockSnapshot({ schemaVersion: 0 });
         const migratedSnapshot = createMockSnapshot({
           schemaVersion: CURRENT_SCHEMA_VERSION,
         });
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(oldSnapshot));
         mockSchemaMigrationService.needsMigration.and.returnValue(true);
-        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue(migratedSnapshot);
+        mockSnapshotService.migrateSnapshotWithBackup.and.resolveTo(migratedSnapshot);
 
         await service.hydrateStore();
 
-        expect(mockSchemaMigrationService.migrateStateIfNeeded).toHaveBeenCalledWith(
+        expect(mockSnapshotService.migrateSnapshotWithBackup).toHaveBeenCalledWith(
           oldSnapshot,
         );
       });
 
-      it('should create backup before migration', async () => {
-        const oldSnapshot = createMockSnapshot({ schemaVersion: 0 });
-        const migratedSnapshot = createMockSnapshot({
-          schemaVersion: CURRENT_SCHEMA_VERSION,
-        });
-        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(oldSnapshot));
-        mockSchemaMigrationService.needsMigration.and.returnValue(true);
-        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue(migratedSnapshot);
+      it('should not call migrateSnapshotWithBackup if no migration needed', async () => {
+        const snapshot = createMockSnapshot({ schemaVersion: CURRENT_SCHEMA_VERSION });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockSchemaMigrationService.needsMigration.and.returnValue(false);
 
         await service.hydrateStore();
 
-        expect(mockOpLogStore.saveStateCacheBackup).toHaveBeenCalled();
+        expect(mockSnapshotService.migrateSnapshotWithBackup).not.toHaveBeenCalled();
       });
 
-      it('should clear backup after successful migration', async () => {
+      it('should dispatch loadAllData with migrated snapshot state', async () => {
         const oldSnapshot = createMockSnapshot({ schemaVersion: 0 });
+        const migratedState = { task: { entities: {}, ids: ['migrated'] } } as any;
         const migratedSnapshot = createMockSnapshot({
           schemaVersion: CURRENT_SCHEMA_VERSION,
+          state: migratedState,
         });
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(oldSnapshot));
         mockSchemaMigrationService.needsMigration.and.returnValue(true);
-        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue(migratedSnapshot);
+        mockSnapshotService.migrateSnapshotWithBackup.and.resolveTo(migratedSnapshot);
 
         await service.hydrateStore();
 
-        expect(mockOpLogStore.clearStateCacheBackup).toHaveBeenCalled();
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          loadAllData({ appDataComplete: migratedState }),
+        );
       });
 
-      it('should restore backup if migration fails', async () => {
+      it('should call recoveryService.attemptRecovery if migration fails', async () => {
         const oldSnapshot = createMockSnapshot({ schemaVersion: 0 });
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(oldSnapshot));
         mockSchemaMigrationService.needsMigration.and.returnValue(true);
-        mockSchemaMigrationService.migrateStateIfNeeded.and.throwError(
+        mockSnapshotService.migrateSnapshotWithBackup.and.rejectWith(
           new Error('Migration failed'),
         );
 
         // hydrateStore catches migration error and attempts recovery
-        // We verify that backup was restored before the error was re-thrown
         await service.hydrateStore();
 
-        expect(mockOpLogStore.restoreStateCacheFromBackup).toHaveBeenCalled();
+        expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
       });
 
       it('should migrate tail operations if needed', async () => {
@@ -812,7 +840,7 @@ describe('OperationLogHydratorService', () => {
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(oldSnapshot));
         mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(tailOps));
         mockSchemaMigrationService.needsMigration.and.returnValue(true);
-        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue(migratedSnapshot);
+        mockSnapshotService.migrateSnapshotWithBackup.and.resolveTo(migratedSnapshot);
         mockSchemaMigrationService.operationNeedsMigration.and.returnValue(true);
 
         const migratedOps = tailOps.map((e) => ({
@@ -824,7 +852,7 @@ describe('OperationLogHydratorService', () => {
         await service.hydrateStore();
 
         // Both snapshot and operations should be migrated
-        expect(mockSchemaMigrationService.migrateStateIfNeeded).toHaveBeenCalled();
+        expect(mockSnapshotService.migrateSnapshotWithBackup).toHaveBeenCalled();
         expect(mockSchemaMigrationService.migrateOperations).toHaveBeenCalled();
         // Operations should be applied via bulk dispatch
         expect(mockStore.dispatch).toHaveBeenCalledWith(
@@ -905,12 +933,12 @@ describe('OperationLogHydratorService', () => {
 
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(legacySnapshot));
         mockSchemaMigrationService.needsMigration.and.returnValue(true);
-        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue(migratedSnapshot);
+        mockSnapshotService.migrateSnapshotWithBackup.and.resolveTo(migratedSnapshot);
 
         await service.hydrateStore();
 
         // Should call migration for legacy (undefined version) snapshot
-        expect(mockSchemaMigrationService.migrateStateIfNeeded).toHaveBeenCalledWith(
+        expect(mockSnapshotService.migrateSnapshotWithBackup).toHaveBeenCalledWith(
           legacySnapshot,
         );
       });
@@ -929,56 +957,45 @@ describe('OperationLogHydratorService', () => {
     });
 
     describe('pending remote ops recovery', () => {
-      it('should recover pending remote ops from crashed sync', async () => {
-        const pendingOps = [
-          createMockEntry(1, createMockOperation('op-1')),
-          createMockEntry(2, createMockOperation('op-2')),
-        ];
-        mockOpLogStore.getPendingRemoteOps.and.returnValue(Promise.resolve(pendingOps));
+      it('should call recoveryService.recoverPendingRemoteOps during hydration', async () => {
         const snapshot = createMockSnapshot();
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
 
         await service.hydrateStore();
 
-        expect(mockOpLogStore.markApplied).toHaveBeenCalledWith([1, 2]);
+        expect(mockRecoveryService.recoverPendingRemoteOps).toHaveBeenCalled();
       });
 
-      it('should not call markApplied if no pending ops', async () => {
-        mockOpLogStore.getPendingRemoteOps.and.returnValue(Promise.resolve([]));
+      it('should call recoveryService.cleanupCorruptOps during hydration', async () => {
         const snapshot = createMockSnapshot();
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
 
         await service.hydrateStore();
 
-        expect(mockOpLogStore.markApplied).not.toHaveBeenCalled();
+        expect(mockRecoveryService.cleanupCorruptOps).toHaveBeenCalled();
       });
     });
 
     describe('invalid snapshot handling', () => {
-      it('should attempt recovery if snapshot is missing required fields', async () => {
-        const invalidSnapshot = { state: null, lastAppliedOpSeq: 5 } as any;
+      it('should attempt recovery if snapshot is invalid', async () => {
+        const invalidSnapshot = createMockSnapshot();
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(invalidSnapshot));
-        (
-          mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-        ).and.returnValue(Promise.resolve({}));
+        mockSnapshotService.isValidSnapshot.and.returnValue(false);
 
         await service.hydrateStore();
 
-        expect(mockPfapiService.pf.getAllSyncModelDataFromModelCtrls).toHaveBeenCalled();
+        expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
       });
 
-      it('should attempt recovery if snapshot is missing core models', async () => {
-        const invalidSnapshot = createMockSnapshot({
-          state: { task: {} }, // Missing project and globalConfig
-        });
+      it('should not dispatch loadAllData if snapshot is invalid', async () => {
+        const invalidSnapshot = createMockSnapshot();
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(invalidSnapshot));
-        (
-          mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-        ).and.returnValue(Promise.resolve({}));
+        mockSnapshotService.isValidSnapshot.and.returnValue(false);
 
         await service.hydrateStore();
 
-        expect(mockPfapiService.pf.getAllSyncModelDataFromModelCtrls).toHaveBeenCalled();
+        // Only dispatch should NOT happen because recovery takes over
+        expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
       });
     });
 
@@ -1041,7 +1058,7 @@ describe('OperationLogHydratorService', () => {
 
         await service.hydrateStore();
 
-        expect(mockOpLogStore.saveStateCache).toHaveBeenCalled();
+        expect(mockSnapshotService.saveCurrentStateAsSnapshot).toHaveBeenCalled();
       });
 
       it('should validate state BEFORE saving snapshot in full replay (regression test)', async () => {
@@ -1060,14 +1077,14 @@ describe('OperationLogHydratorService', () => {
           callOrder.push('validate');
           return { isValid: true, wasRepaired: false };
         });
-        mockOpLogStore.saveStateCache.and.callFake(() => {
+        mockSnapshotService.saveCurrentStateAsSnapshot.and.callFake(() => {
           callOrder.push('saveSnapshot');
           return Promise.resolve();
         });
 
         await service.hydrateStore();
 
-        // Validate should be called before saveStateCache
+        // Validate should be called before saveSnapshot
         const validateIndex = callOrder.indexOf('validate');
         const saveIndex = callOrder.indexOf('saveSnapshot');
         expect(validateIndex).toBeGreaterThanOrEqual(0);
@@ -1162,233 +1179,28 @@ describe('OperationLogHydratorService', () => {
   });
 
   describe('hydrateFromRemoteSync', () => {
-    it('should load synced data from pf database', async () => {
-      const syncedData = { task: { entities: {}, ids: [] } };
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-
+    it('should delegate to syncHydrationService', async () => {
       await service.hydrateFromRemoteSync();
 
-      expect(mockPfapiService.pf.getAllSyncModelDataFromModelCtrls).toHaveBeenCalled();
+      expect(mockSyncHydrationService.hydrateFromRemoteSync).toHaveBeenCalled();
     });
 
-    it('should create SYNC_IMPORT operation', async () => {
-      const syncedData = { task: { entities: {}, ids: [] } };
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
+    it('should pass downloadedMainModelData to syncHydrationService', async () => {
+      const downloadedData = { task: { entities: {}, ids: [] } };
 
-      await service.hydrateFromRemoteSync();
+      await service.hydrateFromRemoteSync(downloadedData);
 
-      expect(mockOpLogStore.append).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          opType: OpType.SyncImport,
-          entityType: 'ALL',
-          payload: syncedData,
-        }),
-        'remote',
+      expect(mockSyncHydrationService.hydrateFromRemoteSync).toHaveBeenCalledWith(
+        downloadedData,
       );
     });
 
-    it('should save state cache after sync', async () => {
-      const syncedData = { task: { entities: {}, ids: [] } };
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(50));
-
+    it('should pass undefined when no downloadedMainModelData provided', async () => {
       await service.hydrateFromRemoteSync();
 
-      expect(mockOpLogStore.saveStateCache).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          state: syncedData,
-          lastAppliedOpSeq: 50,
-        }),
+      expect(mockSyncHydrationService.hydrateFromRemoteSync).toHaveBeenCalledWith(
+        undefined,
       );
-    });
-
-    it('should dispatch loadAllData with synced data', async () => {
-      const syncedData = { task: { entities: {}, ids: [] } };
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-
-      await service.hydrateFromRemoteSync();
-
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
-        loadAllData({ appDataComplete: syncedData as any }),
-      );
-    });
-
-    it('should validate and repair synced data before dispatching', async () => {
-      const syncedData = { task: { entities: {}, ids: [] } };
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-
-      await service.hydrateFromRemoteSync();
-
-      expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
-    });
-
-    // SKIPPED: Repair system is disabled for debugging archive subtask loss
-    xit('should dispatch repaired data if validation repairs it', async () => {
-      const syncedData = { task: { entities: {}, ids: [] } } as any;
-      const repairedData = { task: { entities: {}, ids: [] }, repaired: true } as any;
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-      mockValidateStateService.validateAndRepair.and.returnValue({
-        isValid: false,
-        wasRepaired: true,
-        repairedState: repairedData,
-        repairSummary: { entityStateFixed: 1 } as any,
-      });
-
-      await service.hydrateFromRemoteSync();
-
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
-        loadAllData({ appDataComplete: repairedData }),
-      );
-    });
-
-    // SKIPPED: Repair system is disabled for debugging archive subtask loss
-    xit('should save repaired state to cache if validation repairs it', async () => {
-      const syncedData = { task: { entities: {}, ids: [] } } as any;
-      const repairedData = { task: { entities: {}, ids: [] }, repaired: true } as any;
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(50));
-      mockValidateStateService.validateAndRepair.and.returnValue({
-        isValid: false,
-        wasRepaired: true,
-        repairedState: repairedData,
-        repairSummary: { entityStateFixed: 1 } as any,
-      });
-
-      await service.hydrateFromRemoteSync();
-
-      expect(mockOpLogStore.saveStateCache).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          state: repairedData,
-          lastAppliedOpSeq: 50,
-        }),
-      );
-    });
-
-    it('should strip syncProvider from remote sync data to preserve local setting', async () => {
-      // Simulate remote data with a syncProvider that should NOT overwrite local
-      const syncedDataWithProvider = {
-        task: { entities: {}, ids: [] },
-        project: { entities: {}, ids: [] },
-        globalConfig: {
-          sync: {
-            syncProvider: 'Dropbox', // Remote has Dropbox
-            isEnabled: true,
-          },
-          misc: { someOtherSetting: true },
-        },
-      } as any;
-
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedDataWithProvider));
-      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(100));
-
-      await service.hydrateFromRemoteSync();
-
-      // Verify the dispatched data has syncProvider nulled out
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
-        loadAllData({
-          appDataComplete: jasmine.objectContaining({
-            globalConfig: jasmine.objectContaining({
-              sync: jasmine.objectContaining({
-                syncProvider: null, // Should be null, not 'Dropbox'
-                isEnabled: true, // Other sync settings preserved
-              }),
-            }),
-          }) as any,
-        }),
-      );
-
-      // Verify the state cache also has syncProvider nulled out
-      expect(mockOpLogStore.saveStateCache).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          state: jasmine.objectContaining({
-            globalConfig: jasmine.objectContaining({
-              sync: jasmine.objectContaining({
-                syncProvider: null,
-              }),
-            }),
-          }),
-        }),
-      );
-    });
-
-    it('should handle remote sync data without globalConfig', async () => {
-      const syncedDataWithoutConfig = {
-        task: { entities: {}, ids: [] },
-        project: { entities: {}, ids: [] },
-      } as any;
-
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedDataWithoutConfig));
-
-      await service.hydrateFromRemoteSync();
-
-      // Should not throw and should dispatch the data as-is
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
-        loadAllData({ appDataComplete: syncedDataWithoutConfig }),
-      );
-    });
-
-    it('should update vector clock store after sync', async () => {
-      // This test verifies that the vector clock store is updated after hydrateFromRemoteSync
-      // to ensure new ops created in the same session have the correct clock
-      const syncedData = { task: { entities: {}, ids: [] } };
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-      mockVectorClockService.getCurrentVectorClock.and.returnValue(
-        Promise.resolve({ clientA: 5 }),
-      );
-      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(50));
-
-      await service.hydrateFromRemoteSync();
-
-      // setVectorClock should be called (the clock is incremented by the client ID)
-      expect(mockOpLogStore.setVectorClock).toHaveBeenCalled();
-      // Verify the clock was called with a clock that includes the client ID
-      const setClock = mockOpLogStore.setVectorClock.calls.mostRecent().args[0];
-      expect(setClock).toBeDefined();
-      // Client 'test-client' should have been incremented
-      expect(setClock['test-client']).toBe(1);
-    });
-
-    it('should update vector clock store after saving state cache', async () => {
-      // Verify order: save state cache, then update vector clock store
-      const syncedData = { task: { entities: {}, ids: [] } };
-      (
-        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
-      ).and.returnValue(Promise.resolve(syncedData));
-      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(50));
-
-      const callOrder: string[] = [];
-      mockOpLogStore.saveStateCache.and.callFake(() => {
-        callOrder.push('saveStateCache');
-        return Promise.resolve();
-      });
-      mockOpLogStore.setVectorClock.and.callFake(() => {
-        callOrder.push('setVectorClock');
-        return Promise.resolve();
-      });
-
-      await service.hydrateFromRemoteSync();
-
-      expect(callOrder).toEqual(['saveStateCache', 'setVectorClock']);
     });
   });
 

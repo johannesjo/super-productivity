@@ -64,6 +64,12 @@ vi.mock('../src/db', async () => {
           .sort((a: any, b: any) => a.serverSeq - b.serverSeq)
           .slice(0, args.take || 500);
       }),
+      findUnique: vi.fn().mockImplementation(async (args: any) => {
+        if (args.where?.id) {
+          return state.operations.get(args.where.id) || null;
+        }
+        return null;
+      }),
     },
     userSyncState: {
       findUnique: vi.fn().mockImplementation(async (args: any) => {
@@ -151,6 +157,12 @@ vi.mock('../src/db', async () => {
           if (ops.length === 0) return { _max: { serverSeq: null } };
           const seqs = ops.map((op: any) => op.serverSeq);
           return { _max: { serverSeq: Math.max(...seqs) } };
+        }),
+        findUnique: vi.fn().mockImplementation(async (args: any) => {
+          if (args.where?.id) {
+            return state.operations.get(args.where.id) || null;
+          }
+          return null;
         }),
       },
     },
@@ -396,7 +408,7 @@ describe('Conflict Detection', () => {
       expect(result[0].accepted).toBe(true);
     });
 
-    it('should skip conflict detection when operation has no entityId', async () => {
+    it('should skip conflict detection when operation has bulk entityType ALL', async () => {
       const service = getSyncService();
 
       // First op on specific entity
@@ -408,13 +420,13 @@ describe('Conflict Detection', () => {
       });
       await service.uploadOps(userId, clientA, [op1]);
 
-      // Op without entityId (batch operation) should bypass conflict detection
+      // Bulk entityType 'ALL' should bypass conflict detection (no entityId required)
       const op2: Operation = {
         id: uuidv7(),
         clientId: clientB,
         actionType: 'BATCH_UPDATE',
         opType: 'BATCH',
-        entityType: 'TASK',
+        entityType: 'ALL', // Bulk entity types don't require entityId
         payload: { entities: {} },
         vectorClock: { [clientB]: 1 },
         timestamp: Date.now(),

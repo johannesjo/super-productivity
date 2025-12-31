@@ -198,4 +198,44 @@ export class OperationLogRecoveryService {
         `rejected ${expiredOps.length} expired ops.`,
     );
   }
+
+  /**
+   * Cleans up corrupt operations that have missing or invalid entityId.
+   * These operations cause infinite rejection loops during sync because:
+   * 1. They get rejected with CONFLICT_CONCURRENT
+   * 2. The rejection handler tries to resolve by creating merged ops
+   * 3. The new ops also have invalid entityId and get rejected again
+   *
+   * By marking these ops as rejected upfront, we break the infinite loop.
+   */
+  async cleanupCorruptOps(): Promise<void> {
+    const unsyncedOps = await this.opLogStore.getUnsynced();
+
+    if (unsyncedOps.length === 0) {
+      return;
+    }
+
+    // Find ops with missing or invalid entityId (excluding bulk 'ALL' operations)
+    const corruptOps = unsyncedOps.filter((entry) => {
+      const op = entry.op;
+      // Bulk operations with entityType 'ALL' don't need entityId
+      if (op.entityType === 'ALL') {
+        return false;
+      }
+      // Check for missing or invalid entityId
+      return !op.entityId || typeof op.entityId !== 'string';
+    });
+
+    if (corruptOps.length === 0) {
+      return;
+    }
+
+    const corruptIds = corruptOps.map((e) => e.op.id);
+    await this.opLogStore.markRejected(corruptIds);
+
+    OpLog.warn(
+      `OperationLogRecoveryService: Rejected ${corruptOps.length} corrupt ops with invalid entityId. ` +
+        `Entity types: ${[...new Set(corruptOps.map((e) => e.op.entityType))].join(', ')}`,
+    );
+  }
 }

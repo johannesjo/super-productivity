@@ -76,6 +76,12 @@ vi.mock('../src/db', async () => {
           _min: { serverSeq: Math.min(...seqs) },
         };
       }),
+      findUnique: vi.fn().mockImplementation(async (args: any) => {
+        if (args.where?.id) {
+          return state.operations.get(args.where.id) || null;
+        }
+        return null;
+      }),
     },
     userSyncState: {
       findUnique: vi.fn().mockImplementation(async (args: any) => {
@@ -169,6 +175,12 @@ vi.mock('../src/db', async () => {
           };
         }),
         deleteMany: vi.fn().mockImplementation(async () => ({ count: 0 })),
+        findUnique: vi.fn().mockImplementation(async (args: any) => {
+          if (args.where?.id) {
+            return state.operations.get(args.where.id) || null;
+          }
+          return null;
+        }),
       },
       syncDevice: {
         findMany: vi.fn().mockImplementation(async () => []),

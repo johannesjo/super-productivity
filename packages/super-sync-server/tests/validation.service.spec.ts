@@ -114,23 +114,133 @@ describe('ValidationService', () => {
       expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_ID);
     });
 
-    it('should accept null entityId', () => {
-      const op = createValidOp({ entityId: null, opType: 'CRT' });
+    // === entityId validation for regular entity types ===
+
+    it('should reject null entityId for regular entity type (TASK)', () => {
+      const op = createValidOp({ entityId: null, opType: 'CRT', entityType: 'TASK' });
       const result = validationService.validateOp(op, clientId);
-      expect(result.valid).toBe(true);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.MISSING_ENTITY_ID);
+      expect(result.error).toContain('requires entityId');
     });
 
-    it('should reject DEL operation without entityId', () => {
+    it('should reject undefined entityId for regular entity type (TAG)', () => {
+      const op = createValidOp({ entityId: undefined, opType: 'UPD', entityType: 'TAG' });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.MISSING_ENTITY_ID);
+    });
+
+    it('should reject missing entityId for DEL operation', () => {
       const op = createValidOp({ opType: 'DEL', entityId: null });
       const result = validationService.validateOp(op, clientId);
       expect(result.valid).toBe(false);
       expect(result.errorCode).toBe(SYNC_ERROR_CODES.MISSING_ENTITY_ID);
     });
 
-    it('should accept DEL operation with entityId', () => {
+    it('should accept DEL operation with valid entityId', () => {
       const op = createValidOp({ opType: 'DEL', entityId: 'entity-1' });
       const result = validationService.validateOp(op, clientId);
       expect(result.valid).toBe(true);
+    });
+
+    // === entityId validation for bulk entity types (ALL, RECOVERY) ===
+
+    it('should accept null entityId for entityType ALL', () => {
+      const op = createValidOp({ entityId: null, opType: 'UPD', entityType: 'ALL' });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept null entityId for entityType RECOVERY', () => {
+      const op = createValidOp({
+        entityId: null,
+        opType: 'BATCH',
+        entityType: 'RECOVERY',
+      });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(true);
+    });
+
+    // === entityId validation for full-state operations ===
+
+    it('should accept null entityId for SYNC_IMPORT operation', () => {
+      const op = createValidOp({
+        entityId: null,
+        opType: 'SYNC_IMPORT',
+        entityType: 'TASK',
+        payload: { appDataComplete: {} },
+      });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept null entityId for BACKUP_IMPORT operation', () => {
+      const op = createValidOp({
+        entityId: null,
+        opType: 'BACKUP_IMPORT',
+        entityType: 'PROJECT',
+        payload: { appDataComplete: {} },
+      });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept null entityId for REPAIR operation', () => {
+      const op = createValidOp({
+        entityId: null,
+        opType: 'REPAIR',
+        entityType: 'TAG',
+        payload: { appDataComplete: {} },
+      });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(true);
+    });
+
+    // === entityId validation edge cases ===
+
+    it('should reject empty string entityId for regular entity type', () => {
+      const op = createValidOp({ entityId: '', opType: 'CRT', entityType: 'TASK' });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.MISSING_ENTITY_ID);
+    });
+
+    it('should include opType and entityType in error message for missing entityId', () => {
+      const op = createValidOp({ entityId: null, opType: 'UPD', entityType: 'PROJECT' });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('UPD');
+      expect(result.error).toContain('PROJECT');
+    });
+
+    it('should reject missing entityId for all regular entity types', () => {
+      const regularEntityTypes = [
+        'TASK',
+        'PROJECT',
+        'TAG',
+        'NOTE',
+        'GLOBAL_CONFIG',
+        'TIME_TRACKING',
+        'SIMPLE_COUNTER',
+        'WORK_CONTEXT',
+        'TASK_REPEAT_CFG',
+        'ISSUE_PROVIDER',
+        'PLANNER',
+        'MENU_TREE',
+        'METRIC',
+        'BOARD',
+        'REMINDER',
+        'PLUGIN_USER_DATA',
+        'PLUGIN_METADATA',
+      ];
+
+      for (const entityType of regularEntityTypes) {
+        const op = createValidOp({ entityId: null, opType: 'UPD', entityType });
+        const result = validationService.validateOp(op, clientId);
+        expect(result.valid).toBe(false);
+        expect(result.errorCode).toBe(SYNC_ERROR_CODES.MISSING_ENTITY_ID);
+      }
     });
 
     it('should reject undefined payload', () => {

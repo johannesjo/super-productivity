@@ -104,11 +104,16 @@ export class OperationLogEffects {
     // Bulk operations with entityType 'ALL' don't need specific entity IDs
     // This catches programming errors early - all persistent actions must have entity identifiers
     const isBulkAllOperation = action.meta.entityType === 'ALL';
-    if (!isBulkAllOperation && !action.meta.entityId && !action.meta.entityIds?.length) {
+    const hasValidEntityId =
+      action.meta.entityId && typeof action.meta.entityId === 'string';
+    const hasValidEntityIds =
+      action.meta.entityIds?.length &&
+      action.meta.entityIds.every((id: unknown) => id && typeof id === 'string');
+    if (!isBulkAllOperation && !hasValidEntityId && !hasValidEntityIds) {
       // IMPORTANT: Dequeue first to prevent queue from getting stuck
       this.operationCaptureService.dequeue();
       devError(
-        `[OperationLogEffects] Action ${action.type} is missing entityId/entityIds - skipping persistence`,
+        `[OperationLogEffects] Action ${action.type} has invalid entityId/entityIds (${action.meta.entityId}) - skipping persistence`,
       );
       return;
     }

@@ -225,7 +225,7 @@ export class TaskService {
         withLatestFrom(this.currentTask$, this._imexMetaService.isDataImportInProgress$),
       )
       .subscribe(([tick, currentTask, isImportInProgress]) => {
-        if (currentTask && !isImportInProgress) {
+        if (currentTask?.id && !isImportInProgress) {
           // Update local state immediately (existing behavior)
           this.addTimeSpent(currentTask, tick.duration, tick.date);
 

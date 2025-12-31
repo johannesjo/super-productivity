@@ -71,6 +71,10 @@ export class OperationLogHydratorService {
         // A.7.12: Check for interrupted migration (touches 'state_cache' store)
         this.opLogStore.hasStateCacheBackup(),
       ]);
+
+      // Clean up corrupt operations (e.g., with undefined entityId) that cause
+      // infinite rejection loops during sync. Must run after recoverPendingRemoteOps.
+      await this.recoveryService.cleanupCorruptOps();
       if (hasBackup) {
         OpLog.warn(
           'OperationLogHydratorService: Found migration backup - previous migration may have crashed. Restoring...',

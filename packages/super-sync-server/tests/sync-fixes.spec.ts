@@ -74,6 +74,12 @@ vi.mock('../src/db', () => {
                 .slice(0, args.take || 500);
             }),
             aggregate: vi.fn().mockResolvedValue({ _min: { serverSeq: 1 } }),
+            findUnique: vi.fn().mockImplementation(async (args: any) => {
+              if (args.where?.id) {
+                return testOperations.get(args.where.id) || null;
+              }
+              return null;
+            }),
           },
           userSyncState: {
             findUnique: vi.fn().mockResolvedValue({ lastSeq: serverSeqCounter }),
@@ -108,6 +114,12 @@ vi.mock('../src/db', () => {
             .slice(0, args.take || 500);
         }),
         aggregate: vi.fn().mockResolvedValue({ _min: { serverSeq: 1 } }),
+        findUnique: vi.fn().mockImplementation(async (args: any) => {
+          if (args.where?.id) {
+            return testOperations.get(args.where.id) || null;
+          }
+          return null;
+        }),
       },
       userSyncState: {
         findUnique: vi.fn().mockImplementation(async () => ({

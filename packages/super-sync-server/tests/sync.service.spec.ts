@@ -138,6 +138,12 @@ vi.mock('../src/db', async () => {
         }
         return count;
       }),
+      findUnique: vi.fn().mockImplementation(async (args: any) => {
+        if (args.where?.id) {
+          return state.operations.get(args.where.id) || null;
+        }
+        return null;
+      }),
     },
     userSyncState: {
       findUnique: vi.fn().mockImplementation(async (args: any) => {
@@ -1390,12 +1396,14 @@ describe('SyncService', () => {
     it('should handle BATCH operations with entities payload', async () => {
       const service = getSyncService();
 
+      // BATCH operations still need entityId for validation
       const op: Operation = {
         id: uuidv7(),
         clientId,
         actionType: 'BATCH_UPDATE',
         opType: 'BATCH',
         entityType: 'TASK',
+        entityId: '*', // Wildcard entityId for batch operations
         payload: {
           entities: {
             t1: { title: 'Task 1', done: false },

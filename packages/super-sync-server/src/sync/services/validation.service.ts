@@ -109,10 +109,22 @@ export class ValidationService {
         };
       }
     }
-    if (op.opType === 'DEL' && !op.entityId) {
+
+    // Require entityId for regular entity operations.
+    // Full-state operations (SYNC_IMPORT, BACKUP_IMPORT, REPAIR) and bulk entity types
+    // (ALL, RECOVERY) legitimately don't have entityId.
+    // This prevents corrupt operations (e.g., TASK with undefined entityId) from being
+    // accepted and causing infinite rejection loops when synced to other clients.
+    const isFullStateOp =
+      op.opType === 'SYNC_IMPORT' ||
+      op.opType === 'BACKUP_IMPORT' ||
+      op.opType === 'REPAIR';
+    const isBulkEntityType = op.entityType === 'ALL' || op.entityType === 'RECOVERY';
+
+    if (!isFullStateOp && !isBulkEntityType && !op.entityId) {
       return {
         valid: false,
-        error: 'DEL operation requires entityId',
+        error: `Operation ${op.opType} on ${op.entityType} requires entityId`,
         errorCode: SYNC_ERROR_CODES.MISSING_ENTITY_ID,
       };
     }
@@ -146,10 +158,7 @@ export class ValidationService {
     // Validate payload complexity to prevent DoS attacks via deeply nested objects.
     // Full-state ops (SYNC_IMPORT, BACKUP_IMPORT, REPAIR) get higher thresholds
     // since they legitimately contain more data.
-    const isFullStateOp =
-      op.opType === 'SYNC_IMPORT' ||
-      op.opType === 'BACKUP_IMPORT' ||
-      op.opType === 'REPAIR';
+    // Note: isFullStateOp is already defined above in entityId validation.
     const maxDepth = isFullStateOp ? 50 : 20;
     const maxKeys = isFullStateOp ? 100000 : 20000;
     if (!this.validatePayloadComplexity(op.payload, maxDepth, maxKeys)) {

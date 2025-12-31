@@ -95,6 +95,12 @@ vi.mock('../src/db', async () => {
         }
         return { count };
       }),
+      findUnique: vi.fn().mockImplementation(async (args: any) => {
+        if (args.where?.id) {
+          return state.operations.get(args.where.id) || null;
+        }
+        return null;
+      }),
     },
     userSyncState: {
       findUnique: vi.fn().mockImplementation(async (args: any) => {
@@ -224,6 +230,12 @@ vi.mock('../src/db', async () => {
             count++;
           }
           return { count };
+        }),
+        findUnique: vi.fn().mockImplementation(async (args: any) => {
+          if (args.where?.id) {
+            return state.operations.get(args.where.id) || null;
+          }
+          return null;
         }),
       },
       syncDevice: {
