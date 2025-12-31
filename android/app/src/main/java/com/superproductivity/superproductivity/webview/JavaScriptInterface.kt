@@ -13,6 +13,7 @@ import com.superproductivity.superproductivity.app.LaunchDecider
 import com.superproductivity.superproductivity.service.FocusModeForegroundService
 import com.superproductivity.superproductivity.service.ReminderNotificationHelper
 import com.superproductivity.superproductivity.service.TrackingForegroundService
+import com.superproductivity.superproductivity.widget.WidgetTaskQueue
 
 
 class JavaScriptInterface(
@@ -190,6 +191,16 @@ class JavaScriptInterface(
     @JavascriptInterface
     fun cancelNativeReminder(notificationId: Int) {
         ReminderNotificationHelper.cancelReminder(activity, notificationId)
+    }
+
+    /**
+     * Get queued tasks from the widget and clear the queue.
+     * Returns JSON string of tasks or null if empty.
+     */
+    @Suppress("unused")
+    @JavascriptInterface
+    fun getWidgetTaskQueue(): String? {
+        return WidgetTaskQueue.getAndClearQueue(activity)
     }
 
     fun callJavaScriptFunction(script: String) {

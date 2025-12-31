@@ -107,5 +107,25 @@
       android:name=".receiver.ReminderActionReceiver"
       android:enabled="true"
       android:exported="false" />
+
+    <!-- Quick Add Widget -->
+    <receiver
+      android:name=".widget.QuickAddWidgetProvider"
+      android:exported="true"
+      android:label="@string/widget_quick_add_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_quick_add_info" />
+    </receiver>
+
+    <!-- Quick Add Dialog Activity -->
+    <activity
+      android:name=".widget.QuickAddActivity"
+      android:exported="false"
+      android:theme="@style/Theme.AppCompat.Light.Dialog"
+      android:excludeFromRecents="true" />
   </application>
 </manifest>

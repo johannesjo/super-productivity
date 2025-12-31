@@ -73,6 +73,9 @@ export interface AndroidInterface {
   ): void;
   cancelNativeReminder?(notificationId: number): void;
 
+  // Widget task queue - get queued tasks from home screen widget
+  getWidgetTaskQueue?(): string | null;
+
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;

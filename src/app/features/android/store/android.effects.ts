@@ -166,6 +166,43 @@ export class AndroidEffects {
       { dispatch: false },
     );
 
+  // Process tasks queued from the home screen widget
+  processWidgetTasks$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        androidInterface.onResume$.pipe(
+          tap(() => {
+            const queueJson = androidInterface.getWidgetTaskQueue?.();
+            if (!queueJson) {
+              return;
+            }
+
+            try {
+              const queue = JSON.parse(queueJson);
+              const tasks = queue.tasks || [];
+
+              for (const widgetTask of tasks) {
+                this._taskService.add(widgetTask.title);
+              }
+
+              if (tasks.length > 0) {
+                this._snackService.open({
+                  type: 'SUCCESS',
+                  msg:
+                    tasks.length === 1
+                      ? 'Task added from widget'
+                      : `${tasks.length} tasks added from widget`,
+                });
+              }
+            } catch (e) {
+              DroidLog.err('Failed to process widget tasks', e);
+            }
+          }),
+        ),
+      { dispatch: false },
+    );
+
   // markTaskAsDone$ = createEffect(() =>
   //   androidInterface.onMarkCurrentTaskAsDone$.pipe(
   //     withLatestFrom(this._store$.select(selectCurrentTask)),
