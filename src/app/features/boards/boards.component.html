@@ -54,21 +54,21 @@
       (click)="editBoard(board)"
     >
       <mat-icon>edit</mat-icon>
-      Edit
+      {{ T.G.EDIT | translate }}
     </button>
     <button
       mat-menu-item
       (click)="duplicateBoard(board)"
     >
       <mat-icon>file_copy</mat-icon>
-      Duplicate
+      {{ T.G.DUPLICATE | translate }}
     </button>
     <button
       mat-menu-item
       (click)="removeBoard(board)"
     >
       <mat-icon class="color-warn-i">delete_forever</mat-icon>
-      Delete Board
+      {{ T.G.DELETE | translate }}
     </button>
   </ng-template>
 </mat-menu>
