@@ -23,6 +23,10 @@ import { BoardEditComponent } from './board-edit/board-edit.component';
 import { DEFAULT_BOARD_CFG } from './boards.const';
 import { BoardsActions } from './store/boards.actions';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
+import { BoardCfg } from './boards.model';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogBoardEditComponent } from './dialog-board-edit/dialog-board-edit.component';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 
 @Component({
   selector: 'boards',
@@ -46,6 +50,7 @@ import { ContextMenuComponent } from '../../ui/context-menu/context-menu.compone
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardsComponent {
+  private _matDialog = inject(MatDialog);
   store = inject(Store);
   elementRef = inject(ElementRef);
   selectedTabIndex = signal(localStorage.getItem(LS.SELECTED_BOARD) || 0);
@@ -83,11 +88,9 @@ export class BoardsComponent {
     return this.elementRef.nativeElement;
   }
 
-  duplicateBoard(): void {
-    const selectedTabId = this.selectedTabIndex();
-    const boardToDuplicate = this.boards()?.[selectedTabId];
+  duplicateBoard(boardToDuplicate: BoardCfg): void {
     if (!boardToDuplicate) {
-      console.warn('No board selected to duplicate');
+      console.warn('No board selected to duplicate'); // todo: use log
       return;
     }
     this.store.dispatch(
@@ -103,5 +106,39 @@ export class BoardsComponent {
         },
       }),
     );
+  }
+
+  editBoard(board: BoardCfg): void {
+    if (!board) {
+      return;
+    }
+    this._matDialog.open(DialogBoardEditComponent, {
+      data: {
+        board: board,
+      },
+    });
+  }
+
+  removeBoard(board: BoardCfg): void {
+    if (!board) {
+      return;
+    }
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          cancelTxt: T.G.CANCEL,
+          okTxt: T.G.DELETE,
+          message:
+            // TODO translate"
+            'Are you sure you want to delete this Board?',
+        },
+      })
+      .afterClosed()
+      .subscribe((isConfirm: boolean) => {
+        if (isConfirm) {
+          this.store.dispatch(BoardsActions.removeBoard({ id: board.id }));
+        }
+      });
   }
 }
