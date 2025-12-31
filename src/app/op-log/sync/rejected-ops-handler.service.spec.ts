@@ -42,6 +42,7 @@ describe('RejectedOpsHandlerService', () => {
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
       'getOpById',
       'markRejected',
+      'markSynced',
     ]);
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     staleOperationResolverSpy = jasmine.createSpyObj('StaleOperationResolverService', [
@@ -143,6 +144,86 @@ describe('RejectedOpsHandlerService', () => {
       ]);
 
       expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    it('should mark DUPLICATE_OPERATION as synced (op already on server)', async () => {
+      // REGRESSION TEST: Bug where duplicate operations would either:
+      // 1. Be marked as rejected (wrong - they ARE on the server)
+      // 2. Cause infinite retry loop when batch transaction failed
+      //
+      // Scenario:
+      // 1. Client uploads op, server accepts but client times out before receiving response
+      // 2. Client retries, server returns DUPLICATE_OPERATION
+      // 3. Client should mark as synced (not rejected) - the op IS on the server
+      const op = createOp({ id: 'dup-op-1' });
+      const entry = { ...mockEntry(op), seq: 42 };
+      opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(entry));
+      opLogStoreSpy.markSynced.and.resolveTo();
+
+      await service.handleRejectedOps([
+        {
+          opId: 'dup-op-1',
+          error: 'Duplicate operation ID',
+          errorCode: 'DUPLICATE_OPERATION',
+        },
+      ]);
+
+      expect(opLogStoreSpy.getOpById).toHaveBeenCalledWith('dup-op-1');
+      expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([42]);
+      expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    it('should handle multiple DUPLICATE_OPERATION rejections', async () => {
+      opLogStoreSpy.getOpById.and.callFake(async (opId: string) => {
+        const seqMap: Record<string, number> = {
+          dupOp1: 10,
+          dupOp2: 20,
+          dupOp3: 30,
+        };
+        const op = createOp({ id: opId });
+        return { ...mockEntry(op), seq: seqMap[opId] };
+      });
+      opLogStoreSpy.markSynced.and.resolveTo();
+
+      await service.handleRejectedOps([
+        { opId: 'dupOp1', error: 'Duplicate', errorCode: 'DUPLICATE_OPERATION' },
+        { opId: 'dupOp2', error: 'Duplicate', errorCode: 'DUPLICATE_OPERATION' },
+        { opId: 'dupOp3', error: 'Duplicate', errorCode: 'DUPLICATE_OPERATION' },
+      ]);
+
+      expect(opLogStoreSpy.markSynced).toHaveBeenCalledTimes(3);
+      expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([10]);
+      expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([20]);
+      expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([30]);
+    });
+
+    it('should skip DUPLICATE_OPERATION if entry not found', async () => {
+      opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(undefined));
+      opLogStoreSpy.markSynced.and.resolveTo();
+
+      await service.handleRejectedOps([
+        { opId: 'missing-op', error: 'Duplicate', errorCode: 'DUPLICATE_OPERATION' },
+      ]);
+
+      expect(opLogStoreSpy.markSynced).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+    });
+
+    it('should skip DUPLICATE_OPERATION if already synced', async () => {
+      const op = createOp({ id: 'already-synced-op' });
+      const entry = { ...mockEntry(op), seq: 42, syncedAt: Date.now() };
+      opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(entry));
+      opLogStoreSpy.markSynced.and.resolveTo();
+
+      await service.handleRejectedOps([
+        {
+          opId: 'already-synced-op',
+          error: 'Duplicate',
+          errorCode: 'DUPLICATE_OPERATION',
+        },
+      ]);
+
+      expect(opLogStoreSpy.markSynced).not.toHaveBeenCalled();
     });
 
     it('should show alert for STORAGE_QUOTA_EXCEEDED and not mark as rejected', async () => {

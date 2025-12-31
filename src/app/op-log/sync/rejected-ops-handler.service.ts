@@ -103,6 +103,21 @@ export class RejectedOpsHandlerService {
         continue;
       }
 
+      // DUPLICATE_OPERATION = the operation already exists on the server.
+      // This is NOT an error - it means the op was successfully uploaded before but the
+      // client didn't record it as synced (e.g., network timeout after server accepted).
+      // Mark it as synced so the client stops retrying.
+      if (rejected.errorCode === 'DUPLICATE_OPERATION') {
+        const dupEntry = await this.opLogStore.getOpById(rejected.opId);
+        if (dupEntry && !dupEntry.syncedAt) {
+          OpLog.normal(
+            `RejectedOpsHandlerService: Op ${rejected.opId} already on server (duplicate), marking as synced`,
+          );
+          await this.opLogStore.markSynced([dupEntry.seq]);
+        }
+        continue;
+      }
+
       const entry = await this.opLogStore.getOpById(rejected.opId);
       // Skip if:
       // - Op doesn't exist (was somehow removed)

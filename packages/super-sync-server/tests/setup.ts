@@ -105,6 +105,10 @@ vi.mock('../src/db', () => {
             testData.operations.set(args.data.id, op);
             return op;
           }),
+          findUnique: vi.fn().mockImplementation(async (args: any) => {
+            // Check if operation with given ID exists
+            return testData.operations.get(args.where?.id) || null;
+          }),
           findFirst: vi.fn().mockImplementation(async (args: any) => {
             // Find the first matching operation
             for (const op of testData.operations.values()) {
@@ -143,7 +147,13 @@ vi.mock('../src/db', () => {
           update: vi.fn().mockImplementation(async (args: any) => {
             const existing = testData.userSyncStates.get(args.where.userId);
             if (existing) {
-              const updated = { ...existing, ...args.data };
+              const updated = { ...existing };
+              // Handle Prisma's increment syntax: { lastSeq: { increment: 1 } }
+              if (args.data?.lastSeq?.increment !== undefined) {
+                updated.lastSeq = (existing.lastSeq || 0) + args.data.lastSeq.increment;
+              } else {
+                Object.assign(updated, args.data);
+              }
               testData.userSyncStates.set(args.where.userId, updated);
               return updated;
             }
@@ -153,7 +163,9 @@ vi.mock('../src/db', () => {
         },
         syncDevice: {
           upsert: vi.fn().mockImplementation(async (args: any) => {
-            const key = `${args.where.clientId_userId.userId}:${args.where.clientId_userId.clientId}`;
+            // Handle both key naming conventions (Prisma uses userId_clientId)
+            const compositeKey = args.where.userId_clientId || args.where.clientId_userId;
+            const key = `${compositeKey.userId}:${compositeKey.clientId}`;
             const result = { ...args.create, ...args.update };
             testData.syncDevices.set(key, result);
             return result;

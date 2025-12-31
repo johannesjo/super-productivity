@@ -386,6 +386,37 @@ export class SyncService {
         };
       }
 
+      // FIX: Check for duplicate operation BEFORE attempting insert.
+      // If we let the insert fail with P2002 (unique constraint), PostgreSQL aborts the
+      // entire transaction, causing all subsequent operations in the batch to fail with
+      // error code 25P02 ("transaction is aborted"). By checking first, we avoid this
+      // and can properly return DUPLICATE_OPERATION for just this op while continuing
+      // to process the rest of the batch.
+      const existingOp = await tx.operation.findUnique({
+        where: { id: op.id },
+        select: { id: true }, // Only need to check existence
+      });
+
+      if (existingOp) {
+        Logger.audit({
+          event: 'OP_REJECTED',
+          userId,
+          clientId,
+          opId: op.id,
+          entityType: op.entityType,
+          entityId: op.entityId,
+          errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+          reason: 'Duplicate operation ID (pre-check)',
+          opType: op.opType,
+        });
+        return {
+          opId: op.id,
+          accepted: false,
+          error: 'Duplicate operation ID',
+          errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+        };
+      }
+
       await tx.operation.create({
         data: {
           id: op.id,
@@ -411,7 +442,8 @@ export class SyncService {
         serverSeq,
       };
     } catch (err: unknown) {
-      // Duplicate ID (already processed) - idempotency
+      // Duplicate ID - fallback in case of race condition between check and insert.
+      // This should be rare now that we pre-check, but kept for safety.
       if (
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === 'P2002' // Unique constraint violation
@@ -424,7 +456,7 @@ export class SyncService {
           entityType: op.entityType,
           entityId: op.entityId,
           errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-          reason: 'Duplicate operation ID',
+          reason: 'Duplicate operation ID (race)',
           opType: op.opType,
         });
         return {
