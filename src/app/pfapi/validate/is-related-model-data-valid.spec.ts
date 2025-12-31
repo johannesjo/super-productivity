@@ -1,5 +1,6 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { PFLog } from '../../core/log';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 describe('isRelatedModelDataValid', () => {
   let isRelatedModelDataValid: any;
@@ -125,5 +126,168 @@ describe('isRelatedModelDataValid', () => {
 
     const result = isRelatedModelDataValid(dataWithValidRepeatCfgId);
     expect(result).toBe(true);
+  });
+
+  describe('TODAY_TAG self-healing', () => {
+    it('should self-heal TODAY_TAG with orphaned task IDs and return true', () => {
+      const dataWithTodayTagOrphans: any = {
+        project: { ids: [], entities: {} },
+        tag: {
+          ids: [TODAY_TAG.id],
+          entities: {
+            [TODAY_TAG.id]: {
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: ['orphan-task-1', 'orphan-task-2'], // These tasks don't exist
+            },
+          },
+        },
+        task: { ids: [], entities: {} }, // No tasks
+        taskRepeatCfg: { ids: [], entities: {} },
+        archiveYoung: { task: { ids: [], entities: {} } },
+        archiveOld: { task: { ids: [], entities: {} } },
+        note: { ids: [], entities: {}, todayOrder: [] },
+        issueProvider: { ids: [], entities: {} },
+        reminders: [],
+        menuTree: { projectTree: [], tagTree: [] },
+      };
+
+      const result = isRelatedModelDataValid(dataWithTodayTagOrphans);
+
+      // Should pass because TODAY_TAG orphans are self-healed
+      expect(result).toBe(true);
+      // Verify self-healing logged a warning
+      expect(PFLog.warn).toHaveBeenCalledWith(
+        jasmine.stringContaining(
+          'Self-healing: Removed 2 orphaned IDs from TODAY_TAG.taskIds',
+        ),
+        jasmine.any(Object),
+      );
+      // Verify the orphaned IDs were removed from the data
+      expect(dataWithTodayTagOrphans.tag.entities[TODAY_TAG.id].taskIds).toEqual([]);
+    });
+
+    it('should keep valid task IDs in TODAY_TAG while removing orphans', () => {
+      const dataWithMixedTodayTag: any = {
+        project: { ids: [], entities: {} },
+        tag: {
+          ids: [TODAY_TAG.id, 'regularTag'],
+          entities: {
+            [TODAY_TAG.id]: {
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: ['validTask', 'orphanTask'], // Mixed valid and orphan
+            },
+            regularTag: {
+              id: 'regularTag',
+              title: 'Regular Tag',
+              taskIds: ['validTask'],
+            },
+          },
+        },
+        task: {
+          ids: ['validTask'],
+          entities: {
+            validTask: {
+              id: 'validTask',
+              projectId: null,
+              tagIds: ['regularTag'],
+              subTaskIds: [],
+              parentId: null,
+            },
+          },
+        },
+        taskRepeatCfg: { ids: [], entities: {} },
+        archiveYoung: { task: { ids: [], entities: {} } },
+        archiveOld: { task: { ids: [], entities: {} } },
+        note: { ids: [], entities: {}, todayOrder: [] },
+        issueProvider: { ids: [], entities: {} },
+        reminders: [],
+        menuTree: { projectTree: [], tagTree: [] },
+      };
+
+      const result = isRelatedModelDataValid(dataWithMixedTodayTag);
+
+      expect(result).toBe(true);
+      // TODAY_TAG should only have the valid task ID
+      expect(dataWithMixedTodayTag.tag.entities[TODAY_TAG.id].taskIds).toEqual([
+        'validTask',
+      ]);
+    });
+
+    it('should fail validation for regular tags with orphaned task IDs', () => {
+      const dataWithRegularTagOrphans: any = {
+        project: { ids: [], entities: {} },
+        tag: {
+          ids: ['regularTag'],
+          entities: {
+            regularTag: {
+              id: 'regularTag',
+              title: 'Regular Tag',
+              taskIds: ['orphanTask'], // This task doesn't exist
+            },
+          },
+        },
+        task: { ids: [], entities: {} }, // No tasks
+        taskRepeatCfg: { ids: [], entities: {} },
+        archiveYoung: { task: { ids: [], entities: {} } },
+        archiveOld: { task: { ids: [], entities: {} } },
+        note: { ids: [], entities: {}, todayOrder: [] },
+        issueProvider: { ids: [], entities: {} },
+        reminders: [],
+        menuTree: { projectTree: [], tagTree: [] },
+      };
+
+      const result = isRelatedModelDataValid(dataWithRegularTagOrphans);
+
+      // Should fail because regular tags don't get self-healing
+      expect(result).toBe(false);
+    });
+
+    it('should not log warning when TODAY_TAG has no orphaned IDs', () => {
+      const dataWithValidTodayTag: any = {
+        project: {
+          ids: ['p1'],
+          entities: {
+            p1: { id: 'p1', taskIds: ['validTask'], backlogTaskIds: [], noteIds: [] },
+          },
+        },
+        tag: {
+          ids: [TODAY_TAG.id],
+          entities: {
+            [TODAY_TAG.id]: {
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: ['validTask'],
+            },
+          },
+        },
+        task: {
+          ids: ['validTask'],
+          entities: {
+            validTask: {
+              id: 'validTask',
+              projectId: 'p1',
+              tagIds: [],
+              subTaskIds: [],
+              parentId: null,
+            },
+          },
+        },
+        taskRepeatCfg: { ids: [], entities: {} },
+        archiveYoung: { task: { ids: [], entities: {} } },
+        archiveOld: { task: { ids: [], entities: {} } },
+        note: { ids: [], entities: {}, todayOrder: [] },
+        issueProvider: { ids: [], entities: {} },
+        reminders: [],
+        menuTree: { projectTree: [], tagTree: [] },
+      };
+
+      const result = isRelatedModelDataValid(dataWithValidTodayTag);
+
+      expect(result).toBe(true);
+      // Should not log any self-healing warning
+      expect(PFLog.warn).not.toHaveBeenCalled();
+    });
   });
 });

@@ -10,7 +10,9 @@ import {
 import { Project } from '../../../features/project/project.model';
 import { TAG_FEATURE_NAME, tagAdapter } from '../../../features/tag/store/tag.reducer';
 import { Tag } from '../../../features/tag/tag.model';
+import { TODAY_TAG } from '../../../features/tag/tag.const';
 import { unique } from '../../../util/unique';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 /**
  * Regex to match LWW Update action types.
@@ -173,6 +175,72 @@ const syncTagTaskIds = (
 };
 
 /**
+ * Updates TODAY_TAG.taskIds when a task's dueDay changes via LWW Update.
+ *
+ * TODAY_TAG is a virtual tag where membership is determined by task.dueDay,
+ * not by task.tagIds. When LWW Update recreates a task or changes its dueDay,
+ * we must update TODAY_TAG.taskIds accordingly.
+ *
+ * See: docs/ai/today-tag-architecture.md
+ */
+const syncTodayTagTaskIds = (
+  state: RootState,
+  taskId: string,
+  oldDueDay: string | undefined,
+  newDueDay: string | undefined,
+): RootState => {
+  const todayStr = getDbDateStr();
+  const wasToday = oldDueDay === todayStr;
+  const isNowToday = newDueDay === todayStr;
+
+  // No change in TODAY membership
+  if (wasToday === isNowToday) {
+    return state;
+  }
+
+  let tagState = state[TAG_FEATURE_NAME];
+  const todayTag = tagState.entities[TODAY_TAG.id] as Tag | undefined;
+
+  if (!todayTag) {
+    // TODAY_TAG doesn't exist yet (shouldn't happen in normal operation)
+    return state;
+  }
+
+  if (!wasToday && isNowToday) {
+    // Task moved to today (or recreated with dueDay = today)
+    if (!todayTag.taskIds.includes(taskId)) {
+      tagState = tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: unique([...todayTag.taskIds, taskId]),
+          },
+        },
+        tagState,
+      );
+    }
+  } else if (wasToday && !isNowToday) {
+    // Task moved away from today
+    if (todayTag.taskIds.includes(taskId)) {
+      tagState = tagAdapter.updateOne(
+        {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: todayTag.taskIds.filter((id) => id !== taskId),
+          },
+        },
+        tagState,
+      );
+    }
+  }
+
+  return {
+    ...state,
+    [TAG_FEATURE_NAME]: tagState,
+  };
+};
+
+/**
  * Meta-reducer that handles LWW (Last-Write-Wins) Update actions.
  *
  * When a LWW conflict is resolved and local state wins, a `[ENTITY_TYPE] LWW Update`
@@ -304,6 +372,11 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       const newTagIds = (entityData['tagIds'] as string[]) || [];
 
       updatedState = syncTagTaskIds(updatedState, entityId, oldTagIds, newTagIds);
+
+      // Sync TODAY_TAG.taskIds when dueDay changes (virtual tag based on dueDay)
+      const oldDueDay = existingEntity?.dueDay as string | undefined;
+      const newDueDay = entityData['dueDay'] as string | undefined;
+      updatedState = syncTodayTagTaskIds(updatedState, entityId, oldDueDay, newDueDay);
     }
 
     return reducer(updatedState, action);

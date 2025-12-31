@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { PFLog } from '../../core/log';
 import { MenuTreeKind } from '../../features/menu-tree/store/menu-tree.model';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 // WARNING: Module-level mutable state. This is not ideal because:
 // 1. Can cause test pollution if tests don't properly isolate
@@ -271,6 +272,27 @@ const validateTasksToProjectsAndTags = (
   for (const tagId of d.tag.ids) {
     const tag = d.tag.entities[tagId];
     if (!tag) continue;
+
+    // Self-healing for TODAY_TAG orphaned IDs
+    // TODAY_TAG is a virtual tag where taskIds stores ordering only.
+    // Orphaned IDs can occur during LWW conflict resolution when UPDATE
+    // wins over DELETE but TODAY_TAG.taskIds wasn't properly synced.
+    if (tagId === TODAY_TAG.id) {
+      const orphanedIds = tag.taskIds.filter((tid) => !taskIds.has(tid));
+      if (orphanedIds.length > 0) {
+        // Auto-repair: Remove orphaned IDs from TODAY_TAG.taskIds
+        const repairedTaskIds = tag.taskIds.filter((tid) => taskIds.has(tid));
+        d.tag.entities[TODAY_TAG.id] = {
+          ...tag,
+          taskIds: repairedTaskIds,
+        };
+        PFLog.warn(
+          `[ValidateState] Self-healing: Removed ${orphanedIds.length} orphaned IDs from TODAY_TAG.taskIds`,
+          { orphanedIds },
+        );
+      }
+      continue; // Skip normal error handling for TODAY_TAG
+    }
 
     for (const tid of tag.taskIds) {
       if (!taskIds.has(tid)) {

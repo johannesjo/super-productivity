@@ -7,6 +7,7 @@ import { TAG_FEATURE_NAME } from '../../../features/tag/store/tag.reducer';
 import { Task } from '../../../features/tasks/task.model';
 import { Project } from '../../../features/project/project.model';
 import { Tag } from '../../../features/tag/tag.model';
+import { TODAY_TAG } from '../../../features/tag/tag.const';
 
 describe('lwwUpdateMetaReducer', () => {
   const mockReducer = jasmine.createSpy('reducer');
@@ -1097,6 +1098,348 @@ describe('lwwUpdateMetaReducer', () => {
 
       // Order should be preserved after removal
       expect(projectA.taskIds).toEqual(['first', 'last']);
+    });
+  });
+
+  describe('TODAY_TAG.taskIds sync on task dueDay change', () => {
+    const TODAY_STR = '2025-12-31';
+    const TOMORROW_STR = '2026-01-01';
+    const YESTERDAY_STR = '2025-12-30';
+
+    beforeEach(() => {
+      // Mock date to control what getDbDateStr returns
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date('2025-12-31T12:00:00'));
+    });
+
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
+    const createStateWithTodayTag = (
+      taskDueDay: string | undefined,
+      todayTagTaskIds: string[],
+    ): Partial<RootState> =>
+      ({
+        [TASK_FEATURE_NAME]: {
+          ids: [TASK_ID],
+          entities: {
+            [TASK_ID]: createMockTask({ dueDay: taskDueDay }),
+          },
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [TODAY_TAG.id],
+          entities: {
+            [TODAY_TAG.id]: createMockTag({
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: todayTagTaskIds,
+            }),
+          },
+        },
+      }) as Partial<RootState>;
+
+    it('should add task to TODAY_TAG.taskIds when LWW Update recreates task with dueDay = today', () => {
+      // Task was deleted locally but UPDATE wins with dueDay = today
+      const state = {
+        [TASK_FEATURE_NAME]: {
+          ids: [], // Task doesn't exist
+          entities: {},
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [TODAY_TAG.id],
+          entities: {
+            [TODAY_TAG.id]: createMockTag({
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: [],
+            }),
+          },
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        title: 'Recreated Task',
+        dueDay: TODAY_STR,
+        tagIds: [],
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      spyOn(console, 'log');
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      expect(todayTag.taskIds).toContain(TASK_ID);
+    });
+
+    it('should add task to TODAY_TAG.taskIds when LWW Update changes dueDay to today', () => {
+      // Task has dueDay = tomorrow, LWW update changes it to today
+      const state = createStateWithTodayTag(TOMORROW_STR, []);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TODAY_STR,
+        tagIds: [],
+        title: 'Task moved to today',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      expect(todayTag.taskIds).toContain(TASK_ID);
+    });
+
+    it('should remove task from TODAY_TAG.taskIds when LWW Update changes dueDay from today', () => {
+      // Task has dueDay = today, LWW update changes it to tomorrow
+      const state = createStateWithTodayTag(TODAY_STR, [TASK_ID]);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TOMORROW_STR,
+        tagIds: [],
+        title: 'Task moved to tomorrow',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      expect(todayTag.taskIds).not.toContain(TASK_ID);
+    });
+
+    it('should not modify TODAY_TAG.taskIds when dueDay unchanged (both today)', () => {
+      const state = createStateWithTodayTag(TODAY_STR, [TASK_ID, 'other-task']);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TODAY_STR, // Same as before
+        tagIds: [],
+        title: 'Updated title only',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      // Should preserve order and not duplicate
+      expect(todayTag.taskIds).toEqual([TASK_ID, 'other-task']);
+    });
+
+    it('should not modify TODAY_TAG.taskIds when dueDay unchanged (neither today)', () => {
+      const state = createStateWithTodayTag(YESTERDAY_STR, ['other-task']);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TOMORROW_STR, // Neither old nor new is today
+        tagIds: [],
+        title: 'Updated task',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      expect(todayTag.taskIds).toEqual(['other-task']);
+      expect(todayTag.taskIds).not.toContain(TASK_ID);
+    });
+
+    it('should handle missing TODAY_TAG gracefully', () => {
+      // TODAY_TAG doesn't exist in state
+      const state = {
+        [TASK_FEATURE_NAME]: {
+          ids: [TASK_ID],
+          entities: {
+            [TASK_ID]: createMockTask({ dueDay: TOMORROW_STR }),
+          },
+          currentTaskId: null,
+          selectedTaskId: null,
+          taskDetailTargetPanel: null,
+          isDataLoaded: true,
+          lastCurrentTaskId: null,
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+        [TAG_FEATURE_NAME]: {
+          ids: [],
+          entities: {},
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TODAY_STR,
+        tagIds: [],
+        title: 'Task moved to today',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      // Should not throw
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      // State should still be updated without TODAY_TAG changes
+      const task = updatedState[TASK_FEATURE_NAME]?.entities[TASK_ID] as Task;
+      expect(task.dueDay).toBe(TODAY_STR);
+    });
+
+    it('should not duplicate task in TODAY_TAG.taskIds if already present', () => {
+      // Task already in TODAY_TAG.taskIds (edge case)
+      const state = createStateWithTodayTag(TOMORROW_STR, [TASK_ID]);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TODAY_STR,
+        tagIds: [],
+        title: 'Task moved to today',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      // Should still only have one instance
+      expect(todayTag.taskIds.filter((id) => id === TASK_ID).length).toBe(1);
+    });
+
+    it('should preserve TODAY_TAG.taskIds order when adding task', () => {
+      const existingTasks = ['existing-1', 'existing-2'];
+      const state = {
+        ...createStateWithTodayTag(TOMORROW_STR, existingTasks),
+        [TAG_FEATURE_NAME]: {
+          ids: [TODAY_TAG.id],
+          entities: {
+            [TODAY_TAG.id]: createMockTag({
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: existingTasks,
+            }),
+          },
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TODAY_STR,
+        tagIds: [],
+        title: 'Task moved to today',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      // Original order should be preserved, new task appended at end
+      expect(todayTag.taskIds).toEqual([...existingTasks, TASK_ID]);
+    });
+
+    it('should preserve TODAY_TAG.taskIds order when removing task', () => {
+      const state = {
+        ...createStateWithTodayTag(TODAY_STR, ['first', TASK_ID, 'last']),
+        [TAG_FEATURE_NAME]: {
+          ids: [TODAY_TAG.id],
+          entities: {
+            [TODAY_TAG.id]: createMockTag({
+              id: TODAY_TAG.id,
+              title: TODAY_TAG.title,
+              taskIds: ['first', TASK_ID, 'last'],
+            }),
+          },
+        },
+      } as Partial<RootState>;
+
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TOMORROW_STR,
+        tagIds: [],
+        title: 'Task moved away from today',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      // Order should be preserved after removal
+      expect(todayTag.taskIds).toEqual(['first', 'last']);
+    });
+
+    it('should add task to TODAY_TAG.taskIds when dueDay changes from undefined to today', () => {
+      const state = createStateWithTodayTag(undefined, []);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: TODAY_STR,
+        tagIds: [],
+        title: 'Task scheduled for today',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      expect(todayTag.taskIds).toContain(TASK_ID);
+    });
+
+    it('should remove task from TODAY_TAG.taskIds when dueDay changes from today to undefined', () => {
+      const state = createStateWithTodayTag(TODAY_STR, [TASK_ID]);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        dueDay: undefined,
+        tagIds: [],
+        title: 'Task unscheduled',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: TASK_ID },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const todayTag = updatedState[TAG_FEATURE_NAME]?.entities[TODAY_TAG.id] as Tag;
+
+      expect(todayTag.taskIds).not.toContain(TASK_ID);
     });
   });
 });
