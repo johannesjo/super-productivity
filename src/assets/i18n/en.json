@@ -1236,6 +1236,8 @@
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
         "UPLOAD_OPS_REJECTED": "{{count}} operation(s) were permanently rejected by the server and won't be synced.",
         "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!",
+        "VERSION_UNSUPPORTED": "Cannot sync: data requires a newer app version. Please update.",
+        "NEWER_VERSION_AVAILABLE": "Some changes are from a newer app version. Consider updating for full compatibility.",
         "FRESH_CLIENT_SYNC_CANCELLED": "Initial sync cancelled. Remote data was not applied.",
         "RESTORE_SUCCESS": "Data restored successfully",
         "RESTORE_ERROR": "Failed to restore data",

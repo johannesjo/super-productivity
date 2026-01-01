@@ -3,6 +3,7 @@ import { RemoteOpsProcessingService } from './remote-ops-processing.service';
 import {
   SchemaMigrationService,
   MAX_VERSION_SKIP,
+  MIN_SUPPORTED_SCHEMA_VERSION,
 } from '../store/schema-migration.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
@@ -414,6 +415,101 @@ describe('RemoteOpsProcessingService', () => {
 
       // Should not proceed to apply ops
       expect(opLogStoreSpy.getUnsynced).not.toHaveBeenCalled();
+    });
+
+    it('should show error snackbar and abort if version is below minimum supported', async () => {
+      const remoteOps: Operation[] = [
+        { id: 'op1', schemaVersion: MIN_SUPPORTED_SCHEMA_VERSION - 1 } as Operation,
+      ];
+
+      const result = await service.processRemoteOps(remoteOps);
+
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.VERSION_UNSUPPORTED,
+        }),
+      );
+
+      // Should not proceed to apply ops
+      expect(opLogStoreSpy.getUnsynced).not.toHaveBeenCalled();
+      expect(result).toEqual({ localWinOpsCreated: 0 });
+    });
+
+    it('should show warning once per session when receiving ops from newer version', async () => {
+      // Current version is 1 (set in beforeEach)
+      const remoteOps: Operation[] = [
+        { id: 'op1', schemaVersion: 2 } as Operation,
+        { id: 'op2', schemaVersion: 2 } as Operation,
+      ];
+
+      // Setup for processing
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+
+      await service.processRemoteOps(remoteOps);
+
+      // Should show warning exactly once (not twice for two ops)
+      expect(snackServiceSpy.open).toHaveBeenCalledTimes(1);
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'WARNING',
+          msg: T.F.SYNC.S.NEWER_VERSION_AVAILABLE,
+        }),
+      );
+
+      // Should still process the ops (ops are applied)
+      expect(opLogStoreSpy.append).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not show newer version warning again in same session', async () => {
+      // Current version is 1 (set in beforeEach)
+      const remoteOps1: Operation[] = [{ id: 'op1', schemaVersion: 2 } as Operation];
+      const remoteOps2: Operation[] = [{ id: 'op2', schemaVersion: 2 } as Operation];
+
+      // Setup for processing
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+
+      // First call
+      await service.processRemoteOps(remoteOps1);
+      // Second call (same session)
+      await service.processRemoteOps(remoteOps2);
+
+      // Warning should only be shown once across both calls
+      expect(snackServiceSpy.open).toHaveBeenCalledTimes(1);
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'WARNING',
+          msg: T.F.SYNC.S.NEWER_VERSION_AVAILABLE,
+        }),
+      );
+    });
+
+    it('should not show warning for ops at current version', async () => {
+      // Current version is 1 (set in beforeEach)
+      const remoteOps: Operation[] = [{ id: 'op1', schemaVersion: 1 } as Operation];
+
+      // Setup for processing
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+
+      await service.processRemoteOps(remoteOps);
+
+      // Should not show any warning
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
     });
 
     it('should use migrated ops for conflict detection', async () => {

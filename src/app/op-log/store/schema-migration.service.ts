@@ -4,6 +4,7 @@ import { OpLog } from '../../core/log';
 import {
   CURRENT_SCHEMA_VERSION as SHARED_CURRENT_SCHEMA_VERSION,
   MAX_VERSION_SKIP as SHARED_MAX_VERSION_SKIP,
+  MIN_SUPPORTED_SCHEMA_VERSION as SHARED_MIN_SUPPORTED_SCHEMA_VERSION,
   MIGRATIONS,
   migrateState,
   migrateOperation as sharedMigrateOperation,
@@ -17,6 +18,7 @@ import {
 // Re-export shared constants for backwards compatibility
 export const CURRENT_SCHEMA_VERSION = SHARED_CURRENT_SCHEMA_VERSION;
 export const MAX_VERSION_SKIP = SHARED_MAX_VERSION_SKIP;
+export const MIN_SUPPORTED_SCHEMA_VERSION = SHARED_MIN_SUPPORTED_SCHEMA_VERSION;
 
 // Re-export types
 export type { SchemaMigration };

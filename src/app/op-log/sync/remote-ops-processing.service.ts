@@ -14,6 +14,7 @@ import { ValidateStateService } from '../validation/validate-state.service';
 import { VectorClockService } from './vector-clock.service';
 import {
   MAX_VERSION_SKIP,
+  MIN_SUPPORTED_SCHEMA_VERSION,
   SchemaMigrationService,
 } from '../store/schema-migration.service';
 import { SnackService } from '../../core/snack/snack.service';
@@ -51,6 +52,9 @@ export class RemoteOpsProcessingService {
   private compactionService = inject(OperationLogCompactionService);
   private syncImportFilterService = inject(SyncImportFilterService);
 
+  /** Flag to show newer version warning only once per session */
+  private _hasWarnedNewerVersionThisSession = false;
+
   /**
    * Core pipeline for processing remote operations.
    *
@@ -73,7 +77,9 @@ export class RemoteOpsProcessingService {
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 1: Schema Migration (Receiver-Side)
     // Migrate ops from older schema versions to current version.
-    // Ops too new (beyond MAX_VERSION_SKIP) trigger an update prompt.
+    // - Ops below MIN_SUPPORTED_SCHEMA_VERSION: error, stop sync
+    // - Ops beyond MAX_VERSION_SKIP: error, stop sync
+    // - Ops from newer version (within skip): warning once per session, continue
     // ─────────────────────────────────────────────────────────────────────────
     const currentVersion = this.schemaMigrationService.getCurrentVersion();
     const migratedOps: Operation[] = [];
@@ -83,10 +89,34 @@ export class RemoteOpsProcessingService {
     for (const op of remoteOps) {
       const opVersion = op.schemaVersion ?? 1;
 
+      // Check if remote op is too old (below minimum supported)
+      if (opVersion < MIN_SUPPORTED_SCHEMA_VERSION) {
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.VERSION_UNSUPPORTED,
+          actionStr: T.PS.UPDATE_APP,
+          actionFn: () =>
+            window.open('https://super-productivity.com/download', '_blank'),
+        });
+        return { localWinOpsCreated: 0 };
+      }
+
       // Check if remote op is too new (exceeds supported skip)
       if (opVersion > currentVersion + MAX_VERSION_SKIP) {
         updateRequired = true;
         break;
+      }
+
+      // Warn once per session if receiving ops from a newer version
+      if (opVersion > currentVersion && !this._hasWarnedNewerVersionThisSession) {
+        this._hasWarnedNewerVersionThisSession = true;
+        this.snackService.open({
+          type: 'WARNING',
+          msg: T.F.SYNC.S.NEWER_VERSION_AVAILABLE,
+          actionStr: T.PS.UPDATE_APP,
+          actionFn: () =>
+            window.open('https://super-productivity.com/download', '_blank'),
+        });
       }
 
       try {
