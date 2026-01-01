@@ -8,7 +8,9 @@ const SCHEDULE_DIALOG_CONFIRM = 'mat-dialog-actions button:last-child';
 
 const SCHEDULE_ROUTE_BTN = 'magic-side-nav a[href="#/scheduled-list"]';
 const SCHEDULE_PAGE_CMP = 'scheduled-list-page';
-const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks planner-task`;
+// Target only the first .tasks container (scheduled with time, not planned for days)
+const SCHEDULE_PAGE_FIRST_TASKS_CONTAINER = `${SCHEDULE_PAGE_CMP} .component-wrapper:nth-of-type(2) .tasks`;
+const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_FIRST_TASKS_CONTAINER} planner-task`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
 const SCHEDULE_PAGE_TASK_1_TITLE_EL = `${SCHEDULE_PAGE_TASK_1} .title`;
 const DETAIL_PANEL_BTN = '.show-additional-info-btn';
