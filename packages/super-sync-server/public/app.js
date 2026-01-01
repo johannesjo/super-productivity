@@ -17,6 +17,9 @@ const refreshBtn = document.getElementById('refresh-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const tabLoginBtn = document.getElementById('tab-login');
 const tabRegisterBtn = document.getElementById('tab-register');
+const forgotPasswordForm = document.getElementById('forgot-password-form');
+const showForgotPasswordBtn = document.getElementById('show-forgot-password');
+const backToLoginBtn = document.getElementById('back-to-login');
 
 // --- Event Listeners ---
 
@@ -35,6 +38,54 @@ refreshBtn.addEventListener('click', refreshToken);
 
 // Logout button
 logoutBtn.addEventListener('click', logout);
+
+// Show forgot password form
+showForgotPasswordBtn.addEventListener('click', () => {
+  loginForm.classList.remove('active');
+  forgotPasswordForm.classList.add('active');
+  hideMessage();
+});
+
+// Back to login from forgot password
+backToLoginBtn.addEventListener('click', () => {
+  forgotPasswordForm.classList.remove('active');
+  loginForm.classList.add('active');
+  hideMessage();
+});
+
+// Forgot password form submit
+forgotPasswordForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('forgot-email').value;
+
+  setLoading(true);
+  hideMessage();
+
+  try {
+    await fetch(`${API_BASE}/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    // Always show success (security: don't reveal if email exists)
+    showMessage(
+      'If an account exists with that email, you will receive a password reset link.',
+      'success',
+    );
+
+    // Return to login after a delay
+    setTimeout(() => {
+      forgotPasswordForm.classList.remove('active');
+      loginForm.classList.add('active');
+      document.getElementById('forgot-email').value = '';
+    }, 3000);
+  } catch (err) {
+    showMessage('An error occurred. Please try again.', 'error');
+  } finally {
+    setLoading(false);
+  }
+});
 
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();

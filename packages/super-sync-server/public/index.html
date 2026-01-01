@@ -84,6 +84,45 @@
             >
               Log In
             </button>
+            <button
+              type="button"
+              class="btn text-only"
+              id="show-forgot-password"
+            >
+              Forgot Password?
+            </button>
+          </form>
+
+          <!-- Forgot Password Form -->
+          <form
+            id="forgot-password-form"
+            class="auth-form"
+          >
+            <p style="margin-bottom: 1rem; color: var(--text-light)">
+              Enter your email address and we'll send you a link to reset your password.
+            </p>
+            <div class="form-group">
+              <label for="forgot-email">Email</label>
+              <input
+                type="email"
+                id="forgot-email"
+                required
+                placeholder="name@example.com"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn primary"
+            >
+              Send Reset Link
+            </button>
+            <button
+              type="button"
+              class="btn text-only"
+              id="back-to-login"
+            >
+              Back to Login
+            </button>
           </form>
 
           <!-- Register Form -->
