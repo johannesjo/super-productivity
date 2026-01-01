@@ -22,7 +22,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { BoardEditComponent } from './board-edit/board-edit.component';
 import { DEFAULT_BOARD_CFG } from './boards.const';
 import { BoardsActions } from './store/boards.actions';
-import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 import { BoardCfg } from './boards.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogBoardEditComponent } from './dialog-board-edit/dialog-board-edit.component';
@@ -43,7 +42,6 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
     CdkDropListGroup,
     TranslatePipe,
     BoardEditComponent,
-    ContextMenuComponent,
   ],
   templateUrl: './boards.component.html',
   styleUrl: './boards.component.scss',
