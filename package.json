@@ -138,7 +138,7 @@
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "^20.0.0",
-    "@angular-devkit/build-angular": "^20.3.13",
+    "@angular-devkit/build-angular": "^21.0.4",
     "@angular-eslint/builder": "^20.5.0",
     "@angular-eslint/eslint-plugin": "^20.5.0",
     "@angular-eslint/eslint-plugin-template": "^20.5.0",
