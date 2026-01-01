@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { encrypt, decrypt } from '../../pfapi/api/encryption/encryption';
+import { inject, Injectable } from '@angular/core';
+import { ENCRYPT_FN, DECRYPT_FN } from '../../pfapi/api/encryption/encryption.token';
 import { SyncOperation } from '../../pfapi/api/sync/sync-provider.interface';
 import { DecryptError } from '../../pfapi/api/errors/errors';
 
@@ -11,13 +11,16 @@ import { DecryptError } from '../../pfapi/api/errors/errors';
   providedIn: 'root',
 })
 export class OperationEncryptionService {
+  private readonly _encrypt = inject(ENCRYPT_FN);
+  private readonly _decrypt = inject(DECRYPT_FN);
+
   /**
    * Encrypts the payload of a SyncOperation.
    * Returns a new operation with encrypted payload and isPayloadEncrypted=true.
    */
   async encryptOperation(op: SyncOperation, encryptKey: string): Promise<SyncOperation> {
     const payloadStr = JSON.stringify(op.payload);
-    const encryptedPayload = await encrypt(payloadStr, encryptKey);
+    const encryptedPayload = await this._encrypt(payloadStr, encryptKey);
     return {
       ...op,
       payload: encryptedPayload,
@@ -39,7 +42,7 @@ export class OperationEncryptionService {
       throw new DecryptError('Encrypted payload must be a string');
     }
     try {
-      const decryptedStr = await decrypt(op.payload, encryptKey);
+      const decryptedStr = await this._decrypt(op.payload, encryptKey);
       const parsedPayload = JSON.parse(decryptedStr);
       return {
         ...op,
@@ -78,7 +81,7 @@ export class OperationEncryptionService {
    */
   async encryptPayload(payload: unknown, encryptKey: string): Promise<string> {
     const payloadStr = JSON.stringify(payload);
-    return encrypt(payloadStr, encryptKey);
+    return this._encrypt(payloadStr, encryptKey);
   }
 
   /**
@@ -90,7 +93,7 @@ export class OperationEncryptionService {
     encryptKey: string,
   ): Promise<T> {
     try {
-      const decryptedStr = await decrypt(encryptedPayload, encryptKey);
+      const decryptedStr = await this._decrypt(encryptedPayload, encryptKey);
       return JSON.parse(decryptedStr) as T;
     } catch (e) {
       throw new DecryptError('Failed to decrypt payload', e);

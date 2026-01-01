@@ -41,7 +41,8 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
 import { LockService } from '../../sync/lock.service';
 import { SchemaMigrationService } from '../../store/schema-migration.service';
-import { decrypt, encrypt } from '../../../pfapi/api/encryption/encryption';
+import { mockDecrypt, mockEncrypt } from '../helpers/mock-encryption.helper';
+import { ENCRYPT_FN, DECRYPT_FN } from '../../../pfapi/api/encryption/encryption.token';
 import { TranslateService } from '@ngx-translate/core';
 
 // Mock Sync Provider that supports operation sync
@@ -292,6 +293,9 @@ describe('Service Logic Integration', () => {
         VectorClockService,
         SchemaMigrationService,
         provideMockStore(),
+        // Use fast mock encryption instead of real Argon2id (saves ~500ms per test)
+        { provide: ENCRYPT_FN, useValue: mockEncrypt },
+        { provide: DECRYPT_FN, useValue: mockDecrypt },
         { provide: ConflictResolutionService, useValue: conflictServiceSpy },
         { provide: OperationApplierService, useValue: applierSpy },
         {
@@ -387,7 +391,10 @@ describe('Service Logic Integration', () => {
       expect(typeof uploadedOp.payload).toBe('string');
 
       // Attempt to decrypt to verify correctness
-      const decryptedPayloadStr = await decrypt(uploadedOp.payload as string, TEST_KEY);
+      const decryptedPayloadStr = await mockDecrypt(
+        uploadedOp.payload as string,
+        TEST_KEY,
+      );
       const decryptedPayload = JSON.parse(decryptedPayloadStr);
       expect(decryptedPayload).toEqual(op.payload);
     });
@@ -398,7 +405,7 @@ describe('Service Logic Integration', () => {
 
       // 2. Prepare encrypted remote operation
       const payload = { title: 'Remote Secret' };
-      const encryptedPayload = await encrypt(JSON.stringify(payload), TEST_KEY);
+      const encryptedPayload = await mockEncrypt(JSON.stringify(payload), TEST_KEY);
 
       const remoteOp: SyncOperation = {
         id: 'op-remote-1',

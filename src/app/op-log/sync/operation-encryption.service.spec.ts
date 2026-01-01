@@ -3,6 +3,8 @@ import { OperationEncryptionService } from './operation-encryption.service';
 import { SyncOperation } from '../../pfapi/api/sync/sync-provider.interface';
 import { DecryptError } from '../../pfapi/api/errors/errors';
 import { ActionType } from '../core/operation.types';
+import { mockEncrypt, mockDecrypt } from '../testing/helpers/mock-encryption.helper';
+import { ENCRYPT_FN, DECRYPT_FN } from '../../pfapi/api/encryption/encryption.token';
 
 describe('OperationEncryptionService', () => {
   let service: OperationEncryptionService;
@@ -24,7 +26,12 @@ describe('OperationEncryptionService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [OperationEncryptionService],
+      providers: [
+        OperationEncryptionService,
+        // Use fast mock encryption instead of real Argon2id (saves ~500ms per test)
+        { provide: ENCRYPT_FN, useValue: mockEncrypt },
+        { provide: DECRYPT_FN, useValue: mockDecrypt },
+      ],
     });
     service = TestBed.inject(OperationEncryptionService);
   });
