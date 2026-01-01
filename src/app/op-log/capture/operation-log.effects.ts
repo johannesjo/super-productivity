@@ -122,16 +122,6 @@ export class OperationLogEffects {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { type, meta, ...actionPayload } = action;
 
-    // Get entity changes from the FIFO queue (for TIME_TRACKING and TASK time sync)
-    // For most actions, this returns empty array since action payloads are sufficient.
-    const entityChanges = this.operationCaptureService.dequeue();
-
-    // Create multi-entity payload with action payload and computed changes
-    const multiEntityPayload: MultiEntityPayload = {
-      actionPayload: actionPayload as Record<string, unknown>,
-      entityChanges,
-    };
-
     // Use the action's declared opType from meta. We don't derive from entity changes because
     // some operations have different semantic meaning than their state changes suggest.
     // E.g., moveToArchive is UPDATE (tasks moved, not deleted) but shows as DELETE in state.
@@ -148,9 +138,35 @@ export class OperationLogEffects {
     }
 
     try {
+      // CRITICAL: Acquire lock BEFORE dequeuing to prevent race condition with flushPendingWrites().
+      // Previously, dequeue happened before lock acquisition, which caused a race:
+      // 1. dequeue() runs, queue becomes 0
+      // 2. flushPendingWrites() polls, sees queue = 0, tries to acquire lock
+      // 3. If flush wins the lock, it returns before this effect writes to IndexedDB
+      // 4. Sync uploads with "No pending operations" even though operations were dispatched
+      //
+      // By acquiring the lock first, flushPendingWrites() must wait for us to finish writing.
       await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
+        // Get entity changes from the FIFO queue (for TIME_TRACKING and TASK time sync)
+        // For most actions, this returns empty array since action payloads are sufficient.
+        // IMPORTANT: This MUST happen inside the lock to prevent race with flushPendingWrites.
+        const entityChanges = this.operationCaptureService.dequeue();
+
+        // Create multi-entity payload with action payload and computed changes
+        const multiEntityPayload: MultiEntityPayload = {
+          actionPayload: actionPayload as Record<string, unknown>,
+          entityChanges,
+        };
         const currentClock = await this.vectorClockService.getCurrentVectorClock();
         const newClock = incrementVectorClock(currentClock, clientId);
+
+        // For bulk operations, entityIds is provided but entityId may not be.
+        // The server requires entityId for non-full-state operations.
+        // Use the first entityId from the array as the primary entityId if not explicitly set.
+        const entityIds =
+          action.meta.entityIds ??
+          (action.meta.entityId ? [action.meta.entityId] : undefined);
+        const entityId = action.meta.entityId ?? entityIds?.[0];
 
         const op: Operation = {
           id: uuidv7(),
@@ -158,11 +174,8 @@ export class OperationLogEffects {
           actionType: action.type as ActionType,
           opType,
           entityType: action.meta.entityType,
-          entityId: action.meta.entityId,
-          // Use entityIds from action meta directly (or derive from entityId if not provided)
-          entityIds:
-            action.meta.entityIds ??
-            (action.meta.entityId ? [action.meta.entityId] : undefined),
+          entityId,
+          entityIds,
           payload: multiEntityPayload,
           clientId: clientId,
           vectorClock: newClock,
