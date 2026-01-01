@@ -188,7 +188,7 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
     async (req, reply) => {
       try {
         const user = getAuthUser(req);
-        const result = replaceToken(user.userId, user.email);
+        const result = await replaceToken(user.userId, user.email);
         return reply.send(result);
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : 'Unknown error';
