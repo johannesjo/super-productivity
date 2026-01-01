@@ -1,6 +1,6 @@
 package com.superproductivity.superproductivity.widget
 
-import android.app.Activity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.WindowManager
@@ -14,7 +14,7 @@ import com.superproductivity.superproductivity.R
  * A minimal floating dialog activity for quick task entry from the widget.
  * Uses a dialog theme to appear as a floating window.
  */
-class QuickAddActivity : Activity() {
+class QuickAddActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
