@@ -133,6 +133,7 @@ export enum ActionType {
   // SimpleCounter actions (S)
   COUNTER_ADD = '[SimpleCounter] Add SimpleCounter',
   COUNTER_UPDATE = '[SimpleCounter] Update SimpleCounter',
+  COUNTER_UPSERT = '[SimpleCounter] Upsert SimpleCounter',
   COUNTER_DELETE = '[SimpleCounter] Delete SimpleCounter',
   COUNTER_DELETE_MULTIPLE = '[SimpleCounter] Delete multiple SimpleCounters',
   COUNTER_UPDATE_ALL = '[SimpleCounter] Update all SimpleCounters',
