@@ -235,7 +235,7 @@
     "nanoid": "^5.1.6",
     "new-github-issue-url": "^1.1.0",
     "ng2-charts": "^8.0.0",
-    "ngx-markdown": "^20.0.0",
+    "ngx-markdown": "^21.0.1",
     "playwright": "^1.56.1",
     "prettier": "^3.5.1",
     "pretty-quick": "^4.1.1",
