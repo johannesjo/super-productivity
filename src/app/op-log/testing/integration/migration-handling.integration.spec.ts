@@ -134,12 +134,16 @@ describe('Migration Handling Integration', () => {
     it('should accept operation with compatible future version (within skip limit)', async () => {
       // Logic: if opVersion <= current + MAX_VERSION_SKIP, it's accepted
       // MAX_VERSION_SKIP is 3. So version 4 should be accepted if current is 1.
+      // Note: A WARNING snackbar may be shown for newer versions, but no ERROR.
       const compatibleVersion = 1 + MAX_VERSION_SKIP;
       const op = createOp(compatibleVersion);
 
       await service.processRemoteOps([op]);
 
-      expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      // Should NOT show error (operation is accepted)
+      expect(snackServiceSpy.open).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: 'ERROR' }),
+      );
       expect(operationApplierSpy.applyOperations).toHaveBeenCalled();
     });
 
