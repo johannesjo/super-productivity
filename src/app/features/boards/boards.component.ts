@@ -26,6 +26,7 @@ import { BoardCfg } from './boards.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogBoardEditComponent } from './dialog-board-edit/dialog-board-edit.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { Log } from 'src/app/core/log';
 
 @Component({
   selector: 'boards',
@@ -88,7 +89,7 @@ export class BoardsComponent {
 
   duplicateBoard(boardToDuplicate: BoardCfg): void {
     if (!boardToDuplicate) {
-      console.warn('No board selected to duplicate'); // todo: use log
+      Log.warn('No board selected to duplicate');
       return;
     }
     this.store.dispatch(
@@ -108,6 +109,7 @@ export class BoardsComponent {
 
   editBoard(board: BoardCfg): void {
     if (!board) {
+      Log.warn('No board selected to edit');
       return;
     }
     this._matDialog.open(DialogBoardEditComponent, {
@@ -119,6 +121,7 @@ export class BoardsComponent {
 
   removeBoard(board: BoardCfg): void {
     if (!board) {
+      Log.warn('No board selected to remove');
       return;
     }
     this._matDialog
