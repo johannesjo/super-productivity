@@ -141,6 +141,8 @@ export class ReminderService {
         type,
         recurringConfig,
       });
+      // Update worker immediately to prevent race condition with 10s check interval
+      this._updateRemindersInWorker(this._reminders);
       this._saveModel(this._reminders, isWaitForReady);
       return id;
     }
@@ -157,6 +159,8 @@ export class ReminderService {
       // TODO find out why we need to do this
       this._reminders = dirtyDeepCopy(this._reminders);
       this._reminders[i] = Object.assign({}, this._reminders[i], reminderChanges);
+      // Update worker immediately to prevent race condition with 10s check interval
+      this._updateRemindersInWorker(this._reminders);
     }
     this._saveModel(this._reminders);
   }
@@ -168,6 +172,8 @@ export class ReminderService {
       // TODO find out why we need to do this
       this._reminders = dirtyDeepCopy(this._reminders);
       this._reminders.splice(i, 1);
+      // Update worker immediately to prevent race condition with 10s check interval
+      this._updateRemindersInWorker(this._reminders);
       this._saveModel(this._reminders);
     } else {
       // throw new Error('Unable to find reminder with id ' + reminderIdToRemove);
