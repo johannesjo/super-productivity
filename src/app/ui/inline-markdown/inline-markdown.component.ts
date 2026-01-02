@@ -206,14 +206,18 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       },
     });
 
+    let lastEmittedContent: string | null = null;
+
     // Subscribe to live auto-save updates from fullscreen dialog
     dialogRef.componentInstance.contentChanged.subscribe((content: string) => {
+      lastEmittedContent = content;
       this.modelCopy.set(content);
       this.changed.emit(content);
     });
 
     dialogRef.afterClosed().subscribe((res) => {
-      if (typeof res === 'string') {
+      // Only emit if content differs from last auto-saved content
+      if (typeof res === 'string' && res !== lastEmittedContent) {
         this.modelCopy.set(res);
         this.changed.emit(res);
       }

@@ -126,8 +126,8 @@ export class AndroidForegroundTrackingEffects {
         androidInterface.onResume$.pipe(
           withLatestFrom(this._store.select(selectCurrentTask)),
           filter(([, currentTask]) => !!currentTask),
-          tap(([, currentTask]) => {
-            this._syncElapsedTimeForTask(currentTask!.id);
+          tap(async ([, currentTask]) => {
+            await this._syncElapsedTimeForTask(currentTask!.id);
           }),
         ),
       { dispatch: false },
@@ -196,10 +196,10 @@ export class AndroidForegroundTrackingEffects {
         androidInterface.onPauseTracking$.pipe(
           withLatestFrom(this._store.select(selectCurrentTask)),
           filter(([, currentTask]) => !!currentTask),
-          tap(([, currentTask]) => {
+          tap(async ([, currentTask]) => {
             DroidLog.log('Pause action from notification');
-            // Sync elapsed time first
-            this._syncElapsedTimeForTask(currentTask!.id);
+            // Sync elapsed time first and wait for completion
+            await this._syncElapsedTimeForTask(currentTask!.id);
             // Force immediate save to prevent data loss (bypasses 15s debounce)
             this._saveTimeTrackingImmediately();
             this._taskService.pauseCurrent();
@@ -219,10 +219,10 @@ export class AndroidForegroundTrackingEffects {
         androidInterface.onMarkTaskDone$.pipe(
           withLatestFrom(this._store.select(selectCurrentTask)),
           filter(([, currentTask]) => !!currentTask),
-          tap(([, currentTask]) => {
+          tap(async ([, currentTask]) => {
             DroidLog.log('Done action from notification', { taskId: currentTask!.id });
-            // Sync elapsed time, mark as done, then pause
-            this._syncElapsedTimeForTask(currentTask!.id);
+            // Sync elapsed time and wait for completion
+            await this._syncElapsedTimeForTask(currentTask!.id);
             this._taskService.setDone(currentTask!.id);
             // Force immediate save to prevent data loss (bypasses 15s debounce)
             this._saveTimeTrackingImmediately();
