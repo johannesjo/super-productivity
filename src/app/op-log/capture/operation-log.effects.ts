@@ -103,12 +103,17 @@ export class OperationLogEffects {
     // Validate that at least one entity identifier exists for non-bulk operations
     // Bulk operations with entityType 'ALL' don't need specific entity IDs
     // This catches programming errors early - all persistent actions must have entity identifiers
+    // Also validates entityId is not empty/whitespace to match server-side validation
     const isBulkAllOperation = action.meta.entityType === 'ALL';
     const hasValidEntityId =
-      action.meta.entityId && typeof action.meta.entityId === 'string';
+      action.meta.entityId &&
+      typeof action.meta.entityId === 'string' &&
+      action.meta.entityId.trim().length > 0;
     const hasValidEntityIds =
       action.meta.entityIds?.length &&
-      action.meta.entityIds.every((id: unknown) => id && typeof id === 'string');
+      action.meta.entityIds.every(
+        (id: unknown) => id && typeof id === 'string' && (id as string).trim().length > 0,
+      );
     if (!isBulkAllOperation && !hasValidEntityId && !hasValidEntityIds) {
       // IMPORTANT: Dequeue first to prevent queue from getting stuck
       this.operationCaptureService.dequeue();

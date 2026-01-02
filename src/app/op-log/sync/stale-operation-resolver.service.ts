@@ -8,6 +8,7 @@ import { VectorClockService } from './vector-clock.service';
 import { LockService } from './lock.service';
 import { toEntityKey } from '../util/entity-key.util';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
+import { LOCK_NAMES } from '../core/operation-log.const';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { uuidv7 } from '../../util/uuid-v7';
@@ -58,7 +59,7 @@ export class StaleOperationResolverService {
     // Without this lock, user actions during conflict resolution could write ops with
     // stale vector clocks, leading to data corruption.
     let result = 0;
-    await this.lockService.request('sp_op_log', async () => {
+    await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
       const clientId = await this.clientIdProvider.loadClientId();
       if (!clientId) {
         OpLog.err(

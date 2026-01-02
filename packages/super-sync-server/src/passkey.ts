@@ -34,6 +34,15 @@ const getWebAuthnConfig = () => {
 // In production with multiple instances, use Redis or similar
 const challenges = new Map<string, { challenge: string; expiresAt: number }>();
 
+// Warn at startup if running with in-memory storage in production
+if (process.env.NODE_ENV === 'production') {
+  Logger.warn(
+    'Passkey challenge storage is using in-memory Map. ' +
+      'This will not work correctly with multiple server instances. ' +
+      'For multi-instance deployments, implement Redis-based challenge storage.',
+  );
+}
+
 // Cleanup expired challenges periodically
 setInterval(() => {
   const now = Date.now();
