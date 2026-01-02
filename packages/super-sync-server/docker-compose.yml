@@ -32,6 +32,9 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=${SMTP_FROM:-}
+      - WEBAUTHN_RP_ID=${WEBAUTHN_RP_ID:-localhost}
+      - WEBAUTHN_RP_NAME=${WEBAUTHN_RP_NAME:-Super Productivity Sync}
+      - WEBAUTHN_ORIGIN=${WEBAUTHN_ORIGIN:-http://localhost:1900}
     ports:
       - '1900:1900'
     volumes:
