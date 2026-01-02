@@ -324,6 +324,148 @@ describe('workContext selectors', () => {
       const result = selectTodayTaskIds.projector(tagState, taskState);
       expect(result).toEqual(['parent']); // subtask excluded
     });
+
+    // Tests for dueWithTime fallback (issue #5841)
+    it('should include task with dueWithTime for today but no dueDay (fallback)', () => {
+      // Create a timestamp for today (e.g., 8:00 AM today)
+      const today = new Date();
+      today.setHours(8, 0, 0, 0);
+      const todayTimestamp = today.getTime();
+
+      const taskWithDueWithTimeOnly = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: undefined, // No dueDay set
+        dueWithTime: todayTimestamp, // But has dueWithTime for today
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagEmpty = {
+        ...TODAY_TAG,
+        taskIds: [],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagEmpty]);
+      const taskState = fakeEntityStateFromArray([taskWithDueWithTimeOnly]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1']); // Should be included via dueWithTime fallback
+    });
+
+    it('should include task with dueWithTime for today but stale dueDay (fallback)', () => {
+      // Create a timestamp for today (e.g., 8:00 AM today)
+      const today = new Date();
+      today.setHours(8, 0, 0, 0);
+      const todayTimestamp = today.getTime();
+
+      const taskWithStaleDueDay = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: '2000-01-01', // Stale dueDay (not today)
+        dueWithTime: todayTimestamp, // But has dueWithTime for today
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagEmpty = {
+        ...TODAY_TAG,
+        taskIds: [],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagEmpty]);
+      const taskState = fakeEntityStateFromArray([taskWithStaleDueDay]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1']); // Should be included via dueWithTime fallback
+    });
+
+    it('should NOT include task with dueWithTime for tomorrow (no fallback)', () => {
+      // Create a timestamp for tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(8, 0, 0, 0);
+      const tomorrowTimestamp = tomorrow.getTime();
+
+      const taskWithDueWithTimeTomorrow = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: undefined,
+        dueWithTime: tomorrowTimestamp, // dueWithTime is for tomorrow
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagEmpty = {
+        ...TODAY_TAG,
+        taskIds: [],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagEmpty]);
+      const taskState = fakeEntityStateFromArray([taskWithDueWithTimeTomorrow]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual([]); // Should NOT be included
+    });
+
+    it('should prefer dueDay over dueWithTime when both are set for today', () => {
+      // Create a timestamp for today
+      const today = new Date();
+      today.setHours(8, 0, 0, 0);
+      const todayTimestamp = today.getTime();
+
+      const taskWithBoth = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr, // dueDay is today
+        dueWithTime: todayTimestamp, // dueWithTime is also today
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagEmpty = {
+        ...TODAY_TAG,
+        taskIds: [],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagEmpty]);
+      const taskState = fakeEntityStateFromArray([taskWithBoth]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1']); // Should be included (no duplicates)
+    });
+
+    it('should handle mix of dueDay and dueWithTime fallback tasks', () => {
+      // Create a timestamp for today (e.g., 8:00 AM today)
+      const today = new Date();
+      today.setHours(8, 0, 0, 0);
+      const todayTimestamp = today.getTime();
+
+      const taskWithDueDay = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const taskWithDueWithTimeOnly = {
+        id: 'task2',
+        tagIds: [],
+        dueDay: undefined,
+        dueWithTime: todayTimestamp,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagWithTask1 = {
+        ...TODAY_TAG,
+        taskIds: ['task1'], // Only task1 is in stored order
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithTask1]);
+      const taskState = fakeEntityStateFromArray([
+        taskWithDueDay,
+        taskWithDueWithTimeOnly,
+      ]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1', 'task2']); // Both included, task2 appended
+    });
   });
 
   describe('selectUndoneTodayTaskIds', () => {

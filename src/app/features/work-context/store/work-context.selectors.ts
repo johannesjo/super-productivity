@@ -17,6 +17,7 @@ import { selectNoteTodayOrder } from '../../note/store/note.reducer';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { Log } from '../../../core/log';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import { isToday } from '../../../util/is-today.util';
 import { Tag } from '../../tag/tag.model';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
@@ -27,24 +28,41 @@ export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
  * TODAY_TAG is a "virtual tag" - membership is determined by task.dueDay === today,
  * NOT by task.tagIds. TODAY_TAG.taskIds only stores the ordering.
  *
+ * Fallback: Tasks with dueWithTime for today (but no/stale dueDay) are also included.
+ * This handles edge cases like imported tasks with scheduled times.
+ *
  * See: docs/ai/today-tag-architecture.md
  */
 const computeOrderedTaskIdsForToday = (
   todayTag: Tag | undefined,
   taskEntities: Record<
     string,
-    { id: string; dueDay?: string | null; parentId?: string | null } | undefined
+    | {
+        id: string;
+        dueDay?: string | null;
+        dueWithTime?: number | null;
+        parentId?: string | null;
+      }
+    | undefined
   >,
 ): string[] => {
   const todayStr = getDbDateStr();
   const storedOrder = todayTag?.taskIds || [];
 
-  // Find all tasks where dueDay === today (membership source of truth)
+  // Find all tasks where dueDay === today OR dueWithTime is for today
   const tasksForToday: string[] = [];
   for (const taskId of Object.keys(taskEntities)) {
     const task = taskEntities[taskId];
-    if (task && !task.parentId && task.dueDay === todayStr) {
-      tasksForToday.push(taskId);
+    if (task && !task.parentId) {
+      // Check dueDay first (primary source of truth)
+      if (task.dueDay === todayStr) {
+        tasksForToday.push(taskId);
+      }
+      // Fallback: check dueWithTime if dueDay doesn't match
+      // This catches tasks scheduled for today that may have stale/missing dueDay
+      else if (task.dueWithTime && isToday(task.dueWithTime)) {
+        tasksForToday.push(taskId);
+      }
     }
   }
 
