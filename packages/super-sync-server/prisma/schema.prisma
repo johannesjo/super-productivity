@@ -11,30 +11,53 @@ datasource db {
 }
 
 model User {
-  id                         Int       @id @default(autoincrement())
-  email                      String    @unique
-  passwordHash               String    @map("password_hash")
-  isVerified                 Int       @default(0) @map("is_verified") // 0 or 1
-  verificationToken          String?   @map("verification_token")
-  verificationTokenExpiresAt BigInt?   @map("verification_token_expires_at")
-  verificationResendCount    Int       @default(0) @map("verification_resend_count")
-  resetPasswordToken         String?   @map("reset_password_token")
-  resetPasswordTokenExpiresAt BigInt?  @map("reset_password_token_expires_at")
-  failedLoginAttempts        Int       @default(0) @map("failed_login_attempts")
-  lockedUntil                BigInt?   @map("locked_until")
-  tokenVersion               Int       @default(0) @map("token_version")
-  termsAcceptedAt            BigInt?   @map("terms_accepted_at")
-  createdAt                  DateTime  @default(now()) @map("created_at")
-  storageQuotaBytes          BigInt    @default(104857600) @map("storage_quota_bytes")  // 100MB default
-  storageUsedBytes           BigInt    @default(0) @map("storage_used_bytes")
+  id                              Int       @id @default(autoincrement())
+  email                           String    @unique
+  passwordHash                    String?   @map("password_hash") // Nullable for passkey-only users
+  isVerified                      Int       @default(0) @map("is_verified") // 0 or 1
+  verificationToken               String?   @map("verification_token")
+  verificationTokenExpiresAt      BigInt?   @map("verification_token_expires_at")
+  verificationResendCount         Int       @default(0) @map("verification_resend_count")
+  resetPasswordToken              String?   @map("reset_password_token")
+  resetPasswordTokenExpiresAt     BigInt?   @map("reset_password_token_expires_at")
+  passkeyRecoveryToken            String?   @map("passkey_recovery_token")
+  passkeyRecoveryTokenExpiresAt   BigInt?   @map("passkey_recovery_token_expires_at")
+  loginToken                      String?   @map("login_token")
+  loginTokenExpiresAt             BigInt?   @map("login_token_expires_at")
+  failedLoginAttempts             Int       @default(0) @map("failed_login_attempts")
+  lockedUntil                     BigInt?   @map("locked_until")
+  tokenVersion                    Int       @default(0) @map("token_version")
+  termsAcceptedAt                 BigInt?   @map("terms_accepted_at")
+  createdAt                       DateTime  @default(now()) @map("created_at")
+  storageQuotaBytes               BigInt    @default(104857600) @map("storage_quota_bytes")  // 100MB default
+  storageUsedBytes                BigInt    @default(0) @map("storage_used_bytes")
 
   operations                 Operation[]
   syncState                  UserSyncState?
   devices                    SyncDevice[]
+  passkeys                   Passkey[]
 
   @@index([verificationToken])
   @@index([resetPasswordToken])
+  @@index([passkeyRecoveryToken])
+  @@index([loginToken])
   @@map("users")
+}
+
+model Passkey {
+  id              String    @id @default(cuid())
+  credentialId    Bytes     @unique @map("credential_id")
+  publicKey       Bytes     @map("public_key")
+  counter         BigInt    @default(0)
+  transports      String?   // JSON array of transport types
+  createdAt       DateTime  @default(now()) @map("created_at")
+  lastUsedAt      DateTime? @map("last_used_at")
+
+  userId          Int       @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("passkeys")
 }
 
 model Operation {

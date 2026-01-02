@@ -16,6 +16,7 @@
       href="favicon.ico"
       type="image/x-icon"
     />
+    <script src="simplewebauthn-browser.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -69,43 +70,48 @@
                 placeholder="name@example.com"
               />
             </div>
-            <div class="form-group">
-              <label for="login-password">Password</label>
-              <input
-                type="password"
-                id="login-password"
-                required
-                placeholder="Your password"
-              />
-            </div>
+
             <button
-              type="submit"
+              type="button"
               class="btn primary"
+              id="login-passkey-btn"
             >
-              Log In
+              Login with Passkey
             </button>
+
+            <div class="divider"><span>or</span></div>
+
+            <button
+              type="button"
+              class="btn secondary"
+              id="login-magic-link-btn"
+            >
+              Send Login Link
+            </button>
+
             <button
               type="button"
               class="btn text-only"
-              id="show-forgot-password"
+              id="show-lost-passkey"
             >
-              Forgot Password?
+              Lost your passkey?
             </button>
           </form>
 
-          <!-- Forgot Password Form -->
+          <!-- Lost Passkey Form -->
           <form
-            id="forgot-password-form"
+            id="lost-passkey-form"
             class="auth-form"
           >
             <p style="margin-bottom: 1rem; color: var(--text-light)">
-              Enter your email address and we'll send you a link to reset your password.
+              Enter your email address and we'll send you a link to register a new
+              passkey.
             </p>
             <div class="form-group">
-              <label for="forgot-email">Email</label>
+              <label for="lost-passkey-email">Email</label>
               <input
                 type="email"
-                id="forgot-email"
+                id="lost-passkey-email"
                 required
                 placeholder="name@example.com"
               />
@@ -114,12 +120,12 @@
               type="submit"
               class="btn primary"
             >
-              Send Reset Link
+              Send Recovery Link
             </button>
             <button
               type="button"
               class="btn text-only"
-              id="back-to-login"
+              id="back-to-login-from-passkey"
             >
               Back to Login
             </button>
@@ -137,25 +143,6 @@
                 id="register-email"
                 required
                 placeholder="name@example.com"
-              />
-            </div>
-            <div class="form-group">
-              <label for="register-password">Password</label>
-              <input
-                type="password"
-                id="register-password"
-                required
-                placeholder="Min. 12 characters"
-              />
-              <small>Must be at least 12 characters.</small>
-            </div>
-            <div class="form-group">
-              <label for="register-confirm">Confirm Password</label>
-              <input
-                type="password"
-                id="register-confirm"
-                required
-                placeholder="Repeat password"
               />
             </div>
             <div
@@ -186,11 +173,13 @@
                 >
               </label>
             </div>
+
             <button
-              type="submit"
-              class="btn secondary"
+              type="button"
+              class="btn primary"
+              id="register-passkey-btn"
             >
-              Register
+              Register with Passkey
             </button>
           </form>
         </div>
@@ -231,12 +220,6 @@
               <li>Click "Save & Enable"</li>
             </ol>
           </details>
-
-          <div class="warning-box">
-            <p>
-              <strong>Keep this safe!</strong> This token grants access to your sync data.
-            </p>
-          </div>
 
           <div class="action-buttons">
             <button

@@ -95,7 +95,7 @@ export const sendVerificationEmail = async (
   }
 };
 
-export const sendPasswordResetEmail = async (
+export const sendPasskeyRecoveryEmail = async (
   to: string,
   token: string,
 ): Promise<boolean> => {
@@ -104,25 +104,25 @@ export const sendPasswordResetEmail = async (
     const config = loadConfigFromEnv();
     const from = config.smtp?.from || '"SuperSync" <noreply@example.com>';
 
-    const resetLink = `${config.publicUrl}/reset-password?token=${token}`;
+    const recoveryLink = `${config.publicUrl}/recover-passkey?token=${token}`;
 
     const info = await mailTransporter.sendMail({
       from,
       to,
-      subject: 'Reset your SuperSync password',
+      subject: 'Recover your SuperSync passkey',
       text:
-        `You requested to reset your password. Click the following link to set a new password: ${resetLink}\n\n` +
+        `You requested to recover your passkey. Click the following link to register a new passkey: ${recoveryLink}\n\n` +
         `If you did not request this, please ignore this email.\n\n` +
         `This link will expire in 1 hour.`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Password Reset Request</h2>
-          <p>You requested to reset your password. Click the button below to set a new password:</p>
+          <h2>Passkey Recovery Request</h2>
+          <p>You requested to recover your passkey. Click the button below to register a new passkey:</p>
           <a
-            href="${resetLink}"
+            href="${recoveryLink}"
             style="display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;"
           >
-            Reset Password
+            Register New Passkey
           </a>
           <p style="margin-top: 20px; font-size: 12px; color: #666;">
             If you did not request this, please ignore this email.
@@ -133,12 +133,12 @@ export const sendPasswordResetEmail = async (
           <p style="margin-top: 20px; font-size: 12px; color: #666;">
             If the button doesn't work, copy and paste this link into your browser:
           </p>
-          <p style="font-size: 12px; color: #666;">${resetLink}</p>
+          <p style="font-size: 12px; color: #666;">${recoveryLink}</p>
         </div>
       `,
     });
 
-    Logger.info(`Password reset email sent to ${to}: ${info.messageId}`);
+    Logger.info(`Passkey recovery email sent to ${to}: ${info.messageId}`);
 
     // If using Ethereal, log the preview URL
     if (nodemailer.getTestMessageUrl(info)) {
@@ -147,7 +147,63 @@ export const sendPasswordResetEmail = async (
 
     return true;
   } catch (err) {
-    Logger.error('Failed to send password reset email:', err);
+    Logger.error('Failed to send passkey recovery email:', err);
+    return false;
+  }
+};
+
+export const sendLoginMagicLinkEmail = async (
+  to: string,
+  token: string,
+): Promise<boolean> => {
+  try {
+    const mailTransporter = await getTransporter();
+    const config = loadConfigFromEnv();
+    const from = config.smtp?.from || '"SuperSync" <noreply@example.com>';
+
+    const loginLink = `${config.publicUrl}/magic-login?token=${token}`;
+
+    const info = await mailTransporter.sendMail({
+      from,
+      to,
+      subject: 'Your SuperSync login link',
+      text:
+        `Click the following link to log in to SuperSync: ${loginLink}\n\n` +
+        `If you did not request this, please ignore this email.\n\n` +
+        `This link will expire in 15 minutes.`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Login to SuperSync</h2>
+          <p>Click the button below to log in:</p>
+          <a
+            href="${loginLink}"
+            style="display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;"
+          >
+            Log In
+          </a>
+          <p style="margin-top: 20px; font-size: 12px; color: #666;">
+            If you did not request this, please ignore this email.
+          </p>
+          <p style="font-size: 12px; color: #666;">
+            This link will expire in 15 minutes.
+          </p>
+          <p style="margin-top: 20px; font-size: 12px; color: #666;">
+            If the button doesn't work, copy and paste this link into your browser:
+          </p>
+          <p style="font-size: 12px; color: #666;">${loginLink}</p>
+        </div>
+      `,
+    });
+
+    Logger.info(`Magic link login email sent to ${to}: ${info.messageId}`);
+
+    if (nodemailer.getTestMessageUrl(info)) {
+      Logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+
+    return true;
+  } catch (err) {
+    Logger.error('Failed to send magic link login email:', err);
     return false;
   }
 };

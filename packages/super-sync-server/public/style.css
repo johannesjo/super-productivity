@@ -1,8 +1,8 @@
 :root {
   --primary: #0c96e2;
   --primary-dark: #097ab8;
-  --secondary: #e91e63;
-  --secondary-dark: #c2185b;
+  --secondary: #6b7280;
+  --secondary-dark: #4b5563;
   --bg: #f5f7fa;
   --card-bg: #ffffff;
   --text: #333333;
@@ -273,6 +273,39 @@ small {
   background-color: #e8f5e9;
   color: var(--success);
   border: 1px solid #c8e6c9;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--border);
+}
+
+.divider span {
+  padding: 0 0.75rem;
+}
+
+/* Text Links Row */
+.text-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.text-links .btn.text-only {
+  margin-top: 0;
 }
 
 /* Footer */

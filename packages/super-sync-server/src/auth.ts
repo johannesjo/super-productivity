@@ -1,21 +1,14 @@
-import { prisma, User } from './db';
-import * as bcrypt from 'bcryptjs';
+import { prisma } from './db';
 import * as jwt from 'jsonwebtoken';
 import { Logger } from './logger';
 import { randomBytes } from 'crypto';
-import { sendVerificationEmail, sendPasswordResetEmail } from './email';
-import { Prisma } from '@prisma/client';
+import { sendLoginMagicLinkEmail } from './email';
 
 // Auth constants
 const MIN_JWT_SECRET_LENGTH = 32;
-const BCRYPT_ROUNDS = 12;
 const JWT_EXPIRY = '7d';
 const VERIFICATION_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
-const RESET_PASSWORD_TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
-
-// Account lockout constants
-const MAX_FAILED_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const LOGIN_MAGIC_LINK_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
 
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
@@ -34,132 +27,6 @@ const getJwtSecret = (): string => {
 };
 
 const JWT_SECRET = getJwtSecret();
-
-export const registerUser = async (
-  email: string,
-  password: string,
-  termsAcceptedAt?: number,
-): Promise<{ message: string }> => {
-  // Password strength validation is handled by Zod in api.ts
-
-  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-  const verificationToken = randomBytes(32).toString('hex');
-  const expiresAt = BigInt(Date.now() + VERIFICATION_TOKEN_EXPIRY_MS);
-  const acceptedAt = termsAcceptedAt ? BigInt(termsAcceptedAt) : BigInt(Date.now());
-
-  try {
-    const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        verificationToken,
-        verificationTokenExpiresAt: expiresAt,
-        termsAcceptedAt: acceptedAt,
-      },
-    });
-
-    Logger.info(`User registered (ID: ${user.id})`);
-
-    // Send verification email asynchronously
-    const emailSent = await sendVerificationEmail(email, verificationToken);
-    if (!emailSent) {
-      // Clean up the newly created account to prevent unusable, un-verifiable entries
-      try {
-        await prisma.user.delete({ where: { id: user.id } });
-        Logger.info(`Cleaned up failed registration (ID: ${user.id})`);
-      } catch (cleanupErr) {
-        // Log but don't mask the original email failure
-        Logger.error(
-          `Failed to clean up user ${user.id} after email failure:`,
-          cleanupErr,
-        );
-      }
-      throw new Error('Failed to send verification email. Please try again later.');
-    }
-  } catch (err: unknown) {
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
-      err.code === 'P2002' // Unique constraint violation (email)
-    ) {
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (!existingUser) {
-        Logger.warn('Unique constraint hit but user not found');
-      } else if (existingUser.isVerified === 1) {
-        Logger.info(
-          `Registration attempt for already verified account (ID: ${existingUser.id})`,
-        );
-      } else {
-        const now = BigInt(Date.now());
-        const tokenStillValid =
-          !!existingUser.verificationToken &&
-          !!existingUser.verificationTokenExpiresAt &&
-          existingUser.verificationTokenExpiresAt > now;
-
-        const newToken =
-          tokenStillValid && existingUser.verificationToken
-            ? existingUser.verificationToken
-            : randomBytes(32).toString('hex');
-        const newExpiresAt =
-          tokenStillValid && existingUser.verificationTokenExpiresAt
-            ? existingUser.verificationTokenExpiresAt
-            : BigInt(Date.now() + VERIFICATION_TOKEN_EXPIRY_MS);
-
-        const previousToken = existingUser.verificationToken;
-        const previousExpiresAt = existingUser.verificationTokenExpiresAt;
-        const previousResendCount = existingUser.verificationResendCount;
-
-        await prisma.user.update({
-          where: { id: existingUser.id },
-          data: {
-            verificationToken: newToken,
-            verificationTokenExpiresAt: newExpiresAt,
-            verificationResendCount: { increment: 1 },
-          },
-        });
-
-        const emailSent = await sendVerificationEmail(email, newToken);
-        if (!emailSent) {
-          try {
-            await prisma.user.update({
-              where: { id: existingUser.id },
-              data: {
-                verificationToken: previousToken,
-                verificationTokenExpiresAt: previousExpiresAt,
-                verificationResendCount: previousResendCount,
-              },
-            });
-            Logger.info(
-              `Rolled back token update for user ${existingUser.id} after email failure`,
-            );
-          } catch (rollbackErr) {
-            // Log but don't mask the original email failure
-            Logger.error(
-              `Failed to rollback token update for user ${existingUser.id}:`,
-              rollbackErr,
-            );
-          }
-
-          throw new Error('Failed to send verification email. Please try again later.');
-        }
-
-        Logger.info(
-          `Resent verification email (ID: ${existingUser.id}, count: ${
-            previousResendCount + 1
-          })`,
-        );
-      }
-    } else {
-      throw err;
-    }
-  }
-
-  return {
-    message: 'Registration successful. Please check your email to verify your account.',
-  };
-};
 
 export const verifyEmail = async (token: string): Promise<boolean> => {
   const user = await prisma.user.findFirst({
@@ -191,94 +58,9 @@ export const verifyEmail = async (token: string): Promise<boolean> => {
   return true;
 };
 
-export const loginUser = async (
-  email: string,
-  password: string,
-): Promise<{ token: string; user: { id: number; email: string } }> => {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  // Check if account is locked (do this after fetching user but before password check)
-  if (user && user.lockedUntil && user.lockedUntil > BigInt(Date.now())) {
-    const remainingMinutes = Math.ceil(
-      Number(user.lockedUntil - BigInt(Date.now())) / 60000,
-    );
-    Logger.warn(
-      `Login attempt for locked account (ID: ${user.id}), ${remainingMinutes}min remaining`,
-    );
-    throw new Error(
-      'Account temporarily locked due to too many failed login attempts. Please try again later.',
-    );
-  }
-
-  // Timing attack mitigation: always perform a comparison
-  // Even if the user is not found, we hash and compare against a dummy hash.
-  const dummyHash = '$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW';
-  // Use dummy hash if user not found OR if user has no password (passkey-only user)
-  const hashToCompare = user?.passwordHash ?? dummyHash;
-
-  const isMatch = await bcrypt.compare(password, hashToCompare);
-
-  if (!user || !isMatch) {
-    // Increment failed attempts if user exists
-    if (user) {
-      const newFailedAttempts = (user.failedLoginAttempts || 0) + 1;
-      const shouldLock = newFailedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
-      const lockedUntil = shouldLock ? BigInt(Date.now() + LOCKOUT_DURATION_MS) : null;
-
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          failedLoginAttempts: newFailedAttempts,
-          lockedUntil,
-        },
-      });
-
-      if (shouldLock) {
-        Logger.warn(
-          `Account locked after ${newFailedAttempts} failed attempts (ID: ${user.id})`,
-        );
-      } else {
-        Logger.debug(
-          `Failed login attempt ${newFailedAttempts}/${MAX_FAILED_LOGIN_ATTEMPTS} (ID: ${user.id})`,
-        );
-      }
-    }
-    throw new Error('Invalid credentials');
-  }
-
-  if (user.isVerified === 0) {
-    throw new Error('Email not verified');
-  }
-
-  // Reset failed attempts on successful login
-  if (user.failedLoginAttempts > 0 || user.lockedUntil) {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        failedLoginAttempts: 0,
-        lockedUntil: null,
-      },
-    });
-  }
-
-  // Include token_version in JWT for revocation support
-  const tokenVersion = user.tokenVersion ?? 0;
-  const token = jwt.sign(
-    { userId: user.id, email: user.email, tokenVersion },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRY },
-  );
-
-  Logger.info(`User logged in (ID: ${user.id})`);
-
-  return { token, user: { id: user.id, email: user.email } };
-};
-
 /**
  * Revoke all existing tokens for a user by incrementing their token version.
- * Call this when the user changes their password or explicitly logs out all devices.
+ * Call this when the user explicitly logs out all devices.
  */
 export const revokeAllTokens = async (userId: number): Promise<void> => {
   await prisma.user.update({
@@ -361,113 +143,102 @@ export const verifyToken = async (
 };
 
 /**
- * Request a password reset for the given email.
- * Generates a reset token, stores it in the database, and sends an email.
+ * Request a magic link for passwordless login.
+ * Generates a login token, stores it in the database, and sends an email.
  * Always returns success message to prevent email enumeration.
  */
-export const requestPasswordReset = async (
+export const requestLoginMagicLink = async (
   email: string,
 ): Promise<{ message: string }> => {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  // Always return the same message to prevent email enumeration
   const successMessage = {
-    message: 'If an account with that email exists, a password reset link has been sent.',
+    message: 'If an account with that email exists, a login link has been sent.',
   };
 
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  });
+
   if (!user) {
-    // Don't reveal that the email doesn't exist
-    Logger.debug(`Password reset requested for non-existent email`);
+    Logger.debug(`Magic link requested for non-existent email`);
     return successMessage;
   }
 
   if (user.isVerified === 0) {
-    // Don't reveal that the account is unverified
-    Logger.debug(`Password reset requested for unverified account (ID: ${user.id})`);
+    Logger.debug(`Magic link requested for unverified account (ID: ${user.id})`);
     return successMessage;
   }
 
-  const resetToken = randomBytes(32).toString('hex');
-  const expiresAt = BigInt(Date.now() + RESET_PASSWORD_TOKEN_EXPIRY_MS);
+  const loginToken = randomBytes(32).toString('hex');
+  const expiresAt = BigInt(Date.now() + LOGIN_MAGIC_LINK_EXPIRY_MS);
 
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      resetPasswordToken: resetToken,
-      resetPasswordTokenExpiresAt: expiresAt,
+      loginToken,
+      loginTokenExpiresAt: expiresAt,
     },
   });
 
-  const emailSent = await sendPasswordResetEmail(email, resetToken);
+  const emailSent = await sendLoginMagicLinkEmail(email, loginToken);
   if (!emailSent) {
-    // Clear the token if email failed
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        resetPasswordToken: null,
-        resetPasswordTokenExpiresAt: null,
+        loginToken: null,
+        loginTokenExpiresAt: null,
       },
     });
-    throw new Error('Failed to send password reset email. Please try again later.');
+    throw new Error('Failed to send login email. Please try again later.');
   }
 
-  Logger.info(`Password reset requested (ID: ${user.id})`);
+  Logger.info(`Magic link login requested (ID: ${user.id})`);
   return successMessage;
 };
 
 /**
- * Reset password using a reset token.
- * Validates the token, updates the password, and revokes all existing tokens.
+ * Verify a magic link login token and return a JWT.
  */
-export const resetPassword = async (
+export const verifyLoginMagicLink = async (
   token: string,
-  newPassword: string,
-): Promise<{ message: string }> => {
+): Promise<{ token: string; user: { id: number; email: string } }> => {
   const user = await prisma.user.findFirst({
-    where: { resetPasswordToken: token },
+    where: { loginToken: token },
   });
 
   if (!user) {
-    throw new Error('Invalid or expired reset token');
+    throw new Error('Invalid or expired login link');
   }
 
-  if (
-    user.resetPasswordTokenExpiresAt &&
-    user.resetPasswordTokenExpiresAt < BigInt(Date.now())
-  ) {
-    // Clear expired token
+  if (user.loginTokenExpiresAt && user.loginTokenExpiresAt < BigInt(Date.now())) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        resetPasswordToken: null,
-        resetPasswordTokenExpiresAt: null,
+        loginToken: null,
+        loginTokenExpiresAt: null,
       },
     });
-    throw new Error('Invalid or expired reset token');
+    throw new Error('Invalid or expired login link');
   }
 
-  const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
-
-  // Update password, clear reset token, increment token version to invalidate all sessions
+  // Clear the token (single use) and reset any failed attempts
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      passwordHash,
-      resetPasswordToken: null,
-      resetPasswordTokenExpiresAt: null,
-      tokenVersion: { increment: 1 },
-      // Also clear any lockout
+      loginToken: null,
+      loginTokenExpiresAt: null,
       failedLoginAttempts: 0,
       lockedUntil: null,
     },
   });
 
-  Logger.info(`Password reset completed (ID: ${user.id})`);
+  const tokenVersion = user.tokenVersion ?? 0;
+  const jwtToken = jwt.sign(
+    { userId: user.id, email: user.email, tokenVersion },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRY },
+  );
 
-  return {
-    message:
-      'Password has been reset successfully. Please log in with your new password.',
-  };
+  Logger.info(`User logged in via magic link (ID: ${user.id})`);
+
+  return { token: jwtToken, user: { id: user.id, email: user.email } };
 };

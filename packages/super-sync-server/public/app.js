@@ -18,9 +18,12 @@ const logoutBtn = document.getElementById('logout-btn');
 const deleteAccountBtn = document.getElementById('delete-account-btn');
 const tabLoginBtn = document.getElementById('tab-login');
 const tabRegisterBtn = document.getElementById('tab-register');
-const forgotPasswordForm = document.getElementById('forgot-password-form');
-const showForgotPasswordBtn = document.getElementById('show-forgot-password');
-const backToLoginBtn = document.getElementById('back-to-login');
+const lostPasskeyForm = document.getElementById('lost-passkey-form');
+const showLostPasskeyBtn = document.getElementById('show-lost-passkey');
+const backToLoginFromPasskeyBtn = document.getElementById('back-to-login-from-passkey');
+const loginPasskeyBtn = document.getElementById('login-passkey-btn');
+const loginMagicLinkBtn = document.getElementById('login-magic-link-btn');
+const registerPasskeyBtn = document.getElementById('register-passkey-btn');
 
 // --- Event Listeners ---
 
@@ -43,30 +46,39 @@ logoutBtn.addEventListener('click', logout);
 // Delete account button
 deleteAccountBtn.addEventListener('click', deleteAccount);
 
-// Show forgot password form
-showForgotPasswordBtn.addEventListener('click', () => {
+// Show lost passkey form
+showLostPasskeyBtn.addEventListener('click', () => {
   loginForm.classList.remove('active');
-  forgotPasswordForm.classList.add('active');
+  lostPasskeyForm.classList.add('active');
   hideMessage();
 });
 
-// Back to login from forgot password
-backToLoginBtn.addEventListener('click', () => {
-  forgotPasswordForm.classList.remove('active');
+// Back to login from lost passkey
+backToLoginFromPasskeyBtn.addEventListener('click', () => {
+  lostPasskeyForm.classList.remove('active');
   loginForm.classList.add('active');
   hideMessage();
 });
 
-// Forgot password form submit
-forgotPasswordForm.addEventListener('submit', async (e) => {
+// Passkey login button
+loginPasskeyBtn.addEventListener('click', loginWithPasskey);
+
+// Magic link login button
+loginMagicLinkBtn.addEventListener('click', requestMagicLink);
+
+// Passkey register button
+registerPasskeyBtn.addEventListener('click', registerWithPasskey);
+
+// Lost passkey form submit
+lostPasskeyForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('forgot-email').value;
+  const email = document.getElementById('lost-passkey-email').value;
 
   setLoading(true);
   hideMessage();
 
   try {
-    await fetch(`${API_BASE}/forgot-password`, {
+    await fetch(`${API_BASE}/recover/passkey`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -74,58 +86,20 @@ forgotPasswordForm.addEventListener('submit', async (e) => {
 
     // Always show success (security: don't reveal if email exists)
     showMessage(
-      'If an account exists with that email, you will receive a password reset link.',
+      'If an account exists with that email, you will receive a passkey recovery link.',
       'success',
     );
 
     // Return to login after a delay
     setTimeout(() => {
-      forgotPasswordForm.classList.remove('active');
+      lostPasskeyForm.classList.remove('active');
       loginForm.classList.add('active');
-      document.getElementById('forgot-email').value = '';
+      document.getElementById('lost-passkey-email').value = '';
     }, 3000);
   } catch (err) {
     showMessage('An error occurred. Please try again.', 'error');
   } finally {
     setLoading(false);
-  }
-});
-
-loginForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-
-  await handleAuth('/login', { email, password });
-});
-
-registerForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('register-email').value;
-  const password = document.getElementById('register-password').value;
-  const confirm = document.getElementById('register-confirm').value;
-  const termsAccepted = document.getElementById('register-terms').checked;
-
-  if (password !== confirm) {
-    showMessage('Passwords do not match', 'error');
-    return;
-  }
-
-  if (!termsAccepted) {
-    showMessage('You must accept the Terms of Service', 'error');
-    return;
-  }
-
-  // Register first
-  const success = await handleAuth('/register', { email, password, termsAccepted }, true);
-
-  // Auto login if registration successful
-  if (success) {
-    // Wait a bit for UX
-    setTimeout(async () => {
-      showMessage('Registration successful! Logging in...', 'success');
-      await handleAuth('/login', { email, password });
-    }, 1000);
   }
 });
 
@@ -150,38 +124,6 @@ function switchTab(tab) {
   hideMessage();
 }
 
-async function handleAuth(endpoint, body, isRegister = false) {
-  setLoading(true);
-  hideMessage();
-
-  try {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || 'Authentication failed');
-    }
-
-    if (isRegister) {
-      // Registration success
-      return true;
-    } else {
-      // Login success -> Show Token
-      showToken(data.token);
-    }
-  } catch (err) {
-    showMessage(err.message, 'error');
-    return false;
-  } finally {
-    setLoading(false);
-  }
-}
-
 function showToken(token) {
   state.token = token;
   tokenArea.value = token;
@@ -196,14 +138,35 @@ function logout() {
   tokenDisplay.classList.add('hidden');
   authForms.classList.remove('hidden');
   hideMessage();
-  document.getElementById('login-password').value = '';
 }
 
 async function copyToken() {
   if (!state.token) return;
 
-  try {
-    await navigator.clipboard.writeText(state.token);
+  let copied = false;
+
+  // Try modern clipboard API first
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(state.token);
+      copied = true;
+    } catch (err) {
+      // Fall through to fallback
+    }
+  }
+
+  // Fallback for non-secure contexts (HTTP)
+  if (!copied) {
+    try {
+      tokenArea.select();
+      tokenArea.setSelectionRange(0, 99999); // For mobile
+      copied = document.execCommand('copy');
+    } catch (err) {
+      // Fallback failed
+    }
+  }
+
+  if (copied) {
     const originalText = copyBtn.innerText;
     copyBtn.innerText = 'Copied!';
     copyBtn.classList.add('success');
@@ -212,8 +175,9 @@ async function copyToken() {
       copyBtn.innerText = originalText;
       copyBtn.classList.remove('success');
     }, 2000);
-  } catch (err) {
-    showMessage('Failed to copy to clipboard', 'error');
+  } else {
+    showMessage('Please manually select and copy the token', 'error');
+    tokenArea.select();
   }
 }
 
@@ -309,7 +273,6 @@ async function deleteAccount() {
     tokenDisplay.classList.add('hidden');
     authForms.classList.remove('hidden');
     document.getElementById('login-email').value = '';
-    document.getElementById('login-password').value = '';
   } catch (err) {
     showMessage(err.message, 'error');
   } finally {
@@ -334,5 +297,199 @@ function setLoading(isLoading) {
     document.body.style.cursor = 'wait';
   } else {
     document.body.style.cursor = 'default';
+  }
+}
+
+// --- Passkey Functions ---
+
+async function loginWithPasskey() {
+  const email = document.getElementById('login-email').value;
+
+  if (!email) {
+    showMessage('Please enter your email address', 'error');
+    return;
+  }
+
+  setLoading(true);
+  hideMessage();
+
+  try {
+    // Step 1: Get authentication options from server
+    const optionsRes = await fetch(`${API_BASE}/login/passkey/options`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!optionsRes.ok) {
+      const data = await optionsRes.json();
+      throw new Error(data.error || 'Failed to get login options');
+    }
+
+    const options = await optionsRes.json();
+
+    // Step 2: Authenticate with passkey using browser API
+    showMessage('Please follow your browser/device prompt...', 'success');
+
+    const credential = await SimpleWebAuthnBrowser.startAuthentication({
+      optionsJSON: options,
+    });
+
+    // Step 3: Verify with server
+    const verifyRes = await fetch(`${API_BASE}/login/passkey/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, credential }),
+    });
+
+    const verifyData = await verifyRes.json();
+
+    if (!verifyRes.ok) {
+      throw new Error(verifyData.error || 'Authentication failed');
+    }
+
+    // Success - show token
+    showToken(verifyData.token);
+  } catch (err) {
+    console.error('Passkey login error:', err);
+    // Handle user cancellation gracefully
+    if (err.name === 'NotAllowedError') {
+      showMessage('Passkey authentication was cancelled', 'error');
+    } else {
+      showMessage(err.message || 'Passkey login failed', 'error');
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function registerWithPasskey() {
+  const email = document.getElementById('register-email').value;
+  const termsAccepted = document.getElementById('register-terms').checked;
+
+  if (!email) {
+    showMessage('Please enter your email address', 'error');
+    return;
+  }
+
+  if (!termsAccepted) {
+    showMessage('You must accept the Terms of Service', 'error');
+    return;
+  }
+
+  setLoading(true);
+  hideMessage();
+
+  try {
+    // Step 1: Get registration options from server
+    const optionsRes = await fetch(`${API_BASE}/register/passkey/options`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, termsAccepted }),
+    });
+
+    if (!optionsRes.ok) {
+      const data = await optionsRes.json();
+      throw new Error(data.error || 'Failed to get registration options');
+    }
+
+    const options = await optionsRes.json();
+
+    // Step 2: Create passkey using browser API
+    showMessage(
+      'Please follow your browser/device prompt to create a passkey...',
+      'success',
+    );
+
+    const credential = await SimpleWebAuthnBrowser.startRegistration({
+      optionsJSON: options,
+    });
+
+    // Step 3: Verify registration with server
+    const verifyRes = await fetch(`${API_BASE}/register/passkey/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, credential }),
+    });
+
+    const verifyData = await verifyRes.json();
+
+    if (!verifyRes.ok) {
+      throw new Error(verifyData.error || 'Registration failed');
+    }
+
+    // Success - show message and prompt to verify email
+    showMessage(
+      verifyData.message ||
+        'Registration successful! Please check your email to verify your account.',
+      'success',
+    );
+
+    // Switch to login tab after delay
+    setTimeout(() => {
+      switchTab('login');
+      document.getElementById('login-email').value = email;
+      showMessage('Please verify your email, then login with your passkey.', 'success');
+    }, 3000);
+  } catch (err) {
+    console.error('Passkey registration error:', err);
+    // Handle user cancellation gracefully
+    if (err.name === 'NotAllowedError') {
+      showMessage('Passkey registration was cancelled', 'error');
+    } else {
+      showMessage(err.message || 'Passkey registration failed', 'error');
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+
+// --- Page Load ---
+
+// Check for token from magic link login (stored in sessionStorage by /magic-login page)
+(function checkForMagicLinkToken() {
+  const token = sessionStorage.getItem('loginToken');
+  if (token) {
+    sessionStorage.removeItem('loginToken');
+    showToken(token);
+  }
+})();
+
+// --- Magic Link Functions ---
+
+async function requestMagicLink() {
+  const email = document.getElementById('login-email').value;
+
+  if (!email) {
+    showMessage('Please enter your email address', 'error');
+    return;
+  }
+
+  setLoading(true);
+  hideMessage();
+
+  try {
+    const res = await fetch(`${API_BASE}/login/magic-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to send login link');
+    }
+
+    // Always show success message (security: don't reveal if email exists)
+    showMessage(
+      data.message ||
+        'If an account exists with that email, you will receive a login link.',
+      'success',
+    );
+  } catch (err) {
+    showMessage(err.message || 'An error occurred. Please try again.', 'error');
+  } finally {
+    setLoading(false);
   }
 }
