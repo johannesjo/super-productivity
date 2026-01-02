@@ -755,10 +755,22 @@ export class FocusModeEffects {
         };
 
     // End session button - complete for work, skip for break (while running)
-    // Hide when session is completed, break time is up, or during active break
-    const endAction =
-      shouldShowStartButton || isOnBreak
-        ? undefined
+    // Hide when session is completed or break time is up (Start button takes priority)
+    const endAction = shouldShowStartButton
+      ? undefined
+      : isOnBreak
+        ? {
+            label: T.F.FOCUS_MODE.SKIP_BREAK,
+            icon: 'skip_next',
+            fn: () => {
+              this.store
+                .select(selectors.selectPausedTaskId)
+                .pipe(take(1))
+                .subscribe((pausedTaskId) => {
+                  this.store.dispatch(actions.skipBreak({ pausedTaskId }));
+                });
+            },
+          }
         : {
             label: T.F.FOCUS_MODE.B.END_SESSION,
             icon: 'done_all',
