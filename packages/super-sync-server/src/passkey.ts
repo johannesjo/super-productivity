@@ -27,6 +27,7 @@ const getWebAuthnConfig = () => {
   const rpID = process.env.WEBAUTHN_RP_ID || 'localhost';
   const origin = process.env.WEBAUTHN_ORIGIN || 'http://localhost:1900';
 
+  Logger.info(`WebAuthn config: rpID=${rpID}, origin=${origin}`);
   return { rpName, rpID, origin };
 };
 
