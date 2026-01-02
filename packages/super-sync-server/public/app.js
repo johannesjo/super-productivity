@@ -256,6 +256,7 @@ async function deleteAccount() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${state.token}`,
       },
+      body: '{}',
     });
 
     const data = await res.json();
