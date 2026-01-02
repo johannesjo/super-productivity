@@ -477,6 +477,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         break;
       case 4:
         const nextMonth = tDate;
+        nextMonth.setDate(1);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
         this.selectedDate = nextMonth;
         break;
