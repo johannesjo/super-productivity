@@ -1,3 +1,9 @@
+## [16.8.1](https://github.com/johannesjo/super-productivity/compare/v16.8.0...v16.8.1) (2026-01-02)
+
+### Bug Fixes
+
+- **e2e:** improve WebDAV sync test reliability ([e6b6468](https://github.com/johannesjo/super-productivity/commit/e6b6468d2aba39149354419b492f860b60bd4fc5))
+
 # [16.8.0](https://github.com/johannesjo/super-productivity/compare/v16.7.3...v16.8.0) (2026-01-02)
 
 ### Bug Fixes
