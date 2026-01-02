@@ -7,10 +7,12 @@ describe('playSound', () => {
   let mockBufferSource: any;
   let mockAudioBuffer: AudioBuffer;
   let originalAudioContext: typeof AudioContext;
+  let originalFetch: typeof window.fetch;
   let fetchSpy: jasmine.Spy;
 
   beforeEach(() => {
     originalAudioContext = (window as any).AudioContext;
+    originalFetch = window.fetch;
 
     mockGainNode = {
       connect: jasmine.createSpy('connect'),
@@ -43,11 +45,13 @@ describe('playSound', () => {
       .createSpy('AudioContext')
       .and.returnValue(mockAudioContext);
 
-    fetchSpy = spyOn(window, 'fetch').and.returnValue(
+    // Create fetch spy by assigning a jasmine spy directly to window.fetch
+    fetchSpy = jasmine.createSpy('fetch').and.returnValue(
       Promise.resolve({
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
       } as Response),
     );
+    (window as any).fetch = fetchSpy;
 
     // Reset the singleton and cache for each test
     closeAudioContext();
@@ -55,6 +59,7 @@ describe('playSound', () => {
 
   afterEach(() => {
     (window as any).AudioContext = originalAudioContext;
+    (window as any).fetch = originalFetch;
     closeAudioContext();
   });
 

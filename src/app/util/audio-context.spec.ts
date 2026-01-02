@@ -7,10 +7,12 @@ import {
 
 describe('audio-context', () => {
   let originalAudioContext: typeof AudioContext;
+  let originalFetch: typeof window.fetch;
   let mockCloseContext: jasmine.Spy;
 
   beforeEach(() => {
     originalAudioContext = (window as any).AudioContext;
+    originalFetch = window.fetch;
 
     // Create a mock context that has the close method
     mockCloseContext = jasmine.createSpy('close');
@@ -30,6 +32,7 @@ describe('audio-context', () => {
 
   afterEach(() => {
     (window as any).AudioContext = originalAudioContext;
+    (window as any).fetch = originalFetch;
   });
 
   describe('getAudioContext', () => {
@@ -101,6 +104,7 @@ describe('audio-context', () => {
     let mockContext: any;
     let mockArrayBuffer: ArrayBuffer;
     let mockAudioBuffer: AudioBuffer;
+    let fetchSpy: jasmine.Spy;
 
     beforeEach(() => {
       mockArrayBuffer = new ArrayBuffer(8);
@@ -118,17 +122,19 @@ describe('audio-context', () => {
         .createSpy('AudioContext')
         .and.returnValue(mockContext);
 
-      spyOn(window, 'fetch').and.returnValue(
+      // Create fetch spy by assigning directly to window.fetch
+      fetchSpy = jasmine.createSpy('fetch').and.returnValue(
         Promise.resolve({
           arrayBuffer: () => Promise.resolve(mockArrayBuffer),
         } as Response),
       );
+      (window as any).fetch = fetchSpy;
     });
 
     it('should fetch and decode audio on first call', async () => {
       const buffer = await getAudioBuffer('./assets/snd/test.mp3');
 
-      expect(window.fetch).toHaveBeenCalledWith('./assets/snd/test.mp3');
+      expect(fetchSpy).toHaveBeenCalledWith('./assets/snd/test.mp3');
       expect(mockContext.decodeAudioData).toHaveBeenCalledWith(mockArrayBuffer);
       expect(buffer).toBe(mockAudioBuffer);
     });
@@ -137,7 +143,7 @@ describe('audio-context', () => {
       await getAudioBuffer('./assets/snd/test.mp3');
       const buffer = await getAudioBuffer('./assets/snd/test.mp3');
 
-      expect(window.fetch).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(buffer).toBe(mockAudioBuffer);
     });
 
@@ -145,9 +151,9 @@ describe('audio-context', () => {
       await getAudioBuffer('./assets/snd/test1.mp3');
       await getAudioBuffer('./assets/snd/test2.mp3');
 
-      expect(window.fetch).toHaveBeenCalledTimes(2);
-      expect(window.fetch).toHaveBeenCalledWith('./assets/snd/test1.mp3');
-      expect(window.fetch).toHaveBeenCalledWith('./assets/snd/test2.mp3');
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(fetchSpy).toHaveBeenCalledWith('./assets/snd/test1.mp3');
+      expect(fetchSpy).toHaveBeenCalledWith('./assets/snd/test2.mp3');
     });
   });
 
@@ -167,17 +173,19 @@ describe('audio-context', () => {
         .createSpy('AudioContext')
         .and.returnValue(mockContext);
 
-      spyOn(window, 'fetch').and.returnValue(
+      // Create fetch spy by assigning directly to window.fetch
+      const fetchSpy = jasmine.createSpy('fetch').and.returnValue(
         Promise.resolve({
           arrayBuffer: () => Promise.resolve(mockArrayBuffer),
         } as Response),
       );
+      (window as any).fetch = fetchSpy;
 
       await getAudioBuffer('./assets/snd/test.mp3');
       clearAudioBufferCache();
       await getAudioBuffer('./assets/snd/test.mp3');
 
-      expect(window.fetch).toHaveBeenCalledTimes(2);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
   });
 
