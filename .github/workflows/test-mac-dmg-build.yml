@@ -118,7 +118,7 @@ jobs:
           fi
 
       - name: Upload DMG artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: mac-dmg-build
           path: .tmp/app-builds/*.dmg
