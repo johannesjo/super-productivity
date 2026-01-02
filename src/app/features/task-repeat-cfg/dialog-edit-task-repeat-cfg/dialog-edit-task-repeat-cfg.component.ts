@@ -88,6 +88,7 @@ export class DialogEditTaskRepeatCfgComponent {
   repeatCfg = signal<Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg>(
     this._initializeRepeatCfg(),
   );
+  isLoading = signal<boolean>(false);
   isEdit = computed(() => {
     if (this._data.repeatCfg) return true;
     if (this._data.task?.repeatCfgId) return true;
@@ -126,12 +127,14 @@ export class DialogEditTaskRepeatCfgComponent {
     // Set up effect to load task repeat config if editing
     effect(() => {
       if (this.isEdit() && this._data.task?.repeatCfgId) {
+        this.isLoading.set(true);
         this._taskRepeatCfgService
           .getTaskRepeatCfgById$(this._data.task.repeatCfgId)
           .pipe(first())
           .subscribe((cfg) => {
             this._setRepeatCfgInitiallyForEditOnly(cfg);
             this._checkCanRemoveInstance();
+            this.isLoading.set(false);
           });
       }
       this._checkCanRemoveInstance();
