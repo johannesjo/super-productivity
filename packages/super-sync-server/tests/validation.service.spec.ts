@@ -199,11 +199,31 @@ describe('ValidationService', () => {
 
     // === entityId validation edge cases ===
 
-    it('should reject empty string entityId for regular entity type', () => {
+    it('should reject empty string entityId', () => {
       const op = createValidOp({ entityId: '', opType: 'CRT', entityType: 'TASK' });
       const result = validationService.validateOp(op, clientId);
       expect(result.valid).toBe(false);
-      expect(result.errorCode).toBe(SYNC_ERROR_CODES.MISSING_ENTITY_ID);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_ID);
+      expect(result.error).toContain('empty');
+    });
+
+    it('should reject whitespace-only entityId', () => {
+      const op = createValidOp({ entityId: '   ', opType: 'UPD', entityType: 'TASK' });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_ID);
+      expect(result.error).toContain('empty');
+    });
+
+    it('should reject tab and newline-only entityId', () => {
+      const op = createValidOp({
+        entityId: '\t\n  \r',
+        opType: 'CRT',
+        entityType: 'PROJECT',
+      });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_ID);
     });
 
     it('should include opType and entityType in error message for missing entityId', () => {

@@ -108,6 +108,14 @@ export class ValidationService {
           errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_ID,
         };
       }
+      // Reject empty strings - these are corrupt operations that would cause sync issues
+      if (op.entityId.trim().length === 0) {
+        return {
+          valid: false,
+          error: 'entityId cannot be empty or whitespace-only',
+          errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_ID,
+        };
+      }
     }
 
     // Require entityId for regular entity operations.
