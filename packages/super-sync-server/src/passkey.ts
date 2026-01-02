@@ -108,7 +108,7 @@ export const generateRegistrationOptions = async (
         transports: pk.transports ? JSON.parse(pk.transports) : undefined,
       })) || [],
     authenticatorSelection: {
-      residentKey: 'preferred',
+      residentKey: 'required', // Required for synced passkeys (Google Password Manager)
       userVerification: 'preferred',
     },
     attestationType: 'none', // We don't need attestation
@@ -116,7 +116,15 @@ export const generateRegistrationOptions = async (
 
   storeChallenge(email, options.challenge);
 
-  Logger.debug(`Generated passkey registration options for ${email}`);
+  Logger.info(
+    `Registration options for ${email}: ${JSON.stringify({
+      rp: options.rp,
+      user: options.user,
+      pubKeyCredParams: options.pubKeyCredParams,
+      authenticatorSelection: options.authenticatorSelection,
+      attestation: options.attestation,
+    })}`,
+  );
   return options;
 };
 
