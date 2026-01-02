@@ -1710,6 +1710,7 @@
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "DONT_SHOW_AGAIN": "Don't show again",
+    "DUPLICATE": "Duplicate",
     "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours and 23 minutes",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
@@ -2116,6 +2117,7 @@
     "TOGGLE_SHOW_ISSUE_PANEL": "Show/Hide Issue Panel",
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
+    "NO_TASKS_TO_TRACK": "Add a task first to start tracking time",
     "TRIGGER_SYNC": "Sync!",
     "UNPLAN_ALL_TASKS": "Unplan all tasks",
     "WORKLOG": "Worklog"
