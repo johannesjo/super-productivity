@@ -215,7 +215,9 @@
         "BREAK_RUNNING": "Pausa em andamento",
         "POMODORO_BREAK_RUNNING": "Pausa #{{cycleNr}} em andamento",
         "POMODORO_SESSION_RUNNING": "Sessão Pomodoro #{{cycleNr}} em andamento",
+        "RESUME": "Currículo",
         "SESSION_RUNNING": "A Sessão de Foco está em execução",
+        "START": "Iniciar",
         "TO_FOCUS_OVERLAY": "Para Sobreposição de Foco"
       },
       "BACK_TO_PLANNING": "Retornar ao Planejamento",
@@ -857,6 +859,9 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Cancelar"
+      },
       "D_CREATE": {
         "CREATE": "Criar Projeto",
         "EDIT": "Editar Projeto",
@@ -1540,6 +1545,7 @@
         "FILTER_BY": "Filtrar por",
         "FILTER_DEFAULT": "Sem Filtro",
         "FILTER_ESTIMATED_TIME": "Tempo Estimado",
+        "FILTER_NOT_SPECIFIED": "Não especificado",
         "FILTER_PROJECT": "Projeto",
         "FILTER_SCHEDULED_DATE": "Data Agendada",
         "FILTER_TAG": "Tag",
@@ -1567,7 +1573,6 @@
         "TIME_2HOUR": "> 2 Horas",
         "TIME_10MIN": "> 10 Minutos",
         "TIME_30MIN": "> 30 Minutos",
-        "FILTER_NOT_SPECIFIED": "Não especificado",
         "TIME_SPENT": "Tempo Gasto",
         "TITLE": "Personalizar Visualização de Tarefas"
       }
@@ -1701,6 +1706,7 @@
     "DISMISS": "Dispensar",
     "DO_IT": "Fazer isto!",
     "DONT_SHOW_AGAIN": "Não mostrar novamente",
+    "DUPLICATE": "Duplicar",
     "DURATION_DESCRIPTION": "por exemplo \"5h 23m\" que resulta em 5 horas em 23 minutos",
     "EDIT": "Editar",
     "ENABLED": "Ativado",
@@ -1733,6 +1739,10 @@
     "YESTERDAY": "Ontem"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Placas",
+      "SCHEDULE": "Agendar"
+    },
     "AUTO_BACKUPS": {
       "HELP": "Salve automaticamente todos os dados na pasta do aplicativo para prepará-los, caso algo dê errado.",
       "LABEL_IS_ENABLED": "Ativar backups automáticos",
@@ -1883,8 +1893,6 @@
       "IS_DARK_MODE": "Modo escuro",
       "IS_DISABLE_ANIMATIONS": "Desativar todas as animações",
       "IS_DISABLE_CELEBRATION": "Desativar celebração no resumo diário",
-      "USER_PROFILES": "Ativar perfis de utilizador (Beta)",
-      "USER_PROFILES_HINT": "Permite criar e alternar entre diferentes perfis de utilizador, cada um com configurações, tarefas e configurações de sincronização separadas. O botão de gestão de perfil aparecerá no canto superior direito quando ativado. Nota: desativar este recurso ocultará a interface do utilizador, mas preservará os dados do seu perfil (recurso Beta, sem garantias. Certifique-se de ter uma cópia de segurança).",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Ativar janela indicadora sobreposta (desktop linux/gnome)",
@@ -1899,7 +1907,9 @@
       "THEME": "Tema",
       "THEME_EXPERIMENTAL": "Tema (experimental)",
       "THEME_SELECT_LABEL": "Selecionar tema",
-      "TITLE": "Configurações diversas"
+      "TITLE": "Configurações diversas",
+      "USER_PROFILES": "Ativar perfis de utilizador (Beta)",
+      "USER_PROFILES_HINT": "Permite criar e alternar entre diferentes perfis de utilizador, cada um com configurações, tarefas e configurações de sincronização separadas. O botão de gestão de perfil aparecerá no canto superior direito quando ativado. Nota: desativar este recurso ocultará a interface do utilizador, mas preservará os dados do seu perfil (recurso Beta, sem garantias. Certifique-se de ter uma cópia de segurança)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Duração de pausas curtas",
@@ -2039,6 +2049,7 @@
     "CREATE_TAG": "Criar tag",
     "DELETE_PROJECT": "Eliminar projeto",
     "DELETE_TAG": "Excluir tag",
+    "DUPLICATE_PROJECT": "Duplicar",
     "ENTER_FOCUS_MODE": "Entrar no Modo Foco",
     "GO_TO_TASK_LIST": "Ir para a lista de tarefas",
     "HELP": "Ajuda",

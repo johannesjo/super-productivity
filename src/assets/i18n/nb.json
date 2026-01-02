@@ -53,6 +53,11 @@
     "SEARCH_PLACEHOLDER": "f.eks., natur, fjell, abstrakt",
     "TITLE": "Velg bakgrunnsbilde fra Unsplash"
   },
+  "DONATE_PAGE": {
+    "BUTTON_TEXT": "Doner via GitHub Sponsors",
+    "INTRO_1": "Super Productivity finansieres helt av fellesskapet. Det er ingen sporing, ingen annonser, og ingen datainnsamling — oppgavene dine forblir på enheten din.",
+    "INTRO_2": "Hvis du verdsetter denne tilnærmingen og ønsker å holde prosjektet sunt og i utvikling, er en frivillig donasjon svært verdsatt."
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -213,9 +218,14 @@
       "ADD_TIME_MINUTE": "Legg til 1 minutt",
       "B": {
         "BREAK_RUNNING": "Pause pågår",
+        "END_BREAK": "Avslutt pause",
+        "END_SESSION": "Avslutt økt",
+        "PAUSE": "Pause",
         "POMODORO_BREAK_RUNNING": "Pause #{{cycleNr}} pågår",
         "POMODORO_SESSION_RUNNING": "Pomodoro-økt #{{cycleNr}} pågår",
+        "RESUME": "CV",
         "SESSION_RUNNING": "Fokusøkt pågår",
+        "START": "Start",
         "TO_FOCUS_OVERLAY": "Til fokusoverlegg"
       },
       "BACK_TO_PLANNING": "Tilbake til Planlegging",
@@ -249,6 +259,7 @@
       "POMODORO": "Pomodoro",
       "POMODORO_HINT": "Strukturerte sprint med planlagte pauser",
       "POMODORO_SESSION_COMPLETED": "Pomodoro-økt fullført!",
+      "POMODORO_SETTINGS": "Pomodoro-innstillinger",
       "PREP_GET_MENTALLY_READY": "Gjør deg mentalt klar til å være fokusert og produktiv",
       "PREP_SIT_UPRIGHT": "Sitt (eller stå) oppreist",
       "PREP_STRETCH": "Gjør noen milde uttøyninger",
@@ -264,6 +275,7 @@
       "SHORT_BREAK_TITLE": "Kort pause - syklus {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Vis/skjul oppgavenotater og vedlegg",
       "SKIP_BREAK": "Hopp over pause",
+      "START_BREAK": "Start pause",
       "START_FOCUS_SESSION": "Start fokusøkten",
       "START_NEXT_FOCUS_SESSION": "Start neste fokusøkt",
       "SWITCH_TASK": "Bytt oppgave",
@@ -857,6 +869,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Avbryt",
+        "MSG": "Dette prosjektet er ganske stort og kan ta en stund å duplisere. Vil du fortsette?",
+        "OK": "Dupliser uansett",
+        "TITLE": "Dupliser prosjekt?"
+      },
       "D_CREATE": {
         "CREATE": "Lag prosjekt",
         "EDIT": "Rediger prosjekt",
@@ -1140,11 +1158,16 @@
         "TITLE": "Synkroniser",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Få det til å fungere i nettleseren:<\\/strong> For å få dette til å fungere i nettleseren må du hviteliste Super Productivity for CORS-forespørselene til din Nextcloud-instans. Dette kan ha negative sikkerhetsimplikasjoner! Vennligst <a href='https:\\/\\/github.com\\/nextcloud\\/server\\/issues\\/3131'>se denne tråden for mer informasjon<\\/a>. En tilnærming for å få dette til å fungere på mobil er å hviteliste \"https:\\/\\/app.super-productivity.com\" via Nextcloud-appen <a href='https:\\/\\/apps.nextcloud.com\\/apps\\/webapppassword'>webapppassword<a>. Bruk på egen risiko!<\\/p>",
+          "D_SYNC_FOLDER_PATH": "Sti relativ til WebDAV-serverens rot hvor synkroniseringsfiler vil bli lagret (f.eks. '/super-productivity' eller '/'). Dette er IKKE serverens interne katalogsti.",
           "INFO": "WebDAV-implementeringer varierer dessverre mye. Super Productivity er kjent for å fungere godt med Nextcloud, <strong>men det kan hende det ikke fungerer med din leverandør</strong>.",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Passord",
           "L_SYNC_FOLDER_PATH": "Synkroniseringsmappebane",
-          "L_USER_NAME": "Brukernavn"
+          "L_TEST_CONNECTION": "Test tilkobling",
+          "L_USER_NAME": "Brukernavn",
+          "S_FILL_ALL_FIELDS": "Vennligst fyll ut alle WebDAV-feltene først",
+          "S_TEST_FAIL": "Tilkoblingstest mislyktes: {{error}} - Mål-URL: {{url}}",
+          "S_TEST_SUCCESS": "Tilkoblingstest vellykket! Mål-URL: {{url}}"
         }
       },
       "S": {
@@ -1157,6 +1180,9 @@
         "ERROR_FALLBACK_TO_BACKUP": "Noe gikk galt under importen av dataene. Faller tilbake til lokal sikkerhetskopi.",
         "ERROR_INVALID_DATA": "Feil under synkronisering. Ugyldige data",
         "ERROR_NO_REV": "Ingen gyldig rev for ekstern fil",
+        "ERROR_PERMISSION": "Filtilgang nektet. Vennligst sjekk filsystemtillatelsene dine.",
+        "ERROR_PERMISSION_FLATPAK": "Filtilgang nektet. Gi filsystemtillatelse via Flatseal eller bruk en sti innenfor ~/.var/app/",
+        "ERROR_PERMISSION_SNAP": "Filtilgang nektet. Kjør 'snap connect super-productivity:home' eller bruk en sti innenfor ~\\/snap\\/super-productivity\\/common\\/",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Feil under synkronisering. Kan ikke lese eksterne data. Kanskje du har aktivert kryptering, og det lokale passordet ditt ikke samsvarer med det som brukes til å kryptere de eksterne dataene?",
         "IMPORTING": "Importerer data",
         "INCOMPLETE_CFG": "Autentisering for synkronisering mislyktes. Vennligst sjekk konfigurasjonen din!",
@@ -1540,6 +1566,7 @@
         "FILTER_BY": "Filtrer etter",
         "FILTER_DEFAULT": "Ingen filter",
         "FILTER_ESTIMATED_TIME": "Estimert tid",
+        "FILTER_NOT_SPECIFIED": "Ikke spesifisert",
         "FILTER_PROJECT": "Prosjekt",
         "FILTER_SCHEDULED_DATE": "Planlagt dato",
         "FILTER_TAG": "Tag",
@@ -1567,7 +1594,6 @@
         "TIME_2HOUR": "> 2 timer",
         "TIME_10MIN": "> 10 minutter",
         "TIME_30MIN": "> 30 minutter",
-        "FILTER_NOT_SPECIFIED": "Ikke spesifisert",
         "TIME_SPENT": "Brukt tid",
         "TITLE": "Tilpass oppgavevisning"
       }
@@ -1701,6 +1727,7 @@
     "DISMISS": "Avvis",
     "DO_IT": "Gjør det!",
     "DONT_SHOW_AGAIN": "Ikke vis igjen",
+    "DUPLICATE": "Duplikat",
     "DURATION_DESCRIPTION": "f.eks. \"5h 23m\", som resulterer i 5 timer og 23 minutter",
     "EDIT": "Redigere",
     "ENABLED": "Aktivert",
@@ -1733,6 +1760,22 @@
     "YESTERDAY": "I går"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Brett",
+      "DONATE_PAGE": "Donasjonsside",
+      "FOCUS_MODE": "Fokusmodus",
+      "HELP": "Aktiver eller deaktiver spesifikke app-funksjoner i hele brukergrensesnittet.",
+      "ISSUES_PANEL": "Problempanel",
+      "PLANNER": "Planlegger",
+      "PROJECT_NOTES": "Prosjektnotater",
+      "SCHEDULE": "Planlegge",
+      "SCHEDULE_DAY_PANEL": "Planlegg dag-panel",
+      "SYNC_BUTTON": "Synkroniseringsknapp",
+      "TIME_TRACKING": "Stoppeklokketidsregistrering",
+      "TITLE": "App-funksjoner",
+      "USER_PROFILES": "Brukerprofiler (Eksperimentell)",
+      "USER_PROFILES_HINT": "Lar deg opprette og bytte mellom forskjellige brukerprofiler, hver med separate innstillinger, oppgaver og synkroniseringskonfigurasjoner. Profilhåndteringsknappen vises øverst til høyre når aktivert. Merk: Deaktivering av denne funksjonen skjuler brukergrensesnittet, men bevarer profildataene dine (Eksperimentell funksjon, ingen garantier. Sørg for å ha en sikkerhetskopi)."
+    },
     "AUTO_BACKUPS": {
       "HELP": "Lagre alle data automatisk i appmappen din for å ha den klar i tilfelle noe går galt.",
       "LABEL_IS_ENABLED": "Aktiver automatiske sikkerhetskopier",
@@ -1755,7 +1798,12 @@
     "FOCUS_MODE": {
       "HELP": "Fokusmodus åpner en skjerm uten distraksjoner for å hjelpe deg med å fokusere på den aktuelle oppgaven.",
       "L_ALWAYS_OPEN_FOCUS_MODE": "Alltid åpen fokusmodus ved sporing",
+      "L_IS_PLAY_TICK": "Spill av tikkelyd under fokusøkter",
+      "L_MANUAL_BREAK_START": "Start pauser manuelt (Pomodoro)",
+      "L_PAUSE_TRACKING_DURING_BREAK": "Pause oppgaveoppfølging under pauser",
       "L_SKIP_PREPARATION_SCREEN": "Hopp over forberedelsesskjermen (strekking osv.)",
+      "L_START_IN_BACKGROUND": "Start fokusøkter med kun banner (ingen overlegg)",
+      "L_SYNC_SESSION_WITH_TRACKING": "Synkroniser fokusøkt med tidsregistrering",
       "TITLE": "Fokusmodus"
     },
     "IDLE": {
@@ -1844,6 +1892,7 @@
       "NL": "Nederland",
       "PL": "Polsk",
       "PT": "Português",
+      "PT_BR": "Portugisisk (Brasil)",
       "RU": "Russisk",
       "SK": "Slovakisk",
       "TIME_LOCALE": "Tidsformat lokalitet",
@@ -1874,6 +1923,7 @@
       "DARK_MODE_LIGHT": "Lys",
       "DARK_MODE_SYSTEM": "System",
       "DEFAULT_PROJECT": "Standard prosjekt som skal brukes til oppgaver hvis ingen er spesifisert",
+      "DEFAULT_START_PAGE": "Standard startside",
       "FIRST_DAY_OF_WEEK": "Første ukedag",
       "HELP": "<p><strong>Ser du ikke skrivebordsvarsler?</strong> For Windows vil du kanskje sjekke System&gt; Varsler og handlinger og sjekke om de nødvendige varslene er aktivert.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Legg til dagens tag automatisk for å jobbe med oppgaver",
@@ -1883,8 +1933,6 @@
       "IS_DARK_MODE": "Mørk modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiver alle animasjoner",
       "IS_DISABLE_CELEBRATION": "Deaktiver feiring i daglig oppsummering",
-      "USER_PROFILES": "Aktiver brukerprofiler (Beta)",
-      "USER_PROFILES_HINT": "Lar deg opprette og bytte mellom forskjellige brukerprofiler, hver med separate innstillinger, oppgaver og synkroniseringskonfigurasjoner. Profilhåndteringsknappen vises øverst til høyre når aktivert. Merk: Deaktivering av denne funksjonen skjuler brukergrensesnittet, men bevarer profildataene dine (Beta-funksjon, ingen garantier. Sørg for å ha en sikkerhetskopi).",
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
       "IS_MINIMIZE_TO_TRAY": "Minimere til skuffen (kun på skrivebordet)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Aktiver overleggindikatorvindu (desktop linux/gnome)",
@@ -1892,6 +1940,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Vis nåværende nedtelling i systemstatusmenyen (kun desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Vis gjeldende oppgave i skuffen / statusmenyen (kun desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Slå av Markdown-parsering for notater",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Bruk egendefinert tittellinje (kun Windows/Linux)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Krever omstart for å tre i kraft",
       "IS_USE_MINIMAL_SIDE_NAV": "Bruk minimal navigasjonslinje (vis bare ikoner)",
       "START_OF_NEXT_DAY": "Starttidspunkt neste dag",
       "START_OF_NEXT_DAY_HINT": "fra når (i timer) du ønsker å telle neste dag har startet. standard er midnatt, som er 0.",
@@ -1899,7 +1949,9 @@
       "THEME": "Tema",
       "THEME_EXPERIMENTAL": "Tema (eksperimentell)",
       "THEME_SELECT_LABEL": "Velg tema",
-      "TITLE": "Diverse innstillinger"
+      "TITLE": "Diverse innstillinger",
+      "USER_PROFILES": "Aktiver brukerprofiler (Beta)",
+      "USER_PROFILES_HINT": "Lar deg opprette og bytte mellom forskjellige brukerprofiler, hver med separate innstillinger, oppgaver og synkroniseringskonfigurasjoner. Profilhåndteringsknappen vises øverst til høyre når aktivert. Merk: Deaktivering av denne funksjonen skjuler brukergrensesnittet, men bevarer profildataene dine (Beta-funksjon, ingen garantier. Sørg for å ha en sikkerhetskopi)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Varighet av korte pauser",
@@ -1910,6 +1962,7 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Vis banner X før den faktiske påminnelsen",
       "DEFAULT_TASK_REMIND_OPTION": "Standard påminnelsesvalg valgt ved oppretting av oppgaver",
+      "DISABLE_REMINDERS": "Deaktiver alle påminnelser",
       "IS_COUNTDOWN_BANNER_ENABLED": "Vis nedtellingsbanner før påminnelser forfaller",
       "TITLE": "Påminnelser"
     },
@@ -1972,6 +2025,9 @@
       "TITLE": "Tidsregistrering"
     }
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (kopi)"
+  },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
       "A_DAY": "om en dag",
@@ -2002,6 +2058,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Kopiert til utklippstavlen",
+    "DUPLICATE_PROJECT_ERROR": "Prosjektet kunne ikke dupliseres",
+    "DUPLICATE_PROJECT_SUCCESS": "Prosjekt duplisert vellykket",
     "ERR_COMPRESSION": "Feil for kompresjonsgrensesnitt",
     "FILE_DOWNLOADED": "{{fileName}} lastet ned",
     "FILE_DOWNLOADED_BTN": "Åpne mappe",
@@ -2039,6 +2097,8 @@
     "CREATE_TAG": "Opprett tag",
     "DELETE_PROJECT": "Slett prosjekt",
     "DELETE_TAG": "Slett tag",
+    "DONATE": "Støtt oss",
+    "DUPLICATE_PROJECT": "Duplikat",
     "ENTER_FOCUS_MODE": "Gå inn i fokusmodus",
     "GO_TO_TASK_LIST": "Gå til oppgavelisten",
     "HELP": "Hjelp",
@@ -2055,6 +2115,7 @@
     "METRICS": "Beregninger",
     "NO_PROJECT_INFO": "Ingen prosjekter tilgjengelig. Du kan opprette et nytt prosjekt ved å klikke på \"Opprett prosjekt\"-knappen.",
     "NO_TAG_INFO": "Det finnes for øyeblikket ingen tagger. Du kan legge til tagger ved å skrive inn `#yourTagName` når du legger til eller redigerer oppgaver.",
+    "NO_TASKS_TO_TRACK": "Legg til en oppgave først for å begynne å spore tid",
     "NOTES": "Merknader",
     "NOTES_PANEL_INFO": "Notater kan bare vises fra tidsplan- og oppgavelistevisningene.",
     "PLANNER": "Planlegger",
@@ -2101,6 +2162,7 @@
       "MSG": "Avslutte applikasjonen?",
       "OK": "Avslutt"
     },
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "Du kan bruke dette området til å skrive ned dine egne avslutningsritualer for dagen, som du vil bli minnet på.",
     "ESTIMATE_TOTAL": "Totalt estimat:",
     "EVALUATE_DAY": "Evaluer",
     "EXPORT_TASK_LIST": "Eksporter oppgaveliste",

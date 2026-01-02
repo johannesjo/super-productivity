@@ -217,9 +217,12 @@
       "ADD_TIME_MINUTE": "Añadir 1 minuto",
       "B": {
         "BREAK_RUNNING": "El descanso está en curso",
+        "PAUSE": "Pausa",
         "POMODORO_BREAK_RUNNING": "El descanso #{{cycleNr}} está en curso",
         "POMODORO_SESSION_RUNNING": "La sesión Pomodoro #{{cycleNr}} está en curso",
+        "RESUME": "Currículum",
         "SESSION_RUNNING": "La sesión de enfoque está en curso",
+        "START": "INICIO",
         "TO_FOCUS_OVERLAY": "A superposición de enfoque"
       },
       "BACK_TO_PLANNING": "Volver a la planificación",
@@ -848,10 +851,10 @@
     },
     "PROJECT": {
       "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
-        "TITLE": "¿Duplicar Proyecto?",
+        "CANCEL": "Cancelar",
         "MSG": "Este proyecto es bastante grande y podría tardar un tiempo en duplicarse. ¿Quieres continuar?",
         "OK": "Duplicar de todos modos",
-        "CANCEL": "Cancelar"
+        "TITLE": "¿Duplicar Proyecto?"
       },
       "D_CREATE": {
         "CREATE": "Crear Proyecto",
@@ -968,6 +971,40 @@
       },
       "S_ACTIVE_TASK_DUE": "¡La tarea en la que estás trabajando ha vencido!<br/> ({{title}})",
       "S_REMINDER_ERR": "Error de la interfaz de recordatorios"
+    },
+    "SAFETY_BACKUP": {
+      "BACKUP_NOT_FOUND": "No se encontró la copia de seguridad con ID {{backupId}}",
+      "BTN_CLEAR_ALL": "Borrar todo",
+      "BTN_CREATE_MANUAL": "Crear copia manual",
+      "BTN_DELETE": "Eliminar",
+      "BTN_REFRESH": "Actualizar",
+      "BTN_RESTORE": "Restaurar",
+      "CLEAR_FAILED": "Error al borrar las copias de seguridad",
+      "CLEARED_SUCCESS": "Todas las copias de seguridad borradas con éxito",
+      "CREATE_FAILED": "Error al crear la copia de seguridad",
+      "CREATED_SUCCESS": "Copia de seguridad manual creada con éxito",
+      "DELETE_FAILED": "Error al eliminar la copia de seguridad",
+      "DELETED_SUCCESS": "Copia de seguridad eliminada con éxito",
+      "DESCRIPTION": "Las copias de seguridad automáticas se crean antes de descargar datos remotos durante las operaciones de sincronización. Las copias se organizan en 4 espacios inteligentes: 2 más recientes, 1 primera de hoy y 1 primera de un día anterior a hoy.",
+      "INVALID_ID_ERROR": "ID de copia de seguridad generado inválido",
+      "LAST_CHANGE_PREFIX": "Último cambio:",
+      "LOADING": "Cargando...",
+      "NO_BACKUPS": "Aún no hay copias de seguridad disponibles. Las copias se crean automáticamente antes de las operaciones de sincronización.",
+      "REASON_BEFORE_UPDATE": "Copia automática antes de sincronizar",
+      "REASON_MANUAL": "Copia manual",
+      "RESTORE_CONFIRM_MSG": "¿Estás seguro de que quieres restaurar la copia de seguridad de {{timestamp}}?\n\n¡Esto REEMPLAZARÁ COMPLETAMENTE todos tus datos actuales!\n\nRazón: {{reason}}\n\nHaz clic en Aceptar para proceder o Cancelar para abortar.",
+      "RESTORE_CONFIRM_TITLE": "Restaurar copia de seguridad",
+      "RESTORE_FAILED": "Error al restaurar la copia de seguridad: {{error}}",
+      "RESTORED_SUCCESS": "Copia de seguridad restaurada con éxito",
+      "SLOT_BEFORE_TODAY": "Primera copia anterior a hoy",
+      "SLOT_RECENT": "Copia reciente",
+      "SLOT_TODAY": "Primera copia de hoy",
+      "TITLE": "Copias de seguridad de sincronización",
+      "TOOLTIP_CLEAR_ALL": "Eliminar todas las copias de seguridad",
+      "TOOLTIP_CREATE_MANUAL": "Crear una copia de seguridad manual de todos tus datos",
+      "TOOLTIP_DELETE": "Eliminar esta copia de seguridad",
+      "TOOLTIP_REFRESH": "Actualizar la lista de copias de seguridad",
+      "TOOLTIP_RESTORE": "Restaurar esta copia (reemplazará todos los datos actuales)"
     },
     "SCHEDULE": {
       "CONTINUED": "continuado",
@@ -1162,41 +1199,14 @@
         "SUCCESS_VIA_BUTTON": "Datos sincronizados exitosamente",
         "UNKNOWN_ERROR": "Error de Sincronización Desconocido: {{err}}",
         "UPLOAD_ERROR": "Error de Subida Desconocido (¿Configuración correcta?): {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "BTN_CLEAR_ALL": "Limpiar todo",
+        "BTN_DELETE": "Eliminar",
+        "BTN_REFRESH": "Actualizar",
+        "BTN_RESTORE": "Restaurar",
+        "LOADING": "Cargando..."
       }
-    },
-    "SAFETY_BACKUP": {
-      "BACKUP_NOT_FOUND": "No se encontró la copia de seguridad con ID {{backupId}}",
-      "BTN_CLEAR_ALL": "Borrar todo",
-      "BTN_CREATE_MANUAL": "Crear copia manual",
-      "BTN_DELETE": "Eliminar",
-      "BTN_REFRESH": "Actualizar",
-      "BTN_RESTORE": "Restaurar",
-      "CLEAR_FAILED": "Error al borrar las copias de seguridad",
-      "CLEARED_SUCCESS": "Todas las copias de seguridad borradas con éxito",
-      "CREATE_FAILED": "Error al crear la copia de seguridad",
-      "CREATED_SUCCESS": "Copia de seguridad manual creada con éxito",
-      "DELETE_FAILED": "Error al eliminar la copia de seguridad",
-      "DELETED_SUCCESS": "Copia de seguridad eliminada con éxito",
-      "DESCRIPTION": "Las copias de seguridad automáticas se crean antes de descargar datos remotos durante las operaciones de sincronización. Las copias se organizan en 4 espacios inteligentes: 2 más recientes, 1 primera de hoy y 1 primera de un día anterior a hoy.",
-      "INVALID_ID_ERROR": "ID de copia de seguridad generado inválido",
-      "LAST_CHANGE_PREFIX": "Último cambio:",
-      "LOADING": "Cargando...",
-      "NO_BACKUPS": "Aún no hay copias de seguridad disponibles. Las copias se crean automáticamente antes de las operaciones de sincronización.",
-      "REASON_BEFORE_UPDATE": "Copia automática antes de sincronizar",
-      "REASON_MANUAL": "Copia manual",
-      "RESTORE_CONFIRM_MSG": "¿Estás seguro de que quieres restaurar la copia de seguridad de {{timestamp}}?\n\n¡Esto REEMPLAZARÁ COMPLETAMENTE todos tus datos actuales!\n\nRazón: {{reason}}\n\nHaz clic en Aceptar para proceder o Cancelar para abortar.",
-      "RESTORE_CONFIRM_TITLE": "Restaurar copia de seguridad",
-      "RESTORE_FAILED": "Error al restaurar la copia de seguridad: {{error}}",
-      "RESTORED_SUCCESS": "Copia de seguridad restaurada con éxito",
-      "SLOT_BEFORE_TODAY": "Primera copia anterior a hoy",
-      "SLOT_RECENT": "Copia reciente",
-      "SLOT_TODAY": "Primera copia de hoy",
-      "TITLE": "Copias de seguridad de sincronización",
-      "TOOLTIP_CLEAR_ALL": "Eliminar todas las copias de seguridad",
-      "TOOLTIP_CREATE_MANUAL": "Crear una copia de seguridad manual de todos tus datos",
-      "TOOLTIP_DELETE": "Eliminar esta copia de seguridad",
-      "TOOLTIP_REFRESH": "Actualizar la lista de copias de seguridad",
-      "TOOLTIP_RESTORE": "Restaurar esta copia (reemplazará todos los datos actuales)"
     },
     "TAG": {
       "D_CREATE": {
@@ -1536,6 +1546,7 @@
         "FILTER_BY": "Filtrar Por",
         "FILTER_DEFAULT": "Sin Filtro",
         "FILTER_ESTIMATED_TIME": "Tiempo Estimado",
+        "FILTER_NOT_SPECIFIED": "No especificado",
         "FILTER_PROJECT": "Proyecto",
         "FILTER_SCHEDULED_DATE": "Fecha Programada",
         "FILTER_TAG": "Etiqueta",
@@ -1562,7 +1573,6 @@
         "TIME_2HOUR": "> 2 Horas",
         "TIME_10MIN": "> 10 Minutos",
         "TIME_30MIN": "> 30 Minutos",
-        "FILTER_NOT_SPECIFIED": "No especificado",
         "TIME_SPENT": "Tiempo Dedicado",
         "TITLE": "Personalizar Vista de Tareas"
       }
@@ -1696,6 +1706,7 @@
     "DISMISS": "Descartar",
     "DO_IT": "¡Hazlo!",
     "DONT_SHOW_AGAIN": "No mostrar de nuevo",
+    "DUPLICATE": "Duplicar",
     "DURATION_DESCRIPTION": "p. ej. \"5h 23m\" que resulta en 5 horas y 23 minutos",
     "EDIT": "Editar",
     "ENABLED": "Habilitado",
@@ -1728,6 +1739,22 @@
     "YESTERDAY": "Ayer"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Tableros",
+      "DONATE_PAGE": "Página de donaciones",
+      "FOCUS_MODE": "Modo concentración",
+      "HELP": "Habilita o deshabilita funciones específicas de la aplicación en la interfaz.",
+      "ISSUES_PANEL": "Panel de incidencias",
+      "PLANNER": "Planificador",
+      "PROJECT_NOTES": "Notas del proyecto",
+      "SCHEDULE": "Horario",
+      "SCHEDULE_DAY_PANEL": "Panel de horario diario",
+      "SYNC_BUTTON": "Botón de sincronización",
+      "TIME_TRACKING": "Seguimiento de tiempo (Cronómetro)",
+      "TITLE": "Funciones de la aplicación",
+      "USER_PROFILES": "Perfiles de usuario (Experimental)",
+      "USER_PROFILES_HINT": "Permite crear y alternar entre diferentes perfiles de usuario, cada uno con configuraciones, tareas y datos de sincronización independientes. El botón de gestión de perfiles aparecerá en la esquina superior derecha cuando esté habilitado. Nota: Deshabilitar esta función ocultará la interfaz pero conservará los datos de tu perfil (Función experimental, sin garantías. Asegúrate de tener una copia de seguridad)."
+    },
     "AUTO_BACKUPS": {
       "HELP": "Guarda automáticamente todos los datos en la carpeta de tu aplicación para tenerlos listos en caso de que algo salga mal.",
       "LABEL_IS_ENABLED": "Habilitar copias de seguridad automáticas",
@@ -1842,26 +1869,26 @@
       "PT_BR": "Portugués (Brasil)",
       "RU": "Ruso",
       "SK": "Eslovaco",
+      "TIME_LOCALE": "Configuración regional de formato de fecha y hora",
+      "TIME_LOCALE_AUTO": "Predeterminado del sistema",
+      "TIME_LOCALE_DE_DE": "Alemán: 24 horas, DD.MM.AAAA",
+      "TIME_LOCALE_DESCRIPTION": "NOTA: ahora estas opciones no pueden cambiar el formato de entrada de hora (12/24 horas) porque está controlado por tu SO",
+      "TIME_LOCALE_EN_GB": "Inglés (Reino Unido): 24 horas, DD/MM/AAAA",
+      "TIME_LOCALE_EN_US": "Inglés (EE.UU.): 12 horas AM/PM, MM/DD/AAAA",
+      "TIME_LOCALE_ES_ES": "Español: 24 horas, DD/MM/AAAA",
+      "TIME_LOCALE_FR_FR": "Francés: 24 horas, DD/MM/AAAA",
+      "TIME_LOCALE_IT_IT": "Italiano: 24 horas, DD/MM/AAAA",
+      "TIME_LOCALE_JA_JP": "Japonés: 24 horas, AAAA/MM/DD",
+      "TIME_LOCALE_KO_KR": "Coreano: 12 horas AM/PM, AAAA. MM. DD",
+      "TIME_LOCALE_PT_BR": "Portugués (Brasil): 24 horas, DD/MM/AAAA",
+      "TIME_LOCALE_RU_RU": "Ruso: 24 horas, DD.MM.AAAA",
+      "TIME_LOCALE_TR_TR": "Turco: 24 horas, DD.MM.AAAA",
+      "TIME_LOCALE_ZH_CN": "Chino (Simplificado): 24 horas, AAAA/MM/DD",
       "TITLE": "Localización",
       "TR": "Turco",
       "UK": "Ucraniano",
       "ZH": "Chino (Simplificado)",
-      "ZH_TW": "Chino (Tradicional)",
-      "TIME_LOCALE": "Configuración regional de formato de fecha y hora",
-      "TIME_LOCALE_DESCRIPTION": "NOTA: ahora estas opciones no pueden cambiar el formato de entrada de hora (12/24 horas) porque está controlado por tu SO",
-      "TIME_LOCALE_AUTO": "Predeterminado del sistema",
-      "TIME_LOCALE_EN_US": "Inglés (EE.UU.): 12 horas AM/PM, MM/DD/AAAA",
-      "TIME_LOCALE_EN_GB": "Inglés (Reino Unido): 24 horas, DD/MM/AAAA",
-      "TIME_LOCALE_TR_TR": "Turco: 24 horas, DD.MM.AAAA",
-      "TIME_LOCALE_DE_DE": "Alemán: 24 horas, DD.MM.AAAA",
-      "TIME_LOCALE_FR_FR": "Francés: 24 horas, DD/MM/AAAA",
-      "TIME_LOCALE_ES_ES": "Español: 24 horas, DD/MM/AAAA",
-      "TIME_LOCALE_IT_IT": "Italiano: 24 horas, DD/MM/AAAA",
-      "TIME_LOCALE_PT_BR": "Portugués (Brasil): 24 horas, DD/MM/AAAA",
-      "TIME_LOCALE_RU_RU": "Ruso: 24 horas, DD.MM.AAAA",
-      "TIME_LOCALE_ZH_CN": "Chino (Simplificado): 24 horas, AAAA/MM/DD",
-      "TIME_LOCALE_JA_JP": "Japonés: 24 horas, AAAA/MM/DD",
-      "TIME_LOCALE_KO_KR": "Coreano: 12 horas AM/PM, AAAA. MM. DD"
+      "ZH_TW": "Chino (Tradicional)"
     },
     "MISC": {
       "DARK_MODE": "Modo Oscuro",
@@ -1897,6 +1924,19 @@
       "THEME_SELECT_LABEL": "Seleccionar Tema",
       "TITLE": "Ajustes Varios"
     },
+    "PAST": {
+      "A_DAY": "hace un día",
+      "A_MINUTE": "hace un minuto",
+      "A_MONTH": "hace un mes",
+      "A_YEAR": "hace un año",
+      "AN_HOUR": "hace una hora",
+      "DAYS": "hace {{count}} días",
+      "FEW_SECONDS": "hace unos segundos",
+      "HOURS": "hace {{count}} horas",
+      "MINUTES": "hace {{count}} minutos",
+      "MONTHS": "hace {{count}} meses",
+      "YEARS": "hace {{count}} años"
+    },
     "POMODORO": {
       "BREAK_DURATION": "Duración de descansos cortos",
       "CYCLES_BEFORE_LONGER_BREAK": "Iniciar descanso más largo después de X sesiones de trabajo",
@@ -1906,9 +1946,9 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Mostrar banner X antes del recordatorio real",
       "DEFAULT_TASK_REMIND_OPTION": "Opción de recordatorio predeterminada seleccionada al crear tareas",
+      "DISABLE_REMINDERS": "Deshabilitar todos los recordatorios",
       "IS_COUNTDOWN_BANNER_ENABLED": "Mostrar banner de cuenta atrás antes del vencimiento de los recordatorios",
-      "TITLE": "Recordatorios",
-      "DISABLE_REMINDERS": "Deshabilitar todos los recordatorios"
+      "TITLE": "Recordatorios"
     },
     "SCHEDULE": {
       "HELP": "La característica de línea de tiempo debería proporcionarte una visión general rápida sobre cómo se desarrollan tus tareas planificadas a lo largo del tiempo. Puedes encontrarla en el menú de la izquierda bajo <a href='#/schedule'>'Cronograma'</a>. ",
@@ -1954,21 +1994,8 @@
       "SNOOZE_TIME": "Tiempo de posponer cuando se pide tomar un descanso",
       "TITLE": "Recordatorio de Descanso"
     },
-    "APP_FEATURES": {
-      "HELP": "Habilita o deshabilita funciones específicas de la aplicación en la interfaz.",
-      "TITLE": "Funciones de la aplicación",
-      "TIME_TRACKING": "Seguimiento de tiempo (Cronómetro)",
-      "FOCUS_MODE": "Modo concentración",
-      "SCHEDULE": "Horario",
-      "PLANNER": "Planificador",
-      "BOARDS": "Tableros",
-      "SCHEDULE_DAY_PANEL": "Panel de horario diario",
-      "ISSUES_PANEL": "Panel de incidencias",
-      "PROJECT_NOTES": "Notas del proyecto",
-      "SYNC_BUTTON": "Botón de sincronización",
-      "DONATE_PAGE": "Página de donaciones",
-      "USER_PROFILES": "Perfiles de usuario (Experimental)",
-      "USER_PROFILES_HINT": "Permite crear y alternar entre diferentes perfiles de usuario, cada uno con configuraciones, tareas y datos de sincronización independientes. El botón de gestión de perfiles aparecerá en la esquina superior derecha cuando esté habilitado. Nota: Deshabilitar esta función ocultará la interfaz pero conservará los datos de tu perfil (Función experimental, sin garantías. Asegúrate de tener una copia de seguridad)."
+    "TIME_TRACKING": {
+      "TITLE": "Seguimiento del tiempo"
     },
     "TIMELINE": {
       "CAL_PROVIDERS": "Proveedores de calendario (experimental y opcional)",
@@ -1981,13 +2008,31 @@
       "L_WORK_START": "Inicio del Día de Trabajo",
       "TITLE": "Línea de tiempo",
       "WORK_START_END_DESCRIPTION": "p. ej. 17:00"
+    }
+  },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copia)"
+  },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "En un día",
+      "A_MINUTE": "en un minuto",
+      "A_MONTH": "En un mes",
+      "A_YEAR": "en un año",
+      "AN_HOUR": "en una hora",
+      "DAYS": "en {{count}} días",
+      "FEW_SECONDS": "en unos segundos",
+      "HOURS": "en {{count}} horas",
+      "MINUTES": "en {{count}} minutos",
+      "MONTHS": "en {{count}} meses",
+      "YEARS": "en {{count}} años"
     },
     "PAST": {
-      "A_DAY": "hace un día",
-      "A_MINUTE": "hace un minuto",
-      "A_MONTH": "hace un mes",
-      "A_YEAR": "hace un año",
-      "AN_HOUR": "hace una hora",
+      "A_DAY": "Hace un día",
+      "A_MINUTE": "Hace un minuto",
+      "A_MONTH": "Hace un mes",
+      "A_YEAR": "Hace un año",
+      "AN_HOUR": "Hace una hora",
       "DAYS": "hace {{count}} días",
       "FEW_SECONDS": "hace unos segundos",
       "HOURS": "hace {{count}} horas",
@@ -2015,9 +2060,6 @@
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} presionado, pero el atajo de abrir marcadores solo está disponible cuando se está en contexto de proyecto.",
     "UNPLANNED_TODAY_TASKS": "Desplanificadas todas las tareas de Hoy"
   },
-  "GLOBAL": {
-    "COPY_SUFFIX": " (copia)"
-  },
   "GPB": {
     "ASSETS": "Cargando activos...",
     "DBX_DOWNLOAD": "Dropbox: Descargar archivo...",
@@ -2037,11 +2079,11 @@
     "BOARDS": "Tableros",
     "COPY_TASK_LIST_MARKDOWN": "Copiar al Portapapeles",
     "CREATE_PROJECT": "Crear Proyecto",
-    "DUPLICATE_PROJECT": "Duplicar",
     "CREATE_TAG": "Crear Etiqueta",
     "DELETE_PROJECT": "Eliminar Proyecto",
     "DELETE_TAG": "Eliminar Etiqueta",
     "DONATE": "Apóyanos",
+    "DUPLICATE_PROJECT": "Duplicar",
     "ENTER_FOCUS_MODE": "Entrar en Modo Enfoque",
     "GO_TO_TASK_LIST": "Ir a la lista de tareas",
     "HELP": "Ayuda",
@@ -2104,10 +2146,10 @@
       "MSG": "¿Salir de la aplicación?",
       "OK": "Salir"
     },
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "Puedes usar este espacio para escribir tus propios rituales de fin de día de los que quieras que se te recuerde.",
     "ESTIMATE_TOTAL": "Estimación total:",
     "EVALUATE_DAY": "Evaluar Día",
     "EXPORT_TASK_LIST": "Exportar Lista de Tareas",
-    "END_OF_DAYS_RITUALS_PLACEHOLDER": "Puedes usar este espacio para escribir tus propios rituales de fin de día de los que quieras que se te recuerde.",
     "FOCUS_SUMMARY": "Sesiones de Enfoque",
     "NO_TASKS": "No hay tareas para este día",
     "PLAN_TOMORROW": "Planificar",

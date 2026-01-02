@@ -1281,6 +1281,7 @@
         "FILTER_BY": "Filtre pa",
         "FILTER_DEFAULT": "Pa gen filtre",
         "FILTER_ESTIMATED_TIME": "Evalyasyon tan",
+        "FILTER_NOT_SPECIFIED": "Nije navedeno",
         "FILTER_PROJECT": "Pwojè",
         "FILTER_SCHEDULED_DATE": "Dat pwograme",
         "FILTER_TAG": "Tag",
@@ -1306,7 +1307,6 @@
         "TIME_2HOUR": "> 2 èdtan",
         "TIME_10MIN": "> 10 minit",
         "TIME_30MIN": "> 30 minit",
-        "FILTER_NOT_SPECIFIED": "Nije navedeno",
         "TIME_SPENT": "Tan pase",
         "TITLE": "Customize Travay View"
       }

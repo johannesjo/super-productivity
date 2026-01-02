@@ -53,6 +53,11 @@
     "SEARCH_PLACEHOLDER": "ex., nature, montagnes, abstrait",
     "TITLE": "Sélectionner une image de fond depuis Unsplash"
   },
+  "DONATE_PAGE": {
+    "BUTTON_TEXT": "Faire un don via GitHub Sponsors",
+    "INTRO_1": "Super Productivity est entièrement financé par la communauté. Il n'y a pas de suivi, pas de publicités, et aucune collecte de données — vos tâches restent sur votre appareil.",
+    "INTRO_2": "Si vous appréciez cette approche et souhaitez maintenir le projet en bonne santé et en évolution, un don volontaire est grandement apprécié."
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -213,9 +218,14 @@
       "ADD_TIME_MINUTE": "Ajouter 1 minute",
       "B": {
         "BREAK_RUNNING": "Pause en cours",
+        "END_BREAK": "Fin de la pause",
+        "END_SESSION": "Fin de la session",
+        "PAUSE": "Pause",
         "POMODORO_BREAK_RUNNING": "Pause #{{cycleNr}} en cours",
         "POMODORO_SESSION_RUNNING": "Session Pomodoro #{{cycleNr}} en cours",
+        "RESUME": "Résumé",
         "SESSION_RUNNING": "La session de concentration est en cours",
+        "START": "Début",
         "TO_FOCUS_OVERLAY": "Pour superposition de concentration"
       },
       "BACK_TO_PLANNING": "Retour à la planification",
@@ -249,6 +259,7 @@
       "POMODORO": "Pomodoro",
       "POMODORO_HINT": "Sprints structurés avec pauses planifiées",
       "POMODORO_SESSION_COMPLETED": "Session Pomodoro terminée !",
+      "POMODORO_SETTINGS": "Paramètres Pomodoro",
       "PREP_GET_MENTALLY_READY": "Préparez-vous mentalement à être concentré et productif",
       "PREP_SIT_UPRIGHT": "Asseyez-vous (ou tenez-vous debout) droit",
       "PREP_STRETCH": "Faire quelques étirements légers",
@@ -264,6 +275,7 @@
       "SHORT_BREAK_TITLE": "Pause courte - Cycle {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Afficher/masquer les notes et pièces jointes de la tâche",
       "SKIP_BREAK": "Passer la pause",
+      "START_BREAK": "Commencer la pause",
       "START_FOCUS_SESSION": "Débuter la session de concentration",
       "START_NEXT_FOCUS_SESSION": "Débuter la prochaine session de concentration",
       "SWITCH_TASK": "Changer de tâche",
@@ -857,6 +869,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Annuler",
+        "MSG": "Ce projet est assez volumineux et peut prendre un certain temps à dupliquer. Voulez-vous continuer ?",
+        "OK": "Dupliquer quand même",
+        "TITLE": "Dupliquer le projet ?"
+      },
       "D_CREATE": {
         "CREATE": "Créer un projet",
         "EDIT": "Modifier le projet",
@@ -1140,11 +1158,16 @@
         "TITLE": "Sync",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Expérimental !!</strong> Pour que cela fonctionne, vous devez désactiver ou limiter CORS pour votre instance Nextcloud, ce qui peut avoir des implications négatives sur la sécurité! Veuillez <a href='https://github.com/nextcloud/server/issues/3131'>consulter ce fil de discussion</a> pour plus d'informations. À utiliser à vos risques et périls!",
+          "D_SYNC_FOLDER_PATH": "Chemin relatif à la racine du serveur WebDAV où les fichiers de synchronisation seront stockés (par exemple, ' /super-productivity' ou ' /'). Ce n'est PAS le chemin interne de votre serveur.",
           "INFO": "Les implémentations WebDAV varient malheureusement beaucoup. Super Productivity fonctionne bien avec Nextcloud, <strong>mais il pourrait ne pas fonctionner avec votre fournisseur</strong>.",
           "L_BASE_URL": "URL de base",
           "L_PASSWORD": "Mot de passe",
           "L_SYNC_FOLDER_PATH": "Synchroniser le chemin du dossier",
-          "L_USER_NAME": "Nom d'utilisateur"
+          "L_TEST_CONNECTION": "Tester la connexion",
+          "L_USER_NAME": "Nom d'utilisateur",
+          "S_FILL_ALL_FIELDS": "Veuillez d'abord remplir tous les champs WebDAV",
+          "S_TEST_FAIL": "Test de connexion échoué : {{error}} - URL cible : {{url}}",
+          "S_TEST_SUCCESS": "Test de connexion réussi ! URL cible : {{url}}"
         }
       },
       "S": {
@@ -1157,6 +1180,9 @@
         "ERROR_FALLBACK_TO_BACKUP": "Quelque chose s'est mal passé lors de l'importation des données. Retour à la sauvegarde locale.",
         "ERROR_INVALID_DATA": "Erreur lors de la synchronisation. Données invalides",
         "ERROR_NO_REV": "Pas de révision valide pour le fichier distant",
+        "ERROR_PERMISSION": "Accès au fichier refusé. Veuillez vérifier les permissions de votre système de fichiers.",
+        "ERROR_PERMISSION_FLATPAK": "Accès au fichier refusé. Accordez la permission du système de fichiers via Flatseal ou utilisez un chemin à l'intérieur de ~ / .var / app /",
+        "ERROR_PERMISSION_SNAP": "Accès au fichier refusé. Exécutez 'snap connect super-productivity:home' ou utilisez un chemin à l'intérieur de ~\\/snap\\/super-productivity\\/common\\/",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Erreur lors de la synchronisation. Impossible de lire les données distantes. Peut-être avez-vous activé le chiffrement et votre mot de passe local ne correspond pas à celui utilisé pour chiffrer les données distantes ?",
         "IMPORTING": "Importer des données",
         "INCOMPLETE_CFG": "L'authentification pour la synchronisation a échoué. Veuillez vérifier votre configuration!",
@@ -1540,6 +1566,7 @@
         "FILTER_BY": "Filtrer par",
         "FILTER_DEFAULT": "Pas de filtre",
         "FILTER_ESTIMATED_TIME": "Temps estimé",
+        "FILTER_NOT_SPECIFIED": "Toute date",
         "FILTER_PROJECT": "Projet",
         "FILTER_SCHEDULED_DATE": "Date prévue",
         "FILTER_TAG": "Étiquette",
@@ -1567,7 +1594,6 @@
         "TIME_2HOUR": "> 2 Heures",
         "TIME_10MIN": "> 10 Minutes",
         "TIME_30MIN": "> 30 Minutes",
-        "FILTER_NOT_SPECIFIED": "Toute date",
         "TIME_SPENT": "Temps passé",
         "TITLE": "Personnaliser la vue des tâches"
       }
@@ -1701,6 +1727,7 @@
     "DISMISS": "Rejeter",
     "DO_IT": "Fais le !",
     "DONT_SHOW_AGAIN": "Ne plus afficher",
+    "DUPLICATE": "Dupliquer",
     "DURATION_DESCRIPTION": "ex: \"5h 23m\" ce qui équivaut à 5 heures et 23 minutes",
     "EDIT": "modifier",
     "ENABLED": "Activée",
@@ -1733,6 +1760,22 @@
     "YESTERDAY": "Hier"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Tableaux",
+      "DONATE_PAGE": "Page de don",
+      "FOCUS_MODE": "Mode Concentration",
+      "HELP": "Activer ou désactiver des fonctionnalités spécifiques de l'application dans l'interface utilisateur.",
+      "ISSUES_PANEL": "Panneau des problèmes",
+      "PLANNER": "Planificateur",
+      "PROJECT_NOTES": "Notes de projet",
+      "SCHEDULE": "Emploi du temps",
+      "SCHEDULE_DAY_PANEL": "Panneau de la journée planifiée",
+      "SYNC_BUTTON": "Bouton de synchronisation",
+      "TIME_TRACKING": "Suivi du temps avec chronomètre",
+      "TITLE": "Fonctionnalités de l'application",
+      "USER_PROFILES": "Profils utilisateur (Expérimental)",
+      "USER_PROFILES_HINT": "Vous permet de créer et de basculer entre différents profils utilisateur, chacun avec des paramètres, des tâches et des configurations de synchronisation séparés. Le bouton de gestion des profils apparaîtra dans le coin supérieur droit lorsqu'il est activé. Remarque : Désactiver cette fonctionnalité masquera l'interface utilisateur mais préservera vos données de profil (fonctionnalité expérimentale, sans garanties. Assurez-vous d'avoir une sauvegarde)."
+    },
     "AUTO_BACKUPS": {
       "HELP": "Sauvegardez automatiquement toutes les données dans votre dossier d'applications afin de les retrouver en cas de problème.",
       "LABEL_IS_ENABLED": "Activer les sauvegardes automatiques",
@@ -1755,7 +1798,12 @@
     "FOCUS_MODE": {
       "HELP": "Le Mode Concentration ouvre un écran dépourvu de toute distraction pour vous aider à vous focaliser sur la tâche courante",
       "L_ALWAYS_OPEN_FOCUS_MODE": "Toujours ouvrir le Mode Concentration, quand le suivi est actif",
+      "L_IS_PLAY_TICK": "Jouer un son de tic-tac pendant les sessions de concentration",
+      "L_MANUAL_BREAK_START": "Démarrer manuellement les pauses (Pomodoro)",
+      "L_PAUSE_TRACKING_DURING_BREAK": "Mettre en pause le suivi des tâches pendant les pauses",
       "L_SKIP_PREPARATION_SCREEN": "Passer l'écran de préparation (étirement, etc.)",
+      "L_START_IN_BACKGROUND": "Démarrer les sessions de concentration avec seulement une bannière (pas de superposition)",
+      "L_SYNC_SESSION_WITH_TRACKING": "Synchroniser la session de concentration avec le suivi du temps",
       "TITLE": "Mode Concentration"
     },
     "IDLE": {
@@ -1844,6 +1892,7 @@
       "NL": "Pays-Bas",
       "PL": "Polonais",
       "PT": "Português",
+      "PT_BR": "Portugais (Brésil)",
       "RU": "Russie",
       "SK": "Slovaque",
       "TIME_LOCALE": "Format de l'heure locale",
@@ -1874,6 +1923,7 @@
       "DARK_MODE_LIGHT": "Lumière",
       "DARK_MODE_SYSTEM": "Système",
       "DEFAULT_PROJECT": "Projet par défaut à utiliser pour les tâches si aucun n'est spécifié",
+      "DEFAULT_START_PAGE": "Page de démarrage par défaut",
       "FIRST_DAY_OF_WEEK": "Premier jour de la semaine",
       "HELP": "<p><strong>Vous ne voyez pas les notifications de bureau ?</strong> Pour Windows, vous pouvez vérifier Système> Notifications et actions et vérifier si les notifications requises ont été activées.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Ajouter automatiquement la balise d'aujourd'hui aux tâches travaillées",
@@ -1883,8 +1933,6 @@
       "IS_DARK_MODE": "Mode sombre",
       "IS_DISABLE_ANIMATIONS": "Désactiver toutes les animations",
       "IS_DISABLE_CELEBRATION": "Désactiver la célébration dans le résumé quotidien",
-      "USER_PROFILES": "Activer les profils utilisateur (Bêta)",
-      "USER_PROFILES_HINT": "Permet de créer et de basculer entre différents profils utilisateur, chacun avec des paramètres, des tâches et des configurations de synchronisation distincts. Le bouton de gestion des profils apparaîtra dans le coin supérieur droit lorsqu'il est activé. Remarque : la désactivation de cette fonctionnalité masquera l'interface utilisateur mais conservera vos données de profil (fonctionnalité bêta, aucune garantie. Assurez-vous d'avoir une sauvegarde).",
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_MINIMIZE_TO_TRAY": "Réduire dans le bac (bureau uniquement)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Activer la fenêtre d'indicateur en superposition (Linux/desktop GNOME)",
@@ -1892,6 +1940,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Afficher le compte à rebours actuel dans la barre d'état / menu (mac de bureau uniquement)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Afficher la tâche en cours dans la barre d'état / menu d'état (bureau uniquement)",
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Utiliser une barre de titre personnalisée (Windows\\/Linux uniquement)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Nécessite un redémarrage pour prendre effet",
       "IS_USE_MINIMAL_SIDE_NAV": "Utiliser la barre minimale de navigation (affichage des icônes uniquement)",
       "START_OF_NEXT_DAY": "Heure de début le jour suivant",
       "START_OF_NEXT_DAY_HINT": "À partir de quelle heure souhaitez-vous considérer que le jour suivant commence. Par défaut, minuit correspond à 0 heure.",
@@ -1899,7 +1949,9 @@
       "THEME": "Theme",
       "THEME_EXPERIMENTAL": "Thème (expérimental)",
       "THEME_SELECT_LABEL": "Sélectionner le thème",
-      "TITLE": "Réglages divers"
+      "TITLE": "Réglages divers",
+      "USER_PROFILES": "Activer les profils utilisateur (Bêta)",
+      "USER_PROFILES_HINT": "Permet de créer et de basculer entre différents profils utilisateur, chacun avec des paramètres, des tâches et des configurations de synchronisation distincts. Le bouton de gestion des profils apparaîtra dans le coin supérieur droit lorsqu'il est activé. Remarque : la désactivation de cette fonctionnalité masquera l'interface utilisateur mais conservera vos données de profil (fonctionnalité bêta, aucune garantie. Assurez-vous d'avoir une sauvegarde)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Durée des pauses courtes",
@@ -1910,6 +1962,7 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Afficher la bannière \"X temps\" avant le rappel réel",
       "DEFAULT_TASK_REMIND_OPTION": "Option de rappel par défaut sélectionnée lors de la création des tâches",
+      "DISABLE_REMINDERS": "Désactiver tous les rappels",
       "IS_COUNTDOWN_BANNER_ENABLED": "Afficher une bannière de compte à rebours avant l'échéance des rappels",
       "TITLE": "Rappels"
     },
@@ -1972,6 +2025,9 @@
       "TITLE": "Suivi du Temps"
     }
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copie)"
+  },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
       "A_DAY": "dans un jour",
@@ -2002,6 +2058,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copié dans le presse-papier",
+    "DUPLICATE_PROJECT_ERROR": "Le projet n'a pas pu être dupliqué",
+    "DUPLICATE_PROJECT_SUCCESS": "Projet dupliqué avec succès",
     "ERR_COMPRESSION": "Erreur pour l'interface de compression",
     "FILE_DOWNLOADED": "{{fileName}} téléchargé",
     "FILE_DOWNLOADED_BTN": "Dossier ouvert",
@@ -2039,6 +2097,8 @@
     "CREATE_TAG": "Créer une balise",
     "DELETE_PROJECT": "Supprimer le projet",
     "DELETE_TAG": "Supprimer la balise",
+    "DONATE": "Soutenez-nous",
+    "DUPLICATE_PROJECT": "Dupliquer",
     "ENTER_FOCUS_MODE": "Entrer en mode concentration",
     "GO_TO_TASK_LIST": "Aller à la liste des tâches",
     "HELP": "Aide",
@@ -2055,6 +2115,7 @@
     "METRICS": "Métriques",
     "NO_PROJECT_INFO": "Aucun projet disponible. Vous pouvez créer un nouveau projet en cliquant sur le bouton \"Créer un projet\".",
     "NO_TAG_INFO": "Il n'y a actuellement aucune balise. Vous pouvez ajouter des balises en saisissant \"#maBalise\" lors de l'ajout ou de la modification de tâches.",
+    "NO_TASKS_TO_TRACK": "Ajoutez d'abord une tâche pour commencer à suivre le temps",
     "NOTES": "Remarques",
     "NOTES_PANEL_INFO": "Les notes ne peuvent être affichées que depuis les vues de programmation et de listes de tâches.",
     "PLANNER": "Planificateur",
@@ -2101,6 +2162,7 @@
       "MSG": "Quitter l'application ?",
       "OK": "Quitter"
     },
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "Vous pouvez utiliser cet espace pour écrire vos propres rituels de fin de journée, dont vous souhaitez être rappelé.",
     "ESTIMATE_TOTAL": "Estimation totale :",
     "EVALUATE_DAY": "Évaluer",
     "EXPORT_TASK_LIST": "Exporter la liste des tâches",

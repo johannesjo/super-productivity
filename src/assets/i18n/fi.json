@@ -53,6 +53,11 @@
     "SEARCH_PLACEHOLDER": "esim. luonto, vuoret, abstrakti",
     "TITLE": "Valitse taustakuva Unsplashista"
   },
+  "DONATE_PAGE": {
+    "BUTTON_TEXT": "Lahjoita GitHub Sponsorsin kautta",
+    "INTRO_1": "Super Productivity on täysin yhteisön rahoittama. Ei seurantaa, ei mainoksia eikä tiedonkeruuta — tehtäväsi pysyvät laitteellasi.",
+    "INTRO_2": "Jos arvostat tätä lähestymistapaa ja haluat pitää projektin terveenä ja kehittyvänä, vapaaehtoinen lahjoitus on erittäin arvostettu."
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -157,6 +162,7 @@
       "BANNER": {
         "ADD_AS_TASK": "Lisää tehtävänä",
         "FOCUS_TASK": "Keskitä tehtävään",
+        "SHOW_TASK": "Näytä tehtävä",
         "TXT": "<strong>{{title}}</strong> alkaa klo <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> alkaa klo <strong>{{start}}</strong>!<br> (ja {{nrOfOtherBanners}} muuta tapahtumaa on meneillään)",
         "TXT_PAST": "<strong>{{title}}</strong> alkoi klo <strong>{{start}}</strong>!",
@@ -209,23 +215,33 @@
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "Lisää 1 minuutti",
       "B": {
         "BREAK_RUNNING": "Tauko on käynnissä",
+        "END_BREAK": "Lopeta tauko",
+        "END_SESSION": "Lopeta istunto",
+        "PAUSE": "Tauko",
         "POMODORO_BREAK_RUNNING": "Tauko #{{cycleNr}} on käynnissä",
         "POMODORO_SESSION_RUNNING": "Pomodorotunti #{{cycleNr}} on käynnissä",
+        "RESUME": "Jatka",
         "SESSION_RUNNING": "Keskittymististunti on käynnissä",
+        "START": "Aloita",
         "TO_FOCUS_OVERLAY": "Keskittymistilan ikkunaan"
       },
       "BACK_TO_PLANNING": "Takaisin suunnitteluun",
       "BREAK_RELAX_MSG": "Ota hetki rentoutumiseen",
+      "CLICK_TO_EDIT_DURATION": "Klikkaa muokataksesi kestoa",
+      "COMPLETE_FOCUS_SESSION": "Täytä keskittymisistunto",
       "COMPLETE_SESSION": "Viimeistele istunto",
       "CONGRATS": "Onnittelut istunnon suorittamisesta!",
       "CONTINUE_SESSION": "Jatka istuntoa",
       "CONTINUE_TO_NEXT_SESSION": "Jatka seuraavaan istuntoon",
       "COUNTDOWN": "Laskuri",
+      "COUNTDOWN_HINT": "Keskity, kunnes kello näyttää nollaa",
       "CURRENT_SESSION_TIME_TOOLTIP": "Nykyisen istunnon aika",
       "FINISH_TASK_AND_SELECT_NEXT": "Viimeistele tehtävä ja valitse seuraava",
       "FLOWTIME": "Flowtime",
+      "FLOWTIME_HINT": "Joustava tahti ilman tiukkoja ajastimia",
       "FOCUS_TIME_TOOLTIP": "Keskittymisaika",
       "FOR_TASK": "tehtävälle",
       "GET_READY": "Valmistaudu keskittymistilaan!",
@@ -236,21 +252,32 @@
       "NEXT": "Seuraava",
       "ON": "päällä",
       "OPEN_ISSUE_IN_BROWSER": "Avaa ongelma selaimessa",
+      "PAUSE_SESSION": "Tauota istunto",
+      "PAUSE_TRACKING": "Tauota seuranta",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "Tauota seuranta nykyisestä tehtävästä",
       "POMODORO": "Pomodoro",
+      "POMODORO_HINT": "Rakenteelliset sprintit suunnitelluilla tauoilla",
       "POMODORO_SESSION_COMPLETED": "Pomodorotunti suoritettu!",
+      "POMODORO_SETTINGS": "Pomodoro-asetukset",
       "PREP_GET_MENTALLY_READY": "Valmistaudu henkisesti olemaan keskittynyt ja tuottelias",
       "PREP_SIT_UPRIGHT": "Istu (tai seiso) selkä suorana",
       "PREP_STRETCH": "Tee kevyttä venyttelyä",
+      "REMOVE_TIME_MINUTE": "Poista 1 minuutti",
+      "RESUME_SESSION": "Jatka istuntoa",
       "SELECT_ANOTHER_TASK": "Valitse toinen tehtävä",
+      "SELECT_MODE": "Valitse keskittymismoodi",
       "SELECT_TASK": "Valitse tehtävä, johon keskittyä",
+      "SELECT_TASK_TO_FOCUS": "Valitse keskityttävä tehtävä",
       "SESSION_COMPLETED": "Keskittymissessio suoritettu!",
       "SET_FOCUS_SESSION_DURATION": "Aseta keskittymissession kesto",
       "SHORT_BREAK": "Lyhyt tauko",
       "SHORT_BREAK_TITLE": "Lyhyt tauko - Kierros {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Näytä/piilota tehtävän muistiinpanot ja liitteet",
       "SKIP_BREAK": "Ohita tauko",
+      "START_BREAK": "Aloita tauko",
       "START_FOCUS_SESSION": "Käynnistä Keskittymissessio",
       "START_NEXT_FOCUS_SESSION": "Käynnistä seuraava Keskittymissessio",
+      "SWITCH_TASK": "Vaihda tehtävää",
       "WORKED_FOR": "Työskentelit"
     },
     "GITEA": {
@@ -429,6 +456,11 @@
         "POLLING_CHANGES": "{{issueProviderName}}: Haetaan muutoksia {{issuesStr}}"
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "Näytetään välimuistissa olevia kalenterituloksia. Tiedot saattavat olla vanhentuneita."
+      }
+    },
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: Estääkseen pääsyn API:sta, Super Productivity on estänyt pääsyn. Sinun pitäisi todennäköisesti tarkistaa Jira-asetuksesi!",
@@ -572,6 +604,7 @@
         "CHECK": "Tein sen!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Toiminnan lämpökartta",
         "AVG_BREAKS_PER_DAY": "Keskim. taukoja päivässä",
         "AVG_TASKS_PER_DAY_WORKED": "Keskim. tehtäviä työpäivässä",
         "AVG_TIME_SPENT_ON_BREAKS": "Keskim. tauoille käytetty aika",
@@ -583,22 +616,33 @@
         "GLOBAL_METRICS": "Globaalit mittarit",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mieliala ja tuottavuus ajan kuluessa",
         "NO_ADDITIONAL_DATA_YET": "Ei vielä kerättyjä lisätietoja. Käytä lomaketta päivittäisen yhteenvedon \"Arviointi\"-paneelissa tehdäksesi niin.",
+        "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Tuottavuus ja kestävyys ajan myötä",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klikkauslaskurit ajan kuluessa",
         "SIMPLE_COUNTERS": "Yksinkertaiset laskurit & tapaseuranta",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Sekuntikellolaskurit ajan kuluessa",
         "TASKS_DONE_CREATED": "Tehtävät (valmiit/luodut)",
         "TIME_ESTIMATED": "Arvioitu aika",
+        "TIME_FRAME_1_MONTH": "1 kuukausi",
+        "TIME_FRAME_2_WEEKS": "2 viikkoa",
+        "TIME_FRAME_LABEL": "Aikajakso",
         "TIME_FRAME_MAX": "Maxi",
         "TIME_SPENT": "Käytetty aika"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Lisää muistiinpano huomiselle",
+        "DAILY_STATE": "Päivittäinen tila",
+        "DAILY_STATE_TOOLTIP": "Neljännesjärjestelmä molempien pisteiden perusteella (\u0002250 on korkea): Syvä virtaus (korkea/korkea), Ylikierrokset (korkea/matala), Palautuminen (matala/korkea), Vaeltelu (matala/matala)",
         "DISABLE_REPEAT_EVERY_DAY": "Poista joka päivä toisto käytöstä",
         "ENABLE_REPEAT_EVERY_DAY": "Toista joka päivä",
+        "ENERGY_LEVEL": "Miten energiasi on?",
+        "ENERGY_LEVEL_HINT": "\u001f62b Uupunut \u001f610 OK \u001f60a Hyvä",
+        "FOCUS_WORK_TIME": "Keskittynyt työaika",
         "HELP_H1": "Miksi minun pitäisi välitä?",
         "HELP_LINK_TXT": "Siirry mittariosioon",
         "HELP_P1": "Aika pieneen itsearviointiin! Vastauksesi tallennetaan ja tarjoavat sinulle hieman tilastoja työskentelystäsi mittariosiossa. Lisäksi huomisen ehdotukset näkyvät tehtävälistasi yläpuolella seuraavana päivänä.",
         "HELP_P2": "Tämän tarkoituksena on olla vähemmän tarkkojen mittareiden laskemisesta tai koneen kaltaisen tehokkaaksi tulemisesta kaikessa mitä teet, kuin siitä, että parantaisit työskentelystäsi tuntemiasi tunteita. Se voi olla hyödyllistä arvioida kipukohtia päivittäisessä rutiinissasi, samoin kuin löytää tekijöitä, jotka auttavat sinua. Siitä, että olet vain hieman systemaattinen, toivottavasti auttaa saamaan paremman otteen näistä ja parantamaan mitä pystyt.",
+        "IMPACT_OF_WORK": "Miten arvioisit työsi vaikutusta tänään?",
+        "IMPACT_OF_WORK_HINT": "1: Ei merkittävää edistystä – 4: Merkittävä vaikutus",
         "IMPROVEMENTS": "Mikä paransi tuottavuuttasi?",
         "IMPROVEMENTS_TOMORROW": "Mitä voisit tehdä parantaaksesi huomista?",
         "MOOD": "Miltä sinusta tuntuu?",
@@ -606,12 +650,53 @@
         "NOTES": "Muistiinpanot huomiselle",
         "OBSTRUCTIONS": "Mikä haittasi tuottavuuttasi?",
         "PRODUCTIVITY": "Kuinka tehokkaasti työskentelit?",
-        "PRODUCTIVITY_HINT": "1: En ole edes aloittanut – 10: Valtavan tehokas"
+        "PRODUCTIVITY_HINT": "1: En ole edes aloittanut – 10: Valtavan tehokas",
+        "PRODUCTIVITY_SCORE": "Tuottavuuspisteet",
+        "PRODUCTIVITY_SCORE_TOOLTIP": "65 % vaikutus (1–4 asteikko)  30 % keskittyminen 4 tunnin tavoitteeseen  5 % kokonais työajasta (rajoitettu 10 tuntiin)",
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7 päivän tuottavuusjako",
+        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7 päivän kestävyysjako",
+        "STATE_DEEP_FLOW_HEADLINE": "Syvä virtaus: Erinomainen keskittyminen ja kestävä tahti.",
+        "STATE_DEEP_FLOW_HINT": "Olet parhaassa kohdassa – pohdi, mikä teki tämän yhdistelmän mahdolliseksi.",
+        "STATE_DRIFT_HEADLINE": "Vaeltelu: Vähäinen keskittyminen ja energia.",
+        "STATE_DRIFT_HINT": "Se on ihan ok. Pohdi, mikä häiritsi sinua, ja säädä varovasti – jokainen uudelleenkäynnistys on mahdollisuus oppia.",
+        "STATE_IMPACT_MISMATCH_HEADLINE": "Vähäinen vaikutus: Paljon keskittymistä, vähän tulosta.",
+        "STATE_IMPACT_MISMATCH_HINT": "Panostit vahvasti keskittymiseen – suuntaa se nyt korkeamman vaikutuksen työhön, jotta tunnet eron.",
+        "STATE_OVERDRIVE_HEADLINE": "Ylikuormitus: Tuottava, mutta kustannuksella.",
+        "STATE_OVERDRIVE_HINT": "Sait paljon aikaan – varmista nyt, että lataudut ennen kuin uupumus iskee.",
+        "STATE_RECOVERY_HEADLINE": "Toipuminen: Lepo ja latautuminen.",
+        "STATE_RECOVERY_HINT": "Annet itsellesi tilaa palautua. Huomenna sinulla on energiaa sukeltaa syvemmälle uudelleen.",
+        "STATE_STEADY_HEADLINE": "Tasainen rytmi: Johdonmukaista, kestävää edistystä.",
+        "STATE_STEADY_HINT": "Mukava tasapaino. Säilytät vauhdin ilman liiallista venymistä — jatka sen ravitsemista, mikä saa tämän tahdin toimimaan.",
+        "SUSTAINABILITY_SCORE": "Kestävyysarvosana",
+        "SUSTAINABILITY_SCORE_TOOLTIP": "45 % Energiataso  40 % Kohtuulliset työtunnit (0 kohdalla 10h)  15 % Keskittymisen tasapaino (optimaalinen 4h)",
+        "TOTAL_WORK_TIME": "Kokonais työaika tänään"
       },
       "FOCUS_SESSION_DIALOG": {
         "ADD_BTN": "Lisää",
+        "ADD_SESSION": "Lisää istunto",
+        "CHART_LABEL": "Keskittymisaika (min)",
         "NEW_SESSION_DURATION": "Kesto",
+        "NO_SESSIONS": "Tälle päivälle ei keskittymisen istuntoja",
+        "SESSIONS_LIST": "Istunnot",
+        "TITLE": "Keskittymisen istunnot",
+        "TOTAL_SESSIONS": "Kokonaisistunnot",
         "TOTAL_TIME": "Kokonaisaika"
+      },
+      "REFLECTION": {
+        "HISTORY_BTN": "Näytä aiemmat pohdinnat",
+        "HISTORY_EMPTY": "Ei vielä tallennettuja pohdintoja. Tallenna tämän päivän muistiinpano aloittaaksesi sarjan.",
+        "HISTORY_TITLE": "Pohdintojen historia",
+        "PLACEHOLDER_1": "Mikä toimi hyvin tänään? Mitä pitäisi muuttaa huomenna?",
+        "PLACEHOLDER_2": "Pieni parannus huomiseksi?",
+        "PLACEHOLDER_3": "Missä keskittyminen lipsui - ja miten voit suojella sitä?",
+        "PLACEHOLDER_4": "Mikä tehtävä antoi sinulle energiaa? Mikä vei sitä?",
+        "PLACEHOLDER_5": "Yksi asia toistettavaksi. Yksi asia muutettavaksi.",
+        "REMIND_LABEL": "Muistuta minua tästä huomenna",
+        "REMINDER_CREATED": "Pohdintojen muistutus ajastettu huomiselle",
+        "REMINDER_ERROR": "Muistutuksen ajastaminen epäonnistui",
+        "REMINDER_NEEDS_TEXT": "Kirjoita pohdinta ennen muistutuksen pyytämistä",
+        "REMINDER_TASK_TITLE": "Palaa pohdintamuistiinpanoon",
+        "TITLE": "Pohdintamuistiinpano"
       },
       "S": {
         "SAVE_METRIC": "Mittari tallennettu onnistuneesti"
@@ -783,6 +868,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Peruuta",
+        "MSG": "Tämä projekti on melko suuri ja sen kopioiminen saattaa kestää hetken. Haluatko jatkaa?",
+        "OK": "Kopioi silti",
+        "TITLE": "Kopioi projekti?"
+      },
       "D_CREATE": {
         "CREATE": "Luo projekti",
         "EDIT": "Muokkaa projektia",
@@ -886,7 +977,8 @@
       }
     },
     "REFLECTION_NOTE": {
-      "ACTION_DISMISS": "Hylkää"
+      "ACTION_DISMISS": "Hylkää",
+      "MSG": "Pohdintamuistio: ({{date}}): {{content}}"
     },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
@@ -905,12 +997,14 @@
         "TITLE": "Aikataulu"
       },
       "END": "Työpäivän loppu",
+      "INSERT_BEFORE": "Ennen",
       "LUNCH_BREAK": "Lounastauko",
       "MONTH": "Kuukausi",
       "NO_TASKS": "Tällä hetkellä ei ole tehtäviä. Lisää joitakin tehtäviä yläpalkin +-painikkeella.",
       "NOW": "Nyt",
       "PLAN_END_DAY": "Suunnittele päivän lopussa",
       "PLAN_START_DAY": "Suunnittele päivän alussa",
+      "SHIFT_KEY_INFO": "Pidä Shift-näppäintä painettuna vaihtaaksesi päivän suunnittelutilaan",
       "START": "Työpäivän alku",
       "TASK_PROJECTION_INFO": "Aikataulutetun toistuvan tehtävän tuleva projektio",
       "WEEK": "Viikko"
@@ -1063,11 +1157,16 @@
         "TITLE": "Synkronointi",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Saadaksesi sen toimimaan selaimessa:</strong> Jotta tämä toimisi selaimessa, sinun on sallittava Super Productivity CORS-pyynnöille webdav-palvelimellasi. Tällä voi olla negatiivisia tietoturvavaikutuksia! Nextcloudille katso <a href='https://github.com/nextcloud/server/issues/3131'>tämä ketju lisätietoja varten</a>. Yksi tapa saada tämä toimimaan mobiilissa on sallia \"https://app.super-productivity.com\" nextcloud-sovelluksen <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a> kautta. Käytä omalla vastuullasi!</p>",
+          "D_SYNC_FOLDER_PATH": "Polku suhteessa WebDAV-palvelimen juureen, johon synkronointitiedostot tallennetaan (esim. '\\/super-productivity' tai '\\/'). Tämä EI ole palvelimesi sisäinen hakemistopolku.",
           "INFO": "WebDAV-toteutukset valitettavasti eroavat toisistaan paljon. Super Productivity tiedetään toimivan hyvin Nextcloudin kanssa, <strong>mutta se ei välttämättä toimi tarjoajasi kanssa</strong>.",
           "L_BASE_URL": "Perus-URL",
           "L_PASSWORD": "Salasana",
           "L_SYNC_FOLDER_PATH": "Synkronointikansion polku",
-          "L_USER_NAME": "Käyttäjänimi"
+          "L_TEST_CONNECTION": "Testaa yhteys",
+          "L_USER_NAME": "Käyttäjänimi",
+          "S_FILL_ALL_FIELDS": "Täytä ensin kaikki WebDAV-kentät",
+          "S_TEST_FAIL": "Yhteyden testaus epäonnistui: {{error}} - Kohde-URL: {{url}}",
+          "S_TEST_SUCCESS": "Yhteyden testaus onnistui! Kohde-URL: {{url}}"
         }
       },
       "S": {
@@ -1080,6 +1179,9 @@
         "ERROR_FALLBACK_TO_BACKUP": "Tietojen tuonnissa tapahtui virhe. Palataan paikalliseen varmuuskopioon.",
         "ERROR_INVALID_DATA": "Virhe synkronoinnissa. Virheelliset tiedot",
         "ERROR_NO_REV": "Ei kelvollista versiota etätiedostolle",
+        "ERROR_PERMISSION": "Tiedoston käyttö estetty. Tarkista tiedostojärjestelmän käyttöoikeudet.",
+        "ERROR_PERMISSION_FLATPAK": "Tiedoston käyttö estetty. Myönnä tiedostojärjestelmän käyttöoikeus Flatsealilla tai käytä polkua, joka sijaitsee ~\\/var\\/app\\/ sisällä.",
+        "ERROR_PERMISSION_SNAP": "Tiedoston käyttö estetty. Suorita 'snap connect super-productivity:home' tai käytä polkua, joka sijaitsee ~\\/snap\\/super-productivity\\/common\\/ sisällä.",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Virhe synkronoinnissa. Etätietojen lukeminen ei onnistu. Ehkä otit salauksen käyttöön ja paikallinen salasanasi ei vastaa etätietojen salaamiseen käytettyä salasanaa?",
         "IMPORTING": "Tuodaan tietoja",
         "INCOMPLETE_CFG": "Synkronoinnin todennus epäonnistui. Tarkista asetuksesi!",
@@ -1311,7 +1413,8 @@
       },
       "D_SELECT_DATE_AND_TIME": {
         "DATE": "Päivämäärä",
-        "TIME": "Aika"
+        "TIME": "Aika",
+        "TITLE": "Valitse päivämäärä ja aika"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Lisää käytetty aika toiselle päivälle",
@@ -1340,6 +1443,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "Siirrettiin tehtävä <strong>{{title}}</strong> taakkaputkesta tämän päivän tehtävälistaan",
         "FOUND_MOVE_FROM_OTHER_LIST": "Lisättiin tehtävä <strong>{{title}}</strong> kohteesta <strong>{{contextTitle}}</strong> nykyiseen listaan",
         "FOUND_RESTORE_FROM_ARCHIVE": "Palautettiin tehtävä <strong>{{title}}</strong> liittyen ongelmaan arkistosta",
+        "GO_TO_TASK": "Siirry tehtävään",
         "LAST_TAG_DELETION_WARNING": "Yrität poistaa viimeisen tunnisteen ei-projektitehtävältä. Tämä ei ole sallittua!",
         "MOVED_TO_ARCHIVE": "Siirrettiin {{nr}} tehtävää arkistoon",
         "MOVED_TO_PROJECT": "Siirrettiin tehtävä \"{{taskTitle}}\" projektiin \"{{projectTitle}}\"",
@@ -1437,7 +1541,12 @@
         "REMOVE_INSTANCE": "Poista tänään",
         "REPEAT_CYCLE": "Toistosykli",
         "REPEAT_EVERY": "Toista joka",
+        "REPEAT_FROM_COMPLETION_DATE": "Toista, kun valmis",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "Seuraava tehtävä luodaan valmistumispäiväsi perusteella, ei aloituspäivästä. (esim. 'Joka 7. päivä' = 7 päivää valmistumisen jälkeen)",
         "SATURDAY": "Lauantai",
+        "SCHEDULE_TYPE_FIXED": "Kiinteä aikataulu (esim. joka maanantai, kuukauden 1. päivä)",
+        "SCHEDULE_TYPE_FLEXIBLE": "Valmistumisen jälkeen (esim. 7 päivää valmistumisen jälkeen)",
+        "SCHEDULE_TYPE_LABEL": "Aikataulun tyyppi",
         "START_DATE": "Aloituspäivämäärä",
         "START_TIME": "Aikataulutettu aloitusaika",
         "START_TIME_DESCRIPTION": "Esim. 15:00. Jätä tyhjäksi koko päivän tehtävälle",
@@ -1456,6 +1565,7 @@
         "FILTER_BY": "Suodata",
         "FILTER_DEFAULT": "Ei suodatinta",
         "FILTER_ESTIMATED_TIME": "Arvioitu aika",
+        "FILTER_NOT_SPECIFIED": "Non spécifié",
         "FILTER_PROJECT": "Projekti",
         "FILTER_SCHEDULED_DATE": "Aikataulutettu päivämäärä",
         "FILTER_TAG": "Tunniste",
@@ -1476,12 +1586,13 @@
         "SORT_CREATION_DATE": "Luomispäivämäärä",
         "SORT_DEFAULT": "Oletus",
         "SORT_NAME": "Nimi",
+        "SORT_PERMANENT": "Lajittele (pysyvä)",
         "SORT_SCHEDULED_DATE": "Aikataulutettu päivämäärä",
+        "SORT_TEMPORARY": "Lajittele (väliaikainen)",
         "TIME_1HOUR": "> 1 Tunti",
         "TIME_2HOUR": "> 2 Tuntia",
         "TIME_10MIN": "> 10 Minuuttia",
         "TIME_30MIN": "> 30 Minuuttia",
-        "FILTER_NOT_SPECIFIED": "Non spécifié",
         "TIME_SPENT": "Käytetty aika",
         "TITLE": "Mukauta tehtävänäkymää"
       }
@@ -1510,7 +1621,9 @@
         "SKIP": "Ohita",
         "SPLIT_TIME": "Jaa aika useisiin tehtäviin ja taukoihin",
         "TASK": "Tehtävä",
-        "TRACK_TO": "Seuraa kohteeseen"
+        "TRACK_TO": "Seuraa kohteeseen",
+        "WARN_SIMPLE_COUNTER": "Aikaa lasketaan aktivoiduilla yksinkertaisilla laskuripainikkeilla.",
+        "WARN_SIMPLE_COUNTER_BREAK": "Aikaa lasketaan SILTI aktivoiduilla yksinkertaisilla laskuripainikkeilla."
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Luo</em> ja seuraa kohteeseen",
@@ -1613,6 +1726,7 @@
     "DISMISS": "Hylkää",
     "DO_IT": "Tee se!",
     "DONT_SHOW_AGAIN": "Älä näytä uudelleen",
+    "DUPLICATE": "Kopioi",
     "DURATION_DESCRIPTION": "esim. \"5h 23min\" joka tulos 5 tuntia ja 23 minuuttia",
     "EDIT": "Muokkaa",
     "ENABLED": "Käytössä",
@@ -1645,6 +1759,22 @@
     "YESTERDAY": "Eilen"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Laudat",
+      "DONATE_PAGE": "Lahjoitussivu",
+      "FOCUS_MODE": "Keskittymismoodi",
+      "HELP": "Ota käyttöön tai poista käytöstä tiettyjä sovelluksen ominaisuuksia käyttöliittymässä.",
+      "ISSUES_PANEL": "Ongelmapaneeli",
+      "PLANNER": "Suunnittelija",
+      "PROJECT_NOTES": "Projektimuistiinpanot",
+      "SCHEDULE": "Aikataulu",
+      "SCHEDULE_DAY_PANEL": "Päivän aikataulupaneeli",
+      "SYNC_BUTTON": "Synkronointipainike",
+      "TIME_TRACKING": "Sekuntikellon aikaseuranta",
+      "TITLE": "Sovelluksen ominaisuudet",
+      "USER_PROFILES": "Käyttäjäprofiilit (Kokeellinen)",
+      "USER_PROFILES_HINT": "Mahdollistaa erilaisten käyttäjäprofiilien luomisen ja vaihtamisen, joilla on omat asetukset, tehtävät ja synkronointiasetukset. Profiilin hallintapainike näkyy oikeassa yläkulmassa, kun ominaisuus on käytössä. Huom: Ominaisuuden poistaminen käytöstä piilottaa käyttöliittymän, mutta säilyttää profiilitiedot (Kokeellinen ominaisuus, ei takuita. Varmista varmuuskopiointi)."
+    },
     "AUTO_BACKUPS": {
       "HELP": "Tallenna automaattisesti kaikki tiedot sovelluskansioosi, jotta ne ovat valmiina, jos jotain menee pieleen.",
       "LABEL_IS_ENABLED": "Ota automaattiset varmuuskopiot käyttöön",
@@ -1667,7 +1797,12 @@
     "FOCUS_MODE": {
       "HELP": "Keskittymistila avaa häiriöttömän näytön auttaaksesi sinua keskittymään nykyiseen tehtävääsi.",
       "L_ALWAYS_OPEN_FOCUS_MODE": "Avaa aina keskittymistila, kun seuraat",
+      "L_IS_PLAY_TICK": "Toista tikitystä keskittymisen aikana",
+      "L_MANUAL_BREAK_START": "Aloita tauot manuaalisesti (Pomodoro)",
+      "L_PAUSE_TRACKING_DURING_BREAK": "Keskeytä tehtävien seuranta taukojen aikana",
       "L_SKIP_PREPARATION_SCREEN": "Ohita valmistelunäyttö (venyttely jne.)",
+      "L_START_IN_BACKGROUND": "Aloita keskittymisseanssit vain bannerilla (ei peittoa)",
+      "L_SYNC_SESSION_WITH_TRACKING": "Synkronoi keskittymisseanssi aikaseurannan kanssa",
       "TITLE": "Keskittymistila"
     },
     "IDLE": {
@@ -1756,6 +1891,7 @@
       "NL": "Hollanti",
       "PL": "Puola",
       "PT": "Portugali",
+      "PT_BR": "Portugali (Brasilia)",
       "RU": "Venäjä",
       "SK": "Slovakki",
       "TIME_LOCALE": "Aikamuodon maa-asetus",
@@ -1786,6 +1922,7 @@
       "DARK_MODE_LIGHT": "Vaalea",
       "DARK_MODE_SYSTEM": "Järjestelmä",
       "DEFAULT_PROJECT": "Oletusprojekti tehtäville, jos mitään ei ole määritetty",
+      "DEFAULT_START_PAGE": "Oletus aloitussivu",
       "FIRST_DAY_OF_WEEK": "Viikon ensimmäinen päivä",
       "HELP": "<p><strong>Etkö näe työpöytäilmoituksia?</strong> Windowsissa saatat haluta tarkistaa Järjestelmä > Ilmoitukset ja toiminnot ja tarkistaa, onko tarvittavat ilmoitukset otettu käyttöön.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Lisää automaattisesti tänään-tunniste työskennellyille tehtäville",
@@ -1795,8 +1932,6 @@
       "IS_DARK_MODE": "Tumma tila",
       "IS_DISABLE_ANIMATIONS": "Poista kaikki animaatiot käytöstä",
       "IS_DISABLE_CELEBRATION": "Poista juhlinta käytöstä päivän yhteenvedossa",
-      "USER_PROFILES": "Ota käyttäjäprofiilit käyttöön (Beta)",
-      "USER_PROFILES_HINT": "Mahdollistaa erilaisten käyttäjäprofiilien luomisen ja niiden välillä vaihtamisen, jokainen omilla asetuksillaan, tehtävillään ja synkronointimäärityksillään. Profiilien hallintapainike ilmestyy oikeaan yläkulmaan, kun toiminto on käytössä. Huomautus: Tämän ominaisuuden poistaminen käytöstä piilottaa käyttöliittymän, mutta säilyttää profiilitietosi (Beta-ominaisuus, ei takeita. Varmista, että sinulla on varmuuskopio).",
       "IS_HIDE_NAV": "Piilota navigointi, kunnes päänimikettä hoveroidaan (vain työpöytä)",
       "IS_MINIMIZE_TO_TRAY": "Pienennä tehtäväpalkkiin (vain työpöytä)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Ota päällekkäisyysindikaattori-ikkuna käyttöön (työpöytä linux/gnome)",
@@ -1804,13 +1939,17 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Näytä nykyinen laskuri tehtäväpalkissa / tilavalikossa (vain työpöytä mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Näytä nykyinen tehtävä tehtäväpalkissa / tilavalikossa (vain työpöytä mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Poista markdown-jäsennys käytöstä tehtävien muistiinpanoissa",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Käytä mukautettua otsikkopalkkia (vain Windows/Linux)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Vaatii uudelleenkäynnistyksen voimaan tullakseen",
       "START_OF_NEXT_DAY": "Seuraavan päivän alkamisaika",
       "START_OF_NEXT_DAY_HINT": "mistä tunnista alkaen haluat laskea seuraavan päivän alkaneen. oletus on keskiyö, joka on 0.",
       "TASK_NOTES_TPL": "Tehtävän kuvauksen mallipohja",
       "THEME": "Teema",
       "THEME_EXPERIMENTAL": "Teema (kokeellinen)",
       "THEME_SELECT_LABEL": "Valitse teema",
-      "TITLE": "Sekalaista"
+      "TITLE": "Sekalaista",
+      "USER_PROFILES": "Ota käyttäjäprofiilit käyttöön (Beta)",
+      "USER_PROFILES_HINT": "Mahdollistaa erilaisten käyttäjäprofiilien luomisen ja niiden välillä vaihtamisen, jokainen omilla asetuksillaan, tehtävillään ja synkronointimäärityksillään. Profiilien hallintapainike ilmestyy oikeaan yläkulmaan, kun toiminto on käytössä. Huomautus: Tämän ominaisuuden poistaminen käytöstä piilottaa käyttöliittymän, mutta säilyttää profiilitietosi (Beta-ominaisuus, ei takeita. Varmista, että sinulla on varmuuskopio)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Lyhyiden taukojen kesto",
@@ -1820,6 +1959,8 @@
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Näytä banneri X ennen varsinaista muistutusta",
+      "DEFAULT_TASK_REMIND_OPTION": "Oletusmuistutusvaihtoehto valittu tehtäviä luotaessa",
+      "DISABLE_REMINDERS": "Poista kaikki muistutukset käytöstä",
       "IS_COUNTDOWN_BANNER_ENABLED": "Näytä laskuribanneri ennen kuin muistutukset erääntyvät",
       "TITLE": "Muistutukset"
     },
@@ -1882,6 +2023,9 @@
       "TITLE": "Ajanseuranta"
     }
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (kopio)"
+  },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
       "A_DAY": "päivän päästä",
@@ -1912,14 +2056,22 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Kopioitu leikepöydälle",
+    "DUPLICATE_PROJECT_ERROR": "Projektia ei voitu kopioida",
+    "DUPLICATE_PROJECT_SUCCESS": "Projekti kopioitiin onnistuneesti",
     "ERR_COMPRESSION": "Virhe pakkausrajapinnassa",
     "FILE_DOWNLOADED": "{{fileName}} ladattu",
     "FILE_DOWNLOADED_BTN": "Avaa kansio",
     "NAVIGATE_TO_TASK_ERR": "Tehtävään keskittyminen ei onnistunut. Poistitko sen?",
+    "NO_TASKS_TO_COPY": "Ei kopioitavia tehtäviä",
+    "NO_TASKS_TO_UNPLAN": "Ei suunnittelemattomia tehtäviä",
     "PERSISTENCE_DISALLOWED": "Tietoja ei tallenneta pysyvästi. Ole tietoinen, että tämä voi johtaa tietojen menetykseen!!",
     "PERSISTENCE_ERROR": "Virhe pyydettäessä tietojen pysyvää tallennusta: {{err}}",
     "RUNNING_X": "Suoritetaan \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} painettu, mutta avaa kirjanmerkit -pikanäppäin on saatavilla vain projektikontekstissa."
+    "SHARE_FAILED": "Jakaminen epäonnistui. Kopioi manuaalisesti.",
+    "SHARE_FAILED_FALLBACK": "Jakaminen epäonnistui. Kopioitu leikepöydälle sen sijaan.",
+    "SHARE_UNAVAILABLE_FALLBACK": "Kopioitu leikepöydälle.",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} painettu, mutta avaa kirjanmerkit -pikanäppäin on saatavilla vain projektikontekstissa.",
+    "UNPLANNED_TODAY_TASKS": "Poistettu kaikki tämän päivän tehtävät suunnitelmasta"
   },
   "GPB": {
     "ASSETS": "Ladataan resursseja...",
@@ -1938,10 +2090,13 @@
     "ADD_NEW_TASK": "Lisää uusi tehtävä",
     "ALL_PLANNED_LIST": "Suunniteltu / Toista",
     "BOARDS": "Taulut",
+    "COPY_TASK_LIST_MARKDOWN": "Kopioi leikepöydälle",
     "CREATE_PROJECT": "Luo projekti",
     "CREATE_TAG": "Luo tunniste",
     "DELETE_PROJECT": "Poista projekti",
     "DELETE_TAG": "Poista tunniste",
+    "DONATE": "Tue meitä",
+    "DUPLICATE_PROJECT": "Kopioi",
     "ENTER_FOCUS_MODE": "Siirry keskittymistilaan",
     "GO_TO_TASK_LIST": "Siirry tehtävälistaan",
     "HELP": "Ohje",
@@ -1958,6 +2113,7 @@
     "METRICS": "Mittarit",
     "NO_PROJECT_INFO": "Ei projekteja saatavilla. Voit luoda uuden projektin klikkaamalla \"Luo projekti\" -painiketta.",
     "NO_TAG_INFO": "Tällä hetkellä ei ole tunnisteita. Voit lisätä tunnisteita kirjoittamalla `#tunnisteesiNimi` lisätessäsi tai muokatessasi tehtäviä.",
+    "NO_TASKS_TO_TRACK": "Lisää ensin tehtävä aloittaaksesi ajan seurannan",
     "NOTES": "Muistiinpanot",
     "NOTES_PANEL_INFO": "Muistiinpanoja voi näyttää vain aikataulusta ja tavallisesta tehtävälistanäkymästä.",
     "PLANNER": "Suunnittelija",
@@ -1969,6 +2125,7 @@
     "SCHEDULE": "Aikataulu",
     "SEARCH": "Haku",
     "SETTINGS": "Asetukset",
+    "SHARE_TASK_LIST_MARKDOWN": "Jaa tehtävälista",
     "SHOW_SEARCH_BAR": "Näytä hakupalkki",
     "SIDE_PANEL_MENU": "Sivupaneelin valikko",
     "TAGS": "Tunnisteet",
@@ -1979,6 +2136,7 @@
     "TOGGLE_SHOW_NOTES": "Näytä/Piilota projektin muistiinpanot",
     "TOGGLE_TRACK_TIME": "Käynnistä/Pysäytä ajan seuranta",
     "TRIGGER_SYNC": "Synkronoi!",
+    "UNPLAN_ALL_TASKS": "Poista kaikki tehtävät suunnitelmasta",
     "WORKLOG": "Työloki"
   },
   "MIGRATE": {
@@ -1990,6 +2148,10 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Lisää tehtäviä tänään",
+    "ARCHIVED_TASKS": {
+      "PLURAL": "{{count}} suoritettua päätehtävää on arkistoitu",
+      "SINGULAR": "{{count}} suoritettu päätehtävä on arkistoitu"
+    },
     "BREAK_LABEL": "Tauot (määrä / aika)",
     "CELEBRATE": "Ota hetki <i>juhlia!</i>",
     "CLEAR_ALL_CONTINUE": "Tyhjennä kaikki valmiit ja jatka",
@@ -1998,6 +2160,7 @@
       "MSG": "Poistu sovelluksesta?",
       "OK": "Poistu"
     },
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "Voit käyttää tätä tilaa kirjoittaaksesi omat päivän lopun rituaalisi, joista haluat muistutuksen.",
     "ESTIMATE_TOTAL": "Arvio yhteensä:",
     "EVALUATE_DAY": "Arvioi",
     "EXPORT_TASK_LIST": "Vie tehtävälista",
