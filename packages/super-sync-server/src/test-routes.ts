@@ -149,5 +149,47 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
     },
   );
 
+  /**
+   * Delete a test user by userId.
+   * Used by E2E tests to simulate account deletion scenarios.
+   */
+  fastify.delete<{ Params: { userId: string } }>(
+    '/user/:userId',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['userId'],
+          properties: {
+            userId: { type: 'string' },
+          },
+        },
+      },
+      config: {
+        rateLimit: false,
+      },
+    },
+    async (request, reply) => {
+      const userId = parseInt(request.params.userId, 10);
+
+      if (isNaN(userId)) {
+        return reply.status(400).send({ error: 'Invalid userId' });
+      }
+
+      try {
+        // CASCADE delete handles: operations, syncState, devices (via Prisma schema)
+        await prisma.user.delete({ where: { id: userId } });
+        Logger.info(`[TEST] Deleted test user ID: ${userId}`);
+        return reply.send({ deleted: true, userId });
+      } catch (err: unknown) {
+        Logger.error('[TEST] Failed to delete test user:', err);
+        return reply.status(404).send({
+          error: 'User not found or already deleted',
+          message: (err as Error).message,
+        });
+      }
+    },
+  );
+
   Logger.info('[TEST] Test routes registered at /api/test/*');
 };

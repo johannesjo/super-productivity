@@ -2,7 +2,7 @@ import { SuperSyncProvider } from './super-sync';
 import { SuperSyncPrivateCfg } from './super-sync.model';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { SyncProviderId } from '../../../pfapi.const';
-import { MissingCredentialsSPError } from '../../../errors/errors';
+import { MissingCredentialsSPError, AuthFailSPError } from '../../../errors/errors';
 import { SyncOperation } from '../../sync-provider.interface';
 
 // Helper to decompress gzip Uint8Array to string
@@ -479,20 +479,20 @@ describe('SuperSyncProvider', () => {
   });
 
   describe('error handling', () => {
-    it('should include error text in API error message', async () => {
+    it('should include error text in API error message for non-auth errors', async () => {
       mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
 
       fetchSpy.and.returnValue(
         Promise.resolve({
           ok: false,
-          status: 401,
-          statusText: 'Unauthorized',
-          text: () => Promise.resolve('Invalid token'),
+          status: 500,
+          statusText: 'Internal Server Error',
+          text: () => Promise.resolve('Database connection failed'),
         } as Response),
       );
 
       await expectAsync(provider.downloadOps(0)).toBeRejectedWithError(
-        'SuperSync API error: 401 Unauthorized - Invalid token',
+        'SuperSync API error: 500 Internal Server Error - Database connection failed',
       );
     });
 
@@ -549,6 +549,137 @@ describe('SuperSyncProvider', () => {
       await expectAsync(
         provider.uploadSnapshot({}, 'client-1', 'recovery', {}, 1),
       ).toBeRejectedWithError(/SuperSync API error: 413.*Storage quota exceeded/);
+    });
+  });
+
+  describe('authentication error handling', () => {
+    it('should throw AuthFailSPError on 401 Unauthorized response', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+          text: () => Promise.resolve('Invalid or expired token'),
+        } as Response),
+      );
+
+      await expectAsync(provider.downloadOps(0)).toBeRejectedWith(
+        jasmine.any(AuthFailSPError),
+      );
+    });
+
+    it('should throw AuthFailSPError on 403 Forbidden response', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 403,
+          statusText: 'Forbidden',
+          text: () => Promise.resolve('Account deleted'),
+        } as Response),
+      );
+
+      await expectAsync(provider.downloadOps(0)).toBeRejectedWith(
+        jasmine.any(AuthFailSPError),
+      );
+    });
+
+    it('should clear cached config on auth failure', async () => {
+      // First call succeeds - config gets cached
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ops: [], hasMore: false, latestSeq: 0 }),
+        } as Response),
+      );
+      await provider.downloadOps(0);
+      expect(mockPrivateCfgStore.load).toHaveBeenCalledTimes(1);
+
+      // Second call fails with 401
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+          text: () => Promise.resolve('Token expired'),
+        } as Response),
+      );
+
+      try {
+        await provider.downloadOps(0);
+      } catch (e) {
+        // Expected to throw AuthFailSPError
+        expect(e).toBeInstanceOf(AuthFailSPError);
+      }
+
+      // Third call should reload config from store (cache was cleared)
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ops: [], hasMore: false, latestSeq: 0 }),
+        } as Response),
+      );
+      await provider.downloadOps(0);
+      expect(mockPrivateCfgStore.load).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw AuthFailSPError for uploadOps on 401', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+          text: () => Promise.resolve('Account not found'),
+        } as Response),
+      );
+
+      await expectAsync(
+        provider.uploadOps([createMockOperation()], 'client-1'),
+      ).toBeRejectedWith(jasmine.any(AuthFailSPError));
+    });
+
+    it('should throw AuthFailSPError for uploadSnapshot on 401', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+          text: () => Promise.resolve('Invalid token'),
+        } as Response),
+      );
+
+      await expectAsync(
+        provider.uploadSnapshot({}, 'client-1', 'recovery', {}, 1),
+      ).toBeRejectedWith(jasmine.any(AuthFailSPError));
+    });
+
+    it('should include HTTP status code in AuthFailSPError message', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 403,
+          statusText: 'Forbidden',
+          text: () => Promise.resolve('Access denied'),
+        } as Response),
+      );
+
+      try {
+        await provider.downloadOps(0);
+        fail('Expected AuthFailSPError to be thrown');
+      } catch (e) {
+        expect(e).toBeInstanceOf(AuthFailSPError);
+        expect((e as AuthFailSPError).message).toContain('403');
+      }
     });
   });
 

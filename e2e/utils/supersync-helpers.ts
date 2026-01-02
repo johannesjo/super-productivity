@@ -95,6 +95,23 @@ export const cleanupTestData = async (): Promise<void> => {
 };
 
 /**
+ * Delete a specific test user account on the SuperSync server.
+ * Used to test account deletion and re-registration scenarios.
+ *
+ * @param userId - The user ID to delete
+ */
+export const deleteTestUser = async (userId: number): Promise<void> => {
+  const response = await fetch(`${SUPERSYNC_BASE_URL}/api/test/user/${userId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok && response.status !== 404) {
+    const text = await response.text();
+    throw new Error(`Failed to delete test user: ${response.status} - ${text}`);
+  }
+};
+
+/**
  * Check if the SuperSync server is running, healthy, AND has test mode enabled.
  * Tests require TEST_MODE=true on the server for the /api/test/* endpoints.
  */

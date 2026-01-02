@@ -16,7 +16,7 @@ import {
 } from '../../sync-provider.interface';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { SuperSyncPrivateCfg } from './super-sync.model';
-import { MissingCredentialsSPError } from '../../../errors/errors';
+import { MissingCredentialsSPError, AuthFailSPError } from '../../../errors/errors';
 import { SyncLog } from '../../../../../core/log';
 import {
   compressWithGzip,
@@ -347,6 +347,20 @@ export class SuperSyncProvider
     return this._cachedServerSeqKey;
   }
 
+  /**
+   * Check HTTP response status and throw AuthFailSPError for auth failures.
+   * Clears cached config so next operation will reload from store.
+   */
+  private _checkHttpStatus(status: number, body?: string): void {
+    if (status === 401 || status === 403) {
+      // Clear cached config so next operation will reload from store
+      // (allowing user to re-configure after auth failure)
+      this._cachedCfg = undefined;
+      this._cachedServerSeqKey = undefined;
+      throw new AuthFailSPError(`Authentication failed (HTTP ${status})`, body);
+    }
+  }
+
   private async _fetchApi<T>(
     cfg: SuperSyncPrivateCfg,
     path: string,
@@ -370,6 +384,8 @@ export class SuperSyncProvider
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error');
+      // Check for auth failure FIRST before throwing generic error
+      this._checkHttpStatus(response.status, errorText);
       throw new Error(
         `SuperSync API error: ${response.status} ${response.statusText} - ${errorText}`,
       );
@@ -407,6 +423,8 @@ export class SuperSyncProvider
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error');
+      // Check for auth failure FIRST before throwing generic error
+      this._checkHttpStatus(response.status, errorText);
       throw new Error(
         `SuperSync API error: ${response.status} ${response.statusText} - ${errorText}`,
       );
@@ -457,6 +475,8 @@ export class SuperSyncProvider
     if (response.status < 200 || response.status >= 300) {
       const errorData =
         typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      // Check for auth failure FIRST before throwing generic error
+      this._checkHttpStatus(response.status, errorData);
       throw new Error(`SuperSync API error: ${response.status} - ${errorData}`);
     }
 
