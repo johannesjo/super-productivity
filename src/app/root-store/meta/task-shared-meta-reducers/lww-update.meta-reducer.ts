@@ -11,6 +11,11 @@ import { Project } from '../../../features/project/project.model';
 import { TAG_FEATURE_NAME, tagAdapter } from '../../../features/tag/store/tag.reducer';
 import { Tag } from '../../../features/tag/tag.model';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
+import {
+  TASK_FEATURE_NAME,
+  taskAdapter,
+} from '../../../features/tasks/store/task.reducer';
+import { Task } from '../../../features/tasks/task.model';
 import { unique } from '../../../util/unique';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 
@@ -241,6 +246,71 @@ const syncTodayTagTaskIds = (
 };
 
 /**
+ * Updates parent task's subTaskIds arrays when a task's parentId changes via LWW Update.
+ *
+ * When LWW conflict resolution updates a task's parentId (making it a subtask or
+ * moving it to a different parent), we must also update the corresponding parent
+ * task's subTaskIds arrays to maintain bidirectional consistency:
+ * - Remove task from old parent's subTaskIds (if it was a subtask)
+ * - Add task to new parent's subTaskIds (if it becomes a subtask)
+ *
+ * This is necessary because the original moveToOtherProject or convertToSubtask
+ * actions update both the task and parent entities atomically, but LWW Update
+ * only syncs the TASK entity state.
+ */
+const syncParentSubTaskIds = (
+  state: RootState,
+  taskId: string,
+  oldParentId: string | undefined,
+  newParentId: string | undefined,
+): RootState => {
+  // If parentId didn't change, nothing to do
+  if (oldParentId === newParentId) {
+    return state;
+  }
+
+  let taskState = state[TASK_FEATURE_NAME];
+
+  // Remove from old parent's subTaskIds
+  if (oldParentId && taskState.entities[oldParentId]) {
+    const oldParent = taskState.entities[oldParentId] as Task;
+    if (oldParent.subTaskIds.includes(taskId)) {
+      taskState = taskAdapter.updateOne(
+        {
+          id: oldParentId,
+          changes: {
+            subTaskIds: oldParent.subTaskIds.filter((id) => id !== taskId),
+          },
+        },
+        taskState,
+      );
+    }
+  }
+
+  // Add to new parent's subTaskIds
+  if (newParentId && taskState.entities[newParentId]) {
+    const newParent = taskState.entities[newParentId] as Task;
+    // Only add if not already present
+    if (!newParent.subTaskIds.includes(taskId)) {
+      taskState = taskAdapter.updateOne(
+        {
+          id: newParentId,
+          changes: {
+            subTaskIds: unique([...newParent.subTaskIds, taskId]),
+          },
+        },
+        taskState,
+      );
+    }
+  }
+
+  return {
+    ...state,
+    [TASK_FEATURE_NAME]: taskState,
+  };
+};
+
+/**
  * Meta-reducer that handles LWW (Last-Write-Wins) Update actions.
  *
  * When a LWW conflict is resolved and local state wins, a `[ENTITY_TYPE] LWW Update`
@@ -377,6 +447,16 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       const oldDueDay = existingEntity?.dueDay as string | undefined;
       const newDueDay = entityData['dueDay'] as string | undefined;
       updatedState = syncTodayTagTaskIds(updatedState, entityId, oldDueDay, newDueDay);
+
+      // Sync parent.subTaskIds when parentId changes
+      const oldParentId = existingEntity?.parentId as string | undefined;
+      const newParentId = entityData['parentId'] as string | undefined;
+      updatedState = syncParentSubTaskIds(
+        updatedState,
+        entityId,
+        oldParentId,
+        newParentId,
+      );
     }
 
     return reducer(updatedState, action);
