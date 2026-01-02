@@ -6,7 +6,6 @@ import {
 import { PersistentAction } from '../core/persistent-action.interface';
 import { ArchiveService } from '../../features/time-tracking/archive.service';
 import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
-import { PfapiService } from '../../pfapi/pfapi.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { ArchiveModel } from '../../features/time-tracking/time-tracking.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
@@ -14,6 +13,7 @@ import { flushYoungToOld } from '../../features/time-tracking/store/archive.acti
 import { deleteTag, deleteTags } from '../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../features/time-tracking/time-tracking.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
+import { ArchiveDbAdapter } from '../../core/persistence/archive-db-adapter.service';
 
 describe('isArchiveAffectingAction', () => {
   it('should return true for moveToArchive action', () => {
@@ -91,7 +91,7 @@ describe('ArchiveOperationHandler', () => {
   let service: ArchiveOperationHandler;
   let mockArchiveService: jasmine.SpyObj<ArchiveService>;
   let mockTaskArchiveService: jasmine.SpyObj<TaskArchiveService>;
-  let mockPfapiService: jasmine.SpyObj<PfapiService>;
+  let mockArchiveDbAdapter: jasmine.SpyObj<ArchiveDbAdapter>;
   let mockTimeTrackingService: jasmine.SpyObj<TimeTrackingService>;
 
   const createMockTaskWithSubTasks = (
@@ -136,22 +136,21 @@ describe('ArchiveOperationHandler', () => {
       'cleanupDataEverywhereForProject',
       'cleanupArchiveDataForTag',
     ]);
-    mockPfapiService = jasmine.createSpyObj('PfapiService', [], {
-      m: {
-        archiveYoung: {
-          load: jasmine
-            .createSpy('load')
-            .and.returnValue(Promise.resolve(createEmptyArchiveModel())),
-          save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
-        },
-        archiveOld: {
-          load: jasmine
-            .createSpy('load')
-            .and.returnValue(Promise.resolve(createEmptyArchiveModel())),
-          save: jasmine.createSpy('save').and.returnValue(Promise.resolve()),
-        },
-      },
-    });
+    mockArchiveDbAdapter = jasmine.createSpyObj('ArchiveDbAdapter', [
+      'loadArchiveYoung',
+      'loadArchiveOld',
+      'saveArchiveYoung',
+      'saveArchiveOld',
+    ]);
+    // Default returns for ArchiveDbAdapter
+    mockArchiveDbAdapter.loadArchiveYoung.and.returnValue(
+      Promise.resolve(createEmptyArchiveModel()),
+    );
+    mockArchiveDbAdapter.loadArchiveOld.and.returnValue(
+      Promise.resolve(createEmptyArchiveModel()),
+    );
+    mockArchiveDbAdapter.saveArchiveYoung.and.returnValue(Promise.resolve());
+    mockArchiveDbAdapter.saveArchiveOld.and.returnValue(Promise.resolve());
 
     // Set up default resolved promises
     mockArchiveService.writeTasksToArchiveForRemoteSync.and.returnValue(
@@ -181,7 +180,7 @@ describe('ArchiveOperationHandler', () => {
         ArchiveOperationHandler,
         { provide: ArchiveService, useValue: mockArchiveService },
         { provide: TaskArchiveService, useValue: mockTaskArchiveService },
-        { provide: PfapiService, useValue: mockPfapiService },
+        { provide: ArchiveDbAdapter, useValue: mockArchiveDbAdapter },
         { provide: TimeTrackingService, useValue: mockTimeTrackingService },
       ],
     });
@@ -477,8 +476,8 @@ describe('ArchiveOperationHandler', () => {
         }
 
         // Verify it tried to load archives (confirming action was recognized)
-        expect(mockPfapiService.m.archiveYoung.load).toHaveBeenCalled();
-        expect(mockPfapiService.m.archiveOld.load).toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.loadArchiveYoung).toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.loadArchiveOld).toHaveBeenCalled();
       });
     });
 
@@ -809,9 +808,8 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveYoung.save).toHaveBeenCalledWith(
+        expect(mockArchiveDbAdapter.saveArchiveYoung).toHaveBeenCalledWith(
           archiveYoungData,
-          { isUpdateRevAndLastUpdate: false, isIgnoreDBLock: true },
         );
       });
 
@@ -826,10 +824,7 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveOld.save).toHaveBeenCalledWith(archiveOldData, {
-          isUpdateRevAndLastUpdate: false,
-          isIgnoreDBLock: true,
-        });
+        expect(mockArchiveDbAdapter.saveArchiveOld).toHaveBeenCalledWith(archiveOldData);
       });
 
       it('should write both archiveYoung and archiveOld for remote operations', async () => {
@@ -844,14 +839,10 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveYoung.save).toHaveBeenCalledWith(
+        expect(mockArchiveDbAdapter.saveArchiveYoung).toHaveBeenCalledWith(
           archiveYoungData,
-          { isUpdateRevAndLastUpdate: false, isIgnoreDBLock: true },
         );
-        expect(mockPfapiService.m.archiveOld.save).toHaveBeenCalledWith(archiveOldData, {
-          isUpdateRevAndLastUpdate: false,
-          isIgnoreDBLock: true,
-        });
+        expect(mockArchiveDbAdapter.saveArchiveOld).toHaveBeenCalledWith(archiveOldData);
       });
 
       it('should NOT write archive for local operations (already done by PfapiService)', async () => {
@@ -865,8 +856,8 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
-        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveYoung).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveOld).not.toHaveBeenCalled();
       });
 
       it('should NOT write archive when isRemote is undefined (treated as local)', async () => {
@@ -880,8 +871,8 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
-        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveYoung).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveOld).not.toHaveBeenCalled();
       });
 
       it('should handle missing archiveYoung gracefully', async () => {
@@ -895,11 +886,8 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
-        expect(mockPfapiService.m.archiveOld.save).toHaveBeenCalledWith(archiveOldData, {
-          isUpdateRevAndLastUpdate: false,
-          isIgnoreDBLock: true,
-        });
+        expect(mockArchiveDbAdapter.saveArchiveYoung).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveOld).toHaveBeenCalledWith(archiveOldData);
       });
 
       it('should handle missing archiveOld gracefully', async () => {
@@ -913,11 +901,10 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveYoung.save).toHaveBeenCalledWith(
+        expect(mockArchiveDbAdapter.saveArchiveYoung).toHaveBeenCalledWith(
           archiveYoungData,
-          { isUpdateRevAndLastUpdate: false, isIgnoreDBLock: true },
         );
-        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveOld).not.toHaveBeenCalled();
       });
 
       it('should handle empty appDataComplete gracefully', async () => {
@@ -929,8 +916,8 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
-        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveYoung).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.saveArchiveOld).not.toHaveBeenCalled();
       });
 
       it('should preserve timeTracking data in archive', async () => {
@@ -951,9 +938,8 @@ describe('ArchiveOperationHandler', () => {
 
         await service.handleOperation(action);
 
-        const savedData = (
-          mockPfapiService.m.archiveYoung.save as jasmine.Spy
-        ).calls.mostRecent().args[0];
+        const savedData =
+          mockArchiveDbAdapter.saveArchiveYoung.calls.mostRecent().args[0];
         expect(savedData.timeTracking.project.proj1.date20240115.s).toBe(3600000);
         expect(savedData.timeTracking.tag.tag1.date20240115.s).toBe(1800000);
         expect(savedData.lastTimeTrackingFlush).toBe(1234567890);
@@ -1003,7 +989,7 @@ describe('ArchiveOperationHandler', () => {
         expect(
           mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
         ).not.toHaveBeenCalled();
-        expect(mockPfapiService.m.archiveYoung.load).not.toHaveBeenCalled();
+        expect(mockArchiveDbAdapter.loadArchiveYoung).not.toHaveBeenCalled();
       });
 
       it('should not throw for unknown action types', async () => {
@@ -1083,9 +1069,7 @@ describe('ArchiveOperationHandler', () => {
 
       it('should propagate errors from archive load in flushYoungToOld', async () => {
         const error = new Error('Load failed');
-        (mockPfapiService.m.archiveYoung.load as jasmine.Spy).and.returnValue(
-          Promise.reject(error),
-        );
+        mockArchiveDbAdapter.loadArchiveYoung.and.returnValue(Promise.reject(error));
 
         const timestamp = Date.now();
         const action = {
@@ -1273,21 +1257,21 @@ describe('ArchiveOperationHandler', () => {
           } as unknown as PersistentAction;
 
           // Reset spies to verify nothing is called
-          (mockPfapiService.m.archiveYoung.load as jasmine.Spy).calls.reset();
-          (mockPfapiService.m.archiveYoung.save as jasmine.Spy).calls.reset();
-          (mockPfapiService.m.archiveOld.load as jasmine.Spy).calls.reset();
-          (mockPfapiService.m.archiveOld.save as jasmine.Spy).calls.reset();
+          mockArchiveDbAdapter.loadArchiveYoung.calls.reset();
+          mockArchiveDbAdapter.saveArchiveYoung.calls.reset();
+          mockArchiveDbAdapter.loadArchiveOld.calls.reset();
+          mockArchiveDbAdapter.saveArchiveOld.calls.reset();
 
           await service.handleOperation(action);
 
           // Verify NO archive operations were performed for local actions
-          expect(mockPfapiService.m.archiveYoung.load).not.toHaveBeenCalled();
-          expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
-          expect(mockPfapiService.m.archiveOld.load).not.toHaveBeenCalled();
-          expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+          expect(mockArchiveDbAdapter.loadArchiveYoung).not.toHaveBeenCalled();
+          expect(mockArchiveDbAdapter.saveArchiveYoung).not.toHaveBeenCalled();
+          expect(mockArchiveDbAdapter.loadArchiveOld).not.toHaveBeenCalled();
+          expect(mockArchiveDbAdapter.saveArchiveOld).not.toHaveBeenCalled();
         });
 
-        it('should pass isIgnoreDBLock: true for remote operations', async () => {
+        it('should use ArchiveDbAdapter for remote operations', async () => {
           const timestamp = Date.now();
           const action = {
             type: flushYoungToOld.type,
@@ -1301,14 +1285,9 @@ describe('ArchiveOperationHandler', () => {
             // Expected - sort function returns undefined in tests
           }
 
-          // Verify save was called with isIgnoreDBLock: true
-          const saveCall = (
-            mockPfapiService.m.archiveYoung.save as jasmine.Spy
-          ).calls.mostRecent();
-          if (saveCall) {
-            const options = saveCall.args[1];
-            expect(options.isIgnoreDBLock).toBe(true);
-          }
+          // Verify ArchiveDbAdapter was used for loading archives
+          expect(mockArchiveDbAdapter.loadArchiveYoung).toHaveBeenCalled();
+          expect(mockArchiveDbAdapter.loadArchiveOld).toHaveBeenCalled();
         });
       });
     });

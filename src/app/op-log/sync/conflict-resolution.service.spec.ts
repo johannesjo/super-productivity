@@ -1763,4 +1763,175 @@ describe('ConflictResolutionService', () => {
       expect(mockSnackService.open).toHaveBeenCalled();
     });
   });
+
+  // =========================================================================
+  // Clock skew edge cases
+  // =========================================================================
+  // These tests verify LWW conflict resolution handles edge cases where
+  // clients have significant clock differences.
+
+  describe('clock skew edge cases', () => {
+    const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
+    const createOpWithTimestamp = (
+      id: string,
+      clientId: string,
+      timestamp: number,
+      opType: OpType = OpType.Update,
+      entityId: string = 'task-1',
+    ): Operation => ({
+      id,
+      actionType: '[Task] Update Task' as ActionType,
+      opType,
+      entityType: 'TASK',
+      entityId,
+      payload: { source: clientId, timestamp },
+      clientId,
+      timestamp,
+      vectorClock: { [clientId]: 1 },
+      schemaVersion: 1,
+    });
+
+    it('should handle timestamps in far future (client clock ahead)', async () => {
+      const now = Date.now();
+      const futureTime = now + ONE_YEAR_MS; // 1 year in future
+
+      const conflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createOpWithTimestamp('local-1', 'client-a', now)],
+          remoteOps: [createOpWithTimestamp('remote-1', 'client-b', futureTime)],
+          suggestedResolution: 'remote',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(1);
+      mockOpLogStore.markApplied.and.resolveTo(undefined);
+      mockOpLogStore.markRejected.and.resolveTo(undefined);
+      mockOperationApplier.applyOperations.and.resolveTo({
+        appliedOps: [conflicts[0].remoteOps[0]],
+      });
+
+      // Remote wins because its timestamp is newer (even if unrealistic)
+      await service.autoResolveConflictsLWW(conflicts);
+
+      expect(mockOpLogStore.append).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: 'remote-1' }),
+        'remote',
+        jasmine.any(Object),
+      );
+    });
+
+    it('should handle timestamps in far past (client clock behind)', async () => {
+      const now = Date.now();
+      const pastTime = now - ONE_YEAR_MS; // 1 year in past
+
+      const conflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createOpWithTimestamp('local-1', 'client-a', now)],
+          remoteOps: [createOpWithTimestamp('remote-1', 'client-b', pastTime)],
+          suggestedResolution: 'local',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(1);
+      mockOpLogStore.markApplied.and.resolveTo(undefined);
+      mockOpLogStore.markRejected.and.resolveTo(undefined);
+      mockOperationApplier.applyOperations.and.resolveTo({ appliedOps: [] });
+
+      // Local wins because its timestamp is newer
+      await service.autoResolveConflictsLWW(conflicts);
+
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
+    });
+
+    it('should handle zero timestamps gracefully', async () => {
+      const now = Date.now();
+
+      const conflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createOpWithTimestamp('local-1', 'client-a', now)],
+          remoteOps: [createOpWithTimestamp('remote-1', 'client-b', 0)],
+          suggestedResolution: 'local',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(1);
+      mockOpLogStore.markApplied.and.resolveTo(undefined);
+      mockOpLogStore.markRejected.and.resolveTo(undefined);
+      mockOperationApplier.applyOperations.and.resolveTo({ appliedOps: [] });
+
+      // Local wins (0 is earlier than now)
+      await service.autoResolveConflictsLWW(conflicts);
+
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
+    });
+
+    it('should handle negative timestamps gracefully (system clock errors)', async () => {
+      const now = Date.now();
+
+      const conflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createOpWithTimestamp('local-1', 'client-a', now)],
+          remoteOps: [createOpWithTimestamp('remote-1', 'client-b', -1000)],
+          suggestedResolution: 'local',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(1);
+      mockOpLogStore.markApplied.and.resolveTo(undefined);
+      mockOpLogStore.markRejected.and.resolveTo(undefined);
+      mockOperationApplier.applyOperations.and.resolveTo({ appliedOps: [] });
+
+      // Should not throw, local wins
+      await service.autoResolveConflictsLWW(conflicts);
+
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
+    });
+
+    it('should use client ID as stable tie-breaker for identical timestamps', async () => {
+      const now = Date.now();
+
+      // Both have exactly the same timestamp
+      const conflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          // client-a < client-b alphabetically, but we test that remote wins on tie
+          localOps: [createOpWithTimestamp('local-1', 'client-a', now)],
+          remoteOps: [createOpWithTimestamp('remote-1', 'client-b', now)],
+          suggestedResolution: 'remote', // Remote wins on tie
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(1);
+      mockOpLogStore.markApplied.and.resolveTo(undefined);
+      mockOpLogStore.markRejected.and.resolveTo(undefined);
+      mockOperationApplier.applyOperations.and.resolveTo({
+        appliedOps: [conflicts[0].remoteOps[0]],
+      });
+
+      await service.autoResolveConflictsLWW(conflicts);
+
+      // Remote should win on tie
+      expect(mockOpLogStore.append).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: 'remote-1' }),
+        'remote',
+        jasmine.any(Object),
+      );
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-1']);
+    });
+  });
 });

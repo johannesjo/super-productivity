@@ -967,4 +967,74 @@ describe('OperationLogCompactionService', () => {
       expect(callOrder).not.toContain('deleteOpsWhere');
     });
   });
+
+  // =========================================================================
+  // Compaction timeout tests
+  // =========================================================================
+  // These tests verify compaction handles timeout scenarios gracefully
+  // to prevent data corruption from lock expiration.
+
+  describe('compaction timeout handling', () => {
+    it('should throw error when compaction exceeds timeout', async () => {
+      // Simulate slow state retrieval that exceeds the 25s timeout
+      const originalDateNow = Date.now;
+      let callCount = 0;
+
+      // Mock Date.now to simulate time passing during compaction
+      spyOn(Date, 'now').and.callFake(() => {
+        callCount++;
+        // First call is startTime, subsequent calls simulate 26s elapsed
+        if (callCount === 1) {
+          return 0;
+        }
+        return 26000; // 26 seconds - exceeds 25s timeout
+      });
+
+      // Make state retrieval trigger a timeout check
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.callFake(async () => {
+        // This will trigger timeout check after "26 seconds"
+        return mockState;
+      });
+
+      await expectAsync(service.compact()).toBeRejectedWithError(
+        /Compaction timeout after.*Aborting to prevent lock expiration/,
+      );
+
+      // Restore original Date.now
+      (Date.now as jasmine.Spy).and.callFake(originalDateNow);
+    });
+
+    it('should not throw when compaction completes within timeout', async () => {
+      // Normal operation should complete without timeout
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(mockState),
+      );
+
+      await expectAsync(service.compact()).toBeResolved();
+    });
+
+    it('should include phase info in timeout error message', async () => {
+      let callCount = 0;
+
+      spyOn(Date, 'now').and.callFake(() => {
+        callCount++;
+        if (callCount === 1) {
+          return 0;
+        }
+        return 26000;
+      });
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.callFake(async () => {
+        return mockState;
+      });
+
+      try {
+        await service.compact();
+        fail('Expected error to be thrown');
+      } catch (e: any) {
+        expect(e.message).toContain('during');
+        expect(e.message).toContain('Consider reducing state size');
+      }
+    });
+  });
 });

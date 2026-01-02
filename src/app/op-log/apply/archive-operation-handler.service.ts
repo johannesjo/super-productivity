@@ -10,7 +10,6 @@ import {
 } from '../../features/time-tracking/store/archive.actions';
 import { ArchiveService } from '../../features/time-tracking/archive.service';
 import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
-import { PfapiService } from '../../pfapi/pfapi.service';
 import { sortTimeTrackingAndTasksFromArchiveYoungToOld } from '../../features/time-tracking/sort-data-to-flush';
 import { ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD } from '../../features/time-tracking/archive.service';
 import { OpLog } from '../../core/log';
@@ -20,6 +19,17 @@ import { TimeTrackingService } from '../../features/time-tracking/time-tracking.
 import { ArchiveCompressionService } from '../../features/time-tracking/archive-compression.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { ArchiveModel } from '../../features/time-tracking/time-tracking.model';
+import { ArchiveDbAdapter } from '../../core/persistence/archive-db-adapter.service';
+
+/**
+ * Creates an empty ArchiveModel with default values.
+ * Used when archive has never been written (first-time usage).
+ */
+const createEmptyArchiveModel = (): ArchiveModel => ({
+  task: { ids: [], entities: {} },
+  timeTracking: { project: {}, tag: {} },
+  lastTimeTrackingFlush: 0,
+});
 
 /**
  * Action types that affect archive storage and require special handling.
@@ -91,28 +101,25 @@ export const isArchiveAffectingAction = (action: Action): action is PersistentAc
 })
 export class ArchiveOperationHandler {
   // ═══════════════════════════════════════════════════════════════════════════
-  // ARCHITECTURAL DEBT: Lazy Injection for Circular Dependencies
+  // DEPENDENCY INJECTION NOTES
   // ═══════════════════════════════════════════════════════════════════════════
   //
-  // These services use lazyInject() to break circular dependency chains:
+  // Some services use lazyInject() to break circular dependency chains:
   //   DataInitService -> OperationLogHydratorService -> OperationApplierService
   //   -> ArchiveOperationHandler -> ArchiveService/TaskArchiveService -> PfapiService
   //   DataInitService also injects PfapiService directly, causing the cycle.
   //
-  // POTENTIAL REFACTORING APPROACHES:
-  // 1. Extract archive storage operations into a lower-level service that doesn't
-  //    depend on PfapiService directly, only on the database adapter
-  // 2. Create an event-based notification system where archive operations emit
-  //    events and a dedicated handler picks them up (decouples dependencies)
-  // 3. Move archive storage into NgRx state instead of IndexedDB (would require
-  //    significant architectural changes and increase memory usage)
+  // ArchiveDbAdapter is used for direct IndexedDB access to break the PfapiService
+  // dependency for archive operations (_handleFlushYoungToOld, _handleLoadAllData).
+  // This avoids the circular dependency while providing the same functionality.
   //
-  // For now, lazyInject works correctly and the pattern is well-documented.
+  // Other services still use lazyInject because they have their own complex
+  // dependency chains through PfapiService that would require deeper refactoring.
   // ═══════════════════════════════════════════════════════════════════════════
   private _injector = inject(Injector);
+  private _archiveDbAdapter = inject(ArchiveDbAdapter);
   private _getArchiveService = lazyInject(this._injector, ArchiveService);
   private _getTaskArchiveService = lazyInject(this._injector, TaskArchiveService);
-  private _getPfapiService = lazyInject(this._injector, PfapiService);
   private _getTimeTrackingService = lazyInject(this._injector, TimeTrackingService);
   private _getArchiveCompressionService = lazyInject(
     this._injector,
@@ -276,7 +283,7 @@ export class ArchiveOperationHandler {
    * it will produce the same result on all clients.
    *
    * @localBehavior SKIP - Flush performed by ArchiveService.moveTasksToArchiveAndFlushArchiveIfDue() before dispatch
-   * @remoteBehavior Executes - Performs flush with isIgnoreDBLock (sync has DB locked)
+   * @remoteBehavior Executes - Uses ArchiveDbAdapter for direct IndexedDB access (bypasses PfapiService)
    */
   private async _handleFlushYoungToOld(action: PersistentAction): Promise<void> {
     if (!action.meta?.isRemote) {
@@ -284,11 +291,13 @@ export class ArchiveOperationHandler {
     }
 
     const timestamp = (action as ReturnType<typeof flushYoungToOld>).timestamp;
-    const pfapi = this._getPfapiService();
 
-    // Load original state for potential rollback
-    const originalArchiveYoung = await pfapi.m.archiveYoung.load();
-    const originalArchiveOld = await pfapi.m.archiveOld.load();
+    // Load original state for potential rollback using ArchiveDbAdapter
+    // Default to empty archives if they don't exist (first-time usage)
+    const originalArchiveYoung =
+      (await this._archiveDbAdapter.loadArchiveYoung()) ?? createEmptyArchiveModel();
+    const originalArchiveOld =
+      (await this._archiveDbAdapter.loadArchiveOld()) ?? createEmptyArchiveModel();
 
     const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
       archiveYoung: originalArchiveYoung,
@@ -298,27 +307,15 @@ export class ArchiveOperationHandler {
     });
 
     try {
-      await pfapi.m.archiveYoung.save(
-        {
-          ...newSorted.archiveYoung,
-          lastTimeTrackingFlush: timestamp,
-        },
-        {
-          isUpdateRevAndLastUpdate: true,
-          isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
-        },
-      );
+      await this._archiveDbAdapter.saveArchiveYoung({
+        ...newSorted.archiveYoung,
+        lastTimeTrackingFlush: timestamp,
+      });
 
-      await pfapi.m.archiveOld.save(
-        {
-          ...newSorted.archiveOld,
-          lastTimeTrackingFlush: timestamp,
-        },
-        {
-          isUpdateRevAndLastUpdate: true,
-          isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
-        },
-      );
+      await this._archiveDbAdapter.saveArchiveOld({
+        ...newSorted.archiveOld,
+        lastTimeTrackingFlush: timestamp,
+      });
     } catch (e) {
       // Attempt rollback: restore BOTH archiveYoung and archiveOld to original state
       OpLog.err('Archive flush failed, attempting rollback...', e);
@@ -327,10 +324,7 @@ export class ArchiveOperationHandler {
       // Rollback archiveYoung
       try {
         if (originalArchiveYoung) {
-          await pfapi.m.archiveYoung.save(originalArchiveYoung, {
-            isUpdateRevAndLastUpdate: true,
-            isIgnoreDBLock: true,
-          });
+          await this._archiveDbAdapter.saveArchiveYoung(originalArchiveYoung);
         }
       } catch (rollbackErr) {
         rollbackErrors.push(rollbackErr as Error);
@@ -339,10 +333,7 @@ export class ArchiveOperationHandler {
       // Rollback archiveOld
       try {
         if (originalArchiveOld) {
-          await pfapi.m.archiveOld.save(originalArchiveOld, {
-            isUpdateRevAndLastUpdate: true,
-            isIgnoreDBLock: true,
-          });
+          await this._archiveDbAdapter.saveArchiveOld(originalArchiveOld);
         }
       } catch (rollbackErr) {
         rollbackErrors.push(rollbackErr as Error);
@@ -485,7 +476,7 @@ export class ArchiveOperationHandler {
    * data to IndexedDB on remote client, causing data loss on restart.
    *
    * @localBehavior SKIP - Archive written by PfapiService._updateModelCtrlCaches()
-   * @remoteBehavior Executes - Writes archiveYoung/archiveOld to IndexedDB
+   * @remoteBehavior Executes - Uses ArchiveDbAdapter for direct IndexedDB access (bypasses PfapiService)
    */
   private async _handleLoadAllData(action: PersistentAction): Promise<void> {
     if (!action.meta?.isRemote) {
@@ -494,25 +485,18 @@ export class ArchiveOperationHandler {
 
     const loadAllDataAction = action as unknown as ReturnType<typeof loadAllData>;
     const appDataComplete = loadAllDataAction.appDataComplete;
-    const pfapi = this._getPfapiService();
 
     // Write archiveYoung if present in the import data
     const archiveYoung = (appDataComplete as { archiveYoung?: ArchiveModel })
       .archiveYoung;
     if (archiveYoung !== undefined) {
-      await pfapi.m.archiveYoung.save(archiveYoung, {
-        isUpdateRevAndLastUpdate: false, // Preserve rev from import
-        isIgnoreDBLock: true,
-      });
+      await this._archiveDbAdapter.saveArchiveYoung(archiveYoung);
     }
 
     // Write archiveOld if present in the import data
     const archiveOld = (appDataComplete as { archiveOld?: ArchiveModel }).archiveOld;
     if (archiveOld !== undefined) {
-      await pfapi.m.archiveOld.save(archiveOld, {
-        isUpdateRevAndLastUpdate: false,
-        isIgnoreDBLock: true,
-      });
+      await this._archiveDbAdapter.saveArchiveOld(archiveOld);
     }
 
     OpLog.log(

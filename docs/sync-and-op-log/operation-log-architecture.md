@@ -1,8 +1,8 @@
 # Operation Log Architecture
 
-**Status:** Parts A, B, C, D Complete (single-version; cross-version sync requires A.7.11)
+**Status:** Parts A, B, C, D Complete (single-version; cross-version sync A.7.11 documented, not implemented)
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 27, 2025
+**Last Updated:** January 2, 2026
 
 ---
 
@@ -806,6 +806,198 @@ No, not yet. It provides the bridge from older versions of the app to the Operat
 - Prompt user to update app when receiving newer-version ops
 
 **Required before:** Any schema migration that renames/removes fields.
+
+### A.7.11 Cross-Version Sync Implementation Guide
+
+> **Status:** Not yet implemented. This section documents the design for when `CURRENT_SCHEMA_VERSION > 1`.
+
+This guide provides the implementation roadmap for supporting sync between clients on different schema versions.
+
+#### When to Bump CURRENT_SCHEMA_VERSION
+
+Bump the schema version when:
+
+| Change Type                     | Bump Version? | Reason                                                               |
+| ------------------------------- | ------------- | -------------------------------------------------------------------- |
+| Add optional field with default | ✅ Yes        | Old clients won't set it; new clients need to know to apply defaults |
+| Rename field                    | ✅ Yes        | Operations need payload transformation                               |
+| Remove field/feature            | ✅ Yes        | Operations may reference removed entities                            |
+| Change field type               | ✅ Yes        | Payload values need conversion                                       |
+| Add new entity type             | ✅ Yes        | Old snapshots need initialization                                    |
+| Add new action type             | ❌ No         | Old clients ignore unknown actions                                   |
+| Bug fix in reducer              | ❌ No         | Not a schema change                                                  |
+
+**Decision rule:** If the change affects how `state_cache` snapshots or operation payloads are structured, bump the version.
+
+#### Operation Transformation Strategy
+
+When receiving operations from older versions:
+
+```typescript
+// In SchemaMigrationService.migrateOperation()
+async migrateOperation(op: Operation): Promise<Operation | null> {
+  const opVersion = op.schemaVersion ?? 1;
+
+  if (opVersion >= CURRENT_SCHEMA_VERSION) {
+    return op; // Already current
+  }
+
+  // Run through migration chain
+  let migratedPayload = op.payload;
+  for (let v = opVersion; v < CURRENT_SCHEMA_VERSION; v++) {
+    const migration = MIGRATIONS.find(m => m.fromVersion === v);
+    if (migration?.migrateOperation) {
+      const result = migration.migrateOperation(op.actionType, migratedPayload);
+      if (result === null) {
+        // Operation should be dropped (removed feature)
+        return null;
+      }
+      migratedPayload = result;
+    }
+  }
+
+  return {
+    ...op,
+    payload: migratedPayload,
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+  };
+}
+```
+
+#### Conflict Detection Across Versions
+
+The migration shield ensures conflict detection always compares apples-to-apples:
+
+```
+Remote Op (v1)          Local Op (v2)
+     │                       │
+     ▼                       │
+┌─────────────────┐          │
+│ Migration Layer │          │
+│  (v1 → v2)      │          │
+└────────┬────────┘          │
+         │                   │
+         ▼                   ▼
+    ┌────────────────────────────┐
+    │   Conflict Detection       │
+    │   (Both ops now v2)        │
+    └────────────────────────────┘
+```
+
+**Key invariant:** Operations are ALWAYS migrated to current version BEFORE conflict detection. This ensures:
+
+- Vector clock comparison is valid (same logical schema)
+- LWW timestamp comparison is fair (same field semantics)
+- Entity IDs are comparable (no renamed references)
+
+#### Backward Compatibility Guarantees
+
+| Scenario                                   | Behavior                                             | User Experience           |
+| ------------------------------------------ | ---------------------------------------------------- | ------------------------- |
+| Newer client → Older client                | Ops uploaded as-is; older client migrates on receive | Seamless                  |
+| Older client → Newer client                | Newer client migrates incoming ops                   | Seamless                  |
+| Client too old (> MAX_VERSION_SKIP behind) | Reject ops, prompt update                            | "Please update app" modal |
+| Client too new (server rejects)            | N/A - server doesn't validate schema                 | No issue                  |
+
+**MAX_VERSION_SKIP = 5**: Clients more than 5 versions behind cannot sync until updated. This bounds the migration chain complexity.
+
+#### Migration Rollout Strategy
+
+When deploying a schema migration:
+
+1. **Release new version with migration code**
+
+   - Add migration to `MIGRATIONS` array
+   - Bump `CURRENT_SCHEMA_VERSION`
+   - Migration handles both state and operations
+
+2. **Graceful degradation period**
+
+   - Old clients continue working (they don't know about new schema)
+   - New clients migrate incoming old ops seamlessly
+   - Mixed-version sync works via receiver-side migration
+
+3. **Monitoring** (future)
+
+   - Track `op.schemaVersion` distribution in server logs
+   - Alert if many clients are > 2 versions behind
+
+4. **Cleanup** (optional, after many versions)
+   - Remove migrations for versions < `MIN_SUPPORTED_SCHEMA_VERSION`
+   - Update `MIN_SUPPORTED_SCHEMA_VERSION`
+   - Old clients will see "update required" prompt
+
+#### Example Migration: Renaming a Field
+
+```typescript
+// packages/shared-schema/src/migrations.ts
+export const MIGRATIONS: SchemaMigration[] = [
+  {
+    fromVersion: 1,
+    toVersion: 2,
+    description: 'Rename task.estimate to task.timeEstimate',
+
+    // Migrate state snapshot
+    migrateState: (state: unknown): unknown => {
+      const s = state as AppDataComplete;
+      return {
+        ...s,
+        task: {
+          ...s.task,
+          entities: Object.fromEntries(
+            Object.entries(s.task.entities).map(([id, task]) => [
+              id,
+              {
+                ...task,
+                timeEstimate: (task as any).estimate, // Copy old field
+                estimate: undefined, // Remove old field
+              },
+            ]),
+          ),
+        },
+      };
+    },
+
+    // Migrate operation payload
+    requiresOperationMigration: true,
+    migrateOperation: (actionType: string, payload: unknown): unknown | null => {
+      if (actionType.includes('[Task]') && payload && typeof payload === 'object') {
+        const p = payload as Record<string, unknown>;
+        if ('estimate' in p) {
+          return {
+            ...p,
+            timeEstimate: p.estimate,
+            estimate: undefined,
+          };
+        }
+      }
+      return payload; // No change for other actions
+    },
+  },
+];
+```
+
+#### Testing Cross-Version Sync
+
+Before releasing any migration:
+
+1. **Unit tests** in `schema-migration.service.spec.ts`:
+
+   - State migration correctness
+   - Operation migration correctness
+   - Null return for dropped operations
+
+2. **Integration tests** in `cross-version-sync.integration.spec.ts`:
+
+   - Client A (v1) syncs with Client B (v2)
+   - Both clients converge to same state
+   - No data loss during migration
+
+3. **E2E tests** (manual or automated):
+   - Install old app version, create data
+   - Update to new version
+   - Verify data migrated correctly
+   - Sync with another device on new version
 
 ---
 

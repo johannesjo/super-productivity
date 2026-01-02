@@ -128,7 +128,7 @@ This prevents duplicate side effects when syncing operations from other clients.
 | Server Sync (Part C)         | ✅ Complete (single-version)                        |
 | Validation & Repair (Part D) | ✅ Complete                                         |
 | End-to-End Encryption        | ✅ Complete (AES-256-GCM + Argon2id)                |
-| Cross-version Sync (A.7.11)  | ⚠️ Not implemented                                  |
+| Cross-version Sync (A.7.11)  | 📋 Documented (not yet implemented)                 |
 | Schema Migrations            | ✅ Infrastructure ready (no migrations defined yet) |
 
 See [operation-log-architecture.md#implementation-status](./operation-log-architecture.md#implementation-status) for detailed status.
