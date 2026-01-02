@@ -139,6 +139,7 @@ export const verifyRegistration = async (
       expectedChallenge,
       expectedOrigin: origin,
       expectedRPID: rpID,
+      requireUserVerification: false, // We use 'preferred', not 'required'
     });
   } catch (err) {
     Logger.warn(`Passkey registration verification failed for ${email}: ${err}`);
@@ -334,6 +335,7 @@ export const verifyAuthentication = async (
       expectedChallenge,
       expectedOrigin: origin,
       expectedRPID: rpID,
+      requireUserVerification: false, // We use 'preferred', not 'required'
       credential: {
         id: Buffer.from(passkey.credentialId).toString('base64url'),
         publicKey: passkey.publicKey,
@@ -516,6 +518,7 @@ export const completePasskeyRecovery = async (
       expectedChallenge,
       expectedOrigin: origin,
       expectedRPID: rpID,
+      requireUserVerification: false, // We use 'preferred', not 'required'
     });
   } catch (err) {
     Logger.warn(`Passkey recovery verification failed for user ${user.id}: ${err}`);
