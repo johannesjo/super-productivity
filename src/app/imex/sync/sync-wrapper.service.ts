@@ -319,7 +319,10 @@ export class SyncWrapperService {
         this._handleDecryptionError();
         return 'HANDLED_ERROR';
       } else if (error instanceof CanNotMigrateMajorDownError) {
-        alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
+        // Log warning instead of alert - user can't do anything about version mismatch during import
+        SyncLog.warn(
+          'Remote model version newer than local - app update may be required',
+        );
         return 'HANDLED_ERROR';
       } else if (error instanceof SyncAlreadyInProgressError) {
         // Silently ignore concurrent sync attempts (using proper error class)

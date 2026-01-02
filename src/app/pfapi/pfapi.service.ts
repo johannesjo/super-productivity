@@ -42,6 +42,7 @@ import { uuidv7 } from '../util/uuid-v7';
 import { loadAllData } from '../root-store/meta/load-all-data.action';
 import { VectorClockService } from '../op-log/sync/vector-clock.service';
 import { SnackService } from '../core/snack/snack.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -132,9 +133,12 @@ export class PfapiService {
         }
       } catch (e) {
         PFLog.err('Failed to set sync provider:', e);
-        const errorMsg =
-          e instanceof Error ? e.message : 'Unknown error - check console for details';
-        alert(`Unable to set sync provider: ${errorMsg}`);
+        // Only show alert in development - in production just log the error
+        if (!environment.production) {
+          const errorMsg =
+            e instanceof Error ? e.message : 'Unknown error - check console for details';
+          alert(`Unable to set sync provider: ${errorMsg}`);
+        }
       }
     });
 
