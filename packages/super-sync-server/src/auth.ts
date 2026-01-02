@@ -215,7 +215,8 @@ export const loginUser = async (
   // Timing attack mitigation: always perform a comparison
   // Even if the user is not found, we hash and compare against a dummy hash.
   const dummyHash = '$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW';
-  const hashToCompare = user ? user.passwordHash : dummyHash;
+  // Use dummy hash if user not found OR if user has no password (passkey-only user)
+  const hashToCompare = user?.passwordHash ?? dummyHash;
 
   const isMatch = await bcrypt.compare(password, hashToCompare);
 

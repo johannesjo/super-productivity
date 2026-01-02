@@ -95,9 +95,38 @@ export const waitForAppReady = async (
     }
   }
 
-  await page
-    .waitForSelector('magic-side-nav', { state: 'visible', timeout: 15000 })
-    .catch(() => {});
+  // Wait for the main navigation to appear - this is critical for the app to be usable
+  // Use retry loop with longer total timeout to handle slow loads
+  let sideNavVisible = false;
+  const sideNavTimeout = 30000; // 30s total timeout
+  const sideNavStartTime = Date.now();
+
+  while (Date.now() - sideNavStartTime < sideNavTimeout) {
+    try {
+      await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 5000 });
+      sideNavVisible = true;
+      break;
+    } catch {
+      // Check for any blocking dialogs that might have appeared
+      try {
+        const dialogConfirmBtn = page.locator('dialog-confirm button[e2e="confirmBtn"]');
+        if (await dialogConfirmBtn.isVisible()) {
+          await dialogConfirmBtn.click();
+          await page.waitForTimeout(500);
+        }
+      } catch {
+        // No dialog
+      }
+      // Continue waiting
+    }
+  }
+
+  if (!sideNavVisible) {
+    throw new Error(
+      'App failed to load: magic-side-nav not visible after 30s. ' +
+        'The app may be stuck on the splash screen or failed to initialize.',
+    );
+  }
 
   if (ensureRoute) {
     await page.waitForURL(routeRegex, { timeout: 15000 }).catch(() => {});
