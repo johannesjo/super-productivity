@@ -10,13 +10,15 @@ import { WorklogService } from '../../worklog/worklog.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../../tasks/task.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
-import { defer, from } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { combineLatest, defer, from, Subject } from 'rxjs';
+import { first, map, startWith, switchMap } from 'rxjs/operators';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { Task } from '../../tasks/task.model';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconButton } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -40,7 +42,14 @@ interface WeekData {
   templateUrl: './activity-heatmap.component.html',
   styleUrls: ['./activity-heatmap.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, MatIconButton, MatTooltip, MatIcon],
+  imports: [
+    TranslatePipe,
+    MatFormFieldModule,
+    MatIconButton,
+    MatSelectModule,
+    MatTooltip,
+    MatIcon,
+  ],
 })
 export class ActivityHeatmapComponent {
   private readonly _worklogService = inject(WorklogService);
@@ -49,6 +58,7 @@ export class ActivityHeatmapComponent {
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _snackService = inject(SnackService);
   private readonly _shareService = inject(ShareService);
+  private readonly _periodChange$ = new Subject<void>();
   private readonly _dateAdapter = inject(DateAdapter);
 
   T: typeof T = T;
@@ -68,8 +78,11 @@ export class ActivityHeatmapComponent {
 
   // Raw data signals
   private readonly _rawHeatmapData = toSignal(
-    this._workContextService.activeWorkContext$.pipe(
-      switchMap((context) => {
+    combineLatest([
+      this._workContextService.activeWorkContext$,
+      this._periodChange$.pipe(startWith(null)), // Start with initial emission
+    ]).pipe(
+      switchMap(([context]) => {
         // Special case: TODAY tag shows ALL data from all tasks
         if (context.id === TODAY_TAG.id) {
           // Use defer to ensure the Promise is created fresh each time
@@ -134,11 +147,11 @@ export class ActivityHeatmapComponent {
   } | null {
     const dayMap = new Map<string, DayData>();
     const now = new Date();
-    const oneYearAgo = new Date(now);
-    oneYearAgo.setFullYear(now.getFullYear() - 1);
+    const currentYear = now.getFullYear();
+    const startDate = new Date(currentYear, 0, 1);
 
-    // Initialize all days in the past year
-    const currentDate = new Date(oneYearAgo);
+    // Initialize all days in the current year
+    const currentDate = new Date(startDate);
     while (currentDate <= now) {
       const dateStr = this._getDateStr(currentDate);
       dayMap.set(dateStr, {
@@ -210,7 +223,7 @@ export class ActivityHeatmapComponent {
 
     return {
       dayMap,
-      startDate: oneYearAgo,
+      startDate,
       endDate: now,
     };
   }
