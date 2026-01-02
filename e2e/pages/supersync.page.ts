@@ -80,12 +80,45 @@ export class SuperSyncPage extends BasePage {
       await this.syncBtn.waitFor({ state: 'visible', timeout: syncBtnTimeout });
     }
 
-    // Use right-click to always open sync settings dialog
-    // (left-click triggers sync if already configured)
-    await this.syncBtn.click({ button: 'right' });
+    // Retry loop for opening the sync settings dialog via right-click
+    // Sometimes the right-click doesn't register, especially under load
+    let dialogOpened = false;
+    for (let dialogAttempt = 0; dialogAttempt < 5; dialogAttempt++) {
+      if (this.page.isClosed()) {
+        throw new Error('Page was closed during SuperSync setup');
+      }
 
-    // Wait for dialog to be fully loaded
-    await this.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+      console.log(
+        `[SuperSyncPage] Opening sync settings dialog (attempt ${dialogAttempt + 1})...`,
+      );
+
+      // Use right-click to always open sync settings dialog
+      // (left-click triggers sync if already configured)
+      await this.syncBtn.click({ button: 'right' });
+
+      try {
+        // Wait for dialog to be fully loaded - use shorter timeout to retry faster
+        await this.providerSelect.waitFor({ state: 'visible', timeout: 5000 });
+        dialogOpened = true;
+        console.log('[SuperSyncPage] Sync settings dialog opened successfully');
+        break;
+      } catch {
+        console.log(
+          `[SuperSyncPage] Dialog not opened on attempt ${dialogAttempt + 1}, retrying...`,
+        );
+        // Dismiss any partial state
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(500);
+      }
+    }
+
+    if (!dialogOpened) {
+      // Last attempt with longer timeout
+      console.log('[SuperSyncPage] Final attempt to open sync settings dialog...');
+      await this.syncBtn.click({ button: 'right', force: true });
+      await this.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+    }
+
     // Additional wait for the element to be stable/interactive
     await this.page.waitForTimeout(300);
 

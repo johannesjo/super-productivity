@@ -1771,31 +1771,26 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
   );
 
   /**
-   * LWW: Subtask edit wins over parent delete when subtask is edited later
+   * LWW: Subtask deletion cascades with parent delete
    *
-   * This is a critical edge case for LWW conflict resolution. When a parent
-   * task is deleted on one client while the subtask is edited on another,
-   * if the subtask edit has a later timestamp, it should win. The subtask
-   * survives but becomes an orphan (references a deleted parentId).
+   * This tests that parent deletion properly cascades to subtasks even when
+   * the subtask is edited concurrently on another client with a later timestamp.
    *
-   * The lwwUpdateMetaReducer must handle this gracefully without crashing.
+   * Parent deletion cascades to all subtasks to maintain data consistency.
+   * Without this, orphaned subtasks with invalid parentIds would cause issues.
    *
    * Scenario:
    * 1. Client A creates parent task with subtask
    * 2. Both clients sync
-   * 3. Client A deletes the parent task (which deletes parent and subtask locally)
+   * 3. Client A deletes the parent task (cascades to subtask locally)
    * 4. Wait for timestamp gap
    * 5. Client B marks subtask as done (later timestamp, doesn't know parent is deleted)
    * 6. Client A syncs (uploads delete operations)
-   * 7. Client B syncs (LWW: B's subtask update has later timestamp)
-   * 8. Verify: Subtask survives with B's changes (orphaned but functional)
-   *
-   * NOTE: This test is skipped because the expected behavior (subtask surviving
-   * parent delete via LWW) is not yet implemented. Currently, when a parent is
-   * deleted, all its subtasks are also deleted regardless of later edits.
+   * 7. Client B syncs (delete cascades to subtask despite later edit)
+   * 8. Verify: Both parent and subtask are deleted on both clients
    */
-  base.skip(
-    'LWW: Subtask edit survives when parent is deleted concurrently',
+  base(
+    'LWW: Subtask is deleted when parent is deleted concurrently (cascade delete)',
     async ({ browser, baseURL }, testInfo) => {
       testInfo.setTimeout(120000);
       const testRunId = generateTestRunId(testInfo.workerIndex);
@@ -1952,24 +1947,24 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
         await clientA.sync.syncAndWait();
         await clientB.sync.syncAndWait();
 
-        // 9. Verify: Subtask should survive on Client B (it won via LWW)
-        // The subtask becomes orphaned (parentId references deleted parent)
-        // but the lwwUpdateMetaReducer handles this gracefully
+        // 9. Verify: Both parent and subtask are deleted on both clients
+        // Parent deletion cascades to subtasks, even if subtask had later edits
 
-        // On Client B: subtask should still exist and be marked done
-        // It may appear as a top-level task now (orphaned)
-        const survivedSubtaskB = clientB.page.locator(`task:has-text("${subtaskName}")`);
-        await expect(survivedSubtaskB.first()).toBeVisible({ timeout: 10000 });
-        await expect(survivedSubtaskB.first()).toHaveClass(/isDone/, { timeout: 5000 });
-        console.log('[OrphanSubtask] Subtask survived on Client B with done status');
+        // On Client B: subtask should be deleted (cascade delete from parent)
+        const subtaskCountB = await clientB.page
+          .locator(`task:has-text("${subtaskName}")`)
+          .count();
+        expect(subtaskCountB).toBe(0);
+        console.log('[CascadeDelete] Subtask deleted on Client B (cascade)');
 
-        // On Client A: subtask should also appear (synced from B's winning state)
-        const survivedSubtaskA = clientA.page.locator(`task:has-text("${subtaskName}")`);
-        await expect(survivedSubtaskA.first()).toBeVisible({ timeout: 10000 });
-        await expect(survivedSubtaskA.first()).toHaveClass(/isDone/, { timeout: 5000 });
-        console.log('[OrphanSubtask] Subtask also visible on Client A');
+        // On Client A: subtask should also be deleted
+        const subtaskCountA = await clientA.page
+          .locator(`task:has-text("${subtaskName}")`)
+          .count();
+        expect(subtaskCountA).toBe(0);
+        console.log('[CascadeDelete] Subtask deleted on Client A');
 
-        // Parent should still be gone (its delete was not contested)
+        // Parent should be deleted on both clients
         const parentCountA = await clientA.page
           .locator(`task:has-text("${parentName}")`)
           .count();
@@ -1977,13 +1972,11 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
           .locator(`task:has-text("${parentName}")`)
           .count();
 
-        // Parent should be gone (or if subtask title contains parent name, count should be 1 for subtask only)
-        // We use a unique parent name, so count should be 0
         expect(parentCountA).toBe(0);
         expect(parentCountB).toBe(0);
 
         console.log(
-          '[OrphanSubtask] ✓ Subtask edit won over parent delete via LWW - orphaned subtask handled gracefully',
+          '[CascadeDelete] ✓ Parent delete cascaded to subtask - data consistency maintained',
         );
       } finally {
         if (clientA) await closeClient(clientA);
