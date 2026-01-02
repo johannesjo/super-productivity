@@ -158,6 +158,12 @@ export class MainHeaderComponent implements OnDestroy {
     return this.globalConfigService.cfg()?.appFeatures.isSyncIconEnabled;
   });
 
+  // Check if there are any undone tasks that can be tracked
+  private readonly _hasTrackableTasks$ = this.workContextService.undoneTasks$.pipe(
+    map((tasks) => tasks.length > 0),
+  );
+  hasTrackableTasks = toSignal(this._hasTrackableTasks$, { initialValue: true });
+
   private readonly _userProfileService = inject(UserProfileService);
   isUserProfilesEnabled = computed(() => {
     return (

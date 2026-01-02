@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   ElementRef,
   inject,
   input,
@@ -73,10 +74,11 @@ import { distinctUntilChanged, observeOn } from 'rxjs/operators';
       <button
         (click)="taskService.toggleStartTask()"
         [color]="currentTaskId() ? 'accent' : 'primary'"
-        matTooltip="{{ T.MH.TOGGLE_TRACK_TIME | translate }}"
+        [matTooltip]="tooltipText()"
         matTooltipPosition="below"
         class="play-btn tour-playBtn mat-elevation-z3"
         mat-mini-fab
+        [disabled]="isDisabled()"
       >
         @if (!currentTaskId()) {
           <mat-icon>play_arrow</mat-icon>
@@ -203,7 +205,15 @@ export class PlayButtonComponent implements OnInit, OnDestroy {
   readonly currentTask = input<Task | null>();
   readonly currentTaskId = input<string | null>();
   readonly currentTaskContext = input<WorkContext | null>();
+  readonly hasTrackableTasks = input<boolean>(true);
   readonly circleSvg = viewChild<ElementRef<SVGCircleElement>>('circleSvg');
+
+  readonly isDisabled = computed(
+    () => !this.currentTaskId() && !this.hasTrackableTasks(),
+  );
+  readonly tooltipText = computed(() =>
+    this.isDisabled() ? T.MH.NO_TASKS_TO_TRACK : T.MH.TOGGLE_TRACK_TIME,
+  );
 
   private _subs = new Subscription();
   private circumference = 10 * 2 * Math.PI; // ~62.83
