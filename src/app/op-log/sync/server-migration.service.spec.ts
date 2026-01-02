@@ -26,6 +26,7 @@ describe('ServerMigrationService', () => {
   let storeDelegateServiceSpy: jasmine.SpyObj<PfapiStoreDelegateService>;
   let snackServiceSpy: jasmine.SpyObj<SnackService>;
   let pfapiServiceSpy: any;
+  let defaultProvider: OperationSyncProvider;
 
   // Type for operation-sync-capable provider
   type OperationSyncProvider = SyncProviderServiceInterface<SyncProviderId> &
@@ -75,6 +76,7 @@ describe('ServerMigrationService', () => {
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
       'hasSyncedOps',
       'append',
+      'getOpsAfterSeq',
     ]);
     vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
       'getCurrentVectorClock',
@@ -101,6 +103,7 @@ describe('ServerMigrationService', () => {
     // Default mock returns
     opLogStoreSpy.hasSyncedOps.and.returnValue(Promise.resolve(true));
     opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+    opLogStoreSpy.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
     vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
       Promise.resolve({ 'test-client': 5 }),
     );
@@ -135,6 +138,9 @@ describe('ServerMigrationService', () => {
     service = TestBed.inject(ServerMigrationService);
     store = TestBed.inject(MockStore);
     spyOn(store, 'dispatch');
+
+    // Create a default provider for handleServerMigration tests
+    defaultProvider = createMockSyncProvider();
   });
 
   describe('checkAndHandleMigration', () => {
@@ -204,7 +210,7 @@ describe('ServerMigrationService', () => {
         }) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
@@ -219,7 +225,7 @@ describe('ServerMigrationService', () => {
         }) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
@@ -231,7 +237,7 @@ describe('ServerMigrationService', () => {
         error: 'Validation failed',
       } as any);
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
       expect(snackServiceSpy.open).toHaveBeenCalledWith(
@@ -256,7 +262,7 @@ describe('ServerMigrationService', () => {
         repairSummary: 'Fixed orphaned references',
       } as any);
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(store.dispatch).toHaveBeenCalledWith(
         loadAllData({ appDataComplete: repairedState as any }),
@@ -280,7 +286,7 @@ describe('ServerMigrationService', () => {
         Promise.resolve({ 'test-client': 5 }),
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).toHaveBeenCalled();
       const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
@@ -294,7 +300,7 @@ describe('ServerMigrationService', () => {
     it('should abort if no client ID is available', async () => {
       pfapiServiceSpy.pf.metaModel.loadClientId.and.returnValue(Promise.resolve(null));
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
@@ -308,7 +314,7 @@ describe('ServerMigrationService', () => {
         }) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).toHaveBeenCalled();
     });
@@ -322,7 +328,7 @@ describe('ServerMigrationService', () => {
         }) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).toHaveBeenCalled();
     });
@@ -336,7 +342,7 @@ describe('ServerMigrationService', () => {
         }) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).toHaveBeenCalled();
     });
@@ -348,7 +354,7 @@ describe('ServerMigrationService', () => {
         Promise.resolve(null) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
@@ -358,7 +364,7 @@ describe('ServerMigrationService', () => {
         Promise.resolve(undefined) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
@@ -368,7 +374,7 @@ describe('ServerMigrationService', () => {
         Promise.resolve('not an object') as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
@@ -386,7 +392,7 @@ describe('ServerMigrationService', () => {
           }) as any,
         );
 
-        await service.handleServerMigration();
+        await service.handleServerMigration(defaultProvider);
 
         expect(opLogStoreSpy.append).not.toHaveBeenCalled();
       }
@@ -401,8 +407,117 @@ describe('ServerMigrationService', () => {
         }) as any,
       );
 
-      await service.handleServerMigration();
+      await service.handleServerMigration(defaultProvider);
 
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleServerMigration - Double-check and Clock Merging', () => {
+    it('should abort if server is no longer empty during double-check', async () => {
+      // Provider reports server has data on double-check
+      (defaultProvider.downloadOps as jasmine.Spy).and.returnValue(
+        Promise.resolve({ ops: [], latestSeq: 5, hasMore: false }),
+      );
+
+      await service.handleServerMigration(defaultProvider);
+
+      // Should not create SYNC_IMPORT because server is no longer empty
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should proceed if server is still empty during double-check', async () => {
+      // Provider reports server is still empty
+      (defaultProvider.downloadOps as jasmine.Spy).and.returnValue(
+        Promise.resolve({ ops: [], latestSeq: 0, hasMore: false }),
+      );
+
+      await service.handleServerMigration(defaultProvider);
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+
+    it('should merge all local op clocks into SYNC_IMPORT vector clock', async () => {
+      const localOps = [
+        {
+          seq: 1,
+          op: {
+            id: 'op-1',
+            vectorClock: { 'test-client': 1, 'other-client': 3 },
+          },
+          appliedAt: Date.now(),
+          source: 'local' as const,
+        },
+        {
+          seq: 2,
+          op: {
+            id: 'op-2',
+            vectorClock: { 'test-client': 2 },
+          },
+          appliedAt: Date.now(),
+          source: 'local' as const,
+        },
+        {
+          seq: 3,
+          op: {
+            id: 'op-3',
+            vectorClock: { 'third-client': 5 },
+          },
+          appliedAt: Date.now(),
+          source: 'local' as const,
+        },
+      ];
+
+      opLogStoreSpy.getOpsAfterSeq.and.returnValue(Promise.resolve(localOps as any));
+      vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
+        Promise.resolve({ 'test-client': 5 }),
+      );
+
+      await service.handleServerMigration(defaultProvider);
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+
+      // SYNC_IMPORT's clock should dominate all local ops:
+      // Merged: { test-client: 5 (current), other-client: 3, third-client: 5 }
+      // Then incremented for this client: test-client: 6
+      expect(appendedOp.vectorClock['test-client']).toBe(6);
+      expect(appendedOp.vectorClock['other-client']).toBe(3);
+      expect(appendedOp.vectorClock['third-client']).toBe(5);
+    });
+
+    it('should work with empty local ops (only current clock)', async () => {
+      opLogStoreSpy.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
+      vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
+        Promise.resolve({ 'test-client': 10 }),
+      );
+
+      await service.handleServerMigration(defaultProvider);
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+
+      // Should just increment current clock
+      expect(appendedOp.vectorClock['test-client']).toBe(11);
+    });
+
+    it('should skip for non-operation-sync-capable provider', async () => {
+      // Create a legacy provider (no downloadOps method)
+      const legacyProvider = createLegacySyncProvider();
+
+      // This should still proceed but skip the double-check
+      // (legacy providers don't support operation sync anyway)
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({
+          task: { ids: ['task-1'], entities: { 'task-1': { id: 'task-1' } } },
+          project: { ids: [], entities: {} },
+          tag: { ids: [], entities: {} },
+        }) as any,
+      );
+
+      await service.handleServerMigration(legacyProvider as any);
+
+      // Should create SYNC_IMPORT without double-check
       expect(opLogStoreSpy.append).toHaveBeenCalled();
     });
   });

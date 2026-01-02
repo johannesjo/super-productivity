@@ -5,7 +5,7 @@ import { SyncProviderId } from '../../pfapi/api/pfapi.const';
 import { isOperationSyncCapable } from './operation-sync.util';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { VectorClockService } from './vector-clock.service';
-import { incrementVectorClock } from '../../core/util/vector-clock';
+import { incrementVectorClock, mergeVectorClocks } from '../../core/util/vector-clock';
 import { PfapiStoreDelegateService } from '../../pfapi/pfapi-store-delegate.service';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
@@ -108,25 +108,48 @@ export class ServerMigrationService {
       'ServerMigrationService: Server migration detected during upload check. ' +
         'Empty server with previously synced ops. Creating full state SYNC_IMPORT.',
     );
-    await this.handleServerMigration();
+    await this.handleServerMigration(syncProvider);
   }
 
   /**
    * Handles server migration by creating a SYNC_IMPORT operation with full current state.
    *
    * ## Process
-   * 1. Get current state from NgRx store
-   * 2. Skip if state is empty (nothing to migrate)
-   * 3. Validate and repair state (prevent propagating corruption)
-   * 4. Create SYNC_IMPORT operation with full state
-   * 5. Append to operation log for upload
+   * 1. Double-check server is still empty (in case another client just uploaded)
+   * 2. Get current state from NgRx store
+   * 3. Skip if state is empty (nothing to migrate)
+   * 4. Validate and repair state (prevent propagating corruption)
+   * 5. Create SYNC_IMPORT operation with full state (with merged vector clocks)
+   * 6. Append to operation log for upload
    *
    * ## State Validation
    * Before creating SYNC_IMPORT, the state is validated and repaired if needed.
    * This prevents corrupted state (e.g., orphaned references) from propagating
    * to other clients via the full state import.
+   *
+   * ## Vector Clock Merging
+   * The SYNC_IMPORT's vector clock must dominate ALL existing local operations.
+   * We merge all local op clocks to ensure that when SyncImportFilterService
+   * compares operations, all pre-import ops are LESS_THAN the import.
+   *
+   * @param syncProvider - The sync provider to use for double-check
    */
-  async handleServerMigration(): Promise<void> {
+  async handleServerMigration(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<void> {
+    // Double-check server is still empty (in case another client just uploaded)
+    // This is called inside the upload lock, but network timing could still race
+    if (isOperationSyncCapable(syncProvider)) {
+      const freshCheck = await syncProvider.downloadOps(0, undefined, 1);
+      if (freshCheck.latestSeq !== 0) {
+        OpLog.warn(
+          'ServerMigrationService: Server no longer empty, aborting SYNC_IMPORT. ' +
+            'Another client may have just uploaded.',
+        );
+        return;
+      }
+    }
+
     OpLog.warn(
       'ServerMigrationService: Server migration detected. Creating full state SYNC_IMPORT.',
     );
@@ -174,7 +197,7 @@ export class ServerMigrationService {
       );
     }
 
-    // Get client ID and vector clock
+    // Get client ID
     const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
       OpLog.err(
@@ -183,8 +206,20 @@ export class ServerMigrationService {
       return;
     }
 
-    const currentClock = await this.vectorClockService.getCurrentVectorClock();
-    const newClock = incrementVectorClock(currentClock, clientId);
+    // Build vector clock by merging ALL local operation clocks.
+    // This ensures the SYNC_IMPORT's clock dominates all pre-import ops,
+    // so when SyncImportFilterService compares them, all prior ops are
+    // LESS_THAN (not CONCURRENT) and can be properly filtered.
+    const allLocalOps = await this.opLogStore.getOpsAfterSeq(0);
+    let mergedClock = await this.vectorClockService.getCurrentVectorClock();
+    for (const entry of allLocalOps) {
+      mergedClock = mergeVectorClocks(mergedClock, entry.op.vectorClock);
+    }
+    const newClock = incrementVectorClock(mergedClock, clientId);
+
+    OpLog.normal(
+      `ServerMigrationService: Merged ${allLocalOps.length} local op clocks into SYNC_IMPORT vector clock.`,
+    );
 
     // Create SYNC_IMPORT operation with full state
     // NOTE: Use raw state directly (not wrapped in appDataComplete).

@@ -2135,4 +2135,94 @@ describe('OperationLogStoreService', () => {
       expect(failed[0].op.entityId).toBe('failed');
     });
   });
+
+  describe('hasSyncedOps', () => {
+    it('should return false when no ops exist', async () => {
+      const result = await service.hasSyncedOps();
+      expect(result).toBe(false);
+    });
+
+    it('should return false when only unsynced ops exist', async () => {
+      const op = createTestOperation();
+      await service.append(op, 'local');
+
+      const result = await service.hasSyncedOps();
+      expect(result).toBe(false);
+    });
+
+    it('should return true when synced ops exist', async () => {
+      const op = createTestOperation();
+      const seq = await service.append(op, 'local');
+      await service.markSynced([seq]);
+
+      const result = await service.hasSyncedOps();
+      expect(result).toBe(true);
+    });
+
+    it('should return false when only MIGRATION ops have syncedAt', async () => {
+      const migrationOp = createTestOperation({
+        entityType: 'MIGRATION' as EntityType,
+        entityId: '*',
+        opType: OpType.Batch,
+      });
+      const seq = await service.append(migrationOp, 'local');
+      await service.markSynced([seq]);
+
+      const result = await service.hasSyncedOps();
+      expect(result).toBe(false);
+    });
+
+    it('should return false when only RECOVERY ops have syncedAt', async () => {
+      const recoveryOp = createTestOperation({
+        entityType: 'RECOVERY' as EntityType,
+        entityId: '*',
+        opType: OpType.Batch,
+      });
+      const seq = await service.append(recoveryOp, 'local');
+      await service.markSynced([seq]);
+
+      const result = await service.hasSyncedOps();
+      expect(result).toBe(false);
+    });
+
+    it('should return true when mixed MIGRATION and regular synced ops exist', async () => {
+      // Add MIGRATION op
+      const migrationOp = createTestOperation({
+        entityType: 'MIGRATION' as EntityType,
+        entityId: '*',
+        opType: OpType.Batch,
+      });
+      const seq1 = await service.append(migrationOp, 'local');
+      await service.markSynced([seq1]);
+
+      // Add regular op
+      const regularOp = createTestOperation({
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-1',
+        opType: OpType.Create,
+      });
+      const seq2 = await service.append(regularOp, 'local');
+      await service.markSynced([seq2]);
+
+      const result = await service.hasSyncedOps();
+      expect(result).toBe(true);
+    });
+
+    it('should handle multiple MIGRATION/RECOVERY ops correctly', async () => {
+      // Add multiple MIGRATION ops
+      for (let i = 0; i < 3; i++) {
+        const migrationOp = createTestOperation({
+          entityType: 'MIGRATION' as EntityType,
+          entityId: '*',
+          opType: OpType.Batch,
+        });
+        const seq = await service.append(migrationOp, 'local');
+        await service.markSynced([seq]);
+      }
+
+      // All are MIGRATION, so should return false
+      const result = await service.hasSyncedOps();
+      expect(result).toBe(false);
+    });
+  });
 });

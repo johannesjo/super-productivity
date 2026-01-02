@@ -164,6 +164,22 @@ export class OperationLogUploadService {
             await syncProvider.setLastServerSeq(result.serverSeq);
           }
         } else {
+          // Special handling for SYNC_IMPORT_EXISTS: another client already uploaded
+          // a SYNC_IMPORT. We should delete our local SYNC_IMPORT and let the normal
+          // download flow bring in the remote data. Our local ops will then be
+          // uploaded as regular operations.
+          if (result.errorCode === 'SYNC_IMPORT_EXISTS') {
+            OpLog.warn(
+              `OperationLogUploadService: Server already has SYNC_IMPORT from another client. ` +
+                `Deleting local SYNC_IMPORT and proceeding with normal sync flow.`,
+            );
+            await this.opLogStore.deleteOpsWhere(
+              (logEntry) => logEntry.op.id === entry.op.id,
+            );
+            // Don't count as rejected - this is expected behavior when joining existing group
+            continue;
+          }
+
           // Only permanently reject if the server explicitly rejected the operation
           // (e.g., validation error, conflict). Network errors should be retried.
           const isNetworkError = this._isNetworkError(result.error);
@@ -360,7 +376,12 @@ export class OperationLogUploadService {
     syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
     entry: OperationLogEntry,
     encryptKey: string | undefined,
-  ): Promise<{ accepted: boolean; serverSeq?: number; error?: string }> {
+  ): Promise<{
+    accepted: boolean;
+    serverSeq?: number;
+    error?: string;
+    errorCode?: string;
+  }> {
     const op = entry.op;
     OpLog.normal(
       `OperationLogUploadService: Uploading ${op.opType} operation via snapshot endpoint`,
@@ -404,7 +425,13 @@ export class OperationLogUploadService {
         );
       }
 
-      return { accepted: false, error: message };
+      // Extract errorCode from error message if present (server returns JSON with errorCode)
+      let errorCode: string | undefined;
+      if (message.includes('SYNC_IMPORT_EXISTS')) {
+        errorCode = 'SYNC_IMPORT_EXISTS';
+      }
+
+      return { accepted: false, error: message, errorCode };
     }
   }
 

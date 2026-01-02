@@ -1302,4 +1302,142 @@ describe('Restore Points API', () => {
       expect(response.statusCode).toBe(401);
     });
   });
+
+  describe('POST /api/sync/snapshot - SYNC_IMPORT_EXISTS Rejection', () => {
+    it('should reject duplicate SYNC_IMPORT when reason is initial', async () => {
+      // First upload should succeed
+      const firstResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t1: { title: 'Task 1' } } },
+          clientId: 'client-1',
+          reason: 'initial',
+          vectorClock: { 'client-1': 1 },
+        },
+      });
+
+      expect(firstResponse.statusCode).toBe(200);
+      expect(firstResponse.json().accepted).toBe(true);
+
+      // Second upload with reason 'initial' should be rejected
+      const secondResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t2: { title: 'Task 2' } } },
+          clientId: 'client-2',
+          reason: 'initial',
+          vectorClock: { 'client-2': 1 },
+        },
+      });
+
+      expect(secondResponse.statusCode).toBe(409);
+      const body = secondResponse.json();
+      expect(body.errorCode).toBe('SYNC_IMPORT_EXISTS');
+      expect(body.existingImportId).toBeDefined();
+    });
+
+    it('should allow recovery snapshot even if SYNC_IMPORT exists', async () => {
+      // First upload SYNC_IMPORT
+      const firstResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t1: { title: 'Task 1' } } },
+          clientId: 'client-1',
+          reason: 'initial',
+          vectorClock: { 'client-1': 1 },
+        },
+      });
+
+      expect(firstResponse.statusCode).toBe(200);
+
+      // Recovery snapshot should still be allowed
+      const recoveryResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t2: { title: 'Task 2 - recovery' } } },
+          clientId: 'client-1',
+          reason: 'recovery',
+          vectorClock: { 'client-1': 2 },
+        },
+      });
+
+      expect(recoveryResponse.statusCode).toBe(200);
+      expect(recoveryResponse.json().accepted).toBe(true);
+    });
+
+    it('should allow migration snapshot even if SYNC_IMPORT exists', async () => {
+      // First upload SYNC_IMPORT
+      const firstResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t1: { title: 'Task 1' } } },
+          clientId: 'client-1',
+          reason: 'initial',
+          vectorClock: { 'client-1': 1 },
+        },
+      });
+
+      expect(firstResponse.statusCode).toBe(200);
+
+      // Migration snapshot should still be allowed
+      const migrationResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t2: { title: 'Task 2 - migration' } } },
+          clientId: 'client-1',
+          reason: 'migration',
+          vectorClock: { 'client-1': 2 },
+        },
+      });
+
+      expect(migrationResponse.statusCode).toBe(200);
+      expect(migrationResponse.json().accepted).toBe(true);
+    });
+
+    it('should allow initial SYNC_IMPORT from same client (retry scenario)', async () => {
+      // First upload SYNC_IMPORT
+      const firstResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t1: { title: 'Task 1' } } },
+          clientId: 'client-1',
+          reason: 'initial',
+          vectorClock: { 'client-1': 1 },
+        },
+      });
+
+      expect(firstResponse.statusCode).toBe(200);
+
+      // Same client retrying initial should also be rejected (we don't special-case this)
+      // The client should handle 409 and download instead
+      const retryResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/snapshot',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          state: { task: { t1: { title: 'Task 1 - retry' } } },
+          clientId: 'client-1',
+          reason: 'initial',
+          vectorClock: { 'client-1': 1 },
+        },
+      });
+
+      expect(retryResponse.statusCode).toBe(409);
+      expect(retryResponse.json().errorCode).toBe('SYNC_IMPORT_EXISTS');
+    });
+  });
 });

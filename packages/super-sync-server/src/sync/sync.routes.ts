@@ -6,6 +6,7 @@ import { uuidv7 } from 'uuidv7';
 import { authenticate, getAuthUser } from '../middleware';
 import { getSyncService } from './sync.service';
 import { Logger } from '../logger';
+import { prisma } from '../db';
 import {
   UploadOpsRequest,
   UploadOpsResponse,
@@ -670,6 +671,38 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             Logger.info(
               `[user:${userId}] Snapshot quota OK after recalculation: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
             );
+          }
+        }
+
+        // FIX: Reject duplicate SYNC_IMPORT to prevent data loss
+        // Only the FIRST client to sync with an empty server should create SYNC_IMPORT.
+        // Subsequent clients should download existing data and upload their ops as regular ops.
+        // Exceptions that bypass this check:
+        // - 'recovery': Explicit backup restore or repair (user action)
+        // - 'migration': Legacy data migration (should be allowed to override)
+        // Only 'initial' (first-time server migration) should be rejected if one exists.
+        if (reason === 'initial') {
+          const existingImport = await prisma.operation.findFirst({
+            where: {
+              userId,
+              opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+            },
+            select: { id: true, clientId: true },
+          });
+
+          if (existingImport) {
+            Logger.warn(
+              `[user:${userId}] Rejecting duplicate SYNC_IMPORT from client ${clientId}. ` +
+                `Existing import from client ${existingImport.clientId} (id: ${existingImport.id}). ` +
+                `Client should download and merge instead.`,
+            );
+            return reply.status(409).send({
+              error: 'SYNC_IMPORT_EXISTS',
+              errorCode: 'SYNC_IMPORT_EXISTS',
+              message:
+                'A SYNC_IMPORT already exists. Download existing data and upload your changes as regular operations.',
+              existingImportId: existingImport.id,
+            });
           }
         }
 

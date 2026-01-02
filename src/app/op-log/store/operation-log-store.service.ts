@@ -594,15 +594,29 @@ export class OperationLogStoreService {
    * Used to distinguish between:
    * - Fresh client (only local ops, never synced) → NOT a server migration
    * - Client that previously synced (has synced ops) → Server migration scenario
+   *
+   * NOTE: Excludes MIGRATION and RECOVERY entity types from the check.
+   * These are special ops created during local migration from legacy data and
+   * don't represent real sync history with a remote server. Including them
+   * would incorrectly trigger server migration when multiple clients with
+   * legacy data join a new sync group.
    */
   async hasSyncedOps(): Promise<boolean> {
     await this._ensureInit();
-    // Use the bySyncedAt index to efficiently check for any synced ops
-    const cursor = await this.db
-      .transaction('ops')
-      .store.index('bySyncedAt')
-      .openCursor();
-    return cursor !== null;
+    // Use the bySyncedAt index to find synced ops, but exclude MIGRATION/RECOVERY
+    let cursor = await this.db.transaction('ops').store.index('bySyncedAt').openCursor();
+
+    while (cursor) {
+      const op = cursor.value.op;
+      // Handle both compact format ('e') and full format ('entityType')
+      const entityType = isCompactOperation(op) ? op.e : (op as Operation).entityType;
+      // Skip MIGRATION and RECOVERY entity types - they're not real sync history
+      if (entityType !== 'MIGRATION' && entityType !== 'RECOVERY') {
+        return true; // Found a real synced op
+      }
+      cursor = await cursor.continue();
+    }
+    return false;
   }
 
   async saveStateCache(snapshot: {

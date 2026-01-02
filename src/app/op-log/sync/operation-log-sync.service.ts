@@ -243,7 +243,7 @@ export class OperationLogSyncService {
     // Server migration detected: gap on empty server
     // Create a SYNC_IMPORT operation with full local state to seed the new server
     if (result.needsFullStateUpload) {
-      await this.serverMigrationService.handleServerMigration();
+      await this.serverMigrationService.handleServerMigration(syncProvider);
       // Persist lastServerSeq=0 for the migration case (server was reset)
       if (isOperationSyncCapable(syncProvider) && result.latestServerSeq !== undefined) {
         await syncProvider.setLastServerSeq(result.latestServerSeq);

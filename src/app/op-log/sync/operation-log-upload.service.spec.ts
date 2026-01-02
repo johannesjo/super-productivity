@@ -44,6 +44,7 @@ describe('OperationLogUploadService', () => {
       'getUnsynced',
       'markSynced',
       'markRejected',
+      'deleteOpsWhere',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
 
@@ -55,6 +56,7 @@ describe('OperationLogUploadService', () => {
     );
     mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([]));
     mockOpLogStore.markSynced.and.returnValue(Promise.resolve());
+    mockOpLogStore.deleteOpsWhere.and.returnValue(Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
@@ -808,6 +810,139 @@ describe('OperationLogUploadService', () => {
           42,
           false, // isPayloadEncrypted
         );
+      });
+
+      describe('SYNC_IMPORT_EXISTS handling', () => {
+        /**
+         * When a second client tries to upload a SYNC_IMPORT but another client already did,
+         * the server rejects with SYNC_IMPORT_EXISTS. This is expected behavior when joining
+         * an existing sync group - the client should delete the local SYNC_IMPORT and proceed
+         * with normal sync (download existing data, then upload local ops as regular ops).
+         */
+        it('should delete local SYNC_IMPORT when server returns SYNC_IMPORT_EXISTS', async () => {
+          const entry = createFullStateEntry(
+            1,
+            'my-import',
+            'client-1',
+            OpType.SyncImport,
+          );
+          mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+          mockApiProvider.uploadSnapshot.and.returnValue(
+            Promise.resolve({
+              accepted: false,
+              error:
+                'A SYNC_IMPORT already exists. New clients should download and merge.',
+              errorCode: 'SYNC_IMPORT_EXISTS',
+            }),
+          );
+
+          await service.uploadPendingOps(mockApiProvider);
+
+          // Local SYNC_IMPORT should be deleted
+          expect(mockOpLogStore.deleteOpsWhere).toHaveBeenCalled();
+        });
+
+        it('should NOT count SYNC_IMPORT_EXISTS as rejected - it is expected behavior', async () => {
+          const entry = createFullStateEntry(
+            1,
+            'my-import',
+            'client-1',
+            OpType.SyncImport,
+          );
+          mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+          mockApiProvider.uploadSnapshot.and.returnValue(
+            Promise.resolve({
+              accepted: false,
+              error: 'A SYNC_IMPORT already exists',
+              errorCode: 'SYNC_IMPORT_EXISTS',
+            }),
+          );
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          // Should NOT be marked as rejected or counted as rejection
+          expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+          expect(result.rejectedCount).toBe(0);
+          expect(result.rejectedOps.length).toBe(0);
+        });
+
+        it('should NOT mark SYNC_IMPORT_EXISTS as synced', async () => {
+          const entry = createFullStateEntry(
+            1,
+            'my-import',
+            'client-1',
+            OpType.SyncImport,
+          );
+          mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+          mockApiProvider.uploadSnapshot.and.returnValue(
+            Promise.resolve({
+              accepted: false,
+              errorCode: 'SYNC_IMPORT_EXISTS',
+            }),
+          );
+
+          await service.uploadPendingOps(mockApiProvider);
+
+          // Should NOT be marked as synced since it wasn't actually uploaded
+          expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+        });
+
+        it('should continue with remaining ops after SYNC_IMPORT_EXISTS', async () => {
+          const syncImportEntry = createFullStateEntry(
+            1,
+            'sync-import-op',
+            'client-1',
+            OpType.SyncImport,
+          );
+          const regularEntry = createMockEntry(2, 'regular-op', 'client-1');
+          mockOpLogStore.getUnsynced.and.returnValue(
+            Promise.resolve([syncImportEntry, regularEntry]),
+          );
+          mockApiProvider.uploadSnapshot.and.returnValue(
+            Promise.resolve({
+              accepted: false,
+              errorCode: 'SYNC_IMPORT_EXISTS',
+            }),
+          );
+          mockApiProvider.uploadOps.and.returnValue(
+            Promise.resolve({
+              results: [{ opId: 'regular-op', accepted: true }],
+              latestSeq: 2,
+              newOps: [],
+            }),
+          );
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          // SYNC_IMPORT was deleted (not rejected)
+          expect(mockOpLogStore.deleteOpsWhere).toHaveBeenCalled();
+          // Regular op was uploaded successfully
+          expect(mockApiProvider.uploadOps).toHaveBeenCalled();
+          expect(result.uploadedCount).toBe(1);
+          expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([2]);
+        });
+
+        it('should detect SYNC_IMPORT_EXISTS from thrown error when exception contains the code', async () => {
+          // When uploadSnapshot throws an error (e.g., from HTTP client), the error message
+          // is parsed to extract errorCode. This tests that code path.
+          const entry = createFullStateEntry(
+            1,
+            'my-import',
+            'client-1',
+            OpType.SyncImport,
+          );
+          mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+          // Mock throwing an error with SYNC_IMPORT_EXISTS in the message
+          mockApiProvider.uploadSnapshot.and.rejectWith(
+            new Error('SYNC_IMPORT_EXISTS: Another client already uploaded'),
+          );
+
+          await service.uploadPendingOps(mockApiProvider);
+
+          // Should still be handled gracefully - delete local op, don't mark rejected
+          expect(mockOpLogStore.deleteOpsWhere).toHaveBeenCalled();
+          expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+        });
       });
     });
 
