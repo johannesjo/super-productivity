@@ -11,10 +11,15 @@ import { NavigationEnd, Router } from '@angular/router';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { WorkContextType } from '../work-context.model';
 import { WorkContextService } from '../work-context.service';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { Store } from '@ngrx/store';
+import { selectActiveContextTypeAndId } from './work-context.selectors';
+import { Log } from '../../../core/log';
 
 @Injectable()
 export class WorkContextEffects {
   private _actions$ = inject(Actions);
+  private _store$ = inject(Store);
   private _taskService = inject(TaskService);
   private _bannerService = inject(BannerService);
   private _router = inject(Router);
@@ -56,6 +61,34 @@ export class WorkContextEffects {
         ([, currentContext]) =>
           !currentContext || currentContext.activeId !== TODAY_TAG.id,
       ),
+      map(() =>
+        setActiveWorkContext({
+          activeId: TODAY_TAG.id,
+          activeType: WorkContextType.TAG,
+        }),
+      ),
+    ),
+  );
+
+  /**
+   * Validates the active work context after data is reloaded (e.g., from sync).
+   * If the active project no longer exists in the new data, redirects to TODAY tag.
+   * Fixes: https://github.com/johannesjo/super-productivity/issues/5859
+   */
+  validateContextAfterDataLoad$: Observable<unknown> = createEffect(() =>
+    this._actions$.pipe(
+      ofType(loadAllData),
+      withLatestFrom(this._store$.select(selectActiveContextTypeAndId)),
+      filter(([, { activeType }]) => activeType === WorkContextType.PROJECT),
+      filter(([{ appDataComplete }, { activeId }]) => {
+        const projectExists = !!appDataComplete.project?.entities?.[activeId];
+        if (!projectExists) {
+          Log.warn(
+            `Active project ${activeId} not found after data load, redirecting to TODAY`,
+          );
+        }
+        return !projectExists;
+      }),
       map(() =>
         setActiveWorkContext({
           activeId: TODAY_TAG.id,
