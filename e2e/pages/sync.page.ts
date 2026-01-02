@@ -71,22 +71,29 @@ export class SyncPage extends BasePage {
     // Click on provider select to open dropdown with retry
     const webdavOption = this.page.locator('mat-option').filter({ hasText: 'WebDAV' });
 
+    // Use the existing providerSelect locator which targets the mat-select directly
     // Use the providerSelect locator that was already validated above
-    const combobox = this.providerSelect;
+    const selectElement = this.providerSelect;
 
     for (let attempt = 0; attempt < 5; attempt++) {
       // Ensure the select is in view
-      await combobox.scrollIntoViewIfNeeded();
+      await selectElement.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(async () => {
+        // If scrollIntoViewIfNeeded fails, try scrolling the dialog content
+        const dialogContent = this.page.locator('mat-dialog-content');
+        if (await dialogContent.isVisible()) {
+          await dialogContent.evaluate((el) => el.scrollTo(0, 0));
+        }
+      });
       await this.page.waitForTimeout(300);
 
-      // Focus the combobox first
-      await combobox.focus();
+      // Focus and click the select element
+      await selectElement.focus().catch(() => {});
       await this.page.waitForTimeout(200);
 
       // Try multiple ways to open the dropdown
       if (attempt === 0) {
         // First attempt: regular click
-        await combobox.click();
+        await selectElement.click().catch(() => {});
       } else if (attempt === 1) {
         // Second attempt: use Space key to open
         await this.page.keyboard.press('Space');
@@ -95,7 +102,7 @@ export class SyncPage extends BasePage {
         await this.page.keyboard.press('ArrowDown');
       } else {
         // Later attempts: force click
-        await combobox.click({ force: true });
+        await selectElement.click({ force: true }).catch(() => {});
       }
       await this.page.waitForTimeout(500);
 

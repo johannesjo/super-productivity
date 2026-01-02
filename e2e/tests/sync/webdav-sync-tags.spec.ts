@@ -10,6 +10,7 @@ import {
   setupClient,
   waitForSync,
 } from '../../utils/sync-helpers';
+import { waitForAppReady } from '../../utils/waits';
 
 test.describe('WebDAV Sync Tags', () => {
   // Run sync tests serially to avoid WebDAV server contention
@@ -213,6 +214,23 @@ test.describe('WebDAV Sync Tags', () => {
 
     // Reload to ensure UI updates
     await pageB.reload();
+    await waitForAppReady(pageB);
+
+    // Dismiss tour if it appears
+    try {
+      const tourElement = pageB.locator('.shepherd-element').first();
+      await tourElement.waitFor({ state: 'visible', timeout: 2000 });
+      const cancelIcon = pageB.locator('.shepherd-cancel-icon').first();
+      if (await cancelIcon.isVisible()) {
+        await cancelIcon.click();
+      } else {
+        await pageB.keyboard.press('Escape');
+      }
+      await tourElement.waitFor({ state: 'hidden', timeout: 3000 });
+    } catch {
+      // Tour didn't appear or wasn't dismissable
+    }
+
     await workViewPageB.waitForTaskList();
 
     // Verify task still exists but without the specific tag indicator
