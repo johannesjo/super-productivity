@@ -213,9 +213,12 @@
       "ADD_TIME_MINUTE": "Dodaj 1 minutę",
       "B": {
         "BREAK_RUNNING": "Przerwa trwa",
+        "PAUSE": "Pauza",
         "POMODORO_BREAK_RUNNING": "Przerwa #{{cycleNr}} trwa",
         "POMODORO_SESSION_RUNNING": "Sesja Pomodoro #{{cycleNr}} trwa",
+        "RESUME": "CV",
         "SESSION_RUNNING": "Sesja skupienia trwa",
+        "START": "Rozpocznij",
         "TO_FOCUS_OVERLAY": "Do nakładki skupienia"
       },
       "BACK_TO_PLANNING": "Powrót do planowania",
@@ -810,6 +813,9 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Anuluj"
+      },
       "D_CREATE": {
         "CREATE": "Stwórz projekt",
         "EDIT": "Edycja projektu",
@@ -1149,6 +1155,7 @@
         "CREATE_TASK": "Create new task",
         "DUE_BUTTON": "Zaległe ",
         "EXAMPLE": "Example: \"Some task title +projectName #some-tag #some-other-tag 10m/3h\"",
+        "NO_DATE": "Brak daty",
         "START": "Press enter one more time to start",
         "TAGS_BUTTON": "Tagi",
         "TODAY": "Dzisiaj",
@@ -1396,6 +1403,7 @@
         "FILTER_BY": "Filtruj według",
         "FILTER_DEFAULT": "Brak filtra",
         "FILTER_ESTIMATED_TIME": "Szacowany czas",
+        "FILTER_NOT_SPECIFIED": "Nie określono",
         "FILTER_PROJECT": "Projekt",
         "FILTER_SCHEDULED_DATE": "Data zaplanowana",
         "FILTER_TAG": "Tag",
@@ -1421,7 +1429,6 @@
         "TIME_2HOUR": "> 2 godziny",
         "TIME_10MIN": "> 10 minut",
         "TIME_30MIN": "> 30 minut",
-        "FILTER_NOT_SPECIFIED": "Nie określono",
         "TIME_SPENT": "Czas spędzony",
         "TITLE": "Dostosuj widok zadań"
       }
@@ -1550,6 +1557,7 @@
     "DELETE": "Usuń",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
+    "DUPLICATE": "Duplikat",
     "DURATION_DESCRIPTION": "np. \"5h 23m\", co daje wynik 5 godzin w 23 minuty.",
     "EDIT": "Edytuj",
     "ENABLED": "Włączone",
@@ -1582,6 +1590,10 @@
     "YESTERDAY": "Yesterday"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Tablice",
+      "SCHEDULE": "Harmonogram"
+    },
     "AUTO_BACKUPS": {
       "HELP": "Automatycznie zapisuj wszystkie dane w folderze aplikacji, aby mieć kopię na wypadek problemów.",
       "LABEL_IS_ENABLED": "Włącz automatic backups",
@@ -1714,8 +1726,6 @@
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_ANIMATIONS": "Wyłącz wszystkie animacje",
       "IS_DISABLE_CELEBRATION": "Wyłącz świętowanie w podsumowaniu dnia",
-      "USER_PROFILES": "Włącz profile użytkowników (Beta)",
-      "USER_PROFILES_HINT": "Umożliwia tworzenie i przełączanie się między różnymi profilami użytkowników, każdy z oddzielnymi ustawieniami, zadaniami i konfiguracjami synchronizacji. Przycisk zarządzania profilami pojawi się w prawym górnym rogu po włączeniu. Uwaga: wyłączenie tej funkcji ukryje interfejs użytkownika, ale zachowa dane profilu (funkcja Beta, bez gwarancji. Upewnij się, że masz kopię zapasową).",
       "IS_HIDE_NAV": "Ukrywaj nawigację, dopóki nie najedziesz kursorem na nagłówek główny (tylko desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Pokaż wskazówkę dotyczącą produktywności przy starcie aplikacji nieco dłużej",
@@ -1726,7 +1736,9 @@
       "START_OF_NEXT_DAY": "Godzina rozpoczęcia następnego dnia",
       "START_OF_NEXT_DAY_HINT": "od kiedy (w godzinach) ma być liczony następny dzień. domyślnie jest to północ, czyli 0.",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Ustawienia różne"
+      "TITLE": "Ustawienia różne",
+      "USER_PROFILES": "Włącz profile użytkowników (Beta)",
+      "USER_PROFILES_HINT": "Umożliwia tworzenie i przełączanie się między różnymi profilami użytkowników, każdy z oddzielnymi ustawieniami, zadaniami i konfiguracjami synchronizacji. Przycisk zarządzania profilami pojawi się w prawym górnym rogu po włączeniu. Uwaga: wyłączenie tej funkcji ukryje interfejs użytkownika, ale zachowa dane profilu (funkcja Beta, bez gwarancji. Upewnij się, że masz kopię zapasową)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -1859,6 +1871,7 @@
     "CREATE_TAG": "Stwórz Tag",
     "DELETE_PROJECT": "Usuń projekt",
     "DELETE_TAG": "Usuń Tag",
+    "DUPLICATE_PROJECT": "Duplikat",
     "ENTER_FOCUS_MODE": "Włącz tryb skupienia",
     "GO_TO_TASK_LIST": "Idź do listy zadań",
     "HELP": "Pomoc",

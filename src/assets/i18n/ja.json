@@ -1540,6 +1540,7 @@
         "FILTER_BY": "フィルター",
         "FILTER_DEFAULT": "フィルターなし",
         "FILTER_ESTIMATED_TIME": "推定時間",
+        "FILTER_NOT_SPECIFIED": "指定されていない",
         "FILTER_PROJECT": "プロジェクト",
         "FILTER_SCHEDULED_DATE": "開催予定日",
         "FILTER_TAG": "タグ",
@@ -1567,7 +1568,6 @@
         "TIME_2HOUR": "> 2時間",
         "TIME_10MIN": "> 10分間",
         "TIME_30MIN": ">30分",
-        "FILTER_NOT_SPECIFIED": "指定されていない",
         "TIME_SPENT": "滞在時間",
         "TITLE": "タスクビューのカスタマイズ"
       }
@@ -1883,8 +1883,6 @@
       "IS_DARK_MODE": "ダークモード",
       "IS_DISABLE_ANIMATIONS": "すべてのアニメーションを無効にする",
       "IS_DISABLE_CELEBRATION": "日次サマリーの祝賀を無効にする",
-      "USER_PROFILES": "ユーザープロファイルを有効にする（ベータ版）",
-      "USER_PROFILES_HINT": "異なる設定、タスク、同期設定を持つ複数のユーザープロファイルを作成して切り替えることができます。有効にすると、プロファイル管理ボタンが右上隅に表示されます。注意：この機能を無効にするとUIは非表示になりますが、プロファイルデータは保持されます（ベータ機能、保証なし。必ずバックアップを取ってください）。",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
       "IS_OVERLAY_INDICATOR_ENABLED": "オーバーレイインジケーターウィンドウを有効にする(デスクトップLinux/gnome)",
@@ -1899,7 +1897,9 @@
       "THEME": "テーマ",
       "THEME_EXPERIMENTAL": "テーマ(実験的)",
       "THEME_SELECT_LABEL": "セレクト・テーマ",
-      "TITLE": "その他の設定"
+      "TITLE": "その他の設定",
+      "USER_PROFILES": "ユーザープロファイルを有効にする（ベータ版）",
+      "USER_PROFILES_HINT": "異なる設定、タスク、同期設定を持つ複数のユーザープロファイルを作成して切り替えることができます。有効にすると、プロファイル管理ボタンが右上隅に表示されます。注意：この機能を無効にするとUIは非表示になりますが、プロファイルデータは保持されます（ベータ機能、保証なし。必ずバックアップを取ってください）。"
     },
     "POMODORO": {
       "BREAK_DURATION": "短い休憩時間",

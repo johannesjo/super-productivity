@@ -22,6 +22,7 @@ object WidgetTaskQueue {
      * Add a task to the queue.
      * @return The generated task ID
      */
+    @Synchronized
     fun addTask(context: Context, title: String): String {
         val taskId = UUID.randomUUID().toString()
         val task = JSONObject().apply {
@@ -46,7 +47,7 @@ object WidgetTaskQueue {
         tasks.put(task)
         queue.put("tasks", tasks)
 
-        prefs.edit().putString(KEY_TASK_QUEUE, queue.toString()).commit()
+        prefs.edit().putString(KEY_TASK_QUEUE, queue.toString()).apply()
         return taskId
     }
 
@@ -54,6 +55,7 @@ object WidgetTaskQueue {
      * Get all queued tasks and clear the queue atomically.
      * @return JSON string of queued tasks, or null if empty
      */
+    @Synchronized
     fun getAndClearQueue(context: Context): String? {
         val prefs = getPrefs(context)
         val queueJson = prefs.getString(KEY_TASK_QUEUE, null)

@@ -28,7 +28,7 @@ describe('getQuickSettingUpdates', () => {
       expect(result!.startDate).toBeUndefined();
     });
 
-    it('should set only today weekday to true', () => {
+    it('should set only today weekday to true when no referenceDate provided', () => {
       const result = getQuickSettingUpdates('WEEKLY_CURRENT_WEEKDAY');
       const weekdays = [
         'sunday',
@@ -48,6 +48,49 @@ describe('getQuickSettingUpdates', () => {
           expect((result as any)[day]).toBe(false);
         }
       });
+    });
+
+    // Issue #5806: Use referenceDate weekday when provided
+    it('should set Sunday to true when referenceDate is a Sunday (fixes #5806)', () => {
+      // Sunday Dec 28, 2025
+      const sunday = new Date(2025, 11, 28);
+      const result = getQuickSettingUpdates('WEEKLY_CURRENT_WEEKDAY', sunday);
+      expect(result).toBeDefined();
+      expect((result as any).sunday).toBe(true);
+      expect((result as any).monday).toBe(false);
+      expect((result as any).tuesday).toBe(false);
+      expect((result as any).wednesday).toBe(false);
+      expect((result as any).thursday).toBe(false);
+      expect((result as any).friday).toBe(false);
+      expect((result as any).saturday).toBe(false);
+    });
+
+    it('should set Friday to true when referenceDate is a Friday (fixes #5806)', () => {
+      // Friday Dec 26, 2025
+      const friday = new Date(2025, 11, 26);
+      const result = getQuickSettingUpdates('WEEKLY_CURRENT_WEEKDAY', friday);
+      expect(result).toBeDefined();
+      expect((result as any).sunday).toBe(false);
+      expect((result as any).monday).toBe(false);
+      expect((result as any).tuesday).toBe(false);
+      expect((result as any).wednesday).toBe(false);
+      expect((result as any).thursday).toBe(false);
+      expect((result as any).friday).toBe(true);
+      expect((result as any).saturday).toBe(false);
+    });
+
+    it('should set Wednesday to true when referenceDate is a Wednesday (fixes #5806)', () => {
+      // Wednesday Dec 31, 2025
+      const wednesday = new Date(2025, 11, 31);
+      const result = getQuickSettingUpdates('WEEKLY_CURRENT_WEEKDAY', wednesday);
+      expect(result).toBeDefined();
+      expect((result as any).sunday).toBe(false);
+      expect((result as any).monday).toBe(false);
+      expect((result as any).tuesday).toBe(false);
+      expect((result as any).wednesday).toBe(true);
+      expect((result as any).thursday).toBe(false);
+      expect((result as any).friday).toBe(false);
+      expect((result as any).saturday).toBe(false);
     });
   });
 

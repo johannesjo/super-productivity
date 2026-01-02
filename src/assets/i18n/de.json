@@ -53,6 +53,11 @@
     "SEARCH_PLACEHOLDER": "z.B., Natur, Berge, abstrakt",
     "TITLE": "Hintergrundbild von Unsplash auswählen"
   },
+  "DONATE_PAGE": {
+    "BUTTON_TEXT": "Über GitHub Sponsors spenden",
+    "INTRO_1": "Super Productivity wird vollständig von der Community finanziert. Es gibt kein Tracking, keine Werbung und keine Datenerfassung – deine Aufgaben bleiben auf deinem Gerät.",
+    "INTRO_2": "Wenn du diesen Ansatz schätzt und das Projekt gesund und weiterentwickelt halten möchtest, wird eine freiwillige Spende sehr geschätzt."
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -157,6 +162,7 @@
       "BANNER": {
         "ADD_AS_TASK": "Als Aufgabe hinzufügen",
         "FOCUS_TASK": "Fokusaufgabe",
+        "SHOW_TASK": "Aufgabe anzeigen",
         "TXT": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> beginnt um <strong>{{start}}</strong> !<br> (und {{nrOfOtherBanners}} weitere Ereignisse sind fällig)",
         "TXT_PAST": "<strong>{{title}}</strong> startete um <strong>{{start}}</strong> !",
@@ -209,15 +215,23 @@
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "1 Minute hinzufügen",
       "B": {
         "BREAK_RUNNING": "Die Pause läuft",
+        "END_BREAK": "Pause beenden",
+        "END_SESSION": "Sitzung beenden",
+        "PAUSE": "Pause",
         "POMODORO_BREAK_RUNNING": "Die Pause #{{cycleNr}} läuft",
         "POMODORO_SESSION_RUNNING": "Pomodoro Sitzung #{{cycleNr}} läuft",
+        "RESUME": "Lebenslauf",
         "SESSION_RUNNING": "Fokussierungssitzung läuft",
+        "START": "Start",
         "TO_FOCUS_OVERLAY": "Zur Fokussierungsüberlagerung"
       },
       "BACK_TO_PLANNING": "Zurück zur Planung",
       "BREAK_RELAX_MSG": "Nehmen Sie sich einen Moment Zeit zum Entspannen",
+      "CLICK_TO_EDIT_DURATION": "Klicke, um die Dauer zu bearbeiten",
+      "COMPLETE_FOCUS_SESSION": "Fokussierte Sitzung abschließen",
       "COMPLETE_SESSION": "Vollständige Sitzung",
       "CONGRATS": "Herzlichen Glückwunsch zum Abschluss dieser Sitzung!",
       "CONTINUE_SESSION": "Sitzung fortsetzen",
@@ -238,23 +252,32 @@
       "NEXT": "Weiter",
       "ON": "An",
       "OPEN_ISSUE_IN_BROWSER": "Issue im Browser öffnen",
+      "PAUSE_SESSION": "Sitzung pausieren",
+      "PAUSE_TRACKING": "Tracking pausieren",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "Tracking für aktuelle Aufgabe pausieren",
       "POMODORO": "Pomodoro",
       "POMODORO_HINT": "Strukturierte Sprints mit geplanten Pausen",
       "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
+      "POMODORO_SETTINGS": "Pomodoro-Einstellungen",
       "PREP_GET_MENTALLY_READY": "Machen Sie sich mental bereit, konzentriert und produktiv zu sein",
       "PREP_SIT_UPRIGHT": "Sitzen (oder stehen) Sie aufrecht",
       "PREP_STRETCH": "Machen Sie leichte Dehnübungen",
+      "REMOVE_TIME_MINUTE": "1 Minute entfernen",
+      "RESUME_SESSION": "Sitzung fortsetzen",
       "SELECT_ANOTHER_TASK": "Wählen Sie eine andere Aufgabe aus",
       "SELECT_MODE": "Wählen Sie Ihren Fokusmodus",
       "SELECT_TASK": "Wählen Sie die Aufgabe aus, auf die Sie sich konzentrieren möchten",
+      "SELECT_TASK_TO_FOCUS": "Aufgabe zum Fokussieren auswählen",
       "SESSION_COMPLETED": "Fokussierungssitzung abgeschlossen!",
       "SET_FOCUS_SESSION_DURATION": "Legen Sie die Dauer der Fokussitzung fest",
       "SHORT_BREAK": "Kurze Pause",
       "SHORT_BREAK_TITLE": "Kurze Pause - Zyklus {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Aufgabennotizen und Anhänge ein-/ausblenden",
       "SKIP_BREAK": "Pause überspringen",
+      "START_BREAK": "Pause starten",
       "START_FOCUS_SESSION": "Starten Sie die Fokussitzung",
       "START_NEXT_FOCUS_SESSION": "Starten Sie die nächste Fokussitzung",
+      "SWITCH_TASK": "Aufgabe wechseln",
       "WORKED_FOR": "Sie arbeiten bereits seit"
     },
     "GITEA": {
@@ -431,6 +454,11 @@
         "NEW_COMMENT": "{{issueProviderName}}: Neuer Kommentar für \"{{issueTitle}}\"",
         "POLLING_BACKLOG": "{{issueProviderName}}: Abfrage für neue {{issuesStr}}",
         "POLLING_CHANGES": "{{issueProviderName}}: Polling-Änderungen für {{issuesStr}}"
+      }
+    },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "Zwischengespeicherte Kalenderergebnisse werden angezeigt. Daten könnten veraltet sein."
       }
     },
     "JIRA": {
@@ -631,9 +659,30 @@
       },
       "FOCUS_SESSION_DIALOG": {
         "ADD_BTN": "Hinzufügen",
+        "ADD_SESSION": "Sitzung hinzufügen",
+        "CHART_LABEL": "Fokuszeit (Minuten)",
         "NEW_SESSION_DURATION": "Dauer",
+        "NO_SESSIONS": "Keine Fokussitzungen für diesen Tag",
         "SESSIONS_LIST": "Sitzungen",
+        "TITLE": "Fokussitzungen",
+        "TOTAL_SESSIONS": "Gesamtsitzungen",
         "TOTAL_TIME": "Gesamtzeit"
+      },
+      "REFLECTION": {
+        "HISTORY_BTN": "Vergangene Reflexionen ansehen",
+        "HISTORY_EMPTY": "Noch keine Reflexionen gespeichert. Erfasse die heutige Notiz, um eine Serie zu starten.",
+        "HISTORY_TITLE": "Reflexionsverlauf",
+        "PLACEHOLDER_1": "Was hat heute gut funktioniert? Was sollte sich morgen ändern?",
+        "PLACEHOLDER_2": "Kleine Verbesserung für morgen?",
+        "PLACEHOLDER_3": "Wo ist der Fokus verloren gegangen – und wie kannst du ihn schützen?",
+        "PLACEHOLDER_4": "Welche Aufgabe hat dir Energie gegeben? Welche hat sie geraubt?",
+        "PLACEHOLDER_5": "Eine Sache zum Wiederholen. Eine Sache zum Ändern.",
+        "REMIND_LABEL": "Erinnere mich morgen daran",
+        "REMINDER_CREATED": "Erinnerung zur Reflexion für morgen geplant",
+        "REMINDER_ERROR": "Erinnerung konnte nicht geplant werden",
+        "REMINDER_NEEDS_TEXT": "Schreibe eine Reflexion, bevor du um eine Erinnerung bittest",
+        "REMINDER_TASK_TITLE": "Reflexionsnotiz erneut ansehen",
+        "TITLE": "Reflexionsnotiz"
       },
       "S": {
         "SAVE_METRIC": "Metrik erfolgreich gespeichert"
@@ -805,6 +854,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Abbrechen",
+        "MSG": "Dieses Projekt ist ziemlich groß und könnte eine Weile dauern, um es zu duplizieren. Möchtest du fortfahren?",
+        "OK": "Trotzdem duplizieren",
+        "TITLE": "Projekt duplizieren?"
+      },
       "D_CREATE": {
         "CREATE": "Projekt erstellen",
         "EDIT": "Projekt bearbeiten",
@@ -908,7 +963,8 @@
       }
     },
     "REFLECTION_NOTE": {
-      "ACTION_DISMISS": "Verwerfen"
+      "ACTION_DISMISS": "Verwerfen",
+      "MSG": "Reflexionsnotiz: ({{date}}): {{content}}"
     },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
@@ -1087,11 +1143,16 @@
         "TITLE": "Sync",
         "WEB_DAV": {
           "CORS_INFO": "<p><strong>Experimental!!</strong> <strong>Damit dies für Mobil oder den Browser funktioniert, müssen Sie Super Productivity für CORS-Anfragen bei Ihrer Nextcloud-Instanz auf die Whitelist setzen</strong>, dies kann negative Auswirkungen auf die Sicherheit haben! Bitte beziehen Sie sich <a href='https://github.com/nextcloud/server/issues/3131'>auf diesen Thread</a> für weitere Informationen. Ein Ansatz, um dies auch mobil zu ermöglichen, ist das Whitelisting \"https://app.super-productivity.com\" über die Nextcloud-App <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Benutzung auf eigene Gefahr!",
+          "D_SYNC_FOLDER_PATH": "Pfad relativ zum WebDAV-Server-Stamm, in dem die Synchronisationsdateien gespeichert werden (z.B. '\\/super-productivity' oder '\\/'). Dies ist NICHT der interne Verzeichnispfad Ihres Servers.",
           "INFO": "Leider unterscheiden sich WebDAV-Implementierungen stark voneinander. Super Productivity funktioniert bekanntermaßen gut mit Nextcloud, <strong>aber möglicherweise nicht mit Ihrem Anbieter</strong>.",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Passwort",
           "L_SYNC_FOLDER_PATH": "Sync-Ordnerpfad",
-          "L_USER_NAME": "Nutzername"
+          "L_TEST_CONNECTION": "Verbindung testen",
+          "L_USER_NAME": "Nutzername",
+          "S_FILL_ALL_FIELDS": "Bitte füllen Sie zuerst alle WebDAV-Felder aus",
+          "S_TEST_FAIL": "Verbindungstest fehlgeschlagen: {{error}} - Ziel-URL: {{url}}",
+          "S_TEST_SUCCESS": "Verbindungstest erfolgreich! Ziel-URL: {{url}}"
         }
       },
       "S": {
@@ -1104,6 +1165,9 @@
         "ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Zurückgreifen auf lokales Backup.",
         "ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
         "ERROR_NO_REV": "Keine gültige rev für entfernte Datei",
+        "ERROR_PERMISSION": "Dateizugriff verweigert. Bitte überprüfen Sie Ihre Dateisystemberechtigungen.",
+        "ERROR_PERMISSION_FLATPAK": "Dateizugriff verweigert. Gewähren Sie Dateisystemberechtigungen über Flatseal oder verwenden Sie einen Pfad innerhalb von ~\\/var\\/app\\/",
+        "ERROR_PERMISSION_SNAP": "Dateizugriff verweigert. Führen Sie 'snap connect super-productivity:home' aus oder verwenden Sie einen Pfad innerhalb von ~\\/snap\\/super-productivity\\/common\\/",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Fehler beim Synchronisieren. Remote-Daten können nicht gelesen werden. Vielleicht haben Sie die Verschlüsselung aktiviert und Ihr lokales Passwort stimmt nicht mit dem überein, das zur Verschlüsselung der Remote-Daten verwendet wurde?",
         "IMPORTING": "Daten importieren",
         "INCOMPLETE_CFG": "Die Authentifizierung für die Synchronisierung ist fehlgeschlagen. Bitte überprüfen Sie Ihre Konfiguration!",
@@ -1487,6 +1551,7 @@
         "FILTER_BY": "Nach filtern",
         "FILTER_DEFAULT": "Kein Filter",
         "FILTER_ESTIMATED_TIME": "Geschätzte Zeit",
+        "FILTER_NOT_SPECIFIED": "Nicht angegeben",
         "FILTER_PROJECT": "Projekt",
         "FILTER_SCHEDULED_DATE": "Geplantes Datum",
         "FILTER_TAG": "Tag",
@@ -1513,7 +1578,6 @@
         "TIME_2HOUR": "> 2 Stunden",
         "TIME_10MIN": "> 10 Minuten",
         "TIME_30MIN": "> 30 Minuten",
-        "FILTER_NOT_SPECIFIED": "Nicht angegeben",
         "TIME_SPENT": "Aufgewendete Zeit",
         "TITLE": "Aufgabenansicht anpassen"
       }
@@ -1647,6 +1711,7 @@
     "DISMISS": "Verwerfen",
     "DO_IT": "Tu es!",
     "DONT_SHOW_AGAIN": "Nicht mehr anzeigen",
+    "DUPLICATE": "Duplizieren",
     "DURATION_DESCRIPTION": "z. B. \"5h 23m\" was in 5 Stunden und 23 Minuten resultiert",
     "EDIT": "Bearbeiten",
     "ENABLED": "Aktiviert",
@@ -1679,6 +1744,22 @@
     "YESTERDAY": "Gestern"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Bretter",
+      "DONATE_PAGE": "Spenden-Seite",
+      "FOCUS_MODE": "Fokus-Modus",
+      "HELP": "Aktivieren oder deaktivieren Sie bestimmte App-Funktionen in der gesamten Benutzeroberfläche.",
+      "ISSUES_PANEL": "Probleme-Panel",
+      "PLANNER": "Planer",
+      "PROJECT_NOTES": "Projektnotizen",
+      "SCHEDULE": "Zeitplan",
+      "SCHEDULE_DAY_PANEL": "Tagesplan-Panel",
+      "SYNC_BUTTON": "Synchronisations-Schaltfläche",
+      "TIME_TRACKING": "Stoppuhr-Zeiterfassung",
+      "TITLE": "App-Funktionen",
+      "USER_PROFILES": "Benutzerprofile (Experimentell)",
+      "USER_PROFILES_HINT": "Ermöglicht das Erstellen und Wechseln zwischen verschiedenen Benutzerprofilen, jeweils mit separaten Einstellungen, Aufgaben und Synchronisationskonfigurationen. Die Schaltfläche zur Profilverwaltung erscheint oben rechts, wenn aktiviert. Hinweis: Das Deaktivieren dieser Funktion blendet die Benutzeroberfläche aus, bewahrt jedoch Ihre Profildaten (Experimentelle Funktion, keine Garantien. Bitte sichern Sie Ihre Daten)."
+    },
     "AUTO_BACKUPS": {
       "HELP": "Speichern Sie alle Daten automatisch in Ihrem App-Ordner, um sie für den Fall, dass ein Fehler auftritt, bereit zu halten.",
       "LABEL_IS_ENABLED": "Aktivieren Sie automatische Sicherungen",
@@ -1701,7 +1782,12 @@
     "FOCUS_MODE": {
       "HELP": "Der Fokusmodus öffnet einen ablenkungsfreien Bildschirm, damit Sie sich auf Ihre aktuelle Aufgabe konzentrieren können.",
       "L_ALWAYS_OPEN_FOCUS_MODE": "Öffnen Sie beim Zeiterfassen immer den Fokusmodus",
+      "L_IS_PLAY_TICK": "Tick-Geräusch während Fokus-Sitzungen abspielen",
+      "L_MANUAL_BREAK_START": "Pausen manuell starten (Pomodoro)",
+      "L_PAUSE_TRACKING_DURING_BREAK": "Aufgabenverfolgung während Pausen pausieren",
       "L_SKIP_PREPARATION_SCREEN": "Vorbereitungsbildschirm überspringen (Dehnen usw.)",
+      "L_START_IN_BACKGROUND": "Fokus-Sitzungen nur mit Banner starten (kein Overlay)",
+      "L_SYNC_SESSION_WITH_TRACKING": "Fokus-Sitzung mit Zeiterfassung synchronisieren",
       "TITLE": "Fokusmodus"
     },
     "IDLE": {
@@ -1790,6 +1876,7 @@
       "NL": "Niederländisch",
       "PL": "Polnisch",
       "PT": "Portugiesisch",
+      "PT_BR": "Portugiesisch (Brasilien)",
       "RU": "Russisch",
       "SK": "Slowakisch",
       "TIME_LOCALE": "Zeitformat Gebietsschema",
@@ -1820,6 +1907,7 @@
       "DARK_MODE_LIGHT": "Hell",
       "DARK_MODE_SYSTEM": "System",
       "DEFAULT_PROJECT": "Standardprojekt für Aufgaben, wenn keines angegeben ist",
+      "DEFAULT_START_PAGE": "Standard-Startseite",
       "FIRST_DAY_OF_WEEK": "Erster Tag der Woche",
       "HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System -> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Fügen Sie heute automatisch das Tag \"Heute\" hinzu, um an Aufgaben zu arbeiten",
@@ -1829,8 +1917,6 @@
       "IS_DARK_MODE": "Dunkler Modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiviere alle Animationen",
       "IS_DISABLE_CELEBRATION": "Feier im Tagesbericht deaktivieren",
-      "USER_PROFILES": "Benutzerprofile aktivieren (Beta)",
-      "USER_PROFILES_HINT": "Ermöglicht das Erstellen und Wechseln zwischen verschiedenen Benutzerprofilen mit jeweils separaten Einstellungen, Aufgaben und Synchronisierungskonfigurationen. Die Profilverwaltungsschaltfläche wird in der oberen rechten Ecke angezeigt, wenn aktiviert. Hinweis: Das Deaktivieren dieser Funktion blendet die Benutzeroberfläche aus, behält aber Ihre Profildaten bei (Beta-Funktion, keine Garantien. Stellen Sie sicher, dass Sie ein Backup haben).",
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",
@@ -1838,13 +1924,17 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Aktuellen Countdown im Tray / Statusmenü anzeigen (nur Desktop Mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Benutzerdefinierte Titelleiste verwenden (nur Windows/Linux)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Neustart erforderlich, damit die Änderung wirksam wird",
       "START_OF_NEXT_DAY": "Startzeit des nächsten Tages",
       "START_OF_NEXT_DAY_HINT": "Ab wann (in Stunden) der nächste Tag beginnen. Der Standardwert ist Mitternacht, also 0.",
       "TASK_NOTES_TPL": "Aufgabenbeschreibungsvorlage",
       "THEME": "Thema",
       "THEME_EXPERIMENTAL": "Thema (experimentell)",
       "THEME_SELECT_LABEL": "Thema auswählen",
-      "TITLE": "Verschiedene Einstellungen"
+      "TITLE": "Verschiedene Einstellungen",
+      "USER_PROFILES": "Benutzerprofile aktivieren (Beta)",
+      "USER_PROFILES_HINT": "Ermöglicht das Erstellen und Wechseln zwischen verschiedenen Benutzerprofilen mit jeweils separaten Einstellungen, Aufgaben und Synchronisierungskonfigurationen. Die Profilverwaltungsschaltfläche wird in der oberen rechten Ecke angezeigt, wenn aktiviert. Hinweis: Das Deaktivieren dieser Funktion blendet die Benutzeroberfläche aus, behält aber Ihre Profildaten bei (Beta-Funktion, keine Garantien. Stellen Sie sicher, dass Sie ein Backup haben)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Dauer der kurzen Pausen",
@@ -1855,6 +1945,7 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Zeigen Sie Banner vor der eigentlichen Erinnerung an",
       "DEFAULT_TASK_REMIND_OPTION": "Standardmäßig ausgewählte Erinnerungsoption beim Erstellen von Aufgaben",
+      "DISABLE_REMINDERS": "Alle Erinnerungen deaktivieren",
       "IS_COUNTDOWN_BANNER_ENABLED": "Countdown-Banner anzeigen, bevor Erinnerungen fällig werden",
       "TITLE": "Erinnerungen"
     },
@@ -1917,6 +2008,9 @@
       "TITLE": "Zeiterfassung"
     }
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (Kopie)"
+  },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
       "A_DAY": "in einem Tag",
@@ -1947,18 +2041,22 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
+    "DUPLICATE_PROJECT_ERROR": "Das Projekt konnte nicht dupliziert werden",
+    "DUPLICATE_PROJECT_SUCCESS": "Projekt erfolgreich dupliziert",
     "ERR_COMPRESSION": "Fehler bei der Komprimierung",
     "FILE_DOWNLOADED": "{{fileName}} heruntergeladen",
     "FILE_DOWNLOADED_BTN": "Ordner öffnen",
     "NAVIGATE_TO_TASK_ERR": "Konnte den Fokusmodus für die Aufgabe nicht startet. Wurde die Aufgabe gelöscht?",
     "NO_TASKS_TO_COPY": "Keine Aufgaben zum Kopieren",
+    "NO_TASKS_TO_UNPLAN": "Keine Aufgaben zum Entplanen",
     "PERSISTENCE_DISALLOWED": "Daten werden nicht dauerhaft gespeichert. Beachten Sie, dass dies zu Datenverlust führen kann !!",
     "PERSISTENCE_ERROR": "Fehler beim Anfordern, Daten beizubehalten: {{err}}",
     "RUNNING_X": "Wird gestartet: \"{{str}}\".",
     "SHARE_FAILED": "Das Teilen ist fehlgeschlagen. Bitte kopieren Sie es manuell.",
     "SHARE_FAILED_FALLBACK": "Das Teilen ist fehlgeschlagen. Stattdessen in die Zwischenablage kopiert.",
     "SHARE_UNAVAILABLE_FALLBACK": "In die Zwischenablage kopiert.",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} gedrückt, aber die Verknüpfung zum Öffnen von Lesezeichen ist nur im Projektkontext verfügbar."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} gedrückt, aber die Verknüpfung zum Öffnen von Lesezeichen ist nur im Projektkontext verfügbar.",
+    "UNPLANNED_TODAY_TASKS": "Alle Aufgaben von Heute entplant"
   },
   "GPB": {
     "ASSETS": "Laden von Assets ...",
@@ -1982,6 +2080,8 @@
     "CREATE_TAG": "Stichwort erstellen",
     "DELETE_PROJECT": "Projekt löschen",
     "DELETE_TAG": "Stichwort löschen",
+    "DONATE": "Unterstützen Sie uns",
+    "DUPLICATE_PROJECT": "Duplikat",
     "ENTER_FOCUS_MODE": "Fokusmodus aktivieren",
     "GO_TO_TASK_LIST": "Gehe zur Aufgabenliste",
     "HELP": "Hilfe",
@@ -1998,6 +2098,7 @@
     "METRICS": "Metriken",
     "NO_PROJECT_INFO": "Keine Projekte verfügbar. Sie können ein neues Projekt erstellen, indem Sie auf die Schaltfläche \"Projekt erstellen\" klicken.",
     "NO_TAG_INFO": "Derzeit sind keine Tags vorhanden. Sie können Tags hinzufügen, indem Sie beim Hinzufügen oder Bearbeiten von Aufgaben „#IhrNeuesTag“ eingeben.",
+    "NO_TASKS_TO_TRACK": "Fügen Sie zuerst eine Aufgabe hinzu, um die Zeit zu verfolgen",
     "NOTES": "Anmerkungen",
     "NOTES_PANEL_INFO": "Notizen können nur von der Schedule und der normalen Aufgabenliste angezeigt werden.",
     "PLANNER": "Planer",
@@ -2020,6 +2121,7 @@
     "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
     "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
     "TRIGGER_SYNC": "Synchronisierung manuell auslösen",
+    "UNPLAN_ALL_TASKS": "Alle Aufgaben entplanen",
     "WORKLOG": "Worklog"
   },
   "MIGRATE": {
@@ -2044,6 +2146,7 @@
       "MSG": "Anwendung beenden?",
       "OK": "Beenden"
     },
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "Sie können diesen Bereich nutzen, um Ihre eigenen Endzeitrituale aufzuschreiben, an die Sie erinnert werden möchten.",
     "ESTIMATE_TOTAL": "Gesamtschätzung:",
     "EVALUATE_DAY": "Bewerten Sie",
     "EXPORT_TASK_LIST": "Aufgabenliste exportieren",

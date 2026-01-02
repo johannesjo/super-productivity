@@ -80,7 +80,7 @@
     }
 
     <button
-      [disabled]="!formGroup1().valid || !formGroup2().valid"
+      [disabled]="!formGroup1().valid || !formGroup2().valid || isLoading()"
       color="primary"
       mat-stroked-button
       type="submit"

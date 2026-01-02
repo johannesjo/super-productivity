@@ -216,6 +216,7 @@
         "POMODORO_BREAK_RUNNING": "Prestávka #{{cycleNr}} prebieha",
         "POMODORO_SESSION_RUNNING": "Pomodoro relácia #{{cycleNr}} prebieha",
         "SESSION_RUNNING": "Relácia zamerania prebieha",
+        "START": "Začať",
         "TO_FOCUS_OVERLAY": "Na prekrytie zamerania"
       },
       "BACK_TO_PLANNING": "Späť na plánovanie",
@@ -857,6 +858,9 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Zrušiť"
+      },
       "D_CREATE": {
         "CREATE": "Vytvoriť projekt",
         "EDIT": "Upraviť projekt",
@@ -1540,6 +1544,7 @@
         "FILTER_BY": "Filtrovať podľa",
         "FILTER_DEFAULT": "Žiadne filtre",
         "FILTER_ESTIMATED_TIME": "Odhadovaný čas",
+        "FILTER_NOT_SPECIFIED": "Nešpecifikované",
         "FILTER_PROJECT": "Projekt",
         "FILTER_SCHEDULED_DATE": "Naplánovaný dátum",
         "FILTER_TAG": "Tag",
@@ -1567,7 +1572,6 @@
         "TIME_2HOUR": "> 2 hodiny",
         "TIME_10MIN": "> 10 minút",
         "TIME_30MIN": "> 30 minút",
-        "FILTER_NOT_SPECIFIED": "Nešpecifikované",
         "TIME_SPENT": "Strávený čas",
         "TITLE": "Prispôsobiť zobrazenie úloh"
       }
@@ -1701,6 +1705,7 @@
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "DONT_SHOW_AGAIN": "Už nezobrazovať",
+    "DUPLICATE": "Duplikovať",
     "DURATION_DESCRIPTION": "e.g. \"5h 6m\" which results in 5 hours in 6 minutes",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
@@ -1733,6 +1738,10 @@
     "YESTERDAY": "Yesterday"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Tabule",
+      "SCHEDULE": "Harmonogram"
+    },
     "AUTO_BACKUPS": {
       "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
       "LABEL_IS_ENABLED": "Enable automatic backups",
@@ -1883,8 +1892,6 @@
       "IS_DARK_MODE": "Tmavý režim",
       "IS_DISABLE_ANIMATIONS": "Zakázať všetky animácie",
       "IS_DISABLE_CELEBRATION": "Zakázať oslavy v dennom zhrnutí",
-      "USER_PROFILES": "Povoliť používateľské profily (Beta)",
-      "USER_PROFILES_HINT": "Umožňuje vytvárať a prepínať medzi rôznymi používateľskými profilmi, každý s oddelenými nastaveniami, úlohami a konfiguráciami synchronizácie. Tlačidlo správy profilu sa zobrazí v pravom hornom rohu po povolení. Poznámka: Vypnutie tejto funkcie skryje používateľské rozhranie, ale zachová vaše údaje profilu (Beta funkcia, bez záruk. Uistite sa, že máte zálohu).",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Povoliť indikátor prekrytia okna (desktop linux/gnome)",
@@ -1899,7 +1906,9 @@
       "THEME": "Téma",
       "THEME_EXPERIMENTAL": "Téma (experimentálne)",
       "THEME_SELECT_LABEL": "Vybrať tému",
-      "TITLE": "Rôzne nastavenia"
+      "TITLE": "Rôzne nastavenia",
+      "USER_PROFILES": "Povoliť používateľské profily (Beta)",
+      "USER_PROFILES_HINT": "Umožňuje vytvárať a prepínať medzi rôznymi používateľskými profilmi, každý s oddelenými nastaveniami, úlohami a konfiguráciami synchronizácie. Tlačidlo správy profilu sa zobrazí v pravom hornom rohu po povolení. Poznámka: Vypnutie tejto funkcie skryje používateľské rozhranie, ale zachová vaše údaje profilu (Beta funkcia, bez záruk. Uistite sa, že máte zálohu)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Dĺžka krátkych prestávok",
@@ -2039,6 +2048,7 @@
     "CREATE_TAG": "Vytvoriť štítok",
     "DELETE_PROJECT": "Odstrániť projekt",
     "DELETE_TAG": "Odstrániť štítok",
+    "DUPLICATE_PROJECT": "Duplikovať",
     "ENTER_FOCUS_MODE": "Vstúpiť do režimu zamerania",
     "GO_TO_TASK_LIST": "Prejsť do zoznamu úloh",
     "HELP": "Pomoc",

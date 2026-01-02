@@ -4,7 +4,7 @@ import {
 } from '../util/sync-file-prefix';
 import { PFLog } from '../../../core/log';
 import { decrypt, encrypt } from '../encryption/encryption';
-import { DecryptError, DecryptNoPasswordError } from '../errors/errors';
+import { DecryptError, DecryptNoPasswordError, JsonParseError } from '../errors/errors';
 import {
   compressWithGzipToString,
   decompressGzipFromString,
@@ -123,8 +123,15 @@ export class EncryptAndCompressHandlerService {
       outStr = await decompressGzipFromString(outStr);
     }
 
+    let parsedData: T;
+    try {
+      parsedData = JSON.parse(outStr);
+    } catch (e) {
+      throw new JsonParseError(e, outStr);
+    }
+
     return {
-      data: JSON.parse(outStr),
+      data: parsedData,
       modelVersion,
     };
   }

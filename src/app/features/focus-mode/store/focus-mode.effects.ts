@@ -283,7 +283,12 @@ export class FocusModeEffects {
 
         // Check if we should start a break - only for automatic completions
         // Manual completions should stay on SessionDone screen
-        if (!action.isManual && strategy.shouldStartBreakAfterSession) {
+        // Also skip if manual break start is enabled (user must click "Start Break")
+        const shouldAutoStartBreak =
+          !action.isManual &&
+          strategy.shouldStartBreakAfterSession &&
+          !focusModeConfig?.isManualBreakStart;
+        if (shouldAutoStartBreak) {
           // Pause task tracking during break if enabled
           const shouldPauseTracking =
             focusModeConfig?.isPauseTrackingDuringBreak && currentTaskId;
@@ -720,15 +725,18 @@ export class FocusModeEffects {
               ])
                 .pipe(take(1))
                 .subscribe(([mode, pausedTaskId]) => {
+                  const strategy = this.strategyFactory.getStrategy(mode);
                   // Skip break (with pausedTaskId to resume tracking)
                   this.store.dispatch(actions.skipBreak({ pausedTaskId }));
-                  // Then start new session
-                  const strategy = this.strategyFactory.getStrategy(mode);
-                  this.store.dispatch(
-                    actions.startFocusSession({
-                      duration: strategy.initialSessionDuration,
-                    }),
-                  );
+                  // Only manually start session if strategy doesn't auto-start
+                  // (Pomodoro auto-starts via skipBreak$ effect)
+                  if (!strategy.shouldAutoStartNextSession) {
+                    this.store.dispatch(
+                      actions.startFocusSession({
+                        duration: strategy.initialSessionDuration,
+                      }),
+                    );
+                  }
                 });
             } else {
               // Start a new session using the current mode's strategy
@@ -763,10 +771,22 @@ export class FocusModeEffects {
         };
 
     // End session button - complete for work, skip for break (while running)
-    // Hide when session is completed, break time is up, or during active break
-    const endAction =
-      shouldShowStartButton || isOnBreak
-        ? undefined
+    // Hide when session is completed or break time is up (Start button takes priority)
+    const endAction = shouldShowStartButton
+      ? undefined
+      : isOnBreak
+        ? {
+            label: T.F.FOCUS_MODE.SKIP_BREAK,
+            icon: 'skip_next',
+            fn: () => {
+              this.store
+                .select(selectors.selectPausedTaskId)
+                .pipe(take(1))
+                .subscribe((pausedTaskId) => {
+                  this.store.dispatch(actions.skipBreak({ pausedTaskId }));
+                });
+            },
+          }
         : {
             label: T.F.FOCUS_MODE.B.END_SESSION,
             icon: 'done_all',

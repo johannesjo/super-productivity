@@ -53,6 +53,11 @@
     "SEARCH_PLACEHOLDER": "misalnya, alam, gunung, abstrak",
     "TITLE": "Pilih Gambar Latar dari Unsplash"
   },
+  "DONATE_PAGE": {
+    "BUTTON_TEXT": "Donasi melalui GitHub Sponsors",
+    "INTRO_1": "Super Productivity sepenuhnya didanai oleh komunitas. Tidak ada pelacakan, iklan, atau pengumpulan data — tugas Anda tetap di perangkat Anda.",
+    "INTRO_2": "Jika Anda menghargai pendekatan ini dan ingin menjaga proyek tetap sehat dan berkembang, donasi sukarela sangat dihargai."
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -213,9 +218,14 @@
       "ADD_TIME_MINUTE": "Tambah 1 menit",
       "B": {
         "BREAK_RUNNING": "Istirahat sedang berjalan",
+        "END_BREAK": "Akhiri istirahat",
+        "END_SESSION": "Akhiri sesi",
+        "PAUSE": "Jeda",
         "POMODORO_BREAK_RUNNING": "Istirahat #{{cycleNr}} sedang berjalan",
         "POMODORO_SESSION_RUNNING": "Sesi Pomodoro #{{cycleNr}} sedang berjalan",
+        "RESUME": "Lanjutkan",
         "SESSION_RUNNING": "Sesi Fokus sedang berjalan",
+        "START": "Mulai",
         "TO_FOCUS_OVERLAY": "Untuk Overlay Fokus"
       },
       "BACK_TO_PLANNING": "Kembali ke Perencanaan",
@@ -249,6 +259,7 @@
       "POMODORO": "Pomodoro",
       "POMODORO_HINT": "Sprint terstruktur dengan istirahat terencana",
       "POMODORO_SESSION_COMPLETED": "Sesi Pomodoro Selesai!",
+      "POMODORO_SETTINGS": "Pengaturan Pomodoro",
       "PREP_GET_MENTALLY_READY": "Bersiaplah secara mental untuk fokus dan produktif",
       "PREP_SIT_UPRIGHT": "Duduk (atau berdiri) dengan tegak",
       "PREP_STRETCH": "Lakukan peregangan ringan",
@@ -264,6 +275,7 @@
       "SHORT_BREAK_TITLE": "Istirahat Singkat - Siklus {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Menampilkan/menyembunyikan catatan tugas dan lampiran",
       "SKIP_BREAK": "Lewati Istirahat",
+      "START_BREAK": "Mulai Istirahat",
       "START_FOCUS_SESSION": "Mulai Sesi Fokus",
       "START_NEXT_FOCUS_SESSION": "Mulai Sesi Fokus berikutnya",
       "SWITCH_TASK": "Ganti tugas",
@@ -857,6 +869,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "Batal",
+        "MSG": "Proyek ini cukup besar dan mungkin memerlukan waktu untuk diduplikasi. Apakah Anda ingin melanjutkan?",
+        "OK": "Duplikasi Saja",
+        "TITLE": "Duplikasi Proyek?"
+      },
       "D_CREATE": {
         "CREATE": "Buat Proyek",
         "EDIT": "Ubah Proyek",
@@ -1140,11 +1158,16 @@
         "TITLE": "Sinkronisasi",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Membuatnya berfungsi di browser:</strong> Agar ini berfungsi di browser, Anda perlu memasukkan Super Productivity untuk permintaan CORS ke whitelist untuk instans Nextcloud Anda. Ini dapat memiliki implikasi keamanan negatif! Silahkan <a href='https://github.com/nextcloud/server/issues/3131'>lihat utas ini untuk informasi lebih lanjut</a>. Salah satu pendekatan untuk membuat ini berfungsi di seluler adalah memasukkannya ke whitelist \"https://app.super-productivity.com\" lewat nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Gunakan dengan risiko Anda sendiri!</p>",
+          "D_SYNC_FOLDER_PATH": "Jalur relatif terhadap root server WebDAV tempat file sinkronisasi akan disimpan (misalnya, ' /super-productivity' atau '/'). Ini BUKAN jalur direktori internal server Anda.",
           "INFO": "Implementasi WebDAV sangat bervariasi sayangnya. Super Productivity dikenal bekerja dengan baik dengan Nextcloud, <strong>tetapi mungkin tidak bekerja dengan penyedia Anda</strong>.",
           "L_BASE_URL": "Url Dasar",
           "L_PASSWORD": "Kata Sandi",
           "L_SYNC_FOLDER_PATH": "Jalur folder sinkronisasi",
-          "L_USER_NAME": "Nama Pengguna"
+          "L_TEST_CONNECTION": "Uji koneksi",
+          "L_USER_NAME": "Nama Pengguna",
+          "S_FILL_ALL_FIELDS": "Harap isi semua kolom WebDAV terlebih dahulu",
+          "S_TEST_FAIL": "Uji koneksi gagal: {{error}} - URL target: {{url}}",
+          "S_TEST_SUCCESS": "Uji koneksi berhasil! URL target: {{url}}"
         }
       },
       "S": {
@@ -1157,6 +1180,9 @@
         "ERROR_FALLBACK_TO_BACKUP": "Terjadi masalah saat mengimpor data. Kembali ke cadangan lokal.",
         "ERROR_INVALID_DATA": "Kesalahan saat menyinkronkan. Data tidak valid",
         "ERROR_NO_REV": "Tidak ada rev yang valid untuk file jarak jauh",
+        "ERROR_PERMISSION": "Akses file ditolak. Harap periksa izin sistem file Anda.",
+        "ERROR_PERMISSION_FLATPAK": "Akses file ditolak. Berikan izin sistem file melalui Flatseal atau gunakan jalur di dalam ~/ .var/app/",
+        "ERROR_PERMISSION_SNAP": "Akses file ditolak. Jalankan 'snap connect super-productivity:home' atau gunakan jalur di dalam ~\\/snap\\/super-productivity\\/common\\/",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Kesalahan saat menyinkronkan. Tidak dapat membaca data jarak jauh. Mungkin Anda mengaktifkan enkripsi dan kata sandi lokal Anda tidak cocok dengan kata sandi yang digunakan untuk mengenkripsi data jarak jauh?",
         "IMPORTING": "Mengimpor data",
         "INCOMPLETE_CFG": "Otentikasi untuk sinkronisasi gagal. Silakan periksa Konfigurasi Anda!",
@@ -1540,6 +1566,7 @@
         "FILTER_BY": "Saring Berdasarkan",
         "FILTER_DEFAULT": "Tidak Ada Filter",
         "FILTER_ESTIMATED_TIME": "Waktu Perkiraan",
+        "FILTER_NOT_SPECIFIED": "Tidak ditentukan",
         "FILTER_PROJECT": "Proyek",
         "FILTER_SCHEDULED_DATE": "Tanggal Terjadwal",
         "FILTER_TAG": "Tag",
@@ -1567,7 +1594,6 @@
         "TIME_2HOUR": "> 2 Jam",
         "TIME_10MIN": "> 10 Menit",
         "TIME_30MIN": "> 30 Menit",
-        "FILTER_NOT_SPECIFIED": "Tidak ditentukan",
         "TIME_SPENT": "Waktu yang dihabiskan",
         "TITLE": "Sesuaikan Tampilan Tugas"
       }
@@ -1701,6 +1727,7 @@
     "DISMISS": "Abaikan",
     "DO_IT": "Lakukan!",
     "DONT_SHOW_AGAIN": "Jangan tampilkan lagi",
+    "DUPLICATE": "Duplikat",
     "DURATION_DESCRIPTION": "contoh. \"5h 23m\" yang menghasilkan 5 hours 23 minutes (satuan dalam bahasa Inggris)",
     "EDIT": "Ubah",
     "ENABLED": "Aktifkan",
@@ -1733,6 +1760,22 @@
     "YESTERDAY": "Kemarin"
   },
   "GCF": {
+    "APP_FEATURES": {
+      "BOARDS": "Papan",
+      "DONATE_PAGE": "Halaman Donasi",
+      "FOCUS_MODE": "Mode Fokus",
+      "HELP": "Aktifkan atau nonaktifkan fitur aplikasi tertentu di seluruh UI.",
+      "ISSUES_PANEL": "Panel Masalah",
+      "PLANNER": "Perencana",
+      "PROJECT_NOTES": "Catatan Proyek",
+      "SCHEDULE": "Jadwal",
+      "SCHEDULE_DAY_PANEL": "Panel Hari Jadwal",
+      "SYNC_BUTTON": "Tombol Sinkronisasi",
+      "TIME_TRACKING": "Pelacakan Waktu Stopwatch",
+      "TITLE": "Fitur Aplikasi",
+      "USER_PROFILES": "Profil pengguna (Eksperimental)",
+      "USER_PROFILES_HINT": "Memungkinkan Anda membuat dan beralih antara profil pengguna yang berbeda, masing-masing dengan pengaturan, tugas, dan konfigurasi sinkronisasi terpisah. Tombol manajemen profil akan muncul di sudut kanan atas saat diaktifkan. Catatan: Menonaktifkan fitur ini akan menyembunyikan UI tetapi mempertahankan data profil Anda (Fitur eksperimental, tidak ada jaminan. Pastikan untuk memiliki cadangan)."
+    },
     "AUTO_BACKUPS": {
       "HELP": "Simpan otomatis semua data ke folder aplikasi Anda agar siap jika terjadi kesalahan.",
       "LABEL_IS_ENABLED": "Aktifkan pencadangan otomatis",
@@ -1755,7 +1798,12 @@
     "FOCUS_MODE": {
       "HELP": "Mode Fokus membuka layar bebas gangguan untuk membantu Anda fokus pada tugas Anda saat ini.",
       "L_ALWAYS_OPEN_FOCUS_MODE": "Selalu buka mode fokus, ketika melacak",
+      "L_IS_PLAY_TICK": "Putar suara detak selama sesi fokus",
+      "L_MANUAL_BREAK_START": "Mulai istirahat secara manual (Pomodoro)",
+      "L_PAUSE_TRACKING_DURING_BREAK": "Jeda pelacakan tugas selama istirahat",
       "L_SKIP_PREPARATION_SCREEN": "Lewati layar persiapan (peregangan, dll.)",
+      "L_START_IN_BACKGROUND": "Mulai sesi fokus hanya dengan banner (tanpa overlay)",
+      "L_SYNC_SESSION_WITH_TRACKING": "Sinkronkan sesi fokus dengan pelacakan waktu",
       "TITLE": "Mode Fokus"
     },
     "IDLE": {
@@ -1844,6 +1892,7 @@
       "NL": "Belanda",
       "PL": "Polandia",
       "PT": "Português",
+      "PT_BR": "Portugis (Brasil)",
       "RU": "Rusia",
       "SK": "Slowakia",
       "TIME_LOCALE": "Format waktu lokal",
@@ -1874,6 +1923,7 @@
       "DARK_MODE_LIGHT": "Terang",
       "DARK_MODE_SYSTEM": "Sistem",
       "DEFAULT_PROJECT": "Proyek default untuk digunakan untuk tugas jika tidak ada yang ditentukan",
+      "DEFAULT_START_PAGE": "Halaman mulai default",
       "FIRST_DAY_OF_WEEK": "Hari pertama dalam seminggu",
       "HELP": "<p><strong>Tidak melihat Pemberitahuan Desktop?</strong> Untuk windows, Anda mungkin ingin memeriksa Sistem > Pemberitahuan & tindakan dan memeriksa apakah pemberitahuan yang diperlukan telah diaktifkan.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Tambahkan tag hari ini secara otomatis untuk mengerjakan tugas",
@@ -1883,8 +1933,6 @@
       "IS_DARK_MODE": "Mode Gelap",
       "IS_DISABLE_ANIMATIONS": "Nonaktifkan semua animasi",
       "IS_DISABLE_CELEBRATION": "Nonaktifkan perayaan di ringkasan harian",
-      "USER_PROFILES": "Aktifkan profil pengguna (Beta)",
-      "USER_PROFILES_HINT": "Memungkinkan Anda membuat dan beralih antara profil pengguna yang berbeda, masing-masing dengan pengaturan, tugas, dan konfigurasi sinkronisasi terpisah. Tombol manajemen profil akan muncul di sudut kanan atas saat diaktifkan. Catatan: Menonaktifkan fitur ini akan menyembunyikan UI tetapi mempertahankan data profil Anda (fitur Beta, tidak ada jaminan. Pastikan untuk memiliki cadangan).",
       "IS_HIDE_NAV": "Sembunyikan navigasi hingga header utama diarahkan (khusus desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalkan ke baki (hanya desktop)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Aktifkan jendela indikator overlay (desktop linux/gnome)",
@@ -1892,6 +1940,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Tampilkan hitung mundur saat ini di tray / menu status (desktop mac saja)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Tampilkan tugas saat ini di menu baki / status (khusus desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Matikan penguraian penurunan harga untuk catatan tugas",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Gunakan bilah judul khusus (hanya Windows\\/Linux)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Memerlukan restart untuk berlaku",
       "IS_USE_MINIMAL_SIDE_NAV": "Gunakan bilah navigasi minimal (hanya menampilkan ikon)",
       "START_OF_NEXT_DAY": "Waktu mulai hari berikutnya",
       "START_OF_NEXT_DAY_HINT": "dari kapan (dalam jam) Anda ingin menghitung hari berikutnya telah dimulai. defaultnya adalah tengah malam yaitu 0.",
@@ -1899,7 +1949,9 @@
       "THEME": "Tema",
       "THEME_EXPERIMENTAL": "Tema (eksperimental)",
       "THEME_SELECT_LABEL": "Pilih Tema",
-      "TITLE": "Pengaturan Lain-lain"
+      "TITLE": "Pengaturan Lain-lain",
+      "USER_PROFILES": "Aktifkan profil pengguna (Beta)",
+      "USER_PROFILES_HINT": "Memungkinkan Anda membuat dan beralih antara profil pengguna yang berbeda, masing-masing dengan pengaturan, tugas, dan konfigurasi sinkronisasi terpisah. Tombol manajemen profil akan muncul di sudut kanan atas saat diaktifkan. Catatan: Menonaktifkan fitur ini akan menyembunyikan UI tetapi mempertahankan data profil Anda (fitur Beta, tidak ada jaminan. Pastikan untuk memiliki cadangan)."
     },
     "POMODORO": {
       "BREAK_DURATION": "Durasi istirahat pendek",
@@ -1910,6 +1962,7 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Tampilkan spanduk X sebelum pengingat yang sebenarnya",
       "DEFAULT_TASK_REMIND_OPTION": "Opsi pengingat default dipilih saat membuat tugas",
+      "DISABLE_REMINDERS": "Nonaktifkan semua pengingat",
       "IS_COUNTDOWN_BANNER_ENABLED": "Tampilkan spanduk hitung mundur sebelum pengingat jatuh tempo",
       "TITLE": "Pengingat"
     },
@@ -1972,6 +2025,9 @@
       "TITLE": "Pelacakan waktu"
     }
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (salin)"
+  },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
       "A_DAY": "dalam sehari",
@@ -2002,6 +2058,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Disalin ke papan klip",
+    "DUPLICATE_PROJECT_ERROR": "Proyek tidak dapat diduplikasi",
+    "DUPLICATE_PROJECT_SUCCESS": "Proyek berhasil diduplikasi",
     "ERR_COMPRESSION": "Kesalahan untuk antarmuka kompresi",
     "FILE_DOWNLOADED": "{{fileName}} diunduh",
     "FILE_DOWNLOADED_BTN": "Buka folder",
@@ -2039,6 +2097,8 @@
     "CREATE_TAG": "Buat Tag",
     "DELETE_PROJECT": "Menghapus Proyek",
     "DELETE_TAG": "Hapus Tag",
+    "DONATE": "Dukung kami",
+    "DUPLICATE_PROJECT": "Duplikat",
     "ENTER_FOCUS_MODE": "Masukkan Mode Fokus",
     "GO_TO_TASK_LIST": "Buka daftar tugas",
     "HELP": "Bantuan",
@@ -2055,6 +2115,7 @@
     "METRICS": "Metrik",
     "NO_PROJECT_INFO": "Tidak ada proyek yang tersedia. Anda dapat membuat proyek baru dengan mengklik tombol \"Buat Proyek\".",
     "NO_TAG_INFO": "Saat ini tidak ada tag. Anda dapat menambahkan tag dengan memasukkan `#namaTag Anda` saat menambahkan atau mengedit tugas.",
+    "NO_TASKS_TO_TRACK": "Tambahkan tugas terlebih dahulu untuk mulai melacak waktu",
     "NOTES": "Catatan",
     "NOTES_PANEL_INFO": "Catatan hanya dapat ditampilkan dari garis waktu dan tampilan daftar tugas biasa.",
     "PLANNER": "Perencana",
@@ -2101,6 +2162,7 @@
       "MSG": "Keluar dari aplikasi?",
       "OK": "Keluar"
     },
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "Anda dapat menggunakan ruang ini untuk menuliskan ritual akhir hari Anda sendiri, yang ingin Anda ingatkan.",
     "ESTIMATE_TOTAL": "Total perkiraan:",
     "EVALUATE_DAY": "Mengevaluasi",
     "EXPORT_TASK_LIST": "Ekspor Daftar Tugas",

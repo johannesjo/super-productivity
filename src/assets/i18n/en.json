@@ -34,7 +34,7 @@
   },
   "CONFIRM": {
     "AUTO_FIX": "Your data seems to be damaged (\"{{validityError}}\"). Do you want to try to automatically fix it? This might result in partial data loss.",
-    "RELOAD_AFTER_IDB_ERROR": "Cannot access database :( Possible causes are an app update to the app in the background or low disk space. If you installed the app on linux as snap you also want to enable refresh awareness 'snap set core experimental.refresh-app-awareness=true' until they fix this issue on their side. Press OK to reload the app (might require manual restarting the app on some platforms).",
+    "RELOAD_AFTER_IDB_ERROR": "Database Error - App Will Restart\n\nSuper Productivity cannot save data. This is usually caused by:\n• Low disk space (most common)\n• App update in background\n• Linux Snap users: run 'snap set core experimental.refresh-app-awareness=true'\n\nYour recent changes may not have been saved. Please free up disk space if low. The app will restart after you close this dialog.",
     "RESTORE_FILE_BACKUP": "There seems to be NO DATA, but there are backups available at \"{{dir}}\". Do you want to restore the latest backup from {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "There seems to be NO DATA, but there is a backup available. Do you want to load it?",
     "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?"
@@ -161,6 +161,7 @@
     "CALENDARS": {
       "BANNER": {
         "ADD_AS_TASK": "Add as Task",
+        "FOCUS_TASK": "",
         "SHOW_TASK": "Show Task",
         "TXT": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other events are due)",
@@ -233,6 +234,7 @@
       "COMPLETE_FOCUS_SESSION": "Complete focus session",
       "COMPLETE_SESSION": "Complete Session",
       "CONGRATS": "Congrats for completing this session!",
+      "CONTINUE_FOCUS_SESSION": "",
       "CONTINUE_SESSION": "Continue Session",
       "CONTINUE_TO_NEXT_SESSION": "Continue to next Session",
       "COUNTDOWN": "Countdown",
@@ -273,6 +275,7 @@
       "SHORT_BREAK_TITLE": "Short Break - Cycle {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
       "SKIP_BREAK": "Skip Break",
+      "START_BREAK": "Start Break",
       "START_FOCUS_SESSION": "Start focus session",
       "START_NEXT_FOCUS_SESSION": "Start next Focus Session",
       "SWITCH_TASK": "Switch task",
@@ -630,11 +633,25 @@
         "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
         "DAILY_STATE": "Daily State",
         "DAILY_STATE_TOOLTIP": "Quadrant system based on both scores (≥50 is high): Deep Flow (high/high), Overdrive (high/low), Recovery (low/high), Drift (low/low)",
+        "DISABLE_REPEAT_EVERY_DAY": "",
+        "ENABLE_REPEAT_EVERY_DAY": "",
         "ENERGY_LEVEL": "How's your energy?",
         "ENERGY_LEVEL_HINT": "😫 Exhausted – 😐 OK – 😊 Good",
         "FOCUS_WORK_TIME": "Focussed work time",
+        "HELP_H1": "",
+        "HELP_LINK_TXT": "",
+        "HELP_P1": "",
+        "HELP_P2": "",
         "IMPACT_OF_WORK": "How do you rate the impact of your work today?",
         "IMPACT_OF_WORK_HINT": "1: No meaningful progress – 4: Significant impact",
+        "IMPROVEMENTS": "",
+        "IMPROVEMENTS_TOMORROW": "",
+        "MOOD": "",
+        "MOOD_HINT": "",
+        "NOTES": "",
+        "OBSTRUCTIONS": "",
+        "PRODUCTIVITY": "",
+        "PRODUCTIVITY_HINT": "",
         "PRODUCTIVITY_SCORE": "Productivity Score",
         "PRODUCTIVITY_SCORE_TOOLTIP": "65% Impact (1-4 scale) • 30% Focus toward 4h target • 5% total work (capped at 10h)",
         "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7-Day Productivity Breakdown",
@@ -853,10 +870,10 @@
     },
     "PROJECT": {
       "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
-        "TITLE": "Duplicate Project?",
+        "CANCEL": "Cancel",
         "MSG": "This project is quite large and might take a while to duplicate. Do you want to proceed?",
         "OK": "Duplicate Anyway",
-        "CANCEL": "Cancel"
+        "TITLE": "Duplicate Project?"
       },
       "D_CREATE": {
         "CREATE": "Create Project",
@@ -973,6 +990,40 @@
       },
       "S_ACTIVE_TASK_DUE": "The task you are currently working on is now due!<br/> ({{title}})",
       "S_REMINDER_ERR": "Error for reminder interface"
+    },
+    "SAFETY_BACKUP": {
+      "BACKUP_NOT_FOUND": "",
+      "BTN_CLEAR_ALL": "",
+      "BTN_CREATE_MANUAL": "",
+      "BTN_DELETE": "",
+      "BTN_REFRESH": "",
+      "BTN_RESTORE": "",
+      "CLEAR_FAILED": "",
+      "CLEARED_SUCCESS": "",
+      "CREATE_FAILED": "",
+      "CREATED_SUCCESS": "",
+      "DELETE_FAILED": "",
+      "DELETED_SUCCESS": "",
+      "DESCRIPTION": "",
+      "INVALID_ID_ERROR": "",
+      "LAST_CHANGE_PREFIX": "",
+      "LOADING": "",
+      "NO_BACKUPS": "",
+      "REASON_BEFORE_UPDATE": "",
+      "REASON_MANUAL": "",
+      "RESTORE_CONFIRM_MSG": "",
+      "RESTORE_CONFIRM_TITLE": "",
+      "RESTORE_FAILED": "",
+      "RESTORED_SUCCESS": "",
+      "SLOT_BEFORE_TODAY": "",
+      "SLOT_RECENT": "",
+      "SLOT_TODAY": "",
+      "TITLE": "",
+      "TOOLTIP_CLEAR_ALL": "",
+      "TOOLTIP_CREATE_MANUAL": "",
+      "TOOLTIP_DELETE": "",
+      "TOOLTIP_REFRESH": "",
+      "TOOLTIP_RESTORE": ""
     },
     "SCHEDULE": {
       "CONTINUED": "continued",
@@ -1207,12 +1258,12 @@
         "DATA_REPAIRED": "Data automatically repaired ({{count}} issues fixed)",
         "ERROR_CORS": "WebDAV Sync Error: Network request failed.\n\nThis might be a CORS issue. Please ensure:\n• Your WebDAV server allows Cross-Origin requests\n• The server URL is correct and accessible\n• You have a working internet connection",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Remote Data is currently being written",
-        "ERROR_PERMISSION": "File access denied. Please check your filesystem permissions.",
-        "ERROR_PERMISSION_FLATPAK": "File access denied. Grant filesystem permission via Flatseal or use a path inside ~/.var/app/",
-        "ERROR_PERMISSION_SNAP": "File access denied. Run 'snap connect super-productivity:home' or use a path inside ~/snap/super-productivity/common/",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
         "ERROR_NO_REV": "No valid rev for remote file",
+        "ERROR_PERMISSION": "File access denied. Please check your filesystem permissions.",
+        "ERROR_PERMISSION_FLATPAK": "File access denied. Grant filesystem permission via Flatseal or use a path inside ~/.var/app/",
+        "ERROR_PERMISSION_SNAP": "File access denied. Run 'snap connect super-productivity:home' or use a path inside ~/snap/super-productivity/common/",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Error while syncing. Unable to read remote data. Maybe you enabled encryption and your local password does not match the one used to encrypt the remote data?",
         "HYDRATION_FAILED": "Failed to load data. Please reload the app.",
         "INTEGRITY_CHECK_FAILED": "Data integrity issue detected. Auto-repair attempted. If you experience issues, please reload the app.",
@@ -1627,6 +1678,7 @@
         "FILTER_BY": "Filter By",
         "FILTER_DEFAULT": "No Filter",
         "FILTER_ESTIMATED_TIME": "Estimated Time",
+        "FILTER_NOT_SPECIFIED": "Not specified",
         "FILTER_PROJECT": "Project",
         "FILTER_SCHEDULED_DATE": "Scheduled Date",
         "FILTER_TAG": "Tag",
@@ -1643,6 +1695,7 @@
         "SCHEDULED_THIS_WEEK": "This Week",
         "SCHEDULED_TODAY": "Today",
         "SCHEDULED_TOMORROW": "Tomorrow",
+        "SORT_BY": "",
         "SORT_CREATION_DATE": "Creation Date",
         "SORT_DEFAULT": "Default",
         "SORT_NAME": "Name",
@@ -1653,7 +1706,6 @@
         "TIME_1HOUR": "> 1 Hour",
         "TIME_2HOUR": "> 2 Hours",
         "TIME_30MIN": "> 30 Minutes",
-        "FILTER_NOT_SPECIFIED": "Not specified",
         "TIME_SPENT": "Time Spent",
         "TITLE": "Customize Task View"
       }
@@ -1804,6 +1856,7 @@
     "DISMISS": "Dismiss",
     "DONT_SHOW_AGAIN": "Don't show again",
     "DO_IT": "Do it!",
+    "DUPLICATE": "Duplicate",
     "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours and 23 minutes",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
@@ -1874,11 +1927,12 @@
     "FOCUS_MODE": {
       "HELP": "Focus Mode opens up a distraction free screen to help you focus on your current task.",
       "L_ALWAYS_OPEN_FOCUS_MODE": "Always open focus mode, when tracking",
-      "L_SYNC_SESSION_WITH_TRACKING": "Sync focus session with time tracking",
       "L_IS_PLAY_TICK": "Play ticking sound during focus sessions",
+      "L_MANUAL_BREAK_START": "Manually start breaks (Pomodoro)",
       "L_PAUSE_TRACKING_DURING_BREAK": "Pause task tracking during breaks",
       "L_SKIP_PREPARATION_SCREEN": "Skip preparation screen (rocket animation)",
       "L_START_IN_BACKGROUND": "Start focus sessions with banner only (no overlay)",
+      "L_SYNC_SESSION_WITH_TRACKING": "Sync focus session with time tracking",
       "TITLE": "Focus Mode"
     },
     "IDLE": {
@@ -1972,8 +2026,8 @@
       "SK": "Slovak",
       "TIME_LOCALE": "Datetime format locale",
       "TIME_LOCALE_AUTO": "System default",
-      "TIME_LOCALE_DESCRIPTION": "NOTE: now this options can not change time input format (12/24 hour) because it is controlled by your OS",
       "TIME_LOCALE_DE_DE": "German: 24-hour, DD.MM.YYYY",
+      "TIME_LOCALE_DESCRIPTION": "NOTE: now this options can not change time input format (12/24 hour) because it is controlled by your OS",
       "TIME_LOCALE_EN_GB": "English (UK): 24-hour, DD/MM/YYYY",
       "TIME_LOCALE_EN_US": "English (US): 12-hour AM/PM, MM/DD/YYYY",
       "TIME_LOCALE_ES_ES": "Spanish: 24-hour, DD/MM/YYYY",
@@ -2017,13 +2071,29 @@
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Use custom title bar (Windows/Linux only)",
       "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Requires restart to take effect",
+      "IS_USE_MINIMAL_SIDE_NAV": "",
       "START_OF_NEXT_DAY": "Start time of the next day",
       "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "TASK_NOTES_TPL": "Task description template",
       "THEME": "Theme",
       "THEME_EXPERIMENTAL": "Theme (experimental)",
       "THEME_SELECT_LABEL": "Select Theme",
-      "TITLE": "Misc Settings"
+      "TITLE": "Misc Settings",
+      "USER_PROFILES": "",
+      "USER_PROFILES_HINT": ""
+    },
+    "PAST": {
+      "A_DAY": "",
+      "A_MINUTE": "",
+      "A_MONTH": "",
+      "A_YEAR": "",
+      "AN_HOUR": "",
+      "DAYS": "",
+      "FEW_SECONDS": "",
+      "HOURS": "",
+      "MINUTES": "",
+      "MONTHS": "",
+      "YEARS": ""
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",
@@ -2034,9 +2104,9 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
       "DEFAULT_TASK_REMIND_OPTION": "Default remind option selected when creating tasks",
+      "DISABLE_REMINDERS": "Disable all reminders",
       "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
-      "TITLE": "Reminders",
-      "DISABLE_REMINDERS": "Disable all reminders"
+      "TITLE": "Reminders"
     },
     "SCHEDULE": {
       "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
@@ -2097,6 +2167,9 @@
       "TITLE": "Time Tracking"
     }
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copy)"
+  },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
       "AN_HOUR": "in an hour",
@@ -2145,9 +2218,6 @@
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
     "UNPLANNED_TODAY_TASKS": "Unplanned all tasks from Today"
   },
-  "GLOBAL": {
-    "COPY_SUFFIX": " (copy)"
-  },
   "GPB": {
     "ASSETS": "Loading assets...",
     "DBX_DOWNLOAD": "Dropbox: Download file...",
@@ -2167,11 +2237,11 @@
     "BOARDS": "Boards",
     "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "CREATE_PROJECT": "Create Project",
-    "DUPLICATE_PROJECT": "Duplicate",
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",
     "DONATE": "Support us",
+    "DUPLICATE_PROJECT": "Duplicate",
     "ENTER_FOCUS_MODE": "Enter Focus Mode",
     "GO_TO_TASK_LIST": "Go to task list",
     "HELP": "Help",
@@ -2186,6 +2256,7 @@
       "SYNC": "Howto: Configure Sync"
     },
     "METRICS": "Metrics",
+    "NO_TASKS_TO_TRACK": "Add a task first to start tracking time",
     "NOTES": "Notes",
     "NOTES_PANEL_INFO": "Notes can only be shown from the schedule and the regular task list views.",
     "NO_PROJECT_INFO": "No projects available. You can create a new project by clicking the \"Create Project\" button.",
@@ -2230,6 +2301,7 @@
       "PLURAL": "{{count}} done parent tasks have been archived",
       "SINGULAR": "{{count}} done parent task has been archived"
     },
+    "BACK": "",
     "BREAK_LABEL": "Breaks (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",
     "CLEAR_ALL_CONTINUE": "Clear all done and continue",

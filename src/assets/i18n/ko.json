@@ -1302,6 +1302,7 @@
         "FILTER_BY": "필터링 기준",
         "FILTER_DEFAULT": "필터 없음",
         "FILTER_ESTIMATED_TIME": "예상 시간",
+        "FILTER_NOT_SPECIFIED": "지정되지 않음",
         "FILTER_PROJECT": "프로젝트",
         "FILTER_SCHEDULED_DATE": "예정일",
         "FILTER_TAG": "태그",
@@ -1327,7 +1328,6 @@
         "TIME_2HOUR": "> 2 시간",
         "TIME_10MIN": "> 10분",
         "TIME_30MIN": "> 30분",
-        "FILTER_NOT_SPECIFIED": "지정되지 않음",
         "TIME_SPENT": "소요 시간",
         "TITLE": "작업 보기 사용자 지정"
       }
@@ -1617,8 +1617,6 @@
       "IS_DARK_MODE": "다크 모드",
       "IS_DISABLE_ANIMATIONS": "모든 애니메이션 비활성화",
       "IS_DISABLE_CELEBRATION": "일일 요약에서 축하 비활성화",
-      "USER_PROFILES": "사용자 프로필 활성화 (베타)",
-      "USER_PROFILES_HINT": "각각 별도의 설정, 작업 및 동기화 구성을 가진 다른 사용자 프로필을 생성하고 전환할 수 있습니다. 활성화되면 프로필 관리 버튼이 오른쪽 상단에 나타납니다. 참고: 이 기능을 비활성화하면 UI가 숨겨지지만 프로필 데이터는 유지됩니다 (베타 기능, 보증 없음. 백업이 있는지 확인하십시오).",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑만 해당)",
       "IS_SHOW_TIP_LONGER": "앱 시작 시 생산성 팁 표시좀 더 오래",
@@ -1629,7 +1627,9 @@
       "START_OF_NEXT_DAY": "다음 날 시작 시간",
       "START_OF_NEXT_DAY_HINT": "다음 날을 계산하려는 시점(시간 단위)부터 시작됩니다. 기본값은 0인 자정입니다.",
       "TASK_NOTES_TPL": "작업 설명 템플릿",
-      "TITLE": "기타 설정"
+      "TITLE": "기타 설정",
+      "USER_PROFILES": "사용자 프로필 활성화 (베타)",
+      "USER_PROFILES_HINT": "각각 별도의 설정, 작업 및 동기화 구성을 가진 다른 사용자 프로필을 생성하고 전환할 수 있습니다. 활성화되면 프로필 관리 버튼이 오른쪽 상단에 나타납니다. 참고: 이 기능을 비활성화하면 UI가 숨겨지지만 프로필 데이터는 유지됩니다 (베타 기능, 보증 없음. 백업이 있는지 확인하십시오)."
     },
     "POMODORO": {
       "BREAK_DURATION": "짧은 휴식 시간",

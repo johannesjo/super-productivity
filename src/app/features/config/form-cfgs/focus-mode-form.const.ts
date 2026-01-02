@@ -41,5 +41,12 @@ export const FOCUS_MODE_FORM_CFG: ConfigFormSection<FocusModeConfig> = {
         label: T.GCF.FOCUS_MODE.L_PAUSE_TRACKING_DURING_BREAK,
       },
     },
+    {
+      key: 'isManualBreakStart',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.FOCUS_MODE.L_MANUAL_BREAK_START,
+      },
+    },
   ],
 };

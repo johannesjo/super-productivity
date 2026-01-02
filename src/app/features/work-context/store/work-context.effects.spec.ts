@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkContextEffects } from './work-context.effects';
 import { setActiveWorkContext } from './work-context.actions';
@@ -8,12 +8,14 @@ import { setSelectedTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
-import { Router, NavigationEnd } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { WorkContextType } from '../work-context.model';
 import { WorkContextService } from '../work-context.service';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { selectActiveContextTypeAndId } from './work-context.selectors';
 
 describe('WorkContextEffects', () => {
   let effects: WorkContextEffects;
@@ -58,7 +60,17 @@ describe('WorkContextEffects', () => {
       providers: [
         WorkContextEffects,
         provideMockActions(() => actions$),
-        provideMockStore(),
+        provideMockStore({
+          selectors: [
+            {
+              selector: selectActiveContextTypeAndId,
+              value: {
+                activeId: 'project-1',
+                activeType: WorkContextType.PROJECT,
+              },
+            },
+          ],
+        }),
         { provide: TaskService, useValue: taskServiceMock },
         { provide: BannerService, useValue: bannerServiceSpy },
         { provide: Router, useValue: routerMock },
@@ -235,6 +247,132 @@ describe('WorkContextEffects', () => {
         expect(emitted).toBe(false);
         done();
       }, 50);
+    });
+  });
+
+  describe('validateContextAfterDataLoad$', () => {
+    const createMockAppDataComplete = (
+      projectEntities: Record<string, unknown> = {},
+    ): Record<string, unknown> => ({
+      project: {
+        ids: Object.keys(projectEntities),
+        entities: projectEntities,
+      },
+      task: { ids: [], entities: {} },
+      tag: { ids: [], entities: {} },
+      globalConfig: {},
+    });
+
+    it('should redirect to TODAY when active project no longer exists in new data', (done) => {
+      store.overrideSelector(selectActiveContextTypeAndId, {
+        activeId: 'project-123',
+        activeType: WorkContextType.PROJECT,
+      });
+
+      const appDataComplete = createMockAppDataComplete({
+        otherProject: { id: 'otherProject', title: 'Other Project' },
+      });
+
+      effects.validateContextAfterDataLoad$.subscribe((action) => {
+        expect(action).toEqual(
+          setActiveWorkContext({
+            activeId: TODAY_TAG.id,
+            activeType: WorkContextType.TAG,
+          }),
+        );
+        done();
+      });
+
+      actions$.next(loadAllData({ appDataComplete: appDataComplete as any }));
+    });
+
+    it('should not dispatch action when active project still exists', (done) => {
+      store.overrideSelector(selectActiveContextTypeAndId, {
+        activeId: 'project-123',
+        activeType: WorkContextType.PROJECT,
+      });
+
+      const appDataComplete = createMockAppDataComplete({
+        /* eslint-disable-next-line @typescript-eslint/naming-convention */
+        'project-123': { id: 'project-123', title: 'Test Project' },
+      });
+
+      let actionDispatched = false;
+      effects.validateContextAfterDataLoad$.subscribe(() => {
+        actionDispatched = true;
+      });
+
+      actions$.next(loadAllData({ appDataComplete: appDataComplete as any }));
+
+      // Give some time for potential emission
+      setTimeout(() => {
+        expect(actionDispatched).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should not dispatch action when active context is a tag', (done) => {
+      store.overrideSelector(selectActiveContextTypeAndId, {
+        activeId: TODAY_TAG.id,
+        activeType: WorkContextType.TAG,
+      });
+
+      const appDataComplete = createMockAppDataComplete({});
+
+      let actionDispatched = false;
+      effects.validateContextAfterDataLoad$.subscribe(() => {
+        actionDispatched = true;
+      });
+
+      actions$.next(loadAllData({ appDataComplete: appDataComplete as any }));
+
+      // Give some time for potential emission
+      setTimeout(() => {
+        expect(actionDispatched).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should redirect to TODAY when project data is undefined', (done) => {
+      store.overrideSelector(selectActiveContextTypeAndId, {
+        activeId: 'project-123',
+        activeType: WorkContextType.PROJECT,
+      });
+
+      const appDataComplete = { project: undefined } as any;
+
+      effects.validateContextAfterDataLoad$.subscribe((action) => {
+        expect(action).toEqual(
+          setActiveWorkContext({
+            activeId: TODAY_TAG.id,
+            activeType: WorkContextType.TAG,
+          }),
+        );
+        done();
+      });
+
+      actions$.next(loadAllData({ appDataComplete }));
+    });
+
+    it('should redirect to TODAY when project entities is undefined', (done) => {
+      store.overrideSelector(selectActiveContextTypeAndId, {
+        activeId: 'project-123',
+        activeType: WorkContextType.PROJECT,
+      });
+
+      const appDataComplete = { project: { ids: [], entities: undefined } } as any;
+
+      effects.validateContextAfterDataLoad$.subscribe((action) => {
+        expect(action).toEqual(
+          setActiveWorkContext({
+            activeId: TODAY_TAG.id,
+            activeType: WorkContextType.TAG,
+          }),
+        );
+        done();
+      });
+
+      actions$.next(loadAllData({ appDataComplete }));
     });
   });
 });

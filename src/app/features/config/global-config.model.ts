@@ -199,6 +199,7 @@ export type FocusModeConfig = Readonly<{
   isPauseTrackingDuringBreak?: boolean;
   isSyncSessionWithTracking?: boolean;
   isStartInBackground?: boolean;
+  isManualBreakStart?: boolean;
 }>;
 
 export type DailySummaryNote = Readonly<{
