@@ -15,6 +15,7 @@ const messageArea = document.getElementById('message-area');
 const copyBtn = document.getElementById('copy-btn');
 const refreshBtn = document.getElementById('refresh-btn');
 const logoutBtn = document.getElementById('logout-btn');
+const deleteAccountBtn = document.getElementById('delete-account-btn');
 const tabLoginBtn = document.getElementById('tab-login');
 const tabRegisterBtn = document.getElementById('tab-register');
 const forgotPasswordForm = document.getElementById('forgot-password-form');
@@ -38,6 +39,9 @@ refreshBtn.addEventListener('click', refreshToken);
 
 // Logout button
 logoutBtn.addEventListener('click', logout);
+
+// Delete account button
+deleteAccountBtn.addEventListener('click', deleteAccount);
 
 // Show forgot password form
 showForgotPasswordBtn.addEventListener('click', () => {
@@ -258,6 +262,54 @@ async function refreshToken() {
       refreshBtn.innerText = originalText;
       refreshBtn.classList.remove('success');
     }, 2000);
+  } catch (err) {
+    showMessage(err.message, 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function deleteAccount() {
+  if (!state.token) return;
+
+  // Show confirmation dialog
+  const confirmed = confirm(
+    'Are you sure you want to DELETE your account?\n\n' +
+      'This will PERMANENTLY delete your account and ALL synced data. ' +
+      'This action cannot be undone.\n\n' +
+      'Your local data in Super Productivity will NOT be affected.',
+  );
+
+  if (!confirmed) return;
+
+  setLoading(true);
+  hideMessage();
+
+  try {
+    const res = await fetch(`${API_BASE}/account`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${state.token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to delete account');
+    }
+
+    // Show success and return to login
+    showMessage('Account deleted successfully.', 'success');
+
+    // Clear state and return to auth forms
+    state.token = null;
+    tokenArea.value = '';
+    tokenDisplay.classList.add('hidden');
+    authForms.classList.remove('hidden');
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
   } catch (err) {
     showMessage(err.message, 'error');
   } finally {

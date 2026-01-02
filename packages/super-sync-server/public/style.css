@@ -177,6 +177,14 @@ small {
   text-decoration: underline;
 }
 
+.btn.danger {
+  color: var(--error);
+}
+
+.btn.danger:hover {
+  color: #c62828;
+}
+
 /* Token Display */
 .success-icon {
   font-size: 3rem;

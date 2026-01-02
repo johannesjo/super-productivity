@@ -10,6 +10,7 @@ import {
 } from './auth';
 import { authenticate, getAuthUser } from './middleware';
 import { Logger } from './logger';
+import { prisma } from './db';
 
 // Zod Schemas
 const RegisterSchema = z.object({
@@ -266,6 +267,41 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
         Logger.error(`Password reset error: ${errMsg}`);
         return reply.status(400).send({
           error: getSafeErrorMessage(err, 'Password reset failed. Please try again.'),
+        });
+      }
+    },
+  );
+
+  // Delete user account (requires authentication)
+  // This permanently deletes the user and all associated data (operations, sync state, devices)
+  fastify.delete(
+    '/account',
+    {
+      preHandler: authenticate,
+      config: {
+        rateLimit: {
+          max: 3,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        const userId = getAuthUser(req).userId;
+
+        Logger.info(`[user:${userId}] DELETE ACCOUNT requested`);
+
+        // Cascade delete handles: operations, syncState, devices (via Prisma schema)
+        await prisma.user.delete({ where: { id: userId } });
+
+        Logger.audit({ event: 'USER_ACCOUNT_DELETED', userId });
+
+        return reply.send({ success: true });
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
+        Logger.error(`Delete account error: ${errMsg}`);
+        return reply.status(500).send({
+          error: 'Failed to delete account. Please try again.',
         });
       }
     },
