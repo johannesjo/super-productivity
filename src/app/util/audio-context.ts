@@ -17,6 +17,7 @@ export const getAudioContext = (): AudioContext => {
   }
 
   // Resume if suspended (can happen due to browser autoplay policies)
+  // Intentionally fire-and-forget - audio playback is async anyway
   if (audioContext && audioContext.state === 'suspended') {
     audioContext.resume();
   }

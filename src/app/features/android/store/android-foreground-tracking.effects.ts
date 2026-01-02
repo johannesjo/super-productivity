@@ -254,14 +254,16 @@ export class AndroidForegroundTrackingEffects {
       .select(selectTaskFeatureState)
       .pipe(first())
       .subscribe((taskState) => {
-        this._pfapiService.m.task.save(
-          {
-            ...taskState,
-            selectedTaskId: environment.production ? null : taskState.selectedTaskId,
-            currentTaskId: null,
-          },
-          { isUpdateRevAndLastUpdate: true },
-        );
+        this._pfapiService.m.task
+          .save(
+            {
+              ...taskState,
+              selectedTaskId: environment.production ? null : taskState.selectedTaskId,
+              currentTaskId: null,
+            },
+            { isUpdateRevAndLastUpdate: true },
+          )
+          .catch((e) => DroidLog.err('Failed to save task state immediately', e));
       });
 
     // Save time tracking state
@@ -269,9 +271,13 @@ export class AndroidForegroundTrackingEffects {
       .select(selectTimeTrackingState)
       .pipe(first())
       .subscribe((ttState) => {
-        this._pfapiService.m.timeTracking.save(ttState, {
-          isUpdateRevAndLastUpdate: true,
-        });
+        this._pfapiService.m.timeTracking
+          .save(ttState, {
+            isUpdateRevAndLastUpdate: true,
+          })
+          .catch((e) =>
+            DroidLog.err('Failed to save time tracking state immediately', e),
+          );
       });
 
     DroidLog.log('Forced immediate save of time tracking data');

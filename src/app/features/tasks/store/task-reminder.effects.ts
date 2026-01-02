@@ -138,8 +138,12 @@ export class TaskReminderEffects {
           // via reminders$ observable can fail when the app is backgrounded.
           if (IS_ANDROID_WEB_VIEW) {
             deletedTaskIds.forEach((id) => {
-              const notificationId = generateNotificationId(id);
-              androidInterface.cancelNativeReminder?.(notificationId);
+              try {
+                const notificationId = generateNotificationId(id);
+                androidInterface.cancelNativeReminder?.(notificationId);
+              } catch (e) {
+                console.error('Failed to cancel native reminder:', e);
+              }
             });
           }
 
@@ -164,8 +168,12 @@ export class TaskReminderEffects {
           flatTasks.forEach((t) => {
             // On Android, immediately cancel native reminder
             if (IS_ANDROID_WEB_VIEW) {
-              const notificationId = generateNotificationId(t.id);
-              androidInterface.cancelNativeReminder?.(notificationId);
+              try {
+                const notificationId = generateNotificationId(t.id);
+                androidInterface.cancelNativeReminder?.(notificationId);
+              } catch (e) {
+                console.error('Failed to cancel native reminder:', e);
+              }
             }
 
             if (t.reminderId) {
@@ -184,8 +192,12 @@ export class TaskReminderEffects {
           // On Android, immediately cancel native reminders
           if (IS_ANDROID_WEB_VIEW) {
             taskIds.forEach((id) => {
-              const notificationId = generateNotificationId(id);
-              androidInterface.cancelNativeReminder?.(notificationId);
+              try {
+                const notificationId = generateNotificationId(id);
+                androidInterface.cancelNativeReminder?.(notificationId);
+              } catch (e) {
+                console.error('Failed to cancel native reminder:', e);
+              }
             });
           }
 

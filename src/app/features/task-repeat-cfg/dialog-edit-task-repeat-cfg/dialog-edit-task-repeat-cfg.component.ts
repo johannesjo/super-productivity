@@ -366,7 +366,8 @@ export class DialogEditTaskRepeatCfgComponent {
 
     if (processedCfg.quickSetting === 'WEEKLY_CURRENT_WEEKDAY') {
       if (!processedCfg.startDate) {
-        throw new Error('Invalid repeat cfg');
+        // Gracefully fall back to CUSTOM when data is incomplete
+        return { ...processedCfg, quickSetting: 'CUSTOM' } as T;
       }
       if (new Date(processedCfg.startDate).getDay() !== new Date().getDay()) {
         processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };
@@ -374,7 +375,8 @@ export class DialogEditTaskRepeatCfgComponent {
     }
     if (processedCfg.quickSetting === 'YEARLY_CURRENT_DATE') {
       if (!processedCfg.startDate) {
-        throw new Error('Invalid repeat cfg');
+        // Gracefully fall back to CUSTOM when data is incomplete
+        return { ...processedCfg, quickSetting: 'CUSTOM' } as T;
       }
       if (
         new Date(processedCfg.startDate).getDate() !== new Date().getDate() ||
@@ -385,7 +387,8 @@ export class DialogEditTaskRepeatCfgComponent {
     }
     if (processedCfg.quickSetting === 'MONTHLY_CURRENT_DATE') {
       if (!processedCfg.startDate) {
-        throw new Error('Invalid repeat cfg');
+        // Gracefully fall back to CUSTOM when data is incomplete
+        return { ...processedCfg, quickSetting: 'CUSTOM' } as T;
       }
       if (new Date(processedCfg.startDate).getDate() !== new Date().getDate()) {
         processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };

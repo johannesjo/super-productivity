@@ -72,22 +72,33 @@ export class WorkContextEffects {
 
   /**
    * Validates the active work context after data is reloaded (e.g., from sync).
-   * If the active project no longer exists in the new data, redirects to TODAY tag.
+   * If the active project or tag no longer exists in the new data, redirects to TODAY tag.
    * Fixes: https://github.com/johannesjo/super-productivity/issues/5859
    */
   validateContextAfterDataLoad$: Observable<unknown> = createEffect(() =>
     this._actions$.pipe(
       ofType(loadAllData),
       withLatestFrom(this._store$.select(selectActiveContextTypeAndId)),
-      filter(([, { activeType }]) => activeType === WorkContextType.PROJECT),
-      filter(([{ appDataComplete }, { activeId }]) => {
-        const projectExists = !!appDataComplete.project?.entities?.[activeId];
-        if (!projectExists) {
-          Log.warn(
-            `Active project ${activeId} not found after data load, redirecting to TODAY`,
-          );
+      filter(([{ appDataComplete }, { activeType, activeId }]) => {
+        if (activeType === WorkContextType.PROJECT) {
+          const exists = !!appDataComplete.project?.entities?.[activeId];
+          if (!exists) {
+            Log.warn(
+              `Active project ${activeId} not found after data load, redirecting to TODAY`,
+            );
+          }
+          return !exists;
         }
-        return !projectExists;
+        if (activeType === WorkContextType.TAG && activeId !== TODAY_TAG.id) {
+          const exists = !!appDataComplete.tag?.entities?.[activeId];
+          if (!exists) {
+            Log.warn(
+              `Active tag ${activeId} not found after data load, redirecting to TODAY`,
+            );
+          }
+          return !exists;
+        }
+        return false;
       }),
       map(() =>
         setActiveWorkContext({

@@ -209,7 +209,7 @@ export class ReminderService {
       return;
     }
 
-    const remindersWithData: Reminder[] = (await Promise.all(
+    const remindersWithData = await Promise.all(
       reminders.map(async (reminder) => {
         const relatedModel = await this._getRelatedDataForReminder(reminder);
         // Log.log('RelatedModel for Reminder', relatedModel);
@@ -232,8 +232,10 @@ export class ReminderService {
           return reminder;
         }
       }),
-    )) as Reminder[];
-    const finalReminders = remindersWithData.filter((reminder) => !!reminder);
+    );
+    const finalReminders = remindersWithData.filter(
+      (reminder): reminder is Reminder => !!reminder,
+    );
 
     Log.log(`ReminderService: ${finalReminders.length} valid reminder(s) to show`);
     if (finalReminders.length > 0) {

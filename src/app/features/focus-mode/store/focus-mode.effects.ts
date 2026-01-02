@@ -712,15 +712,18 @@ export class FocusModeEffects {
               ])
                 .pipe(take(1))
                 .subscribe(([mode, pausedTaskId]) => {
+                  const strategy = this.strategyFactory.getStrategy(mode);
                   // Skip break (with pausedTaskId to resume tracking)
                   this.store.dispatch(actions.skipBreak({ pausedTaskId }));
-                  // Then start new session
-                  const strategy = this.strategyFactory.getStrategy(mode);
-                  this.store.dispatch(
-                    actions.startFocusSession({
-                      duration: strategy.initialSessionDuration,
-                    }),
-                  );
+                  // Only manually start session if strategy doesn't auto-start
+                  // (Pomodoro auto-starts via skipBreak$ effect)
+                  if (!strategy.shouldAutoStartNextSession) {
+                    this.store.dispatch(
+                      actions.startFocusSession({
+                        duration: strategy.initialSessionDuration,
+                      }),
+                    );
+                  }
                 });
             } else {
               // Start a new session using the current mode's strategy
