@@ -299,7 +299,9 @@ export const generateAuthenticationOptions = async (
 
   storeChallenge(email, options.challenge);
 
-  Logger.info(`Generated passkey authentication options for ${email}`);
+  Logger.info(
+    `Generated passkey authentication options for ${email}: ${JSON.stringify({ rpId: options.rpId, allowCredentials: options.allowCredentials?.map((c) => ({ id: typeof c.id === 'string' ? c.id.substring(0, 20) : 'non-string', transports: c.transports })) })}`,
+  );
   return options;
 };
 
