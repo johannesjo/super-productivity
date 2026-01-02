@@ -14,17 +14,18 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { fadeInAnimation } from '../animations/fade.ani';
+import { FormsModule } from '@angular/forms';
+import { MatIconButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
 import { IS_ELECTRON } from '../../app.constants';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { isMarkdownChecklist } from '../../features/markdown-checklist/is-markdown-checklist';
-import { FormsModule } from '@angular/forms';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIcon } from '@angular/material/icon';
+import { fadeInAnimation } from '../animations/fade.ani';
+import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import * as MarkdownToolbar from './markdown-toolbar.util';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -337,5 +338,99 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         }
       }
     }
+  }
+
+  // =========================================================================
+  // Toolbar actions
+  // =========================================================================
+
+  onApplyBold(): void {
+    this._applyTransform(MarkdownToolbar.applyBold);
+  }
+
+  onApplyItalic(): void {
+    this._applyTransform(MarkdownToolbar.applyItalic);
+  }
+
+  onApplyStrikethrough(): void {
+    this._applyTransform(MarkdownToolbar.applyStrikethrough);
+  }
+
+  onApplyHeading(level: 1 | 2 | 3): void {
+    this._applyTransformWithArgs((text, start, end) =>
+      MarkdownToolbar.applyHeading(text, start, end, level),
+    );
+  }
+
+  onApplyQuote(): void {
+    this._applyTransform(MarkdownToolbar.applyQuote);
+  }
+
+  onApplyBulletList(): void {
+    this._applyTransform(MarkdownToolbar.applyBulletList);
+  }
+
+  onApplyNumberedList(): void {
+    this._applyTransform(MarkdownToolbar.applyNumberedList);
+  }
+
+  onApplyTaskList(): void {
+    this._applyTransform(MarkdownToolbar.applyTaskList);
+  }
+
+  onApplyInlineCode(): void {
+    this._applyTransform(MarkdownToolbar.applyInlineCode);
+  }
+
+  onApplyCodeBlock(): void {
+    this._applyTransform(MarkdownToolbar.applyCodeBlock);
+  }
+
+  onInsertLink(): void {
+    this._applyTransform(MarkdownToolbar.insertLink);
+  }
+
+  onInsertImage(): void {
+    this._applyTransform(MarkdownToolbar.insertImage);
+  }
+
+  onInsertTable(): void {
+    this._applyTransform(MarkdownToolbar.insertTable);
+  }
+
+  private _applyTransform(
+    transformFn: (
+      text: string,
+      start: number,
+      end: number,
+    ) => MarkdownToolbar.TextTransformResult,
+  ): void {
+    this._applyTransformWithArgs(transformFn);
+  }
+
+  private _applyTransformWithArgs(
+    transformFn: (
+      text: string,
+      start: number,
+      end: number,
+    ) => MarkdownToolbar.TextTransformResult,
+  ): void {
+    const textarea = this.textareaEl()?.nativeElement;
+    if (!textarea) {
+      return;
+    }
+
+    const { value, selectionStart, selectionEnd } = textarea;
+    const result = transformFn(value || '', selectionStart, selectionEnd);
+
+    this.modelCopy.set(result.text);
+    textarea.value = result.text;
+
+    // Restore focus and selection
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(result.selectionStart, result.selectionEnd);
+      this.resizeTextareaToFit();
+    });
   }
 }

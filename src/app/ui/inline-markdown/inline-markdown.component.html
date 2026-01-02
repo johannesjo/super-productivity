@@ -1,3 +1,155 @@
+@if (isShowEdit() || isTurnOffMarkdownParsing()) {
+  <div class="formatting-toolbar">
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyHeading(1)"
+      matTooltip="Heading 1"
+      aria-label="Heading 1"
+    >
+      <span class="heading-label">H1</span>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyHeading(2)"
+      matTooltip="Heading 2"
+      aria-label="Heading 2"
+    >
+      <span class="heading-label">H2</span>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyHeading(3)"
+      matTooltip="Heading 3"
+      aria-label="Heading 3"
+    >
+      <span class="heading-label">H3</span>
+    </button>
+
+    <span class="toolbar-divider"></span>
+
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyBold()"
+      matTooltip="Bold (Ctrl+B)"
+      aria-label="Bold"
+    >
+      <mat-icon>format_bold</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyItalic()"
+      matTooltip="Italic (Ctrl+I)"
+      aria-label="Italic"
+    >
+      <mat-icon>format_italic</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyStrikethrough()"
+      matTooltip="Strikethrough"
+      aria-label="Strikethrough"
+    >
+      <mat-icon>strikethrough_s</mat-icon>
+    </button>
+
+    <span class="toolbar-divider"></span>
+
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyBulletList()"
+      matTooltip="Bulleted list"
+      aria-label="Bulleted list"
+    >
+      <mat-icon>format_list_bulleted</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyNumberedList()"
+      matTooltip="Numbered list"
+      aria-label="Numbered list"
+    >
+      <mat-icon>format_list_numbered</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyTaskList()"
+      matTooltip="Task list"
+      aria-label="Task list"
+    >
+      <mat-icon>checklist</mat-icon>
+    </button>
+
+    <span class="toolbar-divider"></span>
+
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyQuote()"
+      matTooltip="Quote"
+      aria-label="Quote"
+    >
+      <mat-icon>format_quote</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyInlineCode()"
+      matTooltip="Inline code"
+      aria-label="Inline code"
+    >
+      <mat-icon>code</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onApplyCodeBlock()"
+      matTooltip="Code block"
+      aria-label="Code block"
+    >
+      <mat-icon>integration_instructions</mat-icon>
+    </button>
+
+    <span class="toolbar-divider"></span>
+
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onInsertLink()"
+      matTooltip="Insert link"
+      aria-label="Insert link"
+    >
+      <mat-icon>link</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onInsertImage()"
+      matTooltip="Insert image"
+      aria-label="Insert image"
+    >
+      <mat-icon>image</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      (mousedown)="$event.preventDefault()"
+      (click)="onInsertTable()"
+      matTooltip="Insert table"
+      aria-label="Insert table"
+    >
+      <mat-icon>table_chart</mat-icon>
+    </button>
+  </div>
+}
+
 <div
   #wrapperEl
   [class.isHideOverflow]="isHideOverflow()"

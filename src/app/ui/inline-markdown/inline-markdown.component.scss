@@ -9,6 +9,49 @@
   }
 }
 
+.formatting-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: var(--s) 0;
+  opacity: 0.6;
+  transition: opacity var(--transition-standard);
+
+  :host:hover &,
+  :host.isFocused & {
+    opacity: 1;
+  }
+
+  .toolbar-divider {
+    width: 1px;
+    background: currentColor;
+    opacity: 0.2;
+    margin: 4px 4px;
+  }
+
+  .heading-label {
+    font-weight: bold;
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  button {
+    min-width: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    line-height: 28px;
+
+    mat-icon,
+    .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+  }
+}
+
 .markdown-wrapper {
   display: block;
   box-sizing: border-box;
