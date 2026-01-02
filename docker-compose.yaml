@@ -24,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: packages/super-sync-server/Dockerfile.test
+    env_file: .env
     ports:
       - '1900:1900'
     cap_drop:
