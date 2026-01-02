@@ -157,3 +157,92 @@ describe('AndroidForegroundTrackingEffects - syncTimeSpentChanges logic', () => 
     });
   });
 });
+
+describe('AndroidForegroundTrackingEffects - safeNativeCall error handling', () => {
+  let logErrSpy: jasmine.Spy;
+  let snackOpenSpy: jasmine.Spy;
+
+  // Replicate the _safeNativeCall helper logic for testing
+  const safeNativeCall = (
+    fn: () => void,
+    errorMsg: string,
+    showSnackbar: boolean,
+    logErr: (msg: string, e: unknown) => void,
+    snackOpen: (params: { msg: string; type: string }) => void,
+  ): void => {
+    try {
+      fn();
+    } catch (e) {
+      logErr(errorMsg, e);
+      if (showSnackbar) {
+        snackOpen({ msg: errorMsg, type: 'ERROR' });
+      }
+    }
+  };
+
+  beforeEach(() => {
+    logErrSpy = jasmine.createSpy('DroidLog.err');
+    snackOpenSpy = jasmine.createSpy('snackService.open');
+  });
+
+  it('should not log error when native call succeeds', () => {
+    const successFn = jasmine.createSpy('successFn');
+
+    safeNativeCall(successFn, 'Error message', false, logErrSpy, snackOpenSpy);
+
+    expect(successFn).toHaveBeenCalled();
+    expect(logErrSpy).not.toHaveBeenCalled();
+    expect(snackOpenSpy).not.toHaveBeenCalled();
+  });
+
+  it('should log error when native call throws', () => {
+    const error = new Error('Java exception was raised');
+    const failFn = jasmine.createSpy('failFn').and.throwError(error);
+
+    safeNativeCall(failFn, 'Failed to start service', false, logErrSpy, snackOpenSpy);
+
+    expect(failFn).toHaveBeenCalled();
+    expect(logErrSpy).toHaveBeenCalledWith('Failed to start service', error);
+    expect(snackOpenSpy).not.toHaveBeenCalled();
+  });
+
+  it('should show snackbar when native call throws and showSnackbar is true', () => {
+    const error = new Error('Java exception was raised');
+    const failFn = jasmine.createSpy('failFn').and.throwError(error);
+
+    safeNativeCall(failFn, 'Failed to start tracking', true, logErrSpy, snackOpenSpy);
+
+    expect(failFn).toHaveBeenCalled();
+    expect(logErrSpy).toHaveBeenCalledWith('Failed to start tracking', error);
+    expect(snackOpenSpy).toHaveBeenCalledWith({
+      msg: 'Failed to start tracking',
+      type: 'ERROR',
+    });
+  });
+
+  it('should NOT show snackbar when native call throws and showSnackbar is false', () => {
+    const error = new Error('Java exception was raised');
+    const failFn = jasmine.createSpy('failFn').and.throwError(error);
+
+    safeNativeCall(failFn, 'Failed to update service', false, logErrSpy, snackOpenSpy);
+
+    expect(failFn).toHaveBeenCalled();
+    expect(logErrSpy).toHaveBeenCalledWith('Failed to update service', error);
+    expect(snackOpenSpy).not.toHaveBeenCalled();
+  });
+
+  it('should handle different error types', () => {
+    const stringError = 'String error message';
+    const failFn = (): void => {
+      throw stringError;
+    };
+
+    safeNativeCall(failFn, 'Native call failed', true, logErrSpy, snackOpenSpy);
+
+    expect(logErrSpy).toHaveBeenCalledWith('Native call failed', stringError);
+    expect(snackOpenSpy).toHaveBeenCalledWith({
+      msg: 'Native call failed',
+      type: 'ERROR',
+    });
+  });
+});

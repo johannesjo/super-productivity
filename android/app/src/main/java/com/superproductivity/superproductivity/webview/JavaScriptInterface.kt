@@ -2,6 +2,7 @@ package com.superproductivity.superproductivity.webview
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
@@ -21,6 +22,13 @@ class JavaScriptInterface(
     private val webView: WebView,
 ) {
 
+    private inline fun safeCall(errorMsg: String, block: () -> Unit) {
+        try {
+            block()
+        } catch (e: Exception) {
+            Log.e(TAG, errorMsg, e)
+        }
+    }
 
     @Suppress("unused")
     @JavascriptInterface
@@ -80,32 +88,38 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun startTrackingService(taskId: String, taskTitle: String, timeSpentMs: Long) {
-        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
-            action = TrackingForegroundService.ACTION_START
-            putExtra(TrackingForegroundService.EXTRA_TASK_ID, taskId)
-            putExtra(TrackingForegroundService.EXTRA_TASK_TITLE, taskTitle)
-            putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
+        safeCall("Failed to start tracking service") {
+            val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+                action = TrackingForegroundService.ACTION_START
+                putExtra(TrackingForegroundService.EXTRA_TASK_ID, taskId)
+                putExtra(TrackingForegroundService.EXTRA_TASK_TITLE, taskTitle)
+                putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
+            }
+            ContextCompat.startForegroundService(activity, intent)
         }
-        ContextCompat.startForegroundService(activity, intent)
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun stopTrackingService() {
-        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
-            action = TrackingForegroundService.ACTION_STOP
+        safeCall("Failed to stop tracking service") {
+            val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+                action = TrackingForegroundService.ACTION_STOP
+            }
+            activity.startService(intent)
         }
-        activity.startService(intent)
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun updateTrackingService(timeSpentMs: Long) {
-        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
-            action = TrackingForegroundService.ACTION_UPDATE
-            putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
+        safeCall("Failed to update tracking service") {
+            val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+                action = TrackingForegroundService.ACTION_UPDATE
+                putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
+            }
+            activity.startService(intent)
         }
-        activity.startService(intent)
     }
 
     @Suppress("unused")
@@ -131,39 +145,45 @@ class JavaScriptInterface(
         isPaused: Boolean,
         taskTitle: String?
     ) {
-        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
-            action = FocusModeForegroundService.ACTION_START
-            putExtra(FocusModeForegroundService.EXTRA_TITLE, title)
-            putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
-            putExtra(FocusModeForegroundService.EXTRA_DURATION_MS, durationMs)
-            putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
-            putExtra(FocusModeForegroundService.EXTRA_IS_BREAK, isBreak)
-            putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+        safeCall("Failed to start focus mode service") {
+            val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+                action = FocusModeForegroundService.ACTION_START
+                putExtra(FocusModeForegroundService.EXTRA_TITLE, title)
+                putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
+                putExtra(FocusModeForegroundService.EXTRA_DURATION_MS, durationMs)
+                putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
+                putExtra(FocusModeForegroundService.EXTRA_IS_BREAK, isBreak)
+                putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+            }
+            ContextCompat.startForegroundService(activity, intent)
         }
-        ContextCompat.startForegroundService(activity, intent)
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun stopFocusModeService() {
-        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
-            action = FocusModeForegroundService.ACTION_STOP
+        safeCall("Failed to stop focus mode service") {
+            val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+                action = FocusModeForegroundService.ACTION_STOP
+            }
+            activity.startService(intent)
         }
-        activity.startService(intent)
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun updateFocusModeService(title: String, remainingMs: Long, isPaused: Boolean, isBreak: Boolean, taskTitle: String?) {
-        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
-            action = FocusModeForegroundService.ACTION_UPDATE
-            putExtra(FocusModeForegroundService.EXTRA_TITLE, title)
-            putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
-            putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
-            putExtra(FocusModeForegroundService.EXTRA_IS_BREAK, isBreak)
-            putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
+        safeCall("Failed to update focus mode service") {
+            val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+                action = FocusModeForegroundService.ACTION_UPDATE
+                putExtra(FocusModeForegroundService.EXTRA_TITLE, title)
+                putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
+                putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+                putExtra(FocusModeForegroundService.EXTRA_IS_BREAK, isBreak)
+                putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
+            }
+            activity.startService(intent)
         }
-        activity.startService(intent)
     }
 
     @Suppress("unused")
@@ -176,21 +196,25 @@ class JavaScriptInterface(
         reminderType: String,
         triggerAtMs: Long
     ) {
-        ReminderNotificationHelper.scheduleReminder(
-            activity,
-            notificationId,
-            reminderId,
-            relatedId,
-            title,
-            reminderType,
-            triggerAtMs
-        )
+        safeCall("Failed to schedule native reminder") {
+            ReminderNotificationHelper.scheduleReminder(
+                activity,
+                notificationId,
+                reminderId,
+                relatedId,
+                title,
+                reminderType,
+                triggerAtMs
+            )
+        }
     }
 
     @Suppress("unused")
     @JavascriptInterface
     fun cancelNativeReminder(notificationId: Int) {
-        ReminderNotificationHelper.cancelReminder(activity, notificationId)
+        safeCall("Failed to cancel native reminder") {
+            ReminderNotificationHelper.cancelReminder(activity, notificationId)
+        }
     }
 
     /**
@@ -208,6 +232,7 @@ class JavaScriptInterface(
     }
 
     companion object {
+        private const val TAG = "JavaScriptInterface"
         // TODO rename to WINDOW_PROPERTY
         const val FN_PREFIX: String = "window.$WINDOW_INTERFACE_PROPERTY."
     }

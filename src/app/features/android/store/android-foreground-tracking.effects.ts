@@ -19,12 +19,14 @@ import { DateService } from '../../../core/date/date.service';
 import { Task } from '../../tasks/task.model';
 import { selectTimer } from '../../focus-mode/store/focus-mode.selectors';
 import { combineLatest } from 'rxjs';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Injectable()
 export class AndroidForegroundTrackingEffects {
   private _store = inject(Store);
   private _taskService = inject(TaskService);
   private _dateService = inject(DateService);
+  private _snackService = inject(SnackService);
 
   /**
    * Start/stop the native foreground service when the current task changes.
@@ -69,7 +71,10 @@ export class AndroidForegroundTrackingEffects {
               DroidLog.log(
                 'Focus mode active, stopping tracking service to avoid duplicate notification',
               );
-              androidInterface.stopTrackingService?.();
+              this._safeNativeCall(
+                () => androidInterface.stopTrackingService?.(),
+                'Failed to stop tracking service',
+              );
               return;
             }
 
@@ -79,14 +84,22 @@ export class AndroidForegroundTrackingEffects {
                 title: currentTask.title,
                 timeSpent: currentTask.timeSpent,
               });
-              androidInterface.startTrackingService?.(
-                currentTask.id,
-                currentTask.title,
-                currentTask.timeSpent || 0,
+              this._safeNativeCall(
+                () =>
+                  androidInterface.startTrackingService?.(
+                    currentTask.id,
+                    currentTask.title,
+                    currentTask.timeSpent || 0,
+                  ),
+                'Failed to start tracking notification',
+                true,
               );
             } else {
               DroidLog.log('Stopping tracking service');
-              androidInterface.stopTrackingService?.();
+              this._safeNativeCall(
+                () => androidInterface.stopTrackingService?.(),
+                'Failed to stop tracking service',
+              );
             }
           }),
         ),
@@ -153,7 +166,10 @@ export class AndroidForegroundTrackingEffects {
               taskId: curr.taskId,
               timeSpent: curr.timeSpent,
             });
-            androidInterface.updateTrackingService?.(curr.timeSpent);
+            this._safeNativeCall(
+              () => androidInterface.updateTrackingService?.(curr.timeSpent),
+              'Failed to update tracking service',
+            );
           }),
         ),
       { dispatch: false },
@@ -199,6 +215,17 @@ export class AndroidForegroundTrackingEffects {
         ),
       { dispatch: false },
     );
+
+  private _safeNativeCall(fn: () => void, errorMsg: string, showSnackbar = false): void {
+    try {
+      fn();
+    } catch (e) {
+      DroidLog.err(errorMsg, e);
+      if (showSnackbar) {
+        this._snackService.open({ msg: errorMsg, type: 'ERROR' });
+      }
+    }
+  }
 
   /**
    * Sync elapsed time from native service to the task.
