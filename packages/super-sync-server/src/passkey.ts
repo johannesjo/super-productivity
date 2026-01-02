@@ -157,6 +157,10 @@ export const verifyRegistration = async (
     credentialBackedUp,
   } = verification.registrationInfo;
 
+  Logger.info(
+    `Registration credentialId (base64url): ${Buffer.from(credentialInfo.id).toString('base64url').substring(0, 30)}...`,
+  );
+
   const verificationToken = randomBytes(32).toString('hex');
   const tokenExpiresAt = BigInt(Date.now() + VERIFICATION_TOKEN_EXPIRY_MS);
   const acceptedAt = termsAcceptedAt ? BigInt(termsAcceptedAt) : BigInt(Date.now());
@@ -278,18 +282,24 @@ export const generateAuthenticationOptions = async (
     return options;
   }
 
+  const allowCredentials = user.passkeys.map((pk) => ({
+    id: Buffer.from(pk.credentialId).toString('base64url'),
+    transports: pk.transports ? JSON.parse(pk.transports) : undefined,
+  }));
+
+  Logger.info(
+    `Login allowCredentials for ${email}: ${JSON.stringify(allowCredentials.map((c) => ({ id: c.id.substring(0, 20) + '...', transports: c.transports })))}`,
+  );
+
   const options = await webAuthnGenerateAuthentication({
     rpID,
-    allowCredentials: user.passkeys.map((pk) => ({
-      id: Buffer.from(pk.credentialId).toString('base64url'),
-      transports: pk.transports ? JSON.parse(pk.transports) : undefined,
-    })),
+    allowCredentials,
     userVerification: 'preferred',
   });
 
   storeChallenge(email, options.challenge);
 
-  Logger.debug(`Generated passkey authentication options for ${email}`);
+  Logger.info(`Generated passkey authentication options for ${email}`);
   return options;
 };
 
