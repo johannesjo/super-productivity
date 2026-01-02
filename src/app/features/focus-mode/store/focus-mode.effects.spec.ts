@@ -395,6 +395,26 @@ describe('FocusModeEffects', () => {
       });
     });
 
+    it('should NOT dispatch startBreak when isManualBreakStart is enabled', (done) => {
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.overrideSelector(selectors.selectCurrentCycle, 1);
+      store.overrideSelector(selectFocusModeConfig, {
+        isSyncSessionWithTracking: false,
+        isSkipPreparation: false,
+        isManualBreakStart: true,
+      });
+      store.refreshState();
+
+      effects.sessionComplete$.pipe(toArray()).subscribe((actionsArr) => {
+        const startBreakAction = actionsArr.find(
+          (a) => a.type === actions.startBreak.type,
+        );
+        expect(startBreakAction).toBeUndefined();
+        done();
+      });
+    });
+
     it('should dispatch correct isLongBreak based on cycle', (done) => {
       actions$ = of(actions.completeFocusSession({ isManual: false }));
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);

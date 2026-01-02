@@ -273,6 +273,7 @@
       "SHORT_BREAK_TITLE": "Short Break - Cycle {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
       "SKIP_BREAK": "Skip Break",
+      "START_BREAK": "Start Break",
       "START_FOCUS_SESSION": "Start focus session",
       "START_NEXT_FOCUS_SESSION": "Start next Focus Session",
       "SWITCH_TASK": "Switch task",
@@ -1768,6 +1769,7 @@
       "L_PAUSE_TRACKING_DURING_BREAK": "Pause task tracking during breaks",
       "L_SKIP_PREPARATION_SCREEN": "Skip preparation screen (rocket animation)",
       "L_START_IN_BACKGROUND": "Start focus sessions with banner only (no overlay)",
+      "L_MANUAL_BREAK_START": "Manually start breaks (Pomodoro)",
       "TITLE": "Focus Mode"
     },
     "IDLE": {
