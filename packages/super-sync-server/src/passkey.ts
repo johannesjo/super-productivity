@@ -3,13 +3,15 @@ import {
   verifyRegistrationResponse,
   generateAuthenticationOptions as webAuthnGenerateAuthentication,
   verifyAuthenticationResponse,
+  type VerifiedRegistrationResponse,
+  type VerifiedAuthenticationResponse,
 } from '@simplewebauthn/server';
 import type {
   PublicKeyCredentialCreationOptionsJSON,
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
-} from '@simplewebauthn/types';
+} from '@simplewebauthn/server';
 import { prisma } from './db';
 import { Logger } from './logger';
 import { randomBytes } from 'crypto';
