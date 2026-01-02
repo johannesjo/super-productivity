@@ -3,11 +3,14 @@ import {
   Component,
   inject,
   OnDestroy,
+  output,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../t.const';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { ESCAPE } from '@angular/cdk/keycodes';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { isSmallScreen } from '../../util/is-small-screen';
@@ -45,7 +48,9 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
   readonly previewEl = viewChild<MarkdownComponent>('previewEl');
+  readonly contentChanged = output<string>();
   private _subs: Subscription = new Subscription();
+  private readonly _contentChanges$ = new Subject<string>();
 
   constructor() {
     const lastViewMode = localStorage.getItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE);
@@ -62,13 +67,20 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
       }
     }
 
-    // we want to save as default
+    // Auto-save with debounce
+    this._contentChanges$
+      .pipe(debounceTime(500), takeUntilDestroyed())
+      .subscribe((value) => {
+        this.contentChanged.emit(value);
+      });
+
+    // Handle Escape key - save and close
     this._matDialogRef.disableClose = true;
     this._subs.add(
       this._matDialogRef.keydownEvents().subscribe((e) => {
         if ((e as any).keyCode === ESCAPE) {
           e.preventDefault();
-          this.close(undefined, true);
+          this.close();
         }
       }),
     );
@@ -80,14 +92,16 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
     }
   }
 
-  ngModelChange(data: string): void {}
+  ngModelChange(content: string): void {
+    this._contentChanges$.next(content);
+  }
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
 
-  close(isSkipSave: boolean = false, isEscapeClose: boolean = false): void {
-    this._matDialogRef.close(!isSkipSave ? this.data?.content : undefined);
+  close(): void {
+    this._matDialogRef.close(this.data?.content);
   }
 
   onViewModeChange(): void {
@@ -125,6 +139,8 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
           ? item.replace('[ ]', '[x]').replace('[]', '[x]')
           : item.replace('[x]', '[ ]');
         this.data.content = allLines.join('\n');
+        // Emit change for auto-save
+        this._contentChanges$.next(this.data.content);
       }
     }
   }

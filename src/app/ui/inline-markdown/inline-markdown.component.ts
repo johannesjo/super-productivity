@@ -197,22 +197,27 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   openFullScreen(): void {
-    this._matDialog
-      .open(DialogFullscreenMarkdownComponent, {
-        minWidth: '100vw',
-        height: '100vh',
-        restoreFocus: true,
-        data: {
-          content: this.modelCopy(),
-        },
-      })
-      .afterClosed()
-      .subscribe((res) => {
-        if (typeof res === 'string') {
-          this.modelCopy.set(res);
-          this.changed.emit(res);
-        }
-      });
+    const dialogRef = this._matDialog.open(DialogFullscreenMarkdownComponent, {
+      minWidth: '100vw',
+      height: '100vh',
+      restoreFocus: true,
+      data: {
+        content: this.modelCopy(),
+      },
+    });
+
+    // Subscribe to live auto-save updates from fullscreen dialog
+    dialogRef.componentInstance.contentChanged.subscribe((content: string) => {
+      this.modelCopy.set(content);
+      this.changed.emit(content);
+    });
+
+    dialogRef.afterClosed().subscribe((res) => {
+      if (typeof res === 'string') {
+        this.modelCopy.set(res);
+        this.changed.emit(res);
+      }
+    });
   }
 
   resizeParsedToFit(): void {
