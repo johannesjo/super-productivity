@@ -240,8 +240,13 @@ export class DialogEditTaskRepeatCfgComponent {
 
     // workaround for formly not always updating hidden fields correctly (in time??)
     if (currentRepeatCfg.quickSetting !== 'CUSTOM') {
+      // Pass startDate to use correct weekday for WEEKLY_CURRENT_WEEKDAY (fixes #5806)
+      const referenceDate = currentRepeatCfg.startDate
+        ? dateStrToUtcDate(currentRepeatCfg.startDate)
+        : undefined;
       const updatesForQuickSetting = getQuickSettingUpdates(
         currentRepeatCfg.quickSetting,
+        referenceDate,
       );
       if (updatesForQuickSetting) {
         this.repeatCfg.update((cfg) => ({ ...cfg, ...updatesForQuickSetting }));
