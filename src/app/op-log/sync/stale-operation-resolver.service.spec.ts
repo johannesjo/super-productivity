@@ -3,6 +3,7 @@ import { StaleOperationResolverService } from './stale-operation-resolver.servic
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { VectorClockService } from './vector-clock.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
+import { LockService } from './lock.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
 import { ActionType, Operation, OpType, EntityType } from '../core/operation.types';
@@ -13,6 +14,7 @@ describe('StaleOperationResolverService', () => {
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockVectorClockService: jasmine.SpyObj<VectorClockService>;
   let mockConflictResolutionService: jasmine.SpyObj<ConflictResolutionService>;
+  let mockLockService: jasmine.SpyObj<LockService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockClientIdProvider: { loadClientId: jasmine.Spy };
 
@@ -48,6 +50,7 @@ describe('StaleOperationResolverService', () => {
     mockConflictResolutionService = jasmine.createSpyObj('ConflictResolutionService', [
       'getCurrentEntityState',
     ]);
+    mockLockService = jasmine.createSpyObj('LockService', ['request']);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockClientIdProvider = {
       loadClientId: jasmine
@@ -59,6 +62,10 @@ describe('StaleOperationResolverService', () => {
     mockVectorClockService.getCurrentVectorClock.and.returnValue(Promise.resolve({}));
     mockOpLogStore.markRejected.and.returnValue(Promise.resolve());
     mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(Promise.resolve(1));
+    // Mock lock service to execute the callback immediately
+    mockLockService.request.and.callFake(
+      (_lockName: string, callback: () => Promise<any>) => callback(),
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -66,6 +73,7 @@ describe('StaleOperationResolverService', () => {
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: VectorClockService, useValue: mockVectorClockService },
         { provide: ConflictResolutionService, useValue: mockConflictResolutionService },
+        { provide: LockService, useValue: mockLockService },
         { provide: SnackService, useValue: mockSnackService },
         { provide: CLIENT_ID_PROVIDER, useValue: mockClientIdProvider },
       ],
@@ -75,6 +83,62 @@ describe('StaleOperationResolverService', () => {
   });
 
   describe('resolveStaleLocalOps', () => {
+    it('should acquire sp_op_log lock before writing operations', async () => {
+      const staleOp = createMockOperation('op-1', 'TASK', 'task-1', { clientA: 1 });
+      const entityState = { id: 'task-1', title: 'Test Task' };
+
+      mockVectorClockService.getCurrentVectorClock.and.returnValue(Promise.resolve({}));
+      mockConflictResolutionService.getCurrentEntityState.and.returnValue(
+        Promise.resolve(entityState),
+      );
+
+      await service.resolveStaleLocalOps([{ opId: 'op-1', op: staleOp }]);
+
+      expect(mockLockService.request).toHaveBeenCalledTimes(1);
+      expect(mockLockService.request).toHaveBeenCalledWith(
+        'sp_op_log',
+        jasmine.any(Function),
+      );
+    });
+
+    it('should execute all operations within the lock callback', async () => {
+      const staleOp = createMockOperation('op-1', 'TASK', 'task-1', { clientA: 1 });
+      const entityState = { id: 'task-1', title: 'Test Task' };
+      const callOrder: string[] = [];
+
+      mockVectorClockService.getCurrentVectorClock.and.returnValue(Promise.resolve({}));
+      mockConflictResolutionService.getCurrentEntityState.and.returnValue(
+        Promise.resolve(entityState),
+      );
+
+      // Track call order to verify operations happen inside lock
+      mockLockService.request.and.callFake(
+        async (_lockName: string, callback: () => Promise<any>) => {
+          callOrder.push('lock-start');
+          const result = await callback();
+          callOrder.push('lock-end');
+          return result;
+        },
+      );
+      mockOpLogStore.markRejected.and.callFake(async () => {
+        callOrder.push('markRejected');
+      });
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(async () => {
+        callOrder.push('appendWithVectorClockUpdate');
+        return 1;
+      });
+
+      await service.resolveStaleLocalOps([{ opId: 'op-1', op: staleOp }]);
+
+      // Verify write operations happen inside the lock
+      expect(callOrder).toEqual([
+        'lock-start',
+        'markRejected',
+        'appendWithVectorClockUpdate',
+        'lock-end',
+      ]);
+    });
+
     it('should return 0 when staleOps array is empty', async () => {
       const result = await service.resolveStaleLocalOps([]);
 
