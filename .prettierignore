@@ -5,3 +5,4 @@ node_modules
 *.env
 *.env.example
 .prettierignore
+packages/super-sync-server/public/simplewebauthn-browser.min.js
