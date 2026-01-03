@@ -259,6 +259,39 @@ Used for full-state operations (BackupImport, SyncImport, Repair):
 | **Entity Type Allowlist**     | Prevents injection of invalid entity types        |
 | **Request Deduplication**     | Prevents duplicate operations on retry            |
 
+## Multi-Instance Deployment Considerations
+
+When deploying multiple server instances behind a load balancer, be aware of these limitations:
+
+### Passkey Challenge Storage
+
+**Issue**: WebAuthn challenges are stored in an in-memory Map, which doesn't work across instances.
+
+**Symptom**: Passkey registration/login fails if the challenge generation request hits instance A but verification hits instance B.
+
+**Solution for multi-instance**:
+
+- Implement Redis-backed challenge storage
+- Or use sticky sessions (less ideal)
+
+**Current status**: A warning is logged at startup in production if in-memory storage is used.
+
+### Snapshot Generation Locks
+
+**Issue**: Concurrent snapshot generation prevention uses an in-memory Map.
+
+**Symptom**: Same user may trigger duplicate snapshot computations across different instances.
+
+**Impact**: Performance only (no data corruption) - snapshots are deterministic.
+
+**Solution for multi-instance**:
+
+- Implement Redis distributed lock (optional, only for performance)
+
+### Single-Instance Deployment
+
+For single-instance deployments, these limitations do not apply. The current implementation is fully functional and well-tested for single-instance use.
+
 ## Security Notes
 
 - **Set JWT_SECRET** to a secure random value in production (min 32 characters).

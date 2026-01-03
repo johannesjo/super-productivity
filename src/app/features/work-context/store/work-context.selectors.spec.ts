@@ -325,6 +325,53 @@ describe('workContext selectors', () => {
       expect(result).toEqual(['parent']); // subtask excluded
     });
 
+    it('should filter out deleted tasks (taskIds referencing non-existent tasks)', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      // task2 exists in TODAY_TAG.taskIds but not in taskState (deleted)
+      const todayTagWithDeletedTask = {
+        ...TODAY_TAG,
+        taskIds: ['task1', 'deleted-task', 'also-deleted'],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithDeletedTask]);
+      const taskState = fakeEntityStateFromArray([task1]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1']); // deleted tasks filtered out
+    });
+
+    it('should filter out archived tasks with dueDay === today', () => {
+      const activeTask = {
+        id: 'active-task',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+        // No 'archived' property - this is the active task
+      } as Partial<TaskCopy> as TaskCopy;
+
+      // In the app, archived tasks are stored in TimeTrackingState, not TaskState.
+      // An archived task would not exist in the regular task entities.
+      // This test verifies that if somehow an archived task ID is in TODAY_TAG.taskIds,
+      // it gets filtered out because it doesn't exist in the active task state.
+      const todayTagWithArchivedRef = {
+        ...TODAY_TAG,
+        taskIds: ['active-task', 'archived-task-id'],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithArchivedRef]);
+      // Only active task in state - archived-task-id doesn't exist
+      const taskState = fakeEntityStateFromArray([activeTask]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['active-task']); // archived task ID filtered out
+    });
+
     // Tests for dueWithTime fallback (issue #5841)
     it('should include task with dueWithTime for today but no dueDay (fallback)', () => {
       // Create a timestamp for today (e.g., 8:00 AM today)

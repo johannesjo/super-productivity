@@ -398,6 +398,13 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       updatedFeatureState = (adapter as EntityAdapter<any>).addOne(
         {
           ...entityData,
+          // INTENTIONAL: We set modified to Date.now() (local time), not the original timestamp.
+          // Rationale:
+          // - Vector clocks are the authoritative conflict resolution mechanism, not `modified`
+          // - The `modified` field is used for UI display ("last edited X minutes ago")
+          // - Setting it to local time reflects when THIS client applied the winning state
+          // - The original timestamp from the winning client is preserved in entityData but
+          //   gets overwritten here because local display should show local application time
           modified: Date.now(),
         } as any,
         featureState as any,
@@ -410,7 +417,10 @@ export const lwwUpdateMetaReducer: MetaReducer = (
           id: entityId,
           changes: {
             ...entityData,
-            modified: Date.now(), // Update modified timestamp
+            // INTENTIONAL: We set modified to Date.now() (local time), not the original timestamp.
+            // See comment above for rationale - vector clocks drive conflict resolution,
+            // `modified` is for UI display of "when this client last saw this change"
+            modified: Date.now(),
           },
         },
         featureState as any,

@@ -20,6 +20,19 @@ import {
 
 const gunzipAsync = promisify(zlib.gunzip);
 
+/**
+ * Helper to create validation error response.
+ * In production, hides detailed Zod error info to prevent schema leakage.
+ */
+const createValidationErrorResponse = (
+  zodIssues: z.ZodIssue[],
+): { error: string; details?: z.ZodIssue[] } => {
+  if (process.env.NODE_ENV === 'production') {
+    return { error: 'Validation failed' };
+  }
+  return { error: 'Validation failed', details: zodIssues };
+};
+
 // Validation constants
 const CLIENT_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
 const MAX_CLIENT_ID_LENGTH = 255;
@@ -210,10 +223,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             `[user:${userId}] Upload validation failed`,
             parseResult.error.issues,
           );
-          return reply.status(400).send({
-            error: 'Validation failed',
-            details: parseResult.error.issues,
-          });
+          return reply
+            .status(400)
+            .send(createValidationErrorResponse(parseResult.error.issues));
         }
 
         const { ops, clientId, lastKnownServerSeq, requestId } = parseResult.data;
@@ -460,10 +472,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             `[user:${userId}] Download validation failed`,
             parseResult.error.issues,
           );
-          return reply.status(400).send({
-            error: 'Validation failed',
-            details: parseResult.error.issues,
-          });
+          return reply
+            .status(400)
+            .send(createValidationErrorResponse(parseResult.error.issues));
         }
 
         const { sinceSeq, limit = 500, excludeClient } = parseResult.data;
@@ -604,10 +615,13 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         // Validate request body
         const parseResult = UploadSnapshotSchema.safeParse(body);
         if (!parseResult.success) {
-          return reply.status(400).send({
-            error: 'Validation failed',
-            details: parseResult.error.issues,
-          });
+          Logger.warn(
+            `[user:${userId}] Snapshot upload validation failed`,
+            parseResult.error.issues,
+          );
+          return reply
+            .status(400)
+            .send(createValidationErrorResponse(parseResult.error.issues));
         }
 
         const {

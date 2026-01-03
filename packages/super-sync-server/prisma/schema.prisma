@@ -83,6 +83,7 @@ model Operation {
   @@index([userId, entityType, entityId])
   @@index([userId, clientId])
   @@index([userId, receivedAt])
+  @@index([userId, opType]) // Speeds up restore point listing (queries for SYNC_IMPORT/BACKUP_IMPORT ops)
   @@map("operations")
 }
 
