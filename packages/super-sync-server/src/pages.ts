@@ -254,7 +254,7 @@ export async function pageRoutes(fastify: FastifyInstance) {
                 infoEl.textContent = 'Please follow your browser/device prompt to create a new passkey...';
                 recoverBtn.textContent = 'Waiting for passkey...';
 
-                const credential = await SimpleWebAuthnBrowser.startRegistration(options);
+                const credential = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options });
 
                 // Step 3: Send credential to server for verification
                 recoverBtn.textContent = 'Verifying...';
