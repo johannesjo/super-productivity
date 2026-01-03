@@ -293,31 +293,20 @@ export const generateAuthenticationOptions = async (
     return options;
   }
 
-  const allowCredentials = user.passkeys.map((pk) => {
-    // pk.credentialId is already a Buffer from Prisma
-    const credId = pk.credentialId.toString('base64url');
-    Logger.info(
-      `[DEBUG] Passkey DB credentialId raw bytes (hex): ${pk.credentialId.toString('hex')}`,
-    );
-    Logger.info(`[DEBUG] Passkey DB credentialId as base64url: ${credId}`);
-    return {
-      id: credId,
-      transports: pk.transports ? JSON.parse(pk.transports) : undefined,
-    };
-  });
-
-  Logger.info(`Login allowCredentials for ${email}: ${JSON.stringify(allowCredentials)}`);
+  // Don't provide allowCredentials - let browser discover resident credentials
+  // This works because we use residentKey: 'required' during registration
+  Logger.info(`Login for ${email}: using discoverable credentials (no allowCredentials)`);
 
   const options = await webAuthnGenerateAuthentication({
     rpID,
-    allowCredentials,
+    // allowCredentials omitted - browser will show all discoverable passkeys for this RP
     userVerification: 'preferred',
   });
 
   storeChallenge(email, options.challenge);
 
   Logger.info(
-    `Generated passkey authentication options for ${email}: ${JSON.stringify({ rpId: options.rpId, allowCredentials: options.allowCredentials?.map((c) => ({ id: typeof c.id === 'string' ? c.id.substring(0, 20) : 'non-string', transports: c.transports })) })}`,
+    `Generated passkey authentication options for ${email}: rpId=${options.rpId}, discoverable=true`,
   );
   return options;
 };
