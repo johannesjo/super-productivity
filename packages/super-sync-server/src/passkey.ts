@@ -3,8 +3,6 @@ import {
   verifyRegistrationResponse,
   generateAuthenticationOptions as webAuthnGenerateAuthentication,
   verifyAuthenticationResponse,
-  type VerifiedRegistrationResponse,
-  type VerifiedAuthenticationResponse,
 } from '@simplewebauthn/server';
 import type {
   PublicKeyCredentialCreationOptionsJSON,
@@ -24,7 +22,7 @@ const RECOVERY_TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 const VERIFICATION_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // WebAuthn configuration from environment
-const getWebAuthnConfig = () => {
+const getWebAuthnConfig = (): { rpName: string; rpID: string; origin: string } => {
   const rpName = process.env.WEBAUTHN_RP_NAME || 'Super Productivity Sync';
   const rpID = process.env.WEBAUTHN_RP_ID || 'localhost';
   const origin = process.env.WEBAUTHN_ORIGIN || 'http://localhost:1900';
@@ -161,16 +159,16 @@ export const verifyRegistration = async (
     throw new Error('Passkey verification failed');
   }
 
-  const {
-    credential: credentialInfo,
-    credentialDeviceType,
-    credentialBackedUp,
-  } = verification.registrationInfo;
+  const { credential: credentialInfo } = verification.registrationInfo;
 
-  const credentialIdBase64url = Buffer.from(credentialInfo.id).toString('base64url');
-  const credentialIdHex = Buffer.from(credentialInfo.id).toString('hex');
-  Logger.info(`[DEBUG] Registration credentialId raw bytes (hex): ${credentialIdHex}`);
-  Logger.info(`[DEBUG] Registration credentialId as base64url: ${credentialIdBase64url}`);
+  // credentialInfo.id from SimpleWebAuthn is a Uint8Array containing the base64url string as UTF-8 bytes
+  // We need to decode it to get the actual raw credential ID bytes
+  const credentialIdBase64url = Buffer.from(credentialInfo.id).toString('utf-8');
+  const credentialIdRawBytes = Buffer.from(credentialIdBase64url, 'base64url');
+  Logger.info(`[DEBUG] Registration credentialId base64url: ${credentialIdBase64url}`);
+  Logger.info(
+    `[DEBUG] Registration credentialId raw bytes (hex): ${credentialIdRawBytes.toString('hex')}`,
+  );
 
   const verificationToken = randomBytes(32).toString('hex');
   const tokenExpiresAt = BigInt(Date.now() + VERIFICATION_TOKEN_EXPIRY_MS);
@@ -195,7 +193,7 @@ export const verifyRegistration = async (
         // Create new passkey
         await tx.passkey.create({
           data: {
-            credentialId: Buffer.from(credentialInfo.id),
+            credentialId: credentialIdRawBytes,
             publicKey: Buffer.from(credentialInfo.publicKey),
             counter: BigInt(credentialInfo.counter),
             transports: credential.response.transports
@@ -228,7 +226,7 @@ export const verifyRegistration = async (
           termsAcceptedAt: acceptedAt,
           passkeys: {
             create: {
-              credentialId: Buffer.from(credentialInfo.id),
+              credentialId: credentialIdRawBytes,
               publicKey: Buffer.from(credentialInfo.publicKey),
               counter: BigInt(credentialInfo.counter),
               transports: credential.response.transports
@@ -555,13 +553,18 @@ export const completePasskeyRecovery = async (
 
   const { credential: credentialInfo } = verification.registrationInfo;
 
+  // credentialInfo.id from SimpleWebAuthn is a Uint8Array containing the base64url string as UTF-8 bytes
+  // We need to decode it to get the actual raw credential ID bytes
+  const credentialIdBase64url = Buffer.from(credentialInfo.id).toString('utf-8');
+  const credentialIdRawBytes = Buffer.from(credentialIdBase64url, 'base64url');
+
   // Delete old passkeys and create new one, clear recovery token, invalidate sessions
   await prisma.$transaction(async (tx) => {
     await tx.passkey.deleteMany({ where: { userId: user.id } });
 
     await tx.passkey.create({
       data: {
-        credentialId: Buffer.from(credentialInfo.id),
+        credentialId: credentialIdRawBytes,
         publicKey: Buffer.from(credentialInfo.publicKey),
         counter: BigInt(credentialInfo.counter),
         transports: credential.response.transports
