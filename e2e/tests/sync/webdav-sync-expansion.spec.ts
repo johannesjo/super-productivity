@@ -3,18 +3,19 @@ import { SyncPage } from '../../pages/sync.page';
 import { WorkViewPage } from '../../pages/work-view.page';
 import { ProjectPage } from '../../pages/project.page';
 import { waitForAppReady, waitForStatePersistence } from '../../utils/waits';
-import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
+import {
+  WEBDAV_CONFIG_TEMPLATE,
+  setupSyncClient,
+  createSyncFolder,
+  waitForSyncComplete,
+  generateSyncFolderName,
+  dismissTourIfVisible,
+} from '../../utils/sync-test-helpers';
 
 test.describe('WebDAV Sync Expansion', () => {
   // Run sync tests serially to avoid WebDAV server contention
   test.describe.configure({ mode: 'serial' });
-
-  const WEBDAV_CONFIG_TEMPLATE = {
-    baseUrl: 'http://127.0.0.1:2345/',
-    username: 'admin',
-    password: 'admin',
-  };
 
   test.beforeAll(async () => {
     const isUp = await isWebDavServerUp(WEBDAV_CONFIG_TEMPLATE.baseUrl);
@@ -24,84 +25,9 @@ test.describe('WebDAV Sync Expansion', () => {
     }
   });
 
-  const createSyncFolder = async (request: any, folderName: string): Promise<void> => {
-    const mkcolUrl = `${WEBDAV_CONFIG_TEMPLATE.baseUrl}${folderName}`;
-    console.log(`Creating WebDAV folder: ${mkcolUrl}`);
-    try {
-      const response = await request.fetch(mkcolUrl, {
-        method: 'MKCOL',
-        headers: {
-          Authorization: 'Basic ' + Buffer.from('admin:admin').toString('base64'),
-        },
-      });
-      if (!response.ok() && response.status() !== 405) {
-        console.warn(
-          `Failed to create WebDAV folder: ${response.status()} ${response.statusText()}`,
-        );
-      }
-    } catch (e) {
-      console.warn('Error creating WebDAV folder:', e);
-    }
-  };
-
-  const dismissTour = async (page: Page): Promise<void> => {
-    try {
-      const tourElement = page.locator('.shepherd-element').first();
-      await tourElement.waitFor({ state: 'visible', timeout: 4000 });
-      const cancelIcon = page.locator('.shepherd-cancel-icon').first();
-      if (await cancelIcon.isVisible()) {
-        await cancelIcon.click();
-      } else {
-        await page.keyboard.press('Escape');
-      }
-      await tourElement.waitFor({ state: 'hidden', timeout: 3000 });
-    } catch (e) {
-      // Ignore
-    }
-  };
-
-  const setupClient = async (
-    browser: Browser,
-    baseURL: string | undefined,
-  ): Promise<{ context: any; page: Page }> => {
-    const context = await browser.newContext({ baseURL });
-    const page = await context.newPage();
-    await page.goto('/');
-    await waitForAppReady(page);
-    await dismissTour(page);
-    return { context, page };
-  };
-
-  const waitForSync = async (
-    page: Page,
-    syncPage: SyncPage,
-  ): Promise<'success' | 'conflict' | void> => {
-    const startTime = Date.now();
-    await expect(syncPage.syncBtn).toBeVisible({ timeout: 10000 });
-
-    while (Date.now() - startTime < 60000) {
-      const successVisible = await syncPage.syncCheckIcon.isVisible();
-      if (successVisible) return 'success';
-
-      const conflictDialog = page.locator('dialog-sync-conflict');
-      if (await conflictDialog.isVisible()) return 'conflict';
-
-      const snackBars = page.locator('.mat-mdc-snack-bar-container');
-      const count = await snackBars.count();
-      for (let i = 0; i < count; ++i) {
-        const text = await snackBars.nth(i).innerText();
-        if (text.toLowerCase().includes('error') || text.toLowerCase().includes('fail')) {
-          throw new Error(`Sync failed with error: ${text}`);
-        }
-      }
-      await page.waitForTimeout(500);
-    }
-    throw new Error('Sync timeout: Success icon did not appear');
-  };
-
   test('should sync projects', async ({ browser, baseURL, request }) => {
     test.slow();
-    const SYNC_FOLDER_NAME = `e2e-expansion-proj-${Date.now()}`;
+    const SYNC_FOLDER_NAME = generateSyncFolderName('e2e-expansion-proj');
     await createSyncFolder(request, SYNC_FOLDER_NAME);
     const WEBDAV_CONFIG = {
       ...WEBDAV_CONFIG_TEMPLATE,
@@ -111,7 +37,7 @@ test.describe('WebDAV Sync Expansion', () => {
     const url = baseURL || 'http://localhost:4242';
 
     // --- Client A ---
-    const { context: contextA, page: pageA } = await setupClient(browser, url);
+    const { context: contextA, page: pageA } = await setupSyncClient(browser, url);
     const syncPageA = new SyncPage(pageA);
     const workViewPageA = new WorkViewPage(pageA);
     const projectPageA = new ProjectPage(pageA);
@@ -132,10 +58,10 @@ test.describe('WebDAV Sync Expansion', () => {
 
     // Sync A
     await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
+    await waitForSyncComplete(pageA, syncPageA);
 
     // --- Client B ---
-    const { context: contextB, page: pageB } = await setupClient(browser, url);
+    const { context: contextB, page: pageB } = await setupSyncClient(browser, url);
     const syncPageB = new SyncPage(pageB);
     const workViewPageB = new WorkViewPage(pageB);
     const projectPageB = new ProjectPage(pageB);
@@ -144,12 +70,12 @@ test.describe('WebDAV Sync Expansion', () => {
     // Configure Sync B
     await syncPageB.setupWebdavSync(WEBDAV_CONFIG);
     await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
+    await waitForSyncComplete(pageB, syncPageB);
 
     // Reload to ensure UI is updated with synced data
     await pageB.reload();
     await waitForAppReady(pageB);
-    await dismissTour(pageB);
+    await dismissTourIfVisible(pageB);
 
     // Wait for the synced project to appear in the sidebar
     // First ensure Projects group is expanded
@@ -176,11 +102,11 @@ test.describe('WebDAV Sync Expansion', () => {
     // Add task on B in project
     await workViewPageB.addTask('Task in Project B');
     await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
+    await waitForSyncComplete(pageB, syncPageB);
 
     // Sync A
     await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
+    await waitForSyncComplete(pageA, syncPageA);
 
     await pageA.reload();
     await waitForAppReady(pageA);
@@ -199,7 +125,7 @@ test.describe('WebDAV Sync Expansion', () => {
 
   test('should sync task done state', async ({ browser, baseURL, request }) => {
     test.slow();
-    const SYNC_FOLDER_NAME = `e2e-expansion-done-${Date.now()}`;
+    const SYNC_FOLDER_NAME = generateSyncFolderName('e2e-expansion-done');
     await createSyncFolder(request, SYNC_FOLDER_NAME);
     const WEBDAV_CONFIG = {
       ...WEBDAV_CONFIG_TEMPLATE,
@@ -209,7 +135,7 @@ test.describe('WebDAV Sync Expansion', () => {
     const url = baseURL || 'http://localhost:4242';
 
     // --- Client A ---
-    const { context: contextA, page: pageA } = await setupClient(browser, url);
+    const { context: contextA, page: pageA } = await setupSyncClient(browser, url);
     const syncPageA = new SyncPage(pageA);
     const workViewPageA = new WorkViewPage(pageA);
     await workViewPageA.waitForTaskList();
@@ -220,10 +146,10 @@ test.describe('WebDAV Sync Expansion', () => {
     await workViewPageA.addTask(taskName);
 
     await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
+    await waitForSyncComplete(pageA, syncPageA);
 
     // --- Client B ---
-    const { context: contextB, page: pageB } = await setupClient(browser, url);
+    const { context: contextB, page: pageB } = await setupSyncClient(browser, url);
     const syncPageB = new SyncPage(pageB);
     const workViewPageB = new WorkViewPage(pageB);
     await workViewPageB.waitForTaskList();
@@ -231,11 +157,11 @@ test.describe('WebDAV Sync Expansion', () => {
     // Configure Sync B
     await syncPageB.setupWebdavSync(WEBDAV_CONFIG);
     await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
+    await waitForSyncComplete(pageB, syncPageB);
 
     await pageB.reload();
     await waitForAppReady(pageB);
-    await dismissTour(pageB);
+    await dismissTourIfVisible(pageB);
     await workViewPageB.waitForTaskList();
 
     // Verify task synced to B
@@ -253,16 +179,16 @@ test.describe('WebDAV Sync Expansion', () => {
     await waitForStatePersistence(pageB);
 
     await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
+    await waitForSyncComplete(pageB, syncPageB);
 
     // Sync A to get done state from B
     await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
+    await waitForSyncComplete(pageA, syncPageA);
 
     // Reload A to ensure UI reflects synced state
     await pageA.reload();
     await waitForAppReady(pageA);
-    await dismissTour(pageA);
+    await dismissTourIfVisible(pageA);
     await workViewPageA.waitForTaskList();
 
     // Check if task appears in main list or Done Tasks section

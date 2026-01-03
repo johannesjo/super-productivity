@@ -5,6 +5,7 @@ import { TaskPage } from '../pages/task.page';
 import { SettingsPage } from '../pages/settings.page';
 import { DialogPage } from '../pages/dialog.page';
 import { waitForAppReady } from '../utils/waits';
+import { dismissTourIfVisible } from '../utils/tour-helpers';
 
 type TestFixtures = {
   workViewPage: WorkViewPage;
@@ -69,6 +70,9 @@ export const test = base.extend<TestFixtures>({
       }
 
       await waitForAppReady(page);
+
+      // Dismiss Shepherd tour if it appears
+      await dismissTourIfVisible(page);
 
       await use(page);
     } finally {

@@ -20,10 +20,22 @@ export class WorkViewPage extends BasePage {
   }
 
   async waitForTaskList(): Promise<void> {
+    // Wait for the loading screen to disappear first (if visible).
+    // The app shows `.loading-full-page-wrapper` while syncing/importing data.
+    const loadingWrapper = this.page.locator('.loading-full-page-wrapper');
+    try {
+      const isLoadingVisible = await loadingWrapper.isVisible().catch(() => false);
+      if (isLoadingVisible) {
+        await loadingWrapper.waitFor({ state: 'hidden', timeout: 30000 });
+      }
+    } catch {
+      // Loading screen might not appear at all - that's fine
+    }
+
     // Wait for task list to be visible
     await this.page.waitForSelector('task-list', {
       state: 'visible',
-      timeout: 10000,
+      timeout: 15000,
     });
 
     // Ensure route wrapper is fully loaded

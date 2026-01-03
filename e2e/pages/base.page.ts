@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { safeIsVisible } from '../utils/element-helpers';
 
 export abstract class BasePage {
   protected page: Page;
@@ -47,10 +48,7 @@ export abstract class BasePage {
     await submitBtn.click();
 
     // Check if a dialog appeared (e.g., create tag dialog)
-    const dialogExists = await this.page
-      .locator('mat-dialog-container')
-      .isVisible()
-      .catch(() => false);
+    const dialogExists = await safeIsVisible(this.page.locator('mat-dialog-container'));
 
     if (!dialogExists) {
       // Wait for task to be created - check for the specific task
@@ -76,7 +74,7 @@ export abstract class BasePage {
 
     if (!skipClose) {
       // Close the add task bar if backdrop is visible
-      const backdropVisible = await this.backdrop.isVisible().catch(() => false);
+      const backdropVisible = await safeIsVisible(this.backdrop);
       if (backdropVisible) {
         await this.backdrop.click();
         await this.backdrop.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {

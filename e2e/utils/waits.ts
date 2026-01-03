@@ -39,6 +39,9 @@ export const waitForAngularStability = async (
 /**
  * Shared helper to wait until the application shell and Angular are ready.
  * Optimized for speed - removed networkidle wait and redundant checks.
+ *
+ * Note: The app shows a loading screen while initial sync and data load completes.
+ * This screen hides the .route-wrapper, so we must wait for loading to complete first.
  */
 export const waitForAppReady = async (
   page: Page,
@@ -49,16 +52,31 @@ export const waitForAppReady = async (
   // Wait for initial page load
   await page.waitForLoadState('domcontentloaded');
 
+  // Wait for the loading screen to disappear (if visible).
+  // The app shows `.loading-full-page-wrapper` while syncing/importing data.
+  // The `.route-wrapper` is conditionally rendered and won't exist until loading completes.
+  const loadingWrapper = page.locator('.loading-full-page-wrapper');
+  try {
+    // Short timeout to check if loading screen is visible
+    const isLoadingVisible = await loadingWrapper.isVisible().catch(() => false);
+    if (isLoadingVisible) {
+      // Wait for loading screen to disappear (longer timeout for sync operations)
+      await loadingWrapper.waitFor({ state: 'hidden', timeout: 30000 });
+    }
+  } catch {
+    // Loading screen might not appear at all - that's fine
+  }
+
   // Wait for route to match (if required)
   if (ensureRoute) {
-    await page.waitForURL(routeRegex, { timeout: 10000 });
+    await page.waitForURL(routeRegex, { timeout: 15000 });
   }
 
   // Wait for main route wrapper to be visible (indicates app shell loaded)
   await page
     .locator('.route-wrapper')
     .first()
-    .waitFor({ state: 'visible', timeout: 10000 });
+    .waitFor({ state: 'visible', timeout: 15000 });
 
   // Wait for optional selector
   if (selector) {

@@ -4,6 +4,8 @@ import {
   waitForPluginAssets,
   waitForPluginManagementInit,
   getCITimeoutMultiplier,
+  enablePluginWithVerification,
+  disablePluginWithVerification,
 } from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
@@ -174,148 +176,32 @@ test.describe.serial('Plugin Loading', () => {
       throw new Error('Plugin management could not be initialized');
     }
 
-    // Enable the plugin first
-    await page.evaluate((pluginName: string) => {
-      const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-      const targetCard = cards.find((card) => {
-        const title = card.querySelector('mat-card-title')?.textContent || '';
-        return title.includes(pluginName);
-      });
-
-      if (targetCard) {
-        const toggleButton = targetCard.querySelector(
-          'mat-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
-        if (toggleButton) {
-          const wasChecked = toggleButton.getAttribute('aria-checked') === 'true';
-          if (!wasChecked) {
-            toggleButton.click();
-          }
-        }
-      }
-    }, 'API Test Plugin');
-
-    // Wait for toggle state to change to enabled
-    await page.waitForFunction(
-      (name) => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-        const targetCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
-          return title.includes(name);
-        });
-        const toggle = targetCard?.querySelector(
-          'mat-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
-        return toggle?.getAttribute('aria-checked') === 'true';
-      },
+    // Enable the plugin first using the helper function
+    const enableResult = await enablePluginWithVerification(
+      page,
       'API Test Plugin',
-      { timeout: 10000 },
+      15000,
     );
-
-    // Ensure plugin management is visible in viewport
-    await page.evaluate(() => {
-      const pluginMgmt = document.querySelector('plugin-management');
-      if (pluginMgmt) {
-        pluginMgmt.scrollIntoView({ behavior: 'instant', block: 'center' });
-      }
-    });
+    expect(enableResult).toBe(true);
 
     // Navigate to plugin management - check for attachment
     await expect(page.locator(PLUGIN_ITEM).first()).toBeAttached({ timeout: 10000 });
 
-    // Find the toggle for API Test Plugin and disable it
-    await page.evaluate(() => {
-      const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-      const apiTestCard = cards.find((card) => {
-        const title = card.querySelector('mat-card-title')?.textContent || '';
-        return title.includes('API Test Plugin');
-      });
-      const toggle = apiTestCard?.querySelector(
-        'mat-slide-toggle button[role="switch"]',
-      ) as HTMLButtonElement;
-
-      const result = {
-        found: !!apiTestCard,
-        hasToggle: !!toggle,
-        wasChecked: toggle?.getAttribute('aria-checked') === 'true',
-        clicked: false,
-      };
-
-      if (toggle && toggle.getAttribute('aria-checked') === 'true') {
-        toggle.click();
-        result.clicked = true;
-      }
-
-      return result;
-    });
-
-    // Wait for toggle state to change to disabled
-    await page.waitForFunction(
-      (name) => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-        const targetCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
-          return title.includes(name);
-        });
-        const toggle = targetCard?.querySelector(
-          'mat-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
-        return toggle?.getAttribute('aria-checked') === 'false';
-      },
+    // Disable the plugin using the helper function
+    const disableResult = await disablePluginWithVerification(
+      page,
       'API Test Plugin',
-      { timeout: 10000 },
+      15000,
     );
+    expect(disableResult).toBe(true);
 
-    // Re-enable the plugin - we should still be on settings page
-    // Just make sure plugin section is visible
-    await page.evaluate(() => {
-      const pluginSection = document.querySelector('.plugin-section');
-      if (pluginSection) {
-        pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
-
-    await page.evaluate(() => {
-      const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-      const apiTestCard = cards.find((card) => {
-        const title = card.querySelector('mat-card-title')?.textContent || '';
-        return title.includes('API Test Plugin');
-      });
-      const toggle = apiTestCard?.querySelector(
-        'mat-slide-toggle button[role="switch"]',
-      ) as HTMLButtonElement;
-
-      const result = {
-        found: !!apiTestCard,
-        hasToggle: !!toggle,
-        wasChecked: toggle?.getAttribute('aria-checked') === 'true',
-        clicked: false,
-      };
-
-      if (toggle && toggle.getAttribute('aria-checked') !== 'true') {
-        toggle.click();
-        result.clicked = true;
-      }
-
-      return result;
-    });
-
-    // Wait for toggle state to change to enabled again
-    await page.waitForFunction(
-      (name) => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-        const targetCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
-          return title.includes(name);
-        });
-        const toggle = targetCard?.querySelector(
-          'mat-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
-        return toggle?.getAttribute('aria-checked') === 'true';
-      },
+    // Re-enable the plugin using the helper function
+    const reEnableResult = await enablePluginWithVerification(
+      page,
       'API Test Plugin',
-      { timeout: 10000 },
+      15000,
     );
+    expect(reEnableResult).toBe(true);
 
     // Navigate back to main view
     await page.click('text=Today'); // Click on Today navigation
