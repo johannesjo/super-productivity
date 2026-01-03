@@ -4,6 +4,11 @@ import { ProjectPage } from '../pages/project.page';
 import { TaskPage } from '../pages/task.page';
 import { SettingsPage } from '../pages/settings.page';
 import { DialogPage } from '../pages/dialog.page';
+import { PlannerPage } from '../pages/planner.page';
+import { SyncPage } from '../pages/sync.page';
+import { TagPage } from '../pages/tag.page';
+import { NotePage } from '../pages/note.page';
+import { SideNavPage } from '../pages/side-nav.page';
 import { waitForAppReady } from '../utils/waits';
 import { dismissTourIfVisible } from '../utils/tour-helpers';
 
@@ -13,6 +18,11 @@ type TestFixtures = {
   taskPage: TaskPage;
   settingsPage: SettingsPage;
   dialogPage: DialogPage;
+  plannerPage: PlannerPage;
+  syncPage: SyncPage;
+  tagPage: TagPage;
+  notePage: NotePage;
+  sideNavPage: SideNavPage;
   isolatedContext: BrowserContext;
   waitForNav: (selector?: string) => Promise<void>;
   testPrefix: string;
@@ -108,6 +118,26 @@ export const test = base.extend<TestFixtures>({
 
   dialogPage: async ({ page, testPrefix }, use) => {
     await use(new DialogPage(page, testPrefix));
+  },
+
+  plannerPage: async ({ page }, use) => {
+    await use(new PlannerPage(page));
+  },
+
+  syncPage: async ({ page }, use) => {
+    await use(new SyncPage(page));
+  },
+
+  tagPage: async ({ page, testPrefix }, use) => {
+    await use(new TagPage(page, testPrefix));
+  },
+
+  notePage: async ({ page, testPrefix }, use) => {
+    await use(new NotePage(page, testPrefix));
+  },
+
+  sideNavPage: async ({ page, testPrefix }, use) => {
+    await use(new SideNavPage(page, testPrefix));
   },
 
   waitForNav: async ({ page }, use) => {

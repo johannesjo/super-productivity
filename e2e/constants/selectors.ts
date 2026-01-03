@@ -133,4 +133,6 @@ export const cssSelectors = {
   SCHEDULE_TASK_ITEM:
     'task-detail-item:has(mat-icon:text("alarm")), task-detail-item:has(mat-icon:text("today")), task-detail-item:has(mat-icon:text("schedule"))',
   TASK_SCHEDULE_BTN: '.ico-btn.schedule-btn',
-};
+} as const;
+
+export type SelectorKey = keyof typeof cssSelectors;

@@ -83,8 +83,10 @@ export const waitForAppReady = async (
     await page.locator(selector).first().waitFor({ state: 'visible', timeout: 8000 });
   }
 
-  // Wait for Angular to stabilize
-  await waitForAngularStability(page);
+  // Note: We no longer call waitForAngularStability here because:
+  // 1. We've already confirmed .route-wrapper is visible
+  // 2. Playwright's auto-waiting handles element actionability
+  // 3. The readyState check in waitForAngularStability can cause flakiness
 };
 
 /**
