@@ -70,17 +70,6 @@ export const test = base.extend<TestFixtures>({
 
       await waitForAppReady(page);
 
-      // Only wait for the global add input if it's already present
-      const addTaskInput = page.locator('add-task-bar.global input');
-      try {
-        const inputCount = await addTaskInput.count();
-        if (inputCount > 0) {
-          await addTaskInput.first().waitFor({ state: 'visible', timeout: 3000 });
-        }
-      } catch {
-        // Non-fatal: not all routes show the global add input immediately
-      }
-
       await use(page);
     } finally {
       // Cleanup - make sure context is still available

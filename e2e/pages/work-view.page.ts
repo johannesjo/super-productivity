@@ -29,28 +29,8 @@ export class WorkViewPage extends BasePage {
     // Ensure route wrapper is fully loaded
     await this.routerWrapper.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Wait for network to settle with timeout
-    await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
-      // Non-fatal: proceed even if network doesn't fully idle
-    });
-
     // Wait for Angular to stabilize using shared helper
     await waitForAngularStability(this.page);
-
-    // If the global add-task bar is already open, wait for its input
-    try {
-      const inputCount = await this.addTaskGlobalInput.count();
-      if (inputCount > 0) {
-        await this.addTaskGlobalInput
-          .first()
-          .waitFor({ state: 'visible', timeout: 3000 });
-      }
-    } catch {
-      // Non-fatal: some routes/tests don't show the global add bar immediately
-    }
-
-    // Final small wait to ensure UI is fully settled
-    await this.page.waitForTimeout(200);
   }
 
   async addSubTask(task: Locator, subTaskName: string): Promise<void> {
@@ -70,13 +50,10 @@ export class WorkViewPage extends BasePage {
 
     // Ensure the field is properly focused and cleared before filling
     await textarea.click();
-    await this.page.waitForTimeout(100);
     await textarea.fill('');
-    await this.page.waitForTimeout(50);
 
     // Use fill() instead of type() for more reliable text input
     await textarea.fill(subTaskName);
-    await this.page.waitForTimeout(100);
     await this.page.keyboard.press('Enter');
   }
 }

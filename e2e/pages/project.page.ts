@@ -42,9 +42,6 @@ export class ProjectPage extends BasePage {
       : projectName;
 
     try {
-      // Ensure page is stable before starting
-      await this.page.waitForLoadState('networkidle');
-
       // Check for empty state first (single "Create Project" button)
       const emptyStateBtn = this.page
         .locator('nav-item')
@@ -135,9 +132,6 @@ export class ProjectPage extends BasePage {
       ? `${this.testPrefix}-${projectName}`
       : projectName;
 
-    // Wait for page to be fully loaded before checking
-    await this.page.waitForLoadState('networkidle');
-
     // Wait for Angular to fully render after any navigation
     await this.page.waitForTimeout(2000);
 
@@ -227,8 +221,6 @@ export class ProjectPage extends BasePage {
       }
     }
 
-    await this.page.waitForLoadState('networkidle');
-
     // Final verification - wait for the project to appear in main
     // Use a locator-based wait for better reliability
     try {
@@ -280,9 +272,6 @@ export class ProjectPage extends BasePage {
   }
 
   async createAndGoToTestProject(): Promise<void> {
-    // Ensure the page context is stable before starting
-    await this.page.waitForLoadState('networkidle');
-
     // Wait for the nav to be fully loaded
     await this.sidenav.waitFor({ state: 'visible', timeout: 3000 }); // Reduced from 5s to 3s
 
@@ -417,9 +406,6 @@ export class ProjectPage extends BasePage {
 
     await newProject.click();
 
-    // Wait for navigation to complete
-    await this.page.waitForLoadState('networkidle');
-
     // Verify we're in the project
     await expect(this.workCtxTitle).toContainText(projectName);
   }
@@ -429,11 +415,8 @@ export class ProjectPage extends BasePage {
     const routerWrapper = this.page.locator('.route-wrapper');
     await routerWrapper.waitFor({ state: 'visible', timeout: 6000 }); // Reduced from 10s to 6s
 
-    // Wait for the page to be fully loaded
-    await this.page.waitForLoadState('networkidle');
     // Wait for project view to be ready
     await this.page.locator('.page-project').waitFor({ state: 'visible' });
-    await this.page.waitForTimeout(100);
 
     // First ensure notes section is visible by clicking toggle if needed
     const toggleNotesBtn = this.page.locator('.e2e-toggle-notes-btn');
