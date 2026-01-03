@@ -59,6 +59,19 @@ export const cssSelectors = {
   MAT_DIALOG: 'mat-dialog-container',
   DIALOG_FULLSCREEN_MARKDOWN: 'dialog-fullscreen-markdown',
   DIALOG_CREATE_PROJECT: 'dialog-create-project',
+  DIALOG_SCHEDULE_TASK: 'dialog-schedule-task',
+  DIALOG_ACTIONS: 'mat-dialog-actions',
+  DIALOG_SUBMIT: 'mat-dialog-actions button:last-child',
+
+  // ============================================================================
+  // REMINDER DIALOG SELECTORS
+  // ============================================================================
+  REMINDER_DIALOG: 'dialog-view-task-reminder',
+  REMINDER_DIALOG_TASKS: 'dialog-view-task-reminder .tasks',
+  REMINDER_DIALOG_TASK: 'dialog-view-task-reminder .task',
+  REMINDER_DIALOG_TASK_1: 'dialog-view-task-reminder .task:first-of-type',
+  REMINDER_DIALOG_TASK_2: 'dialog-view-task-reminder .task:nth-of-type(2)',
+  REMINDER_DIALOG_TASK_3: 'dialog-view-task-reminder .task:nth-of-type(3)',
 
   // ============================================================================
   // SETTINGS PAGE SELECTORS
@@ -108,4 +121,16 @@ export const cssSelectors = {
   // DATE/TIME SELECTORS
   // ============================================================================
   EDIT_DATE_INFO: '.edit-date-info',
+  TIME_INPUT: 'input[type="time"]',
+  MAT_TIME_INPUT: 'mat-form-field input[type="time"]',
+
+  // ============================================================================
+  // TASK DETAIL PANEL SELECTORS
+  // ============================================================================
+  RIGHT_PANEL: '.right-panel',
+  DETAIL_PANEL: 'dialog-task-detail-panel, task-detail-panel',
+  DETAIL_PANEL_BTN: '.show-additional-info-btn',
+  SCHEDULE_TASK_ITEM:
+    'task-detail-item:has(mat-icon:text("alarm")), task-detail-item:has(mat-icon:text("today")), task-detail-item:has(mat-icon:text("schedule"))',
+  TASK_SCHEDULE_BTN: '.ico-btn.schedule-btn',
 };

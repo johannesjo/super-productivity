@@ -92,10 +92,7 @@ test.describe('Work View', () => {
     await page.keyboard.press('Enter');
 
     // Wait for first task to be created
-    await page.waitForFunction(() => document.querySelectorAll('task').length >= 1, {
-      timeout: 10000,
-    });
-    await page.waitForTimeout(300);
+    await page.locator('task').first().waitFor({ state: 'visible', timeout: 10000 });
 
     // Add second task
     await workViewPage.addTaskGlobalInput.clear();
@@ -137,8 +134,8 @@ test.describe('Work View', () => {
     // Add two tasks - the addTask method now properly waits for each one
     await workViewPage.addTask('test task hihi');
 
-    // Wait a bit between tasks to ensure proper state update
-    await page.waitForTimeout(500);
+    // Wait for first task to be visible before adding second
+    await page.locator('task').first().waitFor({ state: 'visible', timeout: 10000 });
 
     await workViewPage.addTask('some other task here');
 

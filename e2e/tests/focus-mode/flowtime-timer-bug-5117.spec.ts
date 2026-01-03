@@ -84,18 +84,14 @@ test.describe('Bug #5117: Flowtime timer stops at Countdown duration', () => {
       const taskSelectorOverlay = page.locator('.task-selector-overlay');
       await expect(taskSelectorOverlay).toBeVisible({ timeout: 3000 });
 
-      // Wait a bit for the autocomplete to show suggestions
-      await page.waitForTimeout(500);
-
       // Click on the first suggested task (mat-option is in CDK overlay panel)
       const suggestedTask = page.locator('mat-option, .mat-mdc-option').first();
       await expect(suggestedTask).toBeVisible({ timeout: 5000 });
       await suggestedTask.click();
-      await page.waitForTimeout(500);
-    }
 
-    // Wait for focus mode main component to be ready (after task selection)
-    await page.waitForTimeout(500);
+      // Wait for task selector overlay to close
+      await expect(taskSelectorOverlay).not.toBeVisible({ timeout: 5000 });
+    }
 
     // Step 2: Switch to Countdown mode
     await countdownButton.click();
@@ -116,10 +112,7 @@ test.describe('Bug #5117: Flowtime timer stops at Countdown duration', () => {
     await expect(durationSlider).not.toBeVisible({ timeout: 2000 });
 
     // Verify clock shows 0:00 (Flowtime starts at 0 and counts up)
-    await page.waitForTimeout(300);
-    const clockText = await clockTime.textContent();
-    console.log('Clock text in Flowtime mode:', clockText);
-    expect(clockText?.trim()).toBe('0:00');
+    await expect(clockTime).toHaveText('0:00', { timeout: 3000 });
 
     // Step 5: Start the focus session by clicking play button
     await expect(playButton).toBeVisible({ timeout: 2000 });
@@ -218,15 +211,13 @@ test.describe('Bug #5117: Flowtime timer stops at Countdown duration', () => {
       const taskSelectorOverlay = page.locator('.task-selector-overlay');
       await expect(taskSelectorOverlay).toBeVisible({ timeout: 3000 });
 
-      await page.waitForTimeout(500);
-
       const suggestedTask = page.locator('mat-option, .mat-mdc-option').first();
       await expect(suggestedTask).toBeVisible({ timeout: 5000 });
       await suggestedTask.click();
-      await page.waitForTimeout(500);
-    }
 
-    await page.waitForTimeout(500);
+      // Wait for task selector overlay to close
+      await expect(taskSelectorOverlay).not.toBeVisible({ timeout: 5000 });
+    }
 
     // Step 1: Switch to Countdown mode
     await countdownButton.click();
@@ -242,10 +233,7 @@ test.describe('Bug #5117: Flowtime timer stops at Countdown duration', () => {
     await expect(flowtimeButton).toHaveClass(/is-active/, { timeout: 2000 });
 
     // Clock should show 0:00 for Flowtime
-    await page.waitForTimeout(300);
-    const flowTimeDisplay = await clockTime.textContent();
-    console.log('Flowtime initial display:', flowTimeDisplay);
-    expect(flowTimeDisplay?.trim()).toBe('0:00');
+    await expect(clockTime).toHaveText('0:00', { timeout: 3000 });
 
     // Step 4: Start the Flowtime session
     await expect(playButton).toBeVisible({ timeout: 2000 });

@@ -86,11 +86,11 @@ test.describe('Planner Navigation', () => {
     await projectPage.createAndGoToTestProject();
 
     // Wait for project to be fully loaded
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Add a task with schedule to ensure planner has content
     await workViewPage.addTask('Scheduled task for planner');
-    await page.waitForTimeout(500);
+    await expect(page.locator('task')).toHaveCount(1, { timeout: 10000 });
 
     // Navigate to planner using the button
     await plannerPage.navigateToPlanner();

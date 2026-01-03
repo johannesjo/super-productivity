@@ -12,8 +12,6 @@ test.describe('Project', () => {
 
     // Wait for app to be ready
     await workViewPage.waitForTaskList();
-    // Additional wait for stability in parallel execution
-    await page.waitForTimeout(50);
   });
 
   test('move done tasks to archive without error', async ({ page }) => {
@@ -65,47 +63,39 @@ test.describe('Project', () => {
       const isExpanded = await projectsGroupBtn.getAttribute('aria-expanded');
       if (isExpanded !== 'true') {
         await projectsGroupBtn.click();
-        await page.waitForTimeout(500); // Wait for expansion animation
+        // Wait for expansion by checking aria-expanded attribute
+        await page.waitForFunction(
+          (btn) => btn?.getAttribute('aria-expanded') === 'true',
+          await projectsGroupBtn.elementHandle(),
+          { timeout: 5000 },
+        );
       }
     }
 
     // Create a new project
     await projectPage.createProject('Cool Test Project');
 
-    // Wait for project creation to complete and navigation to update
+    // Wait for project creation to complete
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); // Increased wait time for DOM updates
 
     // After creating, ensure Projects section exists and is expanded
     await projectsGroupBtn.waitFor({ state: 'visible', timeout: 5000 });
 
-    // Check if Projects section needs to be expanded
-    let isExpanded = await projectsGroupBtn.getAttribute('aria-expanded');
-    if (isExpanded !== 'true') {
-      // Multiple approaches to expand the Projects section
-      // First: Try clicking the expand icon within the Projects button
-      const expandIcon = projectsGroupBtn
-        .locator('mat-icon, .expand-icon, [class*="expand"]')
-        .first();
-      if (await expandIcon.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await expandIcon.click();
-        await page.waitForTimeout(1500);
-        isExpanded = await projectsGroupBtn.getAttribute('aria-expanded');
-      }
-
-      // If still not expanded, try clicking the main button
-      if (isExpanded !== 'true') {
+    // Wait for Projects section to be expanded (the project creation should auto-expand it)
+    await page
+      .waitForFunction(
+        () => {
+          const btn = document.querySelector(
+            'nav-list-tree:has(nav-item button:has-text("Projects")) nav-item button',
+          );
+          return btn?.getAttribute('aria-expanded') === 'true';
+        },
+        { timeout: 10000 },
+      )
+      .catch(async () => {
+        // If not expanded, try clicking the main button
         await projectsGroupBtn.click();
-        await page.waitForTimeout(1500);
-        isExpanded = await projectsGroupBtn.getAttribute('aria-expanded');
-      }
-
-      // If still not expanded, try double-clicking as last resort
-      if (isExpanded !== 'true') {
-        await projectsGroupBtn.dblclick();
-        await page.waitForTimeout(1500);
-      }
-    }
+      });
 
     // Find the newly created project directly (with test prefix)
     const expectedProjectName = testPrefix
@@ -121,10 +111,6 @@ test.describe('Project', () => {
     } else {
       // Projects section might not have expanded properly - continue with fallback approaches
     }
-
-    // Look for the newly created project
-    // Wait a moment for the project to fully appear in the list
-    await page.waitForTimeout(1000);
 
     let newProject;
     let projectFound = false;
@@ -178,10 +164,11 @@ test.describe('Project', () => {
 
     // Wait for navigation to complete
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Brief wait for any animations
 
     // Verify we're in the new project
-    await expect(projectPage.workCtxTitle).toContainText(expectedProjectName);
+    await expect(projectPage.workCtxTitle).toContainText(expectedProjectName, {
+      timeout: 10000,
+    });
   });
 
   test('navigate to project settings', async ({ page }) => {

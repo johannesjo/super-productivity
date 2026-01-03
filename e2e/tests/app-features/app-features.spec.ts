@@ -75,9 +75,6 @@ test.describe('App Features', () => {
       await appFeaturesSection.click();
       await expect(featureSwitch).toBeVisible();
 
-      // Wait a moment for the toggle to be fully interactive after expansion animation
-      await page.waitForTimeout(100);
-
       // Click toggle button to enable and verify state change
       await featureSwitch.click();
       await expect(featureSwitch).toBeChecked();
