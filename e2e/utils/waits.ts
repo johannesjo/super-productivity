@@ -20,55 +20,42 @@ type WaitForAppReadyOptions = {
 /**
  * Wait until Angular reports stability or fall back to a DOM based heuristic.
  * Works for both dev and prod builds (where window.ng may be stripped).
+ * Optimized for speed - reduced timeout and streamlined checks.
  */
 export const waitForAngularStability = async (
   page: Page,
-  timeout = 5000,
+  timeout = 3000,
 ): Promise<void> => {
-  await page
-    .waitForFunction(
-      () => {
-        const win = window as unknown as {
-          getAllAngularTestabilities?: () => Array<{ isStable: () => boolean }>;
-          ng?: any;
-        };
+  await page.waitForFunction(
+    () => {
+      const win = window as unknown as {
+        getAllAngularTestabilities?: () => Array<{ isStable: () => boolean }>;
+      };
 
-        const testabilities = win.getAllAngularTestabilities?.();
-        if (testabilities && testabilities.length) {
-          return testabilities.every((testability) => {
-            try {
-              return testability.isStable();
-            } catch {
-              return false;
-            }
-          });
-        }
+      // Primary check: Angular testability API
+      const testabilities = win.getAllAngularTestabilities?.();
+      if (testabilities && testabilities.length) {
+        return testabilities.every((t) => {
+          try {
+            return t.isStable();
+          } catch {
+            return false;
+          }
+        });
+      }
 
-        const ng = win.ng;
-        const appRef = ng
-          ?.getComponent?.(document.body)
-          ?.injector?.get?.(ng.core?.ApplicationRef);
-        const manualStableFlag = appRef?.isStable;
-        if (typeof manualStableFlag === 'boolean') {
-          return manualStableFlag;
-        }
-
-        // As a final fallback, ensure the main shell exists & DOM settled.
-        return (
-          document.readyState === 'complete' &&
-          !!document.querySelector('magic-side-nav') &&
-          !!document.querySelector('.route-wrapper')
-        );
-      },
-      { timeout },
-    )
-    .catch(() => {
-      // Non-fatal: fall back to next waits
-    });
+      // Fallback: DOM readiness
+      return (
+        document.readyState === 'complete' && !!document.querySelector('.route-wrapper')
+      );
+    },
+    { timeout },
+  );
 };
 
 /**
  * Shared helper to wait until the application shell and Angular are ready.
+ * Optimized for speed - removed networkidle wait and redundant checks.
  */
 export const waitForAppReady = async (
   page: Page,
@@ -76,47 +63,37 @@ export const waitForAppReady = async (
 ): Promise<void> => {
   const { selector, ensureRoute = true, routeRegex = DEFAULT_ROUTE_REGEX } = options;
 
+  // Wait for initial page load
   await page.waitForLoadState('domcontentloaded');
-  await page
-    .waitForSelector('body', { state: 'visible', timeout: 10000 })
-    .catch(() => {});
 
-  await page
-    .waitForSelector('magic-side-nav', { state: 'visible', timeout: 15000 })
-    .catch(() => {});
-
+  // Wait for route to match (if required)
   if (ensureRoute) {
-    await page.waitForURL(routeRegex, { timeout: 15000 }).catch(() => {});
+    await page.waitForURL(routeRegex, { timeout: 10000 });
   }
 
-  await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
-
+  // Wait for main route wrapper to be visible (indicates app shell loaded)
   await page
     .locator('.route-wrapper')
     .first()
-    .waitFor({ state: 'visible', timeout: 10000 })
-    .catch(() => {});
+    .waitFor({ state: 'visible', timeout: 10000 });
 
+  // Wait for optional selector
   if (selector) {
-    await page
-      .waitForSelector(selector, { state: 'visible', timeout: 10000 })
-      .catch(() => {});
+    await page.locator(selector).first().waitFor({ state: 'visible', timeout: 8000 });
   }
 
-  await waitForAngularStability(page).catch(() => {});
-
-  // Small buffer to ensure animations settle.
-  await page.waitForTimeout(200);
+  // Wait for Angular to stabilize
+  await waitForAngularStability(page);
 };
 
 /**
  * Wait for local state changes to persist before triggering sync.
  * This ensures IndexedDB writes have completed after UI state changes.
- * Uses Angular stability + networkidle as indicators that async operations have settled.
+ * Optimized to rely on Angular stability rather than networkidle.
  */
 export const waitForStatePersistence = async (page: Page): Promise<void> => {
   // Wait for Angular to become stable (async operations complete)
-  await waitForAngularStability(page, 3000).catch(() => {});
-  // Wait for any pending network requests to complete
-  await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+  await waitForAngularStability(page, 3000);
+  // Small buffer for IndexedDB writes to complete
+  await page.waitForTimeout(100);
 };
