@@ -1,11 +1,17 @@
 import { BrowserContext, test as base } from '@playwright/test';
 import { WorkViewPage } from '../pages/work-view.page';
 import { ProjectPage } from '../pages/project.page';
+import { TaskPage } from '../pages/task.page';
+import { SettingsPage } from '../pages/settings.page';
+import { DialogPage } from '../pages/dialog.page';
 import { waitForAppReady } from '../utils/waits';
 
 type TestFixtures = {
   workViewPage: WorkViewPage;
   projectPage: ProjectPage;
+  taskPage: TaskPage;
+  settingsPage: SettingsPage;
+  dialogPage: DialogPage;
   isolatedContext: BrowserContext;
   waitForNav: (selector?: string) => Promise<void>;
   testPrefix: string;
@@ -97,6 +103,18 @@ export const test = base.extend<TestFixtures>({
 
   projectPage: async ({ page, testPrefix }, use) => {
     await use(new ProjectPage(page, testPrefix));
+  },
+
+  taskPage: async ({ page, testPrefix }, use) => {
+    await use(new TaskPage(page, testPrefix));
+  },
+
+  settingsPage: async ({ page, testPrefix }, use) => {
+    await use(new SettingsPage(page, testPrefix));
+  },
+
+  dialogPage: async ({ page, testPrefix }, use) => {
+    await use(new DialogPage(page, testPrefix));
   },
 
   waitForNav: async ({ page }, use) => {
