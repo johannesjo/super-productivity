@@ -325,26 +325,31 @@ export const verifyAuthentication = async (
     throw new Error('Challenge expired or not found. Please try again.');
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() },
-    include: { passkeys: true },
+  // With discoverable credentials, look up the passkey by credential ID
+  // instead of by email, since the user might select any passkey for this RP
+  const credentialIdBuffer = Buffer.from(credential.id, 'base64url');
+
+  const passkey = await prisma.passkey.findUnique({
+    where: { credentialId: credentialIdBuffer },
+    include: { user: true },
   });
 
-  if (!user || user.passkeys.length === 0) {
+  if (!passkey) {
+    Logger.warn(
+      `Passkey not found for credential ID: ${credential.id.substring(0, 20)}...`,
+    );
     throw new Error('Invalid credentials');
   }
+
+  const user = passkey.user;
 
   if (user.isVerified === 0) {
     throw new Error('Email not verified');
   }
 
-  // Find the passkey used
-  const passkey = user.passkeys.find(
-    (pk) => Buffer.from(pk.credentialId).toString('base64url') === credential.id,
-  );
-
-  if (!passkey) {
-    throw new Error('Invalid credentials');
+  // Log if the email doesn't match (user selected a different account's passkey)
+  if (user.email.toLowerCase() !== email.toLowerCase()) {
+    Logger.info(`User authenticated with passkey for ${user.email} but entered ${email}`);
   }
 
   let verification;
@@ -356,7 +361,7 @@ export const verifyAuthentication = async (
       expectedRPID: rpID,
       requireUserVerification: false, // We use 'preferred', not 'required'
       credential: {
-        id: Buffer.from(passkey.credentialId).toString('base64url'),
+        id: passkey.credentialId.toString('base64url'),
         publicKey: passkey.publicKey,
         counter: Number(passkey.counter),
         transports: passkey.transports ? JSON.parse(passkey.transports) : undefined,
