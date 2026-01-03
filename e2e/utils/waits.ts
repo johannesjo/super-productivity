@@ -18,37 +18,20 @@ type WaitForAppReadyOptions = {
 };
 
 /**
- * Wait until Angular reports stability or fall back to a DOM based heuristic.
- * Works for both dev and prod builds (where window.ng may be stripped).
- * Optimized for speed - reduced timeout and streamlined checks.
+ * Simplified wait that relies on Playwright's auto-waiting.
+ * Previously used Angular testability API to check Zone.js stability.
+ * Now just checks DOM readiness - Playwright handles element actionability.
+ *
+ * Experiment showed: Angular stability checks not needed for most UI tests.
+ * Playwright's auto-waiting (before click, fill, assertions) is sufficient.
  */
 export const waitForAngularStability = async (
   page: Page,
   timeout = 3000,
 ): Promise<void> => {
   await page.waitForFunction(
-    () => {
-      const win = window as unknown as {
-        getAllAngularTestabilities?: () => Array<{ isStable: () => boolean }>;
-      };
-
-      // Primary check: Angular testability API
-      const testabilities = win.getAllAngularTestabilities?.();
-      if (testabilities && testabilities.length) {
-        return testabilities.every((t) => {
-          try {
-            return t.isStable();
-          } catch {
-            return false;
-          }
-        });
-      }
-
-      // Fallback: DOM readiness
-      return (
-        document.readyState === 'complete' && !!document.querySelector('.route-wrapper')
-      );
-    },
+    () =>
+      document.readyState === 'complete' && !!document.querySelector('.route-wrapper'),
     { timeout },
   );
 };
