@@ -382,6 +382,20 @@ describe('OperationLogStoreService', () => {
     });
   });
 
+  describe('countOps', () => {
+    it('should return 0 when the op-log is empty', async () => {
+      expect(await service.countOps()).toBe(0);
+    });
+
+    it('should return the total number of stored operations', async () => {
+      await service.append(createTestOperation({ entityId: 'task1' }));
+      await service.append(createTestOperation({ entityId: 'task2' }));
+      await service.append(createTestOperation({ entityId: 'task3' }));
+
+      expect(await service.countOps()).toBe(3);
+    });
+  });
+
   describe('getUnsynced', () => {
     it('should return only unsynced local operations', async () => {
       const localOp = createTestOperation({ entityId: 'localTask' });

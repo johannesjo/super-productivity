@@ -1009,6 +1009,18 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
   }
 
   /**
+   * Returns the total number of operations currently in the op-log store.
+   * Backed by the adapter's `count()` — O(1) on IndexedDB (a maintained store count,
+   * not a scan) and a cheap COUNT(*) index walk on SQLite — so it is fine to call on
+   * every startup. Used to detect an op-log that has grown large enough to warrant
+   * compaction (see STARTUP_COMPACTION_OP_THRESHOLD).
+   */
+  async countOps(): Promise<number> {
+    await this._ensureInit();
+    return this._adapter.count(STORE_NAMES.OPS);
+  }
+
+  /**
    * Checks if there are any operations that have been synced to the server.
    * Used to distinguish between:
    * - Fresh client (only local ops, never synced) → NOT a server migration
@@ -1147,6 +1159,17 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
   // ============================================================
   // Persistent Compaction Counter
   // ============================================================
+  //
+  // SUPERSEDED / removal candidate: this persisted counter was meant to carry the
+  // "ops since last compaction" count across restarts, but `incrementCompactionCounter`
+  // has no production callers (it is never persisted as non-zero, and every
+  // `saveStateCache` put wipes the field), so `getCompactionCounter` effectively
+  // always returns 0. Cross-restart op-log growth is now bounded by the startup
+  // op-count check in OperationLogHydratorService (STARTUP_COMPACTION_OP_THRESHOLD).
+  // The mid-session trigger uses only the in-memory counter in OperationLogEffects.
+  // Removing this plumbing is a worthwhile follow-up but is deferred: `getCompactionCounter`
+  // currently doubles as the seed seam for the effect's compaction-threshold unit
+  // tests, so removal needs those tests migrated first.
 
   /**
    * Gets the current compaction counter value.

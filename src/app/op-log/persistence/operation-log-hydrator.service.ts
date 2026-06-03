@@ -8,6 +8,7 @@ import {
   SchemaMigrationService,
 } from './schema-migration.service';
 import { OperationLogSnapshotService } from './operation-log-snapshot.service';
+import { OperationLogCompactionService } from './operation-log-compaction.service';
 import { OperationLogRecoveryService } from './operation-log-recovery.service';
 import { SyncHydrationService } from './sync-hydration.service';
 import { ArchiveMigrationService } from './archive-migration.service';
@@ -23,7 +24,10 @@ import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { bulkApplyOperations } from '../apply/bulk-hydration.action';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../core/operation-log.const';
+import {
+  MAX_CONFLICT_RETRY_ATTEMPTS,
+  STARTUP_COMPACTION_OP_THRESHOLD,
+} from '../core/operation-log.const';
 import { AppDataComplete } from '../model/model-config';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { limitVectorClockSize } from '../../core/util/vector-clock';
@@ -58,6 +62,7 @@ export class OperationLogHydratorService {
 
   // Extracted services
   private snapshotService = inject(OperationLogSnapshotService);
+  private compactionService = inject(OperationLogCompactionService);
   private recoveryService = inject(OperationLogRecoveryService);
   private syncHydrationService = inject(SyncHydrationService);
   private archiveMigrationService = inject(ArchiveMigrationService);
@@ -360,6 +365,10 @@ export class OperationLogHydratorService {
       // Now that state is fully hydrated, dependencies might be resolved
       await this.retryFailedRemoteOps();
 
+      // Safety net for op-log growth: prune if the log has grown large across
+      // sessions (the in-memory compaction counter only fires within a session).
+      await this._compactIfOpLogBloated();
+
       // Clear the auto-reload guard so that a fresh backing-store error in the same
       // tab session gets the auto-reload treatment again rather than going straight
       // to the manual recovery dialog.
@@ -532,6 +541,48 @@ export class OperationLogHydratorService {
    */
   private async _runLegacyCleanupIfNeeded(): Promise<void> {
     // No-op: placeholder for future cleanup operations
+  }
+
+  /**
+   * Triggers a compaction at startup if the op-log has grown past
+   * STARTUP_COMPACTION_OP_THRESHOLD.
+   *
+   * Why this exists: compaction (the only path that prunes old synced ops) is
+   * normally driven by an in-memory counter that fires after COMPACTION_THRESHOLD
+   * ops — but that counter resets every restart, so a user whose sessions stay
+   * below the threshold never prunes and the op-log grows unbounded across
+   * restarts. This checks the actual op count (O(1)) and kicks off a compaction
+   * when the log is genuinely large.
+   *
+   * Fire-and-forget (like OperationLogEffects.triggerCompaction) so it adds no
+   * startup latency, and fully self-contained: any failure is logged and
+   * swallowed so it can never abort hydration (which would trigger recovery).
+   *
+   * Failure handling intentionally differs from OperationLogEffects.triggerCompaction:
+   * failures here are logged but NOT escalated to the COMPACTION_FAILED snack/reload
+   * prompt, because interrupting startup with a reload dialog is worse UX than a
+   * silent retry on the next boot. Known gap: a restart-heavy user (the very
+   * population this trigger targets) whose compaction keeps failing won't be
+   * notified, since they may never cross COMPACTION_THRESHOLD within a session to
+   * reach the escalating path. Accepted for now — the swallow is safe (the log keeps
+   * growing but stays correct) and compaction retries every boot.
+   */
+  private async _compactIfOpLogBloated(): Promise<void> {
+    try {
+      const opCount = await this.opLogStore.countOps();
+      if (opCount > STARTUP_COMPACTION_OP_THRESHOLD) {
+        OpLog.normal(
+          `OperationLogHydratorService: op-log has ${opCount} ops ` +
+            `(> ${STARTUP_COMPACTION_OP_THRESHOLD}) — triggering startup compaction`,
+        );
+        // Not awaited: compaction runs in the background after hydration returns.
+        this.compactionService.compact().catch((e) => {
+          OpLog.err('OperationLogHydratorService: Startup compaction failed', e);
+        });
+      }
+    } catch (e) {
+      OpLog.warn('OperationLogHydratorService: op-log bloat check failed', e);
+    }
   }
 
   /**

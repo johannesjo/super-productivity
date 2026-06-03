@@ -16,6 +16,7 @@ import { VectorClockService } from '../sync/vector-clock.service';
 import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { OperationLogSnapshotService } from './operation-log-snapshot.service';
+import { OperationLogCompactionService } from './operation-log-compaction.service';
 import { OperationLogRecoveryService } from './operation-log-recovery.service';
 import { SyncHydrationService } from './sync-hydration.service';
 import {
@@ -30,6 +31,7 @@ import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider
 import { MAX_VECTOR_CLOCK_SIZE } from '@sp/shared-schema';
 import { IndexedDBOpenError } from '../core/errors/indexed-db-open.error';
 import { IDB_OPEN_ERROR_RELOAD_KEY } from './operation-log-hydrator.service';
+import { STARTUP_COMPACTION_OP_THRESHOLD } from '../core/operation-log.const';
 
 describe('OperationLogHydratorService', () => {
   let service: OperationLogHydratorService;
@@ -45,6 +47,7 @@ describe('OperationLogHydratorService', () => {
   let mockOperationApplierService: jasmine.SpyObj<OperationApplierService>;
   let mockHydrationStateService: jasmine.SpyObj<HydrationStateService>;
   let mockSnapshotService: jasmine.SpyObj<OperationLogSnapshotService>;
+  let mockCompactionService: jasmine.SpyObj<OperationLogCompactionService>;
   let mockRecoveryService: jasmine.SpyObj<OperationLogRecoveryService>;
   let mockSyncHydrationService: jasmine.SpyObj<SyncHydrationService>;
   let mockClientIdProvider: jasmine.SpyObj<ClientIdProvider>;
@@ -111,6 +114,7 @@ describe('OperationLogHydratorService', () => {
       'setVectorClock',
       'mergeRemoteOpClocks',
       'getLatestFullStateOp',
+      'countOps',
     ]);
     mockMigrationService = jasmine.createSpyObj('OperationLogMigrationService', [
       'checkAndMigrate',
@@ -147,6 +151,9 @@ describe('OperationLogHydratorService', () => {
       'migrateSnapshotWithBackup',
       'saveCurrentStateAsSnapshot',
     ]);
+    mockCompactionService = jasmine.createSpyObj('OperationLogCompactionService', [
+      'compact',
+    ]);
     mockRecoveryService = jasmine.createSpyObj('OperationLogRecoveryService', [
       'recoverPendingRemoteOps',
       'cleanupCorruptOps',
@@ -175,6 +182,7 @@ describe('OperationLogHydratorService', () => {
     mockOpLogStore.markFailed.and.returnValue(Promise.resolve());
     mockOpLogStore.mergeRemoteOpClocks.and.returnValue(Promise.resolve());
     mockOpLogStore.getLatestFullStateOp.and.returnValue(Promise.resolve(undefined));
+    mockOpLogStore.countOps.and.returnValue(Promise.resolve(0));
     mockOperationApplierService.applyOperations.and.returnValue(
       Promise.resolve({ appliedOps: [] }),
     );
@@ -197,6 +205,7 @@ describe('OperationLogHydratorService', () => {
     mockSnapshotService.isValidSnapshot.and.returnValue(true);
     mockSnapshotService.migrateSnapshotWithBackup.and.callFake(async (s) => s);
     mockSnapshotService.saveCurrentStateAsSnapshot.and.returnValue(Promise.resolve());
+    mockCompactionService.compact.and.returnValue(Promise.resolve());
     mockRecoveryService.recoverPendingRemoteOps.and.returnValue(Promise.resolve());
     mockRecoveryService.cleanupCorruptOps.and.returnValue(Promise.resolve());
     mockRecoveryService.attemptRecovery.and.returnValue(Promise.resolve());
@@ -217,6 +226,7 @@ describe('OperationLogHydratorService', () => {
         { provide: OperationApplierService, useValue: mockOperationApplierService },
         { provide: HydrationStateService, useValue: mockHydrationStateService },
         { provide: OperationLogSnapshotService, useValue: mockSnapshotService },
+        { provide: OperationLogCompactionService, useValue: mockCompactionService },
         { provide: OperationLogRecoveryService, useValue: mockRecoveryService },
         { provide: SyncHydrationService, useValue: mockSyncHydrationService },
         { provide: CLIENT_ID_PROVIDER, useValue: mockClientIdProvider },
@@ -1431,6 +1441,59 @@ describe('OperationLogHydratorService', () => {
       await service.hydrateStore();
 
       expect(sessionStorage.getItem(IDB_OPEN_ERROR_RELOAD_KEY)).toBeNull();
+    });
+  });
+
+  describe('startup compaction (op-log bloat safety net)', () => {
+    // Drive hydration down a path that reaches the post-hydration bloat check:
+    // a valid snapshot with no tail ops to replay.
+    beforeEach(() => {
+      mockOpLogStore.loadStateCache.and.returnValue(
+        Promise.resolve(createMockSnapshot()),
+      );
+      mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
+    });
+
+    it('triggers compaction when the op-log has grown past the threshold', async () => {
+      mockOpLogStore.countOps.and.returnValue(
+        Promise.resolve(STARTUP_COMPACTION_OP_THRESHOLD + 1),
+      );
+
+      await service.hydrateStore();
+
+      expect(mockCompactionService.compact).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT trigger compaction at or below the threshold', async () => {
+      mockOpLogStore.countOps.and.returnValue(
+        Promise.resolve(STARTUP_COMPACTION_OP_THRESHOLD),
+      );
+
+      await service.hydrateStore();
+
+      expect(mockCompactionService.compact).not.toHaveBeenCalled();
+    });
+
+    it('does not abort hydration if the op-count check fails', async () => {
+      mockOpLogStore.countOps.and.rejectWith(new Error('count failed'));
+
+      // The check is self-contained — a failure must not bubble up and trigger
+      // recovery; hydration still resolves.
+      await expectAsync(service.hydrateStore()).toBeResolved();
+      expect(mockRecoveryService.attemptRecovery).not.toHaveBeenCalled();
+      expect(mockCompactionService.compact).not.toHaveBeenCalled();
+    });
+
+    it('does not abort hydration if the background compaction fails', async () => {
+      mockOpLogStore.countOps.and.returnValue(
+        Promise.resolve(STARTUP_COMPACTION_OP_THRESHOLD + 1),
+      );
+      mockCompactionService.compact.and.rejectWith(new Error('compaction failed'));
+
+      // compact() is fire-and-forget; its rejection is caught, so hydration
+      // still resolves.
+      await expectAsync(service.hydrateStore()).toBeResolved();
+      expect(mockCompactionService.compact).toHaveBeenCalledTimes(1);
     });
   });
 });
