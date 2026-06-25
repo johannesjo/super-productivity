@@ -130,6 +130,7 @@ export interface OpUploadResponse {
   newOps?: ServerSyncOperation[];
   latestSeq: number;
   hasMorePiggyback?: boolean;
+  deduplicated?: boolean;
 }
 
 export interface OpDownloadResponseBase {

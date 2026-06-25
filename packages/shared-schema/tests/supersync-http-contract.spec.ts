@@ -5,7 +5,9 @@ import {
   SuperSyncDownloadOpsQuerySchema,
   SuperSyncDownloadOpsResponseSchema,
   SuperSyncOperationSchema,
+  SuperSyncSnapshotUploadResponseSchema,
   SuperSyncUploadOpsRequestSchema,
+  SuperSyncUploadOpsResponseSchema,
   SuperSyncUploadSnapshotRequestSchema,
 } from '../src/supersync-http-contract';
 
@@ -269,6 +271,39 @@ describe('SuperSync HTTP contract schemas', () => {
         ops: [createValidOperation()],
         clientId: 'client_1',
         requestId: 'x'.repeat(65),
+      }),
+    ).toThrow();
+  });
+
+  it('types deduplicated upload responses instead of relying on passthrough', () => {
+    const parsed = SuperSyncUploadOpsResponseSchema.parse({
+      results: [],
+      latestSeq: 12,
+      deduplicated: true,
+    });
+
+    expect(parsed.deduplicated).toBe(true);
+    expect(() =>
+      SuperSyncUploadOpsResponseSchema.parse({
+        results: [],
+        latestSeq: 12,
+        deduplicated: 'true',
+      }),
+    ).toThrow();
+  });
+
+  it('types snapshot upload errorCode responses instead of relying on passthrough', () => {
+    const parsed = SuperSyncSnapshotUploadResponseSchema.parse({
+      accepted: false,
+      error: 'SYNC_IMPORT_EXISTS',
+      errorCode: 'SYNC_IMPORT_EXISTS',
+    });
+
+    expect(parsed.errorCode).toBe('SYNC_IMPORT_EXISTS');
+    expect(() =>
+      SuperSyncSnapshotUploadResponseSchema.parse({
+        accepted: false,
+        errorCode: 409,
       }),
     ).toThrow();
   });
