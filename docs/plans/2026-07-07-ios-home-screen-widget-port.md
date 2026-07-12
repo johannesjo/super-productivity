@@ -2,9 +2,9 @@
 
 > **Status:** Implemented on open PR #8950; not merged into this branch
 >
-> **Implementation branch:** `codex/pr-8950-improvements`
+> **Implementation branch:** `claude/mobile-platform-improvements-jhp6x2`
 >
-> **Last verified:** 2026-07-29
+> **Last verified:** 2026-08-06
 >
 > Delete this plan after the implementation merges and its durable contract and
 > limitations have moved to a maintained widget guide.

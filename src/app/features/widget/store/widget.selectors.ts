@@ -6,7 +6,7 @@ import {
   selectStartOfNextDayDiffMs,
   selectTodayStr,
 } from '../../../root-store/app-state/app-state.selectors';
-import { AndroidWidgetData, AndroidWidgetTask } from '../android-widget.model';
+import { WidgetData, WidgetTask } from '../widget-data.model';
 
 /**
  * The instant the logical day `dayStr` stops being "today": local midnight after it,
@@ -32,7 +32,7 @@ export const getWidgetValidUntil = (
  * consumers get referential stability from the selector memoization and cheap
  * change detection via JSON comparison in WidgetDataService.
  */
-export const selectAndroidWidgetData = createSelector(
+export const selectWidgetData = createSelector(
   selectTodayTaskIds,
   selectTaskEntities,
   selectProjectFeatureState,
@@ -44,8 +44,8 @@ export const selectAndroidWidgetData = createSelector(
     projectState,
     dayStr,
     startOfNextDayDiffMs,
-  ): AndroidWidgetData => {
-    const tasks: AndroidWidgetTask[] = [];
+  ): WidgetData => {
+    const tasks: WidgetTask[] = [];
     const projectColors: { [projectId: string]: string } = {};
 
     for (const taskId of todayTaskIds) {
@@ -53,7 +53,7 @@ export const selectAndroidWidgetData = createSelector(
       if (!task) {
         continue;
       }
-      const widgetTask: AndroidWidgetTask = {
+      const widgetTask: WidgetTask = {
         id: task.id,
         title: task.title,
         isDone: task.isDone,
