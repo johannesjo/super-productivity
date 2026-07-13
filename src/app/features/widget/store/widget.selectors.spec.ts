@@ -1,7 +1,7 @@
 import { getWidgetValidUntil, selectWidgetData } from './widget.selectors';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { Task } from '../../tasks/task.model';
-import { Project } from '../../project/project.model';
+import { Project, ProjectState } from '../../project/project.model';
 
 describe('getWidgetValidUntil', () => {
   const HOUR = 60 * 60 * 1000;
@@ -71,7 +71,7 @@ describe('selectWidgetData', () => {
       theme: primary ? { primary } : {},
     }) as Project;
 
-  const projectState = (projects: Project[]): any => ({
+  const projectState = (projects: Project[]): ProjectState => ({
     ids: projects.map((p) => p.id),
     entities: Object.fromEntries(projects.map((p) => [p.id, p])),
   });
