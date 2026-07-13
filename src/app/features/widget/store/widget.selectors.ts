@@ -12,7 +12,7 @@ import { WidgetData, WidgetTask } from '../widget-data.model';
  * The instant the logical day `dayStr` stops being "today": local midnight after it,
  * plus the user's start-of-next-day offset. This is the whole of what native needs to
  * judge staleness (`now >= validUntil`), so the app's day rules never get mirrored
- * into Kotlin/Swift — see AndroidWidgetData.validUntil.
+ * into Kotlin/Swift — see WidgetData.validUntil.
  *
  * Pure in its arguments — deliberately no Date.now(), so the selector stays
  * replay-deterministic. `new Date(y, m, d)` normalizes month/year overflow and lands

@@ -8,6 +8,25 @@ import { WIDGET_DATA_KEY } from './widget-data.model';
 import { selectWidgetData } from './store/widget.selectors';
 import { Log } from '../../core/log';
 
+export class WidgetPushQueue {
+  private _pending: Promise<void> = Promise.resolve();
+
+  enqueue(push: () => Promise<boolean>): Promise<boolean> {
+    const result = this._pending.then(push);
+    this._pending = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
+}
+
+export interface WidgetDoneQueueLease {
+  queueJson: string;
+  /** iOS revision token; Android's legacy destructive read has no token. */
+  acknowledgementToken?: string;
+}
+
 /**
  * Pushes the current today-task snapshot to the native store backing the home
  * screen widget (Android: KeyValStore via androidInterface; iOS: App Group
@@ -19,14 +38,21 @@ import { Log } from '../../core/log';
 export class WidgetDataService {
   private _store = inject(Store);
   private _lastPushedJson: string | null = null;
+  private _pushQueue = new WidgetPushQueue();
 
-  async pushCurrent(): Promise<void> {
-    const data = await firstValueFrom(this._store.select(selectWidgetData));
-    const json = JSON.stringify(data);
-    if (json === this._lastPushedJson) {
-      return;
-    }
+  pushCurrent(): Promise<boolean> {
+    return this._pushQueue.enqueue(() => this._pushCurrentNow());
+  }
+
+  private async _pushCurrentNow(): Promise<boolean> {
     try {
+      // Read inside the serialized section so a later trigger always writes a
+      // state at least as fresh as the push before it.
+      const data = await firstValueFrom(this._store.select(selectWidgetData));
+      const json = JSON.stringify(data);
+      if (json === this._lastPushedJson) {
+        return true;
+      }
       if (IS_ANDROID_WEB_VIEW) {
         await androidInterface.saveToDbWrapped(WIDGET_DATA_KEY, json);
         androidInterface.updateWidget?.();
@@ -35,19 +61,44 @@ export class WidgetDataService {
       }
       // only remember successful pushes, so a failed one is retried next trigger
       this._lastPushedJson = json;
+      return true;
     } catch (e) {
       Log.err('Failed to push widget data', e);
+      return false;
     }
   }
 
   /**
-   * Read and clear the pending widget done-tap queue. Both platforms return
-   * the same JSON object string `{taskId: targetIsDone}`, or null when empty.
+   * Read pending widget done targets. The iOS bridge leases without deleting;
+   * Android keeps its existing destructive native read.
    */
-  async getAndClearDoneQueue(): Promise<string | null> {
+  async readDoneQueue(): Promise<WidgetDoneQueueLease | null> {
     if (IS_ANDROID_WEB_VIEW) {
-      return androidInterface.getWidgetDoneQueue?.() ?? null;
+      const queueJson = androidInterface.getWidgetDoneQueue?.() ?? null;
+      return queueJson ? { queueJson } : null;
     }
-    return (await WidgetBridge.getAndClearDoneQueue()).json;
+    const { json, token } = await WidgetBridge.readDoneQueue();
+    if (!json) {
+      return null;
+    }
+    if (!token) {
+      throw new Error('iOS widget queue lease is missing its acknowledgement token');
+    }
+    return { queueJson: json, acknowledgementToken: token };
+  }
+
+  /**
+   * Acknowledge an iOS queue lease after the matching task operations are
+   * durable. Android's legacy read already clears its queue, so this is a no-op.
+   */
+  async acknowledgeDoneQueue(lease: WidgetDoneQueueLease): Promise<void> {
+    if (!IS_ANDROID_WEB_VIEW) {
+      if (!lease.acknowledgementToken) {
+        throw new Error('Cannot acknowledge iOS widget queue without a lease token');
+      }
+      await WidgetBridge.acknowledgeDoneQueue({
+        token: lease.acknowledgementToken,
+      });
+    }
   }
 }
