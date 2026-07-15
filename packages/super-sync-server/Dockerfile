@@ -5,15 +5,20 @@ WORKDIR /repo
 
 RUN apk add --no-cache openssl libc6-compat
 
-# Root package + lock (for workspace install)
-COPY package.json package-lock.json ./
+# Root package + Bun lock (for workspace install)
+COPY package.json bun.lock ./
+COPY apps/client/package.json ./apps/client/
+COPY packages/application/package.json ./packages/application/
+COPY packages/domain/package.json ./packages/domain/
+COPY packages/integrations/package.json ./packages/integrations/
+COPY packages/platform/package.json ./packages/platform/
 COPY packages/sync-core/package.json ./packages/sync-core/
+COPY packages/sync-providers/package.json ./packages/sync-providers/
 COPY packages/shared-schema/package.json ./packages/shared-schema/
 COPY packages/super-sync-server/package.json ./packages/super-sync-server/
 
-# Install ALL dependencies for the monorepo
-# Use npm ci for reproducible builds; requires compatible lockfile
-RUN npm ci --ignore-scripts
+# Install the reproducible Bun workspace graph.
+RUN npm install --global bun@1.3.14 && bun install --frozen-lockfile --ignore-scripts
 
 # Copy source code
 COPY packages/sync-core/ ./packages/sync-core/
@@ -22,18 +27,18 @@ COPY packages/super-sync-server/ ./packages/super-sync-server/
 
 # Build sync-core, then shared-schema
 WORKDIR /repo/packages/sync-core
-RUN npm run build
+RUN bun run build
 RUN npm pack
 
 WORKDIR /repo/packages/shared-schema
-RUN npm run build
+RUN bun run build
 # Pack shared-schema to tgz for installation in production
 RUN npm pack
 
 # Build super-sync-server
 WORKDIR /repo/packages/super-sync-server
-RUN npx prisma generate
-RUN rm -rf dist && npm run build
+RUN bunx prisma generate
+RUN rm -rf dist && bun run build
 
 # ---- Runtime stage ----
 FROM node:24-alpine AS production

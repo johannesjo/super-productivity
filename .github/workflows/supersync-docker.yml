@@ -1,106 +1,44 @@
-name: Build and Push SuperSync Docker Image
+name: SuperSync Docker
 
 on:
   push:
     branches:
       - master
+      - main
     paths:
-      - '.dockerignore'
-      - '.github/workflows/supersync-docker.yml'
-      - 'package.json'
-      - 'package-lock.json'
+      - 'packages/super-sync-server/**'
       - 'packages/shared-schema/**'
       - 'packages/sync-core/**'
-      - 'packages/super-sync-server/**'
+      - '.dockerignore'
+      - 'bun.lock'
   workflow_dispatch:
-    inputs:
-      no_cache:
-        description: 'Build without cache'
-        required: false
-        type: boolean
-        default: true
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  build-and-push:
-    name: Build and Push to GHCR
+  image:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
-        with:
-          egress-policy: audit
-          allowed-endpoints: >
-            api.github.com:443
-            github.com:443
-            ghcr.io:443
-            registry.npmjs.org:443
-            objects.githubusercontent.com:443
-
-      - name: Check out the repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
-
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v2
+      - name: Resolve image source revision
+        id: source-ref
+        run: |
+          revision=$(git rev-parse HEAD)
+          test -n "$revision" || { echo "Could not resolve SuperSync image source revision"; exit 1; }
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags)
-        id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
-        with:
-          images: ghcr.io/super-productivity/supersync
-          tags: |
-            type=raw,value=latest
-            type=sha,prefix={{branch}}-
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
-
-      - name: Resolve image source revision
-        id: source-ref
-        shell: bash
-        run: |
-          revision="$(git log -1 --format=%H -- \
-            .dockerignore \
-            .github/workflows/supersync-docker.yml \
-            package.json \
-            package-lock.json \
-            packages/shared-schema \
-            packages/sync-core \
-            packages/super-sync-server)"
-          if [ -z "$revision" ]; then
-            echo "Could not resolve SuperSync image source revision" >&2
-            exit 1
-          fi
-          echo "revision=$revision" >> "$GITHUB_OUTPUT"
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+      - uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./packages/super-sync-server/Dockerfile
+          file: packages/super-sync-server/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          build-args: |
-            VCS_REF=${{ steps.source-ref.outputs.revision }}
-          no-cache: ${{ github.event_name == 'workflow_dispatch' && inputs.no_cache || false }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Image digest
-        run: echo "Image pushed with digest ${{ steps.meta.outputs.tags }}"
+          tags: ghcr.io/${{ github.repository_owner }}/noura-supersync:latest
+          build-args: VCS_REF=${{ steps.source-ref.outputs.revision }}

@@ -1,1 +1,0 @@
-Fixed dangling tag references during sync archiving by scanning all tags.

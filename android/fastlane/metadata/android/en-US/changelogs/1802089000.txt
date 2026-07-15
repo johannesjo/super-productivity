@@ -1,2 +1,0 @@
-- warn web users about browser limitations
-- move shared timestamp util into electron/ for snap packaging

@@ -20,8 +20,8 @@
 # ==========================================
 # Build & Deployment Configuration (HIGH)
 # ==========================================
-# Electron application entry point and build config
-/electron/ @johannesjo
+# Tauri application host and capabilities
+/apps/client/src-tauri/ @johannesjo
 
 # Docker deployment configuration
 /Dockerfile @johannesjo
@@ -29,22 +29,12 @@
 /docker-compose*.yml @johannesjo
 /docker-compose*.yaml @johannesjo
 
-# Mobile app build configuration
-/android/ @johannesjo
-/ios/ @johannesjo
-/capacitor.config.ts @johannesjo
-
-# Electron Builder configuration (code signing, auto-update)
-/build/ @johannesjo
-/electron-builder*.yml @johannesjo
-/electron-builder*.yaml @johannesjo
-
 # ==========================================
 # Package Management (HIGH)
 # ==========================================
 # Dependencies and lock files (supply chain risk)
 /package.json @johannesjo
-/package-lock.json @johannesjo
+/bun.lock @johannesjo
 
 # ==========================================
 # Security & Environment (HIGH)
@@ -54,7 +44,6 @@
 
 # Environment configuration
 /.env.example @johannesjo
-/tools/load-env.js @johannesjo
 
 # ==========================================
 # Web Server Configuration (MEDIUM)

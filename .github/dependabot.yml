@@ -4,7 +4,7 @@
 version: 2
 updates:
   # ==========================================
-  # npm Dependencies (Monthly Updates)
+  # Bun/npm ecosystem dependencies (monthly updates)
   # ==========================================
   - package-ecosystem: 'npm'
     directory: '/'
@@ -17,42 +17,21 @@ updates:
       default-days: 3
     open-pull-requests-limit: 10
 
-    reviewers:
-      - 'johannesjo'
-
     labels:
       - 'dependencies'
-      - 'npm'
+      - 'bun'
 
     commit-message:
       prefix: 'chore(deps)'
 
-    # Group tightly-coupled families into a single PR. These packages pin each
-    # other's peer versions in lockstep (e.g. @ngrx/effects peer-requires an
-    # exact @ngrx/store), so a single-package bump can never resolve `npm ci`
-    # on its own — it must move as a set. Each group bundles all update types
-    # (major/minor/patch) since a major moves the whole family at once.
     groups:
-      angular:
+      svelte:
         patterns:
-          - '@angular/*'
-          - '@angular-devkit/*'
-          - '@schematics/angular'
-      angular-eslint:
+          - 'svelte'
+          - '@sveltejs/*'
+      tauri:
         patterns:
-          - '@angular-eslint/*'
-          - 'angular-eslint'
-      ngrx:
-        patterns:
-          - '@ngrx/*'
-      capacitor:
-        patterns:
-          - '@capacitor/*'
-          - '@capawesome/*'
-      typescript-eslint:
-        patterns:
-          - '@typescript-eslint/*'
-          - 'typescript-eslint'
+          - '@tauri-apps/*'
 
   # ==========================================
   # GitHub Actions (Weekly Updates - SECURITY)
@@ -70,10 +49,6 @@ updates:
       default-days: 3
     # Limit concurrent PRs to avoid overwhelming maintainers
     open-pull-requests-limit: 5
-
-    # Require @johannesjo approval (matches CODEOWNERS)
-    reviewers:
-      - 'johannesjo'
 
     # Label PRs for easy filtering and security awareness
     labels:

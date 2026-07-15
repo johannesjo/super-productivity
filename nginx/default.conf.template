@@ -1,32 +1,12 @@
-# Load environment variables
-map "" $webdav_backend {
-    default "$WEBDAV_BACKEND";
-}
-
 server {
     listen       ${APP_PORT};
     server_name  localhost;
 
-    # serve super-productivity as static files at the path /
+    # Serve Noura's static SvelteKit build and preserve client-side routing.
     location / {
         root   /usr/share/nginx/html;
         index  index.html index.htm;
         try_files $uri $uri/ /index.html;
-    }
-
-    # forward requests starting with "/webdav/" to $WEBDAV_BACKEND
-    # note: the prefix "/webdav" is removed during forwarding
-    location = /webdav {
-        return 302 /webdav/;
-    }
-    location /webdav/ {
-        if ($webdav_backend = "") {
-            return 404;
-        }
-
-        resolver 127.0.0.11;  # resolve webdav_backend by docker internal DNS
-        rewrite ^/webdav/(.*)$ /$1 break;   # remove the `/webdav/` prefix
-        proxy_pass $webdav_backend;
     }
 
     # redirect server error pages to the static page /50x.html

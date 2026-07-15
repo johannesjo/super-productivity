@@ -1,4 +1,0 @@
-
-### Bug Fixes
-
-* unify task context menu behavior

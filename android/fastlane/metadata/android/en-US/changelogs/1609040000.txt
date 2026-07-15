@@ -1,4 +1,0 @@
-
-### Bug Fixes
-
-* **ci:** update references for repo migration to super-productivity org

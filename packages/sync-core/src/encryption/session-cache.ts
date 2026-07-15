@@ -1,4 +1,4 @@
-import { DerivedKey, deriveKeyFromPassword } from './argon2';
+import { type DerivedKey, deriveKeyFromPassword } from './argon2';
 import { hashPasswordForCache } from './web-crypto';
 import { clearLegacyKeyCache } from './legacy';
 

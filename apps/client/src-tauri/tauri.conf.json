@@ -1,0 +1,39 @@
+{
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+	"productName": "Noura",
+	"version": "0.1.0",
+	"identifier": "app.noura.productivity",
+	"build": {
+		"frontendDist": "../build",
+		"devUrl": "http://localhost:5173",
+		"beforeDevCommand": "bun run dev",
+		"beforeBuildCommand": "bun run build"
+	},
+	"app": {
+		"windows": [
+			{
+				"title": "Noura",
+				"width": 1440,
+				"height": 900,
+				"minWidth": 760,
+				"minHeight": 560,
+				"resizable": true,
+				"fullscreen": false
+			}
+		],
+		"security": {
+			"csp": "default-src 'self'; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://ipc.localhost https: wss:"
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		]
+	}
+}

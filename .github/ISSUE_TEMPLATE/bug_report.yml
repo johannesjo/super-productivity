@@ -8,8 +8,8 @@ body:
     id: environment-version
     attributes:
       label: Version Used
-      description: Version number and package type (e.g., exe, snap, deb, installer).
-      placeholder: "e.g. 'v7.12.0 snap' or 'v2.2.1 firefox'"
+      description: Noura version, web or Tauri, operating system, and package type.
+      placeholder: "e.g. 'v0.1.0 Tauri on macOS 15'"
     validations:
       required: true
 
@@ -72,5 +72,5 @@ body:
       label: Documentation
       description: Optionally, indicate whether documentation updates are needed.
       options:
-        - label: The documentation/[wiki](https://github.com/super-productivity/super-productivity/wiki) is unclear or incorrect for this case.
-        - label: There should be a note added to the documentation/[wiki](https://github.com/super-productivity/super-productivity/wiki) for this case.
+        - label: Existing repository documentation is unclear or incorrect for this case.
+        - label: The repository documentation should describe this behavior.

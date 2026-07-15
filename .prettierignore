@@ -1,9 +1,7 @@
-app-build
 node_modules
-.idea
-.vscode
-*.env
-*.env.example
-.prettierignore
+**/dist
+apps/client/build
+apps/client/.svelte-kit
+apps/client/src-tauri/target
 packages/super-sync-server/public/simplewebauthn-browser.min.js
 packages/super-sync-server/helm

@@ -1,3 +1,5 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[svelte]": { "editor.defaultFormatter": "svelte.svelte-vscode" },
+  "rust-analyzer.check.command": "clippy"
 }

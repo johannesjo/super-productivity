@@ -1,0 +1,5 @@
+interface:
+    display_name: "shadcn-svelte"
+    short_description: "Manages shadcn-svelte components — adding, updating, fixing, debugging, styling, and composing UI."
+    icon_small: "./assets/shadcn-svelte-small.png"
+    icon_large: "./assets/shadcn-svelte.png"

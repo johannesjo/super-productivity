@@ -1,20 +1,14 @@
 {
-  "name": "Super Productivity Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
-  "postCreateCommand": "npm i -g @angular/cli && npm i",
-  "postStartCommand": "ng serve",
-  "forwardPorts": [4200],
-  "portsAttributes": {
-    "4200": {
-      "label": "Angular Dev Server",
-      "onAutoForward": "openBrowser"
-    }
-  },
+  "name": "Noura",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-1-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/kreemer/features/chrometesting:1": {}
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" }
   },
-  "containerEnv": {
-    "CHROME_BIN": "/opt/chrome/chrome"
+  "postCreateCommand": "curl -fsSL https://bun.sh/install | bash && ~/.bun/bin/bun install",
+  "forwardPorts": [5173, 1900],
+  "portsAttributes": {
+    "5173": { "label": "Noura web", "onAutoForward": "openBrowser" },
+    "1900": { "label": "SuperSync" }
   }
 }

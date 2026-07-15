@@ -1,4 +1,0 @@
-
-### Bug Fixes
-
-* es.json

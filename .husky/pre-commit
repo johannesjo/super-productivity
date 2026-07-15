@@ -1,1 +1,0 @@
-npx --no-install pretty-quick --staged && npm run lint

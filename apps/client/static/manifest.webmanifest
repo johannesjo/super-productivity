@@ -1,0 +1,12 @@
+{
+  "name": "Noura",
+  "short_name": "Noura",
+  "description": "A private, local-first task, time, and focus workspace.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1d1d20",
+  "theme_color": "#1d1d20",
+  "icons": [
+    { "src": "/noura.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

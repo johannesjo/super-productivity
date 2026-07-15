@@ -1,6 +1,0 @@
-
-### Bug Fixes
-
-* attempt to fix snap once more #5252
-* attempt to fix snap once more 2 #5252
-* attempt to fix snap once more 3 #5252

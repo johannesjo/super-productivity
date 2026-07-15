@@ -1,33 +1,29 @@
-:hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts:
+# Contributing to Noura
 
-Welcome you awesome human being! You want to contribute to this repository? This is gonna be great!
+Thanks for helping improve Noura. Keep changes focused on a concrete personal-productivity workflow and preserve offline behavior, privacy, and data compatibility.
 
-If you want to discuss something private, please write an email to contact@super-productivity.com.
+## Setup
 
-### Code of conduct
+```sh
+bun install
+bun run dev
+```
 
-Don't be a d\*\*\*!
+Desktop work additionally requires Rust and the Tauri platform prerequisites.
 
-### Options for contributing
+## Before opening a pull request
 
-In case you want to contribute, but you wouldn't know how, here are some suggestions:
+```sh
+bun run check
+bun run lint
+bun run test
+bun run test:client
+bun run test:e2e
+bun run build
+```
 
-1. **Spread the word:** More users means more people testing and contributing to the app which in turn means better stability and possibly more and better features. You can vote for Super Productivity on [Slant](https://www.slant.co/topics/14021/viewpoints/7/~productivity-tools-for-linux~super-productivity), [Product Hunt](https://www.producthunt.com/posts/super-productivity), [Softpedia](https://www.softpedia.com/get/Office-tools/Diary-Organizers-Calendar/Super-Productivity.shtml) or on [AlternativeTo](https://alternativeto.net/software/super-productivity/), you can [tweet about it](https://twitter.com/intent/tweet?text=I%20like%20Super%20Productivity%20%20https%3A%2F%2Fsuper-productivity.com), share it on [LinkedIn](http://www.linkedin.com/shareArticle?mini=true&url=https://super-productivity.com&title=I%20like%20Super%20Productivity&), [reddit](http://www.reddit.com/submit?url=https%3A%2F%2Fsuper-productivity.com&title=I%20like%20Super%20Productivity) or any of your favorite social media platforms. Every little bit helps!
+Run `cargo check --manifest-path apps/client/src-tauri/Cargo.toml` for Tauri changes. Every changed Svelte component/module must also pass the official Svelte autofixer described in `AGENTS.md`.
 
-2. **Provide a Pull Request:** Here is a list of [the most popular community requests](https://github.com/super-productivity/super-productivity/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc) and here some info on **[how to run the development build](https://github.com/super-productivity/super-productivity/wiki/2.11-Run-the-Development-Server)** (wiki). Please make sure that you're following the commit message format documented in [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md#commit-message-format) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature #31`). If your change touches synced state (effects, reducers, bulk dispatches), read the [Contributor Sync Model](docs/sync-and-op-log/contributor-sync-model.md) first — one invariant, partly lint-enforced.
+Changes to domain state or sync must preserve one intent → one persisted operation, deterministic replay, and durable remote application before advancing the sync cursor. Add migration coverage for schema changes.
 
-3. **[Answer questions](https://github.com/super-productivity/super-productivity/discussions)**: You know the answer to another user's problem? Share your knowledge!
-
-4. **[Provide your opinion](https://github.com/super-productivity/super-productivity/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22community+feedback+wanted%22):** Some community suggestions are controversial. Your input might be helpful even if it is just an up- or down-vote.
-
-5. **[Provide a more refined UI spec for existing feature requests](https://github.com/super-productivity/super-productivity/issues?q=is%3Aissue+is%3Aopen+label%3A%22needs+concept+and%2For+ui+spec%22)**
-
-6. **[Report bugs](https://github.com/super-productivity/super-productivity/issues/new)**
-
-7. **[Make a feature or improvement request](https://github.com/super-productivity/super-productivity/issues/new)**: Something can be done better? Something essential missing? Let us know!
-
-8. **[Translations](docs/TRANSLATING.md)**: You don't have to be programmer to help. See our [translation guide](docs/TRANSLATING.md) for details on how to contribute translations.
-
-9. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
-
-:hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts: :hearts::hearts:
+Use conventional commit subjects such as `feat(client): add task filter` or `fix(sync): await remote persistence`. Explain behavior and verification in the pull request.

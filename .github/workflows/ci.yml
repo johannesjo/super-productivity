@@ -1,178 +1,40 @@
 name: CI
+
 on:
   pull_request:
-    branches:
-      - master
-      - main
-    paths-ignore:
-      - 'docs/wiki/**'
+  push:
+    branches: [main, master]
   workflow_dispatch:
-    inputs: {}
-  release:
-    types: [published]
+
 permissions:
   contents: read
 
 jobs:
-  # Verify package-lock.json only uses the official npm registry.
-  # Prevents contributors using mirror registries from rewriting all resolved URLs.
-  check-lockfile-registry:
-    name: Check package-lock.json registry
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
-        with:
-          persist-credentials: false
-      - name: Reject non-standard registry URLs
-        run: |
-          BAD_COUNT=$(grep '"resolved": "https\?://' package-lock.json | grep -cv 'registry.npmjs.org' || true)
-          if [ "$BAD_COUNT" -gt 0 ]; then
-            echo "::error::package-lock.json contains $BAD_COUNT resolved URLs pointing to a non-standard registry."
-            echo "Examples:"
-            grep '"resolved": "https\?://' package-lock.json | grep -v 'registry.npmjs.org' | head -5
-            echo ""
-            echo "Please delete node_modules and package-lock.json, then run 'npm install' with the default registry (https://registry.npmjs.org/)."
-            exit 1
-          fi
-
-  # This job will scan dependency manifest files
-  # surfacing known-vulnerable versions of the packages declared or updated.
-  # Only runs on pull_request events as the action requires base/head refs
-  dependency-vulnerability-review:
-    name: Dependency Vulnerability Review
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: 'Checkout Repository'
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
-        with:
-          persist-credentials: false
-      # work around for npm installs from git+https://github.com/johannesjo/J2M.git
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-
-      - name: 'Dependency Review'
-        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
-
-  lint:
-    name: Lint
+  client-and-packages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-      - name: Check out Git repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
-        with:
-          persist-credentials: false
-      - name: Install npm Packages
-        run: npm i
-      - run: npm run lint
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run lint
+      - run: bun run test
+      - run: bun run test:client
+      - run: bun run build
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test:e2e
 
-  test-on-linux:
-    name: Tests
+  tauri-linux:
     runs-on: ubuntu-latest
-    needs: [lint, dependency-vulnerability-review]
-    if: ${{ !cancelled() && !failure() }}
     steps:
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-      - name: Check out Git repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
-        with:
-          persist-credentials: false
-      # work around for npm installs from git+https://github.com/johannesjo/J2M.git
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
-        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node22-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node22-
-      - name: Install npm Packages
-        run: npm i
-      - name: Install Playwright Browsers
-        run: |
-          npx playwright install --with-deps chromium
-          npx playwright install-deps chromium
-      - run: npm run env # Generate env.generated.ts from environment variables
-      - run: npm run int:test # Validate i18n JSON files
-      - run: npm run test:electron # Node-side unit tests for electron/*.cjs
-      - run: npm run test
-      - name: Build Frontend for E2E
-        run: npm run buildFrontend:e2e
-      - name: Verify Build Output
-        run: |
-          test -f .tmp/angular-dist/browser/index.html || (echo "Build output missing" && exit 1)
-          test -f .tmp/angular-dist/browser/assets/bundled-plugins/api-test-plugin/manifest.json || (echo "Plugin assets missing from build" && exit 1)
-      - name: Test E2E
-        run: npm run e2e:ci
-      - name: 'Upload E2E results on failure'
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: e2eResults
-          path: .tmp/e2e-test-results/**/*.*
-          retention-days: 14
-
-  # Lighthouse is designed to audit the performance, accessibility, SEO, and other metrics of a web application.
-  lighthouse:
-    name: Lighthouse
-    runs-on: ubuntu-latest
-    env:
-      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
-      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
-
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm i
-
-      - run: npm run env # Generate env.generated.ts
-
-      - name: Build production web app
-        run: npm run buildFrontend:prodWeb
-
-      - name: Add swap space for Lighthouse
-        run: |
-          # Ensure Lighthouse/Chrome have enough memory on GitHub-hosted runners
-          # Remove existing swapfile if present
-          sudo swapoff /swapfile 2>/dev/null || true
-          sudo rm -f /swapfile
-          sudo fallocate -l 4G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-
-      - name: Strip service worker artifacts for Lighthouse
-        run: rm -f dist/browser/ngsw.json dist/browser/ngsw-worker.js dist/browser/safety-worker.js dist/browser/worker-basic.min.js
-
-      - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
-        with:
-          # Configure Lighthouse CI
-          configPath: './tools/lighthouse/.lighthouserc.json'
-          # Upload results to temporary storage
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-          # Run once to avoid long Chrome sessions on CI
-          runs: 1
-          # Configure budgets
-          budgetPath: './tools/lighthouse/budget.json'
+          bun-version: 1.3.14
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Tauri system libraries
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: bun install --frozen-lockfile
+      - run: bun run --cwd apps/client tauri build --debug --no-bundle

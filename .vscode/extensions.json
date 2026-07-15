@@ -1,5 +1,8 @@
 {
   "recommendations": [
-    "lucono.karma-test-explorer"
+    "svelte.svelte-vscode",
+    "rust-lang.rust-analyzer",
+    "tauri-apps.tauri-vscode",
+    "oven.bun-vscode"
   ]
 }

@@ -1,104 +1,44 @@
 services:
-  # PostgreSQL database for SuperSync
+  app:
+    build:
+      context: .
+    ports:
+      - '8080:80'
+    restart: unless-stopped
+
   db:
-    image: postgres:15-alpine
-    restart: always
+    image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: supersync
-      POSTGRES_PASSWORD: superpassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
       POSTGRES_DB: supersync_db
-    ports:
-      - '55432:5432'
     volumes:
       - db_data:/var/lib/postgresql/data
-    # Gate on supersync_db existing AND accepting queries from the app user.
-    # Plain `pg_isready -U supersync` returns OK as soon as postgres accepts
-    # connections to the default `postgres` database — but during first-run
-    # initdb the server briefly bounces while POSTGRES_DB is created, so
-    # supersync's `prisma db push` race-fails with P1001. Querying
-    # supersync_db directly closes that window.
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U supersync -d supersync_db && psql -U supersync -d supersync_db -c "SELECT 1" > /dev/null 2>&1',
-        ]
+      test: ['CMD-SHELL', 'pg_isready -U supersync -d supersync_db']
       interval: 3s
       timeout: 5s
       retries: 20
-      start_period: 10s
 
-  # SuperSync server for E2E testing
-  # Start with: docker compose up -d supersync
-  # Required for @supersync e2e tests
   supersync:
     build:
       context: .
       dockerfile: packages/super-sync-server/Dockerfile.test
-    env_file: .env
+    restart: unless-stopped
     ports:
       - '1900:1900'
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - NODE_ENV=development
-      - PORT=1900
-      - TEST_MODE=true
-      - TEST_MODE_CONFIRM=yes-i-understand-the-risks
-      - JWT_SECRET=e2e-test-secret-minimum-32-chars-long-for-security
-      - CORS_ORIGINS=*
-      - DATA_DIR=/data
-      # Prisma connection string
-      - DATABASE_URL=postgresql://supersync:superpassword@db:5432/supersync_db
-    healthcheck:
-      test:
-        [
-          'CMD',
-          'wget',
-          '--quiet',
-          '--tries=1',
-          '--spider',
-          'http://127.0.0.1:1900/health',
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-
-  # Super Productivity app
-  app:
-    image: johannesjo/super-productivity:latest
-    ports:
-      - '8080:80'
-    environment:
-      # Pre-configured defaults for easier setup
-      WEBDAV_BASE_URL: ${WEBDAV_BASE_URL:-http://localhost:2345/}
-      WEBDAV_USERNAME: ${WEBDAV_USERNAME:-admin}
-      WEBDAV_SYNC_FOLDER_PATH: ${WEBDAV_SYNC_FOLDER_PATH:-/}
-      SYNC_INTERVAL: ${SYNC_INTERVAL:-15}
-      IS_COMPRESSION_ENABLED: ${IS_COMPRESSION_ENABLED:-true}
-      IS_ENCRYPTION_ENABLED: ${IS_ENCRYPTION_ENABLED:-false}
-
-  # WebDAV sync server
-  webdav:
-    image: hacdias/webdav:v5
-    ports:
-      - '2345:2345'
-    volumes:
-      - ./webdav.yaml:/etc/webdav/config.yaml:ro
-      - webdav_data:/data
-    healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:2345/']
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      NODE_ENV: development
+      PORT: 1900
+      TEST_MODE: ${TEST_MODE:-false}
+      TEST_MODE_CONFIRM: ${TEST_MODE_CONFIRM:-}
+      JWT_SECRET: ${JWT_SECRET:-replace-with-at-least-32-characters}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://localhost:5173}
+      DATABASE_URL: postgresql://supersync:${POSTGRES_PASSWORD:-change-me}@db:5432/supersync_db
 
 volumes:
   db_data:
-  webdav_data:

@@ -1,24 +1,18 @@
 ## Problem
 
-<!-- Describe the problem that these changes solve (links to issues are welcome). -->
+<!-- What user problem or engineering risk does this solve? -->
 
 ## Solution
 
-<!-- Describe your changes in detail. -->
+<!-- Summarize behavior and important architecture decisions. -->
 
-## Type of Change
+## Verification
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Refactoring
-- [ ] Documentation
-- [ ] Other (please describe)
+<!-- List exact checks, tests, builds, and manual/browser validation. -->
 
-## Checklist
-
-- [ ] I have included relevant changes to the documentation/[wiki](https://github.com/super-productivity/super-productivity/tree/master/docs/wiki).
-- [ ] I have run `npm run checkFile` on changed `.ts`/`.scss` files
-- [ ] I have added tests for my changes (if applicable)
-- [ ] Existing tests still pass
-- [ ] My commit messages follow the Angular format (`type(scope): description`)
+- [ ] `bun run check`
+- [ ] `bun run lint`
+- [ ] Relevant unit and Playwright tests
+- [ ] `bun run build`
+- [ ] Tauri check/build when desktop code or capabilities changed
+- [ ] Documentation and migration notes updated when behavior or data changed

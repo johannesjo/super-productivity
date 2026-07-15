@@ -1,7 +1,7 @@
-# Security Policy
+# Security policy
 
-I am a web developer with a frontend focus and no security expert. I tried to follow the best practices as much as possible and I update electron often, but I can offer no guarantees. Any help with this subject by more dedicated experts would be very much appreciated!
+Please report vulnerabilities privately through this repository's GitHub Security Advisory form. Do not open a public issue for unpatched vulnerabilities.
 
-## Reporting a Vulnerability
+Include the affected version, platform, reproduction steps, impact, and any suggested mitigation. Reports involving backup parsing, Tauri capabilities, credential handling, encryption, SuperSync authentication, account recovery, or server data isolation are especially useful.
 
-Please report any vulnerabilities using the [form here on github](https://github.com/super-productivity/super-productivity/security/advisories/new).
+Noura stores user content locally by default. SuperSync access tokens and encryption passphrases must remain memory-only; logs and diagnostics must never include task content or credentials.

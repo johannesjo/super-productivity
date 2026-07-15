@@ -4,15 +4,15 @@
   "description": "Shared schema versioning and migrations for Super Productivity sync",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "types": "src/index.ts",
   "exports": {
     ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
       "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
+        "default": "./src/index.ts"
       },
       "require": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
     }

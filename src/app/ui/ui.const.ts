@@ -1,1 +1,0 @@
-export const UI_LONG_PRESS_DURATION = 600;

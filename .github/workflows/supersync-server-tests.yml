@@ -1,30 +1,20 @@
-# super-sync-server unit tests (vitest), gated on PRs that touch server code.
-# Previously these ran only nightly / on push to master via e2e-scheduled.yml, so
-# server fixes were never gated by a PR check. The workflow-level `paths` filter keeps
-# this off PRs that don't touch the server or its workspace deps.
 name: SuperSync Server Tests
+
 on:
   pull_request:
-    branches:
-      - master
-      - main
     paths:
       - 'packages/super-sync-server/**'
-      - 'packages/shared-schema/**' # @sp/shared-schema is a direct dep
-      - 'packages/sync-core/**' # transitive dep via @sp/shared-schema
-      - '.github/workflows/supersync-server-tests.yml'
+      - 'packages/shared-schema/**'
+      - 'packages/sync-core/**'
+      - 'bun.lock'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  supersync-server-tests:
-    name: SuperSync Server Tests
+  supersync:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      DATABASE_URL: postgresql://supersync:superpassword@localhost:5432/supersync_db
     services:
       postgres:
         image: postgres:16-alpine
@@ -32,34 +22,20 @@ jobs:
           POSTGRES_USER: supersync
           POSTGRES_PASSWORD: superpassword
           POSTGRES_DB: supersync_db
-        ports:
-          - 5432:5432
+        ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U supersync -d supersync_db"
-          --health-interval 3s
-          --health-timeout 5s
-          --health-retries 10
+          --health-interval 3s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://supersync:superpassword@localhost:5432/supersync_db
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          persist-credentials: false
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        with:
-          node-version: 22
-          cache: 'npm'
-      # work around for npm installs from git+https://github.com/johannesjo/J2M.git
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-      - name: Install npm Packages
-        run: npm i
-      - name: Run SuperSync Server Tests
-        run: cd packages/super-sync-server && npm test
-      - name: Apply PostgreSQL Test Schema
-        working-directory: packages/super-sync-server
-        run: npx prisma db push --skip-generate
-      - name: Run SuperSync PostgreSQL Integration Tests
-        working-directory: packages/super-sync-server
-        run: npm run test:integration:postgres
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun run test:supersync
+      - working-directory: packages/super-sync-server
+        run: bunx prisma db push --skip-generate
+      - working-directory: packages/super-sync-server
+        run: bun run test:integration:postgres

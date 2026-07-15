@@ -1,7 +1,0 @@
-
-### Bug Fixes
-
-* **electron:** sync title bar button colors with app theme (eefbc71), closes #5676
-
-
-

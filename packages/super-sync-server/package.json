@@ -50,6 +50,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^9.0.1",
     "uuidv7": "^1.1.0",
+    "ws": "^8.18.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {

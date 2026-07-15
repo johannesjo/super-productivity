@@ -1,4 +1,0 @@
-
-### Bug Fixes
-
-* **ios:** make responseHeaders mutable to fix Swift compilation error

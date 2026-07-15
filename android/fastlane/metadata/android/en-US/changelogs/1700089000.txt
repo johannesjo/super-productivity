@@ -1,4 +1,0 @@
-
-### Bug Fixes
-
-* **ci:** remove redundant grep-invert args from e2e command
