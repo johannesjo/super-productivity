@@ -5,6 +5,7 @@
 	import { SvelteDate } from 'svelte/reactivity';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
+	import type { ISODate } from '@noura/domain';
 	import type { NouraModel } from './model.svelte';
 
 	let { model }: { model: NouraModel } = $props();
@@ -23,7 +24,7 @@
 		);
 	});
 
-	const key = (date: Date): string => date.toISOString().slice(0, 10);
+	const key = (date: Date): ISODate => date.toISOString().slice(0, 10) as ISODate;
 	const tasksFor = (date: Date) => model.allTasks.filter((task) => task.dueDay === key(date));
 	function move(months: number): void {
 		cursor.setFullYear(cursor.getFullYear(), cursor.getMonth() + months, 1);
@@ -42,7 +43,9 @@
 				><ChevronLeftIcon /></Button
 			><Button variant="ghost" size="icon" aria-label="Next month" onclick={() => move(1)}
 				><ChevronRightIcon /></Button
-			><Button size="sm"><PlusIcon data-icon="inline-start" />Add task</Button>
+			><Button size="sm" onclick={() => model.openTaskCapture({ dueDay: key(new Date()) })}
+				><PlusIcon data-icon="inline-start" />Add task</Button
+			>
 		</div>
 	</header>
 	<div class="month-title">{label}</div>
@@ -56,11 +59,18 @@
 				class:today={key(day) === key(new SvelteDate())}
 				class="day-cell"
 			>
-				<span>{day.getDate()}</span>
+				<div class="day-heading">
+					<span>{day.getDate()}</span>
+					<button
+						type="button"
+						aria-label={`Add task on ${key(day)}`}
+						onclick={() => model.openTaskCapture({ dueDay: key(day) })}><PlusIcon /></button
+					>
+				</div>
 				<div class="day-tasks">
 					{#each tasksFor(day).slice(0, 3) as task (task.id)}<button
 							type="button"
-							onclick={() => model.selectTask(task.id)}><i></i>{task.title}</button
+							onclick={() => model.openTaskDetails(task.id)}><i></i>{task.title}</button
 						>{/each}
 				</div>
 				{#if tasksFor(day).length > 3}<Badge variant="secondary">+{tasksFor(day).length - 3}</Badge
@@ -124,7 +134,12 @@
 		border-right: 1px solid var(--border);
 		border-bottom: 1px solid var(--border);
 	}
-	.day-cell > span {
+	.day-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.day-heading > span {
 		display: grid;
 		width: 24px;
 		height: 24px;
@@ -132,9 +147,25 @@
 		border-radius: 50%;
 		font-size: 11px;
 	}
-	.day-cell.today > span {
+	.day-cell.today .day-heading > span {
 		background: var(--primary);
 		color: var(--primary-foreground);
+	}
+	.day-heading button {
+		display: grid;
+		width: 22px;
+		height: 22px;
+		place-content: center;
+		border-radius: 6px;
+		opacity: 0;
+	}
+	.day-cell:hover .day-heading button,
+	.day-heading button:focus-visible {
+		opacity: 1;
+		background: var(--accent);
+	}
+	.day-heading button :global(svg) {
+		width: 13px;
 	}
 	.day-cell.outside {
 		color: var(--muted-foreground);

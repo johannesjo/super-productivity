@@ -4,6 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import type { Task } from '@noura/domain';
 	import type { NouraModel } from './model.svelte';
 
@@ -27,6 +28,22 @@
 		}
 	]);
 	const tracked = (task: Task): string => `${Math.round(task.trackedMs / 60_000)}m`;
+
+	function addToColumn(columnId: string): void {
+		model.openTaskCapture(
+			columnId === 'today'
+				? { dueDay: today as `${number}-${number}-${number}` }
+				: columnId === 'done'
+					? { status: 'done' }
+					: {}
+		);
+	}
+
+	async function toggleColumn(columnId: string): Promise<void> {
+		const column = columns.find((candidate) => candidate.id === columnId);
+		if (!column) return;
+		for (const task of column.tasks) await model.toggleTask(task.id);
+	}
 </script>
 
 <section class="board" aria-labelledby="board-title">
@@ -35,21 +52,35 @@
 			<h1 id="board-title">Boards</h1>
 			<p>Move through work by state while keeping the same task details.</p>
 		</div>
-		<Button size="sm"><PlusIcon data-icon="inline-start" />Add task</Button>
+		<Button size="sm" onclick={() => addToColumn('backlog')}
+			><PlusIcon data-icon="inline-start" />Add task</Button
+		>
 	</header>
 	<div class="columns">
 		{#each columns as column (column.id)}
 			<section class="column">
 				<div class="column-title">
 					<h2>{column.title} <span>{column.tasks.length}</span></h2>
-					<Button variant="ghost" size="icon" aria-label={`Actions for ${column.title}`}
-						><MoreHorizontalIcon /></Button
-					>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							<Button variant="ghost" size="icon" aria-label={`Actions for ${column.title}`}
+								><MoreHorizontalIcon /></Button
+							>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content align="end">
+							<DropdownMenu.Item onclick={() => addToColumn(column.id)}>Add task</DropdownMenu.Item>
+							{#if column.tasks.length}
+								<DropdownMenu.Item onclick={() => toggleColumn(column.id)}>
+									{column.id === 'done' ? 'Reopen all' : 'Complete all'}
+								</DropdownMenu.Item>
+							{/if}
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
 				</div>
 				<div class="cards">
 					{#each column.tasks as task (task.id)}<Card.Root
 							class="task-card"
-							onclick={() => model.selectTask(task.id)}
+							onclick={() => model.openTaskDetails(task.id)}
 							><Card.Header
 								><Card.Title>{task.title}</Card.Title><Card.Description
 									>{model.state.projects[task.projectId]?.title}</Card.Description
@@ -67,7 +98,7 @@
 							></Card.Root
 						>{/each}
 				</div>
-				<Button variant="ghost" size="sm" class="column-add"
+				<Button variant="ghost" size="sm" class="column-add" onclick={() => addToColumn(column.id)}
 					><PlusIcon data-icon="inline-start" />Add task</Button
 				>
 			</section>

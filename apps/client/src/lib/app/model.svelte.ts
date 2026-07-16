@@ -12,9 +12,11 @@ import {
 	selectOrderedTasks,
 	type DomainOperation,
 	type DomainState,
+	type ISODate,
 	type Project,
 	type Task,
 	type TaskPriority,
+	type TaskStatus,
 	type TimeSession
 } from '@noura/domain';
 import { SvelteURL } from 'svelte/reactivity';
@@ -295,6 +297,12 @@ export class NouraModel {
 	settingsOpen = $state(false);
 	activityOpen = $state(false);
 	sidebarOpen = $state(false);
+	taskCaptureOpen = $state(false);
+	taskCaptureTitle = $state('');
+	taskCaptureDueDay = $state<ISODate | undefined>();
+	taskCaptureProjectId = $state(INBOX_PROJECT_ID);
+	taskCaptureStatus = $state<TaskStatus>('open');
+	taskDetailsOpen = $state(false);
 	completedVisible = $state(false);
 	syncServerUrl = $state('https://sync.super-productivity.com');
 	syncAccessToken = $state('');
@@ -400,19 +408,25 @@ export class NouraModel {
 		await this.selectProject(project.id);
 	}
 
-	async addTask(title: string): Promise<void> {
+	async addTask(
+		title: string,
+		options: { dueDay?: ISODate; projectId?: string; status?: TaskStatus } = {}
+	): Promise<void> {
 		const trimmed = title.trim();
 		if (!trimmed) return;
 		const now = Date.now();
-		const projectId = this.view === 'project' ? this.state.activeProjectId : INBOX_PROJECT_ID;
+		const projectId =
+			options.projectId ??
+			(this.view === 'project' ? this.state.activeProjectId : INBOX_PROJECT_ID);
+		const status = options.status ?? 'open';
 		const task: Task = {
 			id: crypto.randomUUID(),
 			title: trimmed,
 			notes: '',
-			status: 'open',
+			status,
 			priority: 0,
 			projectId,
-			dueDay: this.view === 'today' ? today() : undefined,
+			dueDay: options.dueDay ?? (this.view === 'today' ? today() : undefined),
 			tagIds: [],
 			checklist: [],
 			attachments: [],
@@ -420,9 +434,36 @@ export class NouraModel {
 			trackedMs: 0,
 			createdAt: now,
 			updatedAt: now,
+			completedAt: status === 'done' ? now : undefined,
 			order: this.state.taskOrder.length
 		};
 		await this.#store.execute({ type: 'task/add', payload: { task } });
+	}
+
+	openTaskCapture(
+		options: { dueDay?: ISODate; projectId?: string; status?: TaskStatus } = {}
+	): void {
+		this.taskCaptureTitle = '';
+		this.taskCaptureDueDay = options.dueDay;
+		this.taskCaptureProjectId = options.projectId ?? this.state.activeProjectId;
+		this.taskCaptureStatus = options.status ?? 'open';
+		this.taskCaptureOpen = true;
+	}
+
+	async commitTaskCapture(): Promise<void> {
+		if (!this.taskCaptureTitle.trim()) return;
+		await this.addTask(this.taskCaptureTitle, {
+			dueDay: this.taskCaptureDueDay,
+			projectId: this.taskCaptureProjectId,
+			status: this.taskCaptureStatus
+		});
+		this.taskCaptureTitle = '';
+		this.taskCaptureOpen = false;
+	}
+
+	async openTaskDetails(id: string): Promise<void> {
+		await this.selectTask(id);
+		this.taskDetailsOpen = true;
 	}
 
 	async updateTask(id: string, patch: Partial<Omit<Task, 'id'>>): Promise<void> {
@@ -494,6 +535,26 @@ export class NouraModel {
 		await this.#store.execute({
 			type: 'session/stop',
 			payload: { id, endedAt: Date.now(), durationMs }
+		});
+	}
+
+	async recordFocusSession(
+		mode: TimeSession['mode'],
+		durationMs: number,
+		endedAt = Date.now()
+	): Promise<void> {
+		if (!Number.isFinite(durationMs) || durationMs <= 0) return;
+		const session: TimeSession = {
+			id: crypto.randomUUID(),
+			taskId: this.state.selectedTaskId,
+			mode,
+			startedAt: endedAt - durationMs,
+			durationMs: 0
+		};
+		await this.#store.execute({ type: 'session/start', payload: { session } });
+		await this.#store.execute({
+			type: 'session/stop',
+			payload: { id: session.id, endedAt, durationMs }
 		});
 	}
 

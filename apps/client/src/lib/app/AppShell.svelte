@@ -19,6 +19,7 @@
 	import * as Resizable from '$lib/components/ui/resizable';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
+	import * as Sheet from '$lib/components/ui/sheet';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import FocusView from './FocusView.svelte';
 	import ActivityDialog from './ActivityDialog.svelte';
@@ -28,6 +29,7 @@
 	import SearchDialog from './SearchDialog.svelte';
 	import SettingsDialog from './SettingsDialog.svelte';
 	import TaskInspector from './TaskInspector.svelte';
+	import TaskCaptureDialog from './TaskCaptureDialog.svelte';
 	import TaskWorkspace from './TaskWorkspace.svelte';
 	import { model } from './model.svelte';
 
@@ -221,6 +223,17 @@
 <SearchDialog {model} />
 <SettingsDialog {model} />
 <ActivityDialog {model} />
+<TaskCaptureDialog {model} />
+
+<Sheet.Root bind:open={model.taskDetailsOpen}>
+	<Sheet.Content side="right" class="task-details-sheet" showCloseButton={false}>
+		<Sheet.Header class="sr-only">
+			<Sheet.Title>Task details</Sheet.Title>
+			<Sheet.Description>Edit the selected task</Sheet.Description>
+		</Sheet.Header>
+		<TaskInspector {model} />
+	</Sheet.Content>
+</Sheet.Root>
 
 <style>
 	.app-shell {
@@ -422,5 +435,10 @@
 		.bottom-nav :global(svg) {
 			width: 18px;
 		}
+	}
+	:global(.task-details-sheet) {
+		width: min(460px, 92vw);
+		max-width: none;
+		padding: 0;
 	}
 </style>

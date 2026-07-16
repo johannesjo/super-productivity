@@ -46,4 +46,43 @@ describe('NouraModel', () => {
 		model.view = 'completed';
 		expect(model.visibleTasks.map((candidate) => candidate.id)).toContain(task.id);
 	});
+
+	it('captures tasks with planner and board context', async () => {
+		const model = new NouraModel();
+		model.openTaskCapture({ dueDay: '2026-07-20', projectId: 'study' });
+		model.taskCaptureTitle = 'Prepare the study plan';
+
+		await model.commitTaskCapture();
+
+		expect(model.selectedTask).toMatchObject({
+			title: 'Prepare the study plan',
+			dueDay: '2026-07-20',
+			projectId: 'study',
+			status: 'open'
+		});
+		expect(model.taskCaptureOpen).toBe(false);
+	});
+
+	it('opens full-view task details after selecting a task', async () => {
+		const model = new NouraModel();
+		await model.addTask('Inspect from board');
+		const id = model.selectedTask?.id;
+		if (!id) throw new Error('Expected a selected task');
+		model.taskDetailsOpen = false;
+
+		await model.openTaskDetails(id);
+
+		expect(model.selectedTask?.id).toBe(id);
+		expect(model.taskDetailsOpen).toBe(true);
+	});
+
+	it('adds manual focus records and attributes time to the selected task', async () => {
+		const model = new NouraModel();
+		await model.addTask('Focused task');
+
+		await model.recordFocusSession('pomodoro', 15 * 60_000, 2_000_000);
+
+		expect(Object.values(model.state.sessions)).toHaveLength(1);
+		expect(model.selectedTask?.trackedMs).toBe(15 * 60_000);
+	});
 });

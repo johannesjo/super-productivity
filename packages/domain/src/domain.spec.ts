@@ -46,6 +46,33 @@ describe('reduceDomain', () => {
     expect(done.tasks[task.id]?.completedAt).toBe(42);
   });
 
+  it('records completed focus time on its linked task', () => {
+    const withTask = reduceDomain(createInitialState(1), {
+      type: 'task/add',
+      payload: { task },
+    });
+    const started = reduceDomain(withTask, {
+      type: 'session/start',
+      payload: {
+        session: {
+          id: 'session-1',
+          taskId: task.id,
+          mode: 'pomodoro',
+          startedAt: 100,
+          durationMs: 0,
+        },
+      },
+    });
+    const stopped = reduceDomain(started, {
+      type: 'session/stop',
+      payload: { id: 'session-1', endedAt: 600_100, durationMs: 600_000 },
+    });
+
+    expect(stopped.sessions['session-1']?.durationMs).toBe(600_000);
+    expect(stopped.tasks[task.id]?.trackedMs).toBe(600_000);
+    expect(stopped.tasks[task.id]?.updatedAt).toBe(600_100);
+  });
+
   it('keeps updates fast for a 10,000 task workspace', () => {
     const tasks = Object.fromEntries(
       Array.from({ length: 10_000 }, (_, index) => {

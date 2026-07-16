@@ -4,8 +4,13 @@
 	import MoreHorizontalIcon from '@lucide/svelte/icons/more-horizontal';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import Volume2Icon from '@lucide/svelte/icons/volume-2';
+	import VolumeXIcon from '@lucide/svelte/icons/volume-x';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Field from '$lib/components/ui/field';
+	import { Input } from '$lib/components/ui/input';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import type { NouraModel } from './model.svelte';
 
@@ -13,6 +18,10 @@
 	let mode = $state('pomodoro');
 	let running = $state(false);
 	let elapsed = $state(0);
+	let segmentStartElapsed = 0;
+	let soundEnabled = $state(true);
+	let manualOpen = $state(false);
+	let manualMinutes = $state(25);
 	let timer: ReturnType<typeof setInterval> | undefined;
 	let target = $derived(mode === 'pomodoro' ? 25 * 60 : 0);
 	let displaySeconds = $derived(mode === 'pomodoro' ? Math.max(0, target - elapsed) : elapsed);
@@ -27,36 +36,69 @@
 	);
 	let totalFocusMs = $derived(sessions.reduce((total, session) => total + session.durationMs, 0));
 
+	function playCompletionSound(): void {
+		if (!soundEnabled || typeof window === 'undefined') return;
+		const context = new AudioContext();
+		const oscillator = context.createOscillator();
+		const gain = context.createGain();
+		oscillator.frequency.value = 660;
+		gain.gain.setValueAtTime(0.08, context.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.35);
+		oscillator.connect(gain).connect(context.destination);
+		oscillator.start();
+		oscillator.stop(context.currentTime + 0.35);
+		oscillator.addEventListener('ended', () => void context.close(), { once: true });
+	}
+
 	async function toggle(): Promise<void> {
 		if (!running) {
 			await model.startFocusSession(mode as 'pomodoro' | 'flowtime' | 'stopwatch');
+			segmentStartElapsed = elapsed;
 			running = true;
 			timer = setInterval(() => {
 				elapsed += 1;
 				if (mode === 'pomodoro' && elapsed >= target) {
 					if (timer) clearInterval(timer);
 					running = false;
-					void model.stopFocusSession(elapsed * 1000);
+					void model.stopFocusSession((elapsed - segmentStartElapsed) * 1000);
+					playCompletionSound();
 				}
 			}, 1000);
 		} else {
 			running = false;
 			if (timer) clearInterval(timer);
-			await model.stopFocusSession(elapsed * 1000);
+			await model.stopFocusSession((elapsed - segmentStartElapsed) * 1000);
 		}
 	}
 
 	async function changeMode(value: string): Promise<void> {
-		if (running) await model.stopFocusSession(elapsed * 1000);
+		if (running) await model.stopFocusSession((elapsed - segmentStartElapsed) * 1000);
 		mode = value;
 		elapsed = 0;
 		running = false;
 		if (timer) clearInterval(timer);
 	}
 
+	async function resetTimer(): Promise<void> {
+		if (running) await model.stopFocusSession((elapsed - segmentStartElapsed) * 1000);
+		if (timer) clearInterval(timer);
+		running = false;
+		elapsed = 0;
+		segmentStartElapsed = 0;
+	}
+
+	async function addManualRecord(event: SubmitEvent): Promise<void> {
+		event.preventDefault();
+		await model.recordFocusSession(
+			mode as 'pomodoro' | 'flowtime' | 'stopwatch',
+			Math.max(1, manualMinutes) * 60_000
+		);
+		manualOpen = false;
+	}
+
 	onDestroy(() => {
 		if (timer) clearInterval(timer);
-		if (running) void model.stopFocusSession(elapsed * 1000);
+		if (running) void model.stopFocusSession((elapsed - segmentStartElapsed) * 1000);
 	});
 </script>
 
@@ -72,15 +114,31 @@
 				></Tabs.Root
 			>
 			<div class="timer-tools">
-				<Button variant="ghost" size="icon" aria-label="Add focus record"><PlusIcon /></Button
-				><Button variant="ghost" size="icon" aria-label="Sound"><Volume2Icon /></Button><Button
+				<Button
 					variant="ghost"
 					size="icon"
-					aria-label="Focus options"><MoreHorizontalIcon /></Button
-				>
+					aria-label="Add focus record"
+					onclick={() => (manualOpen = true)}><PlusIcon /></Button
+				><Button
+					variant="ghost"
+					size="icon"
+					aria-label={soundEnabled ? 'Mute completion sound' : 'Enable completion sound'}
+					aria-pressed={!soundEnabled}
+					onclick={() => (soundEnabled = !soundEnabled)}
+					>{#if soundEnabled}<Volume2Icon />{:else}<VolumeXIcon />{/if}</Button
+				><DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						<Button variant="ghost" size="icon" aria-label="Focus options"
+							><MoreHorizontalIcon /></Button
+						>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end">
+						<DropdownMenu.Item onclick={() => void resetTimer()}>Reset timer</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
 			</div>
 		</header>
-		<button class="focus-task" type="button"
+		<button class="focus-task" type="button" onclick={() => (model.searchOpen = true)}
 			>{model.selectedTask?.title ?? 'Choose a task to focus on'} →</button
 		>
 		<div class:running class="timer-ring"><span>{display}</span></div>
@@ -122,7 +180,12 @@
 		</div>
 		<div class="record-title">
 			<h2>Focus record</h2>
-			<Button variant="ghost" size="icon" aria-label="Add focus record"><PlusIcon /></Button>
+			<Button
+				variant="ghost"
+				size="icon"
+				aria-label="Add focus record"
+				onclick={() => (manualOpen = true)}><PlusIcon /></Button
+			>
 		</div>
 		{#if sessions.length}
 			<div class="focus-records">
@@ -141,6 +204,27 @@
 			</div>{/if}
 	</div>
 </section>
+
+<Dialog.Root bind:open={manualOpen}>
+	<Dialog.Content>
+		<form class="manual-record" onsubmit={addManualRecord}>
+			<Dialog.Header>
+				<Dialog.Title>Add focus record</Dialog.Title>
+				<Dialog.Description
+					>Record focused time that happened away from the timer.</Dialog.Description
+				>
+			</Dialog.Header>
+			<Field.Field>
+				<Field.FieldLabel for="focus-minutes">Duration in minutes</Field.FieldLabel>
+				<Input id="focus-minutes" type="number" min="1" bind:value={manualMinutes} />
+			</Field.Field>
+			<Dialog.Footer>
+				<Button type="button" variant="outline" onclick={() => (manualOpen = false)}>Cancel</Button>
+				<Button type="submit">Add record</Button>
+			</Dialog.Footer>
+		</form>
+	</Dialog.Content>
+</Dialog.Root>
 
 <style>
 	.focus-view {
@@ -245,6 +329,10 @@
 		border: 1px solid var(--border);
 		border-radius: 10px;
 		text-transform: capitalize;
+	}
+	.manual-record {
+		display: grid;
+		gap: 20px;
 	}
 	.bottle {
 		margin: 0 auto 20px;

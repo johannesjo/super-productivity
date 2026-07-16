@@ -211,8 +211,19 @@ export const reduceDomain = (state: DomainState, command: DomainCommand): Domain
     case 'session/stop': {
       const session = state.sessions[command.payload.id];
       if (!session) return state;
+      const task = session.taskId ? state.tasks[session.taskId] : undefined;
       return {
         ...state,
+        tasks: task
+          ? {
+              ...state.tasks,
+              [task.id]: {
+                ...task,
+                trackedMs: task.trackedMs + command.payload.durationMs,
+                updatedAt: command.payload.endedAt,
+              },
+            }
+          : state.tasks,
         sessions: {
           ...state.sessions,
           [session.id]: {
