@@ -1,6 +1,7 @@
 import {
 	DomainStore,
 	EncryptedOperationTransport,
+	FileProviderOperationEndpoint,
 	NouraSyncHttpEndpoint,
 	type StateRepository,
 	type SyncCursorRepository
@@ -20,6 +21,17 @@ import {
 	type TimeSession
 } from '@noura/domain';
 import { SvelteURL } from 'svelte/reactivity';
+import {
+	createDropboxConnection,
+	createLocalFileConnection,
+	createNextcloudConnection,
+	createOneDriveConnection,
+	createWebdavConnection,
+	parseOAuthResult,
+	type FileProviderKind,
+	type OAuthProviderConnection,
+	type ProviderConnection
+} from './provider-runtime';
 
 export type AppView =
 	| 'today'
@@ -271,8 +283,8 @@ class LocalSyncCursorRepository implements SyncCursorRepository {
 	#cursor = { serverSeq: 0, vectorClock: {} as Record<string, number> };
 	readonly #key: string;
 
-	constructor(serverUrl: string) {
-		this.#key = `noura-sync-cursor:${serverUrl}`;
+	constructor(connectionIdentity: string) {
+		this.#key = `noura-sync-cursor:${connectionIdentity}`;
 	}
 
 	async load(): Promise<{ serverSeq: number; vectorClock: Record<string, number> }> {
@@ -309,8 +321,27 @@ export class NouraModel {
 	syncPassphrase = $state('');
 	syncStatus = $state<'offline' | 'connecting' | 'connected' | 'error'>('offline');
 	syncError = $state('');
+	syncProvider = $state<'noura' | FileProviderKind>('noura');
+	syncProviderLabel = $state('');
+	webdavUrl = $state('');
+	webdavUsername = $state('');
+	webdavPassword = $state('');
+	webdavFolder = $state('Noura');
+	nextcloudUrl = $state('');
+	nextcloudUsername = $state('');
+	nextcloudLoginName = $state('');
+	nextcloudPassword = $state('');
+	nextcloudFolder = $state('Noura');
+	dropboxAppKey = $state('');
+	oneDriveClientId = $state('');
+	oneDriveTenantId = $state('common');
+	localSyncFolder = $state('');
+	oauthUrl = $state('');
+	oauthCode = $state('');
+	oauthProvider = $state<'dropbox' | 'onedrive' | undefined>();
 	#store: DomainStore;
 	#syncTransport?: EncryptedOperationTransport;
+	#pendingOAuth?: OAuthProviderConnection;
 	readonly #clientId: string;
 
 	constructor() {
@@ -331,8 +362,6 @@ export class NouraModel {
 	}
 
 	async connectNouraSync(): Promise<void> {
-		this.syncError = '';
-		this.syncStatus = 'connecting';
 		try {
 			const url = new SvelteURL(this.syncServerUrl.trim());
 			if (!['http:', 'https:'].includes(url.protocol))
@@ -340,32 +369,185 @@ export class NouraModel {
 			if (!this.syncAccessToken.trim()) throw new Error('Enter a NouraSync access token');
 			if (this.syncPassphrase.length < 8)
 				throw new Error('Use a sync password with at least 8 characters');
-			this.#syncTransport?.stop();
-			this.#syncTransport = new EncryptedOperationTransport(
+			await this.#connectSyncTransport(
 				new NouraSyncHttpEndpoint({ baseUrl: url.toString(), accessToken: this.syncAccessToken }),
-				new LocalSyncCursorRepository(url.origin),
-				this.#clientId,
-				this.syncPassphrase
+				`nourasync:${url.origin}`,
+				'NouraSync'
 			);
-			this.#store.connectTransport(this.#syncTransport);
-			await this.#syncTransport.start();
-			this.syncStatus = 'connected';
 		} catch (error) {
-			this.#store.connectTransport(undefined);
-			this.#syncTransport = undefined;
-			this.syncStatus = 'error';
-			this.syncError = error instanceof Error ? error.message : 'Unable to connect to NouraSync';
+			this.#setSyncError(error, 'Unable to connect to NouraSync');
 		}
 	}
 
-	disconnectNouraSync(): void {
+	async connectWebdav(): Promise<void> {
+		try {
+			const url = new SvelteURL(this.webdavUrl.trim());
+			const connection = await createWebdavConnection({
+				baseUrl: url.toString(),
+				userName: this.webdavUsername.trim(),
+				password: this.webdavPassword,
+				syncFolderPath: this.webdavFolder.trim() || 'Noura'
+			});
+			await this.#connectFileProvider(connection);
+		} catch (error) {
+			this.#setSyncError(error, 'Unable to connect to WebDAV');
+		}
+	}
+
+	async connectNextcloud(): Promise<void> {
+		try {
+			const url = new SvelteURL(this.nextcloudUrl.trim());
+			const connection = await createNextcloudConnection({
+				serverUrl: url.toString(),
+				userName: this.nextcloudUsername.trim(),
+				loginName: this.nextcloudLoginName.trim() || undefined,
+				password: this.nextcloudPassword,
+				syncFolderPath: this.nextcloudFolder.trim() || 'Noura'
+			});
+			await this.#connectFileProvider(connection);
+		} catch (error) {
+			this.#setSyncError(error, 'Unable to connect to Nextcloud');
+		}
+	}
+
+	async beginDropboxAuth(): Promise<void> {
+		await this.#beginOAuth('dropbox', () => createDropboxConnection(this.dropboxAppKey));
+	}
+
+	async beginOneDriveAuth(): Promise<void> {
+		await this.#beginOAuth('onedrive', () =>
+			createOneDriveConnection(this.oneDriveClientId, this.oneDriveTenantId)
+		);
+	}
+
+	async finishOAuth(): Promise<void> {
+		try {
+			if (!this.#pendingOAuth?.auth.verifyCodeChallenge)
+				throw new Error('Start authorization again');
+			const { code } = parseOAuthResult(this.oauthCode, this.#pendingOAuth.expectedState);
+			const privateCfg = await this.#pendingOAuth.auth.verifyCodeChallenge(code);
+			await this.#pendingOAuth.provider.setPrivateCfg(privateCfg);
+			if (!(await this.#pendingOAuth.provider.isReady()))
+				throw new Error(`${this.#pendingOAuth.label} did not return reusable credentials`);
+			const connection = this.#pendingOAuth;
+			this.oauthProvider = undefined;
+			this.oauthCode = '';
+			this.oauthUrl = '';
+			this.#pendingOAuth = undefined;
+			await this.#connectFileProvider(connection);
+		} catch (error) {
+			this.#setSyncError(error, 'Unable to finish authorization');
+		}
+	}
+
+	async chooseLocalSyncFolder(): Promise<void> {
+		try {
+			const { open } = await import('@tauri-apps/plugin-dialog');
+			const selected = await open({
+				directory: true,
+				multiple: false,
+				title: 'Choose sync folder'
+			});
+			if (typeof selected === 'string') this.localSyncFolder = selected;
+		} catch (error) {
+			this.#setSyncError(error, 'Unable to choose a local sync folder');
+		}
+	}
+
+	async connectLocalFolder(): Promise<void> {
+		try {
+			const connection = await createLocalFileConnection(this.localSyncFolder);
+			await this.#connectFileProvider(connection);
+		} catch (error) {
+			this.#setSyncError(error, 'Unable to connect the local sync folder');
+		}
+	}
+
+	disconnectSync(): void {
 		this.#syncTransport?.stop();
 		this.#syncTransport = undefined;
 		this.#store.connectTransport(undefined);
 		this.syncAccessToken = '';
 		this.syncPassphrase = '';
 		this.syncError = '';
+		this.syncProviderLabel = '';
 		this.syncStatus = 'offline';
+	}
+
+	disconnectNouraSync(): void {
+		this.disconnectSync();
+	}
+
+	async #beginOAuth(
+		kind: 'dropbox' | 'onedrive',
+		create: () => Promise<OAuthProviderConnection>
+	): Promise<void> {
+		try {
+			this.#assertSyncPassphrase();
+			this.syncError = '';
+			const connection = await create();
+			if (!connection.auth.authUrl)
+				throw new Error(`${connection.label} did not return an authorization URL`);
+			this.#pendingOAuth = connection;
+			this.oauthProvider = kind;
+			this.oauthUrl = connection.auth.authUrl;
+			this.oauthCode = '';
+			const { openUrl } = await import('@tauri-apps/plugin-opener');
+			await openUrl(connection.auth.authUrl);
+		} catch (error) {
+			this.#setSyncError(error, `Unable to start ${kind} authorization`);
+		}
+	}
+
+	async #connectFileProvider(connection: ProviderConnection): Promise<void> {
+		if (!(await connection.provider.isReady()))
+			throw new Error(`${connection.label} is not fully configured`);
+		await this.#connectSyncTransport(
+			new FileProviderOperationEndpoint({ provider: connection.provider }),
+			`${connection.kind}:${connection.identity}`,
+			connection.label
+		);
+	}
+
+	async #connectSyncTransport(
+		endpoint: ConstructorParameters<typeof EncryptedOperationTransport>[0],
+		identity: string,
+		label: string
+	): Promise<void> {
+		this.#assertSyncPassphrase();
+		this.syncError = '';
+		this.syncStatus = 'connecting';
+		this.#syncTransport?.stop();
+		this.#syncTransport = new EncryptedOperationTransport(
+			endpoint,
+			new LocalSyncCursorRepository(identity),
+			this.#clientId,
+			this.syncPassphrase
+		);
+		this.#store.connectTransport(this.#syncTransport);
+		try {
+			await this.#syncTransport.start();
+			this.syncProviderLabel = label;
+			this.syncStatus = 'connected';
+		} catch (error) {
+			this.#syncTransport.stop();
+			this.#syncTransport = undefined;
+			this.#store.connectTransport(undefined);
+			throw error;
+		}
+	}
+
+	#assertSyncPassphrase(): void {
+		if (this.syncPassphrase.length < 8)
+			throw new Error('Use a sync password with at least 8 characters');
+	}
+
+	#setSyncError(error: unknown, fallback: string): void {
+		this.#store.connectTransport(undefined);
+		this.#syncTransport?.stop();
+		this.#syncTransport = undefined;
+		this.syncStatus = 'error';
+		this.syncError = error instanceof Error ? error.message : fallback;
 	}
 
 	get selectedTask(): Task | undefined {

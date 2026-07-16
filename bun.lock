@@ -19,6 +19,7 @@
         "@noura/platform": "workspace:*",
         "@sp/shared-schema": "workspace:*",
         "@sp/sync-core": "workspace:*",
+        "@sp/sync-providers": "workspace:*",
         "@tauri-apps/api": "^2.11.1",
         "@tauri-apps/plugin-autostart": "~2",
         "@tauri-apps/plugin-clipboard-manager": "~2",

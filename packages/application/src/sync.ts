@@ -25,6 +25,143 @@ export interface NouraSyncOperationEndpoint {
   subscribe?(sinceSeq: number, onAvailable: () => void, clientId: string): () => void;
 }
 
+export interface RevisionedSyncFileProvider {
+  id: string;
+  downloadFile(path: string): Promise<{ rev: string; dataStr: string }>;
+  uploadFile(
+    path: string,
+    dataStr: string,
+    revToMatch: string | null,
+    isForceOverwrite?: boolean,
+  ): Promise<{ rev: string }>;
+}
+
+interface EncryptedOperationFile {
+  version: 1;
+  latestSeq: number;
+  updatedAt: number;
+  operations: EncryptedServerOperation[];
+}
+
+export interface FileProviderOperationEndpointOptions {
+  provider: RevisionedSyncFileProvider;
+  fileName?: string;
+  pollIntervalMs?: number;
+  maxWriteAttempts?: number;
+}
+
+const isProviderError = (error: unknown, name: string): boolean =>
+  error instanceof Error && error.name === name;
+
+/**
+ * Stores Noura's already-encrypted domain operations in a revisioned JSON file.
+ * Dropbox, OneDrive and WebDAV provide atomic revision checks, so a losing writer
+ * re-reads and merges before retrying. Local-folder providers offer best-effort
+ * revision checks and are intentionally documented as single-writer backup sync.
+ */
+export class FileProviderOperationEndpoint implements NouraSyncOperationEndpoint {
+  readonly #provider: RevisionedSyncFileProvider;
+  readonly #fileName: string;
+  readonly #pollIntervalMs: number;
+  readonly #maxWriteAttempts: number;
+
+  constructor(options: FileProviderOperationEndpointOptions) {
+    this.#provider = options.provider;
+    this.#fileName = options.fileName ?? 'noura-sync-operations.json';
+    this.#pollIntervalMs = options.pollIntervalMs ?? 15_000;
+    this.#maxWriteAttempts = options.maxWriteAttempts ?? 6;
+  }
+
+  async upload(operation: EncryptedServerOperation): Promise<{ serverSeq: number }> {
+    for (let attempt = 0; attempt < this.#maxWriteAttempts; attempt += 1) {
+      const current = await this.#read();
+      const existing = current.file.operations.find((item) => item.id === operation.id);
+      if (existing) return { serverSeq: existing.serverSeq };
+
+      const serverSeq = current.file.latestSeq + 1;
+      const next: EncryptedOperationFile = {
+        ...current.file,
+        latestSeq: serverSeq,
+        updatedAt: Date.now(),
+        operations: [...current.file.operations, { ...operation, serverSeq }],
+      };
+      try {
+        await this.#provider.uploadFile(
+          this.#fileName,
+          JSON.stringify(next),
+          current.rev,
+          false,
+        );
+        return { serverSeq };
+      } catch (error) {
+        if (!isProviderError(error, 'UploadRevToMatchMismatchAPIError')) throw error;
+        if (attempt === this.#maxWriteAttempts - 1) {
+          throw new Error(
+            `${this.#provider.id} sync stayed busy after ${this.#maxWriteAttempts} attempts`,
+            { cause: error },
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, 40 * (attempt + 1)));
+      }
+    }
+    throw new Error(`${this.#provider.id} sync upload failed`);
+  }
+
+  async download(
+    sinceSeq: number,
+    excludeClient: string,
+  ): Promise<{
+    operations: EncryptedServerOperation[];
+    latestSeq: number;
+    hasMore: boolean;
+  }> {
+    const { file } = await this.#read();
+    return {
+      operations: file.operations.filter(
+        (operation) =>
+          operation.serverSeq > sinceSeq && operation.clientId !== excludeClient,
+      ),
+      latestSeq: file.latestSeq,
+      hasMore: false,
+    };
+  }
+
+  subscribe(_sinceSeq: number, onAvailable: () => void): () => void {
+    const timer = setInterval(onAvailable, this.#pollIntervalMs);
+    return () => clearInterval(timer);
+  }
+
+  async #read(): Promise<{ rev: string | null; file: EncryptedOperationFile }> {
+    try {
+      const remote = await this.#provider.downloadFile(this.#fileName);
+      const parsed = JSON.parse(remote.dataStr) as Partial<EncryptedOperationFile>;
+      if (
+        parsed.version !== 1 ||
+        typeof parsed.latestSeq !== 'number' ||
+        !Number.isSafeInteger(parsed.latestSeq) ||
+        !Array.isArray(parsed.operations)
+      ) {
+        throw new Error(`${this.#provider.id} contains an unsupported Noura sync file`);
+      }
+      return {
+        rev: remote.rev,
+        file: {
+          version: 1,
+          latestSeq: parsed.latestSeq,
+          updatedAt: typeof parsed.updatedAt === 'number' ? parsed.updatedAt : 0,
+          operations: parsed.operations,
+        },
+      };
+    } catch (error) {
+      if (!isProviderError(error, 'RemoteFileNotFoundAPIError')) throw error;
+      return {
+        rev: null,
+        file: { version: 1, latestSeq: 0, updatedAt: 0, operations: [] },
+      };
+    }
+  }
+}
+
 export interface NouraSyncHttpEndpointOptions {
   baseUrl: string;
   accessToken: string;
@@ -258,7 +395,7 @@ export class EncryptedOperationTransport implements OperationTransport {
     const cursor = await this.cursorRepository.load();
     const nextClock = { ...cursor.vectorClock, [this.clientId]: operation.sequence };
     const encryptedPayload = await encrypt(JSON.stringify(operation), this.passphrase);
-    const result = await this.endpoint.upload({
+    await this.endpoint.upload({
       serverSeq: cursor.serverSeq,
       id: operation.id,
       clientId: this.clientId,
@@ -268,7 +405,9 @@ export class EncryptedOperationTransport implements OperationTransport {
       domainOperation: operation,
     });
     await this.cursorRepository.save({
-      serverSeq: Math.max(cursor.serverSeq, result.serverSeq),
+      // Upload sequence numbers do not prove that this client downloaded every
+      // preceding remote operation. Only the download path advances serverSeq.
+      serverSeq: cursor.serverSeq,
       vectorClock: nextClock,
     });
   }

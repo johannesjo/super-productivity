@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { DomainOperation, Task } from '@noura/domain';
-import { NouraSyncHttpEndpoint } from './sync';
+import {
+  EncryptedOperationTransport,
+  FileProviderOperationEndpoint,
+  MemorySyncCursorRepository,
+  NouraSyncHttpEndpoint,
+  type EncryptedServerOperation,
+  type RevisionedSyncFileProvider,
+} from './sync';
 
 const task: Task = {
   id: 'task-1',
@@ -112,5 +119,124 @@ describe('NouraSyncHttpEndpoint', () => {
       latestSeq: 9,
       hasMore: false,
     });
+  });
+});
+
+class MemoryRevisionedProvider implements RevisionedSyncFileProvider {
+  readonly id = 'MemoryDrive';
+  data?: string;
+  rev = 0;
+  conflictOnce = false;
+
+  async downloadFile(): Promise<{ rev: string; dataStr: string }> {
+    if (!this.data) {
+      const error = new Error('missing');
+      error.name = 'RemoteFileNotFoundAPIError';
+      throw error;
+    }
+    return { rev: String(this.rev), dataStr: this.data };
+  }
+
+  async uploadFile(
+    _path: string,
+    dataStr: string,
+    revToMatch: string | null,
+  ): Promise<{ rev: string }> {
+    if (this.conflictOnce) {
+      this.conflictOnce = false;
+      const remote = JSON.parse(dataStr) as { operations: EncryptedServerOperation[] };
+      const other: EncryptedServerOperation = {
+        serverSeq: 1,
+        id: 'concurrent-op',
+        clientId: 'other',
+        timestamp: 1,
+        vectorClock: { other: 1 },
+        encryptedPayload: 'other-ciphertext',
+      };
+      this.data = JSON.stringify({
+        version: 1,
+        latestSeq: 1,
+        updatedAt: 1,
+        operations: [other, ...remote.operations.filter((op) => op.id !== 'local-op')],
+      });
+      this.rev = 1;
+      const error = new Error('conflict');
+      error.name = 'UploadRevToMatchMismatchAPIError';
+      throw error;
+    }
+    if (this.data && revToMatch !== String(this.rev)) {
+      const error = new Error('conflict');
+      error.name = 'UploadRevToMatchMismatchAPIError';
+      throw error;
+    }
+    if (!this.data && revToMatch !== null) throw new Error('expected create');
+    this.data = dataStr;
+    this.rev += 1;
+    return { rev: String(this.rev) };
+  }
+}
+
+describe('FileProviderOperationEndpoint', () => {
+  const encryptedOperation = (
+    id: string,
+    clientId: string,
+  ): EncryptedServerOperation => ({
+    serverSeq: 0,
+    id,
+    clientId,
+    timestamp: 1,
+    vectorClock: { [clientId]: 1 },
+    encryptedPayload: `${id}-ciphertext`,
+  });
+
+  it('creates an operation file and filters the downloading client', async () => {
+    const provider = new MemoryRevisionedProvider();
+    const endpoint = new FileProviderOperationEndpoint({ provider });
+
+    await endpoint.upload(encryptedOperation('first', 'client-a'));
+    await endpoint.upload(encryptedOperation('second', 'client-b'));
+
+    const result = await endpoint.download(0, 'client-a');
+    expect(result.latestSeq).toBe(2);
+    expect(result.operations.map((operation) => operation.id)).toEqual(['second']);
+  });
+
+  it('re-reads and merges after a conditional-write conflict', async () => {
+    const provider = new MemoryRevisionedProvider();
+    provider.conflictOnce = true;
+    const endpoint = new FileProviderOperationEndpoint({ provider });
+
+    const result = await endpoint.upload(encryptedOperation('local-op', 'client-a'));
+    const file = JSON.parse(provider.data ?? '{}') as {
+      latestSeq: number;
+      operations: EncryptedServerOperation[];
+    };
+
+    expect(result.serverSeq).toBe(2);
+    expect(file.latestSeq).toBe(2);
+    expect(file.operations.map((operation) => operation.id)).toEqual([
+      'concurrent-op',
+      'local-op',
+    ]);
+  });
+});
+
+describe('EncryptedOperationTransport cursors', () => {
+  it('does not skip unseen remote operations when an upload receives a later sequence', async () => {
+    const cursor = new MemorySyncCursorRepository();
+    const endpoint = {
+      upload: async () => ({ serverSeq: 8 }),
+      download: async () => ({ operations: [], latestSeq: 0, hasMore: false }),
+    };
+    const transport = new EncryptedOperationTransport(
+      endpoint,
+      cursor,
+      'client-1',
+      'password-123',
+    );
+
+    await transport.push(domainOperation);
+
+    expect((await cursor.load()).serverSeq).toBe(0);
   });
 });

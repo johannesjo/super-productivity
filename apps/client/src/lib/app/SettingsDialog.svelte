@@ -1,7 +1,6 @@
 <script lang="ts">
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
-	import CloudIcon from '@lucide/svelte/icons/cloud';
 	import KeyboardIcon from '@lucide/svelte/icons/keyboard';
 	import LinkIcon from '@lucide/svelte/icons/link';
 	import MonitorIcon from '@lucide/svelte/icons/monitor';
@@ -14,9 +13,9 @@
 	import * as Field from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
-	import { Separator } from '$lib/components/ui/separator';
 	import { Switch } from '$lib/components/ui/switch';
 	import type { NouraModel } from './model.svelte';
+	import SyncSettings from './SyncSettings.svelte';
 
 	let { model }: { model: NouraModel } = $props();
 	let section = $state('general');
@@ -109,74 +108,9 @@
 				{:else if section === 'account'}
 					<header>
 						<h2>Account & sync</h2>
-						<p>Use Noura fully offline or connect the retained encrypted NouraSync stack.</p>
+						<p>Keep Noura offline or sync through the provider you already trust.</p>
 					</header>
-					<div class="sync-card">
-						<CloudIcon />
-						<div>
-							<strong
-								>{model.syncStatus === 'connected'
-									? 'Encrypted sync connected'
-									: 'Local-first mode'}</strong
-							>
-							<p>
-								Your data is stored on this device. Add NouraSync credentials only when you want
-								encrypted cross-device sync.
-							</p>
-						</div>
-						{#if model.syncStatus === 'connected'}
-							<Button variant="outline" onclick={() => model.disconnectNouraSync()}
-								>Disconnect</Button
-							>
-						{:else}
-							<Button
-								disabled={model.syncStatus === 'connecting'}
-								onclick={() => model.connectNouraSync()}
-								>{model.syncStatus === 'connecting' ? 'Connecting…' : 'Connect NouraSync'}</Button
-							>
-						{/if}
-					</div>
-					<Separator />
-					<Field.FieldGroup>
-						<Field.Field>
-							<Field.FieldLabel for="server-url">NouraSync server</Field.FieldLabel>
-							<Input
-								id="server-url"
-								bind:value={model.syncServerUrl}
-								placeholder="https://sync.example.com"
-							/>
-							<Field.FieldDescription
-								>Use the hosted endpoint or your existing self-hosted server.</Field.FieldDescription
-							>
-						</Field.Field>
-						<Field.Field>
-							<Field.FieldLabel for="access-token">Access token</Field.FieldLabel>
-							<Input
-								id="access-token"
-								type="password"
-								bind:value={model.syncAccessToken}
-								autocomplete="off"
-								placeholder="Paste a NouraSync JWT"
-							/>
-							<Field.FieldDescription
-								>Kept in memory for this session and never written to localStorage.</Field.FieldDescription
-							>
-						</Field.Field>
-						<Field.Field>
-							<Field.FieldLabel for="sync-password">Encryption password</Field.FieldLabel>
-							<Input
-								id="sync-password"
-								type="password"
-								bind:value={model.syncPassphrase}
-								autocomplete="off"
-								placeholder="At least 8 characters"
-							/>
-							<Field.FieldDescription
-								>Used locally to encrypt and decrypt operation payloads.</Field.FieldDescription
-							>
-						</Field.Field>
-						{#if model.syncError}<p class="sync-error" role="alert">{model.syncError}</p>{/if}
-					</Field.FieldGroup>
+					<SyncSettings {model} />
 				{:else if section === 'integrations'}
 					<header>
 						<h2>Integrations</h2>
@@ -332,29 +266,11 @@
 	main header {
 		margin-bottom: 34px;
 	}
-	main header p,
-	.sync-card p {
+	main header p {
 		margin-top: 6px;
 		color: var(--muted-foreground);
 		font-size: 12px;
 		line-height: 1.5;
-	}
-	.sync-card {
-		display: grid;
-		grid-template-columns: 40px 1fr auto;
-		align-items: center;
-		gap: 16px;
-		padding: 20px;
-		border: 1px solid var(--border);
-		border-radius: 12px;
-	}
-	.sync-card > :global(svg) {
-		width: 24px;
-		color: var(--primary);
-	}
-	.sync-error {
-		color: var(--destructive);
-		font-size: 12px;
 	}
 	.integration-list {
 		display: grid;
@@ -415,12 +331,6 @@
 		}
 		main {
 			padding: 24px 20px;
-		}
-		.sync-card {
-			grid-template-columns: 40px minmax(0, 1fr);
-		}
-		.sync-card > :global(button) {
-			grid-column: 1 / -1;
 		}
 		.integration-list {
 			grid-template-columns: 1fr;
