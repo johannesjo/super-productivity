@@ -109,7 +109,7 @@
 				{:else if section === 'account'}
 					<header>
 						<h2>Account & sync</h2>
-						<p>Use Noura fully offline or connect the retained encrypted SuperSync stack.</p>
+						<p>Use Noura fully offline or connect the retained encrypted NouraSync stack.</p>
 					</header>
 					<div class="sync-card">
 						<CloudIcon />
@@ -120,26 +120,26 @@
 									: 'Local-first mode'}</strong
 							>
 							<p>
-								Your data is stored on this device. Add SuperSync credentials only when you want
+								Your data is stored on this device. Add NouraSync credentials only when you want
 								encrypted cross-device sync.
 							</p>
 						</div>
 						{#if model.syncStatus === 'connected'}
-							<Button variant="outline" onclick={() => model.disconnectSuperSync()}
+							<Button variant="outline" onclick={() => model.disconnectNouraSync()}
 								>Disconnect</Button
 							>
 						{:else}
 							<Button
 								disabled={model.syncStatus === 'connecting'}
-								onclick={() => model.connectSuperSync()}
-								>{model.syncStatus === 'connecting' ? 'Connecting…' : 'Connect SuperSync'}</Button
+								onclick={() => model.connectNouraSync()}
+								>{model.syncStatus === 'connecting' ? 'Connecting…' : 'Connect NouraSync'}</Button
 							>
 						{/if}
 					</div>
 					<Separator />
 					<Field.FieldGroup>
 						<Field.Field>
-							<Field.FieldLabel for="server-url">SuperSync server</Field.FieldLabel>
+							<Field.FieldLabel for="server-url">NouraSync server</Field.FieldLabel>
 							<Input
 								id="server-url"
 								bind:value={model.syncServerUrl}
@@ -156,7 +156,7 @@
 								type="password"
 								bind:value={model.syncAccessToken}
 								autocomplete="off"
-								placeholder="Paste a SuperSync JWT"
+								placeholder="Paste a NouraSync JWT"
 							/>
 							<Field.FieldDescription
 								>Kept in memory for this session and never written to localStorage.</Field.FieldDescription
@@ -217,7 +217,7 @@
 						><Field.Field orientation="horizontal"
 							><Field.FieldContent
 								><Field.FieldTitle>Encrypt remote sync</Field.FieldTitle><Field.FieldDescription
-									>SuperSync always uses AES-256-GCM with an Argon2id-derived key.</Field.FieldDescription
+									>NouraSync always uses AES-256-GCM with an Argon2id-derived key.</Field.FieldDescription
 								></Field.FieldContent
 							><Switch checked disabled /></Field.Field
 						></Field.FieldGroup

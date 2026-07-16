@@ -1,0 +1,22 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "packages/noura-sync-server/Dockerfile",
+    "watchPatterns": [
+      "package.json",
+      "bun.lock",
+      "packages/noura-sync-server/**",
+      "packages/shared-schema/**",
+      "packages/sync-core/**"
+    ]
+  },
+  "deploy": {
+    "preDeployCommand": "bun run --cwd packages/noura-sync-server db:migrate",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 120,
+    "numReplicas": 1,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

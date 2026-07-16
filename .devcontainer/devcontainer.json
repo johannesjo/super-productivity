@@ -9,6 +9,6 @@
   "forwardPorts": [5173, 1900],
   "portsAttributes": {
     "5173": { "label": "Noura web", "onAutoForward": "openBrowser" },
-    "1900": { "label": "SuperSync" }
+    "1900": { "label": "NouraSync" }
   }
 }

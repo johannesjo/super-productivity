@@ -1,6 +1,6 @@
 # @sp/sync-core
 
-Framework-agnostic primitives for the Super Productivity sync engine: operation-log types, vector clocks, conflict resolution, gzip compression, and end-to-end encryption. Consumed by the main app and the SuperSync server; no Angular/Electron/Capacitor dependencies.
+Framework-agnostic primitives for the Super Productivity sync engine: operation-log types, vector clocks, conflict resolution, gzip compression, and end-to-end encryption. Consumed by the main app and the NouraSync server; no Angular/Electron/Capacitor dependencies.
 
 ## Encryption
 

@@ -80,9 +80,9 @@ describe('sync provider contracts', () => {
 
   it('keeps restore point strings supplied by the host app', async () => {
     type RestorePointType = 'SYNC_IMPORT' | 'CUSTOM_REPAIR';
-    const provider: OperationSyncCapable<'superSyncOps', RestorePointType> = {
+    const provider: OperationSyncCapable<'nouraSyncOps', RestorePointType> = {
       supportsOperationSync: true,
-      providerMode: 'superSyncOps',
+      providerMode: 'nouraSyncOps',
       uploadOps: vi.fn().mockResolvedValue({ results: [], latestSeq: 1 }),
       downloadOps: vi.fn().mockResolvedValue({ ops: [], hasMore: false, latestSeq: 1 }),
       getLastServerSeq: vi.fn().mockResolvedValue(1),

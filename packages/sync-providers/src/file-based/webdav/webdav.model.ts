@@ -10,7 +10,7 @@ export interface WebdavPrivateCfg {
   baseUrl: string;
   userName: string;
   password: string;
-  // Optional access token for Bearer auth (e.g. SuperSync)
+  // Optional access token for Bearer auth (e.g. NouraSync)
   accessToken?: string;
   syncFolderPath?: string;
 }

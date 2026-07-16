@@ -5,7 +5,7 @@
  * We use primitives (strings) instead of enums/union types because:
  *
  * 1. **Package isolation**: This package is shared between the client app and
- *    super-sync-server. Importing from `src/app/` would create circular deps.
+ *    noura-sync-server. Importing from `src/app/` would create circular deps.
  *
  * 2. **Portability**: Migrations must be pure functions that run anywhere
  *    (server, tests, workers) without Angular or app-specific dependencies.

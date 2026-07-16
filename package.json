@@ -13,7 +13,7 @@
     "packages/shared-schema",
     "packages/sync-core",
     "packages/sync-providers",
-    "packages/super-sync-server"
+    "packages/noura-sync-server"
   ],
   "scripts": {
     "dev": "bun run --cwd apps/client dev",
@@ -25,8 +25,8 @@
     "test:packages": "bun run --filter '@noura/*' --filter '@sp/*' --filter '@super-productivity/*' --if-present --sequential test",
     "test:client": "bun run --cwd apps/client test:unit --run",
     "test:e2e": "bun run --cwd apps/client test:e2e",
-    "test:supersync": "bun run --cwd packages/super-sync-server test",
-    "supersync:dev": "bun run --cwd packages/super-sync-server dev",
+    "test:nourasync": "bun run --cwd packages/noura-sync-server test",
+    "nourasync:dev": "bun run --cwd packages/noura-sync-server dev",
     "tauri:dev": "bun run --cwd apps/client tauri dev",
     "tauri:build": "bun run --cwd apps/client tauri build"
   },

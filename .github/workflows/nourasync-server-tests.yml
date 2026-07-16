@@ -1,0 +1,41 @@
+name: NouraSync Server Tests
+
+on:
+  pull_request:
+    paths:
+      - 'packages/noura-sync-server/**'
+      - 'packages/shared-schema/**'
+      - 'packages/sync-core/**'
+      - 'bun.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nourasync:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nourasync
+          POSTGRES_PASSWORD: superpassword
+          POSTGRES_DB: nourasync_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nourasync -d nourasync_db"
+          --health-interval 3s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nourasync:superpassword@localhost:5432/nourasync_db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun run test:nourasync
+      - working-directory: packages/noura-sync-server
+        run: bun run db:migrate
+      - working-directory: packages/noura-sync-server
+        run: bun run test:integration:postgres

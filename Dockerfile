@@ -10,7 +10,7 @@ COPY packages/platform/package.json ./packages/platform/
 COPY packages/shared-schema/package.json ./packages/shared-schema/
 COPY packages/sync-core/package.json ./packages/sync-core/
 COPY packages/sync-providers/package.json ./packages/sync-providers/
-COPY packages/super-sync-server/package.json ./packages/super-sync-server/
+COPY packages/noura-sync-server/package.json ./packages/noura-sync-server/
 RUN bun install --frozen-lockfile
 
 COPY apps/client ./apps/client

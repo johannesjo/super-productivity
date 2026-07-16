@@ -10,21 +10,25 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: supersync
+      POSTGRES_USER: nourasync
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
-      POSTGRES_DB: supersync_db
+      POSTGRES_DB: nourasync_db
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U supersync -d supersync_db']
+      test: ['CMD-SHELL', 'pg_isready -U nourasync -d nourasync_db']
       interval: 3s
       timeout: 5s
       retries: 20
 
-  supersync:
+  nourasync:
     build:
       context: .
-      dockerfile: packages/super-sync-server/Dockerfile.test
+      dockerfile: packages/noura-sync-server/Dockerfile
+    command:
+      - sh
+      - -c
+      - bun run --cwd packages/noura-sync-server db:migrate && exec bun run --cwd packages/noura-sync-server start
     restart: unless-stopped
     ports:
       - '1900:1900'
@@ -38,7 +42,7 @@ services:
       TEST_MODE_CONFIRM: ${TEST_MODE_CONFIRM:-}
       JWT_SECRET: ${JWT_SECRET:-replace-with-at-least-32-characters}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://localhost:5173}
-      DATABASE_URL: postgresql://supersync:${POSTGRES_PASSWORD:-change-me}@db:5432/supersync_db
+      DATABASE_URL: postgresql://nourasync:${POSTGRES_PASSWORD:-change-me}@db:5432/nourasync_db
 
 volumes:
   db_data:

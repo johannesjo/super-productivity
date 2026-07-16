@@ -216,7 +216,7 @@ export class MissingCredentialsSPError extends Error {
 export class NetworkUnavailableSPError extends Error {
   override name = 'NetworkUnavailableSPError';
   constructor(
-    message = 'Unable to connect to SuperSync server. Check your internet connection.',
+    message = 'Unable to connect to NouraSync server. Check your internet connection.',
   ) {
     super(message);
   }

@@ -19,7 +19,7 @@ describe('isRetryableUploadError', () => {
       expect(isRetryableUploadError('Network failure')).toBe(true);
       expect(
         isRetryableUploadError(
-          'Unable to connect to SuperSync server. Check your internet connection.',
+          'Unable to connect to NouraSync server. Check your internet connection.',
         ),
       ).toBe(true);
     });

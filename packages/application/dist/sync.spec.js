@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SuperSyncHttpEndpoint } from './sync';
+import { NouraSyncHttpEndpoint } from './sync';
 const task = {
     id: 'task-1',
     title: 'Sync me',
@@ -24,10 +24,10 @@ const domainOperation = {
     command: { type: 'task/add', payload: { task } },
     source: 'local',
 };
-describe('SuperSyncHttpEndpoint', () => {
-    it('maps encrypted domain operations to the retained SuperSync contract', async () => {
+describe('NouraSyncHttpEndpoint', () => {
+    it('maps encrypted domain operations to the retained NouraSync contract', async () => {
         let request;
-        const endpoint = new SuperSyncHttpEndpoint({
+        const endpoint = new NouraSyncHttpEndpoint({
             baseUrl: 'https://sync.example.test/',
             accessToken: 'secret-token',
             fetch: async (input, init) => {
@@ -61,7 +61,7 @@ describe('SuperSyncHttpEndpoint', () => {
         });
     });
     it('maps downloaded wire operations back to encrypted operations', async () => {
-        const endpoint = new SuperSyncHttpEndpoint({
+        const endpoint = new NouraSyncHttpEndpoint({
             baseUrl: 'https://sync.example.test',
             accessToken: 'token',
             fetch: async () => Response.json({

@@ -3,5 +3,5 @@ node_modules
 apps/client/build
 apps/client/.svelte-kit
 apps/client/src-tauri/target
-packages/super-sync-server/public/simplewebauthn-browser.min.js
-packages/super-sync-server/helm
+packages/noura-sync-server/public/simplewebauthn-browser.min.js
+packages/noura-sync-server/helm

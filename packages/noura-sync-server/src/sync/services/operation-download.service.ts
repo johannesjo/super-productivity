@@ -1,0 +1,381 @@
+/**
+ * OperationDownloadService - Handles downloading operations for clients
+ *
+ * Extracted from SyncService for better separation of concerns.
+ * This service handles operation retrieval with gap detection and snapshot optimization.
+ */
+import { db } from '../../db';
+import {
+  CAUSAL_FULL_STATE_OPERATION_WHERE,
+  Operation,
+  ServerOperation,
+  VectorClock,
+  limitVectorClockSize,
+} from '../sync.types';
+import { Logger } from '../../logger';
+
+const OPERATION_DOWNLOAD_SELECT = {
+  id: true,
+  serverSeq: true,
+  clientId: true,
+  actionType: true,
+  opType: true,
+  entityType: true,
+  entityId: true,
+  entityIds: true,
+  payload: true,
+  vectorClock: true,
+  schemaVersion: true,
+  clientTimestamp: true,
+  receivedAt: true,
+  isPayloadEncrypted: true,
+  syncImportReason: true,
+  repairBaseServerSeq: true,
+} as const;
+
+const DOWNLOAD_TRANSACTION_TIMEOUT_MS = 60000;
+
+type OperationDownloadResult = {
+  ops: ServerOperation[];
+  latestSeq: number;
+  gapDetected: boolean;
+  latestSnapshotSeq?: number;
+  snapshotVectorClock?: VectorClock;
+};
+
+type OperationDownloadTransactionResult = OperationDownloadResult & {
+  shouldComputeSnapshotVectorClock: boolean;
+  snapshotAuthorClientId?: string;
+  persistedSnapshotVectorClock?: VectorClock;
+};
+
+type OperationDownloadRow = {
+  id: string;
+  serverSeq: number;
+  clientId: string;
+  actionType: string;
+  opType: string;
+  entityType: string;
+  entityId: string | null;
+  entityIds: string[];
+  payload: unknown;
+  vectorClock: unknown;
+  schemaVersion: number;
+  clientTimestamp: bigint;
+  receivedAt: bigint;
+  isPayloadEncrypted: boolean;
+  syncImportReason: string | null;
+  repairBaseServerSeq: number | null;
+};
+
+const mapOperationRow = (row: OperationDownloadRow): ServerOperation => ({
+  serverSeq: row.serverSeq,
+  op: {
+    id: row.id,
+    clientId: row.clientId,
+    actionType: row.actionType,
+    opType: row.opType as Operation['opType'],
+    entityType: row.entityType,
+    entityId: row.entityId ?? undefined,
+    entityIds: row.entityIds.length > 0 ? row.entityIds : undefined,
+    payload: row.payload,
+    vectorClock: row.vectorClock as VectorClock,
+    schemaVersion: row.schemaVersion,
+    timestamp: Number(row.clientTimestamp),
+    isPayloadEncrypted: row.isPayloadEncrypted,
+    syncImportReason: row.syncImportReason ?? undefined,
+    repairBaseServerSeq: row.repairBaseServerSeq ?? undefined,
+  },
+  receivedAt: Number(row.receivedAt),
+});
+
+/**
+ * Strict-or-undefined parser for the JSONB column. The data is written by
+ * this server, so on any shape violation we return `undefined` to fall back
+ * to the legacy `_computeSnapshotVectorClock` aggregate path rather than
+ * silently dropping invalid entries and serving a partial clock.
+ */
+const parsePersistedVectorClock = (value: unknown): VectorClock | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const clock: VectorClock = {};
+  for (const [clientId, counter] of Object.entries(value as Record<string, unknown>)) {
+    if (clientId.length === 0) return undefined;
+    if (typeof counter !== 'number' || !Number.isInteger(counter) || counter < 0) {
+      return undefined;
+    }
+    clock[clientId] = counter;
+  }
+
+  return clock;
+};
+
+export class OperationDownloadService {
+  /**
+   * Get operations and latest sequence atomically with gap detection.
+   *
+   * OPTIMIZATION: When sinceSeq is before the latest full-state operation (SYNC_IMPORT,
+   * BACKUP_IMPORT, REPAIR), we skip to that operation's sequence instead. This prevents
+   * sending operations that will be filtered out by the client anyway, saving bandwidth
+   * and processing time.
+   *
+   * includeSnapshotMetadata controls only the expensive vector-clock aggregate; the
+   * full-state fast-forward still applies so piggyback downloads can return the
+   * replacing operation without scanning superseded history.
+   */
+  async getOpsSinceWithSeq(
+    userId: number,
+    sinceSeq: number,
+    excludeClient?: string,
+    limit: number = 500,
+    includeSnapshotMetadata: boolean = true,
+  ): Promise<OperationDownloadResult> {
+    const result = await db.$transaction(
+      async (tx) => {
+        const seqRow = await tx.userSyncState.findUnique({
+          where: { userId },
+          select: {
+            lastSeq: true,
+            latestFullStateSeq: true,
+            latestFullStateVectorClock: true,
+          },
+        });
+        const latestSeq = seqRow?.lastSeq ?? 0;
+
+        if (latestSeq === 0) {
+          const gapDetected = sinceSeq > 0;
+          if (gapDetected) {
+            Logger.warn(
+              `[user:${userId}] Gap detected: client at sinceSeq=${sinceSeq} but server is empty (latestSeq=0)`,
+            );
+          }
+
+          return {
+            ops: [],
+            latestSeq,
+            gapDetected,
+            latestSnapshotSeq: undefined,
+            snapshotVectorClock: undefined,
+            shouldComputeSnapshotVectorClock: false,
+            snapshotAuthorClientId: undefined,
+          };
+        }
+
+        // Find the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
+        // These operations supersede all previous operations
+        const latestFullStateOp = await tx.operation.findFirst({
+          where: {
+            userId,
+            serverSeq: { lte: latestSeq },
+            ...CAUSAL_FULL_STATE_OPERATION_WHERE,
+          },
+          orderBy: { serverSeq: 'desc' },
+          select: { serverSeq: true, clientId: true },
+        });
+
+        const latestSnapshotSeq = latestFullStateOp?.serverSeq ?? undefined;
+
+        // OPTIMIZATION: If client is requesting ops from before the latest full-state op,
+        // start from the full-state op instead. Pre-import ops are superseded and will
+        // be filtered out by the client anyway.
+        let effectiveSinceSeq = sinceSeq;
+        let shouldComputeSnapshotVectorClock = false;
+
+        if (latestSnapshotSeq !== undefined && sinceSeq < latestSnapshotSeq) {
+          // Start from one before the snapshot so it's included in results
+          effectiveSinceSeq = latestSnapshotSeq - 1;
+          Logger.info(
+            `[user:${userId}] Optimized download: skipping from sinceSeq=${sinceSeq} to ${effectiveSinceSeq} ` +
+              `(latest snapshot at seq ${latestSnapshotSeq})`,
+          );
+
+          shouldComputeSnapshotVectorClock = includeSnapshotMetadata;
+        }
+
+        const ops = await tx.operation.findMany({
+          where: {
+            userId,
+            serverSeq: { gt: effectiveSinceSeq, lte: latestSeq },
+            ...(excludeClient ? { clientId: { not: excludeClient } } : {}),
+          },
+          orderBy: {
+            serverSeq: 'asc',
+          },
+          take: limit,
+          select: OPERATION_DOWNLOAD_SELECT,
+        });
+
+        let minSeq: number | null = null;
+
+        if (sinceSeq > 0 && latestSeq > 0) {
+          // Get min sequence, but only when gap detection can use it.
+          // NOTE: Drizzle's `aggregate({ _min })` compiles to
+          // `SELECT MIN(x) FROM (SELECT x ... OFFSET 0) sub`. The OFFSET
+          // subquery is a planner optimization fence, so Postgres cannot use
+          // the (user_id, server_seq) index's first-row seek and instead scans
+          // every matching row — a per-user O(N) scan that, under load, ran for
+          // minutes and blew the 60s interactive-tx timeout. `findFirst`
+          // ordered by the indexed column compiles to `ORDER BY server_seq ASC
+          // LIMIT 1`: a guaranteed index seek returning the same minimum.
+          const minSeqRow = await tx.operation.findFirst({
+            where: { userId, serverSeq: { lte: latestSeq } },
+            orderBy: { serverSeq: 'asc' },
+            select: { serverSeq: true },
+          });
+          minSeq = minSeqRow?.serverSeq ?? null;
+        }
+
+        // Gap detection logic
+        let gapDetected = false;
+        const gapBaselineSeq = effectiveSinceSeq;
+
+        // Case 1: Client is ahead of server
+        if (sinceSeq > latestSeq && latestSeq > 0) {
+          gapDetected = true;
+          Logger.warn(
+            `[user:${userId}] Gap detected: client ahead sinceSeq=${sinceSeq} > latestSeq=${latestSeq}`,
+          );
+        }
+
+        if (sinceSeq > 0 && latestSeq > 0) {
+          // Case 2: Requested seq is purged. Compare against gapBaselineSeq
+          // (= effectiveSinceSeq) so the snapshot fast-forward suppresses
+          // false positives — when a snapshot supersedes the purged history,
+          // the client receives the snapshot and doesn't actually miss
+          // anything, so this isn't a gap.
+          if (minSeq !== null && gapBaselineSeq < minSeq - 1) {
+            gapDetected = true;
+            Logger.warn(
+              `[user:${userId}] Gap detected: baselineSeq=${gapBaselineSeq} (sinceSeq=${sinceSeq}) but minSeq=${minSeq}`,
+            );
+          }
+
+          // Case 3: Gap in returned operations (use effectiveSinceSeq which accounts for snapshot skip)
+          if (
+            !excludeClient &&
+            ops.length > 0 &&
+            ops[0].serverSeq > effectiveSinceSeq + 1
+          ) {
+            gapDetected = true;
+            Logger.warn(
+              `[user:${userId}] Gap detected: expected seq ${effectiveSinceSeq + 1} but got ${ops[0].serverSeq}`,
+            );
+          }
+        }
+
+        const mappedOps = ops.map(mapOperationRow);
+        const persistedSnapshotVectorClock =
+          latestFullStateOp && seqRow?.latestFullStateSeq === latestFullStateOp.serverSeq
+            ? parsePersistedVectorClock(seqRow.latestFullStateVectorClock)
+            : undefined;
+
+        return {
+          ops: mappedOps,
+          latestSeq,
+          gapDetected,
+          latestSnapshotSeq,
+          snapshotVectorClock: undefined,
+          shouldComputeSnapshotVectorClock,
+          snapshotAuthorClientId: latestFullStateOp?.clientId ?? undefined,
+          persistedSnapshotVectorClock,
+        } satisfies OperationDownloadTransactionResult;
+      },
+      { timeout: DOWNLOAD_TRANSACTION_TIMEOUT_MS },
+    ); // Matches other sync transactions; stays below Hono's 80s request timeout.
+
+    let snapshotVectorClock: VectorClock | undefined;
+    if (
+      result.shouldComputeSnapshotVectorClock &&
+      result.latestSnapshotSeq !== undefined
+    ) {
+      // Preserve the requesting client's ID and the snapshot author's ID from
+      // pruning to avoid false EQUAL in vector-clock comparison.
+      const preserveClientIds: string[] = [];
+      if (excludeClient) preserveClientIds.push(excludeClient);
+      if (result.snapshotAuthorClientId) {
+        preserveClientIds.push(result.snapshotAuthorClientId);
+      }
+      snapshotVectorClock = result.persistedSnapshotVectorClock
+        ? limitVectorClockSize(result.persistedSnapshotVectorClock, preserveClientIds)
+        : await this._computeSnapshotVectorClock(
+            userId,
+            result.latestSnapshotSeq,
+            preserveClientIds,
+          );
+    }
+
+    return {
+      ops: result.ops,
+      latestSeq: result.latestSeq,
+      gapDetected: result.gapDetected,
+      latestSnapshotSeq: result.latestSnapshotSeq,
+      snapshotVectorClock,
+    };
+  }
+
+  private async _computeSnapshotVectorClock(
+    userId: number,
+    latestSnapshotSeq: number,
+    preserveClientIds: ReadonlyArray<string>,
+  ): Promise<VectorClock> {
+    const startedAt = Date.now();
+    // Legacy fallback: aggregate the vector clock from all ops up to and
+    // including the snapshot. Triggered when `user_sync_state.latest_full_state_*`
+    // is null (snapshot uploaded before this column existed) or when the JSONB
+    // shape fails strict validation in `parsePersistedVectorClock`.
+    //
+    // Runs outside the interactive transaction: on large histories the aggregate
+    // is slow enough to trip Drizzle's transaction timeout. Bounded by
+    // `latestSnapshotSeq` (captured inside the transaction) so newly-appended
+    // ops can't perturb the result. Background cleanup may delete rows in this
+    // range between commit and this query; in the common case the snapshot op's
+    // own vector_clock subsumes the deltas it replaces, so the per-client max
+    // is preserved.
+    const clockRows = await db.$queryRaw<
+      Array<{ client_id: string; max_counter: bigint }>
+    >`
+      SELECT kv.key AS client_id, MAX(kv.value::bigint) AS max_counter
+      FROM operations, LATERAL jsonb_each_text(vector_clock) AS kv(key, value)
+      WHERE user_id = ${userId}
+        AND server_seq <= ${latestSnapshotSeq}
+        AND jsonb_typeof(vector_clock) = 'object'
+        AND kv.value ~ '^[0-9]+$'
+      GROUP BY kv.key
+    `;
+
+    let snapshotVectorClock: VectorClock = {};
+    for (const row of clockRows) {
+      snapshotVectorClock[row.client_id] = Number(row.max_counter);
+    }
+
+    snapshotVectorClock = limitVectorClockSize(snapshotVectorClock, [
+      ...preserveClientIds,
+    ]);
+
+    const elapsedMs = Date.now() - startedAt;
+    const logMessage =
+      `[user:${userId}] Computed snapshotVectorClock with ` +
+      `${Object.keys(snapshotVectorClock).length} entries in ${elapsedMs}ms: ` +
+      `${JSON.stringify(snapshotVectorClock)}`;
+    if (elapsedMs > 5000) {
+      Logger.warn(logMessage);
+    } else {
+      Logger.info(logMessage);
+    }
+
+    return snapshotVectorClock;
+  }
+
+  /**
+   * Get the latest sequence number for a user.
+   */
+  async getLatestSeq(userId: number): Promise<number> {
+    const row = await db.userSyncState.findUnique({
+      where: { userId },
+      select: { lastSeq: true },
+    });
+    return row?.lastSeq ?? 0;
+  }
+}

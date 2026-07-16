@@ -7,7 +7,7 @@ Noura is a calm, privacy-first personal productivity application rebuilt from Su
 - Individuals who plan projects and daily work across desktop and web.
 - People who need tasks, notes, estimates, time tracking, reminders, and focus sessions to work completely offline.
 - Developers and technical teams who pull actionable issues from Jira, GitHub, GitLab, Gitea/Forgejo, Linear, ClickUp, Azure DevOps, OpenProject, Redmine, Trello, Nextcloud Deck, and Plainspace.
-- Self-hosters who need the complete SuperSync account, encryption, conflict, recovery, snapshot, and pruning stack.
+- Self-hosters who need the complete NouraSync account, encryption, conflict, recovery, snapshot, and pruning stack.
 
 ## Core workflows
 
@@ -16,7 +16,7 @@ Noura is a calm, privacy-first personal productivity application rebuilt from Su
 3. Open the inspector without losing list context and edit dates, repeats, reminders, priority, notes, checklist, estimates, time, project, tags, files, and linked issues.
 4. Start Pomodoro, flowtime, or stopwatch focus against a selected task and review focus history.
 5. Plan in calendar and board views, search by command palette, and review time/productivity insights.
-6. Work offline, then optionally sync through SuperSync, WebDAV, Nextcloud, Dropbox, OneDrive, or a local file.
+6. Work offline, then optionally sync through NouraSync, WebDAV, Nextcloud, Dropbox, OneDrive, or a local file.
 7. Export/import backups without depending on legacy Electron profiles or plugin state.
 
 ## Product principles
@@ -30,13 +30,13 @@ Noura is a calm, privacy-first personal productivity application rebuilt from Su
 
 ## Scope
 
-Included: every non-plugin Super Productivity capability; first-party compiled integrations; web/PWA; macOS, Windows, and Linux through Tauri 2; the complete SuperSync server and client stack; existing sync providers and backup formats.
+Included: every non-plugin Super Productivity capability; first-party compiled integrations; web/PWA; macOS, Windows, and Linux through Tauri 2; the complete NouraSync server and client stack; existing sync providers and backup formats.
 
 Excluded: runtime plugin marketplace/API, plugin management UI, Brain Dump, Doc Mode, Todoist import, Automations, AI prompts, Procrastination Buster, Voice Reminder, Yesterday Tasks, sync.md, iOS, Android, Electron, and Capacitor.
 
 ## Success criteria
 
 - Existing compatible backup data imports with plugin records ignored safely.
-- SuperSync and provider HTTP/data contracts remain compatible.
+- NouraSync and provider HTTP/data contracts remain compatible.
 - The production graph has no Angular, NgRx, Electron, Capacitor, or runtime plugin API imports.
 - Web/PWA and Tauri builds pass; sync, domain, persistence, E2E, accessibility, offline, and 10k-task performance gates pass.

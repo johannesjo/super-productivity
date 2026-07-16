@@ -1,6 +1,6 @@
 # Noura agent guide
 
-Noura is a SvelteKit 2, Svelte 5, Bun, and Tauri 2 application derived from Super Productivity. The SuperSync server and shared sync packages are retained; Angular, NgRx, Electron, Capacitor, and the runtime plugin platform are not part of the production graph.
+Noura is a SvelteKit 2, Svelte 5, Bun, and Tauri 2 application derived from Super Productivity. The NouraSync server and shared sync packages are retained; Angular, NgRx, Electron, Capacitor, and the runtime plugin platform are not part of the production graph.
 
 ## Required Svelte workflow
 
@@ -37,7 +37,7 @@ Use `bunx --bun shadcn-svelte@latest` for component commands. Read `apps/client/
 - One user intent produces one persisted domain operation.
 - Replayed and remote operations must never create another local operation.
 - Product state changes go through `DomainStore`; keep reducers deterministic and immutable.
-- Never persist SuperSync access tokens or encryption passphrases.
+- Never persist NouraSync access tokens or encryption passphrases.
 - Do not log task titles, notes, credentials, or other user content.
 - Integrations are compiled first-party adapters, never dynamically loaded code.
 - Keep the app fully usable offline; network services are optional layers.

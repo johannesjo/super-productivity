@@ -14,7 +14,7 @@
  *   retry this server-returned error string?
  *
  * Promoted from `src/app/op-log/sync/sync-error-utils.ts` so the
- * SuperSync provider can call it without an app-side import.
+ * NouraSync provider can call it without an app-side import.
  */
 const RETRYABLE_UPLOAD_ERROR_PATTERNS: RegExp[] = [
   /\bfailed to fetch\b/,
@@ -24,7 +24,7 @@ const RETRYABLE_UPLOAD_ERROR_PATTERNS: RegExp[] = [
   // associated with hostname". Routes the error through NetworkUnavailableSPError
   // so the user sees the friendly translated warning instead of the raw message.
   // Anchored to "host" to avoid matching op-graph rejection strings like
-  // "Unable to resolve parent revision" that the SuperSync server may surface.
+  // "Unable to resolve parent revision" that the NouraSync server may surface.
   /\bunable to resolve host\b/,
   /\btimeout\b/,
   /\beconnrefused\b/,

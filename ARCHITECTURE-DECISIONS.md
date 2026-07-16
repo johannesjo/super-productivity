@@ -12,9 +12,9 @@ Tauri 2 is the sole desktop host for macOS, Windows, and Linux. Electron and Cap
 
 Every local domain command produces exactly one immutable operation and one atomic state write. Remote operations and replay do not emit new local operations. This makes persistence, sync, conflict handling, and testing deterministic.
 
-## ADR-004: Keep SuperSync
+## ADR-004: Keep NouraSync
 
-The SuperSync server, shared schema, encryption core, and provider packages remain compatible. Noura adds a client adapter for the existing HTTP and WebSocket contracts. Access tokens and encryption passphrases are memory-only.
+The NouraSync server, shared schema, encryption core, and provider packages remain compatible. Noura adds a client adapter for the existing HTTP and WebSocket contracts. Access tokens and encryption passphrases are memory-only.
 
 ## ADR-005: No runtime plugins
 

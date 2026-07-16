@@ -5,7 +5,7 @@ export default defineConfig({
     'src/dropbox.ts',
     'src/webdav.ts',
     'src/local-file.ts',
-    'src/super-sync.ts',
+    'src/noura-sync.ts',
     'src/onedrive.ts',
     'src/http.ts',
     'src/errors.ts',

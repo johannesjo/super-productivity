@@ -343,7 +343,7 @@ describe('NextcloudProvider', () => {
  * The auth-error path (sync-wrapper -> ProviderManager.clearAuthCredentials
  * -> `provider.clearAuthCredentials?.()`) fires on a SINGLE
  * AuthFailSPError / MissingCredentialsSPError for WebDAV (the transient
- * tolerance is SuperSync-only). For WebDAV the "credential" is a
+ * tolerance is NouraSync-only). For WebDAV the "credential" is a
  * user-typed username/password (often an irrecoverable Nextcloud app
  * password), not a refreshable OAuth token. Erasing it on a recoverable
  * 401 silently destroys the user's connection settings with no undo —

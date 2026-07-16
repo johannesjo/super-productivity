@@ -1,0 +1,44 @@
+name: NouraSync Docker
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - 'packages/noura-sync-server/**'
+      - 'packages/shared-schema/**'
+      - 'packages/sync-core/**'
+      - '.dockerignore'
+      - 'bun.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Resolve image source revision
+        id: source-ref
+        run: |
+          revision=$(git rev-parse HEAD)
+          test -n "$revision" || { echo "Could not resolve NouraSync image source revision"; exit 1; }
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: packages/noura-sync-server/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/noura-nourasync:latest
+          build-args: VCS_REF=${{ steps.source-ref.outputs.revision }}

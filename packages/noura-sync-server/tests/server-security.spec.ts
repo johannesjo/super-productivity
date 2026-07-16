@@ -1,0 +1,406 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Hono } from 'hono';
+import { HttpApp } from '../src/http';
+import {
+  createServer,
+  escapeHtml,
+  sanitizeRequestUrlForLog,
+  SERVER_HELMET_CONFIG,
+} from '../src/server';
+
+describe('Server Security Configuration', () => {
+  describe('request URL log sanitization', () => {
+    it('should redact sensitive query params without removing non-sensitive context', () => {
+      expect(
+        sanitizeRequestUrlForLog(
+          '/api/sync/ws?token=secret-jwt&clientId=B_AEh6&limit=10',
+        ),
+      ).toBe('/api/sync/ws?token=redacted&clientId=B_AEh6&limit=10');
+    });
+
+    it('should redact sensitive query params case-insensitively', () => {
+      expect(sanitizeRequestUrlForLog('/reset-password?resetPasswordToken=secret')).toBe(
+        '/reset-password?resetPasswordToken=redacted',
+      );
+    });
+  });
+
+  describe('Content Security Policy', () => {
+    let app: HttpApp;
+
+    beforeEach(async () => {
+      const server = createServer();
+      await server.ready();
+      app = server.app;
+    });
+
+    it('should include CSP headers in response', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/missing-security-probe',
+      });
+
+      const cspHeader = response.headers.get('content-security-policy');
+      expect(cspHeader).toBeDefined();
+
+      // Verify key CSP directives
+      expect(cspHeader).toContain("default-src 'self'");
+      expect(cspHeader).toContain("script-src 'self'");
+      expect(cspHeader).toContain("object-src 'none'");
+      expect(cspHeader).toContain("frame-ancestors 'none'");
+    });
+
+    it('should include X-Frame-Options header', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/missing-security-probe',
+      });
+
+      expect(response.headers.get('x-frame-options')).toBe('DENY');
+    });
+
+    it('should include X-Content-Type-Options header', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/missing-security-probe',
+      });
+
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    });
+  });
+
+  describe('HTML Escape Function', () => {
+    it('should escape < and > characters', () => {
+      const input = '<script>alert("xss")</script>';
+      const escaped = escapeHtml(input);
+      expect(escaped).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+      expect(escaped).not.toContain('<');
+      expect(escaped).not.toContain('>');
+    });
+
+    it('should escape ampersand', () => {
+      const input = 'Tom & Jerry';
+      const escaped = escapeHtml(input);
+      expect(escaped).toBe('Tom &amp; Jerry');
+    });
+
+    it('should escape double quotes', () => {
+      const input = 'He said "hello"';
+      const escaped = escapeHtml(input);
+      expect(escaped).toBe('He said &quot;hello&quot;');
+    });
+
+    it('should escape single quotes', () => {
+      const input = "It's a test";
+      const escaped = escapeHtml(input);
+      expect(escaped).toBe('It&#039;s a test');
+    });
+
+    it('should handle multiple special characters', () => {
+      const input = '<div class="test" data-value=\'a & b\'>content</div>';
+      const escaped = escapeHtml(input);
+      expect(escaped).toBe(
+        '&lt;div class=&quot;test&quot; data-value=&#039;a &amp; b&#039;&gt;content&lt;/div&gt;',
+      );
+    });
+
+    it('should handle empty string', () => {
+      expect(escapeHtml('')).toBe('');
+    });
+
+    it('should handle string with no special characters', () => {
+      const input = 'Hello World';
+      expect(escapeHtml(input)).toBe('Hello World');
+    });
+
+    it('should escape quotes to prevent attribute injection', () => {
+      // An attacker might try to break out of an attribute and add an event handler
+      const input = '" onmouseover="alert(1)"';
+      const escaped = escapeHtml(input);
+      // The quotes are escaped, so even though 'onmouseover' appears, it's harmless text
+      // because the quote before it is escaped and won't break out of the attribute
+      expect(escaped).toBe('&quot; onmouseover=&quot;alert(1)&quot;');
+      // The key protection is that " is escaped to &quot;
+      expect(escaped).not.toContain('"');
+    });
+  });
+});
+
+describe('Password Reset Page', () => {
+  let app: HttpApp;
+
+  beforeEach(async () => {
+    vi.resetModules();
+  });
+
+  it('should render password reset form with token', async () => {
+    const { pageRoutes } = await import('../src/pages');
+
+    app = new HttpApp(new Hono());
+    await app.register(pageRoutes);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/reset-password?token=test-token-123',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers.get('content-type')).toContain('text/html');
+
+    const html = response.body;
+    expect(html).toContain('<title>Reset Password</title>');
+    expect(html).toContain('<form id="resetForm">');
+    expect(html).toContain('type="password"');
+    expect(html).toContain('Minimum 12 characters');
+    // Token should be escaped in the JavaScript
+    expect(html).toContain('test-token-123');
+  });
+
+  it('should return 400 when token is missing', async () => {
+    const { pageRoutes } = await import('../src/pages');
+
+    app = new HttpApp(new Hono());
+    await app.register(pageRoutes);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/reset-password',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toBe('Token is required');
+  });
+
+  it('should escape malicious token in data attribute', async () => {
+    const { pageRoutes } = await import('../src/pages');
+
+    app = new HttpApp(new Hono());
+    await app.register(pageRoutes);
+
+    // Test attribute breakout attempt - double quotes should be escaped
+    const maliciousToken = '"><script>alert(1)</script>';
+    const response = await app.inject({
+      method: 'GET',
+      url: `/reset-password?token=${encodeURIComponent(maliciousToken)}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const html = response.body;
+
+    // Token is in data-token attribute, escapeHtml prevents attribute breakout
+    expect(html).toContain('data-token="');
+    // The raw attack string should not appear unescaped
+    expect(html).not.toContain('"><script>');
+    // Double quotes are escaped as &quot;
+    expect(html).toContain('&quot;');
+  });
+
+  it('should escape script tags in token to prevent XSS', async () => {
+    const { pageRoutes } = await import('../src/pages');
+
+    app = new HttpApp(new Hono());
+    await app.register(pageRoutes);
+
+    const maliciousToken = '</script><script>alert("xss")</script>';
+    const response = await app.inject({
+      method: 'GET',
+      url: `/reset-password?token=${encodeURIComponent(maliciousToken)}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const html = response.body;
+
+    // escapeHtml escapes < as &lt; to prevent injection
+    expect(html).not.toContain('</script><script>');
+    expect(html).toContain('&lt;'); // < escaped as HTML entity
+  });
+});
+
+describe('Email Verification Page', () => {
+  let app: HttpApp;
+
+  beforeEach(async () => {
+    vi.resetModules();
+  });
+
+  it('should await verifyEmail before sending response', async () => {
+    // Mock the verifyEmail function to track if it was awaited
+    let verifyEmailCompleted = false;
+    vi.doMock('../src/auth', () => ({
+      verifyEmail: vi.fn().mockImplementation(async () => {
+        // Simulate async work
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        verifyEmailCompleted = true;
+        return true;
+      }),
+    }));
+
+    const { pageRoutes } = await import('../src/pages');
+
+    app = new HttpApp(new Hono());
+    await app.register(pageRoutes);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/verify-email?token=valid-token',
+    });
+
+    // The response should only be sent after verifyEmail completes
+    expect(response.statusCode).toBe(200);
+    expect(verifyEmailCompleted).toBe(true);
+    expect(response.body).toContain('Email Verified');
+  });
+
+  it('should handle verification errors properly', async () => {
+    vi.doMock('../src/auth', () => ({
+      verifyEmail: vi.fn().mockRejectedValue(new Error('Invalid verification token')),
+    }));
+
+    const { pageRoutes } = await import('../src/pages');
+
+    app = new HttpApp(new Hono());
+    await app.register(pageRoutes);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/verify-email?token=invalid-token',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toContain('Verification failed');
+  });
+
+  it('should return 400 when token is missing', async () => {
+    const { pageRoutes } = await import('../src/pages');
+
+    app = new HttpApp(new Hono());
+    await app.register(pageRoutes);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/verify-email',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toBe('Token is required');
+  });
+});
+
+describe('CORS with wildcard origins', () => {
+  let app: HttpApp;
+
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  const createCorsApp = async (allowedOrigins: Array<string | RegExp>) => {
+    const server = createServer({
+      cors: { enabled: true, allowedOrigins },
+    });
+    await server.ready();
+    return server.app;
+  };
+
+  it('should allow requests from subdomain matching wildcard pattern', async () => {
+    app = await createCorsApp([/^https:\/\/[^/]+\.preview\.example\.com$/]);
+
+    const response = await app.inject({
+      method: 'OPTIONS',
+      url: '/health',
+      headers: {
+        origin: 'https://abc123.preview.example.com',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(response.headers.get('access-control-allow-origin')).toBe(
+      'https://abc123.preview.example.com',
+    );
+    expect(response.headers.get('access-control-allow-credentials')).toBe('true');
+  });
+
+  it('should reject requests from non-matching origin', async () => {
+    app = await createCorsApp([/^https:\/\/[^/]+\.preview\.example\.com$/]);
+
+    const response = await app.inject({
+      method: 'OPTIONS',
+      url: '/health',
+      headers: {
+        origin: 'https://evil.com',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(response.headers.get('access-control-allow-origin')).toBeNull();
+  });
+
+  it('should allow multiple wildcard patterns', async () => {
+    app = await createCorsApp([
+      /^https:\/\/[^/]+\.preview\.example\.com$/,
+      /^https:\/\/[^/]+\.staging\.example\.com$/,
+    ]);
+
+    // Test first pattern
+    const response1 = await app.inject({
+      method: 'OPTIONS',
+      url: '/health',
+      headers: {
+        origin: 'https://feature-123.preview.example.com',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(response1.headers.get('access-control-allow-origin')).toBe(
+      'https://feature-123.preview.example.com',
+    );
+
+    // Test second pattern
+    const response2 = await app.inject({
+      method: 'OPTIONS',
+      url: '/health',
+      headers: {
+        origin: 'https://test.staging.example.com',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(response2.headers.get('access-control-allow-origin')).toBe(
+      'https://test.staging.example.com',
+    );
+  });
+
+  it('should work with mixed string and RegExp origins', async () => {
+    app = await createCorsApp([
+      'https://app.example.com',
+      /^https:\/\/[^/]+\.preview\.example\.com$/,
+    ]);
+
+    // Test string origin
+    const response1 = await app.inject({
+      method: 'OPTIONS',
+      url: '/health',
+      headers: {
+        origin: 'https://app.example.com',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(response1.headers.get('access-control-allow-origin')).toBe(
+      'https://app.example.com',
+    );
+
+    // Test RegExp origin
+    const response2 = await app.inject({
+      method: 'OPTIONS',
+      url: '/health',
+      headers: {
+        origin: 'https://pr-456.preview.example.com',
+        'access-control-request-method': 'GET',
+      },
+    });
+
+    expect(response2.headers.get('access-control-allow-origin')).toBe(
+      'https://pr-456.preview.example.com',
+    );
+  });
+});

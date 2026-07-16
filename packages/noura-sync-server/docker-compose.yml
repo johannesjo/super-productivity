@@ -1,0 +1,74 @@
+name: nourasync
+
+services:
+  nourasync:
+    build:
+      context: ../..
+      dockerfile: packages/noura-sync-server/Dockerfile
+    image: ${NOURASYNC_IMAGE:-nourasync:local}
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - bun run --cwd packages/noura-sync-server db:migrate && exec bun run --cwd packages/noura-sync-server start
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 1900
+      DATABASE_URL: postgresql://${POSTGRES_USER:-nourasync}:${POSTGRES_PASSWORD:-nourasync}@postgres:5432/${POSTGRES_DB:-nourasync}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET to at least 32 random characters}
+      PUBLIC_URL: ${PUBLIC_URL:?Set PUBLIC_URL to the externally reachable HTTPS URL}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,tauri://localhost,http://tauri.localhost,https://tauri.localhost}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-NouraSync <noreply@example.com>}
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-NouraSync}
+      WEBAUTHN_ORIGIN: ${WEBAUTHN_ORIGIN:-http://localhost:1900}
+      NOURASYNC_BATCH_UPLOAD: ${NOURASYNC_BATCH_UPLOAD:-true}
+      NOURASYNC_DEFAULT_STORAGE_QUOTA_BYTES: ${NOURASYNC_DEFAULT_STORAGE_QUOTA_BYTES:-104857600}
+      NOURASYNC_RETENTION_DAYS: ${NOURASYNC_RETENTION_DAYS:-45}
+      OLD_OPS_CLEANUP_DELETE_BATCH_SIZE: ${OLD_OPS_CLEANUP_DELETE_BATCH_SIZE:-5000}
+      OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN: ${OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN:-25000}
+    ports:
+      - 1900:1900
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - const response = await fetch('http://127.0.0.1:1900/health'); if (!response.ok) process.exit(1)
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nourasync}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nourasync}
+      POSTGRES_DB: ${POSTGRES_DB:-nourasync}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:${POSTGRES_PORT:-55432}:5432
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  postgres-data:

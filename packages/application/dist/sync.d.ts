@@ -10,7 +10,7 @@ export interface EncryptedServerOperation {
     encryptedPayload: string;
     domainOperation?: DomainOperation;
 }
-export interface SuperSyncOperationEndpoint {
+export interface NouraSyncOperationEndpoint {
     upload(operation: EncryptedServerOperation): Promise<{
         serverSeq: number;
     }>;
@@ -21,14 +21,14 @@ export interface SuperSyncOperationEndpoint {
     }>;
     subscribe?(sinceSeq: number, onAvailable: () => void, clientId: string): () => void;
 }
-export interface SuperSyncHttpEndpointOptions {
+export interface NouraSyncHttpEndpointOptions {
     baseUrl: string;
     accessToken: string;
     fetch?: typeof globalThis.fetch;
 }
-export declare class SuperSyncHttpEndpoint implements SuperSyncOperationEndpoint {
+export declare class NouraSyncHttpEndpoint implements NouraSyncOperationEndpoint {
     #private;
-    constructor(options: SuperSyncHttpEndpointOptions);
+    constructor(options: NouraSyncHttpEndpointOptions);
     upload(operation: EncryptedServerOperation): Promise<{
         serverSeq: number;
     }>;
@@ -55,7 +55,7 @@ export declare class EncryptedOperationTransport implements OperationTransport {
     private readonly cursorRepository;
     private readonly clientId;
     private readonly passphrase;
-    constructor(endpoint: SuperSyncOperationEndpoint, cursorRepository: SyncCursorRepository, clientId: string, passphrase: string);
+    constructor(endpoint: NouraSyncOperationEndpoint, cursorRepository: SyncCursorRepository, clientId: string, passphrase: string);
     start(): Promise<void>;
     stop(): void;
     subscribe(onOperation: (operation: DomainOperation) => void | Promise<void>): () => void;

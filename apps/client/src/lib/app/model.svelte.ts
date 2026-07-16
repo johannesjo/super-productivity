@@ -1,7 +1,7 @@
 import {
 	DomainStore,
 	EncryptedOperationTransport,
-	SuperSyncHttpEndpoint,
+	NouraSyncHttpEndpoint,
 	type StateRepository,
 	type SyncCursorRepository
 } from '@noura/application';
@@ -322,19 +322,19 @@ export class NouraModel {
 		await this.#store.hydrate();
 	}
 
-	async connectSuperSync(): Promise<void> {
+	async connectNouraSync(): Promise<void> {
 		this.syncError = '';
 		this.syncStatus = 'connecting';
 		try {
 			const url = new SvelteURL(this.syncServerUrl.trim());
 			if (!['http:', 'https:'].includes(url.protocol))
 				throw new Error('Use an HTTP or HTTPS server URL');
-			if (!this.syncAccessToken.trim()) throw new Error('Enter a SuperSync access token');
+			if (!this.syncAccessToken.trim()) throw new Error('Enter a NouraSync access token');
 			if (this.syncPassphrase.length < 8)
 				throw new Error('Use a sync password with at least 8 characters');
 			this.#syncTransport?.stop();
 			this.#syncTransport = new EncryptedOperationTransport(
-				new SuperSyncHttpEndpoint({ baseUrl: url.toString(), accessToken: this.syncAccessToken }),
+				new NouraSyncHttpEndpoint({ baseUrl: url.toString(), accessToken: this.syncAccessToken }),
 				new LocalSyncCursorRepository(url.origin),
 				this.#clientId,
 				this.syncPassphrase
@@ -346,11 +346,11 @@ export class NouraModel {
 			this.#store.connectTransport(undefined);
 			this.#syncTransport = undefined;
 			this.syncStatus = 'error';
-			this.syncError = error instanceof Error ? error.message : 'Unable to connect to SuperSync';
+			this.syncError = error instanceof Error ? error.message : 'Unable to connect to NouraSync';
 		}
 	}
 
-	disconnectSuperSync(): void {
+	disconnectNouraSync(): void {
 		this.#syncTransport?.stop();
 		this.#syncTransport = undefined;
 		this.#store.connectTransport(undefined);

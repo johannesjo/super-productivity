@@ -2,7 +2,7 @@
 
 Noura is a local-first task, planning, time-tracking, and focus app. It is a Svelte 5 + Tauri 2 rewrite of Super Productivity with a compact, TickTick-inspired information architecture and an original visual identity.
 
-The app works offline in a browser or native desktop shell. Optional end-to-end encrypted synchronization uses the retained SuperSync server. The runtime plugin platform, Angular, Electron, and Capacitor are intentionally not part of Noura.
+The app works offline in a browser or native desktop shell. Optional end-to-end encrypted synchronization uses the retained NouraSync server. The runtime plugin platform, Angular, Electron, and Capacitor are intentionally not part of Noura.
 
 ## Stack
 
@@ -11,7 +11,7 @@ The app works offline in a browser or native desktop shell. Optional end-to-end 
 - Tauri 2 for macOS, Windows, and Linux
 - Bun workspaces
 - IndexedDB on the web and SQLite in Tauri
-- Retained SuperSync, sync-core, sync-providers, and shared-schema packages
+- Retained NouraSync, sync-core, sync-providers, and shared-schema packages
 
 ## Development
 
@@ -34,17 +34,17 @@ bun run tauri:dev
 bun run tauri:build
 ```
 
-## SuperSync
+## NouraSync
 
-The full SuperSync server remains in `packages/super-sync-server`. Start it locally with:
+The full NouraSync server remains in `packages/noura-sync-server`. Start it locally with:
 
 ```sh
-docker compose up db supersync
+docker compose up db nourasync
 ```
 
 Then open Settings → Account in Noura and enter the server URL, access token, and encryption passphrase. Credentials remain in memory; only the sync cursor and encrypted operations are persisted.
 
-See [SuperSync self-hosting](docs/supersync.md) for production guidance.
+See [NouraSync self-hosting](docs/nourasync.md) for production guidance.
 
 ## Data migration
 

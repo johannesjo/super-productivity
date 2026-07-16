@@ -29,7 +29,7 @@ export interface SyncProviderBase<
   /**
    * Implement ONLY when the provider's credential is a machine-refreshable
    * token (OAuth access/refresh token) that is SAFE to destroy on a 401 to
-   * force a re-auth flow (Dropbox, SuperSync). Do NOT implement for
+   * force a re-auth flow (Dropbox, NouraSync). Do NOT implement for
    * user-typed secrets (WebDAV/Nextcloud passwords) — clearing them is
    * irreversible data loss. Absence is a deliberate, supported no-op:
    * `ProviderManager.clearAuthCredentials` skips providers without this
@@ -84,7 +84,7 @@ export const isFileSyncProvider = <
   );
 };
 
-export type OperationSyncProviderMode = 'superSyncOps' | 'fileSnapshotOps';
+export type OperationSyncProviderMode = 'nouraSyncOps' | 'fileSnapshotOps';
 
 export interface SyncOperation {
   id: string;
@@ -137,7 +137,7 @@ export interface OpDownloadResponseBase {
   };
 }
 
-export interface SuperSyncOpDownloadResponse extends OpDownloadResponseBase {
+export interface NouraSyncOpDownloadResponse extends OpDownloadResponseBase {
   snapshotState?: never;
 }
 
@@ -154,13 +154,13 @@ export interface FileSnapshotOpDownloadResponse extends OpDownloadResponseBase {
 }
 
 export type OpDownloadResponse =
-  | SuperSyncOpDownloadResponse
+  | NouraSyncOpDownloadResponse
   | FileSnapshotOpDownloadResponse;
 
 export type OpDownloadResponseForMode<M extends OperationSyncProviderMode> =
   M extends 'fileSnapshotOps'
     ? FileSnapshotOpDownloadResponse
-    : SuperSyncOpDownloadResponse;
+    : NouraSyncOpDownloadResponse;
 
 export interface SnapshotUploadResponse {
   accepted: boolean;
@@ -187,7 +187,7 @@ export interface OperationSyncCapable<
     localStateSnapshot?: unknown,
   ): Promise<OpUploadResponse>;
   /**
-   * @param limit Best-effort page-size hint. Cursor-based providers (SuperSync)
+   * @param limit Best-effort page-size hint. Cursor-based providers (NouraSync)
    * honor it and paginate; cursorless file-based providers cannot paginate (they
    * re-download the whole file each call) and ignore it, returning their whole
    * write-bounded ops buffer in a single page (`hasMore` is always `false`).
@@ -230,7 +230,7 @@ export interface OperationSyncCapable<
    * `getEncryptKey`, so the upload path cannot infer their missing key from the
    * `isEncryptionMandatory` guard; it queries this instead and fails closed
    * (refuses to upload) rather than silently sending plaintext. Providers that
-   * surface their key via `getEncryptKey` (SuperSync) leave this unset.
+   * surface their key via `getEncryptKey` (NouraSync) leave this unset.
    */
   isEncryptionKeyMissing?(): Promise<boolean>;
   /**

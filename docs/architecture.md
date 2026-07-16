@@ -14,12 +14,12 @@ packages/application
   ├─ packages/sync-core
   └─ packages/shared-schema
 
-packages/super-sync-server
+packages/noura-sync-server
   ├─ packages/sync-core
   └─ packages/shared-schema
 ```
 
-The domain package is framework-free. It owns normalized tasks, projects, tags, time sessions, commands, reducers, ordering, and legacy backup conversion. The application package owns the store, atomic repository calls, operation sequencing, encrypted transport, and retained SuperSync protocol mapping.
+The domain package is framework-free. It owns normalized tasks, projects, tags, time sessions, commands, reducers, ordering, and legacy backup conversion. The application package owns the store, atomic repository calls, operation sequencing, encrypted transport, and retained NouraSync protocol mapping.
 
 ## Persistence
 
@@ -27,7 +27,7 @@ The web app persists domain state and operations in a single IndexedDB transacti
 
 ## Synchronization
 
-`EncryptedOperationTransport` encrypts serialized domain operations with sync-core before sending them through `SuperSyncHttpEndpoint`. The endpoint maps Noura operations onto SuperSync's existing operation envelope, bearer authentication, cursor/vector-clock response, and WebSocket invalidation channel. A reconnecting WebSocket triggers pulls; polling is the fallback.
+`EncryptedOperationTransport` encrypts serialized domain operations with sync-core before sending them through `NouraSyncHttpEndpoint`. The endpoint maps Noura operations onto NouraSync's existing operation envelope, bearer authentication, cursor/vector-clock response, and WebSocket invalidation channel. A reconnecting WebSocket triggers pulls; polling is the fallback.
 
 ## Desktop capabilities
 
@@ -36,7 +36,7 @@ The Tauri host enables SQLite, filesystem/dialog, notifications, global shortcut
 ## Security boundaries
 
 - User content is local by default.
-- SuperSync payloads are encrypted before transport.
+- NouraSync payloads are encrypted before transport.
 - Access tokens and passphrases are never stored in the domain database.
 - Runtime plugins and arbitrary third-party code loading are absent.
 - External integrations are explicit compiled adapters.

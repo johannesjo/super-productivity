@@ -32,7 +32,7 @@ const operationShape = (operation) => {
         };
     return { opType: 'UPD', entityType: 'ALL' };
 };
-export class SuperSyncHttpEndpoint {
+export class NouraSyncHttpEndpoint {
     #baseUrl;
     #accessToken;
     #fetch;
@@ -68,7 +68,7 @@ export class SuperSyncHttpEndpoint {
         });
         const result = response.results[0];
         if (!result?.accepted)
-            throw new Error(result?.error || 'SuperSync rejected the operation');
+            throw new Error(result?.error || 'NouraSync rejected the operation');
         return { serverSeq: result.serverSeq ?? response.latestSeq };
     }
     async download(sinceSeq, excludeClient) {
@@ -132,7 +132,7 @@ export class SuperSyncHttpEndpoint {
     }
     async #request(path, init) {
         if (!this.#accessToken)
-            throw new Error('A SuperSync access token is required');
+            throw new Error('A NouraSync access token is required');
         const response = await this.#fetch(`${this.#baseUrl}${path}`, {
             ...init,
             headers: {
@@ -142,7 +142,7 @@ export class SuperSyncHttpEndpoint {
             },
         });
         if (!response.ok)
-            throw new Error(`SuperSync request failed (${response.status})`);
+            throw new Error(`NouraSync request failed (${response.status})`);
         return (await response.json());
     }
 }

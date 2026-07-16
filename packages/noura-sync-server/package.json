@@ -1,0 +1,51 @@
+{
+  "name": "@noura/noura-sync-server",
+  "version": "1.0.0",
+  "description": "NouraSync server for Noura",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun src/db/migrate.ts",
+    "db:check": "drizzle-kit check",
+    "test": "vitest run",
+    "test:integration:postgres": "bunx --bun vitest run --config vitest.integration.config.ts --maxWorkers=1 tests/integration/registration-races.integration.spec.ts tests/integration/clean-slate-atomicity-sql.integration.spec.ts tests/integration/conflict-detection-sql.integration.spec.ts tests/integration/snapshot-vector-clock-sql.integration.spec.ts tests/integration/repair-causality.integration.spec.ts tests/integration/two-device-sync.integration.spec.ts",
+    "docker:build": "docker build -f Dockerfile ../..",
+    "docker:deploy": "docker compose up -d",
+    "docker:deploy:build": "docker compose up --build -d",
+    "docker:backup": "./scripts/backup.sh",
+    "docker:logs": "docker compose logs -f nourasync",
+    "delete-user": "bun scripts/delete-user.ts",
+    "clear-data": "bun scripts/clear-data.ts",
+    "recover-user": "bun scripts/recover-user.ts",
+    "analyze-storage": "bun scripts/analyze-storage.ts"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^13.2.2",
+    "@simplewebauthn/types": "^12.0.0",
+    "@sp/shared-schema": "*",
+    "@sp/sync-core": "*",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "0.45.2",
+    "hono": "4.12.30",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^9.0.1",
+    "uuidv7": "^1.1.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^20.0.0",
+    "@types/nodemailer": "^7.0.5",
+    "drizzle-kit": "0.31.10",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.8"
+  }
+}

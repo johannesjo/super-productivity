@@ -1,8 +1,0 @@
-.git
-.gitignore
-*.swp
-*.bak
-.project
-.idea/
-*.tmproj
-.vscode/

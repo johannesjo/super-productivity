@@ -12,7 +12,7 @@ export interface EncryptedServerOperation {
   domainOperation?: DomainOperation;
 }
 
-export interface SuperSyncOperationEndpoint {
+export interface NouraSyncOperationEndpoint {
   upload(operation: EncryptedServerOperation): Promise<{ serverSeq: number }>;
   download(
     sinceSeq: number,
@@ -25,13 +25,13 @@ export interface SuperSyncOperationEndpoint {
   subscribe?(sinceSeq: number, onAvailable: () => void, clientId: string): () => void;
 }
 
-export interface SuperSyncHttpEndpointOptions {
+export interface NouraSyncHttpEndpointOptions {
   baseUrl: string;
   accessToken: string;
   fetch?: typeof globalThis.fetch;
 }
 
-interface SuperSyncWireOperation {
+interface NouraSyncWireOperation {
   id: string;
   clientId: string;
   actionType: string;
@@ -45,15 +45,15 @@ interface SuperSyncWireOperation {
   isPayloadEncrypted: true;
 }
 
-interface SuperSyncDownloadResponse {
-  ops: Array<{ serverSeq: number; op: SuperSyncWireOperation; receivedAt: number }>;
+interface NouraSyncDownloadResponse {
+  ops: Array<{ serverSeq: number; op: NouraSyncWireOperation; receivedAt: number }>;
   latestSeq: number;
   hasMore: boolean;
 }
 
 const operationShape = (
   operation: DomainOperation,
-): Pick<SuperSyncWireOperation, 'opType' | 'entityType' | 'entityId'> => {
+): Pick<NouraSyncWireOperation, 'opType' | 'entityType' | 'entityId'> => {
   const id = 'id' in operation.command.payload ? operation.command.payload.id : undefined;
   if (operation.command.type === 'task/add')
     return {
@@ -88,12 +88,12 @@ const operationShape = (
   return { opType: 'UPD', entityType: 'ALL' };
 };
 
-export class SuperSyncHttpEndpoint implements SuperSyncOperationEndpoint {
+export class NouraSyncHttpEndpoint implements NouraSyncOperationEndpoint {
   readonly #baseUrl: string;
   readonly #accessToken: string;
   readonly #fetch: typeof globalThis.fetch;
 
-  constructor(options: SuperSyncHttpEndpointOptions) {
+  constructor(options: NouraSyncHttpEndpointOptions) {
     this.#baseUrl = options.baseUrl.replace(/\/$/, '');
     this.#accessToken = options.accessToken.trim();
     this.#fetch = options.fetch ?? globalThis.fetch;
@@ -104,7 +104,7 @@ export class SuperSyncHttpEndpoint implements SuperSyncOperationEndpoint {
     const shape = domainOperation
       ? operationShape(domainOperation)
       : { opType: 'UPD' as const, entityType: 'ALL' as const };
-    const wireOperation: SuperSyncWireOperation = {
+    const wireOperation: NouraSyncWireOperation = {
       id: operation.id,
       clientId: operation.clientId,
       actionType: domainOperation?.command.type ?? 'domain/operation',
@@ -129,7 +129,7 @@ export class SuperSyncHttpEndpoint implements SuperSyncOperationEndpoint {
     });
     const result = response.results[0];
     if (!result?.accepted)
-      throw new Error(result?.error || 'SuperSync rejected the operation');
+      throw new Error(result?.error || 'NouraSync rejected the operation');
     return { serverSeq: result.serverSeq ?? response.latestSeq };
   }
 
@@ -146,7 +146,7 @@ export class SuperSyncHttpEndpoint implements SuperSyncOperationEndpoint {
       excludeClient,
       limit: '500',
     });
-    const response = await this.#request<SuperSyncDownloadResponse>(
+    const response = await this.#request<NouraSyncDownloadResponse>(
       `/api/sync/ops?${query.toString()}`,
       { method: 'GET' },
     );
@@ -201,7 +201,7 @@ export class SuperSyncHttpEndpoint implements SuperSyncOperationEndpoint {
   }
 
   async #request<T>(path: string, init: RequestInit): Promise<T> {
-    if (!this.#accessToken) throw new Error('A SuperSync access token is required');
+    if (!this.#accessToken) throw new Error('A NouraSync access token is required');
     const response = await this.#fetch(`${this.#baseUrl}${path}`, {
       ...init,
       headers: {
@@ -210,7 +210,7 @@ export class SuperSyncHttpEndpoint implements SuperSyncOperationEndpoint {
         ...init.headers,
       },
     });
-    if (!response.ok) throw new Error(`SuperSync request failed (${response.status})`);
+    if (!response.ok) throw new Error(`NouraSync request failed (${response.status})`);
     return (await response.json()) as T;
   }
 }
@@ -226,7 +226,7 @@ export class EncryptedOperationTransport implements OperationTransport {
   #stopRealtime?: () => void;
 
   constructor(
-    private readonly endpoint: SuperSyncOperationEndpoint,
+    private readonly endpoint: NouraSyncOperationEndpoint,
     private readonly cursorRepository: SyncCursorRepository,
     private readonly clientId: string,
     private readonly passphrase: string,

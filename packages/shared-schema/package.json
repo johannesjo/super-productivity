@@ -1,7 +1,7 @@
 {
   "name": "@sp/shared-schema",
   "version": "1.0.0",
-  "description": "Shared schema versioning and migrations for Super Productivity sync",
+  "description": "Shared schema versioning and migrations for Noura sync",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "src/index.ts",

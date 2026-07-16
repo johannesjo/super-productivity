@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784222898687,
+      "tag": "0000_nourasync",
+      "breakpoints": true
+    }
+  ]
+}

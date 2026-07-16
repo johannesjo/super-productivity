@@ -1,7 +1,7 @@
 {
   "name": "@sp/sync-providers",
   "version": "1.0.0",
-  "description": "Framework-agnostic sync provider contracts for Super Productivity sync",
+  "description": "Framework-agnostic sync provider contracts for Noura",
   "sideEffects": false,
   "exports": {
     "./dropbox": {
@@ -34,14 +34,14 @@
         "default": "./dist/local-file.js"
       }
     },
-    "./super-sync": {
+    "./noura-sync": {
       "import": {
-        "types": "./dist/super-sync.d.mts",
-        "default": "./dist/super-sync.mjs"
+        "types": "./dist/noura-sync.d.mts",
+        "default": "./dist/noura-sync.mjs"
       },
       "require": {
-        "types": "./dist/super-sync.d.ts",
-        "default": "./dist/super-sync.js"
+        "types": "./dist/noura-sync.d.ts",
+        "default": "./dist/noura-sync.js"
       }
     },
     "./onedrive": {
@@ -144,7 +144,7 @@
   "scripts": {
     "build": "tsup",
     "build:tsc": "tsc",
-    "test": "npm run test:typecheck && vitest run",
+    "test": "bun run test:typecheck && vitest run",
     "test:typecheck": "tsc --noEmit -p tsconfig.spec.json",
     "test:watch": "vitest"
   },

@@ -6,7 +6,7 @@ import { urlHostOnly } from '../log/error-meta';
  * iOS NSURLSession does NOT auto-retry POST requests (non-idempotent per RFC 7231).
  * Retries are safe for Dropbox uploads: conditional writes (mode: 'update' with revToMatch
  * or mode: 'add') ensure duplicates fail with UploadRevToMatchMismatchAPIError.
- * Retries are safe for SuperSync: the server uses idempotent operations.
+ * Retries are safe for NouraSync: the server uses idempotent operations.
  *
  * Budget: 2 retries with 1.5s/3s linear backoff (~4.5s of additional sleep
  * between attempts; per-attempt connect/read timeouts apply on top). The
