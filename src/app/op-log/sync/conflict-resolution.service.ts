@@ -560,6 +560,7 @@ export class ConflictResolutionService {
     const followUpOps: Operation[] = [];
     const subTaskIds = taskState['subTaskIds'];
     if (Array.isArray(subTaskIds)) {
+      const restoredSubTaskIds: string[] = [];
       for (const subTaskId of new Set(
         subTaskIds.filter((id): id is string => typeof id === 'string'),
       )) {
@@ -582,7 +583,17 @@ export class ConflictResolutionService {
               options.restoreSubTaskSnapshots.losing.get(subTaskId),
             )
           : currentSubTaskRecord;
-        if (subTaskState === undefined) continue;
+        if (subTaskState === undefined) {
+          if (
+            options.restoreSubTaskSnapshots &&
+            currentSubTaskRecord?.['parentId'] === taskOp.entityId &&
+            currentSubTaskRecord['projectId'] === projectId
+          ) {
+            restoredSubTaskIds.push(subTaskId);
+          }
+          continue;
+        }
+        restoredSubTaskIds.push(subTaskId);
         const normalizedSubTaskState = options.restoreSubTaskSnapshots
           ? await restoreCompensation.normalizeRestoredTaskCompensationState(
               subTaskState,
@@ -615,7 +626,12 @@ export class ConflictResolutionService {
           this.createLWWUpdateOp(
             'TASK' as EntityType,
             taskOp.entityId,
-            taskRelationshipPatch(taskOp.entityId, taskState),
+            taskRelationshipPatch(taskOp.entityId, {
+              ...taskState,
+              ...(options.restoreSubTaskSnapshots
+                ? { subTaskIds: restoredSubTaskIds }
+                : {}),
+            }),
             clientId,
             nextClock,
             taskOp.timestamp,
@@ -744,6 +760,8 @@ export class ConflictResolutionService {
           clientId,
         ),
         remoteOp.timestamp,
+        'replace',
+        [conflict.entityId],
       ),
     );
   }

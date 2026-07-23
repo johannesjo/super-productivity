@@ -48,6 +48,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
   const PARENT_ID = 'archived-parent';
   const SUBTASK_ID = 'archived-subtask';
   const MISSING_ARCHIVE_SUBTASK_ID = 'missing-archive-subtask';
+  const INDEPENDENT_SUBTASK_ID = 'independently-moved-subtask';
   const RESTORE_DAY = '2026-07-23';
 
   let resolver: ConflictResolutionService;
@@ -422,26 +423,32 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       id: MISSING_ARCHIVE_SUBTASK_ID,
       title: 'Archived child missing from remote snapshot',
     };
+    const independentSubtask: Task = {
+      ...subtask,
+      id: INDEPENDENT_SUBTASK_ID,
+      title: 'Archived child moved independently after undo',
+    };
     const partialArchiveParent: Task = {
       ...deletedParent,
-      subTaskIds: [SUBTASK_ID, MISSING_ARCHIVE_SUBTASK_ID],
+      subTaskIds: [SUBTASK_ID, MISSING_ARCHIVE_SUBTASK_ID, INDEPENDENT_SUBTASK_ID],
     };
     const partialInitialState: RootState = {
       ...initialState,
       tasks: {
         ...initialState.tasks,
-        ids: [PARENT_ID, SUBTASK_ID, MISSING_ARCHIVE_SUBTASK_ID],
+        ids: [PARENT_ID, SUBTASK_ID, MISSING_ARCHIVE_SUBTASK_ID, INDEPENDENT_SUBTASK_ID],
         entities: {
           ...initialState.tasks.entities,
           [PARENT_ID]: partialArchiveParent,
           [MISSING_ARCHIVE_SUBTASK_ID]: missingArchiveSubtask,
+          [INDEPENDENT_SUBTASK_ID]: independentSubtask,
         },
       },
     };
     const deleteAction = TaskSharedActions.deleteTask({
       task: {
         ...partialArchiveParent,
-        subTasks: [subtask, missingArchiveSubtask],
+        subTasks: [subtask, missingArchiveSubtask, independentSubtask],
       },
     }) as PersistentAction;
     const localUndoParent: Task = {
@@ -456,10 +463,18 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       ...missingArchiveSubtask,
       title: 'Local undo child missing from remote snapshot',
     };
+    const localUndoIndependentSubtask: Task = {
+      ...independentSubtask,
+      title: 'Local undo child later moved independently',
+    };
     const localUndoAction = TaskSharedActions.restoreDeletedTask({
       task: {
         ...localUndoParent,
-        subTasks: [localUndoSubtask, localUndoMissingSubtask],
+        subTasks: [
+          localUndoSubtask,
+          localUndoMissingSubtask,
+          localUndoIndependentSubtask,
+        ],
       },
       projectContext: {
         projectId: 'project1',
@@ -471,7 +486,21 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
         [PARENT_ID]: localUndoParent,
         [SUBTASK_ID]: localUndoSubtask,
         [MISSING_ARCHIVE_SUBTASK_ID]: localUndoMissingSubtask,
+        [INDEPENDENT_SUBTASK_ID]: localUndoIndependentSubtask,
       },
+    }) as PersistentAction;
+    const localConvertIndependentChildAction = TaskSharedActions.convertToMainTask({
+      task: localUndoIndependentSubtask,
+      parentTagIds: ['tag1'],
+      today: RESTORE_DAY,
+      modified: 1_600,
+    }) as PersistentAction;
+    const localMoveIndependentChildAction = TaskSharedActions.updateTask({
+      task: {
+        id: INDEPENDENT_SUBTASK_ID,
+        changes: { projectId: '' },
+      },
+      projectMoveSubTaskIds: [],
     }) as PersistentAction;
     const localEditAction = TaskSharedActions.updateTask({
       task: {
@@ -489,6 +518,10 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
           ...subtask,
           title: 'Remote restored subtask',
         },
+        {
+          ...independentSubtask,
+          title: 'Remote child snapshot superseded by independent move',
+        },
       ],
       restoreToToday: {
         today: RESTORE_DAY,
@@ -497,15 +530,36 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     }) as PersistentAction;
     const localDelete = captureOperation(deleteAction, localClient, 1_000);
     const localUndo = captureOperation(localUndoAction, localClient, 1_500);
+    const localConvertIndependentChild = captureOperation(
+      localConvertIndependentChildAction,
+      localClient,
+      1_600,
+    );
+    const localMoveIndependentChild = captureOperation(
+      localMoveIndependentChildAction,
+      localClient,
+      1_650,
+    );
     const localEdit = captureOperation(localEditAction, localClient, 1_750);
     const remoteRestore = captureOperation(remoteRestoreAction, remoteClient, 2_000);
 
     const deletedState = reducer(partialInitialState, deleteAction);
     localState = deletedState;
-    localState = reducer(reducer(localState, localUndoAction), localEditAction);
+    localState = reducer(localState, localUndoAction);
+    localState = reducer(localState, localConvertIndependentChildAction);
+    localState = reducer(localState, localMoveIndependentChildAction);
+    localState = reducer(localState, localEditAction);
     expect(localState.tasks.entities[PARENT_ID]?.title).toBe('Local edit after undo');
+    expect(localState.tasks.entities[INDEPENDENT_SUBTASK_ID]).toEqual(
+      jasmine.objectContaining({
+        parentId: undefined,
+        projectId: '',
+      }),
+    );
     await opLogStore.append(localDelete, 'local');
     await opLogStore.append(localUndo, 'local');
+    await opLogStore.append(localConvertIndependentChild, 'local');
+    await opLogStore.append(localMoveIndependentChild, 'local');
     await opLogStore.append(localEdit, 'local');
 
     await resolver.autoResolveConflictsLWW([
@@ -522,6 +576,16 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     expect(localState.tasks.entities[SUBTASK_ID]?.title).toBe('Remote restored subtask');
     expect(localState.tasks.entities[MISSING_ARCHIVE_SUBTASK_ID]?.title).toBe(
       'Local undo child missing from remote snapshot',
+    );
+    expect(localState.tasks.entities[INDEPENDENT_SUBTASK_ID]).toEqual(
+      jasmine.objectContaining({
+        title: 'Local undo child later moved independently',
+        parentId: undefined,
+        projectId: '',
+      }),
+    );
+    expect(localState.tasks.entities[PARENT_ID]?.subTaskIds).not.toContain(
+      INDEPENDENT_SUBTASK_ID,
     );
 
     const storedEntries = await opLogStore.getOpsAfterSeq(0);
@@ -547,15 +611,34 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
         op.payload.lwwUpdateMode === 'replace',
     );
     expect(rootCompensation).toBeDefined();
+    expect(rootCompensation?.entityIds).toEqual([PARENT_ID]);
     expect(
       rootCompensation && isLwwUpdatePayload(rootCompensation.payload)
-        ? rootCompensation.payload.actionPayload['title']
+        ? {
+            title: rootCompensation.payload.actionPayload['title'],
+            projectMoveFootprint: rootCompensation.payload.projectMoveFootprint,
+          }
         : undefined,
-    ).toBe('Remote restore winner');
+    ).toEqual({
+      title: 'Remote restore winner',
+      projectMoveFootprint: [PARENT_ID],
+    });
     const localOpIds = new Set([localDelete.id, localUndo.id, localEdit.id]);
-    const acceptedOperations = storedOperations.filter(
-      (operation) => !localOpIds.has(operation.id),
-    );
+    const independentChildOpIds = new Set([
+      localConvertIndependentChild.id,
+      localMoveIndependentChild.id,
+    ]);
+    const originalOpIds = new Set([
+      ...localOpIds,
+      ...independentChildOpIds,
+      remoteRestore.id,
+    ]);
+    const acceptedOperations = [
+      remoteRestore,
+      localConvertIndependentChild,
+      localMoveIndependentChild,
+      ...storedOperations.filter((operation) => !originalOpIds.has(operation.id)),
+    ];
     const passiveState = replay(deletedState, acceptedOperations);
     expect(restoredProjection(passiveState)).toEqual(restoredProjection(localState));
     const passiveMissingSubtask = passiveState.tasks.entities[MISSING_ARCHIVE_SUBTASK_ID];
@@ -571,8 +654,24 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       parentId: liveMissingSubtask?.parentId,
       projectId: liveMissingSubtask?.projectId,
     });
+    expect(passiveState.tasks.entities[INDEPENDENT_SUBTASK_ID]).toEqual(
+      jasmine.objectContaining({
+        parentId: undefined,
+        projectId: '',
+      }),
+    );
     expect(restoredProjection(replay(partialInitialState, storedOperations))).toEqual(
       restoredProjection(localState),
+    );
+    expect(
+      replay(partialInitialState, storedOperations).tasks.entities[
+        INDEPENDENT_SUBTASK_ID
+      ],
+    ).toEqual(
+      jasmine.objectContaining({
+        parentId: undefined,
+        projectId: '',
+      }),
     );
   });
 });
