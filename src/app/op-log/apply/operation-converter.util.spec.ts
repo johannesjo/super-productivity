@@ -1,6 +1,7 @@
 import { convertOpToAction, ACTION_TYPE_ALIASES } from './operation-converter.util';
 import { ActionType, Operation, OpType } from '../core/operation.types';
 import { SyncLog } from '../../core/log';
+import { OperationIntegrityError } from '../core/errors/sync-errors';
 
 describe('operation-converter utility', () => {
   const createMockOperation = (overrides: Partial<Operation> = {}): Operation => ({
@@ -79,6 +80,66 @@ describe('operation-converter utility', () => {
       const action = convertOpToAction(op);
 
       expect(action.meta.opType).toBe(OpType.Create);
+    });
+
+    it('should reject a restore whose payload task id differs from entityId', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        payload: {
+          actionPayload: {
+            task: { id: 'task-payload' },
+            subTasks: [],
+          },
+          entityChanges: [],
+        },
+      });
+
+      expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+    });
+
+    it('should reject a restore with a non-object payload', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        payload: null,
+      });
+
+      expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+    });
+
+    it('should reject injected entityIds on a restore', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        entityIds: ['task-envelope', 'victim-task'],
+        payload: {
+          actionPayload: {
+            task: { id: 'task-envelope' },
+            subTasks: [],
+          },
+          entityChanges: [],
+        },
+      });
+
+      expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+    });
+
+    it('should reject a non-array entityIds footprint on a restore', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        entityIds: Object.assign({ length: 1 }, ['task-envelope']) as unknown as string[],
+        payload: {
+          actionPayload: {
+            task: { id: 'task-envelope' },
+            subTasks: [],
+          },
+          entityChanges: [],
+        },
+      });
+
+      expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
     });
 
     it('should surface the authenticated projectMoveFootprint onto meta.projectMoveFootprint', () => {

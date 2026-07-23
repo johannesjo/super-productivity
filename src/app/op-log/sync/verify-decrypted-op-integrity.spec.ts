@@ -3,6 +3,7 @@ import { SyncOperation } from '../sync-providers/provider.interface';
 import { OperationIntegrityError } from '../core/errors/sync-errors';
 import { toLwwUpdateActionType } from '../core/lww-update-action-types';
 import { SINGLETON_ENTITY_ID } from '../core/entity-registry';
+import { ActionType, OpType } from '../core/operation.types';
 
 describe('assertDecryptedOpMetadataIntegrity', () => {
   const LWW_TASK = toLwwUpdateActionType('TASK');
@@ -64,6 +65,73 @@ describe('assertDecryptedOpMetadataIntegrity', () => {
         OperationIntegrityError,
       );
     });
+
+    it('throws when restore payload task id does not match the envelope entityId', () => {
+      const op = createOp({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-envelope',
+      });
+      const authenticatedPayload = {
+        actionPayload: {
+          task: { id: 'task-payload' },
+          subTasks: [],
+        },
+        entityChanges: [],
+      };
+
+      expect(() =>
+        assertDecryptedOpMetadataIntegrity(op, authenticatedPayload),
+      ).toThrowError(OperationIntegrityError);
+    });
+
+    it('throws when restore metadata is not a TASK update', () => {
+      const authenticatedPayload = {
+        actionPayload: {
+          task: { id: 'task-123' },
+          subTasks: [],
+        },
+        entityChanges: [],
+      };
+      const wrongEntityType = createOp({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        entityType: 'PROJECT',
+      });
+      const wrongOpType = createOp({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Create,
+        entityType: 'TASK',
+      });
+
+      expect(() =>
+        assertDecryptedOpMetadataIntegrity(wrongEntityType, authenticatedPayload),
+      ).toThrowError(OperationIntegrityError);
+      expect(() =>
+        assertDecryptedOpMetadataIntegrity(wrongOpType, authenticatedPayload),
+      ).toThrowError(OperationIntegrityError);
+    });
+
+    it('throws when restore entityIds contains an injected task id', () => {
+      const op = createOp({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityIds: ['task-123', 'victim-task'],
+      });
+      const authenticatedPayload = {
+        actionPayload: {
+          task: { id: 'task-123' },
+          subTasks: [],
+        },
+        entityChanges: [],
+      };
+
+      expect(() =>
+        assertDecryptedOpMetadataIntegrity(op, authenticatedPayload),
+      ).toThrowError(OperationIntegrityError);
+    });
   });
 
   describe('accepts legitimate ops (no false positives)', () => {
@@ -91,6 +159,26 @@ describe('assertDecryptedOpMetadataIntegrity', () => {
       const op = createOp({ entityId: undefined });
       expect(() =>
         assertDecryptedOpMetadataIntegrity(op, { id: 'task-123' }),
+      ).not.toThrow();
+    });
+
+    it('accepts a restore whose authenticated task identity matches its metadata', () => {
+      const op = createOp({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityIds: ['task-123'],
+      });
+      const authenticatedPayload = {
+        actionPayload: {
+          task: { id: 'task-123' },
+          subTasks: [],
+        },
+        entityChanges: [],
+      };
+
+      expect(() =>
+        assertDecryptedOpMetadataIntegrity(op, authenticatedPayload),
       ).not.toThrow();
     });
   });

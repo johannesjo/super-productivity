@@ -11,6 +11,7 @@ import { isSingletonEntityId } from '../core/entity-registry';
 import { PersistentAction } from '../core/persistent-action.interface';
 import { SyncLog } from '../../core/log';
 import { isValidDBDateStr } from '../../util/get-db-date-str';
+import { OperationIntegrityError } from '../core/errors/sync-errors';
 
 const isValidDbDate = (value: unknown): value is string =>
   typeof value === 'string' && isValidDBDateStr(value);
@@ -41,6 +42,78 @@ const getDeterministicLegacyDay = (timestamp: number): string =>
  */
 export const ACTION_TYPE_ALIASES: Record<string, string> = {
   // Example: '[Task] Update Task': '[Task] Update',
+};
+
+interface TaskRestoreOperationLike {
+  id: string;
+  actionType: string;
+  opType: string;
+  entityType: string;
+  entityId?: string;
+  entityIds?: string[];
+  payload: unknown;
+}
+
+/**
+ * `restoreTask` is exempt from generic delete/update conversion because its
+ * semantic payload also drives archive cleanup. Bind that exemption to the
+ * operation's declared TASK identity before the operation can mutate state.
+ */
+export const assertTaskRestoreOperationIntegrity = (
+  op: TaskRestoreOperationLike,
+  payload: unknown = op.payload,
+  expectedEntityId: string | undefined = op.entityId,
+): void => {
+  const actionType = ACTION_TYPE_ALIASES[op.actionType] ?? op.actionType;
+  if (actionType !== ActionType.TASK_SHARED_RESTORE) {
+    return;
+  }
+
+  const extractedPayload = extractActionPayload(payload);
+  const actionPayload =
+    typeof extractedPayload === 'object' &&
+    extractedPayload !== null &&
+    !Array.isArray(extractedPayload)
+      ? extractedPayload
+      : undefined;
+  const task = actionPayload?.['task'];
+  const entityId = op.entityId;
+  const isValid =
+    op.entityType === 'TASK' &&
+    op.opType === OpType.Update &&
+    typeof entityId === 'string' &&
+    entityId.length > 0 &&
+    entityId === expectedEntityId &&
+    (op.entityIds === undefined ||
+      (Array.isArray(op.entityIds) &&
+        op.entityIds.length === 1 &&
+        op.entityIds[0] === entityId)) &&
+    !Object.prototype.hasOwnProperty.call(Object.prototype, entityId) &&
+    typeof task === 'object' &&
+    task !== null &&
+    !Array.isArray(task) &&
+    (task as Record<string, unknown>)['id'] === entityId &&
+    Array.isArray(actionPayload?.['subTasks']);
+
+  if (isValid) {
+    return;
+  }
+
+  // Envelope ids are safe to log; never log the restore payload or task title.
+  SyncLog.err(
+    '[assertTaskRestoreOperationIntegrity] restore metadata does not match its task payload — rejecting',
+    {
+      opId: op.id,
+      entityType: op.entityType,
+      entityId: op.entityId,
+      expectedEntityId,
+      entityIdsCount: op.entityIds?.length,
+      opType: op.opType,
+    },
+  );
+  throw new OperationIntegrityError(
+    `Operation ${op.id} failed restore integrity validation`,
+  );
 };
 
 /**
@@ -255,6 +328,7 @@ const assertValidTaskTimeSyncPayload = (
 export const convertOpToAction = (op: Operation): PersistentAction => {
   // Resolve any aliased action types to their current names
   const actionType = ACTION_TYPE_ALIASES[op.actionType] ?? op.actionType;
+  assertTaskRestoreOperationIntegrity(op);
 
   // Handle full-state operations (SYNC_IMPORT, BACKUP_IMPORT, Repair) specially
   // These need their payload wrapped in appDataComplete for the loadAllData action

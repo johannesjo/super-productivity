@@ -3,7 +3,10 @@ import { SyncOperation } from '../sync-providers/provider.interface';
 import { isLwwUpdateActionType } from '../core/lww-update-action-types';
 import { isSingletonEntityId } from '../core/entity-registry';
 import { OperationIntegrityError } from '../core/errors/sync-errors';
-import { ACTION_TYPE_ALIASES } from '../apply/operation-converter.util';
+import {
+  ACTION_TYPE_ALIASES,
+  assertTaskRestoreOperationIntegrity,
+} from '../apply/operation-converter.util';
 import { SyncLog } from '../../core/log';
 import {
   extractFullStateFromPayload,
@@ -109,6 +112,10 @@ const _migrateFullStateForValidation = (
  * predicate exactly (same alias resolution, same singleton exclusion) so the two
  * boundaries cannot drift and leave a hole.
  *
+ * Semantic `restoreTask` operations are also bound to their authenticated task
+ * id, TASK entity type, and UPDATE op type because conflict resolution preserves
+ * their action type and payload for archive cleanup.
+ *
  * Scope: only encrypted ops reach this boundary (it is called from the decrypt
  * path), so unencrypted ops — where neither side is authenticated and the
  * #7330 producer-drift coercion still legitimately applies — are unaffected.
@@ -135,6 +142,7 @@ export const assertDecryptedOpMetadataIntegrity = (
   // would make this gate skip an op the converter still LWW-coerces, silently
   // reopening the retarget hole.
   const actionType = ACTION_TYPE_ALIASES[op.actionType] ?? op.actionType;
+  assertTaskRestoreOperationIntegrity(op, decryptedPayload);
 
   // Only non-singleton LWW single-entity updates carry a canonical `payload.id`
   // that must equal `op.entityId`. Singletons use SINGLETON_ENTITY_ID (no `id`).

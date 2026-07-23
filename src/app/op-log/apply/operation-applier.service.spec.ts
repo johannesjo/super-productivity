@@ -705,7 +705,7 @@ describe('OperationApplierService', () => {
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-2',
-          payload: { task: {}, subTasks: [] },
+          payload: { task: { id: 'task-2' }, subTasks: [] },
           vectorClock: { testClient: 2 },
           timestamp: Date.now(),
           schemaVersion: 1,
