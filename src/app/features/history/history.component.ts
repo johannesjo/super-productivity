@@ -149,10 +149,6 @@ export class HistoryComponent {
       .subscribe(async (isConfirm: boolean) => {
         // because we navigate away we don't need to worry about updating the worklog itself
         if (isConfirm) {
-          const restoreToToday = {
-            today: this._dateService.todayStr(),
-            startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
-          };
           let subTasks: Task[] | undefined;
           if (task.subTaskIds && task.subTaskIds.length) {
             const archiveState = await this._taskArchiveService.load();
@@ -160,6 +156,10 @@ export class HistoryComponent {
               .map((id) => archiveState.entities[id])
               .filter((t): t is Task => !!t);
           }
+          const restoreToToday = {
+            today: this._dateService.todayStr(),
+            startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
+          };
 
           Log.log('RESTORE', { taskId: task.id, subTaskCount: subTasks?.length });
           this._store.dispatch(

@@ -34,6 +34,7 @@ describe('HistoryComponent', () => {
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
   let routerSpy: jasmine.SpyObj<Router>;
   let taskArchiveServiceSpy: jasmine.SpyObj<TaskArchiveService>;
+  let dateServiceSpy: jasmine.SpyObj<DateService>;
   let store: Store;
 
   const worklogData$ = new BehaviorSubject({
@@ -79,7 +80,7 @@ describe('HistoryComponent', () => {
       'TaskArchiveService',
       ['load'],
     );
-    const dateServiceSpy = jasmine.createSpyObj<DateService>('DateService', [
+    dateServiceSpy = jasmine.createSpyObj<DateService>('DateService', [
       'todayStr',
       'getStartOfNextDayDiffMs',
     ]);
@@ -260,5 +261,48 @@ describe('HistoryComponent', () => {
       startOfNextDayDiffMs: 0,
     });
     expect(routerSpy.navigate).toHaveBeenCalledOnceWith(['/active/tasks']);
+  }));
+
+  it('captures the logical Today after the archive load finishes', fakeAsync(() => {
+    const subTask = {
+      ...createTaskForDate('2026-01-05', 60000, true, 'subtask'),
+      parentId: 'parent',
+    };
+    const parent = {
+      ...createTaskForDate('2026-01-05', 60000, true, 'parent'),
+      subTaskIds: [subTask.id],
+    };
+    let resolveArchiveLoad!: (
+      archive: Awaited<ReturnType<TaskArchiveService['load']>>,
+    ) => void;
+    taskArchiveServiceSpy.load.and.returnValue(
+      new Promise((resolve) => {
+        resolveArchiveLoad = resolve;
+      }),
+    );
+    matDialogSpy.open.and.returnValue({
+      afterClosed: () => of(true),
+    } as ReturnType<MatDialog['open']>);
+
+    fixture.componentInstance.restoreTask(parent);
+    flushMicrotasks();
+
+    dateServiceSpy.todayStr.and.returnValue('2026-01-06');
+    dateServiceSpy.getStartOfNextDayDiffMs.and.returnValue(60 * 60 * 1000);
+    resolveArchiveLoad({
+      ids: [parent.id, subTask.id],
+      entities: {
+        [parent.id]: parent,
+        [subTask.id]: subTask,
+      },
+    });
+    flushMicrotasks();
+
+    const action = (store.dispatch as jasmine.Spy).calls.mostRecent()
+      .args[0] as ReturnType<typeof TaskSharedActions.restoreTask>;
+    expect(action.restoreToToday).toEqual({
+      today: '2026-01-06',
+      startOfNextDayDiffMs: 60 * 60 * 1000,
+    });
   }));
 });
