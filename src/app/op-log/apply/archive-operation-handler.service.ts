@@ -229,11 +229,16 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * @remoteBehavior Executes under the TASK_ARCHIVE mutex
    */
   private async _handleRestoreTask(action: PersistentAction): Promise<void> {
-    const task = (action as ReturnType<typeof TaskSharedActions.restoreTask>).task;
-    const taskIds = [task.id, ...task.subTaskIds];
+    const { task, subTasks } = action as ReturnType<typeof TaskSharedActions.restoreTask>;
+    const taskIds = new Set([task.id, ...task.subTaskIds]);
+    for (const subTask of subTasks) {
+      if (subTask.parentId === task.id) {
+        taskIds.add(subTask.id);
+      }
+    }
     const isRemote = !!action.meta?.isRemote;
     await this._getTaskArchiveService().deleteTasks(
-      taskIds,
+      Array.from(taskIds),
       isRemote ? { isIgnoreDBLock: true } : {},
     );
   }

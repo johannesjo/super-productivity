@@ -320,6 +320,32 @@ describe('ArchiveOperationHandler', () => {
         });
       });
 
+      it('should delete reverse-linked payload subtasks but preserve unrelated tasks', async () => {
+        const task = createMockTask('task-1', []);
+        const reverseLinkedSubTask = {
+          ...createMockTask('subtask-1'),
+          parentId: task.id,
+        };
+        const unrelatedTask = {
+          ...createMockTask('unrelated-task'),
+          parentId: 'another-task',
+        };
+
+        const action = {
+          type: TaskSharedActions.restoreTask.type,
+          task,
+          subTasks: [reverseLinkedSubTask, unrelatedTask, reverseLinkedSubTask],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.deleteTasks).toHaveBeenCalledWith(
+          ['task-1', 'subtask-1'],
+          { isIgnoreDBLock: true },
+        );
+      });
+
       it('should not call other handlers for restoreTask', async () => {
         const task = createMockTask('task-1');
 
