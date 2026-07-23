@@ -7252,6 +7252,47 @@ describe('ConflictResolutionService', () => {
       expect(result[0].payload).toBe(archivePayload);
     });
 
+    it('should not convert a winning remote restore when local DELETE exists', () => {
+      const restorePayload = {
+        actionPayload: {
+          task: {
+            id: 'task-1',
+            title: 'Restored task',
+            subTaskIds: ['subtask-1'],
+          },
+          subTasks: [
+            {
+              id: 'subtask-1',
+              title: 'Restored subtask',
+              parentId: 'task-1',
+            },
+          ],
+        },
+        entityChanges: [],
+      };
+      const remoteRestore = {
+        ...createOpWithTimestamp('remote-restore', 'client-b', Date.now()),
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        payload: restorePayload,
+      };
+      const conflict = createConflict(
+        'task-1',
+        [
+          {
+            ...createOpWithTimestamp('local-del', 'client-a', Date.now() - 1000),
+            opType: OpType.Delete,
+            payload: { task: { id: 'task-1', title: 'Deleted task' } },
+          },
+        ],
+        [remoteRestore],
+      );
+
+      const result = (service as any)._convertToLWWUpdatesIfNeeded(conflict);
+
+      expect(result).toEqual([remoteRestore]);
+    });
+
     it('should return remote op unchanged when base entity cannot be extracted', () => {
       // Rewriting actionType to LWW Update with an unmerged NgRx UPDATE payload
       // would no-op at the consumer (lwwUpdateMetaReducer bails when entityData
