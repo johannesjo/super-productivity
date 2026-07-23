@@ -6,6 +6,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { BatchOperation } from '@super-productivity/plugin-api';
 import { PersistentActionMeta } from '../../op-log/core/persistent-action.interface';
 import { OpType } from '../../op-log/core/operation.types';
+import { isTodayWithOffset } from '../../util/is-today.util';
 
 /**
  * Payload marker stamped on every new `deleteProject` operation so the LWW
@@ -117,15 +118,57 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
-    restoreTask: (taskProps: { task: Task | TaskWithSubTasks; subTasks: Task[] }) => ({
-      ...taskProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'TASK',
-        entityId: taskProps.task.id,
-        opType: OpType.Update,
-      } satisfies PersistentActionMeta,
-    }),
+    restoreTask: (taskProps: {
+      task: Task | TaskWithSubTasks;
+      subTasks: Task[];
+      restoreToToday?: {
+        today: string;
+        startOfNextDayDiffMs: number;
+      };
+    }) => {
+      const { restoreToToday } = taskProps;
+      const dueWithTime = taskProps.task.dueWithTime;
+      const hasValidDueWithTime =
+        typeof dueWithTime === 'number' &&
+        Number.isFinite(dueWithTime) &&
+        dueWithTime > 0;
+      const shouldClearTime =
+        restoreToToday &&
+        dueWithTime !== undefined &&
+        (!hasValidDueWithTime ||
+          !isTodayWithOffset(
+            dueWithTime,
+            restoreToToday.today,
+            restoreToToday.startOfNextDayDiffMs,
+          ));
+      const task = restoreToToday
+        ? {
+            ...taskProps.task,
+            dueDay: restoreToToday.today,
+            remindAt: undefined,
+            ...(shouldClearTime ? { dueWithTime: undefined } : {}),
+          }
+        : taskProps.task;
+      const subTasks = restoreToToday
+        ? taskProps.subTasks.map((subTask) => ({
+            ...subTask,
+            dueDay: undefined,
+            dueWithTime: undefined,
+            remindAt: undefined,
+          }))
+        : taskProps.subTasks;
+      return {
+        ...taskProps,
+        task,
+        subTasks,
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityId: task.id,
+          opType: OpType.Update,
+        } satisfies PersistentActionMeta,
+      };
+    },
 
     // Restore a deleted task (undo delete) - syncs across devices
     restoreDeletedTask: (payload: {

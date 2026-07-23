@@ -3479,17 +3479,10 @@ export class ConflictResolutionService {
   }
 
   /**
-   * Converts remote UPDATE operations to LWW Update format when entity was deleted locally.
+   * Makes winning remote updates recreate entities deleted locally.
    *
-   * When a local DELETE loses to a remote UPDATE via LWW, the entity is already deleted
-   * from the local store. Regular UPDATE operations can't recreate deleted entities -
-   * only LWW Update operations can (via lwwUpdateMetaReducer).
-   *
-   * This method detects DELETE vs UPDATE conflicts and converts the winning remote UPDATE
-   * to LWW Update format by changing its actionType to '[ENTITY_TYPE] LWW Update'.
-   *
-   * @param conflict - The entity conflict being resolved
-   * @returns Remote operations, with UPDATEs converted to LWW Updates if needed
+   * Generic updates become LWW snapshots. Archive/restore actions already recreate
+   * state and retain their type so archive side effects receive the semantic payload.
    */
   private _convertToLWWUpdatesIfNeeded(conflict: EntityConflict): Operation[] {
     // Check if local side has a DELETE operation
@@ -3501,7 +3494,9 @@ export class ConflictResolutionService {
     }
 
     const convertibleRemoteOps = conflict.remoteOps.filter(
-      (op) => op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+      (op) =>
+        op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
+        op.actionType !== ActionType.TASK_SHARED_RESTORE,
     );
     if (convertibleRemoteOps.length === 0) {
       return conflict.remoteOps;

@@ -360,6 +360,21 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
       isClearScheduledTime,
     );
   },
+  [TaskSharedActions.restoreTask.type]: () => {
+    const { task, restoreToToday } = action as ReturnType<
+      typeof TaskSharedActions.restoreTask
+    >;
+    if (!restoreToToday) {
+      return state;
+    }
+    return handlePlanTasksForToday(
+      state,
+      [task.id],
+      {},
+      restoreToToday.today,
+      restoreToToday.startOfNextDayDiffMs,
+    );
+  },
   [TaskSharedActions.removeTasksFromTodayTag.type]: () => {
     const { taskIds } = action as ReturnType<
       typeof TaskSharedActions.removeTasksFromTodayTag
