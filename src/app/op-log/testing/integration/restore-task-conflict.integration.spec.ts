@@ -148,6 +148,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
         remindAt: restoredSubtask?.remindAt,
       },
       projectTaskIds: state.projects.entities.project1?.taskIds,
+      projectBacklogTaskIds: state.projects.entities.project1?.backlogTaskIds,
       todayTaskIds: state[TAG_FEATURE_NAME].entities[TODAY_TAG.id]?.taskIds,
     };
   };
@@ -325,7 +326,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       task: deletedParentWithSubtasks,
     }) as PersistentAction;
     const restoreAction = TaskSharedActions.restoreTask({
-      task: deletedParent,
+      task: { ...deletedParent, subTaskIds: [] },
       subTasks: [subtask],
       restoreToToday: {
         today: RESTORE_DAY,
@@ -462,6 +463,9 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     const localUndoMissingSubtask: Task = {
       ...missingArchiveSubtask,
       title: 'Local undo child missing from remote snapshot',
+      dueDay: '2026-07-22',
+      dueWithTime: 1_721_600_000_000,
+      remindAt: 1_721_599_700_000,
     };
     const localUndoIndependentSubtask: Task = {
       ...independentSubtask,
@@ -478,8 +482,8 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       },
       projectContext: {
         projectId: 'project1',
-        taskIdsForProject: [PARENT_ID],
-        taskIdsForProjectBacklog: [],
+        taskIdsForProject: [],
+        taskIdsForProjectBacklog: [PARENT_ID],
       },
       tagTaskIdMap: {},
       deletedTaskEntities: {
@@ -550,6 +554,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     localState = reducer(localState, localMoveIndependentChildAction);
     localState = reducer(localState, localEditAction);
     expect(localState.tasks.entities[PARENT_ID]?.title).toBe('Local edit after undo');
+    expect(localState.projects.entities.project1?.backlogTaskIds).toContain(PARENT_ID);
     expect(localState.tasks.entities[INDEPENDENT_SUBTASK_ID]).toEqual(
       jasmine.objectContaining({
         parentId: undefined,
@@ -576,6 +581,17 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     expect(localState.tasks.entities[SUBTASK_ID]?.title).toBe('Remote restored subtask');
     expect(localState.tasks.entities[MISSING_ARCHIVE_SUBTASK_ID]?.title).toBe(
       'Local undo child missing from remote snapshot',
+    );
+    expect(localState.tasks.entities[MISSING_ARCHIVE_SUBTASK_ID]).toEqual(
+      jasmine.objectContaining({
+        dueDay: undefined,
+        dueWithTime: undefined,
+        remindAt: undefined,
+      }),
+    );
+    expect(localState.projects.entities.project1?.taskIds).toContain(PARENT_ID);
+    expect(localState.projects.entities.project1?.backlogTaskIds).not.toContain(
+      PARENT_ID,
     );
     expect(localState.tasks.entities[INDEPENDENT_SUBTASK_ID]).toEqual(
       jasmine.objectContaining({
@@ -648,11 +664,17 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       title: passiveMissingSubtask?.title,
       parentId: passiveMissingSubtask?.parentId,
       projectId: passiveMissingSubtask?.projectId,
+      dueDay: passiveMissingSubtask?.dueDay,
+      dueWithTime: passiveMissingSubtask?.dueWithTime,
+      remindAt: passiveMissingSubtask?.remindAt,
     }).toEqual({
       id: liveMissingSubtask?.id,
       title: liveMissingSubtask?.title,
       parentId: liveMissingSubtask?.parentId,
       projectId: liveMissingSubtask?.projectId,
+      dueDay: liveMissingSubtask?.dueDay,
+      dueWithTime: liveMissingSubtask?.dueWithTime,
+      remindAt: liveMissingSubtask?.remindAt,
     });
     expect(passiveState.tasks.entities[INDEPENDENT_SUBTASK_ID]).toEqual(
       jasmine.objectContaining({
@@ -660,14 +682,9 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
         projectId: '',
       }),
     );
-    expect(restoredProjection(replay(partialInitialState, storedOperations))).toEqual(
-      restoredProjection(localState),
-    );
-    expect(
-      replay(partialInitialState, storedOperations).tasks.entities[
-        INDEPENDENT_SUBTASK_ID
-      ],
-    ).toEqual(
+    const restartedState = replay(partialInitialState, storedOperations);
+    expect(restoredProjection(restartedState)).toEqual(restoredProjection(localState));
+    expect(restartedState.tasks.entities[INDEPENDENT_SUBTASK_ID]).toEqual(
       jasmine.objectContaining({
         parentId: undefined,
         projectId: '',

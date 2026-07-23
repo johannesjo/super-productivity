@@ -594,13 +594,22 @@ export class ConflictResolutionService {
           continue;
         }
         restoredSubTaskIds.push(subTaskId);
+        const compensationSubTaskState =
+          options.restoreSubTaskSnapshots?.clearSubTaskSchedule === true
+            ? {
+                ...subTaskState,
+                dueDay: undefined,
+                dueWithTime: undefined,
+                remindAt: undefined,
+              }
+            : subTaskState;
         const normalizedSubTaskState = options.restoreSubTaskSnapshots
           ? await restoreCompensation.normalizeRestoredTaskCompensationState(
-              subTaskState,
+              compensationSubTaskState,
               async (entityType, entityId) =>
                 (await this.getCurrentEntityState(entityType, entityId)) !== undefined,
             )
-          : subTaskState;
+          : compensationSubTaskState;
         const subTaskOp = markLwwDeleteRecreation(
           this.createLWWUpdateOp(
             'TASK' as EntityType,
@@ -682,13 +691,12 @@ export class ConflictResolutionService {
       return followUpOps;
     }
     const taskIds = [...project['taskIds']];
-    const backlogTaskIds = [...project['backlogTaskIds']];
-    if (
-      options.ensureRegularProjectMembership === true &&
-      !taskIds.includes(taskOp.entityId) &&
-      !backlogTaskIds.includes(taskOp.entityId)
-    ) {
-      taskIds.push(taskOp.entityId);
+    let backlogTaskIds = [...project['backlogTaskIds']];
+    if (options.ensureRegularProjectMembership === true) {
+      if (!taskIds.includes(taskOp.entityId)) {
+        taskIds.push(taskOp.entityId);
+      }
+      backlogTaskIds = backlogTaskIds.filter((id) => id !== taskOp.entityId);
     }
     followUpOps.push(
       markLwwDeleteRecreation(
@@ -713,6 +721,7 @@ export class ConflictResolutionService {
   private async _createRemoteTaskWinCompensation(
     conflict: EntityConflict,
     remoteOp: Operation,
+    restoreSubTaskSnapshots?: restoreCompensation.RestoreSubTaskCompensationSnapshots,
   ): Promise<Operation | undefined> {
     const hasCurrentTask =
       remoteOp.actionType === ActionType.TASK_SHARED_RESTORE &&
@@ -724,6 +733,7 @@ export class ConflictResolutionService {
       {
         hasCurrentTask,
         resolvePayloadKey: (entityType) => this._resolvePayloadKey(entityType),
+        restoreSubTaskSnapshots,
       },
     );
     if (!resolvedTaskState) {
@@ -1089,9 +1099,15 @@ export class ConflictResolutionService {
         continue;
       }
       for (const remoteOp of resolution.conflict.remoteOps) {
+        const restoreSubTaskSnapshots =
+          restoreCompensation.buildRestoreSubTaskCompensationSnapshots(
+            resolution.conflict,
+            remoteOp,
+          );
         const compensationOp = await this._createRemoteTaskWinCompensation(
           resolution.conflict,
           remoteOp,
+          restoreSubTaskSnapshots,
         );
         if (!compensationOp) continue;
         newLocalWinOps.push(compensationOp);
@@ -1100,11 +1116,7 @@ export class ConflictResolutionService {
           ensureRegularProjectMembership:
             remoteOp.actionType === ActionType.TASK_SHARED_MOVE_TO_PROJECT ||
             remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
-          restoreSubTaskSnapshots:
-            restoreCompensation.buildRestoreSubTaskCompensationSnapshots(
-              resolution.conflict,
-              remoteOp,
-            ),
+          restoreSubTaskSnapshots,
           requireComplete: remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
         });
         for (const followUpOp of followUpOps) {
@@ -3617,20 +3629,30 @@ export class ConflictResolutionService {
     try {
       // Adapter entities - use selectById
       if (isAdapterEntity(config) && config.selectById) {
+        let selectedEntity: unknown;
         // ISSUE_PROVIDER uses the registry's factory selector shape: (id, key) => selector.
         if (entityType === 'ISSUE_PROVIDER') {
           const selectById = config.selectById as SelectByIdFactory<null>;
-          return await firstValueFrom(this.store.select(selectById(entityId, null)));
+          selectedEntity = await firstValueFrom(
+            this.store.select(selectById(entityId, null)),
+          );
+        } else {
+          // Standard props-based selector
+          // TYPE ASSERTION: NgRx's MemoizedSelectorWithProps requires exact generic
+          // parameter matching. EntityConfig.selectById is a union type covering
+          // adapter, map, array, and singleton patterns - TypeScript cannot narrow
+          // this to MemoizedSelectorWithProps<State, {id: string}, T>. This is a
+          // known NgRx typing limitation. Runtime behavior is correct.
+          selectedEntity = await firstValueFrom(
+            this.store.select(config.selectById as any, { id: entityId }),
+          );
         }
-        // Standard props-based selector
-        // TYPE ASSERTION: NgRx's MemoizedSelectorWithProps requires exact generic
-        // parameter matching. EntityConfig.selectById is a union type covering
-        // adapter, map, array, and singleton patterns - TypeScript cannot narrow
-        // this to MemoizedSelectorWithProps<State, {id: string}, T>. This is a
-        // known NgRx typing limitation. Runtime behavior is correct.
-        return await firstValueFrom(
-          this.store.select(config.selectById as any, { id: entityId }),
-        );
+        return typeof selectedEntity === 'object' &&
+          selectedEntity !== null &&
+          !Array.isArray(selectedEntity) &&
+          (selectedEntity as Record<string, unknown>)['id'] === entityId
+          ? selectedEntity
+          : undefined;
       }
 
       // Singleton entities - return entire feature state

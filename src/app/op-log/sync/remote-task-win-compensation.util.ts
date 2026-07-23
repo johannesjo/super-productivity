@@ -16,11 +16,13 @@ import { INBOX_PROJECT } from '../../features/project/project.const';
 interface RemoteTaskWinCompensationOptions {
   hasCurrentTask: boolean;
   resolvePayloadKey: (entityType: EntityType) => string;
+  restoreSubTaskSnapshots?: RestoreSubTaskCompensationSnapshots;
 }
 
 export interface RestoreSubTaskCompensationSnapshots {
   winning: ReadonlyMap<string, Record<string, unknown>>;
   losing: ReadonlyMap<string, Record<string, unknown>>;
+  clearSubTaskSchedule: boolean;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -93,7 +95,11 @@ export const buildRestoreSubTaskCompensationSnapshots = (
     }
   }
 
-  return { winning, losing };
+  return {
+    winning,
+    losing,
+    clearSubTaskSchedule: isRecord(remotePayload['restoreToToday']),
+  };
 };
 
 export const selectRestoreSubTaskCompensationState = (
@@ -195,7 +201,9 @@ export const resolveRemoteTaskWinCompensationState = (
       isDone: false,
       doneOn: undefined,
     };
-    const restoredSubTasks = buildRestoreSubTaskCompensationSnapshots(conflict, remoteOp);
+    const restoredSubTasks =
+      options.restoreSubTaskSnapshots ??
+      buildRestoreSubTaskCompensationSnapshots(conflict, remoteOp);
     const declaredSubTaskIds = Array.isArray(taskState['subTaskIds'])
       ? taskState['subTaskIds'].filter((id): id is string => typeof id === 'string')
       : [];

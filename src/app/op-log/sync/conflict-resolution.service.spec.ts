@@ -39,6 +39,7 @@ import {
 } from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import { toLwwUpdateActionType } from '../core/lww-update-action-types';
+import { DEFAULT_TASK } from '../../features/tasks/task.model';
 
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
@@ -53,6 +54,18 @@ describe('ConflictResolutionService', () => {
   let mockOperationLogEffects: jasmine.SpyObj<OperationLogEffects>;
 
   const TEST_CLIENT_ID = 'test-client-123';
+
+  const createTaskRestoreSnapshot = (
+    id: string,
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    ...DEFAULT_TASK,
+    id,
+    title: 'Restored task',
+    projectId: 'project-1',
+    created: 1,
+    ...overrides,
+  });
 
   const createMockOp = (id: string, clientId: string): Operation => ({
     id,
@@ -208,6 +221,14 @@ describe('ConflictResolutionService', () => {
       expect(result).toBe(expectedEntity);
       expect(selectorFactoryCalls).toEqual([['issue-provider-1', null]]);
       expect(mockStore.select.calls.mostRecent().args[0]).toBe(selector);
+    });
+
+    it('should reject prototype values returned for adapter entity ids', async () => {
+      mockStore.select.and.returnValue(of(Object.prototype.constructor));
+
+      const result = await service.getCurrentEntityState('TASK', 'constructor');
+
+      expect(result).toBeUndefined();
     });
   });
 
@@ -717,7 +738,9 @@ describe('ConflictResolutionService', () => {
       const openBannerSpy = spyOn(bannerService, 'open');
       // The banner renders msg via [innerHTML]; a title synced from another
       // device must not be able to inject markup.
-      mockStore.select.and.returnValue(of({ title: '<img src=x onerror=alert(1)>' }));
+      mockStore.select.and.returnValue(
+        of({ id: 'task-1', title: '<img src=x onerror=alert(1)>' }),
+      );
       const now = Date.now();
       const conflicts: EntityConflict[] = [
         createConflict(
@@ -759,7 +782,7 @@ describe('ConflictResolutionService', () => {
       const openBannerSpy = spyOn(bannerService, 'open');
       // Kept (current) title comes from the store = the winning value; the
       // discarded value must still be surfaced so double-check is actionable.
-      mockStore.select.and.returnValue(of({ title: 'Remote title' }));
+      mockStore.select.and.returnValue(of({ id: 'task-1', title: 'Remote title' }));
       const now = Date.now();
       const conflicts: EntityConflict[] = [
         createConflict(
@@ -803,7 +826,7 @@ describe('ConflictResolutionService', () => {
     it('escapes the discarded title too (XSS guard on the new field)', async () => {
       const bannerService = TestBed.inject(BannerService);
       const openBannerSpy = spyOn(bannerService, 'open');
-      mockStore.select.and.returnValue(of({ title: 'Kept' }));
+      mockStore.select.and.returnValue(of({ id: 'task-1', title: 'Kept' }));
       const now = Date.now();
       const conflicts: EntityConflict[] = [
         createConflict(
@@ -3585,7 +3608,9 @@ describe('ConflictResolutionService', () => {
             [remoteMultiOp],
           ),
         ];
-        mockStore.select.and.returnValue(of({ title: 'Local winning task' }));
+        mockStore.select.and.callFake((_selector: unknown, props?: { id: string }) =>
+          of({ id: props?.id, title: 'Local winning task' }),
+        );
 
         await service.autoResolveConflictsLWW(conflicts);
 
@@ -7361,6 +7386,38 @@ describe('ConflictResolutionService', () => {
       ).toBeRejectedWithError(OperationIntegrityError);
     });
 
+    it('should reject an incomplete restore before persistence or reducer apply', async () => {
+      const conflict = createConflict(
+        'task-1',
+        [
+          {
+            ...createOpWithTimestamp('local-del', 'client-a', 1_000),
+            opType: OpType.Delete,
+          },
+        ],
+        [
+          {
+            ...createOpWithTimestamp('remote-restore', 'client-b', 2_000),
+            actionType: ActionType.TASK_SHARED_RESTORE,
+            opType: OpType.Update,
+            payload: {
+              actionPayload: {
+                task: { id: 'task-1' },
+                subTasks: [],
+              },
+              entityChanges: [],
+            },
+          },
+        ],
+      );
+
+      await expectAsync(
+        service.autoResolveConflictsLWW([conflict]),
+      ).toBeRejectedWithError(OperationIntegrityError);
+      expect(mockOpLogStore.appendMixedSourceBatchSkipDuplicates).not.toHaveBeenCalled();
+      expect(mockOperationApplier.applyOperations).not.toHaveBeenCalled();
+    });
+
     it('should abort before persisting when required restore follow-ups lose the client id', async () => {
       const localDelete = {
         ...createOpWithTimestamp('local-del', 'client-a', 1_000),
@@ -7373,7 +7430,7 @@ describe('ConflictResolutionService', () => {
         opType: OpType.Update,
         payload: {
           actionPayload: {
-            task: { id: 'task-1', title: 'Restored task' },
+            task: createTaskRestoreSnapshot('task-1'),
             subTasks: [],
           },
           entityChanges: [],

@@ -43,6 +43,10 @@ describe('remote task win compensation', () => {
         { id: 'reverse-child', parentId: 'root', title: 'Remote reverse-linked' },
         { id: 'other-child', parentId: 'other-root', title: 'Unrelated' },
       ],
+      restoreToToday: {
+        today: '2026-07-23',
+        startOfNextDayDiffMs: 0,
+      },
     },
     entityChanges: [],
   };
@@ -83,6 +87,7 @@ describe('remote task win compensation', () => {
     const snapshots = buildRestoreSubTaskCompensationSnapshots(conflict, remoteRestore);
 
     expect([...snapshots!.winning.keys()]).toEqual(['declared-child', 'reverse-child']);
+    expect(snapshots?.clearSubTaskSchedule).toBe(true);
     expect(snapshots!.losing.get('declared-child')?.['title']).toBe('Local child');
     expect(
       resolveRemoteTaskWinCompensationState(conflict, remoteRestore, {
