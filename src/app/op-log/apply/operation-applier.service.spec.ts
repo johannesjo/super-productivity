@@ -14,6 +14,7 @@ import { bulkApplyOperations } from './bulk-hydration.action';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { OperationLogEffects } from '../capture/operation-log.effects';
 import { reportBulkReplayReducerFailure } from './bulk-replay-failure-collector';
+import { DEFAULT_TASK } from '../../features/tasks/task.model';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
@@ -705,7 +706,16 @@ describe('OperationApplierService', () => {
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-2',
-          payload: { task: { id: 'task-2' }, subTasks: [] },
+          payload: {
+            task: {
+              ...DEFAULT_TASK,
+              id: 'task-2',
+              title: 'Restored task',
+              projectId: 'project-1',
+              created: 1,
+            },
+            subTasks: [],
+          },
           vectorClock: { testClient: 2 },
           timestamp: Date.now(),
           schemaVersion: 1,
