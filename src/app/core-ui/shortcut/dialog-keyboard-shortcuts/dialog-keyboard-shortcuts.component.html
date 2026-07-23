@@ -1,0 +1,31 @@
+<h1 mat-dialog-title>{{ T.GCF.KEYBOARD.TITLE | translate }}</h1>
+
+<mat-dialog-content>
+  <table>
+    <tbody>
+      @for (row of rows(); track $index) {
+        @if (row.heading) {
+          <tr>
+            <th colspan="2">{{ row.heading | translate }}</th>
+          </tr>
+        } @else {
+          <tr>
+            <td>{{ row.label | translate }}</td>
+            <td>
+              <kbd>{{ row.combo }}</kbd>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    mat-dialog-close
+  >
+    {{ T.G.CLOSE | translate }}
+  </button>
+</mat-dialog-actions>

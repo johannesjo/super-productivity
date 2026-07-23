@@ -21,8 +21,13 @@ describe('ShortcutService', () => {
   let mockTaskShortcutService: any;
   let mockRouter: any;
   let mockConfigService: any;
+  let mockMatDialog: any;
 
   beforeEach(() => {
+    mockMatDialog = {
+      openDialogs: [],
+      open: jasmine.createSpy('open'),
+    };
     mockTaskShortcutService = {
       handleTaskShortcuts: jasmine
         .createSpy('handleTaskShortcuts')
@@ -53,7 +58,7 @@ describe('ShortcutService', () => {
         { provide: Router, useValue: mockRouter },
         { provide: GlobalConfigService, useValue: mockConfigService },
         { provide: LayoutService, useValue: { isNavOpen: signal(false) } },
-        { provide: MatDialog, useValue: { openDialogs: [] } },
+        { provide: MatDialog, useValue: mockMatDialog },
         { provide: TaskService, useValue: { currentTaskId: signal(null) } },
         { provide: WorkContextService, useValue: { activeWorkContext$: signal({}) } },
         { provide: ActivatedRoute, useValue: { queryParams: of({}) } },
@@ -103,6 +108,33 @@ describe('ShortcutService', () => {
 
       expect(mockTaskShortcutService.handleTaskShortcuts).toHaveBeenCalledWith(ev);
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/schedule']);
+    });
+
+    it('should open the shortcut cheat sheet on "?"', async () => {
+      const ev = new KeyboardEvent('keydown', {
+        key: '?',
+        code: 'Slash',
+        shiftKey: true,
+      });
+      Object.defineProperty(ev, 'target', { value: document.body });
+
+      await service.handleKeyDown(ev);
+
+      expect(mockMatDialog.open).toHaveBeenCalled();
+    });
+
+    it('should NOT open the shortcut cheat sheet when a modifier is held', async () => {
+      const ev = new KeyboardEvent('keydown', {
+        key: '?',
+        code: 'Slash',
+        shiftKey: true,
+        ctrlKey: true,
+      });
+      Object.defineProperty(ev, 'target', { value: document.body });
+
+      await service.handleKeyDown(ev);
+
+      expect(mockMatDialog.open).not.toHaveBeenCalled();
     });
   });
 });

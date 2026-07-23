@@ -28,6 +28,14 @@ const CDK_OVERLAY_CONTAINER_CLASS = 'cdk-overlay-container';
 const CDK_OVERLAY_PANE_CLASS = 'cdk-overlay-pane';
 const MAT_TOOLTIP_PANEL_CLASS = 'mat-mdc-tooltip-panel';
 
+// Matched on ev.key rather than the `showHelp` key combo, because `checkKeyCombo`
+// compares ev.code and can never produce '?'. ev.key is the character the layout
+// actually emitted, so this works on non-QWERTY layouts too. Switch to
+// checkKeyCombo(ev, keys.showHelp) if showHelp ever becomes rebindable via the
+// settings form.
+export const isHelpKeyCombo = (ev: KeyboardEvent): boolean =>
+  ev.key === '?' && !ev.ctrlKey && !ev.metaKey && !ev.altKey;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -180,6 +188,13 @@ export class ShortcutService {
               }
             });
         }
+      }
+    } else if (isHelpKeyCombo(ev)) {
+      if (this._matDialog.openDialogs.length === 0) {
+        ev.preventDefault();
+        const { DialogKeyboardShortcutsComponent } =
+          await import('./dialog-keyboard-shortcuts/dialog-keyboard-shortcuts.component');
+        this._matDialog.open(DialogKeyboardShortcutsComponent, { restoreFocus: true });
       }
     } else if (checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
