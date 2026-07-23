@@ -486,6 +486,7 @@ describe('RemoteOpsProcessingService', () => {
         jasmine.any(Array),
         jasmine.objectContaining({
           disableConflictJournal: true,
+          remoteOpsInOrder: [remoteOp],
         }),
       );
       const resolveOptions =

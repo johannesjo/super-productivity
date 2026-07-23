@@ -484,6 +484,7 @@ export class RemoteOpsProcessingService {
           {
             callerHoldsOperationLogLock: true,
             disableConflictJournal: true,
+            remoteOpsInOrder: validOps,
           },
         );
         localWinOpsCreated = lwwResult.localWinOpsCreated;

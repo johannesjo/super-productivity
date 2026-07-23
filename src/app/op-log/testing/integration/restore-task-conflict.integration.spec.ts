@@ -8,8 +8,24 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { ArchiveModel } from '../../../features/archive/archive.model';
 import { ArchiveService } from '../../../features/archive/archive.service';
 import { TaskArchiveService } from '../../../features/archive/task-archive.service';
-import { TAG_FEATURE_NAME } from '../../../features/tag/store/tag.reducer';
-import { TODAY_TAG } from '../../../features/tag/tag.const';
+import {
+  PROJECT_FEATURE_NAME,
+  projectReducer,
+} from '../../../features/project/store/project.reducer';
+import { addProject } from '../../../features/project/store/project.actions';
+import { DEFAULT_PROJECT } from '../../../features/project/project.const';
+import { TAG_FEATURE_NAME, tagReducer } from '../../../features/tag/store/tag.reducer';
+import { addTag } from '../../../features/tag/store/tag.actions';
+import { DEFAULT_TAG, TODAY_TAG } from '../../../features/tag/tag.const';
+import {
+  TASK_REPEAT_CFG_FEATURE_NAME,
+  taskRepeatCfgReducer,
+} from '../../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
+import { addTaskRepeatCfgToTask } from '../../../features/task-repeat-cfg/store/task-repeat-cfg.actions';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+} from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import {
   TASK_FEATURE_NAME,
@@ -49,6 +65,9 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
   const SUBTASK_ID = 'archived-subtask';
   const MISSING_ARCHIVE_SUBTASK_ID = 'missing-archive-subtask';
   const INDEPENDENT_SUBTASK_ID = 'independently-moved-subtask';
+  const RESTORE_PROJECT_ID = 'restore-project';
+  const RESTORE_TAG_ID = 'restore-tag';
+  const RESTORE_REPEAT_CFG_ID = 'restore-repeat';
   const RESTORE_DAY = '2026-07-23';
 
   let resolver: ConflictResolutionService;
@@ -190,6 +209,12 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     ) => ({
       ...state,
       [TASK_FEATURE_NAME]: taskReducer(state[TASK_FEATURE_NAME], action),
+      [PROJECT_FEATURE_NAME]: projectReducer(state[PROJECT_FEATURE_NAME], action),
+      [TAG_FEATURE_NAME]: tagReducer(state[TAG_FEATURE_NAME], action),
+      [TASK_REPEAT_CFG_FEATURE_NAME]: taskRepeatCfgReducer(
+        state[TASK_REPEAT_CFG_FEATURE_NAME],
+        action,
+      ),
     });
     reducer = createCombinedTaskSharedMetaReducer(
       lwwUpdateMetaReducer(rootReducer),
@@ -690,5 +715,204 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
         projectId: '',
       }),
     );
+  });
+
+  it('orders same-batch restore dependencies before compensation and restart replay', async () => {
+    const localClient = new TestClient(LOCAL_CLIENT_ID);
+    const remoteClient = new TestClient(REMOTE_CLIENT_ID);
+    const dependencyClient = new TestClient('dependency-client');
+    const localRoot: Task = {
+      ...deletedParent,
+      subTaskIds: [],
+      tagIds: [],
+      repeatCfgId: undefined,
+    };
+    const project1 = initialState.projects.entities.project1;
+    if (!project1) {
+      throw new Error('Test fixture project1 is missing');
+    }
+    const dependencyInitialState: RootState = {
+      ...initialState,
+      tasks: {
+        ...initialState.tasks,
+        ids: [PARENT_ID],
+        entities: { [PARENT_ID]: localRoot },
+      },
+      projects: {
+        ...initialState.projects,
+        entities: {
+          ...initialState.projects.entities,
+          project1: {
+            ...project1,
+            taskIds: [PARENT_ID],
+            backlogTaskIds: [],
+          },
+        },
+      },
+    };
+    const deleteAction = TaskSharedActions.deleteTask({
+      task: { ...localRoot, subTasks: [] },
+    }) as PersistentAction;
+    const localUndoAction = TaskSharedActions.restoreDeletedTask({
+      task: { ...localRoot, title: 'Local undo', subTasks: [] },
+      projectContext: {
+        projectId: 'project1',
+        taskIdsForProject: [PARENT_ID],
+        taskIdsForProjectBacklog: [],
+      },
+      tagTaskIdMap: {},
+      deletedTaskEntities: {
+        [PARENT_ID]: { ...localRoot, title: 'Local undo' },
+      },
+    }) as PersistentAction;
+    const restoreProject = {
+      ...DEFAULT_PROJECT,
+      id: RESTORE_PROJECT_ID,
+      title: 'Restore project',
+      taskIds: [],
+      backlogTaskIds: [],
+    };
+    const restoreTag = {
+      ...DEFAULT_TAG,
+      id: RESTORE_TAG_ID,
+      title: 'Restore tag',
+      taskIds: [],
+    };
+    const restoreRepeatCfg: TaskRepeatCfg = {
+      ...DEFAULT_TASK_REPEAT_CFG,
+      id: RESTORE_REPEAT_CFG_ID,
+      projectId: RESTORE_PROJECT_ID,
+      tagIds: [RESTORE_TAG_ID],
+    };
+    const remoteRestoredRoot: Task = {
+      ...localRoot,
+      title: 'Remote restore with dependencies',
+      projectId: RESTORE_PROJECT_ID,
+      tagIds: [RESTORE_TAG_ID],
+      repeatCfgId: RESTORE_REPEAT_CFG_ID,
+    };
+    const addProjectAction = addProject({
+      project: restoreProject,
+    }) as PersistentAction;
+    const addTagAction = addTag({ tag: restoreTag }) as PersistentAction;
+    const addRepeatCfgAction = addTaskRepeatCfgToTask({
+      taskId: PARENT_ID,
+      taskRepeatCfg: restoreRepeatCfg,
+    }) as PersistentAction;
+    const remoteRestoreAction = TaskSharedActions.restoreTask({
+      task: remoteRestoredRoot,
+      subTasks: [],
+      restoreToToday: {
+        today: RESTORE_DAY,
+        startOfNextDayDiffMs: 0,
+      },
+    }) as PersistentAction;
+    const localDelete = captureOperation(deleteAction, localClient, 1_000);
+    const localUndo = captureOperation(localUndoAction, localClient, 1_500);
+    const remoteProjectCreate = captureOperation(
+      addProjectAction,
+      dependencyClient,
+      1_700,
+    );
+    const remoteTagCreate = captureOperation(addTagAction, dependencyClient, 1_800);
+    const remoteRepeatCfgCreate = captureOperation(
+      addRepeatCfgAction,
+      dependencyClient,
+      1_900,
+    );
+    const remoteRestore = captureOperation(remoteRestoreAction, remoteClient, 2_000);
+
+    const deletedState = reducer(dependencyInitialState, deleteAction);
+    localState = reducer(deletedState, localUndoAction);
+    await opLogStore.append(localDelete, 'local');
+    await opLogStore.append(localUndo, 'local');
+    await opLogStore.append(remoteProjectCreate, 'remote', { pendingApply: true });
+
+    await resolver.autoResolveConflictsLWW(
+      [
+        {
+          entityType: 'TASK',
+          entityId: PARENT_ID,
+          localOps: [localDelete, localUndo],
+          remoteOps: [remoteRestore],
+          suggestedResolution: 'manual',
+        },
+      ],
+      [remoteProjectCreate, remoteTagCreate, remoteRepeatCfgCreate],
+    );
+
+    const dependencyProjection = (state: RootState): object => {
+      const restoredTask = state.tasks.entities[PARENT_ID];
+      return {
+        task: {
+          id: restoredTask?.id,
+          projectId: restoredTask?.projectId,
+          tagIds: restoredTask?.tagIds,
+          repeatCfgId: restoredTask?.repeatCfgId,
+        },
+        projectTaskIds: state.projects.entities[RESTORE_PROJECT_ID]?.taskIds,
+        tagTaskIds: state[TAG_FEATURE_NAME].entities[RESTORE_TAG_ID]?.taskIds,
+        repeatCfgId:
+          state[TASK_REPEAT_CFG_FEATURE_NAME].entities[RESTORE_REPEAT_CFG_ID]?.id,
+      };
+    };
+    const expectedProjection = {
+      task: {
+        id: PARENT_ID,
+        projectId: RESTORE_PROJECT_ID,
+        tagIds: [RESTORE_TAG_ID],
+        repeatCfgId: RESTORE_REPEAT_CFG_ID,
+      },
+      projectTaskIds: [PARENT_ID],
+      tagTaskIds: [PARENT_ID],
+      repeatCfgId: RESTORE_REPEAT_CFG_ID,
+    };
+    expect(dependencyProjection(localState)).toEqual(expectedProjection);
+
+    const storedEntries = await opLogStore.getOpsAfterSeq(0);
+    const storedOperations = storedEntries.map(({ op }) => op);
+    const seqByOpId = new Map(storedEntries.map(({ op, seq }) => [op.id, seq]));
+    const restoreSeq = seqByOpId.get(remoteRestore.id);
+    if (restoreSeq === undefined) {
+      throw new Error('Resolved restore operation was not persisted');
+    }
+    for (const dependencyOp of [
+      remoteProjectCreate,
+      remoteTagCreate,
+      remoteRepeatCfgCreate,
+    ]) {
+      expect(seqByOpId.get(dependencyOp.id)).toBeLessThan(restoreSeq);
+    }
+    const rootCompensation = storedOperations.find(
+      (op) =>
+        op.entityId === PARENT_ID &&
+        isLwwUpdatePayload(op.payload) &&
+        op.payload.recreatesEntityAfterDelete === true &&
+        op.payload.lwwUpdateMode === 'replace',
+    );
+    expect(
+      rootCompensation && isLwwUpdatePayload(rootCompensation.payload)
+        ? rootCompensation.payload.actionPayload
+        : undefined,
+    ).toEqual(
+      jasmine.objectContaining({
+        projectId: RESTORE_PROJECT_ID,
+        tagIds: [RESTORE_TAG_ID],
+        repeatCfgId: RESTORE_REPEAT_CFG_ID,
+      }),
+    );
+
+    const rejectedLocalOpIds = new Set([localDelete.id, localUndo.id]);
+    expect(
+      dependencyProjection(
+        replay(
+          deletedState,
+          storedOperations.filter((op) => !rejectedLocalOpIds.has(op.id)),
+        ),
+      ),
+    ).toEqual(expectedProjection);
+    expect(
+      dependencyProjection(replay(dependencyInitialState, storedOperations)),
+    ).toEqual(expectedProjection);
   });
 });

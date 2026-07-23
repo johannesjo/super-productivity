@@ -1,5 +1,6 @@
 import {
   buildRestoreSubTaskCompensationSnapshots,
+  findRestoreDependencyCreateOps,
   normalizeRestoredTaskCompensationState,
   resolveRemoteTaskWinCompensationState,
   selectRestoreSubTaskCompensationState,
@@ -36,11 +37,18 @@ describe('remote task win compensation', () => {
       task: {
         id: 'root',
         projectId: 'project',
-        subTaskIds: ['declared-child'],
+        tagIds: ['tag'],
+        repeatCfgId: 'repeat',
+        subTaskIds: ['declared-child', 'missing-remote-child'],
       },
       subTasks: [
         { id: 'declared-child', parentId: 'root', title: 'Remote declared' },
-        { id: 'reverse-child', parentId: 'root', title: 'Remote reverse-linked' },
+        {
+          id: 'reverse-child',
+          parentId: 'root',
+          title: 'Remote reverse-linked',
+          tagIds: ['child-tag'],
+        },
         { id: 'other-child', parentId: 'other-root', title: 'Unrelated' },
       ],
       restoreToToday: {
@@ -58,6 +66,12 @@ describe('remote task win compensation', () => {
           id: 'declared-child',
           parentId: 'root',
           title: 'Local child',
+        },
+        ['missing-remote-child']: {
+          id: 'missing-remote-child',
+          parentId: 'root',
+          title: 'Local child without archive snapshot',
+          tagIds: ['losing-child-tag'],
         },
       },
     },
@@ -94,7 +108,152 @@ describe('remote task win compensation', () => {
         hasCurrentTask: true,
         resolvePayloadKey: () => 'task',
       })?.['subTaskIds'],
-    ).toEqual(['declared-child', 'reverse-child']);
+    ).toEqual(['declared-child', 'missing-remote-child', 'reverse-child']);
+  });
+
+  it('selects only authenticated same-batch creates referenced by the restore', () => {
+    const snapshots = buildRestoreSubTaskCompensationSnapshots(conflict, remoteRestore);
+    const createOp = (
+      id: string,
+      entityType: EntityType,
+      payloadKey: string,
+      payloadId: string = id,
+    ): Operation => ({
+      ...operation(
+        id,
+        {
+          PROJECT: ActionType.PROJECT_ADD,
+          TAG: ActionType.TAG_ADD,
+          TASK_REPEAT_CFG: ActionType.REPEAT_CFG_ADD,
+        }[entityType] ?? ActionType.PROJECT_ADD,
+        {
+          actionPayload: { [payloadKey]: { id: payloadId } },
+          entityChanges: [],
+        },
+      ),
+      opType: OpType.Create,
+      entityType,
+      entityId: id,
+    });
+    const projectCreate = createOp('project', 'PROJECT', 'project');
+    const tagCreate = createOp('tag', 'TAG', 'tag');
+    const repeatCreate = createOp('repeat', 'TASK_REPEAT_CFG', 'taskRepeatCfg');
+    const childTagCreate = createOp('child-tag', 'TAG', 'tag');
+    const losingChildTagCreate = createOp('losing-child-tag', 'TAG', 'tag');
+    const mismatchedCreate = createOp('tag', 'TAG', 'tag', 'other-tag');
+    const unrelatedCreate = createOp('unrelated', 'PROJECT', 'project');
+
+    expect(
+      findRestoreDependencyCreateOps(
+        [{ remoteOp: remoteRestore, restoreSubTaskSnapshots: snapshots }],
+        [
+          unrelatedCreate,
+          projectCreate,
+          mismatchedCreate,
+          tagCreate,
+          repeatCreate,
+          childTagCreate,
+          losingChildTagCreate,
+        ],
+        (entityType) =>
+          ({
+            PROJECT: 'project',
+            TAG: 'tag',
+            TASK_REPEAT_CFG: 'taskRepeatCfg',
+          })[entityType] ?? entityType.toLowerCase(),
+        [
+          unrelatedCreate,
+          projectCreate,
+          mismatchedCreate,
+          tagCreate,
+          repeatCreate,
+          childTagCreate,
+          losingChildTagCreate,
+          remoteRestore,
+        ],
+      ).map(({ id }) => id),
+    ).toEqual(['project', 'tag', 'repeat', 'child-tag', 'losing-child-tag']);
+
+    const wrongActionCreate = {
+      ...tagCreate,
+      actionType: ActionType.PROJECT_ADD,
+    };
+    expect(
+      findRestoreDependencyCreateOps(
+        [{ remoteOp: remoteRestore, restoreSubTaskSnapshots: snapshots }],
+        [wrongActionCreate],
+        () => 'tag',
+        [wrongActionCreate, remoteRestore],
+      ),
+    ).toEqual([]);
+
+    const tagUpdate: Operation = {
+      ...operation('tag-update', ActionType.TAG_UPDATE, {
+        actionPayload: { tag: { id: 'tag', title: 'Updated' } },
+        entityChanges: [],
+      }),
+      entityType: 'TAG',
+      entityId: 'tag',
+    };
+    expect(
+      findRestoreDependencyCreateOps(
+        [{ remoteOp: remoteRestore, restoreSubTaskSnapshots: snapshots }],
+        [tagCreate],
+        () => 'tag',
+        [tagCreate, tagUpdate, remoteRestore],
+      ),
+    ).toEqual([]);
+
+    const taskAdd: Operation = {
+      ...operation('task-add', ActionType.TASK_SHARED_ADD, {
+        actionPayload: {
+          task: { id: 'other-task', projectId: 'project' },
+        },
+        entityChanges: [],
+      }),
+      opType: OpType.Create,
+      entityId: 'other-task',
+    };
+    expect(
+      findRestoreDependencyCreateOps(
+        [{ remoteOp: remoteRestore, restoreSubTaskSnapshots: snapshots }],
+        [projectCreate],
+        () => 'project',
+        [projectCreate, taskAdd, remoteRestore],
+      ).map(({ id }) => id),
+    ).toEqual(['project']);
+
+    const laterRestore = { ...remoteRestore, id: 'later-restore' };
+    expect(
+      findRestoreDependencyCreateOps(
+        [{ remoteOp: remoteRestore, restoreSubTaskSnapshots: snapshots }],
+        [projectCreate],
+        () => 'project',
+        [remoteRestore, projectCreate],
+      ),
+    ).toEqual([]);
+    expect(
+      findRestoreDependencyCreateOps(
+        [
+          { remoteOp: remoteRestore, restoreSubTaskSnapshots: snapshots },
+          { remoteOp: laterRestore, restoreSubTaskSnapshots: snapshots },
+        ],
+        [projectCreate],
+        () => 'project',
+        [remoteRestore, projectCreate, laterRestore],
+      ),
+    ).toEqual([]);
+    expect(
+      findRestoreDependencyCreateOps(
+        [
+          { remoteOp: remoteRestore, restoreSubTaskSnapshots: snapshots },
+          { remoteOp: laterRestore, restoreSubTaskSnapshots: snapshots },
+        ],
+        [projectCreate],
+        () => 'project',
+        [projectCreate, remoteRestore, laterRestore],
+      ),
+    ).toEqual([]);
   });
 
   it('uses the remote child when current state only differs by undo modified time', () => {

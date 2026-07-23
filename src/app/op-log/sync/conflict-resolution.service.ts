@@ -75,7 +75,10 @@ import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { SYNC_LOGGER } from '../core/sync-logger.adapter';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
-import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import {
+  IncompleteRemoteOperationsError,
+  OperationIntegrityError,
+} from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import { SyncConflictBannerService } from './sync-conflict-banner.service';
 import { buildConflictJournalEntry } from './conflict-journal-emission.util';
@@ -127,6 +130,7 @@ interface ResolvedConflicts {
 interface AutoResolveConflictsLwwOptions {
   callerHoldsOperationLogLock?: boolean;
   disableDisjointMerge?: boolean;
+  remoteOpsInOrder?: readonly Operation[];
   /**
    * Skip conflict-journal emission entirely (observe-only hook, so this can
    * never change which op resolution picks).
@@ -524,6 +528,7 @@ export class ConflictResolutionService {
   async createTaskRecreationFollowUpOps(
     taskOp: Operation,
     options: {
+      entityExists?: (entityType: EntityType, entityId: string) => Promise<boolean>;
       ensureRegularProjectMembership?: boolean;
       restoreSubTaskSnapshots?: restoreCompensation.RestoreSubTaskCompensationSnapshots;
       requireComplete?: boolean;
@@ -606,8 +611,9 @@ export class ConflictResolutionService {
         const normalizedSubTaskState = options.restoreSubTaskSnapshots
           ? await restoreCompensation.normalizeRestoredTaskCompensationState(
               compensationSubTaskState,
-              async (entityType, entityId) =>
-                (await this.getCurrentEntityState(entityType, entityId)) !== undefined,
+              options.entityExists ??
+                (async (entityType, entityId) =>
+                  (await this.getCurrentEntityState(entityType, entityId)) !== undefined),
             )
           : compensationSubTaskState;
         const subTaskOp = markLwwDeleteRecreation(
@@ -722,6 +728,7 @@ export class ConflictResolutionService {
     conflict: EntityConflict,
     remoteOp: Operation,
     restoreSubTaskSnapshots?: restoreCompensation.RestoreSubTaskCompensationSnapshots,
+    entityExists?: (entityType: EntityType, entityId: string) => Promise<boolean>,
   ): Promise<Operation | undefined> {
     const hasCurrentTask =
       remoteOp.actionType === ActionType.TASK_SHARED_RESTORE &&
@@ -743,8 +750,9 @@ export class ConflictResolutionService {
       remoteOp.actionType === ActionType.TASK_SHARED_RESTORE
         ? await restoreCompensation.normalizeRestoredTaskCompensationState(
             resolvedTaskState,
-            async (entityType, entityId) =>
-              (await this.getCurrentEntityState(entityType, entityId)) !== undefined,
+            entityExists ??
+              (async (entityType, entityId) =>
+                (await this.getCurrentEntityState(entityType, entityId)) !== undefined),
           )
         : resolvedTaskState;
 
@@ -924,6 +932,110 @@ export class ConflictResolutionService {
     ];
     let remoteWinsOps = uniqueOpsById(lwwPartitions.remoteWinsOps);
     let localWinsRemoteOps = uniqueOpsById(lwwPartitions.localWinsRemoteOps);
+    const downloadedRemoteOps = options.remoteOpsInOrder ?? [
+      ...nonConflictingOps,
+      ...conflicts.flatMap((conflict) => conflict.remoteOps),
+    ];
+    const allRemoteBatchOpsById = new Map<string, Operation>();
+    for (const op of downloadedRemoteOps) {
+      const duplicate = allRemoteBatchOpsById.get(op.id);
+      if (duplicate && !this._deepEqual(duplicate, op)) {
+        throw new OperationIntegrityError(
+          `Downloaded operations with id ${op.id} do not match`,
+        );
+      }
+      allRemoteBatchOpsById.set(op.id, op);
+    }
+    const allRemoteBatchOps = [...allRemoteBatchOpsById.values()];
+    const dependencyCandidatesById = new Map(
+      [...nonConflictingOps, ...remoteWinsOps].map((op) => [op.id, op]),
+    );
+    const orderedDependencyCandidates = allRemoteBatchOps.flatMap((op) => {
+      const candidate = dependencyCandidatesById.get(op.id);
+      return candidate ? [candidate] : [];
+    });
+    const restoreDependencyPlan = restoreCompensation.buildRestoreDependencyPlan(
+      resolutions,
+      orderedDependencyCandidates,
+      (entityType) => this._resolvePayloadKey(entityType),
+      allRemoteBatchOps,
+    );
+    const nonConflictingOpIds = new Set(nonConflictingOps.map((op) => op.id));
+    const firstRestoreIndex = restoreDependencyPlan.firstRestoreOpId
+      ? allRemoteBatchOps.findIndex(
+          (op) => op.id === restoreDependencyPlan.firstRestoreOpId,
+        )
+      : -1;
+    const remotePrefix =
+      firstRestoreIndex >= 0 ? allRemoteBatchOps.slice(0, firstRestoreIndex) : [];
+    const canReplayRestorePrefix =
+      restoreDependencyPlan.createOps.length > 0 &&
+      remotePrefix.every(
+        (op) =>
+          nonConflictingOpIds.has(op.id) || restoreDependencyPlan.createOpIds.has(op.id),
+      );
+    const restoreDependencyCreateOps = canReplayRestorePrefix
+      ? restoreDependencyPlan.createOps
+      : [];
+    const restoreDependencyCreateOpIds = new Set(
+      restoreDependencyCreateOps.map((op) => op.id),
+    );
+    // The restore is pulled into the conflict-resolution batch. Pull every
+    // preceding non-conflicting op with it so its live and restart order still
+    // matches the server. A preceding non-dependency conflict makes the prefix
+    // unsafe, in which case dependency preservation degrades to current state.
+    const restorePrefixOps = canReplayRestorePrefix
+      ? remotePrefix.filter(
+          (op) =>
+            nonConflictingOpIds.has(op.id) || restoreDependencyCreateOpIds.has(op.id),
+        )
+      : [];
+    const restorePrefixOpIds = new Set(restorePrefixOps.map((op) => op.id));
+    const remainingNonConflictingOps = nonConflictingOps.filter(
+      (op) => !restorePrefixOpIds.has(op.id),
+    );
+    remoteWinsOps = remoteWinsOps.filter((op) => !restorePrefixOpIds.has(op.id));
+    const replayableRestorePrefixOps = (
+      await Promise.all(
+        restorePrefixOps.map(async (op) => {
+          const existing = await this.opLogStore.getOpById(op.id);
+          if (!existing) {
+            return op;
+          }
+          if (!this._deepEqual(existing.op, op)) {
+            throw new OperationIntegrityError(
+              `Stored operation ${op.id} does not match the downloaded operation`,
+            );
+          }
+          if (
+            existing.source !== 'remote' ||
+            existing.applicationStatus !== 'pending' ||
+            existing.rejectedAt !== undefined ||
+            existing.reducerRejectedAt !== undefined
+          ) {
+            return undefined;
+          }
+          return op;
+        }),
+      )
+    ).filter((op): op is Operation => !!op);
+    const replayableRestoreDependencyOpIds = new Set(
+      replayableRestorePrefixOps
+        .filter((op) => restoreDependencyCreateOpIds.has(op.id))
+        .map((op) => op.id),
+    );
+    const replayableRestoreDependencyOpsByRestoreOpId = new Map(
+      [...restoreDependencyPlan.createOpsByRestoreOpId].map(
+        ([restoreOpId, createOps]) => [
+          restoreOpId,
+          createOps.filter(
+            (op) =>
+              restoreDependencyCreateOpIds.has(op.id) &&
+              replayableRestoreDependencyOpIds.has(op.id),
+          ),
+        ],
+      ),
+    );
     let remoteOpsToReject = [...new Set(lwwPartitions.remoteOpsToReject)];
     const newLocalWinOps = uniqueOpsById([
       ...lwwPartitions.newLocalWinOps,
@@ -1099,15 +1211,25 @@ export class ConflictResolutionService {
         continue;
       }
       for (const remoteOp of resolution.conflict.remoteOps) {
-        const restoreSubTaskSnapshots =
-          restoreCompensation.buildRestoreSubTaskCompensationSnapshots(
-            resolution.conflict,
-            remoteOp,
-          );
+        const restoreSubTaskSnapshots = restoreDependencyPlan.subTaskSnapshotsByOpId.get(
+          remoteOp.id,
+        );
+        const restoreDependencyOps =
+          replayableRestoreDependencyOpsByRestoreOpId.get(remoteOp.id) ?? [];
+        const restoreDependencyEntityKeys = new Set(
+          restoreDependencyOps.map((op) => toEntityKey(op.entityType, op.entityId)),
+        );
+        const restoreEntityExists = async (
+          entityType: EntityType,
+          entityId: string,
+        ): Promise<boolean> =>
+          restoreDependencyEntityKeys.has(toEntityKey(entityType, entityId)) ||
+          (await this.getCurrentEntityState(entityType, entityId)) !== undefined;
         const compensationOp = await this._createRemoteTaskWinCompensation(
           resolution.conflict,
           remoteOp,
           restoreSubTaskSnapshots,
+          restoreEntityExists,
         );
         if (!compensationOp) continue;
         newLocalWinOps.push(compensationOp);
@@ -1118,6 +1240,7 @@ export class ConflictResolutionService {
             remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
           restoreSubTaskSnapshots,
           requireComplete: remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
+          entityExists: restoreEntityExists,
         });
         for (const followUpOp of followUpOps) {
           newLocalWinOps.push(followUpOp);
@@ -1332,17 +1455,33 @@ export class ConflictResolutionService {
     // remote winners in live-apply order. Hydration is status-blind, so both
     // durable ordering and the absence of crash gaps are required here.
     // ─────────────────────────────────────────────────────────────────────────
+    const compensatedRemoteOpIds = new Set(compensatedRemoteOps.keys());
+    const unappliedRemoteLosers = localWinsRemoteOps.filter(
+      (op) => !compensatedRemoteOpIds.has(op.id),
+    );
+    remoteOpsToReject = remoteOpsToReject.filter(
+      (opId) => !compensatedRemoteOpIds.has(opId),
+    );
+    await this._assertStoredOperationIdentity([
+      ...unappliedRemoteLosers,
+      ...replayableRestorePrefixOps,
+      ...compensatedRemoteOps.values(),
+      ...remoteWinsOps,
+      ...remainingNonConflictingOps,
+      ...mergedResolutions.flatMap((merged) => merged.conflict.remoteOps),
+    ]);
+
     if (localWinsRemoteOps.length > 0 || newLocalWinOps.length > 0) {
-      const compensatedRemoteOpIds = new Set(compensatedRemoteOps.keys());
-      const unappliedRemoteLosers = localWinsRemoteOps.filter(
-        (op) => !compensatedRemoteOpIds.has(op.id),
-      );
-      remoteOpsToReject = remoteOpsToReject.filter(
-        (opId) => !compensatedRemoteOpIds.has(opId),
-      );
       const resolutionBatches: MixedSourceOperationBatch[] = [];
       if (unappliedRemoteLosers.length > 0) {
         resolutionBatches.push({ ops: unappliedRemoteLosers, source: 'remote' });
+      }
+      if (replayableRestorePrefixOps.length > 0) {
+        resolutionBatches.push({
+          ops: replayableRestorePrefixOps,
+          source: 'remote',
+          options: { pendingApply: true },
+        });
       }
       if (compensatedRemoteOps.size > 0) {
         resolutionBatches.push({
@@ -1377,15 +1516,13 @@ export class ConflictResolutionService {
       }
 
       const replayableRemoteEntries = await this._resolveReplayableOperations(
-        [...compensatedRemoteOps.values(), ...remoteWinsOps],
+        [
+          ...replayableRestorePrefixOps,
+          ...compensatedRemoteOps.values(),
+          ...remoteWinsOps,
+        ],
         'remote',
         result.written,
-      );
-      const pendingCompensatedRemoteEntries = replayableRemoteEntries.filter((entry) =>
-        compensatedRemoteOpIds.has(entry.op.id),
-      );
-      const pendingRemoteWinnerEntries = replayableRemoteEntries.filter(
-        (entry) => !compensatedRemoteOpIds.has(entry.op.id),
       );
       const writtenCompensationEntries = result.written.filter(
         (entry) => entry.source === 'local' && compensationOpIdsToApply.has(entry.op.id),
@@ -1398,15 +1535,11 @@ export class ConflictResolutionService {
       // the combined set in durable sequence order so live state matches the
       // status-blind hydration order after a crash/restart.
       const resolutionApplyEntries: MixedSourceWrittenOperation[] = [
-        ...pendingCompensatedRemoteEntries.map((entry) => ({
+        ...replayableRemoteEntries.map((entry) => ({
           ...entry,
           source: 'remote' as const,
         })),
         ...writtenCompensationEntries,
-        ...pendingRemoteWinnerEntries.map((entry) => ({
-          ...entry,
-          source: 'remote' as const,
-        })),
       ].sort((a, b) => a.seq - b.seq);
       for (const entry of resolutionApplyEntries) {
         allOpsToApply.push(entry.op);
@@ -1418,11 +1551,16 @@ export class ConflictResolutionService {
           });
         }
       }
-    } else if (remoteWinsOps.length > 0) {
-      const result = await this._filterAndAppendOpsWithRetry(remoteWinsOps, 'remote', {
-        pendingApply: true,
-      });
-      const skippedCount = remoteWinsOps.length - result.ops.length;
+    } else if (remoteWinsOps.length > 0 || replayableRestorePrefixOps.length > 0) {
+      const orderedRemoteWinnerOps = [...replayableRestorePrefixOps, ...remoteWinsOps];
+      const result = await this._filterAndAppendOpsWithRetry(
+        orderedRemoteWinnerOps,
+        'remote',
+        {
+          pendingApply: true,
+        },
+      );
+      const skippedCount = orderedRemoteWinnerOps.length - result.ops.length;
       if (skippedCount > 0) {
         OpLog.verbose(
           `ConflictResolutionService: Skipping ${skippedCount} duplicate ops (LWW remote)`,
@@ -1461,9 +1599,9 @@ export class ConflictResolutionService {
     // STEP 3: Add non-conflicting remote ops to the batch
     // Uses retry to handle race condition (issue #6213)
     // ─────────────────────────────────────────────────────────────────────────
-    if (nonConflictingOps.length > 0) {
+    if (remainingNonConflictingOps.length > 0) {
       const result = await this._filterAndAppendOpsWithRetry(
-        nonConflictingOps,
+        remainingNonConflictingOps,
         'remote',
         { pendingApply: true },
       );
@@ -4117,6 +4255,29 @@ export class ConflictResolutionService {
    * @param options - Options for appendBatchSkipDuplicates (e.g., pendingApply)
    * @returns Object containing the written ops and their sequence numbers
    */
+  private async _assertStoredOperationIdentity(ops: readonly Operation[]): Promise<void> {
+    const opsById = new Map<string, Operation>();
+    for (const op of ops) {
+      const duplicate = opsById.get(op.id);
+      if (duplicate && !this._deepEqual(duplicate, op)) {
+        throw new OperationIntegrityError(
+          `Operations queued with id ${op.id} do not match`,
+        );
+      }
+      opsById.set(op.id, op);
+    }
+    await Promise.all(
+      [...opsById.values()].map(async (op) => {
+        const existing = await this.opLogStore.getOpById(op.id);
+        if (existing && !this._deepEqual(existing.op, op)) {
+          throw new OperationIntegrityError(
+            `Stored operation ${op.id} does not match the downloaded operation`,
+          );
+        }
+      }),
+    );
+  }
+
   private async _filterAndAppendOpsWithRetry(
     ops: Operation[],
     source: 'local' | 'remote',
@@ -4158,6 +4319,11 @@ export class ConflictResolutionService {
         // checkpointed. Applied, archive-pending, failed, or rejected rows must
         // not be reducer-dispatched again.
         const existing = await this.opLogStore.getOpById(op.id);
+        if (existing && !this._deepEqual(existing.op, op)) {
+          throw new OperationIntegrityError(
+            `Stored operation ${op.id} does not match the queued operation`,
+          );
+        }
         return existing?.source === source &&
           existing.applicationStatus === 'pending' &&
           existing.rejectedAt === undefined &&
