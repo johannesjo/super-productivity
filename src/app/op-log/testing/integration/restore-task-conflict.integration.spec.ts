@@ -27,7 +27,11 @@ import { convertOpToAction } from '../../apply/operation-converter.util';
 import { OperationCaptureService } from '../../capture/operation-capture.service';
 import { OperationLogEffects } from '../../capture/operation-log.effects';
 import { buildEntityRegistry, ENTITY_REGISTRY } from '../../core/entity-registry';
-import { EntityConflict, Operation } from '../../core/operation.types';
+import {
+  EntityConflict,
+  isLwwUpdatePayload,
+  Operation,
+} from '../../core/operation.types';
 import { PersistentAction } from '../../core/persistent-action.interface';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
 import { ConflictJournalService } from '../../sync/conflict-journal.service';
@@ -43,6 +47,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
   const REMOTE_CLIENT_ID = 'restore-client';
   const PARENT_ID = 'archived-parent';
   const SUBTASK_ID = 'archived-subtask';
+  const MISSING_ARCHIVE_SUBTASK_ID = 'missing-archive-subtask';
   const RESTORE_DAY = '2026-07-23';
 
   let resolver: ConflictResolutionService;
@@ -124,6 +129,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     return {
       parent: {
         id: parent?.id,
+        title: parent?.title,
         projectId: parent?.projectId,
         subTaskIds: parent?.subTaskIds,
         dueDay: parent?.dueDay,
@@ -133,6 +139,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       },
       subtask: {
         id: restoredSubtask?.id,
+        title: restoredSubtask?.title,
         parentId: restoredSubtask?.parentId,
         projectId: restoredSubtask?.projectId,
         dueDay: restoredSubtask?.dueDay,
@@ -405,5 +412,167 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     );
     expect((await archiveDb.loadArchiveYoung())?.task.ids).toEqual([]);
     expect((await archiveDb.loadArchiveOld())?.task.ids).toEqual([]);
+  });
+
+  it('applies a winning remote restore over a local delete followed by undo', async () => {
+    const localClient = new TestClient(LOCAL_CLIENT_ID);
+    const remoteClient = new TestClient(REMOTE_CLIENT_ID);
+    const missingArchiveSubtask: Task = {
+      ...subtask,
+      id: MISSING_ARCHIVE_SUBTASK_ID,
+      title: 'Archived child missing from remote snapshot',
+    };
+    const partialArchiveParent: Task = {
+      ...deletedParent,
+      subTaskIds: [SUBTASK_ID, MISSING_ARCHIVE_SUBTASK_ID],
+    };
+    const partialInitialState: RootState = {
+      ...initialState,
+      tasks: {
+        ...initialState.tasks,
+        ids: [PARENT_ID, SUBTASK_ID, MISSING_ARCHIVE_SUBTASK_ID],
+        entities: {
+          ...initialState.tasks.entities,
+          [PARENT_ID]: partialArchiveParent,
+          [MISSING_ARCHIVE_SUBTASK_ID]: missingArchiveSubtask,
+        },
+      },
+    };
+    const deleteAction = TaskSharedActions.deleteTask({
+      task: {
+        ...partialArchiveParent,
+        subTasks: [subtask, missingArchiveSubtask],
+      },
+    }) as PersistentAction;
+    const localUndoParent: Task = {
+      ...partialArchiveParent,
+      title: 'Local undo',
+    };
+    const localUndoSubtask: Task = {
+      ...subtask,
+      title: 'Local undo subtask',
+    };
+    const localUndoMissingSubtask: Task = {
+      ...missingArchiveSubtask,
+      title: 'Local undo child missing from remote snapshot',
+    };
+    const localUndoAction = TaskSharedActions.restoreDeletedTask({
+      task: {
+        ...localUndoParent,
+        subTasks: [localUndoSubtask, localUndoMissingSubtask],
+      },
+      projectContext: {
+        projectId: 'project1',
+        taskIdsForProject: [PARENT_ID],
+        taskIdsForProjectBacklog: [],
+      },
+      tagTaskIdMap: {},
+      deletedTaskEntities: {
+        [PARENT_ID]: localUndoParent,
+        [SUBTASK_ID]: localUndoSubtask,
+        [MISSING_ARCHIVE_SUBTASK_ID]: localUndoMissingSubtask,
+      },
+    }) as PersistentAction;
+    const localEditAction = TaskSharedActions.updateTask({
+      task: {
+        id: PARENT_ID,
+        changes: { title: 'Local edit after undo' },
+      },
+    }) as PersistentAction;
+    const remoteRestoreAction = TaskSharedActions.restoreTask({
+      task: {
+        ...partialArchiveParent,
+        title: 'Remote restore winner',
+      },
+      subTasks: [
+        {
+          ...subtask,
+          title: 'Remote restored subtask',
+        },
+      ],
+      restoreToToday: {
+        today: RESTORE_DAY,
+        startOfNextDayDiffMs: 0,
+      },
+    }) as PersistentAction;
+    const localDelete = captureOperation(deleteAction, localClient, 1_000);
+    const localUndo = captureOperation(localUndoAction, localClient, 1_500);
+    const localEdit = captureOperation(localEditAction, localClient, 1_750);
+    const remoteRestore = captureOperation(remoteRestoreAction, remoteClient, 2_000);
+
+    const deletedState = reducer(partialInitialState, deleteAction);
+    localState = deletedState;
+    localState = reducer(reducer(localState, localUndoAction), localEditAction);
+    expect(localState.tasks.entities[PARENT_ID]?.title).toBe('Local edit after undo');
+    await opLogStore.append(localDelete, 'local');
+    await opLogStore.append(localUndo, 'local');
+    await opLogStore.append(localEdit, 'local');
+
+    await resolver.autoResolveConflictsLWW([
+      {
+        entityType: 'TASK',
+        entityId: PARENT_ID,
+        localOps: [localDelete, localUndo, localEdit],
+        remoteOps: [remoteRestore],
+        suggestedResolution: 'manual',
+      },
+    ]);
+
+    expect(localState.tasks.entities[PARENT_ID]?.title).toBe('Remote restore winner');
+    expect(localState.tasks.entities[SUBTASK_ID]?.title).toBe('Remote restored subtask');
+    expect(localState.tasks.entities[MISSING_ARCHIVE_SUBTASK_ID]?.title).toBe(
+      'Local undo child missing from remote snapshot',
+    );
+
+    const storedEntries = await opLogStore.getOpsAfterSeq(0);
+    const storedOperations = storedEntries.map(({ op }) => op);
+    for (const localOp of [localDelete, localUndo, localEdit]) {
+      expect(
+        storedEntries.find(({ op }) => op.id === localOp.id)?.rejectedAt,
+      ).toBeDefined();
+    }
+    const storedRestore = storedOperations.find(({ id }) => id === remoteRestore.id);
+    if (!storedRestore) {
+      throw new Error('Resolved restore operation was not persisted');
+    }
+    expect(storedRestore.actionType).toBe(TaskSharedActions.restoreTask.type);
+    expect(convertOpToAction(storedRestore).meta.recreatesEntityAfterDelete).toBe(
+      undefined,
+    );
+    const rootCompensation = storedOperations.find(
+      (op) =>
+        op.entityId === PARENT_ID &&
+        isLwwUpdatePayload(op.payload) &&
+        op.payload.recreatesEntityAfterDelete === true &&
+        op.payload.lwwUpdateMode === 'replace',
+    );
+    expect(rootCompensation).toBeDefined();
+    expect(
+      rootCompensation && isLwwUpdatePayload(rootCompensation.payload)
+        ? rootCompensation.payload.actionPayload['title']
+        : undefined,
+    ).toBe('Remote restore winner');
+    const localOpIds = new Set([localDelete.id, localUndo.id, localEdit.id]);
+    const acceptedOperations = storedOperations.filter(
+      (operation) => !localOpIds.has(operation.id),
+    );
+    const passiveState = replay(deletedState, acceptedOperations);
+    expect(restoredProjection(passiveState)).toEqual(restoredProjection(localState));
+    const passiveMissingSubtask = passiveState.tasks.entities[MISSING_ARCHIVE_SUBTASK_ID];
+    const liveMissingSubtask = localState.tasks.entities[MISSING_ARCHIVE_SUBTASK_ID];
+    expect({
+      id: passiveMissingSubtask?.id,
+      title: passiveMissingSubtask?.title,
+      parentId: passiveMissingSubtask?.parentId,
+      projectId: passiveMissingSubtask?.projectId,
+    }).toEqual({
+      id: liveMissingSubtask?.id,
+      title: liveMissingSubtask?.title,
+      parentId: liveMissingSubtask?.parentId,
+      projectId: liveMissingSubtask?.projectId,
+    });
+    expect(restoredProjection(replay(partialInitialState, storedOperations))).toEqual(
+      restoredProjection(localState),
+    );
   });
 });

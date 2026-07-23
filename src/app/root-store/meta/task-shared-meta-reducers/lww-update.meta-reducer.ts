@@ -706,6 +706,7 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       entityType === 'TASK' &&
       actionMeta?.recreatesEntityAfterDelete === true &&
       ((typeof recreationProjectId === 'string' &&
+        recreationProjectId !== '' &&
         !rootState[PROJECT_FEATURE_NAME].entities[recreationProjectId]) ||
         (typeof recreationParentId === 'string' &&
           (!recreationParent || recreationParent.projectId !== recreationProjectId)));

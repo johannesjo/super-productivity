@@ -407,6 +407,33 @@ describe('lwwUpdateMetaReducer', () => {
       ).toBeUndefined();
     });
 
+    it('should allow a marked task recovery with no project', () => {
+      const state = createMockState([{ projectId: '' }]);
+      const action = {
+        type: '[TASK] LWW Update',
+        id: TASK_ID,
+        title: 'Remote restore winner',
+        projectId: '',
+        parentId: null,
+        subTaskIds: [],
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityId: TASK_ID,
+          lwwUpdateMode: 'replace',
+          recreatesEntityAfterDelete: true,
+        },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      expect(updatedState[TASK_FEATURE_NAME]?.entities[TASK_ID]?.title).toBe(
+        'Remote restore winner',
+      );
+      expect(updatedState[TASK_FEATURE_NAME]?.entities[TASK_ID]?.projectId).toBe('');
+    });
+
     it('should not create a task from a delayed relationship patch (#8997)', () => {
       const state = createMockState();
       const action = {

@@ -33,7 +33,10 @@ import { MAX_VECTOR_CLOCK_SIZE } from '../core/operation-log.const';
 import { buildEntityRegistry, ENTITY_REGISTRY } from '../core/entity-registry';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { OperationLogEffects } from '../capture/operation-log.effects';
-import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import {
+  IncompleteRemoteOperationsError,
+  OperationIntegrityError,
+} from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import { toLwwUpdateActionType } from '../core/lww-update-action-types';
 
@@ -7291,6 +7294,104 @@ describe('ConflictResolutionService', () => {
       const result = (service as any)._convertToLWWUpdatesIfNeeded(conflict);
 
       expect(result).toEqual([remoteRestore]);
+    });
+
+    it('should reject a restore whose payload task id differs from entityId', async () => {
+      const conflict = createConflict(
+        'task-1',
+        [
+          {
+            ...createOpWithTimestamp('local-del', 'client-a', Date.now() - 1000),
+            opType: OpType.Delete,
+            payload: { task: { id: 'task-1', title: 'Deleted task' } },
+          },
+        ],
+        [
+          {
+            ...createOpWithTimestamp('remote-restore', 'client-b', Date.now()),
+            actionType: ActionType.TASK_SHARED_RESTORE,
+            opType: OpType.Update,
+            entityId: 'task-1',
+            payload: {
+              actionPayload: {
+                task: { id: 'different-task', title: 'Restored task' },
+                subTasks: [],
+              },
+              entityChanges: [],
+            },
+          },
+        ],
+      );
+
+      await expectAsync(
+        service.autoResolveConflictsLWW([conflict]),
+      ).toBeRejectedWithError(OperationIntegrityError);
+    });
+
+    it('should reject a restore outside the conflict entity scope', async () => {
+      const conflict = createConflict(
+        'task-conflict',
+        [
+          {
+            ...createOpWithTimestamp('local-del', 'client-a', Date.now() - 1000),
+            opType: OpType.Delete,
+            entityId: 'task-conflict',
+            payload: { task: { id: 'task-conflict', title: 'Deleted task' } },
+          },
+        ],
+        [
+          {
+            ...createOpWithTimestamp('remote-restore', 'client-b', Date.now()),
+            actionType: ActionType.TASK_SHARED_RESTORE,
+            opType: OpType.Update,
+            entityId: 'task-envelope',
+            payload: {
+              actionPayload: {
+                task: { id: 'task-envelope', title: 'Restored task' },
+                subTasks: [],
+              },
+              entityChanges: [],
+            },
+          },
+        ],
+      );
+
+      await expectAsync(
+        service.autoResolveConflictsLWW([conflict]),
+      ).toBeRejectedWithError(OperationIntegrityError);
+    });
+
+    it('should abort before persisting when required restore follow-ups lose the client id', async () => {
+      const localDelete = {
+        ...createOpWithTimestamp('local-del', 'client-a', 1_000),
+        opType: OpType.Delete,
+        payload: { task: { id: 'task-1', title: 'Deleted task' } },
+      };
+      const remoteRestore = {
+        ...createOpWithTimestamp('remote-restore', 'client-b', 2_000),
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        payload: {
+          actionPayload: {
+            task: { id: 'task-1', title: 'Restored task' },
+            subTasks: [],
+          },
+          entityChanges: [],
+        },
+      };
+      mockStore.select.and.returnValue(of({ id: 'task-1', title: 'Local undo' }));
+      mockClientIdProvider.loadClientId.and.returnValues(
+        Promise.resolve(TEST_CLIENT_ID),
+        Promise.resolve(undefined),
+      );
+
+      await expectAsync(
+        service.autoResolveConflictsLWW([
+          createConflict('task-1', [localDelete], [remoteRestore]),
+        ]),
+      ).toBeRejectedWithError(IncompleteRemoteOperationsError);
+      expect(mockOpLogStore.appendMixedSourceBatchSkipDuplicates).not.toHaveBeenCalled();
+      expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
     });
 
     it('should return remote op unchanged when base entity cannot be extracted', () => {

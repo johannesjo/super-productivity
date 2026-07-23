@@ -43,6 +43,7 @@ import { toLwwUpdateActionType } from '../core/lww-update-action-types';
 import { PROJECT_DELETE_WINS_MARKER } from '../../root-store/meta/task-shared.actions';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { OperationApplierService } from '../apply/operation-applier.service';
+import { assertTaskRestoreOperationIntegrity } from '../apply/operation-converter.util';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import {
   type MixedSourceOperationBatch,
@@ -86,6 +87,7 @@ import {
 } from './conflict-disjoint-merge.util';
 import { NOISE_FIELDS } from './conflict-journal.model';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
+import * as restoreCompensation from './remote-task-win-compensation.util';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -518,16 +520,14 @@ export class ConflictResolutionService {
     return incrementVectorClock(mergedClock, clientId);
   }
 
-  /**
-   * Re-emits the relationships that a rewritten recreate-after-delete TASK op
-   * cannot carry by itself. This is used only when an earlier recovery row was
-   * rejected and replaced: the parent TASK goes first, any still-present
-   * subtasks follow, and a parent TASK snapshot or PROJECT membership patch
-   * restores exact relationship ordering last.
-   */
+  /** Re-emits child and project relationships after a TASK recovery op. */
   async createTaskRecreationFollowUpOps(
     taskOp: Operation,
-    options: { ensureRegularProjectMembership?: boolean } = {},
+    options: {
+      ensureRegularProjectMembership?: boolean;
+      restoreSubTaskSnapshots?: restoreCompensation.RestoreSubTaskCompensationSnapshots;
+      requireComplete?: boolean;
+    } = {},
   ): Promise<Operation[]> {
     if (
       taskOp.entityType !== 'TASK' ||
@@ -544,9 +544,13 @@ export class ConflictResolutionService {
 
     const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
-      OpLog.err(
+      const error = new Error(
         'ConflictResolutionService: Cannot create TASK recovery follow-ups - no client ID',
       );
+      if (options.requireComplete === true) {
+        throw new IncompleteRemoteOperationsError(error);
+      }
+      OpLog.err(error.message);
       return [];
     }
     let nextClock = this.mergeAndIncrementClocks(
@@ -559,18 +563,42 @@ export class ConflictResolutionService {
       for (const subTaskId of new Set(
         subTaskIds.filter((id): id is string => typeof id === 'string'),
       )) {
-        const subTaskState = await this.getCurrentEntityState(
+        const currentSubTaskState = await this.getCurrentEntityState(
           'TASK' as EntityType,
           subTaskId,
         );
+        const currentSubTaskRecord =
+          typeof currentSubTaskState === 'object' &&
+          currentSubTaskState !== null &&
+          !Array.isArray(currentSubTaskState)
+            ? (currentSubTaskState as Record<string, unknown>)
+            : undefined;
+        const winningSubTaskState =
+          options.restoreSubTaskSnapshots?.winning.get(subTaskId);
+        const subTaskState = options.restoreSubTaskSnapshots
+          ? restoreCompensation.selectRestoreSubTaskCompensationState(
+              currentSubTaskRecord,
+              winningSubTaskState,
+              options.restoreSubTaskSnapshots.losing.get(subTaskId),
+            )
+          : currentSubTaskRecord;
         if (subTaskState === undefined) continue;
+        const normalizedSubTaskState = options.restoreSubTaskSnapshots
+          ? await restoreCompensation.normalizeRestoredTaskCompensationState(
+              subTaskState,
+              async (entityType, entityId) =>
+                (await this.getCurrentEntityState(entityType, entityId)) !== undefined,
+            )
+          : subTaskState;
         const subTaskOp = markLwwDeleteRecreation(
           this.createLWWUpdateOp(
             'TASK' as EntityType,
             subTaskId,
-            typeof subTaskState === 'object' && subTaskState !== null
-              ? { ...subTaskState, projectId }
-              : subTaskState,
+            {
+              ...normalizedSubTaskState,
+              projectId,
+              ...(options.restoreSubTaskSnapshots ? { parentId: taskOp.entityId } : {}),
+            },
             clientId,
             nextClock,
             taskOp.timestamp,
@@ -666,86 +694,41 @@ export class ConflictResolutionService {
     return followUpOps;
   }
 
-  private async _createRemoteWinCompensationForRejectedTaskRecreation(
+  private async _createRemoteTaskWinCompensation(
     conflict: EntityConflict,
     remoteOp: Operation,
   ): Promise<Operation | undefined> {
-    if (conflict.entityType !== 'TASK' || remoteOp.opType !== OpType.Update) {
-      return undefined;
-    }
-    const localRecreation = conflict.localOps.find(
-      (op) =>
-        isLwwUpdatePayload(op.payload) && op.payload.recreatesEntityAfterDelete === true,
+    const hasCurrentTask =
+      remoteOp.actionType === ActionType.TASK_SHARED_RESTORE &&
+      (await this.getCurrentEntityState('TASK' as EntityType, conflict.entityId)) !==
+        undefined;
+    const resolvedTaskState = restoreCompensation.resolveRemoteTaskWinCompensationState(
+      conflict,
+      remoteOp,
+      {
+        hasCurrentTask,
+        resolvePayloadKey: (entityType) => this._resolvePayloadKey(entityType),
+      },
     );
-    if (!localRecreation) return undefined;
-
-    const isMoveToProject =
-      remoteOp.actionType === ActionType.TASK_SHARED_MOVE_TO_PROJECT;
-    const isTaskLwwUpdate =
-      remoteOp.actionType === toLwwUpdateActionType('TASK') &&
-      isLwwUpdatePayload(remoteOp.payload);
-    const isAdapterTaskUpdate = [
-      ActionType.TASK_SHARED_UPDATE,
-      ActionType.TASK_UPDATE_UI,
-      ActionType.TASK_SHARED_UPDATE_MULTIPLE,
-      ActionType.TASK_UPDATE_MULTIPLE_SIMPLE,
-    ].includes(remoteOp.actionType);
-    if (!isMoveToProject && !isTaskLwwUpdate && !isAdapterTaskUpdate) {
+    if (!resolvedTaskState) {
       return undefined;
     }
-
-    const localTaskState = { ...extractActionPayload(localRecreation.payload) };
-    delete localTaskState['subTasks'];
-    const remoteActionPayload = extractActionPayload(remoteOp.payload);
-    const targetProjectId = remoteActionPayload['targetProjectId'];
-    let taskState: Record<string, unknown>;
-    if (isMoveToProject) {
-      if (typeof targetProjectId !== 'string') return undefined;
-      // moveToOtherProject carries a full pre-move task snapshot, but only its
-      // target project is an intended task-field change.
-      taskState = { ...localTaskState, projectId: targetProjectId };
-    } else {
-      const payloadKey = this._resolvePayloadKey('TASK' as EntityType);
-      const syntheticDelete: Operation = {
-        ...localRecreation,
-        opType: OpType.Delete,
-        payload: {
-          actionPayload: {
-            [payloadKey]: extractActionPayload(localRecreation.payload),
-          },
-          entityChanges: [],
-        },
-      };
-      const [convertedRemoteOp] = convertLocalDeleteRemoteUpdatesToLww<Operation>(
-        { ...conflict, localOps: [syntheticDelete], remoteOps: [remoteOp] },
-        {
-          payloadKey,
-          toLwwUpdateActionType: (entityType) =>
-            toLwwUpdateActionType(entityType as EntityType),
-          isSingletonEntityId,
-        },
-      );
-      if (!isLwwUpdatePayload(convertedRemoteOp.payload)) return undefined;
-      taskState = { ...extractActionPayload(convertedRemoteOp.payload) };
-      delete taskState['subTasks'];
-
-      // Generic adapter/LWW reconstruction is field-safe only. Relationship
-      // changes require action-specific parent/project ordering support.
-      if (
-        !deepEqual(taskState['projectId'], localTaskState['projectId']) ||
-        !deepEqual(taskState['parentId'], localTaskState['parentId']) ||
-        !deepEqual(taskState['subTaskIds'], localTaskState['subTaskIds'])
-      ) {
-        return undefined;
-      }
-    }
+    const taskState =
+      remoteOp.actionType === ActionType.TASK_SHARED_RESTORE
+        ? await restoreCompensation.normalizeRestoredTaskCompensationState(
+            resolvedTaskState,
+            async (entityType, entityId) =>
+              (await this.getCurrentEntityState(entityType, entityId)) !== undefined,
+          )
+        : resolvedTaskState;
 
     const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
-      OpLog.err(
-        'ConflictResolutionService: Cannot compensate remote TASK winner - no client ID',
+      throw new IncompleteRemoteOperationsError(
+        new Error(
+          'ConflictResolutionService: Cannot compensate remote TASK winner - no client ID',
+        ),
       );
-      return undefined;
     }
     return markLwwDeleteRecreation(
       this.createLWWUpdateOp(
@@ -851,6 +834,19 @@ export class ConflictResolutionService {
   ): Promise<{ localWinOpsCreated: number }> {
     if (conflicts.length === 0 && nonConflictingOps.length === 0) {
       return { localWinOpsCreated: 0 };
+    }
+
+    // Restore actions bypass generic LWW conversion so their archive side
+    // effects survive. Validate that semantic exemption before planning can
+    // reject local intent or persist any remote row.
+    for (const conflict of conflicts) {
+      for (const remoteOp of conflict.remoteOps) {
+        assertTaskRestoreOperationIntegrity(
+          remoteOp,
+          remoteOp.payload,
+          conflict.entityId,
+        );
+      }
     }
 
     OpLog.normal(
@@ -1065,34 +1061,33 @@ export class ConflictResolutionService {
       }
     }
 
-    // A semantic remote TASK winner may not recreate an entity that the
-    // earlier project-delete loser removes on a fresh replay. Re-emit the
-    // remote result as a full local snapshot, then restore its dependents and
-    // relationships. Persist/apply the original remote row first so live and
-    // restart order match.
+    // A semantic remote TASK winner can no-op after a losing local recreation
+    // has already made the root active. Re-emit the winning task as a full
+    // local snapshot, then restore its dependents and relationships. Persist
+    // and apply the original remote row first so archive side effects and
+    // status-blind restart replay stay in the same order.
     for (const resolution of resolutions) {
-      if (
-        resolution.winner !== 'remote' ||
-        !resolution.conflict.localOps.some(
-          (op) =>
-            isLwwUpdatePayload(op.payload) &&
-            op.payload.recreatesEntityAfterDelete === true,
-        )
-      ) {
+      if (resolution.winner !== 'remote') {
         continue;
       }
       for (const remoteOp of resolution.conflict.remoteOps) {
-        const compensationOp =
-          await this._createRemoteWinCompensationForRejectedTaskRecreation(
-            resolution.conflict,
-            remoteOp,
-          );
+        const compensationOp = await this._createRemoteTaskWinCompensation(
+          resolution.conflict,
+          remoteOp,
+        );
         if (!compensationOp) continue;
         newLocalWinOps.push(compensationOp);
         compensationOpIdsToApply.add(compensationOp.id);
         const followUpOps = await this.createTaskRecreationFollowUpOps(compensationOp, {
           ensureRegularProjectMembership:
-            remoteOp.actionType === ActionType.TASK_SHARED_MOVE_TO_PROJECT,
+            remoteOp.actionType === ActionType.TASK_SHARED_MOVE_TO_PROJECT ||
+            remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
+          restoreSubTaskSnapshots:
+            restoreCompensation.buildRestoreSubTaskCompensationSnapshots(
+              resolution.conflict,
+              remoteOp,
+            ),
+          requireComplete: remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
         });
         for (const followUpOp of followUpOps) {
           newLocalWinOps.push(followUpOp);
