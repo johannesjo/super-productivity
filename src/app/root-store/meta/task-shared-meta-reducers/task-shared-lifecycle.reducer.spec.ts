@@ -1075,18 +1075,45 @@ describe('taskSharedLifecycleMetaReducer', () => {
         );
       });
 
-      it('should clear stale repeatCfgId on restore', () => {
+      for (const staleRepeatCfgId of ['DELETED_REPEAT_CFG', 'constructor', '__proto__']) {
+        it(`should clear stale repeatCfgId ${staleRepeatCfgId} on restore`, () => {
+          const testState = createBaseState();
+          (testState as any)[TASK_REPEAT_CFG_FEATURE_NAME] = {
+            ids: [],
+            entities: {},
+          };
+
+          const action = createRestoreAction({
+            id: 'archived-task',
+            projectId: 'project1',
+            tagIds: ['tag1'],
+            repeatCfgId: staleRepeatCfgId,
+          });
+
+          metaReducer(testState, action);
+          expectStateUpdate(
+            {
+              ...expectTaskUpdate('archived-task', { repeatCfgId: undefined }),
+            },
+            action,
+            mockReducer,
+            testState,
+          );
+        });
+      }
+
+      it('should clear a repeatCfgId whose entity has a different id', () => {
         const testState = createBaseState();
         (testState as any)[TASK_REPEAT_CFG_FEATURE_NAME] = {
-          ids: [],
-          entities: {},
+          ids: ['mismatchedCfg'],
+          entities: { mismatchedCfg: { id: 'differentCfg' } },
         };
 
         const action = createRestoreAction({
           id: 'archived-task',
           projectId: 'project1',
           tagIds: ['tag1'],
-          repeatCfgId: 'DELETED_REPEAT_CFG',
+          repeatCfgId: 'mismatchedCfg',
         });
 
         metaReducer(testState, action);

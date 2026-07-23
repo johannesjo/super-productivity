@@ -76,10 +76,24 @@ const normalizeRestoredTask = <T extends TaskEntity | Task>(
 
   // Clear stale repeatCfgId (only present on full Task, not minimal TaskEntity)
   const src = t as Record<string, unknown>;
+  const requestedRepeatCfgId = src['repeatCfgId'];
+  const repeatCfgEntity =
+    typeof requestedRepeatCfgId === 'string'
+      ? (
+          state as RootState & {
+            [TASK_REPEAT_CFG_FEATURE_NAME]?: {
+              entities?: Record<string, unknown>;
+            };
+          }
+        )[TASK_REPEAT_CFG_FEATURE_NAME]?.entities?.[requestedRepeatCfgId]
+      : undefined;
   const repeatCfgId =
-    src['repeatCfgId'] &&
-    (state as any)[TASK_REPEAT_CFG_FEATURE_NAME]?.entities?.[src['repeatCfgId'] as string]
-      ? src['repeatCfgId']
+    typeof repeatCfgEntity === 'object' &&
+    repeatCfgEntity !== null &&
+    !Array.isArray(repeatCfgEntity) &&
+    Object.prototype.hasOwnProperty.call(repeatCfgEntity, 'id') &&
+    (repeatCfgEntity as Record<string, unknown>)['id'] === requestedRepeatCfgId
+      ? requestedRepeatCfgId
       : undefined;
 
   return { ...t, projectId, tagIds, repeatCfgId } as T;
