@@ -4,9 +4,22 @@ import { OperationIntegrityError } from '../core/errors/sync-errors';
 import { toLwwUpdateActionType } from '../core/lww-update-action-types';
 import { SINGLETON_ENTITY_ID } from '../core/entity-registry';
 import { ActionType, OpType } from '../core/operation.types';
+import { DEFAULT_TASK } from '../../features/tasks/task.model';
 
 describe('assertDecryptedOpMetadataIntegrity', () => {
   const LWW_TASK = toLwwUpdateActionType('TASK');
+
+  const createTaskRestoreSnapshot = (
+    id: string,
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    ...DEFAULT_TASK,
+    id,
+    title: 'Restored task',
+    projectId: 'project-1',
+    created: 1,
+    ...overrides,
+  });
 
   const createOp = (over: Partial<SyncOperation>): SyncOperation => ({
     id: 'op-1',
@@ -132,6 +145,31 @@ describe('assertDecryptedOpMetadataIntegrity', () => {
         assertDecryptedOpMetadataIntegrity(op, authenticatedPayload),
       ).toThrowError(OperationIntegrityError);
     });
+
+    it('throws when an authenticated restore contains a malformed child snapshot', () => {
+      const op = createOp({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        entityType: 'TASK',
+      });
+      const authenticatedPayload = {
+        actionPayload: {
+          task: createTaskRestoreSnapshot('task-123', {
+            subTaskIds: ['child-1'],
+          }),
+          subTasks: [
+            createTaskRestoreSnapshot('child-1', {
+              parentId: [],
+            }),
+          ],
+        },
+        entityChanges: [],
+      };
+
+      expect(() =>
+        assertDecryptedOpMetadataIntegrity(op, authenticatedPayload),
+      ).toThrowError(OperationIntegrityError);
+    });
   });
 
   describe('accepts legitimate ops (no false positives)', () => {
@@ -162,17 +200,24 @@ describe('assertDecryptedOpMetadataIntegrity', () => {
       ).not.toThrow();
     });
 
-    it('accepts a restore whose authenticated task identity matches its metadata', () => {
+    it('accepts a schema-version-1 restore with a complete legacy task snapshot', () => {
       const op = createOp({
         actionType: ActionType.TASK_SHARED_RESTORE,
         opType: OpType.Update,
         entityType: 'TASK',
         entityIds: ['task-123'],
+        schemaVersion: 1,
       });
       const authenticatedPayload = {
         actionPayload: {
-          task: { id: 'task-123' },
-          subTasks: [],
+          task: createTaskRestoreSnapshot('task-123', {
+            subTaskIds: ['child-1'],
+          }),
+          subTasks: [
+            createTaskRestoreSnapshot('child-1', {
+              parentId: 'task-123',
+            }),
+          ],
         },
         entityChanges: [],
       };

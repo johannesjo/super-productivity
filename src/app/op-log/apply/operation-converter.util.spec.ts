@@ -2,8 +2,21 @@ import { convertOpToAction, ACTION_TYPE_ALIASES } from './operation-converter.ut
 import { ActionType, Operation, OpType } from '../core/operation.types';
 import { SyncLog } from '../../core/log';
 import { OperationIntegrityError } from '../core/errors/sync-errors';
+import { DEFAULT_TASK } from '../../features/tasks/task.model';
 
 describe('operation-converter utility', () => {
+  const createTaskRestoreSnapshot = (
+    id: string,
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    ...DEFAULT_TASK,
+    id,
+    title: 'Restored task',
+    projectId: 'project-1',
+    created: 1,
+    ...overrides,
+  });
+
   const createMockOperation = (overrides: Partial<Operation> = {}): Operation => ({
     id: 'op-123',
     actionType: '[Task] Update Task' as ActionType,
@@ -134,6 +147,92 @@ describe('operation-converter utility', () => {
           actionPayload: {
             task: { id: 'task-envelope' },
             subTasks: [],
+          },
+          entityChanges: [],
+        },
+      });
+
+      expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+    });
+
+    (
+      [
+        ['title', 42],
+        ['projectId', null],
+        ['timeEstimate', Number.POSITIVE_INFINITY],
+        ['timeSpent', Number.NaN],
+        ['created', Number.NEGATIVE_INFINITY],
+        ['isDone', 'false'],
+        ['tagIds', 'tag-1'],
+        ['subTaskIds', {}],
+        ['timeSpentOnDay', []],
+        ['attachments', {}],
+      ] as const
+    ).forEach(([field, invalidValue]) => {
+      it(`should reject a restore whose root task has invalid ${field}`, () => {
+        const op = createMockOperation({
+          actionType: ActionType.TASK_SHARED_RESTORE,
+          entityId: 'task-envelope',
+          payload: {
+            actionPayload: {
+              task: createTaskRestoreSnapshot('task-envelope', {
+                [field]: invalidValue,
+              }),
+              subTasks: [],
+            },
+            entityChanges: [],
+          },
+        });
+
+        expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+      });
+    });
+
+    it('should reject a restore with an incomplete child snapshot', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        payload: {
+          actionPayload: {
+            task: createTaskRestoreSnapshot('task-envelope', {
+              subTaskIds: ['child-1'],
+            }),
+            subTasks: [{ id: 'child-1' }],
+          },
+          entityChanges: [],
+        },
+      });
+
+      expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+    });
+
+    it('should reject reserved prototype keys in task references', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        payload: {
+          actionPayload: {
+            task: createTaskRestoreSnapshot('task-envelope', {
+              tagIds: ['constructor'],
+              subTaskIds: ['__proto__'],
+            }),
+            subTasks: [],
+          },
+          entityChanges: [],
+        },
+      });
+
+      expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+    });
+
+    it('should reject a reserved prototype key as a child task id', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        payload: {
+          actionPayload: {
+            task: createTaskRestoreSnapshot('task-envelope'),
+            subTasks: [createTaskRestoreSnapshot('toString')],
           },
           entityChanges: [],
         },

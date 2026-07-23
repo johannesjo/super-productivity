@@ -19,6 +19,45 @@ const isValidDbDate = (value: unknown): value is string =>
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isSafeEntityId = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  !Object.prototype.hasOwnProperty.call(Object.prototype, value);
+
+const isSafeEntityIdArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every(isSafeEntityId);
+
+/**
+ * Semantic restores replace complete task entities. Keep this deliberately
+ * narrower than full persisted-model validation so legacy snapshots remain
+ * accepted while incomplete objects cannot erase required task fields.
+ */
+const isCompleteTaskRestoreSnapshot = (
+  value: unknown,
+): value is Record<string, unknown> => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    isSafeEntityId(value['id']) &&
+    typeof value['title'] === 'string' &&
+    typeof value['projectId'] === 'string' &&
+    isFiniteNumber(value['timeEstimate']) &&
+    isFiniteNumber(value['timeSpent']) &&
+    isFiniteNumber(value['created']) &&
+    typeof value['isDone'] === 'boolean' &&
+    isSafeEntityIdArray(value['tagIds']) &&
+    isSafeEntityIdArray(value['subTaskIds']) &&
+    isRecord(value['timeSpentOnDay']) &&
+    Array.isArray(value['attachments']) &&
+    (value['parentId'] === undefined || isSafeEntityId(value['parentId']))
+  );
+};
+
 /**
  * Legacy operations did not capture the originating logical day or timezone.
  * UTC cannot recover that lost context, but it gives every replaying client the
@@ -88,12 +127,11 @@ export const assertTaskRestoreOperationIntegrity = (
       (Array.isArray(op.entityIds) &&
         op.entityIds.length === 1 &&
         op.entityIds[0] === entityId)) &&
-    !Object.prototype.hasOwnProperty.call(Object.prototype, entityId) &&
-    typeof task === 'object' &&
-    task !== null &&
-    !Array.isArray(task) &&
-    (task as Record<string, unknown>)['id'] === entityId &&
-    Array.isArray(actionPayload?.['subTasks']);
+    isSafeEntityId(entityId) &&
+    isCompleteTaskRestoreSnapshot(task) &&
+    task['id'] === entityId &&
+    Array.isArray(actionPayload?.['subTasks']) &&
+    actionPayload['subTasks'].every(isCompleteTaskRestoreSnapshot);
 
   if (isValid) {
     return;
