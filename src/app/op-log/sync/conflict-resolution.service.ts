@@ -69,7 +69,11 @@ import {
 } from '../../core/util/vector-clock';
 import { devError } from '../../util/dev-error';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
-import { ENTITY_REGISTRY, isSingletonEntityId } from '../core/entity-registry';
+import {
+  ENTITY_REGISTRY,
+  isLwwPayloadIdCanonical,
+  isSingletonEntityId,
+} from '../core/entity-registry';
 import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { SYNC_LOGGER } from '../core/sync-logger.adapter';
@@ -462,16 +466,35 @@ export class ConflictResolutionService {
     // lwwUpdateMetaReducer bails with "Entity data has no id" when an adapter
     // payload lacks a top-level id; a malformed/partial entityState (e.g. an
     // NgRx selector returning a stripped shape) would silently lose the LWW
-    // write on remote clients. Singletons use the '*' sentinel for entityId
-    // and have no `id` field — injecting `id: '*'` would pollute the singleton
-    // feature state when the consumer reducer spreads entityData. (#7330)
+    // write on remote clients.
+    //
+    // v18.15.0/v18.15.1 also require a matching payload id whenever entityId is
+    // not '*'. Keep that compatibility-only wire field; current receivers strip
+    // it before replacing the singleton feature state. (#7330, #9256)
+    //
+    // This covers EVERY singleton, not just TIME_TRACKING: no shipped singleton
+    // producer emits the '*' sentinel (GLOBAL_CONFIG addresses ops by section
+    // key, MENU_TREE by tree name / folderId, TIME_TRACKING by a composite
+    // TYPE:id:date key), so the else branch below is unreachable in practice and
+    // kept only as a guard for a future whole-state '*' producer.
+    //
+    // SUNSET: this `id` is purely for shipped v18.15.0/v18.15.1 receivers, which
+    // reject composite-id singleton ops that lack it. It rides inside the
+    // AES-GCM payload (so those receivers see an authenticated, matching id) and
+    // never touches the plaintext `op.entityIds`/vector-clock footprint. Remove
+    // it (and the receiver-side strip in operation-converter.util.ts) once those
+    // two versions are no longer in the active fleet — there is no schema bump to
+    // gate on, so this is a manual, fleet-age-based cleanup, not automatic.
     const basePayload =
-      entityState && typeof entityState === 'object'
+      entityState !== null && typeof entityState === 'object'
         ? (entityState as Record<string, unknown>)
         : {};
-    const actionPayload = isSingletonEntityId(entityId)
-      ? basePayload
-      : { ...basePayload, id: entityId };
+    const actionPayload = { ...basePayload };
+    if (isLwwPayloadIdCanonical(entityType) || !isSingletonEntityId(entityId)) {
+      actionPayload['id'] = entityId;
+    } else {
+      delete actionPayload['id'];
+    }
     // Compute the move footprint once and carry it BOTH in the plaintext
     // envelope (op.entityIds — the server needs it for its indexed conflict
     // detection and cannot read the encrypted payload) AND inside the
