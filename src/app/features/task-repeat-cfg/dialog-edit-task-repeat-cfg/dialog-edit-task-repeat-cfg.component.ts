@@ -219,6 +219,7 @@ export class DialogEditTaskRepeatCfgComponent {
     repeatCfg?: TaskRepeatCfg;
     targetDate?: string;
     defaultRemindOption?: TaskReminderOptionId;
+    isRemoveConfirmationRequired?: boolean;
   }>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
@@ -533,9 +534,12 @@ export class DialogEditTaskRepeatCfgComponent {
 
   remove(): void {
     const currentRepeatCfg = this.repeatCfg();
-    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(
-      exists((currentRepeatCfg as TaskRepeatCfg).id),
-    );
+    const repeatCfgId = exists((currentRepeatCfg as TaskRepeatCfg).id);
+    if (this._data.isRemoveConfirmationRequired !== false) {
+      this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(repeatCfgId);
+    } else {
+      this._taskRepeatCfgService.deleteTaskRepeatCfg(repeatCfgId);
+    }
     this.close();
   }
 

@@ -169,11 +169,28 @@ describe('DialogScheduleTaskComponent — repeat button', () => {
 
       expect(matDialogSpy.open).toHaveBeenCalledTimes(1);
       const dialogArg = matDialogSpy.open.calls.mostRecent().args[1] as {
-        data: { task: TaskCopy; targetDate: string };
+        data: {
+          task: TaskCopy;
+          targetDate: string;
+          isRemoveConfirmationRequired: boolean;
+        };
       };
       expect(dialogArg.data.task).toBe(liveTask);
       expect(dialogArg.data.task.repeatCfgId).toBe('cfg-1');
       expect(dialogArg.data.targetDate).toBe(getDbDateStr(new Date(liveTask.created)));
+      expect(dialogArg.data.isRemoveConfirmationRequired).toBeFalse();
+    });
+
+    it('keeps remove confirmation when the task was already repeating on open', async () => {
+      const repeatingTask = baseTask({ repeatCfgId: 'cfg-1' });
+      const c = await setup({ task: repeatingTask }, { liveTask: repeatingTask });
+
+      await c.openRepeatDialog();
+
+      const dialogArg = matDialogSpy.open.calls.mostRecent().args[1] as {
+        data: { isRemoveConfirmationRequired: boolean };
+      };
+      expect(dialogArg.data.isRemoveConfirmationRequired).toBeTrue();
     });
   });
 });
