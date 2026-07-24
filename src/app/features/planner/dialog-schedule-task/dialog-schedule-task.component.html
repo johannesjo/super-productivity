@@ -17,6 +17,7 @@
   }
 
   @if (canRepeat) {
+    @let repeatLabel = repeatCfgLabel();
     <button
       type="button"
       mat-stroked-button
@@ -25,7 +26,12 @@
     >
       <mat-icon>repeat</mat-icon>
       {{ T.F.TASK.D_SCHEDULE_TASK.REPEAT | translate }}:
-      {{ repeatCfgLabel() || (T.F.TASK.D_SCHEDULE_TASK.DOES_NOT_REPEAT | translate) }}
+      <span
+        class="repeat-value"
+        [class.repeat-value--empty]="!repeatLabel"
+      >
+        {{ repeatLabel || (T.F.TASK.D_SCHEDULE_TASK.DOES_NOT_REPEAT | translate) }}
+      </span>
     </button>
   }
 
