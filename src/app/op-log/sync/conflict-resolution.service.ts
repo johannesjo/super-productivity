@@ -1216,6 +1216,8 @@ export class ConflictResolutionService {
         );
         const restoreDependencyOps =
           replayableRestoreDependencyOpsByRestoreOpId.get(remoteOp.id) ?? [];
+        const candidateRestoreDependencyOps =
+          restoreDependencyPlan.candidateCreateOpsByRestoreOpId.get(remoteOp.id) ?? [];
         const restoreDependencyEntityKeys = new Set(
           restoreDependencyOps.map((op) => toEntityKey(op.entityType, op.entityId)),
         );
@@ -1225,6 +1227,28 @@ export class ConflictResolutionService {
         ): Promise<boolean> =>
           restoreDependencyEntityKeys.has(toEntityKey(entityType, entityId)) ||
           (await this.getCurrentEntityState(entityType, entityId)) !== undefined;
+        // A later same-batch create would make normalization lossy here. Keep
+        // the original remote winner instead of uploading a stripped snapshot.
+        const hasDeferredRestoreDependency = (
+          await Promise.all(
+            candidateRestoreDependencyOps.map(async (op) => {
+              if (await restoreEntityExists(op.entityType, op.entityId)) {
+                return false;
+              }
+              const existing = await this.opLogStore.getOpById(op.id);
+              return (
+                !existing ||
+                (existing.source === 'remote' &&
+                  existing.applicationStatus === 'pending' &&
+                  existing.rejectedAt === undefined &&
+                  existing.reducerRejectedAt === undefined)
+              );
+            }),
+          )
+        ).some(Boolean);
+        if (hasDeferredRestoreDependency) {
+          continue;
+        }
         const compensationOp = await this._createRemoteTaskWinCompensation(
           resolution.conflict,
           remoteOp,

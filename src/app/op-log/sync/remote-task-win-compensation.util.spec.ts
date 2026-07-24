@@ -1,4 +1,5 @@
 import {
+  buildRestoreDependencyPlan,
   buildRestoreSubTaskCompensationSnapshots,
   findRestoreDependencyCreateOps,
   normalizeRestoredTaskCompensationState,
@@ -203,6 +204,18 @@ describe('remote task win compensation', () => {
         [tagCreate, tagUpdate, remoteRestore],
       ),
     ).toEqual([]);
+    const updatedDependencyPlan = buildRestoreDependencyPlan(
+      [{ winner: 'remote', conflict }],
+      [tagCreate, tagUpdate],
+      () => 'tag',
+      [tagCreate, tagUpdate, remoteRestore],
+    );
+    expect(updatedDependencyPlan.createOps).toEqual([]);
+    expect(
+      updatedDependencyPlan.candidateCreateOpsByRestoreOpId
+        .get(remoteRestore.id)
+        ?.map(({ id }) => id),
+    ).toEqual([tagCreate.id]);
 
     const taskAdd: Operation = {
       ...operation('task-add', ActionType.TASK_SHARED_ADD, {
@@ -254,6 +267,28 @@ describe('remote task win compensation', () => {
         [projectCreate, remoteRestore, laterRestore],
       ),
     ).toEqual([]);
+
+    const dependencyPlan = buildRestoreDependencyPlan(
+      [
+        { winner: 'remote', conflict },
+        {
+          winner: 'remote',
+          conflict: { ...conflict, remoteOps: [laterRestore] },
+        },
+      ],
+      [projectCreate],
+      () => 'project',
+      [projectCreate, remoteRestore, laterRestore],
+    );
+    expect(dependencyPlan.createOps).toEqual([]);
+    expect(
+      [...dependencyPlan.candidateCreateOpsByRestoreOpId].map(
+        ([restoreOpId, createOps]) => [restoreOpId, createOps.map(({ id }) => id)],
+      ),
+    ).toEqual([
+      [remoteRestore.id, [projectCreate.id]],
+      [laterRestore.id, [projectCreate.id]],
+    ]);
   });
 
   it('uses the remote child when current state only differs by undo modified time', () => {

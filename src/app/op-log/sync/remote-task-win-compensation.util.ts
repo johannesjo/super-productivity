@@ -159,15 +159,12 @@ const getFirstRestorePosition = (
   return index >= 0 ? { id: batchOps[index].id, index } : undefined;
 };
 
-export const findRestoreDependencyCreateOps = (
+const findRestoreDependencyCreateCandidates = (
   restoreContexts: readonly RestoreContext[],
   candidates: readonly Operation[],
   resolvePayloadKey: (entityType: EntityType) => string,
-  batchOps: readonly Operation[] = candidates,
+  batchOps: readonly Operation[],
 ): Array<Operation & { entityId: string }> => {
-  if (restoreContexts.length !== 1) {
-    return [];
-  }
   const referenceKeys = getRestoreReferenceKeys(restoreContexts);
   const firstRestorePosition = getFirstRestorePosition(restoreContexts, batchOps);
   if (!firstRestorePosition) {
@@ -179,15 +176,6 @@ export const findRestoreDependencyCreateOps = (
       batchOpIndexById.set(op.id, index);
     }
   });
-  const batchOpIdsByEntityKey = new Map<string, Set<string>>();
-  for (const batchOp of batchOps.slice(0, firstRestorePosition.index)) {
-    for (const entityId of getOpEntityIds(batchOp)) {
-      const entityKey = toEntityKey(batchOp.entityType, entityId);
-      const opIds = batchOpIdsByEntityKey.get(entityKey) ?? new Set<string>();
-      opIds.add(batchOp.id);
-      batchOpIdsByEntityKey.set(entityKey, opIds);
-    }
-  }
 
   return candidates.filter((op): op is Operation & { entityId: string } => {
     const entityIds = getOpEntityIds(op);
@@ -203,6 +191,40 @@ export const findRestoreDependencyCreateOps = (
     ) {
       return false;
     }
+    const entity = extractActionPayload(op.payload)[resolvePayloadKey(op.entityType)];
+    return isRecord(entity) && entity['id'] === op.entityId;
+  });
+};
+
+export const findRestoreDependencyCreateOps = (
+  restoreContexts: readonly RestoreContext[],
+  candidates: readonly Operation[],
+  resolvePayloadKey: (entityType: EntityType) => string,
+  batchOps: readonly Operation[] = candidates,
+): Array<Operation & { entityId: string }> => {
+  if (restoreContexts.length !== 1) {
+    return [];
+  }
+  const firstRestorePosition = getFirstRestorePosition(restoreContexts, batchOps);
+  if (!firstRestorePosition) {
+    return [];
+  }
+  const batchOpIdsByEntityKey = new Map<string, Set<string>>();
+  for (const batchOp of batchOps.slice(0, firstRestorePosition.index)) {
+    for (const entityId of getOpEntityIds(batchOp)) {
+      const entityKey = toEntityKey(batchOp.entityType, entityId);
+      const opIds = batchOpIdsByEntityKey.get(entityKey) ?? new Set<string>();
+      opIds.add(batchOp.id);
+      batchOpIdsByEntityKey.set(entityKey, opIds);
+    }
+  }
+
+  return findRestoreDependencyCreateCandidates(
+    restoreContexts,
+    candidates,
+    resolvePayloadKey,
+    batchOps,
+  ).filter((op) => {
     const entityId = op.entityId;
     const batchOpIds = batchOpIdsByEntityKey.get(toEntityKey(op.entityType, entityId));
     // Hoisting past another op for the same entity would change server order
@@ -210,8 +232,7 @@ export const findRestoreDependencyCreateOps = (
     if (batchOpIds?.size !== 1 || !batchOpIds.has(op.id)) {
       return false;
     }
-    const entity = extractActionPayload(op.payload)[resolvePayloadKey(op.entityType)];
-    return isRecord(entity) && entity['id'] === op.entityId;
+    return true;
   });
 };
 
@@ -219,6 +240,10 @@ export interface RestoreDependencyPlan {
   createOps: Array<Operation & { entityId: string }>;
   createOpIds: ReadonlySet<string>;
   createOpsByRestoreOpId: ReadonlyMap<string, Array<Operation & { entityId: string }>>;
+  candidateCreateOpsByRestoreOpId: ReadonlyMap<
+    string,
+    Array<Operation & { entityId: string }>
+  >;
   subTaskSnapshotsByOpId: ReadonlyMap<string, RestoreSubTaskCompensationSnapshots>;
   firstRestoreOpId?: string;
 }
@@ -273,6 +298,10 @@ export const buildRestoreDependencyPlan = (
     string,
     Array<Operation & { entityId: string }>
   >();
+  const candidateCreateOpsByRestoreOpId = new Map<
+    string,
+    Array<Operation & { entityId: string }>
+  >();
   for (const restoreContext of restoreContexts) {
     const referenceKeys = getRestoreReferenceKeys([restoreContext]);
     createOpsByRestoreOpId.set(
@@ -281,11 +310,21 @@ export const buildRestoreDependencyPlan = (
         referenceKeys.has(toEntityKey(op.entityType, op.entityId)),
       ),
     );
+    candidateCreateOpsByRestoreOpId.set(
+      restoreContext.remoteOp.id,
+      findRestoreDependencyCreateCandidates(
+        [restoreContext],
+        candidates,
+        resolvePayloadKey,
+        batchOps,
+      ),
+    );
   }
   return {
     createOps,
     createOpIds: new Set(createOps.map((op) => op.id)),
     createOpsByRestoreOpId,
+    candidateCreateOpsByRestoreOpId,
     subTaskSnapshotsByOpId,
     firstRestoreOpId: getFirstRestorePosition(restoreContexts, batchOps)?.id,
   };

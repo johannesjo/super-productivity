@@ -12,7 +12,10 @@ import {
   PROJECT_FEATURE_NAME,
   projectReducer,
 } from '../../../features/project/store/project.reducer';
-import { addProject } from '../../../features/project/store/project.actions';
+import {
+  addProject,
+  updateProject,
+} from '../../../features/project/store/project.actions';
 import { DEFAULT_PROJECT } from '../../../features/project/project.const';
 import { TAG_FEATURE_NAME, tagReducer } from '../../../features/tag/store/tag.reducer';
 import { addTag } from '../../../features/tag/store/tag.actions';
@@ -36,6 +39,7 @@ import { createCombinedTaskSharedMetaReducer } from '../../../root-store/meta/ta
 import { createBaseState } from '../../../root-store/meta/task-shared-meta-reducers/test-utils';
 import { lwwUpdateMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { appStateFeatureKey } from '../../../root-store/app-state/app-state.reducer';
 import { RootState } from '../../../root-store/root-state';
 import { ArchiveOperationHandler } from '../../apply/archive-operation-handler.service';
 import { OperationApplierService } from '../../apply/operation-applier.service';
@@ -183,6 +187,11 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     }
     initialState = {
       ...baseState,
+      [appStateFeatureKey]: {
+        ...baseState[appStateFeatureKey],
+        todayStr: RESTORE_DAY,
+        startOfNextDayDiffMs: 0,
+      },
       tasks: {
         ...baseState.tasks,
         ids: [PARENT_ID, SUBTASK_ID],
@@ -914,5 +923,134 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     expect(
       dependencyProjection(replay(dependencyInitialState, storedOperations)),
     ).toEqual(expectedProjection);
+  });
+
+  it('does not persist lossy compensation when multiple restores share a pending dependency', async () => {
+    const localClient = new TestClient(LOCAL_CLIENT_ID);
+    const dependencyClient = new TestClient('dependency-client');
+    const localRoot: Task = {
+      ...deletedParent,
+      subTaskIds: [],
+      tagIds: [],
+      repeatCfgId: undefined,
+    };
+    const rootOnlyInitialState: RootState = {
+      ...initialState,
+      tasks: {
+        ...initialState.tasks,
+        ids: [PARENT_ID],
+        entities: { [PARENT_ID]: localRoot },
+      },
+    };
+    const deleteAction = TaskSharedActions.deleteTask({
+      task: { ...localRoot, subTasks: [] },
+    }) as PersistentAction;
+    const localUndoAction = TaskSharedActions.restoreDeletedTask({
+      task: { ...localRoot, title: 'Local undo', subTasks: [] },
+      projectContext: {
+        projectId: 'project1',
+        taskIdsForProject: [PARENT_ID],
+        taskIdsForProjectBacklog: [],
+      },
+      tagTaskIdMap: {},
+      deletedTaskEntities: {
+        [PARENT_ID]: { ...localRoot, title: 'Local undo' },
+      },
+    }) as PersistentAction;
+    const localDelete = captureOperation(deleteAction, localClient, 1_000);
+    const localUndo = captureOperation(localUndoAction, localClient, 1_500);
+    const projectCreate = captureOperation(
+      addProject({
+        project: {
+          ...DEFAULT_PROJECT,
+          id: RESTORE_PROJECT_ID,
+          title: 'Restore project',
+          taskIds: [],
+          backlogTaskIds: [],
+        },
+      }) as PersistentAction,
+      dependencyClient,
+      1_700,
+    );
+    const projectUpdate = captureOperation(
+      updateProject({
+        project: {
+          id: RESTORE_PROJECT_ID,
+          changes: { title: 'Updated restore project' },
+        },
+      }) as PersistentAction,
+      dependencyClient,
+      1_800,
+    );
+    const createRemoteRestore = (
+      client: TestClient,
+      title: string,
+      timestamp: number,
+    ): Operation =>
+      captureOperation(
+        TaskSharedActions.restoreTask({
+          task: { ...localRoot, title, projectId: RESTORE_PROJECT_ID },
+          subTasks: [],
+          restoreToToday: {
+            today: RESTORE_DAY,
+            startOfNextDayDiffMs: 0,
+          },
+        }) as PersistentAction,
+        client,
+        timestamp,
+      );
+    const remoteRestores = [
+      createRemoteRestore(
+        new TestClient(REMOTE_CLIENT_ID),
+        'First remote restore',
+        2_000,
+      ),
+      createRemoteRestore(
+        new TestClient('second-restore-client'),
+        'Second remote restore',
+        2_100,
+      ),
+    ];
+
+    localState = reducer(rootOnlyInitialState, deleteAction);
+    localState = reducer(localState, localUndoAction);
+    await opLogStore.append(localDelete, 'local');
+    await opLogStore.append(localUndo, 'local');
+
+    await resolver.autoResolveConflictsLWW(
+      remoteRestores.map((remoteRestore) => ({
+        entityType: 'TASK',
+        entityId: PARENT_ID,
+        localOps: [localDelete, localUndo],
+        remoteOps: [remoteRestore],
+        suggestedResolution: 'manual',
+      })),
+      [projectCreate, projectUpdate],
+      {
+        remoteOpsInOrder: [projectCreate, projectUpdate, ...remoteRestores],
+      },
+    );
+
+    const storedOperations = (await opLogStore.getOpsAfterSeq(0)).map(({ op }) => op);
+    const rootCompensations = storedOperations.filter(
+      (op) =>
+        op.entityId === PARENT_ID &&
+        isLwwUpdatePayload(op.payload) &&
+        op.payload.recreatesEntityAfterDelete === true &&
+        op.payload.lwwUpdateMode === 'replace',
+    );
+    expect(rootCompensations).toEqual([]);
+    expect(localState.projects.entities[RESTORE_PROJECT_ID]).toEqual(
+      jasmine.objectContaining({
+        id: RESTORE_PROJECT_ID,
+        title: 'Updated restore project',
+      }),
+    );
+    expect(localState.tasks.entities[PARENT_ID]?.projectId).toBe('project1');
+    const restartedState = replay(rootOnlyInitialState, storedOperations);
+    expect(restartedState.projects.entities[RESTORE_PROJECT_ID]?.title).toBe(
+      'Updated restore project',
+    );
+    expect(restartedState.tasks.entities[PARENT_ID]?.projectId).toBe('project1');
   });
 });
