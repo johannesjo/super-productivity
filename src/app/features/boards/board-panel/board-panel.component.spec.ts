@@ -896,6 +896,41 @@ describe('BoardPanelComponent - drop()', () => {
     expect(tagsArg).toEqual(['other', 'need']);
   });
 
+  // TODAY_TAG is selectable in the board tag picker (isShowMyDayTag), but it is
+  // virtual — writing it to task.tagIds violates ARCHITECTURE-DECISIONS #2 and
+  // syncs the corruption to every device.
+  it('cross-panel drop never writes the virtual TODAY_TAG into the task', async () => {
+    // Arrange
+    await setup([]);
+    const panelCfg = {
+      id: 'target',
+      title: 'Target',
+      taskIds: [],
+      includedTagIds: [TODAY_TAG.id, 'need'],
+      excludedTagIds: [],
+      taskDoneState: 1,
+      scheduledState: 1,
+      isParentTasksOnly: false,
+      projectIds: [''],
+    } as BoardPanelCfg;
+    fixture.componentRef.setInput('panelCfg', panelCfg);
+    fixture.detectChanges();
+
+    const task = mkTask({ id: 't1', tagIds: ['other'] });
+
+    // Act
+    await component.drop(mkDropEvent({ panelCfg, task }));
+
+    // Assert — only the real required tag is applied
+    expect(updateTagsSpy).toHaveBeenCalledTimes(1);
+    const [, tagsArg] = updateTagsSpy.calls.mostRecent().args;
+    expect(tagsArg).toEqual(['other', 'need']);
+  });
+
+  // The AND-exclude list contains My Day, which `doesTaskMatchPanel` can never
+  // see on a task — so that exclusion is already inert and no real tag ('x'/'y')
+  // may be stripped to satisfy it. Only the legacy TODAY_TAG on the task itself
+  // and the missing required tag are rewritten.
   it('adds an existing task by rewriting real tags without updating board order', async () => {
     const task = mkTask({
       id: 't1',
@@ -924,7 +959,34 @@ describe('BoardPanelComponent - drop()', () => {
       isNewTask: false,
     });
 
-    expect(updateTagsSpy).toHaveBeenCalledOnceWith(task, ['y', 'keep', 'need']);
+    expect(updateTagsSpy).toHaveBeenCalledOnceWith(task, ['x', 'y', 'keep', 'need']);
     expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('never writes the virtual TODAY_TAG into a task when the column requires My Day', async () => {
+    const task = mkTask({ id: 't1', tagIds: ['keep'] });
+    await setup([task]);
+    const panelCfg = {
+      id: 'target',
+      title: 'Target',
+      taskIds: [],
+      includedTagIds: [TODAY_TAG.id, 'need'],
+      includedTagsMatch: 'all',
+      excludedTagIds: [],
+      taskDoneState: 1,
+      scheduledState: 3,
+      isParentTasksOnly: false,
+      projectIds: [''],
+    } as BoardPanelCfg;
+    fixture.componentRef.setInput('panelCfg', panelCfg);
+    fixture.detectChanges();
+
+    await component.afterTaskAdd({
+      taskId: task.id,
+      isAddToBottom: false,
+      isNewTask: false,
+    });
+
+    expect(updateTagsSpy).toHaveBeenCalledOnceWith(task, ['keep', 'need']);
   });
 });

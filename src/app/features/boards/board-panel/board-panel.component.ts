@@ -53,7 +53,6 @@ import {
   moveProjectTaskToRegularListAuto,
 } from '../../project/store/project.actions';
 import { TaskAddEvent } from '../../tasks/add-task-bar/add-task-bar.component';
-import { TODAY_TAG } from '../../tag/tag.const';
 
 @Component({
   selector: 'board-panel',
@@ -274,14 +273,7 @@ export class BoardPanelComponent {
         return;
       }
 
-      const tagFilterCfg = {
-        includedTagIds: panelCfg.includedTagIds.filter((id) => id !== TODAY_TAG.id),
-        includedTagsMatch: panelCfg.includedTagsMatch,
-        excludedTagIds: panelCfg.excludedTagIds.filter((id) => id !== TODAY_TAG.id),
-        excludedTagsMatch: panelCfg.excludedTagsMatch,
-      };
-      const currentTagIds = (task.tagIds || []).filter((id) => id !== TODAY_TAG.id);
-      const newTagIds = unique(rewriteTagIdsForPanel(currentTagIds, tagFilterCfg));
+      const newTagIds = unique(rewriteTagIdsForPanel(task.tagIds || [], panelCfg));
 
       if (!fastArrayCompare(task.tagIds || [], newTagIds)) {
         this.taskService.updateTags(task, newTagIds);
