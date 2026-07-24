@@ -6,6 +6,7 @@ import {
   OPS_INDEXES,
 } from './db-keys.const';
 import { deleteDB, openDB } from 'idb';
+import { isIdbVersionError } from './op-log-errors.const';
 import { OpType } from '../core/operation.types';
 
 describe('runDbUpgrade', () => {
@@ -313,9 +314,30 @@ describe('runDbUpgrade', () => {
         });
         currentDb.close();
 
-        await expectAsync(openDB(dbName, 9)).toBeRejectedWith(
-          jasmine.objectContaining({ name: 'VersionError' }),
+        // One open, both assertions. On the success path the connection is
+        // closed before being discarded, so a regression that lets the
+        // downgrade through fails on the expectation rather than hanging the
+        // `finally`'s deleteDB on an open handle.
+        const rejection = await openDB(dbName, 9).then(
+          (db) => {
+            db.close();
+            return null;
+          },
+          (e: unknown) => e,
         );
+
+        expect(rejection).toEqual(jasmine.objectContaining({ name: 'VersionError' }));
+        // #9187: the rejection an old reader actually gets must be the one the
+        // user-facing classifier recognises, or the dialog falls back to
+        // "your storage may need to be cleared".
+        //
+        // Scope of this oracle: a real downgrade through `openDB`, but on the
+        // fake-indexeddb engine `src/test.ts` installs — NOT Blink. Verified
+        // separately against Chromium 149, which returns
+        //   name: 'VersionError', instanceof DOMException && instanceof Error,
+        //   message: 'The requested version (7) is less than the existing version (10).'
+        // — byte-identical to the message in the #9187 report.
+        expect(isIdbVersionError(rejection)).toBe(true);
       } finally {
         await deleteDB(dbName);
       }

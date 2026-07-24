@@ -949,8 +949,10 @@
           "RE_PLAN_ALL": "Reschedule all"
         }
       },
+      "DAY_LOAD": "Planned: {{planned}} / Available: {{available}}",
       "EDIT_REPEATED_TASK": "Edit recurring task \"{{taskName}}\"",
       "NO_TASKS": "No tasks",
+      "PLANNED_LOAD": "Planned: {{planned}}",
       "PLAN_VIEW": {
         "NO_DEADLINES": "No deadlines",
         "NO_SCHEDULED_ITEMS": "No scheduled items"
@@ -1145,6 +1147,10 @@
       "INSERT_BEFORE": "Before",
       "LUNCH_BREAK": "Lunch Break",
       "MONTH": "Month",
+      "MORE_EVENTS": {
+        "ONE": "{{count}} more event",
+        "OTHER": "{{count}} more events"
+      },
       "NEXT_DAY": "Next Day",
       "NEXT_MONTH": "Next Month",
       "NEXT_WEEK": "Next Week",
@@ -1471,14 +1477,14 @@
           "ENCRYPTION_DISABLED": "Not encrypted",
           "ENCRYPTION_ENABLED": "Encrypted",
           "IMPORTED_STATE": "After import",
-          "ITEM_1": "All sync history and backups on the server will be permanently deleted",
+          "ITEM_1": "This account's existing sync history will be permanently deleted",
           "ITEM_2": "Your imported data will be uploaded with the new encryption settings",
           "ITEM_3": "All other devices must sync and update their encryption settings to match",
-          "NOTE": "Your local data will be replaced with the imported data regardless of this choice.",
+          "NOTE": "If you continue, the imported data will replace your local data.",
           "NOTE_DISABLING": "Important: Without encryption, anyone with access to your sync server can read your data.",
           "NOTE_ENABLING": "Important: Encryption requires a password. If you forget this password, your data CANNOT be recovered!",
           "TITLE": "Encryption Settings Will Change",
-          "WARNING_TEXT": "The backup you are importing has different encryption settings. Encrypted and unencrypted data cannot coexist on the server, so all server data must be deleted.",
+          "WARNING_TEXT": "This backup uses encryption, while this account's current synced data does not. SuperSync requires encryption; continuing will replace this account's synced state on the server and permanently delete its existing sync history.",
           "WHAT_HAPPENS": "What will happen:"
         },
         "L_ENABLE_COMPRESSION": "Enable compression (faster data transfer)",
@@ -1530,7 +1536,7 @@
           "ENABLE_ENCRYPTION_WARNING": "WARNING: This will permanently delete ALL unencrypted sync data on the server! This is necessary because encrypted operations cannot be mixed with unencrypted ones. If you forget your encryption password, your data cannot be recovered.",
           "ENABLE_ENCRYPTION_WHAT_HAPPENS": "What will happen:",
           "ENCRYPTION_ENCOURAGED": "Encryption is required for SuperSync. Please enable encryption to protect your data.",
-          "ENCRYPTION_SETUP_INTRO": "<strong>SuperSync password-encrypts your data before it leaves your device</strong>, making misuse or leaks of your private data almost impossible.",
+          "ENCRYPTION_SETUP_INTRO": "<strong>SuperSync password-encrypts your data before it leaves your device</strong>, so the contents of your tasks and notes can't be read on the server. Technical details like IDs and timestamps are not encrypted.",
           "ENCRYPTION_WARNING": "WARNING: If you forget your encryption password, your data cannot be recovered. This password is separate from your login password. You must use the same password on all devices.",
           "FORCE_OVERWRITE_CONFIRM": "This will <strong>delete all data on the server</strong> and upload your local data with the new password. Unsynced local changes may be lost. Are you sure you want to continue?",
           "FORCE_OVERWRITE_INFO": "If you can't sync because you don't know the current encryption password, you can overwrite the server with your local data and a new password.",
@@ -1623,7 +1629,7 @@
         "ERROR_PAYLOAD_TOO_LARGE": "Sync Error: Your data is too large to upload.\n\nThis happens when you have many archived tasks. Your data was NOT synced!\n\nPlease contact support for assistance.",
         "ERROR_PERMISSION": "File access denied. Please check your filesystem permissions.",
         "ERROR_PERMISSION_FLATPAK": "File access denied. Grant filesystem permission via Flatseal or use a path inside ~/.var/app/",
-        "ERROR_PERMISSION_SNAP": "File access denied. Run 'snap connect super-productivity:home' or use a path inside ~/snap/super-productivity/common/",
+        "ERROR_PERMISSION_SNAP": "File access denied. Run 'snap connect superproductivity:home' or use a path inside ~/snap/superproductivity/common/",
         "ERROR_REMOTE_FILE_CORRUPTED": "Remote sync data is unreadable (possibly truncated or corrupted). Your local data is safe. You can overwrite the remote with your local data.",
         "ERROR_REMOTE_FILE_EMPTY": "Remote sync file is empty. This can happen after an interrupted sync. Overwrite remote with your local data?",
         "ERROR_REMOTE_FILE_LOCKED": "Remote sync file is locked by the server. This may resolve on the next sync attempt.",
@@ -1814,7 +1820,7 @@
         "NOTES": "Note",
         "PARENT": "Parent",
         "REMINDER": "Reminder",
-        "REPEAT": "Recur",
+        "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
         "SUB_TASKS": "Subtasks ({{nr}})",
         "TIME": "Duration",
@@ -1929,6 +1935,7 @@
         "UNSCHEDULE_ALL": "Unschedule all"
       },
       "D_SCHEDULE_TASK": {
+        "DOES_NOT_REPEAT": "Does not repeat",
         "INFO_OUTSIDE_WORK_HOURS": "Falls outside your configured work hours.",
         "INFO_OVERLAP": "Overlaps with another scheduled task.",
         "QA_NEXT_MONTH": "Schedule next month",
@@ -1936,6 +1943,7 @@
         "QA_TODAY": "Schedule today",
         "QA_TOMORROW": "Schedule tomorrow",
         "REMIND_AT": "Remind at",
+        "REPEAT": "Repeat",
         "RO_1H": "1 hour before it starts",
         "RO_5M": "5 minutes before it starts",
         "RO_10M": "10 minutes before it starts",
@@ -2676,6 +2684,7 @@
     },
     "SHORT_SYNTAX": {
       "HELP": "<p>Here you can control short syntax options when creating a task</p>",
+      "IS_ENABLE_DEADLINE": "Enable deadline short syntax (!<deadline time>)",
       "IS_ENABLE_DUE": "Enable planned at short syntax (@<planned time>)",
       "IS_ENABLE_PROJECT": "Enable project short syntax (+<project>)",
       "IS_ENABLE_TAG": "Enable tag short syntax (#<tag>)",

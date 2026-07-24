@@ -83,7 +83,7 @@
           }
           @if (t.subTasks?.length) {
             @let subTaskTimeSpent = t.subTasks | subTaskTotalTimeSpent;
-            @if (t.timeEstimate || subTaskTimeSpent) {
+            @if (subTaskTimeLeft() || subTaskTimeSpent) {
               <div class="time">
                 <div class="time-val">
                   <mat-icon
@@ -96,7 +96,7 @@
                 <div class="separator">/</div>
                 <div class="time-val">
                   <mat-icon inline="true">hourglass_empty</mat-icon>
-                  {{ t.timeEstimate | msToString }}
+                  {{ subTaskTimeLeft() | msToString }}
                 </div>
               </div>
             }

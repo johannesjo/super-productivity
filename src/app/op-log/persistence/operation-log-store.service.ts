@@ -34,6 +34,7 @@ import {
 import {
   DUPLICATE_OPERATION_ERROR_MSG,
   OPERATION_LOG_STORE_NOT_INITIALIZED,
+  isIdbVersionError,
   isLockRelatedIdbOpenError,
 } from './op-log-errors.const';
 import { runDbUpgrade } from './db-upgrade';
@@ -463,6 +464,12 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       } catch (e) {
         lastError = e;
 
+        // Downgrade barrier: the on-disk version can't change while we run, so
+        // every retry fails identically. Surface it now (#9187).
+        if (isIdbVersionError(e)) {
+          break;
+        }
+
         // Classify the error on the first failure. If it doesn't look
         // lock-related, shrink the retry budget so we fail fast and let the
         // hydrator surface the error instead of hanging for the full window.
@@ -495,7 +502,9 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     // carries the formatted original detail, so logging the wrapper exposes
     // everything we need.
     const err = new IndexedDBOpenError(lastError);
-    Log.err('[OpLogStore] IndexedDB open failed after all retries.', err);
+    // Deliberately does not mention retries: the barrier path stops as soon as
+    // it is hit. `err.message` already names which case this is (#9187).
+    Log.err('[OpLogStore] IndexedDB open failed.', err);
     throw err;
   }
 

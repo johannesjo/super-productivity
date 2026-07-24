@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
@@ -61,6 +62,7 @@ import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
+import { ShortSyntaxSegment, splitTextByRanges } from '../short-syntax-ranges';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 import { MarkdownPasteService } from '../markdown-paste.service';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
@@ -85,6 +87,12 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { DateService } from '../../../core/date/date.service';
 import { MenuTreeService } from '../../menu-tree/menu-tree.service';
 import { SelectOptionRowComponent } from '../../../ui/select-option-row/select-option-row.component';
+
+export interface TaskAddEvent {
+  taskId: string;
+  isAddToBottom: boolean;
+  isNewTask: boolean;
+}
 
 @Component({
   selector: 'add-task-bar',
@@ -147,7 +155,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   planForDay = input<string>();
 
   // Outputs
-  afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
+  afterTaskAdd = output<TaskAddEvent>();
   closed = output<void>();
   done = output<void>();
 
@@ -268,8 +276,59 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   // View children
   inputEl = viewChild<ElementRef<HTMLTextAreaElement>>('inputEl');
   noteEl = viewChild<ElementRef<HTMLTextAreaElement>>('noteEl');
+  highlightEl = viewChild<ElementRef<HTMLElement>>('highlightEl');
   taskAutoCompleteEl = viewChild<MatAutocomplete>('taskAutoCompleteEl');
   actionsComponent = viewChild(AddTaskBarActionsComponent);
+
+  // Segments of the raw input for the highlight overlay behind the textarea.
+  // Ranges are pinned to the text they were parsed from (the parse is async),
+  // so they are only ever applied to that exact text or to the part of a newer
+  // text they cannot have moved in.
+  highlightSegments = computed<ShortSyntaxSegment[]>(() => {
+    const txt = this.stateService.inputTxt();
+    if (!txt || this.isSearchMode()) {
+      return [];
+    }
+    const highlight = this.stateService.syntaxHighlight();
+    if (!highlight || highlight.ranges.length === 0) {
+      return [{ text: txt, type: null }];
+    }
+    if (highlight.forText === txt) {
+      return splitTextByRanges(txt, highlight.ranges);
+    }
+    // The parse is async, so every keystroke renders once with ranges from the
+    // previous text. Dropping them all blanks the highlights for a frame
+    // (visible flicker), so keep the ones the edit cannot have moved: those
+    // that end inside the unchanged common prefix. A highlight is then never
+    // mispositioned, only at most one keystroke stale.
+    let common = 0;
+    const max = Math.min(highlight.forText.length, txt.length);
+    while (common < max && highlight.forText[common] === txt[common]) {
+      common++;
+    }
+    const stillValid = highlight.ranges.filter((r) => r.end <= common);
+    return stillValid.length
+      ? splitTextByRanges(txt, stillValid)
+      : [{ text: txt, type: null }];
+  });
+
+  // The overlay must track the textarea's scroll position (cdkTextareaAutosize
+  // caps growth at 4 rows, after which the field scrolls)
+  syncHighlightScroll(): void {
+    const inputElement = this.inputEl()?.nativeElement;
+    const overlay = this.highlightEl()?.nativeElement;
+    if (inputElement && overlay) {
+      overlay.scrollTop = inputElement.scrollTop;
+    }
+  }
+
+  // Once the field scrolls, the textarea's caret-scroll happens before the
+  // overlay re-renders, so the (scroll)-listener alone would clamp against
+  // still-short overlay content — re-sync after each segments render.
+  private readonly _overlayScrollSyncEffect = afterRenderEffect(() => {
+    this.highlightSegments();
+    this.syncHighlightScroll();
+  });
 
   private _focusTimeout?: number;
   private _autocompleteTimeout?: number;
@@ -552,6 +611,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
             ...quickSettingUpdates,
             title,
             quickSetting: state.repeatQuickSetting,
+            notes: taskData.notes,
             tagIds: taskData.tagIds ?? [],
             defaultEstimate: state.estimate || 0,
             startTime: state.time || undefined,
@@ -566,7 +626,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }
 
-      this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
+      this.afterTaskAdd.emit({
+        taskId,
+        isAddToBottom: this.isAddToBottom(),
+        isNewTask: true,
+      });
       this._resetAfterAdd();
     } finally {
       this._isAddingTask = false;
@@ -610,7 +674,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     const planForDay = this.planForDay();
     let didPlanForDay = false;
 
-    if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
+    if (suggestion.taskId && this.isNoDefaults() && !suggestion.isArchivedTask) {
+      taskId = suggestion.taskId;
+    } else if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
       if (planForDay) {
         await this._planTaskForCurrentDay(suggestion.taskId);
         didPlanForDay = true;
@@ -671,6 +737,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       this.afterTaskAdd.emit({
         taskId,
         isAddToBottom: false,
+        isNewTask: !suggestion.taskId,
       });
     }
 

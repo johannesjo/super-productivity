@@ -33,6 +33,8 @@ import { bulkApplyOperations } from '../apply/bulk-hydration.action';
 import { AppDataComplete } from '../model/model-config';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { IS_ELECTRON } from '../../app.constants';
+import { detectChannel, getAppVersionStr } from '../../util/get-app-version-str';
+import { buildIdbOpenErrorMessage } from './idb-open-error-message';
 import {
   BulkReplayReducerFailure,
   runWithBulkReplayFailureCollector,
@@ -1120,20 +1122,10 @@ export class OperationLogHydratorService {
    * @see https://github.com/johannesjo/super-productivity/issues/6255
    */
   private _showIndexedDBOpenError(error: IndexedDBOpenError): void {
-    // Log full error details to console for debugging (can be copied by users)
-    OpLog.err(
-      'IndexedDB open failed after all retries. Original error:',
-      error.originalError,
-    );
-
-    const originalMsg =
-      error.originalError instanceof Error
-        ? error.originalError.message
-        : String(error.originalError);
-
-    // Hoist platform detection — used in both branches below to avoid computing twice
-    const isFlatpak = IS_ELECTRON && window.ea?.isFlatpak?.();
-    const isSnap = !isFlatpak && IS_ELECTRON && window.ea?.isSnap?.();
+    // Log full error details to console for debugging (can be copied by users).
+    // Deliberately does not mention retries — the barrier path stops as soon as
+    // it is hit (#9187); `error.message` names which case this is.
+    OpLog.err('IndexedDB open failed. Original error:', error.originalError);
 
     // For backing-store errors (common during Linux session startup with autostart),
     // auto-reload once after the user dismisses the dialog. By the time the dialog
@@ -1156,34 +1148,15 @@ export class OperationLogHydratorService {
       }
     }
 
-    // Second failure, or non-backing-store error: show full manual recovery instructions.
-    let message =
-      'Database Error - Cannot Load Data\n\n' +
-      'Super Productivity cannot open its database. ' +
-      'This may be caused by:\n\n' +
-      '- Low disk space\n' +
-      '- Temporary file lock (try closing other tabs)\n' +
-      '- Storage corruption\n\n';
-
-    if (error.isBackingStoreError) {
-      message +=
-        'Recovery steps:\n' +
-        '1. Close ALL browser tabs and windows\n' +
-        '2. Restart the app\n' +
-        (isFlatpak
-          ? '3. If using Linux Flatpak with autostart, try disabling autostart and launching manually\n'
-          : isSnap
-            ? '3. If using Linux Snap, try: snap set core experimental.refresh-app-awareness=true\n'
-            : '3. If using Linux with autostart, try disabling autostart and launching manually\n') +
-        '4. If issue persists, check available disk space\n\n';
-    }
-
-    message +=
-      'If the problem continues after restart, your browser storage may need to be cleared.\n\n' +
-      `Technical details: ${originalMsg}\n\n` +
-      '(Check browser console for full error details)';
-
-    alertDialog(message);
+    // `getAppVersionStr()` rather than the bare version: its channel suffix
+    // (e.g. `18.15.1P` vs `18.15.1W`) is what tells a user WHICH of two copies
+    // they just launched — the central question in a downgrade (#9187).
+    alertDialog(
+      buildIdbOpenErrorMessage(error, {
+        channel: detectChannel(),
+        appVersion: getAppVersionStr(),
+      }),
+    );
   }
 
   /**
