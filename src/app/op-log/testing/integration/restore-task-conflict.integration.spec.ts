@@ -375,34 +375,89 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
 
     const deleteClientProjection = restoredProjection(localState);
     expect(restoredProjection(restartedState)).toEqual(deleteClientProjection);
+  });
 
-    // Reverse delivery: the restore author receives the losing delete and
-    // persists the reconciliation operations needed for status-blind restart.
+  it('re-emits a winning local restore after a remote delete for replay and archive convergence', async () => {
     currentClientId = REMOTE_CLIENT_ID;
-    await opLogStore._clearAllDataForTesting();
-    await archiveDb.saveArchiveYoung(archiveModel([deletedParent, subtask]));
-    await archiveDb.saveArchiveOld(archiveModel([]));
-    localState = reducer(reducer(initialState, deleteAction), restoreAction);
+
+    const deleteClient = new TestClient(LOCAL_CLIENT_ID);
+    const restoreClient = new TestClient(REMOTE_CLIENT_ID);
+    const deleteAction = TaskSharedActions.deleteTask({
+      task: deletedParentWithSubtasks,
+    }) as PersistentAction;
+    const restoreAction = TaskSharedActions.restoreTask({
+      task: deletedParent,
+      subTasks: [subtask],
+      restoreToToday: {
+        today: RESTORE_DAY,
+        startOfNextDayDiffMs: 0,
+      },
+    }) as PersistentAction;
+    const remoteDelete = captureOperation(deleteAction, deleteClient, 1_000);
+    const localRestore = captureOperation(restoreAction, restoreClient, 2_000);
+
+    localState = reducer(localState, restoreAction);
     await archiveHandler.handleOperation(restoreAction);
-    await opLogStore.append(remoteRestore, 'local');
+    await opLogStore.append(localRestore, 'local');
 
     await resolver.autoResolveConflictsLWW([
       {
         entityType: 'TASK',
         entityId: PARENT_ID,
-        localOps: [remoteRestore],
-        remoteOps: [localDelete],
+        localOps: [localRestore],
+        remoteOps: [remoteDelete],
         suggestedResolution: 'manual',
       },
     ]);
 
-    expect(restoredProjection(localState)).toEqual(deleteClientProjection);
     const restoreClientOperations = (await opLogStore.getOpsAfterSeq(0)).map(
       ({ op }) => op,
     );
-    expect(restoredProjection(replay(initialState, restoreClientOperations))).toEqual(
-      deleteClientProjection,
+    const replacementRestore = restoreClientOperations.find(
+      (operation) =>
+        operation.id !== localRestore.id &&
+        operation.actionType === TaskSharedActions.restoreTask.type,
     );
+
+    if (!replacementRestore) {
+      throw new Error('Semantic replacement restore was not persisted');
+    }
+    expect(replacementRestore.payload).toEqual(localRestore.payload);
+    const remoteDeleteIndex = restoreClientOperations.findIndex(
+      ({ id }) => id === remoteDelete.id,
+    );
+    const replacementRestoreIndex = restoreClientOperations.findIndex(
+      ({ id }) => id === replacementRestore.id,
+    );
+    expect(remoteDeleteIndex).toBeGreaterThan(-1);
+    expect(remoteDeleteIndex).toBeLessThan(replacementRestoreIndex);
+
+    const replacementRestoreAction = convertOpToAction(replacementRestore) as ReturnType<
+      typeof TaskSharedActions.restoreTask
+    >;
+    expect(replacementRestoreAction.type).toBe(TaskSharedActions.restoreTask.type);
+    expect(replacementRestoreAction.restoreToToday).toEqual({
+      today: RESTORE_DAY,
+      startOfNextDayDiffMs: 0,
+    });
+    expect(replacementRestoreAction.subTasks.map(({ id }) => id)).toEqual([SUBTASK_ID]);
+
+    const restartedState = replay(initialState, restoreClientOperations);
+    expect(restoredProjection(restartedState)).toEqual(restoredProjection(localState));
+    expect(restartedState.tasks.entities[PARENT_ID]?.subTaskIds).toEqual([SUBTASK_ID]);
+    expect(restartedState.tasks.entities[SUBTASK_ID]?.parentId).toBe(PARENT_ID);
+    expect(restartedState[TAG_FEATURE_NAME].entities[TODAY_TAG.id]?.taskIds).toEqual([
+      PARENT_ID,
+    ]);
+
+    const receivingState = replay(reducer(initialState, deleteAction), [
+      replacementRestore,
+    ]);
+    expect(restoredProjection(receivingState)).toEqual(restoredProjection(localState));
+
+    await archiveDb.saveArchiveYoung(archiveModel([deletedParent]));
+    await archiveDb.saveArchiveOld(archiveModel([subtask]));
+    await archiveHandler.handleOperation(replacementRestoreAction);
     expect((await archiveDb.loadArchiveYoung())?.task.ids).toEqual([]);
     expect((await archiveDb.loadArchiveOld())?.task.ids).toEqual([]);
   });

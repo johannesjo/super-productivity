@@ -2523,11 +2523,12 @@ export class ConflictResolutionService {
   }
 
   /**
-   * Creates a new UPDATE operation to sync local state when local wins LWW.
+   * Creates a replacement operation to sync local state when local wins LWW.
    *
    * The new operation has:
    * - Fresh UUIDv7 ID
-   * - Current entity state from NgRx store
+   * - The original semantic restore payload for the exact restore-vs-delete case,
+   *   otherwise the current entity state from NgRx store
    * - Merged vector clock (local + remote) + increment
    * - Preserved maximum timestamp from local ops (for correct LWW semantics)
    *
@@ -2537,6 +2538,53 @@ export class ConflictResolutionService {
   private async _createLocalWinUpdateOp(
     conflict: EntityConflict,
   ): Promise<Operation | undefined> {
+    const [semanticRestoreOp] = conflict.localOps;
+    const [remoteDeleteOp] = conflict.remoteOps;
+    const remoteDeleteIds = remoteDeleteOp ? getOpEntityIds(remoteDeleteOp) : [];
+    // Mixed histories need the generic snapshot path so a stale restore payload
+    // cannot overwrite a later local edit or compensate for unrelated deletes.
+    if (
+      conflict.entityType === 'TASK' &&
+      conflict.localOps.length === 1 &&
+      conflict.remoteOps.length === 1 &&
+      semanticRestoreOp?.actionType === ActionType.TASK_SHARED_RESTORE &&
+      semanticRestoreOp.opType === OpType.Update &&
+      semanticRestoreOp.entityType === 'TASK' &&
+      semanticRestoreOp.entityId === conflict.entityId &&
+      remoteDeleteOp?.opType === OpType.Delete &&
+      remoteDeleteOp.entityType === 'TASK' &&
+      remoteDeleteIds.length === 1 &&
+      remoteDeleteIds[0] === conflict.entityId
+    ) {
+      const clientId = await this.clientIdProvider.loadClientId();
+      if (!clientId) {
+        OpLog.err(
+          'ConflictResolutionService: Cannot create restore-win op - no client ID',
+        );
+        return undefined;
+      }
+
+      return {
+        id: uuidv7(),
+        actionType: semanticRestoreOp.actionType,
+        opType: semanticRestoreOp.opType,
+        entityType: semanticRestoreOp.entityType,
+        entityId: semanticRestoreOp.entityId,
+        entityIds: semanticRestoreOp.entityIds,
+        payload: semanticRestoreOp.payload,
+        clientId,
+        vectorClock: this.mergeAndIncrementClocks(
+          [
+            ...conflict.localOps.map((op) => op.vectorClock),
+            ...conflict.remoteOps.map((op) => op.vectorClock),
+          ],
+          clientId,
+        ),
+        timestamp: semanticRestoreOp.timestamp,
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      };
+    }
+
     // Get current entity state from store
     let entityState = await this.getCurrentEntityState(
       conflict.entityType,
