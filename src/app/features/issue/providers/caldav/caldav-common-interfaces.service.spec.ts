@@ -218,7 +218,15 @@ describe('CaldavCommonInterfacesService', () => {
         of({ ...BASE_ISSUE, completed: true, etag_hash: 43 }),
       );
 
-      const result = await service.getFreshDataForIssueTask(makeSpTask());
+      const result = await service.getFreshDataForIssueTask(
+        makeSpTask({
+          issueLastSyncedValues: {
+            completed: false,
+            summary: BASE_ISSUE.summary,
+            note: BASE_ISSUE.note,
+          },
+        }),
+      );
 
       expect(result?.taskChanges.isDone).toBeTrue();
       expect(result?.taskChanges.issueWasUpdated).toBeTrue();
@@ -258,6 +266,77 @@ describe('CaldavCommonInterfacesService', () => {
       );
 
       expect(result).toBeNull();
+    });
+
+    it('should preserve a pending local both-mode value when only another remote field changed', async () => {
+      const cfg: IssueProviderCaldav = {
+        ...BASE_CFG,
+        twoWaySync: {
+          isDone: 'both',
+          title: 'off',
+          notes: 'off',
+        },
+      };
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+      caldavClientSpy.getById$.and.returnValue(
+        of({
+          ...BASE_ISSUE,
+          etag_hash: 43,
+          start: TIMED_TIMESTAMP,
+        }),
+      );
+
+      const result = await service.getFreshDataForIssueTask(
+        makeSpTask({
+          isDone: true,
+          issueLastUpdated: BASE_ISSUE.etag_hash,
+          issueLastSyncedValues: {
+            completed: BASE_ISSUE.completed,
+            summary: BASE_ISSUE.summary,
+            note: BASE_ISSUE.note,
+          },
+        }),
+      );
+
+      expect(result).not.toBeNull();
+      expect(result?.taskChanges.isDone).toBeUndefined();
+      expect(result?.taskChanges.dueWithTime).toBe(TIMED_TIMESTAMP);
+      expect(result?.taskChanges.issueLastSyncedValues).toEqual(
+        jasmine.objectContaining({ completed: false }),
+      );
+    });
+
+    it('should pull a both-mode field when its sync baseline is missing', async () => {
+      const cfg: IssueProviderCaldav = {
+        ...BASE_CFG,
+        twoWaySync: {
+          isDone: 'off',
+          title: 'off',
+          notes: 'both',
+        },
+      };
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+      caldavClientSpy.getById$.and.returnValue(
+        of({
+          ...BASE_ISSUE,
+          note: undefined,
+          etag_hash: 43,
+        }),
+      );
+
+      const result = await service.getFreshDataForIssueTask(
+        makeSpTask({
+          notes: 'Pending local notes',
+          issueLastUpdated: BASE_ISSUE.etag_hash,
+          issueLastSyncedValues: {
+            completed: BASE_ISSUE.completed,
+            summary: BASE_ISSUE.summary,
+          },
+        }),
+      );
+
+      expect(result?.taskChanges.notes).toBe('');
+      expect(result?.taskChanges.issueLastUpdated).toBe(43);
     });
 
     it('should not pull mapped fields whose directions are off or pushOnly', async () => {

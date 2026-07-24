@@ -12,6 +12,7 @@ import { truncate } from '../../../../util/truncate';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
 import { CALDAV_POLL_INTERVAL } from './caldav.const';
+import { issueValuesEqual } from '../../two-way-sync/compute-push-decisions';
 
 @Injectable({
   providedIn: 'root',
@@ -246,6 +247,7 @@ export class CaldavCommonInterfacesService extends BaseIssueProviderService<Cald
       ? { ...this.getAddTaskData(issue) }
       : {};
     const issueValues = issue as unknown as Record<string, unknown>;
+    const lastSyncedValues = task.issueLastSyncedValues ?? {};
     const syncConfig = this._caldavSyncAdapter.getSyncConfig(cfg);
     const context = { issueId: issue.id };
     let hasPullOnlyMismatch = false;
@@ -263,8 +265,21 @@ export class CaldavCommonInterfacesService extends BaseIssueProviderService<Cald
         issueValues[mapping.issueField],
         context,
       );
+      // A VTODO-wide ETag can change for an unrelated field. In "both" mode,
+      // preserve pending local edits unless this specific remote field changed.
+      const shouldPullAfterEtagChange =
+        direction === 'pullOnly' ||
+        !Object.prototype.hasOwnProperty.call(lastSyncedValues, mapping.issueField) ||
+        !issueValuesEqual(
+          issueValues[mapping.issueField],
+          lastSyncedValues[mapping.issueField],
+        );
       if (wasUpdated) {
-        taskChanges[mapping.taskField] = remoteTaskValue;
+        if (shouldPullAfterEtagChange) {
+          taskChanges[mapping.taskField] = remoteTaskValue;
+        } else {
+          delete taskChanges[mapping.taskField];
+        }
       } else if (
         // Older refreshes could advance the ETag without applying mapped values.
         // Heal provider-owned fields, but preserve possible unpushed edits in "both".
