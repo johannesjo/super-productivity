@@ -377,13 +377,16 @@ export const isLwwPayloadIdCanonical = (entityType: string | undefined): boolean
   ENTITY_CONFIGS[entityType as EntityType]?.storagePattern === 'adapter';
 
 /**
- * Sentinel `entityId` value used for singleton entities (`globalConfig`,
- * `menuTree`, etc.). These have no per-entity primary key, so whole-state
- * operations use `'*'` to denote "the one and only" instance.
+ * Sentinel `entityId` value denoting "the one and only" instance of an entity
+ * that has no per-entity primary key.
  *
- * This is an operation-address sentinel, not a storage-pattern check:
- * TIME_TRACKING uses contextual composite IDs for conflict routing even though
- * its LWW reducer still targets singleton state as a whole.
+ * This is an operation-address sentinel, NOT a storage-pattern check — and in
+ * practice no shipped singleton producer emits it: GLOBAL_CONFIG addresses ops
+ * by section key (`'misc'`, `'sync'`, …), MENU_TREE by `'projectTree'` /
+ * `'tagTree'` / folderId, TIME_TRACKING by a composite `TYPE:id:date` conflict
+ * key. All of them still target their feature state as a whole in the LWW
+ * reducer. Use `isLwwPayloadIdCanonical` to ask "does payload.id address the
+ * state?"; use this only to recognize the whole-state address form.
  */
 export const SINGLETON_ENTITY_ID = '*' as const;
 

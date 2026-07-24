@@ -469,10 +469,14 @@ export class ConflictResolutionService {
     // write on remote clients.
     //
     // v18.15.0/v18.15.1 also require a matching payload id whenever entityId is
-    // not '*'. Keep that compatibility-only wire field for TIME_TRACKING's
-    // composite conflict IDs; current receivers strip it before replacing the
-    // singleton feature state. Whole-state '*' singletons still omit it.
-    // (#7330, #9256)
+    // not '*'. Keep that compatibility-only wire field; current receivers strip
+    // it before replacing the singleton feature state. (#7330, #9256)
+    //
+    // This covers EVERY singleton, not just TIME_TRACKING: no shipped singleton
+    // producer emits the '*' sentinel (GLOBAL_CONFIG addresses ops by section
+    // key, MENU_TREE by tree name / folderId, TIME_TRACKING by a composite
+    // TYPE:id:date key), so the else branch below is unreachable in practice and
+    // kept only as a guard for a future whole-state '*' producer.
     //
     // SUNSET: this `id` is purely for shipped v18.15.0/v18.15.1 receivers, which
     // reject composite-id singleton ops that lack it. It rides inside the
