@@ -896,8 +896,8 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
   });
 
   it('does not duplicate targets when one local bulk op wins multiple conflicts', async () => {
-    mockStore.select.and.returnValue(
-      of({ id: 'selected-task', title: 'Local title', timeSpent: 333 }),
+    mockStore.select.and.callFake((_selector: unknown, props?: { id: string }) =>
+      of({ id: props?.id, title: 'Local title', timeSpent: 333 }),
     );
 
     const localBulkOp = op({
