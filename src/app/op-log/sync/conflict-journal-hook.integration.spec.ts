@@ -90,12 +90,14 @@ describe('ConflictResolution → ConflictJournal hook (integration)', () => {
       'markFailed',
       'getUnsyncedByEntity',
       'getOpById',
+      'inspectStoredOperations',
       'mergeRemoteOpClocks',
       'markReducersCommittedAndMergeClocks',
     ]);
     // Row lookup can't resolve in this mocked store → the synced-op rejection
     // guard fails open (keeps the pending-path rejection behavior).
     mockOpLogStore.getOpById.and.resolveTo(undefined);
+    mockOpLogStore.inspectStoredOperations.and.resolveTo(new Map());
     mockOpLogStore.mergeRemoteOpClocks.and.resolveTo(undefined);
     mockOpLogStore.markReducersCommittedAndMergeClocks.and.resolveTo(undefined);
     mockOpLogStore.appendMixedSourceBatchSkipDuplicates.and.callFake(async (batches) => ({

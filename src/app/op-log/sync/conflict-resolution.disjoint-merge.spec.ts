@@ -144,10 +144,12 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
       'markFailed',
       'getUnsyncedByEntity',
       'getOpById',
+      'inspectStoredOperations',
       'mergeRemoteOpClocks',
       'markReducersCommittedAndMergeClocks',
     ]);
     mockOpLogStore.getOpById.and.resolveTo(undefined);
+    mockOpLogStore.inspectStoredOperations.and.resolveTo(new Map());
     mockOpLogStore.mergeRemoteOpClocks.and.resolveTo(undefined);
     mockOpLogStore.markReducersCommittedAndMergeClocks.and.resolveTo(undefined);
     mockOpLogStore.appendMixedSourceBatchSkipDuplicates.and.callFake(async (batches) => ({
@@ -1448,10 +1450,12 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
         'markFailed',
         'getUnsyncedByEntity',
         'getOpById',
+        'inspectStoredOperations',
         'mergeRemoteOpClocks',
         'markReducersCommittedAndMergeClocks',
       ]);
       opLogStore.getOpById.and.resolveTo(undefined);
+      opLogStore.inspectStoredOperations.and.resolveTo(new Map());
       opLogStore.mergeRemoteOpClocks.and.resolveTo(undefined);
       opLogStore.markReducersCommittedAndMergeClocks.and.resolveTo(undefined);
       opLogStore.appendMixedSourceBatchSkipDuplicates.and.callFake(async (batches) => ({
@@ -1640,6 +1644,7 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
         'markFailed',
         'getUnsyncedByEntity',
         'getOpById',
+        'inspectStoredOperations',
         'mergeRemoteOpClocks',
         'markReducersCommittedAndMergeClocks',
       ]);
@@ -1647,6 +1652,7 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
       opLogStore.markReducersCommittedAndMergeClocks.and.resolveTo(undefined);
       opLogStore.getUnsyncedByEntity.and.resolveTo(new Map());
       opLogStore.getOpById.and.resolveTo(undefined);
+      opLogStore.inspectStoredOperations.and.resolveTo(new Map());
       opLogStore.markRejected.and.resolveTo(undefined);
       opLogStore.markApplied.and.resolveTo(undefined);
       opLogStore.markFailed.and.resolveTo(undefined);

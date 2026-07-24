@@ -759,6 +759,56 @@ describe('taskSharedSchedulingMetaReducer', () => {
     });
   });
 
+  describe('restoreTask action', () => {
+    it('should preserve the materialized timed schedule across timezones', () => {
+      // 00:30 on Feb 16 in Tokyo is still Feb 15 on this suite's Berlin clock.
+      // The originating client already materialized the schedule in the action.
+      const capturedDueWithTime = Date.parse('2026-02-15T15:30:00.000Z');
+      const restoredTask = createMockTask({
+        id: 'task1',
+        dueDay: undefined,
+        dueWithTime: capturedDueWithTime,
+        remindAt: undefined,
+      });
+      const testState = {
+        ...createStateWithExistingTasks([], [], [], []),
+        planner: {
+          ...createStateWithExistingTasks([], [], [], []).planner,
+          days: {
+            '2026-02-16': ['task1', 'keep-task'],
+          },
+        },
+      };
+      testState[TASK_FEATURE_NAME].entities.task1 = restoredTask;
+      testState[TASK_FEATURE_NAME].ids.push('task1');
+      const action = {
+        ...TaskSharedActions.restoreTask({
+          task: restoredTask,
+          subTasks: [],
+          restoreToToday: {
+            today: '2026-02-16',
+            startOfNextDayDiffMs: 0,
+          },
+        }),
+        // Simulate the authenticated operation payload captured in Tokyo.
+        task: restoredTask,
+      };
+
+      metaReducer(testState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      expect(updatedState[TASK_FEATURE_NAME].entities.task1).toEqual(
+        jasmine.objectContaining({
+          dueDay: undefined,
+          dueWithTime: capturedDueWithTime,
+          remindAt: undefined,
+        }),
+      );
+      expect(updatedState[TAG_FEATURE_NAME].entities.TODAY?.taskIds).toEqual(['task1']);
+      expect(updatedState.planner.days['2026-02-16']).toEqual(['keep-task']);
+    });
+  });
+
   describe('removeTasksFromTodayTag action', () => {
     it('should remove specified tasks from Today tag', () => {
       const testState = createStateWithExistingTasks(

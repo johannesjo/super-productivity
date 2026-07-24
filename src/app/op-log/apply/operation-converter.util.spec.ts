@@ -206,6 +206,52 @@ describe('operation-converter utility', () => {
       expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
     });
 
+    (
+      [
+        [{ today: '2026-99-99', startOfNextDayDiffMs: 0 }, 'invalid today'],
+        [{ today: '2026-07-23', startOfNextDayDiffMs: Number.NaN }, 'NaN offset'],
+        [
+          { today: '2026-07-23', startOfNextDayDiffMs: Number.POSITIVE_INFINITY },
+          'infinite offset',
+        ],
+        [{ today: '2026-07-23', startOfNextDayDiffMs: '0' }, 'non-numeric offset'],
+        [[], 'non-object marker'],
+      ] as const
+    ).forEach(([restoreToToday, description]) => {
+      it(`should reject a restoreToToday marker with ${description}`, () => {
+        const op = createMockOperation({
+          actionType: ActionType.TASK_SHARED_RESTORE,
+          entityId: 'task-envelope',
+          payload: {
+            actionPayload: {
+              task: createTaskRestoreSnapshot('task-envelope'),
+              subTasks: [],
+              restoreToToday,
+            },
+            entityChanges: [],
+          },
+        });
+
+        expect(() => convertOpToAction(op)).toThrowError(OperationIntegrityError);
+      });
+    });
+
+    it('should continue accepting a legacy restore without restoreToToday', () => {
+      const op = createMockOperation({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        entityId: 'task-envelope',
+        payload: {
+          actionPayload: {
+            task: createTaskRestoreSnapshot('task-envelope'),
+            subTasks: [],
+          },
+          entityChanges: [],
+        },
+      });
+
+      expect(() => convertOpToAction(op)).not.toThrow();
+    });
+
     it('should reject reserved prototype keys in task references', () => {
       const op = createMockOperation({
         actionType: ActionType.TASK_SHARED_RESTORE,

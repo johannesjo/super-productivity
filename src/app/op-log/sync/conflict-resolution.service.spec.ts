@@ -7,7 +7,10 @@ import {
 import { Store } from '@ngrx/store';
 import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
-import { OperationLogStoreService } from '../persistence/operation-log-store.service';
+import {
+  OperationLogStoreService,
+  StoredRemoteDuplicateHandler,
+} from '../persistence/operation-log-store.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { BannerService } from '../../core/banner/banner.service';
 import { BannerId } from '../../core/banner/banner.model';
@@ -54,6 +57,25 @@ describe('ConflictResolutionService', () => {
   let mockOperationLogEffects: jasmine.SpyObj<OperationLogEffects>;
 
   const TEST_CLIENT_ID = 'test-client-123';
+
+  const notifyStoredRemoteDuplicate = (
+    handler: StoredRemoteDuplicateHandler | undefined,
+    proposed: Operation,
+    existing: Operation = proposed,
+    seq = 7,
+    applicationStatus: 'pending' | 'applied' = 'pending',
+  ): void => {
+    handler?.(
+      {
+        seq,
+        op: existing,
+        appliedAt: 1,
+        source: 'remote',
+        applicationStatus,
+      },
+      proposed,
+    );
+  };
 
   const createTaskRestoreSnapshot = (
     id: string,
@@ -125,6 +147,7 @@ describe('ConflictResolutionService', () => {
       'markFailed',
       'getUnsyncedByEntity',
       'getOpById',
+      'inspectStoredOperations',
       'getVectorClock',
     ]);
     mockOpLogStore.mergeRemoteOpClocks.and.resolveTo(undefined);
@@ -174,6 +197,25 @@ describe('ConflictResolutionService', () => {
     mockValidateStateService.validateAndRepairCurrentState.and.resolveTo(true);
     mockOpLogStore.getUnsyncedByEntity.and.resolveTo(new Map());
     mockOpLogStore.getOpById.and.resolveTo(undefined);
+    mockOpLogStore.inspectStoredOperations.and.callFake(async (operations) => {
+      const entries = await Promise.all(
+        operations.map(
+          async (operation) =>
+            [operation, await mockOpLogStore.getOpById(operation.id)] as const,
+        ),
+      );
+      return new Map(
+        entries.flatMap(([operation, entry]) => {
+          if (!entry) {
+            return [];
+          }
+          if (JSON.stringify(entry.op) !== JSON.stringify(operation)) {
+            throw new OperationIntegrityError('stored operation mismatch');
+          }
+          return [[operation.id, entry] as const];
+        }),
+      );
+    });
     mockOpLogStore.getVectorClock.and.resolveTo({});
     // By default, appendBatchSkipDuplicates writes all ops (no duplicates)
     mockOpLogStore.appendBatchSkipDuplicates.and.callFake((ops: Operation[]) =>
@@ -545,6 +587,7 @@ describe('ConflictResolutionService', () => {
         [jasmine.objectContaining({ id: 'remote-1' })],
         'remote',
         jasmine.any(Object),
+        jasmine.any(Function),
       );
       // Local ops should be rejected
       expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-1']);
@@ -935,6 +978,7 @@ describe('ConflictResolutionService', () => {
         [jasmine.objectContaining({ id: 'remote-1' })],
         'remote',
         jasmine.any(Object),
+        jasmine.any(Function),
       );
       // Local ops should be rejected
       expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-1']);
@@ -1045,6 +1089,7 @@ describe('ConflictResolutionService', () => {
         jasmine.arrayContaining([jasmine.objectContaining({ id: 'non-conflict-1' })]),
         'remote',
         jasmine.any(Object),
+        jasmine.any(Function),
       );
     });
 
@@ -1124,6 +1169,7 @@ describe('ConflictResolutionService', () => {
           jasmine.arrayContaining([jasmine.objectContaining({ id: 'remote-1' })]),
           'remote',
           jasmine.any(Object),
+          jasmine.any(Function),
         );
       });
 
@@ -1291,6 +1337,7 @@ describe('ConflictResolutionService', () => {
           ]),
           'remote',
           jasmine.any(Object),
+          jasmine.any(Function),
         );
         expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-del']);
       });
@@ -1365,6 +1412,7 @@ describe('ConflictResolutionService', () => {
           [remoteDelete],
           'remote',
           { pendingApply: true },
+          jasmine.any(Function),
         );
         expect(getMixedLocalOps()).toEqual([]);
         const appliedOps = mockOperationApplier.applyOperations.calls.mostRecent()
@@ -1407,6 +1455,7 @@ describe('ConflictResolutionService', () => {
           [remoteUpdate],
           'remote',
           { pendingApply: true },
+          jasmine.any(Function),
         );
       });
 
@@ -3786,6 +3835,7 @@ describe('ConflictResolutionService', () => {
           ]),
           'remote',
           jasmine.any(Object),
+          jasmine.any(Function),
         );
         expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-create']);
       });
@@ -3951,6 +4001,7 @@ describe('ConflictResolutionService', () => {
           jasmine.arrayContaining([jasmine.objectContaining({ id: 'remote-planner' })]),
           'remote',
           jasmine.any(Object),
+          jasmine.any(Function),
         );
         expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-planner']);
       });
@@ -4049,6 +4100,7 @@ describe('ConflictResolutionService', () => {
           jasmine.arrayContaining([jasmine.objectContaining({ id: 'remote-reminder' })]),
           'remote',
           jasmine.any(Object),
+          jasmine.any(Function),
         );
         expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-reminder']);
       });
@@ -4111,6 +4163,7 @@ describe('ConflictResolutionService', () => {
           ]),
           'remote',
           jasmine.any(Object),
+          jasmine.any(Function),
         );
         expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-plugin-data']);
       });
@@ -4543,16 +4596,41 @@ describe('ConflictResolutionService', () => {
           of({ id: 'task-2', title: 'Local winning task' }),
         );
         mockOpLogStore.appendMixedSourceBatchSkipDuplicates.and.callFake(
-          async (batches) => ({
-            written: batches
-              .filter((batch) => batch.source === 'local')
-              .flatMap((batch) =>
-                batch.ops.map((op) => ({ seq: 50, op, source: 'local' as const })),
-              ),
-            skippedCount: batches
-              .filter((batch) => batch.source === 'remote')
-              .reduce((count, batch) => count + batch.ops.length, 0),
-          }),
+          async (batches, onStoredRemoteDuplicate) => {
+            for (const batch of batches.filter(({ source }) => source === 'remote')) {
+              for (const op of batch.ops) {
+                if (op.id === remoteMultiOp.id) {
+                  notifyStoredRemoteDuplicate(
+                    onStoredRemoteDuplicate,
+                    op,
+                    durableRemoteMulti,
+                    41,
+                  );
+                } else if (op.id === finalRemoteWinner.id) {
+                  notifyStoredRemoteDuplicate(
+                    onStoredRemoteDuplicate,
+                    op,
+                    durableFinalRemoteWinner,
+                    42,
+                  );
+                }
+              }
+            }
+            return {
+              written: batches
+                .filter((batch) => batch.source === 'local')
+                .flatMap((batch) =>
+                  batch.ops.map((op) => ({
+                    seq: 50,
+                    op,
+                    source: 'local' as const,
+                  })),
+                ),
+              skippedCount: batches
+                .filter((batch) => batch.source === 'remote')
+                .reduce((count, batch) => count + batch.ops.length, 0),
+            };
+          },
         );
         mockOpLogStore.getOpById.and.callFake(async (id) => {
           if (id === remoteMultiOp.id) {
@@ -4615,8 +4693,16 @@ describe('ConflictResolutionService', () => {
           'task-9',
         );
         mockOpLogStore.appendBatchSkipDuplicates.and.callFake(
-          async (ops: Operation[]) => {
+          async (ops, _source, _options, onStoredRemoteDuplicate) => {
             const writtenOps = ops.filter((op) => op.id !== reusedCreate.id);
+            if (ops.some((op) => op.id === reusedCreate.id)) {
+              notifyStoredRemoteDuplicate(
+                onStoredRemoteDuplicate,
+                reusedCreate,
+                reusedCreate,
+                40,
+              );
+            }
             return {
               seqs: writtenOps.map((_, i) => 60 + i),
               writtenOps,
@@ -4740,6 +4826,46 @@ describe('ConflictResolutionService', () => {
             actionType: '[TASK] LWW Update' as ActionType,
           }),
         ]);
+      });
+
+      it('should preflight every remote row before persisting a partial resolution', async () => {
+        const now = Date.now();
+        const remoteLoser = createOpWithTimestamp('remote-loser', 'client-b', now - 1000);
+        const laterRemote = createOpWithTimestamp(
+          'later-remote',
+          'client-b',
+          now,
+          OpType.Update,
+          'task-2',
+        );
+        const conflict = createConflict(
+          'task-1',
+          [createOpWithTimestamp('local-winner', 'client-a', now)],
+          [remoteLoser],
+        );
+        spyOn<any>(service, '_createLocalWinUpdateOp').and.resolveTo(
+          createOpWithTimestamp('local-compensation', 'client-a', now),
+        );
+        mockOpLogStore.getOpById.and.callFake(async (operationId) =>
+          operationId === laterRemote.id
+            ? {
+                seq: 7,
+                op: { ...laterRemote, timestamp: laterRemote.timestamp + 1 },
+                appliedAt: now,
+                source: 'remote',
+              }
+            : undefined,
+        );
+
+        await expectAsync(
+          service.autoResolveConflictsLWW([conflict], [laterRemote]),
+        ).toBeRejectedWithError(OperationIntegrityError);
+
+        expect(
+          mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
+        ).not.toHaveBeenCalled();
+        expect(mockOpLogStore.appendBatchSkipDuplicates).not.toHaveBeenCalled();
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
       });
 
       it('should create a dominating GLOBAL_CONFIG:tasks compensation for a migrated local row', async () => {
@@ -4893,12 +5019,16 @@ describe('ConflictResolutionService', () => {
           createConflict('task-1', [localOp], [redeliveredRemoteOp]),
         ];
         let appendAttempt = 0;
-        mockOpLogStore.appendBatchSkipDuplicates.and.callFake(async () => {
-          appendAttempt++;
-          return appendAttempt === 1
-            ? { seqs: [7], writtenOps: [remoteOp], skippedCount: 0 }
-            : { seqs: [], writtenOps: [], skippedCount: 1 };
-        });
+        mockOpLogStore.appendBatchSkipDuplicates.and.callFake(
+          async (ops, _source, _options, onStoredRemoteDuplicate) => {
+            appendAttempt++;
+            if (appendAttempt === 1) {
+              return { seqs: [7], writtenOps: [remoteOp], skippedCount: 0 };
+            }
+            notifyStoredRemoteDuplicate(onStoredRemoteDuplicate, ops[0], remoteOp, 7);
+            return { seqs: [], writtenOps: [], skippedCount: 1 };
+          },
+        );
         mockOpLogStore.getOpById.and.resolveTo({
           seq: 7,
           op: remoteOp,
@@ -4968,11 +5098,16 @@ describe('ConflictResolutionService', () => {
                   lwwPlans: [],
                 },
         );
-        mockOpLogStore.appendBatchSkipDuplicates.and.resolveTo({
-          seqs: [],
-          writtenOps: [],
-          skippedCount: 1,
-        });
+        mockOpLogStore.appendBatchSkipDuplicates.and.callFake(
+          async (ops, _source, _options, onStoredRemoteDuplicate) => {
+            notifyStoredRemoteDuplicate(onStoredRemoteDuplicate, ops[0], remoteOp, 7);
+            return {
+              seqs: [],
+              writtenOps: [],
+              skippedCount: 1,
+            };
+          },
+        );
         mockOpLogStore.getOpById.and.resolveTo({
           seq: 7,
           op: remoteOp,
@@ -5033,15 +5168,15 @@ describe('ConflictResolutionService', () => {
           mergedResolutions: [{ conflict, mergedOp, plan: { conflict } }],
           lwwPlans: [],
         });
-        mockOpLogStore.getOpById.and.callFake(async (opId: string) =>
-          opId === remoteOp.id
+        mockOpLogStore.getOpById.and.callFake(async (operationId) =>
+          operationId === remoteOp.id
             ? {
                 seq: 7,
                 op: {
                   ...remoteOp,
                   vectorClock: { [remoteOp.clientId]: 9 },
                 },
-                appliedAt: now,
+                appliedAt: 1,
                 source: 'remote',
                 applicationStatus: 'pending',
               }
@@ -5092,11 +5227,16 @@ describe('ConflictResolutionService', () => {
                   lwwPlans: [],
                 },
         );
-        mockOpLogStore.appendBatchSkipDuplicates.and.resolveTo({
-          seqs: [],
-          writtenOps: [],
-          skippedCount: 1,
-        });
+        mockOpLogStore.appendBatchSkipDuplicates.and.callFake(
+          async (ops, _source, _options, onStoredRemoteDuplicate) => {
+            notifyStoredRemoteDuplicate(onStoredRemoteDuplicate, ops[0], remoteOp, 7);
+            return {
+              seqs: [],
+              writtenOps: [],
+              skippedCount: 1,
+            };
+          },
+        );
         mockOpLogStore.getOpById.and.resolveTo({
           seq: 7,
           op: remoteOp,
@@ -5266,8 +5406,11 @@ describe('ConflictResolutionService', () => {
         ];
 
         // Simulate: remote op already exists (skipped as duplicate)
-        mockOpLogStore.appendBatchSkipDuplicates.and.returnValue(
-          Promise.resolve({ seqs: [], writtenOps: [], skippedCount: 1 }),
+        mockOpLogStore.appendBatchSkipDuplicates.and.callFake(
+          async (ops, _source, _options, onStoredRemoteDuplicate) => {
+            notifyStoredRemoteDuplicate(onStoredRemoteDuplicate, ops[0]);
+            return { seqs: [], writtenOps: [], skippedCount: 1 };
+          },
         );
         mockOperationApplier.applyOperations.and.resolveTo({ appliedOps: [] });
 
@@ -5576,6 +5719,7 @@ describe('ConflictResolutionService', () => {
         jasmine.arrayContaining([jasmine.objectContaining({ id: 'remote-1' })]),
         'remote',
         jasmine.any(Object),
+        jasmine.any(Function),
       );
     });
 
@@ -5686,6 +5830,7 @@ describe('ConflictResolutionService', () => {
         jasmine.arrayContaining([jasmine.objectContaining({ id: 'remote-1' })]),
         'remote',
         jasmine.any(Object),
+        jasmine.any(Function),
       );
       expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-1']);
     });
@@ -5811,6 +5956,7 @@ describe('ConflictResolutionService', () => {
         jasmine.arrayContaining([jasmine.objectContaining({ id: 'remote-archive' })]),
         'remote',
         jasmine.any(Object),
+        jasmine.any(Function),
       );
       // Local ops should be rejected
       expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-upd']);
@@ -6027,6 +6173,7 @@ describe('ConflictResolutionService', () => {
         jasmine.arrayContaining([jasmine.objectContaining({ id: 'remote-archive' })]),
         'remote',
         jasmine.any(Object),
+        jasmine.any(Function),
       );
     });
 
@@ -7704,8 +7851,8 @@ describe('ConflictResolutionService', () => {
           entityChanges: [],
         },
       };
-      mockOpLogStore.getOpById.and.callFake(async (opId: string) =>
-        opId === remoteRestore.id
+      mockOpLogStore.getOpById.and.callFake(async (operationId) =>
+        operationId === remoteRestore.id
           ? {
               seq: 1,
               op: {

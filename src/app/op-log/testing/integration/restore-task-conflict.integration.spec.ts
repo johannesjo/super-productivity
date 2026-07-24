@@ -803,6 +803,12 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     const addProjectAction = addProject({
       project: restoreProject,
     }) as PersistentAction;
+    const updateProjectAction = updateProject({
+      project: {
+        id: RESTORE_PROJECT_ID,
+        changes: { title: 'Updated restore project' },
+      },
+    }) as PersistentAction;
     const addTagAction = addTag({ tag: restoreTag }) as PersistentAction;
     const addRepeatCfgAction = addTaskRepeatCfgToTask({
       taskId: PARENT_ID,
@@ -822,6 +828,11 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
       addProjectAction,
       dependencyClient,
       1_700,
+    );
+    const remoteProjectUpdate = captureOperation(
+      updateProjectAction,
+      dependencyClient,
+      1_750,
     );
     const remoteTagCreate = captureOperation(addTagAction, dependencyClient, 1_800);
     const remoteRepeatCfgCreate = captureOperation(
@@ -847,7 +858,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
           suggestedResolution: 'manual',
         },
       ],
-      [remoteProjectCreate, remoteTagCreate, remoteRepeatCfgCreate],
+      [remoteProjectCreate, remoteProjectUpdate, remoteTagCreate, remoteRepeatCfgCreate],
     );
 
     const dependencyProjection = (state: RootState): object => {
@@ -860,6 +871,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
           repeatCfgId: restoredTask?.repeatCfgId,
         },
         projectTaskIds: state.projects.entities[RESTORE_PROJECT_ID]?.taskIds,
+        projectTitle: state.projects.entities[RESTORE_PROJECT_ID]?.title,
         tagTaskIds: state[TAG_FEATURE_NAME].entities[RESTORE_TAG_ID]?.taskIds,
         repeatCfgId:
           state[TASK_REPEAT_CFG_FEATURE_NAME].entities[RESTORE_REPEAT_CFG_ID]?.id,
@@ -873,6 +885,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
         repeatCfgId: RESTORE_REPEAT_CFG_ID,
       },
       projectTaskIds: [PARENT_ID],
+      projectTitle: 'Updated restore project',
       tagTaskIds: [PARENT_ID],
       repeatCfgId: RESTORE_REPEAT_CFG_ID,
     };
@@ -887,11 +900,15 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     }
     for (const dependencyOp of [
       remoteProjectCreate,
+      remoteProjectUpdate,
       remoteTagCreate,
       remoteRepeatCfgCreate,
     ]) {
       expect(seqByOpId.get(dependencyOp.id)).toBeLessThan(restoreSeq);
     }
+    expect(seqByOpId.get(remoteProjectCreate.id)).toBeLessThan(
+      seqByOpId.get(remoteProjectUpdate.id)!,
+    );
     const rootCompensation = storedOperations.find(
       (op) =>
         op.entityId === PARENT_ID &&
@@ -925,7 +942,7 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
     ).toEqual(expectedProjection);
   });
 
-  it('does not persist lossy compensation when multiple restores share a pending dependency', async () => {
+  it('orders an updated pending dependency before multiple winning restores', async () => {
     const localClient = new TestClient(LOCAL_CLIENT_ID);
     const dependencyClient = new TestClient('dependency-client');
     const localRoot: Task = {
@@ -1039,18 +1056,44 @@ describe('restoreTask delete-conflict integration (#9263)', () => {
         op.payload.recreatesEntityAfterDelete === true &&
         op.payload.lwwUpdateMode === 'replace',
     );
-    expect(rootCompensations).toEqual([]);
+    expect(rootCompensations.length).toBe(1);
+    const rootCompensation = rootCompensations[0];
+    const seqByOpId = new Map(
+      (await opLogStore.getOpsAfterSeq(0)).map(({ op, seq }) => [op.id, seq]),
+    );
+    expect(seqByOpId.get(projectCreate.id)).toBeLessThan(
+      seqByOpId.get(projectUpdate.id)!,
+    );
+    expect(seqByOpId.get(projectUpdate.id)).toBeLessThan(
+      seqByOpId.get(remoteRestores[0].id)!,
+    );
+    expect(seqByOpId.get(remoteRestores[0].id)).toBeLessThan(
+      seqByOpId.get(rootCompensation.id)!,
+    );
+    expect(seqByOpId.get(rootCompensation.id)).toBeLessThan(
+      seqByOpId.get(remoteRestores[1].id)!,
+    );
     expect(localState.projects.entities[RESTORE_PROJECT_ID]).toEqual(
       jasmine.objectContaining({
         id: RESTORE_PROJECT_ID,
         title: 'Updated restore project',
       }),
     );
-    expect(localState.tasks.entities[PARENT_ID]?.projectId).toBe('project1');
+    expect(localState.tasks.entities[PARENT_ID]).toEqual(
+      jasmine.objectContaining({
+        title: 'First remote restore',
+        projectId: RESTORE_PROJECT_ID,
+      }),
+    );
     const restartedState = replay(rootOnlyInitialState, storedOperations);
     expect(restartedState.projects.entities[RESTORE_PROJECT_ID]?.title).toBe(
       'Updated restore project',
     );
-    expect(restartedState.tasks.entities[PARENT_ID]?.projectId).toBe('project1');
+    expect(restartedState.tasks.entities[PARENT_ID]).toEqual(
+      jasmine.objectContaining({
+        title: 'First remote restore',
+        projectId: RESTORE_PROJECT_ID,
+      }),
+    );
   });
 });

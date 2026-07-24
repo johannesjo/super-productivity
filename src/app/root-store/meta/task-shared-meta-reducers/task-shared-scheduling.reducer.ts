@@ -261,6 +261,29 @@ const handlePlanTasksForToday = (
   return removeTasksFromPlannerDays(stateWithTodayTag, taskIds);
 };
 
+const handleRestoredTaskPlannedForToday = (
+  state: RootState,
+  taskId: string,
+): RootState => {
+  if (state[TASK_FEATURE_NAME].entities[taskId]?.id !== taskId) {
+    return state;
+  }
+
+  const todayTag = getTag(state, TODAY_TAG.id);
+  const stateWithTodayTag = todayTag.taskIds.includes(taskId)
+    ? state
+    : updateTags(state, [
+        {
+          id: TODAY_TAG.id,
+          changes: { taskIds: unique([taskId, ...todayTag.taskIds]) },
+        },
+      ]);
+
+  // restoreTask already materializes dueDay/dueWithTime on the originating
+  // client. Reinterpreting that timestamp in the replaying timezone diverges.
+  return removeTasksFromPlannerDays(stateWithTodayTag, [taskId]);
+};
+
 const handleRemoveTasksFromTodayTag = (
   state: RootState,
   taskIds: string[],
@@ -362,13 +385,7 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
     if (!restoreToToday) {
       return state;
     }
-    return handlePlanTasksForToday(
-      state,
-      [task.id],
-      {},
-      restoreToToday.today,
-      restoreToToday.startOfNextDayDiffMs,
-    );
+    return handleRestoredTaskPlannedForToday(state, task.id);
   },
   [TaskSharedActions.removeTasksFromTodayTag.type]: () => {
     const { taskIds } = action as ReturnType<

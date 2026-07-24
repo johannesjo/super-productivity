@@ -111,6 +111,26 @@ interface RestoreContext {
   restoreSubTaskSnapshots?: RestoreSubTaskCompensationSnapshots;
 }
 
+interface IndexedOperation {
+  op: Operation;
+  index: number;
+}
+
+interface IndexedRestoreDependencyCreate extends IndexedOperation {
+  op: Operation & { entityId: string };
+}
+
+interface RestoreDependencyBatchIndex {
+  candidateOpIds: ReadonlySet<string>;
+  candidateCreatesByEntityKey: ReadonlyMap<
+    string,
+    readonly IndexedRestoreDependencyCreate[]
+  >;
+  nonUpdateOpsByEntityKey: ReadonlyMap<string, readonly IndexedOperation[]>;
+  opIndexById: ReadonlyMap<string, number>;
+  opsByEntityKey: ReadonlyMap<string, readonly IndexedOperation[]>;
+}
+
 const getRestoreReferenceKeys = (
   restoreContexts: readonly RestoreContext[],
 ): Set<string> => {
@@ -150,90 +170,134 @@ const getRestoreReferenceKeys = (
   return referenceKeys;
 };
 
-const getFirstRestorePosition = (
-  restoreContexts: readonly RestoreContext[],
-  batchOps: readonly Operation[],
-): { id: string; index: number } | undefined => {
-  const restoreOpIds = new Set(restoreContexts.map(({ remoteOp }) => remoteOp.id));
-  const index = batchOps.findIndex((op) => restoreOpIds.has(op.id));
-  return index >= 0 ? { id: batchOps[index].id, index } : undefined;
+const isAuthenticatedRestoreDependencyCreate = (
+  op: Operation,
+  resolvePayloadKey: (entityType: EntityType) => string,
+  entityIds: readonly string[] = getOpEntityIds(op),
+): op is Operation & { entityId: string } => {
+  if (
+    op.opType !== OpType.Create ||
+    !isSafeEntityId(op.entityId) ||
+    op.actionType !== RESTORE_DEPENDENCY_CREATE_ACTION_TYPE[op.entityType] ||
+    entityIds.length !== 1
+  ) {
+    return false;
+  }
+  const entity = extractActionPayload(op.payload)[resolvePayloadKey(op.entityType)];
+  return isRecord(entity) && entity['id'] === op.entityId;
 };
 
-const findRestoreDependencyCreateCandidates = (
-  restoreContexts: readonly RestoreContext[],
+const buildRestoreDependencyBatchIndex = (
   candidates: readonly Operation[],
-  resolvePayloadKey: (entityType: EntityType) => string,
   batchOps: readonly Operation[],
-): Array<Operation & { entityId: string }> => {
-  const referenceKeys = getRestoreReferenceKeys(restoreContexts);
-  const firstRestorePosition = getFirstRestorePosition(restoreContexts, batchOps);
-  if (!firstRestorePosition) {
-    return [];
-  }
-  const batchOpIndexById = new Map<string, number>();
+  resolvePayloadKey: (entityType: EntityType) => string,
+): RestoreDependencyBatchIndex => {
+  const candidateOpIds = new Set(candidates.map((op) => op.id));
+  const candidateCreatesByEntityKey = new Map<string, IndexedRestoreDependencyCreate[]>();
+  const nonUpdateOpsByEntityKey = new Map<string, IndexedOperation[]>();
+  const opIndexById = new Map<string, number>();
+  const opsByEntityKey = new Map<string, IndexedOperation[]>();
   batchOps.forEach((op, index) => {
-    if (!batchOpIndexById.has(op.id)) {
-      batchOpIndexById.set(op.id, index);
+    if (!opIndexById.has(op.id)) {
+      opIndexById.set(op.id, index);
     }
-  });
-
-  return candidates.filter((op): op is Operation & { entityId: string } => {
     const entityIds = getOpEntityIds(op);
-    const batchIndex = batchOpIndexById.get(op.id);
-    if (
-      op.opType !== OpType.Create ||
-      !isSafeEntityId(op.entityId) ||
-      batchIndex === undefined ||
-      batchIndex >= firstRestorePosition.index ||
-      !referenceKeys.has(toEntityKey(op.entityType, op.entityId)) ||
-      op.actionType !== RESTORE_DEPENDENCY_CREATE_ACTION_TYPE[op.entityType] ||
-      entityIds.length !== 1
-    ) {
-      return false;
+    const indexedOperation = { op, index };
+    for (const entityId of entityIds) {
+      const entityKey = toEntityKey(op.entityType, entityId);
+      const indexedOps = opsByEntityKey.get(entityKey) ?? [];
+      indexedOps.push(indexedOperation);
+      opsByEntityKey.set(entityKey, indexedOps);
+      if (op.opType !== OpType.Update) {
+        const nonUpdateOps = nonUpdateOpsByEntityKey.get(entityKey) ?? [];
+        nonUpdateOps.push(indexedOperation);
+        nonUpdateOpsByEntityKey.set(entityKey, nonUpdateOps);
+      }
     }
-    const entity = extractActionPayload(op.payload)[resolvePayloadKey(op.entityType)];
-    return isRecord(entity) && entity['id'] === op.entityId;
+    if (
+      candidateOpIds.has(op.id) &&
+      isAuthenticatedRestoreDependencyCreate(op, resolvePayloadKey, entityIds)
+    ) {
+      const entityKey = toEntityKey(op.entityType, op.entityId);
+      const candidateCreates = candidateCreatesByEntityKey.get(entityKey) ?? [];
+      candidateCreates.push({ op, index });
+      candidateCreatesByEntityKey.set(entityKey, candidateCreates);
+    }
   });
+  return {
+    candidateOpIds,
+    candidateCreatesByEntityKey,
+    nonUpdateOpsByEntityKey,
+    opIndexById,
+    opsByEntityKey,
+  };
 };
 
-export const findRestoreDependencyCreateOps = (
-  restoreContexts: readonly RestoreContext[],
-  candidates: readonly Operation[],
+interface RestoreDependencySelection {
+  candidates: Array<Operation & { entityId: string }>;
+  safeCreates: Array<Operation & { entityId: string }>;
+}
+
+const findFirstOperationAtOrAfter = (
+  operations: readonly IndexedOperation[],
+  targetIndex: number,
+): number => {
+  let low = 0;
+  let high = operations.length;
+  while (low < high) {
+    const middle = low + Math.floor((high - low) / 2);
+    if (operations[middle].index < targetIndex) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+  return low;
+};
+
+const buildRestoreDependencySelection = (
+  restoreContext: RestoreContext,
   resolvePayloadKey: (entityType: EntityType) => string,
-  batchOps: readonly Operation[] = candidates,
-): Array<Operation & { entityId: string }> => {
-  if (restoreContexts.length !== 1) {
-    return [];
+  batchIndex: RestoreDependencyBatchIndex,
+): RestoreDependencySelection => {
+  const restoreIndex = batchIndex.opIndexById.get(restoreContext.remoteOp.id);
+  if (restoreIndex === undefined) {
+    return { candidates: [], safeCreates: [] };
   }
-  const firstRestorePosition = getFirstRestorePosition(restoreContexts, batchOps);
-  if (!firstRestorePosition) {
-    return [];
-  }
-  const batchOpIdsByEntityKey = new Map<string, Set<string>>();
-  for (const batchOp of batchOps.slice(0, firstRestorePosition.index)) {
-    for (const entityId of getOpEntityIds(batchOp)) {
-      const entityKey = toEntityKey(batchOp.entityType, entityId);
-      const opIds = batchOpIdsByEntityKey.get(entityKey) ?? new Set<string>();
-      opIds.add(batchOp.id);
-      batchOpIdsByEntityKey.set(entityKey, opIds);
+
+  const candidates: Array<Operation & { entityId: string }> = [];
+  const safeCreateByEntityKey = new Map<string, Operation & { entityId: string }>();
+  for (const entityKey of getRestoreReferenceKeys([restoreContext])) {
+    const candidateCreates = batchIndex.candidateCreatesByEntityKey.get(entityKey) ?? [];
+    const candidateEnd = findFirstOperationAtOrAfter(candidateCreates, restoreIndex);
+    candidates.push(...candidateCreates.slice(0, candidateEnd).map(({ op }) => op));
+
+    // The last authenticated create whose remaining chain contains updates
+    // only establishes the entity in the exact state seen by the restore.
+    const nonUpdateOps = batchIndex.nonUpdateOpsByEntityKey.get(entityKey) ?? [];
+    const nonUpdateEnd = findFirstOperationAtOrAfter(nonUpdateOps, restoreIndex);
+    const lastNonUpdate = nonUpdateOps[nonUpdateEnd - 1]?.op;
+    if (
+      lastNonUpdate &&
+      batchIndex.candidateOpIds.has(lastNonUpdate.id) &&
+      isAuthenticatedRestoreDependencyCreate(lastNonUpdate, resolvePayloadKey)
+    ) {
+      safeCreateByEntityKey.set(entityKey, lastNonUpdate);
     }
   }
 
-  return findRestoreDependencyCreateCandidates(
-    restoreContexts,
-    candidates,
-    resolvePayloadKey,
-    batchOps,
-  ).filter((op) => {
-    const entityId = op.entityId;
-    const batchOpIds = batchOpIdsByEntityKey.get(toEntityKey(op.entityType, entityId));
-    // Hoisting past another op for the same entity would change server order
-    // (for example CREATE → DELETE → RESTORE), so only isolated creates qualify.
-    if (batchOpIds?.size !== 1 || !batchOpIds.has(op.id)) {
-      return false;
-    }
-    return true;
-  });
+  const sortByBatchIndex = (
+    a: Operation & { entityId: string },
+    b: Operation & { entityId: string },
+  ): number =>
+    (batchIndex.opIndexById.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+    (batchIndex.opIndexById.get(b.id) ?? Number.MAX_SAFE_INTEGER);
+  return {
+    candidates: [...new Map(candidates.map((op) => [op.id, op])).values()].sort(
+      sortByBatchIndex,
+    ),
+    safeCreates: [...safeCreateByEntityKey.values()].sort(sortByBatchIndex),
+  };
 };
 
 export interface RestoreDependencyPlan {
@@ -245,6 +309,9 @@ export interface RestoreDependencyPlan {
     Array<Operation & { entityId: string }>
   >;
   subTaskSnapshotsByOpId: ReadonlyMap<string, RestoreSubTaskCompensationSnapshots>;
+  multipleRestoreRootOpIds: ReadonlySet<string>;
+  primaryRestoreOpIds: ReadonlySet<string>;
+  unsafeRestoreOpIds: ReadonlySet<string>;
   firstRestoreOpId?: string;
 }
 
@@ -284,16 +351,82 @@ export const buildRestoreDependencyPlan = (
     }
   }
 
-  const createOps = [
-    ...new Map(
-      findRestoreDependencyCreateOps(
-        restoreContexts,
-        candidates,
-        resolvePayloadKey,
-        batchOps,
-      ).map((op) => [op.id, op]),
-    ).values(),
-  ];
+  const batchIndex = buildRestoreDependencyBatchIndex(
+    candidates,
+    batchOps,
+    resolvePayloadKey,
+  );
+  const orderedRestoreContexts = restoreContexts
+    .map((context, fallbackIndex) => ({
+      context,
+      index:
+        batchIndex.opIndexById.get(context.remoteOp.id) ??
+        batchOps.length + fallbackIndex,
+    }))
+    .sort((a, b) => a.index - b.index)
+    .map(({ context }) => context);
+  const restoreContextGroups = new Map<
+    string,
+    { primary: RestoreContext; later: RestoreContext[] }
+  >();
+  for (const context of orderedRestoreContexts) {
+    const taskKey = isSafeEntityId(context.remoteOp.entityId)
+      ? toEntityKey(context.remoteOp.entityType, context.remoteOp.entityId)
+      : `INVALID:${context.remoteOp.id}`;
+    const group = restoreContextGroups.get(taskKey);
+    if (group) {
+      group.later.push(context);
+    } else {
+      restoreContextGroups.set(taskKey, { primary: context, later: [] });
+    }
+  }
+  const primaryRestoreContexts = [...restoreContextGroups.values()].map(
+    ({ primary }) => primary,
+  );
+
+  const primaryRestoreOpIds = new Set(
+    primaryRestoreContexts.map(({ remoteOp }) => remoteOp.id),
+  );
+  const multipleRestoreRootOpIds =
+    primaryRestoreContexts.length > 1 ? new Set(primaryRestoreOpIds) : new Set<string>();
+  const unsafeRestoreOpIds = new Set<string>();
+  for (const [taskKey, { primary: primaryContext, later }] of restoreContextGroups) {
+    const primaryIndex = batchIndex.opIndexById.get(primaryContext.remoteOp.id);
+    if (primaryIndex === undefined || !isSafeEntityId(primaryContext.remoteOp.entityId)) {
+      unsafeRestoreOpIds.add(primaryContext.remoteOp.id);
+      continue;
+    }
+    const sameTaskOps = batchIndex.opsByEntityKey.get(taskKey) ?? [];
+    let sameTaskOpIndex = 0;
+    let hasUnsafeIntermediateOp = false;
+    for (const laterRestore of later) {
+      const laterIndex = batchIndex.opIndexById.get(laterRestore.remoteOp.id);
+      if (laterIndex === undefined) {
+        unsafeRestoreOpIds.add(primaryContext.remoteOp.id);
+        unsafeRestoreOpIds.add(laterRestore.remoteOp.id);
+        continue;
+      }
+      while (
+        sameTaskOpIndex < sameTaskOps.length &&
+        sameTaskOps[sameTaskOpIndex].index < laterIndex
+      ) {
+        const { op, index } = sameTaskOps[sameTaskOpIndex];
+        if (
+          index > primaryIndex &&
+          op.actionType !== ActionType.TASK_SHARED_RESTORE &&
+          op.opType !== OpType.Update
+        ) {
+          hasUnsafeIntermediateOp = true;
+        }
+        sameTaskOpIndex++;
+      }
+      if (hasUnsafeIntermediateOp) {
+        unsafeRestoreOpIds.add(primaryContext.remoteOp.id);
+        unsafeRestoreOpIds.add(laterRestore.remoteOp.id);
+      }
+    }
+  }
+
   const createOpsByRestoreOpId = new Map<
     string,
     Array<Operation & { entityId: string }>
@@ -302,31 +435,42 @@ export const buildRestoreDependencyPlan = (
     string,
     Array<Operation & { entityId: string }>
   >();
-  for (const restoreContext of restoreContexts) {
-    const referenceKeys = getRestoreReferenceKeys([restoreContext]);
-    createOpsByRestoreOpId.set(
-      restoreContext.remoteOp.id,
-      createOps.filter((op) =>
-        referenceKeys.has(toEntityKey(op.entityType, op.entityId)),
-      ),
+  const createOpsById = new Map<string, Operation & { entityId: string }>();
+  for (const restoreContext of primaryRestoreContexts) {
+    const selection = buildRestoreDependencySelection(
+      restoreContext,
+      resolvePayloadKey,
+      batchIndex,
     );
-    candidateCreateOpsByRestoreOpId.set(
-      restoreContext.remoteOp.id,
-      findRestoreDependencyCreateCandidates(
-        [restoreContext],
-        candidates,
-        resolvePayloadKey,
-        batchOps,
-      ),
+    createOpsByRestoreOpId.set(restoreContext.remoteOp.id, selection.safeCreates);
+    candidateCreateOpsByRestoreOpId.set(restoreContext.remoteOp.id, selection.candidates);
+    selection.safeCreates.forEach((op) => createOpsById.set(op.id, op));
+    const safeEntityKeys = new Set(
+      selection.safeCreates.map((op) => toEntityKey(op.entityType, op.entityId)),
     );
+    if (
+      selection.candidates.some(
+        (op) => !safeEntityKeys.has(toEntityKey(op.entityType, op.entityId)),
+      )
+    ) {
+      unsafeRestoreOpIds.add(restoreContext.remoteOp.id);
+    }
   }
+  const createOps = [...createOpsById.values()].sort(
+    (a, b) =>
+      (batchIndex.opIndexById.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+      (batchIndex.opIndexById.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+  );
   return {
     createOps,
     createOpIds: new Set(createOps.map((op) => op.id)),
     createOpsByRestoreOpId,
     candidateCreateOpsByRestoreOpId,
     subTaskSnapshotsByOpId,
-    firstRestoreOpId: getFirstRestorePosition(restoreContexts, batchOps)?.id,
+    multipleRestoreRootOpIds,
+    primaryRestoreOpIds,
+    unsafeRestoreOpIds,
+    firstRestoreOpId: primaryRestoreContexts[0]?.remoteOp.id,
   };
 };
 
@@ -336,8 +480,7 @@ export const selectRestoreSubTaskCompensationState = (
   losing: Record<string, unknown> | undefined,
 ): Record<string, unknown> | undefined => {
   if (!current) {
-    // A child restored by the rejected undo and then removed again has an
-    // independent later delete. Do not resurrect it from the remote snapshot.
+    // A child removed after the rejected undo has an independent later delete.
     return losing ? undefined : winning;
   }
   if (!losing) return undefined;

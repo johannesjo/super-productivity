@@ -75,10 +75,7 @@ import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { SYNC_LOGGER } from '../core/sync-logger.adapter';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
-import {
-  IncompleteRemoteOperationsError,
-  OperationIntegrityError,
-} from '../core/errors/sync-errors';
+import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import { SyncConflictBannerService } from './sync-conflict-banner.service';
 import { buildConflictJournalEntry } from './conflict-journal-emission.util';
@@ -91,6 +88,20 @@ import {
 import { NOISE_FIELDS } from './conflict-journal.model';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
 import * as restoreCompensation from './remote-task-win-compensation.util';
+import {
+  assertQueuedOperationIdentity,
+  createStoredOperationReplay,
+} from './stored-operation-replay.util';
+import {
+  createRemoteTaskWinCompensations,
+  prepareRemoteTaskRestoreBatch,
+} from './remote-task-restore-coordinator.util';
+import {
+  createTaskRecreationFollowUpOperations,
+  markLwwDeleteRecreation,
+  taskRelationshipPatch,
+  type TaskRecreationFollowUpOptions,
+} from './task-recreation.util';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -108,16 +119,6 @@ interface MergedResolution {
   /** Kept so the merge is journaled only after its reducer work succeeds. */
   plan: LwwConflictResolutionPlan<EntityConflict>;
 }
-
-const taskRelationshipPatch = (
-  taskId: string,
-  taskState: Record<string, unknown>,
-): Record<string, unknown> => ({
-  id: taskId,
-  projectId: taskState['projectId'],
-  parentId: taskState['parentId'],
-  subTaskIds: taskState['subTaskIds'],
-});
 
 /** Result of `_resolveConflictsWithLWW`: LWW winners plus disjoint merges. */
 interface ResolvedConflicts {
@@ -148,6 +149,8 @@ interface AutoResolveConflictsLwwOptions {
    */
   disableConflictJournal?: boolean;
   remoteApplyLifecycleOwnedByCaller?: boolean;
+  /** The caller validates once after an ordered multi-segment replay. */
+  skipStateValidation?: boolean;
 }
 
 const isProjectDeleteWinsOperation = (operation: Operation): boolean => {
@@ -297,17 +300,6 @@ const latestProjectMoveEntityIds = (
 
   return Array.from(new Set([entityId, ...projectMoveEntityIds]));
 };
-
-const markLwwDeleteRecreation = (op: Operation): Operation =>
-  isLwwUpdatePayload(op.payload)
-    ? {
-        ...op,
-        payload: {
-          ...op.payload,
-          recreatesEntityAfterDelete: true,
-        },
-      }
-    : op;
 
 // The only legacy bulk operation whose captured per-task deltas are known to be
 // independently replayable. Do not generalize this from payload shape alone:
@@ -527,201 +519,34 @@ export class ConflictResolutionService {
   /** Re-emits child and project relationships after a TASK recovery op. */
   async createTaskRecreationFollowUpOps(
     taskOp: Operation,
-    options: {
-      entityExists?: (entityType: EntityType, entityId: string) => Promise<boolean>;
-      ensureRegularProjectMembership?: boolean;
-      restoreSubTaskSnapshots?: restoreCompensation.RestoreSubTaskCompensationSnapshots;
-      requireComplete?: boolean;
-    } = {},
+    options: TaskRecreationFollowUpOptions = {},
   ): Promise<Operation[]> {
-    if (
-      taskOp.entityType !== 'TASK' ||
-      !taskOp.entityId ||
-      !isLwwUpdatePayload(taskOp.payload) ||
-      taskOp.payload.recreatesEntityAfterDelete !== true
-    ) {
-      return [];
-    }
-    const taskState = extractActionPayload(taskOp.payload);
-    const projectId = taskState['projectId'];
-    const parentId = taskState['parentId'];
-    if (typeof projectId !== 'string') return [];
-
-    const clientId = await this.clientIdProvider.loadClientId();
-    if (!clientId) {
-      const error = new Error(
-        'ConflictResolutionService: Cannot create TASK recovery follow-ups - no client ID',
-      );
-      if (options.requireComplete === true) {
-        throw new IncompleteRemoteOperationsError(error);
-      }
-      OpLog.err(error.message);
-      return [];
-    }
-    let nextClock = this.mergeAndIncrementClocks(
-      [(await this.opLogStore.getVectorClock()) ?? {}, taskOp.vectorClock],
-      clientId,
-    );
-    const followUpOps: Operation[] = [];
-    const subTaskIds = taskState['subTaskIds'];
-    if (Array.isArray(subTaskIds)) {
-      const restoredSubTaskIds: string[] = [];
-      for (const subTaskId of new Set(
-        subTaskIds.filter((id): id is string => typeof id === 'string'),
-      )) {
-        const currentSubTaskState = await this.getCurrentEntityState(
-          'TASK' as EntityType,
-          subTaskId,
-        );
-        const currentSubTaskRecord =
-          typeof currentSubTaskState === 'object' &&
-          currentSubTaskState !== null &&
-          !Array.isArray(currentSubTaskState)
-            ? (currentSubTaskState as Record<string, unknown>)
-            : undefined;
-        const winningSubTaskState =
-          options.restoreSubTaskSnapshots?.winning.get(subTaskId);
-        const subTaskState = options.restoreSubTaskSnapshots
-          ? restoreCompensation.selectRestoreSubTaskCompensationState(
-              currentSubTaskRecord,
-              winningSubTaskState,
-              options.restoreSubTaskSnapshots.losing.get(subTaskId),
-            )
-          : currentSubTaskRecord;
-        if (subTaskState === undefined) {
-          if (
-            options.restoreSubTaskSnapshots &&
-            currentSubTaskRecord?.['parentId'] === taskOp.entityId &&
-            currentSubTaskRecord['projectId'] === projectId
-          ) {
-            restoredSubTaskIds.push(subTaskId);
-          }
-          continue;
-        }
-        restoredSubTaskIds.push(subTaskId);
-        const compensationSubTaskState =
-          options.restoreSubTaskSnapshots?.clearSubTaskSchedule === true
-            ? {
-                ...subTaskState,
-                dueDay: undefined,
-                dueWithTime: undefined,
-                remindAt: undefined,
-              }
-            : subTaskState;
-        const normalizedSubTaskState = options.restoreSubTaskSnapshots
-          ? await restoreCompensation.normalizeRestoredTaskCompensationState(
-              compensationSubTaskState,
-              options.entityExists ??
-                (async (entityType, entityId) =>
-                  (await this.getCurrentEntityState(entityType, entityId)) !== undefined),
-            )
-          : compensationSubTaskState;
-        const subTaskOp = markLwwDeleteRecreation(
-          this.createLWWUpdateOp(
-            'TASK' as EntityType,
-            subTaskId,
-            {
-              ...normalizedSubTaskState,
-              projectId,
-              ...(options.restoreSubTaskSnapshots ? { parentId: taskOp.entityId } : {}),
-            },
-            clientId,
-            nextClock,
-            taskOp.timestamp,
-          ),
-        );
-        followUpOps.push(subTaskOp);
-        nextClock = this.mergeAndIncrementClocks(
-          [nextClock, subTaskOp.vectorClock],
-          clientId,
-        );
-      }
-      if (subTaskIds.length > 0) {
-        const taskRelationshipOp = markLwwDeleteRecreation(
-          this.createLWWUpdateOp(
-            'TASK' as EntityType,
-            taskOp.entityId,
-            taskRelationshipPatch(taskOp.entityId, {
-              ...taskState,
-              ...(options.restoreSubTaskSnapshots
-                ? { subTaskIds: restoredSubTaskIds }
-                : {}),
-            }),
-            clientId,
-            nextClock,
-            taskOp.timestamp,
-            'patch',
-          ),
-        );
-        followUpOps.push(taskRelationshipOp);
-        nextClock = this.mergeAndIncrementClocks(
-          [nextClock, taskRelationshipOp.vectorClock],
-          clientId,
-        );
-      }
-    }
-
-    if (typeof parentId === 'string') {
-      const parentTaskState = await this.getCurrentEntityState(
-        'TASK' as EntityType,
-        parentId,
-      );
-      if (parentTaskState === undefined) {
-        return followUpOps;
-      }
-      followUpOps.push(
-        markLwwDeleteRecreation(
-          this.createLWWUpdateOp(
-            'TASK' as EntityType,
-            parentId,
-            taskRelationshipPatch(parentId, parentTaskState as Record<string, unknown>),
-            clientId,
-            this.mergeAndIncrementClocks([nextClock], clientId),
-            taskOp.timestamp,
-            'patch',
-          ),
-        ),
-      );
-      return followUpOps;
-    }
-
-    const projectState = await this.getCurrentEntityState(
-      'PROJECT' as EntityType,
-      projectId,
-    );
-    if (typeof projectState !== 'object' || projectState === null) {
-      return followUpOps;
-    }
-    const project = projectState as Record<string, unknown>;
-    if (!Array.isArray(project['taskIds']) || !Array.isArray(project['backlogTaskIds'])) {
-      return followUpOps;
-    }
-    const taskIds = [...project['taskIds']];
-    let backlogTaskIds = [...project['backlogTaskIds']];
-    if (options.ensureRegularProjectMembership === true) {
-      if (!taskIds.includes(taskOp.entityId)) {
-        taskIds.push(taskOp.entityId);
-      }
-      backlogTaskIds = backlogTaskIds.filter((id) => id !== taskOp.entityId);
-    }
-    followUpOps.push(
-      markLwwDeleteRecreation(
+    return createTaskRecreationFollowUpOperations(taskOp, options, {
+      createLwwUpdateOp: (
+        entityType,
+        entityId,
+        entityState,
+        clientId,
+        vectorClock,
+        timestamp,
+        lwwUpdateMode,
+      ) =>
         this.createLWWUpdateOp(
-          'PROJECT' as EntityType,
-          projectId,
-          {
-            id: projectId,
-            taskIds,
-            backlogTaskIds,
-          },
+          entityType,
+          entityId,
+          entityState,
           clientId,
-          this.mergeAndIncrementClocks([nextClock], clientId),
-          taskOp.timestamp,
-          'patch',
+          vectorClock,
+          timestamp,
+          lwwUpdateMode,
         ),
-      ),
-    );
-    return followUpOps;
+      getCurrentEntityState: (entityType, entityId) =>
+        this.getCurrentEntityState(entityType, entityId),
+      getVectorClock: () => this.opLogStore.getVectorClock(),
+      loadClientId: () => this.clientIdProvider.loadClientId(),
+      mergeAndIncrementClocks: (clocks, clientId) =>
+        this.mergeAndIncrementClocks(clocks, clientId),
+    });
   }
 
   private async _createRemoteTaskWinCompensation(
@@ -932,110 +757,22 @@ export class ConflictResolutionService {
     ];
     let remoteWinsOps = uniqueOpsById(lwwPartitions.remoteWinsOps);
     let localWinsRemoteOps = uniqueOpsById(lwwPartitions.localWinsRemoteOps);
-    const downloadedRemoteOps = options.remoteOpsInOrder ?? [
-      ...nonConflictingOps,
-      ...conflicts.flatMap((conflict) => conflict.remoteOps),
-    ];
-    const allRemoteBatchOpsById = new Map<string, Operation>();
-    for (const op of downloadedRemoteOps) {
-      const duplicate = allRemoteBatchOpsById.get(op.id);
-      if (duplicate && !this._deepEqual(duplicate, op)) {
-        throw new OperationIntegrityError(
-          `Downloaded operations with id ${op.id} do not match`,
-        );
-      }
-      allRemoteBatchOpsById.set(op.id, op);
-    }
-    const allRemoteBatchOps = [...allRemoteBatchOpsById.values()];
-    const dependencyCandidatesById = new Map(
-      [...nonConflictingOps, ...remoteWinsOps].map((op) => [op.id, op]),
-    );
-    const orderedDependencyCandidates = allRemoteBatchOps.flatMap((op) => {
-      const candidate = dependencyCandidatesById.get(op.id);
-      return candidate ? [candidate] : [];
-    });
-    const restoreDependencyPlan = restoreCompensation.buildRestoreDependencyPlan(
+    const preparedRestoreBatch = await prepareRemoteTaskRestoreBatch({
       resolutions,
-      orderedDependencyCandidates,
-      (entityType) => this._resolvePayloadKey(entityType),
-      allRemoteBatchOps,
-    );
-    const nonConflictingOpIds = new Set(nonConflictingOps.map((op) => op.id));
-    const firstRestoreIndex = restoreDependencyPlan.firstRestoreOpId
-      ? allRemoteBatchOps.findIndex(
-          (op) => op.id === restoreDependencyPlan.firstRestoreOpId,
-        )
-      : -1;
-    const remotePrefix =
-      firstRestoreIndex >= 0 ? allRemoteBatchOps.slice(0, firstRestoreIndex) : [];
-    const canReplayRestorePrefix =
-      restoreDependencyPlan.createOps.length > 0 &&
-      remotePrefix.every(
-        (op) =>
-          nonConflictingOpIds.has(op.id) || restoreDependencyPlan.createOpIds.has(op.id),
-      );
-    const restoreDependencyCreateOps = canReplayRestorePrefix
-      ? restoreDependencyPlan.createOps
-      : [];
-    const restoreDependencyCreateOpIds = new Set(
-      restoreDependencyCreateOps.map((op) => op.id),
-    );
-    // The restore is pulled into the conflict-resolution batch. Pull every
-    // preceding non-conflicting op with it so its live and restart order still
-    // matches the server. A preceding non-dependency conflict makes the prefix
-    // unsafe, in which case dependency preservation degrades to current state.
-    const restorePrefixOps = canReplayRestorePrefix
-      ? remotePrefix.filter(
-          (op) =>
-            nonConflictingOpIds.has(op.id) || restoreDependencyCreateOpIds.has(op.id),
-        )
-      : [];
-    const restorePrefixOpIds = new Set(restorePrefixOps.map((op) => op.id));
-    const remainingNonConflictingOps = nonConflictingOps.filter(
-      (op) => !restorePrefixOpIds.has(op.id),
-    );
-    remoteWinsOps = remoteWinsOps.filter((op) => !restorePrefixOpIds.has(op.id));
-    const replayableRestorePrefixOps = (
-      await Promise.all(
-        restorePrefixOps.map(async (op) => {
-          const existing = await this.opLogStore.getOpById(op.id);
-          if (!existing) {
-            return op;
-          }
-          if (!this._deepEqual(existing.op, op)) {
-            throw new OperationIntegrityError(
-              `Stored operation ${op.id} does not match the downloaded operation`,
-            );
-          }
-          if (
-            existing.source !== 'remote' ||
-            existing.applicationStatus !== 'pending' ||
-            existing.rejectedAt !== undefined ||
-            existing.reducerRejectedAt !== undefined
-          ) {
-            return undefined;
-          }
-          return op;
-        }),
-      )
-    ).filter((op): op is Operation => !!op);
-    const replayableRestoreDependencyOpIds = new Set(
-      replayableRestorePrefixOps
-        .filter((op) => restoreDependencyCreateOpIds.has(op.id))
-        .map((op) => op.id),
-    );
-    const replayableRestoreDependencyOpsByRestoreOpId = new Map(
-      [...restoreDependencyPlan.createOpsByRestoreOpId].map(
-        ([restoreOpId, createOps]) => [
-          restoreOpId,
-          createOps.filter(
-            (op) =>
-              restoreDependencyCreateOpIds.has(op.id) &&
-              replayableRestoreDependencyOpIds.has(op.id),
-          ),
-        ],
-      ),
-    );
+      conflicts,
+      nonConflictingOps,
+      remoteWinsOps,
+      remoteOpsInOrder: options.remoteOpsInOrder,
+      resolvePayloadKey: (entityType) => this._resolvePayloadKey(entityType),
+      inspectStoredOperations: (operations) =>
+        this.opLogStore.inspectStoredOperations(operations),
+      operationsEqual: (left, right) => this._deepEqual(left, right),
+    });
+    const {
+      remainingNonConflictingOps,
+      replayablePrefixOps: replayableRestorePrefixOps,
+    } = preparedRestoreBatch;
+    remoteWinsOps = preparedRestoreBatch.remoteWinsOps;
     let remoteOpsToReject = [...new Set(lwwPartitions.remoteOpsToReject)];
     const newLocalWinOps = uniqueOpsById([
       ...lwwPartitions.newLocalWinOps,
@@ -1206,74 +943,31 @@ export class ConflictResolutionService {
     // local snapshot, then restore its dependents and relationships. Persist
     // and apply the original remote row first so archive side effects and
     // status-blind restart replay stay in the same order.
-    for (const resolution of resolutions) {
-      if (resolution.winner !== 'remote') {
-        continue;
-      }
-      for (const remoteOp of resolution.conflict.remoteOps) {
-        const restoreSubTaskSnapshots = restoreDependencyPlan.subTaskSnapshotsByOpId.get(
-          remoteOp.id,
-        );
-        const restoreDependencyOps =
-          replayableRestoreDependencyOpsByRestoreOpId.get(remoteOp.id) ?? [];
-        const candidateRestoreDependencyOps =
-          restoreDependencyPlan.candidateCreateOpsByRestoreOpId.get(remoteOp.id) ?? [];
-        const restoreDependencyEntityKeys = new Set(
-          restoreDependencyOps.map((op) => toEntityKey(op.entityType, op.entityId)),
-        );
-        const restoreEntityExists = async (
-          entityType: EntityType,
-          entityId: string,
-        ): Promise<boolean> =>
-          restoreDependencyEntityKeys.has(toEntityKey(entityType, entityId)) ||
-          (await this.getCurrentEntityState(entityType, entityId)) !== undefined;
-        // A later same-batch create would make normalization lossy here. Keep
-        // the original remote winner instead of uploading a stripped snapshot.
-        const hasDeferredRestoreDependency = (
-          await Promise.all(
-            candidateRestoreDependencyOps.map(async (op) => {
-              if (await restoreEntityExists(op.entityType, op.entityId)) {
-                return false;
-              }
-              const existing = await this.opLogStore.getOpById(op.id);
-              return (
-                !existing ||
-                (existing.source === 'remote' &&
-                  existing.applicationStatus === 'pending' &&
-                  existing.rejectedAt === undefined &&
-                  existing.reducerRejectedAt === undefined)
-              );
-            }),
-          )
-        ).some(Boolean);
-        if (hasDeferredRestoreDependency) {
-          continue;
-        }
-        const compensationOp = await this._createRemoteTaskWinCompensation(
-          resolution.conflict,
+    const remoteTaskCompensations = await createRemoteTaskWinCompensations({
+      preparedBatch: preparedRestoreBatch,
+      resolutions,
+      getCurrentEntityState: (entityType, entityId) =>
+        this.getCurrentEntityState(entityType, entityId),
+      createCompensation: (conflict, remoteOp, snapshots, entityExists) =>
+        this._createRemoteTaskWinCompensation(
+          conflict,
           remoteOp,
-          restoreSubTaskSnapshots,
-          restoreEntityExists,
-        );
-        if (!compensationOp) continue;
-        newLocalWinOps.push(compensationOp);
-        compensationOpIdsToApply.add(compensationOp.id);
-        const followUpOps = await this.createTaskRecreationFollowUpOps(compensationOp, {
-          ensureRegularProjectMembership:
-            remoteOp.actionType === ActionType.TASK_SHARED_MOVE_TO_PROJECT ||
-            remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
-          restoreSubTaskSnapshots,
-          requireComplete: remoteOp.actionType === ActionType.TASK_SHARED_RESTORE,
-          entityExists: restoreEntityExists,
-        });
-        for (const followUpOp of followUpOps) {
-          newLocalWinOps.push(followUpOp);
-          compensationOpIdsToApply.add(followUpOp.id);
-        }
-        compensatedRemoteOps.set(remoteOp.id, remoteOp);
-        remoteWinsOps = remoteWinsOps.filter((op) => op.id !== remoteOp.id);
-      }
-    }
+          snapshots,
+          entityExists,
+        ),
+      createFollowUpOps: (compensationOp, followUpOptions) =>
+        this.createTaskRecreationFollowUpOps(compensationOp, followUpOptions),
+    });
+    newLocalWinOps.push(...remoteTaskCompensations.compensationOps);
+    remoteTaskCompensations.compensationOpIds.forEach((opId) =>
+      compensationOpIdsToApply.add(opId),
+    );
+    remoteTaskCompensations.compensatedRemoteOps.forEach((op, opId) =>
+      compensatedRemoteOps.set(opId, op),
+    );
+    remoteWinsOps = remoteWinsOps.filter(
+      (op) => !remoteTaskCompensations.remoteWinOpIdsToRemove.has(op.id),
+    );
 
     const newLocalWinOpsById = new Map(newLocalWinOps.map((op) => [op.id, op]));
 
@@ -1486,14 +1180,18 @@ export class ConflictResolutionService {
     remoteOpsToReject = remoteOpsToReject.filter(
       (opId) => !compensatedRemoteOpIds.has(opId),
     );
-    await this._assertStoredOperationIdentity([
+    const queuedRemoteOps = [
       ...unappliedRemoteLosers,
       ...replayableRestorePrefixOps,
       ...compensatedRemoteOps.values(),
       ...remoteWinsOps,
       ...remainingNonConflictingOps,
       ...mergedResolutions.flatMap((merged) => merged.conflict.remoteOps),
-    ]);
+    ];
+    assertQueuedOperationIdentity(queuedRemoteOps, (left, right) =>
+      this._deepEqual(left, right),
+    );
+    await this.opLogStore.inspectStoredOperations(queuedRemoteOps);
 
     if (localWinsRemoteOps.length > 0 || newLocalWinOps.length > 0) {
       const resolutionBatches: MixedSourceOperationBatch[] = [];
@@ -1522,8 +1220,13 @@ export class ConflictResolutionService {
           options: { pendingApply: true },
         });
       }
-      const result =
-        await this.opLogStore.appendMixedSourceBatchSkipDuplicates(resolutionBatches);
+      const storedOperationReplay = createStoredOperationReplay((left, right) =>
+        this._deepEqual(left, right),
+      );
+      const result = await this.opLogStore.appendMixedSourceBatchSkipDuplicates(
+        resolutionBatches,
+        storedOperationReplay.onStoredRemoteDuplicate,
+      );
       writtenLocalWinOps = result.written
         .filter((entry) => entry.source === 'local')
         .map((entry) => entry.op);
@@ -1539,7 +1242,7 @@ export class ConflictResolutionService {
         );
       }
 
-      const replayableRemoteEntries = await this._resolveReplayableOperations(
+      const replayableRemoteEntries = storedOperationReplay.resolveReplayableOperations(
         [
           ...replayableRestorePrefixOps,
           ...compensatedRemoteOps.values(),
@@ -1663,17 +1366,23 @@ export class ConflictResolutionService {
       // safety), and the batch rebases each merged op on the durable clock so a
       // synthetic op cannot reuse or regress this client's counter. The rebased
       // clock still dominates both original sides.
-      const mergeBatch = await this.opLogStore.appendMixedSourceBatchSkipDuplicates([
-        {
-          ops: mergedResolutions.flatMap((merged) => merged.conflict.remoteOps),
-          source: 'remote',
-          options: { pendingApply: true },
-        },
-        {
-          ops: mergedResolutions.map((merged) => merged.mergedOp),
-          source: 'local',
-        },
-      ]);
+      const storedOperationReplay = createStoredOperationReplay((left, right) =>
+        this._deepEqual(left, right),
+      );
+      const mergeBatch = await this.opLogStore.appendMixedSourceBatchSkipDuplicates(
+        [
+          {
+            ops: mergedResolutions.flatMap((merged) => merged.conflict.remoteOps),
+            source: 'remote',
+            options: { pendingApply: true },
+          },
+          {
+            ops: mergedResolutions.map((merged) => merged.mergedOp),
+            source: 'local',
+          },
+        ],
+        storedOperationReplay.onStoredRemoteDuplicate,
+      );
       if (mergeBatch.skippedCount > 0) {
         OpLog.verbose(
           `ConflictResolutionService: Skipped ${mergeBatch.skippedCount} duplicate merge-resolution op(s)`,
@@ -1953,8 +1662,10 @@ export class ConflictResolutionService {
     // Validation failure flips the SyncSessionValidationService latch — the
     // wrapper reads it before deciding IN_SYNC vs ERROR. (#7330)
     // ─────────────────────────────────────────────────────────────────────────
-    const isValid = await this._validateAndRepairAfterResolution();
-    if (!isValid) this.sessionValidation.setFailed();
+    if (!options.skipStateValidation) {
+      const isValid = await this._validateAndRepairAfterResolution();
+      if (!isValid) this.sessionValidation.setFailed();
+    }
 
     // Count both LWW local-win ops AND disjoint-merge ops (STEP 3b): each merge
     // appended a synthesized pending-local op that still needs uploading. The
@@ -4279,86 +3990,33 @@ export class ConflictResolutionService {
    * @param options - Options for appendBatchSkipDuplicates (e.g., pendingApply)
    * @returns Object containing the written ops and their sequence numbers
    */
-  private async _assertStoredOperationIdentity(ops: readonly Operation[]): Promise<void> {
-    const opsById = new Map<string, Operation>();
-    for (const op of ops) {
-      const duplicate = opsById.get(op.id);
-      if (duplicate && !this._deepEqual(duplicate, op)) {
-        throw new OperationIntegrityError(
-          `Operations queued with id ${op.id} do not match`,
-        );
-      }
-      opsById.set(op.id, op);
-    }
-    await Promise.all(
-      [...opsById.values()].map(async (op) => {
-        const existing = await this.opLogStore.getOpById(op.id);
-        if (existing && !this._deepEqual(existing.op, op)) {
-          throw new OperationIntegrityError(
-            `Stored operation ${op.id} does not match the downloaded operation`,
-          );
-        }
-      }),
-    );
-  }
-
   private async _filterAndAppendOpsWithRetry(
     ops: Operation[],
     source: 'local' | 'remote',
     options?: { pendingApply?: boolean },
   ): Promise<{ ops: Operation[]; seqs: number[] }> {
-    const result = await this.opLogStore.appendBatchSkipDuplicates(ops, source, options);
+    const storedOperationReplay = createStoredOperationReplay((left, right) =>
+      this._deepEqual(left, right),
+    );
+    const result = await this.opLogStore.appendBatchSkipDuplicates(
+      ops,
+      source,
+      options,
+      storedOperationReplay.onStoredRemoteDuplicate,
+    );
     const written: MixedSourceWrittenOperation[] = result.writtenOps.map((op, index) => ({
       op,
       seq: result.seqs[index],
       source,
     }));
-    const replayable = await this._resolveReplayableOperations(ops, source, written);
+    const replayable = storedOperationReplay.resolveReplayableOperations(
+      ops,
+      source,
+      written,
+    );
     return {
       ops: replayable.map((entry) => entry.op),
       seqs: replayable.map((entry) => entry.seq),
     };
-  }
-
-  private async _resolveReplayableOperations(
-    ops: readonly Operation[],
-    source: 'local' | 'remote',
-    written: readonly MixedSourceWrittenOperation[],
-  ): Promise<Array<{ op: Operation; seq: number }>> {
-    const writtenByOpId = new Map(
-      written
-        .filter((entry) => entry.source === source)
-        .map((entry) => [entry.op.id, entry]),
-    );
-    const replayable = await Promise.all(
-      ops.map(async (op) => {
-        const writtenEntry = writtenByOpId.get(op.id);
-        if (writtenEntry) {
-          return { op: writtenEntry.op, seq: writtenEntry.seq };
-        }
-
-        // A reducer failure deliberately leaves the durable remote row pending.
-        // On the next sync, deduplication finds that row instead of inserting it;
-        // reuse its sequence so the recovered reducer can be retried and
-        // checkpointed. Applied, archive-pending, failed, or rejected rows must
-        // not be reducer-dispatched again.
-        const existing = await this.opLogStore.getOpById(op.id);
-        if (existing && !this._deepEqual(existing.op, op)) {
-          throw new OperationIntegrityError(
-            `Stored operation ${op.id} does not match the queued operation`,
-          );
-        }
-        return existing?.source === source &&
-          existing.applicationStatus === 'pending' &&
-          existing.rejectedAt === undefined &&
-          existing.reducerRejectedAt === undefined
-          ? { op: existing.op, seq: existing.seq }
-          : undefined;
-      }),
-    );
-    const pendingOps = replayable.filter(
-      (entry): entry is { op: Operation; seq: number } => entry !== undefined,
-    );
-    return pendingOps;
   }
 }

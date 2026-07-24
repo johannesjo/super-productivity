@@ -31,6 +31,7 @@ import {
   MAX_VECTOR_CLOCK_SIZE,
 } from '../core/operation-log.const';
 import { IndexedDBOpenError } from '../core/errors/indexed-db-open.error';
+import { OperationIntegrityError } from '../core/errors/sync-errors';
 import {
   FULL_STATE_OPS_META_KEY,
   OPS_INDEXES,
@@ -1618,6 +1619,46 @@ describe('OperationLogStoreService', () => {
       expect(storedOps.length).toBe(1);
     });
 
+    it('should report a matching stored remote duplicate inside the transaction', async () => {
+      const existingOp = {
+        ...createTestOperation({ id: 'existing-remote' }),
+        entityIds: undefined,
+      };
+      await service.append(existingOp, 'remote');
+      const observedExistingIds: string[] = [];
+
+      const result = await service.appendBatchSkipDuplicates(
+        [{ ...existingOp }],
+        'remote',
+        undefined,
+        (existing) => {
+          observedExistingIds.push(existing.op.id);
+          return true;
+        },
+      );
+
+      expect(result.skippedCount).toBe(1);
+      expect(observedExistingIds).toEqual([existingOp.id]);
+    });
+
+    it('should validate a stored remote duplicate inside the append transaction', async () => {
+      const existingOp = createTestOperation({ id: 'existing-remote' });
+      const freshOp = createTestOperation({ id: 'fresh-remote' });
+      const mismatchedDuplicate = {
+        ...existingOp,
+        vectorClock: { otherClient: 9 },
+      };
+      await service.append(existingOp, 'remote');
+
+      await expectAsync(
+        service.appendBatchSkipDuplicates([freshOp, mismatchedDuplicate], 'remote'),
+      ).toBeRejectedWithError(OperationIntegrityError);
+
+      expect((await service.getOpsAfterSeq(0)).map(({ op }) => op.id)).toEqual([
+        existingOp.id,
+      ]);
+    });
+
     it('should append snapshot-included ops and atomically advance the state-cache frontier', async () => {
       const existingOp = createTestOperation({ id: 'snapshot-op-existing' });
       const newOp = createTestOperation({ id: 'snapshot-op-new' });
@@ -1634,6 +1675,30 @@ describe('OperationLogStoreService', () => {
       expect(result.writtenOps).toEqual([newOp]);
       expect(result.skippedCount).toBe(1);
       expect((await service.loadStateCache())?.lastAppliedOpSeq).toBe(2);
+    });
+
+    it('should reject a mismatched duplicate before advancing the snapshot frontier', async () => {
+      const existingOp = createTestOperation({ id: 'snapshot-op-existing' });
+      const mismatchedDuplicate = {
+        ...existingOp,
+        timestamp: existingOp.timestamp + 1,
+      };
+      await service.append(existingOp, 'remote');
+      await service.saveStateCache({
+        state: { task: { ids: ['task1'] } },
+        lastAppliedOpSeq: 1,
+        vectorClock: { testClient: 1 },
+        compactedAt: 1,
+      });
+
+      await expectAsync(
+        service.appendSnapshotIncludedOps([mismatchedDuplicate]),
+      ).toBeRejectedWithError(OperationIntegrityError);
+
+      expect((await service.loadStateCache())?.lastAppliedOpSeq).toBe(1);
+      expect((await service.getOpsAfterSeq(0)).map(({ op }) => op.id)).toEqual([
+        existingOp.id,
+      ]);
     });
 
     it('should not append snapshot-included ops without an existing state cache', async () => {
@@ -1713,6 +1778,31 @@ describe('OperationLogStoreService', () => {
       expect((await db.get(STORE_NAMES.ARCHIVE_OLD, SINGLETON_KEY)).data).toEqual(
         archiveOld,
       );
+    });
+
+    it('should reject a mismatched duplicate before committing a file baseline', async () => {
+      const existingOp = createTestOperation({ id: 'file-snapshot-existing' });
+      await service.append(existingOp, 'remote');
+
+      await expectAsync(
+        service.commitFileSnapshotBaseline({
+          state: { sentinel: 'new-state' },
+          lastAppliedOpSeq: 1,
+          vectorClock: { remote: 2 },
+          compactedAt: 2,
+          snapshotIncludedOps: [
+            {
+              ...existingOp,
+              vectorClock: { remote: 9 },
+            },
+          ],
+        }),
+      ).toBeRejectedWithError(OperationIntegrityError);
+
+      expect((await service.getOpsAfterSeq(0)).map(({ op }) => op.id)).toEqual([
+        existingOp.id,
+      ]);
+      expect(await service.loadStateCache()).toBeNull();
     });
 
     it('should roll back the whole file baseline when its vector-clock write fails', async () => {
@@ -1915,6 +2005,40 @@ describe('OperationLogStoreService', () => {
       expect((await service.getVectorClock())?.testClient).toBe(3);
     });
 
+    it('should roll back mixed writes when remote duplicate validation fails', async () => {
+      await service.setVectorClock({ testClient: 2 });
+      const existingRemote = createTestOperation({
+        id: 'existing-remote',
+        clientId: 'remoteClient',
+      });
+      const freshRemote = createTestOperation({
+        id: 'fresh-remote',
+        clientId: 'remoteClient',
+      });
+      const compensation = createTestOperation({
+        id: 'compensation',
+        vectorClock: { testClient: 1 },
+      });
+      await service.append(existingRemote, 'remote');
+
+      await expectAsync(
+        service.appendMixedSourceBatchSkipDuplicates([
+          { ops: [freshRemote], source: 'remote' },
+          { ops: [compensation], source: 'local' },
+          {
+            ops: [{ ...existingRemote, timestamp: existingRemote.timestamp + 1 }],
+            source: 'remote',
+          },
+        ]),
+      ).toBeRejectedWithError(OperationIntegrityError);
+
+      expect((await service.getOpsAfterSeq(0)).map(({ op }) => op.id)).toEqual([
+        existingRemote.id,
+      ]);
+      service.clearVectorClockCache();
+      expect(await service.getVectorClock()).toEqual({ testClient: 2 });
+    });
+
     it('should roll back both source groups and the clock when the clock write fails', async () => {
       await service.setVectorClock({ testClient: 4 });
       const adapter = (
@@ -1982,6 +2106,41 @@ describe('OperationLogStoreService', () => {
       const entry = await service.getOpById('non-existent-id');
 
       expect(entry).toBeUndefined();
+    });
+
+    it('should inspect selected stored operations in one batch', async () => {
+      const first = createTestOperation({ id: 'first' });
+      const second = createTestOperation({ id: 'second' });
+      await service.appendBatch([first, second]);
+
+      const entries = await service.inspectStoredOperations([
+        second,
+        createTestOperation({ id: 'missing' }),
+        first,
+        { ...second },
+      ]);
+
+      expect([...entries.keys()]).toEqual([second.id, first.id]);
+      expect(entries.get(first.id)?.seq).toBe(1);
+      expect(entries.has('missing')).toBeFalse();
+
+      await expectAsync(
+        service.inspectStoredOperations([{ ...first, timestamp: first.timestamp + 1 }]),
+      ).toBeRejectedWithError(OperationIntegrityError);
+    });
+
+    it('should compare stored operations after schema migration', async () => {
+      const stored = createTestOperation({
+        id: 'stored-before-schema-bump',
+        schemaVersion: 3,
+      });
+      await service.append(stored, 'remote');
+
+      const entries = await service.inspectStoredOperations([
+        { ...stored, schemaVersion: 4 },
+      ]);
+
+      expect(entries.has(stored.id)).toBeTrue();
     });
   });
 

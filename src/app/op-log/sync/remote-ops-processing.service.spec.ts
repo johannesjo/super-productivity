@@ -63,6 +63,23 @@ describe('RemoteOpsProcessingService', () => {
     await options?.onReducersCommitted?.(ops);
     return { appliedOps: ops };
   };
+  const createOperation = (
+    id: string,
+    actionType: ActionType,
+    entityType: Operation['entityType'],
+    entityId: string,
+  ): Operation => ({
+    id,
+    actionType,
+    opType: OpType.Update,
+    entityType,
+    entityId,
+    payload: {},
+    clientId: 'remote',
+    vectorClock: { remote: 1 },
+    timestamp: 1,
+    schemaVersion: 1,
+  });
 
   beforeEach(() => {
     storeSpy = jasmine.createSpyObj('Store', ['select']);
@@ -98,6 +115,7 @@ describe('RemoteOpsProcessingService', () => {
       'getLatestFullStateOp',
       'getLatestFullStateOpEntry',
       'getOpById',
+      'inspectStoredOperations',
       'markRejected',
       'clearFullStateOps',
       'clearFullStateOpsExcept',
@@ -109,6 +127,7 @@ describe('RemoteOpsProcessingService', () => {
     opLogStoreSpy.getVectorClock.and.resolveTo(null);
     opLogStoreSpy.getUnsynced.and.resolveTo([]);
     opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
+    opLogStoreSpy.inspectStoredOperations.and.resolveTo(new Map());
     // By default, appendBatchSkipDuplicates writes all ops (no duplicates)
     opLogStoreSpy.appendBatchSkipDuplicates.and.callFake((ops: any[]) =>
       Promise.resolve({
@@ -492,6 +511,290 @@ describe('RemoteOpsProcessingService', () => {
       const resolveOptions =
         conflictResolutionServiceSpy.autoResolveConflictsLWW.calls.mostRecent().args[2];
       expect(resolveOptions?.disableDisjointMerge).toBeFalsy();
+    });
+
+    it('should resolve restore pages in ordered segments when conflicts span restore boundaries', async () => {
+      const projectCreate = {
+        ...createOperation(
+          'project-create',
+          ActionType.PROJECT_ADD,
+          'PROJECT',
+          'project',
+        ),
+        opType: OpType.Create,
+      };
+      const unrelatedConflict = createOperation(
+        'unrelated-conflict',
+        ActionType.TASK_SHARED_UPDATE,
+        'TASK',
+        'unrelated-task',
+      );
+      const firstRestore = createOperation(
+        'first-restore',
+        ActionType.TASK_SHARED_RESTORE,
+        'TASK',
+        'first-task',
+      );
+      const secondRestore = createOperation(
+        'second-restore',
+        ActionType.TASK_SHARED_RESTORE,
+        'TASK',
+        'second-task',
+      );
+      const segments = [
+        [projectCreate, unrelatedConflict],
+        [firstRestore],
+        [secondRestore],
+      ];
+      const localOp = createOperation(
+        'local-op',
+        ActionType.TASK_SHARED_UPDATE,
+        'TASK',
+        'local-task',
+      );
+      let detectionCall = 0;
+      spyOn(service, 'detectConflicts').and.callFake(async (ops) => {
+        if (detectionCall === 0) {
+          detectionCall++;
+          expect(ops).toEqual([
+            projectCreate,
+            unrelatedConflict,
+            firstRestore,
+            secondRestore,
+          ]);
+          return {
+            nonConflicting: [projectCreate],
+            conflicts: [
+              {
+                entityType: unrelatedConflict.entityType,
+                entityId: unrelatedConflict.entityId!,
+                localOps: [localOp],
+                remoteOps: [unrelatedConflict],
+                suggestedResolution: 'manual',
+              },
+              {
+                entityType: firstRestore.entityType,
+                entityId: firstRestore.entityId!,
+                localOps: [localOp],
+                remoteOps: [firstRestore],
+                suggestedResolution: 'manual',
+              },
+              {
+                entityType: secondRestore.entityType,
+                entityId: secondRestore.entityId!,
+                localOps: [localOp],
+                remoteOps: [secondRestore],
+                suggestedResolution: 'manual',
+              },
+            ],
+          };
+        }
+        const segment = segments[detectionCall - 1];
+        expect(ops).toEqual(segment);
+        const conflictOp = ops[ops.length - 1];
+        detectionCall++;
+        return {
+          nonConflicting: ops.slice(0, -1),
+          conflicts: [
+            {
+              entityType: conflictOp.entityType,
+              entityId: conflictOp.entityId!,
+              localOps: [localOp],
+              remoteOps: [conflictOp],
+              suggestedResolution: 'manual',
+            },
+          ],
+        };
+      });
+      vectorClockServiceSpy.getEntityFrontier.and.resolveTo(new Map());
+      conflictResolutionServiceSpy.autoResolveConflictsLWW.and.resolveTo({
+        localWinOpsCreated: 1,
+      });
+
+      const result = await service.processRemoteOps([
+        projectCreate,
+        unrelatedConflict,
+        firstRestore,
+        secondRestore,
+      ]);
+
+      expect(detectionCall).toBe(segments.length + 1);
+      expect(result.localWinOpsCreated).toBe(segments.length);
+      expect(
+        conflictResolutionServiceSpy.autoResolveConflictsLWW.calls
+          .allArgs()
+          .map((args) => args[2]?.remoteOpsInOrder),
+      ).toEqual(segments);
+      for (const args of conflictResolutionServiceSpy.autoResolveConflictsLWW.calls.allArgs()) {
+        expect(args[2]).toEqual(
+          jasmine.objectContaining({
+            skipStateValidation: true,
+          }),
+        );
+      }
+      expect(validateStateServiceSpy.validateAndRepairCurrentState).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+
+    it('should resolve a conflicted prefix before a single restore', async () => {
+      const prefixConflict = createOperation(
+        'prefix-conflict',
+        ActionType.TASK_SHARED_UPDATE,
+        'TASK',
+        'other-task',
+      );
+      const restore = createOperation(
+        'restore',
+        ActionType.TASK_SHARED_RESTORE,
+        'TASK',
+        'restored-task',
+      );
+      const segments = [[prefixConflict], [restore]];
+      const localOp = createOperation(
+        'local-op',
+        ActionType.TASK_SHARED_UPDATE,
+        'TASK',
+        'local-task',
+      );
+      let detectionCall = 0;
+      spyOn(service, 'detectConflicts').and.callFake(async (ops) => {
+        detectionCall++;
+        if (detectionCall === 1) {
+          return {
+            nonConflicting: [],
+            conflicts: [
+              {
+                entityType: prefixConflict.entityType,
+                entityId: prefixConflict.entityId!,
+                localOps: [localOp],
+                remoteOps: [prefixConflict],
+                suggestedResolution: 'manual',
+              },
+            ],
+          };
+        }
+        const expectedSegment = segments[detectionCall - 2];
+        expect(ops).toEqual(expectedSegment);
+        const conflictOp = ops[0];
+        return {
+          nonConflicting: [],
+          conflicts: [
+            {
+              entityType: conflictOp.entityType,
+              entityId: conflictOp.entityId!,
+              localOps: [localOp],
+              remoteOps: [conflictOp],
+              suggestedResolution: 'manual',
+            },
+          ],
+        };
+      });
+      vectorClockServiceSpy.getEntityFrontier.and.resolveTo(new Map());
+      conflictResolutionServiceSpy.autoResolveConflictsLWW.and.resolveTo({
+        localWinOpsCreated: 1,
+      });
+
+      const result = await service.processRemoteOps([prefixConflict, restore]);
+
+      expect(detectionCall).toBe(3);
+      expect(result.localWinOpsCreated).toBe(2);
+      expect(
+        conflictResolutionServiceSpy.autoResolveConflictsLWW.calls
+          .allArgs()
+          .map((args) => args[2]?.remoteOpsInOrder),
+      ).toEqual(segments);
+    });
+
+    it('should resolve a skipped prefix before a single restore', async () => {
+      const dependencyCreate = {
+        ...createOperation(
+          'project-create',
+          ActionType.PROJECT_ADD,
+          'PROJECT',
+          'project',
+        ),
+        opType: OpType.Create,
+      };
+      const skippedPrefix = createOperation(
+        'skipped-prefix',
+        ActionType.TASK_SHARED_UPDATE,
+        'TASK',
+        'other-task',
+      );
+      const restore = createOperation(
+        'restore',
+        ActionType.TASK_SHARED_RESTORE,
+        'TASK',
+        'restored-task',
+      );
+      const localOp = createOperation(
+        'local-op',
+        ActionType.TASK_SHARED_UPDATE,
+        'TASK',
+        'local-task',
+      );
+      const fullPage = [dependencyCreate, skippedPrefix, restore];
+      let detectionCall = 0;
+      spyOn(service, 'detectConflicts').and.callFake(async (ops) => {
+        detectionCall++;
+        if (detectionCall === 1) {
+          expect(ops).toEqual(fullPage);
+          return {
+            nonConflicting: [dependencyCreate],
+            conflicts: [
+              {
+                entityType: restore.entityType,
+                entityId: restore.entityId!,
+                localOps: [localOp],
+                remoteOps: [restore],
+                suggestedResolution: 'manual',
+              },
+            ],
+          };
+        }
+        if (detectionCall === 2) {
+          expect(ops).toEqual([dependencyCreate, skippedPrefix]);
+          return { nonConflicting: [dependencyCreate], conflicts: [] };
+        }
+        expect(ops).toEqual([restore]);
+        return {
+          nonConflicting: [],
+          conflicts: [
+            {
+              entityType: restore.entityType,
+              entityId: restore.entityId!,
+              localOps: [localOp],
+              remoteOps: [restore],
+              suggestedResolution: 'manual',
+            },
+          ],
+        };
+      });
+      spyOn(service, 'applyNonConflictingOps').and.resolveTo([]);
+      vectorClockServiceSpy.getEntityFrontier.and.resolveTo(new Map());
+      conflictResolutionServiceSpy.autoResolveConflictsLWW.and.resolveTo({
+        localWinOpsCreated: 1,
+      });
+
+      await service.processRemoteOps(fullPage);
+
+      expect(detectionCall).toBe(3);
+      expect(service.applyNonConflictingOps).toHaveBeenCalledOnceWith(
+        [dependencyCreate],
+        true,
+        { skipDeferredActionDrain: true },
+      );
+      expect(
+        conflictResolutionServiceSpy.autoResolveConflictsLWW,
+      ).toHaveBeenCalledOnceWith(
+        jasmine.any(Array),
+        [],
+        jasmine.objectContaining({
+          remoteOpsInOrder: [restore],
+          skipStateValidation: true,
+        }),
+      );
     });
 
     it('should drop operations if migrateOperation returns null', async () => {

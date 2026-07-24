@@ -116,6 +116,7 @@ export const assertTaskRestoreOperationIntegrity = (
       ? extractedPayload
       : undefined;
   const task = actionPayload?.['task'];
+  const restoreToToday = actionPayload?.['restoreToToday'];
   const entityId = op.entityId;
   const isValid =
     op.entityType === 'TASK' &&
@@ -131,7 +132,11 @@ export const assertTaskRestoreOperationIntegrity = (
     isCompleteTaskRestoreSnapshot(task) &&
     task['id'] === entityId &&
     Array.isArray(actionPayload?.['subTasks']) &&
-    actionPayload['subTasks'].every(isCompleteTaskRestoreSnapshot);
+    actionPayload['subTasks'].every(isCompleteTaskRestoreSnapshot) &&
+    (restoreToToday === undefined ||
+      (isRecord(restoreToToday) &&
+        isValidDbDate(restoreToToday['today']) &&
+        isFiniteNumber(restoreToToday['startOfNextDayDiffMs'])));
 
   if (isValid) {
     return;

@@ -170,6 +170,29 @@ describe('assertDecryptedOpMetadataIntegrity', () => {
         assertDecryptedOpMetadataIntegrity(op, authenticatedPayload),
       ).toThrowError(OperationIntegrityError);
     });
+
+    it('throws when an authenticated restore contains an invalid day marker', () => {
+      const op = createOp({
+        actionType: ActionType.TASK_SHARED_RESTORE,
+        opType: OpType.Update,
+        entityType: 'TASK',
+      });
+      const authenticatedPayload = {
+        actionPayload: {
+          task: createTaskRestoreSnapshot('task-123'),
+          subTasks: [],
+          restoreToToday: {
+            today: '2026-99-99',
+            startOfNextDayDiffMs: 0,
+          },
+        },
+        entityChanges: [],
+      };
+
+      expect(() =>
+        assertDecryptedOpMetadataIntegrity(op, authenticatedPayload),
+      ).toThrowError(OperationIntegrityError);
+    });
   });
 
   describe('accepts legitimate ops (no false positives)', () => {

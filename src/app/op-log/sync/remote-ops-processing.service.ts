@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { applyRemoteOperations } from '@sp/sync-core';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import {
+  ActionType,
   ConflictResult,
   EntityConflict,
   extractFullStateFromPayload,
@@ -39,6 +40,36 @@ import {
 } from '../../features/config/local-only-sync-settings.util';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
+
+const isSemanticTaskRestore = (operation: Operation): boolean =>
+  operation.actionType === ActionType.TASK_SHARED_RESTORE;
+
+const splitAroundSemanticTaskRestores = (
+  operations: readonly Operation[],
+): Operation[][] => {
+  const segments: Operation[][] = [];
+  let current: Operation[] = [];
+  for (const operation of operations) {
+    if (isSemanticTaskRestore(operation)) {
+      if (current.length > 0) {
+        segments.push(current);
+        current = [];
+      }
+      segments.push([operation]);
+    } else {
+      current.push(operation);
+    }
+  }
+  if (current.length > 0) {
+    segments.push(current);
+  }
+  return segments;
+};
+
+const hasConflictedSemanticTaskRestore = (
+  conflicts: readonly EntityConflict[],
+): boolean =>
+  conflicts.some((conflict) => conflict.remoteOps.some(isSemanticTaskRestore));
 
 /**
  * Handles the core pipeline for processing remote operations.
@@ -420,32 +451,28 @@ export class RemoteOpsProcessingService {
     // resurrecting archived entities via LWW Update (Bug B).
     await this.writeFlushService.flushPendingWrites();
 
-    // Acquire the same lock used by writeOperation effects.
-    // This ensures no NEW writes can start while we read the frontier,
-    // detect conflicts, AND apply resolutions.
+    const callerHoldsOperationLogLock = options?.callerHoldsOperationLogLock ?? false;
+    const runWithOperationLogLock = async <T>(callback: () => Promise<T>): Promise<T> =>
+      callerHoldsOperationLogLock
+        ? callback()
+        : this.lockService.request(LOCK_NAMES.OPERATION_LOG, callback);
+    if (!callerHoldsOperationLogLock) {
+      await this.writeFlushService.flushPendingWrites();
+    }
+
     let localWinOpsCreated = 0;
-    await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
-      // #9074: asserted AFTER the lock wait — a stale cycle that queued behind
-      // a destructive replacement must not apply old-epoch ops onto it.
-      this.providerManager.assertSyncEpochUnchanged(
-        options?.fenceEpoch,
-        'remote-ops apply',
-      );
-      const { frontier: appliedFrontierByEntity, retainedOpsByEntity } =
-        await this.vectorClockService.getEntityFrontierWithOps();
-      const conflictResult = await this.detectConflicts(
-        validOps,
-        appliedFrontierByEntity,
-        retainedOpsByEntity,
-      );
+    const processSegment = async (
+      segmentOps: Operation[],
+      conflictResult: ConflictResult,
+      deferValidation: boolean,
+    ): Promise<void> => {
       const { nonConflicting, conflicts } = conflictResult;
 
-      // ─────────────────────────────────────────────────────────────────────────
+      // ───────────────────────────────────────────────────────────────────────
       // STEP 5: Handle Results - Auto-Resolve Conflicts with LWW
-      // IMPORTANT: If conflicts exist, we must NOT apply non-conflicting ops first.
-      // They may depend on entities in the conflict (e.g., Task depends on Project).
-      // Instead, piggyback them to ConflictResolutionService for batched application.
-      // ─────────────────────────────────────────────────────────────────────────
+      // IMPORTANT: Within one segment, non-conflicting ops stay piggybacked
+      // with its conflicts because they may be dependencies.
+      // ───────────────────────────────────────────────────────────────────────
       if (conflicts.length > 0) {
         OpLog.warn(
           `RemoteOpsProcessingService: Detected ${conflicts.length} conflicts. Auto-resolving with LWW.`,
@@ -459,46 +486,82 @@ export class RemoteOpsProcessingService {
             })),
           },
         );
-        // Auto-resolve conflicts using Last-Write-Wins strategy.
-        // Piggyback non-conflicting ops so they're applied with resolved conflicts.
-        // Validation failure is surfaced via the session-validation latch.
-        //
-        // PRODUCER FREEZE (journal half) for the conflict-review rollback, set
-        // here at the only production entry point so the producer stops at the
-        // fleet boundary while the service keeps the capability intact:
-        //  - disableConflictJournal: stop persisting the discarded side of a
-        //    conflict verbatim, so that device-local data obligation does not
-        //    expand beyond the edge/internal builds that already carry it.
-        // Reverting the freeze = drop that line.
-        //
-        // The disjoint-merge half of the original #9061 freeze was UNFROZEN for
-        // #9095: with the merge disabled, concurrent edits to DIFFERENT fields
-        // of one entity resolve by whole-entity LWW and the earlier side's edit
-        // is silently and permanently lost on every client (a rename dies when
-        // another device marks the task done). The merged op is a standard LWW
-        // Update whose 'patch' payload released clients apply via updateOne, so
-        // re-enabling it ships no wire format they cannot handle.
+        // Producer freeze: do not persist discarded conflict content. Keep
+        // disjoint merge enabled so concurrent edits to different fields
+        // retain both sides (#9095).
         const lwwResult = await this.conflictResolutionService.autoResolveConflictsLWW(
           conflicts,
           nonConflicting,
           {
             callerHoldsOperationLogLock: true,
             disableConflictJournal: true,
-            remoteOpsInOrder: validOps,
+            remoteOpsInOrder: segmentOps,
+            skipStateValidation: deferValidation,
           },
         );
-        localWinOpsCreated = lwwResult.localWinOpsCreated;
+        localWinOpsCreated += lwwResult.localWinOpsCreated;
         return;
       }
 
-      // ─────────────────────────────────────────────────────────────────────────
+      // ───────────────────────────────────────────────────────────────────────
       // STEP 6: No Conflicts - Apply directly and validate
-      // ─────────────────────────────────────────────────────────────────────────
+      // ───────────────────────────────────────────────────────────────────────
       if (nonConflicting.length > 0) {
         await this.applyNonConflictingOps(nonConflicting, true);
-        await this.validateAfterSync(true); // Inside sp_op_log lock
+        if (!deferValidation) {
+          await this.validateAfterSync(true);
+        }
+      }
+    };
+
+    const detectCurrentConflicts = async (
+      segmentOps: Operation[],
+    ): Promise<ConflictResult> => {
+      await this.opLogStore.inspectStoredOperations(segmentOps);
+      const { frontier, retainedOpsByEntity } =
+        await this.vectorClockService.getEntityFrontierWithOps();
+      return this.detectConflicts(segmentOps, frontier, retainedOpsByEntity);
+    };
+
+    let shouldSegment = false;
+    await runWithOperationLogLock(async () => {
+      this.providerManager.assertSyncEpochUnchanged(
+        options?.fenceEpoch,
+        'remote-ops apply',
+      );
+      const initialConflictResult = await detectCurrentConflicts(validOps);
+      shouldSegment =
+        validOps.length > 1 &&
+        hasConflictedSemanticTaskRestore(initialConflictResult.conflicts);
+      if (!shouldSegment) {
+        await processSegment(validOps, initialConflictResult, false);
       }
     });
+    if (shouldSegment) {
+      // A restore compensation must remain immediately after its semantic
+      // restore. Isolate every restore and re-detect each surrounding segment
+      // against the state committed by its predecessor. Release the lock
+      // between segments so local actions can become durable before the next
+      // frontier read; otherwise their reducers can run while their op writes
+      // are blocked behind this sync pass.
+      for (const segmentOps of splitAroundSemanticTaskRestores(validOps)) {
+        if (!callerHoldsOperationLogLock) {
+          await this.writeFlushService.flushPendingWrites();
+        }
+        await runWithOperationLogLock(async () => {
+          this.providerManager.assertSyncEpochUnchanged(
+            options?.fenceEpoch,
+            'remote-ops segmented apply',
+          );
+          await processSegment(
+            segmentOps,
+            await detectCurrentConflicts(segmentOps),
+            true,
+          );
+        });
+      }
+      await this.validateAfterSync(callerHoldsOperationLogLock);
+    }
     return {
       localWinOpsCreated,
       allOpsFilteredBySyncImport: false,

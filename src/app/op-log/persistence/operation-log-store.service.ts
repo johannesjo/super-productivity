@@ -52,13 +52,19 @@ import { IndexedDBOpenError } from '../core/errors/indexed-db-open.error';
 import { limitVectorClockSize, vectorClockToString } from '../../core/util/vector-clock';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { CompactOperation } from './compact/compact-operation.types';
-import {
-  isCompactOperation,
-  decodeOperation,
-  encodeOperation,
-} from './compact/operation-codec.service';
+import { isCompactOperation, encodeOperation } from './compact/operation-codec.service';
 import { uuidv7 } from '../../util/uuid-v7';
 import { LockService } from '../sync/lock.service';
+import {
+  decodeStoredEntry,
+  getStoredDuplicateSeq,
+  inspectStoredOperations as inspectStoredOperationsInTransaction,
+  type StoredOperationLogEntry,
+  type StoredOperationMetadata,
+  type StoredRemoteDuplicateHandler,
+} from './stored-operation-entry.util';
+
+export type { StoredRemoteDuplicateHandler } from './stored-operation-entry.util';
 
 /**
  * Vector clock entry stored in the vector_clock object store.
@@ -131,41 +137,6 @@ type OpLogMetaEntry =
   | RawRebuildIncompleteEntry
   | RawRebuildRecoveryEntry
   | LegacyTerminalRemoteFailuresMigrationEntry;
-
-/**
- * Stored operation log entry that can hold either compact or full operation format.
- * Used internally for backwards compatibility with existing data.
- */
-interface StoredOperationLogEntry {
-  seq: number;
-  op: Operation | CompactOperation;
-  appliedAt: number;
-  source: 'local' | 'remote';
-  syncedAt?: number;
-  rejectedAt?: number;
-  reducerRejectedAt?: number;
-  applicationStatus?: 'pending' | 'archive_pending' | 'applied' | 'failed';
-  retryCount?: number;
-}
-
-/**
- * Decodes a stored entry to a full OperationLogEntry.
- * Handles both compact and full operation formats for backwards compatibility.
- */
-const decodeStoredEntry = (stored: StoredOperationLogEntry): OperationLogEntry => {
-  const op = isCompactOperation(stored.op) ? decodeOperation(stored.op) : stored.op;
-  return {
-    seq: stored.seq,
-    op,
-    appliedAt: stored.appliedAt,
-    source: stored.source,
-    syncedAt: stored.syncedAt,
-    rejectedAt: stored.rejectedAt,
-    reducerRejectedAt: stored.reducerRejectedAt,
-    applicationStatus: stored.applicationStatus,
-    retryCount: stored.retryCount,
-  };
-};
 
 /**
  * Extracts the operation ID from either compact or full format.
@@ -855,8 +826,15 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     ops: Operation[],
     source: 'local' | 'remote' = 'local',
     options?: { pendingApply?: boolean },
+    onStoredRemoteDuplicate?: StoredRemoteDuplicateHandler,
   ): Promise<{ seqs: number[]; writtenOps: Operation[]; skippedCount: number }> {
-    return this._appendBatchSkipDuplicates(ops, source, options, false);
+    return this._appendBatchSkipDuplicates(
+      ops,
+      source,
+      options,
+      false,
+      onStoredRemoteDuplicate,
+    );
   }
 
   /**
@@ -963,16 +941,9 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
           let skippedCount = 0;
           let snapshotFrontier = preAppendLastSeq;
           for (const op of opts.snapshotIncludedOps) {
-            const existingKey = await tx.getKeyFromIndex(
-              STORE_NAMES.OPS,
-              OPS_INDEXES.BY_ID,
-              op.id,
-            );
-            if (existingKey !== undefined) {
-              if (typeof existingKey !== 'number') {
-                throw new Error('Operation sequence key is not numeric');
-              }
-              snapshotFrontier = Math.max(snapshotFrontier, existingKey);
+            const existingSeq = await getStoredDuplicateSeq(tx, op, 'remote');
+            if (existingSeq !== undefined) {
+              snapshotFrontier = Math.max(snapshotFrontier, existingSeq);
               skippedCount++;
               continue;
             }
@@ -1029,6 +1000,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     source: 'local' | 'remote',
     options: { pendingApply?: boolean } | undefined,
     advanceSnapshotFrontier: boolean,
+    onStoredRemoteDuplicate?: StoredRemoteDuplicateHandler,
   ): Promise<{ seqs: number[]; writtenOps: Operation[]; skippedCount: number }> {
     if (ops.length === 0) {
       return { seqs: [], writtenOps: [], skippedCount: 0 };
@@ -1083,16 +1055,14 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
         let lastIncludedSeq = 0;
         for (const op of ops) {
           // Check if op already exists in the same transaction (atomic)
-          const existingKey = await tx.getKeyFromIndex(
-            STORE_NAMES.OPS,
-            OPS_INDEXES.BY_ID,
-            op.id,
+          const existingSeq = await getStoredDuplicateSeq(
+            tx,
+            op,
+            source,
+            onStoredRemoteDuplicate,
           );
-          if (existingKey !== undefined) {
-            if (typeof existingKey !== 'number') {
-              throw new Error('Operation sequence key is not numeric');
-            }
-            lastIncludedSeq = Math.max(lastIncludedSeq, existingKey);
+          if (existingSeq !== undefined) {
+            lastIncludedSeq = Math.max(lastIncludedSeq, existingSeq);
             skippedCount++;
             continue;
           }
@@ -1140,6 +1110,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
    */
   async appendMixedSourceBatchSkipDuplicates(
     batches: readonly MixedSourceOperationBatch[],
+    onStoredRemoteDuplicate?: StoredRemoteDuplicateHandler,
   ): Promise<{ written: MixedSourceWrittenOperation[]; skippedCount: number }> {
     const nonEmptyBatches = batches.filter((batch) => batch.ops.length > 0);
     if (nonEmptyBatches.length === 0) {
@@ -1178,12 +1149,13 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
 
         for (const batch of nonEmptyBatches) {
           for (const proposedOp of batch.ops) {
-            const existingKey = await tx.getKeyFromIndex(
-              STORE_NAMES.OPS,
-              OPS_INDEXES.BY_ID,
-              proposedOp.id,
+            const existingSeq = await getStoredDuplicateSeq(
+              tx,
+              proposedOp,
+              batch.source,
+              onStoredRemoteDuplicate,
             );
-            if (existingKey !== undefined) {
+            if (existingSeq !== undefined) {
               skippedCount++;
               continue;
             }
@@ -1418,6 +1390,13 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       id,
     );
     return stored ? decodeStoredEntry(stored) : undefined;
+  }
+
+  async inspectStoredOperations(
+    operations: readonly Operation[],
+  ): Promise<ReadonlyMap<string, StoredOperationMetadata>> {
+    await this._ensureInit();
+    return inspectStoredOperationsInTransaction(this._adapter, operations);
   }
 
   async getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]> {
