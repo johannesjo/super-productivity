@@ -273,6 +273,22 @@ describe('OperationEncryptionService', () => {
       ).toBeRejectedWithError(OperationIntegrityError);
     });
 
+    it('still rejects a retargeted TASK op when its plaintext entityType says TIME_TRACKING', async () => {
+      const encrypted = await service.encryptOperation(
+        createLwwOp('task-A'),
+        TEST_PASSWORD,
+      );
+      const tampered: SyncOperation = {
+        ...encrypted,
+        entityType: 'TIME_TRACKING',
+        entityId: 'task-B',
+      };
+
+      await expectAsync(
+        service.decryptOperation(tampered, TEST_PASSWORD),
+      ).toBeRejectedWithError(OperationIntegrityError);
+    });
+
     it('accepts a decrypted LWW op with untampered entityId', async () => {
       const encrypted = await service.encryptOperation(
         createLwwOp('task-123'),
@@ -284,6 +300,25 @@ describe('OperationEncryptionService', () => {
         id: 'task-123',
         changes: { title: 'legit change' },
       });
+    });
+
+    it('accepts the legacy encrypted TIME_TRACKING singleton op from #9256', async () => {
+      const legacyPayload = { project: {}, tag: {} };
+      const legacyOp: SyncOperation = {
+        ...createMockSyncOp(legacyPayload),
+        id: '019d1e73-b5e5-7790-a896-9f215331afe7',
+        actionType: toLwwUpdateActionType('TIME_TRACKING') as ActionType,
+        opType: 'UPDATE',
+        entityType: 'TIME_TRACKING',
+        entityId: 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24',
+        timestamp: 1774332392933,
+      };
+      const encrypted = await service.encryptOperation(legacyOp, TEST_PASSWORD);
+
+      const decrypted = await service.decryptOperation(encrypted, TEST_PASSWORD);
+
+      expect(decrypted.payload).toEqual(legacyPayload);
+      expect(decrypted.entityId).toBe(legacyOp.entityId);
     });
 
     // --- project-move footprint (op.entityIds) across the real crypto flow ---

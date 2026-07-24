@@ -851,10 +851,9 @@ describe('operation-converter utility', () => {
       });
     });
 
-    // Issue #7330: LWW Update apply path requires payload.id to be set so
-    // lwwUpdateMetaReducer can write the entity. Producers force this on the
-    // on-disk shape, but as a universal safety net the converter backfills
-    // payload.id from op.entityId for any LWW Update op missing it.
+    // Issue #7330: adapter-backed LWW Update apply requires payload.id so the
+    // meta-reducer can address an entity. Producers force this on the on-disk
+    // shape, while the converter remains the apply-boundary safety net.
     describe('LWW Update id backfill (#7330)', () => {
       it('injects id from op.entityId into adapter LWW Update payloads when missing', () => {
         const op = createMockOperation({
@@ -946,6 +945,58 @@ describe('operation-converter utility', () => {
 
         expect((action as any).id).toBeUndefined();
         expect((action as any).theme).toBe('dark');
+      });
+
+      it('does NOT inject id for a TIME_TRACKING singleton with a composite conflict id (#9256)', () => {
+        const op = createMockOperation({
+          actionType: '[TIME_TRACKING] LWW Update' as ActionType,
+          entityType: 'TIME_TRACKING',
+          entityId: 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24',
+          payload: { project: {}, tag: {} },
+          timestamp: 1774332392933,
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as { id?: unknown }).id).toBeUndefined();
+      });
+
+      it('strips an id injected by affected clients from TIME_TRACKING singleton state (#9256)', () => {
+        const op = createMockOperation({
+          actionType: '[TIME_TRACKING] LWW Update' as ActionType,
+          entityType: 'TIME_TRACKING',
+          entityId: 'PROJECT:new-context:2026-03-24',
+          payload: {
+            id: 'PROJECT:stale-or-retagged-context:2026-03-24',
+            project: {},
+            tag: {},
+          },
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as { id?: unknown }).id).toBeUndefined();
+      });
+
+      it('does not throw for a malformed null singleton payload', () => {
+        const op = createMockOperation({
+          actionType: '[TIME_TRACKING] LWW Update' as ActionType,
+          entityType: 'TIME_TRACKING',
+          entityId: 'PROJECT:project-1:2026-03-24',
+          payload: null,
+        });
+
+        expect(() => convertOpToAction(op)).not.toThrow();
+      });
+
+      it('still enforces the TASK id when only the plaintext entityType says TIME_TRACKING', () => {
+        const op = createMockOperation({
+          actionType: '[TASK] LWW Update' as ActionType,
+          entityType: 'TIME_TRACKING',
+          entityId: 'task-B',
+          payload: { id: 'task-A', title: 'Authenticated task' },
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as { id?: unknown }).id).toBe('task-B');
       });
 
       it('does NOT inject id for non-LWW action types', () => {

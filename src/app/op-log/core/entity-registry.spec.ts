@@ -8,6 +8,7 @@ import {
   isSingletonEntity,
   isMapEntity,
   isArrayEntity,
+  isLwwPayloadIdCanonical,
   EntityConfig,
 } from './entity-registry';
 
@@ -65,6 +66,17 @@ describe('entity-registry', () => {
     'PLUGIN_USER_DATA',
     'PLUGIN_METADATA',
   ];
+
+  describe('LWW payload id semantics', () => {
+    it('uses payload.id only for adapter-backed entities', () => {
+      expect(isLwwPayloadIdCanonical('TASK')).toBeTrue();
+      expect(isLwwPayloadIdCanonical('TIME_TRACKING')).toBeFalse();
+      expect(isLwwPayloadIdCanonical('PLANNER')).toBeFalse();
+      expect(isLwwPayloadIdCanonical('ALL')).toBeFalse();
+      expect(isLwwPayloadIdCanonical('UNKNOWN')).toBeFalse();
+      expect(isLwwPayloadIdCanonical(undefined)).toBeFalse();
+    });
+  });
 
   describe('ENTITY_CONFIGS completeness', () => {
     it('should have config for all regular entity types', () => {

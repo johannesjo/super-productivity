@@ -69,7 +69,12 @@ import {
 } from '../../core/util/vector-clock';
 import { devError } from '../../util/dev-error';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
-import { ENTITY_REGISTRY, isSingletonEntityId } from '../core/entity-registry';
+import {
+  ENTITY_REGISTRY,
+  getEntityConfig,
+  isLwwPayloadIdCanonical,
+  isSingletonEntityId,
+} from '../core/entity-registry';
 import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { SYNC_LOGGER } from '../core/sync-logger.adapter';
@@ -462,16 +467,20 @@ export class ConflictResolutionService {
     // lwwUpdateMetaReducer bails with "Entity data has no id" when an adapter
     // payload lacks a top-level id; a malformed/partial entityState (e.g. an
     // NgRx selector returning a stripped shape) would silently lose the LWW
-    // write on remote clients. Singletons use the '*' sentinel for entityId
-    // and have no `id` field — injecting `id: '*'` would pollute the singleton
-    // feature state when the consumer reducer spreads entityData. (#7330)
+    // write on remote clients. Singleton LWW actions have no canonical payload
+    // id; their conflict key may be '*' or a contextual composite ID, and
+    // injecting either would pollute the feature state. Remove stale synthetic
+    // ids that an affected client may already carry. (#7330, #9256)
     const basePayload =
       entityState && typeof entityState === 'object'
         ? (entityState as Record<string, unknown>)
         : {};
-    const actionPayload = isSingletonEntityId(entityId)
-      ? basePayload
-      : { ...basePayload, id: entityId };
+    const actionPayload = { ...basePayload };
+    if (isLwwPayloadIdCanonical(entityType)) {
+      actionPayload['id'] = entityId;
+    } else if (getEntityConfig(entityType)?.storagePattern === 'singleton') {
+      delete actionPayload['id'];
+    }
     // Compute the move footprint once and carry it BOTH in the plaintext
     // envelope (op.entityIds — the server needs it for its indexed conflict
     // detection and cannot read the encrypted payload) AND inside the

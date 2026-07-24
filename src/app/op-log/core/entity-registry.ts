@@ -368,12 +368,22 @@ export const getPayloadKey = (entityType: EntityType): string | undefined =>
   getPayloadKeyFromRegistry(ENTITY_CONFIGS, entityType);
 
 /**
+ * Whether an LWW action payload's top-level `id` selects the state that the
+ * LWW meta-reducer applies. Only adapter-backed entities are addressed by that
+ * field; singleton actions target their registered feature state as a whole.
+ */
+export const isLwwPayloadIdCanonical = (entityType: string | undefined): boolean =>
+  entityType !== undefined &&
+  ENTITY_CONFIGS[entityType as EntityType]?.storagePattern === 'adapter';
+
+/**
  * Sentinel `entityId` value used for singleton entities (`globalConfig`,
- * `metric`, etc.). These have no per-entity primary key, so the op-log
- * uses `'*'` to denote "the one and only" instance.
+ * `menuTree`, etc.). These have no per-entity primary key, so whole-state
+ * operations use `'*'` to denote "the one and only" instance.
  *
- * Used wherever singleton ops need to be distinguished from adapter ops,
- * e.g. when conditionally injecting `id` into LWW payloads.
+ * This is an operation-address sentinel, not a storage-pattern check:
+ * TIME_TRACKING uses contextual composite IDs for conflict routing even though
+ * its LWW reducer still targets singleton state as a whole.
  */
 export const SINGLETON_ENTITY_ID = '*' as const;
 

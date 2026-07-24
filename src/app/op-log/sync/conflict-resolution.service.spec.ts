@@ -8045,12 +8045,12 @@ describe('ConflictResolutionService', () => {
     });
   });
 
-  describe('LWW Update payload always has top-level id (#7330)', () => {
-    // The lwwUpdateMetaReducer bails with "Entity data has no id" when an LWW
-    // Update payload lacks a top-level id. createLWWUpdateOp is the choke point
-    // for two of three LWW Update producers (_createLocalWinUpdateOp and the
-    // superseded-operation-resolver). Both pass the canonical entityId — so the
-    // payload should always carry it, even when entityState was malformed.
+  describe('adapter LWW Update payload has a top-level id (#7330)', () => {
+    // The lwwUpdateMetaReducer bails with "Entity data has no id" when an
+    // adapter LWW Update payload lacks a top-level id. createLWWUpdateOp is the
+    // choke point for the local-win and superseded-operation producers. Both
+    // pass the canonical entityId, so adapter payloads must carry it even when
+    // entityState was malformed.
 
     it('should backfill payload.id from entityId when entityState lacks id', () => {
       const entityStateWithoutId = { title: 'Local winner', projectId: 'proj-1' };
@@ -8260,11 +8260,9 @@ describe('ConflictResolutionService', () => {
       expect(payload['projectId']).toBe('proj-1');
     });
 
-    // Singletons (GLOBAL_CONFIG, app-state, time-tracking) use entityId='*'
-    // as a sentinel. Injecting `id: '*'` into the payload would pollute the
-    // singleton feature state — which has no `id` field — when the consumer
-    // reducer spreads entityData into the feature state.
-    it('should NOT inject id when entityId is the singleton sentinel "*"', () => {
+    // Singleton LWW reducers target a whole feature slice, so neither the '*'
+    // sentinel nor a contextual conflict key belongs in payload state.
+    it('should NOT inject id for a GLOBAL_CONFIG singleton', () => {
       const singletonState = { sync: { syncProvider: null }, misc: { foo: 'bar' } };
       const op = service.createLWWUpdateOp(
         'GLOBAL_CONFIG',
@@ -8278,6 +8276,25 @@ describe('ConflictResolutionService', () => {
       expect(extractActionPayload(op.payload)['id']).toBeUndefined();
       // Original action payload shape is preserved (no synthetic field injected).
       expect(extractActionPayload(op.payload)).toEqual(singletonState);
+    });
+
+    it('should NOT inject id for a TIME_TRACKING singleton with a composite conflict id (#9256)', () => {
+      const pollutedSingletonState = {
+        id: 'PROJECT:stale-context:2026-03-23',
+        project: {},
+        tag: {},
+      };
+      const op = service.createLWWUpdateOp(
+        'TIME_TRACKING',
+        'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24',
+        pollutedSingletonState,
+        TEST_CLIENT_ID,
+        { [TEST_CLIENT_ID]: 1 },
+        1774332392933,
+      );
+
+      expect(extractActionPayload(op.payload)['id']).toBeUndefined();
+      expect(extractActionPayload(op.payload)).toEqual({ project: {}, tag: {} });
     });
   });
 });

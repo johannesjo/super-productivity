@@ -11,6 +11,7 @@ import frozen from '../validation/test-fixtures/frozen-state-v18.15.json';
 
 describe('assertDecryptedOpMetadataIntegrity', () => {
   const LWW_TASK = toLwwUpdateActionType('TASK');
+  const LWW_TIME_TRACKING = toLwwUpdateActionType('TIME_TRACKING');
 
   const createOp = (over: Partial<SyncOperation>): SyncOperation => ({
     id: 'op-1',
@@ -87,8 +88,12 @@ describe('assertDecryptedOpMetadataIntegrity', () => {
       ).not.toThrow();
     });
 
-    it('ignores singleton entities (no payload.id to compare)', () => {
-      const op = createOp({ entityId: SINGLETON_ENTITY_ID });
+    it('ignores singleton LWW targets even when their conflict id is composite', () => {
+      const op = createOp({
+        actionType: LWW_TIME_TRACKING,
+        entityType: 'TIME_TRACKING',
+        entityId: 'PROJECT:project-1:2026-03-24',
+      });
       expect(() => assertDecryptedOpMetadataIntegrity(op, { foo: 'bar' })).not.toThrow();
     });
 

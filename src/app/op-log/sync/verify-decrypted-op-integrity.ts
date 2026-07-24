@@ -1,7 +1,7 @@
 import { extractActionPayload } from '@sp/sync-core';
 import { SyncOperation } from '../sync-providers/provider.interface';
-import { isLwwUpdateActionType } from '../core/lww-update-action-types';
-import { isSingletonEntityId } from '../core/entity-registry';
+import { getLwwEntityType } from '../core/lww-update-action-types';
+import { isLwwPayloadIdCanonical } from '../core/entity-registry';
 import { OperationIntegrityError } from '../core/errors/sync-errors';
 import { ACTION_TYPE_ALIASES } from '../apply/operation-converter.util';
 import { SyncLog } from '../../core/log';
@@ -163,10 +163,12 @@ const _migrateFullStateForValidation = (
  * resolve the mismatch by trusting the tampered `op.entityId` over the
  * authenticated `payload.id` (it coerces `payload.id = op.entityId` — including
  * when `payload.id` is absent — and only warns). Here we treat the
- * authenticated `payload.id` as ground truth and fail CLOSED: an in-scope LWW op
- * whose authenticated payload does not carry a string `id` equal to
- * `op.entityId` is rejected. The gate mirrors `convertOpToAction`'s coercion
- * predicate exactly (same alias resolution, same singleton exclusion) so the two
+ * authenticated `payload.id` as ground truth for adapter-backed LWW actions and
+ * fail CLOSED: an in-scope adapter LWW op whose authenticated payload does not
+ * carry a string `id` equal to `op.entityId` is rejected. Singleton LWW actions
+ * target their registered feature state as a whole, so their contextual
+ * conflict IDs do not have a canonical payload `id`. The gate mirrors
+ * `convertOpToAction`'s action-derived storage-pattern check so the two
  * boundaries cannot drift and leave a hole.
  *
  * Scope: only encrypted ops reach this boundary (it is called from the decrypt
@@ -195,14 +197,11 @@ export const assertDecryptedOpMetadataIntegrity = (
   // would make this gate skip an op the converter still LWW-coerces, silently
   // reopening the retarget hole.
   const actionType = ACTION_TYPE_ALIASES[op.actionType] ?? op.actionType;
+  const lwwEntityType = getLwwEntityType(actionType);
 
-  // Only non-singleton LWW single-entity updates carry a canonical `payload.id`
-  // that must equal `op.entityId`. Singletons use SINGLETON_ENTITY_ID (no `id`).
-  if (
-    !isLwwUpdateActionType(actionType) ||
-    !op.entityId ||
-    isSingletonEntityId(op.entityId)
-  ) {
+  // Derive the target from actionType because it chooses the reducer branch;
+  // op.entityType is unauthenticated metadata and must not grant an exemption.
+  if (!op.entityId || !isLwwPayloadIdCanonical(lwwEntityType)) {
     return;
   }
 
