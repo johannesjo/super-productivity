@@ -79,6 +79,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       task?: TaskCopy;
       repeatCfg?: TaskRepeatCfg;
       targetDate?: string;
+      initialStartDate?: string;
       isRemoveConfirmationRequired?: boolean;
     },
     getRepeatCfgReturnValue?:
@@ -353,6 +354,32 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       const component = fixture.componentInstance;
 
       expect(component.isEdit()).toBe(false);
+    });
+  });
+
+  describe('new config initialization', () => {
+    it('uses the explicit initial start date from the schedule dialog', async () => {
+      const taskWithStoredDueDate = {
+        ...mockTask,
+        dueDay: '2026-06-01',
+      } as TaskCopy;
+      const fixture = await setupTestBed({
+        task: taskWithStoredDueDate,
+        initialStartDate: '2026-06-12',
+      });
+
+      expect(fixture.componentInstance.repeatCfg().startDate).toBe('2026-06-12');
+    });
+
+    it('returns the created config ID when saving', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      mockTaskRepeatCfgService.addTaskRepeatCfgToTask.and.callFake(
+        () => 'created-repeat-cfg',
+      );
+
+      fixture.componentInstance.save();
+
+      expect(mockDialogRef.close).toHaveBeenCalledOnceWith('created-repeat-cfg');
     });
   });
 

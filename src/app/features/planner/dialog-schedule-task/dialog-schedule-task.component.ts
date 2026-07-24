@@ -165,6 +165,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
   private _previewTaskId = '__schedule-preview__';
+  private _repeatCfgCreatedInDialogId: string | null = null;
 
   private _defaultTaskRemindCfgId = computed(
     () =>
@@ -318,18 +319,31 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     // matching how task.component / add-task-bar open this dialog.
     const { DialogEditTaskRepeatCfgComponent } =
       await import('../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component');
-    this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
-      restoreFocus: true,
-      data: {
-        task,
-        // A config created inside this still-open schedule dialog has no previous
-        // instances, so removing it again does not need the destructive warning.
-        isRemoveConfirmationRequired: !!this.data.task?.repeatCfgId,
-        // targetDate drives the skip-instance affordance; the recurrence start is
-        // derived from the task's due date inside the repeat dialog.
-        targetDate: task.dueDay || getDbDateStr(new Date(task.created)),
-      },
-    });
+    const selectedDate = this.selectedDate;
+    const targetDate = selectedDate
+      ? typeof selectedDate === 'string'
+        ? selectedDate
+        : getDbDateStr(selectedDate)
+      : task.dueDay || getDbDateStr(task.dueWithTime || task.created);
+    this._matDialog
+      .open(DialogEditTaskRepeatCfgComponent, {
+        restoreFocus: true,
+        data: {
+          task,
+          // Only the exact config created inside this still-open schedule dialog
+          // can safely skip the destructive removal warning.
+          isRemoveConfirmationRequired:
+            task.repeatCfgId !== this._repeatCfgCreatedInDialogId,
+          initialStartDate: targetDate,
+          targetDate,
+        },
+      })
+      .afterClosed()
+      .subscribe((createdRepeatCfgId: unknown) => {
+        if (typeof createdRepeatCfgId === 'string') {
+          this._repeatCfgCreatedInDialogId = createdRepeatCfgId;
+        }
+      });
   }
 
   remove(): void {

@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { SnackService } from '../../../core/snack/snack.service';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { TaskService } from '../../tasks/task.service';
@@ -48,7 +48,11 @@ describe('DialogScheduleTaskComponent — repeat button', () => {
 
   const setup = async (
     data: Record<string, unknown>,
-    opts: { liveTask?: TaskCopy } = {},
+    opts: {
+      liveTask?: TaskCopy;
+      liveTask$?: Observable<TaskCopy | null>;
+      repeatDialogResult?: string;
+    } = {},
   ): Promise<DialogScheduleTaskComponent> => {
     const task = data['task'] as TaskCopy | undefined;
     const liveTask = opts.liveTask ?? task ?? null;
@@ -56,8 +60,11 @@ describe('DialogScheduleTaskComponent — repeat button', () => {
       'scheduleTask',
       'getByIdLive$',
     ]);
-    taskServiceSpy.getByIdLive$.and.returnValue(of(liveTask));
+    taskServiceSpy.getByIdLive$.and.returnValue(opts.liveTask$ ?? of(liveTask));
     matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    matDialogSpy.open.and.returnValue({
+      afterClosed: () => of(opts.repeatDialogResult),
+    } as MatDialogRef<unknown, string | undefined>);
     spyOn(DialogScheduleTaskComponent.prototype, 'ngAfterViewInit').and.stub();
 
     await TestBed.configureTestingModule({
@@ -158,9 +165,7 @@ describe('DialogScheduleTaskComponent — repeat button', () => {
   });
 
   describe('openRepeatDialog', () => {
-    it('opens the repeat dialog with the LIVE task (not the stale snapshot) so a re-open edits instead of duplicating', async () => {
-      // Injected data.task has no repeatCfgId; the live store task already has one
-      // (a repeat was just created here). The dialog must receive the live task.
+    it('keeps confirmation for a config that appeared in live state', async () => {
       const staleSnapshot = baseTask();
       const liveTask = baseTask({ repeatCfgId: 'cfg-1' });
       const c = await setup({ task: staleSnapshot }, { liveTask });
@@ -172,12 +177,56 @@ describe('DialogScheduleTaskComponent — repeat button', () => {
         data: {
           task: TaskCopy;
           targetDate: string;
+          initialStartDate: string;
           isRemoveConfirmationRequired: boolean;
         };
       };
       expect(dialogArg.data.task).toBe(liveTask);
       expect(dialogArg.data.task.repeatCfgId).toBe('cfg-1');
       expect(dialogArg.data.targetDate).toBe(getDbDateStr(new Date(liveTask.created)));
+      expect(dialogArg.data.isRemoveConfirmationRequired).toBeTrue();
+    });
+
+    it('passes the currently selected date as the initial recurrence date', async () => {
+      const task = baseTask({ dueDay: '2026-05-20' });
+      const c = await setup({ task });
+      c.selectedDate = new Date(2026, 4, 27);
+
+      await c.openRepeatDialog();
+
+      const dialogArg = matDialogSpy.open.calls.mostRecent().args[1] as {
+        data: { initialStartDate: string; targetDate: string };
+      };
+      expect(dialogArg.data.initialStartDate).toBe('2026-05-27');
+      expect(dialogArg.data.targetDate).toBe('2026-05-27');
+    });
+
+    it('falls back to the task creation date when no schedule date is selected', async () => {
+      const task = baseTask({ created: new Date(2024, 2, 14).getTime() });
+      const c = await setup({ task });
+
+      await c.openRepeatDialog();
+
+      const dialogArg = matDialogSpy.open.calls.mostRecent().args[1] as {
+        data: { initialStartDate: string };
+      };
+      expect(dialogArg.data.initialStartDate).toBe('2024-03-14');
+    });
+
+    it('suppresses confirmation only for the exact config created by this dialog', async () => {
+      const liveTask$ = new BehaviorSubject<TaskCopy | null>(baseTask());
+      const c = await setup(
+        { task: baseTask() },
+        { liveTask$, repeatDialogResult: 'cfg-created-here' },
+      );
+
+      await c.openRepeatDialog();
+      liveTask$.next(baseTask({ repeatCfgId: 'cfg-created-here' }));
+      await c.openRepeatDialog();
+
+      const dialogArg = matDialogSpy.open.calls.mostRecent().args[1] as {
+        data: { isRemoveConfirmationRequired: boolean };
+      };
       expect(dialogArg.data.isRemoveConfirmationRequired).toBeFalse();
     });
 
