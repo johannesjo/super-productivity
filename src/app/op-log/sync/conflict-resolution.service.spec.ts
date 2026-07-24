@@ -36,6 +36,9 @@ import { OperationLogEffects } from '../capture/operation-log.effects';
 import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import { toLwwUpdateActionType } from '../core/lww-update-action-types';
+import { convertOpToAction } from '../apply/operation-converter.util';
+import { TIME_TRACKING_FEATURE_KEY } from '../../features/time-tracking/store/time-tracking.reducer';
+import { lwwUpdateMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
 
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
@@ -8291,11 +8294,13 @@ describe('ConflictResolutionService', () => {
       expect(extractActionPayload(op.payload)).toEqual(singletonState);
     });
 
-    it('keeps a compatibility id for v18.15 TIME_TRACKING receivers (#9256)', () => {
+    it('keeps the compatibility id on wire and preserves TIME_TRACKING data on replay (#9256)', () => {
+      const project = { project1: { day1: 120000 } };
+      const tag = { tag1: { day1: 30000 } };
       const pollutedSingletonState = {
         id: 'PROJECT:stale-context:2026-03-23',
-        project: {},
-        tag: {},
+        project,
+        tag,
       };
       const entityId = 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24';
       const op = service.createLWWUpdateOp(
@@ -8312,9 +8317,56 @@ describe('ConflictResolutionService', () => {
       // this compatibility-only field before replacing singleton state.
       expect(extractActionPayload(op.payload)).toEqual({
         id: entityId,
-        project: {},
-        tag: {},
+        project,
+        tag,
       });
+
+      const existingTimeTracking = { project: {}, tag: {} };
+      const state = { [TIME_TRACKING_FEATURE_KEY]: existingTimeTracking };
+      const baseReducer = jasmine
+        .createSpy('baseReducer')
+        .and.callFake((currentState: unknown) => currentState);
+      const reducer = lwwUpdateMetaReducer(baseReducer);
+
+      reducer(state, convertOpToAction(op));
+
+      const updatedState = baseReducer.calls.mostRecent().args[0] as typeof state;
+      expect(updatedState[TIME_TRACKING_FEATURE_KEY]).toEqual({ project, tag });
+    });
+
+    it('preserves TIME_TRACKING state when malformed array state crosses the LWW pipeline (#9256)', () => {
+      const entityId = 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24';
+      const op = service.createLWWUpdateOp(
+        'TIME_TRACKING',
+        entityId,
+        ['private-time-entry'],
+        TEST_CLIENT_ID,
+        { [TEST_CLIENT_ID]: 1 },
+        1774332392933,
+      );
+      const existingTimeTracking = {
+        project: { project1: { day1: 120000 } },
+        tag: {},
+      };
+      const state = { [TIME_TRACKING_FEATURE_KEY]: existingTimeTracking };
+      const baseReducer = jasmine
+        .createSpy('baseReducer')
+        .and.callFake((currentState: unknown) => currentState);
+      const reducer = lwwUpdateMetaReducer(baseReducer);
+
+      if (!jasmine.isSpy(window.alert)) {
+        spyOn(window, 'alert');
+      }
+      if (!jasmine.isSpy(window.confirm)) {
+        spyOn(window, 'confirm').and.returnValue(false);
+      } else {
+        (window.confirm as jasmine.Spy).and.returnValue(false);
+      }
+
+      reducer(state, convertOpToAction(op));
+
+      const updatedState = baseReducer.calls.mostRecent().args[0] as typeof state;
+      expect(updatedState[TIME_TRACKING_FEATURE_KEY]).toBe(existingTimeTracking);
     });
   });
 });

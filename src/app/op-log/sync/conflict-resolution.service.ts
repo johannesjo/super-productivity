@@ -474,7 +474,9 @@ export class ConflictResolutionService {
     // singleton feature state. Whole-state '*' singletons still omit it.
     // (#7330, #9256)
     const basePayload =
-      entityState && typeof entityState === 'object'
+      entityState !== null &&
+      typeof entityState === 'object' &&
+      !Array.isArray(entityState)
         ? (entityState as Record<string, unknown>)
         : {};
     const actionPayload = { ...basePayload };

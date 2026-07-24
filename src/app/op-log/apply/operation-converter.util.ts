@@ -15,6 +15,12 @@ import { isValidDBDateStr } from '../../util/get-db-date-str';
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+const getValueType = (value: unknown): string => {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  return typeof value;
+};
+
 const isValidDbDate = (value: unknown): value is string =>
   typeof value === 'string' && isValidDBDateStr(value);
 
@@ -281,12 +287,7 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
       opId: op.id,
       actionType,
       entityType: lwwEntityType,
-      payloadType:
-        actionPayload === null
-          ? 'null'
-          : Array.isArray(actionPayload)
-            ? 'array'
-            : typeof actionPayload,
+      payloadType: getValueType(actionPayload),
     });
     actionPayload = {};
   }
@@ -324,10 +325,10 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
     !isFullStateOp &&
     isLwwPayloadIdCanonical(lwwEntityType) &&
     op.entityId &&
-    actionPayload &&
-    typeof actionPayload === 'object' &&
+    isRecord(actionPayload) &&
     actionPayload['id'] !== op.entityId
   ) {
+    const payloadId = actionPayload['id'];
     // The hard rewrite is correct in direction (canonical entityId wins),
     // but it silently fixes a producer/wire bug. Surface it so we can
     // detect if the assumption ever breaks in production. Log only the
@@ -336,7 +337,8 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
       actionType,
       entityType: op.entityType,
       entityId: op.entityId,
-      payloadId: actionPayload['id'],
+      payloadId:
+        typeof payloadId === 'string' ? payloadId : `<${getValueType(payloadId)}>`,
     });
     actionPayload = { ...actionPayload, id: op.entityId };
   }

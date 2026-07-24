@@ -869,6 +869,19 @@ describe('operation-converter utility', () => {
         expect((action as any).title).toBe('Recovered');
       });
 
+      it('does not throw for a wrapped adapter LWW payload without actionPayload', () => {
+        const op = createMockOperation({
+          actionType: '[TASK] LWW Update' as ActionType,
+          entityId: 'task-789',
+          payload: {
+            entityChanges: [],
+            lwwUpdateMode: 'replace',
+          },
+        });
+
+        expect(() => convertOpToAction(op)).not.toThrow();
+      });
+
       it('preserves payload id when it already matches op.entityId', () => {
         const op = createMockOperation({
           actionType: '[TASK] LWW Update' as ActionType,
@@ -922,6 +935,30 @@ describe('operation-converter utility', () => {
         expect(JSON.stringify(logCall.args)).not.toContain('should not leak');
       });
 
+      it('does not serialize a malformed non-string payload.id into the warning', () => {
+        const warnSpy = spyOn(SyncLog, 'warn');
+        const privatePayloadContent = 'private task title';
+        const op = createMockOperation({
+          actionType: '[TASK] LWW Update' as ActionType,
+          entityId: 'task-canonical',
+          payload: { id: [{ title: privatePayloadContent }] },
+        });
+
+        const action = convertOpToAction(op);
+
+        expect((action as { id?: unknown }).id).toBe('task-canonical');
+        expect(warnSpy).toHaveBeenCalledWith(
+          jasmine.stringMatching(/payload\.id mismatch/),
+          jasmine.objectContaining({
+            entityId: 'task-canonical',
+            payloadId: '<array>',
+          }),
+        );
+        expect(JSON.stringify(warnSpy.calls.mostRecent().args)).not.toContain(
+          privatePayloadContent,
+        );
+      });
+
       it('does not warn when payload.id already matches op.entityId', () => {
         const warnSpy = spyOn(SyncLog, 'warn');
         const op = createMockOperation({
@@ -948,16 +985,20 @@ describe('operation-converter utility', () => {
       });
 
       it('does NOT inject id for a TIME_TRACKING singleton with a composite conflict id (#9256)', () => {
+        const project = { project1: { day1: 120000 } };
+        const tag = { tag1: { day1: 30000 } };
         const op = createMockOperation({
           actionType: '[TIME_TRACKING] LWW Update' as ActionType,
           entityType: 'TIME_TRACKING',
           entityId: 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24',
-          payload: { project: {}, tag: {} },
+          payload: { project, tag },
           timestamp: 1774332392933,
         });
         const action = convertOpToAction(op);
 
         expect((action as { id?: unknown }).id).toBeUndefined();
+        expect((action as { project?: unknown }).project).toEqual(project);
+        expect((action as { tag?: unknown }).tag).toEqual(tag);
       });
 
       it('strips an id injected by affected clients from TIME_TRACKING singleton state (#9256)', () => {

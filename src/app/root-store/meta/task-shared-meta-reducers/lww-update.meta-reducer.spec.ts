@@ -1742,6 +1742,7 @@ describe('lwwUpdateMetaReducer', () => {
         { label: 'null', value: null },
         { label: 'number', value: 1 },
         { label: 'boolean', value: true },
+        { label: 'undefined', value: undefined },
       ];
 
       spyOn(OpLog, 'warn');
@@ -1765,6 +1766,17 @@ describe('lwwUpdateMetaReducer', () => {
               lwwUpdateMode: 'replace',
             },
           },
+          ...(label === 'undefined'
+            ? [
+                {
+                  format: 'wrapped-missing',
+                  payload: {
+                    entityChanges: [],
+                    lwwUpdateMode: 'replace',
+                  },
+                },
+              ]
+            : []),
         ];
         for (const { format, payload } of payloads) {
           const clientId = 'remote-client';
