@@ -19,13 +19,18 @@ import {
 } from '../util/parse-app-uri-task-action';
 import { PENDING_CAPACITOR_APP_URI_ACTION } from './pending-capacitor-app-uri-action';
 
-// Reject an over-long title/notes coming from an external URL trigger — a title
-// syncs as an op to every device, so an unbounded one is an abuse/accident
-// footgun. Caps match the EML import path's limits (title 300, body 100k); unlike
-// EML (a drag-dropped file, silently truncated) a URL is a single deliberate call,
-// so we reject with feedback rather than truncate.
+// Reject an over-long title/notes when CREATING a task from an external URL
+// trigger — a created title syncs as an op to every device, so an unbounded one
+// is an abuse/accident footgun. Caps match the EML import path's limits (title
+// 300, body 100k); unlike EML (a drag-dropped file, silently truncated) a URL is
+// a single deliberate call, so we reject with feedback rather than truncate.
 const MAX_APP_URI_TITLE_LENGTH = 300;
 const MAX_APP_URI_NOTES_LENGTH = 100_000;
+// complete-task's title is only a search needle, never persisted, so it is not
+// held to the 300-char creation cap — an in-app EML import can itself store a
+// 301-char title (it slices to 300 then appends an ellipsis) that must stay
+// completable. Guard only against an absurdly long lookup string.
+const MAX_APP_URI_LOOKUP_LENGTH = 100_000;
 
 /**
  * Handles `create-task`/`complete-task` actions coming from an external URL
@@ -86,17 +91,10 @@ export class AppUriTaskActionsService implements OnDestroy {
   }
 
   private _handleAdd(action: AppUriAddTaskAction): void {
-    if (
-      action.title.length > MAX_APP_URI_TITLE_LENGTH ||
-      (action.notes?.length ?? 0) > MAX_APP_URI_NOTES_LENGTH
-    ) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.TASK.S.INPUT_TOO_LONG_VIA_APP_URI,
-      });
-      return;
-    }
-
+    // Normalize before validating: surrounding whitespace is trimmed per the
+    // documented API, so the empty check and length cap must run on the stored
+    // value, not the raw one — a space-padded 300-char title stores exactly 300
+    // characters and is valid.
     const title = action.title.trim();
     if (!title) {
       // A whitespace-only title (e.g. `?title=%20`) reaches here unrejected on
@@ -105,6 +103,18 @@ export class AppUriTaskActionsService implements OnDestroy {
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.TASK.S.EMPTY_TITLE_VIA_APP_URI,
+      });
+      return;
+    }
+
+    // Notes are not trimmed, so the notes cap stays on the raw value.
+    if (
+      title.length > MAX_APP_URI_TITLE_LENGTH ||
+      (action.notes?.length ?? 0) > MAX_APP_URI_NOTES_LENGTH
+    ) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.TASK.S.INPUT_TOO_LONG_VIA_APP_URI,
       });
       return;
     }
@@ -153,14 +163,6 @@ export class AppUriTaskActionsService implements OnDestroy {
   }
 
   private _handleComplete(action: AppUriCompleteTaskAction): void {
-    if (action.title.length > MAX_APP_URI_TITLE_LENGTH) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.TASK.S.INPUT_TOO_LONG_VIA_APP_URI,
-      });
-      return;
-    }
-
     const needle = action.title.trim().toLowerCase();
     if (!needle) {
       // A whitespace-only title would otherwise match every task via
@@ -169,6 +171,13 @@ export class AppUriTaskActionsService implements OnDestroy {
         type: 'ERROR',
         msg: T.F.TASK.S.NOT_FOUND_VIA_APP_URI,
         translateParams: { title: action.title },
+      });
+      return;
+    }
+    if (needle.length > MAX_APP_URI_LOOKUP_LENGTH) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.TASK.S.INPUT_TOO_LONG_VIA_APP_URI,
       });
       return;
     }

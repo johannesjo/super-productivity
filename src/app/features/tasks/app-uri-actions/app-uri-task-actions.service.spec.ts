@@ -131,6 +131,22 @@ describe('AppUriTaskActionsService', () => {
       );
     });
 
+    it('adds a title padded to exactly the 300-char cap once surrounding whitespace is trimmed', () => {
+      // The cap applies to the stored (trimmed) value, not the raw query, so a
+      // 300-char title with surrounding spaces is valid — its stored form is
+      // exactly 300 characters.
+      const title = 'a'.repeat(300);
+      pendingAction$.next({ type: 'add', title: `  ${title}  ` });
+
+      expect(taskService.add).toHaveBeenCalledWith(title, false, {}, false, true);
+      expect(snackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'SUCCESS',
+          msg: T.F.TASK.S.ADDED_VIA_APP_URI,
+        }),
+      );
+    });
+
     it('shows an error and never adds a task when notes exceed the length cap', () => {
       pendingAction$.next({
         type: 'add',
@@ -291,17 +307,28 @@ describe('AppUriTaskActionsService', () => {
       );
     });
 
-    it('shows an error and never completes a task when the title exceeds the length cap', () => {
-      const selectSpy = spyOn(TestBed.inject(MockStore), 'select').and.callThrough();
+    it('completes an exact match whose title exceeds the 300-char creation cap', () => {
+      // The completion title is only a search needle and is never persisted, so
+      // it is not held to the 300-char creation cap: an in-app EML import can
+      // itself store a 301-char title (300 chars + an ellipsis). Two long titles
+      // differing only in length confirm the full-length exact query resolves
+      // unambiguously via exact-match preference rather than being rejected.
+      const title301 = 'a'.repeat(301);
+      const title302 = 'a'.repeat(302);
+      const store = TestBed.inject(MockStore);
+      store.overrideSelector(selectAllTasksInActiveProjects, [
+        { id: 'long1', title: title301, isDone: false } as Task,
+        { id: 'long2', title: title302, isDone: false } as Task,
+      ]);
+      store.refreshState();
 
-      pendingAction$.next({ type: 'complete', title: 'a'.repeat(301) });
+      pendingAction$.next({ type: 'complete', title: title301 });
 
-      expect(taskService.setDone).not.toHaveBeenCalled();
-      expect(selectSpy).not.toHaveBeenCalled();
+      expect(taskService.setDone).toHaveBeenCalledWith('long1');
       expect(snackService.open).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          type: 'ERROR',
-          msg: T.F.TASK.S.INPUT_TOO_LONG_VIA_APP_URI,
+          type: 'SUCCESS',
+          msg: T.F.TASK.S.COMPLETED_VIA_APP_URI,
         }),
       );
     });
