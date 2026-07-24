@@ -8349,40 +8349,5 @@ describe('ConflictResolutionService', () => {
       const updatedState = baseReducer.calls.mostRecent().args[0] as typeof state;
       expect(updatedState[TIME_TRACKING_FEATURE_KEY]).toEqual({ project, tag });
     });
-
-    it('preserves TIME_TRACKING state when malformed array state crosses the LWW pipeline (#9256)', () => {
-      const entityId = 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24';
-      const op = service.createLWWUpdateOp(
-        'TIME_TRACKING',
-        entityId,
-        ['private-time-entry'],
-        TEST_CLIENT_ID,
-        { [TEST_CLIENT_ID]: 1 },
-        1774332392933,
-      );
-      const existingTimeTracking = {
-        project: { project1: { day1: 120000 } },
-        tag: {},
-      };
-      const state = { [TIME_TRACKING_FEATURE_KEY]: existingTimeTracking };
-      const baseReducer = jasmine
-        .createSpy('baseReducer')
-        .and.callFake((currentState: unknown) => currentState);
-      const reducer = lwwUpdateMetaReducer(baseReducer);
-
-      if (!jasmine.isSpy(window.alert)) {
-        spyOn(window, 'alert');
-      }
-      if (!jasmine.isSpy(window.confirm)) {
-        spyOn(window, 'confirm').and.returnValue(false);
-      } else {
-        (window.confirm as jasmine.Spy).and.returnValue(false);
-      }
-
-      reducer(state, convertOpToAction(op));
-
-      const updatedState = baseReducer.calls.mostRecent().args[0] as typeof state;
-      expect(updatedState[TIME_TRACKING_FEATURE_KEY]).toBe(existingTimeTracking);
-    });
   });
 });

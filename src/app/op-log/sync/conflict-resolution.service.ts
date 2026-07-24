@@ -473,15 +473,16 @@ export class ConflictResolutionService {
     // composite conflict IDs; current receivers strip it before replacing the
     // singleton feature state. Whole-state '*' singletons still omit it.
     // (#7330, #9256)
-    const entityConfig = getEntityConfigFromRegistry(this.entityRegistry, entityType);
-    const isMalformedSingletonState =
-      Array.isArray(entityState) &&
-      entityConfig !== undefined &&
-      isSingletonEntity(entityConfig);
+    //
+    // SUNSET: this `id` is purely for shipped v18.15.0/v18.15.1 receivers, which
+    // reject composite-id singleton ops that lack it. It rides inside the
+    // AES-GCM payload (so those receivers see an authenticated, matching id) and
+    // never touches the plaintext `op.entityIds`/vector-clock footprint. Remove
+    // it (and the receiver-side strip in operation-converter.util.ts) once those
+    // two versions are no longer in the active fleet — there is no schema bump to
+    // gate on, so this is a manual, fleet-age-based cleanup, not automatic.
     const basePayload =
-      entityState !== null &&
-      typeof entityState === 'object' &&
-      !isMalformedSingletonState
+      entityState !== null && typeof entityState === 'object'
         ? (entityState as Record<string, unknown>)
         : {};
     const actionPayload = { ...basePayload };

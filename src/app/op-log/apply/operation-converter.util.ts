@@ -15,23 +15,6 @@ import { isValidDBDateStr } from '../../util/get-db-date-str';
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const MAX_ARRAY_INDEX = 4_294_967_294;
-
-const isCanonicalArrayIndexKey = (key: string): boolean => {
-  const index = Number(key);
-  return (
-    Number.isInteger(index) &&
-    index >= 0 &&
-    index <= MAX_ARRAY_INDEX &&
-    String(index) === key
-  );
-};
-
-const isLegacyArraySpreadRecord = (value: Record<string, unknown>): boolean => {
-  const stateKeys = Object.keys(value).filter((key) => key !== 'id');
-  return stateKeys.length > 0 && stateKeys.every(isCanonicalArrayIndexKey);
-};
-
 const getValueType = (value: unknown): string => {
   if (value === null) return 'null';
   if (Array.isArray(value)) return 'array';
@@ -295,21 +278,16 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
     ? extractFullStatePayload(op.payload)
     : (extractActionPayload(op.payload) as Record<string, unknown>);
 
-  // JSON primitives and arrays are object-spreadable at runtime. Legacy
-  // producers may already have serialized that spread as a numeric-key record.
-  // Without this guard, the LWW reducer mistakes either shape for non-empty
-  // singleton state and replaces the entire feature slice with it.
-  if (
-    isSingletonLww &&
-    (!isRecord(actionPayload) || isLegacyArraySpreadRecord(actionPayload))
-  ) {
+  // JSON primitives and arrays are object-spreadable at runtime: a non-record
+  // singleton payload such as "x" or ["x"] would spread into { 0: "x" }, which
+  // the LWW reducer mistakes for non-empty singleton state and uses to replace
+  // the entire feature slice. Normalize it to the reducer's empty-data no-op.
+  if (isSingletonLww && !isRecord(actionPayload)) {
     SyncLog.warn('[convertOpToAction] malformed singleton LWW payload — ignoring', {
       opId: op.id,
       actionType,
       entityType: lwwEntityType,
-      payloadType: isRecord(actionPayload)
-        ? 'legacy-array-spread-record'
-        : getValueType(actionPayload),
+      payloadType: getValueType(actionPayload),
     });
     actionPayload = {};
   }

@@ -1040,6 +1040,28 @@ describe('operation-converter utility', () => {
         expect((action as { id?: unknown }).id).toBe('task-B');
       });
 
+      // Lockstep residual (#9256): the converter derives the LWW target from the
+      // action type — the SAME plaintext field the integrity gate skips on and
+      // the meta-reducer branches on. A compromised server that swaps a TASK op's
+      // actionType to a singleton type to skip the gate therefore lands it as a
+      // whole-slice singleton replace (id stripped), NOT an adapter retarget: the
+      // authenticated task id can never address a TASK entity here. This pins the
+      // documented, pre-existing actionType-swap residual so a future edit that
+      // decoupled the gate/reducer targets could not silently turn it into a
+      // TASK retarget. See verify-decrypted-op-integrity.ts (OPEN residual note).
+      it('treats an actionType swapped to a singleton as a singleton replace, never a TASK retarget (#9256)', () => {
+        const op = createMockOperation({
+          actionType: '[TIME_TRACKING] LWW Update' as ActionType,
+          entityType: 'TASK',
+          entityId: 'task-A',
+          payload: { id: 'task-A', title: 'Authenticated task' },
+        });
+        const action = convertOpToAction(op);
+
+        expect(action.type).toBe('[TIME_TRACKING] LWW Update');
+        expect((action as { id?: unknown }).id).toBeUndefined();
+      });
+
       it('does NOT inject id for non-LWW action types', () => {
         const op = createMockOperation({
           actionType: '[Task] Update Task' as ActionType,

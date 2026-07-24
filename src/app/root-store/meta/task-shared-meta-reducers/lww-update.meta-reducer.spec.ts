@@ -1743,13 +1743,6 @@ describe('lwwUpdateMetaReducer', () => {
         { label: 'number', value: 1 },
         { label: 'boolean', value: true },
         { label: 'undefined', value: undefined },
-        {
-          label: 'legacy-array-spread-record',
-          value: {
-            ...['private-time-entry'],
-            id: 'PROJECT:project-1:2026-03-24',
-          },
-        },
       ];
 
       spyOn(OpLog, 'warn');
