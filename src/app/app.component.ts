@@ -429,6 +429,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   onTaskAdded({ taskId }: { taskId: string; isAddToBottom: boolean }): void {
     this.layoutService.setPendingFocusTaskId(taskId);
     this.layoutService.scrollToNewTask(taskId);
+    if (this.onboardingHintService.shouldAutoCloseFirstTaskComposer()) {
+      this.layoutService.hideAddTaskBar(taskId);
+    }
   }
 
   // Opacity + blur follow the resolved background source (per-context image or

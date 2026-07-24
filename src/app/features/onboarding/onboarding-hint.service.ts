@@ -126,6 +126,14 @@ export class OnboardingHintService {
     this._startOnboarding();
   }
 
+  shouldAutoCloseFirstTaskComposer(): boolean {
+    return (
+      this._waitingForBarClose &&
+      isTouchActive() &&
+      this._layoutService.isShowMobileBottomNav()
+    );
+  }
+
   skip(): void {
     localStorage.setItem(LS.ONBOARDING_HINTS_DONE, 'true');
     this.currentStep.set(null);
