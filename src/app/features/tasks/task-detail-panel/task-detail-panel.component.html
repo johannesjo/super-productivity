@@ -343,6 +343,9 @@
   >
     <ng-container input-title>
       <mat-icon>label</mat-icon>
+      <span class="cdk-visually-hidden">{{
+        T.F.TASK.ADDITIONAL_INFO.TAGS | translate
+      }}</span>
     </ng-container>
     <ng-container input-value>
       <tag-edit
@@ -364,7 +367,8 @@
       role="button"
       tabindex="0"
     >
-      Created on {{ task().created | localeDate: 'short' : undefined : locale() }}
+      {{ T.F.TASK.ADDITIONAL_INFO.CREATED_ON | translate }}
+      {{ task().created | localeDate: 'short' : undefined : locale() }}
     </div>
     @if (task().doneOn) {
       <div
@@ -376,7 +380,8 @@
         role="button"
         tabindex="0"
       >
-        Completed on {{ task().doneOn | localeDate: 'short' : undefined : locale() }}
+        {{ T.F.TASK.ADDITIONAL_INFO.COMPLETED_ON | translate }}
+        {{ task().doneOn | localeDate: 'short' : undefined : locale() }}
       </div>
     }
   </div>

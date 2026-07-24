@@ -1802,6 +1802,7 @@
         "PASTED_IMAGE_TITLE": "Pasted image",
         "ADD_SUB_TASK": "Add subtask",
         "ATTACHMENTS": "Links & Files ({{nr}})",
+        "CHECKLIST": "Checklist",
         "COMPLETED_ON": "Completed on",
         "CREATED_ON": "Created on",
         "DEADLINE": "Deadline",
@@ -1817,6 +1818,7 @@
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
         "SUB_TASKS": "Subtasks ({{nr}})",
+        "TAGS": "Tags",
         "TIME": "Duration",
         "TITLE_PLACEHOLDER": "Enter a title"
       },
