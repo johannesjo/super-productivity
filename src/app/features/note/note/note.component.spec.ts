@@ -125,6 +125,13 @@ describe('NoteComponent editFullscreen', () => {
 
   const editFullscreen = (): Promise<void> => component.editFullscreen({} as MouseEvent);
 
+  // Lets the close handler's async chain run to its next observable point. A
+  // macrotask turn drains everything queued behind it, so this does not depend
+  // on the exact number of microtask hops the save path happens to take —
+  // counting `await Promise.resolve()` calls turns any internal change (e.g.
+  // wrapping a draft await) into a fake failure of an unrelated assertion.
+  const settle = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+
   it('should clear the draft and open the note content when the draft matches the note', async () => {
     localDraftService.loadDraft.and.resolveTo(draftOf('saved content', 'anything'));
 
@@ -230,8 +237,7 @@ describe('NoteComponent editFullscreen', () => {
     afterClosed$.next('final content');
     // The subscriber awaits saveDraft before dispatching, so let the microtask
     // queue drain before asserting the update landed.
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
 
     // The draft (with the about-to-be-saved content, baseContent still the
     // current note) is written durably first; only then is the update dispatched
@@ -259,8 +265,7 @@ describe('NoteComponent editFullscreen', () => {
     await editFullscreen();
 
     afterClosed$.next('final content');
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
 
     // Dispatched, but the flush hasn't resolved — this is the crash window. The
     // draft MUST survive it, or a crash here loses the edit.
@@ -270,8 +275,7 @@ describe('NoteComponent editFullscreen', () => {
     expect(localDraftService.clearDraftIfContent).not.toHaveBeenCalled();
 
     resolveFlush();
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
 
     // Drop the `await` before the clear and it clears while the flush is still
     // pending -> this expectation goes red. Owned-content clear: only the draft
@@ -289,9 +293,7 @@ describe('NoteComponent editFullscreen', () => {
     await editFullscreen();
 
     afterClosed$.next('final content');
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
 
     // Failing must leave MORE recoverable state, never less: the note was still
     // dispatched, but the draft is kept so the next open can recover it.
@@ -312,9 +314,7 @@ describe('NoteComponent editFullscreen', () => {
     await editFullscreen();
 
     afterClosed$.next('final content');
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
 
     expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
       content: 'final content',
@@ -337,9 +337,7 @@ describe('NoteComponent editFullscreen', () => {
     await editFullscreen();
 
     afterClosed$.next('final content');
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
 
     expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
       content: 'final content',
@@ -355,8 +353,7 @@ describe('NoteComponent editFullscreen', () => {
     // ESC on an unedited open, or an edit reverted before close: res equals the
     // note content, so there is nothing unsaved to recover.
     afterClosed$.next('saved content');
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
 
     expect(localDraftService.saveDraft).not.toHaveBeenCalled();
     // Owned-content clear: the checkpoint this session mirrors (content === the
@@ -443,6 +440,70 @@ describe('NoteComponent editFullscreen', () => {
       .allArgs()
       .filter((args) => args[0] === DialogFullscreenMarkdownComponent);
     expect(fullscreenOpens.length).toBe(1);
+  });
+
+  // A never-settling IndexedDB request is the failure mode these two cover: idb
+  // has no timeout, so such a request never rejects either. Drive the clock past
+  // the production bound, then hand back to real timers so a regression shows up
+  // as a fast, explicit failure instead of a hung spec.
+  const openPastTheDraftIoTimeout = async (): Promise<'settled' | 'hung'> => {
+    jasmine.clock().install();
+    let open: Promise<void>;
+    try {
+      open = editFullscreen();
+      jasmine.clock().tick(60_000); // well past DRAFT_IO_TIMEOUT_MS
+    } finally {
+      jasmine.clock().uninstall();
+    }
+    return Promise.race<'settled' | 'hung'>([
+      open!.then(() => 'settled' as const),
+      new Promise((r) => setTimeout(() => r('hung'), 100)),
+    ]);
+  };
+
+  it('bounds the draft load so a stalled IndexedDB cannot wedge the note shut', async () => {
+    localDraftService.loadDraft.and.returnValue(new Promise(() => {})); // never settles
+
+    const outcome = await openPastTheDraftIoTimeout();
+
+    // Drop the Promise.race in production and this await never returns: the
+    // `finally` releasing _openingNoteIds cannot run across a pending await, so
+    // the note stays un-openable for the rest of the session.
+    expect(outcome).toBe('settled');
+    expect(getFullscreenDialogData().content).toBe('saved content');
+  });
+
+  it('treats a timed-out draft load as unreadable, not as "no draft"', async () => {
+    localDraftService.loadDraft.and.returnValue(new Promise(() => {}));
+
+    await openPastTheDraftIoTimeout();
+
+    // Resolving the race to `undefined` instead of DRAFT_LOAD_ERROR would look
+    // like "no draft exists" and re-arm checkpointing over a draft we never
+    // managed to read -> this goes red.
+    contentChanged$.next('typed so far');
+    expect(localDraftService.saveDraft).not.toHaveBeenCalled();
+  });
+
+  it('bounds the pre-dispatch draft save so a stalled IndexedDB cannot block the note update', async () => {
+    await editFullscreen();
+    // Only the pre-dispatch checkpoint stalls; the open path already resolved.
+    localDraftService.saveDraft.and.returnValue(new Promise(() => {}));
+
+    jasmine.clock().install();
+    try {
+      afterClosed$.next('final content');
+      jasmine.clock().tick(60_000);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+    await settle();
+
+    // Drop the Promise.race and the dispatch never happens: a device-local
+    // convenience DB would be sitting on the critical path of the note save.
+    expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
+      content: 'final content',
+    });
   });
 
   it('aborts opening when the note content changes under us during the async draft load (stale snapshot)', async () => {

@@ -49,6 +49,40 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { RenderLinksPipe } from '../../../ui/pipes/render-links.pipe';
 import { isPathSafeToOpen } from '../../../../../electron/shared-with-frontend/is-external-url-allowed';
 
+/**
+ * Bound on the device-local drafts IndexedDB, which both awaits below put on a
+ * user-visible critical path: the load holds the per-note open guard (a request
+ * that never settles would leave that note un-openable for the rest of the
+ * session, since the `finally` releasing it cannot run), and the save sits in
+ * front of the note update dispatch itself. IndexedDB has no timeout of its own
+ * — a request that never settles never rejects either — so a race is the only
+ * bound. (An idb `blocked` handler would not help: DB_VERSION is fixed at 1, so
+ * `blocked` cannot fire, and it does not settle the open promise anyway.)
+ *
+ * 2s: a local get/put against this tiny store settles in single-digit ms, and
+ * even a cold DB open plus the one iOS/WebKit reconnect retry (#6643) stays far
+ * below it, so a slow-but-working device is not falsely timed out. A genuinely
+ * stuck request then degrades to "no drafts this session" — the same fail-safe
+ * path an unreadable draft takes — instead of a wedged note or a blocked save.
+ */
+const DRAFT_IO_TIMEOUT_MS = 2000;
+
+/**
+ * Resolves to `onTimeout` if `promise` has not settled within
+ * DRAFT_IO_TIMEOUT_MS. The timer is cleared as soon as the promise settles, so
+ * the fast path leaves nothing pending. Rejections are deliberately not
+ * swallowed — both draft calls already handle their own errors internally.
+ */
+const withDraftIoTimeout = <T>(promise: Promise<T>, onTimeout: T): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([
+    promise.finally(() => clearTimeout(timeoutId)),
+    new Promise<T>((resolve) => {
+      timeoutId = setTimeout(() => resolve(onTimeout), DRAFT_IO_TIMEOUT_MS);
+    }),
+  ]);
+};
+
 @Component({
   selector: 'note',
   templateUrl: './note.component.html',
@@ -213,7 +247,13 @@ export class NoteComponent implements OnChanges {
     this._openingNoteIds.add(note.id);
     try {
       let contentToOpen = note.content;
-      const draftOrError = await this._localDraftService.loadDraft('NOTE', note.id);
+      // Timed out reads resolve to DRAFT_LOAD_ERROR, so a stalled DB takes the
+      // same conservative path as an unreadable one (draft handling off for this
+      // session) rather than being mistaken for "no draft exists".
+      const draftOrError = await withDraftIoTimeout(
+        this._localDraftService.loadDraft('NOTE', note.id),
+        DRAFT_LOAD_ERROR,
+      );
       // A failed read is not the same as "no draft": an unread recovery draft may
       // exist, so all draft handling (including writes and clears) is skipped for
       // this session rather than risking to overwrite or delete it.
@@ -324,13 +364,19 @@ export class NoteComponent implements OnChanges {
             // between the two leaves a durable draft the next open restores via the
             // baseContent === note.content branch. Best-effort: saveDraft swallows
             // its own write errors, so this resolves even on failure — the flush
-            // below is what confirms durability, not this await.
-            await this._localDraftService.saveDraft({
-              entityType: 'NOTE',
-              entityId: note.id,
-              content: res,
-              baseContent: note.content,
-            });
+            // below is what confirms durability, not this await. Bounded, so a
+            // stalled drafts DB cannot hold the note update hostage: on timeout
+            // the dispatch proceeds and we simply lose the extra crash-safety of
+            // the pre-dispatch checkpoint.
+            await withDraftIoTimeout(
+              this._localDraftService.saveDraft({
+                entityType: 'NOTE',
+                entityId: note.id,
+                content: res,
+                baseContent: note.content,
+              }),
+              undefined,
+            );
           }
           // Uses the captured `note`, not `this.note`: the guard above ran before
           // the await, so re-reading the instance field here would be reading it

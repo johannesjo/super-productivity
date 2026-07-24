@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { MarkdownModule } from 'ngx-markdown';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, of, Subject } from 'rxjs';
 import { ClipboardImageService } from '../../core/clipboard-image/clipboard-image.service';
 import { ClipboardPasteHandlerService } from '../../core/clipboard-image/clipboard-paste-handler.service';
 import { TaskAttachmentService } from '../../features/tasks/task-attachment/task-attachment.service';
@@ -396,6 +396,32 @@ describe('DialogFullscreenMarkdownComponent', () => {
       component.close(true);
 
       expect(component._matDialogRef.close).not.toHaveBeenCalled();
+    });
+
+    // The flag external closers read (openFullscreenMarkdownDialog's Location
+    // handler) to avoid resolving the opposite of the button the user clicked.
+    it('flags the discard confirmation as open while it awaits an answer, and clears it after', () => {
+      const confirmClosed$ = new Subject<boolean>();
+      spyOn(component['_matDialog'], 'open').and.returnValue({
+        afterClosed: () => confirmClosed$.asObservable(),
+      } as any);
+      component.data.content = 'changed content';
+
+      component.close(true);
+
+      // Drop the flag assignment and this is false while the confirm is up, so
+      // an Android back press saves instead of discarding.
+      expect(component.isDiscardConfirmOpen).toBe(true);
+
+      confirmClosed$.next(false);
+
+      expect(component.isDiscardConfirmOpen).toBe(false);
+    });
+
+    it('leaves the discard-confirm flag down when nothing was modified (no confirm shown)', () => {
+      component.close(true);
+
+      expect(component.isDiscardConfirmOpen).toBe(false);
     });
 
     it('should use originalContent as the modification reference when provided', () => {

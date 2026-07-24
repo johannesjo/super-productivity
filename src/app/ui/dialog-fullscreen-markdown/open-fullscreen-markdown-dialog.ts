@@ -60,7 +60,16 @@ export const openFullscreenMarkdownDialog = (
     // while the dialog is still open so we don't re-run its exit animation
     // (MatDialogRef.close() is not idempotent). The guard runs synchronously,
     // so the component instance is guaranteed present while OPEN.
-    if (dialogRef.getState() === MatDialogState.OPEN) {
+    //
+    // Stand down while the discard confirmation is up: this dialog is still
+    // OPEN behind it, and close() with no args is the SAVE path — so a back
+    // press there would resolve the exact opposite of the Discard the user just
+    // clicked. The confirm closes itself on the same navigation (it keeps
+    // MatDialog's default closeOnNavigation), leaving the editor open.
+    if (
+      dialogRef.getState() === MatDialogState.OPEN &&
+      !dialogRef.componentInstance.isDiscardConfirmOpen
+    ) {
       dialogRef.componentInstance.close();
     }
   });

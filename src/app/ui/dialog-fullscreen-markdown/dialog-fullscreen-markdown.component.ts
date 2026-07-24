@@ -118,6 +118,14 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   resolvedContent = signal<string>('');
   // Plain property for markdown component compatibility
   resolvedContentData: string | undefined;
+  /**
+   * True while the discard confirmation is up. This dialog stays OPEN behind
+   * that confirm, so anything closing it on an external signal must stand down
+   * until the user has answered — see openFullscreenMarkdownDialog, whose
+   * Location handler would otherwise close through the SAVE path, the exact
+   * opposite of the Discard the user just clicked (#8982 review).
+   */
+  isDiscardConfirmOpen = false;
 
   constructor() {
     // Set initial content synchronously for immediate rendering
@@ -344,6 +352,7 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       onDiscard();
       return;
     }
+    this.isDiscardConfirmOpen = true;
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,
@@ -354,6 +363,10 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       })
       .afterClosed()
       .subscribe((isConfirm: boolean) => {
+        // Cleared on every outcome, including the confirm being disposed by a
+        // navigation (it keeps MatDialog's default closeOnNavigation) — the
+        // editor stays open and usable in that case.
+        this.isDiscardConfirmOpen = false;
         if (isConfirm) {
           onDiscard();
         }
