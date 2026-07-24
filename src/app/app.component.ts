@@ -429,7 +429,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   onTaskAdded({ taskId }: { taskId: string; isAddToBottom: boolean }): void {
     this.layoutService.setPendingFocusTaskId(taskId);
     this.layoutService.scrollToNewTask(taskId);
-    if (this.onboardingHintService.shouldAutoCloseFirstTaskComposer()) {
+    if (this.onboardingHintService.shouldAutoCloseFirstTaskComposer(taskId)) {
       this.layoutService.hideAddTaskBar(taskId);
     }
   }

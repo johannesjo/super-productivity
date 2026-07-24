@@ -7,6 +7,10 @@ import {
 } from '../../utils/runtime-errors';
 import { waitForStatePersistence } from '../../utils/waits';
 
+const pixel5TestOptions = { ...devices['Pixel 5'] };
+// Browser type is worker-scoped and cannot be overridden inside a describe block.
+Reflect.deleteProperty(pixel5TestOptions, 'defaultBrowserType');
+
 test.describe('First-run onboarding', () => {
   test('applies a preset and does not show onboarding again after reload', async ({
     isolatedContext,
@@ -57,25 +61,24 @@ test.describe('First-run onboarding', () => {
     await page.close();
   });
 
-  test('closes the mobile composer after the first onboarding task', async ({
-    baseURL,
-    browser,
-  }) => {
-    const context = await browser.newContext({
-      ...devices['Pixel 5'],
-      baseURL: baseURL ?? 'http://localhost:4242',
-      storageState: undefined,
-    });
-    const page = await context.newPage();
-    const runtimeErrors = attachPageErrorCollector(page, 'mobile onboarding');
-    installDevErrorDialogHandler(page, 'mobile onboarding');
+  test.describe('mobile', () => {
+    test.use(pixel5TestOptions);
 
-    await page.addInitScript(() => {
-      localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
-    });
+    test('closes the composer after the first onboarding task', async ({
+      isolatedContext,
+    }) => {
+      const page = await isolatedContext.newPage();
+      const runtimeErrors = attachPageErrorCollector(page, 'mobile onboarding');
+      installDevErrorDialogHandler(page, 'mobile onboarding');
 
-    try {
+      await page.addInitScript(() => {
+        localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
+      });
+
       await page.goto('/');
+      const userAgent = await page.evaluate(() => navigator.userAgent);
+      expect(userAgent).toContain('Pixel 5');
+      expect(userAgent).toContain('PLAYWRIGHT-WORKER-');
 
       const onboarding = page.locator('onboarding-preset-selection');
       await onboarding.getByRole('button', { name: /Simple Todo/ }).tap();
@@ -94,8 +97,54 @@ test.describe('First-run onboarding', () => {
         'Tap a task to open its details.',
       );
       assertNoRuntimeBrowserErrors(runtimeErrors, 'mobile onboarding');
-    } finally {
-      await context.close();
-    }
+      await page.close();
+    });
+
+    test('keeps the composer open after a later touch task', async ({
+      isolatedContext,
+    }) => {
+      const page = await isolatedContext.newPage();
+      const runtimeErrors = attachPageErrorCollector(page, 'hybrid onboarding');
+      installDevErrorDialogHandler(page, 'hybrid onboarding');
+
+      await page.addInitScript(() => {
+        localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
+      });
+
+      await page.goto('/');
+
+      const onboarding = page.locator('onboarding-preset-selection');
+      await onboarding.getByRole('button', { name: /Simple Todo/ }).tap();
+      await expect(onboarding).toBeHidden();
+      await expect(page.locator('onboarding-hint')).toContainText(
+        'Tap + to add your first task',
+      );
+
+      await page.mouse.move(10, 10);
+      await expect(page.locator('body')).toHaveClass(/isMousePrimary/);
+      await page.getByRole('button', { name: 'Add new task' }).click();
+
+      const composer = page.locator('add-task-bar.global');
+      const input = composer.locator('.main-input');
+      await input.fill('First hybrid task');
+      await input.press('Enter');
+      await expect(composer).toBeVisible();
+
+      // Switch intent before the real submit tap so the touch layout has settled.
+      await page.locator('body').dispatchEvent('pointerdown', {
+        pointerType: 'touch',
+      });
+      await expect(page.locator('body')).toHaveClass(/isTouchPrimary/);
+      await expect(composer).toBeVisible();
+
+      await input.fill('Second hybrid task');
+      await composer.locator('.e2e-add-task-submit').tap();
+      await expect(composer).toBeVisible();
+
+      await input.press('Escape');
+      await expect(composer).toBeHidden();
+      assertNoRuntimeBrowserErrors(runtimeErrors, 'hybrid onboarding');
+      await page.close();
+    });
   });
 });
