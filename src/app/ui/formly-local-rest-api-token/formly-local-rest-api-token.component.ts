@@ -35,6 +35,11 @@ export class FormlyLocalRestApiTokenComponent
   readonly T = T;
   readonly token = signal<string | null>(null);
   readonly isRegenerating = signal(false);
+  // There is a real state where the API is switched on and has no credential at
+  // all: the main process could not store the first token, so it failed closed
+  // and did not start the server. Logging that and rendering an empty field
+  // reads as "no token yet", which is the one thing it does not mean.
+  readonly hasTokenError = signal(false);
 
   private readonly _snackService = inject(SnackService);
 
@@ -50,15 +55,22 @@ export class FormlyLocalRestApiTokenComponent
     try {
       // Never log the token itself — the app has a user-visible log export.
       this.token.set(await window.ea.regenerateLocalRestApiToken());
+      this.hasTokenError.set(false);
     } catch (err) {
       // The main process rejects when the new token could not be stored, and it
       // keeps the old one live in that case. Say so instead of leaving the user
-      // to believe the token they are looking at was rotated.
+      // to believe the token they are looking at was rotated — but only when
+      // there *is* a previous token: after a failed first generation there is
+      // none, and claiming one still works would be a lie.
       Log.err('Failed to regenerate local REST API token', err);
+      const hasPreviousToken = this.token() !== null;
       this._snackService.open({
         type: 'ERROR',
-        msg: T.GCF.MISC.LOCAL_REST_API_TOKEN_REGENERATE_ERROR,
+        msg: hasPreviousToken
+          ? T.GCF.MISC.LOCAL_REST_API_TOKEN_REGENERATE_ERROR
+          : T.GCF.MISC.LOCAL_REST_API_TOKEN_ERROR,
       });
+      this.hasTokenError.set(!hasPreviousToken);
     } finally {
       this.isRegenerating.set(false);
     }
@@ -70,8 +82,11 @@ export class FormlyLocalRestApiTokenComponent
     }
     try {
       this.token.set(await window.ea.getLocalRestApiToken());
+      this.hasTokenError.set(false);
     } catch (err) {
       Log.err('Failed to load local REST API token', err);
+      this.token.set(null);
+      this.hasTokenError.set(true);
     }
   }
 }

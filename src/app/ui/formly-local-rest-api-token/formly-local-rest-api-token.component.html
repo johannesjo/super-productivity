@@ -9,6 +9,9 @@
       [attr.aria-label]="T.GCF.MISC.LOCAL_REST_API_TOKEN | translate"
     />
   }
+  @if (hasTokenError()) {
+    <p class="token-error">{{ T.GCF.MISC.LOCAL_REST_API_TOKEN_ERROR | translate }}</p>
+  }
   <button
     mat-stroked-button
     color="primary"

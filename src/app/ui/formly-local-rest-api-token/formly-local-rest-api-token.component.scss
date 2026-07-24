@@ -6,6 +6,11 @@
   margin-bottom: var(--s2);
 }
 
+.token-error {
+  margin: 0;
+  color: var(--color-danger);
+}
+
 .token-value {
   width: 100%;
   padding: var(--s);

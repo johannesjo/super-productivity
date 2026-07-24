@@ -3,6 +3,7 @@ import { log, warn } from 'electron-log/main';
 import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
 import { randomBytes, randomUUID, timingSafeEqual } from 'crypto';
 import {
+  chmodSync,
   closeSync,
   existsSync,
   fchmodSync,
@@ -10,10 +11,11 @@ import {
   openSync,
   readFileSync,
   renameSync,
+  statSync,
   unlinkSync,
   writeFileSync,
 } from 'fs';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { getIsAppReady, getWin } from './main-window';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
@@ -35,6 +37,11 @@ const JSON_HEADERS = {
 let server: Server | null = null;
 let isInitialized = false;
 let isEnabled = false;
+// What the renderer's saved setting asks for, which is not the same thing as
+// what the main process managed to do about it: enabling fails closed when the
+// token cannot be stored, and the saved setting stays `true` regardless. Kept
+// apart so a later recovery can tell "the user wants this on" from "it is on".
+let isEnabledDesired = false;
 let isListening = false;
 const pendingRequests = new Map<
   string,
@@ -81,6 +88,32 @@ const generateToken = (): string => {
 const getTokenFilePath = (): string =>
   join(app.getPath('userData'), 'local-rest-api-token');
 
+/**
+ * Restores the 0600 the token file is supposed to have, or reports that it
+ * could not. A file that ends up group- or world-readable — restored from a
+ * backup, copied with a permissive umask, moved off a filesystem that has no
+ * modes — is otherwise served happily for as long as the user never presses
+ * Regenerate, which is the one path that used to fix it.
+ */
+const restrictTokenFileMode = (filePath: string): boolean => {
+  // POSIX modes carry no meaning on Windows (`statSync` reports a synthesised
+  // 0666/0444 from the read-only flag); access there is governed by the ACL the
+  // file inherits from userData.
+  if (process.platform === 'win32') {
+    return true;
+  }
+  try {
+    if ((statSync(filePath).mode & 0o077) === 0) {
+      return true;
+    }
+    chmodSync(filePath, 0o600);
+    return true;
+  } catch (error) {
+    warn('[local-rest-api] Could not restrict the access token file mode', error);
+    return false;
+  }
+};
+
 const loadPersistedToken = (): string | undefined => {
   try {
     const filePath = getTokenFilePath();
@@ -96,6 +129,12 @@ const loadPersistedToken = (): string | undefined => {
       );
       return undefined;
     }
+    // Fail closed if it cannot be locked down: discarding it mints a fresh
+    // token into a fresh 0600 file, which costs the user their old token but
+    // never keeps serving one that everyone on the machine can read.
+    if (!restrictTokenFileMode(filePath)) {
+      return undefined;
+    }
     return token;
   } catch (error) {
     warn('[local-rest-api] Failed to read access token file', error);
@@ -104,8 +143,45 @@ const loadPersistedToken = (): string | undefined => {
 };
 
 /**
- * Writes the token durably or throws. Failures are deliberately not swallowed:
- * the caller must never activate a token that did not reach the disk.
+ * Tries to make the *directory entry* created by renameSync() durable. On POSIX the
+ * rename is atomic but not crash-safe until the parent directory is fsynced, so
+ * without this an abrupt power loss can bring the previous token back after a
+ * regeneration that reported success — exactly the guarantee persistToken()
+ * exists to make. Best effort by design: the rename already happened and the
+ * new token is on disk, so a filesystem that refuses to fsync a directory must
+ * not turn a completed write into a failed one.
+ */
+const fsyncDirectory = (dirPath: string): void => {
+  // Windows has no directory-fsync equivalent — opening a directory for reading
+  // fails outright — and NTFS metadata ordering makes the rename durable anyway.
+  if (process.platform === 'win32') {
+    return;
+  }
+  let dirFd: number | undefined;
+  try {
+    dirFd = openSync(dirPath, 'r');
+    fsyncSync(dirFd);
+  } catch (error) {
+    warn('[local-rest-api] Could not fsync the access token directory', error);
+  } finally {
+    if (dirFd !== undefined) {
+      try {
+        closeSync(dirFd);
+      } catch {
+        // Nothing useful left to do with the descriptor.
+      }
+    }
+  }
+};
+
+/**
+ * Writes the token or throws. Everything up to and including the rename is
+ * deliberately not swallowed: the caller must never activate a token that did
+ * not reach the disk. The directory fsync that follows the rename is the one
+ * exception — the token is already on disk by then, so turning that into a
+ * throw would report a failed rotation for a write that actually succeeded,
+ * and leave the new token to go live on the next launch while the caller keeps
+ * serving the old one. fsyncDirectory() logs instead.
  */
 const persistToken = (token: string): void => {
   const filePath = getTokenFilePath();
@@ -124,6 +200,7 @@ const persistToken = (token: string): void => {
     closeSync(fd);
     fd = undefined;
     renameSync(tmpFilePath, filePath);
+    fsyncDirectory(dirname(filePath));
   } catch (error) {
     if (fd !== undefined) {
       try {
@@ -203,6 +280,24 @@ const UNAUTHORIZED_HEADERS = {
   'WWW-Authenticate': 'Bearer',
 };
 const TOKEN_LOCATION_HINT = 'Find the token in Settings → Misc → Access Token.';
+
+const respondUnauthorized = (res: ServerResponse, message: string): void => {
+  writeJson(
+    res,
+    401,
+    {
+      ok: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message,
+      },
+    },
+    UNAUTHORIZED_HEADERS,
+  );
+};
+
+const isCurrentToken = (candidate: string): boolean =>
+  !!localRestApiToken && compareToken(candidate, localRestApiToken);
 
 const readJsonBody = async (req: IncomingMessage): Promise<unknown> => {
   const chunks: Buffer[] = [];
@@ -374,35 +469,16 @@ const handleHttpRequest = async (
   const authHeader = req.headers.authorization;
   const bearerMatch = authHeader?.match(/^Bearer +(.+)$/i);
   if (!bearerMatch) {
-    writeJson(
+    respondUnauthorized(
       res,
-      401,
-      {
-        ok: false,
-        error: {
-          code: 'UNAUTHORIZED',
-          message: `Authorization token required — send "Authorization: Bearer <token>". ${TOKEN_LOCATION_HINT}`,
-        },
-      },
-      UNAUTHORIZED_HEADERS,
+      `Authorization token required — send "Authorization: Bearer <token>". ${TOKEN_LOCATION_HINT}`,
     );
     return;
   }
 
   const tokenToValidate = bearerMatch[1];
-  if (!localRestApiToken || !compareToken(tokenToValidate, localRestApiToken)) {
-    writeJson(
-      res,
-      401,
-      {
-        ok: false,
-        error: {
-          code: 'UNAUTHORIZED',
-          message: `Invalid authorization token. ${TOKEN_LOCATION_HINT}`,
-        },
-      },
-      UNAUTHORIZED_HEADERS,
-    );
+  if (!isCurrentToken(tokenToValidate)) {
+    respondUnauthorized(res, `Invalid authorization token. ${TOKEN_LOCATION_HINT}`);
     return;
   }
 
@@ -428,6 +504,18 @@ const handleHttpRequest = async (
         message: error instanceof Error ? error.message : 'Invalid request body',
       },
     });
+    return;
+  }
+
+  // Check again, now that the body is in. The token was only validated against
+  // the headers, and a body can take arbitrarily long to arrive — Node's
+  // request timeout here is 300s, and the renderer's own 15s budget only starts
+  // once the request is forwarded. Without this, whoever holds a leaked token
+  // can bank mutating requests: open them, wait out the rotation, then let the
+  // bodies land. "Regenerating invalidates the previous token immediately" has
+  // to hold for a request that was authenticated but not yet executed.
+  if (!isCurrentToken(tokenToValidate)) {
+    respondUnauthorized(res, `Invalid authorization token. ${TOKEN_LOCATION_HINT}`);
     return;
   }
 
@@ -463,16 +551,27 @@ export const initLocalRestApi = (): void => {
   ipcMain.on(IPC.LOCAL_REST_API_RESPONSE, handleResponse);
 
   // The renderer reads and regenerates the token over IPC; it is never stored
-  // in the synced config.
-  ipcMain.handle(IPC.LOCAL_REST_API_GET_TOKEN, () =>
-    isForceEnabledForDev() ? getForcedDevToken() : ensureToken(),
-  );
+  // in the synced config. Both handlers throw when the token cannot be stored,
+  // and only reconcile once it could — see startServerIfDesired().
+  ipcMain.handle(IPC.LOCAL_REST_API_GET_TOKEN, () => {
+    if (isForceEnabledForDev()) {
+      return getForcedDevToken();
+    }
+    const token = ensureToken();
+    startServerIfDesired();
+    return token;
+  });
   // In forced-dev mode the getter serves the forced token, so regenerating a
   // real one would activate a credential the getter never returns — and would
   // overwrite the user's actual persisted token file. Keep it a no-op.
-  ipcMain.handle(IPC.LOCAL_REST_API_REGENERATE_TOKEN, () =>
-    isForceEnabledForDev() ? getForcedDevToken() : regenerateToken(),
-  );
+  ipcMain.handle(IPC.LOCAL_REST_API_REGENERATE_TOKEN, () => {
+    if (isForceEnabledForDev()) {
+      return getForcedDevToken();
+    }
+    const token = regenerateToken();
+    startServerIfDesired();
+    return token;
+  });
 
   server = createServer((req, res) => {
     void handleHttpRequest(req, res);
@@ -511,6 +610,23 @@ const startServer = (): void => {
   });
 };
 
+/**
+ * Brings the API up if the saved setting wants it and only a storage failure
+ * stopped it. Both token IPCs call this because they are the point at which the
+ * main process learns that storage works again — otherwise the setting reads
+ * "enabled" while nothing listens, and stays that way until the next settings
+ * change or restart. It cannot switch the API on by itself: `isEnabledDesired`
+ * only ever comes from the saved setting.
+ */
+const startServerIfDesired = (): void => {
+  if (!isEnabledDesired || isEnabled) {
+    return;
+  }
+  log('[local-rest-api] Access token is available again — starting the server');
+  isEnabled = true;
+  startServer();
+};
+
 const stopServer = (): void => {
   if (!server || !isListening) {
     return;
@@ -538,6 +654,7 @@ const stopServer = (): void => {
 export const updateLocalRestApiConfig = (cfg: GlobalConfigState): void => {
   const isForcedForDev = isForceEnabledForDev();
   const nextEnabled = isForcedForDev || !!cfg.misc.isLocalRestApiEnabled;
+  isEnabledDesired = nextEnabled;
   // Ensure a token exists whenever the server is (about to be) serving, so
   // enabling the API never starts an unreachable server with no credential.
   if (nextEnabled) {

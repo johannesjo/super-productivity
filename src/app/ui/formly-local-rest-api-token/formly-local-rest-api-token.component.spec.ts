@@ -103,6 +103,69 @@ describe('FormlyLocalRestApiTokenComponent', () => {
     expect(component.isRegenerating()).toBe(false);
   });
 
+  it('surfaces a failed initial load instead of rendering an empty field', async () => {
+    // The main process throws here when it could not store the first token — it
+    // then failed closed, so the API is switched on in settings and not running.
+    // An empty field would read as "no token yet", which is not what happened.
+    (window as unknown as { ea: unknown }).ea = {
+      getLocalRestApiToken: jasmine.createSpy().and.rejectWith(new Error('ENOENT')),
+    };
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.hasTokenError()).toBe(true);
+    expect(component.token()).toBeNull();
+    expect(fixture.nativeElement.querySelector('.token-error')).toBeTruthy();
+  });
+
+  it('does not claim the previous token is valid when there never was one', async () => {
+    const regenerateLocalRestApiToken = jasmine
+      .createSpy('regenerateLocalRestApiToken')
+      .and.rejectWith(new Error('ENOSPC'));
+    (window as unknown as { ea: unknown }).ea = {
+      getLocalRestApiToken: jasmine.createSpy().and.rejectWith(new Error('ENOSPC')),
+      regenerateLocalRestApiToken,
+    };
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await component.regenerate();
+    fixture.detectChanges();
+
+    expect(snackServiceSpy.open).toHaveBeenCalledWith({
+      type: 'ERROR',
+      msg: T.GCF.MISC.LOCAL_REST_API_TOKEN_ERROR,
+    });
+    expect(snackServiceSpy.open).not.toHaveBeenCalledWith({
+      type: 'ERROR',
+      msg: T.GCF.MISC.LOCAL_REST_API_TOKEN_REGENERATE_ERROR,
+    });
+    expect(component.hasTokenError()).toBe(true);
+  });
+
+  it('clears the error once a regeneration finally succeeds', async () => {
+    const regenerateLocalRestApiToken = jasmine
+      .createSpy('regenerateLocalRestApiToken')
+      .and.resolveTo('RECOVERED_TOKEN');
+    (window as unknown as { ea: unknown }).ea = {
+      getLocalRestApiToken: jasmine.createSpy().and.rejectWith(new Error('ENOSPC')),
+      regenerateLocalRestApiToken,
+    };
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.hasTokenError()).toBe(true);
+
+    await component.regenerate();
+    fixture.detectChanges();
+
+    expect(component.hasTokenError()).toBe(false);
+    expect(tokenInputValue()).toBe('RECOVERED_TOKEN');
+    expect(fixture.nativeElement.querySelector('.token-error')).toBeNull();
+  });
+
   it('ignores a second regenerate while one is in flight', async () => {
     let resolveFirst!: (v: string) => void;
     const regenerateLocalRestApiToken = jasmine

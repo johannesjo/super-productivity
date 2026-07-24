@@ -11,49 +11,95 @@ require('ts-node/register/transpile-only');
 const originalModuleLoad = Module._load;
 const localRestApiModulePath = path.resolve(__dirname, 'local-rest-api.ts');
 
-// Isolated userData dir so the persisted token file never touches a real profile.
-const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-test-'));
-const tokenFilePath = path.join(userDataDir, 'local-rest-api-token');
-// Repointed by tests that need writes to fail, or that need a pristine profile.
-let currentUserDataDir = userDataDir;
+const SHARED_PORT = 3879;
+// Isolated copies get a port each. server.close() only releases the socket once
+// its callback runs, so reusing one number across tests makes a later test race
+// the previous test's shutdown.
+let nextIsolatedPort = 3880;
+const takeIsolatedPort = () => nextIsolatedPort++;
 
-const ipcMainOnHandlers = new Map();
-const ipcMainHandleHandlers = new Map();
-let isAppReadyValue = true;
-const mockWin = {
-  webContents: {
-    send: (channel, payload) => {
-      // Simulate the renderer responding back with a successful IPC response.
-      setTimeout(() => {
-        const responseHandler = ipcMainOnHandlers.get('LOCAL_REST_API_RESPONSE');
-        if (responseHandler) {
-          responseHandler(
-            {},
-            {
-              requestId: payload.requestId,
-              status: 200,
-              body: { ok: true, data: 'mock_renderer_data' },
-            },
-          );
-        }
-      }, 5);
+/**
+ * Everything one loaded copy of the module talks to. The module captures its
+ * imports once, at require() time, so each copy keeps the context it was loaded
+ * with — which is what lets an isolated copy own its own IPC handlers, userData
+ * directory, renderer and port without disturbing the shared one.
+ */
+const createContext = ({ port, userDataDir }) => {
+  const ctx = {
+    port,
+    userDataDir,
+    onHandlers: new Map(),
+    handleHandlers: new Map(),
+    isAppReady: true,
+    rendererSendCount: 0,
+    // One-shot probe, fired from getIsAppReady(). handleHttpRequest() calls it
+    // after the token check and immediately before it starts reading the body,
+    // which is the exact window the rotation test has to act in.
+    onAuthenticated: null,
+    // Paths this copy has fsynced, in order. Crash durability cannot be
+    // observed from a test — a power cut is not reproducible here — so the
+    // fsync of the token file and of its parent directory is asserted by the
+    // call being made at all.
+    fsyncedPaths: [],
+  };
+
+  ctx.win = {
+    webContents: {
+      send: (channel, payload) => {
+        ctx.rendererSendCount++;
+        // Simulate the renderer responding back with a successful IPC response.
+        setTimeout(() => {
+          const responseHandler = ctx.onHandlers.get('LOCAL_REST_API_RESPONSE');
+          if (responseHandler) {
+            responseHandler(
+              {},
+              {
+                requestId: payload.requestId,
+                status: 200,
+                body: { ok: true, data: 'mock_renderer_data' },
+              },
+            );
+          }
+        }, 5);
+      },
     },
-  },
+  };
+
+  return ctx;
 };
 
-const installMocks = () => {
+const installMocks = (ctx) => {
   Module._load = function patchedLoad(request, parent, isMain) {
+    if (request === 'fs') {
+      // Pass-through except for bookkeeping: fsyncSync() takes a descriptor, so
+      // openSync() is wrapped only to remember which path each one came from.
+      const actualFs = originalModuleLoad(request, parent, isMain);
+      const pathByFd = new Map();
+      return {
+        ...actualFs,
+        openSync: (filePath, ...rest) => {
+          const fd = actualFs.openSync(filePath, ...rest);
+          pathByFd.set(fd, String(filePath));
+          return fd;
+        },
+        fsyncSync: (fd) => {
+          ctx.fsyncedPaths.push(pathByFd.get(fd));
+          return actualFs.fsyncSync(fd);
+        },
+      };
+    }
+
     if (request === 'electron') {
       return {
         app: {
-          getPath: () => currentUserDataDir,
+          getPath: () => ctx.userDataDir,
         },
         ipcMain: {
           on: (eventName, handler) => {
-            ipcMainOnHandlers.set(eventName, handler);
+            ctx.onHandlers.set(eventName, handler);
           },
           handle: (eventName, handler) => {
-            ipcMainHandleHandlers.set(eventName, handler);
+            ctx.handleHandlers.set(eventName, handler);
           },
         },
       };
@@ -68,8 +114,15 @@ const installMocks = () => {
 
     if (request.endsWith('main-window') || request.endsWith('main-window.ts')) {
       return {
-        getIsAppReady: () => isAppReadyValue,
-        getWin: () => mockWin,
+        getIsAppReady: () => {
+          const probe = ctx.onAuthenticated;
+          ctx.onAuthenticated = null;
+          if (probe) {
+            probe();
+          }
+          return ctx.isAppReady;
+        },
+        getWin: () => ctx.win,
       };
     }
 
@@ -80,7 +133,7 @@ const installMocks = () => {
       const actual = originalModuleLoad(request, parent, isMain);
       return {
         ...actual,
-        LOCAL_REST_API_PORT: 3879, // Non-colliding port for testing.
+        LOCAL_REST_API_PORT: ctx.port, // Non-colliding port for testing.
       };
     }
 
@@ -92,49 +145,83 @@ const uninstallMocks = () => {
   Module._load = originalModuleLoad;
 };
 
-installMocks();
-const { initLocalRestApi, updateLocalRestApiConfig } = require(localRestApiModulePath);
-uninstallMocks();
-
-// A second, independent copy of the module with its own in-memory token, for
-// the cases that can only be observed on a cold start (what a fresh app does
-// with whatever happens to be in the token file). It never gets initLocalRestApi(),
-// so it registers no IPC handlers and starts no server on the shared test port.
-const loadColdModule = () => {
+/** Loads a fresh copy of the module bound to `ctx`, with its own module state. */
+const loadModule = (ctx) => {
   const resolved = require.resolve(localRestApiModulePath);
-  installMocks();
+  installMocks(ctx);
   delete require.cache[resolved];
-  const coldModule = require(localRestApiModulePath);
+  const loaded = require(localRestApiModulePath);
+  // Dropping it again keeps the next load genuinely cold.
   delete require.cache[resolved];
   uninstallMocks();
-  return coldModule;
+  return loaded;
 };
+
+// Isolated userData dir so the persisted token file never touches a real profile.
+const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-test-'));
+const tokenFilePath = path.join(userDataDir, 'local-rest-api-token');
+
+const sharedCtx = createContext({ port: SHARED_PORT, userDataDir });
+const { initLocalRestApi, updateLocalRestApiConfig } = loadModule(sharedCtx);
 
 const enableApi = () =>
   updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
 const disableApi = () =>
   updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
-const getToken = () => ipcMainHandleHandlers.get('LOCAL_REST_API_GET_TOKEN')();
+const getToken = () => sharedCtx.handleHandlers.get('LOCAL_REST_API_GET_TOKEN')();
 const regenerateToken = () =>
-  ipcMainHandleHandlers.get('LOCAL_REST_API_REGENERATE_TOKEN')();
+  sharedCtx.handleHandlers.get('LOCAL_REST_API_REGENERATE_TOKEN')();
 
-const makeRequest = (options, body) => {
+const collectResponse = (res, resolve) => {
+  let data = '';
+  res.on('data', (chunk) => {
+    data += chunk;
+  });
+  res.on('end', () => {
+    resolve({ status: res.statusCode, headers: res.headers, body: JSON.parse(data) });
+  });
+};
+
+const makeRequest = (options, body, port = SHARED_PORT) => {
   return new Promise((resolve, reject) => {
-    const req = http.request({ host: '127.0.0.1', port: 3879, ...options }, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        resolve({ status: res.statusCode, headers: res.headers, body: JSON.parse(data) });
-      });
-    });
+    const req = http.request({ host: '127.0.0.1', port, ...options }, (res) =>
+      collectResponse(res, resolve),
+    );
     req.on('error', (err) => reject(err));
     if (body !== undefined) {
       req.write(JSON.stringify(body));
     }
     req.end();
   });
+};
+
+/**
+ * Sends the headers and the first byte of the body, then hands back a `finish`
+ * that sends the rest — so a test can act in the gap between "request
+ * authenticated" and "request executed".
+ */
+const makeSplitBodyRequest = (options, body, port = SHARED_PORT) => {
+  const payload = JSON.stringify(body);
+  let finish;
+  const response = new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        host: '127.0.0.1',
+        port,
+        ...options,
+        headers: {
+          ...options.headers,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+        },
+      },
+      (res) => collectResponse(res, resolve),
+    );
+    req.on('error', (err) => reject(err));
+    req.write(payload.slice(0, 1));
+    finish = () => req.end(payload.slice(1));
+  });
+  return { response, finish: () => finish() };
 };
 
 test.before(() => {
@@ -165,8 +252,8 @@ test('enabling the API alone mints a live, persisted token', async () => {
 
 test('enabling the API registers get/regenerate IPC handlers', () => {
   enableApi();
-  assert.ok(ipcMainHandleHandlers.has('LOCAL_REST_API_GET_TOKEN'));
-  assert.ok(ipcMainHandleHandlers.has('LOCAL_REST_API_REGENERATE_TOKEN'));
+  assert.ok(sharedCtx.handleHandlers.has('LOCAL_REST_API_GET_TOKEN'));
+  assert.ok(sharedCtx.handleHandlers.has('LOCAL_REST_API_REGENERATE_TOKEN'));
 });
 
 test('getToken returns the same token that was minted on enable', () => {
@@ -264,6 +351,60 @@ test('regenerating invalidates the previous token immediately', async () => {
   assert.equal(newRes.status, 200);
 });
 
+// "Invalidates the previous token immediately" has to cover the request that
+// was authenticated but not yet executed, otherwise someone holding a leaked
+// token can bank mutating requests — open the body, wait for the rotation they
+// expect, then commit them. Node gives them 300s of request-body timeout to do
+// it in, and the renderer's own 15s timeout only starts after forwarding.
+test('rotating the token rejects a request whose body was still arriving', async () => {
+  enableApi();
+  const oldToken = getToken();
+  const sendsBefore = sharedCtx.rendererSendCount;
+
+  const authenticated = new Promise((resolve) => {
+    sharedCtx.onAuthenticated = resolve;
+  });
+  const banked = makeSplitBodyRequest(
+    {
+      method: 'POST',
+      path: '/tasks',
+      headers: { Authorization: `Bearer ${oldToken}` },
+    },
+    { title: 'banked before rotation' },
+  );
+
+  await authenticated;
+  const newToken = regenerateToken();
+  assert.notEqual(oldToken, newToken);
+  banked.finish();
+
+  const res = await banked.response;
+  assertUnauthorized(res, /^Invalid authorization token/);
+  assert.equal(
+    sharedCtx.rendererSendCount,
+    sendsBefore,
+    'the rotated-away request still reached the renderer',
+  );
+});
+
+test('a request that completes without a rotation is unaffected', async () => {
+  enableApi();
+  const token = getToken();
+  const banked = makeSplitBodyRequest(
+    {
+      method: 'POST',
+      path: '/tasks',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+    { title: 'no rotation' },
+  );
+  banked.finish();
+
+  const res = await banked.response;
+  assert.equal(res.status, 200);
+  assert.equal(res.body.data, 'mock_renderer_data');
+});
+
 test('a failed persist leaves the old token live instead of silently un-revoking it', async () => {
   enableApi();
   const liveToken = getToken();
@@ -271,14 +412,14 @@ test('a failed persist leaves the old token live instead of silently un-revoking
 
   // Stand in for any write failure — disk full, EACCES, read-only mount, AV
   // lock — by pointing userData at a directory that does not exist.
-  currentUserDataDir = path.join(userDataDir, 'nope');
+  sharedCtx.userDataDir = path.join(userDataDir, 'nope');
   let regenerateThrew = false;
   try {
     regenerateToken();
   } catch {
     regenerateThrew = true;
   } finally {
-    currentUserDataDir = userDataDir;
+    sharedCtx.userDataDir = userDataDir;
   }
   assert.ok(
     regenerateThrew,
@@ -302,12 +443,15 @@ test('a corrupted token file is replaced instead of becoming the credential', ()
   const coldTokenFilePath = path.join(coldProfileDir, 'local-rest-api-token');
   fs.writeFileSync(coldTokenFilePath, 'trunc', { mode: 0o600 });
 
-  currentUserDataDir = coldProfileDir;
   try {
-    loadColdModule().updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+    // No initLocalRestApi(): this copy registers no IPC handlers and starts no
+    // server, it only has to answer what a fresh app does with this file.
+    const cold = loadModule(
+      createContext({ port: takeIsolatedPort(), userDataDir: coldProfileDir }),
+    );
+    cold.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
     assert.match(fs.readFileSync(coldTokenFilePath, 'utf8').trim(), /^[A-Za-z0-9]{32}$/);
   } finally {
-    currentUserDataDir = userDataDir;
     fs.rmSync(coldProfileDir, { recursive: true, force: true });
   }
 });
@@ -323,6 +467,201 @@ test('the persisted file is left at 0600 even if it already existed as 0644', ()
   const rotated = regenerateToken();
   assert.equal(fs.readFileSync(tokenFilePath, 'utf8').trim(), rotated);
   assert.equal(fs.statSync(tokenFilePath).mode & 0o777, 0o600);
+});
+
+// A valid token in a group/world-readable file is the case regeneration never
+// sees: the app just reads it and serves. Tighten it on load instead of leaving
+// the credential readable until the user happens to press Regenerate.
+test('a cold start repairs the mode of a readable token file without rotating it', () => {
+  if (process.platform === 'win32') {
+    return;
+  }
+  const coldProfileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-cold-'));
+  const coldTokenFilePath = path.join(coldProfileDir, 'local-rest-api-token');
+  const existingToken = 'a'.repeat(32);
+  fs.writeFileSync(coldTokenFilePath, existingToken, { mode: 0o644 });
+
+  try {
+    const cold = loadModule(
+      createContext({ port: takeIsolatedPort(), userDataDir: coldProfileDir }),
+    );
+    cold.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    // Still the user's token — scripts keep working — but no longer readable by
+    // every account on the machine.
+    assert.equal(fs.readFileSync(coldTokenFilePath, 'utf8').trim(), existingToken);
+    assert.equal(fs.statSync(coldTokenFilePath).mode & 0o777, 0o600);
+  } finally {
+    fs.rmSync(coldProfileDir, { recursive: true, force: true });
+  }
+});
+
+// rename() makes the *content* atomic, but on POSIX the new directory entry
+// only survives a power cut once the directory itself has been fsynced.
+test('persisting a token fsyncs the file and the directory entry', () => {
+  if (process.platform === 'win32') {
+    return; // No directory fsync there — see fsyncDirectory().
+  }
+  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-fsync-'));
+  const ctx = createContext({ port: takeIsolatedPort(), userDataDir: profileDir });
+  const cold = loadModule(ctx);
+
+  try {
+    ctx.fsyncedPaths.length = 0;
+    cold.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    assert.ok(
+      ctx.fsyncedPaths.some((p) => p && p.endsWith('.tmp')),
+      `the token file itself was never fsynced (got ${JSON.stringify(ctx.fsyncedPaths)})`,
+    );
+    assert.ok(
+      ctx.fsyncedPaths.includes(profileDir),
+      `the directory entry was never fsynced (got ${JSON.stringify(ctx.fsyncedPaths)})`,
+    );
+  } finally {
+    fs.rmSync(profileDir, { recursive: true, force: true });
+  }
+});
+
+// The directory fsync that makes the rename crash-durable is best effort: the
+// token is already on disk by then, so a filesystem that will not fsync a
+// directory must not turn a completed write into a failed one. Stand in for
+// that with a userData directory this process may write to but not open for
+// reading, which is what fsyncing a directory needs.
+test('a directory that cannot be fsynced does not fail the write', async () => {
+  if (process.platform === 'win32' || process.getuid?.() === 0) {
+    return; // No POSIX modes, or running as root, which ignores them.
+  }
+  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-nofsync-'));
+  const tokenPath = path.join(profileDir, 'local-rest-api-token');
+  const port = takeIsolatedPort();
+  const ctx = createContext({ port, userDataDir: profileDir });
+  const isolated = loadModule(ctx);
+
+  try {
+    fs.chmodSync(profileDir, 0o300); // write + search, no read
+    isolated.initLocalRestApi();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    // Not merely "the file is there" — the rename already happened by the time
+    // the fsync runs, so the file exists either way. What a rethrown fsync
+    // error would cost is the enable itself: ensureToken() would throw and the
+    // API would fail closed over a write that actually succeeded.
+    const health = await makeRequest({ method: 'GET', path: '/health' }, undefined, port);
+    assert.equal(health.status, 200, 'a non-fsyncable directory failed the enable');
+    fs.chmodSync(profileDir, 0o700);
+    assert.match(fs.readFileSync(tokenPath, 'utf8').trim(), /^[A-Za-z0-9]{32}$/);
+  } finally {
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+    fs.chmodSync(profileDir, 0o700);
+    fs.rmSync(profileDir, { recursive: true, force: true });
+  }
+});
+
+// Enabling fails closed when the very first token cannot be stored, but the
+// renderer's saved setting stays `true`. Without a desired-vs-actual split the
+// app is then stuck: storage can recover, the token IPCs can hand out a working
+// credential, and the server still never comes up.
+test('a first enable that could not store a token recovers once storage works', async () => {
+  const brokenProfileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-recover-'));
+  const missingProfileDir = path.join(brokenProfileDir, 'not-created-yet');
+  const port = takeIsolatedPort();
+  const ctx = createContext({ port, userDataDir: missingProfileDir });
+  const isolated = loadModule(ctx);
+
+  try {
+    isolated.initLocalRestApi();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    // Failing closed is correct: no credential, no server.
+    await assert.rejects(
+      () => makeRequest({ method: 'GET', path: '/health' }, undefined, port),
+      /ECONNREFUSED/,
+      'the API served requests even though its token was never stored',
+    );
+
+    // Storage recovers, and the user opens Settings — which reads the token.
+    ctx.userDataDir = brokenProfileDir;
+    const token = ctx.handleHandlers.get('LOCAL_REST_API_GET_TOKEN')();
+    assert.match(token, /^[A-Za-z0-9]{32}$/);
+    assert.equal(
+      fs.readFileSync(path.join(brokenProfileDir, 'local-rest-api-token'), 'utf8').trim(),
+      token,
+    );
+
+    // The setting still says enabled, so the server must now actually be up —
+    // and the token the user is looking at must be the one it accepts.
+    const health = await makeRequest({ method: 'GET', path: '/health' }, undefined, port);
+    assert.equal(health.status, 200, 'settings showed enabled but nothing was listening');
+
+    const authed = await makeRequest(
+      {
+        method: 'GET',
+        path: '/tasks',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      undefined,
+      port,
+    );
+    assert.equal(authed.status, 200);
+    assert.equal(authed.body.data, 'mock_renderer_data');
+  } finally {
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+    fs.rmSync(brokenProfileDir, { recursive: true, force: true });
+  }
+});
+
+// The same recovery, reached from the other IPC: storage is still broken when
+// the settings page loads, so reading the token fails too, and Regenerate is
+// the button the user presses once they have freed the disk.
+test('recovery also works when Regenerate is the call that first succeeds', async () => {
+  const brokenProfileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-regen-'));
+  const missingProfileDir = path.join(brokenProfileDir, 'not-created-yet');
+  const port = takeIsolatedPort();
+  const ctx = createContext({ port, userDataDir: missingProfileDir });
+  const isolated = loadModule(ctx);
+
+  try {
+    isolated.initLocalRestApi();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+    // Settings opens while storage is still broken: the read fails as well.
+    assert.throws(() => ctx.handleHandlers.get('LOCAL_REST_API_GET_TOKEN')());
+
+    ctx.userDataDir = brokenProfileDir;
+    const token = ctx.handleHandlers.get('LOCAL_REST_API_REGENERATE_TOKEN')();
+    assert.match(token, /^[A-Za-z0-9]{32}$/);
+
+    const health = await makeRequest({ method: 'GET', path: '/health' }, undefined, port);
+    assert.equal(health.status, 200, 'settings showed enabled but nothing was listening');
+  } finally {
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+    fs.rmSync(brokenProfileDir, { recursive: true, force: true });
+  }
+});
+
+// The reconciliation above must not become a second way to switch the API on.
+test('recovering a token does not start a server the user disabled', async () => {
+  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-off-'));
+  const port = takeIsolatedPort();
+  const ctx = createContext({ port, userDataDir: profileDir });
+  const isolated = loadModule(ctx);
+
+  try {
+    isolated.initLocalRestApi();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+
+    const token = ctx.handleHandlers.get('LOCAL_REST_API_GET_TOKEN')();
+    assert.match(token, /^[A-Za-z0-9]{32}$/);
+
+    await assert.rejects(
+      () => makeRequest({ method: 'GET', path: '/health' }, undefined, port),
+      /ECONNREFUSED/,
+      'reading the token started the API while the setting was off',
+    );
+  } finally {
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+    fs.rmSync(profileDir, { recursive: true, force: true });
+  }
 });
 
 test('SP_FORCE_LOCAL_REST_API can use an explicit dev token', async () => {
