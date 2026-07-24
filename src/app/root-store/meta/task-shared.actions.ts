@@ -6,7 +6,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { BatchOperation } from '@super-productivity/plugin-api';
 import { PersistentActionMeta } from '../../op-log/core/persistent-action.interface';
 import { OpType } from '../../op-log/core/operation.types';
-import { isTodayWithOffset } from '../../util/is-today.util';
+import { shouldClearDueTimeForToday } from '../../util/is-today.util';
 
 /**
  * Payload marker stamped on every new `deleteProject` operation so the LWW
@@ -127,20 +127,16 @@ export const TaskSharedActions = createActionGroup({
       };
     }) => {
       const { restoreToToday } = taskProps;
-      const dueWithTime = taskProps.task.dueWithTime;
-      const hasValidDueWithTime =
-        typeof dueWithTime === 'number' &&
-        Number.isFinite(dueWithTime) &&
-        dueWithTime > 0;
+      // Materialize Today placement into the snapshot fields so a released
+      // conflict converter degrades to visible-but-unordered Today membership
+      // instead of losing the restore. Clearing rules match handlePlanTasksForToday.
       const shouldClearTime =
-        restoreToToday &&
-        dueWithTime !== undefined &&
-        (!hasValidDueWithTime ||
-          !isTodayWithOffset(
-            dueWithTime,
-            restoreToToday.today,
-            restoreToToday.startOfNextDayDiffMs,
-          ));
+        !!restoreToToday &&
+        shouldClearDueTimeForToday(
+          taskProps.task.dueWithTime,
+          restoreToToday.today,
+          restoreToToday.startOfNextDayDiffMs,
+        );
       const task = restoreToToday
         ? {
             ...taskProps.task,

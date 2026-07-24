@@ -2541,8 +2541,18 @@ export class ConflictResolutionService {
     const [semanticRestoreOp] = conflict.localOps;
     const [remoteDeleteOp] = conflict.remoteOps;
     const remoteDeleteIds = remoteDeleteOp ? getOpEntityIds(remoteDeleteOp) : [];
-    // Mixed histories need the generic snapshot path so a stale restore payload
-    // cannot overwrite a later local edit or compensate for unrelated deletes.
+    // Only re-emit the semantic restore for the exact 1-restore-vs-1-single-entity-
+    // delete shape. Mixed histories need the generic snapshot path so a stale restore
+    // payload cannot overwrite a later local edit or compensate for unrelated deletes.
+    //
+    // Consequence, scoped to #9290: for a bulk `deleteTasks` (multi-`entityIds`) or any
+    // multi-op history the guard fails, and the generic path below emits a `[TASK] LWW
+    // Update` rather than a `restoreTask` action. That still recreates the active entity,
+    // but receivers won't run archive cleanup (dispatched only by the semantic restore
+    // action, see ArchiveOperationHandler), so a stale archived copy can survive next to
+    // the active task. This matches the pre-existing behavior for those shapes — this fix
+    // deliberately covers only the common single-op path; broadening it (and the
+    // dependency that `deleteTask` stays single-entity) is tracked in #9290.
     if (
       conflict.entityType === 'TASK' &&
       conflict.localOps.length === 1 &&
