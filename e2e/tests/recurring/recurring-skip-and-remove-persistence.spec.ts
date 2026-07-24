@@ -140,10 +140,8 @@ test.describe('Recurring task occurrence and series removal persistence', () => 
     await gotoHashRoute(page, '/#/tag/TODAY/tasks', task);
     await taskPage.openTaskDetail(task);
 
-    const repeatItem = page
-      .locator('task-detail-item')
-      .filter({ has: page.locator('mat-icon', { hasText: /^repeat$/ }) });
-    await expect(repeatItem.locator('.reminder-value')).toHaveText('Every day');
+    const repeatValue = page.locator('task-detail-item .schedule-value__repeat');
+    await expect(repeatValue).toContainText('Every day');
 
     const repeatDialog = await openRecurDialog(page);
     await repeatDialog.getByRole('button', { name: 'Remove', exact: true }).click();
@@ -157,7 +155,7 @@ test.describe('Recurring task occurrence and series removal persistence', () => 
     await expect(removeConfirmation).toBeHidden({ timeout: 10000 });
 
     await expect(task).toBeVisible();
-    await expect(repeatItem.locator('.reminder-value')).toHaveCount(0, {
+    await expect(repeatValue).toHaveCount(0, {
       timeout: 10000,
     });
     await page.keyboard.press('Escape');
