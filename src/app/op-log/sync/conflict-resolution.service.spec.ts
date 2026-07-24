@@ -8391,9 +8391,13 @@ describe('ConflictResolutionService', () => {
       );
       const payload = extractActionPayload(op.payload);
 
-      // Old clients accept it BECAUSE of the compat id...
+      // LOAD-BEARING: this is what fails if the producer ever stops emitting the
+      // compat id — drop `|| !isSingletonEntityId(entityId)` from createLWWUpdateOp
+      // (the SUNSET cleanup, done too early) and old clients reject the op again.
       expect(acceptedByV1815Gate(op.actionType, entityId, payload)).toBeTrue();
-      // ...and non-vacuous: strip the compat id and old clients reproduce #9256.
+      // Guards the SIMULATION, not the producer: proves the copied v18.15.1
+      // predicate still discriminates, so the assertion above cannot pass because
+      // the helper degenerated into returning true for everything.
       const withoutCompatId = { ...payload };
       delete withoutCompatId['id'];
       expect(acceptedByV1815Gate(op.actionType, entityId, withoutCompatId)).toBeFalse();
