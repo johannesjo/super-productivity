@@ -510,7 +510,7 @@ describe('taskSharedSchedulingMetaReducer', () => {
       const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
 
       expect(updatedTask.dueWithTime).toBe(scheduledAt);
-      expect(updatedTask.dueDay).toBe(actionToday);
+      expect(updatedTask.dueDay).toBeUndefined();
     });
 
     it('should remove tasks from planner days when adding to Today', () => {
@@ -562,7 +562,60 @@ describe('taskSharedSchedulingMetaReducer', () => {
 
       expect(updatedTask.dueWithTime).toBe(now);
       expect(updatedTask.remindAt).toBeUndefined();
-      expect(updatedTask.dueDay).toBeDefined();
+      expect(updatedTask.dueDay).toBeUndefined();
+    });
+
+    it('should heal a same-day double schedule idempotently', () => {
+      const today = '2024-06-15';
+      const dueWithTime = new Date(2024, 5, 15, 13).getTime();
+      const testState = createStateWithExistingTasks([], [], [], ['task1']);
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueDay: today,
+        dueWithTime,
+        remindAt: dueWithTime - 300_000,
+      });
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        today,
+        startOfNextDayDiffMs: 0,
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
+      expect(updatedTask.dueDay).toBeUndefined();
+      expect(updatedTask.dueWithTime).toBe(dueWithTime);
+      expect(updatedTask.remindAt).toBeUndefined();
+
+      metaReducer(updatedState, action);
+      expect(mockReducer.calls.mostRecent().args[0]).toBe(updatedState);
+    });
+
+    it('should clear an off-day time from a double-scheduled Today task', () => {
+      const today = '2024-06-15';
+      const dueWithTime = new Date(2024, 5, 16, 13).getTime();
+      const testState = createStateWithExistingTasks([], [], [], ['task1']);
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueDay: today,
+        dueWithTime,
+        remindAt: dueWithTime - 300_000,
+      });
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        today,
+        startOfNextDayDiffMs: 0,
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedTask =
+        mockReducer.calls.mostRecent().args[0][TASK_FEATURE_NAME].entities.task1;
+      expect(updatedTask.dueDay).toBe(today);
+      expect(updatedTask.dueWithTime).toBeUndefined();
+      expect(updatedTask.remindAt).toBeUndefined();
     });
 
     it('should clear dueWithTime when task is scheduled for a different day', () => {
@@ -972,7 +1025,7 @@ describe('taskSharedSchedulingMetaReducer', () => {
 
         // 2 AM Feb 16 is still "today" with 4h offset, so dueWithTime should be preserved
         expect(updatedTask.dueWithTime).toBe(FEB_16_2AM);
-        expect(updatedTask.dueDay).toBe(TODAY_STR);
+        expect(updatedTask.dueDay).toBeUndefined();
       });
 
       it('should clear dueWithTime when task time is beyond offset window', () => {

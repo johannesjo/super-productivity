@@ -115,7 +115,7 @@ describe('planTasksForToday operation replay', () => {
     const result = applyOperation(state, op);
     const task = result[TASK_FEATURE_NAME].entities[TASK_ID] as Task;
 
-    expect(task.dueDay).toBe(ACTION_TODAY);
+    expect(task.dueDay).toBeUndefined();
     expect(task.dueWithTime).toBe(scheduledAt);
   });
 });

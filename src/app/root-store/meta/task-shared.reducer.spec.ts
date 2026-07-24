@@ -1292,6 +1292,35 @@ describe('taskSharedMetaReducer', () => {
       ]);
     });
 
+    it('should preserve a captured logical Today time without also setting dueDay', () => {
+      const today = '2026-01-05';
+      const startOfNextDayDiffMs = 4 * 60 * 60 * 1000;
+      const dueWithTime = new Date('2026-01-06T02:00:00').getTime();
+      const action = TaskSharedActions.restoreTask({
+        task: createMockTask({
+          dueDay: '2025-12-30',
+          dueWithTime,
+          remindAt: dueWithTime - 300_000,
+        }),
+        subTasks: [],
+        restoreToToday: {
+          today,
+          startOfNextDayDiffMs,
+        },
+      });
+
+      metaReducer(baseState, action);
+
+      const restoredState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const restoredTask = restoredState[TASK_FEATURE_NAME].entities.task1;
+      expect(restoredTask?.dueWithTime).toBe(dueWithTime);
+      expect(restoredTask?.dueDay).toBeUndefined();
+      expect(restoredTask?.remindAt).toBeUndefined();
+      expect(restoredState[TAG_FEATURE_NAME].entities[TODAY_TAG.id]?.taskIds).toEqual([
+        'task1',
+      ]);
+    });
+
     it('should keep markerless restore out of Today', () => {
       const action = createRestoreAction();
 

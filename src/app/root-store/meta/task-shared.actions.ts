@@ -132,21 +132,20 @@ export const TaskSharedActions = createActionGroup({
         typeof dueWithTime === 'number' &&
         Number.isFinite(dueWithTime) &&
         dueWithTime > 0;
-      const shouldClearTime =
-        restoreToToday &&
-        dueWithTime !== undefined &&
-        (!hasValidDueWithTime ||
-          !isTodayWithOffset(
-            dueWithTime,
-            restoreToToday.today,
-            restoreToToday.startOfNextDayDiffMs,
-          ));
+      const shouldPreserveTime =
+        !!restoreToToday &&
+        hasValidDueWithTime &&
+        isTodayWithOffset(
+          dueWithTime,
+          restoreToToday.today,
+          restoreToToday.startOfNextDayDiffMs,
+        );
       const task = restoreToToday
         ? {
             ...taskProps.task,
-            dueDay: restoreToToday.today,
+            dueDay: shouldPreserveTime ? undefined : restoreToToday.today,
+            dueWithTime: shouldPreserveTime ? dueWithTime : undefined,
             remindAt: undefined,
-            ...(shouldClearTime ? { dueWithTime: undefined } : {}),
           }
         : taskProps.task;
       const subTasks = restoreToToday

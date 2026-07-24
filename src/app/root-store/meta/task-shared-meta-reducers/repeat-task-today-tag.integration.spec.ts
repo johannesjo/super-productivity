@@ -314,9 +314,10 @@ describe('Recurring task TODAY_TAG integration (#6269)', () => {
 
       // Task should be back in TODAY_TAG
       expect(getTodayTagTaskIds(state)).toContain(day1TaskId);
-      // planTasksForToday sets dueDay=today and preserves dueWithTime if for today
+      // A same-day time remains the sole schedule source.
       const recoveredTask = getTask(state, day1TaskId);
-      expect(recoveredTask?.dueDay).toBe(day1Str);
+      expect(recoveredTask?.dueDay).toBeUndefined();
+      expect(recoveredTask?.dueWithTime).toBe(day1_9am);
     });
 
     it('should handle task that only has dueWithTime (no dueDay) during recovery', () => {
@@ -346,9 +347,10 @@ describe('Recurring task TODAY_TAG integration (#6269)', () => {
 
       // Task should now be in TODAY_TAG
       expect(getTodayTagTaskIds(state)).toContain('task1');
-      // And dueDay should be set to today
+      // dueWithTime remains the sole schedule source.
       const task = getTask(state, 'task1');
-      expect(task?.dueDay).toBe(day1Str);
+      expect(task?.dueDay).toBeUndefined();
+      expect(task?.dueWithTime).toBe(day1_9am);
     });
   });
 

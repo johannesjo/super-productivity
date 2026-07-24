@@ -190,6 +190,12 @@ const handlePlanTasksForToday = (
     startOfNextDayDiffMsFromAction ??
     state[appStateFeatureKey]?.startOfNextDayDiffMs ??
     0;
+  const shouldPreserveTaskTime = (task: Task): boolean =>
+    !isClearScheduledTime &&
+    typeof task.dueWithTime === 'number' &&
+    Number.isFinite(task.dueWithTime) &&
+    task.dueWithTime > 0 &&
+    isTodayWithOffset(task.dueWithTime, today, offsetMs);
 
   // Filter out tasks that don't exist, are already in today, or whose parent is in today
   const newTasksForToday = taskIds.filter((taskId) => {
@@ -200,52 +206,41 @@ const handlePlanTasksForToday = (
     return !parentId || !todayTag.taskIds.includes(parentId);
   });
 
-  // Filter for tasks that need updates:
-  // 1. Tasks that need dueDay updated (not yet scheduled for today)
-  // 2. Tasks already scheduled for today that need remindAt/dueWithTime cleared
-  const tasksNeedingUpdate = taskIds.filter((taskId) => {
+  const taskUpdates = taskIds.flatMap((taskId): Update<Task>[] => {
     const task = state[TASK_FEATURE_NAME].entities[taskId] as Task;
-    if (!task) return false;
-
-    // Include tasks that need dueDay updated
-    if (task.dueDay !== today) {
-      return newTasksForToday.includes(taskId) || todayTag.taskIds.includes(taskId);
+    if (
+      !task ||
+      (!newTasksForToday.includes(taskId) && !todayTag.taskIds.includes(taskId))
+    ) {
+      return [];
     }
 
-    // Include tasks already scheduled for today when we need to clear scheduling
-    if (task.dueDay === today && isClearScheduledTime) {
-      // Need to clear remindAt and/or dueWithTime
-      return task.remindAt !== undefined || task.dueWithTime !== undefined;
+    const shouldPreserveTime = shouldPreserveTaskTime(task);
+    const dueDay = shouldPreserveTime ? undefined : today;
+    const shouldClearTime = !shouldPreserveTime && task.dueWithTime !== undefined;
+    const scheduleNeedsUpdate = task.dueDay !== dueDay || shouldClearTime;
+    const shouldClearReminder =
+      !!isClearScheduledTime || task.dueDay !== today || scheduleNeedsUpdate;
+    if (!scheduleNeedsUpdate && (!shouldClearReminder || task.remindAt === undefined)) {
+      return [];
     }
 
-    return false;
+    return [
+      {
+        id: taskId,
+        changes: {
+          dueDay,
+          ...(shouldClearReminder ? { remindAt: undefined } : {}),
+          ...(shouldClearTime ? { dueWithTime: undefined } : {}),
+        },
+      },
+    ];
   });
 
   // Early return if no actual changes needed
-  if (newTasksForToday.length === 0 && tasksNeedingUpdate.length === 0) {
+  if (newTasksForToday.length === 0 && taskUpdates.length === 0) {
     return state;
   }
-
-  // Only create updates for tasks that need dueDay change
-  const taskUpdates: Update<Task>[] = tasksNeedingUpdate.map((taskId) => {
-    const task = state[TASK_FEATURE_NAME].entities[taskId] as Task;
-
-    // Preserve dueWithTime if it matches today's date
-    // Only clear it if the task has a time scheduled for a different day
-    // However, if isClearScheduledTime is true (from reminder dialog), always clear the time
-    const shouldClearTime = isClearScheduledTime
-      ? !!task?.dueWithTime
-      : task?.dueWithTime && !isTodayWithOffset(task.dueWithTime, today, offsetMs);
-
-    return {
-      id: taskId,
-      changes: {
-        dueDay: today,
-        remindAt: undefined, // Always clear reminder when explicitly adding to today
-        ...(shouldClearTime ? { dueWithTime: undefined } : {}),
-      },
-    };
-  });
 
   const updatedState = {
     ...state,
