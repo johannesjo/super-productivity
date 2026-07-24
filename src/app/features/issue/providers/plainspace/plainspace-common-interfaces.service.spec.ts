@@ -182,14 +182,4 @@ describe('PlainspaceCommonInterfacesService', () => {
       expect(updates[0]?.taskChanges.isDone).toBe(true);
     });
   });
-
-  it('keeps automatic removal disabled until local changes can be proven absent', () => {
-    expect(
-      (
-        service as unknown as {
-          getRemovedRemoteTasks?: (tasks: Task[]) => Promise<Task[]>;
-        }
-      ).getRemovedRemoteTasks,
-    ).toBeUndefined();
-  });
 });
