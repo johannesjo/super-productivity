@@ -109,8 +109,6 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
       isDone: issue['isDone'],
       title: issue['title'],
       scheduledAt: issue['scheduledAt'],
-      projectId: issue['projectId'],
-      url: issue['url'],
     };
   }
 

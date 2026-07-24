@@ -61,8 +61,7 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
       ...(dueWithTime ? { dueWithTime } : {}),
       // Seed the last trustworthy remote values. Completion needs the baseline
-      // for write-back; projectId and URL base record which remote Space this
-      // mirror came from so a later provider rebind cannot delete it.
+      // for write-back; title and schedule remain provider-owned pull baselines.
       issueLastSyncedValues: this._syncAdapter.extractSyncValues(
         issue as unknown as Record<string, unknown>,
       ),
@@ -130,71 +129,6 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     return updates;
   }
 
-  /**
-   * Detect imported tasks that are no longer mine on Plainspace. This identifies
-   * candidates only; it does not authorize deletion without a separate proof that
-   * the local mirror is unchanged. The assigned-task list includes done tasks, so
-   * a missing task was deleted or reassigned rather than merely completed.
-   *
-   * Failed or malformed snapshots are ignored. A successful empty snapshot is
-   * trusted only after `/me` independently confirms access to the configured
-   * Space. Remote Space provenance in the task baseline also prevents a provider
-   * rebind from treating old-Space mirrors as removals. This trusts GET /tasks to
-   * remain complete and unpaginated.
-   */
-  async getRemovedRemoteTaskCandidates(tasks: Task[]): Promise<Task[]> {
-    const tasksByProviderId = new Map<string, Task[]>();
-    for (const task of tasks) {
-      if (!task.issueProviderId || !task.issueId) {
-        continue;
-      }
-      const group = tasksByProviderId.get(task.issueProviderId) ?? [];
-      group.push(task);
-      tasksByProviderId.set(task.issueProviderId, group);
-    }
-
-    const removed: Task[] = [];
-    for (const [providerId, providerTasks] of tasksByProviderId) {
-      const cfg = await firstValueFrom(this._getCfgOnce$(providerId));
-      if (!cfg.spaceId) {
-        continue;
-      }
-      const providerBase = getHttpUrl(cfg.host);
-      if (!providerBase) {
-        continue;
-      }
-      const snapshot = await firstValueFrom(
-        this._plainspaceApiService.getAssignedTaskSnapshot$(cfg),
-      );
-      if (snapshot === null) {
-        continue;
-      }
-
-      const spaces = await firstValueFrom(this._plainspaceApiService.getSpaces$(cfg));
-      const matchingSpaces =
-        spaces?.filter(({ id, slug }) => id === cfg.spaceId || slug === cfg.spaceId) ??
-        [];
-      if (matchingSpaces.length !== 1) {
-        continue;
-      }
-      const remoteProjectId = matchingSpaces[0].id;
-      if (snapshot.some((issue) => issue.projectId !== remoteProjectId)) {
-        continue;
-      }
-
-      const myTaskIds = new Set(snapshot.map((issue) => issue.id));
-      removed.push(
-        ...providerTasks.filter(
-          (task) =>
-            task.issueLastSyncedValues?.['projectId'] === remoteProjectId &&
-            isUrlWithinProviderBase(task.issueLastSyncedValues?.['url'], providerBase) &&
-            !myTaskIds.has(task.issueId!),
-        ),
-      );
-    }
-    return removed;
-  }
-
   private _toFreshData(
     task: Task,
     issue: PlainspaceIssue | null,
@@ -251,26 +185,3 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     return new Date((issue as PlainspaceIssue).updatedAt).getTime();
   }
 }
-
-const getHttpUrl = (value: unknown): URL | null => {
-  if (typeof value !== 'string') {
-    return null;
-  }
-  try {
-    const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:' ? url : null;
-  } catch {
-    return null;
-  }
-};
-
-const isUrlWithinProviderBase = (value: unknown, providerBase: URL): boolean => {
-  const url = getHttpUrl(value);
-  if (!url || url.origin !== providerBase.origin) {
-    return false;
-  }
-  const basePath = providerBase.pathname.replace(/\/+$/, '');
-  return (
-    !basePath || url.pathname === basePath || url.pathname.startsWith(`${basePath}/`)
-  );
-};

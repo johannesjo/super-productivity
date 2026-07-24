@@ -17,13 +17,7 @@ describe('PlainspaceSyncAdapterService', () => {
   };
   const patchedIssue = {
     id: 't1',
-    title: 'Buy milk',
     isDone: true,
-    updatedAt: '2026-01-02T00:00:00.000Z',
-    url: 'https://plainspace.org/p/item/t1',
-    projectId: 'space-1',
-    scheduledAt: null,
-    isRecurring: false,
   };
 
   beforeEach(() => {
@@ -151,8 +145,6 @@ describe('PlainspaceSyncAdapterService', () => {
       isDone: false,
       title: 'Buy milk',
       scheduledAt: null,
-      projectId: 'space-1',
-      url: 'https://plainspace.org/p/item/new-1',
     });
     // No numeric issue number -> the SP title keeps no '#123' prefix.
     expect((res as { issueNumber?: number }).issueNumber).toBeUndefined();
@@ -179,21 +171,17 @@ describe('PlainspaceSyncAdapterService', () => {
     expect(await adapter.fetchIssue('missing', cfg)).toEqual({});
   });
 
-  it('extractSyncValues includes remote project provenance in the baseline', () => {
+  it('extractSyncValues includes completion and pulled field baselines', () => {
     expect(
       adapter.extractSyncValues({
         isDone: true,
         title: 'x',
         scheduledAt: '2026-01-02T09:00:00.000Z',
-        projectId: 'space-1',
-        url: 'https://plainspace.org/p/item/t1',
       }),
     ).toEqual({
       isDone: true,
       title: 'x',
       scheduledAt: '2026-01-02T09:00:00.000Z',
-      projectId: 'space-1',
-      url: 'https://plainspace.org/p/item/t1',
     });
   });
 

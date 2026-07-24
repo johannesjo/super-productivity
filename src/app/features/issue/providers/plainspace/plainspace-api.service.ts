@@ -40,12 +40,9 @@ export class PlainspaceApiService {
    */
   getSpaces$(cfg: PlainspaceCfg): Observable<PlainspaceSpace[] | null> {
     return this.getMe$(cfg).pipe(
-      map((me) => {
-        if (!me || !Array.isArray(me.projects) || !me.projects.every(isPlainspaceSpace)) {
-          return null;
-        }
-        return me.projects.map((p) => ({ id: p.id, name: p.name, slug: p.slug }));
-      }),
+      map((me) =>
+        me ? me.projects.map((p) => ({ id: p.id, name: p.name, slug: p.slug })) : null,
+      ),
     );
   }
 
@@ -89,29 +86,6 @@ export class PlainspaceApiService {
             .map(mapSPTaskToIssue),
         ),
         catchError(() => of([])),
-      );
-  }
-
-  /**
-   * A validated assigned-task snapshot for destructive omission checks. `null`
-   * means the response failed or was malformed; `[]` is a successful empty list.
-   */
-  getAssignedTaskSnapshot$(
-    cfg: PlainspaceCfg,
-  ): Observable<Pick<PlainspaceIssue, 'id' | 'projectId'>[] | null> {
-    return this._http
-      .get<unknown>(`${this._base(cfg)}/tasks`, { headers: this._headers(cfg) })
-      .pipe(
-        map((res) => {
-          if (!isSPTaskRefsResponse(res)) {
-            return null;
-          }
-          // /tasks spans all my spaces; keep only this provider's space.
-          return res.tasks
-            .filter((t) => matchesSpace(t, cfg.spaceId))
-            .map(({ id, projectId }) => ({ id, projectId }));
-        }),
-        catchError(() => of(null)),
       );
   }
 
@@ -169,13 +143,13 @@ export class PlainspaceApiService {
     id: string,
     fields: { done: boolean },
     cfg: PlainspaceCfg,
-  ): Observable<PlainspaceIssue | null> {
+  ): Observable<PlainspaceCompletionConfirmation | null> {
     return this._http
       .patch<unknown>(`${this._base(cfg)}/tasks/${encodeURIComponent(id)}`, fields, {
         headers: this._headers(cfg),
       })
       .pipe(
-        map((res) => (isSPTaskResponse(res) ? mapSPTaskToIssue(res.task) : null)),
+        map(parsePlainspaceCompletionConfirmation),
         catchError(() => of(null)),
       );
   }
@@ -260,18 +234,10 @@ interface SPTaskResponse {
   task: SPTask;
 }
 
+type PlainspaceCompletionConfirmation = Pick<PlainspaceIssue, 'id' | 'isDone'>;
+
 interface SPTasksResponse {
   tasks: SPTask[];
-}
-
-interface SPTaskRef {
-  id: string;
-  projectId: string;
-  projectSlug: string;
-}
-
-interface SPTaskRefsResponse {
-  tasks: SPTaskRef[];
 }
 
 interface SPCreateSpaceResponse {
@@ -291,69 +257,28 @@ interface SPMeResponse {
 
 // `cfg.spaceId` may hold either the Plainspace project UUID or its slug (what
 // users see in the space URL, e.g. plainspace.org/<slug>/…), so match both.
-const matchesSpace = (
-  t: Pick<SPTask, 'projectId' | 'projectSlug'>,
-  spaceId: string | null | undefined,
-): boolean => !spaceId || t.projectId === spaceId || t.projectSlug === spaceId;
-
-const isPlainspaceSpace = (value: unknown): value is PlainspaceSpace => {
-  if (!isRecord(value)) {
-    return false;
-  }
-  return (
-    typeof value['id'] === 'string' &&
-    !!value['id'] &&
-    typeof value['name'] === 'string' &&
-    typeof value['slug'] === 'string' &&
-    !!value['slug']
-  );
-};
-
-const isSPTaskRefsResponse = (value: unknown): value is SPTaskRefsResponse =>
-  isRecord(value) && Array.isArray(value['tasks']) && value['tasks'].every(isSPTaskRef);
-
-const isSPTaskResponse = (value: unknown): value is SPTaskResponse =>
-  isRecord(value) && isSPTask(value['task']);
-
-const isSPTask = (value: unknown): value is SPTask => {
-  if (!isRecord(value)) {
-    return false;
-  }
-  return (
-    typeof value['id'] === 'string' &&
-    !!value['id'] &&
-    typeof value['title'] === 'string' &&
-    typeof value['done'] === 'boolean' &&
-    typeof value['projectId'] === 'string' &&
-    !!value['projectId'] &&
-    typeof value['projectName'] === 'string' &&
-    typeof value['projectSlug'] === 'string' &&
-    !!value['projectSlug'] &&
-    typeof value['listId'] === 'string' &&
-    typeof value['url'] === 'string' &&
-    typeof value['createdAt'] === 'string' &&
-    typeof value['updatedAt'] === 'string' &&
-    (value['scheduledAt'] === null || typeof value['scheduledAt'] === 'string') &&
-    typeof value['isRecurring'] === 'boolean'
-  );
-};
-
-const isSPTaskRef = (value: unknown): value is SPTaskRef => {
-  if (!isRecord(value)) {
-    return false;
-  }
-  return (
-    typeof value['id'] === 'string' &&
-    !!value['id'] &&
-    typeof value['projectId'] === 'string' &&
-    !!value['projectId'] &&
-    typeof value['projectSlug'] === 'string' &&
-    !!value['projectSlug']
-  );
-};
+const matchesSpace = (t: SPTask, spaceId: string | null | undefined): boolean =>
+  !spaceId || t.projectId === spaceId || t.projectSlug === spaceId;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
+
+const parsePlainspaceCompletionConfirmation = (
+  value: unknown,
+): PlainspaceCompletionConfirmation | null => {
+  if (!isRecord(value) || !isRecord(value['task'])) {
+    return null;
+  }
+  const task = value['task'];
+  if (
+    typeof task['id'] !== 'string' ||
+    !task['id'] ||
+    typeof task['done'] !== 'boolean'
+  ) {
+    return null;
+  }
+  return { id: task['id'], isDone: task['done'] };
+};
 
 const mapSPTaskToIssue = (t: SPTask): PlainspaceIssue => ({
   id: t.id,
@@ -362,11 +287,8 @@ const mapSPTaskToIssue = (t: SPTask): PlainspaceIssue => ({
   updatedAt: t.updatedAt,
   url: t.url,
   projectId: t.projectId,
-  // Normalize to a canonical UTC ISO instant on read. The two-way-sync baseline
-  // and push both compare `scheduledAt` by exact string, and the push side emits
-  // `new Date(ms).toISOString()` — so an equivalent-but-differently-formatted
-  // server value (offset vs Z, ms precision) would otherwise read as a remote
-  // change and silently drop the user's reschedule.
+  // Normalize to a canonical UTC ISO instant so equivalent server encodings do
+  // not appear as schedule changes in polling and baseline comparisons.
   scheduledAt: t.scheduledAt ? new Date(t.scheduledAt).toISOString() : null,
   isRecurring: !!t.isRecurring,
 });

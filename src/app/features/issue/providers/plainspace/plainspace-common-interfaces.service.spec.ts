@@ -35,8 +35,8 @@ describe('PlainspaceCommonInterfacesService', () => {
   });
 
   // Without a seeded baseline, computePushDecisions skips completion write-back
-  // as 'no-baseline'. The pulled fields and binding provenance remain alongside it.
-  it('getAddTaskData seeds completion and remote provenance baselines', () => {
+  // as 'no-baseline'. The provider-owned pulled fields remain alongside it.
+  it('getAddTaskData seeds completion and pulled field baselines', () => {
     const data = service.getAddTaskData(issue('2026-01-02T09:00:00.000Z', true));
     expect(data.title).toBe('Buy milk');
     expect(data.isDone).toBe(true);
@@ -44,8 +44,6 @@ describe('PlainspaceCommonInterfacesService', () => {
       isDone: true,
       title: 'Buy milk',
       scheduledAt: '2026-01-02T09:00:00.000Z',
-      projectId: 'space-1',
-      url: 'https://plainspace.org/p/item/t1',
     });
   });
 
@@ -55,8 +53,6 @@ describe('PlainspaceCommonInterfacesService', () => {
       isDone: false,
       title: 'Buy milk',
       scheduledAt: null,
-      projectId: 'space-1',
-      url: 'https://plainspace.org/p/item/t1',
     });
   });
 
@@ -187,205 +183,13 @@ describe('PlainspaceCommonInterfacesService', () => {
     });
   });
 
-  describe('getRemovedRemoteTaskCandidates (orphan detection by list-diff)', () => {
-    it('does not expose candidates through the automatic removal hook', () => {
-      expect(
-        (
-          service as unknown as {
-            getRemovedRemoteTasks?: (tasks: Task[]) => Promise<Task[]>;
-          }
-        ).getRemovedRemoteTasks,
-      ).toBeUndefined();
-    });
-
-    const task = (
-      issueId: string,
-      remoteProjectId: string | null = 'space-1',
-      remoteUrl = `https://plainspace.org/space/item/${issueId}`,
-    ): Task =>
-      ({
-        issueProviderId: 'p1',
-        issueId,
-        issueLastUpdated: 0,
-        issueLastSyncedValues: remoteProjectId
-          ? { projectId: remoteProjectId, url: remoteUrl }
-          : undefined,
-      }) as Task;
-
-    const setSnapshot = ({
-      ids,
-      spaceId = 'space-1',
-      host = 'https://plainspace.org',
-      spaces = [{ id: spaceId, name: 'Space', slug: 'space' }],
-    }: {
-      ids: string[] | null;
-      spaceId?: string;
-      host?: string;
-      spaces?: { id: string; name: string; slug: string }[] | null;
-    }): void => {
-      spyOn(
-        service as unknown as { _getCfgOnce$: (id: string) => unknown },
-        '_getCfgOnce$',
-      ).and.returnValue(of({ host, spaceId }));
+  it('keeps automatic removal disabled until local changes can be proven absent', () => {
+    expect(
       (
-        api as unknown as {
-          getAssignedTaskSnapshot$: () => unknown;
-          getSpaces$: () => unknown;
+        service as unknown as {
+          getRemovedRemoteTasks?: (tasks: Task[]) => Promise<Task[]>;
         }
-      ).getAssignedTaskSnapshot$ = () =>
-        of(
-          ids?.map((id) => ({
-            ...issue(null),
-            id,
-            projectId: spaceId,
-          })) ?? null,
-        );
-      (
-        api as unknown as {
-          getAssignedTaskSnapshot$: () => unknown;
-          getSpaces$: () => unknown;
-        }
-      ).getSpaces$ = () => of(spaces);
-    };
-
-    it('returns tasks missing from my task list (deleted or reassigned away)', async () => {
-      setSnapshot({ ids: ['kept'] });
-      const tasks = [task('kept'), task('gone')];
-      const removed = await service.getRemovedRemoteTaskCandidates(tasks);
-      expect(removed.map((t) => t.issueId)).toEqual(['gone']);
-    });
-
-    it('keeps tasks still in my list (done tasks stay in the list)', async () => {
-      setSnapshot({ ids: ['a', 'b'] });
-      const tasks = [task('a'), task('b')];
-      expect(await service.getRemovedRemoteTaskCandidates(tasks)).toEqual([]);
-    });
-
-    it('trusts an empty snapshot only after independently verifying Space access', async () => {
-      setSnapshot({ ids: [] });
-      const gone = task('gone');
-      expect(await service.getRemovedRemoteTaskCandidates([gone])).toEqual([gone]);
-    });
-
-    it('trusts a non-empty snapshot even when every previous task is gone', async () => {
-      setSnapshot({ ids: ['new-task'] });
-      const gone = task('gone');
-      expect(await service.getRemovedRemoteTaskCandidates([gone])).toEqual([gone]);
-    });
-
-    it('preserves tasks when the assigned-task snapshot failed', async () => {
-      setSnapshot({ ids: null });
-      expect(await service.getRemovedRemoteTaskCandidates([task('a')])).toEqual([]);
-    });
-
-    it('preserves tasks when an empty snapshot cannot verify Space access', async () => {
-      setSnapshot({ ids: [], spaces: null });
-      expect(await service.getRemovedRemoteTaskCandidates([task('a')])).toEqual([]);
-    });
-
-    it('preserves tasks after access to the configured Space is lost', async () => {
-      setSnapshot({
-        ids: [],
-        spaces: [{ id: 'other', name: 'Other', slug: 'other' }],
-      });
-      expect(await service.getRemovedRemoteTaskCandidates([task('a')])).toEqual([]);
-    });
-
-    it('preserves mirrors imported before the provider was rebound to another Space', async () => {
-      setSnapshot({
-        ids: ['new-space-task'],
-        spaceId: 'space-2',
-        spaces: [{ id: 'space-2', name: 'New Space', slug: 'new-space' }],
-      });
-      expect(
-        await service.getRemovedRemoteTaskCandidates([task('old-task', 'space-1')]),
-      ).toEqual([]);
-    });
-
-    it('preserves mirrors imported before the provider was rebound to another host', async () => {
-      setSnapshot({
-        ids: [],
-        host: 'https://other.example',
-        spaces: [{ id: 'space-1', name: 'Same ID', slug: 'same-id' }],
-      });
-      expect(
-        await service.getRemovedRemoteTaskCandidates([
-          task(
-            'old-host-task',
-            'space-1',
-            'https://plainspace.org/space/item/old-host-task',
-          ),
-        ]),
-      ).toEqual([]);
-    });
-
-    it('preserves tasks when Space access resolves ambiguously', async () => {
-      setSnapshot({
-        ids: [],
-        spaceId: 'shared-key',
-        spaces: [
-          { id: 'shared-key', name: 'By ID', slug: 'first' },
-          { id: 'other-id', name: 'By Slug', slug: 'shared-key' },
-        ],
-      });
-      expect(await service.getRemovedRemoteTaskCandidates([task('ambiguous')])).toEqual(
-        [],
-      );
-    });
-
-    it('preserves tasks when a non-empty snapshot has an ambiguous Space binding', async () => {
-      setSnapshot({
-        ids: ['remote'],
-        spaceId: 'shared-key',
-        spaces: [
-          { id: 'shared-key', name: 'By ID', slug: 'first' },
-          { id: 'other-id', name: 'By Slug', slug: 'shared-key' },
-        ],
-      });
-      expect(await service.getRemovedRemoteTaskCandidates([task('gone')])).toEqual([]);
-    });
-
-    it('resolves a slug-configured Space to its canonical project id', async () => {
-      setSnapshot({
-        ids: [],
-        spaceId: 'space-slug',
-        spaces: [{ id: 'space-uuid', name: 'Space', slug: 'space-slug' }],
-      });
-      const gone = task('gone', 'space-uuid');
-      expect(await service.getRemovedRemoteTaskCandidates([gone])).toEqual([gone]);
-    });
-
-    it('preserves mirrors when the provider moves to another base path', async () => {
-      setSnapshot({
-        ids: [],
-        host: 'https://example.com/new-base',
-        spaces: [{ id: 'space-1', name: 'Same ID', slug: 'same-id' }],
-      });
-      expect(
-        await service.getRemovedRemoteTaskCandidates([
-          task(
-            'old-base-task',
-            'space-1',
-            'https://example.com/old-base/space/item/old-base-task',
-          ),
-        ]),
-      ).toEqual([]);
-    });
-
-    it('preserves mirrors for non-HTTP provider URLs', async () => {
-      setSnapshot({ ids: [], host: 'file:///plainspace' });
-      expect(
-        await service.getRemovedRemoteTaskCandidates([
-          task('opaque', 'space-1', 'file:///plainspace/space/item/opaque'),
-        ]),
-      ).toEqual([]);
-    });
-
-    it('preserves legacy mirrors without trustworthy remote Space provenance', async () => {
-      setSnapshot({ ids: [] });
-      expect(
-        await service.getRemovedRemoteTaskCandidates([task('legacy', null)]),
-      ).toEqual([]);
-    });
+      ).getRemovedRemoteTasks,
+    ).toBeUndefined();
   });
 });
