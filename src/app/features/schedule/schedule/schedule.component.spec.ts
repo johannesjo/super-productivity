@@ -16,6 +16,8 @@ import { SCHEDULE_CONSTANTS } from '../schedule.constants';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ScheduleDay } from '../schedule.model';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
+import { registerLocaleData } from '@angular/common';
+import localeSv from '@angular/common/locales/sv';
 
 describe('ScheduleComponent', () => {
   const mockLocalization = signal({ firstDayOfWeek: 1, dateTimeLocale: 'en-US' });
@@ -28,6 +30,9 @@ describe('ScheduleComponent', () => {
   let mockGlobalTrackingIntervalService: jasmine.SpyObj<GlobalTrackingIntervalService>;
   let mockGlobalConfigService: jasmine.SpyObj<GlobalConfigService>;
   let mockCalendarEventActionsService: jasmine.SpyObj<CalendarEventActionsService>;
+
+  beforeAll(() => registerLocaleData(localeSv, 'sv'));
+
   beforeEach(async () => {
     mockLocalization.set({ firstDayOfWeek: 1, dateTimeLocale: 'en-US' });
     // Create mock services
@@ -166,20 +171,27 @@ describe('ScheduleComponent', () => {
       expect(component.headerTitle()).toMatch(/April\s+2026/);
     });
 
-    it('uses the UI language for ISO day, week, and month headings', () => {
+    const useIsoDatesWithUiLanguage = (language: string): void => {
       const translate = TestBed.inject(TranslateService);
-      translate.setTranslation('en', {
+      translate.setTranslation(language, {
         F: { WORKLOG: { CMP: { WEEK_NR: 'Week {{nr}}' } } },
       });
-      translate.use('en');
+      translate.use(language);
       mockLocalization.set({ firstDayOfWeek: 1, dateTimeLocale: 'sv' });
+    };
 
+    it('uses the UI language for the ISO day heading', () => {
+      useIsoDatesWithUiLanguage('en');
       mockLayoutService.selectedTimeView.set('day');
       mockScheduleService.getDaysToShow.and.returnValue(['2026-07-19']);
       component['_selectedDate'].set(new Date(2026, 6, 19));
       fixture.detectChanges();
-      expect(component.headerTitle()).toContain('Jul');
 
+      expect(component.headerTitle()).toContain('Jul');
+    });
+
+    it('uses the UI language for the ISO week heading', () => {
+      useIsoDatesWithUiLanguage('en');
       mockLayoutService.selectedTimeView.set('week');
       mockScheduleService.getDaysToShow.and.returnValue([
         '2026-07-13',
@@ -192,8 +204,12 @@ describe('ScheduleComponent', () => {
       ]);
       component['_selectedDate'].set(new Date(2026, 6, 13));
       fixture.detectChanges();
-      expect(component.headerTitle()).toContain('Jul');
 
+      expect(component.headerTitle()).toContain('Jul');
+    });
+
+    it('uses the UI language for the ISO month heading', () => {
+      useIsoDatesWithUiLanguage('en');
       mockLayoutService.selectedTimeView.set('month');
       const monthDays = Array.from({ length: 35 }, (_, i) => {
         const date = new Date(2026, 6, 1 + i);
@@ -206,7 +222,19 @@ describe('ScheduleComponent', () => {
       mockScheduleService.getMonthDaysToShow.and.returnValue(monthDays);
       component['_selectedDate'].set(new Date(2026, 6, 1));
       fixture.detectChanges();
+
       expect(component.headerTitle()).toContain('July');
+    });
+
+    it('preserves Gregorian dates and Latin digits in Persian ISO day headings', () => {
+      useIsoDatesWithUiLanguage('fa');
+      mockLayoutService.selectedTimeView.set('day');
+      mockScheduleService.getDaysToShow.and.returnValue(['2026-07-19']);
+      component['_selectedDate'].set(new Date(2026, 6, 19));
+      fixture.detectChanges();
+
+      expect(component.headerTitle()).toContain('19');
+      expect(component.headerTitle()).not.toMatch(/[۰-۹]/);
     });
   });
 

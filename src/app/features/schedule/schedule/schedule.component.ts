@@ -201,6 +201,7 @@ export class ScheduleComponent {
     const days = this.daysToShow();
     if (!days.length) return '';
     const locale = this._dateTimeFormatService.textLocale();
+    const isIsoLocale = this._dateTimeFormatService.isoTextLocale() !== null;
 
     if (this.isDayView()) {
       // On tablet width and below the full date clips, so drop to month + day
@@ -208,6 +209,10 @@ export class ScheduleComponent {
       const dayOpts: Intl.DateTimeFormatOptions = this._isTablet()
         ? { month: 'short', day: 'numeric' }
         : { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+      if (isIsoLocale) {
+        dayOpts.calendar = 'gregory';
+        dayOpts.numberingSystem = 'latn';
+      }
       return new Intl.DateTimeFormat(locale, dayOpts).format(parseDbDateStr(days[0]));
     }
 
