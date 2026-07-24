@@ -40,9 +40,12 @@ export class PlainspaceApiService {
    */
   getSpaces$(cfg: PlainspaceCfg): Observable<PlainspaceSpace[] | null> {
     return this.getMe$(cfg).pipe(
-      map((me) =>
-        me ? me.projects.map((p) => ({ id: p.id, name: p.name, slug: p.slug })) : null,
-      ),
+      map((me) => {
+        if (!me || !Array.isArray(me.projects) || !me.projects.every(isPlainspaceSpace)) {
+          return null;
+        }
+        return me.projects.map((p) => ({ id: p.id, name: p.name, slug: p.slug }));
+      }),
     );
   }
 
@@ -86,6 +89,29 @@ export class PlainspaceApiService {
             .map(mapSPTaskToIssue),
         ),
         catchError(() => of([])),
+      );
+  }
+
+  /**
+   * A validated assigned-task snapshot for destructive omission checks. `null`
+   * means the response failed or was malformed; `[]` is a successful empty list.
+   */
+  getAssignedTaskSnapshot$(
+    cfg: PlainspaceCfg,
+  ): Observable<Pick<PlainspaceIssue, 'id' | 'projectId'>[] | null> {
+    return this._http
+      .get<unknown>(`${this._base(cfg)}/tasks`, { headers: this._headers(cfg) })
+      .pipe(
+        map((res) => {
+          if (!isSPTaskRefsResponse(res)) {
+            return null;
+          }
+          // /tasks spans all my spaces; keep only this provider's space.
+          return res.tasks
+            .filter((t) => matchesSpace(t, cfg.spaceId))
+            .map(({ id, projectId }) => ({ id, projectId }));
+        }),
+        catchError(() => of(null)),
       );
   }
 
@@ -137,24 +163,19 @@ export class PlainspaceApiService {
   }
 
   /**
-   * Pushes a field change back to Plainspace — done state, title, and/or
-   * scheduled time (`scheduledAt`) — in a single PATCH; null on failure.
-   * `scheduledAt` is an ISO instant, or null to unschedule. Used by the
-   * two-way-sync adapter.
+   * Pushes a completion change back to Plainspace; null on failure.
    */
   patchTask$(
     id: string,
-    fields: { done?: boolean; title?: string; scheduledAt?: string | null },
+    fields: { done: boolean },
     cfg: PlainspaceCfg,
   ): Observable<PlainspaceIssue | null> {
     return this._http
-      .patch<SPTaskResponse>(
-        `${this._base(cfg)}/tasks/${encodeURIComponent(id)}`,
-        fields,
-        { headers: this._headers(cfg) },
-      )
+      .patch<unknown>(`${this._base(cfg)}/tasks/${encodeURIComponent(id)}`, fields, {
+        headers: this._headers(cfg),
+      })
       .pipe(
-        map((res) => mapSPTaskToIssue(res.task)),
+        map((res) => (isSPTaskResponse(res) ? mapSPTaskToIssue(res.task) : null)),
         catchError(() => of(null)),
       );
   }
@@ -243,6 +264,16 @@ interface SPTasksResponse {
   tasks: SPTask[];
 }
 
+interface SPTaskRef {
+  id: string;
+  projectId: string;
+  projectSlug: string;
+}
+
+interface SPTaskRefsResponse {
+  tasks: SPTaskRef[];
+}
+
 interface SPCreateSpaceResponse {
   project: { id: string };
 }
@@ -260,8 +291,69 @@ interface SPMeResponse {
 
 // `cfg.spaceId` may hold either the Plainspace project UUID or its slug (what
 // users see in the space URL, e.g. plainspace.org/<slug>/…), so match both.
-const matchesSpace = (t: SPTask, spaceId: string | null | undefined): boolean =>
-  !spaceId || t.projectId === spaceId || t.projectSlug === spaceId;
+const matchesSpace = (
+  t: Pick<SPTask, 'projectId' | 'projectSlug'>,
+  spaceId: string | null | undefined,
+): boolean => !spaceId || t.projectId === spaceId || t.projectSlug === spaceId;
+
+const isPlainspaceSpace = (value: unknown): value is PlainspaceSpace => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value['id'] === 'string' &&
+    !!value['id'] &&
+    typeof value['name'] === 'string' &&
+    typeof value['slug'] === 'string' &&
+    !!value['slug']
+  );
+};
+
+const isSPTaskRefsResponse = (value: unknown): value is SPTaskRefsResponse =>
+  isRecord(value) && Array.isArray(value['tasks']) && value['tasks'].every(isSPTaskRef);
+
+const isSPTaskResponse = (value: unknown): value is SPTaskResponse =>
+  isRecord(value) && isSPTask(value['task']);
+
+const isSPTask = (value: unknown): value is SPTask => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value['id'] === 'string' &&
+    !!value['id'] &&
+    typeof value['title'] === 'string' &&
+    typeof value['done'] === 'boolean' &&
+    typeof value['projectId'] === 'string' &&
+    !!value['projectId'] &&
+    typeof value['projectName'] === 'string' &&
+    typeof value['projectSlug'] === 'string' &&
+    !!value['projectSlug'] &&
+    typeof value['listId'] === 'string' &&
+    typeof value['url'] === 'string' &&
+    typeof value['createdAt'] === 'string' &&
+    typeof value['updatedAt'] === 'string' &&
+    (value['scheduledAt'] === null || typeof value['scheduledAt'] === 'string') &&
+    typeof value['isRecurring'] === 'boolean'
+  );
+};
+
+const isSPTaskRef = (value: unknown): value is SPTaskRef => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value['id'] === 'string' &&
+    !!value['id'] &&
+    typeof value['projectId'] === 'string' &&
+    !!value['projectId'] &&
+    typeof value['projectSlug'] === 'string' &&
+    !!value['projectSlug']
+  );
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
 const mapSPTaskToIssue = (t: SPTask): PlainspaceIssue => ({
   id: t.id,

@@ -60,10 +60,9 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
       ...(dueWithTime ? { dueWithTime } : {}),
-      // Seed the two-way-sync baseline (last-known remote values) so push-only
-      // fields — done and scheduled time — can detect a change. Without it
-      // computePushDecisions skips every push as 'no-baseline' and nothing is
-      // ever written back. Mirrors the CalDAV provider.
+      // Seed the last trustworthy remote values. Completion needs the baseline
+      // for write-back; projectId and URL base record which remote Space this
+      // mirror came from so a later provider rebind cannot delete it.
       issueLastSyncedValues: this._syncAdapter.extractSyncValues(
         issue as unknown as Record<string, unknown>,
       ),
@@ -75,8 +74,7 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
    * drops `dueWithTime` on poll to protect user-set schedules — we pull
    * `scheduledAt` into `dueWithTime` here. This schedules already-imported tasks
    * once they next change remotely and keeps recurring items in sync as the
-   * server advances `scheduledAt` to the next occurrence. User reschedules in SP
-   * push back via the two-way-sync adapter, so the values stay consistent.
+   * server advances `scheduledAt` to the next occurrence.
    * Mirrors the CalDAV provider's date-on-poll override.
    */
   override async getFreshDataForIssueTask(task: Task): Promise<{
@@ -133,26 +131,18 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
   }
 
   /**
-   * Detect imported tasks that are no longer mine on Plainspace, for the safe
-   * auto-removal of orphans. `getMyTasks$` returns every task assigned to me —
-   * including done ones — so a task missing from that list was either deleted or
-   * reassigned away from me; both mean "no longer my task" and are removed the
-   * same way. Done tasks stay in the list, so completing a task never removes it.
+   * Detect imported tasks that are no longer mine on Plainspace. This identifies
+   * candidates only; it does not authorize deletion without a separate proof that
+   * the local mirror is unchanged. The assigned-task list includes done tasks, so
+   * a missing task was deleted or reassigned rather than merely completed.
    *
-   * Safety gate against fleet-wide data loss: skip when NONE of my polled tasks
-   * are still in the fetched list. `getMyTasks$` fails soft to `[]` (offline /
-   * bad token / wholesale 404), the server returns `[]` when my membership scope
-   * is empty (removed from the space), and a wrong/garbage list shares no ids
-   * with mine — reading any of those as "everything was removed" would wipe every
-   * task on every synced device. A list that still contains some of my tasks
-   * proves it is live and authorized, so the rest can be trusted as removed.
-   * Trade-off: if every one of my tasks disappears in one window we skip, leaving
-   * the orphans until the next appears — the safe direction for a destructive
-   * action. NB: this trusts the list to be COMPLETE; GET /tasks is unpaginated
-   * today, so if it ever paginates/truncates the missing entries would be misread
-   * as removals here.
+   * Failed or malformed snapshots are ignored. A successful empty snapshot is
+   * trusted only after `/me` independently confirms access to the configured
+   * Space. Remote Space provenance in the task baseline also prevents a provider
+   * rebind from treating old-Space mirrors as removals. This trusts GET /tasks to
+   * remain complete and unpaginated.
    */
-  async getRemovedRemoteTasks(tasks: Task[]): Promise<Task[]> {
+  async getRemovedRemoteTaskCandidates(tasks: Task[]): Promise<Task[]> {
     const tasksByProviderId = new Map<string, Task[]>();
     for (const task of tasks) {
       if (!task.issueProviderId || !task.issueId) {
@@ -166,18 +156,41 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     const removed: Task[] = [];
     for (const [providerId, providerTasks] of tasksByProviderId) {
       const cfg = await firstValueFrom(this._getCfgOnce$(providerId));
-      const myTaskIds = new Set(
-        (await firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg))).map(
-          (issue) => issue.id,
-        ),
-      );
-      const gone = providerTasks.filter((task) => !myTaskIds.has(task.issueId!));
-      // All of my polled tasks gone at once → distrust the list, skip (see gate
-      // above). This subsumes the empty-list case.
-      if (gone.length === providerTasks.length) {
+      if (!cfg.spaceId) {
         continue;
       }
-      removed.push(...gone);
+      const providerBase = getHttpUrl(cfg.host);
+      if (!providerBase) {
+        continue;
+      }
+      const snapshot = await firstValueFrom(
+        this._plainspaceApiService.getAssignedTaskSnapshot$(cfg),
+      );
+      if (snapshot === null) {
+        continue;
+      }
+
+      const spaces = await firstValueFrom(this._plainspaceApiService.getSpaces$(cfg));
+      const matchingSpaces =
+        spaces?.filter(({ id, slug }) => id === cfg.spaceId || slug === cfg.spaceId) ??
+        [];
+      if (matchingSpaces.length !== 1) {
+        continue;
+      }
+      const remoteProjectId = matchingSpaces[0].id;
+      if (snapshot.some((issue) => issue.projectId !== remoteProjectId)) {
+        continue;
+      }
+
+      const myTaskIds = new Set(snapshot.map((issue) => issue.id));
+      removed.push(
+        ...providerTasks.filter(
+          (task) =>
+            task.issueLastSyncedValues?.['projectId'] === remoteProjectId &&
+            isUrlWithinProviderBase(task.issueLastSyncedValues?.['url'], providerBase) &&
+            !myTaskIds.has(task.issueId!),
+        ),
+      );
     }
     return removed;
   }
@@ -238,3 +251,26 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     return new Date((issue as PlainspaceIssue).updatedAt).getTime();
   }
 }
+
+const getHttpUrl = (value: unknown): URL | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url : null;
+  } catch {
+    return null;
+  }
+};
+
+const isUrlWithinProviderBase = (value: unknown, providerBase: URL): boolean => {
+  const url = getHttpUrl(value);
+  if (!url || url.origin !== providerBase.origin) {
+    return false;
+  }
+  const basePath = providerBase.pathname.replace(/\/+$/, '');
+  return (
+    !basePath || url.pathname === basePath || url.pathname.startsWith(`${basePath}/`)
+  );
+};

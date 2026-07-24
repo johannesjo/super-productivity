@@ -85,6 +85,51 @@ describe('PlainspaceApiService', () => {
     expect((await p).map((t) => t.id)).toEqual(['a']);
   });
 
+  it('getAssignedTaskSnapshot$ distinguishes a trustworthy empty list from failure', async () => {
+    const p = firstValueFrom(service.getAssignedTaskSnapshot$(cfg));
+    httpMock.expectOne(`${BASE}/tasks`).flush({ tasks: [] });
+    expect(await p).toEqual([]);
+  });
+
+  it('getAssignedTaskSnapshot$ validates and filters refs to the configured Space', async () => {
+    const p = firstValueFrom(
+      service.getAssignedTaskSnapshot$({ ...cfg, spaceId: 'bound-slug' }),
+    );
+    const req = httpMock.expectOne(`${BASE}/tasks`);
+    expect(req.request.headers.get('Authorization')).toBe('Bearer pat_test');
+    req.flush({
+      tasks: [
+        { ...spTask('a', 'space-uuid'), projectSlug: 'bound-slug' },
+        { ...spTask('b', 'other-uuid'), projectSlug: 'other-slug' },
+      ],
+    });
+    expect(await p).toEqual([{ id: 'a', projectId: 'space-uuid' }]);
+  });
+
+  it('getAssignedTaskSnapshot$ returns null on an unauthorized response', async () => {
+    const p = firstValueFrom(service.getAssignedTaskSnapshot$(cfg));
+    httpMock
+      .expectOne(`${BASE}/tasks`)
+      .flush('unauthorized', { status: 401, statusText: 'Unauthorized' });
+    expect(await p).toBeNull();
+  });
+
+  it('getAssignedTaskSnapshot$ returns null on a server error', async () => {
+    const p = firstValueFrom(service.getAssignedTaskSnapshot$(cfg));
+    httpMock
+      .expectOne(`${BASE}/tasks`)
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    expect(await p).toBeNull();
+  });
+
+  it('getAssignedTaskSnapshot$ returns null for a malformed task list', async () => {
+    const p = firstValueFrom(service.getAssignedTaskSnapshot$(cfg));
+    httpMock.expectOne(`${BASE}/tasks`).flush({
+      tasks: [spTask('a', 'space-1'), { id: 'broken', projectId: 'other-space' }],
+    });
+    expect(await p).toBeNull();
+  });
+
   it('claimTask$ POSTs to the claim endpoint and maps the task', async () => {
     const p = firstValueFrom(service.claimTask$('u1', cfg));
     const req = httpMock.expectOne(`${BASE}/tasks/u1/claim`);
@@ -101,24 +146,28 @@ describe('PlainspaceApiService', () => {
     expect(await p).toBeNull();
   });
 
-  it('patchTask$ PATCHes the given fields and maps scheduledAt back', async () => {
-    const p = firstValueFrom(
-      service.patchTask$(
-        'a',
-        { done: true, scheduledAt: '2026-01-02T09:00:00.000Z' },
-        cfg,
-      ),
-    );
+  it('patchTask$ PATCHes completion and maps the updated task', async () => {
+    const p = firstValueFrom(service.patchTask$('a', { done: true }, cfg));
     const req = httpMock.expectOne(`${BASE}/tasks/a`);
     expect(req.request.method).toBe('PATCH');
-    expect(req.request.body).toEqual({
-      done: true,
-      scheduledAt: '2026-01-02T09:00:00.000Z',
-    });
-    req.flush({ task: spTask('a', 'space-1', true, '2026-01-02T09:00:00.000Z') });
+    expect(req.request.body).toEqual({ done: true });
+    req.flush({ task: spTask('a', 'space-1', true) });
     const issue = await p;
     expect(issue?.isDone).toBe(true);
-    expect(issue?.scheduledAt).toBe('2026-01-02T09:00:00.000Z');
+  });
+
+  it('patchTask$ reports a failed completion update as null', async () => {
+    const p = firstValueFrom(service.patchTask$('a', { done: true }, cfg));
+    httpMock
+      .expectOne(`${BASE}/tasks/a`)
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    expect(await p).toBeNull();
+  });
+
+  it('patchTask$ rejects a malformed successful response', async () => {
+    const p = firstValueFrom(service.patchTask$('a', { done: true }, cfg));
+    httpMock.expectOne(`${BASE}/tasks/a`).flush({ task: { id: 'a', done: true } });
+    expect(await p).toBeNull();
   });
 
   it('getSpaces$ maps the account spaces from /me', async () => {
@@ -142,6 +191,15 @@ describe('PlainspaceApiService', () => {
     httpMock
       .expectOne(`${BASE}/me`)
       .flush('boom', { status: 500, statusText: 'Server Error' });
+    expect(await p).toBeNull();
+  });
+
+  it('getSpaces$ returns null for a malformed /me payload', async () => {
+    const p = firstValueFrom(service.getSpaces$(cfg));
+    httpMock.expectOne(`${BASE}/me`).flush({
+      email: 'a@b.c',
+      projects: [{ id: 'space-1' }],
+    });
     expect(await p).toBeNull();
   });
 
