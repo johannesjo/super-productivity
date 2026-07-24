@@ -79,6 +79,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       task?: TaskCopy;
       repeatCfg?: TaskRepeatCfg;
       targetDate?: string;
+      isRemoveConfirmationRequired?: boolean;
     },
     getRepeatCfgReturnValue?:
       | Observable<TaskRepeatCfg | undefined>
@@ -95,6 +96,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       'getTaskRepeatCfgByIdAllowUndefined$',
       'updateTaskRepeatCfg',
       'addTaskRepeatCfgToTask',
+      'deleteTaskRepeatCfg',
       'deleteTaskRepeatCfgWithDialog',
     ]);
     mockDateService = jasmine.createSpyObj('DateService', [
@@ -352,6 +354,50 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
 
       expect(component.isEdit()).toBe(false);
     });
+  });
+
+  describe('remove', () => {
+    it('removes without confirmation when the config was created from the schedule dialog', fakeAsync(async () => {
+      const taskWithRepeatCfg = {
+        ...mockTask,
+        repeatCfgId: 'repeat-cfg-123',
+      } as TaskCopy;
+      const fixture = await setupTestBed(
+        {
+          task: taskWithRepeatCfg,
+          isRemoveConfirmationRequired: false,
+        },
+        of(mockRepeatCfg),
+      );
+      fixture.detectChanges();
+      tick();
+
+      fixture.componentInstance.remove();
+
+      expect(mockTaskRepeatCfgService.deleteTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-123',
+      );
+      expect(
+        mockTaskRepeatCfgService.deleteTaskRepeatCfgWithDialog,
+      ).not.toHaveBeenCalled();
+    }));
+
+    it('keeps confirmation for a pre-existing repeat config', fakeAsync(async () => {
+      const taskWithRepeatCfg = {
+        ...mockTask,
+        repeatCfgId: 'repeat-cfg-123',
+      } as TaskCopy;
+      const fixture = await setupTestBed({ task: taskWithRepeatCfg }, of(mockRepeatCfg));
+      fixture.detectChanges();
+      tick();
+
+      fixture.componentInstance.remove();
+
+      expect(
+        mockTaskRepeatCfgService.deleteTaskRepeatCfgWithDialog,
+      ).toHaveBeenCalledOnceWith('repeat-cfg-123');
+      expect(mockTaskRepeatCfgService.deleteTaskRepeatCfg).not.toHaveBeenCalled();
+    }));
   });
 
   describe('plannedStartDateStr localization (#8987 follow-up)', () => {

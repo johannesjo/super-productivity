@@ -322,6 +322,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       restoreFocus: true,
       data: {
         task,
+        // A config created inside this still-open schedule dialog has no previous
+        // instances, so removing it again does not need the destructive warning.
+        isRemoveConfirmationRequired: !!this.data.task?.repeatCfgId,
         // targetDate drives the skip-instance affordance; the recurrence start is
         // derived from the task's due date inside the repeat dialog.
         targetDate: task.dueDay || getDbDateStr(new Date(task.created)),
