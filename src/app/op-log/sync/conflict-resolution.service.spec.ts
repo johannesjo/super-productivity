@@ -30,12 +30,19 @@ import {
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { MAX_VECTOR_CLOCK_SIZE } from '../core/operation-log.const';
-import { buildEntityRegistry, ENTITY_REGISTRY } from '../core/entity-registry';
+import {
+  buildEntityRegistry,
+  ENTITY_REGISTRY,
+  isSingletonEntityId,
+} from '../core/entity-registry';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { OperationLogEffects } from '../capture/operation-log.effects';
 import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
-import { toLwwUpdateActionType } from '../core/lww-update-action-types';
+import {
+  isLwwUpdateActionType,
+  toLwwUpdateActionType,
+} from '../core/lww-update-action-types';
 import { convertOpToAction } from '../apply/operation-converter.util';
 import { TIME_TRACKING_FEATURE_KEY } from '../../features/time-tracking/store/time-tracking.reducer';
 import { lwwUpdateMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
@@ -8348,6 +8355,48 @@ describe('ConflictResolutionService', () => {
 
       const updatedState = baseReducer.calls.mostRecent().args[0] as typeof state;
       expect(updatedState[TIME_TRACKING_FEATURE_KEY]).toEqual({ project, tag });
+    });
+
+    it('produces TIME_TRACKING ops that shipped v18.15.0/v18.15.1 clients still accept (#9256)', () => {
+      // Faithful copy of the v18.15.1 metadata-integrity predicate
+      // (git show v18.15.1:src/app/op-log/sync/verify-decrypted-op-integrity.ts):
+      // a non-'*' LWW entityId demands payload.id === entityId, else it throws
+      // OperationIntegrityError (the #9256 rejection). This branch does NOT ship a
+      // schema bump, so those released clients run exactly this on our new ops —
+      // the compat id is what keeps a mixed fleet syncing (graceful degradation).
+      const acceptedByV1815Gate = (
+        actionType: string,
+        entityId: string,
+        payload: Record<string, unknown>,
+      ): boolean => {
+        if (
+          !isLwwUpdateActionType(actionType) ||
+          !entityId ||
+          isSingletonEntityId(entityId)
+        ) {
+          return true;
+        }
+        const payloadId = payload['id'];
+        return typeof payloadId === 'string' && payloadId === entityId;
+      };
+
+      const entityId = 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24';
+      const op = service.createLWWUpdateOp(
+        'TIME_TRACKING',
+        entityId,
+        { project: {}, tag: {} },
+        TEST_CLIENT_ID,
+        { [TEST_CLIENT_ID]: 1 },
+        1774332392933,
+      );
+      const payload = extractActionPayload(op.payload);
+
+      // Old clients accept it BECAUSE of the compat id...
+      expect(acceptedByV1815Gate(op.actionType, entityId, payload)).toBeTrue();
+      // ...and non-vacuous: strip the compat id and old clients reproduce #9256.
+      const withoutCompatId = { ...payload };
+      delete withoutCompatId['id'];
+      expect(acceptedByV1815Gate(op.actionType, entityId, withoutCompatId)).toBeFalse();
     });
   });
 });
