@@ -8294,6 +8294,22 @@ describe('ConflictResolutionService', () => {
       expect(extractActionPayload(op.payload)).toEqual(singletonState);
     });
 
+    it('preserves a PLANNER day task-id array in the LWW payload', () => {
+      const day = '2026-03-24';
+      const op = service.createLWWUpdateOp(
+        'PLANNER',
+        day,
+        ['task-1', 'task-2'],
+        TEST_CLIENT_ID,
+        { [TEST_CLIENT_ID]: 1 },
+        1774332392933,
+      );
+
+      const actionPayload = extractActionPayload(op.payload);
+      expect(actionPayload['0']).toBe('task-1');
+      expect(actionPayload['1']).toBe('task-2');
+    });
+
     it('keeps the compatibility id on wire and preserves TIME_TRACKING data on replay (#9256)', () => {
       const project = { project1: { day1: 120000 } };
       const tag = { tag1: { day1: 30000 } };

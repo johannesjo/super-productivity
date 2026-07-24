@@ -1730,7 +1730,7 @@ describe('lwwUpdateMetaReducer', () => {
       expect(timeTracking['isTrackingReminder']).toBe(false);
     });
 
-    it('should preserve timeTracking state for malformed non-record LWW payloads', () => {
+    it('should preserve timeTracking state for malformed singleton LWW payloads', () => {
       const state = createMockStateWithSingletons();
       const originalTimeTracking = state[TIME_TRACKING_FEATURE_KEY];
       const malformedValues: ReadonlyArray<{
@@ -1743,6 +1743,13 @@ describe('lwwUpdateMetaReducer', () => {
         { label: 'number', value: 1 },
         { label: 'boolean', value: true },
         { label: 'undefined', value: undefined },
+        {
+          label: 'legacy-array-spread-record',
+          value: {
+            ...['private-time-entry'],
+            id: 'PROJECT:project-1:2026-03-24',
+          },
+        },
       ];
 
       spyOn(OpLog, 'warn');

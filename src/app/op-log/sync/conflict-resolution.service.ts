@@ -473,10 +473,15 @@ export class ConflictResolutionService {
     // composite conflict IDs; current receivers strip it before replacing the
     // singleton feature state. Whole-state '*' singletons still omit it.
     // (#7330, #9256)
+    const entityConfig = getEntityConfigFromRegistry(this.entityRegistry, entityType);
+    const isMalformedSingletonState =
+      Array.isArray(entityState) &&
+      entityConfig !== undefined &&
+      isSingletonEntity(entityConfig);
     const basePayload =
       entityState !== null &&
       typeof entityState === 'object' &&
-      !Array.isArray(entityState)
+      !isMalformedSingletonState
         ? (entityState as Record<string, unknown>)
         : {};
     const actionPayload = { ...basePayload };
