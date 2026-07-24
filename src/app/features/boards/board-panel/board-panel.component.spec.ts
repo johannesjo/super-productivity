@@ -16,10 +16,14 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
 import { AddTaskInlineComponent } from '../../planner/add-task-inline/add-task-inline.component';
 import { selectUnarchivedProjects } from '../../project/store/project.selectors';
-import { selectAllTasksInActiveProjects } from '../../tasks/store/task.selectors';
+import {
+  selectAllTasksInActiveProjects,
+  selectTaskById,
+} from '../../tasks/store/task.selectors';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { signal } from '@angular/core';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 describe('BoardPanelComponent - Backlog Feature', () => {
   let component: BoardPanelComponent;
@@ -751,10 +755,12 @@ describe('BoardPanelComponent - drop()', () => {
     updateTagsSpy = jasmine.createSpy('updateTags');
 
     const storeMock = {
-      select: (selectorFn: any) => {
+      select: (selectorFn: any, props?: { id: string }) => {
         if (selectorFn === selectUnarchivedProjects)
           return of([{ id: 'p1', backlogTaskIds: [] }]);
         if (selectorFn === selectAllTasksInActiveProjects) return of(tasks);
+        if (selectorFn === selectTaskById)
+          return of(tasks.find((task) => task.id === props?.id));
         return of([]);
       },
       pipe: () => ({ toPromise: () => Promise.resolve(undefined) }),
@@ -888,5 +894,37 @@ describe('BoardPanelComponent - drop()', () => {
     const [taskArg, tagsArg] = updateTagsSpy.calls.mostRecent().args;
     expect(taskArg).toBe(task);
     expect(tagsArg).toEqual(['other', 'need']);
+  });
+
+  it('adds an existing task by rewriting real tags without updating board order', async () => {
+    const task = mkTask({
+      id: 't1',
+      tagIds: [TODAY_TAG.id, 'x', 'y', 'keep'],
+    });
+    await setup([task]);
+    const panelCfg = {
+      id: 'target',
+      title: 'Target',
+      taskIds: [],
+      includedTagIds: [TODAY_TAG.id, 'need'],
+      includedTagsMatch: 'any',
+      excludedTagIds: [TODAY_TAG.id, 'x', 'y'],
+      excludedTagsMatch: 'all',
+      taskDoneState: 1,
+      scheduledState: 3,
+      isParentTasksOnly: false,
+      projectIds: [''],
+    } as BoardPanelCfg;
+    fixture.componentRef.setInput('panelCfg', panelCfg);
+    fixture.detectChanges();
+
+    await component.afterTaskAdd({
+      taskId: task.id,
+      isAddToBottom: false,
+      isNewTask: false,
+    });
+
+    expect(updateTagsSpy).toHaveBeenCalledOnceWith(task, ['y', 'keep', 'need']);
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 });
