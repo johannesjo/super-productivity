@@ -12,6 +12,9 @@ import { PersistentAction } from '../core/persistent-action.interface';
 import { SyncLog } from '../../core/log';
 import { isValidDBDateStr } from '../../util/get-db-date-str';
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 const isValidDbDate = (value: unknown): value is string =>
   typeof value === 'string' && isValidDBDateStr(value);
 
@@ -260,10 +263,33 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
   // Handle full-state operations (SYNC_IMPORT, BACKUP_IMPORT, Repair) specially
   // These need their payload wrapped in appDataComplete for the loadAllData action
   const isFullStateOp = FULL_STATE_OP_TYPES.has(op.opType as OpType);
+  const isSingletonLww =
+    !isFullStateOp &&
+    lwwEntityType !== undefined &&
+    getEntityConfig(lwwEntityType)?.storagePattern === 'singleton';
   const replayActionType = isFullStateOp ? ActionType.LOAD_ALL_DATA : actionType;
   let actionPayload: Record<string, unknown> = isFullStateOp
     ? extractFullStatePayload(op.payload)
     : (extractActionPayload(op.payload) as Record<string, unknown>);
+
+  // JSON primitives and arrays are object-spreadable at runtime. Without this
+  // guard, a malformed singleton payload such as "x" becomes { 0: "x" }, which
+  // the LWW reducer mistakes for non-empty state and uses to replace the entire
+  // feature slice. Normalize it to the reducer's existing empty-data no-op.
+  if (isSingletonLww && !isRecord(actionPayload)) {
+    SyncLog.warn('[convertOpToAction] malformed singleton LWW payload — ignoring', {
+      opId: op.id,
+      actionType,
+      entityType: lwwEntityType,
+      payloadType:
+        actionPayload === null
+          ? 'null'
+          : Array.isArray(actionPayload)
+            ? 'array'
+            : typeof actionPayload,
+    });
+    actionPayload = {};
+  }
 
   actionPayload = addLegacyPlanForTodayDate(actionType, actionPayload, op);
   actionPayload = addLegacyConvertToMainTaskDates(actionType, actionPayload, op);
@@ -280,14 +306,7 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
   // payloads. Singleton models have no top-level id, so remove it based on the
   // action-derived reducer target rather than comparing against unauthenticated
   // envelope metadata. This also cleans stale ids already carried in state.
-  if (
-    !isFullStateOp &&
-    lwwEntityType !== undefined &&
-    getEntityConfig(lwwEntityType)?.storagePattern === 'singleton' &&
-    actionPayload &&
-    typeof actionPayload === 'object' &&
-    Object.hasOwn(actionPayload, 'id')
-  ) {
+  if (isSingletonLww && Object.hasOwn(actionPayload, 'id')) {
     actionPayload = { ...actionPayload };
     delete actionPayload['id'];
   }

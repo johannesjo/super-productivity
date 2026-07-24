@@ -8084,6 +8084,19 @@ describe('ConflictResolutionService', () => {
       expect(extractActionPayload(op.payload)['id']).toBe('task-canonical');
     });
 
+    it('should keep the canonical id when an adapter receives the singleton sentinel', () => {
+      const op = service.createLWWUpdateOp(
+        'TASK',
+        '*',
+        { id: 'wrong-id', title: 'Local winner' },
+        TEST_CLIENT_ID,
+        { [TEST_CLIENT_ID]: 1 },
+        Date.now(),
+      );
+
+      expect(extractActionPayload(op.payload)['id']).toBe('*');
+    });
+
     it('should handle non-object entityState by producing { id } payload', () => {
       // Defensive: producers should never pass non-objects, but if they do
       // we still want a usable payload rather than something the reducer rejects.
@@ -8278,23 +8291,30 @@ describe('ConflictResolutionService', () => {
       expect(extractActionPayload(op.payload)).toEqual(singletonState);
     });
 
-    it('should NOT inject id for a TIME_TRACKING singleton with a composite conflict id (#9256)', () => {
+    it('keeps a compatibility id for v18.15 TIME_TRACKING receivers (#9256)', () => {
       const pollutedSingletonState = {
         id: 'PROJECT:stale-context:2026-03-23',
         project: {},
         tag: {},
       };
+      const entityId = 'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24';
       const op = service.createLWWUpdateOp(
         'TIME_TRACKING',
-        'PROJECT:eP8tBLmm0tBgJThAZOxcT:2026-03-24',
+        entityId,
         pollutedSingletonState,
         TEST_CLIENT_ID,
         { [TEST_CLIENT_ID]: 1 },
         1774332392933,
       );
 
-      expect(extractActionPayload(op.payload)['id']).toBeUndefined();
-      expect(extractActionPayload(op.payload)).toEqual({ project: {}, tag: {} });
+      // v18.15.0/v18.15.1 treat every non-'*' LWW entityId as canonical and
+      // reject encrypted payloads without a matching id. New receivers strip
+      // this compatibility-only field before replacing singleton state.
+      expect(extractActionPayload(op.payload)).toEqual({
+        id: entityId,
+        project: {},
+        tag: {},
+      });
     });
   });
 });

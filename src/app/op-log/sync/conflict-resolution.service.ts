@@ -71,7 +71,6 @@ import { devError } from '../../util/dev-error';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
 import {
   ENTITY_REGISTRY,
-  getEntityConfig,
   isLwwPayloadIdCanonical,
   isSingletonEntityId,
 } from '../core/entity-registry';
@@ -467,18 +466,21 @@ export class ConflictResolutionService {
     // lwwUpdateMetaReducer bails with "Entity data has no id" when an adapter
     // payload lacks a top-level id; a malformed/partial entityState (e.g. an
     // NgRx selector returning a stripped shape) would silently lose the LWW
-    // write on remote clients. Singleton LWW actions have no canonical payload
-    // id; their conflict key may be '*' or a contextual composite ID, and
-    // injecting either would pollute the feature state. Remove stale synthetic
-    // ids that an affected client may already carry. (#7330, #9256)
+    // write on remote clients.
+    //
+    // v18.15.0/v18.15.1 also require a matching payload id whenever entityId is
+    // not '*'. Keep that compatibility-only wire field for TIME_TRACKING's
+    // composite conflict IDs; current receivers strip it before replacing the
+    // singleton feature state. Whole-state '*' singletons still omit it.
+    // (#7330, #9256)
     const basePayload =
       entityState && typeof entityState === 'object'
         ? (entityState as Record<string, unknown>)
         : {};
     const actionPayload = { ...basePayload };
-    if (isLwwPayloadIdCanonical(entityType)) {
+    if (isLwwPayloadIdCanonical(entityType) || !isSingletonEntityId(entityId)) {
       actionPayload['id'] = entityId;
-    } else if (getEntityConfig(entityType)?.storagePattern === 'singleton') {
+    } else {
       delete actionPayload['id'];
     }
     // Compute the move footprint once and carry it BOTH in the plaintext
