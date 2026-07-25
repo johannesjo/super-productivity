@@ -85,6 +85,23 @@ describe('locale-registration', () => {
       await expectAsync(registerNavigatorLocale('th-TH')).toBeResolved();
     });
 
+    it('resolves without throwing when the matched chunk load rejects', async () => {
+      // The unmatched-key spec above returns before load() is ever called, so it
+      // cannot cover the catch. This one matches the map and rejects, which is
+      // the shape that matters: the promise is awaited by an app initializer, so
+      // an escaping rejection would reject bootstrap and block first render
+      // instead of degrading to the default locale.
+      const tag = 'en-XD';
+      const mapKey = 'en_xd';
+      syntheticMapKeys.push(mapKey);
+      NAVIGATOR_FALLBACK_LOCALE_IMPORT_FNS[mapKey] = () =>
+        Promise.reject(new Error('chunk load failed'));
+      await expectAsync(registerNavigatorLocale(tag)).toBeResolved();
+      // …and the failed locale stays unregistered, so it renders the en-GB
+      // (24h) default rather than a half-applied state.
+      expect(formatDate(onePm, 'shortTime', tag.toLowerCase())).toMatch(/^13:00/);
+    });
+
     it('defaults to the same browser locale the date pipe resolves (getBrowserCultureLang, not navigator.language)', async () => {
       // Reading navigator.language instead would register data for a locale the
       // pipe never asks for whenever the two disagree. The synthetic tag is not
