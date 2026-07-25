@@ -6336,6 +6336,69 @@ describe('ConflictResolutionService', () => {
       hasNoSnapshotClock: overrides.hasNoSnapshotClock ?? true,
     });
 
+    const createSectionMoveOp = (
+      id: string,
+      clientId: string,
+      sourceSectionId = 'section-left',
+      taskId = 'task-1',
+    ): Operation => ({
+      ...createMockOp(id, clientId),
+      actionType: ActionType.SECTION_ADD_TASK,
+      opType: OpType.Move,
+      entityType: 'SECTION',
+      entityId: sourceSectionId,
+      entityIds: [sourceSectionId, 'section-right'],
+      payload: {
+        actionPayload: {
+          sectionId: 'section-right',
+          taskId,
+          afterTaskId: 'right-anchor',
+          sourceSectionId,
+        },
+        entityChanges: [],
+      },
+    });
+
+    const createSectionRemoveOp = (
+      id: string,
+      clientId: string,
+      sectionId = 'section-left',
+      taskId = 'task-1',
+    ): Operation => ({
+      ...createMockOp(id, clientId),
+      actionType: ActionType.SECTION_REMOVE_TASK,
+      opType: OpType.Update,
+      entityType: 'SECTION',
+      entityId: sectionId,
+      payload: {
+        actionPayload: {
+          sectionId,
+          taskId,
+          workContextId: 'TODAY',
+          workContextType: WorkContextType.TAG,
+          workContextAfterTaskId: 'main-anchor',
+        },
+        entityChanges: [],
+      },
+    });
+
+    const createSectionOrderOp = (
+      id: string,
+      clientId: string,
+      ids = ['section-right', 'section-left'],
+    ): Operation => ({
+      ...createMockOp(id, clientId),
+      actionType: ActionType.SECTION_UPDATE_ORDER,
+      opType: OpType.Move,
+      entityType: 'SECTION',
+      entityId: ids[0],
+      entityIds: ids,
+      payload: {
+        actionPayload: { contextId: 'TODAY', ids },
+        entityChanges: [],
+      },
+    });
+
     it('should mark CONCURRENT remote op as superseded when entity no longer in state', async () => {
       // Scenario: Client A archived a task (already synced), Client B sends a
       // concurrent update. Client A has no pending ops, but local frontier
@@ -6590,6 +6653,113 @@ describe('ConflictResolutionService', () => {
       );
 
       expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+    });
+
+    [
+      {
+        description: 'remote cross-section move and local source removal',
+        remoteOp: createSectionMoveOp('remote-move', 'clientB'),
+        localOp: createSectionRemoveOp('local-remove', 'clientA'),
+      },
+      {
+        description: 'remote source removal and local cross-section move',
+        remoteOp: createSectionRemoveOp('remote-remove', 'clientB'),
+        localOp: createSectionMoveOp('local-move', 'clientA'),
+      },
+    ].forEach(({ description, remoteOp, localOp }) => {
+      it(`should keep commuting ${description} non-conflicting`, async () => {
+        const localPendingOpsByEntity = new Map<string, Operation[]>([
+          ['SECTION:section-left', [localOp]],
+        ]);
+
+        const result = await service.checkOpForConflicts(
+          remoteOp,
+          buildCtx({ localPendingOpsByEntity }),
+        );
+
+        expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+      });
+    });
+
+    it('should still conflict when a section move and removal target different tasks', async () => {
+      const remoteOp = createSectionMoveOp(
+        'remote-move',
+        'clientB',
+        'section-left',
+        'task-1',
+      );
+      const localOp = createSectionRemoveOp(
+        'local-remove',
+        'clientA',
+        'section-left',
+        'task-2',
+      );
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localOp]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteOp,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result.conflicts).toHaveSize(1);
+      expect(result.conflicts[0].entityId).toBe('section-left');
+    });
+
+    it('should still conflict when section payload and entity metadata disagree', async () => {
+      const remoteOp = {
+        ...createSectionMoveOp('remote-move', 'clientB'),
+        entityIds: ['section-left'],
+      };
+      const localOp = createSectionRemoveOp('local-remove', 'clientA');
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localOp]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteOp,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result.conflicts).toHaveSize(1);
+      expect(result.conflicts[0].entityId).toBe('section-left');
+    });
+
+    it('should keep a move non-conflicting with a causal local removal and section reorder', async () => {
+      const remoteMove = createSectionMoveOp('remote-move', 'clientB');
+      const localRemove = createSectionRemoveOp('local-remove', 'clientA');
+      const localOrder = createSectionOrderOp('local-order', 'clientA');
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localRemove, localOrder]],
+        ['SECTION:section-right', [localOrder]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteMove,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+    });
+
+    it('should keep concurrent section-order replacements on the conflict path', async () => {
+      const remoteOrder = createSectionOrderOp('remote-order', 'clientB', [
+        'section-left',
+        'section-right',
+      ]);
+      const localOrder = createSectionOrderOp('local-order', 'clientA');
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localOrder]],
+        ['SECTION:section-right', [localOrder]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteOrder,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result.conflicts).toHaveSize(2);
     });
 
     it('should use entityId fallback when entityIds is an empty array', async () => {
