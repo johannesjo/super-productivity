@@ -112,12 +112,39 @@ describe('NoteComponent editFullscreen', () => {
 
   const editFullscreen = (): Promise<void> => component.editFullscreen({} as MouseEvent);
 
-  // Lets the close handler's async chain run to its next observable point. A
-  // macrotask turn drains everything queued behind it, so this does not depend
-  // on the exact number of microtask hops the save path happens to take —
-  // counting `await Promise.resolve()` calls turns any internal change (e.g.
-  // wrapping a draft await) into a fake failure of an unrelated assertion.
-  const settle = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+  const turn = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+
+  // Waits for the close handler's async chain to reach the point the assertion
+  // needs, rather than for a fixed number of turns through the queue. Counting
+  // hops (`await Promise.resolve()` twice) or turns (one macrotask) both encode
+  // the save path's current internal depth into unrelated tests: bounding the
+  // drafts DB awaits in Promise.race added a link, and every hop-counting test
+  // broke. One macrotask turn is not a guaranteed drain either — it failed
+  // intermittently on `markSaved` (late in the chain) in full-suite runs while
+  // the earlier `saveDraft`/`update` assertions passed. Waiting on the condition
+  // is stable across any future change to the chain's depth.
+  const waitFor = async (
+    predicate: () => boolean,
+    label: string,
+    maxTurns = 200,
+  ): Promise<void> => {
+    for (let i = 0; i < maxTurns; i++) {
+      if (predicate()) {
+        return;
+      }
+      await turn();
+    }
+    throw new Error(`Timed out after ${maxTurns} turns waiting for ${label}`);
+  };
+
+  // For assertions that nothing happened, there is no condition to wait for, so
+  // this drains several turns instead of one. More turns is strictly safer here:
+  // it gives a violation more chances to show up before we assert its absence.
+  const settle = async (turns = 5): Promise<void> => {
+    for (let i = 0; i < turns; i++) {
+      await turn();
+    }
+  };
 
   // Asserts on the WHOLE surface that can retire a draft, not just one method.
   // Three tests here used to spy on clearDraft alone while the paths under test
@@ -240,9 +267,9 @@ describe('NoteComponent editFullscreen', () => {
     await editFullscreen();
 
     afterClosed$.next('final content');
-    // The subscriber awaits saveDraft before dispatching, so let the microtask
-    // queue drain before asserting the update landed.
-    await settle();
+    // The subscriber awaits saveDraft before dispatching, so wait for the
+    // dispatch itself rather than for a guessed number of queue turns.
+    await waitFor(() => noteService.update.calls.any(), 'the note update dispatch');
 
     // The draft (with the about-to-be-saved content, baseContent still the
     // current note) is written durably first; only then is the update dispatched
@@ -265,7 +292,7 @@ describe('NoteComponent editFullscreen', () => {
     await editFullscreen();
 
     afterClosed$.next('final content');
-    await settle();
+    await waitFor(() => localDraftService.markSaved.calls.any(), 'the saved marker');
 
     expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
       content: 'final content',
@@ -286,7 +313,7 @@ describe('NoteComponent editFullscreen', () => {
     // ESC on an unedited open, or an edit reverted before close: res equals the
     // note content, so there is nothing unsaved to recover.
     afterClosed$.next('saved content');
-    await settle();
+    await waitFor(() => localDraftService.markSaved.calls.any(), 'the saved marker');
 
     // No new checkpoint — that would rewrite the draft with content it already
     // has — but the marker still goes down so a later remote change cannot turn
@@ -308,7 +335,10 @@ describe('NoteComponent editFullscreen', () => {
     await editFullscreen();
 
     afterClosed$.next({ action: 'DISCARD' });
-    await settle();
+    await waitFor(
+      () => localDraftService.markDiscarded.calls.any(),
+      'the discarded marker',
+    );
 
     expect(localDraftService.markDiscarded).toHaveBeenCalledWith('NOTE', NOTE.id);
     expect(localDraftService.clearDraft).not.toHaveBeenCalled();
@@ -379,7 +409,7 @@ describe('NoteComponent editFullscreen', () => {
     expect(localDraftService.saveDraft).not.toHaveBeenCalled();
 
     afterClosed$.next('final content');
-    await settle();
+    await waitFor(() => noteService.update.calls.any(), 'the note update dispatch');
     expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
       content: 'final content',
     });
@@ -464,7 +494,10 @@ describe('NoteComponent editFullscreen', () => {
     } finally {
       jasmine.clock().uninstall();
     }
-    await settle();
+    // Positive assertion, so wait for the dispatch itself. This one sits behind
+    // the longest chain in the file (the timeout race has to fire first), which
+    // makes it the most exposed to a drain-based barrier.
+    await waitFor(() => noteService.update.calls.any(), 'the note update dispatch');
 
     // Drop the Promise.race and the dispatch never happens: a device-local
     // convenience DB would be sitting on the critical path of the note save.
