@@ -60,9 +60,48 @@ const ALLOWLIST = new Set([
 /**
  * Prefixes owned by Angular Material / MDC. Those tokens are emitted by the
  * Material theme at runtime and cannot be enumerated statically.
- * `--palette-*` is injected by angular-material-css-vars.
  */
-const ALLOWED_PREFIXES = ['--mat-', '--mdc-', '--palette-'];
+const ALLOWED_PREFIXES = ['--mat-', '--mdc-'];
+
+/**
+ * Palette tokens injected at runtime by angular-material-css-vars. Unlike
+ * `--mat-*`/`--mdc-*` this set IS statically enumerable (see the library's
+ * src/lib/_variables.scss): hue × step × optional `contrast-` × optional
+ * `-rgb`. Enumerating it (instead of allowing the whole `--palette-` prefix)
+ * lets the check catch invented names like `--palette-green-500` or
+ * `--palette-primary-main` — the second-largest phantom class fixed when this
+ * tool was introduced.
+ */
+const PALETTE_TOKENS = (() => {
+  const hues = ['primary', 'accent', 'warn'];
+  const steps = [
+    '50',
+    '100',
+    '200',
+    '300',
+    '400',
+    '500',
+    '600',
+    '700',
+    '800',
+    '900',
+    'A100',
+    'A200',
+    'A400',
+    'A700',
+  ];
+  const names = new Set();
+  for (const hue of hues) {
+    for (const step of steps) {
+      for (const contrast of ['', 'contrast-']) {
+        for (const suffix of ['', '-rgb']) {
+          names.add(`--palette-${hue}-${contrast}${step}${suffix}`);
+        }
+      }
+    }
+  }
+  return names;
+})();
 
 const walk = (dir, ext, out = []) => {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -96,6 +135,7 @@ for (const file of [...scssFiles, ...themeFiles]) {
 const isKnown = (name) =>
   defined.has(name) ||
   ALLOWLIST.has(name) ||
+  PALETTE_TOKENS.has(name) ||
   ALLOWED_PREFIXES.some((prefix) => name.startsWith(prefix));
 
 const offenders = [];
