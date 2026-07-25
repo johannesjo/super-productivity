@@ -16,16 +16,12 @@ import {
 } from '../../../core/draft/local-draft.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
-import { OperationWriteFlushService } from '../../../op-log/sync/operation-write-flush.service';
-import { OperationCaptureService } from '../../../op-log/capture/operation-capture.service';
 
 describe('NoteComponent editFullscreen', () => {
   let component: NoteComponent;
   let matDialog: jasmine.SpyObj<MatDialog>;
   let noteService: jasmine.SpyObj<NoteService>;
   let localDraftService: jasmine.SpyObj<LocalDraftService>;
-  let flushService: jasmine.SpyObj<OperationWriteFlushService>;
-  let captureService: jasmine.SpyObj<OperationCaptureService>;
   let contentChanged$: Subject<string>;
   let afterClosed$: Subject<unknown>;
   let confirmResult: boolean | undefined;
@@ -71,27 +67,14 @@ describe('NoteComponent editFullscreen', () => {
       'loadDraft',
       'saveDraft',
       'clearDraft',
-      'clearDraftIfContent',
+      'markSaved',
+      'markDiscarded',
     ]);
     localDraftService.loadDraft.and.resolveTo(undefined);
     localDraftService.saveDraft.and.resolveTo(undefined);
     localDraftService.clearDraft.and.resolveTo(undefined);
-    localDraftService.clearDraftIfContent.and.resolveTo(undefined);
-
-    flushService = jasmine.createSpyObj('OperationWriteFlushService', [
-      'flushPendingWrites',
-    ]);
-    flushService.flushPendingWrites.and.resolveTo(undefined);
-
-    // getPhantomChangeRisk() reads all three of these; default them to "no risk"
-    // (nothing pending/failed/deferred) so the durability gate is open unless a
-    // test explicitly arms one lever.
-    captureService = jasmine.createSpyObj('OperationCaptureService', [
-      'hasUnrecoveredPersistFailure',
-      'getPendingCount',
-    ]);
-    captureService.hasUnrecoveredPersistFailure.and.returnValue(false);
-    captureService.getPendingCount.and.returnValue(0);
+    localDraftService.markSaved.and.resolveTo(undefined);
+    localDraftService.markDiscarded.and.resolveTo(undefined);
 
     const clipboardImageService = jasmine.createSpyObj('ClipboardImageService', [
       'resolveMarkdownImages',
@@ -112,8 +95,12 @@ describe('NoteComponent editFullscreen', () => {
         { provide: WorkContextService, useValue: { activeWorkContextTypeAndId$: EMPTY } },
         { provide: ClipboardImageService, useValue: clipboardImageService },
         { provide: LocalDraftService, useValue: localDraftService },
-        { provide: OperationWriteFlushService, useValue: flushService },
-        { provide: OperationCaptureService, useValue: captureService },
+        // OperationWriteFlushService and OperationCaptureService are deliberately
+        // NOT provided. The draft lifecycle no longer proves durability before
+        // touching a draft (the read-time decision tree makes that unnecessary),
+        // so re-introducing either injection fails every test here with a
+        // NullInjectorError instead of quietly restoring the coupling that
+        // produced a new blocker every review round.
       ],
     });
 
@@ -132,37 +119,32 @@ describe('NoteComponent editFullscreen', () => {
   // wrapping a draft await) into a fake failure of an unrelated assertion.
   const settle = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 
-  it('should clear the draft and open the note content when the draft matches the note', async () => {
+  // Asserts on the WHOLE surface that can retire a draft, not just one method.
+  // Three tests here used to spy on clearDraft alone while the paths under test
+  // only ever called clearDraftIfContent, so they asserted nothing — johannesjo
+  // proved it by inserting a call into the catch block and the suite stayed
+  // green (#8982 review). A single helper means a new retirement path cannot be
+  // added without every one of these tests seeing it.
+  const expectNothingRetired = (): void => {
+    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+    expect(localDraftService.markSaved).not.toHaveBeenCalled();
+    expect(localDraftService.markDiscarded).not.toHaveBeenCalled();
+  };
+
+  it('opens the note content and writes NOTHING when the draft matches the note', async () => {
     localDraftService.loadDraft.and.resolveTo(draftOf('saved content', 'anything'));
 
     await editFullscreen();
 
-    // Owned-content clear: only the copy this session sees (content === the
-    // saved note) is dropped, and only because there is no phantom risk.
-    expect(localDraftService.clearDraftIfContent).toHaveBeenCalledWith(
-      'NOTE',
-      NOTE.id,
-      'saved content',
-    );
+    // The open path is read-only now. It used to delete this draft (gated on a
+    // durability proof) because the note already held its text; the read-time
+    // decision tree reaches the same conclusion without touching the DB, so a
+    // misjudged open can no longer destroy anything.
+    expectNothingRetired();
+    expect(localDraftService.saveDraft).not.toHaveBeenCalled();
     const data = getFullscreenDialogData();
     expect(data.content).toBe('saved content');
     expect(data.originalContent).toBeUndefined();
-  });
-
-  it('keeps the draft on the open path when the "saved" note is not yet durable (phantom risk)', async () => {
-    // draft.content === note.content, so the open path would normally drop the
-    // draft as redundant. But note.content is optimistic NgRx state and a write
-    // is still pending, so the durable copy is not on disk — clearing here would
-    // delete the only recoverable copy. Arm the pending-write lever.
-    localDraftService.loadDraft.and.resolveTo(draftOf('saved content', 'anything'));
-    captureService.getPendingCount.and.returnValue(1);
-
-    await editFullscreen();
-
-    // Drop the getPhantomChangeRisk gate on the open-path clear and this clears a
-    // draft whose "saved" content is not durable -> expectation goes red.
-    expect(localDraftService.clearDraftIfContent).not.toHaveBeenCalled();
-    expect(getFullscreenDialogData().content).toBe('saved content');
   });
 
   it('should seed the dialog with the draft content on crash recovery (baseContent matches note)', async () => {
@@ -170,10 +152,30 @@ describe('NoteComponent editFullscreen', () => {
 
     await editFullscreen();
 
-    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+    expectNothingRetired();
     const data = getFullscreenDialogData();
     expect(data.content).toBe('draft content');
     expect(data.originalContent).toBe('saved content');
+  });
+
+  it('recovers an edit whose save was marked but never reached disk', async () => {
+    // The case the flush + getPhantomChangeRisk coupling existed to protect: the
+    // note update was dispatched and the draft marked SAVED, then the write was
+    // rolled back / never persisted, so the note is back at the draft's
+    // baseContent. Recovery is now a READ-side property — the marker is present
+    // and deliberately ignored — so no durability proof is needed at write time.
+    localDraftService.loadDraft.and.resolveTo({
+      ...draftOf('draft content', 'saved content'),
+      resolved: { content: 'draft content', kind: 'SAVED' },
+    });
+
+    await editFullscreen();
+
+    // Rank the SAVED marker above the baseContent check in getDraftOpenAction and
+    // this silently drops the edit -> the editor opens on 'saved content' and
+    // this goes red.
+    expect(getFullscreenDialogData().content).toBe('draft content');
+    expectNothingRetired();
   });
 
   it('should open the draft content when the user resolves a conflict with "review draft"', async () => {
@@ -182,17 +184,20 @@ describe('NoteComponent editFullscreen', () => {
 
     await editFullscreen();
 
-    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+    expectNothingRetired();
     expect(getFullscreenDialogData().content).toBe('draft content');
   });
 
-  it('should clear the draft and open the saved content when the user resolves a conflict with "keep saved"', async () => {
+  it('marks the draft discarded (never deletes it) when the user resolves a conflict with "keep saved"', async () => {
     localDraftService.loadDraft.and.resolveTo(draftOf('draft content', 'other base'));
     confirmResult = false;
 
     await editFullscreen();
 
-    expect(localDraftService.clearDraft).toHaveBeenCalledWith('NOTE', NOTE.id);
+    expect(localDraftService.markDiscarded).toHaveBeenCalledWith('NOTE', NOTE.id);
+    // Choosing the saved version is the same instruction as Discard, and like
+    // Discard it must not delete: the text stays in the DB, just unoffered.
+    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
     expect(getFullscreenDialogData().content).toBe('saved content');
   });
 
@@ -202,9 +207,9 @@ describe('NoteComponent editFullscreen', () => {
 
     await editFullscreen();
 
-    // Opening the editor here would let a checkpoint or Discard overwrite/delete
-    // the still-unresolved draft, so we abort until the user actually chooses.
-    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+    // Opening the editor here would let a checkpoint overwrite the still-
+    // unresolved draft, so we abort until the user actually chooses.
+    expectNothingRetired();
     expect(getFullscreenDialogData()).toBeUndefined();
   });
 
@@ -256,98 +261,26 @@ describe('NoteComponent editFullscreen', () => {
     expect(callOrder).toEqual(['saveDraft', 'update']);
   });
 
-  it('does not clear the draft until the update is durably persisted (flush gates the clear)', async () => {
-    let resolveFlush!: () => void;
-    flushService.flushPendingWrites.and.returnValue(
-      new Promise<void>((r) => (resolveFlush = r)),
-    );
-
+  it('marks the draft saved on the way out, and never deletes it', async () => {
     await editFullscreen();
 
     afterClosed$.next('final content');
     await settle();
 
-    // Dispatched, but the flush hasn't resolved — this is the crash window. The
-    // draft MUST survive it, or a crash here loses the edit.
     expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
       content: 'final content',
     });
-    expect(localDraftService.clearDraftIfContent).not.toHaveBeenCalled();
-
-    resolveFlush();
-    await settle();
-
-    // Drop the `await` before the clear and it clears while the flush is still
-    // pending -> this expectation goes red. Owned-content clear: only the draft
-    // this session saved (content === res) is removed.
-    expect(localDraftService.clearDraftIfContent).toHaveBeenCalledWith(
+    // Scoped to the exact text handed to the note: a newer session that
+    // checkpointed different content into the same key keeps its draft live.
+    expect(localDraftService.markSaved).toHaveBeenCalledWith(
       'NOTE',
       NOTE.id,
       'final content',
     );
-  });
-
-  it('keeps the draft when the flush times out (fail-safe direction)', async () => {
-    flushService.flushPendingWrites.and.rejectWith(new Error('flush timeout'));
-
-    await editFullscreen();
-
-    afterClosed$.next('final content');
-    await settle();
-
-    // Failing must leave MORE recoverable state, never less: the note was still
-    // dispatched, but the draft is kept so the next open can recover it.
-    expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
-      content: 'final content',
-    });
     expect(localDraftService.clearDraft).not.toHaveBeenCalled();
   });
 
-  it('keeps the draft when the flush drains but the write did not persist (rolled back)', async () => {
-    // flushPendingWrites resolves even on a FAILED persist: the effect
-    // decrements the pending counter in its `finally` regardless of outcome, so
-    // draining proves the pipeline is idle, not that the write committed. When
-    // the effect rolled the write back it sets the divergence flag, and the
-    // draft must survive so the next open recovers the edit.
-    captureService.hasUnrecoveredPersistFailure.and.returnValue(true);
-
-    await editFullscreen();
-
-    afterClosed$.next('final content');
-    await settle();
-
-    expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
-      content: 'final content',
-    });
-    // Drop the getPhantomChangeRisk guard and this clears a draft whose edit was
-    // never durably persisted -> this expectation goes red.
-    expect(localDraftService.clearDraftIfContent).not.toHaveBeenCalled();
-  });
-
-  it('keeps the draft on save when the write is not durable beyond the failure flag (full phantom predicate)', async () => {
-    // The save-path clear must gate on the FULL getPhantomChangeRisk predicate,
-    // not hasUnrecoveredPersistFailure() alone. A write that is still pending or a
-    // sync-window-deferred action that never set the failure flag still means the
-    // edit is not durable, so the draft must survive. Drive the pending-write
-    // lever with the failure flag left false — the case the old failure-flag-only
-    // guard missed (#8982 review).
-    captureService.hasUnrecoveredPersistFailure.and.returnValue(false);
-    captureService.getPendingCount.and.returnValue(1);
-
-    await editFullscreen();
-
-    afterClosed$.next('final content');
-    await settle();
-
-    expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
-      content: 'final content',
-    });
-    // Gate on hasUnrecoveredPersistFailure() alone (the old code) and this clears
-    // a draft whose edit is not durable -> red.
-    expect(localDraftService.clearDraftIfContent).not.toHaveBeenCalled();
-  });
-
-  it('clears the draft (does not save one) when closing on unchanged content', async () => {
+  it('marks (does not save) the draft when closing on unchanged content', async () => {
     await editFullscreen();
 
     // ESC on an unedited open, or an edit reverted before close: res equals the
@@ -355,17 +288,45 @@ describe('NoteComponent editFullscreen', () => {
     afterClosed$.next('saved content');
     await settle();
 
+    // No new checkpoint — that would rewrite the draft with content it already
+    // has — but the marker still goes down so a later remote change cannot turn
+    // this stale copy into a spurious conflict prompt.
     expect(localDraftService.saveDraft).not.toHaveBeenCalled();
-    // Owned-content clear: the checkpoint this session mirrors (content === the
-    // saved note) is dropped; a newer session's draft under the same key is left.
-    expect(localDraftService.clearDraftIfContent).toHaveBeenCalledWith(
+    expect(localDraftService.markSaved).toHaveBeenCalledWith(
       'NOTE',
       NOTE.id,
       'saved content',
     );
-    // No flush needed for a no-op: the note is unchanged, so there is no new
-    // write to wait on before clearing.
-    expect(flushService.flushPendingWrites).not.toHaveBeenCalled();
+    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+  });
+
+  it('marks the draft discarded (and deletes nothing) on a confirmed DISCARD', async () => {
+    // The DISCARD branch had NO test at all — `grep -c DISCARD` on this spec
+    // returned 0 — which is how its clear stayed ungated while its sibling was
+    // gated (#8982 review). Both are markers now, so the asymmetry is gone by
+    // construction, and this pins the branch down.
+    await editFullscreen();
+
+    afterClosed$.next({ action: 'DISCARD' });
+    await settle();
+
+    expect(localDraftService.markDiscarded).toHaveBeenCalledWith('NOTE', NOTE.id);
+    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+    expect(noteService.update).not.toHaveBeenCalled();
+    expect(noteService.remove).not.toHaveBeenCalled();
+  });
+
+  it('leaves the draft completely alone on a DISCARD when the draft could not be read', async () => {
+    localDraftService.loadDraft.and.resolveTo(DRAFT_LOAD_ERROR);
+
+    await editFullscreen();
+
+    afterClosed$.next({ action: 'DISCARD' });
+    await settle();
+
+    // An unread draft may be someone else's unsaved recovery copy; a discard of
+    // content we never managed to load must not resolve it.
+    expectNothingRetired();
   });
 
   it('checkpoints the editor contents while typing (crash-safety premise)', async () => {
@@ -393,14 +354,17 @@ describe('NoteComponent editFullscreen', () => {
     expect(localDraftService.clearDraft).toHaveBeenCalledWith('NOTE', NOTE.id);
   });
 
-  it('should keep the draft on a force-close (undefined result)', async () => {
+  it('should keep the draft fully intact on a force-close (undefined result)', async () => {
     await editFullscreen();
 
     afterClosed$.next(undefined);
+    await settle();
 
     expect(noteService.update).not.toHaveBeenCalled();
     expect(noteService.remove).not.toHaveBeenCalled();
-    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+    // A force-close (MatDialog.closeAll(), a disposed overlay) is not a decision
+    // by the user, so the draft stays recoverable — unmarked as well as undeleted.
+    expectNothingRetired();
   });
 
   it('should open the editor but skip all draft handling when the draft load fails', async () => {
@@ -415,11 +379,14 @@ describe('NoteComponent editFullscreen', () => {
     expect(localDraftService.saveDraft).not.toHaveBeenCalled();
 
     afterClosed$.next('final content');
+    await settle();
     expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
       content: 'final content',
     });
     expect(localDraftService.saveDraft).not.toHaveBeenCalled();
-    expect(localDraftService.clearDraft).not.toHaveBeenCalled();
+    // Nothing may retire a draft we could not read — including the marker, which
+    // would suppress recovery of content this session never saw.
+    expectNothingRetired();
   });
 
   it('does not stack a second editor when opened again while the first draft load is still pending', async () => {

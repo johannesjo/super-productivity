@@ -765,6 +765,28 @@ describe('LocalBackupService', () => {
         true,
       );
     });
+
+    it('should clear the active profiles crash-safe drafts after a restore', async () => {
+      // The restore replaced this profile's notes wholesale, so every draft's
+      // baseContent now refers to content that no longer exists and would only
+      // offer misleading recovery. The spy existed here but was never asserted
+      // on, so this call was unprotected (#8982 review).
+      backupServiceSpy.importCompleteBackup.and.resolveTo();
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not clear drafts when the import fails', async () => {
+      // Nothing was replaced, so the drafts still refer to live content. Move the
+      // cleanup out of the success path (e.g. into a finally) and this goes red.
+      backupServiceSpy.importCompleteBackup.and.rejectWith(new Error('boom'));
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
+    });
   });
 
   describe('restoreLatestMobileBackupFromSettings()', () => {

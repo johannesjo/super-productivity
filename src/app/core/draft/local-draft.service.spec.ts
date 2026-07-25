@@ -1,5 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { DRAFT_LOAD_ERROR, LocalDraft, LocalDraftService } from './local-draft.service';
+import {
+  DRAFT_LOAD_ERROR,
+  getDraftOpenAction,
+  isDraftResolved,
+  LocalDraft,
+  LocalDraftService,
+} from './local-draft.service';
 import { UserProfileService } from '../../features/user-profile/user-profile.service';
 import { UserProfileStorageService } from '../../features/user-profile/user-profile-storage.service';
 import { DEFAULT_PROFILE_ID } from '../../features/user-profile/user-profile.model';
@@ -44,6 +50,18 @@ describe('LocalDraftService', () => {
       ],
     });
     service = TestBed.inject(LocalDraftService);
+  });
+
+  // Every test here shares ONE real IndexedDB, and this repo runs specs in a
+  // random order — so anything left behind leaks into whichever test happens to
+  // run next (most visibly the entry-cap tests, which count records). Wipe the
+  // store between tests instead of relying on each one to tidy up after itself.
+  afterEach(async () => {
+    try {
+      await (service as any)._withRetryOnClose((db: any) => db.clear('drafts'));
+    } catch {
+      // A test that deliberately broke IndexedDB has nothing to clean up.
+    }
   });
 
   it('should save and load a draft preserving content and baseContent', async () => {
@@ -421,48 +439,290 @@ describe('LocalDraftService', () => {
     await service.clearDraft('NOTE', entityId);
   });
 
-  describe('clearDraftIfContent (owned-content clear)', () => {
-    it('clears the draft when the stored content still matches', async () => {
+  describe('resolution markers (non-destructive retirement)', () => {
+    const seed = async (id: string, content: string): Promise<void> => {
       activeProfileId = 'profile-a';
-      const id = uniqueId();
       await service.saveDraft({
         entityType: 'NOTE',
         entityId: id,
-        content: 'v1',
+        content,
         baseContent: 'base',
       });
+    };
 
-      await service.clearDraftIfContent('NOTE', id, 'v1');
+    it('markSaved records the text without removing it', async () => {
+      const id = uniqueId();
+      await seed(id, 'v1');
 
-      expect(await service.loadDraft('NOTE', id)).toBeUndefined();
+      await service.markSaved('NOTE', id, 'v1');
+
+      // The whole point of the rework: retiring a draft is a WRITE. The text is
+      // still there to recover from if the save turns out not to have landed.
+      const draft = await loadDraft(id);
+      expect(draft?.content).toBe('v1');
+      expect(draft?.resolved).toEqual({ content: 'v1', kind: 'SAVED' });
     });
 
-    it("leaves a newer session's draft under the same key when content no longer matches", async () => {
+    it("markSaved leaves a newer session's checkpoint unmarked", async () => {
+      const id = uniqueId();
+      // Session B checkpointed Y under the shared key while an older lifecycle A
+      // still believes it owns X. A's marker must not claim Y as saved, or Y
+      // stops being offered for recovery.
+      await seed(id, 'Y-newer');
+
+      await service.markSaved('NOTE', id, 'X-older');
+
+      const draft = await loadDraft(id);
+      expect(draft?.content).toBe('Y-newer');
+      expect(draft?.resolved).toBeUndefined();
+    });
+
+    it('markDiscarded retires whatever text is stored, still without deleting it', async () => {
+      const id = uniqueId();
+      await seed(id, 'typed then thrown away');
+
+      await service.markDiscarded('NOTE', id);
+
+      const draft = await loadDraft(id);
+      expect(draft?.content).toBe('typed then thrown away');
+      expect(draft?.resolved).toEqual({
+        content: 'typed then thrown away',
+        kind: 'DISCARDED',
+      });
+    });
+
+    it('a later checkpoint clears the marker, so typing again revives the draft', async () => {
+      const id = uniqueId();
+      await seed(id, 'v1');
+      await service.markSaved('NOTE', id, 'v1');
+
+      await seed(id, 'v2 typed after saving');
+
+      // saveDraft puts a whole fresh record; if it ever preserved `resolved` the
+      // new text would be born already suppressed and silently unrecoverable.
+      const draft = await loadDraft(id);
+      expect(draft?.resolved).toBeUndefined();
+      expect(getDraftOpenAction(draft!, 'base')).toBe('RESTORE');
+    });
+
+    it('markSaved does not extend the draft retention window', async () => {
       activeProfileId = 'profile-a';
       const id = uniqueId();
-      // Session B has checkpointed newer content Y under the shared key while an
-      // older lifecycle A still believes it owns X. A's clear must NOT delete Y.
-      await service.saveDraft({
-        entityType: 'NOTE',
-        entityId: id,
-        content: 'Y-newer',
-        baseContent: 'base',
-      });
+      // Seed with an updatedAt well in the past. Seeding via saveDraft() would
+      // stamp now(), and a re-stamp on marking lands in the SAME millisecond —
+      // so the assertion below would hold either way and test nothing.
+      const tenDaysMs = 10 * 24 * 60 * 60 * 1000;
+      const tenDaysAgo = Date.now() - tenDaysMs;
+      await (service as any)._withRetryOnClose((db: any) =>
+        db.put('drafts', {
+          key: `profile-a:NOTE:${id}`,
+          entityType: 'NOTE',
+          entityId: id,
+          profileId: 'profile-a',
+          content: 'v1',
+          baseContent: 'base',
+          updatedAt: tenDaysAgo,
+        }),
+      );
 
-      await service.clearDraftIfContent('NOTE', id, 'X-older');
+      await service.markSaved('NOTE', id, 'v1');
 
-      // A key-only clear would have destroyed Y here; the content-conditional
-      // clear no-ops on the mismatch (#8982 review).
-      const survivor = await loadDraft(id);
-      expect(survivor?.content).toBe('Y-newer');
-      await service.clearDraft('NOTE', id);
+      // Bumping updatedAt here would let a resolved draft keep itself alive past
+      // the documented 14 days just by being resolved.
+      expect((await loadDraft(id))!.updatedAt).toBe(tenDaysAgo);
+      expect((await loadDraft(id))!.resolved).toEqual({ content: 'v1', kind: 'SAVED' });
     });
 
-    it('is a safe no-op when the draft is already gone', async () => {
+    it('are safe no-ops when the draft is already gone', async () => {
       activeProfileId = 'profile-a';
-      await expectAsync(
-        service.clearDraftIfContent('NOTE', uniqueId(), 'whatever'),
-      ).toBeResolved();
+      await expectAsync(service.markSaved('NOTE', uniqueId(), 'x')).toBeResolved();
+      await expectAsync(service.markDiscarded('NOTE', uniqueId())).toBeResolved();
+      // Nothing was created just to hold a marker.
+      expect(await service.loadDraft('NOTE', uniqueId())).toBeUndefined();
+    });
+  });
+
+  it('holds the entry cap PER PROFILE, not globally', async () => {
+    // A global cap let a busy profile evict another profile's only unsaved
+    // recovery copy — the exact data this feature exists to protect (#8982
+    // review). Fill profile-a past the cap and check profile-b's single draft.
+    const base = Date.now();
+    const victimId = uniqueId();
+    const busyIds = Array.from({ length: 201 }, () => uniqueId());
+    await (service as any)._withRetryOnClose(async (db: any) => {
+      // profile-b's draft is the OLDEST record in the store, so a global cap
+      // sorted by updatedAt evicts precisely this one.
+      await db.put('drafts', {
+        key: `profile-b:NOTE:${victimId}`,
+        entityType: 'NOTE',
+        entityId: victimId,
+        profileId: 'profile-b',
+        content: 'the only unsaved copy profile-b has',
+        baseContent: 'base',
+        updatedAt: base,
+      });
+      for (let i = 0; i < busyIds.length; i++) {
+        await db.put('drafts', {
+          key: `profile-a:NOTE:${busyIds[i]}`,
+          entityType: 'NOTE',
+          entityId: busyIds[i],
+          profileId: 'profile-a',
+          content: `c${i}`,
+          baseContent: 'base',
+          updatedAt: base + 1 + i,
+        });
+      }
+    });
+
+    await (service as any)._pruneStaleDraftsOnce();
+
+    // Make the cap global again (drop the per-profile grouping) and profile-b's
+    // draft is the one that gets evicted -> red.
+    activeProfileId = 'profile-b';
+    expect((await loadDraft(victimId))?.content).toBe(
+      'the only unsaved copy profile-b has',
+    );
+    // profile-a is still capped: its own oldest entry went.
+    activeProfileId = 'profile-a';
+    expect(await service.loadDraft('NOTE', busyIds[0])).toBeUndefined();
+  });
+
+  it('evicts resolved drafts before live ones when a profile is over the cap', async () => {
+    // Over the cap, something must go. A resolved draft only carries
+    // conflict-prompt suppression; a live one carries unsaved text. Make the
+    // resolved record the NEWEST so an updatedAt-only sort would keep it and
+    // evict the live one instead.
+    const base = Date.now();
+    const liveId = uniqueId();
+    const resolvedId = uniqueId();
+    const fillerIds = Array.from({ length: 199 }, () => uniqueId());
+    await (service as any)._withRetryOnClose(async (db: any) => {
+      await db.put('drafts', {
+        key: `profile-a:NOTE:${liveId}`,
+        entityType: 'NOTE',
+        entityId: liveId,
+        profileId: 'profile-a',
+        content: 'unsaved text',
+        baseContent: 'base',
+        updatedAt: base,
+      });
+      for (let i = 0; i < fillerIds.length; i++) {
+        await db.put('drafts', {
+          key: `profile-a:NOTE:${fillerIds[i]}`,
+          entityType: 'NOTE',
+          entityId: fillerIds[i],
+          profileId: 'profile-a',
+          content: `c${i}`,
+          baseContent: 'base',
+          updatedAt: base + 1 + i,
+        });
+      }
+      await db.put('drafts', {
+        key: `profile-a:NOTE:${resolvedId}`,
+        entityType: 'NOTE',
+        entityId: resolvedId,
+        profileId: 'profile-a',
+        content: 'already saved',
+        baseContent: 'base',
+        resolved: { content: 'already saved', kind: 'SAVED' },
+        updatedAt: base + 1000,
+      });
+    });
+
+    await (service as any)._pruneStaleDraftsOnce();
+
+    activeProfileId = 'profile-a';
+    // Sort by updatedAt alone (drop the isDraftResolved tiebreak) and this flips:
+    // the live draft is evicted and the inert one kept -> red.
+    expect((await loadDraft(liveId))?.content).toBe('unsaved text');
+    expect(await service.loadDraft('NOTE', resolvedId)).toBeUndefined();
+  });
+
+  it('ages resolved drafts out on the normal retention clock', async () => {
+    activeProfileId = 'profile-a';
+    const id = uniqueId();
+    const fifteenDaysMs = 15 * 24 * 60 * 60 * 1000;
+    await (service as any)._withRetryOnClose((db: any) =>
+      db.put('drafts', {
+        key: `profile-a:NOTE:${id}`,
+        entityType: 'NOTE',
+        entityId: id,
+        profileId: 'profile-a',
+        content: 'saved long ago',
+        baseContent: 'base',
+        resolved: { content: 'saved long ago', kind: 'SAVED' },
+        updatedAt: Date.now() - fifteenDaysMs,
+      }),
+    );
+
+    await (service as any)._pruneStaleDraftsOnce();
+
+    // Markers must not become a way for records to outlive the documented 14-day
+    // retention: exempt resolved drafts from the age sweep and this goes red.
+    expect(await service.loadDraft('NOTE', id)).toBeUndefined();
+  });
+
+  describe('getDraftOpenAction (the read-time decision tree)', () => {
+    const draft = (over: Partial<LocalDraft> = {}): LocalDraft => ({
+      key: 'p:NOTE:n1',
+      entityType: 'NOTE',
+      entityId: 'n1',
+      profileId: 'p',
+      content: 'DRAFT',
+      baseContent: 'BASE',
+      updatedAt: 1,
+      ...over,
+    });
+
+    it('ignores a draft the entity already contains', () => {
+      expect(getDraftOpenAction(draft(), 'DRAFT')).toBe('IGNORE');
+    });
+
+    it('restores a draft whose edit never landed (entity still at baseContent)', () => {
+      expect(getDraftOpenAction(draft(), 'BASE')).toBe('RESTORE');
+    });
+
+    it('prompts when the text is unsaved and the entity moved on', () => {
+      expect(getDraftOpenAction(draft(), 'REMOTE')).toBe('PROMPT');
+    });
+
+    it('ignores a SAVED draft once the entity has moved on (the spurious prompt)', () => {
+      // This is the ONLY thing the old destructive clear bought, and the marker
+      // buys it without deleting. Drop the SAVED branch and this prompts the user
+      // about an edit they already saved -> red.
+      const d = draft({ resolved: { content: 'DRAFT', kind: 'SAVED' } });
+      expect(getDraftOpenAction(d, 'REMOTE')).toBe('IGNORE');
+    });
+
+    it('still RESTORES a SAVED draft whose write never reached disk', () => {
+      // The write was dispatched and marked, then rolled back / never persisted,
+      // so the entity sits back at baseContent. This ordering is what makes a
+      // write-time durability gate unnecessary: rank the SAVED branch above the
+      // baseContent branch and the edit is silently lost -> red.
+      const d = draft({ resolved: { content: 'DRAFT', kind: 'SAVED' } });
+      expect(getDraftOpenAction(d, 'BASE')).toBe('RESTORE');
+    });
+
+    it('never resurrects a DISCARDED draft, not even from its own baseContent', () => {
+      // A discard leaves the entity at baseContent by definition, so DISCARDED
+      // must outrank the RESTORE branch. Move it below and the next open hands
+      // back the exact text the user threw away -> red.
+      const d = draft({ resolved: { content: 'DRAFT', kind: 'DISCARDED' } });
+      expect(getDraftOpenAction(d, 'BASE')).toBe('IGNORE');
+      expect(getDraftOpenAction(d, 'REMOTE')).toBe('IGNORE');
+    });
+
+    it('ignores a marker left over from an older edit session', () => {
+      // The marker names the text it applies to. Newer text under the same key is
+      // live work, so a stale marker must not suppress it. Compare only the kind
+      // (not resolved.content === content) and this stops prompting about real
+      // unsaved text -> red.
+      const d = draft({
+        content: 'NEWER',
+        resolved: { content: 'OLDER', kind: 'SAVED' },
+      });
+      expect(getDraftOpenAction(d, 'REMOTE')).toBe('PROMPT');
+      expect(isDraftResolved(d)).toBe(false);
     });
   });
 

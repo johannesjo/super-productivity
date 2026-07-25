@@ -8,6 +8,12 @@ import { isConnectionClosingError } from '../../op-log/persistence/op-log-errors
 
 export type LocalDraftEntityType = 'NOTE';
 
+/**
+ * How a draft's text stopped being unsaved work: the user saved it, or threw it
+ * away in the editor's discard confirmation.
+ */
+export type LocalDraftResolutionKind = 'SAVED' | 'DISCARDED';
+
 export interface LocalDraft {
   key: string;
   entityType: LocalDraftEntityType;
@@ -20,8 +26,78 @@ export interface LocalDraft {
    * draft was created.
    */
   baseContent: string;
+  /**
+   * Present once the draft's text stopped being unsaved work. `content` records
+   * WHICH text was resolved, so the marker only ever applies to the exact text
+   * it was written for: a later checkpoint replaces the whole record (marker
+   * included), and a marker left over from an older edit session simply stops
+   * matching instead of silently suppressing newer text.
+   *
+   * This exists so the lifecycle never has to DELETE a draft to keep a stale one
+   * from arming a spurious conflict prompt. A write can be wrong; it cannot
+   * destroy text, which is what every previous round of this feature kept having
+   * to prove it would not do.
+   */
+  resolved?: {
+    content: string;
+    kind: LocalDraftResolutionKind;
+  };
   updatedAt: number;
 }
+
+/**
+ * True once the marker applies to the text actually stored, i.e. the record can
+ * no longer be recovered onto its entity and only suppresses a stale conflict
+ * prompt. A marker left behind by an older edit session whose text was since
+ * replaced does NOT count — that record is live.
+ */
+export const isDraftResolved = (draft: LocalDraft): boolean =>
+  draft.resolved?.content === draft.content;
+
+/** What an existing draft means for the entity it belongs to. */
+export type DraftOpenAction = 'IGNORE' | 'RESTORE' | 'PROMPT';
+
+/**
+ * Decides what to do with an existing draft when its entity is opened, given the
+ * entity's current (optimistic) content.
+ *
+ * The ORDER of these branches is the whole design; changing it reintroduces data
+ * loss that no amount of write-time gating can compensate for. In particular
+ * RESTORE sits ABOVE the SAVED marker on purpose: a save that was marked and
+ * then never reached disk (crash, rolled-back write, sync-window-deferred
+ * action) leaves the entity sitting back at `baseContent`, and that case must
+ * still recover the edit. Because the read side detects that positively, the
+ * write side needs no durability proof before marking — which is what lets the
+ * flush/phantom-risk coupling disappear from the callers entirely.
+ */
+export const getDraftOpenAction = (
+  draft: LocalDraft,
+  entityContent: string,
+): DraftOpenAction => {
+  // The entity already holds the draft text: there is nothing left to recover.
+  if (draft.content === entityContent) {
+    return 'IGNORE';
+  }
+  // The user explicitly threw this text away. A discard leaves the entity at
+  // `baseContent` by definition, so this MUST outrank the RESTORE branch below —
+  // otherwise the next open hands back the very text the user just discarded.
+  if (draft.resolved?.kind === 'DISCARDED' && draft.resolved.content === draft.content) {
+    return 'IGNORE';
+  }
+  // The entity is exactly where this edit session started, so the edit never
+  // landed: crash recovery.
+  if (draft.baseContent === entityContent) {
+    return 'RESTORE';
+  }
+  // The text was saved and the entity has since moved on (e.g. through sync).
+  // Prompting here would be the spurious conflict this marker exists to avoid.
+  if (draft.resolved?.kind === 'SAVED' && draft.resolved.content === draft.content) {
+    return 'IGNORE';
+  }
+  // Unsaved text, and the entity changed underneath it. Only the user can say
+  // which one wins.
+  return 'PROMPT';
+};
 
 /**
  * Distinguishes a failed draft read from "no draft exists" so callers can
@@ -128,18 +204,62 @@ export class LocalDraftService {
   }
 
   /**
-   * Deletes the draft only if its stored content still equals `expectedContent`,
-   * in a single read-write transaction. Lets a save lifecycle clear the draft it
-   * owns without racing a newer editor session that checkpointed different
-   * content into the same key between this session's save and its flush: an
-   * older lifecycle's key-only clear would otherwise delete the newer session's
-   * checkpoint (#8982 review). A mismatch (newer content, or already gone) is a
-   * safe no-op — the owning session clears its own copy later.
+   * Records that `savedContent` was handed to the entity, so a later open does
+   * not offer it back as unsaved work. Scoped to that exact text: if a newer
+   * edit session checkpointed different content into the same key, this is a
+   * no-op and that newer text stays live.
+   *
+   * Marking is deliberately unconditional on durability. If the write never
+   * reaches disk the entity ends up back at the draft's `baseContent`, which
+   * getDraftOpenAction() detects and restores — so nothing here has to prove the
+   * write landed first.
    */
-  async clearDraftIfContent(
+  async markSaved(
     entityType: LocalDraftEntityType,
     entityId: string,
-    expectedContent: string,
+    savedContent: string,
+  ): Promise<void> {
+    await this._markResolved(entityType, entityId, (existing) =>
+      existing.content === savedContent
+        ? { content: savedContent, kind: 'SAVED' }
+        : undefined,
+    );
+  }
+
+  /**
+   * Records that the user threw this entity's draft away in the editor's discard
+   * confirmation.
+   *
+   * Unlike markSaved() this is NOT scoped to a specific text, because the exact
+   * bytes at the moment of the click are not knowable: checkpoints are debounced,
+   * so the stored copy can lag the editor by up to that debounce. A confirmed
+   * discard is an explicit instruction about this entity's draft as a whole. It
+   * still only writes — the text stays in the record, it is merely no longer
+   * offered for recovery.
+   */
+  async markDiscarded(entityType: LocalDraftEntityType, entityId: string): Promise<void> {
+    await this._markResolved(entityType, entityId, (existing) => ({
+      content: existing.content,
+      kind: 'DISCARDED',
+    }));
+  }
+
+  /**
+   * Read-modify-write of the resolution marker alone, in one transaction.
+   *
+   * `content` is written back exactly as read, so this can never overwrite a
+   * concurrent checkpoint with older text (IndexedDB serializes the two
+   * read-write transactions either way round). `updatedAt` is deliberately NOT
+   * bumped: a resolved draft should keep ageing out on the normal retention
+   * clock rather than being kept alive by being resolved.
+   *
+   * The get and the put are sequential by nature here (the put depends on what
+   * was read), unlike the prune path which can issue its deletes up front.
+   */
+  private async _markResolved(
+    entityType: LocalDraftEntityType,
+    entityId: string,
+    toMarker: (existing: LocalDraft) => LocalDraft['resolved'],
   ): Promise<void> {
     try {
       const profileId = await this._activeProfileId();
@@ -147,13 +267,14 @@ export class LocalDraftService {
       await this._withRetryOnClose(async (db) => {
         const tx = db.transaction(DB_STORE_NAME, 'readwrite');
         const existing = await tx.store.get(key);
-        if (existing && existing.content === expectedContent) {
-          await tx.store.delete(key);
+        const resolved = existing && toMarker(existing);
+        if (existing && resolved) {
+          await tx.store.put({ ...existing, resolved });
         }
         await tx.done;
       });
     } catch (e) {
-      Log.err('LocalDraftService: Failed to conditionally clear draft', e);
+      Log.err('LocalDraftService: Failed to mark draft resolved', e);
     }
   }
 
@@ -244,11 +365,39 @@ export class LocalDraftService {
       const tx = db.transaction(DB_STORE_NAME, 'readwrite');
       const all = await tx.store.getAll();
       const cutoff = now - DRAFT_RETENTION_MS;
+      // Age applies to every draft equally, resolved or not: a resolution marker
+      // does not bump updatedAt, so markers age out on the same 14-day clock as
+      // the drafts they sit on and cannot accumulate past it.
       const expiredKeys = all.filter((d) => d.updatedAt < cutoff).map((d) => d.key);
-      const survivors = all
-        .filter((d) => d.updatedAt >= cutoff)
-        .sort((a, b) => b.updatedAt - a.updatedAt);
-      const overflowKeys = survivors.slice(DRAFT_MAX_ENTRIES).map((d) => d.key);
+      // The entry cap is PER PROFILE. A global cap let one profile's drafts evict
+      // another profile's only unsaved recovery copy, which is exactly the data
+      // this feature exists to protect (#8982 review).
+      const survivorsByProfile = new Map<string, LocalDraft[]>();
+      for (const draft of all) {
+        if (draft.updatedAt < cutoff) {
+          continue;
+        }
+        const forProfile = survivorsByProfile.get(draft.profileId);
+        if (forProfile) {
+          forProfile.push(draft);
+        } else {
+          survivorsByProfile.set(draft.profileId, [draft]);
+        }
+      }
+      const overflowKeys = [...survivorsByProfile.values()].flatMap((drafts) =>
+        drafts
+          // Resolved drafts go first when a profile is over its cap: their text
+          // is already saved or discarded, so all they still carry is
+          // conflict-prompt suppression. Losing that costs at most one extra
+          // prompt; dropping a live draft instead would cost unsaved text.
+          .sort(
+            (a, b) =>
+              Number(isDraftResolved(a)) - Number(isDraftResolved(b)) ||
+              b.updatedAt - a.updatedAt,
+          )
+          .slice(DRAFT_MAX_ENTRIES)
+          .map((d) => d.key),
+      );
       // Issue every delete request up front and await them together with tx.done
       // (idb's canonical multi-write pattern) rather than awaiting each delete in
       // turn: an await BETWEEN requests can let the transaction go inactive on

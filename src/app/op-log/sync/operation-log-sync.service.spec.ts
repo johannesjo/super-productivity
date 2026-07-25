@@ -4575,6 +4575,59 @@ describe('OperationLogSyncService', () => {
       expect(opLogStoreSpy.completeRawRebuild).not.toHaveBeenCalled();
     });
 
+    it('should clear the active profiles crash-safe drafts after the rebuild', async () => {
+      // "Use Server Data" replays the complete server history over live state,
+      // replacing every note, so each draft's baseContent refers to content that
+      // no longer exists. This flow does NOT funnel through importCompleteBackup,
+      // so it is the only place that can clear them. The spy was set up here but
+      // never asserted on, leaving the call unprotected (#8982 review).
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [makeRemoteOp()],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 1,
+      });
+      const mockProvider = {
+        supportsOperationSync: true,
+        setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+      } as any;
+
+      await service.forceDownloadRemoteState(mockProvider);
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT clear drafts when the replay is blocked and no rebuild completes', async () => {
+      // Nothing was replaced, so the drafts still describe live notes. Hoisting
+      // the cleanup out of _completeRawRebuild (e.g. into the caller, or a
+      // finally) would destroy recoverable text on a failed force-download.
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [makeRemoteOp()],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 1,
+      });
+      remoteOpsProcessingServiceSpy.processRemoteOps.and.resolveTo({
+        localWinOpsCreated: 0,
+        allOpsFilteredBySyncImport: false,
+        filteredOpCount: 0,
+        isLocalUnsyncedImport: false,
+        blockedByIncompatibleOp: true,
+      });
+      const mockProvider = {
+        supportsOperationSync: true,
+        setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+      } as any;
+
+      await expectAsync(service.forceDownloadRemoteState(mockProvider)).toBeRejected();
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
+    });
+
     it('should keep the first attempt backup on crash resume instead of re-capturing', async () => {
       downloadServiceSpy.downloadRemoteOps.and.resolveTo({
         newOps: [makeRemoteOp()],
