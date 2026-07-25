@@ -1,3 +1,5 @@
+简体中文说明：[README.zh-CN.md](README.zh-CN.md)
+
 <a href="https://super-productivity.com/"><img alt="Banner" src="docs/screens/banner.png"/></a>
 
 <div style="height:20px;"></div>
