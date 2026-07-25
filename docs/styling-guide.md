@@ -67,6 +67,25 @@ Sibling: `.info-panel` (`_info-panel.scss`) is the same idea for
 formly-generated markup, where no icon element can be added and the glyph has to
 come from a `::before`.
 
+## Typography Scale
+
+| Variable         | Value | Variable          | Value |
+| ---------------- | ----- | ----------------- | ----- |
+| `--font-size-xs` | 11px  | `--font-size-xl`  | 18px  |
+| `--font-size-sm` | 12px  | `--font-size-2xl` | 22px  |
+| `--font-size-md` | 14px  | `--font-size-3xl` | 28px  |
+| `--font-size-lg` | 16px  |                   |       |
+
+Text sizes go through the scale; snap an off-scale value to the nearest step.
+Companion tokens: `--font-weight-medium/-semibold/-bold`,
+`--line-height-tight/-snug/-normal`, `--font-mono-stack`.
+
+Two deliberate exceptions — leave these as plain px/em:
+
+- **Material icon glyph sizes** written as a matched set — `font-size`, `width` and `height` all 20px. The glyph must equal its box or it decenters, and the scale has no 20/24px step. See `main-header.component.scss` and the `.tab-icon` rules in `config-page.component.scss`.
+- **Deliberately proportional `em`** sizes that track their parent
+  (`font-size: 1em` on an inline icon).
+
 ## Key Files
 
 | File                             | Purpose                                                       |
