@@ -37,6 +37,36 @@ Rules:
 - **No dead classes** — the legacy Bootstrap `btn btn-primary` classes are gone; don't reintroduce them. `submit-button` is only styled inside `dialog-create-tag`.
 - **Symmetric choice dialogs** (e.g. sync "use remote" vs "use local") may use two matched `mat-stroked-button`s — there is no single primary.
 
+## Callouts (info / warning / danger / success)
+
+Tinted message boxes inside dialogs and config panes use the global `.callout`
+class from `src/styles/components/_callout.scss` — never a local `.warning-box`
+clone with its own `rgba(255, 152, 0, …)`, which is invisible to the 15 themes.
+
+```html
+<div class="callout callout--warning">
+  <mat-icon aria-hidden="true">warning</mat-icon>
+  <p>If you lose this password your synced data cannot be recovered.</p>
+</div>
+```
+
+| Modifier          | Tone token        | Use for                                   |
+| ----------------- | ----------------- | ----------------------------------------- |
+| _(none)_/`--info` | `--c-primary`     | Neutral context, "what will happen" notes |
+| `--success`       | `--color-success` | Confirmation, savings, "nothing to do"    |
+| `--warning`       | `--color-warning` | Irreversible-but-intended actions         |
+| `--danger`        | `--color-danger`  | Destructive actions, failures             |
+
+One tone token (`--callout-c`) drives icon color, border and fill, the latter two
+via `color-mix()` — so every tone is theme-aware and a new tone is one
+declaration. The icon element is optional; the class also works on a bare `<p>`.
+Outer spacing stays with the consumer (`.callout { margin-bottom: var(--s2); }`
+in the dialog's own SCSS), the primitive owns no margin.
+
+Sibling: `.info-panel` (`_info-panel.scss`) is the same idea for
+formly-generated markup, where no icon element can be added and the glyph has to
+come from a `::before`.
+
 ## Key Files
 
 | File                             | Purpose                                                       |

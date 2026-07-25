@@ -33,7 +33,7 @@
       justify-content: space-between;
       align-items: center;
       padding: var(--s2);
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--extra-border-color);
       border-radius: var(--card-border-radius);
       transition: var(--transition-standard);
 
@@ -95,5 +95,5 @@
 .profile-folder-section {
   margin-top: var(--s3);
   padding-top: var(--s3);
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  border-top: 1px solid var(--extra-border-color);
 }
