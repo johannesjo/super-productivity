@@ -18,11 +18,11 @@
 }
 
 .empty mat-icon {
-  color: var(--success-color, #4caf50);
+  color: var(--color-success);
 }
 
 .error mat-icon {
-  color: var(--warn-color, #f44336);
+  color: var(--color-danger);
 }
 
 .intro {
@@ -41,7 +41,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  border: 1px solid var(--extra-border-color);
   border-radius: var(--card-border-radius);
 
   &.highlight {
@@ -78,7 +78,7 @@
   margin-top: 1rem;
   background: rgba(255, 152, 0, 0.1);
   border-radius: var(--card-border-radius);
-  color: var(--warn-color, #ff9800);
+  color: var(--color-warning);
 
   mat-icon {
     flex-shrink: 0;
