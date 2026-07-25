@@ -381,8 +381,12 @@
 // -----------------------------
 body {
   // Surfaces (background ladder, low → high)
-  --surface-0: rgb(235, 235, 235);
-  --surface-1: #f8f8f7;
+  // Three readable levels: recessed rail (side nav) → page canvas → cards.
+  // Before #4988/#4989/#6639 the canvas was #f8f8f7 against white cards
+  // (1.06:1) and the rail was transparent, so the whole shell read as one flat
+  // sheet with hairlines doing all the separation work.
+  --surface-0: #e6e6e2;
+  --surface-1: #f1f1ee;
   --surface-2: #fff;
   --surface-3: #fff;
   --surface-4: #fff;
@@ -390,15 +394,17 @@ body {
   // Ink (foreground)
   --ink-strong: rgb(0, 0, 0);
   --ink: rgb(44, 44, 44);
-  // 0.66 remains visibly secondary while meeting WCAG AA against the default
-  // light surfaces (including white cards).
-  --ink-muted: rgba(44, 44, 44, 0.66);
+  // 0.70 keeps muted text visibly secondary while clearing WCAG AA (4.5:1) on
+  // every default light surface — cards (5.33:1), canvas (5.00:1) and the
+  // recessed rail (4.82:1). At the previous 0.66 the canvas pair sat at 4.4:1
+  // once the canvas darkened.
+  --ink-muted: rgba(44, 44, 44, 0.7);
   // RGB triplet (no `rgb()` wrapper) — keystone for `rgba(var(--ink-on-channel), α)` overlays.
   --ink-on-channel: 0, 0, 0;
 
   // Separators / scrim / overlays
-  --separator: #d0d0d0;
-  --divider: rgba(0, 0, 0, 0.12);
+  --separator: #c8c8c3;
+  --divider: rgba(0, 0, 0, 0.16);
   --scrim: rgba(0, 0, 0, 0.6);
   --bg-overlay: rgba(255, 255, 255, 0.8);
 
@@ -420,19 +426,23 @@ body {
 }
 
 body.isDarkTheme {
-  --surface-0: var(--dark0);
-  --surface-1: #131314;
-  --surface-2: var(--dark3);
+  // Same three-level ramp as light: recessed rail → page canvas → cards.
+  // The canvas is lifted off near-black (#131314 → #171719) so the shell stops
+  // reading as one crushed black field, and cards gain a real step
+  // (1.20:1 → 1.27:1) instead of relying on a hairline alone.
+  --surface-0: #0c0c0e;
+  --surface-1: #171719;
+  --surface-2: #2b2b2f;
   --surface-3: var(--dark12);
   --surface-4: var(--dark24);
 
   --ink-strong: rgb(255, 255, 255);
   --ink: rgb(230, 230, 230);
-  --ink-muted: rgba(235, 235, 235, 0.65);
+  --ink-muted: rgba(235, 235, 235, 0.68);
   --ink-on-channel: 255, 255, 255;
 
-  --separator: rgba(255, 255, 255, 0.1);
-  --divider: rgba(255, 255, 255, 0.12);
+  --separator: rgba(255, 255, 255, 0.16);
+  --divider: rgba(255, 255, 255, 0.18);
   --scrim: rgba(0, 0, 0, 0.6);
   --bg-overlay: rgba(0, 0, 0, 0.8);
 
@@ -466,7 +476,11 @@ body.isDarkTheme {
   --card-bg: var(--surface-2);
 
   // Navigation & panel (Cat A)
-  --sidenav-bg: transparent;
+  // The rail is the recessed level of the surface ramp. It used to be
+  // `transparent`, i.e. identical to the page canvas, which is why the shell
+  // had no readable left edge in either mode (#6639). Every built-in theme
+  // already declares its own `--sidenav-bg`, so this only affects the base.
+  --sidenav-bg: var(--surface-0);
   --sidenav-bg-mobile: var(--bg);
   // Keep active labels contrast-safe on every project colour. Brand remains
   // visible in the non-text selection tint instead of carrying text contrast.
@@ -591,7 +605,7 @@ body.isDarkTheme {
 /* stylelint-disable-next-line no-duplicate-selectors -- layered token file: Cat B follows Layer 1 primitives on the same selector */
 body {
   // Background colors (Cat B)
-  --bg-drag-col: rgb(242, 242, 242);
+  --bg-drag-col: rgb(233, 233, 229);
   --bg-slightly-lighter: var(--bg);
   --bg-super-light: #fff;
   --card-shadow: var(--whiteframe-shadow-2dp);
@@ -610,7 +624,7 @@ body {
   --selected-task-bg-color: #fff;
 
   // Borders (Cat B)
-  --extra-border-color: #eee;
+  --extra-border-color: #e2e2de;
 
   // Note colors (Cat B)
   --standard-note-bg: #ffffff;
@@ -678,17 +692,20 @@ body.isDarkTheme {
   --sidenav-hover-bg: rgba(255, 255, 255, 0.05);
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
   --right-panel-bg-mobile: var(--bg);
-  --bottom-panel-bg: var(--dark1);
+  --bottom-panel-bg: var(--dark3);
 
   // Text colors (Cat B)
   --text-color-less-intense: rgba(235, 235, 235, 0.8);
   --text-color-more-intense: rgb(245, 245, 245);
 
   // Selected task (Cat B)
-  --selected-task-bg-color: var(--dark6);
+  // Dark task surfaces track --surface-2 (#2b2b2f). Each one moved up a rung so
+  // it keeps the same read against the raised card level: selected/sub-tasks
+  // still sit above a resting card, done still sits below it.
+  --selected-task-bg-color: var(--dark10);
 
   // Borders (Cat B)
-  --extra-border-color: rgba(255, 255, 255, 0.12);
+  --extra-border-color: rgba(255, 255, 255, 0.16);
 
   // Note colors (Cat B)
   --standard-note-bg: var(--dark10);
@@ -697,11 +714,11 @@ body.isDarkTheme {
 
   // Task colors (Cat B)
   --task-c-current-bg: color-mix(in srgb, var(--c-accent) 18%, var(--surface-3));
-  --task-c-selected-bg: var(--dark6);
-  --sub-task-c-bg: var(--dark4-5);
-  --sub-task-c-bg-done: var(--dark2);
-  --task-c-bg-done: var(--dark1);
-  --sub-task-c-bg-in-selected: var(--dark10);
+  --task-c-selected-bg: var(--selected-task-bg-color);
+  --sub-task-c-bg: var(--dark8);
+  --sub-task-c-bg-done: var(--dark4);
+  --task-c-bg-done: var(--dark3);
+  --sub-task-c-bg-in-selected: var(--dark16);
   // Dark subtasks separate via a hairline border (like light), not a resting shadow.
   --sub-task-border-color: var(--extra-border-color);
 
