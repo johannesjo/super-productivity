@@ -45,8 +45,8 @@
   border-radius: var(--card-border-radius);
 
   &.highlight {
-    background: rgba(76, 175, 80, 0.1);
-    border-color: rgba(76, 175, 80, 0.3);
+    background: color-mix(in srgb, var(--color-success) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
   }
 
   mat-icon {
@@ -70,19 +70,9 @@
   }
 }
 
-.warning {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  margin-top: 1rem;
-  background: rgba(255, 152, 0, 0.1);
-  border-radius: var(--card-border-radius);
-  color: var(--color-warning);
-
-  mat-icon {
-    flex-shrink: 0;
-  }
+// Alert box comes from the global `.callout` primitive.
+.callout {
+  margin-top: var(--s2);
 }
 
 [mat-dialog-actions] {

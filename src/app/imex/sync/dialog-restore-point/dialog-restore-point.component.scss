@@ -25,19 +25,9 @@
   margin-bottom: 0.5rem;
 }
 
-.warning {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  background: rgba(255, 152, 0, 0.1);
-  border-radius: var(--card-border-radius);
-  color: var(--color-warning);
-
-  mat-icon {
-    flex-shrink: 0;
-  }
+// Alert box comes from the global `.callout` primitive.
+.callout {
+  margin-bottom: var(--s2);
 }
 
 .restore-points {
