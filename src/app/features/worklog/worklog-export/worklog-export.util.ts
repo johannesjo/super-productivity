@@ -19,6 +19,12 @@ import {
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
+const CSV_DELIMITER = ';';
+
+const escapeCsvField = (value: string | number | undefined): string => {
+  const field = value === undefined ? '' : String(value);
+  return /[;"\r\n]/.test(field) ? `"${field.replace(/"/g, '""')}"` : field;
+};
 
 /**
  * Depending on groupBy it gets a map of RowItems by groupKeys (date, task.id, date_task.id).
@@ -346,7 +352,9 @@ export const formatText = (
   rows: (string | number | undefined)[][],
 ): string => {
   let txt = '';
-  txt += headlineCols.join(';') + LINE_SEPARATOR;
-  txt += rows.map((cols) => cols.join(';')).join(LINE_SEPARATOR);
+  txt += headlineCols.map(escapeCsvField).join(CSV_DELIMITER) + LINE_SEPARATOR;
+  txt += rows
+    .map((cols) => cols.map(escapeCsvField).join(CSV_DELIMITER))
+    .join(LINE_SEPARATOR);
   return txt;
 };

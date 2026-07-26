@@ -109,6 +109,7 @@ export class TaskSummaryTablesComponent {
       restoreFocus: true,
       panelClass: 'big',
       data: {
+        isWorklogExport: true,
         projectId,
         rangeStart: new Date().setHours(0, 0, 0, 0),
         rangeEnd: new Date().setHours(23, 59, 59),

@@ -1,6 +1,6 @@
 import { WorkStartEnd } from 'src/app/features/work-context/work-context.model';
 import { WorklogGrouping } from '../worklog.model';
-import { createRows, formatRows } from './worklog-export.util';
+import { createRows, formatRows, formatText } from './worklog-export.util';
 import { DEFAULT_TASK, WorklogTask } from '../../tasks/task.model';
 import { DEFAULT_PROJECT } from '../../project/project.const';
 import { DEFAULT_TAG } from '../../tag/tag.const';
@@ -471,5 +471,27 @@ describe('worklog-export.util moment replacement', () => {
         expect(rounded).toBe(expected);
       });
     });
+  });
+});
+
+describe('formatText', () => {
+  it('escapes delimiters, quotes, and line breaks while preserving ordinary fields', () => {
+    const csv = formatText(
+      ['Date', 'Titles'],
+      [
+        ['2026-07-26', 'Plain task'],
+        ['2026-07-27', 'Client; follow-up'],
+        ['2026-07-28', 'She said "hello"'],
+        ['2026-07-29', 'Line one\r\nLine two'],
+      ],
+    );
+
+    expect(csv).toBe(
+      'Date;Titles\n' +
+        '2026-07-26;Plain task\n' +
+        '2026-07-27;"Client; follow-up"\n' +
+        '2026-07-28;"She said ""hello"""\n' +
+        '2026-07-29;"Line one\r\nLine two"',
+    );
   });
 });
