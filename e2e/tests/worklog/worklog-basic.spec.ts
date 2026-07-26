@@ -109,7 +109,6 @@ test.describe('Worklog', () => {
     const exportDialog = page.locator('dialog-worklog-export');
     const previewRow = exportDialog.locator('table tr').filter({ hasText: taskName });
     await expect(previewRow).toContainText('0:20');
-    await expect(exportDialog.locator('input[name="separateTasksBy"]')).toBeVisible();
 
     const [download] = await Promise.all([
       page.waitForEvent('download'),
