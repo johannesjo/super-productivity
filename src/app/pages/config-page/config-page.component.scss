@@ -1,10 +1,23 @@
 @use '../../../styles/_globals.scss' as *;
 
+// The routed page is the scroll container. Reserve the scrollbar track so
+// switching tabs (different content heights) can't shift centred content
+// sideways as the scrollbar appears and disappears.
+:host {
+  scrollbar-gutter: stable;
+}
+
 .page-settings {
   text-align: start;
 
   .settings-container {
     max-width: 100%;
+  }
+
+  .settings-search {
+    display: block;
+    max-width: var(--component-max-width);
+    margin: 0 auto var(--s2);
   }
 
   .settings-tabs {
@@ -181,6 +194,22 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--s);
+  }
+}
+
+// The autocomplete panel renders in an overlay outside this component, so it
+// can only be reached from here via ::ng-deep on its own panel class — same
+// approach as `.add-task-bar-panel`.
+::ng-deep .settings-search-panel {
+  .mat-mdc-option .mdc-list-item__primary-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-quarter);
+  }
+
+  .search-result__path {
+    font-size: var(--font-size-sm);
+    color: var(--text-color-muted);
   }
 }
 
