@@ -41,7 +41,9 @@ export class RepeatSectionTypeComponent extends FieldArrayType {
     const initialValue =
       this.field?.templateOptions?.defaultValue || (fn && fn(this.field));
 
-    // Clone so Formly does not push/mutate the shared props.defaultValue object.
+    // Formly's add() already clones, but clone() preserves observe() accessors
+    // on props.defaultValue. Rows now share storage and edits bleed (#8501).
+    // Spread materializes plain values one level deep. Fine for flat defaults.
     const valueToAdd =
       initialValue != null && typeof initialValue === 'object'
         ? { ...initialValue }

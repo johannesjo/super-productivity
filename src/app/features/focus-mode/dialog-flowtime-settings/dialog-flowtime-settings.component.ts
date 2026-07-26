@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { AbstractControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
@@ -66,9 +72,7 @@ export class DialogFlowtimeSettingsComponent {
 
   T = T;
   form = new FormGroup({});
-  // Plain object (not a signal): Formly FieldArray corrupts row values when
-  // `[model]="model()"` re-pushes a new binding on every keystroke.
-  model: FlowtimeFormModel = {};
+  model = signal<FlowtimeFormModel>({});
 
   private readonly _minMaxDurationValidatorMessage = this._translateService.instant(
     T.F.FOCUS_MODE.FLOWTIME_VALIDATION_MIN_MAX,
@@ -90,7 +94,7 @@ export class DialogFlowtimeSettingsComponent {
     return false;
   };
 
-  readonly fields: FormlyFieldConfig[] = [
+  readonly fields = computed(() => [
     {
       key: 'isBreakEnabled',
       type: 'checkbox',
@@ -146,13 +150,13 @@ export class DialogFlowtimeSettingsComponent {
     {
       key: 'breakRules',
       className: 'flowtime-break-rules',
+      description: T.F.FOCUS_MODE.FLOWTIME_BREAK_RULES_DESC,
       type: 'repeat',
       resetOnHide: false,
       expressions: {
         hide: (field: FormlyFieldConfig) => field.parent?.model?.breakMode !== 'rule',
       },
       props: {
-        description: T.F.FOCUS_MODE.FLOWTIME_BREAK_RULES_DESC,
         addText: T.F.FOCUS_MODE.FLOWTIME_ADD_BREAK_RULE,
         defaultValue: {
           minDuration: 0,
@@ -227,7 +231,7 @@ export class DialogFlowtimeSettingsComponent {
         ],
       },
     },
-  ];
+  ]);
 
   constructor() {
     const cfg = this._globalConfigService.cfg();
@@ -247,7 +251,7 @@ export class DialogFlowtimeSettingsComponent {
       }),
     );
 
-    this.model = {
+    this.model.set({
       ...flowtime,
       // Default to 'ratio' when not yet configured so the percentage field
       // shows by default (per UX: disabled but visible until enable is on).
@@ -256,7 +260,7 @@ export class DialogFlowtimeSettingsComponent {
         breakRulesInMinutes.length > 0
           ? breakRulesInMinutes
           : [{ ...this._defaultRuleInMinutes }],
-    };
+    });
   }
 
   save(): void {
@@ -264,7 +268,7 @@ export class DialogFlowtimeSettingsComponent {
       this.form.markAllAsTouched();
       return;
     }
-    const currentModel = this.model;
+    const currentModel = this.model();
     const flowtimeConfig: FlowtimeConfig = {
       isBreakEnabled: currentModel.isBreakEnabled,
       breakMode: currentModel.breakMode,
@@ -287,6 +291,7 @@ export class DialogFlowtimeSettingsComponent {
           };
         }),
     };
+
     this._globalConfigService.updateSection('flowtime', flowtimeConfig, true);
     this._dialogRef.close(flowtimeConfig);
   }

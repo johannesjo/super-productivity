@@ -58,7 +58,7 @@ describe('DialogFlowtimeSettingsComponent', () => {
   });
 
   it('should initialize with values from GlobalConfigService and convert ms to minutes', () => {
-    const model = component.model;
+    const model = component.model();
     expect(model.isBreakEnabled).toBe(true);
     expect(model.breakRules?.length).toBe(1);
     expect(model.breakRules![0].maxDuration).toBe(25); // 1500000 / 60000
@@ -79,13 +79,13 @@ describe('DialogFlowtimeSettingsComponent', () => {
     });
 
     it('should sort rules by minDuration', () => {
-      component.model = {
-        ...component.model,
+      component.model.set({
+        ...component.model(),
         breakRules: [
           { minDuration: 30, maxDuration: 60, breakDuration: 10 },
           { minDuration: 0, maxDuration: 30, breakDuration: 5 },
         ],
-      };
+      });
 
       component.save();
       const savedConfig =
@@ -94,77 +94,51 @@ describe('DialogFlowtimeSettingsComponent', () => {
       expect(savedConfig.breakRules[1].minDuration).toBe(30 * 60000);
     });
 
-    it('should create 4 rules that save correctly', () => {
-      component.model = {
-        ...component.model,
-        breakRules: [
-          { minDuration: 1, maxDuration: 1, breakDuration: 1 },
-          { minDuration: 2, maxDuration: 2, breakDuration: 2 },
-          { minDuration: 3, maxDuration: 6, breakDuration: 1 },
-          { minDuration: 4, maxDuration: 4, breakDuration: 4 },
-        ],
+    // Rows added via "Add" are seeded from `props.defaultValue`. Formly's clone()
+    // copies accessor descriptors verbatim, so without an own-value copy every
+    // added row proxies the same storage and edits bleed across rows (#8501).
+    it('keeps rows added via "Add" independent when edited', () => {
+      const clickAdd = (): void => {
+        fixture.nativeElement.querySelector('.footer button').click();
+        fixture.detectChanges();
       };
+      const inputs = (): HTMLInputElement[] =>
+        Array.from(fixture.nativeElement.querySelectorAll('.list-wrapper input'));
+
+      clickAdd();
+      clickAdd();
+      clickAdd();
+
+      const els = inputs();
+      expect(els.length).withContext('4 rows x 3 inputs').toBe(12);
+
+      [1, 2, 3, 4].forEach((n, row) => {
+        const rowOffset = row * 3;
+        [0, 1, 2].forEach((col) => {
+          const input = els[rowOffset + col];
+          input.value = String(n);
+          input.dispatchEvent(new Event('input'));
+        });
+        fixture.detectChanges();
+      });
 
       component.save();
-      const savedConfig =
-        globalConfigServiceMock.updateSection.calls.mostRecent().args[1];
-      expect(savedConfig.breakRules).toEqual([
-        { minDuration: 1 * 60000, maxDuration: 1 * 60000, breakDuration: 1 * 60000 },
-        { minDuration: 2 * 60000, maxDuration: 2 * 60000, breakDuration: 2 * 60000 },
-        { minDuration: 3 * 60000, maxDuration: 6 * 60000, breakDuration: 1 * 60000 },
-        { minDuration: 4 * 60000, maxDuration: 4 * 60000, breakDuration: 4 * 60000 },
-      ]);
-    });
-    it('should save 4 rules edited through form controls (repro form/model desync)', () => {
-      const rulesCtrl = (): any => component.form.get('breakRules');
-      const expectedInMinutes = [
-        { minDuration: 1, maxDuration: 1, breakDuration: 1 },
-        { minDuration: 2, maxDuration: 2, breakDuration: 2 },
-        { minDuration: 3, maxDuration: 6, breakDuration: 1 },
-        { minDuration: 4, maxDuration: 4, breakDuration: 4 },
-      ];
-      // Setup only: seed 4 rows so the FormArray exists (like clicking "Add" 3 times).
-      // Do NOT put the target values here — those come from form edits below.
-      component.model = {
-        ...component.model,
-        breakRules: expectedInMinutes.map(() => ({
-          minDuration: 0,
-          maxDuration: 25,
-          breakDuration: 5,
-        })),
-      };
-      fixture.detectChanges();
-      // Drive edits the way a user would: through form controls only.
-      expectedInMinutes.forEach((rule, i) => {
-        rulesCtrl().at(i).get('minDuration').setValue(rule.minDuration);
-        rulesCtrl().at(i).get('maxDuration').setValue(rule.maxDuration);
-        rulesCtrl().at(i).get('breakDuration').setValue(rule.breakDuration);
-      });
-      fixture.detectChanges();
-      // Form should reflect what we typed.
-      expect(JSON.stringify(rulesCtrl().value))
-        .withContext('form breakRules before save')
-        .toEqual(JSON.stringify(expectedInMinutes));
-      // If this fails, modelChange never synced repeat edits into the signal.
-      expect(JSON.stringify(component.model.breakRules))
-        .withContext('model breakRules before save (should match form)')
-        .toEqual(JSON.stringify(expectedInMinutes));
-      component.save();
-      const savedConfig =
-        globalConfigServiceMock.updateSection.calls.mostRecent().args[1];
-      expect(savedConfig.breakRules).toEqual([
-        { minDuration: 1 * 60000, maxDuration: 1 * 60000, breakDuration: 1 * 60000 },
-        { minDuration: 2 * 60000, maxDuration: 2 * 60000, breakDuration: 2 * 60000 },
-        { minDuration: 3 * 60000, maxDuration: 6 * 60000, breakDuration: 1 * 60000 },
-        { minDuration: 4 * 60000, maxDuration: 4 * 60000, breakDuration: 4 * 60000 },
+
+      expect(
+        globalConfigServiceMock.updateSection.calls.mostRecent().args[1].breakRules,
+      ).toEqual([
+        { minDuration: 60000, maxDuration: 60000, breakDuration: 60000 },
+        { minDuration: 120000, maxDuration: 120000, breakDuration: 120000 },
+        { minDuration: 180000, maxDuration: 180000, breakDuration: 180000 },
+        { minDuration: 240000, maxDuration: 240000, breakDuration: 240000 },
       ]);
     });
 
     it('should clamp maxDuration to minDuration if invalid', () => {
-      component.model = {
-        ...component.model,
+      component.model.set({
+        ...component.model(),
         breakRules: [{ minDuration: 30, maxDuration: 20, breakDuration: 5 }],
-      };
+      });
 
       component.save();
       const savedConfig =
@@ -173,10 +147,10 @@ describe('DialogFlowtimeSettingsComponent', () => {
     });
 
     it('should save empty maxDuration as null for open-ended rules', () => {
-      component.model = {
-        ...component.model,
+      component.model.set({
+        ...component.model(),
         breakRules: [{ minDuration: 90, maxDuration: null, breakDuration: 15 }],
-      };
+      });
 
       component.save();
       const savedConfig =
@@ -195,7 +169,7 @@ describe('DialogFlowtimeSettingsComponent', () => {
   // This assertion is deterministic (no async hide settling) and fails fast.
   describe('field config opts out of hide-reset at every level', () => {
     it('sets resetOnHide:false on every hideable break field', () => {
-      const fields = component.fields as any[];
+      const fields = component.fields() as any[];
       const byKey = (key: string): any => fields.find((f) => f.key === key);
 
       expect(byKey('breakPercentage').resetOnHide)
@@ -229,28 +203,28 @@ describe('DialogFlowtimeSettingsComponent', () => {
     const rulesCtrl = (): any => component.form.get('breakRules');
 
     it('preserves a single rule across Rule -> Ratio -> Rule', () => {
-      const expected = JSON.stringify(component.model.breakRules);
+      const expected = JSON.stringify(component.model().breakRules);
       switchMode('ratio');
       switchMode('rule');
-      expect(JSON.stringify(component.model.breakRules))
+      expect(JSON.stringify(component.model().breakRules))
         .withContext('model')
         .toEqual(expected);
       expect(JSON.stringify(rulesCtrl().value)).withContext('form').toEqual(expected);
     });
 
     it('preserves two rules across the round-trip', () => {
-      component.model = {
-        ...component.model,
+      component.model.set({
+        ...component.model(),
         breakRules: [
           { minDuration: 0, maxDuration: 25, breakDuration: 5 },
           { minDuration: 25, maxDuration: 60, breakDuration: 10 },
         ],
-      };
+      });
       fixture.detectChanges();
-      const expected = JSON.stringify(component.model.breakRules);
+      const expected = JSON.stringify(component.model().breakRules);
       switchMode('ratio');
       switchMode('rule');
-      expect(JSON.stringify(component.model.breakRules))
+      expect(JSON.stringify(component.model().breakRules))
         .withContext('model with two rules')
         .toEqual(expected);
     });
