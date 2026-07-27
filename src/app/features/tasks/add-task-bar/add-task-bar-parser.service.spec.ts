@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
+import { selectAllSections } from '../../section/store/section.selectors';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
@@ -29,6 +31,7 @@ describe('AddTaskBarParserService', () => {
       'clearRepeatSetting',
       'updateSyntaxHighlight',
       'updateRemindOption',
+      'updateSectionId',
       'isAutoDetected',
       'state',
       'inputTxt',
@@ -57,6 +60,9 @@ describe('AddTaskBarParserService', () => {
       providers: [
         AddTaskBarParserService,
         { provide: AddTaskBarStateService, useValue: mockStateServiceSpy },
+        provideMockStore({
+          selectors: [{ selector: selectAllSections, value: [] }],
+        }),
       ],
     });
 
