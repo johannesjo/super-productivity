@@ -51,7 +51,7 @@ export const AUTO_SWITCH_LNGS: LanguageCode[] = [
   LanguageCode.tr,
 ];
 
-export const RTL_LANGUAGES: LanguageCode[] = [LanguageCode.ar, LanguageCode.fa];
+export const RTL_LANGUAGES: LanguageCode[] = [LanguageCode.ar, LanguageCode.fa, LanguageCode.he];
 
 /**
  * This is a specification used to date-time localization
