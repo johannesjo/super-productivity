@@ -1,5 +1,7 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { validateMigrationRegistry } from '../src/migrate';
 import { MIGRATIONS } from '../src/migrations';
@@ -29,6 +31,115 @@ interface CompatibilityAssessment {
   evidence: SharedSchemaEvidence | ReleasedOracleEvidence;
 }
 
+const RELEASE_TAG_PATTERN = /^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
+const SHA1_PATTERN = /^(?!0{40}$)[0-9a-f]{40}$/;
+const ALL_ZERO_SHA1 = '0'.repeat(40);
+
+const runGit = (repositoryRoot: string, args: string[]): string =>
+  execFileSync('git', ['-C', repositoryRoot, ...args], {
+    encoding: 'utf8',
+    env: { ...process.env, GIT_NO_LAZY_FETCH: '1' },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+
+const tryGit = (repositoryRoot: string, args: string[]): string | undefined => {
+  try {
+    return runGit(repositoryRoot, args);
+  } catch {
+    return undefined;
+  }
+};
+
+const validateReleasedOracleProvenance = (
+  cohort: ReleasedOracleEvidence['cohorts'][number],
+  repositoryRoot: string,
+): string[] => {
+  const errors: string[] = [];
+  const isShallow =
+    tryGit(repositoryRoot, ['rev-parse', '--is-shallow-repository']) === 'true';
+  const unavailableHint = isShallow
+    ? ' (the shallow checkout does not contain the pinned provenance)'
+    : '';
+  const tagCommit = RELEASE_TAG_PATTERN.test(cohort.releaseTag)
+    ? tryGit(repositoryRoot, [
+        'rev-parse',
+        '--verify',
+        `refs/tags/${cohort.releaseTag}^{commit}`,
+      ])
+    : undefined;
+  const commitType = SHA1_PATTERN.test(cohort.commitSha)
+    ? tryGit(repositoryRoot, ['cat-file', '-t', cohort.commitSha])
+    : undefined;
+  const sourceBlob =
+    SHA1_PATTERN.test(cohort.commitSha) && cohort.sourcePath.length > 0
+      ? tryGit(repositoryRoot, [
+          'rev-parse',
+          '--verify',
+          `${cohort.commitSha}:${cohort.sourcePath}`,
+        ])
+      : undefined;
+  const sourceBlobType = sourceBlob
+    ? tryGit(repositoryRoot, ['cat-file', '-t', sourceBlob])
+    : undefined;
+
+  if (tagCommit !== cohort.commitSha) {
+    errors.push(
+      `Invalid or unavailable release tag pin: ${cohort.releaseTag}${unavailableHint}`,
+    );
+  }
+  if (commitType !== 'commit') {
+    errors.push(
+      `Invalid or unavailable commit pin: ${cohort.commitSha}${unavailableHint}`,
+    );
+  }
+  if (
+    !SHA1_PATTERN.test(cohort.sourceBlobSha) ||
+    sourceBlob !== cohort.sourceBlobSha ||
+    sourceBlobType !== 'blob'
+  ) {
+    errors.push(
+      `Invalid or unavailable source blob pin: ${cohort.sourceBlobSha}${unavailableHint}`,
+    );
+  }
+
+  return errors;
+};
+
+const withTestGitRepository = (
+  assertion: (
+    repositoryRoot: string,
+    cohort: ReleasedOracleEvidence['cohorts'][number],
+  ) => void,
+): void => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'released-oracle-provenance-'));
+  try {
+    runGit(repositoryRoot, ['init', '--quiet']);
+    runGit(repositoryRoot, ['config', 'user.name', 'Compatibility Test']);
+    runGit(repositoryRoot, ['config', 'user.email', 'compatibility@test.invalid']);
+    writeFileSync(
+      join(repositoryRoot, 'released-source.ts'),
+      'export const value = 1;\n',
+    );
+    runGit(repositoryRoot, ['add', 'released-source.ts']);
+    runGit(repositoryRoot, ['commit', '--quiet', '-m', 'released source']);
+    runGit(repositoryRoot, ['tag', '-a', 'v1.2.3', '-m', 'v1.2.3']);
+
+    const commitSha = runGit(repositoryRoot, ['rev-parse', 'HEAD']);
+    const sourceBlobSha = runGit(repositoryRoot, [
+      'rev-parse',
+      `${commitSha}:released-source.ts`,
+    ]);
+    assertion(repositoryRoot, {
+      releaseTag: 'v1.2.3',
+      commitSha,
+      sourcePath: 'released-source.ts',
+      sourceBlobSha,
+    });
+  } finally {
+    rmSync(repositoryRoot, { recursive: true, force: true });
+  }
+};
+
 /**
  * Schemas through v4 were reviewed historically, before this evidence gate.
  * This does not claim that the current-client forward-schema E2E exercises a
@@ -50,6 +161,44 @@ const expectExistingSpec = (specPath: string): void => {
 };
 
 describe('released-client compatibility policy', () => {
+  it('accepts a tag, commit, source path, and blob from one real Git provenance chain', () => {
+    withTestGitRepository((repositoryRoot, cohort) => {
+      expect(validateReleasedOracleProvenance(cohort, repositoryRoot)).toEqual([]);
+    });
+  });
+
+  it('rejects fake and all-zero release provenance pins', () => {
+    withTestGitRepository((repositoryRoot, cohort) => {
+      const tamperedPins: readonly [ReleasedOracleEvidence['cohorts'][number], string][] =
+        [
+          [{ ...cohort, releaseTag: 'v9.9.9' }, 'release tag'],
+          [{ ...cohort, commitSha: '1'.repeat(40) }, 'commit'],
+          [{ ...cohort, sourceBlobSha: '2'.repeat(40) }, 'source blob'],
+        ];
+
+      for (const [pins, expectedError] of tamperedPins) {
+        expect(validateReleasedOracleProvenance(pins, repositoryRoot)).toEqual(
+          expect.arrayContaining([expect.stringContaining(expectedError)]),
+        );
+      }
+
+      const allZeroErrors = validateReleasedOracleProvenance(
+        {
+          ...cohort,
+          commitSha: ALL_ZERO_SHA1,
+          sourceBlobSha: ALL_ZERO_SHA1,
+        },
+        repositoryRoot,
+      );
+      expect(allZeroErrors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('commit'),
+          expect.stringContaining('source blob'),
+        ]),
+      );
+    });
+  });
+
   it('requires an explicit assessment for every schema after the audited baseline', () => {
     expect(validateMigrationRegistry()).toEqual([]);
     expect(CURRENT_SCHEMA_VERSION).toBe(MIGRATIONS.at(-1)?.toVersion);
@@ -84,11 +233,9 @@ describe('released-client compatibility policy', () => {
 
       expectExistingSpec(assessment.evidence.oracleSpecPath);
       expect(assessment.evidence.cohorts.length).toBeGreaterThan(0);
+      const repositoryRoot = runGit(process.cwd(), ['rev-parse', '--show-toplevel']);
       for (const cohort of assessment.evidence.cohorts) {
-        expect(cohort.releaseTag).toMatch(/^v\d+\.\d+\.\d+/);
-        expect(cohort.commitSha).toMatch(/^[0-9a-f]{40}$/);
-        expect(cohort.sourcePath.length).toBeGreaterThan(0);
-        expect(cohort.sourceBlobSha).toMatch(/^[0-9a-f]{40}$/);
+        expect(validateReleasedOracleProvenance(cohort, repositoryRoot)).toEqual([]);
       }
     }
   });

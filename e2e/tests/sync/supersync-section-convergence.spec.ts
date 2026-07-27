@@ -11,11 +11,14 @@ import {
 interface SectionSnapshot {
   leftTitles: string[];
   rightTitles: string[];
+  thirdTitles: string[];
   noSectionTitles: string[];
   todayTitles: string[];
   todaySectionIds: string[];
   movingSectionMemberships: number;
   movingTodayOccurrences: number;
+  placementSectionMemberships: number;
+  placementTodayOccurrences: number;
 }
 
 interface PersistentAction extends Record<string, unknown> {
@@ -85,10 +88,12 @@ const getSectionSnapshot = async (
   page: Page,
   leftSectionId: string,
   rightSectionId: string,
+  thirdSectionId: string,
   movingTaskId: string,
+  placementTaskId: string,
 ): Promise<SectionSnapshot> =>
   page.evaluate(
-    ({ leftId, rightId, movingId }) => {
+    ({ leftId, rightId, thirdId, movingId, placementId }) => {
       type TaskLike = { id: string; title: string };
       type SectionLike = { id: string; contextId: string; taskIds: string[] };
       type TagLike = { taskIds: string[] };
@@ -135,6 +140,7 @@ const getSectionSnapshot = async (
       return {
         leftTitles: titlesFor(sections[leftId]?.taskIds ?? []),
         rightTitles: titlesFor(sections[rightId]?.taskIds ?? []),
+        thirdTitles: titlesFor(sections[thirdId]?.taskIds ?? []),
         noSectionTitles: titlesFor(
           todayTaskIds.filter((id) => !sectionedTaskIds.has(id)),
         ),
@@ -144,12 +150,18 @@ const getSectionSnapshot = async (
           section.taskIds.includes(movingId),
         ).length,
         movingTodayOccurrences: todayTaskIds.filter((id) => id === movingId).length,
+        placementSectionMemberships: todaySections.filter((section) =>
+          section.taskIds.includes(placementId),
+        ).length,
+        placementTodayOccurrences: todayTaskIds.filter((id) => id === placementId).length,
       };
     },
     {
       leftId: leftSectionId,
       rightId: rightSectionId,
+      thirdId: thirdSectionId,
       movingId: movingTaskId,
+      placementId: placementTaskId,
     },
   );
 
@@ -163,7 +175,9 @@ test.describe('@supersync Section cross-client convergence', () => {
     const appUrl = baseURL || 'http://localhost:4242';
     const leftSectionId = `section-left-${testRunId}`;
     const rightSectionId = `section-right-${testRunId}`;
+    const thirdSectionId = `section-third-${testRunId}`;
     const movingTitle = `A-${testRunId}-Moving`;
+    const placementTitle = `A-${testRunId}-Placement`;
     const leftAnchorTitle = `A-${testRunId}-Left anchor`;
     const rightAnchorTitle = `A-${testRunId}-Right anchor`;
     const mainAnchorTitle = `A-${testRunId}-Main anchor`;
@@ -183,21 +197,25 @@ test.describe('@supersync Section cross-client convergence', () => {
       await clientA.workView.addTask('Left anchor');
       await clientA.workView.addTask('Moving');
       await clientA.workView.addTask('Right anchor');
+      await clientA.workView.addTask('Placement');
 
       const taskIdsByTitle = await getTaskIdsByTitle(clientA.page, [
         mainAnchorTitle,
         leftAnchorTitle,
         movingTitle,
         rightAnchorTitle,
+        placementTitle,
       ]);
       const mainAnchorId = requireTaskId(taskIdsByTitle, mainAnchorTitle);
       const leftAnchorId = requireTaskId(taskIdsByTitle, leftAnchorTitle);
       const movingTaskId = requireTaskId(taskIdsByTitle, movingTitle);
       const rightAnchorId = requireTaskId(taskIdsByTitle, rightAnchorTitle);
+      const placementTaskId = requireTaskId(taskIdsByTitle, placementTitle);
 
       for (const [id, title] of [
         [leftSectionId, 'Left'],
         [rightSectionId, 'Right'],
+        [thirdSectionId, 'Third'],
       ]) {
         await dispatchPersistentAction(clientA.page, {
           type: '[Section] Add Section',
@@ -250,18 +268,29 @@ test.describe('@supersync Section cross-client convergence', () => {
       const seededSnapshot: SectionSnapshot = {
         leftTitles: [leftAnchorTitle, movingTitle],
         rightTitles: [rightAnchorTitle],
-        noSectionTitles: [mainAnchorTitle],
-        todayTitles: [rightAnchorTitle, movingTitle, leftAnchorTitle, mainAnchorTitle],
-        todaySectionIds: [leftSectionId, rightSectionId],
+        thirdTitles: [],
+        noSectionTitles: [placementTitle, mainAnchorTitle],
+        todayTitles: [
+          placementTitle,
+          rightAnchorTitle,
+          movingTitle,
+          leftAnchorTitle,
+          mainAnchorTitle,
+        ],
+        todaySectionIds: [leftSectionId, rightSectionId, thirdSectionId],
         movingSectionMemberships: 1,
         movingTodayOccurrences: 1,
+        placementSectionMemberships: 0,
+        placementTodayOccurrences: 1,
       };
       expect(
         await getSectionSnapshot(
           clientA.page,
           leftSectionId,
           rightSectionId,
+          thirdSectionId,
           movingTaskId,
+          placementTaskId,
         ),
       ).toEqual(seededSnapshot);
       expect(
@@ -269,7 +298,9 @@ test.describe('@supersync Section cross-client convergence', () => {
           clientB.page,
           leftSectionId,
           rightSectionId,
+          thirdSectionId,
           movingTaskId,
+          placementTaskId,
         ),
       ).toEqual(seededSnapshot);
 
@@ -283,6 +314,19 @@ test.describe('@supersync Section cross-client convergence', () => {
           isPersistent: true,
           entityType: 'SECTION',
           entityIds: [leftSectionId, rightSectionId],
+          opType: 'MOV',
+        },
+      });
+      await dispatchPersistentAction(clientA.page, {
+        type: '[Section] Add Task to Section',
+        sectionId: thirdSectionId,
+        taskId: placementTaskId,
+        afterTaskId: null,
+        sourceSectionId: null,
+        meta: {
+          isPersistent: true,
+          entityType: 'SECTION',
+          entityId: thirdSectionId,
           opType: 'MOV',
         },
       });
@@ -304,11 +348,11 @@ test.describe('@supersync Section cross-client convergence', () => {
       await dispatchPersistentAction(clientB.page, {
         type: '[Section] Update Section Order',
         contextId: 'TODAY',
-        ids: [rightSectionId, leftSectionId],
+        ids: [rightSectionId, thirdSectionId, leftSectionId],
         meta: {
           isPersistent: true,
           entityType: 'SECTION',
-          entityIds: [rightSectionId, leftSectionId],
+          entityIds: [rightSectionId, thirdSectionId, leftSectionId],
           opType: 'MOV',
           isBulk: true,
         },
@@ -322,23 +366,36 @@ test.describe('@supersync Section cross-client convergence', () => {
       const convergedSnapshot: SectionSnapshot = {
         leftTitles: [leftAnchorTitle],
         rightTitles: [rightAnchorTitle, movingTitle],
+        thirdTitles: [placementTitle],
         noSectionTitles: [mainAnchorTitle],
-        todayTitles: [rightAnchorTitle, leftAnchorTitle, mainAnchorTitle, movingTitle],
-        todaySectionIds: [rightSectionId, leftSectionId],
+        todayTitles: [
+          placementTitle,
+          rightAnchorTitle,
+          leftAnchorTitle,
+          mainAnchorTitle,
+          movingTitle,
+        ],
+        todaySectionIds: [rightSectionId, thirdSectionId, leftSectionId],
         movingSectionMemberships: 1,
         movingTodayOccurrences: 1,
+        placementSectionMemberships: 1,
+        placementTodayOccurrences: 1,
       };
       const convergedClientASnapshot = await getSectionSnapshot(
         clientA.page,
         leftSectionId,
         rightSectionId,
+        thirdSectionId,
         movingTaskId,
+        placementTaskId,
       );
       const convergedClientBSnapshot = await getSectionSnapshot(
         clientB.page,
         leftSectionId,
         rightSectionId,
+        thirdSectionId,
         movingTaskId,
+        placementTaskId,
       );
       expect({
         clientA: convergedClientASnapshot,
@@ -363,7 +420,9 @@ test.describe('@supersync Section cross-client convergence', () => {
           clientA.page,
           leftSectionId,
           rightSectionId,
+          thirdSectionId,
           movingTaskId,
+          placementTaskId,
         ),
       ).toEqual(convergedSnapshot);
       expect(
@@ -371,7 +430,9 @@ test.describe('@supersync Section cross-client convergence', () => {
           clientB.page,
           leftSectionId,
           rightSectionId,
+          thirdSectionId,
           movingTaskId,
+          placementTaskId,
         ),
       ).toEqual(convergedSnapshot);
 
@@ -385,7 +446,9 @@ test.describe('@supersync Section cross-client convergence', () => {
           clientC.page,
           leftSectionId,
           rightSectionId,
+          thirdSectionId,
           movingTaskId,
+          placementTaskId,
         ),
       ).toEqual(convergedSnapshot);
       await expect(

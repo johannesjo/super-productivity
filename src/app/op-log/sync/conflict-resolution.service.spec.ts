@@ -6339,18 +6339,25 @@ describe('ConflictResolutionService', () => {
     const createSectionMoveOp = (
       id: string,
       clientId: string,
-      sourceSectionId = 'section-left',
+      sourceSectionId: string | null = 'section-left',
       taskId = 'task-1',
+      destinationSectionId = 'section-right',
     ): Operation => ({
       ...createMockOp(id, clientId),
       actionType: ActionType.SECTION_ADD_TASK,
       opType: OpType.Move,
       entityType: 'SECTION',
-      entityId: sourceSectionId,
-      entityIds: [sourceSectionId, 'section-right'],
+      entityId:
+        sourceSectionId && sourceSectionId !== destinationSectionId
+          ? sourceSectionId
+          : destinationSectionId,
+      entityIds:
+        sourceSectionId && sourceSectionId !== destinationSectionId
+          ? [sourceSectionId, destinationSectionId]
+          : [destinationSectionId],
       payload: {
         actionPayload: {
-          sectionId: 'section-right',
+          sectionId: destinationSectionId,
           taskId,
           afterTaskId: 'right-anchor',
           sourceSectionId,
@@ -6670,6 +6677,58 @@ describe('ConflictResolutionService', () => {
       it(`should keep commuting ${description} non-conflicting`, async () => {
         const localPendingOpsByEntity = new Map<string, Operation[]>([
           ['SECTION:section-left', [localOp]],
+        ]);
+
+        const result = await service.checkOpForConflicts(
+          remoteOp,
+          buildCtx({ localPendingOpsByEntity }),
+        );
+
+        expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+      });
+    });
+
+    [
+      {
+        description: 'null-source placement against remote order',
+        remoteOp: createSectionOrderOp('remote-order-null-source', 'clientB'),
+        localOp: createSectionMoveOp('local-placement-null-source', 'clientA', null),
+        entityKey: 'SECTION:section-right',
+      },
+      {
+        description: 'remote null-source placement against local order',
+        remoteOp: createSectionMoveOp('remote-placement-null-source', 'clientB', null),
+        localOp: createSectionOrderOp('local-order-null-source', 'clientA'),
+        entityKey: 'SECTION:section-right',
+      },
+      {
+        description: 'same-section placement against remote order',
+        remoteOp: createSectionOrderOp('remote-order-same-section', 'clientB'),
+        localOp: createSectionMoveOp(
+          'local-placement-same-section',
+          'clientA',
+          'section-left',
+          'task-1',
+          'section-left',
+        ),
+        entityKey: 'SECTION:section-left',
+      },
+      {
+        description: 'remote same-section placement against local order',
+        remoteOp: createSectionMoveOp(
+          'remote-placement-same-section',
+          'clientB',
+          'section-left',
+          'task-1',
+          'section-left',
+        ),
+        localOp: createSectionOrderOp('local-order-same-section', 'clientA'),
+        entityKey: 'SECTION:section-left',
+      },
+    ].forEach(({ description, remoteOp, localOp, entityKey }) => {
+      it(`should keep commuting ${description} non-conflicting`, async () => {
+        const localPendingOpsByEntity = new Map<string, Operation[]>([
+          [entityKey, [localOp]],
         ]);
 
         const result = await service.checkOpForConflicts(

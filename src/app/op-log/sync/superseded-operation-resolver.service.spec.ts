@@ -988,6 +988,13 @@ describe('SupersededOperationResolverService', () => {
         vectorClock: { original: 4 },
         timestamp: 5000,
       };
+      const unrelatedPendingTaskOp = createMockOperation(
+        'unrelated-pending-task',
+        'TASK',
+        'task-unrelated',
+        { original: 4 },
+        5000,
+      );
 
       sectionOps.forEach(({ description, op, remoteOp }) => {
         it(`should causally re-create a superseded ${description}`, async () => {
@@ -1130,6 +1137,99 @@ describe('SupersededOperationResolverService', () => {
         const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
           .args[0] as Operation;
         expect(replacement.actionType).not.toBe(ActionType.SECTION_ADD_TASK);
+      });
+
+      it('should defer an older move when a later overlapping move is already synced', async () => {
+        const localMoveOp = sectionOps[0].op;
+        const laterOverlappingMoveOp: Operation = {
+          ...localMoveOp,
+          id: 'later-synced-section-move',
+          entityId: 'section-right',
+          entityIds: ['section-right', 'section-third'],
+          payload: {
+            actionPayload: {
+              sectionId: 'section-third',
+              taskId: 'task-1',
+              afterTaskId: 'third-anchor',
+              sourceSectionId: 'section-right',
+            },
+            entityChanges: [],
+          },
+          vectorClock: { original: 4 },
+          timestamp: 1500,
+        };
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({
+          original: 4,
+          remote: 4,
+        });
+        mockOpLogStore.getUnsynced.and.resolveTo(asPendingEntries(localMoveOp));
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: localMoveOp,
+            appliedAt: 1,
+            source: 'local',
+          },
+          {
+            seq: 2,
+            op: laterOverlappingMoveOp,
+            appliedAt: 2,
+            source: 'local',
+            syncedAt: 2,
+          },
+          {
+            seq: 3,
+            op: remoteRemoveOp,
+            appliedAt: 3,
+            source: 'remote',
+            syncedAt: 3,
+            applicationStatus: 'applied',
+          },
+        ]);
+
+        await expectAsync(
+          service.resolveSupersededLocalOps([
+            {
+              opId: localMoveOp.id,
+              op: localMoveOp,
+              existingClock: remoteRemoveOp.vectorClock,
+            },
+          ]),
+        ).toBeRejectedWithError(/Deferring causal SECTION replay/);
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+        expect(mockOpLogStore.appendWithVectorClockOverwrite).not.toHaveBeenCalled();
+      });
+
+      it('should ignore an unrelated pending non-SECTION op for safe replay', async () => {
+        const localMoveOp = sectionOps[0].op;
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
+        mockOpLogStore.getUnsynced.and.resolveTo(
+          asPendingEntries(localMoveOp, unrelatedPendingTaskOp),
+        );
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: remoteRemoveOp,
+            appliedAt: 1,
+            source: 'remote',
+            syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+        ]);
+
+        const result = await service.resolveSupersededLocalOps([
+          {
+            opId: localMoveOp.id,
+            op: localMoveOp,
+            existingClock: remoteRemoveOp.vectorClock,
+          },
+        ]);
+
+        expect(result).toBe(1);
+        expect(mockOpLogStore.markRejected).toHaveBeenCalledOnceWith([localMoveOp.id]);
+        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
+          .args[0] as Operation;
+        expect(replacement.actionType).toBe(ActionType.SECTION_ADD_TASK);
       });
 
       it('should defer instead of using LWW when a new pending op appeared before resolution', async () => {

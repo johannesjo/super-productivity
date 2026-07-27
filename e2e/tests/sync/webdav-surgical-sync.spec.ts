@@ -15,7 +15,16 @@ import { waitForAppReady, waitForStatePersistence } from '../../utils/waits';
 interface SurgicalOpsFile {
   version: number;
   syncVersion: number;
-  recentOps: Array<{ id: string }>;
+  recentOps: Array<{
+    id: string;
+    p?: {
+      actionPayload?: {
+        task?: {
+          title?: string | null;
+        };
+      };
+    };
+  }>;
   snapshotRef: {
     rev?: string;
   };
@@ -301,6 +310,7 @@ test.describe('@webdav @surgical WebDAV Surgical sync', () => {
 
     let migratingClient: Awaited<ReturnType<typeof setupSyncClient>> | null = null;
     let legacyClient: Awaited<ReturnType<typeof setupSyncClient>> | null = null;
+    let freshSplitClient: Awaited<ReturnType<typeof setupSyncClient>> | null = null;
     let legacyRequestListener: ((webDavRequest: Request) => void) | null = null;
     const migrationRoute = `**/${folderName}/DEV/**`;
 
@@ -552,9 +562,17 @@ test.describe('@webdav @surgical WebDAV Surgical sync', () => {
       expect(recoveredBackup).toMatchObject({ version: 3, format: 'split' });
       expect(recoveredOps.migration).toBeUndefined();
       expect(recoveredOps.syncVersion).toBeGreaterThan(legacySyncVersion);
-      expect(
-        recoveredOps.recentOps.filter((operation) => operation.id === pendingOperationId),
-      ).toHaveLength(1);
+      const recoveredPendingOperations = recoveredOps.recentOps.filter(
+        (operation) => operation.id === pendingOperationId,
+      );
+      expect(recoveredPendingOperations).toHaveLength(1);
+      expect(recoveredPendingOperations[0]?.p).toMatchObject({
+        actionPayload: {
+          task: {
+            title: pendingTask,
+          },
+        },
+      });
       const recoveredLocalOperation = await getLocalOperationState(
         migratingClient.page,
         pendingOperationId,
@@ -568,6 +586,23 @@ test.describe('@webdav @surgical WebDAV Surgical sync', () => {
       });
       expect(JSON.stringify(recoveredState.state)).toContain(firstLegacyTask);
       expect(JSON.stringify(recoveredState.state)).toContain(secondLegacyTask);
+      expect(JSON.stringify(recoveredState.state)).not.toContain(pendingTask);
+
+      // Every fault stage reaches the same healed split files. Exercise a fresh
+      // baseline-plus-tail download once without multiplying this slow setup by five.
+      if (scenario.stage === 'final-marker') {
+        freshSplitClient = await setupSyncClient(browser, appUrl);
+        const freshSync = new SyncPage(freshSplitClient.page);
+        await freshSync.setupWebdavSync(splitConfig);
+        await freshSync.triggerSync();
+        await waitForSyncComplete(freshSplitClient.page, freshSync);
+
+        for (const taskTitle of [firstLegacyTask, secondLegacyTask, pendingTask]) {
+          await expect(
+            freshSplitClient.page.locator('task', { hasText: taskTitle }),
+          ).toHaveCount(1);
+        }
+      }
     } finally {
       if (migratingClient) {
         await migratingClient.page.unroute(migrationRoute).catch(() => {});
@@ -575,7 +610,11 @@ test.describe('@webdav @surgical WebDAV Surgical sync', () => {
       if (legacyClient && legacyRequestListener) {
         legacyClient.page.off('request', legacyRequestListener);
       }
-      await closeContextsSafely(migratingClient?.context, legacyClient?.context);
+      await closeContextsSafely(
+        migratingClient?.context,
+        legacyClient?.context,
+        freshSplitClient?.context,
+      );
     }
   };
 

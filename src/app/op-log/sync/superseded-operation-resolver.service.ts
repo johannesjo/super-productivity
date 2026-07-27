@@ -28,7 +28,12 @@ import { T } from '../../t.const';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
 import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
-import { areCommutingSectionOperations } from './section-conflict-commutativity.util';
+import {
+  areCommutingSectionOperations,
+  canReorderSectionTransition,
+  getSectionReplayScopeKeys,
+} from './section-conflict-commutativity.util';
+import { getOpEntityIds } from '../util/get-op-entity-ids.util';
 
 type SupersededOperation = {
   opId: string;
@@ -38,21 +43,86 @@ type SupersededOperation = {
 
 type SectionCausalReplayDecision = 'replay' | 'fallback' | 'defer';
 
+interface SectionCausalReplayContext {
+  retainedByEntityClock: Map<string, OperationLogEntry[]>;
+  syncedLocalByScope: Map<string, OperationLogEntry[]>;
+  unscopedSyncedLocal: OperationLogEntry[];
+  pendingEntries: OperationLogEntry[];
+  pendingById: Map<string, OperationLogEntry>;
+}
+
 const CAUSALLY_REPLAYABLE_SECTION_ACTIONS = new Set<ActionType>([
   ActionType.SECTION_UPDATE_ORDER,
   ActionType.SECTION_ADD_TASK,
   ActionType.SECTION_REMOVE_TASK,
 ]);
 
-const haveStructurallyEqualClocks = (
-  first: VectorClock,
-  second: VectorClock,
-): boolean => {
-  const firstEntries = Object.entries(first);
-  return (
-    firstEntries.length === Object.keys(second).length &&
-    firstEntries.every(([clientId, counter]) => second[clientId] === counter)
-  );
+const getEntityClockIndexKey = (
+  entityType: Operation['entityType'],
+  entityId: string,
+  vectorClock: VectorClock,
+): string =>
+  JSON.stringify([
+    entityType,
+    entityId,
+    Object.entries(vectorClock).sort(([first], [second]) => first.localeCompare(second)),
+  ]);
+
+const addToIndex = (
+  index: Map<string, OperationLogEntry[]>,
+  key: string,
+  entry: OperationLogEntry,
+): void => {
+  const entries = index.get(key);
+  if (entries) {
+    entries.push(entry);
+  } else {
+    index.set(key, [entry]);
+  }
+};
+
+const buildSectionCausalReplayContext = (
+  retainedEntries: OperationLogEntry[],
+  pendingEntries: OperationLogEntry[],
+): SectionCausalReplayContext => {
+  const retainedByEntityClock = new Map<string, OperationLogEntry[]>();
+  const syncedLocalByScope = new Map<string, OperationLogEntry[]>();
+  const unscopedSyncedLocal: OperationLogEntry[] = [];
+
+  for (const entry of retainedEntries) {
+    for (const entityId of getOpEntityIds(entry.op)) {
+      addToIndex(
+        retainedByEntityClock,
+        getEntityClockIndexKey(entry.op.entityType, entityId, entry.op.vectorClock),
+        entry,
+      );
+    }
+
+    if (
+      entry.source !== 'local' ||
+      entry.syncedAt === undefined ||
+      entry.rejectedAt !== undefined ||
+      entry.reducerRejectedAt !== undefined
+    ) {
+      continue;
+    }
+    const scopeKeys = getSectionReplayScopeKeys(entry.op);
+    if (scopeKeys === undefined) {
+      unscopedSyncedLocal.push(entry);
+      continue;
+    }
+    for (const scopeKey of scopeKeys) {
+      addToIndex(syncedLocalByScope, scopeKey, entry);
+    }
+  }
+
+  return {
+    retainedByEntityClock,
+    syncedLocalByScope,
+    unscopedSyncedLocal,
+    pendingEntries,
+    pendingById: new Map(pendingEntries.map((entry) => [entry.op.id, entry])),
+  };
 };
 
 /**
@@ -111,9 +181,7 @@ export class SupersededOperationResolverService {
 
   private _getSectionCausalReplayDecision(
     item: SupersededOperation,
-    retainedEntries: OperationLogEntry[],
-    pendingOps: Operation[],
-    rejectedGroupIds: Set<string>,
+    context: SectionCausalReplayContext,
   ): SectionCausalReplayDecision {
     const existingClock = item.existingClock;
     if (
@@ -125,12 +193,21 @@ export class SupersededOperationResolverService {
       return 'fallback';
     }
 
-    const matchingRetainedEntries = retainedEntries.filter(
-      (entry) =>
-        entry.op.id !== item.op.id &&
-        entry.op.entityType === item.op.entityType &&
-        haveStructurallyEqualClocks(entry.op.vectorClock, existingClock),
-    );
+    const itemEntityIds = getOpEntityIds(item.op);
+    const matchingRetainedEntriesById = new Map<string, OperationLogEntry>();
+    for (const entityId of itemEntityIds) {
+      const indexKey = getEntityClockIndexKey(
+        item.op.entityType,
+        entityId,
+        existingClock,
+      );
+      for (const entry of context.retainedByEntityClock.get(indexKey) ?? []) {
+        if (entry.op.id !== item.op.id) {
+          matchingRetainedEntriesById.set(entry.op.id, entry);
+        }
+      }
+    }
+    const matchingRetainedEntries = Array.from(matchingRetainedEntriesById.values());
     if (matchingRetainedEntries.length !== 1) {
       return 'fallback';
     }
@@ -146,15 +223,55 @@ export class SupersededOperationResolverService {
       return 'fallback';
     }
     const retainedConflictOp = retainedConflictEntry.op;
+    const pendingItemEntry = context.pendingById.get(item.op.id);
+    const itemScopeKeys = getSectionReplayScopeKeys(item.op);
+    const conflictScopeKeys = getSectionReplayScopeKeys(retainedConflictOp);
+    if (
+      !pendingItemEntry ||
+      itemScopeKeys === undefined ||
+      conflictScopeKeys === undefined
+    ) {
+      return 'defer';
+    }
 
-    const canReplayWholePendingGroup =
-      pendingOps.some((pendingOp) => pendingOp.id === item.op.id) &&
-      pendingOps.every(
-        (pendingOp) =>
-          rejectedGroupIds.has(pendingOp.id) &&
-          areCommutingSectionOperations(retainedConflictOp, pendingOp),
-      );
-    return canReplayWholePendingGroup ? 'replay' : 'defer';
+    const scopedSuccessors = new Map<string, OperationLogEntry>();
+    for (const entry of context.unscopedSyncedLocal) {
+      scopedSuccessors.set(entry.op.id, entry);
+    }
+    for (const scopeKey of new Set([...itemScopeKeys, ...conflictScopeKeys])) {
+      for (const entry of context.syncedLocalByScope.get(scopeKey) ?? []) {
+        scopedSuccessors.set(entry.op.id, entry);
+      }
+    }
+    for (const successor of scopedSuccessors.values()) {
+      if (
+        successor.seq <= pendingItemEntry.seq ||
+        compareVectorClocks(item.op.vectorClock, successor.op.vectorClock) !==
+          VectorClockComparison.LESS_THAN
+      ) {
+        continue;
+      }
+      if (
+        canReorderSectionTransition(item.op, successor.op) ||
+        canReorderSectionTransition(retainedConflictOp, successor.op)
+      ) {
+        return 'defer';
+      }
+    }
+
+    for (const pendingEntry of context.pendingEntries) {
+      if (pendingEntry.op.id === item.op.id) {
+        continue;
+      }
+      if (
+        canReorderSectionTransition(item.op, pendingEntry.op) ||
+        canReorderSectionTransition(retainedConflictOp, pendingEntry.op)
+      ) {
+        return 'defer';
+      }
+    }
+
+    return 'replay';
   }
 
   /**
@@ -221,27 +338,30 @@ export class SupersededOperationResolverService {
       //
       // SECTION order/placement operations also carry reducer semantics that an
       // entity snapshot cannot represent. Re-create one only when the exact
-      // applied server row and the entire pending set prove one commuting
-      // rejected group. If another pending op could be reordered, leave the
-      // SECTION row pending and fail this cycle after resolving the other rows.
-      // Any other ambiguity retains the generic LWW fallback.
+      // applied server row proves a commuting crossing and neither pending work
+      // nor an already-accepted causal successor could be reordered around the
+      // replacement. Otherwise leave the SECTION row pending and fail this cycle
+      // after resolving unrelated rejected rows. Any malformed or ambiguous
+      // crossing retains the generic LWW fallback.
       const regularSupersededOps: SupersededOperation[] = [];
-      const rejectedGroupIds = new Set(supersededOps.map(({ opId }) => opId));
-      let retainedEntries: OperationLogEntry[] | undefined;
-      let pendingOps: Operation[] | undefined;
+      let sectionReplayContext: SectionCausalReplayContext | undefined;
       for (const item of supersededOps) {
         let canCausallyReplaySectionOperation = false;
         if (
           CAUSALLY_REPLAYABLE_SECTION_ACTIONS.has(item.op.actionType) &&
           item.existingClock
         ) {
-          retainedEntries ??= await this.opLogStore.getOpsAfterSeq(0);
-          pendingOps ??= (await this.opLogStore.getUnsynced()).map(({ op }) => op);
+          if (!sectionReplayContext) {
+            const retainedEntries = await this.opLogStore.getOpsAfterSeq(0);
+            const pendingEntries = await this.opLogStore.getUnsynced();
+            sectionReplayContext = buildSectionCausalReplayContext(
+              retainedEntries,
+              pendingEntries,
+            );
+          }
           const replayDecision = this._getSectionCausalReplayDecision(
             item,
-            retainedEntries,
-            pendingOps,
-            rejectedGroupIds,
+            sectionReplayContext,
           );
           if (replayDecision === 'defer') {
             deferredSectionOpIds.push(item.opId);
