@@ -114,6 +114,7 @@ export const LocaleImportFns: Record<
   fa: () => import('@angular/common/locales/fa'),
   fi: () => import('@angular/common/locales/fi'),
   fr: () => import('@angular/common/locales/fr'),
+  he: () => import('@angular/common/locales/he'),  
   id: () => import('@angular/common/locales/id'),
   it: () => import('@angular/common/locales/it'),
   pl_pl: () => import('@angular/common/locales/pl'),
