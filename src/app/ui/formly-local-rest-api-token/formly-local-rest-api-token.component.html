@@ -10,7 +10,14 @@
     />
   }
   @if (hasTokenError()) {
-    <p class="token-error">{{ T.GCF.MISC.LOCAL_REST_API_TOKEN_ERROR | translate }}</p>
+    <!-- The message is inserted after the panel has rendered, so without a live
+         region a screen reader never announces that the token is unavailable. -->
+    <p
+      class="token-error"
+      role="alert"
+    >
+      {{ T.GCF.MISC.LOCAL_REST_API_TOKEN_ERROR | translate }}
+    </p>
   }
   <button
     mat-stroked-button

@@ -7,6 +7,7 @@ import {
   closeSync,
   existsSync,
   fchmodSync,
+  fstatSync,
   fsyncSync,
   openSync,
   readFileSync,
@@ -107,6 +108,18 @@ const restrictTokenFileMode = (filePath: string): boolean => {
       return true;
     }
     chmodSync(filePath, 0o600);
+    // chmod() is allowed to report success without changing anything — a CIFS
+    // mount without unix extensions is the documented case — so the one thing
+    // worth reading back is the mode it claims to have set. Without this the
+    // fail-closed path below never fires on exactly the filesystems that need
+    // it, and a world-readable credential is served as if it were locked down.
+    if ((statSync(filePath).mode & 0o077) !== 0) {
+      warn(
+        '[local-rest-api] The access token file is still readable by other accounts ' +
+          'after chmod — this filesystem does not enforce POSIX modes',
+      );
+      return false;
+    }
     return true;
   } catch (error) {
     warn('[local-rest-api] Could not restrict the access token file mode', error);
@@ -147,9 +160,11 @@ const loadPersistedToken = (): string | undefined => {
  * rename is atomic but not crash-safe until the parent directory is fsynced, so
  * without this an abrupt power loss can bring the previous token back after a
  * regeneration that reported success — exactly the guarantee persistToken()
- * exists to make. Best effort by design: the rename already happened and the
- * new token is on disk, so a filesystem that refuses to fsync a directory must
- * not turn a completed write into a failed one.
+ * exists to make. Best effort by design, and therefore best-effort crash
+ * resistance rather than a durability guarantee: the rename already happened
+ * and the new token is on disk, so a filesystem that refuses to fsync a
+ * directory must not turn a completed write into a failed one — the failure is
+ * logged and the rotation still reports success.
  */
 const fsyncDirectory = (dirPath: string): void => {
   // Windows has no directory-fsync equivalent — opening a directory for reading
@@ -196,6 +211,20 @@ const persistToken = (token: string): void => {
     // `mode` only applies when the file is created, so it would leave a
     // pre-existing file at its old — possibly group/world-readable — mode.
     fchmodSync(fd, 0o600);
+    // And verify it through the same descriptor rather than trusting the call:
+    // fchmod() can succeed without effect on a filesystem that does not enforce
+    // POSIX modes. Throwing keeps the write closed, so a token never goes live
+    // out of a file other accounts can read.
+    if (process.platform !== 'win32') {
+      const mode = fstatSync(fd).mode & 0o777;
+      if ((mode & 0o077) !== 0) {
+        throw new Error(
+          `Refusing to store the local REST API access token: the filesystem left ` +
+            `it at mode 0${mode.toString(8)} instead of 0600, so other accounts on ` +
+            `this machine could read it.`,
+        );
+      }
+    }
     fsyncSync(fd);
     closeSync(fd);
     fd = undefined;
@@ -234,7 +263,7 @@ const ensureToken = (): string => {
 const regenerateToken = (): string => {
   // Persist before swapping. Regeneration is the revocation path — the user
   // reaches for it precisely when they think the token leaked — so the new
-  // token only goes live once it is durably stored. Swapping first would let a
+  // token only goes live once the write has landed on disk. Swapping first would let a
   // failed write leave the *old* token on disk and bring it back to life on the
   // next launch, silently breaking the immediate-revocation guarantee.
   const token = generateToken();
@@ -298,6 +327,40 @@ const respondUnauthorized = (res: ServerResponse, message: string): void => {
 
 const isCurrentToken = (candidate: string): boolean =>
   !!localRestApiToken && compareToken(candidate, localRestApiToken);
+
+const BEARER_SCHEME = 'bearer';
+
+/**
+ * Pulls the credential out of an `Authorization: Bearer <token>` header, or
+ * returns undefined if the header is not a bearer credential.
+ *
+ * Scanned by hand rather than matched with `/^Bearer +(.+)$/i`, where the space
+ * run and the credential can both match a space: on a header of "bearer"
+ * followed by thousands of spaces the engine retries every split of them, which
+ * is quadratic in the header length (CodeQL's polynomial-ReDoS finding). One
+ * left-to-right pass costs the same on every input. Behaviour is unchanged —
+ * RFC 7235 auth schemes are case-insensitive, so "bearer <token>" is accepted
+ * too, at least one space must separate scheme from credential, and the
+ * credential is the rest of the header verbatim.
+ */
+const parseBearerToken = (authHeader: string | undefined): string | undefined => {
+  if (
+    !authHeader ||
+    authHeader.length <= BEARER_SCHEME.length ||
+    authHeader.slice(0, BEARER_SCHEME.length).toLowerCase() !== BEARER_SCHEME
+  ) {
+    return undefined;
+  }
+  let tokenStart = BEARER_SCHEME.length;
+  while (tokenStart < authHeader.length && authHeader[tokenStart] === ' ') {
+    tokenStart++;
+  }
+  // No separating space, or nothing after it.
+  if (tokenStart === BEARER_SCHEME.length || tokenStart === authHeader.length) {
+    return undefined;
+  }
+  return authHeader.slice(tokenStart);
+};
 
 const readJsonBody = async (req: IncomingMessage): Promise<unknown> => {
   const chunks: Buffer[] = [];
@@ -464,11 +527,9 @@ const handleHttpRequest = async (
   }
 
   // Validate authorization token. The token is sent in the "Authorization"
-  // header as "Bearer <token>". RFC 7235 auth schemes are case-insensitive, so
-  // "bearer <token>" is accepted too.
-  const authHeader = req.headers.authorization;
-  const bearerMatch = authHeader?.match(/^Bearer +(.+)$/i);
-  if (!bearerMatch) {
+  // header as "Bearer <token>".
+  const tokenToValidate = parseBearerToken(req.headers.authorization);
+  if (tokenToValidate === undefined) {
     respondUnauthorized(
       res,
       `Authorization token required — send "Authorization: Bearer <token>". ${TOKEN_LOCATION_HINT}`,
@@ -476,7 +537,6 @@ const handleHttpRequest = async (
     return;
   }
 
-  const tokenToValidate = bearerMatch[1];
   if (!isCurrentToken(tokenToValidate)) {
     respondUnauthorized(res, `Invalid authorization token. ${TOKEN_LOCATION_HINT}`);
     return;

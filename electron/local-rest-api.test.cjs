@@ -41,6 +41,13 @@ const createContext = ({ port, userDataDir }) => {
     // fsync of the token file and of its parent directory is asserted by the
     // call being made at all.
     fsyncedPaths: [],
+    // Stands in for a filesystem that does not enforce POSIX modes — a CIFS
+    // mount without unix extensions is the documented one, where chmod() is
+    // allowed to report success and change nothing. `createPermissiveMode` is
+    // the other half of it: there, a file created with mode 0600 still lands
+    // group- and world-readable.
+    ignoreChmod: false,
+    createPermissiveMode: false,
   };
 
   ctx.win = {
@@ -77,11 +84,18 @@ const installMocks = (ctx) => {
       const pathByFd = new Map();
       return {
         ...actualFs,
-        openSync: (filePath, ...rest) => {
-          const fd = actualFs.openSync(filePath, ...rest);
+        openSync: (filePath, flags, mode) => {
+          const fd =
+            mode !== undefined && ctx.createPermissiveMode
+              ? actualFs.openSync(filePath, flags, 0o644)
+              : actualFs.openSync(filePath, flags, mode);
           pathByFd.set(fd, String(filePath));
           return fd;
         },
+        chmodSync: (filePath, mode) =>
+          ctx.ignoreChmod ? undefined : actualFs.chmodSync(filePath, mode),
+        fchmodSync: (fd, mode) =>
+          ctx.ignoreChmod ? undefined : actualFs.fchmodSync(fd, mode),
         fsyncSync: (fd) => {
           ctx.fsyncedPaths.push(pathByFd.get(fd));
           return actualFs.fsyncSync(fd);
@@ -328,6 +342,32 @@ test('the Bearer scheme is case-insensitive (RFC 7235)', async () => {
   assert.equal(res.body.ok, true);
 });
 
+// The header used to be split with /^Bearer +(.+)$/i, whose two space-matching
+// parts made it quadratic in the number of spaces. This pins the grammar the
+// replacement has to keep — a run of spaces separates the scheme from the
+// credential, and a header with nothing after them is not a credential. It does
+// not time the parse: at Node's 16 KB header cap the quadratic version is still
+// fast enough that any threshold would be a coin flip on a loaded CI runner.
+test('a long run of spaces separates the scheme from the credential', async () => {
+  enableApi();
+  const token = getToken();
+  const padding = ' '.repeat(5000);
+
+  const res = await makeRequest({
+    method: 'GET',
+    path: '/tasks',
+    headers: { Authorization: `Bearer${padding}${token}` },
+  });
+  assert.equal(res.status, 200);
+
+  const empty = await makeRequest({
+    method: 'GET',
+    path: '/tasks',
+    headers: { Authorization: `Bearer${padding}` },
+  });
+  assert.equal(empty.status, 401);
+});
+
 test('regenerating invalidates the previous token immediately', async () => {
   enableApi();
   const oldToken = getToken();
@@ -493,6 +533,72 @@ test('a cold start repairs the mode of a readable token file without rotating it
     assert.equal(fs.statSync(coldTokenFilePath).mode & 0o777, 0o600);
   } finally {
     fs.rmSync(coldProfileDir, { recursive: true, force: true });
+  }
+});
+
+// chmod() is allowed to report success and change nothing — the Samba docs say
+// so for a CIFS mount without unix extensions. Reading the mode back is the only
+// way to know, and without it the two tests above pass while the credential
+// stays readable by every account on the machine.
+test('a token whose mode cannot actually be restricted is not served', () => {
+  if (process.platform === 'win32') {
+    return;
+  }
+  const coldProfileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-nochmod-'));
+  const coldTokenFilePath = path.join(coldProfileDir, 'local-rest-api-token');
+  const existingToken = 'b'.repeat(32);
+  fs.writeFileSync(coldTokenFilePath, existingToken, { mode: 0o644 });
+
+  try {
+    const ctx = createContext({ port: takeIsolatedPort(), userDataDir: coldProfileDir });
+    ctx.ignoreChmod = true;
+    const cold = loadModule(ctx);
+    cold.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    // The repair silently did nothing, so the readable token has to be dropped
+    // rather than kept as the live credential.
+    const onDisk = fs.readFileSync(coldTokenFilePath, 'utf8').trim();
+    assert.notEqual(onDisk, existingToken, 'a world-readable token stayed live');
+    assert.match(onDisk, /^[A-Za-z0-9]{32}$/);
+    assert.equal(fs.statSync(coldTokenFilePath).mode & 0o777, 0o600);
+  } finally {
+    fs.rmSync(coldProfileDir, { recursive: true, force: true });
+  }
+});
+
+// And the same on the write path: a filesystem that ignores the mode entirely
+// creates the file group/world-readable and fchmod() cannot fix it, so there is
+// nowhere safe to keep the credential. Fail the enable instead of serving from
+// a file the whole machine can read.
+test('enabling fails closed when the token file cannot be made private', async () => {
+  if (process.platform === 'win32') {
+    return;
+  }
+  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-nomode-'));
+  const tokenPath = path.join(profileDir, 'local-rest-api-token');
+  const port = takeIsolatedPort();
+  const ctx = createContext({ port, userDataDir: profileDir });
+  ctx.ignoreChmod = true;
+  ctx.createPermissiveMode = true;
+  const isolated = loadModule(ctx);
+
+  try {
+    isolated.initLocalRestApi();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    await assert.rejects(
+      makeRequest({ method: 'GET', path: '/health' }, undefined, port),
+      /ECONNREFUSED/,
+      'the API came up with a token it could not keep private',
+    );
+    assert.equal(
+      fs.existsSync(tokenPath),
+      false,
+      'a world-readable token file was left behind',
+    );
+  } finally {
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+    fs.rmSync(profileDir, { recursive: true, force: true });
   }
 });
 

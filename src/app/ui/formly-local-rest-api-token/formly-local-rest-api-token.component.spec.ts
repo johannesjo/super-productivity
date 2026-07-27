@@ -117,7 +117,11 @@ describe('FormlyLocalRestApiTokenComponent', () => {
 
     expect(component.hasTokenError()).toBe(true);
     expect(component.token()).toBeNull();
-    expect(fixture.nativeElement.querySelector('.token-error')).toBeTruthy();
+    const error = fixture.nativeElement.querySelector('.token-error');
+    expect(error).toBeTruthy();
+    // Inserted after the first render, so assistive technology only hears about
+    // it if the element is a live region.
+    expect(error.getAttribute('role')).toBe('alert');
   });
 
   it('does not claim the previous token is valid when there never was one', async () => {
