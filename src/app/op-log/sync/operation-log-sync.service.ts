@@ -771,12 +771,13 @@ export class OperationLogSyncService {
             FILE_BASED_SYNC_CONSTANTS.AUTO_MERGE_CONCURRENT_SNAPSHOT,
           );
 
-          // The local snapshot's vector clock is this client's last-synced
-          // baseline: unsynced ops sit on top of it, so the dialog can compute
-          // changes-since-last-sync as a per-client delta instead of summing
-          // the whole (lifetime) clock (SPAP-7). Undefined snapshot → null.
-          const lastSyncedVectorClock =
-            (await this.vectorClockService.getSnapshotVectorClock()) ?? null;
+          // A local state-cache snapshot is only a last-synced baseline after a
+          // completed sync. Fresh clients can already have a snapshot containing
+          // local changes, but using its clock here would hide the first-sync
+          // overwrite warning.
+          const lastSyncedVectorClock = isNeverSyncedAtSyncStart
+            ? null
+            : ((await this.vectorClockService.getSnapshotVectorClock()) ?? null);
 
           if (gate === 'keep-local') {
             // Local strictly dominates the snapshot: keep local, no dialog. The

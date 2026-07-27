@@ -3463,6 +3463,60 @@ describe('OperationLogSyncService', () => {
           }
         });
 
+        it('uses no last-synced baseline for a never-synced client with a local snapshot', async () => {
+          const unsyncedEntries: OperationLogEntry[] = [
+            {
+              seq: 1,
+              op: {
+                id: 'local-op-1',
+                clientId: 'client-A',
+                actionType: 'test' as ActionType,
+                opType: OpType.Update,
+                entityType: 'TASK',
+                entityId: 'task-1',
+                payload: {},
+                vectorClock: { clientA: 1 },
+                timestamp: Date.now(),
+                schemaVersion: 1,
+              },
+              appliedAt: Date.now(),
+              source: 'local',
+            },
+          ];
+          opLogStoreSpy.getUnsynced.and.resolveTo(unsyncedEntries);
+
+          const vectorClockService = TestBed.inject(
+            VectorClockService,
+          ) as jasmine.SpyObj<VectorClockService>;
+          vectorClockService.getSnapshotVectorClock.and.resolveTo({ clientA: 1 });
+
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [],
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'fileSnapshotOps',
+            failedFileCount: 0,
+            snapshotState: { tasks: [{ id: 'remote-task' }] },
+            snapshotVectorClock: { clientB: 1 },
+            latestServerSeq: 0,
+          });
+
+          const mockProvider = {
+            isReady: () => Promise.resolve(true),
+            supportsOperationSync: true,
+          } as any;
+
+          try {
+            await service.downloadRemoteOps(mockProvider, { isNeverSynced: true });
+            fail('Expected LocalDataConflictError to be thrown');
+          } catch (error) {
+            expect(error).toBeInstanceOf(LocalDataConflictError);
+            const conflictError = error as LocalDataConflictError;
+            expect(conflictError.lastSyncedVectorClock).toBeNull();
+            expect(vectorClockService.getSnapshotVectorClock).not.toHaveBeenCalled();
+          }
+        });
+
         it('should NOT throw LocalDataConflictError when client has no unsynced ops', async () => {
           // No unsynced ops
           opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
