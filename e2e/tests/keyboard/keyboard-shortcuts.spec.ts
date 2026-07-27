@@ -14,11 +14,8 @@ import { waitForStatePersistence } from '../../utils/waits';
 const { ADD_TASK_INPUT, DETAIL_PANEL } = cssSelectors;
 
 test.describe('Keyboard Shortcuts', () => {
-  test('should keep an assigned shortcut after Escape and reload', async ({
-    page,
-    settingsPage,
-  }) => {
-    await settingsPage.navigateToSettings();
+  test('should keep an assigned shortcut after Escape and reload', async ({ page }) => {
+    await page.goto('/#/config?section=keyboard');
 
     const shortcutInput = page.locator('keyboard-input input').first();
     await expect(shortcutInput).toBeVisible();
