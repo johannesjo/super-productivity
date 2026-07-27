@@ -44,7 +44,7 @@ export class TaskContextMenuComponent {
   }
 
   close(): boolean {
-    if (!this.isShowInner) {
+    if (!this.isOpen()) {
       return false;
     }
 

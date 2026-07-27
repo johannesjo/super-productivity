@@ -57,4 +57,20 @@ describe('TaskContextMenuComponent', () => {
 
     trigger.remove();
   }));
+
+  it('closes the active inner menu', () => {
+    const closeMenu = jasmine.createSpy('closeMenu');
+    const innerMenu = {
+      contextMenuTrigger: () => ({ closeMenu }),
+    } as unknown as TaskContextMenuInnerComponent;
+    (
+      component as unknown as {
+        taskContextMenuInner: () => TaskContextMenuInnerComponent;
+      }
+    ).taskContextMenuInner = () => innerMenu;
+    component.isOpen.set(true);
+
+    expect(component.close()).toBeTrue();
+    expect(closeMenu).toHaveBeenCalled();
+  });
 });
