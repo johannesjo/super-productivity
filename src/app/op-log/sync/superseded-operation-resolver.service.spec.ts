@@ -1132,9 +1132,10 @@ describe('SupersededOperationResolverService', () => {
                 actionType: '[TAG] LWW Update',
                 entityType: 'TAG',
                 entityId: 'TODAY',
-                payload: jasmine.objectContaining({
+                payload: {
+                  ...TODAY_TAG,
                   taskIds: ['main-anchor', 'task-1'],
-                }),
+                },
               }),
             );
           }
