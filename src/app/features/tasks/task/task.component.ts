@@ -1250,6 +1250,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   openContextMenu(event?: TouchEvent | MouseEvent | KeyboardEvent): void {
+    this._taskFocusService.lastFocusedTaskComponent.set(this);
     this.taskTitleEditEl()?.cancelEditing();
     if (event) {
       event.preventDefault();
