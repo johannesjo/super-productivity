@@ -1,6 +1,8 @@
-// Post-pack hook for Linux builds.
+// Post-pack checks and platform-specific packaging adjustments.
 //
-// Renames the main Electron binary to `superproductivity-bin` and installs
+// macOS: verifies the actual icon copied into every packaged .app.
+//
+// Linux: renames the main Electron binary to `superproductivity-bin` and installs
 // a shell wrapper at the original name. The wrapper forces
 // --class=superproductivity for stable desktop-file matching and forces
 // --ozone-platform=x11 when running in our Snap sandbox on a Wayland session.
@@ -17,7 +19,10 @@
 // See docs/research/snap-wayland-gpu-fix-research.md §18.
 
 const { promises: fs } = require('fs');
+const { execFileSync } = require('node:child_process');
+const { tmpdir } = require('node:os');
 const { join } = require('path');
+const { compareIconsets, verifyIcns } = require('./verify-mac-icon');
 
 const BIN_NAME = 'superproductivity'; // must match linux.executableName
 const RENAMED = 'superproductivity-bin';
@@ -30,10 +35,47 @@ const WAYLAND_IDLE_HELPER_SRC = join(
   'wayland-idle-helper',
 );
 const WAYLAND_IDLE_HELPER_DEST = 'wayland-idle-helper';
+const MAC_ICONSET_DIR = join(__dirname, '..', 'build', 'icon.iconset');
 
 const isTruthyEnv = (value) => value === '1' || value?.toLowerCase() === 'true';
 
+const verifyPackagedMacIcon = async (context) => {
+  const appName = context.packager.appInfo.productFilename;
+  const iconPath = join(
+    context.appOutDir,
+    `${appName}.app`,
+    'Contents',
+    'Resources',
+    'icon.icns',
+  );
+  const chunkTypes = verifyIcns(await fs.readFile(iconPath), iconPath, MAC_ICONSET_DIR);
+
+  if (process.platform === 'darwin') {
+    const temporaryDirectory = await fs.mkdtemp(join(tmpdir(), 'sp-mac-icon-check-'));
+    const extractedIconset = join(temporaryDirectory, 'icon.iconset');
+    try {
+      execFileSync(
+        '/usr/bin/iconutil',
+        ['--convert', 'iconset', '--output', extractedIconset, iconPath],
+        { stdio: 'inherit' },
+      );
+      compareIconsets(MAC_ICONSET_DIR, extractedIconset);
+    } finally {
+      await fs.rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  }
+
+  console.log(`[afterPack] Verified macOS icon: ${chunkTypes.join(', ')}`);
+};
+
 async function afterPack(context) {
+  if (
+    context.electronPlatformName === 'darwin' ||
+    context.electronPlatformName === 'mas'
+  ) {
+    await verifyPackagedMacIcon(context);
+    return;
+  }
   if (context.electronPlatformName !== 'linux') return;
 
   const { appOutDir } = context;
