@@ -361,6 +361,7 @@ describe('mapToScheduleDays()', () => {
             duration: h(1),
             type: 'ScheduledRepeatProjection',
             plannedForDay: '1970-01-02',
+            sourceOccurrenceDate: '1970-01-02',
           },
         ],
         isToday: false,
@@ -431,6 +432,7 @@ describe('mapToScheduleDays()', () => {
             duration: h(1),
             type: 'ScheduledRepeatProjection',
             plannedForDay: '1970-01-02',
+            sourceOccurrenceDate: '1970-01-02',
           },
           {
             data: jasmine.any(Object),
@@ -571,6 +573,7 @@ describe('mapToScheduleDays()', () => {
           start: dhTz(1, 9),
           type: 'ScheduledRepeatProjection',
           plannedForDay: '1970-01-02',
+          sourceOccurrenceDate: '1970-01-02',
         },
         {
           data: jasmine.any(Object),
@@ -594,6 +597,7 @@ describe('mapToScheduleDays()', () => {
           start: dhTz(2, 9),
           type: 'ScheduledRepeatProjection',
           plannedForDay: '1970-01-03',
+          sourceOccurrenceDate: '1970-01-03',
         },
         {
           data: jasmine.any(Object),
@@ -919,6 +923,7 @@ describe('mapToScheduleDays()', () => {
           start: dhTz(1, 1),
           type: 'ScheduledRepeatProjection',
           plannedForDay: '1970-01-02',
+          sourceOccurrenceDate: '1970-01-02',
         },
         {
           data: jasmine.any(Object),
@@ -1003,6 +1008,7 @@ describe('mapToScheduleDays()', () => {
           start: dhTz(2, 1),
           type: 'ScheduledRepeatProjection',
           plannedForDay: '1970-01-03',
+          sourceOccurrenceDate: '1970-01-03',
         },
         {
           data: {
