@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => {
   const syncService = {
     isRateLimited: vi.fn(),
     checkOpsRequestDedup: vi.fn(),
+    getLatestStateReplacementSeq: vi.fn(),
     cacheOpsRequestResults: vi.fn(),
     checkSnapshotRequestDedup: vi.fn(),
     cacheSnapshotRequestResult: vi.fn(),
@@ -68,7 +69,10 @@ vi.mock('../src/db', () => ({
 }));
 
 import { syncRoutes } from '../src/sync/sync.routes';
-import { SYNC_ERROR_CODES } from '../src/sync/sync.types';
+import {
+  STATE_REPLACEMENT_REQUIRED_ERROR,
+  SYNC_ERROR_CODES,
+} from '../src/sync/sync.types';
 import { computeOpStorageBytes } from '../src/sync/sync.const';
 import { CURRENT_SCHEMA_VERSION, SUPER_SYNC_MAX_OPS_PER_UPLOAD } from '@sp/shared-schema';
 
@@ -116,6 +120,7 @@ describe('Sync compressed body routes', () => {
     vi.clearAllMocks();
     mocks.syncService.isRateLimited.mockReturnValue(false);
     mocks.syncService.checkOpsRequestDedup.mockReturnValue(null);
+    mocks.syncService.getLatestStateReplacementSeq.mockResolvedValue(null);
     mocks.syncService.checkSnapshotRequestDedup.mockReturnValue(null);
     mocks.syncService.getMaxClockDriftMs.mockReturnValue(60_000);
     mocks.syncService.filterValidOpsForQuota.mockImplementation((ops: unknown[]) => ops);
@@ -260,6 +265,9 @@ describe('Sync compressed body routes', () => {
       [validOp, invalidOp],
       undefined,
       new Set(),
+      undefined,
+      false,
+      undefined,
     );
   });
 
@@ -325,6 +333,9 @@ describe('Sync compressed body routes', () => {
       [validOp, invalidLargeOp],
       undefined,
       new Set(),
+      undefined,
+      false,
+      undefined,
     );
   });
 
@@ -380,6 +391,9 @@ describe('Sync compressed body routes', () => {
       [duplicateOp, newOp],
       undefined,
       new Set([duplicateOp.id]),
+      undefined,
+      false,
+      undefined,
     );
   });
 
@@ -430,6 +444,9 @@ describe('Sync compressed body routes', () => {
       [incomingOp],
       undefined,
       new Set([incomingOp.id]),
+      undefined,
+      false,
+      undefined,
     );
   });
 
@@ -706,6 +723,237 @@ describe('Sync compressed body routes', () => {
       500,
       false,
     );
+    expect(mocks.syncService.uploadOps).toHaveBeenCalledWith(
+      1,
+      clientId,
+      payload.ops,
+      undefined,
+      new Set(),
+      undefined,
+      false,
+      0,
+    );
+  });
+
+  it('reprocesses stale cached results and includes a same-client replacement', async () => {
+    const clientId = 'same-client-replacement';
+    const staleResult = {
+      opId: 'op-1',
+      accepted: false,
+      error: STATE_REPLACEMENT_REQUIRED_ERROR,
+      errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+    };
+    const replacement = {
+      serverSeq: 3,
+      op: {
+        ...createOp(clientId),
+        id: 'state-replacement',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+        syncImportReason: 'FORCE_UPLOAD',
+      },
+      receivedAt: Date.now(),
+    };
+    mocks.syncService.checkOpsRequestDedup.mockReturnValue([
+      { opId: 'op-1', accepted: true, serverSeq: 2 },
+    ]);
+    mocks.syncService.getLatestStateReplacementSeq.mockResolvedValue(3);
+    mocks.syncService.uploadOps.mockResolvedValue([staleResult]);
+    mocks.syncService.getOpsSinceWithSeq.mockResolvedValue({
+      ops: [replacement],
+      latestSeq: 3,
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/ops',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+      payload: {
+        ops: [createOp(clientId)],
+        clientId,
+        lastKnownServerSeq: 2,
+        requestId: 'pre-replacement-request',
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      results: [staleResult],
+      newOps: [replacement],
+      latestSeq: 3,
+    });
+    expect(mocks.syncService.uploadOps).toHaveBeenCalledOnce();
+    expect(mocks.syncService.getOpsSinceWithSeq).toHaveBeenCalledWith(
+      1,
+      2,
+      undefined,
+      500,
+      false,
+    );
+  });
+
+  it('reprocesses a cached success deleted by a replacement at the current cursor', async () => {
+    const clientId = 'current-after-replacement';
+    mocks.syncService.checkOpsRequestDedup.mockReturnValue([
+      { opId: 'op-1', accepted: true, serverSeq: 2 },
+    ]);
+    mocks.syncService.getLatestStateReplacementSeq.mockResolvedValue(3);
+    mocks.syncService.uploadOps.mockResolvedValue([
+      { opId: 'op-1', accepted: true, serverSeq: 4 },
+    ]);
+    mocks.syncService.getOpsSinceWithSeq.mockResolvedValue({
+      ops: [],
+      latestSeq: 4,
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/ops',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+      payload: {
+        ops: [createOp(clientId)],
+        clientId,
+        lastKnownServerSeq: 3,
+        requestId: 'accepted-before-replacement',
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      results: [{ opId: 'op-1', accepted: true, serverSeq: 4 }],
+      latestSeq: 4,
+    });
+    expect(mocks.syncService.uploadOps).toHaveBeenCalledOnce();
+    expect(mocks.syncService.cacheOpsRequestResults).toHaveBeenCalledWith(
+      1,
+      'accepted-before-replacement',
+      [{ opId: 'op-1', accepted: true, serverSeq: 4 }],
+      expect.any(String),
+    );
+  });
+
+  it('rechecks the replacement boundary after reading a cached retry response', async () => {
+    const clientId = 'replacement-race-client';
+    const staleResult = {
+      opId: 'op-1',
+      accepted: false,
+      error: STATE_REPLACEMENT_REQUIRED_ERROR,
+      errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+    };
+    const replacement = {
+      serverSeq: 3,
+      op: {
+        ...createOp(clientId),
+        id: 'concurrent-state-replacement',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+        syncImportReason: 'PASSWORD_CHANGED',
+      },
+      receivedAt: Date.now(),
+    };
+    mocks.syncService.checkOpsRequestDedup.mockReturnValue([
+      { opId: 'op-1', accepted: true, serverSeq: 2 },
+    ]);
+    mocks.syncService.getLatestStateReplacementSeq.mockResolvedValue(3);
+    mocks.syncService.getOpsSinceWithSeq
+      .mockResolvedValueOnce({
+        ops: [],
+        latestSeq: 2,
+      })
+      .mockResolvedValueOnce({
+        ops: [replacement],
+        latestSeq: 3,
+      });
+    mocks.syncService.uploadOps.mockResolvedValue([staleResult]);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/ops',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+      payload: {
+        ops: [createOp(clientId)],
+        clientId,
+        lastKnownServerSeq: 2,
+        requestId: 'replacement-race',
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      results: [staleResult],
+      newOps: [replacement],
+      latestSeq: 3,
+    });
+    expect(mocks.syncService.getLatestStateReplacementSeq).toHaveBeenCalledOnce();
+    expect(mocks.syncService.uploadOps).toHaveBeenCalledOnce();
+  });
+
+  it('returns the replacement fence before destructive quota cleanup', async () => {
+    const clientId = 'stale-near-quota';
+    const replacement = {
+      serverSeq: 3,
+      op: {
+        ...createOp('replacement-client'),
+        id: 'state-replacement',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+        syncImportReason: 'PASSWORD_CHANGED',
+      },
+      receivedAt: Date.now(),
+    };
+    mocks.syncService.checkStorageQuota.mockResolvedValue({
+      allowed: false,
+      currentUsage: 100,
+      quota: 100,
+    });
+    mocks.syncService.getLatestStateReplacementSeq.mockResolvedValue(3);
+    mocks.syncService.getOpsSinceWithSeq.mockResolvedValue({
+      ops: [replacement],
+      latestSeq: 3,
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/ops',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+      },
+      payload: {
+        ops: [createOp(clientId)],
+        clientId,
+        lastKnownServerSeq: 2,
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      results: [
+        {
+          opId: 'op-1',
+          accepted: false,
+          error: STATE_REPLACEMENT_REQUIRED_ERROR,
+          errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+        },
+      ],
+      newOps: [replacement],
+      latestSeq: 3,
+    });
+    expect(mocks.syncService.updateStorageUsage).not.toHaveBeenCalled();
+    expect(mocks.syncService.freeStorageForUpload).not.toHaveBeenCalled();
+    expect(mocks.syncService.uploadOps).not.toHaveBeenCalled();
   });
 
   it('should skip snapshot metadata for deduplicated retry piggyback downloads', async () => {

@@ -77,6 +77,13 @@ commit conflicting operations. A causal `REPAIR` additionally locks that row
 and must prove `repairBaseServerSeq === lastSeq`. Incoming vector clocks are
 compared before being pruned for storage.
 
+A regular upload carrying `lastKnownServerSeq` uses the same row lock to compare
+its cursor with `user_sync_state.latestStateReplacementSeq`. A cursor behind
+the latest `SYNC_IMPORT` or `BACKUP_IMPORT` is rejected before any operation is
+inserted, and the replacement is piggybacked without excluding its author. The
+nullable marker is reconciled lazily from retained operations after an upgrade;
+zero records that the reconciliation found no replacement.
+
 A clean-slate full-state upload deletes the prior dataset but preserves
 `lastSeq`, preventing sequence reuse visible to existing clients. Only explicit
 `DELETE /api/sync/data` erases the entire dataset and resets the sequence to
@@ -92,11 +99,11 @@ This serialization mechanism is a load-bearing decision; see
 - `operations` is append-on-write, not retained forever. Rows are immutable
   while retained; cleanup, quota recovery, clean-slate replacement, and explicit
   data deletion can remove them.
-- `user_sync_state` owns `lastSeq`, the optional compressed snapshot cache, and
-  the latest causal full-state marker. `sync_devices` is used only for per-device
-  identity/metadata and last-seen tracking. Its `lastAckedSeq` field is dormant
-  legacy schema state: current sync and retention code neither advances nor
-  reads it.
+- `user_sync_state` owns `lastSeq`, the optional compressed snapshot cache, the
+  latest causal full-state marker, and the latest explicit state-replacement
+  boundary. `sync_devices` is used only for per-device identity/metadata and
+  last-seen tracking. Its `lastAckedSeq` field is dormant legacy schema state:
+  current sync and retention code neither advances nor reads it.
 - Normal sync bootstraps from operation rows. `GET /ops` can fast-forward to the
   latest causal full-state operation; clients do not download the server's
   cached snapshot blob.
