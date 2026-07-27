@@ -134,6 +134,87 @@ The in-app **Restore from History** handles this for unencrypted accounts. It
 does **not** work for E2E-encrypted accounts: the server cannot decrypt the op
 payloads, so `generateSnapshotAtSeq` throws `EncryptedOpsNotSupportedError`.
 
+### Diagnose an encrypted download without an app build
+
+When an encrypted account downloads many operation pages successfully and then
+fails with `Failed to decrypt operation payloads`, do not assume the passphrase
+is globally wrong. One corrupt or differently keyed operation rejects the whole
+batch with the same error.
+
+Before diagnosing:
+
+1. Preserve any surviving client profile and automatic backups.
+2. Stop every client for the account so the server sequence cannot advance.
+3. Take a full, checksummed server backup. The commands below are read-only, but
+   a backup remains the recovery source of last resort.
+
+`diagnose-encrypted-ops` is a DB-independent, two-phase tool. Its `fetch`
+command makes only authenticated `GET /api/sync/ops` requests. It captures the
+complete downloadable encrypted suffix from sequence zero, pins the first
+`latestSeq`, and aborts on a changed sequence, gap, malformed response, or
+non-progressing page. It never uploads or decrypts during this phase.
+
+Create an access-token file using a trusted text editor, copy the JWT from the
+SuperSync account page, and restrict the file permissions. Then run from the
+repository root:
+
+```bash
+chmod 600 /absolute/path/token.txt
+npm --workspace packages/super-sync-server run diagnose-encrypted-ops -- fetch \
+  --base-url https://sync.super-productivity.com \
+  --token-file /absolute/path/token.txt \
+  --out /absolute/path/encrypted-ops-bundle.json
+```
+
+The output is created with mode `0600` and is never overwritten. Its payloads
+remain E2E-encrypted, but operation IDs, client IDs, routing metadata, and
+timestamps are plaintext. Treat it as sensitive. The embedded SHA-256 checksum
+detects accidental modification; it is not a signature and does not prove
+server authenticity.
+
+For diagnosis, disconnect from the network if practical, put the E2EE
+passphrase in another mode-`0600` file, and run:
+
+```bash
+chmod 600 /absolute/path/e2ee-passphrase.txt
+npm --workspace packages/super-sync-server run diagnose-encrypted-ops -- diagnose \
+  --in /absolute/path/encrypted-ops-bundle.json \
+  --key-file /absolute/path/e2ee-passphrase.txt \
+  --report /absolute/path/encrypted-ops-report.json
+```
+
+The report contains only safe operation identifiers, sequence numbers, counts,
+and failure stages. It never contains the passphrase, token, ciphertext, or
+decrypted payload. A fresh client starts at sequence zero, which is the default.
+To reproduce an existing client's exact next batches, add
+`--since-seq <persisted-last-server-seq>` and `--exclude-client <client-id>`.
+If the client already stored operation IDs, put one ID per line in a file and
+add `--applied-op-ids-file <path>`. The cursor is applied first, client
+exclusion happens before 500-operation pagination, and stored IDs are removed
+inside each raw page, matching the app. If the persisted cursor is ahead of the
+bundle's `latestSeq`, the app resets it to zero; omit `--since-seq` to reproduce
+the post-reset pages.
+
+Interpret the result conservatively:
+
+- `confirmed-for-some-operations`: the passphrase decrypted at least one
+  authenticated payload, so it is not globally wrong.
+- `no-operation-decrypted`: consistent with a wrong passphrase, but also with a
+  wholly different-key or corrupt range; it is not proof.
+- `operation-failures`: the report identifies each failing `serverSeq` and
+  whether its envelope, decryption, or decrypted JSON failed.
+- `batch-runtime-only`: the exact batch failed while every operation passed
+  individually, pointing to a batch/cache/runtime-specific problem.
+- `decrypts-and-parses-only`: every selected payload authenticated, decrypted,
+  and parsed as JSON. This does not validate operation semantics or full
+  application state.
+
+This is a diagnostic only. It deliberately does not replay operations, validate
+full application state, create an importable file, skip a bad operation, or
+write anything to SuperSync. Recovery remains a separate decision after the
+failure has been reproduced and classified. Remove the temporary token and
+passphrase files when diagnosis is complete.
+
 `scripts/recover-user.ts` fills that gap. It replays the user's operation log up
 to a chosen `serverSeq`, decrypting encrypted payloads with the user's
 passphrase, and writes an importable `AppDataComplete` JSON file. It is
