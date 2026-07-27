@@ -257,7 +257,7 @@ test.describe('@supersync Rejected-ops transient download (#8331)', () => {
       // 7. Remove the fault and let B sync cleanly — the still-pending edit
       //    resolves and its local-win replacement is uploaded in the same sync.
       await clientB.page.unroute('**/api/sync/ops*');
-      await clientB.sync.syncAndWait();
+      await clientB.sync.triggerSync();
 
       // 8. End-to-end recovery proof: after pulling B's now-uploaded edit, both
       //    clients converge to the SAME title. With the bug, B's edit was
