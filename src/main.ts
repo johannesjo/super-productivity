@@ -93,6 +93,7 @@ import { DateTimeFormatService } from './app/core/date-time-format/date-time-for
 import { CustomDateAdapter } from './app/core/date-time-format/custom-date-adapter';
 import { TranslateMatDatepickerIntl } from './app/core/date-time-format/translate-mat-datepicker-intl';
 import { suspendAudioContext, unlockAudioContext } from './app/util/audio-context';
+import { prefersReducedMotion } from './app/util/prefers-reduced-motion';
 import { NetworkRetryInterceptorService } from './app/core/http/network-retry-interceptor.service';
 
 if (environment.production || environment.stage) {
@@ -245,7 +246,10 @@ bootstrapApplication(AppComponent, {
       deps: [GlobalConfigService],
       useFactory: (globalConfigService: GlobalConfigService) => ({
         get animationsDisabled(): boolean {
-          return globalConfigService.misc()?.isDisableAnimations ?? false;
+          return (
+            (globalConfigService.misc()?.isDisableAnimations ?? false) ||
+            prefersReducedMotion()
+          );
         },
       }),
     },
