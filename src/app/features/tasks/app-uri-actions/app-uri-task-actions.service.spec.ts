@@ -7,6 +7,7 @@ import { selectAllTasksInActiveProjects } from '../store/task.selectors';
 import { TaskService } from '../task.service';
 import { ProjectService } from '../../project/project.service';
 import { SnackService } from '../../../core/snack/snack.service';
+import { SnackParams } from '../../../core/snack/snack.model';
 import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 import { T } from '../../../t.const';
 import { Task } from '../task.model';
@@ -331,6 +332,78 @@ describe('AppUriTaskActionsService', () => {
           msg: T.F.TASK.S.COMPLETED_VIA_APP_URI,
         }),
       );
+    });
+  });
+
+  describe('snack title escaping', () => {
+    // A URL-controlled title reaches SnackService.translateParams, which is
+    // interpolated into the snack message and rendered through [innerHtml].
+    // Angular's sanitizer strips scripts but keeps an external <img>, so an
+    // unescaped title is an HTML/resource-injection vector (a privacy beacon
+    // fires on a plain no-match complete-task URL). Every branch that puts a
+    // title into translateParams must escape it.
+    const XSS = '<img src=https://attacker.example/pixel>';
+    const XSS_ESCAPED = '&lt;img src=https://attacker.example/pixel&gt;';
+
+    const titleParamOf = (callIndex = 0): unknown =>
+      (snackService.open.calls.argsFor(callIndex)[0] as SnackParams).translateParams
+        ?.title;
+
+    it('escapes the title in the add-task SUCCESS snack', () => {
+      pendingAction$.next({ type: 'add', title: XSS });
+
+      // The stored title stays verbatim — escaping is presentation-only.
+      expect(taskService.add).toHaveBeenCalledWith(XSS, false, {}, false, true);
+      expect(titleParamOf()).toBe(XSS_ESCAPED);
+    });
+
+    it('escapes the title in the project-not-found ERROR snack', () => {
+      pendingAction$.next({ type: 'add', title: XSS, projectId: 'nope' });
+
+      expect(taskService.add).not.toHaveBeenCalled();
+      expect(titleParamOf()).toBe(XSS_ESCAPED);
+    });
+
+    it('escapes the title in the no-match ERROR snack', () => {
+      pendingAction$.next({ type: 'complete', title: XSS });
+
+      expect(taskService.setDone).not.toHaveBeenCalled();
+      expect(titleParamOf()).toBe(XSS_ESCAPED);
+    });
+
+    it('escapes the title in the ambiguous-match ERROR snack', () => {
+      const store = TestBed.inject(MockStore);
+      store.overrideSelector(selectAllTasksInActiveProjects, [
+        { id: 'a1', title: `${XSS} one`, isDone: false } as Task,
+        { id: 'a2', title: `${XSS} two`, isDone: false } as Task,
+      ]);
+      store.refreshState();
+
+      pendingAction$.next({ type: 'complete', title: XSS });
+
+      expect(taskService.setDone).not.toHaveBeenCalled();
+      expect(titleParamOf()).toBe(XSS_ESCAPED);
+    });
+
+    it('escapes the stored title in the complete-task SUCCESS snack', () => {
+      // The matched task's own title is used here, and a stored title can
+      // carry markup from sync or an EML import, not just from this URL.
+      const store = TestBed.inject(MockStore);
+      store.overrideSelector(selectAllTasksInActiveProjects, [
+        { id: 'x1', title: XSS, isDone: false } as Task,
+      ]);
+      store.refreshState();
+
+      pendingAction$.next({ type: 'complete', title: XSS });
+
+      expect(taskService.setDone).toHaveBeenCalledWith('x1');
+      expect(titleParamOf()).toBe(XSS_ESCAPED);
+    });
+
+    it('escapes the ampersand first so escaping cannot be double-applied', () => {
+      pendingAction$.next({ type: 'add', title: '&lt;img&gt;' });
+
+      expect(titleParamOf()).toBe('&amp;lt;img&amp;gt;');
     });
   });
 });

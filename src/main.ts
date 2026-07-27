@@ -94,8 +94,7 @@ import { CustomDateAdapter } from './app/core/date-time-format/custom-date-adapt
 import { TranslateMatDatepickerIntl } from './app/core/date-time-format/translate-mat-datepicker-intl';
 import { suspendAudioContext, unlockAudioContext } from './app/util/audio-context';
 import { NetworkRetryInterceptorService } from './app/core/http/network-retry-interceptor.service';
-import { parseAppUriTaskAction } from './app/features/tasks/util/parse-app-uri-task-action';
-import { pendingCapacitorAppUriAction$ } from './app/features/tasks/app-uri-actions/pending-capacitor-app-uri-action';
+import { routeCapacitorAppUrl } from './app/core/app-url-open-router';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -543,21 +542,23 @@ if (IS_IOS_NATIVE) {
   });
 
   // Handle app URL open (for OAuth callbacks, deep links, etc.)
-  // OAuth callbacks are handled separately by OAuthCallbackHandlerService's
-  // own `appUrlOpen` listener (Capacitor supports multiple listeners on the
-  // same event). This one only recognizes create-task/complete-task actions
-  // (e.g. from an iOS Shortcut's "Open URLs" action) and hands them off to
-  // AppUriTaskActionsService via the pending-action ReplaySubject, since
-  // Angular's DI (and app data) may not exist yet on a cold launch.
+  //
+  // This must be the ONLY `appUrlOpen` listener in the app. `@capacitor/app`
+  // emits a cold-start URL with `retainUntilConsumed: true`, and Capacitor
+  // drains and clears those retained arguments when the *first* listener for
+  // the event is added (`CAPPlugin.m`, `addEventListener` →
+  // `sendRetainedArgumentsForEvent`). A second listener added later never
+  // receives it, so registering one here and another in
+  // OAuthCallbackHandlerService meant whichever came second silently lost
+  // every cold-launch URL. Instead, route the single event to both consumers
+  // through their ReplaySubjects, which also covers Angular's DI (and app
+  // data) not existing yet on a cold launch.
   CapacitorApp.addListener('appUrlOpen', (event) => {
-    const action = parseAppUriTaskAction(event.url);
-    // Never log the raw URL — it now carries the task title/notes, and log
-    // history is exportable in bug reports. Log that the event fired and
-    // whether it was recognized, matching OAuthCallbackHandlerService's own
-    // logging (which likewise never logs the callback URL).
-    Log.log('iOS app URL open', { recognized: !!action });
-    if (action) {
-      pendingCapacitorAppUriAction$.next(action);
-    }
+    const isTaskAction = routeCapacitorAppUrl(event.url);
+    // Never log the raw URL — it carries the task title/notes for task
+    // actions and an auth code for OAuth callbacks, and log history is
+    // exportable in bug reports. Log only that the event fired and how it
+    // was routed.
+    Log.log('iOS app URL open', { recognized: isTaskAction });
   });
 }

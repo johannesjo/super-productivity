@@ -18,6 +18,7 @@ import {
   AppUriTaskAction,
 } from '../util/parse-app-uri-task-action';
 import { PENDING_CAPACITOR_APP_URI_ACTION } from './pending-capacitor-app-uri-action';
+import { escapeHtml } from '../../../util/escape-html';
 
 // Reject an over-long title/notes when CREATING a task from an external URL
 // trigger — a created title syncs as an op to every device, so an unbounded one
@@ -132,7 +133,7 @@ export class AppUriTaskActionsService implements OnDestroy {
         this._snackService.open({
           type: 'ERROR',
           msg: T.F.TASK.S.PROJECT_NOT_FOUND_VIA_APP_URI,
-          translateParams: { title },
+          translateParams: { title: escapeHtml(title) },
         });
         return;
       }
@@ -158,7 +159,7 @@ export class AppUriTaskActionsService implements OnDestroy {
     this._snackService.open({
       type: 'SUCCESS',
       msg: T.F.TASK.S.ADDED_VIA_APP_URI,
-      translateParams: { title },
+      translateParams: { title: escapeHtml(title) },
     });
   }
 
@@ -170,7 +171,7 @@ export class AppUriTaskActionsService implements OnDestroy {
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.TASK.S.NOT_FOUND_VIA_APP_URI,
-        translateParams: { title: action.title },
+        translateParams: { title: escapeHtml(action.title) },
       });
       return;
     }
@@ -202,7 +203,7 @@ export class AppUriTaskActionsService implements OnDestroy {
             this._snackService.open({
               type: 'ERROR',
               msg: T.F.TASK.S.NOT_FOUND_VIA_APP_URI,
-              translateParams: { title: action.title },
+              translateParams: { title: escapeHtml(action.title) },
             });
             return;
           }
@@ -212,7 +213,7 @@ export class AppUriTaskActionsService implements OnDestroy {
             this._snackService.open({
               type: 'ERROR',
               msg: T.F.TASK.S.AMBIGUOUS_MATCH_VIA_APP_URI,
-              translateParams: { title: action.title },
+              translateParams: { title: escapeHtml(action.title) },
             });
             return;
           }
@@ -221,7 +222,7 @@ export class AppUriTaskActionsService implements OnDestroy {
           this._snackService.open({
             type: 'SUCCESS',
             msg: T.F.TASK.S.COMPLETED_VIA_APP_URI,
-            translateParams: { title: match.title },
+            translateParams: { title: escapeHtml(match.title) },
           });
         }),
     );
