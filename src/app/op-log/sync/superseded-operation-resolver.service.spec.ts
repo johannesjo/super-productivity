@@ -22,6 +22,9 @@ import {
 import { VectorClock } from '../../core/util/vector-clock';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { MAX_VECTOR_CLOCK_SIZE } from '../core/operation-log.const';
+import { StateSnapshotService } from '../backup/state-snapshot.service';
+import { OperationCaptureService } from '../capture/operation-capture.service';
+import { AppStateSnapshot } from '../core/types/backup.types';
 
 describe('SupersededOperationResolverService', () => {
   let service: SupersededOperationResolverService;
@@ -31,8 +34,27 @@ describe('SupersededOperationResolverService', () => {
   let mockLockService: jasmine.SpyObj<LockService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockClientIdProvider: { loadClientId: jasmine.Spy };
+  let mockStateSnapshotService: jasmine.SpyObj<StateSnapshotService>;
+  let mockOperationCapture: jasmine.SpyObj<OperationCaptureService>;
 
   const TEST_CLIENT_ID = 'test-client-123';
+
+  const createReplaySnapshot = (
+    overrides: Partial<AppStateSnapshot> = {},
+  ): AppStateSnapshot =>
+    ({
+      section: { ids: [], entities: {} },
+      project: { ids: [], entities: {} },
+      tag: { ids: [], entities: {} },
+      ...overrides,
+    }) as AppStateSnapshot;
+
+  const expectAtomicRejection = (opIds: readonly string[]): void => {
+    expect(
+      mockOpLogStore.appendMixedSourceBatchSkipDuplicates.calls.mostRecent().args[1],
+    ).toEqual({ rejectOpIds: opIds });
+    expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+  };
 
   const createMockOperation = (
     id: string,
@@ -77,12 +99,24 @@ describe('SupersededOperationResolverService', () => {
         .createSpy('loadClientId')
         .and.returnValue(Promise.resolve(TEST_CLIENT_ID)),
     };
+    mockStateSnapshotService = jasmine.createSpyObj('StateSnapshotService', [
+      'getStateSnapshotForOperationLog',
+    ]);
+    mockOperationCapture = jasmine.createSpyObj('OperationCaptureService', [
+      'hasUnrecoveredPersistFailure',
+      'getPendingCount',
+    ]);
 
     // Default mocks
     mockVectorClockService.getCurrentVectorClock.and.returnValue(Promise.resolve({}));
     mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
     mockOpLogStore.getUnsynced.and.resolveTo([]);
     mockOpLogStore.markRejected.and.returnValue(Promise.resolve());
+    mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+      createReplaySnapshot(),
+    );
+    mockOperationCapture.hasUnrecoveredPersistFailure.and.returnValue(false);
+    mockOperationCapture.getPendingCount.and.returnValue(0);
     mockOpLogStore.appendWithVectorClockOverwrite.and.returnValue(Promise.resolve(1));
     mockOpLogStore.appendMixedSourceBatchSkipDuplicates.and.callFake(async (batches) => {
       const written: MixedSourceWrittenOperation[] = [];
@@ -147,6 +181,8 @@ describe('SupersededOperationResolverService', () => {
         { provide: LockService, useValue: mockLockService },
         { provide: SnackService, useValue: mockSnackService },
         { provide: CLIENT_ID_PROVIDER, useValue: mockClientIdProvider },
+        { provide: StateSnapshotService, useValue: mockStateSnapshotService },
+        { provide: OperationCaptureService, useValue: mockOperationCapture },
       ],
     });
 
@@ -191,13 +227,23 @@ describe('SupersededOperationResolverService', () => {
           return result;
         },
       );
-      mockOpLogStore.markRejected.and.callFake(async () => {
-        callOrder.push('markRejected');
-      });
       mockOpLogStore.appendWithVectorClockOverwrite.and.callFake(async () => {
         callOrder.push('appendWithVectorClockOverwrite');
         return 1;
       });
+      mockOpLogStore.appendMixedSourceBatchSkipDuplicates.and.callFake(
+        async (batches) => {
+          const written: MixedSourceWrittenOperation[] = [];
+          for (const batch of batches) {
+            for (const op of batch.ops) {
+              await mockOpLogStore.appendWithVectorClockOverwrite(op, batch.source);
+              written.push({ seq: written.length + 1, op, source: batch.source });
+            }
+          }
+          callOrder.push('atomicCommit');
+          return { written, skippedCount: 0 };
+        },
+      );
 
       await service.resolveSupersededLocalOps([{ opId: 'op-1', op: supersededOp }]);
 
@@ -205,9 +251,10 @@ describe('SupersededOperationResolverService', () => {
       expect(callOrder).toEqual([
         'lock-start',
         'appendWithVectorClockOverwrite',
-        'markRejected',
+        'atomicCommit',
         'lock-end',
       ]);
+      expectAtomicRejection(['op-1']);
     });
 
     it('keeps superseded rows retryable when the replacement batch fails', async () => {
@@ -295,7 +342,7 @@ describe('SupersededOperationResolverService', () => {
       ]);
 
       expect(result).toBe(1);
-      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1']);
+      expectAtomicRejection(['op-1']);
       expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(1);
 
       const appendedOp = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
@@ -521,7 +568,7 @@ describe('SupersededOperationResolverService', () => {
       ]);
 
       expect(result).toBe(1); // Only ONE new op for all 3 superseded ops
-      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1', 'op-2', 'op-3']);
+      expectAtomicRejection(['op-1', 'op-2', 'op-3']);
       expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(1);
 
       const appendedOp = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
@@ -560,7 +607,7 @@ describe('SupersededOperationResolverService', () => {
       ]);
 
       expect(result).toBe(2);
-      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1', 'op-2']);
+      expectAtomicRejection(['op-1', 'op-2']);
       expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(2);
     });
 
@@ -579,7 +626,7 @@ describe('SupersededOperationResolverService', () => {
       ]);
 
       expect(result).toBe(0);
-      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1']);
+      expectAtomicRejection(['op-1']);
       expect(mockOpLogStore.appendWithVectorClockOverwrite).not.toHaveBeenCalled();
       // Should notify user that local changes were discarded
       expect(mockSnackService.open).toHaveBeenCalledOnceWith(
@@ -767,7 +814,7 @@ describe('SupersededOperationResolverService', () => {
       ]);
 
       expect(result).toBe(2); // Only 2 new ops (for existing entities)
-      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1', 'op-2', 'op-3']); // All 3 rejected
+      expectAtomicRejection(['op-1', 'op-2', 'op-3']); // All 3 rejected
       expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(2);
     });
 
@@ -970,24 +1017,6 @@ describe('SupersededOperationResolverService', () => {
           remoteOp: remoteOrderOp,
         },
       ];
-      const newPendingRemoveOp: Operation = {
-        ...remoteRemoveOp,
-        id: 'new-pending-section-remove',
-        entityId: 'section-other',
-        payload: {
-          actionPayload: {
-            sectionId: 'section-other',
-            taskId: 'task-2',
-            workContextId: 'TODAY',
-            workContextType: 'TAG',
-            workContextAfterTaskId: 'main-anchor',
-          },
-          entityChanges: [],
-        },
-        clientId: 'original-client',
-        vectorClock: { original: 4 },
-        timestamp: 5000,
-      };
       const unrelatedPendingTaskOp = createMockOperation(
         'unrelated-pending-task',
         'TASK',
@@ -995,6 +1024,49 @@ describe('SupersededOperationResolverService', () => {
         { original: 4 },
         5000,
       );
+
+      beforeEach(() => {
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-right', 'section-left', 'section-third'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['right-anchor', 'task-1'],
+                },
+                ['section-third']: {
+                  id: 'section-third',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Third',
+                  taskIds: [],
+                },
+              },
+            },
+            tag: {
+              ids: ['TODAY'],
+              entities: {
+                TODAY: {
+                  id: 'TODAY',
+                  title: 'Today',
+                  taskIds: ['main-anchor', 'task-1'],
+                },
+              },
+            },
+          }),
+        );
+      });
 
       sectionOps.forEach(({ description, op, remoteOp }) => {
         it(`should causally re-create a superseded ${description}`, async () => {
@@ -1016,24 +1088,39 @@ describe('SupersededOperationResolverService', () => {
           ]);
 
           expect(result).toBe(1);
-          expect(mockOpLogStore.markRejected).toHaveBeenCalledWith([op.id]);
+          expectAtomicRejection([op.id]);
           expect(
             mockConflictResolutionService.getCurrentEntityState,
           ).not.toHaveBeenCalled();
           const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
             .args[0] as Operation;
-          expect(replacement).toEqual({
-            ...op,
-            id: jasmine.any(String),
-            clientId: TEST_CLIENT_ID,
-            entityIds: op.entityIds,
-            vectorClock: {
-              ...op.vectorClock,
-              remote: 4,
-              [TEST_CLIENT_ID]: 1,
-            },
-            schemaVersion: CURRENT_SCHEMA_VERSION,
-          });
+          expect(replacement).toEqual(
+            jasmine.objectContaining({
+              actionType: op.actionType,
+              id: jasmine.any(String),
+              clientId: TEST_CLIENT_ID,
+              vectorClock: {
+                ...op.vectorClock,
+                remote: 4,
+                [TEST_CLIENT_ID]: 1,
+              },
+              schemaVersion: CURRENT_SCHEMA_VERSION,
+            }),
+          );
+          if (op.actionType === ActionType.SECTION_UPDATE_ORDER) {
+            expect(replacement.entityIds).toEqual([
+              'section-right',
+              'section-left',
+              'section-third',
+            ]);
+            expect(
+              (replacement.payload as { actionPayload: Record<string, unknown> })
+                .actionPayload['ids'],
+            ).toEqual(['section-right', 'section-left', 'section-third']);
+          } else {
+            expect(replacement.entityIds).toEqual(op.entityIds);
+            expect(replacement.payload).toEqual(op.payload);
+          }
           expect(replacement.id).not.toBe(op.id);
         });
       });
@@ -1139,7 +1226,7 @@ describe('SupersededOperationResolverService', () => {
         expect(replacement.actionType).not.toBe(ActionType.SECTION_ADD_TASK);
       });
 
-      it('should defer an older move when a later overlapping move is already synced', async () => {
+      it('should compose an older move with a later synced move instead of deferring forever', async () => {
         const localMoveOp = sectionOps[0].op;
         const laterOverlappingMoveOp: Operation = {
           ...localMoveOp,
@@ -1162,7 +1249,6 @@ describe('SupersededOperationResolverService', () => {
           original: 4,
           remote: 4,
         });
-        mockOpLogStore.getUnsynced.and.resolveTo(asPendingEntries(localMoveOp));
         mockOpLogStore.getOpsAfterSeq.and.resolveTo([
           {
             seq: 1,
@@ -1186,26 +1272,138 @@ describe('SupersededOperationResolverService', () => {
             applicationStatus: 'applied',
           },
         ]);
-
-        await expectAsync(
-          service.resolveSupersededLocalOps([
-            {
-              opId: localMoveOp.id,
-              op: localMoveOp,
-              existingClock: remoteRemoveOp.vectorClock,
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-right', 'section-left', 'section-third'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['right-anchor'],
+                },
+                ['section-third']: {
+                  id: 'section-third',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Third',
+                  taskIds: ['third-anchor', 'task-1'],
+                },
+              },
             },
-          ]),
-        ).toBeRejectedWithError(/Deferring causal SECTION replay/);
-        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
-        expect(mockOpLogStore.appendWithVectorClockOverwrite).not.toHaveBeenCalled();
+          }),
+        );
+
+        const result = await service.resolveSupersededLocalOps([
+          {
+            opId: localMoveOp.id,
+            op: localMoveOp,
+            existingClock: remoteRemoveOp.vectorClock,
+          },
+        ]);
+
+        expect(result).toBe(1);
+        expectAtomicRejection([localMoveOp.id]);
+        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
+          .args[0] as Operation;
+        expect(replacement.entityId).toBe('section-left');
+        expect(replacement.entityIds).toEqual(['section-left', 'section-third']);
+        expect(
+          (replacement.payload as { actionPayload: Record<string, unknown> })
+            .actionPayload,
+        ).toEqual({
+          sectionId: 'section-third',
+          taskId: 'task-1',
+          afterTaskId: 'third-anchor',
+          sourceSectionId: 'section-left',
+        });
       });
 
-      it('should ignore an unrelated pending non-SECTION op for safe replay', async () => {
+      it('should compose a later removal into one no-section replacement', async () => {
         const localMoveOp = sectionOps[0].op;
         mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
-        mockOpLogStore.getUnsynced.and.resolveTo(
-          asPendingEntries(localMoveOp, unrelatedPendingTaskOp),
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: remoteOrderOp,
+            appliedAt: 1,
+            source: 'remote',
+            syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+        ]);
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-left', 'section-right'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['right-anchor'],
+                },
+              },
+            },
+            tag: {
+              ids: ['TODAY'],
+              entities: {
+                TODAY: {
+                  id: 'TODAY',
+                  title: 'Today',
+                  taskIds: ['current-main-anchor', 'task-1'],
+                },
+              },
+            },
+          }),
         );
+
+        await service.resolveSupersededLocalOps([
+          {
+            opId: localMoveOp.id,
+            op: localMoveOp,
+            existingClock: remoteOrderOp.vectorClock,
+          },
+        ]);
+
+        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
+          .args[0] as Operation;
+        expect(replacement.actionType).toBe(ActionType.SECTION_REMOVE_TASK);
+        expect(replacement.opType).toBe(OpType.Update);
+        expect(replacement.entityId).toBe('section-left');
+        expect(replacement.entityIds).toBeUndefined();
+        expect(
+          (replacement.payload as { actionPayload: Record<string, unknown> })
+            .actionPayload,
+        ).toEqual({
+          sectionId: 'section-left',
+          taskId: 'task-1',
+          workContextId: 'TODAY',
+          workContextType: 'TAG',
+          workContextAfterTaskId: 'current-main-anchor',
+        });
+      });
+
+      it('should ignore an unrelated retained non-SECTION op for safe replay', async () => {
+        const localMoveOp = sectionOps[0].op;
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
         mockOpLogStore.getOpsAfterSeq.and.resolveTo([
           {
             seq: 1,
@@ -1213,6 +1411,14 @@ describe('SupersededOperationResolverService', () => {
             appliedAt: 1,
             source: 'remote',
             syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+          {
+            seq: 2,
+            op: unrelatedPendingTaskOp,
+            appliedAt: 2,
+            source: 'local',
+            syncedAt: 2,
             applicationStatus: 'applied',
           },
         ]);
@@ -1226,18 +1432,15 @@ describe('SupersededOperationResolverService', () => {
         ]);
 
         expect(result).toBe(1);
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledOnceWith([localMoveOp.id]);
+        expectAtomicRejection([localMoveOp.id]);
         const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
           .args[0] as Operation;
         expect(replacement.actionType).toBe(ActionType.SECTION_ADD_TASK);
       });
 
-      it('should defer instead of using LWW when a new pending op appeared before resolution', async () => {
+      it('should replace a deleted section anchor with the current predecessor', async () => {
         const localMoveOp = sectionOps[0].op;
         mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
-        mockOpLogStore.getUnsynced.and.resolveTo(
-          asPendingEntries(localMoveOp, newPendingRemoveOp),
-        );
         mockOpLogStore.getOpsAfterSeq.and.resolveTo([
           {
             seq: 1,
@@ -1248,40 +1451,113 @@ describe('SupersededOperationResolverService', () => {
             applicationStatus: 'applied',
           },
         ]);
-        mockConflictResolutionService.getCurrentEntityState.and.resolveTo({
-          id: 'section-left',
-          taskIds: [],
-        });
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-left', 'section-right'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['new-predecessor', 'task-1', 'tail'],
+                },
+              },
+            },
+          }),
+        );
 
-        const supersededMove = {
-          opId: localMoveOp.id,
-          op: localMoveOp,
-          existingClock: remoteRemoveOp.vectorClock,
-        };
-        await expectAsync(
-          service.resolveSupersededLocalOps([supersededMove]),
-        ).toBeRejectedWithError(/Deferring causal SECTION replay/);
-        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
-        expect(mockOpLogStore.appendWithVectorClockOverwrite).not.toHaveBeenCalled();
-
-        mockOpLogStore.getUnsynced.and.resolveTo(asPendingEntries(localMoveOp));
-        const result = await service.resolveSupersededLocalOps([supersededMove]);
+        const result = await service.resolveSupersededLocalOps([
+          {
+            opId: localMoveOp.id,
+            op: localMoveOp,
+            existingClock: remoteRemoveOp.vectorClock,
+          },
+        ]);
 
         expect(result).toBe(1);
-        expect(
-          mockConflictResolutionService.getCurrentEntityState,
-        ).not.toHaveBeenCalled();
         const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
           .args[0] as Operation;
-        expect(replacement.actionType).toBe(ActionType.SECTION_ADD_TASK);
+        expect(
+          (replacement.payload as { actionPayload: Record<string, unknown> })
+            .actionPayload['afterTaskId'],
+        ).toBe('new-predecessor');
       });
 
-      it('should resolve another rejected op before deferring the SECTION replay', async () => {
+      it('should replace a moved work-context anchor with the current predecessor', async () => {
+        const localRemoveOp = sectionOps[1].op;
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: remoteMoveOp,
+            appliedAt: 1,
+            source: 'remote',
+            syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+        ]);
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-left', 'section-right'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['right-anchor', 'task-1'],
+                },
+              },
+            },
+            tag: {
+              ids: ['TODAY'],
+              entities: {
+                TODAY: {
+                  id: 'TODAY',
+                  title: 'Today',
+                  taskIds: ['new-main-predecessor', 'task-1', 'main-anchor'],
+                },
+              },
+            },
+          }),
+        );
+
+        await service.resolveSupersededLocalOps([
+          {
+            opId: localRemoveOp.id,
+            op: localRemoveOp,
+            existingClock: remoteMoveOp.vectorClock,
+          },
+        ]);
+
+        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
+          .args[0] as Operation;
+        expect(
+          (replacement.payload as { actionPayload: Record<string, unknown> })
+            .actionPayload['workContextAfterTaskId'],
+        ).toBe('new-main-predecessor');
+      });
+
+      it('should leave the predecessor retryable when live state is ahead of durable capture', async () => {
         const localMoveOp = sectionOps[0].op;
         mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
-        mockOpLogStore.getUnsynced.and.resolveTo(
-          asPendingEntries(localMoveOp, newPendingRemoveOp),
-        );
         mockOpLogStore.getOpsAfterSeq.and.resolveTo([
           {
             seq: 1,
@@ -1292,10 +1568,7 @@ describe('SupersededOperationResolverService', () => {
             applicationStatus: 'applied',
           },
         ]);
-        mockConflictResolutionService.getCurrentEntityState.and.resolveTo({
-          id: 'section-other',
-          taskIds: [],
-        });
+        mockOperationCapture.getPendingCount.and.returnValue(1);
 
         await expectAsync(
           service.resolveSupersededLocalOps([
@@ -1304,20 +1577,15 @@ describe('SupersededOperationResolverService', () => {
               op: localMoveOp,
               existingClock: remoteRemoveOp.vectorClock,
             },
-            {
-              opId: newPendingRemoveOp.id,
-              op: newPendingRemoveOp,
-              existingClock: remoteRemoveOp.vectorClock,
-            },
           ]),
-        ).toBeRejectedWithError(/Deferring causal SECTION replay/);
+        ).toBeRejectedWithError(/captured actions are still awaiting persistence/);
 
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledOnceWith([
-          newPendingRemoveOp.id,
-        ]);
-        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
-          .args[0] as Operation;
-        expect(replacement.actionType).not.toBe(ActionType.SECTION_REMOVE_TASK);
+        expect(
+          mockStateSnapshotService.getStateSnapshotForOperationLog,
+        ).not.toHaveBeenCalled();
+        expect(
+          mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
+        ).not.toHaveBeenCalled();
       });
 
       [
@@ -1405,7 +1673,7 @@ describe('SupersededOperationResolverService', () => {
         ]);
 
         expect(result).toBe(1);
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-archive-1']);
+        expectAtomicRejection(['op-archive-1']);
         expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(1);
 
         const appendedOp = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
@@ -1539,10 +1807,7 @@ describe('SupersededOperationResolverService', () => {
         ]);
 
         expect(result).toBe(2);
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith([
-          'op-archive',
-          'op-regular',
-        ]);
+        expectAtomicRejection(['op-archive', 'op-regular']);
         expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(2);
 
         const calls = mockOpLogStore.appendWithVectorClockOverwrite.calls.all();
@@ -1648,10 +1913,7 @@ describe('SupersededOperationResolverService', () => {
         ]);
 
         expect(result).toBe(2);
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith([
-          'op-archive-1',
-          'op-archive-2',
-        ]);
+        expectAtomicRejection(['op-archive-1', 'op-archive-2']);
         expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(2);
 
         const calls = mockOpLogStore.appendWithVectorClockOverwrite.calls.all();
@@ -1707,7 +1969,7 @@ describe('SupersededOperationResolverService', () => {
         ]);
 
         expect(result).toBe(1);
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1']);
+        expectAtomicRejection(['op-1']);
         expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(1);
 
         const appendedOp = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
@@ -1751,7 +2013,7 @@ describe('SupersededOperationResolverService', () => {
         ]);
 
         expect(result).toBe(1); // Only ONE new op for both superseded DELETE ops
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1', 'op-2']);
+        expectAtomicRejection(['op-1', 'op-2']);
         expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(1);
 
         const appendedOp = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
@@ -1842,7 +2104,7 @@ describe('SupersededOperationResolverService', () => {
         ]);
 
         expect(result).toBe(2); // One DELETE op + one UPDATE op
-        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1', 'op-2']);
+        expectAtomicRejection(['op-1', 'op-2']);
         expect(mockOpLogStore.appendWithVectorClockOverwrite).toHaveBeenCalledTimes(2);
 
         const calls = mockOpLogStore.appendWithVectorClockOverwrite.calls.all();

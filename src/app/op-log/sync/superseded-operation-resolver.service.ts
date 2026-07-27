@@ -30,10 +30,16 @@ import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import {
   areCommutingSectionOperations,
-  canReorderSectionTransition,
-  getSectionReplayScopeKeys,
+  projectSectionReplayAgainstState,
+  SectionReplaySnapshot,
 } from './section-conflict-commutativity.util';
 import { getOpEntityIds } from '../util/get-op-entity-ids.util';
+import { StateSnapshotService } from '../backup/state-snapshot.service';
+import { OperationCaptureService } from '../capture/operation-capture.service';
+import { getPhantomChangeRisk } from '../capture/phantom-change-guard.util';
+import { SectionState } from '../../features/section/section.model';
+import { ProjectState } from '../../features/project/project.model';
+import { TagState } from '../../features/tag/tag.model';
 
 type SupersededOperation = {
   opId: string;
@@ -41,14 +47,10 @@ type SupersededOperation = {
   existingClock?: VectorClock;
 };
 
-type SectionCausalReplayDecision = 'replay' | 'fallback' | 'defer';
+type SectionCausalReplayDecision = 'replay' | 'fallback';
 
 interface SectionCausalReplayContext {
   retainedByEntityClock: Map<string, OperationLogEntry[]>;
-  syncedLocalByScope: Map<string, OperationLogEntry[]>;
-  unscopedSyncedLocal: OperationLogEntry[];
-  pendingEntries: OperationLogEntry[];
-  pendingById: Map<string, OperationLogEntry>;
 }
 
 const CAUSALLY_REPLAYABLE_SECTION_ACTIONS = new Set<ActionType>([
@@ -83,11 +85,8 @@ const addToIndex = (
 
 const buildSectionCausalReplayContext = (
   retainedEntries: OperationLogEntry[],
-  pendingEntries: OperationLogEntry[],
 ): SectionCausalReplayContext => {
   const retainedByEntityClock = new Map<string, OperationLogEntry[]>();
-  const syncedLocalByScope = new Map<string, OperationLogEntry[]>();
-  const unscopedSyncedLocal: OperationLogEntry[] = [];
 
   for (const entry of retainedEntries) {
     for (const entityId of getOpEntityIds(entry.op)) {
@@ -97,32 +96,9 @@ const buildSectionCausalReplayContext = (
         entry,
       );
     }
-
-    if (
-      entry.source !== 'local' ||
-      entry.syncedAt === undefined ||
-      entry.rejectedAt !== undefined ||
-      entry.reducerRejectedAt !== undefined
-    ) {
-      continue;
-    }
-    const scopeKeys = getSectionReplayScopeKeys(entry.op);
-    if (scopeKeys === undefined) {
-      unscopedSyncedLocal.push(entry);
-      continue;
-    }
-    for (const scopeKey of scopeKeys) {
-      addToIndex(syncedLocalByScope, scopeKey, entry);
-    }
   }
 
-  return {
-    retainedByEntityClock,
-    syncedLocalByScope,
-    unscopedSyncedLocal,
-    pendingEntries,
-    pendingById: new Map(pendingEntries.map((entry) => [entry.op.id, entry])),
-  };
+  return { retainedByEntityClock };
 };
 
 /**
@@ -153,6 +129,8 @@ export class SupersededOperationResolverService {
   private snackService = inject(SnackService);
   private syncConflictBanner = inject(SyncConflictBannerService);
   private clientIdProvider = inject(CLIENT_ID_PROVIDER);
+  private stateSnapshotService = inject(StateSnapshotService);
+  private operationCapture = inject(OperationCaptureService);
 
   /**
    * Re-creates an operation with a merged vector clock, preserving its original payload.
@@ -222,56 +200,27 @@ export class SupersededOperationResolverService {
     ) {
       return 'fallback';
     }
-    const retainedConflictOp = retainedConflictEntry.op;
-    const pendingItemEntry = context.pendingById.get(item.op.id);
-    const itemScopeKeys = getSectionReplayScopeKeys(item.op);
-    const conflictScopeKeys = getSectionReplayScopeKeys(retainedConflictOp);
-    if (
-      !pendingItemEntry ||
-      itemScopeKeys === undefined ||
-      conflictScopeKeys === undefined
-    ) {
-      return 'defer';
-    }
-
-    const scopedSuccessors = new Map<string, OperationLogEntry>();
-    for (const entry of context.unscopedSyncedLocal) {
-      scopedSuccessors.set(entry.op.id, entry);
-    }
-    for (const scopeKey of new Set([...itemScopeKeys, ...conflictScopeKeys])) {
-      for (const entry of context.syncedLocalByScope.get(scopeKey) ?? []) {
-        scopedSuccessors.set(entry.op.id, entry);
-      }
-    }
-    for (const successor of scopedSuccessors.values()) {
-      if (
-        successor.seq <= pendingItemEntry.seq ||
-        compareVectorClocks(item.op.vectorClock, successor.op.vectorClock) !==
-          VectorClockComparison.LESS_THAN
-      ) {
-        continue;
-      }
-      if (
-        canReorderSectionTransition(item.op, successor.op) ||
-        canReorderSectionTransition(retainedConflictOp, successor.op)
-      ) {
-        return 'defer';
-      }
-    }
-
-    for (const pendingEntry of context.pendingEntries) {
-      if (pendingEntry.op.id === item.op.id) {
-        continue;
-      }
-      if (
-        canReorderSectionTransition(item.op, pendingEntry.op) ||
-        canReorderSectionTransition(retainedConflictOp, pendingEntry.op)
-      ) {
-        return 'defer';
-      }
-    }
 
     return 'replay';
+  }
+
+  /**
+   * Reads a reducer-state frontier that is fully represented by durable ops.
+   * This check and the synchronous snapshot read deliberately have no await
+   * between them. Later user actions wait behind the operation-log lock for
+   * persistence and therefore follow the compensation in durable order.
+   */
+  private _getStableSectionReplaySnapshot(): SectionReplaySnapshot {
+    const phantomRisk = getPhantomChangeRisk(this.operationCapture);
+    if (phantomRisk) {
+      throw new Error(`Cannot project SECTION conflict recovery while ${phantomRisk}.`);
+    }
+    const snapshot = this.stateSnapshotService.getStateSnapshotForOperationLog();
+    return {
+      section: snapshot.section as SectionState,
+      project: snapshot.project as ProjectState,
+      tag: snapshot.tag as TagState,
+    };
   }
 
   /**
@@ -327,7 +276,6 @@ export class SupersededOperationResolverService {
       const opsToReject: string[] = [];
       const newOpsCreated: Operation[] = [];
       const auxiliaryOpIds = new Set<string>();
-      const deferredSectionOpIds: string[] = [];
 
       // Handle irreducible semantic operations BEFORE entity-by-entity grouping.
       // moveToArchive uses OpType.Update but its reducer removes entities from the NgRx store
@@ -338,45 +286,59 @@ export class SupersededOperationResolverService {
       //
       // SECTION order/placement operations also carry reducer semantics that an
       // entity snapshot cannot represent. Re-create one only when the exact
-      // applied server row proves a commuting crossing and neither pending work
-      // nor an already-accepted causal successor could be reordered around the
-      // replacement. Otherwise leave the SECTION row pending and fail this cycle
-      // after resolving unrelated rejected rows. Any malformed or ambiguous
-      // crossing retains the generic LWW fallback.
+      // applied server row proves a commuting crossing. Project its payload
+      // against one stable live-state frontier so anchors and every later local
+      // successor are represented without an action-family allowlist. Malformed
+      // or unrepresentable crossings retain the generic LWW fallback.
       const regularSupersededOps: SupersededOperation[] = [];
       let sectionReplayContext: SectionCausalReplayContext | undefined;
+      let sectionReplaySnapshot: SectionReplaySnapshot | undefined;
       for (const item of supersededOps) {
-        let canCausallyReplaySectionOperation = false;
+        let projectedSectionOp: Operation | undefined;
         if (
           CAUSALLY_REPLAYABLE_SECTION_ACTIONS.has(item.op.actionType) &&
           item.existingClock
         ) {
           if (!sectionReplayContext) {
             const retainedEntries = await this.opLogStore.getOpsAfterSeq(0);
-            const pendingEntries = await this.opLogStore.getUnsynced();
-            sectionReplayContext = buildSectionCausalReplayContext(
-              retainedEntries,
-              pendingEntries,
-            );
+            sectionReplayContext = buildSectionCausalReplayContext(retainedEntries);
           }
           const replayDecision = this._getSectionCausalReplayDecision(
             item,
             sectionReplayContext,
           );
-          if (replayDecision === 'defer') {
-            deferredSectionOpIds.push(item.opId);
-            continue;
+          if (replayDecision === 'replay') {
+            sectionReplaySnapshot ??= this._getStableSectionReplaySnapshot();
+            const projection = projectSectionReplayAgainstState(
+              item.op,
+              sectionReplaySnapshot,
+            );
+            if (projection.kind === 'superseded') {
+              opsToReject.push(item.opId);
+              OpLog.normal(
+                `SupersededOperationResolverService: SECTION intent ${item.opId} ` +
+                  'was superseded by the current durable state.',
+              );
+              continue;
+            }
+            if (projection.kind === 'blocked') {
+              OpLog.warn(
+                `SupersededOperationResolverService: Cannot safely project SECTION ` +
+                  `intent ${item.opId}: ${projection.reason}. Falling back to LWW.`,
+              );
+            } else {
+              projectedSectionOp = projection.operation;
+            }
           }
-          canCausallyReplaySectionOperation = replayDecision === 'replay';
         }
 
         if (
           item.op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
-          canCausallyReplaySectionOperation
+          projectedSectionOp
         ) {
-          // Preserve the original authenticated action payload and footprint.
+          const sourceOp = projectedSectionOp ?? item.op;
           const clocksToMerge = [globalClock, item.op.vectorClock];
-          if (canCausallyReplaySectionOperation && item.existingClock) {
+          if (projectedSectionOp && item.existingClock) {
             clocksToMerge.push(item.existingClock);
           }
           const mergedClock = this.conflictResolutionService.mergeAndIncrementClocks(
@@ -388,7 +350,7 @@ export class SupersededOperationResolverService {
           // MAX_VECTOR_CLOCK_SIZE, causing the comparison to return CONCURRENT instead of
           // GREATER_THAN → infinite rejection loop.
           const newOp = this._recreateOpWithMergedClock(
-            item.op,
+            sourceOp,
             mergedClock,
             clientId,
             item.op.timestamp,
@@ -533,23 +495,19 @@ export class SupersededOperationResolverService {
         );
       }
 
-      // Persist every replacement group atomically and rebase its clocks in
-      // durable sequence order. Retire the stale rows only afterwards: if the
-      // batch fails, the originals remain retryable; if rejection fails, the
-      // complete replacement group is already durable.
-      if (newOpsCreated.length > 0) {
-        const { written } = await this.opLogStore.appendMixedSourceBatchSkipDuplicates([
-          { ops: newOpsCreated, source: 'local' },
-        ]);
+      // Persist replacements, rebase their clocks, and retire their stale
+      // predecessors in one transaction. A crash can therefore expose neither
+      // half of the recovery on its own.
+      if (newOpsCreated.length > 0 || opsToReject.length > 0) {
+        const { written } = await this.opLogStore.appendMixedSourceBatchSkipDuplicates(
+          [{ ops: newOpsCreated, source: 'local' }],
+          { rejectOpIds: opsToReject },
+        );
         for (const { op } of written) {
           OpLog.normal(
             `SupersededOperationResolverService: Appended LWW update op ${op.id} for ${op.entityType}:${op.entityId}`,
           );
         }
-      }
-
-      if (opsToReject.length > 0) {
-        await this.opLogStore.markRejected(opsToReject);
         OpLog.normal(
           `SupersededOperationResolverService: Marked ${opsToReject.length} superseded ops as rejected`,
         );
@@ -572,12 +530,6 @@ export class SupersededOperationResolverService {
       }
 
       result = newOpsCreated.length - auxiliaryOpIds.size;
-      if (deferredSectionOpIds.length > 0) {
-        throw new Error(
-          `Deferring causal SECTION replay for ${deferredSectionOpIds.length} ` +
-            'operation(s) until the pending operation set is stable.',
-        );
-      }
     });
     return result;
   }

@@ -1831,6 +1831,147 @@ describe('OperationLogStoreService', () => {
   });
 
   describe('appendMixedSourceBatchSkipDuplicates', () => {
+    it('should atomically append a replacement and reject its predecessors with one timestamp', async () => {
+      const firstPredecessor = createTestOperation({ id: 'first-predecessor' });
+      const secondPredecessor = createTestOperation({ id: 'second-predecessor' });
+      const replacement = createTestOperation({ id: 'replacement' });
+      await service.appendBatch([firstPredecessor, secondPredecessor], 'local');
+
+      // Populate the unsynced cache before the atomic transition.
+      expect((await service.getUnsynced()).map(({ op }) => op.id)).toEqual([
+        'first-predecessor',
+        'second-predecessor',
+      ]);
+
+      const result = await service.appendMixedSourceBatchSkipDuplicates(
+        [{ ops: [replacement], source: 'local' }],
+        { rejectOpIds: [firstPredecessor.id, secondPredecessor.id] },
+      );
+
+      expect(result.written.map(({ op }) => op.id)).toEqual(['replacement']);
+      const stored = await service.getOpsAfterSeq(0);
+      const rejectedAt = stored
+        .filter(({ op }) => op.id !== replacement.id)
+        .map((entry) => entry.rejectedAt);
+      expect(rejectedAt[0]).toBeDefined();
+      expect(rejectedAt[1]).toBe(rejectedAt[0]);
+      expect(
+        stored.find(({ op }) => op.id === replacement.id)?.rejectedAt,
+      ).toBeUndefined();
+      expect((await service.getUnsynced()).map(({ op }) => op.id)).toEqual([
+        'replacement',
+      ]);
+    });
+
+    it('should roll back replacement and predecessor rejection when the clock write fails', async () => {
+      await service.setVectorClock({ testClient: 4 });
+      const predecessor = createTestOperation({ id: 'rollback-predecessor' });
+      await service.append(predecessor, 'local');
+      expect((await service.getUnsynced()).map(({ op }) => op.id)).toEqual([
+        predecessor.id,
+      ]);
+
+      const adapter = (
+        service as unknown as {
+          _adapter: OpLogDbAdapter;
+        }
+      )._adapter;
+      const originalTransaction = adapter.transaction.bind(adapter);
+      spyOn(adapter, 'transaction').and.callFake(async (stores, mode, callback) =>
+        originalTransaction(stores, mode, async (tx) => {
+          const failingTx = new Proxy(tx, {
+            get: (target, property): unknown => {
+              if (property === 'put') {
+                return async (store: string, value: unknown, key?: string | number) => {
+                  if (store === STORE_NAMES.VECTOR_CLOCK) {
+                    throw new Error('injected atomic replacement clock failure');
+                  }
+                  return target.put(store, value, key);
+                };
+              }
+              const value = Reflect.get(target, property);
+              return typeof value === 'function' ? value.bind(target) : value;
+            },
+          });
+          return callback(failingTx);
+        }),
+      );
+
+      await expectAsync(
+        service.appendMixedSourceBatchSkipDuplicates(
+          [
+            {
+              ops: [createTestOperation({ id: 'rolled-back-replacement' })],
+              source: 'local',
+            },
+          ],
+          { rejectOpIds: [predecessor.id] },
+        ),
+      ).toBeRejectedWithError('injected atomic replacement clock failure');
+
+      const stored = await service.getOpsAfterSeq(0);
+      expect(stored.map(({ op }) => op.id)).toEqual([predecessor.id]);
+      expect(stored[0].rejectedAt).toBeUndefined();
+      expect((await service.getUnsynced()).map(({ op }) => op.id)).toEqual([
+        predecessor.id,
+      ]);
+      service.clearVectorClockCache();
+      expect(await service.getVectorClock()).toEqual({ testClient: 4 });
+    });
+
+    it('should support atomically rejecting predecessors without appending a replacement', async () => {
+      const predecessor = createTestOperation({ id: 'rejection-only-predecessor' });
+      await service.append(predecessor, 'local');
+      expect((await service.getUnsynced()).map(({ op }) => op.id)).toEqual([
+        predecessor.id,
+      ]);
+
+      const result = await service.appendMixedSourceBatchSkipDuplicates([], {
+        rejectOpIds: [predecessor.id],
+      });
+
+      expect(result).toEqual({ written: [], skippedCount: 0 });
+      expect((await service.getOpById(predecessor.id))?.rejectedAt).toBeDefined();
+      expect(await service.getUnsynced()).toEqual([]);
+    });
+
+    it('should abort atomically when a predecessor to reject is missing', async () => {
+      const replacement = createTestOperation({ id: 'orphaned-replacement' });
+
+      await expectAsync(
+        service.appendMixedSourceBatchSkipDuplicates(
+          [{ ops: [replacement], source: 'local' }],
+          { rejectOpIds: ['missing-predecessor'] },
+        ),
+      ).toBeRejectedWithError(
+        'Cannot atomically reject missing operation missing-predecessor',
+      );
+
+      expect(await service.getOpsAfterSeq(0)).toEqual([]);
+    });
+
+    it('should abort atomically when a predecessor is already inactive', async () => {
+      const predecessor = createTestOperation({ id: 'inactive-predecessor' });
+      const replacement = createTestOperation({
+        id: 'replacement-for-inactive-predecessor',
+      });
+      await service.append(predecessor, 'local');
+      await service.markRejected([predecessor.id]);
+
+      await expectAsync(
+        service.appendMixedSourceBatchSkipDuplicates(
+          [{ ops: [replacement], source: 'local' }],
+          { rejectOpIds: [predecessor.id] },
+        ),
+      ).toBeRejectedWithError(
+        'Cannot atomically reject operation inactive-predecessor because it is not an active pending local operation',
+      );
+
+      expect((await service.getOpsAfterSeq(0)).map(({ op }) => op.id)).toEqual([
+        predecessor.id,
+      ]);
+    });
+
     it('should atomically order remote losers before monotonically clocked local compensations', async () => {
       await service.setVectorClock({ testClient: 5, existingClient: 2 });
       const remoteLoser = createTestOperation({

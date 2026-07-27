@@ -1,17 +1,21 @@
 import {
   ActionType,
   extractActionPayload,
-  isFullStateOpType,
+  isMultiEntityPayload,
   Operation,
   OpType,
 } from '../core/operation.types';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { getOpEntityIds } from '../util/get-op-entity-ids.util';
+import { Section, SectionState } from '../../features/section/section.model';
+import { ProjectState } from '../../features/project/project.model';
+import { TagState } from '../../features/tag/tag.model';
 
 interface SectionPlacement {
   sourceSectionId: string | null;
   destinationSectionId: string;
   taskId: string;
+  afterTaskId: string | null;
 }
 
 interface SectionMove extends SectionPlacement {
@@ -23,6 +27,7 @@ interface SectionRemoval {
   taskId: string;
   workContextId: string;
   workContextType: WorkContextType;
+  workContextAfterTaskId: string | null;
 }
 
 interface SectionOrder {
@@ -30,21 +35,16 @@ interface SectionOrder {
   sectionIds: string[];
 }
 
-interface SectionSemanticFootprint {
-  writeKeys: readonly string[];
-  sectionIds: readonly string[];
-  taskIds: readonly string[];
-  workContexts: readonly {
-    id: string;
-    type: WorkContextType;
-  }[];
+export interface SectionReplaySnapshot {
+  section: SectionState;
+  project: ProjectState;
+  tag: TagState;
 }
 
-const SECTION_ACTIONS = new Set<ActionType>([
-  ActionType.SECTION_UPDATE_ORDER,
-  ActionType.SECTION_ADD_TASK,
-  ActionType.SECTION_REMOVE_TASK,
-]);
+export type SectionReplayProjection =
+  | { kind: 'replay'; operation: Operation }
+  | { kind: 'superseded' }
+  | { kind: 'blocked'; reason: string };
 
 const isStringOrNull = (value: unknown): value is string | null =>
   value === null || typeof value === 'string';
@@ -79,11 +79,12 @@ const getSectionPlacement = (operation: Operation): SectionPlacement | undefined
   const sourceSectionId = payload?.['sourceSectionId'];
   const destinationSectionId = payload?.['sectionId'];
   const taskId = payload?.['taskId'];
+  const afterTaskId = payload?.['afterTaskId'];
   if (
     !isStringOrNull(sourceSectionId) ||
     typeof destinationSectionId !== 'string' ||
     typeof taskId !== 'string' ||
-    !isStringOrNull(payload?.['afterTaskId'])
+    !isStringOrNull(afterTaskId)
   ) {
     return undefined;
   }
@@ -98,7 +99,7 @@ const getSectionPlacement = (operation: Operation): SectionPlacement | undefined
   ) {
     return undefined;
   }
-  return { sourceSectionId, destinationSectionId, taskId };
+  return { sourceSectionId, destinationSectionId, taskId, afterTaskId };
 };
 
 const getSectionMove = (operation: Operation): SectionMove | undefined => {
@@ -129,19 +130,26 @@ const getSectionRemoval = (operation: Operation): SectionRemoval | undefined => 
   const taskId = payload?.['taskId'];
   const workContextId = payload?.['workContextId'];
   const workContextType = payload?.['workContextType'];
+  const workContextAfterTaskId = payload?.['workContextAfterTaskId'];
   if (
     typeof sectionId !== 'string' ||
     typeof taskId !== 'string' ||
     typeof workContextId !== 'string' ||
     (workContextType !== WorkContextType.PROJECT &&
       workContextType !== WorkContextType.TAG) ||
-    !isStringOrNull(payload?.['workContextAfterTaskId']) ||
+    !isStringOrNull(workContextAfterTaskId) ||
     operation.entityId !== sectionId ||
     !hasExactEntityIds(operation, [sectionId])
   ) {
     return undefined;
   }
-  return { sectionId, taskId, workContextId, workContextType };
+  return {
+    sectionId,
+    taskId,
+    workContextId,
+    workContextType,
+    workContextAfterTaskId,
+  };
 };
 
 const getSectionOrder = (operation: Operation): SectionOrder | undefined => {
@@ -182,62 +190,6 @@ const isSectionOrderAndPlacementPair = (
   return getOpEntityIds(placementOperation).some((id) => order.sectionIds.includes(id));
 };
 
-const getSectionSemanticFootprint = (
-  operation: Operation,
-): SectionSemanticFootprint | undefined => {
-  const order = getSectionOrder(operation);
-  if (order) {
-    return {
-      writeKeys: [`section-order:${order.contextId}`],
-      sectionIds: order.sectionIds,
-      taskIds: [],
-      workContexts: [],
-    };
-  }
-
-  const placement = getSectionPlacement(operation);
-  if (placement) {
-    const sectionIds =
-      placement.sourceSectionId &&
-      placement.sourceSectionId !== placement.destinationSectionId
-        ? [placement.sourceSectionId, placement.destinationSectionId]
-        : [placement.destinationSectionId];
-    return {
-      writeKeys: [
-        `task-placement:${placement.taskId}`,
-        ...sectionIds.map((id) => `section-tasks:${id}`),
-      ],
-      sectionIds,
-      taskIds: [placement.taskId],
-      workContexts: [],
-    };
-  }
-
-  const removal = getSectionRemoval(operation);
-  if (removal) {
-    return {
-      writeKeys: [
-        `task-placement:${removal.taskId}`,
-        `section-tasks:${removal.sectionId}`,
-        `work-context-tasks:${removal.workContextType}:${removal.workContextId}`,
-      ],
-      sectionIds: [removal.sectionId],
-      taskIds: [removal.taskId],
-      workContexts: [{ id: removal.workContextId, type: removal.workContextType }],
-    };
-  }
-
-  return undefined;
-};
-
-const hasIntersection = (
-  first: readonly string[],
-  second: readonly string[],
-): boolean => {
-  const secondSet = new Set(second);
-  return first.some((value) => secondSet.has(value));
-};
-
 /**
  * Recognizes the narrow SECTION operation pairs whose reducer effects commute.
  * Metadata must exactly match the authenticated action payload before a pair is
@@ -275,95 +227,216 @@ export const areCommutingSectionOperations = (
   );
 };
 
-/**
- * Returns stable lookup keys for operations that can affect a SECTION semantic
- * transition. `undefined` means the operation cannot be scoped safely and must
- * be treated as globally relevant; an empty array is provably unrelated.
- */
-export const getSectionReplayScopeKeys = (
+const withActionPayload = (
   operation: Operation,
-): readonly string[] | undefined => {
-  if (isFullStateOpType(operation.opType)) {
-    return undefined;
-  }
+  actionPayload: Record<string, unknown>,
+): Operation => ({
+  ...operation,
+  payload: isMultiEntityPayload(operation.payload)
+    ? { ...operation.payload, actionPayload, entityChanges: [] }
+    : actionPayload,
+});
 
-  const footprint = getSectionSemanticFootprint(operation);
-  if (footprint) {
-    return Array.from(
-      new Set([
-        ...footprint.writeKeys,
-        ...footprint.sectionIds.map((id) => `section-entity:${id}`),
-        ...footprint.taskIds.map((id) => `task-placement:${id}`),
-        ...footprint.workContexts.map(
-          ({ type, id }) => `work-context-tasks:${type}:${id}`,
-        ),
-      ]),
-    );
+const withEntityFootprint = (
+  operation: Operation,
+  entityIds: readonly string[],
+): Operation => {
+  const next = {
+    ...operation,
+    entityId: entityIds[0],
+  };
+  if (entityIds.length > 1) {
+    next.entityIds = [...entityIds];
+  } else {
+    delete next.entityIds;
   }
-
-  if (SECTION_ACTIONS.has(operation.actionType)) {
-    return undefined;
-  }
-
-  const entityIds = getOpEntityIds(operation);
-  if (entityIds.length === 0) {
-    return operation.entityType === 'SECTION' ? undefined : [];
-  }
-  switch (operation.entityType) {
-    case 'SECTION':
-      return entityIds.flatMap((id) => [`section-entity:${id}`, `section-tasks:${id}`]);
-    case 'TASK':
-      return entityIds.map((id) => `task-placement:${id}`);
-    case 'PROJECT':
-    case 'TAG':
-      return entityIds.map((id) => `work-context-tasks:${operation.entityType}:${id}`);
-    default:
-      return [];
-  }
+  return next;
 };
 
+const getCurrentAnchor = (
+  taskId: string,
+  taskIds: readonly string[],
+): { afterTaskId: string | null } | undefined => {
+  const index = taskIds.indexOf(taskId);
+  if (index === -1 || taskIds.lastIndexOf(taskId) !== index) {
+    return undefined;
+  }
+  return { afterTaskId: index === 0 ? null : taskIds[index - 1] };
+};
+
+const getCurrentSectionsForTask = (state: SectionState, taskId: string): Section[] =>
+  Object.values(state.entities).filter(
+    (section): section is Section => !!section && section.taskIds.includes(taskId),
+  );
+
+const getWorkContextTaskIds = (
+  snapshot: SectionReplaySnapshot,
+  type: WorkContextType,
+  id: string,
+): readonly string[] | undefined =>
+  type === WorkContextType.TAG
+    ? snapshot.tag.entities[id]?.taskIds
+    : snapshot.project.entities[id]?.taskIds;
+
+const createPlacementReplay = (
+  operation: Operation,
+  placement: SectionPlacement,
+  destination: Section,
+): Operation => {
+  const currentAnchor = getCurrentAnchor(placement.taskId, destination.taskIds);
+  if (!currentAnchor) {
+    return operation;
+  }
+  const entityIds =
+    placement.sourceSectionId && placement.sourceSectionId !== destination.id
+      ? [placement.sourceSectionId, destination.id]
+      : [destination.id];
+  return withEntityFootprint(
+    withActionPayload(operation, {
+      sectionId: destination.id,
+      taskId: placement.taskId,
+      afterTaskId: currentAnchor.afterTaskId,
+      sourceSectionId: placement.sourceSectionId,
+    }),
+    entityIds,
+  );
+};
+
+const createRemovalReplay = (
+  operation: Operation,
+  removal: SectionRemoval,
+  afterTaskId: string | null,
+): Operation =>
+  withEntityFootprint(
+    withActionPayload(
+      {
+        ...operation,
+        actionType: ActionType.SECTION_REMOVE_TASK,
+        opType: OpType.Update,
+      },
+      {
+        sectionId: removal.sectionId,
+        taskId: removal.taskId,
+        workContextId: removal.workContextId,
+        workContextType: removal.workContextType,
+        workContextAfterTaskId: afterTaskId,
+      },
+    ),
+    [removal.sectionId],
+  );
+
 /**
- * Whether applying `candidate` before versus after a valid SECTION transition
- * can change the result. Unknown operations fail closed only when their entity
- * footprint can touch the transition.
+ * Projects a causally accepted SECTION intent onto the current, stable NgRx
+ * frontier. The replacement is built from current ordering rather than a stale
+ * anchor, so every already-applied local successor is represented without
+ * action-family whitelists. A replay result must be a local no-op.
  */
-export const canReorderSectionTransition = (
-  sectionOperation: Operation,
-  candidate: Operation,
-): boolean => {
-  const sectionFootprint = getSectionSemanticFootprint(sectionOperation);
-  if (!sectionFootprint || isFullStateOpType(candidate.opType)) {
-    return true;
-  }
-
-  const candidateFootprint = getSectionSemanticFootprint(candidate);
-  if (candidateFootprint) {
-    return (
-      !areCommutingSectionOperations(sectionOperation, candidate) &&
-      hasIntersection(sectionFootprint.writeKeys, candidateFootprint.writeKeys)
+export const projectSectionReplayAgainstState = (
+  operation: Operation,
+  snapshot: SectionReplaySnapshot,
+): SectionReplayProjection => {
+  const order = getSectionOrder(operation);
+  if (order) {
+    const currentIds = snapshot.section.ids.filter(
+      (id) => snapshot.section.entities[id]?.contextId === order.contextId,
     );
+    if (currentIds.length === 0) {
+      return { kind: 'superseded' };
+    }
+    return {
+      kind: 'replay',
+      operation: withEntityFootprint(
+        withActionPayload(operation, {
+          contextId: order.contextId,
+          ids: currentIds,
+        }),
+        currentIds,
+      ),
+    };
   }
 
-  if (SECTION_ACTIONS.has(candidate.actionType)) {
-    return true;
+  const placement = getSectionPlacement(operation);
+  if (placement) {
+    const currentSections = getCurrentSectionsForTask(snapshot.section, placement.taskId);
+    if (currentSections.length > 1) {
+      return {
+        kind: 'blocked',
+        reason: `task ${placement.taskId} belongs to multiple sections`,
+      };
+    }
+    if (currentSections.length === 1) {
+      const destination = currentSections[0];
+      const currentAnchor = getCurrentAnchor(placement.taskId, destination.taskIds);
+      if (!currentAnchor) {
+        return {
+          kind: 'blocked',
+          reason: `task ${placement.taskId} has ambiguous section ordering`,
+        };
+      }
+      return {
+        kind: 'replay',
+        operation: createPlacementReplay(operation, placement, destination),
+      };
+    }
+
+    const contextSection =
+      (placement.sourceSectionId
+        ? snapshot.section.entities[placement.sourceSectionId]
+        : undefined) ?? snapshot.section.entities[placement.destinationSectionId];
+    if (!contextSection) {
+      return { kind: 'superseded' };
+    }
+    const contextTaskIds = getWorkContextTaskIds(
+      snapshot,
+      contextSection.contextType,
+      contextSection.contextId,
+    );
+    const currentAnchor = contextTaskIds
+      ? getCurrentAnchor(placement.taskId, contextTaskIds)
+      : undefined;
+    if (!currentAnchor) {
+      return { kind: 'superseded' };
+    }
+    return {
+      kind: 'replay',
+      operation: createRemovalReplay(
+        operation,
+        {
+          sectionId: placement.sourceSectionId ?? placement.destinationSectionId,
+          taskId: placement.taskId,
+          workContextId: contextSection.contextId,
+          workContextType: contextSection.contextType,
+          workContextAfterTaskId: currentAnchor.afterTaskId,
+        },
+        currentAnchor.afterTaskId,
+      ),
+    };
   }
 
-  const candidateEntityIds = getOpEntityIds(candidate);
-  switch (candidate.entityType) {
-    case 'SECTION':
-      return (
-        candidateEntityIds.length === 0 ||
-        hasIntersection(sectionFootprint.sectionIds, candidateEntityIds)
-      );
-    case 'TASK':
-      return hasIntersection(sectionFootprint.taskIds, candidateEntityIds);
-    case 'PROJECT':
-    case 'TAG':
-      return sectionFootprint.workContexts.some(
-        ({ id, type }) =>
-          type === candidate.entityType && candidateEntityIds.includes(id),
-      );
-    default:
-      return false;
+  const removal = getSectionRemoval(operation);
+  if (removal) {
+    if (snapshot.section.entities[removal.sectionId]?.taskIds.includes(removal.taskId)) {
+      return {
+        kind: 'blocked',
+        reason: `section ${removal.sectionId} still contains task ${removal.taskId}`,
+      };
+    }
+    const contextTaskIds = getWorkContextTaskIds(
+      snapshot,
+      removal.workContextType,
+      removal.workContextId,
+    );
+    const currentAnchor = contextTaskIds
+      ? getCurrentAnchor(removal.taskId, contextTaskIds)
+      : undefined;
+    if (!currentAnchor) {
+      return { kind: 'superseded' };
+    }
+    return {
+      kind: 'replay',
+      operation: createRemovalReplay(operation, removal, currentAnchor.afterTaskId),
+    };
   }
+
+  return { kind: 'blocked', reason: 'operation is not a valid SECTION transition' };
 };
