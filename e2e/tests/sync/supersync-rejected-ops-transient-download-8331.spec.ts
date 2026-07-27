@@ -255,9 +255,8 @@ test.describe('@supersync Rejected-ops transient download (#8331)', () => {
       expect(await isOpPending(clientB.page, concurrentRejectedOpId)).toBe(true);
 
       // 7. Remove the fault and let B sync cleanly — the still-pending edit
-      //    resolves and uploads (the merged op may need a second flush).
+      //    resolves and its local-win replacement is uploaded in the same sync.
       await clientB.page.unroute('**/api/sync/ops*');
-      await clientB.sync.syncAndWait();
       await clientB.sync.syncAndWait();
 
       // 8. End-to-end recovery proof: after pulling B's now-uploaded edit, both
