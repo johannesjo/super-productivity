@@ -8,8 +8,8 @@ import {
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { getOpEntityIds } from '../util/get-op-entity-ids.util';
 import { Section, SectionState } from '../../features/section/section.model';
-import { ProjectState } from '../../features/project/project.model';
-import { TagState } from '../../features/tag/tag.model';
+import { Project, ProjectState } from '../../features/project/project.model';
+import { Tag, TagState } from '../../features/tag/tag.model';
 
 interface SectionPlacement {
   sourceSectionId: string | null;
@@ -41,13 +41,27 @@ export interface SectionReplaySnapshot {
   tag: TagState;
 }
 
+export interface SectionReplayOrder {
+  scope: string;
+  position: number;
+}
+
 export type SectionReplayProjection =
-  | { kind: 'replay'; operation: Operation }
+  | { kind: 'replay'; operation: Operation; order: SectionReplayOrder }
+  | {
+      kind: 'work-context-state';
+      entityType: WorkContextType;
+      entityId: string;
+      entityState: Project | Tag;
+      order: SectionReplayOrder;
+    }
   | { kind: 'superseded' }
   | { kind: 'blocked'; reason: string };
 
 const isStringOrNull = (value: unknown): value is string | null =>
   value === null || typeof value === 'string';
+
+const getReplayScope = (...parts: string[]): string => JSON.stringify(parts);
 
 const getActionPayload = (operation: Operation): Record<string, unknown> | undefined => {
   if (!operation.payload || typeof operation.payload !== 'object') {
@@ -269,14 +283,27 @@ const getCurrentSectionsForTask = (state: SectionState, taskId: string): Section
     (section): section is Section => !!section && section.taskIds.includes(taskId),
   );
 
-const getWorkContextTaskIds = (
+const isSameWorkContext = (first: Section, second: Section): boolean =>
+  first.contextId === second.contextId && first.contextType === second.contextType;
+
+const getCurrentSectionsForTaskInContext = (
+  state: SectionState,
+  taskId: string,
+  contextId: string,
+  contextType: WorkContextType,
+): Section[] =>
+  getCurrentSectionsForTask(state, taskId).filter(
+    (section) => section.contextId === contextId && section.contextType === contextType,
+  );
+
+const getWorkContextEntity = (
   snapshot: SectionReplaySnapshot,
   type: WorkContextType,
   id: string,
-): readonly string[] | undefined =>
+): Project | Tag | undefined =>
   type === WorkContextType.TAG
-    ? snapshot.tag.entities[id]?.taskIds
-    : snapshot.project.entities[id]?.taskIds;
+    ? snapshot.tag.entities[id]
+    : snapshot.project.entities[id];
 
 const createPlacementReplay = (
   operation: Operation,
@@ -352,16 +379,45 @@ export const projectSectionReplayAgainstState = (
         }),
         currentIds,
       ),
+      order: {
+        scope: getReplayScope('section-order', order.contextId),
+        position: 0,
+      },
     };
   }
 
   const placement = getSectionPlacement(operation);
   if (placement) {
-    const currentSections = getCurrentSectionsForTask(snapshot.section, placement.taskId);
+    const sourceSection = placement.sourceSectionId
+      ? snapshot.section.entities[placement.sourceSectionId]
+      : undefined;
+    const destinationSection = snapshot.section.entities[placement.destinationSectionId];
+    if (
+      sourceSection &&
+      destinationSection &&
+      !isSameWorkContext(sourceSection, destinationSection)
+    ) {
+      return {
+        kind: 'blocked',
+        reason: 'source and destination sections belong to different work contexts',
+      };
+    }
+    const contextSection = sourceSection ?? destinationSection;
+    if (!contextSection) {
+      return { kind: 'superseded' };
+    }
+    const currentSections = getCurrentSectionsForTaskInContext(
+      snapshot.section,
+      placement.taskId,
+      contextSection.contextId,
+      contextSection.contextType,
+    );
     if (currentSections.length > 1) {
       return {
         kind: 'blocked',
-        reason: `task ${placement.taskId} belongs to multiple sections`,
+        reason:
+          `task ${placement.taskId} belongs to multiple sections in ` +
+          `${contextSection.contextType}:${contextSection.contextId}`,
       };
     }
     if (currentSections.length === 1) {
@@ -376,24 +432,38 @@ export const projectSectionReplayAgainstState = (
       return {
         kind: 'replay',
         operation: createPlacementReplay(operation, placement, destination),
+        order: {
+          scope: getReplayScope(
+            'section-tasks',
+            destination.contextType,
+            destination.contextId,
+            destination.id,
+          ),
+          position: destination.taskIds.indexOf(placement.taskId),
+        },
       };
     }
 
-    const contextSection =
-      (placement.sourceSectionId
-        ? snapshot.section.entities[placement.sourceSectionId]
-        : undefined) ?? snapshot.section.entities[placement.destinationSectionId];
-    if (!contextSection) {
-      return { kind: 'superseded' };
-    }
-    const contextTaskIds = getWorkContextTaskIds(
+    const contextEntity = getWorkContextEntity(
       snapshot,
       contextSection.contextType,
       contextSection.contextId,
     );
-    const currentAnchor = contextTaskIds
-      ? getCurrentAnchor(placement.taskId, contextTaskIds)
-      : undefined;
+    if (!contextEntity) {
+      return { kind: 'superseded' };
+    }
+    const taskOccurrences = contextEntity.taskIds.filter(
+      (id) => id === placement.taskId,
+    ).length;
+    if (taskOccurrences > 1) {
+      return {
+        kind: 'blocked',
+        reason:
+          `task ${placement.taskId} has ambiguous ordering in ` +
+          `${contextSection.contextType}:${contextSection.contextId}`,
+      };
+    }
+    const currentAnchor = getCurrentAnchor(placement.taskId, contextEntity.taskIds);
     if (!currentAnchor) {
       return { kind: 'superseded' };
     }
@@ -410,31 +480,96 @@ export const projectSectionReplayAgainstState = (
         },
         currentAnchor.afterTaskId,
       ),
+      order: {
+        scope: getReplayScope(
+          'work-context-tasks',
+          contextSection.contextType,
+          contextSection.contextId,
+        ),
+        position: contextEntity.taskIds.indexOf(placement.taskId),
+      },
     };
   }
 
   const removal = getSectionRemoval(operation);
   if (removal) {
-    if (snapshot.section.entities[removal.sectionId]?.taskIds.includes(removal.taskId)) {
+    const sourceSection = snapshot.section.entities[removal.sectionId];
+    if (
+      sourceSection &&
+      (sourceSection.contextId !== removal.workContextId ||
+        sourceSection.contextType !== removal.workContextType)
+    ) {
       return {
         kind: 'blocked',
-        reason: `section ${removal.sectionId} still contains task ${removal.taskId}`,
+        reason: `section ${removal.sectionId} does not belong to the declared work context`,
       };
     }
-    const contextTaskIds = getWorkContextTaskIds(
+    const contextEntity = getWorkContextEntity(
       snapshot,
       removal.workContextType,
       removal.workContextId,
     );
-    const currentAnchor = contextTaskIds
-      ? getCurrentAnchor(removal.taskId, contextTaskIds)
-      : undefined;
+    const sourceContainsTask = sourceSection?.taskIds.includes(removal.taskId) === true;
+    if (!contextEntity) {
+      return sourceContainsTask
+        ? {
+            kind: 'blocked',
+            reason:
+              `task ${removal.taskId} is sectioned but its declared work context ` +
+              `${removal.workContextType}:${removal.workContextId} is missing`,
+          }
+        : { kind: 'superseded' };
+    }
+    const taskOccurrences = contextEntity.taskIds.filter(
+      (id) => id === removal.taskId,
+    ).length;
+    if (taskOccurrences > 1) {
+      return {
+        kind: 'blocked',
+        reason:
+          `task ${removal.taskId} has ambiguous ordering in ` +
+          `${removal.workContextType}:${removal.workContextId}`,
+      };
+    }
+    const currentAnchor = getCurrentAnchor(removal.taskId, contextEntity.taskIds);
+    if (sourceContainsTask) {
+      if (!currentAnchor) {
+        return {
+          kind: 'blocked',
+          reason:
+            `task ${removal.taskId} is sectioned but missing from ` +
+            `${removal.workContextType}:${removal.workContextId}`,
+        };
+      }
+      return {
+        kind: 'work-context-state',
+        entityType: removal.workContextType,
+        entityId: removal.workContextId,
+        entityState: contextEntity,
+        order: {
+          scope: getReplayScope(
+            'work-context-tasks',
+            removal.workContextType,
+            removal.workContextId,
+          ),
+          position: Number.MAX_SAFE_INTEGER,
+        },
+      };
+    }
     if (!currentAnchor) {
       return { kind: 'superseded' };
     }
     return {
       kind: 'replay',
       operation: createRemovalReplay(operation, removal, currentAnchor.afterTaskId),
+      order: {
+        scope: getReplayScope(
+          'work-context-tasks',
+          removal.workContextType,
+          removal.workContextId,
+        ),
+        position: contextEntity.taskIds.indexOf(removal.taskId),
+      },
     };
   }
 

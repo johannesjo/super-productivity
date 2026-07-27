@@ -31,6 +31,8 @@ import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service'
 import {
   areCommutingSectionOperations,
   projectSectionReplayAgainstState,
+  SectionReplayOrder,
+  SectionReplayProjection,
   SectionReplaySnapshot,
 } from './section-conflict-commutativity.util';
 import { getOpEntityIds } from '../util/get-op-entity-ids.util';
@@ -48,6 +50,15 @@ type SupersededOperation = {
 };
 
 type SectionCausalReplayDecision = 'replay' | 'fallback';
+type WorkContextStateProjection = Extract<
+  SectionReplayProjection,
+  { kind: 'work-context-state' }
+>;
+interface OrderedSectionReplacement {
+  operation: Operation;
+  order: SectionReplayOrder;
+  originalIndex: number;
+}
 
 interface SectionCausalReplayContext {
   retainedByEntityClock: Map<string, OperationLogEntry[]>;
@@ -276,6 +287,7 @@ export class SupersededOperationResolverService {
       const opsToReject: string[] = [];
       const newOpsCreated: Operation[] = [];
       const auxiliaryOpIds = new Set<string>();
+      const orderedSectionReplacements: OrderedSectionReplacement[] = [];
 
       // Handle irreducible semantic operations BEFORE entity-by-entity grouping.
       // moveToArchive uses OpType.Update but its reducer removes entities from the NgRx store
@@ -293,8 +305,10 @@ export class SupersededOperationResolverService {
       const regularSupersededOps: SupersededOperation[] = [];
       let sectionReplayContext: SectionCausalReplayContext | undefined;
       let sectionReplaySnapshot: SectionReplaySnapshot | undefined;
-      for (const item of supersededOps) {
+      for (const [itemIndex, item] of supersededOps.entries()) {
         let projectedSectionOp: Operation | undefined;
+        let projectedWorkContextState: WorkContextStateProjection | undefined;
+        let projectedOrder: SectionReplayOrder | undefined;
         if (
           CAUSALLY_REPLAYABLE_SECTION_ACTIONS.has(item.op.actionType) &&
           item.existingClock
@@ -326,19 +340,24 @@ export class SupersededOperationResolverService {
                 `SupersededOperationResolverService: Cannot safely project SECTION ` +
                   `intent ${item.opId}: ${projection.reason}. Falling back to LWW.`,
               );
+            } else if (projection.kind === 'work-context-state') {
+              projectedWorkContextState = projection;
+              projectedOrder = projection.order;
             } else {
               projectedSectionOp = projection.operation;
+              projectedOrder = projection.order;
             }
           }
         }
 
         if (
           item.op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
-          projectedSectionOp
+          projectedSectionOp ||
+          projectedWorkContextState
         ) {
           const sourceOp = projectedSectionOp ?? item.op;
           const clocksToMerge = [globalClock, item.op.vectorClock];
-          if (projectedSectionOp && item.existingClock) {
+          if ((projectedSectionOp || projectedWorkContextState) && item.existingClock) {
             clocksToMerge.push(item.existingClock);
           }
           const mergedClock = this.conflictResolutionService.mergeAndIncrementClocks(
@@ -349,13 +368,31 @@ export class SupersededOperationResolverService {
           // Client-side pruning would drop entity clock IDs when the merged clock exceeds
           // MAX_VECTOR_CLOCK_SIZE, causing the comparison to return CONCURRENT instead of
           // GREATER_THAN → infinite rejection loop.
-          const newOp = this._recreateOpWithMergedClock(
-            sourceOp,
-            mergedClock,
-            clientId,
-            item.op.timestamp,
-          );
-          newOpsCreated.push(newOp);
+          const newOp = projectedWorkContextState
+            ? this.conflictResolutionService.createLWWUpdateOp(
+                projectedWorkContextState.entityType,
+                projectedWorkContextState.entityId,
+                projectedWorkContextState.entityState,
+                clientId,
+                mergedClock,
+                item.op.timestamp,
+                'replace',
+              )
+            : this._recreateOpWithMergedClock(
+                sourceOp,
+                mergedClock,
+                clientId,
+                item.op.timestamp,
+              );
+          if (projectedOrder) {
+            orderedSectionReplacements.push({
+              operation: newOp,
+              order: projectedOrder,
+              originalIndex: itemIndex,
+            });
+          } else {
+            newOpsCreated.push(newOp);
+          }
           opsToReject.push(item.opId);
           OpLog.normal(
             `SupersededOperationResolverService: Created causal replacement ` +
@@ -365,6 +402,13 @@ export class SupersededOperationResolverService {
           regularSupersededOps.push(item);
         }
       }
+      orderedSectionReplacements.sort(
+        (first, second) =>
+          first.order.scope.localeCompare(second.order.scope) ||
+          first.order.position - second.order.position ||
+          first.originalIndex - second.originalIndex,
+      );
+      newOpsCreated.push(...orderedSectionReplacements.map(({ operation }) => operation));
 
       // Group remaining ops by entity to handle multiple ops for the same entity
       const opsByEntity = new Map<string, SupersededOperation[]>();

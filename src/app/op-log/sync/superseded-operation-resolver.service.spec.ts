@@ -1328,6 +1328,92 @@ describe('SupersededOperationResolverService', () => {
         });
       });
 
+      it('should persist projected placements in current predecessor order', async () => {
+        const createPlacement = (
+          taskId: string,
+          afterTaskId: string,
+          counter: number,
+        ): Operation => ({
+          ...sectionOps[0].op,
+          id: `place-${taskId}`,
+          entityId: 'section-right',
+          entityIds: undefined,
+          payload: {
+            actionPayload: {
+              sectionId: 'section-right',
+              taskId,
+              afterTaskId,
+              sourceSectionId: null,
+            },
+            entityChanges: [],
+          },
+          vectorClock: { original: counter },
+          timestamp: 1000 + counter,
+        });
+        const placeC = createPlacement('task-c', 'base-task', 1);
+        const placeB = createPlacement('task-b', 'base-task', 2);
+        const placeA = createPlacement('task-a', 'base-task', 3);
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({
+          original: 3,
+          remote: 4,
+        });
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: remoteOrderOp,
+            appliedAt: 1,
+            source: 'remote',
+            syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+        ]);
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-right', 'section-left'],
+              entities: {
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['base-task', 'task-a', 'task-b', 'task-c'],
+                },
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: [],
+                },
+              },
+            },
+          }),
+        );
+
+        const result = await service.resolveSupersededLocalOps(
+          [placeC, placeB, placeA].map((op) => ({
+            opId: op.id,
+            op,
+            existingClock: remoteOrderOp.vectorClock,
+          })),
+        );
+
+        expect(result).toBe(3);
+        expectAtomicRejection([placeC.id, placeB.id, placeA.id]);
+        const replacementTaskIds = mockOpLogStore.appendWithVectorClockOverwrite.calls
+          .all()
+          .map(
+            ({ args }) =>
+              (
+                args[0].payload as {
+                  actionPayload: { taskId: string };
+                }
+              ).actionPayload.taskId,
+          );
+        expect(replacementTaskIds).toEqual(['task-a', 'task-b', 'task-c']);
+      });
+
       it('should compose a later removal into one no-section replacement', async () => {
         const localMoveOp = sectionOps[0].op;
         mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
@@ -1553,6 +1639,261 @@ describe('SupersededOperationResolverService', () => {
           (replacement.payload as { actionPayload: Record<string, unknown> })
             .actionPayload['workContextAfterTaskId'],
         ).toBe('new-main-predecessor');
+      });
+
+      it('should preserve the work-context reorder when a later action re-adds the task to its source section', async () => {
+        const localRemoveOp = sectionOps[1].op;
+        const laterReAddOp: Operation = {
+          ...sectionOps[0].op,
+          id: 'later-re-add-to-source',
+          entityId: 'section-left',
+          entityIds: undefined,
+          payload: {
+            actionPayload: {
+              sectionId: 'section-left',
+              taskId: 'task-1',
+              afterTaskId: 'left-anchor',
+              sourceSectionId: null,
+            },
+            entityChanges: [],
+          },
+          vectorClock: { original: 4 },
+          timestamp: 2500,
+        };
+        const currentToday = {
+          id: 'TODAY',
+          title: 'Today',
+          taskIds: ['new-main-predecessor', 'task-1', 'main-anchor'],
+        };
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({
+          original: 4,
+          remote: 4,
+        });
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: remoteOrderOp,
+            appliedAt: 1,
+            source: 'remote',
+            syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+          {
+            seq: 2,
+            op: laterReAddOp,
+            appliedAt: 2,
+            source: 'local',
+            syncedAt: 2,
+          },
+        ]);
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-left', 'section-right'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor', 'task-1'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['right-anchor'],
+                },
+              },
+            },
+            tag: {
+              ids: ['TODAY'],
+              entities: { TODAY: currentToday },
+            },
+          }),
+        );
+
+        const result = await service.resolveSupersededLocalOps([
+          {
+            opId: localRemoveOp.id,
+            op: localRemoveOp,
+            existingClock: remoteOrderOp.vectorClock,
+          },
+        ]);
+
+        expect(result).toBe(1);
+        expectAtomicRejection([localRemoveOp.id]);
+        expect(mockConflictResolutionService.createLWWUpdateOp).toHaveBeenCalledWith(
+          'TAG',
+          'TODAY',
+          currentToday,
+          TEST_CLIENT_ID,
+          {
+            original: 4,
+            remote: 4,
+            [TEST_CLIENT_ID]: 1,
+          },
+          localRemoveOp.timestamp,
+          'replace',
+        );
+        expect(
+          mockOpLogStore.appendWithVectorClockOverwrite.calls.first().args[0],
+        ).toEqual(
+          jasmine.objectContaining({
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            actionType: '[TAG] LWW Update',
+          }),
+        );
+      });
+
+      it('should scope placement projection to its work context when the task belongs to sections in two contexts', async () => {
+        const localMoveOp = sectionOps[0].op;
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: remoteOrderOp,
+            appliedAt: 1,
+            source: 'remote',
+            syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+        ]);
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-left', 'project-section', 'section-right'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor'],
+                },
+                ['project-section']: {
+                  id: 'project-section',
+                  contextId: 'project-1',
+                  contextType: 'PROJECT',
+                  title: 'Project',
+                  taskIds: ['task-1'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['right-anchor', 'task-1'],
+                },
+              },
+            },
+          }),
+        );
+
+        await service.resolveSupersededLocalOps([
+          {
+            opId: localMoveOp.id,
+            op: localMoveOp,
+            existingClock: remoteOrderOp.vectorClock,
+          },
+        ]);
+
+        expect(
+          mockConflictResolutionService.getCurrentEntityState,
+        ).not.toHaveBeenCalled();
+        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
+          .args[0] as Operation;
+        expect(replacement.actionType).toBe(ActionType.SECTION_ADD_TASK);
+        expect(replacement.entityIds).toEqual(['section-left', 'section-right']);
+        expect(
+          (replacement.payload as { actionPayload: Record<string, unknown> })
+            .actionPayload,
+        ).toEqual({
+          sectionId: 'section-right',
+          taskId: 'task-1',
+          afterTaskId: 'right-anchor',
+          sourceSectionId: 'section-left',
+        });
+      });
+
+      it('should not retarget a no-section placement replay into another work context', async () => {
+        const localMoveOp = sectionOps[0].op;
+        mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          {
+            seq: 1,
+            op: remoteOrderOp,
+            appliedAt: 1,
+            source: 'remote',
+            syncedAt: 1,
+            applicationStatus: 'applied',
+          },
+        ]);
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.returnValue(
+          createReplaySnapshot({
+            section: {
+              ids: ['section-left', 'project-section', 'section-right'],
+              entities: {
+                ['section-left']: {
+                  id: 'section-left',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Left',
+                  taskIds: ['left-anchor'],
+                },
+                ['project-section']: {
+                  id: 'project-section',
+                  contextId: 'project-1',
+                  contextType: 'PROJECT',
+                  title: 'Project',
+                  taskIds: ['task-1'],
+                },
+                ['section-right']: {
+                  id: 'section-right',
+                  contextId: 'TODAY',
+                  contextType: 'TAG',
+                  title: 'Right',
+                  taskIds: ['right-anchor'],
+                },
+              },
+            },
+            tag: {
+              ids: ['TODAY'],
+              entities: {
+                TODAY: {
+                  id: 'TODAY',
+                  title: 'Today',
+                  taskIds: ['current-main-anchor', 'task-1'],
+                },
+              },
+            },
+          }),
+        );
+
+        await service.resolveSupersededLocalOps([
+          {
+            opId: localMoveOp.id,
+            op: localMoveOp,
+            existingClock: remoteOrderOp.vectorClock,
+          },
+        ]);
+
+        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
+          .args[0] as Operation;
+        expect(replacement.actionType).toBe(ActionType.SECTION_REMOVE_TASK);
+        expect(replacement.entityId).toBe('section-left');
+        expect(
+          (replacement.payload as { actionPayload: Record<string, unknown> })
+            .actionPayload,
+        ).toEqual({
+          sectionId: 'section-left',
+          taskId: 'task-1',
+          workContextId: 'TODAY',
+          workContextType: 'TAG',
+          workContextAfterTaskId: 'current-main-anchor',
+        });
       });
 
       it('should leave the predecessor retryable when live state is ahead of durable capture', async () => {

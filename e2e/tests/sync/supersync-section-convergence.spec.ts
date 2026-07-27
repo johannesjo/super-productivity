@@ -166,7 +166,7 @@ const getSectionSnapshot = async (
   );
 
 test.describe('@supersync Section cross-client convergence', () => {
-  test('concurrent move, removal, and reorder converge once and persist', async ({
+  test('concurrent move, removal, reorder, and dependent placements converge and persist', async ({
     browser,
     baseURL,
     testRunId,
@@ -177,7 +177,9 @@ test.describe('@supersync Section cross-client convergence', () => {
     const rightSectionId = `section-right-${testRunId}`;
     const thirdSectionId = `section-third-${testRunId}`;
     const movingTitle = `A-${testRunId}-Moving`;
-    const placementTitle = `A-${testRunId}-Placement`;
+    const placementTitle = `A-${testRunId}-Placement C`;
+    const placementBTitle = `A-${testRunId}-Placement B`;
+    const placementATitle = `A-${testRunId}-Placement A`;
     const leftAnchorTitle = `A-${testRunId}-Left anchor`;
     const rightAnchorTitle = `A-${testRunId}-Right anchor`;
     const mainAnchorTitle = `A-${testRunId}-Main anchor`;
@@ -197,7 +199,9 @@ test.describe('@supersync Section cross-client convergence', () => {
       await clientA.workView.addTask('Left anchor');
       await clientA.workView.addTask('Moving');
       await clientA.workView.addTask('Right anchor');
-      await clientA.workView.addTask('Placement');
+      await clientA.workView.addTask('Placement C');
+      await clientA.workView.addTask('Placement B');
+      await clientA.workView.addTask('Placement A');
 
       const taskIdsByTitle = await getTaskIdsByTitle(clientA.page, [
         mainAnchorTitle,
@@ -205,12 +209,16 @@ test.describe('@supersync Section cross-client convergence', () => {
         movingTitle,
         rightAnchorTitle,
         placementTitle,
+        placementBTitle,
+        placementATitle,
       ]);
       const mainAnchorId = requireTaskId(taskIdsByTitle, mainAnchorTitle);
       const leftAnchorId = requireTaskId(taskIdsByTitle, leftAnchorTitle);
       const movingTaskId = requireTaskId(taskIdsByTitle, movingTitle);
       const rightAnchorId = requireTaskId(taskIdsByTitle, rightAnchorTitle);
       const placementTaskId = requireTaskId(taskIdsByTitle, placementTitle);
+      const placementBTaskId = requireTaskId(taskIdsByTitle, placementBTitle);
+      const placementATaskId = requireTaskId(taskIdsByTitle, placementATitle);
 
       for (const [id, title] of [
         [leftSectionId, 'Left'],
@@ -269,8 +277,15 @@ test.describe('@supersync Section cross-client convergence', () => {
         leftTitles: [leftAnchorTitle, movingTitle],
         rightTitles: [rightAnchorTitle],
         thirdTitles: [],
-        noSectionTitles: [placementTitle, mainAnchorTitle],
+        noSectionTitles: [
+          placementATitle,
+          placementBTitle,
+          placementTitle,
+          mainAnchorTitle,
+        ],
         todayTitles: [
+          placementATitle,
+          placementBTitle,
           placementTitle,
           rightAnchorTitle,
           movingTitle,
@@ -317,19 +332,21 @@ test.describe('@supersync Section cross-client convergence', () => {
           opType: 'MOV',
         },
       });
-      await dispatchPersistentAction(clientA.page, {
-        type: '[Section] Add Task to Section',
-        sectionId: thirdSectionId,
-        taskId: placementTaskId,
-        afterTaskId: null,
-        sourceSectionId: null,
-        meta: {
-          isPersistent: true,
-          entityType: 'SECTION',
-          entityId: thirdSectionId,
-          opType: 'MOV',
-        },
-      });
+      for (const taskId of [placementTaskId, placementBTaskId, placementATaskId]) {
+        await dispatchPersistentAction(clientA.page, {
+          type: '[Section] Add Task to Section',
+          sectionId: thirdSectionId,
+          taskId,
+          afterTaskId: null,
+          sourceSectionId: null,
+          meta: {
+            isPersistent: true,
+            entityType: 'SECTION',
+            entityId: thirdSectionId,
+            opType: 'MOV',
+          },
+        });
+      }
 
       await dispatchPersistentAction(clientB.page, {
         type: '[Section] Remove Task from Section',
@@ -358,17 +375,19 @@ test.describe('@supersync Section cross-client convergence', () => {
         },
       });
 
-      await clientA.sync.syncAndWait();
       await clientB.sync.syncAndWait();
       await clientA.sync.syncAndWait();
       await clientB.sync.syncAndWait();
+      await clientA.sync.syncAndWait();
 
       const convergedSnapshot: SectionSnapshot = {
         leftTitles: [leftAnchorTitle],
         rightTitles: [rightAnchorTitle, movingTitle],
-        thirdTitles: [placementTitle],
+        thirdTitles: [placementATitle, placementBTitle, placementTitle],
         noSectionTitles: [mainAnchorTitle],
         todayTitles: [
+          placementATitle,
+          placementBTitle,
           placementTitle,
           rightAnchorTitle,
           leftAnchorTitle,
