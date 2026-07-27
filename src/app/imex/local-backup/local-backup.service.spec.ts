@@ -1,4 +1,4 @@
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { fakeAsync, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { LocalBackupService } from './local-backup.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -15,6 +15,7 @@ import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { Action } from '@ngrx/store';
 import { DEFAULT_MAX_BACKUP_FILES } from '../../../../electron/shared-with-frontend/backup-file-cleanup.util';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { Log } from '../../core/log';
 
 const BACKUP_INTERVAL = 5 * 60 * 1000;
 const DATA_CHANGE_DEBOUNCE = 30 * 1000;
@@ -704,6 +705,57 @@ describe('LocalBackupService', () => {
       tick(BACKUP_INTERVAL);
 
       expect(backupSpy).not.toHaveBeenCalled();
+    }));
+
+    it('contains a failed backup and handles a later trigger', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      const error = new DOMException(
+        'An internal error was encountered in the Indexed Database server',
+        'UnknownError',
+      );
+      const logSpy = spyOn(Log, 'err');
+      backupSpy.and.rejectWith(error);
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(logSpy).toHaveBeenCalledWith('LocalBackupService: Backup failed', error);
+
+      backupSpy.and.resolveTo();
+      actions$.next({ type: 'SecondAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(backupSpy).toHaveBeenCalledTimes(2);
+    }));
+
+    it('drops an overlapping trigger and handles one after completion', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      let resolveFirstBackup: (() => void) | undefined;
+      backupSpy.and.returnValue(
+        new Promise<void>((resolve) => {
+          resolveFirstBackup = resolve;
+        }),
+      );
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      expect(backupSpy).toHaveBeenCalledTimes(1);
+
+      actions$.next({ type: 'OverlappingAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      expect(backupSpy).toHaveBeenCalledTimes(1);
+
+      resolveFirstBackup?.();
+      flushMicrotasks();
+
+      backupSpy.and.resolveTo();
+      actions$.next({ type: 'LaterAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(backupSpy).toHaveBeenCalledTimes(2);
     }));
   });
 

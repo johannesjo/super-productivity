@@ -1,9 +1,9 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { EMPTY, firstValueFrom, interval, merge, Observable } from 'rxjs';
+import { EMPTY, firstValueFrom, from, interval, merge, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
-import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, exhaustMap, map, switchMap } from 'rxjs/operators';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { LocalBackupMeta } from './local-backup.model';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../util/is-android-web-view';
@@ -76,7 +76,14 @@ export class LocalBackupService {
           )
         : EMPTY,
     ),
-    tap(() => this._backup()),
+    exhaustMap(() =>
+      from(this._backup()).pipe(
+        catchError((error) => {
+          Log.err('LocalBackupService: Backup failed', error);
+          return EMPTY;
+        }),
+      ),
+    ),
   );
 
   init(): void {
