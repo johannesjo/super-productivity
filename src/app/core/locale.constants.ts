@@ -13,6 +13,7 @@ export enum LanguageCode {
   fa = 'fa',
   fi = 'fi',
   fr = 'fr',
+  he = 'he',
   hr = 'hr',
   id = 'id',
   it = 'it',
