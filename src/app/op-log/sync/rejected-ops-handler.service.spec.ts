@@ -797,6 +797,102 @@ describe('RejectedOpsHandlerService', () => {
         expect(downloadCallback).toHaveBeenCalledWith({ forceFromSeq0: true });
       });
 
+      it('should not resolve an op retired by the forced download', async () => {
+        const op = createOp({ id: 'op-1' });
+        let wasRetired = false;
+        opLogStoreSpy.getOpById.and.callFake(async () =>
+          wasRetired ? { ...mockEntry(op), rejectedAt: Date.now() } : mockEntry(op),
+        );
+        downloadCallback.and.callFake(async (options) => {
+          if (options?.forceFromSeq0) {
+            wasRetired = true;
+            return {
+              kind: 'completed',
+              newOpsCount: 1,
+              localWinOpsCreated: 1,
+              allOpClocks: [{ remoteClient: 2 }],
+            } as DownloadResultForRejection;
+          }
+          return { kind: 'completed', newOpsCount: 0 };
+        });
+
+        const result = await service.handleRejectedOps(
+          [{ opId: op.id, error: 'concurrent', errorCode: 'CONFLICT_CONCURRENT' }],
+          downloadCallback,
+        );
+
+        expect(opLogStoreSpy.getOpById).toHaveBeenCalledTimes(3);
+        expect(
+          supersededOperationResolverSpy.resolveSupersededLocalOps,
+        ).not.toHaveBeenCalled();
+        expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+        expect(result).toEqual({
+          kind: 'completed',
+          mergedOpsCreated: 1,
+          permanentRejectionCount: 0,
+        });
+      });
+
+      it('should resolve only ops still pending after the forced download', async () => {
+        const retiredOp = createOp({ id: 'retired-op', entityId: 'retired-entity' });
+        const pendingOp = createOp({ id: 'pending-op', entityId: 'pending-entity' });
+        const opsById = new Map([
+          [retiredOp.id, retiredOp],
+          [pendingOp.id, pendingOp],
+        ]);
+        let forceDownloadCompleted = false;
+        opLogStoreSpy.getOpById.and.callFake(async (opId) => {
+          const op = opsById.get(opId);
+          if (!op) {
+            return undefined;
+          }
+          return forceDownloadCompleted && opId === retiredOp.id
+            ? { ...mockEntry(op), rejectedAt: Date.now() }
+            : mockEntry(op);
+        });
+        const forceClock = { remoteClient: 2 };
+        const retiredClock = { retiredClient: 1 };
+        const pendingClock = { pendingClient: 1 };
+        downloadCallback.and.callFake(async (options) => {
+          if (options?.forceFromSeq0) {
+            forceDownloadCompleted = true;
+            return {
+              kind: 'completed',
+              newOpsCount: 1,
+              allOpClocks: [forceClock],
+            } as DownloadResultForRejection;
+          }
+          return { kind: 'completed', newOpsCount: 0 };
+        });
+        supersededOperationResolverSpy.resolveSupersededLocalOps.and.resolveTo(1);
+
+        await service.handleRejectedOps(
+          [
+            {
+              opId: retiredOp.id,
+              error: 'concurrent',
+              errorCode: 'CONFLICT_CONCURRENT',
+              existingClock: retiredClock,
+            },
+            {
+              opId: pendingOp.id,
+              error: 'concurrent',
+              errorCode: 'CONFLICT_CONCURRENT',
+              existingClock: pendingClock,
+            },
+          ],
+          downloadCallback,
+        );
+
+        expect(
+          supersededOperationResolverSpy.resolveSupersededLocalOps,
+        ).toHaveBeenCalledOnceWith(
+          [{ opId: pendingOp.id, op: pendingOp, existingClock: pendingClock }],
+          [forceClock, pendingClock],
+          undefined,
+        );
+      });
+
       it('should use superseded operation resolver when force download returns clocks', async () => {
         const op = createOp({ id: 'op-1' });
         opLogStoreSpy.getOpById.and.returnValue(Promise.resolve(mockEntry(op)));

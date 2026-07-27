@@ -242,6 +242,8 @@ export type DownloadResultForRejection =
   | {
       kind: 'completed';
       newOpsCount: number;
+      /** Local-win operations created while applying the nested download. */
+      localWinOpsCreated?: number;
       allOpClocks?: VectorClock[];
       snapshotVectorClock?: VectorClock;
       /** Server cursor after the downloaded operations were durably applied. */

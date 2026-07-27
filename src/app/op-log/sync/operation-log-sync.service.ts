@@ -467,6 +467,7 @@ export class OperationLogSyncService {
           return {
             kind: 'completed',
             newOpsCount: outcome.newOpsCount,
+            localWinOpsCreated: outcome.localWinOpsCreated,
             allOpClocks: outcome.allOpClocks,
             snapshotVectorClock: outcome.snapshotVectorClock,
             latestServerSeq,
