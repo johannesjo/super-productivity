@@ -2,14 +2,16 @@ import { inject, Injectable } from '@angular/core';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
+import { AddTaskBarRepeat } from './add-task-bar.const';
 import {
   SHORT_SYNTAX_REPEAT_REMOVAL_REG_EX,
   SHORT_SYNTAX_TIME_REG_EX,
   shortSyntax,
+  ShortSyntaxRange,
+  ShortSyntaxTokenType,
 } from '../short-syntax';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { RepeatQuickSetting } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
 import { millisecondsDiffToRemindOption } from '../util/remind-option-to-milliseconds';
@@ -28,15 +30,41 @@ interface PreviousParseResult {
   deadlineTime: string | null;
   deadlineRemindOption: TaskReminderOptionId | null;
   isDeadlineFromSyntax: boolean;
-  repeatQuickSetting: RepeatQuickSetting | null;
+  repeat: AddTaskBarRepeat | null;
   isRepeatFromSyntax: boolean;
 }
+
+const isSameRepeat = (
+  a: AddTaskBarRepeat | null,
+  b: AddTaskBarRepeat | null,
+): boolean => {
+  if (a === null || b === null) {
+    return a === b;
+  }
+  if (a.type !== b.type) {
+    return false;
+  }
+  if (a.type === 'INTERVAL' && b.type === 'INTERVAL') {
+    return a.repeatCycle === b.repeatCycle && a.repeatEvery === b.repeatEvery;
+  }
+  if (a.type === 'PRESET' && b.type === 'PRESET') {
+    return a.quickSetting === b.quickSetting;
+  }
+  // both DIALOG
+  return true;
+};
 
 @Injectable()
 export class AddTaskBarParserService {
   private readonly _stateService = inject(AddTaskBarStateService);
   private _previousParseResult: PreviousParseResult | null = null;
   private _parseRunId = 0;
+  // Exactly which characters of which input the parser last consumed, so a
+  // "clear"/"pick" can delete a token without a second grammar guessing at its
+  // extent. Pinned to the text it was computed for; a mismatch means the parse
+  // for the current input has not landed yet and callers fall back.
+  private _lastParsedRanges: { forText: string; ranges: ShortSyntaxRange[] } | null =
+    null;
 
   private _arraysEqual<T>(a: T[], b: T[]): boolean {
     return a.length === b.length && a.every((val, i) => val === b[i]);
@@ -69,12 +97,14 @@ export class AddTaskBarParserService {
       }
       this._stateService.updateSyntaxHighlight(null);
       this._previousParseResult = null;
+      this._lastParsedRanges = null;
       return;
     }
 
     if (!config) {
       this._stateService.updateSyntaxHighlight(null);
       this._previousParseResult = null;
+      this._lastParsedRanges = null;
       return;
     }
 
@@ -94,11 +124,13 @@ export class AddTaskBarParserService {
       return;
     }
 
+    const parsedRanges = parseResult?.parsedRanges ?? [];
+    this._lastParsedRanges = { forText: text, ranges: parsedRanges };
     this._stateService.updateSyntaxHighlight(
-      parseResult && parseResult.parsedRanges.length
+      parsedRanges.length
         ? {
             forText: text,
-            ranges: parseResult.parsedRanges,
+            ranges: parsedRanges,
           }
         : null,
     );
@@ -145,9 +177,7 @@ export class AddTaskBarParserService {
           ? null
           : currentState.deadlineRemindOption || null,
         isDeadlineFromSyntax: false,
-        repeatQuickSetting: wasRepeatFromSyntax
-          ? null
-          : currentState.repeatQuickSetting || null,
+        repeat: wasRepeatFromSyntax ? null : currentState.repeat || null,
         isRepeatFromSyntax: false,
       };
     } else {
@@ -211,13 +241,13 @@ export class AddTaskBarParserService {
         deadlineRemindOption = currentState.deadlineRemindOption || null;
       }
 
-      let repeatQuickSetting: RepeatQuickSetting | null;
-      if (parseResult.repeatQuickSetting) {
-        repeatQuickSetting = parseResult.repeatQuickSetting;
+      let repeat: AddTaskBarRepeat | null;
+      if (parseResult.repeat) {
+        repeat = parseResult.repeat;
       } else if (wasRepeatFromSyntax) {
-        repeatQuickSetting = null;
+        repeat = null;
       } else {
-        repeatQuickSetting = currentState.repeatQuickSetting || null;
+        repeat = currentState.repeat || null;
       }
 
       currentResult = {
@@ -234,8 +264,8 @@ export class AddTaskBarParserService {
         deadlineTime: deadlineTime,
         deadlineRemindOption: deadlineRemindOption,
         isDeadlineFromSyntax: hasParsedDeadline,
-        repeatQuickSetting,
-        isRepeatFromSyntax: !!parseResult.repeatQuickSetting,
+        repeat,
+        isRepeatFromSyntax: !!parseResult.repeat,
       };
     }
 
@@ -349,11 +379,11 @@ export class AddTaskBarParserService {
 
     if (
       !this._previousParseResult ||
-      this._previousParseResult.repeatQuickSetting !== currentResult.repeatQuickSetting
+      !isSameRepeat(this._previousParseResult.repeat, currentResult.repeat)
     ) {
-      if (currentResult.repeatQuickSetting) {
-        this._stateService.updateRepeatSetting(currentResult.repeatQuickSetting);
-      } else if (currentState.repeatQuickSetting) {
+      if (currentResult.repeat) {
+        this._stateService.updateRepeatSetting(currentResult.repeat);
+      } else if (currentState.repeat) {
         this._stateService.clearRepeatSetting();
       }
     }
@@ -365,6 +395,118 @@ export class AddTaskBarParserService {
   resetPreviousResult(): void {
     this._parseRunId++;
     this._previousParseResult = null;
+  }
+
+  /**
+   * Applies a value the user picked in one of the add-bar's controls, and takes
+   * the syntax that said otherwise out of the input.
+   *
+   * All four picks below go through the same three steps, which only work
+   * together:
+   *
+   * 1. Strip the syntax the pick overrides, so the text cannot keep advertising
+   *    a value the task will not get.
+   * 2. Discard an in-flight parse when that strip changed the text. It was
+   *    started for the pre-strip input, so its values are already stale, and it
+   *    would otherwise land between here and the parse the strip queues —
+   *    overwriting both the pick and the ownership record below. The queued
+   *    parse recomputes everything it would have published.
+   * 3. Record the pick as the previous parse result, so the queued parse reads
+   *    the vanished syntax as "the user replaced it" rather than "the user
+   *    deleted their syntax", which would clear the value instead of keeping it.
+   */
+  applyUserRepeatPick(repeat: AddTaskBarRepeat): void {
+    const cleanedInput = this._stripSyntaxForUserPick('repeat');
+    this._recordUserPick({ repeat, isRepeatFromSyntax: false });
+    this._stateService.updateRepeatSetting(repeat, cleanedInput);
+  }
+
+  applyUserDatePick(
+    date: string,
+    time: string | null,
+    remindOption: TaskReminderOptionId | null,
+  ): void {
+    const cleanedInput = this._stripSyntaxForUserPick('date');
+    // A recurrence phrase is due syntax, so the strip above may have taken one
+    // with it — but the user changed the date, not the schedule. Keep the
+    // recurrence by taking ownership of it too; it re-anchors to the new date.
+    const repeat = this._stateService.state().repeat;
+    this._recordUserPick({
+      dueDate: date,
+      dueTime: time,
+      ...(repeat ? { repeat, isRepeatFromSyntax: false } : {}),
+    });
+    this._stateService.updateDate(date, time, cleanedInput);
+    // No UI access to a reminder without a time being set
+    this._stateService.updateRemindOption(remindOption);
+  }
+
+  applyUserDeadlinePick(
+    date: string,
+    time: string | null,
+    remindOption: TaskReminderOptionId | null,
+  ): void {
+    const cleanedInput = this._stripSyntaxForUserPick('deadline');
+    this._recordUserPick({
+      deadlineDate: date,
+      deadlineTime: time,
+      deadlineRemindOption: remindOption,
+      isDeadlineFromSyntax: false,
+    });
+    this._stateService.updateDeadline(date, time, cleanedInput);
+    this._stateService.updateDeadlineRemindOption(remindOption);
+  }
+
+  applyUserEstimatePick(estimate: number): void {
+    const cleanedInput = this._stripSyntaxForUserPick('estimate');
+    // The estimate has no ownership flag — the parse simply reports what the
+    // text says — so record the null a parse of the stripped input produces.
+    // That makes the queued parse a no-op instead of a reset to null.
+    this._recordUserPick({ timeEstimate: null });
+    this._stateService.updateEstimate(estimate, cleanedInput);
+  }
+
+  private _stripSyntaxForUserPick(
+    type: 'date' | 'deadline' | 'estimate' | 'repeat',
+  ): string {
+    const currentInput = this._stateService.inputTxt();
+    const cleanedInput = this.removeShortSyntaxFromInput(currentInput, type);
+    if (cleanedInput !== currentInput) {
+      // Only safe because the changed text queues a parse that supersedes the
+      // discarded one; without a strip there is no such parse to rely on.
+      this._parseRunId++;
+    }
+    return cleanedInput;
+  }
+
+  private _recordUserPick(fields: Partial<PreviousParseResult>): void {
+    if (this._previousParseResult) {
+      this._previousParseResult = { ...this._previousParseResult, ...fields };
+    }
+  }
+
+  /**
+   * Deletes the characters the last parse consumed for `type` from `text`.
+   *
+   * Returns null when the recorded ranges are not for this exact text, leaving
+   * the caller on its regex fallback. The ranges are the only description of a
+   * token's real extent: a whitespace-delimited fallback truncates every
+   * multi-word one ("@next friday" → "friday", "@every 2 fridays" → "2
+   * fridays"), which is worse than not clearing at all — the leftover words
+   * stay in the task title.
+   */
+  private _removeParsedRanges(text: string, type: ShortSyntaxTokenType): string | null {
+    if (!this._lastParsedRanges || this._lastParsedRanges.forText !== text) {
+      return null;
+    }
+    const ranges = this._lastParsedRanges.ranges.filter((r) => r.type === type);
+    if (!ranges.length) {
+      return text;
+    }
+    // Back to front so an earlier deletion cannot shift a later range
+    return [...ranges]
+      .sort((a, b) => b.start - a.start)
+      .reduce((acc, r) => acc.slice(0, r.start) + acc.slice(r.end), text);
   }
 
   removeShortSyntaxFromInput(
@@ -379,47 +521,55 @@ export class AddTaskBarParserService {
     switch (type) {
       case 'tags':
         if (specificTag) {
-          // Remove specific tag (e.g., #tagname)
+          // Remove specific tag (e.g., #tagname). Stays token-based: the ranges
+          // record which characters were tags, not which tag they named.
           const tagRegex = new RegExp(`\\s*#${specificTag}\\b`, 'gi');
           cleanedInput = cleanedInput.replace(tagRegex, '');
         } else {
           // Remove all tags (e.g., #tag1 #tag2)
-          cleanedInput = cleanedInput.replace(/\s*#\w+/g, '');
+          cleanedInput =
+            this._removeParsedRanges(cleanedInput, 'tag') ??
+            cleanedInput.replace(/\s*#\w+/g, '');
         }
         break;
 
       case 'date':
-        // Remove date and time syntax (e.g., @today @16:30 @2024-01-15)
-        cleanedInput = cleanedInput.replace(/\s*@\S+/g, '');
+        // Remove due syntax (e.g., @today, @next friday, @every 2 fridays). A
+        // recurrence phrase is due syntax too — it is the token that set the
+        // date — so clearing the date drops it as well; callers that mean to
+        // keep the recurrence take ownership of it first.
+        cleanedInput =
+          this._removeParsedRanges(cleanedInput, 'due') ??
+          cleanedInput.replace(/\s*@\S+/g, '');
         break;
 
       case 'deadline':
         // Remove deadline date and time syntax (e.g., !today !16:30 !2024-01-15)
-        cleanedInput = cleanedInput.replace(/\s*!\S+/g, '');
+        cleanedInput =
+          this._removeParsedRanges(cleanedInput, 'deadline') ??
+          cleanedInput.replace(/\s*!\S+/g, '');
         break;
 
       case 'repeat':
-        // Remove recurrence syntax (e.g., @daily @every friday). Uses the
-        // parser's own grammar so a phrase the parser did not treat as a
-        // recurrence ("@every 2 weeks") is left untouched; like the 'date'
+        // Remove recurrence syntax (e.g., @daily @every friday @every 2 weeks).
+        // Uses the parser's own grammar so a phrase the parser did not treat as
+        // a recurrence ("@every quarter") is left untouched; like the 'date'
         // case, a trailing time token ("3pm") is left in place
         cleanedInput = cleanedInput.replace(SHORT_SYNTAX_REPEAT_REMOVAL_REG_EX, '');
         break;
 
       case 'estimate':
         // Remove estimate syntax (e.g., t30m, 1h, 30m/1h, t1.5h)
-        cleanedInput = cleanedInput.replace(
-          new RegExp(SHORT_SYNTAX_TIME_REG_EX.source, 'gi'),
-          ' ',
-        );
+        cleanedInput =
+          this._removeParsedRanges(cleanedInput, 'estimate') ??
+          cleanedInput.replace(new RegExp(SHORT_SYNTAX_TIME_REG_EX.source, 'gi'), ' ');
         break;
 
       case 'urls':
         // Remove URL syntax (e.g., https://example.com www.example.com file:///path)
-        cleanedInput = cleanedInput.replace(
-          /(?:(?:https?|file):\/\/\S+|www\.\S+?)(?=\s|$)/gi,
-          '',
-        );
+        cleanedInput =
+          this._removeParsedRanges(cleanedInput, 'url') ??
+          cleanedInput.replace(/(?:(?:https?|file):\/\/\S+|www\.\S+?)(?=\s|$)/gi, '');
         break;
     }
 
