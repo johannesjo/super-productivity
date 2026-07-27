@@ -157,6 +157,7 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
     it('opens every repeat projection variant for its planned calendar day', async () => {
       const repeatCfg = { id: 'repeat_cfg_with_underscores' } as TaskRepeatCfg;
       const plannedForDay = '2026-07-30';
+      const sourceOccurrenceDate = '2026-07-29';
       const projectionTypes = [
         SVEType.RepeatProjection,
         SVEType.RepeatProjectionSplit,
@@ -167,6 +168,9 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
       const matDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
 
       for (const type of projectionTypes) {
+        const isContinuedProjection =
+          type === SVEType.RepeatProjectionSplitContinued ||
+          type === SVEType.RepeatProjectionSplitContinuedLast;
         fixture.componentRef.setInput('event', {
           id: 'repeat_cfg_with_underscores_not-a-date',
           type,
@@ -174,6 +178,7 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
           startHours: 10,
           timeLeftInHours: 1,
           plannedForDay,
+          sourceOccurrenceDate: isContinuedProjection ? sourceOccurrenceDate : undefined,
           data: repeatCfg,
         } as ScheduleEvent);
         fixture.detectChanges();
@@ -183,7 +188,10 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
         expect(matDialog.open).toHaveBeenCalledWith(
           jasmine.anything(),
           jasmine.objectContaining({
-            data: jasmine.objectContaining({ repeatCfg, targetDate: plannedForDay }),
+            data: jasmine.objectContaining({
+              repeatCfg,
+              targetDate: isContinuedProjection ? sourceOccurrenceDate : plannedForDay,
+            }),
           }),
         );
         matDialog.open.calls.reset();

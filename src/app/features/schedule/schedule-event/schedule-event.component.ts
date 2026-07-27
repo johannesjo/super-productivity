@@ -390,7 +390,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
         data: {
           repeatCfg,
-          targetDate: evt.plannedForDay,
+          targetDate: evt.sourceOccurrenceDate ?? evt.plannedForDay,
         },
       });
     } else if (evt.type === SVEType.CalendarEvent) {
