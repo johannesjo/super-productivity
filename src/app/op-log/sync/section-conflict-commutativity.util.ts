@@ -46,15 +46,21 @@ export interface SectionReplayOrder {
   position: number;
 }
 
+export interface SectionReplayStateCompensation {
+  entityType: WorkContextType;
+  entityId: string;
+  entityState: Project | Tag;
+  order: SectionReplayOrder;
+}
+
 export type SectionReplayProjection =
-  | { kind: 'replay'; operation: Operation; order: SectionReplayOrder }
   | {
-      kind: 'work-context-state';
-      entityType: WorkContextType;
-      entityId: string;
-      entityState: Project | Tag;
+      kind: 'replay';
+      operation: Operation;
       order: SectionReplayOrder;
+      stateCompensation?: SectionReplayStateCompensation;
     }
+  | ({ kind: 'work-context-state' } & SectionReplayStateCompensation)
   | { kind: 'superseded' }
   | { kind: 'blocked'; reason: string };
 
@@ -305,6 +311,26 @@ const getWorkContextEntity = (
     ? snapshot.tag.entities[id]
     : snapshot.project.entities[id];
 
+const createStateCompensation = (
+  entityType: WorkContextType,
+  entityId: string,
+  entityState: Project | Tag,
+): SectionReplayStateCompensation => {
+  // Wire compatibility: v18.4.0-v18.4.3 accept schema-4 S6 rows but only
+  // remove section membership; they ignore the later work-context anchor fields.
+  // Their existing Project/Tag LWW reducer does understand this complete entity
+  // snapshot, so persist it after semantic removals to converge taskIds ordering.
+  return {
+    entityType,
+    entityId,
+    entityState,
+    order: {
+      scope: getReplayScope('work-context-tasks', entityType, entityId),
+      position: Number.MAX_SAFE_INTEGER,
+    },
+  };
+};
+
 const createPlacementReplay = (
   operation: Operation,
   placement: SectionPlacement,
@@ -488,6 +514,11 @@ export const projectSectionReplayAgainstState = (
         ),
         position: contextEntity.taskIds.indexOf(placement.taskId),
       },
+      stateCompensation: createStateCompensation(
+        contextSection.contextType,
+        contextSection.contextId,
+        contextEntity,
+      ),
     };
   }
 
@@ -543,17 +574,11 @@ export const projectSectionReplayAgainstState = (
       }
       return {
         kind: 'work-context-state',
-        entityType: removal.workContextType,
-        entityId: removal.workContextId,
-        entityState: contextEntity,
-        order: {
-          scope: getReplayScope(
-            'work-context-tasks',
-            removal.workContextType,
-            removal.workContextId,
-          ),
-          position: Number.MAX_SAFE_INTEGER,
-        },
+        ...createStateCompensation(
+          removal.workContextType,
+          removal.workContextId,
+          contextEntity,
+        ),
       };
     }
     if (!currentAnchor) {
@@ -570,6 +595,11 @@ export const projectSectionReplayAgainstState = (
         ),
         position: contextEntity.taskIds.indexOf(removal.taskId),
       },
+      stateCompensation: createStateCompensation(
+        removal.workContextType,
+        removal.workContextId,
+        contextEntity,
+      ),
     };
   }
 

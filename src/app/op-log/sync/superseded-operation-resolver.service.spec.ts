@@ -25,6 +25,7 @@ import { MAX_VECTOR_CLOCK_SIZE } from '../core/operation-log.const';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
 import { OperationCaptureService } from '../capture/operation-capture.service';
 import { AppStateSnapshot } from '../core/types/backup.types';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 describe('SupersededOperationResolverService', () => {
   let service: SupersededOperationResolverService;
@@ -1058,8 +1059,7 @@ describe('SupersededOperationResolverService', () => {
               ids: ['TODAY'],
               entities: {
                 TODAY: {
-                  id: 'TODAY',
-                  title: 'Today',
+                  ...TODAY_TAG,
                   taskIds: ['main-anchor', 'task-1'],
                 },
               },
@@ -1087,7 +1087,9 @@ describe('SupersededOperationResolverService', () => {
             { opId: op.id, op, existingClock: remoteOp.vectorClock },
           ]);
 
-          expect(result).toBe(1);
+          const needsLegacyWorkContextCompensation =
+            op.actionType === ActionType.SECTION_REMOVE_TASK;
+          expect(result).toBe(needsLegacyWorkContextCompensation ? 2 : 1);
           expectAtomicRejection([op.id]);
           expect(
             mockConflictResolutionService.getCurrentEntityState,
@@ -1122,6 +1124,20 @@ describe('SupersededOperationResolverService', () => {
             expect(replacement.payload).toEqual(op.payload);
           }
           expect(replacement.id).not.toBe(op.id);
+          if (needsLegacyWorkContextCompensation) {
+            expect(
+              mockOpLogStore.appendWithVectorClockOverwrite.calls.allArgs()[1][0],
+            ).toEqual(
+              jasmine.objectContaining({
+                actionType: '[TAG] LWW Update',
+                entityType: 'TAG',
+                entityId: 'TODAY',
+                payload: jasmine.objectContaining({
+                  taskIds: ['main-anchor', 'task-1'],
+                }),
+              }),
+            );
+          }
         });
       });
 
@@ -1414,8 +1430,12 @@ describe('SupersededOperationResolverService', () => {
         expect(replacementTaskIds).toEqual(['task-a', 'task-b', 'task-c']);
       });
 
-      it('should compose a later removal into one no-section replacement', async () => {
+      it('should compose a later removal into a fleet-compatible replacement pair', async () => {
         const localMoveOp = sectionOps[0].op;
+        const currentToday = {
+          ...TODAY_TAG,
+          taskIds: ['current-main-anchor', 'task-1'],
+        };
         mockVectorClockService.getCurrentVectorClock.and.resolveTo({ remote: 4 });
         mockOpLogStore.getOpsAfterSeq.and.resolveTo([
           {
@@ -1451,17 +1471,13 @@ describe('SupersededOperationResolverService', () => {
             tag: {
               ids: ['TODAY'],
               entities: {
-                TODAY: {
-                  id: 'TODAY',
-                  title: 'Today',
-                  taskIds: ['current-main-anchor', 'task-1'],
-                },
+                TODAY: currentToday,
               },
             },
           }),
         );
 
-        await service.resolveSupersededLocalOps([
+        const result = await service.resolveSupersededLocalOps([
           {
             opId: localMoveOp.id,
             op: localMoveOp,
@@ -1469,14 +1485,16 @@ describe('SupersededOperationResolverService', () => {
           },
         ]);
 
-        const replacement = mockOpLogStore.appendWithVectorClockOverwrite.calls.first()
-          .args[0] as Operation;
-        expect(replacement.actionType).toBe(ActionType.SECTION_REMOVE_TASK);
-        expect(replacement.opType).toBe(OpType.Update);
-        expect(replacement.entityId).toBe('section-left');
-        expect(replacement.entityIds).toBeUndefined();
+        expect(result).toBe(2);
+        const replacements =
+          mockOpLogStore.appendWithVectorClockOverwrite.calls.allArgs();
+        const sectionReplacement = replacements[0][0] as Operation;
+        expect(sectionReplacement.actionType).toBe(ActionType.SECTION_REMOVE_TASK);
+        expect(sectionReplacement.opType).toBe(OpType.Update);
+        expect(sectionReplacement.entityId).toBe('section-left');
+        expect(sectionReplacement.entityIds).toBeUndefined();
         expect(
-          (replacement.payload as { actionPayload: Record<string, unknown> })
+          (sectionReplacement.payload as { actionPayload: Record<string, unknown> })
             .actionPayload,
         ).toEqual({
           sectionId: 'section-left',
@@ -1485,6 +1503,14 @@ describe('SupersededOperationResolverService', () => {
           workContextType: 'TAG',
           workContextAfterTaskId: 'current-main-anchor',
         });
+        expect(replacements[1][0]).toEqual(
+          jasmine.objectContaining({
+            actionType: '[TAG] LWW Update',
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: currentToday,
+          }),
+        );
       });
 
       it('should ignore an unrelated retained non-SECTION op for safe replay', async () => {
@@ -1661,8 +1687,7 @@ describe('SupersededOperationResolverService', () => {
           timestamp: 2500,
         };
         const currentToday = {
-          id: 'TODAY',
-          title: 'Today',
+          ...TODAY_TAG,
           taskIds: ['new-main-predecessor', 'task-1', 'main-anchor'],
         };
         mockVectorClockService.getCurrentVectorClock.and.resolveTo({

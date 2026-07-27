@@ -32,8 +32,8 @@ import {
   areCommutingSectionOperations,
   projectSectionReplayAgainstState,
   SectionReplayOrder,
-  SectionReplayProjection,
   SectionReplaySnapshot,
+  SectionReplayStateCompensation,
 } from './section-conflict-commutativity.util';
 import { getOpEntityIds } from '../util/get-op-entity-ids.util';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
@@ -50,10 +50,7 @@ type SupersededOperation = {
 };
 
 type SectionCausalReplayDecision = 'replay' | 'fallback';
-type WorkContextStateProjection = Extract<
-  SectionReplayProjection,
-  { kind: 'work-context-state' }
->;
+type WorkContextStateProjection = SectionReplayStateCompensation;
 interface OrderedSectionReplacement {
   operation: Operation;
   order: SectionReplayOrder;
@@ -342,10 +339,10 @@ export class SupersededOperationResolverService {
               );
             } else if (projection.kind === 'work-context-state') {
               projectedWorkContextState = projection;
-              projectedOrder = projection.order;
             } else {
               projectedSectionOp = projection.operation;
               projectedOrder = projection.order;
+              projectedWorkContextState = projection.stateCompensation;
             }
           }
         }
@@ -355,7 +352,6 @@ export class SupersededOperationResolverService {
           projectedSectionOp ||
           projectedWorkContextState
         ) {
-          const sourceOp = projectedSectionOp ?? item.op;
           const clocksToMerge = [globalClock, item.op.vectorClock];
           if ((projectedSectionOp || projectedWorkContextState) && item.existingClock) {
             clocksToMerge.push(item.existingClock);
@@ -368,8 +364,24 @@ export class SupersededOperationResolverService {
           // Client-side pruning would drop entity clock IDs when the merged clock exceeds
           // MAX_VECTOR_CLOCK_SIZE, causing the comparison to return CONCURRENT instead of
           // GREATER_THAN → infinite rejection loop.
-          const newOp = projectedWorkContextState
-            ? this.conflictResolutionService.createLWWUpdateOp(
+          const replacements: Array<{
+            operation: Operation;
+            order: SectionReplayOrder | undefined;
+          }> = [];
+          if (projectedSectionOp) {
+            replacements.push({
+              operation: this._recreateOpWithMergedClock(
+                projectedSectionOp,
+                mergedClock,
+                clientId,
+                item.op.timestamp,
+              ),
+              order: projectedOrder,
+            });
+          }
+          if (projectedWorkContextState) {
+            replacements.push({
+              operation: this.conflictResolutionService.createLWWUpdateOp(
                 projectedWorkContextState.entityType,
                 projectedWorkContextState.entityId,
                 projectedWorkContextState.entityState,
@@ -377,27 +389,37 @@ export class SupersededOperationResolverService {
                 mergedClock,
                 item.op.timestamp,
                 'replace',
-              )
-            : this._recreateOpWithMergedClock(
-                sourceOp,
+              ),
+              order: projectedWorkContextState.order,
+            });
+          }
+          if (replacements.length === 0) {
+            replacements.push({
+              operation: this._recreateOpWithMergedClock(
+                item.op,
                 mergedClock,
                 clientId,
                 item.op.timestamp,
-              );
-          if (projectedOrder) {
-            orderedSectionReplacements.push({
-              operation: newOp,
-              order: projectedOrder,
-              originalIndex: itemIndex,
+              ),
+              order: undefined,
             });
-          } else {
-            newOpsCreated.push(newOp);
+          }
+          for (const { operation, order } of replacements) {
+            if (order) {
+              orderedSectionReplacements.push({
+                operation,
+                order,
+                originalIndex: itemIndex,
+              });
+            } else {
+              newOpsCreated.push(operation);
+            }
+            OpLog.normal(
+              `SupersededOperationResolverService: Created causal replacement ` +
+                `${operation.actionType} op ${operation.id}, replacing superseded op ${item.opId}`,
+            );
           }
           opsToReject.push(item.opId);
-          OpLog.normal(
-            `SupersededOperationResolverService: Created causal replacement ` +
-              `${item.op.actionType} op ${newOp.id}, replacing superseded op ${item.opId}`,
-          );
         } else {
           regularSupersededOps.push(item);
         }
