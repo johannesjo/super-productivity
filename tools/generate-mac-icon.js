@@ -23,7 +23,7 @@ const {
 } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join } = require('node:path');
-const { verifyIconset, verifyIcns } = require('./verify-mac-icon');
+const { compareIconsets, verifyIcns } = require('./verify-mac-icon');
 
 const BUILD_DIR = join(__dirname, '..', 'build');
 const SOURCE_SVG = join(BUILD_DIR, 'icon-mac.svg');
@@ -66,6 +66,29 @@ const buildPortableIcns = (entries) => {
   return buffer;
 };
 
+const resolveNpmInvocation = ({
+  platform = process.platform,
+  npmExecPath = process.env.npm_execpath,
+  nodeExecutable = process.execPath,
+} = {}) => {
+  // npm is a .cmd shim on Windows, which execFileSync cannot launch directly.
+  if (npmExecPath) {
+    return {
+      command: nodeExecutable,
+      prefixArgs: [npmExecPath],
+    };
+  }
+  if (platform === 'win32') {
+    throw new Error(
+      'npm cannot be located safely on Windows; run npm run generate:mac-icon',
+    );
+  }
+  return {
+    command: 'npm',
+    prefixArgs: [],
+  };
+};
+
 const loadSharp = () => {
   const installedPackage = join(
     SHARP_INSTALL_DIR,
@@ -84,9 +107,11 @@ const loadSharp = () => {
 
   console.log(`Installing sharp ${SHARP_VERSION} in .tmp...`);
   mkdirSync(SHARP_INSTALL_DIR, { recursive: true });
+  const npm = resolveNpmInvocation();
   execFileSync(
-    'npm',
+    npm.command,
     [
+      ...npm.prefixArgs,
       'install',
       '--prefix',
       SHARP_INSTALL_DIR,
@@ -125,6 +150,7 @@ const generateIconset = async () => {
 const compileWithIconutil = () => {
   const temporaryDirectory = mkdtempSync(join(tmpdir(), 'sp-mac-icon-'));
   const temporaryIcon = join(temporaryDirectory, 'icon.icns');
+  const extractedIconset = join(temporaryDirectory, 'icon.iconset');
 
   try {
     execFileSync(
@@ -132,7 +158,12 @@ const compileWithIconutil = () => {
       ['--convert', 'icns', '--output', temporaryIcon, ICONSET_DIR],
       { stdio: 'inherit' },
     );
-    verifyIcns(readFileSync(temporaryIcon), temporaryIcon, ICONSET_DIR);
+    execFileSync(
+      '/usr/bin/iconutil',
+      ['--convert', 'iconset', '--output', extractedIconset, temporaryIcon],
+      { stdio: 'inherit' },
+    );
+    compareIconsets(ICONSET_DIR, extractedIconset);
     copyFileSync(temporaryIcon, OUTPUT_ICNS);
   } finally {
     rmSync(temporaryDirectory, { recursive: true, force: true });
@@ -141,10 +172,10 @@ const compileWithIconutil = () => {
 
 const generateMacIcon = async () => {
   const renderedEntries = COMPILE_ONLY ? undefined : await generateIconset();
-  verifyIconset(ICONSET_DIR);
 
   if (process.platform === 'darwin') {
     compileWithIconutil();
+    console.log(`Verified ${OUTPUT_ICNS} with an iconutil round trip`);
   } else {
     if (COMPILE_ONLY) {
       throw new Error('--compile-only requires macOS and /usr/bin/iconutil');
@@ -153,13 +184,19 @@ const generateMacIcon = async () => {
       'iconutil is only available on macOS; writing an equivalent ten-slot ICNS.',
     );
     writeFileSync(OUTPUT_ICNS, buildPortableIcns(renderedEntries));
+    const chunkTypes = verifyIcns(readFileSync(OUTPUT_ICNS), OUTPUT_ICNS, ICONSET_DIR);
+    console.log(`Verified ${OUTPUT_ICNS}: ${chunkTypes.join(', ')}`);
   }
-
-  const chunkTypes = verifyIcns(readFileSync(OUTPUT_ICNS), OUTPUT_ICNS, ICONSET_DIR);
-  console.log(`Verified ${OUTPUT_ICNS}: ${chunkTypes.join(', ')}`);
 };
 
-generateMacIcon().catch((error) => {
-  console.error(`Failed to generate macOS icon: ${error.message}`);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  generateMacIcon().catch((error) => {
+    console.error(`Failed to generate macOS icon: ${error.message}`);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  generateMacIcon,
+  resolveNpmInvocation,
+};

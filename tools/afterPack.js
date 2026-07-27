@@ -19,10 +19,7 @@
 // See docs/research/snap-wayland-gpu-fix-research.md §18.
 
 const { promises: fs } = require('fs');
-const { execFileSync } = require('node:child_process');
-const { tmpdir } = require('node:os');
 const { join } = require('path');
-const { compareIconsets, verifyIcns } = require('./verify-mac-icon');
 
 const BIN_NAME = 'superproductivity'; // must match linux.executableName
 const RENAMED = 'superproductivity-bin';
@@ -35,7 +32,7 @@ const WAYLAND_IDLE_HELPER_SRC = join(
   'wayland-idle-helper',
 );
 const WAYLAND_IDLE_HELPER_DEST = 'wayland-idle-helper';
-const MAC_ICONSET_DIR = join(__dirname, '..', 'build', 'icon.iconset');
+const MAC_ICON_SOURCE = join(__dirname, '..', 'build', 'icon.icns');
 
 const isTruthyEnv = (value) => value === '1' || value?.toLowerCase() === 'true';
 
@@ -48,24 +45,17 @@ const verifyPackagedMacIcon = async (context) => {
     'Resources',
     'icon.icns',
   );
-  const chunkTypes = verifyIcns(await fs.readFile(iconPath), iconPath, MAC_ICONSET_DIR);
-
-  if (process.platform === 'darwin') {
-    const temporaryDirectory = await fs.mkdtemp(join(tmpdir(), 'sp-mac-icon-check-'));
-    const extractedIconset = join(temporaryDirectory, 'icon.iconset');
-    try {
-      execFileSync(
-        '/usr/bin/iconutil',
-        ['--convert', 'iconset', '--output', extractedIconset, iconPath],
-        { stdio: 'inherit' },
-      );
-      compareIconsets(MAC_ICONSET_DIR, extractedIconset);
-    } finally {
-      await fs.rm(temporaryDirectory, { recursive: true, force: true });
-    }
+  const [sourceIcon, packagedIcon] = await Promise.all([
+    fs.readFile(MAC_ICON_SOURCE),
+    fs.readFile(iconPath),
+  ]);
+  if (!sourceIcon.equals(packagedIcon)) {
+    throw new Error(
+      `[afterPack] Packaged macOS icon ${iconPath} does not match ${MAC_ICON_SOURCE}`,
+    );
   }
 
-  console.log(`[afterPack] Verified macOS icon: ${chunkTypes.join(', ')}`);
+  console.log(`[afterPack] Verified packaged macOS icon matches its source`);
 };
 
 async function afterPack(context) {

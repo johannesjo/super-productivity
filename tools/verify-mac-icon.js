@@ -7,43 +7,21 @@ const { crc32, inflateSync } = require('node:zlib');
 
 const PNG_SIGNATURE = Buffer.from('89504e470d0a1a0a', 'hex');
 const MIN_TRANSPARENT_PIXEL_RATIO = 0.2;
-const ICONSET_FILES = [
-  ['icon_16x16.png', 16],
-  ['icon_16x16@2x.png', 32],
-  ['icon_32x32.png', 32],
-  ['icon_32x32@2x.png', 64],
-  ['icon_128x128.png', 128],
-  ['icon_128x128@2x.png', 256],
-  ['icon_256x256.png', 256],
-  ['icon_256x256@2x.png', 512],
-  ['icon_512x512.png', 512],
-  ['icon_512x512@2x.png', 1024],
-];
 // Same-sized 1x and 2x images are separate semantic representations in ICNS.
 const REPRESENTATIONS = [
-  { label: '16x16', types: ['ic04', 'icp4'], pixels: 16 },
-  { label: '16x16@2x', types: ['ic11'], pixels: 32 },
-  { label: '32x32', types: ['ic05', 'icp5'], pixels: 32 },
-  { label: '32x32@2x', types: ['ic12'], pixels: 64 },
-  { label: '128x128', types: ['ic07'], pixels: 128 },
-  { label: '128x128@2x', types: ['ic13'], pixels: 256 },
-  { label: '256x256', types: ['ic08'], pixels: 256 },
-  { label: '256x256@2x', types: ['ic14'], pixels: 512 },
-  { label: '512x512', types: ['ic09'], pixels: 512 },
-  { label: '512x512@2x', types: ['ic10'], pixels: 1024 },
+  { label: '16x16', type: 'icp4', file: 'icon_16x16.png', pixels: 16 },
+  { label: '16x16@2x', type: 'ic11', file: 'icon_16x16@2x.png', pixels: 32 },
+  { label: '32x32', type: 'icp5', file: 'icon_32x32.png', pixels: 32 },
+  { label: '32x32@2x', type: 'ic12', file: 'icon_32x32@2x.png', pixels: 64 },
+  { label: '128x128', type: 'ic07', file: 'icon_128x128.png', pixels: 128 },
+  { label: '128x128@2x', type: 'ic13', file: 'icon_128x128@2x.png', pixels: 256 },
+  { label: '256x256', type: 'ic08', file: 'icon_256x256.png', pixels: 256 },
+  { label: '256x256@2x', type: 'ic14', file: 'icon_256x256@2x.png', pixels: 512 },
+  { label: '512x512', type: 'ic09', file: 'icon_512x512.png', pixels: 512 },
+  { label: '512x512@2x', type: 'ic10', file: 'icon_512x512@2x.png', pixels: 1024 },
 ];
-const PNG_TYPE_TO_ICONSET_FILE = new Map([
-  ['icp4', 'icon_16x16.png'],
-  ['ic11', 'icon_16x16@2x.png'],
-  ['icp5', 'icon_32x32.png'],
-  ['ic12', 'icon_32x32@2x.png'],
-  ['ic07', 'icon_128x128.png'],
-  ['ic13', 'icon_128x128@2x.png'],
-  ['ic08', 'icon_256x256.png'],
-  ['ic14', 'icon_256x256@2x.png'],
-  ['ic09', 'icon_512x512.png'],
-  ['ic10', 'icon_512x512@2x.png'],
-]);
+const LEGACY_REPRESENTATION_TYPES = ['ic04', 'ic05'];
+const ICONSET_FILES = REPRESENTATIONS.map(({ file, pixels }) => [file, pixels]);
 
 const fail = (source, message) => {
   throw new Error(`${source}: ${message}`);
@@ -299,29 +277,36 @@ const compareIconsets = (expectedDirectory, actualDirectory) => {
 
 const verifyIcns = (buffer, source = 'ICNS', expectedIconsetDirectory) => {
   const chunks = parseIcns(buffer, source);
+  const legacyType = LEGACY_REPRESENTATION_TYPES.find((type) => chunks.has(type));
+  if (legacyType) {
+    fail(
+      source,
+      `legacy ICNS representation ${legacyType} requires native iconutil verification`,
+    );
+  }
+
   const expectedFiles = expectedIconsetDirectory
     ? verifyIconset(expectedIconsetDirectory)
     : undefined;
   const missing = [];
 
   for (const representation of REPRESENTATIONS) {
-    const presentTypes = representation.types.filter((type) => chunks.has(type));
-    if (!presentTypes.length) {
-      missing.push(`${representation.label} (${representation.types.join(' or ')})`);
+    if (!chunks.has(representation.type)) {
+      missing.push(`${representation.label} (${representation.type})`);
       continue;
     }
 
-    for (const type of presentTypes) {
-      const iconsetFile = PNG_TYPE_TO_ICONSET_FILE.get(type);
-      if (!iconsetFile) continue;
-      const decoded = decodePng(
-        chunks.get(type),
-        representation.pixels,
-        `${source}:${type}`,
+    const decoded = decodePng(
+      chunks.get(representation.type),
+      representation.pixels,
+      `${source}:${representation.type}`,
+    );
+    if (expectedFiles) {
+      compareDecodedPng(
+        expectedFiles.get(representation.file),
+        decoded,
+        `${source}:${representation.type}`,
       );
-      if (expectedFiles) {
-        compareDecodedPng(expectedFiles.get(iconsetFile), decoded, `${source}:${type}`);
-      }
     }
   }
 
