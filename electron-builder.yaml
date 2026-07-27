@@ -37,6 +37,8 @@ files:
 directories:
   output: './.tmp/app-builds'
 
+beforePack: ./tools/beforePack.js
+
 # Post-pack hook that installs a shell wrapper for Linux builds to force
 # --ozone-platform=x11 in Snap+Wayland sessions.
 # See tools/afterPack.js + build/linux/snap-wrapper.sh and
@@ -182,6 +184,7 @@ flatpak:
 
 mac:
   appId: com.super-productivity.app
+  icon: build/icon.icns
   type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
