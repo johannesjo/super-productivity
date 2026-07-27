@@ -7,6 +7,7 @@ import {
 } from '@sp/shared-schema';
 import { encrypt } from '@sp/sync-core';
 import { test, expect } from '../../fixtures/supersync.fixture';
+import { SettingsPage } from '../../pages/settings.page';
 import {
   SUPERSYNC_BASE_URL,
   closeClient,
@@ -25,6 +26,12 @@ interface ObservedDownloadPage {
 }
 
 type DownloadHistory = ReturnType<typeof SuperSyncDownloadOpsResponseSchema.parse>;
+
+interface CorruptSuffix {
+  opId: string;
+  serverSeq: number;
+  encryptedPayload: string;
+}
 
 const authHeaders = (token: string): Headers => {
   const headers = new Headers();
@@ -68,8 +75,11 @@ const uploadCorruptSuffix = async (
   testRunId: string,
   password: string,
   history: DownloadHistory,
-): Promise<string> => {
+): Promise<CorruptSuffix> => {
   const clientId = `issue-9256-seed-${testRunId}`;
+  const encryptedPayload = corruptAuthenticationTag(
+    await encrypt(JSON.stringify({ project: {}, tag: {} }), password),
+  );
   const corruptOp: SuperSyncOperation = {
     id: crypto.randomUUID(),
     clientId,
@@ -77,9 +87,7 @@ const uploadCorruptSuffix = async (
     opType: 'UPD',
     entityType: 'TIME_TRACKING',
     entityId: 'PROJECT:issue-9256:2026-03-24',
-    payload: corruptAuthenticationTag(
-      await encrypt(JSON.stringify({ project: {}, tag: {} }), password),
-    ),
+    payload: encryptedPayload,
     vectorClock: { ...mergeHistoryClock(history), [clientId]: 1 },
     timestamp: Date.now(),
     schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -104,7 +112,15 @@ const uploadCorruptSuffix = async (
   if (result.results.length !== 1 || result.results[0].accepted !== true) {
     throw new Error(`Server rejected corrupt fixture: ${JSON.stringify(result)}`);
   }
-  return corruptOp.id;
+  const serverSeq = result.results[0].serverSeq;
+  if (serverSeq === undefined) {
+    throw new Error('Server accepted corrupt fixture without assigning a serverSeq');
+  }
+  return {
+    opId: corruptOp.id,
+    serverSeq,
+    encryptedPayload,
+  };
 };
 
 const containsFailureSequence = (
@@ -120,6 +136,47 @@ const containsFailureSequence = (
       pages[index + 1]?.hasMore === false &&
       pages[index + 1]?.opIds.join() === corruptOpId,
   );
+
+const isExpectedDiagnosticMetadata = (
+  value: unknown,
+  corruptSuffix: CorruptSuffix,
+): boolean => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const metadata = value as Record<string, unknown>;
+  return (
+    Object.keys(metadata).length === 4 &&
+    metadata.opId === corruptSuffix.opId &&
+    metadata.serverSeq === corruptSuffix.serverSeq &&
+    metadata.encryptedBatchIndex === 0 &&
+    metadata.stage === 'decrypt'
+  );
+};
+
+const containsExpectedDiagnosticLog = (
+  value: unknown,
+  corruptSuffix: CorruptSuffix,
+): boolean => {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.some((entry: unknown) => {
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+      return false;
+    }
+    const logEntry = entry as Record<string, unknown>;
+    return (
+      logEntry.context === 'ol' &&
+      logEntry.message ===
+        'OperationLogDownloadService: Encrypted operation payload could not be processed.' &&
+      Array.isArray(logEntry.args) &&
+      logEntry.args.some((arg: unknown) =>
+        isExpectedDiagnosticMetadata(arg, corruptSuffix),
+      )
+    );
+  });
+};
 
 test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
   test('correct password decrypts page 1 but an undecryptable final op blocks recovery', async ({
@@ -159,7 +216,7 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
       ).toBe(true);
       expect(validHistory.ops.some(({ op }) => op.opType === 'SYNC_IMPORT')).toBe(true);
       const validPageOpIds = validHistory.ops.map(({ op }) => op.id);
-      const corruptOpId = await uploadCorruptSuffix(
+      const corruptSuffix = await uploadCorruptSuffix(
         user.token,
         testRunId,
         encryptionPassword,
@@ -202,7 +259,9 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
         decryptErrorDialog.locator('h2:has-text("Decryption Failed")'),
       ).toBeVisible();
       await expect
-        .poll(() => containsFailureSequence(observedPages, validPageOpIds, corruptOpId))
+        .poll(() =>
+          containsFailureSequence(observedPages, validPageOpIds, corruptSuffix.opId),
+        )
         .toBe(true);
 
       // Reaching page 2 proves the same password decrypted and validated page 1.
@@ -227,7 +286,7 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
             containsFailureSequence(
               observedPages.slice(retryPagesStart),
               validPageOpIds,
-              corruptOpId,
+              corruptSuffix.opId,
             ),
           { timeout: 30000 },
         )
@@ -236,6 +295,25 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
       await expect(
         clientB.page.locator(`task:has-text("${taskName}")`),
       ).not.toBeVisible();
+
+      await decryptErrorDialog
+        .getByRole('button', { name: 'Cancel', exact: true })
+        .click();
+      await expect(decryptErrorDialog).not.toBeVisible();
+
+      const settingsPage = new SettingsPage(clientB.page);
+      await settingsPage.navigateToSettings();
+      await clientB.page.getByRole('link', { name: 'Logs', exact: true }).click();
+      const exportedLogsText = await clientB.page
+        .locator('dialog-logs textarea.logs-textarea')
+        .inputValue();
+      const exportedLogs: unknown = JSON.parse(exportedLogsText);
+
+      expect(containsExpectedDiagnosticLog(exportedLogs, corruptSuffix)).toBe(true);
+      expect(exportedLogsText).not.toContain(user.token);
+      expect(exportedLogsText).not.toContain(encryptionPassword);
+      expect(exportedLogsText).not.toContain(corruptSuffix.encryptedPayload);
+      expect(exportedLogsText).not.toContain(taskName);
     } finally {
       if (clientA) await closeClient(clientA);
       if (clientB) {

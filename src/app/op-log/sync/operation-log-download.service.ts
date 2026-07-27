@@ -22,7 +22,10 @@ import {
   CLOCK_DRIFT_THRESHOLD_MS,
   DOWNLOAD_PAGE_SIZE,
 } from '../core/operation-log.const';
-import { OperationEncryptionService } from './operation-encryption.service';
+import {
+  OperationDecryptionError,
+  OperationEncryptionService,
+} from './operation-encryption.service';
 import { DecryptNoPasswordError } from '../core/errors/sync-errors';
 import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected';
 import { SuperSyncStatusService } from './super-sync-status.service';
@@ -296,9 +299,10 @@ export class OperationLogDownloadService implements OnDestroy {
         }
 
         // Filter already applied ops
-        let syncOps: SyncOperation[] = response.ops
-          .filter((serverOp) => !appliedOpIds.has(serverOp.op.id))
-          .map((serverOp) => serverOp.op);
+        const newServerOps = response.ops.filter(
+          (serverOp) => !appliedOpIds.has(serverOp.op.id),
+        );
+        let syncOps: SyncOperation[] = newServerOps.map((serverOp) => serverOp.op);
 
         // Fail closed on a plaintext op when SuperSync encryption is enabled: the
         // server is all-encrypted once encryption is on (delete + reupload), so an
@@ -335,7 +339,28 @@ export class OperationLogDownloadService implements OnDestroy {
           }
 
           // Decrypt encrypted operations - let DecryptError propagate to sync-wrapper handler
-          syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+          try {
+            syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+          } catch (error) {
+            if (error instanceof OperationDecryptionError) {
+              const encryptedServerOps = newServerOps.filter(
+                (serverOp) => serverOp.op.isPayloadEncrypted,
+              );
+              const failedServerOp = encryptedServerOps[error.encryptedBatchIndex];
+              if (failedServerOp?.op.id === error.operationId) {
+                OpLog.error(
+                  'OperationLogDownloadService: Encrypted operation payload could not be processed.',
+                  {
+                    opId: error.operationId,
+                    serverSeq: failedServerOp.serverSeq,
+                    encryptedBatchIndex: error.encryptedBatchIndex,
+                    stage: error.stage,
+                  },
+                );
+              }
+            }
+            throw error;
+          }
         }
 
         // Convert to Operation format

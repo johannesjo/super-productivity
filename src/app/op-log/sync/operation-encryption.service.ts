@@ -8,6 +8,32 @@ import {
   assertDecryptedOpMetadataIntegrity,
 } from './verify-decrypted-op-integrity';
 
+export type OperationDecryptionFailureStage = 'envelope' | 'decrypt' | 'parse';
+
+export interface OperationDecryptionErrorDetails {
+  operationId: string;
+  encryptedBatchIndex: number;
+  stage: OperationDecryptionFailureStage;
+}
+
+/**
+ * Identifies an encrypted operation that could not be processed without
+ * retaining its ciphertext, decrypted payload, or encryption key.
+ */
+export class OperationDecryptionError extends DecryptError {
+  override name = 'OperationDecryptionError';
+  readonly operationId: string;
+  readonly encryptedBatchIndex: number;
+  readonly stage: OperationDecryptionFailureStage;
+
+  constructor(details: OperationDecryptionErrorDetails) {
+    super('Encrypted operation payload could not be processed');
+    this.operationId = details.operationId;
+    this.encryptedBatchIndex = details.encryptedBatchIndex;
+    this.stage = details.stage;
+  }
+}
+
 /**
  * Handles E2E encryption/decryption of operation payloads for SuperSync.
  * Uses AES-256-GCM with Argon2id key derivation.
@@ -116,9 +142,11 @@ export class OperationEncryptionService {
       const op = ops[i];
       if (op.isPayloadEncrypted) {
         if (typeof op.payload !== 'string') {
-          throw new DecryptError(
-            `Encrypted payload must be a string (op ${op.id} has ${typeof op.payload})`,
-          );
+          throw new OperationDecryptionError({
+            operationId: op.id,
+            encryptedBatchIndex: encryptedOps.length,
+            stage: 'envelope',
+          });
         }
         encryptedOps.push({ index: i, op });
       } else {
@@ -134,8 +162,24 @@ export class OperationEncryptionService {
     let decryptedStrings: string[];
     try {
       decryptedStrings = await decryptBatch(encryptedPayloads, encryptKey);
-    } catch (e) {
-      throw new DecryptError('Failed to decrypt operation payloads', e);
+    } catch {
+      let failedIndex: number | undefined;
+      try {
+        failedIndex = await this._findFirstDecryptionFailureIndex(
+          encryptedPayloads,
+          encryptKey,
+        );
+      } catch {
+        // Attribution is best-effort and must never mask the original batch failure.
+      }
+      if (failedIndex !== undefined) {
+        throw new OperationDecryptionError({
+          operationId: encryptedOps[failedIndex].op.id,
+          encryptedBatchIndex: failedIndex,
+          stage: 'decrypt',
+        });
+      }
+      throw new DecryptError('Failed to decrypt operation payloads');
     }
 
     for (let i = 0; i < encryptedOps.length; i++) {
@@ -143,8 +187,12 @@ export class OperationEncryptionService {
       let parsedPayload: unknown;
       try {
         parsedPayload = JSON.parse(decryptedStrings[i]);
-      } catch (e) {
-        throw new DecryptError('Failed to parse decrypted operation payload', e);
+      } catch {
+        throw new OperationDecryptionError({
+          operationId: op.id,
+          encryptedBatchIndex: i,
+          stage: 'parse',
+        });
       }
       // Verify the untrusted metadata against the now-authenticated payload
       // before trusting it downstream (GHSA-8pxh-mgc7-gp3g). Throws on tampering.
@@ -160,6 +208,25 @@ export class OperationEncryptionService {
     }
 
     return results;
+  }
+
+  /**
+   * The batch primitive does not identify which ciphertext failed. Re-check
+   * items serially only after a batch failure and stop at the first failure.
+   * The shared session cache avoids repeating normal key derivation work.
+   */
+  private async _findFirstDecryptionFailureIndex(
+    encryptedPayloads: string[],
+    encryptKey: string,
+  ): Promise<number | undefined> {
+    for (let i = 0; i < encryptedPayloads.length; i++) {
+      try {
+        await decrypt(encryptedPayloads[i], encryptKey);
+      } catch {
+        return i;
+      }
+    }
+    return undefined;
   }
 
   /**
