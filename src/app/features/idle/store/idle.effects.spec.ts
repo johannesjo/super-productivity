@@ -16,8 +16,9 @@ import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { selectIdleConfig } from '../../config/store/global-config.reducer';
 import { selectIsSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
-import { selectIsIdle } from './idle.selectors';
-import { triggerIdle } from './idle.actions';
+import { selectIdleTime, selectIsIdle } from './idle.selectors';
+import { openIdleDialog, triggerIdle } from './idle.actions';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 
 describe('IdleEffects', () => {
   let effects: IdleEffects;
@@ -56,6 +57,8 @@ describe('IdleEffects', () => {
 
     const taskServiceMock = {
       currentTaskId: jasmine.createSpy('currentTaskId').and.returnValue('task-1'),
+      removeTimeSpent: jasmine.createSpy('removeTimeSpent'),
+      setCurrentId: jasmine.createSpy('setCurrentId'),
     };
 
     TestBed.configureTestingModule({
@@ -76,6 +79,7 @@ describe('IdleEffects', () => {
             },
             { selector: selectIsSessionRunning, value: isSessionRunning },
             { selector: selectIsIdle, value: false },
+            { selector: selectIdleTime, value: 0 },
           ],
         }),
         { provide: DataInitStateService, useValue: dataInitStateMock },
@@ -179,6 +183,63 @@ describe('IdleEffects', () => {
         expect(emitted[0]).toEqual(triggerIdle({ idleTime: 120000 }));
         done();
       }, 200);
+    });
+  });
+
+  describe('handleIdleInit$', () => {
+    // #9348: selectIsIdle emits `true` exactly once per idle episode. Dropping
+    // that single edge (rather than deferring it) loses the side effects for
+    // good AND leaves the store stuck at isIdle:true, which makes every later
+    // idle tick short-circuit on isAlreadyIdle - idle handling is then dead
+    // for the whole session.
+    let emitted: Action[];
+    let sub: { unsubscribe: () => void };
+
+    const listen = (): void => {
+      emitted = [];
+      sub = effects.handleIdleInit$.subscribe((a) => emitted.push(a));
+    };
+
+    const goIdle = (): void => {
+      store.overrideSelector(selectIsIdle, true);
+      store.refreshState();
+      TestBed.flushEffects();
+    };
+
+    afterEach(() => {
+      sub?.unsubscribe();
+      // the effect starts a 1s poll interval; stop it so it cannot dispatch
+      // into a torn-down TestBed
+      (effects as unknown as { _cancelIdlePoll: () => void })._cancelIdlePoll();
+    });
+
+    it('opens the idle dialog when nothing is being applied', () => {
+      setup();
+      listen();
+
+      goIdle();
+
+      expect(emitted.length).toBe(1);
+      expect(emitted[0].type).toBe(openIdleDialog.type);
+    });
+
+    it('defers - not drops - the idle side effects when the edge lands inside a sync apply window', () => {
+      setup();
+      const hydrationState = TestBed.inject(HydrationStateService);
+      listen();
+
+      hydrationState.startApplyingRemoteOps();
+      goIdle();
+
+      // still held: the mutations must not run mid-apply
+      expect(emitted.length).toBe(0);
+
+      hydrationState.endApplyingRemoteOps();
+      TestBed.flushEffects();
+
+      // ...but they must not be lost either
+      expect(emitted.length).toBe(1);
+      expect(emitted[0].type).toBe(openIdleDialog.type);
     });
   });
 });

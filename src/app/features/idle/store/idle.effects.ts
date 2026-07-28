@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
+import { waitForSyncWindow } from '../../../util/wait-for-sync-window.operator';
+import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -73,6 +75,7 @@ export class IdleEffects {
   private _dateService = inject(DateService);
 
   private _dataInitStateService = inject(DataInitStateService);
+  private _hydrationStateService = inject(HydrationStateService);
 
   private _clearIdlePollInterval?: () => void;
   private _isDialogOpen: boolean = false;
@@ -160,10 +163,16 @@ export class IdleEffects {
 
   handleIdleInit$ = createEffect(() =>
     this._store.select(selectIsIdle).pipe(
-      // Guard: skip idle state changes during sync - CRITICAL because this effect
-      // has data mutations (removeTimeSpent, setCurrentId, decreaseCounterToday)
-      skipWhileApplyingRemoteOps(),
       distinctUntilChanged(),
+      // Guard: defer idle state changes during sync - CRITICAL because this effect
+      // has data mutations (removeTimeSpent, setCurrentId, decreaseCounterToday).
+      // NOTE: this must DEFER, not drop, and it must sit after
+      // distinctUntilChanged(): selectIsIdle emits `true` exactly once per idle
+      // episode, so a dropped edge is gone for good — and it leaves the store
+      // stuck at isIdle:true, which makes triggerIdleWhenEnabled$ short-circuit
+      // on isAlreadyIdle from then on, killing idle handling for the whole
+      // session. See #9348.
+      waitForSyncWindow(this._hydrationStateService, 'IdleEffects.handleIdleInit$'),
       switchMap((isIdle) => iif(() => isIdle, of(isIdle), EMPTY)),
       withLatestFrom(
         this._store.select(selectIdleTime),
