@@ -158,6 +158,43 @@ describe('TakeABreakService', () => {
       expect(emitted[emitted.length - 1]).toBe(0);
       sub.unsubscribe();
     });
+
+    // Characterises the overlap between the two reset mechanisms: while the user
+    // is away, the current task is already deselected, so the "long stretch with
+    // no tracked task" reset fires during the absence -- before the idle dialog
+    // is ever answered. Answering it with the reset checkbox explicitly UNCHECKED
+    // therefore cannot preserve the pre-idle counter; it is already gone.
+    it('lets the untracked-stretch reset win over an explicit opt-out in the idle dialog', () => {
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+      service.otherNoBreakTIme$.next(89 * 60000);
+      expect(emitted[emitted.length - 1]).toBe(89 * 60000);
+
+      // user goes idle -> handleIdleInit$ deselects the task -> ticks accumulate
+      // as "no current task" for longer than BREAK_TRIGGER_DURATION
+      tick$.next({ duration: 11 * 60000, date: '2026-07-28', timestamp: 0 });
+      expect(emitted[emitted.length - 1]).toBe(0);
+
+      // user returns and says "that was work on a task, do NOT reset my timer"
+      actions$.next(
+        idleDialogResult({
+          trackItems: [
+            {
+              type: 'TASK',
+              time: 'IDLE_TIME',
+              title: 'Some task',
+              simpleCounterToggleBtns: [],
+            },
+          ],
+          isResetBreakTimer: false,
+          wasFocusSessionRunning: false,
+          idleTime: 11 * 60000,
+        }),
+      );
+
+      expect(emitted[emitted.length - 1]).toBe(0);
+      sub.unsubscribe();
+    });
   });
 
   describe('startBreak()', () => {
