@@ -10,8 +10,9 @@ import EN_TRANSLATIONS from '../../../../assets/i18n/en.json';
 
 /**
  * #9349: the Electron main process never sends IPC.IDLE_TIME for idle periods
- * at or below `CONFIG.MIN_IDLE_TIME`, so any `minIdleTime` below that floor
- * silently disables idle detection entirely.
+ * at or below `CONFIG.MIN_IDLE_TIME`, so any `minIdleTime` below that floor is
+ * silently rounded up to it — the dialog opens at roughly 1–1.5 min however low
+ * the setting is. The bound makes that unhonourable range impossible to enter.
  *
  * These tests mount the REAL IDLE_FORM_CFG through the REAL ConfigFormComponent
  * and the REAL Formly `duration` type registration, because the fix is a single
