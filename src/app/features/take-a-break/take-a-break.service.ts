@@ -73,9 +73,15 @@ export class TakeABreakService {
       shareReplay(1),
     );
 
+  // NOTE: edge-triggered on purpose. _timeWithNoCurrentTask$ grows monotonically
+  // while nothing is tracked, so a plain filter would re-fire on every 1s tick
+  // for as long as the app stays open — and timeWorkingWithoutABreak$ is bound
+  // via `| async` in the work view, so each one costs a change-detection pass.
   private _triggerSimpleBreakReset$: Observable<unknown> =
     this._timeWithNoCurrentTask$.pipe(
-      filter((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
+      map((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
+      distinctUntilChanged(),
+      filter(Boolean),
     );
 
   private _tick$: Observable<number> = merge(
@@ -85,11 +91,10 @@ export class TakeABreakService {
     ),
     this._actions$.pipe(ofType(idleDialogResult)).pipe(
       switchMap(({ trackItems, isResetBreakTimer }) => {
-        // the dialog checkbox is the single source of truth for resetting; it
-        // auto-defaults to checked when a break is tracked, so an unchecked
-        // value means the user explicitly opted out of the reset
+        // a requested reset is a reset event, not a measurement — it goes
+        // through _triggerReset$ so it also tears the reminder down
         if (isResetBreakTimer) {
-          return of(0);
+          return EMPTY;
         }
         // without a reset, time tracked to tasks still counts as work; break
         // items don't (but they don't reset the timer either).
@@ -102,6 +107,14 @@ export class TakeABreakService {
       }),
     ),
     this.otherNoBreakTIme$,
+  );
+
+  // the dialog checkbox is the single source of truth for resetting; it
+  // auto-defaults to checked when a break is tracked, so an unchecked value
+  // means the user explicitly opted out of the reset
+  private _triggerIdleDialogReset$: Observable<unknown> = this._actions$.pipe(
+    ofType(idleDialogResult),
+    filter(({ isResetBreakTimer }) => isResetBreakTimer),
   );
 
   private _triggerSnooze$: Subject<number> = new Subject();
@@ -126,9 +139,15 @@ export class TakeABreakService {
 
   private _triggerManualReset$: Subject<number> = new Subject<number>();
 
+  // Every reset path must land here: _triggerReset$ both zeroes the counter and
+  // drives the reminder teardown below, so a reset routed around it (as the idle
+  // dialog and focus-mode breaks used to be) leaves a stale banner up and leaves
+  // the lock-screen / fullscreen-blocker subjects latched at `true`, silently
+  // disabling both for the rest of the session. See #9305.
   private _triggerReset$: Observable<number> = merge(
     this._triggerProgrammaticReset$,
     this._triggerManualReset$,
+    this._triggerIdleDialogReset$,
   ).pipe(mapTo(0));
 
   timeWorkingWithoutABreak$: Observable<number> = merge(
@@ -202,23 +221,16 @@ export class TakeABreakService {
   > = this._triggerBanner$.pipe(throttleTime(DESKTOP_NOTIFICATION_THROTTLE));
 
   constructor() {
-    // Derive the reminder teardown from the counter itself rather than from
-    // _triggerReset$: the idle dialog and focus-mode breaks zero the counter
-    // through _tick$, which bypasses _triggerReset$ entirely. They therefore
-    // used to leave a stale banner up, and — because the lock-screen and
-    // fullscreen-blocker subjects are distinctUntilChanged() — left those
-    // latched at `true`, silently disabling both for the rest of the session.
-    this.timeWorkingWithoutABreak$
-      .pipe(
-        filter((timeWorkingWithoutABreak) => timeWorkingWithoutABreak === 0),
-        withLatestFrom(this._configService.takeABreak$),
-        filter(([, cfg]) => cfg && cfg.isTakeABreakEnabled),
-      )
-      .subscribe(() => {
-        this._triggerLockScreenCounter$.next(false);
-        this._triggerFullscreenBlocker$.next(false);
-        this._bannerService.dismiss(BANNER_ID);
-      });
+    // NOTE: deliberately not gated on isTakeABreakEnabled. Dismissing a banner
+    // that cannot be open and un-latching subjects that cannot be `true` are
+    // both no-ops, whereas skipping the teardown when the feature is toggled
+    // off mid-session strands those subjects at `true` for good — the exact
+    // state this is here to prevent.
+    this._triggerReset$.subscribe(() => {
+      this._triggerLockScreenCounter$.next(false);
+      this._triggerFullscreenBlocker$.next(false);
+      this._bannerService.dismiss(BANNER_ID);
+    });
 
     if (IS_ELECTRON) {
       this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {

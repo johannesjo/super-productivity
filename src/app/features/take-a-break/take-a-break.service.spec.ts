@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { Action } from '@ngrx/store';
 import { TakeABreakService } from './take-a-break.service';
 import { idleDialogResult } from '../idle/store/idle.actions';
@@ -24,6 +24,7 @@ describe('TakeABreakService', () => {
   let bannerService: jasmine.SpyObj<BannerService>;
   let actions$: Subject<Action>;
   let tick$: Subject<Tick>;
+  let currentTaskId$: BehaviorSubject<string | null>;
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
@@ -32,8 +33,12 @@ describe('TakeABreakService', () => {
       'pauseCurrent',
       'currentTaskId',
     ]);
-    // `currentTaskId$` is read as a property during construction.
-    (taskService as unknown as { currentTaskId$: unknown }).currentTaskId$ = of(null);
+    // `currentTaskId$` is read as a property during construction. It must be a
+    // live subject, not `of(null)`: `of` completes, which makes it impossible to
+    // exercise the untracked-stretch reset re-arming after a task is tracked.
+    currentTaskId$ = new BehaviorSubject<string | null>(null);
+    (taskService as unknown as { currentTaskId$: unknown }).currentTaskId$ =
+      currentTaskId$;
     taskService.currentTaskId.and.returnValue(null);
 
     snackService = jasmine.createSpyObj<SnackService>('SnackService', ['open']);
@@ -142,6 +147,67 @@ describe('TakeABreakService', () => {
 
       expect(bannerService.dismiss).toHaveBeenCalledTimes(1);
       expect(bannerService.dismiss).toHaveBeenCalledWith(BannerId.TakeABreak);
+    });
+  });
+
+  describe('reminder teardown', () => {
+    // The idle dialog used to reset the counter without reaching _triggerReset$,
+    // so the banner stayed up and the lock-screen / fullscreen-blocker subjects
+    // stayed latched at `true` for the rest of the session. (Focus-mode breaks
+    // had the same problem; that one is guarded in focus-mode.effects.spec.ts,
+    // since the routing lives in the effect.)
+    it('dismisses the reminder when the idle dialog requests a reset', () => {
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+      service.otherNoBreakTIme$.next(10000);
+
+      actions$.next(
+        idleDialogResult({
+          trackItems: [],
+          isResetBreakTimer: true,
+          wasFocusSessionRunning: false,
+          idleTime: 60000,
+        }),
+      );
+
+      expect(emitted[emitted.length - 1]).toBe(0);
+      expect(bannerService.dismiss).toHaveBeenCalledWith(BannerId.TakeABreak);
+      sub.unsubscribe();
+    });
+
+    it('tears down only once while nothing is being tracked', () => {
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+
+      // past BREAK_TRIGGER_DURATION, then many further ticks
+      for (let i = 0; i < 15; i++) {
+        tick$.next({ duration: 60000, date: '2026-07-28', timestamp: 0 });
+      }
+
+      expect(emitted[emitted.length - 1]).toBe(0);
+      expect(bannerService.dismiss).toHaveBeenCalledTimes(1);
+      sub.unsubscribe();
+    });
+
+    // The edge trigger must re-arm, or the automatic reset degrades to
+    // once-per-session — the same silent-death shape as the #9305 bug itself.
+    it('re-arms after a task is tracked and stopped again', () => {
+      const sub = service.timeWorkingWithoutABreak$.subscribe();
+      const untrackedStretch = (): void => {
+        for (let i = 0; i < 15; i++) {
+          tick$.next({ duration: 60000, date: '2026-07-28', timestamp: 0 });
+        }
+      };
+
+      untrackedStretch();
+      expect(bannerService.dismiss).toHaveBeenCalledTimes(1);
+
+      currentTaskId$.next('task-1');
+      currentTaskId$.next(null);
+      untrackedStretch();
+
+      expect(bannerService.dismiss).toHaveBeenCalledTimes(2);
+      sub.unsubscribe();
     });
   });
 

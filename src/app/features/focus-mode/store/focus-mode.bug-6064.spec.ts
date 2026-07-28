@@ -60,6 +60,9 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
 
     takeABreakServiceMock = {
       otherNoBreakTIme$: otherNoBreakTime$,
+      // #9305: the reset now goes through resetTimer() so it also tears the
+      // reminder down; otherNoBreakTIme$.next(0) only zeroed the counter
+      resetTimer: jasmine.createSpy('resetTimer'),
     };
 
     const strategyFactoryMock = {
@@ -151,8 +154,8 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       tick(10);
 
       // Verify: otherNoBreakTIme$.next(0) was called
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
-      expect(otherNoBreakTime$.next).toHaveBeenCalledTimes(1);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalledTimes(1);
 
       flush();
     }));
@@ -179,7 +182,7 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       tick(10);
 
       // Verify: Break timer still resets
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
@@ -207,7 +210,7 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       tick(10);
 
       // Verify: Break timer still resets
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
@@ -225,7 +228,7 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       );
       tick(10);
 
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
@@ -243,7 +246,7 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       );
       tick(10);
 
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
@@ -280,8 +283,8 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       tick(10);
 
       // Verify: Reset was called 3 times
-      expect(otherNoBreakTime$.next).toHaveBeenCalledTimes(3);
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalledTimes(3);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
@@ -301,7 +304,7 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       );
       tick(10);
 
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
@@ -327,7 +330,7 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       );
       tick(10);
 
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
@@ -349,7 +352,7 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       tick(10);
 
       // Effect is unconditional - it always resets the break timer
-      expect(otherNoBreakTime$.next).toHaveBeenCalledWith(0);
+      expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
 
       flush();
     }));
