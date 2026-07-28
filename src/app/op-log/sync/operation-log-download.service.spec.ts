@@ -12,7 +12,10 @@ import { ActionType, OpType } from '../core/operation.types';
 import { CLOCK_DRIFT_THRESHOLD_MS } from '../core/operation-log.const';
 import { OpLog } from '../../core/log';
 import { T } from '../../t.const';
-import { OperationEncryptionService } from './operation-encryption.service';
+import {
+  OperationDecryptionError,
+  OperationEncryptionService,
+} from './operation-encryption.service';
 import { SuperSyncStatusService } from './super-sync-status.service';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
 import { OperationIntegrityError } from '../core/errors/sync-errors';
@@ -195,6 +198,79 @@ describe('OperationLogDownloadService', () => {
             jasmine.stringMatching(NO_KEY_MSG),
           );
         });
+      });
+
+      it('logs only safe identifiers for an attributable encrypted-operation failure', async () => {
+        const errorSpy = spyOn(OpLog, 'error');
+        const diagnosticError = new OperationDecryptionError({
+          operationId: 'op-corrupt',
+          encryptedBatchIndex: 1,
+          stage: 'decrypt',
+        });
+        mockApiProvider.getEncryptKey = jasmine
+          .createSpy('getEncryptKey')
+          .and.returnValue(Promise.resolve('private-encryption-key'));
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              // Duplicate the untrusted ID so only the encrypted batch index can
+              // map the failure to the correct server sequence.
+              {
+                serverSeq: 41,
+                receivedAt: Date.now(),
+                op: {
+                  id: 'op-corrupt',
+                  clientId: 'c1',
+                  actionType: '[Task] Add' as ActionType,
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: 'private-earlier-encrypted-payload',
+                  isPayloadEncrypted: true,
+                  vectorClock: {},
+                  timestamp: Date.now(),
+                  schemaVersion: 1,
+                },
+              },
+              {
+                serverSeq: 42,
+                receivedAt: Date.now(),
+                op: {
+                  id: 'op-corrupt',
+                  clientId: 'c1',
+                  actionType: '[Task] Add' as ActionType,
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: 'private-encrypted-payload',
+                  isPayloadEncrypted: true,
+                  vectorClock: {},
+                  timestamp: Date.now(),
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 42,
+          }),
+        );
+        mockEncryptionService.decryptOperations.and.rejectWith(diagnosticError);
+
+        await expectAsync(service.downloadRemoteOps(mockApiProvider)).toBeRejectedWith(
+          diagnosticError,
+        );
+
+        expect(errorSpy).toHaveBeenCalledWith(
+          'OperationLogDownloadService: Encrypted operation payload could not be processed.',
+          {
+            opId: 'op-corrupt',
+            serverSeq: 42,
+            encryptedBatchIndex: 1,
+            stage: 'decrypt',
+          },
+        );
+        const serializedLogCalls = JSON.stringify(errorSpy.calls.allArgs());
+        expect(serializedLogCalls).not.toContain('private-earlier-encrypted-payload');
+        expect(serializedLogCalls).not.toContain('private-encrypted-payload');
+        expect(serializedLogCalls).not.toContain('private-encryption-key');
       });
 
       // GHSA-8pxh-mgc7-gp3g: reject an inbound plaintext op when SuperSync
