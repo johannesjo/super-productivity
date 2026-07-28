@@ -430,9 +430,11 @@ vi.mock('../src/db', async () => {
       }
       if (sql.includes('FROM user_sync_state') && sql.includes('FOR UPDATE')) {
         const [txUserId] = params as [number];
+        const syncState = state.userSyncStates.get(txUserId);
         return [
           {
-            lastSeq: state.userSyncStates.get(txUserId)?.lastSeq ?? 0,
+            lastSeq: syncState?.lastSeq ?? 0,
+            latestStateReplacementSeq: syncState?.latestStateReplacementSeq ?? null,
           },
         ];
       }
@@ -913,6 +915,127 @@ describe('SyncService', () => {
   });
 
   describe('uploadOps', () => {
+    it('rejects a cursor behind the latest state replacement but allows its boundary', async () => {
+      const service = new SyncService({ batchUpload: true });
+      const op = makeOp({ id: 'post-replacement-edit' });
+      const replacement = makeOp({
+        id: 'retained-state-replacement',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+      });
+      testState.operations.set(replacement.id, {
+        ...replacement,
+        userId,
+        serverSeq: 3,
+        entityId: null,
+        entityIds: [],
+        payloadBytes: BigInt(1),
+        clientTimestamp: BigInt(replacement.timestamp),
+        receivedAt: BigInt(replacement.timestamp),
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+        repairBaseServerSeq: null,
+      });
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: null,
+      });
+
+      const staleResults = await service.uploadOps(
+        userId,
+        clientId,
+        [op],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        2,
+      );
+
+      expect(staleResults).toEqual([
+        expect.objectContaining({
+          opId: op.id,
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+        }),
+      ]);
+      expect(testState.operations.has(op.id)).toBe(false);
+      expect(testState.userSyncStates.get(userId)?.lastSeq).toBe(4);
+      expect(testState.userSyncStates.get(userId)?.latestStateReplacementSeq).toBe(3);
+
+      const currentResults = await service.uploadOps(
+        userId,
+        clientId,
+        [op],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        3,
+      );
+
+      expect(currentResults).toEqual([
+        expect.objectContaining({
+          opId: op.id,
+          accepted: true,
+          serverSeq: 5,
+        }),
+      ]);
+      expect(testState.operations.has(op.id)).toBe(true);
+    });
+
+    it('resolves the latest state replacement for cached upload checks', async () => {
+      const service = new SyncService();
+      const replacement = makeOp({
+        id: 'cached-check-state-replacement',
+        opType: 'BACKUP_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+      });
+      testState.operations.set(replacement.id, {
+        ...replacement,
+        userId,
+        serverSeq: 3,
+        entityId: null,
+        entityIds: [],
+        payloadBytes: BigInt(1),
+        clientTimestamp: BigInt(replacement.timestamp),
+        receivedAt: BigInt(replacement.timestamp),
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+        repairBaseServerSeq: null,
+      });
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: null,
+      });
+
+      await expect(service.getLatestStateReplacementSeq(userId)).resolves.toBe(3);
+      await expect(service.getLatestStateReplacementSeq(userId + 1)).resolves.toBeNull();
+    });
+
+    it('persists a resolved no-replacement sentinel on the upload path', async () => {
+      const service = new SyncService({ batchUpload: true });
+      const op = makeOp({ id: 'first-upload-with-cursor' });
+
+      const result = await service.uploadOps(
+        userId,
+        clientId,
+        [op],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        0,
+      );
+
+      expect(result[0].accepted).toBe(true);
+      expect(testState.userSyncStates.get(userId)?.latestStateReplacementSeq).toBe(0);
+    });
+
     it('should correctly upload operations', async () => {
       const service = getSyncService();
       const op: Operation = makeOp();
@@ -1763,6 +1886,7 @@ describe('SyncService', () => {
           lastSeq: 3,
           latestFullStateSeq: 2,
           latestFullStateVectorClock: { [clientId]: 9 },
+          latestStateReplacementSeq: 2,
         }),
       );
       aggregateSpy.mockRestore();

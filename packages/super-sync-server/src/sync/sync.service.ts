@@ -7,6 +7,7 @@ import {
   DEFAULT_SYNC_CONFIG,
   VectorClock,
   SYNC_ERROR_CODES,
+  createStateReplacementRequiredResults,
 } from './sync.types';
 import { Logger } from '../logger';
 import { Prisma } from '@prisma/client';
@@ -141,6 +142,7 @@ export class SyncService {
     requestStartOccupiedIds?: ReadonlySet<string>,
     repairBaseServerSeq?: number,
     allowLegacyRepairWithoutBase: boolean = false,
+    lastKnownServerSeq?: number,
   ): Promise<UploadResult[]> {
     if (isCleanSlate && ops.length === 0) {
       return [];
@@ -198,22 +200,74 @@ export class SyncService {
       // Use transaction to acquire write lock and ensure atomicity
       await prisma.$transaction(
         async (tx) => {
-          if (containsRepair && !isLegacyRepairUpload) {
-            // Serialize the causal precondition and the later insert through the
-            // same per-user sequence row. A concurrent upload either commits
-            // first (making this base stale) or waits and lands after REPAIR.
+          const needsSyncStateLock =
+            shouldCleanSlate ||
+            lastKnownServerSeq !== undefined ||
+            (containsRepair && !isLegacyRepairUpload);
+          let currentServerSeq = 0;
+          if (needsSyncStateLock) {
+            // Serialize state replacements, cursor checks, and later inserts on
+            // the same per-user row. Whichever request acquires this lock first
+            // defines the safe order seen by every other server instance.
             await tx.userSyncState.upsert({
               where: { userId },
               create: { userId, lastSeq: 0 },
               update: {},
             });
-            const rows = await tx.$queryRaw<Array<{ lastSeq: number }>>`
-              SELECT last_seq AS "lastSeq"
+            const rows = await tx.$queryRaw<
+              Array<{
+                lastSeq: number;
+                latestStateReplacementSeq: number | null;
+              }>
+            >`
+              SELECT
+                last_seq AS "lastSeq",
+                latest_state_replacement_seq AS "latestStateReplacementSeq"
               FROM user_sync_state
               WHERE user_id = ${userId}
               FOR UPDATE
             `;
-            const currentServerSeq = rows[0]?.lastSeq ?? 0;
+            currentServerSeq = rows[0]?.lastSeq ?? 0;
+            let latestStateReplacementSeq = rows[0]?.latestStateReplacementSeq ?? null;
+            if (latestStateReplacementSeq === null) {
+              // The column is intentionally not backfilled during migration:
+              // the supported Compose deploy keeps the old process serving
+              // while migrations run. Resolve retained replacements lazily
+              // after the new process owns the write path, then persist the
+              // answer for subsequent uploads.
+              const retainedReplacement = await tx.operation.findFirst({
+                where: {
+                  userId,
+                  opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] },
+                },
+                orderBy: { serverSeq: 'desc' },
+                select: { serverSeq: true },
+              });
+              // Zero is a resolved "no retained replacement" sentinel. Keeping
+              // null exclusively for unresolved upgrade rows avoids repeating
+              // this indexed lookup on every upload for ordinary accounts.
+              latestStateReplacementSeq = retainedReplacement?.serverSeq ?? 0;
+              await tx.userSyncState.update({
+                where: { userId },
+                data: { latestStateReplacementSeq },
+              });
+              uploadDbRoundtrips++;
+            }
+            if (
+              lastKnownServerSeq !== undefined &&
+              latestStateReplacementSeq !== null &&
+              lastKnownServerSeq < latestStateReplacementSeq
+            ) {
+              Logger.warn(
+                `[user:${userId}] Rejecting upload from stale state replacement cursor ` +
+                  `(client=${lastKnownServerSeq}, required=${latestStateReplacementSeq})`,
+              );
+              results.push(...createStateReplacementRequiredResults(ops));
+              return;
+            }
+          }
+
+          if (containsRepair && !isLegacyRepairUpload) {
             if (
               repairBaseServerSeq === undefined ||
               repairBaseServerSeq !== currentServerSeq
@@ -267,6 +321,7 @@ export class SyncService {
                 snapshotAt: null,
                 latestFullStateSeq: null,
                 latestFullStateVectorClock: Prisma.DbNull,
+                latestStateReplacementSeq: null,
               },
             });
 
@@ -307,12 +362,14 @@ export class SyncService {
             // We assume user exists in `users` table because of foreign key,
             // but if `uploadOps` is called, authentication should have verified user existence.
             // However, `user_sync_state` might not exist yet.
-            await tx.userSyncState.upsert({
-              where: { userId },
-              create: { userId, lastSeq: 0 },
-              update: {}, // No-op update to ensure it exists
-            });
-            uploadDbRoundtrips++;
+            if (!needsSyncStateLock) {
+              await tx.userSyncState.upsert({
+                where: { userId },
+                create: { userId, lastSeq: 0 },
+                update: {}, // No-op update to ensure it exists
+              });
+              uploadDbRoundtrips++;
+            }
 
             const firstOperationById = new Map<
               string,
@@ -352,6 +409,32 @@ export class SyncService {
               }
             }
           }
+
+          let latestAcceptedStateReplacementSeq: number | undefined;
+          for (let index = 0; index < ops.length; index++) {
+            const op = ops[index];
+            const result = results[index];
+            if (
+              result?.accepted &&
+              result.serverSeq !== undefined &&
+              (op.opType === 'SYNC_IMPORT' || op.opType === 'BACKUP_IMPORT')
+            ) {
+              latestAcceptedStateReplacementSeq = Math.max(
+                latestAcceptedStateReplacementSeq ?? 0,
+                result.serverSeq,
+              );
+            }
+          }
+          if (latestAcceptedStateReplacementSeq !== undefined) {
+            await tx.userSyncState.update({
+              where: { userId },
+              data: {
+                latestStateReplacementSeq: latestAcceptedStateReplacementSeq,
+              },
+            });
+            uploadDbRoundtrips++;
+          }
+
           if (unserializableAccepted > 0) {
             Logger.warn(
               `computeOpsStorageBytes: ${unserializableAccepted} unserializable op(s) ` +
@@ -639,6 +722,26 @@ export class SyncService {
     );
   }
 
+  async getLatestStateReplacementSeq(userId: number): Promise<number | null> {
+    const syncState = await prisma.userSyncState.findUnique({
+      where: { userId },
+      select: { latestStateReplacementSeq: true },
+    });
+    const latestStateReplacementSeq = syncState?.latestStateReplacementSeq;
+    if (typeof latestStateReplacementSeq === 'number') {
+      return latestStateReplacementSeq;
+    }
+    const retainedReplacement = await prisma.operation.findFirst({
+      where: {
+        userId,
+        opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] },
+      },
+      orderBy: { serverSeq: 'desc' },
+      select: { serverSeq: true },
+    });
+    return retainedReplacement?.serverSeq ?? null;
+  }
+
   cacheOpsRequestResults(
     userId: number,
     requestId: string,
@@ -772,8 +875,7 @@ export class SyncService {
       // Delete sync state entirely, resetting lastSeq to 0.
       // Unlike uploadOps clean slate (which preserves lastSeq), account reset
       // intentionally wipes everything. Clients detect the wipe via latestSeq=0
-      // and trigger a full state re-upload. This is correct because account reset
-      // (e.g., encryption password change) requires ALL clients to re-sync.
+      // and trigger a full state re-upload.
       await tx.userSyncState.deleteMany({ where: { userId } });
 
       // Reset storage usage
