@@ -112,7 +112,6 @@ export const dataRepair = (
   dataOut = _removeNonExistentProjectIdsFromIssueProviders(dataOut, summary);
   dataOut = _removeNonExistentProjectIdsFromTaskRepeatCfg(dataOut, summary);
   dataOut = _removeNonExistentRepeatCfgIdsFromTasks(dataOut, summary);
-  dataOut = _addOrphanedTasksToProjectLists(dataOut, summary);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut, summary);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut, summary);
   dataOut = _cleanupOrphanedSubTasks(dataOut, summary);
@@ -132,6 +131,10 @@ export const dataRepair = (
   dataOut = _removeNonExistentProjectIdsFromTasks(dataOut, summary);
   dataOut = _removeNonExistentTagsFromTasks(dataOut, summary);
   dataOut = _addInboxProjectIdIfNecessary(dataOut, summary);
+  // Earlier repair passes can create new top-level tasks or reassign a dangling
+  // projectId to the Inbox. Reconcile project-list membership after those passes
+  // so the repaired tasks are reachable from their owning project. (#8780)
+  dataOut = _addOrphanedTasksToProjectLists(dataOut, summary);
   dataOut = _repairMenuTree(dataOut, summary);
   dataOut = _repairSections(dataOut, summary);
   dataOut = autoFixTypiaErrors(dataOut, errors);

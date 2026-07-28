@@ -338,10 +338,21 @@ const validateTasksToProjectsAndTags = (
       return false;
     }
 
-    // Check if task has project or tag
-    if (!task.parentId && !task.projectId && task.tagIds.length === 0) {
-      _validityError(`Task without project or tag`, { taskId: task.id });
-      return false;
+    if (!task.parentId) {
+      // Empty project ids remain valid for legacy tagged tasks. Normal task
+      // creation assigns a default project, while navigation/data repair can
+      // re-home legacy records without changing their replay semantics.
+      if (!task.projectId && task.tagIds.length === 0) {
+        _validityError('Task without project or tag', { taskId: task.id });
+        return false;
+      }
+      if (task.projectId && !projectTaskMap.get(task.projectId)?.has(task.id)) {
+        _validityError('Task missing from project lists', {
+          taskId: task.id,
+          projectId: task.projectId,
+        });
+        return false;
+      }
     }
   }
 

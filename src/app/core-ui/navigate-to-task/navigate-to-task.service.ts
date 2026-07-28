@@ -1,13 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { SearchQueryParams } from '../../pages/search-page/search-page.model';
 import { first } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { TaskService } from '../../features/tasks/task.service';
 import { ProjectService } from '../../features/project/project.service';
 import { Router } from '@angular/router';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
+import { Task } from '../../features/tasks/task.model';
 import { INBOX_PROJECT } from '../../features/project/project.const';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { DateService } from '../../core/date/date.service';
@@ -18,11 +16,15 @@ import { Log } from '../../core/log';
 import { LayoutService } from '../layout/layout.service';
 import { recordSearchNavDebug } from '../../util/search-nav-debug';
 
+interface ProjectMembershipRepair {
+  task: Task;
+  projectId: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class NavigateToTaskService {
-  private _store = inject(Store);
   private _taskService = inject(TaskService);
   private _projectService = inject(ProjectService);
   private _router = inject(Router);
@@ -36,21 +38,19 @@ export class NavigateToTaskService {
       if (!task) {
         throw new Error(`Task with id ${taskId} not found`);
       }
-      const { location, orphanToHeal } = await this._resolveNavTarget(
-        task,
-        isArchiveTask,
-      );
+      const { location, projectMembershipRepair, contextTask } =
+        await this._resolveNavTarget(task, isArchiveTask);
       if (!location) {
         // Never fall through with an empty location: `''.startsWith` would make
         // the same-context check below always true and swallow the navigation.
         throw new Error(`Could not resolve a location for task ${taskId}`);
       }
-      // Perform the orphan self-heal here (not inside the resolver) so the
+      // Perform the relationship self-heal here (not inside the resolver) so the
       // synced state mutation is an explicit navigation step, not a hidden side
       // effect of computing a URL. Must run before the same-context check below
-      // so the task is added to the Inbox list in either branch. (#8780)
-      if (orphanToHeal) {
-        this._healOrphanTaskToInbox(orphanToHeal);
+      // so the task is added to its project list in either branch. (#8780)
+      if (projectMembershipRepair) {
+        this._repairProjectMembership(projectMembershipRepair);
       }
       recordSearchNavDebug('navigateToTask:start', {
         taskId,
@@ -75,13 +75,13 @@ export class NavigateToTaskService {
       // Route-change path: focus is handed off to the destination view via the
       // `focusItem` query param (AppComponent), which owns its own reveal/retry.
       // The explicit onFailure error snack is only wired to the same-context
-      // branch above; here a heal always adds the task to the Inbox main list, so
-      // it renders and focuses normally.
+      // branch above; here a repair adds the task to its owning project's main
+      // list, so it renders and focuses normally.
       const queryParams: SearchQueryParams = { focusItem: taskId };
       if (isArchiveTask) {
         queryParams.dateStr = await this._getArchivedDate(task);
       } else {
-        queryParams.isInBacklog = await this._isInBacklog(task);
+        queryParams.isInBacklog = await this._isInBacklog(contextTask);
       }
       recordSearchNavDebug('navigateToTask:routeChange', {
         taskId,
@@ -101,15 +101,19 @@ export class NavigateToTaskService {
   }
 
   /**
-   * Pure resolver: computes the navigation location and, for an orphan task,
-   * returns the top-level task that must be re-homed into the Inbox — WITHOUT
-   * mutating state. The caller (`navigate`) performs the heal, keeping this a
-   * side-effect-free "where does this task live?" query. (#8780)
+   * Pure resolver: computes the navigation location and returns any top-level
+   * project relationship that must be repaired — WITHOUT mutating state. The
+   * caller (`navigate`) performs the repair, keeping this a side-effect-free
+   * "where does this task live?" query. (#8780)
    */
   private async _resolveNavTarget(
     task: Task,
     isArchiveTask: boolean,
-  ): Promise<{ location: string; orphanToHeal: Task | null }> {
+  ): Promise<{
+    location: string;
+    projectMembershipRepair: ProjectMembershipRepair | null;
+    contextTask: Task;
+  }> {
     const tasksOrWorklog = isArchiveTask ? 'history' : 'tasks';
 
     let taskToCheck = task;
@@ -123,58 +127,85 @@ export class NavigateToTaskService {
       }
     }
 
+    const projectMembershipRepair = await this._getProjectMembershipRepair(
+      taskToCheck,
+      isArchiveTask,
+    );
+    if (projectMembershipRepair) {
+      return {
+        location: `/project/${projectMembershipRepair.projectId}/${tasksOrWorklog}`,
+        projectMembershipRepair,
+        contextTask: taskToCheck,
+      };
+    }
+
     if (!isArchiveTask && this._isDueToday(taskToCheck)) {
-      return { location: `/tag/${TODAY_TAG.id}/${tasksOrWorklog}`, orphanToHeal: null };
+      return {
+        location: `/tag/${TODAY_TAG.id}/${tasksOrWorklog}`,
+        projectMembershipRepair: null,
+        contextTask: taskToCheck,
+      };
     }
 
     if (taskToCheck.projectId) {
       return {
         location: `/project/${taskToCheck.projectId}/${tasksOrWorklog}`,
-        orphanToHeal: null,
+        projectMembershipRepair: null,
+        contextTask: taskToCheck,
       };
     } else if (taskToCheck.tagIds?.length > 0 && taskToCheck.tagIds[0]) {
       return {
         location: `/tag/${taskToCheck.tagIds[0]}/${tasksOrWorklog}`,
-        orphanToHeal: null,
+        projectMembershipRepair: null,
+        contextTask: taskToCheck,
       };
     } else if (!isArchiveTask) {
-      // No project, no tag, and not due today: the task's id is in no work
-      // context's `taskIds` ordering array, so it renders in no list view
-      // (routing to Today only reveals tasks due or overdue *today*). It must be
-      // self-healed into the Inbox — assigning its projectId and adding it to the
-      // Inbox list — so navigation can actually reveal and focus it. moveToOther-
-      // Project operates on a top-level task, so an orphaned subtask whose parent
-      // could not be loaded (still has `parentId`) is routed but not healed. (#8780)
+      // An orphaned subtask whose parent could not be loaded cannot be repaired
+      // as a top-level task here without corrupting the parent/child link.
       return {
         location: `/project/${INBOX_PROJECT.id}/${tasksOrWorklog}`,
-        orphanToHeal: taskToCheck.parentId ? null : taskToCheck,
+        projectMembershipRepair: null,
+        contextTask: taskToCheck,
       };
     } else {
       devError("Couldn't find task location");
-      return { location: '', orphanToHeal: null };
+      return {
+        location: '',
+        projectMembershipRepair: null,
+        contextTask: taskToCheck,
+      };
     }
   }
 
-  /**
-   * Assign a project-less, tag-less task to the Inbox so it lives in a real list
-   * and can be revealed. The move reducer only strips the task from its source
-   * project when that project exists, so an empty or dangling projectId is
-   * handled gracefully, and it reads canonical subtask data from the store, so
-   * passing an empty `subTasks` here is safe. (#8780)
-   */
-  private _healOrphanTaskToInbox(task: Task): void {
-    // Defense-in-depth: `moveToOtherProject` operates on a top-level task, so
-    // never move a subtask as if it were a parent (the resolver already returns
-    // `null` for subtasks, so this only guards against future misuse).
+  private async _getProjectMembershipRepair(
+    task: Task,
+    isArchiveTask: boolean,
+  ): Promise<ProjectMembershipRepair | null> {
+    if (isArchiveTask || task.parentId) {
+      return null;
+    }
+    if (!task.projectId) {
+      return { task, projectId: INBOX_PROJECT.id };
+    }
+
+    const project = await this._projectService.getByIdOnce$(task.projectId).toPromise();
+    if (!project) {
+      return { task, projectId: INBOX_PROJECT.id };
+    }
+    if (!project.taskIds.includes(task.id) && !project.backlogTaskIds.includes(task.id)) {
+      return { task, projectId: project.id };
+    }
+    return null;
+  }
+
+  private _repairProjectMembership({ task, projectId }: ProjectMembershipRepair): void {
     if (task.parentId) {
       return;
     }
-    this._store.dispatch(
-      TaskSharedActions.moveToOtherProject({
-        task: { ...task, subTasks: [] } as TaskWithSubTasks,
-        targetProjectId: INBOX_PROJECT.id,
-      }),
-    );
+    // Updating projectId to its current value is an intentional relationship
+    // repair: the shared reducer restores missing project-list membership while
+    // preserving an existing main-list/backlog position in one persistent op.
+    this._taskService.update(task.id, { projectId });
   }
 
   private _showNavErrorSnack(): void {

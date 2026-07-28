@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { NavigateToTaskService } from './navigate-to-task.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { ProjectService } from '../../features/project/project.service';
@@ -8,10 +7,9 @@ import { SnackService } from '../../core/snack/snack.service';
 import { DateService } from '../../core/date/date.service';
 import { LayoutService } from '../layout/layout.service';
 import { Task } from '../../features/tasks/task.model';
-import { TODAY_TAG } from '../../features/tag/tag.const';
 import { INBOX_PROJECT } from '../../features/project/project.const';
-import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { Project } from '../../features/project/project.model';
 
 const TODAY_STR = '2026-07-06';
 
@@ -34,22 +32,35 @@ describe('NavigateToTaskService', () => {
   let taskService: jasmine.SpyObj<TaskService>;
   let router: jasmine.SpyObj<Router> & { url: string };
   let layoutService: jasmine.SpyObj<LayoutService>;
-  let store: jasmine.SpyObj<Store>;
+  let projectService: jasmine.SpyObj<ProjectService>;
+  let projects$: BehaviorSubject<Project[]>;
+
+  const setProject = (
+    id: string,
+    taskIds: string[],
+    backlogTaskIds: string[] = [],
+  ): void => {
+    const project = { id, taskIds, backlogTaskIds } as Project;
+    projectService.getByIdOnce$.and.returnValue(of(project));
+    projects$.next([project]);
+  };
 
   beforeEach(() => {
     taskService = jasmine.createSpyObj('TaskService', [
       'getByIdFromEverywhere',
       'getArchivedTasks',
+      'update',
     ]);
-    const projectService = jasmine.createSpyObj('ProjectService', [], {
-      list$: of([]),
+    projects$ = new BehaviorSubject<Project[]>([]);
+    projectService = jasmine.createSpyObj('ProjectService', ['getByIdOnce$'], {
+      list$: projects$.asObservable(),
     });
+    projectService.getByIdOnce$.and.returnValue(of(undefined));
     const snackService = jasmine.createSpyObj('SnackService', ['open']);
     const dateService = jasmine.createSpyObj('DateService', ['isToday', 'todayStr']);
     dateService.todayStr.and.returnValue(TODAY_STR);
     dateService.isToday.and.returnValue(false);
     layoutService = jasmine.createSpyObj('LayoutService', ['focusTaskInViewWhenReady']);
-    store = jasmine.createSpyObj('Store', ['dispatch']);
 
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     routerSpy.navigate.and.resolveTo(true);
@@ -59,7 +70,6 @@ describe('NavigateToTaskService', () => {
     TestBed.configureTestingModule({
       providers: [
         NavigateToTaskService,
-        { provide: Store, useValue: store },
         { provide: TaskService, useValue: taskService },
         { provide: ProjectService, useValue: projectService },
         { provide: SnackService, useValue: snackService },
@@ -83,12 +93,9 @@ describe('NavigateToTaskService', () => {
 
     await service.navigate('t1');
 
-    expect(store.dispatch).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        type: TaskSharedActions.moveToOtherProject.type,
-        targetProjectId: INBOX_PROJECT.id,
-      }),
-    );
+    expect(taskService.update).toHaveBeenCalledWith('t1', {
+      projectId: INBOX_PROJECT.id,
+    });
     expect(router.navigate).toHaveBeenCalledWith(
       [`/project/${INBOX_PROJECT.id}/tasks`],
       jasmine.objectContaining({
@@ -100,6 +107,7 @@ describe('NavigateToTaskService', () => {
   });
 
   it('navigates to the project list for a project task without re-homing it', async () => {
+    setProject('p1', ['t2']);
     taskService.getByIdFromEverywhere.and.resolveTo(
       createTask({ id: 't2', projectId: 'p1', tagIds: [] }),
     );
@@ -110,41 +118,46 @@ describe('NavigateToTaskService', () => {
       ['/project/p1/tasks'],
       jasmine.anything(),
     );
-    expect(store.dispatch).not.toHaveBeenCalled();
+    expect(taskService.update).not.toHaveBeenCalled();
   });
 
-  it('navigates to the tag list for a tagged task with no project without re-homing it', async () => {
+  it('self-heals a tagged task with no project into the Inbox', async () => {
     taskService.getByIdFromEverywhere.and.resolveTo(
       createTask({ id: 't3', projectId: undefined, tagIds: ['tag-a'] }),
     );
 
     await service.navigate('t3');
 
+    expect(taskService.update).toHaveBeenCalledWith('t3', {
+      projectId: INBOX_PROJECT.id,
+    });
     expect(router.navigate).toHaveBeenCalledWith(
-      ['/tag/tag-a/tasks'],
+      [`/project/${INBOX_PROJECT.id}/tasks`],
       jasmine.anything(),
     );
-    expect(store.dispatch).not.toHaveBeenCalled();
   });
 
-  it('navigates to the Today list for a task due today (no re-home needed)', async () => {
+  it('self-heals a due-today task with no project into the Inbox', async () => {
     taskService.getByIdFromEverywhere.and.resolveTo(
       createTask({ id: 't4', projectId: undefined, tagIds: [], dueDay: TODAY_STR }),
     );
 
     await service.navigate('t4');
 
+    expect(taskService.update).toHaveBeenCalledWith('t4', {
+      projectId: INBOX_PROJECT.id,
+    });
     expect(router.navigate).toHaveBeenCalledWith(
-      [`/tag/${TODAY_TAG.id}/tasks`],
+      [`/project/${INBOX_PROJECT.id}/tasks`],
       jasmine.anything(),
     );
-    expect(store.dispatch).not.toHaveBeenCalled();
   });
 
   it('surfaces an error snack instead of silently failing when a same-context task cannot be focused', async () => {
     const snackService = TestBed.inject(SnackService) as jasmine.SpyObj<SnackService>;
     // Already on the task's context so navigate() takes the same-context branch.
     router.url = `/project/p1/tasks`;
+    setProject('p1', ['t5']);
     taskService.getByIdFromEverywhere.and.resolveTo(
       createTask({ id: 't5', projectId: 'p1', tagIds: [] }),
     );
@@ -171,20 +184,87 @@ describe('NavigateToTaskService', () => {
 
     await service.navigate('t6');
 
-    expect(store.dispatch).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        type: TaskSharedActions.moveToOtherProject.type,
-        targetProjectId: INBOX_PROJECT.id,
-      }),
-    );
+    expect(taskService.update).toHaveBeenCalledWith('t6', {
+      projectId: INBOX_PROJECT.id,
+    });
     expect(router.navigate).not.toHaveBeenCalled();
     expect(layoutService.focusTaskInViewWhenReady).toHaveBeenCalled();
   });
 
-  it('does NOT re-home an orphaned subtask whose parent cannot be loaded (moveToOtherProject is top-level only)', async () => {
+  it('repairs a task missing from its project list before navigating (#8780)', async () => {
+    setProject(INBOX_PROJECT.id, []);
+    taskService.getByIdFromEverywhere.and.resolveTo(
+      createTask({
+        id: 'unlisted-inbox-task',
+        projectId: INBOX_PROJECT.id,
+        tagIds: [],
+      }),
+    );
+
+    await service.navigate('unlisted-inbox-task');
+
+    expect(taskService.update).toHaveBeenCalledWith('unlisted-inbox-task', {
+      projectId: INBOX_PROJECT.id,
+    });
+    expect(router.navigate).toHaveBeenCalledWith(
+      [`/project/${INBOX_PROJECT.id}/tasks`],
+      jasmine.objectContaining({
+        queryParams: jasmine.objectContaining({ focusItem: 'unlisted-inbox-task' }),
+      }),
+    );
+  });
+
+  it('repairs a dangling project reference into the Inbox before navigating (#8780)', async () => {
+    projectService.getByIdOnce$.and.returnValue(of(undefined));
+    taskService.getByIdFromEverywhere.and.resolveTo(
+      createTask({ id: 'dangling-task', projectId: 'deleted-project', tagIds: [] }),
+    );
+
+    await service.navigate('dangling-task');
+
+    expect(taskService.update).toHaveBeenCalledWith('dangling-task', {
+      projectId: INBOX_PROJECT.id,
+    });
+    expect(router.navigate).toHaveBeenCalledWith(
+      [`/project/${INBOX_PROJECT.id}/tasks`],
+      jasmine.anything(),
+    );
+  });
+
+  it('opens the backlog when navigating to a subtask whose parent is there', async () => {
+    const parent = createTask({
+      id: 'backlog-parent',
+      projectId: 'p1',
+      subTaskIds: ['backlog-child'],
+    });
+    const child = createTask({
+      id: 'backlog-child',
+      parentId: parent.id,
+      projectId: parent.projectId,
+    });
+    setProject('p1', [], [parent.id]);
+    taskService.getByIdFromEverywhere.and.callFake((id: string) =>
+      Promise.resolve(id === child.id ? child : parent),
+    );
+
+    await service.navigate(child.id);
+
+    expect(taskService.update).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/project/p1/tasks'],
+      jasmine.objectContaining({
+        queryParams: jasmine.objectContaining({
+          focusItem: child.id,
+          isInBacklog: true,
+        }),
+      }),
+    );
+  });
+
+  it('does NOT repair an orphaned subtask whose parent cannot be loaded', async () => {
     // The subtask itself resolves; its parent lookup returns undefined, so
     // `taskToCheck` stays the subtask. It routes to the Inbox but must NOT be
-    // dispatched as a top-level move (which would corrupt the parent/child link).
+    // repaired as a top-level task (which would corrupt the parent/child link).
     taskService.getByIdFromEverywhere.and.callFake((id: string) =>
       Promise.resolve(
         id === 'sub-1'
@@ -200,7 +280,7 @@ describe('NavigateToTaskService', () => {
 
     await service.navigate('sub-1');
 
-    expect(store.dispatch).not.toHaveBeenCalled();
+    expect(taskService.update).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(
       [`/project/${INBOX_PROJECT.id}/tasks`],
       jasmine.anything(),

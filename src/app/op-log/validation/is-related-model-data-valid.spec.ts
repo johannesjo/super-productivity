@@ -137,6 +137,38 @@ describe('isRelatedModelDataValid', () => {
     ).not.toContain(privateNodeKind);
   });
 
+  it('should fail validation when a top-level task is missing from its project lists', () => {
+    const data: any = {
+      project: {
+        ids: ['p1'],
+        entities: {
+          p1: { id: 'p1', taskIds: [], backlogTaskIds: [], noteIds: [] },
+        },
+      },
+      tag: { ids: [], entities: {} },
+      task: {
+        ids: ['t1'],
+        entities: {
+          t1: {
+            id: 't1',
+            projectId: 'p1',
+            tagIds: [],
+            subTaskIds: [],
+          },
+        },
+      },
+      taskRepeatCfg: { ids: [], entities: {} },
+      archiveYoung: { task: { ids: [], entities: {} } },
+      archiveOld: { task: { ids: [], entities: {} } },
+      note: { ids: [], entities: {}, todayOrder: [] },
+      issueProvider: { ids: [], entities: {} },
+      reminders: [],
+      menuTree: { projectTree: [], tagTree: [] },
+    };
+
+    expect(isRelatedModelDataValid(data)).toBe(false);
+  });
+
   it('should fail validation when task has non-existent repeatCfgId', () => {
     const dataWithOrphanedRepeatCfgId: any = {
       project: {

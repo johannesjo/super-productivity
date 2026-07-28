@@ -1320,6 +1320,16 @@ describe('dataRepair()', () => {
           },
         },
       },
+      project: {
+        ...mock.project,
+        entities: {
+          ...mock.project.entities,
+          [INBOX_PROJECT.id]: {
+            ...mock.project.entities[INBOX_PROJECT.id]!,
+            taskIds: ['TEST'],
+          },
+        },
+      },
     });
   });
 
