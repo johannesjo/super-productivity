@@ -17,7 +17,6 @@ import {
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../config/global-config.service';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
-import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { IdleService } from '../idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { BannerService } from '../../core/banner/banner.service';
@@ -28,7 +27,7 @@ import { NotifyService } from '../../core/notify/notify.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { Tick } from '../../core/global-tracking-interval/tick.model';
 import { ofType } from '@ngrx/effects';
-import { idleDialogResult, triggerResetBreakTimer } from '../idle/store/idle.actions';
+import { idleDialogResult } from '../idle/store/idle.actions';
 import { playSound } from '../../util/play-sound';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { SnackService } from '../../core/snack/snack.service';
@@ -59,7 +58,6 @@ export class TakeABreakService {
   private _configService = inject(GlobalConfigService);
   private _notifyService = inject(NotifyService);
   private _bannerService = inject(BannerService);
-  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
   private _uiHelperService = inject(UiHelperService);
   private _snackService = inject(SnackService);
 
@@ -75,24 +73,10 @@ export class TakeABreakService {
       shareReplay(1),
     );
 
-  private _isIdleResetEnabled$: Observable<boolean> = this._configService.idle$.pipe(
-    switchMap((idleCfg) => {
-      const isConfigured = idleCfg.isEnableIdleTimeTracking;
-      // return [true];
-      if (IS_ELECTRON) {
-        return [isConfigured];
-      } else if (isConfigured) {
-        return this._chromeExtensionInterfaceService.isReady$;
-      } else {
-        return [false];
-      }
-    }),
-    distinctUntilChanged(),
-  );
-
-  private _triggerSimpleBreakReset$: Observable<any> = this._timeWithNoCurrentTask$.pipe(
-    filter((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
-  );
+  private _triggerSimpleBreakReset$: Observable<unknown> =
+    this._timeWithNoCurrentTask$.pipe(
+      filter((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
+    );
 
   private _tick$: Observable<number> = merge(
     this._timeTrackingService.tick$.pipe(
@@ -108,7 +92,9 @@ export class TakeABreakService {
           return of(0);
         }
         // without a reset, time tracked to tasks still counts as work; break
-        // items don't (but they don't reset the timer either)
+        // items don't (but they don't reset the timer either).
+        // NOTE: only SPLIT mode sends numbers here — BREAK/TASK send the
+        // 'IDLE_TIME' placeholder, so this contributes 0 for them. See #9352.
         const noBreakTime = trackItems
           .filter((t) => t.type === 'TASK')
           .reduce((acc, t) => acc + (typeof t.time === 'number' ? t.time : 0), 0);
@@ -130,13 +116,13 @@ export class TakeABreakService {
     }),
   );
 
-  private _triggerProgrammaticReset$: Observable<any> = this._isIdleResetEnabled$.pipe(
-    switchMap((isIdleResetEnabled) => {
-      return isIdleResetEnabled
-        ? this._actions$.pipe(ofType(triggerResetBreakTimer))
-        : this._triggerSimpleBreakReset$;
-    }),
-  );
+  // NOTE: this used to be skipped whenever idle tracking was on, on the
+  // assumption that the idle path would reset the timer instead. It hasn't:
+  // the action it waited for lost its last dispatcher in v11.1.0, so for every
+  // Electron user (idle tracking defaults to on) the automatic reset was dead
+  // and only the idle dialog's checkbox could clear the timer. See #9305.
+  private _triggerProgrammaticReset$: Observable<unknown> =
+    this._triggerSimpleBreakReset$;
 
   private _triggerManualReset$: Subject<number> = new Subject<number>();
 
@@ -216,10 +202,17 @@ export class TakeABreakService {
   > = this._triggerBanner$.pipe(throttleTime(DESKTOP_NOTIFICATION_THROTTLE));
 
   constructor() {
-    this._triggerReset$
+    // Derive the reminder teardown from the counter itself rather than from
+    // _triggerReset$: the idle dialog and focus-mode breaks zero the counter
+    // through _tick$, which bypasses _triggerReset$ entirely. They therefore
+    // used to leave a stale banner up, and — because the lock-screen and
+    // fullscreen-blocker subjects are distinctUntilChanged() — left those
+    // latched at `true`, silently disabling both for the rest of the session.
+    this.timeWorkingWithoutABreak$
       .pipe(
+        filter((timeWorkingWithoutABreak) => timeWorkingWithoutABreak === 0),
         withLatestFrom(this._configService.takeABreak$),
-        filter(([reset, cfg]) => cfg && cfg.isTakeABreakEnabled),
+        filter(([, cfg]) => cfg && cfg.isTakeABreakEnabled),
       )
       .subscribe(() => {
         this._triggerLockScreenCounter$.next(false);

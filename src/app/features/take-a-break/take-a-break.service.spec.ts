@@ -10,11 +10,11 @@ import { IdleService } from '../idle/idle.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { NotifyService } from '../../core/notify/notify.service';
 import { BannerService } from '../../core/banner/banner.service';
-import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { BannerId } from '../../core/banner/banner.model';
+import { Tick } from '../../core/global-tracking-interval/tick.model';
 import { T } from '../../t.const';
 
 describe('TakeABreakService', () => {
@@ -23,9 +23,11 @@ describe('TakeABreakService', () => {
   let snackService: jasmine.SpyObj<SnackService>;
   let bannerService: jasmine.SpyObj<BannerService>;
   let actions$: Subject<Action>;
+  let tick$: Subject<Tick>;
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
+    tick$ = new Subject<Tick>();
     taskService = jasmine.createSpyObj<TaskService>('TaskService', [
       'pauseCurrent',
       'currentTaskId',
@@ -47,19 +49,23 @@ describe('TakeABreakService', () => {
         { provide: SnackService, useValue: snackService },
         { provide: BannerService, useValue: bannerService },
         { provide: LOCAL_ACTIONS, useValue: actions$ },
-        { provide: GlobalTrackingIntervalService, useValue: { tick$: new Subject() } },
+        { provide: GlobalTrackingIntervalService, useValue: { tick$: tick$ } },
         { provide: IdleService, useValue: { isIdle$: of(false) } },
         {
           provide: GlobalConfigService,
           useValue: {
-            cfg$: of({ takeABreak: { isTakeABreakEnabled: true } }),
+            cfg$: of({
+              takeABreak: { isTakeABreakEnabled: true },
+              // idle tracking on is the shipped default, and it used to be the
+              // configuration in which the automatic break-timer reset was dead
+              idle: { isEnableIdleTimeTracking: true },
+            }),
             takeABreak$: of({ isTakeABreakEnabled: true }),
-            idle$: of({ isEnableIdleTimeTracking: false }),
+            idle$: of({ isEnableIdleTimeTracking: true }),
             sound$: of({ breakReminderSound: null, volume: 0 }),
           },
         },
         { provide: NotifyService, useValue: { notifyDesktop: () => undefined } },
-        { provide: ChromeExtensionInterfaceService, useValue: { isReady$: of(false) } },
         {
           provide: UiHelperService,
           useValue: { focusAppAfterNotification: () => undefined },
@@ -71,12 +77,15 @@ describe('TakeABreakService', () => {
   });
 
   describe('idle dialog result', () => {
+    const IDLE_TIME = 5 * 60000;
     const BREAK_ITEM: IdleTrackItem = {
       type: 'BREAK',
       time: 'IDLE_TIME',
       simpleCounterToggleBtns: [],
     };
-    const TASK_ITEM: IdleTrackItem = {
+    // only SPLIT mode sends a resolved number; BREAK/TASK send the 'IDLE_TIME'
+    // placeholder with the duration in the action's separate idleTime field
+    const SPLIT_TASK_ITEM: IdleTrackItem = {
       type: 'TASK',
       time: 60000,
       title: 'Some task',
@@ -91,7 +100,7 @@ describe('TakeABreakService', () => {
         trackItems,
         isResetBreakTimer,
         wasFocusSessionRunning: false,
-        idleTime: 5 * 60000,
+        idleTime: IDLE_TIME,
       });
 
     let emitted: number[];
@@ -124,8 +133,30 @@ describe('TakeABreakService', () => {
     });
 
     it('adds tracked task time but not break time when not resetting', () => {
-      actions$.next(dialogResult([BREAK_ITEM, TASK_ITEM], false));
+      actions$.next(dialogResult([BREAK_ITEM, SPLIT_TASK_ITEM], false));
       expect(current()).toBe(10000 + 60000);
+    });
+
+    it('dismisses the reminder banner when the timer is reset', () => {
+      actions$.next(dialogResult([], true));
+
+      expect(bannerService.dismiss).toHaveBeenCalledTimes(1);
+      expect(bannerService.dismiss).toHaveBeenCalledWith(BannerId.TakeABreak);
+    });
+  });
+
+  describe('with idle tracking enabled', () => {
+    it('counts a long stretch without a tracked task as a break', () => {
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+      service.otherNoBreakTIme$.next(10000);
+      expect(emitted[emitted.length - 1]).toBe(10000);
+
+      // more than BREAK_TRIGGER_DURATION with no current task selected
+      tick$.next({ duration: 11 * 60000, date: '2026-07-28', timestamp: 0 });
+
+      expect(emitted[emitted.length - 1]).toBe(0);
+      sub.unsubscribe();
     });
   });
 
