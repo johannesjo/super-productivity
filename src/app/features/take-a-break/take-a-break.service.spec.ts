@@ -26,7 +26,7 @@ describe('TakeABreakService', () => {
   let tick$: Subject<Tick>;
   let currentTaskId$: BehaviorSubject<string | null>;
 
-  beforeEach(() => {
+  const configure = (isTakeABreakEnabled = true): void => {
     actions$ = new Subject<Action>();
     tick$ = new Subject<Tick>();
     taskService = jasmine.createSpyObj<TaskService>('TaskService', [
@@ -60,12 +60,12 @@ describe('TakeABreakService', () => {
           provide: GlobalConfigService,
           useValue: {
             cfg$: of({
-              takeABreak: { isTakeABreakEnabled: true },
+              takeABreak: { isTakeABreakEnabled },
               // idle tracking on is the shipped default, and it used to be the
               // configuration in which the automatic break-timer reset was dead
               idle: { isEnableIdleTimeTracking: true },
             }),
-            takeABreak$: of({ isTakeABreakEnabled: true }),
+            takeABreak$: of({ isTakeABreakEnabled }),
             idle$: of({ isEnableIdleTimeTracking: true }),
             sound$: of({ breakReminderSound: null, volume: 0 }),
           },
@@ -79,7 +79,9 @@ describe('TakeABreakService', () => {
     });
 
     service = TestBed.inject(TakeABreakService);
-  });
+  };
+
+  beforeEach(() => configure());
 
   describe('idle dialog result', () => {
     const IDLE_TIME = 5 * 60000;
@@ -209,6 +211,80 @@ describe('TakeABreakService', () => {
       expect(bannerService.dismiss).toHaveBeenCalledTimes(2);
       sub.unsubscribe();
     });
+
+    // The teardown is deliberately NOT gated on isTakeABreakEnabled: gating it
+    // means toggling the feature off mid-session strands _triggerLockScreenCounter$
+    // and _triggerFullscreenBlocker$ at `true`, and because both are
+    // distinctUntilChanged() the later next(true) is swallowed — so re-enabling
+    // can never re-arm them. Dismissing a banner that cannot be open is a no-op.
+    it('still tears the reminder down when the feature is disabled', () => {
+      TestBed.resetTestingModule();
+      configure(false);
+
+      const sub = service.timeWorkingWithoutABreak$.subscribe();
+      service.resetTimer();
+
+      expect(bannerService.dismiss).toHaveBeenCalledWith(BannerId.TakeABreak);
+      sub.unsubscribe();
+    });
+  });
+
+  describe('counter arithmetic', () => {
+    const trackTask = (): void => {
+      taskService.currentTaskId.and.returnValue('task-1');
+      currentTaskId$.next('task-1');
+    };
+
+    // Only _triggerReset$ may zero the counter. The seedless scan treats any
+    // value <= 0 as a reset, and a 0 is a normal Android event: the focus-mode
+    // effects pass `cap = Math.max(0, timer.duration - timer.elapsed)` to
+    // triggerWakeUpTick, which is exactly 0 once a session reaches its duration.
+    // Zeroing through the tick branch skips the teardown, so the banner would
+    // keep claiming hours of work over a counter reading 0.
+    it('ignores a zero-duration tick rather than zeroing the counter', () => {
+      const twoHours = 2 * 60 * 60000;
+      const oneMinute = 60000;
+      trackTask();
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+      service.otherNoBreakTIme$.next(twoHours);
+
+      tick$.next({ duration: 0, date: '2026-07-28', timestamp: 0 });
+
+      expect(emitted[emitted.length - 1]).toBe(twoHours);
+      expect(bannerService.dismiss).not.toHaveBeenCalled();
+
+      // positive control: a real tick still accumulates, so the assertion above
+      // is not passing merely because the tick branch is wired up wrong
+      tick$.next({ duration: oneMinute, date: '2026-07-28', timestamp: 0 });
+      expect(emitted[emitted.length - 1]).toBe(twoHours + oneMinute);
+      sub.unsubscribe();
+    });
+
+    // consumeCurrentTick() is unclamped, so a backwards clock step goes negative
+    it('ignores a negative tick rather than zeroing the counter', () => {
+      trackTask();
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+      service.otherNoBreakTIme$.next(10000);
+
+      tick$.next({ duration: -5000, date: '2026-07-28', timestamp: 0 });
+
+      expect(emitted[emitted.length - 1]).toBe(10000);
+      sub.unsubscribe();
+    });
+
+    it('zeroes the counter on resetTimer()', () => {
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+      service.otherNoBreakTIme$.next(10000);
+      expect(emitted[emitted.length - 1]).toBe(10000);
+
+      service.resetTimer();
+
+      expect(emitted[emitted.length - 1]).toBe(0);
+      sub.unsubscribe();
+    });
   });
 
   describe('with idle tracking enabled', () => {
@@ -259,6 +335,41 @@ describe('TakeABreakService', () => {
       );
 
       expect(emitted[emitted.length - 1]).toBe(0);
+      sub.unsubscribe();
+    });
+
+    // The other half of the same overlap, and the reason the reset is edge- and
+    // not level-triggered: once it has fired, time added later in the SAME
+    // untracked stretch survives. With a level trigger the next tick wiped it
+    // again -- and every tick after -- so unchecking the dialog's reset box was
+    // inert for any absence over BREAK_TRIGGER_DURATION. SPLIT is the only mode
+    // that sends a resolved number, and handleIdleDialogResult$ re-selects a task
+    // only for a single task item, so with 2+ items the stretch keeps running.
+    it('keeps task time from an opt-out added after the untracked-stretch reset', () => {
+      const emitted: number[] = [];
+      const sub = service.timeWorkingWithoutABreak$.subscribe((v) => emitted.push(v));
+
+      tick$.next({ duration: 11 * 60000, date: '2026-07-28', timestamp: 0 });
+      expect(emitted[emitted.length - 1]).toBe(0);
+
+      actions$.next(
+        idleDialogResult({
+          trackItems: [
+            { type: 'TASK', time: 6 * 60000, title: 'A', simpleCounterToggleBtns: [] },
+            { type: 'TASK', time: 5 * 60000, title: 'B', simpleCounterToggleBtns: [] },
+          ],
+          isResetBreakTimer: false,
+          wasFocusSessionRunning: false,
+          idleTime: 11 * 60000,
+        }),
+      );
+      expect(emitted[emitted.length - 1]).toBe(11 * 60000);
+
+      // still untracked: a level trigger would re-zero this on the next tick
+      tick$.next({ duration: 60000, date: '2026-07-28', timestamp: 0 });
+      tick$.next({ duration: 60000, date: '2026-07-28', timestamp: 0 });
+
+      expect(emitted[emitted.length - 1]).toBe(11 * 60000);
       sub.unsubscribe();
     });
   });

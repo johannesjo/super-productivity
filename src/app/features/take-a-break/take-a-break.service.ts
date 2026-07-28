@@ -73,10 +73,19 @@ export class TakeABreakService {
       shareReplay(1),
     );
 
-  // NOTE: edge-triggered on purpose. _timeWithNoCurrentTask$ grows monotonically
-  // while nothing is tracked, so a plain filter would re-fire on every 1s tick
-  // for as long as the app stays open — and timeWorkingWithoutABreak$ is bound
-  // via `| async` in the work view, so each one costs a change-detection pass.
+  // NOTE: edge-triggered on purpose, and this changes semantics, not just cost.
+  //
+  // Cost: _timeWithNoCurrentTask$ grows monotonically while nothing is tracked,
+  // so a plain filter re-fired on every 1s tick for as long as the app stayed
+  // open — and timeWorkingWithoutABreak$ is bound via `| async` in the work
+  // view, so each one cost a change-detection pass.
+  //
+  // Semantics: the reset now fires once per untracked stretch instead of pinning
+  // the counter to 0 for its whole duration, so time added LATER in the same
+  // stretch survives. That is the point — the idle dialog deselects the task
+  // (idle.effects.ts), so with a level trigger the dialog's "reset break timer"
+  // checkbox was inert for any absence over BREAK_TRIGGER_DURATION: unchecking
+  // it kept the tracked time for one tick before the next tick wiped it again.
   private _triggerSimpleBreakReset$: Observable<unknown> =
     this._timeWithNoCurrentTask$.pipe(
       map((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
@@ -107,6 +116,17 @@ export class TakeABreakService {
       }),
     ),
     this.otherNoBreakTIme$,
+  ).pipe(
+    // Additions only. The seedless scan below treats any value <= 0 as a reset,
+    // so an out-of-band non-positive value used to zero the counter WITHOUT
+    // tearing the reminder down, leaving the banner claiming hours of work over
+    // a counter reading 0. That is not hypothetical: Android passes
+    // `cap = Math.max(0, timer.duration - timer.elapsed)` to
+    // `triggerWakeUpTick`, which is exactly 0 whenever a focus session sits at
+    // or over its duration (android-focus-mode.effects.ts), and
+    // `consumeCurrentTick()` is unclamped, so a backwards clock step goes
+    // negative. Resetting is `_triggerReset$`'s job alone.
+    filter((duration) => duration > 0),
   );
 
   // the dialog checkbox is the single source of truth for resetting; it
@@ -144,6 +164,13 @@ export class TakeABreakService {
   // dialog and focus-mode breaks used to be) leaves a stale banner up and leaves
   // the lock-screen / fullscreen-blocker subjects latched at `true`, silently
   // disabling both for the rest of the session. See #9305.
+  //
+  // Subscribed twice (the teardown below, and timeWorkingWithoutABreak$) and
+  // deliberately left cold: _timeWithNoCurrentTask$ is shareReplay(1), so the
+  // second subscriber is handed exactly the last value the first one saw and the
+  // two distinctUntilChanged instances cannot diverge. Do not "fix" this with
+  // share() — that would trade a state argument that holds unconditionally for
+  // one that depends on nothing emitting between the two subscribe calls.
   private _triggerReset$: Observable<number> = merge(
     this._triggerProgrammaticReset$,
     this._triggerManualReset$,

@@ -141,9 +141,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       // Subscribe to the effect (non-dispatching effect, so we just need to subscribe)
       effects.resetBreakTimerOnBreakStart$.subscribe();
 
-      // Spy on the Subject's next method
-      spyOn(otherNoBreakTime$, 'next');
-
       // Dispatch startBreak action
       actions$.next(
         actions.startBreak({
@@ -153,7 +150,8 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       );
       tick(10);
 
-      // Verify: otherNoBreakTIme$.next(0) was called
+      // Verify: the reset went through resetTimer(), which also tears the
+      // reminder down (otherNoBreakTIme$.next(0) only zeroed the counter)
       expect(takeABreakServiceMock.resetTimer).toHaveBeenCalled();
       expect(takeABreakServiceMock.resetTimer).toHaveBeenCalledTimes(1);
 
@@ -170,7 +168,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       store.refreshState();
 
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       // Dispatch startBreak action
       actions$.next(
@@ -197,7 +194,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       store.refreshState();
 
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       // Dispatch startBreak action
       actions$.next(
@@ -217,7 +213,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
 
     it('should reset break timer for short breaks', fakeAsync(() => {
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       // Dispatch short break (5 minutes)
       actions$.next(
@@ -235,7 +230,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
 
     it('should reset break timer for long breaks', fakeAsync(() => {
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       // Dispatch long break (15 minutes)
       actions$.next(
@@ -253,7 +247,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
 
     it('should reset break timer multiple times across multiple breaks', fakeAsync(() => {
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       // First break
       actions$.next(
@@ -292,7 +285,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
     it('should reset break timer for auto-started breaks', fakeAsync(() => {
       // Auto-started break (triggered by session completion)
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       // Dispatch startBreak from autoStartBreakOnSessionComplete$ effect
       actions$.next(
@@ -319,7 +311,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       store.refreshState();
 
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       // Dispatch startBreak from user action
       actions$.next(
@@ -341,7 +332,6 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
       store.refreshState();
 
       effects.resetBreakTimerOnBreakStart$.subscribe();
-      spyOn(otherNoBreakTime$, 'next');
 
       actions$.next(
         actions.startBreak({
