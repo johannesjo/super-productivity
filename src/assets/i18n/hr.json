@@ -2046,8 +2046,8 @@
         "YEARLY_CURRENT_DATE_AND_TIME": "Godišnje {{dayAndMonthStr}}, {{timeStr}}",
         "MONTHLY_LAST_DAY": "Svakog mjeseca posljednjeg dana",
         "MONTHLY_LAST_DAY_AND_TIME": "Svakog mjeseca posljednjeg dana, {{timeStr}}",
-        "MONTHLY_NTH_WEEKDAY": "Svaki mjesec na {{ordinalStr}} {{weekdayStr}}",
-        "MONTHLY_NTH_WEEKDAY_AND_TIME": "Svaki mjesec na {{ordinalStr}} {{weekdayStr}}, {{timeStr}}"
+        "MONTHLY_NTH_WEEKDAY": "Svaki mjesec: {{weekdayStr}} ({{ordinalStr}})",
+        "MONTHLY_NTH_WEEKDAY_AND_TIME": "Svaki mjesec: {{weekdayStr}} ({{ordinalStr}}), {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
         "MSG": "Postoji {{tasksNr}} instanci ovog ponavljajućeg zadatka. Želiš li ih sve premjestiti u projekt \"{{projectName}}\"?",
@@ -2101,7 +2101,7 @@
         "Q_MONTHLY_CURRENT_DATE": "Svaki mjesec na dan {{dateDayStr}}",
         "Q_MONTHLY_FIRST_DAY": "Svaki mjesec na prvi dan",
         "Q_MONTHLY_LAST_DAY": "Svaki mjesec na zadnji dan",
-        "Q_MONTHLY_NTH_WEEKDAY": "Svaki mjesec na {{ordinalStr}} {{weekdayStr}}",
+        "Q_MONTHLY_NTH_WEEKDAY": "Svaki mjesec: {{weekdayStr}} ({{ordinalStr}})",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Svaki tjedan na {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Svake godine na {{dayAndMonthStr}}",
         "QUICK_SETTING": "Konfiguracija ponavljanja",
@@ -2126,11 +2126,11 @@
         "WEEK_OF_MONTH": "Tjedan u mjesecu",
         "WEEKDAY": "Dan u tjednu",
         "MONTHLY_MODE_DAY_OF_MONTH_DESCRIPTION": "„Dan u mjesecu“ koristi dan prikazan u datumu početka.",
-        "ORD_FIRST_NTH": "prvi",
-        "ORD_FOURTH_NTH": "četvrti",
-        "ORD_LAST_NTH": "zadnji",
-        "ORD_SECOND_NTH": "drugi",
-        "ORD_THIRD_NTH": "treći",
+        "ORD_FIRST_NTH": "prvo pojavljivanje",
+        "ORD_FOURTH_NTH": "četvrto pojavljivanje",
+        "ORD_LAST_NTH": "posljednje pojavljivanje",
+        "ORD_SECOND_NTH": "drugo pojavljivanje",
+        "ORD_THIRD_NTH": "treće pojavljivanje",
         "WAIT_FOR_COMPLETION": "Stvori sljedeći zadatak tek nakon završetka",
         "WAIT_FOR_COMPLETION_DESCRIPTION": "Sprječava gomilanje više ponavljajućih zadataka na čekanju. Sljedeća se instanca stvara tek nakon završetka trenutačnog zadatka",
         "WEEKDAY_REQUIRED": "Odaberi najmanje jedan dan u tjednu"

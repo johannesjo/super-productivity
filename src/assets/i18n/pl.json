@@ -2043,8 +2043,8 @@
         "YEARLY_CURRENT_DATE_AND_TIME": "Rocznie {{dayAndMonthStr}}, {{timeStr}}",
         "MONTHLY_LAST_DAY": "Co miesiąc w ostatnim dniu",
         "MONTHLY_LAST_DAY_AND_TIME": "Co miesiąc w ostatnim dniu, {{timeStr}}",
-        "MONTHLY_NTH_WEEKDAY": "Co miesiąc w {{ordinalStr}} {{weekdayStr}}",
-        "MONTHLY_NTH_WEEKDAY_AND_TIME": "Co miesiąc w {{ordinalStr}} {{weekdayStr}}, {{timeStr}}"
+        "MONTHLY_NTH_WEEKDAY": "Co miesiąc: {{weekdayStr}} — {{ordinalStr}}",
+        "MONTHLY_NTH_WEEKDAY_AND_TIME": "Co miesiąc: {{weekdayStr}} — {{ordinalStr}}, {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
         "MSG": "Dla tego powtarzalnego zadania utworzono {{tasksNr}} instancji. Czy chcesz przenieść je wszystkie do projektu \"{{projectName}}\"?",
@@ -2119,15 +2119,15 @@
         "ORD_LAST": "ostatni",
         "ORD_SECOND": "drugi",
         "ORD_THIRD": "trzeci",
-        "Q_MONTHLY_NTH_WEEKDAY": "Co miesiąc w {{ordinalStr}} {{weekdayStr}}",
+        "Q_MONTHLY_NTH_WEEKDAY": "Co miesiąc: {{weekdayStr}} — {{ordinalStr}}",
         "WEEK_OF_MONTH": "Tydzień miesiąca",
         "WEEKDAY": "Dzień tygodnia",
         "MONTHLY_MODE_DAY_OF_MONTH_DESCRIPTION": "„Dzień miesiąca” używa dnia wskazanego w polu Data rozpoczęcia.",
-        "ORD_FIRST_NTH": "pierwszy",
-        "ORD_FOURTH_NTH": "czwarty",
-        "ORD_LAST_NTH": "ostatni",
-        "ORD_SECOND_NTH": "drugi",
-        "ORD_THIRD_NTH": "trzeci",
+        "ORD_FIRST_NTH": "pierwsze wystąpienie",
+        "ORD_FOURTH_NTH": "czwarte wystąpienie",
+        "ORD_LAST_NTH": "ostatnie wystąpienie",
+        "ORD_SECOND_NTH": "drugie wystąpienie",
+        "ORD_THIRD_NTH": "trzecie wystąpienie",
         "WAIT_FOR_COMPLETION": "Utwórz następne zadanie dopiero po ukończeniu",
         "WAIT_FOR_COMPLETION_DESCRIPTION": "Zapobiega gromadzeniu się wielu oczekujących zadań cyklicznych. Następne wystąpienie zostanie utworzone dopiero po ukończeniu bieżącego zadania",
         "WEEKDAY_REQUIRED": "Wybierz co najmniej jeden dzień tygodnia"

@@ -2038,8 +2038,8 @@
         "YEARLY_CURRENT_DATE_AND_TIME": "Anualmente no {{dayAndMonthStr}}, {{timeStr}}",
         "MONTHLY_LAST_DAY": "Mensalmente no último dia",
         "MONTHLY_LAST_DAY_AND_TIME": "Mensalmente no último dia, {{timeStr}}",
-        "MONTHLY_NTH_WEEKDAY": "Mensalmente na {{ordinalStr}} {{weekdayStr}}",
-        "MONTHLY_NTH_WEEKDAY_AND_TIME": "Mensalmente na {{ordinalStr}} {{weekdayStr}}, {{timeStr}}"
+        "MONTHLY_NTH_WEEKDAY": "Mensalmente na {{ordinalStr}} ocorrência de {{weekdayStr}}",
+        "MONTHLY_NTH_WEEKDAY_AND_TIME": "Mensalmente na {{ordinalStr}} ocorrência de {{weekdayStr}}, {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
         "MSG": "Existem {{tasksNr}} instâncias criadas para esta tarefa repetível. Pretende movê-las todas para o projeto \"{{projectName}}\"?",
@@ -2114,7 +2114,7 @@
         "ORD_LAST": "último",
         "ORD_SECOND": "segundo",
         "ORD_THIRD": "terceiro",
-        "Q_MONTHLY_NTH_WEEKDAY": "Todos os meses no {{ordinalStr}} {{weekdayStr}}",
+        "Q_MONTHLY_NTH_WEEKDAY": "Todos os meses na {{ordinalStr}} ocorrência de {{weekdayStr}}",
         "WEEK_OF_MONTH": "Semana do mês",
         "WEEKDAY": "Dia da semana",
         "SKIP_FOR_DATE": "Ignorar em {{date}}",

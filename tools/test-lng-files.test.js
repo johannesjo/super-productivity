@@ -2,7 +2,14 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { mkdirSync, mkdtempSync, rmSync, writeFileSync } = require('node:fs');
+const {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join } = require('node:path');
 
@@ -13,6 +20,26 @@ const {
   printError,
   printReport,
 } = require('./test-lng-files');
+
+test('unknown-overwrite warnings preserve the safety-critical data labels', () => {
+  const i18nDirectory = join(__dirname, '..', 'src', 'assets', 'i18n');
+  const readLocale = (file) =>
+    JSON.parse(readFileSync(join(i18nDirectory, file), 'utf8'));
+  const collectPlaceholders = (value) =>
+    [...value.matchAll(/\{\{\s*([\w.]+)\s*\}\}/gu)].map((match) => match[1]).sort();
+  const englishWarning =
+    readLocale('en.json').F.SYNC.D_CONFLICT.OVERWRITE_WARNING_UNKNOWN;
+  const expectedPlaceholders = collectPlaceholders(englishWarning);
+
+  for (const file of readdirSync(i18nDirectory)
+    .filter((file) => file.endsWith('.json') && file !== 'en.json')
+    .sort()) {
+    const translatedWarning =
+      readLocale(file).F.SYNC.D_CONFLICT.OVERWRITE_WARNING_UNKNOWN;
+
+    assert.deepEqual(collectPlaceholders(translatedWarning), expectedPlaceholders, file);
+  }
+});
 
 test('collectLeafKeys returns sorted dot-delimited paths for nested leaves', () => {
   assert.deepEqual(
