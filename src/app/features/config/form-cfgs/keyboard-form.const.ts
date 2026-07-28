@@ -57,6 +57,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
     ),
     kbField('toggleIssuePanel', T.GCF.KEYBOARD.TOGGLE_ISSUE_PANEL),
     kbField('showSearchBar', T.GCF.KEYBOARD.SHOW_SEARCH_BAR),
+    kbField('showHelp', T.GCF.KEYBOARD.SHOW_HELP),
     kbField('toggleBacklog', T.GCF.KEYBOARD.TOGGLE_BACKLOG),
     kbField('goToWorkView', T.GCF.KEYBOARD.GO_TO_WORK_VIEW),
     kbField('goToFocusMode', T.GCF.KEYBOARD.GO_TO_FOCUS_MODE),

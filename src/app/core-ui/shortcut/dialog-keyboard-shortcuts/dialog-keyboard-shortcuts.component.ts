@@ -7,10 +7,11 @@ import {
 } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
-import { KeyboardConfig } from '@sp/keyboard-config';
 import { T } from '../../../t.const';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { KEYBOARD_SETTINGS_FORM_CFG } from '../../../features/config/form-cfgs/keyboard-form.const';
+import { createPluginShortcutFormItems } from '../../../features/config/form-cfgs/plugin-keyboard-shortcuts';
+import { PluginBridgeService } from '../../../plugins/plugin-bridge.service';
 
 interface ShortcutRow {
   heading?: string;
@@ -21,6 +22,7 @@ interface ShortcutRow {
 @Component({
   selector: 'dialog-keyboard-shortcuts',
   templateUrl: './dialog-keyboard-shortcuts.component.html',
+  styleUrls: ['./dialog-keyboard-shortcuts.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatDialogTitle,
@@ -33,23 +35,35 @@ interface ShortcutRow {
 })
 export class DialogKeyboardShortcutsComponent {
   private _configService = inject(GlobalConfigService);
+  private _pluginBridgeService = inject(PluginBridgeService);
 
   T: typeof T = T;
 
   // Reuses the settings form config as the single source of labels and grouping,
   // so a new shortcut shows up here without touching this component.
   readonly rows = computed<ShortcutRow[]>(() => {
-    const keyboard = this._configService.cfg()?.keyboard;
+    const keyboard = this._configService.cfg()?.keyboard as
+      | Record<string, string | null | undefined>
+      | undefined;
     if (!keyboard) {
       return [];
     }
 
+    const items = [
+      ...(KEYBOARD_SETTINGS_FORM_CFG.items ?? []),
+      // plugin shortcuts only exist on the config page's runtime copy of the form
+      ...createPluginShortcutFormItems(this._pluginBridgeService.shortcuts()),
+    ];
+
     const rows: ShortcutRow[] = [];
-    for (const item of KEYBOARD_SETTINGS_FORM_CFG.items ?? []) {
+    for (const item of items) {
       if (item.type === 'tpl') {
-        rows.push({ heading: item.templateOptions?.['text'] as string | undefined });
+        // only headings start a group – the explanatory paragraphs are not shown here
+        if (item.templateOptions?.['tag'] === 'h3') {
+          rows.push({ heading: item.templateOptions?.['text'] as string | undefined });
+        }
       } else if (item.key) {
-        const combo = keyboard[item.key as keyof KeyboardConfig];
+        const combo = keyboard[item.key as string];
         if (combo) {
           rows.push({ label: item.templateOptions?.label, combo });
         }
