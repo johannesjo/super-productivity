@@ -63,7 +63,7 @@ module.exports = {
     },
     messages: {
       missingHydrationGuard:
-        'Selector-based effect is missing hydration guard. Add skipWhileApplyingRemoteOps() or filter with isApplyingRemoteOps() to prevent duplicate operations during sync replay.',
+        'Selector-based effect is missing hydration guard. Add skipWhileApplyingRemoteOps(), or waitForSyncWindow() if the selector is edge-triggered (a value that flips once and stays — dropping that emission loses it forever, see #9348), or filter with isApplyingRemoteOps().',
     },
     schema: [],
   },

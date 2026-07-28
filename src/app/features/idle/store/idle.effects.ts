@@ -164,61 +164,82 @@ export class IdleEffects {
   handleIdleInit$ = createEffect(() =>
     this._store.select(selectIsIdle).pipe(
       distinctUntilChanged(),
+      // Capture the task this idle period belongs to BEFORE the wait below. The
+      // deferral can outlive the user's return, and `currentTaskId()` read after
+      // it may already be a *different* task that never accrued this idle time —
+      // subtracting it there would silently delete real tracked work. #9348
+      map((isIdle) => [isIdle, this._taskService.currentTaskId()] as const),
       // Guard: defer idle state changes during sync - CRITICAL because this effect
       // has data mutations (removeTimeSpent, setCurrentId, decreaseCounterToday).
-      // NOTE: this must DEFER, not drop, and it must sit after
-      // distinctUntilChanged(): selectIsIdle emits `true` exactly once per idle
-      // episode, so a dropped edge is gone for good — and it leaves the store
-      // stuck at isIdle:true, which makes triggerIdleWhenEnabled$ short-circuit
-      // on isAlreadyIdle from then on, killing idle handling for the whole
-      // session. See #9348.
+      // NOTE: this must DEFER, not drop. selectIsIdle emits `true` exactly once
+      // per idle episode, so a dropped edge is gone for good — and it leaves the
+      // store stuck at isIdle:true, which makes triggerIdleWhenEnabled$
+      // short-circuit on isAlreadyIdle from then on, killing idle handling for
+      // the whole session. See #9348.
+      // It must also stay AHEAD of every distinctUntilChanged(): the operator is
+      // a switchMap, so a superseded edge is cancelled and never emitted. A dUC
+      // downstream would keep that cancelled value as its "last seen" and swallow
+      // the next identical one — re-creating the wedge this is here to prevent.
       waitForSyncWindow(this._hydrationStateService, 'IdleEffects.handleIdleInit$'),
-      switchMap((isIdle) => iif(() => isIdle, of(isIdle), EMPTY)),
+      switchMap(([isIdle, taskIdAtIdleStart]) =>
+        iif(() => isIdle, of(taskIdAtIdleStart), EMPTY),
+      ),
       withLatestFrom(
         this._store.select(selectIdleTime),
         this._simpleCounterService.enabledSimpleStopWatchCounters$,
         this._isFocusSessionRunning$,
       ),
-      map(([, idleTime, enabledSimpleStopWatchCounters, isFocusSessionRunning]) => {
-        // ALL IDLE SIDE EFFECTS
-        // ---------------------
-        if (IS_ELECTRON) {
-          this._uiHelperService.focusAppAfterNotification();
-        }
-
-        // untrack current task time und unselect
-        let lastCurrentTaskId: string | null;
-        const tid = this._taskService.currentTaskId();
-        if (tid) {
-          lastCurrentTaskId = tid;
-          // remove idle time already tracked
-          this._taskService.removeTimeSpent(tid, idleTime);
-          this._taskService.setCurrentId(null);
-        } else {
-          lastCurrentTaskId = null;
-        }
-
-        // untrack on simple counter time and turn off
-        if (enabledSimpleStopWatchCounters.length) {
-          enabledSimpleStopWatchCounters.forEach((simpleCounter) => {
-            if (simpleCounter.isOn) {
-              this._simpleCounterService.decreaseCounterToday(simpleCounter.id, idleTime);
-            }
-          });
-          this._store.dispatch(turnOffAllSimpleCounterCounters());
-        }
-
-        // NOTE: we need a new idleTimer since the other values are reset as soon as the user is active again
-        this._initIdlePoll(idleTime);
-
-        // this._openDialog(enabledSimpleStopWatchCounters, lastCurrentTaskId);
-        // finally open dialog
-        return openIdleDialog({
+      map(
+        ([
+          taskIdAtIdleStart,
+          idleTime,
           enabledSimpleStopWatchCounters,
-          lastCurrentTaskId,
-          wasFocusSessionRunning: isFocusSessionRunning,
-        });
-      }),
+          isFocusSessionRunning,
+        ]) => {
+          // ALL IDLE SIDE EFFECTS
+          // ---------------------
+          if (IS_ELECTRON) {
+            this._uiHelperService.focusAppAfterNotification();
+          }
+
+          // untrack current task time und unselect
+          let lastCurrentTaskId: string | null;
+          // snapshot from the idle edge, not a re-read — see the capture above
+          const tid = taskIdAtIdleStart;
+          if (tid) {
+            lastCurrentTaskId = tid;
+            // remove idle time already tracked
+            this._taskService.removeTimeSpent(tid, idleTime);
+            this._taskService.setCurrentId(null);
+          } else {
+            lastCurrentTaskId = null;
+          }
+
+          // untrack on simple counter time and turn off
+          if (enabledSimpleStopWatchCounters.length) {
+            enabledSimpleStopWatchCounters.forEach((simpleCounter) => {
+              if (simpleCounter.isOn) {
+                this._simpleCounterService.decreaseCounterToday(
+                  simpleCounter.id,
+                  idleTime,
+                );
+              }
+            });
+            this._store.dispatch(turnOffAllSimpleCounterCounters());
+          }
+
+          // NOTE: we need a new idleTimer since the other values are reset as soon as the user is active again
+          this._initIdlePoll(idleTime);
+
+          // this._openDialog(enabledSimpleStopWatchCounters, lastCurrentTaskId);
+          // finally open dialog
+          return openIdleDialog({
+            enabledSimpleStopWatchCounters,
+            lastCurrentTaskId,
+            wasFocusSessionRunning: isFocusSessionRunning,
+          });
+        },
+      ),
     ),
   );
 

@@ -206,11 +206,32 @@ describe('IdleEffects', () => {
       TestBed.flushEffects();
     };
 
+    const taskSpies = (): {
+      currentTaskId: jasmine.Spy;
+      removeTimeSpent: jasmine.Spy;
+      setCurrentId: jasmine.Spy;
+    } =>
+      TestBed.inject(TaskService) as unknown as {
+        currentTaskId: jasmine.Spy;
+        removeTimeSpent: jasmine.Spy;
+        setCurrentId: jasmine.Spy;
+      };
+
     afterEach(() => {
       sub?.unsubscribe();
       // the effect starts a 1s poll interval; stop it so it cannot dispatch
       // into a torn-down TestBed
-      (effects as unknown as { _cancelIdlePoll: () => void })._cancelIdlePoll();
+      (
+        effects as unknown as { _cancelIdlePoll?: () => void } | undefined
+      )?._cancelIdlePoll?.();
+      // startApplyingRemoteOps() writes a MODULE-level flag that TestBed teardown
+      // does not reset, so a test that throws before its own endApplyingRemoteOps()
+      // would leave every later spec buffering its actions - invisible, and Karma
+      // randomises spec order. Same precaution as tag.effects.spec.ts.
+      const hydrationState = TestBed.inject(HydrationStateService);
+      hydrationState.endApplyingRemoteOps();
+      hydrationState.clearPostSyncCooldown();
+      hydrationState.closeSyncWindow();
     });
 
     it('opens the idle dialog when nothing is being applied', () => {
@@ -233,6 +254,8 @@ describe('IdleEffects', () => {
 
       // still held: the mutations must not run mid-apply
       expect(emitted.length).toBe(0);
+      expect(taskSpies().removeTimeSpent).not.toHaveBeenCalled();
+      expect(taskSpies().setCurrentId).not.toHaveBeenCalled();
 
       hydrationState.endApplyingRemoteOps();
       TestBed.flushEffects();
@@ -240,6 +263,30 @@ describe('IdleEffects', () => {
       // ...but they must not be lost either
       expect(emitted.length).toBe(1);
       expect(emitted[0].type).toBe(openIdleDialog.type);
+      expect(taskSpies().removeTimeSpent).toHaveBeenCalledTimes(1);
+    });
+
+    // The deferral can outlive the user's return. If the entity were re-read
+    // after the wait, the idle time would be subtracted from whatever task is
+    // current by then - deleting real tracked work from a task that never
+    // accrued it.
+    it('subtracts the idle time from the task running at the edge, not one started during the wait', () => {
+      setup();
+      const hydrationState = TestBed.inject(HydrationStateService);
+      listen();
+
+      hydrationState.startApplyingRemoteOps();
+      goIdle();
+
+      // user comes back mid-window and starts tracking something else
+      taskSpies().currentTaskId.and.returnValue('task-2');
+
+      hydrationState.endApplyingRemoteOps();
+      TestBed.flushEffects();
+
+      expect(taskSpies().removeTimeSpent).toHaveBeenCalledTimes(1);
+      expect(taskSpies().removeTimeSpent.calls.mostRecent().args[0]).toBe('task-1');
+      expect(taskSpies().setCurrentId).toHaveBeenCalledWith(null);
     });
   });
 });
