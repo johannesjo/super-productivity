@@ -2479,6 +2479,7 @@
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when the current task is selected",
       "IS_SUPPRESS_IDLE_DURING_FOCUS_MODE": "Suppress idle dialog during focus mode sessions",
       "MIN_IDLE_TIME": "Trigger idle after X",
+      "MIN_IDLE_TIME_DESCRIPTION": "e.g. \"5h 23m\". Must be at least {{min}}; shorter idle periods are never reported. Idle is checked every {{interval}}.",
       "TITLE": "Idle Handling"
     },
     "IMEX": {
