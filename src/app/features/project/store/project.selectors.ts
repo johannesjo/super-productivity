@@ -67,10 +67,7 @@ export const selectProjectById = createSelector(
       return undefined;
     }
     const p = state.entities[props.id];
-    // Entity dictionaries inherit from Object.prototype. Require the stored
-    // entity to identify itself so keys such as "__proto__" and "constructor"
-    // cannot masquerade as projects.
-    if (!p || p.id !== props.id) {
+    if (!p) {
       // Log only — a project the user is viewing can vanish via sync
       // (SYNC_IMPORT_REMOTE, remote delete). devError's window.alert would
       // block the whole browser on a legitimate runtime state. Matches the

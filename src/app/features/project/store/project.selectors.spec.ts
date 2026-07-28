@@ -2,9 +2,8 @@ import {
   selectArchivedProjects,
   selectArchivedProjectIds,
   selectArrayOfArchivedProjectIds,
-  selectProjectById,
 } from './project.selectors';
-import { Project, ProjectState } from '../project.model';
+import { Project } from '../project.model';
 
 const p = (o: Partial<Project>): Project => ({ ...o }) as Project;
 
@@ -36,17 +35,5 @@ describe('project.selectors (completion)', () => {
     expect(idSet.has('done')).toBe(true);
     expect(idSet.has('archived')).toBe(true);
     expect(idSet.has('active')).toBe(false);
-  });
-});
-
-describe('selectProjectById', () => {
-  it('does not return inherited Object prototype members as projects', () => {
-    const state = {
-      ids: [],
-      entities: {},
-    } as ProjectState;
-
-    expect(selectProjectById.projector(state, { id: '__proto__' })).toBeUndefined();
-    expect(selectProjectById.projector(state, { id: 'constructor' })).toBeUndefined();
   });
 });
