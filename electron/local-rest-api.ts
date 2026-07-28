@@ -207,7 +207,6 @@ const persistToken = (token: string): void => {
 
   try {
     fd = openSync(tmpFilePath, 'w', 0o600);
-    writeFileSync(fd, token, 'utf8');
     // `mode` only applies when the file is created, so it would leave a
     // pre-existing file at its old — possibly group/world-readable — mode.
     fchmodSync(fd, 0o600);
@@ -225,6 +224,10 @@ const persistToken = (token: string): void => {
         );
       }
     }
+    // Only now, once the descriptor is known to be private, does the secret
+    // reach the disk. Writing first would put it in a readable file for the
+    // length of the check on exactly the filesystems that check exists for.
+    writeFileSync(fd, token, 'utf8');
     fsyncSync(fd);
     closeSync(fd);
     fd = undefined;
@@ -334,14 +337,17 @@ const BEARER_SCHEME = 'bearer';
  * Pulls the credential out of an `Authorization: Bearer <token>` header, or
  * returns undefined if the header is not a bearer credential.
  *
- * Scanned by hand rather than matched with `/^Bearer +(.+)$/i`, where the space
- * run and the credential can both match a space: on a header of "bearer"
- * followed by thousands of spaces the engine retries every split of them, which
- * is quadratic in the header length (CodeQL's polynomial-ReDoS finding). One
- * left-to-right pass costs the same on every input. Behaviour is unchanged —
- * RFC 7235 auth schemes are case-insensitive, so "bearer <token>" is accepted
- * too, at least one space must separate scheme from credential, and the
- * credential is the rest of the header verbatim.
+ * Scanned by hand rather than matched with `/^Bearer +(.+)$/i`, which CodeQL
+ * flags as polynomial: the space run and the credential can both match a space,
+ * so an input that fails the anchor after the spaces is retried at every split
+ * of them. The reachable inputs are not that input — the retry needs a suffix
+ * that fails `$`, which takes a line break, and Node answers 400 for a header
+ * value containing one before this runs. So no live DoS is being closed here; a
+ * single left-to-right pass simply costs the same on every input and removes
+ * the question. Behaviour is unchanged — RFC 7235 auth schemes are
+ * case-insensitive, so "bearer <token>" is accepted too, at least one space
+ * must separate scheme from credential, and the credential is the rest of the
+ * header verbatim.
  */
 const parseBearerToken = (authHeader: string | undefined): string | undefined => {
   if (
