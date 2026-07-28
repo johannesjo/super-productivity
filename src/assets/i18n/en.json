@@ -1802,6 +1802,7 @@
         "PASTED_IMAGE_TITLE": "Pasted image",
         "ADD_SUB_TASK": "Add subtask",
         "ATTACHMENTS": "Links & Files ({{nr}})",
+        "CHECKLIST": "Checklist",
         "COMPLETED_ON": "Completed on",
         "CREATED_ON": "Created on",
         "DEADLINE": "Deadline",
