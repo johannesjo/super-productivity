@@ -26,6 +26,7 @@ import {
   OperationDecryptionError,
   OperationEncryptionService,
 } from './operation-encryption.service';
+import { buildDecryptFailureLogPayload } from './operation-decrypt-failure-log.util';
 import { DecryptNoPasswordError } from '../core/errors/sync-errors';
 import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected';
 import { SuperSyncStatusService } from './super-sync-status.service';
@@ -168,6 +169,10 @@ export class OperationLogDownloadService implements OnDestroy {
       let sinceSeq = lastServerSeq;
       let hasResetForGap = false;
       let iterationCount = 0;
+      // Run-level password evidence for the failure log: ops decrypted on
+      // earlier pages of THIS run prove the key even when nothing in a later
+      // failing batch decrypts (e.g. a single corrupt op on the final page).
+      let decryptedOpsInEarlierBatches = 0;
 
       while (hasMore) {
         iterationCount++;
@@ -246,6 +251,9 @@ export class OperationLogDownloadService implements OnDestroy {
           remoteLastModified = undefined; // Clear timestamp belonging to the stale state
           sawAnyOps = false; // Reset encryption tracking
           sawEncryptedOp = false;
+          // The re-fetched key may differ (password change clean slate), so
+          // pre-reset decrypts are no evidence for the key used after it.
+          decryptedOpsInEarlierBatches = 0;
 
           // CRITICAL: Re-fetch encryption key after gap detection.
           // Gap usually means server was wiped (e.g., password change clean slate),
@@ -311,8 +319,8 @@ export class OperationLogDownloadService implements OnDestroy {
         assertOpsEncryptedWhenExpected(syncOps, isEncryptionExpected);
 
         // Decrypt encrypted operations if we have an encryption key
-        const hasEncryptedOps = syncOps.some((op) => op.isPayloadEncrypted);
-        if (hasEncryptedOps) {
+        const encryptedOpsInPage = syncOps.filter((op) => op.isPayloadEncrypted).length;
+        if (encryptedOpsInPage > 0) {
           if (!encryptKey) {
             // No encryption key available - throw to let the sync wrapper show the
             // password dialog. Severity depends on history: a client that has never
@@ -341,23 +349,17 @@ export class OperationLogDownloadService implements OnDestroy {
           // Decrypt encrypted operations - let DecryptError propagate to sync-wrapper handler
           try {
             syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+            decryptedOpsInEarlierBatches += encryptedOpsInPage;
           } catch (error) {
             if (error instanceof OperationDecryptionError) {
-              const encryptedServerOps = newServerOps.filter(
-                (serverOp) => serverOp.op.isPayloadEncrypted,
+              OpLog.error(
+                'OperationLogDownloadService: Encrypted operation batch could not be processed.',
+                buildDecryptFailureLogPayload(
+                  error.diagnosis,
+                  newServerOps.filter((serverOp) => serverOp.op.isPayloadEncrypted),
+                  decryptedOpsInEarlierBatches,
+                ),
               );
-              const failedServerOp = encryptedServerOps[error.encryptedBatchIndex];
-              if (failedServerOp?.op.id === error.operationId) {
-                OpLog.error(
-                  'OperationLogDownloadService: Encrypted operation payload could not be processed.',
-                  {
-                    opId: error.operationId,
-                    serverSeq: failedServerOp.serverSeq,
-                    encryptedBatchIndex: error.encryptedBatchIndex,
-                    stage: error.stage,
-                  },
-                );
-              }
             }
             throw error;
           }

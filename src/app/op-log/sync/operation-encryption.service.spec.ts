@@ -241,13 +241,19 @@ describe('OperationEncryptionService', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(OperationDecryptionError);
         expect(e).toBeInstanceOf(DecryptError);
-        expect(e as OperationDecryptionError).toEqual(
-          jasmine.objectContaining({
-            operationId: 'malformed-op-123',
-            encryptedBatchIndex: 0,
-            stage: 'envelope',
-          }),
-        );
+        expect((e as OperationDecryptionError).diagnosis).toEqual({
+          encryptedOperationCount: 1,
+          decryptedCount: 0,
+          parsedCount: 0,
+          passwordEvidence: 'not-tested',
+          failures: [
+            {
+              operationId: 'malformed-op-123',
+              encryptedBatchIndex: 0,
+              stage: 'envelope',
+            },
+          ],
+        });
       }
     });
 
@@ -271,22 +277,51 @@ describe('OperationEncryptionService', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(OperationDecryptionError);
         const diagnosticError = e as OperationDecryptionError;
-        expect(diagnosticError).toEqual(
-          jasmine.objectContaining({
-            operationId: 'corrupt-op',
-            encryptedBatchIndex: 1,
-            stage: 'decrypt',
-          }),
-        );
-        expect(JSON.stringify(diagnosticError.additionalLog)).not.toContain(
-          'Private task title',
-        );
-        expect(JSON.stringify(diagnosticError.additionalLog)).not.toContain(
-          TEST_PASSWORD,
-        );
-        expect(JSON.stringify(diagnosticError.additionalLog)).not.toContain(
-          encrypted[1].payload as string,
-        );
+        // The successful sibling decrypt is what proves the password and pins
+        // the failure to the corrupt operation instead of the key.
+        expect(diagnosticError.diagnosis).toEqual({
+          encryptedOperationCount: 2,
+          decryptedCount: 1,
+          parsedCount: 1,
+          passwordEvidence: 'confirmed-for-some-operations',
+          failures: [
+            { operationId: 'corrupt-op', encryptedBatchIndex: 1, stage: 'decrypt' },
+          ],
+        });
+        const serializedError = JSON.stringify({
+          diagnosis: diagnosticError.diagnosis,
+          additionalLog: diagnosticError.additionalLog,
+        });
+        expect(serializedError).not.toContain('Private task title');
+        expect(serializedError).not.toContain(TEST_PASSWORD);
+        expect(serializedError).not.toContain(encrypted[1].payload as string);
+      }
+    });
+
+    it('reports every operation as failed for a wrong password instead of blaming the first', async () => {
+      const ops = [
+        { ...createMockSyncOp({ title: 'Task A' }), id: 'op-a' },
+        { ...createMockSyncOp({ title: 'Task B' }), id: 'op-b' },
+        { ...createMockSyncOp({ title: 'Task C' }), id: 'op-c' },
+      ];
+      const encrypted = await service.encryptOperations(ops, TEST_PASSWORD);
+
+      try {
+        await service.decryptOperations(encrypted, 'another-password-entirely');
+        fail('Should have thrown OperationDecryptionError');
+      } catch (e) {
+        expect(e).toBeInstanceOf(OperationDecryptionError);
+        expect((e as OperationDecryptionError).diagnosis).toEqual({
+          encryptedOperationCount: 3,
+          decryptedCount: 0,
+          parsedCount: 0,
+          passwordEvidence: 'no-operation-decrypted',
+          failures: [
+            { operationId: 'op-a', encryptedBatchIndex: 0, stage: 'decrypt' },
+            { operationId: 'op-b', encryptedBatchIndex: 1, stage: 'decrypt' },
+            { operationId: 'op-c', encryptedBatchIndex: 2, stage: 'decrypt' },
+          ],
+        });
       }
     });
 
@@ -304,16 +339,21 @@ describe('OperationEncryptionService', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(OperationDecryptionError);
         const diagnosticError = e as OperationDecryptionError;
-        expect(diagnosticError).toEqual(
-          jasmine.objectContaining({
-            operationId: 'invalid-json-op',
-            encryptedBatchIndex: 0,
-            stage: 'parse',
+        expect(diagnosticError.diagnosis).toEqual({
+          encryptedOperationCount: 1,
+          decryptedCount: 1,
+          parsedCount: 0,
+          passwordEvidence: 'confirmed-for-some-operations',
+          failures: [
+            { operationId: 'invalid-json-op', encryptedBatchIndex: 0, stage: 'parse' },
+          ],
+        });
+        expect(
+          JSON.stringify({
+            diagnosis: diagnosticError.diagnosis,
+            additionalLog: diagnosticError.additionalLog,
           }),
-        );
-        expect(JSON.stringify(diagnosticError.additionalLog)).not.toContain(
-          privatePlaintext,
-        );
+        ).not.toContain(privatePlaintext);
       }
     });
   });

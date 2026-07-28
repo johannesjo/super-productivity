@@ -6,6 +6,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import {
   SyncProviderBase,
   OperationSyncCapable,
+  SyncOperation,
 } from '../sync-providers/provider.interface';
 import { SyncProviderId } from '../sync-providers/provider.const';
 import { ActionType, OpType } from '../core/operation.types';
@@ -203,9 +204,13 @@ describe('OperationLogDownloadService', () => {
       it('logs only safe identifiers for an attributable encrypted-operation failure', async () => {
         const errorSpy = spyOn(OpLog, 'error');
         const diagnosticError = new OperationDecryptionError({
-          operationId: 'op-corrupt',
-          encryptedBatchIndex: 1,
-          stage: 'decrypt',
+          encryptedOperationCount: 2,
+          decryptedCount: 1,
+          parsedCount: 1,
+          passwordEvidence: 'confirmed-for-some-operations',
+          failures: [
+            { operationId: 'op-corrupt', encryptedBatchIndex: 1, stage: 'decrypt' },
+          ],
         });
         mockApiProvider.getEncryptKey = jasmine
           .createSpy('getEncryptKey')
@@ -259,18 +264,111 @@ describe('OperationLogDownloadService', () => {
         );
 
         expect(errorSpy).toHaveBeenCalledWith(
-          'OperationLogDownloadService: Encrypted operation payload could not be processed.',
+          'OperationLogDownloadService: Encrypted operation batch could not be processed.',
           {
-            opId: 'op-corrupt',
-            serverSeq: 42,
-            encryptedBatchIndex: 1,
-            stage: 'decrypt',
+            encryptedOperationCount: 2,
+            decryptedCount: 1,
+            parsedCount: 1,
+            decryptedOpsInEarlierBatches: 0,
+            passwordEvidence: 'confirmed-for-some-operations',
+            failureCount: 1,
+            failures: [
+              {
+                opId: 'op-corrupt',
+                encryptedBatchIndex: 1,
+                stage: 'decrypt',
+                serverSeq: 42,
+              },
+            ],
           },
         );
         const serializedLogCalls = JSON.stringify(errorSpy.calls.allArgs());
         expect(serializedLogCalls).not.toContain('private-earlier-encrypted-payload');
         expect(serializedLogCalls).not.toContain('private-encrypted-payload');
         expect(serializedLogCalls).not.toContain('private-encryption-key');
+      });
+
+      it('carries decrypted ops from earlier pages as run-level password evidence', async () => {
+        const errorSpy = spyOn(OpLog, 'error');
+        const makeEncryptedServerOp = (
+          serverSeq: number,
+          id: string,
+        ): { serverSeq: number; receivedAt: number; op: SyncOperation } => ({
+          serverSeq,
+          receivedAt: Date.now(),
+          op: {
+            id,
+            clientId: 'c1',
+            actionType: '[Task] Add' as ActionType,
+            opType: OpType.Create,
+            entityType: 'TASK',
+            payload: `ciphertext-${id}`,
+            isPayloadEncrypted: true,
+            vectorClock: {},
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        });
+        mockApiProvider.getEncryptKey = jasmine
+          .createSpy('getEncryptKey')
+          .and.returnValue(Promise.resolve('private-encryption-key'));
+        mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
+        mockApiProvider.downloadOps.and.returnValues(
+          Promise.resolve({
+            ops: [
+              makeEncryptedServerOp(1, 'op-page1-a'),
+              makeEncryptedServerOp(2, 'op-page1-b'),
+            ],
+            hasMore: true,
+            latestSeq: 3,
+          }),
+          Promise.resolve({
+            ops: [makeEncryptedServerOp(3, 'op-final')],
+            hasMore: false,
+            latestSeq: 3,
+          }),
+        );
+        // The failing batch alone decrypted nothing (the #9256 shape: a single
+        // corrupt op on the final page) — only the earlier page proves the key.
+        const diagnosticError = new OperationDecryptionError({
+          encryptedOperationCount: 1,
+          decryptedCount: 0,
+          parsedCount: 0,
+          passwordEvidence: 'no-operation-decrypted',
+          failures: [
+            { operationId: 'op-final', encryptedBatchIndex: 0, stage: 'decrypt' },
+          ],
+        });
+        mockEncryptionService.decryptOperations.and.callFake(async (ops) => {
+          if (ops.some((op) => op.id === 'op-final')) {
+            throw diagnosticError;
+          }
+          return ops.map((op) => ({
+            ...op,
+            payload: {},
+            isPayloadEncrypted: false,
+          }));
+        });
+
+        await expectAsync(service.downloadRemoteOps(mockApiProvider)).toBeRejectedWith(
+          diagnosticError,
+        );
+
+        expect(errorSpy).toHaveBeenCalledWith(
+          'OperationLogDownloadService: Encrypted operation batch could not be processed.',
+          jasmine.objectContaining({
+            decryptedOpsInEarlierBatches: 2,
+            passwordEvidence: 'confirmed-for-some-operations',
+            failures: [
+              {
+                opId: 'op-final',
+                encryptedBatchIndex: 0,
+                stage: 'decrypt',
+                serverSeq: 3,
+              },
+            ],
+          }),
+        );
       });
 
       // GHSA-8pxh-mgc7-gp3g: reject an inbound plaintext op when SuperSync

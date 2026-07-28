@@ -10,27 +10,43 @@ import {
 
 export type OperationDecryptionFailureStage = 'envelope' | 'decrypt' | 'parse';
 
-export interface OperationDecryptionErrorDetails {
+export interface OperationDecryptionFailure {
   operationId: string;
   encryptedBatchIndex: number;
   stage: OperationDecryptionFailureStage;
 }
 
 /**
- * Identifies an encrypted operation that could not be processed without
- * retaining its ciphertext, decrypted payload, or encryption key.
+ * Safe-to-log classification of a failed encrypted batch. `passwordEvidence`
+ * distinguishes an isolated corrupt operation from a systemically wrong key:
+ * one successful decrypt in the same batch proves the key is not globally
+ * wrong, so a wrong password must never be reported as a per-operation
+ * failure of the first item.
+ */
+export interface OperationBatchDecryptionDiagnosis {
+  encryptedOperationCount: number;
+  decryptedCount: number;
+  parsedCount: number;
+  passwordEvidence:
+    | 'confirmed-for-some-operations'
+    | 'no-operation-decrypted'
+    | 'not-tested';
+  failures: OperationDecryptionFailure[];
+}
+
+/**
+ * Identifies which encrypted operations could not be processed without
+ * retaining ciphertext, decrypted payloads, or the encryption key.
+ * An empty `failures` list means the batch primitive failed although every
+ * operation decrypted and parsed individually (a runtime-level failure).
  */
 export class OperationDecryptionError extends DecryptError {
   override name = 'OperationDecryptionError';
-  readonly operationId: string;
-  readonly encryptedBatchIndex: number;
-  readonly stage: OperationDecryptionFailureStage;
+  readonly diagnosis: OperationBatchDecryptionDiagnosis;
 
-  constructor(details: OperationDecryptionErrorDetails) {
-    super('Encrypted operation payload could not be processed');
-    this.operationId = details.operationId;
-    this.encryptedBatchIndex = details.encryptedBatchIndex;
-    this.stage = details.stage;
+  constructor(diagnosis: OperationBatchDecryptionDiagnosis) {
+    super('Encrypted operation batch could not be processed');
+    this.diagnosis = diagnosis;
   }
 }
 
@@ -137,21 +153,35 @@ export class OperationEncryptionService {
 
     const encryptedOps: { index: number; op: SyncOperation }[] = [];
     const results: SyncOperation[] = new Array(ops.length);
+    const envelopeFailures: OperationDecryptionFailure[] = [];
+    let encryptedOpCount = 0;
 
     for (let i = 0; i < ops.length; i++) {
       const op = ops[i];
       if (op.isPayloadEncrypted) {
+        const encryptedBatchIndex = encryptedOpCount++;
         if (typeof op.payload !== 'string') {
-          throw new OperationDecryptionError({
+          envelopeFailures.push({
             operationId: op.id,
-            encryptedBatchIndex: encryptedOps.length,
+            encryptedBatchIndex,
             stage: 'envelope',
           });
+        } else {
+          encryptedOps.push({ index: i, op });
         }
-        encryptedOps.push({ index: i, op });
       } else {
         results[i] = op;
       }
+    }
+
+    if (envelopeFailures.length > 0) {
+      throw new OperationDecryptionError({
+        encryptedOperationCount: encryptedOpCount,
+        decryptedCount: 0,
+        parsedCount: 0,
+        passwordEvidence: 'not-tested',
+        failures: envelopeFailures,
+      });
     }
 
     if (encryptedOps.length === 0) {
@@ -163,23 +193,7 @@ export class OperationEncryptionService {
     try {
       decryptedStrings = await decryptBatch(encryptedPayloads, encryptKey);
     } catch {
-      let failedIndex: number | undefined;
-      try {
-        failedIndex = await this._findFirstDecryptionFailureIndex(
-          encryptedPayloads,
-          encryptKey,
-        );
-      } catch {
-        // Attribution is best-effort and must never mask the original batch failure.
-      }
-      if (failedIndex !== undefined) {
-        throw new OperationDecryptionError({
-          operationId: encryptedOps[failedIndex].op.id,
-          encryptedBatchIndex: failedIndex,
-          stage: 'decrypt',
-        });
-      }
-      throw new DecryptError('Failed to decrypt operation payloads');
+      throw await this._diagnoseFailedBatch(encryptedOps, encryptedPayloads, encryptKey);
     }
 
     for (let i = 0; i < encryptedOps.length; i++) {
@@ -188,11 +202,9 @@ export class OperationEncryptionService {
       try {
         parsedPayload = JSON.parse(decryptedStrings[i]);
       } catch {
-        throw new OperationDecryptionError({
-          operationId: op.id,
-          encryptedBatchIndex: i,
-          stage: 'parse',
-        });
+        throw new OperationDecryptionError(
+          this._diagnoseParseFailures(encryptedOps, decryptedStrings),
+        );
       }
       // Verify the untrusted metadata against the now-authenticated payload
       // before trusting it downstream (GHSA-8pxh-mgc7-gp3g). Throws on tampering.
@@ -212,21 +224,94 @@ export class OperationEncryptionService {
 
   /**
    * The batch primitive does not identify which ciphertext failed. Re-check
-   * items serially only after a batch failure and stop at the first failure.
-   * The shared session cache avoids repeating normal key derivation work.
+   * every item serially only after a batch failure so a wrong key (all items
+   * fail) is distinguishable from isolated corruption (some items decrypt).
+   * The shared session cache avoids repeating key derivation; each plaintext
+   * is parse-checked and discarded, never retained on the returned error.
    */
-  private async _findFirstDecryptionFailureIndex(
+  private async _diagnoseFailedBatch(
+    encryptedOps: { index: number; op: SyncOperation }[],
     encryptedPayloads: string[],
     encryptKey: string,
-  ): Promise<number | undefined> {
-    for (let i = 0; i < encryptedPayloads.length; i++) {
-      try {
-        await decrypt(encryptedPayloads[i], encryptKey);
-      } catch {
-        return i;
+  ): Promise<Error> {
+    try {
+      const failures: OperationDecryptionFailure[] = [];
+      let decryptedCount = 0;
+      let parsedCount = 0;
+      for (let i = 0; i < encryptedPayloads.length; i++) {
+        let plaintext: string;
+        try {
+          plaintext = await decrypt(encryptedPayloads[i], encryptKey);
+        } catch {
+          failures.push({
+            operationId: encryptedOps[i].op.id,
+            encryptedBatchIndex: i,
+            stage: 'decrypt',
+          });
+          continue;
+        }
+        decryptedCount++;
+        if (this._isParseableJson(plaintext)) {
+          parsedCount++;
+        } else {
+          failures.push({
+            operationId: encryptedOps[i].op.id,
+            encryptedBatchIndex: i,
+            stage: 'parse',
+          });
+        }
+      }
+      return new OperationDecryptionError({
+        encryptedOperationCount: encryptedOps.length,
+        decryptedCount,
+        parsedCount,
+        passwordEvidence:
+          decryptedCount > 0 ? 'confirmed-for-some-operations' : 'no-operation-decrypted',
+        failures,
+      });
+    } catch {
+      // Diagnosis is best-effort and must never mask the original batch failure.
+      return new DecryptError('Failed to decrypt operation payloads');
+    }
+  }
+
+  /**
+   * Batch decryption succeeded but at least one plaintext is not valid JSON.
+   * Classify every item so all parse failures are reported at once.
+   */
+  private _diagnoseParseFailures(
+    encryptedOps: { index: number; op: SyncOperation }[],
+    decryptedStrings: string[],
+  ): OperationBatchDecryptionDiagnosis {
+    const failures: OperationDecryptionFailure[] = [];
+    let parsedCount = 0;
+    for (let i = 0; i < decryptedStrings.length; i++) {
+      if (this._isParseableJson(decryptedStrings[i])) {
+        parsedCount++;
+      } else {
+        failures.push({
+          operationId: encryptedOps[i].op.id,
+          encryptedBatchIndex: i,
+          stage: 'parse',
+        });
       }
     }
-    return undefined;
+    return {
+      encryptedOperationCount: encryptedOps.length,
+      decryptedCount: decryptedStrings.length,
+      parsedCount,
+      passwordEvidence: 'confirmed-for-some-operations',
+      failures,
+    };
+  }
+
+  private _isParseableJson(value: string): boolean {
+    try {
+      JSON.parse(value);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

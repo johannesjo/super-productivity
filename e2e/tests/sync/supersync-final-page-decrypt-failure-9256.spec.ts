@@ -140,23 +140,38 @@ const containsFailureSequence = (
 const isExpectedDiagnosticMetadata = (
   value: unknown,
   corruptSuffix: CorruptSuffix,
+  decryptedOpsInEarlierBatches: number,
 ): boolean => {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return false;
   }
   const metadata = value as Record<string, unknown>;
+  if (!Array.isArray(metadata.failures) || metadata.failures.length !== 1) {
+    return false;
+  }
+  const failure = metadata.failures[0] as Record<string, unknown> | null;
   return (
-    Object.keys(metadata).length === 4 &&
-    metadata.opId === corruptSuffix.opId &&
-    metadata.serverSeq === corruptSuffix.serverSeq &&
-    metadata.encryptedBatchIndex === 0 &&
-    metadata.stage === 'decrypt'
+    // The failing batch is the lone corrupt op on the final page; the pages
+    // decrypted before it are what prove the password is not globally wrong.
+    metadata.encryptedOperationCount === 1 &&
+    metadata.decryptedCount === 0 &&
+    metadata.parsedCount === 0 &&
+    metadata.decryptedOpsInEarlierBatches === decryptedOpsInEarlierBatches &&
+    metadata.passwordEvidence === 'confirmed-for-some-operations' &&
+    metadata.failureCount === 1 &&
+    typeof failure === 'object' &&
+    failure !== null &&
+    failure.opId === corruptSuffix.opId &&
+    failure.serverSeq === corruptSuffix.serverSeq &&
+    failure.encryptedBatchIndex === 0 &&
+    failure.stage === 'decrypt'
   );
 };
 
 const containsExpectedDiagnosticLog = (
   value: unknown,
   corruptSuffix: CorruptSuffix,
+  decryptedOpsInEarlierBatches: number,
 ): boolean => {
   if (!Array.isArray(value)) {
     return false;
@@ -169,10 +184,10 @@ const containsExpectedDiagnosticLog = (
     return (
       logEntry.context === 'ol' &&
       logEntry.message ===
-        'OperationLogDownloadService: Encrypted operation payload could not be processed.' &&
+        'OperationLogDownloadService: Encrypted operation batch could not be processed.' &&
       Array.isArray(logEntry.args) &&
       logEntry.args.some((arg: unknown) =>
-        isExpectedDiagnosticMetadata(arg, corruptSuffix),
+        isExpectedDiagnosticMetadata(arg, corruptSuffix, decryptedOpsInEarlierBatches),
       )
     );
   });
@@ -309,7 +324,9 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
         .inputValue();
       const exportedLogs: unknown = JSON.parse(exportedLogsText);
 
-      expect(containsExpectedDiagnosticLog(exportedLogs, corruptSuffix)).toBe(true);
+      expect(
+        containsExpectedDiagnosticLog(exportedLogs, corruptSuffix, validPageOpIds.length),
+      ).toBe(true);
       expect(exportedLogsText).not.toContain(user.token);
       expect(exportedLogsText).not.toContain(encryptionPassword);
       expect(exportedLogsText).not.toContain(corruptSuffix.encryptedPayload);
