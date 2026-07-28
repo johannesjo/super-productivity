@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { SearchQueryParams } from '../../pages/search-page/search-page.model';
 import { devError } from '../../util/dev-error';
 import { TaskService } from '../../features/tasks/task.service';
-import { ProjectService } from '../../features/project/project.service';
 import { Router } from '@angular/router';
 import { Task } from '../../features/tasks/task.model';
 import { INBOX_PROJECT } from '../../features/project/project.const';
@@ -14,17 +13,16 @@ import { T } from '../../t.const';
 import { Log } from '../../core/log';
 import { LayoutService } from '../layout/layout.service';
 import { recordSearchNavDebug } from '../../util/search-nav-debug';
-import { firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { RootState } from '../../root-store/root-state';
 import { selectTaskEntities } from '../../features/tasks/store/task.selectors';
 import { selectProjectFeatureState } from '../../features/project/store/project.selectors';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
-interface ProjectMembershipRepair {
-  taskId: string;
-  expectedProjectId: string | null | undefined;
-  targetProjectId: string;
+interface NavTarget {
+  location: string;
+  /** Project the task must be (re-)listed in, or `null` when nothing is broken. */
+  repairTargetProjectId: string | null;
 }
 
 @Injectable({
@@ -33,7 +31,6 @@ interface ProjectMembershipRepair {
 export class NavigateToTaskService {
   private _store = inject<Store<RootState>>(Store);
   private _taskService = inject(TaskService);
-  private _projectService = inject(ProjectService);
   private _router = inject(Router);
   private _snackService = inject(SnackService);
   private _dateService = inject(DateService);
@@ -47,8 +44,11 @@ export class NavigateToTaskService {
       if (!task) {
         throw new Error(`Task with id ${taskId} not found`);
       }
-      const { location, projectMembershipRepair, contextTask } =
-        await this._resolveNavTarget(task, isArchiveTask);
+      const contextTask = await this._getContextTask(task, isArchiveTask);
+      const { location, repairTargetProjectId } = this._resolveNavTarget(
+        contextTask,
+        isArchiveTask,
+      );
       if (!location) {
         // Never fall through with an empty location: `''.startsWith` would make
         // the same-context check below always true and swallow the navigation.
@@ -58,8 +58,8 @@ export class NavigateToTaskService {
       // synced state mutation is an explicit navigation step, not a hidden side
       // effect of computing a URL. Must run before the same-context check below
       // so the task is added to its project list in either branch. (#8780)
-      if (projectMembershipRepair) {
-        this._repairProjectMembership(projectMembershipRepair);
+      if (repairTargetProjectId) {
+        this._repairProjectMembership(contextTask.id, repairTargetProjectId);
       }
       recordSearchNavDebug('navigateToTask:start', {
         taskId,
@@ -84,13 +84,13 @@ export class NavigateToTaskService {
       // Route-change path: focus is handed off to the destination view via the
       // `focusItem` query param (AppComponent), which owns its own reveal/retry.
       // The explicit onFailure error snack is only wired to the same-context
-      // branch above; here a repair adds the task to its owning project's main
-      // list, so it renders and focuses normally.
+      // branch above; every location we route to here is one the task renders in
+      // — either it already lists the task, or the repair above just added it.
       const queryParams: SearchQueryParams = { focusItem: taskId };
       if (isArchiveTask) {
         queryParams.dateStr = await this._getArchivedDate(task);
       } else {
-        queryParams.isInBacklog = await this._isInBacklog(contextTask);
+        queryParams.isInBacklog = this._isInBacklog(contextTask);
       }
       recordSearchNavDebug('navigateToTask:routeChange', {
         taskId,
@@ -109,170 +109,130 @@ export class NavigateToTaskService {
     }
   }
 
-  /**
-   * Pure resolver: computes the navigation location and returns any top-level
-   * project relationship that must be repaired — WITHOUT mutating state. The
-   * caller (`navigate`) performs the repair, keeping this a side-effect-free
-   * "where does this task live?" query. (#8780)
-   */
-  private async _resolveNavTarget(
-    task: Task,
-    isArchiveTask: boolean,
-  ): Promise<{
-    location: string;
-    projectMembershipRepair: ProjectMembershipRepair | null;
-    contextTask: Task;
-  }> {
-    const tasksOrWorklog = isArchiveTask ? 'history' : 'tasks';
-
-    let taskToCheck = task;
-    if (task.parentId) {
-      const parentTask = await this._taskService.getByIdFromEverywhere(
-        task.parentId,
-        isArchiveTask,
-      );
-      if (parentTask) {
-        taskToCheck = parentTask;
-      }
+  /** For a subtask, the top-level parent that owns the destination context. */
+  private async _getContextTask(task: Task, isArchiveTask: boolean): Promise<Task> {
+    if (!task.parentId) {
+      return task;
     }
-
-    const projectMembershipRepair = await this._getProjectMembershipRepair(
-      taskToCheck,
+    const parentTask = await this._taskService.getByIdFromEverywhere(
+      task.parentId,
       isArchiveTask,
     );
-    if (projectMembershipRepair) {
-      return {
-        location: `/project/${projectMembershipRepair.targetProjectId}/${tasksOrWorklog}`,
-        projectMembershipRepair,
-        contextTask: taskToCheck,
-      };
-    }
+    return parentTask ?? task;
+  }
 
-    if (!isArchiveTask && this._isDueToday(taskToCheck)) {
+  /**
+   * Pure resolver: computes the navigation location and any project relationship
+   * that must be repaired — WITHOUT mutating state. The caller (`navigate`)
+   * performs the repair, keeping this a side-effect-free "where does this task
+   * live?" query.
+   *
+   * Only a location the task cannot render in warrants a repair, because the
+   * repair is a synced write triggered by a read-only navigation. Today
+   * membership comes from `dueDay`/`dueWithTime` and tag membership from
+   * `task.tagIds` — neither depends on a project's ordering array — so those
+   * routes are left untouched. (#8780)
+   */
+  private _resolveNavTarget(task: Task, isArchiveTask: boolean): NavTarget {
+    const tasksOrWorklog = isArchiveTask ? 'history' : 'tasks';
+
+    if (!isArchiveTask && this._isDueToday(task)) {
       return {
         location: `/tag/${TODAY_TAG.id}/${tasksOrWorklog}`,
-        projectMembershipRepair: null,
-        contextTask: taskToCheck,
+        repairTargetProjectId: null,
       };
     }
 
-    if (taskToCheck.projectId) {
+    if (task.projectId) {
+      // A project's main/backlog list renders from its ordering arrays, so a
+      // task missing from both is unreachable there and must be re-listed.
+      const repairTargetProjectId = isArchiveTask
+        ? null
+        : this._getProjectMembershipRepairTarget(task.id);
       return {
-        location: `/project/${taskToCheck.projectId}/${tasksOrWorklog}`,
-        projectMembershipRepair: null,
-        contextTask: taskToCheck,
+        location: `/project/${repairTargetProjectId ?? task.projectId}/${tasksOrWorklog}`,
+        repairTargetProjectId,
       };
-    } else if (taskToCheck.tagIds?.length > 0 && taskToCheck.tagIds[0]) {
+    }
+
+    if (task.tagIds?.length > 0 && task.tagIds[0]) {
       return {
-        location: `/tag/${taskToCheck.tagIds[0]}/${tasksOrWorklog}`,
-        projectMembershipRepair: null,
-        contextTask: taskToCheck,
+        location: `/tag/${task.tagIds[0]}/${tasksOrWorklog}`,
+        repairTargetProjectId: null,
       };
-    } else if (!isArchiveTask) {
-      // An orphaned subtask whose parent could not be loaded cannot be repaired
-      // as a top-level task here without corrupting the parent/child link.
+    }
+
+    if (!isArchiveTask) {
+      // No project, no tag, and not due today: the task's id is in no work
+      // context's ordering array, so it renders in no list view. Re-home it into
+      // the Inbox so navigation can actually reveal it. An orphaned subtask whose
+      // parent could not be loaded is routed but never re-homed as a top-level
+      // task, which would corrupt the parent/child link. (#8780)
       return {
         location: `/project/${INBOX_PROJECT.id}/${tasksOrWorklog}`,
-        projectMembershipRepair: null,
-        contextTask: taskToCheck,
-      };
-    } else {
-      devError("Couldn't find task location");
-      return {
-        location: '',
-        projectMembershipRepair: null,
-        contextTask: taskToCheck,
+        repairTargetProjectId: task.parentId ? null : INBOX_PROJECT.id,
       };
     }
+
+    devError("Couldn't find task location");
+    return { location: '', repairTargetProjectId: null };
   }
 
-  private async _getProjectMembershipRepair(
-    task: Task,
-    isArchiveTask: boolean,
-  ): Promise<ProjectMembershipRepair | null> {
-    if (isArchiveTask || task.parentId) {
+  /**
+   * Returns the project the task must be (re-)listed in, or `null` when its
+   * project relationship is intact. Reads live store state synchronously so the
+   * resolver and the repair below act on the very same snapshot — there is no
+   * await in between for the task to move through.
+   */
+  private _getProjectMembershipRepairTarget(taskId: string): string | null {
+    // Deliberately the LIVE entity, not the task handed to the resolver: that one
+    // can come from the archive, which is legitimately absent from project lists.
+    const task = this._taskEntities()[taskId];
+    if (task?.id !== taskId || task.parentId || !task.projectId) {
       return null;
     }
-    if (!task.projectId) {
-      return {
-        taskId: task.id,
-        expectedProjectId: task.projectId,
-        targetProjectId: INBOX_PROJECT.id,
-      };
+    const candidate = this._projectState().entities[task.projectId];
+    // Entity dictionaries inherit from Object.prototype — require the stored
+    // entity to identify itself before trusting it.
+    const owningProject = candidate?.id === task.projectId ? candidate : undefined;
+    if (!owningProject) {
+      // Dangling projectId: the owning project is gone, so re-home to the Inbox.
+      return INBOX_PROJECT.id;
     }
-
-    const project = await firstValueFrom(
-      this._projectService.getByIdOnce$(task.projectId),
-    );
-    if (!project) {
-      return {
-        taskId: task.id,
-        expectedProjectId: task.projectId,
-        targetProjectId: INBOX_PROJECT.id,
-      };
-    }
-    if (!project.taskIds.includes(task.id) && !project.backlogTaskIds.includes(task.id)) {
-      return {
-        taskId: task.id,
-        expectedProjectId: task.projectId,
-        targetProjectId: project.id,
-      };
-    }
-    return null;
+    const isListed =
+      (owningProject.taskIds ?? []).includes(taskId) ||
+      (owningProject.backlogTaskIds ?? []).includes(taskId);
+    return isListed ? null : owningProject.id;
   }
 
-  private _repairProjectMembership({
-    taskId,
-    expectedProjectId,
-    targetProjectId,
-  }: ProjectMembershipRepair): void {
+  private _repairProjectMembership(taskId: string, targetProjectId: string): void {
     const task = this._taskEntities()[taskId];
-    if (task?.id !== taskId || task.parentId || task.projectId !== expectedProjectId) {
+    if (task?.id !== taskId || task.parentId) {
       return;
     }
-
-    const projectState = this._projectState();
-    const projectCandidate = task.projectId
-      ? projectState.entities[task.projectId]
-      : undefined;
-    const owningProject =
-      projectCandidate?.id === task.projectId ? projectCandidate : undefined;
-    const isListed =
-      !!owningProject &&
-      (owningProject.taskIds.includes(taskId) ||
-        owningProject.backlogTaskIds.includes(taskId));
-    const currentRepairProjectId =
-      !task.projectId || !owningProject
-        ? INBOX_PROJECT.id
-        : isListed
-          ? undefined
-          : owningProject.id;
-
-    if (currentRepairProjectId !== targetProjectId) {
-      return;
-    }
-    const targetProject = projectState.entities[targetProjectId];
+    const targetProject = this._projectState().entities[targetProjectId];
     if (targetProject?.id !== targetProjectId) {
       return;
     }
 
     if (task.projectId === targetProjectId) {
-      // This repairs only the root-list relationship. Including subtasks would
-      // turn it into a multi-entity op and make concurrent child edits lose
-      // disjoint-merge protection.
+      // Only the root-list relationship is broken. Omitting projectMoveSubTaskIds
+      // keeps this a single-entity op AND leaves the synced move footprint
+      // undefined, so replaying clients derive the task family from their own
+      // state. Passing `[]` instead would mint a one-element footprint that means
+      // "relocate the root alone" and would strand subtasks in the old project.
       this._store.dispatch(
         TaskSharedActions.updateTask({
           task: {
             id: taskId,
             changes: { projectId: targetProjectId },
           },
-          projectMoveSubTaskIds: [],
         }),
       );
       return;
     }
 
-    // A real re-home must continue to move the complete task family.
+    // A real re-home must move the complete task family.
     this._taskService.update(taskId, { projectId: targetProjectId });
   }
 
@@ -299,11 +259,12 @@ export class NavigateToTaskService {
     });
   }
 
-  private async _isInBacklog(task: Task): Promise<boolean> {
+  private _isInBacklog(task: Task): boolean {
     if (!task.projectId) return false;
-    const projects = await firstValueFrom(this._projectService.list$);
-    const project = projects.find((p) => p.id === task.projectId);
-    return project ? project.backlogTaskIds.includes(task.id) : false;
+    const project = this._projectState().entities[task.projectId];
+    return project?.id === task.projectId
+      ? (project.backlogTaskIds ?? []).includes(task.id)
+      : false;
   }
 
   private async _getArchivedDate(task: Task): Promise<string> {

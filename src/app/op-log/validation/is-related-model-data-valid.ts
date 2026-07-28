@@ -299,6 +299,7 @@ const validateTasksToProjectsAndTags = (
   }
 
   // Validate projects in tasks
+  const unlistedTaskIds: string[] = [];
   for (const tid of d.task.ids) {
     const task = d.task.entities[tid];
     if (!task) {
@@ -347,13 +348,24 @@ const validateTasksToProjectsAndTags = (
         return false;
       }
       if (task.projectId && !projectTaskMap.get(task.projectId)?.has(task.id)) {
-        _validityError('Task missing from project lists', {
-          taskId: task.id,
-          projectId: task.projectId,
-        });
-        return false;
+        unlistedTaskIds.push(task.id);
       }
     }
+  }
+
+  // A top-level task missing from its project's ordering arrays renders in no
+  // project list. It is repairable (_addOrphanedTasksToProjectLists) and arises
+  // routinely from whole-entity LWW on PROJECT when a reorder races a task add,
+  // so we log but do NOT fail validation — same treatment as the other
+  // ordering-array inconsistencies above. Failing here would be actively harmful:
+  // the hydration checkpoints validate WITHOUT repairing and gate the snapshot
+  // save on the result, and legacy disaster recovery throws outright, so a
+  // non-syncing user would degrade permanently with nothing ever healing them.
+  if (unlistedTaskIds.length > 0) {
+    OpLog.info(
+      `[ValidateState] ${unlistedTaskIds.length} top-level tasks missing from their project lists (repairable)`,
+      { unlistedTaskIds },
+    );
   }
 
   const archiveCtx: ArchiveValidationCtx = { projectIds, tagIds, taskRepeatCfgIds };

@@ -144,7 +144,13 @@ describe('isRelatedModelDataValid', () => {
     ).not.toContain(privateNodeKind);
   });
 
-  it('should fail validation when a top-level task is missing from its project lists', () => {
+  it('should NOT fail validation when a top-level task is missing from its project lists', () => {
+    // This shape is repairable (dataRepair re-lists the task) and arises from
+    // whole-entity LWW on PROJECT. Failing here would be harmful: the hydration
+    // checkpoints validate WITHOUT repairing and gate the snapshot save on the
+    // result, and legacy recovery throws — so a non-syncing user would degrade
+    // permanently with nothing ever healing them. Log-only, like the other
+    // ordering-array inconsistencies. (#8780)
     const data = createValidAppData();
     const task = createValidTask('t1', { projectId: 'p1' });
     const project = createValidProject('p1');
@@ -162,8 +168,11 @@ describe('isRelatedModelDataValid', () => {
       },
     };
 
-    expect(isRelatedModelDataValid(data)).toBe(false);
-    expect(getLastValidityError()).toBe('Task missing from project lists');
+    expect(isRelatedModelDataValid(data)).toBe(true);
+    expect(getLastValidityError()).toBeUndefined();
+    expect(JSON.stringify((OpLog.info as jasmine.Spy).calls.allArgs())).toContain(
+      'missing from their project lists',
+    );
   });
 
   it('should fail validation when task has non-existent repeatCfgId', () => {

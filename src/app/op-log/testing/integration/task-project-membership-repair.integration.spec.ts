@@ -28,10 +28,11 @@ describe('task project-membership repair (#8780) — integration', () => {
   };
 
   const repairAndExpectValid = (state: AppDataComplete): AppDataComplete => {
-    expect(validateFull(state).isValid).toBe(false);
-
     const repaired = dataRepair(state).data;
 
+    // The broken shape is deliberately NOT a validation failure (it is repairable
+    // ordering-array noise, and the hydration checkpoints validate without
+    // repairing), so we assert the repair's effect rather than a validity flip.
     expect(validateFull(repaired).isValid).toBe(true);
     return repaired;
   };

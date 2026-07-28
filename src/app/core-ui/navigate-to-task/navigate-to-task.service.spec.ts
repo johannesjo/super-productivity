@@ -2,13 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { NavigateToTaskService } from './navigate-to-task.service';
 import { TaskService } from '../../features/tasks/task.service';
-import { ProjectService } from '../../features/project/project.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { DateService } from '../../core/date/date.service';
 import { LayoutService } from '../layout/layout.service';
 import { Task } from '../../features/tasks/task.model';
 import { INBOX_PROJECT } from '../../features/project/project.const';
-import { BehaviorSubject, from, of } from 'rxjs';
 import { Project } from '../../features/project/project.model';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { PROJECT_FEATURE_NAME } from '../../features/project/store/project.reducer';
@@ -36,8 +34,6 @@ describe('NavigateToTaskService', () => {
   let taskService: jasmine.SpyObj<TaskService>;
   let router: jasmine.SpyObj<Router> & { url: string };
   let layoutService: jasmine.SpyObj<LayoutService>;
-  let projectService: jasmine.SpyObj<ProjectService>;
-  let projects$: BehaviorSubject<Project[]>;
   let store: MockStore;
 
   const createProject = (
@@ -52,16 +48,8 @@ describe('NavigateToTaskService', () => {
     backlogTaskIds,
   });
 
-  const setProject = (
-    id: string,
-    taskIds: string[],
-    backlogTaskIds: string[] = [],
-  ): void => {
-    const project = createProject(id, taskIds, backlogTaskIds);
-    projectService.getByIdOnce$.and.returnValue(of(project));
-    projects$.next([project]);
-  };
-
+  // The service reads project/task membership straight from the store, so the
+  // store IS the fixture — there is no second mock to keep in sync.
   const setStoreState = (tasks: Task[], projects: Project[]): void => {
     store.setState({
       [TASK_FEATURE_NAME]: {
@@ -91,11 +79,6 @@ describe('NavigateToTaskService', () => {
       'getArchivedTasks',
       'update',
     ]);
-    projects$ = new BehaviorSubject<Project[]>([]);
-    projectService = jasmine.createSpyObj('ProjectService', ['getByIdOnce$'], {
-      list$: projects$.asObservable(),
-    });
-    projectService.getByIdOnce$.and.returnValue(of(undefined));
     const snackService = jasmine.createSpyObj('SnackService', ['open']);
     const dateService = jasmine.createSpyObj('DateService', ['isToday', 'todayStr']);
     dateService.todayStr.and.returnValue(TODAY_STR);
@@ -127,7 +110,6 @@ describe('NavigateToTaskService', () => {
           },
         }),
         { provide: TaskService, useValue: taskService },
-        { provide: ProjectService, useValue: projectService },
         { provide: SnackService, useValue: snackService },
         { provide: DateService, useValue: dateService },
         { provide: LayoutService, useValue: layoutService },
@@ -138,6 +120,11 @@ describe('NavigateToTaskService', () => {
     store = TestBed.inject(MockStore);
     spyOn(store, 'dispatch').and.callThrough();
   });
+
+  const expectNoStateChange = (): void => {
+    expect(taskService.update).not.toHaveBeenCalled();
+    expect(store.dispatch).not.toHaveBeenCalled();
+  };
 
   it('self-heals an orphan task (no project, no tags, not due today) into the Inbox and navigates there (#8780)', async () => {
     // Empty-string projectId is the real-world case: it survives hydration
@@ -163,11 +150,9 @@ describe('NavigateToTaskService', () => {
     expect(layoutService.focusTaskInViewWhenReady).not.toHaveBeenCalled();
   });
 
-  it('navigates to the project list for a project task without re-homing it', async () => {
-    setProject('p1', ['t2']);
-    taskService.getByIdFromEverywhere.and.resolveTo(
-      createTask({ id: 't2', projectId: 'p1', tagIds: [] }),
-    );
+  it('navigates to the project list for a listed project task without touching state', async () => {
+    const task = createTask({ id: 't2', projectId: 'p1', tagIds: [] });
+    setNavigatedTask(task, [createProject('p1', ['t2'])]);
 
     await service.navigate('t2');
 
@@ -175,29 +160,26 @@ describe('NavigateToTaskService', () => {
       ['/project/p1/tasks'],
       jasmine.anything(),
     );
-    expect(taskService.update).not.toHaveBeenCalled();
+    expectNoStateChange();
   });
 
-  it('self-heals a tagged task with no project into the Inbox', async () => {
-    const task = createTask({
-      id: 't3',
-      projectId: undefined,
-      tagIds: ['tag-a'],
-    });
+  it('navigates to the tag list for a tagged task with no project WITHOUT re-homing it', async () => {
+    // Tag membership is task.tagIds (tag.taskIds only stores ordering), so this
+    // task already renders at /tag/tag-a/tasks. Navigating to it must not write.
+    const task = createTask({ id: 't3', projectId: undefined, tagIds: ['tag-a'] });
     setNavigatedTask(task);
 
     await service.navigate('t3');
 
-    expect(taskService.update).toHaveBeenCalledWith('t3', {
-      projectId: INBOX_PROJECT.id,
-    });
     expect(router.navigate).toHaveBeenCalledWith(
-      [`/project/${INBOX_PROJECT.id}/tasks`],
+      ['/tag/tag-a/tasks'],
       jasmine.anything(),
     );
+    expectNoStateChange();
   });
 
-  it('self-heals a due-today task with no project into the Inbox', async () => {
+  it('navigates to the Today list for a due-today task with no project WITHOUT re-homing it', async () => {
+    // Today membership is dueDay/dueWithTime, so this task already renders there.
     const task = createTask({
       id: 't4',
       projectId: undefined,
@@ -208,23 +190,39 @@ describe('NavigateToTaskService', () => {
 
     await service.navigate('t4');
 
-    expect(taskService.update).toHaveBeenCalledWith('t4', {
-      projectId: INBOX_PROJECT.id,
-    });
     expect(router.navigate).toHaveBeenCalledWith(
-      [`/project/${INBOX_PROJECT.id}/tasks`],
+      ['/tag/TODAY/tasks'],
       jasmine.anything(),
     );
+    expectNoStateChange();
+  });
+
+  it('leaves a due-today task alone even when it is missing from its project lists', async () => {
+    // Reachable via Today regardless of the broken project membership, so a
+    // read-only navigation must not trigger a synced write to repair it.
+    const task = createTask({
+      id: 'due-today-unlisted',
+      projectId: 'p1',
+      tagIds: [],
+      dueDay: TODAY_STR,
+    });
+    setNavigatedTask(task, [createProject('p1', [])]);
+
+    await service.navigate('due-today-unlisted');
+
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/tag/TODAY/tasks'],
+      jasmine.anything(),
+    );
+    expectNoStateChange();
   });
 
   it('surfaces an error snack instead of silently failing when a same-context task cannot be focused', async () => {
     const snackService = TestBed.inject(SnackService) as jasmine.SpyObj<SnackService>;
     // Already on the task's context so navigate() takes the same-context branch.
     router.url = `/project/p1/tasks`;
-    setProject('p1', ['t5']);
-    taskService.getByIdFromEverywhere.and.resolveTo(
-      createTask({ id: 't5', projectId: 'p1', tagIds: [] }),
-    );
+    const task = createTask({ id: 't5', projectId: 'p1', tagIds: [] });
+    setNavigatedTask(task, [createProject('p1', ['t5'])]);
     // Simulate focus never succeeding → onFailure invoked.
     layoutService.focusTaskInViewWhenReady.and.callFake(
       (_taskId, _onSuccess, onFailure) => onFailure?.(),
@@ -255,7 +253,6 @@ describe('NavigateToTaskService', () => {
   });
 
   it('repairs a task missing from its project list before navigating (#8780)', async () => {
-    setProject(INBOX_PROJECT.id, []);
     const task = createTask({
       id: 'unlisted-inbox-task',
       projectId: INBOX_PROJECT.id,
@@ -272,15 +269,19 @@ describe('NavigateToTaskService', () => {
 
     await service.navigate('unlisted-inbox-task');
 
+    // projectMoveSubTaskIds is deliberately OMITTED, not `[]`: omitting keeps
+    // meta.entityIds unset (still a single-entity op) and leaves the synced move
+    // footprint undefined so replaying clients derive the task family from their
+    // own state. `[]` would mint a one-element "relocate the root alone"
+    // footprint and strand `child` in the old project.
     const repairAction = TaskSharedActions.updateTask({
       task: {
         id: task.id,
         changes: { projectId: INBOX_PROJECT.id },
       },
-      projectMoveSubTaskIds: [],
     });
     expect(store.dispatch).toHaveBeenCalledWith(repairAction);
-    expect(repairAction.meta.entityIds).toEqual([task.id]);
+    expect(repairAction.meta.entityIds).toBeUndefined();
     expect(taskService.update).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(
       [`/project/${INBOX_PROJECT.id}/tasks`],
@@ -290,60 +291,38 @@ describe('NavigateToTaskService', () => {
     );
   });
 
-  it('does not apply a stale repair after the task moves during project lookup', async () => {
-    const staleTask = createTask({
-      id: 'moved-task',
-      projectId: 'project-1',
-      tagIds: [],
-    });
-    const movedTask = createTask({
-      ...staleTask,
-      projectId: 'project-2',
-    });
-    const project1 = createProject('project-1');
-    const project2 = createProject('project-2', [movedTask.id]);
-    let resolveProjectLookup!: (project: Project | undefined) => void;
-    const projectLookup = new Promise<Project | undefined>((resolve) => {
-      resolveProjectLookup = resolve;
-    });
-    projectService.getByIdOnce$.and.returnValue(from(projectLookup));
-    projects$.next([project1, project2]);
-    setStoreState([staleTask], [project1, project2]);
-    taskService.getByIdFromEverywhere.and.resolveTo(staleTask);
+  it('does not repair a task that is listed in its project backlog', async () => {
+    const task = createTask({ id: 'backlogged', projectId: 'p1', tagIds: [] });
+    setNavigatedTask(task, [createProject('p1', [], ['backlogged'])]);
 
-    const navigation = service.navigate(staleTask.id);
-    await Promise.resolve();
-    expect(projectService.getByIdOnce$).toHaveBeenCalledWith(project1.id);
+    await service.navigate('backlogged');
 
-    setStoreState([movedTask], [project1, project2]);
-    resolveProjectLookup(project1);
-    await navigation;
-
-    expect(store.dispatch).not.toHaveBeenCalled();
-    expect(taskService.update).not.toHaveBeenCalled();
+    expectNoStateChange();
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/project/p1/tasks'],
+      jasmine.objectContaining({
+        queryParams: jasmine.objectContaining({ isInBacklog: true }),
+      }),
+    );
   });
 
-  it('does not dispatch when membership was restored during project lookup', async () => {
-    const task = createTask({
-      id: 'concurrently-listed-task',
-      projectId: 'project-1',
-      tagIds: [],
-    });
-    const staleProject = createProject('project-1');
-    const currentProject = createProject('project-1', [task.id]);
-    projectService.getByIdOnce$.and.returnValue(of(staleProject));
-    projects$.next([currentProject]);
-    setStoreState([task], [currentProject]);
-    taskService.getByIdFromEverywhere.and.resolveTo(task);
+  it('does not repair an archive-only task that is absent from the live store', async () => {
+    // Archived tasks are legitimately absent from project lists; the resolver
+    // reads the LIVE entity, so it must not mistake that for a broken shape.
+    const archived = createTask({ id: 'archived-task', projectId: 'p1', tagIds: [] });
+    setStoreState([], [createProject('p1', [])]);
+    taskService.getByIdFromEverywhere.and.resolveTo(archived);
 
-    await service.navigate(task.id);
+    await service.navigate('archived-task');
 
-    expect(store.dispatch).not.toHaveBeenCalled();
-    expect(taskService.update).not.toHaveBeenCalled();
+    expectNoStateChange();
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/project/p1/tasks'],
+      jasmine.anything(),
+    );
   });
 
   it('repairs a dangling project reference into the Inbox before navigating (#8780)', async () => {
-    projectService.getByIdOnce$.and.returnValue(of(undefined));
     const task = createTask({
       id: 'dangling-task',
       projectId: 'deleted-project',
@@ -373,14 +352,14 @@ describe('NavigateToTaskService', () => {
       parentId: parent.id,
       projectId: parent.projectId,
     });
-    setProject('p1', [], [parent.id]);
+    setStoreState([parent, child], [createProject('p1', [], [parent.id])]);
     taskService.getByIdFromEverywhere.and.callFake((id: string) =>
       Promise.resolve(id === child.id ? child : parent),
     );
 
     await service.navigate(child.id);
 
-    expect(taskService.update).not.toHaveBeenCalled();
+    expectNoStateChange();
     expect(router.navigate).toHaveBeenCalledWith(
       ['/project/p1/tasks'],
       jasmine.objectContaining({
@@ -393,25 +372,23 @@ describe('NavigateToTaskService', () => {
   });
 
   it('does NOT repair an orphaned subtask whose parent cannot be loaded', async () => {
-    // The subtask itself resolves; its parent lookup returns undefined, so
-    // `taskToCheck` stays the subtask. It routes to the Inbox but must NOT be
+    // The subtask itself resolves; its parent lookup returns undefined, so the
+    // context task stays the subtask. It routes to the Inbox but must NOT be
     // repaired as a top-level task (which would corrupt the parent/child link).
+    const sub = createTask({
+      id: 'sub-1',
+      parentId: 'missing-parent',
+      projectId: '',
+      tagIds: [],
+    });
+    setStoreState([sub], [INBOX_PROJECT]);
     taskService.getByIdFromEverywhere.and.callFake((id: string) =>
-      Promise.resolve(
-        id === 'sub-1'
-          ? createTask({
-              id: 'sub-1',
-              parentId: 'missing-parent',
-              projectId: '',
-              tagIds: [],
-            })
-          : (undefined as unknown as Task),
-      ),
+      Promise.resolve(id === 'sub-1' ? sub : (undefined as unknown as Task)),
     );
 
     await service.navigate('sub-1');
 
-    expect(taskService.update).not.toHaveBeenCalled();
+    expectNoStateChange();
     expect(router.navigate).toHaveBeenCalledWith(
       [`/project/${INBOX_PROJECT.id}/tasks`],
       jasmine.anything(),
