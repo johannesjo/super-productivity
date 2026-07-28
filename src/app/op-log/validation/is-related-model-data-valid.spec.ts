@@ -2,9 +2,15 @@ import { AppDataComplete } from '../model/model-config';
 import { OpLog } from '../../core/log';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { OP_LOG_SYNC_LOGGER } from '../core/sync-logger.adapter';
+import {
+  createValidAppData,
+  createValidProject,
+  createValidTask,
+} from './state-validity-test-utils';
 
 describe('isRelatedModelDataValid', () => {
   let isRelatedModelDataValid: any;
+  let getLastValidityError: () => string | undefined;
 
   beforeEach(() => {
     // Suppress OpLog output during tests by spying on the methods
@@ -34,8 +40,9 @@ describe('isRelatedModelDataValid', () => {
 
     // Import the function under test
     // @ts-ignore
-    isRelatedModelDataValid =
-      require('./is-related-model-data-valid').isRelatedModelDataValid;
+    const validityModule = require('./is-related-model-data-valid');
+    isRelatedModelDataValid = validityModule.isRelatedModelDataValid;
+    getLastValidityError = validityModule.getLastValidityError;
     /* eslint-enable @typescript-eslint/no-require-imports */
   });
 
@@ -138,35 +145,25 @@ describe('isRelatedModelDataValid', () => {
   });
 
   it('should fail validation when a top-level task is missing from its project lists', () => {
-    const data: any = {
-      project: {
-        ids: ['p1'],
-        entities: {
-          p1: { id: 'p1', taskIds: [], backlogTaskIds: [], noteIds: [] },
-        },
+    const data = createValidAppData();
+    const task = createValidTask('t1', { projectId: 'p1' });
+    const project = createValidProject('p1');
+    data.task = {
+      ...data.task,
+      ids: [task.id],
+      entities: { [task.id]: task },
+    };
+    data.project = {
+      ...data.project,
+      ids: [...(data.project.ids as string[]), project.id],
+      entities: {
+        ...data.project.entities,
+        [project.id]: project,
       },
-      tag: { ids: [], entities: {} },
-      task: {
-        ids: ['t1'],
-        entities: {
-          t1: {
-            id: 't1',
-            projectId: 'p1',
-            tagIds: [],
-            subTaskIds: [],
-          },
-        },
-      },
-      taskRepeatCfg: { ids: [], entities: {} },
-      archiveYoung: { task: { ids: [], entities: {} } },
-      archiveOld: { task: { ids: [], entities: {} } },
-      note: { ids: [], entities: {}, todayOrder: [] },
-      issueProvider: { ids: [], entities: {} },
-      reminders: [],
-      menuTree: { projectTree: [], tagTree: [] },
     };
 
     expect(isRelatedModelDataValid(data)).toBe(false);
+    expect(getLastValidityError()).toBe('Task missing from project lists');
   });
 
   it('should fail validation when task has non-existent repeatCfgId', () => {

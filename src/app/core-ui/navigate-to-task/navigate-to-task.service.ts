@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { SearchQueryParams } from '../../pages/search-page/search-page.model';
-import { first } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { TaskService } from '../../features/tasks/task.service';
 import { ProjectService } from '../../features/project/project.service';
@@ -15,22 +14,32 @@ import { T } from '../../t.const';
 import { Log } from '../../core/log';
 import { LayoutService } from '../layout/layout.service';
 import { recordSearchNavDebug } from '../../util/search-nav-debug';
+import { firstValueFrom } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { RootState } from '../../root-store/root-state';
+import { selectTaskEntities } from '../../features/tasks/store/task.selectors';
+import { selectProjectFeatureState } from '../../features/project/store/project.selectors';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
 interface ProjectMembershipRepair {
-  task: Task;
-  projectId: string;
+  taskId: string;
+  expectedProjectId: string | null | undefined;
+  targetProjectId: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class NavigateToTaskService {
+  private _store = inject<Store<RootState>>(Store);
   private _taskService = inject(TaskService);
   private _projectService = inject(ProjectService);
   private _router = inject(Router);
   private _snackService = inject(SnackService);
   private _dateService = inject(DateService);
   private _layoutService = inject(LayoutService);
+  private _taskEntities = this._store.selectSignal(selectTaskEntities);
+  private _projectState = this._store.selectSignal(selectProjectFeatureState);
 
   async navigate(taskId: string, isArchiveTask: boolean = false): Promise<void> {
     try {
@@ -133,7 +142,7 @@ export class NavigateToTaskService {
     );
     if (projectMembershipRepair) {
       return {
-        location: `/project/${projectMembershipRepair.projectId}/${tasksOrWorklog}`,
+        location: `/project/${projectMembershipRepair.targetProjectId}/${tasksOrWorklog}`,
         projectMembershipRepair,
         contextTask: taskToCheck,
       };
@@ -185,27 +194,86 @@ export class NavigateToTaskService {
       return null;
     }
     if (!task.projectId) {
-      return { task, projectId: INBOX_PROJECT.id };
+      return {
+        taskId: task.id,
+        expectedProjectId: task.projectId,
+        targetProjectId: INBOX_PROJECT.id,
+      };
     }
 
-    const project = await this._projectService.getByIdOnce$(task.projectId).toPromise();
+    const project = await firstValueFrom(
+      this._projectService.getByIdOnce$(task.projectId),
+    );
     if (!project) {
-      return { task, projectId: INBOX_PROJECT.id };
+      return {
+        taskId: task.id,
+        expectedProjectId: task.projectId,
+        targetProjectId: INBOX_PROJECT.id,
+      };
     }
     if (!project.taskIds.includes(task.id) && !project.backlogTaskIds.includes(task.id)) {
-      return { task, projectId: project.id };
+      return {
+        taskId: task.id,
+        expectedProjectId: task.projectId,
+        targetProjectId: project.id,
+      };
     }
     return null;
   }
 
-  private _repairProjectMembership({ task, projectId }: ProjectMembershipRepair): void {
-    if (task.parentId) {
+  private _repairProjectMembership({
+    taskId,
+    expectedProjectId,
+    targetProjectId,
+  }: ProjectMembershipRepair): void {
+    const task = this._taskEntities()[taskId];
+    if (task?.id !== taskId || task.parentId || task.projectId !== expectedProjectId) {
       return;
     }
-    // Updating projectId to its current value is an intentional relationship
-    // repair: the shared reducer restores missing project-list membership while
-    // preserving an existing main-list/backlog position in one persistent op.
-    this._taskService.update(task.id, { projectId });
+
+    const projectState = this._projectState();
+    const projectCandidate = task.projectId
+      ? projectState.entities[task.projectId]
+      : undefined;
+    const owningProject =
+      projectCandidate?.id === task.projectId ? projectCandidate : undefined;
+    const isListed =
+      !!owningProject &&
+      (owningProject.taskIds.includes(taskId) ||
+        owningProject.backlogTaskIds.includes(taskId));
+    const currentRepairProjectId =
+      !task.projectId || !owningProject
+        ? INBOX_PROJECT.id
+        : isListed
+          ? undefined
+          : owningProject.id;
+
+    if (currentRepairProjectId !== targetProjectId) {
+      return;
+    }
+    const targetProject = projectState.entities[targetProjectId];
+    if (targetProject?.id !== targetProjectId) {
+      return;
+    }
+
+    if (task.projectId === targetProjectId) {
+      // This repairs only the root-list relationship. Including subtasks would
+      // turn it into a multi-entity op and make concurrent child edits lose
+      // disjoint-merge protection.
+      this._store.dispatch(
+        TaskSharedActions.updateTask({
+          task: {
+            id: taskId,
+            changes: { projectId: targetProjectId },
+          },
+          projectMoveSubTaskIds: [],
+        }),
+      );
+      return;
+    }
+
+    // A real re-home must continue to move the complete task family.
+    this._taskService.update(taskId, { projectId: targetProjectId });
   }
 
   private _showNavErrorSnack(): void {
@@ -233,7 +301,7 @@ export class NavigateToTaskService {
 
   private async _isInBacklog(task: Task): Promise<boolean> {
     if (!task.projectId) return false;
-    const projects = await this._projectService.list$.pipe(first()).toPromise();
+    const projects = await firstValueFrom(this._projectService.list$);
     const project = projects.find((p) => p.id === task.projectId);
     return project ? project.backlogTaskIds.includes(task.id) : false;
   }
