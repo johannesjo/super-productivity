@@ -117,6 +117,15 @@ describe('IDLE_FORM_CFG minIdleTime lower bound (#9349)', () => {
     expect(saveSpy).toHaveBeenCalled();
   });
 
+  // The bound is only half the fix: the field has to say what it is, with both
+  // numbers interpolated from the shared const rather than baked into the copy.
+  it('should name the floor and the poll interval in the description', () => {
+    const hint = (fixture.nativeElement as HTMLElement).querySelector('mat-hint');
+
+    expect(hint?.textContent).toContain('at least 1m');
+    expect(hint?.textContent).toContain('every 30s');
+  });
+
   it('should show the floor as a readable duration, not raw milliseconds', () => {
     setMinIdleTime(30 * 1000);
     component.form.get('minIdleTime')?.markAsTouched();
