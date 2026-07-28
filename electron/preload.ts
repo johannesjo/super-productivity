@@ -207,7 +207,7 @@ const ea: ElectronAPI = {
     _send('REGISTER_GLOBAL_SHORTCUTS', keyboardCfg),
   showFullScreenBlocker: (args) => _send('FULL_SCREEN_BLOCKER', args),
 
-  backupAppData: (appData) => _send('BACKUP', appData),
+  backupAppData: (appData) => _invoke('BACKUP', appData) as Promise<void>,
 
   updateCurrentTask: (
     task,

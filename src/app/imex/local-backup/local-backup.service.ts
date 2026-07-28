@@ -377,7 +377,7 @@ export class LocalBackupService {
 
   private async _backupElectron(data: AppDataComplete): Promise<void> {
     const cfg = await firstValueFrom(this._cfg$);
-    window.ea.backupAppData({
+    await window.ea.backupAppData({
       data,
       maxBackupFiles: cfg.maxBackupFiles ?? DEFAULT_MAX_BACKUP_FILES,
     });
