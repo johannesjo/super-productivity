@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { uuidv7 } from 'uuidv7';
 import { Prisma } from '@prisma/client';
-import { prefetchLatestEntityOpsForBatch } from '../src/sync/conflict';
+import {
+  getEntityConflictKey,
+  prefetchLatestEntityOpsForBatch,
+} from '../src/sync/conflict';
+import { CONFLICT_DETECTION_ENTITY_BATCH_SIZE } from '../src/sync/sync.types';
 import { testState, resetTestState } from './sync.service.test-state';
 
 // Mock the database module with Prisma mocks
@@ -10,6 +14,8 @@ vi.mock('../src/db', async () => {
   const {
     applyOperationSelect,
     hasOperationUniqueConflict,
+    isEntityArrayBranchQuery,
+    entityArrayBranchRows,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -141,23 +147,10 @@ vi.mock('../src/db', async () => {
             .sort((a: any, b: any) => b.serverSeq - a.serverSeq);
           return applyOperationSelect(ops[0], args.select) || null;
         }
-        if (args.where?.entityType && Array.isArray(args.where?.OR)) {
-          const targetEntityId =
-            args.where.OR.find((condition: any) => condition.entityId !== undefined)
-              ?.entityId ??
-            args.where.OR.find((condition: any) => condition.entityIds?.has !== undefined)
-              ?.entityIds.has;
-          const ops = Array.from(state.operations.values())
-            .filter(
-              (op: any) =>
-                op.userId === args.where.userId &&
-                op.entityType === args.where.entityType &&
-                (op.entityId === targetEntityId ||
-                  op.entityIds?.includes(targetEntityId)),
-            )
-            .sort((a: any, b: any) => b.serverSeq - a.serverSeq);
-          return applyOperationSelect(ops[0], args.select) || null;
-        }
+        // Scalar branch of the single-entity conflict lookup. The entity_ids half is
+        // a separate $queryRaw call; the two were one OR + ORDER BY ... LIMIT 1
+        // until that degenerated into a full history scan in production (see the
+        // PERF note in conflict.ts detectConflictForEntity).
         if (args.where?.entityId && args.where?.entityType) {
           const ops = Array.from(state.operations.values())
             .filter(
@@ -281,6 +274,16 @@ vi.mock('../src/db', async () => {
         return count;
       }),
       findUnique: vi.fn().mockImplementation(async (args: any) => {
+        // (user_id, server_seq) compound unique — fetches the conflict lookup's
+        // array-branch winner once its max serverSeq is known.
+        const compound = args.where?.userId_serverSeq;
+        if (compound) {
+          const match = Array.from(state.operations.values()).find(
+            (op: any) =>
+              op.userId === compound.userId && op.serverSeq === compound.serverSeq,
+          );
+          return applyOperationSelect(match, args.select) || null;
+        }
         if (args.where?.id) {
           return (
             applyOperationSelect(state.operations.get(args.where.id), args.select) || null
@@ -419,11 +422,19 @@ vi.mock('../src/db', async () => {
     // returning their existing default shape.
     $queryRaw: vi.fn().mockImplementation(async (strings: any, ...params: any[]) => {
       const sql = Array.isArray(strings) ? strings.join('') : String(strings);
+      // Array branch of the single-entity conflict lookup: MAX(server_seq) over
+      // `entity_ids @> ARRAY[id]`, scoped to ONE entity — not a user-wide max
+      // (see conflict.ts detectConflictForEntity).
+      if (isEntityArrayBranchQuery(strings)) {
+        return entityArrayBranchRows(state.operations, params);
+      }
       if (sql.includes('FROM user_sync_state') && sql.includes('FOR UPDATE')) {
         const [txUserId] = params as [number];
+        const syncState = state.userSyncStates.get(txUserId);
         return [
           {
-            lastSeq: state.userSyncStates.get(txUserId)?.lastSeq ?? 0,
+            lastSeq: syncState?.lastSeq ?? 0,
+            latestStateReplacementSeq: syncState?.latestStateReplacementSeq ?? null,
           },
         ];
       }
@@ -497,7 +508,11 @@ vi.mock('../src/db', async () => {
           max_counter: BigInt(max_counter),
         }));
       }
-      return [{ total: BigInt(0) }];
+      // Unrecognised raw queries must THROW, never return a plausible-looking row.
+      // conflict.ts reads an unknown shape via `arrayBranchRows[0]?.maxSeq ?? null`
+      // as "no array-branch match", so a tolerant default silently deletes the
+      // branch under test instead of failing.
+      throw new Error(`Unmocked raw query in tx: ${sql}`);
     }),
   });
 
@@ -900,6 +915,127 @@ describe('SyncService', () => {
   });
 
   describe('uploadOps', () => {
+    it('rejects a cursor behind the latest state replacement but allows its boundary', async () => {
+      const service = new SyncService({ batchUpload: true });
+      const op = makeOp({ id: 'post-replacement-edit' });
+      const replacement = makeOp({
+        id: 'retained-state-replacement',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+      });
+      testState.operations.set(replacement.id, {
+        ...replacement,
+        userId,
+        serverSeq: 3,
+        entityId: null,
+        entityIds: [],
+        payloadBytes: BigInt(1),
+        clientTimestamp: BigInt(replacement.timestamp),
+        receivedAt: BigInt(replacement.timestamp),
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+        repairBaseServerSeq: null,
+      });
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: null,
+      });
+
+      const staleResults = await service.uploadOps(
+        userId,
+        clientId,
+        [op],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        2,
+      );
+
+      expect(staleResults).toEqual([
+        expect.objectContaining({
+          opId: op.id,
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+        }),
+      ]);
+      expect(testState.operations.has(op.id)).toBe(false);
+      expect(testState.userSyncStates.get(userId)?.lastSeq).toBe(4);
+      expect(testState.userSyncStates.get(userId)?.latestStateReplacementSeq).toBe(3);
+
+      const currentResults = await service.uploadOps(
+        userId,
+        clientId,
+        [op],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        3,
+      );
+
+      expect(currentResults).toEqual([
+        expect.objectContaining({
+          opId: op.id,
+          accepted: true,
+          serverSeq: 5,
+        }),
+      ]);
+      expect(testState.operations.has(op.id)).toBe(true);
+    });
+
+    it('resolves the latest state replacement for cached upload checks', async () => {
+      const service = new SyncService();
+      const replacement = makeOp({
+        id: 'cached-check-state-replacement',
+        opType: 'BACKUP_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+      });
+      testState.operations.set(replacement.id, {
+        ...replacement,
+        userId,
+        serverSeq: 3,
+        entityId: null,
+        entityIds: [],
+        payloadBytes: BigInt(1),
+        clientTimestamp: BigInt(replacement.timestamp),
+        receivedAt: BigInt(replacement.timestamp),
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+        repairBaseServerSeq: null,
+      });
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: null,
+      });
+
+      await expect(service.getLatestStateReplacementSeq(userId)).resolves.toBe(3);
+      await expect(service.getLatestStateReplacementSeq(userId + 1)).resolves.toBeNull();
+    });
+
+    it('persists a resolved no-replacement sentinel on the upload path', async () => {
+      const service = new SyncService({ batchUpload: true });
+      const op = makeOp({ id: 'first-upload-with-cursor' });
+
+      const result = await service.uploadOps(
+        userId,
+        clientId,
+        [op],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        0,
+      );
+
+      expect(result[0].accepted).toBe(true);
+      expect(testState.userSyncStates.get(userId)?.latestStateReplacementSeq).toBe(0);
+    });
+
     it('should correctly upload operations', async () => {
       const service = getSyncService();
       const op: Operation = makeOp();
@@ -1580,23 +1716,62 @@ describe('SyncService', () => {
       expect(testState.userSyncStates.get(userId)?.lastSeq).toBe(1);
     });
 
-    it('should chunk large batch entity prefetch queries', async () => {
-      const entityPairs = Array.from({ length: 250 }, (_, index) => ({
-        entityType: 'TASK',
-        entityId: `task-${index}`,
-      }));
-      const tx = {
-        $queryRaw: vi.fn().mockResolvedValue([]),
-      };
+    it.each([
+      CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
+      CONFLICT_DETECTION_ENTITY_BATCH_SIZE + 1,
+    ])(
+      'should include the boundary pair and chunk correctly for %i pairs',
+      async (pairCount) => {
+        const boundaryIndex = pairCount - 1;
+        const expectedBatchSizes =
+          pairCount > CONFLICT_DETECTION_ENTITY_BATCH_SIZE
+            ? [CONFLICT_DETECTION_ENTITY_BATCH_SIZE, 1]
+            : [CONFLICT_DETECTION_ENTITY_BATCH_SIZE];
+        const entityPairs = Array.from({ length: pairCount }, (_, index) => ({
+          entityType: 'TASK',
+          entityId: `task-${index}`,
+        }));
+        const boundaryPair = entityPairs[boundaryIndex];
+        const boundaryRow = {
+          ...boundaryPair,
+          clientId: 'other-client',
+          actionType: 'UPDATE_TASK',
+          vectorClock: { 'other-client': 1 },
+          serverSeq: 1,
+        };
+        const queriedBatchSizes: number[] = [];
+        const tx = {
+          $queryRaw: vi
+            .fn()
+            .mockImplementation(async (_strings: unknown, ...params: unknown[]) => {
+              const touchedPairValues = (params[0] as Prisma.Sql).values;
+              queriedBatchSizes.push(touchedPairValues.length / 2);
+              for (let index = 0; index < touchedPairValues.length; index += 2) {
+                if (
+                  touchedPairValues[index] === boundaryPair.entityType &&
+                  touchedPairValues[index + 1] === boundaryPair.entityId
+                ) {
+                  return [boundaryRow];
+                }
+              }
+              return [];
+            }),
+        };
 
-      await prefetchLatestEntityOpsForBatch(
-        userId,
-        entityPairs,
-        tx as unknown as Prisma.TransactionClient,
-      );
+        const latestByEntity = await prefetchLatestEntityOpsForBatch(
+          userId,
+          entityPairs,
+          tx as unknown as Prisma.TransactionClient,
+        );
 
-      expect(tx.$queryRaw).toHaveBeenCalledTimes(3);
-    });
+        expect(
+          latestByEntity.get(
+            getEntityConflictKey(boundaryPair.entityType, boundaryPair.entityId),
+          ),
+        ).toEqual(boundaryRow);
+        expect(queriedBatchSizes).toEqual(expectedBatchSizes);
+      },
+    );
 
     it('should create user sync state for first-time batch uploads', async () => {
       const service = new SyncService({ batchUpload: true });
@@ -1711,6 +1886,7 @@ describe('SyncService', () => {
           lastSeq: 3,
           latestFullStateSeq: 2,
           latestFullStateVectorClock: { [clientId]: 9 },
+          latestStateReplacementSeq: 2,
         }),
       );
       aggregateSpy.mockRestore();

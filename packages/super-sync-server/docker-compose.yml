@@ -14,6 +14,14 @@ x-logging: &default-logging
     max-size: '10m'
     max-file: '3'
 
+# Preserve about a day of app history at incident volume (~300 MB), without
+# applying the same 10x increase to Postgres and Caddy. (#9191)
+x-logging-app: &app-logging
+  driver: 'json-file'
+  options:
+    max-size: '10m'
+    max-file: '30'
+
 services:
   supersync:
     image: ${SUPERSYNC_IMAGE:-ghcr.io/super-productivity/supersync:latest}
@@ -23,8 +31,16 @@ services:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=1900
       - HOST=${HOST:-0.0.0.0}
-      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-supersync}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supersync}}
+      # Prisma sizes its default pool from host CPUs, not the container limit.
+      # Overriding DATABASE_URL replaces these bounds; carry them across. The
+      # migrator rejects missing/invalid bounds before a production deploy. A
+      # global statement_timeout remains opt-in because the legacy snapshot-clock
+      # scan can legitimately exceed 60s on upgraded histories. See env.example.
+      # (#9191)
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-supersync}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supersync}?connection_limit=60&pool_timeout=10}
       - RUN_MIGRATIONS_ON_STARTUP=${RUN_MIGRATIONS_ON_STARTUP:-false}
+      - REQUIRE_DATABASE_POOL_LIMITS=true
+      - MIGRATE_RECOVERY_RUNTIME=compose
       - JWT_SECRET=${JWT_SECRET}
       - PUBLIC_URL=${PUBLIC_URL:-http://localhost:1900}
       - CORS_ORIGINS=${CORS_ORIGINS:-https://app.super-productivity.com}
@@ -76,7 +92,7 @@ services:
     cpus: '1.0'
     networks:
       - internal
-    logging: *default-logging
+    logging: *app-logging
 
   postgres:
     image: postgres:16-alpine
@@ -91,9 +107,11 @@ services:
     # well inside the 1.5g cap. Prisma's DEFAULT pool is ~(host_cpu_count × 2),
     # read from host cores NOT the container cpu limit — it is NOT single-digit
     # on this VPS and will silently consume the entire cap. The app MUST bound
-    # it via DATABASE_URL ?connection_limit=N (currently 60). max_connections
-    # stays well above N to reserve slots for migrations, psql, the old-ops
-    # cleanup job, and the reconnect stampede after an in-place crash recovery.
+    # it via DATABASE_URL ?connection_limit=N (60, set on the DATABASE_URL
+    # default above — this comment asserted it for months while the URL carried
+    # no such param, #9191). max_connections stays well above N to reserve slots
+    # for migrations, psql, the old-ops cleanup job, and the reconnect stampede
+    # after an in-place crash recovery.
     command:
       - postgres
       - -c

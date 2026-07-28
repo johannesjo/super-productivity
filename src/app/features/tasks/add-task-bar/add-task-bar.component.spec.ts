@@ -273,14 +273,69 @@ describe('AddTaskBarComponent', () => {
     component = fixture.componentInstance;
   });
 
+  describe('highlightSegments', () => {
+    it('splits the input by the ranges parsed from that exact text', () => {
+      component.stateService.updateInputTxt('Buy milk #shop');
+      component.stateService.updateSyntaxHighlight({
+        forText: 'Buy milk #shop',
+        ranges: [{ start: 9, end: 14, type: 'tag' }],
+      });
+
+      expect(component.highlightSegments()).toEqual([
+        { text: 'Buy milk ', type: null },
+        { text: '#shop', type: 'tag' },
+      ]);
+    });
+
+    // The parse is async: the keystroke paints before its ranges exist, so
+    // dropping every range on a mismatch blanks the overlay for a frame.
+    it('keeps ranges inside the unchanged common prefix while the parse catches up', () => {
+      component.stateService.updateSyntaxHighlight({
+        forText: 'Buy milk #shop',
+        ranges: [{ start: 9, end: 14, type: 'tag' }],
+      });
+      component.stateService.updateInputTxt('Buy milk #shop t');
+
+      expect(component.highlightSegments()).toEqual([
+        { text: 'Buy milk ', type: null },
+        { text: '#shop', type: 'tag' },
+        { text: ' t', type: null },
+      ]);
+    });
+
+    it('drops ranges the edit could have moved', () => {
+      component.stateService.updateSyntaxHighlight({
+        forText: 'Buy milk #shop',
+        ranges: [{ start: 9, end: 14, type: 'tag' }],
+      });
+      // Edit lands before the range, so its position is no longer trustworthy.
+      component.stateService.updateInputTxt('Buy some milk #shop');
+
+      expect(component.highlightSegments()).toEqual([
+        { text: 'Buy some milk #shop', type: null },
+      ]);
+    });
+
+    it('renders nothing in search mode', () => {
+      component.stateService.updateInputTxt('Buy milk #shop');
+      component.stateService.updateSyntaxHighlight({
+        forText: 'Buy milk #shop',
+        ranges: [{ start: 9, end: 14, type: 'tag' }],
+      });
+      component.isSearchMode.set(true);
+
+      expect(component.highlightSegments()).toEqual([]);
+    });
+  });
+
   describe('mobile keyboard positioning', () => {
-    let hadTouchOnlyClass: boolean;
+    let hadTouchPrimaryClass: boolean;
     let hadIOSClass: boolean;
 
     beforeEach(() => {
-      hadTouchOnlyClass = document.body.classList.contains(BodyClass.isTouchOnly);
+      hadTouchPrimaryClass = document.body.classList.contains(BodyClass.isTouchPrimary);
       hadIOSClass = document.body.classList.contains(BodyClass.isIOS);
-      document.body.classList.add(BodyClass.isTouchOnly);
+      document.body.classList.add(BodyClass.isTouchPrimary);
       document.body.classList.remove(BodyClass.isIOS);
       fixture.nativeElement.classList.add('global');
       fixture.nativeElement.style.setProperty('--keyboard-height', '336px');
@@ -292,7 +347,7 @@ describe('AddTaskBarComponent', () => {
     });
 
     afterEach(() => {
-      document.body.classList.toggle(BodyClass.isTouchOnly, hadTouchOnlyClass);
+      document.body.classList.toggle(BodyClass.isTouchPrimary, hadTouchPrimaryClass);
       document.body.classList.toggle(BodyClass.isIOS, hadIOSClass);
     });
 
@@ -313,8 +368,8 @@ describe('AddTaskBarComponent', () => {
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('352px');
     });
 
-    it('keeps the top-positioned layout for hybrid iOS devices', () => {
-      document.body.classList.remove(BodyClass.isTouchOnly);
+    it('keeps the top-positioned layout for mouse-primary iOS devices', () => {
+      document.body.classList.remove(BodyClass.isTouchPrimary);
       const layoutBeforeIOSClass = fixture.nativeElement.getBoundingClientRect();
 
       document.body.classList.add(BodyClass.isIOS);
@@ -326,6 +381,34 @@ describe('AddTaskBarComponent', () => {
   });
 
   describe('onTaskSuggestionSelected', () => {
+    it('leaves an existing task in place when defaults are disabled', async () => {
+      fixture.componentRef.setInput('isNoDefaults', true);
+      fixture.detectChanges();
+
+      const task = {
+        id: 'task-1',
+        title: 'Existing task',
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const suggestion = {
+        title: task.title,
+        taskId: task.id,
+        projectId: 'project-1',
+      } as AddTaskSuggestion;
+      const emitSpy = spyOn(component.afterTaskAdd, 'emit');
+      mockTaskService.getByIdOnce$.and.returnValue(of(task));
+
+      await component.onTaskSuggestionSelected(suggestion);
+
+      expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+      expect(emitSpy.calls.mostRecent().args[0] as unknown).toEqual({
+        taskId: task.id,
+        isAddToBottom: false,
+        isNewTask: false,
+      });
+    });
+
     it('plans existing tasks for the provided planner day instead of moving them to today', async () => {
       // Set component input using fixture.componentRef.setInput for planForDay
       fixture.componentRef.setInput('planForDay', '2024-05-20');
@@ -433,6 +516,24 @@ describe('AddTaskBarComponent', () => {
       expect(addRepeatCfgSpy).toHaveBeenCalled();
       const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
       expect(repeatCfg.startDate).toBe('2024-05-19');
+    });
+
+    it('should copy entered notes to an inline repeat preset config (discussion #937)', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Daily standup');
+      component.stateService.updateCleanText('Daily standup');
+      component.stateService.updateRepeatSetting('DAILY');
+      component.stateService.noteTxt.set('  Join from the meeting room  ');
+
+      await component.addTask();
+
+      const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
+      expect(repeatCfg.notes).toBe('Join from the meeting room');
     });
 
     it('seeds skipOverdue ON for an inline Daily repeat (#8644)', async () => {

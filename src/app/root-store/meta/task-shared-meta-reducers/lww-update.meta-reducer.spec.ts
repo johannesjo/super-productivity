@@ -23,6 +23,8 @@ import {
   SimpleCounter,
   SimpleCounterType,
 } from '../../../features/simple-counter/simple-counter.model';
+import { convertOpToAction } from '../../../op-log/apply/operation-converter.util';
+import { ActionType, Operation, OpType } from '../../../op-log/core/operation.types';
 
 describe('lwwUpdateMetaReducer', () => {
   const mockReducer = jasmine.createSpy('reducer');
@@ -952,6 +954,47 @@ describe('lwwUpdateMetaReducer', () => {
       // Backfilled from DEFAULT_TAG
       expect(recreated.taskIds).toEqual([]);
     });
+
+    // Pins `theme` in RECREATE_FALLBACK.{TAG,PROJECT}.requiredKeys. Those
+    // entries look removable — they drive no backfill, since `defaults` is
+    // spread wholesale — but the warn is gated on `partialKeys.length > 0`, so
+    // dropping one silences the diagnostic ENTIRELY for a payload carrying
+    // title+taskIds and no theme. That is exactly the #9139 corruption shape,
+    // on the one writer that still bypasses getDefaultWorkContextTheme, and
+    // provenance is still unknown — so this is the last signal that path ran.
+    //
+    // Runs for BOTH types on purpose: covering only TAG left PROJECT's entry
+    // dead (dropping it passed 133/133), i.e. a diagnostic that could be lost
+    // without a single test going red.
+    (
+      [
+        ['TAG', 'themeless-tag', 'Themeless Tag'],
+        ['PROJECT', 'themeless-project', 'Themeless Project'],
+      ] as const
+    ).forEach(([entityType, entityId, title]) => {
+      it(`warns when a recreate payload for ${entityType} is missing ONLY \`theme\` (#9139)`, () => {
+        const warnSpy = spyOn(OpLog, 'warn').and.stub();
+        const state = createMockState();
+        const action = {
+          type: `[${entityType}] LWW Update`,
+          id: entityId,
+          title,
+          taskIds: [],
+          meta: {
+            isPersistent: true,
+            entityType,
+            entityId,
+          },
+        };
+
+        reducer(state, action);
+
+        expect(warnSpy).toHaveBeenCalled();
+        const warned = warnSpy.calls.allArgs().flat().join(' ');
+        expect(warned).toContain('missing required');
+        expect(warned).toContain('theme');
+      });
+    });
   });
 
   // Issue #7330 recurred on SIMPLE_COUNTER (ruckusvol's logs, both clients
@@ -1685,6 +1728,79 @@ describe('lwwUpdateMetaReducer', () => {
       expect(timeTracking).toBeDefined();
       expect(timeTracking['currentSessionTime']).toBe(5000);
       expect(timeTracking['isTrackingReminder']).toBe(false);
+    });
+
+    it('should preserve timeTracking state for malformed singleton LWW payloads', () => {
+      const state = createMockStateWithSingletons();
+      const originalTimeTracking = state[TIME_TRACKING_FEATURE_KEY];
+      const malformedValues: ReadonlyArray<{
+        label: string;
+        value: unknown;
+      }> = [
+        { label: 'string', value: 'x' },
+        { label: 'array', value: ['x'] },
+        { label: 'null', value: null },
+        { label: 'number', value: 1 },
+        { label: 'boolean', value: true },
+        { label: 'undefined', value: undefined },
+      ];
+
+      spyOn(OpLog, 'warn');
+      if (!jasmine.isSpy(window.alert)) {
+        spyOn(window, 'alert');
+      }
+      if (!jasmine.isSpy(window.confirm)) {
+        spyOn(window, 'confirm').and.returnValue(false);
+      } else {
+        (window.confirm as jasmine.Spy).and.returnValue(false);
+      }
+
+      for (const { label, value } of malformedValues) {
+        const payloads = [
+          { format: 'flat', payload: value },
+          {
+            format: 'wrapped',
+            payload: {
+              actionPayload: value,
+              entityChanges: [],
+              lwwUpdateMode: 'replace',
+            },
+          },
+          ...(label === 'undefined'
+            ? [
+                {
+                  format: 'wrapped-missing',
+                  payload: {
+                    entityChanges: [],
+                    lwwUpdateMode: 'replace',
+                  },
+                },
+              ]
+            : []),
+        ];
+        for (const { format, payload } of payloads) {
+          const clientId = 'remote-client';
+          const op: Operation = {
+            id: `malformed-${format}-${label}`,
+            actionType: '[TIME_TRACKING] LWW Update' as ActionType,
+            opType: OpType.Update,
+            entityType: 'TIME_TRACKING',
+            entityId: 'PROJECT:project-1:2026-03-24',
+            payload,
+            clientId,
+            vectorClock: { [clientId]: 1 },
+            timestamp: 1,
+            schemaVersion: 1,
+          };
+          const action = convertOpToAction(op);
+
+          const updatedState = reducer(state, action) as Partial<RootState>;
+
+          expect(updatedState[TIME_TRACKING_FEATURE_KEY])
+            .withContext(`${format} ${label}`)
+            .toBe(originalTimeTracking);
+        }
+      }
     });
 
     it('should not require id field for singleton entities', () => {

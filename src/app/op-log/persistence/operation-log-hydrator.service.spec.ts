@@ -29,10 +29,15 @@ import { bulkApplyHydrationOperations } from '../apply/bulk-hydration.action';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { MAX_VECTOR_CLOCK_SIZE } from '../core/operation-log.const';
 import { IndexedDBOpenError } from '../core/errors/indexed-db-open.error';
+import { environment } from '../../../environments/environment';
+import { getAppVersionStr } from '../../util/get-app-version-str';
 import { IDB_OPEN_ERROR_RELOAD_KEY } from './operation-log-hydrator.service';
 import { SyncProviderId } from '../sync-providers/provider.const';
 import { OperationLogEffects } from '../capture/operation-log.effects';
 import { reportBulkReplayReducerFailure } from '../apply/bulk-replay-failure-collector';
+import { reportLoadAllDataReducerFailure } from '../apply/load-all-data-failure-guard.meta-reducer';
+import { Action } from '@ngrx/store';
+import { T } from '../../t.const';
 
 describe('OperationLogHydratorService', () => {
   let service: OperationLogHydratorService;
@@ -151,6 +156,7 @@ describe('OperationLogHydratorService', () => {
     mockHydrationStateService = jasmine.createSpyObj('HydrationStateService', [
       'startApplyingRemoteOps',
       'endApplyingRemoteOps',
+      'setHydrationFallbackActive',
     ]);
     mockSnapshotService = jasmine.createSpyObj('OperationLogSnapshotService', [
       'isValidSnapshot',
@@ -1724,6 +1730,205 @@ describe('OperationLogHydratorService', () => {
       });
     });
 
+    // #9140: a throw on the snapshot MIGRATION path (metadata-validation
+    // failure, migration transform failure) must get the same op-log fallback
+    // the invalid-snapshot path above already has — instead of escalating into
+    // attemptRecovery(), which refuses while a snapshot exists on disk and
+    // bricks to an empty store on every boot.
+    describe('migration failure op-log fallback (#9140)', () => {
+      const arrangeMigrationThrow = (error: Error): void => {
+        const oldSnapshot = createMockSnapshot({ schemaVersion: 1 });
+        mockOpLogStore.loadStateCache.and.resolveTo(oldSnapshot);
+        mockSchemaMigrationService.needsMigration.and.returnValue(true);
+        mockSnapshotService.migrateSnapshotWithBackup.and.rejectWith(error);
+      };
+
+      it('should discard the snapshot and replay the op-log when migration throws and replayable ops exist', async () => {
+        arrangeMigrationThrow(new Error('Migrated snapshot metadata validation failed'));
+        const allOps = [
+          createMockEntry(1, createMockOperation('op-1')),
+          createMockEntry(2, createMockOperation('op-2')),
+        ];
+        mockOpLogStore.getLastSeq.and.resolveTo(2);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo(allOps);
+
+        await service.hydrateStore();
+
+        expect(mockRecoveryService.attemptRecovery).not.toHaveBeenCalled();
+        expect(mockOpLogStore.getOpsAfterSeq).toHaveBeenCalledWith(0);
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          bulkApplyHydrationOperations({
+            operations: allOps.map((e) => e.op),
+            localClientId: 'test-client',
+          }),
+        );
+        // The degraded recovery must be visible to the user...
+        expect(mockSnackService.open).toHaveBeenCalledWith(
+          jasmine.objectContaining({ msg: T.F.SYNC.S.HYDRATION_FALLBACK_RECOVERY }),
+        );
+        // ...and must NEVER persist the (possibly partial) replay over the
+        // intact on-disk snapshot: for a synced client the surviving log is
+        // only a compaction-window tail, and sync never re-sends pruned ops.
+        expect(mockSnapshotService.saveCurrentStateAsSnapshot).not.toHaveBeenCalled();
+        // Compaction must also stay blocked for the session (same overwrite
+        // hazard, one writer later) — see OperationLogCompactionService.
+        expect(mockHydrationStateService.setHydrationFallbackActive).toHaveBeenCalledWith(
+          true,
+        );
+      });
+
+      it('should clear the fallback-active flag on a boot that does not fall back', async () => {
+        const snapshot = createMockSnapshot();
+        mockOpLogStore.loadStateCache.and.resolveTo(snapshot);
+
+        await service.hydrateStore();
+
+        expect(mockHydrationStateService.setHydrationFallbackActive).toHaveBeenCalledWith(
+          false,
+        );
+      });
+
+      it('should escalate instead of booting silently empty when all surviving rows are reducer-rejected', async () => {
+        arrangeMigrationThrow(new Error('SchemaMigrationService: migration failed'));
+        const rejectedOps = [
+          { ...createMockEntry(1, createMockOperation('op-1')), reducerRejectedAt: 123 },
+          { ...createMockEntry(2, createMockOperation('op-2')), reducerRejectedAt: 123 },
+        ];
+        // The cheap row-count gate passes, but nothing is actually replayable.
+        mockOpLogStore.getLastSeq.and.resolveTo(2);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo(rejectedOps);
+
+        await service.hydrateStore();
+
+        expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
+        expect(mockStore.dispatch).not.toHaveBeenCalled();
+        expect(mockSnackService.open).not.toHaveBeenCalled();
+      });
+
+      it('should escalate instead of replaying when the store already holds data (re-entrant hydration)', async () => {
+        // hydrateStore() genuinely re-enters on a LIVE store via
+        // PluginAPI.reInitData(); replay-from-0 on top would double-apply
+        // non-idempotent reducers.
+        arrangeMigrationThrow(new Error('SchemaMigrationService: migration failed'));
+        mockStateSnapshotService.getStateSnapshot.and.returnValue({
+          ...mockState,
+          task: { ids: ['live-task'], entities: { ['live-task']: {} } },
+        });
+        mockOpLogStore.getLastSeq.and.resolveTo(2);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          createMockEntry(1, createMockOperation('op-1')),
+        ]);
+
+        await service.hydrateStore();
+
+        expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
+        expect(mockStore.dispatch).not.toHaveBeenCalled();
+      });
+
+      it('should escalate to recovery when migration throws and the op-log is empty', async () => {
+        arrangeMigrationThrow(new Error('SchemaMigrationService: migration failed'));
+        mockOpLogStore.getLastSeq.and.resolveTo(0);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+
+        await service.hydrateStore();
+
+        // No replayable ops → no local source of truth left; the existing
+        // terminal handling (recovery attempt) is all that remains.
+        expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
+        expect(mockStore.dispatch).not.toHaveBeenCalled();
+      });
+
+      it('should surface HYDRATION_FAILED when migration throws, the op-log is empty, and recovery refuses', async () => {
+        arrangeMigrationThrow(new Error('SchemaMigrationService: migration failed'));
+        mockOpLogStore.getLastSeq.and.resolveTo(0);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+        mockRecoveryService.attemptRecovery.and.rejectWith(
+          new Error('Refusing legacy recovery because a SUP_OPS snapshot still exists'),
+        );
+
+        await expectAsync(service.hydrateStore()).toBeRejected();
+
+        expect(mockSnackService.open).toHaveBeenCalledTimes(1);
+      });
+
+      it('should rethrow an IndexedDBOpenError from migration without attempting op-log fallback', async () => {
+        if (!jasmine.isSpy(window.alert)) {
+          spyOn(window, 'alert');
+        }
+        (window.alert as jasmine.Spy).calls.reset();
+        // Non-backing-store error → dialog path, no auto-reload.
+        arrangeMigrationThrow(new IndexedDBOpenError(new Error('QuotaExceededError')));
+        // Fallback WOULD be viable — but a broken IndexedDB means replay would
+        // fail identically, so the tailored IDB dialog must win.
+        mockOpLogStore.getLastSeq.and.resolveTo(5);
+
+        await expectAsync(service.hydrateStore()).toBeRejected();
+
+        expect(mockStore.dispatch).not.toHaveBeenCalled();
+        expect(mockRecoveryService.attemptRecovery).not.toHaveBeenCalled();
+      });
+    });
+
+    // #9140 (mechanism 2): when a feature reducer throws on the snapshot
+    // loadAllData dispatch (e.g. an old snapshot missing a required field no
+    // reducer backfills), the failure-guard meta-reducer keeps the store alive
+    // and reports the failure to the hydrator, which must fall back to op-log
+    // replay. The dispatch spy simulates the guard by reporting to the active
+    // collector, mirroring how reportBulkReplayReducerFailure is driven above.
+    describe('snapshot loadAllData reducer failure fallback (#9140)', () => {
+      const arrangeReducerRejection = (): void => {
+        const snapshot = createMockSnapshot();
+        mockOpLogStore.loadStateCache.and.resolveTo(snapshot);
+        mockStore.dispatch.and.callFake(((action: Action): void => {
+          if (action.type === loadAllData.type) {
+            reportLoadAllDataReducerFailure(
+              new Error('Cannot read properties of undefined'),
+            );
+          }
+        }) as Store['dispatch']);
+      };
+
+      it('should fall back to op-log replay when a reducer rejects the snapshot state', async () => {
+        arrangeReducerRejection();
+        const allOps = [
+          createMockEntry(1, createMockOperation('op-1')),
+          createMockEntry(2, createMockOperation('op-2')),
+        ];
+        mockOpLogStore.getLastSeq.and.resolveTo(2);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo(allOps);
+
+        await service.hydrateStore();
+
+        expect(mockRecoveryService.attemptRecovery).not.toHaveBeenCalled();
+        // Fallback replays the WHOLE log from seq 0, not the snapshot tail.
+        expect(mockOpLogStore.getOpsAfterSeq).toHaveBeenCalledWith(0);
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          bulkApplyHydrationOperations({
+            operations: allOps.map((e) => e.op),
+            localClientId: 'test-client',
+          }),
+        );
+        // Degraded recovery is visible; the partial replay is never persisted
+        // over the intact snapshot.
+        expect(mockSnackService.open).toHaveBeenCalledWith(
+          jasmine.objectContaining({ msg: T.F.SYNC.S.HYDRATION_FALLBACK_RECOVERY }),
+        );
+        expect(mockSnapshotService.saveCurrentStateAsSnapshot).not.toHaveBeenCalled();
+      });
+
+      it('should escalate when a reducer rejects the snapshot state and the op-log is empty', async () => {
+        arrangeReducerRejection();
+        mockOpLogStore.getLastSeq.and.resolveTo(0);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+
+        await service.hydrateStore();
+
+        expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
+        // Only the failed loadAllData attempt — no bulk replay dispatch.
+        expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('full replay (no snapshot)', () => {
       it('should replay all operations when no snapshot exists', async () => {
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
@@ -2121,6 +2326,58 @@ describe('OperationLogHydratorService', () => {
       await expectAsync(service.hydrateStore()).toBeRejected();
 
       expect(reloadSpy).not.toHaveBeenCalled();
+    });
+
+    // #9187: DB_VERSION 8-10 are deliberate downgrade barriers, so a
+    // VersionError means an old build is looking at an intact database. The
+    // generic dialog's "your browser storage may need to be cleared" would
+    // destroy that data and still not let this build open it.
+    describe('downgrade barrier (VersionError)', () => {
+      const arrangeVersionError = (): void => {
+        mockRecoveryService.recoverPendingRemoteOps.and.rejectWith(
+          new IndexedDBOpenError(
+            new DOMException(
+              'The requested version (7) is less than the existing version (10).',
+              'VersionError',
+            ),
+          ),
+        );
+      };
+
+      const shownMessage = (): string =>
+        (window.alert as jasmine.Spy).calls.mostRecent().args[0] as string;
+
+      it('never tells the user to clear storage or blames corruption', async () => {
+        arrangeVersionError();
+
+        await expectAsync(service.hydrateStore()).toBeRejected();
+
+        expect(window.alert).toHaveBeenCalledTimes(1);
+        const msg = shownMessage();
+        expect(msg).not.toContain('storage may need to be cleared');
+        expect(msg).not.toContain('Storage corruption');
+        expect(msg).not.toContain('Low disk space');
+        expect(msg).toContain('Do NOT clear your storage');
+      });
+
+      it('names the running version and keeps the technical detail', async () => {
+        arrangeVersionError();
+
+        await expectAsync(service.hydrateStore()).toBeRejected();
+
+        const msg = shownMessage();
+        // The channel-suffixed string, not the bare version: the suffix is what
+        // distinguishes two installed copies from each other (#9187).
+        expect(msg).toContain(getAppVersionStr());
+        expect(getAppVersionStr()).not.toBe(environment.version);
+        expect(msg).toContain('newer version');
+        // The raw browser text still reaches bug reports.
+        expect(msg).toContain('The requested version (7) is less than');
+      });
+
+      // No auto-reload assertion here: a VersionError is not a backing-store
+      // error, so the existing non-backing-store test above already covers it.
+      // Asserting it again passes with this branch deleted — a vacuous test.
     });
 
     it('should clear the reload key after successful hydration', async () => {

@@ -422,12 +422,74 @@ echo "    All containers healthy"
 
 # Verify HTTPS health check
 echo ""
+# Report whether the separately-installed alert cron is active and completing.
+# Advisory only: deploys never edit the operator's crontab. (#9191)
+report_monitoring_status() {
+    local state_dir="$SERVER_DIR/.health-alert"
+    local script_path="$SERVER_DIR/scripts/health-alert.sh"
+    local cron_installed=true
+    local recent_run=false
+
+    echo ""
+    echo "==> Monitoring status"
+
+    if ! crontab -l 2>/dev/null | awk -v script="$script_path" '
+        NF >= 6 && $1 !~ /^#/ {
+            command_index = 6
+            while (command_index <= NF &&
+                   $command_index ~ /^[A-Za-z_][A-Za-z0-9_]*=/) {
+                command_index++
+            }
+            if ($command_index == script) found = 1
+        }
+        END { exit(found ? 0 : 1) }
+    '; then
+        cron_installed=false
+        echo "    WARNING: health-alert.sh is not in this user's crontab."
+    else
+        echo "    health-alert.sh: cron installed"
+    fi
+
+    # A fresh heartbeat is authoritative even when another user or scheduler
+    # runs the script and the current user's crontab has no matching entry.
+    if [ -f "$state_dir/last-run" ]; then
+        local last_run age
+        last_run=$(cat "$state_dir/last-run" 2>/dev/null || true)
+        age=$(( $(date -u +%s) - $(date -u -d "$last_run" +%s 2>/dev/null || echo 0) ))
+        if [ "$age" -gt 1800 ]; then
+            echo "    WARNING: last completed run was $last_run (>30m ago) — health-alert.sh is not completing."
+        else
+            recent_run=true
+            echo "    last run: $last_run"
+        fi
+    else
+        echo "    WARNING: health-alert.sh has no completed run recorded yet (expected within 5 minutes)."
+    fi
+
+    if ! $cron_installed; then
+        if $recent_run; then
+            echo "    health-alert.sh: recent completed run found outside this user's crontab"
+        else
+            echo "             Monitoring is not confirmed active. Install with:"
+            echo "               (crontab -l 2>/dev/null; echo \"*/5 * * * * ALERT_EMAIL=you@example.com $script_path\") | crontab -"
+        fi
+    fi
+
+    if [ -f "$state_dir/mail-failed" ]; then
+        echo "    WARNING: alert email delivery FAILED at $(cat "$state_dir/mail-failed" 2>/dev/null)."
+        echo "             Checks are running but nobody is being told. Verify \`mail\` works."
+    else
+        echo "    alert email: no recorded failure (verified only when mail is attempted)"
+    fi
+}
+
 echo "==> Verifying HTTPS health check..."
 for i in {1..6}; do
     if curl -sf "$HEALTH_URL" > /dev/null 2>&1; then
         echo ""
         echo "==> Deployment successful!"
         echo "    Service is healthy at $HEALTH_URL"
+        report_monitoring_status
         exit 0
     fi
     echo "    Waiting... (attempt $i/6)"

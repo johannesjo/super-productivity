@@ -105,7 +105,7 @@ sync primitives.
 **Key Files**:
 
 - [`packages/sync-core/src/index.ts`](packages/sync-core/src/index.ts) - Core public API
-- [`packages/sync-providers/src/index.ts`](packages/sync-providers/src/index.ts) - Provider public API
+- [`packages/sync-providers/package.json`](packages/sync-providers/package.json) - Provider public exports
 - [`eslint.config.js`](eslint.config.js) - Package boundary enforcement
 - [`src/app/op-log/sync-providers/sync-providers.factory.ts`](src/app/op-log/sync-providers/sync-providers.factory.ts) - App-side provider composition
 
@@ -150,13 +150,19 @@ from PostgreSQL RepeatableRead snapshot isolation alone.
 - `REPAIR` uploads persist `repairBaseServerSeq` on the operation row. The HTTP
   handler rejects an obviously stale base before quota cleanup, and the upload
   transaction repeats the check under `SELECT ... FOR UPDATE` before insertion
+- Regular uploads carrying `lastKnownServerSeq` use the same per-user row lock
+  to reject a batch behind the latest `SYNC_IMPORT` or `BACKUP_IMPORT` before
+  insertion. The durable replacement marker is reconciled lazily from retained
+  operations for rows created before the marker existed.
 - Markerless legacy repairs are compatibility records, not causal boundaries:
   they cannot drive download fast-forward, snapshot trust, history pruning, or
   server-generated restore points; snapshot replay across one fails closed
 - Removing or sharding the `lastSeq` write requires replacing this safety
   mechanism with an equivalent per-user serialization primitive
 
-**Documentation**: [`docs/sync-and-op-log/diagrams/02-server-sync.md`](docs/sync-and-op-log/diagrams/02-server-sync.md)
+**Documentation**:
+[`packages/super-sync-server/docs/architecture.md`](packages/super-sync-server/docs/architecture.md),
+[`docs/sync-and-op-log/sync-architecture.html#transport`](docs/sync-and-op-log/sync-architecture.html#transport)
 
 **Key Files**:
 
@@ -170,6 +176,7 @@ from PostgreSQL RepeatableRead snapshot isolation alone.
 - Changing server sequence assignment
 - Changing transaction isolation for upload operations
 - Changing repair base-cursor validation or full-state history pruning
+- Changing the state-replacement upload fence
 - Introducing multi-writer or multi-region upload processing
 
 ---

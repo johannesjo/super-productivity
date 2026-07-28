@@ -222,6 +222,61 @@ Possible causes:
 
 **Investigate**: `snapshot-analysis`, correlation with op count
 
+## Alerting (health-alert.sh)
+
+The reports above are things you go and read. `health-alert.sh` is the only thing
+that comes and finds you, and it is **the piece that has to be installed** — it
+is not started by `deploy.sh` and nothing else runs it:
+
+```bash
+(crontab -l 2>/dev/null; echo "*/5 * * * * ALERT_EMAIL=you@example.com /path/to/super-sync-server/scripts/health-alert.sh") | crontab -
+```
+
+`deploy.sh` reports at the end of every deploy whether this exact cron exists,
+whether it is still completing, and whether the last attempted email failed. It
+cannot prove delivery while the system is healthy because no email is sent then.
+If it says the cron is missing, nothing is watching the server.
+
+### What it checks
+
+| #   | Check                                                            | Fires when                                                               |
+| --- | ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 0–3 | Docker daemon, container state/health, OOM kills, restart counts | a container is down, unhealthy, OOM-killed, or crash-looping             |
+| 4   | `/health` endpoint                                               | HTTP != 200                                                              |
+| 5   | Disk usage                                                       | > 85%                                                                    |
+| 6   | Long-running queries                                             | any query `active` > `MAX_QUERY_SECONDS` (default 120)                   |
+| 7   | Pool saturation                                                  | connections in use ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit` |
+| 8   | Invalid operations indexes                                       | a non-building index is not valid/ready/live                             |
+
+Checks 0–5 detect the outage once containers or `/health` fail. Checks 6–8 inspect
+the database through the app container and catch the precursor while the server
+can still answer. This also works when `POSTGRES_SERVICE=` selects an external
+database. A failed/malformed probe and a missing `connection_limit` are themselves
+alertable problems, so the new checks cannot silently become inert.
+
+Check 7 is deliberately a **ratio** against `connection_limit`, not a fixed
+number: measured steady state sits the same order of magnitude below the
+pathological-query ceiling (pool size ÷ worst-case query duration), so the
+absolute margin is thin and a fixed threshold would not survive a pool resize.
+
+Check 8 matters more than it looks. An interrupted `CREATE INDEX CONCURRENTLY`
+leaves an index that is **unusable for reads but still maintained on every
+insert**. If `operations_entity_ids_gin` were the invalid one, the conflict
+lookup would silently degrade to a sequential scan on every upload, permanently,
+and nothing else in the codebase would report it.
+
+The known migrator is excluded from the long-query check. Indexes currently
+listed in `pg_stat_progress_create_index`, and invalid indexes carrying the
+exact DDL lock held by an active migrator, are excluded from check 8. The latter
+also covers `DROP INDEX CONCURRENTLY`, which has no progress-view entry, without
+hiding unrelated invalid indexes. Each migration run has a unique database
+application id; its finite database/client timeouts and targeted backend cleanup
+bound interrupted DDL without generating incident/recovery noise.
+
+Repeat alerts for the same problem are suppressed by a content hash, so counts
+and durations are normalised out — you get one mail per distinct problem, plus a
+recovery mail when it clears.
+
 ## Automation
 
 You can set up cron jobs for regular monitoring:

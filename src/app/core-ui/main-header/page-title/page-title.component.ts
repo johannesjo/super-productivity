@@ -73,6 +73,7 @@ import { KeyboardConfig } from '@sp/keyboard-config';
           <button
             [mat-menu-trigger-for]="activeWorkContextMenu"
             [matTooltip]="T.MH.PROJECT_MENU | translate"
+            [attr.aria-label]="T.MH.PROJECT_MENU | translate"
             class="project-settings-btn"
             mat-icon-button
           >
@@ -83,6 +84,9 @@ import { KeyboardConfig } from '@sp/keyboard-config';
               class="task-filter-btn"
               [class.isCustomized]="taskViewCustomizerService.isCustomized()"
               [matMenuTriggerFor]="customizerPanel.menu"
+              [attr.aria-label]="
+                T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate
+              "
               mat-icon-button
               matTooltip="{{
                 T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate
@@ -181,6 +185,7 @@ import { KeyboardConfig } from '@sp/keyboard-config';
 
       .project-settings-btn {
         opacity: 1;
+        color: var(--text-color-muted);
 
         /*display: none;*/
         /*@media (min-width: 600px) {*/
@@ -200,6 +205,7 @@ import { KeyboardConfig } from '@sp/keyboard-config';
 
       .task-filter-btn {
         position: relative;
+        color: var(--text-color-muted);
         transition: all 0.2s ease;
         overflow: visible !important;
 
@@ -222,6 +228,19 @@ import { KeyboardConfig } from '@sp/keyboard-config';
           cursor: not-allowed;
           background: transparent !important;
         }
+      }
+
+      :host-context(.wrapper:hover) .project-settings-btn,
+      :host-context(.wrapper:hover) .task-filter-btn:not(.isCustomized),
+      :host-context(.wrapper:focus-within) .project-settings-btn,
+      :host-context(.wrapper:focus-within) .task-filter-btn:not(.isCustomized),
+      .page-title-actions:is(:hover, :focus-within) .project-settings-btn,
+      .page-title-actions:is(:hover, :focus-within) .task-filter-btn:not(.isCustomized) {
+        color: var(--text-color);
+      }
+
+      .project-settings-btn[aria-expanded='true'] {
+        color: var(--brand);
       }
     `,
   ],

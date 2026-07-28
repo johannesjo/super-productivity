@@ -34,6 +34,7 @@ import {
 import {
   DUPLICATE_OPERATION_ERROR_MSG,
   OPERATION_LOG_STORE_NOT_INITIALIZED,
+  isIdbVersionError,
   isLockRelatedIdbOpenError,
 } from './op-log-errors.const';
 import { runDbUpgrade } from './db-upgrade';
@@ -463,6 +464,12 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       } catch (e) {
         lastError = e;
 
+        // Downgrade barrier: the on-disk version can't change while we run, so
+        // every retry fails identically. Surface it now (#9187).
+        if (isIdbVersionError(e)) {
+          break;
+        }
+
         // Classify the error on the first failure. If it doesn't look
         // lock-related, shrink the retry budget so we fail fast and let the
         // hydrator surface the error instead of hanging for the full window.
@@ -495,7 +502,9 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     // carries the formatted original detail, so logging the wrapper exposes
     // everything we need.
     const err = new IndexedDBOpenError(lastError);
-    Log.err('[OpLogStore] IndexedDB open failed after all retries.', err);
+    // Deliberately does not mention retries: the barrier path stops as soon as
+    // it is hit. `err.message` already names which case this is (#9187).
+    Log.err('[OpLogStore] IndexedDB open failed.', err);
     throw err;
   }
 
@@ -1127,13 +1136,18 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
    *
    * Batch order is durable sequence order. Conflict resolution relies on this
    * to persist remote loser rows before the local compensations that supersede
-   * them, without exposing a crash point between the two groups.
+   * them, without exposing a crash point between the two groups. Superseded
+   * predecessor IDs can be rejected in that same transaction. Missing or
+   * inactive IDs abort the commit so callers cannot mistake a partial recovery
+   * for success.
    */
   async appendMixedSourceBatchSkipDuplicates(
     batches: readonly MixedSourceOperationBatch[],
+    options?: { rejectOpIds?: readonly string[] },
   ): Promise<{ written: MixedSourceWrittenOperation[]; skippedCount: number }> {
     const nonEmptyBatches = batches.filter((batch) => batch.ops.length > 0);
-    if (nonEmptyBatches.length === 0) {
+    const rejectOpIds = [...new Set(options?.rejectOpIds ?? [])];
+    if (nonEmptyBatches.length === 0 && rejectOpIds.length === 0) {
       return { written: [], skippedCount: 0 };
     }
 
@@ -1158,9 +1172,37 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     const written: MixedSourceWrittenOperation[] = [];
     let skippedCount = 0;
     let committedClock: VectorClock | undefined;
+    const committedAt = Date.now();
 
     try {
       await this._adapter.transaction(storeNames, 'readwrite', async (tx) => {
+        const entriesToReject: StoredOperationLogEntry[] = [];
+        for (const opId of rejectOpIds) {
+          const entry = await tx.getFromIndex<StoredOperationLogEntry>(
+            STORE_NAMES.OPS,
+            OPS_INDEXES.BY_ID,
+            opId,
+          );
+          if (!entry) {
+            throw new Error(`Cannot atomically reject missing operation ${opId}`);
+          }
+          if (
+            entry.source !== 'local' ||
+            entry.syncedAt !== undefined ||
+            entry.rejectedAt !== undefined ||
+            entry.reducerRejectedAt !== undefined
+          ) {
+            throw new Error(
+              `Cannot atomically reject operation ${opId} because it is not an active pending local operation`,
+            );
+          }
+          entriesToReject.push(entry);
+        }
+        for (const entry of entriesToReject) {
+          entry.rejectedAt = committedAt;
+          await tx.put(STORE_NAMES.OPS, entry);
+        }
+
         const currentClockEntry = hasLocalOps
           ? await tx.get<VectorClockEntry>(STORE_NAMES.VECTOR_CLOCK, SINGLETON_KEY)
           : undefined;
@@ -1207,7 +1249,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
           committedClock = runningClock;
           await tx.put(
             STORE_NAMES.VECTOR_CLOCK,
-            { clock: runningClock, lastUpdate: Date.now() } satisfies VectorClockEntry,
+            { clock: runningClock, lastUpdate: committedAt } satisfies VectorClockEntry,
             SINGLETON_KEY,
           );
         }
@@ -1218,6 +1260,9 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
 
     if (committedClock) {
       this._vectorClockCache = { ...committedClock };
+    }
+    if (rejectOpIds.length > 0) {
+      this._invalidateUnsyncedCache();
     }
     return { written, skippedCount };
   }

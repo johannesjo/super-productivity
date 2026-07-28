@@ -35,23 +35,6 @@ export const escapeHtml = (unsafe: string): string => {
     .replace(/'/g, '&#039;');
 };
 
-const SENSITIVE_QUERY_PARAMS = [
-  'authorization',
-  'jwt',
-  'logintoken',
-  'password',
-  'passkeyrecoverytoken',
-  'resetpasswordtoken',
-  'token',
-] as const;
-
-const SENSITIVE_QUERY_PARAM_SET = new Set<string>(SENSITIVE_QUERY_PARAMS);
-
-const SENSITIVE_QUERY_PARAM_PATTERN = new RegExp(
-  `([?&](?:${SENSITIVE_QUERY_PARAMS.join('|')})=)[^&\\s]*`,
-  'gi',
-);
-
 export const SERVER_HELMET_CONFIG = {
   contentSecurityPolicy: {
     directives: {
@@ -90,17 +73,8 @@ export const pickErrorLogLevel = (
 };
 
 export const sanitizeRequestUrlForLog = (rawUrl: string): string => {
-  try {
-    const url = new URL(rawUrl, 'http://localhost');
-    for (const key of Array.from(url.searchParams.keys())) {
-      if (SENSITIVE_QUERY_PARAM_SET.has(key.toLowerCase())) {
-        url.searchParams.set(key, 'redacted');
-      }
-    }
-    return `${url.pathname}${url.search}`;
-  } catch {
-    return rawUrl.replace(SENSITIVE_QUERY_PARAM_PATTERN, '$1redacted');
-  }
+  const queryStart = rawUrl.indexOf('?');
+  return queryStart === -1 ? rawUrl : `${rawUrl.slice(0, queryStart)}?redacted`;
 };
 
 export const createListenOptions = (

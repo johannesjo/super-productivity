@@ -13,6 +13,10 @@
 #   ALERT_EMAIL    - Email address to receive alerts (required)
 #   COMPOSE_DIR    - Path to docker-compose.yml directory (default: script directory's parent)
 #   HEALTH_URL     - Health endpoint URL (default: read from .env DOMAIN)
+#   MAX_QUERY_SECONDS  - Alert if any query has been active longer (default: 120)
+#   POOL_WARN_PCT      - Alert if connections in use exceed this % of the pool (default: 75)
+#   POSTGRES_SERVICE   - Bundled database service to health-check
+#                        (default: postgres; empty: none)
 
 # Do NOT use set -e — a monitoring script must never silently abort.
 set -uo pipefail
@@ -21,6 +25,21 @@ umask 077
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_DIR="${COMPOSE_DIR:-$(dirname "$SCRIPT_DIR")}"
 ALERT_EMAIL="${ALERT_EMAIL:-contact@super-productivity.com}"
+MAX_QUERY_SECONDS="${MAX_QUERY_SECONDS:-120}"
+POOL_WARN_PCT="${POOL_WARN_PCT:-75}"
+
+CONFIG_PROBLEMS=""
+DB_CONFIG_OK=true
+if ! [[ "$MAX_QUERY_SECONDS" =~ ^[1-9][0-9]*$ ]] ||
+  [ "${#MAX_QUERY_SECONDS}" -gt 10 ] ||
+  [ "$MAX_QUERY_SECONDS" -gt 2147483647 ]; then
+  CONFIG_PROBLEMS="${CONFIG_PROBLEMS}MAX_QUERY_SECONDS must be an integer from 1 to 2147483647\n"
+  DB_CONFIG_OK=false
+fi
+if ! [[ "$POOL_WARN_PCT" =~ ^([1-9]|[1-9][0-9]|100)$ ]]; then
+  CONFIG_PROBLEMS="${CONFIG_PROBLEMS}POOL_WARN_PCT must be an integer from 1 to 100\n"
+  DB_CONFIG_OK=false
+fi
 
 if [ ! -f "$COMPOSE_DIR/docker-compose.yml" ]; then
   echo "ERROR: $COMPOSE_DIR does not contain docker-compose.yml" >&2
@@ -48,7 +67,17 @@ if [ -f ".env" ]; then
 fi
 HEALTH_URL="${HEALTH_URL:-https://${DOMAIN:-localhost}/health}"
 
-PROBLEMS=""
+# An explicitly empty value means the deployment uses an external database.
+if [ "${POSTGRES_SERVICE+x}" != "x" ]; then
+  if grep -qE '^POSTGRES_SERVICE=' ".env" 2>/dev/null; then
+    POSTGRES_SERVICE=$(grep -m1 -E '^POSTGRES_SERVICE=' ".env" 2>/dev/null |
+      cut -d'=' -f2- | tr -d "\"' " || true)
+  else
+    POSTGRES_SERVICE="postgres"
+  fi
+fi
+
+PROBLEMS="$CONFIG_PROBLEMS"
 DOCKER_OK=true
 
 # 0. Check Docker daemon is accessible
@@ -59,7 +88,11 @@ fi
 
 if $DOCKER_OK; then
   # 1. Check if all containers are running and healthy
-  SERVICES=(supersync postgres caddy)
+  SERVICES=(supersync)
+  if [ -n "$POSTGRES_SERVICE" ]; then
+    SERVICES+=("$POSTGRES_SERVICE")
+  fi
+  SERVICES+=(caddy)
   for svc in "${SERVICES[@]}"; do
     STATE=$(docker compose ps --format '{{.State}}' "$svc" 2>/dev/null || echo "missing")
     HEALTH=$(docker compose ps --format '{{.Health}}' "$svc" 2>/dev/null || echo "")
@@ -93,6 +126,173 @@ if $DOCKER_OK; then
       fi
     fi
   done
+
+  # 6-8. Query the configured database from the app container so external
+  # PostgreSQL deployments use the same DATABASE_URL and Prisma client as the app.
+  if $DB_CONFIG_OK; then
+    DB_PROBE_JS=$(cat <<'NODE'
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
+const maxQuerySeconds = Number(process.env.HEALTH_MAX_QUERY_SECONDS);
+
+const readPoolLimit = () => {
+  try {
+    const values = new URL(process.env.DATABASE_URL ?? '').searchParams.getAll(
+      'connection_limit',
+    );
+    if (values.length !== 1) return '';
+    const [value] = values;
+    const numericValue = Number(value);
+    return value && /^\d+$/.test(value) && numericValue > 0 && Number.isSafeInteger(numericValue)
+      ? String(numericValue)
+      : '';
+  } catch {
+    return '';
+  }
+};
+
+const main = async () => {
+  console.log(`POOL_LIMIT=${readPoolLimit()}`);
+
+  const { activity, indexes } = await prisma.$transaction(
+    async (tx) => {
+      await tx.$executeRawUnsafe('SET LOCAL statement_timeout = 10000');
+      const [activity] = await tx.$queryRawUnsafe(
+        `WITH pool_sessions AS (
+       SELECT CASE
+         WHEN state = 'active' THEN now() - query_start
+       END AS active_age
+       FROM pg_stat_activity
+       WHERE state IN (
+         'active',
+         'idle in transaction',
+         'idle in transaction (aborted)'
+       )
+         AND pid <> pg_backend_pid()
+         AND backend_type = 'client backend'
+         AND datname = current_database()
+         AND usename = current_user
+         AND application_name NOT LIKE 'supersync-migrator-%'
+     )
+     SELECT
+       count(*) FILTER (
+         WHERE active_age > $1::integer * interval '1 second'
+       )::integer AS "longQueryCount",
+       COALESCE(round(extract(epoch FROM max(active_age))), 0)::integer AS "longest",
+       count(*)::integer AS "poolInUse"
+     FROM pool_sessions`,
+        maxQuerySeconds,
+      );
+
+      const [indexes] = await tx.$queryRawUnsafe(
+        `SELECT COALESCE(
+       string_agg(i.indexrelid::regclass::text, ', ' ORDER BY i.indexrelid),
+       ''
+     ) AS "badIndex"
+     FROM pg_index i
+     WHERE i.indrelid = 'operations'::regclass
+       AND (NOT i.indisvalid OR NOT i.indisready OR NOT i.indislive)
+       AND NOT EXISTS (
+         SELECT 1
+         FROM pg_stat_progress_create_index p
+          WHERE p.index_relid = i.indexrelid
+       )
+       AND NOT EXISTS (
+         SELECT 1
+         FROM pg_stat_activity m
+         JOIN pg_locks l
+           ON l.pid = m.pid
+          AND l.locktype = 'relation'
+          AND l.relation = i.indexrelid
+          AND l.mode = 'ShareUpdateExclusiveLock'
+         WHERE m.datname = current_database()
+           AND m.usename = current_user
+           AND m.state = 'active'
+           AND m.application_name LIKE 'supersync-migrator-%'
+       )`,
+      );
+
+      return { activity, indexes };
+    },
+    { maxWait: 5000, timeout: 12000 },
+  );
+
+  console.log(`LONG_Q=${activity.longQueryCount}`);
+  console.log(`LONGEST=${activity.longest}`);
+  console.log(`POOL_IN_USE=${activity.poolInUse}`);
+  console.log(`BAD_INDEX=${indexes.badIndex}`);
+};
+
+main()
+  .catch((error) => {
+    console.error(
+      'Database probe failed:',
+      error instanceof Error ? error.message : String(error),
+    );
+    process.exitCode = 1;
+  })
+  .finally(() => prisma.$disconnect());
+NODE
+)
+
+    # Allow Prisma's 5s pool wait plus its 12s transaction bound to finish.
+    DB_OUTPUT=$(timeout -k 5 20 docker compose exec -T \
+      -e "HEALTH_MAX_QUERY_SECONDS=$MAX_QUERY_SECONDS" \
+      supersync timeout 18 node -e "$DB_PROBE_JS" 2>/dev/null)
+    DB_STATUS=$?
+
+    LONG_Q=""
+    LONGEST=""
+    POOL_IN_USE=""
+    POOL_LIMIT=""
+    BAD_IDX=""
+    HAVE_LONG_Q=false
+    HAVE_LONGEST=false
+    HAVE_POOL_IN_USE=false
+    HAVE_POOL_LIMIT=false
+    HAVE_BAD_IDX=false
+    while IFS='=' read -r KEY VALUE; do
+      case "$KEY" in
+        LONG_Q) LONG_Q="$VALUE"; HAVE_LONG_Q=true ;;
+        LONGEST) LONGEST="$VALUE"; HAVE_LONGEST=true ;;
+        POOL_IN_USE) POOL_IN_USE="$VALUE"; HAVE_POOL_IN_USE=true ;;
+        POOL_LIMIT) POOL_LIMIT="$VALUE"; HAVE_POOL_LIMIT=true ;;
+        BAD_INDEX) BAD_IDX="$VALUE"; HAVE_BAD_IDX=true ;;
+      esac
+    done <<< "$DB_OUTPUT"
+
+    if $HAVE_POOL_LIMIT && ! [[ "$POOL_LIMIT" =~ ^[1-9][0-9]*$ ]]; then
+      PROBLEMS="${PROBLEMS}DATABASE_URL has no valid connection_limit\n"
+    fi
+
+    DB_RESULTS_OK=true
+    if [ "$DB_STATUS" -ne 0 ] || ! $HAVE_LONG_Q || ! $HAVE_LONGEST ||
+      ! $HAVE_POOL_IN_USE || ! $HAVE_POOL_LIMIT || ! $HAVE_BAD_IDX ||
+      ! [[ "$LONG_Q" =~ ^[0-9]+$ ]] ||
+      ! [[ "$LONGEST" =~ ^[0-9]+$ ]] ||
+      ! [[ "$POOL_IN_USE" =~ ^[0-9]+$ ]]; then
+      DB_RESULTS_OK=false
+      PROBLEMS="${PROBLEMS}Database monitoring checks failed\n"
+    fi
+
+    if $DB_RESULTS_OK; then
+      if [ "$LONG_Q" -gt 0 ]; then
+        PROBLEMS="${PROBLEMS}${LONG_Q} query(s) active longer than ${MAX_QUERY_SECONDS}s (longest: ${LONGEST}s)\n"
+      fi
+
+      if [[ "$POOL_LIMIT" =~ ^[1-9][0-9]*$ ]]; then
+        PCT=$(( POOL_IN_USE * 100 / POOL_LIMIT ))
+        if [ "$PCT" -ge "$POOL_WARN_PCT" ]; then
+          PROBLEMS="${PROBLEMS}Connection pool ${PCT}% saturated (${POOL_IN_USE} in use / ${POOL_LIMIT} limit)\n"
+        fi
+      fi
+
+      if [ -n "$BAD_IDX" ]; then
+        PROBLEMS="${PROBLEMS}Invalid/unusable index(es) present: ${BAD_IDX}\n"
+      fi
+    fi
+  fi
 fi
 
 # 4. Check health endpoint (runs even if Docker is down — tests from outside)
@@ -116,33 +316,40 @@ HASH_INPUT=$(printf '%s' "$PROBLEMS" | sed \
   's/restarted [0-9]* times/restarted N times/g
    s/([0-9]* entries/(N entries/g
    s/at [0-9]*% on/at N% on/g
-   s/HTTP [0-9]*/HTTP NNN/g')
+   s/HTTP [0-9]*/HTTP NNN/g
+   s/[0-9]* query(s) active longer than [0-9]*s (longest: [0-9]*s)/N query(s) active longer than Ns (longest: Ns)/g
+   s/pool [0-9]*% saturated ([0-9]* in use \/ [0-9]* limit)/pool N% saturated (N in use \/ N limit)/g')
 CURRENT_HASH=$(printf '%s' "$HASH_INPUT" | sha256sum | cut -d' ' -f1)
 PREVIOUS_HASH=$(cat "$ALERT_STATE_FILE" 2>/dev/null || echo "none")
 
 if [ -n "$PROBLEMS" ]; then
-  if [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ]; then
+  if [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ] || [ -f "$ALERT_STATE_DIR/mail-failed" ]; then
     # New or changed problem — send alert, only write state if mail succeeds
     if printf 'SuperSync health check failed at %s\n\nProblems found:\n%b\nServer: %s\n' \
         "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PROBLEMS" "$(hostname)" \
         | timeout 30 mail -s "SuperSync Alert: Health Check Failed" "$ALERT_EMAIL" 2>/dev/null; then
       echo "$CURRENT_HASH" > "$ALERT_STATE_FILE"
+      rm -f "$ALERT_STATE_DIR/mail-failed"
     else
+      # Leave a marker deploy.sh can surface when cron cannot deliver mail.
       echo "ERROR: Failed to send alert email" >&2
+      date -u +%Y-%m-%dT%H:%M:%SZ > "$ALERT_STATE_DIR/mail-failed"
     fi
   fi
 else
-  # All clear — send recovery notification, only delete state if mail succeeds
-  if [ -f "$ALERT_STATE_FILE" ]; then
+  # A healthy retry also proves mail works again and clears a sticky failure marker.
+  if [ -f "$ALERT_STATE_FILE" ] || [ -f "$ALERT_STATE_DIR/mail-failed" ]; then
     if printf 'SuperSync health check recovered at %s\n\nAll checks passing.\nServer: %s\n' \
         "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(hostname)" \
         | timeout 30 mail -s "SuperSync OK: Health Check Recovered" "$ALERT_EMAIL" 2>/dev/null; then
       rm -f "$ALERT_STATE_FILE"
+      rm -f "$ALERT_STATE_DIR/mail-failed"
     else
       echo "ERROR: Failed to send recovery email" >&2
+      date -u +%Y-%m-%dT%H:%M:%SZ > "$ALERT_STATE_DIR/mail-failed"
     fi
   fi
 fi
 
-# Record last successful run for monitoring verification
+# Record the last completed run for deploy-time monitoring verification.
 date -u +%Y-%m-%dT%H:%M:%SZ > "$ALERT_STATE_DIR/last-run"

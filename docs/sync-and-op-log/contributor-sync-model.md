@@ -6,13 +6,19 @@ dispatch that touches synced state.**
 Super Productivity syncs by replaying an operation log. Almost every sync
 correctness rule you will hit is a facet of a **single invariant**:
 
-> ## One user intent = exactly one operation. Replayed and remote operations must never re-trigger effects.
+> ## Each replay-atomic transition (normally one persistent action) = exactly one operation. Replayed and remote operations must never re-trigger effects.
+
+“Intent” here means the transition that must remain indivisible during replay,
+not necessarily an entire multi-step UI workflow. A workflow may deliberately
+compose independent persistent actions when their normal local side effects and
+per-entity conflict boundaries are part of the required behavior.
 
 Reducers **must** run for remote/replayed operations (that is how state is
 rebuilt). Effects **must not** — the UI side effect (snack, sound, navigation)
-already happened on the originating client, and any cascading change is already
-its own entry in the operation log. Re-running effects on replay duplicates side
-effects and emits phantom operations that conflict with sync.
+already happened on the originating client, and every persistent transition the
+workflow deliberately emitted already has its own entry in the operation log.
+Re-running effects on replay duplicates side effects and emits phantom
+operations that conflict with sync.
 
 Everything below is that invariant applied at three points.
 
@@ -60,19 +66,31 @@ operations with stale vector clocks that immediately conflict.
 
 ✅ **Enforced by `local-rules/require-hydration-guard`** (existing rule).
 
-## The atomicity rule — one intent, one op
+## The atomicity rule — one replay-atomic transition, one op
 
 **Multi-entity changes are meta-reducers, not effects. Bulk dispatch loops yield.**
 
-- A change that touches more than one entity for a single user intent (e.g.
-  deleting a tag also removing it from every task) must be **one reducer pass**
-  so it becomes **one operation**. Put it in
+- A transition that must replay atomically and touches more than one entity
+  (e.g. deleting a tag also removing it from every task) must be **one reducer
+  pass** so it becomes **one operation**. Put it in
   `src/app/root-store/meta/task-shared-meta-reducers/`, not in an effect that
   dispatches a fan-out of follow-up actions. An effect-based fan-out emits N
-  operations for one intent _and_ re-runs on replay (a restatement of Boundary 1).
-- `store.dispatch()` is non-blocking. After a loop of 50+ dispatches, add
-  `await new Promise((r) => setTimeout(r, 0))` so captured operations don't
-  lose intermediate state.
+  operations for one atomic transition _and_ re-runs on replay (a restatement
+  of Boundary 1).
+- Do not collapse a broader UI workflow merely because it starts with one user
+  gesture. Independent actions are appropriate when their normal local effects and
+  entity-specific conflict boundaries matter. Project completion intentionally
+  resolves tasks through ordinary per-task actions before flipping the project
+  flag, accepting an unbounded N+1 operation count and a brief intermediate state.
+  That is a known scalability residual for this rare semantic exception, not a
+  precedent for new bulk fan-out; see
+  [ADR #5: Project Completion](../../ARCHITECTURE-DECISIONS.md#5-project-completion-decoupled-resolution-over-atomic-multi-entity-op).
+- `store.dispatch()` and NgRx reducers run synchronously; only the op-log
+  persistence triggered by capture is asynchronous. After a loop of 50+
+  dispatches, add one post-loop macrotask yield,
+  `await new Promise((r) => setTimeout(r, 0))`, to protect capture ordering
+  before a dependent follow-up action. It does not chunk or bound main-thread
+  reducer work, and it does not reduce the N+1 upload amplification.
 
 ⚠️ `local-rules/no-multi-entity-effect` (`warn`) flags this heuristically — it
 catches the array-literal fan-out shape (`map(() => [a(), b()])`), not every
@@ -83,12 +101,12 @@ blessed pattern is a `task-shared-meta-reducers/` reducer.
 
 ## Decision table — "I'm writing an effect"
 
-| Question                                              | Answer                                                    | Linter                               |
-| ----------------------------------------------------- | --------------------------------------------------------- | ------------------------------------ |
-| Does it inject the actions stream?                    | Use `LOCAL_ACTIONS` (not `Actions`)                       | ✅ `no-actions-in-effects` (error)   |
-| Does it react to a **selector** instead of an action? | Add `skipDuringSyncWindow()`                              | ✅ `require-hydration-guard` (error) |
-| Does one user intent change **>1 entity**?            | Make it a meta-reducer, not an effect                     | ⚠️ `no-multi-entity-effect` (warn)   |
-| Does it dispatch in a **loop of 50+**?                | `await new Promise(r => setTimeout(r, 0))` after the loop | — (convention)                       |
+| Question                                                | Answer                                                        | Linter                               |
+| ------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------ |
+| Does it inject the actions stream?                      | Use `LOCAL_ACTIONS` (not `Actions`)                           | ✅ `no-actions-in-effects` (error)   |
+| Does it react to a **selector** instead of an action?   | Add `skipDuringSyncWindow()`                                  | ✅ `require-hydration-guard` (error) |
+| Does one replay-atomic transition change **>1 entity**? | Make it a meta-reducer, not an effect                         | ⚠️ `no-multi-entity-effect` (warn)   |
+| Does it dispatch in a **loop of 50+**?                  | Yield once afterward for capture ordering; it is not batching | — (convention)                       |
 
 Two of the three are mechanically enforced — you do not need to memorize them,
 only understand _why_ (the invariant at the top).
@@ -136,9 +154,11 @@ key-recovery config writes (content-only, must NOT bump).
 ## Why (deeper)
 
 - **Mechanism & rules:** [`operation-rules.md`](./operation-rules.md)
-- **Architecture:** [`operation-log-architecture.md`](./operation-log-architecture.md)
-- **Diagrams:** [`diagrams/05-meta-reducers.md`](./diagrams/05-meta-reducers.md),
-  [`diagrams/08-sync-flow-explained.md`](./diagrams/08-sync-flow-explained.md)
+- **Architecture tour:**
+  [`sync-architecture.html#local-intent`](./sync-architecture.html#local-intent),
+  [`sync-architecture.html#remote-apply`](./sync-architecture.html#remote-apply)
+- **Deep rationale:**
+  [`operation-log-architecture.md`](./operation-log-architecture.md)
 - **Source of truth:** `src/app/util/local-actions.token.ts`,
   `src/app/util/skip-during-sync-window.operator.ts`,
   `src/app/op-log/apply/hydration-state.service.ts`

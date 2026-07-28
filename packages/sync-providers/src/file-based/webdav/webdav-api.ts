@@ -33,6 +33,8 @@ export interface WebdavApiDeps {
    */
   getCfg: () => Promise<WebdavPrivateCfg>;
   httpAdapter: WebDavHttpAdapter;
+  /** Nextcloud's DAV layer exposes its canonical validator in `OC-ETag`. */
+  useCanonicalOcEtag?: boolean;
 }
 
 export class WebdavApi {
@@ -53,10 +55,34 @@ export class WebdavApi {
    * malformed values cannot safely drive `If-Match`, so callers fall back to a
    * content hash and the legacy best-effort check instead.
    */
-  private _readStrongEtag(headers: Record<string, string>): string | undefined {
-    const entry = Object.entries(headers).find(([name]) => name.toLowerCase() === 'etag');
+  private _readStrongEtag(
+    headers: Record<string, string>,
+    headerName: string,
+  ): string | undefined {
+    const entry = Object.entries(headers).find(
+      ([name]) => name.toLowerCase() === headerName,
+    );
     const etag = entry?.[1]?.trim();
     return etag && STRONG_ETAG_RE.test(etag) ? etag : undefined;
+  }
+
+  /**
+   * Returns a strong validator that can be echoed back exactly in `If-Match`.
+   *
+   * Nextcloud exposes its canonical validator as `OC-ETag`, specifically so it
+   * survives HTTP-server rewrites such as Apache's content-coding suffix
+   * (#9154, #9196). Only the dedicated Nextcloud provider enables that
+   * extension; generic WebDAV entity tags are opaque and must never be
+   * rewritten. If browser CORS hides `OC-ETag`, Nextcloud falls back to the
+   * existing content-hash check instead of trusting a potentially rewritten
+   * HTTP `ETag`.
+   */
+  private _readStrongRevision(headers: Record<string, string>): string | undefined {
+    if (this._deps.useCanonicalOcEtag) {
+      return this._readStrongEtag(headers, 'oc-etag');
+    }
+
+    return this._readStrongEtag(headers, 'etag');
   }
 
   private _isStrongEtag(value: string): boolean {
@@ -189,7 +215,7 @@ export class WebdavApi {
 
       const hash = await this._computeContentHash(response.data);
       return {
-        rev: this._readStrongEtag(response.headers) ?? hash,
+        rev: this._readStrongRevision(response.headers) ?? hash,
         dataStr: response.data,
       };
     } catch (e) {
@@ -384,7 +410,7 @@ export class WebdavApi {
           `sync cycle will re-download and reconcile.`,
       );
     }
-    return this._readStrongEtag(remoteResponse.headers) ?? remoteHash;
+    return this._readStrongRevision(remoteResponse.headers) ?? remoteHash;
   }
 
   async remove(path: string): Promise<void> {

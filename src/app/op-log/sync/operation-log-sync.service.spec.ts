@@ -844,7 +844,9 @@ describe('OperationLogSyncService', () => {
 
           const downloadSpy = spyOn(service, 'downloadRemoteOps').and.returnValue(
             Promise.resolve({
-              kind: 'no_new_ops' as const,
+              kind: 'ops_processed' as const,
+              newOpsCount: 1,
+              localWinOpsCreated: 2,
             }),
           );
 
@@ -874,6 +876,7 @@ describe('OperationLogSyncService', () => {
             isNeverSynced: true,
           });
           expect(recoveryResult.latestServerSeq).toBe(12);
+          expect(recoveryResult.localWinOpsCreated).toBe(2);
         });
 
         it('should propagate nested download cancellation as a cancelled upload', async () => {

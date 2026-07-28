@@ -30,14 +30,17 @@ import { ValidateStateService } from '../validation/validate-state.service';
 import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { bulkApplyOperations } from '../apply/bulk-hydration.action';
-import { VectorClockService } from '../sync/vector-clock.service';
 import { AppDataComplete } from '../model/model-config';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { IS_ELECTRON } from '../../app.constants';
+import { detectChannel, getAppVersionStr } from '../../util/get-app-version-str';
+import { buildIdbOpenErrorMessage } from './idb-open-error-message';
 import {
   BulkReplayReducerFailure,
   runWithBulkReplayFailureCollector,
 } from '../apply/bulk-replay-failure-collector';
+import { runWithLoadAllDataFailureCollector } from '../apply/load-all-data-failure-guard.meta-reducer';
+import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
 
 /**
  * sessionStorage key used to track auto-reload attempts after IndexedDB backing store errors.
@@ -69,7 +72,6 @@ export class OperationLogHydratorService {
   private stateSnapshotService = inject(StateSnapshotService);
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
-  private vectorClockService = inject(VectorClockService);
   private operationApplierService = inject(OperationApplierService);
   private hydrationStateService = inject(HydrationStateService);
   private injector = inject(Injector);
@@ -161,9 +163,27 @@ export class OperationLogHydratorService {
       }
 
       // 2. Run schema migration if needed (A.7.12: with backup safety)
+      let hydrationFallbackRan = false;
       if (snapshot && this.schemaMigrationService.needsMigration(snapshot)) {
-        snapshot = await this.snapshotService.migrateSnapshotWithBackup(snapshot);
-        this._migrationRanDuringHydration = true;
+        try {
+          snapshot = await this.snapshotService.migrateSnapshotWithBackup(snapshot);
+          this._migrationRanDuringHydration = true;
+        } catch (migrationErr) {
+          // #9140: escalating a migration throw would hit attemptRecovery(),
+          // which refuses while a snapshot exists on disk — the every-boot
+          // empty-store brick. The backup was already restored (nothing
+          // destroyed), so skip the unmigratable-but-intact snapshot for this
+          // boot and rebuild from the op-log instead. The fallback never
+          // persists its result; recovery re-runs each boot until a fixed
+          // build hydrates the intact snapshot again.
+          await this._fallBackToOpLogReplay(
+            migrationErr,
+            'Schema migration failed',
+            pendingRemoteOps,
+          );
+          hydrationFallbackRan = true;
+          snapshot = null;
+        }
       }
 
       // 3. Validate snapshot if it exists
@@ -247,214 +267,44 @@ export class OperationLogHydratorService {
 
         // 3. Hydrate NgRx with (possibly repaired) snapshot
         // stateToLoad is AppStateSnapshot which is runtime-compatible but TypeScript can't verify
-        this.store.dispatch(
-          loadAllData({
-            appDataComplete: stateToLoad as unknown as AppDataComplete,
-          }),
-        );
-
-        // 4. Replay tail operations (A.7.13: with operation migration)
         //
-        // Replay is status-blind except for durable reducer rejections
-        // (getOpsAfterSeq has no status filter) — every other entry's reducer
-        // effect belongs in state exactly once:
-        // - applied ops: their effect is state history by definition.
-        // - failed ops (remote, archive side effect threw): their reducers DID
-        //   commit before the failure (bulk dispatch precedes archive handling),
-        //   so replay restores that effect; retryFailedRemoteOps() below then
-        //   re-runs ONLY the outstanding archive side effects.
-        // - rejected ops: every rejection path appends its compensation AFTER
-        //   them in seq order, so replay converges to post-resolution runtime
-        //   state — server-rejected local ops are followed by merged ops
-        //   (SupersededOperationResolver) or keep their effect (permanent
-        //   rejections never revert state), and LWW-losing remote ops are
-        //   followed by the local-win op that overwrites them
-        //   (ConflictResolutionService).
-        // - reducerRejectedAt ops: conversion, schema migration, or reducer
-        //   application could not produce state, so replay must not try them
-        //   again on every startup.
-        const tailOps = (
-          await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq)
-        ).filter((entry) => entry.reducerRejectedAt === undefined);
-
-        if (tailOps.length > 0) {
-          // Optimization: If last op is SyncImport or Repair, skip replay and load directly
-          const lastEntry = tailOps[tailOps.length - 1];
-          const lastOp = lastEntry.op;
-          // The shortcut is safe only when the entire replay range has a
-          // durable reducer outcome. An earlier pending row still needs bulk
-          // replay/checkpointing even if a later full-state op replaces its
-          // visible state; otherwise that row would quarantine sync forever.
-          const hasPendingReducerWork = tailOps.some(
-            (entry) => entry.applicationStatus === 'pending',
-          );
-          const appData = hasPendingReducerWork
-            ? undefined
-            : this._extractFullStateFromOp(lastOp);
-          if (appData) {
-            OpLog.normal(
-              `OperationLogHydratorService: Last of ${tailOps.length} tail ops is ${lastOp.opType}, loading directly`,
-            );
-
-            // Validate the full-state data before loading to NgRx.
-            // The check is non-fatal: we log issues but still dispatch so the user
-            // sees their data rather than a half-loaded UI. Repair is intentionally
-            // not attempted here (it requires a confirm dialog that breaks Electron
-            // focus on Windows — see issue #7631).
-            await this._validateStateForHydration(
-              appData as Record<string, unknown>,
-              'tail-full-state-op-load',
-            );
-            // FIX: Merge vector clock BEFORE dispatching loadAllData
-            // This ensures any operations created synchronously during loadAllData
-            // (e.g., TODAY_TAG repair) will have the correct merged clock.
-            // Without this, those operations get superseded clocks and are rejected by the server.
-            await this.opLogStore.mergeRemoteOpClocks([lastOp]);
+        // #9140 (guarded dispatch): a feature reducer throw does NOT surface
+        // here — rxjs diverts it to an async unhandled-error report and
+        // silently tears down the store's state subscription, so hydration
+        // would "succeed" against a dead store that drops every later
+        // dispatch. The loadAllData failure guard catches inside the reducer
+        // chain instead, keeps the store alive, and reports here so we can
+        // fall back to op-log replay (a throwing reducer commits no state).
+        // See loadAllDataFailureGuardMetaReducer.
+        let snapshotLoadFailure: Error | undefined;
+        runWithLoadAllDataFailureCollector(
+          (error) => (snapshotLoadFailure = error),
+          () =>
             this.store.dispatch(
               loadAllData({
-                appDataComplete: appData as unknown as AppDataComplete,
+                appDataComplete: stateToLoad as unknown as AppDataComplete,
               }),
-            );
-            // No snapshot save needed - full state ops already contain complete state
-            // Snapshot will be saved after next batch of regular operations
-          } else {
-            // A.7.13: Migrate tail operations before replay
-            const replayBatch = this._migrateTailOps(tailOps);
-            const opsToReplay = replayBatch.operations;
-
-            const droppedCount = tailOps.length - replayBatch.sourceOpIdsWithReplay.size;
-            OpLog.normal(
-              `OperationLogHydratorService: Replaying ${opsToReplay.length} tail ops ` +
-                `(${droppedCount} dropped during migration).`,
-            );
-            // PERF: Use bulk dispatch to apply all operations in a single NgRx update.
-            // This reduces 500 dispatches to 1, dramatically improving startup performance.
-            // The bulkHydrationMetaReducer iterates through ops and applies each action.
-            // Lenient (no throw) so a cold-boot IndexedDB hiccup can't block
-            // startup. A null clientId leaves the bulk-apply flag unset, which
-            // defaults to own-op semantics (apply faithfully) — the safe
-            // direction for the common case (replaying THIS device's own ops).
-            // See bulkOperationsMetaReducer.
-            const localClientId =
-              (await this.clientIdProvider.loadClientId()) ?? undefined;
-            const tailOpIds = new Set(tailOps.map((entry) => entry.op.id));
-            await this._dispatchHydrationReplay(
-              replayBatch,
-              localClientId,
-              pendingRemoteOps.filter((entry) => tailOpIds.has(entry.op.id)),
-            );
-
-            // CHECKPOINT C: Validate state after replaying tail operations.
-            // If invalid, we keep the data on screen but skip the snapshot save so
-            // we don't cache corrupted state for next boot.
-            const isStateValid =
-              await this._validateCurrentStateForHydration('tail-replay');
-
-            // 5. If we replayed many ops AND state is valid, save a new snapshot
-            // for faster future loads.
-            if (isStateValid && opsToReplay.length > 10) {
-              OpLog.normal(
-                `OperationLogHydratorService: Saving new snapshot after replaying ${opsToReplay.length} ops`,
-              );
-              snapshotPersistedDuringHydration =
-                await this.snapshotService.saveCurrentStateAsSnapshot();
-            }
-          }
-        }
-
-        OpLog.normal('OperationLogHydratorService: Hydration complete.');
-      } else {
-        OpLog.warn(
-          'OperationLogHydratorService: No snapshot found. Replaying all operations from start.',
-        );
-        // No snapshot means we might be in a fresh install state or post-migration-check with no legacy data.
-        // We must replay ALL operations from the beginning of the log.
-        // Status-blind except for durable reducer rejections — see the replay
-        // policy note in the snapshot branch above.
-        const allOps = (await this.opLogStore.getOpsAfterSeq(0)).filter(
-          (entry) => entry.reducerRejectedAt === undefined,
+            ),
         );
 
-        if (allOps.length === 0) {
-          // Fresh install - no data at all
-          OpLog.normal(
-            'OperationLogHydratorService: Fresh install detected. No data to load.',
+        if (snapshotLoadFailure !== undefined) {
+          await this._fallBackToOpLogReplay(
+            snapshotLoadFailure,
+            'loadAllData reducer rejected the snapshot state',
+            pendingRemoteOps,
           );
-          sessionStorage.removeItem(IDB_OPEN_ERROR_RELOAD_KEY);
-          return;
-        }
-
-        // Optimization: If last op is SyncImport or Repair, skip replay and load directly
-        const lastEntry = allOps[allOps.length - 1];
-        const lastOp = lastEntry.op;
-        const hasPendingReducerWork = allOps.some(
-          (entry) => entry.applicationStatus === 'pending',
-        );
-        const appData = hasPendingReducerWork
-          ? undefined
-          : this._extractFullStateFromOp(lastOp);
-        if (appData) {
-          OpLog.normal(
-            `OperationLogHydratorService: Last of ${allOps.length} ops is ${lastOp.opType}, loading directly`,
-          );
-
-          // Validate the full-state data before loading to NgRx (non-fatal).
-          await this._validateStateForHydration(
-            appData as Record<string, unknown>,
-            'full-state-op-load',
-          );
-          // FIX: Merge vector clock BEFORE dispatching loadAllData
-          // Same fix as the tail ops branch - prevents superseded clock bug
-          await this.opLogStore.mergeRemoteOpClocks([lastOp]);
-          this.store.dispatch(
-            loadAllData({
-              appDataComplete: appData as unknown as AppDataComplete,
-            }),
-          );
-          // No snapshot save needed - full state ops already contain complete state
+          hydrationFallbackRan = true;
         } else {
-          // A.7.13: Migrate all operations before replay
-          const replayBatch = this._migrateTailOps(allOps);
-          const opsToReplay = replayBatch.operations;
-
-          const droppedCount = allOps.length - replayBatch.sourceOpIdsWithReplay.size;
-          OpLog.normal(
-            `OperationLogHydratorService: Replaying all ${opsToReplay.length} ops ` +
-              `(${droppedCount} dropped during migration).`,
+          // 4. Replay tail operations (A.7.13: with operation migration)
+          snapshotPersistedDuringHydration = await this._replayTailOps(
+            snapshot.lastAppliedOpSeq,
+            pendingRemoteOps,
           );
-          // PERF: Use bulk dispatch to apply all operations in a single NgRx update.
-          // This reduces 500 dispatches to 1, dramatically improving startup performance.
-          // The bulkHydrationMetaReducer iterates through ops and applies each action.
-          // Lenient (no throw) so a cold-boot IndexedDB hiccup can't block
-          // startup. A null clientId leaves the bulk-apply flag unset, which
-          // defaults to own-op semantics (apply faithfully) — the safe direction
-          // for the common case (replaying THIS device's own ops). See
-          // bulkOperationsMetaReducer.
-          const localClientId = (await this.clientIdProvider.loadClientId()) ?? undefined;
-          const allOpIds = new Set(allOps.map((entry) => entry.op.id));
-          await this._dispatchHydrationReplay(
-            replayBatch,
-            localClientId,
-            pendingRemoteOps.filter((entry) => allOpIds.has(entry.op.id)),
-          );
-
-          // CHECKPOINT C: Validate state after replaying all operations.
-          // If invalid, we still proceed but skip the snapshot save so we don't
-          // cache corrupted state for next boot.
-          const isStateValid =
-            await this._validateCurrentStateForHydration('full-replay');
-
-          // Save snapshot after replay for faster future loads (only when valid).
-          if (isStateValid) {
-            OpLog.normal(
-              `OperationLogHydratorService: Saving snapshot after replaying ${opsToReplay.length} ops`,
-            );
-            snapshotPersistedDuringHydration =
-              await this.snapshotService.saveCurrentStateAsSnapshot();
-          }
+          OpLog.normal('OperationLogHydratorService: Hydration complete.');
         }
-
-        OpLog.normal('OperationLogHydratorService: Full replay complete.');
+      } else if (!hydrationFallbackRan) {
+        snapshotPersistedDuringHydration =
+          await this._replayAllOpsFromScratch(pendingRemoteOps);
       }
 
       // Legacy cleanup placeholder - kept for future maintenance operations if needed
@@ -487,7 +337,13 @@ export class OperationLogHydratorService {
       // snapshot exists) and surface the very "Failed to load data" this fix
       // removes. Only the on-disk cache is at stake; the store is already
       // hydrated.
-      if (this._migrationRanDuringHydration && !snapshotPersistedDuringHydration) {
+      // The #9140 fallback persists nothing — the convergence save must not
+      // undo that by caching the partial replay over the intact snapshot.
+      if (
+        this._migrationRanDuringHydration &&
+        !snapshotPersistedDuringHydration &&
+        !hydrationFallbackRan
+      ) {
         try {
           // Drain explicitly rather than relying on retryFailedRemoteOps(): it
           // early-returns before its finally when there are no failed ops (the
@@ -517,6 +373,10 @@ export class OperationLogHydratorService {
           );
         }
       }
+
+      // #9140: gate compaction while the fallback's possibly-partial state is
+      // live; a later clean run (plugin reInit) re-enables it.
+      this.hydrationStateService.setHydrationFallbackActive(hydrationFallbackRan);
 
       // Clear the auto-reload guard so that a fresh backing-store error in the same
       // tab session gets the auto-reload treatment again rather than going straight
@@ -553,6 +413,307 @@ export class OperationLogHydratorService {
         throw recoveryErr;
       }
     }
+  }
+
+  /**
+   * #9140: gate for the op-log replay fallback. Rethrows `cause` (preserving
+   * the original error for the terminal catch) when: IndexedDB itself is
+   * broken (terminal catch shows the IDB-specific guidance); the store
+   * already holds meaningful data — hydrateStore() re-enters on a LIVE store
+   * via PluginAPI.reInitData(), and replay-from-0 on top would double-apply
+   * non-idempotent reducers; or the op-log has no rows (cheap pre-filter —
+   * _replayAllOpsFromScratch re-checks the reducer-rejected-filtered set).
+   */
+  private async _assertOpLogReplayFallbackViable(cause: unknown): Promise<void> {
+    if (cause instanceof IndexedDBOpenError) {
+      throw cause;
+    }
+    if (hasMeaningfulStateData(this.stateSnapshotService.getStateSnapshot())) {
+      throw cause;
+    }
+    if ((await this.opLogStore.getLastSeq()) === 0) {
+      throw cause;
+    }
+  }
+
+  /**
+   * #9140: hydrates from an op-log replay-from-scratch after the snapshot
+   * could not be hydrated, and makes the degraded recovery visible. Throws
+   * (via the gate or the replay) when the fallback cannot safely produce
+   * state — the terminal catch then keeps the pre-#9140 behavior.
+   */
+  private async _fallBackToOpLogReplay(
+    cause: unknown,
+    reason: string,
+    pendingRemoteOps: OperationLogEntry[],
+  ): Promise<void> {
+    await this._assertOpLogReplayFallbackViable(cause);
+    OpLog.err(
+      `OperationLogHydratorService: ${reason}. Skipping the snapshot for this boot and replaying the op-log from the start.`,
+      cause,
+    );
+    await this._replayAllOpsFromScratch(pendingRemoteOps, cause);
+    // Visible degradation; fires only after the replay produced state (a
+    // replay throw takes the terminal HYDRATION_FAILED path instead).
+    this.snackService.open({
+      type: 'ERROR',
+      msg: T.F.SYNC.S.HYDRATION_FALLBACK_RECOVERY,
+    });
+  }
+
+  /**
+   * Replays the tail operations after a hydrated snapshot (A.7.13: with
+   * operation migration).
+   *
+   * Replay is status-blind except for durable reducer rejections
+   * (getOpsAfterSeq has no status filter) — every other entry's reducer
+   * effect belongs in state exactly once:
+   * - applied ops: their effect is state history by definition.
+   * - failed ops (remote, archive side effect threw): their reducers DID
+   *   commit before the failure (bulk dispatch precedes archive handling),
+   *   so replay restores that effect; retryFailedRemoteOps() then re-runs
+   *   ONLY the outstanding archive side effects.
+   * - rejected ops: every rejection path appends its compensation AFTER
+   *   them in seq order, so replay converges to post-resolution runtime
+   *   state — server-rejected local ops are followed by merged ops
+   *   (SupersededOperationResolver) or keep their effect (permanent
+   *   rejections never revert state), and LWW-losing remote ops are
+   *   followed by the local-win op that overwrites them
+   *   (ConflictResolutionService).
+   * - reducerRejectedAt ops: conversion, schema migration, or reducer
+   *   application could not produce state, so replay must not try them
+   *   again on every startup.
+   *
+   * @returns Whether a fresh snapshot was persisted during the replay.
+   */
+  private async _replayTailOps(
+    lastAppliedOpSeq: number,
+    pendingRemoteOps: OperationLogEntry[],
+  ): Promise<boolean> {
+    const tailOps = (await this.opLogStore.getOpsAfterSeq(lastAppliedOpSeq)).filter(
+      (entry) => entry.reducerRejectedAt === undefined,
+    );
+
+    if (tailOps.length === 0) {
+      return false;
+    }
+
+    // Optimization: If last op is SyncImport or Repair, skip replay and load directly
+    const lastEntry = tailOps[tailOps.length - 1];
+    const lastOp = lastEntry.op;
+    // The shortcut is safe only when the entire replay range has a
+    // durable reducer outcome. An earlier pending row still needs bulk
+    // replay/checkpointing even if a later full-state op replaces its
+    // visible state; otherwise that row would quarantine sync forever.
+    const hasPendingReducerWork = tailOps.some(
+      (entry) => entry.applicationStatus === 'pending',
+    );
+    const appData = hasPendingReducerWork
+      ? undefined
+      : this._extractFullStateFromOp(lastOp);
+    if (appData) {
+      OpLog.normal(
+        `OperationLogHydratorService: Last of ${tailOps.length} tail ops is ${lastOp.opType}, loading directly`,
+      );
+
+      // Validate the full-state data before loading to NgRx.
+      // The check is non-fatal: we log issues but still dispatch so the user
+      // sees their data rather than a half-loaded UI. Repair is intentionally
+      // not attempted here (it requires a confirm dialog that breaks Electron
+      // focus on Windows — see issue #7631).
+      await this._validateStateForHydration(
+        appData as Record<string, unknown>,
+        'tail-full-state-op-load',
+      );
+      // FIX: Merge vector clock BEFORE dispatching loadAllData
+      // This ensures any operations created synchronously during loadAllData
+      // (e.g., TODAY_TAG repair) will have the correct merged clock.
+      // Without this, those operations get superseded clocks and are rejected by the server.
+      await this.opLogStore.mergeRemoteOpClocks([lastOp]);
+      this.store.dispatch(
+        loadAllData({
+          appDataComplete: appData as unknown as AppDataComplete,
+        }),
+      );
+      // No snapshot save needed - full state ops already contain complete state
+      // Snapshot will be saved after next batch of regular operations
+      return false;
+    }
+
+    // A.7.13: Migrate tail operations before replay
+    const replayBatch = this._migrateTailOps(tailOps);
+    const opsToReplay = replayBatch.operations;
+
+    const droppedCount = tailOps.length - replayBatch.sourceOpIdsWithReplay.size;
+    OpLog.normal(
+      `OperationLogHydratorService: Replaying ${opsToReplay.length} tail ops ` +
+        `(${droppedCount} dropped during migration).`,
+    );
+    // PERF: Use bulk dispatch to apply all operations in a single NgRx update.
+    // This reduces 500 dispatches to 1, dramatically improving startup performance.
+    // The bulkHydrationMetaReducer iterates through ops and applies each action.
+    // Lenient (no throw) so a cold-boot IndexedDB hiccup can't block
+    // startup. A null clientId leaves the bulk-apply flag unset, which
+    // defaults to own-op semantics (apply faithfully) — the safe
+    // direction for the common case (replaying THIS device's own ops).
+    // See bulkOperationsMetaReducer.
+    const localClientId = (await this.clientIdProvider.loadClientId()) ?? undefined;
+    const tailOpIds = new Set(tailOps.map((entry) => entry.op.id));
+    await this._dispatchHydrationReplay(
+      replayBatch,
+      localClientId,
+      pendingRemoteOps.filter((entry) => tailOpIds.has(entry.op.id)),
+    );
+
+    // CHECKPOINT C: Validate state after replaying tail operations.
+    // If invalid, we keep the data on screen but skip the snapshot save so
+    // we don't cache corrupted state for next boot.
+    const isStateValid = await this._validateCurrentStateForHydration('tail-replay');
+
+    // 5. If we replayed many ops AND state is valid, save a new snapshot
+    // for faster future loads.
+    if (isStateValid && opsToReplay.length > 10) {
+      OpLog.normal(
+        `OperationLogHydratorService: Saving new snapshot after replaying ${opsToReplay.length} ops`,
+      );
+      return this.snapshotService.saveCurrentStateAsSnapshot();
+    }
+    return false;
+  }
+
+  /**
+   * Replays the entire op-log from seq 0 against the store's current (initial)
+   * state. Runs when no snapshot exists, and as the #9140 fallback when the
+   * snapshot cannot be hydrated (migration throw / loadAllData reducer
+   * rejection) but the op-log still has replayable rows.
+   *
+   * MUST only run while the store holds no snapshot-derived state: bulk replay
+   * applies ops ON TOP of current state, so replay-from-0 after a committed
+   * loadAllData would double-apply non-idempotent reducers. The no-snapshot
+   * call site satisfies this trivially; the #9140 fallback call sites are
+   * guarded by _assertOpLogReplayFallbackViable (throws happen pre-commit, and
+   * the live-store check rejects re-entrant hydration).
+   *
+   * @param fallbackCause - Set when running as the #9140 fallback while an
+   *   INTACT (merely unhydratable-this-build) snapshot is still on disk: the
+   *   replay then rethrows the cause when nothing is replayable (instead of
+   *   booting silently empty) and NEVER persists its result — for a synced
+   *   client the surviving log is only a compaction-window tail and a
+   *   cursor-based sync never re-sends pruned ops, so persisting would
+   *   overwrite the last complete local copy.
+   * @returns Whether a fresh snapshot was persisted during the replay.
+   */
+  private async _replayAllOpsFromScratch(
+    pendingRemoteOps: OperationLogEntry[],
+    fallbackCause?: unknown,
+  ): Promise<boolean> {
+    OpLog.warn(
+      'OperationLogHydratorService: Replaying all operations from the start of the op-log.',
+    );
+    // We might be in a fresh install state or post-migration-check with no
+    // legacy data. Replay ALL operations from the beginning of the log.
+    // Status-blind except for durable reducer rejections — see the replay
+    // policy note on _replayTailOps.
+    const allOps = (await this.opLogStore.getOpsAfterSeq(0)).filter(
+      (entry) => entry.reducerRejectedAt === undefined,
+    );
+
+    if (allOps.length === 0) {
+      if (fallbackCause !== undefined) {
+        // Rows exist (the gate pre-checked) but every one is reducer-rejected:
+        // booting silently empty would be worse than the terminal path.
+        throw fallbackCause;
+      }
+      // Fresh install - no data at all. The caller's common tail clears the
+      // IDB reload guard.
+      OpLog.normal(
+        'OperationLogHydratorService: Fresh install detected. No data to load.',
+      );
+      return false;
+    }
+
+    // Optimization: If last op is SyncImport or Repair, skip replay and load directly
+    const lastEntry = allOps[allOps.length - 1];
+    const lastOp = lastEntry.op;
+    const hasPendingReducerWork = allOps.some(
+      (entry) => entry.applicationStatus === 'pending',
+    );
+    const appData = hasPendingReducerWork
+      ? undefined
+      : this._extractFullStateFromOp(lastOp);
+    if (appData) {
+      OpLog.normal(
+        `OperationLogHydratorService: Last of ${allOps.length} ops is ${lastOp.opType}, loading directly`,
+      );
+
+      // Validate the full-state data before loading to NgRx (non-fatal).
+      await this._validateStateForHydration(
+        appData as Record<string, unknown>,
+        'full-state-op-load',
+      );
+      // FIX: Merge vector clock BEFORE dispatching loadAllData
+      // Same fix as the tail ops branch - prevents superseded clock bug
+      await this.opLogStore.mergeRemoteOpClocks([lastOp]);
+      this.store.dispatch(
+        loadAllData({
+          appDataComplete: appData as unknown as AppDataComplete,
+        }),
+      );
+      // No snapshot save needed - full state ops already contain complete state
+      OpLog.normal('OperationLogHydratorService: Full replay complete.');
+      return false;
+    }
+
+    // A.7.13: Migrate all operations before replay
+    const replayBatch = this._migrateTailOps(allOps);
+    const opsToReplay = replayBatch.operations;
+
+    const droppedCount = allOps.length - replayBatch.sourceOpIdsWithReplay.size;
+    OpLog.normal(
+      `OperationLogHydratorService: Replaying all ${opsToReplay.length} ops ` +
+        `(${droppedCount} dropped during migration).`,
+    );
+    // PERF: Use bulk dispatch to apply all operations in a single NgRx update.
+    // This reduces 500 dispatches to 1, dramatically improving startup performance.
+    // The bulkHydrationMetaReducer iterates through ops and applies each action.
+    // Lenient (no throw) so a cold-boot IndexedDB hiccup can't block
+    // startup. A null clientId leaves the bulk-apply flag unset, which
+    // defaults to own-op semantics (apply faithfully) — the safe direction
+    // for the common case (replaying THIS device's own ops). See
+    // bulkOperationsMetaReducer.
+    const localClientId = (await this.clientIdProvider.loadClientId()) ?? undefined;
+    const allOpIds = new Set(allOps.map((entry) => entry.op.id));
+    await this._dispatchHydrationReplay(
+      replayBatch,
+      localClientId,
+      pendingRemoteOps.filter((entry) => allOpIds.has(entry.op.id)),
+    );
+
+    if (fallbackCause !== undefined) {
+      // #9140 fallback mode: never overwrite the intact on-disk snapshot with
+      // the (possibly partial) replay — see the @param doc.
+      OpLog.warn(
+        'OperationLogHydratorService: Fallback replay complete — keeping the existing on-disk snapshot (no persist).',
+      );
+      return false;
+    }
+
+    // CHECKPOINT C: Validate state after replaying all operations.
+    // If invalid, we still proceed but skip the snapshot save so we don't
+    // cache corrupted state for next boot.
+    const isStateValid = await this._validateCurrentStateForHydration('full-replay');
+
+    // Save snapshot after replay for faster future loads (only when valid).
+    let snapshotPersisted = false;
+    if (isStateValid) {
+      OpLog.normal(
+        `OperationLogHydratorService: Saving snapshot after replaying ${opsToReplay.length} ops`,
+      );
+      snapshotPersisted = await this.snapshotService.saveCurrentStateAsSnapshot();
+    }
+
+    OpLog.normal('OperationLogHydratorService: Full replay complete.');
+    return snapshotPersisted;
   }
 
   /**
@@ -961,20 +1122,10 @@ export class OperationLogHydratorService {
    * @see https://github.com/johannesjo/super-productivity/issues/6255
    */
   private _showIndexedDBOpenError(error: IndexedDBOpenError): void {
-    // Log full error details to console for debugging (can be copied by users)
-    OpLog.err(
-      'IndexedDB open failed after all retries. Original error:',
-      error.originalError,
-    );
-
-    const originalMsg =
-      error.originalError instanceof Error
-        ? error.originalError.message
-        : String(error.originalError);
-
-    // Hoist platform detection — used in both branches below to avoid computing twice
-    const isFlatpak = IS_ELECTRON && window.ea?.isFlatpak?.();
-    const isSnap = !isFlatpak && IS_ELECTRON && window.ea?.isSnap?.();
+    // Log full error details to console for debugging (can be copied by users).
+    // Deliberately does not mention retries — the barrier path stops as soon as
+    // it is hit (#9187); `error.message` names which case this is.
+    OpLog.err('IndexedDB open failed. Original error:', error.originalError);
 
     // For backing-store errors (common during Linux session startup with autostart),
     // auto-reload once after the user dismisses the dialog. By the time the dialog
@@ -997,34 +1148,15 @@ export class OperationLogHydratorService {
       }
     }
 
-    // Second failure, or non-backing-store error: show full manual recovery instructions.
-    let message =
-      'Database Error - Cannot Load Data\n\n' +
-      'Super Productivity cannot open its database. ' +
-      'This may be caused by:\n\n' +
-      '- Low disk space\n' +
-      '- Temporary file lock (try closing other tabs)\n' +
-      '- Storage corruption\n\n';
-
-    if (error.isBackingStoreError) {
-      message +=
-        'Recovery steps:\n' +
-        '1. Close ALL browser tabs and windows\n' +
-        '2. Restart the app\n' +
-        (isFlatpak
-          ? '3. If using Linux Flatpak with autostart, try disabling autostart and launching manually\n'
-          : isSnap
-            ? '3. If using Linux Snap, try: snap set core experimental.refresh-app-awareness=true\n'
-            : '3. If using Linux with autostart, try disabling autostart and launching manually\n') +
-        '4. If issue persists, check available disk space\n\n';
-    }
-
-    message +=
-      'If the problem continues after restart, your browser storage may need to be cleared.\n\n' +
-      `Technical details: ${originalMsg}\n\n` +
-      '(Check browser console for full error details)';
-
-    alertDialog(message);
+    // `getAppVersionStr()` rather than the bare version: its channel suffix
+    // (e.g. `18.15.1P` vs `18.15.1W`) is what tells a user WHICH of two copies
+    // they just launched — the central question in a downgrade (#9187).
+    alertDialog(
+      buildIdbOpenErrorMessage(error, {
+        channel: detectChannel(),
+        appVersion: getAppVersionStr(),
+      }),
+    );
   }
 
   /**
