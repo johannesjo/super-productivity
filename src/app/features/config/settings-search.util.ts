@@ -92,7 +92,9 @@ export const searchSettings = (
     const isTabMatch = has(tab.labelKey);
     const sectionTargets = tab.sections.flatMap((section) => {
       const matchedLabelKey = _allFields(section.items)
-        .flatMap((field) => [field.templateOptions?.label, field.templateOptions?.text])
+        // `props` is the modern name, `templateOptions` the legacy alias — both
+        // are in use across the config sections.
+        .map((field) => (field.props ?? field.templateOptions)?.label)
         .find((val: unknown): val is string => typeof val === 'string' && has(val));
       const isMatch = isTabMatch || has(section.title) || has(section.help);
       if (!isMatch && !matchedLabelKey) {

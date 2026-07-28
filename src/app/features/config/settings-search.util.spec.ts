@@ -14,6 +14,10 @@ const TABS: SettingsSearchTab[] = [
         help: 'GCF.IDLE.Pauses tracking when you step away',
         items: [
           { key: 'minIdleTime', templateOptions: { label: 'GCF.IDLE.Min idle time' } },
+          {
+            key: 'isOnlyOpenIdleWhenCurrentTask',
+            props: { label: 'GCF.IDLE.Only when tracking' },
+          },
         ],
       },
     ],
@@ -61,6 +65,11 @@ describe('searchSettings', () => {
   it('should report which field label matched', () => {
     const [hit] = searchSettings(TABS, 'min idle', translate);
     expect(hit.matchedLabelKey).toBe('GCF.IDLE.Min idle time');
+  });
+
+  it('should match a label declared via the modern `props` API', () => {
+    const [hit] = searchSettings(TABS, 'only when tracking', translate);
+    expect(hit.matchedLabelKey).toBe('GCF.IDLE.Only when tracking');
   });
 
   it('should match a label nested inside a fieldGroup', () => {
