@@ -29,6 +29,10 @@ describe('IdleEffects', () => {
     addEventListener: jasmine.Spy;
   };
   let idleCallback: ((ev: Event, data?: unknown) => void) | null;
+  let simpleCounterServiceMock: {
+    enabledSimpleStopWatchCounters$: BehaviorSubject<{ id: string; isOn: boolean }[]>;
+    decreaseCounterToday: jasmine.Spy;
+  };
 
   const setup = (overrides?: {
     isSuppressIdleDuringFocusMode?: boolean;
@@ -61,6 +65,13 @@ describe('IdleEffects', () => {
       setCurrentId: jasmine.createSpy('setCurrentId'),
     };
 
+    simpleCounterServiceMock = {
+      enabledSimpleStopWatchCounters$: new BehaviorSubject<
+        { id: string; isOn: boolean }[]
+      >([]),
+      decreaseCounterToday: jasmine.createSpy('decreaseCounterToday'),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         IdleEffects,
@@ -88,10 +99,7 @@ describe('IdleEffects', () => {
         { provide: TaskService, useValue: taskServiceMock },
         { provide: MatDialog, useValue: {} as any },
         { provide: UiHelperService, useValue: {} as any },
-        {
-          provide: SimpleCounterService,
-          useValue: { enabledSimpleStopWatchCounters$: new BehaviorSubject([]) },
-        },
+        { provide: SimpleCounterService, useValue: simpleCounterServiceMock },
         {
           provide: DateService,
           useValue: { todayStr: () => '2026-07-13' },
@@ -287,6 +295,33 @@ describe('IdleEffects', () => {
       expect(taskSpies().removeTimeSpent).toHaveBeenCalledTimes(1);
       expect(taskSpies().removeTimeSpent.calls.mostRecent().args[0]).toBe('task-1');
       expect(taskSpies().setCurrentId).toHaveBeenCalledWith(null);
+    });
+
+    // Same hazard, other entity: a counter switched on during the wait never ran
+    // during the idle period, so decrementing it would delete recorded habit time.
+    it('decrements the counters running at the edge, not ones started during the wait', () => {
+      setup();
+      const hydrationState = TestBed.inject(HydrationStateService);
+      simpleCounterServiceMock.enabledSimpleStopWatchCounters$.next([
+        { id: 'counter-at-edge', isOn: true },
+      ]);
+      listen();
+
+      hydrationState.startApplyingRemoteOps();
+      goIdle();
+
+      // user comes back mid-window, stops that counter and starts another
+      simpleCounterServiceMock.enabledSimpleStopWatchCounters$.next([
+        { id: 'counter-started-later', isOn: true },
+      ]);
+
+      hydrationState.endApplyingRemoteOps();
+      TestBed.flushEffects();
+
+      expect(simpleCounterServiceMock.decreaseCounterToday).toHaveBeenCalledTimes(1);
+      expect(
+        simpleCounterServiceMock.decreaseCounterToday.calls.mostRecent().args[0],
+      ).toBe('counter-at-edge');
     });
   });
 });

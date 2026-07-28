@@ -164,11 +164,24 @@ export class IdleEffects {
   handleIdleInit$ = createEffect(() =>
     this._store.select(selectIsIdle).pipe(
       distinctUntilChanged(),
-      // Capture the task this idle period belongs to BEFORE the wait below. The
-      // deferral can outlive the user's return, and `currentTaskId()` read after
-      // it may already be a *different* task that never accrued this idle time —
+      // Snapshot EVERY entity this effect mutates BEFORE the wait below. The
+      // deferral can outlive the user's return, so anything re-read afterwards
+      // may be a *different* task or counter that never accrued this idle time —
       // subtracting it there would silently delete real tracked work. #9348
-      map((isIdle) => [isIdle, this._taskService.currentTaskId()] as const),
+      withLatestFrom(
+        this._store.select(selectIdleTime),
+        this._simpleCounterService.enabledSimpleStopWatchCounters$,
+        this._isFocusSessionRunning$,
+      ),
+      map(
+        ([isIdle, idleTime, enabledSimpleStopWatchCounters, isFocusSessionRunning]) => ({
+          isIdle,
+          idleTime,
+          enabledSimpleStopWatchCounters,
+          isFocusSessionRunning,
+          taskIdAtIdleStart: this._taskService.currentTaskId(),
+        }),
+      ),
       // Guard: defer idle state changes during sync - CRITICAL because this effect
       // has data mutations (removeTimeSpent, setCurrentId, decreaseCounterToday).
       // NOTE: this must DEFER, not drop. selectIsIdle emits `true` exactly once
@@ -181,21 +194,14 @@ export class IdleEffects {
       // downstream would keep that cancelled value as its "last seen" and swallow
       // the next identical one — re-creating the wedge this is here to prevent.
       waitForSyncWindow(this._hydrationStateService, 'IdleEffects.handleIdleInit$'),
-      switchMap(([isIdle, taskIdAtIdleStart]) =>
-        iif(() => isIdle, of(taskIdAtIdleStart), EMPTY),
-      ),
-      withLatestFrom(
-        this._store.select(selectIdleTime),
-        this._simpleCounterService.enabledSimpleStopWatchCounters$,
-        this._isFocusSessionRunning$,
-      ),
+      switchMap((snapshot) => iif(() => snapshot.isIdle, of(snapshot), EMPTY)),
       map(
-        ([
+        ({
           taskIdAtIdleStart,
           idleTime,
           enabledSimpleStopWatchCounters,
           isFocusSessionRunning,
-        ]) => {
+        }) => {
           // ALL IDLE SIDE EFFECTS
           // ---------------------
           if (IS_ELECTRON) {
