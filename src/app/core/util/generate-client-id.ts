@@ -1,44 +1,71 @@
+import { IS_ELECTRON } from '../../app.constants';
+import { IS_IOS } from '../../util/is-ios';
+import { IS_IOS_NATIVE } from '../../util/is-native-platform';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+
 /**
- * Pure client-ID generation and format validation.
+ * Client-ID generation and format validation.
  *
  * Extracted from ClientIdService so destructive-flow callers (clean-slate,
  * backup-restore) can mint an id without going through the stateful service —
  * the new id is persisted only inside the atomic SUP_OPS transaction in
  * OperationLogStoreService.runDestructiveStateReplacement. See issue #7732.
  *
- * No DI, no I/O — directly unit-testable.
+ * No DI. Platform detection reuses the app-wide constants rather than
+ * re-deriving it here: local re-derivation is what broke in #9353. Those
+ * constants are frozen at module load and cannot be stubbed, so the mapping is
+ * split into a pure `getPlatformCode()` that a spec can drive directly — the
+ * same split `util/get-app-version-str.ts` uses for `distChannelSuffix()`.
  */
+
+type PlatformCode = 'B' | 'E' | 'A' | 'I';
+
+interface ClientPlatform {
+  isElectron: boolean;
+  isAndroid: boolean;
+  isIos: boolean;
+}
 
 /**
- * Returns a single-character platform identifier for compact client IDs.
+ * Maps a platform to the single character that prefixes a compact client ID.
  * B = Browser, E = Electron, A = Android, I = iOS.
+ *
+ * The three predicates are independent, so nothing structurally prevents an
+ * overlap and the order is a deliberate guard rather than an arbitrary one. The
+ * closest real case is macOS Electron, which already satisfies `IS_IOS`'s
+ * `Mac` user-agent half — only `'ontouchend' in document` (false on Macs today)
+ * keeps it from also reading as iOS. Electron therefore wins first.
  */
-const _getEnvironmentId = (): string => {
-  // Detect Electron
-  const isElectron =
-    typeof process !== 'undefined' &&
-    !!(process as { versions?: { electron?: string } }).versions?.electron;
-  if (isElectron) {
+export const getPlatformCode = (platform: ClientPlatform): PlatformCode => {
+  if (platform.isElectron) {
     return 'E';
   }
-
-  // Detect Android WebView
-  if (/Android/.test(navigator.userAgent) && /wv/.test(navigator.userAgent)) {
+  if (platform.isAndroid) {
     return 'A';
   }
-
-  // Detect iOS
-  if (
-    navigator.userAgent.includes('iOS') ||
-    navigator.userAgent.includes('iPhone') ||
-    navigator.userAgent.includes('iPad')
-  ) {
+  if (platform.isIos) {
     return 'I';
   }
-
-  // Default: Browser
   return 'B';
 };
+
+const _getEnvironmentId = (): PlatformCode =>
+  getPlatformCode({
+    isElectron: IS_ELECTRON,
+    // `window.SUPAndroid`, injected by both Android activities
+    // (CapacitorMainActivity and the legacy FullscreenActivity), so Play and
+    // F-Droid both stay 'A'. Deliberately narrower than the `Android`+`wv`
+    // user-agent test it replaces: our page inside some *other* app's WebView
+    // is a browser for forensic purposes, and now reports 'B'.
+    isAndroid: IS_ANDROID_WEB_VIEW,
+    // Capacitor first — it is authoritative for the native app, which is the
+    // case that actually broke, and cannot drift when Apple changes a UA. IS_IOS
+    // is the web fallback: it carries the iPadOS desktop-UA workaround and keeps
+    // mobile Safari on 'I'. IS_IOS_NATIVE alone would demote iPhone Safari to
+    // 'B'; IS_IOS alone would leave native detection resting on a deprecated
+    // `navigator.platform` heuristic — the same fragility as the original bug.
+    isIos: IS_IOS_NATIVE || IS_IOS,
+  });
 
 /**
  * Generates a random base62 string of the specified length.
@@ -65,6 +92,14 @@ export const generateClientId = (): string => {
  *
  * Used to narrow `unknown` values read from IndexedDB. An invalid format is
  * treated as "absent" rather than fatal — see issue #6197.
+ *
+ * The `[BEAI]` class is a compatibility contract with the installed fleet, not
+ * a local detail. "Invalid" means "absent" all the way down: a client that does
+ * not know a prefix reads null (`client-id.service.ts:165`) and then mints over
+ * the stored id (`:217`) — a silent vector-clock key rotation, one-time per
+ * install but permanent, the identity loss #7732 exists to prevent. So a fifth
+ * platform code may only ship once the receiving fleet already accepts it.
+ * Adding `E`/`I` here was safe precisely because every released client does.
  */
 export const isValidClientIdFormat = (id: unknown): id is string => {
   return (
