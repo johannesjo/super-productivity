@@ -299,7 +299,6 @@ const validateTasksToProjectsAndTags = (
   }
 
   // Validate projects in tasks
-  const unlistedTaskIds: string[] = [];
   for (const tid of d.task.ids) {
     const task = d.task.entities[tid];
     if (!task) {
@@ -339,33 +338,11 @@ const validateTasksToProjectsAndTags = (
       return false;
     }
 
-    if (!task.parentId) {
-      // Empty project ids remain valid for legacy tagged tasks. Normal task
-      // creation assigns a default project, while navigation/data repair can
-      // re-home legacy records without changing their replay semantics.
-      if (!task.projectId && task.tagIds.length === 0) {
-        _validityError('Task without project or tag', { taskId: task.id });
-        return false;
-      }
-      if (task.projectId && !projectTaskMap.get(task.projectId)?.has(task.id)) {
-        unlistedTaskIds.push(task.id);
-      }
+    // Check if task has project or tag
+    if (!task.parentId && !task.projectId && task.tagIds.length === 0) {
+      _validityError(`Task without project or tag`, { taskId: task.id });
+      return false;
     }
-  }
-
-  // A top-level task missing from its project's ordering arrays renders in no
-  // project list. It is repairable (_addOrphanedTasksToProjectLists) and arises
-  // routinely from whole-entity LWW on PROJECT when a reorder races a task add,
-  // so we log but do NOT fail validation — same treatment as the other
-  // ordering-array inconsistencies above. Failing here would be actively harmful:
-  // the hydration checkpoints validate WITHOUT repairing and gate the snapshot
-  // save on the result, and legacy disaster recovery throws outright, so a
-  // non-syncing user would degrade permanently with nothing ever healing them.
-  if (unlistedTaskIds.length > 0) {
-    OpLog.info(
-      `[ValidateState] ${unlistedTaskIds.length} top-level tasks missing from their project lists (repairable)`,
-      { unlistedTaskIds },
-    );
   }
 
   const archiveCtx: ArchiveValidationCtx = { projectIds, tagIds, taskRepeatCfgIds };

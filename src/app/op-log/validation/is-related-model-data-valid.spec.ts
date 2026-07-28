@@ -2,15 +2,9 @@ import { AppDataComplete } from '../model/model-config';
 import { OpLog } from '../../core/log';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { OP_LOG_SYNC_LOGGER } from '../core/sync-logger.adapter';
-import {
-  createValidAppData,
-  createValidProject,
-  createValidTask,
-} from './state-validity-test-utils';
 
 describe('isRelatedModelDataValid', () => {
   let isRelatedModelDataValid: any;
-  let getLastValidityError: () => string | undefined;
 
   beforeEach(() => {
     // Suppress OpLog output during tests by spying on the methods
@@ -40,9 +34,8 @@ describe('isRelatedModelDataValid', () => {
 
     // Import the function under test
     // @ts-ignore
-    const validityModule = require('./is-related-model-data-valid');
-    isRelatedModelDataValid = validityModule.isRelatedModelDataValid;
-    getLastValidityError = validityModule.getLastValidityError;
+    isRelatedModelDataValid =
+      require('./is-related-model-data-valid').isRelatedModelDataValid;
     /* eslint-enable @typescript-eslint/no-require-imports */
   });
 
@@ -142,37 +135,6 @@ describe('isRelatedModelDataValid', () => {
     expect(
       JSON.stringify((OP_LOG_SYNC_LOGGER.log as jasmine.Spy).calls.allArgs()),
     ).not.toContain(privateNodeKind);
-  });
-
-  it('should NOT fail validation when a top-level task is missing from its project lists', () => {
-    // This shape is repairable (dataRepair re-lists the task) and arises from
-    // whole-entity LWW on PROJECT. Failing here would be harmful: the hydration
-    // checkpoints validate WITHOUT repairing and gate the snapshot save on the
-    // result, and legacy recovery throws — so a non-syncing user would degrade
-    // permanently with nothing ever healing them. Log-only, like the other
-    // ordering-array inconsistencies. (#8780)
-    const data = createValidAppData();
-    const task = createValidTask('t1', { projectId: 'p1' });
-    const project = createValidProject('p1');
-    data.task = {
-      ...data.task,
-      ids: [task.id],
-      entities: { [task.id]: task },
-    };
-    data.project = {
-      ...data.project,
-      ids: [...(data.project.ids as string[]), project.id],
-      entities: {
-        ...data.project.entities,
-        [project.id]: project,
-      },
-    };
-
-    expect(isRelatedModelDataValid(data)).toBe(true);
-    expect(getLastValidityError()).toBeUndefined();
-    expect(JSON.stringify((OpLog.info as jasmine.Spy).calls.allArgs())).toContain(
-      'missing from their project lists',
-    );
   });
 
   it('should fail validation when task has non-existent repeatCfgId', () => {
