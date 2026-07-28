@@ -37,8 +37,6 @@ export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
         required: true,
-        // The main process drops anything at or below this, so a lower value
-        // would silently disable idle detection altogether (#9349).
         min: IDLE_MIN_IDLE_TIME_MS,
         label: T.GCF.IDLE.MIN_IDLE_TIME,
         description: T.GCF.IDLE.MIN_IDLE_TIME_DESCRIPTION,
