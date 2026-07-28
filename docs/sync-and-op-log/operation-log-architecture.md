@@ -988,7 +988,7 @@ The executable owner is
 with causal classification shared through
 [`classifyOpAgainstSyncImport`](../../packages/sync-core/src/sync-import-filter.ts).
 
-### The Problem
+### The Problem Without a Transport Fence
 
 Consider this scenario:
 
@@ -1022,6 +1022,14 @@ suffix work remains valid.
 
 All of these decisions use vector clocks because the question is causal
 knowledge of the full-state boundary, not wall-clock recency.
+
+SuperSync also prevents the invalid suffix from entering the server log. An
+incremental upload carrying `lastKnownServerSeq` is serialized with state
+replacement uploads on the user's sequence row. If its cursor predates the
+latest `SYNC_IMPORT` or `BACKUP_IMPORT`, the whole batch is rejected and the
+replacement is piggybacked before the client retries. Client-side filtering
+remains necessary for other providers, retained legacy data, and defense in
+depth.
 
 See the field guide's [causality and conflict policy](./sync-architecture.html#causality)
 for the visual overview.

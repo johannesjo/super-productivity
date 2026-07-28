@@ -89,6 +89,7 @@ describeWithDb('Clean-slate upload atomicity (PostgreSQL)', () => {
         snapshotAt: null,
         latestFullStateSeq: null,
         latestFullStateVectorClock: null,
+        latestStateReplacementSeq: null,
       },
     });
     await prisma.user.update({
@@ -137,6 +138,96 @@ describeWithDb('Clean-slate upload atomicity (PostgreSQL)', () => {
       expect(
         await prisma.operation.findUnique({ where: { id: replacement.id } }),
       ).toBeNull();
+    },
+  );
+
+  it.each([
+    { name: 'serial upload path', batchUpload: false },
+    { name: 'batch upload path', batchUpload: true },
+  ] as const)(
+    'rejects stale deltas after a replacement without blocking current clients ($name)',
+    async ({ batchUpload }) => {
+      const service = new SyncService({ batchUpload });
+      const replacement = makeOp({
+        id: `state-replacement-${batchUpload}`,
+        opType: 'SYNC_IMPORT',
+        actionType: '[SP_ALL] Load(import) all data',
+        entityType: 'ALL',
+        entityId: undefined,
+        payload: { task: { ids: ['replacement-task'] } },
+        vectorClock: { [CLIENT_ID]: 1 },
+        syncImportReason: 'FORCE_UPLOAD',
+      });
+      const replacementResult = await service.uploadOps(
+        TEST_USER_ID,
+        CLIENT_ID,
+        [replacement],
+        true,
+      );
+      const replacementSeq = replacementResult[0].serverSeq;
+      expect(replacementResult[0].accepted).toBe(true);
+      expect(replacementSeq).toBeDefined();
+      if (replacementSeq === undefined) {
+        throw new Error('State replacement did not receive a server sequence');
+      }
+      // Simulate an upgrade from a server version that wrote the retained
+      // replacement operation before the new boundary column was maintained.
+      await prisma.userSyncState.update({
+        where: { userId: TEST_USER_ID },
+        data: { latestStateReplacementSeq: null },
+      });
+
+      const staleDelta = makeOp({
+        id: `stale-delta-${batchUpload}`,
+        clientId: 'stale-client',
+        entityId: 'stale-task',
+        vectorClock: { 'stale-client': 1 },
+      });
+      const staleResult = await service.uploadOps(
+        TEST_USER_ID,
+        staleDelta.clientId,
+        [staleDelta],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        replacementSeq - 1,
+      );
+
+      expect(staleResult[0]).toEqual(
+        expect.objectContaining({
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+        }),
+      );
+      expect(
+        await prisma.operation.findUnique({ where: { id: staleDelta.id } }),
+      ).toBeNull();
+
+      const currentDelta = makeOp({
+        id: `current-delta-${batchUpload}`,
+        clientId: 'current-client',
+        entityId: 'current-task',
+        vectorClock: { 'current-client': 1 },
+      });
+      const currentResult = await service.uploadOps(
+        TEST_USER_ID,
+        currentDelta.clientId,
+        [currentDelta],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        replacementSeq,
+      );
+
+      expect(currentResult[0].accepted).toBe(true);
+      expect(
+        await prisma.userSyncState.findUniqueOrThrow({
+          where: { userId: TEST_USER_ID },
+          select: { latestStateReplacementSeq: true },
+        }),
+      ).toEqual({ latestStateReplacementSeq: replacementSeq });
     },
   );
 });
