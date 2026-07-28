@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { decrypt, decryptBatch, encrypt, encryptBatch } from '@sp/sync-core';
+import {
+  decrypt,
+  decryptBatch,
+  decryptBatchSettled,
+  encrypt,
+  encryptBatch,
+} from '@sp/sync-core';
 import { SyncOperation } from '../sync-providers/provider.interface';
 import { DecryptError } from '../core/errors/sync-errors';
 import { isFullStateOpType } from '../core/operation.types';
@@ -14,6 +20,14 @@ export interface OperationDecryptionFailure {
   operationId: string;
   encryptedBatchIndex: number;
   stage: OperationDecryptionFailureStage;
+  /**
+   * Sanitized error class name (`toSyncLogError`) for decrypt-stage failures.
+   * `OperationError` is the AES-GCM auth-failure signature (wrong key or
+   * corrupt ciphertext); anything else means the device could not run
+   * decryption at all (e.g. `WebCryptoNotAvailableError`) — which support
+   * must not read as password evidence. Never carries error messages.
+   */
+  errorName?: string;
 }
 
 /**
@@ -22,6 +36,12 @@ export interface OperationDecryptionFailure {
  * one successful decrypt in the same batch proves the key is not globally
  * wrong, so a wrong password must never be reported as a per-operation
  * failure of the first item.
+ *
+ * `passwordEvidence` here is BATCH-scoped. The run-scoped value (which also
+ * counts pages decrypted earlier in the same download run — the #9256 shape)
+ * exists only in the download layer's log payload via
+ * `buildDecryptFailureLogArgs`; do not surface this field to users without
+ * that promotion.
  */
 export interface OperationBatchDecryptionDiagnosis {
   encryptedOperationCount: number;
@@ -224,10 +244,12 @@ export class OperationEncryptionService {
 
   /**
    * The batch primitive does not identify which ciphertext failed. Re-check
-   * every item serially only after a batch failure so a wrong key (all items
-   * fail) is distinguishable from isolated corruption (some items decrypt).
-   * The shared session cache avoids repeating key derivation; each plaintext
-   * is parse-checked and discarded, never retained on the returned error.
+   * every item via `decryptBatchSettled` only after a batch failure so a
+   * wrong key (all items fail) is distinguishable from isolated corruption
+   * (some items decrypt). The settled primitive keeps a batch-local key map,
+   * so pages spanning more unique salts than the session cache holds cannot
+   * thrash Argon2id re-derivations. Each plaintext is parse-checked and
+   * discarded, never retained on the returned error.
    */
   private async _diagnoseFailedBatch(
     encryptedOps: { index: number; op: SyncOperation }[],
@@ -235,23 +257,23 @@ export class OperationEncryptionService {
     encryptKey: string,
   ): Promise<Error> {
     try {
+      const settled = await decryptBatchSettled(encryptedPayloads, encryptKey);
       const failures: OperationDecryptionFailure[] = [];
       let decryptedCount = 0;
       let parsedCount = 0;
-      for (let i = 0; i < encryptedPayloads.length; i++) {
-        let plaintext: string;
-        try {
-          plaintext = await decrypt(encryptedPayloads[i], encryptKey);
-        } catch {
+      for (let i = 0; i < settled.length; i++) {
+        const item = settled[i];
+        if (!item.ok) {
           failures.push({
             operationId: encryptedOps[i].op.id,
             encryptedBatchIndex: i,
             stage: 'decrypt',
+            errorName: item.errorName,
           });
           continue;
         }
         decryptedCount++;
-        if (this._isParseableJson(plaintext)) {
+        if (this._isParseableJson(item.plaintext)) {
           parsedCount++;
         } else {
           failures.push({

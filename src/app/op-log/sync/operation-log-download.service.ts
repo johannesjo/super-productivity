@@ -26,7 +26,7 @@ import {
   OperationDecryptionError,
   OperationEncryptionService,
 } from './operation-encryption.service';
-import { buildDecryptFailureLogPayload } from './operation-decrypt-failure-log.util';
+import { buildDecryptFailureLogArgs } from './operation-decrypt-failure-log.util';
 import { DecryptNoPasswordError } from '../core/errors/sync-errors';
 import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected';
 import { SuperSyncStatusService } from './super-sync-status.service';
@@ -354,7 +354,7 @@ export class OperationLogDownloadService implements OnDestroy {
             if (error instanceof OperationDecryptionError) {
               OpLog.error(
                 'OperationLogDownloadService: Encrypted operation batch could not be processed.',
-                buildDecryptFailureLogPayload(
+                ...buildDecryptFailureLogArgs(
                   error.diagnosis,
                   newServerOps.filter((serverOp) => serverOp.op.isPayloadEncrypted),
                   decryptedOpsInEarlierBatches,

@@ -519,6 +519,11 @@ export class OperationLogUploadService {
               );
             }
 
+            // Deliberately NOT wrapped with the download path's diagnostic
+            // logging: a piggyback decrypt failure throws before the seq
+            // persist below, so the next sync cycle re-fetches the same ops
+            // through the download path, which writes the exported-Logs
+            // diagnosis there. One log site, same ops.
             piggybackSyncOps = await this.encryptionService.decryptOperations(
               piggybackSyncOps,
               encryptKey,

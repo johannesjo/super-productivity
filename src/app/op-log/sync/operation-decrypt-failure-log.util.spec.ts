@@ -1,10 +1,11 @@
 import {
-  buildDecryptFailureLogPayload,
+  buildDecryptFailureLogArgs,
   MAX_LOGGED_DECRYPT_FAILURES,
 } from './operation-decrypt-failure-log.util';
 import { OperationBatchDecryptionDiagnosis } from './operation-encryption.service';
+import { MAX_DATA_LENGTH } from '../../core/log';
 
-describe('buildDecryptFailureLogPayload', () => {
+describe('buildDecryptFailureLogArgs', () => {
   const serverOp = (
     serverSeq: number,
     id: string,
@@ -26,33 +27,46 @@ describe('buildDecryptFailureLogPayload', () => {
 
   it('maps a failure to its server sequence by batch index, not by untrusted id', () => {
     // Both envelopes carry the same id; only the index may pick the seq.
-    const payload = buildDecryptFailureLogPayload(
+    const [summary, ...failures] = buildDecryptFailureLogArgs(
       diagnosisWith({
         encryptedOperationCount: 2,
         decryptedCount: 1,
         parsedCount: 1,
         passwordEvidence: 'confirmed-for-some-operations',
-        failures: [{ operationId: 'op-dup', encryptedBatchIndex: 1, stage: 'decrypt' }],
+        failures: [
+          {
+            operationId: 'op-dup',
+            encryptedBatchIndex: 1,
+            stage: 'decrypt',
+            errorName: 'OperationError',
+          },
+        ],
       }),
       [serverOp(41, 'op-dup'), serverOp(42, 'op-dup')],
       0,
     );
 
-    expect(payload).toEqual({
+    expect(summary).toEqual({
       encryptedOperationCount: 2,
       decryptedCount: 1,
       parsedCount: 1,
       decryptedOpsInEarlierBatches: 0,
       passwordEvidence: 'confirmed-for-some-operations',
       failureCount: 1,
-      failures: [
-        { opId: 'op-dup', encryptedBatchIndex: 1, stage: 'decrypt', serverSeq: 42 },
-      ],
     });
+    expect(failures).toEqual([
+      {
+        opId: 'op-dup',
+        encryptedBatchIndex: 1,
+        stage: 'decrypt',
+        errorName: 'OperationError',
+        serverSeq: 42,
+      },
+    ]);
   });
 
   it('omits serverSeq when the envelope at the index does not carry the attributed op', () => {
-    const payload = buildDecryptFailureLogPayload(
+    const [, failure] = buildDecryptFailureLogArgs(
       diagnosisWith({
         failures: [{ operationId: 'op-a', encryptedBatchIndex: 0, stage: 'decrypt' }],
       }),
@@ -60,7 +74,7 @@ describe('buildDecryptFailureLogPayload', () => {
       0,
     );
 
-    expect((payload.failures as unknown[])[0]).toEqual({
+    expect(failure).toEqual({
       opId: 'op-a',
       encryptedBatchIndex: 0,
       stage: 'decrypt',
@@ -72,8 +86,9 @@ describe('buildDecryptFailureLogPayload', () => {
       operationId: `op-${i}`,
       encryptedBatchIndex: i,
       stage: 'decrypt' as const,
+      errorName: 'OperationError',
     }));
-    const payload = buildDecryptFailureLogPayload(
+    const args = buildDecryptFailureLogArgs(
       diagnosisWith({
         encryptedOperationCount: 500,
         passwordEvidence: 'no-operation-decrypted',
@@ -83,15 +98,15 @@ describe('buildDecryptFailureLogPayload', () => {
       0,
     );
 
-    expect(payload.passwordEvidence).toBe('no-operation-decrypted');
-    expect(payload.failureCount).toBe(500);
-    expect((payload.failures as unknown[]).length).toBe(MAX_LOGGED_DECRYPT_FAILURES);
+    expect(args.length).toBe(1 + MAX_LOGGED_DECRYPT_FAILURES);
+    expect(args[0].passwordEvidence).toBe('no-operation-decrypted');
+    expect(args[0].failureCount).toBe(500);
   });
 
   it('promotes password evidence when earlier batches decrypted with the same key', () => {
     // The #9256 shape: a single corrupt op alone on the final page decrypts
     // nothing in ITS batch, but the pages before it prove the password.
-    const payload = buildDecryptFailureLogPayload(
+    const [summary] = buildDecryptFailureLogArgs(
       diagnosisWith({
         failures: [{ operationId: 'op-final', encryptedBatchIndex: 0, stage: 'decrypt' }],
       }),
@@ -99,12 +114,12 @@ describe('buildDecryptFailureLogPayload', () => {
       42,
     );
 
-    expect(payload.passwordEvidence).toBe('confirmed-for-some-operations');
-    expect(payload.decryptedOpsInEarlierBatches).toBe(42);
+    expect(summary.passwordEvidence).toBe('confirmed-for-some-operations');
+    expect(summary.decryptedOpsInEarlierBatches).toBe(42);
   });
 
-  it('reports a batch-runtime-only failure as zero failures with full counts', () => {
-    const payload = buildDecryptFailureLogPayload(
+  it('reports a batch-runtime-only failure as a lone summary with full counts', () => {
+    const args = buildDecryptFailureLogArgs(
       diagnosisWith({
         encryptedOperationCount: 3,
         decryptedCount: 3,
@@ -116,8 +131,50 @@ describe('buildDecryptFailureLogPayload', () => {
       0,
     );
 
-    expect(payload.failureCount).toBe(0);
-    expect(payload.failures).toEqual([]);
-    expect(payload.decryptedCount).toBe(3);
+    expect(args.length).toBe(1);
+    expect(args[0].failureCount).toBe(0);
+    expect(args[0].decryptedCount).toBe(3);
+  });
+
+  it('clamps oversized op ids for display but id-matches on the full value', () => {
+    const longId = 'x'.repeat(255);
+    const [, failure] = buildDecryptFailureLogArgs(
+      diagnosisWith({
+        failures: [{ operationId: longId, encryptedBatchIndex: 0, stage: 'decrypt' }],
+      }),
+      [serverOp(9, longId)],
+      0,
+    );
+
+    expect(failure.opId).toBe('x'.repeat(64));
+    // Clamping must not defeat the envelope id-guard.
+    expect(failure.serverSeq).toBe(9);
+  });
+
+  it('keeps every arg under the log-export truncation cap at maximal field sizes', () => {
+    // Log.exportLogHistory() turns any arg whose JSON exceeds MAX_DATA_LENGTH
+    // into an unparseable 'short:...' string — the whole reason the builder
+    // returns separate args instead of one payload.
+    const longId = 'y'.repeat(255);
+    const failures = Array.from({ length: 3 }, (_, i) => ({
+      operationId: longId,
+      encryptedBatchIndex: Number.MAX_SAFE_INTEGER - i,
+      stage: 'decrypt' as const,
+      errorName: 'WebCryptoNotAvailableError',
+    }));
+    const args = buildDecryptFailureLogArgs(
+      diagnosisWith({
+        encryptedOperationCount: Number.MAX_SAFE_INTEGER,
+        decryptedCount: Number.MAX_SAFE_INTEGER,
+        parsedCount: Number.MAX_SAFE_INTEGER,
+        failures,
+      }),
+      [],
+      Number.MAX_SAFE_INTEGER,
+    );
+
+    for (const arg of args) {
+      expect(JSON.stringify(arg).length).toBeLessThan(MAX_DATA_LENGTH);
+    }
   });
 });

@@ -142,11 +142,19 @@ download batch with the same user-facing error. The client classifies the
 failing batch itself — ask the affected user for the
 `Encrypted operation batch could not be processed` entry from the exported
 Logs (**Settings → Logs**, an ordinary build). It contains only safe metadata:
-the failing operations' `serverSeq`/`opId`/failure stage, decrypted and parsed
-counts, and `passwordEvidence` — whether the same key decrypted other
-operations in that run, which separates an isolated corrupt operation from a
-wrong passphrase. It never contains the passphrase, token, ciphertext, or
-decrypted content.
+the failing operations' `serverSeq`/`opId`/failure stage/`errorName`,
+decrypted and parsed counts, and `passwordEvidence`. It never contains the
+passphrase, token, ciphertext, or decrypted content.
+
+Interpret `passwordEvidence` conservatively. `confirmed-for-some-operations`
+means the key decrypted at least one operation in that run, which rules out a
+globally wrong passphrase and points at the listed operations.
+`no-operation-decrypted` is **inconclusive**: a wrong passphrase, a wholly
+corrupt or differently keyed range, and a device that could not run
+decryption at all produce the same shape — check each failure's `errorName`
+(`OperationError` is an AES-GCM authentication failure, i.e. wrong key or
+corrupt data; anything else, e.g. `WebCryptoNotAvailableError`, is an
+environment failure, not password evidence).
 
 `scripts/recover-user.ts` fills the encrypted-recovery gap. It replays the user's operation log up
 to a chosen `serverSeq`, decrypting encrypted payloads with the user's

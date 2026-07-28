@@ -285,7 +285,14 @@ describe('OperationEncryptionService', () => {
           parsedCount: 1,
           passwordEvidence: 'confirmed-for-some-operations',
           failures: [
-            { operationId: 'corrupt-op', encryptedBatchIndex: 1, stage: 'decrypt' },
+            {
+              operationId: 'corrupt-op',
+              encryptedBatchIndex: 1,
+              stage: 'decrypt',
+              // AES-GCM auth-failure signature — separates corruption/wrong
+              // key from environment failures that also fail every item.
+              errorName: 'OperationError',
+            },
           ],
         });
         const serializedError = JSON.stringify({
@@ -317,9 +324,24 @@ describe('OperationEncryptionService', () => {
           parsedCount: 0,
           passwordEvidence: 'no-operation-decrypted',
           failures: [
-            { operationId: 'op-a', encryptedBatchIndex: 0, stage: 'decrypt' },
-            { operationId: 'op-b', encryptedBatchIndex: 1, stage: 'decrypt' },
-            { operationId: 'op-c', encryptedBatchIndex: 2, stage: 'decrypt' },
+            {
+              operationId: 'op-a',
+              encryptedBatchIndex: 0,
+              stage: 'decrypt',
+              errorName: 'OperationError',
+            },
+            {
+              operationId: 'op-b',
+              encryptedBatchIndex: 1,
+              stage: 'decrypt',
+              errorName: 'OperationError',
+            },
+            {
+              operationId: 'op-c',
+              encryptedBatchIndex: 2,
+              stage: 'decrypt',
+              errorName: 'OperationError',
+            },
           ],
         });
       }

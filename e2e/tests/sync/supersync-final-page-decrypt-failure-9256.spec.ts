@@ -137,60 +137,78 @@ const containsFailureSequence = (
       pages[index + 1]?.opIds.join() === corruptOpId,
   );
 
-const isExpectedDiagnosticMetadata = (
-  value: unknown,
-  corruptSuffix: CorruptSuffix,
-  decryptedOpsInEarlierBatches: number,
-): boolean => {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return false;
-  }
-  const metadata = value as Record<string, unknown>;
-  if (!Array.isArray(metadata.failures) || metadata.failures.length !== 1) {
-    return false;
-  }
-  const failure = metadata.failures[0] as Record<string, unknown> | null;
-  return (
-    // The failing batch is the lone corrupt op on the final page; the pages
-    // decrypted before it are what prove the password is not globally wrong.
-    metadata.encryptedOperationCount === 1 &&
-    metadata.decryptedCount === 0 &&
-    metadata.parsedCount === 0 &&
-    metadata.decryptedOpsInEarlierBatches === decryptedOpsInEarlierBatches &&
-    metadata.passwordEvidence === 'confirmed-for-some-operations' &&
-    metadata.failureCount === 1 &&
-    typeof failure === 'object' &&
-    failure !== null &&
-    failure.opId === corruptSuffix.opId &&
-    failure.serverSeq === corruptSuffix.serverSeq &&
-    failure.encryptedBatchIndex === 0 &&
-    failure.stage === 'decrypt'
-  );
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const containsExpectedDiagnosticLog = (
+const hasExactKeys = (value: Record<string, unknown>, keys: string[]): boolean =>
+  Object.keys(value).length === keys.length && keys.every((key) => key in value);
+
+// Strict key sets: a regression that adds an extra field (worst case a
+// payload sample) must fail here, not slip through a partial match.
+const isExpectedDiagnosticSummary = (
+  value: unknown,
+  decryptedOpsInEarlierBatches: number,
+): boolean =>
+  isRecord(value) &&
+  hasExactKeys(value, [
+    'encryptedOperationCount',
+    'decryptedCount',
+    'parsedCount',
+    'decryptedOpsInEarlierBatches',
+    'passwordEvidence',
+    'failureCount',
+  ]) &&
+  // The failing batch is the lone corrupt op on the final page; the pages
+  // decrypted before it are what prove the password is not globally wrong.
+  value.encryptedOperationCount === 1 &&
+  value.decryptedCount === 0 &&
+  value.parsedCount === 0 &&
+  value.decryptedOpsInEarlierBatches === decryptedOpsInEarlierBatches &&
+  value.passwordEvidence === 'confirmed-for-some-operations' &&
+  value.failureCount === 1;
+
+const isExpectedDiagnosticFailure = (
+  value: unknown,
+  corruptSuffix: CorruptSuffix,
+): boolean =>
+  isRecord(value) &&
+  hasExactKeys(value, [
+    'opId',
+    'encryptedBatchIndex',
+    'stage',
+    'errorName',
+    'serverSeq',
+  ]) &&
+  value.opId === corruptSuffix.opId &&
+  value.serverSeq === corruptSuffix.serverSeq &&
+  value.encryptedBatchIndex === 0 &&
+  value.stage === 'decrypt' &&
+  // AES-GCM auth failure — corruption/wrong key, not an environment failure.
+  value.errorName === 'OperationError';
+
+const countExpectedDiagnosticLogs = (
   value: unknown,
   corruptSuffix: CorruptSuffix,
   decryptedOpsInEarlierBatches: number,
-): boolean => {
+): number => {
   if (!Array.isArray(value)) {
-    return false;
+    return 0;
   }
-  return value.some((entry: unknown) => {
-    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+  return value.filter((entry: unknown) => {
+    if (!isRecord(entry)) {
       return false;
     }
-    const logEntry = entry as Record<string, unknown>;
     return (
-      logEntry.context === 'ol' &&
-      logEntry.message ===
+      entry.context === 'ol' &&
+      entry.message ===
         'OperationLogDownloadService: Encrypted operation batch could not be processed.' &&
-      Array.isArray(logEntry.args) &&
-      logEntry.args.some((arg: unknown) =>
-        isExpectedDiagnosticMetadata(arg, corruptSuffix, decryptedOpsInEarlierBatches),
-      )
+      Array.isArray(entry.args) &&
+      entry.args.some((arg: unknown) =>
+        isExpectedDiagnosticSummary(arg, decryptedOpsInEarlierBatches),
+      ) &&
+      entry.args.some((arg: unknown) => isExpectedDiagnosticFailure(arg, corruptSuffix))
     );
-  });
+  }).length;
 };
 
 test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
@@ -324,12 +342,17 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
         .inputValue();
       const exportedLogs: unknown = JSON.parse(exportedLogsText);
 
+      // One diagnostic entry per failed run: the initial download plus the
+      // deterministic retry — each with identical run-scoped evidence.
       expect(
-        containsExpectedDiagnosticLog(exportedLogs, corruptSuffix, validPageOpIds.length),
-      ).toBe(true);
+        countExpectedDiagnosticLogs(exportedLogs, corruptSuffix, validPageOpIds.length),
+      ).toBeGreaterThanOrEqual(2);
       expect(exportedLogsText).not.toContain(user.token);
       expect(exportedLogsText).not.toContain(encryptionPassword);
       expect(exportedLogsText).not.toContain(corruptSuffix.encryptedPayload);
+      for (const { op } of validHistory.ops) {
+        expect(exportedLogsText).not.toContain(op.payload as string);
+      }
       expect(exportedLogsText).not.toContain(taskName);
     } finally {
       if (clientA) await closeClient(clientA);
