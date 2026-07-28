@@ -22,10 +22,12 @@ export interface OperationDecryptionFailure {
   stage: OperationDecryptionFailureStage;
   /**
    * Sanitized error class name (`toSyncLogError`) for decrypt-stage failures.
-   * `OperationError` is the AES-GCM auth-failure signature (wrong key or
-   * corrupt ciphertext); anything else means the device could not run
-   * decryption at all (e.g. `WebCryptoNotAvailableError`) — which support
-   * must not read as password evidence. Never carries error messages.
+   * Read case by case: `OperationError` is the WebCrypto AES-GCM auth-failure
+   * signature (wrong key or corrupt ciphertext) — but the no-WebCrypto
+   * fallback reports the same auth failure as a bare `Error`;
+   * `InvalidCiphertextError`/`InvalidCharacterError` mean mangled ciphertext;
+   * `WebCryptoNotAvailableError` is an environment failure and NOT password
+   * evidence. Never carries error messages.
    */
   errorName?: string;
 }

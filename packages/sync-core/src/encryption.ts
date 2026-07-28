@@ -305,9 +305,11 @@ export type DecryptSettledItem =
  * Per-item settled variant of `decryptBatch` for failure diagnosis. Individual
  * items never reject the whole call: each settles as plaintext or a sanitized
  * error NAME (`toSyncLogError` — never the error object; crypto/JSON messages
- * can embed data). `OperationError` is the AES-GCM auth-failure signature
- * (wrong key or corrupt ciphertext); other names indicate environment-level
- * failures (e.g. `WebCryptoNotAvailableError`).
+ * can embed data). Names need case-by-case reading: `OperationError` is the
+ * WebCrypto AES-GCM auth-failure signature (wrong key or corrupt ciphertext),
+ * but the @noble no-WebCrypto fallback reports the same auth failure as a
+ * bare `Error`; `InvalidCiphertextError` means too-short/mangled data;
+ * `WebCryptoNotAvailableError` is an environment failure.
  *
  * Shares `decryptBatch`'s batch-local key map, so a batch spanning more unique
  * salts than the session cache holds cannot thrash Argon2id re-derivations

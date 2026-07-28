@@ -151,10 +151,13 @@ means the key decrypted at least one operation in that run, which rules out a
 globally wrong passphrase and points at the listed operations.
 `no-operation-decrypted` is **inconclusive**: a wrong passphrase, a wholly
 corrupt or differently keyed range, and a device that could not run
-decryption at all produce the same shape — check each failure's `errorName`
-(`OperationError` is an AES-GCM authentication failure, i.e. wrong key or
-corrupt data; anything else, e.g. `WebCryptoNotAvailableError`, is an
-environment failure, not password evidence).
+decryption at all produce the same shape — read each failure's `errorName`
+case by case. `OperationError` is an AES-GCM authentication failure (wrong
+key or corrupt data), and devices without WebCrypto report the same
+authentication failure as a bare `Error` (fallback crypto).
+`InvalidCiphertextError`/`InvalidCharacterError` mean truncated or mangled
+ciphertext, and `WebCryptoNotAvailableError` is an environment failure —
+neither is password evidence.
 
 `scripts/recover-user.ts` fills the encrypted-recovery gap. It replays the user's operation log up
 to a chosen `serverSeq`, decrypting encrypted payloads with the user's

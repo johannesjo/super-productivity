@@ -158,7 +158,7 @@ describe('buildDecryptFailureLogArgs', () => {
     const longId = 'y'.repeat(255);
     const failures = Array.from({ length: 3 }, (_, i) => ({
       operationId: longId,
-      encryptedBatchIndex: Number.MAX_SAFE_INTEGER - i,
+      encryptedBatchIndex: i,
       stage: 'decrypt' as const,
       errorName: 'WebCryptoNotAvailableError',
     }));
@@ -169,10 +169,13 @@ describe('buildDecryptFailureLogArgs', () => {
         parsedCount: Number.MAX_SAFE_INTEGER,
         failures,
       }),
-      [],
+      // Matching envelopes so the entries also carry the longest possible
+      // serverSeq — the optional field that adds the most length.
+      failures.map((f) => serverOp(Number.MAX_SAFE_INTEGER, f.operationId)),
       Number.MAX_SAFE_INTEGER,
     );
 
+    expect((args[1] as { serverSeq?: number }).serverSeq).toBe(Number.MAX_SAFE_INTEGER);
     for (const arg of args) {
       expect(JSON.stringify(arg).length).toBeLessThan(MAX_DATA_LENGTH);
     }
