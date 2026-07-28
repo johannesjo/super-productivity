@@ -1,4 +1,5 @@
-import { app, ipcMain, IpcMainEvent } from 'electron';
+import { app, ipcMain } from 'electron';
+import type { IpcMainInvokeEvent } from 'electron';
 import {
   existsSync,
   mkdirSync,
@@ -64,7 +65,7 @@ export function initBackupAdapter(): void {
   log('Saving backups to', BACKUP_DIR);
 
   // BACKUP
-  ipcMain.on(IPC.BACKUP, backupData);
+  ipcMain.handle(IPC.BACKUP, backupData);
 
   // IS_BACKUP_AVAILABLE
   ipcMain.handle(IPC.BACKUP_IS_AVAILABLE, (): LocalBackupMeta | false => {
@@ -126,7 +127,7 @@ const isBackupDataArgs = (arg: unknown): arg is BackupDataArgs =>
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function backupData(
-  ev: IpcMainEvent,
+  ev: IpcMainInvokeEvent,
   dataOrArgs: AppDataCompleteLegacy | BackupDataArgs,
 ): void {
   if (!existsSync(BACKUP_DIR)) {

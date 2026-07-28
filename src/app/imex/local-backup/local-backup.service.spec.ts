@@ -757,6 +757,45 @@ describe('LocalBackupService', () => {
 
       expect(backupSpy).toHaveBeenCalledTimes(2);
     }));
+
+    it('keeps the overlap gate closed until the Electron write completes', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      let resolveFirstWrite: (() => void) | undefined;
+      const firstWrite = new Promise<void>((resolve) => {
+        resolveFirstWrite = resolve;
+      });
+      const electronBackupSpy = jasmine
+        .createSpy('backupAppData')
+        .and.returnValues(firstWrite, Promise.resolve());
+      (window as unknown as { ea: { backupAppData: jasmine.Spy } }).ea = {
+        backupAppData: electronBackupSpy,
+      };
+      backupSpy.and.callFake(() =>
+        (service as unknown as LocalBackupServiceWithBackupElectron)._backupElectron(
+          {} as AppDataComplete,
+        ),
+      );
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(1);
+
+      // The IPC write is still pending — without awaiting it, exhaustMap's
+      // gate would already be open and this trigger would start a second write.
+      actions$.next({ type: 'OverlappingAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(1);
+
+      resolveFirstWrite?.();
+      flushMicrotasks();
+
+      actions$.next({ type: 'LaterAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(2);
+    }));
   });
 
   describe('informed mobile restore prompt (#7901)', () => {
