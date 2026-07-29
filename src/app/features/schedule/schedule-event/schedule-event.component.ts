@@ -130,7 +130,12 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       evt.type === SVEType.SplitTask ||
       evt.type === SVEType.TaskPlannedForDay ||
       evt.type === SVEType.SplitTaskPlannedForDay ||
-      evt.type === SVEType.ScheduledTask
+      evt.type === SVEType.ScheduledTask ||
+      // continued segments carry the same task, so selecting/context-menu/resize
+      // work on them too; dragging stays disabled via isDraggableSE() since only
+      // the head segment marks where the task starts
+      evt.type === SVEType.SplitTaskContinued ||
+      evt.type === SVEType.SplitTaskContinuedLast
     ) {
       return evt.data as TaskCopy;
     }

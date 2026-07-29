@@ -174,6 +174,44 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
     });
   });
 
+  describe('split-continued segments stay interactive (#9363)', () => {
+    const setEvent = (type: SVEType): void => {
+      fixture.componentRef.setInput('event', { ...makeTaskScheduleEvent(), type });
+      fixture.detectChanges();
+    };
+
+    it('should resolve the task for the continued segments of a split task', () => {
+      setEvent(SVEType.SplitTaskContinued);
+      expect(component.task()?.id).toBe('task-1');
+
+      setEvent(SVEType.SplitTaskContinuedLast);
+      expect(component.task()?.id).toBe('task-1');
+    });
+
+    it('should select the task when a continued segment is clicked', async () => {
+      const taskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
+      setEvent(SVEType.SplitTaskContinued);
+
+      await component.clickHandler(new MouseEvent('click'));
+
+      expect(taskService.setSelectedId).toHaveBeenCalledOnceWith('task-1');
+    });
+
+    it('should render the resize handle on the last segment of a split task', () => {
+      setEvent(SVEType.SplitTaskContinuedLast);
+
+      expect(component.isResizable()).toBe(true);
+      expect(fixture.nativeElement.querySelector('.resize-handle')).toBeTruthy();
+    });
+
+    it('should not offer resizing on non-final segments', () => {
+      setEvent(SVEType.SplitTaskContinued);
+
+      expect(component.isResizable()).toBe(false);
+      expect(fixture.nativeElement.querySelector('.resize-handle')).toBeNull();
+    });
+  });
+
   it('should delete scheduled tasks through TaskService cleanup', fakeAsync(() => {
     const task = {
       id: 'task-1',
