@@ -781,6 +781,7 @@ describe('mapToScheduleDays()', () => {
             type: 'RepeatProjectionSplitContinuedLast',
             splitIndex: 0,
             plannedForDay: '1970-01-01',
+            sourceOccurrenceDate: '1970-01-01',
           },
         ],
         isToday: true,
@@ -827,6 +828,7 @@ describe('mapToScheduleDays()', () => {
             start: 129600000,
             type: 'RepeatProjectionSplitContinuedLast',
             plannedForDay: '1970-01-02',
+            sourceOccurrenceDate: '1970-01-02',
           },
         ],
         isToday: false,
@@ -948,6 +950,7 @@ describe('mapToScheduleDays()', () => {
           type: 'RepeatProjectionSplitContinuedLast',
           splitIndex: 0,
           plannedForDay: '1970-01-02',
+          sourceOccurrenceDate: '1970-01-02',
         },
         {
           data: jasmine.any(Object),
@@ -1274,4 +1277,46 @@ describe('mapToScheduleDays()', () => {
   //     isToday: false,
   //   } as any);
   // });
+  it('should keep every segment of a flow projection pointing at its own occurrence day', () => {
+    // a 26h untimed projection starts on day 1, is pushed over midnight, and is
+    // then split again by a scheduled task on day 2 -> all four segments still
+    // belong to the day-1 occurrence
+    const r = mapToScheduleDays(
+      N,
+      [NDS, '1970-01-02', '1970-01-03'],
+      [],
+      [
+        fakePlannedTaskEntry('S2', new Date(1970, 0, 2, 1, 0, 0, 0), {
+          timeEstimate: h(0.5),
+        }),
+      ],
+      [],
+      [
+        fakeRepeatCfg('R2', undefined, {
+          defaultEstimate: h(26),
+          // monthly so exactly one occurrence falls into the 3 day window
+          repeatCycle: 'MONTHLY',
+        }),
+      ],
+      [],
+      null,
+      {},
+      undefined,
+      undefined,
+    );
+
+    const projectionSegments = r
+      .flatMap((d) => d.entries)
+      .filter((e) => e.type.startsWith('RepeatProjection'));
+
+    expect(projectionSegments.length).toBe(3);
+    // this is what the schedule event click handler resolves the target date to
+    expect(
+      projectionSegments.map(
+        (e) =>
+          (e as { sourceOccurrenceDate?: string }).sourceOccurrenceDate ??
+          e.plannedForDay,
+      ),
+    ).toEqual([NDS, NDS, NDS]);
+  });
 });
