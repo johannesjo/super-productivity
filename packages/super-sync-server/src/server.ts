@@ -86,6 +86,22 @@ export const createListenOptions = (
 });
 
 /**
+ * Locates the served `public/` directory.
+ *
+ * `__dirname` is `dist/src` in the built image but `src` under ts-node/vitest, so a single
+ * relative path is wrong for one of them — `../../public` silently resolved to a
+ * nonexistent `packages/public` in dev, which meant the generated pages were never
+ * written there at all. Probing both keeps dev, tests and the image on the same directory.
+ */
+const resolvePublicDir = (): string => {
+  const candidates = [
+    path.join(__dirname, '../../public'), // dist/src/ -> <pkg>/public
+    path.join(__dirname, '../public'), // src/      -> <pkg>/public
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+};
+
+/**
  * Drops `<!-- OPTIONAL:NAME -->…<!-- /OPTIONAL:NAME -->` sections whose name is not in
  * `keep`, and unwraps the markers of the ones that are. Lets one shipped template serve
  * operators who have a hosting provider or a named supervisory authority and operators
@@ -106,7 +122,7 @@ const applyOptionalBlocks = (html: string, keep: ReadonlySet<string>): string =>
  * legal statement published in the operator's name. A 404 is the honest failure.
  */
 const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
-  const publicDir = path.join(__dirname, '../../public');
+  const publicDir = resolvePublicDir();
   const templatePath = path.join(publicDir, 'privacy.template.html');
   const outputPath = path.join(publicDir, 'privacy.html');
 
@@ -162,7 +178,7 @@ const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
  * unconfigured instance must not ask its users to accept one.
  */
 const generateIndexHtml = (hasLegalPages: boolean): void => {
-  const publicDir = path.join(__dirname, '../../public');
+  const publicDir = resolvePublicDir();
   const templatePath = path.join(publicDir, 'index.template.html');
   const outputPath = path.join(publicDir, 'index.html');
 
@@ -185,7 +201,7 @@ const generateIndexHtml = (hasLegalPages: boolean): void => {
  * ships none, because ours name German law, a Leipzig venue and our own contact address.
  */
 const installOperatorLegalPages = (dataDir: string): boolean => {
-  const publicDir = path.join(__dirname, '../../public');
+  const publicDir = resolvePublicDir();
   const sourcePath = path.join(dataDir, 'legal', 'terms.html');
   const outputPath = path.join(publicDir, 'terms.html');
 
@@ -307,7 +323,7 @@ export const createServer = (
 
       // Serve static files
       await fastifyServer.register(fastifyStatic, {
-        root: path.join(__dirname, '../../public'),
+        root: resolvePublicDir(),
         prefix: '/',
       });
 
