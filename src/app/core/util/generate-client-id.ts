@@ -89,6 +89,8 @@ export const generateClientId = (): string => {
  * Type guard: true if `id` matches a known valid client-ID format.
  * - Legacy format: any string of length >= 10 (legacy IDs).
  * - New format: {platform}_{6-char-base62}, e.g. "B_a7Kx9Z".
+ * - The 4-char suffix v18.7.0 - v18.10.0 minted, e.g. "B_FXMz". Only the
+ *   generator moved to 6 chars; those ids are still on disk and stay valid.
  *
  * Used to narrow `unknown` values read from IndexedDB. An invalid format is
  * treated as "absent" rather than fatal — see issue #6197.
@@ -103,6 +105,7 @@ export const generateClientId = (): string => {
  */
 export const isValidClientIdFormat = (id: unknown): id is string => {
   return (
-    typeof id === 'string' && (id.length >= 10 || /^[BEAI]_[a-zA-Z0-9]{6}$/.test(id))
+    typeof id === 'string' &&
+    (id.length >= 10 || /^[BEAI]_([a-zA-Z0-9]{4}|[a-zA-Z0-9]{6})$/.test(id))
   );
 };

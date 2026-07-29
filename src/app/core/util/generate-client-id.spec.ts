@@ -59,6 +59,14 @@ describe('generate-client-id', () => {
       expect(isValidClientIdFormat('I_ZzZzZz')).toBeTrue();
     });
 
+    it('accepts the 4-char compact format minted by v18.7.0 - v18.10.0', () => {
+      // Those ids are still on disk. Rejecting one reads as "absent", which
+      // mints a new id over it — a silent vector-clock key rotation. #9355.
+      expect(isValidClientIdFormat('B_FXMz')).toBeTrue();
+      expect(isValidClientIdFormat('A_1ile')).toBeTrue();
+      expect(isValidClientIdFormat('E_0000')).toBeTrue();
+    });
+
     it('accepts legacy ids of length >= 10', () => {
       expect(isValidClientIdFormat('LongClientId123')).toBeTrue();
       expect(isValidClientIdFormat('0123456789')).toBeTrue();
