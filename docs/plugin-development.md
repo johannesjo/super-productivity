@@ -54,7 +54,9 @@ iframe plugin can ship only `manifest.json` and `index.html` when the manifest s
   "version": "1.0.0",
   "description": "My first Super Productivity plugin",
   "manifestVersion": 1,
-  "minSupVersion": "14.0.0"
+  "minSupVersion": "14.0.0",
+  "hooks": [],
+  "permissions": []
 }
 ```
 
@@ -88,24 +90,12 @@ PluginAPI.registerHeaderButton({
 
 The `manifest.json` file is required for all plugins and defines the plugin's metadata and configuration.
 
-### Manifest Fields
-
-| Field             | Type     | Required | Description                                                                            |
-| ----------------- | -------- | -------- | -------------------------------------------------------------------------------------- |
-| `id`              | string   | ✓        | Unique identifier for your plugin (use kebab-case)                                     |
-| `name`            | string   | ✓        | Display name shown to users                                                            |
-| `version`         | string   | ✓        | Semantic version (e.g., "1.0.0")                                                       |
-| `description`     | string   | ✓        | Brief description of what your plugin does                                             |
-| `manifestVersion` | number   | ✓        | Currently must be `1`                                                                  |
-| `minSupVersion`   | string   | ✓        | Minimum Super Productivity version required                                            |
-| `author`          | string   |          | Plugin author name                                                                     |
-| `homepage`        | string   |          | Plugin website or repository URL                                                       |
-| `icon`            | string   |          | Path to icon file (SVG recommended)                                                    |
-| `iFrame`          | boolean  |          | Whether plugin uses iframe UI (default: false)                                         |
-| `sidePanel`       | boolean  |          | Show plugin in side panel (default: false), requires `iFrame:true`                     |
-| `permissions`     | string[] |          | The permissions the plugin needs                                                       |
-| `hooks`           | string[] |          | App events to listen to                                                                |
-| `uiKit`           | boolean  |          | Enable UI Kit CSS reset for iframe plugins (default: true). Set to `false` to disable. |
+Use
+[`PluginManifest`](../packages/plugin-api/src/types.ts)
+as the authoritative field contract. In particular, `hooks` and `permissions`
+are required arrays (use `[]` when unused), while `description` is optional.
+Do not rely on the installer's deliberately minimal runtime checks to infer the
+TypeScript contract.
 
 ### Complete Manifest Example
 
@@ -117,8 +107,6 @@ The `manifest.json` file is required for all plugins and defines the plugin's me
   "description": "An advanced plugin with UI and hooks",
   "manifestVersion": 1,
   "minSupVersion": "14.0.2",
-  "author": "John Doe",
-  "homepage": "https://github.com/johndoe/my-plugin",
   "icon": "icon.svg",
   "iFrame": true,
   "sidePanel": false,

@@ -57,6 +57,8 @@ Research should state its snapshot date and tracking issue. Large audit outputs
 may remain while findings are being triaged, but verified work should move to
 issues and durable safety constraints should move to maintained documentation.
 
+- [Sync simplification audit](research/sync-simplification-audit/README.md)
+
 ## Review checklist
 
 When changing behavior or operations:

@@ -162,23 +162,19 @@ described under [Security Properties](#security-properties).
 
 ### 1. OperationEncryptionService
 
-**Location**: `src/app/op-log/sync/operation-encryption.service.ts`
+[`OperationEncryptionService`](../../src/app/op-log/sync/operation-encryption.service.ts)
+owns operation and snapshot payload encryption. Its current contract is more
+than an encrypt/decrypt round trip:
 
-```typescript
-// Encrypt before upload
-async encryptOperation(op: SyncOperation, encryptKey: string): Promise<SyncOperation> {
-  const payloadStr = JSON.stringify(op.payload);
-  const encryptedPayload = await encrypt(payloadStr, encryptKey);
-  return { ...op, payload: encryptedPayload, isPayloadEncrypted: true };
-}
-
-// Decrypt after download
-async decryptOperation(op: SyncOperation, encryptKey: string): Promise<SyncOperation> {
-  if (!op.isPayloadEncrypted) return op;
-  const decryptedStr = await decrypt(op.payload, encryptKey);
-  return { ...op, payload: JSON.parse(decryptedStr), isPayloadEncrypted: false };
-}
-```
+- Upload encrypts the JSON payload and marks the resulting operation encrypted.
+- Download authenticates and decrypts the ciphertext, parses the payload, and
+  then checks the unauthenticated envelope against authenticated payload data
+  before returning an operation for application.
+- LWW target/footprint mismatches and a plaintext `opType` that promotes a
+  non-full-state payload to a full-state operation fail closed. The executable
+  checks live in
+  [`verify-decrypted-op-integrity.ts`](../../src/app/op-log/sync/verify-decrypted-op-integrity.ts);
+  its specs define the accepted legacy and full-state shapes.
 
 ### 2. Encryption Algorithm
 
@@ -199,41 +195,57 @@ remaining unique for every encrypted payload.
 
 ### 3. Upload Integration
 
-**Location**: `src/app/op-log/sync/operation-log-upload.service.ts`
+[`OperationLogUploadService`](../../src/app/op-log/sync/operation-log-upload.service.ts)
+gets the key through the provider contract and encrypts operation and snapshot
+payloads before transport. The upload boundary is fail-closed:
 
-```typescript
-// Check if encryption is enabled
-const privateCfg = await syncProvider.privateCfg.load();
-const isEncryptionEnabled = privateCfg?.isEncryptionEnabled && !!privateCfg?.encryptKey;
+- A provider that mandates E2EE (SuperSync) cannot upload pending operations or
+  snapshots without a usable key. Pending work remains unsynced for a later
+  encrypted retry, and the result reports that encryption setup is incomplete.
+- A file provider whose configuration says encryption is enabled but whose key
+  is missing throws before upload instead of falling back to plaintext.
+- The file-format encryption chokepoint independently enforces the same
+  no-key/no-upload rule in
+  [`encrypt-and-compress-handler.service.ts`](../../src/app/op-log/encryption/encrypt-and-compress-handler.service.ts).
 
-// Encrypt if enabled
-if (isEncryptionEnabled && encryptKey) {
-  syncOps = await this.encryptionService.encryptOperations(syncOps, encryptKey);
-}
-```
+Regression coverage lives in
+[`operation-log-upload.service.spec.ts`](../../src/app/op-log/sync/operation-log-upload.service.spec.ts)
+and
+[`encrypt-and-compress-handler.service.spec.ts`](../../src/app/op-log/encryption/encrypt-and-compress-handler.service.spec.ts).
 
 ### 4. Download Integration
 
-**Location**: `src/app/op-log/sync/operation-log-download.service.ts`
+[`OperationLogDownloadService`](../../src/app/op-log/sync/operation-log-download.service.ts)
+screens downloaded operations before application; the upload service applies
+the same inbound checks to piggybacked operations:
 
-```typescript
-// Decrypt if encrypted
-const hasEncryptedOps = ops.some((op) => op.isPayloadEncrypted);
-if (hasEncryptedOps && encryptKey) {
-  ops = await this.encryptionService.decryptOperations(ops, encryptKey);
-}
-```
+- If SuperSync configuration expects encryption, any plaintext inbound
+  operation rejects its batch. This prevents a forged
+  `isPayloadEncrypted=false` flag from bypassing decryption and all
+  post-decrypt checks; the focused owner is
+  [`assert-ops-encryption-expected.ts`](../../src/app/op-log/sync/assert-ops-encryption-expected.ts).
+- Encrypted input without a key raises the password-recovery error; it is never
+  treated as plaintext.
+- Successful AES-GCM authentication is followed by payload parsing and the
+  metadata/full-state checks described above. Decrypted operations are not
+  released to the apply pipeline first.
 
 ## Configuration Storage
 
-The encryption password is stored in the **private config** (not synced):
-
-```
-privateCfg: {
-  isEncryptionEnabled: true,
-  encryptKey: "user's password"  // Stored locally, never sent to server
-}
-```
+The encryption password/key is stored only in provider **private config**; it is
+not part of synced application state and is never sent to the server. Encryption
+intent is also stored in private config, but is mirrored to
+`globalConfig.sync.isEncryptionEnabled` so the sync pipeline can fail closed.
+That intent bit may travel inside an operation or snapshot payload, but remote
+values are non-authoritative: hydration reapplies the device's local value. The
+credential store and provider expose intent separately from key presence so a
+dropped key cannot silently turn an encrypted configuration into a plaintext
+one. Follow
+[`credential-store.service.ts`](../../src/app/op-log/sync-providers/credential-store.service.ts),
+[`provider-types.ts`](../../packages/sync-providers/src/provider-types.ts), and
+the concrete
+[`SuperSyncProvider`](../../packages/sync-providers/src/super-sync/super-sync.ts)
+instead of copying the private-config shape into new code.
 
 ## Security Properties
 
@@ -252,7 +264,7 @@ privateCfg: {
 > `schemaVersion`, `syncImportReason`, **and the `isPayloadEncrypted` flag
 > itself** — travels as **plaintext** and is **not** bound as Additional
 > Authenticated Data (AAD), so a malicious/compromised sync server or a TLS MITM
-> can tamper with it. As **defense-in-depth**, the client fails closed on three
+> can tamper with it. As **defense-in-depth**, the client fails closed on four
 > tamper vectors:
 >
 > - **Plaintext-injection downgrade:** a forged op with `isPayloadEncrypted=false`
@@ -359,19 +371,22 @@ Sync error shown in UI
 
 ## Snapshot Encryption
 
-Full-state operations (backup import, repair) use the snapshot endpoint but follow the same encryption:
+Full-state operations (backup import and repair) use the snapshot endpoint but
+retain the same fail-closed boundary. The upload service validates the
+full-state structure before transport, encrypts the payload when a key is
+present, and cannot reach the snapshot upload branch for a
+mandatory-encryption provider with pending work but no key. On download, an
+encrypted full-state operation is accepted only after AES-GCM authentication
+and `assertDecryptedFullStateOpIntegrity()` validates it as complete
+application data (including supported legacy migration on a validation copy).
 
-```typescript
-// In operation-log-upload.service.ts
-if (encryptKey) {
-  state = await this.encryptionService.encryptPayload(state, encryptKey);
-}
-await syncProvider.uploadSnapshot(
-  state,
-  clientId,
-  reason,
-  vectorClock,
-  schemaVersion,
-  isPayloadEncrypted,
-);
-```
+Executable owners:
+
+- Upload routing and mandatory-key guard:
+  [`operation-log-upload.service.ts`](../../src/app/op-log/sync/operation-log-upload.service.ts)
+- Payload crypto and post-decrypt dispatch boundary:
+  [`operation-encryption.service.ts`](../../src/app/op-log/sync/operation-encryption.service.ts)
+- Full-state integrity validation:
+  [`verify-decrypted-op-integrity.ts`](../../src/app/op-log/sync/verify-decrypted-op-integrity.ts)
+- Full-state regression coverage:
+  [`verify-decrypted-op-integrity.spec.ts`](../../src/app/op-log/sync/verify-decrypted-op-integrity.spec.ts)

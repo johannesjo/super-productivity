@@ -63,6 +63,34 @@ operations with stale vector clocks that immediately conflict.
   dropped emission cannot be recovered. A store selector normally ends in
   `distinctUntilChanged()`, so the value that changed during sync may never
   re-emit after the window closes.
+- **`waitForSyncWindow()` does not gate initial sync.** It observes only
+  `HydrationStateService.isInSyncWindow()`, so it passes immediately when that
+  window is closed even if the initial-sync gate has not opened.
+  `skipDuringSyncWindow()` is different: it also checks
+  `SyncTriggerService.isInitialSyncDoneSync()`. A sparse mutating effect that
+  must wait for startup sync therefore needs both gates:
+
+  ```typescript
+  return this._syncTriggerService.afterInitialSyncDoneStrict$.pipe(
+    first(),
+    switchMap(() =>
+      sparseSource$.pipe(
+        // Capture all state required by the edge before deferring it.
+        map((edge) => captureRequiredState(edge)),
+        waitForSyncWindow(this._hydrationState, 'MyEffects:mutatingEffect$'),
+        // ...perform the mutation
+      ),
+    ),
+  );
+  ```
+
+  This is the established composition used by
+  `TaskDueEffects.createRepeatableTasksAndAddDueToday$` and
+  `TaskRepeatCleanupEffects.cleanupDuplicateRepeatInstances$`. Use
+  `afterInitialSyncDoneAndDataLoadedInitially$` instead only when its
+  non-strict UI-readiness semantics are intentional; neither gate is proof
+  stronger than the failsafes documented by `SyncTriggerService`.
+
 - Before waiting, combine/map the edge with every piece of state needed to
   handle it. Process that captured snapshot after the window closes; do not
   wait and then reconstruct an already-passed edge from unrelated live state.
@@ -117,13 +145,13 @@ blessed pattern is a `task-shared-meta-reducers/` reducer.
 
 ## Decision table — "I'm writing an effect"
 
-| Question                                                        | Answer                                                               | Linter                               |
-| --------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------ |
-| Does it inject the actions stream?                              | Use `LOCAL_ACTIONS` (not `Actions`)                                  | ✅ `no-actions-in-effects` (error)   |
-| Can a selector emission be safely retried by the next emission? | Drop it with `skipDuringSyncWindow()`                                | ✅ `require-hydration-guard` (error) |
-| Is the selector emission a sparse/unrecoverable edge?           | Capture its required state, then defer it with `waitForSyncWindow()` | ✅ `require-hydration-guard` (error) |
-| Does one replay-atomic transition change **>1 entity**?         | Make it a meta-reducer, not an effect                                | ⚠️ `no-multi-entity-effect` (warn)   |
-| Does it dispatch in a **loop of 50+**?                          | Yield once afterward for capture ordering; it is not batching        | — (convention)                       |
+| Question                                                        | Answer                                                                                                    | Linter                                           |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Does it inject the actions stream?                              | Use `LOCAL_ACTIONS` (not `Actions`)                                                                       | ✅ `no-actions-in-effects` (error)               |
+| Can a selector emission be safely retried by the next emission? | Drop it with `skipDuringSyncWindow()`                                                                     | ✅ `require-hydration-guard` (error)             |
+| Is the selector emission a sparse/unrecoverable edge?           | Enter through the required initial-sync gate, capture its state, then defer it with `waitForSyncWindow()` | ✅ window guard only; initial gate is convention |
+| Does one replay-atomic transition change **>1 entity**?         | Make it a meta-reducer, not an effect                                                                     | ⚠️ `no-multi-entity-effect` (warn)               |
+| Does it dispatch in a **loop of 50+**?                          | Yield once afterward for capture ordering; it is not batching                                             | — (convention)                                   |
 
 Two of the three are mechanically enforced — you do not need to memorize them,
 only understand _why_ (the invariant at the top).
@@ -180,4 +208,6 @@ key-recovery config writes (content-only, must NOT bump).
   [`operation-log-architecture.md`](./operation-log-architecture.md)
 - **Source of truth:** `src/app/util/local-actions.token.ts`,
   `src/app/util/skip-during-sync-window.operator.ts`,
+  `src/app/util/wait-for-sync-window.operator.ts`,
+  `src/app/imex/sync/sync-trigger.service.ts`,
   `src/app/op-log/apply/hydration-state.service.ts`

@@ -41,7 +41,7 @@ Before pushing anything:
 1. Review the version commit and tag.
 2. Read `build/release-notes.md` for accuracy and user-data/privacy leaks.
 3. For a final release, confirm the generated Android changelog exists under
-   `fastlane/metadata/android/en-US/changelogs/`.
+   `android/fastlane/metadata/android/en-US/changelogs/`.
 4. Run the relevant release-note tests:
 
    ```bash
@@ -53,10 +53,12 @@ Before pushing anything:
 If generated files are wrong, stop and repair the local version commit and tag
 before pushing. Never move a release tag that has reached the remote.
 
-Push the reviewed version commit and its tag together:
+Push the reviewed version commit and exactly the intended tag together. Replace
+the placeholder with the tag created by `npm version`; do not use
+`--follow-tags`, which can include other reachable annotated tags.
 
 ```bash
-git push --follow-tags
+git push --atomic origin HEAD "vX.Y.Z"
 ```
 
 ## What the tag triggers

@@ -44,7 +44,7 @@ tests, or a focused contract.
 | Trace remote apply, conflicts, or restart recovery     | [remote apply](./sync-architecture.html#remote-apply), [causality](./sync-architecture.html#causality), [restart](./sync-architecture.html#restart)   |
 | Change SECTION conflict/recovery behavior              | [section-conflict-replay.md](./section-conflict-replay.md) — narrow commutativity, state-projected replay, and released-client compatibility contract |
 | Find executable coverage for a SuperSync scenario      | [supersync-scenarios.md](./supersync-scenarios.md) — scenario-to-test index, not a prose specification                                                |
-| Research rejected alternatives or cross-version policy | [operation-log-architecture.md](./operation-log-architecture.md) — deep rationale and migration reference                                             |
+| Research rejected alternatives or cross-version policy | [operation-log-architecture.md](./operation-log-architecture.md) — deep rationale and history plus the **normative A.7.11 schema-bump policy**        |
 
 ## Reference docs
 
@@ -57,7 +57,7 @@ tests, or a focused contract.
 | Contract | [conflict-journal-and-review.md](./conflict-journal-and-review.md)             | Disjoint-field auto-merge plus the dormant device-local journal/review capability and its security boundary                                       |
 | Contract | [vector-clocks.md](./vector-clocks.md)                                         | Vector-clock implementation, storage/pruning ownership, and history                                                                               |
 | Contract | [supersync-encryption-architecture.md](./supersync-encryption-architecture.md) | End-to-end encryption wire format, key lifecycle, integrity boundary, and known limitations                                                       |
-| History  | [operation-log-architecture.md](./operation-log-architecture.md)               | Deep rationale and migration/implementation history; use focused contracts and executable owners for current detail                               |
+| Mixed    | [operation-log-architecture.md](./operation-log-architecture.md)               | Deep rationale and implementation history plus the normative A.7.11 cross-version/schema-bump contract; use executable owners for volatile detail |
 
 ## Executable scenario index
 

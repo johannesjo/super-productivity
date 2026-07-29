@@ -8,10 +8,10 @@ SuperSync does not currently encrypt PostgreSQL database files or the database
 volume. The former LUKS and PostgreSQL TDE implementations were retired after
 testing showed that they could not run in the production OpenVZ environment.
 
-The abandoned implementation is preserved under
+The retirement summary is preserved under
 [`../archive/encryption-attempts-openvz-incompatible/`](../archive/encryption-attempts-openvz-incompatible/)
-for historical context. Its Compose override, scripts, and operational procedures
-are unsupported and must not be used as a production runbook.
+for historical context. The executable Compose override, scripts, and runbooks
+were removed; Git history retains them for forensic reference.
 
 The durable rationale and revisit criteria are recorded in
 [the repository decision](../../../docs/supersync-encryption-at-rest-decision.md).

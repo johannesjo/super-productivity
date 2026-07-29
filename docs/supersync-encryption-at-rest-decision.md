@@ -18,10 +18,10 @@ PostgreSQL TDE experiment was also not viable in that environment. Both attempts
 were retired rather than leaving an untestable security mechanism in the active
 deployment path.
 
-The old files remain under
+The retirement summary and implementation-history pointers remain under
 [`packages/super-sync-server/archive/encryption-attempts-openvz-incompatible/`](../packages/super-sync-server/archive/encryption-attempts-openvz-incompatible/)
-as historical evidence. They are not current runbooks and must not be executed
-against a production deployment.
+as historical evidence. The executable files and runbooks were removed so they
+cannot be mistaken for a supported production path.
 
 ## Security boundary
 
@@ -59,4 +59,5 @@ Reconsider this decision only with an operations-owned proposal that includes:
 
 Viable future directions include moving to a KVM host with infrastructure-managed
 disk encryption or a managed PostgreSQL service that provides encryption at rest.
-Archived scripts are research inputs, not a shortcut to approval.
+The retired implementation in Git history is a research input, not a shortcut
+to approval.

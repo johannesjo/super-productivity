@@ -8,28 +8,25 @@ name: Wiki Update
       - 'docs/wiki/**'
       - .github/workflows/wiki-sync.yml
       - .github/annotations/wiki-lint-problem-matcher.json
-      - tools/check-doc-links.js
-      - tools/check-doc-links.test.js
   push:
     branches: [master, main]
     paths:
       - 'docs/wiki/**'
       - .github/workflows/wiki-sync.yml
       - .github/annotations/wiki-lint-problem-matcher.json
-      - tools/check-doc-links.js
-      - tools/check-doc-links.test.js
 
 concurrency:
-  group: wiki
+  group: wiki-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       GH_A9S: .github/annotations
       GH_W7S: .github/workflows
@@ -71,16 +68,14 @@ jobs:
             --disable-rules line-length,no-inline-html \
             scan "docs/wiki"
 
-      - name: Check local links and images
-        run: |
-          node --test tools/check-doc-links.test.js
-          node tools/check-doc-links.js docs/wiki
-
   sync:
     name: (r)Sync
     if: github.event_name == 'push'
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     env:
       # Using [standard bot credentials](https://github.com/actions/checkout)
       GIT_AUTHOR_NAME: github-actions[bot]

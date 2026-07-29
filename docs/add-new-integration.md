@@ -142,12 +142,19 @@ calendar time-block operations. Add only capabilities the provider actually
 supports.
 
 Use the `PluginHttp` argument for provider requests. It returns Promises, applies
-the provider headers, limits methods and timeouts, and blocks local/private
-addresses by default. `allowPrivateNetwork` is only honored for trusted bundled
-plugins and should be enabled only for a self-hosted provider that needs it.
+the provider headers, and limits methods and timeouts. Its initial-URL check
+rejects known metadata hosts, common local hostnames, and literal private IP
+addresses by default. It does not resolve hostnames before the request or
+revalidate redirect targets, and issue-provider requests currently follow
+redirects. Use fixed HTTPS API origins that you trust; do not treat
+`PluginHttp` as a complete SSRF boundary. `allowPrivateNetwork` is only honored
+for trusted bundled plugins and should be enabled only for a self-hosted
+provider that needs it.
 
 `manifest.allowedHosts` scopes the separate `PluginAPI.request` method; it does
-not constrain the `PluginHttp` object passed to issue-provider methods.
+not constrain the `PluginHttp` object passed to issue-provider methods. On web
+and desktop, `PluginAPI.request` rejects redirects; native requests can still
+follow them, and hostname resolution is not revalidated on any platform.
 
 ## 3. Handle credentials
 
