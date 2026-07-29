@@ -53,6 +53,9 @@ data:
   {{- else if or $p.contactName $p.addressStreet $p.addressCity $p.addressCountry $p.contactEmail }}
   {{- fail "supersync.privacy: set all of contactName, addressStreet, addressCity, addressCountry and contactEmail, or none. A partial set makes the server refuse to boot." }}
   {{- end }}
+  {{- if .Values.supersync.dataRegion }}
+  PRIVACY_DATA_REGION: {{ .Values.supersync.dataRegion | quote }}
+  {{- end }}
   {{- if .Values.supersync.allowedEmails }}
   ALLOWED_EMAILS: {{ .Values.supersync.allowedEmails | quote }}
   {{- end }}

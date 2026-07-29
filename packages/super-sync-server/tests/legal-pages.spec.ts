@@ -89,15 +89,12 @@ describe('legal pages', () => {
       }
     });
 
-    it('makes no EU-hosting claim on the landing page', () => {
+    it('keeps our commercial roadmap off the landing page', () => {
       const template = fs.readFileSync(
         path.join(TEMPLATE_DIR, 'index.template.html'),
         'utf-8',
       );
 
-      expect(template).not.toContain('Data hosted in EU');
-      expect(template).not.toContain('eu-stars');
-      // Our commercial roadmap must not appear on someone else's registration page.
       expect(template).not.toContain('will likely cost');
     });
   });
@@ -209,6 +206,49 @@ describe('legal pages', () => {
       expect(isConsentRequired(loadConfigFromEnv())).toBe(false);
       setFullPrivacyEnv();
       expect(isConsentRequired(loadConfigFromEnv())).toBe(true);
+    });
+  });
+
+  describe('EU hosting badge', () => {
+    const importServer = async () => await import('../src/server');
+
+    // The badge names the EU specifically. It is true for our hosted instance and false
+    // for a self-hoster anywhere else, so it is opt-in and only EU/EEA unlocks it — an EU
+    // flag above "hosted in the US" is the exact class of false claim this work removed.
+    it('is absent by default', async () => {
+      const { createServer } = await importServer();
+      createServer({ dataDir: makeDataDir() });
+
+      const index = fs.readFileSync(INDEX_OUTPUT, 'utf-8');
+      expect(index).not.toContain('Data hosted in EU');
+      expect(index).not.toContain('eu-stars');
+    });
+
+    for (const region of ['EU', 'eu', 'EEA']) {
+      it(`renders for PRIVACY_DATA_REGION=${region}`, async () => {
+        process.env.PRIVACY_DATA_REGION = region;
+        const { createServer } = await importServer();
+        createServer({ dataDir: makeDataDir() });
+
+        const index = fs.readFileSync(INDEX_OUTPUT, 'utf-8');
+        expect(index).toContain('Data hosted in EU');
+        expect(index).toContain('eu-stars.svg');
+        expect(index).not.toContain('OPTIONAL:');
+      });
+    }
+
+    for (const region of ['US', 'Germany', 'europe']) {
+      it(`stays absent for PRIVACY_DATA_REGION=${region}`, async () => {
+        process.env.PRIVACY_DATA_REGION = region;
+        const { createServer } = await importServer();
+        createServer({ dataDir: makeDataDir() });
+
+        expect(fs.readFileSync(INDEX_OUTPUT, 'utf-8')).not.toContain('Data hosted in EU');
+      });
+    }
+
+    it('ships the flag asset it references', () => {
+      expect(fs.existsSync(path.join(PUBLIC_DIR, 'eu-stars.svg'))).toBe(true);
     });
   });
 

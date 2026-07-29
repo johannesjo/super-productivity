@@ -96,6 +96,9 @@ supersync:
     # -- Optional: the data-protection supervisory authority competent for you.
     # When empty, the policy points users to the authority for their own residence.
     supervisoryAuthority: ""
+  # -- Optional region label. "EU" or "EEA" shows the EU-hosting badge on the landing
+  # page; any other value shows no badge.
+  dataRegion: ""
   # -- Restrict who may register: comma-separated exact addresses and/or *@domain rules.
   # Empty means anyone who can reach the server may register.
   allowedEmails: ""

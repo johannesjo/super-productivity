@@ -113,6 +113,16 @@ export interface ServerConfig {
    */
   privacy?: PrivacyConfig;
   /**
+   * Where this instance stores user data, as an operator-asserted region label.
+   *
+   * Independent of `privacy` on purpose: it is a claim about infrastructure, not about the
+   * controller, and an operator may want the landing-page badge without publishing a full
+   * policy. Only `EU`/`EEA` renders a badge today — every other value is accepted and
+   * simply shows none, because an EU flag next to "US" would be exactly the kind of false
+   * statement this whole change exists to remove.
+   */
+  dataRegion?: string;
+  /**
    * Test mode configuration. When enabled, provides endpoints for E2E testing.
    * NEVER enable in production!
    */
@@ -325,6 +335,8 @@ export const loadConfigFromEnv = (
         process.env.PRIVACY_SUPERVISORY_AUTHORITY?.trim() || undefined,
     };
   }
+
+  config.dataRegion = process.env.PRIVACY_DATA_REGION?.trim() || undefined;
 
   // Test mode configuration
   // Requires both TEST_MODE=true AND TEST_MODE_CONFIRM=yes-i-understand-the-risks

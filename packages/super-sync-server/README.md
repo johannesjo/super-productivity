@@ -253,6 +253,10 @@ error, not a silent fallback.
 | `PRIVACY_ADDRESS_COUNTRY` | Country                                                   |
 | `PRIVACY_CONTACT_EMAIL`   | Contact address for data-protection requests              |
 
+`PRIVACY_DATA_REGION` is separate from the five: set it to `EU` (or `EEA`) to show the
+"Data hosted in EU" badge on the landing page. Any other value shows no badge, because an
+EU flag above "hosted in the US" is the kind of false claim these pages exist to avoid.
+
 Two optional sections are omitted from the policy entirely when unset:
 `PRIVACY_HOSTING_PROVIDER` (your hosting provider, if a third party processes data on your
 behalf) and `PRIVACY_SUPERVISORY_AUTHORITY` (the authority competent for you — without it

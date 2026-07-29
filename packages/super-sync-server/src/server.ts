@@ -107,6 +107,9 @@ const resolvePackageDir = (name: string): string => {
 
 const resolvePublicDir = (): string => resolvePackageDir('public');
 
+/** Values of PRIVACY_DATA_REGION that entitle an instance to show the EU-hosting badge. */
+const EU_DATA_REGIONS = new Set(['EU', 'EEA']);
+
 /** Generous for a legal document; small enough that a stray large file cannot fill the volume. */
 const MAX_OPERATOR_TERMS_BYTES = 2 * 1024 * 1024;
 
@@ -244,6 +247,7 @@ const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
 const generateIndexHtml = (options: {
   hasPrivacyPolicy: boolean;
   hasOperatorTerms: boolean;
+  dataRegion?: string;
 }): void => {
   const publicDir = resolvePublicDir();
   const templatePath = path.join(resolveTemplateDir(), 'index.template.html');
@@ -261,6 +265,10 @@ const generateIndexHtml = (options: {
   if (options.hasPrivacyPolicy) {
     keep.add('LEGAL_CONSENT');
     if (options.hasOperatorTerms) keep.add('LEGAL_TERMS');
+  }
+  // The badge names the EU specifically, so only an EU/EEA operator may show it.
+  if (EU_DATA_REGIONS.has(options.dataRegion?.trim().toUpperCase() ?? '')) {
+    keep.add('EU_BADGE');
   }
   const html = applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep);
   assertFullyRendered(html, 'index.html');
@@ -329,7 +337,11 @@ export const createServer = (
   // Order matters: index.html must reflect the pages that were actually written.
   const hasPrivacyPolicy = generatePrivacyHtml(fullConfig.privacy);
   const hasOperatorTerms = installOperatorLegalPages(fullConfig.dataDir);
-  generateIndexHtml({ hasPrivacyPolicy, hasOperatorTerms });
+  generateIndexHtml({
+    hasPrivacyPolicy,
+    hasOperatorTerms,
+    dataRegion: fullConfig.dataRegion,
+  });
 
   let fastifyServer: FastifyInstance | undefined;
 
