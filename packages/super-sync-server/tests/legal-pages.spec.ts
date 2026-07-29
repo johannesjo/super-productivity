@@ -193,6 +193,45 @@ describe('legal pages', () => {
       expect(privacy).toContain('A Data Processing Agreement (DPA) in');
     });
 
+    it('does not link Terms when the operator supplied none', async () => {
+      setFullPrivacyEnv();
+      const { createServer } = await importServer();
+      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+
+      const index = fs.readFileSync(INDEX_OUTPUT, 'utf-8');
+      // Consent is still asked for (a policy exists), but a link to a page we do not
+      // serve would 404 — and the nested marker must not leak into the served HTML.
+      expect(index).toContain('register-terms');
+      expect(index).toContain('/privacy.html');
+      expect(index).not.toContain('/terms.html');
+      expect(index).not.toContain('OPTIONAL:');
+    });
+
+    it('links Terms when the operator supplied them', async () => {
+      setFullPrivacyEnv();
+      const dataDir = path.join(__dirname, '.tmp-legal-terms');
+      fs.mkdirSync(path.join(dataDir, 'legal'), { recursive: true });
+      fs.writeFileSync(
+        path.join(dataDir, 'legal', 'terms.html'),
+        '<html>operator terms</html>',
+      );
+
+      try {
+        const { createServer } = await importServer();
+        createServer({ dataDir });
+
+        const index = fs.readFileSync(INDEX_OUTPUT, 'utf-8');
+        expect(index).toContain('/terms.html');
+        expect(index).not.toContain('OPTIONAL:');
+
+        const served = path.join(PUBLIC_DIR, 'terms.html');
+        expect(fs.readFileSync(served, 'utf-8')).toContain('operator terms');
+        fs.rmSync(served);
+      } finally {
+        fs.rmSync(dataDir, { recursive: true, force: true });
+      }
+    });
+
     it('escapes operator-supplied values', async () => {
       setFullPrivacyEnv();
       process.env.PRIVACY_CONTACT_NAME = '<script>alert(1)</script>';

@@ -107,11 +107,22 @@ const resolvePublicDir = (): string => {
  * operators who have a hosting provider or a named supervisory authority and operators
  * who have neither, without emitting a claim that is false for the other.
  */
-const applyOptionalBlocks = (html: string, keep: ReadonlySet<string>): string =>
-  html.replace(
-    /[^\S\n]*<!-- OPTIONAL:([A-Z_]+) -->\n?([\s\S]*?)[^\S\n]*<!-- \/OPTIONAL:\1 -->\n?/g,
-    (_match, name: string, body: string) => (keep.has(name) ? body : ''),
-  );
+const applyOptionalBlocks = (html: string, keep: ReadonlySet<string>): string => {
+  const blockPattern =
+    /[^\S\n]*<!-- OPTIONAL:([A-Z_]+) -->\n?([\s\S]*?)[^\S\n]*<!-- \/OPTIONAL:\1 -->\n?/g;
+  // Loop because a kept block's body is not re-scanned by String.replace, so nested
+  // markers (the terms link inside the consent block) would otherwise survive as
+  // literal HTML comments in the served page. Bounded by nesting depth, not input.
+  let previous: string;
+  let current = html;
+  do {
+    previous = current;
+    current = current.replace(blockPattern, (_match, name: string, body: string) =>
+      keep.has(name) ? body : '',
+    );
+  } while (current !== previous);
+  return current;
+};
 
 /**
  * Renders `privacy.html` from the shipped template.
@@ -177,7 +188,10 @@ const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
  * pages actually exist to link to. The generic image ships no Terms of Service, so an
  * unconfigured instance must not ask its users to accept one.
  */
-const generateIndexHtml = (hasLegalPages: boolean): void => {
+const generateIndexHtml = (options: {
+  hasPrivacyPolicy: boolean;
+  hasOperatorTerms: boolean;
+}): void => {
   const publicDir = resolvePublicDir();
   const templatePath = path.join(publicDir, 'index.template.html');
   const outputPath = path.join(publicDir, 'index.html');
@@ -187,7 +201,14 @@ const generateIndexHtml = (hasLegalPages: boolean): void => {
     return;
   }
 
-  const keep = new Set<string>(hasLegalPages ? ['LEGAL_CONSENT'] : []);
+  // The consent notice hangs off the privacy policy: without one there is nothing an
+  // operator can lawfully ask consent to. The Terms link is separately optional so an
+  // instance with a policy but no operator-supplied terms does not link to a 404.
+  const keep = new Set<string>();
+  if (options.hasPrivacyPolicy) {
+    keep.add('LEGAL_CONSENT');
+    if (options.hasOperatorTerms) keep.add('LEGAL_TERMS');
+  }
   fs.writeFileSync(
     outputPath,
     applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep),
@@ -239,9 +260,8 @@ export const createServer = (
   // Order matters: index.html must reflect the pages that were actually written.
   const hasPrivacyPolicy = generatePrivacyHtml(fullConfig.privacy);
   const hasOperatorTerms = installOperatorLegalPages(fullConfig.dataDir);
-  const hasLegalPages = hasPrivacyPolicy || hasOperatorTerms;
-  generateIndexHtml(hasLegalPages);
-  setLegalPagesPublished(hasLegalPages);
+  generateIndexHtml({ hasPrivacyPolicy, hasOperatorTerms });
+  setLegalPagesPublished(hasPrivacyPolicy);
 
   let fastifyServer: FastifyInstance | undefined;
 
