@@ -448,10 +448,6 @@
 :host.SplitTaskContinued,
 :host.SplitTaskContinuedLast {
   cursor: pointer;
-
-  &::before {
-    cursor: pointer;
-  }
 }
 
 :host.draggable {

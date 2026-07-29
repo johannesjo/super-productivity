@@ -197,16 +197,42 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
       expect(taskService.setSelectedId).toHaveBeenCalledOnceWith('task-1');
     });
 
-    it('should render the resize handle on the last segment of a split task', () => {
-      setEvent(SVEType.SplitTaskContinuedLast);
+    it('should keep continued segments undraggable', () => {
+      // elementId() is gated on isDraggableSE(), so an empty id also means no
+      // duplicate DOM ids across the segments of one task
+      setEvent(SVEType.Task);
+      expect(component.elementId()).toBe('t-task-1');
 
-      expect(component.isResizable()).toBe(true);
-      expect(fixture.nativeElement.querySelector('.resize-handle')).toBeTruthy();
+      setEvent(SVEType.SplitTaskContinued);
+      expect(component.elementId()).toBe('');
+
+      setEvent(SVEType.SplitTaskContinuedLast);
+      expect(component.elementId()).toBe('');
     });
 
-    it('should not offer resizing on non-final segments', () => {
-      setEvent(SVEType.SplitTaskContinued);
+    it('should open the task context menu on right-click of a continued segment', () => {
+      setEvent(SVEType.SplitTaskContinuedLast);
 
+      const menu = component.taskContextMenu();
+      expect(menu).toBeTruthy();
+      const openSpy = spyOn(menu!, 'open');
+
+      component.onContextMenu(new MouseEvent('contextmenu'));
+
+      expect(openSpy).toHaveBeenCalled();
+    });
+
+    it('should not offer resizing on any continued segment', () => {
+      // the head already carries the handle, and SplitTaskContinuedLast is not
+      // reliably the final segment of a multi-day scheduled task
+      setEvent(SVEType.Task);
+      expect(fixture.nativeElement.querySelector('.resize-handle')).toBeTruthy();
+
+      setEvent(SVEType.SplitTaskContinued);
+      expect(component.isResizable()).toBe(false);
+      expect(fixture.nativeElement.querySelector('.resize-handle')).toBeNull();
+
+      setEvent(SVEType.SplitTaskContinuedLast);
       expect(component.isResizable()).toBe(false);
       expect(fixture.nativeElement.querySelector('.resize-handle')).toBeNull();
     });
