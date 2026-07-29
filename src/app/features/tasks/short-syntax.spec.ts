@@ -2571,6 +2571,29 @@ describe('shortSyntax recurrence', () => {
     expect(due.getHours()).toBe(6);
   });
 
+  it('should skip the weekend for "@every weekday 6am" typed on a Friday after 6am', async () => {
+    // Fri Jan 19 08:00 — chrono slides the passed 6am to Saturday, which the
+    // workday preset excludes. getFirstRepeatOccurrence would put the task on
+    // Monday off the config's weekday flags, so previewing Saturday would show
+    // a first occurrence the task never gets.
+    const r = await parse('Standup @every weekday 6am', new Date(2024, 0, 19, 8, 0));
+    expect(presetOf(r)).toBe('MONDAY_TO_FRIDAY');
+    const due = new Date(r?.taskChanges.dueWithTime as number);
+    expect(due.getDate()).toBe(22);
+    expect(due.getDay()).toBe(1);
+    expect(due.getHours()).toBe(6);
+  });
+
+  it('should skip the weekend for "@every weekday 6am" typed on a Saturday', async () => {
+    // Sat Jan 20 05:00 — 6am is still ahead, so chrono keeps today; the whole
+    // weekend has to be skipped, not just the slid day.
+    const r = await parse('Standup @every weekday 6am', new Date(2024, 0, 20, 5, 0));
+    const due = new Date(r?.taskChanges.dueWithTime as number);
+    expect(due.getDate()).toBe(22);
+    expect(due.getDay()).toBe(1);
+    expect(due.getHours()).toBe(6);
+  });
+
   it('should parse "@every 15th" as monthly on next 15th', async () => {
     const r = await parse('Pay rent @every 15th', new Date(2024, 0, 20, 10, 0));
     expect(presetOf(r)).toBe('MONTHLY_CURRENT_DATE');
