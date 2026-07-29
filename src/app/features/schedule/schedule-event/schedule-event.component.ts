@@ -130,7 +130,12 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       evt.type === SVEType.SplitTask ||
       evt.type === SVEType.TaskPlannedForDay ||
       evt.type === SVEType.SplitTaskPlannedForDay ||
-      evt.type === SVEType.ScheduledTask
+      evt.type === SVEType.ScheduledTask ||
+      // continued segments carry the same task, so selecting and the context
+      // menu work on them too; dragging stays disabled via isDraggableSE()
+      // since only the head segment marks where the task starts
+      evt.type === SVEType.SplitTaskContinued ||
+      evt.type === SVEType.SplitTaskContinuedLast
     ) {
       return evt.data as TaskCopy;
     }
@@ -533,12 +538,15 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
     const t = this.task();
     const evt = this.se();
-    // Allow resizing for all task types with a time estimate
+    // Allow resizing for all task types with a time estimate.
+    // NOT for continued segments: a split task already has a handle on its head,
+    // and SplitTaskContinuedLast is not reliably the final segment — every day
+    // slice of a multi-day scheduled task carries that type (see
+    // create-view-entries-for-block.ts), so the middle ones cannot grow at all.
     return (
       !!t &&
       (evt.type === SVEType.ScheduledTask ||
         evt.type === SVEType.Task ||
-        evt.type === SVEType.SplitTaskContinuedLast ||
         evt.type === SVEType.TaskPlannedForDay ||
         evt.type === SVEType.SplitTaskPlannedForDay) &&
       t.timeEstimate > 0

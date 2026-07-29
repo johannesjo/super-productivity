@@ -443,6 +443,13 @@
   //}
 }
 
+// Not draggable (the head segment marks where the task starts), but clicking
+// still opens the task, so hint at it.
+:host.SplitTaskContinued,
+:host.SplitTaskContinuedLast {
+  cursor: pointer;
+}
+
 :host.draggable {
   cursor: grab;
 
