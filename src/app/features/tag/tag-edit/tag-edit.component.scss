@@ -30,11 +30,14 @@
       border-bottom-color: var(--extra-border-color);
     }
 
-    // Material only sets opacity: 1 on .mat-mdc-chip-input placeholders inside
-    // a .mat-mdc-form-field ancestor; this bare chip input isn't wrapped in one,
-    // so it never gets that rule and falls back to the browser's low-contrast default.
+    // Material forces `.mdc-text-field__input::placeholder { opacity: 0 }` globally and
+    // only restores it inside a .mat-mdc-form-field ancestor. matChipInput puts that
+    // class on this input, which is deliberately not wrapped in a form field, so without
+    // this the placeholder is fully invisible. The color is set explicitly because the
+    // browser default is a fixed grey that ignores the theme (unreadable on dark).
     &::placeholder {
-      opacity: 1 !important;
+      color: var(--text-color-muted);
+      opacity: 1;
     }
   }
 }
