@@ -485,7 +485,7 @@ async function registerWithPasskey() {
   }
 
   if (termsAccepted === false) {
-    showMessage('You must accept the Terms of Service', 'error');
+    showMessage('You must accept the linked legal documents to register', 'error');
     return;
   }
 
@@ -572,7 +572,7 @@ async function registerWithMagicLink() {
   }
 
   if (termsAccepted === false) {
-    showMessage('You must accept the Terms of Service', 'error');
+    showMessage('You must accept the linked legal documents to register', 'error');
     return;
   }
 

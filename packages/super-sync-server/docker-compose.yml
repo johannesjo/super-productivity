@@ -75,6 +75,12 @@ services:
       - '127.0.0.1:1900:1900'
     volumes:
       - supersync-data:/app/data
+      # To publish your own Terms of Service, uncomment this and put the HTML next to
+      # your compose file. The image ships none on purpose — ours name German law, a
+      # Leipzig venue and our contact address. Without it, /terms.html is simply not
+      # served and the consent notice links only the privacy policy.
+      # NOTE for the hosted deployment: this mount is how legal/terms.html gets in.
+      # - ./legal/terms.html:/app/data/legal/terms.html:ro
     depends_on:
       postgres:
         condition: service_healthy

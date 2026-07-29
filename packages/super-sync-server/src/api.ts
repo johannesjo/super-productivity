@@ -31,7 +31,10 @@ const VerifyEmailSchema = z.object({
   token: z.string().min(1, 'Token is required'),
 });
 
-const TERMS_REQUIRED_MESSAGE = 'You must accept the Terms of Service';
+// Deliberately does not name the Terms of Service: an instance may publish only a
+// privacy policy, in which case the consent label reads "I agree to the Privacy Policy"
+// and naming a document that is not served would be wrong.
+const TERMS_REQUIRED_MESSAGE = 'You must accept the linked legal documents to register';
 
 /**
  * Consent is only enforceable where legal pages actually exist. The generic Docker image
