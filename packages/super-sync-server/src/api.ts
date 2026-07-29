@@ -31,24 +31,35 @@ const VerifyEmailSchema = z.object({
   token: z.string().min(1, 'Token is required'),
 });
 
+const TERMS_REQUIRED_MESSAGE = 'You must accept the Terms of Service';
+
 /**
  * Consent is only enforceable where legal pages actually exist. The generic Docker image
  * ships no Terms of Service and publishes no privacy policy until the operator configures
  * `PRIVACY_*`, so an unconfigured instance must accept registrations without this flag
  * rather than demand agreement to documents it does not serve. See src/legal-pages.ts.
+ *
+ * This MUST be applied to the enclosing object, never as `.optional().refine(...)` on the
+ * field. In zod 4 an issue raised by a refinement on an optional field is DISCARDED when
+ * the key is absent from the input, so a field-level check silently accepts a body with no
+ * `termsAccepted` key at all — i.e. no consent enforcement on an instance that publishes
+ * legal pages. Guarded by tests/legal-pages.spec.ts.
  */
-const TermsAcceptedSchema = z
-  .boolean()
-  .optional()
-  .refine((val) => !areLegalPagesPublished() || val === true, {
-    message: 'You must accept the Terms of Service',
-  });
+const isTermsConsentSatisfied = (data: { termsAccepted?: boolean }): boolean =>
+  !areLegalPagesPublished() || data.termsAccepted === true;
+
+const TERMS_CONSENT_REFINEMENT = {
+  message: TERMS_REQUIRED_MESSAGE,
+  path: ['termsAccepted'] as PropertyKey[],
+};
 
 // Passkey Schemas
-const PasskeyRegisterOptionsSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  termsAccepted: TermsAcceptedSchema,
-});
+export const PasskeyRegisterOptionsSchema = z
+  .object({
+    email: z.string().email('Invalid email format'),
+    termsAccepted: z.boolean().optional(),
+  })
+  .refine(isTermsConsentSatisfied, TERMS_CONSENT_REFINEMENT);
 
 const PasskeyRegisterVerifySchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -78,10 +89,12 @@ const PasskeyRecoveryCompleteSchema = z.object({
 });
 
 // Magic Link Schemas
-const MagicLinkRegisterSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  termsAccepted: TermsAcceptedSchema,
-});
+export const MagicLinkRegisterSchema = z
+  .object({
+    email: z.string().email('Invalid email format'),
+    termsAccepted: z.boolean().optional(),
+  })
+  .refine(isTermsConsentSatisfied, TERMS_CONSENT_REFINEMENT);
 
 const MagicLinkRequestSchema = z.object({
   email: z.string().email('Invalid email format'),

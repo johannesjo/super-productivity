@@ -86,20 +86,32 @@ export const createListenOptions = (
 });
 
 /**
- * Locates the served `public/` directory.
+ * Locates a directory at the package root.
  *
  * `__dirname` is `dist/src` in the built image but `src` under ts-node/vitest, so a single
  * relative path is wrong for one of them — `../../public` silently resolved to a
  * nonexistent `packages/public` in dev, which meant the generated pages were never
  * written there at all. Probing both keeps dev, tests and the image on the same directory.
  */
-const resolvePublicDir = (): string => {
+const resolvePackageDir = (name: string): string => {
   const candidates = [
-    path.join(__dirname, '../../public'), // dist/src/ -> <pkg>/public
-    path.join(__dirname, '../public'), // src/      -> <pkg>/public
+    path.join(__dirname, '../..', name), // dist/src/ -> <pkg>/<name>
+    path.join(__dirname, '..', name), // src/      -> <pkg>/<name>
   ];
   return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
 };
+
+const resolvePublicDir = (): string => resolvePackageDir('public');
+
+/** Generous for a legal document; small enough that a stray large file cannot fill the volume. */
+const MAX_OPERATOR_TERMS_BYTES = 2 * 1024 * 1024;
+
+/**
+ * Templates deliberately live outside `public/`. `@fastify/static` serves that directory
+ * wholesale, so a template kept there is fetchable at `/privacy.template.html` — meaning an
+ * instance that correctly refuses to publish a policy would still serve the policy text.
+ */
+const resolveTemplateDir = (): string => resolvePackageDir('templates');
 
 /**
  * Drops `<!-- OPTIONAL:NAME -->…<!-- /OPTIONAL:NAME -->` sections whose name is not in
@@ -134,7 +146,7 @@ const applyOptionalBlocks = (html: string, keep: ReadonlySet<string>): string =>
  */
 const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
   const publicDir = resolvePublicDir();
-  const templatePath = path.join(publicDir, 'privacy.template.html');
+  const templatePath = path.join(resolveTemplateDir(), 'privacy.template.html');
   const outputPath = path.join(publicDir, 'privacy.html');
 
   // Stale output from an earlier, configured boot must not survive a reconfiguration.
@@ -164,17 +176,21 @@ const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
 
   // Replace placeholders with HTML-escaped values from config (prevent XSS)
   const html = applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep)
-    .replace(/\{\{\s*PRIVACY_CONTACT_NAME\s*\}\}/g, escapeHtml(privacy.contactName))
-    .replace(/\{\{\s*PRIVACY_ADDRESS_STREET\s*\}\}/g, escapeHtml(privacy.addressStreet))
-    .replace(/\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g, escapeHtml(privacy.addressCity))
-    .replace(/\{\{\s*PRIVACY_ADDRESS_COUNTRY\s*\}\}/g, escapeHtml(privacy.addressCountry))
-    .replace(/\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g, escapeHtml(privacy.contactEmail))
-    .replace(
-      /\{\{\s*PRIVACY_HOSTING_PROVIDER\s*\}\}/g,
+    .replace(/\{\{\s*PRIVACY_CONTACT_NAME\s*\}\}/g, () => escapeHtml(privacy.contactName))
+    .replace(/\{\{\s*PRIVACY_ADDRESS_STREET\s*\}\}/g, () =>
+      escapeHtml(privacy.addressStreet),
+    )
+    .replace(/\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g, () => escapeHtml(privacy.addressCity))
+    .replace(/\{\{\s*PRIVACY_ADDRESS_COUNTRY\s*\}\}/g, () =>
+      escapeHtml(privacy.addressCountry),
+    )
+    .replace(/\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g, () =>
+      escapeHtml(privacy.contactEmail),
+    )
+    .replace(/\{\{\s*PRIVACY_HOSTING_PROVIDER\s*\}\}/g, () =>
       escapeHtml(privacy.hostingProvider ?? '').replace(/\n/g, '<br />'),
     )
-    .replace(
-      /\{\{\s*PRIVACY_SUPERVISORY_AUTHORITY\s*\}\}/g,
+    .replace(/\{\{\s*PRIVACY_SUPERVISORY_AUTHORITY\s*\}\}/g, () =>
       escapeHtml(privacy.supervisoryAuthority ?? '').replace(/\n/g, '<br />'),
     );
 
@@ -193,7 +209,7 @@ const generateIndexHtml = (options: {
   hasOperatorTerms: boolean;
 }): void => {
   const publicDir = resolvePublicDir();
-  const templatePath = path.join(publicDir, 'index.template.html');
+  const templatePath = path.join(resolveTemplateDir(), 'index.template.html');
   const outputPath = path.join(publicDir, 'index.html');
 
   if (!fs.existsSync(templatePath)) {
@@ -229,7 +245,24 @@ const installOperatorLegalPages = (dataDir: string): boolean => {
   if (fs.existsSync(outputPath)) {
     fs.rmSync(outputPath);
   }
-  if (!fs.existsSync(sourcePath)) {
+
+  // lstat, not existsSync: copyFileSync follows symlinks, and the destination is served
+  // unauthenticated at /terms.html. A symlink pointing at the server's .env would publish it.
+  const stat = fs.lstatSync(sourcePath, { throwIfNoEntry: false });
+  if (!stat) {
+    return false;
+  }
+  if (!stat.isFile()) {
+    Logger.warn(
+      `Ignoring ${sourcePath}: not a regular file. Symlinks are refused because the copy ` +
+        'is served publicly at /terms.html.',
+    );
+    return false;
+  }
+  if (stat.size > MAX_OPERATOR_TERMS_BYTES) {
+    Logger.warn(
+      `Ignoring ${sourcePath}: ${stat.size} bytes exceeds the ${MAX_OPERATOR_TERMS_BYTES}-byte limit.`,
+    );
     return false;
   }
 

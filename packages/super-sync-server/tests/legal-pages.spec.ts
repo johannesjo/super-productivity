@@ -17,6 +17,8 @@ const resetEnv = (): void => {
 };
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+// Templates live outside public/ so @fastify/static cannot serve them verbatim.
+const TEMPLATE_DIR = path.join(__dirname, '..', 'templates');
 const PRIVACY_OUTPUT = path.join(PUBLIC_DIR, 'privacy.html');
 const INDEX_OUTPUT = path.join(PUBLIC_DIR, 'index.html');
 
@@ -55,7 +57,7 @@ describe('legal pages', () => {
 
     it('keeps operator-specific claims out of the privacy template', () => {
       const template = fs.readFileSync(
-        path.join(PUBLIC_DIR, 'privacy.template.html'),
+        path.join(TEMPLATE_DIR, 'privacy.template.html'),
         'utf-8',
       );
 
@@ -74,7 +76,7 @@ describe('legal pages', () => {
 
     it('makes no EU-hosting claim on the landing page', () => {
       const template = fs.readFileSync(
-        path.join(PUBLIC_DIR, 'index.template.html'),
+        path.join(TEMPLATE_DIR, 'index.template.html'),
         'utf-8',
       );
 
@@ -134,6 +136,68 @@ describe('legal pages', () => {
       expect(privacy?.hostingProvider).toBeUndefined();
       expect(privacy?.supervisoryAuthority).toBeUndefined();
     });
+  });
+
+  describe('registration consent enforcement', () => {
+    const importApi = async () => await import('../src/api');
+    const importFlag = async () => await import('../src/legal-pages');
+
+    // Regression: `termsAccepted: z.boolean().optional().refine(...)` looks correct but is
+    // NOT. In zod 4 an issue raised by a refinement on an optional field is discarded when
+    // the key is absent, so a body of {"email":"..."} passed validation on an instance that
+    // publishes legal pages — silently removing consent enforcement. The refinement must sit
+    // on the enclosing object. These cases fail if it is ever moved back onto the field.
+    for (const name of [
+      'PasskeyRegisterOptionsSchema',
+      'MagicLinkRegisterSchema',
+    ] as const) {
+      describe(name, () => {
+        it('rejects a body with no termsAccepted key when legal pages are published', async () => {
+          const { setLegalPagesPublished } = await importFlag();
+          setLegalPagesPublished(true);
+          const schema = (await importApi())[name];
+
+          // JSON.parse so the key is genuinely absent, exactly as it arrives over the wire.
+          const result = schema.safeParse(JSON.parse('{"email":"user@example.test"}'));
+          expect(result.success).toBe(false);
+        });
+
+        it('rejects termsAccepted:false when legal pages are published', async () => {
+          const { setLegalPagesPublished } = await importFlag();
+          setLegalPagesPublished(true);
+          const schema = (await importApi())[name];
+
+          expect(
+            schema.safeParse({ email: 'user@example.test', termsAccepted: false })
+              .success,
+          ).toBe(false);
+        });
+
+        it('accepts termsAccepted:true when legal pages are published', async () => {
+          const { setLegalPagesPublished } = await importFlag();
+          setLegalPagesPublished(true);
+          const schema = (await importApi())[name];
+
+          expect(
+            schema.safeParse({ email: 'user@example.test', termsAccepted: true }).success,
+          ).toBe(true);
+        });
+
+        it('accepts an omitted termsAccepted when no legal pages are published', async () => {
+          const { setLegalPagesPublished } = await importFlag();
+          setLegalPagesPublished(false);
+          const schema = (await importApi())[name];
+
+          try {
+            expect(
+              schema.safeParse(JSON.parse('{"email":"user@example.test"}')).success,
+            ).toBe(true);
+          } finally {
+            setLegalPagesPublished(true);
+          }
+        });
+      });
+    }
   });
 
   describe('privacy.html generation', () => {
@@ -232,6 +296,25 @@ describe('legal pages', () => {
       }
     });
 
+    // `String.replace(re, str)` treats $&, $`, $' as replacement patterns — and escapeHtml
+    // MANUFACTURES them, since it rewrites ' into &#039;, so a value like "O$'Brien" produces
+    // a literal `$&`. That spliced parts of the template into the <address> element and
+    // re-emitted the raw {{ PRIVACY_CONTACT_NAME }} placeholder into a published policy.
+    // Function replacers disable $-interpretation; these fail if they are ever inlined again.
+    it('does not treat $-sequences in operator values as replacement patterns', async () => {
+      setFullPrivacyEnv();
+      process.env.PRIVACY_CONTACT_NAME = "O$'Brien $& Co $`Ltd";
+      const { createServer } = await importServer();
+      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+
+      const privacy = fs.readFileSync(PRIVACY_OUTPUT, 'utf-8');
+      expect(privacy).not.toContain('{{');
+      // `$\`` splices everything preceding the match, which nested a second copy of the
+      // whole document inside <address>. Exactly one doctype means nothing was spliced.
+      expect(privacy.match(/<!doctype/gi)?.length).toBe(1);
+      expect(privacy).toContain('O$&#039;Brien $&amp; Co $`Ltd');
+    });
+
     it('escapes operator-supplied values', async () => {
       setFullPrivacyEnv();
       process.env.PRIVACY_CONTACT_NAME = '<script>alert(1)</script>';
@@ -241,6 +324,25 @@ describe('legal pages', () => {
       const privacy = fs.readFileSync(PRIVACY_OUTPUT, 'utf-8');
       expect(privacy).not.toContain('<script>alert(1)</script>');
       expect(privacy).toContain('&lt;script&gt;');
+    });
+
+    it('refuses to publish a symlinked terms.html', async () => {
+      setFullPrivacyEnv();
+      const dataDir = path.join(__dirname, '.tmp-legal-symlink');
+      const secret = path.join(dataDir, 'secret.env');
+      fs.mkdirSync(path.join(dataDir, 'legal'), { recursive: true });
+      fs.writeFileSync(secret, 'JWT_SECRET=supersecret');
+      fs.symlinkSync(secret, path.join(dataDir, 'legal', 'terms.html'));
+
+      try {
+        const { createServer } = await importServer();
+        createServer({ dataDir });
+
+        // copyFileSync follows symlinks, and the destination is served unauthenticated.
+        expect(fs.existsSync(path.join(PUBLIC_DIR, 'terms.html'))).toBe(false);
+      } finally {
+        fs.rmSync(dataDir, { recursive: true, force: true });
+      }
     });
 
     it('removes a stale policy left by an earlier configured boot', async () => {

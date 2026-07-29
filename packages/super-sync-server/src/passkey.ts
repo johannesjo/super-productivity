@@ -23,6 +23,7 @@ import {
 } from './auth';
 import { authCache } from './auth-cache';
 import { getDefaultStorageQuotaBytes } from './sync/services/storage-quota.service';
+import { areLegalPagesPublished } from './legal-pages';
 
 // Constants
 const CHALLENGE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
@@ -182,7 +183,14 @@ export const verifyRegistration = async (
 
   const verificationToken = randomBytes(32).toString('hex');
   const tokenExpiresAt = BigInt(Date.now() + VERIFICATION_TOKEN_EXPIRY_MS);
-  const acceptedAt = termsAcceptedAt ? BigInt(termsAcceptedAt) : BigInt(Date.now());
+  // Never invent an acceptance. On an instance that publishes no legal pages there is
+  // nothing to accept, and recording a timestamp would assert a consent the user was never
+  // shown. The column is nullable precisely so "not applicable" is representable.
+  const acceptedAt = termsAcceptedAt
+    ? BigInt(termsAcceptedAt)
+    : areLegalPagesPublished()
+      ? BigInt(Date.now())
+      : null;
 
   try {
     const config = loadConfigFromEnv();

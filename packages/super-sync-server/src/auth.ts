@@ -8,6 +8,7 @@ import { loadConfigFromEnv } from './config';
 import { Prisma } from '@prisma/client';
 import { authCache } from './auth-cache';
 import { getDefaultStorageQuotaBytes } from './sync/services/storage-quota.service';
+import { areLegalPagesPublished } from './legal-pages';
 
 // Auth constants
 const MIN_JWT_SECRET_LENGTH = 32;
@@ -460,7 +461,10 @@ export const registerWithMagicLink = async (
           passwordHash: null,
           verificationToken,
           verificationTokenExpiresAt: tokenExpiresAt,
-          termsAcceptedAt: acceptedAt ?? BigInt(Date.now()),
+          // Never invent an acceptance — see the same guard in passkey.ts. An instance
+          // with no legal pages has nothing to accept, and the column is nullable.
+          termsAcceptedAt:
+            acceptedAt ?? (areLegalPagesPublished() ? BigInt(Date.now()) : null),
           // Set explicitly rather than leaning on the column default, so that
           // SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES actually reaches new accounts.
           storageQuotaBytes: BigInt(getDefaultStorageQuotaBytes()),
