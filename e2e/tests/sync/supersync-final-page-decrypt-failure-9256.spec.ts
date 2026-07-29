@@ -337,9 +337,9 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
       const settingsPage = new SettingsPage(clientB.page);
       await settingsPage.navigateToSettings();
       await clientB.page.getByRole('link', { name: 'Logs', exact: true }).click();
-      const exportedLogsText = await clientB.page
-        .locator('dialog-logs textarea.logs-textarea')
-        .inputValue();
+      const logsTextarea = clientB.page.locator('dialog-logs textarea.logs-textarea');
+      await expect(logsTextarea).toHaveValue(/^\s*\[[\s\S]*\]\s*$/);
+      const exportedLogsText = await logsTextarea.inputValue();
       const exportedLogs: unknown = JSON.parse(exportedLogsText);
 
       // One diagnostic entry per failed run: the initial download plus the
