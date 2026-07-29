@@ -29,6 +29,12 @@
       outline: none;
       border-bottom-color: var(--extra-border-color);
     }
+
+    // MDC hides the placeholder by default unless a mat-form-field adds its
+    // "no-label" modifier class, which this bare chip input never gets.
+    &::placeholder {
+      opacity: 1 !important;
+    }
   }
 }
 

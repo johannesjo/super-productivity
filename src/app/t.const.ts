@@ -1772,6 +1772,7 @@ const T = {
         ADD: 'F.TAG.D_EDIT.ADD',
         EDIT: 'F.TAG.D_EDIT.EDIT',
         LABEL: 'F.TAG.D_EDIT.LABEL',
+        PLACEHOLDER: 'F.TAG.D_EDIT.PLACEHOLDER',
       },
       FORM_BASIC: {
         D_COLOR: 'F.TAG.FORM_BASIC.D_COLOR',
