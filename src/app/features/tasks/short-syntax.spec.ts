@@ -2560,6 +2560,17 @@ describe('shortSyntax recurrence', () => {
     expect(presetOf(r)).toBe('MONDAY_TO_FRIDAY');
   });
 
+  it('should not anchor "@every weekday 6am" to today\'s weekday', async () => {
+    // Wed Jan 17 10:00 — every workday is an occurrence, so tomorrow 6am is the
+    // right first one. Anchoring it the way the *_CURRENT_* presets are would
+    // roll a whole week instead, to Wed the 24th.
+    const r = await parse('Standup @every weekday 6am');
+    expect(presetOf(r)).toBe('MONDAY_TO_FRIDAY');
+    const due = new Date(r?.taskChanges.dueWithTime as number);
+    expect(due.getDate()).toBe(18);
+    expect(due.getHours()).toBe(6);
+  });
+
   it('should parse "@every 15th" as monthly on next 15th', async () => {
     const r = await parse('Pay rent @every 15th', new Date(2024, 0, 20, 10, 0));
     expect(presetOf(r)).toBe('MONTHLY_CURRENT_DATE');

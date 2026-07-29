@@ -872,6 +872,23 @@ describe('AddTaskBarParserService', () => {
           'Call dad',
         );
       });
+
+      // Offsets applied to text they were not computed for cut at arbitrary
+      // positions — the whitespace collapse hides that in same-length inputs
+      it('should not slice an unrelated text with stale ranges', async () => {
+        await parse('a @next friday');
+        expect(
+          service.removeShortSyntaxFromInput('Buy milk and eggs for dinner', 'date'),
+        ).toBe('Buy milk and eggs for dinner');
+      });
+
+      // An estimate inside a due phrase splits it into two ranges of one type,
+      // so the deletions have to run back to front or the second one is shifted
+      it('should remove two ranges of the same type without shifting', async () => {
+        const input = 'Task @tomorrow 1h evening';
+        await parse(input);
+        expect(service.removeShortSyntaxFromInput(input, 'date')).toBe('Task 1h');
+      });
     });
 
     describe('date removal', () => {
@@ -1770,6 +1787,69 @@ describe('AddTaskBarParserService', () => {
         MENU_PICK,
         'Water plants',
       );
+    });
+
+    it('should strip the time the phrase absorbed along with it', async () => {
+      // The recurrence consumed "@daily 6am" whole, so removing only the phrase
+      // orphans "6am" into the title of the task and of its repeat config
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Journal @daily 6am';
+      mockStateService.inputTxt.and.returnValue(input);
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+
+      service.applyUserRepeatPick(MENU_PICK);
+
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith(
+        MENU_PICK,
+        'Journal',
+      );
+    });
+
+    it('should strip the absorbed time when clearing the recurrence too', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Call @every friday 3pm';
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+
+      expect(service.removeShortSyntaxFromInput(input, 'repeat')).toBe('Call');
+    });
+
+    it('should keep the date the stripped phrase anchored', async () => {
+      // The pick takes the whole due token with it, so the date that token
+      // produced lives on in the state alone — the follow-up parse must not
+      // read its absence from the text as the user clearing it
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Journal @daily 6am';
+      mockStateService.inputTxt.and.returnValue(input);
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+      const [anchoredDate, anchoredTime] = mockStateService.updateDate.calls.mostRecent()
+        .args as [string, string];
+
+      service.applyUserRepeatPick(MENU_PICK);
+      mockStateService.state.and.returnValue({
+        ...baseState,
+        repeat: MENU_PICK,
+        date: anchoredDate,
+        time: anchoredTime,
+      } as any);
+      mockStateService.updateDate.calls.reset();
+
+      await service.parseAndUpdateText('Journal', cfg, [], [], defaultProject);
+
+      expect(anchoredTime).toBe('06:00');
+      expect(mockStateService.updateDate).not.toHaveBeenCalled();
+    });
+
+    it('should leave a plain date alone when a recurrence is picked', async () => {
+      // A date the user typed is not what the repeat control overrides — only a
+      // recurrence in the text is, and this text has none
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Call mom @tomorrow';
+      mockStateService.inputTxt.and.returnValue(input);
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+
+      service.applyUserRepeatPick(MENU_PICK);
+
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith(MENU_PICK, input);
     });
 
     it('should keep a menu pick that replaced a parsed recurrence phrase', async () => {

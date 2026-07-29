@@ -171,10 +171,11 @@ const WEEKDAY_UNIT_SOURCE =
 // "friday" date. The ordinal suffix is deliberately not checked against the
 // number ("@every 15st" parses as the 15th): typos should still hit the
 // recurrence people meant, not fall back to a plain date. Interval counts are
-// 1-999 — a never-recurring "@every 0 days" and anything past the dialog's
-// `repeatEvery` max fall through to the plain-date path. Excluding them in the
-// grammar rather than in the parse below keeps the derived removal regex honest:
-// the clear-repeat button may only delete text the parser actually consumed.
+// 1-999: a never-recurring "@every 0 days" falls through to the plain-date path,
+// and the upper bound stays one notch inside the dialog's `repeatEvery` max of
+// 1000. Excluding them in the grammar rather than in the parse below keeps the
+// derived removal regex in step: a bound checked in the parse would leave the
+// clear-repeat button deleting "@every 0 days", which the parser never consumed.
 // `weekday(s)`/`workday(s)` are deliberately absent from the interval units:
 // "every 2 weekdays" means every other workday, which a weekly cycle cannot
 // express (five weekday flags plus an interval means every other *week*, all
@@ -192,12 +193,18 @@ const REPEAT_PHRASE_SOURCE =
 const SHORT_SYNTAX_REPEAT_REG_EX = new RegExp('^' + REPEAT_PHRASE_SOURCE, 'i');
 
 // The same grammar re-anchored to the trigger char, for removing a recurrence
-// phrase from raw input (the clear-repeat button). Derived rather than
-// hand-written so the button can only ever delete text the parser would have
-// consumed — a second, broader grammar here silently eats phrases that fall
-// through to the plain-date path ("@every quarter", "@every 2 fridays"). The
-// leading `\s*` also lets trailing punctuation join the preceding word, the
-// way applyRepeatSyntax does ("Water plants @every friday." → "Water plants.").
+// phrase from raw input. Derived rather than hand-written so it cannot drift
+// from the parser — a second, broader grammar here silently eats phrases that
+// fall through to the plain-date path ("@every quarter", "@every 2 weekdays").
+// It is not equivalent to what the parser consumed, though: the parser matches
+// at the start of a due match (which ends at the next `+ # @ !`), this scans the
+// whole raw input, so the two disagree at the edges — "Task @every friday#tag"
+// is a recurrence this regex leaves alone, and "Task @tomorrow @daily" is not
+// one but has its second token matched here. Removing the ranges the parser
+// recorded is what avoids both (AddTaskBarParserService); this is the fallback
+// for when no parse has landed for the text yet. The leading `\s*` also lets
+// trailing punctuation join the preceding word, the way applyRepeatSyntax does
+// ("Water plants @every friday." → "Water plants.").
 export const SHORT_SYNTAX_REPEAT_REMOVAL_REG_EX = new RegExp(
   `\\s*\\${CH_DUE}` + REPEAT_PHRASE_SOURCE,
   'gi',
@@ -820,6 +827,8 @@ const parseShortSyntaxDate = async (
 // The cycle a recurrence's first occurrence has to be anchored to, or null when
 // the schedule has no anchor to preserve (DAILY / MONDAY_TO_FRIDAY: every day
 // resp. every workday is an occurrence, so the first one needs no alignment).
+// The callers below test the result against the anchored cycles by name, so
+// "no anchor" is expressed by returning null — nothing checks for DAILY.
 const anchorCycleOf = (repeat: ShortSyntaxRepeat): RepeatCycleOption | null => {
   if (repeat.type === 'INTERVAL') {
     return repeat.repeatCycle === 'DAILY' ? null : repeat.repeatCycle;
@@ -897,8 +906,9 @@ const applyRepeatSyntax = async (
   // same), so taking chrono's date verbatim would make "@weekly 6am" typed on a
   // Wednesday morning recur on Thursdays. Pin them to today and let the
   // roll-forward below advance a whole period instead, exactly like "@every
-  // wednesday 6am". DAILY is exempt (anchorCycle null): every day is an
-  // occurrence, so chrono's slide to tomorrow is the correct first one.
+  // wednesday 6am". Unanchored schedules (DAILY, MONDAY_TO_FRIDAY) fall through
+  // all three checks: every day resp. every workday is an occurrence, so
+  // chrono's slide to tomorrow is already the correct first one.
   const isTimeOnlyMatch =
     hasTime &&
     !!parsedDateResult &&

@@ -509,9 +509,36 @@ export class AddTaskBarParserService {
       .reduce((acc, r) => acc.slice(0, r.start) + acc.slice(r.end), text);
   }
 
+  /**
+   * Text with the recurrence syntax taken out.
+   *
+   * A recurrence parsed from the text owns its whole due token: the phrase plus
+   * any adjacent time the token absorbed ("@every friday 3pm"), which the
+   * phrase grammar on its own cannot see. Deleting only the phrase orphans that
+   * time, and it ends up in the title of both the task and its repeat config.
+   *
+   * Only the recurrence is this control's to remove, so a current parse that
+   * found none leaves the text alone — a "@tomorrow" the user typed is a plain
+   * date, not something a recurrence pick overrides. When no parse has landed
+   * for this exact text, the derived grammar is the only description of the
+   * phrase's extent available, and it can match the phrase alone.
+   */
+  private _removeRepeatSyntax(text: string): string {
+    if (
+      this._lastParsedRanges?.forText === text &&
+      !this._previousParseResult?.isRepeatFromSyntax
+    ) {
+      return text;
+    }
+    return (
+      this._removeParsedRanges(text, 'due') ??
+      text.replace(SHORT_SYNTAX_REPEAT_REMOVAL_REG_EX, '')
+    );
+  }
+
   removeShortSyntaxFromInput(
     currentInput: string,
-    type: 'tags' | 'date' | 'estimate' | 'urls' | 'deadline' | 'repeat',
+    type: 'tags' | 'date' | 'estimate' | 'deadline' | 'repeat',
     specificTag?: string,
   ): string {
     if (!currentInput) return currentInput;
@@ -552,10 +579,7 @@ export class AddTaskBarParserService {
 
       case 'repeat':
         // Remove recurrence syntax (e.g., @daily @every friday @every 2 weeks).
-        // Uses the parser's own grammar so a phrase the parser did not treat as
-        // a recurrence ("@every quarter") is left untouched; like the 'date'
-        // case, a trailing time token ("3pm") is left in place
-        cleanedInput = cleanedInput.replace(SHORT_SYNTAX_REPEAT_REMOVAL_REG_EX, '');
+        cleanedInput = this._removeRepeatSyntax(cleanedInput);
         break;
 
       case 'estimate':
@@ -563,13 +587,6 @@ export class AddTaskBarParserService {
         cleanedInput =
           this._removeParsedRanges(cleanedInput, 'estimate') ??
           cleanedInput.replace(new RegExp(SHORT_SYNTAX_TIME_REG_EX.source, 'gi'), ' ');
-        break;
-
-      case 'urls':
-        // Remove URL syntax (e.g., https://example.com www.example.com file:///path)
-        cleanedInput =
-          this._removeParsedRanges(cleanedInput, 'url') ??
-          cleanedInput.replace(/(?:(?:https?|file):\/\/\S+|www\.\S+?)(?=\s|$)/gi, '');
         break;
     }
 

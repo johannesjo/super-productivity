@@ -730,9 +730,10 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should pass a picked reminder option along', () => {
+      const resultDate = new Date('2024-01-15');
       mockDialogRef.afterClosed.and.returnValue(
         of({
-          date: new Date('2024-01-15'),
+          date: resultDate,
           time: '14:30',
           remindOption: TaskReminderOptionId.AtStart,
         }),
@@ -741,7 +742,7 @@ describe('AddTaskBarActionsComponent', () => {
       component.openScheduleDialog();
 
       expect(mockParserService.applyUserDatePick).toHaveBeenCalledWith(
-        '2024-01-15',
+        getDbDateStr(resultDate),
         '14:30',
         TaskReminderOptionId.AtStart,
       );
