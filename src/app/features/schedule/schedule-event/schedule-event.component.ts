@@ -382,13 +382,15 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     } else if (
       evt.type === SVEType.RepeatProjection ||
       evt.type === SVEType.RepeatProjectionSplit ||
-      evt.type === SVEType.ScheduledRepeatProjection
+      evt.type === SVEType.ScheduledRepeatProjection ||
+      evt.type === SVEType.RepeatProjectionSplitContinued ||
+      evt.type === SVEType.RepeatProjectionSplitContinuedLast
     ) {
       const repeatCfg: TaskRepeatCfg = evt.data as TaskRepeatCfg;
       this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
         data: {
           repeatCfg,
-          targetDate: (evt.id.includes('_') && evt.id.split('_')[1]) || undefined,
+          targetDate: evt.sourceOccurrenceDate ?? evt.plannedForDay,
         },
       });
     } else if (evt.type === SVEType.CalendarEvent) {

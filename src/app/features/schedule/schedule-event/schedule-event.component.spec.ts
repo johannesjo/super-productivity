@@ -11,6 +11,7 @@ import { TaskService } from '../../tasks/task.service';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
+import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 
 const makeCalendarScheduleEvent = (isReferenceCalendar: boolean): ScheduleEvent => ({
   id: 'cal-1',
@@ -148,6 +149,52 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
       } else {
         // calMenuTrigger is undefined when MatMenuTrigger is not resolved – openMenu was never called
         expect(trigger).toBeUndefined();
+      }
+    });
+  });
+
+  describe('clickHandler – repeat projections', () => {
+    it('opens every repeat projection variant for its planned calendar day', async () => {
+      const repeatCfg = { id: 'repeat_cfg_with_underscores' } as TaskRepeatCfg;
+      const plannedForDay = '2026-07-30';
+      const sourceOccurrenceDate = '2026-07-29';
+      const projectionTypes = [
+        SVEType.RepeatProjection,
+        SVEType.RepeatProjectionSplit,
+        SVEType.ScheduledRepeatProjection,
+        SVEType.RepeatProjectionSplitContinued,
+        SVEType.RepeatProjectionSplitContinuedLast,
+      ];
+      const matDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+
+      for (const type of projectionTypes) {
+        const isContinuedProjection =
+          type === SVEType.RepeatProjectionSplitContinued ||
+          type === SVEType.RepeatProjectionSplitContinuedLast;
+        fixture.componentRef.setInput('event', {
+          id: 'repeat_cfg_with_underscores_not-a-date',
+          type,
+          style: '',
+          startHours: 10,
+          timeLeftInHours: 1,
+          plannedForDay,
+          sourceOccurrenceDate: isContinuedProjection ? sourceOccurrenceDate : undefined,
+          data: repeatCfg,
+        } as ScheduleEvent);
+        fixture.detectChanges();
+
+        await component.clickHandler(new MouseEvent('click'));
+
+        expect(matDialog.open).toHaveBeenCalledWith(
+          jasmine.anything(),
+          jasmine.objectContaining({
+            data: jasmine.objectContaining({
+              repeatCfg,
+              targetDate: isContinuedProjection ? sourceOccurrenceDate : plannedForDay,
+            }),
+          }),
+        );
+        matDialog.open.calls.reset();
       }
     });
   });
