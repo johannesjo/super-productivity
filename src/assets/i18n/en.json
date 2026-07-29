@@ -3107,6 +3107,8 @@
     "PROJECT_SETTINGS": "Project Specific Settings",
     "PROVIDE_FEEDBACK": "Provide Feedback",
     "RELOAD": "Reload",
+    "SEARCH_NO_RESULTS": "No settings found",
+    "SEARCH_PLACEHOLDER": "Search settings",
     "SYNC": {
       "CONFIGURE": "Configure",
       "EMPTY_STATE_HINT": "Sync your data with Dropbox, WebDAV, Nextcloud, or a local file.",
