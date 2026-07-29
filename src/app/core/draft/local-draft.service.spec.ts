@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import {
   DRAFT_LOAD_ERROR,
+  DRAFT_MAX_ENTRIES,
+  DRAFT_PRUNE_SLACK,
   getDraftOpenAction,
   isDraftResolved,
   LocalDraft,
@@ -314,12 +316,18 @@ describe('LocalDraftService', () => {
     await service.clearDraft('NOTE', freshId);
   });
 
-  it('should prune at most once per session', async () => {
+  it('coalesces concurrent prune requests into one sweep', async () => {
     activeProfileId = 'profile-a';
     const pruneSpy = spyOn(service as any, '_pruneStaleDrafts').and.callThrough();
 
-    await (service as any)._pruneStaleDraftsOnce();
-    await (service as any)._pruneStaleDraftsOnce();
+    // Overlapping callers (app start, an open, a save crossing the soft cap)
+    // share the in-flight sweep rather than each running their own O(n) pass.
+    // Note these are NOT awaited in turn — sequential calls deliberately DO
+    // sweep again, which is what keeps retention reachable all session.
+    await Promise.all([
+      (service as any)._pruneStaleDraftsOnce(),
+      (service as any)._pruneStaleDraftsOnce(),
+    ]);
 
     expect(pruneSpy).toHaveBeenCalledTimes(1);
   });
@@ -662,6 +670,146 @@ describe('LocalDraftService', () => {
     expect(await service.loadDraft('NOTE', id)).toBeUndefined();
   });
 
+  it('prunes again later in the same session (the guard is in-flight only)', async () => {
+    activeProfileId = 'profile-a';
+    // One prune has already run this session (app start, or the first note
+    // opened). Everything created afterwards used to be unreachable by the
+    // retention policy for the rest of the process lifetime.
+    await (service as any)._pruneStaleDraftsOnce();
+
+    const id = uniqueId();
+    const fifteenDaysMs = 15 * 24 * 60 * 60 * 1000;
+    await (service as any)._withRetryOnClose((db: any) =>
+      db.put('drafts', {
+        key: `profile-a:NOTE:${id}`,
+        entityType: 'NOTE',
+        entityId: id,
+        profileId: 'profile-a',
+        content: 'note text past retention',
+        baseContent: 'base',
+        updatedAt: Date.now() - fifteenDaysMs,
+      }),
+    );
+
+    await (service as any)._pruneStaleDraftsOnce();
+
+    // Read the store directly: loadDraft() fires its own (fire-and-forget)
+    // prune, which could make this pass by luck rather than by the guard.
+    const survivor = await (service as any)._withRetryOnClose((db: any) =>
+      db.get('drafts', `profile-a:NOTE:${id}`),
+    );
+    // Cache the settled promise once per session (rather than clearing it when
+    // the prune finishes) and this draft — full note content, well past the
+    // documented 14-day retention — survives until the app restarts -> red.
+    expect(survivor).toBeUndefined();
+  });
+
+  it('does not sweep on a save that is well under the soft cap', async () => {
+    activeProfileId = 'profile-a';
+    const pruneSpy = spyOn(service as any, '_pruneStaleDrafts').and.callThrough();
+
+    for (let i = 0; i < 5; i++) {
+      await service.saveDraft({
+        entityType: 'NOTE',
+        entityId: uniqueId(),
+        content: `c${i}`,
+        baseContent: 'base',
+      });
+    }
+    // Give any fire-and-forget sweep a chance to start before asserting absence.
+    for (let i = 0; i < 5; i++) {
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    // The soft cap is the entire point of the counter: sweep unconditionally
+    // (`if (true)`, or drop DRAFT_PRUNE_SLACK) and every checkpoint pays for a
+    // full O(n) pass over the store -> red.
+    expect(pruneSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not sweep because OTHER profiles pushed the store over the cap', async () => {
+    // The cap _pruneStaleDrafts enforces is PER PROFILE, so the trigger has to
+    // count per profile too. Counting the whole store instead sits permanently
+    // above the threshold once two profiles each hold a normal number of
+    // drafts, turning "amortized every DRAFT_PRUNE_SLACK saves" into "a full
+    // sweep on every keystroke checkpoint" -> red.
+    activeProfileId = 'profile-b';
+    await (service as any)._withRetryOnClose(async (db: any) => {
+      for (let i = 0; i < DRAFT_MAX_ENTRIES + DRAFT_PRUNE_SLACK + 1; i++) {
+        const id = uniqueId();
+        await db.put('drafts', {
+          key: `profile-b:NOTE:${id}`,
+          entityType: 'NOTE',
+          entityId: id,
+          profileId: 'profile-b',
+          content: `b${i}`,
+          baseContent: 'base',
+          updatedAt: Date.now(),
+        });
+      }
+    });
+
+    activeProfileId = 'profile-a';
+    const pruneSpy = spyOn(service as any, '_pruneStaleDrafts').and.callThrough();
+    await service.saveDraft({
+      entityType: 'NOTE',
+      entityId: uniqueId(),
+      content: 'the only draft profile-a has',
+      baseContent: 'base',
+    });
+    for (let i = 0; i < 5; i++) {
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    expect(pruneSpy).not.toHaveBeenCalled();
+  });
+
+  it('prunes off the save path once a profile crosses the soft cap', async () => {
+    activeProfileId = 'profile-a';
+    const expiredId = uniqueId();
+    const fifteenDaysMs = 15 * 24 * 60 * 60 * 1000;
+    await (service as any)._withRetryOnClose((db: any) =>
+      db.put('drafts', {
+        key: `profile-a:NOTE:${expiredId}`,
+        entityType: 'NOTE',
+        entityId: expiredId,
+        profileId: 'profile-a',
+        content: 'note text past retention',
+        baseContent: 'base',
+        updatedAt: Date.now() - fifteenDaysMs,
+      }),
+    );
+
+    // A long-lived session (Electron) that keeps editing: checkpoints alone must
+    // bring retention back around, without a load or a restart to trigger it.
+    for (let i = 0; i < DRAFT_MAX_ENTRIES + DRAFT_PRUNE_SLACK + 1; i++) {
+      await service.saveDraft({
+        entityType: 'NOTE',
+        entityId: uniqueId(),
+        content: `c${i}`,
+        baseContent: 'base',
+      });
+    }
+
+    // The sweep is fire-and-forget (a checkpoint must not wait on it), so poll
+    // rather than reading once. Deliberately does NOT call the prune itself:
+    // triggering it here would pass even with nothing on the save path. Reads
+    // the store directly for the same reason — loadDraft() fires its own prune.
+    for (let i = 0; i < 200; i++) {
+      const survivor = await (service as any)._withRetryOnClose((db: any) =>
+        db.get('drafts', `profile-a:NOTE:${expiredId}`),
+      );
+      if (survivor === undefined) {
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    // Leave the save path free of any retention trigger and the store grows
+    // unbounded for the whole session, keeping expired note text with it -> red.
+    fail('the expired draft was never pruned off the save path');
+  });
+
   describe('getDraftOpenAction (the read-time decision tree)', () => {
     const draft = (over: Partial<LocalDraft> = {}): LocalDraft => ({
       key: 'p:NOTE:n1',
@@ -694,13 +842,32 @@ describe('LocalDraftService', () => {
       expect(getDraftOpenAction(d, 'REMOTE')).toBe('IGNORE');
     });
 
-    it('still RESTORES a SAVED draft whose write never reached disk', () => {
-      // The write was dispatched and marked, then rolled back / never persisted,
-      // so the entity sits back at baseContent. This ordering is what makes a
-      // write-time durability gate unnecessary: rank the SAVED branch above the
-      // baseContent branch and the edit is silently lost -> red.
+    it('ignores a durably SAVED draft when the entity was later edited back to baseContent', () => {
+      // A SAVED marker now means the operation behind the save was durably
+      // acknowledged (isDispatchDurable gates the write side), so an entity
+      // sitting at baseContent means a LATER intentional edit put it back there
+      // — not that the save was lost. Rank the baseContent branch above SAVED
+      // and the next open hands back the superseded text, which Escape or a
+      // navigation then saves over that later edit -> red.
       const d = draft({ resolved: { content: 'DRAFT', kind: 'SAVED' } });
-      expect(getDraftOpenAction(d, 'BASE')).toBe('RESTORE');
+      expect(getDraftOpenAction(d, 'BASE')).toBe('IGNORE');
+    });
+
+    it('separates the two histories only the durability marker can tell apart', () => {
+      // The same stored text, the same entity contents, opposite answers — the
+      // marker is the only thing distinguishing them, which is why it may not be
+      // written for a save that was deferred or failed.
+      const unmarked = draft(); // dispatch never became durable
+      const durable = draft({ resolved: { content: 'DRAFT', kind: 'SAVED' } });
+
+      // Entity moved on: the unmarked copy is the only one left -> ask.
+      expect(getDraftOpenAction(unmarked, 'REMOTE')).toBe('PROMPT');
+      expect(getDraftOpenAction(durable, 'REMOTE')).toBe('IGNORE');
+      // Entity back at base: crash recovery vs. a later edit that must not be
+      // reverted. Move the baseContent branch above the marker and the second
+      // assertion flips to RESTORE -> red.
+      expect(getDraftOpenAction(unmarked, 'BASE')).toBe('RESTORE');
+      expect(getDraftOpenAction(durable, 'BASE')).toBe('IGNORE');
     });
 
     it('never resurrects a DISCARDED draft, not even from its own baseContent', () => {

@@ -61,14 +61,17 @@ export type DraftOpenAction = 'IGNORE' | 'RESTORE' | 'PROMPT';
  * Decides what to do with an existing draft when its entity is opened, given the
  * entity's current (optimistic) content.
  *
- * The ORDER of these branches is the whole design; changing it reintroduces data
- * loss that no amount of write-time gating can compensate for. In particular
- * RESTORE sits ABOVE the SAVED marker on purpose: a save that was marked and
- * then never reached disk (crash, rolled-back write, sync-window-deferred
- * action) leaves the entity sitting back at `baseContent`, and that case must
- * still recover the edit. Because the read side detects that positively, the
- * write side needs no durability proof before marking — which is what lets the
- * flush/phantom-risk coupling disappear from the callers entirely.
+ * The ORDER of these branches is the whole design, and it rests on ONE
+ * invariant: a marker is only written once the save behind it is durable
+ * (isDispatchDurable gates the write side; see markSaved).
+ *
+ * Without that, one record would have to serve two histories needing opposite
+ * answers: a save that never became durable while the entity moved elsewhere
+ * (the draft is the only surviving copy — must PROMPT), and a durable save the
+ * entity was later edited back away from (historical — must not be restored
+ * over that later edit). Gating the marker separates them, because only the
+ * second history can carry one. Every path fails toward an extra prompt rather
+ * than toward suppressing text.
  */
 export const getDraftOpenAction = (
   draft: LocalDraft,
@@ -78,21 +81,19 @@ export const getDraftOpenAction = (
   if (draft.content === entityContent) {
     return 'IGNORE';
   }
-  // The user explicitly threw this text away. A discard leaves the entity at
-  // `baseContent` by definition, so this MUST outrank the RESTORE branch below —
-  // otherwise the next open hands back the very text the user just discarded.
-  if (draft.resolved?.kind === 'DISCARDED' && draft.resolved.content === draft.content) {
+  // This text stopped being unsaved work, so the record is inert whatever the
+  // entity now holds — and either kind of marker MUST outrank the crash-recovery
+  // branch below. DISCARDED: a discard leaves the entity at `baseContent` by
+  // definition, so restoring would hand back the exact text the user threw away.
+  // SAVED: durability is proven before marking, so an entity at `baseContent`
+  // means a later edit put it back there, and restoring would revert that edit.
+  if (isDraftResolved(draft)) {
     return 'IGNORE';
   }
-  // The entity is exactly where this edit session started, so the edit never
-  // landed: crash recovery.
+  // Unmarked text, and the entity is exactly where this edit session started:
+  // the edit never landed. Crash recovery.
   if (draft.baseContent === entityContent) {
     return 'RESTORE';
-  }
-  // The text was saved and the entity has since moved on (e.g. through sync).
-  // Prompting here would be the spurious conflict this marker exists to avoid.
-  if (draft.resolved?.kind === 'SAVED' && draft.resolved.content === draft.content) {
-    return 'IGNORE';
   }
   // Unsaved text, and the entity changed underneath it. Only the user can say
   // which one wins.
@@ -117,7 +118,15 @@ const DB_VERSION = 1;
 // (not imported from the sync module) to avoid a core -> sync layering edge.
 const DRAFT_RETENTION_DAYS = 14;
 const DRAFT_RETENTION_MS = DRAFT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-const DRAFT_MAX_ENTRIES = 200;
+export const DRAFT_MAX_ENTRIES = 200;
+
+/**
+ * How far past {@link DRAFT_MAX_ENTRIES} a profile may grow before a save
+ * prunes it back, mirroring JOURNAL_PRUNE_SLACK. count() is cheap; the O(n)
+ * prune it gates is not, so it runs amortized once every DRAFT_PRUNE_SLACK
+ * saves rather than on every checkpoint.
+ */
+export const DRAFT_PRUNE_SLACK = 20;
 
 interface DraftsDb extends DBSchema {
   [DB_STORE_NAME]: {
@@ -154,8 +163,8 @@ export class LocalDraftService {
   }): Promise<void> {
     try {
       const profileId = await this._activeProfileId();
-      await this._withRetryOnClose((db) =>
-        db.put(DB_STORE_NAME, {
+      const profileCount = await this._withRetryOnClose(async (db) => {
+        await db.put(DB_STORE_NAME, {
           key: this._key(profileId, entityType, entityId),
           entityType,
           entityId,
@@ -163,8 +172,23 @@ export class LocalDraftService {
           content,
           baseContent,
           updatedAt: Date.now(),
-        }),
-      );
+        });
+        // Counts THIS PROFILE only, because that is what the sweep enforces.
+        // ConflictJournalService.record() counts its whole store, but the
+        // journal's cap is global; ours is per profile (see _pruneStaleDrafts).
+        // A global count here would sit permanently above the threshold once two
+        // profiles each hold a normal number of drafts, and every checkpoint
+        // would then fire a full sweep that deletes nothing.
+        return db.count(DB_STORE_NAME, this._profileKeyRange(profileId));
+      });
+      // Retention used to be reachable only from app start and the open path, so
+      // a session that kept editing without opening a note grew unbounded.
+      // count() is cheap; the O(n) sweep it gates runs amortized once every
+      // DRAFT_PRUNE_SLACK saves. Fire-and-forget: a checkpoint must never wait
+      // on (or fail with) a sweep.
+      if (profileCount > DRAFT_MAX_ENTRIES + DRAFT_PRUNE_SLACK) {
+        void this._pruneStaleDraftsOnce();
+      }
     } catch (e) {
       Log.err('LocalDraftService: Failed to save draft', e);
     }
@@ -174,8 +198,9 @@ export class LocalDraftService {
     entityType: LocalDraftEntityType,
     entityId: string,
   ): Promise<LocalDraft | undefined | typeof DRAFT_LOAD_ERROR> {
-    // Reclaim long-abandoned drafts lazily on the open path (fire-and-forget, at
-    // most once per session) so they do not accumulate forever. Age/cap only —
+    // Reclaim long-abandoned drafts lazily on the open path (fire-and-forget,
+    // coalesced with any in-flight sweep) so they do not accumulate forever.
+    // Age/cap only —
     // it cannot know whether an entity still exists. It never blocks or fails
     // this load; it runs in its own transactions, so a draft sitting exactly on
     // the retention boundary may or may not still be here by the get() below —
@@ -209,10 +234,11 @@ export class LocalDraftService {
    * edit session checkpointed different content into the same key, this is a
    * no-op and that newer text stays live.
    *
-   * Marking is deliberately unconditional on durability. If the write never
-   * reaches disk the entity ends up back at the draft's `baseContent`, which
-   * getDraftOpenAction() detects and restores — so nothing here has to prove the
-   * write landed first.
+   * CALLERS MUST PROVE DURABILITY FIRST (isDispatchDurable). The marker is what
+   * lets getDraftOpenAction() treat a record as inert, so writing one for a save
+   * that never became durable suppresses the only remaining copy of the text.
+   * When durability cannot be proven, leave the draft unresolved: the cost is an
+   * extra recovery prompt, not lost work.
    */
   async markSaved(
     entityType: LocalDraftEntityType,
@@ -327,10 +353,11 @@ export class LocalDraftService {
    * (wired via APP_INITIALIZER in main.ts). Without this, prune only ever ran
    * lazily off loadDraft(), so a user who stopped opening notes never pruned
    * again and their drafts — full note content — could outlive the documented
-   * 14-day retention indefinitely. Shares the once-per-session guard, so a later
-   * loadDraft() in the same session does not prune a second time. Fire-and-forget
-   * and best-effort: it opens its own IndexedDB lazily and swallows its own
-   * errors, so it can never block or fail bootstrap.
+   * 14-day retention indefinitely. Shares the in-flight guard, so it coalesces
+   * with a sweep already running; later opens and saves in the same session
+   * deliberately sweep again. Fire-and-forget and best-effort: it opens its own
+   * IndexedDB lazily and swallows its own errors, so it can never block or fail
+   * bootstrap.
    */
   pruneOnStart(): Promise<void> {
     return this._pruneStaleDraftsOnce();
@@ -338,15 +365,26 @@ export class LocalDraftService {
 
   /**
    * Prunes drafts by `updatedAt`: drops anything older than the retention window
-   * and, if still over the entry cap, the oldest remaining entries. Runs at most
-   * once per session (guarded by `_prunePromise`) and is best-effort — a failure
-   * is logged and swallowed so it can never break the load that triggered it.
+   * and, if still over the entry cap, the oldest remaining entries. Concurrent
+   * callers share one sweep (`_prunePromise`); sequential ones each get their
+   * own. Best-effort — a failure is logged and swallowed so it can never break
+   * the load or save that triggered it.
    */
   private _pruneStaleDraftsOnce(): Promise<void> {
     if (!this._prunePromise) {
-      this._prunePromise = this._pruneStaleDrafts().catch((e) => {
-        Log.err('LocalDraftService: Failed to prune stale drafts', e);
-      });
+      this._prunePromise = this._pruneStaleDrafts()
+        .catch((e) => {
+          Log.err('LocalDraftService: Failed to prune stale drafts', e);
+        })
+        // In-flight guard, NOT once-per-session: clearing it on settle keeps
+        // concurrent callers sharing one sweep while leaving retention reachable
+        // for the rest of the session. Cached forever, the startup initializer
+        // consumed the only sweep a long-lived (Electron) session would ever get,
+        // and everything created afterwards outlived both the retention window
+        // and the entry cap until restart.
+        .finally(() => {
+          this._prunePromise = undefined;
+        });
     }
     return this._prunePromise;
   }
@@ -464,6 +502,15 @@ export class LocalDraftService {
     entityId: string,
   ): string {
     return `${profileId}:${entityType}:${entityId}`;
+  }
+
+  /**
+   * Every key of one profile. Keys are `${profileId}:${entityType}:${entityId}`
+   * and a profile id cannot contain the `:` separator, so the prefix range is
+   * exact. `￿` is above every character that can follow the separator.
+   */
+  private _profileKeyRange(profileId: string): IDBKeyRange {
+    return IDBKeyRange.bound(`${profileId}:`, `${profileId}:￿`);
   }
 
   private async _ensureDb(): Promise<IDBPDatabase<DraftsDb>> {

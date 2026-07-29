@@ -42,6 +42,9 @@ import {
   getDraftOpenAction,
   LocalDraftService,
 } from '../../../core/draft/local-draft.service';
+import { isDispatchDurable } from '../../../core/draft/draft-durability.util';
+import { OperationWriteFlushService } from '../../../op-log/sync/operation-write-flush.service';
+import { OperationCaptureService } from '../../../op-log/capture/operation-capture.service';
 import { Log } from '../../../core/log';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { RenderLinksPipe } from '../../../ui/pipes/render-links.pipe';
@@ -110,6 +113,8 @@ export class NoteComponent implements OnChanges {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _clipboardImageService = inject(ClipboardImageService);
   private readonly _localDraftService = inject(LocalDraftService);
+  private readonly _operationWriteFlushService = inject(OperationWriteFlushService);
+  private readonly _operationCaptureService = inject(OperationCaptureService);
 
   // Note ids whose fullscreen-open lifecycle is currently in flight. Serializes
   // opens per note so a second click during the async draft/conflict prelude
@@ -371,15 +376,23 @@ export class NoteComponent implements OnChanges {
           this._noteService.update(note.id, { content: res });
           if (!isDraftUnreadable) {
             // Record that this text was handed to the note, so a later remote
-            // change cannot turn it into a spurious "unsaved draft" prompt. No
-            // flush and no durability gate: if this update never reaches disk the
-            // note ends up back at the draft's baseContent, and the open path
-            // restores from there (getDraftOpenAction ranks that above the marker).
-            // Nothing is deleted, so being wrong here cannot cost text.
-            await withDraftIoTimeout(
-              this._localDraftService.markSaved('NOTE', note.id, res),
-              undefined,
-            );
+            // change cannot turn it into a spurious "unsaved draft" prompt —
+            // but ONLY once the operation behind that update is durably written.
+            // The marker is what makes the record inert at read time, so marking
+            // a save that was deferred or failed would suppress the only copy of
+            // the edit. Unproven durability leaves the draft fully recoverable;
+            // nothing is deleted on either path.
+            if (
+              await isDispatchDurable(
+                this._operationWriteFlushService,
+                this._operationCaptureService,
+              )
+            ) {
+              await withDraftIoTimeout(
+                this._localDraftService.markSaved('NOTE', note.id, res),
+                undefined,
+              );
+            }
           }
           // Discard — confirmed by the user in the dialog, so the draft is recorded
           // as thrown away (not deleted). Any other result (undefined from a

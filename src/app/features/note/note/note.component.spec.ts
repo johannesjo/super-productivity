@@ -16,6 +16,8 @@ import {
 } from '../../../core/draft/local-draft.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import { OperationWriteFlushService } from '../../../op-log/sync/operation-write-flush.service';
+import { OperationCaptureService } from '../../../op-log/capture/operation-capture.service';
 
 describe('NoteComponent editFullscreen', () => {
   let component: NoteComponent;
@@ -25,6 +27,12 @@ describe('NoteComponent editFullscreen', () => {
   let contentChanged$: Subject<string>;
   let afterClosed$: Subject<unknown>;
   let confirmResult: boolean | undefined;
+  // Whether the operation behind the note update is treated as durably written.
+  let isDurable: boolean;
+  // Set once the durability gate has actually been entered, so tests asserting
+  // that nothing was retired can anchor on a point INSIDE the gate rather than
+  // on a guessed number of queue turns.
+  let didFlush: boolean;
 
   const NOTE: Note = {
     id: 'note-1',
@@ -62,6 +70,8 @@ describe('NoteComponent editFullscreen', () => {
       };
     });
 
+    isDurable = true;
+    didFlush = false;
     noteService = jasmine.createSpyObj('NoteService', ['update', 'remove']);
     localDraftService = jasmine.createSpyObj('LocalDraftService', [
       'loadDraft',
@@ -95,12 +105,27 @@ describe('NoteComponent editFullscreen', () => {
         { provide: WorkContextService, useValue: { activeWorkContextTypeAndId$: EMPTY } },
         { provide: ClipboardImageService, useValue: clipboardImageService },
         { provide: LocalDraftService, useValue: localDraftService },
-        // OperationWriteFlushService and OperationCaptureService are deliberately
-        // NOT provided. The draft lifecycle no longer proves durability before
-        // touching a draft (the read-time decision tree makes that unnecessary),
-        // so re-introducing either injection fails every test here with a
-        // NullInjectorError instead of quietly restoring the coupling that
-        // produced a new blocker every review round.
+        // A draft is only marked SAVED once the operation behind the note update
+        // is durably acknowledged, so the save path needs both of these. They are
+        // driven through the real getPhantomChangeRisk() rather than stubbed
+        // wholesale: `isDurable = false` leaves a captured action pending, which
+        // is exactly the deferred/failed state the marker must not paper over.
+        {
+          provide: OperationWriteFlushService,
+          useValue: {
+            flushThenRunExclusive: async <T>(fn: () => Promise<T>): Promise<T> => {
+              didFlush = true;
+              return fn();
+            },
+          },
+        },
+        {
+          provide: OperationCaptureService,
+          useValue: {
+            getPendingCount: () => (isDurable ? 0 : 1),
+            hasUnrecoveredPersistFailure: () => false,
+          },
+        },
       ],
     });
 
@@ -185,12 +210,11 @@ describe('NoteComponent editFullscreen', () => {
     expect(data.originalContent).toBe('saved content');
   });
 
-  it('recovers an edit whose save was marked but never reached disk', async () => {
-    // The case the flush + getPhantomChangeRisk coupling existed to protect: the
-    // note update was dispatched and the draft marked SAVED, then the write was
-    // rolled back / never persisted, so the note is back at the draft's
-    // baseContent. Recovery is now a READ-side property — the marker is present
-    // and deliberately ignored — so no durability proof is needed at write time.
+  it('does not hand back a durably SAVED draft after the note was edited back to its base', async () => {
+    // A SAVED marker now means the operation behind that save was durably
+    // acknowledged, so a note sitting at the draft's baseContent means a LATER
+    // intentional edit put it back there. Offering the superseded text would let
+    // Escape or a navigation save it straight over that later edit.
     localDraftService.loadDraft.and.resolveTo({
       ...draftOf('draft content', 'saved content'),
       resolved: { content: 'draft content', kind: 'SAVED' },
@@ -198,10 +222,31 @@ describe('NoteComponent editFullscreen', () => {
 
     await editFullscreen();
 
-    // Rank the SAVED marker above the baseContent check in getDraftOpenAction and
-    // this silently drops the edit -> the editor opens on 'saved content' and
-    // this goes red.
-    expect(getFullscreenDialogData().content).toBe('draft content');
+    expect(getFullscreenDialogData().content).toBe('saved content');
+    expect(getFullscreenDialogData().originalContent).toBeUndefined();
+    expectNothingRetired();
+  });
+
+  it('leaves the draft unresolved when the note update is not durably persisted', async () => {
+    // The write side's half of that contract: a dispatch that failed or was
+    // deferred in a sync window must NOT be marked, or the read side would treat
+    // the only recoverable copy of the text as already-saved and suppress it.
+    isDurable = false;
+
+    await editFullscreen();
+
+    afterClosed$.next('final content');
+    // Anchor INSIDE the gate: once the flush has run, only microtasks separate
+    // us from a markSaved that must not happen. Waiting on the dispatch and a
+    // single turn instead would assert the absence before the chain gets there.
+    await waitFor(() => didFlush, 'the durability check');
+    await settle();
+
+    expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
+      content: 'final content',
+    });
+    // Failing toward an extra prompt is the point — and nothing is retired by
+    // any route, not just the one this branch happens to use today.
     expectNothingRetired();
   });
 
