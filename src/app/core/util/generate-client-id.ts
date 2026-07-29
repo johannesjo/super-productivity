@@ -2,6 +2,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { IS_IOS } from '../../util/is-ios';
 import { IS_IOS_NATIVE } from '../../util/is-native-platform';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { MIN_CLIENT_ID_LENGTH } from '../../op-log/core/operation-log.const';
 
 /**
  * Client-ID generation and format validation.
@@ -86,23 +87,43 @@ export const generateClientId = (): string => {
 };
 
 /**
- * Type guard: true if `id` matches a known valid client-ID format.
- * - Legacy format: any string of length >= 10 (legacy IDs).
- * - New format: {platform}_{6-char-base62}, e.g. "B_a7Kx9Z".
+ * Charset every clientId must satisfy to survive a round trip to SuperSync
+ * (`SUPER_SYNC_CLIENT_ID_REGEX` in `@sp/shared-schema`). Inlined rather than
+ * imported because that module pulls in zod and this file sits on the boot
+ * path with no dependencies by design. `generate-client-id.spec.ts` pins the
+ * coupling in the direction that matters: every id SuperSync would carry must
+ * pass this predicate.
+ */
+const USABLE_CLIENT_ID_CHARSET = /^[a-zA-Z0-9_-]+$/;
+
+/**
+ * Type guard: true if `id` is a clientId this app can actually USE.
  *
- * Used to narrow `unknown` values read from IndexedDB. An invalid format is
- * treated as "absent" rather than fatal — see issue #6197.
+ * ⚠️ This asks "can the system use this id?", never "did THIS build mint it?".
+ * The distinction is the whole bug in #9336 and #6197/#6142: an id is a
+ * persisted, non-regenerable vector-clock key, so this predicate is applied to
+ * whatever any past build wrote to disk — not to freshly generated values.
  *
- * The `[BEAI]` class is a compatibility contract with the installed fleet, not
- * a local detail. "Invalid" means "absent" all the way down: a client that does
- * not know a prefix reads null (`client-id.service.ts:165`) and then mints over
- * the stored id (`:217`) — a silent vector-clock key rotation, one-time per
- * install but permanent, the identity loss #7732 exists to prevent. So a fifth
- * platform code may only ship once the receiving fleet already accepts it.
- * Adding `E`/`I` here was safe precisely because every released client does.
+ * "Invalid" means "absent" all the way down: a rejected id reads as null
+ * (`client-id.service.ts:165`) and is then minted over (`:217`) — a silent,
+ * permanent identity rotation, the loss #7732 exists to prevent. So:
+ *
+ * **NEVER narrow this predicate.** Widening the generator (4→6 random chars in
+ * ec16757c82, shipped v18.11.0) while narrowing the matching check orphaned
+ * every id minted by v17.0.0–v18.10.0. The same mistake in the other direction
+ * (emitting a new shape before readers accept it) caused #6142/#6197/#6274/
+ * #6588/#6793. Both halves of that contract now live here, so the accepted set
+ * is deliberately looser than anything we mint: the `>= 10` branch keeps every
+ * legacy PFAPI id (`getEnvironmentId() + '_' + Date.now()`), and the charset
+ * branch accepts any future prefix or entropy bump without another edit.
+ *
+ * The floor is `MIN_CLIENT_ID_LENGTH` because `incrementVectorClock` throws
+ * below it — that, and the SuperSync charset, are the only real constraints.
  */
 export const isValidClientIdFormat = (id: unknown): id is string => {
   return (
-    typeof id === 'string' && (id.length >= 10 || /^[BEAI]_[a-zA-Z0-9]{6}$/.test(id))
+    typeof id === 'string' &&
+    (id.length >= 10 ||
+      (id.length >= MIN_CLIENT_ID_LENGTH && USABLE_CLIENT_ID_CHARSET.test(id)))
   );
 };
