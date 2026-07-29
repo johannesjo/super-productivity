@@ -48,6 +48,9 @@ const createContext = ({ port, userDataDir }) => {
     // group- and world-readable.
     ignoreChmod: false,
     createPermissiveMode: false,
+    // Effective mode of the descriptor at each writeFileSync(fd, ...), in order.
+    // On POSIX the secret must never reach one whose mode check has not passed.
+    writtenAtModes: [],
   };
 
   ctx.win = {
@@ -99,6 +102,12 @@ const installMocks = (ctx) => {
         fsyncSync: (fd) => {
           ctx.fsyncedPaths.push(pathByFd.get(fd));
           return actualFs.fsyncSync(fd);
+        },
+        writeFileSync: (target, data, options) => {
+          if (typeof target === 'number') {
+            ctx.writtenAtModes.push(actualFs.fstatSync(target).mode & 0o777);
+          }
+          return actualFs.writeFileSync(target, data, options);
         },
       };
     }
@@ -507,6 +516,17 @@ test('the persisted file is left at 0600 even if it already existed as 0644', ()
   const rotated = regenerateToken();
   assert.equal(fs.readFileSync(tokenFilePath, 'utf8').trim(), rotated);
   assert.equal(fs.statSync(tokenFilePath).mode & 0o777, 0o600);
+
+  // Positive control for the negative assertion further down: that one passes
+  // on an empty `writtenAtModes`, so it would also pass if the probe silently
+  // stopped recording. Here the writes are the ordinary ones this file has
+  // already made, and every one of them has to have gone into a 0600
+  // descriptor.
+  assert.ok(
+    sharedCtx.writtenAtModes.length > 0,
+    'the write-mode probe recorded nothing, so it is no longer wired up',
+  );
+  assert.deepEqual([...new Set(sharedCtx.writtenAtModes)], [0o600]);
 });
 
 // A valid token in a group/world-readable file is the case regeneration never
@@ -595,6 +615,26 @@ test('enabling fails closed when the token file cannot be made private', async (
       fs.existsSync(tokenPath),
       false,
       'a world-readable token file was left behind',
+    );
+    // That assertion cannot see the window this closes: it names the final
+    // path, which the failed rename never creates, while the secret would have
+    // gone into the sibling `<path>.<pid>.tmp`. Nothing else asserts that temp
+    // file is cleaned up either, so check the directory is left empty.
+    assert.deepEqual(
+      fs.readdirSync(profileDir),
+      [],
+      'the temp file that holds the token was left behind',
+    );
+    // And that the secret never reached a readable descriptor in the first
+    // place. The temp name is predictable, which is what makes that window
+    // worth closing. POSIX only — the Windows branch has no mode check, and
+    // this test returns early there.
+    assert.deepEqual(
+      ctx.writtenAtModes.filter((mode) => (mode & 0o077) !== 0),
+      [],
+      `the token was written into a descriptor other accounts can read (modes seen: ${JSON.stringify(
+        ctx.writtenAtModes.map((m) => '0' + m.toString(8)),
+      )})`,
     );
   } finally {
     isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });

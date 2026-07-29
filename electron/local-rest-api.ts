@@ -341,13 +341,14 @@ const BEARER_SCHEME = 'bearer';
  * flags as polynomial: the space run and the credential can both match a space,
  * so an input that fails the anchor after the spaces is retried at every split
  * of them. The reachable inputs are not that input — the retry needs a suffix
- * that fails `$`, which takes a line break, and Node answers 400 for a header
- * value containing one before this runs. So no live DoS is being closed here; a
- * single left-to-right pass simply costs the same on every input and removes
- * the question. Behaviour is unchanged — RFC 7235 auth schemes are
- * case-insensitive, so "bearer <token>" is accepted too, at least one space
- * must separate scheme from credential, and the credential is the rest of the
- * header verbatim.
+ * that fails `$`, and no character `.` rejects can reach the handler: Node
+ * answers 400 for `\n` and `\r`, and it decodes header values as latin1, which
+ * cannot produce a code point above U+00FF, so U+2028 and U+2029 never arrive.
+ * So no live DoS is being closed here; a single left-to-right pass simply costs
+ * the same on every input and removes the question. Behaviour is unchanged —
+ * RFC 7235 auth schemes are case-insensitive, so "bearer <token>" is accepted
+ * too, at least one space must separate scheme from credential, and the
+ * credential is the rest of the header verbatim.
  */
 const parseBearerToken = (authHeader: string | undefined): string | undefined => {
   if (
