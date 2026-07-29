@@ -8,12 +8,16 @@ name: Wiki Update
       - 'docs/wiki/**'
       - .github/workflows/wiki-sync.yml
       - .github/annotations/wiki-lint-problem-matcher.json
+      - tools/check-doc-links.js
+      - tools/check-doc-links.test.js
   push:
     branches: [master, main]
     paths:
       - 'docs/wiki/**'
       - .github/workflows/wiki-sync.yml
       - .github/annotations/wiki-lint-problem-matcher.json
+      - tools/check-doc-links.js
+      - tools/check-doc-links.test.js
 
 concurrency:
   group: wiki
@@ -66,6 +70,11 @@ jobs:
           pymarkdownlnt \
             --disable-rules line-length,no-inline-html \
             scan "docs/wiki"
+
+      - name: Check local links and images
+        run: |
+          node --test tools/check-doc-links.test.js
+          node tools/check-doc-links.js docs/wiki
 
   sync:
     name: (r)Sync

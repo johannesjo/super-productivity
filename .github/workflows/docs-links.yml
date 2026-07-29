@@ -1,0 +1,50 @@
+---
+name: Documentation Links
+
+'on':
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'docs/**'
+      - 'packages/super-sync-server/docs/**'
+      - 'packages/super-sync-server/archive/encryption-attempts-openvz-incompatible/*.md'
+      - packages/plugin-dev/todoist-import/README.md
+      - tools/check-doc-links.js
+      - tools/check-doc-links.test.js
+      - package.json
+      - .github/workflows/docs-links.yml
+  push:
+    branches: [master, main]
+    paths:
+      - 'docs/**'
+      - 'packages/super-sync-server/docs/**'
+      - 'packages/super-sync-server/archive/encryption-attempts-openvz-incompatible/*.md'
+      - packages/plugin-dev/todoist-import/README.md
+      - tools/check-doc-links.js
+      - tools/check-doc-links.test.js
+      - package.json
+      - .github/workflows/docs-links.yml
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: Local links and images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: 22
+
+      - name: Check documentation links
+        run: |
+          node --test tools/check-doc-links.test.js
+          npm run docs:check-links
+          node tools/check-doc-links.js packages/super-sync-server/docs
+          node tools/check-doc-links.js packages/super-sync-server/archive/encryption-attempts-openvz-incompatible
+          node tools/check-doc-links.js packages/plugin-dev/todoist-import

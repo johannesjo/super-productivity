@@ -48,7 +48,8 @@ wrong; the linter rejects `inject(Actions)` / `Actions` imports in
 
 ## Boundary 2 — The selector boundary
 
-**Selector-driven effects must guard with `skipDuringSyncWindow()`.**
+**Selector-driven mutating effects must guard the sync window. Choose whether
+the source may be dropped or must be deferred.**
 
 An effect that reacts to a _selector_ (store state) instead of a specific
 _action_ bypasses Boundary 1 entirely — it fires on every store change,
@@ -56,8 +57,23 @@ including hydration and sync replay. Two timing gaps (initial startup before
 first sync; the post-sync re-evaluation window) make such effects emit
 operations with stale vector clocks that immediately conflict.
 
-- Use `skipDuringSyncWindow()` for selector-based effects that modify
-  frequently-synced entities or perform "repair"/"consistency" work.
+- Use `skipDuringSyncWindow()` only for a **level/repeating** source whose next
+  emission safely retries the work. It deliberately drops emissions.
+- Use `waitForSyncWindow()` for a **sparse or edge-triggered** source when a
+  dropped emission cannot be recovered. A store selector normally ends in
+  `distinctUntilChanged()`, so the value that changed during sync may never
+  re-emit after the window closes.
+- Before waiting, combine/map the edge with every piece of state needed to
+  handle it. Process that captured snapshot after the window closes; do not
+  wait and then reconstruct an already-passed edge from unrelated live state.
+  `waitForSyncWindow()` keeps only the latest pending value, so it is not the
+  right operator when every individual emission must be preserved.
+- `waitForSyncWindow()` is fail-open after 30 seconds: it logs the timeout and
+  emits even if the sync window is still active. It prevents a sparse trigger
+  from being lost during ordinary short syncs, but it is **not** a hard
+  mutual-exclusion boundary. If a mutation must never overlap replay, prefer a
+  `LOCAL_ACTIONS`-driven effect or redesign it around a fail-closed boundary
+  rather than relying on this operator.
 - The narrower `skipWhileApplyingRemoteOps()` /
   `HydrationStateService.isApplyingRemoteOps()` exist for finer control.
 - **Prefer action-based effects.** A selector-based effect is the
@@ -101,12 +117,13 @@ blessed pattern is a `task-shared-meta-reducers/` reducer.
 
 ## Decision table — "I'm writing an effect"
 
-| Question                                                | Answer                                                        | Linter                               |
-| ------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------ |
-| Does it inject the actions stream?                      | Use `LOCAL_ACTIONS` (not `Actions`)                           | ✅ `no-actions-in-effects` (error)   |
-| Does it react to a **selector** instead of an action?   | Add `skipDuringSyncWindow()`                                  | ✅ `require-hydration-guard` (error) |
-| Does one replay-atomic transition change **>1 entity**? | Make it a meta-reducer, not an effect                         | ⚠️ `no-multi-entity-effect` (warn)   |
-| Does it dispatch in a **loop of 50+**?                  | Yield once afterward for capture ordering; it is not batching | — (convention)                       |
+| Question                                                        | Answer                                                               | Linter                               |
+| --------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------ |
+| Does it inject the actions stream?                              | Use `LOCAL_ACTIONS` (not `Actions`)                                  | ✅ `no-actions-in-effects` (error)   |
+| Can a selector emission be safely retried by the next emission? | Drop it with `skipDuringSyncWindow()`                                | ✅ `require-hydration-guard` (error) |
+| Is the selector emission a sparse/unrecoverable edge?           | Capture its required state, then defer it with `waitForSyncWindow()` | ✅ `require-hydration-guard` (error) |
+| Does one replay-atomic transition change **>1 entity**?         | Make it a meta-reducer, not an effect                                | ⚠️ `no-multi-entity-effect` (warn)   |
+| Does it dispatch in a **loop of 50+**?                          | Yield once afterward for capture ordering; it is not batching        | — (convention)                       |
 
 Two of the three are mechanically enforced — you do not need to memorize them,
 only understand _why_ (the invariant at the top).
@@ -153,7 +170,9 @@ key-recovery config writes (content-only, must NOT bump).
 
 ## Why (deeper)
 
-- **Mechanism & rules:** [`operation-rules.md`](./operation-rules.md)
+- **Contributor rules:** this document; the old
+  [`operation-rules.md`](./operation-rules.md) path is now a compatibility
+  pointer.
 - **Architecture tour:**
   [`sync-architecture.html#local-intent`](./sync-architecture.html#local-intent),
   [`sync-architecture.html#remote-apply`](./sync-architecture.html#remote-apply)

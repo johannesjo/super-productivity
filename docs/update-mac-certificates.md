@@ -1,7 +1,8 @@
 # Update macOS certificates for electron-builder
 
 > **Related macOS docs:**
-> - [build-and-publish-notes.md](./build-and-publish-notes.md) -- Build/publish workflow (screenshots, iOS, Windows signing)
+>
+> - [release-and-publishing.md](./release-and-publishing.md) -- Canonical release workflow
 > - [mac-app-store-code-signing-guide.md](./mac-app-store-code-signing-guide.md) -- Code signing setup and troubleshooting
 
 Mac access required! The instructions below refresh every asset used by the GitHub Actions/macOS runners for Mac App Store (MAS) and direct-download (DMG) builds.
@@ -89,4 +90,3 @@ See also:
    rm -Rf app-builds && npm run build && npm run dist:mac:dl
    ```
 4. The script signs, notarizes (via `notarytool`), and staples the DMG using the new certificates and provisioning profiles. Validate with `spctl --assess -vv --type install path/to/app`.
-

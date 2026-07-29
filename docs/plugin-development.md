@@ -163,7 +163,9 @@ PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, (taskId) => {
 
 ### 2. HTML/Iframe Plugins (`index.html`)
 
-Plugins that render custom UI in a sandboxed iframe.
+Plugins that render custom UI in an iframe. The iframe sandbox attribute limits
+some browser capabilities, but `allow-same-origin` means it is not a security
+boundary from the host app.
 
 **Use when:**
 
@@ -174,11 +176,13 @@ Iframe-only plugins do not need a `plugin.js` file if all plugin behavior lives 
 `index.html`. Super Productivity automatically adds the default menu or side-panel entry
 from the manifest when the plugin is loaded.
 
-**Important:** Iframe plugins are served from a sandboxed blob document and talk to
-the host only through the filtered Plugin API message bridge. Inline CSS, JavaScript,
-and small assets directly in `index.html`; arbitrary extra files from the ZIP are not
-served to the iframe. External URLs can work when the app/runtime CSP allows them, but
-they are not part of the portable plugin contract.
+**Important:** Iframe plugins are served through `srcdoc` and receive a filtered
+Plugin API message bridge as their supported interface. Because the iframe is
+same-origin, plugin code can also reach the parent directly; do not treat the
+bridge as enforced isolation. Inline CSS, JavaScript, and small assets directly
+in `index.html`; arbitrary extra files from the ZIP are not served to the iframe.
+External URLs can work when the app/runtime CSP allows them, but they are not part
+of the portable plugin contract.
 
 **Example index.html:**
 
@@ -519,8 +523,8 @@ PluginAPI.registerHook(PluginAPI.Hooks.ACTION, (action) => {
 You can persist data that will also be synced via the `persistDataSynced` and
 `loadSyncedData` APIs. Host-side `plugin.js` code can use `localStorage` for
 data that should stay local. Iframe plugins should prefer the synced
-persistence APIs because sandboxed iframe origins may not have reliable access
-to browser storage.
+persistence APIs because direct iframe browser storage is not part of the
+portable plugin contract and can vary by runtime.
 
 ```javascript
 // Save plugin data
@@ -628,7 +632,8 @@ issued by the Electron **main** process after a native consent dialog and is bou
 plugin id. For uploaded plugins the app cannot verify the manifest, so the dialog flags
 the plugin as unverified third-party code with full machine access that Super Productivity
 cannot sandbox, and defaults to **Deny** — only allow plugins whose source you trust. If
-the user denies, the plugin stays enabled but its node calls fail until it is re-enabled.
+the user denies, the plugin returns to a disabled state; enabling it again reopens the
+prompt.
 
 Consent handling differs by plugin type:
 
@@ -804,7 +809,7 @@ the desktop app grants the plugin `nodeExecution` permission.
 
 ### 1. Local Development
 
-1. Use "Load Plugin from Folder" to test your plugin
+1. Build the plugin ZIP and upload it from **Settings** → **Plugins**
 2. Open DevTools (F12 or Ctrl+Shift+i) to see console logs
 3. Use the API Test Plugin as reference
 

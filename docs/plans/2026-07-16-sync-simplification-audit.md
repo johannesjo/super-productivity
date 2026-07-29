@@ -1,10 +1,18 @@
 # Sync System Simplification Audit Plan
 
-**Status:** Proposed
+**Status:** Completed; superseded by the audit artifacts below
 
 **Date:** 2026-07-16
 
+**Completed:** 2026-07
+
 **Scope:** Evaluation first; this plan does not authorize source changes.
+
+The frozen evidence and triage outputs are under
+[`docs/research/sync-simplification-audit/`](../research/sync-simplification-audit/).
+`verified-risk-reward.md` is the implementation-oriented shortlist and
+`retained.md` records safety/compatibility fences. Raw findings remain research
+evidence until they are migrated to tracked work.
 
 ## Goal
 
@@ -41,17 +49,17 @@ These counts are deliberately approximate because existing reports use slightly
 different source filters. Wave A must produce one reproducible scope manifest
 and replace them with exact figures.
 
-| Surface | Approximate production size | Approximate test size |
-| --- | ---: | ---: |
-| Client op-log | 44.7k TS LOC | 100.6k TS LOC |
-| Client sync shell | 7.0k TS LOC | 10.6k TS LOC |
-| `@sp/sync-core` | 3.9k TS LOC | 4.7k TS LOC |
-| `@sp/sync-providers` | 7.3k TS LOC | 6.7k TS LOC |
-| Shared schema | 1.0k TS LOC | 1.1k TS LOC |
-| SuperSync server | 12.4k TS LOC | 30.4k TS LOC |
-| Sync E2E | n/a | 90 specs, 253 tests, about 33k LOC |
-| Main E2E sync harness | n/a | about 5k LOC |
-| Sync documentation | about 8.2k Markdown LOC | n/a |
+| Surface               | Approximate production size |              Approximate test size |
+| --------------------- | --------------------------: | ---------------------------------: |
+| Client op-log         |                44.7k TS LOC |                      100.6k TS LOC |
+| Client sync shell     |                 7.0k TS LOC |                       10.6k TS LOC |
+| `@sp/sync-core`       |                 3.9k TS LOC |                        4.7k TS LOC |
+| `@sp/sync-providers`  |                 7.3k TS LOC |                        6.7k TS LOC |
+| Shared schema         |                 1.0k TS LOC |                        1.1k TS LOC |
+| SuperSync server      |                12.4k TS LOC |                       30.4k TS LOC |
+| Sync E2E              |                         n/a | 90 specs, 253 tests, about 33k LOC |
+| Main E2E sync harness |                         n/a |                       about 5k LOC |
+| Sync documentation    |     about 8.2k Markdown LOC |                                n/a |
 
 The production surface is therefore roughly 76k TS LOC, with well over twice
 that amount in automated tests. Test LOC is tracked separately and must not be
@@ -175,14 +183,14 @@ coordinator-owned files: `baseline.md`, `ownership.tsv`, `findings.md`,
 infrastructure. Creating these audit artifacts requires separate authorization
 to execute this plan; this plan alone does not authorize any writes.
 
-| Phase | Seed runs | Purpose |
-| --- | ---: | --- |
-| A. Baseline scouts | 7 | Freeze and independently reproduce scope, invariants, dependencies, tests, history, and prior work |
-| B. Domain audits | 38 | Inspect every owned subsystem with minimal overlap |
-| C. Cross-cutting audits | 8 | Find duplication and lifecycle issues that domain ownership can miss |
-| D. Triage and synthesis | 4 | Deduplicate, test-map, risk-classify, and admit candidates to verification |
-| E. Fresh-context verification | 8 | Initial capacity; expand to one run per admitted candidate and a second for sync-critical work |
-| F. Final synthesis | 2 | Sequence the independently verified register and challenge completeness |
+| Phase                         | Seed runs | Purpose                                                                                            |
+| ----------------------------- | --------: | -------------------------------------------------------------------------------------------------- |
+| A. Baseline scouts            |         7 | Freeze and independently reproduce scope, invariants, dependencies, tests, history, and prior work |
+| B. Domain audits              |        38 | Inspect every owned subsystem with minimal overlap                                                 |
+| C. Cross-cutting audits       |         8 | Find duplication and lifecycle issues that domain ownership can miss                               |
+| D. Triage and synthesis       |         4 | Deduplicate, test-map, risk-classify, and admit candidates to verification                         |
+| E. Fresh-context verification |         8 | Initial capacity; expand to one run per admitted candidate and a second for sync-critical work     |
+| F. Final synthesis            |         2 | Sequence the independently verified register and challenge completeness                            |
 
 ### Baseline and run contract
 
@@ -243,15 +251,15 @@ drift invalidates its evidence.
 
 ## Wave A: baseline scouts
 
-| ID | Assignment | Required artifact |
-| --- | --- | --- |
-| A1 | Scope and metric manifest | Baseline ID; reproducible file list and exclusions; source/test/docs LOC and file counts |
-| A1R | Independent baseline reproduction | Re-run A1’s recorded procedure, challenge exclusions/search closure, and either reproduce both hashes or stop the audit |
-| A2 | Invariant ledger | Invariant, canonical source, enforcing code/lint, proving tests, known residuals |
-| A3 | Dependency/API map | Package direction, app deep imports, cycles, public exports, registries, DI/providers, high fan-in/out |
-| A4 | Scenario/test map | Unit/integration/E2E coverage mapped to documented sync scenarios and providers |
-| A5 | History/compatibility ledger | Legacy path origin, last producer/consumer, rollout/support horizon, removal precondition |
-| A6 | Prior-work dedupe | Local plans/ADRs/completed work plus existing issues only when execution authorization includes read-only issue retrieval; otherwise record external issue coverage as a blocking gap |
+| ID  | Assignment                        | Required artifact                                                                                                                                                                     |
+| --- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Scope and metric manifest         | Baseline ID; reproducible file list and exclusions; source/test/docs LOC and file counts                                                                                              |
+| A1R | Independent baseline reproduction | Re-run A1’s recorded procedure, challenge exclusions/search closure, and either reproduce both hashes or stop the audit                                                               |
+| A2  | Invariant ledger                  | Invariant, canonical source, enforcing code/lint, proving tests, known residuals                                                                                                      |
+| A3  | Dependency/API map                | Package direction, app deep imports, cycles, public exports, registries, DI/providers, high fan-in/out                                                                                |
+| A4  | Scenario/test map                 | Unit/integration/E2E coverage mapped to documented sync scenarios and providers                                                                                                       |
+| A5  | History/compatibility ledger      | Legacy path origin, last producer/consumer, rollout/support horizon, removal precondition                                                                                             |
+| A6  | Prior-work dedupe                 | Local plans/ADRs/completed work plus existing issues only when execution authorization includes read-only issue retrieval; otherwise record external issue coverage as a blocking gap |
 
 ### Wave A exit criteria
 
@@ -277,20 +285,20 @@ the semicolon-separated domains map left-to-right to the numbered IDs; for
 example, B01 owns core contracts/entity registry and B04 owns archive
 application.
 
-| IDs | Domain assignments |
-| --- | --- |
-| B01–B04 | Core contracts/entity registry; capture/meta-reducer path; operation conversion/bulk apply; archive application |
-| B05–B09 | Operation-log store; IndexedDB/schema/upgrades; SQLite/backend migration; hydration/recovery; snapshots/compaction |
-| B10–B12 | Backup/legacy migration/clean slate; structural validation; repair algorithms/orchestration |
-| B13–B17 | Sync wrapper/triggers/status; main orchestrator/session guards; download/pagination; upload/write flush; remote/rejected/superseded ops |
-| B18–B22 | Conflict engine; conflict journal/review UI; vector clocks/import filtering; full-state/server migration; encryption/password/restore |
+| IDs     | Domain assignments                                                                                                                               |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| B01–B04 | Core contracts/entity registry; capture/meta-reducer path; operation conversion/bulk apply; archive application                                  |
+| B05–B09 | Operation-log store; IndexedDB/schema/upgrades; SQLite/backend migration; hydration/recovery; snapshots/compaction                               |
+| B10–B12 | Backup/legacy migration/clean slate; structural validation; repair algorithms/orchestration                                                      |
+| B13–B17 | Sync wrapper/triggers/status; main orchestrator/session guards; download/pagination; upload/write flush; remote/rejected/superseded ops          |
+| B18–B22 | Conflict engine; conflict journal/review UI; vector clocks/import filtering; full-state/server migration; encryption/password/restore            |
 | B23–B28 | Provider host/credentials/OAuth; file-based adapter/envelope; WebDAV/Nextcloud; Dropbox; OneDrive/LocalFile/platform; SuperSync client/WebSocket |
-| B29–B31 | `sync-core` algorithms/public API; `sync-providers` shared infrastructure; shared-schema HTTP contracts/migrations |
-| B32–B34 | Server upload/conflict transaction; server download/snapshot/cleanup/quota; server WebSocket/rate/dedup/validation/sync lifecycle |
-| B35 | Platform/perimeter sync correctness: root store, feature effects, logical day, Android/Electron/Capacitor bridges |
-| B36 | Unit/integration/E2E harness ownership and execution topology |
-| B37 | Sync lint rules, build scripts, package exports, CI selection, and scheduled-workflow reachability |
-| B38 | Prisma schema/indexes, database bootstrap/upgrade tooling, operational backup/recovery, and immutable migration inventory |
+| B29–B31 | `sync-core` algorithms/public API; `sync-providers` shared infrastructure; shared-schema HTTP contracts/migrations                               |
+| B32–B34 | Server upload/conflict transaction; server download/snapshot/cleanup/quota; server WebSocket/rate/dedup/validation/sync lifecycle                |
+| B35     | Platform/perimeter sync correctness: root store, feature effects, logical day, Android/Electron/Capacitor bridges                                |
+| B36     | Unit/integration/E2E harness ownership and execution topology                                                                                    |
+| B37     | Sync lint rules, build scripts, package exports, CI selection, and scheduled-workflow reachability                                               |
+| B38     | Prisma schema/indexes, database bootstrap/upgrade tooling, operational backup/recovery, and immutable migration inventory                        |
 
 Each domain agent must:
 
@@ -316,16 +324,16 @@ Each domain agent must:
 
 ## Wave C: cross-cutting audits
 
-| ID | Pattern audit |
-| --- | --- |
-| C1 | Dead exports, unused methods, deprecated aliases, no-value wrappers, and pass-through facades |
-| C2 | Duplicate result types, optional-field flag bags, state-machine branches, and status ownership |
-| C3 | Compatibility paths, migrations, format versions, feature flags, and rollout completion conditions |
-| C4 | Dependency cycles, facade bypasses, package ownership, deep imports, and public surface area |
-| C5 | Provider HTTP/auth/retry/error/logging duplication, separating genuinely shared behavior from protocol quirks |
-| C6 | Unit/integration/E2E duplication, fixtures, fixed waits, direct locators, flakiness, and runtime cost |
-| C7 | Documentation/diagram/ADR/scenario drift and opportunities for one canonical source plus generated links |
-| C8 | Privacy-safe logging, constants/configuration drift, error taxonomies, and platform branching |
+| ID  | Pattern audit                                                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------- |
+| C1  | Dead exports, unused methods, deprecated aliases, no-value wrappers, and pass-through facades                 |
+| C2  | Duplicate result types, optional-field flag bags, state-machine branches, and status ownership                |
+| C3  | Compatibility paths, migrations, format versions, feature flags, and rollout completion conditions            |
+| C4  | Dependency cycles, facade bypasses, package ownership, deep imports, and public surface area                  |
+| C5  | Provider HTTP/auth/retry/error/logging duplication, separating genuinely shared behavior from protocol quirks |
+| C6  | Unit/integration/E2E duplication, fixtures, fixed waits, direct locators, flakiness, and runtime cost         |
+| C7  | Documentation/diagram/ADR/scenario drift and opportunities for one canonical source plus generated links      |
+| C8  | Privacy-safe logging, constants/configuration drift, error taxonomies, and platform branching                 |
 
 Cross-cutting agents reference the primary domain owner instead of filing a
 second finding. The dedupe key is the same invariant, same mechanism, and
@@ -392,12 +400,12 @@ the behavior-preserving verification ladder. “Large file,” “many branches,
 
 Triage happens after discovery and before any verifier is assigned.
 
-| ID | Responsibility |
-| --- | --- |
-| D1 | Finding librarian: assign stable IDs, merge dedupe keys, and link prior work |
-| D2 | Invariant/risk classifier: reject behavioral changes disguised as simplification |
-| D3 | Evidence and test mapper: require reproducible commands and characterization paths |
-| D4 | Benefit/cost classifier: apply the rubric and admit verification-ready candidates |
+| ID  | Responsibility                                                                     |
+| --- | ---------------------------------------------------------------------------------- |
+| D1  | Finding librarian: assign stable IDs, merge dedupe keys, and link prior work       |
+| D2  | Invariant/risk classifier: reject behavioral changes disguised as simplification   |
+| D3  | Evidence and test mapper: require reproducible commands and characterization paths |
+| D4  | Benefit/cost classifier: apply the rubric and admit verification-ready candidates  |
 
 The coordinator applies D1–D4 reports in that order. An admitted candidate has
 one immutable revision hash. Any material edit after admission creates a new
@@ -410,12 +418,12 @@ verifier’s 60-file and time limits.
 
 Do not calculate a synthetic numerical score. Record four independent bands:
 
-| Dimension | Bands |
-| --- | --- |
-| Maintenance benefit | High: removes a policy/state owner or repeated lifecycle; medium: removes meaningful duplication/branching; low: mostly cosmetic |
-| Evidence confidence | Reproduced: commands/results independently repeat; supported: multiple code/test/history sources agree; weak: inference or missing consumer evidence |
-| Behavioral risk | Sync-critical: convergence/data loss/security/format/transaction risk; high: broad lifecycle or compatibility impact; medium: bounded behavior surface; low: no runtime contract change |
-| Validation cost | Small: focused unit/static checks; medium: subsystem integration or provider matrix; large: multi-client/provider/PostgreSQL/migration/soak evidence |
+| Dimension           | Bands                                                                                                                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Maintenance benefit | High: removes a policy/state owner or repeated lifecycle; medium: removes meaningful duplication/branching; low: mostly cosmetic                                                        |
+| Evidence confidence | Reproduced: commands/results independently repeat; supported: multiple code/test/history sources agree; weak: inference or missing consumer evidence                                    |
+| Behavioral risk     | Sync-critical: convergence/data loss/security/format/transaction risk; high: broad lifecycle or compatibility impact; medium: bounded behavior surface; low: no runtime contract change |
+| Validation cost     | Small: focused unit/static checks; medium: subsystem integration or provider matrix; large: multi-client/provider/PostgreSQL/migration/soak evidence                                    |
 
 Unknown evidence blocks admission. Rank verified candidates first by lower
 behavioral risk, then higher maintenance benefit, stronger evidence, lower
@@ -471,10 +479,10 @@ future implementation-planning turn.
 
 ## Wave F: final synthesis
 
-| ID | Responsibility |
-| --- | --- |
-| F1 | Build a dependency graph from verified candidates and all file, invariant, persisted-format, public-contract, test-harness, and transitive-consumer overlaps |
-| F2 | Fresh completeness challenge against the A1 manifest, then return accepted, rejected, retained, already-tracked, and decision-required summaries |
+| ID  | Responsibility                                                                                                                                               |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| F1  | Build a dependency graph from verified candidates and all file, invariant, persisted-format, public-contract, test-harness, and transitive-consumer overlaps |
+| F2  | Fresh completeness challenge against the A1 manifest, then return accepted, rejected, retained, already-tracked, and decision-required summaries             |
 
 F1 and F2 are the bounded lead aggregators for any manifest-derived slice runs
 and return reports. The coordinator is the only final editor and applies them

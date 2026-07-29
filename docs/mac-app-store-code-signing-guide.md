@@ -1,7 +1,8 @@
 # Mac App Store Code Signing Guide
 
 > **Related macOS docs:**
-> - [build-and-publish-notes.md](./build-and-publish-notes.md) -- Build/publish workflow (screenshots, iOS, Windows signing)
+>
+> - [release-and-publishing.md](./release-and-publishing.md) -- Canonical release workflow
 > - [update-mac-certificates.md](./update-mac-certificates.md) -- Annual certificate renewal
 
 This document explains the Mac App Store (MAS) code signing setup and troubleshooting for Super Productivity. It covers the complete solution to certificate/provisioning profile mismatches.
@@ -59,12 +60,10 @@ Go to [Apple Developer Portal - Profiles](https://developer.apple.com/account/re
 1. Click **➕** to create a new profile
 2. Select: **Distribution** → **Mac App Store Connect**
 3. **CRITICAL**: When selecting the certificate, choose:
-
    - ✅ **"Johannes Millan (Distribution)"** - Shows "For use in Xcode 11 or later"
    - ❌ NOT "Johannes Millan (Mac App Distribution)"
 
    **Why this matters:**
-
    - "Johannes Millan (Distribution)" = modern "Apple Distribution" certificate → What electron-builder will use ✅
    - "Johannes Millan (Mac App Distribution)" = legacy "3rd Party Mac Developer Application" → Will cause mismatch ❌
 
@@ -238,16 +237,13 @@ EOF
 **Common causes:**
 
 1. **Still processing** - Apple takes 5-30 minutes to process builds
-
    - Wait and refresh the page periodically
 
 2. **Missing export compliance** - Required for apps with encryption
-
    - Go to App Store Connect → Your App → TestFlight
    - Click on the build, answer the export compliance questions
 
 3. **Version/build number already used**
-
    - Check `package.json` version matches the built app
    - Increment version if needed: `npm version patch`
 
@@ -269,12 +265,10 @@ EOF
 When your certificates expire (annually), follow these steps:
 
 1. **Create new certificates** in Apple Developer Portal
-
    - Apple Distribution (for MAS)
    - Mac Installer Distribution (for PKG signing)
 
 2. **Create new provisioning profile** with the new certificates
-
    - Type: Mac App Store Connect
    - Certificate: "Johannes Millan (Distribution)" ← Use the new one
 

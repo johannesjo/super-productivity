@@ -2,7 +2,10 @@
 
 ## Overview
 
-SuperSync uses **AES-256-GCM** encryption with **Argon2id** key derivation for end-to-end encryption (E2EE). The server never sees plaintext data - all encryption/decryption happens client-side.
+SuperSync uses **AES-256-GCM** encryption with **Argon2id** key derivation for
+end-to-end encryption (E2EE). Operation payload encryption/decryption happens
+client-side. The server still sees the plaintext operation envelope metadata
+described under [Security Properties](#security-properties).
 
 ## Encryption Flow Diagram
 
@@ -179,13 +182,20 @@ async decryptOperation(op: SyncOperation, encryptKey: string): Promise<SyncOpera
 
 ### 2. Encryption Algorithm
 
-**Location**: `src/app/pfapi/api/encryption/encryption.ts`
+**Location**: `packages/sync-core/src/encryption.ts` and its
+`packages/sync-core/src/encryption/` collaborators.
 
 - **Algorithm**: AES-256-GCM (Galois/Counter Mode)
 - **Key Derivation**: Argon2id (memory-hard, resistant to GPU attacks)
-- **Salt**: Random 16 bytes per encryption
-- **IV**: Random 12 bytes per encryption
-- **Output Format**: `salt || iv || ciphertext || authTag` (base64 encoded)
+- **Salt**: Random 16 bytes when a password's session encrypt key is derived;
+  reused with that cached key for the process session
+- **IV**: Fresh random 12 bytes per encrypted payload
+- **Output Format**: `salt || iv || (AES-GCM ciphertext + authTag)` (base64
+  encoded)
+
+The session-stable salt amortizes the expensive Argon2id derivation across
+operations. AES-GCM safety under that fixed derived key depends on the fresh IV
+remaining unique for every encrypted payload.
 
 ### 3. Upload Integration
 
@@ -227,13 +237,14 @@ privateCfg: {
 
 ## Security Properties
 
-| Property            | Guarantee                                       |
-| ------------------- | ----------------------------------------------- |
-| **Confidentiality** | Server cannot read operation payloads           |
-| **Integrity**       | GCM auth tag detects tampering of the _payload_ |
-| **Key Security**    | Argon2id makes brute-force expensive            |
-| **Forward Secrecy** | Each operation uses random IV                   |
-| **Wrong Password**  | Decryption fails, operation rejected            |
+| Property              | Guarantee                                                          |
+| --------------------- | ------------------------------------------------------------------ |
+| **Confidentiality**   | Server cannot read operation payloads                              |
+| **Payload integrity** | GCM auth tag detects tampering of the encrypted payload            |
+| **Key security**      | Argon2id makes password brute-force attempts expensive             |
+| **Nonce uniqueness**  | Each encrypted payload uses a fresh random IV under the cached key |
+| **Forward secrecy**   | Not provided; IV uniqueness is not forward secrecy                 |
+| **Wrong password**    | Decryption fails and the operation is rejected                     |
 
 > **Integrity scope (important).** Only `op.payload` is encrypted and covered by
 > the AES-GCM authentication tag. Every other operation field — `actionType`,
@@ -261,6 +272,13 @@ privateCfg: {
 >   `op.entityId` (`verify-decrypted-op-integrity.ts`). Singleton LWW actions
 >   target their registered feature state as a whole, so contextual conflict
 >   IDs such as TIME_TRACKING's composite key have no canonical payload `id`.
+> - **Project-move footprint injection:** when an encrypted TASK project-move
+>   payload carries `projectMoveSubTaskIds`, the client requires exact-set
+>   equality between plaintext `op.entityIds` and the authenticated set
+>   `{op.entityId} ∪ projectMoveSubTaskIds`. This prevents a compromised server
+>   from appending victim task IDs to an otherwise valid move. Synthetic LWW
+>   operations without an authenticated footprint cannot be checked by this
+>   interim guard; binding the full envelope as GCM AAD remains the durable fix.
 > - **Full-state `opType` promotion:** after decrypting an operation tagged as
 >   `SYNC_IMPORT`, `BACKUP_IMPORT`, or `REPAIR`, the client structurally validates
 >   the authenticated payload as complete application data before the metadata can

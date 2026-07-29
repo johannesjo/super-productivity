@@ -32,32 +32,44 @@ best-effort read/check/write race and is single-writer/backup-only.
 
 ## Start here
 
-| You want to…                                           | Read                                                                                                                                                |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Build a five-minute whole-system mental model          | **[sync-architecture.html](./sync-architecture.html)** — standalone maintainer field guide; open the local file in a browser                        |
-| Write an effect/reducer/bulk-dispatch correctly        | **[contributor-sync-model.md](./contributor-sync-model.md)** — the one invariant, enforced by lint                                                  |
-| Compare SuperSync and file v2/v3                       | [field guide: transports](./sync-architecture.html#transport)                                                                                       |
-| Trace remote apply, conflicts, or restart recovery     | [remote apply](./sync-architecture.html#remote-apply), [causality](./sync-architecture.html#causality), [restart](./sync-architecture.html#restart) |
-| Research rejected alternatives or cross-version policy | [operation-log-architecture.md](./operation-log-architecture.md) — deep rationale and migration reference                                           |
+Current mechanics live in the executable owners linked by these documents.
+Overview and history documents explain the model but do not override code,
+tests, or a focused contract.
+
+| You want to…                                           | Read                                                                                                                                                  |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Build a five-minute whole-system mental model          | **[sync-architecture.html](./sync-architecture.html)** — standalone maintainer field guide; open the local file in a browser                          |
+| Write an effect/reducer/bulk-dispatch correctly        | **[contributor-sync-model.md](./contributor-sync-model.md)** — the one invariant, drop-vs-defer selector rule, and lint boundaries                    |
+| Compare SuperSync and file v2/v3                       | [field guide: transports](./sync-architecture.html#transport)                                                                                         |
+| Trace remote apply, conflicts, or restart recovery     | [remote apply](./sync-architecture.html#remote-apply), [causality](./sync-architecture.html#causality), [restart](./sync-architecture.html#restart)   |
+| Change SECTION conflict/recovery behavior              | [section-conflict-replay.md](./section-conflict-replay.md) — narrow commutativity, state-projected replay, and released-client compatibility contract |
+| Find executable coverage for a SuperSync scenario      | [supersync-scenarios.md](./supersync-scenarios.md) — scenario-to-test index, not a prose specification                                                |
+| Research rejected alternatives or cross-version policy | [operation-log-architecture.md](./operation-log-architecture.md) — deep rationale and migration reference                                             |
 
 ## Reference docs
 
-| Document                                                                       | Scope                                                                                                                                                       |
-| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [sync-architecture.html](./sync-architecture.html)                             | Canonical high-level maintainer map: local intent, transports, crash-safe apply, causality, exceptional boundaries, restart recovery, and executable owners |
-| [operation-log-architecture.md](./operation-log-architecture.md)               | Deep rationale and migration/implementation history; use the focused contracts and executable owners for current detail                                     |
-| [contributor-sync-model.md](./contributor-sync-model.md)                       | Contributor invariant: one replay-atomic transition = one op; replayed/remote ops must not re-trigger effects                                               |
-| [operation-rules.md](./operation-rules.md)                                     | Design rules and guidelines for operations                                                                                                                  |
-| [package-boundaries.md](./package-boundaries.md)                               | Dependency/ownership boundaries for `@sp/sync-core`, `@sp/sync-providers`, app wiring                                                                       |
-| [conflict-journal-and-review.md](./conflict-journal-and-review.md)             | Disjoint-field auto-merge plus the device-local journal/review capability; main remote-path journal emission is currently disabled                          |
-| [vector-clocks.md](./vector-clocks.md)                                         | Vector clock implementation, pruning, history                                                                                                               |
-| [supersync-encryption-architecture.md](./supersync-encryption-architecture.md) | End-to-end encryption (AES-256-GCM + Argon2id)                                                                                                              |
+| Status   | Document                                                                       | Scope                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Overview | [sync-architecture.html](./sync-architecture.html)                             | High-level maintainer map: local intent, transports, crash-safe apply, causality, exceptional boundaries, restart recovery, and executable owners |
+| Contract | [contributor-sync-model.md](./contributor-sync-model.md)                       | Contributor invariant: one replay-atomic transition = one op; replayed/remote ops must not re-trigger effects                                     |
+| Contract | [section-conflict-replay.md](./section-conflict-replay.md)                     | SECTION conflict commutativity, state-projected semantic replay, atomic replacement, and released-client compensation                             |
+| Contract | [package-boundaries.md](./package-boundaries.md)                               | Dependency/ownership boundaries for `@sp/sync-core`, `@sp/sync-providers`, app wiring                                                             |
+| Contract | [conflict-journal-and-review.md](./conflict-journal-and-review.md)             | Disjoint-field auto-merge plus the dormant device-local journal/review capability and its security boundary                                       |
+| Contract | [vector-clocks.md](./vector-clocks.md)                                         | Vector-clock implementation, storage/pruning ownership, and history                                                                               |
+| Contract | [supersync-encryption-architecture.md](./supersync-encryption-architecture.md) | End-to-end encryption wire format, key lifecycle, integrity boundary, and known limitations                                                       |
+| History  | [operation-log-architecture.md](./operation-log-architecture.md)               | Deep rationale and migration/implementation history; use focused contracts and executable owners for current detail                               |
 
-## Scenario catalogs (expected behavior)
+## Executable scenario index
 
-| Document                                           | Scope                                                           |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| [supersync-scenarios.md](./supersync-scenarios.md) | Maintained catalog of SuperSync scenarios and expected behavior |
+| Document                                           | Scope                                                                  |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| [supersync-scenarios.md](./supersync-scenarios.md) | Representative scenario-to-test routing; executable tests own behavior |
+
+## Active plans
+
+| Document                                     | Scope                                                                                  |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [sqlite-migration.md](./sqlite-migration.md) | Current native SQLite durability rationale, landed foundation, remaining rollout gates |
 
 ## Related
 
@@ -67,6 +79,7 @@ best-effort read/check/write race and is single-writer/backup-only.
 | [packages/super-sync-server/](../../packages/super-sync-server/)                                         | SuperSync server implementation              |
 | [ARCHITECTURE-DECISIONS.md](../../ARCHITECTURE-DECISIONS.md)                                             | Load-bearing product/data decisions          |
 
-> Obsolete duplicated walkthroughs and superseded plans live only in git
-> history. Load-bearing ADRs and the explicitly owned migration/rationale
-> sections listed above remain maintained documentation.
+Retired diagram filenames remain as small forwarding stubs so historical links
+continue to resolve. `operation-rules.md` and `sqlite-migration-followup.md` are
+also compatibility pointers; they are not independent sources of current
+behavior or status.
