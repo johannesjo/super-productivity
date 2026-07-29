@@ -1,4 +1,4 @@
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { routeCapacitorAppUrl } from './app-url-open-router';
 import { AppUriTaskAction } from '../features/tasks/util/parse-app-uri-task-action';
 
@@ -8,16 +8,21 @@ import { AppUriTaskAction } from '../features/tasks/util/parse-app-uri-task-acti
  * (`CAPPlugin.m`, `addEventListener` → `sendRetainedArgumentsForEvent`).
  * With one listener per consumer, a launch URL for whichever consumer
  * registered second was silently dropped. These cover the router that
- * replaced those two listeners, including the defining property: the URL
- * arrives *before* anyone is subscribed, as it does on a cold launch.
+ * replaced those two listeners.
+ *
+ * The sinks mirror production's types: the task sink replays, because a task
+ * action does arrive before Angular exists on a cold launch, so those tests
+ * subscribe *after* routing. The OAuth sink is a plain `Subject` (a cold-start
+ * callback cannot be completed at all, see `pending-capacitor-oauth-url.ts`),
+ * so those tests subscribe first, as its real consumer does at bootstrap.
  */
 describe('routeCapacitorAppUrl', () => {
   let taskSink: ReplaySubject<AppUriTaskAction>;
-  let oAuthSink: ReplaySubject<string>;
+  let oAuthSink: Subject<string>;
 
   beforeEach(() => {
     taskSink = new ReplaySubject<AppUriTaskAction>(1);
-    oAuthSink = new ReplaySubject<string>(1);
+    oAuthSink = new Subject<string>();
   });
 
   const OAUTH_URLS = [
@@ -26,7 +31,7 @@ describe('routeCapacitorAppUrl', () => {
     'com.super-productivity.app://plugin-oauth-callback?code=ABC123',
   ];
 
-  describe('retained cold-start event, task route family', () => {
+  describe('task route family', () => {
     it('should still deliver a task action emitted before anyone subscribed', () => {
       expect(
         routeCapacitorAppUrl(
@@ -47,27 +52,26 @@ describe('routeCapacitorAppUrl', () => {
     });
 
     it('should not leak a task action into the OAuth route family', () => {
+      let oAuthReceived = false;
+      oAuthSink.subscribe(() => (oAuthReceived = true));
+
       routeCapacitorAppUrl(
         'com.super-productivity.app://create-task?title=hello',
         taskSink,
         oAuthSink,
       );
 
-      let oAuthReceived = false;
-      oAuthSink.subscribe(() => (oAuthReceived = true));
-
       expect(oAuthReceived).toBe(false);
     });
   });
 
-  describe('retained cold-start event, OAuth route family', () => {
+  describe('OAuth route family', () => {
     OAUTH_URLS.forEach((url) => {
-      it(`should still deliver "${url.split('?')[0]}" emitted before anyone subscribed`, () => {
-        expect(routeCapacitorAppUrl(url, taskSink, oAuthSink)).toBe(false);
-
+      it(`should deliver "${url.split('?')[0]}" to the OAuth consumer`, () => {
         const received: string[] = [];
         oAuthSink.subscribe((u) => received.push(u));
 
+        expect(routeCapacitorAppUrl(url, taskSink, oAuthSink)).toBe(false);
         expect(received).toEqual([url]);
       });
     });
@@ -85,6 +89,9 @@ describe('routeCapacitorAppUrl', () => {
   it('should serve both route families from the single listener', () => {
     // The regression: one native listener has to feed both consumers, because
     // a second listener would never see a cold-start URL at all.
+    let oAuthReceived: string | undefined;
+    oAuthSink.subscribe((u) => (oAuthReceived = u));
+
     routeCapacitorAppUrl(
       'com.super-productivity.app://create-task?title=hello',
       taskSink,
@@ -93,9 +100,7 @@ describe('routeCapacitorAppUrl', () => {
     routeCapacitorAppUrl(OAUTH_URLS[0], taskSink, oAuthSink);
 
     let taskReceived: AppUriTaskAction | undefined;
-    let oAuthReceived: string | undefined;
     taskSink.subscribe((a) => (taskReceived = a));
-    oAuthSink.subscribe((u) => (oAuthReceived = u));
 
     expect(taskReceived?.title).toBe('hello');
     expect(oAuthReceived).toBe(OAUTH_URLS[0]);
@@ -104,13 +109,12 @@ describe('routeCapacitorAppUrl', () => {
   it('should route an unrecognized URL to the OAuth consumer, which ignores it', () => {
     // Unknown routes go to the OAuth side rather than being dropped here, so
     // there is exactly one owner deciding what is not a callback.
-    expect(
-      routeCapacitorAppUrl('superproductivity://toggle-visibility', taskSink, oAuthSink),
-    ).toBe(false);
-
     const received: string[] = [];
     oAuthSink.subscribe((u) => received.push(u));
 
+    expect(
+      routeCapacitorAppUrl('superproductivity://toggle-visibility', taskSink, oAuthSink),
+    ).toBe(false);
     expect(received).toEqual(['superproductivity://toggle-visibility']);
   });
 });

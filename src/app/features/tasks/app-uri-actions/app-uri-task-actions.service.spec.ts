@@ -401,9 +401,11 @@ describe('AppUriTaskActionsService', () => {
     });
 
     it('escapes the ampersand first so escaping cannot be double-applied', () => {
-      pendingAction$.next({ type: 'add', title: '&lt;img&gt;' });
+      // Needs a literal `<` alongside the `&`: with `&` replaced last, the
+      // `&` introduced by `<` -> `&lt;` gets escaped again to `&amp;lt;`.
+      pendingAction$.next({ type: 'add', title: '<b>&' });
 
-      expect(titleParamOf()).toBe('&amp;lt;img&amp;gt;');
+      expect(titleParamOf()).toBe('&lt;b&gt;&amp;');
     });
   });
 });

@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 /**
  * Bridges a Capacitor `appUrlOpen` URL that is not a task action from the
@@ -12,12 +12,18 @@ import { Observable, ReplaySubject } from 'rxjs';
  * `sendRetainedArgumentsForEvent`). Any listener registered after that never
  * sees the cold-start URL, so a second consumer silently lost every URL
  * delivered by a launch. Routing one native listener to both consumers is
- * what keeps cold-start OAuth callbacks and task actions working.
+ * what keeps the task actions working and gives the OAuth consumer a URL at
+ * all on Android, where the redirect arrives as a VIEW intent.
  *
- * `ReplaySubject(1)` because this service only exists once Angular has
- * bootstrapped, which is after the URL has already arrived on a cold launch.
+ * Deliberately a plain `Subject`, not a `ReplaySubject`: a cold-start OAuth
+ * callback cannot be completed by this app no matter how it is delivered.
+ * `PluginOAuthService._pendingRedirect` is in-memory and null after a
+ * relaunch, and the only consumer of `authCodeReceived$` (the auth-code
+ * dialog) subscribes solely on Electron. Replaying a URL that nothing can act
+ * on would only keep an auth code in memory for the rest of the process.
+ * The task sink keeps its replay because task actions *do* work cold.
  */
-export const pendingCapacitorOAuthUrl$ = new ReplaySubject<string>(1);
+export const pendingCapacitorOAuthUrl$ = new Subject<string>();
 
 /**
  * Injected by OAuthCallbackHandlerService instead of importing the singleton

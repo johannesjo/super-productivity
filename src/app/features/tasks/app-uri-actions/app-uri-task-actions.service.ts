@@ -168,10 +168,11 @@ export class AppUriTaskActionsService implements OnDestroy {
     if (!needle) {
       // A whitespace-only title would otherwise match every task via
       // `.includes('')` — refuse rather than completing an arbitrary one.
+      // No escaping needed: reaching here means the title is whitespace-only.
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.TASK.S.NOT_FOUND_VIA_APP_URI,
-        translateParams: { title: escapeHtml(action.title) },
+        translateParams: { title: action.title },
       });
       return;
     }

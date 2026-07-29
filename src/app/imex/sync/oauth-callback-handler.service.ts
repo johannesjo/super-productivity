@@ -178,7 +178,14 @@ export class OAuthCallbackHandlerService implements OnDestroy {
         this._pluginOAuthService.handleRedirectError('no_code_or_error', state);
       }
     } catch (e) {
-      SyncLog.err('OAuthCallbackHandler: Failed to parse plugin OAuth URL', url, e);
+      // Log a non-identifying descriptor only, never the URL or the error
+      // object: the URL carries the auth code, and an `ERR_INVALID_URL` keeps
+      // the raw URL on an enumerable `input` property that inspection prints.
+      // The log is exportable (rule #9). Matches `protocol-handler.ts`.
+      SyncLog.err(
+        'OAuthCallbackHandler: Failed to parse plugin OAuth URL',
+        url.split(':')[0],
+      );
       this._pluginOAuthService.handleRedirectError('parse_error');
     }
   }
