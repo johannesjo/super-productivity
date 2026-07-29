@@ -252,6 +252,13 @@ const createTaskWidgetWindowForGeneration = async (
 
   taskWidgetWin.loadFile(join(__dirname, 'task-widget.html'));
 
+  // Re-apply opacity once the renderer is ready to receive IPC (Windows only; macOS uses setOpacity()).
+  taskWidgetWin.webContents.once('did-finish-load', () => {
+    if (taskWidgetWin && !taskWidgetWin.isDestroyed()) {
+      updateTaskWidgetOpacity(currentOpacity);
+    }
+  });
+
   // Set visible on all workspaces immediately after creation
   taskWidgetWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
@@ -304,6 +311,7 @@ const createTaskWidgetWindowForGeneration = async (
   // Update initial state
   updateTaskWidgetContent();
 
+  // macOS: setOpacity() works immediately; Windows: did-finish-load handler above handles it.
   updateTaskWidgetOpacity(currentOpacity);
 
   if (pendingShowAfterCreate) {

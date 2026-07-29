@@ -24,6 +24,7 @@ const createDeferred = () => {
 
 class FakeWebContents {
   on() {}
+  once() {}
   send() {}
   focus() {}
   isDestroyed() {
