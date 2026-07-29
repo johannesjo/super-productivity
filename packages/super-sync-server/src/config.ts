@@ -65,6 +65,10 @@ export interface PrivacyConfig {
   addressCity: string;
   addressCountry: string;
   contactEmail: string;
+  /** Free-text address block of the hosting provider, if a third party hosts the data. */
+  hostingProvider?: string;
+  /** Free-text block naming the supervisory authority competent for the controller. */
+  supervisoryAuthority?: string;
 }
 
 export interface ServerConfig {
@@ -110,17 +114,17 @@ export interface ServerConfig {
 }
 
 /**
- * Default CORS origins for production security.
- * - Production app: exact match
- * - Preview deployments: RegExp pattern matching Cloudflare Pages format
- * Use CORS_ORIGINS env var to add additional origins.
+ * Default CORS origins — the stable production app, and nothing else.
+ *
+ * Every self-hosted instance inherits this default, and CORS is registered with
+ * `credentials: true`. A Cloudflare Pages preview wildcard used to sit here too, which
+ * meant servers we do not run granted credentialed cross-origin access to our preview
+ * infrastructure by default. Preview origins belong in our own deployment's CORS_ORIGINS.
+ *
+ * Use the CORS_ORIGINS env var to set your own origins; wildcard subdomain patterns are
+ * still supported there (see `parseCorsOrigin`), they just are not shipped as a default.
  */
-const DEFAULT_CORS_ORIGINS: CorsOrigin[] = [
-  'https://app.super-productivity.com',
-  // Cloudflare Pages preview format: <commit-hash>.<project>.pages.dev
-  // Using [a-zA-Z0-9-]+ to prevent domain confusion attacks (e.g., evil.com.preview.pages.dev)
-  /^https:\/\/[a-zA-Z0-9-]+\.super-productivity-preview\.pages\.dev$/,
-];
+const DEFAULT_CORS_ORIGINS: CorsOrigin[] = ['https://app.super-productivity.com'];
 
 const DEFAULT_CONFIG: ServerConfig = {
   port: 1900,
@@ -277,14 +281,38 @@ export const loadConfigFromEnv = (
     };
   }
 
-  // Privacy policy configuration (for German legal requirements)
-  if (process.env.PRIVACY_CONTACT_NAME) {
+  // Privacy policy configuration. The generated policy is only served when the operator
+  // has identified themselves as the controller — a policy naming the wrong controller is
+  // worse than no policy at all, so every field below is required to enable it. Partial
+  // configuration is a hard error rather than a silent fallback to placeholder text.
+  const privacyEnv = {
+    contactName: process.env.PRIVACY_CONTACT_NAME,
+    addressStreet: process.env.PRIVACY_ADDRESS_STREET,
+    addressCity: process.env.PRIVACY_ADDRESS_CITY,
+    addressCountry: process.env.PRIVACY_ADDRESS_COUNTRY,
+    contactEmail: process.env.PRIVACY_CONTACT_EMAIL,
+  };
+  const privacyKeys = Object.keys(privacyEnv) as (keyof typeof privacyEnv)[];
+  const privacySet = privacyKeys.filter((key) => !!privacyEnv[key]?.trim());
+  if (privacySet.length > 0 && privacySet.length < privacyKeys.length) {
+    const missing = privacyKeys
+      .filter((key) => !privacyEnv[key]?.trim())
+      .map((key) => `PRIVACY_${key.replace(/[A-Z]/g, (c) => `_${c}`).toUpperCase()}`);
+    throw new Error(
+      `Incomplete privacy policy configuration. Missing: ${missing.join(', ')}. ` +
+        `Set all of them to publish a privacy policy, or none to disable the legal pages.`,
+    );
+  }
+  if (privacySet.length === privacyKeys.length) {
     config.privacy = {
-      contactName: process.env.PRIVACY_CONTACT_NAME,
-      addressStreet: process.env.PRIVACY_ADDRESS_STREET || '',
-      addressCity: process.env.PRIVACY_ADDRESS_CITY || '',
-      addressCountry: process.env.PRIVACY_ADDRESS_COUNTRY || '',
-      contactEmail: process.env.PRIVACY_CONTACT_EMAIL || '',
+      contactName: privacyEnv.contactName as string,
+      addressStreet: privacyEnv.addressStreet as string,
+      addressCity: privacyEnv.addressCity as string,
+      addressCountry: privacyEnv.addressCountry as string,
+      contactEmail: privacyEnv.contactEmail as string,
+      hostingProvider: process.env.PRIVACY_HOSTING_PROVIDER?.trim() || undefined,
+      supervisoryAuthority:
+        process.env.PRIVACY_SUPERVISORY_AUTHORITY?.trim() || undefined,
     };
   }
 

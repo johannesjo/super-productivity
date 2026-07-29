@@ -7,6 +7,7 @@ import { sendLoginMagicLinkEmail, sendVerificationEmail } from './email';
 import { loadConfigFromEnv } from './config';
 import { Prisma } from '@prisma/client';
 import { authCache } from './auth-cache';
+import { getDefaultStorageQuotaBytes } from './sync/services/storage-quota.service';
 
 // Auth constants
 const MIN_JWT_SECRET_LENGTH = 32;
@@ -460,6 +461,9 @@ export const registerWithMagicLink = async (
           verificationToken,
           verificationTokenExpiresAt: tokenExpiresAt,
           termsAcceptedAt: acceptedAt ?? BigInt(Date.now()),
+          // Set explicitly rather than leaning on the column default, so that
+          // SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES actually reaches new accounts.
+          storageQuotaBytes: BigInt(getDefaultStorageQuotaBytes()),
         },
       });
 

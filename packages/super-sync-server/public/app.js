@@ -465,16 +465,26 @@ async function loginWithPasskey() {
   }
 }
 
+/**
+ * The consent checkbox is only rendered when this instance publishes legal pages. The
+ * generic image ships no Terms of Service, so on an unconfigured instance there is
+ * nothing to consent to: return undefined and omit the field from the request entirely.
+ */
+function readTermsAccepted() {
+  const checkbox = document.getElementById('register-terms');
+  return checkbox ? checkbox.checked : undefined;
+}
+
 async function registerWithPasskey() {
   const email = document.getElementById('register-email').value;
-  const termsAccepted = document.getElementById('register-terms').checked;
+  const termsAccepted = readTermsAccepted();
 
   if (!email) {
     showMessage('Please enter your email address', 'error');
     return;
   }
 
-  if (!termsAccepted) {
+  if (termsAccepted === false) {
     showMessage('You must accept the Terms of Service', 'error');
     return;
   }
@@ -487,7 +497,9 @@ async function registerWithPasskey() {
     const optionsRes = await fetch(`${API_BASE}/register/passkey/options`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, termsAccepted }),
+      body: JSON.stringify(
+        termsAccepted === undefined ? { email } : { email, termsAccepted },
+      ),
     });
 
     if (!optionsRes.ok) {
@@ -552,14 +564,14 @@ async function registerWithPasskey() {
 
 async function registerWithMagicLink() {
   const email = document.getElementById('register-email').value;
-  const termsAccepted = document.getElementById('register-terms').checked;
+  const termsAccepted = readTermsAccepted();
 
   if (!email) {
     showMessage('Please enter your email address', 'error');
     return;
   }
 
-  if (!termsAccepted) {
+  if (termsAccepted === false) {
     showMessage('You must accept the Terms of Service', 'error');
     return;
   }
@@ -571,7 +583,9 @@ async function registerWithMagicLink() {
     const res = await fetch(`${API_BASE}/register/magic-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, termsAccepted }),
+      body: JSON.stringify(
+        termsAccepted === undefined ? { email } : { email, termsAccepted },
+      ),
     });
 
     const data = await res.json();

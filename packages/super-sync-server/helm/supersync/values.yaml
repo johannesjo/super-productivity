@@ -7,8 +7,11 @@ image:
   repository: ghcr.io/super-productivity/supersync
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- Overrides the image tag. Defaults to the chart appVersion.
-  tag: ""
+  # -- Image tag to deploy. Defaults to "latest" because CI publishes only `latest`
+  # and `master-<sha>` — the chart appVersion has never been published as a tag, so
+  # falling back to it produced ImagePullBackOff on a default install.
+  # Pin this to a specific tag for reproducible deploys.
+  tag: "latest"
 
 # -- Docker registry pull secrets
 imagePullSecrets: []

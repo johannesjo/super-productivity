@@ -22,6 +22,7 @@ import {
   verifyEmail,
 } from './auth';
 import { authCache } from './auth-cache';
+import { getDefaultStorageQuotaBytes } from './sync/services/storage-quota.service';
 
 // Constants
 const CHALLENGE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
@@ -32,8 +33,12 @@ type ChallengeCeremony = 'registration' | 'authentication' | 'recovery';
 
 // WebAuthn configuration from environment
 const getWebAuthnConfig = (): { rpName: string; rpID: string; origin: string } => {
-  const rpName = process.env.WEBAUTHN_RP_NAME || 'Super Productivity Sync';
   const rpID = process.env.WEBAUTHN_RP_ID || 'localhost';
+  // Falls back to the relying-party ID, not our brand: this string is what a self-hoster's
+  // users see in their OS passkey prompt and what their device stores against the
+  // credential. Defaulting it to our product name would record us as the relying party on
+  // instances we do not run.
+  const rpName = process.env.WEBAUTHN_RP_NAME || rpID;
   const origin = process.env.WEBAUTHN_ORIGIN || 'http://localhost:1900';
 
   Logger.info(`WebAuthn config: rpID=${rpID}, origin=${origin}`);
@@ -219,6 +224,9 @@ export const verifyRegistration = async (
             email: email.toLowerCase(),
             passwordHash: null,
             termsAcceptedAt: acceptedAt,
+            // Set explicitly rather than leaning on the column default, so that
+            // SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES actually reaches new accounts.
+            storageQuotaBytes: BigInt(getDefaultStorageQuotaBytes()),
           },
         });
         userId = createdUser.id;

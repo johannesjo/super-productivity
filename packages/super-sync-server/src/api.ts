@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { isEmailAllowed } from './email-allowlist';
+import { areLegalPagesPublished } from './legal-pages';
 import * as jwt from 'jsonwebtoken';
 import {
   verifyEmail,
@@ -30,12 +31,23 @@ const VerifyEmailSchema = z.object({
   token: z.string().min(1, 'Token is required'),
 });
 
+/**
+ * Consent is only enforceable where legal pages actually exist. The generic Docker image
+ * ships no Terms of Service and publishes no privacy policy until the operator configures
+ * `PRIVACY_*`, so an unconfigured instance must accept registrations without this flag
+ * rather than demand agreement to documents it does not serve. See src/legal-pages.ts.
+ */
+const TermsAcceptedSchema = z
+  .boolean()
+  .optional()
+  .refine((val) => !areLegalPagesPublished() || val === true, {
+    message: 'You must accept the Terms of Service',
+  });
+
 // Passkey Schemas
 const PasskeyRegisterOptionsSchema = z.object({
   email: z.string().email('Invalid email format'),
-  termsAccepted: z.boolean().refine((val) => val === true, {
-    message: 'You must accept the Terms of Service',
-  }),
+  termsAccepted: TermsAcceptedSchema,
 });
 
 const PasskeyRegisterVerifySchema = z.object({
@@ -68,9 +80,7 @@ const PasskeyRecoveryCompleteSchema = z.object({
 // Magic Link Schemas
 const MagicLinkRegisterSchema = z.object({
   email: z.string().email('Invalid email format'),
-  termsAccepted: z.boolean().refine((val) => val === true, {
-    message: 'You must accept the Terms of Service',
-  }),
+  termsAccepted: TermsAcceptedSchema,
 });
 
 const MagicLinkRequestSchema = z.object({

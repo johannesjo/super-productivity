@@ -94,6 +94,8 @@
       <h2>2. Data Controller</h2>
       <address>
         {{ PRIVACY_CONTACT_NAME }}<br />
+        {{ PRIVACY_ADDRESS_STREET }}<br />
+        {{ PRIVACY_ADDRESS_CITY }}<br />
         {{ PRIVACY_ADDRESS_COUNTRY }}<br />
         <br />
         Email:
@@ -166,23 +168,22 @@
       </p>
 
       <h2>5. Hosting and Infrastructure</h2>
+      <!-- OPTIONAL:HOSTING -->
       <p>The Service is hosted by:</p>
-      <address>
-        <strong>Alfahosting GmbH</strong><br />
-        Ankerstraße 3b<br />
-        06108 Halle (Saale)<br />
-        Germany<br />
-        Website: <a href="https://alfahosting.de/">https://alfahosting.de/</a>
-      </address>
+      <address>{{ PRIVACY_HOSTING_PROVIDER }}</address>
       <p>
-        <strong>Data Location:</strong> Processing takes place exclusively on servers in
-        Germany.
+        <strong>Data Processing Agreement:</strong> A Data Processing Agreement (DPA) in
+        accordance with Art. 28 GDPR has been concluded with this provider.
       </p>
+      <!-- /OPTIONAL:HOSTING -->
+      <!-- OPTIONAL:NO_HOSTING -->
       <p>
-        <strong>Data Processing Agreement:</strong> We have concluded a Data Processing
-        Agreement (DPA) with Alfahosting GmbH in accordance with Art. 28 GDPR. No transfer
-        to a third country takes place via the hoster.
+        Details of the infrastructure on which the Service runs — including any
+        third-party hosting provider, the location of processing, and the corresponding
+        Data Processing Agreement under Art. 28 GDPR — are available on request from the
+        controller named in Section 2.
       </p>
+      <!-- /OPTIONAL:NO_HOSTING -->
 
       <h2>6. Data Processing during Synchronization</h2>
 
@@ -218,10 +219,9 @@
         based on Art. 6(1)(b) GDPR (Performance of Contract).
       </p>
       <p>
-        <strong>Service Provider:</strong> Emails are sent technically via the mail
-        servers of our hosting provider <strong>Alfahosting GmbH</strong> (see Section 5).
-        No external email marketing providers are used. The data thus remains within the
-        German infrastructure.
+        <strong>Service Provider:</strong> Emails are dispatched via the mail
+        infrastructure configured by the controller named in Section 2. No email marketing
+        providers are used, and no email address is passed on for advertising purposes.
       </p>
 
       <h2>8. Storage Duration and Deletion</h2>
@@ -249,8 +249,9 @@
 
       <h3>(4) Statutory Retention Obligations</h3>
       <p>
-        For paid accounts, we are obliged to retain invoice-relevant data for up to
-        <strong>10 years</strong> in accordance with statutory requirements.
+        Where the Service is offered against payment, invoice-relevant data is retained
+        for as long as statutory retention obligations require (in Germany, up to
+        <strong>10 years</strong>). If no paid plan is offered, no such data arises.
       </p>
 
       <h2>9. Transfer to Third Parties</h2>
@@ -258,8 +259,8 @@
       <ul>
         <li>You have expressly consented (Art. 6(1)(a) GDPR),</li>
         <li>
-          It is necessary for the performance of the contract (e.g., transfer to payment
-          service providers for premium accounts),
+          It is necessary for the performance of the contract (e.g., where a paid plan is
+          offered, transfer to the payment service provider handling that payment),
         </li>
         <li>It serves the technical provision (see Hosting),</li>
         <li>Or we are legally obliged to do so (e.g., to law enforcement agencies).</li>
@@ -287,16 +288,13 @@
       <h2>11. Right to Lodge a Complaint</h2>
       <p>
         You have the right to lodge a complaint with a data protection supervisory
-        authority. The authority responsible for us is:
+        authority — in particular in the Member State of your habitual residence or place
+        of work, or of the establishment of the controller named in Section 2.
       </p>
-      <address>
-        <strong
-          >The Saxon Data Protection Commissioner (Sächsischer
-          Datenschutzbeauftragter)</strong
-        ><br />
-        Website:
-        <a href="https://www.saechsdsb.de/">https://www.saechsdsb.de/</a>
-      </address>
+      <!-- OPTIONAL:AUTHORITY -->
+      <p>The authority responsible for the controller is:</p>
+      <address>{{ PRIVACY_SUPERVISORY_AUTHORITY }}</address>
+      <!-- /OPTIONAL:AUTHORITY -->
 
       <h2>12. Cookies and Tracking</h2>
       <p>

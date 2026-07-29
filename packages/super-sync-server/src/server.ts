@@ -24,6 +24,7 @@ import {
   resetWsConnectionService,
 } from './sync/services/websocket-connection.service';
 import { testRoutes } from './test-routes';
+import { setLegalPagesPublished } from './legal-pages';
 
 // HTML escape to prevent XSS in generated HTML
 export const escapeHtml = (unsafe: string): string => {
@@ -84,43 +85,120 @@ export const createListenOptions = (
   host: config.host,
 });
 
-const generatePrivacyHtml = (privacy?: PrivacyConfig): void => {
+/**
+ * Drops `<!-- OPTIONAL:NAME -->…<!-- /OPTIONAL:NAME -->` sections whose name is not in
+ * `keep`, and unwraps the markers of the ones that are. Lets one shipped template serve
+ * operators who have a hosting provider or a named supervisory authority and operators
+ * who have neither, without emitting a claim that is false for the other.
+ */
+const applyOptionalBlocks = (html: string, keep: ReadonlySet<string>): string =>
+  html.replace(
+    /[^\S\n]*<!-- OPTIONAL:([A-Z_]+) -->\n?([\s\S]*?)[^\S\n]*<!-- \/OPTIONAL:\1 -->\n?/g,
+    (_match, name: string, body: string) => (keep.has(name) ? body : ''),
+  );
+
+/**
+ * Renders `privacy.html` from the shipped template.
+ *
+ * Returns whether a policy was written. When the operator has not identified themselves
+ * as the controller we deliberately generate nothing: a policy naming "[Contact Name]" —
+ * or worse, inherited boilerplate about someone else's hosting provider — is a false
+ * legal statement published in the operator's name. A 404 is the honest failure.
+ */
+const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
   const publicDir = path.join(__dirname, '../../public');
   const templatePath = path.join(publicDir, 'privacy.template.html');
   const outputPath = path.join(publicDir, 'privacy.html');
 
+  // Stale output from an earlier, configured boot must not survive a reconfiguration.
+  if (fs.existsSync(outputPath)) {
+    fs.rmSync(outputPath);
+  }
+
   if (!fs.existsSync(templatePath)) {
     Logger.warn('privacy.template.html not found, skipping generation');
+    return false;
+  }
+
+  if (!privacy) {
+    Logger.warn(
+      'No PRIVACY_* configuration set: /privacy.html and the registration consent ' +
+        'notice are disabled. Set PRIVACY_CONTACT_NAME, PRIVACY_ADDRESS_STREET, ' +
+        'PRIVACY_ADDRESS_CITY, PRIVACY_ADDRESS_COUNTRY and PRIVACY_CONTACT_EMAIL to ' +
+        'publish a privacy policy naming you as the controller.',
+    );
+    return false;
+  }
+
+  const keep = new Set<string>([
+    privacy.hostingProvider ? 'HOSTING' : 'NO_HOSTING',
+    ...(privacy.supervisoryAuthority ? ['AUTHORITY'] : []),
+  ]);
+
+  // Replace placeholders with HTML-escaped values from config (prevent XSS)
+  const html = applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep)
+    .replace(/\{\{\s*PRIVACY_CONTACT_NAME\s*\}\}/g, escapeHtml(privacy.contactName))
+    .replace(/\{\{\s*PRIVACY_ADDRESS_STREET\s*\}\}/g, escapeHtml(privacy.addressStreet))
+    .replace(/\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g, escapeHtml(privacy.addressCity))
+    .replace(/\{\{\s*PRIVACY_ADDRESS_COUNTRY\s*\}\}/g, escapeHtml(privacy.addressCountry))
+    .replace(/\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g, escapeHtml(privacy.contactEmail))
+    .replace(
+      /\{\{\s*PRIVACY_HOSTING_PROVIDER\s*\}\}/g,
+      escapeHtml(privacy.hostingProvider ?? '').replace(/\n/g, '<br />'),
+    )
+    .replace(
+      /\{\{\s*PRIVACY_SUPERVISORY_AUTHORITY\s*\}\}/g,
+      escapeHtml(privacy.supervisoryAuthority ?? '').replace(/\n/g, '<br />'),
+    );
+
+  fs.writeFileSync(outputPath, html);
+  Logger.info('Generated privacy.html from template');
+  return true;
+};
+
+/**
+ * Renders `index.html` from its template, keeping the legal-consent block only when legal
+ * pages actually exist to link to. The generic image ships no Terms of Service, so an
+ * unconfigured instance must not ask its users to accept one.
+ */
+const generateIndexHtml = (hasLegalPages: boolean): void => {
+  const publicDir = path.join(__dirname, '../../public');
+  const templatePath = path.join(publicDir, 'index.template.html');
+  const outputPath = path.join(publicDir, 'index.html');
+
+  if (!fs.existsSync(templatePath)) {
+    Logger.warn('index.template.html not found, skipping generation');
     return;
   }
 
-  let template = fs.readFileSync(templatePath, 'utf-8');
+  const keep = new Set<string>(hasLegalPages ? ['LEGAL_CONSENT'] : []);
+  fs.writeFileSync(
+    outputPath,
+    applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep),
+  );
+  Logger.info('Generated index.html from template');
+};
 
-  // Replace placeholders with HTML-escaped values from config (prevent XSS)
-  template = template
-    .replace(
-      /\{\{\s*PRIVACY_CONTACT_NAME\s*\}\}/g,
-      escapeHtml(privacy?.contactName || '[Contact Name]'),
-    )
-    .replace(
-      /\{\{\s*PRIVACY_ADDRESS_STREET\s*\}\}/g,
-      escapeHtml(privacy?.addressStreet || '[Street Address]'),
-    )
-    .replace(
-      /\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g,
-      escapeHtml(privacy?.addressCity || '[City]'),
-    )
-    .replace(
-      /\{\{\s*PRIVACY_ADDRESS_COUNTRY\s*\}\}/g,
-      escapeHtml(privacy?.addressCountry || '[Country]'),
-    )
-    .replace(
-      /\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g,
-      escapeHtml(privacy?.contactEmail || '[Email]'),
-    );
+/**
+ * Copies operator-supplied legal pages from `<dataDir>/legal/` into the served directory.
+ * This is how an operator publishes their own Terms of Service: the image deliberately
+ * ships none, because ours name German law, a Leipzig venue and our own contact address.
+ */
+const installOperatorLegalPages = (dataDir: string): boolean => {
+  const publicDir = path.join(__dirname, '../../public');
+  const sourcePath = path.join(dataDir, 'legal', 'terms.html');
+  const outputPath = path.join(publicDir, 'terms.html');
 
-  fs.writeFileSync(outputPath, template);
-  Logger.info('Generated privacy.html from template');
+  if (fs.existsSync(outputPath)) {
+    fs.rmSync(outputPath);
+  }
+  if (!fs.existsSync(sourcePath)) {
+    return false;
+  }
+
+  fs.copyFileSync(sourcePath, outputPath);
+  Logger.info('Installed operator-supplied terms.html');
+  return true;
 };
 
 export { ServerConfig, loadConfigFromEnv };
@@ -141,8 +219,13 @@ export const createServer = (
     Logger.info(`Created data directory: ${fullConfig.dataDir}`);
   }
 
-  // Generate privacy.html from template with env vars
-  generatePrivacyHtml(fullConfig.privacy);
+  // Generate the legal pages, then tell the API whether consent can be required at all.
+  // Order matters: index.html must reflect the pages that were actually written.
+  const hasPrivacyPolicy = generatePrivacyHtml(fullConfig.privacy);
+  const hasOperatorTerms = installOperatorLegalPages(fullConfig.dataDir);
+  const hasLegalPages = hasPrivacyPolicy || hasOperatorTerms;
+  generateIndexHtml(hasLegalPages);
+  setLegalPagesPublished(hasLegalPages);
 
   let fastifyServer: FastifyInstance | undefined;
 

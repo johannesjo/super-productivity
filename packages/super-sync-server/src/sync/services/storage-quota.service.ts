@@ -18,6 +18,21 @@ import { CAUSAL_FULL_STATE_OPERATION_WHERE } from '../sync.types';
  * Default storage quota per user in bytes (100MB).
  */
 const DEFAULT_STORAGE_QUOTA_BYTES = 100 * 1024 * 1024;
+
+/**
+ * Quota applied to accounts created from now on, overridable per deployment.
+ *
+ * A self-hoster running this on their own disk has no reason to inherit our hosted
+ * service's 100 MB budget, and until this existed the only way to change it was an
+ * `UPDATE users SET storage_quota_bytes` against Postgres. Existing accounts keep the
+ * value stored on their row — this sets what new rows get, and the fallback for rows
+ * where the column is null.
+ */
+export const getDefaultStorageQuotaBytes = (): number =>
+  parsePositiveIntegerEnv(
+    'SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES',
+    DEFAULT_STORAGE_QUOTA_BYTES,
+  );
 const OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = 5_000;
 const OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = 25_000;
 // Operator-DoS guardrail: a 1M `take:` materializes 1M ids in Node memory and
@@ -250,7 +265,7 @@ export class StorageQuotaService {
       select: { storageQuotaBytes: true, storageUsedBytes: true },
     });
 
-    const quota = Number(user?.storageQuotaBytes ?? DEFAULT_STORAGE_QUOTA_BYTES);
+    const quota = Number(user?.storageQuotaBytes ?? getDefaultStorageQuotaBytes());
     const currentUsage = Number(user?.storageUsedBytes ?? 0);
 
     return {
@@ -878,7 +893,7 @@ export class StorageQuotaService {
 
     return {
       storageUsedBytes: Number(user?.storageUsedBytes ?? 0),
-      storageQuotaBytes: Number(user?.storageQuotaBytes ?? DEFAULT_STORAGE_QUOTA_BYTES),
+      storageQuotaBytes: Number(user?.storageQuotaBytes ?? getDefaultStorageQuotaBytes()),
     };
   }
 }

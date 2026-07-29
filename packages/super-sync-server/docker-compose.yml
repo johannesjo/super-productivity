@@ -51,8 +51,22 @@ services:
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=${SMTP_FROM:-}
       - WEBAUTHN_RP_ID=${WEBAUTHN_RP_ID:-localhost}
-      - WEBAUTHN_RP_NAME=${WEBAUTHN_RP_NAME:-Super Productivity Sync}
+      # Shown in your users' OS passkey prompt. Defaults to WEBAUTHN_RP_ID when unset.
+      - WEBAUTHN_RP_NAME=${WEBAUTHN_RP_NAME:-}
       - WEBAUTHN_ORIGIN=${WEBAUTHN_ORIGIN:-http://localhost:1900}
+      # Identify yourself as the data controller to publish /privacy.html. All five are
+      # required together; set none and the legal pages are not served at all. Without
+      # these lines the container never sees them, however carefully you fill in .env.
+      - PRIVACY_CONTACT_NAME=${PRIVACY_CONTACT_NAME:-}
+      - PRIVACY_ADDRESS_STREET=${PRIVACY_ADDRESS_STREET:-}
+      - PRIVACY_ADDRESS_CITY=${PRIVACY_ADDRESS_CITY:-}
+      - PRIVACY_ADDRESS_COUNTRY=${PRIVACY_ADDRESS_COUNTRY:-}
+      - PRIVACY_CONTACT_EMAIL=${PRIVACY_CONTACT_EMAIL:-}
+      # Optional sections of the policy; omitted entirely when unset.
+      - PRIVACY_HOSTING_PROVIDER=${PRIVACY_HOSTING_PROVIDER:-}
+      - PRIVACY_SUPERVISORY_AUTHORITY=${PRIVACY_SUPERVISORY_AUTHORITY:-}
+      - ALLOWED_EMAILS=${ALLOWED_EMAILS:-}
+      - SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES=${SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES:-}
       - OLD_OPS_CLEANUP_DELETE_BATCH_SIZE=${OLD_OPS_CLEANUP_DELETE_BATCH_SIZE:-5000}
       - OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN=${OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN:-25000}
       - SUPERSYNC_BATCH_UPLOAD=${SUPERSYNC_BATCH_UPLOAD:-false}
