@@ -23,11 +23,19 @@ tmp
 # in whatever is on the maintainer's disk. The multi-stage build keeps it out of the
 # published layer today, but that is one COPY edit away from being untrue.
 
-# Secrets and live configuration, anywhere in the tree
+# Secrets and live configuration, anywhere in the tree. `**/.env` does not match
+# `.env.local` / `.env.production`, hence the separate glob.
 **/.env
-**/.env.test
+**/.env.*
+!**/.env.example
 **/secrets/
 **/tde-keys/
+
+# Never let a local install shadow the image's own `npm ci` result, and keep test
+# artifacts out of the build context entirely.
+**/node_modules
+**/coverage
+**/*.log
 
 # Local server state
 packages/super-sync-server/data/

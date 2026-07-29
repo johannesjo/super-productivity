@@ -71,6 +71,16 @@ export interface PrivacyConfig {
   supervisoryAuthority?: string;
 }
 
+/**
+ * Whether this instance may ask users to accept anything.
+ *
+ * Derived, never stored: consent is meaningful exactly when a privacy policy is published,
+ * and that is decided solely by whether the operator identified themselves. Keeping this a
+ * pure function of the environment means there is no initialisation order to get wrong and
+ * no process-wide flag that a forgotten setter could leave pointing the wrong way.
+ */
+export const isConsentRequired = (config: ServerConfig): boolean => !!config.privacy;
+
 export interface ServerConfig {
   port: number;
   host: string;

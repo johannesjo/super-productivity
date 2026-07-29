@@ -5,7 +5,12 @@ import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import fastifyStatic from '@fastify/static';
 import * as path from 'path';
-import { loadConfigFromEnv, ServerConfig, PrivacyConfig } from './config';
+import {
+  loadConfigFromEnv,
+  ServerConfig,
+  PrivacyConfig,
+  isConsentRequired,
+} from './config';
 import { Logger } from './logger';
 import { prisma, disconnectDb } from './db';
 import websocket from '@fastify/websocket';
@@ -24,7 +29,6 @@ import {
   resetWsConnectionService,
 } from './sync/services/websocket-connection.service';
 import { testRoutes } from './test-routes';
-import { setLegalPagesPublished } from './legal-pages';
 
 // HTML escape to prevent XSS in generated HTML
 export const escapeHtml = (unsafe: string): string => {
@@ -119,21 +123,45 @@ const resolveTemplateDir = (): string => resolvePackageDir('templates');
  * operators who have a hosting provider or a named supervisory authority and operators
  * who have neither, without emitting a claim that is false for the other.
  */
-const applyOptionalBlocks = (html: string, keep: ReadonlySet<string>): string => {
-  const blockPattern =
-    /[^\S\n]*<!-- OPTIONAL:([A-Z_]+) -->\n?([\s\S]*?)[^\S\n]*<!-- \/OPTIONAL:\1 -->\n?/g;
-  // Loop because a kept block's body is not re-scanned by String.replace, so nested
-  // markers (the terms link inside the consent block) would otherwise survive as
-  // literal HTML comments in the served page. Bounded by nesting depth, not input.
-  let previous: string;
-  let current = html;
-  do {
-    previous = current;
-    current = current.replace(blockPattern, (_match, name: string, body: string) =>
-      keep.has(name) ? body : '',
-    );
-  } while (current !== previous);
-  return current;
+const applyOptionalBlocks = (html: string, keep: ReadonlySet<string>): string =>
+  // Recursive rather than looping to a fixed point: String.replace does not re-scan its own
+  // replacement, so a kept block's body must be processed explicitly or a nested marker
+  // (the terms link inside the consent block) survives as a literal comment in the served
+  // page. Recursion follows the nesting and terminates with it — no convergence argument.
+  html.replace(
+    /[^\S\n]*<!-- OPTIONAL:([A-Z_]+) -->\n?([\s\S]*?)[^\S\n]*<!-- \/OPTIONAL:\1 -->\n?/g,
+    (_match, name: string, body: string) =>
+      keep.has(name) ? applyOptionalBlocks(body, keep) : '',
+  );
+
+/**
+ * Substitutes `{{ TOKEN }}` placeholders, HTML-escaping every value.
+ *
+ * One pass with a function replacer, deliberately. A per-token chain of
+ * `.replace(re, string)` calls interprets `$&`, `` $` `` and `$'` in the *value* as
+ * replacement patterns — and `escapeHtml` manufactures them, since it rewrites `'` into
+ * `&#039;`. That spliced the document into its own `<address>` element. It also let an
+ * earlier substitution's output be re-scanned by a later one.
+ *
+ * An unknown token throws instead of rendering `{{ FOO }}` into a published legal page —
+ * the same class of defect as the `PRIVACY_ADDRESS_STREET` placeholder that was read from
+ * the environment but had no token in the template.
+ */
+const substituteTokens = (html: string, values: Record<string, string>): string =>
+  html.replace(/\{\{\s*([A-Z_]+)\s*\}\}/g, (_match, key: string) => {
+    const value = values[key];
+    if (value === undefined) {
+      throw new Error(`Unresolved template token {{ ${key} }}`);
+    }
+    return escapeHtml(value);
+  });
+
+/** Fails the boot rather than serving a legal page with a marker or placeholder in it. */
+const assertFullyRendered = (html: string, source: string): void => {
+  const residue = html.match(/OPTIONAL:[A-Z_]*|\{\{[^}]*\}\}/);
+  if (residue) {
+    throw new Error(`Unrendered template residue in ${source}: ${residue[0]}`);
+  }
 };
 
 /**
@@ -155,6 +183,14 @@ const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
   }
 
   if (!fs.existsSync(templatePath)) {
+    // A configured operator with no template is a broken deployment, not a choice. Failing
+    // loudly beats booting healthy-but-quiet with the policy silently unpublished.
+    if (privacy) {
+      throw new Error(
+        `privacy.template.html not found at ${templatePath}, but PRIVACY_* is configured. ` +
+          'Refusing to start rather than silently withhold the privacy policy.',
+      );
+    }
     Logger.warn('privacy.template.html not found, skipping generation');
     return false;
   }
@@ -174,25 +210,26 @@ const generatePrivacyHtml = (privacy?: PrivacyConfig): boolean => {
     ...(privacy.supervisoryAuthority ? ['AUTHORITY'] : []),
   ]);
 
-  // Replace placeholders with HTML-escaped values from config (prevent XSS)
-  const html = applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep)
-    .replace(/\{\{\s*PRIVACY_CONTACT_NAME\s*\}\}/g, () => escapeHtml(privacy.contactName))
-    .replace(/\{\{\s*PRIVACY_ADDRESS_STREET\s*\}\}/g, () =>
-      escapeHtml(privacy.addressStreet),
-    )
-    .replace(/\{\{\s*PRIVACY_ADDRESS_CITY\s*\}\}/g, () => escapeHtml(privacy.addressCity))
-    .replace(/\{\{\s*PRIVACY_ADDRESS_COUNTRY\s*\}\}/g, () =>
-      escapeHtml(privacy.addressCountry),
-    )
-    .replace(/\{\{\s*PRIVACY_CONTACT_EMAIL\s*\}\}/g, () =>
-      escapeHtml(privacy.contactEmail),
-    )
-    .replace(/\{\{\s*PRIVACY_HOSTING_PROVIDER\s*\}\}/g, () =>
-      escapeHtml(privacy.hostingProvider ?? '').replace(/\n/g, '<br />'),
-    )
-    .replace(/\{\{\s*PRIVACY_SUPERVISORY_AUTHORITY\s*\}\}/g, () =>
-      escapeHtml(privacy.supervisoryAuthority ?? '').replace(/\n/g, '<br />'),
-    );
+  // Only tokens whose block survived are supplied; an unused one would be an unresolved
+  // token, and substituteTokens turns that into a boot failure rather than a published
+  // placeholder.
+  const html = substituteTokens(
+    applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep),
+    {
+      PRIVACY_CONTACT_NAME: privacy.contactName,
+      PRIVACY_ADDRESS_STREET: privacy.addressStreet,
+      PRIVACY_ADDRESS_CITY: privacy.addressCity,
+      PRIVACY_ADDRESS_COUNTRY: privacy.addressCountry,
+      PRIVACY_CONTACT_EMAIL: privacy.contactEmail,
+      ...(privacy.hostingProvider
+        ? { PRIVACY_HOSTING_PROVIDER: privacy.hostingProvider }
+        : {}),
+      ...(privacy.supervisoryAuthority
+        ? { PRIVACY_SUPERVISORY_AUTHORITY: privacy.supervisoryAuthority }
+        : {}),
+    },
+  );
+  assertFullyRendered(html, 'privacy.html');
 
   fs.writeFileSync(outputPath, html);
   Logger.info('Generated privacy.html from template');
@@ -225,10 +262,9 @@ const generateIndexHtml = (options: {
     keep.add('LEGAL_CONSENT');
     if (options.hasOperatorTerms) keep.add('LEGAL_TERMS');
   }
-  fs.writeFileSync(
-    outputPath,
-    applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep),
-  );
+  const html = applyOptionalBlocks(fs.readFileSync(templatePath, 'utf-8'), keep);
+  assertFullyRendered(html, 'index.html');
+  fs.writeFileSync(outputPath, html);
   Logger.info('Generated index.html from template');
 };
 
@@ -294,7 +330,6 @@ export const createServer = (
   const hasPrivacyPolicy = generatePrivacyHtml(fullConfig.privacy);
   const hasOperatorTerms = installOperatorLegalPages(fullConfig.dataDir);
   generateIndexHtml({ hasPrivacyPolicy, hasOperatorTerms });
-  setLegalPagesPublished(hasPrivacyPolicy);
 
   let fastifyServer: FastifyInstance | undefined;
 
@@ -421,7 +456,10 @@ export const createServer = (
       });
 
       // API Routes
-      await fastifyServer.register(apiRoutes, { prefix: '/api' });
+      await fastifyServer.register(apiRoutes, {
+        prefix: '/api',
+        requireTermsConsent: isConsentRequired(fullConfig),
+      });
 
       // Sync Routes (operation-based sync)
       await fastifyServer.register(syncRoutes, { prefix: '/api/sync' });

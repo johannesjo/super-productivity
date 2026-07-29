@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 /**
  * The generic image ships no Terms of Service and must publish no privacy policy until
@@ -38,6 +39,15 @@ const setFullPrivacyEnv = (): void => {
 
 const importConfig = async () => await import('../src/config');
 
+// Never mkdir inside the repo: createServer creates its dataDir, and leftovers dirtied
+// `git status` and could poison a later run.
+let tmpDataDirs: string[] = [];
+const makeDataDir = (): string => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'supersync-legal-'));
+  tmpDataDirs.push(dir);
+  return dir;
+};
+
 describe('legal pages', () => {
   beforeEach(() => {
     resetEnv();
@@ -47,6 +57,11 @@ describe('legal pages', () => {
   afterEach(() => {
     resetEnv();
     clearGenerated();
+    if (fs.existsSync(path.join(PUBLIC_DIR, 'terms.html'))) {
+      fs.rmSync(path.join(PUBLIC_DIR, 'terms.html'));
+    }
+    for (const dir of tmpDataDirs) fs.rmSync(dir, { recursive: true, force: true });
+    tmpDataDirs = [];
   });
 
   describe('shipped assets', () => {
@@ -140,64 +155,61 @@ describe('legal pages', () => {
 
   describe('registration consent enforcement', () => {
     const importApi = async () => await import('../src/api');
-    const importFlag = async () => await import('../src/legal-pages');
 
     // Regression: `termsAccepted: z.boolean().optional().refine(...)` looks correct but is
     // NOT. In zod 4 an issue raised by a refinement on an optional field is discarded when
     // the key is absent, so a body of {"email":"..."} passed validation on an instance that
-    // publishes legal pages — silently removing consent enforcement. The refinement must sit
-    // on the enclosing object. These cases fail if it is ever moved back onto the field.
-    for (const name of [
-      'PasskeyRegisterOptionsSchema',
-      'MagicLinkRegisterSchema',
-    ] as const) {
-      describe(name, () => {
-        it('rejects a body with no termsAccepted key when legal pages are published', async () => {
-          const { setLegalPagesPublished } = await importFlag();
-          setLegalPagesPublished(true);
-          const schema = (await importApi())[name];
+    // publishes legal pages — silently removing consent enforcement. `z.literal(true)` has
+    // no such hole: an absent key is a type error, not a skipped check.
+    it('rejects a body with no termsAccepted key when consent is required', async () => {
+      const { buildRegisterBodySchema } = await importApi();
+      const schema = buildRegisterBodySchema(true);
 
-          // JSON.parse so the key is genuinely absent, exactly as it arrives over the wire.
-          const result = schema.safeParse(JSON.parse('{"email":"user@example.test"}'));
-          expect(result.success).toBe(false);
-        });
+      // JSON.parse so the key is genuinely absent, exactly as it arrives over the wire.
+      expect(schema.safeParse(JSON.parse('{"email":"user@example.test"}')).success).toBe(
+        false,
+      );
+    });
 
-        it('rejects termsAccepted:false when legal pages are published', async () => {
-          const { setLegalPagesPublished } = await importFlag();
-          setLegalPagesPublished(true);
-          const schema = (await importApi())[name];
+    it('rejects termsAccepted:false when consent is required', async () => {
+      const { buildRegisterBodySchema } = await importApi();
 
-          expect(
-            schema.safeParse({ email: 'user@example.test', termsAccepted: false })
-              .success,
-          ).toBe(false);
-        });
+      expect(
+        buildRegisterBodySchema(true).safeParse({
+          email: 'user@example.test',
+          termsAccepted: false,
+        }).success,
+      ).toBe(false);
+    });
 
-        it('accepts termsAccepted:true when legal pages are published', async () => {
-          const { setLegalPagesPublished } = await importFlag();
-          setLegalPagesPublished(true);
-          const schema = (await importApi())[name];
+    it('accepts termsAccepted:true when consent is required', async () => {
+      const { buildRegisterBodySchema } = await importApi();
 
-          expect(
-            schema.safeParse({ email: 'user@example.test', termsAccepted: true }).success,
-          ).toBe(true);
-        });
+      expect(
+        buildRegisterBodySchema(true).safeParse({
+          email: 'user@example.test',
+          termsAccepted: true,
+        }).success,
+      ).toBe(true);
+    });
 
-        it('accepts an omitted termsAccepted when no legal pages are published', async () => {
-          const { setLegalPagesPublished } = await importFlag();
-          setLegalPagesPublished(false);
-          const schema = (await importApi())[name];
+    it('accepts an omitted termsAccepted when consent is not required', async () => {
+      const { buildRegisterBodySchema } = await importApi();
 
-          try {
-            expect(
-              schema.safeParse(JSON.parse('{"email":"user@example.test"}')).success,
-            ).toBe(true);
-          } finally {
-            setLegalPagesPublished(true);
-          }
-        });
-      });
-    }
+      expect(
+        buildRegisterBodySchema(false).safeParse(
+          JSON.parse('{"email":"user@example.test"}'),
+        ).success,
+      ).toBe(true);
+    });
+
+    it('derives the requirement from whether a privacy policy is configured', async () => {
+      const { isConsentRequired, loadConfigFromEnv } = await importConfig();
+
+      expect(isConsentRequired(loadConfigFromEnv())).toBe(false);
+      setFullPrivacyEnv();
+      expect(isConsentRequired(loadConfigFromEnv())).toBe(true);
+    });
   });
 
   describe('privacy.html generation', () => {
@@ -205,14 +217,14 @@ describe('legal pages', () => {
 
     it('writes nothing when the operator is not configured', async () => {
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-none') });
+      createServer({ dataDir: makeDataDir() });
 
       expect(fs.existsSync(PRIVACY_OUTPUT)).toBe(false);
     });
 
     it('omits the consent notice from index.html when no legal pages exist', async () => {
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-none') });
+      createServer({ dataDir: makeDataDir() });
 
       const index = fs.readFileSync(INDEX_OUTPUT, 'utf-8');
       expect(index).not.toContain('register-terms');
@@ -224,7 +236,7 @@ describe('legal pages', () => {
     it('renders the controller and keeps the consent notice when configured', async () => {
       setFullPrivacyEnv();
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+      createServer({ dataDir: makeDataDir() });
 
       const privacy = fs.readFileSync(PRIVACY_OUTPUT, 'utf-8');
       expect(privacy).toContain('Test Operator');
@@ -239,10 +251,10 @@ describe('legal pages', () => {
     it('omits the hosting section rather than inheriting a provider', async () => {
       setFullPrivacyEnv();
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+      createServer({ dataDir: makeDataDir() });
 
       const privacy = fs.readFileSync(PRIVACY_OUTPUT, 'utf-8');
-      expect(privacy).not.toContain('A Data Processing Agreement (DPA) in');
+      expect(privacy).not.toContain('Art. 28\n        GDPR requires');
       expect(privacy).toContain('are available on request from the');
     });
 
@@ -250,17 +262,19 @@ describe('legal pages', () => {
       setFullPrivacyEnv();
       process.env.PRIVACY_HOSTING_PROVIDER = 'Example Hosting GmbH';
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+      createServer({ dataDir: makeDataDir() });
 
       const privacy = fs.readFileSync(PRIVACY_OUTPUT, 'utf-8');
       expect(privacy).toContain('Example Hosting GmbH');
-      expect(privacy).toContain('A Data Processing Agreement (DPA) in');
+      // States what Art. 28 requires, not that the operator has signed one — we cannot
+      // verify that on their behalf.
+      expect(privacy).toMatch(/Art\. 28\s+GDPR requires a Data Processing Agreement/);
     });
 
     it('does not link Terms when the operator supplied none', async () => {
       setFullPrivacyEnv();
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+      createServer({ dataDir: makeDataDir() });
 
       const index = fs.readFileSync(INDEX_OUTPUT, 'utf-8');
       // Consent is still asked for (a policy exists), but a link to a page we do not
@@ -273,7 +287,7 @@ describe('legal pages', () => {
 
     it('links Terms when the operator supplied them', async () => {
       setFullPrivacyEnv();
-      const dataDir = path.join(__dirname, '.tmp-legal-terms');
+      const dataDir = makeDataDir();
       fs.mkdirSync(path.join(dataDir, 'legal'), { recursive: true });
       fs.writeFileSync(
         path.join(dataDir, 'legal', 'terms.html'),
@@ -305,7 +319,7 @@ describe('legal pages', () => {
       setFullPrivacyEnv();
       process.env.PRIVACY_CONTACT_NAME = "O$'Brien $& Co $`Ltd";
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+      createServer({ dataDir: makeDataDir() });
 
       const privacy = fs.readFileSync(PRIVACY_OUTPUT, 'utf-8');
       expect(privacy).not.toContain('{{');
@@ -315,11 +329,28 @@ describe('legal pages', () => {
       expect(privacy).toContain('O$&#039;Brien $&amp; Co $`Ltd');
     });
 
+    it('leaves no marker or placeholder residue in either generated page', async () => {
+      setFullPrivacyEnv();
+      process.env.PRIVACY_HOSTING_PROVIDER = 'Example Hosting GmbH';
+      process.env.PRIVACY_SUPERVISORY_AUTHORITY = 'Example Authority';
+      const { createServer } = await importServer();
+      createServer({ dataDir: makeDataDir() });
+
+      // A typo'd marker matches nothing and would otherwise ship verbatim in a legal page,
+      // with BOTH branches of an either/or section surviving. assertFullyRendered turns
+      // that into a boot failure; these assertions are the same check from the outside.
+      for (const file of [PRIVACY_OUTPUT, INDEX_OUTPUT]) {
+        const html = fs.readFileSync(file, 'utf-8');
+        expect(html).not.toContain('OPTIONAL:');
+        expect(html).not.toMatch(/\{\{[^}]*\}\}/);
+      }
+    });
+
     it('escapes operator-supplied values', async () => {
       setFullPrivacyEnv();
       process.env.PRIVACY_CONTACT_NAME = '<script>alert(1)</script>';
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-cfg') });
+      createServer({ dataDir: makeDataDir() });
 
       const privacy = fs.readFileSync(PRIVACY_OUTPUT, 'utf-8');
       expect(privacy).not.toContain('<script>alert(1)</script>');
@@ -328,7 +359,7 @@ describe('legal pages', () => {
 
     it('refuses to publish a symlinked terms.html', async () => {
       setFullPrivacyEnv();
-      const dataDir = path.join(__dirname, '.tmp-legal-symlink');
+      const dataDir = makeDataDir();
       const secret = path.join(dataDir, 'secret.env');
       fs.mkdirSync(path.join(dataDir, 'legal'), { recursive: true });
       fs.writeFileSync(secret, 'JWT_SECRET=supersecret');
@@ -348,7 +379,7 @@ describe('legal pages', () => {
     it('removes a stale policy left by an earlier configured boot', async () => {
       fs.writeFileSync(PRIVACY_OUTPUT, '<html>previous operator</html>');
       const { createServer } = await importServer();
-      createServer({ dataDir: path.join(__dirname, '.tmp-legal-none') });
+      createServer({ dataDir: makeDataDir() });
 
       expect(fs.existsSync(PRIVACY_OUTPUT)).toBe(false);
     });

@@ -24,9 +24,10 @@ const DEFAULT_STORAGE_QUOTA_BYTES = 100 * 1024 * 1024;
  *
  * A self-hoster running this on their own disk has no reason to inherit our hosted
  * service's 100 MB budget, and until this existed the only way to change it was an
- * `UPDATE users SET storage_quota_bytes` against Postgres. Existing accounts keep the
- * value stored on their row — this sets what new rows get, and the fallback for rows
- * where the column is null.
+ * `UPDATE users SET storage_quota_bytes` against Postgres. This sets what NEW rows get;
+ * existing accounts keep the value already stored on their row, so raising it does not
+ * retroactively widen anyone's quota. The column is NOT NULL (schema.prisma), so the `??`
+ * fallbacks at the read sites fire only when the user row itself is missing.
  */
 export const getDefaultStorageQuotaBytes = (): number =>
   parsePositiveIntegerEnv(

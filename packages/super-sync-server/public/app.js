@@ -471,8 +471,7 @@ async function loginWithPasskey() {
  * nothing to consent to: return undefined and omit the field from the request entirely.
  */
 function readTermsAccepted() {
-  const checkbox = document.getElementById('register-terms');
-  return checkbox ? checkbox.checked : undefined;
+  return document.getElementById('register-terms')?.checked;
 }
 
 async function registerWithPasskey() {
@@ -497,9 +496,9 @@ async function registerWithPasskey() {
     const optionsRes = await fetch(`${API_BASE}/register/passkey/options`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(
-        termsAccepted === undefined ? { email } : { email, termsAccepted },
-      ),
+      // JSON.stringify omits undefined-valued properties, so an instance with no legal
+      // pages simply sends { email }.
+      body: JSON.stringify({ email, termsAccepted }),
     });
 
     if (!optionsRes.ok) {
@@ -583,9 +582,9 @@ async function registerWithMagicLink() {
     const res = await fetch(`${API_BASE}/register/magic-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(
-        termsAccepted === undefined ? { email } : { email, termsAccepted },
-      ),
+      // JSON.stringify omits undefined-valued properties, so an instance with no legal
+      // pages simply sends { email }.
+      body: JSON.stringify({ email, termsAccepted }),
     });
 
     const data = await res.json();
