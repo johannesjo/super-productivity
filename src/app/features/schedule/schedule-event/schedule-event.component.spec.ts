@@ -1,5 +1,5 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { TranslateModule } from '@ngx-translate/core';
@@ -197,6 +197,36 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
         matDialog.open.calls.reset();
       }
     });
+
+    // The spec above calls clickHandler() directly, so it cannot see the host
+    // '(click)' binding disappearing. This one goes through a real DOM event.
+    it('opens the dialog via the host click binding, not just the method', () => {
+      const repeatCfg = { id: 'repeat_cfg_with_underscores' } as TaskRepeatCfg;
+      const matDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+      fixture.componentRef.setInput('event', {
+        id: 'repeat_cfg_with_underscores_not-a-date',
+        type: SVEType.RepeatProjectionSplitContinuedLast,
+        style: '',
+        startHours: 10,
+        timeLeftInHours: 1,
+        plannedForDay: '2026-07-30',
+        sourceOccurrenceDate: '2026-07-29',
+        data: repeatCfg,
+      } as ScheduleEvent);
+      fixture.detectChanges();
+      matDialog.open.calls.reset();
+
+      (fixture.nativeElement as HTMLElement).dispatchEvent(
+        new MouseEvent('click', { bubbles: true }),
+      );
+
+      expect(matDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({ repeatCfg, targetDate: '2026-07-29' }),
+        }),
+      );
+    });
   });
 
   describe('resize handle', () => {
@@ -320,5 +350,86 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
       const c = await setupWith24h(false);
       expect(c.scheduledClockStr()).toBe('2:00');
     });
+  });
+});
+
+// Mirrors schedule-week.component.ts, which sets '[class.is-not-dragging]' on an
+// ancestor -- without it the :host-context() guard never matches and every
+// cursor below would read 'auto', making the assertions meaningless.
+@Component({
+  imports: [ScheduleEventComponent],
+  template: `<div class="is-not-dragging">
+    <schedule-event [event]="event"></schedule-event>
+  </div>`,
+})
+class AffordanceHostComponent {
+  event!: ScheduleEvent;
+}
+
+describe('ScheduleEventComponent – clickable affordance', () => {
+  const CLICKABLE_REPEAT_TYPES = [
+    SVEType.RepeatProjection,
+    SVEType.RepeatProjectionSplit,
+    SVEType.ScheduledRepeatProjection,
+    SVEType.RepeatProjectionSplitContinued,
+    SVEType.RepeatProjectionSplitContinuedLast,
+  ];
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AffordanceHostComponent, DragDropModule, TranslateModule.forRoot()],
+      providers: [
+        provideMockStore(),
+        { provide: MatDialog, useValue: { open: jasmine.createSpy('open') } },
+        {
+          provide: TaskService,
+          useValue: { setSelectedId: jasmine.createSpy('setSelectedId') },
+        },
+        {
+          provide: CalendarEventActionsService,
+          useValue: {
+            hasEventUrl: () => false,
+            isPluginEvent: () => false,
+            canMoveEvent: () => false,
+          },
+        },
+        { provide: DateTimeFormatService, useValue: { is24HourFormat: () => true } },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  });
+
+  const cursorFor = (type: SVEType): string => {
+    const fixture = TestBed.createComponent(AffordanceHostComponent);
+    fixture.componentInstance.event = {
+      id: 'repeat_cfg_1_2026-07-30_0',
+      type,
+      style: '',
+      startHours: 10,
+      timeLeftInHours: 1,
+      plannedForDay: '2026-07-30',
+      data: { id: 'repeat_cfg_1', title: 'Repeat' },
+    } as ScheduleEvent;
+    fixture.detectChanges();
+    const host = fixture.nativeElement.querySelector('schedule-event') as HTMLElement;
+    return getComputedStyle(host).cursor;
+  };
+
+  // Every type clickHandler() opens the repeat dialog for must look clickable.
+  // The first three already did; the continued pair became clickable in #9314
+  // and read 'auto' until the selector list was extended -- so those three
+  // double as the positive control proving this assertion can fail.
+  it('shows a pointer cursor for every repeat projection the dialog opens for', () => {
+    const cursors = CLICKABLE_REPEAT_TYPES.map((type) => [type, cursorFor(type)]);
+
+    expect(cursors).toEqual(CLICKABLE_REPEAT_TYPES.map((type) => [type, 'pointer']));
+  });
+
+  // LunchBreak is the one type clickHandler() genuinely ignores -- note that
+  // SplitTaskContinued would be a wrong control here, since #9372 made it
+  // select its task. Asserted positively: `not.toBe('pointer')` would pass just
+  // as happily on '' -- a detached element, or styles that never applied.
+  it('leaves the inert lunch break alone', () => {
+    expect(cursorFor(SVEType.LunchBreak)).toBe('auto');
   });
 });
