@@ -845,6 +845,18 @@ const anchorCycleOf = (repeat: ShortSyntaxRepeat): RepeatCycleOption | null => {
   }
 };
 
+// MONDAY_TO_FRIDAY has no weekday to anchor to, but it does exclude two:
+// chrono's forwardDate slide lands on the weekend for "@every weekday 6am"
+// typed on a Friday after 06:00. The occurrence engine skips to Monday off the
+// config's weekday flags (getFirstRepeatOccurrence), so leaving the weekend
+// date in place would only make the add bar advertise a first occurrence the
+// task never gets. Mutates in place, like the roll-forward above.
+const skipExcludedWeekend = (date: Date): void => {
+  while (date.getDay() === 0 || date.getDay() === 6) {
+    date.setDate(date.getDate() + 1);
+  }
+};
+
 // Resolves a matched recurrence phrase into task changes: the parsed repeat
 // plus an optional anchor date/time parsed from what follows the phrase
 // ("@every friday 3pm" → next Friday 15:00), with the consumed syntax stripped
@@ -908,7 +920,9 @@ const applyRepeatSyntax = async (
   // roll-forward below advance a whole period instead, exactly like "@every
   // wednesday 6am". Unanchored schedules (DAILY, MONDAY_TO_FRIDAY) fall through
   // all three checks: every day resp. every workday is an occurrence, so
-  // chrono's slide to tomorrow is already the correct first one.
+  // chrono's slide to tomorrow is already the correct first one — except when it
+  // slides onto a weekend, which the workday preset excludes (see
+  // skipExcludedWeekend below).
   const isTimeOnlyMatch =
     hasTime &&
     !!parsedDateResult &&
@@ -969,9 +983,13 @@ const applyRepeatSyntax = async (
   }
 
   if (parsedDateResult) {
+    const due = parsedDateResult.start.date();
+    if (repeat.type === 'PRESET' && repeat.quickSetting === 'MONDAY_TO_FRIDAY') {
+      skipExcludedWeekend(due);
+    }
     return {
       changes: {
-        dueWithTime: parsedDateResult.start.date().getTime(),
+        dueWithTime: due.getTime(),
         dueDay: null,
         ...(hasTime ? {} : { hasPlannedTime: false }),
       },
