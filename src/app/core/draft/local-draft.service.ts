@@ -161,10 +161,11 @@ export class LocalDraftService {
     content: string;
     baseContent: string;
   }): Promise<void> {
+    let profileId: string;
     try {
-      const profileId = await this._activeProfileId();
-      const profileCount = await this._withRetryOnClose(async (db) => {
-        await db.put(DB_STORE_NAME, {
+      profileId = await this._activeProfileId();
+      await this._withRetryOnClose((db) =>
+        db.put(DB_STORE_NAME, {
           key: this._key(profileId, entityType, entityId),
           entityType,
           entityId,
@@ -172,25 +173,33 @@ export class LocalDraftService {
           content,
           baseContent,
           updatedAt: Date.now(),
-        });
-        // Counts THIS PROFILE only, because that is what the sweep enforces.
-        // ConflictJournalService.record() counts its whole store, but the
-        // journal's cap is global; ours is per profile (see _pruneStaleDrafts).
-        // A global count here would sit permanently above the threshold once two
-        // profiles each hold a normal number of drafts, and every checkpoint
-        // would then fire a full sweep that deletes nothing.
-        return db.count(DB_STORE_NAME, this._profileKeyRange(profileId));
-      });
-      // Retention used to be reachable only from app start and the open path, so
-      // a session that kept editing without opening a note grew unbounded.
-      // count() is cheap; the O(n) sweep it gates runs amortized once every
-      // DRAFT_PRUNE_SLACK saves. Fire-and-forget: a checkpoint must never wait
-      // on (or fail with) a sweep.
+        }),
+      );
+    } catch (e) {
+      Log.err('LocalDraftService: Failed to save draft', e);
+      return;
+    }
+    // Retention used to be reachable only from app start and the open path, so a
+    // session that kept editing without opening a note grew unbounded. Kept out
+    // of the checkpoint's own try so a failure here cannot be reported as a
+    // failed save: the text IS written by this point, and all that can be lost
+    // is one chance to sweep.
+    try {
+      // Counts THIS PROFILE only, because that is what the sweep enforces.
+      // ConflictJournalService.record() counts its whole store, but the journal's
+      // cap is global; ours is per profile (see _pruneStaleDrafts). A global
+      // count would sit permanently above the threshold once two profiles each
+      // hold a normal number of drafts, turning an amortized sweep into one per
+      // checkpoint. count() is cheap; the O(n) sweep it gates is not.
+      const profileCount = await this._withRetryOnClose((db) =>
+        db.count(DB_STORE_NAME, this._profileKeyRange(profileId)),
+      );
+      // Fire-and-forget: a checkpoint must never wait on (or fail with) a sweep.
       if (profileCount > DRAFT_MAX_ENTRIES + DRAFT_PRUNE_SLACK) {
         void this._pruneStaleDraftsOnce();
       }
     } catch (e) {
-      Log.err('LocalDraftService: Failed to save draft', e);
+      Log.err('LocalDraftService: Failed to check the draft retention cap', e);
     }
   }
 
@@ -200,9 +209,9 @@ export class LocalDraftService {
   ): Promise<LocalDraft | undefined | typeof DRAFT_LOAD_ERROR> {
     // Reclaim long-abandoned drafts lazily on the open path (fire-and-forget,
     // coalesced with any in-flight sweep) so they do not accumulate forever.
-    // Age/cap only —
-    // it cannot know whether an entity still exists. It never blocks or fails
-    // this load; it runs in its own transactions, so a draft sitting exactly on
+    // Age/cap only — it cannot know whether an entity still exists. It never
+    // blocks or fails this load; it runs in its own transactions, so a draft
+    // sitting exactly on
     // the retention boundary may or may not still be here by the get() below —
     // either outcome is fine for a draft that old.
     void this._pruneStaleDraftsOnce();
@@ -507,10 +516,14 @@ export class LocalDraftService {
   /**
    * Every key of one profile. Keys are `${profileId}:${entityType}:${entityId}`
    * and a profile id cannot contain the `:` separator, so the prefix range is
-   * exact. `￿` is above every character that can follow the separator.
+   * exact. The upper bound is the highest code unit, written as an escape rather
+   * than literally: U+FFFF is a non-character that editors and text filters can
+   * mangle, and if it silently became an empty string the range would collapse
+   * to a single key, count() would return 0, and the retention sweep would stop
+   * being triggered from the save path without any error.
    */
   private _profileKeyRange(profileId: string): IDBKeyRange {
-    return IDBKeyRange.bound(`${profileId}:`, `${profileId}:￿`);
+    return IDBKeyRange.bound(`${profileId}:`, `${profileId}:\uFFFF`);
   }
 
   private async _ensureDb(): Promise<IDBPDatabase<DraftsDb>> {

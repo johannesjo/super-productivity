@@ -69,20 +69,40 @@ import { isPathSafeToOpen } from '../../../../../electron/shared-with-frontend/i
 const DRAFT_IO_TIMEOUT_MS = 2000;
 
 /**
- * Resolves to `onTimeout` if `promise` has not settled within
- * DRAFT_IO_TIMEOUT_MS. The timer is cleared as soon as the promise settles, so
- * the fast path leaves nothing pending. Rejections are deliberately not
- * swallowed — both draft calls already handle their own errors internally.
+ * Bound on the durability proof. Deliberately far larger than the drafts-DB
+ * budget above: that one races a local get/put, this one waits for the write
+ * queue to drain AND for the op-log lock, which sync legitimately holds for
+ * seconds at a time. Reusing the 2s budget would report ordinary saves as
+ * unproven on a busy or slow device, and every one of those costs a spurious
+ * recovery prompt — the exact thing the marker exists to prevent.
+ *
+ * It still needs a bound: flushThenRunExclusive can take up to five attempts at
+ * a 30s drain plus a lock acquisition, and there is no reason to hold this
+ * closure (and the note content it captures) alive that long. Timing out means
+ * the draft stays recoverable, which is the same safe direction every other
+ * failure here takes.
  */
-const withDraftIoTimeout = <T>(promise: Promise<T>, onTimeout: T): Promise<T> => {
+const DURABILITY_PROOF_TIMEOUT_MS = 15000;
+
+/**
+ * Resolves to `onTimeout` if `promise` has not settled within `ms`. The timer is
+ * cleared as soon as the promise settles, so the fast path leaves nothing
+ * pending. Rejections are deliberately not swallowed — every caller below
+ * already handles its own errors internally.
+ */
+const withTimeout = <T>(promise: Promise<T>, onTimeout: T, ms: number): Promise<T> => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   return Promise.race([
     promise.finally(() => clearTimeout(timeoutId)),
     new Promise<T>((resolve) => {
-      timeoutId = setTimeout(() => resolve(onTimeout), DRAFT_IO_TIMEOUT_MS);
+      timeoutId = setTimeout(() => resolve(onTimeout), ms);
     }),
   ]);
 };
+
+/** {@link withTimeout} at the drafts-DB budget, which most callers here want. */
+const withDraftIoTimeout = <T>(promise: Promise<T>, onTimeout: T): Promise<T> =>
+  withTimeout(promise, onTimeout, DRAFT_IO_TIMEOUT_MS);
 
 @Component({
   selector: 'note',
@@ -383,9 +403,13 @@ export class NoteComponent implements OnChanges {
             // the edit. Unproven durability leaves the draft fully recoverable;
             // nothing is deleted on either path.
             if (
-              await isDispatchDurable(
-                this._operationWriteFlushService,
-                this._operationCaptureService,
+              await withTimeout(
+                isDispatchDurable(
+                  this._operationWriteFlushService,
+                  this._operationCaptureService,
+                ),
+                false,
+                DURABILITY_PROOF_TIMEOUT_MS,
               )
             ) {
               await withDraftIoTimeout(

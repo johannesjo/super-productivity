@@ -705,7 +705,11 @@ describe('LocalDraftService', () => {
   });
 
   it('does not sweep on a save that is well under the soft cap', async () => {
-    activeProfileId = 'profile-a';
+    // Its own profile id: other tests here seed hundreds of drafts under
+    // `profile-a`, and this store is shared and the spec order randomized, so a
+    // leftover row would push the active profile over the cap and fire a real
+    // sweep — failing this test for a reason that has nothing to do with it.
+    activeProfileId = `under-cap-${uniqueId()}`;
     const pruneSpy = spyOn(service as any, '_pruneStaleDrafts').and.callThrough();
 
     for (let i = 0; i < 5; i++) {
@@ -733,15 +737,19 @@ describe('LocalDraftService', () => {
     // above the threshold once two profiles each hold a normal number of
     // drafts, turning "amortized every DRAFT_PRUNE_SLACK saves" into "a full
     // sweep on every keystroke checkpoint" -> red.
-    activeProfileId = 'profile-b';
+    // Both profiles get ids of their own: this store is shared across the specs
+    // here and the order is randomized, so reusing `profile-a` would let another
+    // test's leftovers decide the outcome.
+    const crowdedProfile = `crowded-${uniqueId()}`;
+    const quietProfile = `quiet-${uniqueId()}`;
     await (service as any)._withRetryOnClose(async (db: any) => {
       for (let i = 0; i < DRAFT_MAX_ENTRIES + DRAFT_PRUNE_SLACK + 1; i++) {
         const id = uniqueId();
         await db.put('drafts', {
-          key: `profile-b:NOTE:${id}`,
+          key: `${crowdedProfile}:NOTE:${id}`,
           entityType: 'NOTE',
           entityId: id,
-          profileId: 'profile-b',
+          profileId: crowdedProfile,
           content: `b${i}`,
           baseContent: 'base',
           updatedAt: Date.now(),
@@ -749,12 +757,12 @@ describe('LocalDraftService', () => {
       }
     });
 
-    activeProfileId = 'profile-a';
+    activeProfileId = quietProfile;
     const pruneSpy = spyOn(service as any, '_pruneStaleDrafts').and.callThrough();
     await service.saveDraft({
       entityType: 'NOTE',
       entityId: uniqueId(),
-      content: 'the only draft profile-a has',
+      content: 'the only draft this profile has',
       baseContent: 'base',
     });
     for (let i = 0; i < 5; i++) {

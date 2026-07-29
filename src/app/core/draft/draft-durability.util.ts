@@ -29,6 +29,10 @@ import { Log } from '../log';
  * Deliberately its own file: the draft lifecycle needs one fact from the op log,
  * and keeping the dependency here means LocalDraftService itself stays free of
  * the core -> sync edge it already goes out of its way to avoid.
+ *
+ * NEVER call this while holding LOCK_NAMES.OPERATION_LOG: flushThenRunExclusive
+ * acquires that same non-reentrant lock, so a caller already inside it would
+ * deadlock until the acquisition times out.
  */
 export const isDispatchDurable = async (
   writeFlush: OperationWriteFlushService,
