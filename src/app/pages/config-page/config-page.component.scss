@@ -18,6 +18,21 @@
     display: block;
     max-width: var(--component-max-width);
     margin: 0 auto var(--s2);
+
+    // Sit back until reached for, so the tab strip below keeps its role as the
+    // page's headings — at full strength this box outweighs them.
+    //
+    // Deliberate tradeoff: the label ships at 4.52:1, i.e. 0.02 above WCAG AA,
+    // so dimming at all drops it below (2.87:1 here). Full contrast returns on
+    // hover/focus. Raise to 0.8 to stay above the 3:1 large-text/UI floor, or
+    // darken the label itself to buy headroom for a deeper dim.
+    opacity: 0.75;
+    transition: opacity var(--transition-fast);
+
+    &:hover,
+    &:focus-within {
+      opacity: 1;
+    }
   }
 
   .settings-tabs {
