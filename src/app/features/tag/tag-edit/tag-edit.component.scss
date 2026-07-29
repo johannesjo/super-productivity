@@ -30,8 +30,9 @@
       border-bottom-color: var(--extra-border-color);
     }
 
-    // MDC hides the placeholder by default unless a mat-form-field adds its
-    // "no-label" modifier class, which this bare chip input never gets.
+    // Material only sets opacity: 1 on .mat-mdc-chip-input placeholders inside
+    // a .mat-mdc-form-field ancestor; this bare chip input isn't wrapped in one,
+    // so it never gets that rule and falls back to the browser's low-contrast default.
     &::placeholder {
       opacity: 1 !important;
     }
