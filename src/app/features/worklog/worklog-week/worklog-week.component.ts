@@ -69,7 +69,6 @@ export class WorklogWeekComponent {
       restoreFocus: true,
       panelClass: 'big',
       data: {
-        isWorklogExport: true,
         rangeStart,
         rangeEnd,
       },

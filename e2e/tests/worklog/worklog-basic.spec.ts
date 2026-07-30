@@ -127,12 +127,9 @@ test.describe('Worklog', () => {
     const rows = csv.replace(/^\uFEFF/, '').split(/\r?\n/);
     expect(rows[0]).toBe('Date;Start;End;Worked;Titles');
     const csvRow = rows.find((row) => row.includes('0:20'));
-    expect(csvRow).toMatch(/^\d{4}-\d{2}-\d{2}; - ; - ;0:20;"/);
-    const columns = csvRow
-      ?.match(/(?:^|;)(?:"(?:[^"]|"")*"|[^;]*)/g)
-      .map((column) => column.replace(/^;/, ''));
-    expect(columns).toHaveLength(5);
-    expect(columns?.[4]).toBe(`"${taskName}"`);
+    expect(csvRow?.replace(/^\d{4}-\d{2}-\d{2}/, 'DATE')).toBe(
+      `DATE; - ; - ;0:20;"${taskName}"`,
+    );
   });
 
   test('should navigate to worklog from side menu', async ({ page, workViewPage }) => {
