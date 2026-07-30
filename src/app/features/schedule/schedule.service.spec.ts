@@ -87,6 +87,22 @@ describe('ScheduleService', () => {
       const lastDay = new Date(result[4]);
       expect(lastDay.getMonth()).toBe(1); // February
     });
+
+    it('should start on the logical today between midnight and the start-of-next-day offset', () => {
+      // 00:30 on Jan 15 with a 04:00 start-of-next-day is logically still Jan
+      // 14; a window anchored on the raw clock would drop (logical) today's
+      // column right after midnight while todayStr() still names it.
+      jasmine.clock().install();
+      try {
+        jasmine.clock().mockDate(new Date(2026, 0, 15, 0, 30));
+        dateService.setStartOfNextDayDiff('04:00');
+        const result = service.getDaysToShow(3, null);
+        expect(result[0]).toBe('2026-01-14');
+        expect(result[1]).toBe('2026-01-15');
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
   });
 
   describe('getMonthDaysToShow', () => {
@@ -95,6 +111,21 @@ describe('ScheduleService', () => {
       const firstDayOfWeek = 1; // Monday
       const result = service.getMonthDaysToShow(numberOfWeeks, firstDayOfWeek);
       expect(result.length).toBe(numberOfWeeks * 7);
+    });
+
+    it('should show the logical month between midnight and the start-of-next-day offset', () => {
+      // 00:30 on Feb 1 with a 04:00 start-of-next-day is logically still Jan
+      // 31, so the grid must be January's (starting Mon Dec 29), not
+      // February's (starting Mon Jan 26).
+      jasmine.clock().install();
+      try {
+        jasmine.clock().mockDate(new Date(2026, 1, 1, 0, 30));
+        dateService.setStartOfNextDayDiff('04:00');
+        const result = service.getMonthDaysToShow(5, 1, null);
+        expect(result[0]).toBe('2025-12-29');
+      } finally {
+        jasmine.clock().uninstall();
+      }
     });
 
     it('should start with the configured first day of week when firstDayOfWeek is Monday (1)', () => {

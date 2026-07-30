@@ -153,7 +153,12 @@ export class ScheduleService {
   }
 
   getDaysToShow(nrOfDaysToShow: number, referenceDate: Date | null = null): string[] {
-    const today = referenceDate ? referenceDate.getTime() : new Date().getTime();
+    // Default anchor is the logical day, not the raw clock: between calendar
+    // midnight and the configured start-of-next-day the window must still
+    // begin at (logical) today, which todayStr() elsewhere keeps naming.
+    const today = referenceDate
+      ? referenceDate.getTime()
+      : this._dateService.getLogicalTodayDate().getTime();
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {
       // eslint-disable-next-line no-mixed-operators
@@ -167,7 +172,8 @@ export class ScheduleService {
     firstDayOfWeek: number = 0,
     referenceDate: Date | null = null,
   ): string[] {
-    const today = referenceDate || new Date();
+    // Same logical-day anchoring as getDaysToShow above.
+    const today = referenceDate || this._dateService.getLogicalTodayDate();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // Calculate the first day to show based on firstDayOfWeek setting
