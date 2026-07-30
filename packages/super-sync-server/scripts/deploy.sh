@@ -396,9 +396,17 @@ if [ "${SUPERSYNC_INSTALL_REPO_TERMS:-false}" = "true" ]; then
     fi
     echo ""
     echo "==> Installing legal/terms.html from the checkout into the data volume..."
+    # ${DATA_DIR:-} expands INSIDE the container, honoring an operator override.
+    # cp -f unlinks a destination left root-owned by an earlier manual `docker cp`,
+    # which uid 1001 could otherwise not open for write.
     docker compose $COMPOSE_FILES run --rm --no-deps --interactive=false -T \
         -v "$SERVER_DIR/legal:/repo-legal:ro" \
-        supersync sh -ec 'mkdir -p /app/data/legal && cp /repo-legal/terms.html /app/data/legal/terms.html'
+        supersync sh -ec 'mkdir -p "${DATA_DIR:-/app/data}/legal" && cp -f /repo-legal/terms.html "${DATA_DIR:-/app/data}/legal/terms.html"'
+    # The server publishes the file only at boot, so a deploy that does not recreate
+    # the app container (same image, same config) leaves /terms.html unchanged.
+    echo "    Installed. Takes effect when the supersync container is next recreated;"
+    echo "    if this deploy does not replace it, run:"
+    echo "      docker compose $COMPOSE_FILES up -d --no-deps --force-recreate supersync"
 fi
 
 # The migration above already ran while the old app was still serving. Disable
