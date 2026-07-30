@@ -90,6 +90,7 @@ import {
 } from './conflict-disjoint-merge.util';
 import { NOISE_FIELDS } from './conflict-journal.model';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
+import { areCommutingSectionOperations } from './section-conflict-commutativity.util';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -3886,6 +3887,18 @@ export class ConflictResolutionService {
 
     // CONCURRENT = true conflict
     if (vcComparison === VectorClockComparison.CONCURRENT) {
+      // The no-pending side already applies these exact crossings as-is because
+      // generic multi-entity LWW cannot split them safely. Applying every pair
+      // is lossless and commutative, so the pending side must do the same to
+      // converge. Any differently shaped local op keeps the conflict path.
+      if (
+        ctx.localOpsForEntity.every((localOp) =>
+          areCommutingSectionOperations(remoteOp, localOp),
+        )
+      ) {
+        return { isSupersededOrDuplicate: false, conflict: null };
+      }
+
       // Task-time sync operations are positive deltas, so two concurrent timer
       // batches commute. Sending them through entity-level LWW would discard one
       // user's tracked time even though both can be applied safely.

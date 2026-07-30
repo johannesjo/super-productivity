@@ -16,6 +16,17 @@ const allMigrationSql = (): string =>
     .join('\n');
 
 describe('performance migrations', () => {
+  it('adds the durable state-replacement boundary without a blocking backfill', () => {
+    const migrationSql = readMigration('20260727000000_add_state_replacement_seq');
+
+    expect(migrationSql).toMatch(
+      /ALTER TABLE "user_sync_state"\s+ADD COLUMN "latest_state_replacement_seq" INTEGER/i,
+    );
+    expect(migrationSql).not.toMatch(/\bUPDATE\b/i);
+    expect(migrationSql).not.toMatch(/\bDROP\s+TABLE\b/i);
+    expect(migrationSql).not.toMatch(/\bBEGIN\b|\bCOMMIT\b/i);
+  });
+
   it('adds the entity sequence index without a blocking or destructive migration', () => {
     const migrationSql = readFileSync(
       join(

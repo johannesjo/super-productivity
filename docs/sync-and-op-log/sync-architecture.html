@@ -1456,7 +1456,8 @@
               state; <a href="#restart">restart recovery</a> owns the guarded shortcut and
               fallback rules. Effects inject <code>LOCAL_ACTIONS</code> so replay cannot
               repeat UI side effects or emit phantom operations. Selector-driven mutating
-              effects additionally need the sync-window guard.
+              effects additionally need a sync-window guard chosen by the source's retry
+              semantics.
             </p>
           </div>
         </div>
@@ -1486,11 +1487,23 @@
                   </td>
                 </tr>
                 <tr>
-                  <td>A selector-driven mutating effect</td>
+                  <td>A repeating/level selector effect</td>
                   <td>
-                    Prefer an action; otherwise use <code>skipDuringSyncWindow()</code>
+                    Prefer an action; otherwise drop unsafe-window emissions with
+                    <code>skipDuringSyncWindow()</code>
                   </td>
-                  <td>Selector emissions bypass the local-action boundary.</td>
+                  <td>The next equivalent emission safely retries the work.</td>
+                </tr>
+                <tr>
+                  <td>A sparse/edge-triggered selector effect</td>
+                  <td>
+                    Capture the edge and its required state, then defer it with
+                    <code>waitForSyncWindow()</code>
+                  </td>
+                  <td>
+                    A dropped <code>distinctUntilChanged()</code> edge may never re-emit;
+                    the wait is fail-open after 30 seconds.
+                  </td>
                 </tr>
                 <tr>
                   <td>One replay-atomic transition changing several entities</td>
@@ -1508,6 +1521,20 @@
               </tbody>
             </table>
             <p>
+              Choose drop versus defer from the source, not merely from the fact that it
+              is a selector. Before waiting, map or combine the edge with all state
+              required to handle it; after the window closes, process that captured
+              snapshot instead of trying to reconstruct an already-passed edge from live
+              state.
+            </p>
+            <p>
+              <strong><code>waitForSyncWindow()</code> is not a hard lock.</strong> After
+              30 seconds it logs a timeout and emits even if the sync window remains open.
+              Use it to preserve recoverable sparse triggers during ordinary short syncs.
+              If a mutation must never overlap replay, prefer a
+              <code>LOCAL_ACTIONS</code>-driven effect or a fail-closed boundary.
+            </p>
+            <p>
               Canonical contract:
               <a href="./contributor-sync-model.md">The Contributor Sync Model</a>.
               Executable owners:
@@ -1517,7 +1544,10 @@
               <a href="../../src/app/op-log/capture/operation-log.effects.ts"
                 >persistence effect</a
               >, and
-              <a href="../../src/app/util/local-actions.token.ts">LOCAL_ACTIONS</a>.
+              <a href="../../src/app/util/local-actions.token.ts">LOCAL_ACTIONS</a>,
+              <a href="../../src/app/util/wait-for-sync-window.operator.ts"
+                >wait-for-sync-window operator</a
+              >.
             </p>
           </div>
         </details>
@@ -1745,8 +1775,8 @@
             <p>
               File providers can optionally encrypt each whole file envelope. That choice
               is stored independently in each provider's private configuration and does
-              not inherit SuperSync's encryption setting. See the focused
-              <a href="./supersync-scenarios.md">provider-switch scenario I9</a>
+              not inherit SuperSync's encryption setting. See the
+              <a href="./supersync-scenarios.md">provider/account-switch test index</a>
               and its executable owner,
               <a href="../../src/app/op-log/sync-providers/wrapped-provider.service.ts"
                 ><code>WrappedProviderService</code></a

@@ -150,6 +150,10 @@ from PostgreSQL RepeatableRead snapshot isolation alone.
 - `REPAIR` uploads persist `repairBaseServerSeq` on the operation row. The HTTP
   handler rejects an obviously stale base before quota cleanup, and the upload
   transaction repeats the check under `SELECT ... FOR UPDATE` before insertion
+- Regular uploads carrying `lastKnownServerSeq` use the same per-user row lock
+  to reject a batch behind the latest `SYNC_IMPORT` or `BACKUP_IMPORT` before
+  insertion. The durable replacement marker is reconciled lazily from retained
+  operations for rows created before the marker existed.
 - Markerless legacy repairs are compatibility records, not causal boundaries:
   they cannot drive download fast-forward, snapshot trust, history pruning, or
   server-generated restore points; snapshot replay across one fails closed
@@ -172,6 +176,7 @@ from PostgreSQL RepeatableRead snapshot isolation alone.
 - Changing server sequence assignment
 - Changing transaction isolation for upload operations
 - Changing repair base-cursor validation or full-state history pruning
+- Changing the state-replacement upload fence
 - Introducing multi-writer or multi-region upload processing
 
 ---

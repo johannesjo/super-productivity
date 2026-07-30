@@ -7,7 +7,7 @@ import {
 } from '../task-repeat-cfg.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 
-const _buildWeeklyForDay = (date: Date): Partial<TaskRepeatCfg> => {
+export const buildWeeklyForDay = (date: Date): Partial<TaskRepeatCfg> => {
   const weekdayStr = TASK_REPEAT_WEEKDAY_MAP[date.getDay()];
   return {
     repeatCycle: 'WEEKLY',
@@ -26,7 +26,7 @@ const _buildWeeklyForDay = (date: Date): Partial<TaskRepeatCfg> => {
 // Switching between monthly presets must clear every monthly anchor —
 // anchor presence is the discriminator, so a stale Nth-weekday or last-day
 // field would silently take effect.
-const MONTHLY_ANCHOR_RESET: Partial<TaskRepeatCfg> = {
+export const MONTHLY_ANCHOR_RESET: Partial<TaskRepeatCfg> = {
   monthlyWeekOfMonth: undefined,
   monthlyWeekday: undefined,
   monthlyLastDay: undefined,
@@ -53,7 +53,7 @@ export const getQuickSettingUpdates = (
     }
 
     case 'WEEKLY_CURRENT_WEEKDAY': {
-      return _buildWeeklyForDay(referenceDate || today);
+      return buildWeeklyForDay(referenceDate || today);
     }
 
     case 'MONDAY_TO_FRIDAY': {

@@ -20,6 +20,8 @@ const BACKUP_DIR_WINSTORE = BACKUP_DIR.replace(
 );
 
 let existingPaths;
+let handleHandlers;
+let onHandlers;
 
 const resetModule = () => {
   delete require.cache[backupModulePath];
@@ -30,7 +32,10 @@ const installMocks = () => {
     if (request === 'electron') {
       return {
         app: { getPath: () => USER_DATA },
-        ipcMain: { on: () => {}, handle: () => {} },
+        ipcMain: {
+          on: (channel, handler) => onHandlers.set(channel, handler),
+          handle: (channel, handler) => handleHandlers.set(channel, handler),
+        },
       };
     }
 
@@ -61,6 +66,8 @@ const loadBackupModule = () => {
 
 test.beforeEach(() => {
   existingPaths = new Set();
+  handleHandlers = new Map();
+  onHandlers = new Map();
   installMocks();
 });
 
@@ -75,6 +82,15 @@ test.afterEach(() => {
 test('derives a distinct Windows Store path from the userData path', () => {
   assert.notEqual(BACKUP_DIR_WINSTORE, BACKUP_DIR);
   assert.match(BACKUP_DIR_WINSTORE, /LocalCache\\Roaming/);
+});
+
+test('registers backup writes as a completion-aware IPC handler', () => {
+  const { initBackupAdapter } = loadBackupModule();
+
+  initBackupAdapter();
+
+  assert.equal(handleHandlers.has('BACKUP'), true);
+  assert.equal(onHandlers.has('BACKUP'), false);
 });
 
 test('non-Store builds always get the real backup dir', () => {

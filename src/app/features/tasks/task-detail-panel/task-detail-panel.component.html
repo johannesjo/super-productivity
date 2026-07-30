@@ -240,7 +240,7 @@
     <ng-container panel-header>
       @if (isMarkdownChecklist()) {
         <mat-icon>checklist</mat-icon>
-        Checklist
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.CHECKLIST | translate }}</span>
         <!-- -->
       } @else if (task().notes) {
         <mat-icon>chat</mat-icon>
@@ -364,7 +364,8 @@
       role="button"
       tabindex="0"
     >
-      Created on {{ task().created | localeDate: 'short' : undefined : locale() }}
+      {{ T.F.TASK.ADDITIONAL_INFO.CREATED_ON | translate }}
+      {{ task().created | localeDate: 'short' : undefined : locale() }}
     </div>
     @if (task().doneOn) {
       <div
@@ -376,7 +377,8 @@
         role="button"
         tabindex="0"
       >
-        Completed on {{ task().doneOn | localeDate: 'short' : undefined : locale() }}
+        {{ T.F.TASK.ADDITIONAL_INFO.COMPLETED_ON | translate }}
+        {{ task().doneOn | localeDate: 'short' : undefined : locale() }}
       </div>
     }
   </div>

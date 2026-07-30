@@ -2,8 +2,8 @@
 // That program sets `types: []`, so it has no ambient Node globals of its own and
 // relied on the now-removed `import { IpcRendererEvent } from 'electron'` here to
 // transitively supply them. Several frontend/shared modules still probe Node globals
-// guarded at runtime (get-dist-channel's `process`/`NodeJS`, generate-client-id's
-// `process`, create-task-placeholder's `NodeJS.Timeout`, user-profile's `require`),
+// guarded at runtime (get-dist-channel's `process`/`NodeJS`,
+// create-task-placeholder's `NodeJS.Timeout`, user-profile's `require`),
 // so re-expose them explicitly instead of by accident.
 /// <reference types="node" />
 import {
@@ -250,7 +250,7 @@ export interface ElectronAPI {
   backupAppData(args: {
     data: AppDataCompleteLegacy | AppDataComplete;
     maxBackupFiles?: number | null;
-  }): void;
+  }): Promise<void>;
 
   updateCurrentTask(
     task: Task | null,
@@ -280,4 +280,6 @@ export interface ElectronAPI {
 
   onLocalRestApiRequest(listener: (payload: LocalRestApiRequestPayload) => void): void;
   sendLocalRestApiResponse(payload: LocalRestApiResponsePayload): void;
+  getLocalRestApiToken(): Promise<string>;
+  regenerateLocalRestApiToken(): Promise<string>;
 }

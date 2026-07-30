@@ -134,7 +134,32 @@ The in-app **Restore from History** handles this for unencrypted accounts. It
 does **not** work for E2E-encrypted accounts: the server cannot decrypt the op
 payloads, so `generateSnapshotAtSeq` throws `EncryptedOpsNotSupportedError`.
 
-`scripts/recover-user.ts` fills that gap. It replays the user's operation log up
+### Diagnosing an encrypted download failure
+
+When an encrypted account fails to sync with a decryption error, do not assume
+the passphrase is globally wrong: one corrupt operation rejects its whole
+download batch with the same user-facing error. The client classifies the
+failing batch itself — ask the affected user for the
+`Encrypted operation batch could not be processed` entry from the exported
+Logs (**Settings → Logs**, an ordinary build). It contains only safe metadata:
+the failing operations' `serverSeq`/`opId`/failure stage/`errorName`,
+decrypted and parsed counts, and `passwordEvidence`. It never contains the
+passphrase, token, ciphertext, or decrypted content.
+
+Interpret `passwordEvidence` conservatively. `confirmed-for-some-operations`
+means the key decrypted at least one operation in that run, which rules out a
+globally wrong passphrase and points at the listed operations.
+`no-operation-decrypted` is **inconclusive**: a wrong passphrase, a wholly
+corrupt or differently keyed range, and a device that could not run
+decryption at all produce the same shape — read each failure's `errorName`
+case by case. `OperationError` is an AES-GCM authentication failure (wrong
+key or corrupt data), and devices without WebCrypto report the same
+authentication failure as a bare `Error` (fallback crypto).
+`InvalidCiphertextError`/`InvalidCharacterError` mean truncated or mangled
+ciphertext, and `WebCryptoNotAvailableError` is an environment failure —
+neither is password evidence.
+
+`scripts/recover-user.ts` fills the encrypted-recovery gap. It replays the user's operation log up
 to a chosen `serverSeq`, decrypting encrypted payloads with the user's
 passphrase, and writes an importable `AppDataComplete` JSON file. It is
 **read-only** on the database.

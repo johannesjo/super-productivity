@@ -11,6 +11,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { DateService } from '../../../core/date/date.service';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { T } from '../../../t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -57,6 +58,7 @@ export class HabitTrackerComponent {
   private _simpleCounterService = inject(SimpleCounterService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _dateService = inject(DateService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _matDialog = inject(MatDialog);
 
   // Exposed so templates can pass the reactive locale to the now-pure
@@ -77,10 +79,13 @@ export class HabitTrackerComponent {
     const weekdayFormatter = isoTextLocale
       ? new Intl.DateTimeFormat(isoTextLocale, { weekday: 'short' })
       : null;
-    const today = new Date();
+    // Day-change dependency, so the window rolls over instead of freezing at first
+    // render (#9072). Also covers sleep and tab throttling, via #5464.
+    this._globalTrackingIntervalService.todayDateStr();
+    const today = this._dateService.getLogicalTodayDate();
     const offset = this.dayOffset();
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(today.getDate() - i + offset);
       days.push({
         str: this._dateService.todayStr(d),

@@ -106,7 +106,7 @@ export const TaskSharedActions = createActionGroup({
     // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
     // Note: Full task payload is required for sync reliability.
     // Remote clients need task data to write to their local archive.
-    // See docs/archive-operation-redesign.md for detailed analysis.
+    // See docs/sync-and-op-log/operation-log-architecture.md for detailed analysis.
     moveToArchive: (taskProps: { tasks: TaskWithSubTasks[] }) => ({
       ...taskProps,
       meta: {
