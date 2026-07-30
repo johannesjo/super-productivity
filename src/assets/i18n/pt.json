@@ -2032,7 +2032,7 @@
         "MONDAY_TO_FRIDAY_AND_TIME": "Seg. a Sex, {{timeStr}}",
         "MONTHLY_CURRENT_DATE": "Mensalmente no dia {{dateDayStr}}",
         "MONTHLY_CURRENT_DATE_AND_TIME": "Mensalmente no dia {{dateDayStr}}, {{timeStr}}",
-        "WEEKLY_CURRENT_WEEKDAY": "Semanalmente {{weekdayStr}",
+        "WEEKLY_CURRENT_WEEKDAY": "Semanalmente {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Semanalmente em {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Anualmente em {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Anualmente no {{dayAndMonthStr}}, {{timeStr}}",

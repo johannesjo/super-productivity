@@ -432,7 +432,7 @@
         "T_TITLE": "Titel",
         "T_TO_BE_SUBMITTED": "Noch einzureichen",
         "TITLE": "Zeit für Issues an GitLab senden",
-        "TOTAL_MSG": "Du wirst <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
+        "TOTAL_MSG": "Du wirst <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}}</em> verschiedene Aufgaben übermitteln."
       },
       "FORM": {
         "FILTER": "Benutzerdefinierte Filter",

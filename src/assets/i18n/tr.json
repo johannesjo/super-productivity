@@ -429,7 +429,7 @@
         "T_TITLE": "Başlık",
         "T_TO_BE_SUBMITTED": "Gönderilecek",
         "TITLE": "Sorunlara Harcanan Zamanı GitLab'a Gönderin",
-        "TOTAL_MSG": "Bugünkü toplam <em>{{totalTimeToSubmit}</em> çalışma süresini <em>{{nrOfTasksToSubmit}</em> farklı sorunlara göndereceksiniz."
+        "TOTAL_MSG": "Bugünkü toplam <em>{{totalTimeToSubmit}}</em> çalışma süresini <em>{{nrOfTasksToSubmit}}</em> farklı sorunlara göndereceksiniz."
       },
       "FORM": {
         "FILTER": "Özel Filtre",
@@ -1980,7 +1980,7 @@
         "DELETED": "\"{{title}}\" görevi silindi",
         "FOUND_MOVE_FROM_BACKLOG": " <strong>{{title}}</strong> görevini bugünkü görev listesine taşıdı",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 'den geçerli listeye <strong>{{title}}</strong> görevi eklendi",
-        "FOUND_RESTORE_FROM_ARCHIVE": "Arşivdeki sorunla ilgili <strong>{{title}</strong> görevi geri yüklendi",
+        "FOUND_RESTORE_FROM_ARCHIVE": "Arşivdeki sorunla ilgili <strong>{{title}}</strong> görevi geri yüklendi",
         "GO_TO_TASK": "Göreve Git",
         "MOVED_TO_ARCHIVE": " {{nr}} görevler arşive taşındı",
         "MOVED_TO_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",

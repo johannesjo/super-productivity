@@ -43,6 +43,52 @@ const compareTranslationKeys = (reference, translation) => {
   return compareKeyLists(referenceKeys, new Set(referenceKeys), translationKeys);
 };
 
+// Same pattern ngx-translate interpolates with (names may be dotted).
+const PLACEHOLDER_PATTERN = /\{\{\s*([\w.]+)\s*\}\}/gu;
+
+const collectPlaceholders = (value) =>
+  typeof value === 'string'
+    ? [...value.matchAll(PLACEHOLDER_PATTERN)].map((match) => match[1]).sort()
+    : [];
+
+// Brace syntax that cannot interpolate cleanly: a run of 3+ braces
+// ("{{{name}}") or unbalanced "{{"/"}}" pairs ("{{name}"). Placeholder-set
+// drift is informational (the parameter just goes missing from the text), but
+// broken braces render literally to the user, so they fail the run the same
+// way malformed JSON does.
+const findBraceDefect = (value) => {
+  if (typeof value !== 'string') return null;
+  if (/\{{3,}|\}{3,}/.test(value)) return 'brace run';
+  const opens = (value.match(/\{\{/g) ?? []).length;
+  const closes = (value.match(/\}\}/g) ?? []).length;
+  return opens === closes ? null : 'unbalanced braces';
+};
+
+const getValueAtPath = (object, dottedKey) =>
+  dottedKey.split('.').reduce((current, key) => current?.[key], object);
+
+// Only keys present in both files are compared: a missing key falls back to
+// the English value (already reported as drift), and an unnecessary key is
+// never rendered.
+const comparePlaceholders = (reference, translation, sharedKeys) => {
+  const placeholderMismatches = [];
+  const malformedKeys = [];
+
+  for (const key of sharedKeys) {
+    const translationValue = getValueAtPath(translation, key);
+    const defect = findBraceDefect(translationValue);
+    if (defect) malformedKeys.push(`${key} (${defect})`);
+
+    const referencePlaceholders = collectPlaceholders(getValueAtPath(reference, key));
+    const translationPlaceholders = collectPlaceholders(translationValue);
+    if (referencePlaceholders.join('\n') !== translationPlaceholders.join('\n')) {
+      placeholderMismatches.push(key);
+    }
+  }
+
+  return { placeholderMismatches, malformedKeys };
+};
+
 const readTranslationFile = (directory, file) => {
   const filePath = join(directory, file);
   const contents = readFileSync(filePath, 'utf8');
@@ -66,14 +112,17 @@ const inspectTranslationDirectory = (directory) => {
     )
     .map((entry) => entry.name)
     .sort()
-    .map((file) => ({
-      file,
-      ...compareKeyLists(
-        referenceKeys,
-        referenceKeySet,
-        collectLeafKeys(readTranslationFile(directory, file)),
-      ),
-    }));
+    .map((file) => {
+      const translation = readTranslationFile(directory, file);
+      const translationKeys = collectLeafKeys(translation);
+      const sharedKeys = translationKeys.filter((key) => referenceKeySet.has(key));
+
+      return {
+        file,
+        ...compareKeyLists(referenceKeys, referenceKeySet, translationKeys),
+        ...comparePlaceholders(reference, translation, sharedKeys),
+      };
+    });
 
   return {
     referenceKeyCount: referenceKeys.length,
@@ -83,6 +132,11 @@ const inspectTranslationDirectory = (directory) => {
       (total, file) => total + file.unnecessaryKeys.length,
       0,
     ),
+    totalPlaceholderMismatches: files.reduce(
+      (total, file) => total + file.placeholderMismatches.length,
+      0,
+    ),
+    totalMalformed: files.reduce((total, file) => total + file.malformedKeys.length, 0),
   };
 };
 
@@ -111,26 +165,36 @@ const printReport = (report) => {
   for (const file of report.files) {
     const missing = file.missingKeys.length;
     const unnecessary = file.unnecessaryKeys.length;
+    const mismatched = file.placeholderMismatches.length;
+    const malformed = file.malformedKeys.length;
 
-    if (missing === 0 && unnecessary === 0) {
+    if (missing === 0 && unnecessary === 0 && mismatched === 0 && malformed === 0) {
       console.log(`${formatLogValue(file.file)}: OK`);
       continue;
     }
 
     console.log(
       `${formatLogValue(file.file)}: ${missing} missing${formatExamples(file.missingKeys)}; ` +
-        `${unnecessary} not in en.json${formatExamples(file.unnecessaryKeys)}`,
+        `${unnecessary} not in en.json${formatExamples(file.unnecessaryKeys)}; ` +
+        `${mismatched} placeholder mismatches${formatExamples(file.placeholderMismatches)}; ` +
+        `${malformed} broken braces${formatExamples(file.malformedKeys)}`,
     );
   }
 
   console.log(
     `Checked ${report.files.length} translation files against en.json ` +
       `(${report.referenceKeyCount} keys): ${report.totalMissing} missing, ` +
-      `${report.totalUnnecessary} not in en.json.`,
+      `${report.totalUnnecessary} not in en.json, ` +
+      `${report.totalPlaceholderMismatches} placeholder mismatches, ` +
+      `${report.totalMalformed} broken braces.`,
   );
   console.log(
-    'Key differences are informational; missing translations use the English fallback.',
+    'Key differences and placeholder mismatches are informational; ' +
+      'missing translations use the English fallback.',
   );
+  if (report.totalMalformed > 0) {
+    console.error('Broken placeholder braces render literally to the user; fix them.');
+  }
 };
 
 const printError = (error) => {
@@ -139,7 +203,11 @@ const printError = (error) => {
 
 if (require.main === module) {
   try {
-    printReport(inspectTranslationDirectory(BASE_PATH));
+    const report = inspectTranslationDirectory(BASE_PATH);
+    printReport(report);
+    if (report.totalMalformed > 0) {
+      process.exitCode = 1;
+    }
   } catch (error) {
     printError(error);
     process.exitCode = 1;
@@ -148,7 +216,9 @@ if (require.main === module) {
 
 module.exports = {
   collectLeafKeys,
+  collectPlaceholders,
   compareTranslationKeys,
+  findBraceDefect,
   inspectTranslationDirectory,
   printError,
   printReport,

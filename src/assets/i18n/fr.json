@@ -945,7 +945,7 @@
       },
       "S": {
         "REMOVED_PLAN_DATE": "Date de planification supprimée pour la tâche \"{{taskTitle}}\"",
-        "TASK_ALREADY_PLANNED": "La tâche est déjà plannifiée le {{date}",
+        "TASK_ALREADY_PLANNED": "La tâche est déjà plannifiée le {{date}}",
         "TASK_PLANNED_FOR": "Tâche planifiée pour {date}"
       }
     },
