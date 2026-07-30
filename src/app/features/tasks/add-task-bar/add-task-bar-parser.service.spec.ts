@@ -5,6 +5,8 @@ import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { TaskReminderOptionId } from '../task.model';
+import { findSpringForwardSunday } from '../dst.test-helper';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('AddTaskBarParserService', () => {
   let service: AddTaskBarParserService;
@@ -1672,6 +1674,40 @@ describe('AddTaskBarParserService', () => {
       deadlineTime: null,
       deadlineRemindOption: null,
     };
+
+    it('should publish the typed time when the anchor day springs forward', async () => {
+      // Guards the dueTimeStr passthrough: on a DST spring-forward day the
+      // typed time does not exist, so deriving the time from the dueWithTime
+      // timestamp reads back an hour shifted — and that string becomes the
+      // repeat config's startTime. Only a real transition day can tell the
+      // passthrough and the timestamp read-back apart.
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        // Timezone without a spring-forward transition (UTC, Tokyo).
+        return;
+      }
+      const friday = new Date(gap.sunday);
+      friday.setDate(friday.getDate() - 2);
+      friday.setHours(10, 0, 0, 0);
+      jasmine.clock().install();
+      jasmine.clock().mockDate(friday);
+      try {
+        mockStateService.state.and.returnValue(baseState as any);
+        await service.parseAndUpdateText(
+          `Backup @every sunday ${gap.missingHour}:30am`,
+          cfg,
+          [],
+          [],
+          defaultProject,
+        );
+        expect(mockStateService.updateDate).toHaveBeenCalledWith(
+          getDbDateStr(gap.sunday),
+          `0${gap.missingHour}:30`,
+        );
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
 
     it('should set repeat setting from "@every friday"', async () => {
       mockStateService.state.and.returnValue(baseState as any);

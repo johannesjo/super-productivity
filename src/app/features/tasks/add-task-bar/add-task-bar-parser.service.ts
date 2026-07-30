@@ -195,7 +195,10 @@ export class AddTaskBarParserService {
         if (parseResult.taskChanges.hasPlannedTime !== false) {
           const hours = dueDateObj.getHours().toString().padStart(2, '0');
           const minutes = dueDateObj.getMinutes().toString().padStart(2, '0');
-          const timeStr = `${hours}:${minutes}`;
+          // Prefer the typed wall-clock time: when the resolved day is a DST
+          // spring-forward day the timestamp reads back an hour shifted, and
+          // this string becomes the repeat config's startTime.
+          const timeStr = parseResult.taskChanges.dueTimeStr ?? `${hours}:${minutes}`;
 
           if (timeStr !== '00:00') {
             dueTime = timeStr;

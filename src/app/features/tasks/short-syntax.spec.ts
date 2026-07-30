@@ -16,6 +16,7 @@ import { Project } from '../project/project.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { INBOX_PROJECT } from '../project/project.const';
 import { RepeatQuickSetting } from '../task-repeat-cfg/task-repeat-cfg.model';
+import { findSpringForwardSunday } from './dst.test-helper';
 
 const TASK: TaskCopy = {
   id: 'id',
@@ -2375,37 +2376,6 @@ describe('shortSyntax recurrence', () => {
   ): RepeatQuickSetting | null =>
     r?.repeat?.type === 'PRESET' ? r.repeat.quickSetting : null;
 
-  // The ambient timezone's spring-forward sunday and the hour it skips, derived
-  // rather than hardcoded so the DST case below is exercised in every zone the
-  // suite runs in (Berlin transitions in march, Los Angeles two weeks earlier,
-  // Sydney in october). Returns null where there is no transition.
-  const findSpringForwardSunday = (
-    year: number,
-  ): { sunday: Date; missingHour: number } | null => {
-    const dayMs = 24 * 60 * 60 * 1000;
-    for (let month = 0; month < 12; month++) {
-      for (let day = 1; day <= 31; day++) {
-        const start = new Date(year, month, day, 0, 0, 0, 0);
-        if (start.getDate() !== day || start.getDay() !== 0) {
-          continue;
-        }
-        // A spring-forward day is shorter than 24h.
-        if (
-          new Date(year, month, day + 1, 0, 0, 0, 0).getTime() - start.getTime() >=
-          dayMs
-        ) {
-          continue;
-        }
-        for (let hour = 1; hour < 6; hour++) {
-          if (new Date(year, month, day, hour, 30, 0, 0).getHours() !== hour) {
-            return { sunday: start, missingHour: hour };
-          }
-        }
-      }
-    }
-    return null;
-  };
-
   it('should parse "@every friday" as weekly repeat anchored to next friday', async () => {
     const r = await parse('Water plants @every friday');
     expect(presetOf(r)).toBe('WEEKLY_CURRENT_WEEKDAY');
@@ -2645,6 +2615,45 @@ describe('shortSyntax recurrence', () => {
     expect(due.getDay()).toBe(1);
     expect(due.getHours()).toBe(gap.missingHour);
     expect(due.getMinutes()).toBe(30);
+    expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+  });
+
+  it('should carry the typed time when the anchor day itself springs forward', async () => {
+    // Unlike the weekend skip, an anchor landing ON the transition day cannot
+    // be repaired on the timestamp: the typed time does not exist that day, so
+    // the Date can only hold the shifted hour. The typed wall-clock time must
+    // travel separately (dueTimeStr) or the repeat config's startTime is wrong
+    // for every later occurrence, where the time does exist.
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      // Timezone without a spring-forward transition (UTC, Tokyo).
+      return;
+    }
+    const friday = new Date(gap.sunday);
+    friday.setDate(friday.getDate() - 2);
+    friday.setHours(10, 0);
+    const r = await parse(`Backup @every sunday ${gap.missingHour}:30am`, friday);
+    expect(presetOf(r)).toBe('WEEKLY_CURRENT_WEEKDAY');
+    const due = new Date(r?.taskChanges.dueWithTime as number);
+    expect(due.getDay()).toBe(0);
+    expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+  });
+
+  it('should carry the typed time when the weekly roll lands on the spring-forward sunday', async () => {
+    // Typed on a Sunday after the typed time has passed, the anchor rolls +7
+    // and lands on the transition Sunday, where the typed time does not exist.
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      return;
+    }
+    const prevSunday = new Date(gap.sunday);
+    prevSunday.setDate(prevSunday.getDate() - 7);
+    prevSunday.setHours(15, 0);
+    const r = await parse(`Backup @every sunday ${gap.missingHour}:30am`, prevSunday);
+    const due = new Date(r?.taskChanges.dueWithTime as number);
+    expect(due.getDay()).toBe(0);
+    expect(due.getTime()).toBeGreaterThan(prevSunday.getTime());
+    expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
   });
 
   it('should parse "@every 15th" as monthly on next 15th', async () => {
