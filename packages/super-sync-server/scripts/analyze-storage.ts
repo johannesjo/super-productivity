@@ -783,7 +783,7 @@ const main = async (): Promise<void> => {
     }
   } catch (error) {
     if (reportMonitoringError('Error:', error)) {
-      process.exit(1);
+      process.exitCode = 1;
     }
   } finally {
     await disconnectDb();
