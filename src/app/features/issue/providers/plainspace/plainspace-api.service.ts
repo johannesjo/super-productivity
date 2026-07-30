@@ -15,8 +15,8 @@ import { mapPlainspaceIssueToSearchResult } from './plainspace-issue-map.util';
  * server-side — no client-side identity filtering is needed.
  *
  * The wire format (`SPTask`) is mapped to the provider-internal `PlainspaceIssue`
- * here, keeping the real contract isolated to this file. See
- * docs/plainspace-api-extension-plan.md for the endpoint contract.
+ * here, keeping the real contract isolated to this file — the DTO interfaces
+ * below are the endpoint contract.
  *
  * Reads fail soft (empty list / null) so a Plainspace outage never blocks the SP
  * UI; `createSpace$` lets errors propagate so the share flow can report them.
@@ -223,8 +223,7 @@ interface SPTask {
   createdAt: string;
   updatedAt: string;
   // ISO instant the task is scheduled for, or null when unscheduled. For
-  // recurring items this is the next occurrence (server-advanced). See
-  // docs/plainspace-api-extension-plan.md §scheduling.
+  // recurring items this is the next occurrence (server-advanced).
   scheduledAt: string | null;
   // Whether the task repeats in Plainspace (the cadence stays server-side).
   isRecurring: boolean;

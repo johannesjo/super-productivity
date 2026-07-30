@@ -852,9 +852,15 @@ const anchorCycleOf = (repeat: ShortSyntaxRepeat): RepeatCycleOption | null => {
 // date in place would only make the add bar advertise a first occurrence the
 // task never gets. Mutates in place, like the roll-forward above.
 const skipExcludedWeekend = (date: Date): void => {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
   while (date.getDay() === 0 || date.getDay() === 6) {
     date.setDate(date.getDate() + 1);
   }
+  // A skipped-over day can be a DST spring-forward day whose 02:00-03:00 hour
+  // does not exist; stepping through it would silently shift the clock time,
+  // and that time is read back into the repeat config's startTime.
+  date.setHours(hours, minutes);
 };
 
 // Resolves a matched recurrence phrase into task changes: the parsed repeat

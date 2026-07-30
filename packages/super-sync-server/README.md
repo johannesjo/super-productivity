@@ -219,20 +219,20 @@ npm start
 
 All configuration is done via environment variables.
 
-| Variable       | Default                              | Description                                                                     |
-| :------------- | :----------------------------------- | :------------------------------------------------------------------------------ |
-| `PORT`         | `1900`                               | Server port                                                                     |
-| `HOST`         | `0.0.0.0`                            | Server bind address. Use `::` for IPv6-only deployments.                        |
-| `DATABASE_URL` | -                                    | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/db`)  |
-| `JWT_SECRET`   | -                                    | **Required.** Secret for signing JWTs (min 32 chars)                            |
-| `PUBLIC_URL`   | -                                    | **Required.** Public URL used for email links (e.g. `https://sync.example.com`) |
-| `CORS_ORIGINS` | `https://app.super-productivity.com` | Allowed CORS origins. `*` allows any origin — never do this in production, CORS runs with `credentials: true`. |
-| `SMTP_HOST`    | -                                    | SMTP Server for emails                                                          |
-| `WEBAUTHN_RP_ID`  | `localhost`                       | **Required for passkeys.** Your domain, without protocol or port. Passkeys bind to this — changing it invalidates every registered credential. |
-| `WEBAUTHN_ORIGIN` | `http://localhost:1900`           | **Required for passkeys.** Where users reach the auth UI, with protocol.        |
-| `WEBAUTHN_RP_NAME` | value of `WEBAUTHN_RP_ID`        | Name shown in your users' OS passkey prompt.                                    |
-| `ALLOWED_EMAILS`  | - (anyone may register)           | Comma-separated exact addresses and/or `*@domain` rules.                        |
-| `SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES` | `104857600` (100 MB) | Quota for accounts created from now on. Existing accounts keep the value stored on their row. |
+| Variable                                | Default                              | Description                                                                                                                                    |
+| :-------------------------------------- | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PORT`                                  | `1900`                               | Server port                                                                                                                                    |
+| `HOST`                                  | `0.0.0.0`                            | Server bind address. Use `::` for IPv6-only deployments.                                                                                       |
+| `DATABASE_URL`                          | -                                    | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/db`)                                                                 |
+| `JWT_SECRET`                            | -                                    | **Required.** Secret for signing JWTs (min 32 chars)                                                                                           |
+| `PUBLIC_URL`                            | -                                    | **Required.** Public URL used for email links (e.g. `https://sync.example.com`)                                                                |
+| `CORS_ORIGINS`                          | `https://app.super-productivity.com` | Allowed CORS origins. `*` allows any origin — never do this in production, CORS runs with `credentials: true`.                                 |
+| `SMTP_HOST`                             | -                                    | SMTP Server for emails                                                                                                                         |
+| `WEBAUTHN_RP_ID`                        | `localhost`                          | **Required for passkeys.** Your domain, without protocol or port. Passkeys bind to this — changing it invalidates every registered credential. |
+| `WEBAUTHN_ORIGIN`                       | `http://localhost:1900`              | **Required for passkeys.** Where users reach the auth UI, with protocol.                                                                       |
+| `WEBAUTHN_RP_NAME`                      | value of `WEBAUTHN_RP_ID`            | Name shown in your users' OS passkey prompt.                                                                                                   |
+| `ALLOWED_EMAILS`                        | - (anyone may register)              | Comma-separated exact addresses and/or `*@domain` rules.                                                                                       |
+| `SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES` | `104857600` (100 MB)                 | Quota for accounts created from now on. Existing accounts keep the value stored on their row.                                                  |
 
 ### Legal pages
 
@@ -245,13 +245,13 @@ Set **all five** of these to publish `/privacy.html` and show the registration c
 notice. Set none and the legal pages are simply not served. A partial set is a startup
 error, not a silent fallback.
 
-| Variable                  | Description                                              |
-| :------------------------ | :------------------------------------------------------- |
-| `PRIVACY_CONTACT_NAME`    | Controller name (person or company)                       |
-| `PRIVACY_ADDRESS_STREET`  | Street address                                            |
-| `PRIVACY_ADDRESS_CITY`    | Postcode and city                                         |
-| `PRIVACY_ADDRESS_COUNTRY` | Country                                                   |
-| `PRIVACY_CONTACT_EMAIL`   | Contact address for data-protection requests              |
+| Variable                  | Description                                  |
+| :------------------------ | :------------------------------------------- |
+| `PRIVACY_CONTACT_NAME`    | Controller name (person or company)          |
+| `PRIVACY_ADDRESS_STREET`  | Street address                               |
+| `PRIVACY_ADDRESS_CITY`    | Postcode and city                            |
+| `PRIVACY_ADDRESS_COUNTRY` | Country                                      |
+| `PRIVACY_CONTACT_EMAIL`   | Contact address for data-protection requests |
 
 `PRIVACY_DATA_REGION` is separate from the five: set it to `EU` (or `EEA`) to show the
 "Data hosted in EU" badge on the landing page. Any other value shows no badge, because an

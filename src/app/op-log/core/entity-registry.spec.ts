@@ -443,7 +443,8 @@ describe('entity-registry', () => {
      * 2. Add it to the appropriate category array (ADAPTER_ENTITIES, SINGLETON_ENTITIES, etc.)
      * 3. Update the expected count below
      *
-     * See docs/ai/adding-new-entity-type-checklist.md for full checklist.
+     * The three steps above are the whole checklist; the guide this used to cite
+     * no longer exists. See operation.types.ts for the EntityType union itself.
      */
     it('test arrays should cover all EntityType union members (canary)', () => {
       const ALL_TESTED: EntityType[] = [

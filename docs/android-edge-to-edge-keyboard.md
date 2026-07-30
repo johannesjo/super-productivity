@@ -13,8 +13,8 @@ area has regressed repeatedly (#8295, then #8508).**
 > painted by a plugin (SystemBars has no color API) — the bars are transparent
 > and the theme color shows through via `NavigationBarPlugin.setWebViewBackgroundColor`
 > (window decor + WebView surface). The #8508 sections below describe the _former_
-> `@capawesome` mechanics and are kept as history. Full rationale + device matrix:
-> [`docs/plans/2026-06-22-android-systembars-migration-corrected.md`](plans/2026-06-22-android-systembars-migration-corrected.md).
+> `@capawesome` mechanics and are kept as history. The migration and device-matrix
+> verification landed in [PR #8543](https://github.com/super-productivity/super-productivity/pull/8543).
 
 > **⚠️ Do NOT inset the WebView for the IME based on an assumption that the
 > system "doesn't resize on Android 15/16."** Real devices (incl. a Pixel-class

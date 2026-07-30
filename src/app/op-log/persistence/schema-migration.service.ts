@@ -76,7 +76,7 @@ export interface MigratableStateCache {
  *    - Drop op if migration returns null
  * 3. Apply migrated ops to migrated state
  *
- * @see docs/ai/sync/operation-log-architecture.md A.7
+ * @see docs/sync-and-op-log/operation-log-architecture.md A.7
  */
 @Injectable({ providedIn: 'root' })
 export class SchemaMigrationService {

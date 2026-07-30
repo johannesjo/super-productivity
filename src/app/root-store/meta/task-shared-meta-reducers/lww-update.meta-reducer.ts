@@ -232,7 +232,7 @@ const syncTagTaskIds = (
  * task.dueWithTime (mutually exclusive). When LWW Update recreates a task or
  * changes either field, we must update TODAY_TAG.taskIds accordingly.
  *
- * See: docs/ai/today-tag-architecture.md
+ * See: ARCHITECTURE-DECISIONS.md Decision #2
  */
 const syncTodayTagTaskIds = (
   state: RootState,

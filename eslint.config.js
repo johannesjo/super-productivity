@@ -43,6 +43,11 @@ module.exports = tseslint.config(
       },
     },
     rules: {
+      // Core ESLint rules are off repo-wide (the config never spreads
+      // js.configs.recommended), so a duplicate key in an object literal reached master
+      // twice on 2026-07-30 and took the whole Karma bundle down with TS1117. tsc catches
+      // it only at build time; catch it at lint time instead.
+      'no-dupe-keys': 'error',
       // Disabled rules
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
