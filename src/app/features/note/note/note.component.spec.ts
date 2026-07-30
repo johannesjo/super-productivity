@@ -423,6 +423,46 @@ describe('NoteComponent editFullscreen', () => {
     );
   });
 
+  it('writes nothing when a note whose draft is already resolved is only viewed', async () => {
+    // A resolved row is inert at read time, so an unmodified close must leave it
+    // alone. Rewriting it would drop its marker, reset its 14-day retention, and
+    // (whenever durability cannot be proven, so markSaved is skipped) leave it
+    // LIVE for a later remote edit to turn into a spurious conflict prompt
+    // offering the note's own stale text back (#8982 review).
+    localDraftService.loadDraft.and.resolveTo({
+      ...draftOf('saved content', 'older base'),
+      resolved: { content: 'saved content', kind: 'SAVED' },
+    });
+
+    await editFullscreen();
+
+    afterClosed$.next(NOTE.content);
+    await waitFor(() => localDraftService.markSaved.calls.any(), 'the saved marker');
+
+    expect(localDraftService.saveDraft).not.toHaveBeenCalled();
+  });
+
+  it('does not erase the marker written by the conflict prompt on an unmodified close', async () => {
+    // "Keep saved" retires the row. The editor then opens on the note content
+    // with nothing typed, so an unmodified close must not checkpoint over the
+    // row: that would drop the marker the user's own answer just wrote and let
+    // the dismissed conflict prompt come back (#8982 review).
+    localDraftService.loadDraft.and.resolveTo(draftOf('draft content', 'other base'));
+    confirmResult = false;
+
+    await editFullscreen();
+
+    afterClosed$.next(NOTE.content);
+    await waitFor(() => localDraftService.markSaved.calls.any(), 'the saved marker');
+
+    expect(localDraftService.markDiscarded).toHaveBeenCalledWith(
+      'NOTE',
+      NOTE.id,
+      'draft content',
+    );
+    expect(localDraftService.saveDraft).not.toHaveBeenCalled();
+  });
+
   it('marks the draft discarded (and deletes nothing) on a confirmed DISCARD', async () => {
     // The DISCARD branch had NO test at all — `grep -c DISCARD` on this spec
     // returned 0 — which is how its clear stayed ungated while its sibling was
@@ -437,10 +477,8 @@ describe('NoteComponent editFullscreen', () => {
       'the discarded marker',
     );
 
-    // Marker ONLY. Checkpointing the final text first would force the scope to
-    // match, but it leaves a restore-eligible row (baseContent === note content)
-    // until the marker lands, so a crash between the two writes would silently
-    // restore the discarded text (#8982 review).
+    // No live row existed (loadDraft resolved undefined and nothing was typed),
+    // so there is nothing to retire and no row is created just to hold a marker.
     expect(localDraftService.saveDraft).not.toHaveBeenCalled();
     expect(localDraftService.markDiscarded).toHaveBeenCalledWith(
       'NOTE',
@@ -452,11 +490,38 @@ describe('NoteComponent editFullscreen', () => {
     expect(noteService.remove).not.toHaveBeenCalled();
   });
 
+  it('leaves no live draft behind when a discard lands back on the note content', async () => {
+    // The undo-then-Discard hole, and the reason the checkpoint here cannot be
+    // dropped. Discard is reachable with NO confirmation dialog:
+    // _confirmDiscardIfNeeded closes instantly when the editor content equals
+    // what it opened with. So typing, pausing past the debounce, undoing, then
+    // hitting Discard closes with the ORIGINAL text while the stored row still
+    // holds the typed text. Without the checkpoint the scoped marker no-ops, and
+    // because the debounced checkpoint already wrote baseContent = note content
+    // the row is restore-eligible: the next open silently RESTOREs the discarded
+    // text and Escape saves it over the note (#8982 review).
+    await editFullscreen();
+
+    contentChanged$.next('typed then undone');
+    afterClosed$.next({ action: 'DISCARD', content: NOTE.content });
+    await waitFor(
+      () => localDraftService.markDiscarded.calls.any(),
+      'the discarded marker',
+    );
+
+    // Whatever the row was last checkpointed with must be what the marker
+    // carries, or the row survives the discard as a live, restorable draft.
+    const lastCheckpoint = localDraftService.saveDraft.calls.mostRecent().args[0];
+    const markedText = localDraftService.markDiscarded.calls.mostRecent().args[2];
+    expect(lastCheckpoint.content).toBe(NOTE.content);
+    expect(markedText).toBe(NOTE.content);
+    expect(lastCheckpoint.content).toBe(markedText);
+  });
+
   it('marks the text the editor ended with, not the last debounced checkpoint', async () => {
     // The debounced checkpoint stream lags the editor, so the last text it
     // emitted is NOT what the user was looking at when they confirmed the
-    // discard. The marker must carry the editor's final text: marking the stale
-    // text would retire the wrong content (#8982 review).
+    // discard. The marker must carry the editor's final text.
     await editFullscreen();
 
     contentChanged$.next('stale debounced checkpoint');
@@ -471,10 +536,9 @@ describe('NoteComponent editFullscreen', () => {
       NOTE.id,
       'what the editor ended with',
     );
-    // The lagging checkpoint is the only saveDraft; the close path adds none.
-    expect(localDraftService.saveDraft).toHaveBeenCalledTimes(1);
+    // ...and the row was brought to that same text first, so the marker lands.
     expect(localDraftService.saveDraft.calls.mostRecent().args[0].content).toBe(
-      'stale debounced checkpoint',
+      'what the editor ended with',
     );
   });
 

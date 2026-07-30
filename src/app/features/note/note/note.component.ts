@@ -41,6 +41,7 @@ import {
   DRAFT_IO_TIMEOUT_MS,
   DRAFT_LOAD_ERROR,
   getDraftOpenAction,
+  isDraftResolved,
   LocalDraftService,
 } from '../../../core/draft/local-draft.service';
 import { withTimeout } from '../../../util/promise-timeout';
@@ -253,6 +254,13 @@ export class NoteComponent implements OnChanges {
       // session rather than risking to overwrite it.
       const isDraftUnreadable = draftOrError === DRAFT_LOAD_ERROR;
       const draft = isDraftUnreadable ? undefined : draftOrError;
+      // Whether a LIVE row may sit under this key, which is what decides if the
+      // close paths below have to checkpoint. A resolved row does not count: it
+      // is already inert at read time, so rewriting it on an unmodified close
+      // would only drop its marker, reset its 14-day retention, and (if
+      // durability cannot be proven, so markSaved is skipped) leave it live for a
+      // later remote edit to turn into a spurious conflict prompt (#8982 review).
+      let hasLiveDraftRow = !!draft && !isDraftResolved(draft);
       if (isDraftUnreadable) {
         Log.err('NoteComponent: Failed to load draft; draft handling disabled', note.id);
       } else if (draft) {
@@ -292,6 +300,11 @@ export class NoteComponent implements OnChanges {
               this._localDraftService.markDiscarded('NOTE', note.id, draft.content),
               undefined,
             );
+            // That answer retired the row, so the editor below opens on a note
+            // with no live draft. Without this, an unmodified close would
+            // checkpoint over the row and ERASE the marker the user just wrote,
+            // letting the conflict prompt they dismissed come back (#8982 review).
+            hasLiveDraftRow = false;
           } else {
             // No decision (undefined from ESC / backdrop / closeAll). Abort opening
             // the editor entirely: proceeding would let a checkpoint overwrite the
@@ -319,14 +332,11 @@ export class NoteComponent implements OnChanges {
         content: contentToOpen,
         ...(contentToOpen !== note.content ? { originalContent: note.content } : {}),
       });
-      // Whether this session may have left a row under this key, which is what
-      // decides if the close path has to checkpoint. See the save branch below.
-      let hasDraftRow = !!draft;
       // Checkpoint the editor contents locally so they survive a crash.
       const contentChangedSub = isDraftUnreadable
         ? undefined
         : dialogRef.componentInstance.contentChanged.subscribe((content) => {
-            hasDraftRow = true;
+            hasLiveDraftRow = true;
             this._localDraftService.saveDraft({
               entityType: 'NOTE',
               entityId: note.id,
@@ -348,7 +358,7 @@ export class NoteComponent implements OnChanges {
             this._localDraftService.clearDraft('NOTE', note.id);
           }
         } else if (typeof res === 'string') {
-          if (!isDraftUnreadable && (hasDraftRow || res !== note.content)) {
+          if (!isDraftUnreadable && (hasLiveDraftRow || res !== note.content)) {
             // Persist the draft (baseContent = the still-current note content) and
             // AWAIT it BEFORE dispatching the note update, so a crash in the window
             // between the two leaves a durable draft the next open restores via the
@@ -422,25 +432,40 @@ export class NoteComponent implements OnChanges {
           !isDraftUnreadable &&
           typeof res.content === 'string'
         ) {
-          // Marker only: NEVER checkpoint on the way out here. Writing the
-          // editor's final text first would make the scope below always match,
-          // but the row it writes carries `baseContent: note.content`, so if the
-          // marker then failed to land (crash between the two awaits, a swallowed
-          // IDB error, the 2s bound) `getDraftOpenAction` would hit its
-          // `baseContent === entityContent` branch and SILENTLY restore the text
-          // the user just threw away. Two non-atomic writes cannot be made safe
-          // here; one write can (#8982 review).
+          // Same gate and same two steps as the save path: checkpoint the text
+          // this editor ended with, then mark THAT text.
           //
-          // The cost is that a discard confirmed within the 500ms debounce can
-          // miss the stored row and leave it live. That is the documented safe
-          // direction (a prompt, or a restore of the user's own text from a
-          // second earlier), and it is rare because a modified discard goes
-          // through a confirmation dialog, which takes longer than the debounce.
+          // The checkpoint is what makes the scoped marker land. Discard is
+          // reachable with NO confirmation dialog at all: _confirmDiscardIfNeeded
+          // closes immediately when the editor content equals what it opened
+          // with. So "type, pause past the 500ms debounce, undo, Discard" closes
+          // instantly with the original text while the stored row still holds the
+          // typed text. Without this write the marker no-ops, and because the
+          // debounced checkpoint already wrote `baseContent: note.content` the
+          // row is restore-eligible: the next open SILENTLY restores the
+          // discarded text and Escape saves it over the note (#8982 review).
+          //
+          // Gated on a live row, so a discard from a session that never
+          // checkpointed still creates nothing. That gate is the whole reason
+          // this write is safe: where no row exists there is nothing to retire,
+          // and where one does it is already restore-eligible, so the checkpoint
+          // adds no state that was not there already.
           //
           // `content` is required rather than defaulted: synthesizing
           // `note.content` for a result that carries none would checkpoint the
           // note over the draft and then successfully mark it, destroying
           // unsaved text on a path meant to be conservative.
+          if (hasLiveDraftRow) {
+            await withDraftIoTimeout(
+              this._localDraftService.saveDraft({
+                entityType: 'NOTE',
+                entityId: note.id,
+                content: res.content,
+                baseContent: note.content,
+              }),
+              undefined,
+            );
+          }
           await withDraftIoTimeout(
             this._localDraftService.markDiscarded('NOTE', note.id, res.content),
             undefined,
