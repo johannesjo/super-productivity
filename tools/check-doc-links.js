@@ -694,7 +694,7 @@ const checkSourceDocRefs = (rootDir, roots = DEFAULT_SOURCE_ROOTS) => {
         }
         // One diagnostic per (file, target): a path cited on many lines of the
         // same file is one stale pointer to fix, not N findings.
-        const key = `${relativeFile} ${target}`;
+        const key = `${relativeFile} ${target}`;
         if (seen.has(key)) {
           continue;
         }
@@ -710,14 +710,23 @@ const checkSourceDocRefs = (rootDir, roots = DEFAULT_SOURCE_ROOTS) => {
   return { brokenRefs, total };
 };
 
+const EMPTY_RESULT = { brokenLinks: [], brokenRefs: [], total: 0 };
+
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const skipSources = args.includes('--docs-only');
-  const inputs = args.filter((arg) => arg !== '--docs-only');
-  const { brokenLinks, total } = checkDocLinks(inputs.length > 0 ? inputs : ['docs']);
+  // CI feeds document lists through xargs, which may invoke this script several
+  // times. Without these flags the source scan would repeat per batch and
+  // double-report the same stale reference, so each pass is separately selectable.
+  const docsOnly = args.includes('--docs-only');
+  const sourcesOnly = args.includes('--sources-only');
+  const inputs = args.filter((arg) => !arg.startsWith('--'));
 
-  const sourceResult = skipSources
-    ? { brokenRefs: [], total: 0 }
+  const { brokenLinks, total } = sourcesOnly
+    ? EMPTY_RESULT
+    : checkDocLinks(inputs.length > 0 ? inputs : ['docs']);
+
+  const sourceResult = docsOnly
+    ? EMPTY_RESULT
     : checkSourceDocRefs(findRepositoryBoundary(process.cwd()));
 
   if (total === 0 && sourceResult.total === 0) {

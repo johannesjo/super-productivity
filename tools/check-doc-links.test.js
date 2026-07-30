@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 
 const {
   checkDocLinks,
@@ -508,6 +509,53 @@ test('does not treat a docs path inside a longer word as a citation', () => {
     },
     (root) => {
       assert.deepEqual(checkSourceDocRefs(root, ['src']).brokenRefs, []);
+    },
+  );
+});
+
+// The --docs-only / --sources-only flags exist so the CI workflow can run each
+// pass exactly once (document lists arrive via xargs, which may batch). They are
+// CLI-only, so drive the CLI.
+const runCli = (root, args) =>
+  spawnSync(process.execPath, [path.join(__dirname, 'check-doc-links.js'), ...args], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+
+test('--docs-only checks documents and ignores source citations', () => {
+  withDocs(
+    {
+      '.git/HEAD': 'ref: refs/heads/main',
+      [docRef('index.md')]: '# Index',
+      'src/a.ts': `// ${docRef('gone.md')}`,
+    },
+    (root) => {
+      const result = runCli(root, ['docs', '--docs-only']);
+
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stdout, /Documentation links are valid/);
+    },
+  );
+});
+
+test('--sources-only checks source citations and ignores document links', () => {
+  withDocs(
+    {
+      '.git/HEAD': 'ref: refs/heads/main',
+      [docRef('index.md')]: '[broken](./nope.md)',
+      'src/a.ts': `// ${docRef('gone.md')}`,
+    },
+    (root) => {
+      const sources = runCli(root, ['--sources-only']);
+      assert.equal(sources.status, 1);
+      assert.match(sources.stderr, /source cites a missing document/);
+      // The broken document link must NOT surface in the source-only pass.
+      assert.doesNotMatch(sources.stderr, /nope\.md/);
+
+      const docs = runCli(root, ['docs', '--docs-only']);
+      assert.equal(docs.status, 1);
+      assert.match(docs.stderr, /nope\.md/);
+      assert.doesNotMatch(docs.stderr, /source cites/);
     },
   );
 });

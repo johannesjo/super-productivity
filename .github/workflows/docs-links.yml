@@ -32,8 +32,11 @@ jobs:
         run: |
           node --test tools/check-doc-links.test.js
           git ls-files -z -- '*.md' '*.markdown' |
-            xargs -0 -r node tools/check-doc-links.js
+            xargs -0 -r node tools/check-doc-links.js --docs-only
           git ls-files -z -- \
             ':(glob)docs/**/*.html' \
             ':(glob)packages/**/docs/**/*.html' |
-            xargs -0 -r node tools/check-doc-links.js
+            xargs -0 -r node tools/check-doc-links.js --docs-only
+          # Separate pass: xargs above may invoke the script per batch, so the
+          # source-comment scan runs once here instead of once per batch.
+          node tools/check-doc-links.js --sources-only
