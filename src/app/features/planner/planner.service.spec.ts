@@ -126,6 +126,7 @@ describe('PlannerService', () => {
 
   afterEach(() => {
     jasmine.clock().uninstall();
+    TestBed.inject(MockStore).resetSelectors();
   });
 
   describe('tomorrow$', () => {
