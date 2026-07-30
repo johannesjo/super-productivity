@@ -66,6 +66,7 @@ import { META_REDUCERS } from './app/root-store/meta/meta-reducer-registry';
 import { setOperationCaptureService } from './app/root-store/meta/task-shared-meta-reducers';
 import { OperationCaptureService } from './app/op-log/capture/operation-capture.service';
 import { ConflictJournalService } from './app/op-log/sync/conflict-journal.service';
+import { LocalDraftService } from './app/core/draft/local-draft.service';
 import { EncryptionPasswordDialogOpenerService } from './app/imex/sync/encryption-password-dialog-opener.service';
 import { DataInitService } from './app/core/data-init/data-init.service';
 import { EffectsModule } from '@ngrx/effects';
@@ -332,6 +333,19 @@ bootstrapApplication(AppComponent, {
         };
       },
       deps: [ConflictJournalService],
+      multi: true,
+    },
+    // Remove crash-leftover note drafts past their retention window on app
+    // start, same rationale as the conflict journal above. Synchronous
+    // localStorage sweep over a handful of keys; swallows its own errors.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (localDraft: LocalDraftService) => {
+        return () => {
+          localDraft.pruneOnStart();
+        };
+      },
+      deps: [LocalDraftService],
       multi: true,
     },
     // Note: ImmediateUploadService now initializes itself in constructor

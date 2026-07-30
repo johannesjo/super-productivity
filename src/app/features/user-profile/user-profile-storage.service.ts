@@ -29,6 +29,14 @@ export class UserProfileStorageService {
    * Load profile metadata from localStorage
    */
   async loadProfileMetadata(): Promise<ProfileMetadata | null> {
+    return this.loadProfileMetadataSync();
+  }
+
+  /**
+   * Synchronous variant for callers that cannot await (e.g. LocalDraftService,
+   * whose whole API is synchronous localStorage access).
+   */
+  loadProfileMetadataSync(): ProfileMetadata | null {
     try {
       if (typeof localStorage === 'undefined') {
         return null;
