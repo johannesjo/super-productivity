@@ -95,7 +95,7 @@ load_env_value() {
     export "$key=$value"
 }
 
-for env_key in GHCR_USER GHCR_TOKEN DATABASE_URL POSTGRES_SERVICE POSTGRES_WAIT_TIMEOUT MIGRATION_TIMEOUT MIGRATE_STEP_TIMEOUT DEPLOY_WAIT_TIMEOUT SUPERSYNC_SKIP_IMAGE_REVISION_CHECK; do
+for env_key in GHCR_USER GHCR_TOKEN DATABASE_URL POSTGRES_SERVICE POSTGRES_WAIT_TIMEOUT MIGRATION_TIMEOUT MIGRATE_STEP_TIMEOUT DEPLOY_WAIT_TIMEOUT SUPERSYNC_SKIP_IMAGE_REVISION_CHECK SUPERSYNC_INSTALL_REPO_TERMS; do
     load_env_value "$env_key"
 done
 
@@ -378,6 +378,27 @@ if [ "$MIGRATE_STATUS" -ne 0 ]; then
     echo "       scripts/migrate-deploy.sh prints exact manual recovery steps"
     echo "       above for any migration it cannot safely auto-recover."
     exit "$MIGRATE_STATUS"
+fi
+
+# Sync the checkout's Terms of Service into the data volume, so the git repository
+# is the single source of truth: every deploy installs the terms.html that matches
+# the deployed code, and the server's boot-time copy publishes it at /terms.html.
+# Opt-in via .env, NOT default: on a stock checkout legal/terms.html is the hosted
+# instance's ToS (German law, our venue and address), and publishing it on someone
+# else's domain is exactly what the operator-owned legal pages exist to prevent.
+# Set it only if legal/terms.html in your checkout is genuinely yours.
+if [ "${SUPERSYNC_INSTALL_REPO_TERMS:-false}" = "true" ]; then
+    if [ ! -f "$SERVER_DIR/legal/terms.html" ]; then
+        echo ""
+        echo "ERROR: SUPERSYNC_INSTALL_REPO_TERMS=true but $SERVER_DIR/legal/terms.html does not exist."
+        echo "       Supply the file or remove the flag from .env."
+        exit 1
+    fi
+    echo ""
+    echo "==> Installing legal/terms.html from the checkout into the data volume..."
+    docker compose $COMPOSE_FILES run --rm --no-deps --interactive=false -T \
+        -v "$SERVER_DIR/legal:/repo-legal:ro" \
+        supersync sh -ec 'mkdir -p /app/data/legal && cp /repo-legal/terms.html /app/data/legal/terms.html'
 fi
 
 # The migration above already ran while the old app was still serving. Disable

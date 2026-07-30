@@ -81,7 +81,9 @@ services:
       # your compose file. The image ships none on purpose — ours name German law, a
       # Leipzig venue and our contact address. Without it, /terms.html is simply not
       # served and the consent notice links only the privacy policy.
-      # NOTE for the hosted deployment: this mount is how legal/terms.html gets in.
+      # Deployments driven by scripts/deploy.sh can instead set
+      # SUPERSYNC_INSTALL_REPO_TERMS=true in .env to sync legal/terms.html from the
+      # checkout into the data volume on every deploy (only if that file is YOURS).
       # - ./legal/terms.html:/app/data/legal/terms.html:ro
     depends_on:
       postgres:
