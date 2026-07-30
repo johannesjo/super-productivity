@@ -57,6 +57,14 @@ describe('createBlockedBlocksByDayMap()', () => {
     const repeatCfg: TaskRepeatCfg = {
       ...DEFAULT_TASK_REPEAT_CFG,
       id: 'daily-across-midnight',
+      // DEFAULT_TASK_REPEAT_CFG freezes the *real* current day into these two at
+      // module load. selectTaskRepeatCfgsForExactDay() drops any cfg whose
+      // effective last-creation day is >= the day being projected, so keeping
+      // the defaults makes this fixture stop projecting once the wall clock
+      // reaches occurrenceDay. A cfg that has never created a task is the state
+      // this case is actually about.
+      lastTaskCreation: undefined,
+      lastTaskCreationDay: undefined,
       quickSetting: 'DAILY',
       repeatCycle: 'DAILY',
       startDate: occurrenceDay,
