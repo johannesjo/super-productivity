@@ -24,9 +24,18 @@ umask 077
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_DIR="${COMPOSE_DIR:-$(dirname "$SCRIPT_DIR")}"
-ALERT_EMAIL="${ALERT_EMAIL:-contact@super-productivity.com}"
+# No default recipient on purpose: this script ships in the repo and the image, so any
+# default address would silently mail a self-hoster's hostname, disk usage and container
+# state to whoever that address belongs to. Alerting is off until the operator opts in.
+ALERT_EMAIL="${ALERT_EMAIL:-}"
 MAX_QUERY_SECONDS="${MAX_QUERY_SECONDS:-120}"
 POOL_WARN_PCT="${POOL_WARN_PCT:-75}"
+
+if [ -z "$ALERT_EMAIL" ]; then
+  echo "health-alert: ALERT_EMAIL is not set, alerting is disabled." >&2
+  echo "  Enable it with: ALERT_EMAIL=you@example.com $0" >&2
+  exit 0
+fi
 
 CONFIG_PROBLEMS=""
 DB_CONFIG_OK=true

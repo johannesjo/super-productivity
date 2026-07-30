@@ -54,6 +54,7 @@ export {
   decrypt,
   encryptBatch,
   decryptBatch,
+  decryptBatchSettled,
   deriveKeyFromPassword,
   clearSessionKeyCache,
   getSessionKeyCacheStats,
@@ -62,7 +63,7 @@ export {
   setArgon2ParamsForTesting,
   setLegacyKdfWarningHandler,
 } from './encryption';
-export type { DerivedKey } from './encryption';
+export type { DerivedKey, DecryptSettledItem } from './encryption';
 
 // Generic error helpers.
 export { extractErrorMessage } from './error.util';

@@ -90,6 +90,7 @@ describe('FocusMode Bug #5995: Resume paused break', () => {
 
     const takeABreakServiceMock = {
       otherNoBreakTIme$: new BehaviorSubject<number>(0),
+      resetTimer: jasmine.createSpy('resetTimer'),
     };
 
     TestBed.configureTestingModule({

@@ -1425,7 +1425,7 @@ a copied file tree here. The main implementation boundaries are
 
 # References
 
-- [Operation Rules](./operation-rules.md) - Payload and validation rules
-- [Contributor Sync Model](./contributor-sync-model.md) - The single invariant for effects, reducers, and bulk dispatch
-- [SuperSync Encryption](./supersync-encryption-architecture.md) - End-to-end encryption implementation
+- [Contributor Sync Model](./contributor-sync-model.md) - The single invariant for effects, reducers, selector guards, and bulk dispatch
+- [SECTION Conflict Replay](./section-conflict-replay.md) - Narrow semantic-replay and released-client compatibility contract
+- [SuperSync Encryption](./supersync-encryption-architecture.md) - End-to-end encryption implementation and integrity boundary
 - [Vector Clocks](./vector-clocks.md) - Vector clock implementation details

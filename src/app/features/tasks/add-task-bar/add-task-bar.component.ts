@@ -74,6 +74,7 @@ import { MentionConfigService } from '../mention-config.service';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DEFAULT_TASK_REPEAT_CFG } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getQuickSettingUpdates } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-quick-setting-updates';
+import { getIntervalRepeatUpdates } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-interval-repeat-updates';
 import { getDefaultSkipOverdue } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-default-skip-overdue';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
@@ -552,8 +553,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         } else {
           taskData.dueDay = state.date;
         }
-      } else if (state.repeatQuickSetting && state.repeatQuickSetting !== 'CUSTOM') {
-        // When a repeat preset is selected without an explicit date, set dueDay to today
+      } else if (state.repeat && state.repeat.type !== 'DIALOG') {
+        // When a recurrence is set without an explicit date, set dueDay to today
         // so the first task instance appears as today's occurrence instead of staying in inbox
         taskData.dueDay = this._dateService.todayStr();
       } else {
@@ -579,9 +580,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       // effect already handles scheduling via scheduleTaskWithTime, so calling both
       // would cause double-scheduling.
       const isTimedRepeatTask =
-        !!state.repeatQuickSetting &&
-        state.repeatQuickSetting !== 'CUSTOM' &&
-        !!state.time;
+        !!state.repeat && state.repeat.type !== 'DIALOG' && !!state.time;
       if (taskData.dueWithTime && !isTimedRepeatTask) {
         this._taskService
           .getByIdOnce$(taskId)
@@ -597,20 +596,31 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
 
       // Create repeat config if a repeat setting was selected
-      if (state.repeatQuickSetting) {
-        if (state.repeatQuickSetting === 'CUSTOM') {
+      if (state.repeat) {
+        const repeat = state.repeat;
+        if (repeat.type === 'DIALOG') {
           this._openRepeatDialogForTask(taskId, resolvedRemindOption);
         } else {
           const startDate = state.date || this._dateService.todayStr();
           const referenceDate = dateStrToUtcDate(startDate);
-          const quickSettingUpdates =
-            getQuickSettingUpdates(state.repeatQuickSetting, referenceDate) || {};
+          // An interval ("@every 2 days") has no preset to expand — it maps to a
+          // CUSTOM config carrying the cycle and interval directly.
+          const repeatUpdates =
+            repeat.type === 'INTERVAL'
+              ? getIntervalRepeatUpdates(
+                  repeat.repeatCycle,
+                  repeat.repeatEvery,
+                  referenceDate,
+                )
+              : {
+                  quickSetting: repeat.quickSetting,
+                  ...getQuickSettingUpdates(repeat.quickSetting, referenceDate),
+                };
           const newRepeatCfg = {
             ...DEFAULT_TASK_REPEAT_CFG,
             startDate,
-            ...quickSettingUpdates,
+            ...repeatUpdates,
             title,
-            quickSetting: state.repeatQuickSetting,
             notes: taskData.notes,
             tagIds: taskData.tagIds ?? [],
             defaultEstimate: state.estimate || 0,
@@ -641,10 +651,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     // Clicking the + button moves focus onto the button, which then vanishes
     // once the input clears — refocus the input so the next task can be typed
     // right away. (The Enter-key submit path never loses input focus.)
-    // Skip the refocus for CUSTOM repeat: addTask() opens the repeat-config
-    // dialog asynchronously, and refocusing would steal focus from it.
-    const willOpenRepeatDialog =
-      this.stateService.state().repeatQuickSetting === 'CUSTOM';
+    // Skip the refocus for the custom-config entry: addTask() opens the
+    // repeat-config dialog asynchronously, and refocusing would steal focus
+    // from it.
+    const willOpenRepeatDialog = this.stateService.state().repeat?.type === 'DIALOG';
     void this.addTask().finally(() => {
       if (!willOpenRepeatDialog) {
         this.focusInput();

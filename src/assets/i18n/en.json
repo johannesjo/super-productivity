@@ -1722,7 +1722,8 @@
       "D_EDIT": {
         "ADD": "Add tags for \"{{title}}\"",
         "EDIT": "Edit tags for \"{{title}}\"",
-        "LABEL": "Tags"
+        "LABEL": "Tags",
+        "PLACEHOLDER": "+ Add Tag"
       },
       "FORM_BASIC": {
         "D_COLOR": "If not set, defaults to the Tag Color.",
@@ -1974,17 +1975,24 @@
         "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
       },
       "S": {
+        "ADDED_VIA_APP_URI": "Added task \"{{title}}\"",
+        "AMBIGUOUS_MATCH_VIA_APP_URI": "Multiple tasks match \"{{title}}\" — be more specific",
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Cannot assign a project via short syntax for recurring tasks!",
+        "COMPLETED_VIA_APP_URI": "Completed task \"{{title}}\"",
         "CREATED_FOR_PROJECT": "Created task \"{{taskTitle}}\" for project \"{{projectTitle}}\"",
         "DEADLINE_REMOVED": "Deadline removed",
         "DEADLINE_SET": "Deadline set for {{date}}",
         "DELETED": "Deleted task \"{{title}}\"",
+        "EMPTY_TITLE_VIA_APP_URI": "Task title was empty, no task was added",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>\"{{title}}\"</strong> from backlog to the Today task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>\"{{title}}\"</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>\"{{title}}\"</strong> related to issue from archive",
         "GO_TO_TASK": "Go to Task",
+        "INPUT_TOO_LONG_VIA_APP_URI": "Task title or notes too long",
         "MOVED_TO_ARCHIVE": "Moved {{nr}} tasks to archive",
         "MOVED_TO_PROJECT": "Moved task \"{{taskTitle}}\" to project \"{{projectTitle}}\"",
+        "NOT_FOUND_VIA_APP_URI": "No matching task found for \"{{title}}\"",
+        "PROJECT_NOT_FOUND_VIA_APP_URI": "Project not found — task \"{{title}}\" was not added",
         "REMINDER_ADDED": "Scheduled <strong>\"{{title}}\"</strong> at <strong>{{date}}</strong>",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
@@ -2081,6 +2089,10 @@
         "ORD_THIRD_NTH": "third",
         "Q_CUSTOM": "Custom recurring config",
         "Q_DAILY": "Every day",
+        "Q_EVERY_X_DAYS": "Every {{count}} days",
+        "Q_EVERY_X_MONTHS": "Every {{count}} months",
+        "Q_EVERY_X_WEEKS": "Every {{count}} weeks on {{weekdayStr}}",
+        "Q_EVERY_X_YEARS": "Every {{count}} years",
         "Q_MONDAY_TO_FRIDAY": "Every Monday through Friday",
         "Q_MONTHLY_CURRENT_DATE": "Every month on the day {{dateDayStr}}",
         "Q_MONTHLY_FIRST_DAY": "Every month on the first day",
@@ -2479,6 +2491,7 @@
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when the current task is selected",
       "IS_SUPPRESS_IDLE_DURING_FOCUS_MODE": "Suppress idle dialog during focus mode sessions",
       "MIN_IDLE_TIME": "Trigger idle after X",
+      "MIN_IDLE_TIME_DESCRIPTION": "e.g. \"5h 23m\". Must be at least {{min}}; shorter idle periods are never reported. Idle is checked every {{interval}}.",
       "TITLE": "Idle Handling"
     },
     "IMEX": {
@@ -2491,6 +2504,8 @@
       "ADD_NEW_TASK": "Add new task",
       "APP_WIDE_SHORTCUTS": "Global Shortcuts (application-wide)",
       "COLLAPSE_SUB_TASKS": "Collapse subtasks",
+      "COLUMN_ACTION": "Action",
+      "COLUMN_SHORTCUT": "Shortcut",
       "EXPAND_SUB_TASKS": "Expand subtasks",
       "GLOBAL_ADD_NOTE": "Add new note",
       "GLOBAL_ADD_TASK": "Add new task",
@@ -2513,6 +2528,7 @@
       "PLUGIN_SHORTCUTS": "Plugin Shortcuts",
       "SELECT_NEXT_TASK": "Select next task",
       "SELECT_PREVIOUS_TASK": "Select previous task",
+      "SHOW_HELP": "Show keyboard shortcut cheat sheet",
       "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system-wide)",
       "TASK_ADD_ATTACHMENT": "Attach file or link",
@@ -3107,6 +3123,8 @@
     "PROJECT_SETTINGS": "Project Specific Settings",
     "PROVIDE_FEEDBACK": "Provide Feedback",
     "RELOAD": "Reload",
+    "SEARCH_NO_RESULTS": "No settings found",
+    "SEARCH_PLACEHOLDER": "Search settings",
     "SYNC": {
       "CONFIGURE": "Configure",
       "EMPTY_STATE_HINT": "Sync your data with Dropbox, WebDAV, Nextcloud, or a local file.",

@@ -32,6 +32,10 @@ import { HydrationStateService } from '../../../op-log/apply/hydration-state.ser
 
 describe('FocusModeEffects', () => {
   let actions$: Observable<any>;
+  let takeABreakServiceMock: {
+    otherNoBreakTIme$: BehaviorSubject<number>;
+    resetTimer: jasmine.Spy;
+  };
   let effects: FocusModeEffects;
   let store: MockStore;
   let strategyFactoryMock: any;
@@ -100,8 +104,9 @@ describe('FocusModeEffects', () => {
         .and.returnValue(false),
     };
 
-    const takeABreakServiceMock = {
+    takeABreakServiceMock = {
       otherNoBreakTIme$: new BehaviorSubject<number>(0),
+      resetTimer: jasmine.createSpy('resetTimer'),
     };
 
     notifyServiceMock = {
@@ -163,6 +168,21 @@ describe('FocusModeEffects', () => {
 
   afterEach(() => {
     store.resetSelectors();
+  });
+
+  describe('resetBreakTimerOnBreakStart$', () => {
+    // #6064 / #9305: must go through resetTimer(), not otherNoBreakTIme$.next(0).
+    // The latter only zeroes the counter and skips the reminder teardown, so the
+    // "take a break" banner stays up and the lock-screen / fullscreen-blocker
+    // subjects stay latched at `true` for the rest of the session.
+    it('resets the break timer via resetTimer() when a break starts', (done) => {
+      actions$ = of(actions.startBreak({}));
+
+      effects.resetBreakTimerOnBreakStart$.subscribe(() => {
+        expect(takeABreakServiceMock.resetTimer).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
   });
 
   describe('syncDurationWithMode$', () => {
@@ -1219,7 +1239,10 @@ describe('FocusModeEffects', () => {
           },
           {
             provide: TakeABreakService,
-            useValue: { otherNoBreakTIme$: new BehaviorSubject<number>(0) },
+            useValue: {
+              otherNoBreakTIme$: new BehaviorSubject<number>(0),
+              resetTimer: jasmine.createSpy('resetTimer'),
+            },
           },
           { provide: NotifyService, useValue: { notify: androidNotify } },
           {

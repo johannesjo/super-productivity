@@ -697,9 +697,10 @@ export class FocusModeEffects {
       this.actions$.pipe(
         ofType(actions.startBreak),
         tap(() => {
-          // Signal TakeABreakService to reset its timer
-          // otherNoBreakTIme$ feeds into the break timer's tick stream
-          this.takeABreakService.otherNoBreakTIme$.next(0);
+          // Signal TakeABreakService to reset its timer. Must be resetTimer()
+          // rather than otherNoBreakTIme$.next(0): the latter only zeroes the
+          // counter and skips the reminder teardown, leaving a stale banner up.
+          this.takeABreakService.resetTimer();
         }),
       ),
     { dispatch: false },
