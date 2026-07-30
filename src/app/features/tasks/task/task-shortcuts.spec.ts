@@ -224,14 +224,6 @@ describe('TaskComponent shortcut handling', () => {
     expect(taskServiceSpy.remove).not.toHaveBeenCalled();
   });
 
-  it('registers a swipe-opened context menu with the focus service', () => {
-    const taskFocusService = TestBed.inject(TaskFocusService);
-
-    component.openContextMenu();
-
-    expect(taskFocusService.lastFocusedTaskComponent()).toBe(component);
-  });
-
   // Guards against a future revert to a direct _matDialog.open that would
   // reintroduce the resize/back data loss (#8434): the helper always disables
   // closeOnNavigation.

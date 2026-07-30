@@ -51,6 +51,8 @@ describe('TaskContextMenuInnerComponent', () => {
   let taskService: jasmine.SpyObj<TaskService>;
   let addSubtaskInputService: jasmine.SpyObj<AddSubtaskInputService>;
   let store: MockStore;
+  let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
+  let closeActiveTaskContextMenu: ReturnType<typeof signal<(() => void) | null>>;
 
   beforeEach(async () => {
     taskService = jasmine.createSpyObj('TaskService', [
@@ -66,6 +68,8 @@ describe('TaskContextMenuInnerComponent', () => {
       'AddSubtaskInputService',
       ['requestOpen'],
     );
+    isTaskContextMenuOpen = signal(false);
+    closeActiveTaskContextMenu = signal<(() => void) | null>(null);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -124,7 +128,8 @@ describe('TaskContextMenuInnerComponent', () => {
           provide: TaskFocusService,
           useValue: {
             focusedTaskId: { set: () => {} },
-            isTaskContextMenuOpen: { set: () => {} },
+            isTaskContextMenuOpen,
+            closeActiveTaskContextMenu,
           },
         },
         { provide: LocaleDatePipe, useValue: {} },
@@ -279,6 +284,39 @@ describe('TaskContextMenuInnerComponent', () => {
   });
 
   describe('getElementById for task ID lookup', () => {
+    it('registers its close callback when opened and clears it when closed', () => {
+      const closeMenu = jasmine.createSpy('closeMenu');
+      (
+        component as unknown as {
+          contextMenuTrigger: () => { closeMenu: () => void; openMenu: () => void };
+        }
+      ).contextMenuTrigger = () => ({ closeMenu, openMenu: () => {} });
+
+      component.open();
+
+      expect(closeActiveTaskContextMenu()).not.toBeNull();
+      closeActiveTaskContextMenu()?.();
+      expect(closeMenu).toHaveBeenCalled();
+
+      component.onClose();
+      expect(closeActiveTaskContextMenu()).toBeNull();
+    });
+
+    it('does not clear a newer menu registration when destroyed', () => {
+      (
+        component as unknown as {
+          contextMenuTrigger: () => { closeMenu: () => void; openMenu: () => void };
+        }
+      ).contextMenuTrigger = () => ({ closeMenu: () => {}, openMenu: () => {} });
+      component.open();
+      const newerClose = (): void => {};
+      closeActiveTaskContextMenu.set(newerClose);
+
+      component.ngOnDestroy();
+
+      expect(closeActiveTaskContextMenu()).toBe(newerClose);
+    });
+
     it('should use getElementById for task ID in focusRelatedTaskOrNext', fakeAsync(() => {
       component.task = {
         id: 'task-with-{special}-chars',

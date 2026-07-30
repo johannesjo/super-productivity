@@ -189,6 +189,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private _restoreFocusTo?: HTMLElement;
   private _touchMenuTimeout: ReturnType<typeof setTimeout> | undefined;
   private _touchMenuRafId: number | undefined;
+  private readonly _closeContextMenu = (): void => {
+    this.contextMenuTrigger()?.closeMenu();
+  };
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
@@ -209,6 +212,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this._clearActiveContextMenu();
     this._destroy$.next(true);
     this._destroy$.complete();
     if (this._touchMenuTimeout !== undefined) {
@@ -250,6 +254,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
     this.contextMenuTrigger()?.openMenu();
     this._taskFocusService.isTaskContextMenuOpen.set(true);
+    this._taskFocusService.closeActiveTaskContextMenu.set(this._closeContextMenu);
 
     if (isTouchActive()) {
       this._touchMenuTimeout = setTimeout(() => {
@@ -334,9 +339,18 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   onClose(): void {
     // Don't manually set focusedTaskId to null here - let the task component's
     // focus/blur handlers manage it automatically to avoid race conditions
-    this._taskFocusService.isTaskContextMenuOpen.set(false);
+    this._clearActiveContextMenu();
     this.focusRelatedTaskOrNext();
     this.close.emit();
+  }
+
+  private _clearActiveContextMenu(): void {
+    if (this._taskFocusService.closeActiveTaskContextMenu() !== this._closeContextMenu) {
+      return;
+    }
+
+    this._taskFocusService.closeActiveTaskContextMenu.set(null);
+    this._taskFocusService.isTaskContextMenuOpen.set(false);
   }
 
   get kb(): KeyboardConfig {

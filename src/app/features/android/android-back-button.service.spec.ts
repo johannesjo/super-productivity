@@ -39,7 +39,7 @@ describe('AndroidBackButtonService (#7972)', () => {
   let hideAddTaskBar: jasmine.Spy;
   let hideAddTaskPanel: jasmine.Spy;
   let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
-  let closeTaskContextMenu: jasmine.Spy<() => boolean>;
+  let closeActiveTaskContextMenu: ReturnType<typeof signal<(() => void) | null>>;
 
   const setProjects = (projects: Project[]): void => {
     store.overrideSelector(selectAllProjects, projects);
@@ -70,9 +70,7 @@ describe('AndroidBackButtonService (#7972)', () => {
     hideAddTaskBar = jasmine.createSpy('hideAddTaskBar');
     hideAddTaskPanel = jasmine.createSpy('hideAddTaskPanel');
     isTaskContextMenuOpen = signal(false);
-    closeTaskContextMenu = jasmine
-      .createSpy('closeTaskContextMenu')
-      .and.returnValue(true);
+    closeActiveTaskContextMenu = signal<(() => void) | null>(null);
 
     TestBed.configureTestingModule({
       providers: [
@@ -115,9 +113,7 @@ describe('AndroidBackButtonService (#7972)', () => {
           provide: TaskFocusService,
           useValue: {
             isTaskContextMenuOpen,
-            lastFocusedTaskComponent: () => ({
-              taskContextMenu: () => ({ close: closeTaskContextMenu }),
-            }),
+            closeActiveTaskContextMenu,
           },
         },
       ],
@@ -150,7 +146,9 @@ describe('AndroidBackButtonService (#7972)', () => {
 
   describe('overlays', () => {
     it('closes an open task context menu before exiting from the start page', () => {
+      const closeTaskContextMenu = jasmine.createSpy('closeTaskContextMenu');
       isTaskContextMenuOpen.set(true);
+      closeActiveTaskContextMenu.set(closeTaskContextMenu);
 
       service.handleBackButton();
 

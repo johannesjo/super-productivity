@@ -117,14 +117,13 @@ export class AndroidBackButtonService {
   }
 
   private _closeTaskContextMenu(): boolean {
-    if (!this._taskFocusService.isTaskContextMenuOpen()) {
+    const close = this._taskFocusService.closeActiveTaskContextMenu();
+    if (!close) {
       return false;
     }
 
-    return (
-      this._taskFocusService.lastFocusedTaskComponent()?.taskContextMenu()?.close() ??
-      false
-    );
+    close();
+    return true;
   }
 
   private _isHistoryOverlayOpen(): boolean {
