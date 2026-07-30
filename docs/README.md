@@ -57,7 +57,13 @@ Research should state its snapshot date and tracking issue. Large audit outputs
 may remain while findings are being triaged, but verified work should move to
 issues and durable safety constraints should move to maintained documentation.
 
-- [Sync simplification audit](research/sync-simplification-audit/README.md)
+Delete a research note once its conclusions have moved into a maintained guide,
+a decision record, or tracked issues. A frozen finding register whose evidence
+directory no longer exists, and whose baseline commit master has long since
+passed, is misleading rather than useful — Git history keeps it retrievable.
+
+- [Recurring events implementation plan](research/recurring-events-implementation-plan.md)
+- [Snap Wayland GPU fix](research/snap-wayland-gpu-fix-research.md)
 
 ## Review checklist
 
