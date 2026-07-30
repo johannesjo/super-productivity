@@ -2639,6 +2639,31 @@ describe('shortSyntax recurrence', () => {
     expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
   });
 
+  it('should carry the typed time when the monthly anchor day springs forward', async () => {
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      return;
+    }
+    const twoDaysBefore = new Date(gap.sunday);
+    twoDaysBefore.setDate(twoDaysBefore.getDate() - 2);
+    twoDaysBefore.setHours(10, 0);
+    const dayOfMonth = gap.sunday.getDate();
+    const suffix = [1, 21, 31].includes(dayOfMonth)
+      ? 'st'
+      : [2, 22].includes(dayOfMonth)
+        ? 'nd'
+        : [3, 23].includes(dayOfMonth)
+          ? 'rd'
+          : 'th';
+    const r = await parse(
+      `Pay rent @every ${dayOfMonth}${suffix} ${gap.missingHour}:30am`,
+      twoDaysBefore,
+    );
+    const due = new Date(r?.taskChanges.dueWithTime as number);
+    expect(due.getDate()).toBe(gap.sunday.getDate());
+    expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+  });
+
   it('should carry the typed time when the weekly roll lands on the spring-forward sunday', async () => {
     // Typed on a Sunday after the typed time has passed, the anchor rolls +7
     // and lands on the transition Sunday, where the typed time does not exist.

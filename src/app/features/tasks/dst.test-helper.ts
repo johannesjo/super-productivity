@@ -21,6 +21,9 @@ export const findSpringForwardSunday = (
       ) {
         continue;
       }
+      // Deliberately starts at 1: a midnight transition (Azores-style 00:00
+      // to 01:00) would need "12:30am" phrasing in the consuming specs, so
+      // such zones return null and the specs skip, same as no-DST zones.
       for (let hour = 1; hour < 6; hour++) {
         if (new Date(year, month, day, hour, 30, 0, 0).getHours() !== hour) {
           return { sunday: start, missingHour: hour };

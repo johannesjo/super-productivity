@@ -374,7 +374,9 @@ const SHORT_SYNTAX_MARKDOWN_LINK_REG_EX =
 
 // Non-Task marker fields that ride along in taskChanges for consumers to read
 // and that must be stripped before persisting (see short-syntax.effects).
-export interface ShortSyntaxMarkers {
+// Consumers reach the fields structurally through shortSyntax's return type,
+// so the interface is deliberately not exported.
+interface ShortSyntaxMarkers {
   hasDeadlineTime?: boolean;
   /**
    * The typed wall-clock time as HH:mm. dueWithTime alone cannot carry it when
@@ -967,7 +969,10 @@ const applyRepeatSyntax = async (
     // Captured from the chrono result, not from anchorDate after the mutations
     // below: the anchor (or a roll below) can land on a DST spring-forward day
     // where the typed time does not exist, and anchorDate can then only hold
-    // the shifted hour.
+    // the shifted hour. Reading the chrono Date is safe the other way around:
+    // chrono's own validity filter drops any parse whose resolved day would
+    // normalize the typed time (getHours() != get('hour')), so `parsed` can
+    // never itself carry a shifted hour — it can only be absent entirely.
     let typedTimeStr: string | undefined;
     if (hasTime && parsedDateResult) {
       const parsed = parsedDateResult.start.date();
