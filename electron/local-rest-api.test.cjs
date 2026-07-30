@@ -51,6 +51,18 @@ const createContext = ({ port, userDataDir }) => {
     // Effective mode of the descriptor at each writeFileSync(fd, ...), in order.
     // On POSIX the secret must never reach one whose mode check has not passed.
     writtenAtModes: [],
+    // When set to a path, openSync() plants a symlink to it at every `.tmp`
+    // path the module opens, at the instant it opens it. That is the
+    // perfectly-timed version of pre-planting one: it removes the guessing from
+    // the attack, leaving only whether the open refuses an existing entry.
+    plantSymlinkOnTempOpen: null,
+    // Every `.tmp` path this copy has opened, in order, and how many symlinks
+    // the hook above planted. Both are how a test can tell "the temp file was
+    // never opened" from "it was opened safely".
+    openedTempPaths: [],
+    plantedSymlinkCount: 0,
+    // Arguments of every warn() this copy made.
+    warnings: [],
   };
 
   ctx.win = {
@@ -88,6 +100,13 @@ const installMocks = (ctx) => {
       return {
         ...actualFs,
         openSync: (filePath, flags, mode) => {
+          if (String(filePath).endsWith('.tmp')) {
+            ctx.openedTempPaths.push(String(filePath));
+            if (ctx.plantSymlinkOnTempOpen) {
+              actualFs.symlinkSync(ctx.plantSymlinkOnTempOpen, filePath);
+              ctx.plantedSymlinkCount++;
+            }
+          }
           const fd =
             mode !== undefined && ctx.createPermissiveMode
               ? actualFs.openSync(filePath, flags, 0o644)
@@ -131,7 +150,11 @@ const installMocks = (ctx) => {
     if (request === 'electron-log/main') {
       return {
         log: () => {},
-        warn: () => {},
+        // Kept, not discarded: the Error this copy warned with is the only
+        // place a test can read *why* a persist failed.
+        warn: (...args) => {
+          ctx.warnings.push(args);
+        },
       };
     }
 
@@ -194,6 +217,16 @@ const disableApi = () =>
 const getToken = () => sharedCtx.handleHandlers.get('LOCAL_REST_API_GET_TOKEN')();
 const regenerateToken = () =>
   sharedCtx.handleHandlers.get('LOCAL_REST_API_REGENERATE_TOKEN')();
+
+/**
+ * Yields the event loop so a pending listen() callback can run. Teardown needs
+ * it: `isListening` only flips inside that callback, and stopServer() returns
+ * early while it is false — so disabling in the same tick as the enable closes
+ * nothing and leaves the socket bound for the rest of the process. A test whose
+ * assertion fails before it awaits anything would otherwise hang the run
+ * instead of reporting the failure.
+ */
+const settleListen = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const collectResponse = (res, resolve) => {
   let data = '';
@@ -618,17 +651,16 @@ test('enabling fails closed when the token file cannot be made private', async (
     );
     // That assertion cannot see the window this closes: it names the final
     // path, which the failed rename never creates, while the secret would have
-    // gone into the sibling `<path>.<pid>.tmp`. Nothing else asserts that temp
-    // file is cleaned up either, so check the directory is left empty.
+    // gone into the sibling temp file. Nothing else asserts that temp file is
+    // cleaned up either, so check the directory is left empty.
     assert.deepEqual(
       fs.readdirSync(profileDir),
       [],
       'the temp file that holds the token was left behind',
     );
     // And that the secret never reached a readable descriptor in the first
-    // place. The temp name is predictable, which is what makes that window
-    // worth closing. POSIX only — the Windows branch has no mode check, and
-    // this test returns early there.
+    // place, which is the property the write order exists for. POSIX only —
+    // the Windows branch has no mode check, and this test returns early there.
     assert.deepEqual(
       ctx.writtenAtModes.filter((mode) => (mode & 0o077) !== 0),
       [],
@@ -639,6 +671,153 @@ test('enabling fails closed when the token file cannot be made private', async (
   } finally {
     isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
     fs.rmSync(profileDir, { recursive: true, force: true });
+  }
+});
+
+// The mode check above protects the token from being *read*. The temp path
+// protects the machine from what the write itself can be aimed at: anything
+// able to create an entry in the profile directory can put a symlink where the
+// token is about to be written, and an open that follows it turns a credential
+// write into a write to a file of someone else's choosing.
+//
+// The two halves of the fix fail this test differently, which is the point of
+// asserting both outcomes below: with the old `<path>.<pid>.tmp` name and a
+// following open, the planted symlink is written through; with that name and an
+// exclusive open, nothing is clobbered but the enable is blocked until someone
+// deletes the entry by hand. Only an unguessable name gives both.
+test('an entry at the old predictable temp path cannot redirect or block the write', async () => {
+  if (process.platform === 'win32') {
+    return;
+  }
+  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-symlink-'));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-outside-'));
+  const outsidePath = path.join(outsideDir, 'victim');
+  const outsideContent = 'do not clobber me';
+  fs.writeFileSync(outsidePath, outsideContent, { mode: 0o600 });
+  const tokenPath = path.join(profileDir, 'local-rest-api-token');
+  // The name the temp file used to carry. Guessing it needed nothing but the
+  // pid, which is not a secret.
+  fs.symlinkSync(outsidePath, `${tokenPath}.${process.pid}.tmp`);
+
+  const port = takeIsolatedPort();
+  const ctx = createContext({ port, userDataDir: profileDir });
+  const isolated = loadModule(ctx);
+
+  try {
+    isolated.initLocalRestApi();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    assert.equal(
+      fs.readFileSync(outsidePath, 'utf8'),
+      outsideContent,
+      'the token was written through the planted symlink, outside the profile',
+    );
+    assert.equal(
+      fs.existsSync(tokenPath),
+      true,
+      'the planted entry blocked the enable, so the temp name is still guessable',
+    );
+    // And the credential is a real file here, not the renamed symlink — which
+    // would redirect every later read and rotation to the attacker's path.
+    assert.equal(fs.lstatSync(tokenPath).isSymbolicLink(), false);
+    const token = fs.readFileSync(tokenPath, 'utf8').trim();
+    assert.match(token, /^[A-Za-z0-9]{32}$/);
+
+    // Awaiting a request is also what lets the teardown below actually stop the
+    // server: isListening only flips inside listen()'s callback, so a disable
+    // in the same tick as the enable finds it still false and closes nothing.
+    const authed = await makeRequest(
+      { method: 'GET', path: '/tasks', headers: { Authorization: `Bearer ${token}` } },
+      undefined,
+      port,
+    );
+    assert.equal(authed.status, 200, 'the token that survived the symlink is not live');
+
+    // Avoiding one known name is not the property being claimed. Rotate twice
+    // and require every temp path to differ: a name that is merely *different*
+    // from the old one, `<token>.fixed.tmp` say, passes everything above and is
+    // just as pre-plantable.
+    ctx.handleHandlers.get('LOCAL_REST_API_REGENERATE_TOKEN')();
+    ctx.handleHandlers.get('LOCAL_REST_API_REGENERATE_TOKEN')();
+    assert.ok(
+      ctx.openedTempPaths.length >= 3,
+      `expected one temp file per write, saw ${ctx.openedTempPaths.length}`,
+    );
+    assert.equal(
+      new Set(ctx.openedTempPaths).size,
+      ctx.openedTempPaths.length,
+      `the temp path repeats across writes, so it is derived rather than random: ${JSON.stringify(
+        ctx.openedTempPaths.map((p) => path.basename(p)),
+      )}`,
+    );
+  } finally {
+    await settleListen();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+    fs.rmSync(profileDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  }
+});
+
+// An unguessable name makes that attack impractical rather than impossible, so
+// the open refuses an existing entry as well. This test hands the attacker the
+// name for free — the symlink appears at the exact path, at the exact moment —
+// which is the only way to observe the flag rather than the name.
+test('the temp file is opened exclusively, so a name that is guessed anyway fails closed', async () => {
+  if (process.platform === 'win32') {
+    return;
+  }
+  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-excl-'));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sp-lra-excl-out-'));
+  const outsidePath = path.join(outsideDir, 'victim');
+  const outsideContent = 'do not clobber me either';
+  fs.writeFileSync(outsidePath, outsideContent, { mode: 0o600 });
+  const tokenPath = path.join(profileDir, 'local-rest-api-token');
+
+  const port = takeIsolatedPort();
+  const ctx = createContext({ port, userDataDir: profileDir });
+  ctx.plantSymlinkOnTempOpen = outsidePath;
+  const isolated = loadModule(ctx);
+
+  try {
+    isolated.initLocalRestApi();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: true } });
+
+    assert.equal(
+      fs.readFileSync(outsidePath, 'utf8'),
+      outsideContent,
+      'the token was written through the planted symlink, outside the profile',
+    );
+    // Failing closed, like every other case where the token cannot be stored
+    // safely: no server, and nothing left behind in the profile.
+    await assert.rejects(
+      makeRequest({ method: 'GET', path: '/health' }, undefined, port),
+      /ECONNREFUSED/,
+      'the API came up with a token it could not store safely',
+    );
+    // Subsumes existsSync(tokenPath): the failed write left nothing at all.
+    assert.deepEqual(fs.readdirSync(profileDir), []);
+    // Every assertion above also holds if the module never opened a temp file
+    // at all — a persistToken() that threw on its first line would pass them.
+    // The hook only fires from inside openSync(), so this says the attempt was
+    // made.
+    assert.ok(
+      ctx.plantedSymlinkCount > 0,
+      'no temp file was ever opened, so this test proves nothing about the open',
+    );
+    // And this says the *exclusive* open is what refused it. "Fails closed" is
+    // reachable by other means — an open that succeeds and a write that then
+    // fails also leaves the victim untouched and no server running — so pin
+    // the reason rather than the outcome.
+    const causes = ctx.warnings.map(([, error]) => error && error.code);
+    assert.ok(
+      causes.includes('EEXIST'),
+      `the write failed for some reason other than the planted entry: ${JSON.stringify(causes)}`,
+    );
+  } finally {
+    await settleListen();
+    isolated.updateLocalRestApiConfig({ misc: { isLocalRestApiEnabled: false } });
+    fs.rmSync(profileDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
   }
 });
 

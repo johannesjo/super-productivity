@@ -202,13 +202,34 @@ const persistToken = (token: string): void => {
   const filePath = getTokenFilePath();
   // Write a sibling temp file and rename it into place. rename() is atomic, so
   // a crash mid-write cannot leave a half-written token behind.
-  const tmpFilePath = `${filePath}.${process.pid}.tmp`;
+  //
+  // The suffix is random and the open below is exclusive, because the temp path
+  // is the weak point of this sequence: a predictable name lets anyone who can
+  // create entries in this directory pre-plant a symlink there, and 'w' would
+  // follow it — writing the token into a file outside the profile and then
+  // renaming the *symlink* into place, so every later read and rotation stays
+  // redirected. 'wx' alone would close that, but on a pid-derived name it also
+  // refuses to run once a leftover temp from a hard kill is met by a run that
+  // draws the same pid, which needs stale-temp handling to undo. A random name
+  // has nothing to pre-plant and makes EEXIST unreachable in practice, so the
+  // two together need no such recovery. The trade is that a hard kill inside
+  // the window orphans a temp file — empty, partial, or the whole 32 bytes,
+  // depending on where it lands — that no later run reclaims.
+  //
+  // What this does not close: renameSync() resolves the name again rather than
+  // the open descriptor, so an attacker who renames the temp entry away after
+  // the open and leaves a symlink at that path still redirects the result. That
+  // needs a won race instead of a file planted at leisure, and it needs the
+  // authority to rename an entry this process owns — which a sticky directory
+  // denies even when it is world-writable, and which is enough to replace the
+  // token file itself where it is not.
+  const tmpFilePath = `${filePath}.${randomBytes(8).toString('hex')}.tmp`;
   let fd: number | undefined;
 
   try {
-    fd = openSync(tmpFilePath, 'w', 0o600);
-    // `mode` only applies when the file is created, so it would leave a
-    // pre-existing file at its old — possibly group/world-readable — mode.
+    fd = openSync(tmpFilePath, 'wx', 0o600);
+    // `mode` is a request, not a guarantee: a filesystem that does not enforce
+    // POSIX modes can create the file group- or world-readable regardless.
     fchmodSync(fd, 0o600);
     // And verify it through the same descriptor rather than trusting the call:
     // fchmod() can succeed without effect on a filesystem that does not enforce
