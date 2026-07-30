@@ -412,15 +412,14 @@ const anchorsFromDocument = (filePath) => {
 
   const isMarkdown = MARKDOWN_EXTENSIONS.has(path.extname(filePath).toLowerCase());
   const visibleLines = isMarkdown ? linesOutsideMarkdownCode(lines) : lines;
-  const visibleContents = visibleLines
-    .join('\n')
-    .replace(/<!--[\s\S]*?-->/g, '')
-    // An unterminated comment comments out the rest of the document. Without
-    // this, an anchor parked inside one validates as real and a link to it
-    // silently passes — the exact false negative this tool exists to catch.
-    // (Paired comments are handled above; HTML comments do not nest, so text
-    // after the first `-->` is genuinely visible and must stay.)
-    .replace(/<!--[\s\S]*$/, '');
+  // Strip HTML comments, terminated or not: `-->` closes one, and an
+  // unterminated comment runs to end of input. Both alternatives are required —
+  // without the `$` arm, an anchor parked inside an unterminated comment
+  // validates as real and a link to it silently passes, which is the exact
+  // false negative this tool exists to catch. One pass suffices because every
+  // `<!--` is consumed by construction, and HTML comments do not nest, so text
+  // after the first `-->` is genuinely visible and must survive.
+  const visibleContents = visibleLines.join('\n').replace(/<!--[\s\S]*?(?:-->|$)/g, '');
   const anchors = new Set();
   const htmlTag = /<([a-z][\w:-]*)\b[^>]*>/gi;
   for (const match of visibleContents.matchAll(htmlTag)) {
