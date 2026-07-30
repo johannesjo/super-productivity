@@ -21,7 +21,7 @@
  */
 
 import { Prisma } from '@prisma/client';
-import { prisma, disconnectDb } from '../src/db';
+import { prisma, disconnectDb, reportMonitoringError } from './monitoring-db';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -65,12 +65,8 @@ const saveToFile = (filename: string, data: any): string => {
 const analyzeOperationSizes = async (userId?: number): Promise<void> => {
   console.log('\n=== Operation Size Distribution ===\n');
 
-  const userWhere = userId
-    ? Prisma.sql`WHERE user_id = ${userId}`
-    : Prisma.empty;
-  const userAnd = userId
-    ? Prisma.sql`AND user_id = ${userId}`
-    : Prisma.empty;
+  const userWhere = userId ? Prisma.sql`WHERE user_id = ${userId}` : Prisma.empty;
+  const userAnd = userId ? Prisma.sql`AND user_id = ${userId}` : Prisma.empty;
 
   // Get percentile distribution
   const sizeDistribution: any[] = await prisma.$queryRaw`
@@ -141,9 +137,7 @@ const analyzeOperationSizes = async (userId?: number): Promise<void> => {
 const analyzeOperationTimeline = async (userId?: number): Promise<void> => {
   console.log('\n=== Operation Timeline Analysis ===\n');
 
-  const userAnd = userId
-    ? Prisma.sql`AND user_id = ${userId}`
-    : Prisma.empty;
+  const userAnd = userId ? Prisma.sql`AND user_id = ${userId}` : Prisma.empty;
 
   // Operations per day
   console.log('Operations per Day (last 30 days):');
@@ -206,9 +200,7 @@ const analyzeOperationTimeline = async (userId?: number): Promise<void> => {
 const analyzeOperationTypes = async (userId?: number): Promise<void> => {
   console.log('\n=== Operation Type Analysis ===\n');
 
-  const userWhere = userId
-    ? Prisma.sql`WHERE user_id = ${userId}`
-    : Prisma.empty;
+  const userWhere = userId ? Prisma.sql`WHERE user_id = ${userId}` : Prisma.empty;
 
   // By opType
   console.log('By Operation Type:');
@@ -790,8 +782,9 @@ const main = async (): Promise<void> => {
         showHelp();
     }
   } catch (error) {
-    console.error('Error:', error);
-    process.exit(1);
+    if (reportMonitoringError('Error:', error)) {
+      process.exit(1);
+    }
   } finally {
     await disconnectDb();
   }
