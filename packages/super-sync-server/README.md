@@ -265,7 +265,10 @@ the policy points users to the authority for their own residence).
 To publish your own Terms of Service, put the HTML at `<DATA_DIR>/legal/terms.html`; it is
 copied to `/terms.html` at startup and linked from the consent notice. With the bundled
 compose file that means bind-mounting it — see the commented example in
-`docker-compose.yml`. The shipped template is a starting point, not legal advice: review
+`docker-compose.yml`. Deployments driven by `scripts/deploy.sh` can instead set
+`SUPERSYNC_INSTALL_REPO_TERMS=true` in `.env` to sync `legal/terms.html` from the git
+checkout into the data volume on every deploy — do that only if the file in your checkout
+is genuinely yours. The shipped template is a starting point, not legal advice: review
 every section against how you actually operate before publishing it.
 
 ## API Endpoints
