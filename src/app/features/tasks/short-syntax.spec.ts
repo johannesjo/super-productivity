@@ -2375,6 +2375,37 @@ describe('shortSyntax recurrence', () => {
   ): RepeatQuickSetting | null =>
     r?.repeat?.type === 'PRESET' ? r.repeat.quickSetting : null;
 
+  // The ambient timezone's spring-forward sunday and the hour it skips, derived
+  // rather than hardcoded so the DST case below is exercised in every zone the
+  // suite runs in (Berlin transitions in march, Los Angeles two weeks earlier,
+  // Sydney in october). Returns null where there is no transition.
+  const findSpringForwardSunday = (
+    year: number,
+  ): { sunday: Date; missingHour: number } | null => {
+    const dayMs = 24 * 60 * 60 * 1000;
+    for (let month = 0; month < 12; month++) {
+      for (let day = 1; day <= 31; day++) {
+        const start = new Date(year, month, day, 0, 0, 0, 0);
+        if (start.getDate() !== day || start.getDay() !== 0) {
+          continue;
+        }
+        // A spring-forward day is shorter than 24h.
+        if (
+          new Date(year, month, day + 1, 0, 0, 0, 0).getTime() - start.getTime() >=
+          dayMs
+        ) {
+          continue;
+        }
+        for (let hour = 1; hour < 6; hour++) {
+          if (new Date(year, month, day, hour, 30, 0, 0).getHours() !== hour) {
+            return { sunday: start, missingHour: hour };
+          }
+        }
+      }
+    }
+    return null;
+  };
+
   it('should parse "@every friday" as weekly repeat anchored to next friday', async () => {
     const r = await parse('Water plants @every friday');
     expect(presetOf(r)).toBe('WEEKLY_CURRENT_WEEKDAY');
@@ -2592,6 +2623,28 @@ describe('shortSyntax recurrence', () => {
     expect(due.getDate()).toBe(22);
     expect(due.getDay()).toBe(1);
     expect(due.getHours()).toBe(6);
+  });
+
+  it('should keep the typed time when the skipped-over sunday springs forward', async () => {
+    // The weekend skip steps through Sunday, which is the day DST changes. If
+    // the typed time falls in the spring-forward gap, setDate normalizes it and
+    // the shift sticks — and this one is not preview-only: the time is read back
+    // off the parsed timestamp into the repeat config's startTime, so the task
+    // would recur an hour late every workday.
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      // Timezone without a spring-forward transition (UTC, Tokyo).
+      return;
+    }
+    const friday = new Date(gap.sunday);
+    friday.setDate(friday.getDate() - 2);
+    friday.setHours(gap.missingHour + 6, 0);
+    const r = await parse(`Standup @every weekday ${gap.missingHour}:30am`, friday);
+    expect(presetOf(r)).toBe('MONDAY_TO_FRIDAY');
+    const due = new Date(r?.taskChanges.dueWithTime as number);
+    expect(due.getDay()).toBe(1);
+    expect(due.getHours()).toBe(gap.missingHour);
+    expect(due.getMinutes()).toBe(30);
   });
 
   it('should parse "@every 15th" as monthly on next 15th', async () => {
