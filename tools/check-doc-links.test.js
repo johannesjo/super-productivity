@@ -559,3 +559,47 @@ test('--sources-only checks source citations and ignores document links', () => 
     },
   );
 });
+
+test('does not harvest anchors from an unterminated HTML comment', () => {
+  withDocs(
+    {
+      'index.md': [
+        '[Commented out](guide.md#never-real)',
+        '[Still visible](guide.md#visible)',
+        '[After a paired comment](guide.md#after-paired)',
+      ].join('\n'),
+      'guide.md': [
+        '# Guide',
+        '<!-- paired --><div id="after-paired"></div>',
+        '<h2 id="visible">Visible</h2>',
+        '<!-- TODO: parked for later',
+        '<div id="never-real"></div>',
+      ].join('\n'),
+    },
+    (root) => {
+      // Only the anchor inside the unterminated comment is unreachable. Anchors
+      // after a *paired* comment stay valid: HTML comments do not nest.
+      assert.deepEqual(findBrokenLinks(root), [
+        {
+          file: 'index.md',
+          issue: 'missing anchor',
+          line: 1,
+          target: 'guide.md#never-real',
+        },
+      ]);
+    },
+  );
+});
+
+test('strips nested-looking HTML tags from a heading to a fix point', () => {
+  withDocs(
+    {
+      'index.md': '[Doubled opener](guide.md#heading)',
+      'guide.md': ['# Guide', '## <<span>span> Heading'].join('\n'),
+    },
+    (root) => {
+      // One strip pass would leave a literal "<span>" in the slug source.
+      assert.deepEqual(findBrokenLinks(root), []);
+    },
+  );
+});

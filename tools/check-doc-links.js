@@ -324,11 +324,23 @@ const renderUnderscoreEmphasis = (value) => {
   return rendered;
 };
 
+// Strip to a fix point: one pass over `<<span>span>` leaves a second `<span>`
+// behind, which would then survive into the slug. Same idiom as
+// renderUnderscoreEmphasis above.
+const stripHtmlTags = (value) => {
+  const tag = /<\/?[a-z][a-z\d-]*(?:\s[^>]*)?>/gi;
+  let stripped = value;
+  let previous;
+  do {
+    previous = stripped;
+    stripped = stripped.replace(tag, '');
+  } while (stripped !== previous);
+  return stripped;
+};
+
 const renderedHeadingText = (heading) =>
   renderUnderscoreEmphasis(
-    renderMarkdownLinks(heading)
-      .replace(/<\/?[a-z][a-z\d-]*(?:\s[^>]*)?>/gi, '')
-      .replace(/`+([^`]*)`+/g, '$1'),
+    stripHtmlTags(renderMarkdownLinks(heading)).replace(/`+([^`]*)`+/g, '$1'),
   );
 
 const headingSlug = (heading) =>
@@ -400,7 +412,15 @@ const anchorsFromDocument = (filePath) => {
 
   const isMarkdown = MARKDOWN_EXTENSIONS.has(path.extname(filePath).toLowerCase());
   const visibleLines = isMarkdown ? linesOutsideMarkdownCode(lines) : lines;
-  const visibleContents = visibleLines.join('\n').replace(/<!--[\s\S]*?-->/g, '');
+  const visibleContents = visibleLines
+    .join('\n')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    // An unterminated comment comments out the rest of the document. Without
+    // this, an anchor parked inside one validates as real and a link to it
+    // silently passes — the exact false negative this tool exists to catch.
+    // (Paired comments are handled above; HTML comments do not nest, so text
+    // after the first `-->` is genuinely visible and must stay.)
+    .replace(/<!--[\s\S]*$/, '');
   const anchors = new Set();
   const htmlTag = /<([a-z][\w:-]*)\b[^>]*>/gi;
   for (const match of visibleContents.matchAll(htmlTag)) {
