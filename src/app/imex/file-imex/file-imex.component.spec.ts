@@ -12,7 +12,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FileImexComponent } from './file-imex.component';
 import { SnackService } from '../../core/snack/snack.service';
 import { BackupService } from '../../op-log/backup/backup.service';
-import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { T } from '../../t.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { ConfirmUrlImportDialogComponent } from '../dialog-confirm-url-import/dialog-confirm-url-import.component';
@@ -27,7 +26,6 @@ describe('FileImexComponent', () => {
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockBackupService: jasmine.SpyObj<BackupService>;
-  let mockLocalDraftService: jasmine.SpyObj<LocalDraftService>;
   let mockActivatedRoute: any;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
   let httpTestingController: HttpTestingController;
@@ -47,10 +45,6 @@ describe('FileImexComponent', () => {
       'loadCompleteBackup',
     ]);
     backupServiceSpy.loadCompleteBackup.and.returnValue(Promise.resolve(mockAppData));
-    const localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', [
-      'deleteDraftsForActiveProfile',
-    ]);
-    localDraftServiceSpy.deleteDraftsForActiveProfile.and.returnValue(Promise.resolve());
     const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     const importEncryptionHandlerSpy = jasmine.createSpyObj(
       'ImportEncryptionHandlerService',
@@ -88,7 +82,6 @@ describe('FileImexComponent', () => {
         { provide: SnackService, useValue: snackServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: BackupService, useValue: backupServiceSpy },
-        { provide: LocalDraftService, useValue: localDraftServiceSpy },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: MatDialog, useValue: matDialogSpy },
         { provide: ImportEncryptionHandlerService, useValue: importEncryptionHandlerSpy },
@@ -101,9 +94,6 @@ describe('FileImexComponent', () => {
     mockSnackService = TestBed.inject(SnackService) as jasmine.SpyObj<SnackService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockBackupService = TestBed.inject(BackupService) as jasmine.SpyObj<BackupService>;
-    mockLocalDraftService = TestBed.inject(
-      LocalDraftService,
-    ) as jasmine.SpyObj<LocalDraftService>;
     mockMatDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
     httpTestingController = TestBed.inject(HttpTestingController);
   });
@@ -351,15 +341,6 @@ describe('FileImexComponent', () => {
         true,
         true,
       );
-      // The import replaced this profile's notes wholesale, so every draft's
-      // baseContent now refers to content that no longer exists.
-      expect(mockLocalDraftService.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not clear drafts when the data is invalid and no import happens', async () => {
-      await component['_processAndImportData']('{ invalid json');
-
-      expect(mockLocalDraftService.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
     });
 
     it('should handle invalid JSON data', async () => {

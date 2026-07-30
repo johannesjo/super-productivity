@@ -46,7 +46,6 @@ import {
   insertTable,
 } from '../inline-markdown/markdown-toolbar.util';
 import { ClipboardImageService } from '../../core/clipboard-image/clipboard-image.service';
-import { DialogConfirmComponent } from '../dialog-confirm/dialog-confirm.component';
 import { TaskAttachmentService } from '../../features/tasks/task-attachment/task-attachment.service';
 import { ClipboardPasteHandlerService } from '../../core/clipboard-image/clipboard-paste-handler.service';
 import { toggleChecklistItemAtIndex } from '../../features/markdown-checklist/checklist-operations';
@@ -92,15 +91,7 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _dateService = inject(DateService);
   _matDialogRef = inject<MatDialogRef<DialogFullscreenMarkdownComponent>>(MatDialogRef);
-  data: {
-    content: string;
-    taskId?: string;
-    originalContent?: string;
-  } = inject(MAT_DIALOG_DATA) || { content: '' };
-  // Reference for the discard confirmation. `originalContent` wins when the
-  // dialog is seeded with recovered draft content that differs from the
-  // persisted entity content.
-  protected _initialContent: string = this.data.originalContent ?? this.data.content;
+  data: { content: string; taskId?: string } = inject(MAT_DIALOG_DATA) || { content: '' };
 
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
@@ -118,14 +109,6 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   resolvedContent = signal<string>('');
   // Plain property for markdown component compatibility
   resolvedContentData: string | undefined;
-  /**
-   * True while the discard confirmation is up. This dialog stays OPEN behind
-   * that confirm, so anything closing it on an external signal must stand down
-   * until the user has answered — see openFullscreenMarkdownDialog, whose
-   * Location handler would otherwise close through the SAVE path, the exact
-   * opposite of the Discard the user just clicked (#8982 review).
-   */
-  isDiscardConfirmOpen = false;
 
   constructor() {
     // Set initial content synchronously for immediate rendering
@@ -323,64 +306,16 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   }
 
   close(isSkipSave: boolean = false): void {
-    // When the "Discard" button is hit by the user, the note is closed without saving
-    // (after confirmation if the content was modified). The explicit result lets
-    // callers tell a user-confirmed discard from the dialog being disposed some
-    // other way (e.g. MatDialog.closeAll()), which emits undefined.
+    // When the "Close" button is hit by the user, the note is closed without saving.
     if (isSkipSave) {
-      // Confirm before discarding modified content, for every caller of this
-      // shared dialog. The "Close" action was renamed to "Discard" (more final),
-      // so confirming is the matching guard — and having no crash-safe draft
-      // (task notes, inline markdown) is a reason to confirm more, not less.
-      // _confirmDiscardIfNeeded no-ops when nothing was modified, so an unmodified
-      // close still closes instantly (#8982 review).
-      // The final editor content rides along on the result. Callers that keep a
-      // crash-safe draft need it to scope their "discarded" marker to the text
-      // this editor session actually ended with — the debounced contentChanged
-      // stream can lag by up to its debounce, so the stored copy is not
-      // authoritative at close time (#8982 review).
-      this._confirmDiscardIfNeeded(() =>
-        this._matDialogRef.close({
-          action: 'DISCARD',
-          content: this.data?.content ?? '',
-        }),
-      );
+      this._matDialogRef.close();
       // When the note is made empty manually by the user and the "Save" button is hit, the note is automatically deleted instead of being left blank.
     } else if (!this.data?.content && this.data.content.trim().length < 1) {
       this._matDialogRef.close({ action: 'DELETE' });
       // When the "Save" button is clicked by the user and the note has content, it will save.
     } else {
-      // The Save path resolves afterClosed with the final content; the note's
-      // save handler awaits its own crash-safe draft write, so no close-path
-      // contentChanged emit is needed (it would only race a duplicate write).
       this._matDialogRef.close(this.data?.content);
     }
-  }
-
-  protected _confirmDiscardIfNeeded(onDiscard: () => void): void {
-    if ((this.data?.content || '') === this._initialContent) {
-      onDiscard();
-      return;
-    }
-    this.isDiscardConfirmOpen = true;
-    this._matDialog
-      .open(DialogConfirmComponent, {
-        restoreFocus: true,
-        data: {
-          message: T.F.NOTE.D_FULLSCREEN.CONFIRM_DISCARD_MSG,
-          okTxt: T.G.DISCARD,
-        },
-      })
-      .afterClosed()
-      .subscribe((isConfirm: boolean) => {
-        // Cleared on every outcome, including the confirm being disposed by a
-        // navigation (it keeps MatDialog's default closeOnNavigation) — the
-        // editor stays open and usable in that case.
-        this.isDiscardConfirmOpen = false;
-        if (isConfirm) {
-          onDiscard();
-        }
-      });
   }
 
   onViewModeChange(): void {
