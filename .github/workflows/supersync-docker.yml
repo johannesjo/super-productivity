@@ -99,8 +99,27 @@ jobs:
             VCS_REF=${{ steps.source-ref.outputs.revision }}
           no-cache: ${{ github.event_name == 'workflow_dispatch' && inputs.no_cache || false }}
           platforms: linux/amd64
+          # Buildx would otherwise attach a provenance attestation, turning every push
+          # into an OCI index with an untagged child version. Nobody consumes the
+          # attestation (deploys verify the VCS_REF revision label instead), and a flat
+          # one-version-per-build graph is what makes the prune step below safe.
+          provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Image digest
         run: echo "Image pushed with digest ${{ steps.meta.outputs.tags }}"
+
+      # Keep the registry from accumulating a version per master push forever. 15
+      # newest versions ≈ weeks of rollback targets at the current push cadence.
+      # Safe to count naively because the build is single-arch with provenance off:
+      # one version per build, no untagged children a deletion could orphan.
+      # Requires the package to grant this repo write access (it does — this same
+      # workflow publishes it with GITHUB_TOKEN).
+      - name: Prune old package versions
+        if: github.event_name == 'push'
+        uses: actions/delete-package-versions@e5bc658cc4c965c472efe991f8beea3981499c55 # v5
+        with:
+          package-name: supersync
+          package-type: container
+          min-versions-to-keep: 15
