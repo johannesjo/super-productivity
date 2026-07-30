@@ -98,7 +98,7 @@ export interface TaskCopy
    * - When dueWithTime is set, dueDay MUST be undefined/null (not both set)
    * - When reading, check dueWithTime FIRST (it takes priority over dueDay)
    *
-   * @see docs/ai/dueDay-dueWithTime-mutual-exclusivity.md
+   * @see ARCHITECTURE-DECISIONS.md Decision #1
    */
   dueWithTime?: number | null;
 
@@ -111,7 +111,7 @@ export interface TaskCopy
    * - When reading, check dueWithTime FIRST (it takes priority over dueDay)
    * - Legacy data may have both fields set; handle via priority pattern
    *
-   * @see docs/ai/dueDay-dueWithTime-mutual-exclusivity.md
+   * @see ARCHITECTURE-DECISIONS.md Decision #1
    */
   dueDay?: string | null;
   hasPlannedTime?: boolean;

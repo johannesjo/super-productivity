@@ -236,7 +236,7 @@ export class TagEffects {
    * or post-sync cooldown period.
    *
    * @see selectTodayTagRepair - detects inconsistencies between TODAY_TAG.taskIds and task.dueDay
-   * @see docs/ai/today-tag-architecture.md
+   * @see ARCHITECTURE-DECISIONS.md Decision #2
    */
   repairTodayTagConsistency$: Observable<unknown> = createEffect(() =>
     this._store$.select(selectTodayTagRepair).pipe(
