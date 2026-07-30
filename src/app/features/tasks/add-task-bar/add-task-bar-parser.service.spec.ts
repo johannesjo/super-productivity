@@ -1678,7 +1678,7 @@ describe('AddTaskBarParserService', () => {
     it('should publish the typed time when the anchor day springs forward', async () => {
       // Guards the dueTimeStr passthrough: on a DST spring-forward day the
       // typed time does not exist, so deriving the time from the dueWithTime
-      // timestamp reads back an hour shifted — and that string becomes the
+      // timestamp reads back an hour shifted, and that string becomes the
       // repeat config's startTime. Only a real transition day can tell the
       // passthrough and the timestamp read-back apart.
       const gap = findSpringForwardSunday(2026);

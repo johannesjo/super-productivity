@@ -490,8 +490,8 @@ export class ConfigPageComponent implements OnInit {
     this.expandedSection = target.sectionKey ?? null;
     this._cd.detectChanges();
     // The tab body swaps in over `animationDuration`, so the element doesn't
-    // exist yet — wait it out before scrolling.
-    // ponytail: a fixed delay, not an animation-done hook. Switch to
+    // exist yet; wait it out before scrolling.
+    // shortcut: a fixed delay, not an animation-done hook. Switch to
     // `MatTabGroup.animationDone` if the duration ever stops being a constant.
     setTimeout(() => {
       this._elRef.nativeElement

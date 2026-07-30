@@ -560,7 +560,7 @@ describe('PlannerService', () => {
       // 00:30 on Jan 15 with a 04:00 start-of-next-day is logically still Jan
       // 14. Anchoring the window on the raw clock instead would start it at
       // Jan 15, leaving the tasks still planned for (logical) today without a
-      // rendered day — and ensureDayLoaded can only extend the window forward,
+      // rendered day, and ensureDayLoaded can only extend the window forward,
       // so no interaction can bring the day back.
       jasmine.clock().install();
       jasmine.clock().mockDate(new Date(2026, 0, 15, 0, 30));
