@@ -252,11 +252,11 @@ const createTaskWidgetWindowForGeneration = async (
 
   taskWidgetWin.loadFile(join(__dirname, 'task-widget.html'));
 
-  // Re-apply opacity once the renderer is ready to receive IPC (Windows only; macOS uses setOpacity()).
-  taskWidgetWin.webContents.once('did-finish-load', () => {
-    if (taskWidgetWin && !taskWidgetWin.isDestroyed()) {
-      updateTaskWidgetOpacity(currentOpacity);
-    }
+  // Re-apply opacity once the page loads. On Windows/Linux opacity is a CSS variable driven
+  // by IPC; sends before did-finish-load are dropped. Uses 'on' (not 'once') so a DevTools
+  // reload also restores the correct opacity. macOS re-calls setOpacity() idempotently.
+  taskWidgetWin.webContents.on('did-finish-load', () => {
+    updateTaskWidgetOpacity(currentOpacity);
   });
 
   // Set visible on all workspaces immediately after creation
@@ -311,7 +311,8 @@ const createTaskWidgetWindowForGeneration = async (
   // Update initial state
   updateTaskWidgetContent();
 
-  // macOS: setOpacity() works immediately; Windows: did-finish-load handler above handles it.
+  // macOS: setOpacity() works immediately. Windows/Linux: IPC send is dropped before the
+  // page loads; the did-finish-load handler above re-delivers it reliably.
   updateTaskWidgetOpacity(currentOpacity);
 
   if (pendingShowAfterCreate) {
