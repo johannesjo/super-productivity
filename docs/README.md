@@ -58,9 +58,12 @@ may remain while findings are being triaged, but verified work should move to
 issues and durable safety constraints should move to maintained documentation.
 
 Delete a research note once its conclusions have moved into a maintained guide,
-a decision record, or tracked issues. A frozen finding register whose evidence
-directory no longer exists, and whose baseline commit master has long since
-passed, is misleading rather than useful — Git history keeps it retrievable.
+a decision record, or tracked issues. Git history keeps it retrievable.
+
+A finding frozen against a past commit decays silently, so state what would make
+it wrong: any claim about which releases carry a change must be re-derived with
+`git tag --contains`, never recalled, because the next tag can invert it without
+any code changing.
 
 - [Recurring events implementation plan](research/recurring-events-implementation-plan.md)
 - [Snap Wayland GPU fix](research/snap-wayland-gpu-fix-research.md)
