@@ -1,5 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
 import {
+  DRAFT_IO_TIMEOUT_MS,
   DRAFT_LOAD_ERROR,
   DRAFT_MAX_ENTRIES,
   DRAFT_PRUNE_SLACK,
@@ -278,6 +279,38 @@ describe('LocalDraftService', () => {
     await service.clearDraft('NOTE', idA);
   });
 
+  it('deleteDraftsForProfile settles even when the DB never does', fakeAsync(() => {
+    // Every caller awaits this in the middle of something it must finish —
+    // UserProfileService.deleteProfile between an irreversible deleteProfileData()
+    // and the metadata commit that drops the profile from the list, and the
+    // import/restore paths inside a dataset replacement. A wedged IndexedDB
+    // request never settles AND never rejects, so without a race the delete hangs
+    // forever and the profile's data is gone while the UI still lists it, with no
+    // error surfaced either way (#8982 review).
+    //
+    // Stubbed at _withRetryOnClose rather than by wedging the engine: the point
+    // is the missing bound, and it keeps the real (fake-)IndexedDB out of the
+    // clocked window below.
+    const wedged = spyOn(service as any, '_withRetryOnClose').and.returnValue(
+      new Promise<void>(() => {}),
+    );
+    let isSettled = false;
+    void service.deleteDraftsForProfile('profile-b').then(() => (isSettled = true));
+
+    tick(DRAFT_IO_TIMEOUT_MS - 1);
+    flushMicrotasks();
+    // Positive control: it is the bound that settles this, not the stub.
+    expect(isSettled).toBe(false);
+
+    tick(1);
+    flushMicrotasks();
+    expect(isSettled).toBe(true);
+
+    // afterEach wipes the shared store through this same method — leave it
+    // working or the wedge leaks out of this spec and hangs the teardown.
+    wedged.and.callThrough();
+  }));
+
   it('should prune drafts past the retention window on open, keeping fresh ones', async () => {
     activeProfileId = 'profile-a';
     const freshId = uniqueId();
@@ -485,11 +518,11 @@ describe('LocalDraftService', () => {
       expect(draft?.resolved).toBeUndefined();
     });
 
-    it('markDiscarded retires whatever text is stored, still without deleting it', async () => {
+    it('markDiscarded retires the discarded text, still without deleting it', async () => {
       const id = uniqueId();
       await seed(id, 'typed then thrown away');
 
-      await service.markDiscarded('NOTE', id);
+      await service.markDiscarded('NOTE', id, 'typed then thrown away');
 
       const draft = await loadDraft(id);
       expect(draft?.content).toBe('typed then thrown away');
@@ -497,6 +530,23 @@ describe('LocalDraftService', () => {
         content: 'typed then thrown away',
         kind: 'DISCARDED',
       });
+    });
+
+    it("markDiscarded leaves a newer session's checkpoint unmarked", async () => {
+      const id = uniqueId();
+      // The mirror of the markSaved case above, and the reason markDiscarded is
+      // scoped at all: a discard that hit its I/O bound in an editor that has
+      // since closed can land after the note was reopened and re-checkpointed.
+      // Retiring "whatever is stored" would suppress that newer, unsaved text.
+      await seed(id, 'Y-newer');
+
+      await service.markDiscarded('NOTE', id, 'X-older');
+
+      const draft = await loadDraft(id);
+      expect(draft?.content).toBe('Y-newer');
+      expect(draft?.resolved).toBeUndefined();
+      // Still offered for recovery, which is the safe direction for a miss.
+      expect(getDraftOpenAction(draft!, 'base')).toBe('RESTORE');
     });
 
     it('a later checkpoint clears the marker, so typing again revives the draft', async () => {
@@ -544,7 +594,7 @@ describe('LocalDraftService', () => {
     it('are safe no-ops when the draft is already gone', async () => {
       activeProfileId = 'profile-a';
       await expectAsync(service.markSaved('NOTE', uniqueId(), 'x')).toBeResolved();
-      await expectAsync(service.markDiscarded('NOTE', uniqueId())).toBeResolved();
+      await expectAsync(service.markDiscarded('NOTE', uniqueId(), 'x')).toBeResolved();
       // Nothing was created just to hold a marker.
       expect(await service.loadDraft('NOTE', uniqueId())).toBeUndefined();
     });

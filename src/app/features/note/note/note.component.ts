@@ -38,10 +38,12 @@ import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { DEFAULT_PROJECT_ICON } from '../../project/project.const';
 import { ClipboardImageService } from '../../../core/clipboard-image/clipboard-image.service';
 import {
+  DRAFT_IO_TIMEOUT_MS,
   DRAFT_LOAD_ERROR,
   getDraftOpenAction,
   LocalDraftService,
 } from '../../../core/draft/local-draft.service';
+import { withTimeout } from '../../../util/promise-timeout';
 import { isDispatchDurable } from '../../../core/draft/draft-durability.util';
 import { OperationWriteFlushService } from '../../../op-log/sync/operation-write-flush.service';
 import { OperationCaptureService } from '../../../op-log/capture/operation-capture.service';
@@ -51,26 +53,9 @@ import { RenderLinksPipe } from '../../../ui/pipes/render-links.pipe';
 import { isPathSafeToOpen } from '../../../../../electron/shared-with-frontend/is-external-url-allowed';
 
 /**
- * Bound on the device-local drafts IndexedDB, which both awaits below put on a
- * user-visible critical path: the load holds the per-note open guard (a request
- * that never settles would leave that note un-openable for the rest of the
- * session, since the `finally` releasing it cannot run), and the save sits in
- * front of the note update dispatch itself. IndexedDB has no timeout of its own
- * — a request that never settles never rejects either — so a race is the only
- * bound. (An idb `blocked` handler would not help: DB_VERSION is fixed at 1, so
- * `blocked` cannot fire, and it does not settle the open promise anyway.)
- *
- * 2s: a local get/put against this tiny store settles in single-digit ms, and
- * even a cold DB open plus the one iOS/WebKit reconnect retry (#6643) stays far
- * below it, so a slow-but-working device is not falsely timed out. A genuinely
- * stuck request then degrades to "no drafts this session" — the same fail-safe
- * path an unreadable draft takes — instead of a wedged note or a blocked save.
- */
-const DRAFT_IO_TIMEOUT_MS = 2000;
-
-/**
  * Bound on the durability proof. Deliberately far larger than the drafts-DB
- * budget above: that one races a local get/put, this one waits for the write
+ * budget ({@link DRAFT_IO_TIMEOUT_MS}): that one races a local get/put, this
+ * one waits for the write
  * queue to drain AND for the op-log lock, which sync legitimately holds for
  * seconds at a time. Reusing the 2s budget would report ordinary saves as
  * unproven on a busy or slow device, and every one of those costs a spurious
@@ -83,22 +68,6 @@ const DRAFT_IO_TIMEOUT_MS = 2000;
  * failure here takes.
  */
 const DURABILITY_PROOF_TIMEOUT_MS = 15000;
-
-/**
- * Resolves to `onTimeout` if `promise` has not settled within `ms`. The timer is
- * cleared as soon as the promise settles, so the fast path leaves nothing
- * pending. Rejections are deliberately not swallowed — every caller below
- * already handles its own errors internally.
- */
-const withTimeout = <T>(promise: Promise<T>, onTimeout: T, ms: number): Promise<T> => {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  return Promise.race([
-    promise.finally(() => clearTimeout(timeoutId)),
-    new Promise<T>((resolve) => {
-      timeoutId = setTimeout(() => resolve(onTimeout), ms);
-    }),
-  ]);
-};
 
 /** {@link withTimeout} at the drafts-DB budget, which most callers here want. */
 const withDraftIoTimeout = <T>(promise: Promise<T>, onTimeout: T): Promise<T> =>
@@ -315,8 +284,12 @@ export class NoteComponent implements OnChanges {
             // The user explicitly chose the saved version over the draft: same
             // instruction as hitting Discard in the editor, so it is recorded the
             // same way — the text stays in the DB, it is just no longer offered.
+            // Scoped to the text that was actually shown in the prompt: if a
+            // concurrent session checkpointed something newer under this key
+            // while the prompt was open, that newer text is not what the user
+            // rejected, and it stays live.
             await withDraftIoTimeout(
-              this._localDraftService.markDiscarded('NOTE', note.id),
+              this._localDraftService.markDiscarded('NOTE', note.id, draft.content),
               undefined,
             );
           } else {
@@ -371,7 +344,7 @@ export class NoteComponent implements OnChanges {
             this._localDraftService.clearDraft('NOTE', note.id);
           }
         } else if (typeof res === 'string') {
-          if (!isDraftUnreadable && res !== note.content) {
+          if (!isDraftUnreadable) {
             // Persist the draft (baseContent = the still-current note content) and
             // AWAIT it BEFORE dispatching the note update, so a crash in the window
             // between the two leaves a durable draft the next open restores via the
@@ -380,6 +353,17 @@ export class NoteComponent implements OnChanges {
             // stalled drafts DB cannot hold the note update hostage: on timeout
             // the dispatch proceeds and we simply lose the extra crash-safety of
             // the pre-dispatch checkpoint.
+            //
+            // UNCONDITIONAL, including when `res` already equals the note content.
+            // Skipping it there looks free — "the note already holds this text" —
+            // but the stored draft only holds it too if a checkpoint landed AFTER
+            // the edit was reverted, and the close path deliberately emits no
+            // contentChanged. Revert inside the 500ms debounce and the row still
+            // holds the newer text, so the scoped markSaved() below no-ops against
+            // it and leaves a live draft that the next open silently RESTOREs over
+            // the note (#8982 review). Writing here keeps one invariant: the stored
+            // text is always the text that was dispatched, so the marker's scope
+            // always matches.
             await withDraftIoTimeout(
               this._localDraftService.saveDraft({
                 entityType: 'NOTE',
@@ -422,8 +406,30 @@ export class NoteComponent implements OnChanges {
           // as thrown away (not deleted). Any other result (undefined from a
           // force-close) leaves it untouched and fully recoverable.
         } else if (res?.action === 'DISCARD' && !isDraftUnreadable) {
+          // Same shape as the save path above, for the same reason: checkpoint the
+          // text this editor owns, then mark THAT text. The debounced checkpoints
+          // can lag the editor, so without this write the scoped marker below
+          // would miss the stored row and leave the discarded text live for the
+          // next open to restore. `content` comes off the DISCARD result, which
+          // the dialog stamps with its final editor content (#8982 review).
+          //
+          // Unconditional, so a discard from a session that never checkpointed
+          // does create a row. That row is born resolved: it is inert at read
+          // time, is the first thing evicted when a profile is over its cap, and
+          // ages out on the normal 14-day clock. Worth it for one rule holding on
+          // both close paths rather than a per-path "did a checkpoint land?" test.
+          const discarded = typeof res.content === 'string' ? res.content : note.content;
           await withDraftIoTimeout(
-            this._localDraftService.markDiscarded('NOTE', note.id),
+            this._localDraftService.saveDraft({
+              entityType: 'NOTE',
+              entityId: note.id,
+              content: discarded,
+              baseContent: note.content,
+            }),
+            undefined,
+          );
+          await withDraftIoTimeout(
+            this._localDraftService.markDiscarded('NOTE', note.id, discarded),
             undefined,
           );
         }

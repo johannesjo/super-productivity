@@ -372,7 +372,12 @@ describe('DialogFullscreenMarkdownComponent', () => {
       component.close(true);
 
       expect(confirmDialogSpy).not.toHaveBeenCalled();
-      expect(component._matDialogRef.close).toHaveBeenCalledWith({ action: 'DISCARD' });
+      // The result carries the final editor content so a caller keeping a
+      // crash-safe draft can scope its "discarded" marker to it (#8982 review).
+      expect(component._matDialogRef.close).toHaveBeenCalledWith({
+        action: 'DISCARD',
+        content: '- [ ] Task 1\n\n- [ ] Task 2',
+      });
     });
 
     it('should ask for confirmation and close when the user confirms discarding', () => {
@@ -384,7 +389,10 @@ describe('DialogFullscreenMarkdownComponent', () => {
       component.close(true);
 
       expect(confirmDialogSpy).toHaveBeenCalled();
-      expect(component._matDialogRef.close).toHaveBeenCalledWith({ action: 'DISCARD' });
+      expect(component._matDialogRef.close).toHaveBeenCalledWith({
+        action: 'DISCARD',
+        content: 'changed content',
+      });
     });
 
     it('should keep the dialog open when the user does not confirm discarding', () => {
@@ -456,7 +464,10 @@ describe('DialogFullscreenMarkdownComponent', () => {
       component.close(true);
 
       expect(confirmDialogSpy).toHaveBeenCalled();
-      expect(component._matDialogRef.close).toHaveBeenCalledWith({ action: 'DISCARD' });
+      expect(component._matDialogRef.close).toHaveBeenCalledWith({
+        action: 'DISCARD',
+        content: 'changed content',
+      });
     });
   });
 

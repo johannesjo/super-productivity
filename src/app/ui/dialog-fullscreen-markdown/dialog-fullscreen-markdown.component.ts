@@ -334,7 +334,17 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       // (task notes, inline markdown) is a reason to confirm more, not less.
       // _confirmDiscardIfNeeded no-ops when nothing was modified, so an unmodified
       // close still closes instantly (#8982 review).
-      this._confirmDiscardIfNeeded(() => this._matDialogRef.close({ action: 'DISCARD' }));
+      // The final editor content rides along on the result. Callers that keep a
+      // crash-safe draft need it to scope their "discarded" marker to the text
+      // this editor session actually ended with — the debounced contentChanged
+      // stream can lag by up to its debounce, so the stored copy is not
+      // authoritative at close time (#8982 review).
+      this._confirmDiscardIfNeeded(() =>
+        this._matDialogRef.close({
+          action: 'DISCARD',
+          content: this.data?.content ?? '',
+        }),
+      );
       // When the note is made empty manually by the user and the "Save" button is hit, the note is automatically deleted instead of being left blank.
     } else if (!this.data?.content && this.data.content.trim().length < 1) {
       this._matDialogRef.close({ action: 'DELETE' });

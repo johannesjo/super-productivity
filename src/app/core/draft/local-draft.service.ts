@@ -5,6 +5,7 @@ import { UserProfileService } from '../../features/user-profile/user-profile.ser
 import { UserProfileStorageService } from '../../features/user-profile/user-profile-storage.service';
 import { DEFAULT_PROFILE_ID } from '../../features/user-profile/user-profile.model';
 import { isConnectionClosingError } from '../../op-log/persistence/op-log-errors.const';
+import { withTimeout } from '../../util/promise-timeout';
 
 export type LocalDraftEntityType = 'NOTE';
 
@@ -127,6 +128,23 @@ export const DRAFT_MAX_ENTRIES = 200;
  * saves rather than on every checkpoint.
  */
 export const DRAFT_PRUNE_SLACK = 20;
+
+/**
+ * Bound on awaits against this IndexedDB whenever one sits on a user-visible
+ * critical path — the note editor's load/save, and the profile-scoped delete
+ * below, which sits between an irreversible data delete and its metadata
+ * commit. IndexedDB has no timeout of its own — a request that never settles
+ * never rejects either — so a race is the only bound. (An idb `blocked` handler
+ * would not help: DB_VERSION is fixed at 1, so `blocked` cannot fire, and it
+ * does not settle the open promise anyway.)
+ *
+ * 2s: a local get/put against this tiny store settles in single-digit ms, and
+ * even a cold DB open plus the one iOS/WebKit reconnect retry (#6643) stays far
+ * below it, so a slow-but-working device is not falsely timed out. A genuinely
+ * stuck request then degrades to "no drafts this session" — the same fail-safe
+ * path an unreadable draft takes — instead of a wedged note or a blocked save.
+ */
+export const DRAFT_IO_TIMEOUT_MS = 2000;
 
 interface DraftsDb extends DBSchema {
   [DB_STORE_NAME]: {
@@ -262,21 +280,31 @@ export class LocalDraftService {
   }
 
   /**
-   * Records that the user threw this entity's draft away in the editor's discard
-   * confirmation.
+   * Records that the user threw `discardedContent` away in the editor's discard
+   * confirmation, so a later open does not offer it back as unsaved work.
    *
-   * Unlike markSaved() this is NOT scoped to a specific text, because the exact
-   * bytes at the moment of the click are not knowable: checkpoints are debounced,
-   * so the stored copy can lag the editor by up to that debounce. A confirmed
-   * discard is an explicit instruction about this entity's draft as a whole. It
-   * still only writes — the text stays in the record, it is merely no longer
-   * offered for recovery.
+   * Scoped to that exact text, exactly like markSaved(): a marker that retired
+   * whatever row happened to be current would let a stale discard from an
+   * already-closed editor (one that hit its I/O bound and landed after the note
+   * was reopened) retire the NEW session's live text. Callers must checkpoint
+   * the editor's final content first — the debounced checkpoints can lag the
+   * editor by up to that debounce, so without it the scope would miss and the
+   * discarded text would stay live. A miss is the safe direction either way: it
+   * leaves the draft recoverable, costing a prompt rather than suppressing text.
+   *
+   * Unlike a delete this only writes — the text stays in the record, it is
+   * merely no longer offered for recovery.
    */
-  async markDiscarded(entityType: LocalDraftEntityType, entityId: string): Promise<void> {
-    await this._markResolved(entityType, entityId, (existing) => ({
-      content: existing.content,
-      kind: 'DISCARDED',
-    }));
+  async markDiscarded(
+    entityType: LocalDraftEntityType,
+    entityId: string,
+    discardedContent: string,
+  ): Promise<void> {
+    await this._markResolved(entityType, entityId, (existing) =>
+      existing.content === discardedContent
+        ? { content: discardedContent, kind: 'DISCARDED' }
+        : undefined,
+    );
   }
 
   /**
@@ -319,18 +347,32 @@ export class LocalDraftService {
    * leave its (never-synced) draft contents behind. Drafts of other profiles are
    * untouched — keys are `${profileId}:${entityType}:${entityId}` and the profile
    * id cannot contain a `:` separator, so the prefix match is unambiguous.
+   *
+   * BOUNDED, because every caller awaits it in the middle of something it must
+   * finish: UserProfileService.deleteProfile sits between an irreversible
+   * deleteProfileData() and the metadata commit that removes the profile from
+   * the list, and the dataset-replacement callers sit inside an import. A wedged
+   * IndexedDB request never settles and never rejects, so an unbounded await
+   * there leaves a profile whose data is gone but which the UI still lists, with
+   * no error either way. On timeout the sweep is abandoned mid-way; the drafts
+   * it did not reach are orphaned, and _pruneStaleDrafts (which sweeps every
+   * profile, not just the active one) ages them out on the normal 14-day clock.
    */
   async deleteDraftsForProfile(profileId: string): Promise<void> {
     try {
-      await this._withRetryOnClose(async (db) => {
-        const prefix = `${profileId}:`;
-        const keys = await db.getAllKeys(DB_STORE_NAME);
-        await Promise.all(
-          keys
-            .filter((key) => key.startsWith(prefix))
-            .map((key) => db.delete(DB_STORE_NAME, key)),
-        );
-      });
+      await withTimeout(
+        this._withRetryOnClose(async (db) => {
+          const prefix = `${profileId}:`;
+          const keys = await db.getAllKeys(DB_STORE_NAME);
+          await Promise.all(
+            keys
+              .filter((key) => key.startsWith(prefix))
+              .map((key) => db.delete(DB_STORE_NAME, key)),
+          );
+        }),
+        undefined,
+        DRAFT_IO_TIMEOUT_MS,
+      );
     } catch (e) {
       Log.err('LocalDraftService: Failed to delete drafts for profile', e);
     }
