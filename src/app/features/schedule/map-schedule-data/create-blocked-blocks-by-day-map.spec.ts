@@ -70,6 +70,12 @@ describe('createBlockedBlocksByDayMap()', () => {
       startDate: occurrenceDay,
       startTime: '23:00',
       defaultEstimate: h(2),
+      // Pin the creation markers: DEFAULT_TASK_REPEAT_CFG seeds them from the REAL
+      // clock at module load, and the exact-day selector drops occurrences on or
+      // before lastTaskCreationDay — unpinned, this spec broke the day the real date
+      // reached its hardcoded 2026-07-30.
+      lastTaskCreation: new Date(2026, 6, 29).getTime(),
+      lastTaskCreationDay: '2026-07-29',
     };
 
     const result = createBlockedBlocksByDayMap(

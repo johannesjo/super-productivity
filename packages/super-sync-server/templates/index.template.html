@@ -23,6 +23,7 @@
       <header>
         <h1>SuperSync <span class="beta-badge">BETA</span></h1>
         <p>Connect your productivity</p>
+        <!-- OPTIONAL:EU_BADGE -->
         <div class="eu-badge">
           <img
             src="eu-stars.svg"
@@ -31,19 +32,10 @@
           />
           <span>Data hosted in EU</span>
         </div>
+        <!-- /OPTIONAL:EU_BADGE -->
       </header>
 
       <main id="app">
-        <div
-          class="warning-box"
-          style="margin-bottom: 1rem"
-        >
-          <p>
-            ⚠️ <strong>Note:</strong> This service is free for now, but will likely cost
-            money in the future.
-          </p>
-        </div>
-
         <!-- Authentication Forms -->
         <div
           id="auth-forms"
@@ -153,6 +145,7 @@
                 placeholder="name@example.com"
               />
             </div>
+            <!-- OPTIONAL:LEGAL_CONSENT -->
             <div
               class="form-group checkbox-group"
               style="display: flex; gap: 0.5rem; align-items: flex-start"
@@ -168,12 +161,14 @@
                 style="display: inline; font-weight: normal; font-size: 0.9rem"
               >
                 I agree to the
+                <!-- OPTIONAL:LEGAL_TERMS -->
                 <a
                   href="/terms.html"
                   target="_blank"
                   >Terms of Service</a
                 >
                 and
+                <!-- /OPTIONAL:LEGAL_TERMS -->
                 <a
                   href="/privacy.html"
                   target="_blank"
@@ -181,6 +176,7 @@
                 >
               </label>
             </div>
+            <!-- /OPTIONAL:LEGAL_CONSENT -->
 
             <button
               type="button"
