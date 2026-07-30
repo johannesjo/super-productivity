@@ -10,6 +10,61 @@ const MAX_DOCUMENT_BYTES = 1024 * 1024;
 const MAX_LINE_LENGTH = 16 * 1024;
 const MAX_DIAGNOSTICS = 100;
 
+// Source files cite documents in comments ("see the styling guide under docs").
+// Those references rot silently: the document scan never opens a .ts, so a deleted
+// doc leaves dangling pointers that no check can see. This second pass reads source
+// for `docs/**` paths and verifies the file exists, resolving each path against both
+// the repository root and the nearest enclosing package (a comment inside
+// packages/foo/ may mean packages/foo/docs/bar.md).
+const SOURCE_EXTENSIONS = new Set([
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.cjs',
+  '.mjs',
+  '.kt',
+  '.java',
+  '.swift',
+  '.scss',
+  '.css',
+  '.html',
+  '.yaml',
+  '.yml',
+  '.sh',
+]);
+const DEFAULT_SOURCE_ROOTS = [
+  'src',
+  'packages',
+  'electron',
+  'android',
+  'ios',
+  'tools',
+  'e2e',
+  'build',
+  '.github',
+  'capacitor.config.ts',
+  'electron-builder.yaml',
+];
+const IGNORED_SOURCE_DIRECTORIES = new Set([
+  'node_modules',
+  'dist',
+  'build-output',
+  'app-builds',
+  'coverage',
+  '.git',
+  '.angular',
+  '.claude',
+  '.worktrees',
+  '.tmp',
+  'tmp',
+]);
+// A repo-relative docs path, optionally inside a same-repo GitHub blob URL. The
+// match deliberately stops at the extension so `#anchor` suffixes fall away —
+// this pass checks existence only, not anchors.
+const DOCS_PATH_IN_SOURCE =
+  /(?<![\w.\-/])docs\/[\w.\-]+(?:\/[\w.\-]+)*\.(?:md|markdown|html|htm)/gi;
+
 const listDocuments = (inputPaths) => {
   const documents = new Set();
   const pending = [...inputPaths];
@@ -536,11 +591,136 @@ const checkDocLinks = (inputs) => {
 
 const findBrokenLinks = (rootDir) => checkDocLinks(rootDir).brokenLinks;
 
-if (require.main === module) {
-  const inputs = process.argv.length > 2 ? process.argv.slice(2) : ['docs'];
-  const { brokenLinks, total } = checkDocLinks(inputs);
+const listSourceFiles = (inputPaths) => {
+  const sources = new Set();
+  const pending = [...inputPaths];
 
-  if (total === 0) {
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (!fs.existsSync(current)) {
+      continue;
+    }
+    const currentStats = fs.lstatSync(current);
+    if (currentStats.isSymbolicLink()) {
+      continue;
+    }
+    if (currentStats.isFile()) {
+      if (SOURCE_EXTENSIONS.has(path.extname(current).toLowerCase())) {
+        sources.add(fs.realpathSync(current));
+      }
+      continue;
+    }
+
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || IGNORED_SOURCE_DIRECTORIES.has(entry.name)) {
+        continue;
+      }
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(entryPath);
+      } else if (
+        entry.isFile() &&
+        SOURCE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())
+      ) {
+        sources.add(fs.realpathSync(entryPath));
+      }
+    }
+  }
+
+  return [...sources].sort();
+};
+
+/**
+ * Verify every repo-relative `docs/**` path mentioned in source files exists.
+ * Complements checkDocLinks, which only ever opens document files.
+ *
+ * @param {string} rootDir repository root to resolve `docs/…` paths against
+ * @param {string[]} [roots] source roots, relative to rootDir
+ * @returns {{brokenRefs: {file: string, line: number, target: string}[], total: number}}
+ */
+const checkSourceDocRefs = (rootDir, roots = DEFAULT_SOURCE_ROOTS) => {
+  const boundary = path.resolve(rootDir);
+  const inputPaths = roots.map((root) => path.resolve(boundary, root));
+  const brokenRefs = [];
+  const seen = new Set();
+  const packageBaseCache = new Map();
+  let total = 0;
+
+  // Bases a docs mention in this file could be relative to: the repo root, and any
+  // enclosing package directory. Resolving against both keeps package-local docs
+  // (a file under packages/foo/docs/, cited without the package prefix) from
+  // reporting as stale.
+  const basesFor = (sourceFile) => {
+    const startDir = path.dirname(sourceFile);
+    if (packageBaseCache.has(startDir)) {
+      return packageBaseCache.get(startDir);
+    }
+    const bases = [boundary];
+    let current = startDir;
+    while (isWithin(boundary, current) && current !== boundary) {
+      if (fs.existsSync(path.join(current, 'package.json'))) {
+        bases.push(current);
+      }
+      const parent = path.dirname(current);
+      if (parent === current) {
+        break;
+      }
+      current = parent;
+    }
+    packageBaseCache.set(startDir, bases);
+    return bases;
+  };
+
+  for (const sourceFile of listSourceFiles(inputPaths)) {
+    const stats = fs.statSync(sourceFile);
+    if (stats.size > MAX_DOCUMENT_BYTES) {
+      continue;
+    }
+    const relativeFile = path.relative(boundary, sourceFile);
+    const lines = fs.readFileSync(sourceFile, 'utf8').split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      if (line.length > MAX_LINE_LENGTH) {
+        return;
+      }
+      for (const match of line.match(DOCS_PATH_IN_SOURCE) ?? []) {
+        const target = match.replace(/\\/g, '/');
+        const resolvesSomewhere = basesFor(sourceFile).some((base) => {
+          const resolved = path.resolve(base, target);
+          return isWithin(boundary, resolved) && fs.existsSync(resolved);
+        });
+        if (resolvesSomewhere) {
+          continue;
+        }
+        // One diagnostic per (file, target): a path cited on many lines of the
+        // same file is one stale pointer to fix, not N findings.
+        const key = `${relativeFile} ${target}`;
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        total += 1;
+        if (brokenRefs.length < MAX_DIAGNOSTICS) {
+          brokenRefs.push({ file: relativeFile, line: index + 1, target });
+        }
+      }
+    });
+  }
+
+  return { brokenRefs, total };
+};
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  const skipSources = args.includes('--docs-only');
+  const inputs = args.filter((arg) => arg !== '--docs-only');
+  const { brokenLinks, total } = checkDocLinks(inputs.length > 0 ? inputs : ['docs']);
+
+  const sourceResult = skipSources
+    ? { brokenRefs: [], total: 0 }
+    : checkSourceDocRefs(findRepositoryBoundary(process.cwd()));
+
+  if (total === 0 && sourceResult.total === 0) {
     console.log('Documentation links are valid.');
   } else {
     for (const link of brokenLinks) {
@@ -551,12 +731,24 @@ if (require.main === module) {
     if (brokenLinks.length < total) {
       console.error(`${total} problems found; showing the first ${brokenLinks.length}.`);
     }
+    for (const ref of sourceResult.brokenRefs) {
+      console.error(
+        `${ref.file}:${ref.line}: source cites a missing document "${ref.target}"`,
+      );
+    }
+    if (sourceResult.brokenRefs.length < sourceResult.total) {
+      console.error(
+        `${sourceResult.total} stale source references found; showing the first ${sourceResult.brokenRefs.length}.`,
+      );
+    }
     process.exitCode = 1;
   }
 }
 
 module.exports = {
   checkDocLinks,
+  checkSourceDocRefs,
+  DEFAULT_SOURCE_ROOTS,
   findBrokenLinks,
   MAX_DIAGNOSTICS,
   MAX_DOCUMENT_BYTES,

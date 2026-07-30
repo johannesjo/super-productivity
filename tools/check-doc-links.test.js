@@ -6,6 +6,7 @@ const path = require('node:path');
 
 const {
   checkDocLinks,
+  checkSourceDocRefs,
   findBrokenLinks,
   MAX_DIAGNOSTICS,
   MAX_DOCUMENT_BYTES,
@@ -414,6 +415,99 @@ test('handles a bounded line of unmatched link openers', () => {
     },
     (root) => {
       assert.deepEqual(findBrokenLinks(root), []);
+    },
+  );
+});
+
+// Fixture doc paths are assembled at runtime rather than written literally: the
+// source pass scans tools/ too, so a literal path here would report this file as
+// citing a missing document.
+const docRef = (name) => ['docs', name].join('/');
+
+test('reports docs paths cited from source comments when the file is missing', () => {
+  withDocs(
+    {
+      [docRef('guide.md')]: '# Guide',
+      'src/app/a.ts': [
+        `// See ${docRef('guide.md')} for the maintained version.`,
+        `// See ${docRef('gone.md')} for the rest.`,
+      ].join('\n'),
+      'src/app/styles.scss': `// ${docRef('also-gone.md')}`,
+      'src/app/tpl.html': `<!-- ${docRef('guide.md')} -->`,
+    },
+    (root) => {
+      const { brokenRefs, total } = checkSourceDocRefs(root, ['src']);
+
+      assert.equal(total, 2);
+      assert.deepEqual(brokenRefs, [
+        { file: path.join('src', 'app', 'a.ts'), line: 2, target: docRef('gone.md') },
+        {
+          file: path.join('src', 'app', 'styles.scss'),
+          line: 1,
+          target: docRef('also-gone.md'),
+        },
+      ]);
+    },
+  );
+});
+
+test('resolves source-cited docs paths against the nearest enclosing package', () => {
+  withDocs(
+    {
+      'packages/server/package.json': '{"name":"server"}',
+      'packages/server/docs/recovery.md': '# Recovery',
+      'packages/server/scripts/run.ts': `// See ${docRef('recovery.md')} for the procedure.`,
+    },
+    (root) => {
+      // Package-relative: the doc exists only under packages/server/.
+      assert.deepEqual(checkSourceDocRefs(root, ['packages']).brokenRefs, []);
+    },
+  );
+});
+
+test('reports one diagnostic per file and target, not per citation', () => {
+  withDocs(
+    {
+      'src/a.ts': [
+        `// ${docRef('gone.md')}`,
+        `// ${docRef('gone.md')} again`,
+        `// ${docRef('gone.md')}`,
+      ].join('\n'),
+    },
+    (root) => {
+      const { brokenRefs, total } = checkSourceDocRefs(root, ['src']);
+
+      assert.equal(total, 1);
+      assert.deepEqual(brokenRefs, [
+        { file: path.join('src', 'a.ts'), line: 1, target: docRef('gone.md') },
+      ]);
+    },
+  );
+});
+
+test('ignores non-source extensions and skipped directories when scanning source', () => {
+  withDocs(
+    {
+      'src/notes.txt': `// ${docRef('gone.md')}`,
+      'src/node_modules/dep/index.ts': `// ${docRef('gone.md')}`,
+      'src/dist/bundle.js': `// ${docRef('gone.md')}`,
+    },
+    (root) => {
+      assert.deepEqual(checkSourceDocRefs(root, ['src']).brokenRefs, []);
+    },
+  );
+});
+
+test('does not treat a docs path inside a longer word as a citation', () => {
+  withDocs(
+    {
+      'src/a.ts': [
+        `// my${docRef('gone.md')} is not a repo path`,
+        `// vendor/${docRef('gone.md')} is not repo-relative either`,
+      ].join('\n'),
+    },
+    (root) => {
+      assert.deepEqual(checkSourceDocRefs(root, ['src']).brokenRefs, []);
     },
   );
 });

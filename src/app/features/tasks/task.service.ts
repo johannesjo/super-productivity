@@ -1018,7 +1018,7 @@ export class TaskService {
 
     if (parentTasksToArchive.length) {
       // Only move parent tasks to archive, never subtasks
-      // Note: Full task payload required for sync - see docs/archive-operation-redesign.md
+      // Note: Full task payload required for sync - see docs/sync-and-op-log/operation-log-architecture.md
       // Persist first: dispatch removes the tasks from NgRx and makes the captured
       // operation eligible for a full-state snapshot. If archive persistence were
       // still in flight, that snapshot could acknowledge the operation while

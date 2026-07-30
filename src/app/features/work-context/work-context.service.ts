@@ -333,7 +333,7 @@ export class WorkContextService {
 
   // Filter project tasks to show only those scheduled for today
   // TODAY_TAG is a virtual tag - membership is determined by task.dueDay, not task.tagIds
-  // See: docs/ai/today-tag-architecture.md
+  // See: ARCHITECTURE-DECISIONS.md Decision #2
   mainListTasksInProject$: Observable<TaskWithSubTasks[]> = this.mainListTasks$.pipe(
     map((tasks) => {
       const todayStr = this._dateService.todayStr();
@@ -484,6 +484,10 @@ export class WorkContextService {
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this.isTodayList$.pipe(
+    // Perf note: the isToday branch hydrates EVERY task in the workspace, not
+    // just today's, so this is O(all tasks) whenever Today is the active
+    // context. Tracking done IDs per context (Today included) would avoid the
+    // workspace-wide scan.
     switchMap((isToday) =>
       isToday ? this._store$.select(selectAllTasksWithSubTasks) : this.mainListTasks$,
     ),

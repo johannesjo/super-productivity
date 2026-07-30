@@ -69,7 +69,7 @@ const handleAddTask = (
   // Add task to task state
   // IMPORTANT: TODAY_TAG should NEVER be in task.tagIds (virtual tag pattern)
   // Membership is determined by task.dueDay, TODAY_TAG.taskIds only stores ordering
-  // See: docs/ai/today-tag-architecture.md
+  // See: ARCHITECTURE-DECISIONS.md Decision #2
   const taskTagIds = task.tagIds.filter((id) => id !== TODAY_TAG.id);
 
   const newTask: Task = {
