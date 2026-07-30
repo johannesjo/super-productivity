@@ -19,6 +19,7 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { selectPlannerState } from './store/planner.selectors';
 import { selectTimelineConfig } from '../config/store/global-config.reducer';
 import { selectStartOfNextDayDiffMs } from '../../root-store/app-state/app-state.selectors';
+import { findSpringForwardSunday } from '../tasks/dst.test-helper';
 
 describe('PlannerService', () => {
   let service: PlannerService;
@@ -552,10 +553,6 @@ describe('PlannerService', () => {
   });
 
   describe('daysToShow$ with a start-of-next-day offset', () => {
-    afterEach(() => {
-      jasmine.clock().uninstall();
-    });
-
     it('should start the window on the logical today between midnight and the offset', (done) => {
       // 00:30 on Jan 15 with a 04:00 start-of-next-day is logically still Jan
       // 14. Anchoring the window on the raw clock instead would start it at
@@ -568,6 +565,31 @@ describe('PlannerService', () => {
       service.daysToShow$.pipe(first()).subscribe((days) => {
         expect(days[0]).toBe('2026-01-14');
         expect(days[1]).toBe('2026-01-15');
+        done();
+      });
+    });
+
+    it('should keep the window consecutive across a spring-forward day', (done) => {
+      // A spring-forward day is 23h long, so stepping the window in +24h ms
+      // increments from a late-evening anchor lands past it and the date
+      // disappears from the planner entirely.
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        // Timezone without a spring-forward transition (UTC, Tokyo).
+        done();
+        return;
+      }
+      jasmine.clock().install();
+      const saturday = new Date(gap.sunday);
+      saturday.setDate(saturday.getDate() - 1);
+      saturday.setHours(23, 30, 0, 0);
+      jasmine.clock().mockDate(saturday);
+      const monday = new Date(gap.sunday);
+      monday.setDate(monday.getDate() + 1);
+      service.daysToShow$.pipe(first()).subscribe((days) => {
+        expect(days[0]).toBe(getDbDateStr(saturday));
+        expect(days[1]).toBe(getDbDateStr(gap.sunday));
+        expect(days[2]).toBe(getDbDateStr(monday));
         done();
       });
     });
