@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { ScheduleService } from './schedule.service';
 import { DateService } from '../../core/date/date.service';
+import { getDbDateStr } from '../../util/get-db-date-str';
+import { findSpringForwardSunday } from '../tasks/dst.test-helper';
 import { provideMockStore } from '@ngrx/store/testing';
 import { selectTimelineTasks } from '../work-context/store/work-context.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
@@ -88,6 +90,34 @@ describe('ScheduleService', () => {
       expect(lastDay.getMonth()).toBe(1); // February
     });
 
+    it('should keep the window consecutive across a spring-forward day', () => {
+      // Same hazard as the planner window: +24h ms stepping from a
+      // late-evening anchor skips the 23h transition day.
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        return;
+      }
+      jasmine.clock().install();
+      try {
+        const saturday = new Date(gap.sunday);
+        saturday.setDate(saturday.getDate() - 1);
+        saturday.setHours(23, 30, 0, 0);
+        jasmine.clock().mockDate(saturday);
+        const result = service.getDaysToShow(3, null);
+        expect(result[0]).toBe(getDbDateStr(saturday));
+        expect(result[1]).toBe(getDbDateStr(gap.sunday));
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('should not mutate a provided reference date', () => {
+      const referenceDate = new Date(2028, 5, 15, 10, 0);
+      const before = referenceDate.getTime();
+      service.getDaysToShow(7, referenceDate);
+      expect(referenceDate.getTime()).toBe(before);
+    });
+
     it('should start on the logical today between midnight and the start-of-next-day offset', () => {
       // 00:30 on Jan 15 with a 04:00 start-of-next-day is logically still Jan
       // 14; a window anchored on the raw clock would drop (logical) today's
@@ -99,6 +129,23 @@ describe('ScheduleService', () => {
         const result = service.getDaysToShow(3, null);
         expect(result[0]).toBe('2026-01-14');
         expect(result[1]).toBe('2026-01-15');
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+  });
+
+  describe('getDayClass', () => {
+    it('should ring the logical today between midnight and the start-of-next-day offset', () => {
+      // Same clock setup as the window specs: at 00:30 with a 04:00 offset the
+      // ring must sit on Jan 14, the column todayStr() names and the window
+      // anchor produces, not on calendar-today.
+      jasmine.clock().install();
+      try {
+        jasmine.clock().mockDate(new Date(2026, 0, 15, 0, 30));
+        dateService.setStartOfNextDayDiff('04:00');
+        expect(service.getDayClass('2026-01-14')).toContain('today');
+        expect(service.getDayClass('2026-01-15')).not.toContain('today');
       } finally {
         jasmine.clock().uninstall();
       }

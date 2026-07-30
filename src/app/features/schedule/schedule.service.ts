@@ -156,13 +156,17 @@ export class ScheduleService {
     // Default anchor is the logical day, not the raw clock: between calendar
     // midnight and the configured start-of-next-day the window must still
     // begin at (logical) today, which todayStr() elsewhere keeps naming.
-    const today = referenceDate
-      ? referenceDate.getTime()
-      : this._dateService.getLogicalTodayDate().getTime();
+    // Cloned because the cursor is mutated below and referenceDate is the
+    // caller's (a selected-date signal value in the schedule component).
+    const cursor = referenceDate
+      ? new Date(referenceDate)
+      : this._dateService.getLogicalTodayDate();
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {
-      // eslint-disable-next-line no-mixed-operators
-      daysToShow.push(this._dateService.todayStr(today + i * 24 * 60 * 60 * 1000));
+      daysToShow.push(this._dateService.todayStr(cursor.getTime()));
+      // Calendar-day stepping: a DST transition day is 23h/25h long, so
+      // +24h ms arithmetic skips or duplicates a date around it.
+      cursor.setDate(cursor.getDate() + 1);
     }
     return daysToShow;
   }
@@ -247,7 +251,9 @@ export class ScheduleService {
 
   getDayClass(day: string, referenceMonth?: Date): string {
     const dayDate = parseDbDateStr(day);
-    const today = new Date();
+    // Logical day, same as the window anchors above: the today ring must sit
+    // on the column todayStr() names, not one off during the offset window.
+    const today = this._dateService.getLogicalTodayDate();
 
     // If referenceMonth is provided, use it to determine "current month"
     // Otherwise, use the actual current month
