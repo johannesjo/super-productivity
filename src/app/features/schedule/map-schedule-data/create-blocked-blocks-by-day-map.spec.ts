@@ -62,6 +62,11 @@ describe('createBlockedBlocksByDayMap()', () => {
       startDate: occurrenceDay,
       startTime: '23:00',
       defaultEstimate: h(2),
+      // DEFAULT_TASK_REPEAT_CFG anchors this to the real today at module load,
+      // and selectTaskRepeatCfgsForExactDay drops a day that equals the anchor —
+      // so leaving it defaulted made this spec pass only until the wall clock
+      // reached the hardcoded occurrence day.
+      lastTaskCreationDay: '1970-01-01',
     };
 
     const result = createBlockedBlocksByDayMap(
