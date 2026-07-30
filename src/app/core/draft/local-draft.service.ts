@@ -286,11 +286,15 @@ export class LocalDraftService {
    * Scoped to that exact text, exactly like markSaved(): a marker that retired
    * whatever row happened to be current would let a stale discard from an
    * already-closed editor (one that hit its I/O bound and landed after the note
-   * was reopened) retire the NEW session's live text. Callers must checkpoint
-   * the editor's final content first — the debounced checkpoints can lag the
-   * editor by up to that debounce, so without it the scope would miss and the
-   * discarded text would stay live. A miss is the safe direction either way: it
-   * leaves the draft recoverable, costing a prompt rather than suppressing text.
+   * was reopened) retire the NEW session's live text.
+   *
+   * Callers must NOT checkpoint the editor's final text first to force the scope
+   * to match. That takes two non-atomic writes, and the row the first one leaves
+   * behind is restore-eligible (`baseContent === entityContent`) until the second
+   * lands, so a crash between them silently restores the discarded text. Missing
+   * the scope is the safe direction: the row stays live, costing a prompt or a
+   * restore of the user's own recent text rather than suppressing or destroying
+   * anything.
    *
    * Unlike a delete this only writes — the text stays in the record, it is
    * merely no longer offered for recovery.

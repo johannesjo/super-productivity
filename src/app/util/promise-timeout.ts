@@ -6,10 +6,6 @@ export const promiseTimeout = (ms: number): Promise<unknown> =>
  * cleared as soon as the promise settles, so the fast path leaves nothing
  * pending. Rejections are deliberately NOT swallowed — a caller that wants them
  * absorbed must handle that itself.
- *
- * Intended for awaits on APIs with no timeout of their own, most notably
- * IndexedDB: a request that never settles never rejects either, so `try`/`catch`
- * does not cover it and a race is the only bound.
  */
 export const withTimeout = <T>(
   promise: Promise<T>,
