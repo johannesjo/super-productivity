@@ -100,36 +100,43 @@ export class PlannerService {
   );
 
   // TODO this needs to be more performant
-  days$: Observable<PlannerDay[]> = this.daysToShow$.pipe(
-    switchMap((daysToShow) =>
-      combineLatest([
-        this._store.select(selectActiveTaskRepeatCfgs),
-        this._store.select(selectTodayTaskIds),
-        this._calendarIntegrationService.calendarEvents$,
-        this.allDueWithTimeTasks$,
-        this._globalTrackingIntervalService.todayDateStr$,
-      ]).pipe(
-        switchMap(
-          ([
-            taskRepeatCfgs,
-            todayListTaskIds,
-            calendarEvents,
-            allTasksPlanned,
-            todayStr,
-          ]) =>
-            this._store.select(
-              selectPlannerDays(
-                daysToShow,
-                taskRepeatCfgs,
-                todayListTaskIds,
-                calendarEvents,
-                allTasksPlanned,
-                todayStr,
+  private _selectPlannerDaysFor$(
+    dayDates$: Observable<string[]>,
+  ): Observable<PlannerDay[]> {
+    return dayDates$.pipe(
+      switchMap((daysToShow) =>
+        combineLatest([
+          this._store.select(selectActiveTaskRepeatCfgs),
+          this._store.select(selectTodayTaskIds),
+          this._calendarIntegrationService.calendarEvents$,
+          this.allDueWithTimeTasks$,
+          this._globalTrackingIntervalService.todayDateStr$,
+        ]).pipe(
+          switchMap(
+            ([
+              taskRepeatCfgs,
+              todayListTaskIds,
+              calendarEvents,
+              allTasksPlanned,
+              todayStr,
+            ]) =>
+              this._store.select(
+                selectPlannerDays(
+                  daysToShow,
+                  taskRepeatCfgs,
+                  todayListTaskIds,
+                  calendarEvents,
+                  allTasksPlanned,
+                  todayStr,
+                ),
               ),
-            ),
+          ),
         ),
       ),
-    ),
+    );
+  }
+
+  days$: Observable<PlannerDay[]> = this._selectPlannerDaysFor$(this.daysToShow$).pipe(
     // for better performance
     // TODO better solution, gets called very often
     // tap((val) => Log.log('days$', val)),
@@ -150,7 +157,7 @@ export class PlannerService {
   //   .pipe(shareReplay(1));
 
   getDayOnce$(dayStr: string): Observable<PlannerDay | undefined> {
-    return this.days$.pipe(
+    return this._selectPlannerDaysFor$(of([dayStr])).pipe(
       map((days) => days.find((d) => d.dayDate === dayStr)),
       first(),
     );

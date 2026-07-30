@@ -1,18 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { PlannerService } from './planner.service';
 import { DateService } from '../../core/date/date.service';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of, BehaviorSubject, ReplaySubject } from 'rxjs';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { selectAllTasksWithDueTime } from '../tasks/store/task.selectors';
-import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import {
+  selectAllTasksWithDueTime,
+  selectMapOfAllTasksInActiveProjects,
+} from '../tasks/store/task.selectors';
+import { selectActiveTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { PlannerDay } from './planner.model';
 import { first, map, shareReplay } from 'rxjs/operators';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { signal, WritableSignal } from '@angular/core';
 import { LayoutService } from '../../core-ui/layout/layout.service';
+import { selectPlannerState } from './store/planner.selectors';
+import { selectTimelineConfig } from '../config/store/global-config.reducer';
+import { selectStartOfNextDayDiffMs } from '../../root-store/app-state/app-state.selectors';
 
 describe('PlannerService', () => {
   let service: PlannerService;
@@ -44,8 +50,25 @@ describe('PlannerService', () => {
         provideMockStore({
           selectors: [
             { selector: selectAllTasksWithDueTime, value: [] },
-            { selector: selectAllTaskRepeatCfgs, value: [] },
+            { selector: selectActiveTaskRepeatCfgs, value: [] },
             { selector: selectTodayTaskIds, value: [] },
+            { selector: selectMapOfAllTasksInActiveProjects, value: new Map() },
+            {
+              selector: selectPlannerState,
+              value: { days: {}, addPlannedTasksDialogLastShown: undefined },
+            },
+            {
+              selector: selectTimelineConfig,
+              value: {
+                isWorkStartEndEnabled: false,
+                workStart: '09:00',
+                workEnd: '17:00',
+                isLunchBreakEnabled: false,
+                lunchBreakStart: '12:00',
+                lunchBreakEnd: '13:00',
+              },
+            },
+            { selector: selectStartOfNextDayDiffMs, value: 0 },
           ],
         }),
         {
@@ -103,6 +126,7 @@ describe('PlannerService', () => {
 
   afterEach(() => {
     jasmine.clock().uninstall();
+    TestBed.inject(MockStore).resetSelectors();
   });
 
   describe('tomorrow$', () => {
@@ -481,6 +505,49 @@ describe('PlannerService', () => {
           done();
         });
       });
+    });
+  });
+
+  describe('getSnackExtraStr', () => {
+    it('should include a stored task on a day outside the loaded render window', async () => {
+      const dayStr = '2026-01-24';
+      mockDaysSubject.next([
+        createMockPlannerDay('2026-01-14'),
+        createMockPlannerDay('2026-01-15'),
+        createMockPlannerDay('2026-01-16'),
+        createMockPlannerDay('2026-01-17'),
+        createMockPlannerDay('2026-01-18'),
+      ]);
+
+      const store = TestBed.inject(MockStore);
+      store.overrideSelector(
+        selectMapOfAllTasksInActiveProjects,
+        new Map([
+          [
+            'out-of-window-task',
+            {
+              id: 'out-of-window-task',
+              title: 'Later task',
+              projectId: 'project1',
+              created: 0,
+              isDone: false,
+              subTaskIds: [],
+              tagIds: [],
+              timeSpentOnDay: {},
+              timeEstimate: 0,
+              timeSpent: 0,
+              attachments: [],
+            } as any,
+          ],
+        ]),
+      );
+      store.overrideSelector(selectPlannerState, {
+        days: { [dayStr]: ['out-of-window-task'] },
+        addPlannedTasksDialogLastShown: undefined,
+      });
+      store.refreshState();
+
+      await expectAsync(service.getSnackExtraStr(dayStr)).toBeResolvedTo(' – ∑ 1');
     });
   });
 
