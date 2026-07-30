@@ -118,6 +118,7 @@ const createBlockerBlocksForScheduledRepeatProjections = (
             data: repeatCfg,
             start,
             end,
+            sourceOccurrenceDate: currentDayStr,
           },
         ],
       });
