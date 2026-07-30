@@ -71,7 +71,11 @@ export class PlannerService {
         return [];
       }
 
-      const today = new Date().getTime();
+      // Anchor on the logical day, not the raw clock: between calendar
+      // midnight and the configured start-of-next-day the window must still
+      // begin at (logical) today, or the tasks planned for it have no rendered
+      // day at all — ensureDayLoaded below can only extend the window forward.
+      const today = this._dateService.getLogicalTodayDate().getTime();
       const daysToShow: string[] = [];
 
       // CRITICAL FIX: Loop until we have the required count of days

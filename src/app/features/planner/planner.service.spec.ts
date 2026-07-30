@@ -551,6 +551,28 @@ describe('PlannerService', () => {
     });
   });
 
+  describe('daysToShow$ with a start-of-next-day offset', () => {
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
+    it('should start the window on the logical today between midnight and the offset', (done) => {
+      // 00:30 on Jan 15 with a 04:00 start-of-next-day is logically still Jan
+      // 14. Anchoring the window on the raw clock instead would start it at
+      // Jan 15, leaving the tasks still planned for (logical) today without a
+      // rendered day — and ensureDayLoaded can only extend the window forward,
+      // so no interaction can bring the day back.
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(2026, 0, 15, 0, 30));
+      dateService.setStartOfNextDayDiff('04:00');
+      service.daysToShow$.pipe(first()).subscribe((days) => {
+        expect(days[0]).toBe('2026-01-14');
+        expect(days[1]).toBe('2026-01-15');
+        done();
+      });
+    });
+  });
+
   describe('resetScrollState', () => {
     it('should reset daysToShow to initial count after loadMoreDays', (done) => {
       service.daysToShow$.pipe(first()).subscribe((initialDays) => {
