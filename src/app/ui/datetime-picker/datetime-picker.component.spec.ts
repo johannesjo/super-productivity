@@ -52,6 +52,24 @@ describe('DateTimePickerComponent', () => {
     expect(calendarEl).toBeTruthy();
   });
 
+  it('should keep a six-row month above the time controls', () => {
+    fixture.nativeElement.style.width = '400px';
+    fixture.componentRef.setInput('selectedDate', new Date(2026, 7, 4));
+    fixture.detectChanges();
+
+    const weekRows = fixture.nativeElement.querySelectorAll(
+      '.mat-calendar-body > tr',
+    ) as NodeListOf<HTMLElement>;
+    const formControls = fixture.nativeElement.querySelector(
+      '.form-ctrl-wrapper',
+    ) as HTMLElement;
+
+    expect(weekRows.length).toBe(6);
+    expect(weekRows[5].getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      formControls.getBoundingClientRect().top,
+    );
+  });
+
   it('should emit dateSelected when a date is selected on the calendar', () => {
     spyOn(component.dateSelected, 'emit');
     const testDate = new Date();
