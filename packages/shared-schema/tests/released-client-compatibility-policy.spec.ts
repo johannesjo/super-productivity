@@ -35,10 +35,39 @@ const RELEASE_TAG_PATTERN = /^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 const SHA1_PATTERN = /^(?!0{40}$)[0-9a-f]{40}$/;
 const ALL_ZERO_SHA1 = '0'.repeat(40);
 
+// Git exports repository-local variables to hooks. Remove the variables listed
+// by `git rev-parse --local-env-vars` before operating on a foreign repository.
+const GIT_LOCAL_ENVIRONMENT_VARIABLES = [
+  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+  'GIT_COMMON_DIR',
+  'GIT_CONFIG',
+  'GIT_CONFIG_COUNT',
+  'GIT_CONFIG_PARAMETERS',
+  'GIT_DIR',
+  'GIT_GRAFT_FILE',
+  'GIT_IMPLICIT_WORK_TREE',
+  'GIT_INDEX_FILE',
+  'GIT_INTERNAL_SUPER_PREFIX',
+  'GIT_NO_REPLACE_OBJECTS',
+  'GIT_OBJECT_DIRECTORY',
+  'GIT_PREFIX',
+  'GIT_REPLACE_REF_BASE',
+  'GIT_SHALLOW_FILE',
+  'GIT_WORK_TREE',
+] as const;
+
+const isolatedGitEnvironment = (): NodeJS.ProcessEnv => {
+  const environment = { ...process.env, GIT_NO_LAZY_FETCH: '1' };
+  for (const variable of GIT_LOCAL_ENVIRONMENT_VARIABLES) {
+    delete environment[variable];
+  }
+  return environment;
+};
+
 const runGit = (repositoryRoot: string, args: string[]): string =>
   execFileSync('git', ['-C', repositoryRoot, ...args], {
     encoding: 'utf8',
-    env: { ...process.env, GIT_NO_LAZY_FETCH: '1' },
+    env: isolatedGitEnvironment(),
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
 
