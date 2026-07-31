@@ -1398,6 +1398,26 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
       expect(component.isTaskSelectorOpen()).toBe(true);
     });
 
+    it('disables the play button when the staged task is completed elsewhere', () => {
+      currentTaskSubject.next(null);
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      expect(component.isPlayButtonDisabled()).toBe(false);
+
+      // e.g. a remote op (or the task list) marks the staged task done while it
+      // still sits in preparation waiting for Start.
+      selectedTaskSubject.next({ ...selectedTask, isDone: true });
+      fixture.detectChanges();
+
+      // Assert the staged task is still displayed, so that a null displayedTask
+      // cannot satisfy the isPlayButtonDisabled expectation below — only the
+      // isDone check can. Without this, dropping that check keeps the spec green.
+      expect(component.displayedTask()).toEqual(
+        jasmine.objectContaining({ id: selectedTask.id, isDone: true }),
+      );
+      expect(component.isPlayButtonDisabled()).toBe(true);
+    });
+
     it('edits the passively selected task rather than an already tracked task', () => {
       component.onTaskSelected(selectedTask.id);
       fixture.detectChanges();
