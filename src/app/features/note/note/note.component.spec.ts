@@ -6,6 +6,7 @@ import { EMPTY, Observable, of, Subject } from 'rxjs';
 import { NoteComponent } from './note.component';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
+import { NoteState } from '../note.model';
 import { ProjectService } from '../../project/project.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ClipboardImageService } from '../../../core/clipboard-image/clipboard-image.service';
@@ -57,6 +58,7 @@ describe('NoteComponent draft lifecycle', () => {
     });
 
     noteService = jasmine.createSpyObj('NoteService', ['update', 'remove']);
+    noteService.state$ = of({ entities: { [NOTE.id]: NOTE } } as unknown as NoteState);
     localDraftService = jasmine.createSpyObj('LocalDraftService', [
       'loadDraft',
       'saveDraft',
@@ -93,6 +95,10 @@ describe('NoteComponent draft lifecycle', () => {
   });
 
   const editFullscreen = (): Promise<void> => component.editFullscreen({} as MouseEvent);
+
+  // The save close-path awaits a store read before consuming the draft.
+  const flushCloseHandler = (): Promise<void> =>
+    new Promise((resolve) => setTimeout(resolve));
 
   describe('opening', () => {
     it('opens with the note content when no draft exists', async () => {
@@ -227,11 +233,27 @@ describe('NoteComponent draft lifecycle', () => {
       await editFullscreen();
 
       afterClosed$.next('final text');
+      await flushCloseHandler();
 
       expect(noteService.update).toHaveBeenCalledWith(NOTE.id, {
         content: 'final text',
       });
       expect(localDraftService.clearDraft).toHaveBeenCalledWith('NOTE', NOTE.id);
+    });
+
+    it('keeps the draft when the note no longer exists after the save dispatch', async () => {
+      // Deleted on another device (and synced here) while the editor was
+      // open: updateOne drops the update for a missing entity and NOTE has no
+      // recreate fallback, so the draft is the only surviving copy.
+      noteService.state$ = of({ entities: {} } as unknown as NoteState);
+      await editFullscreen();
+      contentChanged$.next('typed so far');
+
+      afterClosed$.next('typed so far');
+      await flushCloseHandler();
+
+      expect(noteService.update).toHaveBeenCalled();
+      expect(localDraftService.clearDraft).not.toHaveBeenCalled();
     });
 
     it('clears the draft without updating on a user-confirmed discard', async () => {

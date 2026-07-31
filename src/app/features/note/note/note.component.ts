@@ -266,7 +266,7 @@ export class NoteComponent implements OnChanges {
           });
         },
       );
-      dialogRef.afterClosed().subscribe((res) => {
+      dialogRef.afterClosed().subscribe(async (res) => {
         contentChangedSub.unsubscribe();
         if (!this.note) {
           throw new Error('No note');
@@ -283,7 +283,15 @@ export class NoteComponent implements OnChanges {
           // dispatch fail AND the app crash, the text is lost with the draft —
           // an accepted double-failure window; every ordinary crash is covered
           // by the draft staying alive until this very line.)
-          this._localDraftService.clearDraft('NOTE', note.id);
+          //
+          // Unless the note vanished while the editor was open (deleted on
+          // another device, synced here): updateOne drops the update for a
+          // missing entity and NOTE has no recreate fallback, so the draft is
+          // then the only surviving copy — keep it.
+          const { entities } = await firstValueFrom(this._noteService.state$);
+          if (entities[note.id]) {
+            this._localDraftService.clearDraft('NOTE', note.id);
+          }
         } else if (res?.action === 'DISCARD') {
           // Confirmed by the user in the dialog. Any other result (undefined
           // from a force-close/disposal) leaves the draft for crash recovery.
