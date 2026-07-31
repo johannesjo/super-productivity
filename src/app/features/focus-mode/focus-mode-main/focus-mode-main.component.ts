@@ -173,7 +173,20 @@ export class FocusModeMainComponent {
     ),
   );
 
+  // Picking a task during preparation only stages it for the upcoming Focus
+  // session. Activating it here would start global task tracking before the
+  // user presses Start (#9399).
+  private readonly _pendingTaskId = signal<string | null>(null);
+  private readonly _pendingTask = toSignal(
+    toObservable(this._pendingTaskId).pipe(
+      switchMap((id) => (id ? this.taskService.getByIdLive$(id) : of(null))),
+    ),
+  );
+
   readonly displayedTask = computed(() => {
+    if (this.mainState() !== FocusMainUIState.InProgress && this._pendingTaskId()) {
+      return this._pendingTask() ?? null;
+    }
     const tracked = this.currentTask();
     if (tracked) return tracked;
     if (this.focusModeService.isSessionPaused()) {
@@ -252,7 +265,10 @@ export class FocusModeMainComponent {
   // Play button should be disabled when no task is selected.
   // Sync between focus session and tracking is always on, so starting a session
   // without a task would leave tracking with nothing to bind to.
-  isPlayButtonDisabled = computed(() => !this.currentTask());
+  isPlayButtonDisabled = computed(() => {
+    const task = this.displayedTask();
+    return !task || task.isDone;
+  });
 
   // Mode selector options
   readonly modeOptions = computed<ReadonlyArray<SegmentedButtonOption>>(() => {
@@ -408,12 +424,13 @@ export class FocusModeMainComponent {
   }
 
   finishCurrentTask(): void {
-    const sessionRunning = this.isSessionRunning();
+    const isSessionInProgress =
+      this.mainState() === FocusMainUIState.InProgress || this.isSessionRunning();
+    const task = this.displayedTask();
 
     this._store.dispatch(completeTask());
 
-    const t = this.currentTask();
-    const id = t && t.id;
+    const id = task?.id;
     if (id) {
       this._store.dispatch(
         TaskSharedActions.updateTask({
@@ -428,9 +445,10 @@ export class FocusModeMainComponent {
       );
     }
 
-    if (sessionRunning) {
+    if (isSessionInProgress) {
       this.openTaskSelector();
     } else {
+      this._pendingTaskId.set(null);
       this._store.dispatch(selectFocusTask());
     }
   }
@@ -441,9 +459,9 @@ export class FocusModeMainComponent {
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string): void {
     if (isChanged) {
-      const t = this.currentTask();
+      const t = this.displayedTask();
       if (!t) {
-        Log.warn('updateTaskTitleIfChanged: currentTask is null, skipping update');
+        Log.warn('updateTaskTitleIfChanged: displayedTask is null, skipping update');
         return;
       }
       this.taskService.update(t.id, { title: newTitle });
@@ -489,7 +507,8 @@ export class FocusModeMainComponent {
 
     // Sync between focus session and tracking is always on — require a task
     // before starting so tracking has something to bind to.
-    if (!this.currentTask()) {
+    const task = this.displayedTask();
+    if (!task || task.isDone) {
       this.openTaskSelector();
       return;
     }
@@ -525,7 +544,7 @@ export class FocusModeMainComponent {
       .subscribe(() => {
         this.isLaunching.set(false);
         // The task could have been deselected during the brief launch window.
-        if (!this.currentTask()) {
+        if (!this.displayedTask()) {
           return;
         }
         this._dispatchStartSession();
@@ -537,9 +556,17 @@ export class FocusModeMainComponent {
   }
 
   private _dispatchStartSession(): void {
+    const task = this.displayedTask();
+    if (!task || task.isDone) {
+      this._store.dispatch(selectFocusTask());
+      this.openTaskSelector();
+      return;
+    }
+
     // For Flowtime mode, duration must be 0 to count indefinitely
     const duration = this.mode() === FocusModeMode.Flowtime ? 0 : this.displayDuration();
-    this._store.dispatch(startFocusSession({ duration }));
+    this._store.dispatch(startFocusSession({ duration, taskId: task.id }));
+    this._pendingTaskId.set(null);
   }
 
   pauseSession(): void {
@@ -611,7 +638,11 @@ export class FocusModeMainComponent {
   }
 
   onTaskSelected(taskId: string): void {
-    this.switchToTask(taskId);
+    if (this._isInProgress()) {
+      this.switchToTask(taskId);
+    } else {
+      this._pendingTaskId.set(taskId);
+    }
     this.closeTaskSelector();
   }
 

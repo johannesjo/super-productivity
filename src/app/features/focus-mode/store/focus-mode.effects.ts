@@ -234,7 +234,8 @@ export class FocusModeEffects {
     ),
   );
 
-  // Sync: When focus session starts → start tracking (if not already tracking)
+  // Sync: When focus session starts → start or switch tracking
+  // An explicitly selected task takes precedence over existing and resumable tasks.
   // Checks that the paused task still exists before starting tracking
   // Bug #5954 fix: Falls back to lastCurrentTask if no pausedTaskId (e.g., after app restart)
   // Bug #5954 fix: Shows focus overlay if no valid (undone) task is available
@@ -246,21 +247,24 @@ export class FocusModeEffects {
         this.taskService.currentTaskId$,
         this.store.select(selectLastCurrentTask),
       ),
-      filter(
-        ([_action, pausedTaskId, currentTaskId, lastCurrentTask]) =>
-          !currentTaskId && (!!pausedTaskId || !!lastCurrentTask),
+      filter(([action, pausedTaskId, currentTaskId, lastCurrentTask]) =>
+        action.taskId
+          ? action.taskId !== currentTaskId
+          : !currentTaskId && (!!pausedTaskId || !!lastCurrentTask),
       ),
-      switchMap(([_action, pausedTaskId, _currentTaskId, lastCurrentTask]) => {
-        // Prefer pausedTaskId, fall back to lastCurrentTask
-        const taskIdToResume = pausedTaskId || lastCurrentTask?.id;
+      switchMap(([action, pausedTaskId, _currentTaskId, lastCurrentTask]) => {
+        // Prefer an explicit selection, then pausedTaskId, then lastCurrentTask.
+        const taskIdToResume = action.taskId || pausedTaskId || lastCurrentTask?.id;
         if (!taskIdToResume) return EMPTY;
 
         return this.store.select(selectTaskById, { id: taskIdToResume }).pipe(
           take(1),
-          map((task) =>
+          switchMap((task) =>
             task && !task.isDone
-              ? setCurrentTask({ id: taskIdToResume })
-              : actions.showFocusOverlay(),
+              ? of(setCurrentTask({ id: taskIdToResume }))
+              : action.taskId
+                ? of(actions.selectFocusTask(), actions.showFocusOverlay())
+                : of(actions.showFocusOverlay()),
           ),
         );
       }),
@@ -866,6 +870,7 @@ export class FocusModeEffects {
             actions.completeBreak,
             actions.completeFocusSession,
             actions.cancelFocusSession,
+            actions.selectFocusTask,
           ),
           // Throttle to prevent excessive IPC calls (timer ticks every 1s)
           // Use leading + trailing to ensure immediate feedback and final state
