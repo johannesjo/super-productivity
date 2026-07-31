@@ -788,8 +788,7 @@
         "REMIND_LABEL": "زمان یادآوری",
         "REMINDER_CREATED": "یادآوری ایجاد شد",
         "REMINDER_ERROR": "خطا در ایجاد یادآوری",
-        "REMINDER_NEEDS_TEXT": "لطفاً ابتدا متنی بنویسید",
-        "REMINDER_TASK_TITLE": "بازتاب: {{title}}"
+        "REMINDER_NEEDS_TEXT": "لطفاً ابتدا متنی بنویسید"
       }
     },
     "NOTE": {
@@ -1393,7 +1392,7 @@
           "L_CONFIRM_PASSWORD": "تأیید رمز عبور",
           "L_NEW_PASSWORD": "رمز عبور جدید",
           "L_REMOVE_ENCRYPTION": "حذف رمزنگاری",
-          "PASSWORD_MIN_LENGTH": "رمز عبور باید حداقل {{minLength}} کاراکتر باشد",
+          "PASSWORD_MIN_LENGTH": "رمز عبور باید حداقل 8 کاراکتر باشد",
           "PASSWORDS_DONT_MATCH": "رمزهای عبور مطابقت ندارند",
           "REMOVE_ENCRYPTION_WARNING": "هشدار: حذف رمزنگاری داده‌ها را بدون محافظت قرار می‌دهد.",
           "SETUP_ENCRYPTION_BTN": "رمزنگاری و ادامه",
@@ -1471,7 +1470,7 @@
           "L_REMOVE_ENCRYPTION": "حذف رمزنگاری",
           "L_SERVER_URL": "آدرس سرور",
           "LOGIN_INSTRUCTIONS": "دستورالعمل‌های ورود",
-          "PASSWORD_MIN_LENGTH": "رمز عبور باید حداقل {{minLength}} کاراکتر باشد",
+          "PASSWORD_MIN_LENGTH": "رمز عبور باید حداقل 8 کاراکتر باشد",
           "PASSWORDS_DONT_MATCH": "رمزهای عبور مطابقت ندارند",
           "REMOVE_ENCRYPTION_WARNING": "هشدار: حذف رمزنگاری داده‌ها را بدون محافظت قرار می‌دهد.",
           "SERVER_URL_DESCRIPTION": "آدرس سرور SuperSync خود را وارد کنید",
@@ -2318,7 +2317,6 @@
         "PASSWORD": "رمز عبور",
         "POLL_INTERVAL_MINUTES": "فاصله نظرسنجی (دقیقه)",
         "TITLE_TEMPLATE": "الگوی عنوان",
-        "TITLE_TEMPLATE_DESCRIPTION": "الگو برای عنوان وظیفه. از {{issueId}} و {{summary}} استفاده کنید.",
         "USERNAME": "نام کاربری"
       },
       "FORM_SECTION": {

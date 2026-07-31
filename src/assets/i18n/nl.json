@@ -681,7 +681,7 @@
         "NO_VALID_TRANSITION": "Jira: Geen geldige overgang geconfigureerd",
         "TIMED_OUT": "Jira: Time-out voor verzoek",
         "TRANSITION": "Jira: Stel probleem \"{{issueKey}}\" in op \"{{name}}\"",
-        "TRANSITION_SUCCESS": "Jira: Stel probleem {{issueKey}} in op <strong>{{gekozenTransition}}</strong>",
+        "TRANSITION_SUCCESS": "Jira: Stel probleem {{issueKey}} in op <strong>{{chosenTransition}}</strong>",
         "TRANSITIONS_LOADED": "Jira: Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen",
         "UNABLE_TO_REASSIGN": "Jira: Kan ticket niet aan jezelf toewijzen, omdat je geen gebruikersnaam hebt opgegeven. Ga naar de instellingen."
       },
@@ -2032,7 +2032,7 @@
         "MONDAY_TO_FRIDAY_AND_TIME": "Ma-Vr, {{timeStr}}",
         "MONTHLY_CURRENT_DATE": "Maandelijks op {{dateDayStr}}de",
         "MONTHLY_CURRENT_DATE_AND_TIME": "Maandelijks op {{dateDayStr}}de, {{timeStr}}",
-        "WEEKLY_CURRENT_WEEKDAY": "Wekelijks op {{{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Wekelijks op {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Wekelijks op {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Jaarlijks op {{dayAndMonthStr}}",
         "YEARLY_CURRENT_DATE_AND_TIME": "Jaarlijks op {{dayAndMonthStr}}, {{timeStr}}",

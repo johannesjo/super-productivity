@@ -64,7 +64,7 @@ body.isDarkTheme {
 // Native mobile: dialogs need explicit safe-area offsets because they use
 // position:fixed inside a container that spans the full viewport.
 // Connected overlays (menus, selects) are handled via the CDK viewport margin
-// patch in GlobalThemeService._patchCdkViewportForSafeArea().
+// patch in core/theme/cdk-safe-area-viewport.util.ts.
 body.isNativeMobile .cdk-global-overlay-wrapper {
   padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom)
     var(--safe-area-left);

@@ -108,6 +108,114 @@ test('compareTranslationKeys treats object-versus-leaf differences as structural
   });
 });
 
+test('collectPlaceholders extracts sorted names and ignores non-strings', () => {
+  const { collectPlaceholders } = require('./test-lng-files');
+
+  assert.deepEqual(collectPlaceholders('submit {{b}} to {{ a.name }} now'), [
+    'a.name',
+    'b',
+  ]);
+  assert.deepEqual(collectPlaceholders('welcome {{ user-name }}'), ['user-name']);
+  assert.deepEqual(collectPlaceholders('no placeholders'), []);
+  assert.deepEqual(collectPlaceholders(42), []);
+});
+
+test('findBraceDefect flags brace runs and unbalanced pairs but not clean values', () => {
+  const { findBraceDefect } = require('./test-lng-files');
+
+  assert.equal(findBraceDefect('Weekly on {{weekdayStr}}'), null);
+  assert.equal(findBraceDefect('no braces at all'), null);
+  assert.equal(findBraceDefect(null), null);
+  assert.equal(findBraceDefect('Wekelijks op {{{weekdayStr}}'), 'brace run');
+  assert.equal(findBraceDefect('planned for {{date}'), 'unbalanced braces');
+  assert.equal(findBraceDefect('welcome {{ user-name }}'), null);
+  assert.equal(findBraceDefect('welcome {{  name  }}'), 'invalid placeholder syntax');
+  assert.equal(findBraceDefect('single {braces} are fine'), null);
+});
+
+test('inspectTranslationDirectory reports placeholder mismatches and broken braces per shared key', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'test-lng-files-'));
+
+  try {
+    const writeJson = (file, value) => {
+      writeFileSync(join(directory, file), JSON.stringify(value));
+    };
+
+    writeJson('en.json', {
+      msg: {
+        extraDetail: 'Something failed',
+        hyphenated: 'Hello {{user-name}}',
+        planned: 'planned for {{date}}',
+        renamed: 'Hello {{name}}',
+        spacing: 'Hello {{name}}',
+        weekly: 'Weekly on {{weekdayStr}}',
+        plain: 'no params',
+      },
+    });
+    writeJson('xx.json', {
+      msg: {
+        // Not flagged: English omitting a placeholder does not prove the call
+        // site omits it too, so this stays a mismatch and not a defect.
+        extraDetail: 'Fehlgeschlagen: {{detail}}',
+        hyphenated: 'Hallo {{translated-name}}',
+        planned: 'geplant', // drops {{date}}: mismatch, braces fine
+        renamed: 'Hallo {{translatedName}}', // unresolved name: renders literally
+        spacing: 'Hallo {{  name  }}',
+        weekly: 'Wöchentlich am {{weekdayStr}', // unbalanced: malformed AND mismatch
+        plain: 'keine Parameter',
+      },
+      extra: {
+        // malformed but not a shared key; never rendered, must not count
+        unused: '{{{orphan}}',
+      },
+    });
+
+    const report = inspectTranslationDirectory(directory);
+    assert.deepEqual(report.files[0].placeholderMismatches, [
+      'msg.extraDetail',
+      'msg.hyphenated',
+      'msg.planned',
+      'msg.renamed',
+      'msg.spacing',
+      'msg.weekly',
+    ]);
+    assert.deepEqual(report.files[0].unexpectedPlaceholderKeys, [
+      'msg.hyphenated',
+      'msg.renamed',
+    ]);
+    assert.deepEqual(report.files[0].malformedKeys, [
+      'msg.spacing (invalid placeholder syntax)',
+      'msg.weekly (unbalanced braces)',
+    ]);
+    assert.equal(report.totalPlaceholderMismatches, 6);
+    assert.equal(report.totalUnexpectedPlaceholders, 2);
+    assert.equal(report.totalMalformed, 2);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('no shipped locale value has broken or unexpected placeholders', () => {
+  // Broken braces and translation-only names render literally to users. A
+  // missing expected name may reflect translated prose that omits the value,
+  // so that broader set-level drift remains informational.
+  const report = inspectTranslationDirectory(
+    join(__dirname, '..', 'src', 'assets', 'i18n'),
+  );
+  const offenders = report.files
+    .filter(
+      (file) =>
+        file.unexpectedPlaceholderKeys.length > 0 || file.malformedKeys.length > 0,
+    )
+    .map(
+      (file) =>
+        `${file.file}: unexpected=${file.unexpectedPlaceholderKeys.join(', ')}; ` +
+        `malformed=${file.malformedKeys.join(', ')}`,
+    );
+
+  assert.deepEqual(offenders, []);
+});
+
 test('inspectTranslationDirectory compares every locale with deterministic order and totals', () => {
   const directory = mkdtempSync(join(tmpdir(), 'test-lng-files-'));
 
@@ -157,20 +265,32 @@ test('inspectTranslationDirectory compares every locale with deterministic order
           file: 'de.json',
           missingKeys: ['common.save'],
           unnecessaryKeys: ['common.delete'],
+          placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
+          malformedKeys: [],
         },
         {
           file: 'fr.json',
           missingKeys: ['common.save', 'task.title'],
           unnecessaryKeys: [],
+          placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
+          malformedKeys: [],
         },
         {
           file: 'zh.json',
           missingKeys: [],
           unnecessaryKeys: [],
+          placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
+          malformedKeys: [],
         },
       ],
       totalMissing: 3,
       totalUnnecessary: 1,
+      totalPlaceholderMismatches: 0,
+      totalUnexpectedPlaceholders: 0,
+      totalMalformed: 0,
     });
   } finally {
     rmSync(directory, { recursive: true, force: true });
@@ -211,10 +331,16 @@ test('inspectTranslationDirectory ignores .json directories and checks locale fi
           file: 'de.json',
           missingKeys: ['common.cancel'],
           unnecessaryKeys: [],
+          placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
+          malformedKeys: [],
         },
       ],
       totalMissing: 1,
       totalUnnecessary: 0,
+      totalPlaceholderMismatches: 0,
+      totalUnexpectedPlaceholders: 0,
+      totalMalformed: 0,
     });
   } finally {
     rmSync(directory, { recursive: true, force: true });
@@ -234,10 +360,16 @@ test('printReport keeps adversarial values on inert output lines', (t) => {
         file: '::error file=secret::forged\nname\r\x1b[31m.json',
         missingKeys: ['error.message\n::warning::forged\r\x00\x1b[2J'],
         unnecessaryKeys: [],
+        placeholderMismatches: [],
+        unexpectedPlaceholderKeys: [],
+        malformedKeys: [],
       },
     ],
     totalMissing: 1,
     totalUnnecessary: 0,
+    totalPlaceholderMismatches: 0,
+    totalUnexpectedPlaceholders: 0,
+    totalMalformed: 0,
   });
 
   assert.equal(output.length, 3);
@@ -267,10 +399,16 @@ test('printReport bounds keys while retaining three examples and the remainder',
           'fifth.omitted',
         ],
         unnecessaryKeys: [],
+        placeholderMismatches: [],
+        unexpectedPlaceholderKeys: [],
+        malformedKeys: [],
       },
     ],
     totalMissing: 5,
     totalUnnecessary: 0,
+    totalPlaceholderMismatches: 0,
+    totalUnexpectedPlaceholders: 0,
+    totalMalformed: 0,
   });
 
   const [fileLine] = output;

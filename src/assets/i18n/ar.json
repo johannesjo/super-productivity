@@ -410,7 +410,7 @@
         "T_TITLE": "العنوان",
         "T_TO_BE_SUBMITTED": "يتم تقديمه",
         "TITLE": "إرسال الوقت المنقضي على المشكلات إلى  جيت لاب",
-        "TOTAL_MSG": "ستقوم بإرسال\n<em> {totalTotalTimeToSubmit}</em>\n وقت العمل لهذا اليوم إجمالاً إلى\n<em> {nrOfOfTasksToSubmit}</em>\n مشكلات مختلفة."
+        "TOTAL_MSG": "ستقوم بإرسال\n<em> {{totalTimeToSubmit}}</em>\n وقت العمل لهذا اليوم إجمالاً إلى\n<em> {{nrOfTasksToSubmit}}</em>\n مشكلات مختلفة."
       },
       "FORM": {
         "FILTER": "فلتر مخصص",
@@ -685,7 +685,7 @@
         "DONE": "تم",
         "LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح",
         "TEST_CREDENTIALS": "اختبار بيانات الاعتماد",
-        "WELCOME_USER": "مرحباً {{userName}}!"
+        "WELCOME_USER": "مرحباً {{user}}!"
       }
     },
     "MARKDOWN_PASTE": {
@@ -774,7 +774,6 @@
         "REMINDER_CREATED": "تم إنشاء تذكير التأمل",
         "REMINDER_ERROR": "خطأ في إنشاء تذكير التأمل",
         "REMINDER_NEEDS_TEXT": "يرجى إدخال نص لإنشاء تذكير",
-        "REMINDER_TASK_TITLE": "🧘 تأمل: {{text}}",
         "REMIND_LABEL": "تذكير لاحقاً"
       }
     },
@@ -1326,7 +1325,7 @@
           "L_NEW_PASSWORD": "كلمة المرور الجديدة",
           "L_REMOVE_ENCRYPTION": "إزالة التشفير",
           "PASSWORDS_DONT_MATCH": "كلمات المرور غير متطابقة",
-          "PASSWORD_MIN_LENGTH": "يجب أن تكون كلمة المرور {{minLength}} أحرف على الأقل",
+          "PASSWORD_MIN_LENGTH": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
           "REMOVE_ENCRYPTION_WARNING": "تحذير: ستتم إزالة التشفير من جميع البيانات المتزامنة.",
           "ENCRYPTION_SETUP_INTRO": "<strong>عيّن كلمة مرور لتشفير بياناتك قبل رفعها</strong>، حتى لا تغادر هذا الجهاز من دون تشفير. هذا اختياري — ويمكنك تفعيله أو تغييره لاحقًا.",
           "SETUP_ENCRYPTION_BTN": "التشفير والمتابعة",
@@ -1403,7 +1402,7 @@
           "L_REMOVE_ENCRYPTION": "إزالة التشفير",
           "L_SERVER_URL": "رابط الخادم",
           "PASSWORDS_DONT_MATCH": "كلمات المرور غير متطابقة",
-          "PASSWORD_MIN_LENGTH": "يجب أن تكون كلمة المرور {{minLength}} أحرف على الأقل",
+          "PASSWORD_MIN_LENGTH": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
           "REMOVE_ENCRYPTION_WARNING": "تحذير: ستتم إزالة التشفير من جميع البيانات المتزامنة.",
           "SERVER_URL_DESCRIPTION": "رابط خادم SuperSync الخاص بك.",
           "SETUP_DISABLE_SUPERSYNC_BTN": "تعطيل SuperSync",
@@ -1454,20 +1453,17 @@
         "SUCCESS_DOWNLOAD": "البيانات المتزامنة من جهاز التحكم عن بعد",
         "SUCCESS_VIA_BUTTON": "تمت مزامنة البيانات بنجاح",
         "UNKNOWN_ERROR": "خطأ غير معروف أثناء المزامنة. يرجى التحقق من وحدة التحكم.",
-        "ARCHIVE_OPERATION_FAILED": "فشلت عملية الأرشيف: {{errorMsg}}",
         "AUTH_SETUP_FAILED": "فشل إعداد المصادقة. يرجى المحاولة مرة أخرى. إذا كنت تستخدم تطبيق الويب، فتأكد من الوصول إليه عبر HTTPS. إذا استمرت المشكلة، يرجى الإبلاغ عنها كخطأ.",
         "AUTH_TOKEN_REJECTED": "تم رفض رمز المصادقة. يرجى إعادة المصادقة.",
-        "CHANGE_PASSWORD_FAILED": "فشل تغيير كلمة المرور: {{errorMsg}}",
+        "CHANGE_PASSWORD_FAILED": "فشل تغيير كلمة المرور: {{message}}",
         "CLOCK_DRIFT_WARNING": "تحذير: يبدو أن ساعة جهازك غير متزامنة. قد يؤثر هذا على المزامنة.",
-        "COMPACTION_FAILED": "فشل ضغط البيانات: {{errorMsg}}",
         "CONFLICT_DIALOG_TIMEOUT": "انتهت مهلة حوار التعارض",
         "CONFLICT_RESOLUTION_FAILED": "فشل حل التعارض",
         "DATA_REPAIRED": "تم إصلاح البيانات بنجاح",
         "DECRYPTION_FAILED": "فشل فك التشفير. يرجى التحقق من كلمة المرور.",
-        "DEFERRED_ACTION_FAILED": "فشل الإجراء المؤجل: {{errorMsg}}",
         "DIALOG_RESULT_ERROR": "خطأ في نتيجة الحوار",
-        "DISABLE_ENCRYPTION_FAILED": "فشل تعطيل التشفير: {{errorMsg}}",
-        "ENABLE_ENCRYPTION_FAILED": "فشل تفعيل التشفير: {{errorMsg}}",
+        "DISABLE_ENCRYPTION_FAILED": "فشل تعطيل التشفير: {{message}}",
+        "ENABLE_ENCRYPTION_FAILED": "فشل تفعيل التشفير: {{message}}",
         "ENCRYPTION_DISABLED_ON_OTHER_DEVICE": "تم تعطيل التشفير على جهاز آخر. يرجى إعادة المزامنة.",
         "ENCRYPTION_PASSWORD_REQUIRED": "كلمة مرور التشفير مطلوبة",
         "ENCRYPTION_REQUIRED_FOR_SUPERSYNC": "التشفير مطلوب لـ SuperSync",
@@ -1478,7 +1474,6 @@
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "تعذر قراءة البيانات البعيدة",
         "FINISH_DAY_SYNC_ERROR": "خطأ في مزامنة إنهاء اليوم",
         "FRESH_CLIENT_SYNC_CANCELLED": "تم إلغاء مزامنة العميل الجديد",
-        "HYDRATION_FAILED": "فشل تحميل البيانات: {{errorMsg}}",
         "IMPORTING": "جاري الاستيراد...",
         "INCOMPLETE_OP_SYNC": "مزامنة عمليات غير مكتملة",
         "INITIAL_SYNC_ERROR": "خطأ في المزامنة الأولية",
@@ -1490,22 +1485,16 @@
         "LOCAL_DATA_REPLACE_CANCELLED": "تم إلغاء استبدال البيانات المحلية",
         "LOCK_TIMEOUT_ERROR": "انتهت مهلة القفل. يرجى المحاولة مرة أخرى.",
         "LWW_CONFLICTS_AUTO_RESOLVED": "تم حل {{count}} تعارض(ات) تلقائياً",
-        "MIGRATION_FAILED": "فشل الترحيل: {{errorMsg}}",
         "NEWER_VERSION_AVAILABLE": "إصدار أحدث متاح. يرجى تحديث التطبيق.",
-        "OPERATION_PERMANENTLY_FAILED": "فشلت العملية بشكل دائم: {{errorMsg}}",
-        "OVERWRITE_SERVER_FAILED": "فشل فرض الكتابة فوق الخادم: {{errorMsg}}",
-        "PARTIAL_APPLY_FAILURE": "فشل التطبيق الجزئي: {{errorMsg}}",
-        "PERSIST_FAILED": "فشل حفظ البيانات: {{errorMsg}}",
+        "OVERWRITE_SERVER_FAILED": "فشل فرض الكتابة فوق الخادم: {{message}}",
         "REMOTE_DATA_TOO_OLD": "البيانات البعيدة قديمة جداً",
-        "REPLAY_LOCAL_OPS_FAILED": "فشل إعادة تشغيل العمليات المحلية: {{errorMsg}}",
-        "RESTORE_ERROR": "خطأ في الاستعادة: {{errorMsg}}",
         "RESTORE_SUCCESS": "تمت الاستعادة بنجاح",
         "SERVER_MIGRATION_VALIDATION_FAILED": "فشل التحقق من ترحيل الخادم",
         "STORAGE_QUOTA_EXCEEDED": "تم تجاوز حصة التخزين",
         "STORAGE_RECOVERED_AFTER_COMPACTION": "تم استعادة التخزين بعد الضغط",
         "TIMEOUT_ERROR": "انتهت المهلة. يرجى المحاولة مرة أخرى.",
         "TOO_MANY_OPS_TO_DOWNLOAD": "عمليات كثيرة جداً للتحميل. يرجى إعادة المزامنة.",
-        "UPLOAD_ERROR": "خطأ في الرفع: {{errorMsg}}",
+        "UPLOAD_ERROR": "خطأ في الرفع: {{err}}",
         "UPLOAD_OPS_REJECTED": "تم رفض عمليات الرفع",
         "VECTOR_CLOCK_LIMIT_REACHED": "تم الوصول إلى حد ساعة المتجه",
         "VERSION_TOO_OLD": "الإصدار قديم جداً. يرجى تحديث التطبيق.",
@@ -1619,11 +1608,7 @@
         "TITLE": "ترحيل الخادم مطلوب"
       },
       "D_SYNC_IMPORT_CONFLICT": {
-        "FILTERED_CHANGES": "{{count}} تغيير(ات) محلية ستُحذف",
-        "IMPORT_DATE": "تاريخ الاستيراد: {{date}}",
-        "MSG_INCOMING": "جهاز آخر قام باستيراد/استعادة البيانات. السبب: {{reason}}.",
         "MSG_INCOMING_NO_OPS": "جهاز آخر قام باستيراد/استعادة البيانات. لا توجد تغييرات محلية متأثرة.",
-        "MSG_LOCAL_FILTERS": "لديك {{count}} تغيير(ات) محلية ستُحذف لأنها سابقة للاستيراد.",
         "REASON_BACKUP_RESTORE": "استعادة نسخة احتياطية",
         "REASON_FILE_IMPORT": "استيراد ملف",
         "REASON_FORCE_UPLOAD": "فرض الرفع",
@@ -1714,8 +1699,7 @@
         "D_COLOR": "إذا لم يتم التعيين، فسيتم استخدام اللون الأساسي للسمة افتراضياً."
       },
       "S": {
-        "UPDATED": "تم تحديث إعدادات العلامات",
-        "ARCHIVE_CLEANUP_FAILED": "فشل تنظيف الأرشيف: {{errorMsg}}"
+        "UPDATED": "تم تحديث إعدادات العلامات"
       },
       "TTL": {
         "ADD_NEW_TAG": "إضافة علامة جديدة"
@@ -2210,13 +2194,9 @@
         "BTN_COMPRESS": "ضغط",
         "CONFIRM_MSG": "هل أنت متأكد أنك تريد ضغط الأرشيف؟ لا يمكن التراجع عن هذا.",
         "CONFIRM_TITLE": "تأكيد الضغط",
-        "ESTIMATED_SAVINGS": "التوفير المقدر: {{savings}}",
         "INTRO": "ضغط الأرشيف يزيل البيانات غير الضرورية لتوفير المساحة.",
-        "ISSUE_FIELDS_TO_CLEAR": "حقول المشكلات للمسح: {{count}}",
         "LOADING": "جاري التحليل...",
-        "NOTES_TO_CLEAR": "ملاحظات للمسح: {{count}}",
         "NO_DATA": "لا توجد بيانات للضغط",
-        "SUBTASKS_TO_DELETE": "مهام فرعية للحذف: {{count}}",
         "TITLE": "ضغط الأرشيف",
         "WARNING": "تحذير: لا يمكن التراجع عن هذا الإجراء."
       }
@@ -2771,9 +2751,7 @@
       "SORT_NEWEST": "الأحدث أولاً",
       "SORT_OLDEST": "الأقدم أولاً",
       "SORT_SMALLEST": "الأصغر أولاً",
-      "TITLE": "صور الحافظة",
-      "TOTAL_IMAGES": "إجمالي الصور: {{count}}",
-      "TOTAL_SIZE": "الحجم الإجمالي: {{size}}"
+      "TITLE": "صور الحافظة"
     },
     "TASK_WIDGET": {
       "TITLE": "ودجت المهام",
