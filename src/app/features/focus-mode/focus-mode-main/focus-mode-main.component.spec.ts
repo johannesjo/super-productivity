@@ -66,6 +66,7 @@ describe('FocusModeMainComponent', () => {
   let mockIssueService: jasmine.SpyObj<IssueService>;
   let focusModeServiceSpy: jasmine.SpyObj<FocusModeService>;
   let currentTaskSubject: BehaviorSubject<TaskCopy | null>;
+  let mainStateSignal: WritableSignal<FocusMainUIState>;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
 
   const mockTask: TaskCopy = {
@@ -87,6 +88,7 @@ describe('FocusModeMainComponent', () => {
   } as TaskCopy;
 
   beforeEach(async () => {
+    mainStateSignal = signal(FocusMainUIState.Preparation);
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       tasks: jasmine.createSpy().and.returnValue({
         notesTemplate: 'Default task notes template',
@@ -129,7 +131,7 @@ describe('FocusModeMainComponent', () => {
       currentCycle: jasmine.createSpy().and.returnValue(1),
       sessionDuration: jasmine.createSpy().and.returnValue(0),
       mode: jasmine.createSpy().and.returnValue(FocusModeMode.Pomodoro),
-      mainState: jasmine.createSpy().and.returnValue(FocusMainUIState.Preparation),
+      mainState: mainStateSignal,
       focusModeConfig: jasmine.createSpy().and.returnValue({
         isSkipPreparation: false,
       }),
@@ -440,7 +442,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should open task selector and NOT dispatch selectFocusTask when session is running', () => {
-      focusModeServiceSpy.mainState.and.returnValue(FocusMainUIState.InProgress);
+      mainStateSignal.set(FocusMainUIState.InProgress);
       focusModeServiceSpy.isSessionRunning.and.returnValue(true);
       component.finishCurrentTask();
 
@@ -461,7 +463,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should preserve a paused session while choosing the next task', () => {
-      focusModeServiceSpy.mainState.and.returnValue(FocusMainUIState.InProgress);
+      mainStateSignal.set(FocusMainUIState.InProgress);
       focusModeServiceSpy.isSessionRunning.and.returnValue(false);
       focusModeServiceSpy.isSessionPaused.and.returnValue(true);
 

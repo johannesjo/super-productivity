@@ -396,8 +396,7 @@ export class FocusModeMainComponent {
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
-    // Drop attaches to the displayedTask (= currentTask, or the paused task
-    // during a paused session) so drops still work mid-pause.
+    // Drop attaches to the tracked, paused, or staged preparation task.
     const t = this.displayedTask();
     if (!t) {
       return;
@@ -425,8 +424,7 @@ export class FocusModeMainComponent {
   }
 
   finishCurrentTask(): void {
-    const isSessionInProgress =
-      this.mainState() === FocusMainUIState.InProgress || this.isSessionRunning();
+    const isSessionInProgress = this._isInProgress() || this.isSessionRunning();
     const task = this.displayedTask();
 
     this._store.dispatch(completeTask());
