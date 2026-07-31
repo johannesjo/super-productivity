@@ -14,6 +14,23 @@ import { waitForStatePersistence } from '../../utils/waits';
 const { ADD_TASK_INPUT, DETAIL_PANEL } = cssSelectors;
 
 test.describe('Keyboard Shortcuts', () => {
+  test('should keep an assigned shortcut after Escape and reload', async ({ page }) => {
+    await page.goto('/#/config?section=keyboard');
+
+    const shortcutInput = page.locator('keyboard-input input').first();
+    await expect(shortcutInput).toBeVisible();
+    const assignedShortcut = await shortcutInput.inputValue();
+    expect(assignedShortcut).not.toBe('');
+
+    await shortcutInput.focus();
+    await page.keyboard.press('Escape');
+    await expect(shortcutInput).toHaveValue(assignedShortcut);
+
+    await page.reload();
+    const reloadedShortcutInput = page.locator('keyboard-input input').first();
+    await expect(reloadedShortcutInput).toHaveValue(assignedShortcut);
+  });
+
   test('should focus add task input with Shift+A', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 
