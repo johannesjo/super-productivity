@@ -186,9 +186,9 @@ const showStats = async (): Promise<void> => {
       tableSizes.forEach((t) => console.log(`  ${t.table}: ${t.size}`));
     }
   } catch (error) {
-    if (reportMonitoringError('Error:', error)) {
-      console.log('Status: Disconnected ❌');
-    }
+    reportMonitoringError('Error:', error);
+    console.log('Status: Disconnected ❌');
+    process.exitCode = 1;
   }
 
   // Disk space
@@ -304,6 +304,7 @@ const showUsage = async (saveHistory = true, showFullEmails = false): Promise<vo
     }
   } catch (error) {
     reportMonitoringError('Error fetching usage data:', error);
+    process.exitCode = 1;
   }
 };
 
@@ -612,6 +613,7 @@ const showOps = async (args: string[]): Promise<void> => {
     }
   } catch (error) {
     reportMonitoringError('Error fetching operations:', error);
+    process.exitCode = 1;
   }
 };
 
@@ -763,6 +765,7 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
     );
   } catch (error) {
     reportMonitoringError('Error fetching active users:', error);
+    process.exitCode = 1;
   }
 };
 
@@ -824,6 +827,7 @@ const showActiveUsersQuick = async (args: string[]): Promise<void> => {
     );
   } catch (error) {
     reportMonitoringError('Error fetching active users (quick):', error);
+    process.exitCode = 1;
   }
 };
 
@@ -884,6 +888,7 @@ const main = async (): Promise<void> => {
     }
   } catch (err) {
     reportMonitoringError('Unexpected error:', err);
+    process.exitCode = 1;
   } finally {
     await disconnectDb();
   }

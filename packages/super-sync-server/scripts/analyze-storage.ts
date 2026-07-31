@@ -782,9 +782,8 @@ const main = async (): Promise<void> => {
         showHelp();
     }
   } catch (error) {
-    if (reportMonitoringError('Error:', error)) {
-      process.exitCode = 1;
-    }
+    reportMonitoringError('Error:', error);
+    process.exitCode = 1;
   } finally {
     await disconnectDb();
   }
