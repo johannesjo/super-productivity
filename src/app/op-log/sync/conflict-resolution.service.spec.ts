@@ -37,7 +37,10 @@ import {
 } from '../core/entity-registry';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { OperationLogEffects } from '../capture/operation-log.effects';
-import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import {
+  IncompleteRemoteOperationsError,
+  UnsupportedMultiEntityConflictError,
+} from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import {
   isLwwUpdateActionType,
@@ -46,6 +49,8 @@ import {
 import { convertOpToAction } from '../apply/operation-converter.util';
 import { TIME_TRACKING_FEATURE_KEY } from '../../features/time-tracking/store/time-tracking.reducer';
 import { lwwUpdateMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
+import { MAX_DATA_LENGTH, OpLog } from '../../core/log';
+import { SYNC_MULTI_ENTITY_UNSUPPORTED_CODE } from './conflict-guard-diagnostic.util';
 
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
@@ -3524,6 +3529,7 @@ describe('ConflictResolutionService', () => {
       });
 
       it('fails closed for a non-decomposable local bulk update', async () => {
+        const opLogError = spyOn(OpLog, 'err').and.stub();
         const localBulkUpdate: Operation = {
           ...createOpWithTimestamp(
             'local-bulk-update',
@@ -3551,13 +3557,34 @@ describe('ConflictResolutionService', () => {
           OpType.Update,
           'task-1',
         );
-        await expectAsync(
-          service.autoResolveConflictsLWW([
+        let thrown: unknown;
+        try {
+          await service.autoResolveConflictsLWW([
             createConflict('task-1', [localBulkUpdate], [remoteWinner]),
-          ]),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve local multi-entity operation/,
+          ]);
+        } catch (error) {
+          thrown = error;
+        }
+
+        expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+        expect((thrown as Error).message).toBe(
+          `${SYNC_MULTI_ENTITY_UNSUPPORTED_CODE} side=local ` +
+            `actionTypes=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} ` +
+            'entityType=TASK entityCount=2',
         );
+        expect(opLogError).toHaveBeenCalledTimes(1);
+        const logArgs = opLogError.calls.mostRecent().args;
+        expect(logArgs).toEqual([
+          {
+            code: SYNC_MULTI_ENTITY_UNSUPPORTED_CODE,
+            side: 'local',
+            actionTypes: [ActionType.TASK_SHARED_UPDATE_MULTIPLE],
+            entityType: 'TASK',
+            entityCount: 2,
+            entityId: 'task-1',
+          },
+        ]);
+        expect(JSON.stringify(logArgs[0]).length).toBeLessThanOrEqual(MAX_DATA_LENGTH);
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
@@ -3660,9 +3687,7 @@ describe('ConflictResolutionService', () => {
             createConflict('task-1', [localDelete], [remoteMultiOp]),
             createConflict('task-2', [localTask2], [remoteMultiOp]),
           ]),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve remote multi-entity operation/,
-        );
+        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
@@ -3831,9 +3856,7 @@ describe('ConflictResolutionService', () => {
 
         await expectAsync(
           service.autoResolveConflictsLWW(conflicts),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve remote multi-entity operation/,
-        );
+        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
         expect(mockOpLogStore.appendBatchSkipDuplicates).not.toHaveBeenCalled();
         expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
       });

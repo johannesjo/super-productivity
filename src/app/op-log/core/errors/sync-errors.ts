@@ -122,6 +122,14 @@ export class ForceUploadPendingOpsError extends Error {
   override name = 'ForceUploadPendingOpsError';
 }
 
+export class UnsupportedMultiEntityConflictError extends Error {
+  override name = 'UnsupportedMultiEntityConflictError';
+
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 /**
  * The file-sync target changed (provider switch, account switch behind the same
  * provider id, or an identity-affecting config/folder change) while a file

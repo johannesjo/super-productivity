@@ -15,6 +15,7 @@ import { OperationCaptureService } from '../../capture/operation-capture.service
 import { OperationLogEffects } from '../../capture/operation-log.effects';
 import { buildEntityRegistry, ENTITY_REGISTRY } from '../../core/entity-registry';
 import { ActionType, Operation } from '../../core/operation.types';
+import { UnsupportedMultiEntityConflictError } from '../../core/errors/sync-errors';
 import { PersistentAction } from '../../core/persistent-action.interface';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
 import { ConflictJournalService } from '../../sync/conflict-journal.service';
@@ -239,7 +240,7 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
 
     await expectAsync(
       resolver.autoResolveConflictsLWW(detection.conflicts),
-    ).toBeRejectedWithError(/Cannot safely auto-resolve local multi-entity operation/);
+    ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
 
     const durableEntries = await opLogStore.getOpsAfterSeq(0);
     expect(durableEntries.map(({ op }) => op.id)).toEqual([localOperation.id]);

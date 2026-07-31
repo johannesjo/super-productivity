@@ -46,6 +46,7 @@ import {
   HttpNotOkAPIError,
   IncompleteRemoteOperationsError,
   FileSyncTargetChangedError,
+  UnsupportedMultiEntityConflictError,
 } from '../../op-log/core/errors/sync-errors';
 import { DialogEnterEncryptionPasswordComponent } from './dialog-enter-encryption-password/dialog-enter-encryption-password.component';
 import { MAX_LWW_REUPLOAD_RETRIES } from '../../op-log/core/operation-log.const';
@@ -1225,6 +1226,29 @@ describe('SyncWrapperService', () => {
       );
     });
 
+    it('should render unsupported multi-entity diagnostics through the dedicated escaped snack', async () => {
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new UnsupportedMultiEntityConflictError(
+          'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
+            'actionTypes=<img src=x> entityType=TASK entityCount=2 &',
+        ),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: T.F.SYNC.S.UNSUPPORTED_MULTI_ENTITY_CONFLICT,
+        type: 'ERROR',
+        translateParams: {
+          details:
+            'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
+            'actionTypes=&lt;img src=x&gt; entityType=TASK entityCount=2 &amp;',
+        },
+      });
+    });
+
     it('should handle NetworkUnavailableSPError with WARNING snackbar when user-triggered', async () => {
       mockSyncService.downloadRemoteOps.and.returnValue(
         Promise.reject(new NetworkUnavailableSPError()),
@@ -2120,11 +2144,11 @@ describe('SyncWrapperService', () => {
       const result = await service.sync();
 
       expect(result).toBe('HANDLED_ERROR');
-      expect(mockSnackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          type: 'ERROR',
-        }),
-      );
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: 'Some unexpected error',
+        type: 'ERROR',
+        translateParams: { err: 'Some unexpected error' },
+      });
     });
 
     it('should translate FORCE_UPLOAD failures raised during op-log sync', async () => {

@@ -78,7 +78,10 @@ import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { SYNC_LOGGER } from '../core/sync-logger.adapter';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
-import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import {
+  IncompleteRemoteOperationsError,
+  UnsupportedMultiEntityConflictError,
+} from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import { SyncConflictBannerService } from './sync-conflict-banner.service';
 import { buildConflictJournalEntry } from './conflict-journal-emission.util';
@@ -91,6 +94,7 @@ import {
 import { NOISE_FIELDS } from './conflict-journal.model';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
 import { areCommutingSectionOperations } from './section-conflict-commutativity.util';
+import { buildConflictGuardDiagnostic } from './conflict-guard-diagnostic.util';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -2305,10 +2309,14 @@ export class ConflictResolutionService {
           INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType),
       );
       if (remoteMultiOps.length > 0 && !remoteWholeRemovalIsSafe) {
-        throw new Error(
-          `ConflictResolutionService: Cannot safely auto-resolve remote multi-entity operation ` +
-            `for ${plan.conflict.entityType}:${plan.conflict.entityId}`,
-        );
+        const diagnostic = buildConflictGuardDiagnostic({
+          side: 'remote',
+          operations: remoteMultiOps,
+          entityType: plan.conflict.entityType,
+          entityId: plan.conflict.entityId,
+        });
+        OpLog.err(diagnostic.logMetadata);
+        throw new UnsupportedMultiEntityConflictError(diagnostic.message);
       }
 
       const localMultiOps = plan.conflict.localOps.filter(isMultiEntityOperation);
@@ -2328,10 +2336,14 @@ export class ConflictResolutionService {
         !localArchiveIsRecreated &&
         !localOpsAreDecomposable
       ) {
-        throw new Error(
-          `ConflictResolutionService: Cannot safely auto-resolve local multi-entity operation ` +
-            `for ${plan.conflict.entityType}:${plan.conflict.entityId}`,
-        );
+        const diagnostic = buildConflictGuardDiagnostic({
+          side: 'local',
+          operations: localMultiOps,
+          entityType: plan.conflict.entityType,
+          entityId: plan.conflict.entityId,
+        });
+        OpLog.err(diagnostic.logMetadata);
+        throw new UnsupportedMultiEntityConflictError(diagnostic.message);
       }
     }
   }

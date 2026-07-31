@@ -7,6 +7,7 @@ import {
   InvalidDataSPError,
   JsonParseError,
   ModelValidationError,
+  UnsupportedMultiEntityConflictError,
 } from './sync-errors';
 
 describe('sync errors', () => {
@@ -97,5 +98,21 @@ describe('sync errors', () => {
     new DataValidationFailedError(validationResult);
 
     expect((OpLog.log as jasmine.Spy).calls.count()).toBe(0);
+  });
+
+  it('keeps unsupported multi-entity conflict errors limited to the display message', () => {
+    const message =
+      'SYNC_MULTI_ENTITY_UNSUPPORTED side=local actionTypes=UNKNOWN ' +
+      'entityType=TASK entityCount=2';
+    const err = new UnsupportedMultiEntityConflictError(message);
+
+    expect(err.name).toBe('UnsupportedMultiEntityConflictError');
+    expect(err.message).toBe(message);
+    expect(
+      Object.getOwnPropertyNames(err).filter(
+        (property) => !['message', 'name', 'stack'].includes(property),
+      ),
+    ).toEqual([]);
+    expect((OpLog.err as jasmine.Spy).calls.count()).toBe(0);
   });
 });
