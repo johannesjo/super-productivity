@@ -76,6 +76,12 @@ export class PlannerService {
       // begin at (logical) today, or the tasks planned for it have no rendered
       // day at all; ensureDayLoaded below can only extend the window forward.
       const cursor = this._dateService.getLogicalTodayDate();
+      // Only date parts are read below, so pin the cursor to midday first.
+      // setDate() preserves the wall time, and a late-evening one is normalised
+      // past midnight in zones whose spring-forward gap ends at 00:00
+      // (America/Godthab and America/Scoresbysund skip 23:00-23:59), which
+      // would drop a whole day from the window. Midday is never in a gap.
+      cursor.setHours(12, 0, 0, 0);
       const daysToShow: string[] = [];
 
       // Loop until we have the required count of days (not just iterate N

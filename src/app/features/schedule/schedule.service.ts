@@ -161,6 +161,12 @@ export class ScheduleService {
     const cursor = referenceDate
       ? new Date(referenceDate)
       : this._dateService.getLogicalTodayDate();
+    // Only date parts are read below, so pin the cursor to midday first.
+    // setDate() preserves the wall time, and a late-evening one is normalised
+    // past midnight in zones whose spring-forward gap ends at 00:00
+    // (America/Godthab and America/Scoresbysund skip 23:00-23:59), which would
+    // drop a whole day from the window. Midday is never in a gap.
+    cursor.setHours(12, 0, 0, 0);
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {
       daysToShow.push(this._dateService.todayStr(cursor.getTime()));
