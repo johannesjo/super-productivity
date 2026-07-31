@@ -22,8 +22,10 @@ originating action.
 
 - Keep `_assertMultiEntityPlansAreSafe()` at the same pre-mutation point.
 - Reuse `ConflictResolutionService` translation and the existing `SyncWrapperService` error path.
-- Report only a fixed error code, side, sorted validated action type(s), entity type, and bounded
-  affected-entity count.
+- Report only a fixed error code, side, sorted action type(s) from `Object.values(ActionType)`, an
+  entity type from `ENTITY_TYPES`, and a bounded affected-entity count.
+- Map every unrecognized action or entity type to the literal `UNKNOWN`; never interpolate raw
+  operation metadata into the message.
 - Never report operation/entity IDs, payloads, task content, client IDs, vector clocks, provider
   details, URLs, or credentials.
 - Do not add a service, retry blocker, clipboard workflow, UI page, setting, schema change,
@@ -71,7 +73,8 @@ resulting `Error.message`.
 **Acceptance criteria:**
 
 - [ ] Local and remote failures contain only the allowlisted diagnostic fields.
-- [ ] Secret-looking fixture values and IDs do not appear; unknown actions still fail closed.
+- [ ] Secret-looking IDs and HTML-shaped unknown action/entity types do not appear; unknown values
+      render as `UNKNOWN`, and the operation still fails closed.
 - [ ] Safe archive, independent-delete, and rounding paths remain unchanged, and Task 1's
       no-mutation assertions pass.
 
