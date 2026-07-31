@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { createSelector, Store } from '@ngrx/store';
-import { of } from 'rxjs';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Action, createSelector, Store } from '@ngrx/store';
+import { Subject, Subscription, of } from 'rxjs';
 import { ArchiveDbAdapter } from '../../../core/persistence/archive-db-adapter.service';
 import { SnackService } from '../../../core/snack/snack.service';
+import { ClientIdService } from '../../../core/util/client-id.service';
 import { ArchiveModel } from '../../../features/archive/archive.model';
 import { TaskArchiveService } from '../../../features/archive/task-archive.service';
 import { DEFAULT_TASK, Task } from '../../../features/tasks/task.model';
@@ -12,14 +14,21 @@ import { createBaseState } from '../../../root-store/meta/task-shared-meta-reduc
 import { RootState } from '../../../root-store/root-state';
 import { OperationApplierService } from '../../apply/operation-applier.service';
 import { OperationCaptureService } from '../../capture/operation-capture.service';
+import { clearDeferredActions } from '../../capture/operation-capture.meta-reducer';
 import { OperationLogEffects } from '../../capture/operation-log.effects';
 import { buildEntityRegistry, ENTITY_REGISTRY } from '../../core/entity-registry';
 import { ActionType, Operation } from '../../core/operation.types';
 import { UnsupportedMultiEntityConflictError } from '../../core/errors/sync-errors';
-import { PersistentAction } from '../../core/persistent-action.interface';
+import {
+  isPersistentAction,
+  PersistentAction,
+} from '../../core/persistent-action.interface';
+import { OperationLogCompactionService } from '../../persistence/operation-log-compaction.service';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
 import { ConflictJournalService } from '../../sync/conflict-journal.service';
 import { ConflictResolutionService } from '../../sync/conflict-resolution.service';
+import { ImmediateUploadService } from '../../sync/immediate-upload.service';
+import { OperationWriteFlushService } from '../../sync/operation-write-flush.service';
 import { CLIENT_ID_PROVIDER } from '../../util/client-id.provider';
 import { ValidateStateService } from '../../validation/validate-state.service';
 import { resetTestUuidCounter, TestClient } from './helpers/test-client.helper';
@@ -34,11 +43,15 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
   let taskArchive: TaskArchiveService;
   let opLogStore: OperationLogStoreService;
   let capture: OperationCaptureService;
+  let effects: OperationLogEffects;
+  let writeFlush: OperationWriteFlushService;
   let resolver: ConflictResolutionService;
   let journal: ConflictJournalService;
   let store: jasmine.SpyObj<Store>;
   let operationApplier: jasmine.SpyObj<OperationApplierService>;
   let localState: RootState;
+  let actions$: Subject<Action>;
+  let effectSubscription: Subscription;
 
   const createArchivedTask = (id: string, title: string): Task => ({
     ...DEFAULT_TASK,
@@ -59,9 +72,8 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
       lastTimeTrackingFlush: 0,
     }) as ArchiveModel;
 
-  const captureOperation = (
+  const createRemoteOperation = (
     action: PersistentAction,
-    client: TestClient,
     timestamp: number,
   ): Operation => {
     const { type, meta, ...actionPayload } = action;
@@ -72,7 +84,7 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     }
 
     return {
-      ...client.createOperation({
+      ...new TestClient(REMOTE_CLIENT_ID).createOperation({
         actionType: type,
         opType: meta.opType,
         entityType: meta.entityType,
@@ -87,9 +99,21 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     };
   };
 
+  const dispatchToEffects = (action: Action): void => {
+    if (!isPersistentAction(action)) {
+      throw new Error('Expected TaskArchiveService to dispatch a persistent action');
+    }
+    // Full NgRx bootstrap is outside this producer/effect integration test;
+    // meta-reducer registration and this handoff have dedicated integration tests.
+    capture.incrementPending(action);
+    actions$.next(action);
+  };
+
   beforeEach(async () => {
     resetTestUuidCounter();
+    clearDeferredActions();
     localState = createBaseState();
+    actions$ = new Subject<Action>();
 
     store = jasmine.createSpyObj<Store>('Store', ['dispatch', 'select']);
     store.select.and.callFake((selector: unknown, props?: unknown) => {
@@ -113,11 +137,16 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
       ['validateAndRepairCurrentState'],
     );
     validateState.validateAndRepairCurrentState.and.resolveTo(true);
-    const operationLogEffects = jasmine.createSpyObj<OperationLogEffects>(
-      'OperationLogEffects',
-      ['processDeferredActions'],
+    const compaction = jasmine.createSpyObj<OperationLogCompactionService>(
+      'OperationLogCompactionService',
+      ['compact', 'emergencyCompact'],
     );
-    operationLogEffects.processDeferredActions.and.resolveTo();
+    compaction.compact.and.resolveTo(true);
+    compaction.emergencyCompact.and.resolveTo(true);
+    const clientId = jasmine.createSpyObj<ClientIdService>('ClientIdService', [
+      'getOrGenerateClientId',
+    ]);
+    clientId.getOrGenerateClientId.and.resolveTo(LOCAL_CLIENT_ID);
 
     const entityRegistry = buildEntityRegistry();
     const taskConfig = entityRegistry.TASK;
@@ -132,14 +161,24 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     TestBed.configureTestingModule({
       providers: [
         ConflictResolutionService,
+        OperationLogEffects,
         OperationLogStoreService,
         OperationCaptureService,
         TaskArchiveService,
         ArchiveDbAdapter,
+        provideMockActions(() => actions$),
         { provide: Store, useValue: store },
         { provide: OperationApplierService, useValue: operationApplier },
         { provide: ValidateStateService, useValue: validateState },
-        { provide: OperationLogEffects, useValue: operationLogEffects },
+        { provide: OperationLogCompactionService, useValue: compaction },
+        {
+          provide: ImmediateUploadService,
+          useValue: jasmine.createSpyObj<ImmediateUploadService>(
+            'ImmediateUploadService',
+            ['trigger'],
+          ),
+        },
+        { provide: ClientIdService, useValue: clientId },
         {
           provide: SnackService,
           useValue: jasmine.createSpyObj<SnackService>('SnackService', ['open']),
@@ -160,8 +199,12 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     taskArchive = TestBed.inject(TaskArchiveService);
     opLogStore = TestBed.inject(OperationLogStoreService);
     capture = TestBed.inject(OperationCaptureService);
+    effects = TestBed.inject(OperationLogEffects);
+    writeFlush = TestBed.inject(OperationWriteFlushService);
     resolver = TestBed.inject(ConflictResolutionService);
     journal = TestBed.inject(ConflictJournalService);
+    capture.clear();
+    store.dispatch.and.callFake(dispatchToEffects as Store['dispatch']);
 
     await opLogStore.init();
     await opLogStore._clearAllDataForTesting();
@@ -172,9 +215,15 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     await archiveDb.saveArchiveOld(
       archiveModel([createArchivedTask(OLD_TASK_ID, 'Old occurrence')]),
     );
+    effectSubscription = effects.persistOperation$.subscribe();
   });
 
   afterEach(async () => {
+    await writeFlush.flushPendingWrites();
+    effectSubscription.unsubscribe();
+    actions$.complete();
+    capture.clear();
+    clearDeferredActions();
     await archiveDb.saveArchiveYoung(archiveModel([]));
     await archiveDb.saveArchiveOld(archiveModel([]));
     await opLogStore._clearAllDataForTesting();
@@ -185,11 +234,30 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
   it('reproduces an archive updateTasks conflict that fails closed before mutation', async () => {
     // This reproduces the updateTasks defect class; it does not prove that
     // updateTasks produced the reporter's blocked operation in issue #9405.
+    let youngWriteCommitted = false;
+    let oldWriteCommitted = false;
+    let writesCommittedAtDispatch = false;
+    const saveArchiveYoung = archiveDb.saveArchiveYoung.bind(archiveDb);
+    const saveArchiveOld = archiveDb.saveArchiveOld.bind(archiveDb);
+    spyOn(archiveDb, 'saveArchiveYoung').and.callFake(async (archive) => {
+      await saveArchiveYoung(archive);
+      youngWriteCommitted = true;
+    });
+    spyOn(archiveDb, 'saveArchiveOld').and.callFake(async (archive) => {
+      await saveArchiveOld(archive);
+      oldWriteCommitted = true;
+    });
+    store.dispatch.and.callFake(((action: Action): void => {
+      writesCommittedAtDispatch = youngWriteCommitted && oldWriteCommitted;
+      dispatchToEffects(action);
+    }) as Store['dispatch']);
+
     const updates = [
       { id: YOUNG_TASK_ID, changes: { title: 'Updated young occurrence' } },
       { id: OLD_TASK_ID, changes: { title: 'Updated old occurrence' } },
     ];
     await taskArchive.updateTasks(updates);
+    await writeFlush.flushPendingWrites();
 
     const archiveYoungAfterProducer = await archiveDb.loadArchiveYoung();
     const archiveOldAfterProducer = await archiveDb.loadArchiveOld();
@@ -199,23 +267,24 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     expect(archiveOldAfterProducer?.task.entities[OLD_TASK_ID]?.title).toBe(
       'Updated old occurrence',
     );
+    expect(writesCommittedAtDispatch).toBeTrue();
 
     expect(store.dispatch).toHaveBeenCalledTimes(1);
-    const localAction = store.dispatch.calls.mostRecent()
-      .args[0] as unknown as PersistentAction;
-    const localOperation = captureOperation(
-      localAction,
-      new TestClient(LOCAL_CLIENT_ID),
-      1_000,
-    );
+    expect(capture.getPendingCount()).toBe(0);
+    const unsynced = await opLogStore.getUnsynced();
+    expect(unsynced.length).toBe(1);
+    const localOperation = unsynced[0]!.op;
     expect(localOperation.actionType).toBe(ActionType.TASK_SHARED_UPDATE_MULTIPLE);
     expect(localOperation.entityId).toBe(YOUNG_TASK_ID);
     expect(localOperation.entityIds).toEqual([YOUNG_TASK_ID, OLD_TASK_ID]);
+    expect(localOperation.clientId).toBe(LOCAL_CLIENT_ID);
+    expect(localOperation.vectorClock).toEqual({ [LOCAL_CLIENT_ID]: 1 });
     expect(localOperation.payload).toEqual({
       actionPayload: { tasks: updates },
       entityChanges: [],
     });
-    await opLogStore.append(localOperation, 'local');
+    opLogStore.clearVectorClockCache();
+    expect(await opLogStore.getVectorClock()).toEqual({ [LOCAL_CLIENT_ID]: 1 });
 
     const remoteAction = TaskSharedActions.updateTask({
       task: {
@@ -223,10 +292,9 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
         changes: { title: 'Concurrent remote occurrence' },
       },
     }) as PersistentAction;
-    const remoteOperation = captureOperation(
+    const remoteOperation = createRemoteOperation(
       remoteAction,
-      new TestClient(REMOTE_CLIENT_ID),
-      2_000,
+      localOperation.timestamp + 1,
     );
     const detection = await resolver.checkOpForConflicts(remoteOperation, {
       localPendingOpsByEntity: await opLogStore.getUnsyncedByEntity(),
