@@ -43,8 +43,8 @@ const compareTranslationKeys = (reference, translation) => {
   return compareKeyLists(referenceKeys, new Set(referenceKeys), translationKeys);
 };
 
-// Same pattern ngx-translate interpolates with (names may be dotted).
-const PLACEHOLDER_PATTERN = /\{\{\s*([\w.]+)\s*\}\}/gu;
+// Keep in sync with TranslateDefaultParser.templateMatcher in ngx-translate 17.
+const PLACEHOLDER_PATTERN = /\{\{\s?([^{}\s]*)\s?\}\}/g;
 
 const collectPlaceholders = (value) =>
   typeof value === 'string'
@@ -52,8 +52,9 @@ const collectPlaceholders = (value) =>
     : [];
 
 // Brace syntax that cannot interpolate cleanly: a run of 3+ braces
-// ("{{{name}}") or unbalanced "{{"/"}}" pairs ("{{name}"). Missing expected
-// placeholders are informational because translated prose may omit a value.
+// ("{{{name}}"), unbalanced "{{"/"}}" pairs ("{{name}"), or balanced pairs
+// that ngx-translate's placeholder matcher does not consume ("{{  name  }}").
+// Missing expected placeholders are informational because translated prose may omit a value.
 // When English defines placeholders, a translation-only name is unsafe: callers
 // supplying the English parameter names cannot resolve it, so ngx-translate
 // leaves the placeholder visible in the rendered text.
@@ -62,7 +63,12 @@ const findBraceDefect = (value) => {
   if (/\{{3,}|\}{3,}/.test(value)) return 'brace run';
   const opens = (value.match(/\{\{/g) ?? []).length;
   const closes = (value.match(/\}\}/g) ?? []).length;
-  return opens === closes ? null : 'unbalanced braces';
+  if (opens !== closes) return 'unbalanced braces';
+
+  const unmatchedBraces = value.replace(PLACEHOLDER_PATTERN, '');
+  return unmatchedBraces.includes('{{') || unmatchedBraces.includes('}}')
+    ? 'invalid placeholder syntax'
+    : null;
 };
 
 const getValueAtPath = (object, dottedKey) =>

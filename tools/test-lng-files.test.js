@@ -115,6 +115,7 @@ test('collectPlaceholders extracts sorted names and ignores non-strings', () => 
     'a.name',
     'b',
   ]);
+  assert.deepEqual(collectPlaceholders('welcome {{ user-name }}'), ['user-name']);
   assert.deepEqual(collectPlaceholders('no placeholders'), []);
   assert.deepEqual(collectPlaceholders(42), []);
 });
@@ -127,6 +128,8 @@ test('findBraceDefect flags brace runs and unbalanced pairs but not clean values
   assert.equal(findBraceDefect(null), null);
   assert.equal(findBraceDefect('Wekelijks op {{{weekdayStr}}'), 'brace run');
   assert.equal(findBraceDefect('planned for {{date}'), 'unbalanced braces');
+  assert.equal(findBraceDefect('welcome {{ user-name }}'), null);
+  assert.equal(findBraceDefect('welcome {{  name  }}'), 'invalid placeholder syntax');
   assert.equal(findBraceDefect('single {braces} are fine'), null);
 });
 
@@ -141,8 +144,10 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
     writeJson('en.json', {
       msg: {
         extraDetail: 'Something failed',
+        hyphenated: 'Hello {{user-name}}',
         planned: 'planned for {{date}}',
         renamed: 'Hello {{name}}',
+        spacing: 'Hello {{name}}',
         weekly: 'Weekly on {{weekdayStr}}',
         plain: 'no params',
       },
@@ -151,8 +156,10 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
       msg: {
         // Call sites may supply locale-specific detail even if English omits it.
         extraDetail: 'Fehlgeschlagen: {{detail}}',
+        hyphenated: 'Hallo {{translated-name}}',
         planned: 'geplant', // drops {{date}}: mismatch, braces fine
         renamed: 'Hallo {{translatedName}}', // unresolved name: renders literally
+        spacing: 'Hallo {{  name  }}',
         weekly: 'Wöchentlich am {{weekdayStr}', // unbalanced: malformed AND mismatch
         plain: 'keine Parameter',
       },
@@ -165,15 +172,23 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
     const report = inspectTranslationDirectory(directory);
     assert.deepEqual(report.files[0].placeholderMismatches, [
       'msg.extraDetail',
+      'msg.hyphenated',
       'msg.planned',
       'msg.renamed',
+      'msg.spacing',
       'msg.weekly',
     ]);
-    assert.deepEqual(report.files[0].unexpectedPlaceholderKeys, ['msg.renamed']);
-    assert.deepEqual(report.files[0].malformedKeys, ['msg.weekly (unbalanced braces)']);
-    assert.equal(report.totalPlaceholderMismatches, 4);
-    assert.equal(report.totalUnexpectedPlaceholders, 1);
-    assert.equal(report.totalMalformed, 1);
+    assert.deepEqual(report.files[0].unexpectedPlaceholderKeys, [
+      'msg.hyphenated',
+      'msg.renamed',
+    ]);
+    assert.deepEqual(report.files[0].malformedKeys, [
+      'msg.spacing (invalid placeholder syntax)',
+      'msg.weekly (unbalanced braces)',
+    ]);
+    assert.equal(report.totalPlaceholderMismatches, 6);
+    assert.equal(report.totalUnexpectedPlaceholders, 2);
+    assert.equal(report.totalMalformed, 2);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
