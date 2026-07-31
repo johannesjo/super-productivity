@@ -715,8 +715,11 @@ export class TaskRepeatCfgEffects {
               ),
               tap(([isConfirm, completeCfg]) => {
                 if (isConfirm) {
-                  Log.log(changes);
-                  Log.log(todayTasks, archiveTasks);
+                  Log.log({
+                    id,
+                    activeCount: todayTasks.length,
+                    archiveCount: archiveTasks.length,
+                  });
                   // NOTE: keep in mind that it's very likely that there will be only one task for today
                   // TODO update reminders if given
                   todayTasks.forEach((task) =>
@@ -756,7 +759,6 @@ export class TaskRepeatCfgEffects {
                     ) {
                       changesForArchiveTask.timeEstimate = changes.defaultEstimate;
                     }
-                    Log.log('updateArchiveTask', changesForArchiveTask);
                     return { id: task.id, changes: changesForArchiveTask };
                   });
                   this._taskService.updateArchiveTasks(archiveUpdates);
