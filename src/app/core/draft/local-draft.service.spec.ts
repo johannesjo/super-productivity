@@ -133,6 +133,20 @@ describe('LocalDraftService', () => {
   });
 
   describe('size cap', () => {
+    it('stores a draft exactly at the cap (content plus base)', () => {
+      // Pins the strict `>` comparison and that BOTH fields count toward it.
+      service.saveDraft({
+        entityType: 'NOTE',
+        entityId: 'n1',
+        content: 'x'.repeat(DRAFT_MAX_CONTENT_LENGTH - 5),
+        baseContent: 'y'.repeat(5),
+      });
+
+      expect(service.loadDraft('NOTE', 'n1')?.content.length).toBe(
+        DRAFT_MAX_CONTENT_LENGTH - 5,
+      );
+    });
+
     it('does not store an oversized draft', () => {
       service.saveDraft({
         entityType: 'NOTE',
@@ -240,6 +254,16 @@ describe('LocalDraftService', () => {
   describe('pruneOnStart', () => {
     const storedDraft = (updatedAt: number): string =>
       JSON.stringify({ content: 'c', baseContent: 'b', updatedAt } as LocalDraft);
+
+    it('keeps a draft exactly at the retention boundary', () => {
+      // Pins the strict `<` comparison: exactly 14 days old is still offered.
+      const now = Date.now();
+      localStorage.setItem(keyFor('p1', 'edge'), storedDraft(now - DRAFT_RETENTION_MS));
+
+      service.pruneOnStart(now);
+
+      expect(localStorage.getItem(keyFor('p1', 'edge'))).not.toBeNull();
+    });
 
     it('removes drafts past the retention window and keeps fresh ones, across profiles', () => {
       const now = Date.now();
