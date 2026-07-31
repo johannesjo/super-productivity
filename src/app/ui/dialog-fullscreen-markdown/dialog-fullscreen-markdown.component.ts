@@ -23,7 +23,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { auditTime, debounceTime } from 'rxjs/operators';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { T } from '../../t.const';
 import { isSmallScreen } from '../../util/is-small-screen';
@@ -151,9 +151,13 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       this._cdr.markForCheck();
     });
 
-    // Auto-save with debounce
+    // Checkpoint cadence: auditTime, not debounceTime — with a debounce,
+    // continuous typing resets the timer on every keystroke and a crash
+    // mid-burst would lose the whole burst. auditTime keeps emitting the
+    // latest value every 500 ms while typing goes on. The draft checkpoint
+    // is this output's only consumer.
     this._contentChanges$
-      .pipe(debounceTime(500), takeUntilDestroyed(this._destroyRef))
+      .pipe(auditTime(500), takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => {
         this.contentChanged.emit(value);
       });

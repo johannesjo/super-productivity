@@ -117,6 +117,23 @@ describe('DialogFullscreenMarkdownComponent', () => {
     });
   });
 
+  describe('checkpoint cadence', () => {
+    it('emits contentChanged during continuous typing, not only after a pause', fakeAsync(() => {
+      // A crash mid-burst must not lose the whole burst: keystrokes 100 ms
+      // apart (never a 500 ms pause) still have to checkpoint periodically.
+      spyOn(component.contentChanged, 'emit');
+
+      for (let i = 0; i < 20; i++) {
+        component.ngModelChange('typed '.repeat(i + 1));
+        tick(100);
+      }
+
+      expect(component.contentChanged.emit).toHaveBeenCalled();
+
+      tick(500); // drain the trailing window
+    }));
+  });
+
   describe('keydownHandler', () => {
     let mockTextarea: HTMLTextAreaElement;
 
