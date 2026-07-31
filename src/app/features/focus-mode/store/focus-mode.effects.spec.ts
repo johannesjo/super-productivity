@@ -2278,10 +2278,7 @@ describe('FocusModeEffects', () => {
 
         effects.syncSessionStartToTracking$.pipe(toArray()).subscribe((emitted) => {
           const emittedTypes: string[] = emitted.map((action) => action.type);
-          expect(emittedTypes).toEqual([
-            actions.selectFocusTask.type,
-            actions.showFocusOverlay.type,
-          ]);
+          expect(emittedTypes).toEqual([actions.selectFocusTask.type]);
           done();
         });
       });

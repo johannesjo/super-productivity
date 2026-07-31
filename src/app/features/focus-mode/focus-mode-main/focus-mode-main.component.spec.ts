@@ -1252,6 +1252,49 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
       expect(component.displayedTask()).toBe(mockTask);
     });
 
+    it('does not cancel a session started for another task during inline launch', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      component.startSession();
+
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      currentTaskSubject.next(mockTask);
+      fixture.detectChanges();
+      mockStore.dispatch.calls.reset();
+      tick(800);
+
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(false);
+
+      mainStateSignal.set(FocusMainUIState.Preparation);
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
+      expect(component.displayedTask()).toBeNull();
+    }));
+
+    it('does not restart a session started for the staged task during inline launch', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      component.startSession();
+
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      currentTaskSubject.next(selectedTask);
+      fixture.detectChanges();
+      mockStore.dispatch.calls.reset();
+      tick(800);
+
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(false);
+    }));
+
     it('passes the passive task selection to the focus-session start', fakeAsync(() => {
       currentTaskSubject.next(null);
       component.displayDuration.set(1500000);

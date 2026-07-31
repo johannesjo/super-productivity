@@ -546,6 +546,10 @@ export class FocusModeMainComponent {
       .subscribe(() => {
         this._launchSubscription = null;
         this.isLaunching.set(false);
+        if (!this._isPreparation()) {
+          this._pendingTaskId.set(null);
+          return;
+        }
         this._dispatchStartSession(taskId);
       });
   }

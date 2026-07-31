@@ -263,7 +263,7 @@ export class FocusModeEffects {
             task && !task.isDone
               ? of(setCurrentTask({ id: taskIdToResume }))
               : action.taskId
-                ? of(actions.selectFocusTask(), actions.showFocusOverlay())
+                ? of(actions.selectFocusTask())
                 : of(actions.showFocusOverlay()),
           ),
         );
