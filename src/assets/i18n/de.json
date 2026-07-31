@@ -3030,7 +3030,7 @@
     }
   },
   "PLUGINS": {
-    "ACTION_TYPE_NOT_ALLOWED": "Aktionstyp '{{Typ}}' ist nicht erlaubt",
+    "ACTION_TYPE_NOT_ALLOWED": "Aktionstyp '{{type}}' ist nicht erlaubt",
     "ALLOWED_HOSTS": "Netzwerkzugriff",
     "ALREADY_INITIALIZED": "Plugin ist bereits initialisiert",
     "AUTHORED_BY": "von {{author}}",

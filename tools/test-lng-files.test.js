@@ -140,14 +140,19 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
 
     writeJson('en.json', {
       msg: {
+        extraDetail: 'Something failed',
         planned: 'planned for {{date}}',
+        renamed: 'Hello {{name}}',
         weekly: 'Weekly on {{weekdayStr}}',
         plain: 'no params',
       },
     });
     writeJson('xx.json', {
       msg: {
+        // Call sites may supply locale-specific detail even if English omits it.
+        extraDetail: 'Fehlgeschlagen: {{detail}}',
         planned: 'geplant', // drops {{date}}: mismatch, braces fine
+        renamed: 'Hallo {{translatedName}}', // unresolved name: renders literally
         weekly: 'Wöchentlich am {{weekdayStr}', // unbalanced: malformed AND mismatch
         plain: 'keine Parameter',
       },
@@ -159,26 +164,38 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
 
     const report = inspectTranslationDirectory(directory);
     assert.deepEqual(report.files[0].placeholderMismatches, [
+      'msg.extraDetail',
       'msg.planned',
+      'msg.renamed',
       'msg.weekly',
     ]);
+    assert.deepEqual(report.files[0].unexpectedPlaceholderKeys, ['msg.renamed']);
     assert.deepEqual(report.files[0].malformedKeys, ['msg.weekly (unbalanced braces)']);
-    assert.equal(report.totalPlaceholderMismatches, 2);
+    assert.equal(report.totalPlaceholderMismatches, 4);
+    assert.equal(report.totalUnexpectedPlaceholders, 1);
     assert.equal(report.totalMalformed, 1);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
 });
 
-test('no shipped locale value has broken placeholder braces', () => {
-  // Broken braces render literally to users ("{{date}" in the snack). The
-  // set-level drift stays informational, but this class must stay at zero.
+test('no shipped locale value has broken or unexpected placeholders', () => {
+  // Broken braces and translation-only names render literally to users. A
+  // missing expected name may reflect translated prose that omits the value,
+  // so that broader set-level drift remains informational.
   const report = inspectTranslationDirectory(
     join(__dirname, '..', 'src', 'assets', 'i18n'),
   );
   const offenders = report.files
-    .filter((file) => file.malformedKeys.length > 0)
-    .map((file) => `${file.file}: ${file.malformedKeys.join(', ')}`);
+    .filter(
+      (file) =>
+        file.unexpectedPlaceholderKeys.length > 0 || file.malformedKeys.length > 0,
+    )
+    .map(
+      (file) =>
+        `${file.file}: unexpected=${file.unexpectedPlaceholderKeys.join(', ')}; ` +
+        `malformed=${file.malformedKeys.join(', ')}`,
+    );
 
   assert.deepEqual(offenders, []);
 });
@@ -233,6 +250,7 @@ test('inspectTranslationDirectory compares every locale with deterministic order
           missingKeys: ['common.save'],
           unnecessaryKeys: ['common.delete'],
           placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
           malformedKeys: [],
         },
         {
@@ -240,6 +258,7 @@ test('inspectTranslationDirectory compares every locale with deterministic order
           missingKeys: ['common.save', 'task.title'],
           unnecessaryKeys: [],
           placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
           malformedKeys: [],
         },
         {
@@ -247,12 +266,14 @@ test('inspectTranslationDirectory compares every locale with deterministic order
           missingKeys: [],
           unnecessaryKeys: [],
           placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
           malformedKeys: [],
         },
       ],
       totalMissing: 3,
       totalUnnecessary: 1,
       totalPlaceholderMismatches: 0,
+      totalUnexpectedPlaceholders: 0,
       totalMalformed: 0,
     });
   } finally {
@@ -295,12 +316,14 @@ test('inspectTranslationDirectory ignores .json directories and checks locale fi
           missingKeys: ['common.cancel'],
           unnecessaryKeys: [],
           placeholderMismatches: [],
+          unexpectedPlaceholderKeys: [],
           malformedKeys: [],
         },
       ],
       totalMissing: 1,
       totalUnnecessary: 0,
       totalPlaceholderMismatches: 0,
+      totalUnexpectedPlaceholders: 0,
       totalMalformed: 0,
     });
   } finally {
@@ -322,12 +345,14 @@ test('printReport keeps adversarial values on inert output lines', (t) => {
         missingKeys: ['error.message\n::warning::forged\r\x00\x1b[2J'],
         unnecessaryKeys: [],
         placeholderMismatches: [],
+        unexpectedPlaceholderKeys: [],
         malformedKeys: [],
       },
     ],
     totalMissing: 1,
     totalUnnecessary: 0,
     totalPlaceholderMismatches: 0,
+    totalUnexpectedPlaceholders: 0,
     totalMalformed: 0,
   });
 
@@ -359,12 +384,14 @@ test('printReport bounds keys while retaining three examples and the remainder',
         ],
         unnecessaryKeys: [],
         placeholderMismatches: [],
+        unexpectedPlaceholderKeys: [],
         malformedKeys: [],
       },
     ],
     totalMissing: 5,
     totalUnnecessary: 0,
     totalPlaceholderMismatches: 0,
+    totalUnexpectedPlaceholders: 0,
     totalMalformed: 0,
   });
 

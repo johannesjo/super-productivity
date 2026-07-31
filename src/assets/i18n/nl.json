@@ -681,7 +681,7 @@
         "NO_VALID_TRANSITION": "Jira: Geen geldige overgang geconfigureerd",
         "TIMED_OUT": "Jira: Time-out voor verzoek",
         "TRANSITION": "Jira: Stel probleem \"{{issueKey}}\" in op \"{{name}}\"",
-        "TRANSITION_SUCCESS": "Jira: Stel probleem {{issueKey}} in op <strong>{{gekozenTransition}}</strong>",
+        "TRANSITION_SUCCESS": "Jira: Stel probleem {{issueKey}} in op <strong>{{chosenTransition}}</strong>",
         "TRANSITIONS_LOADED": "Jira: Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen",
         "UNABLE_TO_REASSIGN": "Jira: Kan ticket niet aan jezelf toewijzen, omdat je geen gebruikersnaam hebt opgegeven. Ga naar de instellingen."
       },

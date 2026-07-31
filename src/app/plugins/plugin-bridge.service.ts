@@ -1772,7 +1772,7 @@ export class PluginBridgeService implements OnDestroy {
       );
       throw new Error(
         this._translateService.instant(T.PLUGINS.ACTION_TYPE_NOT_ALLOWED, {
-          actionType: action.type,
+          type: action.type,
         }),
       );
     }

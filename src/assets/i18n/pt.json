@@ -681,7 +681,7 @@
         "NO_VALID_TRANSITION": "Jira: nenhuma transição válida configurada",
         "TIMED_OUT": "Jira: solicitação expirada",
         "TRANSITION": "Jira: defina o problema \"{{issueKey}}\" como \"{{name}}\" ",
-        "TRANSITION_SUCCESS": "Jira: defina o problema {{issueKey}} como <strong> {{selectedTransition}} </strong>",
+        "TRANSITION_SUCCESS": "Jira: defina o problema {{issueKey}} como <strong> {{chosenTransition}} </strong>",
         "TRANSITIONS_LOADED": "Jira: Transições carregadas. Use as opções abaixo para atribuí-las",
         "UNABLE_TO_REASSIGN": "Jira: não foi possível reatribuir o ticket a si mesmo, porque não especificou um nome de utilizador. Visite as definições."
       },

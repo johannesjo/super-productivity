@@ -685,7 +685,7 @@
         "DONE": "تم",
         "LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح",
         "TEST_CREDENTIALS": "اختبار بيانات الاعتماد",
-        "WELCOME_USER": "مرحباً {{userName}}!"
+        "WELCOME_USER": "مرحباً {{user}}!"
       }
     },
     "MARKDOWN_PASTE": {
@@ -1457,7 +1457,7 @@
         "ARCHIVE_OPERATION_FAILED": "فشلت عملية الأرشيف: {{errorMsg}}",
         "AUTH_SETUP_FAILED": "فشل إعداد المصادقة. يرجى المحاولة مرة أخرى. إذا كنت تستخدم تطبيق الويب، فتأكد من الوصول إليه عبر HTTPS. إذا استمرت المشكلة، يرجى الإبلاغ عنها كخطأ.",
         "AUTH_TOKEN_REJECTED": "تم رفض رمز المصادقة. يرجى إعادة المصادقة.",
-        "CHANGE_PASSWORD_FAILED": "فشل تغيير كلمة المرور: {{errorMsg}}",
+        "CHANGE_PASSWORD_FAILED": "فشل تغيير كلمة المرور: {{message}}",
         "CLOCK_DRIFT_WARNING": "تحذير: يبدو أن ساعة جهازك غير متزامنة. قد يؤثر هذا على المزامنة.",
         "COMPACTION_FAILED": "فشل ضغط البيانات: {{errorMsg}}",
         "CONFLICT_DIALOG_TIMEOUT": "انتهت مهلة حوار التعارض",
@@ -1466,8 +1466,8 @@
         "DECRYPTION_FAILED": "فشل فك التشفير. يرجى التحقق من كلمة المرور.",
         "DEFERRED_ACTION_FAILED": "فشل الإجراء المؤجل: {{errorMsg}}",
         "DIALOG_RESULT_ERROR": "خطأ في نتيجة الحوار",
-        "DISABLE_ENCRYPTION_FAILED": "فشل تعطيل التشفير: {{errorMsg}}",
-        "ENABLE_ENCRYPTION_FAILED": "فشل تفعيل التشفير: {{errorMsg}}",
+        "DISABLE_ENCRYPTION_FAILED": "فشل تعطيل التشفير: {{message}}",
+        "ENABLE_ENCRYPTION_FAILED": "فشل تفعيل التشفير: {{message}}",
         "ENCRYPTION_DISABLED_ON_OTHER_DEVICE": "تم تعطيل التشفير على جهاز آخر. يرجى إعادة المزامنة.",
         "ENCRYPTION_PASSWORD_REQUIRED": "كلمة مرور التشفير مطلوبة",
         "ENCRYPTION_REQUIRED_FOR_SUPERSYNC": "التشفير مطلوب لـ SuperSync",
@@ -1493,7 +1493,7 @@
         "MIGRATION_FAILED": "فشل الترحيل: {{errorMsg}}",
         "NEWER_VERSION_AVAILABLE": "إصدار أحدث متاح. يرجى تحديث التطبيق.",
         "OPERATION_PERMANENTLY_FAILED": "فشلت العملية بشكل دائم: {{errorMsg}}",
-        "OVERWRITE_SERVER_FAILED": "فشل فرض الكتابة فوق الخادم: {{errorMsg}}",
+        "OVERWRITE_SERVER_FAILED": "فشل فرض الكتابة فوق الخادم: {{message}}",
         "PARTIAL_APPLY_FAILURE": "فشل التطبيق الجزئي: {{errorMsg}}",
         "PERSIST_FAILED": "فشل حفظ البيانات: {{errorMsg}}",
         "REMOTE_DATA_TOO_OLD": "البيانات البعيدة قديمة جداً",
@@ -1505,7 +1505,7 @@
         "STORAGE_RECOVERED_AFTER_COMPACTION": "تم استعادة التخزين بعد الضغط",
         "TIMEOUT_ERROR": "انتهت المهلة. يرجى المحاولة مرة أخرى.",
         "TOO_MANY_OPS_TO_DOWNLOAD": "عمليات كثيرة جداً للتحميل. يرجى إعادة المزامنة.",
-        "UPLOAD_ERROR": "خطأ في الرفع: {{errorMsg}}",
+        "UPLOAD_ERROR": "خطأ في الرفع: {{err}}",
         "UPLOAD_OPS_REJECTED": "تم رفض عمليات الرفع",
         "VECTOR_CLOCK_LIMIT_REACHED": "تم الوصول إلى حد ساعة المتجه",
         "VERSION_TOO_OLD": "الإصدار قديم جداً. يرجى تحديث التطبيق.",
@@ -1621,9 +1621,7 @@
       "D_SYNC_IMPORT_CONFLICT": {
         "FILTERED_CHANGES": "{{count}} تغيير(ات) محلية ستُحذف",
         "IMPORT_DATE": "تاريخ الاستيراد: {{date}}",
-        "MSG_INCOMING": "جهاز آخر قام باستيراد/استعادة البيانات. السبب: {{reason}}.",
         "MSG_INCOMING_NO_OPS": "جهاز آخر قام باستيراد/استعادة البيانات. لا توجد تغييرات محلية متأثرة.",
-        "MSG_LOCAL_FILTERS": "لديك {{count}} تغيير(ات) محلية ستُحذف لأنها سابقة للاستيراد.",
         "REASON_BACKUP_RESTORE": "استعادة نسخة احتياطية",
         "REASON_FILE_IMPORT": "استيراد ملف",
         "REASON_FORCE_UPLOAD": "فرض الرفع",

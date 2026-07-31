@@ -1903,10 +1903,6 @@
         "MSG": "Tạo nhãn mới {{tagsTxt}}?",
         "OK": "Tạo nhãn"
       },
-      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
-        "MSG": "Xóa việc \"{{title}}\"?",
-        "OK": "Xóa"
-      },
       "D_DEADLINE": {
         "ADD_TIME": "Thêm giờ",
         "QA_NEXT_MONTH": "Tháng sau",

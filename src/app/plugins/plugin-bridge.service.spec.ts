@@ -290,8 +290,14 @@ describe('PluginBridgeService - Counter Methods', () => {
 describe('PluginBridgeService - dispatchAction privacy (#7619)', () => {
   let service: PluginBridgeService;
   let store: MockStore;
+  let translateService: jasmine.SpyObj<TranslateService>;
 
   beforeEach(() => {
+    translateService = jasmine.createSpyObj<TranslateService>('TranslateService', [
+      'instant',
+    ]);
+    translateService.instant.and.returnValue('Action type is not allowed');
+
     TestBed.configureTestingModule({
       providers: [
         PluginBridgeService,
@@ -308,7 +314,7 @@ describe('PluginBridgeService - dispatchAction privacy (#7619)', () => {
         { provide: PluginConfigService, useValue: {} },
         { provide: TaskArchiveService, useValue: {} },
         { provide: Router, useValue: {} },
-        { provide: TranslateService, useValue: {} },
+        { provide: TranslateService, useValue: translateService },
         { provide: SyncWrapperService, useValue: {} },
         { provide: GlobalThemeService, useValue: {} },
         { provide: PluginIssueProviderRegistryService, useValue: {} },
@@ -350,6 +356,19 @@ describe('PluginBridgeService - dispatchAction privacy (#7619)', () => {
     });
 
     expect(Log.exportLogHistory()).toContain(updateGlobalConfigSection.type);
+  });
+
+  it('uses the English placeholder contract for rejected action types', () => {
+    const bound = service.createBoundMethods('test-plugin');
+    const type = '[Forbidden] Test Action';
+
+    expect(() => bound.dispatchAction({ type })).toThrowError(
+      'Action type is not allowed',
+    );
+    expect(translateService.instant).toHaveBeenCalledOnceWith(
+      T.PLUGINS.ACTION_TYPE_NOT_ALLOWED,
+      { type },
+    );
   });
 });
 

@@ -235,12 +235,12 @@
         "TXT": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!",
         "TXT_MULTIPLE": {
           "ONE": "<strong>{{title}}</strong> <strong>{{start}}</strong> saatinde başlıyor!<br> (ve {{nrOfOtherBanners}} başka etkinlik planlanmış)",
-          "OTHER": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)"
+          "OTHER": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!<br> (ve {{nrOfOtherBanners}} diğer etkinlik sona eriyor)"
         },
         "TXT_PAST": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!",
         "TXT_PAST_MULTIPLE": {
           "ONE": "<strong>{{title}}</strong> <strong>{{start}}</strong> saatinde başladı!<br> (ve {{nrOfOtherBanners}} başka etkinlik planlanmış)",
-          "OTHER": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)"
+          "OTHER": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!<br> (ve {{nrOfOtherBanners}} diğer etkinlik sona eriyor)"
         }
       },
       "EVENT_STRINGS": {
