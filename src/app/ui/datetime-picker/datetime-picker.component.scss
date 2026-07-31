@@ -51,11 +51,10 @@
   }
 
   ::ng-deep {
-    // A 6-row month needs ~353px (40px header + ~313px month view); the previous
-    // 400px left ~47px of dead space between the grid and the time input. 360px
-    // fits the tallest month with a small buffer and no clipping.
+    // Reserve enough room for a 6-row month while keeping the dialog height stable
+    // as users navigate between months (#6556, #9397).
     mat-calendar {
-      height: 360px;
+      height: 416px;
     }
 
     .mat-calendar-header {
