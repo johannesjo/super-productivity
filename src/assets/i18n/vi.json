@@ -1146,6 +1146,7 @@
       "END": "Kết thúc",
       "EXCESS_TASK_TOOLTIP": "Việc này không vừa ngày này.",
       "EXCESS_TASKS_DAY_TOOLTIP": "{{count}} việc không vừa thời gian",
+      "EXCESS_TASKS_DAY_TOOLTIP_ONE": "{{count}} việc không vừa thời gian",
       "INSERT_BEFORE": "Trước",
       "LUNCH_BREAK": "Nghỉ trưa",
       "MONTH": "Tháng",
@@ -1994,6 +1995,7 @@
         "TITLE": "Thời lượng"
       },
       "N": {
+        "ESTIMATE_EXCEEDED": "Quá ước tính cho \"{{title}}\"",
         "ESTIMATE_EXCEEDED_BODY": "Vượt ước tính cho \"{{title}}\"."
       },
       "S": {
