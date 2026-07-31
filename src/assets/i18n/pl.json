@@ -2420,7 +2420,6 @@
     "AUTO_BACKUPS": {
       "HELP": "Automatycznie zapisuj wszystkie dane w folderze aplikacji, aby mieć kopię na wypadek problemów.",
       "LABEL_IS_ENABLED": "Włącz automatyczne kopie zapasowe",
-      "LOCATION_INFO": "Lokalizacja: {{path}}",
       "TITLE": "Automatyczne kopie zapasowe",
       "LAST_BACKUP_INFO": "Ostatnia kopia zapasowa: {{date}}",
       "MAX_BACKUP_FILES": "Maksymalna liczba plików kopii zapasowych",

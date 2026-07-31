@@ -1146,7 +1146,6 @@
       "END": "Kết thúc",
       "EXCESS_TASK_TOOLTIP": "Việc này không vừa ngày này.",
       "EXCESS_TASKS_DAY_TOOLTIP": "{{count}} việc không vừa thời gian",
-      "EXCESS_TASKS_DAY_TOOLTIP_ONE": "{{count}} việc không vừa thời gian",
       "INSERT_BEFORE": "Trước",
       "LUNCH_BREAK": "Nghỉ trưa",
       "MONTH": "Tháng",
@@ -1995,7 +1994,6 @@
         "TITLE": "Thời lượng"
       },
       "N": {
-        "ESTIMATE_EXCEEDED": "Quá ước tính cho \"{{title}}\"",
         "ESTIMATE_EXCEEDED_BODY": "Vượt ước tính cho \"{{title}}\"."
       },
       "S": {
@@ -2053,8 +2051,7 @@
         "YEARLY_CURRENT_DATE_AND_TIME": "Hàng năm {{dayAndMonthStr}}, {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "Chuyển {{tasksNr}} phiên vào \"{{projectName}}\"?",
-        "OK": "Chuyển {{tasksNr}} phiên vào \"{{projectName}}\"?"
+        "MSG": "Chuyển {{tasksNr}} phiên vào \"{{projectName}}\"?"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "Xóa cấu hình lặp sẽ chuyển các phiên trước thành việc thường.",

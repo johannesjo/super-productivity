@@ -55,9 +55,9 @@ const collectPlaceholders = (value) =>
 // ("{{{name}}"), unbalanced "{{"/"}}" pairs ("{{name}"), or balanced pairs
 // that ngx-translate's placeholder matcher does not consume ("{{  name  }}").
 // Missing expected placeholders are informational because translated prose may omit a value.
-// When English defines placeholders, a translation-only name is unsafe: callers
-// supplying the English parameter names cannot resolve it, so ngx-translate
-// leaves the placeholder visible in the rendered text.
+// A translation-only name is always unsafe, including where English defines no
+// placeholder at all: call sites pass the English parameter names, or none, so
+// ngx-translate cannot resolve it and leaves it visible in the rendered text.
 const findBraceDefect = (value) => {
   if (typeof value !== 'string') return null;
   if (/\{{3,}|\}{3,}/.test(value)) return 'brace run';
@@ -94,7 +94,6 @@ const comparePlaceholders = (reference, translation, sharedKeys) => {
     }
 
     if (
-      referencePlaceholders.length > 0 &&
       translationPlaceholders.some(
         (placeholder) => !referencePlaceholders.includes(placeholder),
       )
@@ -224,8 +223,8 @@ const printReport = (report) => {
   );
   if (report.totalUnexpectedPlaceholders > 0 || report.totalMalformed > 0) {
     console.error(
-      'Unexpected placeholder names in an English placeholder contract and ' +
-        'broken braces render literally; fix them.',
+      'Placeholder names en.json does not define and broken braces render ' +
+        'literally; fix them.',
     );
   }
 };

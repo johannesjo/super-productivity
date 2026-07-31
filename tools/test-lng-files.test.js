@@ -154,7 +154,7 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
     });
     writeJson('xx.json', {
       msg: {
-        // Call sites may supply locale-specific detail even if English omits it.
+        // English defines no placeholder, so no call site passes one: renders literally
         extraDetail: 'Fehlgeschlagen: {{detail}}',
         hyphenated: 'Hallo {{translated-name}}',
         planned: 'geplant', // drops {{date}}: mismatch, braces fine
@@ -179,6 +179,7 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
       'msg.weekly',
     ]);
     assert.deepEqual(report.files[0].unexpectedPlaceholderKeys, [
+      'msg.extraDetail',
       'msg.hyphenated',
       'msg.renamed',
     ]);
@@ -187,7 +188,7 @@ test('inspectTranslationDirectory reports placeholder mismatches and broken brac
       'msg.weekly (unbalanced braces)',
     ]);
     assert.equal(report.totalPlaceholderMismatches, 6);
-    assert.equal(report.totalUnexpectedPlaceholders, 2);
+    assert.equal(report.totalUnexpectedPlaceholders, 3);
     assert.equal(report.totalMalformed, 2);
   } finally {
     rmSync(directory, { recursive: true, force: true });
