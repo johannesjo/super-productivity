@@ -153,13 +153,25 @@ describe('buildConflictGuardDiagnostic', () => {
 
   it('fits maximum allowlisted metadata in the exported-log serialization cap', () => {
     const longestEntityType = [...ENTITY_TYPES].sort((a, b) => b.length - a.length)[0];
-    const operations = Object.values(ActionType).map((actionType, index) => ({
+    const longestActionTypes = Object.values(ActionType)
+      .sort((a, b) => b.length - a.length || a.localeCompare(b))
+      .slice(0, 3)
+      .sort();
+    const lastLongestActionType = longestActionTypes[2];
+    if (!lastLongestActionType) {
+      throw new Error('Expected at least three action types');
+    }
+    const trailingActionTypes = Object.values(ActionType).filter(
+      (actionType) => actionType > lastLongestActionType,
+    );
+    const maximumActionTypes = [...longestActionTypes, ...trailingActionTypes];
+    const operations = maximumActionTypes.map((actionType, index) => ({
       actionType,
       entityId: `entity-${index}`,
     }));
     operations.push(
       ...Array.from({ length: 1_000 - operations.length }, (_, index) => ({
-        actionType: ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+        actionType: longestActionTypes[0],
         entityId: `extra-${index}`,
       })),
     );
@@ -172,7 +184,11 @@ describe('buildConflictGuardDiagnostic', () => {
     });
 
     expect(diagnostic.logMetadata.entityCount).toBe('999+');
-    expect(diagnostic.logMetadata.actionTypes.length).toBe(4);
+    expect(diagnostic.logMetadata.actionTypes).toEqual([
+      ...longestActionTypes,
+      `+${trailingActionTypes.length}`,
+    ]);
+    expect(diagnostic.message.length).toBeLessThanOrEqual(MAX_DATA_LENGTH);
     expect(JSON.stringify(diagnostic.logMetadata).length).toBeLessThanOrEqual(
       MAX_DATA_LENGTH,
     );

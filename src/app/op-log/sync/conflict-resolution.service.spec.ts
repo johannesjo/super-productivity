@@ -3629,6 +3629,7 @@ describe('ConflictResolutionService', () => {
       });
 
       it('fails closed when a multi-entity remote update wins', async () => {
+        const opLogError = spyOn(OpLog, 'err').and.stub();
         const remoteMultiOp: Operation = {
           ...createOpWithTimestamp(
             'remote-multi',
@@ -3688,6 +3689,14 @@ describe('ConflictResolutionService', () => {
             createConflict('task-2', [localTask2], [remoteMultiOp]),
           ]),
         ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
+        expect(opLogError).toHaveBeenCalledOnceWith({
+          code: SYNC_MULTI_ENTITY_UNSUPPORTED_CODE,
+          side: 'remote',
+          actionTypes: [ActionType.TASK_SHARED_UPDATE_MULTIPLE],
+          entityType: 'TASK',
+          entityCount: 2,
+          entityId: 'task-1',
+        });
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
