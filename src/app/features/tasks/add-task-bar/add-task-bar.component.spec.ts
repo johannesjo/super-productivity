@@ -26,6 +26,7 @@ import { DEFAULT_LOCALE } from 'src/app/core/locale.constants';
 import { DateService } from '../../../core/date/date.service';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
+import { AddTaskBarParserService } from './add-task-bar-parser.service';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { BodyClass } from '../../../app.constants';
 
@@ -522,6 +523,37 @@ describe('AddTaskBarComponent', () => {
       expect(addRepeatCfgSpy).toHaveBeenCalled();
       const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
       expect(repeatCfg.startDate).toBe('2024-05-19');
+    });
+
+    it('should start a menu-picked workday repeat on the Monday after a weekend date', async () => {
+      // The picked Saturday is a day a Monday-to-Friday schedule never lands
+      // on, so the task is created on the Monday regardless. Leaving the
+      // Saturday in the config leaves a start date the user never chose and
+      // cannot see (the dialog hides it for this preset), and any later quick
+      // setting the dialog derives from it — "weekly on current weekday" —
+      // would come out as a Saturday recurrence.
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+      const parserService = fixture.debugElement.injector.get(AddTaskBarParserService);
+
+      component.stateService.updateInputTxt('Standup');
+      component.stateService.updateCleanText('Standup');
+      component.stateService.updateDate('2026-03-28');
+      parserService.applyUserRepeatPick({
+        type: 'PRESET',
+        quickSetting: 'MONDAY_TO_FRIDAY',
+      });
+
+      await component.addTask();
+
+      const taskData = mockTaskService.add.calls.mostRecent()
+        .args[2] as Partial<TaskCopy>;
+      expect(taskData.dueDay).toBe('2026-03-30');
+      const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
+      expect(repeatCfg.startDate).toBe('2026-03-30');
     });
 
     it('should copy entered notes to an inline repeat preset config (discussion #937)', async () => {

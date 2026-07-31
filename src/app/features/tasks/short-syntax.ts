@@ -851,7 +851,9 @@ const anchorCycleOf = (repeat: ShortSyntaxRepeat): RepeatCycleOption | null => {
 // config's weekday flags (getFirstRepeatOccurrence), so leaving the weekend
 // date in place would only make the add bar advertise a first occurrence the
 // task never gets. Mutates in place, like the roll-forward above.
-const skipExcludedWeekend = (date: Date): void => {
+// Exported because the add bar's menus reach the same combination without any
+// syntax — see rollWeekendDateForRepeat in add-task-bar-parser.service.ts.
+export const skipExcludedWeekend = (date: Date): void => {
   const hours = date.getHours();
   const minutes = date.getMinutes();
   while (date.getDay() === 0 || date.getDay() === 6) {

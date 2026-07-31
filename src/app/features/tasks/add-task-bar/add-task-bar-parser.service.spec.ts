@@ -1968,6 +1968,85 @@ describe('AddTaskBarParserService', () => {
       await service.parseAndUpdateText('Plain task', cfg, [], [], defaultProject);
       expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
     });
+
+    // A Monday-to-Friday schedule has no weekend occurrence, so the occurrence
+    // engine starts it on the Monday (getFirstRepeatOccurrence scans the
+    // weekday flags from startDate). Leaving the weekend date on the chip would
+    // advertise a first occurrence the task never gets — the same divergence
+    // skipExcludedWeekend fixes for the "@every weekday" phrase, reached here
+    // through the two menus instead of the text.
+    describe('workday preset on a weekend date', () => {
+      const WORKDAYS = {
+        type: 'PRESET' as const,
+        quickSetting: 'MONDAY_TO_FRIDAY' as const,
+      };
+      // 2026-03-28 is a Saturday, 2026-03-30 the Monday after it
+      const SATURDAY = '2026-03-28';
+      const MONDAY = '2026-03-30';
+
+      it('should move a picked weekend date to the Monday when the workday preset is picked after it', () => {
+        mockStateService.state.and.returnValue({
+          ...baseState,
+          date: SATURDAY,
+        } as any);
+
+        service.applyUserRepeatPick(WORKDAYS);
+
+        expect(mockStateService.updateDate).toHaveBeenCalledWith(MONDAY);
+      });
+
+      it('should move a weekend date picked after the workday preset to the Monday', () => {
+        mockStateService.state.and.returnValue({
+          ...baseState,
+          repeat: WORKDAYS,
+        } as any);
+
+        service.applyUserDatePick(SATURDAY, null, null);
+
+        expect(mockStateService.updateDate).toHaveBeenCalledWith(
+          MONDAY,
+          null,
+          jasmine.anything(),
+        );
+      });
+
+      it('should keep the time a weekend date was picked with', () => {
+        mockStateService.state.and.returnValue({
+          ...baseState,
+          repeat: WORKDAYS,
+        } as any);
+
+        service.applyUserDatePick(SATURDAY, '09:30', null);
+
+        expect(mockStateService.updateDate).toHaveBeenCalledWith(
+          MONDAY,
+          '09:30',
+          jasmine.anything(),
+        );
+      });
+
+      it('should leave a weekend date alone for a preset that has weekend occurrences', () => {
+        mockStateService.state.and.returnValue({
+          ...baseState,
+          date: SATURDAY,
+        } as any);
+
+        service.applyUserRepeatPick(MENU_PICK);
+
+        expect(mockStateService.updateDate).not.toHaveBeenCalled();
+      });
+
+      it('should leave a weekday date alone when the workday preset is picked', () => {
+        mockStateService.state.and.returnValue({
+          ...baseState,
+          date: '2026-03-27',
+        } as any);
+
+        service.applyUserRepeatPick(WORKDAYS);
+
+        expect(mockStateService.updateDate).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('syntax highlight ranges', () => {

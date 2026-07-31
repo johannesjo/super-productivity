@@ -9,9 +9,11 @@ import {
   shortSyntax,
   ShortSyntaxRange,
   ShortSyntaxTokenType,
+  skipExcludedWeekend,
 } from '../short-syntax';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
 import { millisecondsDiffToRemindOption } from '../util/remind-option-to-milliseconds';
@@ -52,6 +54,32 @@ const isSameRepeat = (
   }
   // both DIALOG
   return true;
+};
+
+/**
+ * Returns the day a workday recurrence would really start on, or null when the
+ * date already is that day (so the caller can skip a redundant state write).
+ *
+ * MONDAY_TO_FRIDAY is the only preset with an excluded-day set — every other
+ * one either has no exclusions (DAILY) or derives its anchor from the date
+ * itself (getQuickSettingUpdates), which cannot contradict it. So it is also
+ * the only one whose picked date can name a day the recurrence never lands on.
+ */
+const rollWeekendDateForRepeat = (
+  dateStr: string | null,
+  repeat: AddTaskBarRepeat | null,
+): string | null => {
+  if (
+    !dateStr ||
+    repeat?.type !== 'PRESET' ||
+    repeat.quickSetting !== 'MONDAY_TO_FRIDAY'
+  ) {
+    return null;
+  }
+  const date = dateStrToUtcDate(dateStr);
+  skipExcludedWeekend(date);
+  const rolled = getDbDateStr(date);
+  return rolled === dateStr ? null : rolled;
 };
 
 @Injectable()
@@ -417,8 +445,22 @@ export class AddTaskBarParserService {
    */
   applyUserRepeatPick(repeat: AddTaskBarRepeat): void {
     const cleanedInput = this._stripSyntaxForUserPick('repeat');
-    this._recordUserPick({ repeat, isRepeatFromSyntax: false });
+    // The date already on the chip can be a day this schedule excludes; the
+    // task would then be created on the following Monday and the chip would
+    // have advertised a first occurrence it never gets.
+    const rolledDate = rollWeekendDateForRepeat(this._stateService.state().date, repeat);
+    this._recordUserPick({
+      repeat,
+      isRepeatFromSyntax: false,
+      // Record the rolled date too, so the parse the strip queues sees the
+      // state it is about to read back as unchanged rather than as a reset.
+      ...(rolledDate ? { dueDate: rolledDate } : {}),
+    });
     this._stateService.updateRepeatSetting(repeat, cleanedInput);
+    if (rolledDate) {
+      // Time is left as it is — only the day is excluded, not the hour
+      this._stateService.updateDate(rolledDate);
+    }
   }
 
   applyUserDatePick(
@@ -431,12 +473,15 @@ export class AddTaskBarParserService {
     // with it — but the user changed the date, not the schedule. Keep the
     // recurrence by taking ownership of it too; it re-anchors to the new date.
     const repeat = this._stateService.state().repeat;
+    // Reached from the other side than the repeat pick: an already-set workday
+    // schedule excludes the day just picked, so the same roll applies.
+    const dueDate = rollWeekendDateForRepeat(date, repeat) ?? date;
     this._recordUserPick({
-      dueDate: date,
+      dueDate,
       dueTime: time,
       ...(repeat ? { repeat, isRepeatFromSyntax: false } : {}),
     });
-    this._stateService.updateDate(date, time, cleanedInput);
+    this._stateService.updateDate(dueDate, time, cleanedInput);
     // No UI access to a reminder without a time being set
     this._stateService.updateRemindOption(remindOption);
   }
