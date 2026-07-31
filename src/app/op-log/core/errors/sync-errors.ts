@@ -5,6 +5,9 @@ import {
   extractErrorMessage as packageExtractErrorMessage,
 } from '@sp/sync-providers/errors';
 import { FILE_BASED_SYNC_CONSTANTS } from '../../sync-providers/file-based/file-based-sync.types';
+import { ActionType } from '../action-types.enum';
+
+const ACTION_TYPE_VALUES = new Set<string>(Object.values(ActionType));
 
 // Re-export provider-shared error classes from @sp/sync-providers.
 // Single class definition per error is critical for `instanceof` checks
@@ -125,8 +128,12 @@ export class ForceUploadPendingOpsError extends Error {
 export class UnsupportedMultiEntityConflictError extends Error {
   override name = 'UnsupportedMultiEntityConflictError';
 
-  constructor(message: string) {
-    super(message);
+  constructor(side: 'local' | 'remote', actionType: unknown) {
+    const safeActionType =
+      typeof actionType === 'string' && ACTION_TYPE_VALUES.has(actionType)
+        ? actionType
+        : 'UNKNOWN';
+    super(`SYNC_MULTI_ENTITY_UNSUPPORTED side=${side} actionType=${safeActionType}`);
   }
 }
 

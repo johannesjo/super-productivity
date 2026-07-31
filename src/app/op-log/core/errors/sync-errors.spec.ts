@@ -9,6 +9,7 @@ import {
   ModelValidationError,
   UnsupportedMultiEntityConflictError,
 } from './sync-errors';
+import { ActionType } from '../action-types.enum';
 
 describe('sync errors', () => {
   beforeEach(() => {
@@ -100,14 +101,24 @@ describe('sync errors', () => {
     expect((OpLog.log as jasmine.Spy).calls.count()).toBe(0);
   });
 
-  it('keeps unsupported multi-entity conflict errors limited to the display message', () => {
-    const message =
-      'SYNC_MULTI_ENTITY_UNSUPPORTED side=local actionTypes=UNKNOWN ' +
-      'entityType=TASK entityCount=2';
-    const err = new UnsupportedMultiEntityConflictError(message);
+  it('builds a bounded unsupported multi-entity conflict breadcrumb', () => {
+    const err = new UnsupportedMultiEntityConflictError(
+      'local',
+      ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+    );
+    const hostile = new UnsupportedMultiEntityConflictError(
+      'remote',
+      '<img src=x onerror=alert(1)>',
+    );
 
     expect(err.name).toBe('UnsupportedMultiEntityConflictError');
-    expect(err.message).toBe(message);
+    expect(err.message).toBe(
+      'SYNC_MULTI_ENTITY_UNSUPPORTED side=local ' +
+        `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE}`,
+    );
+    expect(hostile.message).toBe(
+      'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote actionType=UNKNOWN',
+    );
     expect(
       Object.getOwnPropertyNames(err).filter(
         (property) => !['message', 'name', 'stack'].includes(property),

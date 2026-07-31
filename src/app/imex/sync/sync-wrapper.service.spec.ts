@@ -50,6 +50,7 @@ import {
 } from '../../op-log/core/errors/sync-errors';
 import { DialogEnterEncryptionPasswordComponent } from './dialog-enter-encryption-password/dialog-enter-encryption-password.component';
 import { MAX_LWW_REUPLOAD_RETRIES } from '../../op-log/core/operation-log.const';
+import { ActionType } from '../../op-log/core/operation.types';
 import type { SyncProviderBase } from '../../op-log/sync-providers/provider.interface';
 import type { MatDialogRef } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from './dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
@@ -1227,12 +1228,13 @@ describe('SyncWrapperService', () => {
     });
 
     it('should render unsupported multi-entity diagnostics through the dedicated escaped snack', async () => {
-      mockSyncService.downloadRemoteOps.and.rejectWith(
-        new UnsupportedMultiEntityConflictError(
-          'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
-            'actionTypes=<img src=x> entityType=TASK entityCount=2 &',
-        ),
+      const error = new UnsupportedMultiEntityConflictError(
+        'remote',
+        ActionType.TASK_SHARED_UPDATE_MULTIPLE,
       );
+      error.message =
+        'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote actionType=<img src=x> &';
+      mockSyncService.downloadRemoteOps.and.rejectWith(error);
 
       const result = await service.sync();
 
@@ -1244,7 +1246,7 @@ describe('SyncWrapperService', () => {
         translateParams: {
           details:
             'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
-            'actionTypes=&lt;img src=x&gt; entityType=TASK entityCount=2 &amp;',
+            'actionType=&lt;img src=x&gt; &amp;',
         },
       });
     });

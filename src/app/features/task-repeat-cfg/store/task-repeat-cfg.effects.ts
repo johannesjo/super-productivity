@@ -30,7 +30,6 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskArchiveService } from '../../archive/task-archive.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { DateService } from '../../../core/date/date.service';
-import { Log } from '../../../core/log';
 import {
   addSubTask,
   moveSubTask,
@@ -715,11 +714,6 @@ export class TaskRepeatCfgEffects {
               ),
               tap(([isConfirm, completeCfg]) => {
                 if (isConfirm) {
-                  Log.log({
-                    id,
-                    activeCount: todayTasks.length,
-                    archiveCount: archiveTasks.length,
-                  });
                   // NOTE: keep in mind that it's very likely that there will be only one task for today
                   // TODO update reminders if given
                   todayTasks.forEach((task) =>

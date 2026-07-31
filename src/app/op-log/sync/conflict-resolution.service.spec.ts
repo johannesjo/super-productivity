@@ -49,8 +49,6 @@ import {
 import { convertOpToAction } from '../apply/operation-converter.util';
 import { TIME_TRACKING_FEATURE_KEY } from '../../features/time-tracking/store/time-tracking.reducer';
 import { lwwUpdateMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
-import { MAX_DATA_LENGTH, OpLog } from '../../core/log';
-import { SYNC_MULTI_ENTITY_UNSUPPORTED_CODE } from './conflict-guard-diagnostic.util';
 
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
@@ -3529,7 +3527,6 @@ describe('ConflictResolutionService', () => {
       });
 
       it('fails closed for a non-decomposable local bulk update', async () => {
-        const opLogError = spyOn(OpLog, 'err').and.stub();
         const localBulkUpdate: Operation = {
           ...createOpWithTimestamp(
             'local-bulk-update',
@@ -3557,34 +3554,11 @@ describe('ConflictResolutionService', () => {
           OpType.Update,
           'task-1',
         );
-        let thrown: unknown;
-        try {
-          await service.autoResolveConflictsLWW([
+        await expectAsync(
+          service.autoResolveConflictsLWW([
             createConflict('task-1', [localBulkUpdate], [remoteWinner]),
-          ]);
-        } catch (error) {
-          thrown = error;
-        }
-
-        expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
-        expect((thrown as Error).message).toBe(
-          `${SYNC_MULTI_ENTITY_UNSUPPORTED_CODE} side=local ` +
-            `actionTypes=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} ` +
-            'entityType=TASK entityCount=2',
-        );
-        expect(opLogError).toHaveBeenCalledTimes(1);
-        const logArgs = opLogError.calls.mostRecent().args;
-        expect(logArgs).toEqual([
-          {
-            code: SYNC_MULTI_ENTITY_UNSUPPORTED_CODE,
-            side: 'local',
-            actionTypes: [ActionType.TASK_SHARED_UPDATE_MULTIPLE],
-            entityType: 'TASK',
-            entityCount: 2,
-            entityId: 'task-1',
-          },
-        ]);
-        expect(JSON.stringify(logArgs[0]).length).toBeLessThanOrEqual(MAX_DATA_LENGTH);
+          ]),
+        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
@@ -3629,7 +3603,6 @@ describe('ConflictResolutionService', () => {
       });
 
       it('fails closed when a multi-entity remote update wins', async () => {
-        const opLogError = spyOn(OpLog, 'err').and.stub();
         const remoteMultiOp: Operation = {
           ...createOpWithTimestamp(
             'remote-multi',
@@ -3683,20 +3656,20 @@ describe('ConflictResolutionService', () => {
           OpType.Update,
           'task-2',
         );
-        await expectAsync(
-          service.autoResolveConflictsLWW([
+        let thrown: unknown;
+        try {
+          await service.autoResolveConflictsLWW([
             createConflict('task-1', [localDelete], [remoteMultiOp]),
             createConflict('task-2', [localTask2], [remoteMultiOp]),
-          ]),
-        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
-        expect(opLogError).toHaveBeenCalledOnceWith({
-          code: SYNC_MULTI_ENTITY_UNSUPPORTED_CODE,
-          side: 'remote',
-          actionTypes: [ActionType.TASK_SHARED_UPDATE_MULTIPLE],
-          entityType: 'TASK',
-          entityCount: 2,
-          entityId: 'task-1',
-        });
+          ]);
+        } catch (error) {
+          thrown = error;
+        }
+        expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+        expect((thrown as Error).message).toBe(
+          'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
+            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE}`,
+        );
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();

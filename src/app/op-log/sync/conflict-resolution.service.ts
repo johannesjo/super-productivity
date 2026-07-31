@@ -94,7 +94,6 @@ import {
 import { NOISE_FIELDS } from './conflict-journal.model';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
 import { areCommutingSectionOperations } from './section-conflict-commutativity.util';
-import { buildConflictGuardDiagnostic } from './conflict-guard-diagnostic.util';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -2302,21 +2301,17 @@ export class ConflictResolutionService {
     plans: LwwConflictResolutionPlan<EntityConflict>[],
   ): void {
     for (const plan of plans) {
-      const remoteMultiOps = plan.conflict.remoteOps.filter(isMultiEntityOperation);
-      const remoteWholeRemovalIsSafe = remoteMultiOps.every(
+      const unsafeRemoteOp = plan.conflict.remoteOps.find(
         (op) =>
-          op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
-          INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType),
+          isMultiEntityOperation(op) &&
+          op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
+          !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType),
       );
-      if (remoteMultiOps.length > 0 && !remoteWholeRemovalIsSafe) {
-        const diagnostic = buildConflictGuardDiagnostic({
-          side: 'remote',
-          operations: remoteMultiOps,
-          entityType: plan.conflict.entityType,
-          entityId: plan.conflict.entityId,
-        });
-        OpLog.err(diagnostic.logMetadata);
-        throw new UnsupportedMultiEntityConflictError(diagnostic.message);
+      if (unsafeRemoteOp) {
+        throw new UnsupportedMultiEntityConflictError(
+          'remote',
+          unsafeRemoteOp.actionType,
+        );
       }
 
       const localMultiOps = plan.conflict.localOps.filter(isMultiEntityOperation);
@@ -2326,24 +2321,15 @@ export class ConflictResolutionService {
         localMultiOps.every(
           (op) => op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
         );
-      const localOpsAreDecomposable = localMultiOps.every(
-        (op) =>
-          INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) ||
-          DECOMPOSABLE_MULTI_ACTION_FIELDS.has(op.actionType),
-      );
-      if (
-        localMultiOps.length > 0 &&
-        !localArchiveIsRecreated &&
-        !localOpsAreDecomposable
-      ) {
-        const diagnostic = buildConflictGuardDiagnostic({
-          side: 'local',
-          operations: localMultiOps,
-          entityType: plan.conflict.entityType,
-          entityId: plan.conflict.entityId,
-        });
-        OpLog.err(diagnostic.logMetadata);
-        throw new UnsupportedMultiEntityConflictError(diagnostic.message);
+      const unsafeLocalOp = localArchiveIsRecreated
+        ? undefined
+        : localMultiOps.find(
+            (op) =>
+              !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) &&
+              !DECOMPOSABLE_MULTI_ACTION_FIELDS.has(op.actionType),
+          );
+      if (unsafeLocalOp) {
+        throw new UnsupportedMultiEntityConflictError('local', unsafeLocalOp.actionType);
       }
     }
   }
