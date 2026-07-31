@@ -1271,6 +1271,40 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
       );
     }));
 
+    it('returns to task selection if the passive task disappears during inline launch', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      component.startSession();
+      selectedTaskSubject.next(undefined as unknown as TaskCopy);
+      fixture.detectChanges();
+      tick(800);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(true);
+    }));
+
+    it('does not retarget an inline launch after finishing the passive task', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      component.startSession();
+      component.finishCurrentTask();
+      component.onTaskSelected(mockTask.id);
+      tick(800);
+
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.displayedTask()).toBe(mockTask);
+      expect(component.isTaskSelectorOpen()).toBe(false);
+    }));
+
     it('carries a valid passive selection through the full preparation countdown', () => {
       currentTaskSubject.next(null);
       focusModeConfigSignal.set({
@@ -1347,6 +1381,8 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
           },
         }),
       );
+      expect(mockTaskService.setCurrentId).not.toHaveBeenCalled();
+      expect(component.isTaskSelectorOpen()).toBe(true);
     });
 
     it('returns to task selection if the passive task disappears before countdown completion', () => {

@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { Log } from '../../../core/log';
-import { from, Observable, of, Subject, timer } from 'rxjs';
+import { from, Observable, of, Subject, Subscription, timer } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { debounceTime, switchMap, take } from 'rxjs/operators';
@@ -146,6 +146,7 @@ export class FocusModeMainComponent {
   private readonly _LAUNCH_DURATION_MS = 800;
   // True while the brief inline rocket launch plays (default, prep screen off).
   readonly isLaunching = signal(false);
+  private _launchSubscription: Subscription | null = null;
 
   readonly simpleCounterService = inject(SimpleCounterService);
   readonly taskService = inject(TaskService);
@@ -450,6 +451,7 @@ export class FocusModeMainComponent {
     } else {
       this._pendingTaskId.set(null);
       this._store.dispatch(selectFocusTask());
+      this.openTaskSelector();
     }
   }
 
@@ -520,7 +522,7 @@ export class FocusModeMainComponent {
     }
 
     // Default: play a quick inline rocket launch from the play button, then start.
-    this._launchThenStart();
+    this._launchThenStart(task.id);
   }
 
   onCountdownComplete(): void {
@@ -529,25 +531,22 @@ export class FocusModeMainComponent {
     // Main UI state transitions are now handled by the store
   }
 
-  private _launchThenStart(): void {
+  private _launchThenStart(taskId: string): void {
     // Honor "reduce motion": skip the rocket flourish and its timed delay,
     // starting immediately. Otherwise a motion-sensitive user would just wait
     // out an 800ms delay for an animation they never see.
     if (this._prefersReducedMotion()) {
-      this._dispatchStartSession();
+      this._dispatchStartSession(taskId);
       return;
     }
 
     this.isLaunching.set(true);
-    timer(this._LAUNCH_DURATION_MS)
+    this._launchSubscription = timer(this._LAUNCH_DURATION_MS)
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(() => {
+        this._launchSubscription = null;
         this.isLaunching.set(false);
-        // The task could have been deselected during the brief launch window.
-        if (!this.displayedTask()) {
-          return;
-        }
-        this._dispatchStartSession();
+        this._dispatchStartSession(taskId);
       });
   }
 
@@ -555,9 +554,10 @@ export class FocusModeMainComponent {
     return !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   }
 
-  private _dispatchStartSession(): void {
+  private _dispatchStartSession(expectedTaskId?: string): void {
     const task = this.displayedTask();
-    if (!task || task.isDone) {
+    if (!task || task.isDone || (expectedTaskId && task.id !== expectedTaskId)) {
+      this._pendingTaskId.set(null);
       this._store.dispatch(selectFocusTask());
       this.openTaskSelector();
       return;
@@ -630,7 +630,14 @@ export class FocusModeMainComponent {
   }
 
   openTaskSelector(): void {
+    this._cancelInlineLaunch();
     this.isTaskSelectorOpen.set(true);
+  }
+
+  private _cancelInlineLaunch(): void {
+    this._launchSubscription?.unsubscribe();
+    this._launchSubscription = null;
+    this.isLaunching.set(false);
   }
 
   closeTaskSelector(): void {
