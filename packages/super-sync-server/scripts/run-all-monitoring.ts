@@ -127,10 +127,15 @@ const runCommand = async (cmd: MonitoringCommand): Promise<string> => {
     console.log(stdout);
     return stdout;
   } catch (error: any) {
-    const errorMsg = `Error running ${cmd.name}: ${error.message}`;
+    process.exitCode = 1;
+    const stderr = typeof error.stderr === 'string' ? error.stderr.trim() : '';
+    const errorDetail =
+      stderr && !error.message.includes(stderr)
+        ? `${error.message}\n${stderr}`
+        : error.message;
+    const errorMsg = `Error running ${cmd.name}: ${errorDetail}`;
     console.error(errorMsg);
     if (error.stdout) console.log(error.stdout);
-    if (error.stderr) console.error(error.stderr);
     return errorMsg;
   }
 };
@@ -208,7 +213,11 @@ ${'='.repeat(80)}
     console.log(`Size: ${(fullReport.length / 1024).toFixed(1)} KB\n`);
   }
 
-  console.log('✅ Monitoring complete!\n');
+  console.log(
+    process.exitCode === 1
+      ? '⚠️ Monitoring completed with errors.\n'
+      : '✅ Monitoring complete!\n',
+  );
 };
 
 main().catch((error) => {

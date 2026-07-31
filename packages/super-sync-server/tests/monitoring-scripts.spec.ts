@@ -11,12 +11,18 @@ const mocks = vi.hoisted(() => {
     PrismaClient: vi.fn(function () {
       return prisma;
     }),
+    exec: vi.fn<(...args: unknown[]) => unknown>(),
   };
 });
 
 vi.mock('@prisma/client', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@prisma/client')>()),
   PrismaClient: mocks.PrismaClient,
+}));
+
+vi.mock('child_process', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('child_process')>()),
+  exec: mocks.exec,
 }));
 
 const statementTimeout = (): Prisma.PrismaClientKnownRequestError =>
@@ -32,6 +38,7 @@ const statementTimeout = (): Prisma.PrismaClientKnownRequestError =>
 describe('monitoring script error handling', () => {
   let previousExitCode: typeof process.exitCode;
   let previousArgv: string[];
+  let consoleLog: ReturnType<typeof vi.spyOn>;
   let consoleError: ReturnType<typeof vi.spyOn>;
   let exit: ReturnType<typeof vi.spyOn>;
 
@@ -43,7 +50,8 @@ describe('monitoring script error handling', () => {
     process.exitCode = undefined;
     mocks.prisma.$queryRaw.mockReset();
     mocks.prisma.$disconnect.mockReset().mockResolvedValue();
-    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mocks.exec.mockReset();
+    consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     exit = vi.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`Unexpected process.exit(${code})`);
@@ -56,7 +64,7 @@ describe('monitoring script error handling', () => {
     vi.restoreAllMocks();
   });
 
-  it('silently completes and disconnects when the monitor query times out', async () => {
+  it('reports a monitor query timeout and exits unsuccessfully', async () => {
     mocks.prisma.$queryRaw.mockRejectedValue(statementTimeout());
     process.argv = ['node', 'monitor.ts', 'usage', '--no-save'];
 
@@ -64,8 +72,10 @@ describe('monitoring script error handling', () => {
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
     expect(mocks.PrismaClient).toHaveBeenCalledWith({ log: [] });
-    expect(consoleError).not.toHaveBeenCalled();
-    expect(process.exitCode).toBeUndefined();
+    expect(consoleError).toHaveBeenCalledWith(
+      'Error fetching usage data: PostgreSQL canceled this query because it exceeded statement_timeout.',
+    );
+    expect(process.exitCode).toBe(1);
     expect(exit).not.toHaveBeenCalled();
   });
 
@@ -78,19 +88,21 @@ describe('monitoring script error handling', () => {
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
     expect(consoleError).toHaveBeenCalledWith('Error fetching usage data:', error);
-    expect(process.exitCode).toBeUndefined();
+    expect(process.exitCode).toBe(1);
     expect(exit).not.toHaveBeenCalled();
   });
 
-  it('silently completes and disconnects when the analysis query times out', async () => {
+  it('reports an analysis query timeout and exits unsuccessfully', async () => {
     mocks.prisma.$queryRaw.mockRejectedValue(statementTimeout());
     process.argv = ['node', 'analyze-storage.ts', 'operation-sizes'];
 
     await import('../scripts/analyze-storage');
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
-    expect(consoleError).not.toHaveBeenCalled();
-    expect(process.exitCode).toBeUndefined();
+    expect(consoleError).toHaveBeenCalledWith(
+      'Error: PostgreSQL canceled this query because it exceeded statement_timeout.',
+    );
+    expect(process.exitCode).toBe(1);
     expect(exit).not.toHaveBeenCalled();
   });
 
@@ -103,6 +115,49 @@ describe('monitoring script error handling', () => {
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
     expect(consoleError).toHaveBeenCalledWith('Error:', error);
+    expect(process.exitCode).toBe(1);
+    expect(exit).not.toHaveBeenCalled();
+  });
+
+  it('continues the monitoring suite after child failures and exits unsuccessfully', async () => {
+    let invocation = 0;
+    mocks.exec.mockImplementation((...args: unknown[]) => {
+      const callback = args.at(-1);
+      if (typeof callback !== 'function') {
+        throw new Error('Expected exec callback');
+      }
+      invocation += 1;
+      const isMaxBufferFailure = invocation === 1;
+      const stderr = isMaxBufferFailure ? 'ExperimentalWarning' : 'query timed out';
+      callback(
+        Object.assign(
+          new Error(
+            isMaxBufferFailure
+              ? 'stdout maxBuffer length exceeded'
+              : 'Command failed: monitor\nquery timed out',
+          ),
+          {
+            stdout: 'partial output',
+            stderr,
+          },
+        ),
+      );
+    });
+    process.argv = ['node', 'run-all-monitoring.ts', '--quick'];
+
+    await import('../scripts/run-all-monitoring');
+    await vi.waitFor(() => expect(mocks.exec).toHaveBeenCalledTimes(8));
+
+    expect(consoleLog).toHaveBeenCalledWith('⚠️ Monitoring completed with errors.\n');
+    expect(consoleLog).not.toHaveBeenCalledWith('✅ Monitoring complete!\n');
+    expect(consoleError).toHaveBeenCalledTimes(8);
+    expect(String(consoleError.mock.calls[0][0])).toContain(
+      'stdout maxBuffer length exceeded',
+    );
+    expect(String(consoleError.mock.calls[0][0])).toContain('ExperimentalWarning');
+    for (const [message] of consoleError.mock.calls.slice(1)) {
+      expect(String(message).match(/query timed out/g)).toHaveLength(1);
+    }
     expect(process.exitCode).toBe(1);
     expect(exit).not.toHaveBeenCalled();
   });

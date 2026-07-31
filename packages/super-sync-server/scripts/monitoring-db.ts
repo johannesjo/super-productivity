@@ -27,12 +27,14 @@ export const isPrismaStatementTimeout = (error: unknown): boolean => {
 export const reportMonitoringError = (
   message: string,
   error: unknown,
-  logger: (message: string, error: unknown) => void = console.error,
-): boolean => {
+  logger: (message: string, error?: unknown) => void = console.error,
+): void => {
   if (isPrismaStatementTimeout(error)) {
-    return false;
+    logger(
+      `${message} PostgreSQL canceled this query because it exceeded statement_timeout.`,
+    );
+    return;
   }
 
   logger(message, error);
-  return true;
 };

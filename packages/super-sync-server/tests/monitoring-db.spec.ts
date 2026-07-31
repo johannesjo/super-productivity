@@ -45,7 +45,7 @@ describe('monitoring errors', () => {
     expect(isPrismaStatementTimeout(error)).toBe(false);
   });
 
-  it('does not report statement timeouts', () => {
+  it('reports statement timeouts without dumping the raw Prisma error', () => {
     const error = new Prisma.PrismaClientKnownRequestError('Raw query failed', {
       code: 'P2010',
       clientVersion: '5.22.0',
@@ -56,15 +56,18 @@ describe('monitoring errors', () => {
     });
     const logger = vi.fn();
 
-    expect(reportMonitoringError('Error:', error, logger)).toBe(false);
-    expect(logger).not.toHaveBeenCalled();
+    reportMonitoringError('Error:', error, logger);
+    expect(logger).toHaveBeenCalledWith(
+      'Error: PostgreSQL canceled this query because it exceeded statement_timeout.',
+    );
+    expect(logger).toHaveBeenCalledOnce();
   });
 
   it('continues to report genuine errors', () => {
     const error = new Error('permission denied');
     const logger = vi.fn();
 
-    expect(reportMonitoringError('Error:', error, logger)).toBe(true);
+    reportMonitoringError('Error:', error, logger);
     expect(logger).toHaveBeenCalledWith('Error:', error);
   });
 });
