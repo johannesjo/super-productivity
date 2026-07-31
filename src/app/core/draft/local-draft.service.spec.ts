@@ -7,6 +7,7 @@ import {
   LocalDraftService,
 } from './local-draft.service';
 import { LS_LOCAL_DRAFT_PREFIX } from '../persistence/storage-keys.const';
+import { Log } from '../log';
 import { UserProfileService } from '../../features/user-profile/user-profile.service';
 import { UserProfileStorageService } from '../../features/user-profile/user-profile-storage.service';
 import { DEFAULT_PROFILE_ID } from '../../features/user-profile/user-profile.model';
@@ -92,6 +93,22 @@ describe('LocalDraftService', () => {
       localStorage.setItem(keyFor('p1', 'n1'), '{ not json');
 
       expect(service.loadDraft('NOTE', 'n1')).toBeUndefined();
+    });
+
+    it('never passes the raw value or its parse error to logging (draft text is user content)', () => {
+      // V8 SyntaxErrors quote a fragment of the parsed input, and the log
+      // history is exportable — the corrupt value must not travel with it.
+      localStorage.setItem(keyFor('p1', 'n1'), 'SECRET RAW NOTE TEXT');
+      const errSpy = spyOn(Log, 'err');
+
+      expect(service.loadDraft('NOTE', 'n1')).toBeUndefined();
+
+      const logged = errSpy.calls
+        .allArgs()
+        .flat()
+        .map((a) => (a instanceof Error ? `${a.message} ${a.stack}` : String(a)))
+        .join(' ');
+      expect(logged).not.toContain('SECRET RAW');
     });
 
     it('returns undefined for a value with a foreign shape', () => {

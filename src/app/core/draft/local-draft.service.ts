@@ -114,11 +114,20 @@ export class LocalDraftService {
       if (!raw) {
         return undefined;
       }
-      const parsed: unknown = JSON.parse(raw);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        // Deliberately logged WITHOUT the error: V8 SyntaxErrors quote the
+        // raw input, which is user content and must never reach the
+        // exportable log. The startup sweep removes such entries; the next
+        // checkpoint overwrites them.
+        Log.err('LocalDraftService: Draft unparseable');
+        return undefined;
+      }
       return isStoredDraft(parsed) ? parsed : undefined;
     } catch (e) {
-      // Unparseable or unreadable: nothing can be offered back. The startup
-      // sweep removes such entries; the next checkpoint overwrites them.
+      // Unreadable storage: nothing can be offered back.
       Log.err('LocalDraftService: Failed to load draft', e);
       return undefined;
     }
