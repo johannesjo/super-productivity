@@ -137,9 +137,8 @@ export class AddTaskBarParserService {
     }
 
     // Get current tags from state to preserve pre-selected tags
-    const currentState = this._stateService.state();
     const parseResult = await shortSyntax(
-      { title: text, tagIds: currentState.tagIdsFromTxt },
+      { title: text, tagIds: this._stateService.state().tagIdsFromTxt },
       config,
       allTags,
       allProjects,
@@ -151,6 +150,13 @@ export class AddTaskBarParserService {
     if (parseRunId !== this._parseRunId) {
       return;
     }
+
+    // Everything else is read after the await, not before it: a control pick
+    // can land while the parse runs (the first one waits for the chrono-node
+    // chunk), and a pick that leaves the text unchanged queues no parse to
+    // supersede this one. A snapshot from before the await still holds the
+    // values that pick replaced, and publishing them would undo it.
+    const currentState = this._stateService.state();
 
     const parsedRanges = parseResult?.parsedRanges ?? [];
     this._lastParsedRanges = { forText: text, ranges: parsedRanges };
@@ -295,6 +301,21 @@ export class AddTaskBarParserService {
         repeat,
         isRepeatFromSyntax: !!parseResult.repeat,
       };
+    }
+
+    // The date and the recurrence can come from opposite sides — a typed
+    // "@2027-03-27" with a menu-picked workday preset, or a date the bar was
+    // opened on with a recurrence from the text — and only a pick goes through
+    // applyUser*Pick. Reconciling the pair here as well covers every
+    // combination, and keeps it reconciled: a due token stays in the text and
+    // parses back to the excluded day on every following keystroke.
+    const rolledDueDate = rollWeekendDateForRepeat(
+      currentResult.dueDate,
+      currentResult.repeat,
+    );
+    if (rolledDueDate) {
+      // Only the day is excluded, not the hour, so the time stays as parsed
+      currentResult.dueDate = rolledDueDate;
     }
 
     // Compare with previous result and only update changed values

@@ -2049,6 +2049,107 @@ describe('AddTaskBarParserService', () => {
     });
   });
 
+  // The two menus are not the only way this pair can end up contradicting
+  // itself. The date can come from a token the pick has no business deleting,
+  // or from the day the bar was opened on — neither goes through applyUser*Pick,
+  // and a token re-parses to the same excluded day on every keystroke.
+  //
+  // These run against the real state service: what has to hold is that the
+  // state a pick writes survives the next parse, which a mocked state() cannot
+  // show — it would only prove each step called the setter it was told to.
+  describe('workday recurrence against real add bar state', () => {
+    let realState: AddTaskBarStateService;
+    const WORKDAYS = {
+      type: 'PRESET' as const,
+      quickSetting: 'MONDAY_TO_FRIDAY' as const,
+    };
+    // 2027-03-27 is a Saturday, 2027-03-29 the Monday after it
+    const SATURDAY = '2027-03-27';
+    const MONDAY = '2027-03-29';
+    const cfg = {
+      isEnableProject: true,
+      isEnableDue: true,
+      isEnableTag: true,
+    } as ShortSyntaxConfig;
+    const defaultProject = { id: 'default-project', title: 'Default Project' } as Project;
+
+    const parse = (text: string, defaultDate?: string): Promise<void> =>
+      service.parseAndUpdateText(text, cfg, [], [], defaultProject, defaultDate);
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [AddTaskBarParserService, AddTaskBarStateService],
+      });
+      service = TestBed.inject(AddTaskBarParserService);
+      realState = TestBed.inject(AddTaskBarStateService);
+    });
+
+    it('should keep the workday recurrence off a weekend date the text still names', async () => {
+      realState.updateInputTxt(`Standup @${SATURDAY}`);
+      await parse(`Standup @${SATURDAY}`);
+      expect(realState.state().date).toBe(SATURDAY);
+
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      // The pick leaves the date token in place — a plain date the user typed
+      // is not what the repeat control overrides — so the next keystroke parses
+      // the Saturday back out of the text
+      await parse(`Standups @${SATURDAY}`);
+
+      expect(realState.state().date).toBe(MONDAY);
+      expect(realState.state().repeat).toEqual(WORKDAYS);
+    });
+
+    it('should keep it off a weekend day the bar was opened on', async () => {
+      realState.updateInputTxt('Standup');
+      await parse('Standup');
+
+      // Nothing to roll yet: the day only reaches the state through the parse
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBeNull();
+
+      await parse('Standups', SATURDAY);
+
+      expect(realState.state().date).toBe(MONDAY);
+    });
+
+    it('should not let a parse that was in flight during the pick republish the weekend date', async () => {
+      realState.updateInputTxt('Standup');
+      await parse('Standup');
+      realState.updateDate(SATURDAY);
+
+      // Not awaited: the pick lands while this parse is still waiting for the
+      // chrono-node chunk. There is no recurrence syntax in the text, so the
+      // pick strips nothing and queues no replacement parse — this one is still
+      // the parse that will publish.
+      const inFlight = parse('Standup');
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      await inFlight;
+
+      expect(realState.state().date).toBe(MONDAY);
+    });
+
+    it('should not let it republish any other value the pick replaced either', async () => {
+      // Same shape, without a recurrence anywhere near it: every value the
+      // parse falls back to came from the snapshot it took before awaiting
+      realState.updateInputTxt('Taxes');
+      realState.updateDeadline('2027-04-01', null);
+      await parse('Taxes');
+
+      const inFlight = parse('Taxes');
+      service.applyUserDeadlinePick('2027-05-01', null, null);
+      expect(realState.state().deadlineDate).toBe('2027-05-01');
+
+      await inFlight;
+
+      expect(realState.state().deadlineDate).toBe('2027-05-01');
+    });
+  });
+
   describe('syntax highlight ranges', () => {
     const cfg = {
       isEnableProject: true,
