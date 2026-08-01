@@ -46,9 +46,11 @@ import {
   HttpNotOkAPIError,
   IncompleteRemoteOperationsError,
   FileSyncTargetChangedError,
+  UnsupportedMultiEntityConflictError,
 } from '../../op-log/core/errors/sync-errors';
 import { DialogEnterEncryptionPasswordComponent } from './dialog-enter-encryption-password/dialog-enter-encryption-password.component';
 import { MAX_LWW_REUPLOAD_RETRIES } from '../../op-log/core/operation-log.const';
+import { ActionType } from '../../op-log/core/operation.types';
 import type { SyncProviderBase } from '../../op-log/sync-providers/provider.interface';
 import type { MatDialogRef } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from './dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
@@ -1225,6 +1227,48 @@ describe('SyncWrapperService', () => {
       );
     });
 
+    it('should render unsupported multi-entity diagnostics through the dedicated snack', async () => {
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new UnsupportedMultiEntityConflictError(
+          'remote',
+          ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+          2,
+        ),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: T.F.SYNC.S.UNSUPPORTED_MULTI_ENTITY_CONFLICT,
+        type: 'ERROR',
+        translateParams: {
+          details:
+            'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
+            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
+        },
+      });
+    });
+
+    it('should escape the diagnostic before it reaches the [innerHtml] snack', async () => {
+      // Belt-and-braces: sync-errors.spec.ts asserts the message can never carry
+      // these characters, so this only pins the escaping seam itself.
+      const error = new UnsupportedMultiEntityConflictError('remote', 'x', 0);
+      error.message = 'SYNC_MULTI_ENTITY_UNSUPPORTED <img src=x> &';
+      mockSyncService.downloadRemoteOps.and.rejectWith(error);
+
+      await service.sync();
+
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          translateParams: {
+            details: 'SYNC_MULTI_ENTITY_UNSUPPORTED &lt;img src=x&gt; &amp;',
+          },
+        }),
+      );
+    });
+
     it('should handle NetworkUnavailableSPError with WARNING snackbar when user-triggered', async () => {
       mockSyncService.downloadRemoteOps.and.returnValue(
         Promise.reject(new NetworkUnavailableSPError()),
@@ -2120,11 +2164,11 @@ describe('SyncWrapperService', () => {
       const result = await service.sync();
 
       expect(result).toBe('HANDLED_ERROR');
-      expect(mockSnackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          type: 'ERROR',
-        }),
-      );
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: 'Some unexpected error',
+        type: 'ERROR',
+        translateParams: { err: 'Some unexpected error' },
+      });
     });
 
     it('should translate FORCE_UPLOAD failures raised during op-log sync', async () => {

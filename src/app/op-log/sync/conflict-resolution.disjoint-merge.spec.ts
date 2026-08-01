@@ -36,6 +36,7 @@ import { INBOX_PROJECT } from '../../features/project/project.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { appStateFeatureKey } from '../../root-store/app-state/app-state.reducer';
 import { getDbDateStr } from '../../util/get-db-date-str';
+import { UnsupportedMultiEntityConflictError } from '../core/errors/sync-errors';
 
 /**
  * Minimal RootState for exercising the PRODUCTION `lwwUpdateMetaReducer` on a
@@ -447,7 +448,7 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
 
     await expectAsync(
       service.autoResolveConflictsLWW([conflictOf([localOp], [remoteBulkOp], 'task-2')]),
-    ).toBeRejectedWithError(/Cannot safely auto-resolve remote multi-entity operation/);
+    ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
 
     expect(mergedOpArgs('task-2')).toBeUndefined();
     expect(mockOpLogStore.appendBatchSkipDuplicates).not.toHaveBeenCalled();
@@ -810,7 +811,7 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
 
     await expectAsync(
       service.autoResolveConflictsLWW([conflictOf([localBulkOp], [remoteOp], 'task-2')]),
-    ).toBeRejectedWithError(/Cannot safely auto-resolve local multi-entity operation/);
+    ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
 
     expect(mockOpLogStore.appendBatchSkipDuplicates).not.toHaveBeenCalled();
     expect(mockOpLogStore.appendMixedSourceBatchSkipDuplicates).not.toHaveBeenCalled();
@@ -1101,7 +1102,7 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
 
     await expectAsync(
       service.autoResolveConflictsLWW([conflictOf([localOp], [remoteOp])]),
-    ).toBeRejectedWithError(/Cannot safely auto-resolve remote multi-entity operation/);
+    ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
     expect(mergedOpArgs()).toBeUndefined();
     expect(mockOpLogStore.appendMixedSourceBatchSkipDuplicates).not.toHaveBeenCalled();
     expect(await journal.list('history')).toEqual([]);

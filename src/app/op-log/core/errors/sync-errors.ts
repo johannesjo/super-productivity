@@ -5,6 +5,10 @@ import {
   extractErrorMessage as packageExtractErrorMessage,
 } from '@sp/sync-providers/errors';
 import { FILE_BASED_SYNC_CONSTANTS } from '../../sync-providers/file-based/file-based-sync.types';
+import { KNOWN_ACTION_TYPES } from '../action-types.enum';
+
+/** Upper bound for the entity count reported in a sync diagnostic. */
+const MAX_REPORTED_ENTITY_COUNT = 9999;
 
 // Re-export provider-shared error classes from @sp/sync-providers.
 // Single class definition per error is critical for `instanceof` checks
@@ -120,6 +124,32 @@ export class ForceUploadFailedError extends Error {
 
 export class ForceUploadPendingOpsError extends Error {
   override name = 'ForceUploadPendingOpsError';
+}
+
+/**
+ * The multi-entity conflict preflight refused to auto-resolve (#9405). The
+ * message is the whole diagnostic: it is shown to the user and written to the
+ * exportable log, so it carries only allowlisted metadata: a fixed code, the
+ * side, an action type that must be a known `ActionType`, and a clamped entity
+ * count. Never widen this to ids, payloads, or titles.
+ */
+export class UnsupportedMultiEntityConflictError extends Error {
+  override name = 'UnsupportedMultiEntityConflictError';
+
+  constructor(side: 'local' | 'remote', actionType: unknown, entityCount: unknown) {
+    const safeActionType =
+      typeof actionType === 'string' && KNOWN_ACTION_TYPES.has(actionType)
+        ? actionType
+        : 'UNKNOWN';
+    const safeEntityCount =
+      typeof entityCount === 'number' && Number.isInteger(entityCount) && entityCount >= 0
+        ? Math.min(entityCount, MAX_REPORTED_ENTITY_COUNT)
+        : 0;
+    super(
+      `SYNC_MULTI_ENTITY_UNSUPPORTED side=${side} actionType=${safeActionType} ` +
+        `entityCount=${safeEntityCount}`,
+    );
+  }
 }
 
 /**

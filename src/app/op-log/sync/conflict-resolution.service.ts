@@ -78,7 +78,10 @@ import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { SYNC_LOGGER } from '../core/sync-logger.adapter';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
-import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import {
+  IncompleteRemoteOperationsError,
+  UnsupportedMultiEntityConflictError,
+} from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import { SyncConflictBannerService } from './sync-conflict-banner.service';
 import { buildConflictJournalEntry } from './conflict-journal-emission.util';
@@ -2293,21 +2296,32 @@ export class ConflictResolutionService {
    * Fail before op-log mutation unless the winner removes the whole remote set,
    * a local archive is re-created as the same atomic action, or the local legacy
    * rounding action has an explicit per-entity reconciliation path above.
+   *
+   * This is reachable from ordinary use, not only from bulk actions:
+   * `moveTaskInTodayTagList` (a planner drag inside Today) always carries two
+   * entity ids, and `planTasksForToday` is dispatched with every due task id by
+   * the automatic day-rollover paths. So a single pending local op plus one
+   * concurrent remote edit of the same task stops sync with no in-app recovery
+   * (#9405), without the user having done anything bulk. The thrown error names
+   * the blocked action without leaking ids; the reachable set is pinned in
+   * `testing/integration/unsupported-multi-entity-conflict.integration.spec.ts`
+   * so a future self-healing fix knows what it has to cover.
    */
   private _assertMultiEntityPlansAreSafe(
     plans: LwwConflictResolutionPlan<EntityConflict>[],
   ): void {
     for (const plan of plans) {
-      const remoteMultiOps = plan.conflict.remoteOps.filter(isMultiEntityOperation);
-      const remoteWholeRemovalIsSafe = remoteMultiOps.every(
+      const unsafeRemoteOp = plan.conflict.remoteOps.find(
         (op) =>
-          op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
-          INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType),
+          isMultiEntityOperation(op) &&
+          op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
+          !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType),
       );
-      if (remoteMultiOps.length > 0 && !remoteWholeRemovalIsSafe) {
-        throw new Error(
-          `ConflictResolutionService: Cannot safely auto-resolve remote multi-entity operation ` +
-            `for ${plan.conflict.entityType}:${plan.conflict.entityId}`,
+      if (unsafeRemoteOp) {
+        throw new UnsupportedMultiEntityConflictError(
+          'remote',
+          unsafeRemoteOp.actionType,
+          getOpEntityIds(unsafeRemoteOp).length,
         );
       }
 
@@ -2318,19 +2332,18 @@ export class ConflictResolutionService {
         localMultiOps.every(
           (op) => op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
         );
-      const localOpsAreDecomposable = localMultiOps.every(
-        (op) =>
-          INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) ||
-          DECOMPOSABLE_MULTI_ACTION_FIELDS.has(op.actionType),
-      );
-      if (
-        localMultiOps.length > 0 &&
-        !localArchiveIsRecreated &&
-        !localOpsAreDecomposable
-      ) {
-        throw new Error(
-          `ConflictResolutionService: Cannot safely auto-resolve local multi-entity operation ` +
-            `for ${plan.conflict.entityType}:${plan.conflict.entityId}`,
+      const unsafeLocalOp = localArchiveIsRecreated
+        ? undefined
+        : localMultiOps.find(
+            (op) =>
+              !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) &&
+              !DECOMPOSABLE_MULTI_ACTION_FIELDS.has(op.actionType),
+          );
+      if (unsafeLocalOp) {
+        throw new UnsupportedMultiEntityConflictError(
+          'local',
+          unsafeLocalOp.actionType,
+          getOpEntityIds(unsafeLocalOp).length,
         );
       }
     }

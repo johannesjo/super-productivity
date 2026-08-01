@@ -28,6 +28,7 @@ import {
   ForceUploadPendingOpsError,
   FileSyncTargetChangedError,
   SyncEpochChangedError,
+  UnsupportedMultiEntityConflictError,
 } from '../../op-log/core/errors/sync-errors';
 import { MAX_LWW_REUPLOAD_RETRIES } from '../../op-log/core/operation-log.const';
 import { SyncConfig } from '../../features/config/global-config.model';
@@ -1070,14 +1071,24 @@ export class SyncWrapperService {
         // rendering is debounced, so opening the generic error here would win
         // the race and silently remove the only recovery action.
         if (!this._snackService.hasPendingPersistentAction()) {
-          this._snackService.open({
-            // msg: T.F.SYNC.S.UNKNOWN_ERROR,
-            msg: errStr,
-            type: 'ERROR',
-            translateParams: {
-              err: errStr,
-            },
-          });
+          if (error instanceof UnsupportedMultiEntityConflictError) {
+            this._snackService.open({
+              msg: T.F.SYNC.S.UNSUPPORTED_MULTI_ENTITY_CONFLICT,
+              type: 'ERROR',
+              translateParams: {
+                details: escapeHtml(errStr),
+              },
+            });
+          } else {
+            this._snackService.open({
+              // msg: T.F.SYNC.S.UNKNOWN_ERROR,
+              msg: errStr,
+              type: 'ERROR',
+              translateParams: {
+                err: errStr,
+              },
+            });
+          }
         }
         return 'HANDLED_ERROR';
       }
