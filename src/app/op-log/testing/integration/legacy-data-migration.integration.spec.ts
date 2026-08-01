@@ -14,7 +14,7 @@ import { createValidAppData } from '../../validation/state-validity-test-utils';
 import { CURRENT_SCHEMA_VERSION } from '../../persistence/schema-migration.service';
 import { LanguageCode } from '../../../core/locale.constants';
 import { LockService } from '../../sync/lock.service';
-import { LOCK_NAMES } from '../../core/operation-log.const';
+import { LOCK_NAMES, MAX_VECTOR_CLOCK_SIZE } from '../../core/operation-log.const';
 
 /**
  * Integration tests for Operation Log Migration Service.
@@ -438,6 +438,73 @@ describe('Legacy Data Migration Integration', () => {
       expect(await restartedStore.getVectorClock()).toEqual({
         [legacyClientId]: 6,
       });
+    });
+  });
+  describe('Vector clock bounding across the durable rebase', () => {
+    it('bounds the stored op clock and committed clock when durable and proposed clocks are disjoint', async () => {
+      // appendOperationAndSnapshot prunes the proposed clock before opening the
+      // transaction, then unions the whole durable clock back in during the
+      // rebase. Two disjoint bounded clocks therefore used to produce
+      // 2 * MAX_VECTOR_CLOCK_SIZE entries in both the stored operation and the
+      // committed snapshot/working clock. Reachable on the live migration path:
+      // clearAllOperations() retains VECTOR_CLOCK by design.
+      const currentClientId = 'current-client';
+      mockClientIdService.loadClientId.and.resolveTo(currentClientId);
+
+      const durableClock: Record<string, number> = {};
+      for (let i = 0; i < MAX_VECTOR_CLOCK_SIZE; i++) {
+        durableClock[`durable-${i}`] = i + 1;
+      }
+      await opLogStore.setVectorClock(durableClock);
+      expect(Object.keys((await opLogStore.getVectorClock()) ?? {}).length).toBe(
+        MAX_VECTOR_CLOCK_SIZE,
+      );
+
+      const proposedClock: Record<string, number> = { [currentClientId]: 1 };
+      for (let i = 0; i < MAX_VECTOR_CLOCK_SIZE - 1; i++) {
+        proposedClock[`proposed-${i}`] = i + 1;
+      }
+
+      const op: Operation = {
+        id: 'rebase-bounding-op',
+        actionType: '[Migration] Genesis Import' as ActionType,
+        opType: OpType.Batch,
+        entityType: 'MIGRATION',
+        entityId: '*',
+        payload: { task: { ids: [] } },
+        clientId: currentClientId,
+        vectorClock: { ...proposedClock },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      await opLogStore.appendOperationAndSnapshot(op, 'local', {
+        state: createValidAppData(),
+        vectorClock: { ...proposedClock },
+        compactedAt: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      });
+
+      const committed = await opLogStore.getVectorClock();
+      expect(committed).toBeTruthy();
+      expect(Object.keys(committed ?? {}).length).toBeLessThanOrEqual(
+        MAX_VECTOR_CLOCK_SIZE,
+      );
+      // The appending client must survive pruning: dropping it risks counter reuse.
+      expect((committed ?? {})[currentClientId]).toBeGreaterThan(0);
+
+      const stored = await opLogStore.getOpsAfterSeq(0);
+      const storedOp = stored.find((entry) => entry.op.id === op.id);
+      expect(storedOp).toBeDefined();
+      expect(Object.keys(storedOp!.op.vectorClock).length).toBeLessThanOrEqual(
+        MAX_VECTOR_CLOCK_SIZE,
+      );
+      expect(storedOp!.op.vectorClock[currentClientId]).toBeGreaterThan(0);
+
+      const cache = await opLogStore.loadStateCache();
+      expect(Object.keys(cache?.vectorClock ?? {}).length).toBeLessThanOrEqual(
+        MAX_VECTOR_CLOCK_SIZE,
+      );
     });
   });
 });

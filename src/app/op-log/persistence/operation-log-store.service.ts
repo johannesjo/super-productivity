@@ -342,6 +342,30 @@ type OpLogStoreName = (typeof STORE_NAMES)[keyof typeof STORE_NAMES];
  * past the durable value. Makes counter reuse/regression unrepresentable
  * regardless of what the caller derived its proposed clock from (#8939).
  */
+/**
+ * Bounds a clock that has just been rebased on the durable clock.
+ *
+ * `pruneClockForStorage` runs before the transaction opens, so a disjoint
+ * bounded durable clock unioned with a bounded proposed clock can exceed
+ * MAX_VECTOR_CLOCK_SIZE again (20 + 20 = 40). Re-bound after the rebase,
+ * preserving the same authors `pruneClockForStorage` does. Synchronous so it
+ * is safe to call while an IndexedDB transaction is open.
+ */
+const boundRebasedClock = (
+  clock: VectorClock,
+  currentClientId: string | null,
+  importAuthorId: string | undefined,
+): VectorClock => {
+  // No client ID -> no pruning at all (never prune with the author id alone).
+  if (!currentClientId) {
+    return clock;
+  }
+  return limitVectorClockSize(
+    clock,
+    importAuthorId ? [currentClientId, importAuthorId] : [currentClientId],
+  );
+};
+
 const rebaseLocalClockOnDurable = (
   durableClock: VectorClock,
   proposedClock: VectorClock,
@@ -773,7 +797,14 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     snapshot: ReplayAnchorSnapshot,
   ): Promise<number> {
     const vectorClock = await this.pruneClockForStorage(snapshot.vectorClock);
-    return this._appendOperationAndSnapshot(op, source, snapshot, vectorClock, true);
+    // Resolved out here: both lookups are async and must not run while the
+    // IndexedDB transaction below is open.
+    const currentClientId = await this.clientIdProvider.loadClientId();
+    const importAuthorId = (await this.getLatestFullStateOp())?.clientId;
+    return this._appendOperationAndSnapshot(op, source, snapshot, vectorClock, true, {
+      currentClientId,
+      importAuthorId,
+    });
   }
 
   private async _appendOperationAndSnapshot(
@@ -782,6 +813,10 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     snapshot: ReplayAnchorSnapshot,
     vectorClock: VectorClock,
     rebaseOnDurable = false,
+    rebaseAuthors?: {
+      currentClientId: string | null;
+      importAuthorId: string | undefined;
+    },
   ): Promise<number> {
     await this._ensureInit();
     const storeNames: OpLogStoreName[] = [
@@ -802,18 +837,20 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
             SINGLETON_KEY,
           );
           const durableClock = currentClockEntry?.clock ?? {};
+          const bound = (clock: VectorClock): VectorClock =>
+            boundRebasedClock(
+              clock,
+              rebaseAuthors?.currentClientId ?? null,
+              rebaseAuthors?.importAuthorId,
+            );
           operationToStore = {
             ...op,
-            vectorClock: rebaseLocalClockOnDurable(
-              durableClock,
-              op.vectorClock,
-              op.clientId,
+            vectorClock: bound(
+              rebaseLocalClockOnDurable(durableClock, op.vectorClock, op.clientId),
             ),
           };
-          committedClock = rebaseLocalClockOnDurable(
-            durableClock,
-            vectorClock,
-            op.clientId,
+          committedClock = bound(
+            rebaseLocalClockOnDurable(durableClock, vectorClock, op.clientId),
           );
         }
         const entry = this._buildStoredEntry(operationToStore, source);
