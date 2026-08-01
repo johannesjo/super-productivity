@@ -105,19 +105,13 @@ describe('sync errors', () => {
     const err = new UnsupportedMultiEntityConflictError(
       'local',
       ActionType.TASK_SHARED_UPDATE_MULTIPLE,
-    );
-    const hostile = new UnsupportedMultiEntityConflictError(
-      'remote',
-      '<img src=x onerror=alert(1)>',
+      2,
     );
 
     expect(err.name).toBe('UnsupportedMultiEntityConflictError');
     expect(err.message).toBe(
       'SYNC_MULTI_ENTITY_UNSUPPORTED side=local ' +
-        `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE}`,
-    );
-    expect(hostile.message).toBe(
-      'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote actionType=UNKNOWN',
+        `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
     );
     expect(
       Object.getOwnPropertyNames(err).filter(
@@ -125,5 +119,45 @@ describe('sync errors', () => {
       ),
     ).toEqual([]);
     expect((OpLog.err as jasmine.Spy).calls.count()).toBe(0);
+  });
+
+  it('reduces untrusted metadata to placeholders', () => {
+    // `actionType` and `entityIds` are unbounded on the wire, so a remote op can
+    // carry anything. The message is user-visible and log-exported, so nothing
+    // that is not allowlisted may survive into it.
+    const hostile = new UnsupportedMultiEntityConflictError(
+      'remote',
+      '<img src=x onerror=alert(1)>',
+      Number.POSITIVE_INFINITY,
+    );
+
+    expect(hostile.message).toBe(
+      'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote actionType=UNKNOWN entityCount=0',
+    );
+    expect(new UnsupportedMultiEntityConflictError('remote', 42, -1).message).toContain(
+      'actionType=UNKNOWN entityCount=0',
+    );
+    expect(
+      new UnsupportedMultiEntityConflictError(
+        'remote',
+        ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+        1_000_000,
+      ).message,
+    ).toContain('entityCount=9999');
+  });
+
+  it('never emits HTML-sensitive characters for any known action type', () => {
+    // The sync-wrapper renders this message through an [innerHtml] snack. It
+    // escapes on the way out, but the invariant that makes that escaping a
+    // no-op is asserted here, over every reachable input rather than one sample.
+    const messages = Object.values(ActionType).map(
+      (actionType) =>
+        new UnsupportedMultiEntityConflictError('local', actionType, 3).message,
+    );
+    messages.push(
+      new UnsupportedMultiEntityConflictError('remote', '<script>', 3).message,
+    );
+
+    expect(messages.filter((message) => /[&<>"']/.test(message))).toEqual([]);
   });
 });

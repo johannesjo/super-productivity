@@ -3668,7 +3668,7 @@ describe('ConflictResolutionService', () => {
         expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
         expect((thrown as Error).message).toBe(
           'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
-            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE}`,
+            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
         );
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,

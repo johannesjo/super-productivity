@@ -1227,14 +1227,14 @@ describe('SyncWrapperService', () => {
       );
     });
 
-    it('should render unsupported multi-entity diagnostics through the dedicated escaped snack', async () => {
-      const error = new UnsupportedMultiEntityConflictError(
-        'remote',
-        ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+    it('should render unsupported multi-entity diagnostics through the dedicated snack', async () => {
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new UnsupportedMultiEntityConflictError(
+          'remote',
+          ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+          2,
+        ),
       );
-      error.message =
-        'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote actionType=<img src=x> &';
-      mockSyncService.downloadRemoteOps.and.rejectWith(error);
 
       const result = await service.sync();
 
@@ -1246,9 +1246,27 @@ describe('SyncWrapperService', () => {
         translateParams: {
           details:
             'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
-            'actionType=&lt;img src=x&gt; &amp;',
+            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
         },
       });
+    });
+
+    it('should escape the diagnostic before it reaches the [innerHtml] snack', async () => {
+      // Belt-and-braces: sync-errors.spec.ts asserts the message can never carry
+      // these characters, so this only pins the escaping seam itself.
+      const error = new UnsupportedMultiEntityConflictError('remote', 'x', 0);
+      error.message = 'SYNC_MULTI_ENTITY_UNSUPPORTED <img src=x> &';
+      mockSyncService.downloadRemoteOps.and.rejectWith(error);
+
+      await service.sync();
+
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          translateParams: {
+            details: 'SYNC_MULTI_ENTITY_UNSUPPORTED &lt;img src=x&gt; &amp;',
+          },
+        }),
+      );
     });
 
     it('should handle NetworkUnavailableSPError with WARNING snackbar when user-triggered', async () => {

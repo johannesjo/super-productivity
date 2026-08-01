@@ -1676,7 +1676,7 @@
         "TIMEOUT_ERROR": "Sync operation timed out. {{suggestion}}",
         "TOO_MANY_OPS_TO_DOWNLOAD": "Too many sync operations to download. Some changes may be missing.",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
-        "UNSUPPORTED_MULTI_ENTITY_CONFLICT": "Sync stopped for safety. Diagnostic details: {{details}}",
+        "UNSUPPORTED_MULTI_ENTITY_CONFLICT": "Sync stopped for safety to avoid data loss. Please report this code: {{details}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
         "UPLOAD_OPS_REJECTED": "{{count}} operation(s) were permanently rejected by the server and won't be synced.",
         "VECTOR_CLOCK_LIMIT_REACHED": "Sync tidied up old device entries ({{originalSize}} → {{maxSize}}). This is normal. To clear them for good: sync all devices, then export and re-import a backup (Settings → Import/Export).",

@@ -15,7 +15,7 @@ import { clearDeferredActions } from '../../capture/operation-capture.meta-reduc
 import { OperationLogEffects } from '../../capture/operation-log.effects';
 import { buildEntityRegistry, ENTITY_REGISTRY } from '../../core/entity-registry';
 import { UnsupportedMultiEntityConflictError } from '../../core/errors/sync-errors';
-import { ActionType } from '../../core/operation.types';
+import { ActionType, Operation } from '../../core/operation.types';
 import {
   isPersistentAction,
   PersistentAction,
@@ -44,6 +44,7 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
   let resolver: ConflictResolutionService;
   let journal: ConflictJournalService;
   let operationApplier: jasmine.SpyObj<OperationApplierService>;
+  let store: jasmine.SpyObj<Store>;
   let actions$: Subject<Action>;
   let effectSubscription: Subscription;
 
@@ -70,7 +71,7 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     resetTestUuidCounter();
     clearDeferredActions();
     actions$ = new Subject<Action>();
-    const store = jasmine.createSpyObj<Store>('Store', ['dispatch']);
+    store = jasmine.createSpyObj<Store>('Store', ['dispatch']);
 
     operationApplier = jasmine.createSpyObj<OperationApplierService>(
       'OperationApplierService',
@@ -168,30 +169,16 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     TestBed.resetTestingModule();
   });
 
-  it('reports the captured archive action and fails closed before mutation', async () => {
-    // Reproduces the updateTasks defect class, not the unconfirmed action in #9405.
-    const updates = [
-      { id: YOUNG_TASK_ID, changes: { title: 'Updated young occurrence' } },
-      { id: OLD_TASK_ID, changes: { title: 'Updated old occurrence' } },
-    ];
-    await taskArchive.updateTasks(updates);
-    await writeFlush.flushPendingWrites();
-
-    const unsynced = await opLogStore.getUnsynced();
-    expect(unsynced.length).toBe(1);
-    const localOperation = unsynced[0]!.op;
-    expect(localOperation.actionType).toBe(ActionType.TASK_SHARED_UPDATE_MULTIPLE);
-    expect(localOperation.entityIds).toEqual([YOUNG_TASK_ID, OLD_TASK_ID]);
-    expect(localOperation.payload).toEqual({
-      actionPayload: { tasks: updates },
-      entityChanges: [],
-    });
-
+  /**
+   * Races the pending local operation against one concurrent remote edit of
+   * `targetTaskId` and returns whatever `autoResolveConflictsLWW` threw.
+   */
+  const raceConcurrentRemoteEdit = async (
+    targetTaskId: string,
+    localOperation: Operation,
+  ): Promise<unknown> => {
     const remoteAction = TaskSharedActions.updateTask({
-      task: {
-        id: YOUNG_TASK_ID,
-        changes: { title: 'Concurrent remote occurrence' },
-      },
+      task: { id: targetTaskId, changes: { title: 'Concurrent remote occurrence' } },
     }) as PersistentAction;
     const { type, meta, ...actionPayload } = remoteAction;
     const remoteOperation = {
@@ -199,7 +186,7 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
         actionType: type,
         opType: meta.opType,
         entityType: meta.entityType,
-        entityId: YOUNG_TASK_ID,
+        entityId: targetTaskId,
         payload: {
           actionPayload,
           entityChanges: capture.extractEntityChanges(remoteAction),
@@ -215,17 +202,45 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
       snapshotEntityKeys: undefined,
       hasNoSnapshotClock: true,
     });
+    expect(detection.conflicts.length).toBeGreaterThan(0);
 
-    let thrown: unknown;
     try {
       await resolver.autoResolveConflictsLWW(detection.conflicts);
+      return undefined;
     } catch (error) {
-      thrown = error;
+      return error;
     }
+  };
+
+  const pendingLocalOperation = async (): Promise<Operation> => {
+    await writeFlush.flushPendingWrites();
+    const unsynced = await opLogStore.getUnsynced();
+    expect(unsynced.length).toBe(1);
+    return unsynced[0]!.op;
+  };
+
+  it('reports the captured archive action and fails closed before mutation', async () => {
+    // Reproduces the updateTasks defect class, not the unconfirmed action in #9405.
+    const updates = [
+      { id: YOUNG_TASK_ID, changes: { title: 'Updated young occurrence' } },
+      { id: OLD_TASK_ID, changes: { title: 'Updated old occurrence' } },
+    ];
+    await taskArchive.updateTasks(updates);
+
+    const localOperation = await pendingLocalOperation();
+    expect(localOperation.actionType).toBe(ActionType.TASK_SHARED_UPDATE_MULTIPLE);
+    expect(localOperation.entityIds).toEqual([YOUNG_TASK_ID, OLD_TASK_ID]);
+    expect(localOperation.payload).toEqual({
+      actionPayload: { tasks: updates },
+      entityChanges: [],
+    });
+
+    const thrown = await raceConcurrentRemoteEdit(YOUNG_TASK_ID, localOperation);
+
     expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
     expect((thrown as Error).message).toBe(
       'SYNC_MULTI_ENTITY_UNSUPPORTED side=local ' +
-        `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE}`,
+        `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
     );
     expect((thrown as Error).message).not.toContain(YOUNG_TASK_ID);
     expect((await opLogStore.getUnsynced()).map(({ op }) => op.id)).toEqual([
@@ -233,5 +248,74 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     ]);
     expect(operationApplier.applyOperations).not.toHaveBeenCalled();
     expect(await journal.list('history')).toEqual([]);
+  });
+
+  describe('reachability of the guard beyond bulk actions', () => {
+    // The report reads as a recurring-task problem, but the guard is not scoped
+    // to one. Every action below carries >1 entityId and is neither an
+    // independent multi-delete nor decomposable, so one pending local op plus
+    // one concurrent remote edit of the same task is enough to stop sync. This
+    // pins that surface so the self-healing follow-up knows what it must cover;
+    // moving any of these into a safe path is expected to flip its case here.
+    //
+    // Each case notes its production dispatcher, because "an action creator
+    // exists" is not the same claim as "a user can trigger it".
+    const CASES: { name: string; action: () => PersistentAction }[] = [
+      {
+        // planner-day.component.ts: a drag inside Today. Always exactly 2 ids.
+        name: 'reordering Today by drag and drop',
+        action: () =>
+          TaskSharedActions.moveTaskInTodayTagList({
+            toTaskId: YOUNG_TASK_ID,
+            fromTaskId: OLD_TASK_ID,
+          }) as PersistentAction,
+      },
+      {
+        // add-tasks-for-tomorrow.service.ts and task-due.effects.ts dispatch
+        // this with every due task id, automatically, on day rollover.
+        name: 'the automatic day-rollover plan-for-today',
+        action: () =>
+          TaskSharedActions.planTasksForToday({
+            taskIds: [YOUNG_TASK_ID, OLD_TASK_ID],
+          }) as PersistentAction,
+      },
+      {
+        // work-context-menu.component.ts: "unplan" the remaining Today tasks.
+        name: 'unplanning the remaining Today tasks',
+        action: () =>
+          TaskSharedActions.removeTasksFromTodayTag({
+            taskIds: [YOUNG_TASK_ID, OLD_TASK_ID],
+          }) as PersistentAction,
+      },
+      {
+        // No production dispatcher since 6bb0472549 (v18.14.0) removed the tag
+        // dialog; tag edits now go through the single-entity updateTask. Kept
+        // because the op shape still arrives from older peers and from local
+        // ops captured before that release, and both reach this guard.
+        name: 'a legacy addTagToTask op from an older client',
+        action: () =>
+          TaskSharedActions.addTagToTask({
+            taskId: YOUNG_TASK_ID,
+            tagId: 'tag-1',
+          }) as PersistentAction,
+      },
+    ];
+
+    CASES.forEach(({ name, action }) => {
+      it(`names the blocked action for ${name}`, async () => {
+        const dispatched = action();
+        store.dispatch(dispatched);
+
+        const localOperation = await pendingLocalOperation();
+        const thrown = await raceConcurrentRemoteEdit(YOUNG_TASK_ID, localOperation);
+
+        expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+        expect((thrown as Error).message).toBe(
+          'SYNC_MULTI_ENTITY_UNSUPPORTED side=local ' +
+            `actionType=${dispatched.type} entityCount=2`,
+        );
+        expect(operationApplier.applyOperations).not.toHaveBeenCalled();
+      });
+    });
   });
 });

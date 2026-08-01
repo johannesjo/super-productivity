@@ -2296,6 +2296,16 @@ export class ConflictResolutionService {
    * Fail before op-log mutation unless the winner removes the whole remote set,
    * a local archive is re-created as the same atomic action, or the local legacy
    * rounding action has an explicit per-entity reconciliation path above.
+   *
+   * This is reachable from ordinary use, not only from bulk actions:
+   * `moveTaskInTodayTagList` (a planner drag inside Today) always carries two
+   * entity ids, and `planTasksForToday` is dispatched with every due task id by
+   * the automatic day-rollover paths. So a single pending local op plus one
+   * concurrent remote edit of the same task stops sync with no in-app recovery
+   * (#9405), without the user having done anything bulk. The thrown error names
+   * the blocked action without leaking ids; the reachable set is pinned in
+   * `testing/integration/unsupported-multi-entity-conflict.integration.spec.ts`
+   * so a future self-healing fix knows what it has to cover.
    */
   private _assertMultiEntityPlansAreSafe(
     plans: LwwConflictResolutionPlan<EntityConflict>[],
@@ -2311,6 +2321,7 @@ export class ConflictResolutionService {
         throw new UnsupportedMultiEntityConflictError(
           'remote',
           unsafeRemoteOp.actionType,
+          getOpEntityIds(unsafeRemoteOp).length,
         );
       }
 
@@ -2329,7 +2340,11 @@ export class ConflictResolutionService {
               !DECOMPOSABLE_MULTI_ACTION_FIELDS.has(op.actionType),
           );
       if (unsafeLocalOp) {
-        throw new UnsupportedMultiEntityConflictError('local', unsafeLocalOp.actionType);
+        throw new UnsupportedMultiEntityConflictError(
+          'local',
+          unsafeLocalOp.actionType,
+          getOpEntityIds(unsafeLocalOp).length,
+        );
       }
     }
   }
