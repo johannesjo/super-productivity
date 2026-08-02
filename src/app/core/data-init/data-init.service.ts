@@ -51,23 +51,4 @@ export class DataInitService {
     // Hydrate from Operation Log (which handles migration from legacy if needed)
     await this._operationLogHydratorService.hydrateStore();
   }
-
-  /**
-   * Re-initialize the app after a remote sync download.
-   * This uses hydrateFromRemoteSync() which:
-   * 1. Uses the downloaded mainModelData (passed from sync service)
-   * 2. Persists it to SUP_OPS as a SYNC_IMPORT operation
-   * 3. Creates a snapshot for crash safety
-   * 4. Updates NgRx with the synced data
-   *
-   * @param downloadedMainModelData - The main model data from the remote meta file.
-   *   Entity models are not stored in IndexedDB, so this must be passed explicitly.
-   */
-  async reInitFromRemoteSync(
-    downloadedMainModelData?: Record<string, unknown>,
-  ): Promise<void> {
-    await this._operationLogHydratorService.hydrateFromRemoteSync(
-      downloadedMainModelData,
-    );
-  }
 }

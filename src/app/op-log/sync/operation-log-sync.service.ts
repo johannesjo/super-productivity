@@ -1378,14 +1378,11 @@ export class OperationLogSyncService {
           );
         }
 
-        // Hydrate state from snapshot - DON'T create SYNC_IMPORT for file-based
-        // bootstrap. Creating it would trigger clean-slate filtering of concurrent
-        // ops from other clients.
+        // Hydrate state from snapshot. No SYNC_IMPORT is created, so
+        // concurrent ops from other clients are not clean-slate filtered.
         await this.syncHydrationService.hydrateFromRemoteSync(
           result.snapshotState as Record<string, unknown>,
           result.snapshotVectorClock,
-          false,
-          undefined,
           {
             snapshotIncludedOps,
             // Capture only actions that ran on the old state. Actions emitted
@@ -1975,12 +1972,11 @@ export class OperationLogSyncService {
               'OperationLogSyncService: Force download received snapshotState. Hydrating...',
             );
 
-            // Hydrate from snapshot - DON'T create SYNC_IMPORT since we're
-            // accepting remote state, not uploading local state.
+            // Hydrate from snapshot. We're accepting remote state, not
+            // uploading local state, so no SYNC_IMPORT is created.
             await this.syncHydrationService.hydrateFromRemoteSync(
               snapshotState,
               result.snapshotVectorClock,
-              false, // Don't create SYNC_IMPORT
             );
 
             // Record only operations already represented by the snapshot. A

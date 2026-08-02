@@ -932,25 +932,6 @@ export class OperationLogHydratorService {
   }
 
   /**
-   * Handles hydration after a remote sync download.
-   * Delegates to SyncHydrationService.
-   *
-   * @param downloadedMainModelData - Entity models from remote meta file.
-   *   These are NOT stored in IndexedDB (only archives are) so must be passed explicitly.
-   * @param remoteVectorClock - Vector clock from the downloaded snapshot.
-   *   Merged into the SYNC_IMPORT's clock to prevent mutual discarding during provider switch.
-   */
-  async hydrateFromRemoteSync(
-    downloadedMainModelData?: Record<string, unknown>,
-    remoteVectorClock?: Record<string, number>,
-  ): Promise<void> {
-    return this.syncHydrationService.hydrateFromRemoteSync(
-      downloadedMainModelData,
-      remoteVectorClock,
-    );
-  }
-
-  /**
    * Validates a state object during hydration without attempting repair.
    *
    * Repair is intentionally not run here: it requires a native `confirm()` dialog
