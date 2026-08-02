@@ -129,6 +129,7 @@ describe('MainHeaderComponent focus button visibility', () => {
   let isXxxs = signal(false);
   let appFeatures = signal(DEFAULT_GLOBAL_CONFIG.appFeatures);
   let enabledSimpleCounters: SimpleCounter[] = [];
+  let isAllDataLoaded = true;
 
   const configureTestBed = (): void => {
     const cfg = {
@@ -209,7 +210,7 @@ describe('MainHeaderComponent focus button visibility', () => {
         { provide: Store, useValue: { dispatch: jasmine.createSpy('dispatch') } },
         {
           provide: DataInitStateService,
-          useValue: { isAllDataLoadedInitially$: of(true) },
+          useValue: { isAllDataLoadedInitially$: isAllDataLoaded ? of(true) : EMPTY },
         },
         { provide: MetricService, useValue: { getFocusSummaryForDay: () => null } },
         { provide: DateService, useValue: { todayStr: () => '2026-06-09' } },
@@ -236,6 +237,7 @@ describe('MainHeaderComponent focus button visibility', () => {
     isXxxs = signal(false);
     appFeatures = signal(DEFAULT_GLOBAL_CONFIG.appFeatures);
     enabledSimpleCounters = [];
+    isAllDataLoaded = true;
   });
 
   afterEach(() => {
@@ -315,6 +317,21 @@ describe('MainHeaderComponent focus button visibility', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(menu.getAttribute('aria-hidden')).toBe('false');
     expect(menu.inert).toBe(false);
+  });
+
+  it('shows the add-task button before initial data load finishes', () => {
+    // The shell paints before op-log hydration completes; the quick-capture
+    // entry point must already be there in that window, while the
+    // data-dependent header parts still wait for the data-loaded signal.
+    isAllDataLoaded = false;
+
+    configureTestBed();
+    fixture = TestBed.createComponent(MainHeaderComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.tour-addBtn')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('page-title')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('.counters-action-group')).toBeFalsy();
   });
 
   it('keeps a persistent recovery action instead of showing routine sync success', async () => {

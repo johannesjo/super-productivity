@@ -1,34 +1,39 @@
 <div class="wrapper">
   @if (isDataLoaded()) {
     <page-title></page-title>
+  }
 
-    <nav class="action-nav-right">
-      <div class="header-action-group primary-action-group">
-        @if (isTimeTrackingEnabled()) {
-          <play-button
-            [currentTask]="currentTask()"
-            [currentTaskId]="currentTaskId()"
-            [currentTaskContext]="currentTaskContext()"
-            [hasTrackableTasks]="hasTrackableTasks()"
-          ></play-button>
-        }
+  <nav class="action-nav-right">
+    <div class="header-action-group primary-action-group">
+      @if (isDataLoaded() && isTimeTrackingEnabled()) {
+        <play-button
+          [currentTask]="currentTask()"
+          [currentTaskId]="currentTaskId()"
+          [currentTaskContext]="currentTaskContext()"
+          [hasTrackableTasks]="hasTrackableTasks()"
+        ></play-button>
+      }
 
-        @if (showDesktopButtons()) {
-          <button
-            emlDrop
-            (click)="layoutService.showAddTaskBar()"
-            matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
-              kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
-            }}"
-            class="tour-addBtn"
-            color="primary"
-            mat-icon-button
-          >
-            <mat-icon>add</mat-icon>
-          </button>
-        }
-      </div>
+      <!-- Not gated on isDataLoaded: the shell paints before op-log hydration
+           finishes, and the primary quick-capture entry point must not be
+           missing for that window. -->
+      @if (showDesktopButtons()) {
+        <button
+          emlDrop
+          (click)="layoutService.showAddTaskBar()"
+          matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
+            kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
+          }}"
+          class="tour-addBtn"
+          color="primary"
+          mat-icon-button
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      }
+    </div>
 
+    @if (isDataLoaded()) {
       <div class="header-action-group secondary-action-group counters-action-group">
         <!-- Focus button: keep the entry point discoverable on desktop and mobile. -->
         @if (isFocusButtonVisible()) {
@@ -166,6 +171,6 @@
           </div>
         }
       }
-    </nav>
-  }
+    }
+  </nav>
 </div>
