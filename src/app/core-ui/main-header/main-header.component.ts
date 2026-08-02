@@ -234,8 +234,8 @@ export class MainHeaderComponent implements OnDestroy {
     // vertical strip escapes any ancestor containing-block
     // (transform/filter/contain) and reliably anchors to the viewport.
     // Reacts live to the config toggle and the desktop/mobile breakpoint;
-    // also re-runs once the nav enters the DOM (it sits behind
-    // @if(isDataLoaded())).
+    // also re-runs when data load fills in the nav's gated content (the nav
+    // shell itself renders from first paint).
     effect(() => {
       const enabled = this._isVerticalActionBar();
       this.isDataLoaded();
