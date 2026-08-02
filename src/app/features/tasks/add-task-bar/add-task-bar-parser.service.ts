@@ -27,6 +27,10 @@ interface PreviousParseResult {
   timeEstimate: number | null;
   dueDate: string | null;
   dueTime: string | null;
+  // The day a workday recurrence moved `dueDate` off, or null when it was not
+  // moved. Only this service produces that move, so only this service can undo
+  // it — see _dateBeforeWorkdayRoll.
+  rolledFromDate: string | null;
   attachments: TaskAttachment[];
   deadlineDate: string | null;
   deadlineTime: string | null;
@@ -204,6 +208,7 @@ export class AddTaskBarParserService {
         // But if the user explicitly cleared a default date, keep it cleared.
         dueDate: defaultDueDate,
         dueTime: defaultDueTime,
+        rolledFromDate: null,
         attachments: [],
         deadlineDate: wasDeadlineFromSyntax ? null : currentState.deadlineDate || null,
         deadlineTime: wasDeadlineFromSyntax ? null : currentState.deadlineTime || null,
@@ -293,6 +298,7 @@ export class AddTaskBarParserService {
         timeEstimate: parseResult.taskChanges.timeEstimate || null,
         dueDate: dueDate,
         dueTime: dueTime,
+        rolledFromDate: null,
         attachments: parseResult.attachments || [],
         deadlineDate: deadlineDate,
         deadlineTime: deadlineTime,
@@ -315,6 +321,7 @@ export class AddTaskBarParserService {
     );
     if (rolledDueDate) {
       // Only the day is excluded, not the hour, so the time stays as parsed
+      currentResult.rolledFromDate = currentResult.dueDate;
       currentResult.dueDate = rolledDueDate;
     }
 
@@ -464,23 +471,37 @@ export class AddTaskBarParserService {
    *    the vanished syntax as "the user replaced it" rather than "the user
    *    deleted their syntax", which would clear the value instead of keeping it.
    */
-  applyUserRepeatPick(repeat: AddTaskBarRepeat): void {
+
+  /** The recurrence picked in the menu, or null when the user cleared it. */
+  applyUserRepeatPick(repeat: AddTaskBarRepeat | null): void {
     const cleanedInput = this._stripSyntaxForUserPick('repeat');
-    // The date already on the chip can be a day this schedule excludes; the
-    // task would then be created on the following Monday and the chip would
-    // have advertised a first occurrence it never gets.
-    const rolledDate = rollWeekendDateForRepeat(this._stateService.state().date, repeat);
+    // Every schedule is applied to the day the user actually chose, not to the
+    // day a previous schedule rolled that one to. The date already on the chip
+    // can be a day this schedule excludes; the task would then be created on
+    // the following Monday and the chip would have advertised a first
+    // occurrence it never gets. And the roll has to come back off when the new
+    // schedule no longer excludes that day, or the bar keeps a Monday nobody
+    // picked — until the next parse of the unchanged text puts the weekend day
+    // back and quietly changes what submitting writes.
+    const currentDate = this._stateService.state().date;
+    const baseDate = this._dateBeforeWorkdayRoll(currentDate);
+    const dueDate = rollWeekendDateForRepeat(baseDate, repeat) ?? baseDate;
     this._recordUserPick({
       repeat,
       isRepeatFromSyntax: false,
-      // Record the rolled date too, so the parse the strip queues sees the
-      // state it is about to read back as unchanged rather than as a reset.
-      ...(rolledDate ? { dueDate: rolledDate } : {}),
+      // Record the date too, so the parse the strip queues sees the state it is
+      // about to read back as unchanged rather than as a reset.
+      ...(dueDate === currentDate ? {} : { dueDate }),
+      rolledFromDate: dueDate === baseDate ? null : baseDate,
     });
-    this._stateService.updateRepeatSetting(repeat, cleanedInput);
-    if (rolledDate) {
+    if (repeat) {
+      this._stateService.updateRepeatSetting(repeat, cleanedInput);
+    } else {
+      this._stateService.clearRepeatSetting(cleanedInput);
+    }
+    if (dueDate !== currentDate && dueDate !== null) {
       // Time is left as it is — only the day is excluded, not the hour
-      this._stateService.updateDate(rolledDate);
+      this._stateService.updateDate(dueDate);
     }
   }
 
@@ -500,6 +521,9 @@ export class AddTaskBarParserService {
     this._recordUserPick({
       dueDate,
       dueTime: time,
+      // The day the user picked, so leaving the workday schedule can go back to
+      // it. Cleared when nothing was rolled, so a stale one cannot resurface.
+      rolledFromDate: dueDate === date ? null : date,
       ...(repeat ? { repeat, isRepeatFromSyntax: false } : {}),
     });
     this._stateService.updateDate(dueDate, time, cleanedInput);
@@ -530,6 +554,19 @@ export class AddTaskBarParserService {
     // That makes the queued parse a no-op instead of a reset to null.
     this._recordUserPick({ timeEstimate: null });
     this._stateService.updateEstimate(estimate, cleanedInput);
+  }
+
+  /**
+   * The day `date` was picked as, before any workday roll this service applied
+   * to it — so a recurrence change re-derives from the day the user chose
+   * rather than compounding on this service's own output.
+   *
+   * Only unwinds a roll that is still the one standing: a date set since
+   * replaced it, and is returned as it is.
+   */
+  private _dateBeforeWorkdayRoll(date: string | null): string | null {
+    const prev = this._previousParseResult;
+    return prev?.rolledFromDate && prev.dueDate === date ? prev.rolledFromDate : date;
   }
 
   private _stripSyntaxForUserPick(

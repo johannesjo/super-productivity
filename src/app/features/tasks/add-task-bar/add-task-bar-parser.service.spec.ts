@@ -2063,6 +2063,7 @@ describe('AddTaskBarParserService', () => {
       type: 'PRESET' as const,
       quickSetting: 'MONDAY_TO_FRIDAY' as const,
     };
+    const DAILY = { type: 'PRESET' as const, quickSetting: 'DAILY' as const };
     // 2027-03-27 is a Saturday, 2027-03-29 the Monday after it
     const SATURDAY = '2027-03-27';
     const MONDAY = '2027-03-29';
@@ -2113,6 +2114,80 @@ describe('AddTaskBarParserService', () => {
       await parse('Standups', SATURDAY);
 
       expect(realState.state().date).toBe(MONDAY);
+    });
+
+    // The roll belongs to the schedule that excluded the day, so it has to go
+    // when that schedule does. Leaving it standing would make the saved date
+    // depend on whether a parse happens before submitting: the text still names
+    // the weekend day, and nothing queues a parse for an unchanged input.
+    it('should give the weekend date back when the workday recurrence is replaced', async () => {
+      realState.updateInputTxt(`Standup @${SATURDAY}`);
+      await parse(`Standup @${SATURDAY}`);
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      service.applyUserRepeatPick(DAILY);
+
+      expect(realState.state().date).toBe(SATURDAY);
+      // ...and the next parse of the untouched text agrees with it
+      await parse(`Standups @${SATURDAY}`);
+      expect(realState.state().date).toBe(SATURDAY);
+      expect(realState.state().repeat).toEqual(DAILY);
+    });
+
+    it('should give it back when the recurrence is cleared instead', async () => {
+      realState.updateInputTxt(`Standup @${SATURDAY}`);
+      await parse(`Standup @${SATURDAY}`);
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      service.applyUserRepeatPick(null);
+
+      expect(realState.state().date).toBe(SATURDAY);
+      expect(realState.state().repeat).toBeNull();
+      await parse(`Standups @${SATURDAY}`);
+      expect(realState.state().date).toBe(SATURDAY);
+      expect(realState.state().repeat).toBeNull();
+    });
+
+    it('should give back the day the bar was opened on, not the day it rolled to', async () => {
+      realState.updateInputTxt('Standup');
+      await parse('Standup');
+      service.applyUserRepeatPick(WORKDAYS);
+      await parse('Standups', SATURDAY);
+      expect(realState.state().date).toBe(MONDAY);
+
+      service.applyUserRepeatPick(DAILY);
+
+      expect(realState.state().date).toBe(SATURDAY);
+    });
+
+    it('should not give back a date the user replaced after the roll', async () => {
+      // 2027-04-03 is the next Saturday, 2027-04-05 the Monday after it
+      const NEXT_SATURDAY = '2027-04-03';
+      const NEXT_MONDAY = '2027-04-05';
+      realState.updateInputTxt(`Standup @${SATURDAY}`);
+      await parse(`Standup @${SATURDAY}`);
+      service.applyUserRepeatPick(WORKDAYS);
+      service.applyUserDatePick(NEXT_SATURDAY, null, null);
+      expect(realState.state().date).toBe(NEXT_MONDAY);
+
+      service.applyUserRepeatPick(DAILY);
+
+      expect(realState.state().date).toBe(NEXT_SATURDAY);
+    });
+
+    it('should not resurrect a rolled date the user has since cleared', async () => {
+      // The date chip's clear button writes the state directly, so the roll
+      // recorded here is no longer the one standing
+      realState.updateInputTxt(`Standup @${SATURDAY}`);
+      await parse(`Standup @${SATURDAY}`);
+      service.applyUserRepeatPick(WORKDAYS);
+      realState.clearDate('Standup');
+
+      service.applyUserRepeatPick(DAILY);
+
+      expect(realState.state().date).toBeNull();
     });
 
     it('should not let a parse that was in flight during the pick republish the weekend date', async () => {

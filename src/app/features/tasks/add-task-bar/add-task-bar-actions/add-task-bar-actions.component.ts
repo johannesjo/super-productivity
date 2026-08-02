@@ -378,12 +378,9 @@ export class AddTaskBarActionsComponent {
   }
 
   clearRepeatSetting(): void {
-    const currentInput = this.stateService.inputTxt();
-    const cleanedInput = this._parserService.removeShortSyntaxFromInput(
-      currentInput,
-      'repeat',
-    );
-    this.stateService.clearRepeatSetting(cleanedInput);
+    // Same control, same three steps as picking one — clearing a schedule also
+    // has to give back the date its workday roll took away.
+    this._parserService.applyUserRepeatPick(null);
     this.refocus.emit();
   }
 

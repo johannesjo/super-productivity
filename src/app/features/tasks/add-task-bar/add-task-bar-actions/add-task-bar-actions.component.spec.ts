@@ -124,6 +124,7 @@ describe('AddTaskBarActionsComponent', () => {
       'clearEstimate',
       'toggleTag',
       'updateRepeatSetting',
+      'clearRepeatSetting',
     ]);
 
     // Set up signal properties
@@ -677,6 +678,15 @@ describe('AddTaskBarActionsComponent', () => {
       expect(mockParserService.applyUserRepeatPick).toHaveBeenCalledWith({
         type: 'DIALOG',
       });
+    });
+
+    // Same control as the picks above: clearing has to undo a workday roll too,
+    // which only the parser service can do
+    it('should clear the recurrence through the parser service', () => {
+      component.clearRepeatSetting();
+
+      expect(mockParserService.applyUserRepeatPick).toHaveBeenCalledWith(null);
+      expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
     });
   });
 
