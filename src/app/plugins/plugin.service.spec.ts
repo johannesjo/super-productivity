@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { provideMockStore } from '@ngrx/store/testing';
@@ -123,6 +126,7 @@ describe('PluginService', () => {
           useValue: {
             darkMode$: new BehaviorSubject('light'),
             darkMode: () => 'light',
+            registerSvgIconFromContent: jasmine.createSpy('registerSvgIconFromContent'),
           },
         },
         { provide: PluginMetaPersistenceService, useValue: pluginMetaPersistenceService },
@@ -742,5 +746,67 @@ describe('PluginService', () => {
     expect(snack.open).not.toHaveBeenCalled();
     expect(pluginRunner.unloadPlugin).toHaveBeenCalledOnceWith(manifest.id);
     expect(service.getLoadedPlugins()).toEqual([]);
+  });
+
+  describe('built-in plugin icons', () => {
+    const ICON_PLUGIN_PATH = 'assets/bundled-plugins/trello-issue-provider';
+    const SVG = '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1v1H0z"/></svg>';
+    const iconManifest: PluginManifest = {
+      ...mockManifest,
+      id: 'icon-plugin',
+      icon: 'icon.svg',
+    };
+
+    // Discovery walks every bundled path in sequence, so answer 404 for all of
+    // them except the one under test and then hand out its icon.
+    const runDiscovery = async (): Promise<void> => {
+      const httpMock = TestBed.inject(HttpTestingController);
+      let isDone = false;
+      const discovered = (
+        service as unknown as { _discoverBuiltInPlugins(): Promise<void> }
+      )
+        ._discoverBuiltInPlugins()
+        .then(() => {
+          isDone = true;
+        });
+
+      for (let i = 0; i < 300 && !isDone; i++) {
+        await Promise.resolve();
+        for (const req of httpMock.match(() => true)) {
+          if (!req.request.url.endsWith('manifest.json')) {
+            req.flush(SVG);
+          } else if (req.request.url.startsWith(ICON_PLUGIN_PATH)) {
+            req.flush(iconManifest);
+          } else {
+            req.flush('', { status: 404, statusText: 'Not Found' });
+          }
+        }
+      }
+
+      await discovered;
+    };
+
+    it('registers the icon as plugin-<id>-icon', async () => {
+      await runDiscovery();
+
+      // A bundled plugin that ships an icon but does not replace a built-in
+      // issue provider has no pre-registered icon name to point at, so the
+      // issue-provider UI can only find it under this name — without the
+      // registration it falls back to the generic `extension` glyph.
+      const globalTheme = TestBed.inject(GlobalThemeService) as unknown as {
+        registerSvgIconFromContent: jasmine.Spy;
+      };
+      expect(globalTheme.registerSvgIconFromContent).toHaveBeenCalledWith(
+        `plugin-${iconManifest.id}-icon`,
+        SVG,
+      );
+    });
+
+    it('keeps the icon content available for the plugin management UI', async () => {
+      await runDiscovery();
+
+      expect(service.getPluginIcon(iconManifest.id)).toBe(SVG);
+      expect(service.getPluginIconsSignal()().get(iconManifest.id)).toBe(SVG);
+    });
   });
 });

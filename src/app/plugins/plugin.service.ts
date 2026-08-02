@@ -263,6 +263,12 @@ export class PluginService implements OnDestroy {
             if (icon) {
               state.icon = icon;
               this._pluginIcons.set(manifest.id, icon);
+              // Also register it as `plugin-<id>-icon`, the way both uploaded
+              // paths do. Without this a bundled plugin that ships an icon but
+              // no `issueProvider.icon` (i.e. one not replacing a built-in, so
+              // it has no pre-registered icon name to point at) falls back to
+              // the generic `extension` glyph in the issue-provider UI.
+              this._registerPluginIcon(manifest.id, icon);
               this._updatePluginIcons();
             }
           } catch (e) {
