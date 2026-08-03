@@ -562,21 +562,6 @@ describe('TaskReminderEffects - cancelNativeReminderOnDialogAction$ filter', () 
       });
     });
 
-    it('should pass through unscheduleTasks action when on Android', (done) => {
-      const action = TaskSharedActions.unscheduleTasks({
-        taskIds: ['task-1', 'task-2'],
-      });
-      actions$ = of(action);
-
-      effects.cancelNativeReminderOnDialogAction$.subscribe({
-        next: (emittedAction) => {
-          expect(emittedAction).toBe(action);
-          done();
-        },
-        error: done.fail,
-      });
-    });
-
     it('should pass through planTaskForDay action when on Android', (done) => {
       const action = PlannerActions.planTaskForDay({
         task: mockTask,
@@ -626,24 +611,6 @@ describe('TaskReminderEffects - cancelNativeReminderOnDialogAction$ filter', () 
         dueWithTime: Date.now() + 86400000,
         remindAt: Date.now() + 86000000,
         isMoveToBacklog: false,
-      });
-      actions$ = of(action);
-
-      let emitted = false;
-      effects.cancelNativeReminderOnDialogAction$.subscribe({
-        next: () => {
-          emitted = true;
-        },
-        complete: () => {
-          expect(emitted).toBe(false);
-          done();
-        },
-      });
-    });
-
-    it('should filter out unscheduleTasks action when not on Android', (done) => {
-      const action = TaskSharedActions.unscheduleTasks({
-        taskIds: ['task-1', 'task-2'],
       });
       actions$ = of(action);
 

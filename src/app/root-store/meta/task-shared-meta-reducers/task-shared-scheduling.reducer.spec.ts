@@ -185,7 +185,7 @@ describe('taskSharedSchedulingMetaReducer', () => {
     });
   });
 
-  describe('unscheduleTasks action', () => {
+  describe('bulk unschedule updateTasks action', () => {
     it('should clear scheduling fields for multiple scheduled undone tasks', () => {
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'task2']);
       const now = Date.now();
@@ -202,8 +202,12 @@ describe('taskSharedSchedulingMetaReducer', () => {
         remindAt: now,
       });
 
-      const action = TaskSharedActions.unscheduleTasks({
-        taskIds: ['task1', 'task2'],
+      const action = TaskSharedActions.updateTasks({
+        tasks: ['task1', 'task2'].map((id) => ({
+          id,
+          changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+        })),
+        isBulkUnschedule: true,
       });
 
       metaReducer(testState, action);
@@ -240,8 +244,12 @@ describe('taskSharedSchedulingMetaReducer', () => {
         dueDay: '2024-06-15',
       });
 
-      const action = TaskSharedActions.unscheduleTasks({
-        taskIds: ['task1', 'task2'],
+      const action = TaskSharedActions.updateTasks({
+        tasks: ['task1', 'task2'].map((id) => ({
+          id,
+          changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+        })),
+        isBulkUnschedule: true,
       });
 
       metaReducer(testState, action);
@@ -273,8 +281,12 @@ describe('taskSharedSchedulingMetaReducer', () => {
       });
       testState[TASK_FEATURE_NAME].ids.push('unscheduled');
 
-      const action = TaskSharedActions.unscheduleTasks({
-        taskIds: ['scheduled', 'done', 'unscheduled', 'missing'],
+      const action = TaskSharedActions.updateTasks({
+        tasks: ['scheduled', 'done', 'unscheduled', 'missing'].map((id) => ({
+          id,
+          changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+        })),
+        isBulkUnschedule: true,
       });
 
       metaReducer(testState, action);

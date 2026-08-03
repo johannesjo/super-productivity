@@ -186,17 +186,6 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
-    unscheduleTasks: (taskProps: { taskIds: string[] }) => ({
-      ...taskProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'TASK',
-        entityIds: taskProps.taskIds,
-        opType: OpType.Update,
-        isBulk: true,
-      } satisfies PersistentActionMeta,
-    }),
-
     dismissReminderOnly: (taskProps: { id: string }) => ({
       ...taskProps,
       meta: {
@@ -273,7 +262,7 @@ export const TaskSharedActions = createActionGroup({
 
     // Bulk task update - creates single operation instead of N operations
     // Critical for repeating task config updates that affect many archived instances
-    updateTasks: (taskProps: { tasks: Update<Task>[] }) => ({
+    updateTasks: (taskProps: { tasks: Update<Task>[]; isBulkUnschedule?: true }) => ({
       ...taskProps,
       meta: {
         isPersistent: true,

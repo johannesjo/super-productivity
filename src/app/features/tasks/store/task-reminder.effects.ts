@@ -234,7 +234,6 @@ export class TaskReminderEffects {
         ofType(
           TaskSharedActions.reScheduleTaskWithTime,
           TaskSharedActions.planTasksForToday,
-          TaskSharedActions.unscheduleTasks,
           PlannerActions.planTaskForDay,
         ),
         filter(() => this._isAndroidWebView),

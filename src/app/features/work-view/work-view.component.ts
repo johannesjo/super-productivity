@@ -36,7 +36,15 @@ import {
   zip,
 } from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, filter, map, observeOn, startWith, switchMap, take } from 'rxjs/operators';
+import {
+  delay,
+  filter,
+  map,
+  observeOn,
+  startWith,
+  switchMap,
+  take,
+} from 'rxjs/operators';
 import { of } from 'rxjs';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
@@ -69,8 +77,10 @@ import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
   selectLaterTodayTasksWithSubTasks,
+  selectUndoneOverdue,
   selectOverdueTasksWithSubTasks,
 } from '../tasks/store/task.selectors';
+import { SUPER_SYNC_MAX_ENTITY_IDS_PER_OP } from '@sp/shared-schema';
 import {
   selectStartOfNextDayDiffMs,
   selectTodayStr,
@@ -206,6 +216,9 @@ export class WorkViewComponent implements OnInit, OnDestroy {
 
   // TODO refactor all to signals
   overdueTasks = toSignal(this._store.select(selectOverdueTasksWithSubTasks), {
+    initialValue: [],
+  });
+  private _undoneOverdueTasks = toSignal(this._store.select(selectUndoneOverdue), {
     initialValue: [],
   });
   laterTodayTasks = toSignal(this._store.select(selectLaterTodayTasksWithSubTasks), {
@@ -572,8 +585,17 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   }
 
   unscheduleAllOverdue(): void {
-    const taskIds = this.overdueTasks().map((task) => task.id);
+    const taskIds = this._undoneOverdueTasks().map((task) => task.id);
     if (taskIds.length === 0) {
+      return;
+    }
+
+    if (taskIds.length > SUPER_SYNC_MAX_ENTITY_IDS_PER_OP) {
+      this._snackService.open({
+        msg: T.WW.UNSCHEDULE_ALL_LIMIT_EXCEEDED,
+        type: 'ERROR',
+        translateParams: { max: SUPER_SYNC_MAX_ENTITY_IDS_PER_OP },
+      });
       return;
     }
 
@@ -600,7 +622,19 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   }
 
   private _dispatchUnscheduleTasks(taskIds: string[]): void {
-    this._store.dispatch(TaskSharedActions.unscheduleTasks({ taskIds }));
+    this._store.dispatch(
+      TaskSharedActions.updateTasks({
+        tasks: taskIds.map((id) => ({
+          id,
+          changes: {
+            dueDay: undefined,
+            dueWithTime: undefined,
+            remindAt: undefined,
+          },
+        })),
+        isBulkUnschedule: true,
+      }),
+    );
   }
 
   // Reject task drags into the section-reorder list (cdkDropListGroup

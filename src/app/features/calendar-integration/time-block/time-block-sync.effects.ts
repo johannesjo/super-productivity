@@ -155,17 +155,27 @@ export class TimeBlockSyncEffects {
   deleteOnUnschedule$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskSharedActions.unscheduleTask, PlannerActions.transferTask),
-        map((action): string | null => {
+        ofType(
+          TaskSharedActions.unscheduleTask,
+          TaskSharedActions.updateTasks,
+          PlannerActions.transferTask,
+        ),
+        map((action): string[] => {
           if (action.type === TaskSharedActions.unscheduleTask.type) {
-            return (action as ReturnType<typeof TaskSharedActions.unscheduleTask>).id;
+            return [(action as ReturnType<typeof TaskSharedActions.unscheduleTask>).id];
+          }
+          if (action.type === TaskSharedActions.updateTasks.type) {
+            const bulkAction = action as ReturnType<typeof TaskSharedActions.updateTasks>;
+            return bulkAction.isBulkUnschedule
+              ? bulkAction.tasks.map((update) => update.id as string)
+              : [];
           }
           // transferTask clears dueWithTime in the reducer
           const a = action as ReturnType<typeof PlannerActions.transferTask>;
-          return a.task.dueWithTime ? a.task.id : null;
+          return a.task.dueWithTime ? [a.task.id] : [];
         }),
-        filter((taskId): taskId is string => taskId !== null),
-        concatMap((taskId) => this._queueDeleteTimeBlock$(taskId)),
+        filter((taskIds) => taskIds.length > 0),
+        concatMap((taskIds) => this._queueDeleteTimeBlocks$(taskIds)),
       ),
     { dispatch: false },
   );

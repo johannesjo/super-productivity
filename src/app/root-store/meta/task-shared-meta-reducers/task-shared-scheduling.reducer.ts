@@ -23,6 +23,7 @@ import {
   updateTags,
 } from './task-shared-helpers';
 import { filterOutId } from '../../../util/filter-out-id';
+import { getValidatedBulkUnscheduleUpdates } from '../bulk-unschedule.util';
 
 // =============================================================================
 // ACTION HANDLERS
@@ -158,16 +159,10 @@ const handleUnScheduleTask = (
   ]);
 };
 
-const handleUnScheduleTasks = (state: RootState, taskIds: string[]): RootState => {
+const handleBulkUnScheduleTasks = (state: RootState, taskIds: string[]): RootState => {
   const taskIdsToUnschedule = taskIds.filter((taskId) => {
     const task = state[TASK_FEATURE_NAME].entities[taskId] as Task | undefined;
-    return (
-      !!task &&
-      !task.isDone &&
-      (task.dueDay !== undefined ||
-        task.dueWithTime !== undefined ||
-        task.remindAt !== undefined)
-    );
+    return !!task && !task.isDone;
   });
 
   if (taskIdsToUnschedule.length === 0) {
@@ -387,9 +382,17 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
     >;
     return handleUnScheduleTask(state, id, isLeaveInToday);
   },
-  [TaskSharedActions.unscheduleTasks.type]: () => {
-    const { taskIds } = action as ReturnType<typeof TaskSharedActions.unscheduleTasks>;
-    return handleUnScheduleTasks(state, taskIds);
+  [TaskSharedActions.updateTasks.type]: () => {
+    const bulkUnscheduleUpdates = getValidatedBulkUnscheduleUpdates(
+      action as unknown as Record<string, unknown>,
+      (action as ReturnType<typeof TaskSharedActions.updateTasks>).meta.entityIds,
+    );
+    return bulkUnscheduleUpdates
+      ? handleBulkUnScheduleTasks(
+          state,
+          bulkUnscheduleUpdates.map((update) => update.id),
+        )
+      : state;
   },
   [TaskSharedActions.dismissReminderOnly.type]: () => {
     const { id } = action as ReturnType<typeof TaskSharedActions.dismissReminderOnly>;

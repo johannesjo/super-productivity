@@ -1,6 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
-import { ActionType, Operation, OpType, VectorClock } from '../core/operation.types';
+import {
+  ActionType,
+  extractActionPayload,
+  Operation,
+  OpType,
+  VectorClock,
+} from '../core/operation.types';
 import { mergeVectorClocks } from '../../core/util/vector-clock';
 import { OpLog } from '../../core/log';
 import { ConflictResolutionService } from './conflict-resolution.service';
@@ -13,6 +19,7 @@ import { T } from '../../t.const';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
 import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
+import { isValidatedBulkUnschedulePayload } from '../../root-store/meta/bulk-unschedule.util';
 
 /**
  * Resolves superseded local operations that were rejected due to concurrent modification.
@@ -65,6 +72,16 @@ export class SupersededOperationResolverService {
       timestamp,
       schemaVersion: CURRENT_SCHEMA_VERSION,
     };
+  }
+
+  private _isBulkUnscheduleOp(op: Operation): boolean {
+    return (
+      op.actionType === ActionType.TASK_SHARED_UPDATE_MULTIPLE &&
+      isValidatedBulkUnschedulePayload(
+        extractActionPayload(op.payload) as Record<string, unknown>,
+        op.entityIds,
+      )
+    );
   }
 
   /**
@@ -120,20 +137,19 @@ export class SupersededOperationResolverService {
       const opsToReject: string[] = [];
       const newOpsCreated: Operation[] = [];
 
-      // Handle bulk semantic operations BEFORE entity-by-entity grouping.
-      // moveToArchive uses OpType.Update but its reducer removes entities from the NgRx store
-      // (via deleteTaskHelper). This is the ONLY action with this pattern — all other entity
-      // removals use OpType.Delete (handled below). The normal resolution path would call
-      // getCurrentEntityState() → undefined → discard, permanently losing the archive.
-      // Instead, re-create the operation with a merged clock preserving the original payload.
-      // NOTE: If a future action type also removes entities with OpType.Update, add it here.
+      // Handle semantic bulk operations BEFORE entity-by-entity grouping. Their original
+      // payload and full entity scope must survive recovery: degrading them to one LWW update
+      // for entityIds[0] would lose the remaining intent on other clients.
       const regularSupersededOps: Array<{
         opId: string;
         op: Operation;
         existingClock?: VectorClock;
       }> = [];
       for (const item of supersededOps) {
-        if (item.op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE) {
+        if (
+          item.op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
+          this._isBulkUnscheduleOp(item.op)
+        ) {
           // Re-create the archive operation with a merged vector clock.
           // The original payload is preserved exactly (MultiEntityPayload format with
           // actionPayload.tasks containing full task data for remote archive writes).
@@ -154,7 +170,7 @@ export class SupersededOperationResolverService {
           newOpsCreated.push(newOp);
           opsToReject.push(item.opId);
           OpLog.normal(
-            `SupersededOperationResolverService: Created replacement moveToArchive op ${newOp.id} ` +
+            `SupersededOperationResolverService: Created replacement semantic bulk op ${newOp.id} ` +
               `with ${item.op.entityIds?.length ?? 0} tasks, replacing superseded op ${item.opId}`,
           );
         } else {
@@ -263,20 +279,22 @@ export class SupersededOperationResolverService {
         );
       }
 
-      // Mark old ops as rejected
-      if (opsToReject.length > 0) {
-        await this.opLogStore.markRejected(opsToReject);
-        OpLog.normal(
-          `SupersededOperationResolverService: Marked ${opsToReject.length} superseded ops as rejected`,
-        );
-      }
-
       // Append new ops to the log (will be uploaded on next sync)
       // Uses appendWithVectorClockUpdate to ensure vector clock store stays in sync
       for (const op of newOpsCreated) {
         await this.opLogStore.appendWithVectorClockUpdate(op, 'local');
         OpLog.normal(
           `SupersededOperationResolverService: Appended LWW update op ${op.id} for ${op.entityType}:${op.entityId}`,
+        );
+      }
+
+      // Do not discard the original operation until its replacement is durable.
+      // If persistence fails, leaving the source pending is retry-safe; rejecting it
+      // first would permanently lose the full multi-entity intent.
+      if (opsToReject.length > 0) {
+        await this.opLogStore.markRejected(opsToReject);
+        OpLog.normal(
+          `SupersededOperationResolverService: Marked ${opsToReject.length} superseded ops as rejected`,
         );
       }
 

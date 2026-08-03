@@ -171,8 +171,8 @@ describe('SupersededOperationResolverService', () => {
       // Verify write operations happen inside the lock
       expect(callOrder).toEqual([
         'lock-start',
-        'markRejected',
         'appendWithVectorClockUpdate',
+        'markRejected',
         'lock-end',
       ]);
     });
@@ -570,6 +570,60 @@ describe('SupersededOperationResolverService', () => {
       expect(op1.id).not.toBe(op2.id);
       expect(op1.id).not.toBe('op-1'); // New ID, not reusing original
       expect(op2.id).not.toBe('op-2');
+    });
+
+    describe('semantic bulk operation handling', () => {
+      it('recreates a bulk unschedule across its full scope before rejecting it', async () => {
+        const persistenceOrder: string[] = [];
+        mockOpLogStore.appendWithVectorClockUpdate.and.callFake(async () => {
+          persistenceOrder.push('append');
+          return 1;
+        });
+        mockOpLogStore.markRejected.and.callFake(async () => {
+          persistenceOrder.push('reject');
+        });
+        const bulkUnscheduleOp: Operation = {
+          id: 'op-bulk-unschedule',
+          actionType: ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-a',
+          entityIds: ['task-a', 'task-b', 'task-c'],
+          payload: {
+            actionPayload: {
+              tasks: ['task-a', 'task-b', 'task-c'].map((id) => ({
+                id,
+                changes: {
+                  dueDay: undefined,
+                  dueWithTime: undefined,
+                  remindAt: undefined,
+                },
+              })),
+              isBulkUnschedule: true,
+            },
+            entityChanges: [],
+          },
+          clientId: 'original-client',
+          vectorClock: { clientA: 5 },
+          timestamp: 1000,
+          schemaVersion: 1,
+        };
+
+        const result = await service.resolveSupersededLocalOps([
+          { opId: bulkUnscheduleOp.id, op: bulkUnscheduleOp },
+        ]);
+
+        expect(result).toBe(1);
+        expect(
+          mockConflictResolutionService.getCurrentEntityState,
+        ).not.toHaveBeenCalled();
+        const replacement = mockOpLogStore.appendWithVectorClockUpdate.calls.first()
+          .args[0] as Operation;
+        expect(replacement.entityIds).toEqual(['task-a', 'task-b', 'task-c']);
+        expect(replacement.payload).toEqual(bulkUnscheduleOp.payload);
+        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-bulk-unschedule']);
+        expect(persistenceOrder).toEqual(['append', 'reject']);
+      });
     });
 
     describe('moveToArchive operation handling', () => {

@@ -3060,6 +3060,7 @@
     "RECURRING_TASKS": "Recurring Tasks",
     "RESET_BREAK_TIMER": "Reset without break timer",
     "TIME_ESTIMATED": "Time estimated:",
+    "UNSCHEDULE_ALL_LIMIT_EXCEEDED": "Too many overdue tasks to unschedule at once (maximum: {{max}}).",
     "TODAY_REMAINING": "Today remaining:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:",

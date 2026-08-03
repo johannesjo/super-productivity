@@ -10,6 +10,10 @@ import { isSingletonEntityId } from '../core/entity-registry';
 import { PersistentAction } from '../core/persistent-action.interface';
 import { SyncLog } from '../../core/log';
 import { getDbDateStr } from '../../util/get-db-date-str';
+import {
+  BULK_UNSCHEDULE_MARKER,
+  isValidatedBulkUnschedulePayload,
+} from '../../root-store/meta/bulk-unschedule.util';
 
 /**
  * Maps old/renamed action types to their current names.
@@ -146,6 +150,38 @@ const stripMalformedConvertToMainTaskParentTagIds = (
 };
 
 /**
+ * A bulk unschedule is encoded as the released `updateTasks` action plus a
+ * marker. Do not let a malformed remote payload use that marker to mutate an
+ * ID outside the operation's declared conflict scope.
+ */
+const normalizeBulkUnschedulePayload = (
+  actionType: string,
+  actionPayload: Record<string, unknown>,
+  op: Operation,
+): Record<string, unknown> => {
+  if (
+    actionType !== ActionType.TASK_SHARED_UPDATE_MULTIPLE ||
+    actionPayload[BULK_UNSCHEDULE_MARKER] !== true
+  ) {
+    return actionPayload;
+  }
+
+  if (isValidatedBulkUnschedulePayload(actionPayload, op.entityIds)) {
+    return actionPayload;
+  }
+
+  SyncLog.warn('[convertOpToAction] Ignoring malformed bulk unschedule payload', {
+    actionType,
+    entityIdsCount: op.entityIds?.length,
+  });
+  return {
+    ...actionPayload,
+    tasks: [],
+    [BULK_UNSCHEDULE_MARKER]: false,
+  };
+};
+
+/**
  * Converts an Operation from the operation log back into a PersistentAction.
  * Used during sync replay and recovery to re-dispatch operations.
  *
@@ -174,6 +210,7 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
     actionPayload,
     op,
   );
+  actionPayload = normalizeBulkUnschedulePayload(actionType, actionPayload, op);
 
   // Force `payload.id = op.entityId` for non-singleton LWW Update ops. The
   // op's `entityId` is the canonical identifier — producers also enforce

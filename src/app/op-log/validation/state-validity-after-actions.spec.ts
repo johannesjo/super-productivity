@@ -390,7 +390,7 @@ describe('State Validity After Actions', () => {
       });
     });
 
-    describe('unscheduleTasks', () => {
+    describe('bulk unschedule updateTasks', () => {
       it('should produce valid state when bulk unscheduling tasks', () => {
         const baseData = createAppDataWithTask('task1', 'INBOX');
         const appData = {
@@ -417,14 +417,22 @@ describe('State Validity After Actions', () => {
           },
         };
 
-        const action = TaskSharedActions.unscheduleTasks({
-          taskIds: ['task1'],
+        const action = TaskSharedActions.updateTasks({
+          tasks: [
+            {
+              id: 'task1',
+              changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+            },
+          ],
+          isBulkUnschedule: true,
         });
 
         const { validationResult } = applyActionAndValidate(appData, action);
         expect(validationResult.isValid).toBe(true);
         if (!validationResult.isValid) {
-          fail(`unscheduleTasks produced invalid state: ${validationResult.error}`);
+          fail(
+            `bulk unschedule updateTasks produced invalid state: ${validationResult.error}`,
+          );
         }
       });
     });

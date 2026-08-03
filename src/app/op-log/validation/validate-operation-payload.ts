@@ -14,6 +14,11 @@ import {
 import { isValidEntityId } from './is-valid-entity-id';
 import type { SyncLogMeta } from '@sp/sync-core';
 import { OP_LOG_SYNC_LOGGER } from '../core/sync-logger.adapter';
+import {
+  BULK_UNSCHEDULE_MARKER,
+  isValidatedBulkUnschedulePayload,
+} from '../../root-store/meta/bulk-unschedule.util';
+import { ActionType } from '../core/action-types.enum';
 
 /**
  * Result of validating an operation payload.
@@ -600,6 +605,17 @@ export const validateOperationPayload = (op: Operation): PayloadValidationResult
   // For multi-entity payloads, we validate the actionPayload
   // For legacy payloads, we validate the payload directly
   const actionPayload = extractActionPayloadForValidation(op.payload);
+
+  if (
+    op.actionType === ActionType.TASK_SHARED_UPDATE_MULTIPLE &&
+    actionPayload[BULK_UNSCHEDULE_MARKER] === true &&
+    !isValidatedBulkUnschedulePayload(actionPayload, op.entityIds)
+  ) {
+    return {
+      success: false,
+      error: 'Bulk unschedule payload must match the declared entityIds scope',
+    };
+  }
 
   // 4. Validate based on operation type
   let result: PayloadValidationResult;

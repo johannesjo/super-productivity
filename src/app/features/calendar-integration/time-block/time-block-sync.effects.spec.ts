@@ -295,6 +295,28 @@ describe('TimeBlockSyncEffects', () => {
     flush();
   }));
 
+  it('deletes time blocks for every task in a bulk unschedule', fakeAsync(() => {
+    const deleteSub = effects.deleteOnUnschedule$.subscribe();
+
+    actions$.next(
+      TaskSharedActions.updateTasks({
+        tasks: ['task-1', 'task-2'].map((id) => ({
+          id,
+          changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+        })),
+        isBulkUnschedule: true,
+      }),
+    );
+    flush();
+
+    expect(deleteEventSpy).toHaveBeenCalledTimes(2);
+    expect(deleteEventSpy.calls.allArgs().map(([taskId]) => taskId)).toEqual([
+      'task-1',
+      'task-2',
+    ]);
+    deleteSub.unsubscribe();
+  }));
+
   it('keeps a queued delete when a later field update is no-op because the task is unscheduled', fakeAsync(() => {
     const deleteSub = effects.deleteOnUnschedule$.subscribe();
     let currentDueWithTime: number | null = new Date('2026-05-14T15:00:00Z').getTime();

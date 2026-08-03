@@ -276,11 +276,19 @@ finish-day-btn,
 
 .overdue-btn-wrapper {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--s2);
   justify-content: center;
   align-items: center;
   padding-bottom: var(--s);
   padding-top: var(--s);
+}
+
+@include mq(xxxs, max) {
+  .overdue-btn-wrapper {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .repeat-cfg-list {

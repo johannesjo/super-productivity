@@ -74,6 +74,32 @@ describe('operation-converter utility', () => {
       expect(action.meta.entityIds).toEqual(['task-1', 'task-2', 'task-3']);
     });
 
+    it('ignores malformed bulk unschedule updates outside the declared entity scope', () => {
+      const action = convertOpToAction(
+        createMockOperation({
+          actionType: ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+          entityId: 'task-1',
+          entityIds: ['task-1'],
+          payload: {
+            tasks: [
+              {
+                id: 'task-2',
+                changes: {
+                  dueDay: undefined,
+                  dueWithTime: undefined,
+                  remindAt: undefined,
+                },
+              },
+            ],
+            isBulkUnschedule: true,
+          },
+        }),
+      );
+
+      expect((action as Record<string, unknown>)['tasks']).toEqual([]);
+      expect((action as Record<string, unknown>)['isBulkUnschedule']).toBeFalse();
+    });
+
     it('should include opType in meta', () => {
       const op = createMockOperation({ opType: OpType.Create });
       const action = convertOpToAction(op);

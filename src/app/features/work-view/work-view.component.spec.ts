@@ -22,6 +22,7 @@ import { GlobalConfigService } from '../config/global-config.service';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import {
   selectLaterTodayTasksWithSubTasks,
+  selectUndoneOverdue,
   selectOverdueTasksWithSubTasks,
 } from '../tasks/store/task.selectors';
 import {
@@ -48,6 +49,17 @@ import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
 const buildTask = (id: string, subTasks: TaskWithSubTasks[] = []): TaskWithSubTasks =>
   ({ id, subTasks }) as unknown as TaskWithSubTasks;
+
+const createBulkUnscheduleAction = (
+  taskIds: string[],
+): ReturnType<typeof TaskSharedActions.updateTasks> =>
+  TaskSharedActions.updateTasks({
+    tasks: taskIds.map((id) => ({
+      id,
+      changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+    })),
+    isBulkUnschedule: true,
+  });
 
 describe('WorkViewComponent', () => {
   let store: MockStore;
@@ -300,13 +312,16 @@ describe('WorkViewComponent', () => {
   });
 
   describe('bulk overdue actions', () => {
-    let store: MockStore;
     let dialog: jasmine.SpyObj<MatDialog>;
+    let snackService: jasmine.SpyObj<SnackService>;
+    let dispatchSpy: jasmine.Spy;
 
     const createComponent = async (
       overdueTasks: TaskWithSubTasks[],
+      undoneOverdueTasks: TaskWithSubTasks[] = overdueTasks,
     ): Promise<WorkViewComponent> => {
       dialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+      snackService = jasmine.createSpyObj<SnackService>('SnackService', ['open']);
 
       TestBed.configureTestingModule({
         imports: [WorkViewComponent, TranslateModule.forRoot()],
@@ -367,7 +382,11 @@ describe('WorkViewComponent', () => {
               getSectionsByContextId$: () => of([] as readonly Section[]),
             },
           },
-          { provide: SnackService, useValue: { open: () => {} } },
+          { provide: SnackService, useValue: snackService },
+          {
+            provide: CalendarIntegrationService,
+            useValue: { calendarEvents$: of([]) },
+          },
           {
             provide: GlobalConfigService,
             useValue: {
@@ -385,10 +404,13 @@ describe('WorkViewComponent', () => {
 
       store = TestBed.inject(MockStore);
       store.overrideSelector(selectOverdueTasksWithSubTasks, overdueTasks);
+      store.overrideSelector(selectUndoneOverdue, undoneOverdueTasks);
       store.overrideSelector(selectLaterTodayTasksWithSubTasks, []);
       store.overrideSelector(selectTaskRepeatCfgsByProjectId, []);
       store.overrideSelector(selectTaskRepeatCfgsByTagId, []);
-      spyOn(store, 'dispatch');
+      store.overrideSelector(selectTodayStr, '2026-06-23');
+      store.overrideSelector(selectStartOfNextDayDiffMs, 0);
+      dispatchSpy = spyOn(store, 'dispatch');
 
       await TestBed.compileComponents();
       const fixture = TestBed.createComponent(WorkViewComponent);
@@ -399,14 +421,14 @@ describe('WorkViewComponent', () => {
       return fixture.componentInstance;
     };
 
-    it('dispatches unscheduleTasks immediately for up to five overdue tasks', async () => {
+    it('dispatches a backwards-compatible bulk update immediately for up to five overdue tasks', async () => {
       const cmp = await createComponent([buildTask('task1'), buildTask('task2')]);
 
       cmp.unscheduleAllOverdue();
 
       expect(dialog.open).not.toHaveBeenCalled();
-      expect(store.dispatch).toHaveBeenCalledOnceWith(
-        TaskSharedActions.unscheduleTasks({ taskIds: ['task1', 'task2'] }),
+      expect(dispatchSpy).toHaveBeenCalledOnceWith(
+        createBulkUnscheduleAction(['task1', 'task2']),
       );
     });
 
@@ -426,10 +448,15 @@ describe('WorkViewComponent', () => {
       cmp.unscheduleAllOverdue();
 
       expect(dialog.open).toHaveBeenCalled();
-      expect(store.dispatch).toHaveBeenCalledOnceWith(
-        TaskSharedActions.unscheduleTasks({
-          taskIds: ['task1', 'task2', 'task3', 'task4', 'task5', 'task6'],
-        }),
+      expect(dispatchSpy).toHaveBeenCalledOnceWith(
+        createBulkUnscheduleAction([
+          'task1',
+          'task2',
+          'task3',
+          'task4',
+          'task5',
+          'task6',
+        ]),
       );
     });
 
@@ -449,7 +476,57 @@ describe('WorkViewComponent', () => {
       cmp.unscheduleAllOverdue();
 
       expect(dialog.open).toHaveBeenCalled();
-      expect(store.dispatch).not.toHaveBeenCalled();
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('includes overdue subtasks nested under an overdue parent', async () => {
+      const overdueParent = buildTask('parent', [buildTask('child')]);
+      const cmp = await createComponent(
+        [overdueParent],
+        [overdueParent, buildTask('child')],
+      );
+
+      cmp.unscheduleAllOverdue();
+
+      expect(dispatchSpy).toHaveBeenCalledOnceWith(
+        createBulkUnscheduleAction(['parent', 'child']),
+      );
+    });
+
+    it('does not optimistically dispatch more than the SuperSync entity limit', async () => {
+      const overdueTasks = Array.from({ length: 1001 }, (_, index) =>
+        buildTask(`task-${index}`),
+      );
+      const cmp = await createComponent(overdueTasks);
+
+      cmp.unscheduleAllOverdue();
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
+      expect(snackService.open).toHaveBeenCalledOnceWith(
+        jasmine.objectContaining({
+          translateParams: { max: 1000 },
+          type: 'ERROR',
+        }),
+      );
+    });
+
+    it('dispatches exactly the SuperSync entity limit after confirmation', async () => {
+      const overdueTasks = Array.from({ length: 1000 }, (_, index) =>
+        buildTask(`task-${index}`),
+      );
+      const cmp = await createComponent(overdueTasks);
+      dialog.open.and.returnValue({
+        afterClosed: () => of(true),
+      } as unknown as ReturnType<MatDialog['open']>);
+
+      cmp.unscheduleAllOverdue();
+
+      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      const action = dispatchSpy.calls.mostRecent().args[0] as ReturnType<
+        typeof TaskSharedActions.updateTasks
+      >;
+      expect(action.meta.entityIds).toHaveSize(1000);
+      expect(action.isBulkUnschedule).toBeTrue();
     });
   });
 

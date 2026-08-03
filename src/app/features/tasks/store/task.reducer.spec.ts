@@ -92,6 +92,42 @@ describe('Task Reducer', () => {
     });
   });
 
+  describe('backwards-compatible bulk unschedule updates', () => {
+    it('clears schedule fields through the released updateTasks action without marker handling', () => {
+      const scheduledState: TaskState = {
+        ...stateWithTasks,
+        entities: {
+          ...stateWithTasks.entities,
+          task1: {
+            ...stateWithTasks.entities['task1']!,
+            dueDay: '2026-06-20',
+            dueWithTime: Date.now(),
+            remindAt: Date.now(),
+          },
+        },
+      };
+
+      const result = taskReducer(
+        scheduledState,
+        TaskSharedActions.updateTasks({
+          tasks: [
+            {
+              id: 'task1',
+              changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+            },
+          ],
+          // This is intentionally ignored by the task reducer, just as it is
+          // on released clients that predate the enhanced cleanup semantics.
+          isBulkUnschedule: true,
+        }),
+      );
+
+      expect(result.entities['task1']!.dueDay).toBeUndefined();
+      expect(result.entities['task1']!.dueWithTime).toBeUndefined();
+      expect(result.entities['task1']!.remindAt).toBeUndefined();
+    });
+  });
+
   describe('setSelectedTask', () => {
     it('should keep the selected task open when an explicit target panel is requested', () => {
       const state: TaskState = {

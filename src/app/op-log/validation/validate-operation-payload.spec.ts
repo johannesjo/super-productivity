@@ -60,6 +60,57 @@ describe('validateOperationPayload', () => {
     });
   });
 
+  describe('bulk unschedule update payload', () => {
+    it('accepts an updateTasks payload whose task IDs exactly match entityIds', () => {
+      const result = validateOperationPayload(
+        createTestOperation({
+          actionType: ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+          entityId: 'task-1',
+          entityIds: ['task-1', 'task-2'],
+          payload: {
+            tasks: ['task-1', 'task-2'].map((id) => ({
+              id,
+              changes: { dueDay: undefined, dueWithTime: undefined, remindAt: undefined },
+            })),
+            isBulkUnschedule: true,
+          },
+        }),
+      );
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a bulk unschedule payload that targets an undeclared task', () => {
+      const result = validateOperationPayload(
+        createTestOperation({
+          actionType: ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+          entityId: 'task-1',
+          entityIds: ['task-1'],
+          payload: {
+            tasks: [
+              {
+                id: 'task-2',
+                changes: {
+                  dueDay: undefined,
+                  dueWithTime: undefined,
+                  remindAt: undefined,
+                },
+              },
+            ],
+            isBulkUnschedule: true,
+          },
+        }),
+      );
+
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          success: false,
+          error: 'Bulk unschedule payload must match the declared entityIds scope',
+        }),
+      );
+    });
+  });
+
   describe('CREATE operation', () => {
     it('should validate CREATE with valid entity', () => {
       const op = createTestOperation({
