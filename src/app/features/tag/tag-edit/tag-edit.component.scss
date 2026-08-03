@@ -33,9 +33,9 @@
 }
 
 :host-context(.isMousePrimary task-detail-item) {
-  ::ng-deep * {
-    //--mat-chip-outline-color: transparent !important;
-  }
+  // ::ng-deep * {
+  //   --mat-chip-outline-color: transparent !important;
+  // }
   ::ng-deep .mdc-evolution-chip__cell--trailing {
     opacity: 0.05;
     margin-left: -4px;

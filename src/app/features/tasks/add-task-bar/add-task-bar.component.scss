@@ -197,7 +197,7 @@
   .search-toggle-btn.active,
   .note-toggle-btn.active {
     opacity: 1;
-    background-color: var(--primary-light);
+    background-color: color-mix(in srgb, var(--primary) 15%, transparent);
     color: var(--primary);
   }
 
