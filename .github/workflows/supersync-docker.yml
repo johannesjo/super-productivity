@@ -20,6 +20,11 @@ on:
         type: boolean
         default: true
 
+# Every run publishes the same mutable `latest` tag, so only the newest may push.
+concurrency:
+  group: supersync-docker-publish
+  cancel-in-progress: true
+
 jobs:
   build-and-push:
     name: Build and Push to GHCR
