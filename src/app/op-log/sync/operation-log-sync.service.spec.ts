@@ -1974,7 +1974,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               bufferDeferredAction(localAction);
               hooks?.afterArchiveReplacement?.();
               hooks?.beforeStateLoad?.();
@@ -2122,7 +2122,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               hooks?.afterArchiveReplacement?.();
               hooks?.beforeStateLoad?.();
               hooks?.afterStateLoad?.();
@@ -2219,7 +2219,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               expect(hooks?.snapshotIncludedOps).toEqual([snapshotIncludedOp]);
               callOrder.push('commit-snapshot-baseline');
             },
@@ -2293,7 +2293,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               expect(hooks?.snapshotIncludedOps).toEqual([snapshotIncludedOp]);
               bufferDeferredAction(localAction);
               throw new Error('snapshot baseline write failed');
@@ -2397,7 +2397,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               bufferDeferredAction(localAction);
               callOrder.push('commit-snapshot-baseline');
               hooks?.afterArchiveReplacement?.();
@@ -2491,7 +2491,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               expect(hooks?.snapshotIncludedOps).toEqual([snapshotIncludedOp]);
               bufferDeferredAction(localAction);
               throw new Error('atomic vector clock write failed');
@@ -2616,7 +2616,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               bufferDeferredAction(localAction);
               hooks?.afterArchiveReplacement?.();
               hooks?.beforeStateLoad?.();
@@ -2710,7 +2710,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               bufferDeferredAction(localAction);
               hooks?.afterArchiveReplacement?.();
               hooks?.beforeStateLoad?.();
@@ -2803,7 +2803,7 @@ describe('OperationLogSyncService', () => {
             SyncHydrationService,
           ) as jasmine.SpyObj<SyncHydrationService>;
           syncHydrationServiceSpy.hydrateFromRemoteSync.and.callFake(
-            async (_state, _clock, _createImport, _reason, hooks) => {
+            async (_state, _clock, hooks) => {
               bufferDeferredAction(localAction);
               hooks?.afterArchiveReplacement?.();
               hooks?.beforeStateLoad?.();
@@ -3208,7 +3208,7 @@ describe('OperationLogSyncService', () => {
           await service.downloadRemoteOps(mockProvider);
 
           expect(
-            syncHydrationServiceSpy.hydrateFromRemoteSync.calls.mostRecent().args[4]
+            syncHydrationServiceSpy.hydrateFromRemoteSync.calls.mostRecent().args[2]
               ?.snapshotIncludedOps,
           ).toEqual([snapshotIncludedOp]);
           expect(remoteOpsProcessingServiceSpy.processRemoteOps).toHaveBeenCalledOnceWith(
@@ -5458,7 +5458,6 @@ describe('OperationLogSyncService', () => {
       expect(syncHydrationServiceSpy.hydrateFromRemoteSync).toHaveBeenCalledWith(
         snapshotState,
         snapshotVectorClock,
-        false, // Don't create SYNC_IMPORT
       );
 
       // Should NOT process ops (empty)

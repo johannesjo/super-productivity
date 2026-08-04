@@ -185,9 +185,7 @@ describe('SyncWrapperService', () => {
     mockTranslateService = jasmine.createSpyObj('TranslateService', ['instant']);
     mockTranslateService.instant.and.callFake((key: string) => key);
 
-    mockDataInitService = jasmine.createSpyObj('DataInitService', [
-      'reInitFromRemoteSync',
-    ]);
+    mockDataInitService = jasmine.createSpyObj('DataInitService', ['reInit']);
     mockReminderService = jasmine.createSpyObj('ReminderService', ['reloadFromDatabase']);
 
     mockUserInputWaitState = jasmine.createSpyObj(
