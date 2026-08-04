@@ -783,8 +783,11 @@ const MAX_OCCURRENCES_PER_EVENT = 1000;
 // the total work so a high-frequency unbounded RRULE (e.g. FREQ=MINUTELY or
 // SECONDLY) whose DTSTART is far before the sync window can't spin the thread
 // stepping through millions of skipped occurrences before reaching the window.
-// Generous enough for realistic rules (hourly for years stays well under it);
-// only degenerate sub-hourly-since-years-ago series get truncated.
+// 100k steps covers ~11 years of hourly occurrences. A rule that hits the cap
+// before reaching the window is truncated to ZERO in-window results (the event
+// disappears entirely rather than partially). The cap is per event: total
+// expansion work still scales with the number of runaway masters, since no
+// budget is shared across events.
 const MAX_ITERATIONS_PER_EVENT = 100000;
 
 const icalTimeToMs = (t: unknown): number | null => {
