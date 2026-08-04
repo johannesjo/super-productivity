@@ -251,42 +251,18 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
   });
 
   describe('reachability of the guard beyond bulk actions', () => {
-    // The report reads as a recurring-task problem, but the guard is not scoped
-    // to one. Every action below carries >1 entityId and is neither an
-    // independent multi-delete nor decomposable, so one pending local op plus
-    // one concurrent remote edit of the same task is enough to stop sync. This
-    // pins that surface so the self-healing follow-up knows what it must cover;
-    // moving any of these into a safe path is expected to flip its case here.
+    // The report reads as a recurring-task problem, but the guard is not
+    // scoped to one. Every action below carries >1 entityId and is neither an
+    // independent multi-delete, decomposable, nor a resolvable Today-list op,
+    // so one pending local op plus one concurrent remote edit of the same task
+    // is enough to stop sync. This pins the REMAINING blocked surface; the
+    // formerly-pinned Today-list cases (moveTaskInTodayTagList,
+    // planTasksForToday, removeTasksFromTodayTag) resolve since #9426 and are
+    // covered by today-plan-conflict-resolution.integration.spec.ts.
     //
     // Each case notes its production dispatcher, because "an action creator
     // exists" is not the same claim as "a user can trigger it".
     const CASES: { name: string; action: () => PersistentAction }[] = [
-      {
-        // planner-day.component.ts: a drag inside Today. Always exactly 2 ids.
-        name: 'reordering Today by drag and drop',
-        action: () =>
-          TaskSharedActions.moveTaskInTodayTagList({
-            toTaskId: YOUNG_TASK_ID,
-            fromTaskId: OLD_TASK_ID,
-          }) as PersistentAction,
-      },
-      {
-        // add-tasks-for-tomorrow.service.ts and task-due.effects.ts dispatch
-        // this with every due task id, automatically, on day rollover.
-        name: 'the automatic day-rollover plan-for-today',
-        action: () =>
-          TaskSharedActions.planTasksForToday({
-            taskIds: [YOUNG_TASK_ID, OLD_TASK_ID],
-          }) as PersistentAction,
-      },
-      {
-        // work-context-menu.component.ts: "unplan" the remaining Today tasks.
-        name: 'unplanning the remaining Today tasks',
-        action: () =>
-          TaskSharedActions.removeTasksFromTodayTag({
-            taskIds: [YOUNG_TASK_ID, OLD_TASK_ID],
-          }) as PersistentAction,
-      },
       {
         // No production dispatcher since 6bb0472549 (v18.14.0) removed the tag
         // dialog; tag edits now go through the single-entity updateTask. Kept
