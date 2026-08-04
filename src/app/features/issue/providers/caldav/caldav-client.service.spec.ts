@@ -71,6 +71,109 @@ describe('CaldavClientService._getParentRelatedTo', () => {
   });
 });
 
+// ─── _mapTask – completion normalization ──────────────────────────────────────
+
+// Regression tests parsing raw VTODO data through the real ical.js: RFC 5545
+// lists COMPLETED, STATUS, and PERCENT-COMPLETE as independent optional
+// properties, and servers may send any one of them alone to mark a todo done.
+describe('CaldavClientService._mapTask – completion normalization', () => {
+  const mapTask = (vtodoLines: string[]): Promise<CaldavIssue> =>
+    (CaldavClientService as any)._mapTask({
+      url: 'https://cal.example.com/task.ics',
+      etag: '"etag-1"',
+      data: [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Test//EN',
+        'BEGIN:VTODO',
+        'UID:todo-raw-1',
+        'SUMMARY:Raw todo',
+        ...vtodoLines,
+        'END:VTODO',
+        'END:VCALENDAR',
+      ].join('\r\n'),
+    });
+
+  it('should parse a VTODO without completion signals as open', async () => {
+    const issue = await mapTask([]);
+    expect(issue.completed).toBeFalse();
+  });
+
+  it('should treat a COMPLETED timestamp as completed', async () => {
+    const issue = await mapTask(['COMPLETED:20260401T120000Z']);
+    expect(issue.completed).toBeTrue();
+  });
+
+  it('should treat STATUS:COMPLETED without a COMPLETED timestamp as completed', async () => {
+    const issue = await mapTask(['STATUS:COMPLETED']);
+    expect(issue.completed).toBeTrue();
+  });
+
+  it('should treat PERCENT-COMPLETE:100 without STATUS or COMPLETED as completed', async () => {
+    const issue = await mapTask(['PERCENT-COMPLETE:100']);
+    expect(issue.completed).toBeTrue();
+  });
+
+  it('should keep a partially complete in-process VTODO open', async () => {
+    const issue = await mapTask(['PERCENT-COMPLETE:50', 'STATUS:IN-PROCESS']);
+    expect(issue.completed).toBeFalse();
+  });
+});
+
+// ─── updateFields$ – completion push dirty-check ──────────────────────────────
+
+describe('CaldavClientService.updateFields$ – completion push', () => {
+  let svc: CaldavClientService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        CaldavClientService,
+        {
+          provide: SnackService,
+          useValue: jasmine.createSpyObj('SnackService', ['open']),
+        },
+      ],
+    });
+    svc = TestBed.inject(CaldavClientService);
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  // The push dirty-check must use the same completion normalization as the
+  // poll mapping: with the old COMPLETED-timestamp-only check, reopening a
+  // STATUS-only completed todo compared false !== false and never wrote to
+  // the server, so the next poll immediately re-completed the local task.
+  it('should clear STATUS:COMPLETED when reopening a todo completed via STATUS only', async () => {
+    const davTask = {
+      data: [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Test//EN',
+        'BEGIN:VTODO',
+        'UID:todo-push-1',
+        'SUMMARY:Status only',
+        'STATUS:COMPLETED',
+        'END:VTODO',
+        'END:VCALENDAR',
+      ].join('\r\n'),
+      url: 'https://cal.example.com/todo-push-1.ics',
+      etag: '"etag-1"',
+      update: jasmine.createSpy('update').and.resolveTo(undefined),
+    };
+    spyOn(svc as any, '_getCalendar').and.resolveTo({ readOnly: false });
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([davTask]);
+
+    await firstValueFrom(
+      svc.updateFields$(MOCK_CFG, 'todo-push-1', { completed: false }),
+    );
+
+    expect(davTask.update).toHaveBeenCalled();
+    expect(davTask.data).toContain('STATUS:NEEDS-ACTION');
+    expect(davTask.data).not.toContain('STATUS:COMPLETED');
+  });
+});
+
 // ─── _getXhrProvider / _getAndroidXhrProvider ─────────────────────────────────
 
 const MOCK_CFG: CaldavCfg = {
