@@ -312,7 +312,14 @@ instead of copying the private-config shape into new code.
 >
 > Known limitation: a peer running an app version that predates the GHSA-9544
 > _upload_ guard can still push plaintext ops; a keyed client then fails closed
-> here with the tamper message. Recovery is to update the old peer.
+> here with the tamper message. Keep older peers offline and update them before
+> they sync again. If an updated client has a verified complete copy, export a
+> backup and use its explicit **Force Overwrite** action to replace the mixed
+> history with an encrypted clean-slate full state. Never run that action from a
+> fresh or incomplete client. If no verified complete client remains, preserve
+> the database and clients for incident recovery; do not skip the row or advance
+> a cursor past it. See
+> [`backup-and-recovery.md`](../../packages/super-sync-server/docs/backup-and-recovery.md#recovering-a-mixed-encryptedplaintext-history).
 >
 > Full protection — binding the metadata (and the encryption flag) as GCM AAD
 > behind an envelope-version migration, with a monotonic "encryption floor" to
