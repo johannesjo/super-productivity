@@ -30,11 +30,6 @@ interface RawServerOperation {
   serverSeq: number;
 }
 
-interface CapturedSnack {
-  actionLabels: string[];
-  message: string;
-}
-
 const authHeaders = (token: string): Headers => {
   const headers = new Headers();
   headers.set('Authorization', `Bearer ${token}`);
@@ -200,31 +195,6 @@ test.describe('@supersync @encryption #9439 plaintext history recovery', () => {
       );
 
       freshClient = await createSimulatedClient(browser, baseURL!, 'fresh', testRunId);
-      await freshClient.page.evaluate(() => {
-        const capturedSnacks: CapturedSnack[] = [];
-        const observer = new MutationObserver(() => {
-          document.querySelectorAll('snack-custom').forEach((element) => {
-            const message = element.querySelector('.message')?.textContent?.trim();
-            if (!message) return;
-            const actionLabels = Array.from(
-              element.querySelectorAll<HTMLButtonElement>('button.action'),
-            ).flatMap((button) => {
-              const label = button.textContent?.trim();
-              return label ? [label] : [];
-            });
-            const signature = JSON.stringify({ message, actionLabels });
-            if (!capturedSnacks.some((snack) => JSON.stringify(snack) === signature)) {
-              capturedSnacks.push({ message, actionLabels });
-            }
-          });
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-        (
-          globalThis as unknown as {
-            __issue9439Snacks?: CapturedSnack[];
-          }
-        ).__issue9439Snacks = capturedSnacks;
-      });
       const requestedSinceSeqs: number[] = [];
       await routeSuperSyncOps(freshClient.page, async (route) => {
         if (route.request().method() === 'GET') {
@@ -263,27 +233,13 @@ test.describe('@supersync @encryption #9439 plaintext history recovery', () => {
         (await downloadRawServerOps(user.userId)).some(({ id }) => id === plaintextOp.id),
       ).toBe(true);
 
-      const capturedSnacks = await freshClient.page.evaluate(
-        () =>
-          (
-            globalThis as unknown as {
-              __issue9439Snacks?: CapturedSnack[];
-            }
-          ).__issue9439Snacks ?? [],
-      );
-      const integritySnacks = capturedSnacks.filter(({ message }) =>
-        message.includes('security integrity check'),
-      );
-      expect(integritySnacks.length).toBeGreaterThan(0);
-      expect(integritySnacks.every(({ actionLabels }) => actionLabels.length === 0)).toBe(
-        true,
-      );
-      expect(integritySnacks.map(({ message }) => message).join('\n')).toContain(
-        'export a backup',
-      );
-      expect(integritySnacks.map(({ message }) => message).join('\n')).toContain(
-        'Force Overwrite',
-      );
+      const integritySnack = freshClient.page.locator('snack-custom', {
+        hasText: 'security integrity check',
+      });
+      await expect(integritySnack).toBeVisible({ timeout: 30000 });
+      await expect(integritySnack.locator('button.action')).toHaveCount(0);
+      await expect(integritySnack).toContainText('export a backup');
+      await expect(integritySnack).toContainText('Force Overwrite');
 
       await forceOverwriteFromTrustedClient(trustedClient);
       await expect
