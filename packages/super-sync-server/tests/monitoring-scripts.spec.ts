@@ -8,10 +8,11 @@ const mocks = vi.hoisted(() => {
   };
   return {
     prisma,
+    existsSync: vi.fn<(path: string) => boolean>(),
+    readFileSync: vi.fn<(path: string, encoding: string) => string>(),
     PrismaClient: vi.fn(function () {
       return prisma;
     }),
-    exec: vi.fn<(...args: unknown[]) => unknown>(),
   };
 });
 
@@ -20,9 +21,10 @@ vi.mock('@prisma/client', async (importOriginal) => ({
   PrismaClient: mocks.PrismaClient,
 }));
 
-vi.mock('child_process', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('child_process')>()),
-  exec: mocks.exec,
+vi.mock('fs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('fs')>()),
+  existsSync: mocks.existsSync,
+  readFileSync: mocks.readFileSync,
 }));
 
 const statementTimeout = (): Prisma.PrismaClientKnownRequestError =>
@@ -35,11 +37,40 @@ const statementTimeout = (): Prisma.PrismaClientKnownRequestError =>
     },
   });
 
+const renderSqlValue = (value: unknown): string => {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'strings' in value &&
+    'values' in value
+  ) {
+    const sql = value as { strings: string[]; values: unknown[] };
+    return sql.strings.reduce(
+      (rendered, part, index) =>
+        rendered +
+        part +
+        (index < sql.values.length ? renderSqlValue(sql.values[index]) : ''),
+      '',
+    );
+  }
+  return String(value ?? 'NULL');
+};
+
+const renderQueryCall = (call: unknown[]): string => {
+  const strings = call[0] as TemplateStringsArray;
+  return strings.reduce(
+    (rendered, part, index) =>
+      rendered + part + (index + 1 < call.length ? renderSqlValue(call[index + 1]) : ''),
+    '',
+  );
+};
+
 describe('monitoring script error handling', () => {
   let previousExitCode: typeof process.exitCode;
   let previousArgv: string[];
   let consoleLog: ReturnType<typeof vi.spyOn>;
   let consoleError: ReturnType<typeof vi.spyOn>;
+  let consoleTable: ReturnType<typeof vi.spyOn>;
   let exit: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
@@ -50,9 +81,11 @@ describe('monitoring script error handling', () => {
     process.exitCode = undefined;
     mocks.prisma.$queryRaw.mockReset();
     mocks.prisma.$disconnect.mockReset().mockResolvedValue();
-    mocks.exec.mockReset();
+    mocks.existsSync.mockReset().mockReturnValue(false);
+    mocks.readFileSync.mockReset();
     consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    consoleTable = vi.spyOn(console, 'table').mockImplementation(() => undefined);
     exit = vi.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`Unexpected process.exit(${code})`);
     });
@@ -64,7 +97,7 @@ describe('monitoring script error handling', () => {
     vi.restoreAllMocks();
   });
 
-  it('reports a monitor query timeout and exits unsuccessfully', async () => {
+  it('reports a monitor timeout, fails, and disconnects', async () => {
     mocks.prisma.$queryRaw.mockRejectedValue(statementTimeout());
     process.argv = ['node', 'monitor.ts', 'usage', '--no-save'];
 
@@ -92,7 +125,7 @@ describe('monitoring script error handling', () => {
     expect(exit).not.toHaveBeenCalled();
   });
 
-  it('reports an analysis query timeout and exits unsuccessfully', async () => {
+  it('reports an analysis timeout, fails, and disconnects', async () => {
     mocks.prisma.$queryRaw.mockRejectedValue(statementTimeout());
     process.argv = ['node', 'analyze-storage.ts', 'operation-sizes'];
 
@@ -119,46 +152,286 @@ describe('monitoring script error handling', () => {
     expect(exit).not.toHaveBeenCalled();
   });
 
-  it('continues the monitoring suite after child failures and exits unsuccessfully', async () => {
-    let invocation = 0;
-    mocks.exec.mockImplementation((...args: unknown[]) => {
-      const callback = args.at(-1);
-      if (typeof callback !== 'function') {
-        throw new Error('Expected exec callback');
-      }
-      invocation += 1;
-      const isMaxBufferFailure = invocation === 1;
-      const stderr = isMaxBufferFailure ? 'ExperimentalWarning' : 'query timed out';
-      callback(
-        Object.assign(
-          new Error(
-            isMaxBufferFailure
-              ? 'stdout maxBuffer length exceeded'
-              : 'Command failed: monitor\nquery timed out',
-          ),
-          {
-            stdout: 'partial output',
-            stderr,
-          },
-        ),
-      );
-    });
-    process.argv = ['node', 'run-all-monitoring.ts', '--quick'];
+  it('reads user storage from the cached counter without scanning operations', async () => {
+    mocks.prisma.$queryRaw.mockResolvedValue([
+      {
+        id: 1,
+        email: 'user@example.com',
+        ops_bytes: BigInt(800),
+        last_seq: 12,
+        snapshot_bytes: BigInt(200),
+        total_bytes: BigInt(1000),
+      },
+    ]);
+    process.argv = ['node', 'monitor.ts', 'usage', '--no-save'];
 
-    await import('../scripts/run-all-monitoring');
-    await vi.waitFor(() => expect(mocks.exec).toHaveBeenCalledTimes(8));
+    await import('../scripts/monitor');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
-    expect(consoleLog).toHaveBeenCalledWith('⚠️ Monitoring completed with errors.\n');
-    expect(consoleLog).not.toHaveBeenCalledWith('✅ Monitoring complete!\n');
-    expect(consoleError).toHaveBeenCalledTimes(8);
-    expect(String(consoleError.mock.calls[0][0])).toContain(
-      'stdout maxBuffer length exceeded',
+    const query = (mocks.prisma.$queryRaw.mock.calls[0][0] as TemplateStringsArray).join(
+      ' ',
     );
-    expect(String(consoleError.mock.calls[0][0])).toContain('ExperimentalWarning');
-    for (const [message] of consoleError.mock.calls.slice(1)) {
-      expect(String(message).match(/query timed out/g)).toHaveLength(1);
-    }
-    expect(process.exitCode).toBe(1);
-    expect(exit).not.toHaveBeenCalled();
+    expect(query).toContain('storage_used_bytes');
+    expect(query).not.toContain('FROM operations');
+    expect(consoleTable).toHaveBeenCalledOnce();
+  });
+
+  it('samples all-user operation-size analysis instead of scanning full payloads', async () => {
+    mocks.prisma.$queryRaw
+      .mockResolvedValueOnce([
+        {
+          p10: 100,
+          p25: 100,
+          p50: 100,
+          p75: 100,
+          p90: 100,
+          p95: 100,
+          p99: 100,
+          min_size: BigInt(100),
+          max_size: BigInt(100),
+          avg_size: 100,
+          total_ops: BigInt(1),
+        },
+      ])
+      .mockResolvedValueOnce([
+        { size_bucket: '0-512B', count: BigInt(1), total_bytes: BigInt(100) },
+      ]);
+    process.argv = ['node', 'analyze-storage.ts', 'operation-sizes'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const queries = mocks.prisma.$queryRaw.mock.calls.map(renderQueryCall);
+    expect(queries).toHaveLength(2);
+    expect(queries.every((query) => query.includes('TABLESAMPLE SYSTEM (1)'))).toBe(true);
+    expect(queries.every((query) => !query.includes('pg_column_size(payload)'))).toBe(
+      true,
+    );
+    expect(queries.every((query) => !query.includes('WHERE payload_bytes > 0'))).toBe(
+      true,
+    );
+    expect(
+      queries.every(
+        (query) =>
+          query.includes('ELSE OCTET_LENGTH(payload::text)::bigint +') &&
+          query.includes('OCTET_LENGTH(vector_clock::text)::bigint'),
+      ),
+    ).toBe(true);
+    const sampleSeeds = queries.map((query) => query.match(/REPEATABLE \((\d+)\)/)?.[1]);
+    expect(sampleSeeds[0]).toBeDefined();
+    expect(new Set(sampleSeeds).size).toBe(1);
+  });
+
+  it('uses a bounded per-user index tail for user-focused size analysis', async () => {
+    mocks.prisma.$queryRaw
+      .mockResolvedValueOnce([
+        {
+          p10: 100,
+          p25: 100,
+          p50: 100,
+          p75: 100,
+          p90: 100,
+          p95: 100,
+          p99: 100,
+          min_size: BigInt(100),
+          max_size: BigInt(100),
+          avg_size: 100,
+          total_ops: BigInt(1),
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    process.argv = ['node', 'analyze-storage.ts', 'operation-sizes', '--user', '42'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const queries = mocks.prisma.$queryRaw.mock.calls.map(renderQueryCall);
+    expect(queries.every((query) => !query.includes('TABLESAMPLE'))).toBe(true);
+    expect(queries.every((query) => query.includes('WHERE user_id = 42'))).toBe(true);
+    expect(queries.every((query) => query.includes('ORDER BY server_seq DESC'))).toBe(
+      true,
+    );
+    expect(queries.every((query) => query.includes('LIMIT 10000'))).toBe(true);
+    expect(queries.every((query) => !query.includes('WHERE payload_bytes > 0'))).toBe(
+      true,
+    );
+    expect(
+      queries.every((query) => query.indexOf('LIMIT 10000') < query.indexOf('CASE')),
+    ).toBe(true);
+  });
+
+  it('bounds recent operation analysis through each user index', async () => {
+    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    process.argv = ['node', 'monitor.ts', 'ops'];
+
+    await import('../scripts/monitor');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const query = renderQueryCall(mocks.prisma.$queryRaw.mock.calls[0]);
+    expect(query).toContain('CROSS JOIN LATERAL');
+    expect(query).toContain('ORDER BY o.server_seq DESC');
+    expect(query).toContain('LIMIT 5');
+    expect(consoleLog).toHaveBeenCalledWith(
+      'Scope: up to 5 newest operations per user, then the newest 50 candidates overall.',
+    );
+  });
+
+  it('samples operation-type analysis using stored byte counters', async () => {
+    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    process.argv = ['node', 'analyze-storage.ts', 'operation-types'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const queries = mocks.prisma.$queryRaw.mock.calls.map(renderQueryCall);
+    expect(queries).toHaveLength(3);
+    expect(queries.every((query) => query.includes('TABLESAMPLE SYSTEM (1)'))).toBe(true);
+    expect(queries.every((query) => query.includes('payload_bytes'))).toBe(true);
+    expect(queries.every((query) => !query.includes('WHERE payload_bytes > 0'))).toBe(
+      true,
+    );
+    expect(
+      queries.every(
+        (query) =>
+          query.includes('ELSE OCTET_LENGTH(payload::text)::bigint +') &&
+          query.includes('OCTET_LENGTH(vector_clock::text)::bigint'),
+      ),
+    ).toBe(true);
+    const sampleSeeds = queries.map((query) => query.match(/REPEATABLE \((\d+)\)/)?.[1]);
+    expect(sampleSeeds[0]).toBeDefined();
+    expect(new Set(sampleSeeds).size).toBe(1);
+  });
+
+  it('uses a bounded per-user index tail for user-focused type analysis', async () => {
+    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    process.argv = ['node', 'analyze-storage.ts', 'operation-types', '--user', '42'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const queries = mocks.prisma.$queryRaw.mock.calls.map(renderQueryCall);
+    expect(queries.every((query) => !query.includes('TABLESAMPLE'))).toBe(true);
+    expect(queries.every((query) => query.includes('WHERE user_id = 42'))).toBe(true);
+    expect(queries.every((query) => query.includes('ORDER BY server_seq DESC'))).toBe(
+      true,
+    );
+    expect(queries.every((query) => query.includes('LIMIT 10000'))).toBe(true);
+    expect(queries.every((query) => !query.includes('WHERE payload_bytes > 0'))).toBe(
+      true,
+    );
+    expect(
+      queries.every((query) => query.indexOf('LIMIT 10000') < query.indexOf('CASE')),
+    ).toBe(true);
+  });
+
+  it('includes unbackfilled rows in sampled largest-operation analysis', async () => {
+    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    process.argv = ['node', 'analyze-storage.ts', 'large-ops'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const query = renderQueryCall(mocks.prisma.$queryRaw.mock.calls[0]);
+    expect(query).not.toContain('WHERE o.payload_bytes > 0');
+    expect(query).toContain('ELSE OCTET_LENGTH(o.payload::text)::bigint +');
+    expect(query).toContain('OCTET_LENGTH(o.vector_clock::text)::bigint');
+  });
+
+  it('bounds rapid-fire analysis to recent operations per active user', async () => {
+    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    process.argv = ['node', 'analyze-storage.ts', 'rapid-fire'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const query = (mocks.prisma.$queryRaw.mock.calls[0][0] as TemplateStringsArray).join(
+      ' ',
+    );
+    expect(query).toContain('CROSS JOIN LATERAL');
+    expect(query).toContain('ORDER BY o.server_seq DESC');
+    expect(query).toContain('LIMIT 100');
+    expect(query).toContain('FROM recent_ops');
+    expect(query).toMatch(/FROM recent_ops\s+WHERE received_at >/);
+  });
+
+  it('uses sync-state counters for snapshot analysis without scanning operations', async () => {
+    mocks.prisma.$queryRaw
+      .mockResolvedValueOnce([
+        {
+          users_with_snapshot: BigInt(1),
+          users_without_snapshot: BigInt(0),
+          avg_snapshot_size: 100,
+          max_snapshot_size: 100,
+          total_snapshot_size: BigInt(100),
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    process.argv = ['node', 'analyze-storage.ts', 'snapshot-analysis'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const query = (mocks.prisma.$queryRaw.mock.calls[1][0] as TemplateStringsArray).join(
+      ' ',
+    );
+    expect(query).toContain('s.last_seq');
+    expect(query).not.toContain('FROM operations');
+  });
+
+  it('keeps usage-history growth within the current metric version', async () => {
+    mocks.existsSync.mockReturnValue(true);
+    mocks.readFileSync.mockReturnValue(
+      [
+        JSON.stringify({
+          timestamp: '2026-08-01T00:00:00.000Z',
+          totalBytes: 100,
+          userCount: 1,
+          users: [],
+        }),
+        JSON.stringify({
+          metricVersion: 2,
+          timestamp: '2026-08-02T00:00:00.000Z',
+          totalBytes: 200,
+          userCount: 1,
+          users: [],
+        }),
+        JSON.stringify({
+          metricVersion: 2,
+          timestamp: '2026-08-03T00:00:00.000Z',
+          totalBytes: 250,
+          userCount: 1,
+          users: [],
+        }),
+      ].join('\n'),
+    );
+    process.argv = ['node', 'monitor.ts', 'usage-history'];
+
+    await import('../scripts/monitor');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    expect(consoleTable.mock.calls[0][0]).toHaveLength(2);
+    expect(consoleLog).toHaveBeenCalledWith(
+      'Ignoring 1 older snapshot because its storage metric is not comparable.',
+    );
+    expect(consoleLog).toHaveBeenCalledWith('\nGrowth over 1.0 days: +50 Bytes');
+  });
+
+  it('bounds timeline analysis to recent operations per active user', async () => {
+    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    process.argv = ['node', 'analyze-storage.ts', 'operation-timeline'];
+
+    await import('../scripts/analyze-storage');
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+    const queries = mocks.prisma.$queryRaw.mock.calls.map((call) =>
+      (call[0] as TemplateStringsArray).join(' '),
+    );
+    expect(queries).toHaveLength(2);
+    expect(queries.every((query) => query.includes('CROSS JOIN LATERAL'))).toBe(true);
+    expect(queries.every((query) => query.includes('LIMIT 100'))).toBe(true);
+    expect(queries.every((query) => !query.includes('AND o.received_at >'))).toBe(true);
+    expect(
+      queries.every((query) => /FROM recent_ops\s+WHERE received_at >/.test(query)),
+    ).toBe(true);
   });
 });
