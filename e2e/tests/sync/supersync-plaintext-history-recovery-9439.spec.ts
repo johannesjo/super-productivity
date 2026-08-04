@@ -1,0 +1,327 @@
+import {
+  SuperSyncDownloadOpsResponseSchema,
+  SuperSyncUploadOpsRequestSchema,
+  SuperSyncUploadOpsResponseSchema,
+  type SuperSyncOperation,
+} from '@sp/shared-schema';
+import { decrypt } from '@sp/sync-core';
+import { expect, test } from '../../fixtures/supersync.fixture';
+import {
+  closeClient,
+  createSimulatedClient,
+  createTestUser,
+  getSuperSyncConfig,
+  routeSuperSyncOps,
+  SUPERSYNC_BASE_URL,
+  type SimulatedE2EClient,
+  waitForTask,
+} from '../../utils/supersync-helpers';
+
+type DownloadHistory = ReturnType<typeof SuperSyncDownloadOpsResponseSchema.parse>;
+
+interface SeededPlaintextOperation {
+  id: string;
+  serverSeq: number;
+}
+
+interface RawServerOperation {
+  id: string;
+  opType: string;
+  serverSeq: number;
+}
+
+interface CapturedSnack {
+  actionLabels: string[];
+  message: string;
+}
+
+const authHeaders = (token: string): Headers => {
+  const headers = new Headers();
+  headers.set('Authorization', `Bearer ${token}`);
+  headers.set('Content-Type', 'application/json');
+  return headers;
+};
+
+const downloadServerHistory = async (token: string): Promise<DownloadHistory> => {
+  const response = await fetch(
+    `${SUPERSYNC_BASE_URL}/api/sync/ops?sinceSeq=0&limit=1000`,
+    { headers: authHeaders(token) },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to inspect SuperSync history: ${response.status} ${await response.text()}`,
+    );
+  }
+  return SuperSyncDownloadOpsResponseSchema.parse(await response.json());
+};
+
+const downloadRawServerOps = async (userId: number): Promise<RawServerOperation[]> => {
+  const response = await fetch(
+    `${SUPERSYNC_BASE_URL}/api/test/user/${userId}/ops?limit=100`,
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to inspect raw server operations: ${response.status} ${await response.text()}`,
+    );
+  }
+  return ((await response.json()) as { ops: RawServerOperation[] }).ops;
+};
+
+const mergeHistoryClock = (history: DownloadHistory): Record<string, number> => {
+  const merged: Record<string, number> = {};
+  for (const { op } of history.ops) {
+    for (const [clientId, counter] of Object.entries(op.vectorClock)) {
+      merged[clientId] = Math.max(merged[clientId] ?? 0, counter);
+    }
+  }
+  return merged;
+};
+
+/**
+ * Reuses a genuine app-created encrypted TASK operation, decrypts its payload,
+ * and uploads the same wire shape as plaintext. This models the historical
+ * pre-upload-guard leak without mocking the client or server sync seams.
+ */
+const uploadPlaintextClone = async (
+  token: string,
+  password: string,
+  testRunId: string,
+  history: DownloadHistory,
+): Promise<SeededPlaintextOperation> => {
+  const source = history.ops.find(
+    ({ op }) =>
+      op.entityType === 'TASK' &&
+      op.isPayloadEncrypted === true &&
+      typeof op.payload === 'string',
+  )?.op;
+  if (!source || typeof source.payload !== 'string') {
+    throw new Error('No encrypted TASK operation available for the plaintext seed');
+  }
+
+  const clientId = `issue-9439-seed-${testRunId}`;
+  const plaintextOp: SuperSyncOperation = {
+    ...source,
+    id: crypto.randomUUID(),
+    clientId,
+    payload: JSON.parse(await decrypt(source.payload, password)),
+    vectorClock: { ...mergeHistoryClock(history), [clientId]: 1 },
+    timestamp: Date.now(),
+    isPayloadEncrypted: false,
+  };
+  const requestBody = SuperSyncUploadOpsRequestSchema.parse({
+    clientId,
+    ops: [plaintextOp],
+  });
+  const response = await fetch(`${SUPERSYNC_BASE_URL}/api/sync/ops`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify(requestBody),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Failed to seed plaintext operation: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const result = SuperSyncUploadOpsResponseSchema.parse(await response.json());
+  const upload = result.results[0];
+  if (result.results.length !== 1 || upload.accepted !== true || !upload.serverSeq) {
+    throw new Error(`Server rejected plaintext fixture: ${JSON.stringify(result)}`);
+  }
+  return { id: plaintextOp.id, serverSeq: upload.serverSeq };
+};
+
+const forceOverwriteFromTrustedClient = async (
+  client: SimulatedE2EClient,
+): Promise<void> => {
+  await client.sync.syncBtn.click({ button: 'right', noWaitAfter: true });
+  await client.sync.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+
+  const forceOverwriteButton = client.page.getByRole('button', {
+    name: 'Force Overwrite',
+    exact: true,
+  });
+  if (!(await forceOverwriteButton.isVisible().catch(() => false))) {
+    await client.page
+      .locator('.collapsible-header')
+      .filter({ hasText: 'Advanced' })
+      .click();
+  }
+  await expect(forceOverwriteButton).toBeVisible();
+
+  client.page.once('dialog', async (dialog) => {
+    expect(dialog.type()).toBe('confirm');
+    expect(dialog.message()).toContain('REPLACE all data on the server');
+    try {
+      await dialog.accept();
+    } catch {
+      // setupSuperSync also guards native confirmations and may win this race.
+    }
+  });
+  await forceOverwriteButton.click();
+};
+
+test.describe('@supersync @encryption #9439 plaintext history recovery', () => {
+  test('trusted-client force overwrite restores a fresh client without accepting plaintext', async ({
+    browser,
+    baseURL,
+    testRunId,
+  }) => {
+    test.setTimeout(180000);
+    let trustedClient: SimulatedE2EClient | null = null;
+    let freshClient: SimulatedE2EClient | null = null;
+
+    try {
+      const user = await createTestUser(testRunId);
+      const password = `issue-9439-${testRunId}`;
+      const syncConfig = {
+        ...getSuperSyncConfig(user),
+        isEncryptionEnabled: true,
+        password,
+      };
+      const preservedTask = `Preserved-${testRunId}`;
+
+      trustedClient = await createSimulatedClient(
+        browser,
+        baseURL!,
+        'trusted',
+        testRunId,
+      );
+      await trustedClient.sync.setupSuperSync(syncConfig);
+      await trustedClient.workView.addTask(preservedTask);
+      await trustedClient.sync.syncAndWait();
+
+      const validHistory = await downloadServerHistory(user.token);
+      const plaintextOp = await uploadPlaintextClone(
+        user.token,
+        password,
+        testRunId,
+        validHistory,
+      );
+
+      freshClient = await createSimulatedClient(browser, baseURL!, 'fresh', testRunId);
+      await freshClient.page.evaluate(() => {
+        const capturedSnacks: CapturedSnack[] = [];
+        const observer = new MutationObserver(() => {
+          document.querySelectorAll('snack-custom').forEach((element) => {
+            const message = element.querySelector('.message')?.textContent?.trim();
+            if (!message) return;
+            const actionLabels = Array.from(
+              element.querySelectorAll<HTMLButtonElement>('button.action'),
+            ).flatMap((button) => {
+              const label = button.textContent?.trim();
+              return label ? [label] : [];
+            });
+            const signature = JSON.stringify({ message, actionLabels });
+            if (!capturedSnacks.some((snack) => JSON.stringify(snack) === signature)) {
+              capturedSnacks.push({ message, actionLabels });
+            }
+          });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        (
+          globalThis as unknown as {
+            __issue9439Snacks?: CapturedSnack[];
+          }
+        ).__issue9439Snacks = capturedSnacks;
+      });
+      const requestedSinceSeqs: number[] = [];
+      await routeSuperSyncOps(freshClient.page, async (route) => {
+        if (route.request().method() === 'GET') {
+          const url = new URL(route.request().url());
+          requestedSinceSeqs.push(Number(url.searchParams.get('sinceSeq') ?? 0));
+          url.searchParams.set('limit', '1');
+          await route.continue({ url: url.toString() });
+          return;
+        }
+        await route.continue();
+      });
+
+      await freshClient.sync.setupSuperSync({
+        ...syncConfig,
+        waitForInitialSync: false,
+      });
+
+      await expect(freshClient.sync.syncErrorIcon).toBeVisible({ timeout: 30000 });
+      await expect(
+        freshClient.page.locator(`task:has-text("${preservedTask}")`),
+      ).not.toBeVisible();
+      expect(requestedSinceSeqs).toContain(plaintextOp.serverSeq - 1);
+      const zeroRequestsBeforeExplicitRetry = requestedSinceSeqs.filter(
+        (sinceSeq) => sinceSeq === 0,
+      ).length;
+      await freshClient.sync.syncBtn.click();
+      await expect
+        .poll(() => requestedSinceSeqs.filter((sinceSeq) => sinceSeq === 0).length, {
+          timeout: 30000,
+        })
+        .toBeGreaterThan(zeroRequestsBeforeExplicitRetry);
+      await expect(
+        freshClient.page.locator(`task:has-text("${preservedTask}")`),
+      ).not.toBeVisible();
+      expect(
+        (await downloadRawServerOps(user.userId)).some(({ id }) => id === plaintextOp.id),
+      ).toBe(true);
+
+      const capturedSnacks = await freshClient.page.evaluate(
+        () =>
+          (
+            globalThis as unknown as {
+              __issue9439Snacks?: CapturedSnack[];
+            }
+          ).__issue9439Snacks ?? [],
+      );
+      const integritySnacks = capturedSnacks.filter(({ message }) =>
+        message.includes('security integrity check'),
+      );
+      expect(integritySnacks.length).toBeGreaterThan(0);
+      expect(integritySnacks.every(({ actionLabels }) => actionLabels.length === 0)).toBe(
+        true,
+      );
+      expect(integritySnacks.map(({ message }) => message).join('\n')).toContain(
+        'export a backup',
+      );
+      expect(integritySnacks.map(({ message }) => message).join('\n')).toContain(
+        'Force Overwrite',
+      );
+
+      await forceOverwriteFromTrustedClient(trustedClient);
+      await expect
+        .poll(
+          async () => {
+            const [history, rawOps] = await Promise.all([
+              downloadServerHistory(user.token),
+              downloadRawServerOps(user.userId),
+            ]);
+            return (
+              !rawOps.some(({ id }) => id === plaintextOp.id) &&
+              history.latestSeq > plaintextOp.serverSeq &&
+              history.ops.every(({ op }) => op.isPayloadEncrypted === true) &&
+              history.ops.some(
+                ({ op, serverSeq }) =>
+                  op.opType === 'SYNC_IMPORT' &&
+                  op.isPayloadEncrypted === true &&
+                  serverSeq > plaintextOp.serverSeq,
+              )
+            );
+          },
+          { timeout: 60000 },
+        )
+        .toBe(true);
+
+      const recoveredHistory = await downloadServerHistory(user.token);
+      expect(recoveredHistory.ops.every(({ op }) => op.isPayloadEncrypted === true)).toBe(
+        true,
+      );
+      expect(recoveredHistory.latestSeq).toBeGreaterThan(plaintextOp.serverSeq);
+
+      await trustedClient.page.keyboard.press('Escape');
+      await freshClient.sync.syncAndWait();
+      await waitForTask(freshClient.page, preservedTask);
+      await expect(freshClient.sync.syncErrorIcon).not.toBeVisible();
+    } finally {
+      if (trustedClient) await closeClient(trustedClient);
+      if (freshClient) await closeClient(freshClient);
+    }
+  });
+});

@@ -159,6 +159,40 @@ authentication failure as a bare `Error` (fallback crypto).
 ciphertext, and `WebCryptoNotAvailableError` is an environment failure —
 neither is password evidence.
 
+### Recovering a mixed encrypted/plaintext history
+
+An encryption-enabled client that logs
+`received a plaintext op while encryption is mandatory` is not reporting a
+wrong passphrase. It has found a plaintext row in an account that is expected
+to contain only encrypted payloads. The client rejects the complete download
+without applying its valid prefix or advancing its durable cursor.
+
+If an **updated** client still has a verified complete, current copy of the
+account, use the supported client recovery:
+
+1. Keep every other client offline and preserve the complete client unchanged.
+2. Export a full backup from that client and protect it as plaintext user data.
+3. In its sync settings, open **Advanced** and choose **Force Overwrite**.
+4. Wait for the encrypted clean-slate upload to finish before updating and
+   reconnecting the other clients one at a time.
+5. Verify the reconstructed data on a fresh client before deleting the backup.
+
+Force Overwrite deletes the mixed operation dataset and uploads the selected
+client's state as an encrypted full-state operation while preserving server
+sequence monotonicity. Do not run it from a fresh, incomplete, stale, or
+pre-fix client.
+
+Do **not** recover by changing `isPayloadEncrypted`, applying or skipping the
+plaintext row, deleting that row alone, or advancing a client cursor past it.
+The flag and surrounding envelope are unauthenticated, so those shortcuts can
+apply forged data or silently construct an incomplete state. If no client has
+a verified complete copy, preserve the clients and database, inspect only safe
+row metadata first, and treat any server-side reconstruction as an incident
+recovery against an isolated database restore rather than a normal sync path.
+
+The real-shape recovery regression is
+`e2e/tests/sync/supersync-plaintext-history-recovery-9439.spec.ts`.
+
 `scripts/recover-user.ts` fills the encrypted-recovery gap. It replays the user's operation log up
 to a chosen `serverSeq`, decrypting encrypted payloads with the user's
 passphrase, and writes an importable `AppDataComplete` JSON file. It is
@@ -228,3 +262,4 @@ The backup recovery scenarios are covered by automated tests in `e2e/tests/sync/
 1. **Complete data loss** — server wiped, single client recovers all data
 2. **Partial revert** — server reverted to older state, client preserves local data
 3. **Accounts-only restore** — recommended recovery path with multi-client convergence
+4. **Mixed encrypted/plaintext history** — fail closed, then recover through an encrypted trusted-client Force Overwrite

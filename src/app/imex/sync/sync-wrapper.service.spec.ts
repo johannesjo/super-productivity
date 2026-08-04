@@ -1223,6 +1223,12 @@ describe('SyncWrapperService', () => {
       expect(mockSnackService.open).not.toHaveBeenCalledWith(
         jasmine.objectContaining({ msg: jasmine.stringMatching(/GHSA-/) }),
       );
+      const openedSnack = mockSnackService.open.calls.mostRecent().args[0];
+      expect(typeof openedSnack).not.toBe('string');
+      if (typeof openedSnack !== 'string') {
+        expect(openedSnack.actionStr).toBeUndefined();
+        expect(openedSnack.actionFn).toBeUndefined();
+      }
     });
 
     it('should handle NetworkUnavailableSPError with WARNING snackbar when user-triggered', async () => {
