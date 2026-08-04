@@ -472,6 +472,12 @@ test.describe('@webdav WebDAV First Sync Conflict', () => {
     console.log('[Test] Client C conflict dialog appeared');
 
     const useLocalBtnC = conflictDialogC.locator('button', { hasText: /Keep local/i });
+    const snapshotUploadResponse = pageC.waitForResponse(
+      (response) =>
+        response.request().method() === 'PUT' &&
+        new URL(response.url()).pathname.endsWith('/sync-data.json'),
+      { timeout: 60000 },
+    );
     await useLocalBtnC.click();
     console.log('[Test] Client C clicked Use Local (uploads snapshot)');
 
@@ -487,6 +493,7 @@ test.describe('@webdav WebDAV First Sync Conflict', () => {
       // Confirmation might not appear
     }
 
+    expect((await snapshotUploadResponse).ok()).toBe(true);
     await waitForSyncComplete(pageC, syncPageC, 30000);
     console.log('[Test] Client C sync completed (snapshot uploaded)');
 
