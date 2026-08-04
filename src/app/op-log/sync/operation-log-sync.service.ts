@@ -712,6 +712,27 @@ export class OperationLogSyncService {
       const unsyncedOps = await this.opLogStore.getUnsynced();
       const hasLocalChanges = unsyncedOps.length > 0;
 
+      // Nothing from this sync is persisted yet, so these live reads reflect
+      // whether the client completed a prior sync cycle.
+      const isNeverSyncedAtSyncStart =
+        options?.isNeverSynced ?? !(await this.opLogStore.hasSyncedOps());
+      // A local state-cache snapshot is only a last-synced baseline after a
+      // completed sync: fresh clients can already have a snapshot containing
+      // local changes, and using its clock would suppress the count-free
+      // first-sync overwrite warning (#9166). Missing synced op rows cannot
+      // prove "never synced" either (a snapshot-only first sync commits zero
+      // synced rows, and compaction can prune them all later), so also consult
+      // the persisted per-provider cursor, which only advances after a
+      // completed, durably applied sync (setLastServerSeq below). Captured once
+      // here so every conflict surfaced during this snapshot attempt uses the
+      // same baseline decision, including the late-durable-op recheck inside
+      // _hydrateSnapshotExclusive().
+      const hasCompletedSyncBaseline =
+        !isNeverSyncedAtSyncStart || (await syncProvider.getLastServerSeq()) > 0;
+      const lastSyncedVectorClock = hasCompletedSyncBaseline
+        ? ((await this.vectorClockService.getSnapshotVectorClock()) ?? null)
+        : null;
+
       // Collected here, applied AFTER hydrateFromRemoteSync succeeds so a
       // hydration failure doesn't permanently drop discardable startup ops
       // while leaving the user without the remote snapshot.
@@ -739,10 +760,6 @@ export class OperationLogSyncService {
             .map((entry) => entry.op.entityId)
             .filter((id): id is string => id !== undefined),
         );
-        // Nothing from this sync is persisted yet, so this live read reflects
-        // whether the client completed a prior sync cycle.
-        const isNeverSyncedAtSyncStart =
-          options?.isNeverSynced ?? !(await this.opLogStore.hasSyncedOps());
         const pendingOpClassification = {
           hasCompletedInitialSync: !isNeverSyncedAtSyncStart,
         };
@@ -770,14 +787,6 @@ export class OperationLogSyncService {
             result.snapshotVectorClock,
             FILE_BASED_SYNC_CONSTANTS.AUTO_MERGE_CONCURRENT_SNAPSHOT,
           );
-
-          // A local state-cache snapshot is only a last-synced baseline after a
-          // completed sync. Fresh clients can already have a snapshot containing
-          // local changes, but using its clock here would hide the first-sync
-          // overwrite warning.
-          const lastSyncedVectorClock = isNeverSyncedAtSyncStart
-            ? null
-            : ((await this.vectorClockService.getSnapshotVectorClock()) ?? null);
 
           if (gate === 'keep-local') {
             // Local strictly dominates the snapshot: keep local, no dialog. The
@@ -925,7 +934,12 @@ export class OperationLogSyncService {
         'snapshot hydration',
       );
       await this.writeFlushService.flushThenRunExclusive(() =>
-        this._hydrateSnapshotExclusive(result, initialUnsyncedOpIds, snapshotIncludedOps),
+        this._hydrateSnapshotExclusive(
+          result,
+          initialUnsyncedOpIds,
+          snapshotIncludedOps,
+          lastSyncedVectorClock,
+        ),
       );
 
       // Now that the remote snapshot is applied, it's safe to drop the
@@ -1350,6 +1364,10 @@ export class OperationLogSyncService {
     },
     initialUnsyncedOpIds: Set<string>,
     snapshotIncludedOps: Operation[],
+    // Baseline decision captured by the caller before the snapshot attempt, so
+    // the late-durable-op conflict below classifies never-synced clients the
+    // same way as the pre-hydration conflict gate (#9166).
+    lastSyncedVectorClock: Record<string, number> | null,
   ): Promise<void> {
     let deferredActionsOverwrittenBySnapshot: ReturnType<typeof getDeferredActions> = [];
     let didReplaceArchive = false;
@@ -1369,8 +1387,6 @@ export class OperationLogSyncService {
           (entry) => !initialUnsyncedOpIds.has(entry.op.id),
         );
         if (lateDurableOps.length > 0) {
-          const lastSyncedVectorClock =
-            (await this.vectorClockService.getSnapshotVectorClock()) ?? null;
           throw new LocalDataConflictError(
             pendingAtHydrationCutoff.length,
             result.snapshotState as Record<string, unknown>,
