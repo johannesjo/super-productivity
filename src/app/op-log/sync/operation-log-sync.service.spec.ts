@@ -1811,6 +1811,14 @@ describe('OperationLogSyncService', () => {
             Promise.resolve([]),
             Promise.resolve([lateLocalEntry]),
           );
+          // Established client (hasSyncedOps defaults to true): the late-op
+          // conflict must carry the baseline captured before the snapshot
+          // attempt, not a null one.
+          const lastSyncedClock = { clientA: 1, clientB: 4 };
+          const vectorClockService = TestBed.inject(
+            VectorClockService,
+          ) as jasmine.SpyObj<VectorClockService>;
+          vectorClockService.getSnapshotVectorClock.and.resolveTo(lastSyncedClock);
           downloadServiceSpy.downloadRemoteOps.and.resolveTo({
             newOps: [],
             needsFullStateUpload: false,
@@ -1829,12 +1837,74 @@ describe('OperationLogSyncService', () => {
             setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
           } as unknown as OperationSyncCapable;
 
-          await expectAsync(
-            service.downloadRemoteOps(mockProvider),
-          ).toBeRejectedWithError(LocalDataConflictError);
+          try {
+            await service.downloadRemoteOps(mockProvider);
+            fail('Expected LocalDataConflictError to be thrown');
+          } catch (error) {
+            expect(error).toBeInstanceOf(LocalDataConflictError);
+            const conflictError = error as LocalDataConflictError;
+            expect(conflictError.lastSyncedVectorClock).toEqual(lastSyncedClock);
+          }
 
           expect(syncHydrationServiceSpy.hydrateFromRemoteSync).not.toHaveBeenCalled();
           expect(mockProvider.setLastServerSeq).not.toHaveBeenCalled();
+        });
+
+        it('uses no last-synced baseline when a late durable op aborts hydration on a never-synced client', async () => {
+          const lateLocalEntry: OperationLogEntry = {
+            seq: 2,
+            op: {
+              id: 'late-local-op',
+              clientId: 'client-A',
+              actionType: ActionType.TASK_SHARED_UPDATE,
+              opType: OpType.Update,
+              entityType: 'TASK',
+              entityId: 'task-late',
+              payload: { task: { id: 'task-late', changes: { title: 'Keep me' } } },
+              vectorClock: { clientA: 2 },
+              timestamp: 2,
+              schemaVersion: 1,
+            },
+            appliedAt: 2,
+            source: 'local',
+          };
+          opLogStoreSpy.getUnsynced.and.returnValues(
+            Promise.resolve([]),
+            Promise.resolve([lateLocalEntry]),
+          );
+          // Never synced, but a local state-cache snapshot already exists. The
+          // late-op conflict must use the captured null baseline instead of
+          // re-reading the snapshot clock inside the hydration section.
+          opLogStoreSpy.hasSyncedOps.and.resolveTo(false);
+          const vectorClockService = TestBed.inject(
+            VectorClockService,
+          ) as jasmine.SpyObj<VectorClockService>;
+          vectorClockService.getSnapshotVectorClock.and.resolveTo({ clientA: 1 });
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [],
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'fileSnapshotOps',
+            failedFileCount: 0,
+            snapshotState: { task: { ids: ['remote-task'] } },
+            snapshotVectorClock: { clientB: 5 },
+            latestServerSeq: 1,
+          });
+          const mockProvider = {
+            supportsOperationSync: true,
+            getLastServerSeq: () => Promise.resolve(0),
+            setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+          } as unknown as OperationSyncCapable;
+
+          try {
+            await service.downloadRemoteOps(mockProvider);
+            fail('Expected LocalDataConflictError to be thrown');
+          } catch (error) {
+            expect(error).toBeInstanceOf(LocalDataConflictError);
+            const conflictError = error as LocalDataConflictError;
+            expect(conflictError.lastSyncedVectorClock).toBeNull();
+            expect(vectorClockService.getSnapshotVectorClock).not.toHaveBeenCalled();
+          }
         });
 
         it('should restore and persist a local action buffered during snapshot hydration', async () => {
@@ -3061,6 +3131,7 @@ describe('OperationLogSyncService', () => {
           const mockProvider = {
             isReady: () => Promise.resolve(true),
             supportsOperationSync: true,
+            getLastServerSeq: () => Promise.resolve(0),
             setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
           } as unknown as OperationSyncCapable;
 
@@ -3457,6 +3528,126 @@ describe('OperationLogSyncService', () => {
           const mockProvider = {
             isReady: () => Promise.resolve(true),
             supportsOperationSync: true,
+          } as any;
+
+          try {
+            await service.downloadRemoteOps(mockProvider);
+            fail('Expected LocalDataConflictError to be thrown');
+          } catch (error) {
+            expect(error).toBeInstanceOf(LocalDataConflictError);
+            const conflictError = error as LocalDataConflictError;
+            expect(conflictError.lastSyncedVectorClock).toEqual(lastSyncedClock);
+          }
+        });
+
+        it('uses no last-synced baseline for a never-synced client with a local snapshot', async () => {
+          const unsyncedEntries: OperationLogEntry[] = [
+            {
+              seq: 1,
+              op: {
+                id: 'local-op-1',
+                clientId: 'client-A',
+                actionType: 'test' as ActionType,
+                opType: OpType.Update,
+                entityType: 'TASK',
+                entityId: 'task-1',
+                payload: {},
+                vectorClock: { clientA: 1 },
+                timestamp: Date.now(),
+                schemaVersion: 1,
+              },
+              appliedAt: Date.now(),
+              source: 'local',
+            },
+          ];
+          opLogStoreSpy.getUnsynced.and.resolveTo(unsyncedEntries);
+
+          // Production classification, not an injected flag: no retained synced
+          // rows AND no persisted provider cursor means never synced.
+          opLogStoreSpy.hasSyncedOps.and.resolveTo(false);
+
+          const vectorClockService = TestBed.inject(
+            VectorClockService,
+          ) as jasmine.SpyObj<VectorClockService>;
+          vectorClockService.getSnapshotVectorClock.and.resolveTo({ clientA: 1 });
+
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [],
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'fileSnapshotOps',
+            failedFileCount: 0,
+            snapshotState: { tasks: [{ id: 'remote-task' }] },
+            snapshotVectorClock: { clientB: 1 },
+            latestServerSeq: 0,
+          });
+
+          const mockProvider = {
+            isReady: () => Promise.resolve(true),
+            supportsOperationSync: true,
+            getLastServerSeq: () => Promise.resolve(0),
+          } as any;
+
+          try {
+            await service.downloadRemoteOps(mockProvider);
+            fail('Expected LocalDataConflictError to be thrown');
+          } catch (error) {
+            expect(error).toBeInstanceOf(LocalDataConflictError);
+            const conflictError = error as LocalDataConflictError;
+            expect(conflictError.lastSyncedVectorClock).toBeNull();
+            expect(vectorClockService.getSnapshotVectorClock).not.toHaveBeenCalled();
+          }
+        });
+
+        it('keeps the snapshot-clock baseline when synced rows are gone but the provider cursor is set', async () => {
+          // Established client whose synced rows disappeared: a snapshot-only
+          // first sync commits zero synced rows, and compaction can prune them
+          // all later. The persisted per-provider cursor still proves the
+          // completed sync, so the measured-change threshold must keep working
+          // instead of forcing the count-free first-sync warning.
+          const unsyncedEntries: OperationLogEntry[] = [
+            {
+              seq: 1,
+              op: {
+                id: 'local-op-1',
+                clientId: 'client-A',
+                actionType: 'test' as ActionType,
+                opType: OpType.Update,
+                entityType: 'TASK',
+                entityId: 'task-1',
+                payload: {},
+                vectorClock: { clientA: 4 },
+                timestamp: Date.now(),
+                schemaVersion: 1,
+              },
+              appliedAt: Date.now(),
+              source: 'local',
+            },
+          ];
+          opLogStoreSpy.getUnsynced.and.resolveTo(unsyncedEntries);
+          opLogStoreSpy.hasSyncedOps.and.resolveTo(false);
+
+          const lastSyncedClock = { clientA: 3, clientB: 5 };
+          const vectorClockService = TestBed.inject(
+            VectorClockService,
+          ) as jasmine.SpyObj<VectorClockService>;
+          vectorClockService.getSnapshotVectorClock.and.resolveTo(lastSyncedClock);
+
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [],
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'fileSnapshotOps',
+            failedFileCount: 0,
+            snapshotState: { tasks: [{ id: 'remote-task' }] },
+            snapshotVectorClock: { clientB: 6 },
+            latestServerSeq: 0,
+          });
+
+          const mockProvider = {
+            isReady: () => Promise.resolve(true),
+            supportsOperationSync: true,
+            getLastServerSeq: () => Promise.resolve(7),
           } as any;
 
           try {
