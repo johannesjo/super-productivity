@@ -35,31 +35,19 @@ const RELEASE_TAG_PATTERN = /^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 const SHA1_PATTERN = /^(?!0{40}$)[0-9a-f]{40}$/;
 const ALL_ZERO_SHA1 = '0'.repeat(40);
 
-// Git exports repository-local variables to hooks. Remove the variables listed
-// by `git rev-parse --local-env-vars` before operating on a foreign repository.
-const GIT_LOCAL_ENVIRONMENT_VARIABLES = [
-  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-  'GIT_COMMON_DIR',
-  'GIT_CONFIG',
-  'GIT_CONFIG_COUNT',
-  'GIT_CONFIG_PARAMETERS',
-  'GIT_DIR',
-  'GIT_GRAFT_FILE',
-  'GIT_IMPLICIT_WORK_TREE',
-  'GIT_INDEX_FILE',
-  'GIT_INTERNAL_SUPER_PREFIX',
-  'GIT_NO_REPLACE_OBJECTS',
-  'GIT_OBJECT_DIRECTORY',
-  'GIT_PREFIX',
-  'GIT_REPLACE_REF_BASE',
-  'GIT_SHALLOW_FILE',
-  'GIT_WORK_TREE',
-] as const;
+const GIT_LOCAL_ENVIRONMENT_VARIABLES = execFileSync(
+  'git',
+  ['rev-parse', '--local-env-vars'],
+  { encoding: 'utf8' },
+)
+  .trim()
+  .split(/\r?\n/);
 
-const isolatedGitEnvironment = (): NodeJS.ProcessEnv => {
+const createGitEnvironment = (): NodeJS.ProcessEnv => {
   const environment = { ...process.env, GIT_NO_LAZY_FETCH: '1' };
-  for (const variable of GIT_LOCAL_ENVIRONMENT_VARIABLES) {
-    delete environment[variable];
+  // Git hooks export repository-local state that takes precedence over `git -C`.
+  for (const variableName of GIT_LOCAL_ENVIRONMENT_VARIABLES) {
+    delete environment[variableName];
   }
   return environment;
 };
@@ -67,7 +55,7 @@ const isolatedGitEnvironment = (): NodeJS.ProcessEnv => {
 const runGit = (repositoryRoot: string, args: string[]): string =>
   execFileSync('git', ['-C', repositoryRoot, ...args], {
     encoding: 'utf8',
-    env: isolatedGitEnvironment(),
+    env: createGitEnvironment(),
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
 
@@ -190,6 +178,45 @@ const expectExistingSpec = (specPath: string): void => {
 };
 
 describe('released-client compatibility policy', () => {
+  it('keeps temporary Git setup isolated from inherited hook environment', () => {
+    const outerRepositoryRoot = mkdtempSync(join(tmpdir(), 'released-oracle-outer-'));
+    const temporaryRepositoryRoot = mkdtempSync(join(tmpdir(), 'released-oracle-inner-'));
+    const inheritedGitDir = process.env.GIT_DIR;
+    const isolatedEnvironment = { ...process.env };
+    for (const variableName of GIT_LOCAL_ENVIRONMENT_VARIABLES) {
+      delete isolatedEnvironment[variableName];
+    }
+
+    try {
+      execFileSync('git', ['-C', outerRepositoryRoot, 'init', '--quiet'], {
+        env: isolatedEnvironment,
+      });
+      process.env.GIT_DIR = join(outerRepositoryRoot, '.git');
+
+      try {
+        runGit(temporaryRepositoryRoot, ['init', '--quiet']);
+      } finally {
+        if (inheritedGitDir === undefined) {
+          delete process.env.GIT_DIR;
+        } else {
+          process.env.GIT_DIR = inheritedGitDir;
+        }
+      }
+
+      expect(existsSync(join(temporaryRepositoryRoot, '.git'))).toBe(true);
+      expect(
+        execFileSync(
+          'git',
+          ['-C', outerRepositoryRoot, 'rev-parse', '--is-bare-repository'],
+          { encoding: 'utf8', env: isolatedEnvironment },
+        ).trim(),
+      ).toBe('false');
+    } finally {
+      rmSync(outerRepositoryRoot, { recursive: true, force: true });
+      rmSync(temporaryRepositoryRoot, { recursive: true, force: true });
+    }
+  });
+
   it('accepts a tag, commit, source path, and blob from one real Git provenance chain', () => {
     withTestGitRepository((repositoryRoot, cohort) => {
       expect(validateReleasedOracleProvenance(cohort, repositoryRoot)).toEqual([]);
