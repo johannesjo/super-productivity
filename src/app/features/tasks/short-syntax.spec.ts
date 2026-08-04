@@ -1856,9 +1856,9 @@ describe('shortSyntax', () => {
       );
       expect(r?.projectId).toBe('SlashProjectID');
       expect(r?.sectionId).toBeUndefined();
-      // Regression (PR #9014 review): matches master's first-word fallback —
-      // strip "+A/B", not "+A/", so no orphaned "B" remains.
-      expect(r?.taskChanges.title).toBe('Task Testing extra words');
+      // The word-wise matcher (#9679) consumes the fully typed project title
+      // "+A/B Testing", so only the actual task content remains.
+      expect(r?.taskChanges.title).toBe('Task extra words');
     });
 
     it('should match the project without a section when the section part matches nothing', async () => {
@@ -2160,7 +2160,9 @@ describe('shortSyntax', () => {
             false,
             sections,
           );
-          expect(r).withContext(set.map((p: Project) => p.title).join(',')).toBeUndefined();
+          expect(r)
+            .withContext(set.map((p: Project) => p.title).join(','))
+            .toBeUndefined();
         }
       });
 
@@ -2222,11 +2224,12 @@ describe('shortSyntax', () => {
         expect(r?.taskChanges.title).toBe('Task finish draft');
       });
 
-      it('should rank a full project+section match above the first-word project fallback', async () => {
-        // "+Work/Design fix login": "Work/Design" is also a prefix of the
-        // project "Work/Design Archive", but a whole-token match is strong
-        // evidence while a first-word prefix match is weak — the resolved
-        // project+section wins.
+      it('should let a slash-titled project claim its slash over a section reading', async () => {
+        // "+Work/Design fix login" with a project literally titled
+        // "Work/Design Archive": the first word including the slash prefixes
+        // that project, so it wins — reading Work + section "Design Reviews"
+        // instead would silently change which PROJECT the task lands in
+        // (round-4 review finding on PR #9014).
         const archiveProjects = [
           ...projects,
           { title: 'Work/Design Archive', id: 'ArchiveID' },
@@ -2241,9 +2244,129 @@ describe('shortSyntax', () => {
           false,
           sections,
         );
-        expect(r?.projectId).toBe('WorkID');
-        expect(r?.sectionId).toBe('DesignSectionID');
+        expect(r?.projectId).toBe('ArchiveID');
+        expect(r?.sectionId).toBeUndefined();
         expect(r?.taskChanges.title).toBe('Task fix login');
+      });
+
+      it('should never flip the project when a trailing word is added (+Dev/Ops fix)', async () => {
+        // Round-4 repro: projects Dev + Dev/Ops, section "Ops" inside Dev.
+        // "+Dev/Ops" and "+Dev/Ops fix" must both resolve to the Dev/Ops
+        // PROJECT — never to Dev + section Ops.
+        const devProjects = [
+          { title: 'Dev', id: 'DevID' },
+          { title: 'Dev/Ops', id: 'DevOpsID' },
+        ] as any;
+        const devSections = [
+          {
+            id: 'OpsSectionID',
+            contextId: 'DevID',
+            contextType: 'PROJECT',
+            title: 'Ops',
+            taskIds: [],
+          },
+        ] as any;
+        for (const [title, expectedTitle] of [
+          ['deploy +Dev/Ops', 'deploy'],
+          ['deploy +Dev/Ops fix', 'deploy fix'],
+        ]) {
+          const r = await shortSyntax(
+            { ...TASK, title },
+            CONFIG,
+            [],
+            devProjects,
+            undefined,
+            'combine',
+            false,
+            devSections,
+          );
+          expect(r?.projectId).withContext(title).toBe('DevOpsID');
+          expect(r?.sectionId).withContext(title).toBeUndefined();
+          expect(r?.taskChanges.title).withContext(title).toBe(expectedTitle);
+        }
+      });
+
+      it('should not change the project when the slash resolves no section', async () => {
+        // "+Work Inbox/whatever": the left side matches project "Work Inbox"
+        // but "whatever" is no section — the slash reading explained nothing,
+        // so the plain word-wise match ("Work") must win exactly like master
+        // (round-4 rule: section syntax never changes project resolution).
+        const inboxProjects = [
+          ...projects,
+          { title: 'Work Inbox', id: 'WorkInboxID' },
+        ] as any;
+        const r = await shortSyntax(
+          { ...TASK, title: 'Task +Work Inbox/whatever y' },
+          CONFIG,
+          [],
+          inboxProjects,
+          undefined,
+          'combine',
+          false,
+          sections,
+        );
+        expect(r?.projectId).toBe('WorkID');
+        expect(r?.sectionId).toBeUndefined();
+        expect(r?.taskChanges.title).toBe('Task Inbox/whatever y');
+      });
+
+      it('should still pick the multi-word left project when its section matches', async () => {
+        const inboxProjects = [
+          ...projects,
+          { title: 'Work Inbox', id: 'WorkInboxID' },
+        ] as any;
+        const inboxSections = [
+          ...sections,
+          {
+            id: 'TriageID',
+            contextId: 'WorkInboxID',
+            contextType: 'PROJECT',
+            title: 'Triage',
+            taskIds: [],
+          },
+        ] as any;
+        const r = await shortSyntax(
+          { ...TASK, title: 'Task +Work Inbox/Triage y' },
+          CONFIG,
+          [],
+          inboxProjects,
+          undefined,
+          'combine',
+          false,
+          inboxSections,
+        );
+        expect(r?.projectId).toBe('WorkInboxID');
+        expect(r?.sectionId).toBe('TriageID');
+        expect(r?.taskChanges.title).toBe('Task y');
+      });
+
+      it('should strip a section containing non-space whitespace fully', async () => {
+        // Same class as the multi-word residue bug, with a tab instead of a
+        // space (round-4 review note): "/Road\tMap" must match "Road Map"
+        // and strip both words.
+        const roadMapSections = [
+          ...sections,
+          {
+            id: 'RoadMapID',
+            contextId: 'WorkID',
+            contextType: 'PROJECT',
+            title: 'Road Map',
+            taskIds: [],
+          },
+        ] as any;
+        const r = await shortSyntax(
+          { ...TASK, title: 'x /Road\tMap y' },
+          CONFIG,
+          [],
+          projects,
+          undefined,
+          'combine',
+          false,
+          roadMapSections,
+          'WorkID',
+        );
+        expect(r?.sectionId).toBe('RoadMapID');
+        expect(r?.taskChanges.title).toBe('x y');
       });
 
       it('should not read a section out of a slash-titled project token', async () => {
@@ -2273,7 +2396,8 @@ describe('shortSyntax', () => {
         );
         expect(r?.projectId).toBe('SlashProjectID');
         expect(r?.sectionId).toBeUndefined();
-        expect(r?.taskChanges.title).toBe('Task Testing extra words');
+        // Full project title consumed by the word-wise matcher (#9679)
+        expect(r?.taskChanges.title).toBe('Task extra words');
       });
 
       it('should still prefer an exact whole-token project over a section interpretation', async () => {

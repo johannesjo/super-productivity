@@ -150,6 +150,7 @@ describe('AddTaskBarParserService', () => {
         // Mock state to return no current date/time
         const mockState = {
           projectId: mockDefaultProject.id,
+          sectionId: null,
           tagIds: [],
           tagIdsFromTxt: [],
           newTagTitles: [],
@@ -188,6 +189,7 @@ describe('AddTaskBarParserService', () => {
         // Mock state to return current user-selected values
         const mockState = {
           projectId: mockDefaultProject.id,
+          sectionId: null,
           tagIds: [],
           tagIdsFromTxt: [],
           newTagTitles: [],
@@ -223,6 +225,7 @@ describe('AddTaskBarParserService', () => {
         // Mock state with date but no time
         const mockState = {
           projectId: mockDefaultProject.id,
+          sectionId: null,
           tagIds: [],
           tagIdsFromTxt: [],
           newTagTitles: [],
@@ -309,6 +312,7 @@ describe('AddTaskBarParserService', () => {
 
         mockStateService.state.and.returnValue({
           projectId: mockDefaultProject.id,
+          sectionId: null,
           tagIds: [],
           tagIdsFromTxt: [],
           newTagTitles: [],
@@ -341,6 +345,7 @@ describe('AddTaskBarParserService', () => {
 
         mockStateService.state.and.returnValue({
           projectId: mockDefaultProject.id,
+          sectionId: null,
           tagIds: [],
           tagIdsFromTxt: [],
           newTagTitles: [],
@@ -1072,6 +1077,7 @@ describe('AddTaskBarParserService', () => {
       // Mock state to return the date and time
       const mockState = {
         projectId: mockDefaultProject.id,
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1107,6 +1113,7 @@ describe('AddTaskBarParserService', () => {
 
       const mockState = {
         projectId: mockDefaultProject.id,
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1144,6 +1151,7 @@ describe('AddTaskBarParserService', () => {
 
       const mockState = {
         projectId: mockDefaultProject.id,
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1179,6 +1187,7 @@ describe('AddTaskBarParserService', () => {
 
       const mockState = {
         projectId: mockDefaultProject.id,
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1213,6 +1222,7 @@ describe('AddTaskBarParserService', () => {
 
       const mockState = {
         projectId: mockDefaultProject.id,
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1331,6 +1341,7 @@ describe('AddTaskBarParserService', () => {
     it('should extract single HTTPS URL and update state', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1365,6 +1376,7 @@ describe('AddTaskBarParserService', () => {
     it('should extract file:// URL with FILE type', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1399,6 +1411,7 @@ describe('AddTaskBarParserService', () => {
     it('should detect image URLs as IMG type', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1431,6 +1444,7 @@ describe('AddTaskBarParserService', () => {
     it('should extract multiple URLs', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1464,6 +1478,7 @@ describe('AddTaskBarParserService', () => {
     it('should work with combined short syntax (URL + date + tag + estimate)', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1507,6 +1522,7 @@ describe('AddTaskBarParserService', () => {
     it('should not extract URLs from empty text', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1535,6 +1551,7 @@ describe('AddTaskBarParserService', () => {
     it('should update attachments when URL changes', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1583,6 +1600,7 @@ describe('AddTaskBarParserService', () => {
     it('should clear attachments when URL removed from text', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1625,6 +1643,7 @@ describe('AddTaskBarParserService', () => {
     it('should handle www URLs correctly', async () => {
       const mockState = {
         projectId: 'default-project',
+        sectionId: null,
         tagIds: [],
         tagIdsFromTxt: [],
         newTagTitles: [],
@@ -1665,6 +1684,7 @@ describe('AddTaskBarParserService', () => {
     const defaultProject = { id: 'default-project', title: 'Default Project' } as Project;
     const baseState = {
       projectId: 'default-project',
+      sectionId: null,
       tagIds: [],
       tagIdsFromTxt: [],
       newTagTitles: [],
@@ -2036,7 +2056,13 @@ describe('AddTaskBarParserService', () => {
     beforeEach(() => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
-        providers: [AddTaskBarParserService, AddTaskBarStateService],
+        providers: [
+          AddTaskBarParserService,
+          AddTaskBarStateService,
+          provideMockStore({
+            selectors: [{ selector: selectAllSections, value: [] }],
+          }),
+        ],
       });
       service = TestBed.inject(AddTaskBarParserService);
       realState = TestBed.inject(AddTaskBarStateService);
@@ -2086,6 +2112,7 @@ describe('AddTaskBarParserService', () => {
     const defaultProject = { id: 'default-project', title: 'Default Project' } as Project;
     const baseState = {
       projectId: 'default-project',
+      sectionId: null,
       tagIds: [],
       tagIdsFromTxt: [],
       newTagTitles: [],

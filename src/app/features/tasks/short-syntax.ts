@@ -804,11 +804,7 @@ const parseProjectTracked = (
           )
         : undefined;
       if (leftProject) {
-        const section = matchSectionByTypedText(
-          sectionPart,
-          leftProject.id,
-          allSections,
-        );
+        const section = matchSectionByTypedText(sectionPart, leftProject.id, allSections);
         if (section) {
           // "+Work/Design …" → strip through the matched section text
           const leadingWs = sectionPart.length - sectionPart.trimStart().length;
@@ -820,13 +816,19 @@ const parseProjectTracked = (
             ),
           };
         }
-        // "+Work/grocer" with no matching section: strip through the slash so
-        // the leftover ("grocer") rejoins the title instead of keeping a
-        // stray "/" (round-1 review finding on PR #9014).
-        return {
-          projectId: leftProject.id,
-          ranges: consumeAt(1 + projectTitle.length + 1),
-        };
+        // No matching section: the slash reading explained nothing extra, so
+        // it must not change which project the task lands in — fall through
+        // to the plain word-wise match when one exists ("+Work Inbox/x" with
+        // projects Work + "Work Inbox" stays in Work, like master; round-4
+        // rule on PR #9014). Only without any plain match does the left side
+        // claim the token: "+Work/grocer" strips through the slash so the
+        // leftover rejoins the title (round-1 review finding).
+        if (!match) {
+          return {
+            projectId: leftProject.id,
+            ranges: consumeAt(1 + projectTitle.length + 1),
+          };
+        }
       }
     }
 

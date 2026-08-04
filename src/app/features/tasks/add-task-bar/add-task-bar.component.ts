@@ -288,11 +288,17 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     inject(MentionConfigService).mentionConfig$,
     toObservable(this._sectionMentionProjectId),
     this._store.select(selectAllSections),
+    this._globalConfigService.shortSyntax$,
   ]).pipe(
-    map(([cfg, sectionProjectId, allSections]) => {
-      const sections = sectionProjectId
-        ? allSections.filter((s) => s.contextId === sectionProjectId)
-        : [];
+    map(([cfg, sectionProjectId, allSections, shortSyntaxCfg]) => {
+      // The "/" mention rides the project short-syntax toggle, exactly like
+      // the parser paths it feeds — with project syntax off, a picked item
+      // would just leave "/Design" sitting in the title (round-4 review
+      // finding on PR #9014).
+      const sections =
+        sectionProjectId && shortSyntaxCfg?.isEnableProject
+          ? allSections.filter((s) => s.contextId === sectionProjectId)
+          : [];
       if (!sections.length) {
         return cfg;
       }
@@ -640,10 +646,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       // section membership.
       if (state.sectionId && state.projectId && !this.isAddToBacklog()) {
         const targetSection = await firstValueFrom(
-          this._store.select(selectAllSections).pipe(
-            map((all) => all.find((s) => s.id === state.sectionId)),
-            first(),
-          ),
+          this._store
+            .select(selectAllSections)
+            .pipe(map((all) => all.find((s) => s.id === state.sectionId))),
         );
         // Write-site guard in lock-step with the reducer's own checks: the
         // section must still exist AND belong to the project the task was
