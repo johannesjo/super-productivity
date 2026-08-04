@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Action, Store } from '@ngrx/store';
+import { Action, ActionReducer, Store } from '@ngrx/store';
 import { of, Subject, Subscription } from 'rxjs';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ClientIdService } from '../../../core/util/client-id.service';
 import { DEFAULT_TASK, Task } from '../../../features/tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { OperationApplierService } from '../../apply/operation-applier.service';
+import { bulkApplyOperations } from '../../apply/bulk-hydration.action';
+import { bulkOperationsMetaReducer } from '../../apply/bulk-hydration.meta-reducer';
 import { OperationCaptureService } from '../../capture/operation-capture.service';
 import { clearDeferredActions } from '../../capture/operation-capture.meta-reducer';
 import { OperationLogEffects } from '../../capture/operation-log.effects';
@@ -31,6 +33,16 @@ import {
   ApplyOperationsResult,
 } from '../../core/types/apply.types';
 import { resetTestUuidCounter, TestClient } from './helpers/test-client.helper';
+import { RootState } from '../../../root-store/root-state';
+import { createStateWithExistingTasks } from '../../../root-store/meta/task-shared-meta-reducers/test-utils';
+import { createCombinedTaskSharedMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/test-helpers';
+import { lwwUpdateMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
+import {
+  plannerFeatureKey,
+  plannerReducer,
+} from '../../../features/planner/store/planner.reducer';
+import { PlannerActions } from '../../../features/planner/store/planner.actions';
+import { TASK_FEATURE_NAME } from '../../../features/tasks/store/task.reducer';
 
 /**
  * #9426 / #9405: a pending local multi-entity Today-list op (the automatic
@@ -47,6 +59,7 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
   const SIBLING_1 = 'task-sibling-1';
   const SIBLING_2 = 'task-sibling-2';
   const TODAY = '2026-07-30';
+  const FUTURE_DAY = '2026-08-03';
 
   let opLogStore: OperationLogStoreService;
   let capture: OperationCaptureService;
@@ -58,6 +71,7 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
   let actions$: Subject<Action>;
   let effectSubscription: Subscription;
   let taskStateById: Record<string, Task | undefined>;
+  let plannerDaysByDay: Record<string, string[]>;
 
   const liveTask = (id: string): Task => ({
     ...DEFAULT_TASK,
@@ -77,10 +91,18 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
       [SIBLING_1]: liveTask(SIBLING_1),
       [SIBLING_2]: liveTask(SIBLING_2),
     };
+    plannerDaysByDay = {};
     // Serve current entity state for local-win snapshots from a plain map. The
     // registry's TASK selectById is a props-based selector: (selector, {id}).
     store.select.and.callFake(((_selector: unknown, props?: { id?: string }): unknown =>
-      of(props?.id ? taskStateById[props.id] : undefined)) as Store['select']);
+      of(
+        props?.id
+          ? taskStateById[props.id]
+          : {
+              days: plannerDaysByDay,
+              addPlannedTasksDialogLastShown: undefined,
+            },
+      )) as Store['select']);
 
     operationApplier = jasmine.createSpyObj<OperationApplierService>(
       'OperationApplierService',
@@ -456,6 +478,92 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
         (op) => op.entityId === CONFLICT_TASK_ID && op.id !== remotePlanOp.id,
       );
       expect(compensationIndex).toBeGreaterThan(planIndex);
+    });
+
+    it('keeps a local winner in its future planner position after replay', async () => {
+      const localWinner = {
+        ...liveTask(CONFLICT_TASK_ID),
+        title: 'Local newer edit',
+        dueDay: FUTURE_DAY,
+      };
+      taskStateById[CONFLICT_TASK_ID] = localWinner;
+      taskStateById[SIBLING_1] = {
+        ...liveTask(SIBLING_1),
+        dueDay: FUTURE_DAY,
+      };
+      taskStateById[SIBLING_2] = {
+        ...liveTask(SIBLING_2),
+        dueDay: FUTURE_DAY,
+      };
+      plannerDaysByDay = {
+        [FUTURE_DAY]: [SIBLING_2, CONFLICT_TASK_ID, SIBLING_1],
+      };
+
+      const [localEditOp] = await dispatchAndFlush(
+        TaskSharedActions.updateTask({
+          task: { id: CONFLICT_TASK_ID, changes: { title: localWinner.title } },
+        }) as PersistentAction,
+      );
+      const remotePlanOp = buildRemotePlanOp(
+        [CONFLICT_TASK_ID, SIBLING_1],
+        localEditOp.timestamp - 1000,
+      );
+
+      await resolver.autoResolveConflictsLWW(await detectConflictsFor(remotePlanOp));
+
+      const baseState = createStateWithExistingTasks([
+        CONFLICT_TASK_ID,
+        SIBLING_1,
+        SIBLING_2,
+      ]);
+      const stateBeforeRemote: RootState = {
+        ...baseState,
+        [TASK_FEATURE_NAME]: {
+          ...baseState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseState[TASK_FEATURE_NAME].entities,
+            [CONFLICT_TASK_ID]: localWinner,
+            [SIBLING_1]: taskStateById[SIBLING_1],
+            [SIBLING_2]: taskStateById[SIBLING_2],
+          },
+        },
+        [plannerFeatureKey]: {
+          ...baseState[plannerFeatureKey],
+          days: plannerDaysByDay,
+        },
+      };
+      const baseReducer: ActionReducer<RootState, Action> = (state, action) => {
+        if (action.type !== PlannerActions.upsertPlannerDay.type) {
+          return state as RootState;
+        }
+        return {
+          ...(state as RootState),
+          [plannerFeatureKey]: plannerReducer(
+            (state as RootState)[plannerFeatureKey],
+            action,
+          ),
+        };
+      };
+      const replayReducer = bulkOperationsMetaReducer(
+        createCombinedTaskSharedMetaReducer(lwwUpdateMetaReducer(baseReducer)),
+      ) as ActionReducer<RootState, Action>;
+
+      const replayedState = replayReducer(
+        stateBeforeRemote,
+        bulkApplyOperations({
+          operations: appliedOps(),
+          localClientId: LOCAL_CLIENT_ID,
+        }),
+      );
+      const replayedWinner = replayedState[TASK_FEATURE_NAME].entities[
+        CONFLICT_TASK_ID
+      ] as Task;
+      expect(replayedWinner.title).toBe(localWinner.title);
+      expect(replayedWinner.dueDay).toBe(FUTURE_DAY);
+      expect(replayedState[plannerFeatureKey].days[FUTURE_DAY]).toEqual([
+        SIBLING_2,
+        CONFLICT_TASK_ID,
+      ]);
     });
 
     it('degrades to a plain remote win when a local winner has no compensation snapshot', async () => {

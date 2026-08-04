@@ -98,6 +98,7 @@ import {
 import { NOISE_FIELDS } from './conflict-journal.model';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
 import { areCommutingSectionOperations } from './section-conflict-commutativity.util';
+import { selectPlannerState } from '../../features/planner/store/planner.selectors';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -114,6 +115,16 @@ interface MergedResolution {
   mergedOp: Operation;
   /** Kept so the merge is journaled only after its reducer work succeeds. */
   plan: LwwConflictResolutionPlan<EntityConflict>;
+}
+
+interface MultiEntityRemoteOpWinners {
+  op: Operation;
+  hasLocalWinner: boolean;
+  hasRemoteWinner: boolean;
+  localWinnerKeys: Set<string>;
+  resolvedEntityKeys: Set<string>;
+  localWinOpIds: Set<string>;
+  remoteWinCompensationIds: Set<string>;
 }
 
 const taskRelationshipPatch = (
@@ -376,20 +387,19 @@ const INDEPENDENT_MULTI_DELETE_ACTIONS = new Set<ActionType>([
  * - SCOPED_PLAN rows (see `preserve-partial-bulk-plan.util.ts`) are rejected
  *   as a unit and replaced by ONE copy narrowed to the surviving task ids,
  *   mirroring `_preservePartiallyRejectedLocalBulkDeletes`.
- * - ORDERING_ONLY rows touch nothing but `TODAY_TAG.taskIds` ordering — Today
- *   MEMBERSHIP is derived from `task.dueDay`/`dueWithTime` (ADR #2) — so
- *   rejecting such a row loses at most list ordering: cosmetic, self-healing,
- *   no replacement needed. Pinned by the entity-field-free invariant specs in
- *   `task-shared-scheduling.reducer.spec.ts` AND `task.reducer.spec.ts`.
+ * - ORDERING_ONLY rows touch no task entity fields — Today MEMBERSHIP is
+ *   derived from `task.dueDay`/`dueWithTime` (ADR #2). Their reducers can
+ *   reorder `TODAY_TAG.taskIds` and persisted `TaskState.ids`, so rejecting
+ *   such a row loses ordering only: cosmetic, self-healing, no replacement
+ *   needed. Pinned by the entity-field-free and ordering specs in
+ *   `task-shared-scheduling.reducer.spec.ts` and `task.reducer.spec.ts`.
  *
  * Remote rows of these types replay as ordinary atomic actions (the reducers
- * skip unknown task ids); local winners are restored by the existing
- * mixed-winner compensation snapshots applied after the remote row. Known
- * bounded gap of that restore (also pre-existing for archive rows): the
- * snapshot re-imposes TASK fields only, so cross-slice side effects of the
- * applied remote row (e.g. `removeTasksFromPlannerDays` stripping a
- * local-win task's planner-day placement) are not re-imposed; the entry
- * reappears when the task's own dueDay comes around.
+ * skip unknown task ids); local winners are restored by mixed-winner
+ * compensation snapshots applied after the remote row. A remote
+ * `planTasksForToday` also removes every target from `planner.days`, so its
+ * local-winning targets receive an established `Upsert Planner Day` follow-up
+ * that restores their exact surviving placement on live apply and replay.
  */
 const ORDERING_ONLY_MULTI_ACTIONS = new Set<ActionType>([
   ActionType.TASK_SHARED_MOVE_IN_TODAY,
@@ -984,18 +994,7 @@ export class ConflictResolutionService {
     // local-win snapshots after it as compensations. The remote row stays pending
     // until reducer and archive application complete; status-blind hydration then
     // replays the same deterministic sequence after a crash.
-    const multiEntityRemoteOpWinners = new Map<
-      string,
-      {
-        op: Operation;
-        hasLocalWinner: boolean;
-        hasRemoteWinner: boolean;
-        localWinnerKeys: Set<string>;
-        resolvedEntityKeys: Set<string>;
-        localWinOpIds: Set<string>;
-        remoteWinCompensationIds: Set<string>;
-      }
-    >();
+    const multiEntityRemoteOpWinners = new Map<string, MultiEntityRemoteOpWinners>();
     const compensatedRemoteOps = new Map<string, Operation>();
     const compensationOpIdsToApply = new Set<string>();
     for (const resolution of resolutions) {
@@ -1278,6 +1277,17 @@ export class ConflictResolutionService {
           remoteWinnerAffectedEntityKeys.delete(localWinnerKey);
         }
       }
+    }
+
+    const plannerCompensationOps =
+      await this._createMixedRemoteTodayPlannerCompensationOps(
+        [...multiEntityRemoteOpWinners.values()],
+        newLocalWinOpsById,
+      );
+    for (const plannerCompensationOp of plannerCompensationOps) {
+      newLocalWinOps.push(plannerCompensationOp);
+      newLocalWinOpsById.set(plannerCompensationOp.id, plannerCompensationOp);
+      compensationOpIdsToApply.add(plannerCompensationOp.id);
     }
 
     // A remote DELETE that loses outright — single-entity, or a bulk delete
@@ -2782,6 +2792,102 @@ export class ConflictResolutionService {
       localWinOp = markLwwDeleteRecreation(localWinOp);
     }
     return localWinOp;
+  }
+
+  /**
+   * A mixed remote `planTasksForToday` must replay atomically so its remote
+   * winners keep their scheduling change. That same reducer removes every
+   * target from every planner day, including tasks whose newer local edit won.
+   * Re-emit the affected day snapshots after the TASK winner snapshots:
+   * remote-winning targets stay removed, while covered local winners retain
+   * their exact position among untouched tasks.
+   *
+   * `Upsert Planner Day` is an existing wire action understood by released
+   * clients, so this needs neither a schema bump nor a new payload contract.
+   */
+  private async _createMixedRemoteTodayPlannerCompensationOps(
+    winnerGroups: MultiEntityRemoteOpWinners[],
+    localWinOpsById: ReadonlyMap<string, Operation>,
+  ): Promise<Operation[]> {
+    const mixedPlanGroups = winnerGroups.filter(
+      ({ op, hasLocalWinner, hasRemoteWinner }) =>
+        op.actionType === ActionType.TASK_SHARED_PLAN_FOR_TODAY &&
+        hasLocalWinner &&
+        hasRemoteWinner,
+    );
+    if (mixedPlanGroups.length === 0) return [];
+
+    const localWinnerTaskIds = new Set<string>();
+    const localWinnerOps: Operation[] = [];
+    for (const group of mixedPlanGroups) {
+      for (const localWinOpId of group.localWinOpIds) {
+        const localWinOp = localWinOpsById.get(localWinOpId);
+        if (
+          localWinOp?.entityType !== 'TASK' ||
+          !localWinOp.entityId ||
+          localWinOp.opType === OpType.Delete ||
+          !group.localWinnerKeys.has(toEntityKey('TASK', localWinOp.entityId))
+        ) {
+          continue;
+        }
+        localWinnerTaskIds.add(localWinOp.entityId);
+        localWinnerOps.push(localWinOp);
+      }
+    }
+    if (localWinnerTaskIds.size === 0) return [];
+
+    const plannerState = await firstValueFrom(this.store.select(selectPlannerState));
+    if (!plannerState?.days) return [];
+
+    const remoteTargetIds = new Set(
+      mixedPlanGroups.flatMap(({ op }) => getOpEntityIds(op)),
+    );
+    const affectedDays = Object.entries(plannerState.days)
+      .filter(([, taskIds]) => taskIds.some((taskId) => localWinnerTaskIds.has(taskId)))
+      .map(([day, taskIds]) => ({
+        day,
+        taskIds: taskIds.filter(
+          (taskId) => !remoteTargetIds.has(taskId) || localWinnerTaskIds.has(taskId),
+        ),
+      }))
+      .sort((a, b) => a.day.localeCompare(b.day));
+    if (affectedDays.length === 0) return [];
+
+    const clientId = await this.clientIdProvider.loadClientId();
+    if (!clientId) {
+      throw new Error(
+        'ConflictResolutionService: Cannot preserve planner placement - no client ID',
+      );
+    }
+
+    let nextClock = this.mergeAndIncrementClocks(
+      [
+        (await this.opLogStore.getVectorClock()) ?? {},
+        ...mixedPlanGroups.map(({ op }) => op.vectorClock),
+        ...localWinnerOps.map((op) => op.vectorClock),
+      ],
+      clientId,
+    );
+    const timestamp = Math.max(...localWinnerOps.map((op) => op.timestamp));
+    return affectedDays.map(({ day, taskIds }) => {
+      const op: Operation = {
+        id: uuidv7(),
+        actionType: ActionType.PLANNER_UPSERT_DAY,
+        opType: OpType.Update,
+        entityType: 'PLANNER',
+        entityId: day,
+        payload: {
+          actionPayload: { day, taskIds },
+          entityChanges: [],
+        },
+        clientId,
+        vectorClock: nextClock,
+        timestamp,
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      };
+      nextClock = this.mergeAndIncrementClocks([nextClock], clientId);
+      return op;
+    });
   }
 
   /**
