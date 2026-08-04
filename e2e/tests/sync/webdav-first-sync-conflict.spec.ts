@@ -107,18 +107,20 @@ test.describe('@webdav WebDAV First Sync Conflict', () => {
     await useLocalBtn.click();
     console.log('[Test] Clicked Use Local on Client B');
 
-    // Handle potential confirmation dialog (for overwrites with many changes)
+    // A first-sync overwrite must always require the count-free safety warning.
     const confirmDialog = pageB.locator('dialog-confirm');
-    try {
-      await confirmDialog.waitFor({ state: 'visible', timeout: 3000 });
-      // Click the confirm/OK button
-      await confirmDialog
-        .locator('button[color="warn"], button:has-text("OK")')
-        .first()
-        .click();
-    } catch {
-      // Confirmation might not appear - that's fine
-    }
+    await expect(confirmDialog).toBeVisible();
+    await expect(confirmDialog.locator('.content')).toHaveText(
+      'WARNING: This device cannot determine how many unsynced changes the remote data has (it has no record of a previous sync). Overwriting the remote data with the local version may discard changes. Are you sure?',
+    );
+    const snapshotUploadResponse = pageB.waitForResponse(
+      (response) =>
+        response.request().method() === 'PUT' &&
+        new URL(response.url()).pathname.endsWith('/sync-data.json'),
+      { timeout: 60000 },
+    );
+    await confirmDialog.locator('[e2e="confirmBtn"]').click();
+    expect((await snapshotUploadResponse).ok()).toBe(true);
 
     // Wait for sync to complete
     await waitForSyncComplete(pageB, syncPageB, 30000);
@@ -219,17 +221,13 @@ test.describe('@webdav WebDAV First Sync Conflict', () => {
     await useRemoteBtn.click();
     console.log('[Test] Clicked Use Remote');
 
-    // Handle potential confirmation dialog
+    // A first-sync overwrite must always require the count-free safety warning.
     const confirmDialog = pageB.locator('dialog-confirm');
-    try {
-      await confirmDialog.waitFor({ state: 'visible', timeout: 3000 });
-      await confirmDialog
-        .locator('button[color="warn"], button:has-text("OK")')
-        .first()
-        .click();
-    } catch {
-      // Confirmation might not appear
-    }
+    await expect(confirmDialog).toBeVisible();
+    await expect(confirmDialog.locator('.content')).toHaveText(
+      'WARNING: This device cannot determine how many unsynced changes the local data has (it has no record of a previous sync). Overwriting the local data with the remote version may discard changes. Are you sure?',
+    );
+    await confirmDialog.locator('[e2e="confirmBtn"]').click();
 
     await waitForSyncComplete(pageB, syncPageB, 30000);
     console.log('[Test] Sync completed');
