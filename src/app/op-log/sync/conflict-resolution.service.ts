@@ -379,20 +379,26 @@ const INDEPENDENT_MULTI_DELETE_ACTIONS = new Set<ActionType>([
  * - ORDERING_ONLY rows touch nothing but `TODAY_TAG.taskIds` ordering — Today
  *   MEMBERSHIP is derived from `task.dueDay`/`dueWithTime` (ADR #2) — so
  *   rejecting such a row loses at most list ordering: cosmetic, self-healing,
- *   no replacement needed. Pinned by the entity-field-free invariant spec in
- *   `task-shared-scheduling.reducer.spec.ts`.
+ *   no replacement needed. Pinned by the entity-field-free invariant specs in
+ *   `task-shared-scheduling.reducer.spec.ts` AND `task.reducer.spec.ts`.
  *
  * Remote rows of these types replay as ordinary atomic actions (the reducers
  * skip unknown task ids); local winners are restored by the existing
- * mixed-winner compensation snapshots applied after the remote row.
+ * mixed-winner compensation snapshots applied after the remote row. Known
+ * bounded gap of that restore (also pre-existing for archive rows): the
+ * snapshot re-imposes TASK fields only, so cross-slice side effects of the
+ * applied remote row (e.g. `removeTasksFromPlannerDays` stripping a
+ * local-win task's planner-day placement) are not re-imposed; the entry
+ * reappears when the task's own dueDay comes around.
  */
 const ORDERING_ONLY_MULTI_ACTIONS = new Set<ActionType>([
   ActionType.TASK_SHARED_MOVE_IN_TODAY,
   ActionType.TASK_SHARED_REMOVE_FROM_TODAY,
 ]);
-const isResolvableTodayListMultiOp = (op: Operation): boolean =>
-  SCOPED_PLAN_MULTI_ACTIONS.has(op.actionType) ||
-  ORDERING_ONLY_MULTI_ACTIONS.has(op.actionType);
+/** NOTE: classifies by action type alone — callers gate on multi-entity-ness. */
+const isResolvableTodayListAction = (actionType: ActionType): boolean =>
+  SCOPED_PLAN_MULTI_ACTIONS.has(actionType) ||
+  ORDERING_ONLY_MULTI_ACTIONS.has(actionType);
 
 /**
  * Handles sync conflicts using Last-Write-Wins (LWW) automatic resolution.
@@ -1056,18 +1062,19 @@ export class ConflictResolutionService {
           remoteOp,
         );
         if (recreationOp === undefined) {
-          // The local DELETE carries no reconstructable base entity (e.g. a
-          // legacy bulk deleteTasks op stores only taskIds), so we cannot recreate
-          // the remote-winning entity. Degrade like the single-entity path
-          // (_convertToLWWUpdatesIfNeeded / onMissingBaseEntity) instead of
+          // No recreation available: the local DELETE carries no
+          // reconstructable base entity (e.g. a legacy bulk deleteTasks op
+          // stores only taskIds), or the winner is a multi-entity row that
+          // `_convertToLWWUpdatesIfNeeded` refuses to rewrite (#9426). Degrade
+          // like the single-entity path (onMissingBaseEntity) instead of
           // throwing: throwing here aborts autoResolveConflictsLWW without
           // advancing the cursor, so the same op re-downloads and wedges sync
           // forever. The entity stays locally deleted (a bounded divergence for
           // this one entity, logged below) while the rest of the batch resolves.
           OpLog.err(
             `ConflictResolutionService: Cannot recreate remote winner ${remoteOp.id} for ` +
-              `${resolution.conflict.entityType}:${resolution.conflict.entityId} — local delete ` +
-              `carried no base entity. Entity stays deleted on this client; skipping recreation.`,
+              `${resolution.conflict.entityType}:${resolution.conflict.entityId} — no base ` +
+              `entity or multi-entity conversion refused. Entity stays deleted on this client.`,
           );
           continue;
         }
@@ -1188,7 +1195,7 @@ export class ConflictResolutionService {
           )
         : [];
       if (uncoveredLocalWinnerKeys.length > 0) {
-        if (!isResolvableTodayListMultiOp(winners.op)) {
+        if (!isResolvableTodayListAction(winners.op.actionType)) {
           throw new Error(
             `ConflictResolutionService: Cannot safely compensate mixed multi-entity winners for ${remoteOp.id}`,
           );
@@ -1202,6 +1209,14 @@ export class ConflictResolutionService {
         // fall through: the compensated-remote-op flow below re-classifies the
         // row (partition booked it as a rejected loser) so its remote-win and
         // uncontested sibling entities still get it applied.
+        //
+        // KNOWN INACCURACY (bounded): the SPAP-13 journal emits from the
+        // untouched plans, so a degraded conflict is journaled winner=local
+        // although the row applied as a remote win. Confined to
+        // journal-enabled builds — the production entry point passes
+        // `disableConflictJournal: true` (producer freeze, see
+        // RemoteOpsProcessingService) — and fixing it means re-plumbing plan
+        // mutation; revisit when the journal producer is unfrozen.
         OpLog.err(
           `ConflictResolutionService: ${uncoveredLocalWinnerKeys.length} local winner(s) of ` +
             `Today-list op ${remoteOp.id} have no compensation snapshot; applying as remote win.`,
@@ -2351,7 +2366,7 @@ export class ConflictResolutionService {
    * The Today-list ops that used to make this reachable from ordinary use —
    * `planTasksForToday` (dispatched with every due task id by the automatic
    * day-rollover) and the ordering-only Today ops — now resolve via
-   * `isResolvableTodayListMultiOp` (#9426): scoped replacement for plan rows,
+   * `isResolvableTodayListAction` (#9426): scoped replacement for plan rows,
    * plain rejection for ordering rows, atomic replay for remote rows. The
    * remaining blocked set (updateTasks, legacy addTagToTask, …) is pinned in
    * `testing/integration/unsupported-multi-entity-conflict.integration.spec.ts`.
@@ -2365,7 +2380,7 @@ export class ConflictResolutionService {
           isMultiEntityOperation(op) &&
           op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
           !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) &&
-          !isResolvableTodayListMultiOp(op),
+          !isResolvableTodayListAction(op.actionType),
       );
       if (unsafeRemoteOp) {
         throw new UnsupportedMultiEntityConflictError(
@@ -2388,7 +2403,7 @@ export class ConflictResolutionService {
             (op) =>
               !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) &&
               !DECOMPOSABLE_MULTI_ACTION_FIELDS.has(op.actionType) &&
-              !isResolvableTodayListMultiOp(op),
+              !isResolvableTodayListAction(op.actionType),
           );
       if (unsafeLocalOp) {
         throw new UnsupportedMultiEntityConflictError(

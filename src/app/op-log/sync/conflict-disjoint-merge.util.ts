@@ -185,7 +185,12 @@ export const noiseTiebreakSide = (
  *
  * Field-level conditions only (the caller separately excludes archive plans):
  *  - neither side contains a multi-entity op, because resolving one conflicted
- *    entity would reject the whole original op and drop its sibling updates;
+ *    entity would reject the whole original op and drop its sibling updates.
+ *    LOAD-BEARING beyond that rationale since #9426: for SCOPED_PLAN types the
+ *    sibling loss is now handled, but `_preservePartiallyRejectedLocalBulkPlanOps`
+ *    only sees conflicts routed to the plain-LWW `resolutions` list — a merged
+ *    conflict bypasses it and would starve the scoped replacement. Do not relax
+ *    this condition for those types without moving that grouping too;
  *  - neither side has a DELETE op;
  *  - BOTH sides changed at least one real (non-noise) field — if one side only
  *    bumped noise, nothing real is lost by LWW, so leave it to SPAP-13's `noise`

@@ -631,6 +631,19 @@ describe('Task Reducer', () => {
       expect(state.entities).toBe(stateWithOrderedTasks.entities);
     });
 
+    it('must not handle moveTaskInTodayTagList at all (ordering-only invariant #9426)', () => {
+      // The task feature reducer currently has NO handler for this action; a
+      // future one that touches entities would invalidate the ordering-only
+      // rejection in conflict resolution. Same remediation as above.
+      const action = TaskSharedActions.moveTaskInTodayTagList({
+        toTaskId: 'task1',
+        fromTaskId: 'task2',
+      });
+      const state = taskReducer(stateWithTasks, action);
+
+      expect(state).toBe(stateWithTasks);
+    });
+
     it('should ignore all invalid IDs and leave state unchanged', () => {
       stubWindowConfirm(false);
       if (!jasmine.isSpy(window.alert)) {
