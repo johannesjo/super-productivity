@@ -414,6 +414,18 @@ the dialog without clicking a button, it resolves with `undefined`. The legacy
 `content`, `okBtnLabel`, and `cancelBtnLabel` fields are still accepted, but new
 plugins should use `htmlContent` and `buttons`.
 
+The host sanitizes `htmlContent` before rendering it, rebuilding the markup from
+an allowlist. Semantic HTML, native form controls (including their `id`s and
+values), `class`, `data-*`, `aria-*`, and inline layout styles are preserved.
+Removed are scripts, event-handler attributes, unsafe URLs, inline `<svg>`, and
+any `style` attribute containing `url(`, since dialog layout never needs to load
+a resource. Elements outside the allowlist are unwrapped, so their text stays
+visible while the tag itself is dropped.
+
+Escape untrusted values before interpolating them into the HTML string: the
+sanitizer is a safety net for the host, not a substitute for escaping in your
+plugin. Use `content` when plain text is sufficient.
+
 ### Registration Methods (plugin.js only)
 
 #### Header Button
