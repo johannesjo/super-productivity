@@ -58,9 +58,10 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { SafeArea } from 'capacitor-plugin-safe-area';
 import { patchCdkViewportForSafeArea } from './cdk-safe-area-viewport.util';
 import { LS } from '../persistence/storage-keys.const';
-import { Log } from '../log';
+import { Log, PluginLog } from '../log';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { sanitizeIosKeyboardHeight } from './sanitize-ios-keyboard-height.util';
+import { sanitizeSvgIconContent } from '../../util/sanitize-svg-icon.util';
 import { CustomThemeService, getRequiredThemeMode } from './custom-theme.service';
 
 interface NavigationBarPlugin {
@@ -436,12 +437,21 @@ export class GlobalThemeService {
     return this._registeredPluginIcons.has(iconName);
   }
 
+  /**
+   * `svgContent` comes from a plugin, so it is untrusted. `MatIconRegistry` parses the
+   * literal with `div.innerHTML`, which makes this the trust boundary for that sink.
+   */
   registerSvgIconFromContent(iconName: string, svgContent: string): void {
     // Plugin icon is already registered, skip
     if (this._registeredPluginIcons.has(iconName)) return;
+    const safeSvgContent = sanitizeSvgIconContent(svgContent);
+    if (!safeSvgContent) {
+      PluginLog.warn(`Skipping unsafe or invalid SVG icon: ${iconName}`);
+      return;
+    }
     this._matIconRegistry.addSvgIconLiteral(
       iconName,
-      this._domSanitizer.bypassSecurityTrustHtml(svgContent),
+      this._domSanitizer.bypassSecurityTrustHtml(safeSvgContent),
     );
     this._registeredPluginIcons.add(iconName);
   }
