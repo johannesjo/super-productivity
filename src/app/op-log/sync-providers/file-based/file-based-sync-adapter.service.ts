@@ -1765,7 +1765,13 @@ export class FileBasedSyncAdapterService {
     }
   }
 
-  /** Copies the current `sync-state.json` to its `.bak` (non-fatal). */
+  /**
+   * Copies the current `sync-state.json` to its `.bak` (non-fatal, except that a
+   * plaintext-downgrade rejection rethrows). The download's DECODE is
+   * load-bearing security-wise: it is where a plaintext remote is detected
+   * before compaction writes anything (GHSA-vrc7-775g-ggqc) — do not replace it
+   * with a raw byte-copy.
+   */
   private async _backupStateFile(
     provider: GuardedFileSyncProvider,
     cfg: EncryptAndCompressCfg,
@@ -1855,6 +1861,15 @@ export class FileBasedSyncAdapterService {
           'FileBasedSyncAdapter: immutable snapshot does not match snapshotRef; trying sync-state.json',
         );
       } catch (e) {
+        // Same rule as the fixed-file read below (GHSA-vrc7-775g-ggqc): the
+        // referenced immutable snapshot is a PRIMARY source, so a plaintext one
+        // is a downgrade signal, not ordinary corruption — surface it instead of
+        // silently falling through to sync-state.json. No legitimate flow leaves
+        // the REFERENCED gen snapshot plaintext while local encryption is on
+        // (a real disable rewrites the ops file too, which fails decode first).
+        if (e instanceof PlaintextWhenEncryptionExpectedError) {
+          throw e;
+        }
         OpLog.warn(
           'FileBasedSyncAdapter: immutable snapshot unreadable; trying sync-state.json',
           e,

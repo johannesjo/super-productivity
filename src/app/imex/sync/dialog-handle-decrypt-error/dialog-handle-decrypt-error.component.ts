@@ -65,6 +65,12 @@ export class DialogHandleDecryptErrorComponent {
   }
 
   async updatePwAndResync(): Promise<void> {
+    // The template's formEl.valid gate is vacuous (the input has no validators),
+    // so guard here: an empty submit would persist encryptKey '' with
+    // isEncryptionEnabled true — fail-closed but a pointless broken state.
+    if (!this.passwordVal) {
+      return;
+    }
     try {
       await this._syncConfigService.updateEncryptionPassword(this.passwordVal);
       this.passwordVal = '';

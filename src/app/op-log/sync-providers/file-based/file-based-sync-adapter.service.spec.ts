@@ -3733,6 +3733,47 @@ describe('FileBasedSyncAdapterService', () => {
       expect(downloadedPaths).not.toContain(C.STATE_BACKUP_FILE);
     });
 
+    it('(c2) encrypted download rejects a plaintext immutable snapshot without falling back', async () => {
+      // The #9040 gen snapshot is the PRIMARY source once referenced, so a
+      // plaintext one must abort like the fixed file — not silently fall back
+      // to sync-state.json and mask the downgrade signal.
+      const GEN_FILE = 'sync-state-1-tampered.json';
+      const opsFile = makeOpsFile({
+        syncVersion: 5,
+        recentOps: [makeCompactOp()],
+        snapshotRef: {
+          syncVersion: 1,
+          vectorClock: { client1: 1 },
+          rev: 'sr1',
+          file: GEN_FILE,
+        },
+      });
+      routeDownloads({
+        [C.OPS_FILE]: await encryptSplitFile(opsFile),
+        [GEN_FILE]: addPrefix(makeStateFile({ syncVersion: 1 }), 3),
+        // A perfectly valid encrypted fixed file that WOULD ref-validate — the
+        // rejection must fire before it is even consulted.
+        [C.STATE_FILE]: await encryptSplitFile(
+          makeStateFile({ syncVersion: 1, vectorClock: { client1: 1 } }),
+        ),
+      });
+      const encryptedAdapter = service.createAdapter(
+        mockProvider,
+        encryptedCfg,
+        'test-password',
+      );
+
+      await expectAsync(encryptedAdapter.downloadOps(0, 'client2')).toBeRejectedWithError(
+        PlaintextWhenEncryptionExpectedError,
+      );
+
+      const downloadedPaths = mockProvider.downloadFile.calls
+        .allArgs()
+        .map((args) => args[0] as string);
+      expect(downloadedPaths).toContain(GEN_FILE);
+      expect(downloadedPaths).not.toContain(C.STATE_FILE);
+    });
+
     // (d) snapshotRef mismatch (and no usable backup) is treated as a gap.
     it('(d) snapshotRef mismatch with no backup signals a gap (full re-download)', async () => {
       const opsFile = makeOpsFile({

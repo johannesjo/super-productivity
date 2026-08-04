@@ -1572,6 +1572,20 @@ export class SyncWrapperService {
         this._handleMissingPasswordDialog();
         return 'HANDLED_ERROR';
       }
+      // GHSA-vrc7-775g-ggqc: a USE_REMOTE re-download fails closed on a
+      // plaintext remote while encryption is expected. Mirror the main sync
+      // path's dedicated branch so the user gets the translated, actionable
+      // message instead of the raw error text (conflict resolution is always
+      // user-triggered, so no auto-sync gating here).
+      if (resolutionError instanceof PlaintextWhenEncryptionExpectedError) {
+        this._providerManager.setSyncStatus('ERROR');
+        this._snackService.open({
+          msg: T.F.SYNC.S.REMOTE_NOT_ENCRYPTED,
+          type: 'ERROR',
+          config: { duration: 15000 },
+        });
+        return 'HANDLED_ERROR';
+      }
       // Error during conflict resolution (forceUpload or forceDownload failed)
       SyncLog.err(
         'SyncWrapperService: Error during conflict resolution:',
@@ -1608,11 +1622,8 @@ export class SyncWrapperService {
     // message — must NOT be read as a gateway timeout and misclassify an unrelated
     // error. (The OperationIntegrityError branch is also ordered above this guard;
     // this hardening removes the footgun for any other error type too.)
-    return (
-      errStr.includes('timeout') ||
-      /\b504\b/.test(errStr) ||
-      errStr.includes('gateway timeout')
-    );
+    // No separate 'gateway timeout' check: includes('timeout') already covers it.
+    return errStr.includes('timeout') || /\b504\b/.test(errStr);
   }
 
   private _getPermissionErrorMessage(): string {

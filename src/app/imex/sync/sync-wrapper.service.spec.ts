@@ -2034,6 +2034,40 @@ describe('SyncWrapperService', () => {
         });
       });
 
+      it('should show the translated plaintext-rejection message when USE_REMOTE hits a downgraded remote', async () => {
+        // GHSA-vrc7-775g-ggqc: the re-download after USE_REMOTE fails closed on
+        // a plaintext remote; the dedicated branch must surface the translated
+        // REMOTE_NOT_ENCRYPTED message, not the raw error text via the generic
+        // resolution handler.
+        const conflictError = new LocalDataConflictError(
+          2,
+          { tasks: [] },
+          { clientB: 3 },
+        );
+        mockSyncService.downloadRemoteOps.and.rejectWith(conflictError);
+        mockMatDialog.open.and.returnValue({
+          afterClosed: () => of('USE_REMOTE'),
+        } as any);
+        mockSyncService.forceDownloadRemoteState = jasmine
+          .createSpy('forceDownloadRemoteState')
+          .and.rejectWith(
+            new PlaintextWhenEncryptionExpectedError({
+              isCompressed: false,
+              modelVersion: 1,
+            }),
+          );
+
+        const result = await service.sync();
+
+        expect(result).toBe('HANDLED_ERROR');
+        expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+        expect(mockSnackService.open).toHaveBeenCalledWith({
+          msg: T.F.SYNC.S.REMOTE_NOT_ENCRYPTED,
+          type: 'ERROR',
+          config: { duration: 15000 },
+        });
+      });
+
       // GHSA-9544-hjjr-fg8h: USE_LOCAL force-uploads, which refuses to send
       // plaintext when the key is missing. Route to the enter-password recovery
       // dialog instead of a dead-end error snack.
