@@ -2177,6 +2177,53 @@ describe('AddTaskBarParserService', () => {
       expect(realState.state().date).toBe(NEXT_SATURDAY);
     });
 
+    // The roll outlives the parse: an ordinary parse of text that names no date
+    // carries the rolled day over from the state, which is not the same thing as
+    // producing it, and must not be able to forget where it came from.
+    it('should still give the date back after an ordinary parse in between', async () => {
+      realState.updateInputTxt('Standup');
+      await parse('Standup');
+      service.applyUserDatePick(SATURDAY, null, null);
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      // Nothing in this text says anything about a date
+      realState.updateInputTxt('Standups');
+      await parse('Standups');
+      expect(realState.state().date).toBe(MONDAY);
+
+      service.applyUserRepeatPick(DAILY);
+
+      expect(realState.state().date).toBe(SATURDAY);
+    });
+
+    it('should give it back for controls used before the first parse', async () => {
+      // No parse has run, so there is no previous result for a pick to be
+      // recorded against — the roll is tracked apart from it for that reason
+      service.applyUserDatePick(SATURDAY, null, null);
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      service.applyUserRepeatPick(DAILY);
+
+      expect(realState.state().date).toBe(SATURDAY);
+    });
+
+    it('should take the date the text names as the day it was picked as', async () => {
+      // Editing the token to name the Monday makes the Monday the user's
+      // choice, so leaving the schedule has nothing to give back
+      realState.updateInputTxt(`Standup @${SATURDAY}`);
+      await parse(`Standup @${SATURDAY}`);
+      service.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      realState.updateInputTxt(`Standup @${MONDAY}`);
+      await parse(`Standup @${MONDAY}`);
+      service.applyUserRepeatPick(DAILY);
+
+      expect(realState.state().date).toBe(MONDAY);
+    });
+
     it('should not resurrect a rolled date the user has since cleared', async () => {
       // The date chip's clear button writes the state directly, so the roll
       // recorded here is no longer the one standing

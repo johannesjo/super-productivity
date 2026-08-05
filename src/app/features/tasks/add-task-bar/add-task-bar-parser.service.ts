@@ -27,10 +27,6 @@ interface PreviousParseResult {
   timeEstimate: number | null;
   dueDate: string | null;
   dueTime: string | null;
-  // The day a workday recurrence moved `dueDate` off, or null when it was not
-  // moved. Only this service produces that move, so only this service can undo
-  // it — see _dateBeforeWorkdayRoll.
-  rolledFromDate: string | null;
   attachments: TaskAttachment[];
   deadlineDate: string | null;
   deadlineTime: string | null;
@@ -90,6 +86,15 @@ const rollWeekendDateForRepeat = (
 export class AddTaskBarParserService {
   private readonly _stateService = inject(AddTaskBarStateService);
   private _previousParseResult: PreviousParseResult | null = null;
+  // The workday roll currently standing: the day a workday recurrence moved the
+  // date off, and the day it moved it to. Only this service produces that move,
+  // so only this service can take it back off — see _dateBeforeWorkdayRoll.
+  //
+  // Deliberately not part of the parse result: the date the roll applies to
+  // outlives any single parse (the user picks it in a control, and a parse of
+  // text that names no date carries it over), so a parse rebuilding its result
+  // must not be able to forget it.
+  private _workdayRoll: { from: string; to: string } | null = null;
   private _parseRunId = 0;
   // Exactly which characters of which input the parser last consumed, so a
   // "clear"/"pick" can delete a token without a second grammar guessing at its
@@ -208,7 +213,6 @@ export class AddTaskBarParserService {
         // But if the user explicitly cleared a default date, keep it cleared.
         dueDate: defaultDueDate,
         dueTime: defaultDueTime,
-        rolledFromDate: null,
         attachments: [],
         deadlineDate: wasDeadlineFromSyntax ? null : currentState.deadlineDate || null,
         deadlineTime: wasDeadlineFromSyntax ? null : currentState.deadlineTime || null,
@@ -298,7 +302,6 @@ export class AddTaskBarParserService {
         timeEstimate: parseResult.taskChanges.timeEstimate || null,
         dueDate: dueDate,
         dueTime: dueTime,
-        rolledFromDate: null,
         attachments: parseResult.attachments || [],
         deadlineDate: deadlineDate,
         deadlineTime: deadlineTime,
@@ -315,15 +318,20 @@ export class AddTaskBarParserService {
     // applyUser*Pick. Reconciling the pair here as well covers every
     // combination, and keeps it reconciled: a due token stays in the text and
     // parses back to the excluded day on every following keystroke.
-    const rolledDueDate = rollWeekendDateForRepeat(
-      currentResult.dueDate,
+    //
+    // A day the text names is the user stating their choice again, exactly like
+    // a pick, so it is taken as given. Only a day carried over from the state
+    // can be this service's own output, and only that one is unwound first —
+    // otherwise editing the token to name the Monday would leave the roll
+    // claiming a weekend day the text no longer mentions.
+    const isDueDateFromText = !!parseResult?.taskChanges.dueWithTime;
+    // Only the day is excluded, not the hour, so the time stays as parsed
+    currentResult.dueDate = this._rollForRepeat(
+      isDueDateFromText
+        ? currentResult.dueDate
+        : this._dateBeforeWorkdayRoll(currentResult.dueDate),
       currentResult.repeat,
     );
-    if (rolledDueDate) {
-      // Only the day is excluded, not the hour, so the time stays as parsed
-      currentResult.rolledFromDate = currentResult.dueDate;
-      currentResult.dueDate = rolledDueDate;
-    }
 
     // Compare with previous result and only update changed values
     if (
@@ -451,6 +459,7 @@ export class AddTaskBarParserService {
   resetPreviousResult(): void {
     this._parseRunId++;
     this._previousParseResult = null;
+    this._workdayRoll = null;
   }
 
   /**
@@ -484,15 +493,13 @@ export class AddTaskBarParserService {
     // picked — until the next parse of the unchanged text puts the weekend day
     // back and quietly changes what submitting writes.
     const currentDate = this._stateService.state().date;
-    const baseDate = this._dateBeforeWorkdayRoll(currentDate);
-    const dueDate = rollWeekendDateForRepeat(baseDate, repeat) ?? baseDate;
+    const dueDate = this._rollForRepeat(this._dateBeforeWorkdayRoll(currentDate), repeat);
     this._recordUserPick({
       repeat,
       isRepeatFromSyntax: false,
       // Record the date too, so the parse the strip queues sees the state it is
       // about to read back as unchanged rather than as a reset.
       ...(dueDate === currentDate ? {} : { dueDate }),
-      rolledFromDate: dueDate === baseDate ? null : baseDate,
     });
     if (repeat) {
       this._stateService.updateRepeatSetting(repeat, cleanedInput);
@@ -516,14 +523,14 @@ export class AddTaskBarParserService {
     // recurrence by taking ownership of it too; it re-anchors to the new date.
     const repeat = this._stateService.state().repeat;
     // Reached from the other side than the repeat pick: an already-set workday
-    // schedule excludes the day just picked, so the same roll applies.
-    const dueDate = rollWeekendDateForRepeat(date, repeat) ?? date;
+    // schedule excludes the day just picked, so the same roll applies. The day
+    // picked here is the base by definition — it is not unwound, or picking the
+    // Monday a previous roll produced would silently mean the Saturday behind
+    // it.
+    const dueDate = this._rollForRepeat(date, repeat);
     this._recordUserPick({
       dueDate,
       dueTime: time,
-      // The day the user picked, so leaving the workday schedule can go back to
-      // it. Cleared when nothing was rolled, so a stale one cannot resurface.
-      rolledFromDate: dueDate === date ? null : date,
       ...(repeat ? { repeat, isRepeatFromSyntax: false } : {}),
     });
     this._stateService.updateDate(dueDate, time, cleanedInput);
@@ -557,7 +564,29 @@ export class AddTaskBarParserService {
   }
 
   /**
-   * The day `date` was picked as, before any workday roll this service applied
+   * The day the workday recurrence in effect really starts on, given the day
+   * the user chose — recording the move so a later change can take it back off.
+   *
+   * The single place `_workdayRoll` is written: every path that can change
+   * either half of the pair (the date or the recurrence) goes through here, so
+   * the record cannot describe a roll that is no longer the one standing.
+   */
+  private _rollForRepeat(base: string, repeat: AddTaskBarRepeat | null): string;
+  private _rollForRepeat(
+    base: string | null,
+    repeat: AddTaskBarRepeat | null,
+  ): string | null;
+  private _rollForRepeat(
+    base: string | null,
+    repeat: AddTaskBarRepeat | null,
+  ): string | null {
+    const rolled = base && rollWeekendDateForRepeat(base, repeat);
+    this._workdayRoll = base && rolled ? { from: base, to: rolled } : null;
+    return rolled || base;
+  }
+
+  /**
+   * The day `date` was chosen as, before any workday roll this service applied
    * to it — so a recurrence change re-derives from the day the user chose
    * rather than compounding on this service's own output.
    *
@@ -565,8 +594,8 @@ export class AddTaskBarParserService {
    * replaced it, and is returned as it is.
    */
   private _dateBeforeWorkdayRoll(date: string | null): string | null {
-    const prev = this._previousParseResult;
-    return prev?.rolledFromDate && prev.dueDate === date ? prev.rolledFromDate : date;
+    const roll = this._workdayRoll;
+    return roll && roll.to === date ? roll.from : date;
   }
 
   private _stripSyntaxForUserPick(
