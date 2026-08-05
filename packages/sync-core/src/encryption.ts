@@ -6,6 +6,8 @@
  *   encryption/argon2.ts        — Argon2id params, deriveKeyFromPassword, DerivedKey
  *   encryption/legacy.ts        — backward-compat PBKDF2 decryption + warning handler
  *   encryption/session-cache.ts — session-level key caches
+ *   encryption/transport-shape.ts — dependency-free ciphertext-shape classifier
+ *                                   (exported directly via the package barrel)
  *   encryption.ts (this file)   — public API: encrypt/decrypt/encryptBatch/decryptBatch
  *
  * ## Wire format (public contract — do not change without a version-byte migration)

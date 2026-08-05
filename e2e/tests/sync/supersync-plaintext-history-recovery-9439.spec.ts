@@ -1,7 +1,5 @@
 import {
   SuperSyncDownloadOpsResponseSchema,
-  SuperSyncUploadOpsRequestSchema,
-  SuperSyncUploadOpsResponseSchema,
   type SuperSyncOperation,
 } from '@sp/shared-schema';
 import { decrypt } from '@sp/sync-core';
@@ -74,11 +72,12 @@ const mergeHistoryClock = (history: DownloadHistory): Record<string, number> => 
 
 /**
  * Reuses a genuine app-created encrypted TASK operation, decrypts its payload,
- * and uploads the same wire shape as plaintext. This models the historical
- * pre-upload-guard leak without mocking the client or server sync seams.
+ * and inserts the same wire shape through the TEST_MODE database seed route.
+ * This models legacy plaintext history without weakening the production upload
+ * gate that prevents new plaintext from being stored.
  */
-const uploadPlaintextClone = async (
-  token: string,
+const seedPlaintextClone = async (
+  userId: number,
   password: string,
   testRunId: string,
   history: DownloadHistory,
@@ -103,27 +102,36 @@ const uploadPlaintextClone = async (
     timestamp: Date.now(),
     isPayloadEncrypted: false,
   };
-  const requestBody = SuperSyncUploadOpsRequestSchema.parse({
-    clientId,
-    ops: [plaintextOp],
-  });
-  const response = await fetch(`${SUPERSYNC_BASE_URL}/api/sync/ops`, {
-    method: 'POST',
-    headers: authHeaders(token),
-    body: JSON.stringify(requestBody),
-  });
+  const headers = new Headers();
+  headers.set('Content-Type', 'application/json');
+  const response = await fetch(
+    `${SUPERSYNC_BASE_URL}/api/test/user/${userId}/legacy-plaintext-ops`,
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ op: plaintextOp }),
+    },
+  );
   if (!response.ok) {
     throw new Error(
       `Failed to seed plaintext operation: ${response.status} ${await response.text()}`,
     );
   }
 
-  const result = SuperSyncUploadOpsResponseSchema.parse(await response.json());
-  const upload = result.results[0];
-  if (result.results.length !== 1 || upload.accepted !== true || !upload.serverSeq) {
-    throw new Error(`Server rejected plaintext fixture: ${JSON.stringify(result)}`);
+  const result: unknown = await response.json();
+  if (
+    typeof result !== 'object' ||
+    result === null ||
+    !('id' in result) ||
+    result.id !== plaintextOp.id ||
+    !('serverSeq' in result) ||
+    typeof result.serverSeq !== 'number' ||
+    !Number.isSafeInteger(result.serverSeq) ||
+    result.serverSeq < 1
+  ) {
+    throw new Error(`Invalid plaintext seed response: ${JSON.stringify(result)}`);
   }
-  return { id: plaintextOp.id, serverSeq: upload.serverSeq };
+  return { id: plaintextOp.id, serverSeq: result.serverSeq };
 };
 
 const forceOverwriteFromTrustedClient = async (
@@ -187,8 +195,8 @@ test.describe('@supersync @encryption #9439 plaintext history recovery', () => {
       await trustedClient.sync.syncAndWait();
 
       const validHistory = await downloadServerHistory(user.token);
-      const plaintextOp = await uploadPlaintextClone(
-        user.token,
+      const plaintextOp = await seedPlaintextClone(
+        user.userId,
         password,
         testRunId,
         validHistory,

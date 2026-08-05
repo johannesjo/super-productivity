@@ -25,6 +25,8 @@ import {
   MAX_DECOMPRESSED_SIZE_OPS,
   MAX_OPS_PER_BATCH,
   sendCompressedBodyParseFailure,
+  sendE2eeRequiredReply,
+  violatesE2eeGate,
 } from './sync.routes.payload';
 import {
   computeOpsStorageBytesExcludingUnstorableIds,
@@ -117,6 +119,18 @@ export const uploadOpsHandler = async (
       return reply.status(429).send({
         error: 'Rate limited',
         errorCode: SYNC_ERROR_CODES.RATE_LIMITED,
+      });
+    }
+
+    // Encrypted-only ingress gate: every op must be flagged encrypted and
+    // carry the ciphertext transport shape. Reject the whole batch AFTER the
+    // rate limit (floods stay cheap) but BEFORE fingerprinting, dedup, quota
+    // work, and persistence, so a rejected upload leaves no server-side trace.
+    if (ops.some(violatesE2eeGate)) {
+      return sendE2eeRequiredReply(reply, userId, {
+        clientId,
+        surface: 'ops',
+        opsCount: ops.length,
       });
     }
 

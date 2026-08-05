@@ -15,6 +15,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
+import type { SnackParams } from '../../core/snack/snack.model';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { UserInputWaitStateService } from './user-input-wait-state.service';
@@ -23,6 +24,7 @@ import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocke
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
 import {
   AuthFailSPError,
+  DecryptNoPasswordError,
   MissingCredentialsSPError,
   NetworkUnavailableSPError,
   OperationIntegrityError,
@@ -361,6 +363,132 @@ describe('SyncWrapperService', () => {
       expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
         'UNKNOWN_OR_CHANGED',
       );
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+    });
+
+    // A SuperSync provider as the encryption-setup re-check sees it: op-sync
+    // capable, with or without a configured key.
+    const makeSuperSyncProvider = (
+      encryptKey: string | undefined,
+    ): SyncProviderBase<SyncProviderId.SuperSync> =>
+      ({
+        id: SyncProviderId.SuperSync,
+        supportsOperationSync: true,
+        providerMode: 'superSyncOps',
+        getEncryptKey: () => Promise.resolve(encryptKey),
+      }) as unknown as SyncProviderBase<SyncProviderId.SuperSync>;
+
+    const armEncryptionRequiredSnack = async (): Promise<SnackParams> => {
+      mockProviderManager.getActiveProvider.and.returnValue(
+        makeSuperSyncProvider(undefined),
+      );
+      mockSyncService.downloadRemoteOps.and.resolveTo({ kind: 'no_new_ops' as const });
+      mockSyncService.uploadPendingOps.and.resolveTo({
+        kind: 'completed' as const,
+        uploadedCount: 0,
+        piggybackedOpsCount: 0,
+        localWinOpsCreated: 0,
+        permanentRejectionCount: 0,
+        hasMorePiggyback: false,
+        rejectedOps: [],
+        encryptionRequiredKeyMissing: true,
+      });
+      const result = await service.sync(true);
+      expect(result).toBe(SyncStatus.UpdateRemote);
+      return mockSnackService.open.calls.mostRecent().args[0] as SnackParams;
+    };
+
+    it('should offer encryption setup when a user-triggered sync is paused for a missing mandatory key', async () => {
+      const openedSnack = await armEncryptionRequiredSnack();
+
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.F.SYNC.S.ENCRYPTION_REQUIRED_FOR_SUPERSYNC,
+          actionStr: T.F.SYNC.FORM.SUPER_SYNC.SETUP_ENCRYPTION_BTN,
+          actionFn: jasmine.any(Function),
+          config: { duration: 0 },
+        }),
+      );
+
+      // Clicking the action runs the guarded flow: a fresh preflight sync,
+      // then a still-needed re-check, and only then the destructive dialog.
+      await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+
+      expect(mockSyncService.downloadRemoteOps).toHaveBeenCalledTimes(2);
+      // The preflight suppresses the encryption-required snack — no duplicate.
+      expect(mockSnackService.open).toHaveBeenCalledTimes(1);
+      expect(mockMatDialog.open).toHaveBeenCalledWith(jasmine.any(Function), {
+        data: { providerType: 'supersync', initialSetup: false },
+      });
+    });
+
+    it('should NOT open the destructive setup dialog from a stale snack click when the remote got encrypted meanwhile', async () => {
+      const openedSnack = await armEncryptionRequiredSnack();
+
+      // Another device enabled encryption between snack and click: the
+      // click-time preflight download now hits undecryptable content.
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new DecryptNoPasswordError({ reason: 'peer enabled encryption' }),
+      );
+      mockMatDialog.open.and.returnValue({
+        afterClosed: () => of(undefined),
+      } as unknown as MatDialogRef<unknown>);
+
+      await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+
+      // The delete-and-reupload dialog must never open on stale state — the
+      // enter-password flow owns recovery for a peer-encrypted remote.
+      expect(mockMatDialog.open).not.toHaveBeenCalledWith(jasmine.any(Function), {
+        data: { providerType: 'supersync', initialSetup: false },
+      });
+      expect(mockMatDialog.open).toHaveBeenCalledWith(
+        DialogEnterEncryptionPasswordComponent,
+        jasmine.anything(),
+      );
+    });
+
+    it('should report already-encrypted instead of opening the dialog when a key exists by click time', async () => {
+      const openedSnack = await armEncryptionRequiredSnack();
+
+      // By click time this device has a key (e.g. entered via the password flow).
+      mockProviderManager.getActiveProvider.and.returnValue(
+        makeSuperSyncProvider('some-derived-key'),
+      );
+
+      await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+
+      expect(mockMatDialog.open).not.toHaveBeenCalled();
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.APP.B_SUPER_SYNC_ENCRYPTION.ALREADY_ENCRYPTED,
+        }),
+      );
+    });
+
+    it('should leave the missing-key prompt to the already-armed fresh-setup modal', async () => {
+      mockSyncService.uploadPendingOps.and.resolveTo({
+        kind: 'completed' as const,
+        uploadedCount: 0,
+        piggybackedOpsCount: 0,
+        localWinOpsCreated: 0,
+        permanentRejectionCount: 0,
+        hasMorePiggyback: false,
+        rejectedOps: [],
+        encryptionRequiredKeyMissing: true,
+      });
+      const promptSpy = spyOn(
+        service as unknown as {
+          _promptSuperSyncEncryptionIfNeeded: () => Promise<void>;
+        },
+        '_promptSuperSyncEncryptionIfNeeded',
+      ).and.resolveTo();
+      service.markPromptEncryptionAfterSetupSync();
+
+      const result = await service.sync(true);
+
+      expect(result).toBe(SyncStatus.UpdateRemote);
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+      expect(promptSpy).toHaveBeenCalled();
     });
 
     it('should report ERROR when pending ops depend on a rejected full-state upload', async () => {

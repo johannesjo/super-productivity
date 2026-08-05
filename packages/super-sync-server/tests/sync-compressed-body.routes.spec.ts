@@ -78,6 +78,13 @@ import { CURRENT_SCHEMA_VERSION, SUPER_SYNC_MAX_OPS_PER_UPLOAD } from '@sp/share
 
 const gzipAsync = promisify(zlib.gzip);
 
+// Uploads must pass the encrypted-only ingress gate: flag true + a payload
+// with the ciphertext transport shape (canonical base64, >= 28 bytes). Use
+// distinct fills/sizes where tests need distinguishable payload content.
+const ENCRYPTED_PAYLOAD = Buffer.alloc(44, 7).toString('base64');
+const encryptedPayload = (fill: number, bytes = 44): string =>
+  Buffer.alloc(bytes, fill).toString('base64');
+
 const createOp = (clientId: string) => ({
   id: 'op-1',
   clientId,
@@ -85,7 +92,8 @@ const createOp = (clientId: string) => ({
   opType: 'CRT',
   entityType: 'TASK',
   entityId: 'task-1',
-  payload: { title: 'Test Task' },
+  payload: ENCRYPTED_PAYLOAD,
+  isPayloadEncrypted: true,
   vectorClock: {},
   timestamp: Date.now(),
   schemaVersion: 1,
@@ -105,7 +113,7 @@ const createStoredDuplicateOp = (op: ReturnType<typeof createOp>) => ({
   schemaVersion: op.schemaVersion,
   clientTimestamp: BigInt(op.timestamp),
   receivedAt: BigInt(op.timestamp),
-  isPayloadEncrypted: false,
+  isPayloadEncrypted: true,
   syncImportReason: null,
   repairBaseServerSeq: null,
 });
@@ -276,13 +284,13 @@ describe('Sync compressed body routes', () => {
     const validOp = {
       ...createOp(clientId),
       id: 'valid-near-quota-op',
-      payload: { title: 'Valid task' },
+      payload: encryptedPayload(1),
     };
     const invalidLargeOp = {
       ...createOp(clientId),
       id: 'invalid-large-op',
       opType: 'UNKNOWN',
-      payload: { data: 'x'.repeat(10_000) },
+      payload: encryptedPayload(2, 10_000),
     };
     const validBytes = computeOpStorageBytes(validOp).bytes;
     mocks.syncService.filterValidOpsForQuota.mockReturnValueOnce([validOp]);
@@ -345,13 +353,13 @@ describe('Sync compressed body routes', () => {
       ...createOp(clientId),
       id: 'known-duplicate-op',
       entityId: 'task-known-duplicate',
-      payload: { title: 'Already accepted task' },
+      payload: encryptedPayload(3),
     };
     const newOp = {
       ...createOp(clientId),
       id: 'new-op',
       entityId: 'task-new',
-      payload: { title: 'New task' },
+      payload: encryptedPayload(4),
     };
     mocks.prisma.operation.findMany.mockResolvedValueOnce([
       createStoredDuplicateOp(duplicateOp),
@@ -403,11 +411,11 @@ describe('Sync compressed body routes', () => {
       ...createOp(clientId),
       id: 'colliding-op-id',
       entityId: 'task-collision',
-      payload: { title: 'Incoming content' },
+      payload: encryptedPayload(5),
     };
     const storedDifferentOp = createStoredDuplicateOp({
       ...incomingOp,
-      payload: { title: 'Stored different content' },
+      payload: encryptedPayload(6),
     });
     mocks.prisma.operation.findMany.mockResolvedValueOnce([storedDifferentOp]);
     mocks.syncService.uploadOps.mockResolvedValueOnce([
@@ -456,12 +464,12 @@ describe('Sync compressed body routes', () => {
       ...createOp(clientId),
       id: 'repeated-new-id',
       entityId: 'task-first',
-      payload: { title: 'First content' },
+      payload: encryptedPayload(8),
     };
     const repeatedOp = {
       ...firstOp,
       entityId: 'task-second',
-      payload: { title: 'Different repeated content' },
+      payload: encryptedPayload(9),
     };
 
     const response = await app.inject({
@@ -566,7 +574,9 @@ describe('Sync compressed body routes', () => {
           ...createOp(clientId),
           id: 'op-unicode',
           entityId: 'task-unicode',
-          payload: { title: 'Übergrößenträger 🚀' },
+          // Payloads must be ciphertext-shaped, so carry the multi-byte
+          // UTF-8 content in a non-gated string field instead.
+          actionType: 'Übergrößenträger 🚀',
         },
       ],
       clientId,
@@ -632,12 +642,13 @@ describe('Sync compressed body routes', () => {
 
   it('should allow base64 gzip ops up to the binary compressed limit', async () => {
     const clientId = 'base64-gzip-large-client';
+    // base64 of random bytes is itself a valid ciphertext transport shape.
     const randomBlob = randomBytes(Math.floor(7.6 * MiB)).toString('base64');
     const payload = {
       ops: [
         {
           ...createOp(clientId),
-          payload: { blob: randomBlob },
+          payload: randomBlob,
         },
       ],
       clientId,
@@ -999,11 +1010,8 @@ describe('Sync compressed body routes', () => {
   it('should charge compressed snapshot uploads by decompressed JSON size', async () => {
     const clientId = 'base64-gzip-snapshot-client';
     const payload = {
-      state: {
-        tasks: {
-          'task-1': { id: 'task-1', title: 'Snapshot Task' },
-        },
-      },
+      state: encryptedPayload(10, 2048),
+      isPayloadEncrypted: true,
       clientId,
       reason: 'recovery',
       vectorClock: { [clientId]: 1 },
@@ -1030,7 +1038,7 @@ describe('Sync compressed body routes', () => {
       1,
       payload.state,
       1,
-      false,
+      true,
       expect.anything(),
     );
     // Snapshot quota gate now accounts via estimated op + cache-delta bytes
@@ -1045,13 +1053,11 @@ describe('Sync compressed body routes', () => {
 
   it('should allow base64 gzip snapshots up to the binary compressed limit', async () => {
     const clientId = 'base64-gzip-large-snapshot-client';
+    // base64 of random bytes is itself a valid ciphertext transport shape.
     const randomBlob = randomBytes(Math.floor(22.6 * MiB)).toString('base64');
     const payload = {
-      state: {
-        TASK: {
-          'task-1': { id: 'task-1', blob: randomBlob },
-        },
-      },
+      state: randomBlob,
+      isPayloadEncrypted: true,
       clientId,
       reason: 'recovery',
       vectorClock: { [clientId]: 1 },
@@ -1083,7 +1089,7 @@ describe('Sync compressed body routes', () => {
       1,
       payload.state,
       1,
-      false,
+      true,
       expect.anything(),
     );
   }, 15000);
@@ -1141,9 +1147,11 @@ describe('Sync compressed body routes', () => {
       stateBytes: 30,
       cacheable: true,
     });
+    // Post-gate, encrypted clean-slates are charged by op bytes alone
+    // (30 + 2 vector-clock bytes), so the quota must sit below that.
     mocks.syncService.getStorageInfo.mockResolvedValueOnce({
       storageUsedBytes: 1000,
-      storageQuotaBytes: 100,
+      storageQuotaBytes: 20,
     });
 
     const response = await app.inject({
@@ -1151,7 +1159,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'initial',
         vectorClock: {},
@@ -1165,10 +1174,49 @@ describe('Sync compressed body routes', () => {
     expect(mocks.syncService.uploadOps).not.toHaveBeenCalled();
   });
 
+  it('should charge an encrypted clean-slate by op bytes only (no phantom cache bytes)', async () => {
+    // Regression: preparedSnapshot.bytes used to be added to the clean-slate
+    // quota gate even though encrypted state is never cached, so near-quota
+    // clean-slate uploads got 413 for storage that never materializes.
+    const clientId = 'clean-slate-fit-client';
+    mocks.syncService.prepareSnapshotCache.mockReturnValueOnce({
+      data: Buffer.from('cached-snapshot'),
+      bytes: 80,
+      stateBytes: 30,
+      cacheable: true,
+    });
+    mocks.syncService.getStorageInfo.mockResolvedValueOnce({
+      storageUsedBytes: 1000,
+      storageQuotaBytes: 100,
+    });
+    mocks.syncService.cacheSnapshotIfReplayable.mockResolvedValueOnce(null);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: { authorization: `Bearer ${authToken}` },
+      payload: {
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
+        clientId,
+        reason: 'initial',
+        vectorClock: {},
+        opId: '018f2f0b-1c2d-7a1b-8c3d-abcdef123456',
+        isCleanSlate: true,
+      },
+    });
+
+    // 30 op bytes + 2 vector-clock bytes fit the 100-byte quota; the 80
+    // phantom cache bytes would have pushed it to 112 and a spurious 413.
+    expect(response.statusCode).toBe(200);
+    expect(response.json().accepted).toBe(true);
+    expect(mocks.syncService.uploadOps).toHaveBeenCalledOnce();
+  });
+
   it('should return persistent success for a clean-slate retry before deleting data', async () => {
     const opId = '018f2f0b-1c2d-7a1b-8c3d-123456789abc';
     const clientId = 'clean-slate-retry-client';
-    const state = { TASK: { 'task-1': { id: 'task-1' } } };
+    const state = encryptedPayload(11);
     const vectorClock = { [clientId]: 1 };
     mocks.prisma.operation.findUnique.mockResolvedValueOnce({
       id: opId,
@@ -1184,7 +1232,7 @@ describe('Sync compressed body routes', () => {
       schemaVersion: CURRENT_SCHEMA_VERSION,
       clientTimestamp: BigInt(1),
       receivedAt: BigInt(1),
-      isPayloadEncrypted: false,
+      isPayloadEncrypted: true,
       syncImportReason: null,
       serverSeq: 77,
     });
@@ -1195,6 +1243,7 @@ describe('Sync compressed body routes', () => {
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
         state,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'recovery',
         vectorClock,
@@ -1214,6 +1263,9 @@ describe('Sync compressed body routes', () => {
     const opId = '018f2f0b-1c2d-7a1b-8c3d-123456789abc';
     const clientId = 'clean-slate-collision-client';
     const vectorClock = { [clientId]: 1 };
+    // Encrypted retries are matched structurally (ciphertext bytes differ per
+    // encryption because of the fresh IV), so "different content" must show
+    // up in a structural field — here the vector clock.
     mocks.prisma.operation.findUnique.mockResolvedValueOnce({
       id: opId,
       userId: 1,
@@ -1223,12 +1275,12 @@ describe('Sync compressed body routes', () => {
       entityType: 'ALL',
       entityId: null,
       entityIds: [],
-      payload: { TASK: { existing: { id: 'existing' } } },
-      vectorClock,
+      payload: encryptedPayload(12),
+      vectorClock: { [clientId]: 99 },
       schemaVersion: CURRENT_SCHEMA_VERSION,
       clientTimestamp: BigInt(1),
       receivedAt: BigInt(1),
-      isPayloadEncrypted: false,
+      isPayloadEncrypted: true,
       syncImportReason: null,
       serverSeq: 77,
     });
@@ -1238,7 +1290,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { replacement: { id: 'replacement' } } },
+        state: encryptedPayload(13),
+        isPayloadEncrypted: true,
         clientId,
         reason: 'recovery',
         vectorClock,
@@ -1269,7 +1322,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'initial',
         vectorClock: { [clientId]: 1 },
@@ -1297,7 +1351,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId: 'snapshot-retry-client',
         reason: 'initial',
         vectorClock: { 'snapshot-retry-client': 1 },
@@ -1363,7 +1418,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: {} },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId: 'dup-client',
         reason: 'recovery',
         vectorClock: { 'dup-client': 1 },
@@ -1386,7 +1442,7 @@ describe('Sync compressed body routes', () => {
 
   it('should return idempotent success when a committed REPAIR retry has a stale base', async () => {
     const repairId = '018f2f0b-1c2d-7a1b-8c3d-123456789abc';
-    const state = { TASK: { repaired: true } };
+    const state = encryptedPayload(14);
     const vectorClock = { 'repair-client': 3 };
     // The committed first attempt may have filled the account quota. Durable
     // op-id idempotency must still win over the cheap pre-quota gate.
@@ -1406,7 +1462,7 @@ describe('Sync compressed body routes', () => {
       payload: state,
       vectorClock,
       schemaVersion: 1,
-      isPayloadEncrypted: false,
+      isPayloadEncrypted: true,
       syncImportReason: 'REPAIR',
       repairBaseServerSeq: 10,
       serverSeq: 77,
@@ -1418,6 +1474,7 @@ describe('Sync compressed body routes', () => {
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
         state,
+        isPayloadEncrypted: true,
         clientId: 'repair-client',
         reason: 'recovery',
         vectorClock,
@@ -1442,7 +1499,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { repaired: true } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId: 'legacy-repair-client',
         reason: 'recovery',
         vectorClock: { 'legacy-repair-client': 1 },
@@ -1480,7 +1538,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { repaired: true } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId: 'stale-repair-client',
         reason: 'recovery',
         vectorClock: { 'stale-repair-client': 2 },
@@ -1522,7 +1581,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: {} },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId: 'dup-client',
         reason: 'initial',
         vectorClock: { 'dup-client': 1 },
@@ -1562,7 +1622,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: {} },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId: 'dup-client',
         reason: 'initial',
         vectorClock: { 'dup-client': 1 },
@@ -1603,7 +1664,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: {} },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId: 'dup-client',
         reason: 'initial',
         vectorClock: { 'dup-client': 1 },
@@ -1643,7 +1705,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'recovery',
         vectorClock,
@@ -1669,7 +1732,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'recovery',
         vectorClock: { [clientId]: 1 },
@@ -1700,7 +1764,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'recovery',
         vectorClock: { [clientId]: 1 },
@@ -1739,7 +1804,8 @@ describe('Sync compressed body routes', () => {
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'recovery',
         vectorClock,
@@ -1752,85 +1818,32 @@ describe('Sync compressed body routes', () => {
     expect(mocks.syncService.markStorageNeedsReconcile).toHaveBeenCalledWith(1);
   });
 
-  it('should pre-gate the snapshot upload by op + cache-delta bytes', async () => {
-    // B3-route: the gate budget covers BOTH the op row (payload+vc) and the
-    // cache rewrite, so the user cannot squeeze through a snapshot whose
-    // op-row alone fits but whose cache delta would breach quota. The
-    // post-commit increment, however, only writes the cache portion — the
-    // op-row counter is now incremented inside `uploadOps`'s `$transaction`.
+  it('should charge encrypted snapshots by op-row bytes only and skip the plaintext cache delta', async () => {
+    // Post-gate, every snapshot is encrypted and the server never caches
+    // encrypted state: the quota gate budget is the op row (payload + vector
+    // clock) alone, and the plaintext cache-delta lookup must not run. The
+    // pre-gate plaintext accounting (op row + cache rewrite delta) is no
+    // longer reachable through the route.
     const clientId = 'snapshot-delta-client';
     const vectorClock = { [clientId]: 1 };
     const preparedSnapshot = {
-      data: Buffer.from('cached-snapshot'),
+      data: Buffer.from('never-cached'),
       bytes: 40,
-      stateBytes: 25,
-      cacheable: true,
-    };
-    mocks.syncService.prepareSnapshotCache.mockReturnValueOnce(preparedSnapshot);
-    mocks.syncService.getCachedSnapshotBytes.mockResolvedValueOnce(10);
-    mocks.syncService.uploadOps.mockResolvedValueOnce([{ accepted: true, serverSeq: 7 }]);
-    mocks.syncService.cacheSnapshotIfReplayable.mockResolvedValueOnce({
-      cached: true,
-      bytesWritten: 40,
-      previousBytes: 10,
-      deltaBytes: 30,
-    });
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/sync/snapshot',
-      headers: { authorization: `Bearer ${authToken}` },
-      payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
-        clientId,
-        reason: 'recovery',
-        vectorClock,
-      },
-    });
-
-    const vectorClockBytes = Buffer.byteLength(JSON.stringify(vectorClock), 'utf8');
-    // Gate budget = op-row bytes + cache-delta bytes (40 - 10 = 30).
-    const expectedGate = preparedSnapshot.stateBytes + vectorClockBytes + 30;
-
-    expect(response.statusCode).toBe(200);
-    expect(mocks.syncService.checkStorageQuota).toHaveBeenCalledWith(1, expectedGate);
-    expect(mocks.syncService.cacheSnapshotIfReplayable).toHaveBeenCalledWith(
-      1,
-      { TASK: { 'task-1': { id: 'task-1' } } },
-      7,
-      false,
-      preparedSnapshot,
-    );
-    // Post-commit increment only carries the snapshot-cache portion; the
-    // op-row counter is written atomically inside `uploadOps`'s transaction.
-    expect(mocks.syncService.incrementStorageUsage).toHaveBeenCalledWith(1, 30);
-  });
-
-  it('should subtract the old snapshot cache when a replacement is too large to cache', async () => {
-    const clientId = 'oversized-cache-replacement-client';
-    const vectorClock = { [clientId]: 1 };
-    const preparedSnapshot = {
-      data: Buffer.from('too-large-to-cache'),
-      bytes: 51 * 1024 * 1024,
       stateBytes: 25,
       cacheable: false,
     };
     mocks.syncService.prepareSnapshotCache.mockReturnValueOnce(preparedSnapshot);
-    mocks.syncService.getCachedSnapshotBytes.mockResolvedValueOnce(90);
     mocks.syncService.uploadOps.mockResolvedValueOnce([{ accepted: true, serverSeq: 7 }]);
-    mocks.syncService.cacheSnapshotIfReplayable.mockResolvedValueOnce({
-      cached: false,
-      bytesWritten: 0,
-      previousBytes: 90,
-      deltaBytes: -90,
-    });
+    // Encrypted snapshots are never cached; the service reports null.
+    mocks.syncService.cacheSnapshotIfReplayable.mockResolvedValueOnce(null);
 
     const response = await app.inject({
       method: 'POST',
       url: '/api/sync/snapshot',
       headers: { authorization: `Bearer ${authToken}` },
       payload: {
-        state: { TASK: { 'task-1': { id: 'task-1' } } },
+        state: ENCRYPTED_PAYLOAD,
+        isPayloadEncrypted: true,
         clientId,
         reason: 'recovery',
         vectorClock,
@@ -1838,19 +1851,23 @@ describe('Sync compressed body routes', () => {
     });
 
     const vectorClockBytes = Buffer.byteLength(JSON.stringify(vectorClock), 'utf8');
-    const expectedGateDelta = preparedSnapshot.stateBytes + vectorClockBytes - 90;
 
     expect(response.statusCode).toBe(200);
+    // Gate budget = op-row bytes only; no cache delta for encrypted state.
     expect(mocks.syncService.checkStorageQuota).toHaveBeenCalledWith(
       1,
-      expectedGateDelta,
+      preparedSnapshot.stateBytes + vectorClockBytes,
     );
-    // Post-commit, the route only applies the snapshot-cache portion of the
-    // delta — the op-row portion is written atomically inside uploadOps's
-    // $transaction (wave-1 B3 / commit 9af17e460e). cacheSnapshotIfReplayable
-    // reported deltaBytes = -90 (the cleared cache), so the route's
-    // applyStorageUsageDelta path decrements by 90.
-    expect(mocks.syncService.decrementStorageUsage).toHaveBeenCalledWith(1, 90);
+    expect(mocks.syncService.getCachedSnapshotBytes).not.toHaveBeenCalled();
+    expect(mocks.syncService.cacheSnapshotIfReplayable).toHaveBeenCalledWith(
+      1,
+      ENCRYPTED_PAYLOAD,
+      7,
+      true,
+      preparedSnapshot,
+    );
+    // No cache write happened, so no post-commit counter delta either.
     expect(mocks.syncService.incrementStorageUsage).not.toHaveBeenCalled();
+    expect(mocks.syncService.decrementStorageUsage).not.toHaveBeenCalled();
   });
 });

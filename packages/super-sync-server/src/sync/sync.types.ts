@@ -76,6 +76,9 @@ export const SYNC_ERROR_CODES = {
 
   // Encryption-related errors (400)
   ENCRYPTED_OPS_NOT_SUPPORTED: 'ENCRYPTED_OPS_NOT_SUPPORTED' as const,
+  // Encrypted-only ingress gate: upload rejected because a payload is not
+  // flagged encrypted or lacks the ciphertext transport shape.
+  E2EE_REQUIRED: 'E2EE_REQUIRED',
 
   // Server errors (500)
   INTERNAL_ERROR: 'INTERNAL_ERROR',
