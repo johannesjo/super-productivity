@@ -58,6 +58,7 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
   const CONFLICT_TASK_ID = 'rpt_cfg-a_2026-07-28';
   const SIBLING_1 = 'task-sibling-1';
   const SIBLING_2 = 'task-sibling-2';
+  const CONCURRENT_TASK_ID = 'task-concurrent-placement';
   const TODAY = '2026-07-30';
   const FUTURE_DAY = '2026-08-03';
 
@@ -90,6 +91,7 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
       [CONFLICT_TASK_ID]: liveTask(CONFLICT_TASK_ID),
       [SIBLING_1]: liveTask(SIBLING_1),
       [SIBLING_2]: liveTask(SIBLING_2),
+      [CONCURRENT_TASK_ID]: liveTask(CONCURRENT_TASK_ID),
     };
     plannerDaysByDay = {};
     // Serve current entity state for local-win snapshots from a plain map. The
@@ -432,7 +434,11 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
   });
 
   describe('remote planTasksForToday bulk op in a conflict', () => {
-    const buildRemotePlanOp = (taskIds: string[], timestamp: number): Operation => {
+    const buildRemotePlanOp = (
+      taskIds: string[],
+      timestamp: number,
+      remoteClient = new TestClient(REMOTE_CLIENT_ID),
+    ): Operation => {
       const remoteAction = TaskSharedActions.planTasksForToday({
         taskIds,
         today: TODAY,
@@ -440,7 +446,7 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
       }) as PersistentAction;
       const { type, meta, ...actionPayload } = remoteAction;
       return {
-        ...new TestClient(REMOTE_CLIENT_ID).createOperation({
+        ...remoteClient.createOperation({
           actionType: type,
           opType: meta.opType,
           entityType: meta.entityType,
@@ -495,8 +501,12 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
         ...liveTask(SIBLING_2),
         dueDay: FUTURE_DAY,
       };
+      taskStateById[CONCURRENT_TASK_ID] = {
+        ...liveTask(CONCURRENT_TASK_ID),
+        dueDay: FUTURE_DAY,
+      };
       plannerDaysByDay = {
-        [FUTURE_DAY]: [SIBLING_2, CONFLICT_TASK_ID, SIBLING_1],
+        [FUTURE_DAY]: [SIBLING_2, SIBLING_1, CONFLICT_TASK_ID, CONCURRENT_TASK_ID],
       };
 
       const [localEditOp] = await dispatchAndFlush(
@@ -515,6 +525,7 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
         CONFLICT_TASK_ID,
         SIBLING_1,
         SIBLING_2,
+        CONCURRENT_TASK_ID,
       ]);
       const stateBeforeRemote: RootState = {
         ...baseState,
@@ -525,6 +536,7 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
             [CONFLICT_TASK_ID]: localWinner,
             [SIBLING_1]: taskStateById[SIBLING_1],
             [SIBLING_2]: taskStateById[SIBLING_2],
+            [CONCURRENT_TASK_ID]: taskStateById[CONCURRENT_TASK_ID],
           },
         },
         [plannerFeatureKey]: {
@@ -563,7 +575,154 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
       expect(replayedState[plannerFeatureKey].days[FUTURE_DAY]).toEqual([
         SIBLING_2,
         CONFLICT_TASK_ID,
+        CONCURRENT_TASK_ID,
       ]);
+    });
+
+    it('preserves an unrelated placement that reaches the server before compensation', async () => {
+      const localWinner = {
+        ...liveTask(CONFLICT_TASK_ID),
+        title: 'Local newer edit',
+        dueDay: FUTURE_DAY,
+      };
+      const concurrentTask = {
+        ...liveTask(CONCURRENT_TASK_ID),
+        dueDay: FUTURE_DAY,
+      };
+      taskStateById[CONFLICT_TASK_ID] = localWinner;
+      taskStateById[SIBLING_1] = {
+        ...liveTask(SIBLING_1),
+        dueDay: FUTURE_DAY,
+      };
+      taskStateById[SIBLING_2] = {
+        ...liveTask(SIBLING_2),
+        dueDay: FUTURE_DAY,
+      };
+      taskStateById[CONCURRENT_TASK_ID] = concurrentTask;
+      plannerDaysByDay = {
+        [FUTURE_DAY]: [SIBLING_2, CONFLICT_TASK_ID, SIBLING_1],
+      };
+
+      const [localEditOp] = await dispatchAndFlush(
+        TaskSharedActions.updateTask({
+          task: { id: CONFLICT_TASK_ID, changes: { title: localWinner.title } },
+        }) as PersistentAction,
+      );
+      const remotePlanOp = buildRemotePlanOp(
+        [CONFLICT_TASK_ID, SIBLING_1],
+        localEditOp.timestamp - 1000,
+      );
+      const placementAction = PlannerActions.planTaskForDay({
+        task: concurrentTask,
+        day: FUTURE_DAY,
+      }) as PersistentAction;
+      const { type, meta, ...actionPayload } = placementAction;
+      const concurrentPlacementOp = new TestClient(
+        'concurrent-planner-client',
+      ).createOperation({
+        actionType: type,
+        opType: meta.opType,
+        entityType: meta.entityType,
+        entityId: CONCURRENT_TASK_ID,
+        payload: { actionPayload, entityChanges: [] },
+      });
+
+      await resolver.autoResolveConflictsLWW(await detectConflictsFor(remotePlanOp), [
+        concurrentPlacementOp,
+      ]);
+
+      const plannerCompensations = (await unsyncedOps()).filter(
+        (op) => op.entityType === 'PLANNER',
+      );
+      expect(plannerCompensations.length).toBe(1);
+      expect(plannerCompensations[0].actionType).toBe(ActionType.PLANNER_TRANSFER_TASK);
+      expect(plannerCompensations[0].entityId).toBe(CONFLICT_TASK_ID);
+
+      const baseState = createStateWithExistingTasks([
+        CONFLICT_TASK_ID,
+        SIBLING_1,
+        SIBLING_2,
+        CONCURRENT_TASK_ID,
+      ]);
+      const stateBeforeRemote: RootState = {
+        ...baseState,
+        [TASK_FEATURE_NAME]: {
+          ...baseState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseState[TASK_FEATURE_NAME].entities,
+            [CONFLICT_TASK_ID]: localWinner,
+            [SIBLING_1]: taskStateById[SIBLING_1],
+            [SIBLING_2]: taskStateById[SIBLING_2],
+            [CONCURRENT_TASK_ID]: concurrentTask,
+          },
+        },
+        [plannerFeatureKey]: {
+          ...baseState[plannerFeatureKey],
+          days: plannerDaysByDay,
+        },
+      };
+      const baseReducer: ActionReducer<RootState, Action> = (state, action) => ({
+        ...(state as RootState),
+        [plannerFeatureKey]: plannerReducer(
+          (state as RootState)[plannerFeatureKey],
+          action,
+        ),
+      });
+      const replayReducer = bulkOperationsMetaReducer(
+        createCombinedTaskSharedMetaReducer(lwwUpdateMetaReducer(baseReducer)),
+      ) as ActionReducer<RootState, Action>;
+      const serverOrderedOps = [
+        remotePlanOp,
+        concurrentPlacementOp,
+        ...(await unsyncedOps()),
+      ];
+
+      const replayedState = replayReducer(
+        stateBeforeRemote,
+        bulkApplyOperations({
+          operations: serverOrderedOps,
+          localClientId: 'fresh-client',
+        }),
+      );
+
+      expect(replayedState[plannerFeatureKey].days[FUTURE_DAY]).toEqual([
+        SIBLING_2,
+        CONFLICT_TASK_ID,
+        CONCURRENT_TASK_ID,
+      ]);
+    });
+
+    it('does not compensate a task whose later remote Today operation wins', async () => {
+      taskStateById[CONFLICT_TASK_ID] = {
+        ...liveTask(CONFLICT_TASK_ID),
+        title: 'Local middle edit',
+        dueDay: FUTURE_DAY,
+      };
+      plannerDaysByDay = { [FUTURE_DAY]: [CONFLICT_TASK_ID] };
+      const [localEditOp] = await dispatchAndFlush(
+        TaskSharedActions.updateTask({
+          task: { id: CONFLICT_TASK_ID, changes: { title: 'Local middle edit' } },
+        }) as PersistentAction,
+      );
+      const remoteClient = new TestClient(REMOTE_CLIENT_ID);
+      const earlierRemotePlan = buildRemotePlanOp(
+        [CONFLICT_TASK_ID, SIBLING_1],
+        localEditOp.timestamp - 1,
+        remoteClient,
+      );
+      const laterRemotePlan = buildRemotePlanOp(
+        [CONFLICT_TASK_ID, SIBLING_1],
+        localEditOp.timestamp + 1,
+        remoteClient,
+      );
+      const earlierConflicts = await detectConflictsFor(earlierRemotePlan);
+      const laterConflicts = await detectConflictsFor(laterRemotePlan);
+
+      await resolver.autoResolveConflictsLWW([...earlierConflicts, ...laterConflicts]);
+
+      expect((await unsyncedOps()).filter((op) => op.entityType === 'PLANNER')).toEqual(
+        [],
+      );
     });
 
     it('degrades to a plain remote win when a local winner has no compensation snapshot', async () => {

@@ -136,6 +136,7 @@ test.describe('@supersync Today-plan mixed-winner convergence', () => {
     const winnerTitle = `A-${testRunId}-Local winner`;
     const renamedWinnerTitle = `${winnerTitle} renamed`;
     const remoteWinnerTitle = `A-${testRunId}-Remote winner`;
+    const concurrentTitle = `B-${testRunId}-Concurrent placement`;
     let clientA: SimulatedE2EClient | null = null;
     let clientB: SimulatedE2EClient | null = null;
     let clientC: SimulatedE2EClient | null = null;
@@ -216,6 +217,29 @@ test.describe('@supersync Today-plan mixed-winner convergence', () => {
         )
         .toEqual([untouchedId]);
 
+      await clientB.workView.addTask('Concurrent placement');
+      const concurrentTask = (await getTasksByTitle(clientB.page, [concurrentTitle]))[
+        concurrentTitle
+      ];
+      await dispatchPersistentAction(clientB.page, {
+        type: '[Planner] Plan Task for Day',
+        task: concurrentTask,
+        day: futureDay,
+        meta: {
+          isPersistent: true,
+          entityType: 'PLANNER',
+          entityId: concurrentTask.id,
+          opType: 'UPD',
+        },
+      });
+      await expect
+        .poll(
+          async () =>
+            (await getPlannerSnapshot(clientB!.page, futureDay, winnerId, remoteWinnerId))
+              .plannerTaskIds,
+        )
+        .toEqual([untouchedId, concurrentTask.id]);
+
       await clientA.page.clock.setFixedTime(localEditTime);
       await dispatchPersistentAction(clientA.page, {
         type: '[Task Shared] updateTask',
@@ -241,7 +265,7 @@ test.describe('@supersync Today-plan mixed-winner convergence', () => {
       await clientA.sync.syncAndWait();
 
       const expectedSnapshot: PlannerSnapshot = {
-        plannerTaskIds: [untouchedId, winnerId],
+        plannerTaskIds: [untouchedId, winnerId, concurrentTask.id],
         todayTaskIds: [remoteWinnerId],
         winner: { title: renamedWinnerTitle, dueDay: futureDay },
         remoteWinner: { title: remoteWinnerTitle, dueDay: today },

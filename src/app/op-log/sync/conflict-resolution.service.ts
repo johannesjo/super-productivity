@@ -2798,60 +2798,73 @@ export class ConflictResolutionService {
    * A mixed remote `planTasksForToday` must replay atomically so its remote
    * winners keep their scheduling change. That same reducer removes every
    * target from every planner day, including tasks whose newer local edit won.
-   * Re-emit the affected day snapshots after the TASK winner snapshots:
-   * remote-winning targets stay removed, while covered local winners retain
-   * their exact position among untouched tasks.
+   * Re-emit one task-scoped transfer per final local winner after the TASK
+   * snapshots. A whole-day snapshot is unsafe here: it can overwrite an
+   * unrelated placement that reached the server before this compensation.
    *
-   * `Upsert Planner Day` is an existing wire action understood by released
-   * clients, so this needs neither a schema bump nor a new payload contract.
+   * `Transfer Task` is an existing wire action understood by released clients,
+   * so this needs neither a schema bump nor a new payload contract.
    */
   private async _createMixedRemoteTodayPlannerCompensationOps(
     winnerGroups: MultiEntityRemoteOpWinners[],
     localWinOpsById: ReadonlyMap<string, Operation>,
   ): Promise<Operation[]> {
-    const mixedPlanGroups = winnerGroups.filter(
-      ({ op, hasLocalWinner, hasRemoteWinner }) =>
-        op.actionType === ActionType.TASK_SHARED_PLAN_FOR_TODAY &&
-        hasLocalWinner &&
-        hasRemoteWinner,
+    const appliedPlanGroups = winnerGroups.filter(
+      ({ op, hasRemoteWinner }) =>
+        op.actionType === ActionType.TASK_SHARED_PLAN_FOR_TODAY && hasRemoteWinner,
     );
-    if (mixedPlanGroups.length === 0) return [];
+    if (appliedPlanGroups.length === 0) return [];
 
-    const localWinnerTaskIds = new Set<string>();
-    const localWinnerOps: Operation[] = [];
-    for (const group of mixedPlanGroups) {
-      for (const localWinOpId of group.localWinOpIds) {
-        const localWinOp = localWinOpsById.get(localWinOpId);
-        if (
-          localWinOp?.entityType !== 'TASK' ||
-          !localWinOp.entityId ||
-          localWinOp.opType === OpType.Delete ||
-          !group.localWinnerKeys.has(toEntityKey('TASK', localWinOp.entityId))
-        ) {
+    const finalLocalWinners = new Map<
+      string,
+      { localWinOp: Operation; remotePlanOp: Operation }
+    >();
+    for (const group of appliedPlanGroups) {
+      for (const taskId of getOpEntityIds(group.op)) {
+        const taskKey = toEntityKey('TASK', taskId);
+        if (!group.localWinnerKeys.has(taskKey)) {
+          finalLocalWinners.delete(taskId);
           continue;
         }
-        localWinnerTaskIds.add(localWinOp.entityId);
-        localWinnerOps.push(localWinOp);
+        const localWinOp = [...group.localWinOpIds]
+          .map((opId) => localWinOpsById.get(opId))
+          .find(
+            (op): op is Operation =>
+              op?.entityType === 'TASK' &&
+              op.entityId === taskId &&
+              op.opType !== OpType.Delete,
+          );
+        if (localWinOp) {
+          finalLocalWinners.set(taskId, { localWinOp, remotePlanOp: group.op });
+        } else {
+          finalLocalWinners.delete(taskId);
+        }
       }
     }
-    if (localWinnerTaskIds.size === 0) return [];
+    if (finalLocalWinners.size === 0) return [];
 
     const plannerState = await firstValueFrom(this.store.select(selectPlannerState));
     if (!plannerState?.days) return [];
 
     const remoteTargetIds = new Set(
-      mixedPlanGroups.flatMap(({ op }) => getOpEntityIds(op)),
+      appliedPlanGroups.flatMap(({ op }) => getOpEntityIds(op)),
     );
-    const affectedDays = Object.entries(plannerState.days)
-      .filter(([, taskIds]) => taskIds.some((taskId) => localWinnerTaskIds.has(taskId)))
-      .map(([day, taskIds]) => ({
-        day,
-        taskIds: taskIds.filter(
-          (taskId) => !remoteTargetIds.has(taskId) || localWinnerTaskIds.has(taskId),
-        ),
-      }))
-      .sort((a, b) => a.day.localeCompare(b.day));
-    if (affectedDays.length === 0) return [];
+    const placements = Object.entries(plannerState.days)
+      .sort(([dayA], [dayB]) => dayA.localeCompare(dayB))
+      .flatMap(([day, taskIds]) => {
+        const postRemoteTaskIds = taskIds.filter(
+          (taskId) => !remoteTargetIds.has(taskId) || finalLocalWinners.has(taskId),
+        );
+        return postRemoteTaskIds.flatMap((taskId, targetIndex) => {
+          const winner = finalLocalWinners.get(taskId);
+          if (!winner) return [];
+          const today = extractActionPayload(winner.remotePlanOp.payload)['today'];
+          const task = extractActionPayload(winner.localWinOp.payload);
+          if (typeof today !== 'string' || task['id'] !== taskId) return [];
+          return [{ day, targetIndex, taskId, task, today, ...winner }];
+        });
+      });
+    if (placements.length === 0) return [];
 
     const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
@@ -2863,26 +2876,31 @@ export class ConflictResolutionService {
     let nextClock = this.mergeAndIncrementClocks(
       [
         (await this.opLogStore.getVectorClock()) ?? {},
-        ...mixedPlanGroups.map(({ op }) => op.vectorClock),
-        ...localWinnerOps.map((op) => op.vectorClock),
+        ...appliedPlanGroups.map(({ op }) => op.vectorClock),
+        ...placements.map(({ localWinOp }) => localWinOp.vectorClock),
       ],
       clientId,
     );
-    const timestamp = Math.max(...localWinnerOps.map((op) => op.timestamp));
-    return affectedDays.map(({ day, taskIds }) => {
+    return placements.map(({ day, targetIndex, taskId, task, today, localWinOp }) => {
       const op: Operation = {
         id: uuidv7(),
-        actionType: ActionType.PLANNER_UPSERT_DAY,
-        opType: OpType.Update,
+        actionType: ActionType.PLANNER_TRANSFER_TASK,
+        opType: OpType.Move,
         entityType: 'PLANNER',
-        entityId: day,
+        entityId: taskId,
         payload: {
-          actionPayload: { day, taskIds },
+          actionPayload: {
+            task,
+            prevDay: today,
+            newDay: day,
+            targetIndex,
+            today,
+          },
           entityChanges: [],
         },
         clientId,
         vectorClock: nextClock,
-        timestamp,
+        timestamp: localWinOp.timestamp,
         schemaVersion: CURRENT_SCHEMA_VERSION,
       };
       nextClock = this.mergeAndIncrementClocks([nextClock], clientId);
