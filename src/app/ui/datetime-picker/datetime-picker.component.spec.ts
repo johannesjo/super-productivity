@@ -52,22 +52,25 @@ describe('DateTimePickerComponent', () => {
     expect(calendarEl).toBeTruthy();
   });
 
-  it('should keep a six-row month above the time controls', () => {
-    fixture.nativeElement.style.width = '400px';
+  it('should keep a six-row month above the time controls at supported widths', () => {
     fixture.componentRef.setInput('selectedDate', new Date(2026, 7, 4));
     fixture.detectChanges();
 
-    const weekRows = fixture.nativeElement.querySelectorAll(
-      '.mat-calendar-body > tr',
-    ) as NodeListOf<HTMLElement>;
-    const formControls = fixture.nativeElement.querySelector(
-      '.form-ctrl-wrapper',
-    ) as HTMLElement;
+    [400, 560].forEach((pickerWidth) => {
+      fixture.nativeElement.style.width = `${pickerWidth}px`;
 
-    expect(weekRows.length).toBe(6);
-    expect(weekRows[5].getBoundingClientRect().bottom).toBeLessThanOrEqual(
-      formControls.getBoundingClientRect().top,
-    );
+      const weekRows = fixture.nativeElement.querySelectorAll(
+        '.mat-calendar-body > tr',
+      ) as NodeListOf<HTMLElement>;
+      const formControls = fixture.nativeElement.querySelector(
+        '.form-ctrl-wrapper',
+      ) as HTMLElement;
+
+      expect(weekRows.length).withContext(`${pickerWidth}px picker`).toBe(6);
+      expect(weekRows[5].getBoundingClientRect().bottom)
+        .withContext(`${pickerWidth}px picker`)
+        .toBeLessThanOrEqual(formControls.getBoundingClientRect().top);
+    });
   });
 
   it('should emit dateSelected when a date is selected on the calendar', () => {
