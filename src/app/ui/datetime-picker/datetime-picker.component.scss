@@ -51,10 +51,13 @@
   }
 
   ::ng-deep {
-    // Reserve enough room for a 6-row month while keeping the dialog height stable
-    // as users navigate between months (#6556, #9397).
+    // Reserve enough room for a 6-row month at every supported picker width while
+    // keeping the dialog height stable as users navigate between months (#6556,
+    // #9397, #9452). Material calendar rows grow with the picker's width.
     mat-calendar {
-      height: 416px;
+      height: auto;
+      min-height: 416px;
+      aspect-ratio: 25 / 26;
     }
 
     .mat-calendar-header {
