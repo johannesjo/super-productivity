@@ -160,7 +160,7 @@ describe('SuperSyncEncryptionMigrationBannerService', () => {
       lastBanner().action!.fn();
       await flush();
 
-      expect(syncSpy).toHaveBeenCalledWith(true);
+      expect(syncSpy).toHaveBeenCalledWith();
       expect(openSpy).toHaveBeenCalledTimes(1);
       expect(snackService.open).not.toHaveBeenCalled();
       // Snooze is set once we reach the migration decision (not on click).

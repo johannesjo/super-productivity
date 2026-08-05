@@ -629,6 +629,25 @@ export class SyncWrapperService {
             'Reporting UNKNOWN_OR_CHANGED (sync paused until encryption is set up).',
         );
         this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
+        // Fresh setup already opens its dedicated modal after this sync. Avoid
+        // leaving a duplicate persistent snack behind that dialog.
+        if (isUserTriggered && !this._shouldPromptEncryptionAfterSetupSync) {
+          this._snackService.open({
+            msg: T.F.SYNC.S.ENCRYPTION_REQUIRED_FOR_SUPERSYNC,
+            type: 'WARNING',
+            actionStr: T.F.SYNC.FORM.SUPER_SYNC.SETUP_ENCRYPTION_BTN,
+            actionFn: async () => {
+              const { DialogEnableEncryptionComponent } =
+                await import('./dialog-enable-encryption/dialog-enable-encryption.component');
+              this._matDialog.open(DialogEnableEncryptionComponent, {
+                data: { providerType: 'supersync', initialSetup: false },
+              });
+            },
+            // Keep the escape hatch visible, and prevent the header's routine
+            // "sync complete" snack from replacing it. The user can still dismiss it.
+            config: { duration: 0 },
+          });
+        }
         return SyncStatus.UpdateRemote;
       }
 

@@ -15,6 +15,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
+import type { SnackParams } from '../../core/snack/snack.model';
 import { ReminderService } from '../../features/reminder/reminder.service';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { UserInputWaitStateService } from './user-input-wait-state.service';
@@ -361,6 +362,65 @@ describe('SyncWrapperService', () => {
       expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
         'UNKNOWN_OR_CHANGED',
       );
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+    });
+
+    it('should offer encryption setup when a user-triggered sync is paused for a missing mandatory key', async () => {
+      mockSyncService.downloadRemoteOps.and.resolveTo({ kind: 'no_new_ops' as const });
+      mockSyncService.uploadPendingOps.and.resolveTo({
+        kind: 'completed' as const,
+        uploadedCount: 0,
+        piggybackedOpsCount: 0,
+        localWinOpsCreated: 0,
+        permanentRejectionCount: 0,
+        hasMorePiggyback: false,
+        rejectedOps: [],
+        encryptionRequiredKeyMissing: true,
+      });
+
+      const result = await service.sync(true);
+
+      expect(result).toBe(SyncStatus.UpdateRemote);
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.F.SYNC.S.ENCRYPTION_REQUIRED_FOR_SUPERSYNC,
+          actionStr: T.F.SYNC.FORM.SUPER_SYNC.SETUP_ENCRYPTION_BTN,
+          actionFn: jasmine.any(Function),
+          config: { duration: 0 },
+        }),
+      );
+
+      const openedSnack = mockSnackService.open.calls.mostRecent().args[0] as SnackParams;
+      await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+      expect(mockMatDialog.open).toHaveBeenCalledWith(jasmine.any(Function), {
+        data: { providerType: 'supersync', initialSetup: false },
+      });
+    });
+
+    it('should leave the missing-key prompt to the already-armed fresh-setup modal', async () => {
+      mockSyncService.uploadPendingOps.and.resolveTo({
+        kind: 'completed' as const,
+        uploadedCount: 0,
+        piggybackedOpsCount: 0,
+        localWinOpsCreated: 0,
+        permanentRejectionCount: 0,
+        hasMorePiggyback: false,
+        rejectedOps: [],
+        encryptionRequiredKeyMissing: true,
+      });
+      const promptSpy = spyOn(
+        service as unknown as {
+          _promptSuperSyncEncryptionIfNeeded: () => Promise<void>;
+        },
+        '_promptSuperSyncEncryptionIfNeeded',
+      ).and.resolveTo();
+      service.markPromptEncryptionAfterSetupSync();
+
+      const result = await service.sync(true);
+
+      expect(result).toBe(SyncStatus.UpdateRemote);
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+      expect(promptSpy).toHaveBeenCalled();
     });
 
     it('should report ERROR when pending ops depend on a rejected full-state upload', async () => {

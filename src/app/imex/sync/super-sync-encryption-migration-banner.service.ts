@@ -92,7 +92,7 @@ export class SuperSyncEncryptionMigrationBannerService {
     // but key missing), so that variant is excluded here. A device that synced
     // BEFORE encryption existed (isEncryptionEnabled:false) whose peer later enabled
     // it still passes this gate and may briefly show a not-yet-accurate nudge — that
-    // case is caught safely in _startMigration(), where the pre-action sync(true)
+    // case is caught safely in _startMigration(), where the pre-action sync
     // hits DecryptNoPasswordError → HANDLED_ERROR and we defer to the enter-password
     // flow rather than offering a destructive re-encrypt.
     if (!(await provider.isReady())) {
@@ -121,7 +121,11 @@ export class SuperSyncEncryptionMigrationBannerService {
     // (download+merge) both refreshes local state — so the reupload doesn't clobber
     // server-only ops — and surfaces a now-encrypted server as a
     // DecryptNoPasswordError → HANDLED_ERROR (the enter-password flow then owns it).
-    const result = await this._syncWrapperService.sync(true);
+    // The banner already owns this interaction and opens the setup dialog below.
+    // Keep the preflight's missing-key path quiet so it cannot leave a duplicate
+    // persistent snack behind that dialog. The banner remains available if a
+    // transient failure makes the quiet preflight return HANDLED_ERROR.
+    const result = await this._syncWrapperService.sync();
     if (result === 'HANDLED_ERROR') {
       // Offline, or a password/error dialog is already handling this. Defer WITHOUT
       // snoozing so the nudge returns next session (the user asked to encrypt but
