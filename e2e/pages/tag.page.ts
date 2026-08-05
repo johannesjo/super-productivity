@@ -18,9 +18,9 @@ export class TagPage extends BasePage {
   }
 
   /**
-   * Creates a new tag via the sidebar
+   * Opens the create tag dialog via the sidebar and returns its name input.
    */
-  async createTag(tagName: string): Promise<void> {
+  async openCreateTagDialog(): Promise<Locator> {
     // Find the Tags group header button
     const tagsGroupBtn = this.tagsGroup
       .locator('.g-multi-btn-wrapper nav-item button')
@@ -56,6 +56,15 @@ export class TagPage extends BasePage {
 
     // Add a small delay for Angular form initialization
     await this.page.waitForTimeout(500);
+
+    return tagNameInput;
+  }
+
+  /**
+   * Creates a new tag via the sidebar
+   */
+  async createTag(tagName: string): Promise<void> {
+    const tagNameInput = await this.openCreateTagDialog();
 
     await tagNameInput.fill(tagName);
 
