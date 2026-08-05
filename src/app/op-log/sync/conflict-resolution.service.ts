@@ -98,6 +98,7 @@ import {
 import { NOISE_FIELDS } from './conflict-journal.model';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
 import { areCommutingSectionOperations } from './section-conflict-commutativity.util';
+import { selectPlannerState } from '../../features/planner/store/planner.selectors';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -114,6 +115,16 @@ interface MergedResolution {
   mergedOp: Operation;
   /** Kept so the merge is journaled only after its reducer work succeeds. */
   plan: LwwConflictResolutionPlan<EntityConflict>;
+}
+
+interface MultiEntityRemoteOpWinners {
+  op: Operation;
+  hasLocalWinner: boolean;
+  hasRemoteWinner: boolean;
+  localWinnerKeys: Set<string>;
+  resolvedEntityKeys: Set<string>;
+  localWinOpIds: Set<string>;
+  remoteWinCompensationIds: Set<string>;
 }
 
 const taskRelationshipPatch = (
@@ -376,20 +387,21 @@ const INDEPENDENT_MULTI_DELETE_ACTIONS = new Set<ActionType>([
  * - SCOPED_PLAN rows (see `preserve-partial-bulk-plan.util.ts`) are rejected
  *   as a unit and replaced by ONE copy narrowed to the surviving task ids,
  *   mirroring `_preservePartiallyRejectedLocalBulkDeletes`.
- * - ORDERING_ONLY rows touch nothing but `TODAY_TAG.taskIds` ordering — Today
- *   MEMBERSHIP is derived from `task.dueDay`/`dueWithTime` (ADR #2) — so
- *   rejecting such a row loses at most list ordering: cosmetic, self-healing,
- *   no replacement needed. Pinned by the entity-field-free invariant specs in
- *   `task-shared-scheduling.reducer.spec.ts` AND `task.reducer.spec.ts`.
+ * - ORDERING_ONLY rows touch no task entity fields — Today MEMBERSHIP is
+ *   derived from `task.dueDay`/`dueWithTime` (ADR #2). Their reducers can
+ *   reorder `TODAY_TAG.taskIds` and persisted `TaskState.ids`, so rejecting
+ *   such a row loses ordering only: cosmetic, self-healing, no replacement
+ *   needed. Pinned by the entity-field-free and ordering specs in
+ *   `task-shared-scheduling.reducer.spec.ts` and `task.reducer.spec.ts`.
  *
  * Remote rows of these types replay as ordinary atomic actions (the reducers
- * skip unknown task ids); local winners are restored by the existing
- * mixed-winner compensation snapshots applied after the remote row. Known
- * bounded gap of that restore (also pre-existing for archive rows): the
- * snapshot re-imposes TASK fields only, so cross-slice side effects of the
- * applied remote row (e.g. `removeTasksFromPlannerDays` stripping a
- * local-win task's planner-day placement) are not re-imposed; the entry
- * reappears when the task's own dueDay comes around.
+ * skip unknown task ids); local winners are restored by mixed-winner
+ * compensation snapshots applied after the remote row. A remote
+ * `planTasksForToday` also removes every target from `planner.days`, so each
+ * local-winning target whose snapshot still matches its surviving placement
+ * receives an established `Transfer Task` follow-up that restores that exact
+ * placement on live apply and replay
+ * (`_createMixedRemoteTodayPlannerCompensationOps`).
  */
 const ORDERING_ONLY_MULTI_ACTIONS = new Set<ActionType>([
   ActionType.TASK_SHARED_MOVE_IN_TODAY,
@@ -984,18 +996,7 @@ export class ConflictResolutionService {
     // local-win snapshots after it as compensations. The remote row stays pending
     // until reducer and archive application complete; status-blind hydration then
     // replays the same deterministic sequence after a crash.
-    const multiEntityRemoteOpWinners = new Map<
-      string,
-      {
-        op: Operation;
-        hasLocalWinner: boolean;
-        hasRemoteWinner: boolean;
-        localWinnerKeys: Set<string>;
-        resolvedEntityKeys: Set<string>;
-        localWinOpIds: Set<string>;
-        remoteWinCompensationIds: Set<string>;
-      }
-    >();
+    const multiEntityRemoteOpWinners = new Map<string, MultiEntityRemoteOpWinners>();
     const compensatedRemoteOps = new Map<string, Operation>();
     const compensationOpIdsToApply = new Set<string>();
     for (const resolution of resolutions) {
@@ -1278,6 +1279,17 @@ export class ConflictResolutionService {
           remoteWinnerAffectedEntityKeys.delete(localWinnerKey);
         }
       }
+    }
+
+    const plannerCompensationOps =
+      await this._createMixedRemoteTodayPlannerCompensationOps(
+        [...multiEntityRemoteOpWinners.values()],
+        newLocalWinOpsById,
+      );
+    for (const plannerCompensationOp of plannerCompensationOps) {
+      newLocalWinOps.push(plannerCompensationOp);
+      newLocalWinOpsById.set(plannerCompensationOp.id, plannerCompensationOp);
+      compensationOpIdsToApply.add(plannerCompensationOp.id);
     }
 
     // A remote DELETE that loses outright — single-entity, or a bulk delete
@@ -2782,6 +2794,136 @@ export class ConflictResolutionService {
       localWinOp = markLwwDeleteRecreation(localWinOp);
     }
     return localWinOp;
+  }
+
+  /**
+   * A mixed remote `planTasksForToday` must replay atomically so its remote
+   * winners keep their scheduling change. That same reducer removes every
+   * target from every planner day, including tasks whose newer local edit won.
+   * Re-emit one task-scoped transfer per final local winner after the TASK
+   * snapshots. A whole-day snapshot is unsafe here: it can overwrite an
+   * unrelated placement that reached the server before this compensation.
+   *
+   * Each transfer must be a pure ordering restore — its replay force-writes
+   * `dueDay` and clears `dueWithTime` — so a placement whose day disagrees
+   * with the winning snapshot is skipped rather than re-imposed.
+   *
+   * `Transfer Task` is an existing wire action understood by released clients,
+   * so this needs neither a schema bump nor a new payload contract.
+   */
+  private async _createMixedRemoteTodayPlannerCompensationOps(
+    winnerGroups: MultiEntityRemoteOpWinners[],
+    localWinOpsById: ReadonlyMap<string, Operation>,
+  ): Promise<Operation[]> {
+    const appliedPlanGroups = winnerGroups.filter(
+      ({ op, hasRemoteWinner }) =>
+        op.actionType === ActionType.TASK_SHARED_PLAN_FOR_TODAY && hasRemoteWinner,
+    );
+    if (appliedPlanGroups.length === 0) return [];
+
+    const finalLocalWinners = new Map<
+      string,
+      { localWinOp: Operation; remotePlanOp: Operation }
+    >();
+    for (const group of appliedPlanGroups) {
+      for (const taskId of getOpEntityIds(group.op)) {
+        const taskKey = toEntityKey('TASK', taskId);
+        if (!group.localWinnerKeys.has(taskKey)) {
+          finalLocalWinners.delete(taskId);
+          continue;
+        }
+        const localWinOp = [...group.localWinOpIds]
+          .map((opId) => localWinOpsById.get(opId))
+          .find(
+            (op): op is Operation =>
+              op?.entityType === 'TASK' &&
+              op.entityId === taskId &&
+              op.opType !== OpType.Delete,
+          );
+        if (localWinOp) {
+          finalLocalWinners.set(taskId, { localWinOp, remotePlanOp: group.op });
+        } else {
+          finalLocalWinners.delete(taskId);
+        }
+      }
+    }
+    if (finalLocalWinners.size === 0) return [];
+
+    const plannerState = await firstValueFrom(this.store.select(selectPlannerState));
+    if (!plannerState?.days) return [];
+
+    const remoteTargetIds = new Set(
+      appliedPlanGroups.flatMap(({ op }) => getOpEntityIds(op)),
+    );
+    const placements = Object.entries(plannerState.days)
+      .sort(([dayA], [dayB]) => dayA.localeCompare(dayB))
+      .flatMap(([day, taskIds]) => {
+        const postRemoteTaskIds = taskIds.filter(
+          (taskId) => !remoteTargetIds.has(taskId) || finalLocalWinners.has(taskId),
+        );
+        return postRemoteTaskIds.flatMap((taskId, targetIndex) => {
+          const winner = finalLocalWinners.get(taskId);
+          if (!winner) return [];
+          const today = extractActionPayload(winner.remotePlanOp.payload)['today'];
+          const task = extractActionPayload(winner.localWinOp.payload);
+          if (typeof today !== 'string' || task['id'] !== taskId) return [];
+          // Ordering-only restore: the transfer replay force-writes dueDay and
+          // clears dueWithTime, so a stale planner.days entry that disagrees
+          // with the winning snapshot (e.g. left by an earlier LWW snapshot
+          // that moved scheduling without touching planner state) must not be
+          // re-imposed — it would revert the winner's schedule on every
+          // client. Skip it; that winner keeps the pre-existing bounded gap.
+          if (
+            task['dueDay'] !== day ||
+            (task['dueWithTime'] !== undefined && task['dueWithTime'] !== null)
+          ) {
+            return [];
+          }
+          return [{ day, targetIndex, taskId, task, today, ...winner }];
+        });
+      });
+    if (placements.length === 0) return [];
+
+    const clientId = await this.clientIdProvider.loadClientId();
+    if (!clientId) {
+      throw new Error(
+        'ConflictResolutionService: Cannot preserve planner placement - no client ID',
+      );
+    }
+
+    let nextClock = this.mergeAndIncrementClocks(
+      [
+        (await this.opLogStore.getVectorClock()) ?? {},
+        ...appliedPlanGroups.map(({ op }) => op.vectorClock),
+        ...placements.map(({ localWinOp }) => localWinOp.vectorClock),
+      ],
+      clientId,
+    );
+    return placements.map(({ day, targetIndex, taskId, task, today, localWinOp }) => {
+      const op: Operation = {
+        id: uuidv7(),
+        actionType: ActionType.PLANNER_TRANSFER_TASK,
+        opType: OpType.Move,
+        entityType: 'PLANNER',
+        entityId: taskId,
+        payload: {
+          actionPayload: {
+            task,
+            prevDay: today,
+            newDay: day,
+            targetIndex,
+            today,
+          },
+          entityChanges: [],
+        },
+        clientId,
+        vectorClock: nextClock,
+        timestamp: localWinOp.timestamp,
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      };
+      nextClock = this.mergeAndIncrementClocks([nextClock], clientId);
+      return op;
+    });
   }
 
   /**

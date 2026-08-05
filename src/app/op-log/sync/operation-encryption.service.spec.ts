@@ -583,6 +583,69 @@ describe('OperationEncryptionService', () => {
       ).toBeResolved();
     });
 
+    // --- Today-list footprint across the real crypto flow ---
+    // The direct integrity-helper specs pin all supported action shapes. These
+    // cases prove the production decrypt entry points actually invoke that gate
+    // after AES-GCM authenticates actionPayload.taskIds.
+
+    const createTodayPlanOp = (): SyncOperation => ({
+      ...createMockSyncOp({
+        actionPayload: {
+          taskIds: ['task-1', 'task-2'],
+          today: '2026-07-30',
+          startOfNextDayDiffMs: 0,
+        },
+        entityChanges: [],
+      }),
+      actionType: ActionType.TASK_SHARED_PLAN_FOR_TODAY,
+      opType: 'UPDATE',
+      entityType: 'TASK',
+      entityId: 'task-1',
+      entityIds: ['task-1', 'task-2'],
+    });
+
+    it('round-trips a legitimate encrypted Today bulk plan', async () => {
+      const encrypted = await service.encryptOperation(
+        createTodayPlanOp(),
+        TEST_PASSWORD,
+      );
+
+      const decrypted = await service.decryptOperation(encrypted, TEST_PASSWORD);
+
+      expect(decrypted.entityIds).toEqual(['task-1', 'task-2']);
+      expect(
+        (decrypted.payload as { actionPayload: { taskIds: string[] } }).actionPayload
+          .taskIds,
+      ).toEqual(['task-1', 'task-2']);
+    });
+
+    it('rejects an encrypted Today plan whose plaintext footprint injects a victim', async () => {
+      const encrypted = await service.encryptOperation(
+        createTodayPlanOp(),
+        TEST_PASSWORD,
+      );
+      const tampered: SyncOperation = {
+        ...encrypted,
+        entityIds: [...(encrypted.entityIds as string[]), 'victim-task'],
+      };
+
+      await expectAsync(
+        service.decryptOperation(tampered, TEST_PASSWORD),
+      ).toBeRejectedWithError(OperationIntegrityError);
+    });
+
+    it('rejects a stripped Today bulk footprint through batch decrypt', async () => {
+      const [encrypted] = await service.encryptOperations(
+        [createTodayPlanOp()],
+        TEST_PASSWORD,
+      );
+      const tampered: SyncOperation = { ...encrypted, entityIds: undefined };
+
+      await expectAsync(
+        service.decryptOperations([tampered], TEST_PASSWORD),
+      ).toBeRejectedWithError(OperationIntegrityError);
+    });
+
     describe('full-state opType promotion', () => {
       const createFullStateOp = (
         opType: OpType.SyncImport | OpType.BackupImport | OpType.Repair,
