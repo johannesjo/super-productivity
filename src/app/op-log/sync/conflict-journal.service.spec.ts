@@ -134,6 +134,9 @@ describe('ConflictJournalService (store)', () => {
       expect(await service.getEntry('flipped-old')).toBeUndefined();
     });
 
+    // ~200 sequential awaited IDB writes per spec below run 1.7–2.4s on loaded
+    // CI mac runners — right at Jasmine's 2s default, which failed the v18.17.0
+    // release build. Hence the explicit 10s timeout on each looping spec.
     it('prunes the oldest overflow beyond JOURNAL_MAX_ENTRIES (the 201st entry)', async () => {
       const now = Date.now();
       // JOURNAL_MAX_ENTRIES + 1 fresh entries, oldest = index 0.
@@ -150,7 +153,7 @@ describe('ConflictJournalService (store)', () => {
       expect(await service.getEntry('entry-0')).toBeUndefined();
       expect((await service.list('history')).length).toBe(JOURNAL_MAX_ENTRIES);
       expect(await service.getEntry(`entry-${JOURNAL_MAX_ENTRIES}`)).toBeTruthy();
-    });
+    }, 10000);
   });
 
   describe('opportunistic retention on record() (SPAP-36)', () => {
@@ -166,7 +169,7 @@ describe('ConflictJournalService (store)', () => {
       // Exactly at the soft cap: nothing pruned mid-session yet.
       expect((await service.list('history')).length).toBe(softCap);
       expect(await service.getEntry('entry-0')).toBeTruthy();
-    });
+    }, 10000);
 
     it('prunes back to JOURNAL_MAX_ENTRIES when record() crosses the soft cap', async () => {
       const now = Date.now();
@@ -183,7 +186,7 @@ describe('ConflictJournalService (store)', () => {
       // Oldest overflow dropped, newest kept.
       expect(await service.getEntry('entry-0')).toBeUndefined();
       expect(await service.getEntry(`entry-${softCap}`)).toBeTruthy();
-    });
+    }, 10000);
   });
 
   describe('failure hardening (never-throw contract)', () => {
@@ -278,7 +281,7 @@ describe('ConflictJournalService (store)', () => {
       // The abort was observed: tx.done was awaited despite the delete failure.
       // Old sequencing would leave it unhandled — doneThen never called.
       expect(doneThen).toHaveBeenCalled();
-    });
+    }, 10000);
   });
 
   describe('durable clear boundary (privacy fail-safe on profile switch)', () => {
