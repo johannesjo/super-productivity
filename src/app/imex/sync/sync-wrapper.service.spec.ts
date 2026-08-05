@@ -24,6 +24,7 @@ import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocke
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
 import {
   AuthFailSPError,
+  DecryptNoPasswordError,
   MissingCredentialsSPError,
   NetworkUnavailableSPError,
   OperationIntegrityError,
@@ -365,7 +366,22 @@ describe('SyncWrapperService', () => {
       expect(mockSnackService.open).not.toHaveBeenCalled();
     });
 
-    it('should offer encryption setup when a user-triggered sync is paused for a missing mandatory key', async () => {
+    // A SuperSync provider as the encryption-setup re-check sees it: op-sync
+    // capable, with or without a configured key.
+    const makeSuperSyncProvider = (
+      encryptKey: string | undefined,
+    ): SyncProviderBase<SyncProviderId.SuperSync> =>
+      ({
+        id: SyncProviderId.SuperSync,
+        supportsOperationSync: true,
+        providerMode: 'superSyncOps',
+        getEncryptKey: () => Promise.resolve(encryptKey),
+      }) as unknown as SyncProviderBase<SyncProviderId.SuperSync>;
+
+    const armEncryptionRequiredSnack = async (): Promise<SnackParams> => {
+      mockProviderManager.getActiveProvider.and.returnValue(
+        makeSuperSyncProvider(undefined),
+      );
       mockSyncService.downloadRemoteOps.and.resolveTo({ kind: 'no_new_ops' as const });
       mockSyncService.uploadPendingOps.and.resolveTo({
         kind: 'completed' as const,
@@ -377,10 +393,14 @@ describe('SyncWrapperService', () => {
         rejectedOps: [],
         encryptionRequiredKeyMissing: true,
       });
-
       const result = await service.sync(true);
-
       expect(result).toBe(SyncStatus.UpdateRemote);
+      return mockSnackService.open.calls.mostRecent().args[0] as SnackParams;
+    };
+
+    it('should offer encryption setup when a user-triggered sync is paused for a missing mandatory key', async () => {
+      const openedSnack = await armEncryptionRequiredSnack();
+
       expect(mockSnackService.open).toHaveBeenCalledWith(
         jasmine.objectContaining({
           msg: T.F.SYNC.S.ENCRYPTION_REQUIRED_FOR_SUPERSYNC,
@@ -390,11 +410,59 @@ describe('SyncWrapperService', () => {
         }),
       );
 
-      const openedSnack = mockSnackService.open.calls.mostRecent().args[0] as SnackParams;
+      // Clicking the action runs the guarded flow: a fresh preflight sync,
+      // then a still-needed re-check, and only then the destructive dialog.
       await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+
+      expect(mockSyncService.downloadRemoteOps).toHaveBeenCalledTimes(2);
+      // The preflight suppresses the encryption-required snack — no duplicate.
+      expect(mockSnackService.open).toHaveBeenCalledTimes(1);
       expect(mockMatDialog.open).toHaveBeenCalledWith(jasmine.any(Function), {
         data: { providerType: 'supersync', initialSetup: false },
       });
+    });
+
+    it('should NOT open the destructive setup dialog from a stale snack click when the remote got encrypted meanwhile', async () => {
+      const openedSnack = await armEncryptionRequiredSnack();
+
+      // Another device enabled encryption between snack and click: the
+      // click-time preflight download now hits undecryptable content.
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new DecryptNoPasswordError({ reason: 'peer enabled encryption' }),
+      );
+      mockMatDialog.open.and.returnValue({
+        afterClosed: () => of(undefined),
+      } as unknown as MatDialogRef<unknown>);
+
+      await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+
+      // The delete-and-reupload dialog must never open on stale state — the
+      // enter-password flow owns recovery for a peer-encrypted remote.
+      expect(mockMatDialog.open).not.toHaveBeenCalledWith(jasmine.any(Function), {
+        data: { providerType: 'supersync', initialSetup: false },
+      });
+      expect(mockMatDialog.open).toHaveBeenCalledWith(
+        DialogEnterEncryptionPasswordComponent,
+        jasmine.anything(),
+      );
+    });
+
+    it('should report already-encrypted instead of opening the dialog when a key exists by click time', async () => {
+      const openedSnack = await armEncryptionRequiredSnack();
+
+      // By click time this device has a key (e.g. entered via the password flow).
+      mockProviderManager.getActiveProvider.and.returnValue(
+        makeSuperSyncProvider('some-derived-key'),
+      );
+
+      await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+
+      expect(mockMatDialog.open).not.toHaveBeenCalled();
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.APP.B_SUPER_SYNC_ENCRYPTION.ALREADY_ENCRYPTED,
+        }),
+      );
     });
 
     it('should leave the missing-key prompt to the already-armed fresh-setup modal', async () => {
