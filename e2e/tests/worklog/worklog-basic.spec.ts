@@ -32,7 +32,7 @@ test.describe('Worklog', () => {
     await workViewPage.waitForTaskList();
 
     // Create and complete a task with deterministic tracked time
-    const taskName = `${testPrefix}-Worklog Task`;
+    const taskName = `${testPrefix}-Worklog; Task`;
     await workViewPage.addTask(`${taskName} 10m/1h`);
 
     const task = taskPage.getTaskByText(taskName);
@@ -126,8 +126,9 @@ test.describe('Worklog', () => {
     const csv = await readFile(downloadPath, 'utf8');
     const rows = csv.replace(/^\uFEFF/, '').split(/\r?\n/);
     expect(rows[0]).toBe('Date;Start;End;Worked;Titles');
-    expect(rows.find((row) => row.endsWith(`;${taskName}`))).toMatch(
-      /^\d{4}-\d{2}-\d{2}; - ; - ;0:20;/,
+    const csvRow = rows.find((row) => row.includes('0:20'));
+    expect(csvRow?.replace(/^\d{4}-\d{2}-\d{2}/, 'DATE')).toBe(
+      `DATE; - ; - ;0:20;"${taskName}"`,
     );
   });
 

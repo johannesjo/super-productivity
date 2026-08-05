@@ -20,6 +20,11 @@ on:
         type: boolean
         default: true
 
+# Every run publishes the same mutable `latest` tag, so only the newest may push.
+concurrency:
+  group: supersync-docker-publish
+  cancel-in-progress: true
+
 jobs:
   build-and-push:
     name: Build and Push to GHCR
@@ -52,7 +57,7 @@ jobs:
           ssh://git@github.com/
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v2
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

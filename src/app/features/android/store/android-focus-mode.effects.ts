@@ -24,6 +24,9 @@ import { DroidLog } from '../../../core/log';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { Task } from '../../tasks/task.model';
+
+type FocusNotificationTask = Pick<Task, 'id' | 'title'> | null | undefined;
 
 /**
  * On app resume, fire a single `tick()` so the wall-clock-based focus reducer
@@ -40,9 +43,9 @@ export const createFocusResumeTick$ = (onResume$: Observable<void>): Observable<
  * changes need no push at all — and since prev/curr are consecutive per-tick
  * emissions (~1s apart), the 5s gate suppresses them entirely (#8243). Do not
  * weaken it: every push re-runs startForeground + a notification rebuild.
- * Pause/purpose changes — and the large elapsed jump a resume `tick()`
- * produces (#7856) — must propagate immediately so the notification
- * reconciles with the corrected in-app countdown. (The 5000 here and
+ * Pause/purpose and displayed-task changes — and the large elapsed jump a
+ * resume `tick()` produces (#7856) — must propagate immediately so the
+ * notification reconciles with the corrected in-app state. (The 5000 here and
  * TIME_SPENT_JUMP_THRESHOLD_MS in android-foreground-tracking.effects.ts
  * encode the same "larger than any tick" idea but differ in semantics —
  * abs() vs decrease-always-passes — so they are deliberately not shared.)
@@ -50,8 +53,13 @@ export const createFocusResumeTick$ = (onResume$: Observable<void>): Observable<
 export const hasFocusNotificationStateChanged = (
   prevTimer: TimerState | undefined,
   currTimer: TimerState,
+  prevTask?: FocusNotificationTask,
+  currTask?: FocusNotificationTask,
 ): boolean => {
   if (!prevTimer) return true;
+  // The task title is part of the native notification payload, even though the
+  // focus timer itself is unchanged when tracking switches to another task.
+  if (prevTask?.id !== currTask?.id || prevTask?.title !== currTask?.title) return true;
   // Pause state changed
   if (prevTimer.isRunning !== currTimer.isRunning) return true;
   // Purpose changed (work -> break or vice versa)
@@ -253,7 +261,14 @@ export class AndroidFocusModeEffects {
                   'Failed to start focus mode notification',
                   true,
                 );
-              } else if (hasFocusNotificationStateChanged(prev?.timer, timer)) {
+              } else if (
+                hasFocusNotificationStateChanged(
+                  prev?.timer,
+                  timer,
+                  prev?.currentTask,
+                  currentTask,
+                )
+              ) {
                 // Only update if something significant changed
                 DroidLog.log('AndroidFocusModeEffects: Updating focus mode service', {
                   title,

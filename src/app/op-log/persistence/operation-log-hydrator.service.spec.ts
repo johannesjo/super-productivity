@@ -2104,34 +2104,6 @@ describe('OperationLogHydratorService', () => {
     });
   });
 
-  describe('hydrateFromRemoteSync', () => {
-    it('should delegate to syncHydrationService', async () => {
-      await service.hydrateFromRemoteSync();
-
-      expect(mockSyncHydrationService.hydrateFromRemoteSync).toHaveBeenCalled();
-    });
-
-    it('should pass downloadedMainModelData to syncHydrationService', async () => {
-      const downloadedData = { task: { entities: {}, ids: [] } };
-
-      await service.hydrateFromRemoteSync(downloadedData);
-
-      expect(mockSyncHydrationService.hydrateFromRemoteSync).toHaveBeenCalledWith(
-        downloadedData,
-        undefined,
-      );
-    });
-
-    it('should pass undefined when no downloadedMainModelData provided', async () => {
-      await service.hydrateFromRemoteSync();
-
-      expect(mockSyncHydrationService.hydrateFromRemoteSync).toHaveBeenCalledWith(
-        undefined,
-        undefined,
-      );
-    });
-  });
-
   // ===========================================================================
   // retryFailedRemoteOps: Retry failed remote operations
   // ===========================================================================

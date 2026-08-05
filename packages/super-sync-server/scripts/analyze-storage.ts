@@ -65,25 +65,51 @@ const saveToFile = (filename: string, data: any): string => {
 const analyzeOperationSizes = async (userId?: number): Promise<void> => {
   console.log('\n=== Operation Size Distribution ===\n');
 
-  const userWhere = userId ? Prisma.sql`WHERE user_id = ${userId}` : Prisma.empty;
-  const userAnd = userId ? Prisma.sql`AND user_id = ${userId}` : Prisma.empty;
+  console.log(
+    userId
+      ? 'Based on up to 10,000 newest operations for this user.'
+      : 'Based on a 1% page sample of operations.',
+  );
+  const sampleSeed = Math.floor(Math.random() * 2_147_483_647);
+  const scopedOperations = userId
+    ? Prisma.sql`
+        SELECT payload_bytes, payload, vector_clock
+        FROM operations
+        WHERE user_id = ${userId}
+        ORDER BY server_seq DESC
+        LIMIT 10000
+      `
+    : Prisma.sql`
+        SELECT payload_bytes, payload, vector_clock
+        FROM operations TABLESAMPLE SYSTEM (1) REPEATABLE (${sampleSeed})
+      `;
 
   // Get percentile distribution
   const sizeDistribution: any[] = await prisma.$queryRaw`
+    WITH bounded_operations AS MATERIALIZED (
+      ${scopedOperations}
+    ), sampled_operations AS MATERIALIZED (
+      SELECT
+        CASE
+          WHEN payload_bytes > 0 THEN payload_bytes
+          ELSE OCTET_LENGTH(payload::text)::bigint +
+               OCTET_LENGTH(vector_clock::text)::bigint
+        END AS operation_bytes
+      FROM bounded_operations
+    )
     SELECT
-      percentile_cont(0.10) WITHIN GROUP (ORDER BY pg_column_size(payload)) as p10,
-      percentile_cont(0.25) WITHIN GROUP (ORDER BY pg_column_size(payload)) as p25,
-      percentile_cont(0.50) WITHIN GROUP (ORDER BY pg_column_size(payload)) as p50,
-      percentile_cont(0.75) WITHIN GROUP (ORDER BY pg_column_size(payload)) as p75,
-      percentile_cont(0.90) WITHIN GROUP (ORDER BY pg_column_size(payload)) as p90,
-      percentile_cont(0.95) WITHIN GROUP (ORDER BY pg_column_size(payload)) as p95,
-      percentile_cont(0.99) WITHIN GROUP (ORDER BY pg_column_size(payload)) as p99,
-      MIN(pg_column_size(payload)) as min_size,
-      MAX(pg_column_size(payload)) as max_size,
-      AVG(pg_column_size(payload)) as avg_size,
+      percentile_cont(0.10) WITHIN GROUP (ORDER BY operation_bytes) as p10,
+      percentile_cont(0.25) WITHIN GROUP (ORDER BY operation_bytes) as p25,
+      percentile_cont(0.50) WITHIN GROUP (ORDER BY operation_bytes) as p50,
+      percentile_cont(0.75) WITHIN GROUP (ORDER BY operation_bytes) as p75,
+      percentile_cont(0.90) WITHIN GROUP (ORDER BY operation_bytes) as p90,
+      percentile_cont(0.95) WITHIN GROUP (ORDER BY operation_bytes) as p95,
+      percentile_cont(0.99) WITHIN GROUP (ORDER BY operation_bytes) as p99,
+      MIN(operation_bytes) as min_size,
+      MAX(operation_bytes) as max_size,
+      AVG(operation_bytes) as avg_size,
       COUNT(*) as total_ops
-    FROM operations
-    ${userWhere}
+    FROM sampled_operations
   `;
 
   const stats = sizeDistribution[0];
@@ -103,22 +129,32 @@ const analyzeOperationSizes = async (userId?: number): Promise<void> => {
   // Size buckets
   console.log('\nSize Distribution:');
   const buckets: any[] = await prisma.$queryRaw`
+    WITH bounded_operations AS MATERIALIZED (
+      ${scopedOperations}
+    ), sampled_operations AS MATERIALIZED (
+      SELECT
+        CASE
+          WHEN payload_bytes > 0 THEN payload_bytes
+          ELSE OCTET_LENGTH(payload::text)::bigint +
+               OCTET_LENGTH(vector_clock::text)::bigint
+        END AS operation_bytes
+      FROM bounded_operations
+    )
     SELECT
       CASE
-        WHEN pg_column_size(payload) < 512 THEN '0-512B'
-        WHEN pg_column_size(payload) < 1024 THEN '512B-1KB'
-        WHEN pg_column_size(payload) < 5120 THEN '1KB-5KB'
-        WHEN pg_column_size(payload) < 10240 THEN '5KB-10KB'
-        WHEN pg_column_size(payload) < 51200 THEN '10KB-50KB'
-        WHEN pg_column_size(payload) < 102400 THEN '50KB-100KB'
+        WHEN operation_bytes < 512 THEN '0-512B'
+        WHEN operation_bytes < 1024 THEN '512B-1KB'
+        WHEN operation_bytes < 5120 THEN '1KB-5KB'
+        WHEN operation_bytes < 10240 THEN '5KB-10KB'
+        WHEN operation_bytes < 51200 THEN '10KB-50KB'
+        WHEN operation_bytes < 102400 THEN '50KB-100KB'
         ELSE '100KB+'
       END as size_bucket,
       COUNT(*) as count,
-      SUM(pg_column_size(payload)) as total_bytes
-    FROM operations
-    ${userWhere}
+      SUM(operation_bytes) as total_bytes
+    FROM sampled_operations
     GROUP BY size_bucket
-    ORDER BY MIN(pg_column_size(payload))
+    ORDER BY MIN(operation_bytes)
   `;
 
   console.table(
@@ -137,19 +173,39 @@ const analyzeOperationSizes = async (userId?: number): Promise<void> => {
 const analyzeOperationTimeline = async (userId?: number): Promise<void> => {
   console.log('\n=== Operation Timeline Analysis ===\n');
 
-  const userAnd = userId ? Prisma.sql`AND user_id = ${userId}` : Prisma.empty;
+  console.log('Based on up to 100 newest operations per active user.');
+  const thirtyDaysAgo = BigInt(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const monitoredUsers = userId
+    ? Prisma.sql`SELECT ${userId}::integer AS user_id`
+    : Prisma.sql`
+        SELECT DISTINCT user_id
+        FROM sync_devices
+        WHERE last_seen_at > ${thirtyDaysAgo}
+      `;
 
   // Operations per day
   console.log('Operations per Day (last 30 days):');
   const perDay: any[] = await prisma.$queryRaw`
+    WITH monitored_users AS (
+      ${monitoredUsers}
+    ), recent_ops AS MATERIALIZED (
+      SELECT o.received_at, o.client_id, o.payload_bytes
+      FROM monitored_users u
+      CROSS JOIN LATERAL (
+        SELECT o.received_at, o.client_id, o.payload_bytes
+        FROM operations o
+        WHERE o.user_id = u.user_id
+        ORDER BY o.server_seq DESC
+        LIMIT 100
+      ) o
+    )
     SELECT
       DATE(to_timestamp(received_at / 1000)) as date,
       COUNT(*) as ops_count,
       COUNT(DISTINCT client_id) as unique_devices,
-      SUM(pg_column_size(payload)) as total_bytes
-    FROM operations
-    WHERE received_at > EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000
-    ${userAnd}
+      SUM(payload_bytes) as total_bytes
+    FROM recent_ops
+    WHERE received_at > ${thirtyDaysAgo}
     GROUP BY DATE(to_timestamp(received_at / 1000))
     ORDER BY date DESC
     LIMIT 30
@@ -171,13 +227,25 @@ const analyzeOperationTimeline = async (userId?: number): Promise<void> => {
   // Operations per hour (last 24 hours)
   console.log('\nOperations per Hour (last 24 hours):');
   const perHour: any[] = await prisma.$queryRaw`
+    WITH monitored_users AS (
+      ${monitoredUsers}
+    ), recent_ops AS MATERIALIZED (
+      SELECT o.received_at, o.payload_bytes
+      FROM monitored_users u
+      CROSS JOIN LATERAL (
+        SELECT o.received_at, o.payload_bytes
+        FROM operations o
+        WHERE o.user_id = u.user_id
+        ORDER BY o.server_seq DESC
+        LIMIT 100
+      ) o
+    )
     SELECT
       DATE_TRUNC('hour', to_timestamp(received_at / 1000)) as hour,
       COUNT(*) as ops_count,
-      AVG(pg_column_size(payload)) as avg_size
-    FROM operations
+      AVG(payload_bytes) as avg_size
+    FROM recent_ops
     WHERE received_at > EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours') * 1000
-    ${userAnd}
     GROUP BY hour
     ORDER BY hour DESC
     LIMIT 24
@@ -200,20 +268,52 @@ const analyzeOperationTimeline = async (userId?: number): Promise<void> => {
 const analyzeOperationTypes = async (userId?: number): Promise<void> => {
   console.log('\n=== Operation Type Analysis ===\n');
 
-  const userWhere = userId ? Prisma.sql`WHERE user_id = ${userId}` : Prisma.empty;
+  console.log(
+    userId
+      ? 'Based on up to 10,000 newest operations for this user.'
+      : 'Based on a 1% page sample of operations.',
+  );
+  const sampleSeed = Math.floor(Math.random() * 2_147_483_647);
+  const scopedOperations = userId
+    ? Prisma.sql`
+        SELECT
+          op_type, entity_type, action_type, user_id,
+          payload_bytes, payload, vector_clock
+        FROM operations
+        WHERE user_id = ${userId}
+        ORDER BY server_seq DESC
+        LIMIT 10000
+      `
+    : Prisma.sql`
+        SELECT
+          op_type, entity_type, action_type, user_id,
+          payload_bytes, payload, vector_clock
+        FROM operations TABLESAMPLE SYSTEM (1) REPEATABLE (${sampleSeed})
+      `;
 
   // By opType
   console.log('By Operation Type:');
   const byOpType: any[] = await prisma.$queryRaw`
+    WITH bounded_operations AS MATERIALIZED (
+      ${scopedOperations}
+    ), sampled_operations AS MATERIALIZED (
+      SELECT
+        op_type, entity_type, action_type, user_id,
+        CASE
+          WHEN payload_bytes > 0 THEN payload_bytes
+          ELSE OCTET_LENGTH(payload::text)::bigint +
+               OCTET_LENGTH(vector_clock::text)::bigint
+        END AS operation_bytes
+      FROM bounded_operations
+    )
     SELECT
       op_type,
       COUNT(*) as count,
-      SUM(pg_column_size(payload)) as total_bytes,
-      AVG(pg_column_size(payload)) as avg_bytes,
-      MAX(pg_column_size(payload)) as max_bytes,
+      SUM(operation_bytes) as total_bytes,
+      AVG(operation_bytes) as avg_bytes,
+      MAX(operation_bytes) as max_bytes,
       COUNT(DISTINCT user_id) as unique_users
-    FROM operations
-    ${userWhere}
+    FROM sampled_operations
     GROUP BY op_type
     ORDER BY total_bytes DESC
   `;
@@ -232,13 +332,24 @@ const analyzeOperationTypes = async (userId?: number): Promise<void> => {
   // By entityType
   console.log('\nBy Entity Type:');
   const byEntityType: any[] = await prisma.$queryRaw`
+    WITH bounded_operations AS MATERIALIZED (
+      ${scopedOperations}
+    ), sampled_operations AS MATERIALIZED (
+      SELECT
+        op_type, entity_type, action_type, user_id,
+        CASE
+          WHEN payload_bytes > 0 THEN payload_bytes
+          ELSE OCTET_LENGTH(payload::text)::bigint +
+               OCTET_LENGTH(vector_clock::text)::bigint
+        END AS operation_bytes
+      FROM bounded_operations
+    )
     SELECT
       entity_type,
       COUNT(*) as count,
-      SUM(pg_column_size(payload)) as total_bytes,
-      AVG(pg_column_size(payload)) as avg_bytes
-    FROM operations
-    ${userWhere}
+      SUM(operation_bytes) as total_bytes,
+      AVG(operation_bytes) as avg_bytes
+    FROM sampled_operations
     GROUP BY entity_type
     ORDER BY total_bytes DESC
   `;
@@ -255,13 +366,24 @@ const analyzeOperationTypes = async (userId?: number): Promise<void> => {
   // By actionType (top 10)
   console.log('\nBy Action Type (Top 10):');
   const byActionType: any[] = await prisma.$queryRaw`
+    WITH bounded_operations AS MATERIALIZED (
+      ${scopedOperations}
+    ), sampled_operations AS MATERIALIZED (
+      SELECT
+        op_type, entity_type, action_type, user_id,
+        CASE
+          WHEN payload_bytes > 0 THEN payload_bytes
+          ELSE OCTET_LENGTH(payload::text)::bigint +
+               OCTET_LENGTH(vector_clock::text)::bigint
+        END AS operation_bytes
+      FROM bounded_operations
+    )
     SELECT
       action_type,
       COUNT(*) as count,
-      SUM(pg_column_size(payload)) as total_bytes,
-      AVG(pg_column_size(payload)) as avg_bytes
-    FROM operations
-    ${userWhere}
+      SUM(operation_bytes) as total_bytes,
+      AVG(operation_bytes) as avg_bytes
+    FROM sampled_operations
     GROUP BY action_type
     ORDER BY total_bytes DESC
     LIMIT 10
@@ -281,9 +403,27 @@ const analyzeOperationTypes = async (userId?: number): Promise<void> => {
  * Find and analyze the largest operations
  */
 const analyzeLargeOperations = async (limit = 20): Promise<void> => {
-  console.log(`\n=== Top ${limit} Largest Operations ===\n`);
+  console.log(`\n=== Top ${limit} Largest Operations in 1% Page Sample ===\n`);
+  const sampleSeed = Math.floor(Math.random() * 2_147_483_647);
 
   const largeOps: any[] = await prisma.$queryRaw`
+    WITH sampled_operations AS MATERIALIZED (
+      SELECT
+        o.id,
+        o.user_id,
+        o.op_type,
+        o.action_type,
+        o.entity_type,
+        o.entity_id,
+        CASE
+          WHEN o.payload_bytes > 0 THEN o.payload_bytes
+          ELSE OCTET_LENGTH(o.payload::text)::bigint +
+               OCTET_LENGTH(o.vector_clock::text)::bigint
+        END AS operation_bytes,
+        o.received_at,
+        o.is_payload_encrypted
+      FROM operations AS o TABLESAMPLE SYSTEM (1) REPEATABLE (${sampleSeed})
+    )
     SELECT
       o.id,
       o.user_id,
@@ -292,12 +432,12 @@ const analyzeLargeOperations = async (limit = 20): Promise<void> => {
       o.action_type,
       o.entity_type,
       o.entity_id,
-      pg_column_size(o.payload) as payload_bytes,
+      o.operation_bytes AS payload_bytes,
       o.received_at,
       o.is_payload_encrypted
-    FROM operations o
+    FROM sampled_operations o
     JOIN users u ON o.user_id = u.id
-    ORDER BY pg_column_size(o.payload) DESC
+    ORDER BY o.operation_bytes DESC
     LIMIT ${limit};
   `;
 
@@ -369,8 +509,31 @@ const analyzeLargeOperations = async (limit = 20): Promise<void> => {
  */
 const detectRapidFire = async (thresholdPerSecond = 5): Promise<void> => {
   console.log(`\n=== Rapid Fire Detection (>${thresholdPerSecond} ops/second) ===\n`);
+  console.log('Checks up to 100 newest operations per user active in the last 7 days.');
+
+  const sevenDaysAgo = BigInt(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
   const rapidFire: any[] = await prisma.$queryRaw`
+    WITH active_users AS (
+      SELECT DISTINCT user_id
+      FROM sync_devices
+      WHERE last_seen_at > ${sevenDaysAgo}
+    ), recent_ops AS MATERIALIZED (
+      SELECT o.user_id, o.client_id, o.received_at, o.op_type, o.entity_type
+      FROM active_users u
+      CROSS JOIN LATERAL (
+        SELECT
+          o.user_id,
+          o.client_id,
+          o.received_at,
+          o.op_type,
+          o.entity_type
+        FROM operations o
+        WHERE o.user_id = u.user_id
+        ORDER BY o.server_seq DESC
+        LIMIT 100
+      ) o
+    )
     SELECT
       user_id,
       client_id,
@@ -378,7 +541,8 @@ const detectRapidFire = async (thresholdPerSecond = 5): Promise<void> => {
       COUNT(*) as ops_in_second,
       array_agg(DISTINCT op_type) as op_types,
       array_agg(DISTINCT entity_type) as entity_types
-    FROM operations
+    FROM recent_ops
+    WHERE received_at > ${sevenDaysAgo}
     GROUP BY user_id, client_id, second
     HAVING COUNT(*) > ${thresholdPerSecond}
     ORDER BY ops_in_second DESC
@@ -445,13 +609,12 @@ const analyzeSnapshots = async (): Promise<void> => {
   console.log(`  Max size: ${formatBytes(Number(stats.max_snapshot_size || 0))}`);
   console.log(`  Total size: ${formatBytes(Number(stats.total_snapshot_size || 0))}`);
 
-  // Correlation with operation count
-  console.log('\nSnapshot Size vs Operation Count:');
+  console.log('\nLargest Snapshots:');
   const correlation: any[] = await prisma.$queryRaw`
     SELECT
       u.id,
       u.email,
-      (SELECT COUNT(*) FROM operations o WHERE o.user_id = u.id) as op_count,
+      s.last_seq,
       LENGTH(s.snapshot_data) as snapshot_size,
       s.last_snapshot_seq
     FROM users u
@@ -464,9 +627,9 @@ const analyzeSnapshots = async (): Promise<void> => {
   console.table(
     correlation.map((c) => ({
       User: `${c.id} (${c.email})`,
-      Ops: Number(c.op_count),
+      LatestSeq: Number(c.last_seq),
       SnapshotSize: formatBytes(Number(c.snapshot_size)),
-      LastSeq: Number(c.last_snapshot_seq),
+      SnapshotSeq: Number(c.last_snapshot_seq),
     })),
   );
 };
@@ -782,9 +945,8 @@ const main = async (): Promise<void> => {
         showHelp();
     }
   } catch (error) {
-    if (reportMonitoringError('Error:', error)) {
-      process.exitCode = 1;
-    }
+    reportMonitoringError('Error:', error);
+    process.exitCode = 1;
   } finally {
     await disconnectDb();
   }

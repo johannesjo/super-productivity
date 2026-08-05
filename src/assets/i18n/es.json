@@ -426,7 +426,7 @@
         "T_TITLE": "Título",
         "T_TO_BE_SUBMITTED": "Por enviar",
         "TITLE": "Enviar tiempo dedicado a las incidencias a GitLab",
-        "TOTAL_MSG": "Vas a enviar <em>{totalTimeToSubmit}</em> de tiempo trabajado en total para hoy a <em>{nrOfTasksToSubmit}</em> problemas diferentes."
+        "TOTAL_MSG": "Vas a enviar <em>{{totalTimeToSubmit}}</em> de tiempo trabajado en total para hoy a <em>{{nrOfTasksToSubmit}}</em> problemas diferentes."
       },
       "FORM": {
         "FILTER": "Filtro personalizado",

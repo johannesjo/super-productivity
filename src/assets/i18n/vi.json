@@ -1903,10 +1903,6 @@
         "MSG": "Tạo nhãn mới {{tagsTxt}}?",
         "OK": "Tạo nhãn"
       },
-      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
-        "MSG": "Xóa việc \"{{title}}\"?",
-        "OK": "Xóa"
-      },
       "D_DEADLINE": {
         "ADD_TIME": "Thêm giờ",
         "QA_NEXT_MONTH": "Tháng sau",
@@ -2057,8 +2053,7 @@
         "YEARLY_CURRENT_DATE_AND_TIME": "Hàng năm {{dayAndMonthStr}}, {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
-        "MSG": "Chuyển {{tasksNr}} phiên vào \"{{projectName}}\"?",
-        "OK": "Chuyển {{tasksNr}} phiên vào \"{{projectName}}\"?"
+        "MSG": "Chuyển {{tasksNr}} phiên vào \"{{projectName}}\"?"
       },
       "D_CONFIRM_REMOVE": {
         "MSG": "Xóa cấu hình lặp sẽ chuyển các phiên trước thành việc thường.",

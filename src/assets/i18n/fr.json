@@ -945,8 +945,8 @@
       },
       "S": {
         "REMOVED_PLAN_DATE": "Date de planification supprimée pour la tâche \"{{taskTitle}}\"",
-        "TASK_ALREADY_PLANNED": "La tâche est déjà plannifiée le {{date}",
-        "TASK_PLANNED_FOR": "Tâche planifiée pour {date}"
+        "TASK_ALREADY_PLANNED": "La tâche est déjà plannifiée le {{date}}",
+        "TASK_PLANNED_FOR": "Tâche planifiée pour {{date}}"
       }
     },
     "POMODORO": {
@@ -968,7 +968,7 @@
         "EDIT": "Modifier le projet"
       },
       "D_DELETE": {
-        "MSG": "Êtes-vous sûr de vouloir supprimer le projet \"{title}\" ?"
+        "MSG": "Êtes-vous sûr de vouloir supprimer le projet \"{{title}}\" ?"
       },
       "COMPLETE": {
         "COMPLETED_ON": "Terminé le {{date}}",
@@ -1892,11 +1892,11 @@
         "MSG": "Êtes-vous sûr de vouloir supprimer la tâche \"{{title}}\" ?"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
-        "MSG": "Voulez-vous créer la nouvelle balise {tagsTxt} ?",
+        "MSG": "Voulez-vous créer la nouvelle balise {{tagsTxt}} ?",
         "OK": "Créer la balise"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
-        "MSG": "Voulez-vous créer les nouvelles balises {tagsTxt} ?",
+        "MSG": "Voulez-vous créer les nouvelles balises {{tagsTxt}} ?",
         "OK": "Créer les balises"
       },
       "D_DEADLINE": {
@@ -2024,8 +2024,8 @@
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "Configuration de répétition customisée",
-        "CUSTOM_AND_TIME": "Customisé, {timeStr}",
-        "CUSTOM_WEEKLY": "{daysStr}",
+        "CUSTOM_AND_TIME": "Customisé, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
         "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
         "DAILY": "Chaque jour",
         "DAILY_AND_TIME": "Chaque jour, {{timeStr}}",
@@ -2036,17 +2036,17 @@
         "EVERY_X_YEARLY": "Tous les {{x}} ans",
         "EVERY_X_YEARLY_AND_TIME": "Tous les {{x}} ans, {{timeStr}}",
         "MONDAY_TO_FRIDAY": "Lun-Ven",
-        "MONDAY_TO_FRIDAY_AND_TIME": "Lun-Ven, {timeStr}",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Lun-Ven, {{timeStr}}",
         "MONTHLY_CURRENT_DATE": "Le {{dateDayStr}} de chaque mois",
-        "MONTHLY_CURRENT_DATE_AND_TIME": "Le {dateDayStr} de chaque mois, {timeStr}",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Le {{dateDayStr}} de chaque mois, {{timeStr}}",
         "MONTHLY_LAST_DAY": "Chaque mois le dernier jour",
         "MONTHLY_LAST_DAY_AND_TIME": "Chaque mois le dernier jour, {{timeStr}}",
         "MONTHLY_NTH_WEEKDAY": "Chaque mois le {{ordinalStr}} {{weekdayStr}}",
         "MONTHLY_NTH_WEEKDAY_AND_TIME": "Chaque mois le {{ordinalStr}} {{weekdayStr}}, {{timeStr}}",
-        "WEEKLY_CURRENT_WEEKDAY": "Chaque semaine le {weekdayStr}",
-        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Chaque semaine le {weekdayStr}, {timeStr}",
-        "YEARLY_CURRENT_DATE": "Chaque année le {dayAndMonthStr}",
-        "YEARLY_CURRENT_DATE_AND_TIME": "Chaque année le {dayAndMonthStr}, {timeStr}"
+        "WEEKLY_CURRENT_WEEKDAY": "Chaque semaine le {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Chaque semaine le {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Chaque année le {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Chaque année le {{dayAndMonthStr}}, {{timeStr}}"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
         "MSG": "Il y a {{tasksNr}} instances créées pour cette tâche répétée. Voulez-vous toutes les déplacer vers le projet « {{projectName}} » ?",
@@ -2058,7 +2058,7 @@
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "CANCEL": "Seulement aux tâches futures",
-        "MSG": "Il y a {tasksNr} instances créées pour cette tâche répétée. Voulez-vous les mettre toutes à jour avec les nouveaux paramètres par défaut, ou juste appliquer le changement aux tâches futures ?",
+        "MSG": "Il y a {{tasksNr}} instances créées pour cette tâche répétée. Voulez-vous les mettre toutes à jour avec les nouveaux paramètres par défaut, ou juste appliquer le changement aux tâches futures ?",
         "OK": "Mettre à jour toutes les instances"
       },
       "D_DELETE_INSTANCE": {
@@ -2097,9 +2097,9 @@
         "Q_CUSTOM": "Configuration de répétition customisée",
         "Q_DAILY": "Chaque jour",
         "Q_MONDAY_TO_FRIDAY": "Chaque semaine du lundi au vendredi",
-        "Q_MONTHLY_CURRENT_DATE": "Chaque mois le {dateDayStr}",
-        "Q_WEEKLY_CURRENT_WEEKDAY": "Chaque semaine le {weekdayStr}",
-        "Q_YEARLY_CURRENT_DATE": "Chaque année le {dayAndMonthStr}",
+        "Q_MONTHLY_CURRENT_DATE": "Chaque mois le {{dateDayStr}}",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Chaque semaine le {{weekdayStr}}",
+        "Q_YEARLY_CURRENT_DATE": "Chaque année le {{dayAndMonthStr}}",
         "QUICK_SETTING": "Répéter la configuration",
         "REMIND_AT": "Rappeler à",
         "REMIND_AT_PLACEHOLDER": "Sélectionnez quand rappeler",

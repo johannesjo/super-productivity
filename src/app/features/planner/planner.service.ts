@@ -71,24 +71,30 @@ export class PlannerService {
         return [];
       }
 
-      const today = new Date().getTime();
+      // Anchor on the logical day, not the raw clock: between calendar
+      // midnight and the configured start-of-next-day the window must still
+      // begin at (logical) today, or the tasks planned for it have no rendered
+      // day at all; ensureDayLoaded below can only extend the window forward.
+      const cursor = this._dateService.getLogicalTodayDate();
+      // Only date parts are read below, so pin the cursor to midday first.
+      // setDate() preserves the wall time, and a late-evening one is normalised
+      // past midnight in zones whose spring-forward gap ends at 00:00
+      // (America/Godthab and America/Scoresbysund skip 23:00-23:59), which
+      // would drop a whole day from the window. Midday is never in a gap.
+      cursor.setHours(12, 0, 0, 0);
       const daysToShow: string[] = [];
 
-      // CRITICAL FIX: Loop until we have the required count of days
-      // (not just iterate N times which produces fewer days if weekends are excluded)
+      // Loop until we have the required count of days (not just iterate N
+      // times, which produces fewer days when weekends are excluded), stepping
+      // by calendar day: a DST transition day is 23h/25h long, so +24h ms
+      // arithmetic from a late-evening anchor skips or duplicates a date.
       let daysAdded = 0;
-      let offset = 0;
       while (daysAdded < count) {
-        // eslint-disable-next-line no-mixed-operators
-        const dayOfWeek = new Date(today + offset * 24 * 60 * 60 * 1000).getDay();
-        if (includedWeekDays.includes(dayOfWeek)) {
-          daysToShow.push(
-            // eslint-disable-next-line no-mixed-operators
-            this._dateService.todayStr(today + offset * 24 * 60 * 60 * 1000),
-          );
+        if (includedWeekDays.includes(cursor.getDay())) {
+          daysToShow.push(this._dateService.todayStr(cursor));
           daysAdded++;
         }
-        offset++;
+        cursor.setDate(cursor.getDate() + 1);
       }
 
       return daysToShow;

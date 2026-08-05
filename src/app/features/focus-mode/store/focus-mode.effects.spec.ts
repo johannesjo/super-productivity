@@ -29,6 +29,7 @@ import {
 import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
 import { take, toArray } from 'rxjs/operators';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
+import { DEFAULT_TASK } from '../../tasks/task.model';
 
 describe('FocusModeEffects', () => {
   let actions$: Observable<any>;
@@ -2226,6 +2227,63 @@ describe('FocusModeEffects', () => {
   });
 
   describe('syncSessionStartToTracking$', () => {
+    it('should switch tracking to the explicitly selected focus task when the session starts', (done) => {
+      store.overrideSelector(selectors.selectPausedTaskId, 'paused-task');
+      store.overrideSelector(selectLastCurrentTask, null);
+      store.overrideSelector(selectTaskById, {
+        ...DEFAULT_TASK,
+        id: 'selected-task',
+        title: 'Selected Focus Task',
+        isDone: false,
+        projectId: '',
+      });
+      currentTaskId$.next('previously-tracked-task');
+      store.refreshState();
+
+      actions$ = of(
+        actions.startFocusSession({
+          duration: 25 * 60 * 1000,
+          taskId: 'selected-task',
+        }),
+      );
+
+      effects.syncSessionStartToTracking$.pipe(toArray()).subscribe((emitted) => {
+        expect(emitted).toEqual([setCurrentTask({ id: 'selected-task' })]);
+        done();
+      });
+    });
+
+    [null, 'previously-tracked-task'].forEach((currentTaskId) => {
+      it(`should reject an explicitly selected done task without changing ${
+        currentTaskId ? 'different' : 'empty'
+      } tracking`, (done) => {
+        store.overrideSelector(selectors.selectPausedTaskId, null);
+        store.overrideSelector(selectLastCurrentTask, null);
+        store.overrideSelector(selectTaskById, {
+          ...DEFAULT_TASK,
+          id: 'done-selected-task',
+          title: 'Done Selected Focus Task',
+          isDone: true,
+          projectId: '',
+        });
+        currentTaskId$.next(currentTaskId);
+        store.refreshState();
+
+        actions$ = of(
+          actions.startFocusSession({
+            duration: 25 * 60 * 1000,
+            taskId: 'done-selected-task',
+          }),
+        );
+
+        effects.syncSessionStartToTracking$.pipe(toArray()).subscribe((emitted) => {
+          const emittedTypes: string[] = emitted.map((action) => action.type);
+          expect(emittedTypes).toEqual([actions.selectFocusTask.type]);
+          done();
+        });
+      });
+    });
+
     it('should dispatch setCurrentTask when session starts with pausedTaskId and no current task', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
         isSkipPreparation: false,

@@ -4,6 +4,7 @@ import { LocalBackupService } from './local-backup.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { StateSnapshotService } from '../../op-log/backup/state-snapshot.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ArchiveModel } from '../../features/archive/archive.model';
@@ -41,6 +42,7 @@ describe('LocalBackupService', () => {
   let stateSnapshotServiceSpy: jasmine.SpyObj<StateSnapshotService>;
   let globalConfigServiceSpy: jasmine.SpyObj<GlobalConfigService>;
   let backupServiceSpy: jasmine.SpyObj<BackupService>;
+  let localDraftServiceSpy: jasmine.SpyObj<LocalDraftService>;
   let snackServiceSpy: jasmine.SpyObj<SnackService>;
   let translateServiceSpy: jasmine.SpyObj<TranslateService>;
   let platformServiceSpy: jasmine.SpyObj<CapacitorPlatformService>;
@@ -94,6 +96,9 @@ describe('LocalBackupService', () => {
       cfg$: of({ localBackup: { isEnabled: false } }),
     });
     backupServiceSpy = jasmine.createSpyObj('BackupService', ['importCompleteBackup']);
+    localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', [
+      'deleteDraftsForActiveProfile',
+    ]);
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     translateServiceSpy = jasmine.createSpyObj('TranslateService', ['instant']);
     platformServiceSpy = jasmine.createSpyObj('CapacitorPlatformService', ['isIOS']);
@@ -131,6 +136,7 @@ describe('LocalBackupService', () => {
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
         { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
         { provide: BackupService, useValue: backupServiceSpy },
+        { provide: LocalDraftService, useValue: localDraftServiceSpy },
         { provide: SnackService, useValue: snackServiceSpy },
         { provide: TranslateService, useValue: translateServiceSpy },
         { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -211,6 +217,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -477,6 +484,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -652,6 +660,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -845,6 +854,27 @@ describe('LocalBackupService', () => {
         true,
         true,
       );
+    });
+
+    it('should clear the active profiles crash-safe drafts after a restore', async () => {
+      // The restore replaced this profile's notes wholesale, so every draft's
+      // baseContent now refers to content that no longer exists and would only
+      // offer misleading recovery.
+      backupServiceSpy.importCompleteBackup.and.resolveTo();
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not clear drafts when the import fails', async () => {
+      // Nothing was replaced, so the drafts still refer to live content. Move the
+      // cleanup out of the success path (e.g. into a finally) and this goes red.
+      backupServiceSpy.importCompleteBackup.and.rejectWith(new Error('boom'));
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
     });
   });
 

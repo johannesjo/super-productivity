@@ -35,10 +35,27 @@ const RELEASE_TAG_PATTERN = /^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 const SHA1_PATTERN = /^(?!0{40}$)[0-9a-f]{40}$/;
 const ALL_ZERO_SHA1 = '0'.repeat(40);
 
+const GIT_LOCAL_ENVIRONMENT_VARIABLES = execFileSync(
+  'git',
+  ['rev-parse', '--local-env-vars'],
+  { encoding: 'utf8' },
+)
+  .trim()
+  .split(/\r?\n/);
+
+const createGitEnvironment = (): NodeJS.ProcessEnv => {
+  const environment = { ...process.env, GIT_NO_LAZY_FETCH: '1' };
+  // Git hooks export repository-local state that takes precedence over `git -C`.
+  for (const variableName of GIT_LOCAL_ENVIRONMENT_VARIABLES) {
+    delete environment[variableName];
+  }
+  return environment;
+};
+
 const runGit = (repositoryRoot: string, args: string[]): string =>
   execFileSync('git', ['-C', repositoryRoot, ...args], {
     encoding: 'utf8',
-    env: { ...process.env, GIT_NO_LAZY_FETCH: '1' },
+    env: createGitEnvironment(),
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
 
@@ -161,6 +178,45 @@ const expectExistingSpec = (specPath: string): void => {
 };
 
 describe('released-client compatibility policy', () => {
+  it('keeps temporary Git setup isolated from inherited hook environment', () => {
+    const outerRepositoryRoot = mkdtempSync(join(tmpdir(), 'released-oracle-outer-'));
+    const temporaryRepositoryRoot = mkdtempSync(join(tmpdir(), 'released-oracle-inner-'));
+    const inheritedGitDir = process.env.GIT_DIR;
+    const isolatedEnvironment = { ...process.env };
+    for (const variableName of GIT_LOCAL_ENVIRONMENT_VARIABLES) {
+      delete isolatedEnvironment[variableName];
+    }
+
+    try {
+      execFileSync('git', ['-C', outerRepositoryRoot, 'init', '--quiet'], {
+        env: isolatedEnvironment,
+      });
+      process.env.GIT_DIR = join(outerRepositoryRoot, '.git');
+
+      try {
+        runGit(temporaryRepositoryRoot, ['init', '--quiet']);
+      } finally {
+        if (inheritedGitDir === undefined) {
+          delete process.env.GIT_DIR;
+        } else {
+          process.env.GIT_DIR = inheritedGitDir;
+        }
+      }
+
+      expect(existsSync(join(temporaryRepositoryRoot, '.git'))).toBe(true);
+      expect(
+        execFileSync(
+          'git',
+          ['-C', outerRepositoryRoot, 'rev-parse', '--is-bare-repository'],
+          { encoding: 'utf8', env: isolatedEnvironment },
+        ).trim(),
+      ).toBe('false');
+    } finally {
+      rmSync(outerRepositoryRoot, { recursive: true, force: true });
+      rmSync(temporaryRepositoryRoot, { recursive: true, force: true });
+    }
+  });
+
   it('accepts a tag, commit, source path, and blob from one real Git provenance chain', () => {
     withTestGitRepository((repositoryRoot, cohort) => {
       expect(validateReleasedOracleProvenance(cohort, repositoryRoot)).toEqual([]);

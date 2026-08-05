@@ -825,7 +825,13 @@
       }
     },
     "NOTE": {
+      "D_DRAFT_CONFLICT": {
+        "KEEP_SAVED": "Keep saved version",
+        "MSG": "A draft of this note was recovered, but the note has changed in the meantime (e.g. through sync). Review the recovered draft in the editor, or keep the saved version and stop offering this draft?",
+        "REVIEW_DRAFT": "Review draft"
+      },
       "D_FULLSCREEN": {
+        "CONFIRM_DISCARD_MSG": "You have unsaved changes. Discard them?",
         "TOOLBAR": {
           "BOLD": "Bold",
           "BULLET_LIST": "Bulleted list",
@@ -1616,7 +1622,6 @@
         "DEFERRED_ACTION_PERMANENT_FAILED": "A change could not be saved and sync is paused. Reload to restore the last saved state.",
         "DISABLE_ENCRYPTION_FAILED": "Failed to disable encryption: {{message}}",
         "ENABLE_ENCRYPTION_FAILED": "Failed to enable encryption: {{message}}",
-        "ENCRYPTION_DISABLED_ON_OTHER_DEVICE": "Encryption was disabled on another device. Your sync settings have been updated.",
         "ENCRYPTION_PASSWORD_REQUIRED": "Encrypted data received but no encryption password is configured. Please set your encryption password in sync settings.",
         "ENCRYPTION_REQUIRED_FOR_SUPERSYNC": "Encryption is required for SuperSync. Please set an encryption password to continue syncing.",
         "ERROR_CORS": "WebDAV Sync Error: Network request failed.\n\nThis may be a CORS issue. Please ensure:\n• Your WebDAV server allows Cross-Origin requests\n• The server URL is correct and accessible\n• You have a working internet connection",
@@ -1641,7 +1646,7 @@
         "INCOMPLETE_REMOTE_OPERATIONS": "Downloaded changes could not finish applying. Sync is paused to protect your data. Restart the app to retry. If this keeps happening, restore a backup.",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
         "INTEGRITY_CHECK_FAILED": "Data integrity issue detected. Auto-repair attempted. If you experience issues, please reload the app.",
-        "INTEGRITY_TAMPER_DETECTED": "Sync stopped: the server returned data that failed a security integrity check. Your local data is safe. This can indicate a tampered or misconfigured sync server.",
+        "INTEGRITY_TAMPER_DETECTED": "Sync stopped: the server returned data that failed a security integrity check. Your local data is safe. On an updated device that you have verified contains the complete, current data, export a backup, then use Force Overwrite in Sync settings under Advanced. Keep other devices offline until it finishes. Otherwise, stop and contact support.",
         "INVALID_AUTH_CODE": "The authorization code was rejected. Please try authenticating again and make sure to copy the code exactly.",
         "INVALID_OPERATION_PAYLOAD": "Invalid operation detected. Changes may not be saved - please reload.",
         "LEGACY_FORMAT_DETECTED": "Sync format mismatch: the remote storage was last written by an older app version (v16.x or earlier) that uses a different sync format. Please update all your devices to the same app version. \"Force overwrite\" unblocks this device by writing the new format alongside the legacy files; only use it if no older device will sync to this remote anymore, otherwise they will silently diverge from this device.",
@@ -1661,6 +1666,7 @@
         "PARTIAL_APPLY_FAILURE": "Some sync operations failed to apply. Data has been validated.",
         "PERSIST_FAILED": "Failed to save changes. State may be inconsistent - please reload.",
         "REMOTE_DATA_TOO_OLD": "Remote data is too old to be processed. Please update your remote app.",
+        "REMOTE_NOT_ENCRYPTED": "The synced data is not encrypted, but encryption is enabled on this device, so it was rejected. If you turned off encryption on another device, disable it here too in Sync settings to continue.",
         "REPLAY_LOCAL_OPS_FAILED": "Failed to replay local operations after import. Some recent changes may be lost. Data has been validated.",
         "RESTORE_ENCRYPTED": "Restoring from server history isn't available when end-to-end encryption is enabled. The server can't read your encrypted data to reconstruct an earlier point.",
         "RESTORE_ERROR": "Failed to restore data",
@@ -1676,6 +1682,7 @@
         "TIMEOUT_ERROR": "Sync operation timed out. {{suggestion}}",
         "TOO_MANY_OPS_TO_DOWNLOAD": "Too many sync operations to download. Some changes may be missing.",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
+        "UNSUPPORTED_MULTI_ENTITY_CONFLICT": "Sync stopped for safety to avoid data loss. Please report this code: {{details}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
         "UPLOAD_OPS_REJECTED": "{{count}} operation(s) were permanently rejected by the server and won't be synced.",
         "VECTOR_CLOCK_LIMIT_REACHED": "Sync tidied up old device entries ({{originalSize}} → {{maxSize}}). This is normal. To clear them for good: sync all devices, then export and re-import a backup (Settings → Import/Export).",
@@ -2339,6 +2346,7 @@
     "CONFIRM": "Confirm",
     "CONTINUE": "Continue",
     "DELETE": "Delete",
+    "DISCARD": "Discard",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "DONT_SHOW_AGAIN": "Do not show again",
@@ -2518,7 +2526,7 @@
       "GO_TO_SCHEDULED_VIEW": "Go to Schedule",
       "GO_TO_SETTINGS": "Go to settings",
       "GO_TO_WORK_VIEW": "Go to task list and focus first task",
-      "HELP": "<p>Here you can configure all keyboard shortcuts.</p><p>Click on the text input and press the desired keyboard key or key combination. Press <strong>Escape</strong> to abort.</p><p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task.</li> </ul><p>Press <strong>Escape</strong>, <strong>Backspace</strong>, or <strong>Delete</strong> to remove an existing shortcut.",
+      "HELP": "<p>Here you can configure all keyboard shortcuts.</p><p>Click on the text input and press the desired keyboard key or key combination. Press <strong>Escape</strong> to leave the field without assigning a new shortcut.</p><p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task.</li> </ul><p>Press <strong>Backspace</strong> or <strong>Delete</strong> to remove an existing shortcut.",
       "MOVE_TASK_DOWN": "Move task down in the list",
       "MOVE_TASK_TO_BOTTOM": "Move task to the bottom of the list",
       "MOVE_TASK_TO_TOP": "Move task to the top of the list",

@@ -16,8 +16,11 @@ import { SCHEDULE_CONSTANTS } from '../schedule.constants';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ScheduleDay } from '../schedule.model';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
+import { registerLocaleData } from '@angular/common';
+import localeSv from '@angular/common/locales/sv';
 
 describe('ScheduleComponent', () => {
+  const mockLocalization = signal({ firstDayOfWeek: 1, dateTimeLocale: 'en-US' });
   let component: ScheduleComponent;
   let fixture: ComponentFixture<ScheduleComponent>;
   let mockTaskService: jasmine.SpyObj<TaskService>;
@@ -27,7 +30,11 @@ describe('ScheduleComponent', () => {
   let mockGlobalTrackingIntervalService: jasmine.SpyObj<GlobalTrackingIntervalService>;
   let mockGlobalConfigService: jasmine.SpyObj<GlobalConfigService>;
   let mockCalendarEventActionsService: jasmine.SpyObj<CalendarEventActionsService>;
+
+  beforeAll(() => registerLocaleData(localeSv, 'sv'));
+
   beforeEach(async () => {
+    mockLocalization.set({ firstDayOfWeek: 1, dateTimeLocale: 'en-US' });
     // Create mock services
     mockTaskService = jasmine.createSpyObj('TaskService', ['currentTaskId']);
     (mockTaskService as any).currentTaskId = signal(null);
@@ -94,7 +101,7 @@ describe('ScheduleComponent', () => {
     mockGlobalConfigService = jasmine.createSpyObj('GlobalConfigService', [], {
       // Pin the date locale so Intl-formatted headers are deterministic across
       // runners (an en-GB runner would render "20 Jan", not "Jan 20").
-      localization: signal({ firstDayOfWeek: 1, dateTimeLocale: 'en-US' }),
+      localization: mockLocalization,
       cfg: signal(undefined),
     });
 
@@ -162,6 +169,72 @@ describe('ScheduleComponent', () => {
       mockScheduleService.getMonthDaysToShow.and.returnValue(days);
       fixture.detectChanges();
       expect(component.headerTitle()).toMatch(/April\s+2026/);
+    });
+
+    const useIsoDatesWithUiLanguage = (language: string): void => {
+      const translate = TestBed.inject(TranslateService);
+      translate.setTranslation(language, {
+        F: { WORKLOG: { CMP: { WEEK_NR: 'Week {{nr}}' } } },
+      });
+      translate.use(language);
+      mockLocalization.set({ firstDayOfWeek: 1, dateTimeLocale: 'sv' });
+    };
+
+    it('uses the UI language for the ISO day heading', () => {
+      useIsoDatesWithUiLanguage('en');
+      mockLayoutService.selectedTimeView.set('day');
+      mockScheduleService.getDaysToShow.and.returnValue(['2026-07-19']);
+      component['_selectedDate'].set(new Date(2026, 6, 19));
+      fixture.detectChanges();
+
+      expect(component.headerTitle()).toContain('Jul');
+    });
+
+    it('uses the UI language for the ISO week heading', () => {
+      useIsoDatesWithUiLanguage('en');
+      mockLayoutService.selectedTimeView.set('week');
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-07-13',
+        '2026-07-14',
+        '2026-07-15',
+        '2026-07-16',
+        '2026-07-17',
+        '2026-07-18',
+        '2026-07-19',
+      ]);
+      component['_selectedDate'].set(new Date(2026, 6, 13));
+      fixture.detectChanges();
+
+      expect(component.headerTitle()).toContain('Jul');
+    });
+
+    it('uses the UI language for the ISO month heading', () => {
+      useIsoDatesWithUiLanguage('en');
+      mockLayoutService.selectedTimeView.set('month');
+      const monthDays = Array.from({ length: 35 }, (_, i) => {
+        const date = new Date(2026, 6, 1 + i);
+        return [
+          date.getFullYear(),
+          String(date.getMonth() + 1).padStart(2, '0'),
+          String(date.getDate()).padStart(2, '0'),
+        ].join('-');
+      });
+      mockScheduleService.getMonthDaysToShow.and.returnValue(monthDays);
+      component['_selectedDate'].set(new Date(2026, 6, 1));
+      fixture.detectChanges();
+
+      expect(component.headerTitle()).toContain('July');
+    });
+
+    it('preserves Gregorian dates and Latin digits in Persian ISO day headings', () => {
+      useIsoDatesWithUiLanguage('fa');
+      mockLayoutService.selectedTimeView.set('day');
+      mockScheduleService.getDaysToShow.and.returnValue(['2026-07-19']);
+      component['_selectedDate'].set(new Date(2026, 6, 19));
+      fixture.detectChanges();
+
+      expect(component.headerTitle()).toContain('19');
+      expect(component.headerTitle()).not.toMatch(/[۰-۹]/);
     });
   });
 

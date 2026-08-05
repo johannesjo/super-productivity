@@ -46,9 +46,12 @@ import {
   HttpNotOkAPIError,
   IncompleteRemoteOperationsError,
   FileSyncTargetChangedError,
+  UnsupportedMultiEntityConflictError,
+  PlaintextWhenEncryptionExpectedError,
 } from '../../op-log/core/errors/sync-errors';
 import { DialogEnterEncryptionPasswordComponent } from './dialog-enter-encryption-password/dialog-enter-encryption-password.component';
 import { MAX_LWW_REUPLOAD_RETRIES } from '../../op-log/core/operation-log.const';
+import { ActionType } from '../../op-log/core/operation.types';
 import type { SyncProviderBase } from '../../op-log/sync-providers/provider.interface';
 import type { MatDialogRef } from '@angular/material/dialog';
 import { DialogGetAndEnterAuthCodeComponent } from './dialog-get-and-enter-auth-code/dialog-get-and-enter-auth-code.component';
@@ -183,9 +186,7 @@ describe('SyncWrapperService', () => {
     mockTranslateService = jasmine.createSpyObj('TranslateService', ['instant']);
     mockTranslateService.instant.and.callFake((key: string) => key);
 
-    mockDataInitService = jasmine.createSpyObj('DataInitService', [
-      'reInitFromRemoteSync',
-    ]);
+    mockDataInitService = jasmine.createSpyObj('DataInitService', ['reInit']);
     mockReminderService = jasmine.createSpyObj('ReminderService', ['reloadFromDatabase']);
 
     mockUserInputWaitState = jasmine.createSpyObj(
@@ -1223,6 +1224,97 @@ describe('SyncWrapperService', () => {
       expect(mockSnackService.open).not.toHaveBeenCalledWith(
         jasmine.objectContaining({ msg: jasmine.stringMatching(/GHSA-/) }),
       );
+      const openedSnack = mockSnackService.open.calls.mostRecent().args[0];
+      expect(typeof openedSnack).not.toBe('string');
+      if (typeof openedSnack !== 'string') {
+        expect(openedSnack.actionStr).toBeUndefined();
+        expect(openedSnack.actionFn).toBeUndefined();
+      }
+    });
+
+    it('should render unsupported multi-entity diagnostics through the dedicated snack', async () => {
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new UnsupportedMultiEntityConflictError(
+          'remote',
+          ActionType.TASK_SHARED_UPDATE_MULTIPLE,
+          2,
+        ),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: T.F.SYNC.S.UNSUPPORTED_MULTI_ENTITY_CONFLICT,
+        type: 'ERROR',
+        translateParams: {
+          details:
+            'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
+            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
+        },
+      });
+    });
+
+    it('should escape the diagnostic before it reaches the [innerHtml] snack', async () => {
+      // Belt-and-braces: sync-errors.spec.ts asserts the message can never carry
+      // these characters, so this only pins the escaping seam itself.
+      const error = new UnsupportedMultiEntityConflictError('remote', 'x', 0);
+      error.message = 'SYNC_MULTI_ENTITY_UNSUPPORTED <img src=x> &';
+      mockSyncService.downloadRemoteOps.and.rejectWith(error);
+
+      await service.sync();
+
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          translateParams: {
+            details: 'SYNC_MULTI_ENTITY_UNSUPPORTED &lt;img src=x&gt; &amp;',
+          },
+        }),
+      );
+    });
+
+    it('routes an OperationIntegrityError whose op id contains "504" to the tamper handler, not the timeout branch', async () => {
+      // Regression: the error message embeds the offending op's uuidv7 id. The
+      // precise instanceof branch must win over _isTimeoutError's
+      // String(error).includes('504') heuristic — otherwise an id that happens to
+      // contain "504" is misclassified as a gateway timeout and shows the wrong
+      // "try again" message (and skips ERROR status). GHSA-8pxh-mgc7-gp3g.
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(
+          new OperationIntegrityError(
+            'Operation 01920504-6b0a-7f3c-8e2d-000000000000 failed metadata integrity check. GHSA-8pxh-mgc7-gp3g',
+          ),
+        ),
+      );
+
+      const result = await service.sync(true);
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({ msg: T.F.SYNC.S.INTEGRITY_TAMPER_DETECTED }),
+      );
+      expect(mockSnackService.open).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ msg: T.F.SYNC.S.TIMEOUT_ERROR }),
+      );
+    });
+
+    it('suppresses the OperationIntegrityError snack on an automatic sync but still flags ERROR', async () => {
+      // Persistent condition (tampered/misconfigured server): re-showing the snack
+      // on every auto-sync cycle would spam the user, so only surface it on an
+      // explicit sync — matching the sibling PlaintextWhenEncryptionExpectedError
+      // branch. The ERROR status still keeps the sync indicator honest.
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(new OperationIntegrityError('tampered. GHSA-8pxh-mgc7-gp3g')),
+      );
+
+      const result = await service.sync(); // isUserTriggered = false (auto sync)
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ msg: T.F.SYNC.S.INTEGRITY_TAMPER_DETECTED }),
+      );
     });
 
     it('should handle NetworkUnavailableSPError with WARNING snackbar when user-triggered', async () => {
@@ -1390,6 +1482,24 @@ describe('SyncWrapperService', () => {
 
       expect(result).toBe('HANDLED_ERROR');
       expect(mockSnackService.open).not.toHaveBeenCalled();
+    });
+
+    it('does not misclassify a non-timeout error with an embedded "504" token as a gateway timeout', async () => {
+      // _isTimeoutError bounds '504' to word boundaries, so a '504' buried inside
+      // a longer token (here a byte offset) is NOT read as an HTTP 504. Such an
+      // error must fall through to the generic ERROR handler, not the timeout
+      // branch (which would show the wrong "try again" message / silence it).
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(new Error('write failed at offset 1234504')),
+      );
+
+      const result = await service.sync(true);
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ msg: T.F.SYNC.S.TIMEOUT_ERROR }),
+      );
     });
 
     it('should surface a lock-acquisition timeout for user-triggered syncs', async () => {
@@ -1930,6 +2040,40 @@ describe('SyncWrapperService', () => {
         });
       });
 
+      it('should show the translated plaintext-rejection message when USE_REMOTE hits a downgraded remote', async () => {
+        // GHSA-vrc7-775g-ggqc: the re-download after USE_REMOTE fails closed on
+        // a plaintext remote; the dedicated branch must surface the translated
+        // REMOTE_NOT_ENCRYPTED message, not the raw error text via the generic
+        // resolution handler.
+        const conflictError = new LocalDataConflictError(
+          2,
+          { tasks: [] },
+          { clientB: 3 },
+        );
+        mockSyncService.downloadRemoteOps.and.rejectWith(conflictError);
+        mockMatDialog.open.and.returnValue({
+          afterClosed: () => of('USE_REMOTE'),
+        } as any);
+        mockSyncService.forceDownloadRemoteState = jasmine
+          .createSpy('forceDownloadRemoteState')
+          .and.rejectWith(
+            new PlaintextWhenEncryptionExpectedError({
+              isCompressed: false,
+              modelVersion: 1,
+            }),
+          );
+
+        const result = await service.sync();
+
+        expect(result).toBe('HANDLED_ERROR');
+        expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+        expect(mockSnackService.open).toHaveBeenCalledWith({
+          msg: T.F.SYNC.S.REMOTE_NOT_ENCRYPTED,
+          type: 'ERROR',
+          config: { duration: 15000 },
+        });
+      });
+
       // GHSA-9544-hjjr-fg8h: USE_LOCAL force-uploads, which refuses to send
       // plaintext when the key is missing. Route to the enter-password recovery
       // dialog instead of a dead-end error snack.
@@ -2120,11 +2264,11 @@ describe('SyncWrapperService', () => {
       const result = await service.sync();
 
       expect(result).toBe('HANDLED_ERROR');
-      expect(mockSnackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          type: 'ERROR',
-        }),
-      );
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: 'Some unexpected error',
+        type: 'ERROR',
+        translateParams: { err: 'Some unexpected error' },
+      });
     });
 
     it('should translate FORCE_UPLOAD failures raised during op-log sync', async () => {
@@ -2182,6 +2326,40 @@ describe('SyncWrapperService', () => {
       );
       expect(mockSnackService.open).not.toHaveBeenCalled();
       expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('ERROR');
+    });
+
+    it('should explain a rejected plaintext remote for a user-triggered encrypted sync', async () => {
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new PlaintextWhenEncryptionExpectedError({
+          isCompressed: false,
+          modelVersion: 1,
+        }),
+      );
+
+      const result = await service.sync(true);
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: T.F.SYNC.S.REMOTE_NOT_ENCRYPTED,
+        type: 'ERROR',
+        config: { duration: 15000 },
+      });
+    });
+
+    it('should reject a plaintext remote silently during automatic encrypted sync', async () => {
+      mockSyncService.downloadRemoteOps.and.rejectWith(
+        new PlaintextWhenEncryptionExpectedError({
+          isCompressed: false,
+          modelVersion: 1,
+        }),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).not.toHaveBeenCalled();
     });
   });
 

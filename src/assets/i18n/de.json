@@ -432,7 +432,7 @@
         "T_TITLE": "Titel",
         "T_TO_BE_SUBMITTED": "Noch einzureichen",
         "TITLE": "Zeit für Issues an GitLab senden",
-        "TOTAL_MSG": "Du wirst <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}</em> verschiedene Aufgaben übermitteln."
+        "TOTAL_MSG": "Du wirst <em>{{totalTimeToSubmit}}</em> Arbeitszeit für heute insgesamt an <em>{{nrOfTasksToSubmit}}</em> verschiedene Aufgaben übermitteln."
       },
       "FORM": {
         "FILTER": "Benutzerdefinierte Filter",
@@ -3030,7 +3030,7 @@
     }
   },
   "PLUGINS": {
-    "ACTION_TYPE_NOT_ALLOWED": "Aktionstyp '{{Typ}}' ist nicht erlaubt",
+    "ACTION_TYPE_NOT_ALLOWED": "Aktionstyp '{{type}}' ist nicht erlaubt",
     "ALLOWED_HOSTS": "Netzwerkzugriff",
     "ALREADY_INITIALIZED": "Plugin ist bereits initialisiert",
     "AUTHORED_BY": "von {{author}}",

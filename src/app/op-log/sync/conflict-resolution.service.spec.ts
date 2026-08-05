@@ -37,7 +37,10 @@ import {
 } from '../core/entity-registry';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { OperationLogEffects } from '../capture/operation-log.effects';
-import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import {
+  IncompleteRemoteOperationsError,
+  UnsupportedMultiEntityConflictError,
+} from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import {
   isLwwUpdateActionType,
@@ -3555,9 +3558,7 @@ describe('ConflictResolutionService', () => {
           service.autoResolveConflictsLWW([
             createConflict('task-1', [localBulkUpdate], [remoteWinner]),
           ]),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve local multi-entity operation/,
-        );
+        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
@@ -3655,18 +3656,82 @@ describe('ConflictResolutionService', () => {
           OpType.Update,
           'task-2',
         );
-        await expectAsync(
-          service.autoResolveConflictsLWW([
+        let thrown: unknown;
+        try {
+          await service.autoResolveConflictsLWW([
             createConflict('task-1', [localDelete], [remoteMultiOp]),
             createConflict('task-2', [localTask2], [remoteMultiOp]),
-          ]),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve remote multi-entity operation/,
+          ]);
+        } catch (error) {
+          thrown = error;
+        }
+        expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+        expect((thrown as Error).message).toBe(
+          'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
+            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
         );
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
         expect(mockOperationApplier.applyOperations).not.toHaveBeenCalled();
+      });
+
+      it('keeps a locally deleted task deleted when a remote bulk plan op wins (#9426)', async () => {
+        // Pins the multi-entity skip in _convertToLWWUpdatesIfNeeded: with it,
+        // delete-vs-bulk-plan takes the documented stays-deleted degrade (no
+        // recreation row); without it, the conversion feeds the recreate path
+        // and a fresh recreatesEntityAfterDelete row for the deleted task
+        // rides the LOCAL batch. The bulk op itself must stay unmangled either
+        // way so its sibling still gets planned.
+        const remotePlanOp: Operation = {
+          ...createOpWithTimestamp(
+            'remote-bulk-plan',
+            'client-b',
+            2000,
+            OpType.Update,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_PLAN_FOR_TODAY,
+          entityIds: ['task-1', 'task-2'],
+          payload: {
+            actionPayload: { taskIds: ['task-1', 'task-2'], today: '2026-07-30' },
+            entityChanges: [],
+          },
+        };
+        const localDelete: Operation = {
+          ...createOpWithTimestamp(
+            'local-delete',
+            'client-a',
+            1000,
+            OpType.Delete,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_DELETE,
+          payload: {
+            task: { id: 'task-1', title: 'Deleted locally' },
+          },
+        };
+
+        await service.autoResolveConflictsLWW([
+          createConflict('task-1', [localDelete], [remotePlanOp]),
+        ]);
+
+        // The original atomic row is queued unmangled on the remote side.
+        // With no local-win/recreation rows, it takes the plain remote append;
+        // without the conversion guard it instead rides the mixed batch with a
+        // same-id LOCAL rewrite row alongside it.
+        const plainRemoteAppends = mockOpLogStore.appendBatchSkipDuplicates.calls
+          .allArgs()
+          .flatMap(([ops]) => ops as Operation[]);
+        const appendedCopies = [...plainRemoteAppends, ...getMixedRemoteOps()].filter(
+          ({ id }) => id === remotePlanOp.id,
+        );
+        expect(appendedCopies.length).toBe(1);
+        expect(appendedCopies[0].actionType).toBe(ActionType.TASK_SHARED_PLAN_FOR_TODAY);
+        expect(appendedCopies[0].entityIds).toEqual(['task-1', 'task-2']);
+        // Stays-deleted degrade: NO local-source row touches the deleted task
+        // (a recreation row here means the conversion guard was bypassed).
+        expect(getMixedLocalOps().filter((op) => op.entityId === 'task-1')).toEqual([]);
       });
 
       it('should extract entity from DELETE payload when UPDATE wins but entity not in store', () => {
@@ -3831,9 +3896,7 @@ describe('ConflictResolutionService', () => {
 
         await expectAsync(
           service.autoResolveConflictsLWW(conflicts),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve remote multi-entity operation/,
-        );
+        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
         expect(mockOpLogStore.appendBatchSkipDuplicates).not.toHaveBeenCalled();
         expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
       });

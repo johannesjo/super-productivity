@@ -47,7 +47,7 @@
   "CONFIRM": {
     "AUTO_FIX": "Vaše údaje sú zrejme poškodené (\"{{validityError}}\"). Chcete sa pokúsiť o automatickú opravu? Mohlo by to viesť k čiastočnej strate údajov.",
     "RELOAD_AFTER_IDB_ERROR": "Nemožno získať prístup k databáze :( Možnou príčinou je aktualizácia aplikácie na pozadí alebo málo miesta na disku. Ak ste aplikáciu nainštalovali na linux ako snap, mali by ste povoliť refresh awareness 'snap set core experimental.refresh-app-awareness=true', kým tento problém neopravia na svojej strane. Stlačením tlačidla OK aplikáciu znovu načítajte (na niektorých platformách môže byť potrebné manuálne reštartovanie aplikácie).",
-    "RESTORE_FILE_BACKUP": "Zdá sa, že neexistujú žiadne DÁTA, ale na adrese \"{{dir}}\" sú k dispozícii zálohy. Chcete obnoviť poslednú zálohu z {{{z}}?",
+    "RESTORE_FILE_BACKUP": "Zdá sa, že neexistujú žiadne DÁTA, ale na adrese \"{{dir}}\" sú k dispozícii zálohy. Chcete obnoviť poslednú zálohu z {{from}}?",
     "RESTORE_FILE_BACKUP_ANDROID": "Zdá sa, že neexistujú žiadne údaje, ale je k dispozícii záloha. Chcete ju načítať?",
     "RESTORE_STRAY_BACKUP": "Počas poslednej synchronizácie mohlo dôjsť k nejakej chybe. Chcete obnoviť poslednú zálohu?",
     "DELETE_SECTION": "Naozaj chcete odstrániť túto sekciu? Úlohy v nej sa presunú do zoznamu úloh.",

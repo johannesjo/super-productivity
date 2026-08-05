@@ -5,6 +5,7 @@ import { Tag } from '../tag/tag.model';
 import { Project } from '../project/project.model';
 import { ShortSyntaxConfig } from '../config/global-config.model';
 import { isImageUrlSimple } from '../../util/is-image-url';
+import { formatTimeHHmm } from '../../util/format-time-hhmm';
 import { TaskAttachment } from './task-attachment/task-attachment.model';
 import { nanoid } from 'nanoid';
 import type { Chrono, ParsingContext, ParsingResult } from 'chrono-node';
@@ -371,6 +372,21 @@ const SHORT_SYNTAX_URL_REG_EX = new RegExp(
 const SHORT_SYNTAX_MARKDOWN_LINK_REG_EX =
   /\[([^\]]+)\]\(([^()]*(?:\([^()]*\)[^()]*)*)\)/g;
 
+// Non-Task marker fields that ride along in taskChanges for consumers to read
+// and that must be stripped before persisting (see short-syntax.effects).
+// Consumers reach the fields structurally through shortSyntax's return type,
+// so the interface is deliberately not exported.
+interface ShortSyntaxMarkers {
+  hasDeadlineTime?: boolean;
+  /**
+   * The typed wall-clock time as HH:mm. dueWithTime alone cannot carry it when
+   * the resolved day is a DST spring-forward day on which that time does not
+   * exist: the timestamp reads back shifted, and the repeat config's startTime
+   * would inherit the shift for every later occurrence, where the time exists.
+   */
+  dueTimeStr?: string;
+}
+
 export const shortSyntax = async (
   task: Task | Partial<Task>,
   config: ShortSyntaxConfig,
@@ -384,7 +400,7 @@ export const shortSyntax = async (
   isParseRepeat: boolean = false,
 ): Promise<
   | {
-      taskChanges: Partial<Task> & { hasDeadlineTime?: boolean };
+      taskChanges: Partial<Task> & ShortSyntaxMarkers;
       newTagTitles: string[];
       remindAt: number | null;
       projectId: string | undefined;
@@ -402,7 +418,7 @@ export const shortSyntax = async (
   }
 
   // TODO clean up this mess
-  let taskChanges: Partial<TaskCopy> & { hasDeadlineTime?: boolean } = {};
+  let taskChanges: Partial<TaskCopy> & ShortSyntaxMarkers = {};
   let projectId: string | undefined;
   let newTagTitles: string[] = [];
   let attachments: TaskAttachment[] = [];
@@ -692,7 +708,7 @@ const parseTagChanges = (
 // Result of a date-like stage: the task field changes plus the raw-input
 // ranges of the consumed syntax (the working-title edit happens on `tracked`)
 interface DateStageResult {
-  changes: Partial<TaskCopy> & { hasDeadlineTime?: boolean };
+  changes: Partial<TaskCopy> & ShortSyntaxMarkers;
   repeat?: ShortSyntaxRepeat;
   ranges: TextRange[];
 }
@@ -950,8 +966,17 @@ const applyRepeatSyntax = async (
           : null;
 
   if (anchorDate) {
+    // Captured from the chrono result, not from anchorDate after the mutations
+    // below: the anchor (or a roll below) can land on a DST spring-forward day
+    // where the typed time does not exist, and anchorDate can then only hold
+    // the shifted hour. Reading the chrono Date is safe the other way around:
+    // chrono's own validity filter drops any parse whose resolved day would
+    // normalize the typed time (getHours() != get('hour')), so `parsed` can
+    // never itself carry a shifted hour — it can only be absent entirely.
+    let typedTimeStr: string | undefined;
     if (hasTime && parsedDateResult) {
       const parsed = parsedDateResult.start.date();
+      typedTimeStr = formatTimeHHmm(parsed);
       anchorDate.setHours(parsed.getHours(), parsed.getMinutes(), 0, 0);
       // "@every friday 3pm" typed on a Friday after 15:00 must not create a
       // task due in the past — advance one period, like chrono's forwardDate
@@ -981,7 +1006,7 @@ const applyRepeatSyntax = async (
       changes: {
         dueWithTime: anchorDate.getTime(),
         dueDay: null,
-        ...(hasTime ? {} : { hasPlannedTime: false }),
+        ...(hasTime ? { dueTimeStr: typedTimeStr } : { hasPlannedTime: false }),
       },
       repeat,
       ranges,
@@ -990,6 +1015,9 @@ const applyRepeatSyntax = async (
 
   if (parsedDateResult) {
     const due = parsedDateResult.start.date();
+    // Before skipExcludedWeekend, which can leave a shifted hour behind when
+    // the final landed day itself is a DST transition day (see dueTimeStr).
+    const typedTimeStr = hasTime ? formatTimeHHmm(due) : undefined;
     if (repeat.type === 'PRESET' && repeat.quickSetting === 'MONDAY_TO_FRIDAY') {
       skipExcludedWeekend(due);
     }
@@ -997,7 +1025,7 @@ const applyRepeatSyntax = async (
       changes: {
         dueWithTime: due.getTime(),
         dueDay: null,
-        ...(hasTime ? {} : { hasPlannedTime: false }),
+        ...(hasTime ? { dueTimeStr: typedTimeStr } : { hasPlannedTime: false }),
       },
       repeat,
       ranges,

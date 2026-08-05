@@ -623,6 +623,25 @@ describe('Task Reducer', () => {
 
       // The removed tasks should be moved to the beginning while maintaining their relative order
       expect(state.ids).toEqual(['task2', 'task4', 'task1', 'task3']);
+      // Ordering-only invariant (#9426): conflict resolution rejects
+      // conflicted rows of this action outright, which is lossless only while
+      // the handler never touches task entities. If this fails, remove the
+      // action from ORDERING_ONLY_MULTI_ACTIONS in conflict-resolution.service.ts
+      // (or give it a preserve path) BEFORE shipping the reducer change.
+      expect(state.entities).toBe(stateWithOrderedTasks.entities);
+    });
+
+    it('must not handle moveTaskInTodayTagList at all (ordering-only invariant #9426)', () => {
+      // The task feature reducer currently has NO handler for this action; a
+      // future one that touches entities would invalidate the ordering-only
+      // rejection in conflict resolution. Same remediation as above.
+      const action = TaskSharedActions.moveTaskInTodayTagList({
+        toTaskId: 'task1',
+        fromTaskId: 'task2',
+      });
+      const state = taskReducer(stateWithTasks, action);
+
+      expect(state).toBe(stateWithTasks);
     });
 
     it('should ignore all invalid IDs and leave state unchanged', () => {
