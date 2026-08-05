@@ -397,9 +397,11 @@ const INDEPENDENT_MULTI_DELETE_ACTIONS = new Set<ActionType>([
  * Remote rows of these types replay as ordinary atomic actions (the reducers
  * skip unknown task ids); local winners are restored by mixed-winner
  * compensation snapshots applied after the remote row. A remote
- * `planTasksForToday` also removes every target from `planner.days`, so its
- * local-winning targets receive an established `Upsert Planner Day` follow-up
- * that restores their exact surviving placement on live apply and replay.
+ * `planTasksForToday` also removes every target from `planner.days`, so each
+ * local-winning target whose snapshot still matches its surviving placement
+ * receives an established `Transfer Task` follow-up that restores that exact
+ * placement on live apply and replay
+ * (`_createMixedRemoteTodayPlannerCompensationOps`).
  */
 const ORDERING_ONLY_MULTI_ACTIONS = new Set<ActionType>([
   ActionType.TASK_SHARED_MOVE_IN_TODAY,
@@ -2802,6 +2804,10 @@ export class ConflictResolutionService {
    * snapshots. A whole-day snapshot is unsafe here: it can overwrite an
    * unrelated placement that reached the server before this compensation.
    *
+   * Each transfer must be a pure ordering restore — its replay force-writes
+   * `dueDay` and clears `dueWithTime` — so a placement whose day disagrees
+   * with the winning snapshot is skipped rather than re-imposed.
+   *
    * `Transfer Task` is an existing wire action understood by released clients,
    * so this needs neither a schema bump nor a new payload contract.
    */
@@ -2861,6 +2867,18 @@ export class ConflictResolutionService {
           const today = extractActionPayload(winner.remotePlanOp.payload)['today'];
           const task = extractActionPayload(winner.localWinOp.payload);
           if (typeof today !== 'string' || task['id'] !== taskId) return [];
+          // Ordering-only restore: the transfer replay force-writes dueDay and
+          // clears dueWithTime, so a stale planner.days entry that disagrees
+          // with the winning snapshot (e.g. left by an earlier LWW snapshot
+          // that moved scheduling without touching planner state) must not be
+          // re-imposed — it would revert the winner's schedule on every
+          // client. Skip it; that winner keeps the pre-existing bounded gap.
+          if (
+            task['dueDay'] !== day ||
+            (task['dueWithTime'] !== undefined && task['dueWithTime'] !== null)
+          ) {
+            return [];
+          }
           return [{ day, targetIndex, taskId, task, today, ...winner }];
         });
       });

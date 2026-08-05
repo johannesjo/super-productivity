@@ -579,6 +579,84 @@ describe('today-list multi-entity conflict resolution integration (#9426)', () =
       ]);
     });
 
+    it('skips the placement compensation when a stale planner entry disagrees with the winner schedule', async () => {
+      // An earlier LWW TASK snapshot can move scheduling (here: dueWithTime)
+      // without touching planner state, leaving a stale planner.days entry.
+      // The transfer replay force-writes dueDay and clears dueWithTime, so
+      // re-imposing that entry would revert the winner's schedule on every
+      // client. The winner must keep its schedule; only the stale placement
+      // is lost (the pre-existing bounded gap).
+      const localWinner: Task = {
+        ...liveTask(CONFLICT_TASK_ID),
+        title: 'Local newer edit',
+        dueDay: undefined,
+        dueWithTime: Date.parse('2026-08-06T09:00:00Z'),
+      };
+      taskStateById[CONFLICT_TASK_ID] = localWinner;
+      plannerDaysByDay = { [FUTURE_DAY]: [CONFLICT_TASK_ID] };
+
+      const [localEditOp] = await dispatchAndFlush(
+        TaskSharedActions.updateTask({
+          task: { id: CONFLICT_TASK_ID, changes: { title: localWinner.title } },
+        }) as PersistentAction,
+      );
+      const remotePlanOp = buildRemotePlanOp(
+        [CONFLICT_TASK_ID, SIBLING_1],
+        localEditOp.timestamp - 1000,
+      );
+
+      await resolver.autoResolveConflictsLWW(await detectConflictsFor(remotePlanOp));
+
+      expect((await unsyncedOps()).filter((op) => op.entityType === 'PLANNER')).toEqual(
+        [],
+      );
+
+      const baseState = createStateWithExistingTasks([
+        CONFLICT_TASK_ID,
+        SIBLING_1,
+        SIBLING_2,
+      ]);
+      const stateBeforeRemote: RootState = {
+        ...baseState,
+        [TASK_FEATURE_NAME]: {
+          ...baseState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseState[TASK_FEATURE_NAME].entities,
+            [CONFLICT_TASK_ID]: localWinner,
+          },
+        },
+        [plannerFeatureKey]: {
+          ...baseState[plannerFeatureKey],
+          days: plannerDaysByDay,
+        },
+      };
+      const baseReducer: ActionReducer<RootState, Action> = (state, action) => ({
+        ...(state as RootState),
+        [plannerFeatureKey]: plannerReducer(
+          (state as RootState)[plannerFeatureKey],
+          action,
+        ),
+      });
+      const replayReducer = bulkOperationsMetaReducer(
+        createCombinedTaskSharedMetaReducer(lwwUpdateMetaReducer(baseReducer)),
+      ) as ActionReducer<RootState, Action>;
+
+      const replayedState = replayReducer(
+        stateBeforeRemote,
+        bulkApplyOperations({
+          operations: appliedOps(),
+          localClientId: LOCAL_CLIENT_ID,
+        }),
+      );
+      const replayedWinner = replayedState[TASK_FEATURE_NAME].entities[
+        CONFLICT_TASK_ID
+      ] as Task;
+      expect(replayedWinner.title).toBe(localWinner.title);
+      expect(replayedWinner.dueWithTime).toBe(localWinner.dueWithTime);
+      expect(replayedWinner.dueDay).toBeUndefined();
+      expect(replayedState[plannerFeatureKey].days[FUTURE_DAY] ?? []).toEqual([]);
+    });
+
     it('preserves an unrelated placement that reaches the server before compensation', async () => {
       const localWinner = {
         ...liveTask(CONFLICT_TASK_ID),
