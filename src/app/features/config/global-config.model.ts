@@ -81,6 +81,7 @@ export type TasksConfig = Readonly<{
 export type ShortSyntaxConfig = Readonly<{
   isEnableProject: boolean;
   isEnableDue: boolean;
+  isEnableDeadline?: boolean;
   isEnableTag: boolean;
   urlBehavior?: 'keep' | 'extract' | 'keep-and-attach';
 }>;
@@ -105,6 +106,7 @@ export type IdleConfig = Readonly<{
   isEnableIdleTimeTracking: boolean;
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
+  isSuppressIdleDuringFocusMode: boolean;
 }>;
 
 export type TakeABreakConfig = Readonly<{

@@ -5,6 +5,10 @@ import {
   extractErrorMessage as packageExtractErrorMessage,
 } from '@sp/sync-providers/errors';
 import { FILE_BASED_SYNC_CONSTANTS } from '../../sync-providers/file-based/file-based-sync.types';
+import { KNOWN_ACTION_TYPES } from '../action-types.enum';
+
+/** Upper bound for the entity count reported in a sync diagnostic. */
+const MAX_REPORTED_ENTITY_COUNT = 9999;
 
 // Re-export provider-shared error classes from @sp/sync-providers.
 // Single class definition per error is critical for `instanceof` checks
@@ -81,6 +85,8 @@ export class LocalDataConflictError extends Error {
     // display heuristic, not an exact "unsynced" figure. `null` for genuinely-fresh
     // clients that have never synced (SPAP-7).
     public readonly lastSyncedVectorClock?: Record<string, number> | null,
+    /** Actual `lastModified` recorded by the downloaded remote file. */
+    public readonly remoteLastModified?: number,
   ) {
     super(`Local data conflict: ${unsyncedCount} unsynced changes would be lost`);
   }
@@ -112,6 +118,120 @@ export class UnknownSyncStateError extends Error {
   override name = 'UnknownSyncStateError';
 }
 
+export class ForceUploadFailedError extends Error {
+  override name = 'ForceUploadFailedError';
+}
+
+export class ForceUploadPendingOpsError extends Error {
+  override name = 'ForceUploadPendingOpsError';
+}
+
+/**
+ * The multi-entity conflict preflight refused to auto-resolve (#9405). The
+ * message is the whole diagnostic: it is shown to the user and written to the
+ * exportable log, so it carries only allowlisted metadata: a fixed code, the
+ * side, an action type that must be a known `ActionType`, and a clamped entity
+ * count. Never widen this to ids, payloads, or titles.
+ */
+export class UnsupportedMultiEntityConflictError extends Error {
+  override name = 'UnsupportedMultiEntityConflictError';
+
+  constructor(side: 'local' | 'remote', actionType: unknown, entityCount: unknown) {
+    const safeActionType =
+      typeof actionType === 'string' && KNOWN_ACTION_TYPES.has(actionType)
+        ? actionType
+        : 'UNKNOWN';
+    const safeEntityCount =
+      typeof entityCount === 'number' && Number.isInteger(entityCount) && entityCount >= 0
+        ? Math.min(entityCount, MAX_REPORTED_ENTITY_COUNT)
+        : 0;
+    super(
+      `SYNC_MULTI_ENTITY_UNSUPPORTED side=${side} actionType=${safeActionType} ` +
+        `entityCount=${safeEntityCount}`,
+    );
+  }
+}
+
+/**
+ * The file-sync target changed (provider switch, account switch behind the same
+ * provider id, or an identity-affecting config/folder change) while a file
+ * upload was in flight — detected by a bumped adapter target generation before a
+ * remote write. The in-flight write carries the previous target's merged data,
+ * so it is abandoned rather than committed to the new target. The next sync
+ * re-reads and re-uploads against the current target from zero. Transient by
+ * design; not a corruption. (Task 2, docs/plans/2026-07-13-sync-simplification-plan.md.)
+ */
+export class FileSyncTargetChangedError extends Error {
+  override name = 'FileSyncTargetChangedError';
+
+  constructor(capturedGeneration: number, currentGeneration: number) {
+    super(
+      `File sync target changed mid-operation (generation ${capturedGeneration} → ${currentGeneration}); write abandoned.`,
+    );
+  }
+}
+
+/**
+ * The global sync epoch changed (provider switch, account/target move, or a
+ * destructive config operation such as an encryption change) while a sync
+ * cycle was in flight — detected by comparing the epoch captured at cycle
+ * start against `SyncProviderManager.syncEpoch` before a write. The stale
+ * cycle's remaining applies/acks/cursor writes are abandoned so they cannot
+ * land against the new epoch/target; the next sync runs against the current
+ * config from scratch. Transient by design; not a corruption. (#9074 — the
+ * cross-provider generalization of {@link FileSyncTargetChangedError}.)
+ */
+export class SyncEpochChangedError extends Error {
+  override name = 'SyncEpochChangedError';
+
+  constructor(capturedEpoch: number, currentEpoch: number, context: string) {
+    super(
+      `Sync epoch changed mid-cycle (${capturedEpoch} → ${currentEpoch}) at ${context}; write abandoned.`,
+    );
+  }
+}
+
+/**
+ * A deferred action can never be persisted (invalid entity identifiers or an
+ * invalid operation payload) — a deterministic condition, not a transient
+ * I/O failure. The reducer already committed, so the action stays buffered and
+ * sync remains blocked until reload restores the last durable state.
+ */
+export class PermanentDeferredWriteError extends Error {
+  override name = 'PermanentDeferredWriteError';
+}
+
+/**
+ * A local action was captured while a USE_REMOTE rebuild held the op-log lock,
+ * after the destructive replacement committed. The attempt must abort — the
+ * raced action's reducer ran against live state the replay rewrites, so
+ * completing could let a later snapshot cover an op whose live effect is
+ * missing. The raced ops are preserved and re-applied by the retry/resume.
+ */
+export class CaptureRacedRebuildError extends Error {
+  override name = 'CaptureRacedRebuildError';
+
+  constructor() {
+    super(
+      'USE_REMOTE incomplete: a local change arrived during the rebuild and will be restored on retry.',
+    );
+  }
+}
+
+/** Previously downloaded operations have not completed reducer/archive recovery. */
+export class IncompleteRemoteOperationsError extends Error {
+  override name = 'IncompleteRemoteOperationsError';
+
+  constructor(cause?: unknown) {
+    super(
+      cause instanceof Error
+        ? cause.message
+        : 'Downloaded operations are not fully applied.',
+      cause === undefined ? undefined : { cause },
+    );
+  }
+}
+
 // -----ENCRYPTION & COMPRESSION----
 export class DecryptNoPasswordError extends AdditionalLogErrorBase {
   override name = 'DecryptNoPasswordError';
@@ -128,8 +248,50 @@ export class EncryptNoPasswordError extends AdditionalLogErrorBase {
   override name = 'EncryptNoPasswordError';
 }
 
+/**
+ * The remote sync file is PLAINTEXT (its prefix carries no encryption flag) but
+ * local config expects encryption (GHSA-vrc7-775g-ggqc). The prefix flags live
+ * OUTSIDE the AEAD envelope, so a remote attacker (compromised Dropbox/WebDAV
+ * account, or a non-TLS WebDAV MITM) can strip the flag and serve
+ * attacker-authored plaintext. Deciding decrypt-or-not from that
+ * attacker-controlled prefix alone would silently accept the injected data and
+ * drop the E2EE authenticity guarantee, so the download path fails closed with
+ * this error instead — the download-side mirror of EncryptNoPasswordError.
+ * NEVER attach the payload: it is plaintext user (or attacker) content.
+ */
+export class PlaintextWhenEncryptionExpectedError extends AdditionalLogErrorBase<{
+  isCompressed: boolean;
+  modelVersion: number;
+}> {
+  override name = 'PlaintextWhenEncryptionExpectedError';
+
+  constructor(info: { isCompressed: boolean; modelVersion: number }) {
+    super(
+      'Remote sync file is unencrypted but local encryption is enabled — ' +
+        'refusing to accept plaintext (possibly a tampered or downgraded remote).',
+    );
+    this.additionalLog = info;
+  }
+}
+
 export class DecryptError extends AdditionalLogErrorBase {
   override name = 'DecryptError';
+}
+
+/**
+ * Thrown when a successfully-decrypted operation's UNAUTHENTICATED metadata is
+ * inconsistent with its AUTHENTICATED payload — the signature of sync-server
+ * (or MITM) tampering with the plaintext op fields that AES-GCM does not cover.
+ * GHSA-8pxh-mgc7-gp3g.
+ *
+ * Distinct from DecryptError on purpose: it must not carry the raw
+ * message to the user, and (being a sibling, not a subclass) it never matches
+ * the DecryptError branch. SyncWrapperService has a dedicated branch that fails
+ * closed (sync stops) and shows a calm, translated message instead of the raw
+ * technical/GHSA string.
+ */
+export class OperationIntegrityError extends AdditionalLogErrorBase {
+  override name = 'OperationIntegrityError';
 }
 
 export class CompressError extends AdditionalLogErrorBase {

@@ -1,5 +1,11 @@
-import { BrowserWindow, ipcMain, screen } from 'electron';
+import {
+  BrowserWindow,
+  BrowserWindowConstructorOptions,
+  ipcMain,
+  screen,
+} from 'electron';
 import { join } from 'path';
+import { assertSecureWebPreferences } from '../web-preferences-guard';
 import { TaskCopy } from '../../src/app/features/tasks/task.model';
 import { TaskWidgetConfig } from '../../src/app/features/config/global-config.model';
 import { info } from 'electron-log/main';
@@ -200,6 +206,19 @@ const createTaskWidgetWindowForGeneration = async (
     return;
   }
 
+  const webPreferences: BrowserWindowConstructorOptions['webPreferences'] = {
+    preload: join(__dirname, 'task-widget-preload.js'),
+    contextIsolation: true,
+    nodeIntegration: false,
+    nodeIntegrationInSubFrames: false,
+    disableDialogs: true,
+    webSecurity: true,
+    allowRunningInsecureContent: false,
+    backgroundThrottling: false, // Prevent throttling when hidden
+  };
+  // Keep the widget renderer's IPC boundary as tight as the main window's.
+  assertSecureWebPreferences(webPreferences, 'task-widget');
+
   // On macOS, transparent + frameless windows do not support native window
   // dragging or edge resizing (see Electron's BrowserWindow docs: "Transparent
   // windows are not resizable. Setting `resizable` to `true` may make a
@@ -228,18 +247,17 @@ const createTaskWidgetWindowForGeneration = async (
     hasShadow: IS_MAC, // Mac: solid window can keep native shadow
     autoHideMenuBar: true,
     roundedCorners: IS_MAC, // Mac: rely on OS-native rounded corners
-    webPreferences: {
-      preload: join(__dirname, 'task-widget-preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      disableDialogs: true,
-      webSecurity: true,
-      allowRunningInsecureContent: false,
-      backgroundThrottling: false, // Prevent throttling when hidden
-    },
+    webPreferences,
   });
 
   taskWidgetWin.loadFile(join(__dirname, 'task-widget.html'));
+
+  // Re-apply opacity once the page loads. On Windows/Linux opacity is a CSS variable driven
+  // by IPC; sends before did-finish-load are dropped. Uses 'on' (not 'once') so a DevTools
+  // reload also restores the correct opacity. macOS re-calls setOpacity() idempotently.
+  taskWidgetWin.webContents.on('did-finish-load', () => {
+    updateTaskWidgetOpacity(currentOpacity);
+  });
 
   // Set visible on all workspaces immediately after creation
   taskWidgetWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
@@ -293,6 +311,8 @@ const createTaskWidgetWindowForGeneration = async (
   // Update initial state
   updateTaskWidgetContent();
 
+  // macOS: setOpacity() works immediately. Windows/Linux: IPC send is dropped before the
+  // page loads; the did-finish-load handler above re-delivers it reliably.
   updateTaskWidgetOpacity(currentOpacity);
 
   if (pendingShowAfterCreate) {

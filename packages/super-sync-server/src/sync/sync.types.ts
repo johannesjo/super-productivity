@@ -17,8 +17,22 @@ import {
 const FULL_STATE_OP_TYPES: ReadonlySet<string> = new Set(SUPER_SYNC_SNAPSHOT_OP_TYPES);
 
 /**
+ * Database predicate for full-state operations that are proven to supersede
+ * their prefix. Legacy REPAIR rows have no causal base cursor, so they remain
+ * downloadable compatibility records but must never authorize fast-forward or
+ * history pruning.
+ */
+export const CAUSAL_FULL_STATE_OPERATION_WHERE = {
+  OR: [
+    { opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] } },
+    { opType: 'REPAIR', repairBaseServerSeq: { not: null } },
+  ],
+} as const satisfies Prisma.OperationWhereInput;
+
+/**
  * True when `opType` carries the user's full state (SYNC_IMPORT, BACKUP_IMPORT,
- * REPAIR) and therefore supersedes prior ops up to its serverSeq.
+ * REPAIR). Whether it is a proven causal boundary additionally depends on the
+ * REPAIR base cursor; use {@link isCausalFullStateOperation} for that decision.
  */
 export const isFullStateOpType = (opType: string): boolean =>
   FULL_STATE_OP_TYPES.has(opType);
@@ -51,6 +65,7 @@ export const SYNC_ERROR_CODES = {
   // Conflict errors (409)
   CONFLICT_CONCURRENT: 'CONFLICT_CONCURRENT',
   CONFLICT_SUPERSEDED: 'CONFLICT_SUPERSEDED',
+  REPAIR_STALE: 'REPAIR_STALE',
   DUPLICATE_OPERATION: 'DUPLICATE_OPERATION',
 
   // Rate limiting (429)
@@ -61,10 +76,16 @@ export const SYNC_ERROR_CODES = {
 
   // Encryption-related errors (400)
   ENCRYPTED_OPS_NOT_SUPPORTED: 'ENCRYPTED_OPS_NOT_SUPPORTED' as const,
+  // Encrypted-only ingress gate: upload rejected because a payload is not
+  // flagged encrypted or lacks the ciphertext transport shape.
+  E2EE_REQUIRED: 'E2EE_REQUIRED',
 
   // Server errors (500)
   INTERNAL_ERROR: 'INTERNAL_ERROR',
 } as const;
+
+export const STATE_REPLACEMENT_REQUIRED_ERROR =
+  'Download the latest full-state replacement before retrying';
 
 export type SyncErrorCode = (typeof SYNC_ERROR_CODES)[keyof typeof SYNC_ERROR_CODES];
 
@@ -174,7 +195,15 @@ export interface Operation {
   schemaVersion: number;
   isPayloadEncrypted?: boolean; // True if payload is E2E encrypted
   syncImportReason?: string;
+  repairBaseServerSeq?: number;
 }
+
+export const isCausalFullStateOperation = (
+  op: Pick<Operation, 'opType' | 'repairBaseServerSeq'>,
+): boolean =>
+  op.opType === 'SYNC_IMPORT' ||
+  op.opType === 'BACKUP_IMPORT' ||
+  (op.opType === 'REPAIR' && op.repairBaseServerSeq !== undefined);
 
 export interface DuplicateOperationCandidate {
   id: string;
@@ -184,6 +213,7 @@ export interface DuplicateOperationCandidate {
   opType: string;
   entityType: string;
   entityId: string | null;
+  entityIds: string[];
   payload: unknown;
   vectorClock: unknown;
   schemaVersion: number;
@@ -191,6 +221,7 @@ export interface DuplicateOperationCandidate {
   receivedAt: bigint | number | string;
   isPayloadEncrypted: boolean;
   syncImportReason: string | null;
+  repairBaseServerSeq: number | null;
 }
 
 /**
@@ -207,6 +238,7 @@ export const DUPLICATE_OP_SELECT = {
   opType: true,
   entityType: true,
   entityId: true,
+  entityIds: true,
   payload: true,
   vectorClock: true,
   schemaVersion: true,
@@ -214,12 +246,15 @@ export const DUPLICATE_OP_SELECT = {
   receivedAt: true,
   isPayloadEncrypted: true,
   syncImportReason: true,
+  repairBaseServerSeq: true,
 } satisfies Prisma.OperationSelect;
 
 export interface LatestEntityOperationRow {
   entityId: string;
   clientId: string;
+  actionType: string;
   vectorClock: unknown;
+  serverSeq?: number;
 }
 
 export interface LatestBatchEntityOperationRow extends LatestEntityOperationRow {
@@ -275,6 +310,18 @@ export interface UploadResult {
   existingClock?: VectorClock;
 }
 
+export const createStateReplacementRequiredResults = (
+  ops: ReadonlyArray<Pick<Operation, 'id'>>,
+): UploadResult[] =>
+  ops.map((op) => ({
+    opId: op.id,
+    accepted: false,
+    error: STATE_REPLACEMENT_REQUIRED_ERROR,
+    // Released clients already leave INTERNAL_ERROR operations pending and
+    // process piggybacked operations before retrying.
+    errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+  }));
+
 /**
  * Internal return of the serial-path `processOperation`: the client-facing
  * `UploadResult` plus the op's storage size, computed once at the persist site,
@@ -328,6 +375,9 @@ export interface DownloadOpsResponse {
    * Server timestamp for client clock drift detection.
    */
   serverTime?: number;
+  capabilities?: {
+    causalRepairSnapshots: true;
+  };
 }
 
 // Status types
@@ -425,7 +475,7 @@ export const validatePayload = (
 export interface SyncConfig {
   maxPayloadSizeBytes: number;
   uploadRateLimit: { max: number; windowMs: number };
-  retentionMs: number; // Unified retention period for ops, devices, and validation
+  retentionMs: number; // Unified retention period for stored ops and devices
   maxClockDriftMs: number;
   batchUpload: boolean;
 }
@@ -445,7 +495,7 @@ export const ONLINE_DEVICE_THRESHOLD_MS = 5 * MS_PER_MINUTE; // 5 minutes
 export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   maxPayloadSizeBytes: 20 * 1024 * 1024, // 20MB - needed for large imports
   uploadRateLimit: { max: 100, windowMs: MS_PER_MINUTE },
-  retentionMs: RETENTION_MS, // 45 days - used for ops, devices, and validation
+  retentionMs: RETENTION_MS, // 45 days - used for stored ops and devices
   maxClockDriftMs: MS_PER_MINUTE, // 60 seconds
   batchUpload: false,
 };

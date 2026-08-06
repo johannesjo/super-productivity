@@ -3,13 +3,7 @@ import { prisma } from '../db';
 import { Logger } from '../logger';
 import { getSyncService } from './sync.service';
 import { computeOpStorageBytes } from './sync.const';
-import {
-  DUPLICATE_OP_SELECT,
-  Operation,
-  SYNC_ERROR_CODES,
-  type DuplicateOperationCandidate,
-} from './sync.types';
-import { isSameDuplicateOperation } from './conflict';
+import { Operation, SYNC_ERROR_CODES } from './sync.types';
 import { errorMessage, MAX_OPS_PER_BATCH } from './sync.routes.payload';
 
 /**
@@ -37,34 +31,41 @@ export const computeOpsStorageBytes = (
   return { bytes, fallback };
 };
 
-export const computeOpsStorageBytesExcludingKnownDuplicates = async (
-  userId: number,
+export const computeOpsStorageBytesExcludingUnstorableIds = async (
   ops: Operation[],
-  maxClockDriftMs: number,
-): Promise<{ bytes: number; fallback: number }> => {
-  if (ops.length === 0) return { bytes: 0, fallback: 0 };
+  getCachedPayloadBytes?: (op: Operation) => number | undefined,
+): Promise<{
+  bytes: number;
+  fallback: number;
+  requestStartOccupiedIds: ReadonlySet<string>;
+}> => {
+  if (ops.length === 0) {
+    return { bytes: 0, fallback: 0, requestStartOccupiedIds: new Set() };
+  }
 
   const existingOps = await prisma.operation.findMany({
     where: { id: { in: Array.from(new Set(ops.map((op) => op.id))) } },
-    select: DUPLICATE_OP_SELECT,
+    select: { id: true },
   });
-  const existingOpById = new Map<string, DuplicateOperationCandidate>(
-    existingOps.map((existingOp) => [existingOp.id, existingOp]),
-  );
+  const requestStartOccupiedIds = new Set(existingOps.map((existingOp) => existingOp.id));
 
   let bytes = 0;
   let fallback = 0;
+  const seenIncomingIds = new Set<string>();
   for (const op of ops) {
-    const existingOp = existingOpById.get(op.id);
-    if (existingOp && isSameDuplicateOperation(existingOp, userId, op, maxClockDriftMs)) {
+    // uploadOps stores at most the first new operation for an ID. Any occupied
+    // ID (exact retry or collision) and every repeated incoming ID is terminally
+    // rejected, so charging it here can only poison the pre-write quota gate.
+    if (requestStartOccupiedIds.has(op.id) || seenIncomingIds.has(op.id)) {
       continue;
     }
+    seenIncomingIds.add(op.id);
 
-    const sized = computeOpStorageBytes(op);
+    const sized = computeOpStorageBytes(op, getCachedPayloadBytes?.(op));
     bytes += sized.bytes;
     if (sized.fallback) fallback += 1;
   }
-  return { bytes, fallback };
+  return { bytes, fallback, requestStartOccupiedIds };
 };
 
 export const computeJsonStorageBytes = (value: unknown, fallback: unknown): number => {

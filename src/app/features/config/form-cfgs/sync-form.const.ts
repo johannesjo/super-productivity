@@ -80,7 +80,7 @@ const createWebdavFormFields = (options: {
       },
       expressions: {
         'props.required': (field: FormlyFieldConfig) =>
-          field?.parent?.parent?.model?.syncProvider === SyncProviderId.WebDAV,
+          isSyncProvider(field, 2, SyncProviderId.WebDAV),
       },
     },
     {
@@ -92,7 +92,7 @@ const createWebdavFormFields = (options: {
       },
       expressions: {
         'props.required': (field: FormlyFieldConfig) =>
-          field?.parent?.parent?.model?.syncProvider === SyncProviderId.WebDAV,
+          isSyncProvider(field, 2, SyncProviderId.WebDAV),
       },
     },
     {
@@ -105,7 +105,7 @@ const createWebdavFormFields = (options: {
       },
       expressions: {
         'props.required': (field: FormlyFieldConfig) =>
-          field?.parent?.parent?.model?.syncProvider === SyncProviderId.WebDAV,
+          isSyncProvider(field, 2, SyncProviderId.WebDAV),
       },
     },
     {
@@ -117,14 +117,51 @@ const createWebdavFormFields = (options: {
       },
       expressions: {
         'props.required': (field: FormlyFieldConfig) =>
-          field?.parent?.parent?.model?.syncProvider === SyncProviderId.WebDAV,
+          isSyncProvider(field, 2, SyncProviderId.WebDAV),
       },
     },
   ];
 };
 
+/**
+ * Reads the sync form's root `syncProvider`, given a field some number of
+ * `.parent` hops below the root. Centralized because Formly's parent-depth
+ * is otherwise easy to get wrong when copy-pasting a predicate to a field at
+ * a different nesting level: `depth: 1` for a field placed directly in
+ * `SYNC_FORM.items` (typically a provider's `fieldGroup` wrapper), `depth: 2`
+ * for a field nested one level inside such a fieldGroup.
+ */
+const rootSyncProvider = (
+  field: FormlyFieldConfig | undefined,
+  depth: 1 | 2,
+): SyncProviderId | null | undefined => {
+  const root = depth === 1 ? field?.parent : field?.parent?.parent;
+  return root?.model?.syncProvider;
+};
+
+const isSyncProvider = (
+  field: FormlyFieldConfig | undefined,
+  depth: 1 | 2,
+  providerId: SyncProviderId | null,
+): boolean => rootSyncProvider(field, depth) === providerId;
+
+const isNotSyncProvider = (
+  field: FormlyFieldConfig | undefined,
+  depth: 1 | 2,
+  providerId: SyncProviderId | null,
+): boolean => rootSyncProvider(field, depth) !== providerId;
+
+const hasUnsavedProviderSwitch = (
+  field: FormlyFieldConfig | undefined,
+  depth: 1 | 2,
+): boolean => {
+  const root = depth === 1 ? field?.parent : field?.parent?.parent;
+  const activeProviderId = root?.model?._activeProviderId;
+  return activeProviderId !== undefined && activeProviderId !== root?.model?.syncProvider;
+};
+
 const isOneDriveClientIdRequired = (field: FormlyFieldConfig): boolean => {
-  if (field?.parent?.parent?.model?.syncProvider !== SyncProviderId.OneDrive) {
+  if (!isSyncProvider(field, 2, SyncProviderId.OneDrive)) {
     return false;
   }
 
@@ -182,8 +219,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProviderId.LocalFile ||
-        IS_ANDROID_WEB_VIEW,
+        isNotSyncProvider(field, 1, SyncProviderId.LocalFile) || IS_ANDROID_WEB_VIEW,
       resetOnHide: false,
       key: 'localFileSync',
       fieldGroup: [
@@ -199,6 +235,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           // No `key` on purpose: post-#8228 the sync folder path is owned
           // main-side. The picker's return value is for display only and
           // must not write back into the renderer credential store.
+          // Prepare-only (#9075): main holds the pick as a pending candidate;
+          // DialogSyncCfgComponent.save() commits it (and fires the
+          // target-change invalidation there); closing without save discards.
           type: 'btn',
           templateOptions: {
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
@@ -216,8 +255,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProviderId.LocalFile ||
-        !IS_ANDROID_WEB_VIEW,
+        isNotSyncProvider(field, 1, SyncProviderId.LocalFile) || !IS_ANDROID_WEB_VIEW,
       resetOnHide: false,
       key: 'localFileSync',
       fieldGroup: [
@@ -236,7 +274,11 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
             btnStyle: 'stroked',
             onClick: async () => {
-              // NOTE: this actually sets the value in the model
+              // NOTE: this actually sets the value in the model — and ONLY
+              // the model (#9075). The URI is persisted by settings Save via
+              // setProviderConfig, whose config diff detects the target move
+              // (safFolderUri is identity-affecting), so Cancel abandons the
+              // pick. setupSaf throws on cancel, so a value = success.
               const providers = await loadSyncProviders();
               const localProvider = providers.find(
                 (p) => p.id === SyncProviderId.LocalFile,
@@ -246,7 +288,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider === SyncProviderId.LocalFile,
+              isSyncProvider(field, 2, SyncProviderId.LocalFile),
           },
         },
       ],
@@ -255,7 +297,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     // Nextcloud provider form fields
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProviderId.Nextcloud,
+        isNotSyncProvider(field, 1, SyncProviderId.Nextcloud),
       resetOnHide: false,
       key: 'nextcloud',
       fieldGroup: [
@@ -280,7 +322,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+              isSyncProvider(field, 2, SyncProviderId.Nextcloud),
           },
         },
         {
@@ -292,7 +334,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+              isSyncProvider(field, 2, SyncProviderId.Nextcloud),
           },
         },
         {
@@ -313,7 +355,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+              isSyncProvider(field, 2, SyncProviderId.Nextcloud),
           },
         },
         {
@@ -324,7 +366,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+              isSyncProvider(field, 2, SyncProviderId.Nextcloud),
           },
         },
       ],
@@ -332,8 +374,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
 
     // WebDAV provider form fields
     {
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProviderId.WebDAV,
+      hideExpression: (m, v, field) => isNotSyncProvider(field, 1, SyncProviderId.WebDAV),
       resetOnHide: false,
       key: 'webDav',
       fieldGroup: createWebdavFormFields({
@@ -348,7 +389,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     // Note: No key needed - Dropbox credentials stored privately via SyncCredentialStore
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProviderId.Dropbox,
+        isNotSyncProvider(field, 1, SyncProviderId.Dropbox),
       resetOnHide: false,
       fieldGroup: [
         {
@@ -363,7 +404,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     // OneDrive provider form fields
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProviderId.OneDrive,
+        isNotSyncProvider(field, 1, SyncProviderId.OneDrive),
       resetOnHide: false,
       key: 'oneDrive',
       fieldGroup: [
@@ -431,7 +472,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     // OneDrive provider authentication panel
     {
       hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProviderId.OneDrive,
+        isNotSyncProvider(field, 1, SyncProviderId.OneDrive),
       resetOnHide: false,
       props: {},
       fieldGroup: [
@@ -445,10 +486,11 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       ],
     },
 
-    // Encryption status box - shown when encryption is enabled (for any provider)
+    // Encryption status box - shown when encryption is enabled for the active provider.
     {
       hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
-        !(field?.parent?.model?.isEncryptionEnabled ?? false),
+        !(field?.parent?.model?.isEncryptionEnabled ?? false) ||
+        hasUnsavedProviderSwitch(field, 1),
       className: 'encryption-status-box',
       fieldGroup: [
         {
@@ -468,8 +510,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             btnType: 'primary',
             btnStyle: 'stroked',
             onClick: async (field: FormlyFieldConfig) => {
-              const isSuperSync =
-                field?.parent?.parent?.model?.syncProvider === SyncProviderId.SuperSync;
+              const isSuperSync = isSyncProvider(field, 2, SyncProviderId.SuperSync);
               await (isSuperSync
                 ? openEncryptionPasswordChangeDialog()
                 : openEncryptionPasswordChangeDialogForFileBased());
@@ -479,7 +520,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         // Hide disable encryption for SuperSync — encryption is mandatory
         {
           hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
-            field?.parent?.parent?.model?.syncProvider === SyncProviderId.SuperSync,
+            isSyncProvider(field, 2, SyncProviderId.SuperSync),
           type: 'btn',
           className: 'e2e-disable-encryption-btn',
           templateOptions: {
@@ -510,8 +551,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     // The dialog component drops this hide in edit mode and appends action buttons.
     {
       type: 'collapsible',
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider === SyncProviderId.SuperSync,
+      hideExpression: (m, v, field) => isSyncProvider(field, 1, SyncProviderId.SuperSync),
       // syncRole is a stable structural marker the dialog routes on, so a
       // future global rename of T.G.ADVANCED_CFG cannot silently break it.
       props: { label: T.G.ADVANCED_CFG, syncRole: 'advanced' } as SyncCollapsibleProps,
@@ -534,8 +574,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'isManualSyncOnly',
           type: 'checkbox',
           // Only show for file-based providers (Dropbox, WebDAV, LocalFile, Nextcloud)
-          hideExpression: (m, v, field) =>
-            field?.parent?.parent?.model?.syncProvider === null,
+          hideExpression: (m, v, field) => isSyncProvider(field, 2, null),
           templateOptions: {
             label: T.F.SYNC.FORM.L_MANUAL_SYNC_ONLY,
           },
@@ -553,17 +592,21 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'isUseSplitSyncFiles',
           type: 'checkbox',
           hideExpression: (m, v, field) =>
-            field?.parent?.parent?.model?.syncProvider === null ||
-            field?.parent?.parent?.model?.syncProvider === SyncProviderId.SuperSync,
+            isSyncProvider(field, 2, null) ||
+            isSyncProvider(field, 2, SyncProviderId.SuperSync),
           templateOptions: {
             label: T.F.SYNC.FORM.L_USE_SPLIT_SYNC_FILES,
           },
         },
-        // Enable encryption button for file-based providers (shown when encryption is disabled)
+        // Established file-based providers can enable encryption here.
+        // Setup and provider switches expose this only after Save, when the
+        // selected provider is active.
         {
           hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
-            field?.parent?.parent?.model.syncProvider === SyncProviderId.SuperSync ||
-            m.isEncryptionEnabled,
+            isSyncProvider(field, 2, SyncProviderId.SuperSync) ||
+            m.isEncryptionEnabled ||
+            field?.parent?.parent?.model?._isInitialSetup === true ||
+            hasUnsavedProviderSwitch(field, 2),
           type: 'btn',
           className: 'e2e-file-based-enable-encryption-btn',
           templateOptions: {
@@ -594,7 +637,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         // above already shows "Encryption password is set" in that case).
         {
           hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
-            field?.parent?.parent?.model?.syncProvider !== SyncProviderId.SuperSync ||
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync) ||
             (field?.parent?.parent?.model?.isEncryptionEnabled ?? false),
           type: 'tpl',
           templateOptions: {
@@ -605,7 +648,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         },
         {
           hideExpression: (m, v, field) =>
-            field?.parent?.parent?.model.syncProvider !== SyncProviderId.SuperSync,
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync),
           type: 'btn',
           templateOptions: {
             text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
@@ -621,7 +664,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         },
         {
           hideExpression: (m, v, field) =>
-            field?.parent?.parent?.model.syncProvider !== SyncProviderId.SuperSync,
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync),
           key: 'accessToken',
           type: 'textarea',
           className: 'e2e-accessToken',
@@ -632,7 +675,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
-              field?.parent?.parent?.model?.syncProvider === SyncProviderId.SuperSync,
+              isSyncProvider(field, 2, SyncProviderId.SuperSync),
           },
         },
         // Encryption encouragement warning (shown when encryption is NOT enabled)
@@ -642,7 +685,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         // the root flag from SuperSync's privateCfg.isEncryptionEnabled).
         {
           hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
-            field?.parent?.parent?.model?.syncProvider !== SyncProviderId.SuperSync ||
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync) ||
             (field?.parent?.parent?.model?.isEncryptionEnabled ?? false) ||
             field?.parent?.parent?.model?._isInitialSetup === true,
           type: 'tpl',
@@ -653,12 +696,14 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         // Enable encryption button for SuperSync (shown when encryption is disabled)
-        // Hidden during initial setup (encryption dialog opens automatically after save)
+        // Hidden during initial setup and provider switches because the
+        // encryption dialog always acts on the active, persisted provider.
         {
           hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
-            field?.parent?.parent?.model?.syncProvider !== SyncProviderId.SuperSync ||
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync) ||
             (field?.parent?.parent?.model?.isEncryptionEnabled ?? false) ||
-            field?.parent?.parent?.model?._isInitialSetup === true,
+            field?.parent?.parent?.model?._isInitialSetup === true ||
+            hasUnsavedProviderSwitch(field, 2),
           type: 'btn',
           className: 'e2e-enable-encryption-btn',
           templateOptions: {
@@ -694,7 +739,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           type: 'collapsible',
           hideExpression: (m, v, field) =>
-            field?.parent?.parent?.model.syncProvider !== SyncProviderId.SuperSync,
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync),
           props: {
             label: T.G.ADVANCED_CFG,
             syncRole: 'advanced',

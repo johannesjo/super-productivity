@@ -5,6 +5,12 @@ export const SUPER_SYNC_MAX_CLIENT_ID_LENGTH = 255;
 export const SUPER_SYNC_MAX_OPS_PER_UPLOAD = 100;
 export const SUPER_SYNC_MAX_ENTITY_IDS_PER_OP = 1000;
 
+// Upload-only fields must be loose enough to reach per-operation validation,
+// but still bounded so one invalid item cannot amplify logs/responses or make
+// semantic validation walk an arbitrarily large identifier collection.
+const SUPER_SYNC_MAX_INVALID_FIELD_TRANSPORT_LENGTH = 4096;
+const SUPER_SYNC_MAX_INVALID_ENTITY_IDS_TRANSPORT = SUPER_SYNC_MAX_ENTITY_IDS_PER_OP * 2;
+
 export const SUPER_SYNC_OP_TYPES = [
   'CRT',
   'UPD',
@@ -69,13 +75,34 @@ export const SuperSyncOperationSchema = z.object({
   payload: z.unknown(),
   vectorClock: SuperSyncVectorClockSchema,
   timestamp: z.number(),
-  schemaVersion: z.number(),
+  schemaVersion: z.number().int().min(1).max(100),
   isPayloadEncrypted: z.boolean().optional(),
   syncImportReason: z.enum(SUPER_SYNC_IMPORT_REASONS).optional(),
+  /** Server cursor proven to be included in a causally accepted REPAIR snapshot. */
+  repairBaseServerSeq: z.number().int().min(0).optional(),
+});
+
+// Upload requests are envelopes for independently validated operations. Keep
+// structural types and fields that ValidationService does not handle strict,
+// but defer semantic operation validation to the server so one malformed op
+// cannot reject and stall every valid sibling in the batch. Download/response
+// schemas remain strict.
+const SuperSyncUploadOperationSchema = SuperSyncOperationSchema.extend({
+  id: z.string().max(SUPER_SYNC_MAX_INVALID_FIELD_TRANSPORT_LENGTH),
+  clientId: z.string().max(SUPER_SYNC_MAX_INVALID_FIELD_TRANSPORT_LENGTH),
+  opType: z.string().max(SUPER_SYNC_MAX_INVALID_FIELD_TRANSPORT_LENGTH),
+  entityType: z.string().max(SUPER_SYNC_MAX_INVALID_FIELD_TRANSPORT_LENGTH),
+  entityId: z.string().max(SUPER_SYNC_MAX_INVALID_FIELD_TRANSPORT_LENGTH).optional(),
+  entityIds: z
+    .array(z.string().max(SUPER_SYNC_MAX_INVALID_FIELD_TRANSPORT_LENGTH))
+    .max(SUPER_SYNC_MAX_INVALID_ENTITY_IDS_TRANSPORT)
+    .optional(),
+  vectorClock: z.record(z.string(), z.unknown()),
+  schemaVersion: z.number(),
 });
 
 export const SuperSyncUploadOpsRequestSchema = z.object({
-  ops: z.array(SuperSyncOperationSchema).min(1).max(SUPER_SYNC_MAX_OPS_PER_UPLOAD),
+  ops: z.array(SuperSyncUploadOperationSchema).min(1).max(SUPER_SYNC_MAX_OPS_PER_UPLOAD),
   clientId: SuperSyncClientIdSchema,
   lastKnownServerSeq: z.number().optional(),
   requestId: SuperSyncRequestIdSchema.optional(),
@@ -87,19 +114,30 @@ export const SuperSyncDownloadOpsQuerySchema = z.object({
   excludeClient: SuperSyncClientIdSchema.optional(),
 });
 
-export const SuperSyncUploadSnapshotRequestSchema = z.object({
-  state: z.unknown(),
-  clientId: SuperSyncClientIdSchema,
-  reason: z.enum(SUPER_SYNC_SNAPSHOT_REASONS),
-  vectorClock: SuperSyncVectorClockSchema,
-  schemaVersion: z.number().optional(),
-  isPayloadEncrypted: z.boolean().optional(),
-  syncImportReason: z.enum(SUPER_SYNC_IMPORT_REASONS).optional(),
-  opId: z.string().uuid().optional(),
-  isCleanSlate: z.boolean().optional(),
-  snapshotOpType: z.enum(SUPER_SYNC_SNAPSHOT_OP_TYPES).optional(),
-  requestId: SuperSyncRequestIdSchema.optional(),
-});
+export const SuperSyncUploadSnapshotRequestSchema = z
+  .object({
+    state: z.unknown(),
+    clientId: SuperSyncClientIdSchema,
+    reason: z.enum(SUPER_SYNC_SNAPSHOT_REASONS),
+    vectorClock: SuperSyncVectorClockSchema,
+    schemaVersion: z.number().int().min(1).max(100).optional(),
+    isPayloadEncrypted: z.boolean().optional(),
+    syncImportReason: z.enum(SUPER_SYNC_IMPORT_REASONS).optional(),
+    opId: z.string().uuid().optional(),
+    isCleanSlate: z.boolean().optional(),
+    snapshotOpType: z.enum(SUPER_SYNC_SNAPSHOT_OP_TYPES).optional(),
+    repairBaseServerSeq: z.number().int().min(0).optional(),
+    requestId: SuperSyncRequestIdSchema.optional(),
+  })
+  .superRefine((request, context) => {
+    if (request.isCleanSlate && !request.opId) {
+      context.addIssue({
+        code: 'custom',
+        path: ['opId'],
+        message: 'opId is required for clean-slate snapshot idempotency',
+      });
+    }
+  });
 
 export const SuperSyncOperationResponseSchema = SuperSyncOperationSchema.passthrough();
 
@@ -139,6 +177,11 @@ export const SuperSyncDownloadOpsResponseSchema = z
     gapDetected: z.boolean().optional(),
     snapshotVectorClock: SuperSyncVectorClockSchema.optional(),
     serverTime: z.number().optional(),
+    capabilities: z
+      .object({
+        causalRepairSnapshots: z.literal(true).optional(),
+      })
+      .optional(),
   })
   .passthrough();
 
@@ -155,6 +198,7 @@ export const SuperSyncSnapshotUploadResponseSchema = z
     accepted: z.boolean(),
     serverSeq: z.number().optional(),
     error: z.string().optional(),
+    errorCode: z.string().optional(),
   })
   .passthrough();
 

@@ -1,10 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { RemoteOpsProcessingService } from '../../sync/remote-ops-processing.service';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
-import {
-  SchemaMigrationService,
-  MAX_VERSION_SKIP,
-} from '../../persistence/schema-migration.service';
+import { SchemaMigrationService } from '../../persistence/schema-migration.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { VectorClockService } from '../../sync/vector-clock.service';
 import { OperationApplierService } from '../../apply/operation-applier.service';
@@ -33,13 +30,18 @@ describe('Migration Handling Integration', () => {
   let operationApplierSpy: jasmine.SpyObj<OperationApplierService>;
 
   beforeEach(async () => {
-    snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+    snackServiceSpy = jasmine.createSpyObj('SnackService', [
+      'open',
+      'hasPendingPersistentAction',
+    ]);
+    snackServiceSpy.hasPendingPersistentAction.and.returnValue(false);
     operationApplierSpy = jasmine.createSpyObj('OperationApplierService', [
       'applyOperations',
     ]);
-    operationApplierSpy.applyOperations.and.returnValue(
-      Promise.resolve({ appliedOps: [] }),
-    );
+    operationApplierSpy.applyOperations.and.callFake(async (ops, options) => {
+      await options?.onReducersCommitted?.(ops);
+      return { appliedOps: ops };
+    });
 
     TestBed.configureTestingModule({
       providers: [
@@ -59,7 +61,7 @@ describe('Migration Handling Integration', () => {
             ]);
             spy.checkOpForConflicts.and.resolveTo({
               isSupersededOrDuplicate: false,
-              conflict: null,
+              conflicts: [],
             });
             return spy;
           },
@@ -86,7 +88,7 @@ describe('Migration Handling Integration', () => {
             const spy = jasmine.createSpyObj('OperationLogCompactionService', [
               'compact',
             ]);
-            spy.compact.and.returnValue(Promise.resolve());
+            spy.compact.and.returnValue(Promise.resolve(true));
             return spy;
           },
         },
@@ -146,28 +148,14 @@ describe('Migration Handling Integration', () => {
       );
     });
 
-    it('should accept operation with compatible future version (within skip limit)', async () => {
-      // Logic: if opVersion <= current + MAX_VERSION_SKIP, it's accepted
-      // MAX_VERSION_SKIP is 3. So current + 3 should still be accepted.
-      // Note: A WARNING snackbar may be shown for newer versions, but no ERROR.
-      const compatibleVersion = CURRENT_SCHEMA_VERSION + MAX_VERSION_SKIP;
-      const op = createOp(compatibleVersion);
+    it('should block operation from any future version (no forward-compat band)', async () => {
+      // Forward-compatible migrations are not implemented: real migrations
+      // rename/split fields, so a future op applied verbatim corrupts state.
+      // Even one version ahead must block until the app is updated.
+      const futureVersion = CURRENT_SCHEMA_VERSION + 1;
+      const op = createOp(futureVersion);
 
-      await service.processRemoteOps([op]);
-
-      // Should NOT show error (operation is accepted)
-      expect(snackServiceSpy.open).not.toHaveBeenCalledWith(
-        jasmine.objectContaining({ type: 'ERROR' }),
-      );
-      expect(operationApplierSpy.applyOperations).toHaveBeenCalled();
-    });
-
-    it('should reject operation with incompatible future version', async () => {
-      // Logic: if opVersion > current + MAX_VERSION_SKIP, update required
-      const incompatibleVersion = CURRENT_SCHEMA_VERSION + MAX_VERSION_SKIP + 1;
-      const op = createOp(incompatibleVersion);
-
-      await service.processRemoteOps([op]);
+      const result = await service.processRemoteOps([op]);
 
       // Should trigger error snackbar
       expect(snackServiceSpy.open).toHaveBeenCalledWith(
@@ -177,8 +165,9 @@ describe('Migration Handling Integration', () => {
         }),
       );
 
-      // Should NOT apply operation
+      // Should NOT apply operation, and callers must hold the cursor
       expect(operationApplierSpy.applyOperations).not.toHaveBeenCalled();
+      expect(result.blockedByIncompatibleOp).toBe(true);
     });
 
     it('should handle operations missing schemaVersion (default to 1)', async () => {
@@ -213,12 +202,15 @@ describe('Migration Handling Integration', () => {
       const op = createOp('op-fail');
 
       // Make applier return failure result (new behavior with partial success support)
-      operationApplierSpy.applyOperations.and.resolveTo({
-        appliedOps: [],
-        failedOp: {
-          op,
-          error: new Error('Simulated Apply Error'),
-        },
+      operationApplierSpy.applyOperations.and.callFake(async (ops, options) => {
+        await options?.onReducersCommitted?.(ops);
+        return {
+          appliedOps: [],
+          failedOp: {
+            op,
+            error: new Error('Simulated Apply Error'),
+          },
+        };
       });
 
       // Spy on store to verify markFailed is called

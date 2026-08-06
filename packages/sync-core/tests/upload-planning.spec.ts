@@ -32,7 +32,7 @@ describe('planRegularOpsAfterFullStateUpload', () => {
     expect(
       planRegularOpsAfterFullStateUpload({
         regularOps: entries,
-        lastUploadedFullStateOpId: undefined,
+        lastUploadedFullStateOpSeq: undefined,
       }),
     ).toEqual({
       opsIncludedInSnapshot: [],
@@ -40,7 +40,7 @@ describe('planRegularOpsAfterFullStateUpload', () => {
     });
   });
 
-  it('splits regular ops before and after the uploaded full-state op id', () => {
+  it('splits regular ops before and after the uploaded full-state op seq', () => {
     const before = createEntry(1, '001');
     const same = createEntry(2, '010');
     const after = createEntry(3, '011');
@@ -48,11 +48,28 @@ describe('planRegularOpsAfterFullStateUpload', () => {
     expect(
       planRegularOpsAfterFullStateUpload({
         regularOps: [before, same, after],
-        lastUploadedFullStateOpId: '010',
+        lastUploadedFullStateOpSeq: 2,
       }),
     ).toEqual({
       opsIncludedInSnapshot: [before],
       opsAfterSnapshot: [same, after],
+    });
+  });
+
+  it('uploads an op created after the snapshot even when its id sorts before the full-state op id (clock rollback)', () => {
+    // Wall-clock rollback: the post-snapshot op got a lexically SMALLER UUIDv7
+    // id than the full-state op. Local seq order must win — the op is NOT in
+    // the frozen snapshot payload and must be uploaded, not marked synced.
+    const afterSnapshotWithSmallerId = createEntry(5, '001');
+
+    expect(
+      planRegularOpsAfterFullStateUpload({
+        regularOps: [afterSnapshotWithSmallerId],
+        lastUploadedFullStateOpSeq: 4,
+      }),
+    ).toEqual({
+      opsIncludedInSnapshot: [],
+      opsAfterSnapshot: [afterSnapshotWithSmallerId],
     });
   });
 });

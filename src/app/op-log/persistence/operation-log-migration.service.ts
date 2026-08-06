@@ -25,6 +25,8 @@ import {
   MIGRATION_BACKUP_PREFIX,
   getBackupTimestamp,
 } from '../../../../electron/shared-with-frontend/get-backup-timestamp';
+import { LockService } from '../sync/lock.service';
+import { LOCK_NAMES } from '../core/operation-log.const';
 
 /**
  * Service to check for valid operation log state during startup and migrate
@@ -44,6 +46,7 @@ export class OperationLogMigrationService {
   private store = inject(Store);
   private languageService = inject(LanguageService);
   private translateService = inject(TranslateService);
+  private lockService = inject(LockService);
 
   /**
    * Checks if the operation log is in a valid state and migrates legacy data if found.
@@ -89,72 +92,89 @@ export class OperationLogMigrationService {
       throw e;
     }
 
-    // No snapshot exists. Check if there are any operations in the log.
-    const allOps = await this.opLogStore.getOpsAfterSeq(0);
-
-    if (allOps.length > 0) {
-      // Operations exist but no snapshot. Check if the first op is a Genesis/Migration op.
-      const firstOp = allOps[0].op;
-      if (firstOp.entityType === 'MIGRATION' || firstOp.entityType === 'RECOVERY') {
-        // Valid Genesis exists - migration already happened but snapshot might have been lost
-        OpLog.normal(
-          'OperationLogMigrationService: Genesis operation found. Skipping migration.',
-        );
-        return;
-      }
-
-      // Operations exist without Genesis. Behavior depends on whether legacy data exists:
-      if (hasLegacyData) {
-        // Case 1: Legacy data exists - these are orphan ops captured during app init
-        // before hydration. Clear them so migration can proceed cleanly.
-        OpLog.warn(
-          `OperationLogMigrationService: Found ${allOps.length} orphan operations. ` +
-            `Clearing them before legacy migration.`,
-        );
-        await this.opLogStore.clearAllOperations();
-      } else {
-        // Case 2: No legacy data - these are legitimate user operations from a fresh
-        // install. Let the hydrator replay them. No migration needed.
-        OpLog.normal(
-          `OperationLogMigrationService: Found ${allOps.length} operations (fresh install). ` +
-            `Skipping migration - hydrator will replay them.`,
-        );
-        return;
-      }
-    }
-    if (!hasLegacyData) {
-      OpLog.normal('OperationLogMigrationService: No legacy data found. Starting fresh.');
-      return;
-    }
-
-    // Acquire migration lock (prevent concurrent tab migrations)
-    const lockAcquired = await this.legacyPfDb.acquireMigrationLock();
-    if (!lockAcquired) {
-      OpLog.warn(
-        'OperationLogMigrationService: Migration lock held by another instance, skipping.',
-      );
-      return;
-    }
-
-    // Ensure translations are loaded before showing dialog
-    await this._ensureTranslationsLoaded();
-
-    // Show migration dialog and perform migration
-    const dialogRef = this._showMigrationDialog();
+    let migrationLockAcquired = false;
+    let dialogRef: MatDialogRef<DialogLegacyMigrationComponent> | undefined;
     try {
-      await this._createAutoBackup(dialogRef);
-      await this._performMigration(dialogRef);
+      const migrationCompleted = await this.lockService.request(
+        LOCK_NAMES.OPERATION_LOG,
+        async () => {
+          // Re-read both replay anchors after acquiring the barrier. Capture writes
+          // queued behind this lock must land after the genesis snapshot frontier.
+          const lockedSnapshot = await this.opLogStore.loadStateCache();
+          if (lockedSnapshot) {
+            return false;
+          }
+
+          const allOps = await this.opLogStore.getOpsAfterSeq(0);
+          if (allOps.length > 0) {
+            const firstOp = allOps[0].op;
+            if (firstOp.entityType === 'MIGRATION' || firstOp.entityType === 'RECOVERY') {
+              OpLog.normal(
+                'OperationLogMigrationService: Genesis operation found. Skipping migration.',
+              );
+              return false;
+            }
+
+            if (hasLegacyData) {
+              OpLog.warn(
+                `OperationLogMigrationService: Found ${allOps.length} orphan operations. ` +
+                  `Clearing them before legacy migration.`,
+              );
+              await this.opLogStore.clearAllOperations();
+            } else {
+              OpLog.normal(
+                `OperationLogMigrationService: Found ${allOps.length} operations (fresh install). ` +
+                  `Skipping migration - hydrator will replay them.`,
+              );
+              return false;
+            }
+          }
+          if (!hasLegacyData) {
+            OpLog.normal(
+              'OperationLogMigrationService: No legacy data found. Starting fresh.',
+            );
+            return false;
+          }
+
+          migrationLockAcquired = await this.legacyPfDb.acquireMigrationLock();
+          if (!migrationLockAcquired) {
+            OpLog.warn(
+              'OperationLogMigrationService: Migration lock held by another instance, skipping.',
+            );
+            return false;
+          }
+
+          await this._ensureTranslationsLoaded();
+          dialogRef = this._showMigrationDialog();
+          await this._createAutoBackup(dialogRef);
+          await this._performMigration(dialogRef);
+          return true;
+        },
+      );
+
+      if (migrationCompleted && dialogRef) {
+        this._setStatus(dialogRef, 'complete');
+        OpLog.normal('OperationLogMigrationService: Migration complete');
+
+        // Brief delay to show completion status. Keep this cosmetic wait outside
+        // the operation-log barrier so queued capture writes can proceed.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     } catch (error) {
       OpLog.err('OperationLogMigrationService: Migration failed:', error);
-      dialogRef.componentInstance.error.set(
-        'Migration failed. Your backup has been downloaded. Please restart or import the backup file.',
-      );
-      // Wait for user acknowledgment before throwing
-      await firstValueFrom(dialogRef.afterClosed());
+      if (dialogRef) {
+        dialogRef.componentInstance.error.set(
+          'Migration failed. Your backup has been downloaded. Please restart or import the backup file.',
+        );
+        // Wait for user acknowledgment before throwing
+        await firstValueFrom(dialogRef.afterClosed());
+      }
       throw error;
     } finally {
-      await this.legacyPfDb.releaseMigrationLock();
-      dialogRef.close();
+      if (migrationLockAcquired) {
+        await this.legacyPfDb.releaseMigrationLock();
+      }
+      dialogRef?.close();
     }
   }
 
@@ -275,28 +295,19 @@ export class OperationLogMigrationService {
       schemaVersion: CURRENT_SCHEMA_VERSION,
     };
 
-    // 5. Persist to operation log
-    await this.opLogStore.append(migrationOp);
-    const lastSeq = await this.opLogStore.getLastSeq();
-
-    await this.opLogStore.saveStateCache({
+    // 5. Persist the genesis operation, its exact snapshot frontier, and the
+    // working clock in one transaction. There is no post-append interval where
+    // a later tab write can be skipped by the snapshot frontier or have its
+    // clock advancement overwritten by a follow-up migration write.
+    await this.opLogStore.appendOperationAndSnapshot(migrationOp, 'local', {
       state: dataToMigrate,
-      lastAppliedOpSeq: lastSeq,
       vectorClock: migrationOp.vectorClock,
       compactedAt: Date.now(),
       schemaVersion: CURRENT_SCHEMA_VERSION,
     });
 
-    await this.opLogStore.setVectorClock(migrationOp.vectorClock);
-
     // 6. Dispatch to NgRx store
     this.store.dispatch(loadAllData({ appDataComplete: dataToMigrate }));
-
-    this._setStatus(dialogRef, 'complete');
-    OpLog.normal('OperationLogMigrationService: Migration complete');
-
-    // Brief delay to show completion status
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   private _setStatus(

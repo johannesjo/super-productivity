@@ -12,6 +12,7 @@ import { WorkContextType } from '../../../features/work-context/work-context.mod
 import { Action, ActionReducer } from '@ngrx/store';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { IN_PROGRESS_TAG } from '../../../features/tag/tag.const';
+import { appStateFeatureKey } from '../../app-state/app-state.reducer';
 import {
   createBaseState,
   createMockTag,
@@ -401,6 +402,49 @@ describe('taskSharedCrudMetaReducer', () => {
         expectTagUpdates({
           tag1: { taskIds: ['task1'] },
           TODAY: { taskIds: ['task1'] },
+        }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should use captured dates when replaying on a different day', () => {
+      const capturedToday = '2024-06-14';
+      const capturedTimestamp = new Date(2024, 5, 14, 12, 0, 0, 0).getTime();
+      const { action, testState: baseTestState } = createConvertAction(
+        {},
+        {
+          isPlanForToday: true,
+          isDone: true,
+          today: capturedToday,
+          doneOn: capturedTimestamp,
+          modified: capturedTimestamp,
+        },
+      );
+      const testState = {
+        ...baseTestState,
+        [TASK_FEATURE_NAME]: {
+          ...baseTestState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseTestState[TASK_FEATURE_NAME].entities,
+            task1: action.task,
+          },
+          ids: [...baseTestState[TASK_FEATURE_NAME].ids, 'task1'],
+        },
+        [appStateFeatureKey]: {
+          ...baseTestState[appStateFeatureKey],
+          todayStr: '2024-06-15',
+        },
+      };
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        expectTaskUpdate('task1', {
+          dueDay: capturedToday,
+          doneOn: capturedTimestamp,
+          modified: capturedTimestamp,
         }),
         action,
         mockReducer,
@@ -967,6 +1011,25 @@ describe('taskSharedCrudMetaReducer', () => {
       );
     });
 
+    it('should dismiss a deleted iCal event from future auto-imports', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const action = createDeleteAction({
+        issueType: 'ICAL',
+        issueProviderId: 'calendar-provider',
+        issueId: 'calendar-event',
+      });
+
+      metaReducer(testState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const taskState = updatedState[TASK_FEATURE_NAME] as unknown as {
+        dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+      };
+      expect(taskState.dismissedCalendarAutoImportEventIdsByProvider).toEqual({
+        'calendar-provider': ['calendar-event'],
+      });
+    });
+
     it('should handle task with subtasks removal from tags', () => {
       const testState = createStateWithExistingTasks(
         [],
@@ -1102,6 +1165,58 @@ describe('taskSharedCrudMetaReducer', () => {
         mockReducer,
         testState,
       );
+    });
+
+    it('should carry and apply iCal dismissals for deterministic remote replay', () => {
+      const calendarTask = createMockTask({
+        id: 'task1',
+        issueType: 'ICAL',
+        issueProviderId: 'calendar-provider',
+        issueId: 'calendar-event',
+      });
+      const action = TaskSharedActions.deleteTasks({
+        taskIds: ['task1'],
+        tasks: [calendarTask],
+      });
+
+      expect(
+        (
+          action as unknown as {
+            calendarAutoImportDismissals?: {
+              issueProviderId: string;
+              issueId: string;
+            }[];
+          }
+        ).calendarAutoImportDismissals,
+      ).toEqual([{ issueProviderId: 'calendar-provider', issueId: 'calendar-event' }]);
+
+      const remoteAction = {
+        type: action.type,
+        taskIds: action.taskIds,
+        calendarAutoImportDismissals: action.calendarAutoImportDismissals,
+        meta: action.meta,
+      };
+      metaReducer(createBaseState(), remoteAction);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const taskState = updatedState[TASK_FEATURE_NAME] as unknown as {
+        dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+      };
+      expect(taskState.dismissedCalendarAutoImportEventIdsByProvider).toEqual({
+        'calendar-provider': ['calendar-event'],
+      });
+    });
+
+    it('should ignore malformed calendar dismissal markers during remote replay', () => {
+      const action = {
+        ...TaskSharedActions.deleteTasks({ taskIds: ['missing-task'] }),
+        calendarAutoImportDismissals: [
+          null,
+          { issueProviderId: 'calendar-provider' },
+          { issueProviderId: 123, issueId: 'calendar-event' },
+        ],
+      } as unknown as Action;
+
+      expect(() => metaReducer(createBaseState(), action)).not.toThrow();
     });
 
     it('should preserve currentTaskId when not in deleted tasks', () => {
@@ -1286,9 +1401,14 @@ describe('taskSharedCrudMetaReducer', () => {
   });
 
   describe('updateTask action', () => {
-    const createUpdateTaskAction = (taskId: string, changes: Partial<Task>) =>
+    const createUpdateTaskAction = (
+      taskId: string,
+      changes: Partial<Task>,
+      projectMoveSubTaskIds?: string[],
+    ) =>
       TaskSharedActions.updateTask({
         task: { id: taskId, changes },
+        ...(projectMoveSubTaskIds !== undefined && { projectMoveSubTaskIds }),
       });
 
     it('should update task properties without affecting tags', () => {
@@ -1310,6 +1430,340 @@ describe('taskSharedCrudMetaReducer', () => {
             }),
           }),
         },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should atomically move a task and its subtasks to another project', () => {
+      const testState = createStateWithExistingTasks(['task1'], ['subtask1']);
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        subTaskIds: ['subtask1'],
+      });
+      testState[TASK_FEATURE_NAME].entities.subtask1 = createMockTask({
+        id: 'subtask1',
+        projectId: 'project1',
+        parentId: 'task1',
+      });
+      testState[TASK_FEATURE_NAME].entities['target-task'] = createMockTask({
+        id: 'target-task',
+        projectId: 'project2',
+      });
+      (testState[TASK_FEATURE_NAME].ids as string[]).push('target-task');
+      testState[PROJECT_FEATURE_NAME].entities.project2 = {
+        ...testState[PROJECT_FEATURE_NAME].entities.project1,
+        id: 'project2',
+        title: 'Project 2',
+        taskIds: ['target-task'],
+        backlogTaskIds: [],
+      } as Project;
+      (testState[PROJECT_FEATURE_NAME].ids as string[]).push('project2');
+
+      const action = createUpdateTaskAction('task1', {
+        projectId: 'project2',
+        title: 'Moved task',
+      });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: [],
+                backlogTaskIds: [],
+              }),
+              project2: jasmine.objectContaining({
+                taskIds: ['target-task', 'task1'],
+              }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({
+                projectId: 'project2',
+                title: 'Moved task',
+              }),
+              subtask1: jasmine.objectContaining({ projectId: 'project2' }),
+            }),
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should replay only the captured project-move footprint on divergent state', () => {
+      const testState = createStateWithExistingTasks(['task1'], ['orphan-subtask']);
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        subTaskIds: [],
+      });
+      testState[TASK_FEATURE_NAME].entities['orphan-subtask'] = createMockTask({
+        id: 'orphan-subtask',
+        projectId: 'project1',
+        parentId: 'task1',
+      });
+      (testState[TASK_FEATURE_NAME].ids as string[]).push('receiver-only-subtask');
+      testState[TASK_FEATURE_NAME].entities['receiver-only-subtask'] = createMockTask({
+        id: 'receiver-only-subtask',
+        projectId: 'project1',
+        parentId: 'task1',
+      });
+      testState[PROJECT_FEATURE_NAME].entities.project2 = {
+        ...testState[PROJECT_FEATURE_NAME].entities.project1,
+        id: 'project2',
+        title: 'Project 2',
+        taskIds: [],
+        backlogTaskIds: [],
+      } as Project;
+      (testState[PROJECT_FEATURE_NAME].ids as string[]).push('project2');
+      const action = createUpdateTaskAction('task1', { projectId: 'project2' }, [
+        'orphan-subtask',
+      ]);
+
+      expect(action.meta.entityIds).toEqual(['task1', 'orphan-subtask']);
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({
+                taskIds: [],
+                backlogTaskIds: [],
+              }),
+              project2: jasmine.objectContaining({ taskIds: ['task1'] }),
+            }),
+          }),
+          [TASK_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              task1: jasmine.objectContaining({ projectId: 'project2' }),
+              'orphan-subtask': jasmine.objectContaining({ projectId: 'project2' }),
+              'receiver-only-subtask': jasmine.objectContaining({
+                projectId: 'project1',
+              }),
+            }),
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should ignore a missing project destination while applying other fields', () => {
+      const testState = createStateWithExistingTasks(['task1']);
+      const action = createUpdateTaskAction('task1', {
+        projectId: 'missing-project',
+        title: 'Updated title',
+      });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        {
+          ...expectProjectUpdate('project1', { taskIds: ['task1'] }),
+          ...expectTaskUpdate('task1', {
+            projectId: 'project1',
+            title: 'Updated title',
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    for (const invalidTarget of [
+      { label: 'prototype-like', id: 'constructor' },
+      { label: 'prototype-like', id: '__proto__' },
+    ]) {
+      it(`should ignore a ${invalidTarget.label} project destination while applying other fields`, () => {
+        const testState = createStateWithExistingTasks(['task1']);
+        const action = createUpdateTaskAction('task1', {
+          projectId: invalidTarget.id,
+          title: 'Updated title',
+        });
+
+        metaReducer(testState, action);
+
+        expectStateUpdate(
+          {
+            ...expectProjectUpdate('project1', { taskIds: ['task1'] }),
+            ...expectTaskUpdate('task1', {
+              projectId: 'project1',
+              title: 'Updated title',
+            }),
+          },
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+    }
+
+    it('should replay a move to an archived-but-existing project', () => {
+      const testState = createStateWithExistingTasks(['task1']);
+      testState[PROJECT_FEATURE_NAME].entities['archived-project'] = {
+        ...(testState[PROJECT_FEATURE_NAME].entities.project1 as Project),
+        id: 'archived-project',
+        isArchived: true,
+        taskIds: [],
+        backlogTaskIds: [],
+      };
+      (testState[PROJECT_FEATURE_NAME].ids as string[]).push('archived-project');
+      const action = createUpdateTaskAction('task1', {
+        projectId: 'archived-project',
+        title: 'Updated title',
+      });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        {
+          ...expectProjectUpdate('project1', { taskIds: [] }),
+          ...expectProjectUpdate('archived-project', { taskIds: ['task1'] }),
+          ...expectTaskUpdate('task1', {
+            projectId: 'archived-project',
+            title: 'Updated title',
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should allow clearing the project with an empty project id', () => {
+      const testState = createStateWithExistingTasks(['task1']);
+      const action = createUpdateTaskAction('task1', {
+        projectId: '',
+        title: 'Updated title',
+      });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        {
+          ...expectProjectUpdate('project1', { taskIds: [] }),
+          ...expectTaskUpdate('task1', {
+            projectId: '',
+            title: 'Updated title',
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should ignore direct project changes on subtasks', () => {
+      const testState = createStateWithExistingTasks(['task1'], ['subtask1']);
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        subTaskIds: ['subtask1'],
+      });
+      testState[TASK_FEATURE_NAME].entities.subtask1 = createMockTask({
+        id: 'subtask1',
+        projectId: 'project1',
+        parentId: 'task1',
+      });
+      testState[PROJECT_FEATURE_NAME].entities.project2 = {
+        ...testState[PROJECT_FEATURE_NAME].entities.project1,
+        id: 'project2',
+        title: 'Project 2',
+        taskIds: [],
+        backlogTaskIds: [],
+      } as Project;
+      (testState[PROJECT_FEATURE_NAME].ids as string[]).push('project2');
+      const action = createUpdateTaskAction('subtask1', {
+        projectId: 'project2',
+        title: 'Updated subtask',
+      });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        expectTaskUpdate('subtask1', {
+          projectId: 'project1',
+          title: 'Updated subtask',
+        }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should repair stale project memberships when projectId is patched unchanged', () => {
+      const testState = createStateWithExistingTasks(['task1']);
+      testState[PROJECT_FEATURE_NAME].entities.project2 = {
+        ...testState[PROJECT_FEATURE_NAME].entities.project1,
+        id: 'project2',
+        title: 'Project 2',
+        taskIds: [],
+        backlogTaskIds: [],
+      } as Project;
+      (testState[PROJECT_FEATURE_NAME].ids as string[]).push('project2');
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: 'project2',
+      });
+
+      const action = createUpdateTaskAction('task1', { projectId: 'project2' });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        {
+          [PROJECT_FEATURE_NAME]: jasmine.objectContaining({
+            entities: jasmine.objectContaining({
+              project1: jasmine.objectContaining({ taskIds: [] }),
+              project2: jasmine.objectContaining({ taskIds: ['task1'] }),
+            }),
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should preserve task order when projectId is patched unchanged', () => {
+      const testState = createStateWithExistingTasks(['before', 'task1', 'after']);
+      const action = createUpdateTaskAction('task1', { projectId: 'project1' });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        expectProjectUpdate('project1', {
+          taskIds: ['before', 'task1', 'after'],
+        }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should preserve backlog position when projectId is patched unchanged', () => {
+      const testState = createStateWithExistingTasks([], ['before', 'task1', 'after']);
+      const action = createUpdateTaskAction('task1', { projectId: 'project1' });
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        expectProjectUpdate('project1', {
+          taskIds: [],
+          backlogTaskIds: ['before', 'task1', 'after'],
+        }),
         action,
         mockReducer,
         testState,
@@ -2251,6 +2705,34 @@ describe('taskSharedCrudMetaReducer', () => {
       expect(restoredTask).toBeDefined();
       expect(restoredTask.modified).toBeGreaterThanOrEqual(beforeRestore);
       expect(restoredTask.modified).not.toEqual(oldTimestamp);
+    });
+
+    it('should undo the calendar event dismissal when restoring a deleted task', () => {
+      const testState = createBaseState();
+      testState[TASK_FEATURE_NAME] = {
+        ...testState[TASK_FEATURE_NAME],
+        dismissedCalendarAutoImportEventIdsByProvider: {
+          'calendar-provider': ['calendar-event'],
+        },
+      } as (typeof testState)[typeof TASK_FEATURE_NAME];
+      const calendarTask = createMockTask({
+        id: 'calendar-task',
+        issueType: 'ICAL',
+        issueProviderId: 'calendar-provider',
+        issueId: 'calendar-event',
+      });
+      const action = createRestoreAction({
+        taskOverrides: calendarTask,
+        deletedTaskEntities: { 'calendar-task': calendarTask },
+      });
+
+      metaReducer(testState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const taskState = updatedState[TASK_FEATURE_NAME] as unknown as {
+        dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+      };
+      expect(taskState.dismissedCalendarAutoImportEventIdsByProvider).toEqual({});
     });
 
     it('should restore task to project taskIds', () => {

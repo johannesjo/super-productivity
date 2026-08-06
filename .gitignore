@@ -16,6 +16,7 @@ src/app/config/env.generated.ts
 /logs
 packages/plugin-api/dist/**
 docs/ai/tmp
+/output
 
 # dependencies
 /node_modules
@@ -45,7 +46,7 @@ android/.idea
 # misc
 \\backups
 /backups
-/.angular/cache
+/.angular
 /.sass-cache
 /connect.lock
 /coverage
@@ -98,7 +99,6 @@ electron-builder.win-store.yaml
 /src/environments/environment.js
 /src/environments/environment.js.map
 /.claude/*
-!/.claude/skills
 .aider*
 
 

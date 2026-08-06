@@ -3,6 +3,7 @@ import { Component, Input, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
+import localeSv from '@angular/common/locales/sv';
 import { ScheduleMonthComponent } from './schedule-month.component';
 import { ScheduleService } from '../schedule.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
@@ -10,6 +11,8 @@ import { parseDbDateStr } from '../../../util/parse-db-date-str';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { ScheduleEvent } from '../schedule.model';
 import { SVEType } from '../schedule.const';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 describe('ScheduleMonthComponent', () => {
   let component: ScheduleMonthComponent;
@@ -28,11 +31,14 @@ describe('ScheduleMonthComponent', () => {
     mockScheduleService.getEventDayStr.and.returnValue(null);
 
     mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', ['-'], {
-      currentLocale: () => 'en-US',
+      currentLocale: () => 'sv',
+      isoTextLocale: () => 'de',
     });
 
+    registerLocaleData(localeSv, 'sv');
+
     await TestBed.configureTestingModule({
-      imports: [ScheduleMonthComponent],
+      imports: [ScheduleMonthComponent, TranslateModule.forRoot()],
       providers: [
         { provide: ScheduleService, useValue: mockScheduleService },
         { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
@@ -43,6 +49,19 @@ describe('ScheduleMonthComponent', () => {
         add: { imports: [ScheduleEventStubComponent] },
       })
       .compileComponents();
+
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('en', {
+      F: {
+        SCHEDULE: {
+          MORE_EVENTS: {
+            ONE: '{{count}} more event',
+            OTHER: '{{count}} more events',
+          },
+        },
+      },
+    });
+    translateService.use('en');
 
     fixture = TestBed.createComponent(ScheduleMonthComponent);
     component = fixture.componentInstance;
@@ -176,6 +195,116 @@ describe('ScheduleMonthComponent', () => {
       expect(scheduleEventCmp.isMonthView).toBe(true);
       expect(scheduleEventCmp.cdkDragDisabled).toBe(true);
     });
+
+    it('should show how many events are hidden by the compact mobile layout', () => {
+      const events = [
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+        createTaskScheduleEvent('task-2', '2026-01-15'),
+        createTaskScheduleEvent('task-3', '2026-01-15'),
+      ];
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue(events);
+
+      fixture.detectChanges();
+
+      const moreEvents = fixture.nativeElement.querySelector('.month-more-events');
+      expect(moreEvents).not.toBeNull();
+      const visibleCount = moreEvents.querySelector('.month-more-events-count');
+      const accessibleCount = moreEvents.querySelector('.cdk-visually-hidden');
+      expect(moreEvents.getAttribute('aria-label')).toBeNull();
+      expect(visibleCount.textContent.trim()).toBe('+2');
+      expect(visibleCount.getAttribute('aria-hidden')).toBe('true');
+      expect(accessibleCount.textContent.trim()).toBe('2 more events');
+    });
+
+    it('should announce one hidden event with singular grammar', () => {
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue([
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+        createTaskScheduleEvent('task-2', '2026-01-15'),
+      ]);
+
+      fixture.detectChanges();
+
+      const moreEvents = fixture.nativeElement.querySelector('.month-more-events');
+      expect(
+        moreEvents.querySelector('.month-more-events-count').textContent.trim(),
+      ).toBe('+1');
+      expect(moreEvents.querySelector('.cdk-visually-hidden').textContent.trim()).toBe(
+        '1 more event',
+      );
+    });
+
+    it('should use the current language plural category for hidden events', async () => {
+      const translateService = TestBed.inject(TranslateService);
+      translateService.setTranslation('pl', {
+        F: {
+          SCHEDULE: {
+            MORE_EVENTS: {
+              FEW: 'Jeszcze {{count}} wydarzenia',
+              OTHER: 'Jeszcze {{count}} wydarzeń',
+            },
+          },
+        },
+      });
+      await firstValueFrom(translateService.use('pl'));
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue([
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+        createTaskScheduleEvent('task-2', '2026-01-15'),
+        createTaskScheduleEvent('task-3', '2026-01-15'),
+      ]);
+
+      fixture.detectChanges();
+
+      const accessibleCount = fixture.nativeElement.querySelector(
+        '.month-more-events .cdk-visually-hidden',
+      );
+      expect(accessibleCount.textContent.trim()).toBe('Jeszcze 2 wydarzenia');
+    });
+
+    it('should make the hidden-event count visible at the mobile breakpoint', () => {
+      const findMobileVisibilityRule = (
+        rules: CSSRuleList,
+        isInsideMobileQuery = false,
+      ): CSSStyleRule | undefined => {
+        for (const rule of Array.from(rules)) {
+          if (rule instanceof CSSMediaRule) {
+            const isMobileQuery =
+              isInsideMobileQuery || rule.conditionText.includes('max-width: 599px');
+            const match = findMobileVisibilityRule(rule.cssRules, isMobileQuery);
+            if (match) {
+              return match;
+            }
+          } else if (
+            isInsideMobileQuery &&
+            rule instanceof CSSStyleRule &&
+            rule.selectorText.includes('.month-more-events') &&
+            rule.style.display === 'block'
+          ) {
+            return rule;
+          }
+        }
+        return undefined;
+      };
+
+      const visibilityRule = Array.from(document.styleSheets)
+        .map((styleSheet) => findMobileVisibilityRule(styleSheet.cssRules))
+        .find((rule) => rule !== undefined);
+
+      expect(visibilityRule).toBeDefined();
+    });
+
+    it('should not show a hidden-event count when every event fits', () => {
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue([
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+      ]);
+
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.month-more-events')).toBeNull();
+    });
   });
 
   describe('getDayClass', () => {
@@ -301,7 +430,7 @@ describe('ScheduleMonthComponent', () => {
 
       // Assert
       // Sunday should be first
-      expect(headers[0]).toContain('Sun');
+      expect(headers[0]).toBe('So');
     });
 
     it('should start with Monday when firstDayOfWeek is 1', () => {
@@ -314,7 +443,7 @@ describe('ScheduleMonthComponent', () => {
 
       // Assert
       // Monday should be first
-      expect(headers[0]).toContain('Mon');
+      expect(headers[0]).toBe('Mo');
     });
 
     it('should cycle correctly for all days of week', () => {
@@ -450,10 +579,13 @@ describe('ScheduleMonthComponent dayNumberByDay (SPAP-26)', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [ScheduleMonthComponent],
+      imports: [ScheduleMonthComponent, TranslateModule.forRoot()],
       providers: [
         { provide: ScheduleService, useValue: scheduleServiceStub },
-        { provide: DateTimeFormatService, useValue: { currentLocale: localeSig } },
+        {
+          provide: DateTimeFormatService,
+          useValue: { currentLocale: localeSig, isoTextLocale: () => null },
+        },
       ],
     })
       .overrideComponent(ScheduleMonthComponent, {

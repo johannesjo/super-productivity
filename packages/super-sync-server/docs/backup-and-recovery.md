@@ -134,7 +134,66 @@ The in-app **Restore from History** handles this for unencrypted accounts. It
 does **not** work for E2E-encrypted accounts: the server cannot decrypt the op
 payloads, so `generateSnapshotAtSeq` throws `EncryptedOpsNotSupportedError`.
 
-`scripts/recover-user.ts` fills that gap. It replays the user's operation log up
+### Diagnosing an encrypted download failure
+
+When an encrypted account fails to sync with a decryption error, do not assume
+the passphrase is globally wrong: one corrupt operation rejects its whole
+download batch with the same user-facing error. The client classifies the
+failing batch itself — ask the affected user for the
+`Encrypted operation batch could not be processed` entry from the exported
+Logs (**Settings → Logs**, an ordinary build). It contains only safe metadata:
+the failing operations' `serverSeq`/`opId`/failure stage/`errorName`,
+decrypted and parsed counts, and `passwordEvidence`. It never contains the
+passphrase, token, ciphertext, or decrypted content.
+
+Interpret `passwordEvidence` conservatively. `confirmed-for-some-operations`
+means the key decrypted at least one operation in that run, which rules out a
+globally wrong passphrase and points at the listed operations.
+`no-operation-decrypted` is **inconclusive**: a wrong passphrase, a wholly
+corrupt or differently keyed range, and a device that could not run
+decryption at all produce the same shape — read each failure's `errorName`
+case by case. `OperationError` is an AES-GCM authentication failure (wrong
+key or corrupt data), and devices without WebCrypto report the same
+authentication failure as a bare `Error` (fallback crypto).
+`InvalidCiphertextError`/`InvalidCharacterError` mean truncated or mangled
+ciphertext, and `WebCryptoNotAvailableError` is an environment failure —
+neither is password evidence.
+
+### Recovering a mixed encrypted/plaintext history
+
+An encryption-enabled client that logs
+`received a plaintext op while encryption is mandatory` is not reporting a
+wrong passphrase. It has found a plaintext row in an account that is expected
+to contain only encrypted payloads. The client rejects the complete download
+without applying its valid prefix or advancing its durable cursor.
+
+If an **updated** client still has a verified complete, current copy of the
+account, use the supported client recovery:
+
+1. Keep every other client offline and preserve the complete client unchanged.
+2. Export a full backup from that client and protect it as plaintext user data.
+3. In its sync settings, open **Advanced** and choose **Force Overwrite**.
+4. Wait for the encrypted clean-slate upload to finish before updating and
+   reconnecting the other clients one at a time.
+5. Verify the reconstructed data on a fresh client before deleting the backup.
+
+Force Overwrite deletes the mixed operation dataset and uploads the selected
+client's state as an encrypted full-state operation while preserving server
+sequence monotonicity. Do not run it from a fresh, incomplete, stale, or
+pre-fix client.
+
+Do **not** recover by changing `isPayloadEncrypted`, applying or skipping the
+plaintext row, deleting that row alone, or advancing a client cursor past it.
+The flag and surrounding envelope are unauthenticated, so those shortcuts can
+apply forged data or silently construct an incomplete state. If no client has
+a verified complete copy, preserve the clients and database, inspect only safe
+row metadata first, and treat any server-side reconstruction as an incident
+recovery against an isolated database restore rather than a normal sync path.
+
+The real-shape recovery regression is
+`e2e/tests/sync/supersync-plaintext-history-recovery-9439.spec.ts`.
+
+`scripts/recover-user.ts` fills the encrypted-recovery gap. It replays the user's operation log up
 to a chosen `serverSeq`, decrypting encrypted payloads with the user's
 passphrase, and writes an importable `AppDataComplete` JSON file. It is
 **read-only** on the database.
@@ -203,3 +262,4 @@ The backup recovery scenarios are covered by automated tests in `e2e/tests/sync/
 1. **Complete data loss** — server wiped, single client recovers all data
 2. **Partial revert** — server reverted to older state, client preserves local data
 3. **Accounts-only restore** — recommended recovery path with multi-client convergence
+4. **Mixed encrypted/plaintext history** — fail closed, then recover through an encrypted trusted-client Force Overwrite

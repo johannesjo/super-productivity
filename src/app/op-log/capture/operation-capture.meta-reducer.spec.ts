@@ -7,6 +7,7 @@ import {
   bufferDeferredAction,
   getDeferredActions,
   clearDeferredActions,
+  DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD,
 } from './operation-capture.meta-reducer';
 import { OperationCaptureService } from './operation-capture.service';
 import { Action } from '@ngrx/store';
@@ -247,7 +248,7 @@ describe('operationCaptureMetaReducer', () => {
         expect(buffered).toEqual([]);
       });
 
-      it('should clear buffer after returning actions', () => {
+      it('should return a non-destructive snapshot until actions are acknowledged', () => {
         const action = createMockAction();
         bufferDeferredAction(action);
 
@@ -255,7 +256,7 @@ describe('operationCaptureMetaReducer', () => {
         const secondCall = getDeferredActions();
 
         expect(firstCall).toEqual([action]);
-        expect(secondCall).toEqual([]);
+        expect(secondCall).toEqual([action]);
       });
     });
 
@@ -267,6 +268,103 @@ describe('operationCaptureMetaReducer', () => {
         clearDeferredActions();
 
         expect(getDeferredActions()).toEqual([]);
+      });
+    });
+
+    describe('buffer limits', () => {
+      // devError shows a native alert + confirm (and throws if confirm returns
+      // true), so force confirm to return false. src/test.ts installs a
+      // PERMANENT global confirm spy (jasmine.createSpy, never auto-restored),
+      // so reset its accumulated calls per test and restore the global
+      // returnValue(true) default afterwards.
+      const spyNativeDialogs = (): jasmine.Spy => {
+        if (!jasmine.isSpy(window.alert)) {
+          spyOn(window, 'alert');
+        }
+        const confirmSpy = jasmine.isSpy(window.confirm)
+          ? (window.confirm as jasmine.Spy)
+          : spyOn(window, 'confirm');
+        confirmSpy.calls.reset();
+        confirmSpy.and.returnValue(false);
+        return confirmSpy;
+      };
+
+      afterEach(() => {
+        if (jasmine.isSpy(window.confirm)) {
+          (window.confirm as jasmine.Spy).and.returnValue(true);
+        }
+      });
+
+      const createManyActions = (count: number): PersistentAction[] =>
+        Array.from({ length: count }, (_, i) =>
+          createMockAction({ type: `[Test] Action ${i}` }),
+        );
+
+      it('should preserve ALL actions in order past the reload-warning threshold', () => {
+        spyNativeDialogs();
+        const actions = createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD + 50);
+
+        actions.forEach((a) => bufferDeferredAction(a));
+
+        // Nothing may be dropped: each buffered action's state change was
+        // already accepted into NgRx — dropping = permanent unsyncable divergence.
+        expect(getDeferredActions()).toEqual(actions);
+      });
+
+      it('should fire devError at the reload-warning threshold without dropping', () => {
+        const confirmSpy = spyNativeDialogs();
+        const actions = createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD);
+        const reloadWarningCalls = (): unknown[][] =>
+          confirmSpy.calls
+            .allArgs()
+            .filter((args) => /consider reloading/.test(String(args[0])));
+
+        actions.slice(0, -1).forEach((a) => bufferDeferredAction(a));
+        expect(reloadWarningCalls().length).toBe(0);
+
+        bufferDeferredAction(actions[actions.length - 1]);
+        expect(reloadWarningCalls().length).toBe(1);
+
+        expect(getDeferredActions()).toEqual(actions);
+      });
+
+      it('should fire the reload warning only once per stuck window (no per-action spam)', () => {
+        const confirmSpy = spyNativeDialogs();
+        const actions = createManyActions(
+          DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD + 200,
+        );
+        const reloadWarningCalls = (): unknown[][] =>
+          confirmSpy.calls
+            .allArgs()
+            .filter((args) => /consider reloading/.test(String(args[0])));
+
+        actions.forEach((a) => bufferDeferredAction(a));
+
+        // In dev builds devError opens a blocking dialog; firing it on every
+        // buffered action past the threshold would freeze the session exactly
+        // when sync is stuck.
+        expect(reloadWarningCalls().length).toBe(1);
+        expect(getDeferredActions()).toEqual(actions);
+      });
+
+      it('should warn again after the buffer drained and a new stuck window crosses the threshold', () => {
+        const confirmSpy = spyNativeDialogs();
+        const reloadWarningCalls = (): unknown[][] =>
+          confirmSpy.calls
+            .allArgs()
+            .filter((args) => /consider reloading/.test(String(args[0])));
+
+        createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD).forEach((a) =>
+          bufferDeferredAction(a),
+        );
+        expect(reloadWarningCalls().length).toBe(1);
+
+        clearDeferredActions();
+
+        createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD).forEach((a) =>
+          bufferDeferredAction(a),
+        );
+        expect(reloadWarningCalls().length).toBe(2);
       });
     });
   });

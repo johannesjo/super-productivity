@@ -53,6 +53,9 @@ export interface CompactOperation {
 
   /** syncImportReason (optional) */
   r?: string;
+
+  /** repairBaseServerSeq (optional) */
+  b?: number;
 }
 
 /**
@@ -65,6 +68,6 @@ export interface CompactOperationLogEntry {
   source: 'local' | 'remote';
   syncedAt?: number;
   rejectedAt?: number;
-  applicationStatus?: 'pending' | 'applied' | 'failed';
+  applicationStatus?: 'pending' | 'archive_pending' | 'applied' | 'failed';
   retryCount?: number;
 }

@@ -21,7 +21,6 @@ import { InjectionToken } from '@angular/core';
  * | Retention window | 7 days | COMPACTION_RETENTION_MS | Normal compaction |
  * | Emergency retention | 1 day | EMERGENCY_COMPACTION_RETENTION_MS | When quota exceeded |
  * | Clock drift warning | 5 min | CLOCK_DRIFT_THRESHOLD_MS | Warns user once per session |
- * | Max conflict retries | 5 | MAX_CONFLICT_RETRY_ATTEMPTS | Then marked as rejected |
  * | Max concurrent resolution | 3 | MAX_CONCURRENT_RESOLUTION_ATTEMPTS | Prevents infinite merge loop |
  * | Post-sync cooldown | 2s | POST_SYNC_COOLDOWN_MS | Suppresses selector effects |
  *
@@ -51,6 +50,13 @@ import { InjectionToken } from '@angular/core';
  */
 export const LOCK_NAMES = {
   /**
+   * Serializes archive task read-modify-write cycles across tabs. This stays
+   * separate from OPERATION_LOG because remote archive handlers already run
+   * while holding that non-reentrant lock.
+   */
+  TASK_ARCHIVE: 'sp_task_archive',
+
+  /**
    * Main operation log lock. Used for:
    * - Writing operations to IndexedDB
    * - Compaction (snapshot + cleanup)
@@ -72,6 +78,19 @@ export const LOCK_NAMES = {
    */
   DOWNLOAD: 'sp_op_log_download',
 } as const;
+
+/**
+ * Error code a REPAIR recovery snapshot upload returns when it is based on a
+ * remote the client has not fully merged (#9023). Shared as a single symbol so
+ * the producer (`FileBasedSyncAdapterService`) and the consumer
+ * (`RejectedOpsHandlerService`, which routes it to a rebase) cannot drift apart.
+ *
+ * The value MUST equal the server's `SYNC_ERROR_CODES.REPAIR_STALE` — the same
+ * code arrives over the wire from SuperSync, so this is also the wire contract.
+ * (Server-originated codes like CONFLICT_CONCURRENT stay as string matches: the
+ * server owns those; this one has a client-side producer that must agree.)
+ */
+export const REPAIR_STALE_ERROR_CODE = 'REPAIR_STALE';
 
 /**
  * Maximum time to wait for lock acquisition before throwing (milliseconds).
@@ -139,12 +158,6 @@ export const MAX_DOWNLOAD_OPS_IN_MEMORY = 50000;
 export const MAX_DOWNLOAD_ITERATIONS = 1000;
 
 /**
- * Maximum retry attempts for operations that fail during conflict resolution.
- * After this many retries across restarts, the operation is marked as rejected.
- */
-export const MAX_CONFLICT_RETRY_ATTEMPTS = 5;
-
-/**
  * Maximum number of operations to be rejected before showing user warning.
  * Once this threshold is reached, user is notified about permanently failed ops.
  */
@@ -157,14 +170,6 @@ export const MAX_REJECTED_OPS_BEFORE_WARNING = 10;
  * Default: 50 operations per batch
  */
 export const MAX_BATCH_OPERATIONS_SIZE = 50;
-
-/**
- * Maximum age for pending operations before they expire and are rejected (milliseconds).
- * If an operation has been pending for longer than this (e.g., due to data corruption
- * or repeated crashes), it's marked as rejected instead of being replayed.
- * Default: 24 hours - enough time for legitimate recovery scenarios
- */
-export const PENDING_OPERATION_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Threshold for warning about clock drift between client and server (milliseconds).

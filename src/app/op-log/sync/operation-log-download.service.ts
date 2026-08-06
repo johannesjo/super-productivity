@@ -22,8 +22,13 @@ import {
   CLOCK_DRIFT_THRESHOLD_MS,
   DOWNLOAD_PAGE_SIZE,
 } from '../core/operation-log.const';
-import { OperationEncryptionService } from './operation-encryption.service';
+import {
+  OperationDecryptionError,
+  OperationEncryptionService,
+} from './operation-encryption.service';
+import { buildDecryptFailureLogArgs } from './operation-decrypt-failure-log.util';
 import { DecryptNoPasswordError } from '../core/errors/sync-errors';
+import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected';
 import { SuperSyncStatusService } from './super-sync-status.service';
 import { DownloadResult } from '../core/types/sync-results.types';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
@@ -72,9 +77,18 @@ export class OperationLogDownloadService implements OnDestroy {
     this.clockDriftRetryServerTimestamp = null;
   }
 
+  /**
+   * @param options.includeOwnAndAppliedOps - Raw-rebuild mode for USE_REMOTE:
+   *        skips the appliedOpIds filter AND downloads ops authored by this
+   *        client (no excludeClient param). Required to reconstruct the full
+   *        server history — the normal filters would drop everything the local
+   *        store already knows, leaving a destructive replace with nothing to
+   *        replay. Callers are expected to clear the local op store before
+   *        appending the result.
+   */
   async downloadRemoteOps(
     syncProvider: OperationSyncCapable,
-    options?: { forceFromSeq0?: boolean },
+    options?: { forceFromSeq0?: boolean; includeOwnAndAppliedOps?: boolean },
   ): Promise<DownloadResult> {
     if (!syncProvider) {
       OpLog.warn(
@@ -88,7 +102,7 @@ export class OperationLogDownloadService implements OnDestroy {
 
   private async _downloadRemoteOpsViaApi(
     syncProvider: OperationSyncCapable,
-    options?: { forceFromSeq0?: boolean },
+    options?: { forceFromSeq0?: boolean; includeOwnAndAppliedOps?: boolean },
   ): Promise<DownloadResult> {
     const forceFromSeq0 = options?.forceFromSeq0 ?? false;
     OpLog.normal(
@@ -102,6 +116,8 @@ export class OperationLogDownloadService implements OnDestroy {
     let finalLatestSeq = 0;
     let snapshotVectorClock: import('../core/operation.types').VectorClock | undefined;
     let snapshotState: unknown | undefined;
+    let snapshotAppliedOpIds: string[] | undefined;
+    let remoteLastModified: number | undefined;
     // Track encryption state of downloaded operations for detecting encryption config mismatch.
     // When another client disables encryption, all downloaded ops will be unencrypted.
     // We track this BEFORE decryption to detect the server's actual encryption state.
@@ -115,10 +131,28 @@ export class OperationLogDownloadService implements OnDestroy {
       ? await syncProvider.getEncryptKey()
       : undefined;
 
+    // Whether inbound plaintext ops must be rejected (GHSA-8pxh-mgc7-gp3g). Gate
+    // on config INTENT (isEncryptionEnabled), not key presence: in the
+    // dropped-credential state the key is transiently gone but encryption is
+    // still enabled, and a `!!encryptKey` gate would fail OPEN there and accept a
+    // forged plaintext batch. `isEncryptionMandatory` scopes this to SuperSync,
+    // where enabling encryption deletes + re-uploads all data encrypted, so no
+    // legitimate plaintext op remains. Config intent is stable across a
+    // gap-reset re-fetch, so compute once here.
+    const isEncryptionExpected =
+      !!syncProvider.isEncryptionMandatory &&
+      !!(await syncProvider.isEncryptionEnabled?.());
+
     await this.lockService.request(LOCK_NAMES.DOWNLOAD, async () => {
       const lastServerSeq = forceFromSeq0 ? 0 : await syncProvider.getLastServerSeq();
-      const appliedOpIds = await this.opLogStore.getAppliedOpIds();
-      const clientId = await this.clientIdProvider.loadClientId();
+      // Raw-rebuild mode: an empty applied set disables the duplicate filter
+      // below; a missing clientId makes the server include this client's own ops.
+      const appliedOpIds = options?.includeOwnAndAppliedOps
+        ? new Set<string>()
+        : await this.opLogStore.getAppliedOpIds();
+      const clientId = options?.includeOwnAndAppliedOps
+        ? null
+        : await this.clientIdProvider.loadClientId();
       OpLog.verbose(
         `OperationLogDownloadService: [DEBUG] Starting download. ` +
           `lastServerSeq=${lastServerSeq}, appliedOpIds.size=${appliedOpIds.size}, clientId=${clientId}`,
@@ -135,6 +169,10 @@ export class OperationLogDownloadService implements OnDestroy {
       let sinceSeq = lastServerSeq;
       let hasResetForGap = false;
       let iterationCount = 0;
+      // Run-level password evidence for the failure log: ops decrypted on
+      // earlier pages of THIS run prove the key even when nothing in a later
+      // failing batch decrypts (e.g. a single corrupt op on the final page).
+      let decryptedOpsInEarlierBatches = 0;
 
       while (hasMore) {
         iterationCount++;
@@ -175,6 +213,18 @@ export class OperationLogDownloadService implements OnDestroy {
           response.snapshotState
         ) {
           snapshotState = response.snapshotState;
+          snapshotAppliedOpIds =
+            'snapshotAppliedOpIds' in response
+              ? response.snapshotAppliedOpIds
+              : undefined;
+          const receivedLastModified =
+            'remoteLastModified' in response ? response.remoteLastModified : undefined;
+          remoteLastModified =
+            typeof receivedLastModified === 'number' &&
+            Number.isFinite(receivedLastModified) &&
+            receivedLastModified >= 0
+              ? receivedLastModified
+              : undefined;
           OpLog.normal(
             'OperationLogDownloadService: Received snapshotState for fresh download bootstrap',
           );
@@ -197,8 +247,13 @@ export class OperationLogDownloadService implements OnDestroy {
           allOpClocks.length = 0; // Clear clocks too
           snapshotVectorClock = undefined; // Clear snapshot clock to capture fresh one after reset
           snapshotState = undefined; // Clear snapshot state to capture fresh one after reset
+          snapshotAppliedOpIds = undefined; // Clear snapshot boundary with the stale state
+          remoteLastModified = undefined; // Clear timestamp belonging to the stale state
           sawAnyOps = false; // Reset encryption tracking
           sawEncryptedOp = false;
+          // The re-fetched key may differ (password change clean slate), so
+          // pre-reset decrypts are no evidence for the key used after it.
+          decryptedOpsInEarlierBatches = 0;
 
           // CRITICAL: Re-fetch encryption key after gap detection.
           // Gap usually means server was wiped (e.g., password change clean slate),
@@ -214,6 +269,12 @@ export class OperationLogDownloadService implements OnDestroy {
         }
 
         if (response.ops.length === 0) {
+          if (response.hasMore) {
+            OpLog.error(
+              'OperationLogDownloadService: Server returned an empty page with hasMore=true. Aborting to avoid accepting a partial download.',
+            );
+            downloadFailed = true;
+          }
           // No ops to download - caller will persist latestServerSeq after this method returns
           break;
         }
@@ -246,13 +307,20 @@ export class OperationLogDownloadService implements OnDestroy {
         }
 
         // Filter already applied ops
-        let syncOps: SyncOperation[] = response.ops
-          .filter((serverOp) => !appliedOpIds.has(serverOp.op.id))
-          .map((serverOp) => serverOp.op);
+        const newServerOps = response.ops.filter(
+          (serverOp) => !appliedOpIds.has(serverOp.op.id),
+        );
+        let syncOps: SyncOperation[] = newServerOps.map((serverOp) => serverOp.op);
+
+        // Fail closed on a plaintext op when SuperSync encryption is enabled: the
+        // server is all-encrypted once encryption is on (delete + reupload), so an
+        // inbound plaintext op is stale or attacker-injected and would otherwise
+        // skip decryption + the integrity check (GHSA-8pxh-mgc7-gp3g).
+        assertOpsEncryptedWhenExpected(syncOps, isEncryptionExpected);
 
         // Decrypt encrypted operations if we have an encryption key
-        const hasEncryptedOps = syncOps.some((op) => op.isPayloadEncrypted);
-        if (hasEncryptedOps) {
+        const encryptedOpsInPage = syncOps.filter((op) => op.isPayloadEncrypted).length;
+        if (encryptedOpsInPage > 0) {
           if (!encryptKey) {
             // No encryption key available - throw to let the sync wrapper show the
             // password dialog. Severity depends on history: a client that has never
@@ -279,7 +347,22 @@ export class OperationLogDownloadService implements OnDestroy {
           }
 
           // Decrypt encrypted operations - let DecryptError propagate to sync-wrapper handler
-          syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+          try {
+            syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+            decryptedOpsInEarlierBatches += encryptedOpsInPage;
+          } catch (error) {
+            if (error instanceof OperationDecryptionError) {
+              OpLog.error(
+                'OperationLogDownloadService: Encrypted operation batch could not be processed.',
+                ...buildDecryptFailureLogArgs(
+                  error.diagnosis,
+                  newServerOps.filter((serverOp) => serverOp.op.isPayloadEncrypted),
+                  decryptedOpsInEarlierBatches,
+                ),
+              );
+            }
+            throw error;
+          }
         }
 
         // Convert to Operation format
@@ -301,8 +384,18 @@ export class OperationLogDownloadService implements OnDestroy {
           break;
         }
 
-        // Update cursors
-        sinceSeq = response.ops[response.ops.length - 1].serverSeq;
+        // Update cursors. A page that claims more data must advance the cursor;
+        // otherwise accepting the accumulated prefix would silently skip the
+        // unseen suffix (or spin until the iteration cap).
+        const nextSinceSeq = response.ops[response.ops.length - 1].serverSeq;
+        if (response.hasMore && nextSinceSeq <= sinceSeq) {
+          OpLog.error(
+            `OperationLogDownloadService: Non-progressing page cursor (${nextSinceSeq} <= ${sinceSeq}) with hasMore=true. Aborting partial download.`,
+          );
+          downloadFailed = true;
+          break;
+        }
+        sinceSeq = nextSinceSeq;
         hasMore = response.hasMore;
 
         // Monotonicity check: warn if server seq decreased (indicates potential server bug)
@@ -450,6 +543,8 @@ export class OperationLogDownloadService implements OnDestroy {
         providerMode: 'fileSnapshotOps',
         // Include snapshot state for file-based sync fresh downloads
         ...(snapshotState ? { snapshotState } : {}),
+        ...(snapshotAppliedOpIds ? { snapshotAppliedOpIds } : {}),
+        ...(remoteLastModified !== undefined ? { remoteLastModified } : {}),
       };
     }
 

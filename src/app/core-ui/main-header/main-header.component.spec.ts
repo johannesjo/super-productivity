@@ -2,11 +2,13 @@ import {
   Component,
   ElementRef,
   EnvironmentInjector,
+  NO_ERRORS_SCHEMA,
   runInInjectionContext,
   signal,
 } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EMPTY, of } from 'rxjs';
+import { TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { MainHeaderComponent } from './main-header.component';
 import { ProjectService } from '../../features/project/project.service';
@@ -25,6 +27,12 @@ import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
 import { UserProfileService } from '../../features/user-profile/user-profile.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
+import { SyncStatus } from '../../op-log/sync-exports';
+import {
+  SimpleCounter,
+  SimpleCounterType,
+} from '../../features/simple-counter/simple-counter.model';
+import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
 
 // Regression test for #7477: in a project view a long title pushed the
 // right-side header actions (simple-counter / habit buttons) off screen.
@@ -62,7 +70,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-conf
       </div>
 
       <nav class="action-nav-right">
-        <div class="counters-action-group">
+        <div class="header-action-group secondary-action-group counters-action-group">
           <button type="button"></button>
           <button type="button"></button>
           <button type="button"></button>
@@ -116,17 +124,21 @@ describe('MainHeaderComponent layout', () => {
 
 describe('MainHeaderComponent focus button visibility', () => {
   let component: MainHeaderComponent;
+  let fixture: ComponentFixture<MainHeaderComponent> | undefined;
   let isXs = signal(false);
   let isXxxs = signal(false);
   let appFeatures = signal(DEFAULT_GLOBAL_CONFIG.appFeatures);
+  let enabledSimpleCounters: SimpleCounter[] = [];
+  let isAllDataLoaded = true;
 
-  const createComponent = (): MainHeaderComponent => {
+  const configureTestBed = (): void => {
     const cfg = {
       ...DEFAULT_GLOBAL_CONFIG,
       appFeatures: appFeatures(),
     };
 
     TestBed.configureTestingModule({
+      imports: [MainHeaderComponent, TranslateModule.forRoot()],
       providers: [
         {
           provide: ElementRef,
@@ -162,10 +174,14 @@ describe('MainHeaderComponent focus button visibility', () => {
             undoneTasks$: of([]),
           },
         },
-        { provide: SimpleCounterService, useValue: { enabledSimpleCounters$: of([]) } },
+        {
+          provide: SimpleCounterService,
+          useValue: { enabledSimpleCounters$: of(enabledSimpleCounters) },
+        },
         {
           provide: SyncWrapperService,
           useValue: {
+            sync: jasmine.createSpy('sync'),
             isEnabledAndReady$: of(false),
             syncState$: of('IN_SYNC'),
             isSyncInProgress$: of(false),
@@ -173,7 +189,13 @@ describe('MainHeaderComponent focus button visibility', () => {
             superSyncIsConfirmedInSync$: of(false),
           },
         },
-        { provide: SnackService, useValue: { open: jasmine.createSpy('open') } },
+        {
+          provide: SnackService,
+          useValue: {
+            open: jasmine.createSpy('open'),
+            hasPendingPersistentAction: jasmine.createSpy('hasPendingPersistentAction'),
+          },
+        },
         { provide: Router, useValue: { events: EMPTY } },
         {
           provide: GlobalConfigService,
@@ -188,21 +210,39 @@ describe('MainHeaderComponent focus button visibility', () => {
         { provide: Store, useValue: { dispatch: jasmine.createSpy('dispatch') } },
         {
           provide: DataInitStateService,
-          useValue: { isAllDataLoadedInitially$: of(true) },
+          useValue: { isAllDataLoadedInitially$: isAllDataLoaded ? of(true) : EMPTY },
         },
         { provide: MetricService, useValue: { getFocusSummaryForDay: () => null } },
         { provide: DateService, useValue: { todayStr: () => '2026-06-09' } },
         { provide: UserProfileService, useValue: { isInitialized: () => false } },
+        { provide: ConflictJournalService, useValue: { unreviewedCount: signal(0) } },
       ],
+    }).overrideComponent(MainHeaderComponent, {
+      set: {
+        imports: [TranslatePipe],
+        schemas: [NO_ERRORS_SCHEMA],
+      },
     });
+  };
 
+  const createComponent = (): MainHeaderComponent => {
+    configureTestBed();
     return runInInjectionContext(TestBed.inject(EnvironmentInjector), () => {
       return new MainHeaderComponent();
     });
   };
 
+  beforeEach(() => {
+    isXs = signal(false);
+    isXxxs = signal(false);
+    appFeatures = signal(DEFAULT_GLOBAL_CONFIG.appFeatures);
+    enabledSimpleCounters = [];
+    isAllDataLoaded = true;
+  });
+
   afterEach(() => {
     component?.ngOnDestroy();
+    fixture?.destroy();
   });
 
   it('keeps the focus mode entry visible on narrow mobile screens (#8157)', () => {
@@ -228,5 +268,84 @@ describe('MainHeaderComponent focus button visibility', () => {
     component = createComponent();
 
     expect(component.isFocusButtonVisible()).toBe(false);
+  });
+
+  it('labels the mobile counter toggle and removes the collapsed menu from interaction', () => {
+    isXs = signal(true);
+    isXxxs = signal(true);
+    enabledSimpleCounters = [
+      {
+        id: 'counter-1',
+        title: 'Stretch',
+        isEnabled: true,
+        icon: 'fitness_center',
+        type: SimpleCounterType.ClickCounter,
+        countOnDay: {},
+        isOn: false,
+      },
+    ];
+
+    configureTestBed();
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', {
+      F: {
+        METRIC: {
+          CMP: {
+            SIMPLE_COUNTERS: 'Simple Counters & Habit Tracking',
+          },
+        },
+      },
+    });
+    translate.use('en');
+    fixture = TestBed.createComponent(MainHeaderComponent);
+    fixture.detectChanges();
+
+    const toggle = fixture.nativeElement.querySelector(
+      '.mobile-dropdown-wrapper > button',
+    ) as HTMLButtonElement;
+    const menu = fixture.nativeElement.querySelector('.mobile-dropdown') as HTMLElement;
+
+    expect(toggle.getAttribute('aria-label')).toBe('Simple Counters & Habit Tracking');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.getAttribute('aria-controls')).toBe('mobile-simple-counter-menu');
+    expect(menu.getAttribute('aria-hidden')).toBe('true');
+    expect(menu.inert).toBe(true);
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(menu.getAttribute('aria-hidden')).toBe('false');
+    expect(menu.inert).toBe(false);
+  });
+
+  it('shows the add-task button before initial data load finishes', () => {
+    // The shell paints before op-log hydration completes; the quick-capture
+    // entry point must already be there in that window, while the
+    // data-dependent header parts still wait for the data-loaded signal.
+    isAllDataLoaded = false;
+
+    configureTestBed();
+    fixture = TestBed.createComponent(MainHeaderComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.tour-addBtn')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('page-title')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('.counters-action-group')).toBeFalsy();
+  });
+
+  it('keeps a persistent recovery action instead of showing routine sync success', async () => {
+    component = createComponent();
+    const syncWrapperService = TestBed.inject(
+      SyncWrapperService,
+    ) as jasmine.SpyObj<SyncWrapperService>;
+    const snackService = TestBed.inject(SnackService) as jasmine.SpyObj<SnackService>;
+    syncWrapperService.sync.and.resolveTo(SyncStatus.UpdateRemote);
+    snackService.hasPendingPersistentAction.and.returnValue(true);
+
+    component.sync();
+    await Promise.resolve();
+
+    expect(snackService.open).not.toHaveBeenCalled();
   });
 });

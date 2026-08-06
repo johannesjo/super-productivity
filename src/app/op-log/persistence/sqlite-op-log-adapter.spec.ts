@@ -248,7 +248,7 @@ class FakeSqliteDb implements SqliteDb {
 const makeOpEntry = (
   id: string,
   source: 'local' | 'remote',
-  applicationStatus?: 'pending' | 'applied' | 'failed',
+  applicationStatus?: 'pending' | 'archive_pending' | 'applied' | 'failed',
   syncedAt?: number,
 ): Record<string, unknown> => ({
   op: { id },

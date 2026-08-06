@@ -82,7 +82,6 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   readonly rangeStart = input<Date>();
   readonly rangeEnd = input<Date>();
-  readonly isWorklogExport = input<boolean>();
   readonly isShowClose = input<boolean>();
   readonly projectId = input<string | null>();
 

@@ -26,6 +26,7 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { KeyboardConfig, keyboardConfigOrEmpty } from '@sp/keyboard-config';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
@@ -49,6 +50,7 @@ import { UserProfileButtonComponent } from '../../features/user-profile/user-pro
 import { FocusButtonComponent } from './focus-button/focus-button.component';
 import { UserProfileService } from '../../features/user-profile/user-profile.service';
 import { EmlDropDirective } from '../../core/drop-paste-input/eml-drop.directive';
+import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
 
 @Component({
   selector: 'main-header',
@@ -59,6 +61,7 @@ import { EmlDropDirective } from '../../core/drop-paste-input/eml-drop.directive
   imports: [
     MatIconButton,
     MatIcon,
+    MatBadge,
     MatTooltip,
     TranslatePipe,
     SimpleCounterButtonComponent,
@@ -93,10 +96,15 @@ export class MainHeaderComponent implements OnDestroy {
   private readonly _metricService = inject(MetricService);
   private readonly _dateService = inject(DateService);
   private readonly _dataInitStateService = inject(DataInitStateService);
+  private readonly _conflictJournal = inject(ConflictJournalService);
 
   readonly isDataLoaded = toSignal(this._dataInitStateService.isAllDataLoadedInitially$, {
     initialValue: false,
   });
+
+  // SPAP-15: persistent badge on the sync icon — count of unreviewed
+  // auto-resolved sync conflicts awaiting review.
+  readonly unreviewedConflictCount = this._conflictJournal.unreviewedCount;
 
   T: typeof T = T;
   isShowSimpleCounterBtnsDropdown = signal(false);
@@ -226,8 +234,8 @@ export class MainHeaderComponent implements OnDestroy {
     // vertical strip escapes any ancestor containing-block
     // (transform/filter/contain) and reliably anchors to the viewport.
     // Reacts live to the config toggle and the desktop/mobile breakpoint;
-    // also re-runs once the nav enters the DOM (it sits behind
-    // @if(isDataLoaded())).
+    // also re-runs when data load fills in the nav's gated content (the nav
+    // shell itself renders from first paint).
     effect(() => {
       const enabled = this._isVerticalActionBar();
       this.isDataLoaded();
@@ -294,6 +302,11 @@ export class MainHeaderComponent implements OnDestroy {
 
   sync(): void {
     this.syncWrapperService.sync(true).then((r) => {
+      // Keep persistent recovery actions (for example USE_REMOTE Undo) visible;
+      // routine sync-success feedback must not replace them.
+      if (this._snackService.hasPendingPersistentAction()) {
+        return;
+      }
       if (
         r === SyncStatus.UpdateLocal ||
         r === SyncStatus.UpdateRemoteAll ||

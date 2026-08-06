@@ -29,6 +29,16 @@
       outline: none;
       border-bottom-color: var(--extra-border-color);
     }
+
+    // Material forces `.mdc-text-field__input::placeholder { opacity: 0 }` globally and
+    // only restores it inside a .mat-mdc-form-field ancestor. matChipInput puts that
+    // class on this input, which is deliberately not wrapped in a form field, so without
+    // this the placeholder is fully invisible. The color is set explicitly because the
+    // browser default is a fixed grey that ignores the theme (unreadable on dark).
+    &::placeholder {
+      color: var(--text-color-muted);
+      opacity: 1;
+    }
   }
 }
 

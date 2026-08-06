@@ -37,6 +37,7 @@ import { IssueSyncAdapterRegistryService } from '../features/issue/two-way-sync/
 import { SnackService } from '../core/snack/snack.service';
 import { pingWithRetry } from './util/ping-with-retry.util';
 import { PluginBridgeService } from './plugin-bridge.service';
+import { sanitizeSvgIconContent } from '../util/sanitize-svg-icon.util';
 
 // Each plugin's `id` (from its manifest.json, distinct from the asset path
 // here) becomes the entityId prefix for all data it persists via
@@ -61,6 +62,7 @@ const BUNDLED_PLUGIN_PATHS = [
   'assets/bundled-plugins/google-calendar-provider',
   'assets/bundled-plugins/caldav-calendar-provider',
   'assets/bundled-plugins/doc-mode',
+  'assets/bundled-plugins/todoist-import',
 ] as const;
 
 // Reserved ids: an uploaded plugin may not reuse a bundled plugin's manifest id (it would
@@ -85,6 +87,7 @@ const BUNDLED_PLUGIN_IDS = new Set<string>([
   'linear-issue-provider',
   'procrastination-buster',
   'sync-md',
+  'todoist-import',
   'trello-issue-provider',
   'voice-reminder',
   'yesterday-tasks',
@@ -1370,11 +1373,13 @@ export class PluginService implements OnDestroy {
             }),
           );
         }
-        iconContent = new TextDecoder().decode(iconBytes);
-        // Basic SVG validation
-        if (!iconContent.includes('<svg') || !iconContent.includes('</svg>')) {
-          PluginLog.err(`Plugin icon ${manifest.icon} does not appear to be a valid SVG`);
-          iconContent = null;
+        // Sanitize before caching, so anything installed from here on is stored clean.
+        // Icons cached before this existed are still raw, so both sinks sanitize as well.
+        iconContent = sanitizeSvgIconContent(new TextDecoder().decode(iconBytes));
+        if (!iconContent) {
+          PluginLog.err(
+            `Plugin icon ${manifest.icon} could not be sanitized into a renderable SVG icon`,
+          );
         }
       }
 

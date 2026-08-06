@@ -133,40 +133,53 @@ export const getIsApplyingRemoteOps = (): boolean => {
 };
 
 /**
- * Maximum number of deferred actions before warning.
+ * Soft-warning threshold for the deferred actions buffer.
  * If exceeded, sync may be stuck or taking too long.
  */
-const MAX_DEFERRED_ACTIONS_WARNING = 10;
+const DEFERRED_ACTIONS_SOFT_WARNING_THRESHOLD = 10;
 
 /**
- * Hard limit for deferred actions buffer.
- * If reached, oldest actions are dropped to prevent unbounded memory growth.
+ * Reload-warning threshold: a devError advises the user to reload, but
+ * NOTHING is dropped. Every buffered action's state change was already
+ * accepted into NgRx; dropping it would mean no operation ever represents
+ * it — a permanent, unsyncable local divergence.
+ * Exported for tests.
  */
-const MAX_DEFERRED_ACTIONS_HARD_LIMIT = 100;
+export const DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD = 100;
+
+/**
+ * Highest threshold already warned about in the current stuck window; each
+ * warning fires once per crossing instead of on every buffered action (in dev
+ * builds devError opens a blocking dialog, so per-action firing would freeze
+ * the session exactly when sync is stuck). Reset when the buffer drains.
+ */
+let highestWarnedThreshold = 0;
 
 /**
  * Buffers an action for processing after sync completes.
  * Called by the meta-reducer when a persistent action arrives during sync.
+ *
+ * Never drops an accepted persistent action: its reducer mutation already
+ * exists in NgRx, so removal here would create permanent unsyncable state.
  */
 export const bufferDeferredAction = (action: PersistentAction): void => {
-  // Hard limit: drop oldest action if buffer is full (sync stuck scenario).
-  // NOTE: The shifted action remains in deferredActionSet (WeakSet has no delete-by-value).
-  // The effect filters it via isDeferredAction(), and getDeferredActions() won't return it,
-  // so it is silently lost. This is acceptable: the hard limit is itself an error condition
-  // (sync stuck), and dropping the oldest action is the lesser evil vs unbounded growth.
-  if (deferredActions.length >= MAX_DEFERRED_ACTIONS_HARD_LIMIT) {
-    devError(
-      `[operationCaptureMetaReducer] Deferred actions buffer exceeded ${MAX_DEFERRED_ACTIONS_HARD_LIMIT} items. ` +
-        `Dropping oldest action. Sync may be stuck - consider reloading the app.`,
-    );
-    deferredActions.shift();
-  }
-
   deferredActions.push(action);
   deferredActionSet.add(action);
 
-  // Soft warning at 10 items
-  if (deferredActions.length > MAX_DEFERRED_ACTIONS_WARNING) {
+  if (
+    deferredActions.length >= DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD &&
+    highestWarnedThreshold < DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD
+  ) {
+    highestWarnedThreshold = DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD;
+    devError(
+      `[operationCaptureMetaReducer] Deferred actions buffer has ${deferredActions.length} items. ` +
+        `Sync may be stuck - consider reloading the app. Nothing is dropped; actions remain buffered.`,
+    );
+  } else if (
+    deferredActions.length > DEFERRED_ACTIONS_SOFT_WARNING_THRESHOLD &&
+    highestWarnedThreshold < DEFERRED_ACTIONS_SOFT_WARNING_THRESHOLD
+  ) {
+    highestWarnedThreshold = DEFERRED_ACTIONS_SOFT_WARNING_THRESHOLD;
     devError(
       `[operationCaptureMetaReducer] Deferred actions buffer has ${deferredActions.length} items - sync may be stuck or taking too long`,
     );
@@ -174,26 +187,37 @@ export const bufferDeferredAction = (action: PersistentAction): void => {
 };
 
 /**
- * Gets and clears the deferred actions buffer.
- * Called after sync completes to process buffered actions.
+ * Returns a stable snapshot of the deferred actions buffer. Entries remain queued
+ * until their operation is durably written and explicitly acknowledged.
  */
 export const getDeferredActions = (): PersistentAction[] => {
-  const actions = deferredActions;
-  deferredActions = [];
-  return actions;
+  return [...deferredActions];
+};
+
+export const acknowledgeDeferredAction = (action: PersistentAction): void => {
+  const index = deferredActions.indexOf(action);
+  if (index === -1) {
+    return;
+  }
+  deferredActions.splice(index, 1);
+  deferredActionSet.delete(action);
+  if (deferredActions.length === 0) {
+    highestWarnedThreshold = 0;
+  }
 };
 
 /**
  * Clears the deferred actions buffer without processing.
  * Used for cleanup during testing or error recovery.
  *
- * Note: deferredActionSet (WeakSet) is not cleared here because WeakSet has
- * no .clear() method. Entries are garbage-collected when action references are
- * released. In practice, cleared actions are not reused by reference, so stale
- * entries in the WeakSet are harmless.
+ * WeakSet has no clear(), so delete the known buffered references individually.
  */
 export const clearDeferredActions = (): void => {
+  for (const action of deferredActions) {
+    deferredActionSet.delete(action);
+  }
   deferredActions = [];
+  highestWarnedThreshold = 0;
 };
 
 /**

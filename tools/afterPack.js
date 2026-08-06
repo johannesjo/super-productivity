@@ -1,6 +1,8 @@
-// Post-pack hook for Linux builds.
+// Post-pack checks and platform-specific packaging adjustments.
 //
-// Renames the main Electron binary to `superproductivity-bin` and installs
+// macOS: verifies the actual icon copied into every packaged .app.
+//
+// Linux: renames the main Electron binary to `superproductivity-bin` and installs
 // a shell wrapper at the original name. The wrapper forces
 // --class=superproductivity for stable desktop-file matching and forces
 // --ozone-platform=x11 when running in our Snap sandbox on a Wayland session.
@@ -30,10 +32,40 @@ const WAYLAND_IDLE_HELPER_SRC = join(
   'wayland-idle-helper',
 );
 const WAYLAND_IDLE_HELPER_DEST = 'wayland-idle-helper';
+const MAC_ICON_SOURCE = join(__dirname, '..', 'build', 'icon.icns');
 
 const isTruthyEnv = (value) => value === '1' || value?.toLowerCase() === 'true';
 
+const verifyPackagedMacIcon = async (context) => {
+  const appName = context.packager.appInfo.productFilename;
+  const iconPath = join(
+    context.appOutDir,
+    `${appName}.app`,
+    'Contents',
+    'Resources',
+    'icon.icns',
+  );
+  const [sourceIcon, packagedIcon] = await Promise.all([
+    fs.readFile(MAC_ICON_SOURCE),
+    fs.readFile(iconPath),
+  ]);
+  if (!sourceIcon.equals(packagedIcon)) {
+    throw new Error(
+      `[afterPack] Packaged macOS icon ${iconPath} does not match ${MAC_ICON_SOURCE}`,
+    );
+  }
+
+  console.log(`[afterPack] Verified packaged macOS icon matches its source`);
+};
+
 async function afterPack(context) {
+  if (
+    context.electronPlatformName === 'darwin' ||
+    context.electronPlatformName === 'mas'
+  ) {
+    await verifyPackagedMacIcon(context);
+    return;
+  }
   if (context.electronPlatformName !== 'linux') return;
 
   const { appOutDir } = context;

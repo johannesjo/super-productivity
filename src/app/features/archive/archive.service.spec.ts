@@ -83,6 +83,86 @@ describe('ArchiveService', () => {
       expect(savedData.task.ids).toContain('task-1');
     });
 
+    it('should serialize concurrent task archive mutations without dropping either task', async () => {
+      let archiveYoung = createEmptyArchive(Date.now());
+      let releaseFirstSave: (() => void) | undefined;
+      let firstSaveStarted: (() => void) | undefined;
+      const firstSaveStartedPromise = new Promise<void>((resolve) => {
+        firstSaveStarted = resolve;
+      });
+      const firstSaveGate = new Promise<void>((resolve) => {
+        releaseFirstSave = resolve;
+      });
+
+      mockArchiveDbAdapter.loadArchiveYoung.and.callFake(async () => archiveYoung);
+      mockArchiveDbAdapter.loadArchiveOld.and.callFake(async () =>
+        createEmptyArchive(Date.now()),
+      );
+      mockArchiveDbAdapter.saveArchiveYoung.and.callFake(async (nextArchive) => {
+        if (mockArchiveDbAdapter.saveArchiveYoung.calls.count() === 1) {
+          firstSaveStarted?.();
+          await firstSaveGate;
+        }
+        archiveYoung = nextArchive;
+      });
+
+      const first = service.moveTasksToArchiveAndFlushArchiveIfDue([
+        createMockTask('task-a'),
+      ]);
+      await firstSaveStartedPromise;
+      const second = service.moveTasksToArchiveAndFlushArchiveIfDue([
+        createMockTask('task-b'),
+      ]);
+
+      // The second read must wait for the first write to commit.
+      await Promise.resolve();
+      expect(mockArchiveDbAdapter.loadArchiveYoung).toHaveBeenCalledTimes(1);
+
+      releaseFirstSave?.();
+      await Promise.all([first, second]);
+
+      expect(archiveYoung.task.ids).toEqual(['task-a', 'task-b']);
+      expect(Object.keys(archiveYoung.task.entities).sort()).toEqual([
+        'task-a',
+        'task-b',
+      ]);
+    });
+
+    it('should replace a stale archived task on retry and keep ids deduped and sorted', async () => {
+      const staleTask = createMockTask('task-b', {
+        title: 'Stale archived title',
+        timeSpent: 1,
+      });
+      const otherTask = createMockTask('task-a');
+      mockArchiveDbAdapter.loadArchiveYoung.and.returnValue(
+        Promise.resolve({
+          ...createEmptyArchive(),
+          task: {
+            ids: ['task-b', 'task-a', 'task-b'],
+            entities: {
+              [otherTask.id]: otherTask,
+              [staleTask.id]: staleTask,
+            },
+          },
+        }),
+      );
+      mockArchiveDbAdapter.loadArchiveOld.and.returnValue(
+        Promise.resolve(createEmptyArchive(Date.now() - 1000)),
+      );
+      const retriedTask = createMockTask('task-b', {
+        title: 'Newest active title',
+        timeSpent: 42,
+      });
+
+      await service.moveTasksToArchiveAndFlushArchiveIfDue([retriedTask]);
+
+      const savedTaskState =
+        mockArchiveDbAdapter.saveArchiveYoung.calls.first().args[0].task;
+      expect(savedTaskState.ids).toEqual(['task-a', 'task-b']);
+      expect(savedTaskState.entities['task-b']!.title).toBe('Newest active title');
+      expect(savedTaskState.entities['task-b']!.timeSpent).toBe(42);
+    });
+
     it('should dispatch updateWholeState for time tracking', async () => {
       const tasks = [createMockTask('task-1')];
 
@@ -344,6 +424,38 @@ describe('ArchiveService', () => {
   });
 
   describe('writeTasksToArchiveForRemoteSync', () => {
+    it('should replace a stale archived task on remote retry and keep ids deduped and sorted', async () => {
+      const staleTask = createMockTask('task-b', {
+        title: 'Stale remote title',
+        timeSpent: 1,
+      });
+      const otherTask = createMockTask('task-a');
+      mockArchiveDbAdapter.loadArchiveYoung.and.returnValue(
+        Promise.resolve({
+          ...createEmptyArchive(),
+          task: {
+            ids: ['task-b', 'task-a', 'task-b'],
+            entities: {
+              [otherTask.id]: otherTask,
+              [staleTask.id]: staleTask,
+            },
+          },
+        }),
+      );
+      const retriedTask = createMockTask('task-b', {
+        title: 'Newest remote title',
+        timeSpent: 84,
+      });
+
+      await service.writeTasksToArchiveForRemoteSync([retriedTask]);
+
+      const savedTaskState =
+        mockArchiveDbAdapter.saveArchiveYoung.calls.mostRecent().args[0].task;
+      expect(savedTaskState.ids).toEqual(['task-a', 'task-b']);
+      expect(savedTaskState.entities['task-b']!.title).toBe('Newest remote title');
+      expect(savedTaskState.entities['task-b']!.timeSpent).toBe(84);
+    });
+
     it('should ignore malformed tasks without valid ids', async () => {
       const invalidTask = {
         title: 'Invalid task',

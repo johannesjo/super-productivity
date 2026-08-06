@@ -623,6 +623,25 @@ describe('Task Reducer', () => {
 
       // The removed tasks should be moved to the beginning while maintaining their relative order
       expect(state.ids).toEqual(['task2', 'task4', 'task1', 'task3']);
+      // Ordering-only invariant (#9426): conflict resolution rejects
+      // conflicted rows of this action outright, which is lossless only while
+      // the handler never touches task entities. If this fails, remove the
+      // action from ORDERING_ONLY_MULTI_ACTIONS in conflict-resolution.service.ts
+      // (or give it a preserve path) BEFORE shipping the reducer change.
+      expect(state.entities).toBe(stateWithOrderedTasks.entities);
+    });
+
+    it('must not handle moveTaskInTodayTagList at all (ordering-only invariant #9426)', () => {
+      // The task feature reducer currently has NO handler for this action; a
+      // future one that touches entities would invalidate the ordering-only
+      // rejection in conflict resolution. Same remediation as above.
+      const action = TaskSharedActions.moveTaskInTodayTagList({
+        toTaskId: 'task1',
+        fromTaskId: 'task2',
+      });
+      const state = taskReducer(stateWithTasks, action);
+
+      expect(state).toBe(stateWithTasks);
     });
 
     it('should ignore all invalid IDs and leave state unchanged', () => {
@@ -960,6 +979,104 @@ describe('Task Reducer', () => {
       expect(state.entities['task-r']!.timeSpent).toBe(8000);
     });
 
+    it('should add consecutive durations from stale task action snapshots', () => {
+      const staleTask = createTask('task-r', {
+        timeSpentOnDay: { '2024-01-01': 100 },
+        timeSpent: 100,
+      });
+      const stateWithTime: TaskState = {
+        ...initialTaskState,
+        ids: ['task-r'],
+        entities: { 'task-r': staleTask },
+      };
+
+      const afterFirstCredit = taskReducer(
+        stateWithTime,
+        TimeTrackingActions.addTimeSpent({
+          task: staleTask,
+          date: '2024-01-01',
+          duration: 20,
+          isFromTrackingReminder: false,
+        }),
+      );
+      const afterSecondCredit = taskReducer(
+        afterFirstCredit,
+        TimeTrackingActions.addTimeSpent({
+          task: staleTask,
+          date: '2024-01-01',
+          duration: 30,
+          isFromTrackingReminder: false,
+        }),
+      );
+
+      expect(afterSecondCredit.entities['task-r']!.timeSpentOnDay['2024-01-01']).toBe(
+        150,
+      );
+      expect(afterSecondCredit.entities['task-r']!.timeSpent).toBe(150);
+    });
+
+    it('should keep own time sync additive when client identity is unavailable', () => {
+      const taskWithLocalTime = createTask('task-r', {
+        timeSpentOnDay: { '2024-01-01': 3000 },
+        timeSpent: 3000,
+      });
+      const stateWithLocalTime: TaskState = {
+        ...initialTaskState,
+        ids: ['task-r'],
+        entities: { 'task-r': taskWithLocalTime },
+      };
+      const action = {
+        ...syncTimeSpent({
+          taskId: 'task-r',
+          date: '2024-01-01',
+          duration: 5000,
+        }),
+        timeSpentForDay: 5000,
+      };
+      const ownReplayAction = {
+        ...action,
+        meta: { ...action.meta, isRemote: true },
+      };
+
+      const state = taskReducer(stateWithLocalTime, ownReplayAction);
+
+      expect(state.entities['task-r']!.timeSpentOnDay['2024-01-01']).toBe(8000);
+      expect(state.entities['task-r']!.timeSpent).toBe(8000);
+    });
+
+    it('should keep foreign time sync additive to preserve concurrent tracking', () => {
+      const taskWithLocalTime = createTask('task-r', {
+        timeSpentOnDay: { '2024-01-01': 3000 },
+        timeSpent: 3000,
+      });
+      const stateWithLocalTime: TaskState = {
+        ...initialTaskState,
+        ids: ['task-r'],
+        entities: { 'task-r': taskWithLocalTime },
+      };
+      const action = {
+        ...syncTimeSpent({
+          taskId: 'task-r',
+          date: '2024-01-01',
+          duration: 5000,
+        }),
+        timeSpentForDay: 5000,
+      };
+      const foreignAction = {
+        ...action,
+        meta: {
+          ...action.meta,
+          isRemote: true,
+          isApplyingFromOtherClient: true,
+        },
+      };
+
+      const state = taskReducer(stateWithLocalTime, foreignAction);
+
+      expect(state.entities['task-r']!.timeSpentOnDay['2024-01-01']).toBe(8000);
+      expect(state.entities['task-r']!.timeSpent).toBe(8000);
+    });
+
     it('should handle remote dispatch for missing task gracefully', () => {
       const action = syncTimeSpent({
         taskId: 'nonexistent',
@@ -1013,6 +1130,23 @@ describe('Task Reducer', () => {
   // -----------------------------------------------------------------------
 
   describe('loadAllData - timeSpentOnDay normalization', () => {
+    it('should default calendar event dismissals missing from older persisted state', () => {
+      const appDataComplete = {
+        task: {
+          ids: [],
+          entities: {},
+          currentTaskId: null,
+          selectedTaskId: null,
+          lastCurrentTaskId: null,
+          isDataLoaded: false,
+        },
+      } as any;
+
+      const result = taskReducer(initialTaskState, loadAllData({ appDataComplete }));
+
+      expect(result.dismissedCalendarAutoImportEventIdsByProvider).toEqual({});
+    });
+
     it('should normalize tasks with undefined timeSpentOnDay to {} on load', () => {
       const taskWithUndefined = createTask('t1', { timeSpentOnDay: undefined as any });
       const appDataComplete = {

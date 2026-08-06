@@ -10,29 +10,38 @@ import {
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 
-// Reads the op-log store directly and counts terminally-rejected ops (rejectedAt
-// set). This is the precise, timing-independent discriminator for #8331: the
-// transient blip must NOT have rejected the pending edit.
-const countRejectedOps = (page: Page): Promise<number> =>
-  page.evaluate(async () => {
+// Reads the exact server-rejected op from the op-log. This is the precise,
+// timing-independent discriminator for #8331: the transient blip must leave
+// that edit pending, regardless of unrelated startup-only op cleanup.
+const isOpPending = (page: Page, opId: string): Promise<boolean> =>
+  page.evaluate(async (id) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const req = indexedDB.open('SUP_OPS');
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
     });
     try {
-      if (!db.objectStoreNames.contains('ops')) return 0;
-      const entries = await new Promise<{ rejectedAt?: number }[]>((resolve, reject) => {
+      if (!db.objectStoreNames.contains('ops')) return false;
+      const entry = await new Promise<
+        { syncedAt?: number; rejectedAt?: number } | undefined
+      >((resolve, reject) => {
         const tx = db.transaction('ops', 'readonly');
-        const r = tx.objectStore('ops').getAll();
-        r.onsuccess = () => resolve(r.result as { rejectedAt?: number }[]);
-        r.onerror = () => reject(r.error);
+        const request = tx.objectStore('ops').index('byId').get(id);
+        request.onsuccess = () =>
+          resolve(
+            request.result as { syncedAt?: number; rejectedAt?: number } | undefined,
+          );
+        request.onerror = () => reject(request.error);
       });
-      return entries.filter((e) => e.rejectedAt).length;
+      return (
+        entry !== undefined &&
+        entry.syncedAt === undefined &&
+        entry.rejectedAt === undefined
+      );
     } finally {
       db.close();
     }
-  });
+  }, opId);
 
 /**
  * Regression: transient download failure during rejected-ops resolution must
@@ -45,11 +54,10 @@ const countRejectedOps = (page: Page): Promise<number> =>
  * locally but never reached other devices. The fix leaves the op pending so it
  * re-resolves on the next sync.
  *
- * Discriminator: after the blip, B's pending edit must NOT be terminally
- * rejected (op-log has zero rejectedAt ops) — with the bug the catch called
- * markRejected() so that count is >= 1. End-to-end: once the fault clears, B's
- * edit resolves and both clients converge to the same title; with the bug B's
- * edit is dropped and the clients diverge.
+ * Discriminator: after the blip, the exact CONFLICT_CONCURRENT op must still be
+ * pending. With the bug, the catch called markRejected() on that op. End-to-end:
+ * once the fault clears, B's edit resolves and both clients converge to the
+ * same title; with the bug B's edit is dropped and the clients diverge.
  *
  * Prerequisites:
  * - super-sync-server running on localhost:1901 with TEST_MODE=true
@@ -153,6 +161,7 @@ test.describe('@supersync Rejected-ops transient download (#8331)', () => {
       let abortedResolutionGets = 0;
       let strippedPreUploadDownloads = 0;
       let strippedConflictPiggybacks = 0;
+      let concurrentRejectedOpId: string | null = null;
       await clientB.page.route('**/api/sync/ops*', async (route) => {
         const method = route.request().method();
         if (method === 'GET') {
@@ -193,6 +202,15 @@ test.describe('@supersync Rejected-ops transient download (#8331)', () => {
           sawUploadAttempt = true;
           const response = await route.fetch();
           const json = await response.json();
+          const concurrentResult = Array.isArray(json.results)
+            ? json.results.find(
+                (result: { errorCode?: unknown }) =>
+                  result.errorCode === 'CONFLICT_CONCURRENT',
+              )
+            : undefined;
+          if (typeof concurrentResult?.opId === 'string') {
+            concurrentRejectedOpId = concurrentResult.opId;
+          }
           if (Array.isArray(json.newOps) && json.newOps.length > 0) {
             json.newOps = [];
             json.hasMorePiggyback = false;
@@ -226,17 +244,20 @@ test.describe('@supersync Rejected-ops transient download (#8331)', () => {
       expect(strippedPreUploadDownloads).toBeGreaterThanOrEqual(1);
       expect(strippedConflictPiggybacks).toBeGreaterThanOrEqual(1);
       expect(abortedResolutionGets).toBeGreaterThanOrEqual(1);
+      expect(concurrentRejectedOpId).not.toBeNull();
+      if (!concurrentRejectedOpId) {
+        throw new Error('Expected a CONFLICT_CONCURRENT upload result');
+      }
 
       // Precise discriminator (timing-independent): the blip must not have
-      // terminally rejected B's pending edit. With the bug, the catch called
-      // markRejected() so this is >= 1; with the fix the edit stays pending -> 0.
-      expect(await countRejectedOps(clientB.page)).toBe(0);
+      // terminally rejected B's exact pending edit. With the bug, the catch
+      // called markRejected(); with the fix the entry remains pending.
+      expect(await isOpPending(clientB.page, concurrentRejectedOpId)).toBe(true);
 
       // 7. Remove the fault and let B sync cleanly — the still-pending edit
-      //    resolves and uploads (the merged op may need a second flush).
+      //    resolves and its local-win replacement is uploaded in the same sync.
       await clientB.page.unroute('**/api/sync/ops*');
-      await clientB.sync.syncAndWait();
-      await clientB.sync.syncAndWait();
+      await clientB.sync.triggerSync();
 
       // 8. End-to-end recovery proof: after pulling B's now-uploaded edit, both
       //    clients converge to the SAME title. With the bug, B's edit was

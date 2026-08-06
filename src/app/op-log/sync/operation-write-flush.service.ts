@@ -40,9 +40,22 @@ export class OperationWriteFlushService {
   private readonly MAX_WAIT_TIME = 30000;
 
   /**
+   * Maximum flush→lock→recheck attempts in flushThenRunExclusive before
+   * aborting. Bounds the retry loop so continuous dispatch activity (e.g. a
+   * runaway effect or 1Hz tracking ticks on a very slow device) cannot
+   * livelock the caller; the operation re-triggers on the next sync.
+   */
+  private readonly MAX_CUTOFF_ATTEMPTS = 5;
+
+  /**
    * Polling interval to check queue size (ms).
    */
   private readonly POLL_INTERVAL = 10;
+
+  /** Whether a reducer action is still waiting to become durable. */
+  hasPendingWrites(): boolean {
+    return this.captureService.getPendingCount() > 0;
+  }
 
   /**
    * Waits for all pending operation writes to complete.
@@ -105,6 +118,45 @@ export class OperationWriteFlushService {
     OpLog.normal(
       `OperationWriteFlushService: Flush complete in ${totalWait}ms. ` +
         `Initial pending: ${initialPendingCount}, Final pending: ${finalPendingCount}`,
+    );
+  }
+
+  /**
+   * Runs `fn` inside the operation-log lock with the capture pipeline drained —
+   * every action dispatched before the lock was acquired is durably written.
+   *
+   * flushPendingWrites() must NOT be called while holding the lock: its Phase 2
+   * re-acquires the same non-reentrant lock and deadlocks until the acquisition
+   * timeout. So the flush runs BEFORE acquisition. A reducer action can still
+   * land in the tiny gap between the flush releasing the lock and our
+   * acquisition — its pending counter increments synchronously, before the
+   * persistence effect waits for the lock. Taking a snapshot/backup then would
+   * include that reducer state but precede its operation, so instead the lock
+   * is released, the writes are re-flushed, and the acquisition retried
+   * (bounded by MAX_CUTOFF_ATTEMPTS).
+   */
+  async flushThenRunExclusive<T>(fn: () => Promise<T>): Promise<T> {
+    for (let attempt = 0; attempt < this.MAX_CUTOFF_ATTEMPTS; attempt++) {
+      await this.flushPendingWrites();
+      const outcome = await this.lockService.request(
+        LOCK_NAMES.OPERATION_LOG,
+        async (): Promise<{ retry: true } | { retry: false; value: T }> => {
+          if (this.captureService.getPendingCount() > 0) {
+            return { retry: true };
+          }
+          return { retry: false, value: await fn() };
+        },
+      );
+      if (!outcome.retry) {
+        return outcome.value;
+      }
+      OpLog.warn(
+        `OperationWriteFlushService: Capture landed between flush and lock acquisition; ` +
+          `retrying cutoff (attempt ${attempt + 1}/${this.MAX_CUTOFF_ATTEMPTS}).`,
+      );
+    }
+    throw new Error(
+      `Operation write cutoff not reached after ${this.MAX_CUTOFF_ATTEMPTS} attempts — continuous dispatch activity. Try again.`,
     );
   }
 }

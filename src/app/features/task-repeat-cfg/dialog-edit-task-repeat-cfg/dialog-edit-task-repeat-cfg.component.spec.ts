@@ -7,7 +7,10 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { DateAdapter, MatNativeDateModule } from '@angular/material/core';
+import { MatFormFieldHarness } from '@angular/material/form-field/testing';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Observable, of, Subject } from 'rxjs';
@@ -36,6 +39,12 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
   let mockGlobalConfigService: jasmine.SpyObj<GlobalConfigService>;
   let mockDateTimeFormatService: jasmine.SpyObj<DateTimeFormatService>;
   let mockDateService: jasmine.SpyObj<DateService>;
+
+  // Mutable locale backing the DateTimeFormatService mock, so a test can
+  // simulate the ISO 8601 option (numeric locale = sv sentinel, spelled-out
+  // names = UI language). Reset in setupTestBed.
+  let mockCurrentLocale = 'en-US';
+  let mockTextLocale = 'en-US';
 
   // DateService is mocked to this fixed day; assertions about "today" must
   // derive from these consts, never from the real clock (see #8017 CI breakage).
@@ -70,10 +79,13 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       task?: TaskCopy;
       repeatCfg?: TaskRepeatCfg;
       targetDate?: string;
+      initialStartDate?: string;
+      isRemoveConfirmationRequired?: boolean;
     },
     getRepeatCfgReturnValue?:
       | Observable<TaskRepeatCfg | undefined>
       | Subject<TaskRepeatCfg>,
+    renderTemplate = false,
   ): Promise<ComponentFixture<DialogEditTaskRepeatCfgComponent>> => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -85,6 +97,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       'getTaskRepeatCfgByIdAllowUndefined$',
       'updateTaskRepeatCfg',
       'addTaskRepeatCfgToTask',
+      'deleteTaskRepeatCfg',
       'deleteTaskRepeatCfgWithDialog',
     ]);
     mockDateService = jasmine.createSpyObj('DateService', [
@@ -108,8 +121,13 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
     mockGlobalConfigService = jasmine.createSpyObj('GlobalConfigService', [], {
       cfg: () => ({ reminder: { defaultTaskRemindOption: null } }),
     });
+    mockCurrentLocale = 'en-US';
+    mockTextLocale = 'en-US';
     mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', [], {
-      currentLocale: () => 'en-US',
+      currentLocale: () => mockCurrentLocale,
+      // Mirrors the real service: spelled-out names follow this locale (equals
+      // currentLocale() unless the ISO option remaps it to the UI language).
+      textLocale: () => mockTextLocale,
       dateFormat: () => ({
         parse: 'MM/dd/yyyy',
         display: { dateInput: 'MM/dd/yyyy' },
@@ -117,7 +135,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       formatTime: () => '12:00 PM',
     });
 
-    await TestBed.configureTestingModule({
+    const testModule = TestBed.configureTestingModule({
       imports: [
         DialogEditTaskRepeatCfgComponent,
         MatDialogModule,
@@ -140,22 +158,92 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
         { provide: DateService, useValue: mockDateService },
         { provide: DateAdapter, useClass: CustomDateAdapter },
       ],
-    })
-      .overrideComponent(DialogEditTaskRepeatCfgComponent, {
+    });
+
+    if (!renderTemplate) {
+      testModule.overrideComponent(DialogEditTaskRepeatCfgComponent, {
         set: {
           // Use a minimal template to avoid @ngx-formly/material select rendering,
           // which triggers a compareWith validation error with Angular Material 21+.
           // These tests verify component signals/logic, not template rendering.
           template: '<div></div>',
         },
-      })
-      .compileComponents();
+      });
+    }
+
+    await testModule.compileComponents();
 
     return TestBed.createComponent(DialogEditTaskRepeatCfgComponent);
   };
 
   afterEach(() => {
     TestBed.resetTestingModule();
+  });
+
+  it('keeps Day of month selected after switching from an Nth weekday (#8886)', async () => {
+    const monthlyNthWeekdayCfg: TaskRepeatCfg = {
+      ...DEFAULT_TASK_REPEAT_CFG,
+      id: 'repeat-cfg-monthly-nth-weekday',
+      title: 'Monthly task',
+      quickSetting: 'CUSTOM',
+      repeatCycle: 'MONTHLY',
+      startDate: '2026-06-09',
+      monthlyWeekOfMonth: 2,
+      monthlyWeekday: 1,
+    };
+    const fixture = await setupTestBed(
+      { repeatCfg: monthlyNthWeekdayCfg },
+      undefined,
+      true,
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const selects = await loader.getAllHarnesses(MatSelectHarness);
+    const formFieldsBeforeSwitch = await loader.getAllHarnesses(MatFormFieldHarness);
+    const labelsBeforeSwitch = await Promise.all(
+      formFieldsBeforeSwitch.map((formField) => formField.getLabel()),
+    );
+    expect(labelsBeforeSwitch).toContain(T.F.TASK_REPEAT.F.WEEKDAY);
+    let monthlyPatternSelect: MatSelectHarness | undefined;
+    let dayOfMonthOptionText = '';
+
+    for (const select of selects) {
+      await select.open();
+      const [dayOfMonthOption] = await select.getOptions({
+        text: /MONTHLY_MODE_DAY_OF_MONTH/,
+      });
+      if (dayOfMonthOption) {
+        monthlyPatternSelect = select;
+        dayOfMonthOptionText = await dayOfMonthOption.getText();
+        await dayOfMonthOption.click();
+        break;
+      }
+      await select.close();
+    }
+
+    expect(monthlyPatternSelect).toBeDefined();
+    expect(await monthlyPatternSelect!.getValueText()).toBe(dayOfMonthOptionText);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.repeatCfg().monthlyWeekOfMonth).toBeNull();
+    const formFieldsAfterSwitch = await loader.getAllHarnesses(MatFormFieldHarness);
+    const labelsAfterSwitch = await Promise.all(
+      formFieldsAfterSwitch.map((formField) => formField.getLabel()),
+    );
+    expect(labelsAfterSwitch).not.toContain(T.F.TASK_REPEAT.F.WEEKDAY);
+
+    fixture.componentInstance.save();
+
+    const changes =
+      mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent().args[1];
+    expect(
+      Object.prototype.hasOwnProperty.call(changes, 'monthlyWeekOfMonth'),
+    ).toBeTrue();
+    expect(changes.monthlyWeekOfMonth).toBeUndefined();
   });
 
   describe('isLoading signal', () => {
@@ -266,6 +354,140 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       const component = fixture.componentInstance;
 
       expect(component.isEdit()).toBe(false);
+    });
+  });
+
+  describe('deleteInstance', () => {
+    it('formats a date-only target date at local midnight in the skip confirmation', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: mockRepeatCfg,
+        targetDate: '2026-06-10',
+      });
+      const component = fixture.componentInstance;
+      component.canRemoveInstance.set(true);
+      const toLocaleDateStringSpy = spyOn(
+        Date.prototype,
+        'toLocaleDateString',
+      ).and.callFake(function (this: Date): string {
+        return String(this.getHours());
+      });
+      spyOn(TestBed.inject(TranslateService), 'instant').and.callFake(
+        (_key: string, params?: { date?: string }) => params?.date || '',
+      );
+
+      component.deleteInstance();
+
+      expect(toLocaleDateStringSpy).toHaveBeenCalled();
+      expect(mockMatDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({ data: jasmine.objectContaining({ message: '0' }) }),
+      );
+    });
+  });
+
+  describe('new config initialization', () => {
+    it('uses the explicit initial start date from the schedule dialog', async () => {
+      const taskWithStoredDueDate = {
+        ...mockTask,
+        dueDay: '2026-06-01',
+      } as TaskCopy;
+      const fixture = await setupTestBed({
+        task: taskWithStoredDueDate,
+        initialStartDate: '2026-06-12',
+      });
+
+      expect(fixture.componentInstance.repeatCfg().startDate).toBe('2026-06-12');
+    });
+
+    it('returns the created config ID when saving', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      mockTaskRepeatCfgService.addTaskRepeatCfgToTask.and.callFake(
+        () => 'created-repeat-cfg',
+      );
+
+      fixture.componentInstance.save();
+
+      expect(mockDialogRef.close).toHaveBeenCalledOnceWith('created-repeat-cfg');
+    });
+  });
+
+  describe('remove', () => {
+    it('removes without confirmation when the config was created from the schedule dialog', fakeAsync(async () => {
+      const taskWithRepeatCfg = {
+        ...mockTask,
+        repeatCfgId: 'repeat-cfg-123',
+      } as TaskCopy;
+      const fixture = await setupTestBed(
+        {
+          task: taskWithRepeatCfg,
+          isRemoveConfirmationRequired: false,
+        },
+        of(mockRepeatCfg),
+      );
+      fixture.detectChanges();
+      tick();
+
+      fixture.componentInstance.remove();
+
+      expect(mockTaskRepeatCfgService.deleteTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-123',
+      );
+      expect(
+        mockTaskRepeatCfgService.deleteTaskRepeatCfgWithDialog,
+      ).not.toHaveBeenCalled();
+    }));
+
+    it('keeps confirmation for a pre-existing repeat config', fakeAsync(async () => {
+      const taskWithRepeatCfg = {
+        ...mockTask,
+        repeatCfgId: 'repeat-cfg-123',
+      } as TaskCopy;
+      const fixture = await setupTestBed({ task: taskWithRepeatCfg }, of(mockRepeatCfg));
+      fixture.detectChanges();
+      tick();
+
+      fixture.componentInstance.remove();
+
+      expect(
+        mockTaskRepeatCfgService.deleteTaskRepeatCfgWithDialog,
+      ).toHaveBeenCalledOnceWith('repeat-cfg-123');
+      expect(mockTaskRepeatCfgService.deleteTaskRepeatCfg).not.toHaveBeenCalled();
+    }));
+  });
+
+  describe('plannedStartDateStr localization (#8987 follow-up)', () => {
+    it('renders the start-date value in the UI language under the ISO option, not sv', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      // ISO 8601 option: numeric locale is the sv sentinel, but spelled-out
+      // names must follow the UI language ('en').
+      mockCurrentLocale = 'sv';
+      mockTextLocale = 'en';
+
+      fixture.componentInstance.repeatCfg.set({
+        ...DEFAULT_TASK_REPEAT_CFG,
+        startDate: '2026-07-15',
+      });
+
+      const label = fixture.componentInstance.plannedStartDateStr();
+      // English spelled-out names ("Wed, Jul 15, 2026"), not Swedish
+      // ("ons 15 juli 2026").
+      expect(label).toContain('Jul');
+      expect(label).not.toContain('juli');
+      expect(label).not.toContain('ons');
+    });
+
+    it('keeps the configured locale for spelled-out names when not the ISO option', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      // de-DE renders its own spelled-out names; textLocale equals currentLocale.
+      mockCurrentLocale = 'de-DE';
+      mockTextLocale = 'de-DE';
+
+      fixture.componentInstance.repeatCfg.set({
+        ...DEFAULT_TASK_REPEAT_CFG,
+        startDate: '2026-07-15',
+      });
+
+      expect(fixture.componentInstance.plannedStartDateStr()).toContain('Juli');
     });
   });
 

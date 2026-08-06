@@ -7,7 +7,7 @@ import { ServerMigrationService } from './server-migration.service';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import { VectorClockService } from './vector-clock.service';
 import { ValidateStateService } from '../validation/validate-state.service';
-import { StateSnapshotService } from '../backup/state-snapshot.service';
+import { AppStateSnapshot, StateSnapshotService } from '../backup/state-snapshot.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { UserInputWaitStateService } from '../../imex/sync/user-input-wait-state.service';
 import {
@@ -15,11 +15,15 @@ import {
   OperationSyncCapable,
 } from '../sync-providers/provider.interface';
 import { SyncProviderId } from '../sync-providers/provider.const';
-import { OpType } from '../core/operation.types';
+import { ActionType, OperationLogEntry, OpType } from '../core/operation.types';
 import { SYSTEM_TAG_IDS } from '../../features/tag/tag.const';
 import { INBOX_PROJECT } from '../../features/project/project.const';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
+import { LockService } from './lock.service';
+import { OperationWriteFlushService } from './operation-write-flush.service';
+import { LOCK_NAMES } from '../core/operation-log.const';
+import { OperationCaptureService } from '../capture/operation-capture.service';
 
 describe('ServerMigrationService', () => {
   let service: ServerMigrationService;
@@ -32,6 +36,9 @@ describe('ServerMigrationService', () => {
   let clientIdProviderSpy: jasmine.SpyObj<ClientIdProvider>;
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
   let userInputWaitStateSpy: jasmine.SpyObj<UserInputWaitStateService>;
+  let lockServiceSpy: jasmine.SpyObj<LockService>;
+  let writeFlushServiceSpy: jasmine.SpyObj<OperationWriteFlushService>;
+  let operationCaptureServiceSpy: jasmine.SpyObj<OperationCaptureService>;
   let defaultProvider: OperationSyncProvider;
 
   // Type for operation-sync-capable provider
@@ -63,12 +70,34 @@ describe('ServerMigrationService', () => {
     } as unknown as OperationSyncProvider;
   };
 
+  const createMigrationEntry = (rejectedAt?: number): OperationLogEntry => ({
+    seq: 1,
+    op: {
+      id: '01900000-0000-7000-8000-000000000001',
+      actionType: ActionType.LOAD_ALL_DATA,
+      opType: OpType.SyncImport,
+      entityType: 'ALL',
+      payload: {},
+      clientId: 'test-client',
+      vectorClock: { 'test-client': 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+      syncImportReason: 'SERVER_MIGRATION',
+    },
+    source: 'local',
+    appliedAt: Date.now(),
+    rejectedAt,
+  });
+
   beforeEach(() => {
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
       'hasSyncedOps',
       'append',
       'getOpsAfterSeq',
+      'pruneClockForStorage',
     ]);
+    // Store-owned pruning (#9096): pass-through by default.
+    opLogStoreSpy.pruneClockForStorage.and.callFake(async (clock) => clock);
     vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
       'getCurrentVectorClock',
     ]);
@@ -78,7 +107,11 @@ describe('ServerMigrationService', () => {
     stateSnapshotServiceSpy = jasmine.createSpyObj('StateSnapshotService', [
       'getStateSnapshot',
       'getStateSnapshotAsync',
+      'getStateSnapshotForOperationLogAsync',
     ]);
+    stateSnapshotServiceSpy.getStateSnapshotForOperationLogAsync.and.callFake(() =>
+      stateSnapshotServiceSpy.getStateSnapshotAsync(),
+    );
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     clientIdProviderSpy = jasmine.createSpyObj('ClientIdProvider', ['loadClientId']);
     matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
@@ -86,6 +119,26 @@ describe('ServerMigrationService', () => {
       'startWaiting',
     ]);
     userInputWaitStateSpy.startWaiting.and.returnValue(() => {});
+    lockServiceSpy = jasmine.createSpyObj('LockService', ['request']);
+    lockServiceSpy.request.and.callFake(async <T>(_name: string, fn: () => Promise<T>) =>
+      fn(),
+    );
+    writeFlushServiceSpy = jasmine.createSpyObj('OperationWriteFlushService', [
+      'flushPendingWrites',
+      'flushThenRunExclusive',
+    ]);
+    writeFlushServiceSpy.flushPendingWrites.and.resolveTo();
+    // Mirror the real barrier semantics: flush, acquire the op-log lock, run fn.
+    writeFlushServiceSpy.flushThenRunExclusive.and.callFake(
+      async <T>(fn: () => Promise<T>) => {
+        await writeFlushServiceSpy.flushPendingWrites();
+        return lockServiceSpy.request(LOCK_NAMES.OPERATION_LOG, fn);
+      },
+    );
+    operationCaptureServiceSpy = jasmine.createSpyObj('OperationCaptureService', [
+      'getPendingCount',
+    ]);
+    operationCaptureServiceSpy.getPendingCount.and.returnValue(0);
 
     // Default mock returns
     opLogStoreSpy.hasSyncedOps.and.returnValue(Promise.resolve(true));
@@ -130,6 +183,9 @@ describe('ServerMigrationService', () => {
         { provide: CLIENT_ID_PROVIDER, useValue: clientIdProviderSpy },
         { provide: MatDialog, useValue: matDialogSpy },
         { provide: UserInputWaitStateService, useValue: userInputWaitStateSpy },
+        { provide: LockService, useValue: lockServiceSpy },
+        { provide: OperationWriteFlushService, useValue: writeFlushServiceSpy },
+        { provide: OperationCaptureService, useValue: operationCaptureServiceSpy },
       ],
     });
 
@@ -150,6 +206,26 @@ describe('ServerMigrationService', () => {
       (provider.getLastServerSeq as jasmine.Spy).and.returnValue(Promise.resolve(10));
 
       await service.checkAndHandleMigration(provider);
+
+      expect(provider.downloadOps).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should reuse an existing pending server-migration snapshot without probing again', async () => {
+      const provider = createMockSyncProvider();
+      opLogStoreSpy.getOpsAfterSeq.and.resolveTo([createMigrationEntry()]);
+
+      await service.checkAndHandleMigration(provider);
+
+      expect(provider.downloadOps).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should block after a rejected server-migration snapshot instead of appending another', async () => {
+      const provider = createMockSyncProvider();
+      opLogStoreSpy.getOpsAfterSeq.and.resolveTo([createMigrationEntry(Date.now())]);
+
+      await expectAsync(service.checkAndHandleMigration(provider)).toBeRejected();
 
       expect(provider.downloadOps).not.toHaveBeenCalled();
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
@@ -231,6 +307,15 @@ describe('ServerMigrationService', () => {
   });
 
   describe('handleServerMigration', () => {
+    it('should create the snapshot and import under the operation-log lock', async () => {
+      await service.handleServerMigration(defaultProvider);
+
+      expect(lockServiceSpy.request).toHaveBeenCalledWith(
+        'sp_op_log',
+        jasmine.any(Function),
+      );
+    });
+
     it('should skip if state is empty (no tasks/projects/tags)', async () => {
       stateSnapshotServiceSpy.getStateSnapshotAsync.and.returnValue(
         Promise.resolve({
@@ -291,9 +376,10 @@ describe('ServerMigrationService', () => {
         } as any),
       );
 
-      await service.handleServerMigration(defaultProvider);
+      const createdOpId = await service.handleServerMigration(defaultProvider);
 
       expect(opLogStoreSpy.append).toHaveBeenCalled();
+      expect(createdOpId).toBe(opLogStoreSpy.append.calls.mostRecent().args[0].id);
     });
 
     it('should proceed if non-entity sync state differs from defaults', async () => {
@@ -470,6 +556,45 @@ describe('ServerMigrationService', () => {
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
   });
+
+  it('should capture and append the full-state operation inside one operation-log barrier', async () => {
+    const events: string[] = [];
+    writeFlushServiceSpy.flushPendingWrites.and.callFake(async () => {
+      events.push('flush');
+    });
+    lockServiceSpy.request.and.callFake(async <T>(name: string, fn: () => Promise<T>) => {
+      events.push(`lock:${name}:start`);
+      const result = await fn();
+      events.push(`lock:${name}:end`);
+      return result;
+    });
+    stateSnapshotServiceSpy.getStateSnapshotAsync.and.callFake(async () => {
+      events.push('snapshot');
+      return {
+        task: { ids: ['task-1'], entities: { 'task-1': { id: 'task-1' } } },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      } as unknown as AppStateSnapshot;
+    });
+    opLogStoreSpy.append.and.callFake(async () => {
+      events.push('append');
+      return 1;
+    });
+
+    await service.handleServerMigration(defaultProvider);
+
+    expect(events).toEqual([
+      'flush',
+      `lock:${LOCK_NAMES.OPERATION_LOG}:start`,
+      'snapshot',
+      'append',
+      `lock:${LOCK_NAMES.OPERATION_LOG}:end`,
+    ]);
+  });
+
+  // The release-flush-retry behavior when an action lands between flush and lock
+  // acquisition now lives in OperationWriteFlushService.flushThenRunExclusive —
+  // covered by operation-write-flush.service.spec.ts.
 
   describe('system-tag empty-state detection (tested via handleServerMigration)', () => {
     it('should identify system tags correctly', async () => {

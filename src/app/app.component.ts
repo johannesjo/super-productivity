@@ -41,7 +41,10 @@ import { concatMap, first, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { recordSearchNavDebug } from './util/search-nav-debug';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
-import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
+import {
+  AddTaskBarComponent,
+  TaskAddEvent,
+} from './features/tasks/add-task-bar/add-task-bar.component';
 import { Dir } from '@angular/cdk/bidi';
 import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav.component';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
@@ -76,6 +79,7 @@ import { readableUrl } from './util/readable-url';
 import { MobileBottomNavComponent } from './core-ui/mobile-bottom-nav/mobile-bottom-nav.component';
 import { StartupService } from './core/startup/startup.service';
 import { DataInitStateService } from './core/data-init/data-init-state.service';
+import { AppUriTaskActionsService } from './features/tasks/app-uri-actions/app-uri-task-actions.service';
 import { ExampleTasksService } from './core/example-tasks/example-tasks.service';
 import { KeyboardLayoutService } from './core/keyboard-layout/keyboard-layout.service';
 import { setKeyboardLayoutService } from './util/check-key-combo';
@@ -158,6 +162,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _keyboardLayoutService = inject(KeyboardLayoutService);
   private _dataInitStateService = inject(DataInitStateService);
   private _materialIconsLoaderService = inject(MaterialIconsLoaderService);
+  // Injected only to trigger its constructor eagerly at app start, so a
+  // cold-launch add-task/complete-task URL action is never missed.
+  private _appUriTaskActionsService = inject(AppUriTaskActionsService);
   readonly onboardingHintService = inject(OnboardingHintService);
 
   private _syncTriggerService = inject(SyncTriggerService);
@@ -426,9 +433,12 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     return this._activeWorkContextId() ?? null;
   }
 
-  onTaskAdded({ taskId }: { taskId: string; isAddToBottom: boolean }): void {
+  onTaskAdded({ taskId }: TaskAddEvent): void {
     this.layoutService.setPendingFocusTaskId(taskId);
     this.layoutService.scrollToNewTask(taskId);
+    if (this.onboardingHintService.shouldAutoCloseFirstTaskComposer(taskId)) {
+      this.layoutService.hideAddTaskBar(taskId);
+    }
   }
 
   // Opacity + blur follow the resolved background source (per-context image or

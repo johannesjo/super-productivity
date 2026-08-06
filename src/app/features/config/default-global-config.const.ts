@@ -76,6 +76,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   shortSyntax: {
     isEnableProject: true,
     isEnableDue: true,
+    isEnableDeadline: false,
     isEnableTag: true,
     urlBehavior: 'keep',
   },
@@ -84,6 +85,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,
+    isSuppressIdleDuringFocusMode: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
   },

@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import {
+  ActionType,
   FULL_STATE_OP_TYPES,
   Operation,
   OperationLogEntry,
@@ -10,7 +11,20 @@ import { OperationWriteFlushService } from './operation-write-flush.service';
 import { SyncImportConflictData } from './dialog-sync-import-conflict/dialog-sync-import-conflict.component';
 import { isExampleTaskCreateOp } from '../validation/is-example-task-op.util';
 
-const USER_ENTITY_TYPES = new Set(['TASK', 'PROJECT', 'TAG', 'NOTE']);
+/**
+ * Enabling/configuring sync on a never-synced client necessarily writes the
+ * sync config section before the first download. That setup-only operation is
+ * not local user data divergence. Other GLOBAL_CONFIG sections remain protected.
+ */
+const isInitialSyncSetupOp = (entry: OperationLogEntry): boolean =>
+  entry.op.actionType === ActionType.GLOBAL_CONFIG_UPDATE_SECTION &&
+  entry.op.opType === OpType.Update &&
+  entry.op.entityType === 'GLOBAL_CONFIG' &&
+  entry.op.entityId === 'sync';
+
+interface PendingOpClassificationOptions {
+  hasCompletedInitialSync: boolean;
+}
 
 export interface IncomingFullStateConflictGateResult {
   fullStateOp?: Operation;
@@ -36,11 +50,20 @@ export class SyncImportConflictGateService {
   private writeFlushService = inject(OperationWriteFlushService);
 
   /**
-   * Config-only pending ops are not considered user work for this conflict gate.
-   * Full-state ops are always meaningful because applying a newer full-state op can
-   * invalidate their local import/repair semantics.
+   * Every pending op is user work unless it is an onboarding example-task create,
+   * or the sync-section setup write on a client that has never completed sync.
+   * Full-state ops are always meaningful because applying a newer full-state op
+   * can invalidate their local import/repair semantics.
+   *
+   * The lifecycle default is deliberately conservative: a caller that does not
+   * know whether initial sync completed must protect startup-entity changes.
    */
-  hasMeaningfulPendingOps(ops: OperationLogEntry[]): boolean {
+  hasMeaningfulPendingOps(
+    ops: OperationLogEntry[],
+    options: PendingOpClassificationOptions = {
+      hasCompletedInitialSync: true,
+    },
+  ): boolean {
     return ops.some((entry) => {
       if (FULL_STATE_OP_TYPES.has(entry.op.opType as OpType)) {
         return true;
@@ -48,18 +71,43 @@ export class SyncImportConflictGateService {
       if (isExampleTaskCreateOp(entry)) {
         return false;
       }
-      return (
-        USER_ENTITY_TYPES.has(entry.op.entityType) &&
-        (entry.op.opType === OpType.Create ||
-          entry.op.opType === OpType.Update ||
-          entry.op.opType === OpType.Delete)
-      );
+      if (isInitialSyncSetupOp(entry)) {
+        return options.hasCompletedInitialSync;
+      }
+      return true;
     });
   }
 
+  getDiscardablePendingOpIds(
+    ops: OperationLogEntry[],
+    options: PendingOpClassificationOptions,
+  ): string[] {
+    return ops
+      .filter(
+        (entry) =>
+          isExampleTaskCreateOp(entry) ||
+          (!options.hasCompletedInitialSync && isInitialSyncSetupOp(entry)),
+      )
+      .map((entry) => entry.op.id);
+  }
+
+  /**
+   * @param options.preCapturedPendingOps - Exact pending ops selected by the upload
+   *        round, unioned with a live read. NOTE: accepted ops of the current round
+   *        are still in the live set when this gate runs (acknowledgement is
+   *        deferred until piggyback processing commits), so the union is NOT what
+   *        protects them. Its own coverage is the narrower set of ops removed from
+   *        the live set mid-upload: a local SYNC_IMPORT deleted on
+   *        SYNC_IMPORT_EXISTS, full-state ops perma-rejected by the server, and a
+   *        concurrent tab marking ops synced between lock release and this read.
+   */
   async checkIncomingFullStateConflict(
     incomingOps: Operation[],
-    options: { flushPendingWrites?: boolean; isNeverSynced?: boolean } = {},
+    options: {
+      flushPendingWrites?: boolean;
+      isNeverSynced?: boolean;
+      preCapturedPendingOps?: OperationLogEntry[];
+    } = {},
   ): Promise<IncomingFullStateConflictGateResult> {
     const fullStateOp = incomingOps.find((op) => FULL_STATE_OP_TYPES.has(op.opType));
 
@@ -78,15 +126,41 @@ export class SyncImportConflictGateService {
       await this.writeFlushService.flushPendingWrites();
     }
 
-    const pendingOps = await this.opLogStore.getUnsynced();
-    const hasMeaningfulPending = this.hasMeaningfulPendingOps(pendingOps);
-    // Example-task ops that the caller may reject when it accepts the import silently.
-    // When `hasMeaningfulPending` is true (real work pending alongside example tasks),
-    // the conflict dialog is shown instead and these are intentionally left untouched:
-    // if the user keeps local state, their example tasks ride along with the rest.
-    const discardablePendingOpIds = pendingOps
-      .filter(isExampleTaskCreateOp)
-      .map((entry) => entry.op.id);
+    const livePendingOps = await this.opLogStore.getUnsynced();
+    const pendingOps = options.preCapturedPendingOps
+      ? this._mergePendingOps(options.preCapturedPendingOps, livePendingOps)
+      : livePendingOps;
+
+    // Preserve the cheap example-task-only path. If nothing could be meaningful
+    // even for a synced client, there is no reason to read sync history.
+    const canContainMeaningfulPending = this.hasMeaningfulPendingOps(pendingOps);
+    if (!canContainMeaningfulPending) {
+      return {
+        fullStateOp,
+        pendingOps,
+        hasMeaningfulPending: false,
+        discardablePendingOpIds: this.getDiscardablePendingOpIds(livePendingOps, {
+          hasCompletedInitialSync: true,
+        }),
+      };
+    }
+
+    const isNeverSynced =
+      options.isNeverSynced ?? !(await this.opLogStore.hasSyncedOps());
+    const classificationOptions = {
+      hasCompletedInitialSync: !isNeverSynced,
+    };
+    const hasMeaningfulPending = this.hasMeaningfulPendingOps(
+      pendingOps,
+      classificationOptions,
+    );
+    // Only live pending ops may be rejected. A pre-captured upload snapshot can
+    // include ops already acknowledged by the server, which must not be rewritten
+    // as rejected locally.
+    const discardablePendingOpIds = this.getDiscardablePendingOpIds(
+      livePendingOps,
+      classificationOptions,
+    );
 
     const result = {
       fullStateOp,
@@ -99,20 +173,6 @@ export class SyncImportConflictGateService {
       return result;
     }
 
-    // A client that has never completed a sync cannot have diverged from remote — its
-    // "meaningful" pending ops are pre-first-sync startup state (e.g. example tasks).
-    // Flag this so the dialog guards the destructive USE_LOCAL choice with an extra
-    // confirmation (it would overwrite the populated remote with throwaway data).
-    //
-    // Callers SHOULD pass `isNeverSynced` captured at sync-cycle start (pre-download).
-    // A live `hasSyncedOps()` here is unreliable on the piggyback-upload path: by the
-    // time that gate runs, this same sync has already persisted downloaded ops
-    // (syncedAt set) and marked accepted uploads synced, so reading it now would see
-    // post-sync state and wrongly clear the guard. Fall back to a live read only for
-    // standalone callers (e.g. the download path, where nothing is persisted yet).
-    const isNeverSynced =
-      options.isNeverSynced ?? !(await this.opLogStore.hasSyncedOps());
-
     return {
       ...result,
       dialogData: {
@@ -123,5 +183,22 @@ export class SyncImportConflictGateService {
         isNeverSynced,
       },
     };
+  }
+
+  private _mergePendingOps(
+    uploadSnapshot: OperationLogEntry[],
+    livePendingOps: OperationLogEntry[],
+  ): OperationLogEntry[] {
+    const merged = [...uploadSnapshot];
+    const seenOpIds = new Set(uploadSnapshot.map((entry) => entry.op.id));
+
+    for (const entry of livePendingOps) {
+      if (!seenOpIds.has(entry.op.id)) {
+        merged.push(entry);
+        seenOpIds.add(entry.op.id);
+      }
+    }
+
+    return merged;
   }
 }

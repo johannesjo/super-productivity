@@ -1,9 +1,9 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { EMPTY, firstValueFrom, interval, merge, Observable } from 'rxjs';
+import { EMPTY, firstValueFrom, from, interval, merge, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
-import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, exhaustMap, map, switchMap } from 'rxjs/operators';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { LocalBackupMeta } from './local-backup.model';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../util/is-android-web-view';
@@ -11,6 +11,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { androidInterface } from '../../features/android/android-interface';
 import { StateSnapshotService } from '../../op-log/backup/state-snapshot.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDataComplete } from '../../op-log/model/model-config';
@@ -54,6 +55,7 @@ export class LocalBackupService {
   private _configService = inject(GlobalConfigService);
   private _stateSnapshotService = inject(StateSnapshotService);
   private _backupService = inject(BackupService);
+  private _localDraftService = inject(LocalDraftService);
   private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
   private _platformService = inject(CapacitorPlatformService);
@@ -76,7 +78,14 @@ export class LocalBackupService {
           )
         : EMPTY,
     ),
-    tap(() => this._backup()),
+    exhaustMap(() =>
+      from(this._backup()).pipe(
+        catchError((error) => {
+          Log.err('LocalBackupService: Backup failed', error);
+          return EMPTY;
+        }),
+      ),
+    ),
   );
 
   init(): void {
@@ -370,7 +379,7 @@ export class LocalBackupService {
 
   private async _backupElectron(data: AppDataComplete): Promise<void> {
     const cfg = await firstValueFrom(this._cfg$);
-    window.ea.backupAppData({
+    await window.ea.backupAppData({
       data,
       maxBackupFiles: cfg.maxBackupFiles ?? DEFAULT_MAX_BACKUP_FILES,
     });
@@ -545,6 +554,11 @@ export class LocalBackupService {
         true,
         true,
       );
+      // This profile's notes were just replaced wholesale (Electron startup
+      // restore, mobile auto-restore, Android Settings restore all funnel
+      // here), so every draft's baseContent refers to content that no longer
+      // exists.
+      this._localDraftService.deleteDraftsForActiveProfile();
       return true;
     } catch (e) {
       this._snackService.open({

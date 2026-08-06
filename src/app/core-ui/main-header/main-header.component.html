@@ -1,18 +1,40 @@
 <div class="wrapper">
   @if (isDataLoaded()) {
     <page-title></page-title>
+  }
 
-    <nav class="action-nav-right">
-      <div class="counters-action-group">
-        @if (isTimeTrackingEnabled()) {
-          <play-button
-            [currentTask]="currentTask()"
-            [currentTaskId]="currentTaskId()"
-            [currentTaskContext]="currentTaskContext()"
-            [hasTrackableTasks]="hasTrackableTasks()"
-          ></play-button>
-        }
+  <nav class="action-nav-right">
+    <div class="header-action-group primary-action-group">
+      @if (isDataLoaded() && isTimeTrackingEnabled()) {
+        <play-button
+          [currentTask]="currentTask()"
+          [currentTaskId]="currentTaskId()"
+          [currentTaskContext]="currentTaskContext()"
+          [hasTrackableTasks]="hasTrackableTasks()"
+        ></play-button>
+      }
 
+      <!-- Not gated on isDataLoaded: the shell paints before op-log hydration
+           finishes, and the primary quick-capture entry point must not be
+           missing for that window. -->
+      @if (showDesktopButtons()) {
+        <button
+          emlDrop
+          (click)="layoutService.showAddTaskBar()"
+          matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
+            kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
+          }}"
+          class="tour-addBtn"
+          color="primary"
+          mat-icon-button
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      }
+    </div>
+
+    @if (isDataLoaded()) {
+      <div class="header-action-group secondary-action-group counters-action-group">
         <!-- Focus button: keep the entry point discoverable on desktop and mobile. -->
         @if (isFocusButtonVisible()) {
           <focus-button></focus-button>
@@ -32,24 +54,31 @@
         }
       </div>
 
-      <!-- Desktop: Secondary action group -->
-      @if (showDesktopButtons()) {
-        <button
-          emlDrop
-          (click)="layoutService.showAddTaskBar()"
-          matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
-            kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
-          }}"
-          class="tour-addBtn"
-          mat-icon-button
-        >
-          <mat-icon>add</mat-icon>
-        </button>
-      }
-
       @if (isSyncIconEnabled()) {
+        <!--
+          matBadgeHidden only hides the badge VISUALLY (CSS) — MatBadge keeps an
+          aria description active regardless of hidden state. So at count 0 the
+          badge description must be empty (not a stale "0 conflicts" announced to
+          screen readers on every encounter). '' is the type-correct
+          "no description" value; MatBadge removes the aria-describedby for it.
+        -->
         <button
-          class="sync-btn"
+          class="sync-btn secondary-header-action"
+          [class.is-error]="syncIsEnabledAndReady() && syncState() === 'ERROR'"
+          [class.is-offline]="syncIsEnabledAndReady() && !isOnline()"
+          [class.is-in-progress]="syncIsEnabledAndReady() && isSyncInProgress()"
+          [matBadge]="unreviewedConflictCount()"
+          [matBadgeHidden]="unreviewedConflictCount() === 0"
+          matBadgeColor="accent"
+          matBadgeSize="small"
+          matBadgeOverlap="true"
+          [matBadgeDescription]="
+            unreviewedConflictCount() > 0
+              ? (T.F.SYNC.CONFLICT_REVIEW.BADGE_TOOLTIP
+                | translate: { count: unreviewedConflictCount() })
+              : ''
+          "
+          [attr.aria-label]="syncTooltip() | translate"
           matTooltip="{{ syncTooltip() | translate }}"
           (click)="onSyncButtonClick()"
           (longPress)="setupSync()"
@@ -79,18 +108,21 @@
         </button>
       }
 
-      <plugin-work-context-header-btns></plugin-work-context-header-btns>
-      <plugin-header-btns></plugin-header-btns>
+      <plugin-work-context-header-btns
+        class="secondary-header-action"
+      ></plugin-work-context-header-btns>
+      <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
 
       @if (isUserProfilesEnabled()) {
-        <user-profile-button></user-profile-button>
+        <user-profile-button class="secondary-header-action"></user-profile-button>
       }
 
       <!-- Desktop: Show all buttons inline -->
       @if (showDesktopButtons()) {
-        <plugin-side-panel-btns></plugin-side-panel-btns>
+        <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
 
         <desktop-panel-buttons
+          class="secondary-header-action"
           [kb]="kb"
           [isRouteWithSidePanel]="isRouteWithSidePanel()"
           [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
@@ -102,21 +134,28 @@
       <!-- Simple Counter Dropdown (mobile only) -->
       @if (isXs()) {
         @if (enabledSimpleCounters().length) {
-          <div class="mobile-dropdown-wrapper">
+          <div class="header-action-group secondary-action-group mobile-dropdown-wrapper">
             <button
               (click)="
                 isShowSimpleCounterBtnsDropdown.set(!isShowSimpleCounterBtnsDropdown())
               "
               [color]="isCounterRunning(enabledSimpleCounters()) ? 'accent' : ''"
+              aria-controls="mobile-simple-counter-menu"
+              [attr.aria-expanded]="isShowSimpleCounterBtnsDropdown()"
+              [attr.aria-label]="T.F.METRIC.CMP.SIMPLE_COUNTERS | translate"
               mat-icon-button
+              type="button"
             >
               <mat-icon>{{
                 isShowSimpleCounterBtnsDropdown() ? 'close' : 'timer'
               }}</mat-icon>
             </button>
             <div
+              id="mobile-simple-counter-menu"
               class="mobile-dropdown"
               [class.isVisible]="isShowSimpleCounterBtnsDropdown()"
+              [attr.aria-hidden]="!isShowSimpleCounterBtnsDropdown()"
+              [attr.inert]="isShowSimpleCounterBtnsDropdown() ? null : ''"
             >
               @for (
                 simpleCounter of enabledSimpleCounters();
@@ -132,6 +171,6 @@
           </div>
         }
       }
-    </nav>
-  }
+    }
+  </nav>
 </div>

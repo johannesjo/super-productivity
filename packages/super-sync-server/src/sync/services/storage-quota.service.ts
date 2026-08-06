@@ -12,11 +12,28 @@ import { prisma } from '../../db';
 import { Logger } from '../../logger';
 import { parsePositiveIntegerEnv } from '../../util/env';
 import { APPROX_BYTES_PER_OP } from '../sync.const';
+import { CAUSAL_FULL_STATE_OPERATION_WHERE } from '../sync.types';
 
 /**
  * Default storage quota per user in bytes (100MB).
  */
 const DEFAULT_STORAGE_QUOTA_BYTES = 100 * 1024 * 1024;
+
+/**
+ * Quota applied to accounts created from now on, overridable per deployment.
+ *
+ * A self-hoster running this on their own disk has no reason to inherit our hosted
+ * service's 100 MB budget, and until this existed the only way to change it was an
+ * `UPDATE users SET storage_quota_bytes` against Postgres. This sets what NEW rows get;
+ * existing accounts keep the value already stored on their row, so raising it does not
+ * retroactively widen anyone's quota. The column is NOT NULL (schema.prisma), so the `??`
+ * fallbacks at the read sites fire only when the user row itself is missing.
+ */
+export const getDefaultStorageQuotaBytes = (): number =>
+  parsePositiveIntegerEnv(
+    'SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES',
+    DEFAULT_STORAGE_QUOTA_BYTES,
+  );
 const OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = 5_000;
 const OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = 25_000;
 // Operator-DoS guardrail: a 1M `take:` materializes 1M ids in Node memory and
@@ -249,7 +266,7 @@ export class StorageQuotaService {
       select: { storageQuotaBytes: true, storageUsedBytes: true },
     });
 
-    const quota = Number(user?.storageQuotaBytes ?? DEFAULT_STORAGE_QUOTA_BYTES);
+    const quota = Number(user?.storageQuotaBytes ?? getDefaultStorageQuotaBytes());
     const currentUsage = Number(user?.storageUsedBytes ?? 0);
 
     return {
@@ -408,6 +425,7 @@ export class StorageQuotaService {
         userId: true,
         lastSnapshotSeq: true,
         snapshotAt: true,
+        latestFullStateSeq: true,
       },
       orderBy: { snapshotAt: 'asc' },
     });
@@ -416,6 +434,7 @@ export class StorageQuotaService {
     const affectedUserIds: number[] = [];
     const deleteBatchSize = getOldOpsCleanupDeleteBatchSize();
     let remainingDeleteBudget = getOldOpsCleanupMaxDeletedPerRun();
+    let eligibleUsersWithoutReplayBase = 0;
 
     for (const state of states) {
       if (remainingDeleteBudget <= 0) break;
@@ -423,8 +442,68 @@ export class StorageQuotaService {
       const snapshotAt = Number(state.snapshotAt);
       const lastSnapshotSeq = state.lastSnapshotSeq ?? 0;
 
-      // Only prune ops that are both older than the retention window and covered by a snapshot
+      // The cached snapshot is only exposed by restore endpoints; normal sync
+      // clients still bootstrap from the operation log. Therefore cleanup may
+      // only remove the superseded prefix before the newest full-state op and
+      // must keep that op plus its complete replay tail.
       if (!(snapshotAt >= cutoffTime && lastSnapshotSeq > 0)) continue;
+      let protectedFromSeq =
+        typeof state.latestFullStateSeq === 'number' &&
+        state.latestFullStateSeq <= lastSnapshotSeq
+          ? state.latestFullStateSeq
+          : null;
+
+      // The cached `latestFullStateSeq` marker is NOT self-validating. Installs
+      // upgraded from before the causal-marker migration (#8973) may have set it
+      // from a legacy REPAIR (repairBaseServerSeq NULL) through the old
+      // isFullStateOpType gate, and that migration shipped no backfill to clear
+      // stale markers. Trusting it blindly would prune history behind a repair
+      // the replay path deliberately refuses as a boundary
+      // (LegacyRepairReplayUnsupportedError) — permanent, cross-device loss.
+      // Confirm the marked op is actually causal before it can authorize a
+      // DELETE; otherwise drop to the causal-only lookup below (or skip).
+      if (protectedFromSeq !== null) {
+        const markerIsCausal = await prisma.operation.findFirst({
+          where: {
+            userId: state.userId,
+            serverSeq: protectedFromSeq,
+            ...CAUSAL_FULL_STATE_OPERATION_WHERE,
+          },
+          select: { serverSeq: true },
+        });
+        if (!markerIsCausal) {
+          protectedFromSeq = null;
+        }
+      }
+
+      // Existing installations may have full-state rows created before the
+      // marker was introduced, and a snapshot can temporarily lag a newer
+      // marker. Fall back only for those legacy/stale-marker cases.
+      if (protectedFromSeq === null) {
+        const latestCoveredFullStateOp = await prisma.operation.findFirst({
+          where: {
+            userId: state.userId,
+            serverSeq: { lte: lastSnapshotSeq },
+            // Legacy REPAIR rows carry no causal base cursor, so they must never
+            // authorize history pruning (see CAUSAL_FULL_STATE_OPERATION_WHERE).
+            // This is the one query whose result directly authorizes a DELETE;
+            // it must match the five other full-state queries and the primary
+            // `latestFullStateSeq` marker (validated causal just above). A
+            // legacy-repair-only user then yields protectedFromSeq === null →
+            // eligibleUsersWithoutReplayBase++ → skipped (no deletion).
+            ...CAUSAL_FULL_STATE_OPERATION_WHERE,
+          },
+          orderBy: { serverSeq: 'desc' },
+          select: { serverSeq: true },
+        });
+        protectedFromSeq = latestCoveredFullStateOp?.serverSeq ?? null;
+      }
+
+      if (protectedFromSeq === null) {
+        eligibleUsersWithoutReplayBase++;
+        continue;
+      }
+      if (protectedFromSeq <= 1) continue;
 
       // Drain this user across multiple batches until either they're empty or
       // the global per-run budget is exhausted. Without this, a single user
@@ -436,7 +515,7 @@ export class StorageQuotaService {
         const batchLimit = Math.min(deleteBatchSize, remainingDeleteBudget);
         const deletedCount = await this.deleteOldSyncedOpsBatch(
           state.userId,
-          lastSnapshotSeq,
+          protectedFromSeq,
           cutoffTime,
           batchLimit,
         );
@@ -472,6 +551,13 @@ export class StorageQuotaService {
       }
     }
 
+    if (eligibleUsersWithoutReplayBase > 0) {
+      Logger.warn(
+        `Cleanup [old-ops]: skipped ${eligibleUsersWithoutReplayBase} eligible user(s) ` +
+          'without a full-state replay base; their operation histories were left intact.',
+      );
+    }
+
     if (remainingDeleteBudget <= 0) {
       Logger.warn(
         `Cleanup [old-ops]: per-run budget exhausted after ${totalDeleted} ops; ` +
@@ -485,14 +571,14 @@ export class StorageQuotaService {
 
   private async deleteOldSyncedOpsBatch(
     userId: number,
-    lastSnapshotSeq: number,
+    protectedFromSeq: number,
     cutoffTime: number,
     limit: number,
   ): Promise<number> {
     const doomedOps = await prisma.operation.findMany({
       where: {
         userId,
-        serverSeq: { lte: lastSnapshotSeq },
+        serverSeq: { lt: protectedFromSeq },
         receivedAt: { lt: BigInt(cutoffTime) },
       },
       orderBy: { serverSeq: 'asc' },
@@ -530,7 +616,7 @@ export class StorageQuotaService {
     const restorePoints = await prisma.operation.findMany({
       where: {
         userId,
-        opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+        ...CAUSAL_FULL_STATE_OPERATION_WHERE,
       },
       orderBy: { serverSeq: 'asc' },
       select: { serverSeq: true, opType: true },
@@ -736,7 +822,7 @@ export class StorageQuotaService {
       const restorePoints = await prisma.operation.findMany({
         where: {
           userId,
-          opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+          ...CAUSAL_FULL_STATE_OPERATION_WHERE,
         },
         orderBy: { serverSeq: 'asc' },
         select: { serverSeq: true },
@@ -808,7 +894,7 @@ export class StorageQuotaService {
 
     return {
       storageUsedBytes: Number(user?.storageUsedBytes ?? 0),
-      storageQuotaBytes: Number(user?.storageQuotaBytes ?? DEFAULT_STORAGE_QUOTA_BYTES),
+      storageQuotaBytes: Number(user?.storageQuotaBytes ?? getDefaultStorageQuotaBytes()),
     };
   }
 }

@@ -84,11 +84,17 @@ describe('AddTaskBarActionsComponent', () => {
       localization: () => ({ timeLocale: locale }),
     });
   };
+  // Mutable locales backing the mock so a test can simulate the ISO 8601 option
+  // (numeric locale = sv sentinel, spelled-out names = UI language). Reset in
+  // beforeEach.
+  let mockCurrentLocale = 'en-US';
+  let mockTextLocale = 'en-US';
   const mockDateTimeFormatService = jasmine.createSpyObj(
     'DateTimeFormatService',
     ['formatTime'],
     {
-      currentLocale: () => 'en-US',
+      currentLocale: () => mockCurrentLocale,
+      textLocale: () => mockTextLocale,
     },
   );
   mockDateTimeFormatService.formatTime.and.callFake((timestamp: number) =>
@@ -99,6 +105,8 @@ describe('AddTaskBarActionsComponent', () => {
   );
 
   beforeEach(async () => {
+    mockCurrentLocale = 'en-US';
+    mockTextLocale = 'en-US';
     // Create proper signal mocks
     const mockStateSignal = signal(mockState);
     const mockAutoDetectedSignal = signal(false);
@@ -115,6 +123,7 @@ describe('AddTaskBarActionsComponent', () => {
       'clearTags',
       'clearEstimate',
       'toggleTag',
+      'updateRepeatSetting',
     ]);
 
     // Set up signal properties
@@ -142,7 +151,16 @@ describe('AddTaskBarActionsComponent', () => {
 
     mockParserService = jasmine.createSpyObj('AddTaskBarParserService', [
       'removeShortSyntaxFromInput',
+      'applyUserRepeatPick',
+      'applyUserDatePick',
+      'applyUserDeadlinePick',
+      'applyUserEstimatePick',
     ]);
+    // Stand-in for "input held no syntax of that type"; tests that care about
+    // the stripping override this
+    mockParserService.removeShortSyntaxFromInput.and.callFake(
+      (currentInput: string) => currentInput,
+    );
 
     mockProjectsSignal = signal([mockProject]);
     mockProjectService = jasmine.createSpyObj('ProjectService', [], {
@@ -393,6 +411,25 @@ describe('AddTaskBarActionsComponent', () => {
       expect(result).toContain(futureDate.getDate().toString());
     });
 
+    it('should render dateDisplay month name in the UI language under the ISO option (#8987)', () => {
+      // ISO 8601 option: numeric locale is the sv sentinel, spelled-out month
+      // name must follow the UI language ('en').
+      mockCurrentLocale = 'sv';
+      mockTextLocale = 'en';
+      mockDateService.getLogicalTodayDate.and.returnValue(new Date(2020, 0, 1));
+      (mockStateService as any)._mockStateSignal.set({
+        ...mockState,
+        date: '2026-07-15',
+        time: null,
+      });
+
+      fixture.detectChanges();
+      const result = component.dateDisplay();
+      // English 'Jul 15', not Swedish '15 juli'.
+      expect(result).toContain('Jul');
+      expect(result).not.toContain('juli');
+    });
+
     it('should compute estimateDisplay correctly', () => {
       const estimate = 1800000; // 30 minutes
       const stateWithEstimate = {
@@ -495,6 +532,7 @@ describe('AddTaskBarActionsComponent', () => {
             provide: DateTimeFormatService,
             useValue: jasmine.createSpyObj('DateTimeFormatService', ['-'], {
               currentLocale: () => 'de-de',
+              textLocale: () => 'de-de',
             }),
           },
           { provide: DateService, useValue: mockDateService },
@@ -565,6 +603,83 @@ describe('AddTaskBarActionsComponent', () => {
     });
   });
 
+  describe('Repeat Setting', () => {
+    beforeEach(() => {
+      TestBed.inject(TranslateService).setTranslation(
+        'en',
+        {
+          F: {
+            TASK_REPEAT: {
+              F: {
+                Q_CUSTOM: 'Custom recurring config',
+                Q_DAILY: 'Every day',
+                Q_EVERY_X_DAYS: 'Every {{count}} days',
+                Q_EVERY_X_WEEKS: 'Every {{count}} weeks on {{weekdayStr}}',
+              },
+            },
+          },
+        },
+        true,
+      );
+    });
+
+    it('should label an interval recurrence with its count', () => {
+      (mockStateService as any)._mockStateSignal.set({
+        ...mockState,
+        repeat: { type: 'INTERVAL', repeatCycle: 'DAILY', repeatEvery: 3 },
+      });
+
+      expect(component.repeatDisplay()).toBe('Every 3 days');
+    });
+
+    it('should name the recurring weekday of a weekly interval', () => {
+      // 2024-05-24 is a Friday — the first occurrence, so also the weekday the
+      // config will recur on
+      (mockStateService as any)._mockStateSignal.set({
+        ...mockState,
+        date: '2024-05-24',
+        repeat: { type: 'INTERVAL', repeatCycle: 'WEEKLY', repeatEvery: 2 },
+      });
+
+      expect(component.repeatDisplay()).toBe('Every 2 weeks on Friday');
+    });
+
+    it('should label a preset recurrence from the quick setting options', () => {
+      (mockStateService as any)._mockStateSignal.set({
+        ...mockState,
+        repeat: { type: 'PRESET', quickSetting: 'DAILY' },
+      });
+
+      expect(component.repeatDisplay()).toBe('Every day');
+    });
+
+    it('should label the custom-config menu entry', () => {
+      (mockStateService as any)._mockStateSignal.set({
+        ...mockState,
+        repeat: { type: 'DIALOG' },
+      });
+
+      expect(component.repeatDisplay()).toBe('Custom recurring config');
+    });
+
+    it('should map a menu preset to a preset repeat', () => {
+      component.selectRepeatQuickSetting('DAILY');
+
+      expect(mockParserService.applyUserRepeatPick).toHaveBeenCalledWith({
+        type: 'PRESET',
+        quickSetting: 'DAILY',
+      });
+    });
+
+    it('should map the custom menu entry to the dialog repeat', () => {
+      component.selectRepeatQuickSetting('CUSTOM');
+
+      expect(mockParserService.applyUserRepeatPick).toHaveBeenCalledWith({
+        type: 'DIALOG',
+      });
+    });
+  });
+
   describe('Schedule Dialog', () => {
     it('should open schedule dialog with correct data', () => {
       const testDateStr = '2024-01-15';
@@ -607,9 +722,29 @@ describe('AddTaskBarActionsComponent', () => {
 
       component.openScheduleDialog();
 
-      expect(mockStateService.updateDate).toHaveBeenCalledWith(
+      expect(mockParserService.applyUserDatePick).toHaveBeenCalledWith(
         getDbDateStr(resultDate),
         resultTime,
+        null,
+      );
+    });
+
+    it('should pass a picked reminder option along', () => {
+      const resultDate = new Date('2024-01-15');
+      mockDialogRef.afterClosed.and.returnValue(
+        of({
+          date: resultDate,
+          time: '14:30',
+          remindOption: TaskReminderOptionId.AtStart,
+        }),
+      );
+
+      component.openScheduleDialog();
+
+      expect(mockParserService.applyUserDatePick).toHaveBeenCalledWith(
+        getDbDateStr(resultDate),
+        '14:30',
+        TaskReminderOptionId.AtStart,
       );
     });
 
@@ -625,7 +760,7 @@ describe('AddTaskBarActionsComponent', () => {
 
       component.openScheduleDialog();
 
-      expect(mockStateService.updateDate).not.toHaveBeenCalled();
+      expect(mockParserService.applyUserDatePick).not.toHaveBeenCalled();
       expect(component.refocus.emit).toHaveBeenCalled();
     });
 
@@ -641,7 +776,7 @@ describe('AddTaskBarActionsComponent', () => {
 
       component.openScheduleDialog();
 
-      expect(mockStateService.updateDate).not.toHaveBeenCalled();
+      expect(mockParserService.applyUserDatePick).not.toHaveBeenCalled();
       expect(component.refocus.emit).toHaveBeenCalled();
     });
 
@@ -817,11 +952,12 @@ describe('AddTaskBarActionsComponent', () => {
   describe('Estimate Operations', () => {
     it('should handle estimate input with valid value', () => {
       spyOn(component.estimateChanged, 'emit');
+      (mockStateService as any)._mockInputTxtSignal.set('Task');
       const testValue = '30m'; // This should result in 1800000ms (30 minutes)
 
       component.onEstimateInput(testValue);
 
-      expect(mockStateService.updateEstimate).toHaveBeenCalledWith(1800000);
+      expect(mockParserService.applyUserEstimatePick).toHaveBeenCalledWith(1800000);
       expect(component.estimateChanged.emit).toHaveBeenCalledWith(testValue);
     });
 
@@ -830,7 +966,7 @@ describe('AddTaskBarActionsComponent', () => {
 
       component.onEstimateInput('invalid');
 
-      expect(mockStateService.updateEstimate).not.toHaveBeenCalled();
+      expect(mockParserService.applyUserEstimatePick).not.toHaveBeenCalled();
       expect(component.estimateChanged.emit).not.toHaveBeenCalled();
     });
 
@@ -853,15 +989,15 @@ describe('AddTaskBarActionsComponent', () => {
 
       // Test hours
       component.onEstimateInput('2h');
-      expect(mockStateService.updateEstimate).toHaveBeenCalledWith(7200000); // 2 hours in ms
+      expect(mockParserService.applyUserEstimatePick).toHaveBeenCalledWith(7200000); // 2 hours in ms
       expect(emitSpy).toHaveBeenCalledWith('2h');
 
-      mockStateService.updateEstimate.calls.reset();
+      mockParserService.applyUserEstimatePick.calls.reset();
       emitSpy.calls.reset();
 
       // Test decimal hours
       component.onEstimateInput('1.5h');
-      expect(mockStateService.updateEstimate).toHaveBeenCalledWith(5400000); // 1.5 hours in ms
+      expect(mockParserService.applyUserEstimatePick).toHaveBeenCalledWith(5400000); // 1.5 hours in ms
       expect(emitSpy).toHaveBeenCalledWith('1.5h');
     });
 
@@ -870,12 +1006,12 @@ describe('AddTaskBarActionsComponent', () => {
 
       // Test empty string (should return 0 from stringToMs)
       component.onEstimateInput('');
-      expect(mockStateService.updateEstimate).not.toHaveBeenCalled();
+      expect(mockParserService.applyUserEstimatePick).not.toHaveBeenCalled();
       expect(component.estimateChanged.emit).not.toHaveBeenCalled();
 
       // Test zero value
       component.onEstimateInput('0m');
-      expect(mockStateService.updateEstimate).not.toHaveBeenCalled();
+      expect(mockParserService.applyUserEstimatePick).not.toHaveBeenCalled();
       expect(component.estimateChanged.emit).not.toHaveBeenCalled();
     });
   });
@@ -1129,9 +1265,10 @@ describe('AddTaskBarActionsComponent', () => {
       component.openScheduleDialog();
 
       // Should convert the Date to string format for consistency
-      expect(mockStateService.updateDate).toHaveBeenCalledWith(
+      expect(mockParserService.applyUserDatePick).toHaveBeenCalledWith(
         '2025-03-15', // Date converted to string format
         '15:00', // Time preserved
+        null,
       );
     });
 
@@ -1172,7 +1309,11 @@ describe('AddTaskBarActionsComponent', () => {
 
       component.openScheduleDialog();
 
-      expect(mockStateService.updateDate).toHaveBeenCalledWith('2025-01-01', '00:00');
+      expect(mockParserService.applyUserDatePick).toHaveBeenCalledWith(
+        '2025-01-01',
+        '00:00',
+        null,
+      );
     });
   });
 });

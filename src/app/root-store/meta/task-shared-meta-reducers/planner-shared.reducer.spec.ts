@@ -83,6 +83,26 @@ describe('plannerSharedMetaReducer', () => {
       expect(resultState.planner.days['2099-12-31']).toContain('task1');
     });
 
+    it('should not touch a sub-task scheduled for a different day when transferring the parent (#9019)', () => {
+      const todayStr = getDbDateStr();
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState.planner = {
+        ...testState.planner,
+        days: {
+          '2024-01-16': ['sub1'], // sub scheduled for its own day
+          '2024-01-20': ['other'],
+        },
+      };
+      const task = createMockTask({ id: 'parent', subTaskIds: ['sub1', 'sub2'] });
+      // parent is transferred onto a different day than the sub-task
+      const action = createTransferTaskAction(task, todayStr, 0, '2024-01-20', todayStr);
+
+      metaReducer(testState, action);
+      const resultState = mockReducer.calls.mostRecent().args[0];
+      expect(resultState.planner.days['2024-01-16']).toEqual(['sub1']);
+      expect(resultState.planner.days['2024-01-20']).toEqual(['parent', 'other']);
+    });
+
     it('should update task.dueDay when transferring from today to different day', () => {
       const todayStr = getDbDateStr();
       const newDay = '2026-01-15';
@@ -366,9 +386,30 @@ describe('plannerSharedMetaReducer', () => {
       ]);
     });
 
+    it('should only collapse sub-tasks on the target day, not erase them from other days (#9019)', () => {
+      const testState = createStateWithExistingTasks([], [], [], []);
+      // sub1 is scheduled for a *different* day than the parent is planned for
+      testState.planner = {
+        ...testState.planner,
+        days: {
+          '2024-01-16': ['sub1'],
+          '2024-01-20': ['other'],
+        },
+      };
+      const task = createMockTask({ id: 'parent', subTaskIds: ['sub1', 'sub2'] });
+      const action = createPlanTaskForDayAction(task, '2024-01-20', false);
+
+      metaReducer(testState, action);
+      const resultState = mockReducer.calls.mostRecent().args[0];
+      // sub1 stays on its own day (2024-01-16); the parent lands on 2024-01-20.
+      // Before the fix, planning the parent wiped sub1 from ALL days.
+      expect(resultState.planner.days['2024-01-16']).toEqual(['sub1']);
+      expect(resultState.planner.days['2024-01-20']).toEqual(['other', 'parent']);
+    });
+
     // Virtual tag pattern tests: TODAY_TAG membership is determined by task.dueDay,
     // NOT by task.tagIds. TODAY_TAG should NEVER be in task.tagIds.
-    // See: docs/ai/today-tag-architecture.md
+    // See: ARCHITECTURE-DECISIONS.md Decision #2
     describe('virtual tag pattern: task.tagIds cleanup (TODAY should NEVER be in tagIds)', () => {
       it('should NOT add TODAY to task.tagIds when planning for today (virtual tag pattern)', () => {
         const todayStr = getDbDateStr();

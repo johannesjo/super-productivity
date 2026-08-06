@@ -11,6 +11,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { DateService } from '../../../core/date/date.service';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { T } from '../../../t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,6 +31,7 @@ interface HabitDay {
   str: string;
   date: Date;
   dow: number;
+  weekdayLabel?: string;
 }
 
 @Component({
@@ -56,6 +58,7 @@ export class HabitTrackerComponent {
   private _simpleCounterService = inject(SimpleCounterService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _dateService = inject(DateService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _matDialog = inject(MatDialog);
 
   // Exposed so templates can pass the reactive locale to the now-pure
@@ -72,15 +75,23 @@ export class HabitTrackerComponent {
 
   days = computed(() => {
     const days: HabitDay[] = [];
-    const today = new Date();
+    const isoTextLocale = this._dateTimeFormatService.isoTextLocale();
+    const weekdayFormatter = isoTextLocale
+      ? new Intl.DateTimeFormat(isoTextLocale, { weekday: 'short' })
+      : null;
+    // Day-change dependency, so the window rolls over instead of freezing at first
+    // render (#9072). Also covers sleep and tab throttling, via #5464.
+    this._globalTrackingIntervalService.todayDateStr();
+    const today = this._dateService.getLogicalTodayDate();
     const offset = this.dayOffset();
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(today.getDate() - i + offset);
       days.push({
         str: this._dateService.todayStr(d),
         date: d,
         dow: d.getDay(),
+        weekdayLabel: weekdayFormatter?.format(d),
       });
     }
     return days;
@@ -114,7 +125,9 @@ export class HabitTrackerComponent {
     const first = days[0].date;
     const last = days[days.length - 1].date;
 
-    const locale = this._dateTimeFormatService.currentLocale();
+    // Spelled-out `month: 'short'` name follows the UI language under the ISO
+    // 8601 option (the `sv` sentinel would otherwise leak Swedish). #8987 f/u.
+    const locale = this._dateTimeFormatService.textLocale();
     const formatOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
     const firstStr = first.toLocaleDateString(locale, formatOptions);
     const lastStr = last.toLocaleDateString(locale, formatOptions);

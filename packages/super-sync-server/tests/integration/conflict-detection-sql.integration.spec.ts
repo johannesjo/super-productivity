@@ -1,5 +1,5 @@
 /**
- * Integration test for the multi-entity conflict-detection raw SQL (#8334).
+ * Integration tests for the conflict-detection raw SQL (#8334, #9194).
  *
  * Runs the ACTUAL `detectConflict` / `prefetchLatestEntityOpsForBatch` functions
  * (not a copy of the SQL, not a mock) against a REAL PostgreSQL database. Unit
@@ -8,11 +8,13 @@
  * unnest, the `&&` / `= ANY` prefilter, the `DISTINCT ON` latest-per-entity pick,
  * and the empty-array → scalar fallback for pre-migration rows.
  *
- * The decisive case is "divergent scalar": a stored op whose scalar `entity_id`
+ * The decisive #8334 case is "divergent scalar": a stored op whose scalar `entity_id`
  * is NOT a member of its own `entity_ids`. The previous mutually-exclusive
  * `CASE WHEN cardinality(entity_ids) > 0 THEN entity_ids ELSE ARRAY[entity_id]`
  * dropped that scalar from the batch lookup, so a later concurrent op touching it
- * was wrongly accepted (silent data loss). The union covers it.
+ * was wrongly accepted (silent data loss). The union covers it. The #9194 case
+ * also verifies the single-entity array winner and compound Prisma lookup against
+ * real PostgreSQL rather than the PGlite transaction shim.
  *
  * Prerequisites (same as snapshot-vector-clock-sql.integration.spec.ts):
  *   - PostgreSQL running (see docker-compose.yaml), schema applied (prisma db push)
@@ -40,7 +42,7 @@ import { Operation, VectorClock } from '../../src/sync/sync.types';
 const DATABASE_URL = process.env.DATABASE_URL;
 const describeWithDb = DATABASE_URL ? describe : describe.skip;
 
-describeWithDb('Multi-entity conflict detection SQL (PostgreSQL) (#8334)', () => {
+describeWithDb('Conflict detection SQL (PostgreSQL)', () => {
   let prisma: PrismaClient;
   const TEST_USER_ID = 99998; // Unlikely to collide with real data
   const TEST_EMAIL = `test-conflict-sql-${Date.now()}@test.local`;
@@ -143,6 +145,35 @@ describeWithDb('Multi-entity conflict detection SQL (PostgreSQL) (#8334)', () =>
     expect(result.conflictType).toBe('concurrent');
   });
 
+  it('detects a single-entity conflict through a stored entity_ids member', async () => {
+    await insertOp({
+      serverSeq: 1,
+      clientId: 'A',
+      entityId: 'task-scalar',
+      entityIds: ['task-scalar', 'task-array-only'],
+      vectorClock: { A: 1 },
+    });
+
+    const incomingOp: Operation = {
+      id: `incoming-single-B-${Date.now()}`,
+      clientId: 'B',
+      actionType: '[Task] Update',
+      opType: 'UPD',
+      entityType: 'TASK',
+      entityId: 'task-array-only',
+      payload: {},
+      vectorClock: { B: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+    };
+
+    const result = await detectConflict(TEST_USER_ID, incomingOp, tx());
+
+    expect(result.hasConflict).toBe(true);
+    expect(result.conflictType).toBe('concurrent');
+    expect(result.existingClock).toEqual({ A: 1 });
+  });
+
   it('detects a conflict on a stored op whose scalar entity_id is NOT in its entity_ids (the union fix)', async () => {
     // Divergent scalar: entity_id='task-z' is absent from entity_ids=['task-a'].
     // The old mutually-exclusive CASE dropped task-z from the batch lookup.
@@ -163,6 +194,140 @@ describeWithDb('Multi-entity conflict detection SQL (PostgreSQL) (#8334)', () =>
     // Would be { hasConflict: false } under the pre-fix CASE — silent data loss.
     expect(result.hasConflict).toBe(true);
     expect(result.conflictType).toBe('concurrent');
+  });
+
+  // The GLOBAL_CONFIG misc→tasks alias (a legacy v1 misc write stored task
+  // settings under the raw `misc` key) must gate on the FIXED v1→v2 split
+  // boundary, not the moving CURRENT_SCHEMA_VERSION. Before the fix the
+  // read-side lookup used `schemaVersion < CURRENT_SCHEMA_VERSION`, so once v4
+  // shipped a post-split (v2/v3) misc op — disjoint from `tasks` — was aliased
+  // to an incoming `tasks` write and fabricated a false conflict.
+  const insertConfigOp = async (args: {
+    entityId: 'misc' | 'tasks';
+    clientId: string;
+    schemaVersion: number;
+    vectorClock: VectorClock;
+  }): Promise<void> => {
+    opCounter++;
+    await prisma.operation.create({
+      data: {
+        id: `test-conflict-sql-cfg-${opCounter}-${Date.now()}`,
+        userId: TEST_USER_ID,
+        clientId: args.clientId,
+        serverSeq: opCounter,
+        actionType: '[Global Config] Update Section',
+        opType: 'UPD',
+        entityType: 'GLOBAL_CONFIG',
+        entityId: args.entityId,
+        entityIds: [],
+        payload: {},
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma JSON input; matches sibling specs
+        vectorClock: args.vectorClock as any,
+        schemaVersion: args.schemaVersion,
+        clientTimestamp: BigInt(Date.now()),
+        receivedAt: BigInt(Date.now()),
+      },
+    });
+  };
+
+  const incomingConfigTasksOp = (
+    clientId: string,
+    vectorClock: VectorClock,
+  ): Operation => ({
+    id: `incoming-cfg-tasks-${clientId}-${Date.now()}`,
+    clientId,
+    actionType: '[Global Config] Update Section',
+    opType: 'UPD',
+    entityType: 'GLOBAL_CONFIG',
+    entityId: 'tasks',
+    payload: {},
+    vectorClock,
+    timestamp: Date.now(),
+    schemaVersion: 4,
+  });
+
+  it('does not alias a post-split (v3) misc write to an incoming tasks write', async () => {
+    // Stored post-split misc write from A (v3 >= split v2 → disjoint from tasks).
+    await insertConfigOp({
+      entityId: 'misc',
+      clientId: 'A',
+      schemaVersion: 3,
+      vectorClock: { A: 1 },
+    });
+
+    // Concurrent incoming `tasks` write from B.
+    const result = await detectConflict(
+      TEST_USER_ID,
+      incomingConfigTasksOp('B', { B: 1 }),
+      tx(),
+    );
+
+    // Pre-fix (`< CURRENT_SCHEMA_VERSION` = < 4): v3 misc aliased to tasks →
+    // CONCURRENT → false conflict. Post-fix (`< split v2`): v3 excluded → none.
+    expect(result.hasConflict).toBe(false);
+  });
+
+  it('still aliases a legacy pre-split (v1) misc write to an incoming tasks write', async () => {
+    // The alias must remain for genuine pre-split rows: a v1 misc op DID carry
+    // task settings, so a concurrent tasks write is a real conflict.
+    await insertConfigOp({
+      entityId: 'misc',
+      clientId: 'A',
+      schemaVersion: 1,
+      vectorClock: { A: 1 },
+    });
+
+    const result = await detectConflict(
+      TEST_USER_ID,
+      incomingConfigTasksOp('B', { B: 1 }),
+      tx(),
+    );
+
+    expect(result.hasConflict).toBe(true);
+    expect(result.conflictType).toBe('concurrent');
+  });
+
+  // The same fix applies to the batch lookup `prefetchLatestEntityOpsForBatch`,
+  // which folds a legacy misc row into the `tasks` conflict key. Cover both
+  // directions of the split-boundary gate on that path too.
+  it('prefetch does not fold a post-split (v3) misc write into the tasks key', async () => {
+    await insertConfigOp({
+      entityId: 'misc',
+      clientId: 'A',
+      schemaVersion: 3,
+      vectorClock: { A: 1 },
+    });
+
+    const latestByEntity = await prefetchLatestEntityOpsForBatch(
+      TEST_USER_ID,
+      [{ entityType: 'GLOBAL_CONFIG', entityId: 'tasks' }],
+      tx(),
+    );
+
+    // Pre-fix (`< CURRENT_SCHEMA_VERSION`) folded the v3 misc row into the tasks
+    // key; post-fix (`< split v2`) excludes it, so tasks has no aliased op.
+    expect(
+      latestByEntity.get(getEntityConflictKey('GLOBAL_CONFIG', 'tasks')),
+    ).toBeUndefined();
+  });
+
+  it('prefetch still folds a legacy pre-split (v1) misc write into the tasks key', async () => {
+    await insertConfigOp({
+      entityId: 'misc',
+      clientId: 'A',
+      schemaVersion: 1,
+      vectorClock: { A: 1 },
+    });
+
+    const latestByEntity = await prefetchLatestEntityOpsForBatch(
+      TEST_USER_ID,
+      [{ entityType: 'GLOBAL_CONFIG', entityId: 'tasks' }],
+      tx(),
+    );
+
+    const row = latestByEntity.get(getEntityConflictKey('GLOBAL_CONFIG', 'tasks'));
+    expect(row).toBeDefined();
+    expect(row?.clientId).toBe('A');
   });
 
   it('falls back to the scalar entity_id for pre-migration rows (empty entity_ids)', async () => {

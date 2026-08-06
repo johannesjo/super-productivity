@@ -27,7 +27,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 const XS_BREAKPOINT = 600;
 const XXXS_BREAKPOINT = 398;
-const XS_MEDIA_QUERY = `(max-width: ${XS_BREAKPOINT}px)`;
+const maxWidthMediaQuery = (breakpoint: number): string =>
+  `(max-width: ${breakpoint - 1}px)`;
+const XS_MEDIA_QUERY = maxWidthMediaQuery(XS_BREAKPOINT);
+const XXXS_MEDIA_QUERY = maxWidthMediaQuery(XXXS_BREAKPOINT);
 const initialXsMatch =
   typeof window !== 'undefined' ? window.matchMedia(XS_MEDIA_QUERY).matches : false;
 
@@ -61,7 +64,7 @@ export class LayoutService {
     select(selectIsShowIssuePanel),
   );
 
-  readonly selectedTimeView = signal<'week' | 'month'>('week');
+  readonly selectedTimeView = signal<'week' | 'month' | 'day'>('week');
   readonly isWorkViewScrolled = signal<boolean>(false);
   readonly isShowAddTaskBar = toSignal(this.isShowAddTaskBar$, { initialValue: false });
 
@@ -74,7 +77,7 @@ export class LayoutService {
 
   readonly isXxxs = toSignal(
     this._breakPointObserver
-      .observe(`(max-width: ${XXXS_BREAKPOINT}px)`)
+      .observe(XXXS_MEDIA_QUERY)
       .pipe(map((result) => result.matches)),
     { initialValue: false },
   );
@@ -168,6 +171,7 @@ export class LayoutService {
   focusTaskInViewWhenReady(
     taskId: string,
     onSuccess?: (el: HTMLElement) => void,
+    onFailure?: () => void,
     retriesLeft: number = LayoutService._TASK_FOCUS_MAX_RETRIES,
   ): void {
     if (this._pendingTaskRevealTimeout) {
@@ -182,12 +186,13 @@ export class LayoutService {
     }
 
     if (retriesLeft <= 0) {
+      onFailure?.();
       return;
     }
 
     this._pendingTaskRevealTimeout = window.setTimeout(() => {
       this._pendingTaskRevealTimeout = undefined;
-      this.focusTaskInViewWhenReady(taskId, onSuccess, retriesLeft - 1);
+      this.focusTaskInViewWhenReady(taskId, onSuccess, onFailure, retriesLeft - 1);
     }, LayoutService._TASK_FOCUS_RETRY_DELAY);
   }
 
