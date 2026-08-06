@@ -11,6 +11,10 @@ import { IssueSyncAdapterRegistryService } from '../features/issue/two-way-sync/
 import { T } from '../t.const';
 import { PluginCacheService } from './plugin-cache.service';
 import { PluginCleanupService } from './plugin-cleanup.service';
+import {
+  MAX_PLUGIN_TRANSLATIONS_SIZE,
+  MAX_PLUGIN_TRANSLATION_SIZE,
+} from './plugin.const';
 import { PluginHooksService } from './plugin-hooks';
 import { PluginI18nService } from './plugin-i18n.service';
 import { PluginIssueProviderRegistryService } from './issue-provider/plugin-issue-provider-registry.service';
@@ -225,6 +229,81 @@ describe('PluginService loadPluginFromZip iframe-only plugins', () => {
       translations,
       undefined,
     );
+  });
+
+  it('loads each supported translation only once', async () => {
+    const manifest: PluginManifest = {
+      ...iframeManifest,
+      i18n: { languages: ['en', 'en', 'unsupported'] },
+    };
+    const indexHtml = '<!doctype html><html><body>Translated plugin UI</body></html>';
+    const enTranslation = JSON.stringify({ GREETING: 'x'.repeat(4096) });
+    const unsupportedTranslation = JSON.stringify({ GREETING: 'Ignored' });
+    const files: Record<string, string> = {};
+    files['manifest.json'] = JSON.stringify(manifest);
+    files['index.html'] = indexHtml;
+    files['i18n/en.json'] = enTranslation;
+    files['i18n/unsupported.json'] = unsupportedTranslation;
+    const enTranslationSize = strToU8(enTranslation).byteLength;
+    const decodeSpy = spyOn(TextDecoder.prototype, 'decode').and.callThrough();
+
+    await service.loadPluginFromZip(createZipFile(files));
+
+    expect(pluginCache.storePlugin).toHaveBeenCalledOnceWith(
+      manifest.id,
+      JSON.stringify(manifest),
+      '',
+      indexHtml,
+      undefined,
+      { en: enTranslation },
+      undefined,
+    );
+    const enDecodeCount = decodeSpy.calls
+      .allArgs()
+      .filter(
+        ([input]) =>
+          input instanceof Uint8Array && input.byteLength === enTranslationSize,
+      ).length;
+    expect(enDecodeCount).toBe(1);
+  });
+
+  it('rejects an oversized translation file before caching it', async () => {
+    const manifest: PluginManifest = {
+      ...iframeManifest,
+      i18n: { languages: ['en'] },
+    };
+    const files: Record<string, string> = {};
+    files['manifest.json'] = JSON.stringify(manifest);
+    files['index.html'] = '<!doctype html><html><body>Plugin UI</body></html>';
+    files['i18n/en.json'] = JSON.stringify({
+      BIG: 'x'.repeat(MAX_PLUGIN_TRANSLATION_SIZE),
+    });
+
+    await expectAsync(
+      service.loadPluginFromZip(createZipFile(files)),
+    ).toBeRejectedWithError(T.PLUGINS.FILE_TOO_LARGE);
+    expect(pluginCache.storePlugin).not.toHaveBeenCalled();
+  });
+
+  it('rejects oversized combined translations before caching them', async () => {
+    const languages = ['en', 'de', 'fr', 'es', 'it', 'nl'];
+    const manifest: PluginManifest = {
+      ...iframeManifest,
+      i18n: { languages },
+    };
+    const files: Record<string, string> = {};
+    files['manifest.json'] = JSON.stringify(manifest);
+    files['index.html'] = '<!doctype html><html><body>Plugin UI</body></html>';
+    for (const lang of languages) {
+      files[`i18n/${lang}.json`] = JSON.stringify({
+        BIG: 'x'.repeat(Math.floor(MAX_PLUGIN_TRANSLATIONS_SIZE / languages.length)),
+      });
+    }
+
+    await expectAsync(
+      service.loadPluginFromZip(createZipFile(files)),
+    ).toBeRejectedWithError(T.PLUGINS.FILE_TOO_LARGE);
+    expect(pluginCache.storePlugin).not.toHaveBeenCalled();
   });
 
   it('rejects a plugin zip without plugin.js when index.html is absent', async () => {

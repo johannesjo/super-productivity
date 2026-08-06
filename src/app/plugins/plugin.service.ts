@@ -17,6 +17,8 @@ import { PluginCacheService } from './plugin-cache.service';
 import {
   MAX_PLUGIN_CODE_SIZE,
   MAX_PLUGIN_MANIFEST_SIZE,
+  MAX_PLUGIN_TRANSLATIONS_SIZE,
+  MAX_PLUGIN_TRANSLATION_SIZE,
   MAX_PLUGIN_ZIP_SIZE,
 } from './plugin.const';
 import { take } from 'rxjs/operators';
@@ -38,6 +40,7 @@ import { SnackService } from '../core/snack/snack.service';
 import { pingWithRetry } from './util/ping-with-retry.util';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { sanitizeSvgIconContent } from '../util/sanitize-svg-icon.util';
+import { LanguageCode } from '../core/locale.constants';
 
 // Each plugin's `id` (from its manifest.json, distinct from the asset path
 // here) becomes the entityId prefix for all data it persists via
@@ -92,6 +95,7 @@ const BUNDLED_PLUGIN_IDS = new Set<string>([
   'voice-reminder',
   'yesterday-tasks',
 ]);
+const SUPPORTED_PLUGIN_LANGUAGES = new Set<string>(Object.values(LanguageCode));
 
 /**
  * Thrown by `_fireOnReady` when the user explicitly DENIES a nodeExecution consent
@@ -1367,9 +1371,29 @@ export class PluginService implements OnDestroy {
       if (manifest.i18n?.languages.length) {
         translations = {};
         const decoder = new TextDecoder();
-        for (const lang of manifest.i18n.languages) {
+        let translationsSize = 0;
+        const assertWithinTranslationLimit = (size: number, maxSize: number): void => {
+          if (size > maxSize) {
+            throw new Error(
+              this._translateService.instant(T.PLUGINS.FILE_TOO_LARGE, {
+                maxSize: (maxSize / 1024 / 1024).toFixed(1),
+                fileSize: (size / 1024 / 1024).toFixed(1),
+              }),
+            );
+          }
+        };
+        for (const lang of new Set(manifest.i18n.languages)) {
+          if (!SUPPORTED_PLUGIN_LANGUAGES.has(lang)) {
+            continue;
+          }
           const translationBytes = extractedFiles[`i18n/${lang}.json`];
           if (translationBytes !== undefined) {
+            assertWithinTranslationLimit(
+              translationBytes.length,
+              MAX_PLUGIN_TRANSLATION_SIZE,
+            );
+            translationsSize += translationBytes.length;
+            assertWithinTranslationLimit(translationsSize, MAX_PLUGIN_TRANSLATIONS_SIZE);
             translations[lang] = decoder.decode(translationBytes);
           }
         }
@@ -1662,6 +1686,8 @@ export class PluginService implements OnDestroy {
       // Unload and unregister the plugin
       this.unloadPlugin(pluginId);
     }
+    // Disabled and failed plugins can still have translations registered from their ZIP.
+    this._pluginI18nService.unloadPluginTranslations(pluginId);
 
     // Purge local-only credentials (secrets + OAuth tokens) FIRST so they
     // never outlive their plugin — even if a later cleanup step throws.

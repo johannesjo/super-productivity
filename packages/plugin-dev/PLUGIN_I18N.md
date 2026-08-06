@@ -88,6 +88,9 @@ my-plugin/
 
 **File naming**: Use language codes from the manifest (e.g., `en.json`, `de.json`)
 
+For uploaded plugin ZIPs, each translation file is limited to 1 MB and all declared
+translation files combined are limited to 5 MB.
+
 ### 3. Translation File Format
 
 Use hierarchical JSON structure for organization:
