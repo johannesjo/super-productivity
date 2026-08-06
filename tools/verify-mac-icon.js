@@ -8,10 +8,12 @@ const { crc32, inflateSync } = require('node:zlib');
 const PNG_SIGNATURE = Buffer.from('89504e470d0a1a0a', 'hex');
 const MIN_TRANSPARENT_PIXEL_RATIO = 0.2;
 // Same-sized 1x and 2x images are separate semantic representations in ICNS.
+// iconutil stores the small sizes as ic04/ic05 (ARGB form) while the portable
+// generator writes icp4/icp5 (PNG form); either type satisfies the slot.
 const REPRESENTATIONS = [
-  { label: '16x16', type: 'icp4', file: 'icon_16x16.png', pixels: 16 },
+  { label: '16x16', type: 'icp4', argbType: 'ic04', file: 'icon_16x16.png', pixels: 16 },
   { label: '16x16@2x', type: 'ic11', file: 'icon_16x16@2x.png', pixels: 32 },
-  { label: '32x32', type: 'icp5', file: 'icon_32x32.png', pixels: 32 },
+  { label: '32x32', type: 'icp5', argbType: 'ic05', file: 'icon_32x32.png', pixels: 32 },
   { label: '32x32@2x', type: 'ic12', file: 'icon_32x32@2x.png', pixels: 64 },
   { label: '128x128', type: 'ic07', file: 'icon_128x128.png', pixels: 128 },
   { label: '128x128@2x', type: 'ic13', file: 'icon_128x128@2x.png', pixels: 256 },
@@ -20,7 +22,6 @@ const REPRESENTATIONS = [
   { label: '512x512', type: 'ic09', file: 'icon_512x512.png', pixels: 512 },
   { label: '512x512@2x', type: 'ic10', file: 'icon_512x512@2x.png', pixels: 1024 },
 ];
-const LEGACY_REPRESENTATION_TYPES = ['ic04', 'ic05'];
 const ICONSET_FILES = REPRESENTATIONS.map(({ file, pixels }) => [file, pixels]);
 
 const fail = (source, message) => {
@@ -361,38 +362,45 @@ const compareIconsets = (expectedDirectory, actualDirectory) => {
   }
 };
 
+const decodeRepresentationChunk = (chunk, expectedPixels, chunkSource) => {
+  if (chunk.subarray(0, 4).equals(ARGB_MAGIC)) {
+    return decodeArgbChunk(chunk, expectedPixels, chunkSource);
+  }
+  if (chunk.subarray(0, 8).equals(PNG_SIGNATURE)) {
+    return decodePng(chunk, expectedPixels, chunkSource);
+  }
+  fail(
+    chunkSource,
+    `unrecognized payload (starts with ${chunk.subarray(0, 8).toString('hex')})`,
+  );
+};
+
 const verifyIcns = (buffer, source = 'ICNS', expectedIconsetDirectory) => {
   const chunks = parseIcns(buffer, source);
-  const legacyType = LEGACY_REPRESENTATION_TYPES.find((type) => chunks.has(type));
-  if (legacyType) {
-    fail(
-      source,
-      `legacy ICNS representation ${legacyType} requires native iconutil verification`,
-    );
-  }
-
   const expectedFiles = expectedIconsetDirectory
     ? verifyIconset(expectedIconsetDirectory)
     : undefined;
   const missing = [];
 
   for (const representation of REPRESENTATIONS) {
-    if (!chunks.has(representation.type)) {
+    const presentTypes = [representation.type, representation.argbType].filter(
+      (type) => type && chunks.has(type),
+    );
+    if (!presentTypes.length) {
       missing.push(`${representation.label} (${representation.type})`);
       continue;
     }
 
-    const chunk = chunks.get(representation.type);
-    const chunkSource = `${source}:${representation.type}`;
-    const decoded = chunk.subarray(0, 4).equals(ARGB_MAGIC)
-      ? decodeArgbChunk(chunk, representation.pixels, chunkSource)
-      : decodePng(chunk, representation.pixels, chunkSource);
-    if (expectedFiles) {
-      compareDecodedPng(
-        expectedFiles.get(representation.file),
-        decoded,
-        `${source}:${representation.type}`,
+    for (const type of presentTypes) {
+      const chunkSource = `${source}:${type}`;
+      const decoded = decodeRepresentationChunk(
+        chunks.get(type),
+        representation.pixels,
+        chunkSource,
       );
+      if (expectedFiles) {
+        compareDecodedPng(expectedFiles.get(representation.file), decoded, chunkSource);
+      }
     }
   }
 

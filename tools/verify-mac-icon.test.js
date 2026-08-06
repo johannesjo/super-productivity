@@ -44,15 +44,15 @@ test('checked-in macOS icon sources contain every standard representation', () =
   assert.doesNotThrow(() => verifyIcns(readFileSync(ICON_PATH), ICON_PATH, ICONSET_PATH));
 });
 
-test('macOS icon verification rejects unchecked legacy small-icon payloads', () => {
-  const legacyIcon = Buffer.from(readFileSync(ICON_PATH));
-  assert.equal(legacyIcon.toString('ascii', 8, 12), 'icp4');
-  legacyIcon.write('ic04', 8, 4, 'ascii');
-  legacyIcon.fill(0, 16, 24);
+test('macOS icon verification rejects unrecognized small-icon payloads', () => {
+  const mangledIcon = Buffer.from(readFileSync(ICON_PATH));
+  assert.equal(mangledIcon.toString('ascii', 8, 12), 'icp4');
+  mangledIcon.write('ic04', 8, 4, 'ascii');
+  mangledIcon.fill(0, 16, 24);
 
   assert.throws(
-    () => verifyIcns(legacyIcon, 'legacy.icns', ICONSET_PATH),
-    /legacy.*ic04|ic04.*legacy/i,
+    () => verifyIcns(mangledIcon, 'mangled.icns', ICONSET_PATH),
+    /unrecognized payload/,
   );
 });
 
@@ -176,10 +176,12 @@ const buildIcnsWithArgbSmallIcon = (pixels) => {
   while (offset < source.length) {
     const type = source.toString('ascii', offset, offset + 4);
     const length = source.readUInt32BE(offset + 4);
-    chunks.push({
-      type,
-      data: type === 'icp4' ? argbData : source.subarray(offset + 8, offset + length),
-    });
+    // iconutil emits the 16x16 slot as ic04 with ARGB data; mirror that shape.
+    chunks.push(
+      type === 'icp4'
+        ? { type: 'ic04', data: argbData }
+        : { type, data: source.subarray(offset + 8, offset + length) },
+    );
     offset += length;
   }
 
