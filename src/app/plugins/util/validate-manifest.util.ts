@@ -2,6 +2,7 @@ import { PluginManifest } from '../plugin-api.model';
 import { SUPPORTED_LANGUAGE_CODES } from '../../core/locale.constants';
 
 const MAX_REPORTED_INVALID_LANGUAGES = 10;
+const MAX_REPORTED_LANGUAGE_LENGTH = 20;
 
 /**
  * Simplified manifest validation following KISS principles.
@@ -68,9 +69,13 @@ export const validatePluginManifest = (
       );
 
       if (invalidLanguages.length > 0) {
-        // Truncate: `languages` comes from a third-party manifest with no length
-        // bound, and this warning is logged into the exportable log history.
-        const shown = invalidLanguages.slice(0, MAX_REPORTED_INVALID_LANGUAGES);
+        // `languages` is third-party and bounded only by the 100KB manifest cap, and
+        // this warning is logged verbatim into the exportable log history. Bound BOTH
+        // the number of codes and the length of each: capping only the count still
+        // allows a handful of 8000-character codes to produce an ~80KB log entry.
+        const shown = invalidLanguages
+          .slice(0, MAX_REPORTED_INVALID_LANGUAGES)
+          .map((lang) => String(lang).slice(0, MAX_REPORTED_LANGUAGE_LENGTH));
         const rest = invalidLanguages.length - shown.length;
         warnings.push(
           `Unsupported language codes: ${shown.join(', ')}` +

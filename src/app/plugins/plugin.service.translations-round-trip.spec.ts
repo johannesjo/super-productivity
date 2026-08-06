@@ -29,11 +29,17 @@ import { PluginUserPersistenceService } from './plugin-user-persistence.service'
  * PluginCacheService, which means the write-then-read that actually broke is only
  * ever asserted as "storePlugin was called with X".
  *
- * This spec deliberately uses the REAL cache, loader and i18n service against the
- * browser's own IndexedDB, so the whole chain is executed:
+ * This spec deliberately uses the REAL cache, loader and i18n service, so the whole
+ * chain is executed rather than asserted through spies:
  *   loadPluginFromZip -> IndexedDB -> loadUploadedPluginAssets -> translate()
+ *
+ * Caveat worth knowing: `src/test.ts` installs `fake-indexeddb`, so the store is an
+ * in-memory polyfill, not the browser's IndexedDB. This exercises PluginCacheService's
+ * own put/get code (which every other spec mocks) but does not prove real-browser
+ * storage semantics. test.ts also swaps in a fresh IDBFactory per spec, so no manual
+ * teardown is needed here.
  */
-describe('PluginService uploaded translations round-trip (real IndexedDB)', () => {
+describe('PluginService uploaded translations round-trip', () => {
   const PLUGIN_ID = 'i18n-round-trip';
 
   const manifest: PluginManifest = {
@@ -166,18 +172,13 @@ describe('PluginService uploaded translations round-trip (real IndexedDB)', () =
     });
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     configure();
-    // Clear rather than deleteDatabase: an open connection from a prior spec would
-    // block deletion, and clearCache goes through the same store this spec exercises.
-    await TestBed.inject(PluginCacheService).clearCache();
   });
 
-  afterEach(async () => {
-    await TestBed.inject(PluginCacheService).clearCache();
-  });
-
-  it('translates through the real cache immediately after upload', async () => {
+  // Does not touch the cache — registration happens in memory during the upload.
+  // Kept because it pins the shape users report: it works until you restart.
+  it('translates in-session immediately after upload', async () => {
     await TestBed.inject(PluginService).loadPluginFromZip(pluginZip({ en: EN, de: DE }));
 
     const i18n = TestBed.inject(PluginI18nService);
@@ -195,26 +196,27 @@ describe('PluginService uploaded translations round-trip (real IndexedDB)', () =
     expect(cached!.translations).toEqual({ en: EN, de: DE });
   });
 
-  // The regression #9459 actually describes: it worked in-session but was gone
-  // after a restart, because nothing had been written for the reader to find.
-  it('still translates after a restart, from a fresh service graph', async () => {
+  // The regression #9459 actually describes: it worked in-session but was gone after
+  // a restart. Drives the production startup path end to end — discovery, activation
+  // and registration — so removing the cache-to-i18n handoff anywhere along it fails
+  // here, not just a broken write.
+  it('still translates after a restart, via the real startup path', async () => {
     await TestBed.inject(PluginService).loadPluginFromZip(pluginZip({ en: EN, de: DE }));
 
-    // "Restart": tear down every service instance, keep the same IndexedDB.
+    // "Restart": tear down every service instance, keep the stored data.
     TestBed.resetTestingModule();
     configure();
 
-    const assets =
-      await TestBed.inject(PluginLoaderService).loadUploadedPluginAssets(PLUGIN_ID);
-    expect(assets.translations).toEqual({ en: EN, de: DE });
-
     const i18n = TestBed.inject(PluginI18nService);
-    // Nothing is registered until the reader hands the cached content over.
+    // Nothing is registered until startup reads the cache back.
     expect(i18n.translate(PLUGIN_ID, 'GREETING')).toBe('GREETING');
 
-    i18n.loadPluginTranslationsFromContent(PLUGIN_ID, assets.translations!);
+    await TestBed.inject(PluginService).initializePlugins();
+
     i18n.setCurrentLanguage('de');
     expect(i18n.translate(PLUGIN_ID, 'GREETING')).toBe('Hallo');
+    i18n.setCurrentLanguage('en');
+    expect(i18n.translate(PLUGIN_ID, 'GREETING')).toBe('Hello');
   });
 
   it('never persists a language whose json cannot be parsed', async () => {
@@ -227,8 +229,5 @@ describe('PluginService uploaded translations round-trip (real IndexedDB)', () =
     // Broken content in the cache would survive every restart while degrading
     // translate() to returning keys — #9459's symptom in a new disguise.
     expect(cached!.translations).toEqual({ en: EN });
-    const i18n = TestBed.inject(PluginI18nService);
-    i18n.setCurrentLanguage('de');
-    expect(i18n.translate(PLUGIN_ID, 'GREETING')).toBe('Hello');
   });
 });

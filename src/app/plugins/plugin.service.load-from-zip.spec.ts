@@ -228,37 +228,10 @@ describe('PluginService loadPluginFromZip iframe-only plugins', () => {
     );
   });
 
-  // Selection semantics (dedupe, unsupported codes, missing files) are covered by
-  // read-plugin-translations-from-zip.util.spec.ts. Keep this file to what only the
+  // Selection semantics (dedupe, unsupported codes, missing files, invalid json) are
+  // covered by read-plugin-translations-from-zip.util.spec.ts, and persistence by
+  // plugin.service.translations-round-trip.spec.ts. Keep this file to what only the
   // full upload path can show.
-
-  it('installs but does not cache a translation file whose json is broken', async () => {
-    const manifest: PluginManifest = {
-      ...iframeManifest,
-      i18n: { languages: ['en', 'de'] },
-    };
-    const indexHtml = '<!doctype html><html><body>Plugin UI</body></html>';
-    const enTranslation = JSON.stringify({ GREETING: 'Hello' });
-    const files: Record<string, string> = {};
-    files['manifest.json'] = JSON.stringify(manifest);
-    files['index.html'] = indexHtml;
-    files['i18n/en.json'] = enTranslation;
-    files['i18n/de.json'] = '{ this is not json ';
-
-    await service.loadPluginFromZip(createZipFile(files));
-
-    // Unparseable content in the cache would survive every restart while silently
-    // degrading translate() to returning keys — the #9459 symptom in a new disguise.
-    expect(pluginCache.storePlugin).toHaveBeenCalledOnceWith(
-      manifest.id,
-      JSON.stringify(manifest),
-      '',
-      indexHtml,
-      undefined,
-      { en: enTranslation },
-      undefined,
-    );
-  });
 
   // A failed upload files its error state under a synthetic `error-…` id, so on the
   // next upload `existingState` is undefined and the teardown that normally unloads

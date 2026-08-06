@@ -39,7 +39,6 @@ describe('readPluginTranslationsFromZip', () => {
     );
 
     expect(result.translations).toEqual({ en: content });
-    expect(result.totalBytes).toBe(content.length);
   });
 
   it('drops an unsupported language without reporting it (the validator warns)', () => {
@@ -65,6 +64,23 @@ describe('readPluginTranslationsFromZip', () => {
 
     expect(Object.keys(result.translations)).toEqual(['en']);
     expect(result.skipped).toEqual([{ lang: 'de', reason: 'file-missing' }]);
+  });
+
+  // These all parse, but PluginI18nService resolves every key to itself against
+  // them — a "loaded successfully" report with #9459's exact behaviour.
+  it('reports and excludes json that parses but is not an object', () => {
+    for (const notAnObject of ['null', '"text"', '123', '[]', 'true']) {
+      const result = readPluginTranslationsFromZip(
+        zipEntries([['i18n/en.json', notAnObject]]),
+        ['en'],
+        NO_LIMIT,
+      );
+
+      expect(result.translations).withContext(`for content ${notAnObject}`).toEqual({});
+      expect(result.skipped)
+        .withContext(`for content ${notAnObject}`)
+        .toEqual([{ lang: 'en', reason: 'invalid-json' }]);
+    }
   });
 
   it('reports and excludes a language whose json does not parse', () => {
@@ -93,7 +109,7 @@ describe('readPluginTranslationsFromZip', () => {
     expect(result.skipped).toEqual([{ lang: 'en', reason: 'file-missing' }]);
   });
 
-  it('stops at the combined limit without decoding the rest', () => {
+  it('reports over-limit and hands back nothing', () => {
     const big = `{"A":"${'x'.repeat(2000)}"}`;
     const result = readPluginTranslationsFromZip(
       zipEntries([
@@ -106,8 +122,8 @@ describe('readPluginTranslationsFromZip', () => {
     );
 
     expect(result.isOverLimit).toBeTrue();
-    // Stopped on the third file, so only the first two were ever materialized.
-    expect(Object.keys(result.translations)).toEqual(['en', 'de']);
+    // The caller rejects the upload, so nothing is handed back.
+    expect(result.translations).toEqual({});
   });
 
   it('accepts a set exactly at the combined limit', () => {

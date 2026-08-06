@@ -42,6 +42,7 @@ import { sanitizeSvgIconContent } from '../util/sanitize-svg-icon.util';
 import {
   logSkippedPluginTranslations,
   readPluginTranslationsFromZip,
+  truncateId,
 } from './util/read-plugin-translations-from-zip.util';
 
 // Each plugin's `id` (from its manifest.json, distinct from the asset path
@@ -1133,8 +1134,10 @@ export class PluginService implements OnDestroy {
       // Surface non-fatal manifest problems the way the path-based loader does.
       // These include "English (en) not in i18n.languages" and unsupported language
       // codes — both direct causes of translate() silently returning keys (#9459).
+      // The id is truncated: it is third-party, length-unvalidated, and lands
+      // verbatim in the exportable log history.
       for (const warning of manifestValidation.warnings) {
-        PluginLog.err(`Plugin ${manifest.id}: ${warning}`);
+        PluginLog.err(`Plugin ${truncateId(manifest.id)}: ${warning}`);
       }
       this._assertUploadedPluginAllowed(manifest);
 
@@ -1876,18 +1879,6 @@ export class PluginService implements OnDestroy {
   /**
    * Clean up all resources when service is destroyed
    */
-  /**
-   * Ensure plugin is marked as enabled in memory only during startup.
-   * This avoids pfapi writes during initialization that could cause sync conflicts.
-   */
-  private _ensurePluginEnabledInMemory(pluginId: string): void {
-    // We only need to track this in memory for startup purposes
-    // The actual persistence will happen when user explicitly enables/disables plugins
-    PluginLog.log(
-      `Plugin ${pluginId} marked as enabled in memory (no pfapi write during startup)`,
-    );
-  }
-
   ngOnDestroy(): void {
     PluginLog.log('PluginService: Cleaning up all resources');
 

@@ -94,22 +94,39 @@ describe('validatePluginManifest', () => {
       );
     });
 
-    // `languages` is third-party and unbounded, and this warning is logged into the
-    // exportable log history, so the message must not grow with the input.
-    it('truncates the unsupported-code list instead of echoing all of it', () => {
-      const many = Array.from({ length: 5000 }, (_, i) => `bogus-${i}`);
-      const result = validatePluginManifest({
-        ...baseManifest,
-        i18n: { languages: ['en', ...many] },
-      });
-
-      const warning = result.warnings.find((w) =>
-        w.startsWith('Unsupported language codes:'),
+    // `languages` is third-party and bounded only by the 100KB manifest cap, and this
+    // warning is logged verbatim into the exportable log history, so the message must
+    // not grow with the input — in EITHER dimension.
+    const unsupportedWarning = (languages: string[]): string | undefined =>
+      validatePluginManifest({ ...baseManifest, i18n: { languages } }).warnings.find(
+        (w) => w.startsWith('Unsupported language codes:'),
       );
+
+    it('bounds the warning when there are many codes', () => {
+      const warning = unsupportedWarning([
+        'en',
+        ...Array.from({ length: 5000 }, (_, i) => `bogus-${i}`),
+      ]);
+
       expect(warning).toBeDefined();
       expect(warning!.length).toBeLessThan(300);
       expect(warning).toContain('(+4990 more)');
-      // Never a hard failure: a plugin stays loadable despite bad language codes.
+    });
+
+    // Capping only the count still allowed ~80KB: 12 codes x 8000 chars fits the
+    // manifest cap. Each code must be truncated too.
+    it('bounds the warning when a single code is enormous', () => {
+      const warning = unsupportedWarning(['en', ...Array(12).fill('x'.repeat(8000))]);
+
+      expect(warning).toBeDefined();
+      expect(warning!.length).toBeLessThan(300);
+    });
+
+    it('never fails the manifest over bad language codes', () => {
+      const result = validatePluginManifest({
+        ...baseManifest,
+        i18n: { languages: ['en', 'pt-BR'] },
+      });
       expect(result.isValid).toBe(true);
     });
 
