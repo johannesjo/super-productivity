@@ -29,9 +29,14 @@ applied by the app on next resume.
   extension); `WidgetData.swift`, `ToggleDoneIntent.swift`,
   `TaskListWidget.swift`, and `WidgetPresentation.swift` are extension-only.
 
-Known v1 limitations are documented in the plan (the new day's tasks stay empty
-until the app next opens, taps while the app is alive apply on next resume,
-iOS 17+ only — the app itself stays at iOS 16).
+Known v1 limitations: the new day's tasks stay empty until the app next opens,
+taps while the app is alive apply on next resume, and the widget requires iOS
+17+ while the app itself stays at iOS 16.
+
+The shared snapshot retains Android's `dayStr` field so Android can label an
+expired snapshot with its original date. The iOS widget deliberately does not
+render that date in v1: it hides expired rows and shows the existing refresh
+prompt instead.
 
 Widget strings live under `WIDGET.IOS` in `src/assets/i18n/en.json`.
 `npm run sync:ios` regenerates `en.lproj/Localizable.strings`; never edit the

@@ -9,13 +9,14 @@ final class WidgetDataTests: XCTestCase {
     private let blob = """
         {
           "v": 1,
+          "dayStr": "2026-07-17",
+          "validUntil": 1784325600000,
           "tasks": [
             {"id": "t1", "title": "Task one", "isDone": false, "projectId": "p1"},
             {"id": "t2", "title": "Task two", "isDone": true},
             {"id": "t3", "title": "Task three", "isDone": false, "projectId": null}
           ],
-          "projectColors": {"p1": "#ff0000"},
-          "validUntil": 1783980000000
+          "projectColors": {"p1": "#ff0000"}
         }
         """
 
@@ -77,7 +78,7 @@ final class WidgetDataTests: XCTestCase {
         let snapshot = WidgetData.parseSnapshot(blob)
 
         let validUntil = try XCTUnwrap(snapshot.validUntil)
-        XCTAssertEqual(validUntil.timeIntervalSince1970 * 1_000, 1_783_980_000_000)
+        XCTAssertEqual(validUntil.timeIntervalSince1970 * 1_000, 1_784_325_600_000)
         XCTAssertTrue(snapshot.isValid(at: validUntil.addingTimeInterval(-1)))
         XCTAssertFalse(snapshot.isValid(at: validUntil))
     }
