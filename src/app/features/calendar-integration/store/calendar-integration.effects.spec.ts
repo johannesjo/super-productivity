@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BehaviorSubject, of, Subscription } from 'rxjs';
 import { CalendarIntegrationEffects } from './calendar-integration.effects';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
@@ -156,6 +156,9 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
 
   afterEach(() => {
     sub?.unsubscribe();
+    // overrideSelector() mutates the globally memoized selector, so without this
+    // every later spec in the Karma run would read this empty task state.
+    TestBed.inject(MockStore).resetSelectors();
   });
 
   it('imports a today event when first sync is done and we are NOT in a sync window', fakeAsync(() => {
