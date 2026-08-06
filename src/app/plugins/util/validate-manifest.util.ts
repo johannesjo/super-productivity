@@ -1,6 +1,8 @@
 import { PluginManifest } from '../plugin-api.model';
 import { SUPPORTED_LANGUAGE_CODES } from '../../core/locale.constants';
 
+const MAX_REPORTED_INVALID_LANGUAGES = 10;
+
 /**
  * Simplified manifest validation following KISS principles.
  * Only validate what's absolutely necessary for the app to function.
@@ -59,12 +61,6 @@ export const validatePluginManifest = (
       errors.push('i18n.languages must be an array');
     } else if (manifest.i18n.languages.length === 0) {
       warnings.push('i18n.languages is empty - plugin will have no translations');
-    } else if (manifest.i18n.languages.length > SUPPORTED_LANGUAGE_CODES.size) {
-      // No plugin can legitimately declare more languages than the app has, and an
-      // unbounded list would be echoed verbatim into the exportable log history.
-      errors.push(
-        `i18n.languages must not exceed ${SUPPORTED_LANGUAGE_CODES.size} entries`,
-      );
     } else {
       // Validate language codes
       const invalidLanguages = manifest.i18n.languages.filter(
@@ -72,8 +68,13 @@ export const validatePluginManifest = (
       );
 
       if (invalidLanguages.length > 0) {
+        // Truncate: `languages` comes from a third-party manifest with no length
+        // bound, and this warning is logged into the exportable log history.
+        const shown = invalidLanguages.slice(0, MAX_REPORTED_INVALID_LANGUAGES);
+        const rest = invalidLanguages.length - shown.length;
         warnings.push(
-          `Unsupported language codes: ${invalidLanguages.join(', ')} - these will be ignored`,
+          `Unsupported language codes: ${shown.join(', ')}` +
+            `${rest > 0 ? ` (+${rest} more)` : ''} - these will be ignored`,
         );
       }
 

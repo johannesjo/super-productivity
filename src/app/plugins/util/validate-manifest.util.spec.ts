@@ -94,28 +94,34 @@ describe('validatePluginManifest', () => {
       );
     });
 
-    // An unbounded list would be echoed verbatim into the exportable log history.
-    it('rejects more languages than the app supports', () => {
-      const tooMany = Array.from(
-        { length: SUPPORTED_LANGUAGE_CODES.size + 1 },
-        (_, i) => `lang-${i}`,
-      );
+    // `languages` is third-party and unbounded, and this warning is logged into the
+    // exportable log history, so the message must not grow with the input.
+    it('truncates the unsupported-code list instead of echoing all of it', () => {
+      const many = Array.from({ length: 5000 }, (_, i) => `bogus-${i}`);
       const result = validatePluginManifest({
         ...baseManifest,
-        i18n: { languages: tooMany },
+        i18n: { languages: ['en', ...many] },
       });
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        `i18n.languages must not exceed ${SUPPORTED_LANGUAGE_CODES.size} entries`,
+
+      const warning = result.warnings.find((w) =>
+        w.startsWith('Unsupported language codes:'),
       );
+      expect(warning).toBeDefined();
+      expect(warning!.length).toBeLessThan(300);
+      expect(warning).toContain('(+4990 more)');
+      // Never a hard failure: a plugin stays loadable despite bad language codes.
+      expect(result.isValid).toBe(true);
     });
 
+    // Several bundled plugins declare exactly this many, so a cap here would put
+    // them one added language away from failing to load at all.
     it('accepts a declaration of every supported language', () => {
       const result = validatePluginManifest({
         ...baseManifest,
         i18n: { languages: [...SUPPORTED_LANGUAGE_CODES] },
       });
       expect(result.isValid).toBe(true);
+      expect(result.warnings).toEqual([]);
     });
   });
 });
