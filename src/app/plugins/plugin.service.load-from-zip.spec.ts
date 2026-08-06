@@ -183,6 +183,50 @@ describe('PluginService loadPluginFromZip iframe-only plugins', () => {
     expect(service.getPluginIndexHtml(iframeManifest.id)).toBe(indexHtml);
   });
 
+  it('loads declared translations before executing an uploaded plugin', async () => {
+    const manifest: PluginManifest = {
+      ...iframeManifest,
+      i18n: { languages: ['en', 'de'] },
+    };
+    const indexHtml = '<!doctype html><html><body>Translated plugin UI</body></html>';
+    const translations = {
+      en: JSON.stringify({ GREETING: 'Hello' }),
+      de: JSON.stringify({ GREETING: 'Hallo' }),
+    };
+    const files: Record<string, string> = {};
+    files['manifest.json'] = JSON.stringify(manifest);
+    files['index.html'] = indexHtml;
+    files['i18n/en.json'] = translations.en;
+    files['i18n/de.json'] = translations.de;
+    files['i18n/fr.json'] = JSON.stringify({ GREETING: 'Bonjour' });
+    const file = createZipFile(files);
+    pluginRunner.loadPlugin.and.callFake(
+      async (loadedManifest, _pluginCode, _baseCfg, isEnabled = true) => {
+        expect(pluginI18n.loadPluginTranslationsFromContent).toHaveBeenCalledOnceWith(
+          manifest.id,
+          translations,
+        );
+        return {
+          manifest: loadedManifest,
+          loaded: true,
+          isEnabled,
+        };
+      },
+    );
+
+    await service.loadPluginFromZip(file);
+
+    expect(pluginCache.storePlugin).toHaveBeenCalledOnceWith(
+      manifest.id,
+      JSON.stringify(manifest),
+      '',
+      indexHtml,
+      undefined,
+      translations,
+      undefined,
+    );
+  });
+
   it('rejects a plugin zip without plugin.js when index.html is absent', async () => {
     const files: Record<string, string> = {};
     files['manifest.json'] = JSON.stringify(iframeManifest);

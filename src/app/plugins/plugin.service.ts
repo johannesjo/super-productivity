@@ -1361,6 +1361,20 @@ export class PluginService implements OnDestroy {
         throw new Error(this._translateService.instant(T.PLUGINS.INDEX_HTML_NOT_LOADED));
       }
 
+      // Extract only translations declared by the manifest. Uploaded plugins use a
+      // virtual cache path, so these files cannot be fetched after the ZIP is discarded.
+      let translations: Record<string, string> | undefined;
+      if (manifest.i18n?.languages.length) {
+        translations = {};
+        const decoder = new TextDecoder();
+        for (const lang of manifest.i18n.languages) {
+          const translationBytes = extractedFiles[`i18n/${lang}.json`];
+          if (translationBytes !== undefined) {
+            translations[lang] = decoder.decode(translationBytes);
+          }
+        }
+      }
+
       // Extract icon if specified in manifest
       let iconContent: string | null = null;
       if (manifest.icon && extractedFiles[manifest.icon]) {
@@ -1447,9 +1461,16 @@ export class PluginService implements OnDestroy {
         pluginCode,
         indexHtml || undefined,
         iconContent || undefined,
-        undefined,
+        translations,
         configSchema,
       );
+
+      if (translations && Object.keys(translations).length > 0) {
+        this._pluginI18nService.loadPluginTranslationsFromContent(
+          manifest.id,
+          translations,
+        );
+      }
 
       // Store index.html content if it exists
       if (indexHtml) {
