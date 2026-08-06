@@ -148,29 +148,66 @@ test('macOS icon comparison tolerates one level of premultiplied rounding noise'
   assert.doesNotThrow(() => compareIconsets(ICONSET_PATH, actualIconset));
 });
 
-test('macOS icon comparison tolerates iconutil un-premultiplying straight-alpha data', (t) => {
-  const temporaryDirectory = mkdtempSync(join(tmpdir(), 'sp-mac-iconset-test-'));
-  t.after(() => rmSync(temporaryDirectory, { recursive: true, force: true }));
-
-  const actualIconset = join(temporaryDirectory, 'icon.iconset');
-  cpSync(ICONSET_PATH, actualIconset, { recursive: true });
-
-  // Reproduce what `iconutil --convert iconset` did on macos-15 (#9481): it
-  // treated the straight-alpha bytes stored at compile time as premultiplied
-  // and un-premultiplied them, clamping channels at 255.
-  const decoded = verifyIconset(ICONSET_PATH).get('icon_16x16.png');
-  const pixels = Buffer.from(decoded.pixels);
-  for (let offset = 0; offset < pixels.length; offset += 4) {
-    const alpha = pixels[offset + 3];
-    for (let channel = 0; channel < 3; channel++) {
-      pixels[offset + channel] = alpha
-        ? Math.min(255, Math.round((pixels[offset + channel] * 255) / alpha))
-        : 0;
-    }
+// iconutil compiles small representations as 'ARGB' chunks: four icns-RLE
+// planes in A,R,G,B order with straight-alpha values. Encode literal-only
+// runs, which the icns RLE decoder must accept.
+const encodeIcnsRlePlane = (plane) => {
+  const parts = [];
+  for (let offset = 0; offset < plane.length; offset += 128) {
+    const literals = plane.subarray(offset, Math.min(offset + 128, plane.length));
+    parts.push(Buffer.from([literals.length - 1]), literals);
   }
-  writeFileSync(join(actualIconset, 'icon_16x16.png'), encodePng(16, pixels));
+  return Buffer.concat(parts);
+};
 
-  assert.doesNotThrow(() => compareIconsets(ICONSET_PATH, actualIconset));
+const buildIcnsWithArgbSmallIcon = (pixels) => {
+  const planes = [3, 0, 1, 2].map((channel) => {
+    const plane = Buffer.alloc(pixels.length / 4);
+    for (let i = 0; i < plane.length; i++) {
+      plane[i] = pixels[i * 4 + channel];
+    }
+    return encodeIcnsRlePlane(plane);
+  });
+  const argbData = Buffer.concat([Buffer.from('ARGB', 'ascii'), ...planes]);
+
+  const source = readFileSync(ICON_PATH);
+  const chunks = [];
+  let offset = 8;
+  while (offset < source.length) {
+    const type = source.toString('ascii', offset, offset + 4);
+    const length = source.readUInt32BE(offset + 4);
+    chunks.push({
+      type,
+      data: type === 'icp4' ? argbData : source.subarray(offset + 8, offset + length),
+    });
+    offset += length;
+  }
+
+  const totalLength = chunks.reduce((sum, chunk) => sum + 8 + chunk.data.length, 8);
+  const icns = Buffer.alloc(totalLength);
+  icns.write('icns', 0, 4, 'ascii');
+  icns.writeUInt32BE(totalLength, 4);
+  let outputOffset = 8;
+  for (const { type, data } of chunks) {
+    icns.write(type, outputOffset, 4, 'ascii');
+    icns.writeUInt32BE(8 + data.length, outputOffset + 4);
+    data.copy(icns, outputOffset + 8);
+    outputOffset += 8 + data.length;
+  }
+  return icns;
+};
+
+test('macOS icns verification accepts iconutil-style ARGB small representations', () => {
+  const decoded = verifyIconset(ICONSET_PATH).get('icon_16x16.png');
+  const icns = buildIcnsWithArgbSmallIcon(decoded.pixels);
+  assert.doesNotThrow(() => verifyIcns(icns, 'argb.icns', ICONSET_PATH));
+});
+
+test('macOS icns verification rejects ARGB artwork drift', () => {
+  const decoded = verifyIconset(ICONSET_PATH).get('icon_16x16.png');
+  const pixels = shiftChannelByPremultipliedLevels(decoded, 8);
+  const icns = buildIcnsWithArgbSmallIcon(pixels);
+  assert.throws(() => verifyIcns(icns, 'argb.icns', ICONSET_PATH), /artwork differs/);
 });
 
 test('macOS icon comparison rejects artwork drift beyond rounding noise', (t) => {

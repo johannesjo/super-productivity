@@ -192,18 +192,11 @@ const decodePng = (buffer, expectedPixels, source) => {
   return { width, height, pixels };
 };
 
-// The iconutil round trip is lossy in two convention-dependent ways, and an
-// exact compare failed every mac release build since v18.17.0 (#9481):
-// - CoreGraphics premultiply rounding can land one level away from
-//   Math.round on anti-aliased pixels, and
-// - `iconutil --convert iconset` un-premultiplies small-size payloads even
-//   though its compile step stored our straight-alpha bytes verbatim, so
-//   partially transparent pixels come back as clamp(value * 255 / alpha) —
-//   artwork preserved, alpha convention reinterpreted (observed on macos-15:
-//   16x16 pixel 19 expected rgba(9,118,207,54) came back rgba(43,255,255,54)).
-// A pixel passes if the actual data matches the expected artwork under
-// either convention with one level of rounding noise; real artwork
-// regressions like #6323 match neither.
+// CoreGraphics runs ARGB payloads through a premultiply round trip whose
+// rounding can land one level away from Math.round on anti-aliased pixels
+// (#9481 — an exact compare failed every mac release build since v18.17.0).
+// Real artwork regressions like #6323 move many pixels by many levels, so
+// one level of noise is safe to absorb.
 const CODEC_ROUNDING_TOLERANCE = 1;
 const MAX_REPORTED_PIXEL_DIFFS = 8;
 
@@ -212,30 +205,18 @@ const compareDecodedPng = (expected, actual, source) => {
   for (let offset = 0; offset < expected.pixels.length; offset += 4) {
     const expectedAlpha = expected.pixels[offset + 3];
     const actualAlpha = actual.pixels[offset + 3];
-    const alphaDelta = Math.abs(expectedAlpha - actualAlpha);
-    let premultipliedDelta = alphaDelta;
-    let unpremultipliedDelta = alphaDelta;
+    let delta = Math.abs(expectedAlpha - actualAlpha);
 
     for (let channel = 0; channel < 3; channel++) {
-      const expectedValue = expected.pixels[offset + channel];
-      const actualValue = actual.pixels[offset + channel];
-      const expectedPremultiplied = Math.round((expectedValue * expectedAlpha) / 255);
-      const actualPremultiplied = Math.round((actualValue * actualAlpha) / 255);
-      premultipliedDelta = Math.max(
-        premultipliedDelta,
-        Math.abs(expectedPremultiplied - actualPremultiplied),
+      const expectedPremultiplied = Math.round(
+        (expected.pixels[offset + channel] * expectedAlpha) / 255,
       );
-
-      const expectedUnpremultiplied = expectedAlpha
-        ? Math.min(255, Math.round((expectedValue * 255) / expectedAlpha))
-        : actualValue;
-      unpremultipliedDelta = Math.max(
-        unpremultipliedDelta,
-        Math.abs(expectedUnpremultiplied - actualValue),
+      const actualPremultiplied = Math.round(
+        (actual.pixels[offset + channel] * actualAlpha) / 255,
       );
+      delta = Math.max(delta, Math.abs(expectedPremultiplied - actualPremultiplied));
     }
 
-    const delta = Math.min(premultipliedDelta, unpremultipliedDelta);
     if (delta > CODEC_ROUNDING_TOLERANCE) {
       diffs.push({ pixel: offset / 4, delta, offset });
     }
@@ -255,6 +236,68 @@ const compareDecodedPng = (expected, actual, source) => {
       `artwork differs at ${diffs.length} pixel(s) beyond rounding tolerance: ${details}`,
     );
   }
+};
+
+const ARGB_MAGIC = Buffer.from('ARGB', 'ascii');
+
+// icns run-length encoding (not classic PackBits): a control byte below 0x80
+// starts a literal run of control+1 bytes; 0x80 and above repeats the next
+// byte control-0x80+3 times.
+const decodeIcnsRle = (data, expectedLength, source) => {
+  const plane = Buffer.alloc(expectedLength);
+  let inputOffset = 0;
+  let outputOffset = 0;
+  while (outputOffset < expectedLength) {
+    if (inputOffset >= data.length) {
+      fail(source, 'truncated RLE channel data');
+    }
+    const control = data[inputOffset++];
+    const count = control < 0x80 ? control + 1 : control - 0x80 + 3;
+    if (outputOffset + count > expectedLength) {
+      fail(
+        source,
+        `RLE run overflows channel by ${outputOffset + count - expectedLength} bytes`,
+      );
+    }
+    if (control < 0x80) {
+      if (inputOffset + count > data.length) {
+        fail(source, 'truncated RLE literal run');
+      }
+      data.copy(plane, outputOffset, inputOffset, inputOffset + count);
+      inputOffset += count;
+    } else {
+      if (inputOffset >= data.length) {
+        fail(source, 'truncated RLE repeat run');
+      }
+      plane.fill(data[inputOffset++], outputOffset, outputOffset + count);
+    }
+    outputOffset += count;
+  }
+  return { plane, bytesRead: inputOffset };
+};
+
+// iconutil stores small representations (icp4/icp5) as 'ARGB': four
+// icns-RLE-compressed planes in alpha, red, green, blue order holding
+// straight (non-premultiplied) channel values.
+const decodeArgbChunk = (buffer, expectedPixels, source) => {
+  const pixelCount = expectedPixels * expectedPixels;
+  const pixels = Buffer.alloc(pixelCount * 4);
+  let offset = ARGB_MAGIC.length;
+  for (const channel of [3, 0, 1, 2]) {
+    const { plane, bytesRead } = decodeIcnsRle(
+      buffer.subarray(offset),
+      pixelCount,
+      `${source}:plane${channel}`,
+    );
+    for (let i = 0; i < pixelCount; i++) {
+      pixels[i * 4 + channel] = plane[i];
+    }
+    offset += bytesRead;
+  }
+  if (offset !== buffer.length) {
+    fail(source, `unexpected ${buffer.length - offset} trailing bytes in ARGB data`);
+  }
+  return { width: expectedPixels, height: expectedPixels, pixels };
 };
 
 const parseIcns = (buffer, source) => {
@@ -339,11 +382,11 @@ const verifyIcns = (buffer, source = 'ICNS', expectedIconsetDirectory) => {
       continue;
     }
 
-    const decoded = decodePng(
-      chunks.get(representation.type),
-      representation.pixels,
-      `${source}:${representation.type}`,
-    );
+    const chunk = chunks.get(representation.type);
+    const chunkSource = `${source}:${representation.type}`;
+    const decoded = chunk.subarray(0, 4).equals(ARGB_MAGIC)
+      ? decodeArgbChunk(chunk, representation.pixels, chunkSource)
+      : decodePng(chunk, representation.pixels, chunkSource);
     if (expectedFiles) {
       compareDecodedPng(
         expectedFiles.get(representation.file),
