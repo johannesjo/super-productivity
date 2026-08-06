@@ -192,11 +192,18 @@ const decodePng = (buffer, expectedPixels, source) => {
   return { width, height, pixels };
 };
 
-// The iconutil round trip re-encodes pixels through CoreGraphics, whose
-// premultiply rounding can land one level away from Math.round on
-// anti-aliased pixels — an exact compare failed every mac release build
-// since v18.17.0 (16x16 pixel 19). Real artwork regressions like #6323
-// move many pixels by many levels, so one level of noise is safe to absorb.
+// The iconutil round trip is lossy in two convention-dependent ways, and an
+// exact compare failed every mac release build since v18.17.0 (#9481):
+// - CoreGraphics premultiply rounding can land one level away from
+//   Math.round on anti-aliased pixels, and
+// - `iconutil --convert iconset` un-premultiplies small-size payloads even
+//   though its compile step stored our straight-alpha bytes verbatim, so
+//   partially transparent pixels come back as clamp(value * 255 / alpha) —
+//   artwork preserved, alpha convention reinterpreted (observed on macos-15:
+//   16x16 pixel 19 expected rgba(9,118,207,54) came back rgba(43,255,255,54)).
+// A pixel passes if the actual data matches the expected artwork under
+// either convention with one level of rounding noise; real artwork
+// regressions like #6323 match neither.
 const CODEC_ROUNDING_TOLERANCE = 1;
 const MAX_REPORTED_PIXEL_DIFFS = 8;
 
@@ -205,18 +212,30 @@ const compareDecodedPng = (expected, actual, source) => {
   for (let offset = 0; offset < expected.pixels.length; offset += 4) {
     const expectedAlpha = expected.pixels[offset + 3];
     const actualAlpha = actual.pixels[offset + 3];
-    let delta = Math.abs(expectedAlpha - actualAlpha);
+    const alphaDelta = Math.abs(expectedAlpha - actualAlpha);
+    let premultipliedDelta = alphaDelta;
+    let unpremultipliedDelta = alphaDelta;
 
     for (let channel = 0; channel < 3; channel++) {
-      const expectedPremultiplied = Math.round(
-        (expected.pixels[offset + channel] * expectedAlpha) / 255,
+      const expectedValue = expected.pixels[offset + channel];
+      const actualValue = actual.pixels[offset + channel];
+      const expectedPremultiplied = Math.round((expectedValue * expectedAlpha) / 255);
+      const actualPremultiplied = Math.round((actualValue * actualAlpha) / 255);
+      premultipliedDelta = Math.max(
+        premultipliedDelta,
+        Math.abs(expectedPremultiplied - actualPremultiplied),
       );
-      const actualPremultiplied = Math.round(
-        (actual.pixels[offset + channel] * actualAlpha) / 255,
+
+      const expectedUnpremultiplied = expectedAlpha
+        ? Math.min(255, Math.round((expectedValue * 255) / expectedAlpha))
+        : actualValue;
+      unpremultipliedDelta = Math.max(
+        unpremultipliedDelta,
+        Math.abs(expectedUnpremultiplied - actualValue),
       );
-      delta = Math.max(delta, Math.abs(expectedPremultiplied - actualPremultiplied));
     }
 
+    const delta = Math.min(premultipliedDelta, unpremultipliedDelta);
     if (delta > CODEC_ROUNDING_TOLERANCE) {
       diffs.push({ pixel: offset / 4, delta, offset });
     }

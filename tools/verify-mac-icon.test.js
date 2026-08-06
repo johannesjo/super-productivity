@@ -148,6 +148,31 @@ test('macOS icon comparison tolerates one level of premultiplied rounding noise'
   assert.doesNotThrow(() => compareIconsets(ICONSET_PATH, actualIconset));
 });
 
+test('macOS icon comparison tolerates iconutil un-premultiplying straight-alpha data', (t) => {
+  const temporaryDirectory = mkdtempSync(join(tmpdir(), 'sp-mac-iconset-test-'));
+  t.after(() => rmSync(temporaryDirectory, { recursive: true, force: true }));
+
+  const actualIconset = join(temporaryDirectory, 'icon.iconset');
+  cpSync(ICONSET_PATH, actualIconset, { recursive: true });
+
+  // Reproduce what `iconutil --convert iconset` did on macos-15 (#9481): it
+  // treated the straight-alpha bytes stored at compile time as premultiplied
+  // and un-premultiplied them, clamping channels at 255.
+  const decoded = verifyIconset(ICONSET_PATH).get('icon_16x16.png');
+  const pixels = Buffer.from(decoded.pixels);
+  for (let offset = 0; offset < pixels.length; offset += 4) {
+    const alpha = pixels[offset + 3];
+    for (let channel = 0; channel < 3; channel++) {
+      pixels[offset + channel] = alpha
+        ? Math.min(255, Math.round((pixels[offset + channel] * 255) / alpha))
+        : 0;
+    }
+  }
+  writeFileSync(join(actualIconset, 'icon_16x16.png'), encodePng(16, pixels));
+
+  assert.doesNotThrow(() => compareIconsets(ICONSET_PATH, actualIconset));
+});
+
 test('macOS icon comparison rejects artwork drift beyond rounding noise', (t) => {
   const temporaryDirectory = mkdtempSync(join(tmpdir(), 'sp-mac-iconset-test-'));
   t.after(() => rmSync(temporaryDirectory, { recursive: true, force: true }));
