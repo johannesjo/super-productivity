@@ -1,5 +1,5 @@
 import { PluginManifest } from '../plugin-api.model';
-import { LanguageCode } from '../../core/locale.constants';
+import { SUPPORTED_LANGUAGE_CODES } from '../../core/locale.constants';
 
 /**
  * Simplified manifest validation following KISS principles.
@@ -61,9 +61,8 @@ export const validatePluginManifest = (
       warnings.push('i18n.languages is empty - plugin will have no translations');
     } else {
       // Validate language codes
-      const validLanguages = Object.values(LanguageCode);
       const invalidLanguages = manifest.i18n.languages.filter(
-        (lang) => !validLanguages.includes(lang as LanguageCode),
+        (lang) => !SUPPORTED_LANGUAGE_CODES.has(lang),
       );
 
       if (invalidLanguages.length > 0) {

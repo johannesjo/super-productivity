@@ -36,6 +36,15 @@ export enum LanguageCode {
 }
 
 /**
+ * Single source of truth for "is this a language code the app knows?".
+ * Used to validate and filter plugin `i18n.languages` declarations, which are
+ * plain strings from a third-party manifest.
+ */
+export const SUPPORTED_LANGUAGE_CODES: ReadonlySet<string> = new Set<string>(
+  Object.values(LanguageCode),
+);
+
+/**
  * We're assuming that the other language speakers are likely to speak English
  * and as English offers most likely the best experience, we use it as default
  */

@@ -17,8 +17,8 @@ import { PluginCacheService } from './plugin-cache.service';
 import {
   MAX_PLUGIN_CODE_SIZE,
   MAX_PLUGIN_MANIFEST_SIZE,
-  MAX_PLUGIN_TRANSLATIONS_SIZE,
-  MAX_PLUGIN_TRANSLATION_SIZE,
+  MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE,
+  MAX_PLUGIN_TRANSLATION_FILE_SIZE,
   MAX_PLUGIN_ZIP_SIZE,
 } from './plugin.const';
 import { take } from 'rxjs/operators';
@@ -40,7 +40,7 @@ import { SnackService } from '../core/snack/snack.service';
 import { pingWithRetry } from './util/ping-with-retry.util';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { sanitizeSvgIconContent } from '../util/sanitize-svg-icon.util';
-import { LanguageCode } from '../core/locale.constants';
+import { selectPluginTranslationFiles } from './util/select-plugin-translation-files.util';
 
 // Each plugin's `id` (from its manifest.json, distinct from the asset path
 // here) becomes the entityId prefix for all data it persists via
@@ -95,7 +95,6 @@ const BUNDLED_PLUGIN_IDS = new Set<string>([
   'voice-reminder',
   'yesterday-tasks',
 ]);
-const SUPPORTED_PLUGIN_LANGUAGES = new Set<string>(Object.values(LanguageCode));
 
 /**
  * Thrown by `_fireOnReady` when the user explicitly DENIES a nodeExecution consent
@@ -1369,33 +1368,38 @@ export class PluginService implements OnDestroy {
       // virtual cache path, so these files cannot be fetched after the ZIP is discarded.
       let translations: Record<string, string> | undefined;
       if (manifest.i18n?.languages.length) {
-        translations = {};
+        const { files, skipped } = selectPluginTranslationFiles(
+          extractedFiles,
+          manifest.i18n.languages,
+        );
+        // Never skip silently: a declared language that loads nothing is exactly the
+        // "translate() just returns the key" mystery reported in #9459.
+        for (const { lang, reason } of skipped) {
+          PluginLog.err(
+            `Plugin ${manifest.id} declares i18n language "${lang}" but no translations were loaded (${reason})`,
+          );
+        }
         const decoder = new TextDecoder();
-        let translationsSize = 0;
-        const assertWithinTranslationLimit = (size: number, maxSize: number): void => {
-          if (size > maxSize) {
+        translations = {};
+        let totalSize = 0;
+        for (const { lang, bytes } of files) {
+          if (bytes.length > MAX_PLUGIN_TRANSLATION_FILE_SIZE) {
             throw new Error(
-              this._translateService.instant(T.PLUGINS.FILE_TOO_LARGE, {
-                maxSize: (maxSize / 1024 / 1024).toFixed(1),
-                fileSize: (size / 1024 / 1024).toFixed(1),
+              this._translateService.instant(T.PLUGINS.TRANSLATION_FILE_TOO_LARGE, {
+                lang,
+                maxSize: (MAX_PLUGIN_TRANSLATION_FILE_SIZE / 1024 / 1024).toFixed(1),
               }),
             );
           }
-        };
-        for (const lang of new Set(manifest.i18n.languages)) {
-          if (!SUPPORTED_PLUGIN_LANGUAGES.has(lang)) {
-            continue;
-          }
-          const translationBytes = extractedFiles[`i18n/${lang}.json`];
-          if (translationBytes !== undefined) {
-            assertWithinTranslationLimit(
-              translationBytes.length,
-              MAX_PLUGIN_TRANSLATION_SIZE,
+          totalSize += bytes.length;
+          if (totalSize > MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE) {
+            throw new Error(
+              this._translateService.instant(T.PLUGINS.TRANSLATIONS_TOO_LARGE, {
+                maxSize: (MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE / 1024 / 1024).toFixed(1),
+              }),
             );
-            translationsSize += translationBytes.length;
-            assertWithinTranslationLimit(translationsSize, MAX_PLUGIN_TRANSLATIONS_SIZE);
-            translations[lang] = decoder.decode(translationBytes);
           }
+          translations[lang] = decoder.decode(bytes);
         }
       }
 

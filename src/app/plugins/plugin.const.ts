@@ -4,5 +4,5 @@
 export const MAX_PLUGIN_ZIP_SIZE = 10 * 1024 * 1024; // 10MB - plenty of room
 export const MAX_PLUGIN_MANIFEST_SIZE = 100 * 1024; // 100KB - why limit JSON?
 export const MAX_PLUGIN_CODE_SIZE = 5 * 1024 * 1024; // 5MB - let them build complex plugins
-export const MAX_PLUGIN_TRANSLATION_SIZE = 1024 * 1024; // 1MB per language
-export const MAX_PLUGIN_TRANSLATIONS_SIZE = 5 * 1024 * 1024; // 5MB combined
+export const MAX_PLUGIN_TRANSLATION_FILE_SIZE = 1024 * 1024; // 1MB per language
+export const MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE = 5 * 1024 * 1024; // 5MB combined
