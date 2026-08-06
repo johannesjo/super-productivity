@@ -134,7 +134,12 @@ test.describe('Calendar #5162', () => {
     });
 
     // --- …and stays out of the task list ---
-    await page.goto(page.url().replace(/#.*$/, '').replace(/\/$/, '') + '#/tag/TODAY');
+    // Use the canonical work-view route: bare `#/tag/TODAY` matches the lazy
+    // `tag/:id` child routes, which have no empty-path route, and renders an
+    // empty outlet on CI (locally the `**` fallback happens to rescue it).
+    await page.goto(
+      page.url().replace(/#.*$/, '').replace(/\/$/, '') + '#/tag/TODAY/tasks',
+    );
     await workViewPage.waitForTaskList();
     await expect(taskPage.getTaskByText(EVENT_TITLE)).toHaveCount(0);
   });
