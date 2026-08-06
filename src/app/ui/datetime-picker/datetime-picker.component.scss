@@ -58,6 +58,11 @@
       height: auto;
       min-height: 416px;
       aspect-ratio: 25 / 26;
+      // The min-height transfers through the aspect-ratio into a ~400px
+      // intrinsic width, which forces horizontal scrolling in dialogs narrower
+      // than that (360–390px phones). Cap the width; min-height still reserves
+      // the 6-row height on its own.
+      max-width: 100%;
     }
 
     .mat-calendar-header {

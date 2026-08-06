@@ -38,6 +38,14 @@ mat-dialog-content {
 mat-dialog-actions {
   padding: 0 0 var(--s2) 0 !important;
   row-gap: calc(var(--s) + var(--s-half));
+
+  // On very narrow phones (≤398px) the three action buttons don't fit with
+  // their icons and wrap onto a second row — drop the icons, keep the labels.
+  @include mq(xxxs, max) {
+    button mat-icon {
+      display: none;
+    }
+  }
 }
 
 .dialog-actions-and-warnings {
