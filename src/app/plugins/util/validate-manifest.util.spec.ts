@@ -15,26 +15,6 @@ describe('validatePluginManifest', () => {
     expect(result.errors).toEqual([]);
   });
 
-  // The id is interpolated untruncated into ~6 log sites, IndexedDB keys and
-  // persistence key prefixes. Bounding it here bounds all of them at once.
-  it('rejects an unbounded plugin id', () => {
-    const result = validatePluginManifest({
-      ...baseManifest,
-      id: 'x'.repeat(101),
-    });
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Plugin ID must be at most 100 characters');
-  });
-
-  // The longest real plugin id is 27 chars, so the cap must not sit near it.
-  it('accepts a comfortably long real-world plugin id', () => {
-    const result = validatePluginManifest({
-      ...baseManifest,
-      id: 'azure-devops-issue-provider-with-a-very-long-suffix',
-    });
-    expect(result.isValid).toBe(true);
-  });
-
   it("rejects a plugin id containing ':'", () => {
     // ':' is reserved as the persistence key delimiter (composeId). A
     // plugin with this id would collide with another plugin's keyed

@@ -1133,8 +1133,9 @@ export class PluginService implements OnDestroy {
       // Surface non-fatal manifest problems the way the path-based loader does.
       // These include "English (en) not in i18n.languages" and unsupported language
       // codes — both direct causes of translate() silently returning keys (#9459).
+      // warn, matching PluginLoaderService's level for the identical strings.
       for (const warning of manifestValidation.warnings) {
-        PluginLog.err(`Plugin ${manifest.id}: ${warning}`);
+        PluginLog.warn(`Plugin ${manifest.id}: ${warning}`);
       }
       this._assertUploadedPluginAllowed(manifest);
 

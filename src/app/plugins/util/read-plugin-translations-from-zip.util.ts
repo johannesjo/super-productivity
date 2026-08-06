@@ -70,8 +70,11 @@ export const readPluginTranslationsFromZip = (
       skipped.push({ lang, reason: 'file-missing' });
       continue;
     }
-    // Check before decoding so an oversized set never materializes as strings.
-    // The caller rejects the upload, so the partial map is never observed.
+    // Check before decoding, so the KEPT set never materializes beyond the limit.
+    // Only accepted files accumulate, so a run of large unparseable ones still
+    // decodes transiently: this bounds what is stored, not peak memory — `unzip`
+    // has already decompressed the whole archive by the time we get here.
+    // The caller rejects the upload on this return, so the partial map is unobserved.
     if (totalBytes + bytes.length > maxTotalBytes) {
       return { translations: {}, skipped, isOverLimit: true };
     }
@@ -88,17 +91,21 @@ export const readPluginTranslationsFromZip = (
 };
 
 /**
- * Every interpolant here is bounded: `skipped` by the supported-language count, `lang`
- * by the allowlist, `reason` by its union, and `pluginId` by the manifest validator's
- * length check — which matters because `Log.recordLog` stores a string argument
- * verbatim in the exportable, ring-buffered log history.
+ * `Log.recordLog` stores a string argument verbatim in the exportable, ring-buffered
+ * log history, so the third-party parts of this message are bounded at the source:
+ * `skipped` by the supported-language count, `lang` by the allowlist, `reason` by its
+ * union. `pluginId` is not bounded here — it is already logged untruncated from ~10
+ * pre-existing sites (plugin-cache.service.ts, startup discovery), so bounding it is
+ * a separate, wider change than this one.
  */
 export const logSkippedPluginTranslations = (
   pluginId: string,
   skipped: readonly SkippedTranslation[],
 ): void => {
   for (const { lang, reason } of skipped) {
-    PluginLog.err(
+    // warn, matching how PluginLoaderService reports the same class of problem for
+    // path-based plugins: a plugin author's omission, not an app error.
+    PluginLog.warn(
       `Plugin ${pluginId} declares i18n language "${lang}" but no translations were loaded (${reason})`,
     );
   }

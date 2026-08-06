@@ -1,7 +1,6 @@
 import { PluginManifest } from '../plugin-api.model';
 import { SUPPORTED_LANGUAGE_CODES } from '../../core/locale.constants';
 
-const MAX_PLUGIN_ID_LENGTH = 100;
 const MAX_REPORTED_INVALID_LANGUAGES = 10;
 const MAX_REPORTED_LANGUAGE_LENGTH = 20;
 
@@ -20,13 +19,6 @@ export const validatePluginManifest = (
   const warnings: string[] = [];
 
   // Only validate critical fields
-  if (manifest?.id && manifest.id.length > MAX_PLUGIN_ID_LENGTH) {
-    // The id is third-party and lands verbatim in log messages (Log.recordLog stores
-    // a string argument untruncated), in IndexedDB keys and in persistence key
-    // prefixes. Bounding it here bounds every one of those at once. The longest real
-    // plugin id is 27 characters, so this cannot bite a genuine plugin.
-    errors.push(`Plugin ID must be at most ${MAX_PLUGIN_ID_LENGTH} characters`);
-  }
   if (!manifest?.id) {
     errors.push('Plugin ID is required');
   } else if (manifest.id.includes(':')) {

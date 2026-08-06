@@ -99,7 +99,7 @@ outright rather than loaded with mangled characters.
 
 A declared language is skipped when it ships no matching `i18n/<lang>.json` in the ZIP,
 or when that file is not valid UTF-8 JSON describing an object. Each of those is logged
-individually as a console error. Unsupported language codes are reported together in one
+individually as a console warning. Unsupported language codes are reported together in one
 `Unsupported language codes: …` warning, truncated to the first few. `translate()` then
 falls back to returning the key, so check the console first when a translation does not
 show up.
