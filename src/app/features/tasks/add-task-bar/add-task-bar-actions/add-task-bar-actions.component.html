@@ -193,6 +193,15 @@
   }
 </div>
 
+<!-- Announces the date the workday recurrence moved for the user, which is
+     otherwise a silent change to a button they are not focused on. -->
+<span
+  class="cdk-visually-hidden"
+  aria-live="polite"
+  data-test="add-task-bar-date-move-announcement"
+  >{{ workdayDateMoveAnnouncement() }}</span
+>
+
 <!-------------- Menus ------------------->
 <mat-menu #projectMenu="matMenu">
   @for (project of allProjects(); track project.id) {

@@ -6,7 +6,7 @@ import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translat
 import { of } from 'rxjs';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
-import { AddTaskBarParserService } from '../add-task-bar-parser.service';
+import { AddTaskBarParserService, WorkdayDateMove } from '../add-task-bar-parser.service';
 import { ProjectService } from '../../../project/project.service';
 import { TagService } from '../../../tag/tag.service';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -40,6 +40,7 @@ describe('AddTaskBarActionsComponent', () => {
   let mockDialogRef: jasmine.SpyObj<MatDialogRef<DialogScheduleTaskComponent>>;
   let mockDateService: jasmine.SpyObj<DateService>;
   let mockProjectsSignal: WritableSignal<Project[]>;
+  let mockWorkdayDateMove: WritableSignal<WorkdayDateMove | null>;
 
   const mockProject: Project = {
     id: '1',
@@ -150,18 +151,27 @@ describe('AddTaskBarActionsComponent', () => {
     (mockStateService as any)._mockAutoDetectedSignal = mockAutoDetectedSignal;
     (mockStateService as any)._mockInputTxtSignal = mockInputTxtSignal;
 
-    mockParserService = jasmine.createSpyObj('AddTaskBarParserService', [
-      'removeShortSyntaxFromInput',
-      'applyUserRepeatPick',
-      'applyUserDatePick',
-      'applyUserDeadlinePick',
-      'applyUserEstimatePick',
-    ]);
+    mockWorkdayDateMove = signal<WorkdayDateMove | null>(null);
+    mockParserService = jasmine.createSpyObj(
+      'AddTaskBarParserService',
+      [
+        'removeShortSyntaxFromInput',
+        'applyUserRepeatPick',
+        'applyUserDatePick',
+        'applyUserDeadlinePick',
+        'applyUserEstimatePick',
+        'dateBeforeWorkdayRoll',
+      ],
+      { workdayDateMove: mockWorkdayDateMove.asReadonly() },
+    );
     // Stand-in for "input held no syntax of that type"; tests that care about
     // the stripping override this
     mockParserService.removeShortSyntaxFromInput.and.callFake(
       (currentInput: string) => currentInput,
     );
+    // The real one only unwinds a roll it made itself, so with none standing it
+    // hands the date straight back
+    mockParserService.dateBeforeWorkdayRoll.and.callFake((date: string | null) => date);
 
     mockProjectsSignal = signal([mockProject]);
     mockProjectService = jasmine.createSpyObj('ProjectService', [], {
@@ -616,6 +626,7 @@ describe('AddTaskBarActionsComponent', () => {
                 Q_DAILY: 'Every day',
                 Q_EVERY_X_DAYS: 'Every {{count}} days',
                 Q_EVERY_X_WEEKS: 'Every {{count}} weeks on {{weekdayStr}}',
+                Q_WEEKLY_CURRENT_WEEKDAY: 'Every week on {{weekdayStr}}',
               },
             },
           },
@@ -687,6 +698,140 @@ describe('AddTaskBarActionsComponent', () => {
 
       expect(mockParserService.applyUserRepeatPick).toHaveBeenCalledWith(null);
       expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
+    });
+
+    // The chip can hold a day a workday roll produced rather than one the user
+    // picked, and picking any other option here takes that roll back off first
+    it('should build the labels from the day behind a workday roll', () => {
+      mockParserService.dateBeforeWorkdayRoll.and.returnValue('2027-03-27');
+      (mockStateService as any)._mockStateSignal.set({
+        ...mockState,
+        // The Monday the roll moved the picked Saturday to
+        date: '2027-03-29',
+        repeat: { type: 'PRESET', quickSetting: 'MONDAY_TO_FRIDAY' },
+      });
+
+      const weekly = component
+        .repeatQuickOptions()
+        .find((o) => o.value === 'WEEKLY_CURRENT_WEEKDAY');
+
+      expect(weekly?.label).toBe('Every week on Saturday');
+    });
+  });
+
+  // The two halves of the contextual options — what the label says and what
+  // picking it saves — come from opposite sides of the roll, so only the real
+  // parser and state can show them agreeing.
+  describe('Repeat Setting against real add bar state', () => {
+    let realState: AddTaskBarStateService;
+    let realParser: AddTaskBarParserService;
+    // 2027-03-27 is a Saturday, 2027-03-29 the Monday after it
+    const SATURDAY = '2027-03-27';
+    const MONDAY = '2027-03-29';
+    const WORKDAYS = {
+      type: 'PRESET' as const,
+      quickSetting: 'MONDAY_TO_FRIDAY' as const,
+    };
+
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [
+          AddTaskBarActionsComponent,
+          BrowserAnimationsModule,
+          TranslateModule.forRoot(),
+        ],
+        providers: [
+          AddTaskBarStateService,
+          AddTaskBarParserService,
+          { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
+          { provide: DateService, useValue: mockDateService },
+          {
+            provide: GlobalConfigService,
+            useValue: mockConfigService(DateTimeLocales.en_us),
+          },
+          { provide: Store, useValue: mockStore },
+          { provide: ProjectService, useValue: mockProjectService },
+          { provide: TagService, useValue: mockTagService },
+          { provide: MatDialog, useValue: mockMatDialog },
+          TranslateService,
+          TranslateStore,
+        ],
+      }).compileComponents();
+
+      const translateService = TestBed.inject(TranslateService);
+      translateService.setTranslation('en', {
+        F: {
+          TASK: {
+            ADD_TASK_BAR: {
+              A11Y_DATE_MOVED_BACK: 'Date moved back to {{dateStr}}',
+              A11Y_DATE_MOVED_FOR_WORKDAYS: 'Date moved to {{dateStr}}',
+            },
+          },
+          TASK_REPEAT: {
+            F: {
+              Q_MONDAY_TO_FRIDAY: 'Workdays',
+              Q_WEEKLY_CURRENT_WEEKDAY: 'Every week on {{weekdayStr}}',
+            },
+          },
+        },
+      });
+      translateService.use('en');
+
+      fixture = TestBed.createComponent(AddTaskBarActionsComponent);
+      component = fixture.componentInstance;
+      realState = TestBed.inject(AddTaskBarStateService);
+      realParser = TestBed.inject(AddTaskBarParserService);
+      fixture.detectChanges();
+    });
+
+    it('should save the recurrence its label offered after a workday roll', () => {
+      realParser.applyUserDatePick(SATURDAY, null, null);
+      realParser.applyUserRepeatPick(WORKDAYS);
+      expect(realState.state().date).toBe(MONDAY);
+
+      const label = component
+        .repeatQuickOptions()
+        .find((o) => o.value === 'WEEKLY_CURRENT_WEEKDAY')?.label;
+      component.selectRepeatQuickSetting('WEEKLY_CURRENT_WEEKDAY');
+
+      // The day the recurrence is anchored to on submit, and so the weekday it
+      // recurs on — the label has to have named this one
+      expect(realState.state().date).toBe(SATURDAY);
+      expect(label).toBe('Every week on Saturday');
+    });
+
+    it('should announce a date it moved by itself, and moving it back', () => {
+      const region = (): HTMLElement =>
+        fixture.nativeElement.querySelector(
+          '[data-test="add-task-bar-date-move-announcement"]',
+        );
+      // Present from the start: a live region added along with its text is not
+      // reliably announced
+      expect(region().getAttribute('aria-live')).toBe('polite');
+      expect(region().textContent?.trim()).toBe('');
+
+      realParser.applyUserDatePick(SATURDAY, null, null);
+      realParser.applyUserRepeatPick(WORKDAYS);
+      fixture.detectChanges();
+
+      expect(region().textContent?.trim()).toBe('Date moved to Monday, March 29');
+
+      realParser.applyUserRepeatPick(null);
+      fixture.detectChanges();
+
+      expect(region().textContent?.trim()).toBe('Date moved back to Saturday, March 27');
+    });
+
+    it('should stay quiet about a date the user set themselves', () => {
+      realParser.applyUserDatePick(SATURDAY, null, null);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement
+          .querySelector('[data-test="add-task-bar-date-move-announcement"]')
+          .textContent?.trim(),
+      ).toBe('');
     });
   });
 

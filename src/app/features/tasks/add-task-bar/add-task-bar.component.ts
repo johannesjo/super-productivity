@@ -62,6 +62,8 @@ import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
+import { AddTaskBarState } from './add-task-bar.const';
+import { rollWeekendDateForRepeat } from './roll-weekend-date-for-repeat';
 import { ShortSyntaxSegment, splitTextByRanges } from '../short-syntax-ranges';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 import { MarkdownPasteService } from '../markdown-paste.service';
@@ -556,7 +558,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       } else if (state.repeat && state.repeat.type !== 'DIALOG') {
         // When a recurrence is set without an explicit date, set dueDay to today
         // so the first task instance appears as today's occurrence instead of staying in inbox
-        taskData.dueDay = this._dateService.todayStr();
+        taskData.dueDay = this._repeatStartDate(state);
       } else {
         // Explicitly set dueDay to undefined when no date is selected
         // This prevents automatic assignment of today's date in TODAY context
@@ -601,7 +603,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         if (repeat.type === 'DIALOG') {
           this._openRepeatDialogForTask(taskId, resolvedRemindOption);
         } else {
-          const startDate = state.date || this._dateService.todayStr();
+          const startDate = this._repeatStartDate(state);
           const referenceDate = dateStrToUtcDate(startDate);
           // An interval ("@every 2 days") has no preset to expand — it maps to a
           // CUSTOM config carrying the cycle and interval directly.
@@ -645,6 +647,22 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     } finally {
       this._isAddingTask = false;
     }
+  }
+
+  /**
+   * The day the recurrence being submitted really starts on.
+   *
+   * A date on the chip has been rolled off an excluded weekend day already (the
+   * parser does it as it is picked, so the chip cannot advertise a first
+   * occurrence the task never gets). A recurrence with no date at all never
+   * passes through the parser, so the fallback to today is rolled here — on a
+   * weekend it would otherwise leave the task on the Monday the occurrence
+   * engine moves it to, while the config's hidden `startDate` kept the Saturday
+   * that every later preset change would derive from.
+   */
+  private _repeatStartDate(state: AddTaskBarState): string {
+    const base = state.date || this._dateService.todayStr();
+    return rollWeekendDateForRepeat(base, state.repeat) ?? base;
   }
 
   onSubmitBtnClick(): void {

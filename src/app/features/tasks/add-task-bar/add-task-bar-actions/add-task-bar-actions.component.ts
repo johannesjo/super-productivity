@@ -204,9 +204,37 @@ export class AddTaskBarActionsComponent {
   // First occurrence of the recurrence being built: the same date the repeat
   // config takes as its `startDate` on submit, so a label derived from it can
   // never name a different weekday than the config recurs on.
+  //
+  // A workday roll is taken back off first, because picking one of these
+  // options takes it off too: the day on the chip can be the Monday a workday
+  // schedule moved the user's Saturday to, and every option here re-derives
+  // from the Saturday. Anchoring the labels anywhere else offers "every week on
+  // Monday" and saves a Saturday recurrence.
   private _repeatRefDate = computed(() => {
-    const dateStr = this.state().date;
+    const dateStr = this._parserService.dateBeforeWorkdayRoll(this.state().date);
     return dateStr ? dateStrToUtcDate(dateStr) : new Date();
+  });
+
+  // The one date change in this bar the user did not make themselves, so the
+  // only one a screen reader gets no signal from. Empty until it happens —
+  // announcing the current date unprompted would talk over the title input.
+  workdayDateMoveAnnouncement = computed(() => {
+    const move = this._parserService.workdayDateMove();
+    if (!move) {
+      return '';
+    }
+    const dateStr = dateStrToUtcDate(move.date).toLocaleDateString(
+      // Spelled-out weekday and month follow the UI language under the ISO
+      // option, so they aren't shown in Swedish (the `sv` sentinel).
+      this._dateTimeFormatService.textLocale(),
+      { weekday: 'long', month: 'long', day: 'numeric' },
+    );
+    return this._translateService.instant(
+      move.type === 'MOVED'
+        ? T.F.TASK.ADD_TASK_BAR.A11Y_DATE_MOVED_FOR_WORKDAYS
+        : T.F.TASK.ADD_TASK_BAR.A11Y_DATE_MOVED_BACK,
+      { dateStr },
+    );
   });
 
   repeatQuickOptions = computed(() => {

@@ -1762,6 +1762,8 @@
     },
     "TASK": {
       "ADD_TASK_BAR": {
+        "A11Y_DATE_MOVED_BACK": "Date moved back to {{dateStr}}",
+        "A11Y_DATE_MOVED_FOR_WORKDAYS": "Date moved to {{dateStr}}, the first workday of this repeating task",
         "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
         "CREATE_NEW_TAGS": "Create new tags",
         "DUE_BUTTON": "Schedule",
