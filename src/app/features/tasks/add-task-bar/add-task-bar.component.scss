@@ -41,8 +41,18 @@
 // the autocomplete panel rule further down.
 :host-context(.isTouchPrimary).global {
   top: auto;
-  // Keep the action buttons clear of whichever occupies more space: the
-  // keyboard or system navigation. Mobile browsers may report both at once.
+  // Clear whichever bottom obstruction is taller — the keyboard or the system
+  // navigation bar (#9462) — never their sum: where `--keyboard-height` is set
+  // it measures the obscured slice of the viewport, and the IME spans to the
+  // screen edge with the nav bar drawn over it, so the inset is already inside
+  // that number. In practice each platform reports only one of the two anyway
+  // (the Capacitor build zeroes the bottom inset while the IME is up — see
+  // SystemBars.calcSafeAreaInsets — and mobile web never writes
+  // `--keyboard-height` at all: its tracker is gated on IS_TOUCH_ONLY, which
+  // Android Chrome fails, and its keyboard shrinks the layout viewport instead,
+  // #9277), so max() just picks out whichever term is live on the platform at
+  // hand. `--s2` rather than `--s`, which leaves the buttons flush against the
+  // obstruction and awkward to tap.
   bottom: calc(max(var(--keyboard-height), var(--safe-area-bottom)) + var(--s2));
   transition: bottom var(--transition-duration-m) ease-out;
 }
@@ -50,6 +60,14 @@
 // Capacitor's native iOS mode shrinks the WebView around the keyboard. Only
 // apply an additional offset when the keyboard still overlays that viewport;
 // using its full height here would move the fixed bar twice (#8778).
+//
+// Deliberately no `--safe-area-bottom` here, unlike the rule above: on iOS the
+// inset comes from capacitor-plugin-safe-area, which reads the window insets and
+// re-reads them on orientation change only — so it keeps reporting the home
+// indicator while the keyboard is up. Folding it in (even via max()) would float
+// the bar an indicator's height above the keyboard in the common case. Clearing
+// the indicator while the bar is open *without* a keyboard therefore needs a
+// rule gated on `body.isKeyboardVisible`, not a wider max().
 :host-context(.isTouchPrimary.isIOS).global {
   bottom: calc(var(--keyboard-overlay-offset) + var(--s2));
 }
