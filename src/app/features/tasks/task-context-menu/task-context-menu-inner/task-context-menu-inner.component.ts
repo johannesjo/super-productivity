@@ -156,6 +156,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   isCurrent: boolean = false;
   isBacklog: boolean = false;
+  isInSubTaskList: boolean = false;
 
   private _task$: ReplaySubject<TaskWithSubTasks | Task> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
@@ -203,6 +204,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.isBacklog = !!this._elementRef.nativeElement.closest('.backlog');
+    // Subtask reorder only changes the parent's subTaskIds, so move to
+    // top/bottom is only offered where that order is on screen — a subtask
+    // rendered flat in a tag or Today list would reorder invisibly.
+    this.isInSubTaskList = !!this._elementRef.nativeElement.closest('.sub-tasks');
 
     setTimeout(() => {
       if (!this._isOpenedFromKeyboard) {
@@ -532,7 +537,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   moveToTop(): void {
-    this._taskService.moveToTop(this.task.id, this.task.parentId, false);
+    this._taskService.moveToTop(this.task.id, this.task.parentId, this.isBacklog);
+  }
+
+  moveToBottom(): void {
+    this._taskService.moveToBottom(this.task.id, this.task.parentId, this.isBacklog);
   }
 
   @throttle(200, { leading: true, trailing: false })
