@@ -10,7 +10,10 @@ import { CalendarIntegrationEvent } from '../calendar-integration.model';
 import { isCalenderEventDue } from '../is-calender-event-due';
 import { CalendarIntegrationService } from '../calendar-integration.service';
 import { BannerId } from '../../../core/banner/banner.model';
-import { selectTaskByIssueId } from '../../tasks/store/task.selectors';
+import {
+  selectTaskByIssueId,
+  selectTaskFeatureState,
+} from '../../tasks/store/task.selectors';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
 import { T } from '../../../t.const';
 import { isValidUrl } from '../../../util/is-valid-url';
@@ -50,6 +53,7 @@ export class CalendarIntegrationEffects {
   private _translateStore = inject(TranslateStore);
   private _syncTriggerService = inject(SyncTriggerService);
   private _hydrationStateService = inject(HydrationStateService);
+  private _taskState = this._store.selectSignal(selectTaskFeatureState);
 
   /**
    * Poll external calendar providers for events and auto-import them as tasks.
@@ -122,6 +126,12 @@ export class CalendarIntegrationEffects {
                         // during the await (e.g. tab resume → openSyncWindow()),
                         // and importing now would still emit a duplicate CRT op.
                         if (!this._hydrationStateService.isInSyncWindow()) {
+                          const dismissedIdsByProvider =
+                            this._taskState()
+                              .dismissedCalendarAutoImportEventIdsByProvider;
+                          const dismissedEventIds = new Set(
+                            dismissedIdsByProvider?.[calProvider.id] ?? [],
+                          );
                           allEventsToday.forEach((calEv) => {
                             if (
                               passesCalendarEventRegexFilter(
@@ -130,7 +140,10 @@ export class CalendarIntegrationEffects {
                                 calProvider.filterExcludeRegex,
                               ) &&
                               this._dateService.isToday(calEv.start) &&
-                              !matchesAnyCalendarEventId(calEv, allIssueIds)
+                              !matchesAnyCalendarEventId(calEv, allIssueIds) &&
+                              !getCalendarEventIdCandidates(calEv).some((id) =>
+                                dismissedEventIds.has(id),
+                              )
                             ) {
                               this._issueService.addTaskFromIssue({
                                 issueProviderKey:
