@@ -339,6 +339,9 @@ describe('AddTaskBarComponent', () => {
       document.body.classList.remove(BodyClass.isIOS);
       fixture.nativeElement.classList.add('global');
       fixture.nativeElement.style.setProperty('--keyboard-height', '336px');
+      // Non-zero for every case in this block, so the assertions below pin
+      // whether each offset stacks with the bottom inset or supersedes it.
+      fixture.nativeElement.style.setProperty('--safe-area-bottom', '48px');
       fixture.nativeElement.style.setProperty('--keyboard-overlay-offset', '0px');
       fixture.nativeElement.style.setProperty('--s', '8px');
       fixture.nativeElement.style.setProperty('--s2', '16px');
@@ -351,6 +354,9 @@ describe('AddTaskBarComponent', () => {
       document.body.classList.toggle(BodyClass.isIOS, hadIOSClass);
     });
 
+    // iOS keeps the overlay-offset-only rule on purpose — its inset source never
+    // zeroes out while the keyboard is up, so folding it in would lift the bar
+    // off the keyboard. See the iOS block in the component stylesheet.
     it('uses the overlay-only keyboard offset for the iOS global bar', () => {
       document.body.classList.add(BodyClass.isIOS);
 
@@ -364,8 +370,15 @@ describe('AddTaskBarComponent', () => {
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('56px');
     });
 
-    it('keeps the measured keyboard offset for non-iOS touch builds', () => {
+    it('does not add the safe area to the keyboard offset for non-iOS touch builds', () => {
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('352px');
+    });
+
+    it('keeps the global bar above the bottom safe area without a keyboard', () => {
+      fixture.nativeElement.style.setProperty('--keyboard-height', '0px');
+      fixture.nativeElement.style.setProperty('--safe-area-bottom', '48px');
+
+      expect(getComputedStyle(fixture.nativeElement).bottom).toBe('64px');
     });
 
     it('keeps the top-positioned layout for mouse-primary iOS devices', () => {
