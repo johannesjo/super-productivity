@@ -5,14 +5,6 @@ import { PluginLog } from '../../core/log';
 // decoding also stops mojibake (U+FFFD) being cached and served as if it were text.
 const TEXT_DECODER = new TextDecoder('utf-8', { fatal: true });
 
-const MAX_LOGGED_ID_LENGTH = 40;
-
-/** Plugin ids are third-party and length-unvalidated; never log one whole. */
-export const truncateId = (pluginId: string): string =>
-  pluginId.length > MAX_LOGGED_ID_LENGTH
-    ? `${pluginId.slice(0, MAX_LOGGED_ID_LENGTH)}…`
-    : pluginId;
-
 /**
  * Decode and validate one translation file, returning its raw JSON text or `null`.
  *
@@ -34,7 +26,7 @@ const readTranslationFile = (bytes: Uint8Array): string | null => {
   }
 };
 
-type SkippedTranslationReason = 'file-missing' | 'invalid-json';
+type SkippedTranslationReason = 'file-missing' | 'not-a-utf8-json-object';
 
 interface SkippedTranslation {
   lang: string;
@@ -85,7 +77,7 @@ export const readPluginTranslationsFromZip = (
     }
     const content = readTranslationFile(bytes);
     if (content === null) {
-      skipped.push({ lang, reason: 'invalid-json' });
+      skipped.push({ lang, reason: 'not-a-utf8-json-object' });
       continue;
     }
     totalBytes += bytes.length;
@@ -96,10 +88,10 @@ export const readPluginTranslationsFromZip = (
 };
 
 /**
- * `skipped` is bounded by the supported-language count, but `pluginId` is third-party
- * and length-unvalidated, so it must be truncated: `Log.recordLog` stores a string
- * first argument verbatim in the exportable, ring-buffered log history, and a 90KB id
- * across 28 languages writes ~2.5M characters from a single upload.
+ * Every interpolant here is bounded: `skipped` by the supported-language count, `lang`
+ * by the allowlist, `reason` by its union, and `pluginId` by the manifest validator's
+ * length check — which matters because `Log.recordLog` stores a string argument
+ * verbatim in the exportable, ring-buffered log history.
  */
 export const logSkippedPluginTranslations = (
   pluginId: string,
@@ -107,7 +99,7 @@ export const logSkippedPluginTranslations = (
 ): void => {
   for (const { lang, reason } of skipped) {
     PluginLog.err(
-      `Plugin ${truncateId(pluginId)} declares i18n language "${lang}" but no translations were loaded (${reason})`,
+      `Plugin ${pluginId} declares i18n language "${lang}" but no translations were loaded (${reason})`,
     );
   }
 };

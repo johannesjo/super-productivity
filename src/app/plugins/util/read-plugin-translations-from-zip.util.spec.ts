@@ -79,7 +79,7 @@ describe('readPluginTranslationsFromZip', () => {
       expect(result.translations).withContext(`for content ${notAnObject}`).toEqual({});
       expect(result.skipped)
         .withContext(`for content ${notAnObject}`)
-        .toEqual([{ lang: 'en', reason: 'invalid-json' }]);
+        .toEqual([{ lang: 'en', reason: 'not-a-utf8-json-object' }]);
     }
   });
 
@@ -94,8 +94,36 @@ describe('readPluginTranslationsFromZip', () => {
     );
 
     expect(result.translations).toEqual({ en: '{"A":"a"}' });
-    expect(result.skipped).toEqual([{ lang: 'de', reason: 'invalid-json' }]);
+    expect(result.skipped).toEqual([{ lang: 'de', reason: 'not-a-utf8-json-object' }]);
     expect(result.isOverLimit).toBeFalse();
+  });
+
+  // Latin-1 `{"A":"é"}`. Without fatal decoding the 0xE9 becomes U+FFFD, JSON.parse
+  // then SUCCEEDS, and the mojibake is cached and served as if it were the text.
+  it('reports and excludes a file that is not valid UTF-8', () => {
+    const latin1 = new Uint8Array([0x7b, 0x22, 0x41, 0x22, 0x3a, 0x22, 0xe9, 0x22, 0x7d]);
+    const files: Record<string, Uint8Array> = {};
+    files['i18n/en.json'] = latin1;
+
+    const result = readPluginTranslationsFromZip(files, ['en'], NO_LIMIT);
+
+    expect(result.translations).toEqual({});
+    expect(result.skipped).toEqual([{ lang: 'en', reason: 'not-a-utf8-json-object' }]);
+  });
+
+  // Real editors emit BOMs; TextDecoder strips one even when fatal, so these must load.
+  it('accepts a UTF-8 file with a byte-order mark', () => {
+    const body = new TextEncoder().encode('{"A":"a"}');
+    const withBom = new Uint8Array(3 + body.length);
+    withBom.set([0xef, 0xbb, 0xbf]);
+    withBom.set(body, 3);
+    const files: Record<string, Uint8Array> = {};
+    files['i18n/en.json'] = withBom;
+
+    const result = readPluginTranslationsFromZip(files, ['en'], NO_LIMIT);
+
+    expect(result.translations).toEqual({ en: '{"A":"a"}' });
+    expect(result.skipped).toEqual([]);
   });
 
   it('does not treat a nested translation file as the root one', () => {
