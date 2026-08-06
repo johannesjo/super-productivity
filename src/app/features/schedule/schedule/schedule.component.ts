@@ -7,6 +7,7 @@ import {
   ElementRef,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -103,6 +104,8 @@ export class ScheduleComponent {
   toggleCalProvider(providerId: string): void {
     this._hiddenCalendarProviders.toggle(providerId);
   }
+
+  private _scrollWrapper = viewChild<ElementRef<HTMLElement>>('scrollWrapper');
 
   private _currentTimeViewMode = computed(() => this.layoutService.selectedTimeView());
   isMonthView = computed(() => this._currentTimeViewMode() === 'month');
@@ -392,6 +395,19 @@ export class ScheduleComponent {
     this.isHScrolled.set(el.scrollLeft > 0);
   }
 
+  // The month grid is taller than the wrapper on a short window, so a scroll
+  // position carried over from week view clamps to the bottom and opens the
+  // month with its first row above the viewport (#9463 review). scrollTo is
+  // safe here where _scrollAnchorToTop's measured offsets would not be, since
+  // a fixed origin is independent of the warpRoute scale.
+  private _resetScrollWrapper(): void {
+    this._scrollWrapper()?.nativeElement.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant',
+    });
+  }
+
   // Scroll one of the schedule's time anchors to the top of the scroll-wrapper.
   //
   // The framing (lead above the target, and clearance for the sticky time
@@ -441,6 +457,8 @@ export class ScheduleComponent {
             this.currentTimeRow() !== null ? 'current-time' : 'work-start',
           ),
         );
+      } else {
+        setTimeout(() => this._resetScrollWrapper());
       }
     });
   }
