@@ -192,13 +192,20 @@ const decodePng = (buffer, expectedPixels, source) => {
   return { width, height, pixels };
 };
 
+// The iconutil round trip re-encodes pixels through CoreGraphics, whose
+// premultiply rounding can land one level away from Math.round on
+// anti-aliased pixels — an exact compare failed every mac release build
+// since v18.17.0 (16x16 pixel 19). Real artwork regressions like #6323
+// move many pixels by many levels, so one level of noise is safe to absorb.
+const CODEC_ROUNDING_TOLERANCE = 1;
+const MAX_REPORTED_PIXEL_DIFFS = 8;
+
 const compareDecodedPng = (expected, actual, source) => {
+  const diffs = [];
   for (let offset = 0; offset < expected.pixels.length; offset += 4) {
     const expectedAlpha = expected.pixels[offset + 3];
     const actualAlpha = actual.pixels[offset + 3];
-    if (expectedAlpha !== actualAlpha) {
-      fail(source, `alpha differs at pixel ${offset / 4}`);
-    }
+    let delta = Math.abs(expectedAlpha - actualAlpha);
 
     for (let channel = 0; channel < 3; channel++) {
       const expectedPremultiplied = Math.round(
@@ -207,10 +214,27 @@ const compareDecodedPng = (expected, actual, source) => {
       const actualPremultiplied = Math.round(
         (actual.pixels[offset + channel] * actualAlpha) / 255,
       );
-      if (expectedPremultiplied !== actualPremultiplied) {
-        fail(source, `artwork differs at pixel ${offset / 4}`);
-      }
+      delta = Math.max(delta, Math.abs(expectedPremultiplied - actualPremultiplied));
     }
+
+    if (delta > CODEC_ROUNDING_TOLERANCE) {
+      diffs.push({ pixel: offset / 4, delta, offset });
+    }
+  }
+
+  if (diffs.length) {
+    const details = diffs
+      .slice(0, MAX_REPORTED_PIXEL_DIFFS)
+      .map(({ pixel, delta, offset }) => {
+        const expectedRgba = Array.from(expected.pixels.subarray(offset, offset + 4));
+        const actualRgba = Array.from(actual.pixels.subarray(offset, offset + 4));
+        return `pixel ${pixel} (delta ${delta}): expected rgba(${expectedRgba.join(',')}), got rgba(${actualRgba.join(',')})`;
+      })
+      .join('; ');
+    fail(
+      source,
+      `artwork differs at ${diffs.length} pixel(s) beyond rounding tolerance: ${details}`,
+    );
   }
 };
 
