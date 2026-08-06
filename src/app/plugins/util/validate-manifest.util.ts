@@ -59,6 +59,12 @@ export const validatePluginManifest = (
       errors.push('i18n.languages must be an array');
     } else if (manifest.i18n.languages.length === 0) {
       warnings.push('i18n.languages is empty - plugin will have no translations');
+    } else if (manifest.i18n.languages.length > SUPPORTED_LANGUAGE_CODES.size) {
+      // No plugin can legitimately declare more languages than the app has, and an
+      // unbounded list would be echoed verbatim into the exportable log history.
+      errors.push(
+        `i18n.languages must not exceed ${SUPPORTED_LANGUAGE_CODES.size} entries`,
+      );
     } else {
       // Validate language codes
       const invalidLanguages = manifest.i18n.languages.filter(

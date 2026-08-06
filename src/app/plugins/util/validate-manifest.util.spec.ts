@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGE_CODES } from '../../core/locale.constants';
 import { PluginManifest } from '../plugin-api.model';
 import { validatePluginManifest } from './validate-manifest.util';
 
@@ -78,6 +79,43 @@ describe('validatePluginManifest', () => {
       expect(result.errors).toContain(
         'allowedHosts entries must be non-empty hostnames without scheme, port, or path (e.g. "api.example.com")',
       );
+    });
+  });
+
+  describe('i18n.languages', () => {
+    it('warns about unsupported codes without rejecting the manifest', () => {
+      const result = validatePluginManifest({
+        ...baseManifest,
+        i18n: { languages: ['en', 'pt-BR'] },
+      });
+      expect(result.isValid).toBe(true);
+      expect(result.warnings).toContain(
+        'Unsupported language codes: pt-BR - these will be ignored',
+      );
+    });
+
+    // An unbounded list would be echoed verbatim into the exportable log history.
+    it('rejects more languages than the app supports', () => {
+      const tooMany = Array.from(
+        { length: SUPPORTED_LANGUAGE_CODES.size + 1 },
+        (_, i) => `lang-${i}`,
+      );
+      const result = validatePluginManifest({
+        ...baseManifest,
+        i18n: { languages: tooMany },
+      });
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        `i18n.languages must not exceed ${SUPPORTED_LANGUAGE_CODES.size} entries`,
+      );
+    });
+
+    it('accepts a declaration of every supported language', () => {
+      const result = validatePluginManifest({
+        ...baseManifest,
+        i18n: { languages: [...SUPPORTED_LANGUAGE_CODES] },
+      });
+      expect(result.isValid).toBe(true);
     });
   });
 });

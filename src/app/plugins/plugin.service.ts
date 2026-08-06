@@ -18,7 +18,6 @@ import {
   MAX_PLUGIN_CODE_SIZE,
   MAX_PLUGIN_MANIFEST_SIZE,
   MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE,
-  MAX_PLUGIN_TRANSLATION_FILE_SIZE,
   MAX_PLUGIN_ZIP_SIZE,
 } from './plugin.const';
 import { take } from 'rxjs/operators';
@@ -40,7 +39,10 @@ import { SnackService } from '../core/snack/snack.service';
 import { pingWithRetry } from './util/ping-with-retry.util';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { sanitizeSvgIconContent } from '../util/sanitize-svg-icon.util';
-import { selectPluginTranslationFiles } from './util/select-plugin-translation-files.util';
+import {
+  logSkippedPluginTranslations,
+  readPluginTranslationsFromZip,
+} from './util/read-plugin-translations-from-zip.util';
 
 // Each plugin's `id` (from its manifest.json, distinct from the asset path
 // here) becomes the entityId prefix for all data it persists via
@@ -1326,6 +1328,12 @@ export class PluginService implements OnDestroy {
           }),
         );
       }
+      // Surface non-fatal manifest problems the way the path-based loader does.
+      // These include "English (en) not in i18n.languages" and unsupported language
+      // codes — both direct causes of translate() silently returning keys (#9459).
+      for (const warning of manifestValidation.warnings) {
+        PluginLog.err(`Plugin ${manifest.id}: ${warning}`);
+      }
       this._assertUploadedPluginAllowed(manifest);
 
       // Extract index.html if it exists (optional) and iFrame is true
@@ -1367,39 +1375,26 @@ export class PluginService implements OnDestroy {
       // Extract only translations declared by the manifest. Uploaded plugins use a
       // virtual cache path, so these files cannot be fetched after the ZIP is discarded.
       let translations: Record<string, string> | undefined;
-      if (manifest.i18n?.languages.length) {
-        const { files, skipped } = selectPluginTranslationFiles(
+      // Guard the way the path-based loader does: a non-object `i18n` is falsy but
+      // not nullish, so `i18n?.languages.length` would throw a raw TypeError.
+      if (manifest.i18n?.languages && manifest.i18n.languages.length > 0) {
+        const result = readPluginTranslationsFromZip(
           extractedFiles,
           manifest.i18n.languages,
+          MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE,
         );
-        // Never skip silently: a declared language that loads nothing is exactly the
-        // "translate() just returns the key" mystery reported in #9459.
-        for (const { lang, reason } of skipped) {
-          PluginLog.err(
-            `Plugin ${manifest.id} declares i18n language "${lang}" but no translations were loaded (${reason})`,
+        if (result.isOverLimit) {
+          throw new Error(
+            this._translateService.instant(T.PLUGINS.TRANSLATIONS_TOO_LARGE, {
+              maxSize: (MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE / 1024 / 1024).toFixed(1),
+            }),
           );
         }
-        const decoder = new TextDecoder();
-        translations = {};
-        let totalSize = 0;
-        for (const { lang, bytes } of files) {
-          if (bytes.length > MAX_PLUGIN_TRANSLATION_FILE_SIZE) {
-            throw new Error(
-              this._translateService.instant(T.PLUGINS.TRANSLATION_FILE_TOO_LARGE, {
-                lang,
-                maxSize: (MAX_PLUGIN_TRANSLATION_FILE_SIZE / 1024 / 1024).toFixed(1),
-              }),
-            );
-          }
-          totalSize += bytes.length;
-          if (totalSize > MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE) {
-            throw new Error(
-              this._translateService.instant(T.PLUGINS.TRANSLATIONS_TOO_LARGE, {
-                maxSize: (MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE / 1024 / 1024).toFixed(1),
-              }),
-            );
-          }
-          translations[lang] = decoder.decode(bytes);
+        // Never skip silently: a declared language that loads nothing is exactly the
+        // "translate() just returns the key" mystery reported in #9459.
+        logSkippedPluginTranslations(manifest.id, result.skipped);
+        if (Object.keys(result.translations).length > 0) {
+          translations = result.translations;
         }
       }
 
@@ -1493,12 +1488,11 @@ export class PluginService implements OnDestroy {
         configSchema,
       );
 
-      if (translations && Object.keys(translations).length > 0) {
-        this._pluginI18nService.loadPluginTranslationsFromContent(
-          manifest.id,
-          translations,
-        );
-      }
+      // An upload always fully replaces this id's translations. The teardown above
+      // only runs when a prior state exists, and a failed upload leaves none (its
+      // error state is filed under a synthetic `error-…` id), so without this a
+      // re-upload that drops a language would keep serving the old version's strings.
+      this._pluginI18nService.unloadPluginTranslations(manifest.id);
 
       // Store index.html content if it exists
       if (indexHtml) {
@@ -1584,6 +1578,17 @@ export class PluginService implements OnDestroy {
 
         PluginLog.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
+      }
+
+      // Register translations immediately before executing the plugin, so its own
+      // init can call translate(). Deliberately below the placeholder returns above:
+      // a plugin that never runs needs nothing registered, and activating it later
+      // reloads these from the cache anyway.
+      if (translations) {
+        this._pluginI18nService.loadPluginTranslationsFromContent(
+          manifest.id,
+          translations,
+        );
       }
 
       // Load the plugin
