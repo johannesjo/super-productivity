@@ -142,7 +142,7 @@
     "author": "Fernando Pindado",
     "authorUrl": "https://codeberg.org/fpindado",
     "stars": 0
-  }
+  },
   {
     "name": "JSON to Tasks",
     "shortDescription": "Create tasks and subtasks from pasted JSON, with project/tag resolution and optional creation of missing projects and tags.",
@@ -150,5 +150,5 @@
     "author": "nekoritsme",
     "authorUrl": "https://github.com/nekoritsme",
     "stars": 0
-}
+  }
 ]
