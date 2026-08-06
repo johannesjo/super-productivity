@@ -156,7 +156,7 @@
     </button>
   }
 
-  @if (isAdvancedControls() && !task.parentId && !task.isDone) {
+  @if (isAdvancedControls() && !task.isDone && (!task.parentId || isInSubTaskList)) {
     <button
       (click)="moveToTop()"
       mat-menu-item
@@ -165,6 +165,17 @@
         <mat-icon>arrow_upward</mat-icon>
         {{ T.F.TASK.CMP.MOVE_TO_TOP | translate }}
       </span>
+      <span class="key-i">{{ kb.moveTaskToTop }}</span>
+    </button>
+    <button
+      (click)="moveToBottom()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>arrow_downward</mat-icon>
+        {{ T.F.TASK.CMP.MOVE_TO_BOTTOM | translate }}
+      </span>
+      <span class="key-i">{{ kb.moveTaskToBottom }}</span>
     </button>
   }
   @if (isAdvancedControls() && !task.parentId && !task.isDone) {
