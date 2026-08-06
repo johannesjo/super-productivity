@@ -16,6 +16,9 @@ import { HydrationStateService } from '../../../op-log/apply/hydration-state.ser
 import { selectCalendarProviders } from '../../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../../issue/issue.model';
 import { CalendarIntegrationEvent } from '../calendar-integration.model';
+import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
+import { initialTaskState } from '../../tasks/store/task.reducer';
+import { TaskState } from '../../tasks/task.model';
 
 describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
   let effects: CalendarIntegrationEffects;
@@ -27,6 +30,9 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
   let requestEvents$Spy: jasmine.Spy;
   let isInitialSyncDoneSyncSpy: jasmine.Spy;
   let isInSyncWindowSpy: jasmine.Spy;
+  let taskStateForSelector: TaskState & {
+    dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+  };
 
   const PROVIDER_ID = 'ip-cal-1';
 
@@ -80,12 +86,16 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
     isInSyncWindowSpy = jasmine.createSpy('isInSyncWindow').and.returnValue(false);
 
     todayDateStr$ = new BehaviorSubject<string>('2026-05-20');
+    taskStateForSelector = { ...initialTaskState };
 
     TestBed.configureTestingModule({
       providers: [
         CalendarIntegrationEffects,
         provideMockStore({
-          selectors: [{ selector: selectCalendarProviders, value: [buildProvider()] }],
+          selectors: [
+            { selector: selectCalendarProviders, value: [buildProvider()] },
+            { selector: selectTaskFeatureState, value: taskStateForSelector },
+          ],
         }),
         {
           provide: GlobalTrackingIntervalService,
@@ -168,6 +178,33 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
     );
   }));
 
+  it('does NOT auto-import an event dismissed by deleting its task', fakeAsync(() => {
+    taskStateForSelector.dismissedCalendarAutoImportEventIdsByProvider = {
+      [PROVIDER_ID]: ['legacy-cal-evt-1'],
+    };
+    requestEvents$Spy.and.returnValue(
+      of([buildEvent('cal-evt-1', { legacyIds: ['legacy-cal-evt-1'] })]),
+    );
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(addTaskFromIssueSpy).not.toHaveBeenCalled();
+  }));
+
+  it('keeps calendar event dismissals scoped to their provider', fakeAsync(() => {
+    taskStateForSelector.dismissedCalendarAutoImportEventIdsByProvider = {
+      another_provider: ['cal-evt-1'],
+    };
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(addTaskFromIssueSpy).toHaveBeenCalledTimes(1);
+  }));
+
   it('does NOT import while the initial sync has not completed (cold-start race)', fakeAsync(() => {
     isInitialSyncDoneSyncSpy.and.returnValue(false);
     isInSyncWindowSpy.and.returnValue(false);
@@ -199,6 +236,21 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
     // the import loop runs. The second guard inside the tap must catch this.
     getAllIssueIdsSpy.and.callFake(async () => {
       isInSyncWindowSpy.and.returnValue(true);
+      return [];
+    });
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(addTaskFromIssueSpy).not.toHaveBeenCalled();
+  }));
+
+  it('does NOT import if the event is dismissed during the IDB-read await', fakeAsync(() => {
+    getAllIssueIdsSpy.and.callFake(async () => {
+      taskStateForSelector.dismissedCalendarAutoImportEventIdsByProvider = {
+        [PROVIDER_ID]: ['cal-evt-1'],
+      };
       return [];
     });
 

@@ -1011,6 +1011,25 @@ describe('taskSharedCrudMetaReducer', () => {
       );
     });
 
+    it('should dismiss a deleted iCal event from future auto-imports', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const action = createDeleteAction({
+        issueType: 'ICAL',
+        issueProviderId: 'calendar-provider',
+        issueId: 'calendar-event',
+      });
+
+      metaReducer(testState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const taskState = updatedState[TASK_FEATURE_NAME] as unknown as {
+        dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+      };
+      expect(taskState.dismissedCalendarAutoImportEventIdsByProvider).toEqual({
+        'calendar-provider': ['calendar-event'],
+      });
+    });
+
     it('should handle task with subtasks removal from tags', () => {
       const testState = createStateWithExistingTasks(
         [],
@@ -1146,6 +1165,58 @@ describe('taskSharedCrudMetaReducer', () => {
         mockReducer,
         testState,
       );
+    });
+
+    it('should carry and apply iCal dismissals for deterministic remote replay', () => {
+      const calendarTask = createMockTask({
+        id: 'task1',
+        issueType: 'ICAL',
+        issueProviderId: 'calendar-provider',
+        issueId: 'calendar-event',
+      });
+      const action = TaskSharedActions.deleteTasks({
+        taskIds: ['task1'],
+        tasks: [calendarTask],
+      });
+
+      expect(
+        (
+          action as unknown as {
+            calendarAutoImportDismissals?: {
+              issueProviderId: string;
+              issueId: string;
+            }[];
+          }
+        ).calendarAutoImportDismissals,
+      ).toEqual([{ issueProviderId: 'calendar-provider', issueId: 'calendar-event' }]);
+
+      const remoteAction = {
+        type: action.type,
+        taskIds: action.taskIds,
+        calendarAutoImportDismissals: action.calendarAutoImportDismissals,
+        meta: action.meta,
+      };
+      metaReducer(createBaseState(), remoteAction);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const taskState = updatedState[TASK_FEATURE_NAME] as unknown as {
+        dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+      };
+      expect(taskState.dismissedCalendarAutoImportEventIdsByProvider).toEqual({
+        'calendar-provider': ['calendar-event'],
+      });
+    });
+
+    it('should ignore malformed calendar dismissal markers during remote replay', () => {
+      const action = {
+        ...TaskSharedActions.deleteTasks({ taskIds: ['missing-task'] }),
+        calendarAutoImportDismissals: [
+          null,
+          { issueProviderId: 'calendar-provider' },
+          { issueProviderId: 123, issueId: 'calendar-event' },
+        ],
+      } as unknown as Action;
+
+      expect(() => metaReducer(createBaseState(), action)).not.toThrow();
     });
 
     it('should preserve currentTaskId when not in deleted tasks', () => {
@@ -2634,6 +2705,34 @@ describe('taskSharedCrudMetaReducer', () => {
       expect(restoredTask).toBeDefined();
       expect(restoredTask.modified).toBeGreaterThanOrEqual(beforeRestore);
       expect(restoredTask.modified).not.toEqual(oldTimestamp);
+    });
+
+    it('should undo the calendar event dismissal when restoring a deleted task', () => {
+      const testState = createBaseState();
+      testState[TASK_FEATURE_NAME] = {
+        ...testState[TASK_FEATURE_NAME],
+        dismissedCalendarAutoImportEventIdsByProvider: {
+          'calendar-provider': ['calendar-event'],
+        },
+      } as (typeof testState)[typeof TASK_FEATURE_NAME];
+      const calendarTask = createMockTask({
+        id: 'calendar-task',
+        issueType: 'ICAL',
+        issueProviderId: 'calendar-provider',
+        issueId: 'calendar-event',
+      });
+      const action = createRestoreAction({
+        taskOverrides: calendarTask,
+        deletedTaskEntities: { 'calendar-task': calendarTask },
+      });
+
+      metaReducer(testState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const taskState = updatedState[TASK_FEATURE_NAME] as unknown as {
+        dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+      };
+      expect(taskState.dismissedCalendarAutoImportEventIdsByProvider).toEqual({});
     });
 
     it('should restore task to project taskIds', () => {

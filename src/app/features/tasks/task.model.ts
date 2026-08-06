@@ -224,6 +224,17 @@ export interface TaskState extends EntityState<Task> {
   taskDetailTargetPanel?: TaskDetailTargetPanel | null;
   lastCurrentTaskId: string | null;
   isDataLoaded: boolean;
+  /**
+   * iCal event IDs whose imported tasks were explicitly deleted, scoped by provider.
+   * Optional because persisted task state from older versions does not contain it.
+   * Provider deletion intentionally does not prune this commutative tombstone set:
+   * concurrent provider/task deletes must converge regardless of replay order.
+   * shortcut: grow-only — entries carry no timestamp, so nothing can age them out
+   * deterministically (deleting a daily recurring occurrence every day adds ~250
+   * entries/year; non-recurring dismissals stay relevant forever). If growth ever
+   * matters, record the dismissal day in the delete op payload and prune on replay.
+   */
+  dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
 }
 
 export interface WorklogTask extends Task {

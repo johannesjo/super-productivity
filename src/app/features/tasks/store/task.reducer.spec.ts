@@ -1130,6 +1130,23 @@ describe('Task Reducer', () => {
   // -----------------------------------------------------------------------
 
   describe('loadAllData - timeSpentOnDay normalization', () => {
+    it('should default calendar event dismissals missing from older persisted state', () => {
+      const appDataComplete = {
+        task: {
+          ids: [],
+          entities: {},
+          currentTaskId: null,
+          selectedTaskId: null,
+          lastCurrentTaskId: null,
+          isDataLoaded: false,
+        },
+      } as any;
+
+      const result = taskReducer(initialTaskState, loadAllData({ appDataComplete }));
+
+      expect(result.dismissedCalendarAutoImportEventIdsByProvider).toEqual({});
+    });
+
     it('should normalize tasks with undefined timeSpentOnDay to {} on load', () => {
       const taskWithUndefined = createTask('t1', { timeSpentOnDay: undefined as any });
       const appDataComplete = {
