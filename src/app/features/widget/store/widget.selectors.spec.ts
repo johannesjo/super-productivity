@@ -151,10 +151,11 @@ describe('selectWidgetData', () => {
 
   it('should serialize to the exact v:1 blob shape consumed by WidgetData.kt and WidgetData.swift (see WidgetDataTest.kt / WidgetDataTests.swift)', () => {
     const result = selectWidgetData.projector(
-      ['t1', 't2'],
+      ['t1', 't2', 't3'],
       {
         t1: task('t1', { title: 'Task one', projectId: 'p1' }),
         t2: task('t2', { title: 'Task two', isDone: true }),
+        t3: task('t3', { title: 'Task three' }),
       },
       projectState([project('p1', '#ff0000')]),
       DAY,
@@ -163,7 +164,8 @@ describe('selectWidgetData', () => {
     expect(JSON.stringify(result)).toBe(
       `{"v":1,"dayStr":"${DAY}","validUntil":${VALID_UNTIL},"tasks":[` +
         '{"id":"t1","title":"Task one","isDone":false,"projectId":"p1"},' +
-        '{"id":"t2","title":"Task two","isDone":true}],' +
+        '{"id":"t2","title":"Task two","isDone":true},' +
+        '{"id":"t3","title":"Task three","isDone":false}],' +
         '"projectColors":{"p1":"#ff0000"}}',
     );
   });

@@ -14,7 +14,7 @@ final class WidgetDataTests: XCTestCase {
           "tasks": [
             {"id": "t1", "title": "Task one", "isDone": false, "projectId": "p1"},
             {"id": "t2", "title": "Task two", "isDone": true},
-            {"id": "t3", "title": "Task three", "isDone": false, "projectId": null}
+            {"id": "t3", "title": "Task three", "isDone": false}
           ],
           "projectColors": {"p1": "#ff0000"}
         }
@@ -34,8 +34,9 @@ final class WidgetDataTests: XCTestCase {
     }
 
     func testJsonNullProjectIdDoesNotBecomeStringNull() {
-        let tasks = WidgetData.parse(blob)
-        XCTAssertNil(tasks[2].projectColor)
+        let json =
+            #"{"v":1,"tasks":[{"id":"a","title":"A","isDone":false,"projectId":null}],"projectColors":{"null":"#ff0000"}}"#
+        XCTAssertNil(WidgetData.parse(json)[0].projectColor)
     }
 
     func testOverlaysPendingDoneTargets() {

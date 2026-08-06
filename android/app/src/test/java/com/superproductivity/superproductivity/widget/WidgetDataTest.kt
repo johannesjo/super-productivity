@@ -28,7 +28,7 @@ class WidgetDataTest {
           "tasks": [
             {"id": "t1", "title": "Task one", "isDone": false, "projectId": "p1"},
             {"id": "t2", "title": "Task two", "isDone": true},
-            {"id": "t3", "title": "Task three", "isDone": false, "projectId": null}
+            {"id": "t3", "title": "Task three", "isDone": false}
           ],
           "projectColors": {"p1": "#ff0000"}
         }
@@ -45,8 +45,9 @@ class WidgetDataTest {
     @Test
     fun jsonNullProjectIdDoesNotBecomeStringNull() {
         // org.json's optString maps JSON null to the literal string "null"
-        val tasks = WidgetData.parse(blob)
-        assertNull(tasks[2].projectColor)
+        val json =
+            """{"v":1,"tasks":[{"id":"a","title":"A","isDone":false,"projectId":null}],"projectColors":{"null":"#ff0000"}}"""
+        assertNull(WidgetData.parse(json)[0].projectColor)
     }
 
     @Test
