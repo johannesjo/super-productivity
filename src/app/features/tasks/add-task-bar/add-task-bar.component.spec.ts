@@ -368,6 +368,13 @@ describe('AddTaskBarComponent', () => {
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('352px');
     });
 
+    it('keeps the global bar above the bottom safe area without a keyboard', () => {
+      fixture.nativeElement.style.setProperty('--keyboard-height', '0px');
+      fixture.nativeElement.style.setProperty('--safe-area-bottom', '48px');
+
+      expect(getComputedStyle(fixture.nativeElement).bottom).toBe('64px');
+    });
+
     it('keeps the top-positioned layout for mouse-primary iOS devices', () => {
       document.body.classList.remove(BodyClass.isTouchPrimary);
       const layoutBeforeIOSClass = fixture.nativeElement.getBoundingClientRect();
