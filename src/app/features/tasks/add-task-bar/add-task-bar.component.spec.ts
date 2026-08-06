@@ -339,6 +339,7 @@ describe('AddTaskBarComponent', () => {
       document.body.classList.remove(BodyClass.isIOS);
       fixture.nativeElement.classList.add('global');
       fixture.nativeElement.style.setProperty('--keyboard-height', '336px');
+      fixture.nativeElement.style.setProperty('--safe-area-bottom', '48px');
       fixture.nativeElement.style.setProperty('--keyboard-overlay-offset', '0px');
       fixture.nativeElement.style.setProperty('--s', '8px');
       fixture.nativeElement.style.setProperty('--s2', '16px');
@@ -364,7 +365,7 @@ describe('AddTaskBarComponent', () => {
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('56px');
     });
 
-    it('keeps the measured keyboard offset for non-iOS touch builds', () => {
+    it('does not add the safe area to the keyboard offset for non-iOS touch builds', () => {
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('352px');
     });
 

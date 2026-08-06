@@ -41,9 +41,9 @@
 // the autocomplete panel rule further down.
 :host-context(.isTouchPrimary).global {
   top: auto;
-  // Keep the action buttons clear of both the keyboard and system navigation.
-  // Capacitor reports a zero bottom safe area while the keyboard is visible.
-  bottom: calc(var(--keyboard-height) + var(--safe-area-bottom) + var(--s2));
+  // Keep the action buttons clear of whichever occupies more space: the
+  // keyboard or system navigation. Mobile browsers may report both at once.
+  bottom: calc(max(var(--keyboard-height), var(--safe-area-bottom)) + var(--s2));
   transition: bottom var(--transition-duration-m) ease-out;
 }
 
