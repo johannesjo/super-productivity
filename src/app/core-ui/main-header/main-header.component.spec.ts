@@ -343,6 +343,55 @@ describe('MainHeaderComponent focus button visibility', () => {
     expect(component.showPanelBtnsInline()).toBe(true);
   });
 
+  it('keeps the counters collapsed on mobile at any width (#9480)', () => {
+    // Where the counters live on mobile is a placement rule, not a pixel one:
+    // the bottom nav owns the row, so they belong behind their toggle exactly
+    // as they did before #9480. Computing it from width made the header
+    // non-monotonic -- below 398px `page-title` drops its action buttons, which
+    // freed more room than the narrower window took away, so the counters
+    // sprang back into a row that has less space, not more.
+    isXs = signal(true);
+    isXxxs = signal(true);
+    enabledSimpleCounters = [1, 2, 3].map((n) => ({
+      id: `counter-${n}`,
+      title: `Counter ${n}`,
+      isEnabled: true,
+      icon: 'fitness_center',
+      type: SimpleCounterType.ClickCounter,
+      countOnDay: {},
+      isOn: false,
+    })) as SimpleCounter[];
+
+    component = createComponent();
+
+    component.setHostWidthForTesting(390);
+    expect(component.areCountersCollapsed()).toBe(true);
+
+    // ...and still collapsed just above the breakpoint, with no pop back.
+    isXxxs.set(false);
+    component.setHostWidthForTesting(410);
+    expect(component.areCountersCollapsed()).toBe(true);
+  });
+
+  it('never demotes the plugin side-panel buttons, which have no menu row (#9480)', () => {
+    // The overflow menu renders the three desktop panel buttons as flat rows
+    // but has nothing for plugin side-panel buttons, so if they rode along with
+    // the panel group they would be neither in the bar nor in the menu -- the
+    // unreachable-action bug this whole change exists to fix.
+    isXs = signal(false);
+
+    // Rendered for real (NO_ERRORS_SCHEMA leaves the child tags in the DOM), so
+    // this pins the template binding and not just the signal behind it.
+    configureTestBed();
+    fixture = TestBed.createComponent(MainHeaderComponent);
+    fixture.componentInstance.setHostWidthForTesting(320);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.showPanelBtnsInline()).toBe(false);
+    expect(fixture.nativeElement.querySelector('desktop-panel-buttons')).toBeNull();
+    expect(fixture.nativeElement.querySelector('plugin-side-panel-btns')).not.toBeNull();
+  });
+
   it('demotes a wide group even when the row is only just too narrow (#9480)', () => {
     // The overflow trigger costs a slot, so a demotion is only worth making
     // when it frees more than that slot -- not when the row happens to be over

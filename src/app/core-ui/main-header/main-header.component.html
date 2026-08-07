@@ -126,9 +126,15 @@
         <user-profile-button class="secondary-header-action"></user-profile-button>
       }
 
-      @if (showPanelBtnsInline()) {
+      <!-- Keyed to the bottom nav (which carries these on mobile), never to the
+           fit: the overflow menu has no row for them - they carry plugin-supplied
+           icons and toggled state - so demoting them would make them unreachable,
+           the exact failure #9480 exists to fix. `_pinnedWidth` bills them so. -->
+      @if (showSidePanelBtns()) {
         <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
+      }
 
+      @if (showPanelBtnsInline()) {
         <desktop-panel-buttons
           class="secondary-header-action"
           [kb]="kb"

@@ -374,11 +374,20 @@ export class MainHeaderComponent implements OnDestroy {
     const fixed =
       this._pinnedWidth() + DEMOTION_ORDER.reduce((sum, id) => sum + widths[id], 0);
 
-    // Collapsing the counters costs the least -- it is one tap, and it is
-    // already how they present on mobile -- so it happens before any demotion.
-    // Their toggle is a slot of its own, so it only saves from two counters up.
+    // On mobile the counters live behind their toggle whatever the width --
+    // the same placement rule that hands add-task and the panels to the bottom
+    // nav. Deriving it from width instead made the header non-monotonic: below
+    // 398px `page-title` sheds its action buttons, which frees more room than
+    // the narrower window takes away, so the counters sprang back into a row
+    // with less space, not more.
+    //
+    // Above that, collapsing costs the least of the fit moves -- one tap, and
+    // the presentation users already know -- so it happens before any demotion.
+    // The toggle is a slot of its own, so it only saves from two counters up.
     const countersCollapsed =
-      fixed + expandedCountersW > available && expandedCountersW > SLOT_W;
+      counters > 0 &&
+      (this._isOwnedByBottomNav() ||
+        (fixed + expandedCountersW > available && expandedCountersW > SLOT_W));
     const used = fixed + (countersCollapsed ? SLOT_W : expandedCountersW);
     if (used <= available) {
       return { countersCollapsed, demoted };
@@ -422,6 +431,8 @@ export class MainHeaderComponent implements OnDestroy {
     () => !this._isOwnedByBottomNav() && !this._demoted().has('addTask'),
   );
   readonly showPluginBtnsInline = computed(() => !this._demoted().has('pluginHeader'));
+  /** Placement rule only — see the template comment on why these never demote. */
+  readonly showSidePanelBtns = computed(() => !this._isOwnedByBottomNav());
   readonly showPanelBtnsInline = computed(
     () => !this._isOwnedByBottomNav() && !this._demoted().has('panelButtons'),
   );
