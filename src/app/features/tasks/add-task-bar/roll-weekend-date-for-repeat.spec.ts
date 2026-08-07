@@ -47,19 +47,17 @@ describe('rollWeekendDateForRepeat', () => {
     expect(rollWeekendDateForRepeat(SATURDAY, null)).toBe(SATURDAY);
   });
 
-  // Only reachable in a production build: `dateStrToUtcDate` reports a
-  // malformed string through `devError`, which rethrows in dev and test (the
-  // global `window.confirm` stub in test.ts answers yes) but only logs in
-  // production — and then hands back an Invalid Date. Without the guard
-  // `getDbDateStr` renders that as the literal "NaN-NaN-NaN", and every caller
-  // persists and syncs what it gets back.
-  describe('a string that is not a real calendar day', () => {
-    beforeEach(() => (window.confirm as jasmine.Spy).and.returnValue(false));
-    afterEach(() => (window.confirm as jasmine.Spy).and.returnValue(true));
-
+  // Guarded before `dateStrToUtcDate` is called, so these run in every build:
+  // unguarded, the Invalid Date it hands back renders as the literal
+  // "NaN-NaN-NaN", and every caller persists and syncs what it gets back.
+  describe('anything that is not a YYYY-MM-DD calendar day', () => {
     it('should be handed back unchanged', () => {
       expect(rollWeekendDateForRepeat('2026-02-30', WORKDAYS)).toBe('2026-02-30');
       expect(rollWeekendDateForRepeat('not-a-date', WORKDAYS)).toBe('not-a-date');
+      // Would otherwise slip past a guard on the parse result: an empty string
+      // makes `dateStrToUtcDate` return *today* rather than an Invalid Date,
+      // so the roll would answer with a day the caller never asked about.
+      expect(rollWeekendDateForRepeat('', WORKDAYS)).toBe('');
     });
   });
 });
