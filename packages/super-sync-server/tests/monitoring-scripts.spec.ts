@@ -77,23 +77,45 @@ const projectsJsonColumns = (query: string): boolean =>
       .replace(/payload_bytes/g, ''),
   );
 
+/**
+ * Every all-user report resolves its user scope first, then queries `operations`.
+ * `reportQuery(n)` skips past that scope query to the n-th operations query.
+ */
+const SCOPE_ROW = [{ user_id: 1, matched_users: BigInt(1) }];
+
 /** The per-user tail subquery, where a pushed-down time window would undo the bound. */
-const lateralTail = (query: string): string =>
-  query.slice(query.indexOf('CROSS JOIN LATERAL'), query.indexOf('AS scoped_ops'));
+const lateralTail = (query: string): string => {
+  const start = query.indexOf('CROSS JOIN LATERAL');
+  const end = query.indexOf('AS scoped_ops');
+  // Without this, a query that lost its LATERAL entirely would slice to '' and
+  // every assertion below would pass vacuously.
+  if (start === -1 || end === -1) throw new Error('query has no per-user tail');
+  return query.slice(start, end);
+};
 
 describe('monitoring script error handling', () => {
   let previousExitCode: typeof process.exitCode;
   let previousArgv: string[];
+  let previousScopeUsers: string | undefined;
   let consoleLog: ReturnType<typeof vi.spyOn>;
   let consoleError: ReturnType<typeof vi.spyOn>;
   let consoleTable: ReturnType<typeof vi.spyOn>;
   let exit: ReturnType<typeof vi.spyOn>;
+
+  const mockScope = (rows: unknown[] = []): void => {
+    mocks.prisma.$queryRaw.mockResolvedValueOnce(SCOPE_ROW).mockResolvedValue(rows);
+  };
+
+  const reportQuery = (index = 0): string =>
+    renderQueryCall(mocks.prisma.$queryRaw.mock.calls[index + 1]);
 
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
     previousExitCode = process.exitCode;
     previousArgv = process.argv;
+    previousScopeUsers = process.env.MONITOR_SCOPE_USERS;
+    delete process.env.MONITOR_SCOPE_USERS;
     process.exitCode = undefined;
     mocks.prisma.$queryRaw.mockReset();
     mocks.prisma.$disconnect.mockReset().mockResolvedValue();
@@ -110,6 +132,8 @@ describe('monitoring script error handling', () => {
   afterEach(() => {
     process.exitCode = previousExitCode;
     process.argv = previousArgv;
+    if (previousScopeUsers === undefined) delete process.env.MONITOR_SCOPE_USERS;
+    else process.env.MONITOR_SCOPE_USERS = previousScopeUsers;
     vi.restoreAllMocks();
   });
 
@@ -199,12 +223,12 @@ describe('monitoring script error handling', () => {
   // ever registered. Both drivers are now the capped most-recently-active list, so a
   // report's cost is `--users x per-user tail` whatever the table and account count do.
   const ALL_USER_OPERATION_REPORTS = [
-    { name: 'monitor ops', script: 'monitor', argv: ['ops'], queries: 1 },
+    { name: 'monitor ops', script: 'monitor', argv: ['ops'], queries: 2 },
     {
       name: 'operation-sizes',
       script: 'analyze-storage',
       argv: ['operation-sizes'],
-      queries: 2,
+      queries: 3,
       // Percentile row: the report reads stats[0] before any table is printed.
       rows: [{}],
     },
@@ -212,15 +236,15 @@ describe('monitoring script error handling', () => {
       name: 'operation-types',
       script: 'analyze-storage',
       argv: ['operation-types'],
-      queries: 3,
+      queries: 4,
     },
-    { name: 'large-ops', script: 'analyze-storage', argv: ['large-ops'], queries: 1 },
-    { name: 'rapid-fire', script: 'analyze-storage', argv: ['rapid-fire'], queries: 1 },
+    { name: 'large-ops', script: 'analyze-storage', argv: ['large-ops'], queries: 2 },
+    { name: 'rapid-fire', script: 'analyze-storage', argv: ['rapid-fire'], queries: 2 },
     {
       name: 'operation-timeline',
       script: 'analyze-storage',
       argv: ['operation-timeline'],
-      queries: 2,
+      queries: 3,
     },
   ] as const;
 
@@ -231,7 +255,9 @@ describe('monitoring script error handling', () => {
 
   for (const report of ALL_USER_OPERATION_REPORTS) {
     it(`bounds ${report.name} by the capped active-user scope`, async () => {
-      mocks.prisma.$queryRaw.mockResolvedValue(('rows' in report && report.rows) || []);
+      // Every report resolves its user scope first; a non-empty result is what
+      // lets it proceed to the operations queries this test inspects.
+      mockScope(('rows' in report && report.rows) || []);
       process.argv = ['node', `${report.script}.ts`, ...report.argv];
 
       await SCRIPTS[report.script]();
@@ -240,12 +266,21 @@ describe('monitoring script error handling', () => {
 
       const queries = mocks.prisma.$queryRaw.mock.calls.map(renderQueryCall);
       expect(queries).toHaveLength(report.queries);
-      for (const query of queries) {
+
+      // The scope is resolved once, up front, and reused: re-running the driver
+      // per statement would let one report's tables describe different user
+      // populations, because live heartbeats reorder sync_devices continuously.
+      const [scopeQuery, ...reportQueries] = queries;
+      expect(scopeQuery).toMatch(
+        /FROM sync_devices[\s\S]*ORDER BY seen DESC\s+LIMIT 200/,
+      );
+      expect(scopeQuery).toContain('COUNT(*) OVER ()');
+
+      for (const query of reportQueries) {
         expect(query).not.toContain('TABLESAMPLE');
         expect(query).not.toContain('user_sync_state');
-        expect(query).toMatch(
-          /FROM sync_devices[\s\S]*ORDER BY MAX\(last_seen_at\) DESC\s+LIMIT 200/,
-        );
+        expect(query).not.toContain('sync_devices');
+        expect(query).toContain('unnest(');
         expect(query).toContain('CROSS JOIN LATERAL');
         expect(query).toMatch(/ORDER BY operations\.server_seq DESC\s+LIMIT \d+/);
         expect(projectsJsonColumns(query)).toBe(false);
@@ -257,13 +292,13 @@ describe('monitoring script error handling', () => {
   }
 
   it('measures sampled operation size without projecting the payload', async () => {
-    mocks.prisma.$queryRaw.mockResolvedValue([{}]);
+    mockScope([{}]);
     process.argv = ['node', 'analyze-storage.ts', 'operation-sizes'];
 
     await import('../scripts/analyze-storage');
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
-    const queries = mocks.prisma.$queryRaw.mock.calls.map(renderQueryCall);
+    const queries = mocks.prisma.$queryRaw.mock.calls.slice(1).map(renderQueryCall);
     expect(queries.every((query) => !query.includes('pg_column_size(payload)'))).toBe(
       true,
     );
@@ -319,32 +354,59 @@ describe('monitoring script error handling', () => {
   });
 
   it('names the sampled user scope in the recent-operations header', async () => {
-    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    mockScope();
     process.argv = ['node', 'monitor.ts', 'ops'];
 
     await import('../scripts/monitor');
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
-    const query = renderQueryCall(mocks.prisma.$queryRaw.mock.calls[0]);
-    expect(query).toMatch(/ORDER BY operations\.server_seq DESC\s+LIMIT 5/);
+    expect(reportQuery()).toMatch(/ORDER BY operations\.server_seq DESC\s+LIMIT 5/);
     expect(consoleLog).toHaveBeenCalledWith(
-      'Scope: up to 5 newest operations for each of the up to 200 most recently active users, then the newest 50 candidates overall.',
+      'Scope: up to 5 newest operations per user, then the newest 50 candidates overall.',
+    );
+    expect(consoleLog).toHaveBeenCalledWith(
+      'Based on the newest 100 operations of each of all 1 matching users.',
     );
   });
 
-  it('honours a lowered --users cap', async () => {
+  it('honours a lowered MONITOR_SCOPE_USERS cap', async () => {
+    process.env.MONITOR_SCOPE_USERS = '25';
     mocks.prisma.$queryRaw.mockResolvedValue([]);
-    process.argv = ['node', 'analyze-storage.ts', 'rapid-fire', '--users', '25'];
+    process.argv = ['node', 'analyze-storage.ts', 'rapid-fire'];
 
     await import('../scripts/analyze-storage');
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
     const query = renderQueryCall(mocks.prisma.$queryRaw.mock.calls[0]);
-    expect(query).toMatch(/ORDER BY MAX\(last_seen_at\) DESC\s+LIMIT 25/);
-    expect(consoleLog).toHaveBeenCalledWith(
-      'Based on the newest 100 operations of each of the up to 25 most recently active users (change with --users <n>).',
-    );
+    expect(query).toMatch(/ORDER BY seen DESC\s+LIMIT 25/);
+    // No users matched, so the report stops before touching `operations` at all.
+    expect(mocks.prisma.$queryRaw).toHaveBeenCalledOnce();
+    expect(consoleLog).toHaveBeenCalledWith('No active users found.');
   });
+
+  it.each(['abc', '0', '-5', '10.5', ''])(
+    'rejects MONITOR_SCOPE_USERS=%j rather than querying with it',
+    async (value) => {
+      process.env.MONITOR_SCOPE_USERS = value;
+      mocks.prisma.$queryRaw.mockResolvedValue([]);
+      process.argv = ['node', 'analyze-storage.ts', 'rapid-fire'];
+
+      await import('../scripts/analyze-storage');
+      await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
+
+      if (value === '') {
+        // Empty means "unset": fall back to the default rather than erroring.
+        expect(renderQueryCall(mocks.prisma.$queryRaw.mock.calls[0])).toContain(
+          'LIMIT 200',
+        );
+        return;
+      }
+      // NaN would bind as SQL NULL, and `LIMIT NULL` is `LIMIT ALL` -- the
+      // unbounded fan-out this module exists to prevent. It must never reach the DB.
+      expect(mocks.prisma.$queryRaw).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+    },
+  );
 
   it('uses a bounded per-user index tail for user-focused type analysis', async () => {
     mocks.prisma.$queryRaw.mockResolvedValue([]);
@@ -368,26 +430,26 @@ describe('monitoring script error handling', () => {
   });
 
   it('includes unbackfilled rows in sampled largest-operation analysis', async () => {
-    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    mockScope();
     process.argv = ['node', 'analyze-storage.ts', 'large-ops'];
 
     await import('../scripts/analyze-storage');
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
-    const query = renderQueryCall(mocks.prisma.$queryRaw.mock.calls[0]);
+    const query = reportQuery();
     expect(query).not.toContain('WHERE payload_bytes > 0');
     expect(query).toContain('ELSE OCTET_LENGTH(payload::text)::bigint +');
     expect(query).toContain('OCTET_LENGTH(vector_clock::text)::bigint');
   });
 
   it('applies the rapid-fire time window outside the per-user tail', async () => {
-    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    mockScope();
     process.argv = ['node', 'analyze-storage.ts', 'rapid-fire'];
 
     await import('../scripts/analyze-storage');
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
-    const query = renderQueryCall(mocks.prisma.$queryRaw.mock.calls[0]);
+    const query = reportQuery();
     expect(query).toMatch(/FROM recent_ops\s+WHERE received_at >/);
     expect(lateralTail(query)).not.toContain('received_at >');
   });
@@ -455,13 +517,13 @@ describe('monitoring script error handling', () => {
   });
 
   it('applies the timeline time window outside the per-user tail', async () => {
-    mocks.prisma.$queryRaw.mockResolvedValue([]);
+    mockScope();
     process.argv = ['node', 'analyze-storage.ts', 'operation-timeline'];
 
     await import('../scripts/analyze-storage');
     await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalledOnce());
 
-    const queries = mocks.prisma.$queryRaw.mock.calls.map(renderQueryCall);
+    const queries = mocks.prisma.$queryRaw.mock.calls.slice(1).map(renderQueryCall);
     expect(queries).toHaveLength(2);
     expect(queries.every((query) => !lateralTail(query).includes('received_at >'))).toBe(
       true,

@@ -16,18 +16,17 @@ import {
  * monitoring-scripts.spec.ts renders each query to a STRING and asserts what it
  * contains — it never sends the SQL anywhere, so a query Postgres refuses to parse
  * still passes there. That matters because the bounded rewrites these reports rely
- * on use constructs a string assertion cannot vet: `TABLESAMPLE SYSTEM (1)
- * REPEATABLE ($1)` with a bound parameter, nested Prisma.sql fragments spliced into
- * MATERIALIZED CTEs, and CROSS JOIN LATERAL per-user tails. This spec executes the
+ * on use constructs a string assertion cannot vet: nested Prisma.sql fragments spliced
+ * into MATERIALIZED CTEs, `unnest($1::int[])` driving CROSS JOIN LATERAL per-user
+ * tails, and `COUNT(*) OVER ()` alongside a LIMIT. This spec executes the
  * real tagged templates against an in-process Postgres (PGlite — no Docker, no
  * DATABASE_URL).
  *
  * Scope, deliberately: this proves each query PARSES AND PLANS on real Postgres, and
  * that the row-shaping code downstream survives real result rows. It does NOT vet
- * production query cost — the fixture has no realistic index set or row count — and
- * for the TABLESAMPLE reports a 1% sample of a single-page fixture is usually empty,
- * so only the plan is exercised there. Semantics stay pinned by the string
- * assertions in monitoring-scripts.spec.ts; the two specs are complementary.
+ * production query cost — the fixture has no realistic index set or row count.
+ * Semantics stay pinned by the string assertions in monitoring-scripts.spec.ts;
+ * the two specs are complementary.
  */
 
 const mocks = vi.hoisted(() => {
@@ -128,6 +127,8 @@ describe('monitoring report SQL (PGlite)', () => {
   let db: PGlite;
   let previousArgv: string[];
   let previousExitCode: typeof process.exitCode;
+  let previousScopeUsers: string | undefined;
+  let consoleLog: ReturnType<typeof vi.spyOn>;
   let consoleError: ReturnType<typeof vi.spyOn>;
   let consoleTable: ReturnType<typeof vi.spyOn>;
 
@@ -215,9 +216,11 @@ describe('monitoring report SQL (PGlite)', () => {
     vi.resetModules();
     previousArgv = process.argv;
     previousExitCode = process.exitCode;
+    previousScopeUsers = process.env.MONITOR_SCOPE_USERS;
+    delete process.env.MONITOR_SCOPE_USERS;
     process.exitCode = undefined;
     mocks.prisma.$disconnect.mockClear();
-    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    consoleLog = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     consoleTable = vi.spyOn(console, 'table').mockImplementation(() => undefined);
     consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     // The CLIs call process.exit directly on bad arguments; without this a future
@@ -230,6 +233,8 @@ describe('monitoring report SQL (PGlite)', () => {
   afterEach(() => {
     process.argv = previousArgv;
     process.exitCode = previousExitCode;
+    if (previousScopeUsers === undefined) delete process.env.MONITOR_SCOPE_USERS;
+    else process.env.MONITOR_SCOPE_USERS = previousScopeUsers;
     vi.restoreAllMocks();
   });
 
@@ -261,20 +266,24 @@ describe('monitoring report SQL (PGlite)', () => {
     ['monitor active-users-quick', 'monitor', ['active-users-quick']],
     ['monitor ops (all users)', 'monitor', ['ops']],
     ['monitor ops (single user)', 'monitor', ['ops', '--user', '1']],
-    ['analyze operation-sizes (1% sample)', 'analyze-storage', ['operation-sizes']],
+    ['analyze operation-sizes (sampled fleet)', 'analyze-storage', ['operation-sizes']],
     [
       'analyze operation-sizes (single user)',
       'analyze-storage',
       ['operation-sizes', '--user', '1'],
     ],
-    ['analyze operation-types (1% sample)', 'analyze-storage', ['operation-types']],
+    ['analyze operation-types (sampled fleet)', 'analyze-storage', ['operation-types']],
     [
       'analyze operation-types (single user)',
       'analyze-storage',
       ['operation-types', '--user', '1'],
     ],
     ['analyze operation-timeline', 'analyze-storage', ['operation-timeline']],
-    ['analyze large-ops (1% sample)', 'analyze-storage', ['large-ops', '--limit', '20']],
+    [
+      'analyze large-ops (sampled fleet)',
+      'analyze-storage',
+      ['large-ops', '--limit', '20'],
+    ],
     ['analyze rapid-fire', 'analyze-storage', ['rapid-fire', '--threshold', '5']],
     ['analyze snapshot-analysis', 'analyze-storage', ['snapshot-analysis']],
   ];
@@ -299,11 +308,42 @@ describe('monitoring report SQL (PGlite)', () => {
   });
 
   it('reads only the capped set of most recently active users', async () => {
-    await run('monitor', ['ops', '--users', '1']);
+    process.env.MONITOR_SCOPE_USERS = '1';
+    await run('monitor', ['ops']);
     const users = new Set(rowsWithColumn('PayloadSize').map((row) => row.User));
     // Without the cap this query fans out across every user that ever synced --
     // the driver that made this report time out against production.
     expect(users).toEqual(new Set([NEWEST_USER]));
+  });
+
+  it('reports how many users matched when the cap truncates the fleet', async () => {
+    process.env.MONITOR_SCOPE_USERS = '1';
+    await run('analyze-storage', ['rapid-fire']);
+    // "up to N" reads identically whether the cap bound or not; the realized
+    // counts are what tell an operator they are looking at a truncated sample.
+    expect(consoleLog).toHaveBeenCalledWith(
+      `Based on the newest 100 operations of each of the 1 most recently active users, of ${SYNCING_USERS} matching (widen with MONITOR_SCOPE_USERS).`,
+    );
+  });
+
+  it('refuses a MONITOR_SCOPE_USERS value that would remove the bound', async () => {
+    // parseInt('abc') is NaN, which Prisma serialises to SQL NULL -- and
+    // `LIMIT NULL` is `LIMIT ALL`, i.e. the unbounded fan-out this module exists
+    // to prevent. It has to fail loudly instead.
+    process.env.MONITOR_SCOPE_USERS = 'abc';
+    process.argv = ['node', 'analyze-storage', 'rapid-fire'];
+    await SCRIPTS['analyze-storage']();
+    await vi.waitFor(() => expect(mocks.prisma.$disconnect).toHaveBeenCalled());
+    expect(process.exitCode).toBe(1);
+    expect(consoleError).toHaveBeenCalledWith(
+      'Error:',
+      expect.objectContaining({
+        message: expect.stringContaining(
+          'MONITOR_SCOPE_USERS must be a positive integer',
+        ),
+      }),
+    );
+    process.exitCode = undefined;
   });
 
   it("does not multiply a user's operation count by their device count", async () => {

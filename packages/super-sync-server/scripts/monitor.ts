@@ -1,10 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma, disconnectDb, reportMonitoringError } from './monitoring-db';
-import {
-  DEFAULT_SCOPE_USERS,
-  newestOpsPerUser,
-  recentlyActiveUserIds,
-} from './monitoring-scope';
+import { newestOpsPerUser, resolveOperationScope } from './monitoring-scope';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -453,12 +449,13 @@ const showOps = async (args: string[]): Promise<void> => {
   try {
     const tailCount = parseIntArg(args, '--tail', 50);
     const userId = parseIntArg(args, '--user', -1);
-    const scopeUsers = parseIntArg(args, '--users', DEFAULT_SCOPE_USERS);
     const hasUserFilter = userId >= 0;
-    if (!hasUserFilter) {
+    const scope = hasUserFilter ? undefined : await resolveOperationScope();
+    if (scope) {
       console.log(
-        `Scope: up to ${RECENT_OPS_PER_USER} newest operations for each of the up to ${scopeUsers} most recently active users, then the newest ${tailCount} candidates overall.`,
+        `Scope: up to ${RECENT_OPS_PER_USER} newest operations per user, then the newest ${tailCount} candidates overall.`,
       );
+      console.log(scope.description);
     }
 
     // The global server sequence is per-user, so ORDER BY server_seq across the
@@ -485,7 +482,7 @@ const showOps = async (args: string[]): Promise<void> => {
       ops = await prisma.$queryRaw`
         WITH candidate_ops AS MATERIALIZED (
           ${newestOpsPerUser(
-            recentlyActiveUserIds(scopeUsers),
+            scope?.userIds ?? [],
             Prisma.sql`
               id, user_id, action_type, op_type, entity_type, entity_id,
               payload_bytes, received_at
@@ -834,11 +831,12 @@ const main = async (): Promise<void> => {
         console.log('  ops            Analyze recent operations');
         console.log('    --tail <n>     Show last n ops (default 50)');
         console.log('    --user <id>    Filter by user ID');
-        console.log(
-          `    --users <n>    Sampled users when unfiltered (default ${DEFAULT_SCOPE_USERS})`,
-        );
         console.log('\nGlobal flags:');
         console.log('  --unmask         Show full email addresses (masked by default)');
+        console.log('\nEnvironment:');
+        console.log(
+          '  MONITOR_SCOPE_USERS  Users sampled by unfiltered `ops` (default 200)',
+        );
         break;
     }
   } catch (err) {
