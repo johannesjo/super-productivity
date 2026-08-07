@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ApplicationRef } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { EMPTY, of } from 'rxjs';
 import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
@@ -227,7 +228,11 @@ describe('MainHeaderComponent focus button visibility', () => {
       ],
     }).overrideComponent(MainHeaderComponent, {
       set: {
-        imports: [TranslatePipe],
+        // NgTemplateOutlet is real, not stubbed: the sync button is mounted
+        // through it, and a stubbed outlet would leave `[data-slot="sync"]`
+        // empty -- a slot the reflow measures at zero and would then have no
+        // recorded width to restore it by.
+        imports: [TranslatePipe, NgTemplateOutlet],
         schemas: [NO_ERRORS_SCHEMA],
       },
     });
@@ -301,7 +306,7 @@ describe('MainHeaderComponent focus button visibility', () => {
     // would also inflate the empty wrappers (no plugins, no counters here) and
     // measure widths that do not exist in production.
     styleEl.textContent =
-      `[data-slot="panelButtons"],[data-slot="addTask"]` +
+      `[data-slot="panelButtons"],[data-slot="sync"]` +
       `{min-width:${SLOT_TEST_W}px !important}`;
     document.head.appendChild(styleEl);
     box = document.createElement('div');
@@ -353,12 +358,12 @@ describe('MainHeaderComponent focus button visibility', () => {
     await resizeTo(1400);
 
     expect(host.querySelector('[data-slot="panelButtons"]')).toBeTruthy();
-    expect(host.querySelector('[data-slot="addTask"]')).toBeTruthy();
+    expect(host.querySelector('[data-slot="sync"]')).toBeTruthy();
     expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
   });
 
   it('moves actions into the overflow panel when the header is narrow (#9480)', async () => {
-    // Two 200px slots (panel buttons, add-task) cannot both sit in 320px.
+    // Two 200px slots (panel buttons, sync) cannot both sit in 320px.
     const host = await mountAtWidth(320);
 
     const panel = host.querySelector('.header-overflow-panel');
@@ -374,7 +379,7 @@ describe('MainHeaderComponent focus button visibility', () => {
 
     expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
     expect(host.querySelector('.header-overflow-panel')).toBeFalsy();
-    expect(host.querySelector('[data-slot="addTask"]')).toBeTruthy();
+    expect(host.querySelector('.tour-addBtn')).toBeTruthy();
     expect(host.querySelector('[data-slot="panelButtons"]')).toBeTruthy();
   });
 
@@ -388,8 +393,22 @@ describe('MainHeaderComponent focus button visibility', () => {
     expect(panel).toBeTruthy();
     expect(host.querySelector('[data-slot="panelButtons"]')).toBeFalsy();
     expect(panel!.querySelector('desktop-panel-buttons')).toBeTruthy();
-    expect(host.querySelector('[data-slot="addTask"]')).toBeFalsy();
-    expect(panel!.querySelector('.tour-addBtn')).toBeTruthy();
+    expect(host.querySelector('[data-slot="sync"]')).toBeFalsy();
+    expect(panel!.querySelector('.sync-btn')).toBeTruthy();
+  });
+
+  it('keeps the add-task button in the bar at any width (#9480)', async () => {
+    // Add-task is pinned, not demoted last. It is the primary quick-capture
+    // entry point and where there is no bottom-nav FAB the header button is the
+    // only one on the page, so it must never end up behind the overflow tap --
+    // however little room is left. Sync yields in its place.
+    const host = await mountAtWidth(220);
+
+    const addBtn = host.querySelector('.tour-addBtn');
+    expect(addBtn).toBeTruthy();
+    // In the bar, not in the panel.
+    expect(host.querySelector('.header-overflow-panel')!.contains(addBtn)).toBe(false);
+    expect(host.querySelector('nav.action-nav-right')!.contains(addBtn)).toBe(true);
   });
 
   it('shows the add-task button before initial data load finishes', () => {

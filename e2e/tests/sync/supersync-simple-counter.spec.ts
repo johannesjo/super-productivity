@@ -69,22 +69,21 @@ const createSimpleCounter = async (
 };
 
 /**
- * Helper to check whether the counters are collapsed behind their toggle
- * (#9480). When the header has room they render inline in
- * `.counters-action-group`; when it does not they collapse into
- * `.counters-dropdown` behind `.counters-toggle-btn`.
+ * Helper to check whether the counters are collapsed behind the overflow
+ * toggle (#9480). When the header has room they render inline in
+ * `.counters-action-group`; when it does not they move into
+ * `.header-overflow-panel` behind `.header-overflow-btn`.
  */
 const areCountersCollapsed = async (client: SimulatedE2EClient): Promise<boolean> => {
   return (
-    (await client.page
-      .locator('.counters-action-group simple-counter-button')
-      .count()) === 0 && (await client.page.locator('.header-overflow-btn').count()) > 0
+    (await client.page.locator('.header-overflow-panel simple-counter-button').count()) >
+    0
   );
 };
 
 /**
  * Helper to ensure counters are accessible in the header.
- * Opens the counters dropdown when they are collapsed.
+ * Opens the overflow panel when the counters have been demoted into it.
  */
 const ensureCountersVisible = async (client: SimulatedE2EClient): Promise<void> => {
   if (!(await areCountersCollapsed(client))) {
@@ -95,25 +94,26 @@ const ensureCountersVisible = async (client: SimulatedE2EClient): Promise<void> 
     return;
   }
 
-  const dropdown = client.page.locator('.counters-dropdown');
-  if ((await client.page.locator('.counters-dropdown.isVisible').count()) === 0) {
-    await client.page.locator('.counters-toggle-btn').click();
+  // The closed panel is `opacity: 0; pointer-events: none` but still laid out,
+  // so Playwright considers it "visible" — assert on `.isVisible` instead.
+  if ((await client.page.locator('.header-overflow-panel.isVisible').count()) === 0) {
+    await client.page.locator('.header-overflow-btn').click();
   }
-  await dropdown
-    .locator('simple-counter-button')
+  await client.page
+    .locator('.header-overflow-panel.isVisible simple-counter-button')
     .first()
     .waitFor({ state: 'visible', timeout: 5000 });
 };
 
 /**
- * Helper to get the visible counter buttons locator, inline or in the collapsed
- * dropdown depending on how much room the header has.
+ * Helper to get the visible counter buttons locator, inline or in the overflow
+ * panel depending on how much room the header has.
  */
 const getVisibleCounters = async (
   client: SimulatedE2EClient,
 ): Promise<ReturnType<typeof client.page.locator>> => {
   if (await areCountersCollapsed(client)) {
-    return client.page.locator('.counters-dropdown.isVisible simple-counter-button');
+    return client.page.locator('.header-overflow-panel.isVisible simple-counter-button');
   }
   return client.page.locator('.counters-action-group simple-counter-button');
 };

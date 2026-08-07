@@ -22,22 +22,21 @@
 
       <!-- Not gated on isDataLoaded: the shell paints before op-log hydration
            finishes, and the primary quick-capture entry point must not be
-           missing for that window (#9420). -->
+           missing for that window (#9420). No `data-slot`: this one is pinned,
+           so it is never measured and never demoted. -->
       @if (showAddTaskInline()) {
-        <div data-slot="addTask">
-          <button
-            emlDrop
-            (click)="layoutService.showAddTaskBar()"
-            matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
-              kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
-            }}"
-            class="tour-addBtn"
-            color="primary"
-            mat-icon-button
-          >
-            <mat-icon>add</mat-icon>
-          </button>
-        </div>
+        <button
+          emlDrop
+          (click)="layoutService.showAddTaskBar()"
+          matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
+            kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
+          }}"
+          class="tour-addBtn"
+          color="primary"
+          mat-icon-button
+        >
+          <mat-icon>add</mat-icon>
+        </button>
       }
     </div>
 
@@ -64,58 +63,10 @@
         }
       </div>
 
-      @if (isSyncIconEnabled()) {
-        <!--
-          matBadgeHidden only hides the badge VISUALLY (CSS) — MatBadge keeps an
-          aria description active regardless of hidden state. So at count 0 the
-          badge description must be empty (not a stale "0 conflicts" announced to
-          screen readers on every encounter). '' is the type-correct
-          "no description" value; MatBadge removes the aria-describedby for it.
-        -->
-        <button
-          class="sync-btn secondary-header-action"
-          [class.is-error]="syncIsEnabledAndReady() && syncState() === 'ERROR'"
-          [class.is-offline]="syncIsEnabledAndReady() && !isOnline()"
-          [class.is-in-progress]="syncIsEnabledAndReady() && isSyncInProgress()"
-          [matBadge]="unreviewedConflictCount()"
-          [matBadgeHidden]="unreviewedConflictCount() === 0"
-          matBadgeColor="accent"
-          matBadgeSize="small"
-          matBadgeOverlap="true"
-          [matBadgeDescription]="
-            unreviewedConflictCount() > 0
-              ? (T.F.SYNC.CONFLICT_REVIEW.BADGE_TOOLTIP
-                | translate: { count: unreviewedConflictCount() })
-              : ''
-          "
-          [attr.aria-label]="syncTooltip() | translate"
-          matTooltip="{{ syncTooltip() | translate }}"
-          (click)="onSyncButtonClick()"
-          (longPress)="setupSync()"
-          (contextmenu)="$event.preventDefault(); setupSync()"
-          mat-icon-button
-        >
-          @if (syncIsEnabledAndReady()) {
-            @if (isOnline()) {
-              @if (syncState() === 'ERROR') {
-                <mat-icon>sync_problem</mat-icon>
-              } @else {
-                <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
-              }
-              @if (hasNoPendingOps()) {
-                @if (superSyncIsConfirmedInSync()) {
-                  <mat-icon class="sync-state-ico">done_all</mat-icon>
-                } @else {
-                  <mat-icon class="sync-state-ico">check</mat-icon>
-                }
-              }
-            } @else {
-              <mat-icon>wifi_off</mat-icon>
-            }
-          } @else {
-            <mat-icon>sync_disabled</mat-icon>
-          }
-        </button>
+      @if (showSyncInline()) {
+        <div data-slot="sync">
+          <ng-container [ngTemplateOutlet]="syncBtnTpl"></ng-container>
+        </div>
       }
 
       @if (showPluginBtnsInline()) {
@@ -155,11 +106,29 @@
       }
     }
 
-    <!-- Ungated, so a demoted add button always has a way back (#9420). -->
+    <!--
+      Ungated, so a demoted add button always has a way back (#9420). While sync
+      is demoted the trigger carries its state: the conflict badge and the
+      error/offline colour, so collapsing sync never hides the fact that it is
+      broken.
+    -->
     @if (hasOverflow()) {
       <button
         class="header-overflow-btn secondary-header-action"
+        [class.is-error]="isDemotedSyncError()"
+        [class.is-offline]="isDemotedSyncOffline()"
         [color]="isDemotedCounterRunning() ? 'accent' : ''"
+        [matBadge]="demotedConflictCount()"
+        [matBadgeHidden]="demotedConflictCount() === 0"
+        matBadgeColor="accent"
+        matBadgeSize="small"
+        matBadgeOverlap="true"
+        [matBadgeDescription]="
+          demotedConflictCount() > 0
+            ? (T.F.SYNC.CONFLICT_REVIEW.BADGE_TOOLTIP
+              | translate: { count: demotedConflictCount() })
+            : ''
+        "
         (click)="toggleOverflow()"
         aria-controls="header-overflow-panel"
         [attr.aria-expanded]="isOverflowOpen()"
@@ -226,17 +195,65 @@
       }
     }
 
-    @if (isDemotedAddTask()) {
-      <button
-        emlDrop
-        (click)="layoutService.showAddTaskBar()"
-        [matTooltip]="T.MH.ADD_NEW_TASK | translate"
-        class="tour-addBtn"
-        color="primary"
-        mat-icon-button
-      >
-        <mat-icon>add</mat-icon>
-      </button>
+    @if (isDemotedSync()) {
+      <ng-container [ngTemplateOutlet]="syncBtnTpl"></ng-container>
     }
   </div>
 }
+
+<!--
+  One definition, two mount points (inline slot and overflow panel), so the two
+  copies cannot drift the way hand-duplicated markup does.
+
+  matBadgeHidden only hides the badge VISUALLY (CSS) — MatBadge keeps an aria
+  description active regardless of hidden state. So at count 0 the badge
+  description must be empty (not a stale "0 conflicts" announced to screen
+  readers on every encounter). '' is the type-correct "no description" value;
+  MatBadge removes the aria-describedby for it.
+-->
+<ng-template #syncBtnTpl>
+  <button
+    class="sync-btn secondary-header-action"
+    [class.is-error]="syncIsEnabledAndReady() && syncState() === 'ERROR'"
+    [class.is-offline]="syncIsEnabledAndReady() && !isOnline()"
+    [class.is-in-progress]="syncIsEnabledAndReady() && isSyncInProgress()"
+    [matBadge]="unreviewedConflictCount()"
+    [matBadgeHidden]="unreviewedConflictCount() === 0"
+    matBadgeColor="accent"
+    matBadgeSize="small"
+    matBadgeOverlap="true"
+    [matBadgeDescription]="
+      unreviewedConflictCount() > 0
+        ? (T.F.SYNC.CONFLICT_REVIEW.BADGE_TOOLTIP
+          | translate: { count: unreviewedConflictCount() })
+        : ''
+    "
+    [attr.aria-label]="syncTooltip() | translate"
+    matTooltip="{{ syncTooltip() | translate }}"
+    (click)="onSyncButtonClick()"
+    (longPress)="setupSync()"
+    (contextmenu)="$event.preventDefault(); setupSync()"
+    mat-icon-button
+  >
+    @if (syncIsEnabledAndReady()) {
+      @if (isOnline()) {
+        @if (syncState() === 'ERROR') {
+          <mat-icon>sync_problem</mat-icon>
+        } @else {
+          <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
+        }
+        @if (hasNoPendingOps()) {
+          @if (superSyncIsConfirmedInSync()) {
+            <mat-icon class="sync-state-ico">done_all</mat-icon>
+          } @else {
+            <mat-icon class="sync-state-ico">check</mat-icon>
+          }
+        }
+      } @else {
+        <mat-icon>wifi_off</mat-icon>
+      }
+    } @else {
+      <mat-icon>sync_disabled</mat-icon>
+    }
+  </button>
+</ng-template>

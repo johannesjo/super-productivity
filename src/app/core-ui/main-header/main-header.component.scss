@@ -337,7 +337,13 @@ page-title {
 
   // While syncing we intentionally keep the muted color: the spin animation
   // already signals progress, and the brand color drew too much focus.
+}
 
+// Shared with the overflow trigger, which wears sync's state while sync is
+// demoted into the panel (#9480) — otherwise collapsing sync would hide the
+// only indication that it is failing.
+.sync-btn,
+.header-overflow-btn {
   &.is-error,
   &.is-offline {
     color: var(--button-warn-label);

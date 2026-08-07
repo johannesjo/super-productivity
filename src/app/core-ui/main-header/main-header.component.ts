@@ -29,6 +29,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
 import { MatTooltip } from '@angular/material/tooltip';
+import { NgTemplateOutlet } from '@angular/common';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
@@ -60,7 +61,16 @@ import { ConflictJournalService } from '../../op-log/sync/conflict-journal.servi
  * takes a prefix of this list, so the whole state is one count.
  *
  * Everything not listed is pinned: the play button, the focus button and the
- * sync button, which are the header's reason to exist.
+ * add-task button, which are the header's reason to exist.
+ *
+ * Add-task is pinned rather than demoted last. It is the primary quick-capture
+ * entry point and there must always be one visible on the page: on mobile the
+ * bottom nav's FAB is that copy, and where there is no bottom nav the header
+ * button is the only one, so it must not end up behind another tap. Sync yields
+ * instead. Sync carries state — a conflict badge and an error/offline
+ * condition — but the trigger republishes both while sync is demoted
+ * (`isDemotedSyncError`, `demotedConflictCount`), which a hidden add button has
+ * no equivalent of.
  */
 type DemotableId =
   | 'pluginHeader'
@@ -68,7 +78,7 @@ type DemotableId =
   | 'sidePanelBtns'
   | 'panelButtons'
   | 'counters'
-  | 'addTask';
+  | 'sync';
 
 const DEMOTION_ORDER: readonly DemotableId[] = [
   'pluginHeader',
@@ -76,7 +86,7 @@ const DEMOTION_ORDER: readonly DemotableId[] = [
   'sidePanelBtns',
   'panelButtons',
   'counters',
-  'addTask',
+  'sync',
 ];
 
 /** Sub-pixel slop, so a fractional layout width never reads as an overflow. */
@@ -89,6 +99,7 @@ const FIT_EPSILON = 1;
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, expandFadeHorizontalAnimation],
   imports: [
+    NgTemplateOutlet,
     MatIconButton,
     MatIcon,
     MatBadge,
@@ -309,8 +320,8 @@ export class MainHeaderComponent implements OnDestroy {
             );
           case 'counters':
             return this._counterCount() > 0;
-          case 'addTask':
-            return !ownedByBottomNav;
+          case 'sync':
+            return this.isSyncIconEnabled();
         }
       });
     },
@@ -352,7 +363,7 @@ export class MainHeaderComponent implements OnDestroy {
   readonly isDemotedSidePanelBtns = computed(() => this._demoted().has('sidePanelBtns'));
   readonly isDemotedPanelBtns = computed(() => this._demoted().has('panelButtons'));
   readonly isDemotedCounters = computed(() => this._demoted().has('counters'));
-  readonly isDemotedAddTask = computed(() => this._demoted().has('addTask'));
+  readonly isDemotedSync = computed(() => this._demoted().has('sync'));
 
   readonly showPluginBtnsInline = computed(
     () => this.isDataLoaded() && !this.isDemotedPluginBtns(),
@@ -367,11 +378,14 @@ export class MainHeaderComponent implements OnDestroy {
     () => !this._isOwnedByBottomNav() && !this.isDemotedPanelBtns(),
   );
   readonly showCountersInline = computed(() => !this.isDemotedCounters());
-  // Not gated on isDataLoaded: the shell paints before hydration and the
-  // quick-capture entry point must already be there (#9420).
-  readonly showAddTaskInline = computed(
-    () => !this._isOwnedByBottomNav() && !this.isDemotedAddTask(),
+  readonly showSyncInline = computed(
+    () => this.isSyncIconEnabled() && !this.isDemotedSync(),
   );
+  // Pinned, and not gated on isDataLoaded: the shell paints before hydration
+  // and the quick-capture entry point must already be there (#9420). Off the
+  // demotion list entirely — where the bottom nav is not carrying its FAB, this
+  // is the only add button on the page.
+  readonly showAddTaskInline = computed(() => !this._isOwnedByBottomNav());
 
   readonly isOverflowOpen = signal(false);
 
@@ -537,9 +551,17 @@ export class MainHeaderComponent implements OnDestroy {
       // Bringing one back costs its own width but refunds the trigger when it
       // empties the panel. Requiring the *measured* slack to cover that is what
       // stops the row oscillating across the boundary it just crossed.
-      const cost = this._slotWidths.get(ids[count - 1]) ?? 0;
+      const cost = this._slotWidths.get(ids[count - 1]);
       const refund = count === 1 ? this._triggerWidth : 0;
-      if (cost > 0 && cost - refund <= free) {
+      // An unmeasured slot has no cost to weigh, so let it back optimistically
+      // rather than refusing forever. This is reachable: `_demotableIds` is a
+      // *prefix* count, so an id appearing at the head of the list — a plugin
+      // registering its header buttons while the bar is already collapsed —
+      // lands inside the demoted prefix having never been inline. Refusing it
+      // (the old `cost > 0` guard) stranded it in the panel for the rest of the
+      // session, at any width. Letting it through costs one frame: the next
+      // pass measures it for real and re-demotes if it genuinely does not fit.
+      if (cost === undefined || cost - refund <= free) {
         this._demotedCount.set(count - 1);
         this._scheduleReflow();
       }
@@ -692,6 +714,24 @@ export class MainHeaderComponent implements OnDestroy {
   /** Accent the trigger while a demoted counter is still running. */
   readonly isDemotedCounterRunning = computed(
     () => this.isDemotedCounters() && this.enabledSimpleCounters().some((c) => c.isOn),
+  );
+
+  // Sync is the one demotable action that carries state the user is supposed to
+  // notice without opening anything: a conflict count and an error/offline
+  // condition. Republish both on the trigger while it is hidden, otherwise
+  // demoting sync silently swallows the only signal that sync is broken.
+  readonly isDemotedSyncError = computed(
+    () =>
+      this.isDemotedSync() &&
+      !!this.syncIsEnabledAndReady() &&
+      this.isOnline() &&
+      this.syncState() === 'ERROR',
+  );
+  readonly isDemotedSyncOffline = computed(
+    () => this.isDemotedSync() && !!this.syncIsEnabledAndReady() && !this.isOnline(),
+  );
+  readonly demotedConflictCount = computed(() =>
+    this.isDemotedSync() ? this.unreviewedConflictCount() : 0,
   );
 
   /** The panel is not a `mat-menu`, so dismissal is ours to handle. */
