@@ -2404,7 +2404,6 @@
       "TITLE": "App Features",
       "USER_PROFILES": "User profiles (will be removed in the next release)",
       "USER_PROFILES_HINT": "Allows you to create and switch between different user profiles, each with separate settings, tasks, and sync configurations. The profile management button will appear in the top-right corner when enabled. Note: Disabling this feature will hide the UI but preserve your profile data. (Experimental feature. No guarantees. Make sure to have a backup!)",
-      "USER_PROFILES_WARNING": "<strong>Removal scheduled:</strong> User Profiles will be removed in the next release. Before updating, switch to every profile and export its current data via Settings → Sync & Export → Import/Export → Export data. After exporting them all, switch back to the profile you want to continue using. Store exported files securely because they may contain private data and credentials.",
       "EXPERIMENTAL_WARNING_TITLE": "Experimental Feature",
       "EXPERIMENTAL_WARNING_MSG": "This feature is experimental. It may have bugs, change significantly, or be removed in a future update. Make sure to keep backups of your data.<br/><br/>Do you want to enable it?"
     },

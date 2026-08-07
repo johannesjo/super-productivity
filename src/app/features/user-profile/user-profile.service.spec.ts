@@ -7,12 +7,14 @@ import { SnackService } from '../../core/snack/snack.service';
 import { ProfileMetadata, UserProfile } from './user-profile.model';
 import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { T } from '../../t.const';
+import { BannerService } from '../../core/banner/banner.service';
+import { BannerId } from '../../core/banner/banner.model';
 
 describe('UserProfileService', () => {
   let service: UserProfileService;
   let storage: jasmine.SpyObj<UserProfileStorageService>;
   let localDraft: jasmine.SpyObj<LocalDraftService>;
-  let snack: jasmine.SpyObj<SnackService>;
+  let bannerService: BannerService;
 
   const profileA: UserProfile = {
     id: 'profile-a',
@@ -43,7 +45,7 @@ describe('UserProfileService', () => {
     storage.saveProfileMetadata.and.resolveTo(undefined);
 
     const providerManager = { getActiveProvider: () => null };
-    snack = jasmine.createSpyObj('SnackService', ['open']);
+    const snack = jasmine.createSpyObj('SnackService', ['open']);
     localDraft = jasmine.createSpyObj('LocalDraftService', ['deleteDraftsForProfile']);
 
     TestBed.configureTestingModule({
@@ -57,22 +59,30 @@ describe('UserProfileService', () => {
         },
         { provide: SnackService, useValue: snack },
         { provide: LocalDraftService, useValue: localDraft },
+        BannerService,
       ],
     });
     service = TestBed.inject(UserProfileService);
+    bannerService = TestBed.inject(BannerService);
     (service as any)._metadata.set(metadata);
     service.profiles.set(metadata.profiles);
     service.activeProfile.set(profileA);
   });
 
-  it('keeps the next-release profile removal warning visible until dismissed', async () => {
+  it('keeps the profile removal warning queued until the user dismisses it', async () => {
     await service.initialize();
 
-    expect(snack.open).toHaveBeenCalledWith({
+    expect(bannerService.activeBanner()).toEqual({
+      id: BannerId.UserProfilesRemoval,
       msg: T.USER_PROFILES.REMOVAL_WARNING,
-      type: 'WARNING',
-      config: { duration: 0 },
+      ico: 'warning',
     });
+
+    bannerService.open({ id: BannerId.TakeABreak, msg: 'Take a break' });
+    expect(bannerService.activeBanner()?.id).toBe(BannerId.TakeABreak);
+
+    bannerService.dismiss(BannerId.TakeABreak);
+    expect(bannerService.activeBanner()?.id).toBe(BannerId.UserProfilesRemoval);
   });
 
   it('deletes the profiles device-local drafts along with its data', async () => {

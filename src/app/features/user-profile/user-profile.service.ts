@@ -11,6 +11,8 @@ import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { AppDataComplete, MODEL_CONFIGS } from '../../op-log/model/model-config';
 import type { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import type { LocalDraftService } from '../../core/draft/local-draft.service';
+import { BannerService } from '../../core/banner/banner.service';
+import { BannerId } from '../../core/banner/banner.model';
 
 /**
  * Core service for user profile management
@@ -24,6 +26,7 @@ export class UserProfileService {
   private readonly _providerManager = inject(SyncProviderManager);
   private readonly _backupService = inject(BackupService);
   private readonly _snackService = inject(SnackService);
+  private readonly _bannerService = inject(BannerService);
   private readonly _injector = inject(Injector);
 
   // Lazy-loaded to avoid circular dependency:
@@ -534,10 +537,10 @@ export class UserProfileService {
   }
 
   private _showRemovalWarning(): void {
-    this._snackService.open({
+    this._bannerService.open({
+      id: BannerId.UserProfilesRemoval,
       msg: T.USER_PROFILES.REMOVAL_WARNING,
-      type: 'WARNING',
-      config: { duration: 0 },
+      ico: 'warning',
     });
   }
 

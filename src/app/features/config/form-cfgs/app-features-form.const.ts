@@ -132,7 +132,7 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
       type: 'tpl',
       templateOptions: {
         tag: 'div',
-        text: T.GCF.APP_FEATURES.USER_PROFILES_WARNING,
+        text: T.USER_PROFILES.REMOVAL_WARNING,
         class: 'sync-warning',
       },
     },
