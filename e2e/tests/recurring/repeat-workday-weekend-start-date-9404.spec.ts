@@ -125,6 +125,10 @@ test.describe('Recurring Task - workday schedule on a weekend date (#9404)', () 
       .first()
       .click();
     await expect(repeatButton).toHaveClass(/has-value/, { timeout: 10000 });
+    // `has-value` flips on click, but focus only returns to the input once the
+    // menu's close animation ends (menuClosed -> refocus). Pressing Enter
+    // before that would re-open the menu off the still-focused trigger.
+    await expect(input).toBeFocused({ timeout: 10000 });
 
     await page.keyboard.press('Enter');
 
