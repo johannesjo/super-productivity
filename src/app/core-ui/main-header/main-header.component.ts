@@ -338,12 +338,6 @@ export class MainHeaderComponent implements OnDestroy {
   /** How many leading `_demotableIds` are in the overflow panel. */
   private readonly _demotedCount = signal(0);
 
-  /**
-   * Last measured width of each slot while it was inline, so a slot that has
-   * already left the bar can still be costed when deciding to bring it back.
-   */
-  private readonly _slotWidths = new Map<DemotableId, number>();
-  private _triggerWidth = 0;
   private _rafId = 0;
   /** Frames spent settling since the last real change; see `_restartReflow`. */
   private _passes = 0;
@@ -437,14 +431,25 @@ export class MainHeaderComponent implements OnDestroy {
    * costs nothing: the browser has already laid out by then, so the reads are
    * still free.
    *
-   * `_passes` bounds it independently of that. The demote/restore rules are
-   * meant to be stable — a restore has to pay back more than the trigger it
-   * refunds, so it cannot immediately re-demote — but "I proved it converges" is
-   * exactly the reasoning that has been wrong repeatedly here, so the budget
-   * makes a mistake in it cost one settled frame instead of a hung app.
+   * `_passes` bounds it independently of that. The demotion is monotone within
+   * a settle, so it provably terminates — but "I proved it converges" is exactly
+   * the reasoning that has been wrong repeatedly here, so the budget stays as a
+   * backstop that makes a mistake cost one settled frame instead of a hung app.
+   *
+   * @param fromScratch re-offer every action inline and re-derive the whole
+   * count from one measurement, instead of only demoting further from where it
+   * currently stands. Widening is the case that needs it: `_demotedCount` is a
+   * prefix count, so the only way it can come *down* is to recompute it. It
+   * costs one frame in which the row renders everything and may overflow —
+   * which, since the nav has a scroll floor, is a transient scroll rather than
+   * a lost button. Narrowing skips it, because demoting further is already
+   * enough and re-offering would make a drag-resize flicker.
    */
-  private _restartReflow(): void {
+  private _restartReflow(fromScratch = true): void {
     this._passes = 0;
+    if (fromScratch) {
+      this._demotedCount.set(0);
+    }
     this._scheduleReflow();
   }
 
@@ -496,12 +501,13 @@ export class MainHeaderComponent implements OnDestroy {
     // stylesheet that owns the title also owns how much of it must survive.
     //
     // Compare the content box against its occupants rather than looking at
-    // edges. Two nearer-looking measures are both wrong here: `scrollWidth`
-    // reports nothing, because the wrapper is `overflow: visible` and so
-    // establishes no scroll container even while the row runs off the edge; and
-    // the gap between the nav and the content edge is always ~0, because the nav
-    // is pushed flush right and the leftover space collapses into an auto
-    // margin. Slack that sits in an auto margin is only visible by subtraction.
+    // edges. Two nearer-looking measures are both wrong here: the *wrapper's*
+    // `scrollWidth` reports nothing, because the wrapper is `overflow: visible`
+    // and so establishes no scroll container even while the row runs off the
+    // edge; and the gap between the nav and the content edge is always ~0,
+    // because the nav is pushed flush right and the leftover space collapses
+    // into an auto margin. Slack that sits in an auto margin is only visible by
+    // subtraction.
     //
     // An earlier version measured only how much further `.page-title` could
     // shrink, which made demotion a one-way ratchet: a short context name sits
@@ -521,7 +527,14 @@ export class MainHeaderComponent implements OnDestroy {
       '.page-title-actions',
     ) as HTMLElement | null;
     const titleActionsW = titleActions ? titleActions.getBoundingClientRect().width : 0;
-    const free = contentW - nav.getBoundingClientRect().width - titleMinW - titleActionsW;
+    // The NAV's `scrollWidth`, not its rect. Since #9480 gave the nav a scroll
+    // floor it is both shrinkable and a scroll container, so its rendered width
+    // is clamped to whatever fits — by construction it always "fits", and a rect
+    // measurement would report slack that does not exist, `free` would never go
+    // negative, and nothing would ever demote. `scrollWidth` is the intrinsic
+    // width the row wants, which is the question being asked. It rounds to an
+    // integer; FIT_EPSILON absorbs that.
+    const free = contentW - nav.scrollWidth - titleMinW - titleActionsW;
 
     const ids = this._demotableIds();
     const count = Math.min(this._demotedCount(), ids.length);
@@ -531,59 +544,47 @@ export class MainHeaderComponent implements OnDestroy {
       return;
     }
 
-    // Record every slot that is inline, including a zero-width one. The width
-    // is what the restore branch costs against, and a slot that is *never*
-    // recorded takes the unmeasured path below every single pass — which turns
-    // a one-off optimistic restore into a permanent ping-pong.
-    for (const el of Array.from(nav.querySelectorAll<HTMLElement>('[data-slot]'))) {
-      this._slotWidths.set(
-        el.dataset.slot as DemotableId,
-        el.getBoundingClientRect().width,
-      );
-    }
-    const trigger = nav.querySelector('.header-overflow-btn') as HTMLElement | null;
-    if (trigger) {
-      this._triggerWidth = trigger.getBoundingClientRect().width;
+    if (free >= -FIT_EPSILON || count >= ids.length) {
+      return;
     }
 
-    if (free < -FIT_EPSILON && count < ids.length) {
-      // A demotion is only worth making if it actually frees width. The first
-      // one introduces the trigger, so it frees only the difference — and every
-      // header action is a 40px icon button, as is the trigger, so "remove one
-      // button, add one button, gain nothing" is a reachable state rather than
-      // a rounding concern. On a phone the bottom nav owns add-task, the panel
-      // buttons and the side-panel buttons, so a default install with no
-      // plugins, no profiles and no counters has exactly ONE demotable: sync.
-      // Demoting it would reclaim zero pixels, leave the row still overflowing,
-      // and hide the app's only persistent sync indicator behind a tap. Mirror
-      // of the restore branch's `refund`.
-      const gain =
-        (this._slotWidths.get(ids[count]) ?? 0) -
-        (count === 0 ? this._triggerWidth || this._estimatedTriggerWidth(nav) : 0);
-      if (gain > FIT_EPSILON) {
-        this._demotedCount.set(count + 1);
-        this._scheduleReflow();
-        return;
-      }
+    // Everything still inline is measurable right now, so decide the whole
+    // demotion in this one pass rather than moving one action per frame and
+    // re-measuring. That is what lets the remembered-width cache go: the only
+    // direction that ever needed remembering was the way back, and widening now
+    // re-derives the count from zero instead of costing a restore against a
+    // width recorded some frames ago. It also makes the settle monotone —
+    // `count` only rises within one — so termination stops being an argument.
+    const widths = new Map<string, number>();
+    for (const el of Array.from(nav.querySelectorAll<HTMLElement>('[data-slot]'))) {
+      widths.set(el.dataset.slot as string, el.getBoundingClientRect().width);
     }
-    if (free > FIT_EPSILON && count > 0) {
-      // Bringing one back costs its own width but refunds the trigger when it
-      // empties the panel. Requiring the *measured* slack to cover that is what
-      // stops the row oscillating across the boundary it just crossed.
-      const cost = this._slotWidths.get(ids[count - 1]);
-      const refund = count === 1 ? this._triggerWidth : 0;
-      // An unmeasured slot has no cost to weigh, so let it back optimistically
-      // rather than refusing forever. This is reachable: `_demotableIds` is a
-      // *prefix* count, so an id appearing at the head of the list — a plugin
-      // registering its header buttons while the bar is already collapsed —
-      // lands inside the demoted prefix having never been inline. Refusing it
-      // (the old `cost > 0` guard) stranded it in the panel for the rest of the
-      // session, at any width. Letting it through costs one frame: the next
-      // pass measures it for real and re-demotes if it genuinely does not fit.
-      if (cost === undefined || cost - refund <= free) {
-        this._demotedCount.set(count - 1);
-        this._scheduleReflow();
-      }
+    // Demoting the first action also introduces the trigger, so that pass has
+    // to reclaim the deficit *plus* the trigger's own width.
+    const trigger = nav.querySelector('.header-overflow-btn') as HTMLElement | null;
+    const triggerW = trigger
+      ? trigger.getBoundingClientRect().width
+      : this._estimatedTriggerWidth(nav);
+    const triggerCost = count === 0 ? triggerW : 0;
+
+    let reclaimed = 0;
+    let next = count;
+    while (reclaimed < -free + triggerCost && next < ids.length) {
+      reclaimed += widths.get(ids[next]) ?? 0;
+      next++;
+    }
+
+    // Only worth doing if it actually frees width. Every header action is a
+    // 40px icon button and so is the trigger, so "remove one button, add one
+    // button, gain nothing" is reachable rather than a rounding concern: on a
+    // phone the bottom nav owns add-task, the panel buttons and the side-panel
+    // buttons, so a default install with no plugins, no profiles and no
+    // counters has exactly ONE demotable — sync. Demoting it would reclaim zero
+    // pixels, leave the row still overflowing, and hide the app's only
+    // persistent sync indicator behind a tap.
+    if (next > count && reclaimed - triggerCost > FIT_EPSILON) {
+      this._demotedCount.set(next);
+      this._scheduleReflow();
     }
   }
 
@@ -621,8 +622,11 @@ export class MainHeaderComponent implements OnDestroy {
     this._resizeObserver = new ResizeObserver((entries) => {
       const width = entries[entries.length - 1]?.contentRect.width ?? 0;
       if (width > 0 && width !== lastWidth) {
+        const widened = width > lastWidth;
         lastWidth = width;
-        this._restartReflow();
+        // Only a widening needs the count re-derived from zero; narrowing just
+        // demotes further from where it is. See `_restartReflow`.
+        this._restartReflow(widened);
       }
     });
     this._resizeObserver.observe(el);

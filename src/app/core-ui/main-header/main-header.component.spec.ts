@@ -45,9 +45,19 @@ import { ConflictJournalService } from '../../op-log/sync/conflict-journal.servi
 // the `.action-nav-right` nav whose `.counters-action-group` children are
 // `flex-shrink: 0`. We then assert observable layout rather than CSS strings.
 //
-// The discriminating rule under test is `.action-nav-right { flex: 0 0 auto }`:
-// remove it and the nav shrinks, its non-shrinking buttons overflow, and the
-// last button's right edge escapes the row — which is exactly the bug.
+// The rule under test used to be `.action-nav-right { flex: 0 0 auto }`. Since
+// #9480 the nav has to be shrinkable so that it can scroll as a last resort, so
+// the same guarantee is expressed as a shrink *priority* instead: the title
+// carries `flex-shrink: 999` and absorbs essentially all of the squeeze before
+// the nav gives up a pixel. That declaration lives in page-title.component.ts
+// (which owns the title's own flex behaviour, as it owns its `min-width`), and
+// this synthetic host mirrors it — it loads only main-header's stylesheet, so
+// it cannot inherit it. Drop the priority and both shrink at factor 1, the
+// nav's non-shrinking buttons overflow, and the last button escapes the row.
+//
+// The second assertion covers the #9480 floor itself, which does live in
+// main-header.component.scss: even when the row genuinely cannot fit, the nav
+// is a scroll container, so no button is ever unreachable.
 @Component({
   standalone: true,
   styleUrls: ['./main-header.component.scss'],
@@ -59,7 +69,7 @@ import { ConflictJournalService } from '../../op-log/sync/conflict-journal.servi
       <div
         class="page-title"
         style="
-          flex: 1 1 auto;
+          flex: 1 999 auto;
           min-width: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -84,11 +94,88 @@ class HeaderLayoutHostComponent {
   title = 'A very long active work context title '.repeat(8);
 }
 
+// The state the demotion model cannot fix: the row is narrower than the PINNED
+// actions alone, so there is nothing left to move into the panel. Measured
+// against the real CSS this is not a corner -- play + add-task + focus + the
+// overflow trigger plus the title's floor stop fitting somewhere under a
+// ~1050px window with the right panel open, and at 600-730px with just the
+// default side nav. `_reflow` bails at `count === ids.length` and, before the
+// scroll floor, the row simply ran off an edge nothing in the ancestor chain
+// can scroll (`.main-content` is `overflow: hidden`) -- issue #9480 exactly.
+@Component({
+  standalone: true,
+  styleUrls: ['./main-header.component.scss'],
+  template: `
+    <div
+      class="wrapper"
+      style="width: 260px; box-sizing: border-box"
+    >
+      <div
+        class="page-title"
+        style="flex: 1 999 auto; min-width: 160px; overflow: hidden"
+      >
+        A project name
+      </div>
+
+      <nav class="action-nav-right">
+        <button
+          type="button"
+          style="flex-shrink: 0; width: 40px; height: 40px"
+        ></button>
+        <button
+          type="button"
+          style="flex-shrink: 0; width: 40px; height: 40px"
+        ></button>
+        <button
+          type="button"
+          class="header-overflow-btn"
+          style="flex-shrink: 0; width: 40px; height: 40px"
+        ></button>
+      </nav>
+    </div>
+  `,
+})
+class PinnedOverflowHostComponent {}
+
 describe('MainHeaderComponent layout', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderLayoutHostComponent],
+      imports: [HeaderLayoutHostComponent, PinnedOverflowHostComponent],
     }).compileComponents();
+  });
+
+  it('keeps pinned actions reachable when even they do not fit (#9480)', () => {
+    const fixture = TestBed.createComponent(PinnedOverflowHostComponent);
+    document.body.appendChild(fixture.nativeElement);
+    try {
+      fixture.detectChanges();
+
+      const wrapper = fixture.nativeElement.querySelector('.wrapper') as HTMLElement;
+      const nav = fixture.nativeElement.querySelector('.action-nav-right') as HTMLElement;
+      const trigger = fixture.nativeElement.querySelector(
+        '.header-overflow-btn',
+      ) as HTMLElement;
+
+      // Precondition: the row genuinely cannot fit its pinned actions, so this
+      // is the unfixable-by-demotion case and not a trivially passing setup.
+      expect(nav.scrollWidth).toBeGreaterThan(nav.clientWidth);
+
+      // The nav stays inside the clip edge instead of spilling past it...
+      expect(nav.getBoundingClientRect().right).toBeLessThanOrEqual(
+        wrapper.getBoundingClientRect().right + 0.5,
+      );
+      // ...and the last pinned action -- the trigger, which is the only route
+      // to everything already demoted -- can actually be scrolled into view.
+      nav.scrollLeft = nav.scrollWidth;
+      expect(nav.scrollLeft).toBeGreaterThan(0);
+
+      const navRect = nav.getBoundingClientRect();
+      const triggerRect = trigger.getBoundingClientRect();
+      expect(triggerRect.right).toBeLessThanOrEqual(navRect.right + 0.5);
+      expect(triggerRect.left).toBeGreaterThanOrEqual(navRect.left - 0.5);
+    } finally {
+      document.body.removeChild(fixture.nativeElement);
+    }
   });
 
   it('keeps the action buttons on screen when the title is long (#7477)', () => {
@@ -116,6 +203,11 @@ describe('MainHeaderComponent layout', () => {
       const wrapperRect = wrapper.getBoundingClientRect();
       const lastButtonRect = lastButton.getBoundingClientRect();
       expect(lastButtonRect.right).toBeLessThanOrEqual(wrapperRect.right + 0.5);
+
+      // And the #9480 floor: whatever else happens, the nav scrolls rather than
+      // spilling buttons past an edge nothing in the ancestor chain can reach.
+      const nav = fixture.nativeElement.querySelector('.action-nav-right') as HTMLElement;
+      expect(getComputedStyle(nav).overflowX).toBe('auto');
     } finally {
       document.body.removeChild(fixture.nativeElement);
     }

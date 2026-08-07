@@ -130,9 +130,18 @@ import { KeyboardConfig } from '@sp/keyboard-config';
         border-radius: var(--card-border-radius);
         padding: var(--s) var(--s2) var(--s) var(--s);
 
-        /* How much of the context name has to survive. The title is the only
-           thing in the header row that shrinks, so this floor is also what
-           decides when header actions start moving into the overflow panel:
+        /* The title yields before the action row does, so a long context name
+           ellipsizes instead of pushing the buttons off screen (#7477). This
+           used to be expressed by making the nav unshrinkable, but the nav now
+           has to be able to shrink in order to scroll as a last resort
+           (#9480) — so the priority is stated here instead. Both are
+           shrinkable; the title just absorbs essentially all of it, down to the
+           floor below. */
+        flex-shrink: 999;
+
+        /* How much of the context name has to survive. The title is the first
+           thing in the header row to shrink, so this floor is also what decides
+           when header actions start moving into the overflow panel:
            MainHeaderComponent reads this value back with getComputedStyle
            rather than restating it in TypeScript (#9480). On a phone there is
            no room for both a full name and the actions, so the name yields

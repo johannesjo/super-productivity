@@ -165,15 +165,54 @@ button.isActive2 {
   margin-left: auto;
   display: flex;
   align-items: center;
-  // Keep the action group at its intrinsic width so a long title shrinks
-  // (it ellipsizes) instead of pushing these buttons off screen (#7477).
-  flex: 0 0 auto;
+  // The title still yields first, so a long name ellipsizes rather than pushing
+  // these buttons off screen (#7477) — but that is now expressed as a shrink
+  // *priority* (`.page-title` carries `flex-shrink: 999`) rather than by making
+  // the nav unshrinkable. The nav has to be able to shrink so that it can
+  // scroll: see the floor below.
+  flex: 0 1 auto;
   gap: var(--header-nav-button-gap);
   min-width: 0;
 
   :host-context([dir='rtl']) & {
     margin-left: 0;
     margin-right: auto;
+  }
+
+  // Last-resort floor (#9480). The demotion model moves the low-priority
+  // actions out, but the pinned ones — play, add-task, focus and the overflow
+  // trigger itself — cannot move, and measured against the real CSS they stop
+  // fitting somewhere under a ~1050px window with the right panel open. Once
+  // everything demotable has already gone, `_reflow` has nothing left to do and
+  // the row used to simply run off the edge, unreachable, because nothing in
+  // the ancestor chain scrolls (`.main-content` is `overflow: hidden`). That is
+  // the reported bug, and the reporter asked for exactly this: "scrollable or
+  // otherwise accessible". So the worst case degrades to a scroll instead of a
+  // lost button, which is also what makes a demotion bug cosmetic rather than
+  // data-losing.
+  //
+  // Not applied to the teleported vertical strip — it is a fixed-width column
+  // that sets its own `overflow: visible` so the current-task flyout can escape.
+  &:not(.action-nav-right--teleported) {
+    overflow-x: auto;
+    // `overflow-x: auto` forces `overflow-y` to compute to `auto` (the two axes
+    // are coupled), which would clip the sync badge above and the
+    // `.panel-btn.isActive::after` tab 5px below. Pin it to `hidden` so no
+    // stray vertical scrollbar can appear, and buy back the bleed with padding
+    // the negative margin cancels, so the row's own box is unchanged.
+    overflow-y: hidden;
+    padding-block: 6px;
+    margin-block: -6px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    // Buttons keep their size and let the row scroll instead.
+    > * {
+      flex-shrink: 0;
+    }
   }
 
   // EXPERIMENT: vertical action strip styles live in src/styles.scss so they
