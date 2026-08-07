@@ -17,6 +17,43 @@ import {
 const TASK_TIME_DELTA_ACTION_TYPE = '[TimeTracking] Sync time spent';
 
 /**
+ * ARRAY-branch candidates for BOTH batch conflict lookups: every stored op whose
+ * `entity_ids` contains a probed id, tagged with the id that matched. Expects a
+ * `probe(eid)` CTE in scope and binds no parameters of its own, which is why it can be
+ * shared verbatim instead of hand-copied — the #8334 "keep these two in sync" hazard is
+ * exactly what let #9503 ship the same mis-plan into both queries.
+ *
+ * Carrying `p.eid` is load-bearing for COST, not correctness. Re-deriving the matched id
+ * downstream with `unnest(entity_ids) JOIN probe` instead emits |probe ∩ entity_ids|²
+ * rows per op, because `cand` already holds one copy of the op per matching probe id.
+ * Measured on PGlite over a 40k-row seed, 20 stored ops of 100 ids against a 100-id
+ * probe: 8645ms / 19.8M join-filtered rows / 1611 temp blocks, against 8ms and zero for
+ * the form below. At the 1000-id wire cap it was 36.8s vs 4.5ms. The probe set here is
+ * the incoming op's OWN id list, so that overlap is maximal by construction, not an edge
+ * case. Not selecting `entity_ids` at all also keeps the materialised tuplestore narrow.
+ * batch-conflict-plan.pglite.spec.ts pins this; both guards fail on the fan-out form.
+ *
+ * MATERIALIZED is load-bearing: it stops the outer user_id / entity_type predicates
+ * being pushed down, which hands the composite btree back and restores the slice scan
+ * this whole change exists to remove (measured: 1106 blocks and no GIN without it — an
+ * earlier revision of this comment cited 2500 discarded rows, which is the OR form's
+ * number, not the fence's).
+ *
+ * Isolation: like the single-entity path, this matches by entity id across ALL users and
+ * the callers' outer WHERE enforces the user boundary — correct, but NOT cost-bounded
+ * per user. See the note at detectConflictForEntity for the shared-literal probe vectors
+ * ('KANBAN_DEFAULT' &c.) and the expression-GIN fix that would bound it.
+ */
+const ARRAY_BRANCH_CANDIDATES_CTE = Prisma.sql`
+  cand AS MATERIALIZED (
+    SELECT p.eid AS eid, o.user_id, o.entity_type, o.client_id, o.action_type,
+           o.vector_clock, o.server_seq
+    FROM probe p
+    JOIN operations o ON o.entity_ids @> ARRAY[p.eid]
+  )
+`;
+
+/**
  * Check if an incoming operation conflicts with existing operations.
  * Returns conflict info if a concurrent modification is detected.
  */
@@ -103,28 +140,28 @@ export const detectConflictForEntities = async (
     // PLUS the sort column are covered by the composite btree, so each probe is an
     // index seek that terminates on an empty range when the entity is new.
     //
-    // Array branch: per-id `@>` probes, NOT one `entity_ids && $arr`. This is
-    // deliberate and measured. A single 100-key `&&` costs enough under a DIRTY GIN
-    // pending list that the planner abandons the index for a SEQ SCAN of the whole
-    // table — and `fastupdate = off` (migration 20260720000000) cannot be expressed in
-    // schema.prisma, so every `prisma db push` database has the pending list ON. The
-    // 1-key `@>` form keeps the GIN chosen in BOTH states for ~100 extra blocks, and
-    // is the same probe detectConflictForEntity already ships. batch-conflict-plan
-    // .pglite.spec.ts pins both properties; do not "simplify" this back to `&&`.
-    //
-    // MATERIALIZED is load-bearing on `cand`, exactly as in the single-entity path:
-    // it stops the outer user_id / entity_type predicates being pushed down, which
-    // would hand the composite btree back and restore the slice scan (measured: 2500
-    // rows discarded with them pushed in, 0 with the fence).
+    // Array branch: per-id `@>` probes, NOT one `entity_ids && $arr`, and the tradeoff
+    // is narrower than it looks — measure before changing it either way. With
+    // `fastupdate = off` (migration 20260720000000, what `prisma migrate deploy` gives
+    // production) both forms ride the GIN and `@>` costs ~100 extra blocks. With the
+    // pending list DIRTY a single 100-key `&&` is expensive enough that the planner
+    // abandons the index for a SEQ SCAN, which `@>` avoids — but on a 40k-row seed that
+    // seq scan measured FASTER than the surviving GIN plan (78ms vs 116ms), so `@>` is
+    // not a free win there. It is defensible because `fastupdate = off` cannot be
+    // expressed in schema.prisma, so `prisma db push` databases (CI, the E2E stack, the
+    // manual setup in README.md) have the pending list ON, and because a seq scan at
+    // production's 6.97M rows / 5.6GB extrapolates far worse than at 40k — that last
+    // step is UNMEASURED. `@>` is also the same probe detectConflictForEntity ships.
     //
     // `probe` binds the 100 ids ONCE — they used to be interpolated three times, for
-    // 300 of the statement's 302 parameters — and is then referenced three times, so
-    // Postgres materialises the list once. DISTINCT mirrors the prefetch sibling,
+    // 300 of the statement's 302 parameters — and is then referenced twice, so Postgres
+    // materialises the list once. Its DISTINCT is redundant here (detectConflict already
+    // dedupes) and kept only so this shape stays identical to the prefetch sibling,
     // where the same id can legitimately appear under two entity types.
     const idArray = Prisma.sql`ARRAY[${Prisma.join(batchEntityIds)}]::text[]`;
     const latestOps = await tx.$queryRaw<LatestEntityOperationRow[]>`
       WITH probe(eid) AS (
-        SELECT DISTINCT unnest(${idArray})
+        SELECT DISTINCT eid FROM unnest(${idArray}) AS eid
       ),
       scalar_hits AS (
         SELECT p.eid AS eid, x.client_id, x.action_type, x.vector_clock, x.server_seq
@@ -139,22 +176,10 @@ export const detectConflictForEntities = async (
           LIMIT 1
         ) x
       ),
-      cand AS MATERIALIZED (
-        SELECT x.user_id, x.entity_type, x.entity_ids, x.client_id, x.action_type,
-               x.vector_clock, x.server_seq
-        FROM probe p
-        CROSS JOIN LATERAL (
-          SELECT o.user_id, o.entity_type, o.entity_ids, o.client_id, o.action_type,
-                 o.vector_clock, o.server_seq
-          FROM operations o
-          WHERE o.entity_ids @> ARRAY[p.eid]
-        ) x
-      ),
+      ${ARRAY_BRANCH_CANDIDATES_CTE},
       array_hits AS (
-        SELECT m.eid AS eid, c.client_id, c.action_type, c.vector_clock, c.server_seq
+        SELECT c.eid AS eid, c.client_id, c.action_type, c.vector_clock, c.server_seq
         FROM cand c
-        CROSS JOIN LATERAL unnest(c.entity_ids) AS m(eid)
-        JOIN probe p2 ON p2.eid = m.eid
         WHERE c.user_id = ${userId}
           AND c.entity_type = ${op.entityType}
       )
@@ -164,9 +189,9 @@ export const detectConflictForEntities = async (
         action_type AS "actionType",
         vector_clock AS "vectorClock"
       FROM (
-        SELECT * FROM scalar_hits
+        SELECT eid, client_id, action_type, vector_clock, server_seq FROM scalar_hits
         UNION ALL
-        SELECT * FROM array_hits
+        SELECT eid, client_id, action_type, vector_clock, server_seq FROM array_hits
       ) u
       ORDER BY eid, server_seq DESC
     `;
@@ -729,7 +754,9 @@ export const prefetchLatestEntityOpsForBatch = async (
 
     // Two separately-indexed branches, mirroring detectConflictForEntities — see the
     // PERF note there for the measurements and for why the array branch probes per id
-    // rather than with one `&&`. Keep the two shapes in sync. (#8334)
+    // rather than with one `&&`. The array branch itself is the shared
+    // ARRAY_BRANCH_CANDIDATES_CTE, so only the scalar branch and the keying differ.
+    // (#8334)
     //
     // This query was the WORSE of the two: it carries no `entity_type` predicate (the
     // entity type only ever appeared in the join), so the composite btree's usable
@@ -740,6 +767,14 @@ export const prefetchLatestEntityOpsForBatch = async (
     //
     // The requested ids now come from `touched` instead of a second bound array, so
     // there is no separate id-array parameter at all.
+    //
+    // `array_hits` re-checks the entity TYPE with a row-wise `IN`, not a `JOIN`: `cand`
+    // is keyed by id alone (`probe` drops the type), so a stored op matched by id still
+    // has to be confirmed against the requested (type, id) PAIR. A semi-join lets the
+    // planner hash `touched` once — the inner JOIN this replaced was planned as a nested
+    // loop that re-compared every candidate against all 100 pairs (measured 198k
+    // join-filter comparisons on the wide-array seed). It also cannot duplicate a row
+    // when `entityPairs` carries the same pair twice, which the JOIN could.
     const latestOps = await tx.$queryRaw<LatestBatchEntityOperationRow[]>`
       WITH touched(entity_type, entity_id) AS (
         VALUES ${Prisma.join(touchedRows)}
@@ -761,26 +796,13 @@ export const prefetchLatestEntityOpsForBatch = async (
           LIMIT 1
         ) x
       ),
-      cand AS MATERIALIZED (
-        SELECT x.user_id, x.entity_type, x.entity_ids, x.client_id, x.action_type,
-               x.vector_clock, x.server_seq
-        FROM probe p
-        CROSS JOIN LATERAL (
-          SELECT o.user_id, o.entity_type, o.entity_ids, o.client_id, o.action_type,
-                 o.vector_clock, o.server_seq
-          FROM operations o
-          WHERE o.entity_ids @> ARRAY[p.eid]
-        ) x
-      ),
+      ${ARRAY_BRANCH_CANDIDATES_CTE},
       array_hits AS (
-        SELECT c.entity_type, m.eid AS eid, c.client_id, c.action_type,
+        SELECT c.entity_type, c.eid AS eid, c.client_id, c.action_type,
                c.vector_clock, c.server_seq
         FROM cand c
-        CROSS JOIN LATERAL unnest(c.entity_ids) AS m(eid)
-        JOIN touched t2
-          ON t2.entity_type = c.entity_type
-         AND t2.entity_id = m.eid
         WHERE c.user_id = ${userId}
+          AND (c.entity_type, c.eid) IN (SELECT entity_type, entity_id FROM touched)
       )
       SELECT DISTINCT ON (entity_type, eid)
         entity_type AS "entityType",
@@ -790,9 +812,11 @@ export const prefetchLatestEntityOpsForBatch = async (
         vector_clock AS "vectorClock",
         server_seq AS "serverSeq"
       FROM (
-        SELECT * FROM scalar_hits
+        SELECT entity_type, eid, client_id, action_type, vector_clock, server_seq
+        FROM scalar_hits
         UNION ALL
-        SELECT * FROM array_hits
+        SELECT entity_type, eid, client_id, action_type, vector_clock, server_seq
+        FROM array_hits
       ) u
       ORDER BY entity_type, eid, server_seq DESC
     `;

@@ -218,14 +218,28 @@ vi.mock('../src/db', async () => {
       // Anything left must be the batched multi-entity conflict lookup. Assert that
       // rather than assuming it: falling through and reinterpreting an unrelated
       // query as this one is how a mock silently answers a call it never modelled.
-      if (!sql.includes('DISTINCT ON')) {
+      // `DISTINCT ON` alone stopped discriminating once #9503 gave BOTH batch queries
+      // that clause, so key on detect's own CTE and exclude prefetch's — otherwise a
+      // future batchUpload test lands here, finds no bare string to read entityType
+      // from, matches no ops and silently reports "no conflict".
+      if (!sql.includes('scalar_hits') || sql.includes('touched(entity_type')) {
         throw new Error(`Unmocked raw query in tx: ${sql}`);
       }
-      // Located by shape, not by position: userId is the only number, entityType the
-      // only bare string, and the id array the only Sql fragment. #9503 reordered
-      // these (and repeated userId/entityType), so a positional destructure is wrong.
-      const userId = params.find((p): p is number => typeof p === 'number') as number;
-      const entityType = params.find((p): p is string => typeof p === 'string') as string;
+      // Located by shape, not by position: #9503 reordered the params (and repeated
+      // userId/entityType), so a positional destructure is wrong. Shape lookup is
+      // type-ambiguous, though, so assert the shape instead of trusting it — a future
+      // numeric param (a LIMIT, a schema version) would otherwise silently rebind
+      // userId and quietly disable the tenant scoping this mock exists to model.
+      const numberParams = params.filter((p): p is number => typeof p === 'number');
+      const stringParams = params.filter((p): p is string => typeof p === 'string');
+      if (new Set(numberParams).size !== 1 || new Set(stringParams).size !== 1) {
+        throw new Error(
+          `Batched conflict query params no longer identify userId/entityType by shape: ` +
+            `${numberParams.length} numbers, ${stringParams.length} strings`,
+        );
+      }
+      const userId = numberParams[0];
+      const entityType = stringParams[0];
       const entityIdsSql = params.find(
         (p): p is Prisma.Sql =>
           !!p && typeof p === 'object' && Array.isArray((p as Prisma.Sql).values),
@@ -242,7 +256,7 @@ vi.mock('../src/db', async () => {
         ),
       );
       // An op covers every entity in its entity_ids set UNION its scalar
-      // entity_id — mirrors the `entity_ids || ARRAY[entity_id]` unnest. The
+      // entity_id — mirrors the array branch UNION ALL the scalar branch. The
       // scalar is always folded in (not just for empty/pre-migration rows) so a
       // divergent scalar entity_id is never missed; the Set below dedupes the
       // common entity_id = entityIds[0] overlap. (#8334)

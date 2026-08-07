@@ -26,9 +26,10 @@ const TASK_TIME_DELTA_ACTION = '[TimeTracking] Sync time spent';
  * Prisma.sql, including nested Prisma.Sql / Prisma.join fragments, then executes its
  * PostgreSQL text and bound values in PGlite. There is no second copy of the query.
  *
- * Load-bearing detail: the unnest folds the scalar `entity_id` INTO the `entity_ids`
- * set with a UNION (`o.entity_ids || ...ARRAY[entity_id]`), NOT a mutually-exclusive
- * `CASE WHEN cardinality(entity_ids) > 0 THEN entity_ids ELSE ARRAY[entity_id]`. The
+ * Load-bearing detail: the queries cover the scalar `entity_id` AND the `entity_ids` set
+ * as a UNION — since #9503 that is a scalar branch `UNION ALL` an array branch, before
+ * it a single `o.entity_ids || ...ARRAY[entity_id]` unnest. Either way it must NOT be a
+ * mutually-exclusive `CASE WHEN cardinality(entity_ids) > 0 THEN ... ELSE ...`. The
  * old CASE form dropped the scalar whenever entity_ids was non-empty, so an op whose
  * scalar entity_id is NOT a member of its own entity_ids (the dedup-off-scalar case)
  * was invisible — a later concurrent op touching that scalar was wrongly accepted

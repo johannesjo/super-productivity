@@ -42,11 +42,16 @@ import type { Operation } from '../src/sync/sync.types';
  *    20260720000000, #9213), rather than left at the default as the sibling does. It
  *    decides which plan the array branch gets, so leaving it implicit would measure a
  *    state production is not in. The last describe pins the opposite state on purpose.
+ *  - The seed carries a WIDE-array population (see WIDE_WIDTH) as well as the width-2
+ *    majority. The first fix for #9503 regressed only on wide arrays, and a width-2
+ *    seed cannot express that: see the two "does not fan out" tests.
  *
- * REMAINING FIDELITY LIMIT: PGlite is PG18 and reports every block as a cache hit, so
+ * REMAINING FIDELITY LIMITS: PGlite is PG18 and reports every block as a cache hit, so
  * these counts cannot model production's cold-cache I/O. The plan SHAPE is what
- * transfers — and it was cross-checked node-for-node against postgres:16-alpine
- * (PG 16.14), production's major version, on this same seed.
+ * transfers. The shipped-vs-regressed plan shapes were also cross-checked against
+ * postgres:16-alpine (PG 16.14), production's major version, during review of #9503 —
+ * that was a one-off manual check, not something this file re-runs, so treat it as a
+ * dated observation (2026-08) rather than a maintained property.
  */
 
 const OWN_OPS = 20_000;
@@ -94,10 +99,28 @@ const INSERT_COLS =
   'schema_version,vector_clock';
 
 type PlanNode = Record<string, unknown>;
-type Measured = { blocks: number; rowsFiltered: number; nodes: string };
+type Measured = {
+  blocks: number;
+  rowsFiltered: number;
+  rowsJoinFiltered: number;
+  tempBlocks: number;
+  nodes: string;
+};
 
-const walk = (node: PlanNode, acc: { filtered: number; nodes: string[] }): void => {
+/**
+ * `Rows Removed by Filter` alone is NOT enough, and assuming it was let a 1000x
+ * regression through review: this rewrite moved the id match from a `WHERE ... = ANY`
+ * into a JOIN, and Postgres reports work discarded there as `Rows Removed by JOIN
+ * Filter` — a different key. A fan-out that read and threw away 19.8M join rows scored
+ * `rowsFiltered: 0` and passed `expectBounded` untouched. Count both, plus temp blocks,
+ * which is what an over-wide intermediate spills to.
+ */
+const walk = (
+  node: PlanNode,
+  acc: { filtered: number; joinFiltered: number; nodes: string[] },
+): void => {
   acc.filtered += (node['Rows Removed by Filter'] as number) ?? 0;
+  acc.joinFiltered += (node['Rows Removed by Join Filter'] as number) ?? 0;
   acc.nodes.push(
     `${node['Node Type']}${node['Scan Direction'] ? ' ' + node['Scan Direction'] : ''}` +
       `${node['Index Name'] ? ' on ' + node['Index Name'] : ''}`,
@@ -127,13 +150,15 @@ const explainGeneric = async (
       `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) EXECUTE ${name}${args ? `(${args})` : ''}`,
     );
     const plan = (res.rows[0]['QUERY PLAN'] as PlanNode[])[0].Plan as PlanNode;
-    const acc = { filtered: 0, nodes: [] as string[] };
+    const acc = { filtered: 0, joinFiltered: 0, nodes: [] as string[] };
     walk(plan, acc);
     return {
       blocks:
         ((plan['Shared Hit Blocks'] as number) ?? 0) +
         ((plan['Shared Read Blocks'] as number) ?? 0),
       rowsFiltered: acc.filtered,
+      rowsJoinFiltered: acc.joinFiltered,
+      tempBlocks: (plan['Temp Written Blocks'] as number) ?? 0,
       nodes: acc.nodes.join(' -> '),
     };
   } finally {
@@ -184,6 +209,27 @@ const incomingOp = (): Operation =>
 const brandNewIds = (): string[] =>
   Array.from({ length: PROBE_SIZE }, (_, i) => `task-brand-new-${i}`);
 
+/**
+ * The OTHER pathological input, and the one a width-2 seed cannot express: repeated bulk
+ * ops over the SAME wide id set. `planTasksForToday`, `updateTasks`, `moveToArchive` and
+ * the board/planner reorders all emit the full id list (`task-shared.actions.ts`), and
+ * `detectConflictForEntities` probes the incoming op's OWN ids — so probe and stored
+ * `entity_ids` overlap MAXIMALLY here, by construction. That overlap is the multiplier in
+ * any array-branch fan-out, so this is where such a regression shows up and nowhere else.
+ */
+const WIDE_OPS = 20;
+/**
+ * Deliberately WIDER than PROBE_SIZE, so the two cost models separate numerically and a
+ * fan-out cannot hide inside the fan-out-free ceiling: without fan-out the array branch
+ * handles |probe| x WIDE_OPS candidate rows regardless of how wide the stored arrays
+ * are; with it, every candidate is re-expanded by WIDE_WIDTH.
+ */
+const WIDE_WIDTH = 300;
+const wideIds = (): string[] =>
+  Array.from({ length: WIDE_WIDTH }, (_, i) => `wide-task-${i}`);
+/** Probe a strict subset, as a client re-uploading part of a bulk selection would. */
+const wideProbeIds = (): string[] => wideIds().slice(0, PROBE_SIZE);
+
 const seed = async (db: PGlite, fastupdate: 'on' | 'off'): Promise<void> => {
   await db.exec(CREATE_TABLE);
   // BEFORE the rows, as in production: rows arrive one op at a time against a
@@ -223,6 +269,19 @@ const seed = async (db: PGlite, fastupdate: 'on' | 'off'): Promise<void> => {
   }
   await flush();
 
+  // The wide-array population (see wideIds): WIDE_OPS ops all carrying the SAME
+  // WIDE_WIDTH ids, as a repeated bulk action produces.
+  const wide = wideIds()
+    .map((id) => `"${id}"`)
+    .join(',');
+  for (let k = 1; k <= WIDE_OPS; k++) {
+    rows.push(
+      `('op-wide-${k}', ${USER_ID}, 'seed-client', ${OWN_OPS + k}, '[Task] Update',` +
+        ` 'TASK', 'wide-task-0', '{${wide}}', 1, '{"seed-client":${OWN_OPS + k}}')`,
+    );
+  }
+  await flush();
+
   // ANALYZE so the planner works from real statistics. Deliberately NOT VACUUM: that
   // would flush the GIN pending list and measure the freshly-vacuumed best case.
   await db.exec('ANALYZE operations');
@@ -249,12 +308,26 @@ const BTREE_INDEX = 'operations_user_id_entity_type_entity_id_server_seq_idx';
  * property structurally: the mis-plan is precisely the one that rides NEITHER index
  * usefully.
  */
-const expectBounded = (measured: Measured): void => {
+/**
+ * `maxJoinFiltered` is 0 for every query that has no join left to mis-plan. The one
+ * exception is prefetchLatestEntityOpsForBatch, whose array branch must still confirm a
+ * by-id GIN match against the requested (entity_type, entity_id) PAIR. Under
+ * `force_generic_plan` Postgres cannot see the parameter values and plans that semi-join
+ * as a nested loop, so it compares |cand| x |touched|. That is bounded by the batch size
+ * and the number of matching ops, and is INDEPENDENT of how wide the stored arrays are —
+ * which is exactly what separates it from a fan-out. See WIDE_WIDTH.
+ */
+const expectBounded = (measured: Measured, maxJoinFiltered = 0): void => {
   expect(measured.rowsFiltered).toBe(0);
+  expect(measured.rowsJoinFiltered).toBeLessThanOrEqual(maxJoinFiltered);
+  expect(measured.tempBlocks).toBe(0);
   expect(measured.nodes).not.toContain('Seq Scan');
   expect(measured.nodes).toContain(GIN_INDEX);
   expect(measured.nodes).toContain(BTREE_INDEX);
 };
+
+/** The fan-out-free ceiling for the pair re-check: candidates x requested pairs. */
+const MAX_PAIR_RECHECK_COMPARISONS = PROBE_SIZE * WIDE_OPS * PROBE_SIZE;
 
 describe('batch conflict detection does not scan the history (PGlite)', () => {
   let db: PGlite;
@@ -280,7 +353,27 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 
     expect(result.hasConflict).toBe(false);
     expect(measured).toHaveLength(1);
-    console.log('DETECT', JSON.stringify(measured[0]));
+    expectBounded(measured[0]);
+  });
+
+  it('detectConflictForEntities does not fan out on wide entity_ids (#9503)', async () => {
+    // REGRESSION GUARD. The first fix for #9503 tagged nothing onto the array-branch
+    // candidates and re-derived the matched id with `unnest(entity_ids) JOIN probe`.
+    // Because `cand` already holds one copy of an op per matching probe id, that emitted
+    // |probe n entity_ids| squared rows per op: measured 8645ms / 19.8M join-filtered
+    // rows / 1611 temp blocks on exactly this seed, against 8ms and zero for the shipped
+    // form. It passed the all-new test above untouched, because a batch that matches
+    // NOTHING has no fan-out to multiply.
+    const measured: Measured[] = [];
+    const result = await detectConflictForEntities(
+      USER_ID,
+      incomingOp(),
+      wideProbeIds(),
+      makeExplainingTx(db, measured),
+    );
+
+    expect(result.hasConflict).toBe(true);
+    expect(measured).toHaveLength(1);
     expectBounded(measured[0]);
   });
 
@@ -296,8 +389,22 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 
     expect(latest.size).toBe(0);
     expect(measured).toHaveLength(1);
-    console.log('PREFETCH', JSON.stringify(measured[0]));
     expectBounded(measured[0]);
+  });
+
+  it('prefetchLatestEntityOpsForBatch does not fan out on wide entity_ids (#9503)', async () => {
+    // Same guard for the sibling shape, which fanned out harder still (it re-joined
+    // `touched` on two columns): 36.8s at the 1000-id wire cap before the fix.
+    const measured: Measured[] = [];
+    const latest = await prefetchLatestEntityOpsForBatch(
+      USER_ID,
+      wideProbeIds().map((entityId) => ({ entityType: 'TASK', entityId })),
+      makeExplainingTx(db, measured),
+    );
+
+    expect(latest.size).toBe(PROBE_SIZE);
+    expect(measured).toHaveLength(1);
+    expectBounded(measured[0], MAX_PAIR_RECHECK_COMPARISONS);
   });
 
   it('still finds the latest op per entity for a batch that DOES match', async () => {
@@ -347,8 +454,10 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
       [USER_ID, 'TASK', ids],
     );
 
-    // The whole probed (user_id, 'TASK') slice, read and discarded.
-    expect(regressed.rowsFiltered).toBe(OWN_OPS / ENTITY_TYPES.length);
+    // The whole probed (user_id, 'TASK') slice, read and discarded. A lower bound, not
+    // an equality: the exact count is a planner artefact that a PGlite bump can shift,
+    // while "it still reads the slice" is the property this canary exists to assert.
+    expect(regressed.rowsFiltered).toBeGreaterThanOrEqual(OWN_OPS / ENTITY_TYPES.length);
     // ...and the structural cause: the OR makes the GIN unusable, so the plan rides
     // only the btree and uses it as a filter rather than a seek.
     expect(regressed.nodes).not.toContain(GIN_INDEX);
@@ -393,8 +502,8 @@ describe('batch conflict array branch survives a dirty GIN pending list (PGlite)
       makeExplainingTx(db, measured),
     );
 
-    console.log('DIRTYGIN', JSON.stringify(measured[0]));
     expect(measured[0].rowsFiltered).toBe(0);
+    expect(measured[0].rowsJoinFiltered).toBe(0);
     expect(measured[0].nodes).not.toContain('Seq Scan');
     expect(measured[0].nodes).toContain('operations_entity_ids_gin');
   });
