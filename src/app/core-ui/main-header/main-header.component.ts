@@ -93,10 +93,19 @@ const GAP_W = 4; // --s-half
 const SLOT_W = BTN_W + GAP_W;
 /** `--header-action-group-gap` minus the regular gap, on the two groups that carry it. */
 const GROUP_GAP_EXTRA_W = 2 * (16 - GAP_W);
-/** `.page-title`'s own irreducible icon + padding, with no action buttons. */
-const TITLE_MIN_W = 36;
-/** `.page-title-actions`: three 40px buttons on a 2px gap, plus a 16px end margin. */
-const TITLE_ACTIONS_W = 142;
+/**
+ * Room kept for `.page-title` itself. It shrinks and ellipsizes, so this is a
+ * floor, not a measurement — but it is deliberately more than the bare icon +
+ * padding (~36px): reserving only that lets the action row fill the bar and
+ * crush the project/tag name away, which is not a header that fits, just one
+ * that has stopped saying where you are. Below 600px there is no room for both
+ * and the name yields, which is how it behaved before #9480.
+ */
+const TITLE_MIN_W = 128;
+const TITLE_MIN_W_NARROW = 56;
+/** Each `.page-title-actions` button: 40px on a 2px gap. */
+const TITLE_ACTION_W = 42;
+const TITLE_ACTIONS_MARGIN_W = 16;
 /** `.wrapper` horizontal padding — the desktop (larger) value, deliberately. */
 const WRAPPER_PADDING_W = 32;
 
@@ -323,15 +332,22 @@ export class MainHeaderComponent implements OnDestroy {
   });
 
   /**
-   * Room `page-title` needs; its action buttons do not shrink either. They are
-   * gated on `isXxxs` — the *window*, not this row — so ask that signal rather
-   * than guess a host width at which they disappear.
+   * Room `page-title` needs; its action buttons do not shrink either. Both are
+   * keyed to the *window*, not this row, so ask the breakpoint signals rather
+   * than guess a host width: `page-title-actions` is hidden wholesale below
+   * 398px, and its settings button is CSS-hidden below 600px
+   * (`.project-settings-btn` in page-title.component), leaving just the filter.
    */
   private readonly _titleReserve = computed(() => {
     if (!this.isDataLoaded()) {
       return 0;
     }
-    return TITLE_MIN_W + (this.isXxxs() ? 0 : TITLE_ACTIONS_W);
+    const actionCount = this.isXxxs() ? 0 : this.isXs() ? 1 : 3;
+    const btnsW = actionCount * TITLE_ACTION_W;
+    return (
+      (this.isXs() ? TITLE_MIN_W_NARROW : TITLE_MIN_W) +
+      (actionCount ? btnsW + TITLE_ACTIONS_MARGIN_W : 0)
+    );
   });
 
   private readonly _itemWidths = computed<Record<DemotableHeaderItem, number>>(() => {
@@ -393,10 +409,14 @@ export class MainHeaderComponent implements OnDestroy {
       return { countersCollapsed, demoted };
     }
 
-    // Then demote in order until the row fits. The overflow trigger takes a
-    // slot of its own, so demoting is only worth it once it frees more than
-    // that slot -- otherwise the row swaps one button for another and is no
-    // narrower for it.
+    // Then demote in order until the row fits, counting the slot the overflow
+    // trigger costs once anything moves.
+    //
+    // No "is this demotion worth it?" test: the alternative to demoting is not
+    // that the action stays usable in the bar, it is that the action is clipped
+    // off the edge with nothing to scroll it back (#9480). So even a swap that
+    // frees nothing -- one button out, the trigger in -- is strictly better,
+    // because the menu is reachable and the clipped button is not.
     let freed = 0;
     for (const id of DEMOTION_ORDER) {
       if (used + SLOT_W - freed <= available) {
@@ -406,9 +426,6 @@ export class MainHeaderComponent implements OnDestroy {
         demoted.add(id);
         freed += widths[id];
       }
-    }
-    if (freed <= SLOT_W) {
-      demoted.clear();
     }
     return { countersCollapsed, demoted };
   });
@@ -474,6 +491,15 @@ export class MainHeaderComponent implements OnDestroy {
       const enabled = this._isVerticalActionBar();
       this.isDataLoaded();
       this._syncTeleport(enabled);
+    });
+
+    // Widening the header expands the counters back into the bar and removes
+    // the toggle, but the open flag would survive — so the dropdown would spring
+    // open by itself the next time the header narrowed.
+    effect(() => {
+      if (!this.areCountersCollapsed()) {
+        this.isShowCountersDropdown.set(false);
+      }
     });
 
     this._observeHostWidth();

@@ -337,7 +337,8 @@ describe('MainHeaderComponent focus button visibility', () => {
 
     // Only just too narrow: shedding the plugin buttons alone is enough, so
     // the panel buttons -- further down the demotion order -- stay in the bar.
-    component.setHostWidthForTesting(600);
+    // (The width tracks the title reserve; what is under test is the *order*.)
+    component.setHostWidthForTesting(690);
 
     expect(component.showPluginBtnsInline()).toBe(false);
     expect(component.showPanelBtnsInline()).toBe(true);
@@ -412,17 +413,19 @@ describe('MainHeaderComponent focus button visibility', () => {
       })),
     );
 
-    // 20px over: shedding 132px of plugin buttons for a 44px trigger fits.
-    component.setHostWidthForTesting(478);
+    // 14px over: shedding 132px of plugin buttons for a 44px trigger fits.
+    component.setHostWidthForTesting(420);
 
     expect(component.showPluginBtnsInline()).toBe(false);
     expect(component.hasOverflow()).toBe(true);
   });
 
-  it('leaves a lone slot-wide action in the bar rather than swapping it for the trigger (#9480)', () => {
-    // With the panel buttons and plugin buttons gone, add-task is all that is
-    // left to demote -- and it is exactly the width of the trigger that would
-    // replace it, so moving it buys no room and costs a tap.
+  it('demotes a lone slot-wide action rather than letting it clip (#9480)', () => {
+    // With the panel and plugin buttons gone, add-task is all that is left to
+    // demote -- and it is exactly the width of the trigger that replaces it, so
+    // the move frees nothing and looks pointless. It is not: the alternative is
+    // not that the button stays usable, it is that it hangs off an edge nothing
+    // can scroll. A trigger you can tap beats a button you cannot reach.
     isXs = signal(false);
     appFeatures = signal({
       ...DEFAULT_GLOBAL_CONFIG.appFeatures,
@@ -432,9 +435,72 @@ describe('MainHeaderComponent focus button visibility', () => {
     });
 
     component = createComponent();
-    component.setHostWidthForTesting(390);
+    component.setHostWidthForTesting(330);
 
-    expect(component.showAddTaskInline()).toBe(true);
+    expect(component.showAddTaskInline()).toBe(false);
+    expect(component.isDemotedAddTask()).toBe(true);
+  });
+
+  it('never leaves a mobile plugin button clipped instead of in the menu (#9480)', () => {
+    // Reported regression: a single plugin header button is exactly one slot
+    // wide, so a payoff test ("does moving this free more than the trigger
+    // costs?") declined to move it -- and on a phone that left it hanging off
+    // the edge, in the bar according to the model and visible to nobody.
+    isXs = signal(true);
+    isXxxs = signal(true);
+    enabledSimpleCounters = [1, 2].map((n) => ({
+      id: `counter-${n}`,
+      title: `Counter ${n}`,
+      isEnabled: true,
+      icon: 'fitness_center',
+      type: SimpleCounterType.ClickCounter,
+      countOnDay: {},
+      isOn: false,
+    })) as SimpleCounter[];
+
+    component = createComponent();
+    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
+      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
+    };
+    bridge.headerButtons.set([
+      { pluginId: 'a', label: 'A', icon: 'star', onClick: () => {} },
+    ]);
+
+    component.setHostWidthForTesting(320);
+
+    expect(component.showPluginBtnsInline()).toBe(false);
+    expect(component.isDemotedPluginBtns()).toBe(true);
+    expect(component.hasOverflow()).toBe(true);
+  });
+
+  it('keeps plugin buttons in the bar at ordinary phone widths (#9480)', () => {
+    // ...but they must not be swept into the menu on every phone either. The
+    // title reserve decides this, so it has to match what `page-title` really
+    // renders: below 600px its settings button is CSS-hidden, leaving one
+    // action button, not the three a desktop header carries.
+    isXs = signal(true);
+    enabledSimpleCounters = [1, 2].map((n) => ({
+      id: `counter-${n}`,
+      title: `Counter ${n}`,
+      isEnabled: true,
+      icon: 'fitness_center',
+      type: SimpleCounterType.ClickCounter,
+      countOnDay: {},
+      isOn: false,
+    })) as SimpleCounter[];
+
+    component = createComponent();
+    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
+      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
+    };
+    bridge.headerButtons.set([
+      { pluginId: 'a', label: 'A', icon: 'star', onClick: () => {} },
+    ]);
+
+    // A Pixel-class portrait phone, past the 398px title-actions breakpoint.
+    component.setHostWidthForTesting(412);
+
+    expect(component.showPluginBtnsInline()).toBe(true);
     expect(component.hasOverflow()).toBe(false);
   });
 
