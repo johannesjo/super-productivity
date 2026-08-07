@@ -186,6 +186,35 @@ describe('Task Reducer', () => {
       expect(result.entities['parent']!.subTaskIds).toEqual(['subTask']);
       expect(result.entities['parent']!.timeEstimate).toBe(2.5 * 60 * 60 * 1000);
     });
+
+    // Both the plugin API and the local REST API forward `dueDay` when creating
+    // a subtask. The reducer overrides exactly three fields — parentId, tagIds
+    // and projectId — and must leave everything else intact; without this,
+    // "the caller forwards dueDay" is only ever asserted on the dispatched
+    // action, never on the state that results from it.
+    it('should keep a forwarded dueDay while overriding the inherited fields', () => {
+      const parent = createTask('parent', { projectId: 'parent-project' });
+      const subTask = createTask('subTask', {
+        dueDay: '2026-09-01',
+        tagIds: ['dropped-by-reducer'],
+        projectId: 'replaced-by-reducer',
+      });
+      const state: TaskState = {
+        ...initialTaskState,
+        ids: ['parent'],
+        entities: { parent },
+      };
+
+      const result = taskReducer(
+        state,
+        fromActions.addSubTask({ task: subTask, parentId: 'parent' }),
+      );
+
+      expect(result.entities['subTask']!.dueDay).toBe('2026-09-01');
+      expect(result.entities['subTask']!.parentId).toBe('parent');
+      expect(result.entities['subTask']!.tagIds).toEqual([]);
+      expect(result.entities['subTask']!.projectId).toBe('parent-project');
+    });
   });
 
   describe('moveSubTask (anchor-based)', () => {
