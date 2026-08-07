@@ -541,7 +541,7 @@ test.describe('@supersync @import-conflict Sync Import Conflict Dialog', () => {
 
       // Click sync directly so we can race the dialog vs. completion ourselves.
       // (syncAndWait() would auto-dismiss the dialog and mask the regression.)
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
 
       // Race the failure path (conflict dialog) against the success path
       // (sync completes). Use the spinner cycle as the completion signal —
@@ -677,7 +677,7 @@ test.describe('@supersync @import-conflict Sync Import Conflict Dialog', () => {
       console.log('[#8304] Phase 4: Client B syncs → conflict dialog → CANCEL');
 
       // Click sync directly (not syncAndWait) so the dialog is not auto-dismissed.
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
       const dialog = clientB.page.locator('dialog-sync-import-conflict');
       await expect(dialog).toBeVisible({ timeout: 20000 });
       await dialog.getByRole('button', { name: /cancel/i }).click();
@@ -704,7 +704,7 @@ test.describe('@supersync @import-conflict Sync Import Conflict Dialog', () => {
       // defect #8304 fixes on the upload path), the next download would skip it and NO
       // dialog would appear — Client B would be permanently diverged. The dialog
       // re-appearing proves the import was re-fetched.
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
       await expect(dialog).toBeVisible({ timeout: 20000 });
       console.log('[#8304] ✓ SYNC_IMPORT was re-offered on the next sync (not lost)');
 

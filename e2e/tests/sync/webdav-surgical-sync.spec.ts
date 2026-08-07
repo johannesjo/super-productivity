@@ -500,7 +500,7 @@ test.describe('@webdav @surgical WebDAV Surgical sync', () => {
           response.ok(),
         { timeout: 20000 },
       );
-      await legacySync.clickSyncBtn({ noWaitAfter: true });
+      await legacySync.syncBtn.click({ noWaitAfter: true });
       await guardedFormatDownload;
       await expect(legacyClient.page.locator('snack-custom .message')).toContainText(
         /split-file format.*(?:Enable|Turn on).*Surgical sync.*Sync settings/i,

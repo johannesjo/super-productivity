@@ -2,6 +2,14 @@
 
 // TODO split up into more manageable bits
 
+@mixin btn-transition {
+  transition: var(--transition-standard);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  margin: var(--s) 0 0 0;
+}
+
 :host {
   display: block;
   position: relative;
@@ -165,74 +173,15 @@ button.isActive2 {
   margin-left: auto;
   display: flex;
   align-items: center;
-  // The title still yields first, so a long name ellipsizes rather than pushing
-  // these buttons off screen (#7477) — but that is now expressed as a shrink
-  // *priority* (`.page-title` carries `flex-shrink: 999`) rather than by making
-  // the nav unshrinkable. The nav has to be able to shrink so that it can
-  // scroll: see the floor below.
-  flex: 0 1 auto;
+  // Keep the action group at its intrinsic width so a long title shrinks
+  // (it ellipsizes) instead of pushing these buttons off screen (#7477).
+  flex: 0 0 auto;
   gap: var(--header-nav-button-gap);
   min-width: 0;
 
   :host-context([dir='rtl']) & {
     margin-left: 0;
     margin-right: auto;
-  }
-
-  // Last-resort floor (#9480). The demotion model moves the low-priority
-  // actions out, but the pinned ones — play, add-task, focus and the overflow
-  // trigger itself — cannot move, and measured against the real CSS they stop
-  // fitting somewhere under a ~1050px window with the right panel open. Once
-  // everything demotable has already gone, `_reflow` has nothing left to do and
-  // the row used to simply run off the edge, unreachable, because nothing in
-  // the ancestor chain scrolls (`.main-content` is `overflow: hidden`). That is
-  // the reported bug, and the reporter asked for exactly this: "scrollable or
-  // otherwise accessible". So the worst case degrades to a scroll instead of a
-  // lost button, which is also what makes a demotion bug cosmetic rather than
-  // data-losing.
-  //
-  // Not applied to the teleported vertical strip — it is a fixed-width column
-  // that sets its own `overflow: visible` so the current-task flyout can escape.
-  &:not(.action-nav-right--teleported) {
-    // Buttons keep their size and let the row scroll instead.
-    > * {
-      flex-shrink: 0;
-    }
-
-    // Only while the row genuinely does not fit (`_reflow` sets the class).
-    // Scrolling means clipping, and clipping this row is not free: the play
-    // button is its first child, so `.current-task-title` — the pill naming
-    // the tracked task, absolutely positioned at `right: 100%` of the play
-    // button — lies entirely outside the inline-start clip edge. Left-of-origin
-    // overflow is not scrollable either (`scrollLeft` clamps at 0), so an
-    // always-on floor did not merely hide the pill, it made it unreachable.
-    // Making the clip conditional keeps the fallback for the state that needs
-    // it and gives every other state its ink back.
-    &.action-nav-right--scrolls {
-      overflow-x: auto;
-      // `overflow-x: auto` forces `overflow-y` to compute to `auto` (the two
-      // axes are coupled). Pin it to `hidden` so no stray vertical scrollbar
-      // can appear, and buy the clipped ink back as padding: the sync badge
-      // above, the `.panel-btn.isActive::after` tab 5px below, and the play
-      // button's elevation, which reaches 8px under its box and 5px to either
-      // side.
-      //
-      // Block padding is cancelled by a negative margin, so the row's own box
-      // is unchanged. The start padding is not: that side carries
-      // `margin-left: auto`, which absorbs the 8px instead, so no button
-      // moves. It costs `nav.scrollWidth` (the fit measure in `_reflow`) 8px
-      // in this state only, which errs towards staying scrollable rather than
-      // towards clipping.
-      overflow-y: hidden;
-      padding-block: 8px;
-      padding-inline-start: 8px;
-      margin-block: -8px;
-      scrollbar-width: none;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    }
   }
 
   // EXPERIMENT: vertical action strip styles live in src/styles.scss so they
@@ -264,52 +213,54 @@ page-title {
   position: relative;
 }
 
-// Wrappers around each demotable action. They exist to be measured — the
-// reflow pass reads their real width instead of predicting it from the button
-// sizes and gaps declared in other stylesheets (#9480). `display: contents`
-// would leave nothing to measure, so they are real flex boxes carrying the same
-// gap the nav does, which keeps the row looking identical.
-[data-slot] {
-  display: flex;
-  align-items: center;
-  gap: var(--header-nav-button-gap);
-  flex-shrink: 0;
+.mobile-dropdown-wrapper {
+  position: relative;
 }
 
-.header-overflow-panel {
+.mobile-dropdown {
   position: absolute;
   display: flex;
   transition: var(--transition-standard);
   top: 100%;
-  // Logical, not `right`: the nav flips to the left edge in RTL (see the
-  // `[dir='rtl']` rule above), and the panel has to follow its trigger. The
-  // `.mobile-dropdown` this replaces was centred, so it never had to care.
-  inset-inline-end: var(--s2);
   flex-direction: column;
-  align-items: center;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 2;
   pointer-events: none;
-  opacity: 0;
-  // Many demoted actions (notably counters) must stay reachable, #5999.
+  // Scrolling support for many counters (fixes #5999)
   max-height: calc(100dvh - 120px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: var(--s);
-  gap: var(--s);
+  padding-bottom: var(--s);
 
   &.isVisible {
     pointer-events: all;
-    opacity: 1;
     border-radius: var(--card-border-radius);
     background: var(--card-bg);
     box-shadow: var(--whiteframe-shadow-2dp);
   }
 
-  // The demoted components keep their own `display: contents`, so their buttons
-  // become direct children of this column.
-  > * {
+  simple-counter-button {
+    @include btn-transition;
+    transform: translateY(-100%);
+    opacity: 0;
+    position: relative;
+    z-index: 2;
+    margin-top: var(--s);
+    margin-left: 0;
     flex-shrink: 0;
+
+    @for $i from 2 through 7 {
+      &:nth-child(#{$i}) {
+        transform: translateY(#{$i * -100%});
+      }
+    }
+  }
+
+  &.isVisible simple-counter-button {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
@@ -399,13 +350,7 @@ page-title {
 
   // While syncing we intentionally keep the muted color: the spin animation
   // already signals progress, and the brand color drew too much focus.
-}
 
-// Shared with the overflow trigger, which wears sync's state while sync is
-// demoted into the panel (#9480) — otherwise collapsing sync would hide the
-// only indication that it is failing.
-.sync-btn,
-.header-overflow-btn {
   &.is-error,
   &.is-offline {
     color: var(--button-warn-label);

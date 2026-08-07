@@ -65,7 +65,7 @@ test.describe('@supersync SuperSync Account Deletion', () => {
       console.log(`[Account-Deletion] ✓ Deleted user ${user.userId}`);
 
       // 3. Try to sync again - should fail with auth error
-      await client.sync.clickSyncBtn();
+      await client.sync.syncBtn.click();
 
       // 4. Wait for error indicator to appear
       // The sync button should show error state (sync_problem icon),
@@ -134,7 +134,7 @@ test.describe('@supersync SuperSync Account Deletion', () => {
 
       // 4. Reconfigure client with user B credentials
       // Open sync settings via right-click
-      await client.sync.clickSyncBtn({ button: 'right' });
+      await client.sync.syncBtn.click({ button: 'right' });
       await client.sync.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
 
       // Update access token

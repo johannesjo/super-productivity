@@ -88,7 +88,7 @@ test.describe('@supersync @encryption Password Preservation', () => {
       // which could overwrite the encryption password with stale values
       console.log('[PasswordRace] Phase 2: Opening settings to trigger form model race');
 
-      await clientA.sync.clickSyncBtn({ button: 'right' });
+      await clientA.sync.syncBtn.click({ button: 'right' });
       const dialog = clientA.page.locator('mat-dialog-container');
       await dialog.waitFor({ state: 'visible', timeout: 5000 });
       await clientA.page.waitForTimeout(1000);
@@ -198,7 +198,7 @@ test.describe('@supersync @encryption Password Preservation', () => {
       console.log('[SettingsOpen] Phase 2: Opening settings dialog');
 
       // Right-click sync button to open settings
-      await clientA.sync.clickSyncBtn({ button: 'right' });
+      await clientA.sync.syncBtn.click({ button: 'right' });
 
       // Wait for dialog to appear
       const dialog = clientA.page.locator('mat-dialog-container');

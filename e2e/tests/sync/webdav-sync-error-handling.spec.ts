@@ -223,9 +223,9 @@ test.describe('@webdav WebDAV Sync Error Handling', () => {
     await waitForStatePersistence(pageA);
 
     // Trigger sync twice rapidly (simulating double-click)
-    await syncPageA.clickSyncBtn();
+    await syncPageA.syncBtn.click();
     await pageA.waitForTimeout(100);
-    await syncPageA.clickSyncBtn();
+    await syncPageA.syncBtn.click();
 
     // Wait for sync to complete
     await waitForSync(pageA, syncPageA);

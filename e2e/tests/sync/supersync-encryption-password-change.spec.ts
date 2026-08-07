@@ -96,7 +96,7 @@ const recoverWithNewPasswordAndServerData = async (
 
   const dialogAlreadyVisible = await decryptErrorDialog.isVisible().catch(() => false);
   if (!dialogAlreadyVisible) {
-    await client.sync.clickSyncBtn();
+    await client.sync.syncBtn.click();
   }
 
   const decryptAppeared = await decryptErrorDialog
@@ -362,7 +362,7 @@ test.describe('@supersync SuperSync Encryption Password Change', () => {
       await clientA.sync.changeEncryptionPassword(newPassword);
 
       const clientBDecryptDialog = clientB.page.locator('dialog-handle-decrypt-error');
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
       await expect(clientBDecryptDialog).toBeVisible({ timeout: 30000 });
       await clientBDecryptDialog.getByRole('button', { name: /cancel/i }).click();
       await expect(clientBDecryptDialog).toBeHidden();
@@ -484,7 +484,7 @@ test.describe('@supersync SuperSync Encryption Password Change', () => {
       await waitForTask(clientB.page, staleTaskFromB);
 
       const passwordChange = clientA.sync.changeEncryptionPassword(newPassword);
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
       await clientB.sync.syncSpinner
         .waitFor({ state: 'hidden', timeout: 30000 })
         .catch(() => undefined);
@@ -723,7 +723,7 @@ test.describe('@supersync SuperSync Encryption Password Change', () => {
 
       // Click sync button directly — triggerSync() throws on error state before
       // the async decrypt error dialog has time to render
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
 
       // Wait for decrypt error dialog to appear
       // Use specific component selector to avoid strict mode violation

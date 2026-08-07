@@ -7,7 +7,6 @@ import {
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 import { ImportPage } from '../../pages/import.page';
-import { revealHeaderAction } from '../../utils/header-helpers';
 
 /**
  * SuperSync: incoming SYNC_IMPORT must not silently discard NON-task local work.
@@ -73,13 +72,8 @@ const getNamedClickCounter = async (
   client: SimulatedE2EClient,
   title: string,
 ): Promise<ReturnType<typeof client.page.locator>> => {
-  // Counters move into the overflow panel when the header is narrow (#9480).
-  await revealHeaderAction(client.page, 'simple-counter-button');
   const counter = client.page
-    .locator(
-      '.counters-action-group simple-counter-button,' +
-        ' .header-overflow-panel.isVisible simple-counter-button',
-    )
+    .locator('.counters-action-group simple-counter-button')
     .last();
   await counter.waitFor({ state: 'visible', timeout: 15000 });
 
@@ -180,7 +174,7 @@ test.describe('@supersync incoming SYNC_IMPORT preserves non-task local work', (
         await route.continue();
       });
 
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
       await downloadCaptured;
       console.log('[Gate] Client B completed its pre-import download; response paused');
 

@@ -137,7 +137,7 @@ const seedPlaintextClone = async (
 const forceOverwriteFromTrustedClient = async (
   client: SimulatedE2EClient,
 ): Promise<void> => {
-  await client.sync.clickSyncBtn({ button: 'right', noWaitAfter: true });
+  await client.sync.syncBtn.click({ button: 'right', noWaitAfter: true });
   await client.sync.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
 
   const forceOverwriteButton = client.page.getByRole('button', {
@@ -228,7 +228,7 @@ test.describe('@supersync @encryption #9439 plaintext history recovery', () => {
       const zeroRequestsBeforeExplicitRetry = requestedSinceSeqs.filter(
         (sinceSeq) => sinceSeq === 0,
       ).length;
-      await freshClient.sync.clickSyncBtn();
+      await freshClient.sync.syncBtn.click();
       await expect
         .poll(() => requestedSinceSeqs.filter((sinceSeq) => sinceSeq === 0).length, {
           timeout: 30000,

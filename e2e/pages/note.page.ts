@@ -1,6 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
 import { BasePage } from './base.page';
-import { revealHeaderAction } from '../utils/header-helpers';
 
 export class NotePage extends BasePage {
   readonly toggleNotesBtn: Locator;
@@ -58,9 +57,7 @@ export class NotePage extends BasePage {
       return;
     }
 
-    // Toggle notes panel via header button, which the header may have moved
-    // into the overflow panel (#9480) — where it is `inert` until opened.
-    await revealHeaderAction(this.page, '.e2e-toggle-notes-btn');
+    // Toggle notes panel via header button
     const isToggleBtnVisible = await this.toggleNotesBtn
       .isVisible({ timeout: 3000 })
       .catch(() => false);

@@ -456,7 +456,7 @@ test.describe('@supersync Error Scenarios', () => {
       // `triggerSync()` is a success-oriented helper and may throw as soon as
       // the expected error icon appears. Click directly and require the stable
       // blocked state before inspecting the cursor.
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
       await expect.poll(() => clientB!.sync.hasSyncError()).toBe(true);
 
       expect(injectedResponses).toBeGreaterThan(0);
@@ -549,7 +549,7 @@ test.describe('@supersync Error Scenarios', () => {
         await route.continue();
       });
 
-      await clientB.sync.clickSyncBtn();
+      await clientB.sync.syncBtn.click();
       await expect.poll(() => clientB!.sync.hasSyncError()).toBe(true);
 
       expect(injectedResponses).toBeGreaterThan(0);
