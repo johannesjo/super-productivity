@@ -526,8 +526,8 @@ describe('MainHeaderComponent focus button visibility', () => {
     // under the open menu, and the menu's own focus restore then pointed into
     // an `inert` subtree, dropping focus to <body>.
     const host = await mountAtWidth(220);
-    const component = fixture!.componentInstance;
-    component.toggleOverflow();
+    const header = fixture!.componentInstance;
+    header.toggleOverflow();
     await settle();
     expect(host.querySelector('.header-overflow-panel.isVisible')).toBeTruthy();
 
@@ -539,7 +539,7 @@ describe('MainHeaderComponent focus button visibility', () => {
     try {
       menuItem.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
       await settle();
-      expect(component.isOverflowOpen()).toBe(true);
+      expect(header.isOverflowOpen()).toBe(true);
     } finally {
       overlay.remove();
     }
@@ -547,7 +547,7 @@ describe('MainHeaderComponent focus button visibility', () => {
     // A click that really is elsewhere still dismisses it.
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await settle();
-    expect(component.isOverflowOpen()).toBe(false);
+    expect(header.isOverflowOpen()).toBe(false);
   });
 
   it('restores a slot that was demoted before it was ever measured (#9480)', async () => {
