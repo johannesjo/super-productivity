@@ -112,7 +112,7 @@ export class UserProfileService {
       this.activeProfile.set(defaultMetadata.profiles[0]);
       this.isInitialized.set(true);
     }
-    this._showDeprecationWarning();
+    this._showRemovalWarning();
   }
 
   /**
@@ -516,7 +516,7 @@ export class UserProfileService {
       this.profiles.set(metadata.profiles);
       this.activeProfile.set(metadata.profiles[0]);
       this.isInitialized.set(true);
-      this._showDeprecationWarning();
+      this._showRemovalWarning();
 
       Log.log('UserProfileService: Migration completed successfully');
     } catch (error) {
@@ -533,11 +533,11 @@ export class UserProfileService {
     return profiles.length > 1;
   }
 
-  private _showDeprecationWarning(): void {
+  private _showRemovalWarning(): void {
     this._snackService.open({
-      msg: T.USER_PROFILES.DEPRECATION_WARNING,
+      msg: T.USER_PROFILES.REMOVAL_WARNING,
       type: 'WARNING',
-      config: { duration: 10000 },
+      config: { duration: 0 },
     });
   }
 

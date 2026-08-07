@@ -6,11 +6,13 @@ import { BackupService } from '../../op-log/backup/backup.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { ProfileMetadata, UserProfile } from './user-profile.model';
 import { LocalDraftService } from '../../core/draft/local-draft.service';
+import { T } from '../../t.const';
 
-describe('UserProfileService deleteProfile', () => {
+describe('UserProfileService', () => {
   let service: UserProfileService;
   let storage: jasmine.SpyObj<UserProfileStorageService>;
   let localDraft: jasmine.SpyObj<LocalDraftService>;
+  let snack: jasmine.SpyObj<SnackService>;
 
   const profileA: UserProfile = {
     id: 'profile-a',
@@ -32,14 +34,16 @@ describe('UserProfileService deleteProfile', () => {
 
   beforeEach(() => {
     storage = jasmine.createSpyObj('UserProfileStorageService', [
+      'loadProfileMetadata',
       'saveProfileMetadata',
       'deleteProfileData',
     ]);
+    storage.loadProfileMetadata.and.resolveTo(metadata);
     storage.deleteProfileData.and.resolveTo(undefined);
     storage.saveProfileMetadata.and.resolveTo(undefined);
 
     const providerManager = { getActiveProvider: () => null };
-    const snack = jasmine.createSpyObj('SnackService', ['open']);
+    snack = jasmine.createSpyObj('SnackService', ['open']);
     localDraft = jasmine.createSpyObj('LocalDraftService', ['deleteDraftsForProfile']);
 
     TestBed.configureTestingModule({
@@ -59,6 +63,16 @@ describe('UserProfileService deleteProfile', () => {
     (service as any)._metadata.set(metadata);
     service.profiles.set(metadata.profiles);
     service.activeProfile.set(profileA);
+  });
+
+  it('keeps the next-release profile removal warning visible until dismissed', async () => {
+    await service.initialize();
+
+    expect(snack.open).toHaveBeenCalledWith({
+      msg: T.USER_PROFILES.REMOVAL_WARNING,
+      type: 'WARNING',
+      config: { duration: 0 },
+    });
   });
 
   it('deletes the profiles device-local drafts along with its data', async () => {
