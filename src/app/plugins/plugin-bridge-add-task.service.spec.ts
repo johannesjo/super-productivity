@@ -24,7 +24,8 @@ import { PluginHttpService } from './issue-provider/plugin-http.service';
 import { DataInitService } from '../core/data-init/data-init.service';
 import { GlobalConfigService } from '../features/config/global-config.service';
 import { addSubTask } from '../features/tasks/store/task.actions';
-import { Task } from '../features/tasks/task.model';
+import { Task, TaskCopy } from '../features/tasks/task.model';
+import { PluginCreateTaskData } from '@super-productivity/plugin-api';
 import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
 import EN_TRANSLATIONS from '../../assets/i18n/en.json';
 
@@ -52,11 +53,13 @@ describe('PluginBridgeService.addTask() — subtask creation', () => {
     ]);
     taskServiceSpy.allTasks$ = of(allTasks);
 
+    // 'p1' / 't1' exist so tests can pass projectId/tagIds without tripping
+    // _validateTaskReferences.
     const projectServiceSpy = jasmine.createSpyObj('ProjectService', [], {
-      list$: of([]),
+      list$: of([{ id: 'p1' }]),
     });
     const tagServiceSpy = jasmine.createSpyObj('TagService', [], {
-      tags$: of([]),
+      tags$: of([{ id: 't1' }]),
     });
 
     const cfgSignal = signal({
@@ -277,6 +280,72 @@ describe('PluginBridgeService.addTask() — subtask creation', () => {
       expect(taskService.update).toHaveBeenCalledWith('parent-1', {
         title: 'renamed',
       });
+    });
+  });
+
+  // dueDay was advertised on PluginCreateTaskData for both branches but wired
+  // into only one, and nothing failed until a user noticed. This block makes
+  // that class of bug mechanical: the Record below is exhaustive over the type,
+  // so adding a field forces a decision here, and the two tests prove each
+  // 'forwarded' field actually reaches the task on both branches.
+  describe('every advertised field is forwarded', () => {
+    const FIELD_HANDLING: Record<
+      keyof PluginCreateTaskData,
+      'forwarded' | 'title' | 'structural' | 'parentInherited'
+    > = {
+      title: 'title',
+      notes: 'forwarded',
+      timeEstimate: 'forwarded',
+      isDone: 'forwarded',
+      dueDay: 'forwarded',
+      projectId: 'forwarded',
+      // Set on main tasks; the addSubTask reducer forces [] on subtasks.
+      tagIds: 'parentInherited',
+      // Selects the branch rather than being copied onto the task.
+      parentId: 'structural',
+    };
+
+    const ALL_FIELDS: PluginCreateTaskData = {
+      title: 'every field',
+      notes: 'some notes',
+      timeEstimate: 1234,
+      isDone: true,
+      dueDay: '2026-08-07',
+      projectId: 'p1',
+      tagIds: ['t1'],
+    };
+
+    const forwarded = (
+      Object.keys(FIELD_HANDLING) as (keyof PluginCreateTaskData)[]
+    ).filter((f) => FIELD_HANDLING[f] === 'forwarded');
+
+    it('main-task branch forwards them to TaskService.add', async () => {
+      const { service, taskService } = setup(true);
+
+      await service.addTask({ ...ALL_FIELDS });
+
+      const additional = taskService.add.calls.mostRecent().args[2] as Partial<TaskCopy>;
+      forwarded.forEach((field) => {
+        expect(additional[field as keyof TaskCopy])
+          .withContext(`main task should forward "${field}"`)
+          .toEqual(ALL_FIELDS[field] as never);
+      });
+      expect(additional.tagIds).toEqual(['t1']);
+    });
+
+    it('subtask branch forwards them, minus the parent-inherited ones', async () => {
+      const { service, taskService } = setup(true);
+
+      await service.addTask({ ...ALL_FIELDS, parentId: 'parent-1' });
+
+      const { additional } =
+        taskService.createNewTaskWithDefaults.calls.mostRecent().args[0];
+      forwarded.forEach((field) => {
+        expect(additional?.[field as keyof TaskCopy])
+          .withContext(`subtask should forward "${field}"`)
+          .toEqual(ALL_FIELDS[field] as never);
+      });
+      expect(additional?.tagIds).toEqual([]);
     });
   });
 });
