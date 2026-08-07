@@ -319,11 +319,40 @@ describe('MainHeaderComponent focus button visibility', () => {
     return host;
   };
 
+  /** Resize the mounted header and let the reflow settle again. */
+  const resizeTo = async (width: number): Promise<void> => {
+    box!.style.width = `${width}px`;
+    const appRef = TestBed.inject(ApplicationRef);
+    for (let i = 0; i < 10; i++) {
+      // The reflow is woken by the ResizeObserver, which delivers on its own
+      // frame -- ticking alone would never see the new width.
+      await new Promise((r) => setTimeout(r, 20));
+      appRef.tick();
+      await fixture!.whenStable();
+    }
+  };
+
   afterEach(() => {
     styleEl?.remove();
     box?.remove();
     styleEl = undefined;
     box = undefined;
+  });
+
+  it('brings actions back when the header widens again (#9480)', async () => {
+    // Demotion must not be a one-way ratchet. It was: slack was measured only
+    // as how much further `.page-title` could shrink, and a short name sits at
+    // its min-width already, so there was never any slack to report. One
+    // transient overflow demoted an action and nothing could restore it, until
+    // the header was collapsed at every width.
+    const host = await mountAtWidth(220);
+    expect(host.querySelector('.header-overflow-btn')).toBeTruthy();
+
+    await resizeTo(1400);
+
+    expect(host.querySelector('[data-slot="panelButtons"]')).toBeTruthy();
+    expect(host.querySelector('[data-slot="addTask"]')).toBeTruthy();
+    expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
   });
 
   it('moves actions into the overflow panel when the header is narrow (#9480)', async () => {

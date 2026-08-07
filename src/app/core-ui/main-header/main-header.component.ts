@@ -433,30 +433,37 @@ export class MainHeaderComponent implements OnDestroy {
       return;
     }
 
-    // Slack, in one line and without knowing a single gap, padding or button
-    // size: `.page-title` is the only thing in the row that shrinks, so the
-    // room still available is whatever it can still give up, less whatever the
-    // row is already spilling once it has given up everything. Its floor is a
-    // `min-width` in page-title.component — the stylesheet that owns the title
-    // also owns how much of it must survive.
-    const title = wrapper.querySelector('.page-title') as HTMLElement | null;
-    const titleW = title ? title.getBoundingClientRect().width : 0;
-    const titleMinW = title ? parseFloat(getComputedStyle(title).minWidth) || 0 : 0;
-
-    // How far the nav has escaped the wrapper's content box. Not `scrollWidth`:
-    // the wrapper is `overflow: visible`, so it establishes no scroll container
-    // and browsers report `scrollWidth === clientWidth` while the row spills
-    // over the edge regardless. Comparing edges is unambiguous, and taking both
-    // sides keeps it correct in RTL.
-    const wrapRect = wrapper.getBoundingClientRect();
-    const navRect = nav.getBoundingClientRect();
+    // Slack: what the row has, less what it owes. Every term is measured except
+    // the title's floor, which is a `min-width` in page-title.component — the
+    // stylesheet that owns the title also owns how much of it must survive.
+    //
+    // Compare the content box against its occupants rather than looking at
+    // edges. Two nearer-looking measures are both wrong here: `scrollWidth`
+    // reports nothing, because the wrapper is `overflow: visible` and so
+    // establishes no scroll container even while the row runs off the edge; and
+    // the gap between the nav and the content edge is always ~0, because the nav
+    // is pushed flush right and the leftover space collapses into an auto
+    // margin. Slack that sits in an auto margin is only visible by subtraction.
+    //
+    // An earlier version measured only how much further `.page-title` could
+    // shrink, which made demotion a one-way ratchet: a short context name sits
+    // at its min-width already, so there was never any slack to report, one
+    // transient overflow during the first paint demoted an action, and nothing
+    // could bring it back — the header ended up collapsed at every width.
     const style = getComputedStyle(wrapper);
-    const overflowing = Math.max(
-      0,
-      navRect.right - (wrapRect.right - (parseFloat(style.paddingRight) || 0)),
-      wrapRect.left + (parseFloat(style.paddingLeft) || 0) - navRect.left,
-    );
-    const free = titleW - titleMinW - overflowing;
+    const contentW =
+      wrapper.clientWidth -
+      (parseFloat(style.paddingLeft) || 0) -
+      (parseFloat(style.paddingRight) || 0);
+    const title = wrapper.querySelector('.page-title') as HTMLElement | null;
+    const titleMinW = title ? parseFloat(getComputedStyle(title).minWidth) || 0 : 0;
+    // The title's own action buttons do not shrink either, so they are owed in
+    // full — measured, because which of them render varies by breakpoint.
+    const titleActions = wrapper.querySelector(
+      '.page-title-actions',
+    ) as HTMLElement | null;
+    const titleActionsW = titleActions ? titleActions.getBoundingClientRect().width : 0;
+    const free = contentW - nav.getBoundingClientRect().width - titleMinW - titleActionsW;
 
     const ids = this._demotableIds();
     const count = Math.min(this._demotedCount(), ids.length);
