@@ -6,6 +6,7 @@
 
 export * from './assertions';
 export * from './element-helpers';
+export * from './header-helpers';
 export * from './waits';
 
 // Note: sync-helpers, time-input-helper, and schedule-task-helper

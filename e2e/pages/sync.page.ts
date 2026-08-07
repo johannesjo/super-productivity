@@ -1,5 +1,6 @@
 import { type Page, type Locator, expect } from '@playwright/test';
 import { BasePage } from './base.page';
+import { revealHeaderAction } from '../utils/header-helpers';
 
 export class SyncPage extends BasePage {
   readonly syncBtn: Locator;
@@ -37,6 +38,18 @@ export class SyncPage extends BasePage {
     );
     // Disable encryption button is in the encryption status box (main view)
     this.disableEncryptionBtn = page.locator('.e2e-disable-encryption-btn button');
+  }
+
+  /**
+   * Click the header's sync button, opening the overflow panel first if the
+   * header was too narrow to keep it inline (#9480). Sync is last in the
+   * demotion order, so this is a no-op in a roomy header — but when it is not,
+   * clicking `syncBtn` directly hits an `inert` node and times out after 15s
+   * with nothing to suggest the header layout was the cause.
+   */
+  async clickSyncBtn(options?: Parameters<Locator['click']>[0]): Promise<void> {
+    const btn = await revealHeaderAction(this.page, 'button.sync-btn');
+    await btn.click(options);
   }
 
   async setupWebdavSync(

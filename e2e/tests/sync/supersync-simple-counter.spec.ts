@@ -6,6 +6,7 @@ import {
   closeClient,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
+import { isHeaderActionDemoted, revealHeaderAction } from '../../utils/header-helpers';
 
 /**
  * SuperSync Simple Counter E2E Tests
@@ -69,40 +70,18 @@ const createSimpleCounter = async (
 };
 
 /**
- * Helper to check whether the counters are collapsed behind the overflow
- * toggle (#9480). When the header has room they render inline in
- * `.counters-action-group`; when it does not they move into
- * `.header-overflow-panel` behind `.header-overflow-btn`.
+ * Whether the counters have been demoted into the overflow panel (#9480).
+ * When the header has room they render inline in `.counters-action-group`.
  */
-const areCountersCollapsed = async (client: SimulatedE2EClient): Promise<boolean> => {
-  return (
-    (await client.page.locator('.header-overflow-panel simple-counter-button').count()) >
-    0
-  );
-};
+const areCountersCollapsed = async (client: SimulatedE2EClient): Promise<boolean> =>
+  isHeaderActionDemoted(client.page, 'simple-counter-button');
 
-/**
- * Helper to ensure counters are accessible in the header.
- * Opens the overflow panel when the counters have been demoted into it.
- */
+/** Make the counters reachable, wherever the header put them. */
 const ensureCountersVisible = async (client: SimulatedE2EClient): Promise<void> => {
-  if (!(await areCountersCollapsed(client))) {
-    await client.page
-      .locator('.counters-action-group simple-counter-button')
-      .first()
-      .waitFor({ state: 'visible', timeout: 15000 });
-    return;
-  }
-
-  // The closed panel is `opacity: 0; pointer-events: none` but still laid out,
-  // so Playwright considers it "visible" — assert on `.isVisible` instead.
-  if ((await client.page.locator('.header-overflow-panel.isVisible').count()) === 0) {
-    await client.page.locator('.header-overflow-btn').click();
-  }
-  await client.page
-    .locator('.header-overflow-panel.isVisible simple-counter-button')
+  await revealHeaderAction(client.page, 'simple-counter-button');
+  await (await getVisibleCounters(client))
     .first()
-    .waitFor({ state: 'visible', timeout: 5000 });
+    .waitFor({ state: 'visible', timeout: 15000 });
 };
 
 /**

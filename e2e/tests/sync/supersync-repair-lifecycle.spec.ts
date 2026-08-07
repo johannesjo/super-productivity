@@ -385,7 +385,7 @@ test.describe('@supersync REPAIR lifecycle', () => {
         markReplacementAccepted();
       });
 
-      await clientA.sync.syncBtn.click();
+      await clientA.sync.clickSyncBtn();
       await firstRepairSeen;
       await expect(clientA.sync.syncSpinner).toBeVisible();
       expect(firstRepairRequest?.repairBaseServerSeq).toBe(corruptionServerSeq);

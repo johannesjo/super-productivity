@@ -357,7 +357,7 @@ test.describe('@supersync Multi-Tab Same Account', () => {
       expect(pendingBeforeRace).toBe(0);
 
       await acquireUploadLock(tab1);
-      await tab1Sync.syncBtn.click();
+      await tab1Sync.clickSyncBtn();
       await waitForQueuedUploadLock(tab1);
 
       const lateTask = `Sibling-Late-Task-${testRunId}`;
