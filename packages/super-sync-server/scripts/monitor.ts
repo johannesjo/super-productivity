@@ -1,4 +1,10 @@
+import { Prisma } from '@prisma/client';
 import { prisma, disconnectDb, reportMonitoringError } from './monitoring-db';
+import {
+  DEFAULT_SCOPE_USERS,
+  newestOpsPerUser,
+  recentlyActiveUserIds,
+} from './monitoring-scope';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -447,10 +453,11 @@ const showOps = async (args: string[]): Promise<void> => {
   try {
     const tailCount = parseIntArg(args, '--tail', 50);
     const userId = parseIntArg(args, '--user', -1);
+    const scopeUsers = parseIntArg(args, '--users', DEFAULT_SCOPE_USERS);
     const hasUserFilter = userId >= 0;
     if (!hasUserFilter) {
       console.log(
-        `Scope: up to ${RECENT_OPS_PER_USER} newest operations per user, then the newest ${tailCount} candidates overall.`,
+        `Scope: up to ${RECENT_OPS_PER_USER} newest operations for each of the up to ${scopeUsers} most recently active users, then the newest ${tailCount} candidates overall.`,
       );
     }
 
@@ -477,23 +484,14 @@ const showOps = async (args: string[]): Promise<void> => {
     } else {
       ops = await prisma.$queryRaw`
         WITH candidate_ops AS MATERIALIZED (
-          SELECT o.*
-          FROM user_sync_state s
-          CROSS JOIN LATERAL (
-            SELECT
-              o.id,
-              o.user_id,
-              o.action_type,
-              o.op_type,
-              o.entity_type,
-              o.entity_id,
-              o.payload_bytes,
-              o.received_at
-            FROM operations o
-            WHERE o.user_id = s.user_id
-            ORDER BY o.server_seq DESC
-            LIMIT ${RECENT_OPS_PER_USER}
-          ) o
+          ${newestOpsPerUser(
+            recentlyActiveUserIds(scopeUsers),
+            Prisma.sql`
+              id, user_id, action_type, op_type, entity_type, entity_id,
+              payload_bytes, received_at
+            `,
+            RECENT_OPS_PER_USER,
+          )}
         )
         SELECT
           id,
@@ -836,6 +834,9 @@ const main = async (): Promise<void> => {
         console.log('  ops            Analyze recent operations');
         console.log('    --tail <n>     Show last n ops (default 50)');
         console.log('    --user <id>    Filter by user ID');
+        console.log(
+          `    --users <n>    Sampled users when unfiltered (default ${DEFAULT_SCOPE_USERS})`,
+        );
         console.log('\nGlobal flags:');
         console.log('  --unmask         Show full email addresses (masked by default)');
         break;

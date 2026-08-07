@@ -116,6 +116,9 @@ const TOTAL_USERS = 4; // user 4 has never synced: no sync state, no device, no 
 const OPS_PER_USER = 20;
 const MULTI_DEVICE_USER = 1;
 const MULTI_DEVICE_COUNT = 3;
+// Heartbeats are staggered so the "most recently active users" cap has a defined
+// order to cut on; the highest-numbered syncing user is the newest.
+const NEWEST_USER = SYNCING_USERS;
 
 interface TableRow {
   [column: string]: unknown;
@@ -154,7 +157,7 @@ describe('monitoring report SQL (PGlite)', () => {
             `client-${userId}-${device}`,
             userId,
             `Device ${userId}-${device}`,
-            now - 1000,
+            now - (SYNCING_USERS - userId) * 1000 - 1000,
             now - 100000,
           ],
         );
@@ -293,6 +296,14 @@ describe('monitoring report SQL (PGlite)', () => {
     expect(ops).toHaveLength(5);
     // server_seq DESC, so the highest-seq (newest) op leads.
     expect(ops[0].Entity).toBe(`TASK:task-${OPS_PER_USER}`);
+  });
+
+  it('reads only the capped set of most recently active users', async () => {
+    await run('monitor', ['ops', '--users', '1']);
+    const users = new Set(rowsWithColumn('PayloadSize').map((row) => row.User));
+    // Without the cap this query fans out across every user that ever synced --
+    // the driver that made this report time out against production.
+    expect(users).toEqual(new Set([NEWEST_USER]));
   });
 
   it("does not multiply a user's operation count by their device count", async () => {

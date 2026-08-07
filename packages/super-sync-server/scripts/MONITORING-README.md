@@ -84,6 +84,17 @@ npm run analyze-storage -- export-ops --user 29 --limit 1000
 npm run analyze-storage -- compare-users 27 29
 ```
 
+The all-user operation reports (`operation-sizes`, `operation-types`,
+`large-ops`, `rapid-fire`, `operation-timeline`, and `monitor -- ops`) sample the
+200 most recently active users by default. `--users <n>` moves that cap — raise
+it for a wider picture, lower it if a report hits the database
+`statement_timeout`. See [Performance Notes](#performance-notes).
+
+```bash
+npm run analyze-storage -- operation-sizes --users 500
+npm run analyze-storage -- rapid-fire --threshold 10 --users 50
+```
+
 ### 3. Complete Monitoring Suite (`run-all-monitoring.ts`)
 
 Runs all monitoring and analysis tools in sequence.
@@ -319,11 +330,24 @@ You can set up cron jobs for regular monitoring:
 - Run in quick mode
 - Increase Node.js heap: `NODE_OPTIONS=--max-old-space-size=4096 npm run ...`
 
-### "Query timeout"
+### "PostgreSQL canceled this query because it exceeded statement_timeout"
 
-- Database might be under load
-- Reduce time ranges
-- Add indexes if needed
+The reports run over the server's own `DATABASE_URL`, so they inherit whatever
+`statement_timeout` the deployment sets (see the recovery guardrail in
+`env.example`) — a budget sized for user-facing sync requests, not for reports.
+
+- Lower `--users` on the report that failed; it is what bounds its cost
+  (`npm run analyze-storage -- operation-sizes --users 25`). Same flag on
+  `monitor -- ops`.
+- Scope to one account with `--user <id>` instead of sampling the fleet.
+- **Check the `payload_bytes` backfill first.** Rows still at 0 make every size
+  expression read the payload itself, which is an out-of-line TOAST fetch per
+  row and by far the largest per-row cost in these reports — measured at 15x the
+  backfilled path. `SELECT EXISTS (SELECT 1 FROM operations WHERE payload_bytes
+= 0)` answers it through a partial index; `npm run migrate-payload-bytes`
+  fixes it.
+- If a report is slow at a small `--users`, the database itself is under load —
+  check `monitor -- stats` and the long-query alert in `health-alert.sh`.
 
 ## Development
 
@@ -337,9 +361,39 @@ To add new analysis commands:
 ## Performance Notes
 
 - **Quick mode**: ~10-30 seconds
-- **Full suite**: ~1-3 minutes (depends on data size)
+- **Full suite**: ~1-3 minutes
 - **user-deep-dive**: ~5-15 seconds per user
 - **export-ops**: ~1-5 seconds per 1000 operations
+
+### How the operations reports stay bounded
+
+`ops`, `operation-sizes`, `operation-types`, `large-ops`, `rapid-fire` and
+`operation-timeline` are the reports that read `operations`, by far the largest
+table. They all share one driver (`scripts/monitoring-scope.ts`): the `--users n`
+most recently active users by device heartbeat, and for each of them a tail of
+the newest operations read backwards through the `(user_id, server_seq)` index.
+Cost is therefore `--users x tail`, and does **not** grow with the size of the
+operations table or with the number of registered accounts.
+
+That bound is the whole point, so keep it when editing these queries:
+
+- Never drive a per-user tail from `users`, `user_sync_state`, or an unlimited
+  `sync_devices` scan. Those grow with every signup, including accounts that
+  stopped syncing years ago.
+- Never sample the table itself (`TABLESAMPLE SYSTEM (1)` and friends). One
+  percent of a table that keeps growing is not a bound.
+- Compute the size expression **at the scan**, never over a CTE that projects
+  `payload` forward. The extra materialisation pass copies every inline-stored
+  payload and spills it to temp files (measured 46ms/559 temp blocks vs
+  17ms/none on 20k 12KB rows).
+- Keep `received_at` windows outside the per-user tail. Inside it, the LIMIT no
+  longer bounds anything: Postgres walks the user's whole history looking for
+  matches.
+
+These reports are samples of recent activity, not full-history statistics — the
+printed header says exactly which population each one measured. For a complete
+picture of one account use `--user <id>`, which reads that user's index tail
+directly instead of sampling the fleet.
 
 ## Security Notes
 
