@@ -41,7 +41,10 @@ export const BANNER_SORT_PRIO_MAP = {
   [BannerId.SyncConflictContentResolved]: 1,
   [BannerId.SyncConflictsAutoResolved]: 0,
   [BannerId.UpdateAvailable]: 0,
-  [BannerId.UserProfilesRemoval]: 1,
+  // Lowest of all: it is opened at startup and never auto-dismisses, so at any
+  // shared priority it would win every tie (stable sort + earliest insertion)
+  // and permanently mask Offline, UpdateAvailable and the sync-safety banners.
+  [BannerId.UserProfilesRemoval]: -1,
 } as const;
 
 export interface BannerAction {

@@ -9,12 +9,17 @@ import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { T } from '../../t.const';
 import { BannerService } from '../../core/banner/banner.service';
 import { BannerId } from '../../core/banner/banner.model';
+import { MatDialog } from '@angular/material/dialog';
 
 describe('UserProfileService', () => {
   let service: UserProfileService;
   let storage: jasmine.SpyObj<UserProfileStorageService>;
   let localDraft: jasmine.SpyObj<LocalDraftService>;
+  let backup: jasmine.SpyObj<BackupService>;
   let bannerService: BannerService;
+
+  const STORED_SNAPSHOT = { timestamp: 1, data: { task: { ids: ['stale'] } } };
+  const LIVE_DATA = { timestamp: 2, data: { task: { ids: ['live'] } } };
 
   const profileA: UserProfile = {
     id: 'profile-a',
@@ -39,26 +44,31 @@ describe('UserProfileService', () => {
       'loadProfileMetadata',
       'saveProfileMetadata',
       'deleteProfileData',
+      'loadProfileData',
     ]);
     storage.loadProfileMetadata.and.resolveTo(metadata);
     storage.deleteProfileData.and.resolveTo(undefined);
     storage.saveProfileMetadata.and.resolveTo(undefined);
+    storage.loadProfileData.and.resolveTo(STORED_SNAPSHOT as any);
 
     const providerManager = { getActiveProvider: () => null };
     const snack = jasmine.createSpyObj('SnackService', ['open']);
     localDraft = jasmine.createSpyObj('LocalDraftService', ['deleteDraftsForProfile']);
+    backup = jasmine.createSpyObj('BackupService', [
+      'importCompleteBackup',
+      'loadCompleteBackup',
+    ]);
+    backup.loadCompleteBackup.and.resolveTo(LIVE_DATA as any);
 
     TestBed.configureTestingModule({
       providers: [
         UserProfileService,
         { provide: UserProfileStorageService, useValue: storage },
         { provide: SyncProviderManager, useValue: providerManager },
-        {
-          provide: BackupService,
-          useValue: jasmine.createSpyObj('BackupService', ['importCompleteBackup']),
-        },
+        { provide: BackupService, useValue: backup },
         { provide: SnackService, useValue: snack },
         { provide: LocalDraftService, useValue: localDraft },
+        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
         BannerService,
       ],
     });
@@ -69,20 +79,80 @@ describe('UserProfileService', () => {
     service.activeProfile.set(profileA);
   });
 
-  it('keeps the profile removal warning queued until the user dismisses it', async () => {
+  it('shows the removal warning with a shortcut to the export dialog', async () => {
     await service.initialize();
 
-    expect(bannerService.activeBanner()).toEqual({
-      id: BannerId.UserProfilesRemoval,
-      msg: T.USER_PROFILES.REMOVAL_WARNING,
-      ico: 'warning',
+    const banner = bannerService.activeBanner();
+    expect(banner?.id).toBe(BannerId.UserProfilesRemoval);
+    expect(banner?.msg).toBe(T.USER_PROFILES.REMOVAL_WARNING);
+    expect(banner?.action?.label).toBe(T.USER_PROFILES.MANAGE_PROFILES);
+  });
+
+  it('resolves the lazily imported management dialog', async () => {
+    // The banner action goes through this: the dialog has to be imported lazily
+    // because its component injects this service, so a static import would close
+    // a cycle - and a broken path would only surface when a user clicks.
+    await (service as any)._openManagementDialog();
+
+    expect(TestBed.inject(MatDialog).open).toHaveBeenCalled();
+  });
+
+  it('never masks another banner while it sits there unread', async () => {
+    // It opens at startup and only goes away when the user dismisses it, so any
+    // priority it shared with another banner it would win on insertion order —
+    // silently hiding the offline, update and sync-safety banners for good.
+    await service.initialize();
+
+    for (const id of Object.values(BannerId)) {
+      if (id === BannerId.UserProfilesRemoval) {
+        continue;
+      }
+      bannerService.open({ id, msg: id });
+      expect(bannerService.activeBanner()?.id)
+        .withContext(`${id} must outrank the removal warning`)
+        .toBe(id);
+      bannerService.dismiss(id);
+    }
+  });
+
+  it('warns users who switched the feature off but still have profile data', async () => {
+    // `initialize()` never runs for them, so this is their only notice.
+    await service.warnAboutRemovalIfProfileDataExists();
+
+    const banner = bannerService.activeBanner();
+    expect(banner?.id).toBe(BannerId.UserProfilesRemoval);
+    expect(banner?.msg).toBe(T.USER_PROFILES.REMOVAL_WARNING_DISABLED);
+    // The management dialog reads signals `initialize()` never filled.
+    expect(banner?.action).toBeUndefined();
+  });
+
+  it('does not warn when a lone default profile is stored', async () => {
+    // Its snapshot mirrors the data the app loads anyway - nothing to rescue.
+    storage.loadProfileMetadata.and.resolveTo({
+      ...metadata,
+      profiles: [profileA],
     });
 
-    bannerService.open({ id: BannerId.TakeABreak, msg: 'Take a break' });
-    expect(bannerService.activeBanner()?.id).toBe(BannerId.TakeABreak);
+    await service.warnAboutRemovalIfProfileDataExists();
 
-    bannerService.dismiss(BannerId.TakeABreak);
-    expect(bannerService.activeBanner()?.id).toBe(BannerId.UserProfilesRemoval);
+    expect(bannerService.activeBanner()).toBeNull();
+  });
+
+  it('exports the live state for the active profile, not its stale snapshot', async () => {
+    // The snapshot of the active profile is only written when switching away,
+    // so exporting it would hand the user a backup missing everything they did
+    // since - exactly the data this warning tells them to rescue.
+    await service.exportProfile('profile-a');
+
+    expect(backup.loadCompleteBackup).toHaveBeenCalledWith(true);
+    expect(storage.loadProfileData).not.toHaveBeenCalled();
+  });
+
+  it('exports inactive profiles from their stored snapshot', async () => {
+    await service.exportProfile('profile-b');
+
+    expect(storage.loadProfileData).toHaveBeenCalledWith('profile-b');
+    expect(backup.loadCompleteBackup).not.toHaveBeenCalled();
   });
 
   it('deletes the profiles device-local drafts along with its data', async () => {

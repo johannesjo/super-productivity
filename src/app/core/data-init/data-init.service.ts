@@ -46,6 +46,10 @@ export class DataInitService {
     if (isProfilesEnabled) {
       // Only initialize profile system if explicitly enabled
       await this._userProfileService.initialize();
+    } else {
+      // Turning the feature off keeps profile data on disk, so this cohort still
+      // needs the removal warning even though the profile system stays asleep.
+      await this._userProfileService.warnAboutRemovalIfProfileDataExists();
     }
 
     // Hydrate from Operation Log (which handles migration from legacy if needed)
