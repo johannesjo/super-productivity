@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
@@ -12,7 +12,6 @@ import {
 } from '../short-syntax';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { rollWeekendDateForRepeat } from './roll-weekend-date-for-repeat';
 import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
 import { millisecondsDiffToRemindOption } from '../util/remind-option-to-milliseconds';
@@ -55,39 +54,10 @@ const isSameRepeat = (
   return true;
 };
 
-/**
- * A date change the bar made on the user's behalf, for the screen-reader
- * announcement — nothing else in this bar moves the date without being asked.
- *
- * Both days are named, and not for reading comfort: every weekend day rolls to
- * the same Monday, so the day moved *off* is the only thing that tells one
- * automatic move apart from the next. A live region re-set to the text it
- * already held announces nothing at all.
- */
-export interface WorkdayDateMove {
-  type: 'MOVED' | 'RESTORED';
-  /** The day the date was on before this move. */
-  from: string;
-  /** The day the date holds now. */
-  to: string;
-}
-
 @Injectable()
 export class AddTaskBarParserService {
   private readonly _stateService = inject(AddTaskBarStateService);
   private _previousParseResult: PreviousParseResult | null = null;
-  // The workday roll currently standing: the day a workday recurrence moved the
-  // date off, and the day it moved it to. Only this service produces that move,
-  // so only this service can take it back off — see dateBeforeWorkdayRoll.
-  //
-  // Deliberately not part of the parse result: the date the roll applies to
-  // outlives any single parse (the user picks it in a control, and a parse of
-  // text that names no date carries it over), so a parse rebuilding its result
-  // must not be able to forget it.
-  private readonly _workdayRoll = signal<{ from: string; to: string } | null>(null);
-  private readonly _workdayDateMove = signal<WorkdayDateMove | null>(null);
-  /** The last move of the date this service made by itself, for announcing it. */
-  readonly workdayDateMove = this._workdayDateMove.asReadonly();
   private _parseRunId = 0;
   // Exactly which characters of which input the parser last consumed, so a
   // "clear"/"pick" can delete a token without a second grammar guessing at its
@@ -305,27 +275,6 @@ export class AddTaskBarParserService {
       };
     }
 
-    // The date and the recurrence can come from opposite sides — a typed
-    // "@2027-03-27" with a menu-picked workday preset, or a date the bar was
-    // opened on with a recurrence from the text — and only a pick goes through
-    // applyUser*Pick. Reconciling the pair here as well covers every
-    // combination, and keeps it reconciled: a due token stays in the text and
-    // parses back to the excluded day on every following keystroke.
-    //
-    // A day the text names is the user stating their choice again, exactly like
-    // a pick, so it is taken as given. Only a day carried over from the state
-    // can be this service's own output, and only that one is unwound first —
-    // otherwise editing the token to name the Monday would leave the roll
-    // claiming a weekend day the text no longer mentions.
-    const isDueDateFromText = !!parseResult?.taskChanges.dueWithTime;
-    // Only the day is excluded, not the hour, so the time stays as parsed
-    currentResult.dueDate = this._rollForRepeat(
-      isDueDateFromText
-        ? currentResult.dueDate
-        : this.dateBeforeWorkdayRoll(currentResult.dueDate),
-      currentResult.repeat,
-    );
-
     // Compare with previous result and only update changed values
     if (
       !this._previousParseResult ||
@@ -449,33 +398,9 @@ export class AddTaskBarParserService {
     this._previousParseResult = currentResult;
   }
 
-  /**
-   * Forgets the parse history of the input that was just submitted.
-   *
-   * The date survives an add on purpose — it is sticky, so consecutive tasks
-   * can be given the same day — which is exactly why a roll still standing has
-   * to be taken back off here. The recurrence that moved the date is cleared by
-   * the same reset, so leaving its Monday behind would hand the next,
-   * non-recurring task a day the user never picked: the lie this roll exists to
-   * prevent, one task later.
-   *
-   * Giving it back is a date change nobody asked for, exactly like the roll
-   * itself, so it is announced the same way. The bar is reset here, not
-   * dismissed — focus returns to its title field and the date button keeps
-   * showing the day the next task will get.
-   */
   resetPreviousResult(): void {
     this._parseRunId++;
     this._previousParseResult = null;
-    const roll = this._workdayRoll();
-    if (roll && roll.to === this._stateService.state().date) {
-      this._stateService.updateDate(roll.from);
-      this._workdayDateMove.set({ type: 'RESTORED', from: roll.to, to: roll.from });
-    } else {
-      // Nothing was given back, so the move the region still describes is over
-      this._workdayDateMove.set(null);
-    }
-    this._workdayRoll.set(null);
   }
 
   /**
@@ -496,35 +421,15 @@ export class AddTaskBarParserService {
    *    the vanished syntax as "the user replaced it" rather than "the user
    *    deleted their syntax", which would clear the value instead of keeping it.
    */
-
-  /** The recurrence picked in the menu, or null when the user cleared it. */
+  // `null` is the clear button, which is the same control doing the same three
+  // steps — writing the state directly would skip both of the last two.
   applyUserRepeatPick(repeat: AddTaskBarRepeat | null): void {
     const cleanedInput = this._stripSyntaxForUserPick('repeat');
-    // Every schedule is applied to the day the user actually chose, not to the
-    // day a previous schedule rolled that one to. The date already on the chip
-    // can be a day this schedule excludes; the task would then be created on
-    // the following Monday and the chip would have advertised a first
-    // occurrence it never gets. And the roll has to come back off when the new
-    // schedule no longer excludes that day, or the bar keeps a Monday nobody
-    // picked — until the next parse of the unchanged text puts the weekend day
-    // back and quietly changes what submitting writes.
-    const currentDate = this._stateService.state().date;
-    const dueDate = this._rollForRepeat(this.dateBeforeWorkdayRoll(currentDate), repeat);
-    this._recordUserPick({
-      repeat,
-      isRepeatFromSyntax: false,
-      // Record the date too, so the parse the strip queues sees the state it is
-      // about to read back as unchanged rather than as a reset.
-      ...(dueDate === currentDate ? {} : { dueDate }),
-    });
+    this._recordUserPick({ repeat, isRepeatFromSyntax: false });
     if (repeat) {
       this._stateService.updateRepeatSetting(repeat, cleanedInput);
     } else {
       this._stateService.clearRepeatSetting(cleanedInput);
-    }
-    if (dueDate !== currentDate && dueDate !== null) {
-      // Time is left as it is — only the day is excluded, not the hour
-      this._stateService.updateDate(dueDate);
     }
   }
 
@@ -538,18 +443,12 @@ export class AddTaskBarParserService {
     // with it — but the user changed the date, not the schedule. Keep the
     // recurrence by taking ownership of it too; it re-anchors to the new date.
     const repeat = this._stateService.state().repeat;
-    // Reached from the other side than the repeat pick: an already-set workday
-    // schedule excludes the day just picked, so the same roll applies. The day
-    // picked here is the base by definition — it is not unwound, or picking the
-    // Monday a previous roll produced would silently mean the Saturday behind
-    // it.
-    const dueDate = this._rollForRepeat(date, repeat);
     this._recordUserPick({
-      dueDate,
+      dueDate: date,
       dueTime: time,
       ...(repeat ? { repeat, isRepeatFromSyntax: false } : {}),
     });
-    this._stateService.updateDate(dueDate, time, cleanedInput);
+    this._stateService.updateDate(date, time, cleanedInput);
     // No UI access to a reminder without a time being set
     this._stateService.updateRemindOption(remindOption);
   }
@@ -577,64 +476,6 @@ export class AddTaskBarParserService {
     // That makes the queued parse a no-op instead of a reset to null.
     this._recordUserPick({ timeEstimate: null });
     this._stateService.updateEstimate(estimate, cleanedInput);
-  }
-
-  /**
-   * The day the workday recurrence in effect really starts on, given the day
-   * the user chose — recording the move so a later change can take it back off.
-   *
-   * The single place `_workdayRoll` is written: every path that can change
-   * either half of the pair (the date or the recurrence) goes through here, so
-   * the record cannot describe a roll that is no longer the one standing.
-   */
-  private _rollForRepeat(base: string, repeat: AddTaskBarRepeat | null): string;
-  private _rollForRepeat(
-    base: string | null,
-    repeat: AddTaskBarRepeat | null,
-  ): string | null;
-  private _rollForRepeat(
-    base: string | null,
-    repeat: AddTaskBarRepeat | null,
-  ): string | null {
-    const previous = this._workdayRoll();
-    const rolled = base && rollWeekendDateForRepeat(base, repeat);
-    const roll = base && rolled ? { from: base, to: rolled } : null;
-    this._workdayRoll.set(roll);
-    if (roll) {
-      // Re-deriving the roll already standing on every keystroke is not a new
-      // move, and announcing it again would talk over the user typing. The day
-      // it moves off is part of that comparison, not decoration: choosing the
-      // Sunday after the Saturday is a second automatic move, and both end on
-      // the same Monday, so the destination alone reads as nothing happening.
-      if (roll.from !== previous?.from || roll.to !== previous?.to) {
-        this._workdayDateMove.set({ type: 'MOVED', ...roll });
-      }
-    } else if (previous && base === previous.from) {
-      this._workdayDateMove.set({
-        type: 'RESTORED',
-        from: previous.to,
-        to: previous.from,
-      });
-    }
-    return rolled || base;
-  }
-
-  /**
-   * The day `date` was chosen as, before any workday roll this service applied
-   * to it — so a recurrence change re-derives from the day the user chose
-   * rather than compounding on this service's own output.
-   *
-   * Public because it is also the anchor a recurrence *label* has to be built
-   * from: every option in the repeat menu re-derives from the day the user
-   * chose, so a label built from the rolled day offers "every week on Monday"
-   * and saves a Saturday one.
-   *
-   * Only unwinds a roll that is still the one standing: a date set since
-   * replaced it, and is returned as it is.
-   */
-  dateBeforeWorkdayRoll(date: string | null): string | null {
-    const roll = this._workdayRoll();
-    return roll && roll.to === date ? roll.from : date;
   }
 
   private _stripSyntaxForUserPick(

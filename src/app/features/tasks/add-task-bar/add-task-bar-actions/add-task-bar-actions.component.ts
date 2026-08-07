@@ -204,43 +204,9 @@ export class AddTaskBarActionsComponent {
   // First occurrence of the recurrence being built: the same date the repeat
   // config takes as its `startDate` on submit, so a label derived from it can
   // never name a different weekday than the config recurs on.
-  //
-  // A workday roll is taken back off first, because picking one of these
-  // options takes it off too: the day on the chip can be the Monday a workday
-  // schedule moved the user's Saturday to, and every option here re-derives
-  // from the Saturday. Anchoring the labels anywhere else offers "every week on
-  // Monday" and saves a Saturday recurrence.
   private _repeatRefDate = computed(() => {
-    const dateStr = this._parserService.dateBeforeWorkdayRoll(this.state().date);
+    const dateStr = this.state().date;
     return dateStr ? dateStrToUtcDate(dateStr) : new Date();
-  });
-
-  // The one date change in this bar the user did not make themselves, so the
-  // only one a screen reader gets no signal from. Empty until it happens —
-  // announcing the current date unprompted would talk over the title input.
-  workdayDateMoveAnnouncement = computed(() => {
-    const move = this._parserService.workdayDateMove();
-    if (!move) {
-      return '';
-    }
-    // Spelled-out weekday and month follow the UI language under the ISO
-    // option, so they aren't shown in Swedish (the `sv` sentinel).
-    const locale = this._dateTimeFormatService.textLocale();
-    const dayStr = (dateStr: string): string =>
-      dateStrToUtcDate(dateStr).toLocaleDateString(locale, {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-      });
-    return this._translateService.instant(
-      move.type === 'MOVED'
-        ? T.F.TASK.ADD_TASK_BAR.A11Y_DATE_MOVED_FOR_WORKDAYS
-        : T.F.TASK.ADD_TASK_BAR.A11Y_DATE_MOVED_BACK,
-      // The day moved off is named so that two weekend days rolling to the same
-      // Monday do not produce the same sentence twice — an unchanged live region
-      // is a silent one
-      { fromDateStr: dayStr(move.from), toDateStr: dayStr(move.to) },
-    );
   });
 
   repeatQuickOptions = computed(() => {
@@ -412,8 +378,9 @@ export class AddTaskBarActionsComponent {
   }
 
   clearRepeatSetting(): void {
-    // Same control, same three steps as picking one — clearing a schedule also
-    // has to give back the date its workday roll took away.
+    // Same control as picking one, so it goes through the same three steps —
+    // writing the state directly skipped both the pick record and the
+    // in-flight-parse invalidation.
     this._parserService.applyUserRepeatPick(null);
     this.refocus.emit();
   }

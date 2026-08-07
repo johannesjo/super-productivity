@@ -1,10 +1,5 @@
-@use '@angular/cdk' as cdk;
 @use '../../../../../styles/_globals.scss' as *;
 @use '../../shared-tag-project-styles';
-
-// Provides the .cdk-visually-hidden helper used for the live region that
-// announces an automatic date move (encapsulation-scoped, not global).
-@include cdk.a11y-visually-hidden();
 
 :host {
   display: block;

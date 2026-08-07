@@ -1968,107 +1968,19 @@ describe('AddTaskBarParserService', () => {
       await service.parseAndUpdateText('Plain task', cfg, [], [], defaultProject);
       expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
     });
-
-    // A Monday-to-Friday schedule has no weekend occurrence, so the occurrence
-    // engine starts it on the Monday (getFirstRepeatOccurrence scans the
-    // weekday flags from startDate). Leaving the weekend date on the chip would
-    // advertise a first occurrence the task never gets — the same divergence
-    // skipExcludedWeekend fixes for the "@every weekday" phrase, reached here
-    // through the two menus instead of the text.
-    describe('workday preset on a weekend date', () => {
-      const WORKDAYS = {
-        type: 'PRESET' as const,
-        quickSetting: 'MONDAY_TO_FRIDAY' as const,
-      };
-      // 2026-03-28 is a Saturday, 2026-03-30 the Monday after it
-      const SATURDAY = '2026-03-28';
-      const MONDAY = '2026-03-30';
-
-      it('should move a picked weekend date to the Monday when the workday preset is picked after it', () => {
-        mockStateService.state.and.returnValue({
-          ...baseState,
-          date: SATURDAY,
-        } as any);
-
-        service.applyUserRepeatPick(WORKDAYS);
-
-        expect(mockStateService.updateDate).toHaveBeenCalledWith(MONDAY);
-      });
-
-      it('should move a weekend date picked after the workday preset to the Monday', () => {
-        mockStateService.state.and.returnValue({
-          ...baseState,
-          repeat: WORKDAYS,
-        } as any);
-
-        service.applyUserDatePick(SATURDAY, null, null);
-
-        expect(mockStateService.updateDate).toHaveBeenCalledWith(
-          MONDAY,
-          null,
-          jasmine.anything(),
-        );
-      });
-
-      it('should keep the time a weekend date was picked with', () => {
-        mockStateService.state.and.returnValue({
-          ...baseState,
-          repeat: WORKDAYS,
-        } as any);
-
-        service.applyUserDatePick(SATURDAY, '09:30', null);
-
-        expect(mockStateService.updateDate).toHaveBeenCalledWith(
-          MONDAY,
-          '09:30',
-          jasmine.anything(),
-        );
-      });
-
-      it('should leave a weekend date alone for a preset that has weekend occurrences', () => {
-        mockStateService.state.and.returnValue({
-          ...baseState,
-          date: SATURDAY,
-        } as any);
-
-        service.applyUserRepeatPick(MENU_PICK);
-
-        expect(mockStateService.updateDate).not.toHaveBeenCalled();
-      });
-
-      it('should leave a weekday date alone when the workday preset is picked', () => {
-        mockStateService.state.and.returnValue({
-          ...baseState,
-          date: '2026-03-27',
-        } as any);
-
-        service.applyUserRepeatPick(WORKDAYS);
-
-        expect(mockStateService.updateDate).not.toHaveBeenCalled();
-      });
-    });
   });
 
-  // The two menus are not the only way this pair can end up contradicting
-  // itself. The date can come from a token the pick has no business deleting,
-  // or from the day the bar was opened on — neither goes through applyUser*Pick,
-  // and a token re-parses to the same excluded day on every keystroke.
+  // A pick that lands while a parse is still in flight has to survive it. The
+  // parse publishes state values it fell back to, and reading them before the
+  // await means reading the values the pick has since replaced — with nothing
+  // to correct it afterwards when the pick left the text unchanged, because an
+  // unchanged input queues no parse.
   //
-  // These run against the real state service: what has to hold is that the
-  // state a pick writes survives the next parse, which a mocked state() cannot
-  // show — it would only prove each step called the setter it was told to.
-  describe('workday recurrence against real add bar state', () => {
+  // Runs against the real state service: what has to hold is that the state a
+  // pick writes is still there once the parse lands, which a mocked state()
+  // cannot show — it would only prove each step called the setter it was told to.
+  describe('picks against real add bar state', () => {
     let realState: AddTaskBarStateService;
-    const WORKDAYS = {
-      type: 'PRESET' as const,
-      quickSetting: 'MONDAY_TO_FRIDAY' as const,
-    };
-    const DAILY = { type: 'PRESET' as const, quickSetting: 'DAILY' as const };
-    // 2027-03-27 is a Saturday, 2027-03-28 the Sunday and 2027-03-29 the Monday
-    // after it
-    const SATURDAY = '2027-03-27';
-    const SUNDAY = '2027-03-28';
-    const MONDAY = '2027-03-29';
     const cfg = {
       isEnableProject: true,
       isEnableDue: true,
@@ -2088,217 +2000,26 @@ describe('AddTaskBarParserService', () => {
       realState = TestBed.inject(AddTaskBarStateService);
     });
 
-    it('should keep the workday recurrence off a weekend date the text still names', async () => {
-      realState.updateInputTxt(`Standup @${SATURDAY}`);
-      await parse(`Standup @${SATURDAY}`);
-      expect(realState.state().date).toBe(SATURDAY);
-
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBe(MONDAY);
-
-      // The pick leaves the date token in place — a plain date the user typed
-      // is not what the repeat control overrides — so the next keystroke parses
-      // the Saturday back out of the text
-      await parse(`Standups @${SATURDAY}`);
-
-      expect(realState.state().date).toBe(MONDAY);
-      expect(realState.state().repeat).toEqual(WORKDAYS);
-    });
-
-    it('should keep it off a weekend day the bar was opened on', async () => {
+    it('should not let a parse that was in flight during a date pick republish the old date', async () => {
       realState.updateInputTxt('Standup');
       await parse('Standup');
-
-      // Nothing to roll yet: the day only reaches the state through the parse
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBeNull();
-
-      await parse('Standups', SATURDAY);
-
-      expect(realState.state().date).toBe(MONDAY);
-    });
-
-    // The roll belongs to the schedule that excluded the day, so it has to go
-    // when that schedule does. Leaving it standing would make the saved date
-    // depend on whether a parse happens before submitting: the text still names
-    // the weekend day, and nothing queues a parse for an unchanged input.
-    it('should give the weekend date back when the workday recurrence is replaced', async () => {
-      realState.updateInputTxt(`Standup @${SATURDAY}`);
-      await parse(`Standup @${SATURDAY}`);
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBe(MONDAY);
-
-      service.applyUserRepeatPick(DAILY);
-
-      expect(realState.state().date).toBe(SATURDAY);
-      // ...and the next parse of the untouched text agrees with it
-      await parse(`Standups @${SATURDAY}`);
-      expect(realState.state().date).toBe(SATURDAY);
-      expect(realState.state().repeat).toEqual(DAILY);
-    });
-
-    it('should give it back when the recurrence is cleared instead', async () => {
-      realState.updateInputTxt(`Standup @${SATURDAY}`);
-      await parse(`Standup @${SATURDAY}`);
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBe(MONDAY);
-
-      service.applyUserRepeatPick(null);
-
-      expect(realState.state().date).toBe(SATURDAY);
-      expect(realState.state().repeat).toBeNull();
-      await parse(`Standups @${SATURDAY}`);
-      expect(realState.state().date).toBe(SATURDAY);
-      expect(realState.state().repeat).toBeNull();
-    });
-
-    it('should give back the day the bar was opened on, not the day it rolled to', async () => {
-      realState.updateInputTxt('Standup');
-      await parse('Standup');
-      service.applyUserRepeatPick(WORKDAYS);
-      await parse('Standups', SATURDAY);
-      expect(realState.state().date).toBe(MONDAY);
-
-      service.applyUserRepeatPick(DAILY);
-
-      expect(realState.state().date).toBe(SATURDAY);
-    });
-
-    it('should not give back a date the user replaced after the roll', async () => {
-      // 2027-04-03 is the next Saturday, 2027-04-05 the Monday after it
-      const NEXT_SATURDAY = '2027-04-03';
-      const NEXT_MONDAY = '2027-04-05';
-      realState.updateInputTxt(`Standup @${SATURDAY}`);
-      await parse(`Standup @${SATURDAY}`);
-      service.applyUserRepeatPick(WORKDAYS);
-      service.applyUserDatePick(NEXT_SATURDAY, null, null);
-      expect(realState.state().date).toBe(NEXT_MONDAY);
-
-      service.applyUserRepeatPick(DAILY);
-
-      expect(realState.state().date).toBe(NEXT_SATURDAY);
-    });
-
-    // The roll outlives the parse: an ordinary parse of text that names no date
-    // carries the rolled day over from the state, which is not the same thing as
-    // producing it, and must not be able to forget where it came from.
-    it('should still give the date back after an ordinary parse in between', async () => {
-      realState.updateInputTxt('Standup');
-      await parse('Standup');
-      service.applyUserDatePick(SATURDAY, null, null);
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBe(MONDAY);
-
-      // Nothing in this text says anything about a date
-      realState.updateInputTxt('Standups');
-      await parse('Standups');
-      expect(realState.state().date).toBe(MONDAY);
-
-      service.applyUserRepeatPick(DAILY);
-
-      expect(realState.state().date).toBe(SATURDAY);
-    });
-
-    it('should give it back for controls used before the first parse', async () => {
-      // No parse has run, so there is no previous result for a pick to be
-      // recorded against — the roll is tracked apart from it for that reason
-      service.applyUserDatePick(SATURDAY, null, null);
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBe(MONDAY);
-
-      service.applyUserRepeatPick(DAILY);
-
-      expect(realState.state().date).toBe(SATURDAY);
-    });
-
-    it('should take the date the text names as the day it was picked as', async () => {
-      // Editing the token to name the Monday makes the Monday the user's
-      // choice, so leaving the schedule has nothing to give back
-      realState.updateInputTxt(`Standup @${SATURDAY}`);
-      await parse(`Standup @${SATURDAY}`);
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBe(MONDAY);
-
-      realState.updateInputTxt(`Standup @${MONDAY}`);
-      await parse(`Standup @${MONDAY}`);
-      service.applyUserRepeatPick(DAILY);
-
-      expect(realState.state().date).toBe(MONDAY);
-    });
-
-    it('should not resurrect a rolled date the user has since cleared', async () => {
-      // The date chip's clear button writes the state directly, so the roll
-      // recorded here is no longer the one standing
-      realState.updateInputTxt(`Standup @${SATURDAY}`);
-      await parse(`Standup @${SATURDAY}`);
-      service.applyUserRepeatPick(WORKDAYS);
-      realState.clearDate('Standup');
-
-      service.applyUserRepeatPick(DAILY);
-
-      expect(realState.state().date).toBeNull();
-    });
-
-    it('should not let a parse that was in flight during the pick republish the weekend date', async () => {
-      realState.updateInputTxt('Standup');
-      await parse('Standup');
-      realState.updateDate(SATURDAY);
+      realState.updateDate('2027-03-27');
 
       // Not awaited: the pick lands while this parse is still waiting for the
-      // chrono-node chunk. There is no recurrence syntax in the text, so the
-      // pick strips nothing and queues no replacement parse — this one is still
-      // the parse that will publish.
+      // chrono-node chunk. There is no due syntax in the text, so the pick
+      // strips nothing and queues no replacement parse — this one is still the
+      // parse that will publish.
       const inFlight = parse('Standup');
-      service.applyUserRepeatPick(WORKDAYS);
-      expect(realState.state().date).toBe(MONDAY);
+      service.applyUserDatePick('2027-03-29', null, null);
+      expect(realState.state().date).toBe('2027-03-29');
 
       await inFlight;
 
-      expect(realState.state().date).toBe(MONDAY);
-    });
-
-    // Every parse of the unchanged token re-derives the roll already standing.
-    // That is not a move the user has to be told about a second time, so the
-    // published move stays the very same one — a consumer of this signal cannot
-    // tell a repeat from a new event any other way.
-    it('should publish no new move for a roll it only re-derived', async () => {
-      realState.updateInputTxt(`Standup @${SATURDAY}`);
-      await parse(`Standup @${SATURDAY}`);
-      service.applyUserRepeatPick(WORKDAYS);
-      const announced = service.workdayDateMove();
-      expect(announced).toEqual({ type: 'MOVED', from: SATURDAY, to: MONDAY });
-
-      realState.updateInputTxt(`Standups @${SATURDAY}`);
-      await parse(`Standups @${SATURDAY}`);
-
-      expect(realState.state().date).toBe(MONDAY);
-      expect(service.workdayDateMove()).toBe(announced);
-    });
-
-    it('should publish a move for each weekend day that lands on the same Monday', async () => {
-      // The second pick is a second automatic adjustment, and nothing about the
-      // day it lands on says so — the day it moved off is what tells the two
-      // announcements apart.
-      service.applyUserRepeatPick(WORKDAYS);
-      service.applyUserDatePick(SATURDAY, null, null);
-      expect(service.workdayDateMove()).toEqual({
-        type: 'MOVED',
-        from: SATURDAY,
-        to: MONDAY,
-      });
-
-      service.applyUserDatePick(SUNDAY, null, null);
-
-      expect(realState.state().date).toBe(MONDAY);
-      expect(service.workdayDateMove()).toEqual({
-        type: 'MOVED',
-        from: SUNDAY,
-        to: MONDAY,
-      });
+      expect(realState.state().date).toBe('2027-03-29');
     });
 
     it('should not let it republish any other value the pick replaced either', async () => {
-      // Same shape, without a recurrence anywhere near it: every value the
+      // Same shape, on a control with no date anywhere near it: every value the
       // parse falls back to came from the snapshot it took before awaiting
       realState.updateInputTxt('Taxes');
       realState.updateDeadline('2027-04-01', null);
@@ -2311,6 +2032,23 @@ describe('AddTaskBarParserService', () => {
       await inFlight;
 
       expect(realState.state().deadlineDate).toBe('2027-05-01');
+    });
+
+    // The clear button is the same control as picking a recurrence, so it takes
+    // the same route: writing the state directly left the stale parse to land
+    // and put the cleared recurrence straight back.
+    it('should not let it republish a recurrence the clear button removed', async () => {
+      realState.updateInputTxt('Standup');
+      await parse('Standup');
+      realState.updateRepeatSetting({ type: 'PRESET', quickSetting: 'DAILY' });
+
+      const inFlight = parse('Standup');
+      service.applyUserRepeatPick(null);
+      expect(realState.state().repeat).toBeNull();
+
+      await inFlight;
+
+      expect(realState.state().repeat).toBeNull();
     });
   });
 

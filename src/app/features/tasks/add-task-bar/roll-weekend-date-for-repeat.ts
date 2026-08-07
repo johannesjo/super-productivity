@@ -5,7 +5,8 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 
 /**
  * Returns the day a workday recurrence would really start on, or null when the
- * date already is that day (so the caller can skip a redundant state write).
+ * date already is that day — so a caller can tell "nothing to do" apart from a
+ * day it has to write somewhere.
  *
  * MONDAY_TO_FRIDAY is the only preset with an excluded-day set — every other
  * one either has no exclusions (DAILY) or derives its anchor from the date

@@ -852,7 +852,7 @@ const anchorCycleOf = (repeat: ShortSyntaxRepeat): RepeatCycleOption | null => {
 // date in place would only make the add bar advertise a first occurrence the
 // task never gets. Mutates in place, like the roll-forward above.
 // Exported because the add bar's menus reach the same combination without any
-// syntax — see rollWeekendDateForRepeat in add-task-bar-parser.service.ts.
+// syntax — see add-task-bar/roll-weekend-date-for-repeat.ts.
 export const skipExcludedWeekend = (date: Date): void => {
   const hours = date.getHours();
   const minutes = date.getMinutes();
