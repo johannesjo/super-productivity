@@ -46,19 +46,21 @@ import type { Operation } from '../src/sync/sync.types';
  *    majority. The first fix for #9503 regressed only on wide arrays, and a width-2
  *    seed cannot express that: see the two "does not fan out" tests.
  *  - Every user gets DISJOINT entity ids, so nothing here measures the array branch's
- *    cross-tenant cost. That exclusion is deliberate and load-bearing: `expectBounded`
- *    asserts `rowsFiltered === 0`, which a shared-id seed violates by construction (the
- *    `cand` CTE matches by id across all users and `array_hits` filters afterwards). So
- *    "bounded" in this file means "bounded given disjoint ids" — the shared-literal case
- *    ('KANBAN_DEFAULT' &c.) is documented, with numbers, at arrayBranchCandidatesCte in
- *    conflict.ts, and is not guarded anywhere. Do not read these tests as covering it.
+ *    cross-tenant cost, which is linear in rows across ALL tenants carrying a probed id.
+ *    So "bounded" in this file means "bounded given disjoint ids". The shared-literal
+ *    case ('KANBAN_DEFAULT' &c.) is documented with numbers at arrayBranchCandidatesCte
+ *    in conflict.ts and tracked in #9510; it is not guarded anywhere. Do not read these
+ *    tests as covering it.
  *
- * REMAINING FIDELITY LIMITS: PGlite is PG18 and reports every block as a cache hit, so
- * these counts cannot model production's cold-cache I/O. The plan SHAPE is what
- * transfers. The shipped-vs-regressed plan shapes were also cross-checked against
- * postgres:16-alpine (PG 16.14), production's major version, during review of #9503 —
- * that was a one-off manual check, not something this file re-runs, so treat it as a
- * dated observation (2026-08) rather than a maintained property.
+ * REMAINING FIDELITY LIMITS — PGlite is PG18, and the planner differences from
+ * production's PG 16.14 are real, not theoretical. Measured during review of #9503
+ * (2026-08, a one-off manual check against postgres:16-alpine, NOT re-run by this file):
+ * PG 16.14 plans the array-branch join as a HASH join where PGlite uses a nested loop,
+ * so `Rows Removed by Join Filter` reads 0 there for a plan that is still 80x too
+ * expensive. That is exactly why `rowsTouched` is the primary assertion — see walk().
+ * Blocks are also unmodellable here: PGlite reports every block as a cache hit, so these
+ * counts cannot stand in for production's cold-cache I/O. The plan SHAPE transfers; the
+ * absolute numbers below do not.
  */
 
 const OWN_OPS = 20_000;
@@ -108,6 +110,7 @@ const INSERT_COLS =
 type PlanNode = Record<string, unknown>;
 type Measured = {
   blocks: number;
+  rowsTouched: number;
   rowsFiltered: number;
   rowsJoinFiltered: number;
   tempBlocks: number;
@@ -115,19 +118,34 @@ type Measured = {
 };
 
 /**
- * `Rows Removed by Filter` alone is NOT enough, and assuming it was let a 1000x
- * regression through review: this rewrite moved the id match from a `WHERE ... = ANY`
- * into a JOIN, and Postgres reports work discarded there as `Rows Removed by JOIN
- * Filter` — a different key. A fan-out that read and threw away 59.8M join rows scored
- * `rowsFiltered: 0` and passed `expectBounded` untouched. Count both, plus temp blocks,
- * which is what an over-wide intermediate spills to.
+ * `rowsTouched` — Actual Rows x Actual Loops summed over the tree — is the PRIMARY
+ * signal, and it is the only one here that is planner-independent.
+ *
+ * Two rounds of review were defeated by picking a counter instead. Round 1 asserted
+ * `Rows Removed by Filter`, and the fan-out moved the work into a JOIN, where Postgres
+ * reports `Rows Removed by Join Filter` — a different key, so 59.8M discarded rows
+ * scored 0. Round 2 added that key, and it too fails on PG 16.14 (production's version),
+ * where the same fan-out is planned as a HASH join and attributes nothing to a join
+ * filter: both counters read 0 while the query touches 2.2M rows against the shipped
+ * form's 12.5k. `tempBlocks` catches it only at low `work_mem` — the shipped
+ * docker-compose sets 4MB, but at 64MB an 80x regression passes clean.
+ *
+ * Rows touched separates the two by ~177x on BOTH PG 16.14 and PGlite and assumes
+ * nothing about join strategy or `work_mem`. Keep the discarded-row counters as
+ * secondary signals for the OR mis-plan, but do not rely on them alone again.
+ *
+ * `Actual Loops` multiplication is not cosmetic: Postgres divides the discarded-row
+ * counters by loops (`explain.c:show_instrumentation_count`), so a filter inside a
+ * per-probe nested loop is reported at 1/100th of what it discarded.
  */
 const walk = (
   node: PlanNode,
-  acc: { filtered: number; joinFiltered: number; nodes: string[] },
+  acc: { touched: number; filtered: number; joinFiltered: number; nodes: string[] },
 ): void => {
-  acc.filtered += (node['Rows Removed by Filter'] as number) ?? 0;
-  acc.joinFiltered += (node['Rows Removed by Join Filter'] as number) ?? 0;
+  const loops = (node['Actual Loops'] as number) ?? 1;
+  acc.touched += ((node['Actual Rows'] as number) ?? 0) * loops;
+  acc.filtered += ((node['Rows Removed by Filter'] as number) ?? 0) * loops;
+  acc.joinFiltered += ((node['Rows Removed by Join Filter'] as number) ?? 0) * loops;
   acc.nodes.push(
     `${node['Node Type']}${node['Scan Direction'] ? ' ' + node['Scan Direction'] : ''}` +
       `${node['Index Name'] ? ' on ' + node['Index Name'] : ''}`,
@@ -157,12 +175,13 @@ const explainGeneric = async (
       `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) EXECUTE ${name}${args ? `(${args})` : ''}`,
     );
     const plan = (res.rows[0]['QUERY PLAN'] as PlanNode[])[0].Plan as PlanNode;
-    const acc = { filtered: 0, joinFiltered: 0, nodes: [] as string[] };
+    const acc = { touched: 0, filtered: 0, joinFiltered: 0, nodes: [] as string[] };
     walk(plan, acc);
     return {
       blocks:
         ((plan['Shared Hit Blocks'] as number) ?? 0) +
         ((plan['Shared Read Blocks'] as number) ?? 0),
+      rowsTouched: acc.touched,
       rowsFiltered: acc.filtered,
       rowsJoinFiltered: acc.joinFiltered,
       tempBlocks: (plan['Temp Written Blocks'] as number) ?? 0,
@@ -319,9 +338,8 @@ const BTREE_INDEX = 'operations_user_id_entity_type_entity_id_server_seq_idx';
  * it compares |cand| x |touched| — bounded by the batch size and INDEPENDENT of how wide
  * the stored arrays are, which is exactly what separates it from a fan-out.
  */
-const expectBounded = (measured: Measured, maxJoinFiltered = 0): void => {
-  expect(measured.rowsFiltered).toBe(0);
-  expect(measured.rowsJoinFiltered).toBeLessThanOrEqual(maxJoinFiltered);
+const expectBounded = (measured: Measured, maxRowsTouched: number): void => {
+  expect(measured.rowsTouched).toBeLessThanOrEqual(maxRowsTouched);
   expect(measured.tempBlocks).toBe(0);
   expect(measured.nodes).not.toContain('Seq Scan');
   expect(measured.nodes).toContain(GIN_INDEX);
@@ -329,13 +347,25 @@ const expectBounded = (measured: Measured, maxJoinFiltered = 0): void => {
 };
 
 /**
- * Ceiling for prefetch's pair re-check. Pinned just above the measured 99_000 (=|cand| x
- * |touched|) rather than at the analytic worst case: the natural-looking
- * PROBE_SIZE * WIDE_OPS * PROBE_SIZE = 200_000 would also admit the inner JOIN this
- * replaced, which measures exactly 198_000 — a ceiling that passes the form you removed
- * for cost is not a guard.
+ * Row-touch ceilings, each ~2x the measured value so a planner shift does not flake
+ * while any fan-out still fails by orders of magnitude.
+ *
+ * All-new probe: nothing matches, so both queries only pay the per-probe index seeks.
+ * Wide probe: |cand| is |probe| x WIDE_OPS = 2000 and the branches feed DISTINCT ON, so
+ * ~12.5k rows move. The round-1 fan-out re-expanded each candidate by WIDE_WIDTH and
+ * touched 2.2M on PG 16.14 / 21M on PGlite — 177x and 1700x over these ceilings.
  */
-const MAX_PAIR_RECHECK_COMPARISONS = 110_000;
+const MAX_ROWS_TOUCHED_ALL_NEW = 3_000;
+const MAX_ROWS_TOUCHED_WIDE = 30_000;
+/**
+ * Prefetch's wide case is higher (measured 115_505) because its array branch must
+ * re-check each candidate against the requested (entity_type, entity_id) PAIR, and under
+ * `force_generic_plan` PGlite runs that semi-join as a nested loop over `touched`:
+ * |cand| x |touched| on top of the rows the branches actually produce. PG 16.14 plans it
+ * as a hash join and pays none of this, so the ceiling is sized for the pessimistic
+ * planner. Still ~400x below the round-1 fan-out on the same seed.
+ */
+const MAX_ROWS_TOUCHED_WIDE_PAIRS = 250_000;
 
 describe('batch conflict detection does not scan the history (PGlite)', () => {
   let db: PGlite;
@@ -361,7 +391,7 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 
     expect(result.hasConflict).toBe(false);
     expect(measured).toHaveLength(1);
-    expectBounded(measured[0]);
+    expectBounded(measured[0], MAX_ROWS_TOUCHED_ALL_NEW);
   });
 
   it('detectConflictForEntities does not fan out on wide entity_ids (#9503)', async () => {
@@ -383,7 +413,7 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 
     expect(result.hasConflict).toBe(true);
     expect(measured).toHaveLength(1);
-    expectBounded(measured[0]);
+    expectBounded(measured[0], MAX_ROWS_TOUCHED_WIDE);
   });
 
   it('prefetchLatestEntityOpsForBatch reads a bounded amount for an all-new batch (#9503)', async () => {
@@ -398,7 +428,7 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 
     expect(latest.size).toBe(0);
     expect(measured).toHaveLength(1);
-    expectBounded(measured[0]);
+    expectBounded(measured[0], MAX_ROWS_TOUCHED_ALL_NEW);
   });
 
   it('prefetchLatestEntityOpsForBatch does not fan out on wide entity_ids (#9503)', async () => {
@@ -413,7 +443,7 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 
     expect(latest.size).toBe(PROBE_SIZE);
     expect(measured).toHaveLength(1);
-    expectBounded(measured[0], MAX_PAIR_RECHECK_COMPARISONS);
+    expectBounded(measured[0], MAX_ROWS_TOUCHED_WIDE_PAIRS);
   });
 
   it('still finds the latest op per entity for a batch that DOES match', async () => {

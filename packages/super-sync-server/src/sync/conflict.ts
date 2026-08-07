@@ -158,22 +158,36 @@ export const detectConflictForEntities = async (
     // PLUS the sort column are covered by the composite btree, so each probe is an
     // index seek that terminates on an empty range when the entity is new.
     //
-    // Array branch: per-id `@>` probes, NOT one `entity_ids && $arr`. With
-    // `fastupdate = off` (migration 20260720000000, what `prisma migrate deploy` gives
-    // production) both forms ride the GIN and `@>` costs modestly more — +99 blocks on
-    // an all-new probe, +495 on the wide-array one. It earns that back when the pending
-    // list is DIRTY, which every `prisma db push` database has (CI, the E2E stack, the
-    // manual setup in README.md) because `fastupdate = off` cannot be expressed in
-    // schema.prisma: there a single 100-key `&&` is costly enough that the planner
-    // abandons the index for a SEQ SCAN of the whole table.
+    // Scale trade, worth knowing before "optimising" this: the fix moved the array
+    // branch's cost from "the probing user's slice" to "the whole table". That is an
+    // enormous win for the large slice that caused #9503, but on PG 16.14 with a TYPICAL
+    // small slice it inverts as the table grows — measured ~1.6x SLOWER than the old OR
+    // form at 1.5M rows (18.0ms vs 11.2ms), having been ~6x faster at 400k. The gap
+    // widens with table size. Bounding it is #9510.
     //
-    // At the 40k-row seed scale that seq scan is actually FASTER (108ms vs 185ms), so
-    // the case does not rest on wall-clock — it rests on how the two grow. `@>` reads
-    // |probe| x pending-list pages, and the pending list is capped by
-    // `gin_pending_list_limit` (4MB default => ~512 pages, so ~51k blocks at |probe|=100)
-    // INDEPENDENTLY of table size; the seq scan reads the whole heap, which on production
-    // is 5.6GB (~700k blocks). That is a structural bound, not an extrapolation. `@>` is
-    // also the same probe detectConflictForEntity ships.
+    // Array branch: per-id `@>` probes rather than one `entity_ids && $arr`. This is the
+    // same probe detectConflictForEntity ships, and it is NOT the settled choice the rest
+    // of this note is — treat it as the open question here. #9510.
+    //
+    // What is measured: on PGlite/PG18 a single 100-key `&&` under a dirty GIN pending
+    // list is costly enough that the planner abandons the index for a SEQ SCAN, which the
+    // per-id form avoids. That matters because `fastupdate = off` (migration
+    // 20260720000000) cannot be expressed in schema.prisma, so every `prisma db push`
+    // database — CI, the E2E stack, the manual setup in README.md — has the pending list
+    // ON. With the reloption right, `@>` costs +99 blocks on an all-new probe and +495 on
+    // the wide one.
+    //
+    // What does NOT hold: an earlier revision argued this was a "structural bound" from
+    // `gin_pending_list_limit`. Review measured the opposite on PG 16.14, production's
+    // actual version — `&&` stays on the GIN at every pending-list depth tested (no seq
+    // scan reproducible at all) and reads 5-46x FEWER blocks, and isolated GIN cost grows
+    // with table size for `@>` (0.8ms at 400k rows -> 3.7ms at 1.5M) while `&&` stays
+    // flat. The seq-scan fallback this form defends against looks PGlite-specific, and
+    // even there the seq scan measured faster than the GIN plan `@>` gets.
+    //
+    // So the per-id form is currently justified only for db-push databases on PG18-ish
+    // planners. Re-measure `&&` on PG 16 before assuming either way; do not "simplify"
+    // this on the strength of the paragraph above alone.
     //
     // `probe` binds the 100 ids ONCE — they used to be interpolated three times, for
     // 300 of the statement's 302 parameters — and is then referenced twice, so Postgres
@@ -793,14 +807,15 @@ export const prefetchLatestEntityOpsForBatch = async (
     // `array_hits` re-checks the entity TYPE with a row-wise `IN`, not a `JOIN`: `cand`
     // is keyed by id alone (the probe source drops the type), so a stored op matched by
     // id still has to be confirmed against the requested (type, id) PAIR. A semi-join
-    // stops at the first match per candidate where the JOIN scanned on, which measured
-    // 99k comparisons against 198k on the wide-array seed — though that particular
-    // saving is an artefact of the seed's ordering and would shrink on adversarial
-    // input. Output is identical either way (the outer DISTINCT ON absorbs the JOIN's
-    // duplicates), so this is a cost choice, not a correctness one. Under
-    // `force_generic_plan` it stays a NESTED LOOP, not a hash: the residual is
-    // |cand| x |touched|, bounded by the batch size and independent of how wide the
-    // stored arrays are, which is what distinguishes it from a fan-out.
+    // stops at the first match per candidate where the JOIN scanned on. Output is
+    // identical either way (the outer DISTINCT ON absorbs the JOIN's duplicates), so this
+    // is a cost choice, not a correctness one — and a modest, planner-dependent one:
+    // PGlite plans it as a nested loop and the semi-join halves the comparisons
+    // (99k vs 198k on the wide seed, itself an artefact of that seed's ordering), while
+    // PG 16.14 plans BOTH forms as a hash join at identical cost. Kept because it reads
+    // more directly and is never worse. Either way the residual is |cand| x |touched|,
+    // bounded by the batch size and independent of how wide the stored arrays are, which
+    // is what distinguishes it from a fan-out.
     const latestOps = await tx.$queryRaw<LatestBatchEntityOperationRow[]>`
       WITH touched(entity_type, entity_id) AS (
         VALUES ${Prisma.join(touchedRows)}
