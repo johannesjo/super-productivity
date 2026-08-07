@@ -5,11 +5,9 @@ import {
   effect,
   ElementRef,
   inject,
-  NgZone,
   OnDestroy,
   signal,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
@@ -30,8 +28,14 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { PluginWorkContextHeaderBtnCfg } from '../../plugins/plugin-api.model';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -57,36 +61,44 @@ import { EmlDropDirective } from '../../core/drop-paste-input/eml-drop.directive
 import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
 
 /**
- * Header actions that leave the bar when it runs out of room, in the order they
- * go. Everything not listed here is pinned and always stays visible.
+ * Header actions that leave the bar for the overflow menu when it runs out of
+ * room, in the order they go (first entry leaves first).
+ *
+ * Only stateless *trigger* actions are demotable, so the menu can be built from
+ * real `mat-menu-item` rows (keyboard-navigable, correct ARIA, closes on click).
+ * Deliberately NOT demotable:
+ * - simple counters — they carry live state and own their countdown-completion
+ *   subscription, so a lazily-destroyed menu would silently stop reminders.
+ *   They collapse into their own always-instantiated dropdown instead.
+ * - user profile / plugin side-panel buttons — each is exactly the width of the
+ *   overflow trigger, so demoting one alone would save nothing.
  */
-type DemotableHeaderItem =
-  | 'pluginHeader'
-  | 'userProfile'
-  | 'panelButtons'
-  | 'counters'
-  | 'addTask';
+type DemotableHeaderItem = 'pluginHeader' | 'panelButtons' | 'addTask';
 
 const DEMOTION_ORDER: readonly DemotableHeaderItem[] = [
   'pluginHeader',
-  'userProfile',
   'panelButtons',
-  'counters',
   'addTask',
 ];
 
 // The header is a fixed icon grid, so the fit can be computed instead of
-// measured per button: every icon button is 40px
-// (styles/components/_overwrite-material.scss), the play mini-fab is 48px, and
-// counter buttons are 36px (`.counters-action-group` below).
+// measured per button. Every icon button is 40px
+// (styles/components/_overwrite-material.scss) — including the play mini-fab,
+// which Angular Material hardcodes to 40px. Counter buttons are 36px
+// (`.counters-action-group` in the stylesheet beside this file).
 const BTN_W = 40;
-const PLAY_BTN_W = 48;
 const COUNTER_BTN_W = 36;
 const GAP_W = 4; // --s-half
-/** Room kept for the page title and its own non-shrinkable action buttons. */
-const TITLE_MIN_W = 128;
+/** `--header-action-group-gap` minus the regular gap, on the two groups that carry it. */
+const GROUP_GAP_EXTRA_W = 2 * (16 - GAP_W);
+/** `.page-title`'s own irreducible icon + padding, with no action buttons. */
+const TITLE_MIN_W = 36;
+/** `.page-title-actions`: three 40px buttons on a 2px gap, plus a 16px end margin. */
+const TITLE_ACTIONS_W = 142;
 /** `.wrapper` horizontal padding — the desktop (larger) value, deliberately. */
 const WRAPPER_PADDING_W = 32;
+/** Below this width `page-title` drops its action buttons entirely. */
+const PAGE_TITLE_ACTIONS_MIN_W = 351;
 
 @Component({
   selector: 'main-header',
@@ -101,8 +113,8 @@ const WRAPPER_PADDING_W = 32;
     MatTooltip,
     MatMenu,
     MatMenuContent,
+    MatMenuItem,
     MatMenuTrigger,
-    NgTemplateOutlet,
     TranslatePipe,
     SimpleCounterButtonComponent,
     LongPressDirective,
@@ -147,6 +159,7 @@ export class MainHeaderComponent implements OnDestroy {
   readonly unreviewedConflictCount = this._conflictJournal.unreviewedCount;
 
   T: typeof T = T;
+  isShowCountersDropdown = signal(false);
 
   isXs = this.layoutService.isXs;
   isXxxs = this.layoutService.isXxxs;
@@ -280,27 +293,51 @@ export class MainHeaderComponent implements OnDestroy {
   // buttons fell off the edge unreachably (nothing in the ancestor chain
   // scrolls horizontally). Measuring the header's own width fixes the landscape
   // case, the side-nav/right-panel cases and unbounded plugin buttons at once.
-  private readonly _zone = inject(NgZone);
   private readonly _pluginBridge = inject(PluginBridgeService);
   private _resizeObserver: ResizeObserver | null = null;
   // Infinity until first measured, so nothing collapses on the first paint.
   private readonly _hostWidth = signal(Number.POSITIVE_INFINITY);
 
-  private readonly _pinnedWidth = computed(
-    () =>
-      (this.isTimeTrackingEnabled() ? PLAY_BTN_W + GAP_W : 0) +
-      (this.isFocusButtonVisible() ? BTN_W + GAP_W : 0) +
-      (this.isSyncIconEnabled() ? BTN_W + GAP_W : 0),
+  private readonly _counterCount = computed(
+    () => this.enabledSimpleCounters().filter((c) => !c.isHideButton).length,
   );
 
+  // Width the row needs before anything is collapsed or demoted. Only counts
+  // what is actually rendered: before hydration the header holds nothing but
+  // the add button, so charging for play/focus/sync would demote it for no
+  // reason -- and it has no overflow trigger to fall back to yet (#9420).
+  private readonly _pinnedWidth = computed(() => {
+    if (!this.isDataLoaded()) {
+      return 0;
+    }
+    return (
+      (this.isTimeTrackingEnabled() ? BTN_W + GAP_W : 0) +
+      (this.isFocusButtonVisible() ? BTN_W + GAP_W : 0) +
+      (this.isSyncIconEnabled() ? BTN_W + GAP_W : 0) +
+      (this.isUserProfilesEnabled() ? BTN_W + GAP_W : 0) +
+      (this._isOwnedByBottomNav()
+        ? 0
+        : this._pluginBridge.sidePanelButtons().length * (BTN_W + GAP_W)) +
+      GROUP_GAP_EXTRA_W
+    );
+  });
+
+  /** Room `page-title` needs; its action buttons do not shrink either. */
+  private readonly _titleReserve = computed(() => {
+    if (!this.isDataLoaded()) {
+      return 0;
+    }
+    const hasActions = this._hostWidth() >= PAGE_TITLE_ACTIONS_MIN_W;
+    return TITLE_MIN_W + (hasActions ? TITLE_ACTIONS_W : 0);
+  });
+
   private readonly _itemWidths = computed<Record<DemotableHeaderItem, number>>(() => {
+    if (!this.isDataLoaded()) {
+      return { pluginHeader: 0, panelButtons: 0, addTask: BTN_W + GAP_W };
+    }
     const af = this.globalConfigService.appFeatures();
     const ownedByBottomNav = this._isOwnedByBottomNav();
-    const counterCount = this.enabledSimpleCounters().filter(
-      (c) => !c.isHideButton,
-    ).length;
     const panelCount =
-      this._pluginBridge.sidePanelButtons().length +
       (af.isScheduleDayPanelEnabled ? 1 : 0) +
       (af.isIssuesPanelEnabled ? 1 : 0) +
       (af.isProjectNotesEnabled ? 1 : 0);
@@ -309,76 +346,110 @@ export class MainHeaderComponent implements OnDestroy {
         (this._pluginBridge.headerButtons().length +
           this._pluginBridge.workContextHeaderButtons().length) *
         (BTN_W + GAP_W),
-      userProfile: this.isUserProfilesEnabled() ? BTN_W + GAP_W : 0,
       panelButtons: ownedByBottomNav ? 0 : panelCount * (BTN_W + GAP_W),
-      counters: counterCount * (COUNTER_BTN_W + GAP_W),
       addTask: ownedByBottomNav ? 0 : BTN_W + GAP_W,
     };
   });
 
-  /** Items that do not fit and are shown in the overflow menu instead. */
-  readonly demotedItems = computed<ReadonlySet<DemotableHeaderItem>>(() => {
+  /**
+   * Fit the row by, in order: collapsing the counters into their dropdown, then
+   * demoting trigger actions into the overflow menu.
+   */
+  private readonly _fit = computed<{
+    countersCollapsed: boolean;
+    demoted: ReadonlySet<DemotableHeaderItem>;
+  }>(() => {
     const demoted = new Set<DemotableHeaderItem>();
     // The teleported vertical strip is a fixed-width column, not this row.
     if (this._isVerticalActionBar()) {
-      return demoted;
+      return { countersCollapsed: false, demoted };
     }
     const widths = this._itemWidths();
-    const available = this._hostWidth() - TITLE_MIN_W - WRAPPER_PADDING_W;
-    let used =
+    const counters = this._counterCount();
+    const available = this._hostWidth() - this._titleReserve() - WRAPPER_PADDING_W;
+    const collapsedCountersW = counters > 0 ? BTN_W + GAP_W : 0;
+    const expandedCountersW = counters * (COUNTER_BTN_W + GAP_W);
+    const fixed =
       this._pinnedWidth() + DEMOTION_ORDER.reduce((sum, id) => sum + widths[id], 0);
-    if (used <= available) {
-      return demoted;
+
+    if (fixed + expandedCountersW <= available) {
+      return { countersCollapsed: false, demoted };
     }
-    // Once anything is demoted, the trigger button needs room of its own.
+    // Collapsing costs the least -- it is one tap, and it is already how
+    // counters present on mobile -- so it happens before anything is demoted.
+    const countersCollapsed = collapsedCountersW < expandedCountersW;
+    let used = fixed + (countersCollapsed ? collapsedCountersW : expandedCountersW);
+    if (used <= available) {
+      return { countersCollapsed, demoted };
+    }
+    // A demotion only pays off if it frees more than the trigger it costs.
+    const overBy = used - available;
+    const demotable = DEMOTION_ORDER.filter((id) => widths[id] > 0);
+    const totalDemotable = demotable.reduce((sum, id) => sum + widths[id], 0);
+    if (!demotable.length || totalDemotable <= BTN_W + GAP_W) {
+      return { countersCollapsed, demoted };
+    }
+    if (demotable.length === 1 && overBy <= BTN_W + GAP_W) {
+      return { countersCollapsed, demoted };
+    }
     used += BTN_W + GAP_W;
-    for (const id of DEMOTION_ORDER) {
+    for (const id of demotable) {
       if (used <= available) {
         break;
-      }
-      if (widths[id] === 0) {
-        continue;
       }
       demoted.add(id);
       used -= widths[id];
     }
-    return demoted;
+    return { countersCollapsed, demoted };
   });
 
-  readonly hasOverflow = computed(() => this.demotedItems().size > 0);
+  readonly areCountersCollapsed = computed(() => this._fit().countersCollapsed);
+  private readonly _demoted = computed(() => this._fit().demoted);
+
+  readonly isScheduleDayPanelEnabled = computed(
+    () => this.globalConfigService.appFeatures().isScheduleDayPanelEnabled,
+  );
+  readonly isIssuesPanelEnabled = computed(
+    () => this.globalConfigService.appFeatures().isIssuesPanelEnabled,
+  );
+  readonly isProjectNotesEnabled = computed(
+    () => this.globalConfigService.appFeatures().isProjectNotesEnabled,
+  );
+
+  readonly hasOverflow = computed(() => this._demoted().size > 0);
+  readonly showAddTaskInline = computed(
+    () => !this._isOwnedByBottomNav() && !this._demoted().has('addTask'),
+  );
+  readonly showPluginBtnsInline = computed(() => !this._demoted().has('pluginHeader'));
+  readonly showPanelBtnsInline = computed(
+    () => !this._isOwnedByBottomNav() && !this._demoted().has('panelButtons'),
+  );
+  readonly isDemotedPluginBtns = computed(() => this._demoted().has('pluginHeader'));
+  readonly isDemotedPanelBtns = computed(() => this._demoted().has('panelButtons'));
+  readonly isDemotedAddTask = computed(() => this._demoted().has('addTask'));
+
+  /** Plugin buttons rendered as menu rows when demoted. */
+  readonly pluginHeaderBtns = computed(() => this._pluginBridge.headerButtons());
+  readonly pluginWorkContextBtns = computed(() =>
+    this._pluginBridge.workContextHeaderButtons(),
+  );
+
+  async onWorkContextPluginBtnClick(
+    button: PluginWorkContextHeaderBtnCfg,
+  ): Promise<void> {
+    const ctx = await this._pluginBridge.getActiveWorkContext();
+    if (ctx) {
+      button.onClick(ctx);
+    }
+  }
 
   /**
-   * Test seam: Karma cannot resize a detached fixture, so the demotion logic is
+   * Test seam: Karma cannot resize a detached fixture, so the fit logic is
    * exercised by feeding it the width a real layout would have produced.
    */
   setHostWidthForTesting(width: number): void {
     this._hostWidth.set(width);
   }
-
-  readonly showAddTaskInline = computed(
-    () => !this._isOwnedByBottomNav() && !this.demotedItems().has('addTask'),
-  );
-  readonly showCountersInline = computed(() => !this.demotedItems().has('counters'));
-  readonly showPluginBtnsInline = computed(
-    () => !this.demotedItems().has('pluginHeader'),
-  );
-  readonly showUserProfileInline = computed(
-    () => this.isUserProfilesEnabled() && !this.demotedItems().has('userProfile'),
-  );
-  readonly showPanelBtnsInline = computed(
-    () => !this._isOwnedByBottomNav() && !this.demotedItems().has('panelButtons'),
-  );
-  readonly isDemotedCounters = computed(() => this.demotedItems().has('counters'));
-  readonly isDemotedPluginBtns = computed(() => this.demotedItems().has('pluginHeader'));
-  readonly isDemotedUserProfile = computed(
-    () => this.isUserProfilesEnabled() && this.demotedItems().has('userProfile'),
-  );
-  readonly isDemotedPanelBtns = computed(
-    () => !this._isOwnedByBottomNav() && this.demotedItems().has('panelButtons'),
-  );
-  readonly isDemotedAddTask = computed(
-    () => !this._isOwnedByBottomNav() && this.demotedItems().has('addTask'),
-  );
 
   constructor() {
     // Teleport the action nav to document.body (and back) so the fixed
@@ -397,29 +468,27 @@ export class MainHeaderComponent implements OnDestroy {
   }
 
   /**
-   * Track the width the header actually has, not the window's. Runs outside
-   * Angular and coalesces per frame: drawer open/close animations fire a
-   * resize entry every frame and each one would otherwise be a change
-   * detection pass.
+   * Track the width the header actually has, not the window's.
+   *
+   * No zone or rAF plumbing: the app is zoneless (`provideZonelessChangeDetection`
+   * in main.ts), and ResizeObserver already delivers at most one entry per frame
+   * per target, so there is nothing to coalesce. The width comparison is what
+   * keeps height-only resizes (mobile keyboard) from scheduling any work, and
+   * `contentRect` is a snapshot, so reading it forces no layout.
    */
   private _observeHostWidth(): void {
     const el = this._elRef.nativeElement as HTMLElement;
     if (typeof ResizeObserver === 'undefined' || !(el instanceof Element)) {
       return;
     }
-    this._zone.runOutsideAngular(() => {
-      let frame = 0;
-      this._resizeObserver = new ResizeObserver((entries) => {
-        cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => {
-          const width = entries[entries.length - 1]?.contentRect.width ?? 0;
-          if (width > 0 && width !== this._hostWidth()) {
-            this._zone.run(() => this._hostWidth.set(width));
-          }
-        });
-      });
-      this._resizeObserver.observe(el);
+    this._resizeObserver = new ResizeObserver((entries) => {
+      const width = entries[entries.length - 1]?.contentRect.width ?? 0;
+      // A `display: none` header reports 0 and would demote everything.
+      if (width > 0 && width !== this._hostWidth()) {
+        this._hostWidth.set(width);
+      }
     });
+    this._resizeObserver.observe(el);
   }
 
   private _syncTeleport(enabled: boolean): void {
@@ -531,6 +600,10 @@ export class MainHeaderComponent implements OnDestroy {
 
   enableFocusMode(): void {
     this._store.dispatch(showFocusOverlay());
+  }
+
+  isCounterRunning(counters: SimpleCounter[]): boolean {
+    return !!(counters && counters.find((counter) => counter.isOn));
   }
 
   get kb(): KeyboardConfig {

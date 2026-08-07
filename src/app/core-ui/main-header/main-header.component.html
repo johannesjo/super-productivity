@@ -1,60 +1,3 @@
-<!--
-  Each demotable action lives in an ng-template so the *same* component
-  instance definition is rendered either inline in the bar or inside the
-  overflow menu, depending on the measured fit (#9480). Keeping the real
-  components (rather than flat menu rows) preserves their existing behaviour —
-  tooltips, toggled states and their own nested menus/dialogs.
--->
-<ng-template #addTaskTpl>
-  <button
-    emlDrop
-    (click)="layoutService.showAddTaskBar()"
-    matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
-      kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
-    }}"
-    class="tour-addBtn"
-    color="primary"
-    mat-icon-button
-  >
-    <mat-icon>add</mat-icon>
-  </button>
-</ng-template>
-
-<ng-template #countersTpl>
-  @for (simpleCounter of enabledSimpleCounters(); track trackById($index, simpleCounter)) {
-    @if (!simpleCounter.isHideButton) {
-      <simple-counter-button
-        [matTooltip]="simpleCounter.title"
-        [simpleCounter]="simpleCounter"
-      ></simple-counter-button>
-    }
-  }
-</ng-template>
-
-<ng-template #pluginBtnsTpl>
-  <plugin-work-context-header-btns
-    class="secondary-header-action"
-  ></plugin-work-context-header-btns>
-  <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
-</ng-template>
-
-<ng-template #userProfileTpl>
-  <user-profile-button class="secondary-header-action"></user-profile-button>
-</ng-template>
-
-<ng-template #panelBtnsTpl>
-  <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
-
-  <desktop-panel-buttons
-    class="secondary-header-action"
-    [kb]="kb"
-    [isRouteWithSidePanel]="isRouteWithSidePanel()"
-    [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
-    [isShowIssuePanel]="isShowIssuePanel()"
-    [isShowNotes]="isShowNotes()"
-  ></desktop-panel-buttons>
-</ng-template>
-
 <div class="wrapper">
   @if (isDataLoaded()) {
     <page-title></page-title>
@@ -73,9 +16,21 @@
 
       <!-- Not gated on isDataLoaded: the shell paints before op-log hydration
            finishes, and the primary quick-capture entry point must not be
-           missing for that window. -->
+           missing for that window (#9420). The overflow trigger below is
+           likewise ungated, so a demoted add button is never nowhere. -->
       @if (showAddTaskInline()) {
-        <ng-container *ngTemplateOutlet="addTaskTpl"></ng-container>
+        <button
+          emlDrop
+          (click)="layoutService.showAddTaskBar()"
+          matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
+            kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
+          }}"
+          class="tour-addBtn"
+          color="primary"
+          mat-icon-button
+        >
+          <mat-icon>add</mat-icon>
+        </button>
       }
     </div>
 
@@ -85,8 +40,24 @@
         @if (isFocusButtonVisible()) {
           <focus-button></focus-button>
         }
-        @if (showCountersInline()) {
-          <ng-container *ngTemplateOutlet="countersTpl"></ng-container>
+        <!--
+          Counters stay mounted whether or not they are visible: each owns its
+          countdown-completion subscription, so destroying them would silently
+          stop repeated-countdown reminders. When the row is tight they collapse
+          behind a toggle rather than moving into the overflow menu.
+        -->
+        @if (!areCountersCollapsed()) {
+          @for (
+            simpleCounter of enabledSimpleCounters();
+            track trackById($index, simpleCounter)
+          ) {
+            @if (!simpleCounter.isHideButton) {
+              <simple-counter-button
+                [matTooltip]="simpleCounter.title"
+                [simpleCounter]="simpleCounter"
+              ></simple-counter-button>
+            }
+          }
         }
       </div>
 
@@ -145,61 +116,161 @@
       }
 
       @if (showPluginBtnsInline()) {
-        <ng-container *ngTemplateOutlet="pluginBtnsTpl"></ng-container>
+        <plugin-work-context-header-btns
+          class="secondary-header-action"
+        ></plugin-work-context-header-btns>
+        <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
       }
 
-      @if (showUserProfileInline()) {
-        <ng-container *ngTemplateOutlet="userProfileTpl"></ng-container>
+      @if (isUserProfilesEnabled()) {
+        <user-profile-button class="secondary-header-action"></user-profile-button>
       }
 
       @if (showPanelBtnsInline()) {
-        <ng-container *ngTemplateOutlet="panelBtnsTpl"></ng-container>
+        <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
+
+        <desktop-panel-buttons
+          class="secondary-header-action"
+          [kb]="kb"
+          [isRouteWithSidePanel]="isRouteWithSidePanel()"
+          [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
+          [isShowIssuePanel]="isShowIssuePanel()"
+          [isShowNotes]="isShowNotes()"
+        ></desktop-panel-buttons>
       }
 
-      @if (hasOverflow()) {
+      <!-- Collapsed counters live behind their own toggle, not the overflow
+           menu, so they stay mounted (see the comment on the group above). -->
+      @if (areCountersCollapsed() && enabledSimpleCounters().length) {
         <button
-          class="header-overflow-btn secondary-header-action"
-          [matMenuTriggerFor]="overflowMenu"
-          [attr.aria-label]="T.G.MORE_ACTIONS | translate"
-          matTooltip="{{ T.G.MORE_ACTIONS | translate }}"
+          (click)="isShowCountersDropdown.set(!isShowCountersDropdown())"
+          [color]="isCounterRunning(enabledSimpleCounters()) ? 'accent' : ''"
+          aria-controls="header-counters-menu"
+          [attr.aria-expanded]="isShowCountersDropdown()"
+          [attr.aria-label]="T.F.METRIC.CMP.SIMPLE_COUNTERS | translate"
+          class="counters-toggle-btn secondary-header-action"
           mat-icon-button
+          type="button"
         >
-          <mat-icon>more_horiz</mat-icon>
+          <mat-icon>{{ isShowCountersDropdown() ? 'close' : 'timer' }}</mat-icon>
         </button>
       }
+    }
+
+    <!-- Ungated, so a demoted add button always has a way back (see above). -->
+    @if (hasOverflow()) {
+      <button
+        class="header-overflow-btn secondary-header-action"
+        [matMenuTriggerFor]="overflowMenu"
+        [attr.aria-label]="T.G.MORE_ACTIONS | translate"
+        matTooltip="{{ T.G.MORE_ACTIONS | translate }}"
+        mat-icon-button
+      >
+        <mat-icon>more_horiz</mat-icon>
+      </button>
     }
   </nav>
 </div>
 
 <!--
-  Overflow menu: a CDK overlay, so unlike an in-header dropdown it is not
-  clipped by the header row (which is exactly 40px tall and has no vertical
-  slack for badges or flyouts).
+  Counters dropdown. Anchored to the nav rather than rendered in an overlay so
+  the buttons stay mounted while collapsed; `inert` keeps them out of the tab
+  order and the a11y tree when hidden (#9272).
+-->
+@if (isDataLoaded() && areCountersCollapsed() && enabledSimpleCounters().length) {
+  <div
+    id="header-counters-menu"
+    class="counters-dropdown"
+    [class.isVisible]="isShowCountersDropdown()"
+    [attr.aria-hidden]="!isShowCountersDropdown()"
+    [attr.inert]="isShowCountersDropdown() ? null : ''"
+  >
+    @for (
+      simpleCounter of enabledSimpleCounters();
+      track trackById($index, simpleCounter)
+    ) {
+      @if (!simpleCounter.isHideButton) {
+        <simple-counter-button [simpleCounter]="simpleCounter"></simple-counter-button>
+      }
+    }
+  </div>
+}
+
+<!--
+  Overflow menu: real `mat-menu-item` rows, so it is keyboard-navigable, exposes
+  a valid `menu` / `menuitem` structure, and closes on activation. Only stateless
+  trigger actions land here — see DemotableHeaderItem for why.
 -->
 <mat-menu
   #overflowMenu="matMenu"
-  class="header-overflow-menu"
 >
   <ng-template matMenuContent>
-    <div
-      class="header-overflow-panel"
-      (click)="$event.stopPropagation()"
-    >
-      @if (isDemotedPluginBtns()) {
-        <ng-container *ngTemplateOutlet="pluginBtnsTpl"></ng-container>
+    @if (isDemotedPluginBtns()) {
+      @for (button of pluginWorkContextBtns(); track button.pluginId + button.label) {
+        <button
+          mat-menu-item
+          (click)="onWorkContextPluginBtnClick(button)"
+        >
+          <mat-icon>{{ button.icon }}</mat-icon>
+          <span>{{ button.label }}</span>
+        </button>
       }
-      @if (isDemotedUserProfile()) {
-        <ng-container *ngTemplateOutlet="userProfileTpl"></ng-container>
+      @for (button of pluginHeaderBtns(); track button.pluginId + button.label) {
+        <button
+          mat-menu-item
+          (click)="button.onClick()"
+        >
+          <mat-icon>{{ button.icon }}</mat-icon>
+          <span>{{ button.label }}</span>
+        </button>
       }
-      @if (isDemotedPanelBtns()) {
-        <ng-container *ngTemplateOutlet="panelBtnsTpl"></ng-container>
+    }
+
+    @if (isDemotedPanelBtns()) {
+      @if (isScheduleDayPanelEnabled()) {
+        <button
+          mat-menu-item
+          class="e2e-toggle-schedule-day-panel"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="layoutService.toggleScheduleDayPanel()"
+        >
+          <mat-icon>schedule</mat-icon>
+          <span>{{ T.MH.SCHEDULE | translate }}</span>
+        </button>
       }
-      @if (isDemotedCounters()) {
-        <ng-container *ngTemplateOutlet="countersTpl"></ng-container>
+      @if (isIssuesPanelEnabled()) {
+        <button
+          mat-menu-item
+          class="e2e-toggle-issue-provider-panel"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="layoutService.toggleAddTaskPanel()"
+        >
+          <mat-icon>webhook</mat-icon>
+          <span>{{ T.MH.TOGGLE_SHOW_ISSUE_PANEL | translate }}</span>
+        </button>
       }
-      @if (isDemotedAddTask()) {
-        <ng-container *ngTemplateOutlet="addTaskTpl"></ng-container>
+      @if (isProjectNotesEnabled()) {
+        <button
+          mat-menu-item
+          class="e2e-toggle-notes-btn"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="layoutService.toggleNotes()"
+        >
+          <mat-icon>comment</mat-icon>
+          <span>{{ T.MH.TOGGLE_SHOW_NOTES | translate }}</span>
+        </button>
       }
-    </div>
+    }
+
+    @if (isDemotedAddTask()) {
+      <button
+        mat-menu-item
+        class="tour-addBtn"
+        (click)="layoutService.showAddTaskBar()"
+      >
+        <mat-icon>add</mat-icon>
+        <span>{{ T.MH.ADD_NEW_TASK | translate }}</span>
+      </button>
+    }
   </ng-template>
 </mat-menu>

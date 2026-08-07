@@ -302,17 +302,17 @@ describe('MainHeaderComponent focus button visibility', () => {
     // Landscape phone: past the 600px window breakpoint, so no bottom nav and
     // the full desktop button set -- but the header only gets part of the width.
     isXs = signal(false);
-    enabledSimpleCounters = [
-      {
-        id: 'counter-1',
-        title: 'Stretch',
-        isEnabled: true,
-        icon: 'fitness_center',
-        type: SimpleCounterType.ClickCounter,
-        countOnDay: {},
-        isOn: false,
-      },
-    ];
+    // Three counters, so collapsing them is actually a saving: one collapsed
+    // toggle (44px) only beats inline counters (40px each) from two up.
+    enabledSimpleCounters = [1, 2, 3].map((n) => ({
+      id: `counter-${n}`,
+      title: `Counter ${n}`,
+      isEnabled: true,
+      icon: 'fitness_center',
+      type: SimpleCounterType.ClickCounter,
+      countOnDay: {},
+      isOn: false,
+    })) as SimpleCounter[];
 
     component = createComponent();
 
@@ -320,10 +320,12 @@ describe('MainHeaderComponent focus button visibility', () => {
     component.setHostWidthForTesting(1200);
     expect(component.hasOverflow()).toBe(false);
     expect(component.showPanelBtnsInline()).toBe(true);
-    expect(component.showCountersInline()).toBe(true);
+    expect(component.areCountersCollapsed()).toBe(false);
 
-    // Squeezed by the side nav: actions move into the menu, not off-screen.
+    // Squeezed by the side nav: counters collapse and actions move into the
+    // menu rather than off-screen.
     component.setHostWidthForTesting(360);
+    expect(component.areCountersCollapsed()).toBe(true);
     expect(component.hasOverflow()).toBe(true);
     expect(component.showPanelBtnsInline()).toBe(false);
   });
@@ -342,10 +344,24 @@ describe('MainHeaderComponent focus button visibility', () => {
 
     // Only just too narrow: shedding the plugin buttons alone is enough, so
     // the panel buttons -- further down the demotion order -- stay in the bar.
-    component.setHostWidthForTesting(540);
+    component.setHostWidthForTesting(600);
 
     expect(component.showPluginBtnsInline()).toBe(false);
     expect(component.showPanelBtnsInline()).toBe(true);
+  });
+
+  it('keeps add-task reachable when narrow before hydration finishes (#9420/#9480)', () => {
+    // The budget must only charge for what is actually rendered: pre-hydration
+    // the header holds nothing but the add button, so it must never be demoted
+    // into an overflow trigger that does not exist yet.
+    isXs = signal(false);
+    isAllDataLoaded = false;
+
+    component = createComponent();
+    component.setHostWidthForTesting(320);
+
+    expect(component.showAddTaskInline()).toBe(true);
+    expect(component.hasOverflow()).toBe(false);
   });
 
   it('shows the add-task button before initial data load finishes', () => {

@@ -9,6 +9,10 @@
   --header-nav-button-gap: var(--s-half);
   --header-action-group-gap: var(--s);
   --header-button-size: 40px;
+
+  @include mq(xs) {
+    --header-action-group-gap: var(--s2);
+  }
 }
 
 :host-context(.isMac.isElectron) {
@@ -201,8 +205,35 @@ page-title {
   position: relative;
 }
 
-.header-overflow-btn {
-  flex-shrink: 0;
+.counters-dropdown {
+  position: absolute;
+  display: flex;
+  transition: var(--transition-standard);
+  top: 100%;
+  right: var(--s2);
+  flex-direction: column;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  // Scrolling support for many counters (fixes #5999)
+  max-height: calc(100dvh - 120px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: var(--s);
+  gap: var(--s);
+
+  &.isVisible {
+    pointer-events: all;
+    opacity: 1;
+    border-radius: var(--card-border-radius);
+    background: var(--card-bg);
+    box-shadow: var(--whiteframe-shadow-2dp);
+  }
+
+  simple-counter-button {
+    flex-shrink: 0;
+  }
 }
 
 .panel-btn {
