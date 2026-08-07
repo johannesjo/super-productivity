@@ -308,11 +308,13 @@ describe('MainHeaderComponent focus button visibility', () => {
     box.style.width = `${width}px`;
     document.body.appendChild(box);
     box.appendChild(host);
-    // `detectChanges()` alone does not flush afterRender hooks -- the reflow
-    // runs in one, so drive it through ApplicationRef. It demotes one action
-    // per pass, so let it settle: a pass per demotable action, plus margin.
+    // The reflow runs on an animation frame (never inside change detection --
+    // writing from a render hook is what NG0103 forbids), and moves one action
+    // per frame. So let frames actually pass: one per demotable action, plus
+    // margin.
     const appRef = TestBed.inject(ApplicationRef);
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 12; i++) {
+      await new Promise((r) => setTimeout(r, 20));
       appRef.tick();
       await fixture.whenStable();
     }
@@ -323,8 +325,8 @@ describe('MainHeaderComponent focus button visibility', () => {
   const resizeTo = async (width: number): Promise<void> => {
     box!.style.width = `${width}px`;
     const appRef = TestBed.inject(ApplicationRef);
-    for (let i = 0; i < 10; i++) {
-      // The reflow is woken by the ResizeObserver, which delivers on its own
+    for (let i = 0; i < 12; i++) {
+      // The reflow is woken by the ResizeObserver and runs on an animation
       // frame -- ticking alone would never see the new width.
       await new Promise((r) => setTimeout(r, 20));
       appRef.tick();

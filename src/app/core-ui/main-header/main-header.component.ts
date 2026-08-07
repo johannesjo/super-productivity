@@ -1,5 +1,4 @@
 import {
-  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -273,9 +272,6 @@ export class MainHeaderComponent implements OnDestroy {
   // case, the side-nav/right-panel cases and unbounded plugin buttons at once.
   private readonly _pluginBridge = inject(PluginBridgeService);
   private _resizeObserver: ResizeObserver | null = null;
-  /** Bumped on every resize so the reflow pass re-runs; the value is unused. */
-  private readonly _resizeTick = signal(0);
-
   private readonly _counterCount = computed(
     () => this.enabledSimpleCounters().filter((c) => !c.isHideButton).length,
   );
@@ -286,37 +282,47 @@ export class MainHeaderComponent implements OnDestroy {
    * mobile rather than demoted: the bottom nav owns them there (its FAB and its
    * panels menu), which is a placement rule, not a question of width.
    */
-  private readonly _demotableIds = computed<readonly DemotableId[]>(() => {
-    if (!this.isDataLoaded()) {
-      return [];
-    }
-    const af = this.globalConfigService.appFeatures();
-    const ownedByBottomNav = this._isOwnedByBottomNav();
-    return DEMOTION_ORDER.filter((id) => {
-      switch (id) {
-        case 'pluginHeader':
-          return (
-            this._pluginBridge.headerButtons().length > 0 ||
-            this._pluginBridge.workContextHeaderButtons().length > 0
-          );
-        case 'userProfile':
-          return this.isUserProfilesEnabled();
-        case 'sidePanelBtns':
-          return !ownedByBottomNav && this._pluginBridge.sidePanelButtons().length > 0;
-        case 'panelButtons':
-          return (
-            !ownedByBottomNav &&
-            (af.isScheduleDayPanelEnabled ||
-              af.isIssuesPanelEnabled ||
-              af.isProjectNotesEnabled)
-          );
-        case 'counters':
-          return this._counterCount() > 0;
-        case 'addTask':
-          return !ownedByBottomNav;
+  private readonly _demotableIds = computed<readonly DemotableId[]>(
+    () => {
+      if (!this.isDataLoaded()) {
+        return [];
       }
-    });
-  });
+      const af = this.globalConfigService.appFeatures();
+      const ownedByBottomNav = this._isOwnedByBottomNav();
+      return DEMOTION_ORDER.filter((id) => {
+        switch (id) {
+          case 'pluginHeader':
+            return (
+              this._pluginBridge.headerButtons().length > 0 ||
+              this._pluginBridge.workContextHeaderButtons().length > 0
+            );
+          case 'userProfile':
+            return this.isUserProfilesEnabled();
+          case 'sidePanelBtns':
+            return !ownedByBottomNav && this._pluginBridge.sidePanelButtons().length > 0;
+          case 'panelButtons':
+            return (
+              !ownedByBottomNav &&
+              (af.isScheduleDayPanelEnabled ||
+                af.isIssuesPanelEnabled ||
+                af.isProjectNotesEnabled)
+            );
+          case 'counters':
+            return this._counterCount() > 0;
+          case 'addTask':
+            return !ownedByBottomNav;
+        }
+      });
+    },
+    // Compare by contents, not identity. This computed rebuilds its array
+    // whenever any source signal so much as re-emits — the counters observable
+    // pushes a fresh array every tick while one is running — and the reflow
+    // restarts whenever this changes. Without value equality that is a restart
+    // every second, each one re-measuring and re-scheduling for nothing.
+    {
+      equal: (a, b) => a.length === b.length && a.every((id, i) => id === b[i]),
+    },
+  );
 
   /** How many leading `_demotableIds` are in the overflow panel. */
   private readonly _demotedCount = signal(0);
@@ -327,6 +333,9 @@ export class MainHeaderComponent implements OnDestroy {
    */
   private readonly _slotWidths = new Map<DemotableId, number>();
   private _triggerWidth = 0;
+  private _rafId = 0;
+  /** Frames spent settling since the last real change; see `_restartReflow`. */
+  private _passes = 0;
 
   private readonly _demoted = computed<ReadonlySet<DemotableId>>(() => {
     // The teleported vertical strip is a fixed-width column, not this row.
@@ -392,19 +401,47 @@ export class MainHeaderComponent implements OnDestroy {
       }
     });
 
-    // Settle the row against what the browser actually laid out. Runs in the
-    // `read` phase, so every measurement here is a plain read of a finished
-    // layout — nothing in this pass forces one.
-    afterRenderEffect({
-      read: () => {
-        this._resizeTick();
-        this._demotableIds();
-        this._demotedCount();
-        this._reflow();
-      },
+    // Anything that changes which actions exist restarts the fit from scratch:
+    // data arriving, a plugin registering a button, a panel feature toggled,
+    // switching to or from the mobile bottom nav.
+    effect(() => {
+      this._demotableIds();
+      this._restartReflow();
     });
 
     this._observeHostWidth();
+  }
+
+  /**
+   * Re-fit on an animation frame, never inside change detection.
+   *
+   * The reflow writes `_demotedCount`, which re-renders the bar. Doing that from
+   * an `afterRender` hook makes every pass dirty the view from inside the render
+   * phase, and Angular stops the application with NG0103 ("infinite change
+   * detection") rather than trying to decide whether the sequence converges.
+   * Measuring on a frame instead puts the write outside the cycle entirely, and
+   * costs nothing: the browser has already laid out by then, so the reads are
+   * still free.
+   *
+   * `_passes` bounds it independently of that. The demote/restore rules are
+   * meant to be stable — a restore has to pay back more than the trigger it
+   * refunds, so it cannot immediately re-demote — but "I proved it converges" is
+   * exactly the reasoning that has been wrong repeatedly here, so the budget
+   * makes a mistake in it cost one settled frame instead of a hung app.
+   */
+  private _restartReflow(): void {
+    this._passes = 0;
+    this._scheduleReflow();
+  }
+
+  private _scheduleReflow(): void {
+    if (this._rafId || typeof requestAnimationFrame === 'undefined') {
+      return;
+    }
+    this._rafId = requestAnimationFrame(() => {
+      this._rafId = 0;
+      this._reflow();
+    });
   }
 
   /**
@@ -417,8 +454,9 @@ export class MainHeaderComponent implements OnDestroy {
    * layout instead: `.page-title` carries its own `min-width`, and the row has
    * overflowed exactly when the nav no longer fits beside that minimum.
    *
-   * One step per pass. Each step re-renders and re-measures, so this converges
-   * in at most `_demotableIds().length` frames and needs no iteration here.
+   * Moves one action per frame and schedules the next, so it settles in at most
+   * one frame per demotable action. Never iterates here: each step has to be
+   * re-measured against a real layout, not a predicted one.
    */
   private _reflow(): void {
     const host = this._elRef.nativeElement as HTMLElement;
@@ -426,6 +464,12 @@ export class MainHeaderComponent implements OnDestroy {
     // A teleported nav is a fixed-width column, and a `display: none` header
     // measures 0 — in both cases there is nothing meaningful to fit.
     if (!wrapper || this._isVerticalActionBar() || !wrapper.clientWidth) {
+      return;
+    }
+    // One frame per demotable action is enough to settle, plus slack for the
+    // trigger appearing and disappearing. Past that, stop and leave the row as
+    // it stands rather than trading frames forever.
+    if (this._passes++ > DEMOTION_ORDER.length + 2) {
       return;
     }
     const nav = wrapper.querySelector('nav.action-nav-right') as HTMLElement | null;
@@ -469,6 +513,7 @@ export class MainHeaderComponent implements OnDestroy {
     const count = Math.min(this._demotedCount(), ids.length);
     if (count !== this._demotedCount()) {
       this._demotedCount.set(count);
+      this._scheduleReflow();
       return;
     }
 
@@ -485,6 +530,7 @@ export class MainHeaderComponent implements OnDestroy {
 
     if (free < -FIT_EPSILON && count < ids.length) {
       this._demotedCount.set(count + 1);
+      this._scheduleReflow();
       return;
     }
     if (free > FIT_EPSILON && count > 0) {
@@ -495,6 +541,7 @@ export class MainHeaderComponent implements OnDestroy {
       const refund = count === 1 ? this._triggerWidth : 0;
       if (cost > 0 && cost - refund <= free) {
         this._demotedCount.set(count - 1);
+        this._scheduleReflow();
       }
     }
   }
@@ -521,7 +568,7 @@ export class MainHeaderComponent implements OnDestroy {
       const width = entries[entries.length - 1]?.contentRect.width ?? 0;
       if (width > 0 && width !== lastWidth) {
         lastWidth = width;
-        this._resizeTick.update((t) => t + 1);
+        this._restartReflow();
       }
     });
     this._resizeObserver.observe(el);
@@ -577,6 +624,10 @@ export class MainHeaderComponent implements OnDestroy {
     this._subs.unsubscribe();
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
+    if (this._rafId) {
+      cancelAnimationFrame(this._rafId);
+      this._rafId = 0;
+    }
     this._teleportObserver?.disconnect();
     this._teleportedNav?.remove();
     this._teleportedNav = null;
