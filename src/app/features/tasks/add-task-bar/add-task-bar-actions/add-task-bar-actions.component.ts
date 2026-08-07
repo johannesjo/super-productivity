@@ -201,9 +201,13 @@ export class AddTaskBarActionsComponent {
     return estimate ? msToString(estimate) : null;
   });
 
-  // First occurrence of the recurrence being built: the same date the repeat
-  // config takes as its `startDate` on submit, so a label derived from it can
-  // never name a different weekday than the config recurs on.
+  // The day the user chose, which is what every option here re-derives from —
+  // so a label can never name a different weekday than the config it saves
+  // recurs on. Not always the config's `startDate`: submitting a workday
+  // recurrence rolls a weekend day forward to the Monday. That does not break
+  // the guarantee, because the only preset that is rolled is the one whose
+  // label names no weekday ("Workdays"); a preset whose label does name one
+  // derives its own anchor from this date and is never rolled.
   private _repeatRefDate = computed(() => {
     const dateStr = this.state().date;
     return dateStr ? dateStrToUtcDate(dateStr) : new Date();
@@ -378,10 +382,12 @@ export class AddTaskBarActionsComponent {
   }
 
   clearRepeatSetting(): void {
-    // Same control as picking one, so it goes through the same three steps —
-    // writing the state directly skipped both the pick record and the
-    // in-flight-parse invalidation.
-    this._parserService.applyUserRepeatPick(null);
+    const currentInput = this.stateService.inputTxt();
+    const cleanedInput = this._parserService.removeShortSyntaxFromInput(
+      currentInput,
+      'repeat',
+    );
+    this.stateService.clearRepeatSetting(cleanedInput);
     this.refocus.emit();
   }
 

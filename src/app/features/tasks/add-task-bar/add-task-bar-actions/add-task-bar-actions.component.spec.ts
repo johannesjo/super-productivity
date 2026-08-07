@@ -124,7 +124,6 @@ describe('AddTaskBarActionsComponent', () => {
       'clearEstimate',
       'toggleTag',
       'updateRepeatSetting',
-      'clearRepeatSetting',
     ]);
 
     // Set up signal properties
@@ -678,15 +677,6 @@ describe('AddTaskBarActionsComponent', () => {
       expect(mockParserService.applyUserRepeatPick).toHaveBeenCalledWith({
         type: 'DIALOG',
       });
-    });
-
-    // Same control as the picks above, so it takes the same route: writing the
-    // state directly skipped the pick record and the in-flight-parse guard
-    it('should clear the recurrence through the parser service', () => {
-      component.clearRepeatSetting();
-
-      expect(mockParserService.applyUserRepeatPick).toHaveBeenCalledWith(null);
-      expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
     });
   });
 

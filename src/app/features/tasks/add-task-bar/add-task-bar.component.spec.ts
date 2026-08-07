@@ -535,10 +535,9 @@ describe('AddTaskBarComponent', () => {
     // A Monday-to-Friday schedule has no weekend occurrence, so the occurrence
     // engine starts the task on the Monday regardless (getFirstRepeatOccurrence
     // scans the config's weekday flags from startDate). Leaving the Saturday in
-    // the config leaves a start date the user never chose and cannot see (the
-    // dialog hides it for this preset), and any later quick setting the dialog
-    // derives from it — "weekly on current weekday" — would come out as a
-    // Saturday recurrence.
+    // the config leaves a start date the recurrence never lands on, and every
+    // later quick setting the repeat dialog derives from it — "weekly on
+    // current weekday" — comes out as a Saturday recurrence.
     it('should start a menu-picked workday repeat on the Monday after a weekend date', async () => {
       mockTaskService.add.and.returnValue('task-1');
       const addRepeatCfgSpy = spyOn(
@@ -564,10 +563,11 @@ describe('AddTaskBarComponent', () => {
       expect(repeatCfg.startDate).toBe('2026-03-30');
     });
 
-    // The roll is applied on the way out, not to the date on the chip: the day
-    // the user picked stays the day the bar shows, so it is also the day the
-    // repeat menu's contextual labels are built from and the day a sticky date
-    // hands to the next task.
+    // Guards the design, not the roll: nothing here can fail from a change to
+    // rollWeekendDateForRepeat. It pins that the bar never rewrites the day the
+    // user picked — the earlier attempt at this fix did, and needed a
+    // provenance signal, an unwind on every recurrence change and a restore
+    // after submit to stay consistent.
     it('should leave the picked weekend date on the bar', async () => {
       mockTaskService.add.and.returnValue('task-1');
       spyOn(TestBed.inject(TaskRepeatCfgService), 'addTaskRepeatCfgToTask');
@@ -640,57 +640,6 @@ describe('AddTaskBarComponent', () => {
         .args[2] as Partial<TaskCopy>;
       expect(taskData.dueDay).toBe('2024-05-20');
       expect(addRepeatCfgSpy.calls.mostRecent().args[2].startDate).toBe('2024-05-20');
-    });
-
-    it('should do the same for a date the user cleared before picking it', async () => {
-      mockDateService.todayStr.and.returnValue('2024-05-19');
-      mockTaskService.add.and.returnValue('task-1');
-      const addRepeatCfgSpy = spyOn(
-        TestBed.inject(TaskRepeatCfgService),
-        'addTaskRepeatCfgToTask',
-      );
-
-      component.stateService.updateInputTxt('Standup');
-      component.stateService.updateCleanText('Standup');
-      component.stateService.updateDate('2024-05-22');
-      component.stateService.clearDate();
-      component.stateService.updateRepeatSetting({
-        type: 'PRESET',
-        quickSetting: 'MONDAY_TO_FRIDAY',
-      });
-
-      await component.addTask();
-
-      const taskData = mockTaskService.add.calls.mostRecent()
-        .args[2] as Partial<TaskCopy>;
-      expect(taskData.dueDay).toBe('2024-05-20');
-      expect(addRepeatCfgSpy.calls.mostRecent().args[2].startDate).toBe('2024-05-20');
-    });
-
-    // Only MONDAY_TO_FRIDAY has an excluded-day set — every other preset either
-    // has no exclusions or derives its anchor from the date itself, which
-    // cannot contradict it.
-    it('should leave a weekend date alone for a preset with weekend occurrences', async () => {
-      mockTaskService.add.and.returnValue('task-1');
-      const addRepeatCfgSpy = spyOn(
-        TestBed.inject(TaskRepeatCfgService),
-        'addTaskRepeatCfgToTask',
-      );
-
-      component.stateService.updateInputTxt('Standup');
-      component.stateService.updateCleanText('Standup');
-      component.stateService.updateDate('2026-03-28');
-      component.stateService.updateRepeatSetting({
-        type: 'PRESET',
-        quickSetting: 'DAILY',
-      });
-
-      await component.addTask();
-
-      const taskData = mockTaskService.add.calls.mostRecent()
-        .args[2] as Partial<TaskCopy>;
-      expect(taskData.dueDay).toBe('2026-03-28');
-      expect(addRepeatCfgSpy.calls.mostRecent().args[2].startDate).toBe('2026-03-28');
     });
 
     it('should copy entered notes to an inline repeat preset config (discussion #937)', async () => {

@@ -421,16 +421,10 @@ export class AddTaskBarParserService {
    *    the vanished syntax as "the user replaced it" rather than "the user
    *    deleted their syntax", which would clear the value instead of keeping it.
    */
-  // `null` is the clear button, which is the same control doing the same three
-  // steps — writing the state directly would skip both of the last two.
-  applyUserRepeatPick(repeat: AddTaskBarRepeat | null): void {
+  applyUserRepeatPick(repeat: AddTaskBarRepeat): void {
     const cleanedInput = this._stripSyntaxForUserPick('repeat');
     this._recordUserPick({ repeat, isRepeatFromSyntax: false });
-    if (repeat) {
-      this._stateService.updateRepeatSetting(repeat, cleanedInput);
-    } else {
-      this._stateService.clearRepeatSetting(cleanedInput);
-    }
+    this._stateService.updateRepeatSetting(repeat, cleanedInput);
   }
 
   applyUserDatePick(

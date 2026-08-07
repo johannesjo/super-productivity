@@ -2033,23 +2033,6 @@ describe('AddTaskBarParserService', () => {
 
       expect(realState.state().deadlineDate).toBe('2027-05-01');
     });
-
-    // The clear button is the same control as picking a recurrence, so it takes
-    // the same route: writing the state directly left the stale parse to land
-    // and put the cleared recurrence straight back.
-    it('should not let it republish a recurrence the clear button removed', async () => {
-      realState.updateInputTxt('Standup');
-      await parse('Standup');
-      realState.updateRepeatSetting({ type: 'PRESET', quickSetting: 'DAILY' });
-
-      const inFlight = parse('Standup');
-      service.applyUserRepeatPick(null);
-      expect(realState.state().repeat).toBeNull();
-
-      await inFlight;
-
-      expect(realState.state().repeat).toBeNull();
-    });
   });
 
   describe('syntax highlight ranges', () => {

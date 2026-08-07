@@ -62,7 +62,6 @@ import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
-import { AddTaskBarRepeat } from './add-task-bar.const';
 import { rollWeekendDateForRepeat } from './roll-weekend-date-for-repeat';
 import { ShortSyntaxSegment, splitTextByRanges } from '../short-syntax-ranges';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
@@ -540,8 +539,30 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }
 
+      // One day for the whole submit. A Monday-to-Friday schedule has no
+      // weekend occurrence, so a weekend day is one the task never starts on:
+      // the occurrence engine moves it to the following Monday off the config's
+      // weekday flags (getFirstRepeatOccurrence), while the weekend day stays
+      // behind in the config's `startDate` — where the repeat dialog re-derives
+      // every later quick setting from it, turning "weekly on current weekday"
+      // into a Saturday recurrence.
+      //
+      // Rolled once, on the way out, rather than on the date chip: the day the
+      // user picked stays the day the bar shows and the day the repeat menu's
+      // contextual labels are built from. Computing it once also keeps the
+      // task's due day and the config's start date from disagreeing across a
+      // logical-day rollover between two `todayStr()` calls.
+      //
+      // The task's own due day would be corrected anyway — the effects rerun
+      // `getFirstRepeatOccurrence` and rewrite it — but writing it right here
+      // costs nothing and saves both a synced update op and a task that shows
+      // up on the Saturday first.
+      const startDay = rollWeekendDateForRepeat(
+        state.date || this._dateService.todayStr(),
+        state.repeat,
+      );
+
       if (state.date) {
-        const startDay = this._effectiveStartDate(state.date, state.repeat);
         // Parse date components to create date in local timezone
         // This avoids timezone issues when parsing date strings like "2024-01-15"
         const [year, month, day] = startDay.split('-').map(Number);
@@ -559,10 +580,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       } else if (state.repeat && state.repeat.type !== 'DIALOG') {
         // When a recurrence is set without an explicit date, set dueDay to today
         // so the first task instance appears as today's occurrence instead of staying in inbox
-        taskData.dueDay = this._effectiveStartDate(
-          this._dateService.todayStr(),
-          state.repeat,
-        );
+        taskData.dueDay = startDay;
       } else {
         // Explicitly set dueDay to undefined when no date is selected
         // This prevents automatic assignment of today's date in TODAY context
@@ -607,11 +625,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         if (repeat.type === 'DIALOG') {
           this._openRepeatDialogForTask(taskId, resolvedRemindOption);
         } else {
-          const startDate = this._effectiveStartDate(
-            state.date || this._dateService.todayStr(),
-            repeat,
-          );
-          const referenceDate = dateStrToUtcDate(startDate);
+          const referenceDate = dateStrToUtcDate(startDay);
           // An interval ("@every 2 days") has no preset to expand — it maps to a
           // CUSTOM config carrying the cycle and interval directly.
           const repeatUpdates =
@@ -627,7 +641,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
                 };
           const newRepeatCfg = {
             ...DEFAULT_TASK_REPEAT_CFG,
-            startDate,
+            startDate: startDay,
             ...repeatUpdates,
             title,
             notes: taskData.notes,
@@ -654,27 +668,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     } finally {
       this._isAddingTask = false;
     }
-  }
-
-  /**
-   * The day the task being submitted — and any recurrence on it — really
-   * starts on.
-   *
-   * A Monday-to-Friday schedule has no weekend occurrence, so a weekend
-   * `base` is a day the task is never created on: the occurrence engine starts
-   * it on the following Monday off the config's weekday flags
-   * (`getFirstRepeatOccurrence`), while the weekend day stays behind in the
-   * config's `startDate` — which the repeat dialog hides for this preset and
-   * still derives every later quick setting from, so "weekly on current
-   * weekday" would come out as a Saturday recurrence.
-   *
-   * Applied once here, on the way out, rather than to the date on the chip:
-   * the day the user picked stays the day the bar shows and the day the repeat
-   * menu's contextual labels are built from. Returns `base` unchanged for every
-   * other schedule, and for no schedule at all.
-   */
-  private _effectiveStartDate(base: string, repeat: AddTaskBarRepeat | null): string {
-    return rollWeekendDateForRepeat(base, repeat) ?? base;
   }
 
   onSubmitBtnClick(): void {

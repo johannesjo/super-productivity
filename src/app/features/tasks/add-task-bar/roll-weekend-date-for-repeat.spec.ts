@@ -21,35 +21,45 @@ describe('rollWeekendDateForRepeat', () => {
     expect(rollWeekendDateForRepeat(SUNDAY, WORKDAYS)).toBe(MONDAY);
   });
 
-  // Null rather than the day itself, so a caller can tell "nothing to do" from
-  // a day it has to write back
-  it('should return null for a day the schedule already lands on', () => {
-    expect(rollWeekendDateForRepeat(FRIDAY, WORKDAYS)).toBeNull();
-    expect(rollWeekendDateForRepeat(MONDAY, WORKDAYS)).toBeNull();
+  it('should leave a day the schedule already lands on alone', () => {
+    expect(rollWeekendDateForRepeat(FRIDAY, WORKDAYS)).toBe(FRIDAY);
+    expect(rollWeekendDateForRepeat(MONDAY, WORKDAYS)).toBe(MONDAY);
   });
 
   it('should leave a weekend day alone for every other schedule', () => {
     expect(
       rollWeekendDateForRepeat(SATURDAY, { type: 'PRESET', quickSetting: 'DAILY' }),
-    ).toBeNull();
+    ).toBe(SATURDAY);
     expect(
       rollWeekendDateForRepeat(SATURDAY, {
         type: 'PRESET',
         quickSetting: 'WEEKLY_CURRENT_WEEKDAY',
       }),
-    ).toBeNull();
+    ).toBe(SATURDAY);
     expect(
       rollWeekendDateForRepeat(SATURDAY, {
         type: 'INTERVAL',
         repeatCycle: 'WEEKLY',
         repeatEvery: 2,
       }),
-    ).toBeNull();
-    expect(rollWeekendDateForRepeat(SATURDAY, { type: 'DIALOG' })).toBeNull();
-    expect(rollWeekendDateForRepeat(SATURDAY, null)).toBeNull();
+    ).toBe(SATURDAY);
+    expect(rollWeekendDateForRepeat(SATURDAY, { type: 'DIALOG' })).toBe(SATURDAY);
+    expect(rollWeekendDateForRepeat(SATURDAY, null)).toBe(SATURDAY);
   });
 
-  it('should handle a missing date', () => {
-    expect(rollWeekendDateForRepeat(null, WORKDAYS)).toBeNull();
+  // Only reachable in a production build: `dateStrToUtcDate` reports a
+  // malformed string through `devError`, which rethrows in dev and test (the
+  // global `window.confirm` stub in test.ts answers yes) but only logs in
+  // production — and then hands back an Invalid Date. Without the guard
+  // `getDbDateStr` renders that as the literal "NaN-NaN-NaN", and every caller
+  // persists and syncs what it gets back.
+  describe('a string that is not a real calendar day', () => {
+    beforeEach(() => (window.confirm as jasmine.Spy).and.returnValue(false));
+    afterEach(() => (window.confirm as jasmine.Spy).and.returnValue(true));
+
+    it('should be handed back unchanged', () => {
+      expect(rollWeekendDateForRepeat('2026-02-30', WORKDAYS)).toBe('2026-02-30');
+      expect(rollWeekendDateForRepeat('not-a-date', WORKDAYS)).toBe('not-a-date');
+    });
   });
 });
