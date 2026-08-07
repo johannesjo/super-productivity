@@ -109,9 +109,8 @@ export class AddTaskBarParserService {
     }
 
     // Get current tags from state to preserve pre-selected tags
-    const currentState = this._stateService.state();
     const parseResult = await shortSyntax(
-      { title: text, tagIds: currentState.tagIdsFromTxt },
+      { title: text, tagIds: this._stateService.state().tagIdsFromTxt },
       config,
       allTags,
       allProjects,
@@ -123,6 +122,13 @@ export class AddTaskBarParserService {
     if (parseRunId !== this._parseRunId) {
       return;
     }
+
+    // Everything else is read after the await, not before it: a control pick
+    // can land while the parse runs (the first one waits for the chrono-node
+    // chunk), and a pick that leaves the text unchanged queues no parse to
+    // supersede this one. A snapshot from before the await still holds the
+    // values that pick replaced, and publishing them would undo it.
+    const currentState = this._stateService.state();
 
     const parsedRanges = parseResult?.parsedRanges ?? [];
     this._lastParsedRanges = { forText: text, ranges: parsedRanges };

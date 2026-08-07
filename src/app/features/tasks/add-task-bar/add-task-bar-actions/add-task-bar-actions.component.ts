@@ -201,12 +201,21 @@ export class AddTaskBarActionsComponent {
     return estimate ? msToString(estimate) : null;
   });
 
-  // First occurrence of the recurrence being built: the same date the repeat
-  // config takes as its `startDate` on submit, so a label derived from it can
-  // never name a different weekday than the config recurs on.
+  // The day the user chose, which is what every option here re-derives from —
+  // so a label can never name a different weekday than the config it saves
+  // recurs on. Not always the config's `startDate`: submitting a workday
+  // recurrence rolls a weekend day forward to the Monday. That does not break
+  // the guarantee, because the only preset that is rolled is the one whose
+  // label names no weekday ("Workdays"); a preset whose label does name one
+  // derives its own anchor from this date and is never rolled.
+  //
+  // The no-date fallback is the *logical* today, matching the `todayStr()` the
+  // submit path falls back to. A wall-clock `new Date()` would name yesterday's
+  // weekday between midnight and the configured start of the next day, so the
+  // label and the saved config would disagree in exactly that window.
   private _repeatRefDate = computed(() => {
     const dateStr = this.state().date;
-    return dateStr ? dateStrToUtcDate(dateStr) : new Date();
+    return dateStr ? dateStrToUtcDate(dateStr) : this._dateService.getLogicalTodayDate();
   });
 
   repeatQuickOptions = computed(() => {

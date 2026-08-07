@@ -2006,6 +2006,71 @@ describe('AddTaskBarParserService', () => {
     });
   });
 
+  // A pick that lands while a parse is still in flight has to survive it. The
+  // parse publishes state values it fell back to, and reading them before the
+  // await means reading the values the pick has since replaced — with nothing
+  // to correct it afterwards when the pick left the text unchanged, because an
+  // unchanged input queues no parse.
+  //
+  // Runs against the real state service: what has to hold is that the state a
+  // pick writes is still there once the parse lands, which a mocked state()
+  // cannot show.
+  describe('picks against real add bar state', () => {
+    let realState: AddTaskBarStateService;
+    const cfg = {
+      isEnableProject: true,
+      isEnableDue: true,
+      isEnableTag: true,
+    } as ShortSyntaxConfig;
+    const defaultProject = { id: 'default-project', title: 'Default Project' } as Project;
+
+    const parse = (text: string, defaultDate?: string): Promise<void> =>
+      service.parseAndUpdateText(text, cfg, [], [], defaultProject, defaultDate);
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [AddTaskBarParserService, AddTaskBarStateService],
+      });
+      service = TestBed.inject(AddTaskBarParserService);
+      realState = TestBed.inject(AddTaskBarStateService);
+    });
+
+    it('should not let a parse that was in flight during a date pick republish the old date', async () => {
+      realState.updateInputTxt('Standup');
+      await parse('Standup');
+      realState.updateDate('2027-03-27');
+
+      // Not awaited: the pick lands while this parse is still waiting for the
+      // chrono-node chunk. There is no due syntax in the text, so the pick
+      // strips nothing and queues no replacement parse — this one is still the
+      // parse that will publish.
+      const inFlight = parse('Standup');
+      service.applyUserDatePick('2027-03-29', null, null);
+      expect(realState.state().date).toBe('2027-03-29');
+
+      await inFlight;
+
+      expect(realState.state().date).toBe('2027-03-29');
+    });
+
+    it('should not let it republish any other value the pick replaced either', async () => {
+      // Same shape, on a control with no date anywhere near it: every value the
+      // parse falls back to came from the snapshot it took before awaiting
+      realState.updateInputTxt('Taxes');
+      realState.updateDeadline('2027-04-01', null);
+      await parse('Taxes');
+
+      const inFlight = parse('Taxes');
+      service.applyUserDeadlinePick('2027-05-01', null, null);
+      expect(realState.state().deadlineDate).toBe('2027-05-01');
+
+      await inFlight;
+
+      expect(realState.state().deadlineDate).toBe('2027-05-01');
+    });
+  });
+
   describe('syntax highlight ranges', () => {
     const cfg = {
       isEnableProject: true,
