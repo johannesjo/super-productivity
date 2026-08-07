@@ -5,9 +5,11 @@ import {
   effect,
   ElementRef,
   inject,
+  NgZone,
   OnDestroy,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
@@ -28,6 +30,8 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
+import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -52,6 +56,38 @@ import { UserProfileService } from '../../features/user-profile/user-profile.ser
 import { EmlDropDirective } from '../../core/drop-paste-input/eml-drop.directive';
 import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
 
+/**
+ * Header actions that leave the bar when it runs out of room, in the order they
+ * go. Everything not listed here is pinned and always stays visible.
+ */
+type DemotableHeaderItem =
+  | 'pluginHeader'
+  | 'userProfile'
+  | 'panelButtons'
+  | 'counters'
+  | 'addTask';
+
+const DEMOTION_ORDER: readonly DemotableHeaderItem[] = [
+  'pluginHeader',
+  'userProfile',
+  'panelButtons',
+  'counters',
+  'addTask',
+];
+
+// The header is a fixed icon grid, so the fit can be computed instead of
+// measured per button: every icon button is 40px
+// (styles/components/_overwrite-material.scss), the play mini-fab is 48px, and
+// counter buttons are 36px (`.counters-action-group` below).
+const BTN_W = 40;
+const PLAY_BTN_W = 48;
+const COUNTER_BTN_W = 36;
+const GAP_W = 4; // --s-half
+/** Room kept for the page title and its own non-shrinkable action buttons. */
+const TITLE_MIN_W = 128;
+/** `.wrapper` horizontal padding — the desktop (larger) value, deliberately. */
+const WRAPPER_PADDING_W = 32;
+
 @Component({
   selector: 'main-header',
   templateUrl: './main-header.component.html',
@@ -63,6 +99,10 @@ import { ConflictJournalService } from '../../op-log/sync/conflict-journal.servi
     MatIcon,
     MatBadge,
     MatTooltip,
+    MatMenu,
+    MatMenuContent,
+    MatMenuTrigger,
+    NgTemplateOutlet,
     TranslatePipe,
     SimpleCounterButtonComponent,
     LongPressDirective,
@@ -107,12 +147,15 @@ export class MainHeaderComponent implements OnDestroy {
   readonly unreviewedConflictCount = this._conflictJournal.unreviewedCount;
 
   T: typeof T = T;
-  isShowSimpleCounterBtnsDropdown = signal(false);
 
   isXs = this.layoutService.isXs;
   isXxxs = this.layoutService.isXxxs;
 
-  showDesktopButtons = computed(() => !this.isXs());
+  // Add-task and the panel buttons are not "demoted" on small screens, they
+  // *live somewhere else*: the bottom nav owns the add FAB and the panels menu.
+  // That is a product placement rule, not a width one, so it stays keyed to the
+  // bottom nav's presence rather than to the measured fit below.
+  private readonly _isOwnedByBottomNav = this.layoutService.isShowMobileBottomNav;
 
   private _currentTaskContext$ = this.taskService.currentTaskParentOrCurrent$.pipe(
     filter((ct) => !!ct),
@@ -229,6 +272,114 @@ export class MainHeaderComponent implements OnDestroy {
     () => !this.isXs() && !!this.globalConfigService.misc()?.isVerticalActionBar,
   );
 
+  // --- Overflow handling (#9480) ------------------------------------------
+  // The header used to pick its button set from the *window* width (`isXs`),
+  // but it is laid out inside `.main-content`, which the in-flow side nav and
+  // the right panel both narrow. A landscape phone therefore rendered the full
+  // desktop set into a row ~260px narrower than the window, and the surplus
+  // buttons fell off the edge unreachably (nothing in the ancestor chain
+  // scrolls horizontally). Measuring the header's own width fixes the landscape
+  // case, the side-nav/right-panel cases and unbounded plugin buttons at once.
+  private readonly _zone = inject(NgZone);
+  private readonly _pluginBridge = inject(PluginBridgeService);
+  private _resizeObserver: ResizeObserver | null = null;
+  // Infinity until first measured, so nothing collapses on the first paint.
+  private readonly _hostWidth = signal(Number.POSITIVE_INFINITY);
+
+  private readonly _pinnedWidth = computed(
+    () =>
+      (this.isTimeTrackingEnabled() ? PLAY_BTN_W + GAP_W : 0) +
+      (this.isFocusButtonVisible() ? BTN_W + GAP_W : 0) +
+      (this.isSyncIconEnabled() ? BTN_W + GAP_W : 0),
+  );
+
+  private readonly _itemWidths = computed<Record<DemotableHeaderItem, number>>(() => {
+    const af = this.globalConfigService.appFeatures();
+    const ownedByBottomNav = this._isOwnedByBottomNav();
+    const counterCount = this.enabledSimpleCounters().filter(
+      (c) => !c.isHideButton,
+    ).length;
+    const panelCount =
+      this._pluginBridge.sidePanelButtons().length +
+      (af.isScheduleDayPanelEnabled ? 1 : 0) +
+      (af.isIssuesPanelEnabled ? 1 : 0) +
+      (af.isProjectNotesEnabled ? 1 : 0);
+    return {
+      pluginHeader:
+        (this._pluginBridge.headerButtons().length +
+          this._pluginBridge.workContextHeaderButtons().length) *
+        (BTN_W + GAP_W),
+      userProfile: this.isUserProfilesEnabled() ? BTN_W + GAP_W : 0,
+      panelButtons: ownedByBottomNav ? 0 : panelCount * (BTN_W + GAP_W),
+      counters: counterCount * (COUNTER_BTN_W + GAP_W),
+      addTask: ownedByBottomNav ? 0 : BTN_W + GAP_W,
+    };
+  });
+
+  /** Items that do not fit and are shown in the overflow menu instead. */
+  readonly demotedItems = computed<ReadonlySet<DemotableHeaderItem>>(() => {
+    const demoted = new Set<DemotableHeaderItem>();
+    // The teleported vertical strip is a fixed-width column, not this row.
+    if (this._isVerticalActionBar()) {
+      return demoted;
+    }
+    const widths = this._itemWidths();
+    const available = this._hostWidth() - TITLE_MIN_W - WRAPPER_PADDING_W;
+    let used =
+      this._pinnedWidth() + DEMOTION_ORDER.reduce((sum, id) => sum + widths[id], 0);
+    if (used <= available) {
+      return demoted;
+    }
+    // Once anything is demoted, the trigger button needs room of its own.
+    used += BTN_W + GAP_W;
+    for (const id of DEMOTION_ORDER) {
+      if (used <= available) {
+        break;
+      }
+      if (widths[id] === 0) {
+        continue;
+      }
+      demoted.add(id);
+      used -= widths[id];
+    }
+    return demoted;
+  });
+
+  readonly hasOverflow = computed(() => this.demotedItems().size > 0);
+
+  /**
+   * Test seam: Karma cannot resize a detached fixture, so the demotion logic is
+   * exercised by feeding it the width a real layout would have produced.
+   */
+  setHostWidthForTesting(width: number): void {
+    this._hostWidth.set(width);
+  }
+
+  readonly showAddTaskInline = computed(
+    () => !this._isOwnedByBottomNav() && !this.demotedItems().has('addTask'),
+  );
+  readonly showCountersInline = computed(() => !this.demotedItems().has('counters'));
+  readonly showPluginBtnsInline = computed(
+    () => !this.demotedItems().has('pluginHeader'),
+  );
+  readonly showUserProfileInline = computed(
+    () => this.isUserProfilesEnabled() && !this.demotedItems().has('userProfile'),
+  );
+  readonly showPanelBtnsInline = computed(
+    () => !this._isOwnedByBottomNav() && !this.demotedItems().has('panelButtons'),
+  );
+  readonly isDemotedCounters = computed(() => this.demotedItems().has('counters'));
+  readonly isDemotedPluginBtns = computed(() => this.demotedItems().has('pluginHeader'));
+  readonly isDemotedUserProfile = computed(
+    () => this.isUserProfilesEnabled() && this.demotedItems().has('userProfile'),
+  );
+  readonly isDemotedPanelBtns = computed(
+    () => !this._isOwnedByBottomNav() && this.demotedItems().has('panelButtons'),
+  );
+  readonly isDemotedAddTask = computed(
+    () => !this._isOwnedByBottomNav() && this.demotedItems().has('addTask'),
+  );
+
   constructor() {
     // Teleport the action nav to document.body (and back) so the fixed
     // vertical strip escapes any ancestor containing-block
@@ -240,6 +391,34 @@ export class MainHeaderComponent implements OnDestroy {
       const enabled = this._isVerticalActionBar();
       this.isDataLoaded();
       this._syncTeleport(enabled);
+    });
+
+    this._observeHostWidth();
+  }
+
+  /**
+   * Track the width the header actually has, not the window's. Runs outside
+   * Angular and coalesces per frame: drawer open/close animations fire a
+   * resize entry every frame and each one would otherwise be a change
+   * detection pass.
+   */
+  private _observeHostWidth(): void {
+    const el = this._elRef.nativeElement as HTMLElement;
+    if (typeof ResizeObserver === 'undefined' || !(el instanceof Element)) {
+      return;
+    }
+    this._zone.runOutsideAngular(() => {
+      let frame = 0;
+      this._resizeObserver = new ResizeObserver((entries) => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          const width = entries[entries.length - 1]?.contentRect.width ?? 0;
+          if (width > 0 && width !== this._hostWidth()) {
+            this._zone.run(() => this._hostWidth.set(width));
+          }
+        });
+      });
+      this._resizeObserver.observe(el);
     });
   }
 
@@ -291,6 +470,8 @@ export class MainHeaderComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
     this._teleportObserver?.disconnect();
     this._teleportedNav?.remove();
     this._teleportedNav = null;
@@ -346,10 +527,6 @@ export class MainHeaderComponent implements OnDestroy {
         this.dialogSyncCfgRef = null;
       }),
     );
-  }
-
-  isCounterRunning(counters: SimpleCounter[]): boolean {
-    return !!(counters && counters.find((counter) => counter.isOn));
   }
 
   enableFocusMode(): void {

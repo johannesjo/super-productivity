@@ -69,22 +69,25 @@ const createSimpleCounter = async (
 };
 
 /**
- * Helper to check if the page is in mobile layout.
- * On mobile, counters are behind a `.mobile-dropdown-wrapper` toggle.
- * On desktop (1920x1080), counters are rendered inline in `.counters-action-group`.
+ * Helper to check whether the counters have been demoted into the header's
+ * overflow menu (#9480). When the header has room they render inline in
+ * `.counters-action-group`; when it does not, they move behind the
+ * `.header-overflow-btn` trigger into a `.header-overflow-menu` overlay panel.
  */
-const isMobileLayout = async (client: SimulatedE2EClient): Promise<boolean> => {
-  return (await client.page.locator('.mobile-dropdown-wrapper').count()) > 0;
+const isCountersInOverflow = async (client: SimulatedE2EClient): Promise<boolean> => {
+  return (
+    (await client.page
+      .locator('.counters-action-group simple-counter-button')
+      .count()) === 0 && (await client.page.locator('.header-overflow-btn').count()) > 0
+  );
 };
 
 /**
  * Helper to ensure counters are accessible in the header.
- * On mobile: opens the `.mobile-dropdown` toggle if needed.
- * On desktop: counters are already inline — this is a no-op.
+ * Opens the overflow menu when they have been demoted into it.
  */
 const ensureCountersVisible = async (client: SimulatedE2EClient): Promise<void> => {
-  if (!(await isMobileLayout(client))) {
-    // Desktop: counters are inline, wait for at least one to appear
+  if (!(await isCountersInOverflow(client))) {
     await client.page
       .locator('.counters-action-group simple-counter-button')
       .first()
@@ -92,33 +95,26 @@ const ensureCountersVisible = async (client: SimulatedE2EClient): Promise<void> 
     return;
   }
 
-  // Mobile: open the dropdown if not already open
-  const wrapper = client.page.locator('.mobile-dropdown-wrapper');
-  await wrapper.waitFor({ state: 'visible', timeout: 15000 });
-
-  const visibleDropdown = client.page.locator('.mobile-dropdown.isVisible');
-  if ((await visibleDropdown.count()) > 0) {
+  const panel = client.page.locator('.header-overflow-menu');
+  if ((await panel.count()) > 0 && (await panel.first().isVisible())) {
     return;
   }
-  const toggleBtn = wrapper.locator('> button');
-  await toggleBtn.click();
-  await visibleDropdown.waitFor({ state: 'attached', timeout: 5000 });
-  await visibleDropdown
+  await client.page.locator('.header-overflow-btn').click();
+  await panel
     .locator('simple-counter-button')
     .first()
     .waitFor({ state: 'visible', timeout: 5000 });
 };
 
 /**
- * Helper to get the visible counter buttons locator.
- * On desktop: counters are inline in `.counters-action-group`.
- * On mobile: counters are inside `.mobile-dropdown.isVisible`.
+ * Helper to get the visible counter buttons locator, inline or in the overflow
+ * menu depending on how much room the header has.
  */
 const getVisibleCounters = async (
   client: SimulatedE2EClient,
 ): Promise<ReturnType<typeof client.page.locator>> => {
-  if (await isMobileLayout(client)) {
-    return client.page.locator('.mobile-dropdown.isVisible simple-counter-button');
+  if (await isCountersInOverflow(client)) {
+    return client.page.locator('.header-overflow-menu simple-counter-button');
   }
   return client.page.locator('.counters-action-group simple-counter-button');
 };

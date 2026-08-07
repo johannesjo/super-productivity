@@ -5,10 +5,15 @@ import {
   NO_ERRORS_SCHEMA,
   runInInjectionContext,
   signal,
+  WritableSignal,
 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EMPTY, of } from 'rxjs';
-import { TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
+import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
+import { NgTemplateOutlet } from '@angular/common';
+import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { PluginHeaderBtnCfg } from '../../plugins/plugin-api.model';
 
 import { MainHeaderComponent } from './main-header.component';
 import { ProjectService } from '../../features/project/project.service';
@@ -154,9 +159,18 @@ describe('MainHeaderComponent focus button visibility', () => {
           useValue: {
             isXs,
             isXxxs,
+            isShowMobileBottomNav: isXs,
             isShowIssuePanel: signal(false),
             isShowNotes: signal(false),
             isShowScheduleDayPanel: signal(false),
+          },
+        },
+        {
+          provide: PluginBridgeService,
+          useValue: {
+            headerButtons: signal([]),
+            workContextHeaderButtons: signal([]),
+            sidePanelButtons: signal([]),
           },
         },
         {
@@ -219,7 +233,15 @@ describe('MainHeaderComponent focus button visibility', () => {
       ],
     }).overrideComponent(MainHeaderComponent, {
       set: {
-        imports: [TranslatePipe],
+        // MatMenu/MatMenuTrigger are real: NO_ERRORS_SCHEMA tolerates unknown
+        // elements but not the `#overflowMenu="matMenu"` export reference.
+        imports: [
+          TranslatePipe,
+          MatMenu,
+          MatMenuContent,
+          MatMenuTrigger,
+          NgTemplateOutlet,
+        ],
         schemas: [NO_ERRORS_SCHEMA],
       },
     });
@@ -255,7 +277,8 @@ describe('MainHeaderComponent focus button visibility', () => {
 
     component = createComponent();
 
-    expect(component.showDesktopButtons()).toBe(false);
+    // The add button lives in the bottom nav's FAB on mobile, not the header.
+    expect(component.showAddTaskInline()).toBe(false);
     expect(component.isFocusButtonVisible()).toBe(true);
   });
 
@@ -270,9 +293,15 @@ describe('MainHeaderComponent focus button visibility', () => {
     expect(component.isFocusButtonVisible()).toBe(false);
   });
 
-  it('labels the mobile counter toggle and removes the collapsed menu from interaction', () => {
-    isXs = signal(true);
-    isXxxs = signal(true);
+  // Regression test for #9480: the header used to choose its button set from
+  // the *window* width, but it is laid out inside a row that the in-flow side
+  // nav and the right panel both narrow. On a landscape phone that rendered the
+  // full desktop button set into a header ~260px narrower than the window, and
+  // the surplus buttons were clipped away with no way to scroll to them.
+  it('demotes actions into the overflow menu when the header itself is narrow (#9480)', () => {
+    // Landscape phone: past the 600px window breakpoint, so no bottom nav and
+    // the full desktop button set -- but the header only gets part of the width.
+    isXs = signal(false);
     enabledSimpleCounters = [
       {
         id: 'counter-1',
@@ -285,38 +314,38 @@ describe('MainHeaderComponent focus button visibility', () => {
       },
     ];
 
-    configureTestBed();
-    const translate = TestBed.inject(TranslateService);
-    translate.setTranslation('en', {
-      F: {
-        METRIC: {
-          CMP: {
-            SIMPLE_COUNTERS: 'Simple Counters & Habit Tracking',
-          },
-        },
-      },
-    });
-    translate.use('en');
-    fixture = TestBed.createComponent(MainHeaderComponent);
-    fixture.detectChanges();
+    component = createComponent();
 
-    const toggle = fixture.nativeElement.querySelector(
-      '.mobile-dropdown-wrapper > button',
-    ) as HTMLButtonElement;
-    const menu = fixture.nativeElement.querySelector('.mobile-dropdown') as HTMLElement;
+    // A roomy header keeps everything in the bar.
+    component.setHostWidthForTesting(1200);
+    expect(component.hasOverflow()).toBe(false);
+    expect(component.showPanelBtnsInline()).toBe(true);
+    expect(component.showCountersInline()).toBe(true);
 
-    expect(toggle.getAttribute('aria-label')).toBe('Simple Counters & Habit Tracking');
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(toggle.getAttribute('aria-controls')).toBe('mobile-simple-counter-menu');
-    expect(menu.getAttribute('aria-hidden')).toBe('true');
-    expect(menu.inert).toBe(true);
+    // Squeezed by the side nav: actions move into the menu, not off-screen.
+    component.setHostWidthForTesting(360);
+    expect(component.hasOverflow()).toBe(true);
+    expect(component.showPanelBtnsInline()).toBe(false);
+  });
 
-    toggle.click();
-    fixture.detectChanges();
+  it('demotes plugin buttons before the panel buttons (#9480)', () => {
+    isXs = signal(false);
 
-    expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(menu.getAttribute('aria-hidden')).toBe('false');
-    expect(menu.inert).toBe(false);
+    component = createComponent();
+    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
+      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
+    };
+    bridge.headerButtons.set([
+      { pluginId: 'a', label: 'A', icon: 'star', onClick: () => {} },
+      { pluginId: 'b', label: 'B', icon: 'star', onClick: () => {} },
+    ]);
+
+    // Only just too narrow: shedding the plugin buttons alone is enough, so
+    // the panel buttons -- further down the demotion order -- stay in the bar.
+    component.setHostWidthForTesting(540);
+
+    expect(component.showPluginBtnsInline()).toBe(false);
+    expect(component.showPanelBtnsInline()).toBe(true);
   });
 
   it('shows the add-task button before initial data load finishes', () => {

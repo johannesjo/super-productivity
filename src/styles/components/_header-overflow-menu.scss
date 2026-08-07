@@ -1,0 +1,36 @@
+// Overflow menu for the main header (#9480).
+//
+// The header row is a fixed 40px-tall icon strip with no horizontal scroll and
+// no vertical slack (badges and flyouts already overhang it), so actions that
+// do not fit are moved into this menu instead of running off the edge.
+// MainHeaderComponent renders the *real* action components in here rather than
+// flat `mat-menu-item` rows, so each keeps its own tooltip, toggled state and
+// nested menu — hence the grid layout below instead of the default menu list.
+//
+// Lives here, not in main-header.component.scss: a mat-menu panel is attached
+// to the CDK overlay container on <body> and is therefore outside the
+// component's emulated view encapsulation.
+.header-overflow-menu {
+  .header-overflow-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-half);
+    padding: var(--s);
+    // Enough for a comfortable 4-per-row grid of 40px targets.
+    max-width: 216px;
+    // Many enabled counters must stay reachable (as the old in-header
+    // dropdown allowed, #5999).
+    max-height: calc(100dvh - 120px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  // These render inline in the header bar, where `display: contents` lets the
+  // buttons participate directly in the nav's flex row. Inside the panel the
+  // same applies, so no override is needed — but the counter buttons carry a
+  // header-specific compact size that should not follow them here.
+  simple-counter-button {
+    flex-shrink: 0;
+  }
+}

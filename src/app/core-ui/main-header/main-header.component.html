@@ -1,3 +1,60 @@
+<!--
+  Each demotable action lives in an ng-template so the *same* component
+  instance definition is rendered either inline in the bar or inside the
+  overflow menu, depending on the measured fit (#9480). Keeping the real
+  components (rather than flat menu rows) preserves their existing behaviour —
+  tooltips, toggled states and their own nested menus/dialogs.
+-->
+<ng-template #addTaskTpl>
+  <button
+    emlDrop
+    (click)="layoutService.showAddTaskBar()"
+    matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
+      kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
+    }}"
+    class="tour-addBtn"
+    color="primary"
+    mat-icon-button
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+</ng-template>
+
+<ng-template #countersTpl>
+  @for (simpleCounter of enabledSimpleCounters(); track trackById($index, simpleCounter)) {
+    @if (!simpleCounter.isHideButton) {
+      <simple-counter-button
+        [matTooltip]="simpleCounter.title"
+        [simpleCounter]="simpleCounter"
+      ></simple-counter-button>
+    }
+  }
+</ng-template>
+
+<ng-template #pluginBtnsTpl>
+  <plugin-work-context-header-btns
+    class="secondary-header-action"
+  ></plugin-work-context-header-btns>
+  <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
+</ng-template>
+
+<ng-template #userProfileTpl>
+  <user-profile-button class="secondary-header-action"></user-profile-button>
+</ng-template>
+
+<ng-template #panelBtnsTpl>
+  <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
+
+  <desktop-panel-buttons
+    class="secondary-header-action"
+    [kb]="kb"
+    [isRouteWithSidePanel]="isRouteWithSidePanel()"
+    [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
+    [isShowIssuePanel]="isShowIssuePanel()"
+    [isShowNotes]="isShowNotes()"
+  ></desktop-panel-buttons>
+</ng-template>
+
 <div class="wrapper">
   @if (isDataLoaded()) {
     <page-title></page-title>
@@ -17,19 +74,8 @@
       <!-- Not gated on isDataLoaded: the shell paints before op-log hydration
            finishes, and the primary quick-capture entry point must not be
            missing for that window. -->
-      @if (showDesktopButtons()) {
-        <button
-          emlDrop
-          (click)="layoutService.showAddTaskBar()"
-          matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
-            kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
-          }}"
-          class="tour-addBtn"
-          color="primary"
-          mat-icon-button
-        >
-          <mat-icon>add</mat-icon>
-        </button>
+      @if (showAddTaskInline()) {
+        <ng-container *ngTemplateOutlet="addTaskTpl"></ng-container>
       }
     </div>
 
@@ -39,18 +85,8 @@
         @if (isFocusButtonVisible()) {
           <focus-button></focus-button>
         }
-        @if (showDesktopButtons()) {
-          @for (
-            simpleCounter of enabledSimpleCounters();
-            track trackById($index, simpleCounter)
-          ) {
-            @if (!simpleCounter.isHideButton) {
-              <simple-counter-button
-                [matTooltip]="simpleCounter.title"
-                [simpleCounter]="simpleCounter"
-              ></simple-counter-button>
-            }
-          }
+        @if (showCountersInline()) {
+          <ng-container *ngTemplateOutlet="countersTpl"></ng-container>
         }
       </div>
 
@@ -108,69 +144,62 @@
         </button>
       }
 
-      <plugin-work-context-header-btns
-        class="secondary-header-action"
-      ></plugin-work-context-header-btns>
-      <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
-
-      @if (isUserProfilesEnabled()) {
-        <user-profile-button class="secondary-header-action"></user-profile-button>
+      @if (showPluginBtnsInline()) {
+        <ng-container *ngTemplateOutlet="pluginBtnsTpl"></ng-container>
       }
 
-      <!-- Desktop: Show all buttons inline -->
-      @if (showDesktopButtons()) {
-        <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
-
-        <desktop-panel-buttons
-          class="secondary-header-action"
-          [kb]="kb"
-          [isRouteWithSidePanel]="isRouteWithSidePanel()"
-          [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
-          [isShowIssuePanel]="isShowIssuePanel()"
-          [isShowNotes]="isShowNotes()"
-        ></desktop-panel-buttons>
+      @if (showUserProfileInline()) {
+        <ng-container *ngTemplateOutlet="userProfileTpl"></ng-container>
       }
 
-      <!-- Simple Counter Dropdown (mobile only) -->
-      @if (isXs()) {
-        @if (enabledSimpleCounters().length) {
-          <div class="header-action-group secondary-action-group mobile-dropdown-wrapper">
-            <button
-              (click)="
-                isShowSimpleCounterBtnsDropdown.set(!isShowSimpleCounterBtnsDropdown())
-              "
-              [color]="isCounterRunning(enabledSimpleCounters()) ? 'accent' : ''"
-              aria-controls="mobile-simple-counter-menu"
-              [attr.aria-expanded]="isShowSimpleCounterBtnsDropdown()"
-              [attr.aria-label]="T.F.METRIC.CMP.SIMPLE_COUNTERS | translate"
-              mat-icon-button
-              type="button"
-            >
-              <mat-icon>{{
-                isShowSimpleCounterBtnsDropdown() ? 'close' : 'timer'
-              }}</mat-icon>
-            </button>
-            <div
-              id="mobile-simple-counter-menu"
-              class="mobile-dropdown"
-              [class.isVisible]="isShowSimpleCounterBtnsDropdown()"
-              [attr.aria-hidden]="!isShowSimpleCounterBtnsDropdown()"
-              [attr.inert]="isShowSimpleCounterBtnsDropdown() ? null : ''"
-            >
-              @for (
-                simpleCounter of enabledSimpleCounters();
-                track trackById($index, simpleCounter)
-              ) {
-                @if (!simpleCounter.isHideButton) {
-                  <simple-counter-button
-                    [simpleCounter]="simpleCounter"
-                  ></simple-counter-button>
-                }
-              }
-            </div>
-          </div>
-        }
+      @if (showPanelBtnsInline()) {
+        <ng-container *ngTemplateOutlet="panelBtnsTpl"></ng-container>
+      }
+
+      @if (hasOverflow()) {
+        <button
+          class="header-overflow-btn secondary-header-action"
+          [matMenuTriggerFor]="overflowMenu"
+          [attr.aria-label]="T.G.MORE_ACTIONS | translate"
+          matTooltip="{{ T.G.MORE_ACTIONS | translate }}"
+          mat-icon-button
+        >
+          <mat-icon>more_horiz</mat-icon>
+        </button>
       }
     }
   </nav>
 </div>
+
+<!--
+  Overflow menu: a CDK overlay, so unlike an in-header dropdown it is not
+  clipped by the header row (which is exactly 40px tall and has no vertical
+  slack for badges or flyouts).
+-->
+<mat-menu
+  #overflowMenu="matMenu"
+  class="header-overflow-menu"
+>
+  <ng-template matMenuContent>
+    <div
+      class="header-overflow-panel"
+      (click)="$event.stopPropagation()"
+    >
+      @if (isDemotedPluginBtns()) {
+        <ng-container *ngTemplateOutlet="pluginBtnsTpl"></ng-container>
+      }
+      @if (isDemotedUserProfile()) {
+        <ng-container *ngTemplateOutlet="userProfileTpl"></ng-container>
+      }
+      @if (isDemotedPanelBtns()) {
+        <ng-container *ngTemplateOutlet="panelBtnsTpl"></ng-container>
+      }
+      @if (isDemotedCounters()) {
+        <ng-container *ngTemplateOutlet="countersTpl"></ng-container>
+      }
+      @if (isDemotedAddTask()) {
+        <ng-container *ngTemplateOutlet="addTaskTpl"></ng-container>
+      }
+    </div>
+  </ng-template>
+</mat-menu>

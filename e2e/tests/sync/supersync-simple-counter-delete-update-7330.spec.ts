@@ -88,7 +88,7 @@ const createClickCounter = async (
 const incrementCounter = async (client: SimulatedE2EClient): Promise<void> => {
   const counter = client.page
     .locator(
-      '.counters-action-group simple-counter-button, .mobile-dropdown simple-counter-button',
+      '.counters-action-group simple-counter-button, .header-overflow-menu simple-counter-button',
     )
     .first();
   await counter.waitFor({ state: 'visible', timeout: 15000 });
@@ -126,7 +126,7 @@ const counterCount = async (client: SimulatedE2EClient): Promise<number> => {
   await client.page.waitForTimeout(500);
   return client.page
     .locator(
-      '.counters-action-group simple-counter-button, .mobile-dropdown simple-counter-button',
+      '.counters-action-group simple-counter-button, .header-overflow-menu simple-counter-button',
     )
     .count();
 };
