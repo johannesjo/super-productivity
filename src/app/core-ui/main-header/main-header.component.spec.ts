@@ -505,6 +505,51 @@ describe('MainHeaderComponent focus button visibility', () => {
     expect(panel!.querySelector('.sync-btn')).toBeTruthy();
   });
 
+  it('holds the collapsed overflow panel out of the a11y tree (#9272)', async () => {
+    const host = await mountAtWidth(220);
+    const panel = host.querySelector('.header-overflow-panel')!;
+
+    expect(panel.getAttribute('inert')).toBe('');
+    expect(panel.getAttribute('aria-hidden')).toBe('true');
+
+    fixture!.componentInstance.toggleOverflow();
+    await settle();
+
+    expect(panel.getAttribute('inert')).toBeNull();
+    expect(panel.classList.contains('isVisible')).toBe(true);
+  });
+
+  it('does not dismiss the panel when a menu it opened is clicked (#9480)', async () => {
+    // Demoted actions open real menus and dialogs, and the CDK renders those
+    // into `.cdk-overlay-container` on <body> -- outside the panel. Treating
+    // the first click on a menu item as an outside click closed the panel from
+    // under the open menu, and the menu's own focus restore then pointed into
+    // an `inert` subtree, dropping focus to <body>.
+    const host = await mountAtWidth(220);
+    const component = fixture!.componentInstance;
+    component.toggleOverflow();
+    await settle();
+    expect(host.querySelector('.header-overflow-panel.isVisible')).toBeTruthy();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'cdk-overlay-container';
+    const menuItem = document.createElement('button');
+    overlay.appendChild(menuItem);
+    document.body.appendChild(overlay);
+    try {
+      menuItem.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      await settle();
+      expect(component.isOverflowOpen()).toBe(true);
+    } finally {
+      overlay.remove();
+    }
+
+    // A click that really is elsewhere still dismisses it.
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await settle();
+    expect(component.isOverflowOpen()).toBe(false);
+  });
+
   it('restores a slot that was demoted before it was ever measured (#9480)', async () => {
     // `_demotedCount` is a prefix count over `_demotableIds`, so an id
     // appearing at the HEAD of that list lands inside the already-demoted
