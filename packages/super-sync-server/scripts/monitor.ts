@@ -646,7 +646,9 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
         u.created_at,
         MAX(d.last_seen_at) as last_active,
         COUNT(DISTINCT d.client_id) as device_count,
-        COALESCE(COUNT(o.id), 0) as ops_7d
+        -- DISTINCT is load-bearing: the sync_devices join multiplies every
+        -- operation row by the user's device count before this counts it.
+        COALESCE(COUNT(DISTINCT o.id), 0) as ops_7d
       FROM users u
       INNER JOIN sync_devices d ON u.id = d.user_id
       LEFT JOIN operations o ON u.id = o.user_id AND o.received_at > ${sevenDaysAgo}
