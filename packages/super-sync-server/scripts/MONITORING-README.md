@@ -38,10 +38,6 @@ npm run monitor:dev -- usage-history --tail 20
 npm run monitor:dev -- active-users
 npm run monitor:dev -- active-users --threshold 5 --limit 50
 
-# Same report against a built image, without the `--` passthrough
-npm run monitor:active-users
-npm run monitor:active-users:quick          # sync_devices only, skips operations
-
 # Recent operations analysis
 npm run monitor:dev -- ops --tail 100
 npm run monitor:dev -- ops --user 29

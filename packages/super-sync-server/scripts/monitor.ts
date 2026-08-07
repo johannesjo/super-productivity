@@ -55,8 +55,7 @@ interface TableSizeRow {
   size: string;
 }
 
-interface ActivityWindowRow {
-  bucket: bigint;
+interface ActiveCountRow {
   device_count: bigint;
   ops_count: bigint;
 }
@@ -593,57 +592,31 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
       { label: 'Last 7 days', ms: 7 * ONE_DAY },
       { label: 'Last 30 days', ms: 30 * ONE_DAY },
       { label: 'Last 90 days', ms: 90 * ONE_DAY },
-    ].map((period) => ({ ...period, threshold: BigInt(now - period.ms) }));
+    ];
 
     console.log('\n--- Active Users (by device heartbeat / by sync operations) ---');
-    // One pass for all four windows, driven off each user's newest operation.
-    //
-    // The obvious form -- COUNT(DISTINCT user_id) FROM operations WHERE
-    // received_at > $1, once per window -- reads the whole table four times: the
-    // only index on received_at is (user_id, received_at), whose leading column
-    // the predicate does not constrain, so it degrades to a sequential scan of
-    // the largest table on the instance and was what timed out at ~10k users.
-    //
-    // Probing per user inverts that into an index seek: MAX(received_at) for one
-    // user_id is a backwards descent that stops at the first row, so the cost is
-    // one descent per registered user regardless of how many operations each has
-    // -- and the four windows then come from counting those maxima, not from
-    // four more scans. Same shape as resolveOperationScope() over sync_devices.
-    const activity: ActivityWindowRow[] = await prisma.$queryRaw`
-      WITH user_activity AS MATERIALIZED (
-        SELECT
-          (SELECT MAX(d.last_seen_at) FROM sync_devices d WHERE d.user_id = u.id) AS last_seen,
-          (SELECT MAX(o.received_at) FROM operations o WHERE o.user_id = u.id) AS last_op
-        FROM users u
-      ),
-      windows (bucket) AS (
-        VALUES ${Prisma.join(
-          periods.map((period) => Prisma.sql`(${period.threshold}::bigint)`),
-        )}
-      )
-      SELECT
-        w.bucket AS bucket,
-        COUNT(*) FILTER (WHERE a.last_seen > w.bucket) AS device_count,
-        COUNT(*) FILTER (WHERE a.last_op > w.bucket) AS ops_count
-      FROM windows w
-      CROSS JOIN user_activity a
-      GROUP BY w.bucket
-    `;
-
-    const countsByBucket = new Map(
-      activity.map((row) => [
-        String(row.bucket),
-        {
-          devices: Number(row.device_count ?? 0),
-          ops: Number(row.ops_count ?? 0),
-        },
-      ]),
-    );
+    // Deliberately left as one statement per window, despite reading `operations`
+    // four times. A per-user MAX() probe driven from `users` was tried and
+    // reverted: `received_at > $1` does NOT force a sequential scan as it appears
+    // to -- the planner applies it as an index qual on the non-leading column of
+    // (user_id, received_at) and walks the index, measured on production at 1,232
+    // buffers / 85 ms where the per-user form cost ~11x the buffers for the same
+    // answer. The probe form only wins above roughly 1M operations AND on storage
+    // where random reads are cheap; this instance is the opposite case (measured
+    // 2026-08-07: 1.74 MB/s, ~9.5 ms per miss), so scattered probes are the wrong
+    // trade here. When this report does time out, look first at whether
+    // `operations` has been vacuumed and analyzed -- an absent visibility map
+    // costs a heap fetch per row and dwarfs any query shape.
     for (const period of periods) {
-      const counts = countsByBucket.get(String(period.threshold));
-      console.log(
-        `  ${period.label}: ${counts?.devices ?? 0} connected / ${counts?.ops ?? 0} syncing`,
-      );
+      const threshold = BigInt(now - period.ms);
+      const result: ActiveCountRow[] = await prisma.$queryRaw`
+        SELECT
+          (SELECT COUNT(DISTINCT user_id) FROM sync_devices WHERE last_seen_at > ${threshold}) as device_count,
+          (SELECT COUNT(DISTINCT user_id) FROM operations WHERE received_at > ${threshold}) as ops_count;
+      `;
+      const devices = Number(result[0]?.device_count ?? 0);
+      const ops = Number(result[0]?.ops_count ?? 0);
+      console.log(`  ${period.label}: ${devices} connected / ${ops} syncing`);
     }
 
     // New users by time period
