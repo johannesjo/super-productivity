@@ -107,17 +107,17 @@
     }
 
     <!--
-      Ungated, so a demoted add button always has a way back (#9420). While sync
-      is demoted the trigger carries its state: the conflict badge and the
-      error/offline colour, so collapsing sync never hides the fact that it is
-      broken.
+      While sync is demoted the trigger carries its state — conflict badge,
+      glyph, warn colour and tooltip — so collapsing sync never hides the fact
+      that it is broken. Colour alone would be WCAG 1.4.1 and silent to a
+      screen reader, hence the glyph and the handed-over tooltip.
     -->
     @if (hasOverflow()) {
       <button
         class="header-overflow-btn secondary-header-action"
-        [class.is-error]="isDemotedSyncError()"
-        [class.is-offline]="isDemotedSyncOffline()"
-        [color]="isDemotedCounterRunning() ? 'accent' : ''"
+        [class.is-error]="demotedSyncState() === 'error'"
+        [class.is-offline]="demotedSyncState() === 'offline'"
+        [color]="!demotedSyncState() && isDemotedCounterRunning() ? 'accent' : ''"
         [matBadge]="demotedConflictCount()"
         [matBadgeHidden]="demotedConflictCount() === 0"
         matBadgeColor="accent"
@@ -133,11 +133,11 @@
         aria-controls="header-overflow-panel"
         [attr.aria-expanded]="isOverflowOpen()"
         [attr.aria-label]="T.G.MORE_ACTIONS | translate"
-        matTooltip="{{ T.G.MORE_ACTIONS | translate }}"
+        matTooltip="{{ overflowTooltip() | translate }}"
         mat-icon-button
         type="button"
       >
-        <mat-icon>{{ isOverflowOpen() ? 'close' : 'more_horiz' }}</mat-icon>
+        <mat-icon>{{ overflowIcon() }}</mat-icon>
       </button>
     }
   </nav>

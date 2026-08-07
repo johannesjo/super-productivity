@@ -130,6 +130,10 @@ describe('MainHeaderComponent focus button visibility', () => {
   let appFeatures = signal(DEFAULT_GLOBAL_CONFIG.appFeatures);
   let enabledSimpleCounters: SimpleCounter[] = [];
   let isAllDataLoaded = true;
+  // Plugins register their header buttons after boot, so this is writable: it
+  // is how a demotable slot appears at the *head* of the list while the bar is
+  // already collapsed.
+  let pluginHeaderButtons = signal<unknown[]>([]);
 
   const configureTestBed = (): void => {
     const cfg = {
@@ -163,7 +167,7 @@ describe('MainHeaderComponent focus button visibility', () => {
         {
           provide: PluginBridgeService,
           useValue: {
-            headerButtons: signal([]),
+            headerButtons: pluginHeaderButtons,
             workContextHeaderButtons: signal([]),
             sidePanelButtons: signal([]),
           },
@@ -251,6 +255,7 @@ describe('MainHeaderComponent focus button visibility', () => {
     appFeatures = signal(DEFAULT_GLOBAL_CONFIG.appFeatures);
     enabledSimpleCounters = [];
     isAllDataLoaded = true;
+    pluginHeaderButtons = signal<unknown[]>([]);
   });
 
   afterEach(() => {
@@ -297,7 +302,7 @@ describe('MainHeaderComponent focus button visibility', () => {
   let styleEl: HTMLStyleElement | undefined;
   let box: HTMLElement | undefined;
 
-  const mountAtWidth = async (width: number): Promise<HTMLElement> => {
+  const mountAtWidth = async (width: number, slotCss?: string): Promise<HTMLElement> => {
     configureTestBed();
     fixture = TestBed.createComponent(MainHeaderComponent);
     const host = fixture.nativeElement as HTMLElement;
@@ -306,8 +311,15 @@ describe('MainHeaderComponent focus button visibility', () => {
     // would also inflate the empty wrappers (no plugins, no counters here) and
     // measure widths that do not exist in production.
     styleEl.textContent =
+      slotCss ??
       `[data-slot="panelButtons"],[data-slot="sync"]` +
-      `{min-width:${SLOT_TEST_W}px !important}`;
+        `{min-width:${SLOT_TEST_W}px !important}` +
+        // In production an unpopulated plugin wrapper measures exactly 0: its
+        // two children are `display: contents` and produce no boxes, so there
+        // are no flex items and the wrapper's `gap` never applies. The stubs
+        // here ARE boxes, so without this the empty wrapper would measure one
+        // gap (4px) and mask the zero-width case the reflow has to survive.
+        `[data-slot="pluginHeader"]{gap:0 !important}`;
     document.head.appendChild(styleEl);
     box = document.createElement('div');
     box.style.width = `${width}px`;
@@ -395,6 +407,65 @@ describe('MainHeaderComponent focus button visibility', () => {
     expect(panel!.querySelector('desktop-panel-buttons')).toBeTruthy();
     expect(host.querySelector('[data-slot="sync"]')).toBeFalsy();
     expect(panel!.querySelector('.sync-btn')).toBeTruthy();
+  });
+
+  it('restores a slot that was demoted before it was ever measured (#9480)', async () => {
+    // `_demotedCount` is a prefix count over `_demotableIds`, so an id
+    // appearing at the HEAD of that list lands inside the already-demoted
+    // prefix without ever having been inline *with content* -- a plugin
+    // registering its header buttons while the bar is collapsed. Its only
+    // recorded width is the 0 it measured while empty, and the old
+    // `cost > 0` guard read that as "cannot be costed" and refused it forever:
+    // the panel held it, and the trigger stayed, at every width for the rest of
+    // the session.
+    const host = await mountAtWidth(320);
+    expect(host.querySelector('.header-overflow-btn')).toBeTruthy();
+    // Empty and inline, so the only width on record for it is 0.
+    expect(
+      host.querySelector('[data-slot="pluginHeader"]')!.getBoundingClientRect().width,
+    ).toBe(0);
+
+    // The plugin arrives while the header is already collapsed, and now has
+    // real buttons in it.
+    styleEl!.textContent += `[data-slot="pluginHeader"]{min-width:${SLOT_TEST_W}px !important}`;
+    pluginHeaderButtons.set([{ label: 'x', icon: 'x', onClick: () => {} }]);
+    await resizeTo(320);
+    expect(host.querySelector('[data-slot="pluginHeader"]')).toBeFalsy();
+
+    await resizeTo(1400);
+
+    // Fails against `cost > 0`: pluginHeader's recorded width is 0, so it is
+    // never restored and holds the trigger open even at 1400px.
+    expect(host.querySelector('[data-slot="pluginHeader"]')).toBeTruthy();
+    expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
+  });
+
+  it('does not demote a slot that is no wider than the trigger it adds (#9480)', async () => {
+    // On a phone the bottom nav owns add-task, the panel buttons and the
+    // side-panel buttons, so a default install with no plugins, no user
+    // profiles and no counters has exactly ONE demotable action: sync. Every
+    // header action is a 40px icon button and so is the overflow trigger, so
+    // demoting it removes 40px and immediately adds 40px back -- reclaiming
+    // nothing while hiding the app's only persistent sync indicator behind a
+    // tap. The row is still overflowing afterwards, and `count === ids.length`
+    // stops the loop, so it is not even a step towards a fix.
+    isXs = signal(true);
+    isXxxs = signal(true);
+
+    // Narrow enough that the row genuinely overflows, so the demote branch is
+    // reached and the guard is what stops it -- not a lack of pressure.
+    // Both boxed to the same 40px an icon button really is -- the stubbed
+    // `mat-icon` renders its ligature as literal text, so an unconstrained slot
+    // would measure the width of the word "sync_disabled" instead.
+    const host = await mountAtWidth(
+      50,
+      `[data-slot="sync"],.header-overflow-btn` +
+        `{width:40px !important;min-width:40px !important;` +
+        `max-width:40px !important;overflow:hidden !important}`,
+    );
+
+    expect(host.querySelector('[data-slot="sync"]')).toBeTruthy();
+    expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
   });
 
   it('keeps the add-task button in the bar at any width (#9480)', async () => {

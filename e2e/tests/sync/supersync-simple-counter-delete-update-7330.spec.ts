@@ -86,10 +86,25 @@ const createClickCounter = async (
 
 /** Increment the (single) click counter shown in the header by one. */
 const incrementCounter = async (client: SimulatedE2EClient): Promise<void> => {
+  // When the header has no room the counters move into the overflow panel
+  // (#9480), which is `opacity: 0` and `inert` until opened. Playwright counts
+  // that as "visible", so waiting on visibility is not enough — the click would
+  // land on a `pointer-events: none` node and time out. Open it first.
+  const inPanel = client.page.locator('.header-overflow-panel simple-counter-button');
+  if ((await inPanel.count()) > 0) {
+    if ((await client.page.locator('.header-overflow-panel.isVisible').count()) === 0) {
+      await client.page.locator('.header-overflow-btn').click();
+    }
+    const counter = client.page
+      .locator('.header-overflow-panel.isVisible simple-counter-button')
+      .first();
+    await counter.waitFor({ state: 'visible', timeout: 15000 });
+    await counter.locator('.main-btn').click();
+    return;
+  }
+
   const counter = client.page
-    .locator(
-      '.counters-action-group simple-counter-button, .header-overflow-panel simple-counter-button',
-    )
+    .locator('.counters-action-group simple-counter-button')
     .first();
   await counter.waitFor({ state: 'visible', timeout: 15000 });
   await counter.locator('.main-btn').click();

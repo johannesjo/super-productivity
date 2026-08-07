@@ -69,7 +69,7 @@ import { ConflictJournalService } from '../../op-log/sync/conflict-journal.servi
  * button is the only one, so it must not end up behind another tap. Sync yields
  * instead. Sync carries state — a conflict badge and an error/offline
  * condition — but the trigger republishes both while sync is demoted
- * (`isDemotedSyncError`, `demotedConflictCount`), which a hidden add button has
+ * (`demotedSyncState`, `demotedConflictCount`), which a hidden add button has
  * no equivalent of.
  */
 type DemotableId =
@@ -531,11 +531,15 @@ export class MainHeaderComponent implements OnDestroy {
       return;
     }
 
+    // Record every slot that is inline, including a zero-width one. The width
+    // is what the restore branch costs against, and a slot that is *never*
+    // recorded takes the unmeasured path below every single pass — which turns
+    // a one-off optimistic restore into a permanent ping-pong.
     for (const el of Array.from(nav.querySelectorAll<HTMLElement>('[data-slot]'))) {
-      const w = el.getBoundingClientRect().width;
-      if (w > 0) {
-        this._slotWidths.set(el.dataset.slot as DemotableId, w);
-      }
+      this._slotWidths.set(
+        el.dataset.slot as DemotableId,
+        el.getBoundingClientRect().width,
+      );
     }
     const trigger = nav.querySelector('.header-overflow-btn') as HTMLElement | null;
     if (trigger) {
@@ -543,9 +547,24 @@ export class MainHeaderComponent implements OnDestroy {
     }
 
     if (free < -FIT_EPSILON && count < ids.length) {
-      this._demotedCount.set(count + 1);
-      this._scheduleReflow();
-      return;
+      // A demotion is only worth making if it actually frees width. The first
+      // one introduces the trigger, so it frees only the difference — and every
+      // header action is a 40px icon button, as is the trigger, so "remove one
+      // button, add one button, gain nothing" is a reachable state rather than
+      // a rounding concern. On a phone the bottom nav owns add-task, the panel
+      // buttons and the side-panel buttons, so a default install with no
+      // plugins, no profiles and no counters has exactly ONE demotable: sync.
+      // Demoting it would reclaim zero pixels, leave the row still overflowing,
+      // and hide the app's only persistent sync indicator behind a tap. Mirror
+      // of the restore branch's `refund`.
+      const gain =
+        (this._slotWidths.get(ids[count]) ?? 0) -
+        (count === 0 ? this._triggerWidth || this._estimatedTriggerWidth(nav) : 0);
+      if (gain > FIT_EPSILON) {
+        this._demotedCount.set(count + 1);
+        this._scheduleReflow();
+        return;
+      }
     }
     if (free > FIT_EPSILON && count > 0) {
       // Bringing one back costs its own width but refunds the trigger when it
@@ -566,6 +585,19 @@ export class MainHeaderComponent implements OnDestroy {
         this._scheduleReflow();
       }
     }
+  }
+
+  /**
+   * What the overflow trigger will cost before one has ever been rendered, so
+   * the very first demotion can still tell a worthwhile trade from a pointless
+   * one. Read from `--header-button-size`, the token every header action is
+   * sized by, rather than restated as a number here — same reason the title's
+   * floor is read back out of its own stylesheet. Superseded by the measured
+   * width as soon as a trigger exists.
+   */
+  private _estimatedTriggerWidth(nav: HTMLElement): number {
+    const size = getComputedStyle(nav).getPropertyValue('--header-button-size');
+    return parseFloat(size) || 0;
   }
 
   /**
@@ -716,20 +748,56 @@ export class MainHeaderComponent implements OnDestroy {
     () => this.isDemotedCounters() && this.enabledSimpleCounters().some((c) => c.isOn),
   );
 
-  // Sync is the one demotable action that carries state the user is supposed to
-  // notice without opening anything: a conflict count and an error/offline
-  // condition. Republish both on the trigger while it is hidden, otherwise
-  // demoting sync silently swallows the only signal that sync is broken.
-  readonly isDemotedSyncError = computed(
-    () =>
-      this.isDemotedSync() &&
-      !!this.syncIsEnabledAndReady() &&
-      this.isOnline() &&
-      this.syncState() === 'ERROR',
+  // Sync is the one demotable action carrying state the user is meant to notice
+  // without opening anything, and `MainHeaderComponent` is the app's only
+  // consumer of `syncState$` — several ERROR transitions show no snack at all,
+  // so this button is the whole persistent signal. While sync is in the panel
+  // the trigger has to speak for it.
+  //
+  // One computed rather than a class binding per state, so the precedence is a
+  // testable line of code instead of a cascade accident, and so a seventh slot
+  // wanting the trigger's attention has somewhere to plug in. Order matches the
+  // inline button's own icon cascade: offline short-circuits before error.
+  //
+  // Deliberately does NOT republish `!syncIsEnabledAndReady()`. Inline that
+  // renders `sync_disabled`, but it is also the resting state of everyone who
+  // has never configured sync, so mirroring it would brand the trigger for the
+  // majority who have nothing wrong. The cost is that a mid-session credential
+  // revocation reads as plain "more actions" until the panel is opened.
+  readonly demotedSyncState = computed<'offline' | 'error' | null>(() => {
+    if (!this.isDemotedSync() || !this.syncIsEnabledAndReady()) {
+      return null;
+    }
+    if (!this.isOnline()) {
+      return 'offline';
+    }
+    return this.syncState() === 'ERROR' ? 'error' : null;
+  });
+
+  /**
+   * Colour alone would be WCAG 1.4.1 — and useless to a screen reader — so the
+   * trigger also swaps its glyph and hands its tooltip over to `syncTooltip()`,
+   * which MatTooltip exposes as `aria-describedby`. The `aria-label` stays
+   * "More actions": that is still what the button *does*.
+   */
+  readonly overflowIcon = computed(() => {
+    if (this.isOverflowOpen()) {
+      return 'close';
+    }
+    switch (this.demotedSyncState()) {
+      case 'error':
+        return 'sync_problem';
+      case 'offline':
+        return 'wifi_off';
+      default:
+        return 'more_horiz';
+    }
+  });
+
+  readonly overflowTooltip = computed(() =>
+    this.demotedSyncState() ? this.syncTooltip() : T.G.MORE_ACTIONS,
   );
-  readonly isDemotedSyncOffline = computed(
-    () => this.isDemotedSync() && !!this.syncIsEnabledAndReady() && !this.isOnline(),
-  );
+
   readonly demotedConflictCount = computed(() =>
     this.isDemotedSync() ? this.unreviewedConflictCount() : 0,
   );

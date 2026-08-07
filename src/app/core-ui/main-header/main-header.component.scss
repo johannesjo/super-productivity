@@ -222,7 +222,10 @@ page-title {
   display: flex;
   transition: var(--transition-standard);
   top: 100%;
-  right: var(--s2);
+  // Logical, not `right`: the nav flips to the left edge in RTL (see the
+  // `[dir='rtl']` rule above), and the panel has to follow its trigger. The
+  // `.mobile-dropdown` this replaces was centred, so it never had to care.
+  inset-inline-end: var(--s2);
   flex-direction: column;
   align-items: center;
   z-index: 2;
