@@ -922,6 +922,7 @@ export class PluginBridgeService implements OnDestroy {
           isDone: (taskData as { isDone?: boolean }).isDone || false,
           tagIds: [], // Subtasks don't have tags
           projectId: taskData.projectId || undefined,
+          dueDay: taskData.dueDay ?? undefined,
           ...subTaskTitleProps.timeProps,
         },
       });
@@ -1734,17 +1735,21 @@ export class PluginBridgeService implements OnDestroy {
       }
     }
 
-    // Validate parent task exists if provided
+    // Validate parent task exists and is not itself a subtask if provided
     if (parentId) {
       const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
 
-      const parentExists = tasks?.some((task) => task.id === parentId);
-      if (!parentExists) {
+      const parent = tasks?.find((task) => task.id === parentId);
+      if (!parent) {
         errors.push(
           this._translateService.instant(T.PLUGINS.PARENT_TASK_DOES_NOT_EXIST, {
             parentId,
           }),
         );
+      } else if (parent.parentId) {
+        // The task model is two levels deep; the reducer would happily write a
+        // 3-level tree. Mirrors the local REST API's INVALID_PARENT rejection.
+        errors.push(this._translateService.instant(T.PLUGINS.CANNOT_NEST_SUBTASKS));
       }
     }
 

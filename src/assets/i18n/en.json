@@ -3036,6 +3036,7 @@
     "AUTHORED_BY": "by {{author}}",
     "CHOOSE_PLUGIN_FILE": "Choose Plugin File",
     "CLEAR_PLUGIN_CACHE": "Clear Plugin Cache",
+    "CANNOT_NEST_SUBTASKS": "Cannot nest subtasks: parent task is itself a subtask",
     "CODE_TOO_LARGE": "Plugin code is too large (max {{maxSize}}MB)",
     "CONFIGURATION": "Configuration",
     "CONFIGURE": "Configure",

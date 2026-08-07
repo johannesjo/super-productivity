@@ -33,6 +33,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.
 describe('PluginBridgeService.addTask() — subtask short-syntax (issue #7437)', () => {
   const setup = (
     isEnableDue: boolean,
+    allTasks: Task[] = [{ id: 'parent-1' } as Task],
   ): {
     service: PluginBridgeService;
     store: jasmine.SpyObj<Store>;
@@ -44,7 +45,7 @@ describe('PluginBridgeService.addTask() — subtask short-syntax (issue #7437)',
       'createNewTaskWithDefaults',
       'add',
     ]);
-    taskServiceSpy.allTasks$ = of([{ id: 'parent-1' } as Task]);
+    taskServiceSpy.allTasks$ = of(allTasks);
 
     const projectServiceSpy = jasmine.createSpyObj('ProjectService', [], {
       list$: of([]),
@@ -102,7 +103,12 @@ describe('PluginBridgeService.addTask() — subtask short-syntax (issue #7437)',
         },
         {
           provide: TranslateService,
-          useValue: { instant: (key: string) => key },
+          useValue: {
+            // Keep the params in the string so error assertions can see which
+            // validation message was raised.
+            instant: (key: string, params?: object) =>
+              params ? `${key} ${JSON.stringify(params)}` : key,
+          },
         },
         {
           provide: SyncWrapperService,
@@ -178,5 +184,50 @@ describe('PluginBridgeService.addTask() — subtask short-syntax (issue #7437)',
     const factoryCall = taskService.createNewTaskWithDefaults.calls.mostRecent();
     expect(factoryCall.args[0].title).toBe('subtask1 15m');
     expect(factoryCall.args[0].additional?.timeEstimate).toBe(0);
+  });
+
+  // PluginCreateTaskData advertises dueDay, and TaskService.addSubTaskTo (used by
+  // the local REST API) honours it — the plugin path used to drop it silently.
+  it('passes dueDay through for subtasks', async () => {
+    const { service, store, taskService } = setup(true);
+
+    await service.addTask({
+      title: 'a subtask',
+      parentId: 'parent-1',
+      dueDay: '2026-08-07',
+    });
+
+    const factoryCall = taskService.createNewTaskWithDefaults.calls.mostRecent();
+    expect(factoryCall.args[0].additional?.dueDay).toBe('2026-08-07');
+
+    const dispatched = store.dispatch.calls.mostRecent().args[0] as unknown as ReturnType<
+      typeof addSubTask
+    >;
+    expect(dispatched.task.dueDay).toBe('2026-08-07');
+  });
+
+  it('leaves dueDay undefined when not given', async () => {
+    const { service, taskService } = setup(true);
+
+    await service.addTask({ title: 'a subtask', parentId: 'parent-1' });
+
+    const factoryCall = taskService.createNewTaskWithDefaults.calls.mostRecent();
+    expect(factoryCall.args[0].additional?.dueDay).toBeUndefined();
+  });
+
+  // The task model is only two levels deep and the addSubTask reducer doesn't
+  // check depth, so the guard has to live in validation — same as the local
+  // REST API's INVALID_PARENT / "Cannot nest subtasks" rejection.
+  it('rejects a parentId that is itself a subtask', async () => {
+    const { service, store } = setup(true, [
+      { id: 'parent-1' } as Task,
+      { id: 'sub-1', parentId: 'parent-1' } as Task,
+    ]);
+
+    await expectAsync(
+      service.addTask({ title: 'nested', parentId: 'sub-1' }),
+    ).toBeRejectedWithError(/CANNOT_NEST_SUBTASKS/);
+
+    expect(store.dispatch).not.toHaveBeenCalled();
   });
 });
