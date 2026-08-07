@@ -223,17 +223,23 @@ export class AddTaskBarActionsComponent {
     if (!move) {
       return '';
     }
-    const dateStr = dateStrToUtcDate(move.date).toLocaleDateString(
-      // Spelled-out weekday and month follow the UI language under the ISO
-      // option, so they aren't shown in Swedish (the `sv` sentinel).
-      this._dateTimeFormatService.textLocale(),
-      { weekday: 'long', month: 'long', day: 'numeric' },
-    );
+    // Spelled-out weekday and month follow the UI language under the ISO
+    // option, so they aren't shown in Swedish (the `sv` sentinel).
+    const locale = this._dateTimeFormatService.textLocale();
+    const dayStr = (dateStr: string): string =>
+      dateStrToUtcDate(dateStr).toLocaleDateString(locale, {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+      });
     return this._translateService.instant(
       move.type === 'MOVED'
         ? T.F.TASK.ADD_TASK_BAR.A11Y_DATE_MOVED_FOR_WORKDAYS
         : T.F.TASK.ADD_TASK_BAR.A11Y_DATE_MOVED_BACK,
-      { dateStr },
+      // The day moved off is named so that two weekend days rolling to the same
+      // Monday do not produce the same sentence twice — an unchanged live region
+      // is a silent one
+      { fromDateStr: dayStr(move.from), toDateStr: dayStr(move.to) },
     );
   });
 

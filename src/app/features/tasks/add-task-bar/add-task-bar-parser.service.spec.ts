@@ -2064,8 +2064,10 @@ describe('AddTaskBarParserService', () => {
       quickSetting: 'MONDAY_TO_FRIDAY' as const,
     };
     const DAILY = { type: 'PRESET' as const, quickSetting: 'DAILY' as const };
-    // 2027-03-27 is a Saturday, 2027-03-29 the Monday after it
+    // 2027-03-27 is a Saturday, 2027-03-28 the Sunday and 2027-03-29 the Monday
+    // after it
     const SATURDAY = '2027-03-27';
+    const SUNDAY = '2027-03-28';
     const MONDAY = '2027-03-29';
     const cfg = {
       isEnableProject: true,
@@ -2253,6 +2255,46 @@ describe('AddTaskBarParserService', () => {
       await inFlight;
 
       expect(realState.state().date).toBe(MONDAY);
+    });
+
+    // Every parse of the unchanged token re-derives the roll already standing.
+    // That is not a move the user has to be told about a second time, so the
+    // published move stays the very same one — a consumer of this signal cannot
+    // tell a repeat from a new event any other way.
+    it('should publish no new move for a roll it only re-derived', async () => {
+      realState.updateInputTxt(`Standup @${SATURDAY}`);
+      await parse(`Standup @${SATURDAY}`);
+      service.applyUserRepeatPick(WORKDAYS);
+      const announced = service.workdayDateMove();
+      expect(announced).toEqual({ type: 'MOVED', from: SATURDAY, to: MONDAY });
+
+      realState.updateInputTxt(`Standups @${SATURDAY}`);
+      await parse(`Standups @${SATURDAY}`);
+
+      expect(realState.state().date).toBe(MONDAY);
+      expect(service.workdayDateMove()).toBe(announced);
+    });
+
+    it('should publish a move for each weekend day that lands on the same Monday', async () => {
+      // The second pick is a second automatic adjustment, and nothing about the
+      // day it lands on says so — the day it moved off is what tells the two
+      // announcements apart.
+      service.applyUserRepeatPick(WORKDAYS);
+      service.applyUserDatePick(SATURDAY, null, null);
+      expect(service.workdayDateMove()).toEqual({
+        type: 'MOVED',
+        from: SATURDAY,
+        to: MONDAY,
+      });
+
+      service.applyUserDatePick(SUNDAY, null, null);
+
+      expect(realState.state().date).toBe(MONDAY);
+      expect(service.workdayDateMove()).toEqual({
+        type: 'MOVED',
+        from: SUNDAY,
+        to: MONDAY,
+      });
     });
 
     it('should not let it republish any other value the pick replaced either', async () => {

@@ -58,10 +58,18 @@ const isSameRepeat = (
 /**
  * A date change the bar made on the user's behalf, for the screen-reader
  * announcement — nothing else in this bar moves the date without being asked.
+ *
+ * Both days are named, and not for reading comfort: every weekend day rolls to
+ * the same Monday, so the day moved *off* is the only thing that tells one
+ * automatic move apart from the next. A live region re-set to the text it
+ * already held announces nothing at all.
  */
 export interface WorkdayDateMove {
   type: 'MOVED' | 'RESTORED';
-  date: string;
+  /** The day the date was on before this move. */
+  from: string;
+  /** The day the date holds now. */
+  to: string;
 }
 
 @Injectable()
@@ -450,6 +458,11 @@ export class AddTaskBarParserService {
    * the same reset, so leaving its Monday behind would hand the next,
    * non-recurring task a day the user never picked: the lie this roll exists to
    * prevent, one task later.
+   *
+   * Giving it back is a date change nobody asked for, exactly like the roll
+   * itself, so it is announced the same way. The bar is reset here, not
+   * dismissed — focus returns to its title field and the date button keeps
+   * showing the day the next task will get.
    */
   resetPreviousResult(): void {
     this._parseRunId++;
@@ -457,10 +470,12 @@ export class AddTaskBarParserService {
     const roll = this._workdayRoll();
     if (roll && roll.to === this._stateService.state().date) {
       this._stateService.updateDate(roll.from);
+      this._workdayDateMove.set({ type: 'RESTORED', from: roll.to, to: roll.from });
+    } else {
+      // Nothing was given back, so the move the region still describes is over
+      this._workdayDateMove.set(null);
     }
     this._workdayRoll.set(null);
-    // Nothing to announce: the bar the announcement described is gone
-    this._workdayDateMove.set(null);
   }
 
   /**
@@ -587,12 +602,19 @@ export class AddTaskBarParserService {
     this._workdayRoll.set(roll);
     if (roll) {
       // Re-deriving the roll already standing on every keystroke is not a new
-      // move, and announcing it again would talk over the user typing
-      if (roll.to !== previous?.to) {
-        this._workdayDateMove.set({ type: 'MOVED', date: roll.to });
+      // move, and announcing it again would talk over the user typing. The day
+      // it moves off is part of that comparison, not decoration: choosing the
+      // Sunday after the Saturday is a second automatic move, and both end on
+      // the same Monday, so the destination alone reads as nothing happening.
+      if (roll.from !== previous?.from || roll.to !== previous?.to) {
+        this._workdayDateMove.set({ type: 'MOVED', ...roll });
       }
     } else if (previous && base === previous.from) {
-      this._workdayDateMove.set({ type: 'RESTORED', date: previous.from });
+      this._workdayDateMove.set({
+        type: 'RESTORED',
+        from: previous.to,
+        to: previous.from,
+      });
     }
     return rolled || base;
   }

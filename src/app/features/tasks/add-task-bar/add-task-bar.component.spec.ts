@@ -631,6 +631,14 @@ describe('AddTaskBarComponent', () => {
 
       expect(component.stateService.state().repeat).toBeNull();
       expect(component.stateService.state().date).toBe('2026-03-28');
+      // The bar is reset, not gone: the day the next task will be given just
+      // changed on a control nobody is focused on, so it is announced like the
+      // roll that produced it
+      expect(parserService.workdayDateMove()).toEqual({
+        type: 'RESTORED',
+        from: '2026-03-30',
+        to: '2026-03-28',
+      });
     });
 
     it('should copy entered notes to an inline repeat preset config (discussion #937)', async () => {

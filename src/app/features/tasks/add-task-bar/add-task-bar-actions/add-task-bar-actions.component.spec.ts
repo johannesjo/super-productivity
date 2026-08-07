@@ -725,13 +725,20 @@ describe('AddTaskBarActionsComponent', () => {
   describe('Repeat Setting against real add bar state', () => {
     let realState: AddTaskBarStateService;
     let realParser: AddTaskBarParserService;
-    // 2027-03-27 is a Saturday, 2027-03-29 the Monday after it
+    // 2027-03-27 is a Saturday, 2027-03-28 the Sunday and 2027-03-29 the Monday
+    // after it
     const SATURDAY = '2027-03-27';
+    const SUNDAY = '2027-03-28';
     const MONDAY = '2027-03-29';
     const WORKDAYS = {
       type: 'PRESET' as const,
       quickSetting: 'MONDAY_TO_FRIDAY' as const,
     };
+    const region = (): HTMLElement =>
+      fixture.nativeElement.querySelector(
+        '[data-test="add-task-bar-date-move-announcement"]',
+      );
+    const announcement = (): string => region().textContent?.trim() ?? '';
 
     beforeEach(async () => {
       TestBed.resetTestingModule();
@@ -764,8 +771,9 @@ describe('AddTaskBarActionsComponent', () => {
         F: {
           TASK: {
             ADD_TASK_BAR: {
-              A11Y_DATE_MOVED_BACK: 'Date moved back to {{dateStr}}',
-              A11Y_DATE_MOVED_FOR_WORKDAYS: 'Date moved to {{dateStr}}',
+              A11Y_DATE_MOVED_BACK: 'Date moved back to {{toDateStr}}',
+              A11Y_DATE_MOVED_FOR_WORKDAYS:
+                'Date moved from {{fromDateStr}} to {{toDateStr}}',
             },
           },
           TASK_REPEAT: {
@@ -802,10 +810,6 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should announce a date it moved by itself, and moving it back', () => {
-      const region = (): HTMLElement =>
-        fixture.nativeElement.querySelector(
-          '[data-test="add-task-bar-date-move-announcement"]',
-        );
       // Present from the start: a live region added along with its text is not
       // reliably announced
       expect(region().getAttribute('aria-live')).toBe('polite');
@@ -815,23 +819,54 @@ describe('AddTaskBarActionsComponent', () => {
       realParser.applyUserRepeatPick(WORKDAYS);
       fixture.detectChanges();
 
-      expect(region().textContent?.trim()).toBe('Date moved to Monday, March 29');
+      expect(announcement()).toBe(
+        'Date moved from Saturday, March 27 to Monday, March 29',
+      );
 
       realParser.applyUserRepeatPick(null);
       fixture.detectChanges();
 
-      expect(region().textContent?.trim()).toBe('Date moved back to Saturday, March 27');
+      expect(announcement()).toBe('Date moved back to Saturday, March 27');
+    });
+
+    // Every weekend day rolls to the same Monday, so a second weekend pick is a
+    // second automatic move that the destination day cannot describe: the
+    // region would keep the text it already had, which is announced as nothing
+    it('should announce a second weekend day moved to the same Monday', () => {
+      realParser.applyUserRepeatPick(WORKDAYS);
+      realParser.applyUserDatePick(SATURDAY, null, null);
+      fixture.detectChanges();
+      expect(announcement()).toBe(
+        'Date moved from Saturday, March 27 to Monday, March 29',
+      );
+
+      realParser.applyUserDatePick(SUNDAY, null, null);
+      fixture.detectChanges();
+
+      expect(realState.state().date).toBe(MONDAY);
+      expect(announcement()).toBe('Date moved from Sunday, March 28 to Monday, March 29');
+    });
+
+    // The reset after an add keeps the date and drops the recurrence, so it
+    // gives the picked day back — a date change nobody asked for, on a bar
+    // whose live region is still mounted
+    it('should announce the day the reset after an add gives back', () => {
+      realParser.applyUserDatePick(SATURDAY, null, null);
+      realParser.applyUserRepeatPick(WORKDAYS);
+      realState.resetAfterAdd();
+
+      realParser.resetPreviousResult();
+      fixture.detectChanges();
+
+      expect(realState.state().date).toBe(SATURDAY);
+      expect(announcement()).toBe('Date moved back to Saturday, March 27');
     });
 
     it('should stay quiet about a date the user set themselves', () => {
       realParser.applyUserDatePick(SATURDAY, null, null);
       fixture.detectChanges();
 
-      expect(
-        fixture.nativeElement
-          .querySelector('[data-test="add-task-bar-date-move-announcement"]')
-          .textContent?.trim(),
-      ).toBe('');
+      expect(announcement()).toBe('');
     });
   });
 
