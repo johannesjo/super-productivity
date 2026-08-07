@@ -208,9 +208,14 @@ export class AddTaskBarActionsComponent {
   // the guarantee, because the only preset that is rolled is the one whose
   // label names no weekday ("Workdays"); a preset whose label does name one
   // derives its own anchor from this date and is never rolled.
+  //
+  // The no-date fallback is the *logical* today, matching the `todayStr()` the
+  // submit path falls back to. A wall-clock `new Date()` would name yesterday's
+  // weekday between midnight and the configured start of the next day, so the
+  // label and the saved config would disagree in exactly that window.
   private _repeatRefDate = computed(() => {
     const dateStr = this.state().date;
-    return dateStr ? dateStrToUtcDate(dateStr) : new Date();
+    return dateStr ? dateStrToUtcDate(dateStr) : this._dateService.getLogicalTodayDate();
   });
 
   repeatQuickOptions = computed(() => {
