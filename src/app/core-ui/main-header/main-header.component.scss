@@ -205,17 +205,30 @@ page-title {
   position: relative;
 }
 
-.counters-dropdown {
+// Wrappers around each demotable action. They exist to be measured — the
+// reflow pass reads their real width instead of predicting it from the button
+// sizes and gaps declared in other stylesheets (#9480). `display: contents`
+// would leave nothing to measure, so they are real flex boxes carrying the same
+// gap the nav does, which keeps the row looking identical.
+[data-slot] {
+  display: flex;
+  align-items: center;
+  gap: var(--header-nav-button-gap);
+  flex-shrink: 0;
+}
+
+.header-overflow-panel {
   position: absolute;
   display: flex;
   transition: var(--transition-standard);
   top: 100%;
   right: var(--s2);
   flex-direction: column;
+  align-items: center;
   z-index: 2;
   pointer-events: none;
   opacity: 0;
-  // Scrolling support for many counters (fixes #5999)
+  // Many demoted actions (notably counters) must stay reachable, #5999.
   max-height: calc(100dvh - 120px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -231,7 +244,9 @@ page-title {
     box-shadow: var(--whiteframe-shadow-2dp);
   }
 
-  simple-counter-button {
+  // The demoted components keep their own `display: contents`, so their buttons
+  // become direct children of this column.
+  > * {
     flex-shrink: 0;
   }
 }

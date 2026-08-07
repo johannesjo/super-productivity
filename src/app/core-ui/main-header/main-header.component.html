@@ -1,3 +1,9 @@
+<!--
+  Actions that do not fit move into the overflow panel below, in the order set
+  by DEMOTION_ORDER. Each demotable action is wrapped in a `[data-slot]` element
+  so the reflow pass can measure what it actually costs instead of predicting it
+  from copied CSS constants (#9480).
+-->
 <div class="wrapper">
   @if (isDataLoaded()) {
     <page-title></page-title>
@@ -16,21 +22,22 @@
 
       <!-- Not gated on isDataLoaded: the shell paints before op-log hydration
            finishes, and the primary quick-capture entry point must not be
-           missing for that window (#9420). The overflow trigger below is
-           likewise ungated, so a demoted add button is never nowhere. -->
+           missing for that window (#9420). -->
       @if (showAddTaskInline()) {
-        <button
-          emlDrop
-          (click)="layoutService.showAddTaskBar()"
-          matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
-            kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
-          }}"
-          class="tour-addBtn"
-          color="primary"
-          mat-icon-button
-        >
-          <mat-icon>add</mat-icon>
-        </button>
+        <div data-slot="addTask">
+          <button
+            emlDrop
+            (click)="layoutService.showAddTaskBar()"
+            matTooltip="{{ T.MH.ADD_NEW_TASK | translate }} {{
+              kb.addNewTask ? '[' + kb.addNewTask + ']' : ''
+            }}"
+            class="tour-addBtn"
+            color="primary"
+            mat-icon-button
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
       }
     </div>
 
@@ -40,24 +47,20 @@
         @if (isFocusButtonVisible()) {
           <focus-button></focus-button>
         }
-        <!--
-          Counters stay mounted whether or not they are visible: each owns its
-          countdown-completion subscription, so destroying them would silently
-          stop repeated-countdown reminders. When the row is tight they collapse
-          behind a toggle rather than moving into the overflow menu.
-        -->
-        @if (!areCountersCollapsed()) {
-          @for (
-            simpleCounter of enabledSimpleCounters();
-            track trackById($index, simpleCounter)
-          ) {
-            @if (!simpleCounter.isHideButton) {
-              <simple-counter-button
-                [matTooltip]="simpleCounter.title"
-                [simpleCounter]="simpleCounter"
-              ></simple-counter-button>
+        @if (showCountersInline()) {
+          <div data-slot="counters">
+            @for (
+              simpleCounter of enabledSimpleCounters();
+              track trackById($index, simpleCounter)
+            ) {
+              @if (!simpleCounter.isHideButton) {
+                <simple-counter-button
+                  [matTooltip]="simpleCounter.title"
+                  [simpleCounter]="simpleCounter"
+                ></simple-counter-button>
+              }
             }
-          }
+          </div>
         }
       </div>
 
@@ -116,167 +119,124 @@
       }
 
       @if (showPluginBtnsInline()) {
-        <plugin-work-context-header-btns
-          class="secondary-header-action"
-        ></plugin-work-context-header-btns>
-        <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
+        <div data-slot="pluginHeader">
+          <plugin-work-context-header-btns
+            class="secondary-header-action"
+          ></plugin-work-context-header-btns>
+          <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
+        </div>
       }
 
-      @if (isUserProfilesEnabled()) {
-        <user-profile-button class="secondary-header-action"></user-profile-button>
+      @if (showUserProfileInline()) {
+        <div data-slot="userProfile">
+          <user-profile-button class="secondary-header-action"></user-profile-button>
+        </div>
       }
 
-      <!-- Keyed to the bottom nav (which carries these on mobile), never to the
-           fit: the overflow menu has no row for them - they carry plugin-supplied
-           icons and toggled state - so demoting them would make them unreachable,
-           the exact failure #9480 exists to fix. `_pinnedWidth` bills them so. -->
-      @if (showSidePanelBtns()) {
-        <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
+      @if (showSidePanelBtnsInline()) {
+        <div data-slot="sidePanelBtns">
+          <plugin-side-panel-btns
+            class="secondary-header-action"
+          ></plugin-side-panel-btns>
+        </div>
       }
 
       @if (showPanelBtnsInline()) {
-        <desktop-panel-buttons
-          class="secondary-header-action"
-          [kb]="kb"
-          [isRouteWithSidePanel]="isRouteWithSidePanel()"
-          [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
-          [isShowIssuePanel]="isShowIssuePanel()"
-          [isShowNotes]="isShowNotes()"
-        ></desktop-panel-buttons>
-      }
-
-      <!-- Collapsed counters live behind their own toggle, not the overflow
-           menu, so they stay mounted (see the comment on the group above). -->
-      @if (areCountersCollapsed() && enabledSimpleCounters().length) {
-        <button
-          (click)="isShowCountersDropdown.set(!isShowCountersDropdown())"
-          [color]="isCounterRunning(enabledSimpleCounters()) ? 'accent' : ''"
-          aria-controls="header-counters-menu"
-          [attr.aria-expanded]="isShowCountersDropdown()"
-          [attr.aria-label]="T.F.METRIC.CMP.SIMPLE_COUNTERS | translate"
-          class="counters-toggle-btn secondary-header-action"
-          mat-icon-button
-          type="button"
-        >
-          <mat-icon>{{ isShowCountersDropdown() ? 'close' : 'timer' }}</mat-icon>
-        </button>
+        <div data-slot="panelButtons">
+          <desktop-panel-buttons
+            class="secondary-header-action"
+            [kb]="kb"
+            [isRouteWithSidePanel]="isRouteWithSidePanel()"
+            [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
+            [isShowIssuePanel]="isShowIssuePanel()"
+            [isShowNotes]="isShowNotes()"
+          ></desktop-panel-buttons>
+        </div>
       }
     }
 
-    <!-- Ungated, so a demoted add button always has a way back (see above). -->
+    <!-- Ungated, so a demoted add button always has a way back (#9420). -->
     @if (hasOverflow()) {
       <button
         class="header-overflow-btn secondary-header-action"
-        [matMenuTriggerFor]="overflowMenu"
+        [color]="isDemotedCounterRunning() ? 'accent' : ''"
+        (click)="toggleOverflow()"
+        aria-controls="header-overflow-panel"
+        [attr.aria-expanded]="isOverflowOpen()"
         [attr.aria-label]="T.G.MORE_ACTIONS | translate"
         matTooltip="{{ T.G.MORE_ACTIONS | translate }}"
         mat-icon-button
+        type="button"
       >
-        <mat-icon>more_horiz</mat-icon>
+        <mat-icon>{{ isOverflowOpen() ? 'close' : 'more_horiz' }}</mat-icon>
       </button>
     }
   </nav>
 </div>
 
 <!--
-  Counters dropdown. Anchored to the nav rather than rendered in an overlay so
-  the buttons stay mounted while collapsed; `inert` keeps them out of the tab
-  order and the a11y tree when hidden (#9272).
+  Overflow panel. Anchored to the header rather than rendered into a `mat-menu`
+  overlay, and holding the *real* action components rather than flat menu rows.
+  Both follow from one constraint: a mat-menu instantiates its content only
+  while open, and `simple-counter-button` owns its countdown-completion
+  subscription — a counter that existed only while the panel was open would stop
+  firing repeated-countdown reminders. Keeping the components also keeps their
+  tooltips, toggled state and nested menus instead of reimplementing them.
+  `inert` holds the hidden panel out of the tab order and the a11y tree (#9272).
 -->
-@if (isDataLoaded() && areCountersCollapsed() && enabledSimpleCounters().length) {
+@if (isDataLoaded() && hasOverflow()) {
   <div
-    id="header-counters-menu"
-    class="counters-dropdown"
-    [class.isVisible]="isShowCountersDropdown()"
-    [attr.aria-hidden]="!isShowCountersDropdown()"
-    [attr.inert]="isShowCountersDropdown() ? null : ''"
+    id="header-overflow-panel"
+    class="header-overflow-panel"
+    [class.isVisible]="isOverflowOpen()"
+    [attr.aria-hidden]="!isOverflowOpen()"
+    [attr.inert]="isOverflowOpen() ? null : ''"
   >
-    @for (
-      simpleCounter of enabledSimpleCounters();
-      track trackById($index, simpleCounter)
-    ) {
-      @if (!simpleCounter.isHideButton) {
-        <simple-counter-button [simpleCounter]="simpleCounter"></simple-counter-button>
-      }
-    }
-  </div>
-}
-
-<!--
-  Overflow menu: real `mat-menu-item` rows, so it is keyboard-navigable, exposes
-  a valid `menu` / `menuitem` structure, and closes on activation. Only stateless
-  trigger actions land here — see DemotableHeaderItem for why.
--->
-<mat-menu
-  #overflowMenu="matMenu"
->
-  <ng-template matMenuContent>
     @if (isDemotedPluginBtns()) {
-      @for (button of pluginWorkContextBtns(); track button.pluginId + button.label) {
-        <button
-          mat-menu-item
-          (click)="onWorkContextPluginBtnClick(button)"
-        >
-          <mat-icon>{{ button.icon }}</mat-icon>
-          <span>{{ button.label }}</span>
-        </button>
-      }
-      @for (button of pluginHeaderBtns(); track button.pluginId + button.label) {
-        <button
-          mat-menu-item
-          (click)="button.onClick()"
-        >
-          <mat-icon>{{ button.icon }}</mat-icon>
-          <span>{{ button.label }}</span>
-        </button>
-      }
+      <plugin-work-context-header-btns></plugin-work-context-header-btns>
+      <plugin-header-btns></plugin-header-btns>
+    }
+
+    @if (isDemotedUserProfile()) {
+      <user-profile-button></user-profile-button>
+    }
+
+    @if (isDemotedSidePanelBtns()) {
+      <plugin-side-panel-btns></plugin-side-panel-btns>
     }
 
     @if (isDemotedPanelBtns()) {
-      @if (isScheduleDayPanelEnabled()) {
-        <button
-          mat-menu-item
-          class="e2e-toggle-schedule-day-panel"
-          [disabled]="!isRouteWithSidePanel()"
-          (click)="layoutService.toggleScheduleDayPanel()"
-        >
-          <mat-icon>schedule</mat-icon>
-          <span>{{ T.MH.SCHEDULE | translate }}</span>
-        </button>
-      }
-      @if (isIssuesPanelEnabled()) {
-        <button
-          mat-menu-item
-          class="e2e-toggle-issue-provider-panel"
-          [disabled]="!isRouteWithSidePanel()"
-          (click)="layoutService.toggleAddTaskPanel()"
-        >
-          <mat-icon>webhook</mat-icon>
-          <span>{{ T.MH.TOGGLE_SHOW_ISSUE_PANEL | translate }}</span>
-        </button>
-      }
-      @if (isProjectNotesEnabled()) {
-        <button
-          mat-menu-item
-          class="e2e-toggle-notes-btn"
-          [disabled]="!isRouteWithSidePanel()"
-          (click)="layoutService.toggleNotes()"
-        >
-          <mat-icon>comment</mat-icon>
-          <span>{{ T.MH.TOGGLE_SHOW_NOTES | translate }}</span>
-        </button>
+      <desktop-panel-buttons
+        [kb]="kb"
+        [isRouteWithSidePanel]="isRouteWithSidePanel()"
+        [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
+        [isShowIssuePanel]="isShowIssuePanel()"
+        [isShowNotes]="isShowNotes()"
+      ></desktop-panel-buttons>
+    }
+
+    @if (isDemotedCounters()) {
+      @for (
+        simpleCounter of enabledSimpleCounters();
+        track trackById($index, simpleCounter)
+      ) {
+        @if (!simpleCounter.isHideButton) {
+          <simple-counter-button [simpleCounter]="simpleCounter"></simple-counter-button>
+        }
       }
     }
 
     @if (isDemotedAddTask()) {
       <button
-        mat-menu-item
-        class="tour-addBtn"
+        emlDrop
         (click)="layoutService.showAddTaskBar()"
+        [matTooltip]="T.MH.ADD_NEW_TASK | translate"
+        class="tour-addBtn"
+        color="primary"
+        mat-icon-button
       >
         <mat-icon>add</mat-icon>
-        <span>{{ T.MH.ADD_NEW_TASK | translate }}</span>
       </button>
     }
-  </ng-template>
-</mat-menu>
+  </div>
+}

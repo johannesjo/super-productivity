@@ -1,9 +1,11 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
   ElementRef,
+  HostListener,
   inject,
   OnDestroy,
   signal,
@@ -28,14 +30,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
 import { MatTooltip } from '@angular/material/tooltip';
-import {
-  MatMenu,
-  MatMenuContent,
-  MatMenuItem,
-  MatMenuTrigger,
-} from '@angular/material/menu';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
-import { PluginWorkContextHeaderBtnCfg } from '../../plugins/plugin-api.model';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -61,53 +56,32 @@ import { EmlDropDirective } from '../../core/drop-paste-input/eml-drop.directive
 import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
 
 /**
- * Header actions that leave the bar for the overflow menu when it runs out of
- * room, in the order they go (first entry leaves first).
+ * Header actions that leave the bar for the overflow panel when it runs out of
+ * room, in the order they go (first entry leaves first). A demotion always
+ * takes a prefix of this list, so the whole state is one count.
  *
- * Only stateless *trigger* actions are demotable, so the menu can be built from
- * real `mat-menu-item` rows (keyboard-navigable, correct ARIA, closes on click).
- * Deliberately NOT demotable:
- * - simple counters — they carry live state and own their countdown-completion
- *   subscription, so a lazily-destroyed menu would silently stop reminders.
- *   They collapse into their own always-instantiated dropdown instead.
- * - user profile / plugin side-panel buttons — each opens its own menu, which a
- *   flat row cannot stand in for without reimplementing it.
+ * Everything not listed is pinned: the play button, the focus button and the
+ * sync button, which are the header's reason to exist.
  */
-type DemotableHeaderItem = 'pluginHeader' | 'panelButtons' | 'addTask';
+type DemotableId =
+  | 'pluginHeader'
+  | 'userProfile'
+  | 'sidePanelBtns'
+  | 'panelButtons'
+  | 'counters'
+  | 'addTask';
 
-const DEMOTION_ORDER: readonly DemotableHeaderItem[] = [
+const DEMOTION_ORDER: readonly DemotableId[] = [
   'pluginHeader',
+  'userProfile',
+  'sidePanelBtns',
   'panelButtons',
+  'counters',
   'addTask',
 ];
 
-// The header is a fixed icon grid, so the fit can be computed instead of
-// measured per button. Every icon button is 40px
-// (styles/components/_overwrite-material.scss) — including the play mini-fab,
-// which Angular Material hardcodes to 40px. Counter buttons are 36px
-// (`.counters-action-group` in the stylesheet beside this file).
-const BTN_W = 40;
-const COUNTER_BTN_W = 36;
-const GAP_W = 4; // --s-half
-/** A button and the gap before it — the unit everything in the row is billed in. */
-const SLOT_W = BTN_W + GAP_W;
-/** `--header-action-group-gap` minus the regular gap, on the two groups that carry it. */
-const GROUP_GAP_EXTRA_W = 2 * (16 - GAP_W);
-/**
- * Room kept for `.page-title` itself. It shrinks and ellipsizes, so this is a
- * floor, not a measurement — but it is deliberately more than the bare icon +
- * padding (~36px): reserving only that lets the action row fill the bar and
- * crush the project/tag name away, which is not a header that fits, just one
- * that has stopped saying where you are. Below 600px there is no room for both
- * and the name yields, which is how it behaved before #9480.
- */
-const TITLE_MIN_W = 128;
-const TITLE_MIN_W_NARROW = 56;
-/** Each `.page-title-actions` button: 40px on a 2px gap. */
-const TITLE_ACTION_W = 42;
-const TITLE_ACTIONS_MARGIN_W = 16;
-/** `.wrapper` horizontal padding — the desktop (larger) value, deliberately. */
-const WRAPPER_PADDING_W = 32;
+/** Sub-pixel slop, so a fractional layout width never reads as an overflow. */
+const FIT_EPSILON = 1;
 
 @Component({
   selector: 'main-header',
@@ -120,10 +94,6 @@ const WRAPPER_PADDING_W = 32;
     MatIcon,
     MatBadge,
     MatTooltip,
-    MatMenu,
-    MatMenuContent,
-    MatMenuItem,
-    MatMenuTrigger,
     TranslatePipe,
     SimpleCounterButtonComponent,
     LongPressDirective,
@@ -168,7 +138,6 @@ export class MainHeaderComponent implements OnDestroy {
   readonly unreviewedConflictCount = this._conflictJournal.unreviewedCount;
 
   T: typeof T = T;
-  isShowCountersDropdown = signal(false);
 
   isXs = this.layoutService.isXs;
   isXxxs = this.layoutService.isXxxs;
@@ -304,180 +273,101 @@ export class MainHeaderComponent implements OnDestroy {
   // case, the side-nav/right-panel cases and unbounded plugin buttons at once.
   private readonly _pluginBridge = inject(PluginBridgeService);
   private _resizeObserver: ResizeObserver | null = null;
-  // Infinity until first measured, so nothing collapses on the first paint.
-  private readonly _hostWidth = signal(Number.POSITIVE_INFINITY);
+  /** Bumped on every resize so the reflow pass re-runs; the value is unused. */
+  private readonly _resizeTick = signal(0);
 
   private readonly _counterCount = computed(
     () => this.enabledSimpleCounters().filter((c) => !c.isHideButton).length,
   );
 
-  // Width the row needs before anything is collapsed or demoted. Only counts
-  // what is actually rendered: before hydration the header holds nothing but
-  // the add button, so charging for play/focus/sync would demote it for no
-  // reason -- and it has no overflow trigger to fall back to yet (#9420).
-  private readonly _pinnedWidth = computed(() => {
-    if (!this.isDataLoaded()) {
-      return 0;
-    }
-    return (
-      (this.isTimeTrackingEnabled() ? SLOT_W : 0) +
-      (this.isFocusButtonVisible() ? SLOT_W : 0) +
-      (this.isSyncIconEnabled() ? SLOT_W : 0) +
-      (this.isUserProfilesEnabled() ? SLOT_W : 0) +
-      (this._isOwnedByBottomNav()
-        ? 0
-        : this._pluginBridge.sidePanelButtons().length * SLOT_W) +
-      GROUP_GAP_EXTRA_W
-    );
-  });
-
   /**
-   * Room `page-title` needs; its action buttons do not shrink either. Both are
-   * keyed to the *window*, not this row, so ask the breakpoint signals rather
-   * than guess a host width: `page-title-actions` is hidden wholesale below
-   * 398px, and its settings button is CSS-hidden below 600px
-   * (`.project-settings-btn` in page-title.component), leaving just the filter.
+   * Which actions this configuration can offer at all, in demotion order.
+   * Add-task, the panel buttons and the plugin side-panel buttons are absent on
+   * mobile rather than demoted: the bottom nav owns them there (its FAB and its
+   * panels menu), which is a placement rule, not a question of width.
    */
-  private readonly _titleReserve = computed(() => {
+  private readonly _demotableIds = computed<readonly DemotableId[]>(() => {
     if (!this.isDataLoaded()) {
-      return 0;
-    }
-    const actionCount = this.isXxxs() ? 0 : this.isXs() ? 1 : 3;
-    const btnsW = actionCount * TITLE_ACTION_W;
-    return (
-      (this.isXs() ? TITLE_MIN_W_NARROW : TITLE_MIN_W) +
-      (actionCount ? btnsW + TITLE_ACTIONS_MARGIN_W : 0)
-    );
-  });
-
-  private readonly _itemWidths = computed<Record<DemotableHeaderItem, number>>(() => {
-    if (!this.isDataLoaded()) {
-      return { pluginHeader: 0, panelButtons: 0, addTask: SLOT_W };
+      return [];
     }
     const af = this.globalConfigService.appFeatures();
     const ownedByBottomNav = this._isOwnedByBottomNav();
-    const panelCount =
-      (af.isScheduleDayPanelEnabled ? 1 : 0) +
-      (af.isIssuesPanelEnabled ? 1 : 0) +
-      (af.isProjectNotesEnabled ? 1 : 0);
-    return {
-      pluginHeader:
-        (this._pluginBridge.headerButtons().length +
-          this._pluginBridge.workContextHeaderButtons().length) *
-        SLOT_W,
-      panelButtons: ownedByBottomNav ? 0 : panelCount * SLOT_W,
-      addTask: ownedByBottomNav ? 0 : SLOT_W,
-    };
+    return DEMOTION_ORDER.filter((id) => {
+      switch (id) {
+        case 'pluginHeader':
+          return (
+            this._pluginBridge.headerButtons().length > 0 ||
+            this._pluginBridge.workContextHeaderButtons().length > 0
+          );
+        case 'userProfile':
+          return this.isUserProfilesEnabled();
+        case 'sidePanelBtns':
+          return !ownedByBottomNav && this._pluginBridge.sidePanelButtons().length > 0;
+        case 'panelButtons':
+          return (
+            !ownedByBottomNav &&
+            (af.isScheduleDayPanelEnabled ||
+              af.isIssuesPanelEnabled ||
+              af.isProjectNotesEnabled)
+          );
+        case 'counters':
+          return this._counterCount() > 0;
+        case 'addTask':
+          return !ownedByBottomNav;
+      }
+    });
   });
 
+  /** How many leading `_demotableIds` are in the overflow panel. */
+  private readonly _demotedCount = signal(0);
+
   /**
-   * Fit the row by, in order: collapsing the counters into their dropdown, then
-   * demoting trigger actions into the overflow menu.
+   * Last measured width of each slot while it was inline, so a slot that has
+   * already left the bar can still be costed when deciding to bring it back.
    */
-  private readonly _fit = computed<{
-    countersCollapsed: boolean;
-    demoted: ReadonlySet<DemotableHeaderItem>;
-  }>(() => {
-    const demoted = new Set<DemotableHeaderItem>();
+  private readonly _slotWidths = new Map<DemotableId, number>();
+  private _triggerWidth = 0;
+
+  private readonly _demoted = computed<ReadonlySet<DemotableId>>(() => {
     // The teleported vertical strip is a fixed-width column, not this row.
     if (this._isVerticalActionBar()) {
-      return { countersCollapsed: false, demoted };
+      return new Set<DemotableId>();
     }
-    const widths = this._itemWidths();
-    const counters = this._counterCount();
-    const available = this._hostWidth() - this._titleReserve() - WRAPPER_PADDING_W;
-    const expandedCountersW = counters * (COUNTER_BTN_W + GAP_W);
-    const fixed =
-      this._pinnedWidth() + DEMOTION_ORDER.reduce((sum, id) => sum + widths[id], 0);
-
-    // On mobile the counters live behind their toggle whatever the width --
-    // the same placement rule that hands add-task and the panels to the bottom
-    // nav. Deriving it from width instead made the header non-monotonic: below
-    // 398px `page-title` sheds its action buttons, which frees more room than
-    // the narrower window takes away, so the counters sprang back into a row
-    // with less space, not more.
-    //
-    // Above that, collapsing costs the least of the fit moves -- one tap, and
-    // the presentation users already know -- so it happens before any demotion.
-    // The toggle is a slot of its own, so it only saves from two counters up.
-    const countersCollapsed =
-      counters > 0 &&
-      (this._isOwnedByBottomNav() ||
-        (fixed + expandedCountersW > available && expandedCountersW > SLOT_W));
-    const used = fixed + (countersCollapsed ? SLOT_W : expandedCountersW);
-    if (used <= available) {
-      return { countersCollapsed, demoted };
-    }
-
-    // Then demote in order until the row fits, counting the slot the overflow
-    // trigger costs once anything moves.
-    //
-    // No "is this demotion worth it?" test: the alternative to demoting is not
-    // that the action stays usable in the bar, it is that the action is clipped
-    // off the edge with nothing to scroll it back (#9480). So even a swap that
-    // frees nothing -- one button out, the trigger in -- is strictly better,
-    // because the menu is reachable and the clipped button is not.
-    let freed = 0;
-    for (const id of DEMOTION_ORDER) {
-      if (used + SLOT_W - freed <= available) {
-        break;
-      }
-      if (widths[id] > 0) {
-        demoted.add(id);
-        freed += widths[id];
-      }
-    }
-    return { countersCollapsed, demoted };
+    return new Set(this._demotableIds().slice(0, this._demotedCount()));
   });
 
-  readonly areCountersCollapsed = computed(() => this._fit().countersCollapsed);
-  private readonly _demoted = computed(() => this._fit().demoted);
-
-  readonly isScheduleDayPanelEnabled = computed(
-    () => this.globalConfigService.appFeatures().isScheduleDayPanelEnabled,
-  );
-  readonly isIssuesPanelEnabled = computed(
-    () => this.globalConfigService.appFeatures().isIssuesPanelEnabled,
-  );
-  readonly isProjectNotesEnabled = computed(
-    () => this.globalConfigService.appFeatures().isProjectNotesEnabled,
-  );
-
   readonly hasOverflow = computed(() => this._demoted().size > 0);
-  readonly showAddTaskInline = computed(
-    () => !this._isOwnedByBottomNav() && !this._demoted().has('addTask'),
-  );
-  readonly showPluginBtnsInline = computed(() => !this._demoted().has('pluginHeader'));
-  /** Placement rule only — see the template comment on why these never demote. */
-  readonly showSidePanelBtns = computed(() => !this._isOwnedByBottomNav());
-  readonly showPanelBtnsInline = computed(
-    () => !this._isOwnedByBottomNav() && !this._demoted().has('panelButtons'),
-  );
+
   readonly isDemotedPluginBtns = computed(() => this._demoted().has('pluginHeader'));
+  readonly isDemotedUserProfile = computed(() => this._demoted().has('userProfile'));
+  readonly isDemotedSidePanelBtns = computed(() => this._demoted().has('sidePanelBtns'));
   readonly isDemotedPanelBtns = computed(() => this._demoted().has('panelButtons'));
+  readonly isDemotedCounters = computed(() => this._demoted().has('counters'));
   readonly isDemotedAddTask = computed(() => this._demoted().has('addTask'));
 
-  /** Plugin buttons rendered as menu rows when demoted. */
-  readonly pluginHeaderBtns = computed(() => this._pluginBridge.headerButtons());
-  readonly pluginWorkContextBtns = computed(() =>
-    this._pluginBridge.workContextHeaderButtons(),
+  readonly showPluginBtnsInline = computed(
+    () => this.isDataLoaded() && !this.isDemotedPluginBtns(),
+  );
+  readonly showUserProfileInline = computed(
+    () => this.isUserProfilesEnabled() && !this.isDemotedUserProfile(),
+  );
+  readonly showSidePanelBtnsInline = computed(
+    () => !this._isOwnedByBottomNav() && !this.isDemotedSidePanelBtns(),
+  );
+  readonly showPanelBtnsInline = computed(
+    () => !this._isOwnedByBottomNav() && !this.isDemotedPanelBtns(),
+  );
+  readonly showCountersInline = computed(() => !this.isDemotedCounters());
+  // Not gated on isDataLoaded: the shell paints before hydration and the
+  // quick-capture entry point must already be there (#9420).
+  readonly showAddTaskInline = computed(
+    () => !this._isOwnedByBottomNav() && !this.isDemotedAddTask(),
   );
 
-  async onWorkContextPluginBtnClick(
-    button: PluginWorkContextHeaderBtnCfg,
-  ): Promise<void> {
-    const ctx = await this._pluginBridge.getActiveWorkContext();
-    if (ctx) {
-      button.onClick(ctx);
-    }
-  }
+  readonly isOverflowOpen = signal(false);
 
-  /**
-   * Test seam: Karma cannot resize a detached fixture, so the fit logic is
-   * exercised by feeding it the width a real layout would have produced.
-   */
-  setHostWidthForTesting(width: number): void {
-    this._hostWidth.set(width);
+  toggleOverflow(): void {
+    this.isOverflowOpen.update((v) => !v);
   }
 
   constructor() {
@@ -493,37 +383,138 @@ export class MainHeaderComponent implements OnDestroy {
       this._syncTeleport(enabled);
     });
 
-    // Widening the header expands the counters back into the bar and removes
-    // the toggle, but the open flag would survive — so the dropdown would spring
-    // open by itself the next time the header narrowed.
+    // Widening the header empties the overflow panel and removes its trigger,
+    // but the open flag would survive — so the panel would spring open by
+    // itself the next time the header narrowed.
     effect(() => {
-      if (!this.areCountersCollapsed()) {
-        this.isShowCountersDropdown.set(false);
+      if (!this.hasOverflow()) {
+        this.isOverflowOpen.set(false);
       }
+    });
+
+    // Settle the row against what the browser actually laid out. Runs in the
+    // `read` phase, so every measurement here is a plain read of a finished
+    // layout — nothing in this pass forces one.
+    afterRenderEffect({
+      read: () => {
+        this._resizeTick();
+        this._demotableIds();
+        this._demotedCount();
+        this._reflow();
+      },
     });
 
     this._observeHostWidth();
   }
 
   /**
-   * Track the width the header actually has, not the window's.
+   * Decide the row by measuring it, not by predicting it.
    *
-   * No zone or rAF plumbing: the app is zoneless (`provideZonelessChangeDetection`
-   * in main.ts), and ResizeObserver already delivers at most one entry per frame
-   * per target, so there is nothing to coalesce. The width comparison is what
-   * keeps height-only resizes (mobile keyboard) from scheduling any work, and
-   * `contentRect` is a snapshot, so reading it forces no layout.
+   * Every earlier attempt at this mirrored pixel constants from four other
+   * stylesheets — button sizes, gaps, the title's action buttons and the
+   * breakpoints that hide them — and each of the three bugs #9480 went through
+   * was one of those constants disagreeing with the CSS it copied. So ask the
+   * layout instead: `.page-title` carries its own `min-width`, and the row has
+   * overflowed exactly when the nav no longer fits beside that minimum.
+   *
+   * One step per pass. Each step re-renders and re-measures, so this converges
+   * in at most `_demotableIds().length` frames and needs no iteration here.
+   */
+  private _reflow(): void {
+    const host = this._elRef.nativeElement as HTMLElement;
+    const wrapper = host?.querySelector?.('.wrapper') as HTMLElement | null;
+    // A teleported nav is a fixed-width column, and a `display: none` header
+    // measures 0 — in both cases there is nothing meaningful to fit.
+    if (!wrapper || this._isVerticalActionBar() || !wrapper.clientWidth) {
+      return;
+    }
+    const nav = wrapper.querySelector('nav.action-nav-right') as HTMLElement | null;
+    if (!nav) {
+      return;
+    }
+
+    // Slack, in one line and without knowing a single gap, padding or button
+    // size: `.page-title` is the only thing in the row that shrinks, so the
+    // room still available is whatever it can still give up, less whatever the
+    // row is already spilling once it has given up everything. Its floor is a
+    // `min-width` in page-title.component — the stylesheet that owns the title
+    // also owns how much of it must survive.
+    const title = wrapper.querySelector('.page-title') as HTMLElement | null;
+    const titleW = title ? title.getBoundingClientRect().width : 0;
+    const titleMinW = title ? parseFloat(getComputedStyle(title).minWidth) || 0 : 0;
+
+    // How far the nav has escaped the wrapper's content box. Not `scrollWidth`:
+    // the wrapper is `overflow: visible`, so it establishes no scroll container
+    // and browsers report `scrollWidth === clientWidth` while the row spills
+    // over the edge regardless. Comparing edges is unambiguous, and taking both
+    // sides keeps it correct in RTL.
+    const wrapRect = wrapper.getBoundingClientRect();
+    const navRect = nav.getBoundingClientRect();
+    const style = getComputedStyle(wrapper);
+    const overflowing = Math.max(
+      0,
+      navRect.right - (wrapRect.right - (parseFloat(style.paddingRight) || 0)),
+      wrapRect.left + (parseFloat(style.paddingLeft) || 0) - navRect.left,
+    );
+    const free = titleW - titleMinW - overflowing;
+
+    const ids = this._demotableIds();
+    const count = Math.min(this._demotedCount(), ids.length);
+    if (count !== this._demotedCount()) {
+      this._demotedCount.set(count);
+      return;
+    }
+
+    for (const el of Array.from(nav.querySelectorAll<HTMLElement>('[data-slot]'))) {
+      const w = el.getBoundingClientRect().width;
+      if (w > 0) {
+        this._slotWidths.set(el.dataset.slot as DemotableId, w);
+      }
+    }
+    const trigger = nav.querySelector('.header-overflow-btn') as HTMLElement | null;
+    if (trigger) {
+      this._triggerWidth = trigger.getBoundingClientRect().width;
+    }
+
+    if (free < -FIT_EPSILON && count < ids.length) {
+      this._demotedCount.set(count + 1);
+      return;
+    }
+    if (free > FIT_EPSILON && count > 0) {
+      // Bringing one back costs its own width but refunds the trigger when it
+      // empties the panel. Requiring the *measured* slack to cover that is what
+      // stops the row oscillating across the boundary it just crossed.
+      const cost = this._slotWidths.get(ids[count - 1]) ?? 0;
+      const refund = count === 1 ? this._triggerWidth : 0;
+      if (cost > 0 && cost - refund <= free) {
+        this._demotedCount.set(count - 1);
+      }
+    }
+  }
+
+  /**
+   * Re-run the fit whenever the header's own width changes — not the window's.
+   * The header sits inside `.main-content`, which the in-flow side nav and the
+   * right panel both narrow, so the window is the wrong thing to watch (#9480).
+   *
+   * Observes the host, whose width is set by its parent, so a demotion cannot
+   * feed back into this callback and loop. No zone or rAF plumbing: the app is
+   * zoneless, and ResizeObserver delivers at most one entry per frame per
+   * target. Comparing the width keeps height-only resizes (the mobile keyboard)
+   * from scheduling any work, and `contentRect` is a snapshot, so it forces no
+   * layout.
    */
   private _observeHostWidth(): void {
     const el = this._elRef.nativeElement as HTMLElement;
     if (typeof ResizeObserver === 'undefined' || !(el instanceof Element)) {
       return;
     }
+    let lastWidth = -1;
     this._resizeObserver = new ResizeObserver((entries) => {
       const width = entries[entries.length - 1]?.contentRect.width ?? 0;
-      // A `display: none` header reports 0 and would demote everything.
-      if (width > 0 && width !== this._hostWidth()) {
-        this._hostWidth.set(width);
+      if (width > 0 && width !== lastWidth) {
+        lastWidth = width;
+        this._resizeTick.update((t) => t + 1);
       }
     });
     this._resizeObserver.observe(el);
@@ -640,8 +631,30 @@ export class MainHeaderComponent implements OnDestroy {
     this._store.dispatch(showFocusOverlay());
   }
 
-  isCounterRunning(counters: SimpleCounter[]): boolean {
-    return !!(counters && counters.find((counter) => counter.isOn));
+  /** Accent the trigger while a demoted counter is still running. */
+  readonly isDemotedCounterRunning = computed(
+    () => this.isDemotedCounters() && this.enabledSimpleCounters().some((c) => c.isOn),
+  );
+
+  /** The panel is not a `mat-menu`, so dismissal is ours to handle. */
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.isOverflowOpen.set(false);
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(ev: Event): void {
+    if (!this.isOverflowOpen()) {
+      return;
+    }
+    const target = ev.target as Node | null;
+    const host = this._elRef.nativeElement as HTMLElement;
+    const panel = host?.querySelector?.('.header-overflow-panel');
+    const trigger = host?.querySelector?.('.header-overflow-btn');
+    if (target && (panel?.contains(target) || trigger?.contains(target))) {
+      return;
+    }
+    this.isOverflowOpen.set(false);
   }
 
   get kb(): KeyboardConfig {

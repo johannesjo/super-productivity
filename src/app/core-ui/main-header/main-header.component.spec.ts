@@ -5,14 +5,12 @@ import {
   NO_ERRORS_SCHEMA,
   runInInjectionContext,
   signal,
-  WritableSignal,
 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ApplicationRef } from '@angular/core';
 import { EMPTY, of } from 'rxjs';
 import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
-import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
-import { PluginHeaderBtnCfg } from '../../plugins/plugin-api.model';
 
 import { MainHeaderComponent } from './main-header.component';
 import { ProjectService } from '../../features/project/project.service';
@@ -32,10 +30,7 @@ import { DateService } from '../../core/date/date.service';
 import { UserProfileService } from '../../features/user-profile/user-profile.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { SyncStatus } from '../../op-log/sync-exports';
-import {
-  SimpleCounter,
-  SimpleCounterType,
-} from '../../features/simple-counter/simple-counter.model';
+import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
 
 // Regression test for #7477: in a project view a long title pushed the
@@ -232,9 +227,7 @@ describe('MainHeaderComponent focus button visibility', () => {
       ],
     }).overrideComponent(MainHeaderComponent, {
       set: {
-        // MatMenu/MatMenuTrigger are real: NO_ERRORS_SCHEMA tolerates unknown
-        // elements but not the `#overflowMenu="matMenu"` export reference.
-        imports: [TranslatePipe, MatMenu, MatMenuContent, MatMenuTrigger],
+        imports: [TranslatePipe],
         schemas: [NO_ERRORS_SCHEMA],
       },
     });
@@ -286,236 +279,86 @@ describe('MainHeaderComponent focus button visibility', () => {
     expect(component.isFocusButtonVisible()).toBe(false);
   });
 
-  // Regression test for #9480: the header used to choose its button set from
-  // the *window* width, but it is laid out inside a row that the in-flow side
-  // nav and the right panel both narrow. On a landscape phone that rendered the
-  // full desktop button set into a header ~260px narrower than the window, and
-  // the surplus buttons were clipped away with no way to scroll to them.
-  it('demotes actions into the overflow menu when the header itself is narrow (#9480)', () => {
-    // Landscape phone: past the 600px window breakpoint, so no bottom nav and
-    // the full desktop button set -- but the header only gets part of the width.
-    isXs = signal(false);
-    // Three counters, so collapsing them is actually a saving: one collapsed
-    // toggle (44px) only beats inline counters (40px each) from two up.
-    enabledSimpleCounters = [1, 2, 3].map((n) => ({
-      id: `counter-${n}`,
-      title: `Counter ${n}`,
-      isEnabled: true,
-      icon: 'fitness_center',
-      type: SimpleCounterType.ClickCounter,
-      countOnDay: {},
-      isOn: false,
-    })) as SimpleCounter[];
+  // The fit is measured, not predicted, so these mount the real component into
+  // the live DOM at a fixed width and let the browser lay it out. Every earlier
+  // version of this logic was unit-tested against injected widths and every one
+  // of them shipped a bug where the arithmetic disagreed with the CSS (#9480).
+  // The child components are stubbed here (NO_ERRORS_SCHEMA), so they measure
+  // zero and nothing would ever overflow. Give each slot a known width instead:
+  // that is the input the reflow reads in production too, so the algorithm --
+  // measure, demote one, re-measure, settle -- is exercised for real while the
+  // numbers stay under the test's control.
+  const SLOT_TEST_W = 200;
+  let styleEl: HTMLStyleElement | undefined;
+  let box: HTMLElement | undefined;
 
-    component = createComponent();
-
-    // A roomy header keeps everything in the bar.
-    component.setHostWidthForTesting(1200);
-    expect(component.hasOverflow()).toBe(false);
-    expect(component.showPanelBtnsInline()).toBe(true);
-    expect(component.areCountersCollapsed()).toBe(false);
-
-    // Squeezed by the side nav: counters collapse and actions move into the
-    // menu rather than off-screen.
-    component.setHostWidthForTesting(360);
-    expect(component.areCountersCollapsed()).toBe(true);
-    expect(component.hasOverflow()).toBe(true);
-    expect(component.showPanelBtnsInline()).toBe(false);
-  });
-
-  it('demotes plugin buttons before the panel buttons (#9480)', () => {
-    isXs = signal(false);
-
-    component = createComponent();
-    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
-      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
-    };
-    bridge.headerButtons.set([
-      { pluginId: 'a', label: 'A', icon: 'star', onClick: () => {} },
-      { pluginId: 'b', label: 'B', icon: 'star', onClick: () => {} },
-    ]);
-
-    // Only just too narrow: shedding the plugin buttons alone is enough, so
-    // the panel buttons -- further down the demotion order -- stay in the bar.
-    // (The width tracks the title reserve; what is under test is the *order*.)
-    component.setHostWidthForTesting(690);
-
-    expect(component.showPluginBtnsInline()).toBe(false);
-    expect(component.showPanelBtnsInline()).toBe(true);
-  });
-
-  it('keeps the counters collapsed on mobile at any width (#9480)', () => {
-    // Where the counters live on mobile is a placement rule, not a pixel one:
-    // the bottom nav owns the row, so they belong behind their toggle exactly
-    // as they did before #9480. Computing it from width made the header
-    // non-monotonic -- below 398px `page-title` drops its action buttons, which
-    // freed more room than the narrower window took away, so the counters
-    // sprang back into a row that has less space, not more.
-    isXs = signal(true);
-    isXxxs = signal(true);
-    enabledSimpleCounters = [1, 2, 3].map((n) => ({
-      id: `counter-${n}`,
-      title: `Counter ${n}`,
-      isEnabled: true,
-      icon: 'fitness_center',
-      type: SimpleCounterType.ClickCounter,
-      countOnDay: {},
-      isOn: false,
-    })) as SimpleCounter[];
-
-    component = createComponent();
-
-    component.setHostWidthForTesting(390);
-    expect(component.areCountersCollapsed()).toBe(true);
-
-    // ...and still collapsed just above the breakpoint, with no pop back.
-    isXxxs.set(false);
-    component.setHostWidthForTesting(410);
-    expect(component.areCountersCollapsed()).toBe(true);
-  });
-
-  it('never demotes the plugin side-panel buttons, which have no menu row (#9480)', () => {
-    // The overflow menu renders the three desktop panel buttons as flat rows
-    // but has nothing for plugin side-panel buttons, so if they rode along with
-    // the panel group they would be neither in the bar nor in the menu -- the
-    // unreachable-action bug this whole change exists to fix.
-    isXs = signal(false);
-
-    // Rendered for real (NO_ERRORS_SCHEMA leaves the child tags in the DOM), so
-    // this pins the template binding and not just the signal behind it.
+  const mountAtWidth = async (width: number): Promise<HTMLElement> => {
     configureTestBed();
     fixture = TestBed.createComponent(MainHeaderComponent);
-    fixture.componentInstance.setHostWidthForTesting(320);
-    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    styleEl = document.createElement('style');
+    // Only the slots this configuration actually populates. A blanket rule
+    // would also inflate the empty wrappers (no plugins, no counters here) and
+    // measure widths that do not exist in production.
+    styleEl.textContent =
+      `[data-slot="panelButtons"],[data-slot="addTask"]` +
+      `{min-width:${SLOT_TEST_W}px !important}`;
+    document.head.appendChild(styleEl);
+    box = document.createElement('div');
+    box.style.width = `${width}px`;
+    document.body.appendChild(box);
+    box.appendChild(host);
+    // `detectChanges()` alone does not flush afterRender hooks -- the reflow
+    // runs in one, so drive it through ApplicationRef. It demotes one action
+    // per pass, so let it settle: a pass per demotable action, plus margin.
+    const appRef = TestBed.inject(ApplicationRef);
+    for (let i = 0; i < 10; i++) {
+      appRef.tick();
+      await fixture.whenStable();
+    }
+    return host;
+  };
 
-    expect(fixture.componentInstance.showPanelBtnsInline()).toBe(false);
-    expect(fixture.nativeElement.querySelector('desktop-panel-buttons')).toBeNull();
-    expect(fixture.nativeElement.querySelector('plugin-side-panel-btns')).not.toBeNull();
+  afterEach(() => {
+    styleEl?.remove();
+    box?.remove();
+    styleEl = undefined;
+    box = undefined;
   });
 
-  it('demotes a wide group even when the row is only just too narrow (#9480)', () => {
-    // The overflow trigger costs a slot, so a demotion is only worth making
-    // when it frees more than that slot -- not when the row happens to be over
-    // by less than a slot. Mobile, so add-task and the panel buttons live in the
-    // bottom nav and the plugin group is the only thing that can leave the bar.
-    isXs = signal(true);
+  it('moves actions into the overflow panel when the header is narrow (#9480)', async () => {
+    // Two 200px slots (panel buttons, add-task) cannot both sit in 320px.
+    const host = await mountAtWidth(320);
 
-    component = createComponent();
-    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
-      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
-    };
-    bridge.headerButtons.set(
-      ['a', 'b', 'c'].map((id) => ({
-        pluginId: id,
-        label: id,
-        icon: 'star',
-        onClick: () => {},
-      })),
-    );
-
-    // 14px over: shedding 132px of plugin buttons for a 44px trigger fits.
-    component.setHostWidthForTesting(420);
-
-    expect(component.showPluginBtnsInline()).toBe(false);
-    expect(component.hasOverflow()).toBe(true);
+    const panel = host.querySelector('.header-overflow-panel');
+    expect(host.querySelector('.header-overflow-btn')).toBeTruthy();
+    expect(panel).toBeTruthy();
+    // Panel buttons lead the demotion order, so they are what left the bar.
+    expect(host.querySelector('[data-slot="panelButtons"]')).toBeFalsy();
+    expect(panel!.querySelector('desktop-panel-buttons')).toBeTruthy();
   });
 
-  it('demotes a lone slot-wide action rather than letting it clip (#9480)', () => {
-    // With the panel and plugin buttons gone, add-task is all that is left to
-    // demote -- and it is exactly the width of the trigger that replaces it, so
-    // the move frees nothing and looks pointless. It is not: the alternative is
-    // not that the button stays usable, it is that it hangs off an edge nothing
-    // can scroll. A trigger you can tap beats a button you cannot reach.
-    isXs = signal(false);
-    appFeatures = signal({
-      ...DEFAULT_GLOBAL_CONFIG.appFeatures,
-      isScheduleDayPanelEnabled: false,
-      isIssuesPanelEnabled: false,
-      isProjectNotesEnabled: false,
-    });
+  it('keeps every action in the bar when the header is wide (#9480)', async () => {
+    const host = await mountAtWidth(1400);
 
-    component = createComponent();
-    component.setHostWidthForTesting(330);
-
-    expect(component.showAddTaskInline()).toBe(false);
-    expect(component.isDemotedAddTask()).toBe(true);
+    expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
+    expect(host.querySelector('.header-overflow-panel')).toBeFalsy();
+    expect(host.querySelector('[data-slot="addTask"]')).toBeTruthy();
+    expect(host.querySelector('[data-slot="panelButtons"]')).toBeTruthy();
   });
 
-  it('never leaves a mobile plugin button clipped instead of in the menu (#9480)', () => {
-    // Reported regression: a single plugin header button is exactly one slot
-    // wide, so a payoff test ("does moving this free more than the trigger
-    // costs?") declined to move it -- and on a phone that left it hanging off
-    // the edge, in the bar according to the model and visible to nobody.
-    isXs = signal(true);
-    isXxxs = signal(true);
-    enabledSimpleCounters = [1, 2].map((n) => ({
-      id: `counter-${n}`,
-      title: `Counter ${n}`,
-      isEnabled: true,
-      icon: 'fitness_center',
-      type: SimpleCounterType.ClickCounter,
-      countOnDay: {},
-      isOn: false,
-    })) as SimpleCounter[];
+  it('never leaves a demoted action with nowhere to be (#9480)', async () => {
+    // The bug this whole change exists to fix is an action that is in neither
+    // the bar nor a panel. At 220px nothing fits, so everything demotable has
+    // to have moved -- and every one of them must be findable in the panel.
+    const host = await mountAtWidth(220);
+    const panel = host.querySelector('.header-overflow-panel');
 
-    component = createComponent();
-    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
-      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
-    };
-    bridge.headerButtons.set([
-      { pluginId: 'a', label: 'A', icon: 'star', onClick: () => {} },
-    ]);
-
-    component.setHostWidthForTesting(320);
-
-    expect(component.showPluginBtnsInline()).toBe(false);
-    expect(component.isDemotedPluginBtns()).toBe(true);
-    expect(component.hasOverflow()).toBe(true);
-  });
-
-  it('keeps plugin buttons in the bar at ordinary phone widths (#9480)', () => {
-    // ...but they must not be swept into the menu on every phone either. The
-    // title reserve decides this, so it has to match what `page-title` really
-    // renders: below 600px its settings button is CSS-hidden, leaving one
-    // action button, not the three a desktop header carries.
-    isXs = signal(true);
-    enabledSimpleCounters = [1, 2].map((n) => ({
-      id: `counter-${n}`,
-      title: `Counter ${n}`,
-      isEnabled: true,
-      icon: 'fitness_center',
-      type: SimpleCounterType.ClickCounter,
-      countOnDay: {},
-      isOn: false,
-    })) as SimpleCounter[];
-
-    component = createComponent();
-    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
-      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
-    };
-    bridge.headerButtons.set([
-      { pluginId: 'a', label: 'A', icon: 'star', onClick: () => {} },
-    ]);
-
-    // A Pixel-class portrait phone, past the 398px title-actions breakpoint.
-    component.setHostWidthForTesting(412);
-
-    expect(component.showPluginBtnsInline()).toBe(true);
-    expect(component.hasOverflow()).toBe(false);
-  });
-
-  it('keeps add-task reachable when narrow before hydration finishes (#9420/#9480)', () => {
-    // The budget must only charge for what is actually rendered: pre-hydration
-    // the header holds nothing but the add button, so it must never be demoted
-    // into an overflow trigger that does not exist yet.
-    isXs = signal(false);
-    isAllDataLoaded = false;
-
-    component = createComponent();
-    component.setHostWidthForTesting(320);
-
-    expect(component.showAddTaskInline()).toBe(true);
-    expect(component.hasOverflow()).toBe(false);
+    expect(panel).toBeTruthy();
+    expect(host.querySelector('[data-slot="panelButtons"]')).toBeFalsy();
+    expect(panel!.querySelector('desktop-panel-buttons')).toBeTruthy();
+    expect(host.querySelector('[data-slot="addTask"]')).toBeFalsy();
+    expect(panel!.querySelector('.tour-addBtn')).toBeTruthy();
   });
 
   it('shows the add-task button before initial data load finishes', () => {
