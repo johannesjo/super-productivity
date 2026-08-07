@@ -1978,7 +1978,7 @@ describe('AddTaskBarParserService', () => {
   //
   // Runs against the real state service: what has to hold is that the state a
   // pick writes is still there once the parse lands, which a mocked state()
-  // cannot show — it would only prove each step called the setter it was told to.
+  // cannot show.
   describe('picks against real add bar state', () => {
     let realState: AddTaskBarStateService;
     const cfg = {

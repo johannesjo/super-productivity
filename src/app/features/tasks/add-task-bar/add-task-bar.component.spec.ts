@@ -565,9 +565,7 @@ describe('AddTaskBarComponent', () => {
 
     // Guards the design, not the roll: nothing here can fail from a change to
     // rollWeekendDateForRepeat. It pins that the bar never rewrites the day the
-    // user picked — the earlier attempt at this fix did, and needed a
-    // provenance signal, an unwind on every recurrence change and a restore
-    // after submit to stay consistent.
+    // user picked, which is what keeps the roll free of provenance tracking.
     it('should leave the picked weekend date on the bar', async () => {
       mockTaskService.add.and.returnValue('task-1');
       spyOn(TestBed.inject(TaskRepeatCfgService), 'addTaskRepeatCfgToTask');

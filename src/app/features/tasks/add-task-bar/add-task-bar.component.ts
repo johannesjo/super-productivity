@@ -547,16 +547,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       // every later quick setting from it, turning "weekly on current weekday"
       // into a Saturday recurrence.
       //
-      // Rolled once, on the way out, rather than on the date chip: the day the
-      // user picked stays the day the bar shows and the day the repeat menu's
-      // contextual labels are built from. Computing it once also keeps the
-      // task's due day and the config's start date from disagreeing across a
-      // logical-day rollover between two `todayStr()` calls.
-      //
-      // The task's own due day would be corrected anyway — the effects rerun
-      // `getFirstRepeatOccurrence` and rewrite it — but writing it right here
-      // costs nothing and saves both a synced update op and a task that shows
-      // up on the Saturday first.
+      // Rolled here rather than on the date chip, so the day the user picked
+      // stays the day the bar shows and the repeat menu's labels are built
+      // from. Computed once, so the task's due day and the config's start date
+      // cannot disagree across a logical-day rollover between two `todayStr()`
+      // calls. The effects would correct the due day anyway; writing it here
+      // just spares the user a task that first appears on the Saturday.
       const startDay = rollWeekendDateForRepeat(
         state.date || this._dateService.todayStr(),
         state.repeat,
