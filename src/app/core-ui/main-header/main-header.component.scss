@@ -196,13 +196,26 @@ button.isActive2 {
   &:not(.action-nav-right--teleported) {
     overflow-x: auto;
     // `overflow-x: auto` forces `overflow-y` to compute to `auto` (the two axes
-    // are coupled), which would clip the sync badge above and the
-    // `.panel-btn.isActive::after` tab 5px below. Pin it to `hidden` so no
-    // stray vertical scrollbar can appear, and buy back the bleed with padding
-    // the negative margin cancels, so the row's own box is unchanged.
+    // are coupled), so the row now clips ink that the buttons paint outside
+    // their own boxes. Pin `overflow-y` to `hidden` so no stray vertical
+    // scrollbar can appear, and buy the clipped ink back as padding.
+    //
+    // What has to fit: the sync badge above, the `.panel-btn.isActive::after`
+    // tab 5px below, and the play button's elevation — `--md-sys-level1-5`
+    // reaches 8px under its box and 5px to either side. The inline-start side
+    // is the one that bit: the play button is the row's first child, so its
+    // border edge IS the clip edge and it lost its left penumbra entirely.
+    //
+    // Block padding is cancelled by a negative margin, so the row's own box is
+    // unchanged. The start padding is not: that side carries `margin-left:
+    // auto`, which absorbs the 8px instead, so the buttons do not move — it
+    // only costs the title 8px of its widest case, and makes `nav.scrollWidth`
+    // (the fit measure in `_reflow`) claim 8px more than the buttons need,
+    // which errs towards demoting early rather than towards clipping.
     overflow-y: hidden;
-    padding-block: 6px;
-    margin-block: -6px;
+    padding-block: 8px;
+    padding-inline-start: 8px;
+    margin-block: -8px;
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
