@@ -1,9 +1,18 @@
+<!--
+  Actions that do not fit move into the overflow panel below, in the order set
+  by DEMOTION_ORDER. Each demotable action is wrapped in a `[data-slot]` element
+  so the reflow pass can measure what it actually costs instead of predicting it
+  from copied CSS constants (#9480).
+-->
 <div class="wrapper">
   @if (isDataLoaded()) {
     <page-title></page-title>
   }
 
-  <nav class="action-nav-right">
+  <nav
+    class="action-nav-right"
+    [class.action-nav-right--scrolls]="needsScrollFloor()"
+  >
     <div class="header-action-group primary-action-group">
       @if (isDataLoaded() && isTimeTrackingEnabled()) {
         <play-button
@@ -16,8 +25,9 @@
 
       <!-- Not gated on isDataLoaded: the shell paints before op-log hydration
            finishes, and the primary quick-capture entry point must not be
-           missing for that window. -->
-      @if (showDesktopButtons()) {
+           missing for that window (#9420). No `data-slot`: this one is pinned,
+           so it is never measured and never demoted. -->
+      @if (showAddTaskInline()) {
         <button
           emlDrop
           (click)="layoutService.showAddTaskBar()"
@@ -39,138 +49,214 @@
         @if (isFocusButtonVisible()) {
           <focus-button></focus-button>
         }
-        @if (showDesktopButtons()) {
-          @for (
-            simpleCounter of enabledSimpleCounters();
-            track trackById($index, simpleCounter)
-          ) {
-            @if (!simpleCounter.isHideButton) {
-              <simple-counter-button
-                [matTooltip]="simpleCounter.title"
-                [simpleCounter]="simpleCounter"
-              ></simple-counter-button>
+        @if (showCountersInline()) {
+          <div data-slot="counters">
+            @for (
+              simpleCounter of enabledSimpleCounters();
+              track trackById($index, simpleCounter)
+            ) {
+              @if (!simpleCounter.isHideButton) {
+                <simple-counter-button
+                  [matTooltip]="simpleCounter.title"
+                  [simpleCounter]="simpleCounter"
+                ></simple-counter-button>
+              }
             }
-          }
+          </div>
         }
       </div>
 
-      @if (isSyncIconEnabled()) {
-        <!--
-          matBadgeHidden only hides the badge VISUALLY (CSS) — MatBadge keeps an
-          aria description active regardless of hidden state. So at count 0 the
-          badge description must be empty (not a stale "0 conflicts" announced to
-          screen readers on every encounter). '' is the type-correct
-          "no description" value; MatBadge removes the aria-describedby for it.
-        -->
-        <button
-          class="sync-btn secondary-header-action"
-          [class.is-error]="syncIsEnabledAndReady() && syncState() === 'ERROR'"
-          [class.is-offline]="syncIsEnabledAndReady() && !isOnline()"
-          [class.is-in-progress]="syncIsEnabledAndReady() && isSyncInProgress()"
-          [matBadge]="unreviewedConflictCount()"
-          [matBadgeHidden]="unreviewedConflictCount() === 0"
-          matBadgeColor="accent"
-          matBadgeSize="small"
-          matBadgeOverlap="true"
-          [matBadgeDescription]="
-            unreviewedConflictCount() > 0
-              ? (T.F.SYNC.CONFLICT_REVIEW.BADGE_TOOLTIP
-                | translate: { count: unreviewedConflictCount() })
-              : ''
-          "
-          [attr.aria-label]="syncTooltip() | translate"
-          matTooltip="{{ syncTooltip() | translate }}"
-          (click)="onSyncButtonClick()"
-          (longPress)="setupSync()"
-          (contextmenu)="$event.preventDefault(); setupSync()"
-          mat-icon-button
-        >
-          @if (syncIsEnabledAndReady()) {
-            @if (isOnline()) {
-              @if (syncState() === 'ERROR') {
-                <mat-icon>sync_problem</mat-icon>
-              } @else {
-                <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
-              }
-              @if (hasNoPendingOps()) {
-                @if (superSyncIsConfirmedInSync()) {
-                  <mat-icon class="sync-state-ico">done_all</mat-icon>
-                } @else {
-                  <mat-icon class="sync-state-ico">check</mat-icon>
-                }
-              }
-            } @else {
-              <mat-icon>wifi_off</mat-icon>
-            }
-          } @else {
-            <mat-icon>sync_disabled</mat-icon>
-          }
-        </button>
+      @if (showSyncInline()) {
+        <div data-slot="sync">
+          <ng-container [ngTemplateOutlet]="syncBtnTpl"></ng-container>
+        </div>
       }
 
-      <plugin-work-context-header-btns
-        class="secondary-header-action"
-      ></plugin-work-context-header-btns>
-      <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
-
-      @if (isUserProfilesEnabled()) {
-        <user-profile-button class="secondary-header-action"></user-profile-button>
+      @if (showPluginBtnsInline()) {
+        <div data-slot="pluginHeader">
+          <plugin-work-context-header-btns
+            class="secondary-header-action"
+          ></plugin-work-context-header-btns>
+          <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
+        </div>
       }
 
-      <!-- Desktop: Show all buttons inline -->
-      @if (showDesktopButtons()) {
-        <plugin-side-panel-btns class="secondary-header-action"></plugin-side-panel-btns>
-
-        <desktop-panel-buttons
-          class="secondary-header-action"
-          [kb]="kb"
-          [isRouteWithSidePanel]="isRouteWithSidePanel()"
-          [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
-          [isShowIssuePanel]="isShowIssuePanel()"
-          [isShowNotes]="isShowNotes()"
-        ></desktop-panel-buttons>
+      @if (showUserProfileInline()) {
+        <div data-slot="userProfile">
+          <user-profile-button class="secondary-header-action"></user-profile-button>
+        </div>
       }
 
-      <!-- Simple Counter Dropdown (mobile only) -->
-      @if (isXs()) {
-        @if (enabledSimpleCounters().length) {
-          <div class="header-action-group secondary-action-group mobile-dropdown-wrapper">
-            <button
-              (click)="
-                isShowSimpleCounterBtnsDropdown.set(!isShowSimpleCounterBtnsDropdown())
-              "
-              [color]="isCounterRunning(enabledSimpleCounters()) ? 'accent' : ''"
-              aria-controls="mobile-simple-counter-menu"
-              [attr.aria-expanded]="isShowSimpleCounterBtnsDropdown()"
-              [attr.aria-label]="T.F.METRIC.CMP.SIMPLE_COUNTERS | translate"
-              mat-icon-button
-              type="button"
-            >
-              <mat-icon>{{
-                isShowSimpleCounterBtnsDropdown() ? 'close' : 'timer'
-              }}</mat-icon>
-            </button>
-            <div
-              id="mobile-simple-counter-menu"
-              class="mobile-dropdown"
-              [class.isVisible]="isShowSimpleCounterBtnsDropdown()"
-              [attr.aria-hidden]="!isShowSimpleCounterBtnsDropdown()"
-              [attr.inert]="isShowSimpleCounterBtnsDropdown() ? null : ''"
-            >
-              @for (
-                simpleCounter of enabledSimpleCounters();
-                track trackById($index, simpleCounter)
-              ) {
-                @if (!simpleCounter.isHideButton) {
-                  <simple-counter-button
-                    [simpleCounter]="simpleCounter"
-                  ></simple-counter-button>
-                }
-              }
-            </div>
-          </div>
-        }
+      @if (showSidePanelBtnsInline()) {
+        <div data-slot="sidePanelBtns">
+          <plugin-side-panel-btns
+            class="secondary-header-action"
+          ></plugin-side-panel-btns>
+        </div>
       }
+
+      @if (showPanelBtnsInline()) {
+        <div data-slot="panelButtons">
+          <desktop-panel-buttons
+            class="secondary-header-action"
+            [kb]="kb"
+            [isRouteWithSidePanel]="isRouteWithSidePanel()"
+            [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
+            [isShowIssuePanel]="isShowIssuePanel()"
+            [isShowNotes]="isShowNotes()"
+          ></desktop-panel-buttons>
+        </div>
+      }
+    }
+
+    <!--
+      While sync is demoted the trigger carries its state — conflict badge,
+      glyph, warn colour and tooltip — so collapsing sync never hides the fact
+      that it is broken. Colour alone would be WCAG 1.4.1 and silent to a
+      screen reader, hence the glyph and the handed-over tooltip.
+    -->
+    @if (hasOverflow()) {
+      <button
+        class="header-overflow-btn secondary-header-action"
+        [class.is-error]="demotedSyncState() === 'error'"
+        [class.is-offline]="demotedSyncState() === 'offline'"
+        [color]="!demotedSyncState() && isDemotedCounterRunning() ? 'accent' : ''"
+        [matBadge]="demotedConflictCount()"
+        [matBadgeHidden]="demotedConflictCount() === 0"
+        matBadgeColor="accent"
+        matBadgeSize="small"
+        matBadgeOverlap="true"
+        [matBadgeDescription]="
+          demotedConflictCount() > 0
+            ? (T.F.SYNC.CONFLICT_REVIEW.BADGE_TOOLTIP
+              | translate: { count: demotedConflictCount() })
+            : ''
+        "
+        (click)="toggleOverflow()"
+        aria-controls="header-overflow-panel"
+        [attr.aria-expanded]="isOverflowOpen()"
+        [attr.aria-label]="T.G.MORE_ACTIONS | translate"
+        matTooltip="{{ overflowTooltip() | translate }}"
+        mat-icon-button
+        type="button"
+      >
+        <mat-icon>{{ overflowIcon() }}</mat-icon>
+      </button>
     }
   </nav>
 </div>
+
+<!--
+  Overflow panel. Anchored to the header rather than rendered into a `mat-menu`
+  overlay, and holding the *real* action components rather than flat menu rows.
+  Both follow from one constraint: a mat-menu instantiates its content only
+  while open, and `simple-counter-button` owns its countdown-completion
+  subscription — a counter that existed only while the panel was open would stop
+  firing repeated-countdown reminders. Keeping the components also keeps their
+  tooltips, toggled state and nested menus instead of reimplementing them.
+  `inert` holds the hidden panel out of the tab order and the a11y tree (#9272).
+-->
+@if (isDataLoaded() && hasOverflow()) {
+  <div
+    id="header-overflow-panel"
+    class="header-overflow-panel"
+    [class.isVisible]="isOverflowOpen()"
+    [attr.aria-hidden]="!isOverflowOpen()"
+    [attr.inert]="isOverflowOpen() ? null : ''"
+  >
+    @if (isDemotedPluginBtns()) {
+      <plugin-work-context-header-btns></plugin-work-context-header-btns>
+      <plugin-header-btns></plugin-header-btns>
+    }
+
+    @if (isDemotedUserProfile()) {
+      <user-profile-button></user-profile-button>
+    }
+
+    @if (isDemotedSidePanelBtns()) {
+      <plugin-side-panel-btns></plugin-side-panel-btns>
+    }
+
+    @if (isDemotedPanelBtns()) {
+      <desktop-panel-buttons
+        [kb]="kb"
+        [isRouteWithSidePanel]="isRouteWithSidePanel()"
+        [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
+        [isShowIssuePanel]="isShowIssuePanel()"
+        [isShowNotes]="isShowNotes()"
+      ></desktop-panel-buttons>
+    }
+
+    @if (isDemotedCounters()) {
+      @for (
+        simpleCounter of enabledSimpleCounters();
+        track trackById($index, simpleCounter)
+      ) {
+        @if (!simpleCounter.isHideButton) {
+          <simple-counter-button [simpleCounter]="simpleCounter"></simple-counter-button>
+        }
+      }
+    }
+
+    @if (isDemotedSync()) {
+      <ng-container [ngTemplateOutlet]="syncBtnTpl"></ng-container>
+    }
+  </div>
+}
+
+<!--
+  One definition, two mount points (inline slot and overflow panel), so the two
+  copies cannot drift the way hand-duplicated markup does.
+
+  matBadgeHidden only hides the badge VISUALLY (CSS) — MatBadge keeps an aria
+  description active regardless of hidden state. So at count 0 the badge
+  description must be empty (not a stale "0 conflicts" announced to screen
+  readers on every encounter). '' is the type-correct "no description" value;
+  MatBadge removes the aria-describedby for it.
+-->
+<ng-template #syncBtnTpl>
+  <button
+    class="sync-btn secondary-header-action"
+    [class.is-error]="syncIsEnabledAndReady() && syncState() === 'ERROR'"
+    [class.is-offline]="syncIsEnabledAndReady() && !isOnline()"
+    [class.is-in-progress]="syncIsEnabledAndReady() && isSyncInProgress()"
+    [matBadge]="unreviewedConflictCount()"
+    [matBadgeHidden]="unreviewedConflictCount() === 0"
+    matBadgeColor="accent"
+    matBadgeSize="small"
+    matBadgeOverlap="true"
+    [matBadgeDescription]="
+      unreviewedConflictCount() > 0
+        ? (T.F.SYNC.CONFLICT_REVIEW.BADGE_TOOLTIP
+          | translate: { count: unreviewedConflictCount() })
+        : ''
+    "
+    [attr.aria-label]="syncTooltip() | translate"
+    matTooltip="{{ syncTooltip() | translate }}"
+    (click)="onSyncButtonClick()"
+    (longPress)="setupSync()"
+    (contextmenu)="$event.preventDefault(); setupSync()"
+    mat-icon-button
+  >
+    @if (syncIsEnabledAndReady()) {
+      @if (isOnline()) {
+        @if (syncState() === 'ERROR') {
+          <mat-icon>sync_problem</mat-icon>
+        } @else {
+          <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
+        }
+        @if (hasNoPendingOps()) {
+          @if (superSyncIsConfirmedInSync()) {
+            <mat-icon class="sync-state-ico">done_all</mat-icon>
+          } @else {
+            <mat-icon class="sync-state-ico">check</mat-icon>
+          }
+        }
+      } @else {
+        <mat-icon>wifi_off</mat-icon>
+      }
+    } @else {
+      <mat-icon>sync_disabled</mat-icon>
+    }
+  </button>
+</ng-template>

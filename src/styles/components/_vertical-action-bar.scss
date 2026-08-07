@@ -60,6 +60,16 @@
       );
     }
 
+    // The horizontal bar wraps each demotable action in a `[data-slot]` box so
+    // the overflow reflow can measure it (#9480). That box is a *row* flex, and
+    // it would both lay its buttons out sideways inside this 48px rail and hide
+    // the components below from the direct-child selectors that follow. Nothing
+    // needs measuring here — `_reflow()` early-returns while the bar is
+    // vertical — so collapse the wrappers away entirely.
+    [data-slot] {
+      display: contents;
+    }
+
     // These wrapper custom-elements have no box of their own (height 0),
     // so as direct flex children the strip's `gap` lands on a collapsed
     // wrapper instead of the button(s) inside — the visible icons end up
@@ -67,10 +77,15 @@
     // each wrapper a column flex item that stacks its button(s) with the
     // same gap, and drop truly-empty wrappers so they don't reserve a
     // phantom gap slot.
-    > plugin-header-btns,
-    > plugin-side-panel-btns,
-    > desktop-panel-buttons,
-    > user-profile-button {
+    //
+    // Descendant, not child: since #9480 these sit one level down inside the
+    // `[data-slot]` box above. `display: contents` removes that box from the
+    // *rendered* tree but not from the *selector* tree, so a `>` combinator
+    // would silently stop matching and the rail would lose its column layout.
+    plugin-header-btns,
+    plugin-side-panel-btns,
+    desktop-panel-buttons,
+    user-profile-button {
       display: flex;
       flex-direction: column;
       align-items: center;
