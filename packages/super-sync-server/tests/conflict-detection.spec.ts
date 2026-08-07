@@ -221,9 +221,17 @@ vi.mock('../src/db', async () => {
       if (!sql.includes('DISTINCT ON')) {
         throw new Error(`Unmocked raw query in tx: ${sql}`);
       }
-      const [userId, entityType, entityIdsSql] = params as [number, string, Prisma.Sql];
+      // Located by shape, not by position: userId is the only number, entityType the
+      // only bare string, and the id array the only Sql fragment. #9503 reordered
+      // these (and repeated userId/entityType), so a positional destructure is wrong.
+      const userId = params.find((p): p is number => typeof p === 'number') as number;
+      const entityType = params.find((p): p is string => typeof p === 'string') as string;
+      const entityIdsSql = params.find(
+        (p): p is Prisma.Sql =>
+          !!p && typeof p === 'object' && Array.isArray((p as Prisma.Sql).values),
+      );
       state.batchConflictQueryCount++;
-      if (!Array.isArray(entityIdsSql.values)) {
+      if (!entityIdsSql || !Array.isArray(entityIdsSql.values)) {
         throw new Error(
           'Expected batched conflict query entity IDs to be passed via Prisma.join(...)',
         );

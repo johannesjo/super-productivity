@@ -413,7 +413,17 @@ describe('conflict helpers', () => {
         $queryRaw: vi
           .fn()
           .mockImplementation(async (_strings: unknown, ...params: unknown[]) => {
-            const queriedEntityIds = (params[2] as Prisma.Sql).values;
+            // Located by shape, not by position: the id array is the only Sql
+            // fragment among the params. #9503 reordered them and a positional
+            // index broke silently.
+            const idArrayParam = params.find(
+              (param): param is Prisma.Sql =>
+                !!param &&
+                typeof param === 'object' &&
+                Array.isArray((param as Prisma.Sql).values),
+            );
+            if (!idArrayParam) throw new Error('no entity-id array param in query');
+            const queriedEntityIds = idArrayParam.values;
             queriedBatchSizes.push(queriedEntityIds.length);
             if (!queriedEntityIds.includes(boundaryEntityId)) return [];
 

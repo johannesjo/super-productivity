@@ -449,12 +449,13 @@ vi.mock('../src/db', async () => {
         state.serverSeqCounter = Math.max(state.serverSeqCounter, lastSeq);
         return [{ lastSeq }];
       }
-      if (sql.includes('JOIN (VALUES')) {
-        // Params are [touchedRows (VALUES join), userId, idArray, idArray]: userId
-        // is the only number; the VALUES join is the first Sql fragment, whose
-        // .values hold the flattened (entity_type, entity_id) touched pairs. The
-        // idArray prefilter params (#8334) are not needed by the mock. (Previously
-        // userId was the last param and the join the only fragment.)
+      if (sql.includes('touched(entity_type, entity_id)')) {
+        // Params are [touchedRows (the VALUES CTE), userId, userId]: userId is the
+        // only number; the touched rows are the only Sql fragment, whose .values hold
+        // the flattened (entity_type, entity_id) pairs. Matched on the CTE name rather
+        // than on `JOIN (VALUES` because #9503 lifted the VALUES list into a CTE and
+        // dropped the separate idArray params. Deliberately position-independent —
+        // three mocks broke on positional params during that change.
         const txUserId = params.find((p: unknown) => typeof p === 'number') as number;
         const valuesParam = params.find(
           (p: unknown) =>

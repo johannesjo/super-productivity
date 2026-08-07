@@ -31,9 +31,12 @@ export function resetTestState(): void {
 /**
  * detectConflictForEntity's array branch is raw SQL — a MATERIALIZED CTE over the
  * entity_ids GIN index — so every tx mock must answer it via $queryRaw rather than
- * the typed model API. `AS "maxSeq"` is the discriminator: the only other raw query
- * against `operations` (prefetchLatestEntityOpsForBatch) is a DISTINCT ON with no
- * such alias, so the two never collide.
+ * the typed model API.
+ *
+ * `AS "maxSeq"` is the load-bearing half of the discriminator. `entity_ids @>` alone
+ * is NOT enough any more: since #9503 split them the same way, both batch queries
+ * probe the GIN with `@>` too. Only this one aggregates to a maxSeq, so keep both
+ * conditions — dropping the alias check would silently route a batch query here.
  */
 export function isEntityArrayBranchQuery(strings: unknown): boolean {
   const sql = Array.isArray(strings) ? strings.join('') : String(strings);
