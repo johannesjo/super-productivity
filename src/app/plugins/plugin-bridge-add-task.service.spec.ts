@@ -27,10 +27,13 @@ import { addSubTask } from '../features/tasks/store/task.actions';
 import { Task } from '../features/tasks/task.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
 
-// Regression test for issue #7437 — Brain Dump (and any plugin using
-// PluginAPI.addTask with a parentId) used to drop short-syntax time estimates
-// from subtask titles, because addSubTask doesn't trigger ShortSyntaxEffects.
-describe('PluginBridgeService.addTask() — subtask short-syntax (issue #7437)', () => {
+// Covers the plugin API's subtask-creation branch, which hand-rolls task
+// construction rather than going through TaskService.addSubTaskTo(). The
+// short-syntax cases are the regression test for issue #7437 — Brain Dump (and
+// any plugin using PluginAPI.addTask with a parentId) used to drop short-syntax
+// time estimates from subtask titles, because addSubTask doesn't trigger
+// ShortSyntaxEffects.
+describe('PluginBridgeService.addTask() — subtask creation', () => {
   const setup = (
     isEnableDue: boolean,
     allTasks: Task[] = [{ id: 'parent-1' } as Task],
@@ -206,13 +209,18 @@ describe('PluginBridgeService.addTask() — subtask short-syntax (issue #7437)',
     expect(dispatched.task.dueDay).toBe('2026-08-07');
   });
 
-  it('leaves dueDay undefined when not given', async () => {
+  it('normalises a null dueDay to undefined but still sets the key', async () => {
     const { service, taskService } = setup(true);
 
-    await service.addTask({ title: 'a subtask', parentId: 'parent-1' });
+    await service.addTask({ title: 'a subtask', parentId: 'parent-1', dueDay: null });
 
-    const factoryCall = taskService.createNewTaskWithDefaults.calls.mostRecent();
-    expect(factoryCall.args[0].additional?.dueDay).toBeUndefined();
+    const { additional } =
+      taskService.createNewTaskWithDefaults.calls.mostRecent().args[0];
+    expect(additional?.dueDay).toBeUndefined();
+    // Key presence is load-bearing: createNewTaskWithDefaults auto-assigns
+    // today's date only while `'dueDay' in additional` is false, so dropping
+    // the key would silently re-arm that for subtasks created from Today.
+    expect('dueDay' in (additional ?? {})).toBeTrue();
   });
 
   // The task model is only two levels deep and the addSubTask reducer doesn't

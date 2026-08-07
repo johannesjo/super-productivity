@@ -922,6 +922,11 @@ export class PluginBridgeService implements OnDestroy {
           isDone: (taskData as { isDone?: boolean }).isDone || false,
           tagIds: [], // Subtasks don't have tags
           projectId: taskData.projectId || undefined,
+          // The key must always be present, even when undefined:
+          // createNewTaskWithDefaults only auto-assigns today's date while
+          // `'dueDay' in additional` is false, and a subtask must not inherit a
+          // due date from whichever view the user happened to be on. Matches
+          // TaskService.addSubTaskTo() and the main-task branch below.
           dueDay: taskData.dueDay ?? undefined,
           ...subTaskTitleProps.timeProps,
         },
@@ -1749,6 +1754,8 @@ export class PluginBridgeService implements OnDestroy {
       } else if (parent.parentId) {
         // The task model is two levels deep; the reducer would happily write a
         // 3-level tree. Mirrors the local REST API's INVALID_PARENT rejection.
+        // Guards addTask/updateTask only — batchUpdateForProject validates in
+        // its own reducer and still accepts a subtask as parent.
         errors.push(this._translateService.instant(T.PLUGINS.CANNOT_NEST_SUBTASKS));
       }
     }
