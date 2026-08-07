@@ -450,18 +450,24 @@ vi.mock('../src/db', async () => {
         return [{ lastSeq }];
       }
       if (sql.includes('touched(entity_type, entity_id)')) {
-        // Params are [touchedRows (the VALUES CTE), userId, userId]: userId is the
-        // only number; the touched rows are the only Sql fragment, whose .values hold
-        // the flattened (entity_type, entity_id) pairs. Matched on the CTE name rather
-        // than on `JOIN (VALUES` because #9503 lifted the VALUES list into a CTE and
-        // dropped the separate idArray params. Deliberately position-independent —
+        // Params are [touchedRows (the VALUES CTE), userId, arrayBranchCte, userId]:
+        // userId is the only number, and touchedRows is the only Sql fragment with a
+        // NON-EMPTY .values (the shared array-branch CTE binds nothing), whose values
+        // hold the flattened (entity_type, entity_id) pairs. Matched on the CTE name
+        // rather than on `JOIN (VALUES` because #9503 lifted the VALUES list into a CTE
+        // and dropped the separate idArray params. Deliberately position-independent —
         // three mocks broke on positional params during that change.
+        //
+        // This mock matches stored ops by scalar entityId only and ignores entityIds,
+        // so it does not model the array branch: a future batchUpload test whose prior
+        // op is multi-entity would get a false "no conflict" here.
         const txUserId = params.find((p: unknown) => typeof p === 'number') as number;
         const valuesParam = params.find(
           (p: unknown) =>
             !!p &&
             typeof p === 'object' &&
-            Array.isArray((p as { values?: unknown[] }).values),
+            Array.isArray((p as { values?: unknown[] }).values) &&
+            (p as { values: unknown[] }).values.length > 0,
         ) as { values: unknown[] } | undefined;
         const touchedParams = valuesParam?.values ?? [];
         const touchedPairs = new Set<string>();

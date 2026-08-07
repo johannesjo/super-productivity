@@ -18,37 +18,55 @@ const TASK_TIME_DELTA_ACTION_TYPE = '[TimeTracking] Sync time spent';
 
 /**
  * ARRAY-branch candidates for BOTH batch conflict lookups: every stored op whose
- * `entity_ids` contains a probed id, tagged with the id that matched. Expects a
- * `probe(eid)` CTE in scope and binds no parameters of its own, which is why it can be
- * shared verbatim instead of hand-copied — the #8334 "keep these two in sync" hazard is
- * exactly what let #9503 ship the same mis-plan into both queries.
+ * `entity_ids` contains a probed id, tagged with the id that matched. Shared rather than
+ * hand-copied — the #8334 "keep these two in sync" hazard is exactly what let #9503 ship
+ * the same mis-plan into both queries. `probeSource` is passed in (rather than the
+ * fragment reaching for a `probe` CTE the caller must remember to define) so the contract
+ * is explicit; both call sites were measured plan-identical either way.
  *
  * Carrying `p.eid` is load-bearing for COST, not correctness. Re-deriving the matched id
  * downstream with `unnest(entity_ids) JOIN probe` instead emits |probe ∩ entity_ids|²
  * rows per op, because `cand` already holds one copy of the op per matching probe id.
- * Measured on PGlite over a 40k-row seed, 20 stored ops of 100 ids against a 100-id
- * probe: 8645ms / 19.8M join-filtered rows / 1611 temp blocks, against 8ms and zero for
- * the form below. At the 1000-id wire cap it was 36.8s vs 4.5ms. The probe set here is
- * the incoming op's OWN id list, so that overlap is maximal by construction, not an edge
- * case. Not selecting `entity_ids` at all also keeps the materialised tuplestore narrow.
- * batch-conflict-plan.pglite.spec.ts pins this; both guards fail on the fan-out form.
+ * On batch-conflict-plan.pglite.spec.ts's wide seed that is 59.8M join-filtered rows /
+ * 2211 temp blocks / ~23s, against zero and ~8ms for the form below; at the 1000-id wire
+ * cap the gap was 36.8s vs 4.5ms. Callers probe an id set that OVERLAPS the stored
+ * arrays heavily — detect probes the incoming op's own ids, prefetch the upload batch's
+ * — so that is the normal shape, not an edge case. Not selecting `entity_ids` at all
+ * also keeps the materialised tuplestore narrow. Both spec guards fail on the fan-out
+ * form; keep it that way.
  *
  * MATERIALIZED is load-bearing: it stops the outer user_id / entity_type predicates
  * being pushed down, which hands the composite btree back and restores the slice scan
- * this whole change exists to remove (measured: 1106 blocks and no GIN without it — an
- * earlier revision of this comment cited 2500 discarded rows, which is the OR form's
- * number, not the fence's).
+ * this whole change exists to remove (measured: 1106 blocks and no GIN without it).
  *
  * Isolation: like the single-entity path, this matches by entity id across ALL users and
- * the callers' outer WHERE enforces the user boundary — correct, but NOT cost-bounded
- * per user. See the note at detectConflictForEntity for the shared-literal probe vectors
- * ('KANBAN_DEFAULT' &c.) and the expression-GIN fix that would bound it.
+ * the callers' outer WHERE enforces the user boundary. CORRECT — cross-tenant rows are
+ * rejected before anything is returned, pinned by the ARRAY-branch isolation tests in
+ * entity-ids-conflict.pglite.spec.ts — but NOT cost-bounded per user, and that part IS a
+ * regression against master, which carried `user_id` inside the scanned relation. The
+ * `MATERIALIZED` fence is precisely what forbids putting it back.
+ *
+ * The cost is linear in the number of rows ACROSS ALL TENANTS carrying a probed id, and
+ * the batch paths multiply it by the batch size (up to 1000 ids/op) where the
+ * single-entity path probes one. Measured: 4000 co-tenants sharing one id => 30ms here
+ * vs 0.1ms on master; a 100-id wide probe with 40 co-tenants => 14401 blocks / 821 temp
+ * blocks / 110ms vs master's 810 blocks / 33ms. It only bites on ids that are
+ * byte-identical across tenants — the hard-coded 'KANBAN_DEFAULT' / 'EISENHOWER_MATRIX'
+ * that `sortBoards` both stores and probes — so it is small today and far from the
+ * multi-second statement_timeout #9503 was about, but it grows with server population
+ * and nothing the tenant controls bounds it.
+ *
+ * DELIBERATELY NOT COVERED by batch-conflict-plan.pglite.spec.ts: that seed gives every
+ * user disjoint ids, and `expectBounded` asserts `rowsFiltered === 0`, which a shared-id
+ * seed violates by construction. So "bounded" there means "bounded given disjoint ids",
+ * not bounded absolutely. The real fix is the expression-GIN sketched at
+ * detectConflictForEntity; it needs its own issue and its own measurements.
  */
-const ARRAY_BRANCH_CANDIDATES_CTE = Prisma.sql`
+const arrayBranchCandidatesCte = (probeSource: Prisma.Sql): Prisma.Sql => Prisma.sql`
   cand AS MATERIALIZED (
     SELECT p.eid AS eid, o.user_id, o.entity_type, o.client_id, o.action_type,
            o.vector_clock, o.server_seq
-    FROM probe p
+    FROM (${probeSource}) p
     JOIN operations o ON o.entity_ids @> ARRAY[p.eid]
   )
 `;
@@ -140,18 +158,22 @@ export const detectConflictForEntities = async (
     // PLUS the sort column are covered by the composite btree, so each probe is an
     // index seek that terminates on an empty range when the entity is new.
     //
-    // Array branch: per-id `@>` probes, NOT one `entity_ids && $arr`, and the tradeoff
-    // is narrower than it looks — measure before changing it either way. With
+    // Array branch: per-id `@>` probes, NOT one `entity_ids && $arr`. With
     // `fastupdate = off` (migration 20260720000000, what `prisma migrate deploy` gives
-    // production) both forms ride the GIN and `@>` costs ~100 extra blocks. With the
-    // pending list DIRTY a single 100-key `&&` is expensive enough that the planner
-    // abandons the index for a SEQ SCAN, which `@>` avoids — but on a 40k-row seed that
-    // seq scan measured FASTER than the surviving GIN plan (78ms vs 116ms), so `@>` is
-    // not a free win there. It is defensible because `fastupdate = off` cannot be
-    // expressed in schema.prisma, so `prisma db push` databases (CI, the E2E stack, the
-    // manual setup in README.md) have the pending list ON, and because a seq scan at
-    // production's 6.97M rows / 5.6GB extrapolates far worse than at 40k — that last
-    // step is UNMEASURED. `@>` is also the same probe detectConflictForEntity ships.
+    // production) both forms ride the GIN and `@>` costs modestly more — +99 blocks on
+    // an all-new probe, +495 on the wide-array one. It earns that back when the pending
+    // list is DIRTY, which every `prisma db push` database has (CI, the E2E stack, the
+    // manual setup in README.md) because `fastupdate = off` cannot be expressed in
+    // schema.prisma: there a single 100-key `&&` is costly enough that the planner
+    // abandons the index for a SEQ SCAN of the whole table.
+    //
+    // At the 40k-row seed scale that seq scan is actually FASTER (108ms vs 185ms), so
+    // the case does not rest on wall-clock — it rests on how the two grow. `@>` reads
+    // |probe| x pending-list pages, and the pending list is capped by
+    // `gin_pending_list_limit` (4MB default => ~512 pages, so ~51k blocks at |probe|=100)
+    // INDEPENDENTLY of table size; the seq scan reads the whole heap, which on production
+    // is 5.6GB (~700k blocks). That is a structural bound, not an extrapolation. `@>` is
+    // also the same probe detectConflictForEntity ships.
     //
     // `probe` binds the 100 ids ONCE — they used to be interpolated three times, for
     // 300 of the statement's 302 parameters — and is then referenced twice, so Postgres
@@ -176,7 +198,7 @@ export const detectConflictForEntities = async (
           LIMIT 1
         ) x
       ),
-      ${ARRAY_BRANCH_CANDIDATES_CTE},
+      ${arrayBranchCandidatesCte(Prisma.sql`SELECT eid FROM probe`)},
       array_hits AS (
         SELECT c.eid AS eid, c.client_id, c.action_type, c.vector_clock, c.server_seq
         FROM cand c
@@ -769,18 +791,19 @@ export const prefetchLatestEntityOpsForBatch = async (
     // there is no separate id-array parameter at all.
     //
     // `array_hits` re-checks the entity TYPE with a row-wise `IN`, not a `JOIN`: `cand`
-    // is keyed by id alone (`probe` drops the type), so a stored op matched by id still
-    // has to be confirmed against the requested (type, id) PAIR. A semi-join lets the
-    // planner hash `touched` once — the inner JOIN this replaced was planned as a nested
-    // loop that re-compared every candidate against all 100 pairs (measured 198k
-    // join-filter comparisons on the wide-array seed). It also cannot duplicate a row
-    // when `entityPairs` carries the same pair twice, which the JOIN could.
+    // is keyed by id alone (the probe source drops the type), so a stored op matched by
+    // id still has to be confirmed against the requested (type, id) PAIR. A semi-join
+    // stops at the first match per candidate where the JOIN scanned on, which measured
+    // 99k comparisons against 198k on the wide-array seed — though that particular
+    // saving is an artefact of the seed's ordering and would shrink on adversarial
+    // input. Output is identical either way (the outer DISTINCT ON absorbs the JOIN's
+    // duplicates), so this is a cost choice, not a correctness one. Under
+    // `force_generic_plan` it stays a NESTED LOOP, not a hash: the residual is
+    // |cand| x |touched|, bounded by the batch size and independent of how wide the
+    // stored arrays are, which is what distinguishes it from a fan-out.
     const latestOps = await tx.$queryRaw<LatestBatchEntityOperationRow[]>`
       WITH touched(entity_type, entity_id) AS (
         VALUES ${Prisma.join(touchedRows)}
-      ),
-      probe(eid) AS (
-        SELECT DISTINCT entity_id FROM touched
       ),
       scalar_hits AS (
         SELECT t.entity_type, t.entity_id AS eid, x.client_id, x.action_type,
@@ -796,7 +819,9 @@ export const prefetchLatestEntityOpsForBatch = async (
           LIMIT 1
         ) x
       ),
-      ${ARRAY_BRANCH_CANDIDATES_CTE},
+      ${arrayBranchCandidatesCte(
+        Prisma.sql`SELECT DISTINCT entity_id AS eid FROM touched`,
+      )},
       array_hits AS (
         SELECT c.entity_type, c.eid AS eid, c.client_id, c.action_type,
                c.vector_clock, c.server_seq

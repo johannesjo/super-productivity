@@ -240,9 +240,16 @@ vi.mock('../src/db', async () => {
       }
       const userId = numberParams[0];
       const entityType = stringParams[0];
+      // `values.length > 0` is load-bearing: the shared array-branch CTE is also a
+      // Prisma.Sql, with an EMPTY values array, so a bare Array.isArray check would
+      // match it if fragment order ever changed — and an empty id set matches no op,
+      // i.e. a silent "no conflict" for every entity.
       const entityIdsSql = params.find(
         (p): p is Prisma.Sql =>
-          !!p && typeof p === 'object' && Array.isArray((p as Prisma.Sql).values),
+          !!p &&
+          typeof p === 'object' &&
+          Array.isArray((p as Prisma.Sql).values) &&
+          (p as Prisma.Sql).values.length > 0,
       );
       state.batchConflictQueryCount++;
       if (!entityIdsSql || !Array.isArray(entityIdsSql.values)) {

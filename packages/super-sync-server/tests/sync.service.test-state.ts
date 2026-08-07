@@ -33,10 +33,15 @@ export function resetTestState(): void {
  * entity_ids GIN index — so every tx mock must answer it via $queryRaw rather than
  * the typed model API.
  *
- * `AS "maxSeq"` is the load-bearing half of the discriminator. `entity_ids @>` alone
- * is NOT enough any more: since #9503 split them the same way, both batch queries
- * probe the GIN with `@>` too. Only this one aggregates to a maxSeq, so keep both
- * conditions — dropping the alias check would silently route a batch query here.
+ * `AS "maxSeq"` is the load-bearing half of the discriminator: only this query
+ * aggregates to a maxSeq. Keep `entity_ids @>` as well, but do not rely on it —
+ * this inspects the template LITERALS, and both batch queries moved their `@>` into
+ * an interpolated `Prisma.sql` fragment, so it is a bound VALUE there and invisible
+ * here. Which is the general hazard worth remembering: every tx mock discriminates on
+ * template literals, so extracting SQL into a `Prisma.sql` fragment silently removes
+ * that text from all of their views. The dangerous direction is prefetch losing
+ * `touched(entity_type` from its literals while `scalar_hits` survives — it would then
+ * be answered by detect's branch. (Losing `scalar_hits` throws, which is loud.)
  */
 export function isEntityArrayBranchQuery(strings: unknown): boolean {
   const sql = Array.isArray(strings) ? strings.join('') : String(strings);

@@ -413,14 +413,17 @@ describe('conflict helpers', () => {
         $queryRaw: vi
           .fn()
           .mockImplementation(async (_strings: unknown, ...params: unknown[]) => {
-            // Located by shape, not by position: the id array is the only Sql
-            // fragment among the params. #9503 reordered them and a positional
-            // index broke silently.
+            // Located by shape, not by position: #9503 reordered the params and a
+            // positional index broke silently. `values.length > 0` is load-bearing —
+            // the shared array-branch CTE is ALSO a Prisma.Sql, with an EMPTY values
+            // array, so a bare Array.isArray check would match it if fragment order
+            // ever changed and would then report "no conflict" for every entity.
             const idArrayParam = params.find(
               (param): param is Prisma.Sql =>
                 !!param &&
                 typeof param === 'object' &&
-                Array.isArray((param as Prisma.Sql).values),
+                Array.isArray((param as Prisma.Sql).values) &&
+                (param as Prisma.Sql).values.length > 0,
             );
             if (!idArrayParam) throw new Error('no entity-id array param in query');
             const queriedEntityIds = idArrayParam.values;

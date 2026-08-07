@@ -18,9 +18,9 @@ import type { Operation } from '../src/sync/sync.types';
  * `DISTINCT ON`. It is not that. The combined `(entity_ids && $arr OR entity_id = ANY($arr))`
  * spans the entity_ids GIN and the (user_id, entity_type, entity_id, server_seq) btree, and
  * the planner abandons both to slice-scan the btree: on the seed below, PG16.14 and PGlite
- * both discard the probed user's WHOLE (user_id, entity_type) slice — 2500 rows — for a
+ * both discard the probed user's WHOLE (user_id, entity_type) slice — 2520 rows — for a
  * 100-id probe that matches nothing. `prefetchLatestEntityOpsForBatch` carries no
- * `entity_type` predicate at all, so it discarded 20007: the user's ENTIRE history.
+ * `entity_type` predicate at all, so it discarded 20020: the user's ENTIRE history.
  * That is the same OR-across-two-indexes degeneracy as the 2026-07-20 outage, which
  * conflict.ts flagged as "not excluded" for these paths. `DISTINCT ON` is not what made
  * it expensive; the OR is.
@@ -35,7 +35,7 @@ import type { Operation } from '../src/sync/sync.types';
  *  - The sibling keeps `entity_ids` empty on EVERY row because array-element statistics
  *    disarm ITS regression. That does NOT apply here, and it was checked rather than
  *    assumed: the batch mis-plan reproduces identically at 0% and at 10% multi-entity
- *    rows (2500 filtered either way), because the OR never lets the planner consider the
+ *    rows (the same slice either way), because the OR never lets the planner consider the
  *    GIN in the first place. So this seed DOES populate a minority of rows — otherwise
  *    the array branch of the fix is never exercised at all.
  *  - `fastupdate = off` is set explicitly, matching production (migration
@@ -45,6 +45,13 @@ import type { Operation } from '../src/sync/sync.types';
  *  - The seed carries a WIDE-array population (see WIDE_WIDTH) as well as the width-2
  *    majority. The first fix for #9503 regressed only on wide arrays, and a width-2
  *    seed cannot express that: see the two "does not fan out" tests.
+ *  - Every user gets DISJOINT entity ids, so nothing here measures the array branch's
+ *    cross-tenant cost. That exclusion is deliberate and load-bearing: `expectBounded`
+ *    asserts `rowsFiltered === 0`, which a shared-id seed violates by construction (the
+ *    `cand` CTE matches by id across all users and `array_hits` filters afterwards). So
+ *    "bounded" in this file means "bounded given disjoint ids" — the shared-literal case
+ *    ('KANBAN_DEFAULT' &c.) is documented, with numbers, at arrayBranchCandidatesCte in
+ *    conflict.ts, and is not guarded anywhere. Do not read these tests as covering it.
  *
  * REMAINING FIDELITY LIMITS: PGlite is PG18 and reports every block as a cache hit, so
  * these counts cannot model production's cold-cache I/O. The plan SHAPE is what
@@ -111,7 +118,7 @@ type Measured = {
  * `Rows Removed by Filter` alone is NOT enough, and assuming it was let a 1000x
  * regression through review: this rewrite moved the id match from a `WHERE ... = ANY`
  * into a JOIN, and Postgres reports work discarded there as `Rows Removed by JOIN
- * Filter` — a different key. A fan-out that read and threw away 19.8M join rows scored
+ * Filter` — a different key. A fan-out that read and threw away 59.8M join rows scored
  * `rowsFiltered: 0` and passed `expectBounded` untouched. Count both, plus temp blocks,
  * which is what an over-wide intermediate spills to.
  */
@@ -291,31 +298,26 @@ const GIN_INDEX = 'operations_entity_ids_gin';
 const BTREE_INDEX = 'operations_user_id_entity_type_entity_id_server_seq_idx';
 
 /**
- * Measured on this seed with fastupdate=off, the production reloption: post-fix both
- * batch queries discard NOTHING and read 600 blocks, riding the GIN for the array
- * branch and the composite btree for the scalar one. The shipped OR form reads 806
- * while discarding 2500 (detect) / 20007 (prefetch).
+ * NO BLOCK BUDGET HERE, unlike the sibling spec — tried and rejected on evidence. On the
+ * all-new probe the fix reads 600 blocks against the OR form's 810 (detect) and 438
+ * (prefetch): the regression reads FEWER blocks than the fix in one of the two cases, so
+ * no threshold can separate them, and any budget wide enough not to flake would pass the
+ * very mis-plan this file exists to catch. (The sibling's budget works because its
+ * regression is 816 against a fixed 143.) `Measured.blocks` is therefore reported for
+ * debugging and deliberately never asserted.
  *
- * NO BLOCK BUDGET HERE, unlike the sibling spec — that was tried and rejected on
- * evidence. Fixed reads 600 blocks and the regression 806: a 34% gap, so no threshold
- * separates them, and any budget wide enough not to flake would pass the very mis-plan
- * this file exists to catch. (The sibling's budget works because its regression is 816
- * against a fixed 143.)
+ * Discarded-row counts carry the signal instead. They are the regressions' actual
+ * signatures — "read history and threw it away" for the OR form, "expanded every
+ * candidate and threw it away" for the fan-out — and unlike blocks they are scale-free.
+ * The index-name assertions pin the same property structurally: the OR mis-plan is
+ * precisely the one that rides NEITHER index usefully.
  *
- * `rowsFiltered` carries the signal instead. It is the regression's actual signature —
- * "read the user's history and threw it away" — and unlike blocks it is scale-free, so
- * it keeps its meaning if the seed changes. The index-name assertions pin the same
- * property structurally: the mis-plan is precisely the one that rides NEITHER index
- * usefully.
- */
-/**
- * `maxJoinFiltered` is 0 for every query that has no join left to mis-plan. The one
- * exception is prefetchLatestEntityOpsForBatch, whose array branch must still confirm a
- * by-id GIN match against the requested (entity_type, entity_id) PAIR. Under
- * `force_generic_plan` Postgres cannot see the parameter values and plans that semi-join
- * as a nested loop, so it compares |cand| x |touched|. That is bounded by the batch size
- * and the number of matching ops, and is INDEPENDENT of how wide the stored arrays are —
- * which is exactly what separates it from a fan-out. See WIDE_WIDTH.
+ * `maxJoinFiltered` is 0 for every query with no join left to mis-plan. The one exception
+ * is prefetchLatestEntityOpsForBatch, whose array branch must still confirm a by-id GIN
+ * match against the requested (entity_type, entity_id) PAIR. Under `force_generic_plan`
+ * Postgres cannot see the parameter values and plans that semi-join as a nested loop, so
+ * it compares |cand| x |touched| — bounded by the batch size and INDEPENDENT of how wide
+ * the stored arrays are, which is exactly what separates it from a fan-out.
  */
 const expectBounded = (measured: Measured, maxJoinFiltered = 0): void => {
   expect(measured.rowsFiltered).toBe(0);
@@ -326,8 +328,14 @@ const expectBounded = (measured: Measured, maxJoinFiltered = 0): void => {
   expect(measured.nodes).toContain(BTREE_INDEX);
 };
 
-/** The fan-out-free ceiling for the pair re-check: candidates x requested pairs. */
-const MAX_PAIR_RECHECK_COMPARISONS = PROBE_SIZE * WIDE_OPS * PROBE_SIZE;
+/**
+ * Ceiling for prefetch's pair re-check. Pinned just above the measured 99_000 (=|cand| x
+ * |touched|) rather than at the analytic worst case: the natural-looking
+ * PROBE_SIZE * WIDE_OPS * PROBE_SIZE = 200_000 would also admit the inner JOIN this
+ * replaced, which measures exactly 198_000 — a ceiling that passes the form you removed
+ * for cost is not a guard.
+ */
+const MAX_PAIR_RECHECK_COMPARISONS = 110_000;
 
 describe('batch conflict detection does not scan the history (PGlite)', () => {
   let db: PGlite;
@@ -360,10 +368,11 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
     // REGRESSION GUARD. The first fix for #9503 tagged nothing onto the array-branch
     // candidates and re-derived the matched id with `unnest(entity_ids) JOIN probe`.
     // Because `cand` already holds one copy of an op per matching probe id, that emitted
-    // |probe n entity_ids| squared rows per op: measured 8645ms / 19.8M join-filtered
-    // rows / 1611 temp blocks on exactly this seed, against 8ms and zero for the shipped
-    // form. It passed the all-new test above untouched, because a batch that matches
-    // NOTHING has no fan-out to multiply.
+    // |probe n entity_ids| squared rows per op: on this seed 59.8M join-filtered rows
+    // (= |cand| 2000 x WIDE_WIDTH x PROBE_SIZE, less the 200k that match) / 2211 temp
+    // blocks / ~23s, against zero and ~8ms for the shipped form. It passed the all-new
+    // test above untouched, because a batch that matches NOTHING has no fan-out to
+    // multiply — which is exactly why this seed needs a wide, MATCHING population.
     const measured: Measured[] = [];
     const result = await detectConflictForEntities(
       USER_ID,
