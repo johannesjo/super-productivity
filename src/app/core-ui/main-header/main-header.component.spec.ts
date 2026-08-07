@@ -11,7 +11,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EMPTY, of } from 'rxjs';
 import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
-import { NgTemplateOutlet } from '@angular/common';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { PluginHeaderBtnCfg } from '../../plugins/plugin-api.model';
 
@@ -235,13 +234,7 @@ describe('MainHeaderComponent focus button visibility', () => {
       set: {
         // MatMenu/MatMenuTrigger are real: NO_ERRORS_SCHEMA tolerates unknown
         // elements but not the `#overflowMenu="matMenu"` export reference.
-        imports: [
-          TranslatePipe,
-          MatMenu,
-          MatMenuContent,
-          MatMenuTrigger,
-          NgTemplateOutlet,
-        ],
+        imports: [TranslatePipe, MatMenu, MatMenuContent, MatMenuTrigger],
         schemas: [NO_ERRORS_SCHEMA],
       },
     });
@@ -348,6 +341,52 @@ describe('MainHeaderComponent focus button visibility', () => {
 
     expect(component.showPluginBtnsInline()).toBe(false);
     expect(component.showPanelBtnsInline()).toBe(true);
+  });
+
+  it('demotes a wide group even when the row is only just too narrow (#9480)', () => {
+    // The overflow trigger costs a slot, so a demotion is only worth making
+    // when it frees more than that slot -- not when the row happens to be over
+    // by less than a slot. Mobile, so add-task and the panel buttons live in the
+    // bottom nav and the plugin group is the only thing that can leave the bar.
+    isXs = signal(true);
+
+    component = createComponent();
+    const bridge = TestBed.inject(PluginBridgeService) as unknown as {
+      headerButtons: WritableSignal<PluginHeaderBtnCfg[]>;
+    };
+    bridge.headerButtons.set(
+      ['a', 'b', 'c'].map((id) => ({
+        pluginId: id,
+        label: id,
+        icon: 'star',
+        onClick: () => {},
+      })),
+    );
+
+    // 20px over: shedding 132px of plugin buttons for a 44px trigger fits.
+    component.setHostWidthForTesting(478);
+
+    expect(component.showPluginBtnsInline()).toBe(false);
+    expect(component.hasOverflow()).toBe(true);
+  });
+
+  it('leaves a lone slot-wide action in the bar rather than swapping it for the trigger (#9480)', () => {
+    // With the panel buttons and plugin buttons gone, add-task is all that is
+    // left to demote -- and it is exactly the width of the trigger that would
+    // replace it, so moving it buys no room and costs a tap.
+    isXs = signal(false);
+    appFeatures = signal({
+      ...DEFAULT_GLOBAL_CONFIG.appFeatures,
+      isScheduleDayPanelEnabled: false,
+      isIssuesPanelEnabled: false,
+      isProjectNotesEnabled: false,
+    });
+
+    component = createComponent();
+    component.setHostWidthForTesting(390);
+
+    expect(component.showAddTaskInline()).toBe(true);
+    expect(component.hasOverflow()).toBe(false);
   });
 
   it('keeps add-task reachable when narrow before hydration finishes (#9420/#9480)', () => {
