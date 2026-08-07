@@ -3055,6 +3055,7 @@
     "FAILED_TO_LOAD_CONFIG": "Failed to load plugin configuration",
     "FAILED_TO_REMOVE": "Failed to remove plugin",
     "FAILED_TO_SAVE_CONFIG": "Failed to save plugin configuration",
+    "FIELD_NOT_UPDATABLE": "\"{{field}}\" cannot be set via updateTask — re-parenting is not supported. Create subtasks with addTask({ parentId }), or restructure via batchUpdateForProject",
     "FILE_TOO_LARGE": "File too large ({{fileSize}}MB). Maximum size is {{maxSize}}MB",
     "GO_BACK": "Go Back",
     "HOOKS": "Hooks",

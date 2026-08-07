@@ -26,6 +26,7 @@ import { GlobalConfigService } from '../features/config/global-config.service';
 import { addSubTask } from '../features/tasks/store/task.actions';
 import { Task } from '../features/tasks/task.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
+import EN_TRANSLATIONS from '../../assets/i18n/en.json';
 
 // Covers the plugin API's subtask-creation branch, which hand-rolls task
 // construction rather than going through TaskService.addSubTaskTo(). The
@@ -47,6 +48,7 @@ describe('PluginBridgeService.addTask() — subtask creation', () => {
       'allTasks$',
       'createNewTaskWithDefaults',
       'add',
+      'update',
     ]);
     taskServiceSpy.allTasks$ = of(allTasks);
 
@@ -237,5 +239,44 @@ describe('PluginBridgeService.addTask() — subtask creation', () => {
     ).toBeRejectedWithError(/CANNOT_NEST_SUBTASKS/);
 
     expect(store.dispatch).not.toHaveBeenCalled();
+  });
+
+  // _validateTaskReferences wraps every individual error in VALIDATION_FAILED.
+  // Without the {{errors}} placeholder ngx-translate drops the payload, and
+  // every plugin API validation failure — missing project, missing tag, missing
+  // parent, nested subtask — reaches the caller as one indistinguishable
+  // string. Asserted against the real translation because the TranslateService
+  // stub above interpolates unconditionally and would hide its absence.
+  it('has a VALIDATION_FAILED string that interpolates the failed checks', () => {
+    expect(EN_TRANSLATIONS.PLUGINS.VALIDATION_FAILED).toContain('{{errors}}');
+  });
+
+  // Relational fields reach the reducer as plain values, so `parentId` on an
+  // update writes a task no parent lists in subTaskIds. The local REST API
+  // refuses both fields on PATCH for the same reason.
+  describe('updateTask() — relational fields', () => {
+    (['parentId', 'subTaskIds'] as const).forEach((field) => {
+      it(`rejects ${field} instead of applying it`, async () => {
+        const { service, store } = setup(true);
+
+        await expectAsync(
+          service.updateTask('parent-1', {
+            [field]: field === 'parentId' ? 'other-task' : ['a'],
+          }),
+        ).toBeRejectedWithError(/FIELD_NOT_UPDATABLE/);
+
+        expect(store.dispatch).not.toHaveBeenCalled();
+      });
+    });
+
+    it('still applies non-relational updates', async () => {
+      const { service, taskService } = setup(true);
+
+      await service.updateTask('parent-1', { title: 'renamed' });
+
+      expect(taskService.update).toHaveBeenCalledWith('parent-1', {
+        title: 'renamed',
+      });
+    });
   });
 });
