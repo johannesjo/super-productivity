@@ -92,6 +92,11 @@ const SCHEMA = `
     is_payload_encrypted boolean NOT NULL DEFAULT false
   );
   CREATE UNIQUE INDEX operations_user_seq ON operations (user_id, server_seq);
+  -- Mirrors 0_init. Without it the fixture cannot exercise the plan the
+  -- received_at-bounded reports depend on, so a query that only performs
+  -- acceptably *because* of this index would look identical here to one that
+  -- does not.
+  CREATE INDEX operations_user_id_received_at_idx ON operations (user_id, received_at);
   CREATE TABLE user_sync_state (
     user_id integer PRIMARY KEY,
     last_seq integer NOT NULL DEFAULT 0,
