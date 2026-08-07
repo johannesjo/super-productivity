@@ -421,30 +421,30 @@ describe('MainHeaderComponent focus button visibility', () => {
     box.style.width = `${width}px`;
     document.body.appendChild(box);
     box.appendChild(host);
-    // The reflow runs on an animation frame (never inside change detection --
-    // writing from a render hook is what NG0103 forbids), and moves one action
-    // per frame. So let frames actually pass: one per demotable action, plus
-    // margin.
+    await settle();
+    return host;
+  };
+
+  /**
+   * Let the fit settle. The reflow runs on an animation frame (never inside
+   * change detection -- writing from a render hook is what NG0103 forbids), and
+   * is woken by a ResizeObserver or an effect, so ticking alone would never see
+   * it. Frames have to actually pass: one per demotable action, plus the
+   * `REOFFER_DELAY_MS` a widening waits out before re-offering, plus margin.
+   */
+  const settle = async (): Promise<void> => {
     const appRef = TestBed.inject(ApplicationRef);
     for (let i = 0; i < 12; i++) {
       await new Promise((r) => setTimeout(r, 20));
       appRef.tick();
-      await fixture.whenStable();
+      await fixture!.whenStable();
     }
-    return host;
   };
 
   /** Resize the mounted header and let the reflow settle again. */
   const resizeTo = async (width: number): Promise<void> => {
     box!.style.width = `${width}px`;
-    const appRef = TestBed.inject(ApplicationRef);
-    for (let i = 0; i < 12; i++) {
-      // The reflow is woken by the ResizeObserver and runs on an animation
-      // frame -- ticking alone would never see the new width.
-      await new Promise((r) => setTimeout(r, 20));
-      appRef.tick();
-      await fixture!.whenStable();
-    }
+    await settle();
   };
 
   afterEach(() => {
@@ -516,10 +516,10 @@ describe('MainHeaderComponent focus button visibility', () => {
     // the session.
     const host = await mountAtWidth(320);
     expect(host.querySelector('.header-overflow-btn')).toBeTruthy();
-    // Empty and inline, so the only width on record for it is 0.
-    expect(
-      host.querySelector('[data-slot="pluginHeader"]')!.getBoundingClientRect().width,
-    ).toBe(0);
+    // With no buttons registered the slot is not rendered at all, so there is
+    // no width on record for it -- which is the same standing start the bug
+    // came from, now without an empty wrapper spending a gap to get there.
+    expect(host.querySelector('[data-slot="pluginHeader"]')).toBeFalsy();
 
     // The plugin arrives while the header is already collapsed, and now has
     // real buttons in it.
@@ -562,6 +562,31 @@ describe('MainHeaderComponent focus button visibility', () => {
 
     expect(host.querySelector('[data-slot="sync"]')).toBeTruthy();
     expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
+  });
+
+  it('re-fits when a slot grows without changing which slots exist (#9480)', async () => {
+    // `_demotableIds` compares by id, so one plugin button becoming two leaves
+    // it identical -- and the header's own width does not change either, so the
+    // ResizeObserver never fires. Nothing re-measured, which is exactly the
+    // case the reporter says gets worse "with every enabled simple counter".
+    const btn = { label: 'x', icon: 'x', onClick: () => {} };
+    pluginHeaderButtons.set([btn]);
+    const host = await mountAtWidth(
+      520,
+      `[data-slot="pluginHeader"]{min-width:100px !important}` +
+        `[data-slot="panelButtons"],[data-slot="sync"]{min-width:100px !important}`,
+    );
+    expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
+
+    // The plugin adds a second button: same slot, more width.
+    styleEl!.textContent = styleEl!.textContent!.replace(
+      '[data-slot="pluginHeader"]{min-width:100px !important}',
+      '[data-slot="pluginHeader"]{min-width:400px !important}',
+    );
+    pluginHeaderButtons.set([btn, btn]);
+    await settle();
+
+    expect(host.querySelector('.header-overflow-btn')).toBeTruthy();
   });
 
   it('leaves the scroll floor off while the row fits (#9480)', async () => {
