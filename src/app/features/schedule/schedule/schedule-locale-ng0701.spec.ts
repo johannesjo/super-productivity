@@ -72,7 +72,9 @@ describe('issue #7383 — NG0701 race on /schedule', () => {
         'getDayClass',
         'hasEventsForDay',
         'getEventsForDay',
+        'deadlineGhostEventsComputed',
       ]);
+      mockScheduleService.deadlineGhostEventsComputed.and.returnValue(signal([]));
       const monthDays = Array.from({ length: 35 }, (_, i) => {
         const d = new Date(2026, 3, 1 + i);
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

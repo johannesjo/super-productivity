@@ -137,6 +137,26 @@
     );
   }
 
+  &.DeadlineGhost {
+    opacity: 0.35;
+    // grid item on a full-day row span (see create-deadline-ghost-events.ts) —
+    // pin it to a thin strip at the top instead of stretching the whole day.
+    align-self: start;
+    justify-self: stretch;
+    height: 18px;
+    min-height: 14px;
+    border-style: dashed;
+
+    .ico-wrapper {
+      margin-top: 2px;
+    }
+
+    .title {
+      padding: 2px 6px;
+      font-size: 11px;
+    }
+  }
+
   &.is-beyond-budget {
     border-bottom: calc(var(--s-quarter) + 1px) solid var(--c-warn);
 
@@ -453,6 +473,16 @@
 :host.SplitTaskContinued,
 :host.SplitTaskContinuedLast {
   cursor: pointer;
+}
+
+// Not draggable (it's a projection of the real planned/deadline events), but
+// clicking still opens the task.
+:host.DeadlineGhost {
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
 }
 
 :host.draggable {

@@ -25,6 +25,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskService } from '../tasks/task.service';
 import { startWith } from 'rxjs/operators';
 import { parseDbDateStr } from '../../util/parse-db-date-str';
+import { selectAllTasksInActiveProjects } from '../tasks/store/task.selectors';
+import { createDeadlineGhostEvents } from './map-schedule-data/create-deadline-ghost-events';
 
 @Injectable({
   providedIn: 'root',
@@ -42,6 +44,7 @@ export class ScheduleService {
   );
   private _timelineConfig = toSignal(this._store.select(selectTimelineConfig));
   private _plannerDayMap = toSignal(this._store.select(selectPlannerDayMap));
+  private _allActiveTasks = toSignal(this._store.select(selectAllTasksInActiveProjects));
   private _calendarEvents = toSignal(this._calendarIntegrationService.calendarEvents$, {
     initialValue: [],
   });
@@ -69,6 +72,16 @@ export class ScheduleService {
         currentTaskId,
       });
     });
+  }
+
+  deadlineGhostEventsComputed(daysToShow: Signal<string[]>): Signal<ScheduleEvent[]> {
+    return computed(() =>
+      createDeadlineGhostEvents(
+        this._allActiveTasks() ?? [],
+        daysToShow(),
+        this._dateService.getStartOfNextDayDiffMs(),
+      ),
+    );
   }
 
   buildScheduleDays(params: BuildScheduleDaysParams): ScheduleDay[] {
@@ -332,7 +345,8 @@ const isTaskEventWithPlannedForDay = (
     ev.type === SVEType.SplitTaskPlannedForDay ||
     ev.type === SVEType.SplitTask ||
     ev.type === SVEType.ScheduledTask ||
-    ev.type === SVEType.Task) &&
+    ev.type === SVEType.Task ||
+    ev.type === SVEType.DeadlineGhost) &&
   typeof ev.plannedForDay === 'string';
 
 const isScheduledTaskWithRemindAt = (

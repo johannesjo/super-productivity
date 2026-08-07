@@ -135,7 +135,8 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       // menu work on them too; dragging stays disabled via isDraggableSE()
       // since only the head segment marks where the task starts
       evt.type === SVEType.SplitTaskContinued ||
-      evt.type === SVEType.SplitTaskContinuedLast
+      evt.type === SVEType.SplitTaskContinuedLast ||
+      evt.type === SVEType.DeadlineGhost
     ) {
       return evt.data as TaskCopy;
     }
@@ -164,6 +165,9 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
   readonly hoverTitle = computed(() => {
     const evt = this.se();
+    if (evt.type === SVEType.DeadlineGhost) {
+      return this.title();
+    }
     const is12Hour = !this._dateTimeFormatService.is24HourFormat();
     const startClockStr = getClockStringFromHours(
       is12Hour && evt.startHours > 12 ? evt.startHours - 12 : evt.startHours,
@@ -345,6 +349,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     | 'CAL_PROJECTION'
     | 'SPLIT_CONTINUE'
     | 'LUNCH_BREAK'
+    | 'DEADLINE_GHOST'
   >(() => {
     const evt = this.se();
     switch (evt.type) {
@@ -364,6 +369,8 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
         return 'SCHEDULED_TASK';
       case SVEType.LunchBreak:
         return 'LUNCH_BREAK';
+      case SVEType.DeadlineGhost:
+        return 'DEADLINE_GHOST';
     }
     return 'SPLIT_CONTINUE';
   });

@@ -53,7 +53,9 @@ describe('ScheduleComponent', () => {
       'getDayClass',
       'hasEventsForDay',
       'getEventsForDay',
+      'deadlineGhostEventsComputed',
     ]);
+    mockScheduleService.deadlineGhostEventsComputed.and.returnValue(signal([]));
     mockScheduleService.getDaysToShow.and.returnValue([
       '2026-01-20',
       '2026-01-21',

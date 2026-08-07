@@ -304,7 +304,11 @@ export class ScheduleComponent {
     );
   });
 
-  events = computed(() => this._eventsAndBeyondBudget().eventsFlat);
+  deadlineGhostEvents = this.scheduleService.deadlineGhostEventsComputed(this.daysToShow);
+
+  events = computed(() =>
+    this._eventsAndBeyondBudget().eventsFlat.concat(this.deadlineGhostEvents()),
+  );
   beyondBudget = computed(() => this._eventsAndBeyondBudget().beyondBudgetDays);
   monthEvents = computed(() => this.events().concat(...this.beyondBudget()));
 

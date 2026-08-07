@@ -48,6 +48,13 @@
         >{{ $any(se().data)?.icon || 'event' }}
       </mat-icon>
     }
+    @case ('DEADLINE_GHOST') {
+      <mat-icon
+        class="ico"
+        inline="true"
+        >flag
+      </mat-icon>
+    }
     <!--- --->
     @default {}
     <!--- --->

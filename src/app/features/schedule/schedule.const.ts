@@ -15,6 +15,7 @@ export enum SVEType {
   WorkdayStart = 'WorkdayStart',
   WorkdayEnd = 'WorkdayEnd',
   LunchBreak = 'LunchBreak',
+  DeadlineGhost = 'DeadlineGhost',
 }
 
 export const SCHEDULE_VIEW_TYPE_ORDER: {
