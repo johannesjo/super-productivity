@@ -338,6 +338,19 @@ export class MainHeaderComponent implements OnDestroy {
   /** How many leading `_demotableIds` are in the overflow panel. */
   private readonly _demotedCount = signal(0);
 
+  /**
+   * Whether the row has to fall back to scrolling — everything demotable has
+   * gone and the pinned actions still do not fit.
+   *
+   * Kept as state rather than left permanently on, because scrolling means
+   * clipping and this row has ink outside its buttons that must not be clipped
+   * in the ordinary case: most visibly `.current-task-title`, the pill naming
+   * the tracked task, which `play-button` hangs off the play button at
+   * `right: 100%` — i.e. entirely beyond the inline-start clip edge, in a
+   * direction `scrollLeft` cannot reach. An always-on floor deleted it.
+   */
+  readonly needsScrollFloor = signal(false);
+
   private _rafId = 0;
   /** Frames spent settling since the last real change; see `_restartReflow`. */
   private _passes = 0;
@@ -527,14 +540,7 @@ export class MainHeaderComponent implements OnDestroy {
       '.page-title-actions',
     ) as HTMLElement | null;
     const titleActionsW = titleActions ? titleActions.getBoundingClientRect().width : 0;
-    // The NAV's `scrollWidth`, not its rect. Since #9480 gave the nav a scroll
-    // floor it is both shrinkable and a scroll container, so its rendered width
-    // is clamped to whatever fits — by construction it always "fits", and a rect
-    // measurement would report slack that does not exist, `free` would never go
-    // negative, and nothing would ever demote. `scrollWidth` is the intrinsic
-    // width the row wants, which is the question being asked. It rounds to an
-    // integer; FIT_EPSILON absorbs that.
-    const free = contentW - nav.scrollWidth - titleMinW - titleActionsW;
+    const free = contentW - this._intrinsicNavWidth(nav) - titleMinW - titleActionsW;
 
     const ids = this._demotableIds();
     const count = Math.min(this._demotedCount(), ids.length);
@@ -544,7 +550,15 @@ export class MainHeaderComponent implements OnDestroy {
       return;
     }
 
-    if (free >= -FIT_EPSILON || count >= ids.length) {
+    if (free >= -FIT_EPSILON) {
+      this.needsScrollFloor.set(false);
+      return;
+    }
+    if (count >= ids.length) {
+      // Over-wide with nothing left to demote: exactly the state the floor is
+      // for. Turning it on adds the bleed padding, which only makes the row
+      // measure wider still, so this cannot flip back and forth.
+      this.needsScrollFloor.set(true);
       return;
     }
 
@@ -585,7 +599,45 @@ export class MainHeaderComponent implements OnDestroy {
     if (next > count && reclaimed - triggerCost > FIT_EPSILON) {
       this._demotedCount.set(next);
       this._scheduleReflow();
+    } else {
+      // Demoting more would free nothing, so the row stays over-wide and the
+      // floor is the only thing left that keeps the buttons reachable.
+      this.needsScrollFloor.set(true);
     }
+  }
+
+  /**
+   * How wide the row wants to be — the question `_reflow` is actually asking,
+   * and the one measurement here that must not depend on how the row is
+   * currently laid out.
+   *
+   * Neither obvious reading survives on its own. The nav's rect is clamped by
+   * `flex-shrink`, so it always "fits" and would report slack that does not
+   * exist. `nav.scrollWidth` reports the overflow only while the nav is a
+   * scroll container — which it is only while the scroll floor is engaged, so
+   * reading it alone made the fit model silently blind in exactly the state
+   * that has to decide whether to engage the floor at all.
+   *
+   * The children are the stable answer: they never shrink (`flex-shrink: 0`),
+   * so the span from the leftmost to the rightmost is what the row is asking
+   * for in every state — while scrolled, while clamped, in LTR and in RTL.
+   * Zero-area children (an unpopulated slot, or anything `display: contents`)
+   * are skipped rather than dragging the span to the viewport origin.
+   */
+  private _intrinsicNavWidth(nav: HTMLElement): number {
+    let left = Infinity;
+    let right = -Infinity;
+    for (const kid of Array.from(nav.children)) {
+      const r = kid.getBoundingClientRect();
+      if (!r.width && !r.height) {
+        continue;
+      }
+      left = Math.min(left, r.left);
+      right = Math.max(right, r.right);
+    }
+    // `scrollWidth` still counts, because it is the one that includes the nav's
+    // own padding — the bleed the floor adds.
+    return Math.max(nav.scrollWidth, right > left ? right - left : 0);
   }
 
   /**

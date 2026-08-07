@@ -102,6 +102,8 @@ class HeaderLayoutHostComponent {
 // default side nav. `_reflow` bails at `count === ids.length` and, before the
 // scroll floor, the row simply ran off an edge nothing in the ancestor chain
 // can scroll (`.main-content` is `overflow: hidden`) -- issue #9480 exactly.
+// `action-nav-right--scrolls` is the class `_reflow` sets on reaching that
+// state; this host hard-codes it because the CSS is what is under test here.
 @Component({
   standalone: true,
   styleUrls: ['./main-header.component.scss'],
@@ -117,7 +119,7 @@ class HeaderLayoutHostComponent {
         A project name
       </div>
 
-      <nav class="action-nav-right">
+      <nav class="action-nav-right action-nav-right--scrolls">
         <button
           type="button"
           style="flex-shrink: 0; width: 40px; height: 40px"
@@ -204,10 +206,12 @@ describe('MainHeaderComponent layout', () => {
       const lastButtonRect = lastButton.getBoundingClientRect();
       expect(lastButtonRect.right).toBeLessThanOrEqual(wrapperRect.right + 0.5);
 
-      // And the #9480 floor: whatever else happens, the nav scrolls rather than
-      // spilling buttons past an edge nothing in the ancestor chain can reach.
+      // And because everything fits here, the #9480 floor stays off: a clipping
+      // row would take `.current-task-title` with it, which `play-button` hangs
+      // off `right: 100%` of the play button -- wholly outside the inline-start
+      // clip edge, and unreachable by scrolling.
       const nav = fixture.nativeElement.querySelector('.action-nav-right') as HTMLElement;
-      expect(getComputedStyle(nav).overflowX).toBe('auto');
+      expect(getComputedStyle(nav).overflowX).toBe('visible');
     } finally {
       document.body.removeChild(fixture.nativeElement);
     }
@@ -558,6 +562,36 @@ describe('MainHeaderComponent focus button visibility', () => {
 
     expect(host.querySelector('[data-slot="sync"]')).toBeTruthy();
     expect(host.querySelector('.header-overflow-btn')).toBeFalsy();
+  });
+
+  it('leaves the scroll floor off while the row fits (#9480)', async () => {
+    // The floor is a clip, and clipping this row is not free: `play-button`
+    // hangs `.current-task-title` -- the pill naming the tracked task -- off
+    // `right: 100%` of the play button, which is the row's first child. That
+    // puts the whole pill beyond the inline-start clip edge, in the one
+    // direction `scrollLeft` cannot reach, so an always-on floor did not hide
+    // the pill, it deleted it.
+    const host = await mountAtWidth(1400);
+    const nav = host.querySelector('nav.action-nav-right') as HTMLElement;
+
+    expect(nav.classList.contains('action-nav-right--scrolls')).toBe(false);
+    expect(getComputedStyle(nav).overflowX).toBe('visible');
+  });
+
+  it('engages the scroll floor when even the pinned actions do not fit (#9480)', async () => {
+    // Everything demotable leaves and the row is still over-wide -- the state
+    // the floor exists for, and the only one that may pay its clip. The pinned
+    // group is widened here because the stubbed children measure nothing.
+    const host = await mountAtWidth(
+      320,
+      `[data-slot="panelButtons"],[data-slot="sync"]{min-width:200px !important}` +
+        `.primary-action-group{min-width:400px !important}`,
+    );
+    const nav = host.querySelector('nav.action-nav-right') as HTMLElement;
+
+    expect(host.querySelector('[data-slot="sync"]')).toBeFalsy();
+    expect(nav.classList.contains('action-nav-right--scrolls')).toBe(true);
+    expect(getComputedStyle(nav).overflowX).toBe('auto');
   });
 
   it('keeps the add-task button in the bar at any width (#9480)', async () => {

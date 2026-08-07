@@ -9,7 +9,10 @@
     <page-title></page-title>
   }
 
-  <nav class="action-nav-right">
+  <nav
+    class="action-nav-right"
+    [class.action-nav-right--scrolls]="needsScrollFloor()"
+  >
     <div class="header-action-group primary-action-group">
       @if (isDataLoaded() && isTimeTrackingEnabled()) {
         <play-button
