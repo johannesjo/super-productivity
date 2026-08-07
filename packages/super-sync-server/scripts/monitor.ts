@@ -55,7 +55,8 @@ interface TableSizeRow {
   size: string;
 }
 
-interface ActiveCountRow {
+interface ActivityWindowRow {
+  bucket: bigint;
   device_count: bigint;
   ops_count: bigint;
 }
@@ -592,19 +593,57 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
       { label: 'Last 7 days', ms: 7 * ONE_DAY },
       { label: 'Last 30 days', ms: 30 * ONE_DAY },
       { label: 'Last 90 days', ms: 90 * ONE_DAY },
-    ];
+    ].map((period) => ({ ...period, threshold: BigInt(now - period.ms) }));
 
     console.log('\n--- Active Users (by device heartbeat / by sync operations) ---');
-    for (const period of periods) {
-      const threshold = BigInt(now - period.ms);
-      const result: ActiveCountRow[] = await prisma.$queryRaw`
+    // One pass for all four windows, driven off each user's newest operation.
+    //
+    // The obvious form -- COUNT(DISTINCT user_id) FROM operations WHERE
+    // received_at > $1, once per window -- reads the whole table four times: the
+    // only index on received_at is (user_id, received_at), whose leading column
+    // the predicate does not constrain, so it degrades to a sequential scan of
+    // the largest table on the instance and was what timed out at ~10k users.
+    //
+    // Probing per user inverts that into an index seek: MAX(received_at) for one
+    // user_id is a backwards descent that stops at the first row, so the cost is
+    // one descent per registered user regardless of how many operations each has
+    // -- and the four windows then come from counting those maxima, not from
+    // four more scans. Same shape as resolveOperationScope() over sync_devices.
+    const activity: ActivityWindowRow[] = await prisma.$queryRaw`
+      WITH user_activity AS MATERIALIZED (
         SELECT
-          (SELECT COUNT(DISTINCT user_id) FROM sync_devices WHERE last_seen_at > ${threshold}) as device_count,
-          (SELECT COUNT(DISTINCT user_id) FROM operations WHERE received_at > ${threshold}) as ops_count;
-      `;
-      const devices = Number(result[0]?.device_count ?? 0);
-      const ops = Number(result[0]?.ops_count ?? 0);
-      console.log(`  ${period.label}: ${devices} connected / ${ops} syncing`);
+          (SELECT MAX(d.last_seen_at) FROM sync_devices d WHERE d.user_id = u.id) AS last_seen,
+          (SELECT MAX(o.received_at) FROM operations o WHERE o.user_id = u.id) AS last_op
+        FROM users u
+      ),
+      windows (bucket) AS (
+        VALUES ${Prisma.join(
+          periods.map((period) => Prisma.sql`(${period.threshold}::bigint)`),
+        )}
+      )
+      SELECT
+        w.bucket AS bucket,
+        COUNT(*) FILTER (WHERE a.last_seen > w.bucket) AS device_count,
+        COUNT(*) FILTER (WHERE a.last_op > w.bucket) AS ops_count
+      FROM windows w
+      CROSS JOIN user_activity a
+      GROUP BY w.bucket
+    `;
+
+    const countsByBucket = new Map(
+      activity.map((row) => [
+        String(row.bucket),
+        {
+          devices: Number(row.device_count ?? 0),
+          ops: Number(row.ops_count ?? 0),
+        },
+      ]),
+    );
+    for (const period of periods) {
+      const counts = countsByBucket.get(String(period.threshold));
+      console.log(
+        `  ${period.label}: ${counts?.devices ?? 0} connected / ${counts?.ops ?? 0} syncing`,
+      );
     }
 
     // New users by time period
@@ -634,23 +673,41 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
     `;
     const totalActiveCount = Number(totalActive[0]?.count ?? 0);
 
+    // Pick the page from sync_devices first, then count operations for those
+    // rows only. Joining operations before the LIMIT aggregated every operation
+    // of the last 7 days across every active user (~5k) to display 30 of them;
+    // counting after it is `recentLimit` bounded range scans on
+    // (user_id, received_at) instead. The DISTINCT that used to guard ops_7d is
+    // gone with the fan-out that made it necessary -- no device join remains to
+    // multiply the rows, so COUNT(*) is both correct and cheaper here.
     const recentUsers: RecentUserRow[] = await prisma.$queryRaw`
+      WITH recent AS MATERIALIZED (
+        SELECT
+          u.id,
+          u.email,
+          u.created_at,
+          MAX(d.last_seen_at) as last_active,
+          COUNT(DISTINCT d.client_id) as device_count
+        FROM users u
+        INNER JOIN sync_devices d ON u.id = d.user_id
+        WHERE d.last_seen_at > ${sevenDaysAgo}
+        GROUP BY u.id, u.email, u.created_at
+        ORDER BY last_active DESC
+        LIMIT ${recentLimit}
+      )
       SELECT
-        u.id,
-        u.email,
-        u.created_at,
-        MAX(d.last_seen_at) as last_active,
-        COUNT(DISTINCT d.client_id) as device_count,
-        -- DISTINCT is load-bearing: the sync_devices join multiplies every
-        -- operation row by the user's device count before this counts it.
-        COALESCE(COUNT(DISTINCT o.id), 0) as ops_7d
-      FROM users u
-      INNER JOIN sync_devices d ON u.id = d.user_id
-      LEFT JOIN operations o ON u.id = o.user_id AND o.received_at > ${sevenDaysAgo}
-      WHERE d.last_seen_at > ${sevenDaysAgo}
-      GROUP BY u.id, u.email, u.created_at
-      ORDER BY last_active DESC
-      LIMIT ${recentLimit};
+        r.id,
+        r.email,
+        r.created_at,
+        r.last_active,
+        r.device_count,
+        (
+          SELECT COUNT(*)
+          FROM operations o
+          WHERE o.user_id = r.id AND o.received_at > ${sevenDaysAgo}
+        ) as ops_7d
+      FROM recent r
+      ORDER BY r.last_active DESC;
     `;
 
     if (recentUsers.length > 0) {

@@ -24,6 +24,8 @@
     "recover-user": "ts-node --transpile-only scripts/recover-user.ts",
     "monitor": "node dist/scripts/monitor.js",
     "monitor:dev": "tsx scripts/monitor.ts",
+    "monitor:active-users": "node dist/scripts/monitor.js active-users",
+    "monitor:active-users:quick": "node dist/scripts/monitor.js active-users-quick",
     "analyze-storage": "node dist/scripts/analyze-storage.js",
     "analyze-storage:dev": "tsx scripts/analyze-storage.ts",
     "monitor:all": "node dist/scripts/run-all-monitoring.js",

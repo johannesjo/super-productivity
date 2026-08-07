@@ -351,8 +351,28 @@ describe('monitoring report SQL (PGlite)', () => {
     const recent = rowsWithColumn('Ops (7d)');
     const multiDevice = recent.find((row) => row.ID === MULTI_DEVICE_USER);
     expect(multiDevice?.Devices).toBe(MULTI_DEVICE_COUNT);
-    // Without COUNT(DISTINCT o.id) this reads OPS_PER_USER * MULTI_DEVICE_COUNT.
+    // ops_7d is counted after the page is cut, so no sync_devices join remains to
+    // fan the rows out. Were operations joined alongside devices again, this
+    // would read OPS_PER_USER * MULTI_DEVICE_COUNT.
     expect(multiDevice?.['Ops (7d)']).toBe(OPS_PER_USER);
+  });
+
+  it('counts each active user once per window, and never-synced users not at all', async () => {
+    await run('monitor', ['active-users']);
+
+    // SYNCING_USERS connected, not SYNCING_USERS + (MULTI_DEVICE_COUNT - 1):
+    // the per-user maxima collapse a user's devices before anything is counted.
+    // And the registered-but-never-synced user is in neither total.
+    for (const label of [
+      'Last 24 hours',
+      'Last 7 days',
+      'Last 30 days',
+      'Last 90 days',
+    ]) {
+      expect(consoleLog).toHaveBeenCalledWith(
+        `  ${label}: ${SYNCING_USERS} connected / ${SYNCING_USERS} syncing`,
+      );
+    }
   });
 
   it('buckets per-user sizes across backfilled and unbackfilled rows', async () => {
