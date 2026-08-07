@@ -342,9 +342,9 @@
 
   .search-toggle-btn.active,
   .note-toggle-btn.active {
-    --mat-icon-button-icon-color: var(--brand);
-
-    background-color: var(--state-selected);
+    opacity: 1;
+    background-color: color-mix(in srgb, var(--primary) 15%, transparent);
+    color: var(--primary);
   }
 
   // A collapsed note still holds its text — keep the icon undimmed and tinted so
