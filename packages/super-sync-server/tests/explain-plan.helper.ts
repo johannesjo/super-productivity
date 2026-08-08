@@ -1,7 +1,5 @@
-import type { PGlite } from '@electric-sql/pglite';
-
 /**
- * Shared EXPLAIN harness for the two conflict-lookup plan specs.
+ * Shared EXPLAIN harness for the conflict-lookup plan specs.
  *
  * Extracted because it was copied, and the copy rotted: the batch spec's walker was
  * fixed to multiply the discarded-row counters by `Actual Loops` and to read
@@ -9,7 +7,17 @@ import type { PGlite } from '@electric-sql/pglite';
  * under-reporting by up to the loop count and scored a join fan-out as zero. Both specs
  * exist to catch cost regressions on the upload path, so a blind spot in either is the
  * same class of bug. One implementation, one place to fix.
+ *
+ * The runner is structural rather than `PGlite` so the same walker also drives a REAL
+ * PostgreSQL connection (batch-conflict-plan.integration.spec.ts). PGlite is PG18 and
+ * production is PG 16.x; the two planners disagree about this exact query — see that
+ * spec's header — so the numbers have to be reproducible on both without a second
+ * implementation to keep in sync.
  */
+export type ExplainRunner = {
+  exec: (sql: string) => Promise<unknown>;
+  query: (sql: string) => Promise<{ rows: Array<Record<string, unknown>> }>;
+};
 
 type PlanNode = Record<string, unknown>;
 
@@ -114,7 +122,7 @@ let preparedCounterId = 0;
  * production. If you add a shape, route it through this function.
  */
 export const explainGeneric = async (
-  db: PGlite,
+  db: ExplainRunner,
   sql: string,
   params: readonly unknown[],
 ): Promise<Measured> => {
@@ -123,7 +131,7 @@ export const explainGeneric = async (
   await db.exec(`SET plan_cache_mode = force_generic_plan`);
   await db.exec(`PREPARE ${name} AS ${sql}`);
   try {
-    const res = await db.query<Record<string, unknown>>(
+    const res = await db.query(
       `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) EXECUTE ${name}${args ? `(${args})` : ''}`,
     );
     const plan = (res.rows[0]['QUERY PLAN'] as PlanNode[])[0].Plan as PlanNode;
