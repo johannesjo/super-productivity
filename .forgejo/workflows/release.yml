@@ -169,6 +169,9 @@ jobs:
 
       - name: Build Linux AppImage + Flatpak
         shell: bash
+        env:
+          # Runner image has no Rust/Cargo; skip Wayland idle helper (optional runtime feature).
+          SP_SKIP_WAYLAND_IDLE_HELPER_BUILD: "1"
         run: |
           set -euo pipefail
           # Do NOT use buildAllElectron:prod — it runs preCheck (lint+unit+e2e).
