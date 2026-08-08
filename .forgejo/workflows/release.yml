@@ -162,10 +162,14 @@ jobs:
           test -n "$apk"
           ver="${GITHUB_REF_NAME:-manual}"
           ver="${ver#v}"
+          # Obtainium needs plain Semver in the filename (strip -newas.N etc.)
+          ver="$(printf '%s' "$ver" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
           out="super-productivity-newas-arm64-v8a-v${ver}.apk"
           cp "$apk" "$out"
+          cp "$apk" "super-productivity-newas-arm64-v8a.apk"
           echo "ANDROID_APK=$out" >> "$GITHUB_ENV"
-          ls -la "$out"
+          echo "ANDROID_APK_STABLE=super-productivity-newas-arm64-v8a.apk" >> "$GITHUB_ENV"
+          ls -la "$out" super-productivity-newas-arm64-v8a.apk
 
       - name: Build Linux AppImage + Flatpak
         shell: bash
@@ -185,6 +189,7 @@ jobs:
           fi
           ver="${GITHUB_REF_NAME:-manual}"
           ver="${ver#v}"
+          ver="$(printf '%s' "$ver" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
           img="$(find .tmp dist -name '*.AppImage' 2>/dev/null | head -1)"
           if [ -z "$img" ]; then
             img="$(find . -name '*.AppImage' -not -path './node_modules/*' | head -1)"
@@ -216,7 +221,8 @@ jobs:
           set -euo pipefail
           tag="${GITHUB_REF_NAME:-}"
           if [[ ! "$tag" =~ ^v ]]; then
-            tag="v$(node -p "require('./package.json').version")-newas.$(date +%Y%m%d%H%M)"
+            # Prefer plain Semver for Obtainium (Finamp/Flow pattern).
+            tag="v$(node -p "require('./package.json').version")"
           fi
           api="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases"
           body=$(jq -n --arg tag "$tag" --arg name "$tag" '{tag_name:$tag,name:$name,draft:false,prerelease:false}')
@@ -226,7 +232,7 @@ jobs:
             echo "$rel" | jq . || echo "$rel"
             exit 1
           fi
-          for f in "${ANDROID_APK}" "${LINUX_APPIMAGE}" ${LINUX_FLATPAK:+"${LINUX_FLATPAK}"}; do
+          for f in "${ANDROID_APK}" ${ANDROID_APK_STABLE:+"${ANDROID_APK_STABLE}"} "${LINUX_APPIMAGE}" ${LINUX_FLATPAK:+"${LINUX_FLATPAK}"}; do
             curl -sk -H "Authorization: token ${FORGEJO_TOKEN}" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @"$f" \
