@@ -61,13 +61,63 @@ const TASK_TIME_DELTA_ACTION_TYPE = '[TimeTracking] Sync time spent';
  * seed violates by construction. So "bounded" there means "bounded given disjoint ids",
  * not bounded absolutely. The real fix is the expression-GIN sketched at
  * detectConflictForEntity; it needs its own issue and its own measurements.
+ *
+ * ONE `&&` PROBE, NOT ONE `@>` PER ID. This is the load-bearing cost decision, and it is
+ * the opposite of what the single-entity path does — deliberately, because that path
+ * probes one id and the two forms are then identical.
+ *
+ * Two independent reasons, and BOTH were measured by A/B-ing the real statement this
+ * file emits with only this CTE swapped — on postgres:16-alpine 16.14 (production's
+ * version), 1.5M rows, 100-id all-new probe, `force_generic_plan`:
+ *
+ *   fastupdate            `@>` per id            `&&`
+ *   off (production)       12.4 ms /    700 blk   0.64 ms /   601 blk
+ *   on  (prisma db push)    261 ms / 47,800 blk    170 ms / 1,072 blk
+ *
+ * 1. Under a generic plan Postgres cannot see the 100 bound ids, and re-probing the GIN
+ *    once per opaque parameter costs ~18x what one multi-key probe costs. Measure this
+ *    with the ids bound INDIVIDUALLY, as Prisma sends them (104 parameters); collapsing
+ *    them into one array parameter makes the per-id form look ~25x cheaper than it is,
+ *    which is how it got shipped.
+ * 2. A GIN scan must read the whole PENDING LIST, so N per-id probes read it N times
+ *    where one `&&` reads it once — I/O linear in CONFLICT_DETECTION_ENTITY_BATCH_SIZE.
+ *    The list is bounded only by `gin_pending_list_limit` (4MB / ~512 pages by default),
+ *    not by anything a tenant controls. Both callers CHUNK at 100 ids, so an op carrying
+ *    the 1000-id wire cap issues ten such statements in one upload transaction: 2.6 s of
+ *    `@>` against 1.7 s of `&&`, 478,000 blocks against 10,720. Multi-second statements
+ *    inside the upload transaction are #9503's own failure mode, re-created by its fix.
+ *    Production sets `fastupdate = off` (migration 20260720000000) so it is not exposed,
+ *    but that reloption cannot be expressed in schema.prisma, so every `prisma db push`
+ *    database — CI, the E2E stack, the manual setup in README.md — is.
+ *
+ * An earlier revision shipped the per-id form on the grounds that PGlite/PG18 abandons
+ * the GIN for a SEQ SCAN under a dirty pending list. The plan claim is true and the cost
+ * conclusion was backwards: that seq scan is 6.8x FASTER and reads 20x fewer blocks than
+ * the GIN plan `@>` gets (26 ms / 981 blk vs 175 ms / 19,600 blk on the batch spec's
+ * seed). Do not "restore" the per-id form on the strength of a plan shape; measure cost.
+ *
+ * The LATERAL recovers WHICH probed ids each candidate matched — `cand` must stay tagged
+ * with `eid`, see above. It is bounded by |matching ops| x |entity_ids|, NOT squared:
+ * one row per (op, matched id) pair, exactly as the `@>` form produced. Verified
+ * equivalent to that form by differential fuzzing (448 comparisons over randomised ops
+ * and probes, zero differences; controls that drop the INTERSECT or weaken `&&` to `@>`
+ * diverge in 220/224 and 173/224 rounds).
+ *
+ * The COALESCE is documentation, not defence: an empty probe makes `array_agg` NULL and
+ * `entity_ids && NULL` already excludes every row, which is the same nothing the `@>`
+ * form returned. Both callers chunk a non-empty batch, so it is unreachable either way.
  */
 const arrayBranchCandidatesCte = (probeSource: Prisma.Sql): Prisma.Sql => Prisma.sql`
   cand AS MATERIALIZED (
-    SELECT p.eid AS eid, o.user_id, o.entity_type, o.client_id, o.action_type,
+    SELECT x.eid AS eid, o.user_id, o.entity_type, o.client_id, o.action_type,
            o.vector_clock, o.server_seq
-    FROM (${probeSource}) p
-    JOIN operations o ON o.entity_ids @> ARRAY[p.eid]
+    FROM operations o
+    CROSS JOIN LATERAL (
+      SELECT unnest(o.entity_ids) AS eid
+      INTERSECT
+      SELECT eid FROM (${probeSource}) p
+    ) x
+    WHERE o.entity_ids && COALESCE((SELECT array_agg(eid) FROM (${probeSource}) q), '{}')
   )
 `;
 
@@ -158,36 +208,22 @@ export const detectConflictForEntities = async (
     // PLUS the sort column are covered by the composite btree, so each probe is an
     // index seek that terminates on an empty range when the entity is new.
     //
+    // Array branch: see arrayBranchCandidatesCte for why it is ONE `&&` and not one
+    // `@>` per id, with the measurements.
+    //
     // Scale trade, worth knowing before "optimising" this: the fix moved the array
-    // branch's cost from "the probing user's slice" to "the whole table". That is an
-    // enormous win for the large slice that caused #9503, but on PG 16.14 with a TYPICAL
-    // small slice it inverts as the table grows — measured ~1.6x SLOWER than the old OR
-    // form at 1.5M rows (18.0ms vs 11.2ms), having been ~6x faster at 400k. The gap
-    // widens with table size. Bounding it is #9510.
+    // branch's cost from "the probing user's slice" to a roughly FIXED whole-table GIN
+    // probe. Small accounts therefore pay MORE than they used to, large ones far less.
+    // Measured on PG 16.14 at 1.5M rows with a 100-id all-new probe, this statement
+    // against the pre-#9503 one:
     //
-    // Array branch: per-id `@>` probes rather than one `entity_ids && $arr`. This is the
-    // same probe detectConflictForEntity ships, and it is NOT the settled choice the rest
-    // of this note is — treat it as the open question here. #9510.
+    //   70-op account (typical)             0.05 ms /    3 blk  ->  0.59 ms / 601 blk
+    //   100k-op account (the #9503 one)    37.77 ms / 4048 blk  ->  0.69 ms / 601 blk
     //
-    // What is measured: on PGlite/PG18 a single 100-key `&&` under a dirty GIN pending
-    // list is costly enough that the planner abandons the index for a SEQ SCAN, which the
-    // per-id form avoids. That matters because `fastupdate = off` (migration
-    // 20260720000000) cannot be expressed in schema.prisma, so every `prisma db push`
-    // database — CI, the E2E stack, the manual setup in README.md — has the pending list
-    // ON. With the reloption right, `@>` costs +99 blocks on an all-new probe and +495 on
-    // the wide one.
-    //
-    // What does NOT hold: an earlier revision argued this was a "structural bound" from
-    // `gin_pending_list_limit`. Review measured the opposite on PG 16.14, production's
-    // actual version — `&&` stays on the GIN at every pending-list depth tested (no seq
-    // scan reproducible at all) and reads 5-46x FEWER blocks, and isolated GIN cost grows
-    // with table size for `@>` (0.8ms at 400k rows -> 3.7ms at 1.5M) while `&&` stays
-    // flat. The seq-scan fallback this form defends against looks PGlite-specific, and
-    // even there the seq scan measured faster than the GIN plan `@>` gets.
-    //
-    // So the per-id form is currently justified only for db-push databases on PG18-ish
-    // planners. Re-measure `&&` on PG 16 before assuming either way; do not "simplify"
-    // this on the strength of the paragraph above alone.
+    // A typical account pays ~0.5 ms and ~600 blocks it did not pay before. That is
+    // worth it because the term it replaces is unbounded in account history, while this
+    // one is flat — but it is a real regression for small accounts, not a free win, and
+    // it is the reason the co-tenant term on top of it (#9510) matters.
     //
     // `probe` binds the 100 ids ONCE — they used to be interpolated three times, for
     // 300 of the statement's 302 parameters — and is then referenced twice, so Postgres
@@ -782,17 +818,19 @@ export const prefetchLatestEntityOpsForBatch = async (
       start,
       start + CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
     );
-    // The ::text casts let the VALUES list stand alone as a CTE: without them
-    // Postgres cannot infer a type for the bound parameters outside a comparison.
+    // The ::text casts pin the VALUES list's column types explicitly. They are belt and
+    // braces, not a requirement: inference from the `o.entity_type = t.entity_type`
+    // comparisons resolves both columns to text without them on PG 16.14 (checked with
+    // an untyped PREPARE, which is what leaves inference to do the work). Kept because a
+    // future edit that drops the last comparison — the array branch already probes
+    // `touched` through `array_agg` alone — would silently make them load-bearing.
     const touchedRows = batchPairs.map(
       ({ entityType, entityId }) => Prisma.sql`(${entityType}::text, ${entityId}::text)`,
     );
 
     // Two separately-indexed branches, mirroring detectConflictForEntities — see the
-    // PERF note there for the measurements and for why the array branch probes per id
-    // rather than with one `&&`. The array branch itself is the shared
-    // ARRAY_BRANCH_CANDIDATES_CTE, so only the scalar branch and the keying differ.
-    // (#8334)
+    // PERF note there for the measurements. The array branch itself is the shared
+    // arrayBranchCandidatesCte, so only the scalar branch and the keying differ. (#8334)
     //
     // This query was the WORSE of the two: it carries no `entity_type` predicate (the
     // entity type only ever appeared in the join), so the composite btree's usable

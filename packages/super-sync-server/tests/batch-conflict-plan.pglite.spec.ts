@@ -6,6 +6,7 @@ import {
   getEntityConflictKey,
   prefetchLatestEntityOpsForBatch,
 } from '../src/sync/conflict';
+import { explainGeneric, type Measured } from './explain-plan.helper';
 import type { Operation } from '../src/sync/sync.types';
 
 /**
@@ -54,13 +55,16 @@ import type { Operation } from '../src/sync/sync.types';
  *
  * REMAINING FIDELITY LIMITS — PGlite is PG18, and the planner differences from
  * production's PG 16.14 are real, not theoretical. Measured during review of #9503
- * (2026-08, a one-off manual check against postgres:16-alpine, NOT re-run by this file):
+ * (2026-08, one-off manual checks against postgres:16-alpine, NOT re-run by this file):
  * PG 16.14 plans the array-branch join as a HASH join where PGlite uses a nested loop,
  * so `Rows Removed by Join Filter` reads 0 there for a plan that is still 80x too
- * expensive. That is exactly why `rowsTouched` is the primary assertion — see walk().
- * Blocks are also unmodellable here: PGlite reports every block as a cache hit, so these
- * counts cannot stand in for production's cold-cache I/O. The plan SHAPE transfers; the
- * absolute numbers below do not.
+ * expensive. That is exactly why `rowsTouched` is the primary assertion — see
+ * explain-plan.helper.ts. The two versions also disagree on plan SHAPE under a dirty
+ * pending list (PG 16.14 stays on the GIN where PG18 seq-scans), which is why the last
+ * describe asserts cost and not nodes. Blocks are unmodellable here in the other
+ * direction too: PGlite reports every block as a cache hit, so these counts cannot stand
+ * in for production's cold-cache I/O. The plan shape mostly transfers; the absolute
+ * numbers below do not.
  */
 
 const OWN_OPS = 20_000;
@@ -106,92 +110,6 @@ const createIndexes = (fastupdate: 'on' | 'off'): string => `
 const INSERT_COLS =
   'id,user_id,client_id,server_seq,action_type,entity_type,entity_id,entity_ids,' +
   'schema_version,vector_clock';
-
-type PlanNode = Record<string, unknown>;
-type Measured = {
-  blocks: number;
-  rowsTouched: number;
-  rowsFiltered: number;
-  rowsJoinFiltered: number;
-  tempBlocks: number;
-  nodes: string;
-};
-
-/**
- * `rowsTouched` — Actual Rows x Actual Loops summed over the tree — is the PRIMARY
- * signal, and it is the only one here that is planner-independent.
- *
- * Two rounds of review were defeated by picking a counter instead. Round 1 asserted
- * `Rows Removed by Filter`, and the fan-out moved the work into a JOIN, where Postgres
- * reports `Rows Removed by Join Filter` — a different key, so 59.8M discarded rows
- * scored 0. Round 2 added that key, and it too fails on PG 16.14 (production's version),
- * where the same fan-out is planned as a HASH join and attributes nothing to a join
- * filter: both counters read 0 while the query touches 2.2M rows against the shipped
- * form's 12.5k. `tempBlocks` catches it only at low `work_mem` — the shipped
- * docker-compose sets 4MB, but at 64MB an 80x regression passes clean.
- *
- * Rows touched separates the two by ~177x on BOTH PG 16.14 and PGlite and assumes
- * nothing about join strategy or `work_mem`. Keep the discarded-row counters as
- * secondary signals for the OR mis-plan, but do not rely on them alone again.
- *
- * `Actual Loops` multiplication is not cosmetic: Postgres divides the discarded-row
- * counters by loops (`explain.c:show_instrumentation_count`), so a filter inside a
- * per-probe nested loop is reported at 1/100th of what it discarded.
- */
-const walk = (
-  node: PlanNode,
-  acc: { touched: number; filtered: number; joinFiltered: number; nodes: string[] },
-): void => {
-  const loops = (node['Actual Loops'] as number) ?? 1;
-  acc.touched += ((node['Actual Rows'] as number) ?? 0) * loops;
-  acc.filtered += ((node['Rows Removed by Filter'] as number) ?? 0) * loops;
-  acc.joinFiltered += ((node['Rows Removed by Join Filter'] as number) ?? 0) * loops;
-  acc.nodes.push(
-    `${node['Node Type']}${node['Scan Direction'] ? ' ' + node['Scan Direction'] : ''}` +
-      `${node['Index Name'] ? ' on ' + node['Index Name'] : ''}`,
-  );
-  for (const child of (node.Plans as PlanNode[]) ?? []) walk(child, acc);
-};
-
-const toSqlLiteral = (value: unknown): string => {
-  if (value === null || value === undefined) return 'NULL';
-  if (typeof value === 'number' || typeof value === 'bigint') return String(value);
-  if (Array.isArray(value)) return `ARRAY[${value.map(toSqlLiteral).join(',')}]::text[]`;
-  return `'${String(value).replace(/'/g, "''")}'`;
-};
-
-let preparedCounterId = 0;
-const explainGeneric = async (
-  db: PGlite,
-  sql: string,
-  params: readonly unknown[],
-): Promise<Measured> => {
-  const name = `batch_plan_probe_${preparedCounterId++}`;
-  const args = params.map(toSqlLiteral).join(', ');
-  await db.exec(`SET plan_cache_mode = force_generic_plan`);
-  await db.exec(`PREPARE ${name} AS ${sql}`);
-  try {
-    const res = await db.query<Record<string, unknown>>(
-      `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) EXECUTE ${name}${args ? `(${args})` : ''}`,
-    );
-    const plan = (res.rows[0]['QUERY PLAN'] as PlanNode[])[0].Plan as PlanNode;
-    const acc = { touched: 0, filtered: 0, joinFiltered: 0, nodes: [] as string[] };
-    walk(plan, acc);
-    return {
-      blocks:
-        ((plan['Shared Hit Blocks'] as number) ?? 0) +
-        ((plan['Shared Read Blocks'] as number) ?? 0),
-      rowsTouched: acc.touched,
-      rowsFiltered: acc.filtered,
-      rowsJoinFiltered: acc.joinFiltered,
-      tempBlocks: (plan['Temp Written Blocks'] as number) ?? 0,
-      nodes: acc.nodes.join(' -> '),
-    };
-  } finally {
-    await db.exec(`DEALLOCATE ${name}`);
-    await db.exec(`SET plan_cache_mode = auto`);
-  }
-};
 
 /**
  * Renders the PRODUCTION tagged template through the real `Prisma.sql` (so nested
@@ -318,25 +236,21 @@ const BTREE_INDEX = 'operations_user_id_entity_type_entity_id_server_seq_idx';
 
 /**
  * NO BLOCK BUDGET HERE, unlike the sibling spec — tried and rejected on evidence. On the
- * all-new probe the fix reads 600 blocks against the OR form's 810 (detect) and 438
+ * all-new probe the fix reads 501 blocks against the OR form's 810 (detect) and 438
  * (prefetch): the regression reads FEWER blocks than the fix in one of the two cases, so
  * no threshold can separate them, and any budget wide enough not to flake would pass the
  * very mis-plan this file exists to catch. (The sibling's budget works because its
  * regression is 816 against a fixed 143.) `Measured.blocks` is therefore reported for
- * debugging and deliberately never asserted.
+ * debugging and asserted only in the dirty-pending-list describe, where it is a RATIO
+ * between two probe sizes rather than an absolute.
  *
- * Discarded-row counts carry the signal instead. They are the regressions' actual
- * signatures — "read history and threw it away" for the OR form, "expanded every
- * candidate and threw it away" for the fan-out — and unlike blocks they are scale-free.
- * The index-name assertions pin the same property structurally: the OR mis-plan is
- * precisely the one that rides NEITHER index usefully.
- *
- * `maxJoinFiltered` is 0 for every query with no join left to mis-plan. The one exception
- * is prefetchLatestEntityOpsForBatch, whose array branch must still confirm a by-id GIN
- * match against the requested (entity_type, entity_id) PAIR. Under `force_generic_plan`
- * Postgres cannot see the parameter values and plans that semi-join as a nested loop, so
- * it compares |cand| x |touched| — bounded by the batch size and INDEPENDENT of how wide
- * the stored arrays are, which is exactly what separates it from a fan-out.
+ * `rowsTouched` carries the signal instead: it is scale-free, planner-independent, and
+ * it is the fan-out's actual signature — "expanded every candidate and threw it away".
+ * The index-name assertions pin the OTHER regression structurally: the OR mis-plan is
+ * precisely the one that rides NEITHER index usefully, so requiring both here fails it
+ * even if a future seed stops blowing the row ceiling. Those node assertions hold under
+ * production's `fastupdate = off`; do NOT copy them into the dirty describe, where the
+ * cheapest plan is a seq scan.
  */
 const expectBounded = (measured: Measured, maxRowsTouched: number): void => {
   expect(measured.rowsTouched).toBeLessThanOrEqual(maxRowsTouched);
@@ -347,23 +261,26 @@ const expectBounded = (measured: Measured, maxRowsTouched: number): void => {
 };
 
 /**
- * Row-touch ceilings, each ~2x the measured value so a planner shift does not flake
- * while any fan-out still fails by orders of magnitude.
+ * Row-touch ceilings. They are deliberately LOOSE — the point is to fail a fan-out by
+ * orders of magnitude, not to pin a number a planner change can move.
  *
- * All-new probe: nothing matches, so both queries only pay the per-probe index seeks.
- * Wide probe: |cand| is |probe| x WIDE_OPS = 2000 and the branches feed DISTINCT ON, so
- * ~12.5k rows move. The round-1 fan-out re-expanded each candidate by WIDE_WIDTH and
- * touched 2.2M on PG 16.14 / 21M on PGlite — 177x and 1700x over these ceilings.
+ * All-new probe: nothing matches, so both queries only pay the index seeks. Measured 401.
+ * Wide probe: |cand| is |probe| x WIDE_OPS = 2000 and the branches feed DISTINCT ON.
+ * Measured 11_047 (detect) and 13_347 (prefetch). The round-1 fan-out re-expanded each
+ * candidate by WIDE_WIDTH and touched 2.2M on PG 16.14 / 21M on PGlite, so it fails
+ * these by ~75x and ~700x.
  */
 const MAX_ROWS_TOUCHED_ALL_NEW = 3_000;
 const MAX_ROWS_TOUCHED_WIDE = 30_000;
 /**
- * Prefetch's wide case is higher (measured 115_505) because its array branch must
- * re-check each candidate against the requested (entity_type, entity_id) PAIR, and under
- * `force_generic_plan` PGlite runs that semi-join as a nested loop over `touched`:
- * |cand| x |touched| on top of the rows the branches actually produce. PG 16.14 plans it
- * as a hash join and pays none of this, so the ceiling is sized for the pessimistic
- * planner. Still ~400x below the round-1 fan-out on the same seed.
+ * Prefetch keeps its own, much looser ceiling because its array branch must re-check
+ * each candidate against the requested (entity_type, entity_id) PAIR, and the cost of
+ * that semi-join is PLANNER-DEPENDENT by an order of magnitude: a hash semi-join (what
+ * both PGlite and PG 16.14 currently choose) touches the 13_347 above, while a nested
+ * loop over `touched` — which PGlite chose for the pre-`&&` shape of this same query —
+ * costs |cand| x |touched| and touched 115_505. The ceiling sits above the pessimistic
+ * plan on purpose, so a planner shift is not a red build. Still ~180x below the round-1
+ * fan-out on this seed, which is the regression it exists to catch.
  */
 const MAX_ROWS_TOUCHED_WIDE_PAIRS = 250_000;
 
@@ -505,45 +422,102 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 });
 
 /**
- * The array branch must ride the GIN even when the pending list is DIRTY.
+ * The array branch must stay CHEAP when the GIN pending list is DIRTY — and the shape
+ * that achieves that is ONE `&&` probe, not one `@>` per requested id.
  *
  * `fastupdate = off` is set by raw migration 20260720000000 and CANNOT be expressed in
  * schema.prisma, so every `prisma db push` database — CI, the E2E stack, the documented
- * manual setup — has it ON. Measured on this seed: a single 100-key `entity_ids && $arr`
- * probe costs enough under a dirty pending list that the planner abandons the GIN for a
- * SEQ SCAN of the whole table (40000 rows discarded) — at production's 6.97M rows that
- * is far worse than the slice scan being fixed. Probing per id with a 1-key `@>` keeps
- * the GIN chosen in BOTH states; it costs ~100 extra blocks when the reloption is right,
- * and it is the same shape detectConflictForEntity already ships.
+ * manual setup in README.md — has it ON. Every GIN scan then reads the whole pending
+ * list, so N per-id probes read it N times where one `&&` reads it once: the per-id
+ * form's I/O is LINEAR IN THE BATCH SIZE. Measured, per statement:
  *
- * So this is not a micro-optimisation: it is why the array branch is written as a
- * per-id lateral rather than one `&&`. Do not "simplify" it back.
+ *              PGlite, this seed        PG 16.14, 1.5M rows, 471 pending pages
+ *   form       time / blocks            time / blocks
+ *   `@>`x100   175 ms / 19,600           261 ms / 47,800
+ *   `&&`        26 ms /    981           170 ms /  1,072
+ *
+ * Both callers chunk at CONFLICT_DETECTION_ENTITY_BATCH_SIZE, so an op at the 1000-id
+ * wire cap issues ten of these in one upload transaction: 2.5 s of `@>` against 1.6 s of
+ * `&&` on PG 16.14. Multi-second statements inside the upload transaction are #9503's
+ * own failure mode, so this describe is not a micro-optimisation guard — it is the one
+ * that stops the fix re-creating the incident on every db-push deployment.
+ *
+ * ON THE PLAN SHAPE: under a dirty pending list PGlite/PG18 abandons the GIN for a SEQ
+ * SCAN here. That is FINE and this file deliberately does NOT forbid it — the seq scan
+ * is 6.8x faster and reads 20x fewer blocks than the GIN plan the per-id form gets. A
+ * previous revision asserted `not.toContain('Seq Scan')` and so pinned the WORSE outcome
+ * as if it were the requirement, which is how the per-id form got shipped. Assert cost,
+ * never plan shape, in this state.
  */
 describe('batch conflict array branch survives a dirty GIN pending list (PGlite)', () => {
   let db: PGlite;
+  /** A FULL-batch probe and a tenth-size one, both against the dirty pending list. */
+  let dirty: Measured;
+  let dirtySmall: Measured;
+  /** The full-batch probe again, after VACUUM flushes the pending list. */
+  let flushed: Measured;
 
+  // Measured in beforeAll rather than per-test because the VACUUM below DESTROYS the
+  // state the other assertions need, and an ordering dependency between `it`s is exactly
+  // the kind of thing that silently stops holding.
   beforeAll(async () => {
     db = new PGlite();
     await db.waitReady;
     await seed(db, 'on');
+
+    const probe = async (ids: string[]): Promise<Measured> => {
+      const runs: Measured[] = [];
+      await detectConflictForEntities(
+        USER_ID,
+        incomingOp(),
+        ids,
+        makeExplainingTx(db, runs),
+      );
+      expect(runs).toHaveLength(1);
+      return runs[0];
+    };
+
+    dirtySmall = await probe(brandNewIds().slice(0, PROBE_SIZE / 10));
+    dirty = await probe(brandNewIds());
+
+    // PGlite ships no pgstattuple, so `pending_pages` cannot be read directly. VACUUM
+    // flushes the pending list into the main GIN entry tree, so re-measuring the SAME
+    // probe afterwards prices the same query against a clean index — the difference IS
+    // the pending list.
+    await db.exec('VACUUM operations');
+    flushed = await probe(brandNewIds());
   }, 180_000);
 
   afterAll(async () => {
     await db.close();
   });
 
-  it('does not fall back to a Seq Scan with fastupdate=on', async () => {
-    const measured: Measured[] = [];
-    await detectConflictForEntities(
-      USER_ID,
-      incomingOp(),
-      brandNewIds(),
-      makeExplainingTx(db, measured),
-    );
+  /**
+   * CANARY. Without this the describe can pass while measuring a CLEAN index — which is
+   * what a reviewer suspected was already happening, on the grounds that a bulk load
+   * flushes past `gin_pending_list_limit`. It does not flush ALL of it: the tail stays
+   * pending (confirmed directly on PG 16.14 via pgstatginindex — 58 pages / 4,544 tuples
+   * after the same bulk load), and that tail is what the reloption exposes.
+   */
+  it('CANARY: the fastupdate=on seed really does leave a dirty pending list', () => {
+    expect(dirty.blocks).toBeGreaterThan(flushed.blocks * 2);
+  });
 
-    expect(measured[0].rowsFiltered).toBe(0);
-    expect(measured[0].rowsJoinFiltered).toBe(0);
-    expect(measured[0].nodes).not.toContain('Seq Scan');
-    expect(measured[0].nodes).toContain('operations_entity_ids_gin');
+  it('does not re-read the pending list once per probed id', () => {
+    // THE property, stated scale-free: one `&&` reads the pending list once however many
+    // ids are asked for, so a 10x bigger batch must NOT cost 10x the blocks. Measured
+    // 1065 blocks at 100 ids against 1010 at 10 — essentially flat. The per-id form is
+    // 19,600 at 100 ids and scales linearly, so it fails this by ~10x however the seed
+    // is resized. An absolute budget could not do this: it would have to be re-derived
+    // for every seed change, and the numbers above are PGlite's, not production's.
+    //
+    // Blocks, not time: this is an I/O regression, and PGlite reports every block as a
+    // cache hit, so wall time understates it exactly where production would feel it most.
+    expect(dirty.blocks).toBeLessThan(dirtySmall.blocks * 3);
+    // Deliberately NOT rowsFiltered === 0, which the other describe does assert: the
+    // seq-scan plan PG18 picks here reads and filters all 40,020 rows by construction,
+    // so that assertion would once again be pinning a plan shape rather than a cost.
+    // rowsTouched counts rows EMITTED, so it still fails any fan-out regression.
+    expect(dirty.rowsTouched).toBeLessThanOrEqual(MAX_ROWS_TOUCHED_ALL_NEW);
   });
 });
