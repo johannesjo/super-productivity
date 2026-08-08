@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
+import { Prisma } from '@prisma/client';
+import { arrayBranchCandidatesCte } from '../src/sync/conflict';
 
 /**
  * The array branch of the batch conflict lookups is a COST choice between forms that
@@ -44,13 +46,18 @@ const CREATE = `
   CREATE INDEX operations_entity_ids_gin ON operations USING GIN (entity_ids);
 `;
 
-/** SHIPPED: one `@>` GIN probe per requested id, tagged with the id from the index. */
-const SHIPPED = `cand AS MATERIALIZED (
-  SELECT p.eid AS eid, o.user_id, o.entity_type, o.client_id, o.action_type,
-         o.vector_clock, o.server_seq
-  FROM (SELECT eid FROM probe) p
-  JOIN operations o ON o.entity_ids @> ARRAY[p.eid]
-)`;
+/**
+ * SHIPPED: one `@>` GIN probe per requested id, tagged with the id from the index.
+ *
+ * DERIVED from the production fragment, never copied. A hand-written literal here passed
+ * whether or not it still matched conflict.ts, so a later cost change to the array branch
+ * would have been "proved" equivalent by a file that never saw it — the same
+ * keep-these-two-in-sync hazard (#8334) that let #9503 ship the same mis-plan into both
+ * batch queries. The fragment binds no values, so `.sql` is its literal text; the first
+ * test below pins that, because a `$n` appearing here would silently renumber the `$1/$2/$3`
+ * of every query in this file.
+ */
+const SHIPPED = arrayBranchCandidatesCte(Prisma.sql`SELECT eid FROM probe`).sql;
 
 /**
  * The alternatives, kept here so a future cost change can be re-checked for equivalence
@@ -155,6 +162,21 @@ describe('batch array branch: alternative forms are equivalent (PGlite)', () => 
 
   afterEach(async () => {
     await db.close();
+  });
+
+  it('splices the REAL production fragment, and it binds no parameters', () => {
+    const fragment = arrayBranchCandidatesCte(Prisma.sql`SELECT eid FROM probe`);
+    // If the fragment ever binds a value, its `$1` would collide with this file's own
+    // `$1/$2/$3` and every query here would silently probe the wrong thing. Fail here
+    // instead, where the message says what to do.
+    expect(
+      fragment.values,
+      'arrayBranchCandidatesCte now binds values; thread them through detectQuery',
+    ).toEqual([]);
+    expect(SHIPPED).not.toMatch(/\$\d/);
+    // Sanity that we spliced the array branch and not something else entirely.
+    expect(SHIPPED).toContain('cand AS MATERIALIZED');
+    expect(SHIPPED).toContain('@> ARRAY[p.eid]');
   });
 
   it('returns identical rows to every alternative form, and mutants diverge', async () => {

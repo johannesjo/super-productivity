@@ -39,15 +39,22 @@ const TASK_TIME_DELTA_ACTION_TYPE = '[TimeTracking] Sync time spent';
  *   only with index size) while `&&`'s `matches x stored width` is bounded by nothing a
  *   tenant controls — but `&&` IS ~20x faster on an all-new probe, so this is a real
  *   trade and not a free win. Equivalence of the forms is pinned by
- *   array-branch-equivalence.pglite.spec.ts: swap the form there when you swap it here.
+ *   array-branch-equivalence.pglite.spec.ts, which DERIVES the shipped form from this
+ *   fragment, so changing it here re-points that spec automatically.
  *
  * NOT user-scoped: like the single-entity path this matches by entity id across ALL users,
  * and the callers' outer WHERE enforces the boundary. Correct — pinned by the ARRAY-branch
  * isolation tests in entity-ids-conflict.pglite.spec.ts — but the cost is not bounded per
  * tenant, which IS a regression against master and is tracked as #9510. The `MATERIALIZED`
  * fence is precisely what forbids putting `user_id` back inside.
+ *
+ * Exported ONLY so the equivalence spec can splice the real text instead of a copy; it
+ * binds no values, and that is asserted there because a `$n` would renumber the callers'
+ * parameters.
  */
-const arrayBranchCandidatesCte = (probeSource: Prisma.Sql): Prisma.Sql => Prisma.sql`
+export const arrayBranchCandidatesCte = (
+  probeSource: Prisma.Sql,
+): Prisma.Sql => Prisma.sql`
   cand AS MATERIALIZED (
     SELECT p.eid AS eid, o.user_id, o.entity_type, o.client_id, o.action_type,
            o.vector_clock, o.server_seq
