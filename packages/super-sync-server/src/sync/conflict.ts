@@ -20,105 +20,32 @@ const TASK_TIME_DELTA_ACTION_TYPE = '[TimeTracking] Sync time spent';
  * ARRAY-branch candidates for BOTH batch conflict lookups: every stored op whose
  * `entity_ids` contains a probed id, tagged with the id that matched. Shared rather than
  * hand-copied — the #8334 "keep these two in sync" hazard is exactly what let #9503 ship
- * the same mis-plan into both queries. `probeSource` is passed in (rather than the
- * fragment reaching for a `probe` CTE the caller must remember to define) so the contract
- * is explicit; both call sites were measured plan-identical either way.
+ * the same mis-plan into both queries.
  *
- * Carrying `p.eid` is load-bearing for COST, not correctness. Re-deriving the matched id
- * downstream with `unnest(entity_ids) JOIN probe` instead emits |probe ∩ entity_ids|²
- * rows per op, because `cand` already holds one copy of the op per matching probe id.
- * On batch-conflict-plan.pglite.spec.ts's wide seed that is 59.8M join-filtered rows /
- * 2211 temp blocks / ~23s, against zero and ~8ms for the form below; at the 1000-id wire
- * cap the gap was 36.8s vs 4.5ms. Callers probe an id set that OVERLAPS the stored
- * arrays heavily — detect probes the incoming op's own ids, prefetch the upload batch's
- * — so that is the normal shape, not an edge case. Not selecting `entity_ids` at all
- * also keeps the materialised tuplestore narrow. Both spec guards fail on the fan-out
- * form; keep it that way.
+ * Three properties are load-bearing. Each is a COST property, not a correctness one, so
+ * nothing here fails loudly; changing one needs the full measurements in
+ * docs/sync-and-op-log/vector-clocks.md, not a single benchmark.
  *
- * MATERIALIZED is load-bearing: it stops the outer user_id / entity_type predicates
- * being pushed down, which hands the composite btree back and restores the slice scan
- * this whole change exists to remove (measured: 1106 blocks and no GIN without it).
+ * - `p.eid` is CARRIED, never re-derived downstream by unnesting `entity_ids`: `cand`
+ *   already holds one copy of the op per matching probe id, so re-deriving fans out
+ *   quadratically on wide arrays, and callers normally probe ids that OVERLAP the stored
+ *   arrays heavily. Guarded by the "does not fan out" tests in
+ *   batch-conflict-plan.pglite.spec.ts, which carry the numbers.
+ * - `MATERIALIZED` stops the callers' outer user_id / entity_type predicates being pushed
+ *   down, which would hand the composite btree back and restore the slice scan this whole
+ *   change exists to remove.
+ * - ONE `@>` PROBE PER ID, not one `&&` for the batch. Both forms are correct and both fix
+ *   #9503. `@>` ships because its terms are bounded (probe size is chunked, descent grows
+ *   only with index size) while `&&`'s `matches x stored width` is bounded by nothing a
+ *   tenant controls — but `&&` IS ~20x faster on an all-new probe, so this is a real
+ *   trade and not a free win. Equivalence of the forms is pinned by
+ *   array-branch-equivalence.pglite.spec.ts: swap the form there when you swap it here.
  *
- * Isolation: like the single-entity path, this matches by entity id across ALL users and
- * the callers' outer WHERE enforces the user boundary. CORRECT — cross-tenant rows are
- * rejected before anything is returned, pinned by the ARRAY-branch isolation tests in
- * entity-ids-conflict.pglite.spec.ts — but NOT cost-bounded per user, and that part IS a
- * regression against master, which carried `user_id` inside the scanned relation. The
- * `MATERIALIZED` fence is precisely what forbids putting it back.
- *
- * The cost is linear in the number of rows ACROSS ALL TENANTS carrying a probed id, and
- * the batch paths multiply it by the batch size where the single-entity path probes one.
- * It only bites on ids that are byte-identical across tenants — the hard-coded
- * 'KANBAN_DEFAULT' / 'EISENHOWER_MATRIX' that `sortBoards` both stores and probes.
- *
- * Do NOT read that as "small". Measured on PG 16.14, `fastupdate = off`, a 70-op account
- * probing one shared id: 20k co-tenants => 17.6 ms / 1,072 blk; 80k co-tenants =>
- * 74.3 ms / 2,478 blk and 800 TEMP BLOCKS WRITTEN — the MATERIALIZED tuplestore spills
- * at the shipped `work_mem = 4MB`. Against master's 0.09 ms / 6 blk. Chunked at 100, an
- * op at the wire cap issues ten of those inside one upload transaction, which is the
- * same order as #9503's own failure mode rather than "far from" it.
- *
- * And the driving input is not organic growth — it is other tenants' writes, unmetered:
- * `computeOpStorageBytes` charges payload + vectorClock only, so `entity_ids` costs zero
- * quota while the schema permits 1000 ids x 255 chars per op. Bounding it is #9510; the
- * cheap half of that fix (bill `entity_ids` bytes) needs no SQL change at all.
- *
- * DELIBERATELY NOT COVERED by batch-conflict-plan.pglite.spec.ts: that seed gives every
- * user disjoint ids, so the co-tenant term never appears in it. "Bounded" there means
- * "bounded given disjoint ids", not bounded absolutely. The real fix is the
- * expression-GIN sketched at detectConflictForEntity; it needs its own measurements.
- *
- * ONE `@>` PROBE PER ID, NOT ONE `&&` FOR THE BATCH. Both forms are correct and both fix
- * #9503; this is purely a cost choice, and it is NOT the obvious one, so here is the
- * whole cost model rather than the half of it that fits a single benchmark.
- *
- *   `@>` per id  ~  P x (D + M)        P = probe size (<= 100, chunked)
- *   `&&` batch   ~  D + M x W + M x P  D = index descent + GIN pending-list read
- *                                      M = matching ops,  W = stored entity_ids width
- *
- * `@>` gets the matched id FROM THE INDEX, so it never reads `entity_ids` at all. `&&`
- * must detoast and unnest every element of every matching op to recover which ids
- * matched, and re-scans the probe per candidate. Measured on postgres:16-alpine 16.14
- * (production's version), `fastupdate = off`, `force_generic_plan`, real statements with
- * the ids bound INDIVIDUALLY as Prisma sends them, median of 9:
- *
- *   shape                                  `@>` per id        `&&` batch
- *   100 all-new ids @ 1.5M rows            13.5 ms /    700    0.68 ms /   601 blk
- *   2-id probe, 1000 ops of width 1000      1.4 ms /     28     106 ms / 3,359
- *   10-id probe, same                       7.3 ms /    140     146 ms / 3,453
- *   100-id probe, same                     91.4 ms /  1,490     268 ms / 4,505
- *   100 ids over 10,000 width-2 ops        17.3 ms / 10,600     202 ms /   675
- *
- * NEITHER FORM DOMINATES, and the first row is the honest cost of this choice: `&&` is
- * 20x faster on an all-new probe, and that floor is paid by every batch upload. `@>` is
- * chosen anyway because of WHICH TERM IS BOUNDED. `P` is capped at
- * CONFLICT_DETECTION_ENTITY_BATCH_SIZE and `D` grows only with index size, so `@>` has a
- * predictable ceiling that no tenant's data can move. `M x W` has none: `M` counts
- * matching ops ACROSS ALL TENANTS (this CTE is not user-scoped — see above and #9510),
- * `W` runs to SUPER_SYNC_MAX_ENTITY_IDS_PER_OP, and neither is metered — `entity_ids` is
- * billed at zero bytes by computeOpStorageBytes. On an upload-path statement running
- * inside a transaction, a bounded 13.5 ms beats an unbounded 0.68 ms.
- *
- * MEASURE BOTH REGIMES. `&&` was briefly shipped on the strength of the first row alone,
- * from a seed with ~20 matching ops where the `M x W` term is invisible. A third form
- * (`&&` plus a hashed `x.eid IN (...)` semi-join) removes the `M x P` term — 202 ms ->
- * 34.7 ms on the width-2 shape — but not `M x W`, so it is still 155 ms on the
- * 2-id/width-1000 shape. If you want to revisit this, that is the promising direction,
- * and the bar is the whole table above, not one row of it.
- *
- * All three forms are EQUIVALENT, and that is asserted rather than asserted-about:
- * array-branch-equivalence.pglite.spec.ts differential-tests them against each other over
- * randomised ops and probes plus the edge shapes operators actually disagree on
- * (duplicate and NULL array elements, NULL scalars, divergent scalars, cross-tenant and
- * cross-type id collisions), with mutants that must diverge or the file fails. Swap the
- * form there when you swap it here.
- *
- * WHAT `@>` COSTS IN EXCHANGE: a GIN scan reads the whole `fastupdate` pending list, and
- * P per-id probes read it P times. With a dirty list (471 pending pages) a 100-id probe
- * measured 261 ms / 47,800 blocks against `&&`'s 170 ms / 1,072. Production sets
- * `fastupdate = off` (migration 20260720000000) and is not exposed; `prisma db push`
- * databases are, and README.md documents the one-line `ALTER INDEX` remedy. That is an
- * ops-config problem with an ops-config fix, not a reason to pay `M x W` on every upload.
+ * NOT user-scoped: like the single-entity path this matches by entity id across ALL users,
+ * and the callers' outer WHERE enforces the boundary. Correct — pinned by the ARRAY-branch
+ * isolation tests in entity-ids-conflict.pglite.spec.ts — but the cost is not bounded per
+ * tenant, which IS a regression against master and is tracked as #9510. The `MATERIALIZED`
+ * fence is precisely what forbids putting `user_id` back inside.
  */
 const arrayBranchCandidatesCte = (probeSource: Prisma.Sql): Prisma.Sql => Prisma.sql`
   cand AS MATERIALIZED (
@@ -202,15 +129,14 @@ export const detectConflictForEntities = async (
     // prefetchLatestEntityOpsForBatch — keep them in sync. (#8334)
     //
     // PERF — this must stay TWO separately-indexed branches, for the reason
-    // detectConflictForEntity documents at length below. It was ONE query with a
-    // combined `(entity_ids && $arr OR entity_id = ANY($arr))`, and that OR spans the
-    // entity_ids GIN and the (user_id, entity_type, entity_id, server_seq) btree, so
-    // the planner abandoned both and slice-scanned the btree: measured on PG16.14 and
-    // PGlite, a 100-id probe matching NOTHING read and discarded the probed user's
-    // ENTIRE (user_id, entity_type) slice. On production that ran twice per upload
-    // inside the transaction and was cancelled by statement_timeout every 5-12
-    // minutes (#9503). The batch paths were previously argued to be safe because they
-    // have no LIMIT for the planner to bet on; that was the wrong property to check.
+    // detectConflictForEntity documents at length below. It was ONE query with a combined
+    // `(entity_ids && $arr OR entity_id = ANY($arr))`, and that OR spans the entity_ids
+    // GIN and the (user_id, entity_type, entity_id, server_seq) btree, so the planner
+    // abandoned both and slice-scanned the btree: a 100-id probe matching NOTHING read and
+    // discarded the probed user's ENTIRE (user_id, entity_type) slice, twice per upload
+    // inside the transaction, and production cancelled it by statement_timeout every 5-12
+    // minutes (#9503). Guarded by batch-conflict-plan.pglite.spec.ts, whose CANARY test
+    // still reproduces the mis-plan on the old form.
     //
     // Scalar branch: a lateral top-1 per requested id. All three equality columns
     // PLUS the sort column are covered by the composite btree, so each probe is an
@@ -219,27 +145,17 @@ export const detectConflictForEntities = async (
     // Array branch: per-id `@>` probes. See arrayBranchCandidatesCte for the full cost
     // model and why the one-`&&`-per-batch alternative was measured and rejected.
     //
-    // Scale trade, worth knowing before "optimising" this: the fix moved the array
-    // branch's cost from "the probing user's slice" to a FIXED whole-table GIN probe.
-    // Small accounts therefore pay MORE than they used to, large ones far less.
-    // Measured on PG 16.14 at 1.5M rows with a 100-id all-new probe, median of 9, this
-    // statement against the pre-#9503 one:
+    // Trade accepted knowingly: this moves the array branch's cost from "the probing
+    // user's slice" to a FIXED whole-table GIN probe, so SMALL accounts pay ~13 ms / 700
+    // blocks per call they did not pay before (and this path runs twice per upload) while
+    // large ones pay far less. Accepted because the term it replaces is unbounded in
+    // account history while this one cannot exceed |probe| index descents. Measurements:
+    // PR #9516; the unbounded co-tenant term stacked on top of it is #9510.
     //
-    //   70-op account (typical)             0.05 ms /    3 blk  ->  13.6 ms / 700 blk
-    //   100k-op account (the #9503 one)    37.92 ms / 3659 blk  ->  13.5 ms / 700 blk
-    //
-    // So a typical account pays ~13 ms and ~700 blocks it did not pay before, on every
-    // batch upload, and this path runs twice per upload. That is a real and unconditional
-    // regression, accepted because the term it replaces is unbounded in account history
-    // (production's incident account had a slice far larger than this seed's) while this
-    // one cannot exceed |probe| index descents. It is also why the co-tenant term stacked
-    // on top of it (#9510) matters more than its absolute size suggests.
-    //
-    // `probe` binds the 100 ids ONCE — they used to be interpolated three times, for
-    // 300 of the statement's 302 parameters — and is then referenced twice, so Postgres
-    // materialises the list once. Its DISTINCT is redundant here (detectConflict already
-    // dedupes) and kept only so this shape stays identical to the prefetch sibling,
-    // where the same id can legitimately appear under two entity types.
+    // `probe` binds the ids ONCE and is then referenced twice, so Postgres materialises
+    // the list once. Its DISTINCT is redundant here (detectConflict already dedupes) and
+    // kept only so this shape stays identical to the prefetch sibling, where the same id
+    // can legitimately appear under two entity types.
     const idArray = Prisma.sql`ARRAY[${Prisma.join(batchEntityIds)}]::text[]`;
     const latestOps = await tx.$queryRaw<LatestEntityOperationRow[]>`
       WITH probe(eid) AS (
@@ -828,41 +744,26 @@ export const prefetchLatestEntityOpsForBatch = async (
       start,
       start + CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
     );
-    // The ::text casts pin the VALUES list's column types. Not required — inference
-    // resolves both columns without them on PG 16.14, checked with an untyped PREPARE —
-    // and a future edit that made them load-bearing would fail loudly at PREPARE, not
-    // silently. Kept only because they cost nothing and state the intent.
+    // The ::text casts pin the VALUES list's column types.
     const touchedRows = batchPairs.map(
       ({ entityType, entityId }) => Prisma.sql`(${entityType}::text, ${entityId}::text)`,
     );
 
-    // Two separately-indexed branches, mirroring detectConflictForEntities — see the
-    // PERF note there for the measurements. The array branch itself is the shared
-    // arrayBranchCandidatesCte, so only the scalar branch and the keying differ. (#8334)
+    // Two separately-indexed branches, mirroring detectConflictForEntities — see the PERF
+    // note there. The array branch is the shared arrayBranchCandidatesCte, so only the
+    // scalar branch and the keying differ. (#8334) This was the WORSE of the two under the
+    // old OR form: it carries no `entity_type` predicate of its own, so the btree's usable
+    // prefix was just `user_id` and the degeneracy read the user's ENTIRE history across
+    // every entity type. Only `batchUpload` defaulting to false spared it production
+    // traffic (#9503).
     //
-    // This query was the WORSE of the two: it carries no `entity_type` predicate (the
-    // entity type only ever appeared in the join), so the composite btree's usable
-    // prefix was just `user_id` and the OR degeneracy read the user's ENTIRE history,
-    // every entity type — measured at 20020 rows discarded against detect's 2520 on
-    // batch-conflict-plan.pglite.spec.ts's seed (the whole own-user population, against
-    // just its TASK slice). It is only spared production traffic because `batchUpload`
-    // defaults to false (#9503).
-    //
-    // The requested ids now come from `touched` instead of a second bound array, so
-    // there is no separate id-array parameter at all.
-    //
-    // `array_hits` re-checks the entity TYPE with a row-wise `IN`, not a `JOIN`: `cand`
-    // is keyed by id alone (the probe source drops the type), so a stored op matched by
-    // id still has to be confirmed against the requested (type, id) PAIR. A semi-join
-    // stops at the first match per candidate where the JOIN scanned on. Output is
-    // identical either way (the outer DISTINCT ON absorbs the JOIN's duplicates), so this
-    // is a cost choice, not a correctness one — and a modest, planner-dependent one:
-    // PGlite plans it as a nested loop and the semi-join halves the comparisons
-    // (99k vs 198k on the wide seed, itself an artefact of that seed's ordering), while
-    // PG 16.14 plans BOTH forms as a hash join at identical cost. Kept because it reads
-    // more directly and is never worse. Either way the residual is |cand| x |touched|,
-    // bounded by the batch size and independent of how wide the stored arrays are, which
-    // is what distinguishes it from a fan-out.
+    // `array_hits` re-checks the entity TYPE with a row-wise `IN`, not a `JOIN`: `cand` is
+    // keyed by id alone (the probe source drops the type), so a stored op matched by id
+    // must still be confirmed against the requested (type, id) PAIR. Semi-join vs JOIN is
+    // a cost choice here, not a correctness one — the outer DISTINCT ON absorbs either.
+    // Either way the residual is |cand| x |touched|, bounded by the batch size and
+    // independent of how wide the stored arrays are, which is what distinguishes it from
+    // a fan-out.
     const latestOps = await tx.$queryRaw<LatestBatchEntityOperationRow[]>`
       WITH touched(entity_type, entity_id) AS (
         VALUES ${Prisma.join(touchedRows)}
