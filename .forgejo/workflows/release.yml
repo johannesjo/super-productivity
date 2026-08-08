@@ -129,32 +129,31 @@ jobs:
         shell: bash
         env:
           RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ] || [ -z "${STORE_PASSWORD:-}" ] || [ -z "${KEY_ALIAS:-}" ] || [ -z "${KEY_PASSWORD:-}" ]; then
-            echo "Missing Android signing secrets (RELEASE_KEYSTORE_BASE64 / STORE_PASSWORD / KEY_ALIAS / KEY_PASSWORD)"
+          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ]; then
+            echo "Missing secret RELEASE_KEYSTORE_BASE64"
             exit 1
           fi
-          # android/app/build.gradle expects ../../keystore.jks + env RELEASE_KEYSTORE_*
+          # android/app/build.gradle expects ../../keystore.jks (repo root)
           printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > keystore.jks
           test -s keystore.jks
-          {
-            echo "RELEASE_KEYSTORE_PASSWORD=${STORE_PASSWORD}"
-            echo "RELEASE_KEYSTORE_ALIAS=${KEY_ALIAS}"
-            echo "RELEASE_KEY_PASSWORD=${KEY_PASSWORD}"
-            echo "SIGNED=1"
-          } >> "$GITHUB_ENV"
           echo "Release keystore ready ($(wc -c < keystore.jks) bytes)"
 
       - name: Build Android release APK
         shell: bash
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          RELEASE_KEYSTORE_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
+          test -s keystore.jks
+          test -n "${RELEASE_KEYSTORE_PASSWORD:-}"
+          test -n "${RELEASE_KEYSTORE_ALIAS:-}"
+          test -n "${RELEASE_KEY_PASSWORD:-}"
           npm run dist:android:prod
-          apk="$(find android/app/build/outputs/apk -name '*.apk' | head -1)"
+          apk="$(find android/app/build/outputs/apk -name '*release*.apk' | head -1)"
           test -n "$apk"
           ver="${GITHUB_REF_NAME:-manual}"
           ver="${ver#v}"
