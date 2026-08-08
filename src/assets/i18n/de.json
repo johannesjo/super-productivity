@@ -2991,7 +2991,7 @@
       "INVALID": "Dieses Token hat nicht funktioniert. Stelle sicher, dass du das vollständige Token kopiert hast (es beginnt mit „pat_“), und versuche es erneut.",
       "OPEN_LINK": "Plainspace öffnen",
       "TITLE": "Mit Plainspace verbinden",
-      "TOKEN_HELP": "Erstelle ein API-Token in Plainspace und füge es unten ein.",
+      "TOKEN_HELP": "Öffne Plainspace (Host oben), erstelle ein API-Token und füge es unten ein.",
       "TOKEN_LABEL": "API-Token",
       "TOKEN_PLACEHOLDER": "pat_…"
     },

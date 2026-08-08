@@ -2990,7 +2990,7 @@
       "INVALID": "That token didn't work. Make sure you copied the whole token (it starts with \"pat_\") and try again.",
       "OPEN_LINK": "Open Plainspace",
       "TITLE": "Connect to Plainspace",
-      "TOKEN_HELP": "Create an API token on Plainspace, then paste it below.",
+      "TOKEN_HELP": "Open Plainspace (uses the host above), create an API token, then paste it below.",
       "TOKEN_LABEL": "API token",
       "TOKEN_PLACEHOLDER": "pat_…"
     },

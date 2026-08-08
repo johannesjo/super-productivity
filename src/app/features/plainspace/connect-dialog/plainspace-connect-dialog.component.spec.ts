@@ -35,7 +35,7 @@ describe('PlainspaceConnectDialogComponent', () => {
 
   it('renders and uses the provided host', () => {
     expect(component).toBeTruthy();
-    expect(component.host).toBe('https://plainspace.org');
+    expect(component.hostModel).toBe('https://plainspace.org');
   });
 
   it('does nothing when the token is blank', async () => {

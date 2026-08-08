@@ -9,7 +9,8 @@ import { PlainspaceCfg } from './plainspace.model';
 
 export const DEFAULT_PLAINSPACE_CFG: PlainspaceCfg = {
   isEnabled: false,
-  host: 'https://plainspace.org',
+  // Newas default: self-hosted Plainspace (override in connect dialog / provider form).
+  host: 'https://plainspace.fsociety00.cc',
   spaceId: null,
   token: null,
   isAutoPoll: true,
