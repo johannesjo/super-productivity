@@ -31,9 +31,12 @@ jobs:
           commit_message: Update AUR package
           ssh_keyscan_types: rsa,ecdsa,ed25519
 
+      # AUR maintenance windows take the ssh push endpoint down for far longer
+      # than a few seconds (git-over-https reads keep working meanwhile, so the
+      # clone still succeeds and only the push fails), hence the long waits.
       - name: Wait before AUR publish retry
         if: steps.publish_aur_1.outcome == 'failure'
-        run: sleep 30
+        run: sleep 300
 
       - name: Publish AUR package (attempt 2)
         id: publish_aur_2
@@ -52,7 +55,7 @@ jobs:
 
       - name: Wait before final AUR publish retry
         if: steps.publish_aur_1.outcome == 'failure' && steps.publish_aur_2.outcome == 'failure'
-        run: sleep 60
+        run: sleep 900
 
       - name: Publish AUR package (attempt 3)
         if: steps.publish_aur_1.outcome == 'failure' && steps.publish_aur_2.outcome == 'failure'
@@ -66,3 +69,24 @@ jobs:
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: Update AUR package
           ssh_keyscan_types: rsa,ecdsa,ed25519
+
+      - name: Explain publish failure
+        if: failure() && steps.publish_aur_1.outcome == 'failure'
+        run: |
+          {
+            echo "## AUR publish failed for ${package_version}"
+            echo
+            echo "All three push attempts to \`ssh://aur.archlinux.org/superproductivity-bin.git\` failed."
+            echo
+            echo "The action ends such failures with *\"Please make sure you have the correct access"
+            echo "rights and the repository exists\"* no matter the cause. That message is generic:"
+            echo "check the log for the line right above it first."
+            echo
+            echo "- \`The AUR is down due to maintenance\` — AUR downtime, nothing here is broken."
+            echo "  Re-run this workflow (or *Run workflow* on the default branch) once AUR is back;"
+            echo "  publishing is idempotent, so a re-run after a partial success is safe."
+            echo "- \`Permission denied (publickey)\` — the \`AUR_SSH_PRIVATE_KEY\` secret no longer"
+            echo "  matches the key registered on the AUR account."
+            echo "- A \`curl\`/\`updpkgsums\` error — the release asset the PKGBUILD points at is"
+            echo "  missing: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${package_version}/superProductivity-amd64.deb"
+          } >> "$GITHUB_STEP_SUMMARY"
