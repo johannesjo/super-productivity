@@ -58,15 +58,41 @@ jobs:
           npm -v
           [[ "$(node -v)" == v22* ]]
 
-      - name: Set up JDK
+      - name: Set up JDK 21
         shell: bash
         run: |
           set -euo pipefail
-          java -version
-          if command -v javac >/dev/null 2>&1; then
-            java_home="$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")"
-            echo "JAVA_HOME=$java_home" >> "$GITHUB_ENV"
+          # Capacitor/Android toolchain requires languageVersion=21; runner image ships JDK 17 only.
+          pkg_install() {
+            if [ "$(id -u)" -eq 0 ]; then "$@"
+            elif command -v sudo >/dev/null 2>&1; then sudo "$@"
+            else echo "Need root to install JDK 21"; exit 1; fi
+          }
+          pick_jdk21() {
+            for d in /usr/lib/jvm/java-21-openjdk /usr/lib/jvm/java-21 /usr/lib/jvm/jdk-21*; do
+              if [ -x "$d/bin/javac" ]; then echo "$d"; return 0; fi
+            done
+            return 1
+          }
+          java_home="$(pick_jdk21 || true)"
+          if [ -z "${java_home:-}" ]; then
+            if command -v dnf >/dev/null 2>&1; then
+              pkg_install dnf install -y java-21-openjdk-devel
+            elif command -v apt-get >/dev/null 2>&1; then
+              pkg_install apt-get update
+              pkg_install apt-get install -y openjdk-21-jdk
+            else
+              echo "No package manager to install JDK 21"
+              exit 1
+            fi
+            java_home="$(pick_jdk21)"
           fi
+          echo "JAVA_HOME=$java_home" >> "$GITHUB_ENV"
+          echo "PATH=$java_home/bin:${PATH}" >> "$GITHUB_ENV"
+          export JAVA_HOME="$java_home" PATH="$java_home/bin:${PATH}"
+          java -version
+          javac -version
+          [[ "$(java -version 2>&1 | head -1)" == *\"21* ]]
 
       - name: Set up Android SDK
         shell: bash
