@@ -25,6 +25,8 @@ describe('PlainspaceSyncAdapterService', () => {
       'getById$',
       'patchTask$',
       'createTask$',
+      'unassignTask$',
+      'deleteTask$',
     ]);
     TestBed.configureTestingModule({
       providers: [
@@ -148,6 +150,40 @@ describe('PlainspaceSyncAdapterService', () => {
     });
     // No numeric issue number -> the SP title keeps no '#123' prefix.
     expect((res as { issueNumber?: number }).issueNumber).toBeUndefined();
+  });
+
+  it('deleteIssue unassigns by default', async () => {
+    api.unassignTask$.and.returnValue(
+      of({
+        id: 't1',
+        title: 'T',
+        isDone: false,
+        updatedAt: '2026-01-02T00:00:00.000Z',
+        url: 'u',
+        projectId: 'space-1',
+        scheduledAt: null,
+        isRecurring: false,
+      }),
+    );
+    await adapter.deleteIssue('t1', cfg);
+    expect(api.unassignTask$).toHaveBeenCalledWith('t1', cfg);
+    expect(api.deleteTask$).not.toHaveBeenCalled();
+  });
+
+  it('deleteIssue soft-deletes when onLocalDelete is delete', async () => {
+    api.deleteTask$.and.returnValue(of(undefined));
+    await adapter.deleteIssue('t1', { ...cfg, onLocalDelete: 'delete' });
+    expect(api.deleteTask$).toHaveBeenCalledWith('t1', {
+      ...cfg,
+      onLocalDelete: 'delete',
+    });
+    expect(api.unassignTask$).not.toHaveBeenCalled();
+  });
+
+  it('deleteIssue is a no-op when onLocalDelete is localOnly', async () => {
+    await adapter.deleteIssue('t1', { ...cfg, onLocalDelete: 'localOnly' });
+    expect(api.unassignTask$).not.toHaveBeenCalled();
+    expect(api.deleteTask$).not.toHaveBeenCalled();
   });
 
   it('fetchIssue returns the issue, or {} when it is missing', async () => {

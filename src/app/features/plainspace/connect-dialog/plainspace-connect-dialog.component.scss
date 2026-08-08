@@ -23,8 +23,13 @@
   color: var(--text-color-muted);
 }
 
-.token-field {
+.token-field,
+.host-field {
   width: 100%;
+}
+
+.host-field {
+  margin-bottom: 8px;
 }
 
 .error {

@@ -15,6 +15,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { IS_ELECTRON } from '../../../app.constants';
 import { PlainspaceAccountService } from '../plainspace-account.service';
+import { DEFAULT_PLAINSPACE_CFG } from '../../issue/providers/plainspace/plainspace-cfg-form.const';
 
 export interface PlainspaceConnectDialogData {
   host?: string | null;
@@ -54,32 +55,31 @@ export class PlainspaceConnectDialogComponent {
   });
 
   readonly T = T;
-  readonly host = this._data?.host || 'https://plainspace.org';
-  // Deep link to the dedicated "from Super Productivity" onboarding flow, which
-  // guides token creation — instead of dropping the user on the bare marketing
-  // host. Trailing slash stripped so we never produce a double slash.
-  //
-  // On desktop we also pass a `?return=` deep link so the connect page can bounce
-  // the user back to the app. Only Electron registers the `superproductivity://`
-  // scheme (mobile uses a different one, web none), so gate it on IS_ELECTRON —
-  // otherwise the page would render dead "Open Super Productivity" buttons.
-  readonly connectUrl =
-    `${this.host.replace(/\/+$/, '')}/connect/super-productivity` +
-    (IS_ELECTRON
-      ? `?return=${encodeURIComponent('superproductivity://plainspace-connect')}`
-      : '');
+  /** Editable so self-hosted instances are not forced to plainspace.org. */
+  hostModel = (this._data?.host || DEFAULT_PLAINSPACE_CFG.host || '').replace(/\/+$/, '');
   token = '';
   readonly isConnecting = signal(false);
   readonly hasError = signal(false);
 
+  connectUrl(): string {
+    const host = (this.hostModel || DEFAULT_PLAINSPACE_CFG.host).replace(/\/+$/, '');
+    return (
+      `${host}/connect/super-productivity` +
+      (IS_ELECTRON
+        ? `?return=${encodeURIComponent('superproductivity://plainspace-connect')}`
+        : '')
+    );
+  }
+
   async connect(): Promise<void> {
     const token = this.token.trim();
-    if (!token || this.isConnecting()) {
+    const host = (this.hostModel || '').trim().replace(/\/+$/, '');
+    if (!token || !host || this.isConnecting()) {
       return;
     }
     this.isConnecting.set(true);
     this.hasError.set(false);
-    const ok = await this._accountService.connect(token, this.host);
+    const ok = await this._accountService.connect(token, host);
     if (ok) {
       this._dialogRef.close(true);
     } else {

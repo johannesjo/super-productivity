@@ -1,6 +1,14 @@
 import { BaseIssueProviderCfg, IssueProviderPollingMode } from '../../issue.model';
 
 /**
+ * What to do on Plainspace when a linked task is deleted locally in Super
+ * Productivity. Default `unassign` returns the item to the claim pool so
+ * collaborators can pick it up; `delete` soft-deletes remotely; `localOnly`
+ * leaves the remote item unchanged.
+ */
+export type PlainspaceOnLocalDelete = 'unassign' | 'delete' | 'localOnly';
+
+/**
  * Per-instance config for the Plainspace (plainspace.org / `Johannesjo/spaces`)
  * issue provider. One instance is bound to one SP project (via the provider's
  * `defaultProjectId`) and one remote Plainspace space (`spaceId`).
@@ -17,4 +25,8 @@ export interface PlainspaceCfg extends BaseIssueProviderCfg {
   isAutoPoll?: boolean;
   isAutoAddToBacklog?: boolean;
   pollingMode?: IssueProviderPollingMode;
+  /**
+   * Remote action when a linked task is deleted in SP. Default: unassign.
+   */
+  onLocalDelete?: PlainspaceOnLocalDelete;
 }

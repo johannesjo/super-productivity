@@ -79,6 +79,22 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     };
   }
 
+  /**
+   * Honours `cfg.onLocalDelete` (default unassign): unassign returns the item
+   * to the claim pool, delete soft-deletes remotely, localOnly is a no-op.
+   */
+  async deleteIssue(issueId: string, cfg: PlainspaceCfg): Promise<void> {
+    const mode = cfg.onLocalDelete ?? 'unassign';
+    if (mode === 'localOnly') {
+      return;
+    }
+    if (mode === 'delete') {
+      await firstValueFrom(this._api.deleteTask$(issueId, cfg));
+      return;
+    }
+    await firstValueFrom(this._api.unassignTask$(issueId, cfg));
+  }
+
   async fetchIssue(
     issueId: string,
     cfg: PlainspaceCfg,

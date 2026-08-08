@@ -6,7 +6,7 @@ import { PlainspaceAccount } from './plainspace-account.model';
 import { PlainspaceApiService } from '../issue/providers/plainspace/plainspace-api.service';
 import { DEFAULT_PLAINSPACE_CFG } from '../issue/providers/plainspace/plainspace-cfg-form.const';
 
-const DEFAULT_HOST = 'https://plainspace.org';
+const DEFAULT_HOST = 'https://plainspace.fsociety00.cc';
 
 /**
  * Holds the connected Plainspace account (a personal API token + host) and

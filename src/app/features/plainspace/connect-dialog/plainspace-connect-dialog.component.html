@@ -9,11 +9,22 @@
 <mat-dialog-content>
   <p class="intro">{{ T.PLAINSPACE.CONNECT.INTRO | translate }}</p>
 
+  <mat-form-field class="host-field">
+    <mat-label>{{ T.PLAINSPACE.FORM.HOST | translate }}</mat-label>
+    <input
+      matInput
+      type="url"
+      autocomplete="off"
+      [(ngModel)]="hostModel"
+      placeholder="https://plainspace.fsociety00.cc"
+    />
+  </mat-form-field>
+
   <a
     mat-stroked-button
     color="primary"
     class="open-link"
-    [href]="connectUrl"
+    [href]="connectUrl()"
     target="_blank"
     rel="noopener noreferrer"
   >

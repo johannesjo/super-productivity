@@ -1,0 +1,241 @@
+# Builds Newas Super Productivity releases for Obtainium (Android) and Linux AppImage.
+# Runner: desktop-release (same host pattern as Finamp/Flow).
+#
+# Optional signing secrets (Android): RELEASE_KEYSTORE_BASE64, STORE_PASSWORD,
+# KEY_ALIAS, KEY_PASSWORD — if missing, publishes an unsigned release APK.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & publish release
+    runs-on: desktop-release
+    timeout-minutes: 180
+
+    steps:
+      - name: Clone repository
+        shell: bash
+        env:
+          FORGEJO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          rm -rf .git
+          git init .
+          origin_url="${GITHUB_SERVER_URL#https://}"
+          origin_url="${origin_url#http://}"
+          git remote add origin "https://copilot:${FORGEJO_TOKEN}@${origin_url}/${GITHUB_REPOSITORY}.git"
+          git -c http.sslVerify=false fetch --depth=1 origin "${GITHUB_SHA}"
+          git checkout --force FETCH_HEAD
+          test -f package.json
+          echo "Checked out ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+
+      - name: Set up Node 22
+        shell: bash
+        run: |
+          set -euo pipefail
+          # desktop-release runs in a Fedora Podman image without Node; host has v22 but is not mounted.
+          if ! command -v node >/dev/null 2>&1 || [[ "$(node -v)" != v22* ]]; then
+            NODE_VER=22.22.2
+            NODE_DIR="/data/tools/node-v${NODE_VER}-linux-x64"
+            if [[ ! -x "${NODE_DIR}/bin/node" ]]; then
+              mkdir -p /data/tools
+              curl -fsSL "https://nodejs.org/dist/v${NODE_VER}/node-v${NODE_VER}-linux-x64.tar.xz" \
+                | tar -xJ -C /data/tools
+            fi
+            echo "PATH=${NODE_DIR}/bin:${PATH}" >> "$GITHUB_ENV"
+            export PATH="${NODE_DIR}/bin:${PATH}"
+          fi
+          node -v
+          npm -v
+          [[ "$(node -v)" == v22* ]]
+
+      - name: Set up JDK 21
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Capacitor/Android toolchain requires languageVersion=21; runner image ships JDK 17 only.
+          pkg_install() {
+            if [ "$(id -u)" -eq 0 ]; then "$@"
+            elif command -v sudo >/dev/null 2>&1; then sudo "$@"
+            else echo "Need root to install JDK 21"; exit 1; fi
+          }
+          pick_jdk21() {
+            for d in /usr/lib/jvm/java-21-openjdk /usr/lib/jvm/java-21 /usr/lib/jvm/jdk-21*; do
+              if [ -x "$d/bin/javac" ]; then echo "$d"; return 0; fi
+            done
+            return 1
+          }
+          java_home="$(pick_jdk21 || true)"
+          if [ -z "${java_home:-}" ]; then
+            if command -v dnf >/dev/null 2>&1; then
+              pkg_install dnf install -y java-21-openjdk-devel
+            elif command -v apt-get >/dev/null 2>&1; then
+              pkg_install apt-get update
+              pkg_install apt-get install -y openjdk-21-jdk
+            else
+              echo "No package manager to install JDK 21"
+              exit 1
+            fi
+            java_home="$(pick_jdk21)"
+          fi
+          echo "JAVA_HOME=$java_home" >> "$GITHUB_ENV"
+          echo "PATH=$java_home/bin:${PATH}" >> "$GITHUB_ENV"
+          export JAVA_HOME="$java_home" PATH="$java_home/bin:${PATH}"
+          java -version
+          javac -version
+          [[ "$(java -version 2>&1 | head -1)" == *\"21* ]]
+
+      - name: Set up Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_candidates=(
+            "${ANDROID_HOME:-}"
+            "${ANDROID_SDK_ROOT:-}"
+            "/home/yuna/Android/Sdk"
+            "${HOME}/Android/Sdk"
+            "/opt/android-sdk-linux"
+          )
+          sdk_dir=""
+          for candidate in "${sdk_candidates[@]}"; do
+            if [ -n "$candidate" ] && [ -d "$candidate/platforms" ] && [ -d "$candidate/build-tools" ]; then
+              sdk_dir="$candidate"
+              break
+            fi
+          done
+          if [ -z "$sdk_dir" ]; then
+            echo "Android SDK not found on desktop-release host."
+            exit 1
+          fi
+          echo "ANDROID_HOME=$sdk_dir" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$sdk_dir" >> "$GITHUB_ENV"
+
+      - name: Install npm packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+
+      - name: Configure Android signing
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          RELEASE_KEYSTORE_BASE64="$(printf '%s' "${RELEASE_KEYSTORE_BASE64:-}" | tr -d '[:space:]')"
+          if [ -z "${RELEASE_KEYSTORE_BASE64}" ]; then
+            echo "Missing secret RELEASE_KEYSTORE_BASE64"
+            exit 1
+          fi
+          # android/app/build.gradle expects ../../keystore.jks (repo root)
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > keystore.jks
+          test -s keystore.jks
+          echo "Release keystore ready ($(wc -c < keystore.jks) bytes)"
+
+      - name: Build Android release APK
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          RELEASE_KEYSTORE_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          # Forgejo secret payloads sometimes keep a trailing newline
+          export RELEASE_KEYSTORE_PASSWORD="$(printf '%s' "${RELEASE_KEYSTORE_PASSWORD:-}" | tr -d '\r\n')"
+          export RELEASE_KEYSTORE_ALIAS="$(printf '%s' "${RELEASE_KEYSTORE_ALIAS:-}" | tr -d '\r\n')"
+          export RELEASE_KEY_PASSWORD="$(printf '%s' "${RELEASE_KEY_PASSWORD:-}" | tr -d '\r\n')"
+          test -s keystore.jks
+          test -n "${RELEASE_KEYSTORE_PASSWORD}"
+          test -n "${RELEASE_KEYSTORE_ALIAS}"
+          test -n "${RELEASE_KEY_PASSWORD}"
+          npm run dist:android:prod
+          apk="$(find android/app/build/outputs/apk -name '*release*.apk' | head -1)"
+          test -n "$apk"
+          ver="${GITHUB_REF_NAME:-manual}"
+          ver="${ver#v}"
+          # Obtainium needs plain Semver in the filename (strip -newas.N etc.)
+          ver="$(printf '%s' "$ver" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          out="super-productivity-newas-arm64-v8a-v${ver}.apk"
+          cp "$apk" "$out"
+          cp "$apk" "super-productivity-newas-arm64-v8a.apk"
+          echo "ANDROID_APK=$out" >> "$GITHUB_ENV"
+          echo "ANDROID_APK_STABLE=super-productivity-newas-arm64-v8a.apk" >> "$GITHUB_ENV"
+          ls -la "$out" super-productivity-newas-arm64-v8a.apk
+
+      - name: Build Linux AppImage + Flatpak
+        shell: bash
+        env:
+          # Runner image has no Rust/Cargo; skip Wayland idle helper (optional runtime feature).
+          SP_SKIP_WAYLAND_IDLE_HELPER_BUILD: "1"
+        run: |
+          set -euo pipefail
+          # Do NOT use buildAllElectron:prod — it runs preCheck (lint+unit+e2e).
+          npm run buildFrontend:prod:es6
+          npm run electron:build
+          # Flatpak needs flatpak-builder on the runner; AppImage is the primary Linux artifact.
+          if command -v flatpak-builder >/dev/null 2>&1; then
+            npx electron-builder --linux AppImage flatpak --publish never
+          else
+            npx electron-builder --linux AppImage --publish never
+          fi
+          ver="${GITHUB_REF_NAME:-manual}"
+          ver="${ver#v}"
+          ver="$(printf '%s' "$ver" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          img="$(find .tmp dist -name '*.AppImage' 2>/dev/null | head -1)"
+          if [ -z "$img" ]; then
+            img="$(find . -name '*.AppImage' -not -path './node_modules/*' | head -1)"
+          fi
+          test -n "$img"
+          out="SuperProductivity-Newas-${ver}.AppImage"
+          cp "$img" "$out"
+          echo "LINUX_APPIMAGE=$out" >> "$GITHUB_ENV"
+          ls -la "$out"
+          flat="$(find .tmp dist -name '*.flatpak' 2>/dev/null | head -1)"
+          if [ -z "$flat" ]; then
+            flat="$(find . -name '*.flatpak' -not -path './node_modules/*' | head -1)"
+          fi
+          if [ -n "$flat" ]; then
+            fout="SuperProductivity-Newas-${ver}.flatpak"
+            cp "$flat" "$fout"
+            echo "LINUX_FLATPAK=$fout" >> "$GITHUB_ENV"
+            ls -la "$fout"
+          else
+            echo "WARN: no .flatpak artifact (install flatpak-builder on runner)"
+            echo "LINUX_FLATPAK=" >> "$GITHUB_ENV"
+          fi
+
+      - name: Publish Forgejo release
+        shell: bash
+        env:
+          FORGEJO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME:-}"
+          if [[ ! "$tag" =~ ^v ]]; then
+            # Prefer plain Semver for Obtainium (Finamp/Flow pattern).
+            tag="v$(node -p "require('./package.json').version")"
+          fi
+          api="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases"
+          body=$(jq -n --arg tag "$tag" --arg name "$tag" '{tag_name:$tag,name:$name,draft:false,prerelease:false}')
+          rel=$(curl -sk -H "Authorization: token ${FORGEJO_TOKEN}" -H "Content-Type: application/json" -d "$body" "$api")
+          upload_url=$(echo "$rel" | jq -r '.upload_url // empty' | sed 's/{?name,label}//')
+          if [ -z "$upload_url" ]; then
+            echo "$rel" | jq . || echo "$rel"
+            exit 1
+          fi
+          for f in "${ANDROID_APK}" ${ANDROID_APK_STABLE:+"${ANDROID_APK_STABLE}"} "${LINUX_APPIMAGE}" ${LINUX_FLATPAK:+"${LINUX_FLATPAK}"}; do
+            curl -sk -H "Authorization: token ${FORGEJO_TOKEN}" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"$f" \
+              "${upload_url}?name=$(basename "$f")"
+          done
+          echo "Published $tag"
