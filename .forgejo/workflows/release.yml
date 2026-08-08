@@ -128,23 +128,36 @@ jobs:
           echo "ANDROID_APK=$out" >> "$GITHUB_ENV"
           ls -la "$out"
 
-      - name: Build Linux AppImage
+      - name: Build Linux AppImage + Flatpak
         shell: bash
         run: |
           set -euo pipefail
-          npm run buildAllElectron:prod || npm run buildFrontend:prod && npm run electron:build
-          npx electron-builder --linux AppImage --publish never
+          npm run buildAllElectron:prod || (npm run buildFrontend:prod && npm run electron:build)
+          npx electron-builder --linux AppImage flatpak --publish never
+          ver="${GITHUB_REF_NAME:-manual}"
+          ver="${ver#v}"
           img="$(find .tmp dist -name '*.AppImage' 2>/dev/null | head -1)"
           if [ -z "$img" ]; then
             img="$(find . -name '*.AppImage' -not -path './node_modules/*' | head -1)"
           fi
           test -n "$img"
-          ver="${GITHUB_REF_NAME:-manual}"
-          ver="${ver#v}"
           out="SuperProductivity-Newas-${ver}.AppImage"
           cp "$img" "$out"
           echo "LINUX_APPIMAGE=$out" >> "$GITHUB_ENV"
           ls -la "$out"
+          flat="$(find .tmp dist -name '*.flatpak' 2>/dev/null | head -1)"
+          if [ -z "$flat" ]; then
+            flat="$(find . -name '*.flatpak' -not -path './node_modules/*' | head -1)"
+          fi
+          if [ -n "$flat" ]; then
+            fout="SuperProductivity-Newas-${ver}.flatpak"
+            cp "$flat" "$fout"
+            echo "LINUX_FLATPAK=$fout" >> "$GITHUB_ENV"
+            ls -la "$fout"
+          else
+            echo "WARN: no .flatpak artifact (install flatpak-builder on runner)"
+            echo "LINUX_FLATPAK=" >> "$GITHUB_ENV"
+          fi
 
       - name: Publish Forgejo release
         shell: bash
@@ -164,7 +177,7 @@ jobs:
             echo "$rel" | jq . || echo "$rel"
             exit 1
           fi
-          for f in "${ANDROID_APK}" "${LINUX_APPIMAGE}"; do
+          for f in "${ANDROID_APK}" "${LINUX_APPIMAGE}" ${LINUX_FLATPAK:+"${LINUX_FLATPAK}"}; do
             curl -sk -H "Authorization: token ${FORGEJO_TOKEN}" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @"$f" \
