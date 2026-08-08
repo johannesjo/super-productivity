@@ -9,6 +9,7 @@ import { IssueSyncAdapterRegistryService } from './issue-sync-adapter-registry.s
 import { IssueSyncAdapterResolverService } from './issue-sync-adapter-resolver.service';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
 import { PlainspaceSyncAdapterService } from '../providers/plainspace/plainspace-sync-adapter.service';
+import { PlainspaceApiService } from '../providers/plainspace/plainspace-api.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
@@ -142,6 +143,13 @@ describe('IssueTwoWaySyncEffects', () => {
       'extractSyncValues',
     ]);
 
+    const plainspaceApiSpy = jasmine.createSpyObj('PlainspaceApiService', [
+      'getMyTasks$',
+      'getById$',
+    ]);
+    plainspaceApiSpy.getMyTasks$.and.returnValue(of([]));
+    plainspaceApiSpy.getById$.and.returnValue(of(null));
+
     TestBed.configureTestingModule({
       providers: [
         IssueTwoWaySyncEffects,
@@ -154,6 +162,7 @@ describe('IssueTwoWaySyncEffects', () => {
         { provide: IssueProviderService, useValue: issueProviderServiceSpy },
         { provide: CaldavSyncAdapterService, useValue: caldavSpy },
         { provide: PlainspaceSyncAdapterService, useValue: plainspaceSpy },
+        { provide: PlainspaceApiService, useValue: plainspaceApiSpy },
         { provide: SnackService, useValue: snackServiceSpy },
         {
           provide: IssueSyncAdapterResolverService,
@@ -1762,6 +1771,113 @@ describe('IssueTwoWaySyncEffects', () => {
       );
 
       adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+  });
+
+  describe('heal stale Plainspace links', () => {
+    it('unlinks and recreates when getById returns null for a linked task', fakeAsync(() => {
+      const createIssueSpy = jasmine.createSpy('createIssue').and.resolveTo({
+        issueId: 'fresh-issue',
+        issueNumber: null,
+        issueData: { title: 'Wäsche' },
+      });
+      const adapter = createMockAdapter({
+        createIssue: createIssueSpy,
+        getFieldMappings: jasmine.createSpy('getFieldMappings').and.returnValue([]),
+        getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+        extractSyncValues: jasmine
+          .createSpy('extractSyncValues')
+          .and.returnValue({ title: 'Wäsche' }),
+      });
+      adapterRegistry.register('PLAINSPACE', adapter);
+
+      const provider = createMockIssueProvider({
+        id: 'ps-1',
+        issueProviderKey: 'PLAINSPACE' as any,
+        defaultProjectId: 'chores',
+        spaceId: 'space-1',
+        token: 'pat_x',
+        isAutoPoll: true,
+      } as any);
+
+      const staleTask = createMockTask({
+        id: 'waesche',
+        title: 'Wäsche',
+        projectId: 'chores',
+        parentId: undefined,
+        issueId: 'dead-org-id',
+        issueType: 'PLAINSPACE' as any,
+        issueProviderId: 'ps-1',
+      });
+
+      store.overrideSelector(selectEnabledIssueProviders, [provider]);
+      store.overrideSelector(selectAllTasks, [staleTask]);
+      store.refreshState();
+
+      const cfg = { ...provider, host: 'https://plainspace.example' };
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(staleTask));
+
+      const api = TestBed.inject(PlainspaceApiService) as jasmine.SpyObj<PlainspaceApiService>;
+      api.getMyTasks$.and.returnValue(of([]));
+      api.getById$.and.returnValue(of(null));
+
+      // Call private heal helper via bracket access (same pattern as other private probes).
+      (effects as any)
+        ._healStalePlainspaceLinksForProvider$(provider)
+        .subscribe();
+
+      tick();
+
+      expect(api.getById$).toHaveBeenCalledWith('dead-org-id', cfg);
+      expect(taskServiceSpy.update).toHaveBeenCalledWith(
+        'waesche',
+        jasmine.objectContaining({ issueId: undefined }),
+      );
+      expect(createIssueSpy).toHaveBeenCalledWith('Wäsche', cfg);
+
+      adapterRegistry.unregister('PLAINSPACE');
+    }));
+
+    it('leaves claim-pool tasks alone when getById still finds the issue', fakeAsync(() => {
+      const createIssueSpy = jasmine.createSpy('createIssue');
+      const adapter = createMockAdapter({ createIssue: createIssueSpy });
+      adapterRegistry.register('PLAINSPACE', adapter);
+
+      const provider = createMockIssueProvider({
+        id: 'ps-1',
+        issueProviderKey: 'PLAINSPACE' as any,
+        defaultProjectId: 'chores',
+        spaceId: 'space-1',
+        token: 'pat_x',
+      } as any);
+
+      const claimableLinked = createMockTask({
+        id: 't1',
+        title: 'Claimable',
+        projectId: 'chores',
+        issueId: 'still-exists',
+        issueProviderId: 'ps-1',
+        issueType: 'PLAINSPACE' as any,
+      });
+
+      store.overrideSelector(selectAllTasks, [claimableLinked]);
+      store.refreshState();
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(provider));
+
+      const api = TestBed.inject(PlainspaceApiService) as jasmine.SpyObj<PlainspaceApiService>;
+      api.getMyTasks$.and.returnValue(of([]));
+      api.getById$.and.returnValue(
+        of({ id: 'still-exists', title: 'Claimable' } as any),
+      );
+
+      (effects as any)._healStalePlainspaceLinksForProvider$(provider).subscribe();
+      tick();
+
+      expect(createIssueSpy).not.toHaveBeenCalled();
+      expect(taskServiceSpy.update).not.toHaveBeenCalled();
+
+      adapterRegistry.unregister('PLAINSPACE');
     }));
   });
 });
