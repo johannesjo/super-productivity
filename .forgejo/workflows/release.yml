@@ -125,7 +125,7 @@ jobs:
           set -euo pipefail
           npm ci
 
-      - name: Configure Android signing (optional)
+      - name: Configure Android signing
         shell: bash
         env:
           RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
@@ -134,19 +134,20 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ]; then
-            echo "No keystore secrets — will publish unsigned/debug-signed APK if Gradle allows."
-            echo "SIGNED=0" >> "$GITHUB_ENV"
-            exit 0
+          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ] || [ -z "${STORE_PASSWORD:-}" ] || [ -z "${KEY_ALIAS:-}" ] || [ -z "${KEY_PASSWORD:-}" ]; then
+            echo "Missing Android signing secrets (RELEASE_KEYSTORE_BASE64 / STORE_PASSWORD / KEY_ALIAS / KEY_PASSWORD)"
+            exit 1
           fi
-          echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > android/app/newas-release.jks
-          cat > android/keystore.properties <<EOF
-          storeFile=newas-release.jks
-          storePassword=${STORE_PASSWORD}
-          keyAlias=${KEY_ALIAS}
-          keyPassword=${KEY_PASSWORD}
-          EOF
-          echo "SIGNED=1" >> "$GITHUB_ENV"
+          # android/app/build.gradle expects ../../keystore.jks + env RELEASE_KEYSTORE_*
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > keystore.jks
+          test -s keystore.jks
+          {
+            echo "RELEASE_KEYSTORE_PASSWORD=${STORE_PASSWORD}"
+            echo "RELEASE_KEYSTORE_ALIAS=${KEY_ALIAS}"
+            echo "RELEASE_KEY_PASSWORD=${KEY_PASSWORD}"
+            echo "SIGNED=1"
+          } >> "$GITHUB_ENV"
+          echo "Release keystore ready ($(wc -c < keystore.jks) bytes)"
 
       - name: Build Android release APK
         shell: bash
