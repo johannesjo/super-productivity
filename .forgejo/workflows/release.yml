@@ -42,15 +42,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # desktop-release runs in a Fedora Podman image without Node; host has v22 but is not mounted.
           if ! command -v node >/dev/null 2>&1 || [[ "$(node -v)" != v22* ]]; then
-            echo "Node 22 required on desktop-release"
-            node -v || true
-            exit 1
+            NODE_VER=22.22.2
+            NODE_DIR="/data/tools/node-v${NODE_VER}-linux-x64"
+            if [[ ! -x "${NODE_DIR}/bin/node" ]]; then
+              mkdir -p /data/tools
+              curl -fsSL "https://nodejs.org/dist/v${NODE_VER}/node-v${NODE_VER}-linux-x64.tar.xz" \
+                | tar -xJ -C /data/tools
+            fi
+            echo "PATH=${NODE_DIR}/bin:${PATH}" >> "$GITHUB_ENV"
+            export PATH="${NODE_DIR}/bin:${PATH}"
           fi
           node -v
           npm -v
+          [[ "$(node -v)" == v22* ]]
 
-      - name: Set up JDK 21
+      - name: Set up JDK
         shell: bash
         run: |
           set -euo pipefail
