@@ -172,6 +172,31 @@ export class PlainspaceApiService {
       .pipe(map((res) => mapSPTaskToIssue(res.task)));
   }
 
+  /**
+   * Clears the caller's assignment so the task returns to the claim pool.
+   * Errors propagate (same as create) so delete sync can snack on failure.
+   */
+  unassignTask$(id: string, cfg: PlainspaceCfg): Observable<PlainspaceIssue> {
+    return this._http
+      .post<SPTaskResponse>(
+        `${this._base(cfg)}/tasks/${encodeURIComponent(id)}/unassign`,
+        {},
+        { headers: this._headers(cfg) },
+      )
+      .pipe(map((res) => mapSPTaskToIssue(res.task)));
+  }
+
+  /**
+   * Soft-deletes the remote task. Errors propagate for the delete sync effect.
+   */
+  deleteTask$(id: string, cfg: PlainspaceCfg): Observable<void> {
+    return this._http
+      .delete(`${this._base(cfg)}/tasks/${encodeURIComponent(id)}`, {
+        headers: this._headers(cfg),
+      })
+      .pipe(map(() => undefined));
+  }
+
   /** Creates a remote space and returns its id (used by the share flow). */
   createSpace$(title: string, cfg: PlainspaceCfg): Observable<{ id: string }> {
     return this._http

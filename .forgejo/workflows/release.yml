@@ -1,0 +1,173 @@
+# Builds Newas Super Productivity releases for Obtainium (Android) and Linux AppImage.
+# Runner: desktop-release (same host pattern as Finamp/Flow).
+#
+# Optional signing secrets (Android): RELEASE_KEYSTORE_BASE64, STORE_PASSWORD,
+# KEY_ALIAS, KEY_PASSWORD — if missing, publishes an unsigned release APK.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & publish release
+    runs-on: desktop-release
+    timeout-minutes: 180
+
+    steps:
+      - name: Clone repository
+        shell: bash
+        env:
+          FORGEJO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          rm -rf .git
+          git init .
+          origin_url="${GITHUB_SERVER_URL#https://}"
+          origin_url="${origin_url#http://}"
+          git remote add origin "https://copilot:${FORGEJO_TOKEN}@${origin_url}/${GITHUB_REPOSITORY}.git"
+          git -c http.sslVerify=false fetch --depth=1 origin "${GITHUB_SHA}"
+          git checkout --force FETCH_HEAD
+          test -f package.json
+          echo "Checked out ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+
+      - name: Set up Node 22
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v node >/dev/null 2>&1 || [[ "$(node -v)" != v22* ]]; then
+            echo "Node 22 required on desktop-release"
+            node -v || true
+            exit 1
+          fi
+          node -v
+          npm -v
+
+      - name: Set up JDK 21
+        shell: bash
+        run: |
+          set -euo pipefail
+          java -version
+          if command -v javac >/dev/null 2>&1; then
+            java_home="$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")"
+            echo "JAVA_HOME=$java_home" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_candidates=(
+            "${ANDROID_HOME:-}"
+            "${ANDROID_SDK_ROOT:-}"
+            "/home/yuna/Android/Sdk"
+            "${HOME}/Android/Sdk"
+            "/opt/android-sdk-linux"
+          )
+          sdk_dir=""
+          for candidate in "${sdk_candidates[@]}"; do
+            if [ -n "$candidate" ] && [ -d "$candidate/platforms" ] && [ -d "$candidate/build-tools" ]; then
+              sdk_dir="$candidate"
+              break
+            fi
+          done
+          if [ -z "$sdk_dir" ]; then
+            echo "Android SDK not found on desktop-release host."
+            exit 1
+          fi
+          echo "ANDROID_HOME=$sdk_dir" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$sdk_dir" >> "$GITHUB_ENV"
+
+      - name: Install npm packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+
+      - name: Configure Android signing (optional)
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ]; then
+            echo "No keystore secrets — will publish unsigned/debug-signed APK if Gradle allows."
+            echo "SIGNED=0" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > android/app/newas-release.jks
+          cat > android/keystore.properties <<EOF
+          storeFile=newas-release.jks
+          storePassword=${STORE_PASSWORD}
+          keyAlias=${KEY_ALIAS}
+          keyPassword=${KEY_PASSWORD}
+          EOF
+          echo "SIGNED=1" >> "$GITHUB_ENV"
+
+      - name: Build Android release APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run dist:android:prod
+          apk="$(find android/app/build/outputs/apk -name '*.apk' | head -1)"
+          test -n "$apk"
+          ver="${GITHUB_REF_NAME:-manual}"
+          ver="${ver#v}"
+          out="super-productivity-newas-arm64-v8a-v${ver}.apk"
+          cp "$apk" "$out"
+          echo "ANDROID_APK=$out" >> "$GITHUB_ENV"
+          ls -la "$out"
+
+      - name: Build Linux AppImage
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run buildAllElectron:prod || npm run buildFrontend:prod && npm run electron:build
+          npx electron-builder --linux AppImage --publish never
+          img="$(find .tmp dist -name '*.AppImage' 2>/dev/null | head -1)"
+          if [ -z "$img" ]; then
+            img="$(find . -name '*.AppImage' -not -path './node_modules/*' | head -1)"
+          fi
+          test -n "$img"
+          ver="${GITHUB_REF_NAME:-manual}"
+          ver="${ver#v}"
+          out="SuperProductivity-Newas-${ver}.AppImage"
+          cp "$img" "$out"
+          echo "LINUX_APPIMAGE=$out" >> "$GITHUB_ENV"
+          ls -la "$out"
+
+      - name: Publish Forgejo release
+        shell: bash
+        env:
+          FORGEJO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME:-}"
+          if [[ ! "$tag" =~ ^v ]]; then
+            tag="v$(node -p "require('./package.json').version")-newas.$(date +%Y%m%d%H%M)"
+          fi
+          api="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases"
+          body=$(jq -n --arg tag "$tag" --arg name "$tag" '{tag_name:$tag,name:$name,draft:false,prerelease:false}')
+          rel=$(curl -sk -H "Authorization: token ${FORGEJO_TOKEN}" -H "Content-Type: application/json" -d "$body" "$api")
+          upload_url=$(echo "$rel" | jq -r '.upload_url // empty' | sed 's/{?name,label}//')
+          if [ -z "$upload_url" ]; then
+            echo "$rel" | jq . || echo "$rel"
+            exit 1
+          fi
+          for f in "${ANDROID_APK}" "${LINUX_APPIMAGE}"; do
+            curl -sk -H "Authorization: token ${FORGEJO_TOKEN}" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"$f" \
+              "${upload_url}?name=$(basename "$f")"
+          done
+          echo "Published $tag"

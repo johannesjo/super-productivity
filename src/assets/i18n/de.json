@@ -3000,7 +3000,12 @@
       "SPACE_ID": "Space-ID",
       "SPACE_ID_DESCRIPTION": "Der Space, mit dem dieser Anbieter synchronisiert – füge die ID oder den Slug aus der Space-URL ein (plainspace.org/<slug>/…).",
       "TOKEN": "API-Token",
-      "TOKEN_DESCRIPTION": "Persönliches API-Token (beginnt mit „pat_“). Öffne in Plainspace einen Space → Personen → Erweitert → API-Tokens, um eines zu erstellen."
+      "TOKEN_DESCRIPTION": "Persönliches API-Token (beginnt mit „pat_“). Öffne in Plainspace einen Space → Personen → Erweitert → API-Tokens, um eines zu erstellen.",
+      "ON_LOCAL_DELETE": "Wenn ich eine Aufgabe in Super Productivity lösche",
+      "ON_LOCAL_DELETE_DESCRIPTION": "Was mit dem zugehörigen Plainspace-Eintrag passieren soll. Standard: Zuweisung entfernen, damit andere ihn wieder übernehmen können.",
+      "ON_LOCAL_DELETE_UNASSIGN": "Zuweisung entfernen (zurück in den Claim-Pool)",
+      "ON_LOCAL_DELETE_DELETE": "Auf Plainspace löschen",
+      "ON_LOCAL_DELETE_LOCAL_ONLY": "Nur lokal entfernen (Plainspace unverändert lassen)"
     },
     "FORM_SECTION": {
       "HELP": "Verbinde einen Plainspace-Space über ein persönliches API-Token, um dir zugewiesene Aufgaben zu importieren und verfügbare Aufgaben zu übernehmen.",

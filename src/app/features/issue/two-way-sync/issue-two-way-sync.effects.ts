@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { createEffect, ofType } from '@ngrx/effects';
-import { EMPTY, Observable, first, firstValueFrom, from } from 'rxjs';
-import { catchError, concatMap, filter, map } from 'rxjs/operators';
+import { EMPTY, Observable, first, firstValueFrom, from, merge, timer } from 'rxjs';
+import { catchError, concatMap, filter, map, switchMap, finalize } from 'rxjs/operators';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { TaskService } from '../../tasks/task.service';
 import { Task } from '../../tasks/task.model';
@@ -18,6 +18,7 @@ import { IssueLog } from '../../../core/log';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
 import { PlainspaceSyncAdapterService } from '../providers/plainspace/plainspace-sync-adapter.service';
+import { PLAINSPACE_POLL_INTERVAL } from '../providers/plainspace/plainspace.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   DeletedTaskIssueSidecarService,
@@ -31,7 +32,9 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteTag, deleteTags } from '../../tag/store/tag.actions';
 import { IssueSyncAdapterResolverService } from './issue-sync-adapter-resolver.service';
 import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
-
+import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
+import { DELAY_BEFORE_ISSUE_POLLING } from '../issue.const';
+import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
 const SYNCABLE_TASK_FIELDS: ReadonlySet<string> = new Set([
   'isDone',
   'title',
@@ -125,7 +128,10 @@ export class IssueTwoWaySyncEffects {
   private readonly _deletedTagTitlesSidecar = inject(DeletedTagTitlesSidecarService);
   private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
+  private readonly _syncTriggerService = inject(SyncTriggerService);
   private _syncOriginatedTaskIds = new Set<string>();
+  /** In-flight auto-creates (add/move/poll) so we never double-POST the same task. */
+  private _pendingAutoCreateTaskIds = new Set<string>();
   private static readonly _MAX_SYNC_ORIGINATED_IDS = 1000;
 
   constructor() {
@@ -288,75 +294,196 @@ export class IssueTwoWaySyncEffects {
         filter(({ task }) => !task.parentId),
         filter(({ task }) => !!task.projectId),
         concatMap(({ task }) =>
+          this._createRemoteIssueForTask$(task, task.projectId as string),
+        ),
+      ),
+    { dispatch: false },
+  );
+
+  /**
+   * Moving an existing (unlinked) task into a Plainspace-backed project must
+   * create the remote item — same as typing a new task there. Upstream only
+   * listened to addTask, so move-into-shared-project never POSTed.
+   */
+  autoCreateIssueOnMoveToProject$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.moveToOtherProject),
+        filter(({ task }) => !task.issueId),
+        filter(({ task }) => !task.parentId),
+        concatMap(({ task, targetProjectId }) =>
+          this._createRemoteIssueForTask$(task, targetProjectId),
+        ),
+      ),
+    { dispatch: false },
+  );
+
+  /**
+   * Regularly push top-level tasks in Plainspace-bound projects that still lack
+   * an issueId (heals moves that raced, sync restores, and any path that skipped
+   * addTask). Cadence matches Plainspace poll interval; also fires when opening
+   * the bound project.
+   */
+  pushUnlinkedPlainspaceIssuesOnPoll$: Observable<unknown> = createEffect(
+    () =>
+      this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
+        switchMap(() =>
           this._store.select(selectEnabledIssueProviders).pipe(
-            first(),
-            map((providers) =>
-              providers.find(
+            switchMap((providers) => {
+              const plainspace = providers.filter(
                 (p) =>
-                  p.defaultProjectId === task.projectId && this._hasAutoCreateEnabled(p),
-              ),
-            ),
-            filter((provider): provider is IssueProvider => !!provider),
-            concatMap((provider) => {
-              const adapter = this._getAdapter(provider.issueProviderKey);
-              if (!adapter?.createIssue) {
+                  p.issueProviderKey === 'PLAINSPACE' &&
+                  this._hasAutoCreateEnabled(p) &&
+                  !!p.defaultProjectId &&
+                  p.isAutoPoll !== false,
+              );
+              if (plainspace.length === 0) {
                 return EMPTY;
               }
-              return this._issueProviderService
-                .getCfgOnce$(provider.id, provider.issueProviderKey)
-                .pipe(
-                  concatMap((cfg) =>
-                    from(adapter.createIssue!(task.title, cfg)).pipe(
-                      concatMap(async ({ issueId, issueNumber, issueData }) => {
-                        this._trackSyncOriginatedTask(task.id);
-                        try {
-                          const titlePrefix =
-                            issueNumber != null ? `#${issueNumber} ` : '';
-                          const syncValues = adapter.extractSyncValues(issueData);
-                          this._taskService.update(task.id, {
-                            issueId,
-                            issueType: provider.issueProviderKey,
-                            issueProviderId: provider.id,
-                            issueLastUpdated: Date.now(),
-                            issueWasUpdated: false,
-                            issueLastSyncedValues: syncValues,
-                            title: titlePrefix
-                              ? `${titlePrefix}${task.title}`
-                              : task.title,
-                          });
-
-                          // Push initial task values (e.g. dueWithTime from short syntax)
-                          // that were set before the issue was linked
-                          await this._pushInitialValues(
-                            task,
-                            issueId,
-                            adapter,
-                            cfg,
-                            syncValues,
-                          );
-                        } catch (e) {
-                          this._syncOriginatedTaskIds.delete(task.id);
-                          throw e;
-                        }
-                      }),
+              return merge(
+                ...plainspace.map((provider) =>
+                  merge(
+                    timer(DELAY_BEFORE_ISSUE_POLLING, PLAINSPACE_POLL_INTERVAL),
+                    this._actions$.pipe(
+                      ofType(setActiveWorkContext),
+                      filter(
+                        ({ activeId }) =>
+                          activeId === provider.defaultProjectId,
+                      ),
+                    ),
+                  ).pipe(
+                    switchMap(() =>
+                      this._pushUnlinkedTasksForProvider$(provider),
                     ),
                   ),
-                );
-            }),
-            catchError((err) => {
-              IssueLog.err('Auto-create issue failed', err);
-              this._snackService.open({
-                type: 'ERROR',
-                msg: T.F.ISSUE.S.AUTO_CREATE_FAILED,
-                translateParams: { errorMsg: getErrorTxt(err) },
-              });
-              return EMPTY;
+                ),
+              );
             }),
           ),
         ),
       ),
     { dispatch: false },
   );
+
+  private _createRemoteIssueForTask$(
+    task: Task,
+    projectId: string,
+  ): Observable<unknown> {
+    if (this._pendingAutoCreateTaskIds.has(task.id)) {
+      return EMPTY;
+    }
+    return this._store.select(selectEnabledIssueProviders).pipe(
+      first(),
+      map((providers) =>
+        providers.find(
+          (p) =>
+            p.defaultProjectId === projectId && this._hasAutoCreateEnabled(p),
+        ),
+      ),
+      filter((provider): provider is IssueProvider => !!provider),
+      concatMap((provider) => this._runCreateIssueForTask$(task, provider)),
+      catchError((err) => {
+        IssueLog.err('Auto-create issue failed', err);
+        this._snackService.open({
+          type: 'ERROR',
+          msg: T.F.ISSUE.S.AUTO_CREATE_FAILED,
+          translateParams: { errorMsg: getErrorTxt(err) },
+        });
+        return EMPTY;
+      }),
+    );
+  }
+
+  private _pushUnlinkedTasksForProvider$(
+    provider: IssueProvider,
+  ): Observable<unknown> {
+    const projectId = provider.defaultProjectId;
+    if (!projectId) {
+      return EMPTY;
+    }
+    return this._store.select(selectAllTasks).pipe(
+      first(),
+      map((tasks) =>
+        tasks.filter(
+          (t) =>
+            t.projectId === projectId &&
+            !t.parentId &&
+            !t.issueId &&
+            !this._pendingAutoCreateTaskIds.has(t.id),
+        ),
+      ),
+      filter((tasks) => tasks.length > 0),
+      concatMap((tasks) =>
+        from(tasks).pipe(
+          concatMap((task) =>
+            this._runCreateIssueForTask$(task, provider).pipe(
+              catchError((err) => {
+                IssueLog.err('Push unlinked Plainspace issue failed', err);
+                this._snackService.open({
+                  type: 'ERROR',
+                  msg: T.F.ISSUE.S.AUTO_CREATE_FAILED,
+                  translateParams: { errorMsg: getErrorTxt(err) },
+                });
+                return EMPTY;
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  private _runCreateIssueForTask$(
+    task: Task,
+    provider: IssueProvider,
+  ): Observable<unknown> {
+    const adapter = this._getAdapter(provider.issueProviderKey);
+    if (!adapter?.createIssue) {
+      return EMPTY;
+    }
+    if (this._pendingAutoCreateTaskIds.has(task.id)) {
+      return EMPTY;
+    }
+    this._pendingAutoCreateTaskIds.add(task.id);
+    return this._issueProviderService
+      .getCfgOnce$(provider.id, provider.issueProviderKey)
+      .pipe(
+        concatMap((cfg) =>
+          from(adapter.createIssue!(task.title, cfg)).pipe(
+            concatMap(async ({ issueId, issueNumber, issueData }) => {
+              this._trackSyncOriginatedTask(task.id);
+              try {
+                const titlePrefix = issueNumber != null ? `#${issueNumber} ` : '';
+                const syncValues = adapter.extractSyncValues(issueData);
+                this._taskService.update(task.id, {
+                  issueId,
+                  issueType: provider.issueProviderKey,
+                  issueProviderId: provider.id,
+                  issueLastUpdated: Date.now(),
+                  issueWasUpdated: false,
+                  issueLastSyncedValues: syncValues,
+                  title: titlePrefix ? `${titlePrefix}${task.title}` : task.title,
+                });
+
+                await this._pushInitialValues(
+                  task,
+                  issueId,
+                  adapter,
+                  cfg,
+                  syncValues,
+                );
+              } catch (e) {
+                this._syncOriginatedTaskIds.delete(task.id);
+                throw e;
+              }
+            }),
+          ),
+        ),
+        finalize(() => {
+          this._pendingAutoCreateTaskIds.delete(task.id);
+        }),
+      );
+  }
 
   private async _pushInitialValues(
     task: Task,

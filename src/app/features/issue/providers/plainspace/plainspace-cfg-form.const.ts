@@ -21,6 +21,8 @@ export const DEFAULT_PLAINSPACE_CFG: PlainspaceCfg = {
   // spinner is suppressed for these background polls (see
   // checkAndImportNewIssuesToBacklogForProject).
   pollingMode: 'always',
+  // Safer default for shared Spaces: leave the remote item for others.
+  onLocalDelete: 'unassign',
 };
 
 export const PLAINSPACE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderPlainspace>[] =
@@ -51,6 +53,29 @@ export const PLAINSPACE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderPlain
         type: 'password',
         required: true,
         description: T.PLAINSPACE.FORM.TOKEN_DESCRIPTION,
+      },
+    },
+    {
+      key: 'onLocalDelete',
+      type: 'select',
+      templateOptions: {
+        label: T.PLAINSPACE.FORM.ON_LOCAL_DELETE,
+        description: T.PLAINSPACE.FORM.ON_LOCAL_DELETE_DESCRIPTION,
+        required: true,
+        options: [
+          {
+            label: T.PLAINSPACE.FORM.ON_LOCAL_DELETE_UNASSIGN,
+            value: 'unassign',
+          },
+          {
+            label: T.PLAINSPACE.FORM.ON_LOCAL_DELETE_DELETE,
+            value: 'delete',
+          },
+          {
+            label: T.PLAINSPACE.FORM.ON_LOCAL_DELETE_LOCAL_ONLY,
+            value: 'localOnly',
+          },
+        ],
       },
     },
     {
