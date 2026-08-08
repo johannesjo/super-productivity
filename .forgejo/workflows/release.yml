@@ -131,7 +131,8 @@ jobs:
           RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
         run: |
           set -euo pipefail
-          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ]; then
+          RELEASE_KEYSTORE_BASE64="$(printf '%s' "${RELEASE_KEYSTORE_BASE64:-}" | tr -d '[:space:]')"
+          if [ -z "${RELEASE_KEYSTORE_BASE64}" ]; then
             echo "Missing secret RELEASE_KEYSTORE_BASE64"
             exit 1
           fi
@@ -148,10 +149,14 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
+          # Forgejo secret payloads sometimes keep a trailing newline
+          export RELEASE_KEYSTORE_PASSWORD="$(printf '%s' "${RELEASE_KEYSTORE_PASSWORD:-}" | tr -d '\r\n')"
+          export RELEASE_KEYSTORE_ALIAS="$(printf '%s' "${RELEASE_KEYSTORE_ALIAS:-}" | tr -d '\r\n')"
+          export RELEASE_KEY_PASSWORD="$(printf '%s' "${RELEASE_KEY_PASSWORD:-}" | tr -d '\r\n')"
           test -s keystore.jks
-          test -n "${RELEASE_KEYSTORE_PASSWORD:-}"
-          test -n "${RELEASE_KEYSTORE_ALIAS:-}"
-          test -n "${RELEASE_KEY_PASSWORD:-}"
+          test -n "${RELEASE_KEYSTORE_PASSWORD}"
+          test -n "${RELEASE_KEYSTORE_ALIAS}"
+          test -n "${RELEASE_KEY_PASSWORD}"
           npm run dist:android:prod
           apk="$(find android/app/build/outputs/apk -name '*release*.apk' | head -1)"
           test -n "$apk"
