@@ -171,8 +171,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm run buildAllElectron:prod || (npm run buildFrontend:prod && npm run electron:build)
-          npx electron-builder --linux AppImage flatpak --publish never
+          # Do NOT use buildAllElectron:prod — it runs preCheck (lint+unit+e2e).
+          npm run buildFrontend:prod:es6
+          npm run electron:build
+          # Flatpak needs flatpak-builder on the runner; AppImage is the primary Linux artifact.
+          if command -v flatpak-builder >/dev/null 2>&1; then
+            npx electron-builder --linux AppImage flatpak --publish never
+          else
+            npx electron-builder --linux AppImage --publish never
+          fi
           ver="${GITHUB_REF_NAME:-manual}"
           ver="${ver#v}"
           img="$(find .tmp dist -name '*.AppImage' 2>/dev/null | head -1)"

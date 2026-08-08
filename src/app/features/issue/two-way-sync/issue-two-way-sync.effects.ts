@@ -346,16 +346,9 @@ export class IssueTwoWaySyncEffects {
                     timer(DELAY_BEFORE_ISSUE_POLLING, PLAINSPACE_POLL_INTERVAL),
                     this._actions$.pipe(
                       ofType(setActiveWorkContext),
-                      filter(
-                        ({ activeId }) =>
-                          activeId === provider.defaultProjectId,
-                      ),
+                      filter(({ activeId }) => activeId === provider.defaultProjectId),
                     ),
-                  ).pipe(
-                    switchMap(() =>
-                      this._pushUnlinkedTasksForProvider$(provider),
-                    ),
-                  ),
+                  ).pipe(switchMap(() => this._pushUnlinkedTasksForProvider$(provider))),
                 ),
               );
             }),
@@ -365,10 +358,7 @@ export class IssueTwoWaySyncEffects {
     { dispatch: false },
   );
 
-  private _createRemoteIssueForTask$(
-    task: Task,
-    projectId: string,
-  ): Observable<unknown> {
+  private _createRemoteIssueForTask$(task: Task, projectId: string): Observable<unknown> {
     if (this._pendingAutoCreateTaskIds.has(task.id)) {
       return EMPTY;
     }
@@ -376,8 +366,7 @@ export class IssueTwoWaySyncEffects {
       first(),
       map((providers) =>
         providers.find(
-          (p) =>
-            p.defaultProjectId === projectId && this._hasAutoCreateEnabled(p),
+          (p) => p.defaultProjectId === projectId && this._hasAutoCreateEnabled(p),
         ),
       ),
       filter((provider): provider is IssueProvider => !!provider),
@@ -394,9 +383,7 @@ export class IssueTwoWaySyncEffects {
     );
   }
 
-  private _pushUnlinkedTasksForProvider$(
-    provider: IssueProvider,
-  ): Observable<unknown> {
+  private _pushUnlinkedTasksForProvider$(provider: IssueProvider): Observable<unknown> {
     const projectId = provider.defaultProjectId;
     if (!projectId) {
       return EMPTY;
@@ -465,13 +452,7 @@ export class IssueTwoWaySyncEffects {
                   title: titlePrefix ? `${titlePrefix}${task.title}` : task.title,
                 });
 
-                await this._pushInitialValues(
-                  task,
-                  issueId,
-                  adapter,
-                  cfg,
-                  syncValues,
-                );
+                await this._pushInitialValues(task, issueId, adapter, cfg, syncValues);
               } catch (e) {
                 this._syncOriginatedTaskIds.delete(task.id);
                 throw e;
