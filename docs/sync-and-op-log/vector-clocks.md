@@ -269,7 +269,7 @@ The lookups in `conflict.ts` match a requested entity as the scalar `entity_id` 
   > `packages/super-sync-server/tests/conflict-entity-lookup-plan.pglite.spec.ts` and the note
   > at `detectConflictForEntity` in `packages/super-sync-server/src/sync/conflict.ts`.
 
-- `detectConflictForEntities` / `prefetchLatestEntityOpsForBatch` (batch) — raw SQL covering the **union** of both columns: a scalar branch (a lateral top-1 per requested id on the `entity_id` btree) `UNION ALL` an array branch (one `entity_ids && <all requested ids>` probe of the `GIN(entity_ids)` index, migration `20260613000001`), deduped by `DISTINCT ON`.
+- `detectConflictForEntities` / `prefetchLatestEntityOpsForBatch` (batch) — raw SQL covering the **union** of both columns: a scalar branch (a lateral top-1 per requested id on the `entity_id` btree) `UNION ALL` an array branch (per-id `entity_ids @> ARRAY[id]` probes of the `GIN(entity_ids)` index, migration `20260613000001`), deduped by `DISTINCT ON`.
 
   > ⚠️ The two branches must stay **separate**. They were one query with an
   > `entity_ids && ... OR entity_id = ANY(...)` prefilter, and this section used to
@@ -282,15 +282,17 @@ The lookups in `conflict.ts` match a requested entity as the scalar `entity_id` 
   > by unnesting, which otherwise fans out quadratically on wide `entity_ids`. Both
   > properties are pinned by `tests/batch-conflict-plan.pglite.spec.ts`.
 
-  > ⚠️ The array branch is **one** `&&` probe, not one `@>` per requested id — the
-  > opposite of the single-entity lookup above, which probes a single id and for which
-  > the two are identical. A generic plan cannot see the bound ids, and a GIN scan reads
-  > the whole `fastupdate` pending list, so per-id probes pay both costs once per id:
-  > measured on PG 16.14 at 1.5M rows, 12.4 ms / 700 blocks against 0.64 ms / 601 for
-  > `&&`, and with a dirty pending list 261 ms / 47,800 blocks against 170 ms / 1,072.
-  > Chunked at `CONFLICT_DETECTION_ENTITY_BATCH_SIZE`, a 1000-id op reaches 2.6 s inside
-  > the upload transaction — #9503's own failure mode. Measure with the ids bound
-  > individually as Prisma sends them; one array parameter understates it ~25×.
+  > ⚠️ The array branch probes **per id** (`@>`), not once per batch (`&&`), and neither
+  > form dominates — so do not "optimise" it from a single benchmark. `@>` costs
+  > `probe × (descent + matches)`; `&&` costs `descent + matches × stored width`, because
+  > it must unnest every matching op's array to learn which ids matched. Measured on
+  > PG 16.14: `&&` is 20× faster on an all-new 100-id probe (0.68 ms vs 13.5 ms at 1.5M
+  > rows) and **75× slower** on a 2-id probe against 1000 ops of width 1000 (106 ms vs
+  > 1.4 ms) — and a 2-id probe is the modal multi-entity op. `@>` is shipped because its
+  > terms are bounded (probe size is chunked, descent grows only with index size) while
+  > `matches × width` is bounded by nothing a tenant controls. Equivalence of the forms is
+  > pinned by `tests/array-branch-equivalence.pglite.spec.ts`; measure with the ids bound
+  > individually as Prisma sends them, since one array parameter understates `@>` ~25×.
 
   > ⚠️ It must be a **union**, not the mutually exclusive
   > `CASE WHEN cardinality(entity_ids) > 0 THEN entity_ids ELSE ARRAY[entity_id] END`

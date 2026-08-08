@@ -120,8 +120,10 @@ const INSERT_COLS =
 
 type PlanStats = {
   blocks: number;
+  rowsTouched: number;
   rowsFiltered: number;
   rowsJoinFiltered: number;
+  tempBlocks: number;
   sql: string[];
   rawSql: string[];
   /** Plan node types + index names, per measured query, parallel to `sql`. */
@@ -130,8 +132,10 @@ type PlanStats = {
 
 const newStats = (): PlanStats => ({
   blocks: 0,
+  rowsTouched: 0,
   rowsFiltered: 0,
   rowsJoinFiltered: 0,
+  tempBlocks: 0,
   sql: [],
   rawSql: [],
   nodes: [],
@@ -221,8 +225,10 @@ const makeMeasuringTx = (db: PGlite, stats: PlanStats): unknown => {
   ): Promise<Record<string, unknown>[]> => {
     const measured = await explainGeneric(db, sql, params);
     stats.blocks += measured.blocks;
+    stats.rowsTouched += measured.rowsTouched;
     stats.rowsFiltered += measured.rowsFiltered;
     stats.rowsJoinFiltered += measured.rowsJoinFiltered;
+    stats.tempBlocks += measured.tempBlocks;
     stats.sql.push(sql);
     stats.nodes.push(measured.nodes);
     return (await db.query<Record<string, unknown>>(sql, params)).rows;
@@ -300,12 +306,23 @@ const makeMeasuringTx = (db: PGlite, stats: PlanStats): unknown => {
 // the seed ever stops reproducing the mis-plan at all.
 const MAX_BLOCKS = 300;
 
+/**
+ * Both lookups touch only what actually matches: the scalar top-1 plus, for a deep
+ * entity, the winning row's re-fetch. Measured 3 on this seed; the ceiling is loose
+ * because it is a fan-out guard, not a pin.
+ */
+const MAX_ROWS_TOUCHED = 100;
+
 const expectWithinBudget = (stats: PlanStats): void => {
   expect(stats.rowsFiltered).toBe(0);
   // A regression that moves the discarded work into a JOIN is reported under a
-  // DIFFERENT key, and this spec scored 59.8M such rows as 0 until the walker was
-  // shared with the batch spec. Assert both counters, never just one.
+  // DIFFERENT key, and this spec scored such rows as 0 until the walker was shared with
+  // the batch spec. Assert both counters, never just one.
   expect(stats.rowsJoinFiltered).toBe(0);
+  // ...and neither counter sees a node that EMITS its rows rather than discarding them,
+  // which is what a fan-out does. The batch spec learned this the expensive way.
+  expect(stats.rowsTouched).toBeLessThanOrEqual(MAX_ROWS_TOUCHED);
+  expect(stats.tempBlocks).toBe(0);
   expect(stats.blocks).toBeLessThan(MAX_BLOCKS);
 };
 

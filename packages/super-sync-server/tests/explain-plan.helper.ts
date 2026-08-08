@@ -11,7 +11,7 @@ import type { PGlite } from '@electric-sql/pglite';
  * same class of bug. One implementation, one place to fix.
  */
 
-export type PlanNode = Record<string, unknown>;
+type PlanNode = Record<string, unknown>;
 
 export type Measured = {
   /** ROOT-node buffers only — see rootBlocks. */
@@ -72,10 +72,25 @@ const rootBlocks = (node: PlanNode): number =>
   ((node['Shared Hit Blocks'] as number) ?? 0) +
   ((node['Shared Read Blocks'] as number) ?? 0);
 
-export const toSqlLiteral = (value: unknown): string => {
+/**
+ * Renders an EXECUTE argument. TEST-ONLY, and deliberately not exported: it builds SQL
+ * literals by escaping, which is safe here only because every value comes from a spec's
+ * own fixture and `standard_conforming_strings` is on. Arrays are hard-coded to
+ * `::text[]` — the only array parameter these statements bind — and a non-scalar would
+ * otherwise render as `[object Object]`, silently EXPLAINing a DIFFERENT query than
+ * production sends, which is the exact fidelity trap this harness exists to prevent. So
+ * it throws instead.
+ */
+const toSqlLiteral = (value: unknown): string => {
   if (value === null || value === undefined) return 'NULL';
   if (typeof value === 'number' || typeof value === 'bigint') return String(value);
   if (Array.isArray(value)) return `ARRAY[${value.map(toSqlLiteral).join(',')}]::text[]`;
+  if (typeof value === 'object') {
+    throw new Error(
+      `explainGeneric cannot render a non-scalar parameter (${JSON.stringify(value)}); ` +
+        'add an explicit cast rather than letting it stringify.',
+    );
+  }
   return `'${String(value).replace(/'/g, "''")}'`;
 };
 

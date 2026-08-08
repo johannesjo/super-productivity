@@ -42,10 +42,14 @@ import type { Operation } from '../src/sync/sync.types';
  *  - `fastupdate = off` is set explicitly, matching production (migration
  *    20260720000000, #9213), rather than left at the default as the sibling does. It
  *    decides which plan the array branch gets, so leaving it implicit would measure a
- *    state production is not in. The last describe pins the opposite state on purpose.
+ *    state production is not in. `prisma db push` databases get the default `on`, where
+ *    per-id probing re-reads the pending list once per id; that is an ops-config problem
+ *    with an ops-config fix (README.md's `ALTER INDEX`), not something this file pins.
  *  - The seed carries a WIDE-array population (see WIDE_WIDTH) as well as the width-2
- *    majority. The first fix for #9503 regressed only on wide arrays, and a width-2
- *    seed cannot express that: see the two "does not fan out" tests.
+ *    majority, with DISTINCT id sets per op. The first fix for #9503 regressed only on
+ *    wide arrays, and a width-2 seed cannot express that: see the two "does not fan out"
+ *    tests. Identical id sets cannot express it either — Memoize collapses the per-op
+ *    work, which is why wideIds() shifts each op's set.
  *  - Every user gets DISJOINT entity ids, so nothing here measures the array branch's
  *    cross-tenant cost, which is linear in rows across ALL tenants carrying a probed id.
  *    So "bounded" in this file means "bounded given disjoint ids". The shared-literal
@@ -59,12 +63,11 @@ import type { Operation } from '../src/sync/sync.types';
  * PG 16.14 plans the array-branch join as a HASH join where PGlite uses a nested loop,
  * so `Rows Removed by Join Filter` reads 0 there for a plan that is still 80x too
  * expensive. That is exactly why `rowsTouched` is the primary assertion — see
- * explain-plan.helper.ts. The two versions also disagree on plan SHAPE under a dirty
- * pending list (PG 16.14 stays on the GIN where PG18 seq-scans), which is why the last
- * describe asserts cost and not nodes. Blocks are unmodellable here in the other
- * direction too: PGlite reports every block as a cache hit, so these counts cannot stand
- * in for production's cold-cache I/O. The plan shape mostly transfers; the absolute
- * numbers below do not.
+ * explain-plan.helper.ts. The two versions also disagree on plan SHAPE under a dirty GIN
+ * pending list (PG 16.14 stays on the GIN where PG18 seq-scans), so never assert node
+ * names for that state. Blocks are unmodellable here in the other direction too: PGlite
+ * reports every block as a cache hit, so these counts cannot stand in for production's
+ * cold-cache I/O. The plan shape mostly transfers; the absolute numbers below do not.
  */
 
 const OWN_OPS = 20_000;
@@ -164,15 +167,36 @@ const brandNewIds = (): string[] =>
 const WIDE_OPS = 20;
 /**
  * Deliberately WIDER than PROBE_SIZE, so the two cost models separate numerically and a
- * fan-out cannot hide inside the fan-out-free ceiling: without fan-out the array branch
- * handles |probe| x WIDE_OPS candidate rows regardless of how wide the stored arrays
- * are; with it, every candidate is re-expanded by WIDE_WIDTH.
+ * fan-out cannot hide inside the fan-out-free ceiling: the array branch handles
+ * |probe| x WIDE_OPS candidate rows, while a fan-out re-expands every candidate by
+ * WIDE_WIDTH.
  */
 const WIDE_WIDTH = 300;
-const wideIds = (): string[] =>
-  Array.from({ length: WIDE_WIDTH }, (_, i) => `wide-task-${i}`);
-/** Probe a strict subset, as a client re-uploading part of a bulk selection would. */
-const wideProbeIds = (): string[] => wideIds().slice(0, PROBE_SIZE);
+/**
+ * Each wide op gets a DISTINCT id set (same width, shifted by `op`). Do not "simplify"
+ * this back to one shared literal: with byte-identical arrays Postgres MEMOIZES the
+ * array branch's per-candidate work and evaluates it ONCE for all WIDE_OPS, which hides
+ * exactly the per-op cost these tests exist to measure. Measured on this seed: identical
+ * arrays report 11_047 rows touched where distinct arrays report 19_306.
+ */
+const wideIds = (op: number): string[] =>
+  Array.from({ length: WIDE_WIDTH }, (_, i) => `wide-task-${i + op}`);
+/**
+ * Probe a strict subset that every wide op contains, as a client re-uploading part of a
+ * bulk selection would. Offset by WIDE_OPS so it lies inside all of their shifted sets.
+ */
+const wideProbeIds = (): string[] =>
+  Array.from({ length: PROBE_SIZE }, (_, i) => `wide-task-${i + WIDE_OPS}`);
+/**
+ * The SMALL-probe counterpart. `detectConflictForEntities` is entered at >= 2 entity ids,
+ * so this — not the 100-id batch — is the modal multi-entity op, and it is the shape the
+ * one-`&&`-per-batch form regresses on (75x on PG 16.14): that form's cost is
+ * |matching ops| x |stored width| and so is nearly indifferent to how few ids you ask
+ * for, while the shipped per-id `@>` pays only 2 index descents. Nothing else here
+ * covers it — the wide tests probe 100 ids and the all-new tests match nothing.
+ */
+const SMALL_PROBE_SIZE = 2;
+const smallWideProbeIds = (): string[] => wideProbeIds().slice(0, SMALL_PROBE_SIZE);
 
 const seed = async (db: PGlite, fastupdate: 'on' | 'off'): Promise<void> => {
   await db.exec(CREATE_TABLE);
@@ -213,12 +237,13 @@ const seed = async (db: PGlite, fastupdate: 'on' | 'off'): Promise<void> => {
   }
   await flush();
 
-  // The wide-array population (see wideIds): WIDE_OPS ops all carrying the SAME
-  // WIDE_WIDTH ids, as a repeated bulk action produces.
-  const wide = wideIds()
-    .map((id) => `"${id}"`)
-    .join(',');
+  // The wide-array population (see wideIds): WIDE_OPS ops each carrying WIDE_WIDTH ids,
+  // as a repeated bulk action produces. The id sets OVERLAP but are not identical, so
+  // Memoize cannot collapse the per-candidate work.
   for (let k = 1; k <= WIDE_OPS; k++) {
+    const wide = wideIds(k)
+      .map((id) => `"${id}"`)
+      .join(',');
     rows.push(
       `('op-wide-${k}', ${USER_ID}, 'seed-client', ${OWN_OPS + k}, '[Task] Update',` +
         ` 'TASK', 'wide-task-0', '{${wide}}', 1, '{"seed-client":${OWN_OPS + k}}')`,
@@ -248,17 +273,46 @@ const BTREE_INDEX = 'operations_user_id_entity_type_entity_id_server_seq_idx';
  * it is the fan-out's actual signature — "expanded every candidate and threw it away".
  * The index-name assertions pin the OTHER regression structurally: the OR mis-plan is
  * precisely the one that rides NEITHER index usefully, so requiring both here fails it
- * even if a future seed stops blowing the row ceiling. Those node assertions hold under
- * production's `fastupdate = off`; do NOT copy them into the dirty describe, where the
- * cheapest plan is a seq scan.
+ * even if a future seed stops blowing the row ceiling.
+ *
+ * The discarded-row counters are asserted TOO, not instead. `rowsTouched` counts rows
+ * EMITTED by each node, so a plan that seeks the btree on the (user_id, entity_type)
+ * prefix, filters the whole slice on a non-indexable predicate and emits nothing scores
+ * zero on it while doing exactly the work #9503 was about — and the array branch would
+ * still supply the GIN node the assertions below look for. Neither signal covers the
+ * other; the ceiling catches fan-out, the counters catch slice scans.
+ *
+ * `maxJoinFiltered` defaults to 0 because no branch has a join left to mis-plan. The one
+ * exception is prefetchLatestEntityOpsForBatch, whose array branch must confirm each
+ * by-id GIN match against the requested (entity_type, entity_id) PAIR — `cand` is keyed
+ * by id alone. Under `force_generic_plan` PGlite runs that semi-join as a nested loop, so
+ * it compares |cand| x |touched|. That residual is bounded by the BATCH SIZE and is
+ * independent of how wide the stored arrays are, which is exactly what distinguishes it
+ * from a fan-out; PG 16.14 plans it as a hash join and pays none of it.
  */
-const expectBounded = (measured: Measured, maxRowsTouched: number): void => {
+const expectBounded = (
+  measured: Measured,
+  maxRowsTouched: number,
+  maxJoinFiltered = 0,
+): void => {
   expect(measured.rowsTouched).toBeLessThanOrEqual(maxRowsTouched);
+  expect(measured.rowsFiltered).toBe(0);
+  expect(measured.rowsJoinFiltered).toBeLessThanOrEqual(maxJoinFiltered);
   expect(measured.tempBlocks).toBe(0);
   expect(measured.nodes).not.toContain('Seq Scan');
   expect(measured.nodes).toContain(GIN_INDEX);
   expect(measured.nodes).toContain(BTREE_INDEX);
 };
+
+/**
+ * |cand| x |touched| = (PROBE_SIZE x WIDE_OPS) x PROBE_SIZE — the structural bound on
+ * prefetch's pair re-check when it is planned as a nested loop. Measured 99_000, i.e.
+ * half of it, because a semi-join stops at the first match per candidate. Stated as the
+ * derivation rather than the measurement so it stays meaningful if the seed is resized;
+ * a fan-out re-expands each candidate by WIDE_WIDTH and lands in the millions, so the
+ * separation is orders of magnitude either way.
+ */
+const MAX_PAIR_RECHECK_JOIN_FILTERED = PROBE_SIZE * WIDE_OPS * PROBE_SIZE;
 
 /**
  * Row-touch ceilings. They are deliberately LOOSE — the point is to fail a fan-out by
@@ -360,7 +414,11 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 
     expect(latest.size).toBe(PROBE_SIZE);
     expect(measured).toHaveLength(1);
-    expectBounded(measured[0], MAX_ROWS_TOUCHED_WIDE_PAIRS);
+    expectBounded(
+      measured[0],
+      MAX_ROWS_TOUCHED_WIDE_PAIRS,
+      MAX_PAIR_RECHECK_JOIN_FILTERED,
+    );
   });
 
   it('still finds the latest op per entity for a batch that DOES match', async () => {
@@ -422,102 +480,61 @@ describe('batch conflict detection does not scan the history (PGlite)', () => {
 });
 
 /**
- * The array branch must stay CHEAP when the GIN pending list is DIRTY — and the shape
- * that achieves that is ONE `&&` probe, not one `@>` per requested id.
+ * A SMALL probe against a WIDE matching history — the shape nothing else here covers,
+ * and the one that decided `@>`-per-id over one-`&&`-per-batch.
  *
- * `fastupdate = off` is set by raw migration 20260720000000 and CANNOT be expressed in
- * schema.prisma, so every `prisma db push` database — CI, the E2E stack, the documented
- * manual setup in README.md — has it ON. Every GIN scan then reads the whole pending
- * list, so N per-id probes read it N times where one `&&` reads it once: the per-id
- * form's I/O is LINEAR IN THE BATCH SIZE. Measured, per statement:
+ * `detectConflictForEntities` is entered at >= 2 entity ids, so a 2-id probe is the MODAL
+ * multi-entity op, not an edge case; and wide stored arrays are what repeated bulk
+ * actions accumulate, because op rows are never deleted. The `&&` form's cost is
+ * |matching ops| x |stored width| — it must detoast and unnest every element of every
+ * matching op just to learn which ids matched — so it barely benefits from being asked
+ * for fewer ids. `@>` gets the matched id from the index and pays 2 descents.
  *
- *              PGlite, this seed        PG 16.14, 1.5M rows, 471 pending pages
- *   form       time / blocks            time / blocks
- *   `@>`x100   175 ms / 19,600           261 ms / 47,800
- *   `&&`        26 ms /    981           170 ms /  1,072
+ * Measured on PG 16.14, 1000 ops of width 1000, `fastupdate = off`:
  *
- * Both callers chunk at CONFLICT_DETECTION_ENTITY_BATCH_SIZE, so an op at the 1000-id
- * wire cap issues ten of these in one upload transaction: 2.5 s of `@>` against 1.6 s of
- * `&&` on PG 16.14. Multi-second statements inside the upload transaction are #9503's
- * own failure mode, so this describe is not a micro-optimisation guard — it is the one
- * that stops the fix re-creating the incident on every db-push deployment.
+ *   probe ids   `@>` per id (shipped)   one `&&` per batch
+ *   2            1.4 ms /    28 blk      106 ms / 3,359 blk
+ *   10           7.3 ms /   140          146 ms / 3,453
+ *   100         91.4 ms / 1,490          268 ms / 4,505
  *
- * ON THE PLAN SHAPE: under a dirty pending list PGlite/PG18 abandons the GIN for a SEQ
- * SCAN here. That is FINE and this file deliberately does NOT forbid it — the seq scan
- * is 6.8x faster and reads 20x fewer blocks than the GIN plan the per-id form gets. A
- * previous revision asserted `not.toContain('Seq Scan')` and so pinned the WORSE outcome
- * as if it were the requirement, which is how the per-id form got shipped. Assert cost,
- * never plan shape, in this state.
+ * The other tests in this file cannot see that: `wide` probes 100 ids (where the gap
+ * narrows to 1.3x) and `allnew` matches nothing (where `&&` wins 20x). A form was
+ * briefly shipped on the strength of the all-new number alone. This test is what makes
+ * that mistake fail instead of pass.
  */
-describe('batch conflict array branch survives a dirty GIN pending list (PGlite)', () => {
+describe('batch conflict array branch stays cheap for a SMALL probe (PGlite)', () => {
   let db: PGlite;
-  /** A FULL-batch probe and a tenth-size one, both against the dirty pending list. */
-  let dirty: Measured;
-  let dirtySmall: Measured;
-  /** The full-batch probe again, after VACUUM flushes the pending list. */
-  let flushed: Measured;
 
-  // Measured in beforeAll rather than per-test because the VACUUM below DESTROYS the
-  // state the other assertions need, and an ordering dependency between `it`s is exactly
-  // the kind of thing that silently stops holding.
   beforeAll(async () => {
     db = new PGlite();
     await db.waitReady;
-    await seed(db, 'on');
-
-    const probe = async (ids: string[]): Promise<Measured> => {
-      const runs: Measured[] = [];
-      await detectConflictForEntities(
-        USER_ID,
-        incomingOp(),
-        ids,
-        makeExplainingTx(db, runs),
-      );
-      expect(runs).toHaveLength(1);
-      return runs[0];
-    };
-
-    dirtySmall = await probe(brandNewIds().slice(0, PROBE_SIZE / 10));
-    dirty = await probe(brandNewIds());
-
-    // PGlite ships no pgstattuple, so `pending_pages` cannot be read directly. VACUUM
-    // flushes the pending list into the main GIN entry tree, so re-measuring the SAME
-    // probe afterwards prices the same query against a clean index — the difference IS
-    // the pending list.
-    await db.exec('VACUUM operations');
-    flushed = await probe(brandNewIds());
+    await seed(db, 'off');
   }, 180_000);
 
   afterAll(async () => {
     await db.close();
   });
 
-  /**
-   * CANARY. Without this the describe can pass while measuring a CLEAN index — which is
-   * what a reviewer suspected was already happening, on the grounds that a bulk load
-   * flushes past `gin_pending_list_limit`. It does not flush ALL of it: the tail stays
-   * pending (confirmed directly on PG 16.14 via pgstatginindex — 58 pages / 4,544 tuples
-   * after the same bulk load), and that tail is what the reloption exposes.
-   */
-  it('CANARY: the fastupdate=on seed really does leave a dirty pending list', () => {
-    expect(dirty.blocks).toBeGreaterThan(flushed.blocks * 2);
-  });
+  it('does not pay the stored array width when only two ids are asked for', async () => {
+    const measured: Measured[] = [];
+    const result = await detectConflictForEntities(
+      USER_ID,
+      incomingOp(),
+      smallWideProbeIds(),
+      makeExplainingTx(db, measured),
+    );
 
-  it('does not re-read the pending list once per probed id', () => {
-    // THE property, stated scale-free: one `&&` reads the pending list once however many
-    // ids are asked for, so a 10x bigger batch must NOT cost 10x the blocks. Measured
-    // 1065 blocks at 100 ids against 1010 at 10 — essentially flat. The per-id form is
-    // 19,600 at 100 ids and scales linearly, so it fails this by ~10x however the seed
-    // is resized. An absolute budget could not do this: it would have to be re-derived
-    // for every seed change, and the numbers above are PGlite's, not production's.
-    //
-    // Blocks, not time: this is an I/O regression, and PGlite reports every block as a
-    // cache hit, so wall time understates it exactly where production would feel it most.
-    expect(dirty.blocks).toBeLessThan(dirtySmall.blocks * 3);
-    // Deliberately NOT rowsFiltered === 0, which the other describe does assert: the
-    // seq-scan plan PG18 picks here reads and filters all 40,020 rows by construction,
-    // so that assertion would once again be pinning a plan shape rather than a cost.
-    // rowsTouched counts rows EMITTED, so it still fails any fan-out regression.
-    expect(dirty.rowsTouched).toBeLessThanOrEqual(MAX_ROWS_TOUCHED_ALL_NEW);
+    expect(result.hasConflict).toBe(true);
+    expect(measured).toHaveLength(1);
+    // Scale-free and planner-independent: asking for 2 ids instead of 100 must cost
+    // proportionally less. The per-id form is linear in the probe, so it lands far under
+    // this; a width-driven form is nearly flat in the probe and blows straight through
+    // it. Deliberately NOT an absolute budget — that would need re-deriving per seed.
+    expect(measured[0].rowsTouched).toBeLessThanOrEqual(
+      (MAX_ROWS_TOUCHED_WIDE * SMALL_PROBE_SIZE) / PROBE_SIZE,
+    );
+    expect(measured[0].rowsFiltered).toBe(0);
+    expect(measured[0].rowsJoinFiltered).toBe(0);
+    expect(measured[0].nodes).toContain(GIN_INDEX);
   });
 });
