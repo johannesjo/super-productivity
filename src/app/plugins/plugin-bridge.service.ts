@@ -55,6 +55,7 @@ import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
 import { nanoid } from 'nanoid';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
+import { INBOX_PROJECT } from '../features/project/project.const';
 import { TagService } from '../features/tag/tag.service';
 import typia from 'typia';
 import { distinctUntilChanged, first, map, take, timeout } from 'rxjs/operators';
@@ -1049,6 +1050,32 @@ export class PluginBridgeService implements OnDestroy {
     this._projectService.update(projectId, updates);
 
     PluginLog.log('PluginBridge: Project updated successfully', { projectId });
+  }
+
+  /**
+   * Delete a project and the tasks it contains
+   */
+  async deleteProject(projectId: string): Promise<void> {
+    typia.assert<string>(projectId);
+
+    // The Inbox is the fallback target for tasks that belong nowhere, so it is not
+    // a project a caller may remove — the UI does not offer it either.
+    if (projectId === INBOX_PROJECT.id) {
+      throw new Error('The Inbox project cannot be deleted');
+    }
+
+    const project = await firstValueFrom(this._projectService.getByIdOnce$(projectId));
+
+    if (!project) {
+      throw new Error(`Project not found: ${projectId}`);
+    }
+
+    // Delegate to ProjectService so the cascade (tasks, backlog, subtasks, their
+    // time-sync entries, note drafts and the defaultProjectId fallback) stays defined
+    // in one place — the same path the UI's "Delete project" takes.
+    await this._projectService.remove(project);
+
+    PluginLog.log('PluginBridge: Project deleted successfully', { projectId });
   }
 
   /**
