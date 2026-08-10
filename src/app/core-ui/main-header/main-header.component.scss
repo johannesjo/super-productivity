@@ -137,9 +137,36 @@
   padding: var(--s-half) var(--s);
   min-height: var(--bar-height-large);
 
+  // The row's own width, which is what decides whether identity fits — not the
+  // window's. The right panel narrows this box without narrowing the viewport,
+  // and keying off the viewport instead is the exact mistake #9480 exists to
+  // kill. Inline-size containment is safe here: the wrapper is a block-level
+  // box, so its width comes from its parent and never from its contents.
+  container-type: inline-size;
+  container-name: main-header;
+
   @include mq(xs) {
     min-height: var(--bar-height);
     padding: var(--s-half) var(--s2);
+  }
+}
+
+// Below a row that cannot seat both, identity yields entirely.
+//
+// The title's floor plus its two never-shrinking buttons cost about 164px, so
+// under roughly this width they claimed everything and the action row was left
+// with its padding and nothing else: measured with the notes panel open, a
+// 650px window gave the row an 8px box holding ZERO of its seven actions, and
+// scrolling cannot help a scrollport with no width. Above this the title still
+// wins the squeeze (#7477) and the actions scroll, which is the ordering this
+// row has always stated; below it there is no version of "the title yields a
+// bit" that seats a 40px control, so it yields all of it.
+//
+// The name is the thing lost, and that is the trade the width forces: an action
+// you cannot reach is worse than a context you can still read from the side nav.
+@container main-header (max-width: 250px) {
+  page-title {
+    display: none;
   }
 }
 

@@ -193,9 +193,27 @@ test.describe('main header title and action row', () => {
         expect(row!.atStart, `row was not at rest at ${width}px`).toBe(true);
       }).toPass({ timeout: 10000 });
 
-      // The trailing action really can be brought into view, whether or not the
-      // row happens to overflow at this particular width. Down to the button
-      // rather than the group around it: several action components are
+      // The scrollport can actually seat a control. `toBeInViewport()` alone
+      // cannot say this: it passes on any non-zero intersection, so it went
+      // green at 650px against a row whose content box was 0px wide and which
+      // showed none of its seven actions — the very failure this test names.
+      // A scroll affordance is worth nothing without room to scroll in.
+      const seats = await page.evaluate(() => {
+        const scroller = document.querySelector('.action-nav-scroll') as HTMLElement;
+        const btn = scroller.querySelector('button');
+        return {
+          clientWidth: scroller.clientWidth,
+          buttonWidth: btn ? Math.round(btn.getBoundingClientRect().width) : 0,
+        };
+      });
+      expect(
+        seats.clientWidth,
+        `action row had no room for a button at ${width}px`,
+      ).toBeGreaterThanOrEqual(seats.buttonWidth);
+
+      // ...and the trailing action really can be brought into view, whether or
+      // not the row happens to overflow at this particular width. Down to the
+      // button rather than the group around it: several action components are
       // `display: contents` and so have no box to put in the viewport.
       const last = page.locator('.action-nav-scroll button').last();
       await last.scrollIntoViewIfNeeded();
