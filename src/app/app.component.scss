@@ -62,16 +62,24 @@
 }
 
 // First-run onboarding is a focused full-window takeover, so hide the app
-// shell's navigation behind it. Necessary for translucent themes (e.g.
-// liquid-glass sets `--bg: transparent`) where the nav would otherwise show
+// shell behind it. Necessary for translucent themes (e.g. liquid-glass sets
+// `--bg: transparent`, the Mac default) where the shell would otherwise show
 // through the onboarding backdrop and overlap its content (#7885).
-// Use `visibility: hidden` (not `display: none`) so the nav keeps its layout
-// space — when onboarding finishes the nav reveals in place instead of the
-// content reflowing as it pops back in.
+// Use `visibility: hidden` (not `display: none`) so everything keeps its
+// layout space — when onboarding finishes the shell reveals in place instead
+// of the content reflowing as it pops back in.
 .app-container.is-onboarding {
   magic-side-nav,
   mobile-bottom-nav {
     visibility: hidden !important;
+  }
+
+  // The nav stays hidden for the whole onboarding lifetime, but the main
+  // content must reappear as soon as a preset is picked (`.app-entrance` is
+  // added then): its entrance animation plays *behind* the fading onboarding
+  // backdrop as a crossfade.
+  &:not(.app-entrance) .main-content {
+    visibility: hidden;
   }
 }
 
