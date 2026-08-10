@@ -253,8 +253,16 @@ export class ConfigPageComponent implements OnInit {
             label: T.GCF.AUTO_BACKUPS.CHANGE_LOCATION,
             icon: 'folder_open',
             onClick: async () => {
-              if (await window.ea.pickBackupFolder()) {
-                this._updateAutomaticBackUpCfg();
+              try {
+                if (await window.ea.pickBackupFolder()) {
+                  this._updateAutomaticBackUpCfg();
+                }
+              } catch (err) {
+                Log.err(err);
+                this._snackService.open({
+                  type: 'ERROR',
+                  msg: T.GCF.AUTO_BACKUPS.S_FOLDER_NOT_ALLOWED,
+                });
               }
             },
           },

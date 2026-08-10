@@ -15,7 +15,10 @@ import * as path from 'path';
 import { error, log } from 'electron-log/main';
 import type { AppDataCompleteLegacy } from '../src/app/imex/sync/sync.model';
 import type { AppDataComplete } from '../src/app/op-log/model/model-config';
-import { getBackupTimestamp } from './shared-with-frontend/get-backup-timestamp';
+import {
+  getBackupTimestamp,
+  isAutoBackupFilename,
+} from './shared-with-frontend/get-backup-timestamp';
 import { assertPathOutside, isPathInsideDir } from './file-path-guard';
 import {
   DEFAULT_MAX_BACKUP_FILES,
@@ -70,21 +73,18 @@ export const getBackupDirForDisplay = async (): Promise<string> => {
 };
 
 /**
- * The folder the user picked via `IPC.PICK_BACKUP_FOLDER`, or null while none is
- * configured. Main-owned (like the sync folder path, #8228) for two reasons: the
- * renderer runs untrusted plugin code and must not be able to redirect backup
- * writes, and the folder is device-specific so it must not travel in the synced
- * globalConfig.
+ * Where automatic backups are written to and restored from: the folder the user
+ * picked via `IPC.PICK_BACKUP_FOLDER`, or BACKUP_DIR while none is configured.
+ * The picked path is main-owned (like the sync folder path, #8228) for two
+ * reasons: the renderer runs untrusted plugin code and must not be able to
+ * redirect backup writes, and the folder is device-specific so it must not
+ * travel in the synced globalConfig.
  */
-const getCustomBackupDir = async (): Promise<string | null> => {
+export const getBackupDir = async (): Promise<string> => {
   const all = await loadSimpleStoreAll();
   const raw = all[SimpleStoreKey.BACKUP_FOLDER_PATH];
-  return typeof raw === 'string' && raw.length > 0 ? raw : null;
+  return typeof raw === 'string' && raw.length > 0 ? raw : BACKUP_DIR;
 };
-
-/** Where automatic backups are written to and restored from. */
-export const getBackupDir = async (): Promise<string> =>
-  (await getCustomBackupDir()) ?? BACKUP_DIR;
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function initBackupAdapter(): void {
@@ -103,7 +103,7 @@ export function initBackupAdapter(): void {
       return false;
     }
 
-    const files = readdirSync(backupDir);
+    const files = readdirSync(backupDir).filter(isAutoBackupFilename);
     if (!files.length) {
       return false;
     }
@@ -142,6 +142,9 @@ export function initBackupAdapter(): void {
         !isPathInsideDir(BACKUP_DIR_WINSTORE, backupPath)
       ) {
         throw new Error('BACKUP_LOAD_DATA: refused path outside backup directory');
+      }
+      if (!isAutoBackupFilename(path.basename(backupPath))) {
+        throw new Error('BACKUP_LOAD_DATA: refused non-backup filename');
       }
       const resolved = path.resolve(backupPath);
       log('Reading backup file: ', resolved);
@@ -221,7 +224,7 @@ function cleanupOldBackups(backupDir: string, maxBackupFiles?: number | null): v
   }
 
   try {
-    const files = readdirSync(backupDir).filter((f) => f.endsWith('.json'));
+    const files = readdirSync(backupDir).filter(isAutoBackupFilename);
     const filesWithMtime = files.map((fileName) => {
       const filePath = path.join(backupDir, fileName);
       return { fileName, filePath, mtime: statSync(filePath).mtime.getTime() };

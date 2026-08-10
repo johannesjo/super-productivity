@@ -26,6 +26,8 @@ let writtenFiles;
 let dirFiles;
 let simpleStore;
 let openDialogResult;
+let deletedFiles;
+let fileMtimes;
 
 const resetModule = () => {
   delete require.cache[backupModulePath];
@@ -76,8 +78,13 @@ const installMocks = () => {
         writeFileSync: (p, data) => writtenFiles.set(p, data),
         readdirSync: (p) => [...(dirFiles[p] ?? [])],
         readFileSync: (p) => writtenFiles.get(p),
-        // No test below depends on the order backup files are listed in.
-        statSync: () => ({ mtime: new Date(0) }),
+        // No test below depends on the order backup files are listed in,
+        // except where fileMtimes gives a file an explicit mtime.
+        statSync: (p) => ({ mtime: fileMtimes[p] ?? new Date(0) }),
+        unlinkSync: (p) => {
+          deletedFiles.push(p);
+          writtenFiles.delete(p);
+        },
       };
     }
 
@@ -99,6 +106,8 @@ test.beforeEach(() => {
   dirFiles = {};
   simpleStore = {};
   openDialogResult = { canceled: true, filePaths: [] };
+  deletedFiles = [];
+  fileMtimes = {};
   installMocks();
 });
 
@@ -196,6 +205,57 @@ test('the picked folder is where restore looks for backups', async () => {
     await handleHandlers.get('BACKUP_LOAD_DATA')(null, filePath),
     '{"stub":true}',
   );
+});
+
+// Regression for #9482: a user-picked folder can hold files that are not
+// backups (e.g. an existing Syncthing/Dropbox folder), so cleanup must never
+// treat them as candidates just because they end in `.json`.
+test('cleanup never deletes non-backup-shaped files, even when they are the oldest', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  await pickFolder(PICKED_DIR);
+  existingPaths.add(PICKED_DIR);
+
+  const foreignFile = 'family-budget.json';
+  const olderBackup = '2026-07-01_090000.json';
+  const newerBackup = '2026-07-02_090000.json';
+  dirFiles[PICKED_DIR] = [foreignFile, olderBackup, newerBackup];
+  fileMtimes[path.join(PICKED_DIR, foreignFile)] = new Date(2020, 0, 1);
+  fileMtimes[path.join(PICKED_DIR, olderBackup)] = new Date(2026, 6, 1);
+  fileMtimes[path.join(PICKED_DIR, newerBackup)] = new Date(2026, 6, 2);
+
+  await handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 1 });
+
+  assert.deepEqual(deletedFiles, [path.join(PICKED_DIR, olderBackup)]);
+});
+
+// Regression for #9482: BACKUP_IS_AVAILABLE returned the newest file of any
+// kind, so a stray non-backup file could hide the real backup from restore.
+test('a non-backup file in the folder does not hide the real backup from restore', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  await pickFolder(PICKED_DIR);
+  existingPaths.add(PICKED_DIR);
+
+  const realBackupFile = '2026-07-28_120000.json';
+  dirFiles[PICKED_DIR] = [realBackupFile, 'holiday-photo.png'];
+  writtenFiles.set(path.join(PICKED_DIR, realBackupFile), '{"stub":true}');
+
+  const meta = await handleHandlers.get('BACKUP_IS_AVAILABLE')();
+  assert.equal(meta.name, realBackupFile);
+});
+
+// Regression for #9482: even a path that passes the directory check must
+// still look like a backup filename before BACKUP_LOAD_DATA reads it.
+test('refuses to load a non-backup file even inside the picked folder', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  await pickFolder(PICKED_DIR);
+
+  const filePath = path.join(PICKED_DIR, 'holiday-photo.png');
+  writtenFiles.set(filePath, 'not json');
+
+  await assert.rejects(() => handleHandlers.get('BACKUP_LOAD_DATA')(null, filePath));
 });
 
 // The picked folder is read back by BACKUP_LOAD_DATA, which the renderer (and

@@ -53,6 +53,14 @@ export const getAutomaticBackUpFormCfg = (
               text: `<a href="file://${backupPath}" target="_blank">${backupPath}</a>`,
             },
           },
+          {
+            type: 'tpl',
+            className: `tpl`,
+            templateOptions: {
+              tag: 'p',
+              text: T.GCF.AUTO_BACKUPS.LOCATION_CHANGE_INFO,
+            },
+          },
         ]
       : []),
     {

@@ -2414,10 +2414,12 @@
       "LABEL_IS_ENABLED": "Enable automatic backups",
       "LAST_BACKUP_INFO": "Last backup: {{date}}",
       "LOCATION_INFO": "Backups are saved to:",
+      "LOCATION_CHANGE_INFO": "Changing the folder does not move existing backups; only backups in the current folder are used for restore.",
       "MAX_BACKUP_FILES": "Maximum backup files",
       "MAX_BACKUP_FILES_DESCRIPTION": "Desktop only. Older automatic backup files are deleted once this limit is exceeded.",
       "RESTORE_LATEST": "Restore latest automatic backup",
       "S_AUTO_RESTORED": "Restored {{tasks}} tasks and {{projects}} projects from an on-device backup.",
+      "S_FOLDER_NOT_ALLOWED": "Couldn't use that folder. Please pick a location outside the app's data folder.",
       "S_NO_BACKUP_AVAILABLE": "No automatic backup available.",
       "S_RESTORE_SUCCESS": "Backup restored successfully.",
       "TITLE": "Automatic Backups"
