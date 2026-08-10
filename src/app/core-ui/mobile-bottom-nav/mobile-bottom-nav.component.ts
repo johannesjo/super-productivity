@@ -127,15 +127,29 @@ export class MobileBottomNavComponent {
   // Panel state signals from layout service
   readonly isShowNotes = this._layoutService.isShowNotes;
   readonly isShowIssuePanel = this._layoutService.isShowIssuePanel;
+  readonly isShowScheduleDayPanel = this._layoutService.isShowScheduleDayPanel;
   readonly isIssuesPanelEnabled = computed(
     () => this._globalConfigService.appFeatures().isIssuesPanelEnabled,
   );
   readonly isProjectNotesEnabled = computed(
     () => this._globalConfigService.appFeatures().isProjectNotesEnabled,
   );
+  readonly isScheduleDayPanelEnabled = computed(
+    () => this._globalConfigService.appFeatures().isScheduleDayPanelEnabled,
+  );
+
+  /**
+   * Below 600px this menu is the *only* route to every right-panel toggle --
+   * `desktop-panel-buttons` is not rendered there at all. So every enabled
+   * panel must be listed here and must count towards showing the button:
+   * schedule was in neither, and `toggleScheduleDayPanel()` has no other
+   * caller and no keyboard shortcut, so the panel was simply unreachable on a
+   * phone.
+   */
   readonly hasSidePanelMenuItems = computed(
     () =>
       this.sidePanelButtons().length > 0 ||
+      this.isScheduleDayPanelEnabled() ||
       this.isIssuesPanelEnabled() ||
       this.isProjectNotesEnabled(),
   );
@@ -169,5 +183,9 @@ export class MobileBottomNavComponent {
 
   toggleNotes(): void {
     this._layoutService.toggleNotes();
+  }
+
+  toggleScheduleDayPanel(): void {
+    this._layoutService.toggleScheduleDayPanel();
   }
 }
