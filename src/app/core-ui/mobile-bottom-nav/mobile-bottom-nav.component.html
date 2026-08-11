@@ -79,7 +79,6 @@
     <button
       mat-menu-item
       class="e2e-toggle-schedule-day-panel"
-      [disabled]="!isRouteWithSidePanel()"
       [class.active]="isShowScheduleDayPanel()"
       (click)="toggleScheduleDayPanel()"
     >
@@ -92,7 +91,6 @@
     <button
       mat-menu-item
       class="e2e-toggle-issue-provider-panel"
-      [disabled]="!isRouteWithSidePanel()"
       [class.active]="isShowIssuePanel()"
       (click)="toggleIssuePanel()"
     >
@@ -105,7 +103,6 @@
     <button
       mat-menu-item
       class="e2e-toggle-notes-btn"
-      [disabled]="!isRouteWithSidePanel()"
       [class.active]="isShowNotes()"
       (click)="toggleNotes()"
     >

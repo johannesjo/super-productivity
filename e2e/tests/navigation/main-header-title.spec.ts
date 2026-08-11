@@ -175,14 +175,29 @@ test.describe('main header title and action row', () => {
           if (!nav || !scroller) {
             return null;
           }
+          // Put the row at rest first, because at these widths it does not
+          // start there: the open panel this test needs deliberately reveals
+          // the row's END, and that reveal is re-applied on every resize while
+          // the panel's width animation still runs — so each step of the sweep
+          // lands on a revealed row. The trailing action is scrolled into view
+          // further down for the same reason. Neither is a layout fault, and
+          // asserting "already at 0" would only assert that narrowing rewinds
+          // a deliberate scroll, which is neither true nor wanted. What the
+          // sweep is about is where the content sits once the row IS at rest.
+          scroller.scrollLeft = 0;
           const navRect = nav.getBoundingClientRect();
+          const scrollRect = scroller.getBoundingClientRect();
+          const leading = scroller.querySelector('button');
           const wrapper = document.querySelector('main-header .wrapper') as HTMLElement;
           return {
             // The nav never spills past the header's own clip edge...
             insideWrapper: navRect.right <= wrapper.getBoundingClientRect().right + 0.5,
-            // ...and rests at the inline start, so nothing is stranded
-            // left-of-origin where `scrollLeft` clamps and cannot bring it back.
-            atStart: Math.abs(scroller.scrollLeft) < 1,
+            // ...and at rest the leading action begins inside the scrollport,
+            // so nothing is stranded left-of-origin, where `scrollLeft` clamps
+            // at 0 and cannot bring it back. Asked of the rendered box rather
+            // than of `scrollLeft`, which reads 0 in exactly that failure.
+            atStart:
+              !!leading && leading.getBoundingClientRect().left >= scrollRect.left - 1,
             overflowPx: Math.round(scroller.scrollWidth - scroller.clientWidth),
           };
         });
@@ -218,16 +233,6 @@ test.describe('main header title and action row', () => {
       const last = page.locator('.action-nav-scroll button').last();
       await last.scrollIntoViewIfNeeded();
       await expect(last).toBeInViewport();
-
-      // Park the row back at the start before the next width. A row the test
-      // itself just scrolled to its trailing edge is not a row "at rest", and
-      // leaving it there would make the next iteration's `atStart` assert that
-      // narrowing silently rewinds a deliberate scroll — which is neither true
-      // nor wanted.
-      await page.evaluate(() => {
-        const scroller = document.querySelector('.action-nav-scroll') as HTMLElement;
-        scroller.scrollLeft = 0;
-      });
     }
   });
 

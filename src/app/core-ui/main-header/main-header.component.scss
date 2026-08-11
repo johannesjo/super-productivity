@@ -118,7 +118,11 @@
     cursor: grabbing;
   }
 
-  .current-work-context-title,
+  // `.page-title` is a div with a routerLink, so neither `button` nor `a`
+  // below reaches it -- it needs naming here or the one control that fills the
+  // left of the header is inside the drag region and cannot be clicked. It was
+  // named here, as `.current-work-context-title`, until that class was renamed.
+  .page-title,
   ::ng-deep .current-task-title,
   button,
   a,
@@ -173,11 +177,6 @@
 a,
 button {
   cursor: pointer;
-}
-
-button.isActive2 {
-  background: var(--c-accent);
-  transition: background var(--transition-standard);
 }
 
 .header-action-group {
@@ -414,10 +413,6 @@ button.isActive2 {
     transform-origin: center center;
     backface-visibility: hidden;
   }
-}
-
-page-title {
-  position: relative;
 }
 
 // Only the teleported vertical strip leaves this box out of the layout; the

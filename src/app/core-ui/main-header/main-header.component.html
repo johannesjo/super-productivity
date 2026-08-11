@@ -22,7 +22,6 @@
     @if (isDataLoaded()) {
       <tracked-task-pill
         [currentTask]="currentTask()"
-        [currentTaskId]="currentTaskId()"
         [currentTaskContext]="currentTaskContext()"
       ></tracked-task-pill>
     }
@@ -190,7 +189,6 @@
           <desktop-panel-buttons
             class="secondary-header-action"
             [kb]="kb"
-            [isRouteWithSidePanel]="isRouteWithSidePanel()"
             [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
             [isShowIssuePanel]="isShowIssuePanel()"
             [isShowNotes]="isShowNotes()"

@@ -47,7 +47,7 @@ import { NavigateToTaskService } from '../../navigate-to-task/navigate-to-task.s
         @fade
         type="button"
         class="current-task-title"
-        (click)="navigateToCurrentTask()"
+        (click)="navigateToTask(task.id)"
         [attr.aria-label]="T.MH.SHOW_TRACKED_TASK | translate"
         matTooltip="{{ T.MH.SHOW_TRACKED_TASK | translate }}"
         matTooltipPosition="below"
@@ -236,13 +236,9 @@ export class TrackedTaskPillComponent {
   readonly T = T;
 
   readonly currentTask = input<Task | null>();
-  readonly currentTaskId = input<string | null>();
   readonly currentTaskContext = input<WorkContext | null>();
 
-  navigateToCurrentTask(): void {
-    const taskId = this.currentTaskId();
-    if (taskId) {
-      this._navigateToTaskService.navigate(taskId);
-    }
+  navigateToTask(taskId: string): void {
+    this._navigateToTaskService.navigate(taskId);
   }
 }

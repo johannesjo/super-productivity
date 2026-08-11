@@ -33,7 +33,6 @@ describe('DesktopPanelButtonsComponent', () => {
     }).compileComponents();
 
     const fixture = TestBed.createComponent(DesktopPanelButtonsComponent);
-    fixture.componentRef.setInput('isRouteWithSidePanel', true);
     fixture.componentRef.setInput('isShowScheduleDayPanel', false);
     fixture.componentRef.setInput('isShowIssuePanel', false);
     fixture.componentRef.setInput('isShowNotes', false);

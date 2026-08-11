@@ -16,14 +16,13 @@ import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { T } from '../../t.const';
-import { filter, map, startWith, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { NavigationEnd, Router } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { KeyboardConfig, keyboardConfigOrEmpty } from '@sp/keyboard-config';
 import { MatIconButton } from '@angular/material/button';
@@ -103,7 +102,6 @@ export class MainHeaderComponent implements OnDestroy {
   readonly syncWrapperService = inject(SyncWrapperService);
   readonly globalConfigService = inject(GlobalConfigService);
   private readonly _snackService = inject(SnackService);
-  private readonly _router = inject(Router);
   private readonly _configService = inject(GlobalConfigService);
   private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _conflictJournal = inject(ConflictJournalService);
@@ -143,13 +141,6 @@ export class MainHeaderComponent implements OnDestroy {
 
   currentTaskContext = toSignal(this._currentTaskContext$);
 
-  private _isRouteWithSidePanel$ = this._router.events.pipe(
-    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-    map((event) => true), // Always true since right-panel is now global
-    startWith(true), // Always true since right-panel is now global
-  );
-  isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: true });
-
   // Convert more observables to signals
 
   currentTask = toSignal(this.taskService.currentTask$);
@@ -157,9 +148,9 @@ export class MainHeaderComponent implements OnDestroy {
   enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
     initialValue: [],
   });
-  isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
-  isShowNotes = computed(() => this.layoutService.isShowNotes());
-  isShowScheduleDayPanel = computed(() => this.layoutService.isShowScheduleDayPanel());
+  isShowIssuePanel = this.layoutService.isShowIssuePanel;
+  isShowNotes = this.layoutService.isShowNotes;
+  isShowScheduleDayPanel = this.layoutService.isShowScheduleDayPanel;
 
   /**
    * Which right-panel content is open, as one comparable key.
@@ -374,6 +365,13 @@ export class MainHeaderComponent implements OnDestroy {
   /**
    * Scroll the row so the named edge is on screen, and keep it there while the
    * row's own box is still animating (see `_pendingReveal`).
+   *
+   * Only the tracking reveal actually glides: nothing resizes the row there, so
+   * this smooth scroll is the whole motion. On a panel open the first
+   * ResizeObserver tick supersedes it ~17ms later and every frame after that is
+   * the instant path, which is what makes the row track the panel exactly one
+   * frame behind instead of easing toward a target that keeps moving. Traced at
+   * 900px: scrollLeft 0 -> 202 over 12 frames, converging as the panel stops.
    */
   private _reveal(edge: 'start' | 'end'): void {
     this._pendingReveal = { edge, until: Date.now() + ACTION_ROW_REVEAL_PIN_MS };
