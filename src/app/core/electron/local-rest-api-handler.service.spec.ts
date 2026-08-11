@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { LocalRestApiHandlerService } from './local-rest-api-handler.service';
 import { TaskService } from '../../features/tasks/task.service';
@@ -13,6 +14,8 @@ import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
+import { FocusModeMode, TimerState } from '../../features/focus-mode/focus-mode.model';
+import * as focusSelectors from '../../features/focus-mode/store/focus-mode.selectors';
 
 describe('LocalRestApiHandlerService', () => {
   let service: LocalRestApiHandlerService;
@@ -21,6 +24,7 @@ describe('LocalRestApiHandlerService', () => {
   let projectServiceMock: jasmine.SpyObj<ProjectService>;
   let tagServiceMock: jasmine.SpyObj<TagService>;
   let dateServiceMock: jasmine.SpyObj<DateService>;
+  let store: MockStore;
   let activeProjects: Project[];
   let requestHandler: ((payload: LocalRestApiRequestPayload) => void) | null = null;
   let responsePromiseResolve: ((response: LocalRestApiResponsePayload) => void) | null =
@@ -49,6 +53,30 @@ describe('LocalRestApiHandlerService', () => {
     ...task,
     subTasks,
   });
+
+  const setFocusState = ({
+    timer,
+    mode = FocusModeMode.Countdown,
+    cycle = 0,
+    isPaused = false,
+    isLongBreak = false,
+    remainingMs = Math.max(0, timer.duration - timer.elapsed),
+  }: {
+    timer: TimerState;
+    mode?: FocusModeMode;
+    cycle?: number;
+    isPaused?: boolean;
+    isLongBreak?: boolean;
+    remainingMs?: number;
+  }): void => {
+    store.overrideSelector(focusSelectors.selectTimer, timer);
+    store.overrideSelector(focusSelectors.selectMode, mode);
+    store.overrideSelector(focusSelectors.selectCurrentCycle, cycle);
+    store.overrideSelector(focusSelectors.selectIsSessionPaused, isPaused);
+    store.overrideSelector(focusSelectors.selectIsLongBreak, isLongBreak);
+    store.overrideSelector(focusSelectors.selectTimeRemaining, remainingMs);
+    store.refreshState();
+  };
 
   const mockElectronApi = (): void => {
     (window as any).ea = {
@@ -173,10 +201,12 @@ describe('LocalRestApiHandlerService', () => {
         { provide: ProjectService, useValue: projectServiceMock },
         { provide: TagService, useValue: tagServiceMock },
         { provide: DateService, useValue: dateServiceMock },
+        provideMockStore(),
       ],
     });
 
     service = TestBed.inject(LocalRestApiHandlerService);
+    store = TestBed.inject(MockStore);
   });
 
   afterEach(() => {
@@ -212,6 +242,178 @@ describe('LocalRestApiHandlerService', () => {
 
       expect(response.body.ok).toBe(true);
       expect(response.status).toBe(200);
+    });
+  });
+
+  describe('GET /focus', () => {
+    beforeEach(() => {
+      service.init();
+    });
+
+    const requestFocus = async (): Promise<LocalRestApiResponsePayload> =>
+      sendRequestAndWait(createRequest('GET', '/focus'));
+
+    const expectFocusData = (
+      response: LocalRestApiResponsePayload,
+      expected: unknown,
+    ): void => {
+      expect(response.status).toBe(200);
+      expect(response.body.ok).toBe(true);
+      if (!response.body.ok) {
+        throw new Error(`Expected success response, got ${response.body.error.code}`);
+      }
+      expect(response.body.data).toEqual(expected);
+    };
+
+    it('should return a null timer while focus mode is idle', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: null,
+          elapsed: 0,
+          duration: 0,
+          purpose: null,
+        },
+        mode: FocusModeMode.Countdown,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 0,
+        timer: null,
+      });
+    });
+
+    it('should return a running Pomodoro work timer', async () => {
+      setFocusState({
+        timer: {
+          isRunning: true,
+          startedAt: 1,
+          elapsed: 120_000,
+          duration: 1_500_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Pomodoro,
+        cycle: 2,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 2,
+        timer: {
+          purpose: 'work',
+          isRunning: true,
+          isPaused: false,
+          elapsedMs: 120_000,
+          remainingMs: 1_380_000,
+          durationMs: 1_500_000,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should return a paused Countdown work timer', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 90_000,
+          duration: 300_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        isPaused: true,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        timer: {
+          purpose: 'work',
+          isRunning: false,
+          isPaused: true,
+          elapsedMs: 90_000,
+          remainingMs: 210_000,
+          durationMs: 300_000,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should return short and long Pomodoro breaks', async () => {
+      const timer: TimerState = {
+        isRunning: true,
+        startedAt: 1,
+        elapsed: 30_000,
+        duration: 300_000,
+        purpose: 'break',
+      };
+
+      setFocusState({ timer, mode: FocusModeMode.Pomodoro, cycle: 2 });
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 2,
+        timer: {
+          purpose: 'break',
+          isRunning: true,
+          isPaused: false,
+          elapsedMs: 30_000,
+          remainingMs: 270_000,
+          durationMs: 300_000,
+          isLongBreak: false,
+        },
+      });
+
+      setFocusState({
+        timer: { ...timer, isRunning: false, isLongBreak: true },
+        mode: FocusModeMode.Pomodoro,
+        cycle: 4,
+        isPaused: true,
+        isLongBreak: true,
+      });
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 4,
+        timer: {
+          purpose: 'break',
+          isRunning: false,
+          isPaused: true,
+          elapsedMs: 30_000,
+          remainingMs: 270_000,
+          durationMs: 300_000,
+          isLongBreak: true,
+        },
+      });
+    });
+
+    it('should return Flowtime state and clamp negative remaining time', async () => {
+      setFocusState({
+        timer: {
+          isRunning: true,
+          startedAt: 1,
+          elapsed: 600_000,
+          duration: 0,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Flowtime,
+        cycle: -1,
+        remainingMs: -1,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Flowtime,
+        cycle: 0,
+        timer: {
+          purpose: 'work',
+          isRunning: true,
+          isPaused: false,
+          elapsedMs: 600_000,
+          remainingMs: 0,
+          durationMs: 0,
+          isLongBreak: false,
+        },
+      });
     });
   });
 
