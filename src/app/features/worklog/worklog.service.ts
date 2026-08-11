@@ -29,6 +29,65 @@ import { getDbDateStr } from '../../util/get-db-date-str';
 import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 import { Log } from '../../core/log';
 
+export const createWorklogTasksForDay = (data: WorklogDay): WorklogTask[] =>
+  data.logEntries.map((entry) => ({
+    ...entry.task,
+    timeSpent: entry.timeSpent,
+    timeSpentOnDay: {
+      ...entry.task.timeSpentOnDay,
+      [data.dateStr]: entry.timeSpent,
+    },
+    dateStr: data.dateStr,
+  }));
+
+export const getWorklogWeekForDate = (
+  worklog: Worklog,
+  relativeDate: Date,
+  firstDayOfWeek: number,
+): WorklogWeek | null => {
+  const normalizedFirstDayOfWeek = ((firstDayOfWeek % 7) + 7) % 7;
+  const rangeEnd = new Date(
+    relativeDate.getFullYear(),
+    relativeDate.getMonth(),
+    relativeDate.getDate(),
+  );
+  const daysSinceStart = (rangeEnd.getDay() - normalizedFirstDayOfWeek + 7) % 7;
+  const rangeStart = new Date(rangeEnd);
+  rangeStart.setDate(rangeStart.getDate() - daysSinceStart);
+
+  const ent: WorklogWeek['ent'] = {};
+  let daysWorked = 0;
+  let timeSpent = 0;
+
+  for (
+    const date = new Date(rangeStart);
+    date <= rangeEnd;
+    date.setDate(date.getDate() + 1)
+  ) {
+    const day =
+      worklog[date.getFullYear()]?.ent[date.getMonth() + 1]?.ent[date.getDate()];
+
+    if (day) {
+      ent[date.getDate()] = day;
+      daysWorked += 1;
+      timeSpent += day.timeSpent;
+    }
+  }
+
+  if (daysWorked === 0) {
+    return null;
+  }
+
+  return {
+    start: rangeStart.getDate(),
+    end: rangeEnd.getDate(),
+    weekNr: getWeekNumber(relativeDate, normalizedFirstDayOfWeek),
+    timeSpent,
+    daysWorked,
+    ent,
+  };
+};
+
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
   private readonly _workContextService = inject(WorkContextService);
@@ -108,16 +167,7 @@ export class WorklogService {
   currentWeek$: Observable<WorklogWeek | null> = this.worklog$.pipe(
     map((worklog) => {
       const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const weekNr = getWeekNumber(now);
-
-      if (worklog[year] && worklog[year].ent[month]) {
-        return (
-          worklog[year].ent[month].weeks.find((week) => week.weekNr === weekNr) || null
-        );
-      }
-      return null;
+      return getWorklogWeekForDate(worklog, now, this._dateAdapter.getFirstDayOfWeek());
     }),
   );
 
@@ -140,7 +190,7 @@ export class WorklogService {
                 const dayKey = +dayKeyIN;
                 const day: WorklogDay = month.ent[dayKey];
                 if (day) {
-                  tasks = tasks.concat(this._createTasksForDay(day));
+                  tasks = tasks.concat(createWorklogTasksForDay(day));
                 }
               });
             }
@@ -237,17 +287,5 @@ export class WorklogService {
       worklog: {},
       totalTimeSpent: 0,
     };
-  }
-
-  private _createTasksForDay(data: WorklogDay): WorklogTask[] {
-    const dayData = { ...data };
-
-    return dayData.logEntries.map((entry) => {
-      return {
-        ...entry.task,
-        timeSpent: entry.timeSpent,
-        dateStr: dayData.dateStr,
-      };
-    });
   }
 }

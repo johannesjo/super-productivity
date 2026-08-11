@@ -15,7 +15,11 @@ import {
   RowItem,
   TaskFields,
   WorklogExportData,
+  WorklogMarkdownLabels,
 } from './worklog-export.model';
+import { isChecklistItemLine } from '../../markdown-checklist/checklist-operations';
+import { markdownToChecklist } from '../../markdown-checklist/markdown-to-checklist';
+import { INBOX_PROJECT } from '../../project/project.const';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -354,3 +358,171 @@ export const formatText = (
   txt += rows.map((cols) => cols.map(escapeCsvField).join(';')).join(LINE_SEPARATOR);
   return txt;
 };
+
+/**
+ * Creates an editable Markdown work-report draft from the same task data as the CSV export.
+ * Leaf tasks are grouped by project so parent/subtask work is not counted twice.
+ */
+export const formatMarkdownReport = (
+  data: WorklogExportData,
+  labels: WorklogMarkdownLabels,
+): string => {
+  const realProjectIds = new Set(
+    data.projects
+      .filter((project) => project.id !== INBOX_PROJECT.id)
+      .map((project) => project.id),
+  );
+  const projectTasks = data.tasks.filter(
+    (task) => !!task.projectId && realProjectIds.has(task.projectId),
+  );
+  const projectGroups = new Map<
+    string,
+    {
+      title: string;
+      rows: RowItem[];
+    }
+  >();
+
+  createRows({ ...data, tasks: projectTasks }, WorklogGrouping.TASK).forEach((row) => {
+    const projectTitle = row.projects[0];
+    if (!projectTitle) {
+      return;
+    }
+    const existingGroup = projectGroups.get(projectTitle);
+
+    if (existingGroup) {
+      existingGroup.rows.push(row);
+    } else {
+      projectGroups.set(projectTitle, {
+        title: projectTitle,
+        rows: [row],
+      });
+    }
+  });
+
+  const groups = [...projectGroups.values()].sort((a, b) =>
+    a.title.localeCompare(b.title),
+  );
+  const renderedParentNoteIds = new Set<string>();
+
+  const completedWork =
+    groups.length === 0
+      ? '-'
+      : groups
+          .map((group) => {
+            const taskLines = [...group.rows]
+              .sort(compareMarkdownRows)
+              .map((row, index) =>
+                formatMarkdownTask(
+                  row,
+                  index,
+                  labels,
+                  projectTasks,
+                  renderedParentNoteIds,
+                ),
+              )
+              .join(LINE_SEPARATOR);
+            return `### ${escapeMarkdown(group.title)}${LINE_SEPARATOR}${LINE_SEPARATOR}${taskLines}`;
+          })
+          .join(`${LINE_SEPARATOR}${LINE_SEPARATOR}`);
+
+  return [
+    `# ${labels.title}`,
+    `## ${labels.completedWork}`,
+    completedWork,
+    `## ${labels.workAnalysis}`,
+    '-',
+    `## ${labels.nextWeekPlan}`,
+    '-',
+    `## ${labels.coordination}`,
+    '-',
+  ].join(`${LINE_SEPARATOR}${LINE_SEPARATOR}`);
+};
+
+const compareMarkdownRows = (a: RowItem, b: RowItem): number => {
+  const dateComparison = (a.dates[0] ?? '').localeCompare(b.dates[0] ?? '');
+  return dateComparison || getMarkdownTaskTitle(a).localeCompare(getMarkdownTaskTitle(b));
+};
+
+const formatMarkdownTask = (
+  row: RowItem,
+  index: number,
+  labels: WorklogMarkdownLabels,
+  allTasks: WorklogTask[],
+  renderedParentNoteIds: Set<string>,
+): string => {
+  const task = row.tasks[0];
+  const dates = row.dates.length > 0 ? row.dates : task.dateStr ? [task.dateStr] : [];
+  const details = dates.length > 0 ? [`${labels.dates}: ${dates.join(', ')}`] : [];
+  const worked = msToString(row.timeSpent, false, true);
+
+  if (worked) {
+    details.push(`${labels.worked}: ${worked}`);
+  }
+  if (row.tags.length > 0) {
+    details.push(`${labels.tags}: ${row.tags.join(', ')}`);
+  }
+
+  const ownNoteLines = formatMarkdownNoteLines(task.notes, labels, '   ');
+  const parentTask = task.parentId
+    ? allTasks.find((candidate) => candidate.id === task.parentId)
+    : undefined;
+  const parentNoteLines =
+    parentTask && !renderedParentNoteIds.has(parentTask.id)
+      ? formatMarkdownNoteLines(parentTask.notes, labels, '     ')
+      : [];
+
+  if (parentTask && parentNoteLines.length > 0) {
+    renderedParentNoteIds.add(parentTask.id);
+  }
+
+  return [
+    `${index + 1}. ${escapeMarkdown(getMarkdownTaskTitle(row))}`,
+    ...details.map((detail) => `   - ${escapeMarkdown(detail)}`),
+    ...(parentTask && parentNoteLines.length > 0
+      ? [`   - ${escapeMarkdown(parentTask.title)}:`, ...parentNoteLines]
+      : []),
+    ...ownNoteLines,
+  ].join(LINE_SEPARATOR);
+};
+
+const formatMarkdownNoteLines = (
+  notes: string | undefined,
+  labels: WorklogMarkdownLabels,
+  indentation: string,
+): string[] => {
+  const taskNotes = notes?.trim() ?? '';
+  const checklistItems = markdownToChecklist(taskNotes);
+  const plainNotes = taskNotes
+    .split('\n')
+    .filter((line) => !isChecklistItemLine(line))
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(' / ');
+  const lines: string[] = [];
+
+  if (plainNotes) {
+    lines.push(`${indentation}- ${escapeMarkdown(`${labels.notes}: ${plainNotes}`)}`);
+  }
+  if (checklistItems.length > 0) {
+    lines.push(`${indentation}- ${escapeMarkdown(labels.checklist)}:`);
+    lines.push(
+      ...checklistItems.map(
+        (item) =>
+          `${indentation}  - [${item.isChecked ? 'x' : ' '}] ${escapeMarkdown(item.text)}`,
+      ),
+    );
+  }
+
+  return lines;
+};
+
+const getMarkdownTaskTitle = (row: RowItem): string => {
+  const task = row.tasks[0];
+  return task.parentId
+    ? `${row.titles[0]} — ${row.titlesWithSub[0]}`
+    : row.titlesWithSub[0];
+};
+
+const escapeMarkdown = (value: string): string =>
+  value.replace(/\r?\n/g, ' ').replace(/([\\`*_[\]<>#])/g, '\\$1');

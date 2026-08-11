@@ -1,11 +1,20 @@
 import { WorkStartEnd } from 'src/app/features/work-context/work-context.model';
 import { WorklogGrouping } from '../worklog.model';
-import { createRows, formatRows, formatText } from './worklog-export.util';
+import {
+  createRows,
+  formatMarkdownReport,
+  formatRows,
+  formatText,
+} from './worklog-export.util';
 import { DEFAULT_TASK, WorklogTask } from '../../tasks/task.model';
-import { DEFAULT_PROJECT } from '../../project/project.const';
+import { DEFAULT_PROJECT, INBOX_PROJECT } from '../../project/project.const';
 import { DEFAULT_TAG } from '../../tag/tag.const';
 import { Project } from 'src/app/features/project/project.model';
-import { WorklogExportData, WorkTimes } from './worklog-export.model';
+import {
+  WorklogExportData,
+  WorklogMarkdownLabels,
+  WorkTimes,
+} from './worklog-export.model';
 import { Tag } from '../../tag/tag.model';
 
 const startTime1 = new Date(2021, 1, 5, 10, 0, 0).getTime();
@@ -20,14 +29,27 @@ const workTimes: WorkTimes = { start, end };
 const oneHour = 3600000,
   twoHours = 7200000;
 
+const markdownLabels: WorklogMarkdownLabels = {
+  title: 'Weekly report 2021-02-05–2021-02-06',
+  completedWork: 'Completed this week',
+  workAnalysis: 'Work analysis summary',
+  nextWeekPlan: "Next week's plan",
+  coordination: 'Coordination and help needed',
+  dates: 'Dates',
+  worked: 'Worked',
+  notes: 'Notes',
+  checklist: 'Checklist',
+  tags: 'Tags',
+};
+
 const createTask = (partialTask: Partial<WorklogTask>): WorklogTask => {
   const deepCopy = JSON.parse(JSON.stringify(DEFAULT_TASK));
   return {
     ...deepCopy,
     timeSpentOnDay: { [dateKey1]: oneHour },
     title: partialTask.id as string,
-    ...partialTask,
     dateStr: '',
+    ...partialTask,
   };
 };
 
@@ -409,6 +431,153 @@ describe('createRows', () => {
         [dateKey2, '14:00', '16:00'],
       ]);
     });
+  });
+});
+
+describe('formatMarkdownReport', () => {
+  it('groups project tasks and includes useful source details', () => {
+    const projectTask = createTask({
+      id: 'project-task',
+      title: 'Finish *integration*',
+      notes: 'Validated on device',
+      timeSpentOnDay: {
+        [dateKey1]: oneHour,
+        [dateKey2]: oneHour,
+      },
+    });
+    const uncategorizedTask = createTask({
+      id: 'uncategorized-task',
+      title: 'Prepare summary',
+    });
+    const project = createProject('Project #1', projectTask);
+    const tag = createTag('customer-facing', projectTask);
+
+    const result = formatMarkdownReport(
+      createWorklogData({
+        tasks: [uncategorizedTask, projectTask],
+        projects: [project],
+        tags: [tag],
+      }),
+      markdownLabels,
+    );
+
+    expect(result).toContain('# Weekly report 2021-02-05–2021-02-06');
+    expect(result).toContain('### Project \\#1');
+    expect(result).toContain('1. Finish \\*integration\\*');
+    expect(result).toContain('Dates: 2021-02-05, 2021-02-06');
+    expect(result).toContain('Worked: 2h');
+    expect(result).toContain('Notes: Validated on device');
+    expect(result).toContain('Tags: customer-facing');
+    expect(result).not.toContain('Prepare summary');
+  });
+
+  it('excludes Inbox and tasks without a real project', () => {
+    const inboxTask = createTask({
+      id: 'inbox-task',
+      title: 'Personal reimbursement',
+      projectId: INBOX_PROJECT.id,
+    });
+    const projectlessTask = createTask({
+      id: 'projectless-task',
+      title: 'Loose task',
+      projectId: '',
+    });
+    const orphanedTask = createTask({
+      id: 'orphaned-task',
+      title: 'Missing project task',
+      projectId: 'missing-project',
+    });
+
+    const result = formatMarkdownReport(
+      createWorklogData({
+        tasks: [inboxTask, projectlessTask, orphanedTask],
+        projects: [INBOX_PROJECT],
+      }),
+      markdownLabels,
+    );
+
+    expect(result).not.toContain('### Inbox');
+    expect(result).not.toContain('Personal reimbursement');
+    expect(result).not.toContain('Loose task');
+    expect(result).not.toContain('Missing project task');
+    expect(result).toContain('## Completed this week\n\n-');
+  });
+
+  it('uses the worklog date when no tracked-time date remains', () => {
+    const task = createTask({
+      id: 'date-fallback-task',
+      title: 'Prepared project documents',
+      dateStr: dateKey2,
+      timeSpentOnDay: {},
+    });
+    const project = createProject('Project', task);
+
+    const result = formatMarkdownReport(
+      createWorklogData({ tasks: [task], projects: [project] }),
+      markdownLabels,
+    );
+
+    expect(result).toContain(`Dates: ${dateKey2}`);
+    expect(result).not.toContain('Dates: \n');
+  });
+
+  it('uses the parent and subtask titles without exporting the parent twice', () => {
+    const parent = createTask({
+      id: 'parent',
+      title: 'Main delivery',
+      notes: '- [x] Parent acceptance complete',
+    });
+    const subtask = createSubTask(
+      {
+        id: 'subtask',
+        title: 'Protocol adaptation',
+      },
+      parent,
+    );
+    const project = createProject('Project', parent, subtask);
+
+    const result = formatMarkdownReport(
+      createWorklogData({ tasks: [parent, subtask], projects: [project] }),
+      markdownLabels,
+    );
+
+    expect(result).toContain('1. Main delivery — Protocol adaptation');
+    expect(result.match(/^\d+\. Main delivery/gm)?.length).toBe(1);
+    expect(result).toContain('     - Checklist:');
+    expect(result).toContain('       - [x] Parent acceptance complete');
+  });
+
+  it('preserves checklist items and their completion state separately from notes', () => {
+    const task = createTask({
+      id: 'checklist-task',
+      title: 'Security remediation',
+      notes: [
+        'Retest after the firewall restart.',
+        '- [x] Close exposed port',
+        '- [ ] Confirm *scanner* result',
+      ].join('\n'),
+    });
+    const project = createProject('Project', task);
+
+    const result = formatMarkdownReport(
+      createWorklogData({ tasks: [task], projects: [project] }),
+      markdownLabels,
+    );
+
+    expect(result).toContain('Notes: Retest after the firewall restart.');
+    expect(result).toContain('   - Checklist:');
+    expect(result).toContain('     - [x] Close exposed port');
+    expect(result).toContain('     - [ ] Confirm \\*scanner\\* result');
+    expect(result).not.toContain('Notes: Retest after the firewall restart. / - [x]');
+  });
+
+  it('keeps editable placeholder sections when there are no tasks', () => {
+    const result = formatMarkdownReport(createWorklogData({}), markdownLabels);
+
+    expect(result).toContain('## Completed this week\n\n-');
+    expect(result).toContain('## Work analysis summary\n\n-');
+    expect(result).toContain("## Next week's plan\n\n-");
+    expect(result).toContain('## Coordination and help needed\n\n-');
   });
 });
 

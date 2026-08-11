@@ -120,6 +120,58 @@ describe('mapArchiveToWorklog', () => {
     expect(w[2018].ent[2].ent[16].logEntries[1].parentId).toBe('A');
   });
 
+  it('should place completed subtasks without tracked time on their own completion days', () => {
+    const ts = fakeTaskStateFromArray([
+      {
+        ...DEFAULT_TASK,
+        projectId: 'P1',
+        title: 'Parent',
+        id: 'PARENT',
+        subTaskIds: ['SUB_A', 'SUB_B', 'SUB_C'],
+        created: new Date(2026, 6, 20, 12).getTime(),
+      },
+      {
+        ...DEFAULT_TASK,
+        projectId: 'P1',
+        title: 'SUB_A',
+        id: 'SUB_A',
+        parentId: 'PARENT',
+        isDone: true,
+        doneOn: new Date(2026, 6, 30, 12).getTime(),
+      },
+      {
+        ...DEFAULT_TASK,
+        projectId: 'P1',
+        title: 'SUB_B',
+        id: 'SUB_B',
+        parentId: 'PARENT',
+        isDone: true,
+        doneOn: new Date(2026, 6, 31, 12).getTime(),
+      },
+      {
+        ...DEFAULT_TASK,
+        projectId: 'P1',
+        title: 'SUB_C',
+        id: 'SUB_C',
+        parentId: 'PARENT',
+        isDone: true,
+        doneOn: new Date(2026, 7, 1, 12).getTime(),
+      },
+    ]);
+
+    const { worklog } = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
+
+    expect(worklog[2026].ent[7].ent[30].logEntries.map((entry) => entry.task.id)).toEqual(
+      ['SUB_A'],
+    );
+    expect(worklog[2026].ent[7].ent[31].logEntries.map((entry) => entry.task.id)).toEqual(
+      ['SUB_B'],
+    );
+    expect(worklog[2026].ent[8].ent[1].logEntries.map((entry) => entry.task.id)).toEqual([
+      'SUB_C',
+    ]);
+  });
+
   it('should sort sub tasks directly after their parent', () => {
     const ts = fakeTaskStateFromArray([
       {

@@ -24,6 +24,8 @@ const _getTimeSpentOnDay = (
     task.timeSpentOnDay && !!Object.keys(task.timeSpentOnDay).length;
   if (isTimeSpentTracked) {
     return task.timeSpentOnDay;
+  } else if (task.doneOn) {
+    return { [getDbDateStr(task.doneOn)]: 1 };
   } else if (task.parentId) {
     const parentSpentOnDay = task.parentId && entities[task.parentId]!.timeSpentOnDay;
     const parentLogEntryDate =
