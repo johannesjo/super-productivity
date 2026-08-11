@@ -133,6 +133,26 @@ export class OperationLogCompactionService {
         return false;
       }
 
+      // GUARD (#9084): boot hydration dispatches the snapshot's loadAllData,
+      // then replays the tail ops on top of it — with await boundaries in
+      // between and no lock held across them. A write that lands in that
+      // window (e.g. TODAY_TAG repair) is durable and can push the
+      // compaction counter over threshold before the tail ops are
+      // re-dispatched. None of the guards above see it: the tail ops are
+      // local and already 'applied' from their original session (so
+      // getPendingRemoteOps is empty), and nothing is pending or deferred.
+      // Compacting then would cache a state missing the tail ops' effects
+      // under a lastAppliedOpSeq that covers them, and prune the very ops
+      // the next boot needs to recover them. Skipping is always safe: the
+      // op-log stays the source of truth and compaction re-runs once
+      // hydration completes.
+      if (this.hydrationState.isHydrationInProgress()) {
+        OpLog.warn(
+          `OperationLogCompactionService: Skipping ${label}compaction — boot hydration replay in progress (#9084)`,
+        );
+        return false;
+      }
+
       // 1. Get current state from NgRx store
       const currentState = this.stateSnapshot.getStateSnapshotForOperationLog();
       this.checkCompactionTimeout(startTime, `${label}state snapshot`);

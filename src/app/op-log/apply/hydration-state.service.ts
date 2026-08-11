@@ -64,6 +64,7 @@ const SYNC_WINDOW_FAILSAFE_MS = 2000;
 export class HydrationStateService implements RemoteApplyWindowPort {
   private _isApplyingRemoteOps = signal(false);
   private _isHydrationFallbackActive = false;
+  private _isHydrationInProgress = false;
   private _isDirectApplyActive = false;
   private _applyingRemoteOpsHoldCount = 0;
   private _isInPostSyncCooldown = signal(false);
@@ -125,6 +126,28 @@ export class HydrationStateService implements RemoteApplyWindowPort {
 
   setHydrationFallbackActive(isActive: boolean): void {
     this._isHydrationFallbackActive = isActive;
+  }
+
+  /**
+   * #9084: true for the full duration of OperationLogHydratorService's
+   * hydrateStore() run, from before the snapshot's loadAllData dispatch until
+   * the tail ops it implies have actually been replayed into the store. A
+   * write landing in that window (e.g. TODAY_TAG repair reacting to
+   * loadAllData) is durable and unblocks the compaction counter before the
+   * tail ops are re-dispatched, so none of compact()'s other guards see it:
+   * getPendingRemoteOps is empty (the tail ops are local, already
+   * 'applied' from their original session) and nothing is pending or
+   * deferred. Without this flag compact() would cache a state missing the
+   * tail ops' effects under a lastAppliedOpSeq that covers them, and prune
+   * the very ops the next boot needs to recover them. Set/cleared by
+   * OperationLogHydratorService around each hydrateStore() run.
+   */
+  isHydrationInProgress(): boolean {
+    return this._isHydrationInProgress;
+  }
+
+  setHydrationInProgress(isInProgress: boolean): void {
+    this._isHydrationInProgress = isInProgress;
   }
 
   /**
