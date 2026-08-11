@@ -442,8 +442,16 @@ export class ScheduleComponent {
 
     effect(() => {
       if (this.isMonthView() === false) {
-        // scroll to work start whenever view is switched to work-week
-        setTimeout(() => this._scrollIntoViewWithTimeColumnOffset('work-start'));
+        // prefer the current time when it is visible (today is in range),
+        // otherwise fall back to work start. NOTE: the signal read must stay
+        // inside the setTimeout so it is untracked — otherwise currentTimeRow's
+        // 2-minute refresh tick would re-run this effect and yank the scroll
+        // position while the user is reading the schedule.
+        setTimeout(() =>
+          this._scrollIntoViewWithTimeColumnOffset(
+            this.currentTimeRow() !== null ? 'current-time' : 'work-start',
+          ),
+        );
       }
     });
   }

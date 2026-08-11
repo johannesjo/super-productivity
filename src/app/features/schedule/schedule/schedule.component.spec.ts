@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ScheduleComponent } from './schedule.component';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -1099,6 +1099,63 @@ describe('ScheduleComponent', () => {
       expect(component.isWeekView()).toBe(false);
       expect(component.isMonthView()).toBe(false);
     });
+  });
+
+  describe('initial scroll target on view switch', () => {
+    // The effect only re-runs when isMonthView() flips, so go through month first.
+    const switchToMonthThenWeek = (scrollSpy: jasmine.Spy): void => {
+      mockLayoutService.selectedTimeView.set('month');
+      fixture.detectChanges();
+      scrollSpy.calls.reset();
+      mockLayoutService.selectedTimeView.set('week');
+      fixture.detectChanges();
+    };
+
+    it('scrolls to current-time when the current-time indicator is rendered', fakeAsync(() => {
+      const scrollSpy = spyOn<any>(component, '_scrollIntoViewWithTimeColumnOffset');
+      // Viewing today (default: _selectedDate null) → #current-time renders.
+      expect(fixture.nativeElement.querySelector('#current-time')).toBeTruthy();
+
+      switchToMonthThenWeek(scrollSpy);
+      tick();
+
+      expect(scrollSpy).toHaveBeenCalledWith('current-time');
+    }));
+
+    it('falls back to work-start when the current-time indicator is absent', fakeAsync(() => {
+      const scrollSpy = spyOn<any>(component, '_scrollIntoViewWithTimeColumnOffset');
+      // Viewing a future range without today → currentTimeRow() is null.
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2027-06-14',
+        '2027-06-15',
+        '2027-06-16',
+      ]);
+      component['_selectedDate'].set(new Date(2027, 5, 15));
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('#current-time')).toBeFalsy();
+
+      switchToMonthThenWeek(scrollSpy);
+      tick();
+
+      expect(scrollSpy).toHaveBeenCalledWith('work-start');
+    }));
+
+    it('scrolls to current-time on initial load directly in week view', fakeAsync(() => {
+      // The issue's actual scenario: component created while already in week
+      // view. Spy on the prototype BEFORE creating the fixture so the
+      // constructor effect's initial run is captured.
+      const scrollSpy = spyOn<any>(
+        ScheduleComponent.prototype,
+        '_scrollIntoViewWithTimeColumnOffset',
+      );
+      const freshFixture = TestBed.createComponent(ScheduleComponent);
+      freshFixture.detectChanges();
+      tick();
+
+      // Viewing today (default: _selectedDate null) → currentTimeRow non-null.
+      expect(scrollSpy).toHaveBeenCalledWith('current-time');
+      freshFixture.destroy();
+    }));
   });
 
   describe('day view toggle rendering', () => {
