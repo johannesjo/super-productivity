@@ -26,9 +26,10 @@ const resolveDeadlineDayStr = (
 };
 
 /**
- * Builds one faded "ghost" event per visible day that falls strictly between a
- * task's planned day and its deadline day (both ends already show their own
- * real markers, so they're excluded here).
+ * Builds one faded "ghost" event per visible day from the day after a task's
+ * planned day through its deadline day, inclusive. The planned day itself is
+ * excluded (it already shows the real task marker); the deadline day is
+ * included since Schedule has no other marker for it today.
  */
 export const createDeadlineGhostEvents = (
   tasks: TaskCopy[],
@@ -49,7 +50,7 @@ export const createDeadlineGhostEvents = (
     }
 
     daysToShow.forEach((day, dayIndex) => {
-      if (day > plannedStr && day < deadlineStr) {
+      if (day > plannedStr && day <= deadlineStr) {
         ghostEvents.push({
           id: `ghost__${task.id}__${day}`,
           type: SVEType.DeadlineGhost,

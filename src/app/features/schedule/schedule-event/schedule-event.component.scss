@@ -141,10 +141,12 @@
     opacity: 0.35;
     // grid item on a full-day row span (see create-deadline-ghost-events.ts) —
     // pin it to a thin strip at the top instead of stretching the whole day.
+    // Height is auto rather than fixed so the full (untruncated) title below
+    // can wrap onto as many lines as it needs.
     align-self: start;
     justify-self: stretch;
-    height: 18px;
-    min-height: 14px;
+    height: auto;
+    min-height: 18px;
     border-style: dashed;
 
     .ico-wrapper {
@@ -154,6 +156,16 @@
     .title {
       padding: 2px 6px;
       font-size: 11px;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .title-text {
+      -webkit-line-clamp: unset;
+      line-clamp: unset;
+      max-height: none;
+      overflow: visible;
+      white-space: normal;
     }
   }
 

@@ -27,7 +27,7 @@ const baseTask = (overrides: Partial<TaskCopy>): TaskCopy =>
   }) as TaskCopy;
 
 describe('createDeadlineGhostEvents()', () => {
-  it('creates ghost events for every day strictly between planned and deadline', () => {
+  it('creates ghost events for every day from the day after planned through the deadline day', () => {
     const task = baseTask({ dueDay: '2026-08-01', deadlineDay: '2026-08-09' });
     const result = createDeadlineGhostEvents([task], DAYS, 0);
 
@@ -39,17 +39,18 @@ describe('createDeadlineGhostEvents()', () => {
       '2026-08-06',
       '2026-08-07',
       '2026-08-08',
+      '2026-08-09',
     ]);
     expect(result.every((ev) => ev.type === SVEType.DeadlineGhost)).toBe(true);
     expect(result.every((ev) => ev.data === task)).toBe(true);
   });
 
-  it('excludes the planned day and the deadline day themselves', () => {
+  it('excludes the planned day but includes the deadline day', () => {
     const task = baseTask({ dueDay: '2026-08-01', deadlineDay: '2026-08-09' });
     const result = createDeadlineGhostEvents([task], DAYS, 0);
 
     expect(result.some((ev) => ev.plannedForDay === '2026-08-01')).toBe(false);
-    expect(result.some((ev) => ev.plannedForDay === '2026-08-09')).toBe(false);
+    expect(result.some((ev) => ev.plannedForDay === '2026-08-09')).toBe(true);
   });
 
   it('excludes done tasks', () => {
@@ -97,6 +98,7 @@ describe('createDeadlineGhostEvents()', () => {
       '2026-08-05',
       '2026-08-06',
       '2026-08-07',
+      '2026-08-08',
     ]);
   });
 

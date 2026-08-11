@@ -63,7 +63,7 @@
   border: 1px solid var(--grid-color);
   display: flex;
   flex-direction: column;
-  min-height: 80px;
+  min-height: 150px;
   position: relative;
   width: 100%;
   max-width: 100%;
@@ -208,20 +208,6 @@
       display: none;
     }
   }
-
-  .month-event:nth-child(n + 4) {
-    display: none;
-
-    @media (min-height: 800px) {
-      display: block;
-    }
-
-    @media (min-height: 800px) and (max-width: 768px) {
-      &:nth-child(n + 3) {
-        display: none;
-      }
-    }
-  }
 }
 
 .month-more-events {
@@ -251,6 +237,16 @@
       opacity: 0.8;
       transform: scale(1.02);
       transition: var(--transition-standard);
+    }
+
+    // Ghost bars show the full deadline-range title (see
+    // schedule-event.component.scss), so undo the single-line ellipsis
+    // truncation applied to every other month-view event above.
+    &.DeadlineGhost {
+      height: auto;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
     }
   }
 }
