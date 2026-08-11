@@ -97,10 +97,15 @@ export const createScheduleDays = (
       }
     }
 
+    // Which cfgs are due is a property of the calendar day, not of where the
+    // clock happens to sit. Anchoring this on startTime (which is `now` for
+    // i === 0) only agrees with dayDate while day 0 contains now -- an
+    // invariant month view breaks, since its day 0 is the first grid cell and
+    // usually lands in the previous month.
     const nonScheduledRepeatCfgsDueOnDay = selectTaskRepeatCfgsForExactDay.projector(
       unScheduledTaskRepeatCfgs,
       {
-        dayDate: startTime,
+        dayDate: dayStartTime,
       },
     );
 

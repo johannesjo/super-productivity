@@ -988,7 +988,7 @@ The executable owner is
 with causal classification shared through
 [`classifyOpAgainstSyncImport`](../../packages/sync-core/src/sync-import-filter.ts).
 
-### The Problem
+### The Problem Without a Transport Fence
 
 Consider this scenario:
 
@@ -1022,6 +1022,14 @@ suffix work remains valid.
 
 All of these decisions use vector clocks because the question is causal
 knowledge of the full-state boundary, not wall-clock recency.
+
+SuperSync also prevents the invalid suffix from entering the server log. An
+incremental upload carrying `lastKnownServerSeq` is serialized with state
+replacement uploads on the user's sequence row. If its cursor predates the
+latest `SYNC_IMPORT` or `BACKUP_IMPORT`, the whole batch is rejected and the
+replacement is piggybacked before the client retries. Client-side filtering
+remains necessary for other providers, retained legacy data, and defense in
+depth.
 
 See the field guide's [causality and conflict policy](./sync-architecture.html#causality)
 for the visual overview.
@@ -1417,7 +1425,7 @@ a copied file tree here. The main implementation boundaries are
 
 # References
 
-- [Operation Rules](./operation-rules.md) - Payload and validation rules
-- [Contributor Sync Model](./contributor-sync-model.md) - The single invariant for effects, reducers, and bulk dispatch
-- [SuperSync Encryption](./supersync-encryption-architecture.md) - End-to-end encryption implementation
+- [Contributor Sync Model](./contributor-sync-model.md) - The single invariant for effects, reducers, selector guards, and bulk dispatch
+- [SECTION Conflict Replay](./section-conflict-replay.md) - Narrow semantic-replay and released-client compatibility contract
+- [SuperSync Encryption](./supersync-encryption-architecture.md) - End-to-end encryption implementation and integrity boundary
 - [Vector Clocks](./vector-clocks.md) - Vector clock implementation details

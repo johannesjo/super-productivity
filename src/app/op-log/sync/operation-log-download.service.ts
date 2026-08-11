@@ -22,7 +22,11 @@ import {
   CLOCK_DRIFT_THRESHOLD_MS,
   DOWNLOAD_PAGE_SIZE,
 } from '../core/operation-log.const';
-import { OperationEncryptionService } from './operation-encryption.service';
+import {
+  OperationDecryptionError,
+  OperationEncryptionService,
+} from './operation-encryption.service';
+import { buildDecryptFailureLogArgs } from './operation-decrypt-failure-log.util';
 import { DecryptNoPasswordError } from '../core/errors/sync-errors';
 import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected';
 import { SuperSyncStatusService } from './super-sync-status.service';
@@ -165,6 +169,10 @@ export class OperationLogDownloadService implements OnDestroy {
       let sinceSeq = lastServerSeq;
       let hasResetForGap = false;
       let iterationCount = 0;
+      // Run-level password evidence for the failure log: ops decrypted on
+      // earlier pages of THIS run prove the key even when nothing in a later
+      // failing batch decrypts (e.g. a single corrupt op on the final page).
+      let decryptedOpsInEarlierBatches = 0;
 
       while (hasMore) {
         iterationCount++;
@@ -243,6 +251,9 @@ export class OperationLogDownloadService implements OnDestroy {
           remoteLastModified = undefined; // Clear timestamp belonging to the stale state
           sawAnyOps = false; // Reset encryption tracking
           sawEncryptedOp = false;
+          // The re-fetched key may differ (password change clean slate), so
+          // pre-reset decrypts are no evidence for the key used after it.
+          decryptedOpsInEarlierBatches = 0;
 
           // CRITICAL: Re-fetch encryption key after gap detection.
           // Gap usually means server was wiped (e.g., password change clean slate),
@@ -296,9 +307,10 @@ export class OperationLogDownloadService implements OnDestroy {
         }
 
         // Filter already applied ops
-        let syncOps: SyncOperation[] = response.ops
-          .filter((serverOp) => !appliedOpIds.has(serverOp.op.id))
-          .map((serverOp) => serverOp.op);
+        const newServerOps = response.ops.filter(
+          (serverOp) => !appliedOpIds.has(serverOp.op.id),
+        );
+        let syncOps: SyncOperation[] = newServerOps.map((serverOp) => serverOp.op);
 
         // Fail closed on a plaintext op when SuperSync encryption is enabled: the
         // server is all-encrypted once encryption is on (delete + reupload), so an
@@ -307,8 +319,8 @@ export class OperationLogDownloadService implements OnDestroy {
         assertOpsEncryptedWhenExpected(syncOps, isEncryptionExpected);
 
         // Decrypt encrypted operations if we have an encryption key
-        const hasEncryptedOps = syncOps.some((op) => op.isPayloadEncrypted);
-        if (hasEncryptedOps) {
+        const encryptedOpsInPage = syncOps.filter((op) => op.isPayloadEncrypted).length;
+        if (encryptedOpsInPage > 0) {
           if (!encryptKey) {
             // No encryption key available - throw to let the sync wrapper show the
             // password dialog. Severity depends on history: a client that has never
@@ -335,7 +347,22 @@ export class OperationLogDownloadService implements OnDestroy {
           }
 
           // Decrypt encrypted operations - let DecryptError propagate to sync-wrapper handler
-          syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+          try {
+            syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+            decryptedOpsInEarlierBatches += encryptedOpsInPage;
+          } catch (error) {
+            if (error instanceof OperationDecryptionError) {
+              OpLog.error(
+                'OperationLogDownloadService: Encrypted operation batch could not be processed.',
+                ...buildDecryptFailureLogArgs(
+                  error.diagnosis,
+                  newServerOps.filter((serverOp) => serverOp.op.isPayloadEncrypted),
+                  decryptedOpsInEarlierBatches,
+                ),
+              );
+            }
+            throw error;
+          }
         }
 
         // Convert to Operation format

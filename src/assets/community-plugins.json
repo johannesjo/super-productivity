@@ -134,5 +134,13 @@
     "author": "CuriousChipmunk",
     "authorUrl": "https://github.com/CuriousChipmunk",
     "stars": 0
+  },
+  {
+    "name": "sync.md Multi",
+    "shortDescription": "Sync multiple SuperProductivity projects with their own markdown files (bidirectional).",
+    "url": "https://codeberg.org/fpindado/sync-md-multi",
+    "author": "Fernando Pindado",
+    "authorUrl": "https://codeberg.org/fpindado",
+    "stars": 0
   }
 ]

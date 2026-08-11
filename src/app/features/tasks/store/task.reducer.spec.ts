@@ -186,6 +186,35 @@ describe('Task Reducer', () => {
       expect(result.entities['parent']!.subTaskIds).toEqual(['subTask']);
       expect(result.entities['parent']!.timeEstimate).toBe(2.5 * 60 * 60 * 1000);
     });
+
+    // Both the plugin API and the local REST API forward `dueDay` when creating
+    // a subtask. The reducer overrides exactly three fields — parentId, tagIds
+    // and projectId — and must leave everything else intact; without this,
+    // "the caller forwards dueDay" is only ever asserted on the dispatched
+    // action, never on the state that results from it.
+    it('should keep a forwarded dueDay while overriding the inherited fields', () => {
+      const parent = createTask('parent', { projectId: 'parent-project' });
+      const subTask = createTask('subTask', {
+        dueDay: '2026-09-01',
+        tagIds: ['dropped-by-reducer'],
+        projectId: 'replaced-by-reducer',
+      });
+      const state: TaskState = {
+        ...initialTaskState,
+        ids: ['parent'],
+        entities: { parent },
+      };
+
+      const result = taskReducer(
+        state,
+        fromActions.addSubTask({ task: subTask, parentId: 'parent' }),
+      );
+
+      expect(result.entities['subTask']!.dueDay).toBe('2026-09-01');
+      expect(result.entities['subTask']!.parentId).toBe('parent');
+      expect(result.entities['subTask']!.tagIds).toEqual([]);
+      expect(result.entities['subTask']!.projectId).toBe('parent-project');
+    });
   });
 
   describe('moveSubTask (anchor-based)', () => {
@@ -623,6 +652,25 @@ describe('Task Reducer', () => {
 
       // The removed tasks should be moved to the beginning while maintaining their relative order
       expect(state.ids).toEqual(['task2', 'task4', 'task1', 'task3']);
+      // Ordering-only invariant (#9426): conflict resolution rejects
+      // conflicted rows of this action outright, which is lossless only while
+      // the handler never touches task entities. If this fails, remove the
+      // action from ORDERING_ONLY_MULTI_ACTIONS in conflict-resolution.service.ts
+      // (or give it a preserve path) BEFORE shipping the reducer change.
+      expect(state.entities).toBe(stateWithOrderedTasks.entities);
+    });
+
+    it('must not handle moveTaskInTodayTagList at all (ordering-only invariant #9426)', () => {
+      // The task feature reducer currently has NO handler for this action; a
+      // future one that touches entities would invalidate the ordering-only
+      // rejection in conflict resolution. Same remediation as above.
+      const action = TaskSharedActions.moveTaskInTodayTagList({
+        toTaskId: 'task1',
+        fromTaskId: 'task2',
+      });
+      const state = taskReducer(stateWithTasks, action);
+
+      expect(state).toBe(stateWithTasks);
     });
 
     it('should ignore all invalid IDs and leave state unchanged', () => {
@@ -1111,6 +1159,23 @@ describe('Task Reducer', () => {
   // -----------------------------------------------------------------------
 
   describe('loadAllData - timeSpentOnDay normalization', () => {
+    it('should default calendar event dismissals missing from older persisted state', () => {
+      const appDataComplete = {
+        task: {
+          ids: [],
+          entities: {},
+          currentTaskId: null,
+          selectedTaskId: null,
+          lastCurrentTaskId: null,
+          isDataLoaded: false,
+        },
+      } as any;
+
+      const result = taskReducer(initialTaskState, loadAllData({ appDataComplete }));
+
+      expect(result.dismissedCalendarAutoImportEventIdsByProvider).toEqual({});
+    });
+
     it('should normalize tasks with undefined timeSpentOnDay to {} on load', () => {
       const taskWithUndefined = createTask('t1', { timeSpentOnDay: undefined as any });
       const appDataComplete = {

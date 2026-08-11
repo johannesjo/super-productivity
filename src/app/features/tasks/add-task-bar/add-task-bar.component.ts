@@ -62,6 +62,7 @@ import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
+import { rollWeekendDateForRepeat } from './roll-weekend-date-for-repeat';
 import { ShortSyntaxSegment, splitTextByRanges } from '../short-syntax-ranges';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 import { MarkdownPasteService } from '../markdown-paste.service';
@@ -74,6 +75,7 @@ import { MentionConfigService } from '../mention-config.service';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DEFAULT_TASK_REPEAT_CFG } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getQuickSettingUpdates } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-quick-setting-updates';
+import { getIntervalRepeatUpdates } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-interval-repeat-updates';
 import { getDefaultSkipOverdue } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-default-skip-overdue';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
@@ -537,10 +539,29 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }
 
+      // One day for the whole submit. A Monday-to-Friday schedule has no
+      // weekend occurrence, so a weekend day is one the task never starts on:
+      // the occurrence engine moves it to the following Monday off the config's
+      // weekday flags (getFirstRepeatOccurrence), while the weekend day stays
+      // behind in the config's `startDate` — where the repeat dialog re-derives
+      // every later quick setting from it, turning "weekly on current weekday"
+      // into a Saturday recurrence.
+      //
+      // Rolled here rather than on the date chip, so the day the user picked
+      // stays the day the bar shows and the repeat menu's labels are built
+      // from. Computed once, so the task's due day and the config's start date
+      // cannot disagree across a logical-day rollover between two `todayStr()`
+      // calls. The effects would correct the due day anyway; writing it here
+      // just spares the user a task that first appears on the Saturday.
+      const startDay = rollWeekendDateForRepeat(
+        state.date || this._dateService.todayStr(),
+        state.repeat,
+      );
+
       if (state.date) {
         // Parse date components to create date in local timezone
         // This avoids timezone issues when parsing date strings like "2024-01-15"
-        const [year, month, day] = state.date.split('-').map(Number);
+        const [year, month, day] = startDay.split('-').map(Number);
         const date = new Date(year, month - 1, day);
 
         if (state.time) {
@@ -550,12 +571,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           taskData.dueWithTime = date.getTime();
           taskData.hasPlannedTime = true;
         } else {
-          taskData.dueDay = state.date;
+          taskData.dueDay = startDay;
         }
-      } else if (state.repeatQuickSetting && state.repeatQuickSetting !== 'CUSTOM') {
-        // When a repeat preset is selected without an explicit date, set dueDay to today
+      } else if (state.repeat && state.repeat.type !== 'DIALOG') {
+        // When a recurrence is set without an explicit date, set dueDay to today
         // so the first task instance appears as today's occurrence instead of staying in inbox
-        taskData.dueDay = this._dateService.todayStr();
+        taskData.dueDay = startDay;
       } else {
         // Explicitly set dueDay to undefined when no date is selected
         // This prevents automatic assignment of today's date in TODAY context
@@ -579,9 +600,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       // effect already handles scheduling via scheduleTaskWithTime, so calling both
       // would cause double-scheduling.
       const isTimedRepeatTask =
-        !!state.repeatQuickSetting &&
-        state.repeatQuickSetting !== 'CUSTOM' &&
-        !!state.time;
+        !!state.repeat && state.repeat.type !== 'DIALOG' && !!state.time;
       if (taskData.dueWithTime && !isTimedRepeatTask) {
         this._taskService
           .getByIdOnce$(taskId)
@@ -597,20 +616,30 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
 
       // Create repeat config if a repeat setting was selected
-      if (state.repeatQuickSetting) {
-        if (state.repeatQuickSetting === 'CUSTOM') {
+      if (state.repeat) {
+        const repeat = state.repeat;
+        if (repeat.type === 'DIALOG') {
           this._openRepeatDialogForTask(taskId, resolvedRemindOption);
         } else {
-          const startDate = state.date || this._dateService.todayStr();
-          const referenceDate = dateStrToUtcDate(startDate);
-          const quickSettingUpdates =
-            getQuickSettingUpdates(state.repeatQuickSetting, referenceDate) || {};
+          const referenceDate = dateStrToUtcDate(startDay);
+          // An interval ("@every 2 days") has no preset to expand — it maps to a
+          // CUSTOM config carrying the cycle and interval directly.
+          const repeatUpdates =
+            repeat.type === 'INTERVAL'
+              ? getIntervalRepeatUpdates(
+                  repeat.repeatCycle,
+                  repeat.repeatEvery,
+                  referenceDate,
+                )
+              : {
+                  quickSetting: repeat.quickSetting,
+                  ...getQuickSettingUpdates(repeat.quickSetting, referenceDate),
+                };
           const newRepeatCfg = {
             ...DEFAULT_TASK_REPEAT_CFG,
-            startDate,
-            ...quickSettingUpdates,
+            startDate: startDay,
+            ...repeatUpdates,
             title,
-            quickSetting: state.repeatQuickSetting,
             notes: taskData.notes,
             tagIds: taskData.tagIds ?? [],
             defaultEstimate: state.estimate || 0,
@@ -641,10 +670,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     // Clicking the + button moves focus onto the button, which then vanishes
     // once the input clears — refocus the input so the next task can be typed
     // right away. (The Enter-key submit path never loses input focus.)
-    // Skip the refocus for CUSTOM repeat: addTask() opens the repeat-config
-    // dialog asynchronously, and refocusing would steal focus from it.
-    const willOpenRepeatDialog =
-      this.stateService.state().repeatQuickSetting === 'CUSTOM';
+    // Skip the refocus for the custom-config entry: addTask() opens the
+    // repeat-config dialog asynchronously, and refocusing would steal focus
+    // from it.
+    const willOpenRepeatDialog = this.stateService.state().repeat?.type === 'DIALOG';
     void this.addTask().finally(() => {
       if (!willOpenRepeatDialog) {
         this.focusInput();

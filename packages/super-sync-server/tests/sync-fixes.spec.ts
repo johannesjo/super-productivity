@@ -244,6 +244,11 @@ vi.mock('../src/auth', () => ({
 // Import after mocking
 import { syncRoutes } from '../src/sync/sync.routes';
 import { initSyncService, getSyncService } from '../src/sync/sync.service';
+import { SYNC_ERROR_CODES } from '../src/sync/sync.types';
+
+// Uploads must pass the encrypted-only ingress gate: flag true + a payload
+// with the ciphertext transport shape (canonical base64, >= 28 bytes).
+const ENCRYPTED_PAYLOAD = Buffer.alloc(44, 7).toString('base64');
 
 // Helper to create operation
 const createOp = (
@@ -255,6 +260,7 @@ const createOp = (
     entityType: string;
     entityId: string;
     payload: unknown;
+    isPayloadEncrypted: boolean;
     vectorClock: Record<string, number>;
     timestamp: number;
     schemaVersion: number;
@@ -266,7 +272,8 @@ const createOp = (
   opType: 'CRT',
   entityType: 'TASK',
   entityId: 'task-1',
-  payload: { title: 'Test Task' },
+  payload: ENCRYPTED_PAYLOAD,
+  isPayloadEncrypted: true,
   vectorClock: {},
   timestamp: Date.now(),
   schemaVersion: 1,
@@ -427,7 +434,7 @@ describe('Sync System Fixes', () => {
         url: '/api/sync/snapshot',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          state: 'encrypted-string-here',
+          state: ENCRYPTED_PAYLOAD,
           clientId: 'test-client',
           reason: 'recovery',
           vectorClock: { 'test-client': 1 },
@@ -455,7 +462,10 @@ describe('Sync System Fixes', () => {
       expect(syncImportOp.op.isPayloadEncrypted).toBe(true);
     });
 
-    it('should default isPayloadEncrypted to false when not provided', async () => {
+    it('rejects a snapshot without the encryption flag (E2EE_REQUIRED) and stores nothing', async () => {
+      // Pre-gate behavior was "missing flag defaults to false and is
+      // accepted"; the encrypted-only ingress gate deliberately inverted
+      // that: missing means rejected.
       const snapshotResponse = await app.inject({
         method: 'POST',
         url: '/api/sync/snapshot',
@@ -469,9 +479,10 @@ describe('Sync System Fixes', () => {
         },
       });
 
-      expect(snapshotResponse.statusCode).toBe(200);
+      expect(snapshotResponse.statusCode).toBe(400);
+      expect(snapshotResponse.json().errorCode).toBe(SYNC_ERROR_CODES.E2EE_REQUIRED);
 
-      // Download and verify default
+      // Download and verify the rejected snapshot left no operation behind
       const downloadResponse = await app.inject({
         method: 'GET',
         url: '/api/sync/ops?sinceSeq=0',
@@ -482,7 +493,7 @@ describe('Sync System Fixes', () => {
       const syncImportOp = downloadBody.ops.find(
         (op: { op: { opType: string } }) => op.op.opType === 'SYNC_IMPORT',
       );
-      expect(syncImportOp.op.isPayloadEncrypted).toBe(false);
+      expect(syncImportOp).toBeUndefined();
     });
   });
 
@@ -620,7 +631,8 @@ describe('Sync System Fixes', () => {
               opType: 'CRT',
               entityType: 'TASK',
               entityId,
-              payload: { title: 'Task' },
+              payload: ENCRYPTED_PAYLOAD,
+              isPayloadEncrypted: true,
               vectorClock: { [clientA]: 1 },
               timestamp: Date.now(),
               schemaVersion: 1,

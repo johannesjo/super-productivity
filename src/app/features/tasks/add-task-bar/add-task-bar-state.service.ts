@@ -1,11 +1,14 @@
 import { effect, Injectable, signal, WritableSignal } from '@angular/core';
 import { Tag } from '../../tag/tag.model';
-import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
+import {
+  AddTaskBarRepeat,
+  AddTaskBarState,
+  INITIAL_ADD_TASK_BAR_STATE,
+} from './add-task-bar.const';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
-import { RepeatQuickSetting } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { ShortSyntaxRange } from '../short-syntax';
 import { normalizeClockStr } from '../../../util/normalize-clock-str';
 
@@ -59,13 +62,16 @@ export class AddTaskBarStateService {
     this.isAutoDetected.set(false);
   }
 
-  updateDate(date: string | null, time?: string | null): void {
+  updateDate(date: string | null, time?: string | null, cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => ({
       ...state,
       date,
       time: time !== undefined ? this._normTime(time) : state.time,
       isDateExplicitlyCleared: date ? false : state.isDateExplicitlyCleared,
     }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   updateTime(time: string | null): void {
@@ -80,8 +86,11 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, remindOption }));
   }
 
-  updateEstimate(estimate: number | null): void {
+  updateEstimate(estimate: number | null, cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => ({ ...state, estimate }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   toggleTag(tag: Tag, cleanedInputTxt?: string): void {
@@ -161,24 +170,34 @@ export class AddTaskBarStateService {
     }
   }
 
-  updateRepeatSetting(repeatQuickSetting: RepeatQuickSetting): void {
-    this._taskInputState.update((state) => ({ ...state, repeatQuickSetting }));
-  }
-
-  clearRepeatSetting(cleanedInputTxt?: string): void {
-    this._taskInputState.update((state) => ({ ...state, repeatQuickSetting: null }));
+  updateRepeatSetting(repeat: AddTaskBarRepeat, cleanedInputTxt?: string): void {
+    this._taskInputState.update((state) => ({ ...state, repeat }));
     if (cleanedInputTxt !== undefined) {
       this.inputTxt.set(cleanedInputTxt);
     }
   }
 
-  updateDeadline(deadlineDate: string | null, deadlineTime?: string | null): void {
+  clearRepeatSetting(cleanedInputTxt?: string): void {
+    this._taskInputState.update((state) => ({ ...state, repeat: null }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
+  }
+
+  updateDeadline(
+    deadlineDate: string | null,
+    deadlineTime?: string | null,
+    cleanedInputTxt?: string,
+  ): void {
     this._taskInputState.update((state) => ({
       ...state,
       deadlineDate,
       deadlineTime:
         deadlineTime !== undefined ? this._normTime(deadlineTime) : state.deadlineTime,
     }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   // Recover a stray seconds component (e.g. a pasted `13:30:00`) so a time the
@@ -213,7 +232,7 @@ export class AddTaskBarStateService {
       newTagTitles: [],
       cleanText: null,
       attachments: [],
-      repeatQuickSetting: null,
+      repeat: null,
       deadlineDate: null,
       deadlineTime: null,
       deadlineRemindOption: null,

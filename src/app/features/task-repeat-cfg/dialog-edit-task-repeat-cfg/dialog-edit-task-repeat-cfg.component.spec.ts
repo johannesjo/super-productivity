@@ -357,6 +357,34 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
     });
   });
 
+  describe('deleteInstance', () => {
+    it('formats a date-only target date at local midnight in the skip confirmation', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: mockRepeatCfg,
+        targetDate: '2026-06-10',
+      });
+      const component = fixture.componentInstance;
+      component.canRemoveInstance.set(true);
+      const toLocaleDateStringSpy = spyOn(
+        Date.prototype,
+        'toLocaleDateString',
+      ).and.callFake(function (this: Date): string {
+        return String(this.getHours());
+      });
+      spyOn(TestBed.inject(TranslateService), 'instant').and.callFake(
+        (_key: string, params?: { date?: string }) => params?.date || '',
+      );
+
+      component.deleteInstance();
+
+      expect(toLocaleDateStringSpy).toHaveBeenCalled();
+      expect(mockMatDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({ data: jasmine.objectContaining({ message: '0' }) }),
+      );
+    });
+  });
+
   describe('new config initialization', () => {
     it('uses the explicit initial start date from the schedule dialog', async () => {
       const taskWithStoredDueDate = {

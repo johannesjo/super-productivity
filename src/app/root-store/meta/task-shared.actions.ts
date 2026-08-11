@@ -17,6 +17,20 @@ import { shouldClearDueTimeForToday } from '../../util/is-today.util';
  */
 export const PROJECT_DELETE_WINS_MARKER = 'projectDeleteWins';
 
+export interface CalendarAutoImportDismissal {
+  issueProviderId: string;
+  issueId: string;
+}
+
+export const getCalendarAutoImportDismissals = (
+  tasks: readonly Task[],
+): CalendarAutoImportDismissal[] =>
+  tasks.flatMap((task) =>
+    task.issueType === 'ICAL' && task.issueProviderId && task.issueId
+      ? [{ issueProviderId: task.issueProviderId, issueId: task.issueId }]
+      : [],
+  );
+
 /**
  * Shared actions that affect multiple reducers (tasks, projects, tags)
  * These actions are handled by the task-shared meta-reducer
@@ -92,21 +106,29 @@ export const TaskSharedActions = createActionGroup({
     // Issue metadata for remote issue deletion still travels through
     // DeletedTaskIssueSidecarService. Task snapshots are persisted separately
     // so a concurrent winning update can recreate an entity after this delete.
-    deleteTasks: (taskProps: { taskIds: string[]; tasks?: Task[] }) => ({
-      ...taskProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'TASK',
-        entityIds: taskProps.taskIds,
-        opType: OpType.Delete,
-        isBulk: true,
-      } satisfies PersistentActionMeta,
-    }),
+    deleteTasks: (taskProps: { taskIds: string[]; tasks?: Task[] }) => {
+      const calendarAutoImportDismissals = getCalendarAutoImportDismissals(
+        taskProps.tasks ?? [],
+      );
+      return {
+        ...taskProps,
+        ...(calendarAutoImportDismissals.length > 0 && {
+          calendarAutoImportDismissals,
+        }),
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityIds: taskProps.taskIds,
+          opType: OpType.Delete,
+          isBulk: true,
+        } satisfies PersistentActionMeta,
+      };
+    },
 
     // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
     // Note: Full task payload is required for sync reliability.
     // Remote clients need task data to write to their local archive.
-    // See docs/archive-operation-redesign.md for detailed analysis.
+    // See docs/sync-and-op-log/operation-log-architecture.md for detailed analysis.
     moveToArchive: (taskProps: { tasks: TaskWithSubTasks[] }) => ({
       ...taskProps,
       meta: {

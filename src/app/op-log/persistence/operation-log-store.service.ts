@@ -109,6 +109,13 @@ interface StateCacheEntry {
   snapshotEntityKeys?: string[];
 }
 
+interface ReplayAnchorSnapshot {
+  state: unknown;
+  vectorClock: VectorClock;
+  compactedAt: number;
+  schemaVersion?: number;
+}
+
 export interface RawRebuildIncompleteEntry {
   incomplete: true;
   startedAt: number;
@@ -336,6 +343,30 @@ type OpLogStoreName = (typeof STORE_NAMES)[keyof typeof STORE_NAMES];
  * past the durable value. Makes counter reuse/regression unrepresentable
  * regardless of what the caller derived its proposed clock from (#8939).
  */
+/**
+ * Bounds a clock that has just been rebased on the durable clock.
+ *
+ * `pruneClockForStorage` runs before the transaction opens, so a disjoint
+ * bounded durable clock unioned with a bounded proposed clock can exceed
+ * MAX_VECTOR_CLOCK_SIZE again (20 + 20 = 40). Re-bound after the rebase,
+ * preserving the same authors `pruneClockForStorage` does. Synchronous so it
+ * is safe to call while an IndexedDB transaction is open.
+ */
+const boundRebasedClock = (
+  clock: VectorClock,
+  currentClientId: string | null,
+  importAuthorId: string | undefined,
+): VectorClock => {
+  // No client ID -> no pruning at all (never prune with the author id alone).
+  if (!currentClientId) {
+    return clock;
+  }
+  return limitVectorClockSize(
+    clock,
+    importAuthorId ? [currentClientId, importAuthorId] : [currentClientId],
+  );
+};
+
 const rebaseLocalClockOnDurable = (
   durableClock: VectorClock,
   proposedClock: VectorClock,
@@ -764,6 +795,105 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
   }
 
   /**
+   * Atomically appends an operation and installs its matching replay anchor.
+   * The snapshot frontier and working clock cannot move independently from
+   * the operation, so a concurrent tab's later append remains replayable and
+   * its clock advancement cannot be overwritten by a follow-up write.
+   */
+  async appendOperationAndSnapshot(
+    op: Operation,
+    source: 'local' | 'remote',
+    snapshot: ReplayAnchorSnapshot,
+  ): Promise<number> {
+    const vectorClock = await this.pruneClockForStorage(snapshot.vectorClock);
+    // Resolved out here: both lookups are async and must not run while the
+    // IndexedDB transaction below is open.
+    const currentClientId = await this.clientIdProvider.loadClientId();
+    const importAuthorId = (await this.getLatestFullStateOp())?.clientId;
+    return this._appendOperationAndSnapshot(op, source, snapshot, vectorClock, true, {
+      currentClientId,
+      importAuthorId,
+    });
+  }
+
+  private async _appendOperationAndSnapshot(
+    op: Operation,
+    source: 'local' | 'remote',
+    snapshot: ReplayAnchorSnapshot,
+    vectorClock: VectorClock,
+    rebaseOnDurable = false,
+    rebaseAuthors?: {
+      currentClientId: string | null;
+      importAuthorId: string | undefined;
+    },
+  ): Promise<number> {
+    await this._ensureInit();
+    const storeNames: OpLogStoreName[] = [
+      STORE_NAMES.OPS,
+      STORE_NAMES.STATE_CACHE,
+      STORE_NAMES.VECTOR_CLOCK,
+    ];
+    if (isFullStateOpType(op.opType)) {
+      storeNames.push(STORE_NAMES.META);
+    }
+    let committedClock = vectorClock;
+    try {
+      const seq = await this._adapter.transaction(storeNames, 'readwrite', async (tx) => {
+        let operationToStore = op;
+        if (rebaseOnDurable) {
+          const currentClockEntry = await tx.get<VectorClockEntry>(
+            STORE_NAMES.VECTOR_CLOCK,
+            SINGLETON_KEY,
+          );
+          const durableClock = currentClockEntry?.clock ?? {};
+          const bound = (clock: VectorClock): VectorClock =>
+            boundRebasedClock(
+              clock,
+              rebaseAuthors?.currentClientId ?? null,
+              rebaseAuthors?.importAuthorId,
+            );
+          operationToStore = {
+            ...op,
+            vectorClock: bound(
+              rebaseLocalClockOnDurable(durableClock, op.vectorClock, op.clientId),
+            ),
+          };
+          committedClock = bound(
+            rebaseLocalClockOnDurable(durableClock, vectorClock, op.clientId),
+          );
+        }
+        const entry = this._buildStoredEntry(operationToStore, source);
+        const writtenSeq = await tx.add(STORE_NAMES.OPS, entry);
+        await this._recordFullStateOpInTx(tx, entry.op, writtenSeq);
+        await tx.put(STORE_NAMES.STATE_CACHE, {
+          id: SINGLETON_KEY,
+          state: snapshot.state,
+          lastAppliedOpSeq: writtenSeq,
+          vectorClock: committedClock,
+          compactedAt: snapshot.compactedAt,
+          ...(snapshot.schemaVersion === undefined
+            ? {}
+            : { schemaVersion: snapshot.schemaVersion }),
+        } satisfies StateCacheEntry);
+        await tx.put(
+          STORE_NAMES.VECTOR_CLOCK,
+          {
+            clock: committedClock,
+            lastUpdate: snapshot.compactedAt,
+          } satisfies VectorClockEntry,
+          SINGLETON_KEY,
+        );
+        return writtenSeq;
+      });
+      this._vectorClockCache = { ...committedClock };
+      this._invalidateUnsyncedCache();
+      return seq;
+    } catch (e) {
+      this._handleAppendError(e);
+    }
+  }
+
+  /**
    * Atomically installs a validated legacy recovery as one replay anchor.
    * A crash must never leave the recovery operation without its matching
    * snapshot/vector clock, because the fail-closed recovery guard will then
@@ -773,42 +903,13 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     op: Operation,
     state: unknown,
   ): Promise<number> {
-    await this._ensureInit();
-    const now = Date.now();
-    try {
-      const seq = await this._adapter.transaction(
-        [STORE_NAMES.OPS, STORE_NAMES.STATE_CACHE, STORE_NAMES.VECTOR_CLOCK],
-        'readwrite',
-        async (tx) => {
-          const writtenSeq = await tx.add(
-            STORE_NAMES.OPS,
-            this._buildStoredEntry(op, 'local'),
-          );
-          await tx.put(STORE_NAMES.STATE_CACHE, {
-            id: SINGLETON_KEY,
-            state,
-            lastAppliedOpSeq: writtenSeq,
-            vectorClock: op.vectorClock,
-            compactedAt: now,
-            schemaVersion: op.schemaVersion,
-          } satisfies StateCacheEntry);
-          await tx.put(
-            STORE_NAMES.VECTOR_CLOCK,
-            {
-              clock: op.vectorClock,
-              lastUpdate: now,
-            } satisfies VectorClockEntry,
-            SINGLETON_KEY,
-          );
-          return writtenSeq;
-        },
-      );
-      this._vectorClockCache = { ...op.vectorClock };
-      this._invalidateUnsyncedCache();
-      return seq;
-    } catch (e) {
-      this._handleAppendError(e);
-    }
+    const snapshot = {
+      state,
+      vectorClock: op.vectorClock,
+      compactedAt: Date.now(),
+      schemaVersion: op.schemaVersion,
+    };
+    return this._appendOperationAndSnapshot(op, 'local', snapshot, op.vectorClock);
   }
 
   async appendBatch(
@@ -1136,13 +1237,18 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
    *
    * Batch order is durable sequence order. Conflict resolution relies on this
    * to persist remote loser rows before the local compensations that supersede
-   * them, without exposing a crash point between the two groups.
+   * them, without exposing a crash point between the two groups. Superseded
+   * predecessor IDs can be rejected in that same transaction. Missing or
+   * inactive IDs abort the commit so callers cannot mistake a partial recovery
+   * for success.
    */
   async appendMixedSourceBatchSkipDuplicates(
     batches: readonly MixedSourceOperationBatch[],
+    options?: { rejectOpIds?: readonly string[] },
   ): Promise<{ written: MixedSourceWrittenOperation[]; skippedCount: number }> {
     const nonEmptyBatches = batches.filter((batch) => batch.ops.length > 0);
-    if (nonEmptyBatches.length === 0) {
+    const rejectOpIds = [...new Set(options?.rejectOpIds ?? [])];
+    if (nonEmptyBatches.length === 0 && rejectOpIds.length === 0) {
       return { written: [], skippedCount: 0 };
     }
 
@@ -1167,9 +1273,37 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     const written: MixedSourceWrittenOperation[] = [];
     let skippedCount = 0;
     let committedClock: VectorClock | undefined;
+    const committedAt = Date.now();
 
     try {
       await this._adapter.transaction(storeNames, 'readwrite', async (tx) => {
+        const entriesToReject: StoredOperationLogEntry[] = [];
+        for (const opId of rejectOpIds) {
+          const entry = await tx.getFromIndex<StoredOperationLogEntry>(
+            STORE_NAMES.OPS,
+            OPS_INDEXES.BY_ID,
+            opId,
+          );
+          if (!entry) {
+            throw new Error(`Cannot atomically reject missing operation ${opId}`);
+          }
+          if (
+            entry.source !== 'local' ||
+            entry.syncedAt !== undefined ||
+            entry.rejectedAt !== undefined ||
+            entry.reducerRejectedAt !== undefined
+          ) {
+            throw new Error(
+              `Cannot atomically reject operation ${opId} because it is not an active pending local operation`,
+            );
+          }
+          entriesToReject.push(entry);
+        }
+        for (const entry of entriesToReject) {
+          entry.rejectedAt = committedAt;
+          await tx.put(STORE_NAMES.OPS, entry);
+        }
+
         const currentClockEntry = hasLocalOps
           ? await tx.get<VectorClockEntry>(STORE_NAMES.VECTOR_CLOCK, SINGLETON_KEY)
           : undefined;
@@ -1216,7 +1350,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
           committedClock = runningClock;
           await tx.put(
             STORE_NAMES.VECTOR_CLOCK,
-            { clock: runningClock, lastUpdate: Date.now() } satisfies VectorClockEntry,
+            { clock: runningClock, lastUpdate: committedAt } satisfies VectorClockEntry,
             SINGLETON_KEY,
           );
         }
@@ -1227,6 +1361,9 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
 
     if (committedClock) {
       this._vectorClockCache = { ...committedClock };
+    }
+    if (rejectOpIds.length > 0) {
+      this._invalidateUnsyncedCache();
     }
     return { written, skippedCount };
   }

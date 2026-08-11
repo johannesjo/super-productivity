@@ -54,6 +54,12 @@ export type DialogResult = string | undefined;
 
 export interface DialogCfg {
   title?: string;
+  /**
+   * Rich HTML sanitized by the host before rendering, rebuilt from an allowlist.
+   * Semantic HTML, native form controls and inline layout styles are preserved;
+   * scripts, event-handler attributes, unsafe URLs, inline `<svg>` and `style`
+   * values containing `url(` are removed. Escape untrusted values yourself.
+   */
   htmlContent?: string;
   content?: string;
   okBtnLabel?: string;

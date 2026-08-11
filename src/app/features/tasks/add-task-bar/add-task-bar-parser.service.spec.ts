@@ -5,6 +5,8 @@ import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { TaskReminderOptionId } from '../task.model';
+import { findSpringForwardSunday } from '../dst.test-helper';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('AddTaskBarParserService', () => {
   let service: AddTaskBarParserService;
@@ -26,11 +28,14 @@ describe('AddTaskBarParserService', () => {
       'updateRepeatSetting',
       'clearRepeatSetting',
       'updateSyntaxHighlight',
+      'updateRemindOption',
       'isAutoDetected',
       'state',
+      'inputTxt',
     ]);
 
     mockStateServiceSpy.isAutoDetected.and.returnValue(false);
+    mockStateServiceSpy.inputTxt.and.returnValue('');
 
     // Default state return value
     const defaultMockState = {
@@ -149,7 +154,7 @@ describe('AddTaskBarParserService', () => {
           cleanText: null,
           remindOption: null,
           attachments: [],
-          repeatQuickSetting: null,
+          repeat: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -187,7 +192,7 @@ describe('AddTaskBarParserService', () => {
           cleanText: null,
           remindOption: null,
           attachments: [],
-          repeatQuickSetting: null,
+          repeat: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -222,7 +227,7 @@ describe('AddTaskBarParserService', () => {
           cleanText: null,
           remindOption: null,
           attachments: [],
-          repeatQuickSetting: null,
+          repeat: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -309,7 +314,7 @@ describe('AddTaskBarParserService', () => {
           cleanText: null,
           remindOption: null,
           attachments: [],
-          repeatQuickSetting: null,
+          repeat: null,
         });
 
         await service.parseAndUpdateText(
@@ -341,7 +346,7 @@ describe('AddTaskBarParserService', () => {
           cleanText: null,
           remindOption: null,
           attachments: [],
-          repeatQuickSetting: null,
+          repeat: null,
         });
 
         await service.parseAndUpdateText(
@@ -802,6 +807,92 @@ describe('AddTaskBarParserService', () => {
       });
     });
 
+    describe('removal from the ranges the parser consumed', () => {
+      const cfg = {
+        isEnableProject: true,
+        isEnableDue: true,
+        isEnableDeadline: true,
+        isEnableTag: true,
+      } as ShortSyntaxConfig;
+      const defaultProject = {
+        id: 'default-project',
+        title: 'Default Project',
+      } as Project;
+      const baseState = {
+        projectId: 'default-project',
+        tagIds: [],
+        tagIdsFromTxt: [],
+        newTagTitles: [],
+        date: null,
+        time: null,
+        spent: null,
+        estimate: null,
+        cleanText: null,
+        remindOption: null,
+        attachments: [],
+        repeat: null,
+        deadlineDate: null,
+        deadlineTime: null,
+        deadlineRemindOption: null,
+      };
+
+      const parse = async (text: string): Promise<void> => {
+        mockStateService.state.and.returnValue(baseState as any);
+        await service.parseAndUpdateText(text, cfg, [], [], defaultProject);
+      };
+
+      // A whitespace-delimited fallback truncates these, leaving the tail words
+      // behind in the task title
+      it('should remove a multi-word due token whole', async () => {
+        const input = 'Call mom @next friday';
+        await parse(input);
+        expect(service.removeShortSyntaxFromInput(input, 'date')).toBe('Call mom');
+      });
+
+      it('should remove a recurrence phrase whole when clearing the date', async () => {
+        const input = 'Water plants @every 2 fridays';
+        await parse(input);
+        expect(service.removeShortSyntaxFromInput(input, 'date')).toBe('Water plants');
+      });
+
+      it('should remove a multi-word deadline token whole', async () => {
+        const input = 'Taxes !next friday';
+        await parse(input);
+        expect(service.removeShortSyntaxFromInput(input, 'deadline')).toBe('Taxes');
+      });
+
+      it('should leave the input alone when the parser consumed nothing of that type', async () => {
+        const input = 'Water plants @every 2 fridays';
+        await parse(input);
+        expect(service.removeShortSyntaxFromInput(input, 'deadline')).toBe(input);
+      });
+
+      it('should fall back to token removal when the ranges are for other text', async () => {
+        await parse('Call mom @next friday');
+        // Ranges pinned to the parsed text, so a newer input must not use them
+        expect(service.removeShortSyntaxFromInput('Call dad @today', 'date')).toBe(
+          'Call dad',
+        );
+      });
+
+      // Offsets applied to text they were not computed for cut at arbitrary
+      // positions — the whitespace collapse hides that in same-length inputs
+      it('should not slice an unrelated text with stale ranges', async () => {
+        await parse('a @next friday');
+        expect(
+          service.removeShortSyntaxFromInput('Buy milk and eggs for dinner', 'date'),
+        ).toBe('Buy milk and eggs for dinner');
+      });
+
+      // An estimate inside a due phrase splits it into two ranges of one type,
+      // so the deletions have to run back to front or the second one is shifted
+      it('should remove two ranges of the same type without shifting', async () => {
+        const input = 'Task @tomorrow 1h evening';
+        await parse(input);
+        expect(service.removeShortSyntaxFromInput(input, 'date')).toBe('Task 1h');
+      });
+    });
+
     describe('date removal', () => {
       it('should remove date syntax', async () => {
         const input = 'Task @today @16:30 @2024-01-15';
@@ -985,7 +1076,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1020,7 +1111,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1057,7 +1148,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1092,7 +1183,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1126,7 +1217,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1244,7 +1335,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1278,7 +1369,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1312,7 +1403,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1344,7 +1435,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1377,7 +1468,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1420,7 +1511,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1448,7 +1539,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1496,7 +1587,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1538,7 +1629,7 @@ describe('AddTaskBarParserService', () => {
         cleanText: null,
         remindOption: null,
         attachments: [],
-        repeatQuickSetting: null,
+        repeat: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -1559,6 +1650,7 @@ describe('AddTaskBarParserService', () => {
   });
 
   describe('repeat short syntax', () => {
+    const MENU_PICK = { type: 'PRESET' as const, quickSetting: 'DAILY' as const };
     const cfg = {
       isEnableProject: true,
       isEnableDue: true,
@@ -1577,11 +1669,45 @@ describe('AddTaskBarParserService', () => {
       cleanText: null,
       remindOption: null,
       attachments: [],
-      repeatQuickSetting: null,
+      repeat: null,
       deadlineDate: null,
       deadlineTime: null,
       deadlineRemindOption: null,
     };
+
+    it('should publish the typed time when the anchor day springs forward', async () => {
+      // Guards the dueTimeStr passthrough: on a DST spring-forward day the
+      // typed time does not exist, so deriving the time from the dueWithTime
+      // timestamp reads back an hour shifted, and that string becomes the
+      // repeat config's startTime. Only a real transition day can tell the
+      // passthrough and the timestamp read-back apart.
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        // Timezone without a spring-forward transition (UTC, Tokyo).
+        return;
+      }
+      const friday = new Date(gap.sunday);
+      friday.setDate(friday.getDate() - 2);
+      friday.setHours(10, 0, 0, 0);
+      jasmine.clock().install();
+      jasmine.clock().mockDate(friday);
+      try {
+        mockStateService.state.and.returnValue(baseState as any);
+        await service.parseAndUpdateText(
+          `Backup @every sunday ${gap.missingHour}:30am`,
+          cfg,
+          [],
+          [],
+          defaultProject,
+        );
+        expect(mockStateService.updateDate).toHaveBeenCalledWith(
+          getDbDateStr(gap.sunday),
+          `0${gap.missingHour}:30`,
+        );
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
 
     it('should set repeat setting from "@every friday"', async () => {
       mockStateService.state.and.returnValue(baseState as any);
@@ -1592,13 +1718,14 @@ describe('AddTaskBarParserService', () => {
         [],
         defaultProject,
       );
-      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith(
-        'WEEKLY_CURRENT_WEEKDAY',
-      );
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith({
+        type: 'PRESET',
+        quickSetting: 'WEEKLY_CURRENT_WEEKDAY',
+      });
       expect(mockStateService.updateCleanText).toHaveBeenCalledWith('Water plants');
     });
 
-    it('should NOT set a repeat setting for interval phrases like "@every 2 weeks"', async () => {
+    it('should set an interval repeat setting from "@every 2 weeks"', async () => {
       mockStateService.state.and.returnValue(baseState as any);
       await service.parseAndUpdateText(
         'Review @every 2 weeks',
@@ -1607,7 +1734,51 @@ describe('AddTaskBarParserService', () => {
         [],
         defaultProject,
       );
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith({
+        type: 'INTERVAL',
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 2,
+      });
+      expect(mockStateService.updateCleanText).toHaveBeenCalledWith('Review');
+    });
+
+    it('should not re-publish an unchanged interval on the next keystroke', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      await service.parseAndUpdateText(
+        'Review @every 2 weeks',
+        cfg,
+        [],
+        [],
+        defaultProject,
+      );
+      mockStateService.state.and.returnValue({
+        ...baseState,
+        repeat: { type: 'INTERVAL', repeatCycle: 'WEEKLY', repeatEvery: 2 },
+      } as any);
+      mockStateService.updateRepeatSetting.calls.reset();
+      await service.parseAndUpdateText(
+        'Review it @every 2 weeks',
+        cfg,
+        [],
+        [],
+        defaultProject,
+      );
       expect(mockStateService.updateRepeatSetting).not.toHaveBeenCalled();
+    });
+
+    it('should collapse an interval of 1 to the matching preset', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      await service.parseAndUpdateText(
+        'Review @every 1 week',
+        cfg,
+        [],
+        [],
+        defaultProject,
+      );
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith({
+        type: 'PRESET',
+        quickSetting: 'WEEKLY_CURRENT_WEEKDAY',
+      });
     });
 
     it('should clear the repeat setting when the syntax is removed again', async () => {
@@ -1621,7 +1792,7 @@ describe('AddTaskBarParserService', () => {
       );
       mockStateService.state.and.returnValue({
         ...baseState,
-        repeatQuickSetting: 'WEEKLY_CURRENT_WEEKDAY',
+        repeat: { type: 'PRESET', quickSetting: 'WEEKLY_CURRENT_WEEKDAY' },
       } as any);
       await service.parseAndUpdateText('Water plants', cfg, [], [], defaultProject);
       expect(mockStateService.clearRepeatSetting).toHaveBeenCalled();
@@ -1640,13 +1811,263 @@ describe('AddTaskBarParserService', () => {
       expect(mockStateService.clearRepeatSetting).toHaveBeenCalled();
     });
 
+    it('should strip the phrase a menu pick contradicts', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Water plants @every 2 weeks';
+      mockStateService.inputTxt.and.returnValue(input);
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+
+      service.applyUserRepeatPick(MENU_PICK);
+
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith(
+        MENU_PICK,
+        'Water plants',
+      );
+    });
+
+    it('should strip the time the phrase absorbed along with it', async () => {
+      // The recurrence consumed "@daily 6am" whole, so removing only the phrase
+      // orphans "6am" into the title of the task and of its repeat config
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Journal @daily 6am';
+      mockStateService.inputTxt.and.returnValue(input);
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+
+      service.applyUserRepeatPick(MENU_PICK);
+
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith(
+        MENU_PICK,
+        'Journal',
+      );
+    });
+
+    it('should strip the absorbed time when clearing the recurrence too', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Call @every friday 3pm';
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+
+      expect(service.removeShortSyntaxFromInput(input, 'repeat')).toBe('Call');
+    });
+
+    it('should keep the date the stripped phrase anchored', async () => {
+      // The pick takes the whole due token with it, so the date that token
+      // produced lives on in the state alone — the follow-up parse must not
+      // read its absence from the text as the user clearing it
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Journal @daily 6am';
+      mockStateService.inputTxt.and.returnValue(input);
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+      const [anchoredDate, anchoredTime] = mockStateService.updateDate.calls.mostRecent()
+        .args as [string, string];
+
+      service.applyUserRepeatPick(MENU_PICK);
+      mockStateService.state.and.returnValue({
+        ...baseState,
+        repeat: MENU_PICK,
+        date: anchoredDate,
+        time: anchoredTime,
+      } as any);
+      mockStateService.updateDate.calls.reset();
+
+      await service.parseAndUpdateText('Journal', cfg, [], [], defaultProject);
+
+      expect(anchoredTime).toBe('06:00');
+      expect(mockStateService.updateDate).not.toHaveBeenCalled();
+    });
+
+    it('should leave a plain date alone when a recurrence is picked', async () => {
+      // A date the user typed is not what the repeat control overrides — only a
+      // recurrence in the text is, and this text has none
+      mockStateService.state.and.returnValue(baseState as any);
+      const input = 'Call mom @tomorrow';
+      mockStateService.inputTxt.and.returnValue(input);
+      await service.parseAndUpdateText(input, cfg, [], [], defaultProject);
+
+      service.applyUserRepeatPick(MENU_PICK);
+
+      expect(mockStateService.updateRepeatSetting).toHaveBeenCalledWith(MENU_PICK, input);
+    });
+
+    it('should keep a menu pick that replaced a parsed recurrence phrase', async () => {
+      // The pick strips the phrase it contradicts, so the follow-up parse sees
+      // it vanish — which must not be read as "the user deleted their syntax"
+      mockStateService.state.and.returnValue(baseState as any);
+      mockStateService.inputTxt.and.returnValue('Water plants @every 2 weeks');
+      await service.parseAndUpdateText(
+        'Water plants @every 2 weeks',
+        cfg,
+        [],
+        [],
+        defaultProject,
+      );
+
+      service.applyUserRepeatPick(MENU_PICK);
+      mockStateService.state.and.returnValue({ ...baseState, repeat: MENU_PICK } as any);
+      mockStateService.updateRepeatSetting.calls.reset();
+
+      await service.parseAndUpdateText('Water plants', cfg, [], [], defaultProject);
+
+      expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
+      expect(mockStateService.updateRepeatSetting).not.toHaveBeenCalled();
+    });
+
+    it('should keep a pick made while the parse for the pre-strip text is in flight', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      mockStateService.inputTxt.and.returnValue('Water plants @every 2 weeks');
+      // No await: the pick lands in the middle of this parse, which was started
+      // for the text the pick is about to strip
+      const inFlight = service.parseAndUpdateText(
+        'Water plants @every 2 weeks',
+        cfg,
+        [],
+        [],
+        defaultProject,
+      );
+
+      service.applyUserRepeatPick(MENU_PICK);
+      mockStateService.updateRepeatSetting.calls.reset();
+      await inFlight;
+
+      // The stale parse published nothing, so the pick still stands
+      expect(mockStateService.updateRepeatSetting).not.toHaveBeenCalled();
+      expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
+    });
+
+    it('should keep a dialog-picked deadline that replaced parsed deadline syntax', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      mockStateService.inputTxt.and.returnValue('Taxes !friday');
+      await service.parseAndUpdateText('Taxes !friday', cfg, [], [], defaultProject);
+
+      service.applyUserDeadlinePick('2026-08-31', null, null);
+      mockStateService.state.and.returnValue({
+        ...baseState,
+        deadlineDate: '2026-08-31',
+      } as any);
+      mockStateService.updateDeadline.calls.reset();
+
+      await service.parseAndUpdateText('Taxes', cfg, [], [], defaultProject);
+
+      expect(mockStateService.updateDeadline).not.toHaveBeenCalled();
+    });
+
+    it('should keep a menu-picked estimate that replaced parsed estimate syntax', async () => {
+      mockStateService.state.and.returnValue(baseState as any);
+      mockStateService.inputTxt.and.returnValue('Task 30m');
+      await service.parseAndUpdateText('Task 30m', cfg, [], [], defaultProject);
+
+      service.applyUserEstimatePick(2 * 60 * 60 * 1000);
+      mockStateService.state.and.returnValue({
+        ...baseState,
+        estimate: 2 * 60 * 60 * 1000,
+      } as any);
+      mockStateService.updateEstimate.calls.reset();
+
+      await service.parseAndUpdateText('Task', cfg, [], [], defaultProject);
+
+      expect(mockStateService.updateEstimate).not.toHaveBeenCalled();
+    });
+
+    it('should keep a recurrence whose phrase a picked date strips', async () => {
+      const repeat = {
+        type: 'INTERVAL' as const,
+        repeatCycle: 'WEEKLY' as const,
+        repeatEvery: 2,
+      };
+      mockStateService.inputTxt.and.returnValue('Water plants @every 2 fridays');
+      mockStateService.state.and.returnValue(baseState as any);
+      await service.parseAndUpdateText(
+        'Water plants @every 2 fridays',
+        cfg,
+        [],
+        [],
+        defaultProject,
+      );
+
+      mockStateService.state.and.returnValue({ ...baseState, repeat } as any);
+      service.applyUserDatePick('2026-08-31', null, null);
+      mockStateService.state.and.returnValue({
+        ...baseState,
+        repeat,
+        date: '2026-08-31',
+      } as any);
+
+      await service.parseAndUpdateText('Water plants', cfg, [], [], defaultProject);
+
+      expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
+    });
+
     it('should preserve a menu-selected repeat setting on unrelated text', async () => {
       mockStateService.state.and.returnValue({
         ...baseState,
-        repeatQuickSetting: 'DAILY',
+        repeat: { type: 'PRESET', quickSetting: 'DAILY' },
       } as any);
       await service.parseAndUpdateText('Plain task', cfg, [], [], defaultProject);
       expect(mockStateService.clearRepeatSetting).not.toHaveBeenCalled();
+    });
+  });
+
+  // A pick that lands while a parse is still in flight has to survive it. The
+  // parse publishes state values it fell back to, and reading them before the
+  // await means reading the values the pick has since replaced — with nothing
+  // to correct it afterwards when the pick left the text unchanged, because an
+  // unchanged input queues no parse.
+  //
+  // Runs against the real state service: what has to hold is that the state a
+  // pick writes is still there once the parse lands, which a mocked state()
+  // cannot show.
+  describe('picks against real add bar state', () => {
+    let realState: AddTaskBarStateService;
+    const cfg = {
+      isEnableProject: true,
+      isEnableDue: true,
+      isEnableTag: true,
+    } as ShortSyntaxConfig;
+    const defaultProject = { id: 'default-project', title: 'Default Project' } as Project;
+
+    const parse = (text: string, defaultDate?: string): Promise<void> =>
+      service.parseAndUpdateText(text, cfg, [], [], defaultProject, defaultDate);
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [AddTaskBarParserService, AddTaskBarStateService],
+      });
+      service = TestBed.inject(AddTaskBarParserService);
+      realState = TestBed.inject(AddTaskBarStateService);
+    });
+
+    it('should not let a parse that was in flight during a date pick republish the old date', async () => {
+      realState.updateInputTxt('Standup');
+      await parse('Standup');
+      realState.updateDate('2027-03-27');
+
+      // Not awaited: the pick lands while this parse is still waiting for the
+      // chrono-node chunk. There is no due syntax in the text, so the pick
+      // strips nothing and queues no replacement parse — this one is still the
+      // parse that will publish.
+      const inFlight = parse('Standup');
+      service.applyUserDatePick('2027-03-29', null, null);
+      expect(realState.state().date).toBe('2027-03-29');
+
+      await inFlight;
+
+      expect(realState.state().date).toBe('2027-03-29');
+    });
+
+    it('should not let it republish any other value the pick replaced either', async () => {
+      // Same shape, on a control with no date anywhere near it: every value the
+      // parse falls back to came from the snapshot it took before awaiting
+      realState.updateInputTxt('Taxes');
+      realState.updateDeadline('2027-04-01', null);
+      await parse('Taxes');
+
+      const inFlight = parse('Taxes');
+      service.applyUserDeadlinePick('2027-05-01', null, null);
+      expect(realState.state().deadlineDate).toBe('2027-05-01');
+
+      await inFlight;
+
+      expect(realState.state().deadlineDate).toBe('2027-05-01');
     });
   });
 
@@ -1669,7 +2090,7 @@ describe('AddTaskBarParserService', () => {
       cleanText: null,
       remindOption: null,
       attachments: [],
-      repeatQuickSetting: null,
+      repeat: null,
       repeatEvery: null,
       deadlineDate: null,
       deadlineTime: null,
@@ -1746,13 +2167,26 @@ describe('AddTaskBarParserService', () => {
       );
     });
 
+    it('should remove interval phrases', () => {
+      const expected: [string, string][] = [
+        ['Review @every 2 weeks', 'Review'],
+        ['Water flowers @every 3 days', 'Water flowers'],
+        ['Water plants @every 2 fridays', 'Water plants'],
+      ];
+      for (const [input, cleaned] of expected) {
+        expect(service.removeShortSyntaxFromInput(input, 'repeat'))
+          .withContext(input)
+          .toBe(cleaned);
+      }
+    });
+
     // The button renders for any repeat setting, including menu-selected ones,
     // so it must not delete phrases the parser never treated as a recurrence
     it('should leave phrases the parser does not read as a recurrence', () => {
       const untouched = [
-        'Review @every 2 weeks',
-        'Review @every 3 days',
         'Ship @every quarter',
+        'Review @every 0 days',
+        'Standup @every 2 weekdays',
       ];
       for (const input of untouched) {
         expect(service.removeShortSyntaxFromInput(input, 'repeat'))

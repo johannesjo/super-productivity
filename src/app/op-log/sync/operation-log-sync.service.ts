@@ -14,11 +14,7 @@ import {
 } from '../persistence/operation-log-store.service';
 import { BackupService } from '../backup/backup.service';
 import { OpLog } from '../../core/log';
-import {
-  OperationSyncCapable,
-  SyncProviderBase,
-} from '../sync-providers/provider.interface';
-import { SyncProviderId } from '../sync-providers/provider.const';
+import { OperationSyncCapable } from '../sync-providers/provider.interface';
 import { OperationLogUploadService } from './operation-log-upload.service';
 import { DownloadOutcome, UploadOutcome } from '../core/types/sync-results.types';
 import { OperationLogDownloadService } from './operation-log-download.service';
@@ -35,6 +31,7 @@ import { OperationWriteFlushService } from './operation-write-flush.service';
 import { RepairSyncContextService } from '../validation/repair-sync-context.service';
 import { RemoteOpsProcessingService } from './remote-ops-processing.service';
 import { ConflictJournalService } from './conflict-journal.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { VectorClockService } from './vector-clock.service';
 import {
   DownloadResultForRejection,
@@ -173,6 +170,7 @@ export class OperationLogSyncService {
   // Extracted services
   private remoteOpsProcessingService = inject(RemoteOpsProcessingService);
   private conflictJournalService = inject(ConflictJournalService);
+  private localDraftService = inject(LocalDraftService);
   private vectorClockService = inject(VectorClockService);
   private rejectedOpsHandlerService = inject(RejectedOpsHandlerService);
   private syncHydrationService = inject(SyncHydrationService);
@@ -467,6 +465,7 @@ export class OperationLogSyncService {
           return {
             kind: 'completed',
             newOpsCount: outcome.newOpsCount,
+            localWinOpsCreated: outcome.localWinOpsCreated,
             allOpClocks: outcome.allOpClocks,
             snapshotVectorClock: outcome.snapshotVectorClock,
             latestServerSeq,
@@ -516,8 +515,8 @@ export class OperationLogSyncService {
     const pendingOps = await this.opLogStore.getUnsynced();
     this.superSyncStatusService.updatePendingOpsStatus(pendingOps.length > 0);
 
-    // Check for encryption state mismatch in piggybacked ops (another client disabled encryption)
-    await this.handleEncryptionStateMismatch(
+    // Detect (warn-only) an encryption-state mismatch in piggybacked ops — never auto-disable
+    await this.warnOnEncryptionStateMismatch(
       syncProvider,
       result.piggybackHasOnlyUnencryptedData,
     );
@@ -711,6 +710,27 @@ export class OperationLogSyncService {
       const unsyncedOps = await this.opLogStore.getUnsynced();
       const hasLocalChanges = unsyncedOps.length > 0;
 
+      // Nothing from this sync is persisted yet, so these live reads reflect
+      // whether the client completed a prior sync cycle.
+      const isNeverSyncedAtSyncStart =
+        options?.isNeverSynced ?? !(await this.opLogStore.hasSyncedOps());
+      // A local state-cache snapshot is only a last-synced baseline after a
+      // completed sync: fresh clients can already have a snapshot containing
+      // local changes, and using its clock would suppress the count-free
+      // first-sync overwrite warning (#9166). Missing synced op rows cannot
+      // prove "never synced" either (a snapshot-only first sync commits zero
+      // synced rows, and compaction can prune them all later), so also consult
+      // the persisted per-provider cursor, which only advances after a
+      // completed, durably applied sync (setLastServerSeq below). Captured once
+      // here so every conflict surfaced during this snapshot attempt uses the
+      // same baseline decision, including the late-durable-op recheck inside
+      // _hydrateSnapshotExclusive().
+      const hasCompletedSyncBaseline =
+        !isNeverSyncedAtSyncStart || (await syncProvider.getLastServerSeq()) > 0;
+      const lastSyncedVectorClock = hasCompletedSyncBaseline
+        ? ((await this.vectorClockService.getSnapshotVectorClock()) ?? null)
+        : null;
+
       // Collected here, applied AFTER hydrateFromRemoteSync succeeds so a
       // hydration failure doesn't permanently drop discardable startup ops
       // while leaving the user without the remote snapshot.
@@ -738,10 +758,6 @@ export class OperationLogSyncService {
             .map((entry) => entry.op.entityId)
             .filter((id): id is string => id !== undefined),
         );
-        // Nothing from this sync is persisted yet, so this live read reflects
-        // whether the client completed a prior sync cycle.
-        const isNeverSyncedAtSyncStart =
-          options?.isNeverSynced ?? !(await this.opLogStore.hasSyncedOps());
         const pendingOpClassification = {
           hasCompletedInitialSync: !isNeverSyncedAtSyncStart,
         };
@@ -769,13 +785,6 @@ export class OperationLogSyncService {
             result.snapshotVectorClock,
             FILE_BASED_SYNC_CONSTANTS.AUTO_MERGE_CONCURRENT_SNAPSHOT,
           );
-
-          // The local snapshot's vector clock is this client's last-synced
-          // baseline: unsynced ops sit on top of it, so the dialog can compute
-          // changes-since-last-sync as a per-client delta instead of summing
-          // the whole (lifetime) clock (SPAP-7). Undefined snapshot → null.
-          const lastSyncedVectorClock =
-            (await this.vectorClockService.getSnapshotVectorClock()) ?? null;
 
           if (gate === 'keep-local') {
             // Local strictly dominates the snapshot: keep local, no dialog. The
@@ -923,7 +932,12 @@ export class OperationLogSyncService {
         'snapshot hydration',
       );
       await this.writeFlushService.flushThenRunExclusive(() =>
-        this._hydrateSnapshotExclusive(result, initialUnsyncedOpIds, snapshotIncludedOps),
+        this._hydrateSnapshotExclusive(
+          result,
+          initialUnsyncedOpIds,
+          snapshotIncludedOps,
+          lastSyncedVectorClock,
+        ),
       );
 
       // Now that the remote snapshot is applied, it's safe to drop the
@@ -1210,8 +1224,8 @@ export class OperationLogSyncService {
     const pendingOps = await this.opLogStore.getUnsynced();
     this.superSyncStatusService.updatePendingOpsStatus(pendingOps.length > 0);
 
-    // Check for encryption state mismatch (another client disabled encryption)
-    await this.handleEncryptionStateMismatch(
+    // Detect (warn-only) an encryption-state mismatch — never auto-disable local encryption
+    await this.warnOnEncryptionStateMismatch(
       syncProvider,
       result.serverHasOnlyUnencryptedData,
     );
@@ -1348,6 +1362,10 @@ export class OperationLogSyncService {
     },
     initialUnsyncedOpIds: Set<string>,
     snapshotIncludedOps: Operation[],
+    // Baseline decision captured by the caller before the snapshot attempt, so
+    // the late-durable-op conflict below classifies never-synced clients the
+    // same way as the pre-hydration conflict gate (#9166).
+    lastSyncedVectorClock: Record<string, number> | null,
   ): Promise<void> {
     let deferredActionsOverwrittenBySnapshot: ReturnType<typeof getDeferredActions> = [];
     let didReplaceArchive = false;
@@ -1367,8 +1385,6 @@ export class OperationLogSyncService {
           (entry) => !initialUnsyncedOpIds.has(entry.op.id),
         );
         if (lateDurableOps.length > 0) {
-          const lastSyncedVectorClock =
-            (await this.vectorClockService.getSnapshotVectorClock()) ?? null;
           throw new LocalDataConflictError(
             pendingAtHydrationCutoff.length,
             result.snapshotState as Record<string, unknown>,
@@ -1378,14 +1394,11 @@ export class OperationLogSyncService {
           );
         }
 
-        // Hydrate state from snapshot - DON'T create SYNC_IMPORT for file-based
-        // bootstrap. Creating it would trigger clean-slate filtering of concurrent
-        // ops from other clients.
+        // Hydrate state from snapshot. No SYNC_IMPORT is created, so
+        // concurrent ops from other clients are not clean-slate filtered.
         await this.syncHydrationService.hydrateFromRemoteSync(
           result.snapshotState as Record<string, unknown>,
           result.snapshotVectorClock,
-          false,
-          undefined,
           {
             snapshotIncludedOps,
             // Capture only actions that ran on the old state. Actions emitted
@@ -1975,12 +1988,11 @@ export class OperationLogSyncService {
               'OperationLogSyncService: Force download received snapshotState. Hydrating...',
             );
 
-            // Hydrate from snapshot - DON'T create SYNC_IMPORT since we're
-            // accepting remote state, not uploading local state.
+            // Hydrate from snapshot. We're accepting remote state, not
+            // uploading local state, so no SYNC_IMPORT is created.
             await this.syncHydrationService.hydrateFromRemoteSync(
               snapshotState,
               result.snapshotVectorClock,
-              false, // Don't create SYNC_IMPORT
             );
 
             // Record only operations already represented by the snapshot. A
@@ -2229,6 +2241,10 @@ export class OperationLogSyncService {
     // keep the badge count and offer review actions against replaced state.
     // clearAll swallows its own errors and must not fail the rebuild.
     await this.conflictJournalService.clearAll();
+    // Same reasoning for note drafts: this "Use Server Data" path replays the
+    // complete server history over live state, replacing every note, and it
+    // does NOT funnel through importCompleteBackup.
+    this.localDraftService.deleteDraftsForActiveProfile();
     return hasDurableRecovery;
   }
 
@@ -2446,14 +2462,18 @@ export class OperationLogSyncService {
   }
 
   /**
-   * Checks if there's an encryption state mismatch between local config and server data.
-   * If the server has only unencrypted data but local config has encryption enabled,
-   * this means another client disabled encryption. Updates local config to match.
+   * Detects an encryption-state mismatch: the server has only unencrypted data
+   * while local config has encryption enabled. Detect-and-warn ONLY — it never
+   * mutates config. The "server is unencrypted" signal is attacker-controllable
+   * (GHSA-vrc7-775g-ggqc), so adopting a plaintext remote must be a deliberate
+   * user action in Sync settings, never an automatic downgrade. The download
+   * path additionally fails closed on the plaintext blob itself
+   * (PlaintextWhenEncryptionExpectedError).
    *
-   * @param syncProvider - The sync provider to check and update
+   * @param syncProvider - The sync provider to check
    * @param serverHasOnlyUnencryptedData - Whether all downloaded/piggybacked ops were unencrypted
    */
-  async handleEncryptionStateMismatch(
+  async warnOnEncryptionStateMismatch(
     syncProvider: OperationSyncCapable,
     serverHasOnlyUnencryptedData: boolean | undefined,
   ): Promise<void> {
@@ -2472,77 +2492,22 @@ export class OperationLogSyncService {
       return;
     }
 
-    // Mismatch detected: server has only unencrypted data but local has encryption enabled
+    // Mismatch detected: server has only unencrypted data but local has encryption enabled.
+    //
+    // GHSA-vrc7-775g-ggqc: NEVER auto-disable encryption to match a plaintext
+    // server. The "server is unencrypted" signal is attacker-controllable — a
+    // compromised remote or a MITM can strip encryption — so silently flipping
+    // the user's encryption setting off to match it is a downgrade that would
+    // leak subsequent uploads as plaintext. Encryption reflects the user's
+    // explicit intent; adopting a plaintext remote must be a deliberate action
+    // in Sync settings, never an automatic reaction. This was already the
+    // behavior for SuperSync (mandatory encryption); it now applies to every
+    // provider. The download path additionally fails closed on the plaintext
+    // blob itself (PlaintextWhenEncryptionExpectedError).
     OpLog.warn(
-      'OperationLogSyncService: Encryption state mismatch detected. ' +
-        'Server has only unencrypted data but local config has encryption enabled.',
-    );
-
-    // SuperSync: encryption is mandatory — never auto-disable it.
-    // An older unencrypted client or stale server must not downgrade encryption.
-    const activeProvider = this.providerManager.getActiveProvider();
-    if (activeProvider?.id === SyncProviderId.SuperSync) {
-      OpLog.warn(
-        'OperationLogSyncService: SuperSync requires encryption — ' +
-          'NOT auto-disabling. Server has stale unencrypted data.',
-      );
-      return;
-    }
-
-    // Non-SuperSync providers: allow auto-disable
-    OpLog.warn(
-      'OperationLogSyncService: Non-SuperSync provider — ' +
-        'updating local config to match server (disabling encryption).',
-    );
-
-    // Check if provider supports config updates using type guard
-    if (!this._isSyncProviderWithConfig(syncProvider)) {
-      OpLog.warn(
-        'OperationLogSyncService: Cannot update encryption config - ' +
-          'provider does not support privateCfg or setPrivateCfg.',
-      );
-      return;
-    }
-
-    // Load existing config
-    const existingCfg = await syncProvider.privateCfg.load();
-    if (!existingCfg) {
-      OpLog.warn(
-        'OperationLogSyncService: Cannot update encryption config - ' +
-          'failed to load existing config.',
-      );
-      return;
-    }
-
-    // Update config via providerManager to ensure currentProviderPrivateCfg$ observable is updated
-    await this.providerManager.setProviderConfig(syncProvider.id, {
-      ...existingCfg,
-      encryptKey: undefined,
-      isEncryptionEnabled: false,
-    });
-
-    OpLog.normal(
-      'OperationLogSyncService: Local encryption config updated to match server state.',
-    );
-
-    // Notify user - use WARNING since this is a security-relevant change
-    this.snackService.open({
-      type: 'WARNING',
-      msg: T.F.SYNC.S.ENCRYPTION_DISABLED_ON_OTHER_DEVICE,
-    });
-  }
-
-  /**
-   * Type guard to check if a sync provider supports config updates.
-   * Returns true if the provider has both privateCfg.load() and setPrivateCfg().
-   */
-  private _isSyncProviderWithConfig(
-    provider: OperationSyncCapable,
-  ): provider is OperationSyncCapable & SyncProviderBase<SyncProviderId> {
-    const providerWithCfg = provider as Partial<SyncProviderBase<SyncProviderId>>;
-    return (
-      typeof providerWithCfg.privateCfg?.load === 'function' &&
-      typeof providerWithCfg.setPrivateCfg === 'function'
+      'OperationLogSyncService: Encryption state mismatch detected — server has ' +
+        'only unencrypted data but local encryption is enabled. NOT auto-disabling; ' +
+        'the user must change this in Sync settings if intended.',
     );
   }
 }

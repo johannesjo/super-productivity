@@ -24,9 +24,18 @@ umask 077
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_DIR="${COMPOSE_DIR:-$(dirname "$SCRIPT_DIR")}"
-ALERT_EMAIL="${ALERT_EMAIL:-contact@super-productivity.com}"
+# No default recipient on purpose: this script ships in the repo and the image, so any
+# default address would silently mail a self-hoster's hostname, disk usage and container
+# state to whoever that address belongs to. Alerting is off until the operator opts in.
+ALERT_EMAIL="${ALERT_EMAIL:-}"
 MAX_QUERY_SECONDS="${MAX_QUERY_SECONDS:-120}"
 POOL_WARN_PCT="${POOL_WARN_PCT:-75}"
+
+if [ -z "$ALERT_EMAIL" ]; then
+  echo "health-alert: ALERT_EMAIL is not set, alerting is disabled." >&2
+  echo "  Enable it with: ALERT_EMAIL=you@example.com $0" >&2
+  exit 0
+fi
 
 CONFIG_PROBLEMS=""
 DB_CONFIG_OK=true
@@ -162,7 +171,14 @@ const main = async () => {
         `WITH pool_sessions AS (
        SELECT CASE
          WHEN state = 'active' THEN now() - query_start
-       END AS active_age
+       END AS active_age,
+       -- Long-running maintenance sessions are expected, so they must not page
+       -- anyone -- but they still occupy a real backend, which is the resource
+       -- the 2026-07-20 incident exhausted. Carrying the flag instead of
+       -- filtering the CTE is what keeps them out of "longQueryCount"/"longest"
+       -- while poolInUse below still counts every session.
+       application_name NOT LIKE 'supersync-migrator-%'
+         AND application_name <> 'supersync-monitor' AS pageable
        FROM pg_stat_activity
        WHERE state IN (
          'active',
@@ -173,13 +189,12 @@ const main = async () => {
          AND backend_type = 'client backend'
          AND datname = current_database()
          AND usename = current_user
-         AND application_name NOT LIKE 'supersync-migrator-%'
      )
      SELECT
        count(*) FILTER (
-         WHERE active_age > $1::integer * interval '1 second'
+         WHERE pageable AND active_age > $1::integer * interval '1 second'
        )::integer AS "longQueryCount",
-       COALESCE(round(extract(epoch FROM max(active_age))), 0)::integer AS "longest",
+       COALESCE(round(extract(epoch FROM max(active_age) FILTER (WHERE pageable))), 0)::integer AS "longest",
        count(*)::integer AS "poolInUse"
      FROM pool_sessions`,
         maxQuerySeconds,

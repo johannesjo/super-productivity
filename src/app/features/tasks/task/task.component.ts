@@ -518,7 +518,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
 
     // Dev-time sanity check: TODAY_TAG should NEVER be in task.tagIds (virtual tag pattern)
-    // Membership is determined by task.dueDay. See: docs/ai/today-tag-architecture.md
+    // Membership is determined by task.dueDay. See: ARCHITECTURE-DECISIONS.md Decision #2
     if (!environment.production) {
       if (this.task().tagIds.includes(TODAY_TAG.id)) {
         throw new Error('Task should not have TODAY_TAG in tagIds - it is a virtual tag');

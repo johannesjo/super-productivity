@@ -54,6 +54,7 @@ export {
   decrypt,
   encryptBatch,
   decryptBatch,
+  decryptBatchSettled,
   deriveKeyFromPassword,
   clearSessionKeyCache,
   getSessionKeyCacheStats,
@@ -62,7 +63,14 @@ export {
   setArgon2ParamsForTesting,
   setLegacyKdfWarningHandler,
 } from './encryption';
-export type { DerivedKey } from './encryption';
+export type { DerivedKey, DecryptSettledItem } from './encryption';
+
+// Structural ciphertext-transport classifier — used by the SuperSync server's
+// encrypted-only ingress gate (E2EE_REQUIRED). Shape check only, never proof.
+export {
+  isEncryptedPayloadTransportShape,
+  MIN_ENCRYPTED_PAYLOAD_TRANSPORT_BYTES,
+} from './encryption/transport-shape';
 
 // Generic error helpers.
 export { extractErrorMessage } from './error.util';

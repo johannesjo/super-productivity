@@ -1,4 +1,6 @@
-import { prisma, disconnectDb } from '../src/db';
+import { Prisma } from '@prisma/client';
+import { prisma, disconnectDb, reportMonitoringError } from './monitoring-db';
+import { newestOpsPerUser, resolveOperationScope } from './monitoring-scope';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,6 +9,8 @@ import { execSync, execFileSync } from 'child_process';
 
 const LOG_FILE_PATH = path.join(process.cwd(), 'logs', 'app.log');
 const USAGE_HISTORY_PATH = path.join(process.cwd(), 'logs', 'usage-history.jsonl');
+const USAGE_METRIC_VERSION = 2;
+const RECENT_OPS_PER_USER = 5;
 
 const maskEmail = (email: string): string => {
   const [local, domain] = email.split('@');
@@ -64,38 +68,26 @@ interface UserStorageRow {
   id: number;
   email: string;
   ops_bytes: bigint;
-  ops_count: bigint;
+  last_seq: number;
   snapshot_bytes: bigint;
   total_bytes: bigint;
 }
 
 interface OperationRow {
-  id: number;
+  id: string;
   user_id: number;
   action_type: string;
   op_type: string;
   entity_type: string;
   entity_id: string | null;
   payload_bytes: bigint;
-  payload_json_length: bigint;
   received_at: bigint;
 }
 
-interface EntityTypeBreakdownRow {
-  entity_type: string;
-  count: bigint;
-  total_bytes: bigint;
-  avg_bytes: bigint;
-  max_bytes: bigint;
-}
-
-interface LargestOperationRow {
-  id: number;
-  action_type: string;
-  entity_type: string;
-  entity_id: string | null;
-  payload_bytes: bigint;
-  payload: unknown;
+interface EntityTypeSummary {
+  count: number;
+  totalBytes: number;
+  maxBytes: number;
 }
 
 interface RecentUserRow {
@@ -134,11 +126,12 @@ interface UsageSnapshotUser {
   email: string;
   bytes: number;
   opsBytes: number;
-  opsCount: number;
+  lastSeq: number;
   snapshotBytes: number;
 }
 
 interface UsageSnapshot {
+  metricVersion?: number;
   timestamp: string;
   totalBytes: number;
   userCount: number;
@@ -186,8 +179,9 @@ const showStats = async (): Promise<void> => {
       tableSizes.forEach((t) => console.log(`  ${t.table}: ${t.size}`));
     }
   } catch (error) {
+    reportMonitoringError('Error:', error);
     console.log('Status: Disconnected ❌');
-    console.error('Error:', error);
+    process.exitCode = 1;
   }
 
   // Disk space
@@ -224,28 +218,22 @@ const showStats = async (): Promise<void> => {
 const showUsage = async (saveHistory = true, showFullEmails = false): Promise<void> => {
   console.log('\n--- User Storage Usage (Top 20) ---');
   try {
-    // Aggregate per-user op size in a single pass; correlated subqueries here
-    // scan the full operations table per user and hang on large DBs.
+    // Uploads and cleanup maintain storage_used_bytes incrementally. Reading that
+    // counter avoids a full operations-table scan on every monitoring run.
     const users: UserStorageRow[] = await prisma.$queryRaw`
-      WITH ops_per_user AS (
-        SELECT
-          user_id,
-          SUM(pg_column_size(payload))::bigint AS ops_bytes,
-          COUNT(*)::bigint AS ops_count
-        FROM operations
-        GROUP BY user_id
-      )
       SELECT
         u.id,
         u.email,
-        COALESCE(o.ops_bytes, 0) as ops_bytes,
-        COALESCE(o.ops_count, 0) as ops_count,
-        COALESCE(LENGTH(s.snapshot_data), 0) as snapshot_bytes,
-        (COALESCE(o.ops_bytes, 0) + COALESCE(LENGTH(s.snapshot_data), 0)) as total_bytes
+        GREATEST(
+          u.storage_used_bytes - COALESCE(OCTET_LENGTH(s.snapshot_data), 0),
+          0
+        )::bigint AS ops_bytes,
+        COALESCE(s.last_seq, 0) AS last_seq,
+        COALESCE(OCTET_LENGTH(s.snapshot_data), 0)::bigint AS snapshot_bytes,
+        u.storage_used_bytes AS total_bytes
       FROM users u
-      LEFT JOIN ops_per_user o ON o.user_id = u.id
       LEFT JOIN user_sync_state s ON u.id = s.user_id
-      ORDER BY total_bytes DESC
+      ORDER BY u.storage_used_bytes DESC
       LIMIT 20;
     `;
 
@@ -262,7 +250,7 @@ const showUsage = async (saveHistory = true, showFullEmails = false): Promise<vo
       email: u.email,
       bytes: Number(u.total_bytes),
       opsBytes: Number(u.ops_bytes),
-      opsCount: Number(u.ops_count),
+      lastSeq: u.last_seq,
       snapshotBytes: Number(u.snapshot_bytes),
     }));
 
@@ -270,9 +258,8 @@ const showUsage = async (saveHistory = true, showFullEmails = false): Promise<vo
       usersData.map((u) => ({
         ID: u.id,
         Email: displayEmail(u.email),
-        Ops: u.opsCount,
+        LastSeq: u.lastSeq,
         OpsSize: formatBytes(u.opsBytes),
-        AvgOp: u.opsCount > 0 ? formatBytes(u.opsBytes / u.opsCount) : '-',
         Snapshot: formatBytes(u.snapshotBytes),
         Total: formatBytes(u.bytes),
       })),
@@ -288,6 +275,7 @@ const showUsage = async (saveHistory = true, showFullEmails = false): Promise<vo
         email: displayEmail(u.email),
       }));
       const snapshot = {
+        metricVersion: USAGE_METRIC_VERSION,
         timestamp: new Date().toISOString(),
         totalBytes,
         userCount: usersData.length,
@@ -302,7 +290,8 @@ const showUsage = async (saveHistory = true, showFullEmails = false): Promise<vo
       console.log(`\nSnapshot saved to ${USAGE_HISTORY_PATH}`);
     }
   } catch (error) {
-    console.error('Error fetching usage data:', error);
+    reportMonitoringError('Error fetching usage data:', error);
+    process.exitCode = 1;
   }
 };
 
@@ -319,13 +308,25 @@ const showUsageHistory = async (args: string[]): Promise<void> => {
 
   const content = fs.readFileSync(USAGE_HISTORY_PATH, 'utf-8');
   const lines = content.trim().split('\n').filter(Boolean);
-  const snapshots: UsageSnapshot[] = lines
+  const parsedSnapshots: UsageSnapshot[] = lines
     .slice(-tailCount)
     .map((line) => JSON.parse(line));
 
-  if (snapshots.length === 0) {
+  if (parsedSnapshots.length === 0) {
     console.log('No snapshots found.');
     return;
+  }
+
+  const currentMetricVersion =
+    parsedSnapshots[parsedSnapshots.length - 1].metricVersion ?? 1;
+  const snapshots = parsedSnapshots.filter(
+    (snapshot) => (snapshot.metricVersion ?? 1) === currentMetricVersion,
+  );
+  const ignoredSnapshotCount = parsedSnapshots.length - snapshots.length;
+  if (ignoredSnapshotCount > 0) {
+    console.log(
+      `Ignoring ${ignoredSnapshotCount} older ${ignoredSnapshotCount === 1 ? 'snapshot' : 'snapshots'} because ${ignoredSnapshotCount === 1 ? 'its' : 'their'} storage metric is not comparable.`,
+    );
   }
 
   console.table(
@@ -449,8 +450,17 @@ const showOps = async (args: string[]): Promise<void> => {
     const tailCount = parseIntArg(args, '--tail', 50);
     const userId = parseIntArg(args, '--user', -1);
     const hasUserFilter = userId >= 0;
+    const scope = hasUserFilter ? undefined : await resolveOperationScope();
+    if (scope) {
+      console.log(
+        `Scope: up to ${RECENT_OPS_PER_USER} newest operations per user, then the newest ${tailCount} candidates overall.`,
+      );
+      console.log(scope.description);
+    }
 
-    // Get recent operations with sizes
+    // The global server sequence is per-user, so ORDER BY server_seq across the
+    // entire table cannot use the (user_id, server_seq) index. Fetch a small tail
+    // through that index for each user, then sort only those candidates.
     let ops: OperationRow[];
     if (hasUserFilter) {
       ops = await prisma.$queryRaw`
@@ -461,8 +471,7 @@ const showOps = async (args: string[]): Promise<void> => {
           o.op_type,
           o.entity_type,
           o.entity_id,
-          pg_column_size(o.payload) as payload_bytes,
-          LENGTH(o.payload::text) as payload_json_length,
+          o.payload_bytes,
           o.received_at
         FROM operations o
         WHERE o.user_id = ${userId}
@@ -471,18 +480,27 @@ const showOps = async (args: string[]): Promise<void> => {
       `;
     } else {
       ops = await prisma.$queryRaw`
+        WITH candidate_ops AS MATERIALIZED (
+          ${newestOpsPerUser(
+            scope?.userIds ?? [],
+            Prisma.sql`
+              id, user_id, action_type, op_type, entity_type, entity_id,
+              payload_bytes, received_at
+            `,
+            RECENT_OPS_PER_USER,
+          )}
+        )
         SELECT
-          o.id,
-          o.user_id,
-          o.action_type,
-          o.op_type,
-          o.entity_type,
-          o.entity_id,
-          pg_column_size(o.payload) as payload_bytes,
-          LENGTH(o.payload::text) as payload_json_length,
-          o.received_at
-        FROM operations o
-        ORDER BY o.server_seq DESC
+          id,
+          user_id,
+          action_type,
+          op_type,
+          entity_type,
+          entity_id,
+          payload_bytes,
+          received_at
+        FROM candidate_ops
+        ORDER BY received_at DESC
         LIMIT ${tailCount};
       `;
     }
@@ -498,119 +516,51 @@ const showOps = async (args: string[]): Promise<void> => {
         Action: o.action_type.substring(0, 40),
         Entity: `${o.entity_type}:${(o.entity_id || '*').substring(0, 15)}`,
         PayloadSize: formatBytes(Number(o.payload_bytes)),
-        JSONLen: Number(o.payload_json_length),
         Time: new Date(Number(o.received_at)).toLocaleTimeString(),
       })),
     );
 
-    // Summary by entity type
-    let byType: EntityTypeBreakdownRow[];
-    if (hasUserFilter) {
-      byType = await prisma.$queryRaw`
-        SELECT
-          o.entity_type,
-          COUNT(*) as count,
-          SUM(pg_column_size(o.payload)) as total_bytes,
-          AVG(pg_column_size(o.payload)) as avg_bytes,
-          MAX(pg_column_size(o.payload)) as max_bytes
-        FROM operations o
-        WHERE o.user_id = ${userId}
-        GROUP BY o.entity_type
-        ORDER BY total_bytes DESC;
-      `;
-    } else {
-      byType = await prisma.$queryRaw`
-        SELECT
-          o.entity_type,
-          COUNT(*) as count,
-          SUM(pg_column_size(o.payload)) as total_bytes,
-          AVG(pg_column_size(o.payload)) as avg_bytes,
-          MAX(pg_column_size(o.payload)) as max_bytes
-        FROM operations o
-        GROUP BY o.entity_type
-        ORDER BY total_bytes DESC;
-      `;
+    const byType = new Map<string, EntityTypeSummary>();
+    for (const op of ops) {
+      const bytes = Number(op.payload_bytes);
+      const current = byType.get(op.entity_type) ?? {
+        count: 0,
+        totalBytes: 0,
+        maxBytes: 0,
+      };
+      current.count += 1;
+      current.totalBytes += bytes;
+      current.maxBytes = Math.max(current.maxBytes, bytes);
+      byType.set(op.entity_type, current);
     }
 
-    console.log('\n--- Breakdown by Entity Type ---');
+    console.log('\n--- Breakdown of Shown Operations by Entity Type ---');
     console.table(
-      byType.map((t) => ({
-        Type: t.entity_type,
-        Count: Number(t.count),
-        Total: formatBytes(Number(t.total_bytes)),
-        Avg: formatBytes(Number(t.avg_bytes)),
-        Max: formatBytes(Number(t.max_bytes)),
-      })),
+      Array.from(byType.entries())
+        .sort((a, b) => b[1].totalBytes - a[1].totalBytes)
+        .map(([type, summary]) => ({
+          Type: type,
+          Count: summary.count,
+          Total: formatBytes(summary.totalBytes),
+          Avg: formatBytes(summary.totalBytes / summary.count),
+          Max: formatBytes(summary.maxBytes),
+        })),
     );
 
-    // Show largest single operation
-    let largest: LargestOperationRow[];
-    if (hasUserFilter) {
-      largest = await prisma.$queryRaw`
-        SELECT
-          o.id,
-          o.action_type,
-          o.entity_type,
-          o.entity_id,
-          pg_column_size(o.payload) as payload_bytes,
-          o.payload
-        FROM operations o
-        WHERE o.user_id = ${userId}
-        ORDER BY pg_column_size(o.payload) DESC
-        LIMIT 1;
-      `;
-    } else {
-      largest = await prisma.$queryRaw`
-        SELECT
-          o.id,
-          o.action_type,
-          o.entity_type,
-          o.entity_id,
-          pg_column_size(o.payload) as payload_bytes,
-          o.payload
-        FROM operations o
-        ORDER BY pg_column_size(o.payload) DESC
-        LIMIT 1;
-      `;
-    }
-
-    if (largest.length > 0) {
-      const op = largest[0];
-      console.log('\n--- Largest Operation ---');
+    const largest = ops.reduce((current, op) =>
+      Number(op.payload_bytes) > Number(current.payload_bytes) ? op : current,
+    );
+    if (largest) {
+      const op = largest;
+      console.log('\n--- Largest Shown Operation ---');
       console.log(`ID: ${op.id}`);
       console.log(`Action: ${op.action_type}`);
       console.log(`Entity: ${op.entity_type}:${op.entity_id || '*'}`);
       console.log(`Size: ${formatBytes(Number(op.payload_bytes))}`);
-
-      // Show keys in the payload
-      const payload = op.payload as Record<string, unknown> | null;
-      if (payload && typeof payload === 'object') {
-        console.log('\nPayload structure:');
-        const analyzePayload = (
-          obj: Record<string, unknown>,
-          prefix = '',
-          depth = 0,
-        ): void => {
-          if (depth > 10) return;
-          for (const key of Object.keys(obj)) {
-            const val = obj[key];
-            const valStr = JSON.stringify(val);
-            const size = new TextEncoder().encode(valStr).length;
-            if (size > 1000) {
-              console.log(
-                `  ${prefix}${key}: ${formatBytes(size)} (${typeof val}${Array.isArray(val) ? `[${val.length}]` : ''})`,
-              );
-              if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
-                analyzePayload(val as Record<string, unknown>, prefix + '  ', depth + 1);
-              }
-            }
-          }
-        };
-        analyzePayload(payload);
-      }
     }
   } catch (error) {
-    console.error('Error fetching operations:', error);
+    reportMonitoringError('Error fetching operations:', error);
+    process.exitCode = 1;
   }
 };
 
@@ -645,6 +595,18 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
     ];
 
     console.log('\n--- Active Users (by device heartbeat / by sync operations) ---');
+    // Deliberately left as one statement per window, despite reading `operations`
+    // four times. A per-user MAX() probe driven from `users` was tried and
+    // reverted: `received_at > $1` does NOT force a sequential scan as it appears
+    // to -- the planner applies it as an index qual on the non-leading column of
+    // (user_id, received_at) and walks the index, measured on production at 1,232
+    // buffers / 85 ms where the per-user form cost ~11x the buffers for the same
+    // answer. The probe form only wins above roughly 1M operations AND on storage
+    // where random reads are cheap; this instance is the opposite case (measured
+    // 2026-08-07: 1.74 MB/s, ~9.5 ms per miss), so scattered probes are the wrong
+    // trade here. When this report does time out, look first at whether
+    // `operations` has been vacuumed and analyzed -- an absent visibility map
+    // costs a heap fetch per row and dwarfs any query shape.
     for (const period of periods) {
       const threshold = BigInt(now - period.ms);
       const result: ActiveCountRow[] = await prisma.$queryRaw`
@@ -684,21 +646,41 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
     `;
     const totalActiveCount = Number(totalActive[0]?.count ?? 0);
 
+    // Pick the page from sync_devices first, then count operations for those
+    // rows only. Joining operations before the LIMIT aggregated every operation
+    // of the last 7 days across every active user (~5k) to display 30 of them;
+    // counting after it is `recentLimit` bounded range scans on
+    // (user_id, received_at) instead. The DISTINCT that used to guard ops_7d is
+    // gone with the fan-out that made it necessary -- no device join remains to
+    // multiply the rows, so COUNT(*) is both correct and cheaper here.
     const recentUsers: RecentUserRow[] = await prisma.$queryRaw`
+      WITH recent AS MATERIALIZED (
+        SELECT
+          u.id,
+          u.email,
+          u.created_at,
+          MAX(d.last_seen_at) as last_active,
+          COUNT(DISTINCT d.client_id) as device_count
+        FROM users u
+        INNER JOIN sync_devices d ON u.id = d.user_id
+        WHERE d.last_seen_at > ${sevenDaysAgo}
+        GROUP BY u.id, u.email, u.created_at
+        ORDER BY last_active DESC
+        LIMIT ${recentLimit}
+      )
       SELECT
-        u.id,
-        u.email,
-        u.created_at,
-        MAX(d.last_seen_at) as last_active,
-        COUNT(DISTINCT d.client_id) as device_count,
-        COALESCE(COUNT(o.id), 0) as ops_7d
-      FROM users u
-      INNER JOIN sync_devices d ON u.id = d.user_id
-      LEFT JOIN operations o ON u.id = o.user_id AND o.received_at > ${sevenDaysAgo}
-      WHERE d.last_seen_at > ${sevenDaysAgo}
-      GROUP BY u.id, u.email, u.created_at
-      ORDER BY last_active DESC
-      LIMIT ${recentLimit};
+        r.id,
+        r.email,
+        r.created_at,
+        r.last_active,
+        r.device_count,
+        (
+          SELECT COUNT(*)
+          FROM operations o
+          WHERE o.user_id = r.id AND o.received_at > ${sevenDaysAgo}
+        ) as ops_7d
+      FROM recent r
+      ORDER BY r.last_active DESC;
     `;
 
     if (recentUsers.length > 0) {
@@ -761,7 +743,8 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
       `\nUsers who never registered a device: ${Number(neverSynced[0]?.count ?? 0)}`,
     );
   } catch (error) {
-    console.error('Error fetching active users:', error);
+    reportMonitoringError('Error fetching active users:', error);
+    process.exitCode = 1;
   }
 };
 
@@ -822,7 +805,8 @@ const showActiveUsersQuick = async (args: string[]): Promise<void> => {
       })),
     );
   } catch (error) {
-    console.error('Error fetching active users (quick):', error);
+    reportMonitoringError('Error fetching active users (quick):', error);
+    process.exitCode = 1;
   }
 };
 
@@ -879,10 +863,15 @@ const main = async (): Promise<void> => {
         console.log('    --user <id>    Filter by user ID');
         console.log('\nGlobal flags:');
         console.log('  --unmask         Show full email addresses (masked by default)');
+        console.log('\nEnvironment:');
+        console.log(
+          '  MONITOR_SCOPE_USERS  Users sampled by unfiltered `ops` (default 200)',
+        );
         break;
     }
   } catch (err) {
-    console.error('Unexpected error:', err);
+    reportMonitoringError('Unexpected error:', err);
+    process.exitCode = 1;
   } finally {
     await disconnectDb();
   }

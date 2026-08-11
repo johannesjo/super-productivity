@@ -390,6 +390,7 @@ describe('markedOptionsFactory', () => {
           // #8429: app deep-links must stay clickable
           'obsidian://open?vault=Notes',
           'vscode://file/home/user/x.ts',
+          'siyuan://blocks/20240101000000-abcdefg',
           'webexteams://im?space=ff135070-68f8-11f1-9229-c7e6cca7a7cd&message=f4f13440-6b50-11f1-8868-03e71232fa87',
         ].forEach((href) => {
           const result = linkRenderer({

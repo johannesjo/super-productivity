@@ -552,13 +552,16 @@ export class DialogEditTaskRepeatCfgComponent {
 
     const currentRepeatCfg = this.repeatCfg() as TaskRepeatCfg;
     const targetDate = this._data.targetDate;
+    const confirmationDate = isDBDateStr(targetDate)
+      ? dateStrToUtcDate(targetDate)
+      : new Date(targetDate);
 
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
           message: this._translateService.instant(T.F.TASK_REPEAT.D_SKIP_INSTANCE.MSG, {
-            date: new Date(targetDate).toLocaleDateString(
+            date: confirmationDate.toLocaleDateString(
               this._dateTimeFormatService.currentLocale(),
             ),
           }),

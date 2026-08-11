@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { OperationEncryptionService } from './operation-encryption.service';
+import {
+  OperationDecryptionError,
+  OperationEncryptionService,
+} from './operation-encryption.service';
 import { SyncOperation } from '../sync-providers/provider.interface';
 import { DecryptError, OperationIntegrityError } from '../core/errors/sync-errors';
 import { ActionType, Operation, OpType } from '../core/operation.types';
@@ -7,7 +10,7 @@ import { toLwwUpdateActionType } from '../core/lww-update-action-types';
 import { convertOpToAction } from '../apply/operation-converter.util';
 import { lwwUpdateMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/lww-update.meta-reducer';
 import { TIME_TRACKING_FEATURE_KEY } from '../../features/time-tracking/store/time-tracking.reducer';
-import { clearSessionKeyCache, setArgon2ParamsForTesting } from '@sp/sync-core';
+import { clearSessionKeyCache, encrypt, setArgon2ParamsForTesting } from '@sp/sync-core';
 import { createValidAppData } from '../validation/state-validity-test-utils';
 import { stripLocalOnlySyncSettingsFromAppData } from '../../features/config/local-only-sync-settings.util';
 import { CURRENT_SCHEMA_VERSION } from '@sp/shared-schema';
@@ -31,6 +34,12 @@ describe('OperationEncryptionService', () => {
   });
 
   const jsonRoundTrip = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+
+  const corruptAuthenticationTag = (ciphertext: string): string => {
+    const bytes = Uint8Array.from(atob(ciphertext), (char) => char.charCodeAt(0));
+    bytes[bytes.length - 1] ^= 1;
+    return btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(''));
+  };
 
   // Use real encryption with weakened Argon2 params (8KiB memory, 1 iteration).
   // The session cache derives the key once per password across the whole spec,
@@ -230,8 +239,143 @@ describe('OperationEncryptionService', () => {
         await service.decryptOperations([malformedOp], TEST_PASSWORD);
         fail('Should have thrown DecryptError');
       } catch (e) {
+        expect(e).toBeInstanceOf(OperationDecryptionError);
         expect(e).toBeInstanceOf(DecryptError);
-        expect((e as Error).message).toContain('malformed-op-123');
+        expect((e as OperationDecryptionError).diagnosis).toEqual({
+          encryptedOperationCount: 1,
+          decryptedCount: 0,
+          parsedCount: 0,
+          passwordEvidence: 'not-tested',
+          failures: [
+            {
+              operationId: 'malformed-op-123',
+              encryptedBatchIndex: 0,
+              stage: 'envelope',
+            },
+          ],
+        });
+      }
+    });
+
+    it('attributes a corrupted ciphertext to its operation without retaining payload data', async () => {
+      const ops = [
+        { ...createMockSyncOp({ title: 'Valid task' }), id: 'valid-op' },
+        {
+          ...createMockSyncOp({ title: 'Private task title' }),
+          id: 'corrupt-op',
+        },
+      ];
+      const encrypted = await service.encryptOperations(ops, TEST_PASSWORD);
+      encrypted[1] = {
+        ...encrypted[1],
+        payload: corruptAuthenticationTag(encrypted[1].payload as string),
+      };
+
+      try {
+        await service.decryptOperations(encrypted, TEST_PASSWORD);
+        fail('Should have thrown OperationDecryptionError');
+      } catch (e) {
+        expect(e).toBeInstanceOf(OperationDecryptionError);
+        const diagnosticError = e as OperationDecryptionError;
+        // The successful sibling decrypt is what proves the password and pins
+        // the failure to the corrupt operation instead of the key.
+        expect(diagnosticError.diagnosis).toEqual({
+          encryptedOperationCount: 2,
+          decryptedCount: 1,
+          parsedCount: 1,
+          passwordEvidence: 'confirmed-for-some-operations',
+          failures: [
+            {
+              operationId: 'corrupt-op',
+              encryptedBatchIndex: 1,
+              stage: 'decrypt',
+              // AES-GCM auth-failure signature — separates corruption/wrong
+              // key from environment failures that also fail every item.
+              errorName: 'OperationError',
+            },
+          ],
+        });
+        const serializedError = JSON.stringify({
+          diagnosis: diagnosticError.diagnosis,
+          additionalLog: diagnosticError.additionalLog,
+        });
+        expect(serializedError).not.toContain('Private task title');
+        expect(serializedError).not.toContain(TEST_PASSWORD);
+        expect(serializedError).not.toContain(encrypted[1].payload as string);
+      }
+    });
+
+    it('reports every operation as failed for a wrong password instead of blaming the first', async () => {
+      const ops = [
+        { ...createMockSyncOp({ title: 'Task A' }), id: 'op-a' },
+        { ...createMockSyncOp({ title: 'Task B' }), id: 'op-b' },
+        { ...createMockSyncOp({ title: 'Task C' }), id: 'op-c' },
+      ];
+      const encrypted = await service.encryptOperations(ops, TEST_PASSWORD);
+
+      try {
+        await service.decryptOperations(encrypted, 'another-password-entirely');
+        fail('Should have thrown OperationDecryptionError');
+      } catch (e) {
+        expect(e).toBeInstanceOf(OperationDecryptionError);
+        expect((e as OperationDecryptionError).diagnosis).toEqual({
+          encryptedOperationCount: 3,
+          decryptedCount: 0,
+          parsedCount: 0,
+          passwordEvidence: 'no-operation-decrypted',
+          failures: [
+            {
+              operationId: 'op-a',
+              encryptedBatchIndex: 0,
+              stage: 'decrypt',
+              errorName: 'OperationError',
+            },
+            {
+              operationId: 'op-b',
+              encryptedBatchIndex: 1,
+              stage: 'decrypt',
+              errorName: 'OperationError',
+            },
+            {
+              operationId: 'op-c',
+              encryptedBatchIndex: 2,
+              stage: 'decrypt',
+              errorName: 'OperationError',
+            },
+          ],
+        });
+      }
+    });
+
+    it('attributes invalid decrypted JSON without retaining plaintext', async () => {
+      const privatePlaintext = 'private invalid JSON payload';
+      const malformedOp = {
+        ...createMockSyncOp(await encrypt(privatePlaintext, TEST_PASSWORD)),
+        id: 'invalid-json-op',
+        isPayloadEncrypted: true,
+      };
+
+      try {
+        await service.decryptOperations([malformedOp], TEST_PASSWORD);
+        fail('Should have thrown OperationDecryptionError');
+      } catch (e) {
+        expect(e).toBeInstanceOf(OperationDecryptionError);
+        const diagnosticError = e as OperationDecryptionError;
+        expect(diagnosticError.diagnosis).toEqual({
+          encryptedOperationCount: 1,
+          decryptedCount: 1,
+          parsedCount: 0,
+          passwordEvidence: 'confirmed-for-some-operations',
+          failures: [
+            { operationId: 'invalid-json-op', encryptedBatchIndex: 0, stage: 'parse' },
+          ],
+        });
+        expect(
+          JSON.stringify({
+            diagnosis: diagnosticError.diagnosis,
+            additionalLog: diagnosticError.additionalLog,
+          }),
+        ).not.toContain(privatePlaintext);
       }
     });
   });
@@ -437,6 +581,69 @@ describe('OperationEncryptionService', () => {
       await expectAsync(
         service.decryptOperation(encrypted, TEST_PASSWORD),
       ).toBeResolved();
+    });
+
+    // --- Today-list footprint across the real crypto flow ---
+    // The direct integrity-helper specs pin all supported action shapes. These
+    // cases prove the production decrypt entry points actually invoke that gate
+    // after AES-GCM authenticates actionPayload.taskIds.
+
+    const createTodayPlanOp = (): SyncOperation => ({
+      ...createMockSyncOp({
+        actionPayload: {
+          taskIds: ['task-1', 'task-2'],
+          today: '2026-07-30',
+          startOfNextDayDiffMs: 0,
+        },
+        entityChanges: [],
+      }),
+      actionType: ActionType.TASK_SHARED_PLAN_FOR_TODAY,
+      opType: 'UPDATE',
+      entityType: 'TASK',
+      entityId: 'task-1',
+      entityIds: ['task-1', 'task-2'],
+    });
+
+    it('round-trips a legitimate encrypted Today bulk plan', async () => {
+      const encrypted = await service.encryptOperation(
+        createTodayPlanOp(),
+        TEST_PASSWORD,
+      );
+
+      const decrypted = await service.decryptOperation(encrypted, TEST_PASSWORD);
+
+      expect(decrypted.entityIds).toEqual(['task-1', 'task-2']);
+      expect(
+        (decrypted.payload as { actionPayload: { taskIds: string[] } }).actionPayload
+          .taskIds,
+      ).toEqual(['task-1', 'task-2']);
+    });
+
+    it('rejects an encrypted Today plan whose plaintext footprint injects a victim', async () => {
+      const encrypted = await service.encryptOperation(
+        createTodayPlanOp(),
+        TEST_PASSWORD,
+      );
+      const tampered: SyncOperation = {
+        ...encrypted,
+        entityIds: [...(encrypted.entityIds as string[]), 'victim-task'],
+      };
+
+      await expectAsync(
+        service.decryptOperation(tampered, TEST_PASSWORD),
+      ).toBeRejectedWithError(OperationIntegrityError);
+    });
+
+    it('rejects a stripped Today bulk footprint through batch decrypt', async () => {
+      const [encrypted] = await service.encryptOperations(
+        [createTodayPlanOp()],
+        TEST_PASSWORD,
+      );
+      const tampered: SyncOperation = { ...encrypted, entityIds: undefined };
+
+      await expectAsync(
+        service.decryptOperations([tampered], TEST_PASSWORD),
+      ).toBeRejectedWithError(OperationIntegrityError);
     });
 
     describe('full-state opType promotion', () => {

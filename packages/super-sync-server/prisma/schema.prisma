@@ -134,6 +134,7 @@ model UserSyncState {
   snapshotSchemaVersion      Int?    @default(1) @map("snapshot_schema_version")
   latestFullStateSeq         Int?    @map("latest_full_state_seq")
   latestFullStateVectorClock Json?   @map("latest_full_state_vector_clock")
+  latestStateReplacementSeq  Int?    @map("latest_state_replacement_seq")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

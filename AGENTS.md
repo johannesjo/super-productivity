@@ -2,6 +2,18 @@
 
 Guidance for AI agents working in this repository. Super Productivity is a todo and time-tracking app on Angular + Electron + Capacitor.
 
+## Repo map
+
+- `src/app/features/` — feature modules (tasks, planner, project, schedule, boards, …); `tasks/` is the hot core
+- `src/app/root-store/` — NgRx root store; `meta/` holds the cross-entity meta-reducers
+- `src/app/op-log/` — operation-log sync pipeline (capture, apply, persistence, validation)
+- `src/app/pfapi/` — low-level persistence layer (model/database controllers)
+- `src/app/imex/` — import/export and sync setup UI
+- `src/app/core/`, `core-ui/`, `ui/` — core services and shared UI building blocks; `util/` — pure helpers
+- `packages/` — workspace packages: `sync-core` + `sync-providers` (shared sync logic), `shared-schema`, `super-sync-server`, `plugin-api` + `plugin-dev`
+- `electron/` — Electron main process (tests are `*.test.cjs`); `android/` + `ios/` — Capacitor shells
+- `e2e/` — Playwright suite (see [`e2e/CLAUDE.md`](e2e/CLAUDE.md))
+
 ## Product principles
 
 From the project manifesto (_Deep Work, Your Way_), kept to what changes a build decision — weigh them on every feature, and surface the leaner path when a request fights them:
@@ -56,7 +68,7 @@ For local SuperSync E2E (docker-compose) and the full E2E reference, see [`e2e/C
 - **State:** never mutate NgRx state — return new objects in reducers. Prefer Signals to Observables.
 - **Tests:** add unit tests for new services and state logic.
 - **Service size cap:** no service may exceed 1200 lines (physical lines — blanks and comments count), lint-enforced via `max-lines` on `**/*.service.ts`; specs are exempt. Split by responsibility before crossing the line — extract collaborators, move pure logic to utils or `packages/` — and never grow a service past it. A new service over the cap fails lint. The pre-existing offenders (sync/op-log/plugin/task services) are grandfathered to warnings in `eslint.config.js`: that list may only shrink — never add to it — and they are debt to pay down when touched, not a precedent to extend.
-- **Agent-control files:** never modify `AGENTS.md`, `CLAUDE.md`, `.agents/**`, or `.codex/**` unless the user explicitly requests it in the current task. Keep such changes isolated from product/code changes in a dedicated commit or PR, and describe how they alter future agent behavior.
+- **Agent-control files:** never modify `AGENTS.md`, `CLAUDE.md`, `.agents/**`, or `.codex/**` unless the user explicitly requests it in the current task. Keep such changes isolated from product/code changes in a dedicated commit or PR, and describe how they alter future agent behavior. When adding an incident-derived rule to this file, keep it to invariant + enforcement + issue/doc pointers and move the narrative to `docs/` — this file must stay skimmable — and date any statistics you cite ("measured YYYY-MM").
 - **Does it earn its place?** For a new feature, the first review question is whether it should exist at all — not whether the diff is correct. Complexity added is permanent, so the burden is on the change to justify it. Is there real demand (reactions and distinct participants on the linked issue, not just the author)? Has the same idea been declined before — search **closed** issues, because a prior "no" needs new evidence, not a new PR. Does the PR's stated motivation survive checking: are the issues it cites actually open, or already fixed more cheaply (`git log -S`, `git tag --contains`)? Treat the motivation as a claim to verify, not context to accept. A correct, well-tested implementation of something that doesn't earn its place is still a decline, and the leanest fix that resolves the reported symptom usually wins.
 - **Code review:** when reviewing new features, always double-check the potential long-term costs and risks a change introduces — maintenance burden, hard-to-reverse choices (data shapes, public/plugin APIs, sync formats), locked-in dependencies/abstractions, and footguns that only surface at scale or across synced clients — not just whether the immediate diff is correct.
 - **Task component is a hot path:** every change to `src/app/features/tasks/task/task.component.*` (rendered once per task in long, scrollable lists) must be double-checked for negative performance impact — avoid function/getter calls in the template, extra change-detection work, and uncleaned subscriptions; verify against a large task list.
@@ -79,7 +91,7 @@ Touched on most state-related PRs. Read the linked source/doc for full reasoning
 8. **Vector clocks:** `MAX_VECTOR_CLOCK_SIZE = 20`. Server prunes after conflict detection, before storage. → `docs/sync-and-op-log/vector-clocks.md`.
 9. **Logging:** `Log.log({ id: task.id })`, never `Log.log(task)` or `Log.log(title)` — log history is exportable, never log user content.
 10. **A schema bump never protects the released fleet — and is near-irreversible, so default to NOT bumping `CURRENT_SCHEMA_VERSION`.** v17.0.0–v18.14.0 clients apply ops up to schema 5 UNMIGRATED (their old `+3` skip band) and, at schema ≥ 6, block them but still advance the server cursor — those ops are skipped permanently, even after updating. Only post-v18.14.0 receivers block newer ops safely. So new op semantics MUST degrade gracefully on older clients (`LwwUpdatePayload` envelope pattern); a change old clients would misapply must not ship behind a bump alone. And a change old clients can TOLERATE must not ship behind a bump at all: a bump hard-blocks every lagging post-v18.14.0 client (frozen cursor), can't be reverted once ops carry the version, and buys nothing a payload marker/envelope wouldn't (v4/#9009 delete-wins was bumped for a marker-only change that didn't need it — the mistake to avoid). → `packages/shared-schema/src/schema-version.ts`, [operation-log-architecture.md](docs/sync-and-op-log/operation-log-architecture.md) §A.7.11 "Bump Policy".
-11. **A new REQUIRED field on a persisted model breaks every existing install — type it optional (`?`).** Data already on users' disks lacks it and typia rejects it. Prefer `?` plus a runtime default; a backfill migration is the exception, because it costs a schema bump (rule 10). TypeScript guards only _new_ data: it errors until you add the field to `DEFAULT_*`, then compiles clean while every existing install still fails validation. **Do not assume a heal exists** — `loadAllData` merges per-section defaults for only 9 of the 21 `globalConfig` sections (`global-config.reducer.ts`; the rest are a top-level spread, so a stored section wins wholesale), entity slices get only the generic coercions in `auto-fix-typia-errors.ts` (missing boolean → `false`, nullable → `null`), and that file's blanket `globalConfig.*` default runs only inside the user-facing `dataRepair` flow, not normal hydration. A per-type heal needs its own branch in `auto-fix-typia-errors.ts` — **not** `recreate-fallback.const.ts`, where membership also opts the type into SPAP-14 disjoint-field auto-merge. The failure is latent: hydration trusts a snapshot whose schema version matches, so it surfaces only when an unrelated bump drags it onto the migration path (#8965 shipped in January, detonated in v18.15.0 as a boot-to-empty-store). Guarded by `src/app/op-log/validation/frozen-state.spec.ts` — if it fails, fix the model, never the fixture. → #9125, #9124.
+11. **A new REQUIRED field on a persisted model breaks every existing install — type it optional (`?`) plus a runtime default.** Data already on users' disks lacks the field and typia rejects it on hydration; TypeScript guards only _new_ data, so the build goes green while every existing install still fails validation. A backfill migration instead costs a schema bump (rule 10). **Do not assume a heal exists** — most stored state gets no per-field defaulting on normal hydration; a per-type heal needs its own branch in `auto-fix-typia-errors.ts`, **not** `recreate-fallback.const.ts` (membership there also opts into SPAP-14 auto-merge). The failure is latent: it surfaces only when an unrelated bump drags old data onto the migration path (#8965 shipped in January, detonated in v18.15.0 as a boot-to-empty-store). Guarded by `src/app/op-log/validation/frozen-state.spec.ts` — if it fails, fix the model, never the fixture. → full analysis: [persisted-model-fields.md](docs/sync-and-op-log/persisted-model-fields.md), #9125, #9124.
 
 ## Judging sync severity
 
@@ -106,11 +118,11 @@ here because getting it wrong already produced a confidently wrong conclusion.
    disappeared, gone, missing, duplicate, reverted, old version, overwritten, reset, not syncing_
    (#7892 "all data deleted overnight"; #8107 user rebuilt lost projects from memory; #7549 done
    tasks resurrecting). ~53 user-reported sync/data-loss issues from 44 authors in 90 days ≈ one
-   every 2 days. And silent data loss is structurally under-reported — absence of reports is never
+   every 2 days (measured 2026-07). And silent data loss is structurally under-reported — absence of reports is never
    evidence of absence.
 5. **Audit-generated findings are low-precision, not low-yield — verify them, don't dismiss them.**
    ~89% of sync fixes since v18.14.0 repaired code present in the release, yet ~97% of the self-filed
-   sync issues carried no reproduction. So both failure modes are live: **do not close an unreproduced
+   sync issues carried no reproduction (both measured 2026-07). So both failure modes are live: **do not close an unreproduced
    finding as speculation** (#8960/#9073/#8751/#9040 had no repro and were all real and shipped), and
    **do not fix one blind** — the _fix_ must carry a test that fails without it, and you must confirm
    the fix actually fires on a real op (#9045 shipped an `entityIds` security check that **never fired**;

@@ -56,11 +56,12 @@ import { Keyboard, KeyboardInfo } from '@capacitor/keyboard';
 import { PluginListenerHandle, registerPlugin } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SafeArea } from 'capacitor-plugin-safe-area';
-import { FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
+import { patchCdkViewportForSafeArea } from './cdk-safe-area-viewport.util';
 import { LS } from '../persistence/storage-keys.const';
-import { Log } from '../log';
+import { Log, PluginLog } from '../log';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { sanitizeIosKeyboardHeight } from './sanitize-ios-keyboard-height.util';
+import { sanitizeSvgIconContent } from '../../util/sanitize-svg-icon.util';
 import { CustomThemeService, getRequiredThemeMode } from './custom-theme.service';
 
 interface NavigationBarPlugin {
@@ -436,12 +437,21 @@ export class GlobalThemeService {
     return this._registeredPluginIcons.has(iconName);
   }
 
+  /**
+   * `svgContent` comes from a plugin, so it is untrusted. `MatIconRegistry` parses the
+   * literal with `div.innerHTML`, which makes this the trust boundary for that sink.
+   */
   registerSvgIconFromContent(iconName: string, svgContent: string): void {
     // Plugin icon is already registered, skip
     if (this._registeredPluginIcons.has(iconName)) return;
+    const safeSvgContent = sanitizeSvgIconContent(svgContent);
+    if (!safeSvgContent) {
+      PluginLog.warn(`Skipping unsafe or invalid SVG icon: ${iconName}`);
+      return;
+    }
     this._matIconRegistry.addSvgIconLiteral(
       iconName,
-      this._domSanitizer.bypassSecurityTrustHtml(svgContent),
+      this._domSanitizer.bypassSecurityTrustHtml(safeSvgContent),
     );
     this._registeredPluginIcons.add(iconName);
   }
@@ -980,44 +990,7 @@ export class GlobalThemeService {
       SafeArea.getSafeAreaInsets().then(({ insets }) => applyInsets(insets));
       SafeArea.addListener('safeAreaChanged', ({ insets }) => applyInsets(insets));
     }
-    this._patchCdkViewportForSafeArea();
-  }
-
-  /**
-   * Monkey-patch CDK's viewport rect calculation to include native mobile insets.
-   * This keeps connected overlays (menus, selects, autocomplete panels) above
-   * the safe areas and the iOS keyboard when the WebView does not shrink.
-   */
-  private _patchCdkViewportForSafeArea(): void {
-    const proto = FlexibleConnectedPositionStrategy.prototype as any;
-    const original = proto._getNarrowedViewportRect;
-    const doc = this.document;
-    proto._getNarrowedViewportRect = function (): {
-      top: number;
-      left: number;
-      right: number;
-      bottom: number;
-      width: number;
-      height: number;
-    } {
-      const rect = original.call(this);
-      const style = getComputedStyle(doc.documentElement);
-      const safeTop = parseInt(style.getPropertyValue(CSS_VAR_SAFE_AREA_TOP), 10) || 0;
-      const safeBottom =
-        parseInt(style.getPropertyValue(CSS_VAR_SAFE_AREA_BOTTOM), 10) || 0;
-      const keyboardOverlayOffset =
-        doc.body.classList.contains(BodyClass.isIOS) &&
-        doc.body.classList.contains(BodyClass.isKeyboardVisible)
-          ? parseInt(style.getPropertyValue(CSS_VAR_KEYBOARD_OVERLAY_OFFSET), 10) || 0
-          : 0;
-      const bottomInset = safeBottom + keyboardOverlayOffset;
-      return {
-        ...rect,
-        top: rect.top + safeTop,
-        bottom: rect.bottom - bottomInset,
-        height: rect.height - safeTop - bottomInset,
-      };
-    };
+    patchCdkViewportForSafeArea(this.document);
   }
 
   private _initMobileStatusBar(): void {

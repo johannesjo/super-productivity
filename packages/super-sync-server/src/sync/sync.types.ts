@@ -76,10 +76,16 @@ export const SYNC_ERROR_CODES = {
 
   // Encryption-related errors (400)
   ENCRYPTED_OPS_NOT_SUPPORTED: 'ENCRYPTED_OPS_NOT_SUPPORTED' as const,
+  // Encrypted-only ingress gate: upload rejected because a payload is not
+  // flagged encrypted or lacks the ciphertext transport shape.
+  E2EE_REQUIRED: 'E2EE_REQUIRED',
 
   // Server errors (500)
   INTERNAL_ERROR: 'INTERNAL_ERROR',
 } as const;
+
+export const STATE_REPLACEMENT_REQUIRED_ERROR =
+  'Download the latest full-state replacement before retrying';
 
 export type SyncErrorCode = (typeof SYNC_ERROR_CODES)[keyof typeof SYNC_ERROR_CODES];
 
@@ -303,6 +309,18 @@ export interface UploadResult {
    */
   existingClock?: VectorClock;
 }
+
+export const createStateReplacementRequiredResults = (
+  ops: ReadonlyArray<Pick<Operation, 'id'>>,
+): UploadResult[] =>
+  ops.map((op) => ({
+    opId: op.id,
+    accepted: false,
+    error: STATE_REPLACEMENT_REQUIRED_ERROR,
+    // Released clients already leave INTERNAL_ERROR operations pending and
+    // process piggybacked operations before retrying.
+    errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+  }));
 
 /**
  * Internal return of the serial-path `processOperation`: the client-facing

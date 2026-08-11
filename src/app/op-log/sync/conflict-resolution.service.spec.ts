@@ -37,7 +37,10 @@ import {
 } from '../core/entity-registry';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { OperationLogEffects } from '../capture/operation-log.effects';
-import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import {
+  IncompleteRemoteOperationsError,
+  UnsupportedMultiEntityConflictError,
+} from '../core/errors/sync-errors';
 import { ConflictJournalService } from './conflict-journal.service';
 import {
   isLwwUpdateActionType,
@@ -3555,9 +3558,7 @@ describe('ConflictResolutionService', () => {
           service.autoResolveConflictsLWW([
             createConflict('task-1', [localBulkUpdate], [remoteWinner]),
           ]),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve local multi-entity operation/,
-        );
+        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
@@ -3655,18 +3656,82 @@ describe('ConflictResolutionService', () => {
           OpType.Update,
           'task-2',
         );
-        await expectAsync(
-          service.autoResolveConflictsLWW([
+        let thrown: unknown;
+        try {
+          await service.autoResolveConflictsLWW([
             createConflict('task-1', [localDelete], [remoteMultiOp]),
             createConflict('task-2', [localTask2], [remoteMultiOp]),
-          ]),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve remote multi-entity operation/,
+          ]);
+        } catch (error) {
+          thrown = error;
+        }
+        expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+        expect((thrown as Error).message).toBe(
+          'SYNC_MULTI_ENTITY_UNSUPPORTED side=remote ' +
+            `actionType=${ActionType.TASK_SHARED_UPDATE_MULTIPLE} entityCount=2`,
         );
         expect(
           mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
         ).not.toHaveBeenCalled();
         expect(mockOperationApplier.applyOperations).not.toHaveBeenCalled();
+      });
+
+      it('keeps a locally deleted task deleted when a remote bulk plan op wins (#9426)', async () => {
+        // Pins the multi-entity skip in _convertToLWWUpdatesIfNeeded: with it,
+        // delete-vs-bulk-plan takes the documented stays-deleted degrade (no
+        // recreation row); without it, the conversion feeds the recreate path
+        // and a fresh recreatesEntityAfterDelete row for the deleted task
+        // rides the LOCAL batch. The bulk op itself must stay unmangled either
+        // way so its sibling still gets planned.
+        const remotePlanOp: Operation = {
+          ...createOpWithTimestamp(
+            'remote-bulk-plan',
+            'client-b',
+            2000,
+            OpType.Update,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_PLAN_FOR_TODAY,
+          entityIds: ['task-1', 'task-2'],
+          payload: {
+            actionPayload: { taskIds: ['task-1', 'task-2'], today: '2026-07-30' },
+            entityChanges: [],
+          },
+        };
+        const localDelete: Operation = {
+          ...createOpWithTimestamp(
+            'local-delete',
+            'client-a',
+            1000,
+            OpType.Delete,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_DELETE,
+          payload: {
+            task: { id: 'task-1', title: 'Deleted locally' },
+          },
+        };
+
+        await service.autoResolveConflictsLWW([
+          createConflict('task-1', [localDelete], [remotePlanOp]),
+        ]);
+
+        // The original atomic row is queued unmangled on the remote side.
+        // With no local-win/recreation rows, it takes the plain remote append;
+        // without the conversion guard it instead rides the mixed batch with a
+        // same-id LOCAL rewrite row alongside it.
+        const plainRemoteAppends = mockOpLogStore.appendBatchSkipDuplicates.calls
+          .allArgs()
+          .flatMap(([ops]) => ops as Operation[]);
+        const appendedCopies = [...plainRemoteAppends, ...getMixedRemoteOps()].filter(
+          ({ id }) => id === remotePlanOp.id,
+        );
+        expect(appendedCopies.length).toBe(1);
+        expect(appendedCopies[0].actionType).toBe(ActionType.TASK_SHARED_PLAN_FOR_TODAY);
+        expect(appendedCopies[0].entityIds).toEqual(['task-1', 'task-2']);
+        // Stays-deleted degrade: NO local-source row touches the deleted task
+        // (a recreation row here means the conversion guard was bypassed).
+        expect(getMixedLocalOps().filter((op) => op.entityId === 'task-1')).toEqual([]);
       });
 
       it('should extract entity from DELETE payload when UPDATE wins but entity not in store', () => {
@@ -3831,9 +3896,7 @@ describe('ConflictResolutionService', () => {
 
         await expectAsync(
           service.autoResolveConflictsLWW(conflicts),
-        ).toBeRejectedWithError(
-          /Cannot safely auto-resolve remote multi-entity operation/,
-        );
+        ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
         expect(mockOpLogStore.appendBatchSkipDuplicates).not.toHaveBeenCalled();
         expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
       });
@@ -6336,6 +6399,76 @@ describe('ConflictResolutionService', () => {
       hasNoSnapshotClock: overrides.hasNoSnapshotClock ?? true,
     });
 
+    const createSectionMoveOp = (
+      id: string,
+      clientId: string,
+      sourceSectionId: string | null = 'section-left',
+      taskId = 'task-1',
+      destinationSectionId = 'section-right',
+    ): Operation => ({
+      ...createMockOp(id, clientId),
+      actionType: ActionType.SECTION_ADD_TASK,
+      opType: OpType.Move,
+      entityType: 'SECTION',
+      entityId:
+        sourceSectionId && sourceSectionId !== destinationSectionId
+          ? sourceSectionId
+          : destinationSectionId,
+      entityIds:
+        sourceSectionId && sourceSectionId !== destinationSectionId
+          ? [sourceSectionId, destinationSectionId]
+          : [destinationSectionId],
+      payload: {
+        actionPayload: {
+          sectionId: destinationSectionId,
+          taskId,
+          afterTaskId: 'right-anchor',
+          sourceSectionId,
+        },
+        entityChanges: [],
+      },
+    });
+
+    const createSectionRemoveOp = (
+      id: string,
+      clientId: string,
+      sectionId = 'section-left',
+      taskId = 'task-1',
+    ): Operation => ({
+      ...createMockOp(id, clientId),
+      actionType: ActionType.SECTION_REMOVE_TASK,
+      opType: OpType.Update,
+      entityType: 'SECTION',
+      entityId: sectionId,
+      payload: {
+        actionPayload: {
+          sectionId,
+          taskId,
+          workContextId: 'TODAY',
+          workContextType: WorkContextType.TAG,
+          workContextAfterTaskId: 'main-anchor',
+        },
+        entityChanges: [],
+      },
+    });
+
+    const createSectionOrderOp = (
+      id: string,
+      clientId: string,
+      ids = ['section-right', 'section-left'],
+    ): Operation => ({
+      ...createMockOp(id, clientId),
+      actionType: ActionType.SECTION_UPDATE_ORDER,
+      opType: OpType.Move,
+      entityType: 'SECTION',
+      entityId: ids[0],
+      entityIds: ids,
+      payload: {
+        actionPayload: { contextId: 'TODAY', ids },
+        entityChanges: [],
+      },
+    });
+
     it('should mark CONCURRENT remote op as superseded when entity no longer in state', async () => {
       // Scenario: Client A archived a task (already synced), Client B sends a
       // concurrent update. Client A has no pending ops, but local frontier
@@ -6590,6 +6723,165 @@ describe('ConflictResolutionService', () => {
       );
 
       expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+    });
+
+    [
+      {
+        description: 'remote cross-section move and local source removal',
+        remoteOp: createSectionMoveOp('remote-move', 'clientB'),
+        localOp: createSectionRemoveOp('local-remove', 'clientA'),
+      },
+      {
+        description: 'remote source removal and local cross-section move',
+        remoteOp: createSectionRemoveOp('remote-remove', 'clientB'),
+        localOp: createSectionMoveOp('local-move', 'clientA'),
+      },
+    ].forEach(({ description, remoteOp, localOp }) => {
+      it(`should keep commuting ${description} non-conflicting`, async () => {
+        const localPendingOpsByEntity = new Map<string, Operation[]>([
+          ['SECTION:section-left', [localOp]],
+        ]);
+
+        const result = await service.checkOpForConflicts(
+          remoteOp,
+          buildCtx({ localPendingOpsByEntity }),
+        );
+
+        expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+      });
+    });
+
+    [
+      {
+        description: 'null-source placement against remote order',
+        remoteOp: createSectionOrderOp('remote-order-null-source', 'clientB'),
+        localOp: createSectionMoveOp('local-placement-null-source', 'clientA', null),
+        entityKey: 'SECTION:section-right',
+      },
+      {
+        description: 'remote null-source placement against local order',
+        remoteOp: createSectionMoveOp('remote-placement-null-source', 'clientB', null),
+        localOp: createSectionOrderOp('local-order-null-source', 'clientA'),
+        entityKey: 'SECTION:section-right',
+      },
+      {
+        description: 'same-section placement against remote order',
+        remoteOp: createSectionOrderOp('remote-order-same-section', 'clientB'),
+        localOp: createSectionMoveOp(
+          'local-placement-same-section',
+          'clientA',
+          'section-left',
+          'task-1',
+          'section-left',
+        ),
+        entityKey: 'SECTION:section-left',
+      },
+      {
+        description: 'remote same-section placement against local order',
+        remoteOp: createSectionMoveOp(
+          'remote-placement-same-section',
+          'clientB',
+          'section-left',
+          'task-1',
+          'section-left',
+        ),
+        localOp: createSectionOrderOp('local-order-same-section', 'clientA'),
+        entityKey: 'SECTION:section-left',
+      },
+    ].forEach(({ description, remoteOp, localOp, entityKey }) => {
+      it(`should keep commuting ${description} non-conflicting`, async () => {
+        const localPendingOpsByEntity = new Map<string, Operation[]>([
+          [entityKey, [localOp]],
+        ]);
+
+        const result = await service.checkOpForConflicts(
+          remoteOp,
+          buildCtx({ localPendingOpsByEntity }),
+        );
+
+        expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+      });
+    });
+
+    it('should still conflict when a section move and removal target different tasks', async () => {
+      const remoteOp = createSectionMoveOp(
+        'remote-move',
+        'clientB',
+        'section-left',
+        'task-1',
+      );
+      const localOp = createSectionRemoveOp(
+        'local-remove',
+        'clientA',
+        'section-left',
+        'task-2',
+      );
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localOp]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteOp,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result.conflicts).toHaveSize(1);
+      expect(result.conflicts[0].entityId).toBe('section-left');
+    });
+
+    it('should still conflict when section payload and entity metadata disagree', async () => {
+      const remoteOp = {
+        ...createSectionMoveOp('remote-move', 'clientB'),
+        entityIds: ['section-left'],
+      };
+      const localOp = createSectionRemoveOp('local-remove', 'clientA');
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localOp]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteOp,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result.conflicts).toHaveSize(1);
+      expect(result.conflicts[0].entityId).toBe('section-left');
+    });
+
+    it('should keep a move non-conflicting with a causal local removal and section reorder', async () => {
+      const remoteMove = createSectionMoveOp('remote-move', 'clientB');
+      const localRemove = createSectionRemoveOp('local-remove', 'clientA');
+      const localOrder = createSectionOrderOp('local-order', 'clientA');
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localRemove, localOrder]],
+        ['SECTION:section-right', [localOrder]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteMove,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+    });
+
+    it('should keep concurrent section-order replacements on the conflict path', async () => {
+      const remoteOrder = createSectionOrderOp('remote-order', 'clientB', [
+        'section-left',
+        'section-right',
+      ]);
+      const localOrder = createSectionOrderOp('local-order', 'clientA');
+      const localPendingOpsByEntity = new Map<string, Operation[]>([
+        ['SECTION:section-left', [localOrder]],
+        ['SECTION:section-right', [localOrder]],
+      ]);
+
+      const result = await service.checkOpForConflicts(
+        remoteOrder,
+        buildCtx({ localPendingOpsByEntity }),
+      );
+
+      expect(result.conflicts).toHaveSize(2);
     });
 
     it('should use entityId fallback when entityIds is an empty array', async () => {
