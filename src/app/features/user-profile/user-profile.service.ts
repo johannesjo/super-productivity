@@ -11,6 +11,9 @@ import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { AppDataComplete, MODEL_CONFIGS } from '../../op-log/model/model-config';
 import type { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import type { LocalDraftService } from '../../core/draft/local-draft.service';
+import { BannerService } from '../../core/banner/banner.service';
+import { BannerId } from '../../core/banner/banner.model';
+import { MatDialog } from '@angular/material/dialog';
 
 /**
  * Core service for user profile management
@@ -24,6 +27,8 @@ export class UserProfileService {
   private readonly _providerManager = inject(SyncProviderManager);
   private readonly _backupService = inject(BackupService);
   private readonly _snackService = inject(SnackService);
+  private readonly _bannerService = inject(BannerService);
+  private readonly _matDialog = inject(MatDialog);
   private readonly _injector = inject(Injector);
 
   // Lazy-loaded to avoid circular dependency:
@@ -112,7 +117,7 @@ export class UserProfileService {
       this.activeProfile.set(defaultMetadata.profiles[0]);
       this.isInitialized.set(true);
     }
-    this._showDeprecationWarning();
+    this._showRemovalWarning();
   }
 
   /**
@@ -432,8 +437,13 @@ export class UserProfileService {
       throw new Error('Profile not found');
     }
 
-    // Load profile data
-    const data = await this._storageService.loadProfileData(profileId);
+    // The stored snapshot of the *active* profile is only written when switching
+    // away from it, so it is stale by everything the user did since. Export the
+    // live state instead, matching what `switchProfile` would persist.
+    const data =
+      profileId === this.activeProfile()?.id
+        ? await this._backupService.loadCompleteBackup(true)
+        : await this._storageService.loadProfileData(profileId);
     if (!data) {
       throw new Error('Profile data not found');
     }
@@ -516,7 +526,7 @@ export class UserProfileService {
       this.profiles.set(metadata.profiles);
       this.activeProfile.set(metadata.profiles[0]);
       this.isInitialized.set(true);
-      this._showDeprecationWarning();
+      this._showRemovalWarning();
 
       Log.log('UserProfileService: Migration completed successfully');
     } catch (error) {
@@ -533,11 +543,53 @@ export class UserProfileService {
     return profiles.length > 1;
   }
 
-  private _showDeprecationWarning(): void {
-    this._snackService.open({
-      msg: T.USER_PROFILES.DEPRECATION_WARNING,
-      type: 'WARNING',
-      config: { duration: 10000 },
+  /**
+   * Surface the removal warning for users who enabled profiles, created more
+   * than one and then switched the feature off again: their extra profiles
+   * still hold data, but `initialize()` never runs for them, so nothing else in
+   * the app would prompt them to export it before the feature disappears.
+   */
+  async warnAboutRemovalIfProfileDataExists(): Promise<void> {
+    try {
+      const metadata = await this._storageService.loadProfileMetadata();
+      // A lone default profile mirrors the data the app already loads normally,
+      // so there is nothing for the user to rescue.
+      if (metadata && metadata.profiles.length > 1) {
+        this._showRemovalWarning();
+      }
+    } catch (error) {
+      Log.err('UserProfileService: Failed to check for stored profile data', error);
+    }
+  }
+
+  private _showRemovalWarning(): void {
+    // The management dialog reads the signals that only `initialize()` fills, so
+    // the shortcut is offered to the enabled cohort only; everyone else is told
+    // to switch the feature back on first.
+    const canOpenDialog = this.isInitialized();
+    this._bannerService.open({
+      id: BannerId.UserProfilesRemoval,
+      msg: canOpenDialog
+        ? T.USER_PROFILES.REMOVAL_WARNING
+        : T.USER_PROFILES.REMOVAL_WARNING_DISABLED,
+      ico: 'warning',
+      ...(canOpenDialog && {
+        action: {
+          label: T.USER_PROFILES.MANAGE_PROFILES,
+          fn: () => void this._openManagementDialog(),
+        },
+      }),
+    });
+  }
+
+  private async _openManagementDialog(): Promise<void> {
+    // Imported lazily: the dialog component injects this service, so a static
+    // import would close a cycle.
+    const { DialogUserProfileManagementComponent } =
+      await import('./dialog-user-profile-management/dialog-user-profile-management.component');
+    this._matDialog.open(DialogUserProfileManagementComponent, {
+      width: '600px',
+      maxHeight: '80vh',
     });
   }
 

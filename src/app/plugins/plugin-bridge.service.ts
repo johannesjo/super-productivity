@@ -91,6 +91,13 @@ import { PluginService } from './plugin.service';
 import { PluginI18nService } from './plugin-i18n.service';
 import { formatDateForPlugin } from './plugin-i18n-date.util';
 
+/**
+ * Relational fields `updateTask` refuses: they are applied to the store as
+ * plain values, so writing them corrupts the parent<->child links rather than
+ * moving a task. Mirrors `REJECTED_TASK_FIELDS` in the local REST API.
+ */
+const REJECTED_UPDATE_FIELDS = ['parentId', 'subTaskIds'] as const;
+
 const toPluginTaskCopy = (
   task: (TaskCopy & { subTasks?: unknown }) | null | undefined,
 ): TaskCopy | null => {
@@ -842,12 +849,24 @@ export class PluginBridgeService implements OnDestroy {
     typia.assert<string>(taskId);
     typia.assert<Partial<TaskCopy>>(updates);
 
-    // Validate that referenced project, tags and parent task exist if they are being updated
-    await this._validateTaskReferences(
-      updates.projectId,
-      updates.tagIds,
-      updates.parentId,
-    );
+    // Relational fields are rejected rather than applied: they reach the reducer
+    // as plain values, so setting `parentId` writes a task that no parent lists
+    // in `subTaskIds` — an orphan invisible in both the main list and the
+    // parent, which no repair pass reconciles. Same rule and reason as the local
+    // REST API's REJECTED_TASK_FIELDS on PATCH. Create subtasks via
+    // addTask({ parentId }); restructure existing trees via
+    // batchUpdateForProject, which maintains both sides of the link.
+    const rejectedField = REJECTED_UPDATE_FIELDS.find((field) => field in updates);
+    if (rejectedField) {
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.FIELD_NOT_UPDATABLE, {
+          field: rejectedField,
+        }),
+      );
+    }
+
+    // Validate that referenced project and tags exist if they are being updated
+    await this._validateTaskReferences(updates.projectId, updates.tagIds);
 
     const { projectId, ...otherUpdates } = updates;
 
@@ -905,6 +924,23 @@ export class PluginBridgeService implements OnDestroy {
       taskData.parentId,
     );
 
+    // One mapping from PluginCreateTaskData to task defaults for both branches:
+    // maintaining it twice is how `dueDay` came to be honoured for main tasks
+    // and silently dropped for subtasks.
+    const additional: Partial<TaskCopy> = {
+      projectId: taskData.projectId || undefined,
+      tagIds: taskData.tagIds || [],
+      notes: taskData.notes || '',
+      timeEstimate: taskData.timeEstimate || 0,
+      isDone: taskData.isDone || false,
+      // The dueDay key must always be present, even when undefined:
+      // createNewTaskWithDefaults only auto-assigns today's date while
+      // `'dueDay' in additional` is false, and a task created through the API
+      // must not inherit a due date from whichever view the user happened to be
+      // on. Matches TaskService.addSubTaskTo().
+      dueDay: taskData.dueDay ?? undefined,
+    };
+
     let createdTask: Task;
     if (taskData.parentId) {
       // For subtasks, we use the addSubTask action to properly update the parent.
@@ -917,11 +953,8 @@ export class PluginBridgeService implements OnDestroy {
       const newTask = this._taskService.createNewTaskWithDefaults({
         title: subTaskTitleProps.title,
         additional: {
-          notes: taskData.notes || '',
-          timeEstimate: taskData.timeEstimate || 0,
-          isDone: (taskData as { isDone?: boolean }).isDone || false,
+          ...additional,
           tagIds: [], // Subtasks don't have tags
-          projectId: taskData.projectId || undefined,
           ...subTaskTitleProps.timeProps,
         },
       });
@@ -943,16 +976,6 @@ export class PluginBridgeService implements OnDestroy {
       return createdTask.id;
     } else {
       // For main tasks, use the regular add method
-      const additional: Partial<TaskCopy> = {
-        projectId: taskData.projectId || undefined,
-        tagIds: taskData.tagIds || [],
-        notes: taskData.notes || '',
-        timeEstimate: taskData.timeEstimate || 0,
-        isDone: (taskData as { isDone?: boolean }).isDone || false,
-        dueDay: taskData.dueDay ?? undefined,
-      };
-
-      // Add the task using TaskService
       const taskId = this._taskService.add(
         taskData.title,
         false, // isAddToBacklog
@@ -1734,17 +1757,23 @@ export class PluginBridgeService implements OnDestroy {
       }
     }
 
-    // Validate parent task exists if provided
+    // Validate parent task exists and is not itself a subtask if provided
     if (parentId) {
       const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
 
-      const parentExists = tasks?.some((task) => task.id === parentId);
-      if (!parentExists) {
+      const parent = tasks?.find((task) => task.id === parentId);
+      if (!parent) {
         errors.push(
           this._translateService.instant(T.PLUGINS.PARENT_TASK_DOES_NOT_EXIST, {
             parentId,
           }),
         );
+      } else if (parent.parentId) {
+        // The task model is two levels deep; the reducer would happily write a
+        // 3-level tree. Mirrors the local REST API's INVALID_PARENT rejection.
+        // Guards addTask only — batchUpdateForProject validates in its own
+        // reducer and still accepts a subtask as parent.
+        errors.push(this._translateService.instant(T.PLUGINS.CANNOT_NEST_SUBTASKS));
       }
     }
 

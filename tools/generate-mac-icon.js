@@ -23,7 +23,7 @@ const {
 } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join } = require('node:path');
-const { compareIconsets, verifyIcns } = require('./verify-mac-icon');
+const { verifyIcns } = require('./verify-mac-icon');
 
 const BUILD_DIR = join(__dirname, '..', 'build');
 const SOURCE_SVG = join(BUILD_DIR, 'icon-mac.svg');
@@ -150,7 +150,6 @@ const generateIconset = async () => {
 const compileWithIconutil = () => {
   const temporaryDirectory = mkdtempSync(join(tmpdir(), 'sp-mac-icon-'));
   const temporaryIcon = join(temporaryDirectory, 'icon.icns');
-  const extractedIconset = join(temporaryDirectory, 'icon.iconset');
 
   try {
     execFileSync(
@@ -158,12 +157,11 @@ const compileWithIconutil = () => {
       ['--convert', 'icns', '--output', temporaryIcon, ICONSET_DIR],
       { stdio: 'inherit' },
     );
-    execFileSync(
-      '/usr/bin/iconutil',
-      ['--convert', 'iconset', '--output', extractedIconset, temporaryIcon],
-      { stdio: 'inherit' },
-    );
-    compareIconsets(ICONSET_DIR, extractedIconset);
+    // Verify the compiled artifact directly. `iconutil --convert iconset`
+    // must NOT be used as a round-trip oracle: it un-premultiplies the
+    // straight-alpha ARGB planes its own compile step wrote, clamping
+    // anti-aliased pixels into garbage (#9481).
+    verifyIcns(readFileSync(temporaryIcon), temporaryIcon, ICONSET_DIR);
     copyFileSync(temporaryIcon, OUTPUT_ICNS);
   } finally {
     rmSync(temporaryDirectory, { recursive: true, force: true });
@@ -175,7 +173,7 @@ const generateMacIcon = async () => {
 
   if (process.platform === 'darwin') {
     compileWithIconutil();
-    console.log(`Verified ${OUTPUT_ICNS} with an iconutil round trip`);
+    console.log(`Verified compiled ${OUTPUT_ICNS} against the source iconset`);
   } else {
     if (COMPILE_ONLY) {
       throw new Error('--compile-only requires macOS and /usr/bin/iconutil');

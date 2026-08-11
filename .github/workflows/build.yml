@@ -248,10 +248,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Test Unit
-        run: npm run test
-        env:
-          NODE_OPTIONS: '--max-old-space-size=4096'
+      # No unit tests here: the suite is platform-independent (Karma/ChromeHeadless,
+      # TZ pinned via cross-env) and already runs in PR CI and in the linux job of
+      # this same workflow. On macOS it only added ~8min and flaky 2s-timeout
+      # failures that blocked the release binary (v18.15.0).
 
       #      - uses: browser-actions/setup-chrome@v2
       #        id: setup-chrome

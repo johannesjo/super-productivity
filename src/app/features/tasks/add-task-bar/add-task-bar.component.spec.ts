@@ -164,9 +164,17 @@ describe('AddTaskBarComponent', () => {
   const mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', [
     'currentLocale',
     'textLocale',
+    // Reached by the actions bar's date chip as soon as a state has a time on it
+    'formatTime',
   ]);
   mockDateTimeFormatService.currentLocale.and.returnValue('en-US');
   mockDateTimeFormatService.textLocale.and.returnValue('en-US');
+  mockDateTimeFormatService.formatTime.and.callFake((timestamp: number) =>
+    new Date(timestamp).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+    }),
+  );
 
   beforeEach(async () => {
     // The state service seeds its note draft (and thus isNoteExpanded) from
@@ -535,6 +543,114 @@ describe('AddTaskBarComponent', () => {
       expect(addRepeatCfgSpy).toHaveBeenCalled();
       const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
       expect(repeatCfg.startDate).toBe('2024-05-19');
+    });
+
+    // A Monday-to-Friday schedule has no weekend occurrence, so the occurrence
+    // engine starts the task on the Monday regardless (getFirstRepeatOccurrence
+    // scans the config's weekday flags from startDate). Leaving the Saturday in
+    // the config leaves a start date the recurrence never lands on, and every
+    // later quick setting the repeat dialog derives from it — "weekly on
+    // current weekday" — comes out as a Saturday recurrence.
+    it('should start a menu-picked workday repeat on the Monday after a weekend date', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Standup');
+      component.stateService.updateCleanText('Standup');
+      // 2026-03-28 is a Saturday, 2026-03-30 the Monday after it
+      component.stateService.updateDate('2026-03-28');
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'MONDAY_TO_FRIDAY',
+      });
+
+      await component.addTask();
+
+      const taskData = mockTaskService.add.calls.mostRecent()
+        .args[2] as Partial<TaskCopy>;
+      expect(taskData.dueDay).toBe('2026-03-30');
+      const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
+      expect(repeatCfg.startDate).toBe('2026-03-30');
+    });
+
+    // Guards the design, not the roll: nothing here can fail from a change to
+    // rollWeekendDateForRepeat. It pins that the bar never rewrites the day the
+    // user picked, which is what keeps the roll free of provenance tracking.
+    it('should leave the picked weekend date on the bar', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      spyOn(TestBed.inject(TaskRepeatCfgService), 'addTaskRepeatCfgToTask');
+
+      component.stateService.updateInputTxt('Standup');
+      component.stateService.updateCleanText('Standup');
+      component.stateService.updateDate('2026-03-28');
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'MONDAY_TO_FRIDAY',
+      });
+      expect(component.stateService.state().date).toBe('2026-03-28');
+
+      await component.addTask();
+
+      expect(component.stateService.state().repeat).toBeNull();
+      expect(component.stateService.state().date).toBe('2026-03-28');
+    });
+
+    // The timed path writes a timestamp instead of a dueDay, and reads the same
+    // day. Only the day is excluded, not the hour.
+    it('should keep the time when a timed workday repeat starts on the Monday', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Standup');
+      component.stateService.updateCleanText('Standup');
+      component.stateService.updateDate('2026-03-28', '09:30');
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'MONDAY_TO_FRIDAY',
+      });
+
+      await component.addTask();
+
+      const taskData = mockTaskService.add.calls.mostRecent()
+        .args[2] as Partial<TaskCopy>;
+      expect(getDbDateStr(taskData.dueWithTime!)).toBe('2026-03-30');
+      const due = new Date(taskData.dueWithTime!);
+      expect(`${due.getHours()}:${due.getMinutes()}`).toBe('9:30');
+      expect(addRepeatCfgSpy.calls.mostRecent().args[2].startDate).toBe('2026-03-30');
+    });
+
+    // Nothing rolls the fallback to today on the way in — a recurrence with no
+    // date never passes a date through the parser — so the config would keep a
+    // weekend start date the user cannot see while the task itself is created
+    // on the Monday the occurrence engine moves it to.
+    it('should start a date-less workday repeat on the Monday after a weekend today', async () => {
+      // 2024-05-19 is a Sunday, 2024-05-20 the Monday after it
+      mockDateService.todayStr.and.returnValue('2024-05-19');
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Standup');
+      component.stateService.updateCleanText('Standup');
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'MONDAY_TO_FRIDAY',
+      });
+
+      await component.addTask();
+
+      const taskData = mockTaskService.add.calls.mostRecent()
+        .args[2] as Partial<TaskCopy>;
+      expect(taskData.dueDay).toBe('2024-05-20');
+      expect(addRepeatCfgSpy.calls.mostRecent().args[2].startDate).toBe('2024-05-20');
     });
 
     it('should copy entered notes to an inline repeat preset config (discussion #937)', async () => {

@@ -1,4 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { prisma, disconnectDb, reportMonitoringError } from './monitoring-db';
+import { newestOpsPerUser, resolveOperationScope } from './monitoring-scope';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -448,10 +450,12 @@ const showOps = async (args: string[]): Promise<void> => {
     const tailCount = parseIntArg(args, '--tail', 50);
     const userId = parseIntArg(args, '--user', -1);
     const hasUserFilter = userId >= 0;
-    if (!hasUserFilter) {
+    const scope = hasUserFilter ? undefined : await resolveOperationScope();
+    if (scope) {
       console.log(
         `Scope: up to ${RECENT_OPS_PER_USER} newest operations per user, then the newest ${tailCount} candidates overall.`,
       );
+      console.log(scope.description);
     }
 
     // The global server sequence is per-user, so ORDER BY server_seq across the
@@ -477,23 +481,14 @@ const showOps = async (args: string[]): Promise<void> => {
     } else {
       ops = await prisma.$queryRaw`
         WITH candidate_ops AS MATERIALIZED (
-          SELECT o.*
-          FROM user_sync_state s
-          CROSS JOIN LATERAL (
-            SELECT
-              o.id,
-              o.user_id,
-              o.action_type,
-              o.op_type,
-              o.entity_type,
-              o.entity_id,
-              o.payload_bytes,
-              o.received_at
-            FROM operations o
-            WHERE o.user_id = s.user_id
-            ORDER BY o.server_seq DESC
-            LIMIT ${RECENT_OPS_PER_USER}
-          ) o
+          ${newestOpsPerUser(
+            scope?.userIds ?? [],
+            Prisma.sql`
+              id, user_id, action_type, op_type, entity_type, entity_id,
+              payload_bytes, received_at
+            `,
+            RECENT_OPS_PER_USER,
+          )}
         )
         SELECT
           id,
@@ -600,6 +595,18 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
     ];
 
     console.log('\n--- Active Users (by device heartbeat / by sync operations) ---');
+    // Deliberately left as one statement per window, despite reading `operations`
+    // four times. A per-user MAX() probe driven from `users` was tried and
+    // reverted: `received_at > $1` does NOT force a sequential scan as it appears
+    // to -- the planner applies it as an index qual on the non-leading column of
+    // (user_id, received_at) and walks the index, measured on production at 1,232
+    // buffers / 85 ms where the per-user form cost ~11x the buffers for the same
+    // answer. The probe form only wins above roughly 1M operations AND on storage
+    // where random reads are cheap; this instance is the opposite case (measured
+    // 2026-08-07: 1.74 MB/s, ~9.5 ms per miss), so scattered probes are the wrong
+    // trade here. When this report does time out, look first at whether
+    // `operations` has been vacuumed and analyzed -- an absent visibility map
+    // costs a heap fetch per row and dwarfs any query shape.
     for (const period of periods) {
       const threshold = BigInt(now - period.ms);
       const result: ActiveCountRow[] = await prisma.$queryRaw`
@@ -639,21 +646,41 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
     `;
     const totalActiveCount = Number(totalActive[0]?.count ?? 0);
 
+    // Pick the page from sync_devices first, then count operations for those
+    // rows only. Joining operations before the LIMIT aggregated every operation
+    // of the last 7 days across every active user (~5k) to display 30 of them;
+    // counting after it is `recentLimit` bounded range scans on
+    // (user_id, received_at) instead. The DISTINCT that used to guard ops_7d is
+    // gone with the fan-out that made it necessary -- no device join remains to
+    // multiply the rows, so COUNT(*) is both correct and cheaper here.
     const recentUsers: RecentUserRow[] = await prisma.$queryRaw`
+      WITH recent AS MATERIALIZED (
+        SELECT
+          u.id,
+          u.email,
+          u.created_at,
+          MAX(d.last_seen_at) as last_active,
+          COUNT(DISTINCT d.client_id) as device_count
+        FROM users u
+        INNER JOIN sync_devices d ON u.id = d.user_id
+        WHERE d.last_seen_at > ${sevenDaysAgo}
+        GROUP BY u.id, u.email, u.created_at
+        ORDER BY last_active DESC
+        LIMIT ${recentLimit}
+      )
       SELECT
-        u.id,
-        u.email,
-        u.created_at,
-        MAX(d.last_seen_at) as last_active,
-        COUNT(DISTINCT d.client_id) as device_count,
-        COALESCE(COUNT(o.id), 0) as ops_7d
-      FROM users u
-      INNER JOIN sync_devices d ON u.id = d.user_id
-      LEFT JOIN operations o ON u.id = o.user_id AND o.received_at > ${sevenDaysAgo}
-      WHERE d.last_seen_at > ${sevenDaysAgo}
-      GROUP BY u.id, u.email, u.created_at
-      ORDER BY last_active DESC
-      LIMIT ${recentLimit};
+        r.id,
+        r.email,
+        r.created_at,
+        r.last_active,
+        r.device_count,
+        (
+          SELECT COUNT(*)
+          FROM operations o
+          WHERE o.user_id = r.id AND o.received_at > ${sevenDaysAgo}
+        ) as ops_7d
+      FROM recent r
+      ORDER BY r.last_active DESC;
     `;
 
     if (recentUsers.length > 0) {
@@ -836,6 +863,10 @@ const main = async (): Promise<void> => {
         console.log('    --user <id>    Filter by user ID');
         console.log('\nGlobal flags:');
         console.log('  --unmask         Show full email addresses (masked by default)');
+        console.log('\nEnvironment:');
+        console.log(
+          '  MONITOR_SCOPE_USERS  Users sampled by unfiltered `ops` (default 200)',
+        );
         break;
     }
   } catch (err) {
