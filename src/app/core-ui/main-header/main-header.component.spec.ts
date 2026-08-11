@@ -414,6 +414,8 @@ describe('MainHeaderComponent action placement', () => {
   let isAllDataLoaded = true;
   let pluginHeaderButtons = signal<unknown[]>([]);
   let pluginSidePanelButtons = signal<unknown[]>([]);
+  let currentTaskId = signal<string | null>(null);
+  let isShowNotes = signal(false);
 
   const configureTestBed = (): void => {
     const cfg = {
@@ -440,8 +442,10 @@ describe('MainHeaderComponent action placement', () => {
             isXxxs,
             isShowMobileBottomNav: isXs,
             isShowIssuePanel: signal(false),
-            isShowNotes: signal(false),
+            isShowNotes,
             isShowScheduleDayPanel: signal(false),
+            isShowPluginPanel: signal(false),
+            activePluginId: signal(null),
           },
         },
         {
@@ -457,7 +461,7 @@ describe('MainHeaderComponent action placement', () => {
           useValue: {
             currentTaskParentOrCurrent$: of(null),
             currentTask$: of(null),
-            currentTaskId: signal(null),
+            currentTaskId,
           },
         },
         {
@@ -547,6 +551,8 @@ describe('MainHeaderComponent action placement', () => {
     isAllDataLoaded = true;
     pluginHeaderButtons = signal<unknown[]>([]);
     pluginSidePanelButtons = signal<unknown[]>([]);
+    currentTaskId = signal<string | null>(null);
+    isShowNotes = signal(false);
   });
 
   afterEach(() => {
@@ -700,6 +706,93 @@ describe('MainHeaderComponent action placement', () => {
     const addBtn = host.querySelector('.tour-addBtn');
     expect(addBtn).toBeTruthy();
     expect(host.querySelector('.action-nav-scroll')!.contains(addBtn)).toBe(true);
+  });
+
+  // The reveal rules: the row keeps whatever scroll it was left with, so the
+  // two moments that MAKE an off-screen control the relevant one scroll it
+  // back on screen — a tracking change reveals the play button at the start,
+  // a panel open reveals the toggle that closes it at the end. The real
+  // stubbed-out buttons render no width here, so the overflow the reveal
+  // reacts to is faked onto the scroller and the scroll itself is spied.
+  const fakeOverflowAndSpy = (host: HTMLElement): jasmine.Spy => {
+    const scroller = host.querySelector('.action-nav-scroll') as HTMLElement;
+    Object.defineProperty(scroller, 'scrollWidth', { value: 500, configurable: true });
+    Object.defineProperty(scroller, 'clientWidth', { value: 200, configurable: true });
+    return spyOn(scroller, 'scrollTo');
+  };
+
+  it('returns the row to its start when tracking starts', async () => {
+    // A running timer's pause control behind the start edge is the worst
+    // hidden action the row can have: the start fade may land on the group
+    // gap and say nothing at all.
+    const host = await mountAtWidth(1400);
+    const scrollTo = fakeOverflowAndSpy(host);
+
+    currentTaskId.set('task-1');
+    await settle();
+
+    expect(scrollTo).toHaveBeenCalledWith(jasmine.objectContaining({ left: 0 }));
+  });
+
+  it('keeps the toggle that closes a panel on screen when it opens', async () => {
+    // Opening a panel shrinks the row, which pushes the very button just
+    // clicked — last in DOM order — behind the trailing edge.
+    const host = await mountAtWidth(1400);
+    const scrollTo = fakeOverflowAndSpy(host);
+
+    isShowNotes.set(true);
+    await settle();
+
+    expect(scrollTo).toHaveBeenCalledWith(jasmine.objectContaining({ left: 300 }));
+  });
+
+  it('returns the row to rest when the panel closes', async () => {
+    const host = await mountAtWidth(1400);
+    const scrollTo = fakeOverflowAndSpy(host);
+
+    isShowNotes.set(true);
+    await settle();
+    scrollTo.calls.reset();
+
+    isShowNotes.set(false);
+    await settle();
+
+    expect(scrollTo).toHaveBeenCalledWith(jasmine.objectContaining({ left: 0 }));
+  });
+
+  it('leaves the row alone when the bottom nav owns the panel toggles', async () => {
+    // Below 600px the panel opens as a bottom sheet and its toggles live in
+    // the bottom nav — there is nothing at the row's end to reveal.
+    isXs = signal(true);
+    const host = await mountAtWidth(404);
+    const scrollTo = fakeOverflowAndSpy(host);
+
+    isShowNotes.set(true);
+    await settle();
+
+    expect(scrollTo).not.toHaveBeenCalled();
+  });
+
+  it('does not move the row for the boot state', async () => {
+    // A panel restored open (or a task already tracking) at boot is not a
+    // user action; the row must come up at rest, not mid-reveal.
+    currentTaskId = signal<string | null>('task-1');
+    isShowNotes = signal(true);
+    const host = await mountAtWidth(1400);
+    const scrollTo = fakeOverflowAndSpy(host);
+
+    // A boot-time reveal would fire during mount, before the spy exists, and
+    // against real geometry it scrolls nothing — what it leaves behind is a
+    // live 400ms pin. Resize the SCROLLER itself (its box is content-sized,
+    // so resizing the host box around it does not move it) to make the
+    // ResizeObserver re-apply that pin against the faked overflow, where the
+    // spy catches it; without this the test passes even with the first-run
+    // guard removed.
+    const scroller = host.querySelector('.action-nav-scroll') as HTMLElement;
+    scroller.style.width = '150px';
+    await settle();
+
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 
   it('shows the add-task button before initial data load finishes', () => {

@@ -9,6 +9,7 @@ import {
   inject,
   OnDestroy,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
@@ -53,6 +54,14 @@ import { UserProfileService } from '../../features/user-profile/user-profile.ser
 
 /** One `DOM_DELTA_LINE` notch, in CSS pixels. Matches the row's icon metrics. */
 const WHEEL_LINE_HEIGHT_PX = 16;
+
+/**
+ * How long a reveal keeps re-asserting its edge while the row's own box is
+ * still changing under it, in ms. Covers the right panel's 225ms width
+ * animation (ANI_ENTER_TIMING) with margin; once it passes, the scroll
+ * position belongs to the user again.
+ */
+const ACTION_ROW_REVEAL_PIN_MS = 400;
 
 @Component({
   selector: 'main-header',
@@ -151,6 +160,35 @@ export class MainHeaderComponent implements OnDestroy {
   isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
   isShowNotes = computed(() => this.layoutService.isShowNotes());
   isShowScheduleDayPanel = computed(() => this.layoutService.isShowScheduleDayPanel());
+
+  /**
+   * Which right-panel content is open, as one comparable key.
+   *
+   * Drives the action-row reveal: a change means the user opened, switched or
+   * closed a panel whose toggle lives at the row's end. The task-detail panel
+   * is deliberately absent — it opens from the task list, not from a header
+   * toggle, so there is nothing in the row to reveal for it. One known edge:
+   * selecting a task WHILE e.g. notes is open dispatches
+   * `hideNonTaskSidePanelContent`, so this key reads NOTES → null and the row
+   * returns to rest even though the panel itself stays open (now showing the
+   * task). Cosmetic motion only — no control becomes unreachable — and
+   * "reveal start on select" is arguably right anyway, so it is left as is.
+   */
+  private readonly _activePanelKey = computed<string | null>(() => {
+    if (this.isShowNotes()) {
+      return 'NOTES';
+    }
+    if (this.isShowIssuePanel()) {
+      return 'ISSUES';
+    }
+    if (this.isShowScheduleDayPanel()) {
+      return 'SCHEDULE';
+    }
+    if (this.layoutService.isShowPluginPanel()) {
+      return `PLUGIN:${this.layoutService.activePluginId()}`;
+    }
+    return null;
+  });
   syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
   syncState = toSignal(this.syncWrapperService.syncState$);
   isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);
@@ -311,6 +349,70 @@ export class MainHeaderComponent implements OnDestroy {
   }
 
   /**
+   * The edge the row was last asked to reveal, pinned briefly.
+   *
+   * A reveal cannot be a single scroll: opening a panel *shrinks* the row over
+   * a 225ms width animation, so a scroll issued the moment the state flips is
+   * computed against a box that is still narrowing — the end it reaches is not
+   * where the end will be. The ResizeObserver that already watches the
+   * scroller re-applies the pending reveal on every size change until the
+   * deadline passes, which rides the animation instead of guessing its exact
+   * duration. The deadline is what hands the row back to the user: a resize
+   * later than this (a window drag, a panel resize) must not fight them.
+   */
+  private _pendingReveal: { edge: 'start' | 'end'; until: number } | null = null;
+
+  /**
+   * Guards `_actionScroll()` in code paths that can run without a view: the
+   * reveal effects fire on signal changes, and `viewChild.required` throws
+   * until the template has rendered. Set in the same `afterNextRender` that
+   * wires up the ResizeObserver, whose first callback applies anything a
+   * pre-render effect left pending.
+   */
+  private _isViewReady = false;
+
+  /**
+   * Scroll the row so the named edge is on screen, and keep it there while the
+   * row's own box is still animating (see `_pendingReveal`).
+   */
+  private _reveal(edge: 'start' | 'end'): void {
+    this._pendingReveal = { edge, until: Date.now() + ACTION_ROW_REVEAL_PIN_MS };
+    this._applyPendingReveal('smooth');
+  }
+
+  private _applyPendingReveal(behavior: ScrollBehavior): void {
+    const pending = this._pendingReveal;
+    if (!pending || !this._isViewReady) {
+      return;
+    }
+    if (Date.now() > pending.until) {
+      this._pendingReveal = null;
+      return;
+    }
+    const el = this._actionScroll().nativeElement;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    // Nothing hidden: the row fits, or this is the vertical rail, where the
+    // scroller is `display: contents` and has no scrollable geometry.
+    if (maxScroll <= 0) {
+      return;
+    }
+    // RTL runs `scrollLeft` from 0 down to -max (see onActionWheel).
+    const towardsEnd = document.documentElement.dir === 'rtl' ? -1 : 1;
+    const left = pending.edge === 'start' ? 0 : towardsEnd * maxScroll;
+    el.scrollTo({
+      left,
+      behavior: this._prefersReducedMotion() ? 'auto' : behavior,
+    });
+  }
+
+  private _prefersReducedMotion(): boolean {
+    return (
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }
+
+  /**
    * Let a plain wheel scroll the row.
    *
    * A vertical wheel does nothing to a horizontal-only scroller, so on a mouse
@@ -398,6 +500,58 @@ export class MainHeaderComponent implements OnDestroy {
       this._syncTeleport(enabled);
     });
 
+    /**
+     * Reveal the play button when tracking starts, stops or switches task.
+     *
+     * The row keeps whatever scroll the user (or a Tab-through) left it with,
+     * so a running timer's pause control can sit behind the start edge — where
+     * the fade may have no ink to say so (the band next to it is the group
+     * gap). A tracking change is the one moment the play button is what the
+     * user is acting on, so the row glides back to rest and shows it.
+     *
+     * `undefined` is the first-run sentinel: the boot value must not move the
+     * row (and a remote-synced tracking change later merely returns it to
+     * rest, which is harmless).
+     */
+    let prevTrackedId: string | null | undefined;
+    effect(() => {
+      const trackedId = this.currentTaskId() ?? null;
+      const isFirstRun = prevTrackedId === undefined;
+      const isChanged = trackedId !== prevTrackedId;
+      prevTrackedId = trackedId;
+      if (isFirstRun || !isChanged) {
+        return;
+      }
+      untracked(() => this._reveal('start'));
+    });
+
+    /**
+     * Keep the toggle that closes a panel on screen.
+     *
+     * Opening a panel shrinks the row, which pushes the very button just
+     * clicked — last in DOM order — behind the trailing edge, leaving the
+     * panel with no visible header control to close it. So an open or switch
+     * reveals the row's end, and a close returns the row to rest. Skipped
+     * below 600px, where the bottom nav owns the panel toggles and the panel
+     * is a bottom sheet, and on boot (same sentinel as above).
+     */
+    let prevPanelKey: string | null | undefined;
+    effect(() => {
+      const panelKey = this._activePanelKey();
+      const isFirstRun = prevPanelKey === undefined;
+      const isChanged = panelKey !== prevPanelKey;
+      prevPanelKey = panelKey;
+      if (isFirstRun || !isChanged) {
+        return;
+      }
+      untracked(() => {
+        if (this.hasBottomNav()) {
+          return;
+        }
+        this._reveal(panelKey === null ? 'start' : 'end');
+      });
+    });
+
     afterNextRender(() => {
       // Re-check the fade whenever the scroller's own box changes -- the window,
       // the side nav, the right panel.
@@ -411,11 +565,18 @@ export class MainHeaderComponent implements OnDestroy {
       // contents`, which have no box for a ResizeObserver to report at all.
       // Left uncovered rather than papered over: the row still scrolls, and the
       // fade corrects itself on the first scroll or resize after the change.
+      this._isViewReady = true;
       if (typeof ResizeObserver === 'undefined') {
         return;
       }
       const el = this._actionScroll().nativeElement;
-      const ro = new ResizeObserver(() => this.onActionScroll());
+      const ro = new ResizeObserver(() => {
+        this.onActionScroll();
+        // Instant, not smooth: during a panel's width animation this runs per
+        // frame, and restarting a smooth scroll each frame would lag the box
+        // it is chasing. Re-pinning instantly reads as the row riding along.
+        this._applyPendingReveal('auto');
+      });
       ro.observe(el);
       this._destroyRef.onDestroy(() => ro.disconnect());
     });
