@@ -207,6 +207,18 @@
     {{ T.F.WORKLOG.EXPORT.SAVE_TO_FILE | translate }}
   </a>
 
+  @if (isWeeklyRange) {
+    <a
+      [simpleDownloadData]="markdownText"
+      [simpleDownload]="markdownFileName"
+      color="primary"
+      mat-button
+    >
+      <mat-icon>description</mat-icon>
+      {{ T.F.WORKLOG.EXPORT.SAVE_WEEKLY_REPORT | translate }}
+    </a>
+  }
+
   @if (isShowClose()) {
     <button
       (click)="onCloseClick()"

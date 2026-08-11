@@ -25,7 +25,12 @@ import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
-import { createRows, formatRows, formatText } from './worklog-export.util';
+import {
+  createRows,
+  formatMarkdownReport,
+  formatRows,
+  formatText,
+} from './worklog-export.util';
 import { MatDialogActions, MatDialogContent } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { MatAnchor, MatButton, MatMiniFabButton } from '@angular/material/button';
@@ -40,7 +45,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { SimpleDownloadDirective } from '../../../ui/simple-download/simple-download.directive';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 
 @Component({
@@ -79,6 +84,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _timeTrackingService = inject(TimeTrackingService);
+  private _translateService = inject(TranslateService);
 
   readonly rangeStart = input<Date>();
   readonly rangeEnd = input<Date>();
@@ -98,6 +104,9 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   };
   txt: string = '';
   fileName: string = 'tasks.csv';
+  markdownText: string = '';
+  markdownFileName: string = 'weekly-report.md';
+  isWeeklyRange: boolean = false;
   roundTimeOptions: { id: string; title: string }[] = [
     { id: 'QUARTER', title: T.F.WORKLOG.EXPORT.O.FULL_QUARTERS },
     { id: 'HALF', title: T.F.WORKLOG.EXPORT.O.FULL_HALF_HOURS },
@@ -141,6 +150,14 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     }
     this.fileName =
       'tasks' + getDbDateStr(rangeStart) + '-' + getDbDateStr(rangeEnd) + '.csv';
+    this.markdownFileName =
+      'weekly-report' + getDbDateStr(rangeStart) + '-' + getDbDateStr(rangeEnd) + '.md';
+    const expectedWeekEnd = new Date(
+      rangeStart.getFullYear(),
+      rangeStart.getMonth(),
+      rangeStart.getDate() + 6,
+    );
+    this.isWeeklyRange = getDbDateStr(expectedWeekEnd) === getDbDateStr(rangeEnd);
 
     this._subs.add(
       this._workContextService.advancedCfg$
@@ -227,6 +244,40 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             });
 
             this.txt = formatText(this.headlineCols, this.formattedRows);
+            this.markdownText = formatMarkdownReport(data, {
+              title: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.TITLE,
+                {
+                  start: getDbDateStr(rangeStart),
+                  end: getDbDateStr(rangeEnd),
+                },
+              ),
+              completedWork: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.COMPLETED_WORK,
+              ),
+              workAnalysis: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.WORK_ANALYSIS,
+              ),
+              nextWeekPlan: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.NEXT_WEEK_PLAN,
+              ),
+              coordination: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.COORDINATION,
+              ),
+              dates: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.DATES,
+              ),
+              worked: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.WORKED,
+              ),
+              notes: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.NOTES,
+              ),
+              checklist: this._translateService.instant(
+                T.F.WORKLOG.EXPORT.WEEKLY_REPORT.CHECKLIST,
+              ),
+              tags: this._translateService.instant(T.F.WORKLOG.EXPORT.WEEKLY_REPORT.TAGS),
+            });
             this._changeDetectorRef.detectChanges();
           }
         }),

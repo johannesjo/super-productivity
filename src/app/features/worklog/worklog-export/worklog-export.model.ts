@@ -10,6 +10,19 @@ export interface WorklogExportData {
   workTimes: WorkTimes;
 }
 
+export interface WorklogMarkdownLabels {
+  title: string;
+  completedWork: string;
+  workAnalysis: string;
+  nextWeekPlan: string;
+  coordination: string;
+  dates: string;
+  worked: string;
+  notes: string;
+  checklist: string;
+  tags: string;
+}
+
 export interface WorkTimes {
   start: WorkStartEnd;
   end: WorkStartEnd;
