@@ -58,23 +58,14 @@ describe('LocalRestApiHandlerService', () => {
     timer,
     mode = FocusModeMode.Countdown,
     cycle = 0,
-    isPaused = false,
-    isLongBreak = false,
-    remainingMs = Math.max(0, timer.duration - timer.elapsed),
   }: {
     timer: TimerState;
     mode?: FocusModeMode;
     cycle?: number;
-    isPaused?: boolean;
-    isLongBreak?: boolean;
-    remainingMs?: number;
   }): void => {
     store.overrideSelector(focusSelectors.selectTimer, timer);
     store.overrideSelector(focusSelectors.selectMode, mode);
     store.overrideSelector(focusSelectors.selectCurrentCycle, cycle);
-    store.overrideSelector(focusSelectors.selectIsSessionPaused, isPaused);
-    store.overrideSelector(focusSelectors.selectIsLongBreak, isLongBreak);
-    store.overrideSelector(focusSelectors.selectTimeRemaining, remainingMs);
     store.refreshState();
   };
 
@@ -323,7 +314,6 @@ describe('LocalRestApiHandlerService', () => {
         },
         mode: FocusModeMode.Countdown,
         cycle: 1,
-        isPaused: true,
       });
 
       expectFocusData(await requestFocus(), {
@@ -369,8 +359,6 @@ describe('LocalRestApiHandlerService', () => {
         timer: { ...timer, isRunning: false, isLongBreak: true },
         mode: FocusModeMode.Pomodoro,
         cycle: 4,
-        isPaused: true,
-        isLongBreak: true,
       });
       expectFocusData(await requestFocus(), {
         mode: FocusModeMode.Pomodoro,
@@ -387,7 +375,7 @@ describe('LocalRestApiHandlerService', () => {
       });
     });
 
-    it('should return Flowtime state and clamp negative remaining time', async () => {
+    it('should return Flowtime state with no remaining countdown time', async () => {
       setFocusState({
         timer: {
           isRunning: true,
@@ -398,7 +386,6 @@ describe('LocalRestApiHandlerService', () => {
         },
         mode: FocusModeMode.Flowtime,
         cycle: -1,
-        remainingMs: -1,
       });
 
       expectFocusData(await requestFocus(), {
@@ -411,6 +398,33 @@ describe('LocalRestApiHandlerService', () => {
           elapsedMs: 600_000,
           remainingMs: 0,
           durationMs: 0,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should normalize a work timer after a backward clock adjustment', async () => {
+      setFocusState({
+        timer: {
+          isRunning: true,
+          startedAt: 1,
+          elapsed: -1_000,
+          duration: 300_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Countdown,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 0,
+        timer: {
+          purpose: 'work',
+          isRunning: true,
+          isPaused: false,
+          elapsedMs: 0,
+          remainingMs: 300_000,
+          durationMs: 300_000,
           isLongBreak: false,
         },
       });

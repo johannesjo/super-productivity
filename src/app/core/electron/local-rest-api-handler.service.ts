@@ -12,10 +12,7 @@ import { DateService } from '../date/date.service';
 import { isTodayWithOffset } from '../../util/is-today.util';
 import {
   selectCurrentCycle,
-  selectIsLongBreak,
-  selectIsSessionPaused,
   selectMode,
-  selectTimeRemaining,
   selectTimer,
 } from '../../features/focus-mode/store/focus-mode.selectors';
 import {
@@ -283,14 +280,13 @@ export class LocalRestApiHandlerService {
   }
 
   private async _handleGetFocus(requestId: string): Promise<LocalRestApiResponsePayload> {
-    const [timer, mode, cycle, isPaused, isLongBreak, remainingMs] = await Promise.all([
+    const [timer, mode, cycle] = await Promise.all([
       firstValueFrom(this._store.select(selectTimer)),
       firstValueFrom(this._store.select(selectMode)),
       firstValueFrom(this._store.select(selectCurrentCycle)),
-      firstValueFrom(this._store.select(selectIsSessionPaused)),
-      firstValueFrom(this._store.select(selectIsLongBreak)),
-      firstValueFrom(this._store.select(selectTimeRemaining)),
     ]);
+    const durationMs = Math.max(0, timer.duration);
+    const elapsedMs = Math.max(0, timer.elapsed);
 
     return createSuccessResponse(requestId, 200, {
       mode,
@@ -301,11 +297,11 @@ export class LocalRestApiHandlerService {
           : {
               purpose: timer.purpose,
               isRunning: timer.isRunning,
-              isPaused,
-              elapsedMs: timer.elapsed,
-              remainingMs: Math.max(0, remainingMs),
-              durationMs: timer.duration,
-              isLongBreak,
+              isPaused: !timer.isRunning,
+              elapsedMs,
+              remainingMs: Math.max(0, durationMs - elapsedMs),
+              durationMs,
+              isLongBreak: timer.purpose === 'break' && timer.isLongBreak === true,
             },
     });
   }
