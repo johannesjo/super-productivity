@@ -65,6 +65,7 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | App shell (56px rail, resizable panes, sheet <1280 / overlay <960 / single <640) | ✅ | `src/lib/app/AppShell.svelte` |
 | Sidebar (Today/Upcoming/Inbox/projects) | ✅ | `src/lib/app/AppShell.svelte` |
 | Quick capture with syntax parsing (due/start/remind/repeat/tags/project/prio/subtask) | 🟡 | `apps/client/src/lib/app/model.svelte.ts` + `packages/application/src/capture.ts` | `apps/client/src/lib/app/model.spec.ts` + `apps/client/e2e/capture.e2e.ts` |
+| Task list: nested subtask tree render, sections, inline edit, drag-and-drop reorder, context menu | 🟡 | `src/lib/app/TaskWorkspace.svelte` | `apps/client/e2e/tasklist.e2e.ts` |
 | Task list (compact rows, checklist progress) | 🟡 | `src/lib/app/TaskWorkspace.svelte` |
 | Inspector (schedule, notes, checklist, tags, repeat, attachments, tracking) | 🟡 | `src/lib/app/TaskInspector.svelte` |
 | Focus view (pomodoro/flowtime/stopwatch + stats) | 🟡 | `src/lib/app/FocusView.svelte` |

@@ -119,4 +119,41 @@ describe('NouraModel', () => {
 		expect(task?.repeatCfgId).toBeDefined();
 		expect(Object.values(model.state.taskRepeatCfgs)).toHaveLength(1);
 	});
+
+	it('adds, links, indents, dedents, renames, and reorders subtask trees', async () => {
+		const model = new NouraModel();
+		// addSubtask requires a real parent; empty input is ignored
+		await model.addSubtask('', '');
+		await model.addTask('Parent');
+		const parent = model.selectedTask;
+		if (!parent) throw new Error('Expected parent task');
+
+		const childId = await model.addSubtask(parent.id, 'Child');
+		expect(childId).toBeDefined();
+		const child = childId ? model.state.tasks[childId] : undefined;
+		expect(child?.parentId).toBe(parent.id);
+		expect(model.state.tasks[parent.id]?.subtaskIds).toContain(childId);
+
+		await model.addTask('Sibling');
+		const sibling = model.selectedTask;
+		const siblingId = sibling?.id;
+		expect(siblingId).toBeDefined();
+		if (!siblingId) return;
+
+		// indent sibling under child
+		await model.indentTask(siblingId, childId);
+		expect(model.state.tasks[siblingId]?.parentId).toBe(childId);
+		expect(child ? model.state.tasks[child.id]?.subtaskIds : []).toContain(siblingId);
+
+		// dedent sibling back to top level
+		await model.dedentTask(siblingId);
+		expect(model.state.tasks[siblingId]?.parentId).toBeUndefined();
+
+		await model.renameTask(parent.id, 'Renamed parent');
+		expect(model.state.tasks[parent.id]?.title).toBe('Renamed parent');
+
+		const before = model.state.taskOrder;
+		await model.reorderTasks([...before].reverse());
+		expect(model.state.taskOrder).toEqual([...before].reverse());
+	});
 });

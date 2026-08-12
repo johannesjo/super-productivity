@@ -209,8 +209,9 @@ export const PARITY_LEDGER = [
                 tests: 'apps/client/src/lib/app/model.spec.ts',
             },
             {
-                feature: 'Task list (compact rows, checklist progress)',
+                feature: 'Task list: nested subtask tree render, sections, inline edit, drag-and-drop reorder, context menu',
                 owner: 'apps/client/src/lib/app/TaskWorkspace.svelte',
+                tests: 'apps/client/e2e/tasklist.e2e.ts',
             },
             {
                 feature: 'Inspector (schedule, notes, checklist, tags, attachments, repeat)',

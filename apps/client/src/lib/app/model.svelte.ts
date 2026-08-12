@@ -589,13 +589,33 @@ export class NouraModel {
 	}
 	get visibleTasks(): Task[] {
 		const open = this.allTasks.filter((task) => this.completedVisible || task.status !== 'done');
-		if (this.view === 'today') return open.filter((task) => task.dueDay === today());
-		if (this.view === 'upcoming') return open.filter((task) => Boolean(task.dueDay));
-		if (this.view === 'project')
-			return open.filter((task) => task.projectId === this.state.activeProjectId);
-		if (this.view === 'priority') return open.filter((task) => task.priority >= 2);
-		if (this.view === 'completed') return this.allTasks.filter((task) => task.status === 'done');
-		return open;
+		let filtered: Task[];
+		if (this.view === 'today') filtered = open.filter((task) => task.dueDay === today());
+		else if (this.view === 'upcoming') filtered = open.filter((task) => Boolean(task.dueDay));
+		else if (this.view === 'project')
+			filtered = open.filter((task) => task.projectId === this.state.activeProjectId);
+		else if (this.view === 'priority') filtered = open.filter((task) => task.priority >= 2);
+		else if (this.view === 'completed')
+			filtered = this.allTasks.filter((task) => task.status === 'done');
+		else filtered = open;
+
+		// Keep nested trees coherent: a task is visible when it or any ancestor
+		// matched the filter, so subtasks render under their parent regardless of
+		// the parent's own due date/status.
+		if (this.view === 'today' || this.view === 'upcoming') {
+			const included: Record<string, true> = Object.fromEntries(
+				filtered.map((task) => [task.id, true])
+			);
+			for (const child of filtered) {
+				let parentId = child.parentId;
+				while (parentId && this.state.tasks[parentId] && !included[parentId]) {
+					included[parentId] = true;
+					parentId = this.state.tasks[parentId]?.parentId;
+				}
+			}
+			return open.filter((task) => included[task.id]);
+		}
+		return filtered;
 	}
 
 	async addProject(title: string): Promise<void> {
@@ -802,6 +822,65 @@ export class NouraModel {
 
 	async removeTask(id: string): Promise<void> {
 		await this.#store.execute({ type: 'task/remove', payload: { id } });
+	}
+
+	/** Persists a full (flat) task order; used by drag-and-drop reordering. */
+	async reorderTasks(ids: string[]): Promise<void> {
+		await this.#store.execute({ type: 'task/reorder', payload: { ids } });
+	}
+
+	/** Creates a child task under `parentId` and links the subtree. */
+	async addSubtask(parentId: string, title: string): Promise<string | undefined> {
+		const trimmed = title.trim();
+		if (!trimmed) return undefined;
+		const parent = this.state.tasks[parentId];
+		if (!parent) return undefined;
+		const now = Date.now();
+		const id = crypto.randomUUID();
+		const task: Task = {
+			id,
+			title: trimmed,
+			notes: '',
+			status: 'open',
+			priority: 0,
+			projectId: parent.projectId,
+			parentId,
+			dueDay: parent.dueDay,
+			subtaskIds: [],
+			tagIds: [],
+			checklist: [],
+			sections: [],
+			attachments: [],
+			estimateMs: 0,
+			trackedMs: 0,
+			createdAt: now,
+			updatedAt: now,
+			order: this.state.taskOrder.length
+		};
+		await this.#store.execute({ type: 'task/add', payload: { task } });
+		return id;
+	}
+
+	/** Makes `id` a subtask of the nearest preceding sibling row (if any). */
+	async indentTask(id: string, parentId?: string): Promise<void> {
+		const task = this.state.tasks[id];
+		if (!task) return;
+		await this.updateTask(id, { parentId });
+	}
+
+	/** Removes `id` from its parent subtree (becomes a top-level task). */
+	async dedentTask(id: string): Promise<void> {
+		const task = this.state.tasks[id];
+		if (!task) return;
+		const patch: Partial<Omit<Task, 'id'>> = { parentId: undefined };
+		await this.updateTask(id, patch);
+	}
+
+	/** Renames a task in place (inline editing). */
+	async renameTask(id: string, title: string): Promise<void> {
+		const trimmed = title.trim();
+		if (!trimmed) return;
+		await this.updateTask(id, { title: trimmed });
 	}
 
 	async postponeOverdue(): Promise<void> {
