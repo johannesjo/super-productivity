@@ -1,5 +1,16 @@
 import { type DomainCommand, type DomainOperation, type DomainState } from '@noura/domain';
 export * from './sync';
+export * from './backup';
+export * from './services/ports';
+export * from './services/reminder-scheduler';
+export * from './services/tracking-reminder';
+export * from './services/take-a-break';
+export * from './services/idle';
+export * from './services/search';
+export * from './services/notifications';
+export * from './services/shortcuts';
+export * from './effects/daily';
+export * from './effects/focus';
 export interface StateRepository {
     load(): Promise<DomainState | undefined>;
     save(state: DomainState, operation: DomainOperation): Promise<void>;

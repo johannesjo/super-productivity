@@ -159,9 +159,44 @@ export const PARITY_LEDGER: ParityArea[] = [
       },
       {
         feature: 'Effects/orchestration (day strategies, finish-day)',
-        owner: 'apps/client/src/lib/app/model.svelte.ts',
+        owner: 'packages/application/src/effects/daily.ts',
+        tests: 'packages/application/src/effects.spec.ts',
       },
-      { feature: 'Reminders scheduler', owner: 'packages/platform/src/index.ts' },
+      {
+        feature: 'Reminder scheduler service',
+        owner: 'packages/application/src/services/reminder-scheduler.ts',
+        tests: 'packages/application/src/services.spec.ts',
+      },
+      {
+        feature: 'Tracking-reminder + take-a-break services',
+        owner: 'packages/application/src/services/tracking-reminder.ts',
+        tests: 'packages/application/src/services.spec.ts',
+      },
+      {
+        feature: 'Idle detection + idle-split tracking',
+        owner: 'packages/application/src/services/idle.ts',
+        tests: 'packages/application/src/services.spec.ts',
+      },
+      {
+        feature: 'Global full-text search index',
+        owner: 'packages/application/src/services/search.ts',
+        tests: 'packages/application/src/services.spec.ts',
+      },
+      {
+        feature: 'Notifications + global shortcuts services',
+        owner: 'packages/application/src/services/notifications.ts',
+        tests: 'packages/application/src/services.spec.ts',
+      },
+      {
+        feature: 'Focus effects (completion→history, summary→worklog)',
+        owner: 'packages/application/src/effects/focus.ts',
+        tests: 'packages/application/src/effects.spec.ts',
+      },
+      {
+        feature: 'Encrypted backup (AES-GCM)',
+        owner: 'packages/application/src/backup.ts',
+        tests: 'packages/application/src/backup.spec.ts',
+      },
     ],
   },
   {

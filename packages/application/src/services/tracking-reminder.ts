@@ -1,0 +1,44 @@
+import type { ClockPort, FocusPulse } from './ports';
+
+export type { FocusPulse };
+
+export interface TrackingReminderOptions {
+  clock: ClockPort;
+  /** Returns the current focus state. */
+  state: () => FocusPulse;
+  /** Called when a tracking-reminder is due for the active entry. */
+  onReminder: (entryId: string) => void;
+}
+
+/**
+ * Tracking-reminder: when the user keeps time-tracking past
+ * `trackingReminderMinutes` without interruption, nudge them. Fires at most
+ * once per active entry, reset when a new entry starts.
+ */
+export class TrackingReminder {
+  readonly #clock: ClockPort;
+  readonly #state: () => FocusPulse;
+  readonly #onReminder: (entryId: string) => void;
+  #remindedFor?: string;
+
+  constructor(options: TrackingReminderOptions) {
+    this.#clock = options.clock;
+    this.#state = options.state;
+    this.#onReminder = options.onReminder;
+  }
+
+  check(trackingReminderMinutes: number): void {
+    if (trackingReminderMinutes <= 0) return;
+    const pulse = this.#state();
+    if (!pulse.activeEntryId || pulse.startedAt === undefined) {
+      this.#remindedFor = undefined;
+      return;
+    }
+    if (this.#remindedFor === pulse.activeEntryId) return;
+    const thresholdMs = trackingReminderMinutes * 60_000;
+    if (this.#clock.now() - pulse.startedAt >= thresholdMs) {
+      this.#remindedFor = pulse.activeEntryId;
+      this.#onReminder(pulse.activeEntryId);
+    }
+  }
+}

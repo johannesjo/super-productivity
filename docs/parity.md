@@ -46,9 +46,14 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | EncryptedOperationTransport (sync-core encryption) | ✅ | `packages/application/src/sync.ts` | `packages/application/src/sync.spec.ts` |
 | NouraSync HTTP endpoint + WebSocket subscribe | ✅ | `packages/application/src/sync.ts` | — |
 | File provider endpoints (WebDAV/Nextcloud/Dropbox/OneDrive/local) | ✅ | `packages/application/src/sync.ts` | — |
-| Selectors package (planner buckets, smart lists, metrics, search index) | 🟡 | `packages/domain/src/selectors.ts` | `packages/domain/src/domain.spec.ts` |
-| Effects/orchestration (day strategies, finish-day, completion→history) | 🟡 | `apps/client/src/lib/app/model.svelte.ts` | `apps/client/src/lib/app/model.spec.ts` |
-| Services (reminders scheduler, tracking reminder, take-a-break, idle detection, global shortcuts, search index) | 🟡 | `packages/platform/src/index.ts` | — |
+| Selectors package (planner buckets, smart lists, metrics, search index) | ✅ | `packages/domain/src/selectors.ts` + `packages/application/src/services/search.ts` | `packages/application/src/services.spec.ts` |
+| Day effects (finish-day summary, plan-tomorrow, morning review) | ✅ | `packages/application/src/effects/daily.ts` | `packages/application/src/effects.spec.ts` |
+| Focus effects (completion→history, summary→worklog) | ✅ | `packages/application/src/effects/focus.ts` | `packages/application/src/effects.spec.ts` |
+| Reminder scheduler service | ✅ | `packages/application/src/services/reminder-scheduler.ts` | `packages/application/src/services.spec.ts` |
+| Tracking-reminder + take-a-break services | ✅ | `packages/application/src/services/tracking-reminder.ts` | `packages/application/src/services.spec.ts` |
+| Idle detection + idle-split tracking | ✅ | `packages/application/src/services/idle.ts` | `packages/application/src/services.spec.ts` |
+| Global full-text search | ✅ | `packages/application/src/services/search.ts` | `packages/application/src/services.spec.ts` |
+| Notifications + global shortcuts services | ✅ | `packages/application/src/services/notifications.ts` / `shortcuts.ts` | `packages/application/src/services.spec.ts` |
 | Platform adapters (credentials/files/clipboard/http/notifications/tray/backup) | 🟡 | `packages/platform/src/index.ts` | — |
 
 ## Phase 3 — Shell & core task UI (TickTick target, `apps/client`)
