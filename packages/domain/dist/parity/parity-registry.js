@@ -372,8 +372,34 @@ export const PARITY_LEDGER = [
                 tests: 'packages/integrations/src/index.spec.ts',
             },
             {
-                feature: 'Client adapters + OAuth + polling + ingest (per provider)',
-                owner: 'packages/integrations/src/index.ts',
+                feature: 'Framework-free HTTP/auth client base (token/basic/oauth2)',
+                owner: 'packages/integrations/src/http.ts',
+                tests: 'packages/integrations/src/clients.spec.ts',
+            },
+            {
+                feature: 'Transforms: issue->task seed, backlog import, comments',
+                owner: 'packages/integrations/src/transforms.ts',
+                tests: 'packages/integrations/src/clients.spec.ts',
+            },
+            {
+                feature: 'Jira client (search/get/comment/worklogs/test-connection)',
+                owner: 'packages/integrations/src/jira.ts',
+                tests: 'packages/integrations/src/clients.spec.ts',
+            },
+            {
+                feature: 'iCalendar parser + CalDAV client (window query)',
+                owner: 'packages/integrations/src/ical.ts',
+                tests: 'packages/integrations/src/clients.spec.ts',
+            },
+            {
+                feature: 'Pinned-search polling (dedupe) + worklog export',
+                owner: 'packages/integrations/src/polling.ts',
+                tests: 'packages/integrations/src/clients.spec.ts',
+            },
+            {
+                feature: 'Provider pipeline E2E over headless mock server (Jira + CalDAV)',
+                owner: 'packages/integrations/src/mock-server.ts',
+                tests: 'packages/integrations/src/e2e.pipeline.spec.ts',
             },
         ],
     },

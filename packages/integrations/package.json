@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@noura/domain": "workspace:*" },
   "scripts": { "build": "tsc -p tsconfig.json", "check": "tsc -p tsconfig.json --noEmit", "test": "vitest run" },
   "devDependencies": { "typescript": "^6.0.3", "vitest": "^4.1.8" }
 }

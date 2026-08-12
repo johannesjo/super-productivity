@@ -93,7 +93,12 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Worklog/timesheet (incl. CSV export) | 🟡 | `src/lib/app/HistoryView.svelte` (+ `packages/application/src/worklog.ts`) |
 | Project/Tag management UI | ✅ | `src/lib/app/OrgDialog.svelte` |
 | Provider registry (15 providers) | ✅ | `packages/integrations/src/index.ts` |
-| Provider clients + OAuth + polling + ingest | ❌ | `packages/integrations/src/index.ts` |
+| HTTP/auth client base (token/basic/oauth2) + transforms (issue→task seed, backlog import) | ✅ | `packages/integrations/src/http.ts` / `transforms.ts` |
+| Jira client (search/get/comment/worklogs/test-connection) | ✅ | `packages/integrations/src/jira.ts` |
+| iCalendar parser + CalDAV client (window query) | ✅ | `packages/integrations/src/ical.ts` / `caldav.ts` |
+| Pinned-search polling (dedupe) + worklog export | ✅ | `packages/integrations/src/polling.ts` / `worklog-export.ts` |
+| Jira + CalDAV pipeline E2E (headless mock server) | ✅ | `packages/integrations/src/e2e.pipeline.spec.ts` |
+| Provider clients wired into the UI (per-provider OAuth, remote updates, calendar agenda in Planner) | ❌ | `apps/client/src/lib/app/SettingsDialog.svelte` |
 | NouraSync server (Bun, full service set) | 🔒 | `packages/noura-sync-server/src/index.ts` |
 | Sync-core (encryption, vector clocks, conflicts) | 🔒 | `packages/sync-core/src/index.ts` |
 | File providers (WebDAV/Nextcloud/Dropbox/OneDrive/local) | 🔒 | `packages/sync-providers/src/provider-types.ts` |

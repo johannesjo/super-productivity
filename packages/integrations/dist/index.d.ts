@@ -98,3 +98,4 @@ export declare const INTEGRATIONS: readonly [{
     readonly capabilities: readonly ["import", "create", "update", "events"];
 }];
 export declare const integrationById: (id: string) => IntegrationDefinition | undefined;
+export * from './clients';
