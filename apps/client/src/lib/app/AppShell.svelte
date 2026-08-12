@@ -6,6 +6,7 @@
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import ArchiveIcon from '@lucide/svelte/icons/archive';
 	import BookOpenIcon from '@lucide/svelte/icons/book-open';
+	import BriefcaseIcon from '@lucide/svelte/icons/briefcase';
 	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
 	import CalendarDaysIcon from '@lucide/svelte/icons/calendar-days';
 	import CheckSquareIcon from '@lucide/svelte/icons/square-check-big';
@@ -292,6 +293,15 @@
 										></button
 									>{/each}
 							</section>
+							{#if model.workContexts.length > 1}<section>
+									<h2>Work contexts</h2>
+									{#each model.workContexts as context (context.id)}<button
+											class:active={model.state.activeWorkContextId === context.id}
+											type="button"
+											onclick={() => model.selectWorkContext(context.id)}
+											><BriefcaseIcon /><span>{context.title}</span></button
+										>{/each}
+								</section>{/if}
 							<div class="sidebar-footer">
 								<button type="button" onclick={() => (model.orgOpen = true)}
 									><FolderIcon /><span>Projects & tags</span></button

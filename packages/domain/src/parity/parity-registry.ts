@@ -312,6 +312,11 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'apps/client/e2e/settings.e2e.ts',
       },
       {
+        feature: 'Work-context switching in the sidebar',
+        owner: 'apps/client/src/lib/app/AppShell.svelte',
+        tests: 'apps/client/src/lib/app/model.spec.ts',
+      },
+      {
         feature: 'Translated shell strings (nav, sidebar, workspace headings)',
         owner: 'apps/client/src/lib/app/AppShell.svelte',
         tests: 'apps/client/e2e/settings.e2e.ts',
@@ -420,6 +425,11 @@ export const PARITY_LEDGER: ParityArea[] = [
         feature: 'Pinned-search polling (dedupe) + worklog export',
         owner: 'packages/integrations/src/polling.ts',
         tests: 'packages/integrations/src/clients.spec.ts',
+      },
+      {
+        feature: 'Settings UI wiring: Jira test-connection + backlog import',
+        owner: 'apps/client/src/lib/app/SettingsDialog.svelte',
+        tests: 'apps/client/e2e/integration.e2e.ts',
       },
       {
         feature: 'Provider pipeline E2E over headless mock server (Jira + CalDAV)',

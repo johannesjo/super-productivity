@@ -318,4 +318,38 @@ describe('NouraModel', () => {
 		});
 		expect(model.config.shortcutBindings['search.open']).toBe('CmdOrCtrl+Shift+K');
 	});
+
+	it('imports issue seeds as tasks with linked issue refs', async () => {
+		const model = new NouraModel();
+		const count = await model.importIssueSeeds([
+			{
+				title: 'SP-1: Ship',
+				notes: 'plan',
+				priority: 3,
+				issue: { providerId: 'JIRA', issueId: '1', key: 'SP-1', url: 'u' }
+			},
+			{
+				title: 'SP-2: Retro',
+				notes: '',
+				priority: 0,
+				issue: { providerId: 'JIRA', issueId: '2', key: 'SP-2', url: 'u' }
+			}
+		]);
+		expect(count).toBe(2);
+		const imported = Object.values(model.state.tasks).filter(
+			(task) => task.issue?.providerId === 'JIRA'
+		);
+		expect(imported).toHaveLength(2);
+		expect(imported.some((task) => task.issue?.key === 'SP-1')).toBe(true);
+		expect(imported.some((task) => task.priority === 3)).toBe(true);
+	});
+
+	it('adds and switches work contexts', async () => {
+		const model = new NouraModel();
+		const clientId = await model.addWorkContext('Client');
+		expect(clientId).toBeDefined();
+		expect(model.workContexts).toHaveLength(2);
+		await model.selectWorkContext(clientId as string);
+		expect(model.state.activeWorkContextId).toBe(clientId);
+	});
 });

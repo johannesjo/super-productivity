@@ -8,7 +8,12 @@
 	import ShieldIcon from '@lucide/svelte/icons/shield-check';
 	import TimerIcon from '@lucide/svelte/icons/timer';
 	import UserIcon from '@lucide/svelte/icons/user-round';
-	import { INTEGRATIONS, type IntegrationDefinition } from '@noura/integrations';
+	import {
+		INTEGRATIONS,
+		JiraClient,
+		importBacklogSeeds,
+		type IntegrationDefinition
+	} from '@noura/integrations';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Field from '$lib/components/ui/field';
@@ -25,6 +30,58 @@
 	let integrationEndpoint = $state('');
 	let integrationCredential = $state('');
 	let configuredIntegrations = $state<string[]>([]);
+	let integrationStatus = $state('');
+	let integrationBusy = $state(false);
+
+	const integrationClient = () => {
+		const endpoint = integrationEndpoint.trim();
+		const baseUrl = /^https?:\/\//.test(endpoint) ? endpoint : `https://${endpoint}`;
+		return new JiraClient({
+			baseUrl,
+			auth: { type: 'token', token: integrationCredential.trim() }
+		});
+	};
+
+	async function testIntegration(): Promise<void> {
+		if (!selectedIntegration || selectedIntegration.id !== 'jira') return;
+		integrationBusy = true;
+		integrationStatus = '';
+		try {
+			const ok = await integrationClient().testConnection();
+			integrationStatus = ok
+				? 'Connection verified — this server responds correctly.'
+				: 'Could not reach this server with those credentials.';
+		} catch {
+			integrationStatus = 'Could not reach this Jira instance.';
+		} finally {
+			integrationBusy = false;
+		}
+	}
+
+	async function importBacklog(): Promise<void> {
+		if (!selectedIntegration || selectedIntegration.id !== 'jira') return;
+		integrationBusy = true;
+		integrationStatus = '';
+		try {
+			const issues = await integrationClient().search(
+				'assignee = currentUser() AND resolution = Unresolved ORDER BY priority DESC',
+				25
+			);
+			const seeds = importBacklogSeeds(issues, 'JIRA');
+			const count = await model.importIssueSeeds(seeds);
+			if (!configuredIntegrations.includes('jira'))
+				configuredIntegrations = [...configuredIntegrations, 'jira'];
+			integrationStatus = `Imported ${count} open issues into the current project.`;
+			setTimeout(() => {
+				integrationOpen = false;
+				integrationStatus = '';
+			}, 900);
+		} catch {
+			integrationStatus = 'Backlog import failed — check the URL and token.';
+		} finally {
+			integrationBusy = false;
+		}
+	}
 	const sections = [
 		{ id: 'general', label: 'General', icon: MonitorIcon },
 		{ id: 'account', label: 'Account & sync', icon: UserIcon },
@@ -482,7 +539,16 @@
 				</Field.Field>
 			{/if}
 		</Field.FieldGroup>
+		{#if integrationStatus}<p class="integration-status" role="status">{integrationStatus}</p>{/if}
 		<Dialog.Footer>
+			{#if selectedIntegration?.id === 'jira'}
+				<Button variant="outline" disabled={integrationBusy} onclick={() => void testIntegration()}
+					>Test connection</Button
+				>
+				<Button variant="outline" disabled={integrationBusy} onclick={() => void importBacklog()}
+					>Import backlog</Button
+				>
+			{/if}
 			<Button variant="outline" onclick={() => (integrationOpen = false)}>Cancel</Button>
 			<Button onclick={saveIntegration}>Save connection</Button>
 		</Dialog.Footer>
@@ -619,6 +685,11 @@
 	}
 	:global(.shortcut-input) {
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 12px;
+	}
+	.integration-status {
+		margin: 12px 0 0;
+		color: var(--muted-foreground);
 		font-size: 12px;
 	}
 	@media (max-width: 760px) {

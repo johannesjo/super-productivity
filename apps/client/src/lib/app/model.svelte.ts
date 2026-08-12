@@ -724,6 +724,66 @@ export class NouraModel {
 		await this.updateTask(id, { dueDay });
 	}
 
+	/** Imports normalized issue seeds (from a provider backlog) into the active project. */
+	async importIssueSeeds(seeds: Array<import('@noura/integrations').TaskSeed>): Promise<number> {
+		const now = Date.now();
+		for (const seed of seeds) {
+			const task: Task = {
+				id: crypto.randomUUID(),
+				title: seed.title,
+				notes: seed.notes,
+				status: 'open',
+				priority: seed.priority,
+				projectId: this.state.activeProjectId,
+				subtaskIds: [],
+				tagIds: [],
+				checklist: [],
+				sections: [],
+				attachments: [],
+				issue: seed.issue,
+				estimateMs: 0,
+				trackedMs: 0,
+				createdAt: now,
+				updatedAt: now,
+				order: this.state.taskOrder.length
+			};
+			await this.#store.execute({ type: 'task/add', payload: { task } });
+		}
+		return seeds.length;
+	}
+
+	/** Switches the active work context (reducer maintains the domain link). */
+	async selectWorkContext(id: string): Promise<void> {
+		await this.#store.execute({ type: 'workcontext/switch', payload: { id } });
+	}
+
+	async addWorkContext(title: string): Promise<string | undefined> {
+		const trimmed = title.trim();
+		if (!trimmed) return undefined;
+		const now = Date.now();
+		const id = crypto.randomUUID();
+		await this.#store.execute({
+			type: 'workcontext/add',
+			payload: {
+				context: {
+					id,
+					title: trimmed,
+					icon: 'briefcase',
+					isEnabled: true,
+					isPersistent: true,
+					taskIds: [],
+					createdAt: now,
+					modifiedAt: now
+				}
+			}
+		});
+		return id;
+	}
+
+	get workContexts() {
+		return Object.values(this.state.workContexts).filter((context) => context.isEnabled);
+	}
+
 	get config(): GlobalConfig {
 		return this.state.config;
 	}
