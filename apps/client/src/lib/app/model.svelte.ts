@@ -6,6 +6,8 @@ import {
 	exportEncryptedBackup,
 	IdleDetection,
 	importEncryptedBackup,
+	countState,
+	importSummary,
 	parseCapture,
 	type EncryptedBackupFile,
 	type StateRepository,
@@ -369,6 +371,7 @@ export class NouraModel {
 	syncError = $state('');
 	syncStatusOpen = $state(false);
 	lastSyncedAt = $state<number | undefined>();
+	lastImportSummary = $state('');
 	syncProvider = $state<'noura' | FileProviderKind>('noura');
 	syncProviderLabel = $state('');
 	webdavUrl = $state('');
@@ -1468,6 +1471,7 @@ export class NouraModel {
 	async restoreEncryptedBackup(file: EncryptedBackupFile, passphrase: string): Promise<void> {
 		const state = await importEncryptedBackup(file, passphrase);
 		await this.#store.import(state);
+		this.lastImportSummary = importSummary(countState(state));
 	}
 
 	async exportBackup(): Promise<void> {
@@ -1530,6 +1534,7 @@ export class NouraModel {
 		const imported = importAnyState(parsed);
 		if (!imported.tasks || !imported.projects) throw new Error('Unsupported backup format');
 		await this.#store.import(imported);
+		this.lastImportSummary = importSummary(countState(imported));
 	}
 }
 

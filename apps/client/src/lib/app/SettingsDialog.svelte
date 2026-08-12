@@ -8,6 +8,7 @@
 	import MonitorIcon from '@lucide/svelte/icons/monitor';
 	import PaletteIcon from '@lucide/svelte/icons/palette';
 	import ShieldIcon from '@lucide/svelte/icons/shield-check';
+	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 	import TimerIcon from '@lucide/svelte/icons/timer';
 	import UserIcon from '@lucide/svelte/icons/user-round';
 	import {
@@ -92,12 +93,17 @@
 		{ id: 'date', label: 'Date & time', icon: CalendarClockIcon },
 		{ id: 'notifications', label: 'Notifications', icon: BellIcon },
 		{ id: 'focus', label: 'Focus & tracking', icon: TimerIcon },
+		{ id: 'features', label: 'Features', icon: SparklesIcon },
 		{ id: 'integrations', label: 'Integrations', icon: LinkIcon },
 		{ id: 'privacy', label: 'Privacy & backup', icon: ShieldIcon },
 		{ id: 'smartlists', label: 'Smart lists', icon: ListChecksIcon },
 		{ id: 'shortcuts', label: 'Shortcuts', icon: KeyboardIcon },
 		{ id: 'about', label: 'About', icon: InfoIcon }
 	];
+
+	async function importPlain(): Promise<void> {
+		await model.importBackup();
+	}
 
 	async function exportEncrypted(): Promise<void> {
 		const passphrase = window.prompt('Backup encryption password (at least 8 characters)') ?? '';
@@ -489,6 +495,45 @@
 							/></Field.Field
 						>
 					</Field.FieldGroup>
+				{:else if section === 'features'}
+					<header>
+						<h2>Features</h2>
+						<p>Calm, privacy-friendly behavior toggles persisted per device.</p>
+					</header>
+					<Field.FieldGroup>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Keep notes pinned to Today</Field.FieldTitle
+								><Field.FieldDescription
+									>Carry notes-forward when a repeating task moves to a new day.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch
+								checked={model.config.isKeepNotesOnToday}
+								onCheckedChange={(checked) =>
+									void model.updateConfig({ isKeepNotesOnToday: checked })}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Block finishing day while tracking</Field.FieldTitle
+								><Field.FieldDescription
+									>Warn instead of finishing the day when a task is still being tracked.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch
+								checked={model.config.isBlockFinishDayForTimeTrackingTasks}
+								onCheckedChange={(checked) =>
+									void model.updateConfig({ isBlockFinishDayForTimeTrackingTasks: checked })}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Show subtask count in lists</Field.FieldTitle
+								><Field.FieldDescription
+									>Render nested subtasks indented beneath their parent rows.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch checked disabled /></Field.Field
+						>
+					</Field.FieldGroup>
 				{:else if section === 'integrations'}
 					<header>
 						<h2>Integrations</h2>
@@ -522,15 +567,16 @@
 					<div class="backup-actions">
 						<Button onclick={() => model.exportBackup()}>Export backup</Button><Button
 							variant="outline"
-							onclick={() => model.importBackup()}>Import backup</Button
-						>
-						<Button variant="secondary" onclick={() => void exportEncrypted()}
+							onclick={() => void importPlain()}>Import backup</Button
+						><Button variant="secondary" onclick={() => void exportEncrypted()}
 							>Export encrypted</Button
+						><Button variant="outline" onclick={() => void importEncrypted()}
+							>Import encrypted</Button
 						>
-						<Button variant="outline" onclick={() => void importEncrypted()}>
-							Import encrypted
-						</Button>
 					</div>
+					{#if model.lastImportSummary}<p class="integration-status" role="status">
+							Review: {model.lastImportSummary}
+						</p>{/if}
 					<Field.FieldGroup
 						><Field.Field orientation="horizontal"
 							><Field.FieldContent

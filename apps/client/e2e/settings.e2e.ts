@@ -124,3 +124,28 @@ test('smart-list and about settings sections render and interact', async ({ page
 	await expect(settings.getByText(/Noura 0.1.0/)).toBeVisible();
 	await expect(settings.getByText(/MIT License/)).toBeVisible();
 });
+
+// Phase 6 gate: Features section toggles persist to GlobalConfig.
+test('features section toggles persist across reload', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,');
+	const settings = page.getByRole('dialog', { name: 'Settings' });
+	await settings.getByRole('button', { name: 'Features' }).click();
+	await expect(settings.getByRole('heading', { name: 'Features' })).toBeVisible();
+
+	const keepNotes = settings.getByRole('switch').first();
+	await keepNotes.click();
+	// Let the async IndexedDB write settle before reloading.
+	await page.waitForTimeout(400);
+	await page.keyboard.press('Escape');
+
+	await page.reload();
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+	await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,');
+	await settings.getByRole('button', { name: 'Features' }).click();
+	await expect
+		.poll(() => settings.getByRole('switch').first().getAttribute('aria-checked'))
+		.toBe('true');
+});
