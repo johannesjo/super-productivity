@@ -22,7 +22,21 @@ test('sync rail widget moves offline -> connecting -> connected -> offline', asy
 	await page.getByRole('button', { name: 'Connect NouraSync' }).click();
 
 	await expect(pill).toHaveAttribute('aria-label', 'Sync: connected', { timeout: 15_000 });
+	await page.keyboard.press('Escape');
 
-	await page.getByRole('button', { name: 'Disconnect' }).click();
+	// The rail dot opens the account/devices status dialog.
+	await pill.click();
+	const status = page.getByRole('dialog', { name: 'Sync' });
+	await expect(status).toBeVisible();
+	await expect(status.getByText(/connected/)).toBeVisible();
+	await expect(status.getByText('This device')).toBeVisible();
+	await expect(status.locator('.policy')).toContainText('last-write-wins');
+	await status.getByRole('button', { name: 'Close' }).last().click();
+
+	// Reopen sync settings and disconnect.
+	await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,');
+	const settings = page.getByRole('dialog', { name: 'Settings' });
+	await settings.getByRole('button', { name: 'Account & sync' }).click();
+	await settings.getByRole('button', { name: 'Disconnect' }).click();
 	await expect(pill).toHaveAttribute('aria-label', 'Sync: offline');
 });

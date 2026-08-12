@@ -367,6 +367,8 @@ export class NouraModel {
 	syncPassphrase = $state('');
 	syncStatus = $state<'offline' | 'connecting' | 'connected' | 'error'>('offline');
 	syncError = $state('');
+	syncStatusOpen = $state(false);
+	lastSyncedAt = $state<number | undefined>();
 	syncProvider = $state<'noura' | FileProviderKind>('noura');
 	syncProviderLabel = $state('');
 	webdavUrl = $state('');
@@ -518,6 +520,7 @@ export class NouraModel {
 		this.syncError = '';
 		this.syncProviderLabel = '';
 		this.syncStatus = 'offline';
+		this.lastSyncedAt = undefined;
 	}
 
 	disconnectNouraSync(): void {
@@ -575,6 +578,7 @@ export class NouraModel {
 			await this.#syncTransport.start();
 			this.syncProviderLabel = label;
 			this.syncStatus = 'connected';
+			this.lastSyncedAt = Date.now();
 		} catch (error) {
 			this.#syncTransport.stop();
 			this.#syncTransport = undefined;

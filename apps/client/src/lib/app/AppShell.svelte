@@ -47,6 +47,7 @@
 	import TaskInspector from './TaskInspector.svelte';
 	import TaskCaptureDialog from './TaskCaptureDialog.svelte';
 	import TaskWorkspace from './TaskWorkspace.svelte';
+	import SyncStatusDialog from './SyncStatusDialog.svelte';
 	import { model } from './model.svelte';
 
 	const railItems = [
@@ -150,7 +151,7 @@
 							type="button"
 							class="sync-indicator"
 							aria-label={`Sync: ${model.syncStatus}`}
-							onclick={() => (model.settingsOpen = true)}
+							onclick={() => (model.syncStatusOpen = true)}
 							><span class={`sync-dot status-${model.syncStatus}`}></span></button
 						></Tooltip.Trigger
 					><Tooltip.Content side="right">Sync: {model.syncStatus}</Tooltip.Content></Tooltip.Root
@@ -349,6 +350,7 @@
 <SearchDialog {model} />
 <SettingsDialog {model} />
 <ActivityDialog {model} />
+<SyncStatusDialog {model} />
 <TaskCaptureDialog {model} />
 <OrgDialog {model} />
 <OnboardingDialog {model} />
