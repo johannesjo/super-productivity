@@ -1180,4 +1180,62 @@ describe('ScheduleComponent', () => {
       expect(mockLayoutService.selectedTimeView()).toBe('day');
     });
   });
+
+  describe('scroll target measurement', () => {
+    const TARGET_TOP_PX = 250;
+    let host: HTMLElement;
+    let wrapper: HTMLElement;
+
+    const buildScrollableDom = (scale: string): void => {
+      host = document.createElement('div');
+      // The route enter animation (warpRoute) starts the view at scale(1.2),
+      // and the scroll runs while that is still in flight.
+      host.style.cssText = `position:relative;transform:${scale};transform-origin:top left;`;
+
+      wrapper = document.createElement('div');
+      wrapper.className = 'scroll-wrapper';
+      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
+
+      const spacer = document.createElement('div');
+      spacer.style.cssText = 'height:600px;width:400px;';
+
+      const target = document.createElement('div');
+      target.id = 'test-scroll-target';
+      target.style.cssText = `position:absolute;top:${TARGET_TOP_PX}px;left:0;height:2px;width:10px;`;
+
+      wrapper.append(spacer, target);
+      host.append(wrapper);
+      document.body.append(host);
+    };
+
+    afterEach(() => host?.remove());
+
+    it('scrolls to the layout position even while an ancestor is scaled', () => {
+      buildScrollableDom('scale(1.2)');
+      const scrollToSpy = spyOn(wrapper, 'scrollTo');
+
+      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
+
+      expect(scrollToSpy).toHaveBeenCalled();
+      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
+      // Rect-based math would return TARGET_TOP_PX * 1.2 here, scrolling the
+      // view roughly two hours past "now".
+      expect(options.top).toBe(TARGET_TOP_PX);
+    });
+
+    it('gives the same target with and without the scale', () => {
+      buildScrollableDom('scale(1.2)');
+      const scaledSpy = spyOn(wrapper, 'scrollTo');
+      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
+      const scaledTop = (scaledSpy.calls.mostRecent().args[0] as ScrollToOptions).top;
+      host.remove();
+
+      buildScrollableDom('none');
+      const plainSpy = spyOn(wrapper, 'scrollTo');
+      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
+      const plainTop = (plainSpy.calls.mostRecent().args[0] as ScrollToOptions).top;
+
+      expect(scaledTop).toBe(plainTop);
+    });
+  });
 });

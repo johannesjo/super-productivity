@@ -402,19 +402,25 @@ export class ScheduleComponent {
 
     const timeCol = scrollContainer.querySelector(
       'schedule-week .time-column-bg, schedule-week .filler',
-    );
+    ) as HTMLElement | null;
     // `.filler` is `display:none` in side-panel mode, so a 0-width hit
     // here means we matched the hidden one — fall back to the default.
-    const timeColWidth = timeCol?.getBoundingClientRect().width || 48;
+    const timeColWidth = timeCol?.offsetWidth || 48;
     const EXTRA_PX = 12;
 
-    const elRect = element.getBoundingClientRect();
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const targetTop = scrollContainer.scrollTop + elRect.top - containerRect.top;
+    // Measured via offsetTop/offsetLeft rather than getBoundingClientRect().
+    // Rects are visual coordinates and include any ancestor CSS transform,
+    // while scrollTo() takes layout coordinates. The route enter animation
+    // starts this view at scale(1.2) and the scroll runs on a setTimeout(0),
+    // so rect-based math overshoots by whatever the animation's current scale
+    // happens to be.
+    const elPos = this._layoutOffset(element);
+    const containerPos = this._layoutOffset(scrollContainer);
+    const targetTop = elPos.top - containerPos.top - scrollContainer.clientTop;
     const targetLeft =
-      scrollContainer.scrollLeft +
-      elRect.left -
-      containerRect.left -
+      elPos.left -
+      containerPos.left -
+      scrollContainer.clientLeft -
       timeColWidth -
       EXTRA_PX;
 
@@ -423,6 +429,22 @@ export class ScheduleComponent {
       left: Math.max(0, targetLeft),
       behavior: 'instant',
     });
+  }
+
+  // Position within the offset-parent chain. Unlike getBoundingClientRect(),
+  // this is unaffected by CSS transforms on any ancestor.
+  private _layoutOffset(element: HTMLElement): { top: number; left: number } {
+    let top = 0;
+    let left = 0;
+    let node: HTMLElement | null = element;
+
+    while (node) {
+      top += node.offsetTop;
+      left += node.offsetLeft;
+      node = node.offsetParent as HTMLElement | null;
+    }
+
+    return { top, left };
   }
 
   selectTimeView(view: 'week' | 'month' | 'day'): void {
