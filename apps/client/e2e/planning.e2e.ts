@@ -138,3 +138,38 @@ test('schedule: move an inbox task to Today via quick plan and persist it', asyn
 		page.locator('button[draggable="true"]').filter({ visible: true }).filter({ hasText: title })
 	).toBeVisible();
 });
+
+// Phase 7 gate: calendar feed -> iCal parse -> Planner agenda.
+test('planner: load a calendar feed and show its events in the agenda', async ({ page }) => {
+	const now = new Date();
+	const monday = new Date(
+		Date.UTC(
+			now.getUTCFullYear(),
+			now.getUTCMonth(),
+			now.getUTCDate() - ((now.getUTCDay() + 6) % 7)
+		)
+	);
+	const dt = monday.toISOString().slice(0, 10).replace(/-/g, '');
+	const ics = [
+		'BEGIN:VCALENDAR',
+		'BEGIN:VEVENT',
+		'UID:evt-1',
+		'SUMMARY:Architecture review',
+		'DTSTART:' + dt + 'T150000Z',
+		'DTEND:' + dt + 'T160000Z',
+		'END:VEVENT',
+		'END:VCALENDAR'
+	].join('\r\n');
+
+	await page.route('**/calendar.ics', (route) =>
+		route.fulfill({ status: 200, contentType: 'text/calendar', body: ics })
+	);
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+	await page.locator("button[aria-label='Planner']").click();
+
+	page.on('dialog', (dialog) => dialog.accept('https://example.test/calendar.ics'));
+	await page.getByRole('button', { name: /Load calendar/ }).click();
+
+	await expect(page.locator('.agenda-list')).toContainText('Architecture review');
+});

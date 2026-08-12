@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { scheduleOccurrences, selectWeekBuckets, weekDays } from '@noura/application';
+	import {
+		calendarAgenda,
+		scheduleOccurrences,
+		selectWeekBuckets,
+		weekDays
+	} from '@noura/application';
 	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import PlusIcon from '@lucide/svelte/icons/plus';
@@ -75,6 +80,14 @@
 		// move within a week = reschedule; dropping an "unscheduled" card = schedule
 		if (source && source.dueDay !== day) await model.setTaskDay(id, day);
 	}
+
+	const agenda = $derived(calendarAgenda(model.calendarEvents, weekStart));
+
+	async function loadCalendar(): Promise<void> {
+		const url = window.prompt('Calendar feed URL (.ics)');
+		if (!url) return;
+		await model.loadCalendarFromUrl(url);
+	}
 </script>
 
 <section class="planner" aria-labelledby="planner-title">
@@ -129,6 +142,19 @@
 								onclick={() => model.openTaskDetails(task.id)}>{task.title}</button
 							>{/each}
 					</div>{:else}<p class="none">Nothing left to schedule.</p>{/if}
+				{#if agenda.some((day) => day.events.length)}
+					<h2 class="agenda-title" style="margin-top: 20px">Calendar</h2>
+					<ul class="agenda-list">
+						{#each agenda.flatMap((day) => day.events) as event (event.id)}<li>
+								<span class="agenda-date">{event.date.slice(5)}</span><span class="agenda-summary"
+									>{event.summary}</span
+								>
+							</li>{/each}
+					</ul>
+				{/if}
+				<button type="button" class="load-calendar" onclick={() => void loadCalendar()}>
+					+ Load calendar
+				</button>
 			</aside>
 			<div class="week-grid">
 				<div class="week-head" aria-hidden="true">
@@ -292,6 +318,41 @@
 	.unscheduled .none {
 		color: var(--muted-foreground);
 		font-size: 12px;
+	}
+	.agenda-list {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		margin: 6px 0 10px;
+	}
+	.agenda-list li {
+		display: flex;
+		align-items: baseline;
+		gap: 7px;
+		font-size: 11px;
+	}
+	.agenda-date {
+		flex: 0 0 auto;
+		color: var(--muted-foreground);
+		font-variant-numeric: tabular-nums;
+	}
+	.agenda-summary {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.load-calendar {
+		width: 100%;
+		margin-top: 6px;
+		padding: 7px 0;
+		border: 1px dashed var(--border);
+		border-radius: 8px;
+		color: var(--muted-foreground);
+		font-size: 11px;
+	}
+	.load-calendar:hover {
+		color: var(--foreground);
+		border-color: var(--ring);
 	}
 	.week-grid {
 		min-width: 0;

@@ -7,6 +7,7 @@ export * from './eisenhower';
 export * from './worklog';
 export * from './metrics';
 export * from './planner';
+export * from './calendar';
 export * from './i18n';
 export { localeCodes } from './locales';
 export * from './local-http';

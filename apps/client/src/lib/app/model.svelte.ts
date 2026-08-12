@@ -346,6 +346,7 @@ export class NouraModel {
 	selectedNoteId = $state<string | undefined>();
 	orgOpen = $state(false);
 	searchOpen = $state(false);
+	calendarEvents = $state.raw<Array<import('@noura/application').CalendarEventInput>>([]);
 	settingsOpen = $state(false);
 	activityOpen = $state(false);
 	sidebarOpen = $state(false);
@@ -782,6 +783,18 @@ export class NouraModel {
 
 	get workContexts() {
 		return Object.values(this.state.workContexts).filter((context) => context.isEnabled);
+	}
+
+	/** Loads an iCalendar feed over HTTP and stages its events for the agenda. */
+	async loadCalendarFromUrl(url: string): Promise<void> {
+		const trimmed = url.trim();
+		if (!trimmed) return;
+		const response = await fetch(trimmed);
+		if (!response.ok) throw new Error(`Could not load calendar (${response.status})`);
+		const { parseIcs } = await import('@noura/integrations');
+		const text = await response.text();
+		const events = parseIcs(text);
+		this.calendarEvents = events;
 	}
 
 	get config(): GlobalConfig {

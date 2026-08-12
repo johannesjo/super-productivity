@@ -422,6 +422,16 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'packages/integrations/src/clients.spec.ts',
       },
       {
+        feature: 'Calendar agenda projection (Planner overlay)',
+        owner: 'packages/application/src/calendar.ts',
+        tests: 'packages/application/src/calendar.spec.ts',
+      },
+      {
+        feature: 'iCal feed -> Planner week agenda (load + parse)',
+        owner: 'apps/client/src/lib/app/PlannerView.svelte',
+        tests: 'apps/client/e2e/planning.e2e.ts',
+      },
+      {
         feature: 'Pinned-search polling (dedupe) + worklog export',
         owner: 'packages/integrations/src/polling.ts',
         tests: 'packages/integrations/src/clients.spec.ts',

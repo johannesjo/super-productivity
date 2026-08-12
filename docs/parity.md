@@ -99,7 +99,8 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Pinned-search polling (dedupe) + worklog export | ✅ | `packages/integrations/src/polling.ts` / `worklog-export.ts` |
 | Jira + CalDAV pipeline E2E (headless mock server) | ✅ | `packages/integrations/src/e2e.pipeline.spec.ts` |
 | Jira wired into Settings (test-connection + backlog import) | ✅ | `apps/client/src/lib/app/SettingsDialog.svelte` (`e2e/integration.e2e.ts`) |
-| Other providers wired into UI (OAuth, remote updates, calendar agenda in Planner) | ❌ | `apps/client/src/lib/app/SettingsDialog.svelte` |
+| Calendar agenda into Planner (iCal feed load + week overlay) | ✅ | `packages/application/src/calendar.ts` + `apps/client/src/lib/app/PlannerView.svelte` |
+| Other providers wired into UI (OAuth, remote updates) | ❌ | `apps/client/src/lib/app/SettingsDialog.svelte` |
 | NouraSync server (Bun, full service set) | 🔒 | `packages/noura-sync-server/src/index.ts` |
 | Sync-core (encryption, vector clocks, conflicts) | 🔒 | `packages/sync-core/src/index.ts` |
 | File providers (WebDAV/Nextcloud/Dropbox/OneDrive/local) | 🔒 | `packages/sync-providers/src/provider-types.ts` |

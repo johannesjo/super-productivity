@@ -352,4 +352,21 @@ describe('NouraModel', () => {
 		await model.selectWorkContext(clientId as string);
 		expect(model.state.activeWorkContextId).toBe(clientId);
 	});
+
+	it('loads an iCalendar feed and stages its events', async () => {
+		const original = globalThis.fetch;
+		globalThis.fetch = (async () =>
+			new Response(
+				'BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:1\r\nSUMMARY:Standup\r\nDTSTART:20260713T090000Z\r\nDTEND:20260713T091500Z\r\nEND:VEVENT\r\nEND:VCALENDAR',
+				{ status: 200, headers: { 'content-type': 'text/calendar' } }
+			)) as typeof fetch;
+		try {
+			const model = new NouraModel();
+			await model.loadCalendarFromUrl('https://example.test/cal.ics');
+			expect(model.calendarEvents).toHaveLength(1);
+			expect(model.calendarEvents[0]?.summary).toBe('Standup');
+		} finally {
+			globalThis.fetch = original;
+		}
+	});
 });
