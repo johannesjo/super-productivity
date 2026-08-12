@@ -1,3 +1,10 @@
+/** Default accelerator per shortcut command id (see Settings → Shortcuts). */
+export const DEFAULT_SHORTCUTS = {
+    'search.open': 'CmdOrCtrl+K',
+    'settings.open': 'CmdOrCtrl+,',
+    'focus.newTask': 'CmdOrCtrl+N',
+    'task.complete': 'Space',
+};
 export const INBOX_PROJECT_ID = 'inbox';
 export const DEFAULT_WORK_CONTEXT_ID = 'default';
 export const createDefaultConfig = (now = Date.now()) => ({
@@ -20,6 +27,7 @@ export const createDefaultConfig = (now = Date.now()) => ({
     workEndHour: 18,
     isBlockFinishDayForTimeTrackingTasks: false,
     isKeepNotesOnToday: false,
+    shortcutBindings: { ...DEFAULT_SHORTCUTS },
 });
 export const createDefaultTaskViewConfig = (viewId, now = Date.now()) => ({
     id: viewId,

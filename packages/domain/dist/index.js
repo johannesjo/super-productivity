@@ -1,4 +1,4 @@
-export { createDefaultConfig, createDefaultTaskViewConfig, createInitialState, DEFAULT_WORK_CONTEXT_ID, INBOX_PROJECT_ID, } from './entities';
+export { createDefaultConfig, createDefaultTaskViewConfig, createInitialState, DEFAULT_SHORTCUTS, DEFAULT_WORK_CONTEXT_ID, INBOX_PROJECT_ID, } from './entities';
 export { reduceDomain } from './reducer';
 export { getRepeatConfigNextDate, expandRepeatConfig, parseDate, toDateStr, addDays, } from './recurrence';
 export { selectArchivedTasks, selectCounterByType, selectDescendants, selectDoneOn, selectDueOn, selectHistoryForDay, selectOpenTasks, selectOrderedTasks, selectOverdueTasks, selectPriorityTasks, selectSmartListTasks, selectSubtasks, selectTask, selectTasksByProject, selectTasksByStatus, selectTasksByTag, selectTasksDueBetween, selectTasksWithReminder, selectTodayBucket, selectTotalTrackedOn, selectTrackedEntriesForTask, selectUpcomingBucket, selectWorklogForTask, } from './selectors';

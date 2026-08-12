@@ -37,6 +37,7 @@ export {
   createDefaultConfig,
   createDefaultTaskViewConfig,
   createInitialState,
+  DEFAULT_SHORTCUTS,
   DEFAULT_WORK_CONTEXT_ID,
   INBOX_PROJECT_ID,
 } from './entities';

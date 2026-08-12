@@ -200,7 +200,11 @@ export interface GlobalConfig {
     workEndHour: number;
     isBlockFinishDayForTimeTrackingTasks: boolean;
     isKeepNotesOnToday: boolean;
+    /** Keyboard shortcut bindings (command id -> accelerator). */
+    shortcutBindings: Record<string, string>;
 }
+/** Default accelerator per shortcut command id (see Settings → Shortcuts). */
+export declare const DEFAULT_SHORTCUTS: Record<string, string>;
 export interface TaskViewConfig {
     id: EntityId;
     viewId: EntityId;

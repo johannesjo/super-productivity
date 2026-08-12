@@ -198,6 +198,11 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'packages/application/src/effects.spec.ts',
       },
       {
+        feature: 'i18n framework + en/de locales (structure for 175)',
+        owner: 'packages/application/src/i18n.ts',
+        tests: 'packages/application/src/i18n.spec.ts',
+      },
+      {
         feature: 'Encrypted backup (AES-GCM)',
         owner: 'packages/application/src/backup.ts',
         tests: 'packages/application/src/backup.spec.ts',
@@ -297,8 +302,18 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'apps/client/e2e/settings.e2e.ts',
       },
       {
+        feature: 'Shortcut editor + cheat sheet persisted to GlobalConfig',
+        owner: 'apps/client/src/lib/app/SettingsDialog.svelte',
+        tests: 'apps/client/src/lib/app/model.spec.ts',
+      },
+      {
         feature: 'Light/dark/system themes applied + persisted',
         owner: 'apps/client/src/lib/app/model.svelte.ts',
+        tests: 'apps/client/e2e/settings.e2e.ts',
+      },
+      {
+        feature: 'Translated shell strings (nav, sidebar, workspace headings)',
+        owner: 'apps/client/src/lib/app/AppShell.svelte',
         tests: 'apps/client/e2e/settings.e2e.ts',
       },
       {

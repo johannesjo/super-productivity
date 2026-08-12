@@ -76,6 +76,8 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Insights (weekly/daily focus charts + top tasks) | 🟡 | `src/lib/app/InsightsView.svelte` (+ `packages/application/src/metrics.ts`) |
 | Search (full index: tasks/notes/tags/projects + actions) | 🟡 | `src/lib/app/SearchDialog.svelte` |
 | Settings persisted to GlobalConfig (theme/date/notifications/focus) | 🟡 | `src/lib/app/SettingsDialog.svelte` |
+| i18n framework + en/de locales (structure for 175) + language selector | ✅ | `packages/application/src/i18n.ts` |
+| Shortcut editor/cheat sheet persisted to GlobalConfig | ✅ | `src/lib/app/SettingsDialog.svelte` + `packages/domain/src/entities.ts` |
 | Sync settings + providers | ✅ | `src/lib/app/SyncSettings.svelte` |
 | Activity dialog | ✅ | `src/lib/app/ActivityDialog.svelte` |
 

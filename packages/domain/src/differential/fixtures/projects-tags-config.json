@@ -94,6 +94,12 @@
       "isKeepNotesOnToday": false,
       "isReduceMotion": false,
       "language": "de",
+      "shortcutBindings": {
+        "focus.newTask": "CmdOrCtrl+N",
+        "search.open": "CmdOrCtrl+K",
+        "settings.open": "CmdOrCtrl+,",
+        "task.complete": "Space"
+      },
       "takeABreakMinute": 30,
       "themeMode": "light",
       "timeFormat": "HH:mm",

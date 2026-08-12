@@ -121,6 +121,24 @@
 					<Field.FieldGroup>
 						<Field.Field orientation="horizontal"
 							><Field.FieldContent
+								><Field.FieldTitle>Language</Field.FieldTitle><Field.FieldDescription
+									>Interface language; non-UI keys fall back to English.</Field.FieldDescription
+								></Field.FieldContent
+							><Select.Root
+								type="single"
+								value={model.config.language}
+								onValueChange={(value) => void model.updateConfig({ language: value })}
+								><Select.Trigger>{model.config.language}</Select.Trigger><Select.Content
+									><Select.Group
+										>{#each ['en', 'de'] as code (code)}<Select.Item value={code}
+												>{code === 'en' ? 'English' : 'Deutsch'}</Select.Item
+											>{/each}</Select.Group
+									></Select.Content
+								></Select.Root
+							></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
 								><Field.FieldTitle>Theme</Field.FieldTitle><Field.FieldDescription
 									>Persisted per device; system follows your OS.</Field.FieldDescription
 								></Field.FieldContent
@@ -392,6 +410,31 @@
 							><Switch checked disabled /></Field.Field
 						></Field.FieldGroup
 					>
+				{:else if section === 'shortcuts'}
+					<header>
+						<h2>Shortcuts</h2>
+						<p>Rebind accelerators; changes persist and apply immediately.</p>
+					</header>
+					<div class="shortcut-list">
+						{#each Object.entries(model.config.shortcutBindings) as [id, accelerator] (id)}<div
+								class="shortcut-row"
+							>
+								<span class="shortcut-name">{id}</span>
+								<Input
+									class="shortcut-input"
+									value={accelerator}
+									aria-label={`Shortcut ${id}`}
+									placeholder="CmdOrCtrl+K"
+									onchange={(event) =>
+										void model.updateConfig({
+											shortcutBindings: {
+												...model.config.shortcutBindings,
+												[id]: event.currentTarget.value.trim() || 'CmdOrCtrl+K'
+											}
+										})}
+								/>
+							</div>{/each}
+					</div>
 				{:else}
 					<header>
 						<h2>{sections.find((item) => item.id === section)?.label}</h2>
@@ -557,6 +600,26 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
+	}
+	.shortcut-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		max-width: 460px;
+	}
+	.shortcut-row {
+		display: grid;
+		grid-template-columns: 1fr 200px;
+		align-items: center;
+		gap: 12px;
+	}
+	.shortcut-name {
+		font-size: 13px;
+		font-variant-ligatures: none;
+	}
+	:global(.shortcut-input) {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 12px;
 	}
 	@media (max-width: 760px) {
 		.settings-shell {

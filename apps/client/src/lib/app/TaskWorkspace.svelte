@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createTranslator } from '@noura/application';
 	import type { Task } from '@noura/domain';
 	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
 	import CheckCircle2Icon from '@lucide/svelte/icons/check-circle-2';
@@ -33,24 +34,25 @@
 	let subtaskDraftFor = $state<string | undefined>();
 	let subtaskDraft = $state('');
 
+	const t = $derived(createTranslator(model.config.language));
 	const title = $derived(
 		model.view === 'today'
-			? 'Today'
+			? t('nav.today')
 			: model.view === 'upcoming'
-				? 'Upcoming'
+				? t('nav.upcoming')
 				: model.view === 'priority'
-					? 'High priority'
+					? t('nav.highPriority')
 					: model.view === 'completed'
-						? 'Completed'
+						? t('nav.completed')
 						: model.view === 'smartlist'
-							? (model.activeSmartList?.title ?? 'Smart list')
+							? (model.activeSmartList?.title ?? t('nav.smartLists'))
 							: model.view === 'tag'
 								? model.activeTag
 									? `Task: ${model.activeTag.title}`
-									: 'Tag'
+									: t('nav.tags')
 								: model.view === 'archives'
-									? 'Archives'
-									: (model.activeProject?.title ?? 'Inbox')
+									? t('nav.archives')
+									: (model.activeProject?.title ?? t('nav.inbox'))
 	);
 	const displayTasks = $derived.by(() => {
 		const filtered = priorityOnly
@@ -118,7 +120,7 @@
 					month: 'long',
 					day: 'numeric'
 				}).format(new Date())
-			: `${model.visibleTasks.length} open tasks`
+			: t('workspace.openTasks', { count: model.visibleTasks.length })
 	);
 
 	async function submitQuickAdd(event: KeyboardEvent): Promise<void> {

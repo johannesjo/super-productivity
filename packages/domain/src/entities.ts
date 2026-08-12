@@ -230,7 +230,17 @@ export interface GlobalConfig {
   // Finish-day behavior
   isBlockFinishDayForTimeTrackingTasks: boolean;
   isKeepNotesOnToday: boolean;
+  /** Keyboard shortcut bindings (command id -> accelerator). */
+  shortcutBindings: Record<string, string>;
 }
+
+/** Default accelerator per shortcut command id (see Settings → Shortcuts). */
+export const DEFAULT_SHORTCUTS: Record<string, string> = {
+  'search.open': 'CmdOrCtrl+K',
+  'settings.open': 'CmdOrCtrl+,',
+  'focus.newTask': 'CmdOrCtrl+N',
+  'task.complete': 'Space',
+};
 
 export interface TaskViewConfig {
   id: EntityId;
@@ -336,6 +346,7 @@ export const createDefaultConfig = (now = Date.now()): GlobalConfig => ({
   workEndHour: 18,
   isBlockFinishDayForTimeTrackingTasks: false,
   isKeepNotesOnToday: false,
+  shortcutBindings: { ...DEFAULT_SHORTCUTS },
 });
 
 export const createDefaultTaskViewConfig = (

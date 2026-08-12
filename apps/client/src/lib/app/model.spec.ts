@@ -307,4 +307,15 @@ describe('NouraModel', () => {
 			ended: 2_000_000
 		});
 	});
+
+	it('persists language and shortcut bindings to config', async () => {
+		const model = new NouraModel();
+		await model.updateConfig({ language: 'de' });
+		expect(model.config.language).toBe('de');
+
+		await model.updateConfig({
+			shortcutBindings: { ...model.config.shortcutBindings, 'search.open': 'CmdOrCtrl+Shift+K' }
+		});
+		expect(model.config.shortcutBindings['search.open']).toBe('CmdOrCtrl+Shift+K');
+	});
 });

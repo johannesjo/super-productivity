@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { selectSmartListTasks, type SmartList } from '@noura/domain';
+	import { createTranslator } from '@noura/application';
+	import { DEFAULT_SHORTCUTS, selectSmartListTasks, type SmartList } from '@noura/domain';
 	import BarChart3Icon from '@lucide/svelte/icons/chart-no-axes-combined';
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import ArchiveIcon from '@lucide/svelte/icons/archive';
@@ -47,17 +48,30 @@
 	import { model } from './model.svelte';
 
 	const railItems = [
-		{ view: 'today', label: 'Tasks', icon: CheckSquareIcon },
-		{ view: 'planner', label: 'Planner', icon: CalendarDaysIcon },
-		{ view: 'schedule', label: 'Schedule', icon: CalendarClockIcon },
-		{ view: 'eisenhower', label: 'Eisenhower', icon: Grid3x3Icon },
-		{ view: 'boards', label: 'Boards', icon: Columns3Icon },
-		{ view: 'focus', label: 'Focus', icon: TimerIcon },
-		{ view: 'search', label: 'Search', icon: SearchIcon },
-		{ view: 'notes', label: 'Notes', icon: NotebookIcon },
-		{ view: 'history', label: 'History', icon: HistoryIcon },
-		{ view: 'insights', label: 'Insights', icon: BarChart3Icon }
+		{ view: 'today', i18n: 'nav.tasks', icon: CheckSquareIcon },
+		{ view: 'planner', i18n: 'nav.planner', icon: CalendarDaysIcon },
+		{ view: 'schedule', i18n: 'nav.schedule', icon: CalendarClockIcon },
+		{ view: 'eisenhower', i18n: 'nav.eisenhower', icon: Grid3x3Icon },
+		{ view: 'boards', i18n: 'nav.boards', icon: Columns3Icon },
+		{ view: 'focus', i18n: 'nav.focus', icon: TimerIcon },
+		{ view: 'search', i18n: 'nav.search', icon: SearchIcon },
+		{ view: 'notes', i18n: 'nav.notes', icon: NotebookIcon },
+		{ view: 'history', i18n: 'nav.history', icon: HistoryIcon },
+		{ view: 'insights', i18n: 'nav.insights', icon: BarChart3Icon }
 	] as const;
+
+	const t = $derived(createTranslator(model.config.language));
+
+	const matchesShortcut = (event: KeyboardEvent, accelerator: string): boolean => {
+		const bindings = model.config.shortcutBindings ?? DEFAULT_SHORTCUTS;
+		const value = bindings[accelerator] ?? DEFAULT_SHORTCUTS[accelerator] ?? '';
+		const segments = value.split('+');
+		const wantsMeta = segments.includes('CmdOrCtrl');
+		const key = segments.at(-1)?.toLowerCase();
+		const normalizedKey = key === 'space' ? ' ' : key;
+		if (wantsMeta && !(event.metaKey || event.ctrlKey)) return false;
+		return Boolean(normalizedKey && event.key.toLowerCase() === normalizedKey);
+	};
 
 	onMount(() => {
 		void model.hydrate();
@@ -97,11 +111,11 @@
 
 <svelte:window
 	onkeydown={(event) => {
-		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+		if (matchesShortcut(event, 'search.open')) {
 			event.preventDefault();
 			model.searchOpen = true;
 		}
-		if ((event.metaKey || event.ctrlKey) && event.key === ',') {
+		if (matchesShortcut(event, 'settings.open')) {
 			event.preventDefault();
 			model.settingsOpen = true;
 		}
@@ -120,10 +134,10 @@
 							><button
 								type="button"
 								class:active={item.view === 'search' ? model.searchOpen : model.view === item.view}
-								aria-label={item.label}
+								aria-label={t(item.i18n)}
 								onclick={() => railAction(item.view)}><item.icon /></button
 							></Tooltip.Trigger
-						><Tooltip.Content side="right">{item.label}</Tooltip.Content></Tooltip.Root
+						><Tooltip.Content side="right">{t(item.i18n)}</Tooltip.Content></Tooltip.Root
 					>
 				{/each}
 			</div>
@@ -179,7 +193,7 @@
 									class:active={model.view === 'today'}
 									type="button"
 									onclick={() => (model.view = 'today')}
-									><SunIcon /><span>Today</span><small
+									><SunIcon /><span>{t('nav.today')}</span><small
 										>{model.allTasks.filter(
 											(task) =>
 												task.dueDay === new Date().toISOString().slice(0, 10) &&
@@ -191,13 +205,13 @@
 									class:active={model.view === 'upcoming'}
 									type="button"
 									onclick={() => (model.view = 'upcoming')}
-									><CalendarDaysIcon /><span>Upcoming</span></button
+									><CalendarDaysIcon /><span>{t('nav.upcoming')}</span></button
 								>
 								<button
 									class:active={model.view === 'project' && model.state.activeProjectId === 'inbox'}
 									type="button"
 									onclick={() => model.selectProject('inbox')}
-									><InboxIcon /><span>Inbox</span><small
+									><InboxIcon /><span>{t('nav.inbox')}</span><small
 										>{model.allTasks.filter(
 											(task) => task.projectId === 'inbox' && task.status === 'open'
 										).length}</small
@@ -207,11 +221,9 @@
 							<Separator />
 							<section>
 								<h2>
-									Projects <Button
-										variant="ghost"
-										size="icon"
-										aria-label="Add project"
-										onclick={addProject}><PlusIcon /></Button
+									{t('nav.projects')}
+									<Button variant="ghost" size="icon" aria-label="Add project" onclick={addProject}
+										><PlusIcon /></Button
 									>
 								</h2>
 								{#each model.projects as project (project.id)}<button
@@ -224,7 +236,8 @@
 							</section>
 							<section>
 								<h2>
-									Smart lists <Button
+									{t('nav.smartLists')}
+									<Button
 										variant="ghost"
 										size="icon"
 										aria-label="Add smart list"
@@ -235,7 +248,7 @@
 									class:active={model.view === 'priority'}
 									type="button"
 									onclick={() => (model.view = 'priority')}
-									><SparklesIcon /><span>High priority</span></button
+									><SparklesIcon /><span>{t('nav.highPriority')}</span></button
 								>
 								{#each model.smartLists as list (list.id)}<button
 										class:active={model.view === 'smartlist' &&
@@ -249,13 +262,13 @@
 									class:active={model.view === 'completed'}
 									type="button"
 									onclick={() => (model.view = 'completed')}
-									><CircleDotIcon /><span>Completed</span></button
+									><CircleDotIcon /><span>{t('nav.completed')}</span></button
 								>
 								<button
 									class:active={model.view === 'archives'}
 									type="button"
 									onclick={() => model.selectArchives()}
-									><ArchiveIcon /><span>Archives</span><small
+									><ArchiveIcon /><span>{t('nav.archives')}</span><small
 										>{Object.values(model.state.tasks).filter((task) => task.status === 'archived')
 											.length}</small
 									></button
@@ -263,11 +276,9 @@
 							</section>
 							<section>
 								<h2>
-									Tags <Button
-										variant="ghost"
-										size="icon"
-										aria-label="Add tag"
-										onclick={() => addTag()}>+</Button
+									{t('nav.tags')}
+									<Button variant="ghost" size="icon" aria-label="Add tag" onclick={() => addTag()}
+										>+</Button
 									>
 								</h2>
 								{#each model.tags as tag (tag.id)}<button
@@ -286,7 +297,7 @@
 									><FolderIcon /><span>Projects & tags</span></button
 								>
 								<button type="button" onclick={() => (model.settingsOpen = true)}
-									><SettingsIcon /><span>Settings</span></button
+									><SettingsIcon /><span>{t('nav.settings')}</span></button
 								>
 							</div>
 						</aside>
@@ -307,7 +318,7 @@
 			{#each railItems.slice(0, 5) as item (item.view)}<button
 					type="button"
 					class:active={item.view === 'search' ? model.searchOpen : model.view === item.view}
-					onclick={() => railAction(item.view)}><item.icon /><span>{item.label}</span></button
+					onclick={() => railAction(item.view)}><item.icon /><span>{t(item.i18n)}</span></button
 				>{/each}
 		</nav>
 	</div>
