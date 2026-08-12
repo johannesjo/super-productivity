@@ -84,9 +84,10 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Feature | Status | Owning file |
 |---|---|---|
 | Schedule / TickTick planning pane | ❌ | `src/lib/app/AppShell.svelte` |
-| Eisenhower matrix | ❌ | `src/lib/app/AppShell.svelte` |
+| Eisenhower matrix | 🟡 | `src/lib/app/EisenhowerView.svelte` (+ `packages/application/src/eisenhower.ts`) |
 | Notes view (Markdown + bookmarks) | ❌ | `src/lib/app/AppShell.svelte` |
-| History view + Worklog/timesheet | ❌ | `src/lib/app/InsightsView.svelte` |
+| History view (done tasks, charts) | 🟡 | `src/lib/app/HistoryView.svelte` |
+| Worklog/timesheet (incl. CSV export) | 🟡 | `src/lib/app/HistoryView.svelte` (+ `packages/application/src/worklog.ts`) |
 | Tags manager | ❌ | `src/lib/app/AppShell.svelte` |
 | Provider registry (15 providers) | ✅ | `packages/integrations/src/index.ts` |
 | Provider clients + OAuth + polling + ingest | ❌ | `packages/integrations/src/index.ts` |

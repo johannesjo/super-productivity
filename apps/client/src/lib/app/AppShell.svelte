@@ -10,6 +10,8 @@
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import CircleDotIcon from '@lucide/svelte/icons/circle-dot';
 	import Columns3Icon from '@lucide/svelte/icons/columns-3';
+	import Grid3x3Icon from '@lucide/svelte/icons/grid-3x3';
+	import HistoryIcon from '@lucide/svelte/icons/history';
 	import InboxIcon from '@lucide/svelte/icons/inbox';
 	import MenuIcon from '@lucide/svelte/icons/menu';
 	import PlusIcon from '@lucide/svelte/icons/plus';
@@ -27,6 +29,8 @@
 	import FocusView from './FocusView.svelte';
 	import ActivityDialog from './ActivityDialog.svelte';
 	import BoardView from './BoardView.svelte';
+	import EisenhowerView from './EisenhowerView.svelte';
+	import HistoryView from './HistoryView.svelte';
 	import InsightsView from './InsightsView.svelte';
 	import PlannerView from './PlannerView.svelte';
 	import SearchDialog from './SearchDialog.svelte';
@@ -39,9 +43,11 @@
 	const railItems = [
 		{ view: 'today', label: 'Tasks', icon: CheckSquareIcon },
 		{ view: 'planner', label: 'Planner', icon: CalendarDaysIcon },
+		{ view: 'eisenhower', label: 'Eisenhower', icon: Grid3x3Icon },
 		{ view: 'boards', label: 'Boards', icon: Columns3Icon },
 		{ view: 'focus', label: 'Focus', icon: TimerIcon },
 		{ view: 'search', label: 'Search', icon: SearchIcon },
+		{ view: 'history', label: 'History', icon: HistoryIcon },
 		{ view: 'insights', label: 'Insights', icon: BarChart3Icon }
 	] as const;
 
@@ -130,6 +136,10 @@
 			<main class="full-main"><PlannerView {model} /></main>
 		{:else if model.view === 'boards'}
 			<main class="full-main"><BoardView {model} /></main>
+		{:else if model.view === 'eisenhower'}
+			<main class="full-main"><EisenhowerView {model} /></main>
+		{:else if model.view === 'history'}
+			<main class="full-main"><HistoryView {model} /></main>
 		{:else if model.view === 'insights'}
 			<main class="full-main"><InsightsView {model} /></main>
 		{:else}

@@ -279,24 +279,40 @@ export const PARITY_LEDGER: ParityArea[] = [
   },
   {
     area: 'Views & planning',
-    status: 'absent',
+    status: 'partial',
     entries: [
       {
         feature: 'Schedule/TickTick planning pane',
         owner: 'apps/client/src/lib/app/AppShell.svelte',
       },
-      { feature: 'Eisenhower matrix', owner: 'apps/client/src/lib/app/AppShell.svelte' },
+      {
+        feature: 'Eisenhower matrix view',
+        owner: 'apps/client/src/lib/app/EisenhowerView.svelte',
+        tests: 'apps/client/e2e/views.e2e.ts',
+      },
+      {
+        feature: 'Eisenhower derivation (framework-free)',
+        owner: 'packages/application/src/eisenhower.ts',
+        tests: 'packages/application/src/eisenhower-worklog.spec.ts',
+      },
       {
         feature: 'Notes view (Markdown + bookmarks)',
         owner: 'apps/client/src/lib/app/AppShell.svelte',
       },
       {
-        feature: 'History view (done, resets, charts)',
-        owner: 'apps/client/src/lib/app/InsightsView.svelte',
+        feature: 'History view (done tasks, chart)',
+        owner: 'apps/client/src/lib/app/HistoryView.svelte',
+        tests: 'apps/client/e2e/views.e2e.ts',
       },
       {
-        feature: 'Worklog/timesheet view',
-        owner: 'apps/client/src/lib/app/InsightsView.svelte',
+        feature: 'Worklog/timesheet view + CSV export',
+        owner: 'apps/client/src/lib/app/HistoryView.svelte',
+        tests: 'apps/client/e2e/views.e2e.ts',
+      },
+      {
+        feature: 'Worklog projection + CSV export (framework-free)',
+        owner: 'packages/application/src/worklog.ts',
+        tests: 'packages/application/src/eisenhower-worklog.spec.ts',
       },
       { feature: 'Tags manager', owner: 'apps/client/src/lib/app/AppShell.svelte' },
     ],

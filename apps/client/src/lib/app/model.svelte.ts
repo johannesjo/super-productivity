@@ -50,7 +50,9 @@ export type AppView =
 	| 'insights'
 	| 'smartlist'
 	| 'tag'
-	| 'archives';
+	| 'archives'
+	| 'history'
+	| 'eisenhower';
 
 const today = (): `${number}-${number}-${number}` =>
 	new Date().toISOString().slice(0, 10) as `${number}-${number}-${number}`;

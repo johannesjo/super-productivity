@@ -3,6 +3,8 @@ export * from './sync';
 export * from './backup';
 export * from './capture';
 export * from './md';
+export * from './eisenhower';
+export * from './worklog';
 export * from './local-http';
 export * from './services/ports';
 export * from './services/reminder-scheduler';
