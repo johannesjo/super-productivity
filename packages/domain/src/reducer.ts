@@ -63,6 +63,8 @@ export const reduceDomain = (input: DomainState, command: DomainCommand): Domain
         activeProjectId: command.payload.id,
         selectedTaskId: undefined,
       };
+    case 'project/remove':
+      return removeProject(state, command.payload);
     case 'project/archive':
       return updateProject(state, {
         id: command.payload.id,
@@ -512,6 +514,36 @@ const removeEntity = <K extends keyof DomainState>(
   const map = { ...(state[key] as Record<string, unknown>) };
   delete map[id];
   return { ...state, [key]: map } as DomainState;
+};
+
+const removeProject = (
+  state: DomainState,
+  payload: { id: string; fallbackProjectId: string },
+): DomainState => {
+  if (!state.projects[payload.id] || payload.id === INBOX_PROJECT_ID) return state;
+  const fallback = state.projects[payload.fallbackProjectId]?.id ?? INBOX_PROJECT_ID;
+  const projects = { ...state.projects };
+  delete projects[payload.id];
+
+  const tasks = { ...state.tasks };
+  for (const task of Object.values(tasks)) {
+    if (task.projectId === payload.id) {
+      tasks[task.id] = { ...task, projectId: fallback };
+    }
+  }
+  const notes = { ...state.notes };
+  for (const note of Object.values(notes)) {
+    if (note.projectId === payload.id) notes[note.id] = { ...note, projectId: fallback };
+  }
+
+  return {
+    ...state,
+    projects,
+    tasks,
+    notes,
+    activeProjectId:
+      state.activeProjectId === payload.id ? fallback : state.activeProjectId,
+  };
 };
 
 const addProject = (

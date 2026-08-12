@@ -66,3 +66,46 @@ test('insights charts daily focus after a recorded focus segment', async ({ page
 	await expect(page.getByRole('img', { name: /Bar chart of daily focus minutes/ })).toBeVisible();
 	await expect(page.locator('.week-grid')).toBeVisible();
 });
+
+// Phase 4 gate: Planner week view, drag an unscheduled task onto a day column.
+test('planner: drop an unscheduled task onto a week day and persist it', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	const title = `Meeting ${Date.now()}`;
+	// Add from Upcoming so the task has no due day.
+	await page.locator('aside').getByRole('button', { name: 'Upcoming' }).click();
+	await expect(page.getByRole('heading', { name: 'Upcoming' })).toBeVisible();
+	const quickAdd = page.getByRole('textbox', { name: 'Add a task' });
+	await quickAdd.fill(title);
+	await quickAdd.press('Enter');
+
+	await page.locator("button[aria-label='Planner']").click();
+	await expect(page.getByRole('heading', { name: 'Planner' })).toBeVisible();
+	const card = page.locator('.unscheduled-card', { hasText: title });
+	await expect(card).toBeVisible();
+	await card.dragTo(page.locator('.week-day').first());
+
+	await page.reload();
+	await page.locator("button[aria-label='Planner']").click();
+	await expect(page.locator('.week-day').first()).toContainText(title);
+});
+
+// Phase 4 gate: project/tag management dialog (rename + delete).
+test('organizes projects: rename then delete from the projects & tags dialog', async ({ page }) => {
+	// A single handler accepts the delete confirm (multiple handlers make Playwright dismiss instead).
+	page.on('dialog', (dialog) => dialog.accept());
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	await page.locator('aside').getByRole('button', { name: 'Projects & tags' }).click();
+	const dialog = page.getByRole('dialog', { name: 'Projects & tags' });
+	await expect(dialog).toBeVisible();
+	await expect(dialog.getByLabel('Rename project Study')).toBeVisible();
+
+	await dialog.getByLabel('Rename project Study').fill('Learning');
+	await dialog.getByLabel('Rename project Study').press('Enter');
+	await expect(dialog.getByLabel('Rename project Learning')).toBeVisible();
+	await dialog.getByLabel('Delete project Learning').click();
+	await expect(dialog.locator('.org-row', { hasText: 'Learning' })).toHaveCount(0);
+});

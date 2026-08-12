@@ -88,6 +88,12 @@ export type DomainCommand = {
         archived: boolean;
     };
 } | {
+    type: 'project/remove';
+    payload: {
+        id: EntityId;
+        fallbackProjectId: EntityId;
+    };
+} | {
     type: 'tag/add';
     payload: {
         tag: Tag;

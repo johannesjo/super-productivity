@@ -71,7 +71,7 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Task list (compact rows, checklist progress) | 🟡 | `src/lib/app/TaskWorkspace.svelte` |
 | Inspector (schedule, notes, checklist, tags, repeat, attachments, tracking) | 🟡 | `src/lib/app/TaskInspector.svelte` |
 | Focus view (pomodoro/flowtime/stopwatch + stats) | 🟡 | `src/lib/app/FocusView.svelte` |
-| Planner month grid | 🟡 | `src/lib/app/PlannerView.svelte` |
+| Planner week + month (drag-to-schedule, recurrence-aware) | 🟡 | `src/lib/app/PlannerView.svelte` |
 | Boards (per-project kanban, WIP, drag-to-move, work-context boards) | 🟡 | `src/lib/app/BoardView.svelte` |
 | Insights (weekly/daily focus charts + top tasks) | 🟡 | `src/lib/app/InsightsView.svelte` (+ `packages/application/src/metrics.ts`) |
 | Search (full index: tasks/notes/tags/projects + actions) | 🟡 | `src/lib/app/SearchDialog.svelte` |
@@ -83,12 +83,13 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 
 | Feature | Status | Owning file |
 |---|---|---|
+| Planner (week + month, drag-to-schedule, recurrence-aware) | 🟡 | `src/lib/app/PlannerView.svelte` (+ `packages/application/src/planner.ts`) |
 | Schedule / TickTick planning pane | ❌ | `src/lib/app/AppShell.svelte` |
 | Eisenhower matrix | 🟡 | `src/lib/app/EisenhowerView.svelte` (+ `packages/application/src/eisenhower.ts`) |
 | Notes view (Markdown editor + bookmarks) | 🟡 | `src/lib/app/NotesView.svelte` |
 | History view (done tasks, charts) | 🟡 | `src/lib/app/HistoryView.svelte` |
 | Worklog/timesheet (incl. CSV export) | 🟡 | `src/lib/app/HistoryView.svelte` (+ `packages/application/src/worklog.ts`) |
-| Tags manager | ❌ | `src/lib/app/AppShell.svelte` |
+| Project/Tag management UI | ✅ | `src/lib/app/OrgDialog.svelte` |
 | Provider registry (15 providers) | ✅ | `packages/integrations/src/index.ts` |
 | Provider clients + OAuth + polling + ingest | ❌ | `packages/integrations/src/index.ts` |
 | NouraSync server (Bun, full service set) | 🔒 | `packages/noura-sync-server/src/index.ts` |

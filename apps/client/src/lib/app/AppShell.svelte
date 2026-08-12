@@ -10,6 +10,7 @@
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import CircleDotIcon from '@lucide/svelte/icons/circle-dot';
 	import Columns3Icon from '@lucide/svelte/icons/columns-3';
+	import FolderIcon from '@lucide/svelte/icons/folder';
 	import Grid3x3Icon from '@lucide/svelte/icons/grid-3x3';
 	import HistoryIcon from '@lucide/svelte/icons/history';
 	import InboxIcon from '@lucide/svelte/icons/inbox';
@@ -34,6 +35,7 @@
 	import HistoryView from './HistoryView.svelte';
 	import InsightsView from './InsightsView.svelte';
 	import NotesView from './NotesView.svelte';
+	import OrgDialog from './OrgDialog.svelte';
 	import PlannerView from './PlannerView.svelte';
 	import SearchDialog from './SearchDialog.svelte';
 	import SettingsDialog from './SettingsDialog.svelte';
@@ -270,6 +272,9 @@
 									>{/each}
 							</section>
 							<div class="sidebar-footer">
+								<button type="button" onclick={() => (model.orgOpen = true)}
+									><FolderIcon /><span>Projects & tags</span></button
+								>
 								<button type="button" onclick={() => (model.settingsOpen = true)}
 									><SettingsIcon /><span>Settings</span></button
 								>
@@ -302,6 +307,7 @@
 <SettingsDialog {model} />
 <ActivityDialog {model} />
 <TaskCaptureDialog {model} />
+<OrgDialog {model} />
 
 <Sheet.Root bind:open={model.taskDetailsOpen}>
 	<Sheet.Content side="right" class="task-details-sheet" showCloseButton={false}>

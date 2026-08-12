@@ -85,6 +85,11 @@ export const PARITY_LEDGER = [
                 tests: 'packages/domain/src/domain.spec.ts',
             },
             {
+                feature: 'Project removal (tasks/notes -> fallback project)',
+                owner: 'packages/domain/src/reducer.ts',
+                tests: 'packages/application/src/planner.spec.ts',
+            },
+            {
                 feature: 'Deterministic, immutable reducer (ADR-003)',
                 owner: 'packages/domain/src/reducer.ts',
                 tests: 'packages/domain/src/domain.spec.ts',
@@ -271,6 +276,21 @@ export const PARITY_LEDGER = [
         status: 'partial',
         entries: [
             {
+                feature: 'Planner: week + month views, drag-to-schedule, recurrence-aware occurrences',
+                owner: 'apps/client/src/lib/app/PlannerView.svelte',
+                tests: 'apps/client/e2e/planning.e2e.ts',
+            },
+            {
+                feature: 'Planner projections (week buckets + recurring occurrences)',
+                owner: 'packages/application/src/planner.ts',
+                tests: 'packages/application/src/planner.spec.ts',
+            },
+            {
+                feature: 'Project/Tag management UI (rename, recolor, archive, delete)',
+                owner: 'apps/client/src/lib/app/OrgDialog.svelte',
+                tests: 'apps/client/e2e/planning.e2e.ts',
+            },
+            {
                 feature: 'Schedule/TickTick planning pane',
                 owner: 'apps/client/src/lib/app/AppShell.svelte',
             },
@@ -304,7 +324,10 @@ export const PARITY_LEDGER = [
                 owner: 'packages/application/src/worklog.ts',
                 tests: 'packages/application/src/eisenhower-worklog.spec.ts',
             },
-            { feature: 'Tags manager', owner: 'apps/client/src/lib/app/AppShell.svelte' },
+            {
+                feature: 'Tags manager',
+                owner: 'apps/client/src/lib/app/OrgDialog.svelte',
+            },
         ],
     },
     {

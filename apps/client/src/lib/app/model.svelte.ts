@@ -341,6 +341,7 @@ export class NouraModel {
 	activeSmartListId = $state<string | undefined>();
 	activeTagId = $state<string | undefined>();
 	selectedNoteId = $state<string | undefined>();
+	orgOpen = $state(false);
 	searchOpen = $state(false);
 	settingsOpen = $state(false);
 	activityOpen = $state(false);
@@ -667,6 +668,57 @@ export class NouraModel {
 		};
 		await this.#store.execute({ type: 'project/add', payload: { project } });
 		await this.selectProject(project.id);
+	}
+
+	async renameProject(id: string, title: string): Promise<void> {
+		const trimmed = title.trim();
+		if (!trimmed) return;
+		await this.#store.execute({
+			type: 'project/update',
+			payload: { id, patch: { title: trimmed } }
+		});
+	}
+
+	async setProjectColor(id: string, color: string): Promise<void> {
+		await this.#store.execute({ type: 'project/update', payload: { id, patch: { color } } });
+	}
+
+	async archiveProject(id: string, archived: boolean): Promise<void> {
+		await this.#store.execute({ type: 'project/archive', payload: { id, archived } });
+	}
+
+	async removeProject(id: string): Promise<void> {
+		if (id === INBOX_PROJECT_ID) return;
+		await this.#store.execute({
+			type: 'project/remove',
+			payload: { id, fallbackProjectId: INBOX_PROJECT_ID }
+		});
+		if (this.view === 'project' && this.state.activeProjectId === undefined) {
+			this.view = 'today';
+		}
+	}
+
+	async renameTag(id: string, title: string): Promise<void> {
+		const trimmed = title.trim();
+		if (!trimmed) return;
+		await this.#store.execute({ type: 'tag/update', payload: { id, patch: { title: trimmed } } });
+	}
+
+	async setTagColor(id: string, color: string): Promise<void> {
+		await this.#store.execute({ type: 'tag/update', payload: { id, patch: { color } } });
+	}
+
+	async removeTag(id: string): Promise<void> {
+		await this.#store.execute({ type: 'tag/remove', payload: { id } });
+		if (this.activeTagId === id) {
+			this.activeTagId = undefined;
+			this.view = 'today';
+		}
+	}
+
+	/** Drag-to-schedule: assigns a task to a day (or clears it). */
+	async setTaskDay(id: string, dueDay: ISODate | undefined): Promise<void> {
+		await this.updateTask(id, { dueDay });
 	}
 
 	async addTask(

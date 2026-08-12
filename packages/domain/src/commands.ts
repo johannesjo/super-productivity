@@ -40,6 +40,10 @@ export type DomainCommand =
     }
   | { type: 'project/select'; payload: { id: EntityId } }
   | { type: 'project/archive'; payload: { id: EntityId; archived: boolean } }
+  | {
+      type: 'project/remove';
+      payload: { id: EntityId; fallbackProjectId: EntityId };
+    }
   // Tags
   | { type: 'tag/add'; payload: { tag: Tag } }
   | { type: 'tag/update'; payload: { id: EntityId; patch: Partial<Omit<Tag, 'id'>> } }
