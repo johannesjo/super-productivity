@@ -189,4 +189,46 @@ describe('NouraModel', () => {
 		// archives view has none yet; restore flow uses task/archive
 		await model.selectTag(tagId as string);
 	});
+
+	it('tracks per-task time and stops with attribution', async () => {
+		const model = new NouraModel();
+		await model.addTask('Tracked task');
+		const task = model.selectedTask;
+		if (!task) throw new Error('Expected task');
+
+		await model.startTrackingForTask(task.id);
+		expect(model.trackingTaskId()).toBe(task.id);
+		expect(model.state.activeSessionId).toBeDefined();
+
+		await model.stopTracking();
+		expect(model.state.activeSessionId).toBeUndefined();
+		expect(model.trackingTaskId()).toBeUndefined();
+		const entry = Object.values(model.state.trackedEntries)[0];
+		expect(model.state.tasks[task.id]?.trackedMs).toBe(entry?.durationMs ?? 0);
+		expect(entry?.taskId).toBe(task.id);
+	});
+
+	it('applies and clears an engine-backed repeat config', async () => {
+		const model = new NouraModel();
+		await model.addTask('Standup');
+		const task = model.selectedTask;
+		if (!task) throw new Error('Expected task');
+
+		await model.applyRepeat(task.id, { repeatEvery: 1, repeatEveryUnit: 'DAILY', daysOfWeek: [] });
+		expect(model.state.tasks[task.id]?.repeatCfgId).toBeDefined();
+		expect(Object.values(model.state.taskRepeatCfgs)).toHaveLength(1);
+		expect(model.state.tasks[task.id]?.repeatRule).toMatch(/Every 1 day/);
+
+		await model.applyRepeat(task.id, {
+			repeatEvery: 2,
+			repeatEveryUnit: 'WEEKLY',
+			daysOfWeek: [1, 4]
+		});
+		const cfg = model.state.taskRepeatCfgs[model.state.tasks[task.id]!.repeatCfgId!];
+		expect(cfg?.repeatEveryUnit).toBe('WEEKLY');
+		expect(cfg?.daysOfWeek).toEqual([1, 4]);
+
+		await model.clearRepeat(task.id);
+		expect(model.state.tasks[task.id]?.repeatCfgId).toBeUndefined();
+	});
 });

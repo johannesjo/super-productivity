@@ -235,8 +235,15 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'apps/client/e2e/tasklist.e2e.ts',
       },
       {
-        feature: 'Inspector (schedule, notes, checklist, tags, attachments, repeat)',
+        feature:
+          'Inspector: schedule date+time, engine-backed repeat editor + preview, reminder, Markdown edit/preview, per-task tracking, tags picker, attachments open/remove, issue panel',
         owner: 'apps/client/src/lib/app/TaskInspector.svelte',
+        tests: 'apps/client/e2e/inspector.e2e.ts',
+      },
+      {
+        feature: 'XSS-safe Markdown renderer (notes preview)',
+        owner: 'packages/application/src/md.ts',
+        tests: 'packages/application/src/md.spec.ts',
       },
       {
         feature: 'Focus view (pomodoro/flowtime/stopwatch + stats)',

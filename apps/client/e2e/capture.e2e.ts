@@ -13,7 +13,10 @@ test('capture syntax creates a task and persists it', async ({ page }) => {
 		.fill(`${title} @Operations #release due:today`);
 	await page.getByRole('textbox', { name: 'Add a task' }).press('Enter');
 
-	const row = page.getByRole('button', { name: new RegExp(title) });
+	const row = page
+		.locator('button[draggable="true"]')
+		.filter({ visible: true })
+		.filter({ hasText: title });
 	await expect(row).toBeVisible();
 
 	await page.reload();

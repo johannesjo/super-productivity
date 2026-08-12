@@ -9,7 +9,10 @@ test('captures, completes, and persists a task offline', async ({ page }) => {
 	const title = `Offline task ${Date.now()}`;
 	await page.getByRole('textbox', { name: 'Add a task' }).fill(title);
 	await page.getByRole('textbox', { name: 'Add a task' }).press('Enter');
-	const row = page.getByRole('button', { name: new RegExp(title) });
+	const row = page
+		.locator('button[draggable="true"]')
+		.filter({ visible: true })
+		.filter({ hasText: title });
 	await expect(row).toBeVisible();
 	await page.reload();
 	const persistedCheckbox = page.getByRole('checkbox', { name: `Complete ${title}` });

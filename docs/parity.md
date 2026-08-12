@@ -66,6 +66,8 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Sidebar (Today/Upcoming/Inbox/projects) | ✅ | `src/lib/app/AppShell.svelte` |
 | Quick capture with syntax parsing (due/start/remind/repeat/tags/project/prio/subtask) | 🟡 | `apps/client/src/lib/app/model.svelte.ts` + `packages/application/src/capture.ts` | `apps/client/src/lib/app/model.spec.ts` + `apps/client/e2e/capture.e2e.ts` |
 | Task list: nested subtask tree render, sections, inline edit, drag-and-drop reorder, context menu | 🟡 | `src/lib/app/TaskWorkspace.svelte` | `apps/client/e2e/tasklist.e2e.ts` |
+| Inspector: schedule date+time, engine-backed repeat editor + next-date preview, reminder, Markdown edit/preview, per-task tracking, tags picker, attachments open/remove, issue panel | 🟡 | `src/lib/app/TaskInspector.svelte` | `apps/client/e2e/inspector.e2e.ts` |
+| XSS-safe Markdown renderer (notes preview) | ✅ | `packages/application/src/md.ts` | `packages/application/src/md.spec.ts` |
 | Task list (compact rows, checklist progress) | 🟡 | `src/lib/app/TaskWorkspace.svelte` |
 | Inspector (schedule, notes, checklist, tags, repeat, attachments, tracking) | 🟡 | `src/lib/app/TaskInspector.svelte` |
 | Focus view (pomodoro/flowtime/stopwatch + stats) | 🟡 | `src/lib/app/FocusView.svelte` |

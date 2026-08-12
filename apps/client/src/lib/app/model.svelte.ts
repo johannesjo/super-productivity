@@ -887,6 +887,95 @@ export class NouraModel {
 		await this.#store.execute({ type: 'task/restore', payload: { id } });
 	}
 
+	/** Starts a stopwatch-style tracked entry against a specific task. */
+	async startTrackingForTask(taskId: string): Promise<void> {
+		if (this.state.activeSessionId) return;
+		const now = Date.now();
+		const entry: TimeSession = {
+			id: crypto.randomUUID(),
+			taskId,
+			mode: 'stopwatch',
+			startedAt: now,
+			durationMs: 0,
+			source: 'timer',
+			updatedAt: now
+		};
+		await this.#store.execute({ type: 'session/start', payload: { session: entry } });
+	}
+
+	/** Stops the currently active tracked entry, attributing elapsed time. */
+	async stopTracking(): Promise<void> {
+		const id = this.state.activeSessionId;
+		if (!id) return;
+		const entry = this.state.trackedEntries[id];
+		if (!entry) return;
+		const now = Date.now();
+		await this.#store.execute({
+			type: 'session/stop',
+			payload: { id, endedAt: now, durationMs: now - entry.startedAt }
+		});
+	}
+
+	/** Returns the active entry when it is tracking the given task. */
+	trackingTaskId(): string | undefined {
+		const id = this.state.activeSessionId;
+		return id ? this.state.trackedEntries[id]?.taskId : undefined;
+	}
+
+	/**
+	 * Links (or creates) a recurrence config for a task from the engine-backed
+	 * editor inputs, then points the task at it. One operation moves the task.
+	 */
+	async applyRepeat(
+		taskId: string,
+		next: Pick<TaskRepeatCfg, 'repeatEvery' | 'repeatEveryUnit' | 'daysOfWeek'> &
+			Partial<Pick<TaskRepeatCfg, 'dayOfMonth' | 'weekOfMonth' | 'yearMonth'>>
+	): Promise<void> {
+		const task = this.state.tasks[taskId];
+		if (!task) return;
+		const now = Date.now();
+		const cfgId = task.repeatCfgId ?? crypto.randomUUID();
+		const cfg: TaskRepeatCfg = {
+			id: cfgId,
+			title: `Every ${next.repeatEvery} ${unitLabel(next.repeatEveryUnit)}`,
+			repeatEvery: next.repeatEvery,
+			repeatEveryUnit: next.repeatEveryUnit,
+			daysOfWeek: [...next.daysOfWeek],
+			dayOfMonth: next.dayOfMonth,
+			weekOfMonth: next.weekOfMonth,
+			yearMonth: next.yearMonth,
+			repeatOffset: 0,
+			createdAt: this.state.taskRepeatCfgs[cfgId]?.createdAt ?? now,
+			modifiedAt: now
+		};
+		if (this.state.taskRepeatCfgs[cfgId]) {
+			await this.#store.execute({
+				type: 'repeatCfg/update',
+				payload: {
+					id: cfgId,
+					patch: {
+						title: cfg.title,
+						repeatEvery: cfg.repeatEvery,
+						repeatEveryUnit: cfg.repeatEveryUnit,
+						daysOfWeek: cfg.daysOfWeek,
+						dayOfMonth: cfg.dayOfMonth,
+						weekOfMonth: cfg.weekOfMonth,
+						yearMonth: cfg.yearMonth,
+						modifiedAt: now
+					}
+				}
+			});
+		} else {
+			await this.#store.execute({ type: 'repeatCfg/add', payload: { cfg } });
+		}
+		await this.updateTask(task.id, { repeatCfgId: cfgId, repeatRule: cfg.title });
+	}
+
+	/** Removes the recurrence link from a task (keeps the shared config). */
+	async clearRepeat(taskId: string): Promise<void> {
+		await this.updateTask(taskId, { repeatCfgId: undefined, repeatRule: undefined });
+	}
+
 	async addTag(title: string): Promise<string | undefined> {
 		const trimmed = title.trim();
 		if (!trimmed) return undefined;
