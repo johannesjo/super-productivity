@@ -80,6 +80,7 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Backup import review summary (counts per family) | ✅ | `packages/application/src/summary.ts` + `apps/client/src/lib/app/SettingsDialog.svelte` |
 | Tauri host compiles (cargo check on macOS) | ✅ | `apps/client/src-tauri/src/lib.rs` |
 | NouraSync server E2E (passkeys, realtime/ws, wrong-password recovery, snapshot/compaction) | ✅ | `packages/noura-sync-server/tests` (871 green) |
+| Client-side full sync E2E: two-device convergence (real encryption + wire contract) | ✅ | `packages/application/src/two-device.spec.ts` |
 | i18n framework + en/de locales (structure for 175) + language selector | ✅ | `packages/application/src/i18n.ts` |
 | Shortcut editor/cheat sheet persisted to GlobalConfig | ✅ | `src/lib/app/SettingsDialog.svelte` + `packages/domain/src/entities.ts` |
 | Sync settings + providers | ✅ | `src/lib/app/SyncSettings.svelte` |
