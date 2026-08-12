@@ -35,6 +35,14 @@ describe('InputTimeDirective', () => {
       expect(nativeElement.value).toBe('17:00');
     });
 
+    it('does not rewrite an identical value', () => {
+      nativeElement.value = '17:00';
+
+      directive.writeValue('17:00');
+
+      expect(renderer.setProperty).not.toHaveBeenCalled();
+    });
+
     it('clears the display for an empty/invalid value', () => {
       directive.writeValue(null);
       expect(nativeElement.value).toBe('');

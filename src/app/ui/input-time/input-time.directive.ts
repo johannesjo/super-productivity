@@ -53,11 +53,11 @@ export class InputTimeDirective implements ControlValueAccessor {
   }
 
   writeValue(value: string | null): void {
-    this._renderer.setProperty(
-      this._elementRef.nativeElement,
-      'value',
-      toPaddedClockStr(value),
-    );
+    const normalizedValue = toPaddedClockStr(value);
+    if (this._elementRef.nativeElement.value === normalizedValue) {
+      return;
+    }
+    this._renderer.setProperty(this._elementRef.nativeElement, 'value', normalizedValue);
   }
 
   registerOnChange(fn: (value: string) => void): void {
