@@ -40,3 +40,26 @@ test('sync rail widget moves offline -> connecting -> connected -> offline', asy
 	await settings.getByRole('button', { name: 'Disconnect' }).click();
 	await expect(pill).toHaveAttribute('aria-label', 'Sync: offline');
 });
+
+// Phase 9 gate: provider switching swaps the credential fields.
+test('switches sync providers and swaps their credential forms', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,');
+	const settings = page.getByRole('dialog', { name: 'Settings' });
+	await settings.getByRole('button', { name: 'Account & sync' }).click();
+
+	const group = page.getByRole('group', { name: 'Sync providers' });
+	await expect(settings.getByLabel('NouraSync server')).toBeVisible();
+
+	await group.getByRole('radio', { name: 'WebDAV' }).click();
+	await expect(settings.getByLabel('WebDAV URL')).toBeVisible();
+	await expect(settings.getByLabel('Username')).toBeVisible();
+
+	await group.getByRole('radio', { name: 'Dropbox' }).click();
+	await expect(settings.getByLabel('Dropbox app key')).toBeVisible();
+
+	await group.getByRole('radio', { name: 'NouraSync' }).click();
+	await expect(settings.getByLabel('NouraSync server')).toBeVisible();
+});

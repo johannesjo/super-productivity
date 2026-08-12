@@ -179,7 +179,7 @@
 	}
 </script>
 
-<section class="workspace" aria-labelledby="workspace-title">
+<section class="workspace" role="main" aria-labelledby="workspace-title">
 	<header class="workspace-header">
 		<div class="title-row">
 			<div>
@@ -314,6 +314,7 @@
 								{#if task.checklist.length}<Progress
 										value={checklistProgress(task)}
 										class="task-progress"
+										aria-label={`${checklistProgress(task)}% checklist complete for ${task.title}`}
 									/>{/if}
 								<span class="task-project">{model.state.projects[task.projectId]?.title}</span>
 								{#if task.dueDay}<span
@@ -469,6 +470,15 @@
 	.indent {
 		width: calc(var(--task-depth) * 22px);
 		flex: 0 0 auto;
+	}
+	:global(.task-row [data-slot='checkbox']) {
+		width: 24px;
+		height: 24px;
+		border-radius: 7px;
+	}
+	:global(.task-row [data-slot='checkbox']::after) {
+		width: 14px;
+		height: 14px;
 	}
 	.task-copy {
 		display: flex;

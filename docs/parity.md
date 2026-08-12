@@ -123,3 +123,5 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 states; `differential.spec.ts` re-applies the command batches and asserts
 byte-identical normalized output. Baseline covers `tasks-basic` and
 `projects-tags-config`.
+| Provider switching UX (credential forms per provider) | ✅ | `src/lib/app/SyncSettings.svelte` (+ `e2e/sync.e2e.ts`) |
+| WCAG AA accessibility gate (Lighthouse snapshot: a11y 100) | ✅ | `src/lib/app/TaskWorkspace.svelte` + `docs/parity.md` |
