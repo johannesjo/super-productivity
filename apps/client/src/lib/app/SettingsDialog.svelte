@@ -193,6 +193,19 @@
 						>
 						<Field.Field orientation="horizontal"
 							><Field.FieldContent
+								><Field.FieldTitle>Welcome tour</Field.FieldTitle><Field.FieldDescription
+									>Replay the quick tour of capture, planning, focus, and search.</Field.FieldDescription
+								></Field.FieldContent
+							><Button
+								variant="outline"
+								size="sm"
+								disabled={model.config.isOnboardingComplete}
+								onclick={() => (model.onboardingOpen = true)}
+								>{model.config.isOnboardingComplete ? 'Completed' : 'Start tour'}</Button
+							></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
 								><Field.FieldTitle>Show completed tasks</Field.FieldTitle><Field.FieldDescription
 									>Keep completed items visible in task lists.</Field.FieldDescription
 								></Field.FieldContent

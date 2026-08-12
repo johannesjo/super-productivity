@@ -39,6 +39,7 @@
 	import InsightsView from './InsightsView.svelte';
 	import NotesView from './NotesView.svelte';
 	import OrgDialog from './OrgDialog.svelte';
+	import OnboardingDialog from './OnboardingDialog.svelte';
 	import PlannerView from './PlannerView.svelte';
 	import ScheduleView from './ScheduleView.svelte';
 	import SearchDialog from './SearchDialog.svelte';
@@ -350,6 +351,7 @@
 <ActivityDialog {model} />
 <TaskCaptureDialog {model} />
 <OrgDialog {model} />
+<OnboardingDialog {model} />
 
 <Sheet.Root bind:open={model.taskDetailsOpen}>
 	<Sheet.Content side="right" class="task-details-sheet" showCloseButton={false}>

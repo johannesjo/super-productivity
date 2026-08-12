@@ -232,6 +232,8 @@ export interface GlobalConfig {
   isKeepNotesOnToday: boolean;
   /** Keyboard shortcut bindings (command id -> accelerator). */
   shortcutBindings: Record<string, string>;
+  /** Dismissed the welcome/onboarding tour at least once. */
+  isOnboardingComplete: boolean;
 }
 
 /** Default accelerator per shortcut command id (see Settings → Shortcuts). */
@@ -347,6 +349,7 @@ export const createDefaultConfig = (now = Date.now()): GlobalConfig => ({
   isBlockFinishDayForTimeTrackingTasks: false,
   isKeepNotesOnToday: false,
   shortcutBindings: { ...DEFAULT_SHORTCUTS },
+  isOnboardingComplete: false,
 });
 
 export const createDefaultTaskViewConfig = (

@@ -97,6 +97,7 @@
       "isEnableTakeABreak": true,
       "isEnableTrackingReminder": true,
       "isKeepNotesOnToday": false,
+      "isOnboardingComplete": false,
       "isReduceMotion": false,
       "language": "en",
       "shortcutBindings": {

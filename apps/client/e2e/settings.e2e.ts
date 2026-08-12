@@ -67,3 +67,34 @@ test('switches language to German and persists accross reload', async ({ page })
 	await page.keyboard.press('Escape');
 	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
 });
+
+// Phase 6 gate: welcome (onboarding) tour from Settings completes and persists.
+test('runs the welcome tour and marks onboarding complete', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,');
+	await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+	const startTour = page.getByRole('button', { name: 'Start tour' });
+	await startTour.scrollIntoViewIfNeeded();
+	await startTour.click();
+
+	const tour = page.getByRole('dialog', { name: 'Welcome to Noura' });
+	await expect(tour).toBeVisible();
+	for (let index = 0; index < 5; index += 1) {
+		const next = tour.getByRole('button', { name: 'Next' });
+		if ((await next.count()) === 0) break;
+		await next.click();
+	}
+	await tour.getByRole('button', { name: 'Get started' }).click();
+	await expect(tour).toBeHidden();
+	await page.keyboard.press('Escape');
+
+	// The completed flag persists across reload.
+	await page.reload();
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+	await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,');
+	await expect(
+		page.getByRole('dialog', { name: 'Settings' }).getByRole('button', { name: 'Completed' })
+	).toBeVisible();
+});

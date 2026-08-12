@@ -349,6 +349,7 @@ export class NouraModel {
 	selectedNoteId = $state<string | undefined>();
 	orgOpen = $state(false);
 	searchOpen = $state(false);
+	onboardingOpen = $state(false);
 	calendarEvents = $state.raw<Array<import('@noura/application').CalendarEventInput>>([]);
 	settingsOpen = $state(false);
 	activityOpen = $state(false);
@@ -810,6 +811,10 @@ export class NouraModel {
 	async updateConfig(patch: Partial<GlobalConfig>): Promise<void> {
 		await this.#store.execute({ type: 'config/update', payload: { patch } });
 		this.applyTheme();
+	}
+
+	async completeOnboarding(): Promise<void> {
+		await this.updateConfig({ isOnboardingComplete: true });
 	}
 
 	/** Applies the persisted theme mode (light/dark/system) to the document. */

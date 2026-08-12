@@ -384,4 +384,11 @@ describe('NouraModel', () => {
 
 		await expect(restored.restoreEncryptedBackup(file, 'wrong password')).rejects.toThrow();
 	});
+
+	it('completes onboarding and persists the flag', async () => {
+		const model = new NouraModel();
+		expect(model.config.isOnboardingComplete).toBe(false);
+		await model.completeOnboarding();
+		expect(model.config.isOnboardingComplete).toBe(true);
+	});
 });

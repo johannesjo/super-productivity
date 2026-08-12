@@ -302,6 +302,11 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'apps/client/e2e/settings.e2e.ts',
       },
       {
+        feature: 'Welcome tour (onboarding) + persisted completion flag',
+        owner: 'apps/client/src/lib/app/OnboardingDialog.svelte',
+        tests: 'apps/client/e2e/settings.e2e.ts',
+      },
+      {
         feature: 'Shortcut editor + cheat sheet persisted to GlobalConfig',
         owner: 'apps/client/src/lib/app/SettingsDialog.svelte',
         tests: 'apps/client/src/lib/app/model.spec.ts',

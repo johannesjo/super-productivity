@@ -202,6 +202,8 @@ export interface GlobalConfig {
     isKeepNotesOnToday: boolean;
     /** Keyboard shortcut bindings (command id -> accelerator). */
     shortcutBindings: Record<string, string>;
+    /** Dismissed the welcome/onboarding tour at least once. */
+    isOnboardingComplete: boolean;
 }
 /** Default accelerator per shortcut command id (see Settings → Shortcuts). */
 export declare const DEFAULT_SHORTCUTS: Record<string, string>;
