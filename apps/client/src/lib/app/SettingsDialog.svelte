@@ -94,6 +94,41 @@
 		{ id: 'shortcuts', label: 'Shortcuts', icon: KeyboardIcon }
 	];
 
+	async function exportEncrypted(): Promise<void> {
+		const passphrase = window.prompt('Backup encryption password (at least 8 characters)') ?? '';
+		if (passphrase.length < 8) return;
+		try {
+			const file = await model.createEncryptedBackup(passphrase);
+			const payload = JSON.stringify(file, null, 2);
+			const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
+			const anchor = document.createElement('a');
+			anchor.href = url;
+			anchor.download = `noura-backup-encrypted-${new Date().toISOString().slice(0, 10)}.json`;
+			anchor.click();
+			URL.revokeObjectURL(url);
+		} catch {
+			window.alert('Encrypted export failed.');
+		}
+	}
+
+	async function importEncrypted(): Promise<void> {
+		const passphrase = window.prompt('Backup encryption password') ?? '';
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = 'application/json,.json';
+		input.onchange = async () => {
+			const file = input.files?.[0];
+			if (!file) return;
+			const text = await file.text();
+			try {
+				await model.restoreEncryptedBackup(JSON.parse(text) as never, passphrase);
+			} catch {
+				window.alert('Encrypted import failed — wrong password or unsupported file.');
+			}
+		};
+		input.click();
+	}
+
 	function configureIntegration(integration: IntegrationDefinition): void {
 		selectedIntegration = integration;
 		integrationEndpoint = '';
@@ -457,6 +492,12 @@
 							variant="outline"
 							onclick={() => model.importBackup()}>Import backup</Button
 						>
+						<Button variant="secondary" onclick={() => void exportEncrypted()}
+							>Export encrypted</Button
+						>
+						<Button variant="outline" onclick={() => void importEncrypted()}>
+							Import encrypted
+						</Button>
 					</div>
 					<Field.FieldGroup
 						><Field.Field orientation="horizontal"

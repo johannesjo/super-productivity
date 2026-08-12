@@ -3,7 +3,10 @@ import {
 	EncryptedOperationTransport,
 	FileProviderOperationEndpoint,
 	NouraSyncHttpEndpoint,
+	exportEncryptedBackup,
+	importEncryptedBackup,
 	parseCapture,
+	type EncryptedBackupFile,
 	type StateRepository,
 	type SyncCursorRepository
 } from '@noura/application';
@@ -1420,6 +1423,19 @@ export class NouraModel {
 			type: 'worklog/from-entry',
 			payload: { entry: { ...session, durationMs, endedAt } }
 		});
+	}
+
+	/** Builds an AES-GCM encrypted backup of the current state. */
+	async createEncryptedBackup(passphrase: string): Promise<EncryptedBackupFile> {
+		if (passphrase.length < 8) throw new Error('Use a backup password with at least 8 characters');
+		const state = await this.#store.export();
+		return exportEncryptedBackup(state, { passphrase });
+	}
+
+	/** Restores an AES-GCM encrypted backup into the store. */
+	async restoreEncryptedBackup(file: EncryptedBackupFile, passphrase: string): Promise<void> {
+		const state = await importEncryptedBackup(file, passphrase);
+		await this.#store.import(state);
 	}
 
 	async exportBackup(): Promise<void> {

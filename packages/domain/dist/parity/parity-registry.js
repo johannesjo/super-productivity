@@ -461,6 +461,16 @@ export const PARITY_LEDGER = [
                 tests: 'packages/platform/src/web.spec.ts',
             },
             {
+                feature: 'PWA service worker (cache-first shell + offline navigations)',
+                owner: 'apps/client/src/service-worker.ts',
+                tests: 'apps/client/e2e/offline.e2e.ts',
+            },
+            {
+                feature: 'Encrypted backup export/import UI (AES-GCM)',
+                owner: 'apps/client/src/lib/app/SettingsDialog.svelte',
+                tests: 'apps/client/src/lib/app/model.spec.ts',
+            },
+            {
                 feature: 'Tauri host (SQLite, dialog, opener, store, updater)',
                 owner: 'apps/client/src-tauri/src/lib.rs',
             },

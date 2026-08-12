@@ -369,4 +369,19 @@ describe('NouraModel', () => {
 			globalThis.fetch = original;
 		}
 	});
+
+	it('creates and restores an AES-GCM encrypted backup', async () => {
+		const model = new NouraModel();
+		await model.addTask('Secret task');
+		const file = await model.createEncryptedBackup('correct horse battery staple');
+		expect(file.format).toBe('noura-backup-encrypted');
+
+		const restored = new NouraModel();
+		await restored.restoreEncryptedBackup(file, 'correct horse battery staple');
+		expect(Object.values(restored.state.tasks).some((task) => task.title === 'Secret task')).toBe(
+			true
+		);
+
+		await expect(restored.restoreEncryptedBackup(file, 'wrong password')).rejects.toThrow();
+	});
 });
