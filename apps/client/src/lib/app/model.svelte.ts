@@ -12,10 +12,13 @@ import {
 	createInitialState,
 	importAnyState,
 	selectOrderedTasks,
+	selectSmartListTasks,
 	type DomainOperation,
 	type DomainState,
 	type ISODate,
 	type Project,
+	type SmartList,
+	type Tag,
 	type Task,
 	type TaskPriority,
 	type TaskRepeatCfg,
@@ -44,7 +47,10 @@ export type AppView =
 	| 'planner'
 	| 'boards'
 	| 'focus'
-	| 'insights';
+	| 'insights'
+	| 'smartlist'
+	| 'tag'
+	| 'archives';
 
 const today = (): `${number}-${number}-${number}` =>
 	new Date().toISOString().slice(0, 10) as `${number}-${number}-${number}`;
@@ -328,6 +334,8 @@ class LocalSyncCursorRepository implements SyncCursorRepository {
 export class NouraModel {
 	state = $state.raw<DomainState>(seedState());
 	view = $state<AppView>('today');
+	activeSmartListId = $state<string | undefined>();
+	activeTagId = $state<string | undefined>();
 	searchOpen = $state(false);
 	settingsOpen = $state(false);
 	activityOpen = $state(false);
@@ -584,6 +592,20 @@ export class NouraModel {
 			(project) => project.id !== INBOX_PROJECT_ID && !project.archived
 		);
 	}
+	get smartLists(): SmartList[] {
+		return Object.values(this.state.smartLists).sort(
+			(a, b) => a.order - b.order || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+		);
+	}
+	get tags(): Tag[] {
+		return Object.values(this.state.tags).sort((a, b) => a.title.localeCompare(b.title));
+	}
+	get activeSmartList(): SmartList | undefined {
+		return this.activeSmartListId ? this.state.smartLists[this.activeSmartListId] : undefined;
+	}
+	get activeTag(): Tag | undefined {
+		return this.activeTagId ? this.state.tags[this.activeTagId] : undefined;
+	}
 	get allTasks(): Task[] {
 		return selectOrderedTasks(this.state);
 	}
@@ -597,7 +619,16 @@ export class NouraModel {
 		else if (this.view === 'priority') filtered = open.filter((task) => task.priority >= 2);
 		else if (this.view === 'completed')
 			filtered = this.allTasks.filter((task) => task.status === 'done');
-		else filtered = open;
+		else if (this.view === 'smartlist') {
+			const list = this.activeSmartList;
+			filtered = list ? selectSmartListTasks(this.state, list) : [];
+		} else if (this.view === 'tag') {
+			filtered = this.activeTagId
+				? open.filter((task) => task.tagIds.includes(this.activeTagId as string))
+				: [];
+		} else if (this.view === 'archives') {
+			filtered = this.allTasks.filter((task) => task.status === 'archived');
+		} else filtered = open;
 
 		// Keep nested trees coherent: a task is visible when it or any ancestor
 		// matched the filter, so subtasks render under their parent regardless of
@@ -796,6 +827,79 @@ export class NouraModel {
 	async selectProject(id: string): Promise<void> {
 		this.view = 'project';
 		await this.#store.execute({ type: 'project/select', payload: { id } });
+	}
+
+	async selectSmartList(id: string): Promise<void> {
+		if (!this.state.smartLists[id]) return;
+		this.activeSmartListId = id;
+		this.activeTagId = undefined;
+		this.view = 'smartlist';
+		await this.#store.execute({ type: 'task/select', payload: { id: undefined } });
+	}
+
+	async addSmartList(
+		title: string,
+		criteria?: SmartList['listConfig']['filterCriteria']
+	): Promise<string | undefined> {
+		const trimmed = title.trim();
+		if (!trimmed) return undefined;
+		const now = Date.now();
+		const list: SmartList = {
+			id: crypto.randomUUID(),
+			title: trimmed,
+			order: this.smartLists.length,
+			listConfig: {
+				isShowCompletedTasks: false,
+				filterCriteria: criteria ?? []
+			},
+			createdAt: now,
+			modifiedAt: now
+		};
+		await this.#store.execute({ type: 'smartList/add', payload: { list } });
+		await this.selectSmartList(list.id);
+		return list.id;
+	}
+
+	async removeSmartList(id: string): Promise<void> {
+		await this.#store.execute({ type: 'smartList/remove', payload: { id } });
+		if (this.activeSmartListId === id) {
+			this.activeSmartListId = undefined;
+			this.view = 'today';
+		}
+	}
+
+	async selectTag(id: string): Promise<void> {
+		if (!this.state.tags[id]) return;
+		this.activeTagId = id;
+		this.activeSmartListId = undefined;
+		this.view = 'tag';
+		await this.#store.execute({ type: 'task/select', payload: { id: undefined } });
+	}
+
+	async selectArchives(): Promise<void> {
+		this.activeSmartListId = undefined;
+		this.activeTagId = undefined;
+		this.view = 'archives';
+		await this.#store.execute({ type: 'task/select', payload: { id: undefined } });
+	}
+
+	async restoreTask(id: string): Promise<void> {
+		await this.#store.execute({ type: 'task/restore', payload: { id } });
+	}
+
+	async addTag(title: string): Promise<string | undefined> {
+		const trimmed = title.trim();
+		if (!trimmed) return undefined;
+		const existing = Object.values(this.state.tags).find(
+			(tag) => tag.title.toLowerCase() === trimmed.toLowerCase()
+		);
+		if (existing) return existing.id;
+		const id = crypto.randomUUID();
+		await this.#store.execute({
+			type: 'tag/add',
+			payload: { tag: { id, title: trimmed, color: 'blue' } }
+		});
+		return id;
 	}
 	async setPriority(id: string, priority: TaskPriority): Promise<void> {
 		await this.updateTask(id, { priority });

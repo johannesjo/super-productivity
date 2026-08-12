@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { selectSmartListTasks, type SmartList } from '@noura/domain';
 	import BarChart3Icon from '@lucide/svelte/icons/chart-no-axes-combined';
 	import BellIcon from '@lucide/svelte/icons/bell';
+	import ArchiveIcon from '@lucide/svelte/icons/archive';
 	import BookOpenIcon from '@lucide/svelte/icons/book-open';
 	import CalendarDaysIcon from '@lucide/svelte/icons/calendar-days';
 	import CheckSquareIcon from '@lucide/svelte/icons/square-check-big';
@@ -15,6 +17,7 @@
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 	import SunIcon from '@lucide/svelte/icons/sun';
+	import TagIcon from '@lucide/svelte/icons/tag';
 	import TimerIcon from '@lucide/svelte/icons/timer';
 	import * as Resizable from '$lib/components/ui/resizable';
 	import { Button } from '$lib/components/ui/button';
@@ -56,6 +59,21 @@
 		const title = window.prompt('Project name');
 		if (title) await model.addProject(title);
 	}
+
+	async function addSmartList(): Promise<void> {
+		const title = window.prompt('Smart list name');
+		if (title) await model.addSmartList(title);
+	}
+
+	async function addTag(): Promise<void> {
+		const title = window.prompt('Tag name');
+		const trimmed = title?.trim();
+		if (!trimmed) return;
+		await model.addTag(trimmed);
+	}
+
+	const smartListCount = (list: SmartList): number =>
+		selectSmartListTasks(model.state, list).length;
 </script>
 
 <svelte:window
@@ -178,18 +196,63 @@
 									>{/each}
 							</section>
 							<section>
-								<h2>Smart lists</h2>
+								<h2>
+									Smart lists <Button
+										variant="ghost"
+										size="icon"
+										aria-label="Add smart list"
+										onclick={() => addSmartList()}><PlusIcon /></Button
+									>
+								</h2>
 								<button
 									class:active={model.view === 'priority'}
 									type="button"
 									onclick={() => (model.view = 'priority')}
 									><SparklesIcon /><span>High priority</span></button
-								><button
+								>
+								{#each model.smartLists as list (list.id)}<button
+										class:active={model.view === 'smartlist' &&
+											model.state.smartLists[model.activeSmartListId ?? '']?.id === list.id}
+										type="button"
+										onclick={() => model.selectSmartList(list.id)}
+										><SparklesIcon /><span>{list.title}</span><small>{smartListCount(list)}</small
+										></button
+									>{/each}
+								<button
 									class:active={model.view === 'completed'}
 									type="button"
 									onclick={() => (model.view = 'completed')}
 									><CircleDotIcon /><span>Completed</span></button
 								>
+								<button
+									class:active={model.view === 'archives'}
+									type="button"
+									onclick={() => model.selectArchives()}
+									><ArchiveIcon /><span>Archives</span><small
+										>{Object.values(model.state.tasks).filter((task) => task.status === 'archived')
+											.length}</small
+									></button
+								>
+							</section>
+							<section>
+								<h2>
+									Tags <Button
+										variant="ghost"
+										size="icon"
+										aria-label="Add tag"
+										onclick={() => addTag()}>+</Button
+									>
+								</h2>
+								{#each model.tags as tag (tag.id)}<button
+										class:active={model.view === 'tag' && model.activeTagId === tag.id}
+										type="button"
+										onclick={() => model.selectTag(tag.id)}
+										><TagIcon /><span>{tag.title}</span><small
+											>{Object.values(model.state.tasks).filter(
+												(task) => task.tagIds.includes(tag.id) && task.status === 'open'
+											).length}</small
+										></button
+									>{/each}
 							</section>
 							<div class="sidebar-footer">
 								<button type="button" onclick={() => (model.settingsOpen = true)}

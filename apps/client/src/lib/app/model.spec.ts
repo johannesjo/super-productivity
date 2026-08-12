@@ -156,4 +156,37 @@ describe('NouraModel', () => {
 		await model.reorderTasks([...before].reverse());
 		expect(model.state.taskOrder).toEqual([...before].reverse());
 	});
+
+	it('handles smart lists, tags, and archives from the sidebar', async () => {
+		const model = new NouraModel();
+		await model.addTask('Low priority item');
+		const low = model.selectedTask;
+		if (!low) throw new Error('Expected task');
+		await model.addTask('Important task p2');
+		const high = model.selectedTask;
+		if (!high) throw new Error('Expected task');
+
+		const listId = await model.addSmartList('High focus', [{ type: 'PRIORITY', value: '2' }]);
+		expect(listId).toBeDefined();
+		expect(model.view).toBe('smartlist');
+		expect(model.visibleTasks.map((task) => task.id)).toContain(high.id);
+		expect(model.visibleTasks.map((task) => task.id)).not.toContain(low.id);
+
+		const tagId = await model.addTag('release');
+		expect(tagId).toBeDefined();
+		await model.updateTask(high.id, { tagIds: tagId ? [tagId] : [] });
+		await model.selectTag(tagId as string);
+		expect(model.view).toBe('tag');
+		expect(model.visibleTasks.map((task) => task.id)).toContain(high.id);
+		expect(model.visibleTasks.map((task) => task.id)).not.toContain(low.id);
+
+		await model.toggleTask(high.id);
+		await model.selectArchives();
+		expect(model.view).toBe('archives');
+		expect(
+			Object.values(model.state.tasks).filter((task) => task.status === 'archived')
+		).toHaveLength(0);
+		// archives view has none yet; restore flow uses task/archive
+		await model.selectTag(tagId as string);
+	});
 });

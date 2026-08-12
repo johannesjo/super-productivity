@@ -42,7 +42,15 @@
 					? 'High priority'
 					: model.view === 'completed'
 						? 'Completed'
-						: (model.activeProject?.title ?? 'Inbox')
+						: model.view === 'smartlist'
+							? (model.activeSmartList?.title ?? 'Smart list')
+							: model.view === 'tag'
+								? model.activeTag
+									? `Task: ${model.activeTag.title}`
+									: 'Tag'
+								: model.view === 'archives'
+									? 'Archives'
+									: (model.activeProject?.title ?? 'Inbox')
 	);
 	const displayTasks = $derived.by(() => {
 		const filtered = priorityOnly
