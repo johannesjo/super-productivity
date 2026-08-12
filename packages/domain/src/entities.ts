@@ -216,6 +216,8 @@ export interface GlobalConfig {
   isReduceMotion: boolean;
   // Preferences
   defaultProjectId?: EntityId;
+  /** User profile display name (user profile, kept on-device). */
+  name: string;
   // Reminders & tracking
   isEnableReminders: boolean;
   isEnableTrackingReminder: boolean;
@@ -350,6 +352,7 @@ export const createDefaultConfig = (now = Date.now()): GlobalConfig => ({
   isKeepNotesOnToday: false,
   shortcutBindings: { ...DEFAULT_SHORTCUTS },
   isOnboardingComplete: false,
+  name: '',
 });
 
 export const createDefaultTaskViewConfig = (

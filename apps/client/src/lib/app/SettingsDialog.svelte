@@ -171,6 +171,20 @@
 					<Field.FieldGroup>
 						<Field.Field orientation="horizontal"
 							><Field.FieldContent
+								><Field.FieldTitle>Display name</Field.FieldTitle><Field.FieldDescription
+									>Shown in local summaries and timesheets; stays on this device.</Field.FieldDescription
+								></Field.FieldContent
+							><Input
+								class="shortcut-input"
+								value={model.config.name}
+								aria-label="Display name"
+								placeholder="Your name"
+								onchange={(event) =>
+									void model.updateConfig({ name: event.currentTarget.value.trim() })}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
 								><Field.FieldTitle>Start at login</Field.FieldTitle><Field.FieldDescription
 									>Open Noura quietly when your computer starts.</Field.FieldDescription
 								></Field.FieldContent

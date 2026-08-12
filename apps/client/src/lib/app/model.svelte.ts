@@ -4,6 +4,7 @@ import {
 	FileProviderOperationEndpoint,
 	NouraSyncHttpEndpoint,
 	exportEncryptedBackup,
+	IdleDetection,
 	importEncryptedBackup,
 	parseCapture,
 	type EncryptedBackupFile,
@@ -815,6 +816,18 @@ export class NouraModel {
 
 	async completeOnboarding(): Promise<void> {
 		await this.updateConfig({ isOnboardingComplete: true });
+	}
+
+	/** Splits the running entry around an idle gap (suspend + resume). */
+	async splitForIdle(lastActiveAt: number, resumedAt = Date.now()): Promise<boolean> {
+		const id = this.state.activeSessionId;
+		if (!id) return false;
+		const entry = this.state.trackedEntries[id];
+		if (!entry) return false;
+		const commands = IdleDetection.splitCommands(entry, lastActiveAt, resumedAt);
+		if (!commands.length) return false;
+		for (const command of commands) await this.#store.execute(command);
+		return true;
 	}
 
 	/** Applies the persisted theme mode (light/dark/system) to the document. */

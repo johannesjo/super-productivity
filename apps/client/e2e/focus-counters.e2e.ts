@@ -24,3 +24,19 @@ test('adds a counter, ticks it, and persists the value', async ({ page }) => {
 	await expect(persisted).toBeVisible();
 	await expect(persisted.locator('.counter-value')).toHaveText('1');
 });
+
+// Phase 5 gate: idle-split closes the running segment and opens a continuation.
+test('splits an active focus segment into two tracked entries', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	await page.locator("button[aria-label='Focus']").click();
+	await page.getByRole('button', { name: 'Start', exact: true }).click();
+	await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeVisible();
+
+	await page.getByRole('button', { name: 'Focus options' }).first().click();
+	await page.getByRole('menuitem', { name: 'Split idle segment' }).click();
+
+	await expect(page.locator('.focus-records > div')).toHaveCount(2);
+	await page.getByRole('button', { name: 'Pause', exact: true }).click();
+});

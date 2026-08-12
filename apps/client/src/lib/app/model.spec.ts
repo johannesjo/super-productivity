@@ -391,4 +391,33 @@ describe('NouraModel', () => {
 		await model.completeOnboarding();
 		expect(model.config.isOnboardingComplete).toBe(true);
 	});
+
+	it('persists the user display name', async () => {
+		const model = new NouraModel();
+		await model.updateConfig({ name: 'Ada' });
+		expect(model.config.name).toBe('Ada');
+	});
+
+	it('splits an active tracked entry around an idle gap', async () => {
+		const model = new NouraModel();
+		await model.addTask('Split task');
+		const task = model.selectedTask;
+		if (!task) throw new Error('Expected task');
+		await model.startTrackingForTask(task.id);
+		const originalId = model.state.activeSessionId;
+		expect(originalId).toBeDefined();
+		const startedAt = model.state.trackedEntries[originalId as string]?.startedAt ?? 0;
+
+		const ok = await model.splitForIdle(startedAt + 60_000, startedAt + 60_001);
+		expect(ok).toBe(true);
+
+		const original = model.state.trackedEntries[originalId as string];
+		expect(original?.endedAt).toBeDefined();
+		const entries = Object.values(model.state.trackedEntries);
+		expect(entries).toHaveLength(2);
+		const continuation = entries.find((entry) => entry.id !== originalId);
+		expect(continuation?.endedAt).toBeUndefined();
+		// The closed segment's duration is attributed to the task.
+		expect(model.state.tasks[task.id]?.trackedMs).toBeGreaterThanOrEqual(60_000);
+	});
 });

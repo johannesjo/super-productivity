@@ -188,6 +188,8 @@ export interface GlobalConfig {
     weekStartDay: number;
     isReduceMotion: boolean;
     defaultProjectId?: EntityId;
+    /** User profile display name (user profile, kept on-device). */
+    name: string;
     isEnableReminders: boolean;
     isEnableTrackingReminder: boolean;
     trackingReminderMinute: number;

@@ -29,6 +29,7 @@ export const createDefaultConfig = (now = Date.now()) => ({
     isKeepNotesOnToday: false,
     shortcutBindings: { ...DEFAULT_SHORTCUTS },
     isOnboardingComplete: false,
+    name: '',
 });
 export const createDefaultTaskViewConfig = (viewId, now = Date.now()) => ({
     id: viewId,

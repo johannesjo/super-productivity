@@ -132,6 +132,13 @@
 		segmentStartElapsed = 0;
 	}
 
+	/** Closes the current segment and resumes a new one (idle suspension). */
+	async function splitIdle(): Promise<void> {
+		await model.splitForIdle(Date.now() - 1);
+		elapsed = 0;
+		segmentStartElapsed = elapsed;
+	}
+
 	async function addManualRecord(event: SubmitEvent): Promise<void> {
 		event.preventDefault();
 		await model.recordFocusSession(
@@ -171,13 +178,17 @@
 					aria-pressed={!soundEnabled}
 					onclick={() => (soundEnabled = !soundEnabled)}
 					>{#if soundEnabled}<Volume2Icon />{:else}<VolumeXIcon />{/if}</Button
-				><DropdownMenu.Root>
+				>
+				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
 						<Button variant="ghost" size="icon" aria-label="Focus options"
 							><MoreHorizontalIcon /></Button
 						>
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content align="end">
+						{#if running}<DropdownMenu.Item onclick={() => void splitIdle()}
+								>Split idle segment</DropdownMenu.Item
+							>{/if}
 						<DropdownMenu.Item onclick={() => void resetTimer()}>Reset timer</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>

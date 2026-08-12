@@ -95,6 +95,7 @@
       "isOnboardingComplete": false,
       "isReduceMotion": false,
       "language": "de",
+      "name": "",
       "shortcutBindings": {
         "focus.newTask": "CmdOrCtrl+N",
         "search.open": "CmdOrCtrl+K",

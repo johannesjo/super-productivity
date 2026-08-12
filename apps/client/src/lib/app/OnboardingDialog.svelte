@@ -56,7 +56,7 @@
 		</Dialog.Header>
 		<div class="onboarding-body">
 			<div class="progress">
-				{#each steps as item, index (index)}<span class:active={index === step}></span>{/each}
+				{#each steps.keys() as index (index)}<span class:active={index === step}></span>{/each}
 			</div>
 			<div class="step">
 				<current.icon />
