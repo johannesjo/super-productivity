@@ -80,6 +80,7 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Shortcut editor/cheat sheet persisted to GlobalConfig | ✅ | `src/lib/app/SettingsDialog.svelte` + `packages/domain/src/entities.ts` |
 | Sync settings + providers | ✅ | `src/lib/app/SyncSettings.svelte` |
 | Sync status rail widget + device line (offline→connecting→connected→error) | ✅ | `src/lib/app/AppShell.svelte` (+ `e2e/sync.e2e.ts`) |
+| Account/devices/conflicts status dialog (device id, last synced, conflict policy) | ✅ | `src/lib/app/SyncStatusDialog.svelte` |
 | Accounts/devices/conflicts/repair/recovery UI; provider switching review | ❌ | `apps/client/src/lib/app/SyncSettings.svelte` |
 | PWA service worker (cache-first shell + offline navigations) + offline E2E | ✅ | `apps/client/src/service-worker.ts` (+ `e2e/offline.e2e.ts`) |
 | Encrypted backup export/import UI (AES-GCM) | ✅ | `src/lib/app/SettingsDialog.svelte` + `packages/application/src/backup.ts` |

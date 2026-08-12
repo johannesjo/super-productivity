@@ -26,7 +26,7 @@
 		<div class="rows">
 			<div class="row">
 				<span>Status</span><strong class:offline={model.syncStatus === 'offline'}
-					>{model.syncStatus}{' '}
+					>{model.syncStatus}
 					{#if model.syncStatus === 'connected'}<CheckCircleIcon
 						/>{:else if model.syncStatus === 'offline'}<CloudOffIcon />{/if}
 				</strong>
@@ -91,6 +91,7 @@
 	}
 	.row > strong :global(svg) {
 		width: 15px;
+		margin-left: 4px;
 		color: #22c55e;
 	}
 	.row > strong.offline {
