@@ -6,6 +6,7 @@
 	import MonitorIcon from '@lucide/svelte/icons/monitor';
 	import PaletteIcon from '@lucide/svelte/icons/palette';
 	import ShieldIcon from '@lucide/svelte/icons/shield-check';
+	import TimerIcon from '@lucide/svelte/icons/timer';
 	import UserIcon from '@lucide/svelte/icons/user-round';
 	import { INTEGRATIONS, type IntegrationDefinition } from '@noura/integrations';
 	import { Button } from '$lib/components/ui/button';
@@ -30,6 +31,7 @@
 		{ id: 'appearance', label: 'Appearance', icon: PaletteIcon },
 		{ id: 'date', label: 'Date & time', icon: CalendarClockIcon },
 		{ id: 'notifications', label: 'Notifications', icon: BellIcon },
+		{ id: 'focus', label: 'Focus & tracking', icon: TimerIcon },
 		{ id: 'integrations', label: 'Integrations', icon: LinkIcon },
 		{ id: 'privacy', label: 'Privacy & backup', icon: ShieldIcon },
 		{ id: 'shortcuts', label: 'Shortcuts', icon: KeyboardIcon }
@@ -111,6 +113,240 @@
 						<p>Keep Noura offline or sync through the provider you already trust.</p>
 					</header>
 					<SyncSettings {model} />
+				{:else if section === 'appearance'}
+					<header>
+						<h2>Appearance</h2>
+						<p>Pick how Noura looks; reduced motion keeps transitions calm.</p>
+					</header>
+					<Field.FieldGroup>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Theme</Field.FieldTitle><Field.FieldDescription
+									>Persisted per device; system follows your OS.</Field.FieldDescription
+								></Field.FieldContent
+							><Select.Root
+								type="single"
+								value={model.config.themeMode}
+								onValueChange={(value) =>
+									void model.updateConfig({ themeMode: value as 'light' | 'dark' | 'system' })}
+								><Select.Trigger>{model.config.themeMode}</Select.Trigger><Select.Content
+									><Select.Group
+										><Select.Item value="light">Light</Select.Item><Select.Item value="dark"
+											>Dark</Select.Item
+										><Select.Item value="system">System</Select.Item></Select.Group
+									></Select.Content
+								></Select.Root
+							></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Reduce motion</Field.FieldTitle><Field.FieldDescription
+									>Minimize transitions and movement.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch
+								checked={model.config.isReduceMotion}
+								onCheckedChange={(checked) => void model.updateConfig({ isReduceMotion: checked })}
+							/></Field.Field
+						>
+					</Field.FieldGroup>
+				{:else if section === 'date'}
+					<header>
+						<h2>Date & time</h2>
+						<p>Formats and the week start apply across the planner and lists.</p>
+					</header>
+					<Field.FieldGroup>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Date format</Field.FieldTitle><Field.FieldDescription
+									>How dates appear in lists and views.</Field.FieldDescription
+								></Field.FieldContent
+							><Select.Root
+								type="single"
+								value={model.config.dateFormat}
+								onValueChange={(value) => void model.updateConfig({ dateFormat: value })}
+								><Select.Trigger>{model.config.dateFormat}</Select.Trigger><Select.Content
+									><Select.Group
+										><Select.Item value="MM/DD/YYYY">MM/DD/YYYY</Select.Item><Select.Item
+											value="DD/MM/YYYY">DD/MM/YYYY</Select.Item
+										><Select.Item value="YYYY-MM-DD">YYYY-MM-DD</Select.Item></Select.Group
+									></Select.Content
+								></Select.Root
+							></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Time format</Field.FieldTitle><Field.FieldDescription
+									>24-hour or 12-hour clock.</Field.FieldDescription
+								></Field.FieldContent
+							><Select.Root
+								type="single"
+								value={model.config.timeFormat}
+								onValueChange={(value) => void model.updateConfig({ timeFormat: value })}
+								><Select.Trigger>{model.config.timeFormat}</Select.Trigger><Select.Content
+									><Select.Group
+										><Select.Item value="HH:mm">24-hour</Select.Item><Select.Item value="h:mm a"
+											>12-hour</Select.Item
+										></Select.Group
+									></Select.Content
+								></Select.Root
+							></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Week starts on</Field.FieldTitle><Field.FieldDescription
+									>First day of the planner week.</Field.FieldDescription
+								></Field.FieldContent
+							><Select.Root
+								type="single"
+								value={String(model.config.weekStartDay)}
+								onValueChange={(value) => void model.updateConfig({ weekStartDay: Number(value) })}
+								><Select.Trigger
+									>{model.config.weekStartDay === 1 ? 'Monday' : 'Sunday'}</Select.Trigger
+								><Select.Content
+									><Select.Group
+										><Select.Item value="1">Monday</Select.Item><Select.Item value="7"
+											>Sunday</Select.Item
+										></Select.Group
+									></Select.Content
+								></Select.Root
+							></Field.Field
+						>
+					</Field.FieldGroup>
+				{:else if section === 'notifications'}
+					<header>
+						<h2>Notifications</h2>
+						<p>Reminders, tracking nudges, and breaks stay fully offline.</p>
+					</header>
+					<Field.FieldGroup>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Task reminders</Field.FieldTitle><Field.FieldDescription
+									>Notify when a task reminder is due.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch
+								checked={model.config.isEnableReminders}
+								onCheckedChange={(checked) =>
+									void model.updateConfig({ isEnableReminders: checked })}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Tracking reminder</Field.FieldTitle><Field.FieldDescription
+									>Gently remind after a while of continuous tracking.</Field.FieldDescription
+								></Field.FieldContent
+							><Input
+								class="minutes-input"
+								type="number"
+								min="1"
+								value={model.config.trackingReminderMinute}
+								aria-label="Tracking reminder minutes"
+								onchange={(event) =>
+									void model.updateConfig({
+										trackingReminderMinute: Math.max(1, Number(event.currentTarget.value) || 1)
+									})}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Take a break</Field.FieldTitle><Field.FieldDescription
+									>Prompt a break after continuous focus.</Field.FieldDescription
+								></Field.FieldContent
+							>
+							<div class="toggle-with-input">
+								<Switch
+									checked={model.config.isEnableTakeABreak}
+									onCheckedChange={(checked) =>
+										void model.updateConfig({ isEnableTakeABreak: checked })}
+								/><Input
+									class="minutes-input"
+									type="number"
+									min="1"
+									value={model.config.takeABreakMinute}
+									aria-label="Take a break minutes"
+									onchange={(event) =>
+										void model.updateConfig({
+											takeABreakMinute: Math.max(1, Number(event.currentTarget.value) || 1)
+										})}
+								/>
+							</div></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Idle detection</Field.FieldTitle><Field.FieldDescription
+									>Suspend time tracking during idle gaps.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch
+								checked={model.config.isEnableIdleDetection}
+								onCheckedChange={(checked) =>
+									void model.updateConfig({ isEnableIdleDetection: checked })}
+							/></Field.Field
+						>
+					</Field.FieldGroup>
+				{:else if section === 'focus'}
+					<header>
+						<h2>Focus & tracking</h2>
+						<p>Defaults for pomodoro sequences and working hours.</p>
+					</header>
+					<Field.FieldGroup>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Auto-start break</Field.FieldTitle><Field.FieldDescription
+									>Begin the break when a pomodoro ends.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch
+								checked={model.config.isEnablePomodoroAutoStartBreak}
+								onCheckedChange={(checked) =>
+									void model.updateConfig({ isEnablePomodoroAutoStartBreak: checked })}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Auto-start next</Field.FieldTitle><Field.FieldDescription
+									>Kick off the next pomodoro after a break.</Field.FieldDescription
+								></Field.FieldContent
+							><Switch
+								checked={model.config.isEnablePomodoroAutoStartNext}
+								onCheckedChange={(checked) =>
+									void model.updateConfig({ isEnablePomodoroAutoStartNext: checked })}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Workday start</Field.FieldTitle><Field.FieldDescription
+									>Hour the working day begins (24h).</Field.FieldDescription
+								></Field.FieldContent
+							><Input
+								class="minutes-input"
+								type="number"
+								min="0"
+								max="23"
+								value={model.config.workStartHour}
+								aria-label="Workday start hour"
+								onchange={(event) =>
+									void model.updateConfig({
+										workStartHour: Math.min(23, Math.max(0, Number(event.currentTarget.value) || 0))
+									})}
+							/></Field.Field
+						>
+						<Field.Field orientation="horizontal"
+							><Field.FieldContent
+								><Field.FieldTitle>Workday end</Field.FieldTitle><Field.FieldDescription
+									>Hour the working day ends (24h).</Field.FieldDescription
+								></Field.FieldContent
+							><Input
+								class="minutes-input"
+								type="number"
+								min="0"
+								max="23"
+								value={model.config.workEndHour}
+								aria-label="Workday end hour"
+								onchange={(event) =>
+									void model.updateConfig({
+										workEndHour: Math.min(23, Math.max(0, Number(event.currentTarget.value) || 0))
+									})}
+							/></Field.Field
+						>
+					</Field.FieldGroup>
 				{:else if section === 'integrations'}
 					<header>
 						<h2>Integrations</h2>
@@ -313,6 +549,14 @@
 		display: flex;
 		gap: 10px;
 		margin-bottom: 30px;
+	}
+	:global(.minutes-input) {
+		width: 76px;
+	}
+	.toggle-with-input {
+		display: flex;
+		align-items: center;
+		gap: 12px;
 	}
 	@media (max-width: 760px) {
 		.settings-shell {

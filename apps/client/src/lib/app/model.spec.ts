@@ -252,4 +252,30 @@ describe('NouraModel', () => {
 		expect(model.state.notes[noteId as string]).toBeUndefined();
 		expect(model.selectedNoteId).toBeUndefined();
 	});
+
+	it('persists global configuration through config/update', async () => {
+		const model = new NouraModel();
+		expect(model.config.themeMode).toBe('dark');
+		await model.updateConfig({ themeMode: 'light', language: 'de', trackingReminderMinute: 30 });
+		expect(model.state.config).toMatchObject({
+			themeMode: 'light',
+			language: 'de',
+			trackingReminderMinute: 30
+		});
+		expect(model.config.language).toBe('de');
+	});
+
+	it('removes a project and moves its tasks to the fallback', async () => {
+		const model = new NouraModel();
+		await model.addProject('Temp');
+		const projectId = model.state.activeProjectId;
+		await model.addTask('Loose task');
+		await model.removeProject(projectId);
+		expect(model.state.projects[projectId]).toBeUndefined();
+		expect(
+			Object.values(model.state.tasks).some(
+				(task) => task.projectId === projectId && task.title === 'Loose task'
+			)
+		).toBe(false);
+	});
 });

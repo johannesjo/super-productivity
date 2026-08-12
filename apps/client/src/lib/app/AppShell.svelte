@@ -5,6 +5,7 @@
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import ArchiveIcon from '@lucide/svelte/icons/archive';
 	import BookOpenIcon from '@lucide/svelte/icons/book-open';
+	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
 	import CalendarDaysIcon from '@lucide/svelte/icons/calendar-days';
 	import CheckSquareIcon from '@lucide/svelte/icons/square-check-big';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
@@ -37,6 +38,7 @@
 	import NotesView from './NotesView.svelte';
 	import OrgDialog from './OrgDialog.svelte';
 	import PlannerView from './PlannerView.svelte';
+	import ScheduleView from './ScheduleView.svelte';
 	import SearchDialog from './SearchDialog.svelte';
 	import SettingsDialog from './SettingsDialog.svelte';
 	import TaskInspector from './TaskInspector.svelte';
@@ -47,6 +49,7 @@
 	const railItems = [
 		{ view: 'today', label: 'Tasks', icon: CheckSquareIcon },
 		{ view: 'planner', label: 'Planner', icon: CalendarDaysIcon },
+		{ view: 'schedule', label: 'Schedule', icon: CalendarClockIcon },
 		{ view: 'eisenhower', label: 'Eisenhower', icon: Grid3x3Icon },
 		{ view: 'boards', label: 'Boards', icon: Columns3Icon },
 		{ view: 'focus', label: 'Focus', icon: TimerIcon },
@@ -58,7 +61,12 @@
 
 	onMount(() => {
 		void model.hydrate();
-		document.documentElement.classList.add('dark');
+		model.applyTheme();
+	});
+
+	$effect(() => {
+		void model.state.config.themeMode;
+		model.applyTheme();
 	});
 
 	function railAction(view: (typeof railItems)[number]['view']): void {
@@ -139,6 +147,8 @@
 			<main class="full-main"><FocusView {model} /></main>
 		{:else if model.view === 'planner'}
 			<main class="full-main"><PlannerView {model} /></main>
+		{:else if model.view === 'schedule'}
+			<main class="full-main"><ScheduleView {model} /></main>
 		{:else if model.view === 'boards'}
 			<main class="full-main"><BoardView {model} /></main>
 		{:else if model.view === 'eisenhower'}

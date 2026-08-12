@@ -15,6 +15,7 @@ import {
 	selectSmartListTasks,
 	type DomainOperation,
 	type DomainState,
+	type GlobalConfig,
 	type ISODate,
 	type Note,
 	type Project,
@@ -46,6 +47,7 @@ export type AppView =
 	| 'priority'
 	| 'completed'
 	| 'planner'
+	| 'schedule'
 	| 'boards'
 	| 'focus'
 	| 'insights'
@@ -719,6 +721,32 @@ export class NouraModel {
 	/** Drag-to-schedule: assigns a task to a day (or clears it). */
 	async setTaskDay(id: string, dueDay: ISODate | undefined): Promise<void> {
 		await this.updateTask(id, { dueDay });
+	}
+
+	get config(): GlobalConfig {
+		return this.state.config;
+	}
+
+	async updateConfig(patch: Partial<GlobalConfig>): Promise<void> {
+		await this.#store.execute({ type: 'config/update', payload: { patch } });
+		this.applyTheme();
+	}
+
+	/** Applies the persisted theme mode (light/dark/system) to the document. */
+	applyTheme(): void {
+		if (typeof document === 'undefined') return;
+		const mode = this.state.config.themeMode;
+		const apply = (dark: boolean): void => {
+			document.documentElement.classList.toggle('dark', dark);
+		};
+		if (mode === 'system') {
+			const prefersDark =
+				typeof window !== 'undefined' &&
+				window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+			apply(Boolean(prefersDark));
+		} else {
+			apply(mode === 'dark');
+		}
 	}
 
 	async addTask(

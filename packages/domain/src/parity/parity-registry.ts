@@ -280,8 +280,20 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'apps/client/e2e/planning.e2e.ts',
       },
       {
-        feature: 'Settings dialog (8 sections)',
+        feature:
+          'Settings persisted to GlobalConfig (theme, date/time, notifications, focus & tracking)',
         owner: 'apps/client/src/lib/app/SettingsDialog.svelte',
+        tests: 'apps/client/e2e/settings.e2e.ts',
+      },
+      {
+        feature: 'Light/dark/system themes applied + persisted',
+        owner: 'apps/client/src/lib/app/model.svelte.ts',
+        tests: 'apps/client/e2e/settings.e2e.ts',
+      },
+      {
+        feature: 'Schedule/TickTick planning pane (Today/This week/planning inbox)',
+        owner: 'apps/client/src/lib/app/ScheduleView.svelte',
+        tests: 'apps/client/e2e/planning.e2e.ts',
       },
       {
         feature: 'Sync settings + providers',
@@ -312,10 +324,6 @@ export const PARITY_LEDGER: ParityArea[] = [
         feature: 'Project/Tag management UI (rename, recolor, archive, delete)',
         owner: 'apps/client/src/lib/app/OrgDialog.svelte',
         tests: 'apps/client/e2e/planning.e2e.ts',
-      },
-      {
-        feature: 'Schedule/TickTick planning pane',
-        owner: 'apps/client/src/lib/app/AppShell.svelte',
       },
       {
         feature: 'Eisenhower matrix view',

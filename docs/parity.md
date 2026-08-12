@@ -75,7 +75,7 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Boards (per-project kanban, WIP, drag-to-move, work-context boards) | 🟡 | `src/lib/app/BoardView.svelte` |
 | Insights (weekly/daily focus charts + top tasks) | 🟡 | `src/lib/app/InsightsView.svelte` (+ `packages/application/src/metrics.ts`) |
 | Search (full index: tasks/notes/tags/projects + actions) | 🟡 | `src/lib/app/SearchDialog.svelte` |
-| Settings dialog | 🟡 | `src/lib/app/SettingsDialog.svelte` |
+| Settings persisted to GlobalConfig (theme/date/notifications/focus) | 🟡 | `src/lib/app/SettingsDialog.svelte` |
 | Sync settings + providers | ✅ | `src/lib/app/SyncSettings.svelte` |
 | Activity dialog | ✅ | `src/lib/app/ActivityDialog.svelte` |
 
@@ -84,7 +84,7 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Feature | Status | Owning file |
 |---|---|---|
 | Planner (week + month, drag-to-schedule, recurrence-aware) | 🟡 | `src/lib/app/PlannerView.svelte` (+ `packages/application/src/planner.ts`) |
-| Schedule / TickTick planning pane | ❌ | `src/lib/app/AppShell.svelte` |
+| Schedule / TickTick planning pane (Today/This week/planning inbox) | 🟡 | `src/lib/app/ScheduleView.svelte` |
 | Eisenhower matrix | 🟡 | `src/lib/app/EisenhowerView.svelte` (+ `packages/application/src/eisenhower.ts`) |
 | Notes view (Markdown editor + bookmarks) | 🟡 | `src/lib/app/NotesView.svelte` |
 | History view (done tasks, charts) | 🟡 | `src/lib/app/HistoryView.svelte` |

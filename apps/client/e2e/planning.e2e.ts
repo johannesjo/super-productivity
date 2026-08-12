@@ -109,3 +109,32 @@ test('organizes projects: rename then delete from the projects & tags dialog', a
 	await dialog.getByLabel('Delete project Learning').click();
 	await expect(dialog.locator('.org-row', { hasText: 'Learning' })).toHaveCount(0);
 });
+
+// Phase 4 gate: Schedule/TickTick planning pane — plan an inbox task Today.
+test('schedule: move an inbox task to Today via quick plan and persist it', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	const title = `Triaged ${Date.now()}`;
+	// Add from Upcoming so the task is unscheduled (lands in the planning inbox).
+	await page.locator('aside').getByRole('button', { name: 'Upcoming' }).click();
+	const quickAdd = page.getByRole('textbox', { name: 'Add a task' });
+	await quickAdd.fill(title);
+	await quickAdd.press('Enter');
+
+	await page.locator("button[aria-label='Schedule']").click();
+	await expect(page.getByRole('heading', { name: 'Schedule' })).toBeVisible();
+	const inboxCard = page.locator('.inbox-card', { hasText: title });
+	await expect(inboxCard).toBeVisible();
+	await inboxCard.getByRole('button', { name: 'Today' }).click();
+	await expect(page.locator('.today-panel')).toContainText(title);
+	// Let the async IndexedDB write settle before reloading.
+	await page.waitForTimeout(400);
+
+	await page.reload();
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+	// The task is due today, so it must survive reload in the durable store.
+	await expect(
+		page.locator('button[draggable="true"]').filter({ visible: true }).filter({ hasText: title })
+	).toBeVisible();
+});
