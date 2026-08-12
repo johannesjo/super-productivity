@@ -197,6 +197,16 @@ export const PARITY_LEDGER: ParityArea[] = [
         owner: 'packages/application/src/backup.ts',
         tests: 'packages/application/src/backup.spec.ts',
       },
+      {
+        feature: 'Capture syntax parser (due/start/remind/repeat/tags/project/prio/subtask)',
+        owner: 'packages/application/src/capture.ts',
+        tests: 'packages/application/src/capture.spec.ts',
+      },
+      {
+        feature: 'Local REST API (offline backend surface)',
+        owner: 'packages/application/src/local-http.ts',
+        tests: 'packages/application/src/local-http.spec.ts',
+      },
     ],
   },
   {
@@ -213,8 +223,9 @@ export const PARITY_LEDGER: ParityArea[] = [
         owner: 'apps/client/src/lib/app/AppShell.svelte',
       },
       {
-        feature: 'Quick capture with due/project/status',
-        owner: 'apps/client/src/lib/app/TaskCaptureDialog.svelte',
+        feature:
+          'Quick capture with syntax (due/start/remind/repeat/tags/project/prio/subtask) wired to the model',
+        owner: 'apps/client/src/lib/app/model.svelte.ts',
         tests: 'apps/client/src/lib/app/model.spec.ts',
       },
       {
@@ -323,6 +334,11 @@ export const PARITY_LEDGER: ParityArea[] = [
         feature:
           'Platform ports (credentials, files, clipboard, http, notifications, shell, desktop, backup)',
         owner: 'packages/platform/src/index.ts',
+      },
+      {
+        feature: 'Web platform adapters + in-memory credentials store',
+        owner: 'packages/platform/src/web.ts',
+        tests: 'packages/platform/src/web.spec.ts',
       },
       {
         feature: 'Tauri host (SQLite, dialog, opener, store, updater)',

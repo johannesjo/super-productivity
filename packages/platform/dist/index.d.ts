@@ -48,3 +48,6 @@ export interface PlatformPorts {
     backup: BackupPort;
 }
 export declare const isTauri: () => boolean;
+export * from './memory-credentials';
+export { createWebPlatformPorts } from './web';
+export type { CredentialsStore } from './memory-credentials';

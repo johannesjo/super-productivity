@@ -54,7 +54,9 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Idle detection + idle-split tracking | ✅ | `packages/application/src/services/idle.ts` | `packages/application/src/services.spec.ts` |
 | Global full-text search | ✅ | `packages/application/src/services/search.ts` | `packages/application/src/services.spec.ts` |
 | Notifications + global shortcuts services | ✅ | `packages/application/src/services/notifications.ts` / `shortcuts.ts` | `packages/application/src/services.spec.ts` |
-| Platform adapters (credentials/files/clipboard/http/notifications/tray/backup) | 🟡 | `packages/platform/src/index.ts` | — |
+| Local REST API (offline backend surface) | ✅ | `packages/application/src/local-http.ts` | `packages/application/src/local-http.spec.ts` |
+| Capture syntax parser (due/start/remind/repeat/tags/project/prio/subtask) | ✅ | `packages/application/src/capture.ts` | `packages/application/src/capture.spec.ts` |
+| Platform adapters (credentials/files/clipboard/http/notifications/tray/backup) | 🟡 | `packages/platform/src/index.ts` + `packages/platform/src/web.ts` | `packages/platform/src/web.spec.ts` |
 
 ## Phase 3 — Shell & core task UI (TickTick target, `apps/client`)
 
@@ -62,7 +64,7 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 |---|---|---|
 | App shell (56px rail, resizable panes, sheet <1280 / overlay <960 / single <640) | ✅ | `src/lib/app/AppShell.svelte` |
 | Sidebar (Today/Upcoming/Inbox/projects) | ✅ | `src/lib/app/AppShell.svelte` |
-| Quick capture (due/project/status) | 🟡 | `src/lib/app/TaskCaptureDialog.svelte` |
+| Quick capture with syntax parsing (due/start/remind/repeat/tags/project/prio/subtask) | 🟡 | `apps/client/src/lib/app/model.svelte.ts` + `packages/application/src/capture.ts` | `apps/client/src/lib/app/model.spec.ts` + `apps/client/e2e/capture.e2e.ts` |
 | Task list (compact rows, checklist progress) | 🟡 | `src/lib/app/TaskWorkspace.svelte` |
 | Inspector (schedule, notes, checklist, tags, repeat, attachments, tracking) | 🟡 | `src/lib/app/TaskInspector.svelte` |
 | Focus view (pomodoro/flowtime/stopwatch + stats) | 🟡 | `src/lib/app/FocusView.svelte` |

@@ -3,6 +3,7 @@ import {
 	EncryptedOperationTransport,
 	FileProviderOperationEndpoint,
 	NouraSyncHttpEndpoint,
+	parseCapture,
 	type StateRepository,
 	type SyncCursorRepository
 } from '@noura/application';
@@ -17,6 +18,7 @@ import {
 	type Project,
 	type Task,
 	type TaskPriority,
+	type TaskRepeatCfg,
 	type TaskStatus,
 	type TimeSession
 } from '@noura/domain';
@@ -46,6 +48,19 @@ export type AppView =
 
 const today = (): `${number}-${number}-${number}` =>
 	new Date().toISOString().slice(0, 10) as `${number}-${number}-${number}`;
+
+const unitLabel = (unit: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'): string => {
+	switch (unit) {
+		case 'DAILY':
+			return 'day';
+		case 'WEEKLY':
+			return 'week';
+		case 'MONTHLY':
+			return 'month';
+		case 'YEARLY':
+			return 'year';
+	}
+};
 
 const CLIENT_ID_KEY = 'noura-client-id';
 const clientId = (): string => {
@@ -602,23 +617,111 @@ export class NouraModel {
 		title: string,
 		options: { dueDay?: ISODate; projectId?: string; status?: TaskStatus } = {}
 	): Promise<void> {
-		const trimmed = title.trim();
+		const intent = parseCapture(title, { today: today(), now: Date.now() });
+		const trimmed = (intent?.title ?? title).trim();
 		if (!trimmed) return;
 		const now = Date.now();
+		const projectName = intent?.projectName;
+
+		let defaultProject = INBOX_PROJECT_ID;
+		const currentProject = this.state.projects[this.state.activeProjectId];
+		if (this.view === 'project' && currentProject) defaultProject = currentProject.id;
+
 		const projectId =
 			options.projectId ??
-			(this.view === 'project' ? this.state.activeProjectId : INBOX_PROJECT_ID);
+			(projectName
+				? (Object.values(this.state.projects).find(
+						(project) =>
+							project.title.toLowerCase() === projectName.toLowerCase() && !project.archived
+					)?.id ?? defaultProject)
+				: defaultProject);
 		const status = options.status ?? 'open';
+
+		const tagIds: string[] = [];
+		for (const name of intent?.tagNames ?? []) {
+			const existing = Object.values(this.state.tags).find(
+				(tag) => tag.title.toLowerCase() === name.toLowerCase()
+			);
+			if (existing) {
+				tagIds.push(existing.id);
+			} else {
+				const id = crypto.randomUUID();
+				await this.#store.execute({
+					type: 'tag/add',
+					payload: { tag: { id, title: name, color: 'blue' } }
+				});
+				tagIds.push(id);
+			}
+		}
+
+		let repeatCfgId: string | undefined;
+		let repeatRule: string | undefined;
+		if (intent?.repeat) {
+			const cfg: TaskRepeatCfg = {
+				id: crypto.randomUUID(),
+				title: `Every ${intent.repeat.repeatEvery} ${unitLabel(intent.repeat.repeatEveryUnit)}`,
+				repeatEvery: intent.repeat.repeatEvery,
+				repeatEveryUnit: intent.repeat.repeatEveryUnit,
+				daysOfWeek: intent.repeat.daysOfWeek,
+				dayOfMonth: intent.repeat.dayOfMonth,
+				weekOfMonth: intent.repeat.weekOfMonth,
+				yearMonth: intent.repeat.yearMonth,
+				repeatOffset: 0,
+				createdAt: now,
+				modifiedAt: now
+			};
+			await this.#store.execute({ type: 'repeatCfg/add', payload: { cfg } });
+			repeatCfgId = cfg.id;
+			repeatRule = cfg.title;
+		}
+
+		let parentId: string | undefined;
+		for (const parentTitle of intent?.subtaskChain ?? []) {
+			const id = crypto.randomUUID();
+			await this.#store.execute({
+				type: 'task/add',
+				payload: {
+					task: {
+						id,
+						title: parentTitle,
+						notes: '',
+						status: 'open',
+						priority: 0,
+						projectId,
+						parentId,
+						subtaskIds: [],
+						tagIds: [],
+						checklist: [],
+						sections: [],
+						attachments: [],
+						estimateMs: 0,
+						trackedMs: 0,
+						createdAt: now,
+						updatedAt: now,
+						order: this.state.taskOrder.length
+					}
+				}
+			});
+			parentId = id;
+		}
+
 		const task: Task = {
 			id: crypto.randomUUID(),
 			title: trimmed,
 			notes: '',
 			status,
-			priority: 0,
+			priority: intent?.priority ?? 0,
 			projectId,
-			dueDay: options.dueDay ?? (this.view === 'today' ? today() : undefined),
+			parentId,
+			dueDay: options.dueDay ?? intent?.dueDay ?? (this.view === 'today' ? today() : undefined),
+			dueAt: intent?.dueAt,
+			start: intent?.start,
+			startAt: intent?.startAt,
+			reminderAt: intent?.reminderAt,
+			repeatCfgId,
+			repeatRule,
 			subtaskIds: [],
-			tagIds: [],
+			tagIds,
 			checklist: [],
 			sections: [],
 			attachments: [],

@@ -85,4 +85,38 @@ describe('NouraModel', () => {
 		expect(Object.values(model.state.trackedEntries)).toHaveLength(1);
 		expect(model.selectedTask?.trackedMs).toBe(15 * 60_000);
 	});
+
+	it('parses capture syntax: priority, tags, project, due, and subtask chain', async () => {
+		const model = new NouraModel();
+		await model.addProject('Operations');
+		const operationsId = model.state.activeProjectId;
+		await model.selectProject(operationsId);
+
+		await model.addTask('Deploy #release p2 @Operations due:tomorrow');
+		const task = model.selectedTask;
+		expect(task).toMatchObject({
+			title: 'Deploy',
+			priority: 2,
+			projectId: operationsId,
+			dueDay: new Date(Date.now() + 86_400_000).toISOString().slice(0, 10)
+		});
+		expect(task?.tagIds.length).toBe(1);
+		expect(Object.values(model.state.tags).some((tag) => tag.title === 'release')).toBe(true);
+
+		await model.addTask('Project > Milestone > Ship');
+		const leaf = model.selectedTask;
+		expect(leaf?.title).toBe('Ship');
+		expect(leaf?.parentId).toBeDefined();
+		const parent = leaf ? model.state.tasks[leaf.parentId ?? ''] : undefined;
+		expect(parent?.title).toBe('Milestone');
+		expect(parent?.parentId).toBeDefined();
+	});
+
+	it('parses repeat syntax into a repeat config reference', async () => {
+		const model = new NouraModel();
+		await model.addTask('Standup repeat:daily');
+		const task = model.selectedTask;
+		expect(task?.repeatCfgId).toBeDefined();
+		expect(Object.values(model.state.taskRepeatCfgs)).toHaveLength(1);
+	});
 });

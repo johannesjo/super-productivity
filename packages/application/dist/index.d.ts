@@ -1,6 +1,8 @@
 import { type DomainCommand, type DomainOperation, type DomainState } from '@noura/domain';
 export * from './sync';
 export * from './backup';
+export * from './capture';
+export * from './local-http';
 export * from './services/ports';
 export * from './services/reminder-scheduler';
 export * from './services/tracking-reminder';
