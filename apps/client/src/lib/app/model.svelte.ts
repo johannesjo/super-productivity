@@ -1055,6 +1055,16 @@ export class NouraModel {
 		}
 	}
 
+	async updateSmartListConfig(id: string, isShowCompletedTasks: boolean): Promise<void> {
+		await this.#store.execute({
+			type: 'smartList/update',
+			payload: {
+				id,
+				patch: { listConfig: { ...this.state.smartLists[id]?.listConfig, isShowCompletedTasks } }
+			}
+		});
+	}
+
 	async selectTag(id: string): Promise<void> {
 		if (!this.state.tags[id]) return;
 		this.activeTagId = id;

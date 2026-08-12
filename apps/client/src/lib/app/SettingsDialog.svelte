@@ -1,8 +1,10 @@
 <script lang="ts">
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
+	import InfoIcon from '@lucide/svelte/icons/info';
 	import KeyboardIcon from '@lucide/svelte/icons/keyboard';
 	import LinkIcon from '@lucide/svelte/icons/link';
+	import ListChecksIcon from '@lucide/svelte/icons/list-checks';
 	import MonitorIcon from '@lucide/svelte/icons/monitor';
 	import PaletteIcon from '@lucide/svelte/icons/palette';
 	import ShieldIcon from '@lucide/svelte/icons/shield-check';
@@ -20,6 +22,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { Switch } from '$lib/components/ui/switch';
+	import TrashIcon from '@lucide/svelte/icons/trash-2';
 	import type { NouraModel } from './model.svelte';
 	import SyncSettings from './SyncSettings.svelte';
 
@@ -91,7 +94,9 @@
 		{ id: 'focus', label: 'Focus & tracking', icon: TimerIcon },
 		{ id: 'integrations', label: 'Integrations', icon: LinkIcon },
 		{ id: 'privacy', label: 'Privacy & backup', icon: ShieldIcon },
-		{ id: 'shortcuts', label: 'Shortcuts', icon: KeyboardIcon }
+		{ id: 'smartlists', label: 'Smart lists', icon: ListChecksIcon },
+		{ id: 'shortcuts', label: 'Shortcuts', icon: KeyboardIcon },
+		{ id: 'about', label: 'About', icon: InfoIcon }
 	];
 
 	async function exportEncrypted(): Promise<void> {
@@ -535,6 +540,50 @@
 							><Switch checked disabled /></Field.Field
 						></Field.FieldGroup
 					>
+				{:else if section === 'smartlists'}
+					<header>
+						<h2>Smart lists</h2>
+						<p>Curated task filters; each list can include completed tasks.</p>
+					</header>
+					<div class="smartlist-list">
+						{#each model.smartLists as list (list.id)}<div class="smartlist-row">
+								<span class="smartlist-name">{list.title}</span>
+								<label class="smartlist-toggle"
+									><Switch
+										checked={list.listConfig.isShowCompletedTasks}
+										onCheckedChange={(checked) =>
+											void model.updateSmartListConfig(list.id, checked)}
+									/><small>show done</small></label
+								>
+								<Button
+									variant="ghost"
+									size="icon"
+									class="danger"
+									aria-label={`Delete smart list ${list.title}`}
+									onclick={() => void model.removeSmartList(list.id)}><TrashIcon /></Button
+								>
+							</div>{:else}<p class="empty">
+								No smart lists yet — create one from the sidebar.
+							</p>{/each}
+					</div>
+				{:else if section === 'about'}
+					<header>
+						<h2>About</h2>
+						<p>Noura is a calm, privacy-first personal productivity app.</p>
+					</header>
+					<div class="about-block">
+						<h3>Noura {import.meta.env.PACKAGE_VERSION ?? '0.1.0'}</h3>
+						<p>
+							Derived from Super Productivity. Offline-first, local-first, no analytics, and no
+							runtime plugins — integrations are compiled-in adapters.
+						</p>
+						<ul>
+							<li>Domain + reducer: deterministic, one intent → one operation (ADR-003).</li>
+							<li>Sync: encrypted with AES-256-GCM; NouraSync + file providers.</li>
+							<li>Backups: plain JSON or encrypted (AES-GCM) export/import.</li>
+						</ul>
+						<p class="license">MIT License · local data stays on your device.</p>
+					</div>
 				{:else if section === 'shortcuts'}
 					<header>
 						<h2>Shortcuts</h2>
@@ -758,6 +807,54 @@
 	.integration-status {
 		margin: 12px 0 0;
 		color: var(--muted-foreground);
+		font-size: 12px;
+	}
+	.smartlist-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		max-width: 520px;
+	}
+	.smartlist-row {
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 12px;
+		border: 1px solid var(--border);
+		border-radius: 10px;
+	}
+	.smartlist-name {
+		font-size: 13px;
+	}
+	.smartlist-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		color: var(--muted-foreground);
+		font-size: 11px;
+	}
+	:global(.smartlist-row .danger) {
+		color: var(--destructive);
+	}
+	.about-block h3 {
+		margin-bottom: 8px;
+		font-size: 18px;
+	}
+	.about-block p {
+		max-width: 520px;
+		color: var(--muted-foreground);
+		font-size: 13px;
+		line-height: 1.6;
+	}
+	.about-block ul {
+		margin: 14px 0;
+		padding-left: 20px;
+		color: var(--muted-foreground);
+		font-size: 13px;
+		line-height: 1.7;
+	}
+	.about-block .license {
 		font-size: 12px;
 	}
 	@media (max-width: 760px) {

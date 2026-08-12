@@ -98,3 +98,29 @@ test('runs the welcome tour and marks onboarding complete', async ({ page }) => 
 		page.getByRole('dialog', { name: 'Settings' }).getByRole('button', { name: 'Completed' })
 	).toBeVisible();
 });
+
+// Phase 6 gate: Smart lists and About settings sections.
+test('smart-list and about settings sections render and interact', async ({ page }) => {
+	page.on('dialog', (dialog) => dialog.accept('Deep work'));
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	await page
+		.locator('aside[aria-label="Task navigation"]')
+		.getByRole('button', { name: 'Add smart list' })
+		.click();
+
+	await page.keyboard.press(process.platform === 'darwin' ? 'Meta+,' : 'Control+,');
+	const settings = page.getByRole('dialog', { name: 'Settings' });
+	await settings.getByRole('button', { name: 'Smart lists' }).click();
+	await expect(settings.getByRole('heading', { name: 'Smart lists' })).toBeVisible();
+	const row = settings.locator('.smartlist-row', { hasText: 'Deep work' });
+	await expect(row).toBeVisible();
+	await row.getByRole('button', { name: 'Delete smart list Deep work' }).click();
+	await expect(settings.locator('.smartlist-row', { hasText: 'Deep work' })).toHaveCount(0);
+
+	await settings.getByRole('button', { name: 'About' }).click();
+	await expect(settings.getByRole('heading', { name: 'About' })).toBeVisible();
+	await expect(settings.getByText(/Noura 0.1.0/)).toBeVisible();
+	await expect(settings.getByText(/MIT License/)).toBeVisible();
+});
