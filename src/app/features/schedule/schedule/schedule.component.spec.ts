@@ -1257,6 +1257,51 @@ describe('ScheduleComponent', () => {
       expect(options.top).toBe(TARGET_TOP_PX - leadPx);
     });
 
+    it('keeps the full lead visible below the sticky week header', () => {
+      const HEADER_HEIGHT_PX = 33;
+
+      host = document.createElement('div');
+      host.style.cssText = 'position:relative;';
+
+      wrapper = document.createElement('div');
+      wrapper.className = 'scroll-wrapper';
+      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
+
+      const week = document.createElement('schedule-week');
+      week.style.cssText = 'display:block;';
+
+      // Sticky, so it stays over the top of the viewport once scrolled and
+      // covers the first HEADER_HEIGHT_PX of whatever sits below it.
+      const header = document.createElement('div');
+      header.className = 'week-header';
+      header.style.cssText = `position:sticky;top:0;height:${HEADER_HEIGHT_PX}px;width:400px;`;
+
+      const grid = document.createElement('div');
+      grid.className = 'grid-container';
+      grid.style.cssText = 'position:relative;height:2880px;width:400px;';
+
+      const target = document.createElement('div');
+      target.id = 'test-scroll-target';
+      target.style.cssText = `position:absolute;top:${TARGET_TOP_PX}px;left:0;height:2px;width:10px;`;
+
+      grid.append(target);
+      week.append(header, grid);
+      wrapper.append(week);
+      host.append(wrapper);
+      document.body.append(host);
+
+      const scrollToSpy = spyOn(wrapper, 'scrollTo');
+      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
+
+      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
+      const leadPx = SCROLL_LEAD_MINUTES * PX_PER_MINUTE;
+      // The target sits HEADER_HEIGHT_PX further down the flow, and the scroll
+      // pulls back by the same amount, so the lead below the header is the full
+      // 30 minutes. Without the compensation this lands HEADER_HEIGHT_PX lower
+      // and the header covers more than half of that lead.
+      expect(options.top).toBe(TARGET_TOP_PX - leadPx);
+    });
+
     it('clamps the lead at the top of the day', () => {
       host = document.createElement('div');
       host.style.cssText = 'position:relative;';

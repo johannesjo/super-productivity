@@ -412,6 +412,15 @@ export class ScheduleComponent {
     const timeColWidth = timeCol?.offsetWidth || 48;
     const EXTRA_PX = 12;
 
+    // The week header is `position: sticky; top: 0` inside this same scroll
+    // container, so it sits opaque over the top of the viewport and covers
+    // that many pixels of the lead we leave below. Pull the scroll target up
+    // by its height, the vertical counterpart to the time column offset.
+    const stickyHeader = scrollContainer.querySelector(
+      'schedule-week .week-header',
+    ) as HTMLElement | null;
+    const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
+
     // Measured via offsetTop/offsetLeft rather than getBoundingClientRect().
     // Rects are visual coordinates and include any ancestor CSS transform,
     // while scrollTo() takes layout coordinates. The route enter animation
@@ -421,7 +430,11 @@ export class ScheduleComponent {
     const elPos = this._layoutOffset(element);
     const containerPos = this._layoutOffset(scrollContainer);
     const targetTop =
-      elPos.top - containerPos.top - scrollContainer.clientTop - this._leadPx(element);
+      elPos.top -
+      containerPos.top -
+      scrollContainer.clientTop -
+      this._leadPx(element) -
+      stickyHeaderHeight;
     const targetLeft =
       elPos.left -
       containerPos.left -
