@@ -55,6 +55,10 @@
 			></Alert.Action
 		>
 	{/if}
+	<div class="device-line" role="status">
+		<span>Device {model.syncClientId.slice(0, 8)}</span>
+		{#if model.syncError}<span class="sync-error">{model.syncError}</span>{/if}
+	</div>
 </Alert.Root>
 
 <ToggleGroup.Root
@@ -296,6 +300,22 @@
 <style>
 	:global(.connection-summary) {
 		align-items: center;
+	}
+	.device-line {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		margin-top: 10px;
+		color: var(--muted-foreground);
+		font-size: 11px;
+		font-variant-numeric: tabular-nums;
+	}
+	.sync-error {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		color: var(--destructive);
 	}
 	.provider-icon :global(svg) {
 		width: 19px;

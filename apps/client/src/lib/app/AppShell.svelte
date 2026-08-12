@@ -143,6 +143,17 @@
 				{/each}
 			</div>
 			<div class="rail-bottom">
+				<Tooltip.Root
+					><Tooltip.Trigger
+						><button
+							type="button"
+							class="sync-indicator"
+							aria-label={`Sync: ${model.syncStatus}`}
+							onclick={() => (model.settingsOpen = true)}
+							><span class={`sync-dot status-${model.syncStatus}`}></span></button
+						></Tooltip.Trigger
+					><Tooltip.Content side="right">Sync: {model.syncStatus}</Tooltip.Content></Tooltip.Root
+				>
 				<button
 					type="button"
 					aria-label="Activity"
@@ -420,6 +431,38 @@
 	.rail button.active {
 		background: var(--accent);
 		color: var(--foreground);
+	}
+	.sync-indicator {
+		display: grid;
+		place-content: center;
+	}
+	.sync-dot {
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		background: var(--muted-foreground);
+		opacity: 0.7;
+	}
+	.sync-dot.status-connected {
+		background: #22c55e;
+		opacity: 1;
+	}
+	.sync-dot.status-connecting {
+		background: #f59e0b;
+		animation: pulse 1.2s ease-in-out infinite;
+	}
+	.sync-dot.status-error {
+		background: #ef4444;
+		opacity: 1;
+	}
+	@keyframes pulse {
+		0%,
+		100% {
+			opacity: 0.4;
+		}
+		50% {
+			opacity: 1;
+		}
 	}
 	.rail :global(svg) {
 		width: 20px;

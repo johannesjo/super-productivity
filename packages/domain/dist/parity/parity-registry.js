@@ -302,6 +302,11 @@ export const PARITY_LEDGER = [
                 tests: 'apps/client/e2e/planning.e2e.ts',
             },
             {
+                feature: 'Sync status rail widget + device/client id line',
+                owner: 'apps/client/src/lib/app/AppShell.svelte',
+                tests: 'apps/client/e2e/sync.e2e.ts',
+            },
+            {
                 feature: 'Sync settings + providers',
                 owner: 'apps/client/src/lib/app/SyncSettings.svelte',
                 tests: 'apps/client/src/lib/app/model.spec.ts',

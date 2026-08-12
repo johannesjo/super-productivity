@@ -597,6 +597,9 @@ export class NouraModel {
 	get activeProject(): Project | undefined {
 		return this.state.projects[this.state.activeProjectId];
 	}
+	get syncClientId(): string {
+		return this.#clientId;
+	}
 	get projects(): Project[] {
 		return Object.values(this.state.projects).filter(
 			(project) => project.id !== INBOX_PROJECT_ID && !project.archived
