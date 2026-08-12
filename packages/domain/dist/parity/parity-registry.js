@@ -238,6 +238,16 @@ export const PARITY_LEDGER = [
                 owner: 'apps/client/src/lib/app/FocusView.svelte',
             },
             {
+                feature: 'Idle-split: suspend + resume a tracked entry around an idle gap',
+                owner: 'apps/client/src/lib/app/model.svelte.ts',
+                tests: 'apps/client/src/lib/app/model.spec.ts',
+            },
+            {
+                feature: 'User profile display name (persisted)',
+                owner: 'apps/client/src/lib/app/SettingsDialog.svelte',
+                tests: 'apps/client/src/lib/app/model.spec.ts',
+            },
+            {
                 feature: 'Simple counters UI (config, tick, start/stop, remove)',
                 owner: 'apps/client/src/lib/app/FocusView.svelte',
                 tests: 'apps/client/e2e/focus-counters.e2e.ts',
