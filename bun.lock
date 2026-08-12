@@ -102,6 +102,9 @@
     "packages/integrations": {
       "name": "@noura/integrations",
       "version": "0.1.0",
+      "dependencies": {
+        "@noura/domain": "workspace:*",
+      },
       "devDependencies": {
         "typescript": "^6.0.3",
         "vitest": "^4.1.8",
