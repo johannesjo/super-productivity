@@ -231,4 +231,25 @@ describe('NouraModel', () => {
 		await model.clearRepeat(task.id);
 		expect(model.state.tasks[task.id]?.repeatCfgId).toBeUndefined();
 	});
+
+	it('creates, edits, bookmarks, and removes notes', async () => {
+		const model = new NouraModel();
+		const noteId = await model.addNote('Weekly plan');
+		expect(noteId).toBeDefined();
+		expect(model.selectedNoteId).toBe(noteId);
+		expect(model.selectedNote?.content).toContain('Weekly plan');
+
+		await model.updateNote(noteId as string, { content: '# Weekly plan\n\nReview metrics' });
+		expect(model.selectedNote?.content).toContain('Review metrics');
+
+		await model.addBookmark(noteId as string, 'notes/metrics.qmd');
+		expect(model.state.notes[noteId as string]?.bookmarks).toHaveLength(1);
+		const bookmarkId = model.state.notes[noteId as string]?.bookmarks[0]?.id;
+		await model.removeBookmark(noteId as string, bookmarkId as string);
+		expect(model.state.notes[noteId as string]?.bookmarks).toHaveLength(0);
+
+		await model.removeNote(noteId as string);
+		expect(model.state.notes[noteId as string]).toBeUndefined();
+		expect(model.selectedNoteId).toBeUndefined();
+	});
 });

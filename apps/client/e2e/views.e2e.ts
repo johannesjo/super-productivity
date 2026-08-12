@@ -39,3 +39,26 @@ test('history shows completed work, a chart, and an exportable timesheet', async
 	await expect(page.getByRole('button', { name: 'Export CSV' })).toBeVisible();
 	await expect(page.getByRole('img', { name: /Bar chart/ })).toBeVisible();
 });
+
+// Phase 4 gate: Notes view — create, Markdown preview, persist across reload.
+test('notes: create a note, preview markdown, and persist it', async ({ page }) => {
+	page.on('dialog', (dialog) => dialog.accept('Trip plan'));
+	await page.goto('/');
+	await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+	await page.locator("button[aria-label='Notes']").click();
+	await expect(page.getByRole('heading', { name: 'Notes' })).toBeVisible();
+	await page.getByRole('button', { name: 'New note' }).click();
+	const noteListButton = page.locator('.notes-list button', { hasText: 'Trip plan' });
+	await expect(noteListButton).toBeVisible();
+
+	await page.locator('.note-textarea').fill('# Trip plan\n\n**bold** here');
+	await page.getByRole('button', { name: 'Preview', exact: true }).click();
+	const markdown = page.locator('.markdown');
+	await expect(markdown).toContainText('Trip plan');
+	await expect(markdown).toContainText('bold');
+
+	await page.reload();
+	await page.locator("button[aria-label='Notes']").click();
+	await expect(page.locator('.notes-list button', { hasText: 'Trip plan' })).toBeVisible();
+});

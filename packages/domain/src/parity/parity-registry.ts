@@ -296,8 +296,9 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'packages/application/src/eisenhower-worklog.spec.ts',
       },
       {
-        feature: 'Notes view (Markdown + bookmarks)',
-        owner: 'apps/client/src/lib/app/AppShell.svelte',
+        feature: 'Notes view (Markdown editor + bookmarks/search)',
+        owner: 'apps/client/src/lib/app/NotesView.svelte',
+        tests: 'apps/client/e2e/views.e2e.ts',
       },
       {
         feature: 'History view (done tasks, chart)',

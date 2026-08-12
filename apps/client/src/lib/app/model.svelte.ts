@@ -16,6 +16,7 @@ import {
 	type DomainOperation,
 	type DomainState,
 	type ISODate,
+	type Note,
 	type Project,
 	type SmartList,
 	type Tag,
@@ -52,7 +53,8 @@ export type AppView =
 	| 'tag'
 	| 'archives'
 	| 'history'
-	| 'eisenhower';
+	| 'eisenhower'
+	| 'notes';
 
 const today = (): `${number}-${number}-${number}` =>
 	new Date().toISOString().slice(0, 10) as `${number}-${number}-${number}`;
@@ -338,6 +340,7 @@ export class NouraModel {
 	view = $state<AppView>('today');
 	activeSmartListId = $state<string | undefined>();
 	activeTagId = $state<string | undefined>();
+	selectedNoteId = $state<string | undefined>();
 	searchOpen = $state(false);
 	settingsOpen = $state(false);
 	activityOpen = $state(false);
@@ -991,6 +994,76 @@ export class NouraModel {
 			payload: { tag: { id, title: trimmed, color: 'blue' } }
 		});
 		return id;
+	}
+
+	get notes() {
+		return Object.values(this.state.notes).sort((a, b) => b.modifiedAt - a.modifiedAt);
+	}
+	get selectedNote() {
+		return this.selectedNoteId ? this.state.notes[this.selectedNoteId] : undefined;
+	}
+
+	async selectNote(id: string): Promise<void> {
+		if (!this.state.notes[id]) return;
+		this.selectedNoteId = id;
+		await this.#store.execute({ type: 'task/select', payload: { id: undefined } });
+	}
+
+	async addNote(title: string, projectId?: string): Promise<string | undefined> {
+		const trimmed = title.trim();
+		if (!trimmed) return undefined;
+		const now = Date.now();
+		const note: Note = {
+			id: crypto.randomUUID(),
+			projectId: projectId ?? this.state.activeProjectId,
+			content: `# ${trimmed}\n`,
+			bookmarks: [],
+			attachments: [],
+			createdAt: now,
+			modifiedAt: now
+		};
+		await this.#store.execute({ type: 'note/add', payload: { note } });
+		this.selectedNoteId = note.id;
+		return note.id;
+	}
+
+	async updateNote(id: string, patch: Partial<Omit<Note, 'id'>>): Promise<void> {
+		await this.#store.execute({
+			type: 'note/update',
+			payload: { id, patch: { ...patch, modifiedAt: Date.now() } }
+		});
+	}
+
+	async removeNote(id: string): Promise<void> {
+		await this.#store.execute({ type: 'note/remove', payload: { id } });
+		if (this.selectedNoteId === id) this.selectedNoteId = undefined;
+	}
+
+	async addBookmark(noteId: string, path: string): Promise<void> {
+		const trimmed = path.trim();
+		const note = this.state.notes[noteId];
+		if (!trimmed || !note) return;
+		const now = Date.now();
+		await this.#store.execute({
+			type: 'note-bookmark/add',
+			payload: {
+				noteId,
+				bookmark: {
+					id: crypto.randomUUID(),
+					noteId,
+					path: trimmed,
+					createdAt: now,
+					modifiedAt: now
+				}
+			}
+		});
+	}
+
+	async removeBookmark(noteId: string, bookmarkId: string): Promise<void> {
+		await this.#store.execute({
+			type: 'note-bookmark/remove',
+			payload: { noteId, bookmarkId }
+		});
 	}
 	async setPriority(id: string, priority: TaskPriority): Promise<void> {
 		await this.updateTask(id, { priority });

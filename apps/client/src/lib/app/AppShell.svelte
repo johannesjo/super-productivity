@@ -14,6 +14,7 @@
 	import HistoryIcon from '@lucide/svelte/icons/history';
 	import InboxIcon from '@lucide/svelte/icons/inbox';
 	import MenuIcon from '@lucide/svelte/icons/menu';
+	import NotebookIcon from '@lucide/svelte/icons/notebook';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
@@ -32,6 +33,7 @@
 	import EisenhowerView from './EisenhowerView.svelte';
 	import HistoryView from './HistoryView.svelte';
 	import InsightsView from './InsightsView.svelte';
+	import NotesView from './NotesView.svelte';
 	import PlannerView from './PlannerView.svelte';
 	import SearchDialog from './SearchDialog.svelte';
 	import SettingsDialog from './SettingsDialog.svelte';
@@ -47,6 +49,7 @@
 		{ view: 'boards', label: 'Boards', icon: Columns3Icon },
 		{ view: 'focus', label: 'Focus', icon: TimerIcon },
 		{ view: 'search', label: 'Search', icon: SearchIcon },
+		{ view: 'notes', label: 'Notes', icon: NotebookIcon },
 		{ view: 'history', label: 'History', icon: HistoryIcon },
 		{ view: 'insights', label: 'Insights', icon: BarChart3Icon }
 	] as const;
@@ -140,6 +143,8 @@
 			<main class="full-main"><EisenhowerView {model} /></main>
 		{:else if model.view === 'history'}
 			<main class="full-main"><HistoryView {model} /></main>
+		{:else if model.view === 'notes'}
+			<main class="full-main"><NotesView {model} /></main>
 		{:else if model.view === 'insights'}
 			<main class="full-main"><InsightsView {model} /></main>
 		{:else}
