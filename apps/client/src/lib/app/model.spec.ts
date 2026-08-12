@@ -278,4 +278,33 @@ describe('NouraModel', () => {
 			)
 		).toBe(false);
 	});
+
+	it('manages simple counters (create, tick, toggle, remove)', async () => {
+		const model = new NouraModel();
+		const id = await model.addCounter('Pomodoros', 'COUNTER');
+		expect(id).toBeDefined();
+		await model.tickCounter(id as string, 2);
+		expect(model.state.counters[id as string]?.counterValue).toBe(2);
+		await model.toggleCounter(id as string);
+		expect(model.state.counters[id as string]?.counterOn).toBe(true);
+		await model.removeCounter(id as string);
+		expect(model.state.counters[id as string]).toBeUndefined();
+	});
+
+	it('synthesizes a durable worklog row from a finished focus session', async () => {
+		const model = new NouraModel();
+		await model.addTask('Focused task');
+		const task = model.selectedTask;
+		if (!task) throw new Error('Expected task');
+
+		await model.recordFocusSession('pomodoro', 15 * 60_000, 2_000_000);
+
+		const worklogs = Object.values(model.state.worklogs);
+		expect(worklogs).toHaveLength(1);
+		expect(worklogs[0]).toMatchObject({
+			taskId: task.id,
+			duration: 15 * 60_000,
+			ended: 2_000_000
+		});
+	});
 });

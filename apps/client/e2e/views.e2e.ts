@@ -32,12 +32,18 @@ test('history shows completed work, a chart, and an exportable timesheet', async
 		.getByRole('checkbox');
 	await complete.click();
 
+	// A focus segment synthesizes a durable worklog row (Phase 5).
+	await page.locator("button[aria-label='Focus']").click();
+	await page.getByRole('button', { name: 'Start', exact: true }).click();
+	await page.getByRole('button', { name: 'Pause', exact: true }).click();
+
 	await page.locator("button[aria-label='History']").click();
 	await expect(page.getByRole('heading', { name: 'History' })).toBeVisible();
 	const completed = page.locator('section.panel', { hasText: 'Completed tasks' });
 	await expect(completed).toContainText(title);
 	await expect(page.getByRole('button', { name: 'Export CSV' })).toBeVisible();
 	await expect(page.getByRole('img', { name: /Bar chart/ })).toBeVisible();
+	await expect(page.locator('.worklog tbody tr').first()).toBeVisible();
 });
 
 // Phase 4 gate: Notes view — create, Markdown preview, persist across reload.

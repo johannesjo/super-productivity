@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import { TakeABreak, TrackingReminder } from '@noura/application';
 	import { SvelteDate } from 'svelte/reactivity';
+	import CoffeeIcon from '@lucide/svelte/icons/coffee';
 	import MoreHorizontalIcon from '@lucide/svelte/icons/more-horizontal';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import Volume2Icon from '@lucide/svelte/icons/volume-2';
@@ -22,6 +24,7 @@
 	let soundEnabled = $state(true);
 	let manualOpen = $state(false);
 	let manualMinutes = $state(25);
+	let breakPrompt = $state<string | undefined>();
 	let timer: ReturnType<typeof setInterval> | undefined;
 	let target = $derived(mode === 'pomodoro' ? 25 * 60 : 0);
 	let displaySeconds = $derived(mode === 'pomodoro' ? Math.max(0, target - elapsed) : elapsed);
@@ -35,6 +38,47 @@
 		todaySessions.reduce((total, session) => total + session.durationMs, 0)
 	);
 	let totalFocusMs = $derived(sessions.reduce((total, session) => total + session.durationMs, 0));
+
+	// Phase 5 services: take-a-break + tracking reminders, checked on each tick
+	// while a focus session runs. Deterministic logic is covered by fake-clock
+	// unit tests in packages/application; here they are bound to real config.
+	const pulse = () => {
+		const entry = model.state.activeSessionId
+			? model.state.trackedEntries[model.state.activeSessionId]
+			: undefined;
+		return { activeEntryId: entry?.id, startedAt: entry?.startedAt };
+	};
+	const clock = {
+		now: () => Date.now(),
+		today: () => new Date().toISOString().slice(0, 10)
+	};
+	const trackingReminder = new TrackingReminder({
+		clock,
+		state: pulse,
+		onReminder: (entryId) => (breakPrompt = `Still tracking (${entryId}) — time for a short break?`)
+	});
+	const takeABreak = new TakeABreak({
+		clock,
+		state: pulse,
+		onTakeABreak: () => (breakPrompt = 'You have been focusing for a while — step away briefly.')
+	});
+
+	function dismissBreakPrompt(): void {
+		breakPrompt = undefined;
+	}
+
+	async function addCounter(): Promise<void> {
+		const title = window.prompt('Counter name (e.g. Pomodoros)');
+		if (title) await model.addCounter(title, 'COUNTER');
+	}
+
+	const trackBreaks = () => {
+		if (!running) return;
+		const cfg = model.state.config;
+		if (cfg.isEnableTakeABreak) takeABreak.check(cfg.takeABreakMinute);
+		if (cfg.trackingReminderMinute > 0 && cfg.isEnableReminders)
+			trackingReminder.check(cfg.trackingReminderMinute);
+	};
 
 	function playCompletionSound(): void {
 		if (!soundEnabled || typeof window === 'undefined') return;
@@ -57,6 +101,7 @@
 			running = true;
 			timer = setInterval(() => {
 				elapsed += 1;
+				trackBreaks();
 				if (mode === 'pomodoro' && elapsed >= target) {
 					if (timer) clearInterval(timer);
 					running = false;
@@ -145,6 +190,11 @@
 		<Button class="start-button" size="lg" onclick={() => void toggle()}
 			>{running ? 'Pause' : elapsed ? 'Resume' : 'Start'}</Button
 		>
+		{#if breakPrompt}<div class="break-banner" role="status">
+				<CoffeeIcon />
+				<span>{breakPrompt}</span>
+				<Button size="sm" variant="secondary" onclick={dismissBreakPrompt}>Got it</Button>
+			</div>{/if}
 	</div>
 	<div class="overview-pane">
 		<h2>Overview</h2>
@@ -202,6 +252,35 @@
 				<p>No focus records yet</p>
 				<span>Completed focus sessions appear here.</span>
 			</div>{/if}
+		<div class="record-title">
+			<h2>Counters</h2>
+			<Button variant="ghost" size="icon" aria-label="Add counter" onclick={() => void addCounter()}
+				><PlusIcon /></Button
+			>
+		</div>
+		{#if model.counters.length}<div class="counter-list">
+				{#each model.counters as counter (counter.id)}<div class="counter-row">
+						<span class="counter-name">{counter.title}</span>
+						<span class="counter-value">{counter.counterValue}</span>
+						<Button
+							variant="outline"
+							size="sm"
+							aria-label={`Start or stop ${counter.title}`}
+							onclick={() => void model.toggleCounter(counter.id)}
+							>{counter.counterOn ? 'Stop' : 'Start'}</Button
+						><Button
+							variant="secondary"
+							size="sm"
+							aria-label={`Tick ${counter.title}`}
+							onclick={() => void model.tickCounter(counter.id)}>+1</Button
+						><Button
+							variant="ghost"
+							size="icon"
+							aria-label={`Delete counter ${counter.title}`}
+							onclick={() => void model.removeCounter(counter.id)}>×</Button
+						>
+					</div>{/each}
+			</div>{:else}<p class="record-empty">No counters yet — add one above.</p>{/if}
 	</div>
 </section>
 
@@ -314,6 +393,43 @@
 		place-content: center;
 		text-align: center;
 		color: var(--muted-foreground);
+	}
+	.break-banner {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		max-width: 360px;
+		margin-top: 22px;
+		padding: 10px 14px;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		background: var(--card);
+		font-size: 12px;
+	}
+	.break-banner :global(svg) {
+		width: 16px;
+		color: var(--primary);
+	}
+	.counter-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.counter-row {
+		display: grid;
+		grid-template-columns: 1fr auto auto auto auto;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 10px;
+		border: 1px solid var(--border);
+		border-radius: 10px;
+	}
+	.counter-name {
+		font-size: 13px;
+	}
+	.counter-value {
+		font-variant-numeric: tabular-nums;
+		font-weight: 650;
 	}
 	.focus-records {
 		display: flex;

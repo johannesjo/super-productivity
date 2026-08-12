@@ -19,6 +19,7 @@ import {
 	type ISODate,
 	type Note,
 	type Project,
+	type SimpleCounter,
 	type SmartList,
 	type Tag,
 	type Task,
@@ -1087,6 +1088,42 @@ export class NouraModel {
 		return this.selectedNoteId ? this.state.notes[this.selectedNoteId] : undefined;
 	}
 
+	get counters() {
+		return Object.values(this.state.counters).sort((a, b) => a.title.localeCompare(b.title));
+	}
+
+	async addCounter(
+		title: string,
+		counterType: 'STOPWATCH' | 'COUNTER'
+	): Promise<string | undefined> {
+		const trimmed = title.trim();
+		if (!trimmed) return undefined;
+		const now = Date.now();
+		const counter: SimpleCounter = {
+			id: crypto.randomUUID(),
+			title: trimmed,
+			counterType,
+			counterOn: false,
+			counterValue: 0,
+			createdAt: now,
+			modifiedAt: now
+		};
+		await this.#store.execute({ type: 'counter/add', payload: { counter } });
+		return counter.id;
+	}
+
+	async toggleCounter(id: string): Promise<void> {
+		await this.#store.execute({ type: 'counter/toggle', payload: { id, at: Date.now() } });
+	}
+
+	async tickCounter(id: string, value = 1): Promise<void> {
+		await this.#store.execute({ type: 'counter/tick', payload: { id, value } });
+	}
+
+	async removeCounter(id: string): Promise<void> {
+		await this.#store.execute({ type: 'counter/remove', payload: { id } });
+	}
+
 	async selectNote(id: string): Promise<void> {
 		if (!this.state.notes[id]) return;
 		this.selectedNoteId = id;
@@ -1260,10 +1297,27 @@ export class NouraModel {
 	async stopFocusSession(durationMs: number): Promise<void> {
 		const id = this.state.activeSessionId;
 		if (!id) return;
+		const entry = this.state.trackedEntries[id];
+		const endedAt = Date.now();
 		await this.#store.execute({
 			type: 'session/stop',
-			payload: { id, endedAt: Date.now(), durationMs }
+			payload: { id, endedAt, durationMs }
 		});
+		// Focus-day summary -> durable worklog row (Phase 5).
+		if (entry && endedAt > entry.startedAt) {
+			await this.#store.execute({
+				type: 'worklog/from-entry',
+				payload: {
+					entry: {
+						...entry,
+						endedAt,
+						durationMs,
+						source: 'timer',
+						updatedAt: endedAt
+					}
+				}
+			});
+		}
 	}
 
 	async recordFocusSession(
@@ -1285,6 +1339,10 @@ export class NouraModel {
 		await this.#store.execute({
 			type: 'session/stop',
 			payload: { id: session.id, endedAt, durationMs }
+		});
+		await this.#store.execute({
+			type: 'worklog/from-entry',
+			payload: { entry: { ...session, durationMs, endedAt } }
 		});
 	}
 

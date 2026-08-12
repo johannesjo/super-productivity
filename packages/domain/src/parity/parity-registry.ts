@@ -251,8 +251,19 @@ export const PARITY_LEDGER: ParityArea[] = [
         tests: 'packages/application/src/md.spec.ts',
       },
       {
-        feature: 'Focus view (pomodoro/flowtime/stopwatch + stats)',
+        feature:
+          'Focus view (pomodoro/flowtime/stopwatch + stats + take-a-break + tracking reminders)',
         owner: 'apps/client/src/lib/app/FocusView.svelte',
+      },
+      {
+        feature: 'Simple counters UI (config, tick, start/stop, remove)',
+        owner: 'apps/client/src/lib/app/FocusView.svelte',
+        tests: 'apps/client/e2e/focus-counters.e2e.ts',
+      },
+      {
+        feature: 'Focus-day summary → durable worklog rows',
+        owner: 'apps/client/src/lib/app/model.svelte.ts',
+        tests: 'apps/client/src/lib/app/model.spec.ts',
       },
       {
         feature: 'Planner month grid',
