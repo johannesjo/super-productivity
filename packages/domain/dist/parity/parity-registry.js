@@ -232,13 +232,24 @@ export const PARITY_LEDGER = [
                 owner: 'apps/client/src/lib/app/PlannerView.svelte',
             },
             {
-                feature: 'Boards (per-project, kanban columns)',
+                feature: 'Boards: per-project kanban, status columns with drag-to-move, WIP limits, work-context boards',
                 owner: 'apps/client/src/lib/app/BoardView.svelte',
+                tests: 'apps/client/e2e/planning.e2e.ts',
             },
-            { feature: 'Insights', owner: 'apps/client/src/lib/app/InsightsView.svelte' },
             {
-                feature: 'Search dialog (tasks + nav + settings)',
+                feature: 'Metrics weekly/daily charts + top tasks',
+                owner: 'apps/client/src/lib/app/InsightsView.svelte',
+                tests: 'apps/client/e2e/planning.e2e.ts',
+            },
+            {
+                feature: 'Metrics derivation (framework-free)',
+                owner: 'packages/application/src/metrics.ts',
+                tests: 'packages/application/src/metrics.spec.ts',
+            },
+            {
+                feature: 'Search: full index (tasks/notes/tags/projects) + actions',
                 owner: 'apps/client/src/lib/app/SearchDialog.svelte',
+                tests: 'apps/client/e2e/planning.e2e.ts',
             },
             {
                 feature: 'Settings dialog (8 sections)',

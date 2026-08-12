@@ -892,6 +892,10 @@ export class NouraModel {
 		await this.#store.execute({ type: 'task/restore', payload: { id } });
 	}
 
+	async archiveTask(id: string): Promise<void> {
+		await this.#store.execute({ type: 'task/archive', payload: { id, at: Date.now() } });
+	}
+
 	/** Starts a stopwatch-style tracked entry against a specific task. */
 	async startTrackingForTask(taskId: string): Promise<void> {
 		if (this.state.activeSessionId) return;

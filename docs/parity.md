@@ -72,9 +72,9 @@ Legend: ✅ implemented · 🟡 partial · ❌ absent · 🔒 retained (unchange
 | Inspector (schedule, notes, checklist, tags, repeat, attachments, tracking) | 🟡 | `src/lib/app/TaskInspector.svelte` |
 | Focus view (pomodoro/flowtime/stopwatch + stats) | 🟡 | `src/lib/app/FocusView.svelte` |
 | Planner month grid | 🟡 | `src/lib/app/PlannerView.svelte` |
-| Boards (per-project columns) | 🟡 | `src/lib/app/BoardView.svelte` |
-| Insights | 🟡 | `src/lib/app/InsightsView.svelte` |
-| Search dialog | 🟡 | `src/lib/app/SearchDialog.svelte` |
+| Boards (per-project kanban, WIP, drag-to-move, work-context boards) | 🟡 | `src/lib/app/BoardView.svelte` |
+| Insights (weekly/daily focus charts + top tasks) | 🟡 | `src/lib/app/InsightsView.svelte` (+ `packages/application/src/metrics.ts`) |
+| Search (full index: tasks/notes/tags/projects + actions) | 🟡 | `src/lib/app/SearchDialog.svelte` |
 | Settings dialog | 🟡 | `src/lib/app/SettingsDialog.svelte` |
 | Sync settings + providers | ✅ | `src/lib/app/SyncSettings.svelte` |
 | Activity dialog | ✅ | `src/lib/app/ActivityDialog.svelte` |
