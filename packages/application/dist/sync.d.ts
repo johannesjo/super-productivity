@@ -21,6 +21,41 @@ export interface NouraSyncOperationEndpoint {
     }>;
     subscribe?(sinceSeq: number, onAvailable: () => void, clientId: string): () => void;
 }
+export interface RevisionedSyncFileProvider {
+    id: string;
+    downloadFile(path: string): Promise<{
+        rev: string;
+        dataStr: string;
+    }>;
+    uploadFile(path: string, dataStr: string, revToMatch: string | null, isForceOverwrite?: boolean): Promise<{
+        rev: string;
+    }>;
+}
+export interface FileProviderOperationEndpointOptions {
+    provider: RevisionedSyncFileProvider;
+    fileName?: string;
+    pollIntervalMs?: number;
+    maxWriteAttempts?: number;
+}
+/**
+ * Stores Noura's already-encrypted domain operations in a revisioned JSON file.
+ * Dropbox, OneDrive and WebDAV provide atomic revision checks, so a losing writer
+ * re-reads and merges before retrying. Local-folder providers offer best-effort
+ * revision checks and are intentionally documented as single-writer backup sync.
+ */
+export declare class FileProviderOperationEndpoint implements NouraSyncOperationEndpoint {
+    #private;
+    constructor(options: FileProviderOperationEndpointOptions);
+    upload(operation: EncryptedServerOperation): Promise<{
+        serverSeq: number;
+    }>;
+    download(sinceSeq: number, excludeClient: string): Promise<{
+        operations: EncryptedServerOperation[];
+        latestSeq: number;
+        hasMore: boolean;
+    }>;
+    subscribe(_sinceSeq: number, onAvailable: () => void): () => void;
+}
 export interface NouraSyncHttpEndpointOptions {
     baseUrl: string;
     accessToken: string;

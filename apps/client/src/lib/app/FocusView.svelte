@@ -29,7 +29,7 @@
 		`${String(Math.floor(displaySeconds / 60)).padStart(2, '0')}:${String(displaySeconds % 60).padStart(2, '0')}`
 	);
 	const todayStart = new SvelteDate().setHours(0, 0, 0, 0);
-	let sessions = $derived(Object.values(model.state.sessions));
+	let sessions = $derived(Object.values(model.state.trackedEntries));
 	let todaySessions = $derived(sessions.filter((session) => session.startedAt >= todayStart));
 	let todayFocusMs = $derived(
 		todaySessions.reduce((total, session) => total + session.durationMs, 0)

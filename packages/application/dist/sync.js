@@ -1,4 +1,92 @@
 import { decrypt, encrypt, mergeVectorClocks } from '@sp/sync-core';
+const isProviderError = (error, name) => error instanceof Error && error.name === name;
+/**
+ * Stores Noura's already-encrypted domain operations in a revisioned JSON file.
+ * Dropbox, OneDrive and WebDAV provide atomic revision checks, so a losing writer
+ * re-reads and merges before retrying. Local-folder providers offer best-effort
+ * revision checks and are intentionally documented as single-writer backup sync.
+ */
+export class FileProviderOperationEndpoint {
+    #provider;
+    #fileName;
+    #pollIntervalMs;
+    #maxWriteAttempts;
+    constructor(options) {
+        this.#provider = options.provider;
+        this.#fileName = options.fileName ?? 'noura-sync-operations.json';
+        this.#pollIntervalMs = options.pollIntervalMs ?? 15_000;
+        this.#maxWriteAttempts = options.maxWriteAttempts ?? 6;
+    }
+    async upload(operation) {
+        for (let attempt = 0; attempt < this.#maxWriteAttempts; attempt += 1) {
+            const current = await this.#read();
+            const existing = current.file.operations.find((item) => item.id === operation.id);
+            if (existing)
+                return { serverSeq: existing.serverSeq };
+            const serverSeq = current.file.latestSeq + 1;
+            const next = {
+                ...current.file,
+                latestSeq: serverSeq,
+                updatedAt: Date.now(),
+                operations: [...current.file.operations, { ...operation, serverSeq }],
+            };
+            try {
+                await this.#provider.uploadFile(this.#fileName, JSON.stringify(next), current.rev, false);
+                return { serverSeq };
+            }
+            catch (error) {
+                if (!isProviderError(error, 'UploadRevToMatchMismatchAPIError'))
+                    throw error;
+                if (attempt === this.#maxWriteAttempts - 1) {
+                    throw new Error(`${this.#provider.id} sync stayed busy after ${this.#maxWriteAttempts} attempts`, { cause: error });
+                }
+                await new Promise((resolve) => setTimeout(resolve, 40 * (attempt + 1)));
+            }
+        }
+        throw new Error(`${this.#provider.id} sync upload failed`);
+    }
+    async download(sinceSeq, excludeClient) {
+        const { file } = await this.#read();
+        return {
+            operations: file.operations.filter((operation) => operation.serverSeq > sinceSeq && operation.clientId !== excludeClient),
+            latestSeq: file.latestSeq,
+            hasMore: false,
+        };
+    }
+    subscribe(_sinceSeq, onAvailable) {
+        const timer = setInterval(onAvailable, this.#pollIntervalMs);
+        return () => clearInterval(timer);
+    }
+    async #read() {
+        try {
+            const remote = await this.#provider.downloadFile(this.#fileName);
+            const parsed = JSON.parse(remote.dataStr);
+            if (parsed.version !== 1 ||
+                typeof parsed.latestSeq !== 'number' ||
+                !Number.isSafeInteger(parsed.latestSeq) ||
+                !Array.isArray(parsed.operations)) {
+                throw new Error(`${this.#provider.id} contains an unsupported Noura sync file`);
+            }
+            return {
+                rev: remote.rev,
+                file: {
+                    version: 1,
+                    latestSeq: parsed.latestSeq,
+                    updatedAt: typeof parsed.updatedAt === 'number' ? parsed.updatedAt : 0,
+                    operations: parsed.operations,
+                },
+            };
+        }
+        catch (error) {
+            if (!isProviderError(error, 'RemoteFileNotFoundAPIError'))
+                throw error;
+            return {
+                rev: null,
+                file: { version: 1, latestSeq: 0, updatedAt: 0, operations: [] },
+            };
+        }
+    }
+}
 const operationShape = (operation) => {
     const id = 'id' in operation.command.payload ? operation.command.payload.id : undefined;
     if (operation.command.type === 'task/add')
@@ -177,7 +265,7 @@ export class EncryptedOperationTransport {
         const cursor = await this.cursorRepository.load();
         const nextClock = { ...cursor.vectorClock, [this.clientId]: operation.sequence };
         const encryptedPayload = await encrypt(JSON.stringify(operation), this.passphrase);
-        const result = await this.endpoint.upload({
+        await this.endpoint.upload({
             serverSeq: cursor.serverSeq,
             id: operation.id,
             clientId: this.clientId,
@@ -187,7 +275,9 @@ export class EncryptedOperationTransport {
             domainOperation: operation,
         });
         await this.cursorRepository.save({
-            serverSeq: Math.max(cursor.serverSeq, result.serverSeq),
+            // Upload sequence numbers do not prove that this client downloaded every
+            // preceding remote operation. Only the download path advances serverSeq.
+            serverSeq: cursor.serverSeq,
             vectorClock: nextClock,
         });
     }

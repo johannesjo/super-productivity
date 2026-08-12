@@ -82,7 +82,7 @@ describe('NouraModel', () => {
 
 		await model.recordFocusSession('pomodoro', 15 * 60_000, 2_000_000);
 
-		expect(Object.values(model.state.sessions)).toHaveLength(1);
+		expect(Object.values(model.state.trackedEntries)).toHaveLength(1);
 		expect(model.selectedTask?.trackedMs).toBe(15 * 60_000);
 	});
 });

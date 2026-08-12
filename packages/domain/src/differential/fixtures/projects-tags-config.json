@@ -1,0 +1,179 @@
+{
+  "id": "projects-tags-config",
+  "description": "project select, tag add/update, config update",
+  "engine": "captured-reference",
+  "now": 100,
+  "commands": [
+    {
+      "type": "project/add",
+      "payload": {
+        "project": {
+          "id": "study",
+          "title": "Study",
+          "color": "blue",
+          "icon": "book-open",
+          "archived": false,
+          "createdAt": 1
+        }
+      }
+    },
+    {
+      "type": "project/select",
+      "payload": {
+        "id": "study"
+      }
+    },
+    {
+      "type": "tag/add",
+      "payload": {
+        "tag": {
+          "id": "t1",
+          "title": "Work",
+          "color": "blue"
+        }
+      }
+    },
+    {
+      "type": "tag/update",
+      "payload": {
+        "id": "t1",
+        "patch": {
+          "color": "red"
+        }
+      }
+    },
+    {
+      "type": "task/add",
+      "payload": {
+        "task": {
+          "id": "a",
+          "title": "a",
+          "notes": "",
+          "status": "open",
+          "priority": 0,
+          "projectId": "study",
+          "subtaskIds": [],
+          "tagIds": [
+            "t1"
+          ],
+          "checklist": [],
+          "sections": [],
+          "attachments": [],
+          "estimateMs": 0,
+          "trackedMs": 0,
+          "createdAt": 1,
+          "updatedAt": 1,
+          "order": 0
+        }
+      }
+    },
+    {
+      "type": "config/update",
+      "payload": {
+        "patch": {
+          "language": "de",
+          "themeMode": "light"
+        }
+      }
+    }
+  ],
+  "expected": {
+    "activeProjectId": "study",
+    "activeWorkContextId": "default",
+    "archives": {},
+    "config": {
+      "dateFormat": "MM/DD/YYYY",
+      "id": "cfg",
+      "isBlockFinishDayForTimeTrackingTasks": false,
+      "isEnableIdleDetection": true,
+      "isEnablePomodoroAutoStartBreak": true,
+      "isEnablePomodoroAutoStartNext": false,
+      "isEnableReminders": true,
+      "isEnableTakeABreak": true,
+      "isEnableTrackingReminder": true,
+      "isKeepNotesOnToday": false,
+      "isReduceMotion": false,
+      "language": "de",
+      "takeABreakMinute": 30,
+      "themeMode": "light",
+      "timeFormat": "HH:mm",
+      "trackingReminderMinute": 45,
+      "weekStartDay": 1,
+      "workEndHour": 18,
+      "workStartHour": 8
+    },
+    "counters": {},
+    "history": {},
+    "issueProviders": {},
+    "notes": {},
+    "projects": {
+      "inbox": {
+        "archived": false,
+        "color": "neutral",
+        "createdAt": 100,
+        "icon": "inbox",
+        "id": "inbox",
+        "title": "Inbox"
+      },
+      "study": {
+        "archived": false,
+        "color": "blue",
+        "createdAt": 1,
+        "icon": "book-open",
+        "id": "study",
+        "title": "Study"
+      }
+    },
+    "schemaVersion": 2,
+    "selectedTaskId": "a",
+    "smartLists": {},
+    "tags": {
+      "t1": {
+        "color": "red",
+        "id": "t1",
+        "title": "Work"
+      }
+    },
+    "taskOrder": [
+      "a"
+    ],
+    "taskRepeatCfgs": {},
+    "taskViewConfigs": {},
+    "tasks": {
+      "a": {
+        "attachments": [],
+        "checklist": [],
+        "createdAt": 1,
+        "estimateMs": 0,
+        "id": "a",
+        "notes": "",
+        "order": 0,
+        "priority": 0,
+        "projectId": "study",
+        "sections": [],
+        "status": "open",
+        "subtaskIds": [],
+        "tagIds": [
+          "t1"
+        ],
+        "title": "a",
+        "trackedMs": 0,
+        "updatedAt": 1
+      }
+    },
+    "trackedEntries": {},
+    "workContexts": {
+      "default": {
+        "createdAt": 100,
+        "icon": "briefcase",
+        "id": "default",
+        "isEnabled": true,
+        "isPersistent": true,
+        "modifiedAt": 100,
+        "taskIds": [],
+        "title": "Default"
+      }
+    },
+    "worklogs": {}
+  }
+}

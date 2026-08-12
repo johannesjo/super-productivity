@@ -5,7 +5,18 @@
 3. Choose Import backup and select the JSON file.
 4. Review imported projects, tags, completed tasks, and linked issues before replacing the old installation.
 
-Noura maps projects, tags, live and archived tasks, notes, completion, priority, due dates, reminders, repeat references, estimates, tracked duration, subtasks/checklists, attachments, and issue-provider metadata. `INBOX_PROJECT` is normalized to Noura's Inbox.
+Noura maps projects, tags, live and archived tasks, notes, work contexts, task
+repeat configs, simple counters, smart lists, global config/user profile,
+issue-provider metadata, completion, priority, due dates and times, reminders
+(resolved against `reminderActive`), repeat references, estimates, tracked
+duration, nested subtask trees, checklists, attachments, and linked issues.
+`INBOX_PROJECT` is normalized to Noura's Inbox; the default work context is
+normalized to Noura's Default.
+
+Nested subtasks in a Super Productivity backup import as real Noura task
+hierarchy (a parent owns children through `subtaskIds`), not flattened
+checklist items. All imported data is current-form (schema version 2); the
+migrator also upgrades an existing Noura v1 state in place.
 
 Plugin state is ignored because Noura has no runtime plugin platform. Features intentionally outside the product scope—Brain Dump, Doc Mode, Todoist import, Automations, AI prompts, Procrastination Buster, Voice Reminder, Yesterday Tasks, sync.md, iOS, and Android—are not migrated as active features.
 

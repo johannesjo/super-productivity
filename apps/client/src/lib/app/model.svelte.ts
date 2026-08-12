@@ -9,7 +9,7 @@ import {
 import {
 	INBOX_PROJECT_ID,
 	createInitialState,
-	migrateLegacyBackupToNoura,
+	importAnyState,
 	selectOrderedTasks,
 	type DomainOperation,
 	type DomainState,
@@ -76,8 +76,10 @@ const seedState = (): DomainState => {
 			status: 'open',
 			priority: 0,
 			projectId: INBOX_PROJECT_ID,
+			subtaskIds: [],
 			tagIds: ['start'],
 			checklist: [],
+			sections: [],
 			attachments: [],
 			estimateMs: 25 * 60_000,
 			trackedMs: 0,
@@ -92,12 +94,14 @@ const seedState = (): DomainState => {
 			status: 'open',
 			priority: 2,
 			projectId: INBOX_PROJECT_ID,
+			subtaskIds: [],
 			dueDay: today(),
 			tagIds: ['planning'],
 			checklist: [
 				{ id: 'c1', title: 'Review open projects', done: true },
 				{ id: 'c2', title: 'Block focus sessions', done: false }
 			],
+			sections: [],
 			attachments: [],
 			estimateMs: 30 * 60_000,
 			trackedMs: 8 * 60_000,
@@ -112,9 +116,11 @@ const seedState = (): DomainState => {
 			status: 'open',
 			priority: 1,
 			projectId: 'study',
+			subtaskIds: [],
 			dueDay: today(),
 			tagIds: ['reading'],
 			checklist: [],
+			sections: [],
 			attachments: [],
 			estimateMs: 60 * 60_000,
 			trackedMs: 0,
@@ -129,14 +135,16 @@ const seedState = (): DomainState => {
 			status: 'done',
 			priority: 0,
 			projectId: 'study',
+			subtaskIds: [],
 			tagIds: [],
 			checklist: [],
+			sections: [],
 			attachments: [],
 			estimateMs: 15 * 60_000,
 			trackedMs: 12 * 60_000,
 			createdAt: now - 1000,
 			updatedAt: now - 1000,
-			completedAt: now - 500,
+			doneOn: now - 500,
 			order: 3
 		}
 	];
@@ -609,14 +617,16 @@ export class NouraModel {
 			priority: 0,
 			projectId,
 			dueDay: options.dueDay ?? (this.view === 'today' ? today() : undefined),
+			subtaskIds: [],
 			tagIds: [],
 			checklist: [],
+			sections: [],
 			attachments: [],
 			estimateMs: 0,
 			trackedMs: 0,
 			createdAt: now,
 			updatedAt: now,
-			completedAt: status === 'done' ? now : undefined,
+			doneOn: status === 'done' ? now : undefined,
 			order: this.state.taskOrder.length
 		};
 		await this.#store.execute({ type: 'task/add', payload: { task } });
@@ -655,7 +665,7 @@ export class NouraModel {
 		});
 	}
 	async toggleTask(id: string): Promise<void> {
-		await this.#store.execute({ type: 'task/toggle', payload: { id, completedAt: Date.now() } });
+		await this.#store.execute({ type: 'task/toggle', payload: { id, doneOn: Date.now() } });
 	}
 	async selectTask(id?: string): Promise<void> {
 		await this.#store.execute({ type: 'task/select', payload: { id } });
@@ -706,7 +716,9 @@ export class NouraModel {
 			taskId: this.state.selectedTaskId,
 			mode,
 			startedAt: Date.now(),
-			durationMs: 0
+			durationMs: 0,
+			source: 'timer',
+			updatedAt: Date.now()
 		};
 		await this.#store.execute({ type: 'session/start', payload: { session } });
 	}
@@ -731,7 +743,9 @@ export class NouraModel {
 			taskId: this.state.selectedTaskId,
 			mode,
 			startedAt: endedAt - durationMs,
-			durationMs: 0
+			durationMs: 0,
+			source: 'timer',
+			updatedAt: endedAt
 		};
 		await this.#store.execute({ type: 'session/start', payload: { session } });
 		await this.#store.execute({
@@ -797,17 +811,7 @@ export class NouraModel {
 		}
 		if (!content) return;
 		const parsed = JSON.parse(content) as unknown;
-		const candidate =
-			parsed && typeof parsed === 'object' && 'state' in parsed
-				? (parsed as { state?: unknown }).state
-				: parsed;
-		const imported =
-			candidate &&
-			typeof candidate === 'object' &&
-			'schemaVersion' in candidate &&
-			(candidate as { schemaVersion?: unknown }).schemaVersion === 1
-				? (candidate as DomainState)
-				: migrateLegacyBackupToNoura(parsed);
+		const imported = importAnyState(parsed);
 		if (!imported.tasks || !imported.projects) throw new Error('Unsupported backup format');
 		await this.#store.import(imported);
 	}

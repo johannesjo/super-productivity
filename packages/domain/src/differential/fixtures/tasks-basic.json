@@ -1,0 +1,200 @@
+{
+  "id": "tasks-basic",
+  "description": "add with subtask, toggle done, reorder",
+  "engine": "captured-reference",
+  "now": 100,
+  "commands": [
+    {
+      "type": "task/add",
+      "payload": {
+        "task": {
+          "id": "parent",
+          "title": "Parent",
+          "notes": "",
+          "status": "open",
+          "priority": 2,
+          "projectId": "inbox",
+          "subtaskIds": [],
+          "tagIds": [],
+          "checklist": [],
+          "sections": [],
+          "attachments": [],
+          "estimateMs": 0,
+          "trackedMs": 0,
+          "createdAt": 1,
+          "updatedAt": 1,
+          "order": 0,
+          "dueDay": "2026-07-20"
+        }
+      }
+    },
+    {
+      "type": "task/add",
+      "payload": {
+        "task": {
+          "id": "child",
+          "title": "Child",
+          "notes": "",
+          "status": "open",
+          "priority": 0,
+          "projectId": "inbox",
+          "subtaskIds": [],
+          "tagIds": [],
+          "checklist": [],
+          "sections": [],
+          "attachments": [],
+          "estimateMs": 0,
+          "trackedMs": 0,
+          "createdAt": 1,
+          "updatedAt": 1,
+          "order": 0,
+          "parentId": "parent"
+        }
+      }
+    },
+    {
+      "type": "task/toggle",
+      "payload": {
+        "id": "parent",
+        "doneOn": 42
+      }
+    },
+    {
+      "type": "task/reorder",
+      "payload": {
+        "ids": [
+          "child",
+          "parent"
+        ]
+      }
+    },
+    {
+      "type": "project/add",
+      "payload": {
+        "project": {
+          "id": "study",
+          "title": "Study",
+          "color": "blue",
+          "icon": "book-open",
+          "archived": false,
+          "createdAt": 1
+        }
+      }
+    }
+  ],
+  "expected": {
+    "activeProjectId": "inbox",
+    "activeWorkContextId": "default",
+    "archives": {},
+    "config": {
+      "dateFormat": "MM/DD/YYYY",
+      "id": "cfg",
+      "isBlockFinishDayForTimeTrackingTasks": false,
+      "isEnableIdleDetection": true,
+      "isEnablePomodoroAutoStartBreak": true,
+      "isEnablePomodoroAutoStartNext": false,
+      "isEnableReminders": true,
+      "isEnableTakeABreak": true,
+      "isEnableTrackingReminder": true,
+      "isKeepNotesOnToday": false,
+      "isReduceMotion": false,
+      "language": "en",
+      "takeABreakMinute": 30,
+      "themeMode": "dark",
+      "timeFormat": "HH:mm",
+      "trackingReminderMinute": 45,
+      "weekStartDay": 1,
+      "workEndHour": 18,
+      "workStartHour": 8
+    },
+    "counters": {},
+    "history": {},
+    "issueProviders": {},
+    "notes": {},
+    "projects": {
+      "inbox": {
+        "archived": false,
+        "color": "neutral",
+        "createdAt": 100,
+        "icon": "inbox",
+        "id": "inbox",
+        "title": "Inbox"
+      },
+      "study": {
+        "archived": false,
+        "color": "blue",
+        "createdAt": 1,
+        "icon": "book-open",
+        "id": "study",
+        "title": "Study"
+      }
+    },
+    "schemaVersion": 2,
+    "selectedTaskId": "child",
+    "smartLists": {},
+    "tags": {},
+    "taskOrder": [
+      "child",
+      "parent"
+    ],
+    "taskRepeatCfgs": {},
+    "taskViewConfigs": {},
+    "tasks": {
+      "child": {
+        "attachments": [],
+        "checklist": [],
+        "createdAt": 1,
+        "estimateMs": 0,
+        "id": "child",
+        "notes": "",
+        "order": 0,
+        "parentId": "parent",
+        "priority": 0,
+        "projectId": "inbox",
+        "sections": [],
+        "status": "open",
+        "subtaskIds": [],
+        "tagIds": [],
+        "title": "Child",
+        "trackedMs": 0,
+        "updatedAt": 1
+      },
+      "parent": {
+        "attachments": [],
+        "checklist": [],
+        "createdAt": 1,
+        "doneOn": 42,
+        "dueDay": "2026-07-20",
+        "estimateMs": 0,
+        "id": "parent",
+        "notes": "",
+        "order": 0,
+        "priority": 2,
+        "projectId": "inbox",
+        "sections": [],
+        "status": "done",
+        "subtaskIds": [
+          "child"
+        ],
+        "tagIds": [],
+        "title": "Parent",
+        "trackedMs": 0,
+        "updatedAt": 42
+      }
+    },
+    "trackedEntries": {},
+    "workContexts": {
+      "default": {
+        "createdAt": 100,
+        "icon": "briefcase",
+        "id": "default",
+        "isEnabled": true,
+        "isPersistent": true,
+        "modifiedAt": 100,
+        "taskIds": [],
+        "title": "Default"
+      }
+    },
+    "worklogs": {}
+  }
+}
