@@ -152,3 +152,13 @@
 		animation-iteration-count: 1 !important;
 	}
 }
+
+/* Manual reduced-motion toggle persisted in GlobalConfig (Settings -> Appearance). */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+	scroll-behavior: auto !important;
+	transition-duration: 0.01ms !important;
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+}

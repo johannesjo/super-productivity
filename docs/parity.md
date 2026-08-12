@@ -125,3 +125,6 @@ byte-identical normalized output. Baseline covers `tasks-basic` and
 `projects-tags-config`.
 | Provider switching UX (credential forms per provider) | ✅ | `src/lib/app/SyncSettings.svelte` (+ `e2e/sync.e2e.ts`) |
 | WCAG AA accessibility gate (Lighthouse snapshot: a11y 100) | ✅ | `src/lib/app/TaskWorkspace.svelte` + `docs/parity.md` |
+| Reduced-motion (prefers-reduced-motion + persisted manual toggle) | ✅ | `apps/client/src/routes/layout.css` + `apps/client/src/lib/app/model.svelte.ts` |
+| i18n coverage lint gate (every UI t() key resolves in en) | ✅ | `packages/application/src/i18n-coverage.spec.ts` |
+| Desktop release build (cargo build --release, macOS) | ✅ | `apps/client/src-tauri` |

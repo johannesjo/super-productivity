@@ -837,7 +837,7 @@ export class NouraModel {
 		return true;
 	}
 
-	/** Applies the persisted theme mode (light/dark/system) to the document. */
+	/** Applies the persisted theme + reduced-motion preference to the document. */
 	applyTheme(): void {
 		if (typeof document === 'undefined') return;
 		const mode = this.state.config.themeMode;
@@ -852,6 +852,7 @@ export class NouraModel {
 		} else {
 			apply(mode === 'dark');
 		}
+		document.documentElement.classList.toggle('reduce-motion', this.state.config.isReduceMotion);
 	}
 
 	async addTask(
