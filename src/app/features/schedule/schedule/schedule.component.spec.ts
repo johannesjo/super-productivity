@@ -1183,6 +1183,9 @@ describe('ScheduleComponent', () => {
 
   describe('scroll target measurement', () => {
     const TARGET_TOP_PX = 250;
+    // The test grid below is 2880px tall for a 24h day.
+    const PX_PER_MINUTE = 2;
+    const SCROLL_LEAD_MINUTES = 30;
     let host: HTMLElement;
     let wrapper: HTMLElement;
 
@@ -1221,6 +1224,66 @@ describe('ScheduleComponent', () => {
       // Rect-based math would return TARGET_TOP_PX * 1.2 here, scrolling the
       // view roughly two hours past "now".
       expect(options.top).toBe(TARGET_TOP_PX);
+    });
+
+    it('leaves 30 minutes of the schedule visible above the target', () => {
+      host = document.createElement('div');
+      host.style.cssText = 'position:relative;';
+
+      wrapper = document.createElement('div');
+      wrapper.className = 'scroll-wrapper';
+      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
+
+      // The grid always spans a full 24h, so its height fixes the pixels-per-
+      // minute scale. 2880px / 1440min = 2px per minute.
+      const grid = document.createElement('div');
+      grid.className = 'grid-container';
+      grid.style.cssText = 'position:relative;height:2880px;width:400px;';
+
+      const target = document.createElement('div');
+      target.id = 'test-scroll-target';
+      target.style.cssText = `position:absolute;top:${TARGET_TOP_PX}px;left:0;height:2px;width:10px;`;
+
+      grid.append(target);
+      wrapper.append(grid);
+      host.append(wrapper);
+      document.body.append(host);
+
+      const scrollToSpy = spyOn(wrapper, 'scrollTo');
+      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
+
+      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
+      const leadPx = SCROLL_LEAD_MINUTES * PX_PER_MINUTE;
+      expect(options.top).toBe(TARGET_TOP_PX - leadPx);
+    });
+
+    it('clamps the lead at the top of the day', () => {
+      host = document.createElement('div');
+      host.style.cssText = 'position:relative;';
+
+      wrapper = document.createElement('div');
+      wrapper.className = 'scroll-wrapper';
+      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
+
+      const grid = document.createElement('div');
+      grid.className = 'grid-container';
+      grid.style.cssText = 'position:relative;height:2880px;width:400px;';
+
+      const target = document.createElement('div');
+      target.id = 'test-scroll-target';
+      // 10px into the day, less than the 60px of lead.
+      target.style.cssText = 'position:absolute;top:10px;left:0;height:2px;width:10px;';
+
+      grid.append(target);
+      wrapper.append(grid);
+      host.append(wrapper);
+      document.body.append(host);
+
+      const scrollToSpy = spyOn(wrapper, 'scrollTo');
+      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
+
+      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
+      expect(options.top).toBe(0);
     });
 
     it('gives the same target with and without the scale', () => {

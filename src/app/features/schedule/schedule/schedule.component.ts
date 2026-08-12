@@ -44,6 +44,10 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
 import { getWeekNumber } from '../../../util/get-week-number';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
 
+// How much of the schedule before the scroll target stays visible above it.
+const SCROLL_LEAD_MINUTES = 30;
+const MINUTES_PER_DAY = 24 * 60;
+
 @Component({
   selector: 'schedule',
   imports: [
@@ -416,7 +420,8 @@ export class ScheduleComponent {
     // happens to be.
     const elPos = this._layoutOffset(element);
     const containerPos = this._layoutOffset(scrollContainer);
-    const targetTop = elPos.top - containerPos.top - scrollContainer.clientTop;
+    const targetTop =
+      elPos.top - containerPos.top - scrollContainer.clientTop - this._leadPx(element);
     const targetLeft =
       elPos.left -
       containerPos.left -
@@ -429,6 +434,20 @@ export class ScheduleComponent {
       left: Math.max(0, targetLeft),
       behavior: 'instant',
     });
+  }
+
+  // Leave a bit of the preceding schedule visible above the target, so it reads
+  // as "now, in context" rather than the day being cut off at the top.
+  //
+  // Measured from the rendered grid, which always spans exactly 24h, rather
+  // than from the row height: rows are shorter on mobile, so a fixed pixel
+  // amount would mean a different number of minutes per breakpoint.
+  private _leadPx(element: HTMLElement): number {
+    const grid = element.closest('.grid-container') as HTMLElement | null;
+    const dayHeight = grid?.offsetHeight;
+    if (!dayHeight) return 0;
+
+    return (dayHeight / MINUTES_PER_DAY) * SCROLL_LEAD_MINUTES;
   }
 
   // Position within the offset-parent chain. Unlike getBoundingClientRect(),
