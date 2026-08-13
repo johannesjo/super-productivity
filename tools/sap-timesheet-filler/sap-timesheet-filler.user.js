@@ -67,17 +67,17 @@
 
   // The row's Assignment / WBS / PSP element. SAP rejects a row without it
   // ("WBS must not be empty"), so it is filled alongside the hours. In the
-  // Fiori Time Entry app it is copied from a day you already booked; this box
-  // only has to be filled when no booked day exists to copy from.
+  // Fiori Time Entry app the dropdown's first entry is selected; set this (or
+  // the panel box) to a code to pick that entry instead.
   const WBS_DEFAULT = '';
 
-  // Fiori Time Entry books a start/end time per day. An 8-hour day whose
-  // start/end span is exactly 8 hours contains no break, which is what raises
-  // "Attention ! Keep the 30 minutes break !" — so the end time is set to
-  // start + hours + BREAK_MINUTES (09:00 + 8h + 30min = 17:30). The break is
-  // not working time and is not booked; only the span reflects it.
-  const START_TIME = '09:00'; // fallback when no booked day exists to copy from
-  const BREAK_MINUTES = 30;
+  // Fiori Time Entry books a start/end time per day.
+  // NOTE: 09:00–17:00 is an 8-hour span holding 8 booked hours, so it leaves no
+  // room for a break and SAP raises "Attention ! Keep the 30 minutes break !".
+  // That message is a warning to acknowledge, not a rejection. Setting END_TIME
+  // to '17:30' (8h work + 30min break) is what stops it appearing.
+  const START_TIME = '09:00';
+  const END_TIME = '17:00';
 
   const WBS_DEF = {
     key: 'wbs',
@@ -452,12 +452,7 @@
     return isNaN(n) ? 0 : n;
   }
 
-  function addMinutes(hhmm, minutes) {
-    const m = /^(\d{1,2}):(\d{2})/.exec(String(hhmm || '').trim());
-    if (!m) return '';
-    const total = Number(m[1]) * 60 + Number(m[2]) + minutes;
-    return pad2(Math.floor(total / 60) % 24) + ':' + pad2(total % 60);
-  }
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   // The UI5 control owning a DOM node, when the UI5 runtime is reachable.
   function ui5Control(el) {
@@ -479,46 +474,73 @@
     return null;
   }
 
-  // A ComboBox stores a key, not the typed text, so picking the matching list
-  // item is what actually gets the assignment into the model.
-  function setControlValue(el, value) {
-    const ctrl = ui5Control(el);
-    if (
-      ctrl &&
-      typeof ctrl.getItems === 'function' &&
-      typeof ctrl.setSelectedItem === 'function'
-    ) {
-      let items = [];
-      try {
-        items = ctrl.getItems() || [];
-      } catch (e) {
-        items = [];
-      }
-      const want = normalize(value);
-      const item = items.find(
-        (it) =>
-          (it.getText && normalize(it.getText()) === want) ||
-          (it.getKey && normalize(it.getKey()) === want),
-      );
-      if (item) {
-        ctrl.setSelectedItem(item);
-        if (ctrl.fireChange) {
-          ctrl.fireChange({ value: item.getText ? item.getText() : value });
-        }
-        return true;
-      }
+  const itemText = (item) => (item && item.getText && item.getText()) || '';
+  const itemKey = (item) => (item && item.getKey && item.getKey()) || '';
+
+  // Entries with neither text nor key are placeholders, never a real assignment.
+  function comboItems(ctrl) {
+    let items = [];
+    try {
+      items = ctrl.getItems() || [];
+    } catch (e) {
+      items = [];
     }
-    setFieldValue(el, value);
-    return false;
+    return items.filter((it) => itemText(it).trim() || itemKey(it).trim());
   }
 
-  function fillFiori(grid) {
+  // Sets the row's Assignment. A ComboBox stores a key rather than the typed
+  // text, so an entry has to be *selected*: by default the first one in the
+  // dropdown, or the one matching `wanted` when a code is known. Returns
+  // { label, text } describing what happened, or null if nothing was set.
+  async function selectAssignment(el, wanted) {
+    const ctrl = ui5Control(el);
+    if (ctrl && typeof ctrl.setSelectedItem === 'function') {
+      let items = comboItems(ctrl);
+      // A list bound lazily is empty until the dropdown has been opened once.
+      if (!items.length && typeof ctrl.open === 'function') {
+        try {
+          ctrl.open();
+          await delay(350);
+          items = comboItems(ctrl);
+        } catch (e) {
+          /* opening is best-effort */
+        }
+        try {
+          if (ctrl.close) ctrl.close();
+        } catch (e) {
+          /* ignore */
+        }
+      }
+      const want = normalize(wanted);
+      const item = want
+        ? items.find(
+            (it) => normalize(itemText(it)) === want || normalize(itemKey(it)) === want,
+          )
+        : items[0];
+      if (item) {
+        ctrl.setSelectedItem(item);
+        if (ctrl.fireChange) ctrl.fireChange({ value: itemText(item) });
+        const text = itemText(item) || itemKey(item);
+        return {
+          text,
+          label: 'assignment ' + text + (want ? '' : ' (1st entry)'),
+        };
+      }
+    }
+    if (wanted) {
+      setFieldValue(el, wanted);
+      return { text: wanted, label: 'assignment ' + wanted + ' (typed)' };
+    }
+    return null;
+  }
+
+  async function fillFiori(grid) {
     const dayRows = fioriDayRows(grid);
     const lines = [];
     let missing = 0;
 
-    // A day that is already booked carries the right Assignment and Attendance
-    // Type — copying them beats asking the user to retype codes.
+    // Attendance Type has no dropdown to pick a default from, so a day that is
+    // already booked supplies it.
     let template = null;
     Object.keys(dayRows).forEach((key) =>
       dayRows[key].forEach((row) => {
@@ -528,23 +550,26 @@
       }),
     );
 
-    const assignment = wbsValue() || fieldValue(template && template.assignment);
+    // Empty = take the dropdown's first entry. Once one day has resolved, the
+    // remaining days reuse that exact code: it keeps the week consistent and
+    // spares them the wait for a lazily-loaded list.
+    let wanted = wbsValue();
+    const fallbackAssignment = fieldValue(template && template.assignment);
     const attendance = fieldValue(template && template.attendance);
-    const startTime = fieldValue(template && template.start) || START_TIME;
-    const hoursNum = toNum(HOURS);
 
-    FILL_DAYS.forEach((day) => {
+    for (let i = 0; i < FILL_DAYS.length; i++) {
+      const day = FILL_DAYS[i];
       const rows = dayRows[day];
       if (!rows || !rows.length) {
         missing++;
         lines.push('✗ ' + labelFor(day) + ' — no row for this day');
-        return;
+        continue;
       }
       const f = fioriRowFields(rows[0]);
       if (!f.hours) {
         missing++;
         lines.push('✗ ' + labelFor(day) + ' — hours field not found');
-        return;
+        continue;
       }
       const booked = toNum(fieldValue(f.hours));
       if (booked > 0) {
@@ -555,36 +580,42 @@
             fieldValue(f.hours) +
             ' — left as is',
         );
-        return;
-      }
-      if (!assignment) {
-        missing++;
-        lines.push('✗ ' + labelFor(day) + ' — no assignment to use (fill the box above)');
-        return;
+        continue;
       }
 
       const done = [];
       if (f.assignment && !fieldValue(f.assignment)) {
-        const picked = setControlValue(f.assignment, assignment);
-        done.push(picked ? 'assignment' : 'assignment (typed)');
+        let picked = await selectAssignment(f.assignment, wanted);
+        // No reachable dropdown: reuse the code from a day already booked.
+        if (!picked && fallbackAssignment) {
+          setFieldValue(f.assignment, fallbackAssignment);
+          picked = {
+            text: fallbackAssignment,
+            label: 'assignment ' + fallbackAssignment + ' (copied)',
+          };
+        }
+        if (!picked) {
+          missing++;
+          lines.push('✗ ' + labelFor(day) + ' — no assignment to select');
+          continue;
+        }
+        wanted = picked.text;
+        done.push(picked.label);
       }
       if (attendance && f.attendance && !fieldValue(f.attendance)) {
         setFieldValue(f.attendance, attendance);
         done.push('type ' + attendance);
       }
       if (f.start && f.end && !fieldValue(f.start) && !fieldValue(f.end)) {
-        const end = addMinutes(startTime, Math.round(hoursNum * 60) + BREAK_MINUTES);
-        if (end) {
-          setFieldValue(f.start, startTime);
-          setFieldValue(f.end, end);
-          done.push(startTime + '–' + end);
-        }
+        setFieldValue(f.start, START_TIME);
+        setFieldValue(f.end, END_TIME);
+        done.push(START_TIME + '–' + END_TIME);
       }
       // Hours last: it is the value that matters most, so nothing re-renders over it.
       setFieldValue(f.hours, HOURS);
       done.push(HOURS + ' h');
       lines.push('✓ ' + labelFor(day) + ': ' + done.join(', '));
-    });
+    }
 
     if (lines.some((l) => l.indexOf('(typed)') !== -1)) {
       lines.push(
@@ -603,7 +634,8 @@
   function fillWeek() {
     const grid = fioriGrid();
     if (grid) {
-      fillFiori(grid);
+      setStatus('Filling…');
+      fillFiori(grid).catch((e) => setStatus('Failed: ' + (e && e.message)));
       return;
     }
     fillGeneric();
@@ -780,7 +812,7 @@
     wbsInputEl = document.createElement('input');
     wbsInputEl.type = 'text';
     wbsInputEl.value = localStorage.getItem(WBS_STORE_KEY) || WBS_DEFAULT;
-    wbsInputEl.placeholder = 'empty = copy from a booked day';
+    wbsInputEl.placeholder = 'empty = first dropdown entry';
     wbsInputEl.style.cssText =
       'width:100%;box-sizing:border-box;margin-top:2px;padding:3px 5px;' +
       'border:1px solid #888;border-radius:4px;font:12px/1.4 monospace;';

@@ -45,18 +45,20 @@ automatic detection can't work.
 SAP rejects a row without a project code — _"Input to the WBS invalid. WBS must
 not be empty."_ — so the hours alone are never enough.
 
-**In the Fiori layout** the code lives in the row's **Assignment** dropdown.
-You normally don't have to type it: the script copies the Assignment (and the
-Attendance Type) from a day you have already booked this week, so the empty
-days get exactly what the booked ones use. Only when no day is booked yet does
-it need the panel's **Assignment / WBS** box; what you type there is stored per
-site and takes precedence when set.
+**In the Fiori layout** the code lives in the row's **Assignment** dropdown, and
+by default the script **selects the first entry** in it — reported as
+`assignment AÜ-… (1st entry)`. Nothing to type. Once one day has resolved, the
+remaining days reuse that same code, so the whole week stays consistent and
+only the first day waits for a list that loads lazily.
 
-Since an Assignment is a dropdown, the script picks the matching list entry so
-SAP stores the underlying key, not just display text. If no matching entry is
-available it falls back to typing and says so — `assignment (typed)`. If SAP
-then still reports an empty WBS, choose the value from the dropdown once by
-hand.
+To book a different assignment, type its code into the panel's **Assignment /
+WBS** box; the script then selects that entry instead, and the value is stored
+per site for future weeks. If no dropdown is reachable at all it falls back to
+the code from a day already booked this week.
+
+The entry is _selected_, not typed, so SAP stores the underlying key rather
+than display text. Where that isn't possible the panel says `(typed)` — if SAP
+then still reports an empty WBS, pick the value from the dropdown once by hand.
 
 **In the classic layout** the box is required, and two safety rules apply:
 
@@ -81,10 +83,10 @@ overwriting of submitted entries, so running Fill twice is harmless.
 2. A small **"SAP timesheet filler"** panel appears in the bottom-right corner.
    If the timesheet is embedded in a frame, a panel appears inside that frame —
    use that one.
-3. Click **Fill 8h**. The panel reports what it filled, e.g.
-   `✓ Mon 10.08. = 8 (label)` and `✓ WBS = P-12345.6.7 (label)`. A day that
-   already had hours is reported as `(label, was 4)` so an overwrite is never
-   silent.
+3. Click **Fill 8h**. The panel reports what it filled per day — in the Fiori
+   layout `✓ Tue 11.08.: assignment AÜ-… (1st entry), type 0800, 09:00–17:00,
+   8 h`, in the classic layout `✓ Tue 11.08. = 8 (label)`. Nothing is ever
+   changed silently: skipped days and overwritten values are both spelled out.
 4. Check the values on screen, then press **Save** in SAP as usual.
 
 ## If the wrong fields (or none) are filled
@@ -114,22 +116,20 @@ day exists. See [The Assignment / WBS](#the-assignment--wbs).
 
 **"Attention ! Keep the 30 minutes break !"** — the day's **start/end span
 leaves no room for a break**. German working-time law (ArbZG §4) requires a
-30-minute break once a working day exceeds 6 hours, so booking 8 hours between
-09:00 and 17:00 describes 8 hours of work with nothing in between, and SAP
-objects.
+30-minute break once a working day exceeds 6 hours, so 8 booked hours between
+09:00 and 17:00 describes 8 hours of work with nothing in between, and SAP says
+so.
 
-The break is not working time and is not booked, so the fix is the span, not
-the hours: 8 hours of work plus a 30-minute break means being present from
-09:00 to **17:30**. That is what the script writes — `start + hours +
-BREAK_MINUTES` — so days it fills do not raise the message. Days you entered by
-hand keep whatever times they have; to silence the warning there, move the end
-time half an hour later yourself.
-
-Adjust the assumption at the top of the script if your break differs:
+**The script fills 09:00–17:00, so expect this message.** It is a warning to
+acknowledge (press Enter / continue), not a rejection — the entry saves. The
+break is not working time and is not booked, so if you would rather not see it,
+the fix is the span rather than the hours: 8 hours of work plus a 30-minute
+break means being present until **17:30**. Change the constant at the top of
+the script:
 
 ```js
-const START_TIME = '09:00'; // only used when no booked day exists to copy from
-const BREAK_MINUTES = 30;
+const START_TIME = '09:00';
+const END_TIME = '17:00'; // '17:30' = 8h work + 30min break, no warning
 ```
 
 ## Adjusting the schedule
@@ -139,11 +139,13 @@ Edit the config block at the top of the script:
 ```js
 const HOURS = '8'; // use '8,00' if your SAP expects a decimal comma
 const FILL_DAYS = ['mon', 'tue', 'wed', 'thu'];
+const START_TIME = '09:00'; // Fiori layout only
+const END_TIME = '17:00';
 ```
 
-The WBS is **not** configured here — type it into the panel box, which stores
-it per site so the bookmarklet does not have to be rebuilt when your project
-changes.
+The assignment is **not** configured here — the first dropdown entry is used,
+or whatever you type into the panel box, which stores it per site so the
+bookmarklet does not have to be rebuilt when your project changes.
 
 ## Running it as a bookmarklet (no extension needed)
 
@@ -179,7 +181,9 @@ title is matched to a day of the current week by weekday name _and_ day of
 month (so a two-week table stays unambiguous), and within that day's first
 entry row the fields are found by role and column header — the hours field is
 the row's `spinbutton`, the Assignment its `combobox`, and Attendance Type /
-Start Time / End Time come from their column headers.
+Start Time / End Time come from their column headers. The Assignment is set
+through the UI5 control so the dropdown entry is genuinely selected; if its
+list is still empty, the dropdown is opened once to load it.
 
 **Classic layout:** for each configured day of the current week — and for the
 WBS field — the script tries, in order:
