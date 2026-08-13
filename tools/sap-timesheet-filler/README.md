@@ -62,13 +62,32 @@ const HOURS = '8'; // use '8,00' if your SAP expects a decimal comma
 const FILL_DAYS = ['mon', 'tue', 'wed', 'thu'];
 ```
 
-## Without a browser extension
+## Running it as a bookmarklet (no extension needed)
 
-If you can't install extensions (locked-down corporate browser), you can paste
-the script body (everything from `(function () {` to the end) into the DevTools
-console (`F12` → Console) while the timesheet page is open. If the timesheet is
-inside a frame, first select that frame in the console's context dropdown. The
-panel appears and works the same way; you just have to paste again next week.
+The script also ships as a bookmarklet —
+[`sap-timesheet-filler.bookmarklet.txt`](./sap-timesheet-filler.bookmarklet.txt):
+
+1. Create a new bookmark in your browser (right-click the bookmarks bar →
+   _Add page…_).
+2. Name it e.g. `SAP 8h`, and paste the **entire** content of the `.txt` file
+   (one long `javascript:…` line) as the URL.
+3. Open your timesheet, click the bookmark — the same panel appears (no
+   `@match` setup needed, it simply runs on whatever page you click it on).
+
+The bookmarklet walks all **same-origin** frames, so iframe-embedded
+timesheets work too. Its limits versus the userscript: it cannot reach
+**cross-origin** frames (timesheet served from a different domain than the
+portal around it), and rare sites block `javascript:` URLs via their content
+security policy — in both cases use the Tampermonkey route.
+
+After changing `HOURS`/`FILL_DAYS` in the userscript, regenerate with
+`node build-bookmarklet.js` (uses `npx terser`, fetched on first run) and
+re-paste the bookmark URL.
+
+As a last resort you can also paste the script body (everything from
+`(function () {` to the end) into the DevTools console (`F12` → Console) while
+the timesheet page is open — select the timesheet's frame in the console
+context dropdown if it sits in one.
 
 ## How field detection works
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SAP Timesheet Filler (8h Mon–Thu)
 // @namespace    https://github.com/super-productivity/super-productivity
-// @version      1.0.0
+// @version      1.1.0
 // @description  One click fills the current week's SAP timesheet with 8 hours on Mon–Thu. It only types into the fields — it NEVER saves or submits; you review and press Save in SAP yourself.
 // @match        https://YOUR-SAP-HOST.example.com/*
 // @grant        none
@@ -19,8 +19,8 @@
  * different), use "Teach fields" once: click each day's field when prompted,
  * and the choice is remembered for that site.
  *
- * No extension available? The whole body below also works pasted into the
- * browser DevTools console on the timesheet page (see README).
+ * No extension available? Use the bookmarklet build (node build-bookmarklet.js,
+ * see README) or paste the body below into the DevTools console.
  */
 
 (function () {
@@ -313,10 +313,11 @@
 
   // ---------------------------------------------------------------- filling
   function setFieldValue(el, value) {
+    const win = el.ownerDocument.defaultView;
     const proto =
       el.tagName === 'TEXTAREA'
-        ? HTMLTextAreaElement.prototype
-        : HTMLInputElement.prototype;
+        ? win.HTMLTextAreaElement.prototype
+        : win.HTMLInputElement.prototype;
     const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
     el.focus();
     setter.call(el, value);
