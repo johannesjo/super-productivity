@@ -603,6 +603,65 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
     expect(appliedIds).toContain(compensation!.id);
   });
 
+  it('splits one group between a scoped replacement and a restore compensation', async () => {
+    // One group containing BOTH kinds of local-win rows: C stays archived
+    // (its row takes the scoped replacement), B was restored (its row takes
+    // the current-state compensation). Pins the branch condition itself — an
+    // inverted check would hand B's row the C-scoped replacement and leave
+    // C's row without any local-win op, silently losing the restore.
+    const restoredB: Task = {
+      ...doneTask(TASK_B),
+      title: 'Restored B stays',
+      isDone: false,
+    };
+    const [bulkOp] = await dispatchAndFlush(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_B), doneTask(TASK_C)],
+      }) as PersistentAction,
+    );
+    store.dispatch(
+      TaskSharedActions.restoreTask({
+        task: restoredB,
+        subTasks: [],
+      }) as PersistentAction,
+    );
+    await writeFlush.flushPendingWrites();
+    taskStateById[TASK_B] = restoredB;
+
+    const client = remoteClient();
+    const remoteArchiveOp = buildRemoteArchiveOp(client, [TASK_A], bulkOp.timestamp + 1);
+    const remoteEditB = buildRemoteTaskEdit(client, TASK_B, bulkOp.timestamp + 2);
+    const remoteEditC = buildRemoteTaskEdit(client, TASK_C, bulkOp.timestamp + 3);
+    const conflicts = [
+      ...(await detectConflictsFor(remoteArchiveOp)),
+      ...(await detectConflictsFor(remoteEditB)),
+      ...(await detectConflictsFor(remoteEditC)),
+    ];
+
+    await resolver.autoResolveConflictsLWW(conflicts);
+
+    const pending = await unsyncedOps();
+    const replacement = pending.find(
+      (op) => op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+    );
+    expect(replacement).toBeDefined();
+    expect(replacement!.entityIds).toEqual([TASK_C]);
+    expect(payloadTaskIds(replacement!)).toEqual([TASK_C]);
+    const compensation = pending.find(
+      (op) =>
+        op.entityId === TASK_B &&
+        op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+    );
+    expect(compensation).toBeDefined();
+    expect(
+      (compensation!.payload as { actionPayload?: { title?: string } }).actionPayload
+        ?.title,
+    ).toBe('Restored B stays');
+    expect(pending.length).toBe(2);
+    expectDominates(replacement!, bulkOp);
+    expectDominates(compensation!, remoteEditB);
+  });
+
   it('accumulates remote-archived tasks across archive ops from several clients', async () => {
     // Three-device finish-day race: client B archived A, client C archived B,
     // the local bulk covered A, B and C — ONE replacement scoped to C, with a

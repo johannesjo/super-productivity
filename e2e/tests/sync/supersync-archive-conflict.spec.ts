@@ -246,9 +246,9 @@ test.describe('@supersync Archive Conflict Resolution', () => {
       console.log('[ArchVsArch] Client A bulk-archived T1+T2+T3');
 
       // ============ PHASE 5: Client A syncs (archive-vs-archive conflict) ====
-      // (The WS transport stays blocked by the harness either way — flipping
-      // the flag only mirrors sibling Test A's choreography; determinism comes
-      // from the harness's blocked immediate-upload/auto-sync + explicit syncs.)
+      // (Flipping the flag mirrors sibling Test A's choreography; the
+      // harness's WS route-block plus blocked immediate-upload/auto-sync and
+      // the explicit syncs are what keep this race deterministic.)
       await clientA.page.evaluate(
         () => ((globalThis as any).__SP_E2E_BLOCK_WS_DOWNLOAD = false),
       );
