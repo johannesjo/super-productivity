@@ -1,207 +1,91 @@
 # SAP Timesheet Filler
 
-A small userscript that fills the **current week** of an SAP timesheet with
-**8 hours on Monday–Thursday** in one click. It runs in your own browser, in
-your own logged-in SAP session.
+Fills the **current week** of the SAP Fiori _Time Entry_ timesheet with
+**8 hours on Monday–Thursday** in one click, including each row's Assignment
+and start/end time. It runs in your own browser, in your own logged-in session.
 
-**It never saves or submits anything.** It only types values into the day
-fields — you review the result and press SAP's own _Save_ button yourself.
+**It never saves or submits.** It fills fields; you review and press SAP's own
+_Save_.
 
-## Install (once)
+## Scope
 
-1. Install a userscript manager in your browser, e.g.
-   [Tampermonkey](https://www.tampermonkey.net/) or Violentmonkey.
-2. Create a new userscript and paste the whole content of
-   [`sap-timesheet-filler.user.js`](./sap-timesheet-filler.user.js) into it.
-3. **Edit the `@match` line** at the top so it points at your SAP host.
-   Open your timesheet in SAP, copy the domain from the address bar, and use:
+This targets the Fiori _Time Entry_ app: the timesheet that lists **one group
+row per calendar day** (_"Monday, August 10, 2026"_) with Assignment,
+Attendance Type, Entered, Start Time and End Time as columns.
 
-   ```
-   // @match https://<your-sap-domain>/*
-   ```
+On any other page the panel says so and does nothing. That is deliberate — a
+tool that guesses at unknown fields is worse than one that declines.
 
-   (If your timesheet loads content from a second domain inside a frame, add a
-   second `@match` line for that domain too.)
+## Use it
 
-4. Save the script.
+**As a bookmarklet** (no extension needed): create a bookmark, name it e.g.
+`SAP 8h`, and paste the whole content of
+[`sap-timesheet-filler.bookmarklet.txt`](./sap-timesheet-filler.bookmarklet.txt)
+(one long `javascript:…` line) as its URL. Open the timesheet on the current
+week and click it.
 
-## Two timesheet layouts
+**As a userscript**: paste
+[`sap-timesheet-filler.user.js`](./sap-timesheet-filler.user.js) into
+Tampermonkey and change the `@match` line to your SAP host. The advantage over
+the bookmarklet is that it also reaches cross-origin frames.
 
-SAP timesheets come in two fundamentally different shapes, and the script picks
-the right engine automatically:
+Either way a small panel appears. Click **Fill 8h Mon–Thu**, check what it
+reports, then press Save in SAP.
 
-**Fiori "Time Entry" (day per row).** Each calendar day is a group row
-(_"Monday, August 10, 2026"_) with the entry rows underneath, and the columns
-are fields: Assignment, Attendance Type, Entered (hours), Start/End Time. This
-is detected first; if the page has such a table, everything below about
-columns, teach mode and the WBS box being required does not apply.
+## What it does per day
 
-**Classic (day per column).** One row per project with Mon–Sun as columns. Days
-are matched by column header, and teach mode exists for the layouts where
-automatic detection can't work.
+For each of Mon–Thu of the current week it takes that day's first entry row and
+fills what is still empty:
 
-## The Assignment / WBS
+| Field           | Value                                                     |
+| --------------- | --------------------------------------------------------- |
+| Assignment      | the dropdown's **first entry** (or the panel box, if set) |
+| Attendance Type | copied from a day already booked this week                |
+| Start / End     | `09:00` / `17:00`                                         |
+| Entered         | `8`                                                       |
 
-SAP rejects a row without a project code — _"Input to the WBS invalid. WBS must
-not be empty."_ — so the hours alone are never enough.
+The Assignment is _selected_ from the dropdown, not typed, so SAP stores the
+underlying key — that is what the _"WBS must not be empty"_ error is about. If
+the list loads only once opened, the first day opens it; the rest reuse the
+same code so the week stays consistent.
 
-**In the Fiori layout** the code lives in the row's **Assignment** dropdown, and
-by default the script **selects the first entry** in it — reported as
-`assignment AÜ-… (1st entry)`. Nothing to type. Once one day has resolved, the
-remaining days reuse that same code, so the whole week stays consistent and
-only the first day waits for a list that loads lazily.
+**A day that already has hours is never touched** (`• Mon 10.08. already 8,00 —
+untouched`), so clicking Fill twice is harmless.
 
-To book a different assignment, type its code into the panel's **Assignment /
-WBS** box; the script then selects that entry instead, and the value is stored
-per site for future weeks. If no dropdown is reachable at all it falls back to
-the code from a day already booked this week.
+## Reading the result
 
-The entry is _selected_, not typed, so SAP stores the underlying key rather
-than display text. Where that isn't possible the panel says `(typed)` — if SAP
-then still reports an empty WBS, pick the value from the dropdown once by hand.
+- `✓ Tue 11.08.: AÜ-…, type 0800, 09:00, 17:00, 8 h` — filled.
+- `• Mon 10.08. already 8,00 — untouched` — skipped, nothing changed.
+- `✗ … — REJECTED: hours` — the field did not accept the value.
+- `⚠ Tue 11.08. went back to empty` — it accepted the value and then reverted
+  it a moment later, which means SAP refused it. Checked ~1s after filling, so
+  a fill that looks fine really is.
+- `No Time Entry table on this page.` — wrong page, or the timesheet is in a
+  frame the bookmarklet can't see; use the userscript.
 
-**In the classic layout** the box is required, and two safety rules apply:
+## The 30-minute break message
 
-- If the row **already** carries a different project code, it is left
-  untouched and reported (`• WBS already set to … — left unchanged`) rather
-  than overwritten.
-- The WBS field is only filled when found via a real label/column header or
-  taught explicitly — unlike the hours fields it is never guessed by position,
-  because a project code in the wrong field is worse than an empty one. If the
-  panel reports `✗ WBS — field not found`, use **Teach fields**.
+`Attention ! Keep the 30 minutes break !` appears because 09:00–17:00 is an
+8-hour span holding 8 booked hours, leaving no room for a break (ArbZG §4
+requires 30 minutes beyond 6 hours). It is a warning to acknowledge, not a
+rejection — the entry saves.
 
-## Days that are already booked are never touched
+The break is not working time and is not booked, so the fix is the span, not
+the hours: being present until **17:30** is 8 hours of work plus the break.
 
-In the Fiori layout a day that already has hours is reported
-(`• Mon 10.08. already booked 8,00 — left as is`) and skipped entirely — no
-overwriting of submitted entries, so running Fill twice is harmless.
+## Settings
 
-## Weekly use
-
-1. Open your SAP timesheet on the **current week** (the script matches columns
-   by this week's day names and dates — English and German are supported).
-2. A small **"SAP timesheet filler"** panel appears in the bottom-right corner.
-   If the timesheet is embedded in a frame, a panel appears inside that frame —
-   use that one.
-3. Click **Fill 8h**. The panel reports what it filled per day — in the Fiori
-   layout `✓ Tue 11.08.: assignment AÜ-… (1st entry), type 0800, 09:00–17:00,
-   8 h`, in the classic layout `✓ Tue 11.08. = 8 (label)`. Nothing is ever
-   changed silently: skipped days and overwritten values are both spelled out.
-4. Check the values on screen, then press **Save** in SAP as usual.
-
-## If the wrong fields (or none) are filled
-
-Every SAP install renders its timesheet differently, so automatic detection can
-miss. Fix it once with teach mode:
-
-1. Click **Teach fields** in the panel.
-2. Click the input the panel asks for: the hours field for each day (Mon, Tue,
-   Wed, Thu), then your row's WBS / PSP element field. **Skip field** leaves
-   one out (e.g. if your timesheet has no WBS column), `Esc` cancels.
-3. The fields are remembered for this site (stored in your browser's
-   localStorage). From then on, **Fill** uses them directly.
-
-**Forget taught** clears the stored fields and returns to auto-detection.
-
-Teach mode is also the answer for multi-row timesheets (several
-projects/positions per week): auto-detection targets the topmost row, so teach
-it the row you actually book on.
-
-## SAP messages when you save
-
-**"Input to the WBS invalid. WBS must not be empty."** — the row carries no
-project code. In the Fiori layout that is the row's **Assignment**; the script
-copies it from a day you already booked, or from the panel box when no booked
-day exists. See [The Assignment / WBS](#the-assignment--wbs).
-
-**"Attention ! Keep the 30 minutes break !"** — the day's **start/end span
-leaves no room for a break**. German working-time law (ArbZG §4) requires a
-30-minute break once a working day exceeds 6 hours, so 8 booked hours between
-09:00 and 17:00 describes 8 hours of work with nothing in between, and SAP says
-so.
-
-**The script fills 09:00–17:00, so expect this message.** It is a warning to
-acknowledge (press Enter / continue), not a rejection — the entry saves. The
-break is not working time and is not booked, so if you would rather not see it,
-the fix is the span rather than the hours: 8 hours of work plus a 30-minute
-break means being present until **17:30**. Change the constant at the top of
-the script:
+Top of the userscript:
 
 ```js
-const START_TIME = '09:00';
-const END_TIME = '17:00'; // '17:30' = 8h work + 30min break, no warning
-```
-
-## Adjusting the schedule
-
-Edit the config block at the top of the script:
-
-```js
-const HOURS = '8'; // use '8,00' if your SAP expects a decimal comma
+const HOURS = '8';
 const FILL_DAYS = ['mon', 'tue', 'wed', 'thu'];
-const START_TIME = '09:00'; // Fiori layout only
-const END_TIME = '17:00';
+const START_TIME = '09:00';
+const END_TIME = '17:00'; // '17:30' silences the break warning
 ```
 
-The assignment is **not** configured here — the first dropdown entry is used,
-or whatever you type into the panel box, which stores it per site so the
-bookmarklet does not have to be rebuilt when your project changes.
+After changing these, rebuild the bookmarklet with `node build-bookmarklet.js`
+(uses `npx terser`, fetched on first run) and re-paste the bookmark URL.
 
-## Running it as a bookmarklet (no extension needed)
-
-The script also ships as a bookmarklet —
-[`sap-timesheet-filler.bookmarklet.txt`](./sap-timesheet-filler.bookmarklet.txt):
-
-1. Create a new bookmark in your browser (right-click the bookmarks bar →
-   _Add page…_).
-2. Name it e.g. `SAP 8h`, and paste the **entire** content of the `.txt` file
-   (one long `javascript:…` line) as the URL.
-3. Open your timesheet, click the bookmark — the same panel appears (no
-   `@match` setup needed, it simply runs on whatever page you click it on).
-
-The bookmarklet walks all **same-origin** frames, so iframe-embedded
-timesheets work too. Its limits versus the userscript: it cannot reach
-**cross-origin** frames (timesheet served from a different domain than the
-portal around it), and rare sites block `javascript:` URLs via their content
-security policy — in both cases use the Tampermonkey route.
-
-After changing `HOURS`/`FILL_DAYS` in the userscript, regenerate with
-`node build-bookmarklet.js` (uses `npx terser`, fetched on first run) and
-re-paste the bookmark URL.
-
-As a last resort you can also paste the script body (everything from
-`(function () {` to the end) into the DevTools console (`F12` → Console) while
-the timesheet page is open — select the timesheet's frame in the console
-context dropdown if it sits in one.
-
-## How field detection works
-
-**Fiori layout:** the table is recognised by its day group rows. Each group
-title is matched to a day of the current week by weekday name _and_ day of
-month (so a two-week table stays unambiguous), and within that day's first
-entry row the fields are found by role and column header — the hours field is
-the row's `spinbutton`, the Assignment its `combobox`, and Attendance Type /
-Start Time / End Time come from their column headers. The Assignment is set
-through the UI5 control so the dropdown entry is genuinely selected; if its
-list is still empty, the dropdown is opened once to load it.
-
-**Classic layout:** for each configured day of the current week — and for the
-WBS field — the script tries, in order:
-
-1. **Taught fields** — what you clicked in teach mode (matched by id, name,
-   aria-label, placeholder and position).
-2. **Labels** — the input's own `aria-label` / placeholder / `<label>` /
-   table or ARIA-grid column header, matched against day names (`Monday`,
-   `Montag`, `Mo`, …), this week's dates in common formats (`10.08.`,
-   `08/10`, `2026-08-10`, …), and for the project field `WBS` / `PSP`
-   (so `WBS Element`, `Receiver WBS element` and `PSP-Element` all match).
-3. **Position** — a short text on the page naming the day (e.g. a column
-   header rendered as a plain `<div>`, common in SAP UI5 grids), paired with
-   the nearest input below it in the same column. **Hours fields only** — the
-   WBS field is never matched this way.
-
-A text naming two targets at once is treated as ambiguous and ignored, and each
-input is claimed by at most one target, so a single field can't be filled twice.
-
-Values are set with the native value setter plus `input`/`change` events, so
-UI5/React-style forms register the change like real typing.
+The Assignment is not set here — it comes from the dropdown, or from the panel
+box, which is stored per site.
