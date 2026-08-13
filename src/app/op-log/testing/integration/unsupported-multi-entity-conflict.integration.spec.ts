@@ -7,7 +7,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { ClientIdService } from '../../../core/util/client-id.service';
 import { ArchiveModel } from '../../../features/archive/archive.model';
 import { TaskArchiveService } from '../../../features/archive/task-archive.service';
-import { DEFAULT_TASK, Task } from '../../../features/tasks/task.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { OperationApplierService } from '../../apply/operation-applier.service';
 import { OperationCaptureService } from '../../capture/operation-capture.service';
@@ -246,6 +246,77 @@ describe('unsupported archive multi-entity conflict integration (#9405)', () => 
     expect((await opLogStore.getUnsynced()).map(({ op }) => op.id)).toEqual([
       localOperation.id,
     ]);
+    expect(operationApplier.applyOperations).not.toHaveBeenCalled();
+    expect(await journal.list('history')).toEqual([]);
+  });
+
+  it('wedges sync when both devices archive an overlapping done task (finish-day race)', async () => {
+    // Reachable from ordinary use on two devices: "Finish day" (daily summary /
+    // work view) archives ALL done tasks as ONE atomic moveToArchive op. When a
+    // second device archives any of the same tasks concurrently, the planner
+    // resolves the shared entity as remote-archive (winner=remote), so the
+    // local multi-entity archive op loses — and a losing moveToArchive has no
+    // scoped-replacement path (the archive-win recreation only runs when LOCAL
+    // wins). The preflight fails closed and sync stays wedged until one side's
+    // ops change. Pins the live defect observed 2026-08 (entityCount=4).
+    const doneTask = (id: string): TaskWithSubTasks => ({
+      ...DEFAULT_TASK,
+      id,
+      title: `Done ${id}`,
+      projectId: 'project1',
+      isDone: true,
+      doneOn: 1_000,
+      subTasks: [],
+    });
+    const localAction = TaskSharedActions.moveToArchive({
+      tasks: [doneTask('task-a'), doneTask('task-b')],
+    }) as PersistentAction;
+    store.dispatch(localAction);
+
+    const localOperation = await pendingLocalOperation();
+    expect(localOperation.actionType).toBe(ActionType.TASK_SHARED_MOVE_TO_ARCHIVE);
+    expect(localOperation.entityIds).toEqual(['task-a', 'task-b']);
+
+    const remoteAction = TaskSharedActions.moveToArchive({
+      tasks: [doneTask('task-a')],
+    }) as PersistentAction;
+    const { type, meta, ...actionPayload } = remoteAction;
+    const remoteOperation = {
+      ...new TestClient(REMOTE_CLIENT_ID).createOperation({
+        actionType: type,
+        opType: meta.opType,
+        entityType: meta.entityType,
+        entityId: 'task-a',
+        entityIds: ['task-a'],
+        payload: {
+          actionPayload,
+          entityChanges: capture.extractEntityChanges(remoteAction),
+        },
+      }),
+      timestamp: localOperation.timestamp + 1,
+    };
+    const detection = await resolver.checkOpForConflicts(remoteOperation, {
+      localPendingOpsByEntity: await opLogStore.getUnsyncedByEntity(),
+      appliedFrontierByEntity: new Map(),
+      retainedOpsByEntity: new Map(),
+      snapshotVectorClock: undefined,
+      snapshotEntityKeys: undefined,
+      hasNoSnapshotClock: true,
+    });
+    expect(detection.conflicts.length).toBeGreaterThan(0);
+
+    let thrown: unknown;
+    try {
+      await resolver.autoResolveConflictsLWW(detection.conflicts);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+    expect((thrown as Error).message).toBe(
+      'SYNC_MULTI_ENTITY_UNSUPPORTED side=local ' +
+        `actionType=${ActionType.TASK_SHARED_MOVE_TO_ARCHIVE} entityCount=2`,
+    );
     expect(operationApplier.applyOperations).not.toHaveBeenCalled();
     expect(await journal.list('history')).toEqual([]);
   });
