@@ -3592,7 +3592,10 @@ describe('ConflictResolutionService', () => {
           ),
           actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
           entityIds: ['task-1', 'task-2'],
-          // Legacy flat shape: the action payload IS the op payload.
+          // Legacy flat shape: the action payload IS the op payload (still
+          // accepted by extractActionPayload / payload validation). NOTE: the
+          // flat-payload + populated-entityIds combination is a defensive
+          // hybrid — scoping requires entityIds regardless of payload era.
           payload: {
             tasks: [
               { id: 'task-1', title: 'Task one', subTasks: [] },

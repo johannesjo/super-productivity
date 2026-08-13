@@ -480,6 +480,127 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
       (op) => op.actionType === ActionType.TASK_SHARED_RESTORE,
     );
     expect(restoreOp).toBeDefined();
+    // Exactly the replacement + the restore op — nothing else re-asserted.
+    expect(pending.length).toBe(2);
+  });
+
+  it('re-asserts a restored task via a current-state op when its own row is conflicted', async () => {
+    // The restored task B here has its OWN conflict row (a concurrent remote
+    // edit), so row rejection discards the pending restoreTask op along with
+    // the bulk archive. The resolution must emit a current-state compensation
+    // for B — with neither a replacement archive nor a compensation, the
+    // restore would silently never reach other devices.
+    const restoredB: Task = {
+      ...doneTask(TASK_B),
+      title: 'Restored B current title',
+      isDone: false,
+    };
+    const [bulkOp] = await dispatchAndFlush(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_B)],
+      }) as PersistentAction,
+    );
+    store.dispatch(
+      TaskSharedActions.restoreTask({
+        task: restoredB,
+        subTasks: [],
+      }) as PersistentAction,
+    );
+    await writeFlush.flushPendingWrites();
+    taskStateById[TASK_B] = restoredB;
+
+    const client = remoteClient();
+    const remoteArchiveOp = buildRemoteArchiveOp(client, [TASK_A], bulkOp.timestamp + 1);
+    const remoteEditOp = buildRemoteTaskEdit(client, TASK_B, bulkOp.timestamp + 2);
+    const conflicts = [
+      ...(await detectConflictsFor(remoteArchiveOp)),
+      ...(await detectConflictsFor(remoteEditOp)),
+    ];
+
+    await resolver.autoResolveConflictsLWW(conflicts);
+
+    const pending = await unsyncedOps();
+    // No archive op survives (A remote-archived, B restored)...
+    expect(
+      pending.some((op) => op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE),
+    ).toBe(false);
+    // ...but B's restored state is re-asserted by a compensation op.
+    const compensation = pending.find((op) => op.entityId === TASK_B);
+    expect(compensation).toBeDefined();
+    const compensationPayload = compensation!.payload as {
+      actionPayload?: { title?: string };
+    };
+    expect(compensationPayload.actionPayload?.title).toBe('Restored B current title');
+    expectDominates(compensation!, remoteEditOp);
+    expectDominates(compensation!, bulkOp);
+
+    const appliedIds = appliedOps().map(({ id }) => id);
+    expect(appliedIds).toContain(remoteArchiveOp.id);
+    expect(appliedIds).not.toContain(remoteEditOp.id);
+  });
+
+  it('compensates a restored task instead of wedging when a remote BULK delete shares its row', async () => {
+    // Same restored-task shape, but the remote loser on B is a MULTI-entity
+    // deleteTasks op: with a bare undefined localWinOp the mixed-winner
+    // machinery would throw 'Cannot safely compensate mixed multi-entity
+    // winners' and wedge sync — the current-state compensation keeps the row
+    // coverable and the uncontested sibling delete applies.
+    const restoredB: Task = {
+      ...doneTask(TASK_B),
+      title: 'Restored B survives delete',
+      isDone: false,
+    };
+    const [bulkOp] = await dispatchAndFlush(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_B)],
+      }) as PersistentAction,
+    );
+    store.dispatch(
+      TaskSharedActions.restoreTask({
+        task: restoredB,
+        subTasks: [],
+      }) as PersistentAction,
+    );
+    await writeFlush.flushPendingWrites();
+    taskStateById[TASK_B] = restoredB;
+
+    const client = remoteClient();
+    const remoteArchiveOp = buildRemoteArchiveOp(client, [TASK_A], bulkOp.timestamp + 1);
+    const remoteDeleteAction = TaskSharedActions.deleteTasks({
+      taskIds: [TASK_B, 'task-remote-only'],
+    }) as PersistentAction;
+    const { type, meta, ...actionPayload } = remoteDeleteAction;
+    const remoteDeleteOp: Operation = {
+      ...client.createOperation({
+        actionType: type,
+        opType: meta.opType,
+        entityType: meta.entityType,
+        entityId: TASK_B,
+        entityIds: [TASK_B, 'task-remote-only'],
+        payload: { actionPayload, entityChanges: [] },
+      }),
+      timestamp: bulkOp.timestamp + 2,
+    };
+    const conflicts = [
+      ...(await detectConflictsFor(remoteArchiveOp)),
+      ...(await detectConflictsFor(remoteDeleteOp)),
+    ];
+
+    await resolver.autoResolveConflictsLWW(conflicts);
+
+    const pending = await unsyncedOps();
+    expect(
+      pending.some((op) => op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE),
+    ).toBe(false);
+    const compensation = pending.find((op) => op.entityId === TASK_B);
+    expect(compensation).toBeDefined();
+    expectDominates(compensation!, remoteDeleteOp);
+
+    // The remote bulk delete applies (its uncontested sibling wins), followed
+    // by B's compensation in the same batch.
+    const appliedIds = appliedOps().map(({ id }) => id);
+    expect(appliedIds).toContain(remoteDeleteOp.id);
+    expect(appliedIds).toContain(compensation!.id);
   });
 
   it('accumulates remote-archived tasks across archive ops from several clients', async () => {
@@ -565,7 +686,7 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
       }) as PersistentAction,
     );
     await writeFlush.flushPendingWrites();
-    const [bulkOp1] = await unsyncedOps();
+    const [bulkOp1, bulkOp2] = await unsyncedOps();
 
     const remoteEditOp = buildRemoteTaskEdit(
       remoteClient(),
@@ -582,10 +703,14 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
     }
 
     expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+    expect((thrown as Error).message).toBe(
+      'SYNC_MULTI_ENTITY_UNSUPPORTED side=local ' +
+        `actionType=${ActionType.TASK_SHARED_MOVE_TO_ARCHIVE} entityCount=3`,
+    );
     expect(operationApplier.applyOperations).not.toHaveBeenCalled();
     expect(await journal.list('history')).toEqual([]);
     // Fail-closed means pre-mutation: both bulk rows stay pending untouched.
-    expect((await unsyncedOps()).length).toBe(2);
+    expect((await unsyncedOps()).map(({ id }) => id)).toEqual([bulkOp1.id, bulkOp2.id]);
   });
 
   it('fails closed when a bulk archive overlaps a pending bulk delete', async () => {
@@ -603,7 +728,7 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
       }) as PersistentAction,
     );
     await writeFlush.flushPendingWrites();
-    const [bulkArchiveOp] = await unsyncedOps();
+    const [bulkArchiveOp, bulkDeleteOp] = await unsyncedOps();
 
     const remoteEditOp = buildRemoteTaskEdit(
       remoteClient(),
@@ -620,7 +745,16 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
     }
 
     expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+    expect((thrown as Error).message).toBe(
+      'SYNC_MULTI_ENTITY_UNSUPPORTED side=local ' +
+        `actionType=${ActionType.TASK_SHARED_MOVE_TO_ARCHIVE} entityCount=2`,
+    );
     expect(operationApplier.applyOperations).not.toHaveBeenCalled();
     expect(await journal.list('history')).toEqual([]);
+    // Fail-closed means pre-mutation: both bulk rows stay pending untouched.
+    expect((await unsyncedOps()).map(({ id }) => id)).toEqual([
+      bulkArchiveOp.id,
+      bulkDeleteOp.id,
+    ]);
   });
 });

@@ -246,6 +246,9 @@ test.describe('@supersync Archive Conflict Resolution', () => {
       console.log('[ArchVsArch] Client A bulk-archived T1+T2+T3');
 
       // ============ PHASE 5: Client A syncs (archive-vs-archive conflict) ====
+      // (The WS transport stays blocked by the harness either way — flipping
+      // the flag only mirrors sibling Test A's choreography; determinism comes
+      // from the harness's blocked immediate-upload/auto-sync + explicit syncs.)
       await clientA.page.evaluate(
         () => ((globalThis as any).__SP_E2E_BLOCK_WS_DOWNLOAD = false),
       );
@@ -273,9 +276,12 @@ test.describe('@supersync Archive Conflict Resolution', () => {
       await expectTaskNotVisible(clientA, task3Name);
       console.log('[ArchVsArch] Client A: no tasks in active list');
 
-      await expectTaskNotVisible(clientB, task1Name);
-      await expectTaskNotVisible(clientB, task2Name);
-      await expectTaskNotVisible(clientB, task3Name);
+      // Client B archives T2/T3 through the async remote-apply pipeline —
+      // give it the same extended window sibling Test B documents (15s).
+      const archivedAssertionTimeout = 15000;
+      await expectTaskNotVisible(clientB, task1Name, archivedAssertionTimeout);
+      await expectTaskNotVisible(clientB, task2Name, archivedAssertionTimeout);
+      await expectTaskNotVisible(clientB, task3Name, archivedAssertionTimeout);
       console.log('[ArchVsArch] Client B: no tasks in active list');
 
       // ============ PHASE 8: Verify ALL tasks IN worklog on BOTH clients =====

@@ -2428,7 +2428,10 @@ export class ConflictResolutionService {
       // overlapping a bulk delete, would make the per-op scoped replacements
       // re-assert contradictory or superseded intents with no cross-op
       // ordering — one op's uniquely-retained tasks could silently never
-      // upload. Keep the safe stop for those degenerate histories.
+      // upload. Keep the safe stop for those degenerate histories. (Scope
+      // caveat: this sees only ops sharing THIS row's conflicted task — an
+      // overlap confined to non-conflicted siblings passes and resolves
+      // per-op, which can re-assert the older op's stale sibling snapshot.)
       const localBulkArchiveOps = plan.conflict.localOps.filter(
         (op) =>
           isMultiEntityOperation(op) &&
@@ -3153,11 +3156,15 @@ export class ConflictResolutionService {
    * remote-archived tasks' stale local snapshots.
    *
    * Retained tasks that are back in the ACTIVE store (restored after the bulk
-   * archive was captured) are dropped from the replacement — their later
-   * pending ops are authoritative. Degenerate multi-bulk histories (two
-   * pending bulk archives sharing a task, bulk archive overlapping a bulk
-   * delete) never reach this method: `_assertMultiEntityPlansAreSafe` keeps
-   * the fail-closed stop for them.
+   * archive was captured) are dropped from the replacement; when such a task's
+   * own row won locally, a current-state compensation op re-asserts the
+   * restore (the row rejection discards the raw restoreTask op with the row).
+   * Degenerate multi-bulk histories (two pending bulk archives, or a bulk
+   * archive plus a bulk delete, sharing a CONFLICTED task) never reach this
+   * method: `_assertMultiEntityPlansAreSafe` keeps the fail-closed stop for
+   * them. Overlaps confined to non-conflicted siblings still flow through
+   * per-op and can re-assert a stale snapshot — a pre-existing hazard of the
+   * whole preserve/recreate family, shared with `_createArchiveWinOp`.
    */
   private async _preservePartiallyRejectedLocalBulkArchives(
     resolutions: LWWResolution[],
@@ -3217,29 +3224,40 @@ export class ConflictResolutionService {
       }
 
       // With nothing left to re-assert, the replacement is skipped entirely —
-      // but any archive-win row still holding the FULL-SET recreation must
-      // drop it too (winner stays local, remote loser rows stay rejected;
-      // same shape as archive-sibling rows with `localWinOp: undefined`).
+      // any archive-win row still holding the FULL-SET recreation is handled
+      // per-row below.
       const replacementOp =
         stillArchivedEntityIds.length > 0
           ? await this._createScopedBulkArchiveReplacement(group, stillArchivedEntityIds)
           : undefined;
+      const stillArchivedEntityIdSet = new Set(stillArchivedEntityIds);
       let assignedToLocalWinner = false;
       for (const resolution of group.resolutions) {
         if (
-          resolution.winner === 'local' &&
-          resolution.localWinOp?.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
+          resolution.winner !== 'local' ||
+          resolution.localWinOp?.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
           // Provenance binding: only swap a recreation built from THIS
           // group's op (`_createArchiveWinOp` reuses the payload reference).
           // A recreation derived from a different pending archive op must
           // stay untouched, or its group's replacement would be lost.
-          resolution.localWinOp.payload === group.archiveOp.payload
+          resolution.localWinOp.payload !== group.archiveOp.payload
         ) {
-          resolution.localWinOp = replacementOp;
-          if (replacementOp) {
-            assignedToLocalWinner = true;
-          }
+          continue;
         }
+        if (replacementOp && stillArchivedEntityIdSet.has(resolution.conflict.entityId)) {
+          resolution.localWinOp = replacementOp;
+          assignedToLocalWinner = true;
+          continue;
+        }
+        // The row's own task was restored after the bulk archive: its archive
+        // intent is obsolete, but the row still resolves winner=local and ALL
+        // its raw local ops — including the pending restoreTask op — are
+        // rejected with it. A bare undefined localWinOp would lose the
+        // restore fleet-wide (nothing re-asserts the entity) and wedge the
+        // mixed-winner compensation when the row's remote loser is a
+        // multi-entity op, so re-assert the CURRENT active state — the
+        // restore's outcome — as the row's local-win op instead.
+        resolution.localWinOp = await this._createLocalWinUpdateOp(resolution.conflict);
       }
       if (replacementOp && !assignedToLocalWinner) {
         additionalOps.push(replacementOp);
