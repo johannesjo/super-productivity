@@ -1,17 +1,20 @@
 # SAP Timesheet Filler
 
-Fills the **current week** of the SAP Fiori _Time Entry_ timesheet with
-**8 hours on Monday–Thursday** in one click, including each row's Assignment
-and start/end time. It runs in your own browser, in your own logged-in session.
+Fills the SAP Fiori _Time Entry_ timesheet — hours, Assignment and start/end
+time per day — in one click. It runs in your own browser, in your own
+logged-in session.
 
-**It never saves or submits.** It fills fields; you review and press SAP's own
+**It fills the week that is on screen.** Navigate to any week, click Fill.
+There is no "current week" assumption to fight with.
+
+**It never saves or submits.** You review the result and press SAP's own
 _Save_.
 
 ## Scope
 
-This targets the Fiori _Time Entry_ app: the timesheet that lists **one group
-row per calendar day** (_"Monday, August 10, 2026"_) with Assignment,
-Attendance Type, Entered, Start Time and End Time as columns.
+The Fiori _Time Entry_ app: the timesheet that lists **one group row per
+calendar day** (_"Monday, August 17, 2026"_) with Assignment, Attendance Type,
+Entered, Start Time and End Time as columns.
 
 On any other page the panel says so and does nothing. That is deliberate — a
 tool that guesses at unknown fields is worse than one that declines.
@@ -19,47 +22,52 @@ tool that guesses at unknown fields is worse than one that declines.
 ## Use it
 
 **As a bookmarklet** (no extension needed): create a bookmark, name it e.g.
-`SAP 8h`, and paste the whole content of
+`SAP fill`, and paste the whole content of
 [`sap-timesheet-filler.bookmarklet.txt`](./sap-timesheet-filler.bookmarklet.txt)
-(one long `javascript:…` line) as its URL. Open the timesheet on the current
-week and click it.
+(one long `javascript:…` line) as its URL. Open the timesheet on the week you
+want and click it.
 
 **As a userscript**: paste
 [`sap-timesheet-filler.user.js`](./sap-timesheet-filler.user.js) into
 Tampermonkey and change the `@match` line to your SAP host. The advantage over
 the bookmarklet is that it also reaches cross-origin frames.
 
-Either way a small panel appears. Click **Fill 8h Mon–Thu**, check what it
-reports, then press Save in SAP.
+## The panel
 
-## What it does per day
+Everything is set in the panel and stored per site — no editing code, no
+rebuilding the bookmarklet when something changes:
 
-For each of Mon–Thu of the current week it takes that day's first entry row and
-fills what is still empty:
+| Setting         | Default           | Meaning                                                      |
+| --------------- | ----------------- | ------------------------------------------------------------ |
+| **Assignment**  | empty             | empty = the **first entry** of the row's dropdown; or a code |
+| **Hours**       | `8`               | what goes in the Entered field                               |
+| **Start / End** | `09:00` / `17:00` | leave one blank to skip it                                   |
+| **Type**        | `0800`            | Attendance Type, only used if no booked day supplies one     |
+| **Days**        | Mon–Thu           | which days of the shown week to fill                         |
 
-| Field           | Value                                                     |
-| --------------- | --------------------------------------------------------- |
-| Assignment      | the dropdown's **first entry** (or the panel box, if set) |
-| Attendance Type | copied from a day already booked this week                |
-| Start / End     | `09:00` / `17:00`                                         |
-| Entered         | `8`                                                       |
+Click **Fill**, check what it reports, then press Save in SAP.
 
-The Assignment is _selected_ from the dropdown, not typed, so SAP stores the
-underlying key — that is what the _"WBS must not be empty"_ error is about. If
-the list loads only once opened, the first day opens it; the rest reuse the
-same code so the week stays consistent.
+## What it fills
 
-**A day that already has hours is never touched** (`• Mon 10.08. already 8,00 —
+For each selected day it takes that day's first entry row and fills only what
+is still empty. The Assignment is _selected_ from the dropdown, not typed, so
+SAP stores the underlying key — that is what the _"WBS must not be empty"_
+error is about. If the list only loads once opened, the first day opens it; the
+rest reuse the same code so the week stays consistent.
+
+**A day that already has hours is never touched** (`• Mon 17. already 8,00 —
 untouched`), so clicking Fill twice is harmless.
 
 ## Reading the result
 
-- `✓ Tue 11.08.: AÜ-…, type 0800, 09:00, 17:00, 8 h` — filled.
-- `• Mon 10.08. already 8,00 — untouched` — skipped, nothing changed.
+- `✓ Tue 18.: AÜ-…, type 0800, 09:00, 17:00, 8 h` — filled.
+- `• Mon 17. already 8,00 — untouched` — skipped, nothing changed.
 - `✗ … — REJECTED: hours` — the field did not accept the value.
-- `⚠ Tue 11.08. went back to empty` — it accepted the value and then reverted
-  it a moment later, which means SAP refused it. Checked ~1s after filling, so
-  a fill that looks fine really is.
+- `⚠ Tue 18. went back to empty` — it took the value and then reverted a moment
+  later, meaning SAP refused it. Checked ~1s after filling, so a fill that
+  looks fine really is.
+- `Table found, but none of the selected days are in it.` — the week on screen
+  doesn't contain your selected days.
 - `No Time Entry table on this page.` — wrong page, or the timesheet is in a
   frame the bookmarklet can't see; use the userscript.
 
@@ -70,22 +78,16 @@ untouched`), so clicking Fill twice is harmless.
 requires 30 minutes beyond 6 hours). It is a warning to acknowledge, not a
 rejection — the entry saves.
 
-The break is not working time and is not booked, so the fix is the span, not
-the hours: being present until **17:30** is 8 hours of work plus the break.
+The break is not working time and is not booked, so the fix is the span rather
+than the hours: set **End** to `17:30` in the panel and the message stops.
 
-## Settings
+## Rebuilding the bookmarklet
 
-Top of the userscript:
+Only needed if you change the script itself — the panel settings are stored in
+the browser, not baked into the bookmarklet.
 
-```js
-const HOURS = '8';
-const FILL_DAYS = ['mon', 'tue', 'wed', 'thu'];
-const START_TIME = '09:00';
-const END_TIME = '17:00'; // '17:30' silences the break warning
+```sh
+node build-bookmarklet.js   # uses npx terser, fetched on first run
 ```
 
-After changing these, rebuild the bookmarklet with `node build-bookmarklet.js`
-(uses `npx terser`, fetched on first run) and re-paste the bookmark URL.
-
-The Assignment is not set here — it comes from the dropdown, or from the panel
-box, which is stored per site.
+Then re-paste the bookmark URL.

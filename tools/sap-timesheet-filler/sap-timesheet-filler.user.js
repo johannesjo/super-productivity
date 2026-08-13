@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         SAP Timesheet Filler (8h Mon–Thu)
+// @name         SAP Timesheet Filler
 // @namespace    https://github.com/super-productivity/super-productivity
-// @version      2.0.0
-// @description  Fills the current week of the SAP Fiori "Time Entry" timesheet with 8 hours on Mon–Thu, including each row's Assignment and start/end time. It only fills fields — it NEVER saves or submits.
+// @version      3.0.0
+// @description  Fills the SAP Fiori "Time Entry" week on screen — hours, Assignment and start/end time per day. Everything is set in its panel. It only fills fields; it NEVER saves or submits.
 // @match        https://YOUR-SAP-HOST.example.com/*
 // @grant        none
 // @run-at       document-idle
@@ -12,23 +12,18 @@
  * SETUP: replace the @match line above with your real SAP host, or use the
  * bookmarklet build (node build-bookmarklet.js). See README.md.
  *
- * Scope: the Fiori "Time Entry" app only — the timesheet that lists one group
- * row per calendar day ("Monday, August 10, 2026") with Assignment, Entered,
- * Start Time and End Time as columns. On any other page the panel says so and
+ * Scope: the Fiori "Time Entry" app — the timesheet listing one group row per
+ * calendar day ("Monday, August 17, 2026") with Assignment, Entered, Start
+ * Time and End Time as columns. It fills WHATEVER WEEK IS ON SCREEN, so it
+ * works on next week as well as this one. On any other page it says so and
  * does nothing, rather than guessing at fields.
  */
 
 (function () {
   'use strict';
 
-  // --------------------------------------------------------------- config
-  const HOURS = '8';
-  const FILL_DAYS = ['mon', 'tue', 'wed', 'thu'];
-  const START_TIME = '09:00';
-  // 09:00–17:00 holds 8 booked hours with no break, so SAP shows "Keep the 30
-  // minutes break!" — a warning to acknowledge, not a rejection. '17:30'
-  // (8h work + 30min break) is the value that stops it appearing.
-  const END_TIME = '17:00';
+  const PANEL_ID = 'sap-timesheet-filler-panel';
+  const STORE_KEY = 'sapTimesheetFiller:' + location.host;
 
   const DAYS = [
     { key: 'mon', label: 'Mon', names: ['monday', 'montag'] },
@@ -40,53 +35,53 @@
     { key: 'sun', label: 'Sun', names: ['sunday', 'sonntag'] },
   ];
 
-  const PANEL_ID = 'sap-timesheet-filler-panel';
-  const ASSIGN_KEY = 'sapTimesheetFiller:assignment:' + location.host;
+  // Every one of these is editable in the panel and stored per site.
+  // 09:00–17:00 holds 8 booked hours with no break, which is what makes SAP
+  // show "Keep the 30 minutes break!" — a warning to acknowledge, not a
+  // rejection. An end of 17:30 (8h work + 30min break) avoids it.
+  const DEFAULTS = {
+    hours: '8',
+    days: ['mon', 'tue', 'wed', 'thu'],
+    start: '09:00',
+    end: '17:00',
+    attendance: '0800', // only used when no booked day supplies one
+    assignment: '', // empty = first entry of the row's dropdown
+  };
 
-  // ------------------------------------------------------------- the week
-  const pad2 = (n) => String(n).padStart(2, '0');
+  function loadSettings() {
+    let stored = null;
+    try {
+      stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    } catch (e) {
+      stored = null;
+    }
+    const s = Object.assign({}, DEFAULTS, stored || {});
+    if (!Array.isArray(s.days) || !s.days.length) s.days = DEFAULTS.days.slice();
+    return s;
+  }
 
-  const weekDates = (() => {
-    const now = new Date();
-    const monday = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() - ((now.getDay() + 6) % 7),
-    );
-    const map = {};
-    DAYS.forEach((d, i) => {
-      map[d.key] = new Date(
-        monday.getFullYear(),
-        monday.getMonth(),
-        monday.getDate() + i,
-      );
-    });
-    return map;
-  })();
+  let settings = loadSettings();
+
+  const saveSettings = () => localStorage.setItem(STORE_KEY, JSON.stringify(settings));
 
   const normalize = (s) => (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
 
-  function hasToken(text, token) {
-    return new RegExp('(^|[^0-9a-zäöüß])' + token + '($|[^0-9a-zäöüß])').test(text);
-  }
-
-  // "Monday, August 10, 2026" -> 'mon'. Both the weekday name and the day of
-  // month must match, so a table showing more than one week stays unambiguous.
+  // "Monday, August 17, 2026" -> 'mon'. No comparison against today's date:
+  // whatever week the table shows is the week that gets filled.
   function groupRowDay(text) {
     const t = normalize(text);
-    const hit = DAYS.find(
-      (d) =>
-        d.names.some((n) => hasToken(t, n)) &&
-        hasToken(t, String(weekDates[d.key].getDate())),
+    const hit = DAYS.find((d) =>
+      d.names.some((n) => new RegExp('(^|[^a-zäöüß])' + n + '($|[^a-zäöüß])').test(t)),
     );
     return hit ? hit.key : null;
   }
 
-  const dayLabel = (key) => {
-    const d = DAYS.find((x) => x.key === key);
-    const date = weekDates[key];
-    return d.label + ' ' + pad2(date.getDate()) + '.' + pad2(date.getMonth() + 1) + '.';
-  };
+  // "Monday, August 17, 2026" -> "Mon 17."
+  function dayLabel(key, title) {
+    const short = DAYS.find((x) => x.key === key).label;
+    const dom = (String(title || '').match(/\b(3[01]|[12]\d|0?[1-9])\b/) || [])[1];
+    return dom ? short + ' ' + dom + '.' : short;
+  }
 
   // ---------------------------------------------------------------- table
   function findGrid() {
@@ -97,16 +92,18 @@
     );
   }
 
-  // { dayKey -> [entry rows] }
-  function dayRows(grid) {
+  // { dayKey -> { title, rows } }, first group per weekday.
+  function dayGroups(grid) {
     const out = {};
     let day = null;
     Array.from(grid.querySelectorAll('tbody > tr')).forEach((tr) => {
       const title = tr.querySelector('.sapMGHLITitle');
       if (title) {
-        day = groupRowDay(title.textContent);
+        const key = groupRowDay(title.textContent);
+        day = key && !out[key] ? key : null;
+        if (day) out[day] = { title: title.textContent.trim(), rows: [] };
       } else if (day && tr.classList.contains('sapMListTblRow')) {
-        (out[day] = out[day] || []).push(tr);
+        out[day].rows.push(tr);
       }
     });
     return out;
@@ -263,53 +260,51 @@
     if (!grid) {
       setStatus(
         'No Time Entry table on this page.\nOpen the timesheet first; if it sits' +
-          ' in a frame, use the panel that appears inside that frame.',
+          ' in a frame, use the panel inside that frame.',
       );
       return;
     }
 
-    const rows = dayRows(grid);
-    const found = Object.keys(rows).length;
-    if (!found) {
-      setStatus(
-        'Found the table, but no day of THIS week in it. Switch to the current week.',
-      );
+    const groups = dayGroups(grid);
+    const wanted = settings.days.filter((d) => groups[d]);
+    if (!wanted.length) {
+      setStatus('Table found, but none of the selected days are in it.');
       return;
     }
 
-    // Attendance Type has no dropdown to default from, so a booked day supplies
-    // it — as it does for the Assignment when the dropdown can't be reached.
+    // A booked day is the best source for the Attendance Type, and for the
+    // Assignment when the dropdown cannot be reached.
     let attendance = '';
     let bookedAssignment = '';
-    Object.keys(rows).forEach((k) =>
-      rows[k].forEach((r) => {
+    Object.keys(groups).forEach((k) =>
+      groups[k].rows.forEach((r) => {
         const f = rowFields(r);
         if (!attendance) attendance = valueOf(f.attendance);
         if (!bookedAssignment) bookedAssignment = valueOf(f.assignment);
       }),
     );
+    if (!attendance) attendance = settings.attendance;
 
-    let assignment = assignmentBoxValue(); // empty = first dropdown entry
+    let assignment = settings.assignment;
     const lines = [];
     const filled = [];
 
-    for (let i = 0; i < FILL_DAYS.length; i++) {
-      const day = FILL_DAYS[i];
-      const row = rows[day] && rows[day][0];
+    for (let i = 0; i < wanted.length; i++) {
+      const day = wanted[i];
+      const label = dayLabel(day, groups[day].title);
+      const row = groups[day].rows[0];
       if (!row) {
-        lines.push('✗ ' + dayLabel(day) + ' — no row');
+        lines.push('✗ ' + label + ' — no row');
         continue;
       }
       const f = rowFields(row);
       if (!f.hours) {
-        lines.push('✗ ' + dayLabel(day) + ' — no hours field');
+        lines.push('✗ ' + label + ' — no hours field');
         continue;
       }
       const booked = toNum(valueOf(f.hours));
       if (booked > 0) {
-        lines.push(
-          '• ' + dayLabel(day) + ' already ' + valueOf(f.hours) + ' — untouched',
-        );
+        lines.push('• ' + label + ' already ' + valueOf(f.hours) + ' — untouched');
         continue;
       }
 
@@ -318,13 +313,12 @@
 
       if (f.assignment && !valueOf(f.assignment)) {
         let picked = await selectAssignment(f.assignment, assignment);
-        // No reachable dropdown: fall back to the code a booked day uses.
         if (!picked && bookedAssignment && writeField(f.assignment, bookedAssignment)) {
           picked = bookedAssignment;
         }
         if (picked) {
           assignment = picked; // keep the whole week on one assignment
-          done.push(picked + (valueOf(f.assignment) === picked ? '' : ' ?'));
+          done.push(picked);
         } else {
           failed.push('assignment');
         }
@@ -333,25 +327,25 @@
         if (writeField(f.attendance, attendance)) done.push('type ' + attendance);
         else failed.push('type');
       }
-      if (f.start && !valueOf(f.start)) {
-        if (writeField(f.start, START_TIME)) done.push(START_TIME);
+      if (settings.start && f.start && !valueOf(f.start)) {
+        if (writeField(f.start, settings.start)) done.push(settings.start);
         else failed.push('start');
       }
-      if (f.end && !valueOf(f.end)) {
-        if (writeField(f.end, END_TIME)) done.push(END_TIME);
+      if (settings.end && f.end && !valueOf(f.end)) {
+        if (writeField(f.end, settings.end)) done.push(settings.end);
         else failed.push('end');
       }
-      if (writeField(f.hours, HOURS)) done.push(HOURS + ' h');
+      if (writeField(f.hours, settings.hours)) done.push(settings.hours + ' h');
       else failed.push('hours');
 
       lines.push(
         (failed.length ? '✗ ' : '✓ ') +
-          dayLabel(day) +
+          label +
           ': ' +
           done.join(', ') +
           (failed.length ? ' — REJECTED: ' + failed.join(', ') : ''),
       );
-      filled.push({ day: day, hours: f.hours });
+      filled.push({ label: label, hours: f.hours });
     }
 
     lines.push('Nothing is saved yet — review, then press Save in SAP.');
@@ -361,12 +355,14 @@
     // written; saying so beats letting it look like it worked.
     if (filled.length) {
       await delay(1200);
-      const lost = filled.filter((x) => !(toNum(valueOf(x.hours)) > 0)).map((x) => x.day);
+      const lost = filled
+        .filter((x) => !(toNum(valueOf(x.hours)) > 0))
+        .map((x) => x.label);
       if (lost.length) {
         setStatus(
           lines.join('\n') +
             '\n⚠ ' +
-            lost.map(dayLabel).join(', ') +
+            lost.join(', ') +
             ' went back to empty — SAP rejected the value.',
         );
       }
@@ -375,13 +371,61 @@
 
   // ---------------------------------------------------------------- panel
   let statusEl = null;
-  let assignEl = null;
-
-  const assignmentBoxValue = () =>
-    assignEl ? assignEl.value.trim() : (localStorage.getItem(ASSIGN_KEY) || '').trim();
 
   function setStatus(text) {
     if (statusEl) statusEl.textContent = text;
+  }
+
+  const INPUT_CSS =
+    'box-sizing:border-box;padding:3px 5px;border:1px solid #888;' +
+    'border-radius:4px;font:12px/1.4 monospace;';
+
+  function field(labelText, key, width) {
+    const wrap = document.createElement('label');
+    wrap.style.cssText = 'display:inline-block;margin:4px 6px 0 0;';
+    const span = document.createElement('div');
+    span.textContent = labelText;
+    span.style.cssText = 'font-size:11px;color:#555;';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = settings[key];
+    input.style.cssText = INPUT_CSS + 'width:' + width + ';';
+    input.addEventListener('input', () => {
+      settings[key] = input.value.trim();
+      saveSettings();
+    });
+    wrap.appendChild(span);
+    wrap.appendChild(input);
+    return wrap;
+  }
+
+  function dayPicker() {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin:6px 0 2px;font-size:11px;color:#555;';
+    const caption = document.createElement('div');
+    caption.textContent = 'Days';
+    wrap.appendChild(caption);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;';
+    DAYS.forEach((d) => {
+      const item = document.createElement('label');
+      item.style.cssText = 'display:flex;align-items:center;gap:2px;color:#111;';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = settings.days.indexOf(d.key) !== -1;
+      box.style.cssText = 'margin:0;';
+      box.addEventListener('change', () => {
+        settings.days = DAYS.filter((x) =>
+          x.key === d.key ? box.checked : settings.days.indexOf(x.key) !== -1,
+        ).map((x) => x.key);
+        saveSettings();
+      });
+      item.appendChild(box);
+      item.appendChild(document.createTextNode(d.label));
+      row.appendChild(item);
+    });
+    wrap.appendChild(row);
+    return wrap;
   }
 
   function mountPanel() {
@@ -392,42 +436,38 @@
     panel.style.cssText =
       'position:fixed;right:16px;bottom:16px;z-index:2147483647;background:#fff;' +
       'color:#111;border:1px solid #888;border-radius:8px;padding:10px 12px;' +
-      'box-shadow:0 2px 12px rgba(0,0,0,.25);font:12px/1.5 sans-serif;width:290px;';
+      'box-shadow:0 2px 12px rgba(0,0,0,.25);font:12px/1.5 sans-serif;width:300px;';
 
     const title = document.createElement('div');
     title.textContent = 'SAP timesheet filler';
-    title.style.cssText = 'font-weight:bold;margin-bottom:6px;';
+    title.style.cssText = 'font-weight:bold;margin-bottom:2px;';
     const close = document.createElement('span');
     close.textContent = '×';
     close.style.cssText = 'float:right;cursor:pointer;padding:0 2px;';
     close.addEventListener('click', () => panel.remove());
     title.appendChild(close);
 
-    statusEl = document.createElement('div');
-    statusEl.style.cssText = 'white-space:pre-line;margin:6px 0;color:#333;';
-    statusEl.textContent =
-      HOURS + 'h on Mon–Thu of this week, ' + START_TIME + '–' + END_TIME + '.';
+    const hint = document.createElement('div');
+    hint.textContent = 'Fills the week currently shown.';
+    hint.style.cssText = 'font-size:11px;color:#555;';
 
-    const label = document.createElement('label');
-    label.style.cssText = 'display:block;margin:6px 0;';
-    label.appendChild(document.createTextNode('Assignment'));
-    assignEl = document.createElement('input');
-    assignEl.type = 'text';
-    assignEl.value = localStorage.getItem(ASSIGN_KEY) || '';
-    assignEl.placeholder = 'empty = first dropdown entry';
-    assignEl.style.cssText =
-      'width:100%;box-sizing:border-box;margin-top:2px;padding:3px 5px;' +
-      'border:1px solid #888;border-radius:4px;font:12px/1.4 monospace;';
-    assignEl.addEventListener('input', () =>
-      localStorage.setItem(ASSIGN_KEY, assignEl.value.trim()),
-    );
-    label.appendChild(assignEl);
+    const assignment = field('Assignment (empty = 1st entry)', 'assignment', '100%');
+    assignment.style.display = 'block';
+
+    const row = document.createElement('div');
+    row.appendChild(field('Hours', 'hours', '46px'));
+    row.appendChild(field('Start', 'start', '58px'));
+    row.appendChild(field('End', 'end', '58px'));
+    row.appendChild(field('Type', 'attendance', '52px'));
+
+    statusEl = document.createElement('div');
+    statusEl.style.cssText = 'white-space:pre-line;margin:8px 0;color:#333;';
 
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = 'Fill ' + HOURS + 'h Mon–Thu';
+    button.textContent = 'Fill';
     button.style.cssText =
-      'padding:5px 12px;border:1px solid #888;border-radius:4px;background:#f5f5f5;' +
+      'padding:5px 14px;border:1px solid #888;border-radius:4px;background:#f5f5f5;' +
       'color:#111;cursor:pointer;font:12px/1.4 sans-serif;';
     button.addEventListener('click', () => {
       setStatus('Filling…');
@@ -435,8 +475,11 @@
     });
 
     panel.appendChild(title);
+    panel.appendChild(hint);
+    panel.appendChild(assignment);
+    panel.appendChild(row);
+    panel.appendChild(dayPicker());
     panel.appendChild(statusEl);
-    panel.appendChild(label);
     panel.appendChild(button);
     document.body.appendChild(panel);
   }
