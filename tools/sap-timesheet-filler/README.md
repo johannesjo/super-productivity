@@ -1,31 +1,23 @@
-# SAP Timesheet Filler
+# Timesheet Filler
 
-Fills the SAP Fiori _Time Entry_ timesheet — hours, Assignment and start/end
-time per day — in one click. It runs in your own browser, in your own
-logged-in session.
+Fills a day-per-row timesheet — the SAP Fiori _Time Entry_ shape, where each
+calendar day is a group row and the fields are columns. It runs in your own
+browser, in your own logged-in session.
+
+**Nothing about the timesheet is hard-coded.** The script reads the table's own
+column headers and gives you one box per column: whatever you type is what it
+fills. New column, renamed column, different app — no code change.
 
 **It fills the week that is on screen.** Navigate to any week, click Fill.
-There is no "current week" assumption to fight with.
 
-**It never saves or submits.** You review the result and press SAP's own
-_Save_.
-
-## Scope
-
-The Fiori _Time Entry_ app: the timesheet that lists **one group row per
-calendar day** (_"Monday, August 17, 2026"_) with Assignment, Attendance Type,
-Entered, Start Time and End Time as columns.
-
-On any other page the panel says so and does nothing. That is deliberate — a
-tool that guesses at unknown fields is worse than one that declines.
+**It never saves or submits.** You review the result and press Save yourself.
 
 ## Use it
 
 **As a bookmarklet** (no extension needed): create a bookmark, name it e.g.
-`SAP fill`, and paste the whole content of
+`Fill`, and paste the whole content of
 [`sap-timesheet-filler.bookmarklet.txt`](./sap-timesheet-filler.bookmarklet.txt)
-(one long `javascript:…` line) as its URL. Open the timesheet on the week you
-want and click it.
+(one long `javascript:…` line) as its URL. Open the timesheet and click it.
 
 **As a userscript**: paste
 [`sap-timesheet-filler.user.js`](./sap-timesheet-filler.user.js) into
@@ -34,42 +26,44 @@ the bookmarklet is that it also reaches cross-origin frames.
 
 ## The panel
 
-Everything is set in the panel and stored per site — no editing code, no
-rebuilding the bookmarklet when something changes:
+- **Days** — tick which days of the week on screen to fill.
+- **One box per column** — the columns come from the table itself. The first
+  time a column is seen it gets a sensible guess (Assignment `*`, Entered `8`,
+  Start `09:00`, End `17:00`, Attendance Type `0800`); after that it is just a
+  setting you edit. Everything is stored per site.
+- **Fill** — does the work. **Rescan** — re-reads the columns, for when the app
+  finished rendering after the panel opened, or the columns changed.
 
-| Setting         | Default           | Meaning                                                      |
-| --------------- | ----------------- | ------------------------------------------------------------ |
-| **Assignment**  | empty             | empty = the **first entry** of the row's dropdown; or a code |
-| **Hours**       | `8`               | what goes in the Entered field                               |
-| **Start / End** | `09:00` / `17:00` | leave one blank to skip it                                   |
-| **Type**        | `0800`            | Attendance Type, only used if no booked day supplies one     |
-| **Days**        | Mon–Thu           | which days of the shown week to fill                         |
+Values:
 
-Click **Fill**, check what it reports, then press Save in SAP.
+| You type  | What happens                                        |
+| --------- | --------------------------------------------------- |
+| _(empty)_ | the column is left alone                            |
+| `*`       | the **first entry** of that column's dropdown       |
+| a value   | typed in — or selected, if the column is a dropdown |
 
-## What it fills
+`*` is what makes the Assignment work: a dropdown stores a key, not text, so
+the entry has to be genuinely selected — that is what the _"WBS must not be
+empty"_ error is about. If the list only loads once opened, the first day opens
+it and the rest reuse the same entry, keeping the week consistent. If the
+column has no reachable dropdown, `*` falls back to the value that column
+already holds on another day.
 
-For each selected day it takes that day's first entry row and fills only what
-is still empty. The Assignment is _selected_ from the dropdown, not typed, so
-SAP stores the underlying key — that is what the _"WBS must not be empty"_
-error is about. If the list only loads once opened, the first day opens it; the
-rest reuse the same code so the week stays consistent.
-
-**A day that already has hours is never touched** (`• Mon 17. already 8,00 —
-untouched`), so clicking Fill twice is harmless.
+**A day that already has a value in one of your filled columns is skipped**
+(`• Mon 17. already has … — untouched`), so clicking Fill twice is harmless. An
+hours field showing `0,00` counts as empty, not as booked.
 
 ## Reading the result
 
-- `✓ Tue 18.: AÜ-…, type 0800, 09:00, 17:00, 8 h` — filled.
-- `• Mon 17. already 8,00 — untouched` — skipped, nothing changed.
-- `✗ … — REJECTED: hours` — the field did not accept the value.
-- `⚠ Tue 18. went back to empty` — it took the value and then reverted a moment
-  later, meaning SAP refused it. Checked ~1s after filling, so a fill that
-  looks fine really is.
-- `Table found, but none of the selected days are in it.` — the week on screen
-  doesn't contain your selected days.
-- `No Time Entry table on this page.` — wrong page, or the timesheet is in a
-  frame the bookmarklet can't see; use the userscript.
+- `✓ Tue 18.: AÜ-…, 0800, 8, 09:00, 17:00` — filled.
+- `• Mon 17. already has … — untouched` — skipped, nothing changed.
+- `✗ … — REJECTED: Assignment` — that column refused the value.
+- `⚠ Tue 18. went back to empty — rejected.` — it took the values and reverted
+  a moment later. Checked ~1s after filling, so a fill that looks fine really
+  is.
+- `No rows for the ticked days in the week on screen.`
+- `No table with fillable fields on this page.` — wrong page, or the timesheet
+  is in a frame the bookmarklet can't see; use the userscript.
 
 ## The 30-minute break message
 
@@ -79,12 +73,21 @@ requires 30 minutes beyond 6 hours). It is a warning to acknowledge, not a
 rejection — the entry saves.
 
 The break is not working time and is not booked, so the fix is the span rather
-than the hours: set **End** to `17:30` in the panel and the message stops.
+than the hours: set the End column to `17:30` and the message stops.
+
+## How it finds things
+
+- **The table** — the one on the page holding the most fillable inputs.
+- **The days** — a row that names a weekday and has no inputs of its own is a
+  heading; the input rows under it belong to that day. No comparison against
+  today's date, which is why any week works.
+- **The columns** — each cell's own column header (via `data-sap-ui-column`, or
+  its position in the header row).
 
 ## Rebuilding the bookmarklet
 
-Only needed if you change the script itself — the panel settings are stored in
-the browser, not baked into the bookmarklet.
+Only needed if you change the script itself — the panel settings live in the
+browser, not in the bookmarklet.
 
 ```sh
 node build-bookmarklet.js   # uses npx terser, fetched on first run
