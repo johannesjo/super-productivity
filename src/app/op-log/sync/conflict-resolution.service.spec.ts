@@ -3481,6 +3481,159 @@ describe('ConflictResolutionService', () => {
         ).toBe(VectorClockComparison.GREATER_THAN);
       });
 
+      it('narrows payload tasks AND entityChanges when scoping a partially rejected bulk archive', async () => {
+        // Capture emits entityChanges: [] for moveToArchive today, but the
+        // scoping must narrow whatever a legacy/peer row carries — this pins
+        // the filter with a synthetic non-empty fixture (#9537).
+        const localBulkArchive: Operation = {
+          ...createOpWithTimestamp(
+            'local-archive-multiple',
+            'client-a',
+            1000,
+            OpType.Update,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+          entityIds: ['task-1', 'task-2'],
+          payload: {
+            actionPayload: {
+              tasks: [
+                { id: 'task-1', title: 'Task one', subTasks: [] },
+                {
+                  id: 'task-2',
+                  title: 'Task two',
+                  subTasks: [{ id: 'task-2-child', parentId: 'task-2', title: 'Child' }],
+                },
+              ],
+            },
+            entityChanges: [
+              {
+                entityType: 'TASK',
+                entityId: 'task-1',
+                opType: OpType.Update,
+                changes: {},
+              },
+              {
+                entityType: 'TASK',
+                entityId: 'task-2',
+                opType: OpType.Update,
+                changes: {},
+              },
+            ],
+          },
+        };
+        const remoteArchive: Operation = {
+          ...createOpWithTimestamp(
+            'remote-archive-task-1',
+            'client-b',
+            2000,
+            OpType.Update,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+          payload: {
+            actionPayload: {
+              tasks: [{ id: 'task-1', title: 'Remote snapshot', subTasks: [] }],
+            },
+            entityChanges: [],
+          },
+        };
+        mockOperationApplier.applyOperations.and.callFake(async (ops, options) => {
+          await options?.onReducersCommitted?.(ops);
+          return { appliedOps: ops };
+        });
+
+        const result = await service.autoResolveConflictsLWW([
+          createConflict('task-1', [localBulkArchive], [remoteArchive]),
+        ]);
+
+        const replacement = getFirstMixedLocalOp();
+        expect(result.localWinOpsCreated).toBe(1);
+        expect(replacement.actionType).toBe(ActionType.TASK_SHARED_MOVE_TO_ARCHIVE);
+        expect(replacement.entityId).toBe('task-2');
+        expect(replacement.entityIds).toEqual(['task-2']);
+        expect(
+          (
+            extractActionPayload(replacement.payload)['tasks'] as Array<{
+              id: string;
+              subTasks?: Array<{ id: string }>;
+            }>
+          ).map(({ id }) => id),
+        ).toEqual(['task-2']);
+        // The retained parent keeps its nested subtasks.
+        expect(
+          (
+            extractActionPayload(replacement.payload)['tasks'] as Array<{
+              subTasks?: Array<{ id: string }>;
+            }>
+          )[0].subTasks?.map(({ id }) => id),
+        ).toEqual(['task-2-child']);
+        expect(
+          (
+            replacement.payload as { entityChanges?: Array<{ entityId: string }> }
+          ).entityChanges?.map(({ entityId }) => entityId),
+        ).toEqual(['task-2']);
+        expect(
+          compareVectorClocks(replacement.vectorClock, localBulkArchive.vectorClock),
+        ).toBe(VectorClockComparison.GREATER_THAN);
+        expect(
+          compareVectorClocks(replacement.vectorClock, remoteArchive.vectorClock),
+        ).toBe(VectorClockComparison.GREATER_THAN);
+      });
+
+      it('scopes a legacy flat-payload bulk archive without inventing a MultiEntityPayload wrapper', async () => {
+        const localBulkArchive: Operation = {
+          ...createOpWithTimestamp(
+            'local-archive-flat',
+            'client-a',
+            1000,
+            OpType.Update,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+          entityIds: ['task-1', 'task-2'],
+          // Legacy flat shape: the action payload IS the op payload.
+          payload: {
+            tasks: [
+              { id: 'task-1', title: 'Task one', subTasks: [] },
+              { id: 'task-2', title: 'Task two', subTasks: [] },
+            ],
+          },
+        };
+        const remoteArchive: Operation = {
+          ...createOpWithTimestamp(
+            'remote-archive-task-1-flat',
+            'client-b',
+            2000,
+            OpType.Update,
+            'task-1',
+          ),
+          actionType: ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+          payload: {
+            actionPayload: {
+              tasks: [{ id: 'task-1', title: 'Remote snapshot', subTasks: [] }],
+            },
+            entityChanges: [],
+          },
+        };
+        mockOperationApplier.applyOperations.and.callFake(async (ops, options) => {
+          await options?.onReducersCommitted?.(ops);
+          return { appliedOps: ops };
+        });
+
+        await service.autoResolveConflictsLWW([
+          createConflict('task-1', [localBulkArchive], [remoteArchive]),
+        ]);
+
+        const replacement = getFirstMixedLocalOp();
+        expect(replacement.entityIds).toEqual(['task-2']);
+        const payload = replacement.payload as Record<string, unknown>;
+        expect('actionPayload' in payload).toBe(false);
+        expect((payload['tasks'] as Array<{ id: string }>).map(({ id }) => id)).toEqual([
+          'task-2',
+        ]);
+      });
+
       it('preserves unaffected siblings from non-task bulk deletes', async () => {
         const localBulkDelete: Operation = {
           ...createOpWithTimestamp(

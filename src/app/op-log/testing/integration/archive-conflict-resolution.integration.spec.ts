@@ -12,6 +12,7 @@ import { OperationCaptureService } from '../../capture/operation-capture.service
 import { clearDeferredActions } from '../../capture/operation-capture.meta-reducer';
 import { OperationLogEffects } from '../../capture/operation-log.effects';
 import { buildEntityRegistry, ENTITY_REGISTRY } from '../../core/entity-registry';
+import { UnsupportedMultiEntityConflictError } from '../../core/errors/sync-errors';
 import { ActionType, EntityConflict, Operation } from '../../core/operation.types';
 import {
   isPersistentAction,
@@ -62,14 +63,15 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
   let effectSubscription: Subscription;
   let taskStateById: Record<string, Task | undefined>;
 
-  const doneTask = (id: string): TaskWithSubTasks => ({
+  const doneTask = (id: string, subTasks: Task[] = []): TaskWithSubTasks => ({
     ...DEFAULT_TASK,
     id,
     title: `Done ${id}`,
     projectId: 'project1',
     isDone: true,
     doneOn: 1_000,
-    subTasks: [],
+    subTaskIds: subTasks.map(({ id: subId }) => subId),
+    subTasks,
   });
 
   beforeEach(async () => {
@@ -200,7 +202,7 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
     timestamp: number,
   ): Operation => {
     const remoteAction = TaskSharedActions.moveToArchive({
-      tasks: taskIds.map(doneTask),
+      tasks: taskIds.map((id) => doneTask(id)),
     }) as PersistentAction;
     const { type, meta, ...actionPayload } = remoteAction;
     return {
@@ -272,9 +274,23 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
 
   it('re-scopes a losing bulk archive to the tasks the remote archive did not cover (finish-day race)', async () => {
     // LOCAL: the Mac's "Finish day" archives 4 done tasks in one atomic op.
+    // Task C carries a subtask to pin that nested subtasks survive scoping.
+    const subTaskC: Task = {
+      ...DEFAULT_TASK,
+      id: 'task-c-sub-1',
+      title: 'Subtask of C',
+      projectId: 'project1',
+      parentId: TASK_C,
+      isDone: true,
+    };
     const [bulkOp] = await dispatchAndFlush(
       TaskSharedActions.moveToArchive({
-        tasks: [doneTask(TASK_A), doneTask(TASK_B), doneTask(TASK_C), doneTask(TASK_D)],
+        tasks: [
+          doneTask(TASK_A),
+          doneTask(TASK_B),
+          doneTask(TASK_C, [subTaskC]),
+          doneTask(TASK_D),
+        ],
       }) as PersistentAction,
     );
     expect(bulkOp.actionType).toBe(ActionType.TASK_SHARED_MOVE_TO_ARCHIVE);
@@ -296,13 +312,25 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
     expect(replacement.entityId).toBe(TASK_B);
     expect(replacement.entityIds).toEqual([TASK_B, TASK_C, TASK_D]);
     expect(payloadTaskIds(replacement)).toEqual([TASK_B, TASK_C, TASK_D]);
+    const retainedC = (
+      replacement.payload as { actionPayload: { tasks: TaskWithSubTasks[] } }
+    ).actionPayload.tasks.find(({ id }) => id === TASK_C);
+    expect(retainedC!.subTasks).toEqual([subTaskC]);
     expect(replacement.timestamp).toBe(bulkOp.timestamp);
     expectDominates(replacement, bulkOp);
     expectDominates(replacement, remoteOp);
+    // A plain clock merge would already dominate both concurrent originals —
+    // pin the increment, which is what protects against third parties.
+    expect(replacement.vectorClock[LOCAL_CLIENT_ID]).toBe(
+      (bulkOp.vectorClock[LOCAL_CLIENT_ID] ?? 0) + 1,
+    );
 
-    // The remote archive is applied (its snapshot wins for the shared task).
+    // The remote archive is applied (its snapshot wins for the shared task);
+    // the replacement is upload-only — local state already reflects it.
     expect(operationApplier.applyOperations).toHaveBeenCalled();
-    expect(appliedOps().map(({ id }) => id)).toContain(remoteOp.id);
+    const appliedIds = appliedOps().map(({ id }) => id);
+    expect(appliedIds).toContain(remoteOp.id);
+    expect(appliedIds).not.toContain(replacement.id);
   });
 
   it('rejects the bulk archive outright when the remote archive covers every task', async () => {
@@ -359,10 +387,12 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
     expectDominates(replacement, remoteArchiveOp);
     expectDominates(replacement, remoteEditOp);
 
-    // The remote archive is applied; the losing remote edit is not.
+    // The remote archive is applied; the losing remote edit and the
+    // upload-only replacement are not.
     const appliedIds = appliedOps().map(({ id }) => id);
     expect(appliedIds).toContain(remoteArchiveOp.id);
     expect(appliedIds).not.toContain(remoteEditOp.id);
+    expect(appliedIds).not.toContain(replacement.id);
   });
 
   it('resolves a winning bulk archive that shares an entity with a decomposable bulk op', async () => {
@@ -411,5 +441,186 @@ describe('bulk archive conflict resolution integration (#9537)', () => {
 
     // The losing remote edit is rejected, not applied.
     expect(appliedOps().map(({ id }) => id)).not.toContain(remoteEditOp.id);
+  });
+
+  it('drops a retained task from the replacement when it was restored from archive meanwhile', async () => {
+    // Between the bulk archive and the resolving sync, the user restored B —
+    // B is back in the ACTIVE store and a restoreTask op is pending. The
+    // replacement must not re-assert B's stale archival with a dominating
+    // clock, or the restore would be silently overridden fleet-wide.
+    const restoredB = doneTask(TASK_B);
+    const [bulkOp] = await dispatchAndFlush(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), restoredB, doneTask(TASK_C)],
+      }) as PersistentAction,
+    );
+    store.dispatch(
+      TaskSharedActions.restoreTask({
+        task: restoredB,
+        subTasks: [],
+      }) as PersistentAction,
+    );
+    await writeFlush.flushPendingWrites();
+    taskStateById[TASK_B] = restoredB;
+
+    const remoteOp = buildRemoteArchiveOp(remoteClient(), [TASK_A], bulkOp.timestamp + 1);
+    const conflicts = await detectConflictsFor(remoteOp);
+
+    await resolver.autoResolveConflictsLWW(conflicts);
+
+    const pending = await unsyncedOps();
+    const replacement = pending.find(
+      (op) => op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE,
+    );
+    expect(replacement).toBeDefined();
+    expect(replacement!.entityIds).toEqual([TASK_C]);
+    expect(payloadTaskIds(replacement!)).toEqual([TASK_C]);
+    // The restore op itself stays pending and uploads normally.
+    const restoreOp = pending.find(
+      (op) => op.actionType === ActionType.TASK_SHARED_RESTORE,
+    );
+    expect(restoreOp).toBeDefined();
+  });
+
+  it('accumulates remote-archived tasks across archive ops from several clients', async () => {
+    // Three-device finish-day race: client B archived A, client C archived B,
+    // the local bulk covered A, B and C — ONE replacement scoped to C, with a
+    // clock dominating every involved row.
+    const [bulkOp] = await dispatchAndFlush(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_B), doneTask(TASK_C)],
+      }) as PersistentAction,
+    );
+    const remoteArchiveA = buildRemoteArchiveOp(
+      new TestClient('remote-client-b'),
+      [TASK_A],
+      bulkOp.timestamp + 1,
+    );
+    const remoteArchiveB = buildRemoteArchiveOp(
+      new TestClient('remote-client-c'),
+      [TASK_B],
+      bulkOp.timestamp + 2,
+    );
+    const conflicts = [
+      ...(await detectConflictsFor(remoteArchiveA)),
+      ...(await detectConflictsFor(remoteArchiveB)),
+    ];
+
+    await resolver.autoResolveConflictsLWW(conflicts);
+
+    const pending = await unsyncedOps();
+    expect(pending.length).toBe(1);
+    const replacement = pending[0];
+    expect(replacement.entityIds).toEqual([TASK_C]);
+    expect(payloadTaskIds(replacement)).toEqual([TASK_C]);
+    expectDominates(replacement, bulkOp);
+    expectDominates(replacement, remoteArchiveA);
+    expectDominates(replacement, remoteArchiveB);
+    const appliedIds = appliedOps().map(({ id }) => id);
+    expect(appliedIds).toContain(remoteArchiveA.id);
+    expect(appliedIds).toContain(remoteArchiveB.id);
+  });
+
+  it('emits ONE replacement when several archive-win rows share the same bulk op', async () => {
+    // Remote archived A; two SEPARATE remote edits hit B and C — two
+    // archive-win rows for the same bulk op. Both rows must end up pointing at
+    // the SAME scoped replacement (deduped by id), never one op per row.
+    const [bulkOp] = await dispatchAndFlush(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_B), doneTask(TASK_C)],
+      }) as PersistentAction,
+    );
+    const client = remoteClient();
+    const remoteArchiveOp = buildRemoteArchiveOp(client, [TASK_A], bulkOp.timestamp + 1);
+    const remoteEditB = buildRemoteTaskEdit(client, TASK_B, bulkOp.timestamp + 2);
+    const remoteEditC = buildRemoteTaskEdit(client, TASK_C, bulkOp.timestamp + 3);
+    const conflicts = [
+      ...(await detectConflictsFor(remoteArchiveOp)),
+      ...(await detectConflictsFor(remoteEditB)),
+      ...(await detectConflictsFor(remoteEditC)),
+    ];
+
+    await resolver.autoResolveConflictsLWW(conflicts);
+
+    const pending = await unsyncedOps();
+    expect(pending.length).toBe(1);
+    expect(pending[0].entityIds).toEqual([TASK_B, TASK_C]);
+    expect(payloadTaskIds(pending[0])).toEqual([TASK_B, TASK_C]);
+  });
+
+  it('fails closed when two pending bulk archives share a conflicted task', async () => {
+    // Archive → restore → re-archive without a sync in between leaves TWO
+    // pending bulk archives containing the same task. Per-op scoped
+    // replacement cannot express a coherent cross-op supersession order here,
+    // so the preflight must keep the safe stop instead of silently dropping
+    // one op's uniquely-retained tasks.
+    store.dispatch(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_B), doneTask(TASK_D)],
+      }) as PersistentAction,
+    );
+    store.dispatch(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_C)],
+      }) as PersistentAction,
+    );
+    await writeFlush.flushPendingWrites();
+    const [bulkOp1] = await unsyncedOps();
+
+    const remoteEditOp = buildRemoteTaskEdit(
+      remoteClient(),
+      TASK_A,
+      bulkOp1.timestamp + 1,
+    );
+    const conflicts = await detectConflictsFor(remoteEditOp);
+
+    let thrown: unknown;
+    try {
+      await resolver.autoResolveConflictsLWW(conflicts);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+    expect(operationApplier.applyOperations).not.toHaveBeenCalled();
+    expect(await journal.list('history')).toEqual([]);
+    // Fail-closed means pre-mutation: both bulk rows stay pending untouched.
+    expect((await unsyncedOps()).length).toBe(2);
+  });
+
+  it('fails closed when a bulk archive overlaps a pending bulk delete', async () => {
+    // A bulk archive and a bulk delete both covering task A re-assert
+    // contradictory whole-entity intents for A if scoped independently — keep
+    // the safe stop (pre-fix parity: this shape always wedged).
+    store.dispatch(
+      TaskSharedActions.moveToArchive({
+        tasks: [doneTask(TASK_A), doneTask(TASK_B)],
+      }) as PersistentAction,
+    );
+    store.dispatch(
+      TaskSharedActions.deleteTasks({
+        taskIds: [TASK_A, TASK_C],
+      }) as PersistentAction,
+    );
+    await writeFlush.flushPendingWrites();
+    const [bulkArchiveOp] = await unsyncedOps();
+
+    const remoteEditOp = buildRemoteTaskEdit(
+      remoteClient(),
+      TASK_A,
+      bulkArchiveOp.timestamp + 1,
+    );
+    const conflicts = await detectConflictsFor(remoteEditOp);
+
+    let thrown: unknown;
+    try {
+      await resolver.autoResolveConflictsLWW(conflicts);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+    expect(operationApplier.applyOperations).not.toHaveBeenCalled();
+    expect(await journal.list('history')).toEqual([]);
   });
 });
