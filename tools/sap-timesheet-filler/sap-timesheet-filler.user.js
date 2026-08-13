@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SAP Timesheet Filler (8h Mon–Thu)
 // @namespace    https://github.com/super-productivity/super-productivity
-// @version      1.1.0
-// @description  One click fills the current week's SAP timesheet with 8 hours on Mon–Thu. It only types into the fields — it NEVER saves or submits; you review and press Save in SAP yourself.
+// @version      1.3.0
+// @description  One click fills the current week's SAP timesheet with 8 hours on Mon–Thu, including the row's Assignment / WBS. Knows the Fiori "Time Entry" day-per-row layout and classic day-per-column timesheets. It only types into the fields — it NEVER saves or submits; you review and press Save in SAP yourself.
 // @match        https://YOUR-SAP-HOST.example.com/*
 // @grant        none
 // @run-at       document-idle
@@ -65,7 +65,33 @@
     },
   ];
 
+  // The row's Assignment / WBS / PSP element. SAP rejects a row without it
+  // ("WBS must not be empty"), so it is filled alongside the hours. In the
+  // Fiori Time Entry app it is copied from a day you already booked; this box
+  // only has to be filled when no booked day exists to copy from.
+  const WBS_DEFAULT = '';
+
+  // Fiori Time Entry books a start/end time per day. An 8-hour day whose
+  // start/end span is exactly 8 hours contains no break, which is what raises
+  // "Attention ! Keep the 30 minutes break !" — so the end time is set to
+  // start + hours + BREAK_MINUTES (09:00 + 8h + 30min = 17:30). The break is
+  // not working time and is not booked; only the span reflects it.
+  const START_TIME = '09:00'; // fallback when no booked day exists to copy from
+  const BREAK_MINUTES = 30;
+
+  const WBS_DEF = {
+    key: 'wbs',
+    label: 'Assignment / WBS',
+    // 'psp' also matches 'PSP-Element'; the token test treats '-' as a boundary.
+    names: ['wbs', 'psp', 'assignment'],
+    abbrs: [],
+  };
+
+  // Targets resolved on the page: the days, plus the row's WBS field.
+  const TARGET_DEFS = DAY_DEFS.concat([WBS_DEF]);
+
   const STORE_KEY = 'sapTimesheetFiller:' + location.host;
+  const WBS_STORE_KEY = 'sapTimesheetFiller:wbs:' + location.host;
   const PANEL_ID = 'sap-timesheet-filler-panel';
 
   // ----------------------------------------------------- current week dates
@@ -108,9 +134,12 @@
     );
   }
 
-  const dayTokens = {};
-  DAY_DEFS.forEach((def) => {
-    dayTokens[def.key] = def.names.concat(def.abbrs, dateTokens(weekDates[def.key]));
+  const tokensByKey = {};
+  TARGET_DEFS.forEach((def) => {
+    tokensByKey[def.key] = def.names.concat(
+      def.abbrs,
+      weekDates[def.key] ? dateTokens(weekDates[def.key]) : [],
+    );
   });
 
   // ------------------------------------------------------------- matching
@@ -121,13 +150,26 @@
     return new RegExp('(^|[^0-9a-zäöüß])' + esc + '($|[^0-9a-zäöüß])').test(text);
   }
 
-  // The day a text refers to — or null if it names none or several (ambiguous).
-  function dayForText(text) {
+  // The target (day or WBS) a text refers to — or null if it names none or
+  // several (ambiguous).
+  function targetForText(text) {
     if (!text) return null;
-    const matches = DAY_DEFS.filter((def) =>
-      dayTokens[def.key].some((tok) => hasToken(text, tok)),
+    const matches = TARGET_DEFS.filter((def) =>
+      tokensByKey[def.key].some((tok) => hasToken(text, tok)),
     );
     return matches.length === 1 ? matches[0].key : null;
+  }
+
+  // A Fiori group-row title ("Monday, August 10, 2026") names both the weekday
+  // and the day of month; requiring both keeps a two-week table unambiguous.
+  function groupRowDay(text) {
+    const t = normalize(text);
+    const hit = DAY_DEFS.find(
+      (def) =>
+        def.names.concat(def.abbrs).some((tok) => hasToken(t, tok)) &&
+        hasToken(t, String(weekDates[def.key].getDate())),
+    );
+    return hit ? hit.key : null;
   }
 
   const CANDIDATE_SEL =
@@ -136,6 +178,7 @@
 
   function isFillable(el) {
     if (el.disabled || el.readOnly) return false;
+    if (el.closest('#' + PANEL_ID)) return false; // the panel's own WBS box
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0;
   }
@@ -208,7 +251,7 @@
     while ((node = walker.nextNode())) {
       const text = normalize(node.nodeValue);
       if (!text || text.length > 60) continue;
-      const day = dayForText(text);
+      const day = targetForText(text);
       if (!day) continue;
       const range = document.createRange();
       range.selectNodeContents(node);
@@ -270,39 +313,47 @@
   }
 
   // ------------------------------------------------------- field resolution
-  // Returns { day → { el, how } } for the configured days.
+  // Returns { target → { el, how } } for the configured days plus 'wbs'.
+  // Days are resolved before the WBS field so an ambiguous match never steals
+  // an hours field.
   function resolveFields() {
     const all = candidates();
     const taught = loadTaught();
+    const targets = FILL_DAYS.concat([WBS_DEF.key]);
     const result = {};
     const claimed = new Set();
-    const claim = (day, el, how) => {
+    const claim = (key, el, how) => {
       if (el && !claimed.has(el)) {
-        result[day] = { el, how };
+        result[key] = { el, how };
         claimed.add(el);
       }
     };
 
     if (taught) {
-      FILL_DAYS.forEach((day) => {
-        if (taught[day]) claim(day, matchTaught(taught[day], all), 'taught');
+      targets.forEach((key) => {
+        if (taught[key]) claim(key, matchTaught(taught[key], all), 'taught');
       });
     }
 
-    const unresolved = () => FILL_DAYS.filter((d) => !result[d]);
+    const unresolved = () => targets.filter((k) => !result[k]);
 
-    unresolved().forEach((day) => {
+    unresolved().forEach((key) => {
       const el = all.find(
         (c) =>
           !claimed.has(c) &&
-          (dayForText(ownText(c)) === day || dayForText(columnHeaderText(c)) === day),
+          (targetForText(ownText(c)) === key ||
+            targetForText(columnHeaderText(c)) === key),
       );
-      claim(day, el, 'label');
+      claim(key, el, 'label');
     });
 
-    if (unresolved().length) {
+    // Geometric matching is deliberately days-only: putting a project code in
+    // the wrong field is worse than leaving it empty, so the WBS field must
+    // come from a real label or from teach mode.
+    const geometricPending = unresolved().filter((k) => k !== WBS_DEF.key);
+    if (geometricPending.length) {
       const anchors = headerAnchors();
-      unresolved().forEach((day) => {
+      geometricPending.forEach((day) => {
         const free = all.filter((c) => !claimed.has(c));
         claim(day, geometricMatch(day, free, anchors), 'position');
       });
@@ -326,23 +377,274 @@
     el.blur();
   }
 
-  function labelFor(dayKey) {
-    const def = DAY_DEFS.find((d) => d.key === dayKey);
-    const date = weekDates[dayKey];
+  function labelFor(key) {
+    const def = TARGET_DEFS.find((d) => d.key === key);
+    const date = weekDates[key];
+    if (!date) return def.label;
     return def.label + ' ' + pad2(date.getDate()) + '.' + pad2(date.getMonth() + 1) + '.';
   }
 
+  // Current WBS: the panel box while mounted, else what was stored for this site.
+  function wbsValue() {
+    if (wbsInputEl) return wbsInputEl.value.trim();
+    return (localStorage.getItem(WBS_STORE_KEY) || WBS_DEFAULT).trim();
+  }
+
+  // ------------------------------------------------- SAP Fiori "Time Entry"
+  // This app puts one *group row* per calendar day ("Monday, August 10, 2026")
+  // followed by that day's entry rows; the columns are fields (Assignment,
+  // Entered, Start Time, …). The day is a ROW, so the column matching used for
+  // classic timesheets does not apply and this engine takes over.
+
+  function fioriGrid() {
+    const grids = Array.from(document.querySelectorAll('table.sapMListTbl'));
+    return grids.find((g) => g.querySelector('.sapMGHLITitle')) || null;
+  }
+
+  // { dayKey -> [entry rows] } for the current week.
+  function fioriDayRows(grid) {
+    const out = {};
+    let day = null;
+    Array.from(grid.querySelectorAll('tbody > tr')).forEach((tr) => {
+      const title = tr.querySelector('.sapMGHLITitle');
+      if (title) {
+        day = groupRowDay(title.textContent);
+      } else if (day && tr.classList.contains('sapMListTblRow')) {
+        (out[day] = out[day] || []).push(tr);
+      }
+    });
+    return out;
+  }
+
+  // A cell's column header text — cells carry the header element's id.
+  function columnLabel(td) {
+    const id = td.getAttribute('data-sap-ui-column');
+    const th = id && document.getElementById(id);
+    return th ? normalize(th.textContent) : '';
+  }
+
+  function fioriRowFields(row) {
+    const cellInput = (needle) => {
+      const cell = Array.from(row.querySelectorAll('td[data-sap-ui-column]')).find(
+        (td) => columnLabel(td).indexOf(needle) !== -1,
+      );
+      const input = cell && cell.querySelector('input');
+      return input && input.type !== 'checkbox' ? input : null;
+    };
+    return {
+      // The hours cell is a StepInput; its inner field is the row's spinbutton.
+      hours: row.querySelector('input[role="spinbutton"]') || cellInput('entered'),
+      assignment: row.querySelector('input[role="combobox"]') || cellInput('assignment'),
+      attendance: cellInput('attendance'),
+      start: cellInput('start time'),
+      end: cellInput('end time'),
+    };
+  }
+
+  const fieldValue = (el) => (el && el.value ? el.value.trim() : '');
+
+  function toNum(value) {
+    const n = parseFloat(
+      String(value || '')
+        .replace(/\s/g, '')
+        .replace(',', '.'),
+    );
+    return isNaN(n) ? 0 : n;
+  }
+
+  function addMinutes(hhmm, minutes) {
+    const m = /^(\d{1,2}):(\d{2})/.exec(String(hhmm || '').trim());
+    if (!m) return '';
+    const total = Number(m[1]) * 60 + Number(m[2]) + minutes;
+    return pad2(Math.floor(total / 60) % 24) + ':' + pad2(total % 60);
+  }
+
+  // The UI5 control owning a DOM node, when the UI5 runtime is reachable.
+  function ui5Control(el) {
+    const ns = window.sap;
+    if (!ns || !ns.ui) return null;
+    for (let node = el; node && node.nodeType === 1; node = node.parentElement) {
+      if (!node.id) continue;
+      try {
+        const core = ns.ui.getCore && ns.ui.getCore();
+        const byId = core && core.byId && core.byId(node.id);
+        if (byId) return byId;
+        const registry = ns.ui.core && ns.ui.core.Element && ns.ui.core.Element.registry;
+        const found = registry && registry.get && registry.get(node.id);
+        if (found) return found;
+      } catch (e) {
+        /* UI5 not ready, or this id is not a control */
+      }
+    }
+    return null;
+  }
+
+  // A ComboBox stores a key, not the typed text, so picking the matching list
+  // item is what actually gets the assignment into the model.
+  function setControlValue(el, value) {
+    const ctrl = ui5Control(el);
+    if (
+      ctrl &&
+      typeof ctrl.getItems === 'function' &&
+      typeof ctrl.setSelectedItem === 'function'
+    ) {
+      let items = [];
+      try {
+        items = ctrl.getItems() || [];
+      } catch (e) {
+        items = [];
+      }
+      const want = normalize(value);
+      const item = items.find(
+        (it) =>
+          (it.getText && normalize(it.getText()) === want) ||
+          (it.getKey && normalize(it.getKey()) === want),
+      );
+      if (item) {
+        ctrl.setSelectedItem(item);
+        if (ctrl.fireChange) {
+          ctrl.fireChange({ value: item.getText ? item.getText() : value });
+        }
+        return true;
+      }
+    }
+    setFieldValue(el, value);
+    return false;
+  }
+
+  function fillFiori(grid) {
+    const dayRows = fioriDayRows(grid);
+    const lines = [];
+    let missing = 0;
+
+    // A day that is already booked carries the right Assignment and Attendance
+    // Type — copying them beats asking the user to retype codes.
+    let template = null;
+    Object.keys(dayRows).forEach((key) =>
+      dayRows[key].forEach((row) => {
+        if (template) return;
+        const f = fioriRowFields(row);
+        if (fieldValue(f.assignment)) template = f;
+      }),
+    );
+
+    const assignment = wbsValue() || fieldValue(template && template.assignment);
+    const attendance = fieldValue(template && template.attendance);
+    const startTime = fieldValue(template && template.start) || START_TIME;
+    const hoursNum = toNum(HOURS);
+
+    FILL_DAYS.forEach((day) => {
+      const rows = dayRows[day];
+      if (!rows || !rows.length) {
+        missing++;
+        lines.push('✗ ' + labelFor(day) + ' — no row for this day');
+        return;
+      }
+      const f = fioriRowFields(rows[0]);
+      if (!f.hours) {
+        missing++;
+        lines.push('✗ ' + labelFor(day) + ' — hours field not found');
+        return;
+      }
+      const booked = toNum(fieldValue(f.hours));
+      if (booked > 0) {
+        lines.push(
+          '• ' +
+            labelFor(day) +
+            ' already booked ' +
+            fieldValue(f.hours) +
+            ' — left as is',
+        );
+        return;
+      }
+      if (!assignment) {
+        missing++;
+        lines.push('✗ ' + labelFor(day) + ' — no assignment to use (fill the box above)');
+        return;
+      }
+
+      const done = [];
+      if (f.assignment && !fieldValue(f.assignment)) {
+        const picked = setControlValue(f.assignment, assignment);
+        done.push(picked ? 'assignment' : 'assignment (typed)');
+      }
+      if (attendance && f.attendance && !fieldValue(f.attendance)) {
+        setFieldValue(f.attendance, attendance);
+        done.push('type ' + attendance);
+      }
+      if (f.start && f.end && !fieldValue(f.start) && !fieldValue(f.end)) {
+        const end = addMinutes(startTime, Math.round(hoursNum * 60) + BREAK_MINUTES);
+        if (end) {
+          setFieldValue(f.start, startTime);
+          setFieldValue(f.end, end);
+          done.push(startTime + '–' + end);
+        }
+      }
+      // Hours last: it is the value that matters most, so nothing re-renders over it.
+      setFieldValue(f.hours, HOURS);
+      done.push(HOURS + ' h');
+      lines.push('✓ ' + labelFor(day) + ': ' + done.join(', '));
+    });
+
+    if (lines.some((l) => l.indexOf('(typed)') !== -1)) {
+      lines.push(
+        '"(typed)" = entered as text, not picked from the dropdown. If SAP still' +
+          ' says the WBS is empty, choose it once from the list yourself.',
+      );
+    }
+    lines.push(
+      missing === 0
+        ? 'Nothing is saved yet — review and press Save in SAP.'
+        : 'Some days could not be filled (see above).',
+    );
+    setStatus(lines.join('\n'));
+  }
+
   function fillWeek() {
+    const grid = fioriGrid();
+    if (grid) {
+      fillFiori(grid);
+      return;
+    }
+    fillGeneric();
+  }
+
+  function fillGeneric() {
     const fields = resolveFields();
+    let missing = 0;
+
     const lines = FILL_DAYS.map((day) => {
       const f = fields[day];
-      if (!f) return '✗ ' + labelFor(day) + ' — field not found';
+      if (!f) {
+        missing++;
+        return '✗ ' + labelFor(day) + ' — field not found';
+      }
+      const prev = f.el.value.trim();
       setFieldValue(f.el, HOURS);
-      return '✓ ' + labelFor(day) + ' = ' + HOURS + ' (' + f.how + ')';
+      const wasNote = prev && prev !== HOURS ? ', was ' + prev : '';
+      return '✓ ' + labelFor(day) + ' = ' + HOURS + ' (' + f.how + wasNote + ')';
     });
-    const found = FILL_DAYS.filter((d) => fields[d]).length;
+
+    const wbs = wbsValue();
+    const wbsField = fields[WBS_DEF.key];
+    if (!wbs) {
+      lines.push('• WBS box empty — SAP will reject the row without it.');
+    } else if (!wbsField) {
+      missing++;
+      lines.push('✗ WBS — field not found, use "Teach fields"');
+    } else {
+      const prev = wbsField.el.value.trim();
+      if (!prev || prev === wbs) {
+        setFieldValue(wbsField.el, wbs);
+        lines.push('✓ WBS = ' + wbs + ' (' + wbsField.how + ')');
+      } else {
+        // Never clobber a different project code that is already booked.
+        lines.push('• WBS already set to ' + prev + ' — left unchanged');
+      }
+    }
+
     lines.push(
-      found === FILL_DAYS.length
+      missing === 0
         ? 'Done. Nothing is saved yet — review and press Save in SAP.'
         : 'Some fields were not found. Use "Teach fields" once to fix this.',
     );
@@ -350,10 +652,11 @@
   }
 
   // ------------------------------------------------------------ teach mode
-  let teaching = null; // { queue: [dayKey…], collected: {…} }
+  let teaching = null; // { queue: [targetKey…], collected: {…} }
 
   function startTeaching() {
-    teaching = { queue: FILL_DAYS.slice(), collected: {} };
+    teaching = { queue: FILL_DAYS.concat([WBS_DEF.key]), collected: {} };
+    if (skipBtnEl) skipBtnEl.style.display = '';
     promptNextTeach();
     document.addEventListener('click', onTeachClick, true);
     document.addEventListener('keydown', onTeachKey, true);
@@ -361,17 +664,39 @@
 
   function stopTeaching(message) {
     teaching = null;
+    if (skipBtnEl) skipBtnEl.style.display = 'none';
     document.removeEventListener('click', onTeachClick, true);
     document.removeEventListener('keydown', onTeachKey, true);
     setStatus(message);
   }
 
   function promptNextTeach() {
-    setStatus(
-      'Teach mode: click the hours field for ' +
-        labelFor(teaching.queue[0]) +
-        '\n(Esc cancels)',
-    );
+    const key = teaching.queue[0];
+    const what =
+      key === WBS_DEF.key
+        ? 'the WBS / PSP element field of your row'
+        : 'the hours field for ' + labelFor(key);
+    setStatus('Teach mode: click ' + what + '\n(Skip leaves it out, Esc cancels)');
+  }
+
+  function advanceTeaching() {
+    if (teaching.queue.length) {
+      promptNextTeach();
+      return;
+    }
+    const learned = Object.keys(teaching.collected);
+    if (learned.length) {
+      localStorage.setItem(STORE_KEY, JSON.stringify(teaching.collected));
+      stopTeaching('Learned ' + learned.length + ' fields ✓ — now click Fill.');
+    } else {
+      stopTeaching('Nothing learned — auto-detection stays in use.');
+    }
+  }
+
+  function skipTeachField() {
+    if (!teaching) return;
+    teaching.queue.shift();
+    advanceTeaching();
   }
 
   function onTeachKey(e) {
@@ -397,18 +722,15 @@
       setStatus('That does not look like an input — click directly inside the field.');
       return;
     }
-    const day = teaching.queue.shift();
-    teaching.collected[day] = describeForTeaching(el, candidates());
-    if (teaching.queue.length) {
-      promptNextTeach();
-    } else {
-      localStorage.setItem(STORE_KEY, JSON.stringify(teaching.collected));
-      stopTeaching('Learned ' + FILL_DAYS.length + ' fields ✓ — now click Fill.');
-    }
+    const key = teaching.queue.shift();
+    teaching.collected[key] = describeForTeaching(el, candidates());
+    advanceTeaching();
   }
 
   // ----------------------------------------------------------------- panel
   let statusEl = null;
+  let wbsInputEl = null;
+  let skipBtnEl = null;
 
   function setStatus(text) {
     if (statusEl) statusEl.textContent = text;
@@ -451,10 +773,29 @@
     ).join(', ');
     statusEl.textContent = 'Ready: ' + HOURS + 'h on ' + dayLabels + ' (this week).';
 
+    // WBS box — SAP rejects a row without it, so it is part of every fill.
+    const wbsLabel = document.createElement('label');
+    wbsLabel.style.cssText = 'display:block;margin:6px 0;';
+    wbsLabel.appendChild(document.createTextNode('Assignment / WBS'));
+    wbsInputEl = document.createElement('input');
+    wbsInputEl.type = 'text';
+    wbsInputEl.value = localStorage.getItem(WBS_STORE_KEY) || WBS_DEFAULT;
+    wbsInputEl.placeholder = 'empty = copy from a booked day';
+    wbsInputEl.style.cssText =
+      'width:100%;box-sizing:border-box;margin-top:2px;padding:3px 5px;' +
+      'border:1px solid #888;border-radius:4px;font:12px/1.4 monospace;';
+    wbsInputEl.addEventListener('input', () => {
+      localStorage.setItem(WBS_STORE_KEY, wbsInputEl.value.trim());
+    });
+    wbsLabel.appendChild(wbsInputEl);
+
     const buttons = document.createElement('div');
     buttons.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
     buttons.appendChild(makeButton('Fill ' + HOURS + 'h', fillWeek));
     buttons.appendChild(makeButton('Teach fields', startTeaching));
+    skipBtnEl = makeButton('Skip field', skipTeachField);
+    skipBtnEl.style.display = 'none';
+    buttons.appendChild(skipBtnEl);
     buttons.appendChild(
       makeButton('Forget taught', () => {
         localStorage.removeItem(STORE_KEY);
@@ -464,6 +805,7 @@
 
     panel.appendChild(title);
     panel.appendChild(statusEl);
+    panel.appendChild(wbsLabel);
     panel.appendChild(buttons);
     document.body.appendChild(panel);
   }
@@ -473,6 +815,7 @@
   // timesheet in an iframe): show it only where timesheet-like fields exist, and
   // keep checking for a while because SAP UIs render late.
   function frameLooksRelevant() {
+    if (fioriGrid()) return true;
     if (loadTaught() && candidates().length > 0) return true;
     return Object.keys(resolveFields()).length >= 2;
   }

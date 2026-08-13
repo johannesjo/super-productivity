@@ -25,6 +25,55 @@ fields — you review the result and press SAP's own _Save_ button yourself.
 
 4. Save the script.
 
+## Two timesheet layouts
+
+SAP timesheets come in two fundamentally different shapes, and the script picks
+the right engine automatically:
+
+**Fiori "Time Entry" (day per row).** Each calendar day is a group row
+(_"Monday, August 10, 2026"_) with the entry rows underneath, and the columns
+are fields: Assignment, Attendance Type, Entered (hours), Start/End Time. This
+is detected first; if the page has such a table, everything below about
+columns, teach mode and the WBS box being required does not apply.
+
+**Classic (day per column).** One row per project with Mon–Sun as columns. Days
+are matched by column header, and teach mode exists for the layouts where
+automatic detection can't work.
+
+## The Assignment / WBS
+
+SAP rejects a row without a project code — _"Input to the WBS invalid. WBS must
+not be empty."_ — so the hours alone are never enough.
+
+**In the Fiori layout** the code lives in the row's **Assignment** dropdown.
+You normally don't have to type it: the script copies the Assignment (and the
+Attendance Type) from a day you have already booked this week, so the empty
+days get exactly what the booked ones use. Only when no day is booked yet does
+it need the panel's **Assignment / WBS** box; what you type there is stored per
+site and takes precedence when set.
+
+Since an Assignment is a dropdown, the script picks the matching list entry so
+SAP stores the underlying key, not just display text. If no matching entry is
+available it falls back to typing and says so — `assignment (typed)`. If SAP
+then still reports an empty WBS, choose the value from the dropdown once by
+hand.
+
+**In the classic layout** the box is required, and two safety rules apply:
+
+- If the row **already** carries a different project code, it is left
+  untouched and reported (`• WBS already set to … — left unchanged`) rather
+  than overwritten.
+- The WBS field is only filled when found via a real label/column header or
+  taught explicitly — unlike the hours fields it is never guessed by position,
+  because a project code in the wrong field is worse than an empty one. If the
+  panel reports `✗ WBS — field not found`, use **Teach fields**.
+
+## Days that are already booked are never touched
+
+In the Fiori layout a day that already has hours is reported
+(`• Mon 10.08. already booked 8,00 — left as is`) and skipped entirely — no
+overwriting of submitted entries, so running Fill twice is harmless.
+
 ## Weekly use
 
 1. Open your SAP timesheet on the **current week** (the script matches columns
@@ -33,7 +82,9 @@ fields — you review the result and press SAP's own _Save_ button yourself.
    If the timesheet is embedded in a frame, a panel appears inside that frame —
    use that one.
 3. Click **Fill 8h**. The panel reports what it filled, e.g.
-   `✓ Mon 10.08. = 8 (label)`.
+   `✓ Mon 10.08. = 8 (label)` and `✓ WBS = P-12345.6.7 (label)`. A day that
+   already had hours is reported as `(label, was 4)` so an overwrite is never
+   silent.
 4. Check the values on screen, then press **Save** in SAP as usual.
 
 ## If the wrong fields (or none) are filled
@@ -42,8 +93,9 @@ Every SAP install renders its timesheet differently, so automatic detection can
 miss. Fix it once with teach mode:
 
 1. Click **Teach fields** in the panel.
-2. Click the hours input for each day the panel asks for (Mon, Tue, Wed, Thu).
-   `Esc` cancels.
+2. Click the input the panel asks for: the hours field for each day (Mon, Tue,
+   Wed, Thu), then your row's WBS / PSP element field. **Skip field** leaves
+   one out (e.g. if your timesheet has no WBS column), `Esc` cancels.
 3. The fields are remembered for this site (stored in your browser's
    localStorage). From then on, **Fill** uses them directly.
 
@@ -53,6 +105,33 @@ Teach mode is also the answer for multi-row timesheets (several
 projects/positions per week): auto-detection targets the topmost row, so teach
 it the row you actually book on.
 
+## SAP messages when you save
+
+**"Input to the WBS invalid. WBS must not be empty."** — the row carries no
+project code. In the Fiori layout that is the row's **Assignment**; the script
+copies it from a day you already booked, or from the panel box when no booked
+day exists. See [The Assignment / WBS](#the-assignment--wbs).
+
+**"Attention ! Keep the 30 minutes break !"** — the day's **start/end span
+leaves no room for a break**. German working-time law (ArbZG §4) requires a
+30-minute break once a working day exceeds 6 hours, so booking 8 hours between
+09:00 and 17:00 describes 8 hours of work with nothing in between, and SAP
+objects.
+
+The break is not working time and is not booked, so the fix is the span, not
+the hours: 8 hours of work plus a 30-minute break means being present from
+09:00 to **17:30**. That is what the script writes — `start + hours +
+BREAK_MINUTES` — so days it fills do not raise the message. Days you entered by
+hand keep whatever times they have; to silence the warning there, move the end
+time half an hour later yourself.
+
+Adjust the assumption at the top of the script if your break differs:
+
+```js
+const START_TIME = '09:00'; // only used when no booked day exists to copy from
+const BREAK_MINUTES = 30;
+```
+
 ## Adjusting the schedule
 
 Edit the config block at the top of the script:
@@ -61,6 +140,10 @@ Edit the config block at the top of the script:
 const HOURS = '8'; // use '8,00' if your SAP expects a decimal comma
 const FILL_DAYS = ['mon', 'tue', 'wed', 'thu'];
 ```
+
+The WBS is **not** configured here — type it into the panel box, which stores
+it per site so the bookmarklet does not have to be rebuilt when your project
+changes.
 
 ## Running it as a bookmarklet (no extension needed)
 
@@ -91,17 +174,30 @@ context dropdown if it sits in one.
 
 ## How field detection works
 
-For each configured day of the current week the script tries, in order:
+**Fiori layout:** the table is recognised by its day group rows. Each group
+title is matched to a day of the current week by weekday name _and_ day of
+month (so a two-week table stays unambiguous), and within that day's first
+entry row the fields are found by role and column header — the hours field is
+the row's `spinbutton`, the Assignment its `combobox`, and Attendance Type /
+Start Time / End Time come from their column headers.
+
+**Classic layout:** for each configured day of the current week — and for the
+WBS field — the script tries, in order:
 
 1. **Taught fields** — what you clicked in teach mode (matched by id, name,
    aria-label, placeholder and position).
 2. **Labels** — the input's own `aria-label` / placeholder / `<label>` /
    table or ARIA-grid column header, matched against day names (`Monday`,
-   `Montag`, `Mo`, …) and this week's dates in common formats (`10.08.`,
-   `08/10`, `2026-08-10`, …).
+   `Montag`, `Mo`, …), this week's dates in common formats (`10.08.`,
+   `08/10`, `2026-08-10`, …), and for the project field `WBS` / `PSP`
+   (so `WBS Element`, `Receiver WBS element` and `PSP-Element` all match).
 3. **Position** — a short text on the page naming the day (e.g. a column
    header rendered as a plain `<div>`, common in SAP UI5 grids), paired with
-   the nearest input below it in the same column.
+   the nearest input below it in the same column. **Hours fields only** — the
+   WBS field is never matched this way.
+
+A text naming two targets at once is treated as ambiguous and ignored, and each
+input is claimed by at most one target, so a single field can't be filled twice.
 
 Values are set with the native value setter plus `input`/`change` events, so
 UI5/React-style forms register the change like real typing.
