@@ -8,8 +8,8 @@ area has regressed repeatedly (#8295, then #8508).**
 > Capacitor's built-in `SystemBars`** (`insetsHandling: 'css'`). Edge-to-edge
 > insets + IME padding are now handled by SystemBars on **WebView ≥ 140** (or
 > API ≥ 35); the **WebView < 140 / API < 35** tail is covered by env() + a native
-> keyboard shim (`adjustWebViewHeightForKeyboardBelowApi30`, now gated to
-> WebView < 140 so it never fights SystemBars). Bar backgrounds are no longer
+> keyboard shim (`adjustWebViewHeightForKeyboard`, gated by `NativeInsetShimGate`
+> to exactly that tail so it never fights SystemBars). Bar backgrounds are no longer
 > painted by a plugin (SystemBars has no color API) — the bars are transparent
 > and the theme color shows through via `NavigationBarPlugin.setWebViewBackgroundColor`
 > (window decor + WebView surface). The #8508 sections below describe the _former_
@@ -121,7 +121,7 @@ bar sits just above the keyboard (no behind-keyboard regression).**
 
 ## #8508 follow-up — SDK 28 (Android 9): add-task bar sits BEHIND the keyboard
 
-**Status: fix implemented (`CapacitorMainActivity.adjustWebViewForKeyboardBelowApi30`),
+**Status: fix implemented (`CapacitorMainActivity.adjustWebViewHeightForKeyboard`),
 PENDING ON-DEVICE VALIDATION across the matrix below.** After 18.12.0 (patch
 removed) a user on **Android 9 / API 28** reports the global add-task bar sits
 _below / behind_ the soft keyboard. This is the realization of open item #4
@@ -160,7 +160,7 @@ resize, that double-counts and floats the bar mid-screen. The web layer lacks
 the signal to disambiguate; native has it unambiguously.
 
 **Implemented fix (native, explicit WebView height while the IME is up, scoped to
-API < 30) — `CapacitorMainActivity.adjustWebViewHeightForKeyboardBelowApi30`.**
+API < 30) — `CapacitorMainActivity.adjustWebViewHeightForKeyboard`.**
 Driven from the existing keyboard `OnGlobalLayoutListener`:
 
 - while the keyboard is up: set an explicit WebView **layout height** to the
@@ -271,7 +271,7 @@ an iOS bottom gap appears, drop the term there too.
 
 ## #8508 follow-up — SDK 28 (Android 9): header draws BEHIND the status bar
 
-**Status: fix implemented (`CapacitorMainActivity.pushStatusBarOverlapBelowApi30`),
+**Status: fix implemented (`CapacitorMainActivity.pushStatusBarOverlap`),
 PENDING ON-DEVICE VALIDATION.** Separate from the keyboard — on API 28 the web
 header overlaps the **status bar** (no top gap), reported on #8508.
 
@@ -290,7 +290,7 @@ edge-to-edge under the status bar" from "WebView is already inset below it" —
 `env()` is 0 in both, and adding the status-bar height blindly would double-count
 in the inset case. Native has the geometry.
 
-**Fix (native overlap → SCSS fallback) — `pushStatusBarOverlapBelowApi30`.** From
+**Fix (native overlap → SCSS fallback) — `pushStatusBarOverlap`.** From
 the existing keyboard `OnGlobalLayoutListener`, measure the overlap
 `max(0, rect.top − webViewTopOnScreen)` — `rect.top` is the visible-frame top
 (= status-bar height, reliable on API 28; the same frame the keyboard path reads)
@@ -316,15 +316,67 @@ SystemBars on `--safe-area-inset-*`:
 - JS readers (`_patchCdkViewportForSafeArea`) still parse the `var(max(...))`
   token to 0, so overlay positioning is unchanged — preserving #8283 scoping
   (only the header padding is affected).
-- Known small gap: an **API 30–34** device on an **old WebView < 140** also has
+- ~~Known small gap: an **API 30–34** device on an **old WebView < 140** also has
   env()==0 but is excluded by the SDK < 30 gate; rare (WebView auto-updates above
-  API 30) — broaden the gate to WebView-only if it ever surfaces.
+  API 30) — broaden the gate to WebView-only if it ever surfaces.~~ **It surfaced
+  (#9316); the gate was broadened — see the section below.**
 - The var lives only as an inline style on the document, so a web-side reload
   (`window.location.reload()` — language change, PWA update, sync-conflict
   recovery) wipes it. The native dedupe (`lastStatusBarOverlapCssPx`) is reset in
   `flushPendingShareIntent()` (runs on every frontend (re)load) so the next layout
   pass re-publishes it; without the reset the unchanged value would be skipped and
   the overlap would regress after a reload.
+
+## #9316 — API 34 + old WebView: add-task bar behind the keyboard
+
+**Status: gate widened (`NativeInsetShimGate`), PENDING ON-DEVICE VALIDATION by
+the reporters.** Two users on **Android 14 (API 34)** report the add-task bar (and
+the task-detail notes field) sitting behind the keyboard. This is the "known small
+gap" above, realized.
+
+**Root cause — nobody owns the IME inset.** `SystemBars` installs its
+`OnApplyWindowInsetsListener` on the WebView's parent (the activity content root,
+`capacitor_bridge_layout_main.xml`) on **every** API level, so it — not the
+framework — is the inset owner. But it only applies IME padding on two paths
+(`SystemBars.initWindowInsetsListener`): the passthrough branch, gated
+`webViewMajor >= 140 && viewport-fit=cover`, and an `SDK_INT >= 35` branch. On
+**API < 35 AND WebView < 140** it applies nothing at all — and our shims were
+gated `SDK_INT < 30`, so they did not step in either. Nothing shrinks →
+`obscured = innerHeight − visualViewport.height` is 0 → `--keyboard-height: 0` →
+the `position: fixed` bar stays at the bottom of a viewport that extends behind
+the IME. The reporters' before/after screenshots are pixel-identical, which is
+exactly this signature.
+
+**Why the old gate's assumption failed.** `SDK_INT < 30` encoded "API >= 30
+implies a current WebView, because it auto-updates." Not on a custom ROM:
+crDroid ships its own `com.android.webview` (124) and the Play-updated
+`com.google.android.webview` (150) is *installed but disabled*. Settings shows
+150; `dumpsys webviewupdate` shows the **active** provider is 124. Always read
+the `Current WebView package` line, never the Settings screen.
+
+**Evidence.** Two independent reporters at API 34 / WebView 124 and 126. One of
+them side-loaded WebView 151 with no app change and the bug disappeared — a clean
+A/B isolating the WebView version, and a direct confirmation of the 140 boundary.
+
+**Fix — `NativeInsetShimGate.shouldRunShim(sdkInt, webViewMajor)`**, now shared by
+`adjustWebViewHeightForKeyboard` and `pushStatusBarOverlap` (both lost their
+`BelowApi30` suffix — the gate is no longer SDK 30). It is the exact complement of
+SystemBars' two ownership branches: run iff `sdkInt < 35 && (webViewMajor == null
+|| webViewMajor < 140)`. An unreadable version runs the shim, because SystemBars
+treats an unreadable version as `0` and skips its passthrough too — both off would
+strand the device with no inset owner. Unit-covered in `NativeInsetShimGateTest`.
+
+**Why this does not re-arm #8508.** The rule from that saga is that any inset must
+be *resize-detecting*. This shim already is, structurally: it sets the WebView's
+layout height to an **absolute** target read from the visible frame
+(`rect.bottom − webViewTop`), not a delta. On a device where the window already
+shrank for the IME, the WebView bottom is already at `rect.bottom`, so the
+computed height equals the current one and nothing moves. That property is what
+makes broadening the gate safe; do not replace it with a delta-based inset.
+
+**Still REQUIRED before release:** the widened band (API 30–34) is not covered by
+any device on hand — validate via a test build with the #9316 reporters, plus the
+matrix below to confirm API >= 35 and WebView >= 140 are untouched.
 
 ## What NOT to do
 
@@ -346,6 +398,14 @@ typing a word fast right after tapping +, on:
 - Android 15 (API 35) — we opt out via `windowOptOutEdgeToEdgeEnforcement`
 - Android 16 (API 36) — our target; the system was observed to still resize for
   the IME on a real device
+
+**The WebView version is a second axis, not a detail (#9316).** SystemBars
+branches on it at 140, so an API 30–34 device on WebView < 140 behaves nothing
+like the same device on WebView >= 140 — that combination is what #9316 was, and
+it is the one the SDK-only matrix missed. Read the active provider with
+`adb shell dumpsys webviewupdate` (the `Current WebView package` line) — **not**
+the Settings screen, which can show an installed-but-disabled package. Custom
+ROMs are the realistic source of an old WebView above API 30.
 
 Both gesture-nav and 3-button-nav, light and dark. Confirm: no blank gap above
 the keyboard, bar visible just above the keyboard, and typed characters appear in
