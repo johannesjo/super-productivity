@@ -247,6 +247,86 @@ describe('Multi-tab frontier guard (#9438)', () => {
     expect(cache?.lastAppliedOpSeq).toBe(postWipeSeq);
   });
 
+  // WIRING LOCK: every mid-session append method of the store must keep the
+  // tracker in step — a method missing its observe/establish call makes the
+  // next observed write look like a foreign gap and silently disables
+  // snapshot saves + compaction for the session on ALL platforms (see the
+  // invariant note in TabSeqFrontierService). Each case fails if the wiring
+  // for that method is removed. New append methods must be added here.
+  describe('store wiring lock (#9438)', () => {
+    let baseSeq: number;
+
+    beforeEach(async () => {
+      baseSeq = await appendOwnOps(2, 'base');
+      frontier.establishFrontier(baseSeq);
+    });
+
+    const expectInStep = async (): Promise<void> => {
+      const lastSeq = await storeService.getLastSeq();
+      expect(frontier.hasKnownForeignWrites()).toBe(false);
+      expect(frontier.isSaveSafeAt(lastSeq)).toBe(true);
+    };
+
+    it('appendBatch advances the frontier', async () => {
+      await storeService.appendBatch(
+        [
+          createTaskOperation(client, 'wl-batch-1', OpType.Create, { title: 'b1' }),
+          createTaskOperation(client, 'wl-batch-2', OpType.Create, { title: 'b2' }),
+        ],
+        'local',
+      );
+      await expectInStep();
+    });
+
+    it('appendBatchSkipDuplicates advances the frontier', async () => {
+      await storeService.appendBatchSkipDuplicates(
+        [createTaskOperation(client, 'wl-skipdup-1', OpType.Create, { title: 's1' })],
+        'remote',
+        { pendingApply: true },
+      );
+      await expectInStep();
+    });
+
+    it('appendMixedSourceBatchSkipDuplicates advances the frontier', async () => {
+      await storeService.appendMixedSourceBatchSkipDuplicates([
+        {
+          source: 'remote',
+          ops: [
+            createTaskOperation(client, 'wl-mixed-1', OpType.Create, { title: 'm1' }),
+          ],
+        },
+      ]);
+      await expectInStep();
+    });
+
+    it('appendWithVectorClockOverwrite advances the frontier', async () => {
+      await storeService.appendWithVectorClockOverwrite(
+        createTaskOperation(client, 'wl-vclock-1', OpType.Create, { title: 'v1' }),
+        'local',
+      );
+      await expectInStep();
+    });
+
+    it('appendOperationAndSnapshot establishes at its written seq, clearing prior divergence', async () => {
+      // Put the tracker into the pure-foreign mismatch state first …
+      await foreignStore.append(
+        createTaskOperation(foreignClient, 'wl-foreign', OpType.Create, {
+          title: 'foreign',
+        }),
+        'local',
+      );
+      // … then install a full baseline: state cache and op are one atomic
+      // anchor, so the tracker must be re-established at exactly that seq.
+      const seq = await storeService.appendOperationAndSnapshot(
+        createTaskOperation(client, 'wl-anchor', OpType.Create, { title: 'anchor' }),
+        'local',
+        { state: meaningfulState, vectorClock: {}, compactedAt: Date.now() },
+      );
+      expect(frontier.isSaveSafeAt(seq)).toBe(true);
+      await expectInStep();
+    });
+  });
+
   it('stays default-open while no frontier was established (pre-hydration behavior unchanged)', async () => {
     await appendOwnOps(3, 'own');
     const foreignSeq = await foreignStore.append(
