@@ -42,7 +42,9 @@ input {
   color: var(--text-color);
   padding: var(--s-half) var(--s-half);
   text-align: center;
-  font-size: 14px;
+  // Only visible while editing, so there is no display counterpart to stay in
+  // sync with — safe to raise unconditionally (#9556).
+  @include noIosFocusZoom();
   min-height: 100%;
 
   @include inlineEditElevation();

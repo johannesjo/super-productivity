@@ -72,8 +72,12 @@ progress-bar {
   min-height: 40px;
   font-size: 17px;
 
+  // 16px rather than 15px: this rule outweighs task-title's own touch-scoped
+  // bump, and at these widths a touch device is a tablet — where 15px would
+  // still trip the iOS focus zoom (#9556). Below 600px the base 17px already
+  // clears it.
   @include mq(xs) {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   &:focus {
