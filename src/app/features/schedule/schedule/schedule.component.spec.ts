@@ -1112,7 +1112,7 @@ describe('ScheduleComponent', () => {
     };
 
     it('scrolls to current-time when the current-time indicator is rendered', fakeAsync(() => {
-      const scrollSpy = spyOn<any>(component, '_scrollIntoViewWithTimeColumnOffset');
+      const scrollSpy = spyOn<any>(component, '_scrollAnchorToTop');
       // Viewing today (default: _selectedDate null) → #current-time renders.
       expect(fixture.nativeElement.querySelector('#current-time')).toBeTruthy();
 
@@ -1123,7 +1123,7 @@ describe('ScheduleComponent', () => {
     }));
 
     it('falls back to work-start when the current-time indicator is absent', fakeAsync(() => {
-      const scrollSpy = spyOn<any>(component, '_scrollIntoViewWithTimeColumnOffset');
+      const scrollSpy = spyOn<any>(component, '_scrollAnchorToTop');
       // Viewing a future range without today → currentTimeRow() is null.
       mockScheduleService.getDaysToShow.and.returnValue([
         '2027-06-14',
@@ -1144,10 +1144,7 @@ describe('ScheduleComponent', () => {
       // The issue's actual scenario: component created while already in week
       // view. Spy on the prototype BEFORE creating the fixture so the
       // constructor effect's initial run is captured.
-      const scrollSpy = spyOn<any>(
-        ScheduleComponent.prototype,
-        '_scrollIntoViewWithTimeColumnOffset',
-      );
+      const scrollSpy = spyOn<any>(ScheduleComponent.prototype, '_scrollAnchorToTop');
       const freshFixture = TestBed.createComponent(ScheduleComponent);
       freshFixture.detectChanges();
       tick();
@@ -1181,169 +1178,61 @@ describe('ScheduleComponent', () => {
     });
   });
 
-  describe('scroll target measurement', () => {
-    const TARGET_TOP_PX = 250;
-    // The test grid below is 2880px tall for a 24h day.
-    const PX_PER_MINUTE = 2;
-    const SCROLL_LEAD_MINUTES = 30;
-    let host: HTMLElement;
-    let wrapper: HTMLElement;
+  describe('scroll framing', () => {
+    // Rendered against the real schedule-week DOM and the component's own
+    // styles, so a rename of .week-header or .scroll-wrapper fails here rather
+    // than only in production.
+    const LEAD_FRACTION = 0.12;
 
-    const buildScrollableDom = (scale: string): void => {
-      host = document.createElement('div');
-      // The route enter animation (warpRoute) starts the view at scale(1.2),
-      // and the scroll runs while that is still in flight.
-      host.style.cssText = `position:relative;transform:${scale};transform-origin:top left;`;
-
-      wrapper = document.createElement('div');
-      wrapper.className = 'scroll-wrapper';
-      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
-
-      const spacer = document.createElement('div');
-      spacer.style.cssText = 'height:600px;width:400px;';
-
-      const target = document.createElement('div');
-      target.id = 'test-scroll-target';
-      target.style.cssText = `position:absolute;top:${TARGET_TOP_PX}px;left:0;height:2px;width:10px;`;
-
-      wrapper.append(spacer, target);
-      host.append(wrapper);
-      document.body.append(host);
+    const renderScrollable = (transform: string): HTMLElement => {
+      const host = fixture.nativeElement as HTMLElement;
+      host.style.cssText = `display:block;height:400px;transform:${transform};transform-origin:top left;`;
+      fixture.detectChanges();
+      return host;
     };
 
-    afterEach(() => host?.remove());
+    afterEach(() => ((fixture.nativeElement as HTMLElement).style.cssText = ''));
 
-    it('scrolls to the layout position even while an ancestor is scaled', () => {
-      buildScrollableDom('scale(1.2)');
-      const scrollToSpy = spyOn(wrapper, 'scrollTo');
+    it('lands the current time below the sticky header with a lead above it', () => {
+      const host = renderScrollable('none');
+      const wrapper = host.querySelector('.scroll-wrapper') as HTMLElement;
+      const header = host.querySelector('.week-header') as HTMLElement;
+      const anchor = host.querySelector('#current-time') as HTMLElement;
+      expect(wrapper && header && anchor).toBeTruthy();
 
-      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
+      wrapper.scrollTop = 0;
+      const distanceFromContentTop =
+        anchor.getBoundingClientRect().top - wrapper.getBoundingClientRect().top;
 
-      expect(scrollToSpy).toHaveBeenCalled();
-      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
-      // Rect-based math would return TARGET_TOP_PX * 1.2 here, scrolling the
-      // view roughly two hours past "now".
-      expect(options.top).toBe(TARGET_TOP_PX);
+      component['_scrollAnchorToTop']('current-time');
+
+      const lead = LEAD_FRACTION * wrapper.clientHeight;
+      const maxScrollTop = wrapper.scrollHeight - wrapper.clientHeight;
+      // Within one viewport of the end of the day the browser clamps, and the
+      // lead cannot be honored — anchoring on "now" can't do better there.
+      const expected = Math.min(
+        Math.max(0, distanceFromContentTop - header.offsetHeight - lead),
+        maxScrollTop,
+      );
+      expect(Math.abs(wrapper.scrollTop - expected)).toBeLessThan(2);
     });
 
-    it('leaves 30 minutes of the schedule visible above the target', () => {
-      host = document.createElement('div');
-      host.style.cssText = 'position:relative;';
+    it('lands at the same place while the route enter animation is scaling the view', () => {
+      const plainHost = renderScrollable('none');
+      const plainWrapper = plainHost.querySelector('.scroll-wrapper') as HTMLElement;
+      component['_scrollAnchorToTop']('current-time');
+      const plainTop = plainWrapper.scrollTop;
 
-      wrapper = document.createElement('div');
-      wrapper.className = 'scroll-wrapper';
-      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
+      plainWrapper.scrollTop = 0;
+      // warpRoute starts the view at scale(1.2); the scroll runs on a
+      // setTimeout(0) while that is still in flight.
+      const scaledHost = renderScrollable('scale(1.2)');
+      const scaledWrapper = scaledHost.querySelector('.scroll-wrapper') as HTMLElement;
+      component['_scrollAnchorToTop']('current-time');
 
-      // The grid always spans a full 24h, so its height fixes the pixels-per-
-      // minute scale. 2880px / 1440min = 2px per minute.
-      const grid = document.createElement('div');
-      grid.className = 'grid-container';
-      grid.style.cssText = 'position:relative;height:2880px;width:400px;';
-
-      const target = document.createElement('div');
-      target.id = 'test-scroll-target';
-      target.style.cssText = `position:absolute;top:${TARGET_TOP_PX}px;left:0;height:2px;width:10px;`;
-
-      grid.append(target);
-      wrapper.append(grid);
-      host.append(wrapper);
-      document.body.append(host);
-
-      const scrollToSpy = spyOn(wrapper, 'scrollTo');
-      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
-
-      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
-      const leadPx = SCROLL_LEAD_MINUTES * PX_PER_MINUTE;
-      expect(options.top).toBe(TARGET_TOP_PX - leadPx);
-    });
-
-    it('keeps the full lead visible below the sticky week header', () => {
-      const HEADER_HEIGHT_PX = 33;
-
-      host = document.createElement('div');
-      host.style.cssText = 'position:relative;';
-
-      wrapper = document.createElement('div');
-      wrapper.className = 'scroll-wrapper';
-      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
-
-      const week = document.createElement('schedule-week');
-      week.style.cssText = 'display:block;';
-
-      // Sticky, so it stays over the top of the viewport once scrolled and
-      // covers the first HEADER_HEIGHT_PX of whatever sits below it.
-      const header = document.createElement('div');
-      header.className = 'week-header';
-      header.style.cssText = `position:sticky;top:0;height:${HEADER_HEIGHT_PX}px;width:400px;`;
-
-      const grid = document.createElement('div');
-      grid.className = 'grid-container';
-      grid.style.cssText = 'position:relative;height:2880px;width:400px;';
-
-      const target = document.createElement('div');
-      target.id = 'test-scroll-target';
-      target.style.cssText = `position:absolute;top:${TARGET_TOP_PX}px;left:0;height:2px;width:10px;`;
-
-      grid.append(target);
-      week.append(header, grid);
-      wrapper.append(week);
-      host.append(wrapper);
-      document.body.append(host);
-
-      const scrollToSpy = spyOn(wrapper, 'scrollTo');
-      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
-
-      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
-      const leadPx = SCROLL_LEAD_MINUTES * PX_PER_MINUTE;
-      // The target sits HEADER_HEIGHT_PX further down the flow, and the scroll
-      // pulls back by the same amount, so the lead below the header is the full
-      // 30 minutes. Without the compensation this lands HEADER_HEIGHT_PX lower
-      // and the header covers more than half of that lead.
-      expect(options.top).toBe(TARGET_TOP_PX - leadPx);
-    });
-
-    it('clamps the lead at the top of the day', () => {
-      host = document.createElement('div');
-      host.style.cssText = 'position:relative;';
-
-      wrapper = document.createElement('div');
-      wrapper.className = 'scroll-wrapper';
-      wrapper.style.cssText = 'position:relative;overflow:auto;height:100px;width:200px;';
-
-      const grid = document.createElement('div');
-      grid.className = 'grid-container';
-      grid.style.cssText = 'position:relative;height:2880px;width:400px;';
-
-      const target = document.createElement('div');
-      target.id = 'test-scroll-target';
-      // 10px into the day, less than the 60px of lead.
-      target.style.cssText = 'position:absolute;top:10px;left:0;height:2px;width:10px;';
-
-      grid.append(target);
-      wrapper.append(grid);
-      host.append(wrapper);
-      document.body.append(host);
-
-      const scrollToSpy = spyOn(wrapper, 'scrollTo');
-      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
-
-      const options = scrollToSpy.calls.mostRecent().args[0] as ScrollToOptions;
-      expect(options.top).toBe(0);
-    });
-
-    it('gives the same target with and without the scale', () => {
-      buildScrollableDom('scale(1.2)');
-      const scaledSpy = spyOn(wrapper, 'scrollTo');
-      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
-      const scaledTop = (scaledSpy.calls.mostRecent().args[0] as ScrollToOptions).top;
-      host.remove();
-
-      buildScrollableDom('none');
-      const plainSpy = spyOn(wrapper, 'scrollTo');
-      component['_scrollIntoViewWithTimeColumnOffset']('test-scroll-target');
-      const plainTop = (plainSpy.calls.mostRecent().args[0] as ScrollToOptions).top;
-
-      expect(scaledTop).toBe(plainTop);
+      // Rect-based math landed 20% of the distance from midnight too far —
+      // hundreds of pixels. What is left here is sub-pixel rounding.
+      expect(Math.abs(scaledWrapper.scrollTop - plainTop)).toBeLessThan(2);
     });
   });
 });
