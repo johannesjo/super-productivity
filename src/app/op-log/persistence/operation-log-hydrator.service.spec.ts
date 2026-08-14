@@ -17,6 +17,7 @@ import { OperationApplierService } from '../apply/operation-applier.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { OperationLogSnapshotService } from './operation-log-snapshot.service';
 import { OperationLogRecoveryService } from './operation-log-recovery.service';
+import { TabSeqFrontierService } from './tab-seq-frontier.service';
 import { SyncHydrationService } from './sync-hydration.service';
 import {
   ActionType,
@@ -371,6 +372,54 @@ describe('OperationLogHydratorService', () => {
         await service.hydrateStore();
 
         expect(mockOpLogStore.setVectorClock).toHaveBeenCalledWith(exactClock);
+      });
+    });
+
+    describe('tab applied-seq frontier establishment (#9438)', () => {
+      // The snapshot/compaction guard only arms once hydration establishes
+      // the frontier — these tests protect that wiring.
+      it('establishes the frontier at the snapshot anchor when there are no tail ops', async () => {
+        const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
+        mockOpLogStore.loadStateCache.and.resolveTo(snapshot);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+
+        await service.hydrateStore();
+
+        const frontier = TestBed.inject(TabSeqFrontierService);
+        expect(frontier.isSaveSafeAt(5)).toBe(true);
+        expect(frontier.isSaveSafeAt(6)).toBe(false);
+      });
+
+      it('establishes the frontier at the last replayed tail seq', async () => {
+        const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
+        mockOpLogStore.loadStateCache.and.resolveTo(snapshot);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
+          createMockEntry(6, createMockOperation('op-6')),
+          createMockEntry(7, createMockOperation('op-7')),
+        ]);
+
+        await service.hydrateStore();
+
+        const frontier = TestBed.inject(TabSeqFrontierService);
+        expect(frontier.isSaveSafeAt(7)).toBe(true);
+        expect(frontier.isSaveSafeAt(8)).toBe(false);
+      });
+
+      it('covers reducer-rejected tail entries with the frontier (replay skips them by design)', async () => {
+        const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
+        const rejectedEntry: OperationLogEntry = {
+          ...createMockEntry(6, createMockOperation('op-reducer-rejected')),
+          rejectedAt: Date.now(),
+          reducerRejectedAt: Date.now(),
+        };
+        mockOpLogStore.loadStateCache.and.resolveTo(snapshot);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([rejectedEntry]);
+
+        await service.hydrateStore();
+
+        const frontier = TestBed.inject(TabSeqFrontierService);
+        expect(frontier.isSaveSafeAt(6)).toBe(true);
+        expect(frontier.isSaveSafeAt(5)).toBe(false);
       });
     });
 
