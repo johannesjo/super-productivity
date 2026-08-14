@@ -462,4 +462,159 @@ describe('WorkViewComponent', () => {
       expect(result.noSection.map((t) => t.id)).toEqual(['a', 'b']);
     });
   });
+
+  /**
+   * A collapsed customizer group unmounts its whole task-list (`collapsible`
+   * renders its panel behind `@if (isExpanded)`), so a `focusItem` target inside
+   * one has no row to focus and retrying alone can never succeed. The reveal
+   * loop must expand the holding group. (#8780)
+   */
+  describe('collapsed group reveal (#8780)', () => {
+    let toggleGroupExpansion: jasmine.Spy;
+
+    const setup = async (
+      focusItem: string | undefined,
+      grouped: Record<string, TaskWithSubTasks[]> | undefined,
+      collapsedGroupIds: string[],
+    ): Promise<void> => {
+      toggleGroupExpansion = jasmine.createSpy('toggleGroupExpansion');
+      TestBed.configureTestingModule({
+        imports: [WorkViewComponent, TranslateModule.forRoot()],
+        providers: [
+          provideNoopAnimations(),
+          provideMockStore({ initialState: {} }),
+          {
+            provide: TaskService,
+            useValue: {
+              selectedTaskId: signal<string | null>(null),
+              setSelectedId: () => {},
+              moveToArchive: () => Promise.resolve(),
+            },
+          },
+          { provide: TakeABreakService, useValue: { resetTimer: () => {} } },
+          {
+            provide: LayoutService,
+            useValue: {
+              isXs: signal(false),
+              isWorkViewScrolled: { set: () => {} },
+              showAddTaskBar: () => {},
+            },
+          },
+          {
+            provide: TaskViewCustomizerService,
+            useValue: {
+              customizeUndoneTasks: () => of({ list: [], grouped }),
+              isCustomized: signal(true),
+              collapsedGroupIds: signal(collapsedGroupIds),
+              toggleGroupExpansion,
+            },
+          },
+          {
+            provide: WorkContextService,
+            useValue: {
+              activeWorkContextId: 'ctx',
+              undoneTasks$: of([]),
+              todayRemainingInProject$: of(0),
+              estimateRemainingToday$: of(0),
+              workingToday$: of(0),
+              breakTimeToday$: of(0),
+              isTodayList$: of(false),
+              activeWorkContextId$: of('ctx'),
+              activeWorkContextTypeAndId$: of({
+                activeType: 'PROJECT',
+                activeId: 'ctx',
+              }),
+              activeWorkContext$: of({ id: 'ctx', type: 'PROJECT' }),
+              isActiveWorkContextProject$: of(true),
+              isContextChanging$: of(false),
+            },
+          },
+          {
+            provide: PluginBridgeService,
+            useValue: { workContextEmbedPluginId: signal(null) },
+          },
+          { provide: ProjectService, useValue: { onMoveToBacklog$: of() } },
+          {
+            provide: SectionService,
+            useValue: {
+              getSectionsByContextId$: () => of([] as readonly Section[]),
+            },
+          },
+          { provide: SnackService, useValue: { open: () => {} } },
+          {
+            provide: CalendarIntegrationService,
+            useValue: { calendarEvents$: of([]) },
+          },
+          {
+            provide: GlobalConfigService,
+            useValue: {
+              appFeatures: signal({ isFinishDayEnabled: false }),
+              cfg: () => ({}),
+            },
+          },
+          // The reveal loop is kicked off by this query param in ngOnInit.
+          { provide: ActivatedRoute, useValue: { queryParams: of({ focusItem }) } },
+        ],
+      });
+      TestBed.overrideComponent(WorkViewComponent, {
+        set: { template: '', imports: [], styles: [''] },
+      });
+      store = TestBed.inject(MockStore);
+      store.overrideSelector(selectOverdueTasksWithSubTasks, []);
+      store.overrideSelector(selectLaterTodayTasksWithSubTasks, []);
+      store.overrideSelector(selectTaskRepeatCfgsByProjectId, []);
+      store.overrideSelector(selectTaskRepeatCfgsByTagId, []);
+      store.overrideSelector(selectTodayStr, '2026-06-23');
+      store.overrideSelector(selectStartOfNextDayDiffMs, 0);
+
+      await TestBed.compileComponents();
+      const fixture = TestBed.createComponent(WorkViewComponent);
+      fixture.componentRef.setInput('undoneTasks', []);
+      fixture.componentRef.setInput('doneTasks', []);
+      fixture.componentRef.setInput('backlogTasks', []);
+      // The stubbed template renders no rows, so the focus attempt always misses
+      // — exactly the state the reveal step exists to repair.
+      fixture.detectChanges();
+    };
+
+    it('expands the collapsed group holding the focus target', async () => {
+      await setup('t1', { Today: [buildTask('t1')], Tomorrow: [buildTask('t2')] }, [
+        'Today',
+      ]);
+
+      expect(toggleGroupExpansion).toHaveBeenCalledOnceWith('Today');
+    });
+
+    it('expands the group holding the target as a SUBTASK', async () => {
+      await setup('sub-1', { Today: [buildTask('t1', [buildTask('sub-1')])] }, ['Today']);
+
+      expect(toggleGroupExpansion).toHaveBeenCalledOnceWith('Today');
+    });
+
+    it('leaves an already expanded group alone', async () => {
+      await setup('t1', { Today: [buildTask('t1')] }, []);
+
+      expect(toggleGroupExpansion).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when the target is in no group', async () => {
+      await setup('nope', { Today: [buildTask('t1')] }, ['Today']);
+
+      expect(toggleGroupExpansion).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when grouping is off', async () => {
+      await setup('t1', undefined, ['Today']);
+
+      expect(toggleGroupExpansion).not.toHaveBeenCalled();
+    });
+
+    it('ignores a stale collapsed id that resolves off Object.prototype', async () => {
+      // Group keys are user-authored project/tag titles, so `constructor` is a
+      // reachable value. Indexing `grouped` by it would yield a function.
+      await setup('t1', { Today: [buildTask('t1')] }, ['constructor', 'toString']);
+
+      expect(toggleGroupExpansion).not.toHaveBeenCalled();
+    });
+  });
 });
