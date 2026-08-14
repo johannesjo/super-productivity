@@ -739,5 +739,37 @@ describe('TaskComponent shortcut handling', () => {
 
       expect(storeSpy.dispatch).not.toHaveBeenCalled();
     });
+
+    describe('scheduleForTodayWithFocus', () => {
+      it('keeps focus on the task instead of advancing to the next one', fakeAsync(() => {
+        // Both reports describe the caret moving on to the next task, because
+        // this used to call focusNext() unconditionally. Scheduling does not
+        // remove the row from a normal list, so focus must stay on the task;
+        // advancing is only the delayed fallback for a row that disappeared
+        // (the overdue panels).
+        // Asserted through the focus methods rather than document.activeElement:
+        // the TestBed host is a <div>, so focusSelfOrNextIfNotPossible's
+        // `tagName === 'task'` check can never pass here.
+        const focusSelfSpy = spyOn(component, 'focusSelf');
+        const focusNextSpy = spyOn(component, 'focusNext');
+        setTask({});
+
+        component.scheduleForTodayWithFocus();
+
+        expect(focusSelfSpy).toHaveBeenCalled();
+        expect(focusNextSpy).not.toHaveBeenCalled();
+        tick(200); // flush the fallback timer
+      }));
+
+      it('still schedules the task', fakeAsync(() => {
+        (fixture.nativeElement as HTMLElement).tabIndex = 0;
+        setTask({});
+
+        component.scheduleForTodayWithFocus();
+        tick(200);
+
+        expectScheduledForToday();
+      }));
+    });
   });
 });

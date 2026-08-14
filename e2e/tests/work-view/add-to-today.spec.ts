@@ -1,4 +1,5 @@
 import { expect, test } from '../../fixtures/test.fixture';
+import { expectTaskVisible } from '../../utils/assertions';
 
 test.describe('Add to Today - Subtask Support', () => {
   test('should add subtask to Today when parent is NOT in Today', async ({
@@ -204,5 +205,37 @@ test.describe('Add to Today - Subtask Support', () => {
       .locator('task task-title')
       .filter({ hasText: 'Context Menu Subtask' });
     await expect(todaySubtask).toBeVisible();
+  });
+});
+
+test.describe('Add to Today - keyboard shortcut', () => {
+  test('Shift+T schedules a top-level project task for Today', async ({
+    page,
+    projectPage,
+    workViewPage,
+    taskPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    await projectPage.createAndGoToTestProject();
+
+    await workViewPage.addTask('Shortcut To Today');
+    const task = await taskPage.waitForTaskWithText('Shortcut To Today');
+
+    // Precondition: the task is NOT on Today yet. The "Add to Today" button is
+    // rendered exactly when the task has no due day for today, so its presence
+    // keeps this test from passing vacuously.
+    await task.hover();
+    await expect(task.locator('button[title*="Add to Today"]')).toBeVisible();
+
+    await task.focus();
+    await expect(task).toBeFocused();
+    await page.keyboard.press('Shift+T');
+
+    // Assert real Today membership. Checking that the row is still visible in
+    // the project — as the subtask tests above do — passes even when the
+    // shortcut does nothing, which is how #9563 shipped unnoticed.
+    await page.goto('/#/tag/TODAY/tasks');
+    await workViewPage.waitForTaskList();
+    await expectTaskVisible(taskPage, 'Shortcut To Today');
   });
 });
