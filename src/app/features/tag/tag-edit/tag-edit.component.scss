@@ -15,6 +15,13 @@
     appearance: none;
     display: block;
     width: 100%;
+    // iOS zooms the whole page when focusing an input whose computed font-size
+    // is below 16px. This input sits outside a mat-form-field on purpose (see
+    // the placeholder comment below), so without these it falls back to the
+    // ~13px Arial UA default and triggers that zoom (#9415, #9551, #9556).
+    // 16px is a fixed platform threshold, not a design token.
+    font-family: inherit;
+    font-size: 16px;
     box-shadow: none;
     border: none;
     color: var(--text-color);
