@@ -1,5 +1,6 @@
 import { expect, test } from '../../fixtures/test.fixture';
 import { expectTaskVisible } from '../../utils/assertions';
+import { waitForStatePersistence } from '../../utils/waits';
 
 test.describe('Add to Today - Subtask Support', () => {
   test('should add subtask to Today when parent is NOT in Today', async ({
@@ -234,7 +235,15 @@ test.describe('Add to Today - keyboard shortcut', () => {
     // Assert real Today membership. Checking that the row is still visible in
     // the project — as the subtask tests above do — passes even when the
     // shortcut does nothing, which is how #9563 shipped unnoticed.
+    //
+    // Reload instead of navigating by hash: the soft navigation keeps the
+    // leaving project view in the DOM while it animates out, and that ghost row
+    // is a visible <task> with this title, so a plain visibility check passes
+    // even when nothing was scheduled (verified by dropping the keypress). The
+    // reload also proves the schedule survived persistence.
+    await waitForStatePersistence(page);
     await page.goto('/#/tag/TODAY/tasks');
+    await page.reload();
     await workViewPage.waitForTaskList();
     await expectTaskVisible(taskPage, 'Shortcut To Today');
   });
