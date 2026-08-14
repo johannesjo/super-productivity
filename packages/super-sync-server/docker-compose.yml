@@ -24,6 +24,8 @@ x-logging-app: &app-logging
 
 services:
   supersync:
+    # Only `latest` and `master-<sha>` are published, both built from master — there
+    # are no release tags. Pin SUPERSYNC_IMAGE to a master-<sha> for a fixed version.
     image: ${SUPERSYNC_IMAGE:-ghcr.io/super-productivity/supersync:latest}
     container_name: supersync-server
     restart: unless-stopped
