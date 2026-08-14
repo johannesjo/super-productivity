@@ -64,6 +64,11 @@ class CapacitorMainActivity : BridgeActivity() {
     // See pushStatusBarOverlap.
     private var lastStatusBarOverlapCssPx: Int = -1
 
+    // Last IME state the geometry diagnostic logged, so the per-layout-pass
+    // listener logs once per transition instead of every pass. null = nothing yet.
+    // See logImeGeometryOnTransition.
+    private var lastLoggedKeyboardOpen: Boolean? = null
+
     private var isTimerCompleteReceiverRegistered = false
     private var isForegroundServiceFailureReceiverRegistered = false
     private var isWidgetDoneDrainReceiverRegistered = false
@@ -233,6 +238,7 @@ class CapacitorMainActivity : BridgeActivity() {
                 "isKeyboardShown$",
                 if (isKeyboardOpen) "true" else "false"
             )
+            logImeGeometryOnTransition(rect, isKeyboardOpen)
             adjustWebViewHeightForKeyboard(rect, isKeyboardOpen)
             pushStatusBarOverlap(rect)
         }
@@ -513,8 +519,39 @@ class CapacitorMainActivity : BridgeActivity() {
     private fun shouldRunNativeInsetShim(): Boolean =
         NativeInsetShimGate.shouldRunShim(
             sdkInt = android.os.Build.VERSION.SDK_INT,
-            webViewMajor = webViewCompatibility?.majorVersion,
+            webViewMajor = NativeInsetShimGate.activeProviderMajor(webViewCompatibility),
         )
+
+    /**
+     * One-line IME geometry diagnostic, logged once per keyboard transition.
+     *
+     * #9316 can only be settled on a reporter's device, and the shim is a strict
+     * no-op wherever the window already resizes for the IME — so "the bar looks
+     * fixed" cannot by itself tell a working shim from one that never ran. This
+     * prints the gate's inputs next to the geometry it decides from, so a test
+     * build gives an unambiguous answer.
+     *
+     * Silent unless explicitly enabled (`adb shell setprop log.tag.SUPKeyboard
+     * DEBUG`), so release builds stay quiet; the transition check comes first to
+     * keep the per-layout-pass listener cheap. Geometry and versions only — never
+     * user content.
+     */
+    private fun logImeGeometryOnTransition(rect: Rect, isKeyboardOpen: Boolean) {
+        if (lastLoggedKeyboardOpen == isKeyboardOpen) return
+        lastLoggedKeyboardOpen = isKeyboardOpen
+        if (!Log.isLoggable("SUPKeyboard", Log.DEBUG)) return
+        val webView = bridge?.webView ?: return
+        webView.getLocationOnScreen(webViewLocationOnScreen)
+        Log.d(
+            "SUPKeyboard",
+            "ime=$isKeyboardOpen shim=${shouldRunNativeInsetShim()} " +
+                "sdk=${android.os.Build.VERSION.SDK_INT} " +
+                "wvMajor=${NativeInsetShimGate.activeProviderMajor(webViewCompatibility)} " +
+                "(raw=${webViewCompatibility?.majorVersion} src=${webViewCompatibility?.source}) " +
+                "rectBottom=${rect.bottom} webViewTop=${webViewLocationOnScreen[1]} " +
+                "webViewHeight=${webView.height} paramsHeight=${webView.layoutParams?.height}"
+        )
+    }
 
     /**
      * Soft-keyboard fallback for the add-task bar sitting behind the keyboard
