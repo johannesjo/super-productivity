@@ -25,6 +25,7 @@ import com.superproductivity.superproductivity.service.ForegroundServiceFailure
 import com.superproductivity.superproductivity.service.SyncReminderScheduler
 import com.superproductivity.superproductivity.service.TrackingForegroundService
 import com.superproductivity.superproductivity.util.printWebViewVersion
+import com.superproductivity.superproductivity.webview.ImeWebViewHeight
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.NativeInsetShimGate
 import com.superproductivity.superproductivity.webview.WebHelper
@@ -228,9 +229,11 @@ class CapacitorMainActivity : BridgeActivity() {
                 "isKeyboardShown$",
                 if (isKeyboardOpen) "true" else "false"
             )
-            logImeGeometryOnTransition(rect, isKeyboardOpen)
             adjustWebViewHeightForKeyboard(rect, isKeyboardOpen)
             pushStatusBarOverlap(rect)
+            // After the shim, so the log shows the height it applied. See
+            // logImeGeometryOnTransition.
+            logImeGeometryOnTransition(rect, isKeyboardOpen)
         }
 
         // Register broadcast receiver for focus mode timer completion
@@ -509,6 +512,13 @@ class CapacitorMainActivity : BridgeActivity() {
      * prints the gate's inputs next to the geometry it decides from, so a test
      * build gives an unambiguous answer.
      *
+     * Must be called **after** the shim has had its pass, so `paramsHeight` is
+     * what the shim just applied rather than the value it replaced. `target` is
+     * recomputed here from the same input, so a pass where the shim bailed on a
+     * degenerate frame still reads unambiguously (`target` set, `paramsHeight`
+     * unchanged) instead of looking like the gate was off. `webViewHeight` is
+     * still the pre-layout measurement — it catches up on the next pass.
+     *
      * Silent unless explicitly enabled (`adb shell setprop log.tag.SUPKeyboard
      * DEBUG`), so release builds stay quiet; the transition check comes first to
      * keep the per-layout-pass listener cheap. Geometry and versions only — never
@@ -527,6 +537,9 @@ class CapacitorMainActivity : BridgeActivity() {
                 "wvMajor=${NativeInsetShimGate.activeProviderMajor(webViewCompatibility)} " +
                 "(raw=${webViewCompatibility?.majorVersion} src=${webViewCompatibility?.source}) " +
                 "rectBottom=${rect.bottom} webViewTop=${webViewLocationOnScreen[1]} " +
+                "target=${
+                    ImeWebViewHeight.targetHeight(rect.bottom, webViewLocationOnScreen[1])
+                } " +
                 "webViewHeight=${webView.height} paramsHeight=${webView.layoutParams?.height}"
         )
     }
@@ -573,12 +586,14 @@ class CapacitorMainActivity : BridgeActivity() {
         val targetHeight: Int
         if (isKeyboardOpen) {
             webView.getLocationOnScreen(webViewLocationOnScreen)
-            val heightToKeyboardTop = rect.bottom - webViewLocationOnScreen[1]
-            // Guard against a degenerate/transient measurement collapsing the
-            // WebView to 0 — the height==0 check above would then latch and stop
-            // recomputing. Keep the current height until a sane value appears.
-            if (heightToKeyboardTop <= 0) return
-            targetHeight = heightToKeyboardTop
+            // Absolute target, never a delta — see ImeWebViewHeight for why that is
+            // what keeps this from re-creating #8508. null = degenerate/transient
+            // frame; keep the current height until a sane value appears, or the
+            // height==0 check above would latch and stop recomputing.
+            targetHeight = ImeWebViewHeight.targetHeight(
+                rectBottom = rect.bottom,
+                webViewTop = webViewLocationOnScreen[1],
+            ) ?: return
         } else {
             targetHeight = webViewLayoutHeightDefault ?: ViewGroup.LayoutParams.MATCH_PARENT
         }

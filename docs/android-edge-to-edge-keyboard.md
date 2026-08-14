@@ -347,7 +347,11 @@ the `position: fixed` bar stays at the bottom of a viewport that extends behind
 the IME. The reporters' before/after screenshots are pixel-identical, which is
 exactly this signature.
 
-**Why `adjustResize` does not save us.** The manifest declares
+**Why `adjustResize` does not save us — INFERRED, not yet observed.** This is
+read off the sources below, not measured on a device in the affected band; treat
+it as the working explanation and confirm it before building on it (an API 30–34
+emulator settles it — the window configuration does not depend on the WebView
+version, so any device in the band answers the question). The manifest declares
 `windowSoftInputMode="adjustResize"`, so the obvious question is why the window
 does not simply shrink. Because Capacitor's StatusBar plugin runs with
 `overlaysWebView: true` (`capacitor.config.ts`), which applies
@@ -417,10 +421,19 @@ adb logcat -s SUPKeyboard
 adb shell dumpsys webviewupdate | grep -i 'Current WebView package'
 ```
 
-A fixed device must show `shim=true` with `paramsHeight` dropping to roughly
-`rectBottom − webViewTop` while `ime=true`, and the provider version from
-`dumpsys` must match the `wvMajor=` the gate read. If `shim=false`, the version
-source is wrong, not the theory.
+The line is printed **after** the shim's pass, so on a fixed device the
+`ime=true` line reads `shim=true` with `paramsHeight` equal to `target` (both
+`rectBottom − webViewTop`). Cases to distinguish:
+
+- `shim=false` → the gate is off: compare `wvMajor=` against the `dumpsys`
+  provider. The version source is wrong, not the theory.
+- `target` set but `paramsHeight` unchanged → the shim ran and bailed on a
+  degenerate frame, or the height was already correct (the device resized itself,
+  in which case the shim is a legitimate no-op — see `ImeWebViewHeight`).
+- no line at all → the listener never saw a transition; check the tag is enabled
+  and the app was restarted after `setprop`.
+
+`webViewHeight` lags by one layout pass — that is expected, not a failure.
 
 ## What NOT to do
 
