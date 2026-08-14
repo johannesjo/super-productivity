@@ -445,13 +445,31 @@ const filterOrphanedTaskIdsFromEntityData = (
  *   payloads merge and replace produce the same result.
  * - A missing item is appended for `'replace'` snapshots (the delete-vs-update
  *   heal, mirroring the adapter recreate path) but skipped for `'patch'` deltas
- *   — a partial delta cannot recreate a schema-valid item.
+ *   — a partial delta cannot recreate a schema-valid item. Types listed in
+ *   ARRAY_RECREATE_UNSAFE_ENTITY_TYPES are skipped in BOTH modes: for them
+ *   even a full snapshot cannot recreate a schema-valid item.
  * - No `modified` stamping: these models have no such field and a stray key
  *   would fail typia validation on hydration.
  *
  * Returns undefined when the update cannot be applied (caller passes the state
  * through unchanged).
  */
+/**
+ * Array entities whose model has a schema-REQUIRED field named `type` or
+ * `meta`. The flat action envelope shadows those keys (see convertOpToAction),
+ * so a recreate-append could only ever produce an item that fails typia
+ * validation on the next hydration — the "Repair attempted but failed"
+ * dead-end that RECREATE_FALLBACK exists to prevent for adapter entities
+ * (SIMPLE_COUNTER precedent). Skipping the append instead is deterministic
+ * (pure reducer, every client skips identically) and safe: the item stays
+ * deleted on this client while the updating device keeps its copy — the same
+ * accepted divergence shape as SIMPLE_COUNTER's documented `type` limitation.
+ * A RECREATE_FALLBACK entry is deliberately NOT the fix: membership there
+ * also opts the type into SPAP-14 disjoint-merge, and inventing a Reminder
+ * `type` would misfire notifications rather than heal anything.
+ */
+const ARRAY_RECREATE_UNSAFE_ENTITY_TYPES: ReadonlySet<string> = new Set(['REMINDER']);
+
 const applyArrayEntityLwwUpdate = (options: {
   rootState: RootState;
   featureName: string;
@@ -479,6 +497,14 @@ const applyArrayEntityLwwUpdate = (options: {
   const index = items.findIndex((item) => (item as { id?: unknown })?.id === id);
   if (index === -1 && options.lwwUpdateMode === 'patch') {
     OpLog.log(`lwwUpdateMetaReducer: Ignoring ${entityType} patch for absent item ${id}`);
+    return undefined;
+  }
+  if (index === -1 && ARRAY_RECREATE_UNSAFE_ENTITY_TYPES.has(entityType)) {
+    OpLog.warn(
+      `lwwUpdateMetaReducer: Skipping ${entityType} recreate for absent item — ` +
+        'the action envelope cannot carry its required `type` field, so the ' +
+        'appended item would fail schema validation',
+    );
     return undefined;
   }
   const updatedItems =

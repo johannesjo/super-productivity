@@ -4411,6 +4411,32 @@ describe('lwwUpdateMetaReducer', () => {
       });
     });
 
+    it('should skip a replace-mode REMINDER recreate for an absent item (required `type` cannot survive the action envelope)', () => {
+      const state = createMockStateWithArrayEntities();
+      // A full replace snapshot as produced by conflict resolution — but the
+      // flat action envelope shadows the entity's `type` field, so appending
+      // this would create a Reminder that fails typia validation on the next
+      // hydration. The item must stay deleted instead.
+      const action = {
+        type: '[REMINDER] LWW Update',
+        id: 'deleted-reminder',
+        relatedId: TASK_ID,
+        remindAt: 2000,
+        title: 'recreated',
+        meta: {
+          isPersistent: true,
+          entityType: 'REMINDER',
+          entityId: 'deleted-reminder',
+          isRemote: true,
+          lwwUpdateMode: 'replace',
+        },
+      };
+
+      reducer(state, action);
+
+      expect(mockReducer).toHaveBeenCalledWith(state, action);
+    });
+
     it('should ignore a patch for an absent item instead of inserting a partial one', () => {
       const state = createMockStateWithArrayEntities();
       const action = {
