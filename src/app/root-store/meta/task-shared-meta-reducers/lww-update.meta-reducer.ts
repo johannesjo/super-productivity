@@ -4,6 +4,7 @@ import { RootState } from '../../root-state';
 import {
   getEntityConfig,
   isAdapterEntity,
+  isArrayEntity,
   isSingletonEntity,
 } from '../../../op-log/core/entity-registry';
 import { getLwwEntityType } from '../../../op-log/core/lww-update-action-types';
@@ -429,6 +430,69 @@ const filterOrphanedTaskIdsFromEntityData = (
 };
 
 /**
+ * Applies an LWW Update to an array-pattern feature state (BOARD, REMINDER,
+ * PLUGIN_USER_DATA, PLUGIN_METADATA): items live in a plain array — the feature
+ * state itself for `arrayKey: null`, else under `arrayKey` — addressed by their
+ * `id` field. Before #9526 these ops fell into the "Unsupported storage
+ * pattern" bail and every conflict winner for these entities was silently
+ * dropped on receiving clients.
+ *
+ * Semantics vs the adapter branch:
+ * - An existing item is shallow-MERGED in both modes. Entity fields named
+ *   `type` or `meta` cannot survive the action representation (the action
+ *   envelope shadows them — e.g. `Reminder.type`), so a raw replace would
+ *   silently drop them; these models are fixed-shape, so for real full-snapshot
+ *   payloads merge and replace produce the same result.
+ * - A missing item is appended for `'replace'` snapshots (the delete-vs-update
+ *   heal, mirroring the adapter recreate path) but skipped for `'patch'` deltas
+ *   — a partial delta cannot recreate a schema-valid item.
+ * - No `modified` stamping: these models have no such field and a stray key
+ *   would fail typia validation on hydration.
+ *
+ * Returns undefined when the update cannot be applied (caller passes the state
+ * through unchanged).
+ */
+const applyArrayEntityLwwUpdate = (options: {
+  rootState: RootState;
+  featureName: string;
+  featureState: unknown;
+  arrayKey: string | null | undefined;
+  entityType: string;
+  entityData: Record<string, unknown>;
+  lwwUpdateMode?: LwwUpdateMode;
+}): RootState | undefined => {
+  const { rootState, featureName, featureState, arrayKey, entityType, entityData } =
+    options;
+  const id = entityData['id'];
+  if (typeof id !== 'string' || !id) {
+    OpLog.warn(`lwwUpdateMetaReducer: ${entityType} LWW Update payload has no id`);
+    return undefined;
+  }
+  const items =
+    arrayKey === null || arrayKey === undefined
+      ? featureState
+      : (featureState as Record<string, unknown>)[arrayKey];
+  if (!Array.isArray(items)) {
+    OpLog.warn(`lwwUpdateMetaReducer: ${entityType} feature state is not an array`);
+    return undefined;
+  }
+  const index = items.findIndex((item) => (item as { id?: unknown })?.id === id);
+  if (index === -1 && options.lwwUpdateMode === 'patch') {
+    OpLog.log(`lwwUpdateMetaReducer: Ignoring ${entityType} patch for absent item ${id}`);
+    return undefined;
+  }
+  const updatedItems =
+    index === -1
+      ? [...items, entityData]
+      : items.map((item, i) => (i === index ? { ...item, ...entityData } : item));
+  const updatedFeatureState =
+    arrayKey === null || arrayKey === undefined
+      ? updatedItems
+      : { ...(featureState as Record<string, unknown>), [arrayKey]: updatedItems };
+  return { ...rootState, [featureName]: updatedFeatureState };
+};
+
+/**
  * Meta-reducer that handles LWW (Last-Write-Wins) Update actions.
  *
  * When a LWW conflict is resolved and local state wins, a `[ENTITY_TYPE] LWW Update`
@@ -560,6 +624,24 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       return reducer(updatedState, action);
     }
 
+    // Array entities (#9526): BOARD, REMINDER, PLUGIN_USER_DATA, PLUGIN_METADATA.
+    if (isArrayEntity(config)) {
+      const updatedState = applyArrayEntityLwwUpdate({
+        rootState,
+        featureName,
+        featureState,
+        arrayKey: config.arrayKey,
+        entityType,
+        entityData,
+        lwwUpdateMode: actionMeta?.lwwUpdateMode,
+      });
+      return reducer(updatedState ?? state, action);
+    }
+
+    // Only 'map' (PLANNER) remains unsupported: its LWW wire payload is a
+    // spread string[] day (numeric keys, no real `id` addressing), so applying
+    // it needs a producer-side payload redesign first — tracked separately
+    // from #9526.
     if (!isAdapterEntity(config)) {
       OpLog.warn(`lwwUpdateMetaReducer: Unsupported storage pattern for: ${entityType}`);
       devError(`lwwUpdateMetaReducer: Unsupported storage pattern for: ${entityType}`);
