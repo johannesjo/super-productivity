@@ -27,6 +27,7 @@ import com.superproductivity.superproductivity.service.SyncReminderScheduler
 import com.superproductivity.superproductivity.service.TrackingForegroundService
 import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
+import com.superproductivity.superproductivity.webview.NativeInsetShimGate
 import com.superproductivity.superproductivity.webview.WebHelper
 import com.superproductivity.superproductivity.webview.WebViewBlockActivity
 import com.superproductivity.superproductivity.webview.WebViewCompatibilityChecker
@@ -49,18 +50,18 @@ class CapacitorMainActivity : BridgeActivity() {
     private var isFrontendReady = false
     private var startupOverlayManager: StartupOverlayManager? = null
 
-    // SDK < 30 soft-keyboard workaround: the WebView's resting layout height
+    // Soft-keyboard workaround: the WebView's resting layout height
     // (e.g. MATCH_PARENT), captured so it can be restored when the keyboard hides.
-    // See adjustWebViewHeightForKeyboardBelowApi30.
+    // See adjustWebViewHeightForKeyboard.
     private var webViewLayoutHeightDefault: Int? = null
 
     // Reused scratch for getLocationOnScreen in the keyboard layout listener (hot
     // path) to avoid allocating an IntArray on every pass while the IME is up.
     private val webViewLocationOnScreen = IntArray(2)
 
-    // SDK < 30 status-bar overlap workaround: last value pushed to JS, to dedupe
-    // the per-layout-pass listener. -1 = nothing pushed yet.
-    // See pushStatusBarOverlapBelowApi30.
+    // Status-bar overlap workaround: last value pushed to JS, to dedupe the
+    // per-layout-pass listener. -1 = nothing pushed yet.
+    // See pushStatusBarOverlap.
     private var lastStatusBarOverlapCssPx: Int = -1
 
     private var isTimerCompleteReceiverRegistered = false
@@ -214,8 +215,8 @@ class CapacitorMainActivity : BridgeActivity() {
 
 
         // Remember the WebView's resting layout height (e.g. MATCH_PARENT) so the
-        // SDK < 30 keyboard workaround can restore it on hide. See
-        // adjustWebViewHeightForKeyboardBelowApi30.
+        // keyboard workaround can restore it on hide. See
+        // adjustWebViewHeightForKeyboard.
         webViewLayoutHeightDefault = bridge?.webView?.layoutParams?.height
 
         // Handle keyboard visibility changes
@@ -232,8 +233,8 @@ class CapacitorMainActivity : BridgeActivity() {
                 "isKeyboardShown$",
                 if (isKeyboardOpen) "true" else "false"
             )
-            adjustWebViewHeightForKeyboardBelowApi30(rect, isKeyboardOpen)
-            pushStatusBarOverlapBelowApi30(rect)
+            adjustWebViewHeightForKeyboard(rect, isKeyboardOpen)
+            pushStatusBarOverlap(rect)
         }
 
         // Register broadcast receiver for focus mode timer completion
@@ -360,8 +361,8 @@ class CapacitorMainActivity : BridgeActivity() {
         // re-enters here, but it also wipes the inline --android-status-bar-overlap
         // off the fresh document. Re-arm the dedupe so the next layout pass
         // re-publishes it; otherwise the unchanged value is skipped and the
-        // header overlaps the status bar again on the WebView < 140 / API < 30
-        // tail. See pushStatusBarOverlapBelowApi30.
+        // header overlaps the status bar again on the WebView < 140 / API < 35
+        // tail. See pushStatusBarOverlap.
         lastStatusBarOverlapCssPx = -1
         pendingShareIntent?.let {
             Log.d("SP_SHARE", "Flushing pending share intent")
@@ -506,17 +507,27 @@ class CapacitorMainActivity : BridgeActivity() {
     }
 
     /**
-     * SDK < 30 soft-keyboard fallback for the add-task bar sitting behind the
-     * keyboard (#8508 follow-up, Android 9 / API 28).
+     * Whether Capacitor's SystemBars leaves the insets unowned on this device, so
+     * our native shims below have to step in. See [NativeInsetShimGate].
+     */
+    private fun shouldRunNativeInsetShim(): Boolean =
+        NativeInsetShimGate.shouldRunShim(
+            sdkInt = android.os.Build.VERSION.SDK_INT,
+            webViewMajor = webViewCompatibility?.majorVersion,
+        )
+
+    /**
+     * Soft-keyboard fallback for the add-task bar sitting behind the keyboard
+     * (#8508 follow-up on Android 9 / API 28; #9316 on API 34 + WebView 124/126).
      *
      * Context: Android edge-to-edge inset handling is owned by Capacitor's
      * built-in SystemBars now (the `@capawesome` edge-to-edge plugin was removed).
      * SystemBars only pads the WebView for the IME on **WebView >= 140**
-     * (passthrough) or **API >= 35**; below that band it is a no-op, and under
-     * enforced edge-to-edge the window does NOT resize for the IME on API < 30,
-     * so the `position: fixed` add-task bar sits behind the keyboard. This shim
-     * covers exactly that WebView < 140 / API < 30 tail and is **gated to
-     * WebView < 140** so it never double-counts against SystemBars' own padding.
+     * (passthrough) or **API >= 35**; outside that it applies nothing, the window
+     * does NOT resize for the IME, and the `position: fixed` add-task bar sits
+     * behind the keyboard. This shim covers exactly that gap — see
+     * [NativeInsetShimGate] for why the gate is the complement of SystemBars'
+     * two ownership branches, so the two never double-count.
      *
      * We must NOT correct this via `bottomMargin` or `padding` (a margin writer
      * fights whatever owns the insets, and WebView padding does not move the web
@@ -526,19 +537,19 @@ class CapacitorMainActivity : BridgeActivity() {
      * the view shrinks the web layout viewport, so the existing CSS resolves the
      * bar above the keyboard with no web-side keyboard-height math (avoiding the
      * reverted #8295 fallback). The target (`rect.bottom − webViewTop`) is read
-     * from `getWindowVisibleDisplayFrame` (reliable on API 28) and does not
-     * depend on the WebView's own height, so it is stable across passes — no
-     * feedback loop. See docs/android-edge-to-edge-keyboard.md.
+     * from `getWindowVisibleDisplayFrame` and does not depend on the WebView's
+     * own height, so it is stable across passes — no feedback loop.
      *
-     * API >= 30 and WebView >= 140 are strict no-ops.
+     * That absolute target is also what makes this **resize-detecting**, the
+     * hard requirement #8508 left behind: on a device where the window already
+     * shrank for the IME, the WebView bottom is already at `rect.bottom`, so the
+     * computed height equals the current one and nothing moves. It cannot
+     * re-create the squashed-WebView regression the way the reverted delta-based
+     * inset did. See docs/android-edge-to-edge-keyboard.md and
+     * docs/plans/2026-06-22-android-systembars-migration-corrected.md.
      */
-    private fun adjustWebViewHeightForKeyboardBelowApi30(rect: Rect, isKeyboardOpen: Boolean) {
-        if (android.os.Build.VERSION.SDK_INT >= 30) return
-        // Skip when SystemBars already handles the IME inset (WebView >= 140
-        // passthrough pads the WebView parent itself). Unknown version (null) ->
-        // run the shim, the safe default on API < 30.
-        val wvMajor = webViewCompatibility?.majorVersion
-        if (wvMajor != null && wvMajor >= 140) return
+    private fun adjustWebViewHeightForKeyboard(rect: Rect, isKeyboardOpen: Boolean) {
+        if (!shouldRunNativeInsetShim()) return
         val webView = bridge?.webView ?: return
         val params = webView.layoutParams ?: return
         // Ignore stale/pre-layout geometry so the height is not set from a bad frame.
@@ -570,7 +581,8 @@ class CapacitorMainActivity : BridgeActivity() {
 
     /**
      * Status-bar overlap workaround for the web header drawing BEHIND the status
-     * bar on the WebView < 140 tail (#8508 / #8283 follow-up, Android 9 / API 28).
+     * bar on the WebView < 140 tail (#8508 / #8283 follow-up, Android 9 / API 28;
+     * reads 0 and self-disables where the WebView is already inset).
      *
      * Edge-to-edge insets are owned by Capacitor's built-in SystemBars now. On
      * **API >= 35** it injects the real `--safe-area-inset-*` px, and on
@@ -592,19 +604,12 @@ class CapacitorMainActivity : BridgeActivity() {
      * once it is — `max()` never double-counts. Physical px → CSS px via display
      * density; deduped so the per-layout listener does not spam evaluateJavascript.
      *
-     * Gated to **SDK < 30 AND WebView < 140** (mirrors
-     * adjustWebViewHeightForKeyboardBelowApi30) so it never fights SystemBars; on
-     * API >= 35 the injected --safe-area-inset-top wins via var() precedence and
-     * the published var is ignored regardless. (Known small gap: an API 30–34
-     * device on an old WebView < 140 also has env()==0; rare, since WebView
-     * auto-updates above API 30 — broaden the gate if it ever surfaces.)
+     * Shares [NativeInsetShimGate] with the keyboard shim so it never fights
+     * SystemBars; on API >= 35 the injected --safe-area-inset-top wins via var()
+     * precedence and the published var is ignored regardless.
      */
-    private fun pushStatusBarOverlapBelowApi30(rect: Rect) {
-        if (android.os.Build.VERSION.SDK_INT >= 30) return
-        // Skip when SystemBars/env() already give the correct top inset (WebView
-        // >= 140 passthrough). Unknown version (null) -> run it, the safe default.
-        val wvMajor = webViewCompatibility?.majorVersion
-        if (wvMajor != null && wvMajor >= 140) return
+    private fun pushStatusBarOverlap(rect: Rect) {
+        if (!shouldRunNativeInsetShim()) return
         if (!::javaScriptInterface.isInitialized) return
         val webView = bridge?.webView ?: return
         webView.getLocationOnScreen(webViewLocationOnScreen)
