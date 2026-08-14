@@ -231,14 +231,22 @@ export class NavigateToTaskService {
     if (parent?.id !== task.parentId) {
       return;
     }
-    // `filterDoneTasks` exempts the currently TRACKED task from HideAll, so that
-    // one row renders even inside a collapsed parent. Without this check the
-    // tracked-task pill — which navigates to exactly that task — would expand
+    // Mirrors `filterDoneTasks` together with the bindings that feed it
+    // (`task.component.html`: isHideDone = mode === HideDone, isHideAll = !!mode,
+    // and isHideDone wins): HideDone drops only done subtasks, any OTHER truthy
+    // mode keeps just the currently TRACKED one. That exemption is why the
+    // tracked-task pill — which navigates to exactly that task — must not expand
     // the parent on every device to reveal a row already on screen.
+    //
+    // Reading `!!mode` rather than `=== HideAll` matters for legacy or
+    // out-of-enum values: the template hides those rows, but a strict enum check
+    // would decide nothing was wrong and the reveal would fail exactly as it did
+    // before this fix.
+    const mode = parent._hideSubTasksMode;
     const isHiddenByParent =
-      (parent._hideSubTasksMode === HideSubTasksMode.HideAll &&
-        this._currentTaskId() !== task.id) ||
-      (parent._hideSubTasksMode === HideSubTasksMode.HideDone && task.isDone);
+      mode === HideSubTasksMode.HideDone
+        ? task.isDone
+        : !!mode && this._currentTaskId() !== task.id;
     if (!isHiddenByParent) {
       return;
     }
@@ -296,6 +304,34 @@ export class NavigateToTaskService {
   }
 
   private _focusTaskElement(taskId: string): void {
+    // KNOWN GAP: this branch gets the collapsed-parent reveal above and nothing
+    // else. The other containers that can drop a row from the DOM — customizer
+    // group, section, and the done/overdue/later panels — are opened by
+    // WorkViewComponent off the `focusItem` query param, which only the
+    // route-change branch sets.
+    //
+    // (The backlog is a separate, pre-existing gap on BOTH branches: `isInBacklog`
+    // opens the split, but `#splitBottomEl` is a sibling of `#splitTopEl`, and both
+    // reveal loops require the row to live inside their container. A backlog task
+    // therefore becomes visible but is never scrolled to or focused.)
+    //
+    // This is NOT the reported bug: global search runs from `/search`, so it never
+    // matches the same-context check above and always routes. The cost lands on the
+    // in-app callers (tracked-task pill, notification actions, issue creation,
+    // calendar events), and it fails loudly through the snack below.
+    //
+    // Worst case there: a subtask whose parent is collapsed AND which sits inside
+    // a collapsed section. The parent reveal above has already written its synced
+    // op by then, so the user gets a cross-device write for a navigation that then
+    // visibly fails. Accepted rather than reordered, because running the parent
+    // reveal before the branch split is what makes it work on both paths.
+    //
+    // Re-routing here with `focusItem` is not the fix: the router default is
+    // `onSameUrlNavigation: 'ignore'` (see `provideRouter` in main.ts), so a second
+    // navigation to the same task would emit nothing at all. Closing this means one
+    // reveal path for both branches — consolidating the three retry loops that
+    // already compete here, rather than adding a fourth participant. (#8780)
+    //
     // Never swallow silently: if the task never becomes focusable in the current
     // context, surface the error instead of leaving the user on the wrong view.
     this._layoutService.focusTaskInViewWhenReady(taskId, undefined, () => {
