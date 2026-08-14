@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BehaviorSubject, of, Subscription } from 'rxjs';
 import { CalendarIntegrationEffects } from './calendar-integration.effects';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
@@ -16,16 +16,23 @@ import { HydrationStateService } from '../../../op-log/apply/hydration-state.ser
 import { selectCalendarProviders } from '../../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../../issue/issue.model';
 import { CalendarIntegrationEvent } from '../calendar-integration.model';
+import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
+import { initialTaskState } from '../../tasks/store/task.reducer';
+import { TaskState } from '../../tasks/task.model';
 
 describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
   let effects: CalendarIntegrationEffects;
   let sub: Subscription;
   let addTaskFromIssueSpy: jasmine.Spy;
   let getAllIssueIdsSpy: jasmine.Spy;
+  let checkForTaskWithIssueEverywhereSpy: jasmine.Spy;
   let todayDateStr$: BehaviorSubject<string>;
   let requestEvents$Spy: jasmine.Spy;
   let isInitialSyncDoneSyncSpy: jasmine.Spy;
   let isInSyncWindowSpy: jasmine.Spy;
+  let taskStateForSelector: TaskState & {
+    dismissedCalendarAutoImportEventIdsByProvider?: Record<string, string[]>;
+  };
 
   const PROVIDER_ID = 'ip-cal-1';
 
@@ -67,6 +74,9 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
     getAllIssueIdsSpy = jasmine
       .createSpy('getAllIssueIdsForProviderEverywhere')
       .and.resolveTo([]);
+    checkForTaskWithIssueEverywhereSpy = jasmine
+      .createSpy('checkForTaskWithIssueEverywhere')
+      .and.resolveTo(null);
     requestEvents$Spy = jasmine
       .createSpy('requestEvents$')
       .and.returnValue(of([buildEvent('cal-evt-1')]));
@@ -76,12 +86,16 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
     isInSyncWindowSpy = jasmine.createSpy('isInSyncWindow').and.returnValue(false);
 
     todayDateStr$ = new BehaviorSubject<string>('2026-05-20');
+    taskStateForSelector = { ...initialTaskState };
 
     TestBed.configureTestingModule({
       providers: [
         CalendarIntegrationEffects,
         provideMockStore({
-          selectors: [{ selector: selectCalendarProviders, value: [buildProvider()] }],
+          selectors: [
+            { selector: selectCalendarProviders, value: [buildProvider()] },
+            { selector: selectTaskFeatureState, value: taskStateForSelector },
+          ],
         }),
         {
           provide: GlobalTrackingIntervalService,
@@ -93,7 +107,10 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
         },
         {
           provide: TaskService,
-          useValue: { getAllIssueIdsForProviderEverywhere: getAllIssueIdsSpy },
+          useValue: {
+            getAllIssueIdsForProviderEverywhere: getAllIssueIdsSpy,
+            checkForTaskWithIssueEverywhere: checkForTaskWithIssueEverywhereSpy,
+          },
         },
         {
           provide: LocaleDatePipe,
@@ -139,6 +156,9 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
 
   afterEach(() => {
     sub?.unsubscribe();
+    // overrideSelector() mutates the globally memoized selector, so without this
+    // every later spec in the Karma run would read this empty task state.
+    TestBed.inject(MockStore).resetSelectors();
   });
 
   it('imports a today event when first sync is done and we are NOT in a sync window', fakeAsync(() => {
@@ -155,8 +175,37 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
         issueProviderId: PROVIDER_ID,
         issueDataReduced: jasmine.objectContaining({ id: 'cal-evt-1' }),
         isForceDefaultProject: true,
+        // Automatic auto-import must not inherit the active context's tag (#8673).
+        isAutoImport: true,
       }),
     );
+  }));
+
+  it('does NOT auto-import an event dismissed by deleting its task', fakeAsync(() => {
+    taskStateForSelector.dismissedCalendarAutoImportEventIdsByProvider = {
+      [PROVIDER_ID]: ['legacy-cal-evt-1'],
+    };
+    requestEvents$Spy.and.returnValue(
+      of([buildEvent('cal-evt-1', { legacyIds: ['legacy-cal-evt-1'] })]),
+    );
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(addTaskFromIssueSpy).not.toHaveBeenCalled();
+  }));
+
+  it('keeps calendar event dismissals scoped to their provider', fakeAsync(() => {
+    taskStateForSelector.dismissedCalendarAutoImportEventIdsByProvider = {
+      another_provider: ['cal-evt-1'],
+    };
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(addTaskFromIssueSpy).toHaveBeenCalledTimes(1);
   }));
 
   it('does NOT import while the initial sync has not completed (cold-start race)', fakeAsync(() => {
@@ -200,6 +249,21 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
     expect(addTaskFromIssueSpy).not.toHaveBeenCalled();
   }));
 
+  it('does NOT import if the event is dismissed during the IDB-read await', fakeAsync(() => {
+    getAllIssueIdsSpy.and.callFake(async () => {
+      taskStateForSelector.dismissedCalendarAutoImportEventIdsByProvider = {
+        [PROVIDER_ID]: ['cal-evt-1'],
+      };
+      return [];
+    });
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(addTaskFromIssueSpy).not.toHaveBeenCalled();
+  }));
+
   it('still queues the banner branch when the import branch is gated off', fakeAsync(() => {
     // Import gate closed
     isInitialSyncDoneSyncSpy.and.returnValue(true);
@@ -226,5 +290,113 @@ describe('CalendarIntegrationEffects pollChanges$ startup guard', () => {
     )._currentlyShownBanners$.getValue();
     expect(banners.length).toBe(1);
     expect(banners[0].id).toBe('cal-evt-due');
+  }));
+
+  it('does NOT queue the banner branch for an event already linked to an archived task', fakeAsync(() => {
+    // Import gate closed: this pins the banner branch itself, not auto-import.
+    isInitialSyncDoneSyncSpy.and.returnValue(false);
+    checkForTaskWithIssueEverywhereSpy.and.resolveTo({
+      task: { id: 'archived-task', title: 'Archived task' },
+      subTasks: null,
+      isFromArchive: true,
+    });
+
+    requestEvents$Spy.and.returnValue(
+      of([
+        buildEvent('cal-evt-archived', {
+          start: Date.now() + THIRTY_MINUTES_MS,
+        }),
+      ]),
+    );
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(checkForTaskWithIssueEverywhereSpy).toHaveBeenCalledWith(
+      'cal-evt-archived',
+      'ICAL',
+      PROVIDER_ID,
+    );
+    expect(getAllIssueIdsSpy).not.toHaveBeenCalled();
+    expect(addTaskFromIssueSpy).not.toHaveBeenCalled();
+
+    const banners = (
+      effects as unknown as {
+        _currentlyShownBanners$: BehaviorSubject<{ id: string }[]>;
+      }
+    )._currentlyShownBanners$.getValue();
+    expect(banners.length).toBe(0);
+  }));
+
+  it('still queues the banner branch for an event linked to an active task', fakeAsync(() => {
+    // Import gate closed: this pins active linked task banner behavior.
+    isInitialSyncDoneSyncSpy.and.returnValue(false);
+    checkForTaskWithIssueEverywhereSpy.and.resolveTo({
+      task: { id: 'active-task', title: 'Active task' },
+      subTasks: null,
+      isFromArchive: false,
+    });
+
+    requestEvents$Spy.and.returnValue(
+      of([
+        buildEvent('cal-evt-active', {
+          start: Date.now() + THIRTY_MINUTES_MS,
+        }),
+      ]),
+    );
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    expect(addTaskFromIssueSpy).not.toHaveBeenCalled();
+
+    const banners = (
+      effects as unknown as {
+        _currentlyShownBanners$: BehaviorSubject<{ id: string }[]>;
+      }
+    )._currentlyShownBanners$.getValue();
+    expect(banners.length).toBe(1);
+    expect(banners[0].id).toBe('cal-evt-active');
+  }));
+
+  it('removes an already queued banner when its event becomes linked to an archived task', fakeAsync(() => {
+    // Import gate closed: this pins the banner queue reconciliation itself.
+    isInitialSyncDoneSyncSpy.and.returnValue(false);
+    checkForTaskWithIssueEverywhereSpy.and.resolveTo({
+      task: { id: 'archived-task', title: 'Archived task' },
+      subTasks: null,
+      isFromArchive: true,
+    });
+
+    const event = buildEvent('cal-evt-stale', {
+      start: Date.now() + THIRTY_MINUTES_MS,
+    });
+    (
+      effects as unknown as {
+        _currentlyShownBanners$: BehaviorSubject<
+          {
+            id: string;
+            calEv: CalendarIntegrationEvent;
+            calProvider: IssueProviderCalendar;
+          }[]
+        >;
+      }
+    )._currentlyShownBanners$.next([
+      { id: event.id, calEv: event, calProvider: buildProvider() },
+    ]);
+    requestEvents$Spy.and.returnValue(of([event]));
+
+    sub = effects.pollChanges$.subscribe();
+    tick(0);
+    flush();
+
+    const banners = (
+      effects as unknown as {
+        _currentlyShownBanners$: BehaviorSubject<{ id: string }[]>;
+      }
+    )._currentlyShownBanners$.getValue();
+    expect(banners.length).toBe(0);
   }));
 });

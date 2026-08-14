@@ -17,6 +17,8 @@ import { TAG_FEATURE_NAME, tagAdapter } from '../tag/store/tag.reducer';
 import { WORK_CONTEXT_FEATURE_NAME } from '../work-context/store/work-context.selectors';
 import { plannerFeatureKey } from '../planner/store/planner.reducer';
 import { TODAY_TAG } from '../tag/tag.const';
+import { LockService } from '../../op-log/sync/lock.service';
+import { LOCK_NAMES } from '../../op-log/core/operation-log.const';
 
 // Normalize timeSpentOnDay at the data boundary so all consumers can trust the
 // invariant: timeSpentOnDay is always a valid object, never undefined. This mirrors
@@ -74,6 +76,7 @@ type TaskArchiveAction =
 })
 export class TaskArchiveService {
   private _injector = inject(Injector);
+  private readonly _lockService = inject(LockService);
   private _archiveDbAdapter?: ArchiveDbAdapter;
   private get archiveDbAdapter(): ArchiveDbAdapter {
     if (!this._archiveDbAdapter) {
@@ -105,6 +108,23 @@ export class TaskArchiveService {
   }
 
   constructor() {}
+
+  /**
+   * Every mutation in THIS service is serialized behind the cross-tab
+   * TASK_ARCHIVE lock — including remote sync side effects: TASK_ARCHIVE is
+   * deliberately a separate lock from OPERATION_LOG, so acquiring it while
+   * sync holds the op-log lock is safe (and the remote moveToArchive path
+   * already does). The legacy `isIgnoreDBLock` option no longer bypasses this
+   * mutex; a bypassed remote mutation could interleave with a locked local one
+   * and silently drop one side's archive write.
+   *
+   * ArchiveCompressionService, TimeTrackingService, snapshot hydration/import,
+   * remote full-state replay, and authoritative op-log state replacements use
+   * the same mutex.
+   */
+  private _runTaskArchiveMutation(mutation: () => Promise<void>): Promise<void> {
+    return this._lockService.request(LOCK_NAMES.TASK_ARCHIVE, mutation);
+  }
 
   async loadYoung(): Promise<TaskArchive> {
     const archiveYoung =
@@ -230,10 +250,14 @@ export class TaskArchiveService {
     return result;
   }
 
-  async deleteTasks(
+  deleteTasks(
     taskIdsToDelete: string[],
     options?: { isIgnoreDBLock?: boolean },
   ): Promise<void> {
+    return this._runTaskArchiveMutation(() => this._deleteTasks(taskIdsToDelete));
+  }
+
+  private async _deleteTasks(taskIdsToDelete: string[]): Promise<void> {
     const archiveYoung =
       (await this.archiveDbAdapter.loadArchiveYoung()) || DEFAULT_ARCHIVE;
     const toDeleteInArchiveYoung = taskIdsToDelete.filter(
@@ -272,7 +296,17 @@ export class TaskArchiveService {
     }
   }
 
-  async updateTask(
+  updateTask(
+    id: string,
+    changedFields: Partial<Task>,
+    options?: { isSkipDispatch?: boolean; isIgnoreDBLock?: boolean },
+  ): Promise<void> {
+    return this._runTaskArchiveMutation(() =>
+      this._updateTask(id, changedFields, options),
+    );
+  }
+
+  private async _updateTask(
     id: string,
     changedFields: Partial<Task>,
     options?: { isSkipDispatch?: boolean; isIgnoreDBLock?: boolean },
@@ -311,7 +345,14 @@ export class TaskArchiveService {
     throw new Error('Archive task to update not found');
   }
 
-  async updateTasks(
+  updateTasks(
+    updates: Update<Task>[],
+    options?: { isSkipDispatch?: boolean; isIgnoreDBLock?: boolean },
+  ): Promise<void> {
+    return this._runTaskArchiveMutation(() => this._updateTasks(updates, options));
+  }
+
+  private async _updateTasks(
     updates: Update<Task>[],
     options?: { isSkipDispatch?: boolean; isIgnoreDBLock?: boolean },
   ): Promise<void> {
@@ -364,9 +405,17 @@ export class TaskArchiveService {
   }
 
   // -----------------------------------------
-  async removeAllArchiveTasksForProject(
+  removeAllArchiveTasksForProject(
     projectIdToDelete: string,
     options?: { isIgnoreDBLock?: boolean },
+  ): Promise<void> {
+    return this._runTaskArchiveMutation(() =>
+      this._removeAllArchiveTasksForProject(projectIdToDelete),
+    );
+  }
+
+  private async _removeAllArchiveTasksForProject(
+    projectIdToDelete: string,
   ): Promise<void> {
     const taskArchiveState: TaskArchive = await this.load();
     const archiveTaskIdsToDelete = !!taskArchiveState
@@ -378,13 +427,19 @@ export class TaskArchiveService {
           return t.projectId === projectIdToDelete;
         })
       : [];
-    await this.deleteTasks(archiveTaskIdsToDelete, options);
+    await this._deleteTasks(archiveTaskIdsToDelete);
   }
 
-  async removeTagsFromAllTasks(
+  removeTagsFromAllTasks(
     tagIdsToRemove: string[],
     options?: { isIgnoreDBLock?: boolean },
   ): Promise<void> {
+    return this._runTaskArchiveMutation(() =>
+      this._removeTagsFromAllTasks(tagIdsToRemove),
+    );
+  }
+
+  private async _removeTagsFromAllTasks(tagIdsToRemove: string[]): Promise<void> {
     const taskArchiveState: TaskArchive = await this.load();
     await this._execActionBoth(
       TaskSharedActions.removeTagsForAllTasks({ tagIdsToRemove }),
@@ -406,16 +461,22 @@ export class TaskArchiveService {
       }
     });
     // TODO check to maybe update to today tag instead
-    await this.deleteTasks(
-      [...archiveMainTaskIdsToDelete, ...archiveSubTaskIdsToDelete],
-      options,
-    );
+    await this._deleteTasks([
+      ...archiveMainTaskIdsToDelete,
+      ...archiveSubTaskIdsToDelete,
+    ]);
   }
 
-  async removeRepeatCfgFromArchiveTasks(
+  removeRepeatCfgFromArchiveTasks(
     repeatConfigId: string,
     options?: { isIgnoreDBLock?: boolean },
   ): Promise<void> {
+    return this._runTaskArchiveMutation(() =>
+      this._removeRepeatCfgFromArchiveTasks(repeatConfigId),
+    );
+  }
+
+  private async _removeRepeatCfgFromArchiveTasks(repeatConfigId: string): Promise<void> {
     const taskArchive = await this.load();
 
     const newState = { ...taskArchive };
@@ -435,16 +496,23 @@ export class TaskArchiveService {
           },
         };
       });
-      await this.updateTasks(updates, {
+      await this._updateTasks(updates, {
         isSkipDispatch: true,
-        isIgnoreDBLock: options?.isIgnoreDBLock,
       });
     }
   }
 
-  async unlinkIssueProviderFromArchiveTasks(
+  unlinkIssueProviderFromArchiveTasks(
     issueProviderId: string,
     options?: { isIgnoreDBLock?: boolean },
+  ): Promise<void> {
+    return this._runTaskArchiveMutation(() =>
+      this._unlinkIssueProviderFromArchiveTasks(issueProviderId),
+    );
+  }
+
+  private async _unlinkIssueProviderFromArchiveTasks(
+    issueProviderId: string,
   ): Promise<void> {
     const taskArchive = await this.load();
 
@@ -466,14 +534,23 @@ export class TaskArchiveService {
           issuePoints: undefined,
         },
       }));
-      await this.updateTasks(updates, {
+      await this._updateTasks(updates, {
         isSkipDispatch: true,
-        isIgnoreDBLock: options?.isIgnoreDBLock,
       });
     }
   }
 
-  async roundTimeSpent({
+  roundTimeSpent(params: {
+    day: string;
+    taskIds: string[];
+    roundTo: RoundTimeOption;
+    isRoundUp: boolean;
+    projectId?: string | null;
+  }): Promise<void> {
+    return this._runTaskArchiveMutation(() => this._roundTimeSpent(params));
+  }
+
+  private async _roundTimeSpent({
     day,
     taskIds,
     roundTo,

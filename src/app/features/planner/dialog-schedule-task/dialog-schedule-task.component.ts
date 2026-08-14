@@ -6,10 +6,10 @@ import {
   computed,
   inject,
   signal,
-  viewChild,
 } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
+  MatDialog,
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
@@ -21,7 +21,6 @@ import {
   TaskReminderOptionId,
 } from '../../tasks/task.model';
 import { T } from 'src/app/t.const';
-import { MatCalendar } from '@angular/material/datepicker';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../store/planner.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
@@ -32,29 +31,17 @@ import { truncate } from '../../../util/truncate';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
 import { FormsModule } from '@angular/forms';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
-import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { getClockStringFromHours } from '../../../util/get-clock-string-from-hours';
 import { DateService } from '../../../core/date/date.service';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { normalizeClockStr } from '../../../util/normalize-clock-str';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-import { DateAdapter, MatOption } from '@angular/material/core';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { DateAdapter } from '@angular/material/core';
+import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import {
-  MatFormField,
-  MatLabel,
-  MatPrefix,
-  MatSuffix,
-} from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { MatInput } from '@angular/material/input';
-import { TimeStepDirective } from '../../../ui/time-step/time-step.directive';
 import { Log } from '../../../core/log';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
@@ -62,34 +49,28 @@ import { selectAllTasksWithDueTimeSorted } from '../../tasks/store/task.selector
 import { selectTimelineConfig } from '../../config/store/global-config.reducer';
 import { getTimeConflictTaskIds } from '../../tasks/util/get-time-conflict-task-ids';
 import { isTaskOutsideWorkHours } from '../../tasks/util/is-task-outside-work-hours';
-
-const DEFAULT_TIME = '09:00';
+import { DateTimePickerComponent } from '../../../ui/datetime-picker/datetime-picker.component';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { selectTaskRepeatCfgByIdAllowUndefined } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { getTaskRepeatInfoText } from '../../tasks/task-detail-panel/get-task-repeat-info-text.util';
 
 @Component({
   selector: 'dialog-schedule-task',
   imports: [
     FormsModule,
-    MatTooltip,
-    MatIconButton,
     MatIcon,
-    MatFormField,
-    MatSelect,
-    MatOption,
     TranslatePipe,
     MatButton,
     MatDialogActions,
     MatDialogContent,
-    MatCalendar,
-    MatInput,
-    MatLabel,
-    MatSuffix,
-    MatPrefix,
-    TimeStepDirective,
+    DateTimePickerComponent,
   ],
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandFadeAnimation, fadeAnimation],
 })
 export class DialogScheduleTaskComponent implements AfterViewInit {
   data = inject<{
@@ -97,8 +78,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     targetDay?: string;
     targetTime?: string;
     isSelectDueOnly?: boolean;
+    showQuickAccess?: boolean;
+    minDate?: Date | null;
+    isSubmitOnQuickAccess?: boolean;
   }>(MAT_DIALOG_DATA);
   private _matDialogRef = inject<MatDialogRef<DialogScheduleTaskComponent>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private _cd = inject(ChangeDetectorRef);
   private _store = inject(Store);
   private _snackService = inject(SnackService);
@@ -121,25 +107,65 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   );
 
   T: typeof T = T;
-  minDate = new Date();
-  readonly calendar = viewChild.required(MatCalendar);
+  minDate = this.data.minDate === undefined ? new Date() : this.data.minDate;
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
   task: TaskCopy | undefined = this.data.task;
+
+  // Recurrence only applies to top-level, non-issue tasks (mirrors the panel's
+  // Repeat row gating). Hidden in select-due-only mode, since that mode IS the
+  // repeat dialog's own start-date picker and a repeat button there is circular.
+  readonly canRepeat =
+    !this.data.isSelectDueOnly &&
+    !!this.data.task &&
+    !this.data.task.parentId &&
+    !this.data.task.issueId;
+
+  // Reactive label for the repeat button. Tracks the live task in the store so it
+  // flips from "does not repeat" to e.g. "Daily" the moment the repeat sub-dialog
+  // saves, without closing this dialog.
+  private _task$: Observable<Task | null> = this.data.task
+    ? this._taskService.getByIdLive$(this.data.task.id)
+    : of(null);
+  // Live task from the store — used to open the repeat dialog with an up-to-date
+  // repeatCfgId (the injected data.task is a frozen snapshot from dialog open).
+  private _liveTask = toSignal(this._task$);
+  readonly repeatCfgLabel = toSignal(
+    this._task$.pipe(
+      map((task) => task?.repeatCfgId ?? null),
+      distinctUntilChanged(),
+      switchMap((repeatCfgId) =>
+        repeatCfgId
+          ? this._store.select(selectTaskRepeatCfgByIdAllowUndefined, { id: repeatCfgId })
+          : of(null),
+      ),
+      map((repeatCfg) => {
+        if (!repeatCfg) {
+          return null;
+        }
+        const [key, params] = getTaskRepeatInfoText(
+          repeatCfg,
+          this._dateTimeFormatService.currentLocale(),
+          this._dateTimeFormatService,
+          this._translateService,
+        );
+        return this._translateService.instant(key, params);
+      }),
+    ),
+    { initialValue: null },
+  );
 
   private _selectedDate = signal<Date | string | null>(null);
   private _selectedTime = signal<string | null>(null);
   selectedReminderCfgId!: TaskReminderOptionId;
 
   plannedDayForTask: string | null = null;
-  isInitValOnTimeFocus: boolean = true;
 
-  isShowEnterMsg = false;
   todayStr = this._dateService.todayStr();
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
-  private _timeCheckVal: string | null = null;
   private _previewTaskId = '__schedule-preview__';
+  private _repeatCfgCreatedInDialogId: string | null = null;
 
   private _defaultTaskRemindCfgId = computed(
     () =>
@@ -161,21 +187,29 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     this._selectedTime.set(value);
   }
 
+  // A `<input type="time">` can yield `HH:MM:SS` (macOS Chrome renders a seconds
+  // segment even with step="60"); recover it to `HH:MM` so the time the user set
+  // survives validation instead of being dropped or crashing the guard (#7802).
+  private _normalizedTime = computed<string | null>(() => {
+    const t = this._selectedTime();
+    return t ? normalizeClockStr(t) : null;
+  });
+
   plannedTimestamp = computed<number | null>(() => {
     const selectedDate = this._selectedDate();
-    const selectedTime = this._selectedTime();
-    // Malformed values (e.g. `HH:MM:SS` pasted into <input type="time">, out-of-range
-    // `25:00`, garbage) would otherwise crash getDateTimeFromClockString and bubble
-    // "Invalid clock string" to the global error handler via scheduleWarnings (#7802).
-    if (!selectedDate || !selectedTime || !isValidSplitTime(selectedTime)) {
+    const normalizedTime = this._normalizedTime();
+    // Out-of-range (`25:00`) or garbage values still fail validation here and
+    // would otherwise crash getDateTimeFromClockString and bubble "Invalid clock
+    // string" to the global error handler via scheduleWarnings (#7802).
+    if (!selectedDate || !normalizedTime || !isValidSplitTime(normalizedTime)) {
       return null;
     }
 
-    return getDateTimeFromClockString(selectedTime, selectedDate as Date);
+    return getDateTimeFromClockString(normalizedTime, selectedDate as Date);
   });
   scheduleWarnings = computed(() => {
     const plannedTimestamp = this.plannedTimestamp();
-    if (!plannedTimestamp) {
+    if (!plannedTimestamp || this.data.isSelectDueOnly) {
       return {
         hasOverlap: false,
         isOutsideWorkHours: false,
@@ -254,71 +288,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.selectedTime = this.data.targetTime;
     }
 
-    this.calendar().activeDate = new Date(this.selectedDate || new Date());
     this._cd.detectChanges();
-
-    setTimeout(() => {
-      this._focusInitially();
-    });
-    setTimeout(() => {
-      this._focusInitially();
-    }, 300);
-  }
-
-  private _focusInitially(): void {
-    if (this.selectedDate) {
-      (
-        document.querySelector('.mat-calendar-body-selected') as HTMLElement
-      )?.parentElement?.focus();
-    } else {
-      (
-        document.querySelector('.mat-calendar-body-today') as HTMLElement
-      )?.parentElement?.focus();
-    }
-    // setTimeout(() => {
-    //   (
-    //     document.querySelector('dialog-schedule-task button:nth-child(2)') as HTMLElement
-    //   )?.focus();
-    // });
-  }
-
-  onKeyDownOnCalendar(ev: KeyboardEvent): void {
-    this._timeCheckVal = null;
-    // Log.log(ev.key, ev.keyCode);
-    if (ev.code === 'Enter' || ev.code === 'Space') {
-      this.isShowEnterMsg = true;
-      // Log.log(
-      //   'check to submit',
-      //   this.selectedDate &&
-      //     new Date(this.selectedDate).getTime() ===
-      //       new Date(this.calendar.activeDate).getTime(),
-      //   this.selectedDate,
-      //   this.calendar.activeDate,
-      // );
-      if (
-        this.selectedDate &&
-        new Date(this.selectedDate).getTime() ===
-          new Date(this.calendar().activeDate).getTime()
-      ) {
-        this.submit();
-      }
-    } else {
-      this.isShowEnterMsg = false;
-    }
-  }
-
-  onTimeKeyDown(ev: KeyboardEvent): void {
-    // Log.log('ev.key!', ev.key);
-    if (ev.key === 'Enter') {
-      this.isShowEnterMsg = true;
-
-      if (this._timeCheckVal === this.selectedTime) {
-        this.submit();
-      }
-      this._timeCheckVal = this.selectedTime;
-    } else {
-      this.isShowEnterMsg = false;
-    }
   }
 
   close(
@@ -334,12 +304,46 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   dateSelected(newDate: Date): void {
-    // Log.log('dateSelected', typeof newDate, newDate, this.selectedDate);
-    // we do the timeout is there to make sure this happens after our click handler
-    setTimeout(() => {
-      this.selectedDate = new Date(newDate);
-      this.calendar().activeDate = this.selectedDate;
-    });
+    this.selectedDate = new Date(newDate);
+  }
+
+  async openRepeatDialog(): Promise<void> {
+    // Use the live task, not the frozen dialog snapshot: if a repeat cfg was just
+    // created here, re-opening must route to edit (via its repeatCfgId) instead of
+    // creating a second, orphaning cfg.
+    const task = this._liveTask() ?? this.data.task;
+    if (!task) {
+      return;
+    }
+    // Lazy import to avoid a static schedule-dialog <-> repeat-dialog module cycle,
+    // matching how task.component / add-task-bar open this dialog.
+    const { DialogEditTaskRepeatCfgComponent } =
+      await import('../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component');
+    const selectedDate = this.selectedDate;
+    const targetDate = selectedDate
+      ? typeof selectedDate === 'string'
+        ? selectedDate
+        : getDbDateStr(selectedDate)
+      : task.dueDay || getDbDateStr(task.dueWithTime || task.created);
+    this._matDialog
+      .open(DialogEditTaskRepeatCfgComponent, {
+        restoreFocus: true,
+        data: {
+          task,
+          // Only the exact config created inside this still-open schedule dialog
+          // can safely skip the destructive removal warning.
+          isRemoveConfirmationRequired:
+            task.repeatCfgId !== this._repeatCfgCreatedInDialogId,
+          initialStartDate: targetDate,
+          targetDate,
+        },
+      })
+      .afterClosed()
+      .subscribe((createdRepeatCfgId: unknown) => {
+        if (typeof createdRepeatCfgId === 'string') {
+          this._repeatCfgCreatedInDialogId = createdRepeatCfgId;
+        }
+      });
   }
 
   remove(): void {
@@ -386,31 +390,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     this.close(true);
   }
 
-  onTimeClear(ev: MouseEvent): void {
-    ev.stopPropagation();
-    this.selectedTime = null;
-    this.isInitValOnTimeFocus = true;
-  }
-
-  onTimeFocus(): void {
-    Log.log('onTimeFocus');
-    if (!this.selectedTime && this.isInitValOnTimeFocus) {
-      this.isInitValOnTimeFocus = false;
-
-      if (this.selectedDate) {
-        if (this._dateService.isToday(this.selectedDate as Date)) {
-          this.selectedTime = getClockStringFromHours(new Date().getHours() + 1);
-        } else {
-          this.selectedTime = DEFAULT_TIME;
-        }
-      } else {
-        // get current time +1h
-        this.selectedTime = getClockStringFromHours(new Date().getHours() + 1);
-        this.selectedDate = new Date();
-      }
-    }
-  }
-
   async submit(): Promise<void> {
     if (!this.selectedDate) {
       Log.err('no selected date');
@@ -419,10 +398,14 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     // If in select-due-only mode, return the selected values instead of dispatching actions
     if (this.data.isSelectDueOnly) {
+      const normalizedTime = this._normalizedTime();
       this.close({
         date: this.selectedDate as Date,
-        time: this.selectedTime,
-        remindOption: this.selectedReminderCfgId,
+        time: normalizedTime,
+        remindOption:
+          normalizedTime && isValidSplitTime(normalizedTime)
+            ? this.selectedReminderCfgId
+            : null,
       });
       return;
     }
@@ -432,9 +415,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     this._handleReminderRemoval();
 
-    // Treat malformed time the same as "no time": fall through to day-only planning
-    // rather than crashing in _scheduleWithTime (#7802).
-    const hasValidTime = !!this.selectedTime && isValidSplitTime(this.selectedTime);
+    // Treat genuinely malformed time the same as "no time": fall through to
+    // day-only planning rather than crashing in _scheduleWithTime (#7802).
+    const normalizedTime = this._normalizedTime();
+    const hasValidTime = !!normalizedTime && isValidSplitTime(normalizedTime);
 
     if (hasValidTime) {
       this._scheduleWithTime();
@@ -483,13 +467,14 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _scheduleWithTime(): void {
     // Only schedule if task is provided and time is valid (submit() pre-validates;
     // belt-and-braces guard against direct callers / malformed paste — see #7802).
-    if (!this.data.task || !isValidSplitTime(this.selectedTime ?? undefined)) {
+    const normalizedTime = this._normalizedTime();
+    if (!this.data.task || !normalizedTime || !isValidSplitTime(normalizedTime)) {
       return;
     }
 
     const task = this.data.task;
     const newDate = new Date(
-      getDateTimeFromClockString(this.selectedTime as string, this.selectedDate as Date),
+      getDateTimeFromClockString(normalizedTime, this.selectedDate as Date),
     );
     this._taskService.scheduleTask(
       task,
@@ -519,29 +504,20 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     );
   }
 
-  quickAccessBtnClick(eventOrItem: MouseEvent | number, maybeItem?: number): void {
-    if (eventOrItem instanceof MouseEvent) {
-      eventOrItem.stopPropagation();
-    }
-
-    const item = typeof eventOrItem === 'number' ? eventOrItem : maybeItem;
-    if (!item) {
-      return;
-    }
-
+  onQuickAccessClick(option: 'today' | 'tomorrow' | 'nextWeek' | 'nextMonth'): void {
     const tDate = new Date();
     tDate.setMinutes(0, 0, 0);
 
-    switch (item) {
-      case 1:
+    switch (option) {
+      case 'today':
         this.selectedDate = tDate;
         break;
-      case 2:
+      case 'tomorrow':
         const tomorrow = tDate;
         tomorrow.setDate(tomorrow.getDate() + 1);
         this.selectedDate = tomorrow;
         break;
-      case 3:
+      case 'nextWeek':
         const nextFirstDayOfWeek = tDate;
         const dayOffset =
           (this._dateAdapter.getFirstDayOfWeek() -
@@ -551,7 +527,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         nextFirstDayOfWeek.setDate(nextFirstDayOfWeek.getDate() + dayOffset);
         this.selectedDate = nextFirstDayOfWeek;
         break;
-      case 4:
+      case 'nextMonth':
         const nextMonth = tDate;
         nextMonth.setDate(1);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
@@ -559,6 +535,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         break;
     }
 
-    this.submit();
+    if (this.data.isSubmitOnQuickAccess !== false) {
+      this.submit();
+    }
   }
 }

@@ -1,16 +1,25 @@
 import { Prisma } from '@prisma/client';
 import { Logger } from '../../logger';
-import { computeOpStorageBytes } from '../sync.const';
+import {
+  CLIENT_ID_REGEX,
+  computeOpStorageBytes,
+  MAX_CLIENT_ID_LENGTH,
+} from '../sync.const';
 import {
   AcceptedBatchOperation,
   BatchUploadCandidate,
+  CAUSAL_FULL_STATE_OPERATION_WHERE,
   CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
   ConflictResult,
   DEFAULT_SYNC_CONFIG,
   DUPLICATE_OP_SELECT,
+  isCausalFullStateOperation,
   isFullStateOpType,
   limitVectorClockSize,
+  MAX_VECTOR_CLOCK_SIZE,
   Operation,
+  OP_TYPES,
+  ProcessOperationResult,
   SyncConfig,
   SYNC_ERROR_CODES,
   UploadResult,
@@ -20,19 +29,66 @@ import {
   detectConflict,
   getBatchConflictEntityPairs,
   getConflictEntityIds,
+  getStoredEntityIds,
   getEntityConflictKey,
   isSameDuplicateOperation,
+  isSameIncomingOperation,
   prefetchLatestEntityOpsForBatch,
   pruneVectorClockForStorage,
   resolveConflictForExistingOp,
 } from '../conflict';
-import { ValidationService } from './validation.service';
+import {
+  ALLOWED_ENTITY_TYPES,
+  ValidationService,
+  type ValidationResult,
+} from './validation.service';
 
 // Observability threshold: log a warning when the full-state op aggregate scan
 // exceeds this duration. Mirrors the threshold used by the legacy snapshot
 // vector-clock aggregate in OperationDownloadService so production logs use a
 // consistent slow-aggregate signal.
 const SLOW_FULL_STATE_AGGREGATE_MS = 5_000;
+const INVALID_AUDIT_FIELD = '[invalid]';
+const SAFE_AUDIT_ID_REGEX = /^[A-Za-z0-9_-]+$/;
+
+const isSafeAuditIdentifier = (value: unknown, maxLength: number): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  value.length <= maxLength &&
+  SAFE_AUDIT_ID_REGEX.test(value);
+
+const getSafeAuditOperationMetadata = (
+  op: Operation,
+): { opId: string; entityType: string; entityId?: string; opType: string } => {
+  const rawOp = op as unknown as Record<string, unknown>;
+  const rawOpId = rawOp['id'];
+  const rawEntityType = rawOp['entityType'];
+  const rawEntityId = rawOp['entityId'];
+  const rawOpType = rawOp['opType'];
+
+  return {
+    opId: isSafeAuditIdentifier(rawOpId, 255) ? rawOpId : INVALID_AUDIT_FIELD,
+    entityType:
+      typeof rawEntityType === 'string' && ALLOWED_ENTITY_TYPES.has(rawEntityType)
+        ? rawEntityType
+        : INVALID_AUDIT_FIELD,
+    entityId:
+      rawEntityId === undefined || rawEntityId === null
+        ? undefined
+        : isSafeAuditIdentifier(rawEntityId, 255)
+          ? rawEntityId
+          : INVALID_AUDIT_FIELD,
+    opType:
+      typeof rawOpType === 'string' && OP_TYPES.includes(rawOpType as Operation['opType'])
+        ? rawOpType
+        : INVALID_AUDIT_FIELD,
+  };
+};
+
+const getSafeAuditClientId = (clientId: string): string =>
+  clientId.length <= MAX_CLIENT_ID_LENGTH && CLIENT_ID_REGEX.test(clientId)
+    ? clientId
+    : INVALID_AUDIT_FIELD;
 
 const toSafeServerSeq = (value: number | bigint | undefined, userId: number): number => {
   if (typeof value === 'bigint') {
@@ -72,9 +128,8 @@ export class OperationUploadService {
       Logger.audit({
         event: 'TIMESTAMP_CLAMPED',
         userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
+        clientId: getSafeAuditClientId(clientId),
+        ...getSafeAuditOperationMetadata(op),
         originalTimestamp,
         clampedTo: maxAllowedTimestamp,
         driftMs: originalTimestamp - now,
@@ -94,13 +149,10 @@ export class OperationUploadService {
     Logger.audit({
       event: 'OP_REJECTED',
       userId,
-      clientId,
-      opId: op.id,
-      entityType: op.entityType,
-      entityId: op.entityId,
+      clientId: getSafeAuditClientId(clientId),
+      ...getSafeAuditOperationMetadata(op),
       errorCode,
-      reason: error,
-      opType: op.opType,
+      reason: errorCode ?? 'OP_REJECTED',
     });
 
     return {
@@ -180,12 +232,77 @@ export class OperationUploadService {
     });
   }
 
+  /**
+   * Memoizes the causal full-state author per upload transaction. The answer can
+   * only change when THIS transaction accepts a causal full-state op, which
+   * {@link noteFullStateAuthor} folds back in — so one query per transaction is
+   * enough. Keyed by the `tx` client (a fresh short-lived object per
+   * `$transaction`), so entries cannot outlive the request that created them.
+   */
+  private readonly fullStateAuthorByTx = new WeakMap<
+    Prisma.TransactionClient,
+    { author: string | undefined }
+  >();
+
+  /**
+   * The latest causal full-state author remains a required clock edge for
+   * post-import operations. If pruning drops that low-counter entry, clients
+   * at the boundary classify the operation as concurrent and filter it out.
+   *
+   * Resolved lazily: only an op whose clock actually overflows pays for it.
+   */
+  private async resolveFullStateAuthor(
+    tx: Prisma.TransactionClient,
+    userId: number,
+  ): Promise<string | undefined> {
+    const memoized = this.fullStateAuthorByTx.get(tx);
+    if (memoized) {
+      return memoized.author;
+    }
+    const latestFullStateOp = await tx.operation.findFirst({
+      where: { userId, ...CAUSAL_FULL_STATE_OPERATION_WHERE },
+      orderBy: { serverSeq: 'desc' },
+      select: { clientId: true },
+    });
+    const author = latestFullStateOp?.clientId;
+    this.fullStateAuthorByTx.set(tx, { author });
+    return author;
+  }
+
+  /**
+   * Records a causal full-state op accepted earlier in this same transaction, so
+   * later ops protect the new author without re-reading (and without depending on
+   * read-your-writes visibility).
+   */
+  private noteFullStateAuthor(tx: Prisma.TransactionClient, clientId: string): void {
+    this.fullStateAuthorByTx.set(tx, { author: clientId });
+  }
+
+  /**
+   * Protected clock IDs for storage: the uploader, plus the active causal
+   * full-state author when the clock is actually oversized. Under-limit clocks are
+   * never pruned, so they need no lookup at all.
+   */
+  private async getPruneProtectedIds(
+    tx: Prisma.TransactionClient,
+    userId: number,
+    op: Operation,
+  ): Promise<string[]> {
+    if (Object.keys(op.vectorClock).length <= MAX_VECTOR_CLOCK_SIZE) {
+      return [];
+    }
+    const author = await this.resolveFullStateAuthor(tx, userId);
+    return author ? [author] : [];
+  }
+
   async processOperationBatch(
     userId: number,
     clientId: string,
     ops: Operation[],
     now: number,
     tx: Prisma.TransactionClient,
+    prevalidatedResults?: ReadonlyMap<Operation, ValidationResult>,
+    requestStartOccupiedIds?: ReadonlySet<string>,
   ): Promise<{
     results: UploadResult[];
     acceptedDeltaBytes: number;
@@ -206,14 +323,13 @@ export class OperationUploadService {
       ops,
       now,
       results,
+      prevalidatedResults,
     );
 
-    const uniqueCandidates = this.rejectIntraBatchDuplicates(
-      userId,
-      clientId,
-      validatedCandidates,
-      results,
-    );
+    // Intra-batch duplicate ids were already terminally rejected in stage 1:
+    // validateAndClampBatch reserves each id on first occurrence (including
+    // invalid first siblings), so validatedCandidates is unique by op id.
+    const uniqueCandidates = validatedCandidates;
 
     if (uniqueCandidates.length === 0) {
       return {
@@ -230,6 +346,7 @@ export class OperationUploadService {
       uniqueCandidates,
       tx,
       results,
+      requestStartOccupiedIds,
     );
     dbRoundtrips += classified.dbRoundtrips;
     const duplicateFreeCandidates = classified.duplicateFreeCandidates;
@@ -274,8 +391,9 @@ export class OperationUploadService {
   }
 
   /**
-   * Stage 1: clamp future timestamps and validate every op in memory (no DB).
-   * Invalid ops get a terminal rejection written into `results` by index.
+   * Stage 1: reserve each transport-level operation ID, clamp timestamps, and
+   * validate every first occurrence in memory (no DB). Invalid first ops and
+   * every later same-ID sibling get terminal results by index.
    */
   private validateAndClampBatch(
     userId: number,
@@ -283,12 +401,41 @@ export class OperationUploadService {
     ops: Operation[],
     now: number,
     results: UploadResult[],
+    prevalidatedResults?: ReadonlyMap<Operation, ValidationResult>,
   ): BatchUploadCandidate[] {
     const validatedCandidates: BatchUploadCandidate[] = [];
+    const firstOperationById = new Map<
+      string,
+      { op: Operation; originalTimestamp: number }
+    >();
     for (let i = 0; i < ops.length; i++) {
       const op = ops[i];
       const originalTimestamp = this.clampFutureTimestamp(userId, clientId, op, now);
-      const validation = this.validationService.validateOp(op, clientId);
+      const firstOperation = firstOperationById.get(op.id);
+      if (firstOperation) {
+        const isExactRetry = isSameIncomingOperation(
+          firstOperation.op,
+          op,
+          firstOperation.originalTimestamp,
+          originalTimestamp,
+        );
+        results[i] = this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          isExactRetry
+            ? 'Duplicate operation ID'
+            : 'Operation ID already belongs to a different operation',
+          isExactRetry
+            ? SYNC_ERROR_CODES.DUPLICATE_OPERATION
+            : SYNC_ERROR_CODES.INVALID_OP_ID,
+        );
+        continue;
+      }
+      firstOperationById.set(op.id, { op, originalTimestamp });
+
+      const validation =
+        prevalidatedResults?.get(op) ?? this.validationService.validateOp(op, clientId);
 
       if (!validation.valid) {
         results[i] = this.rejectedUploadResult(
@@ -305,50 +452,22 @@ export class OperationUploadService {
         op,
         resultIndex: i,
         originalTimestamp,
-        fullStateVectorClock: isFullStateOpType(op.opType)
+        fullStateVectorClock: isCausalFullStateOperation(op)
           ? { ...op.vectorClock }
           : undefined,
+        payloadBytes: validation.payloadBytes,
       });
     }
     return validatedCandidates;
   }
 
   /**
-   * Stage 2: within a single batch, accept the first op for an id and reject
-   * every later op sharing that id as DUPLICATE_OPERATION (by id, not content
-   * — see plan §1a step 2 / the C4 divergence note). Must run before sequence
-   * reservation so a duplicate never consumes a server_seq.
-   */
-  private rejectIntraBatchDuplicates(
-    userId: number,
-    clientId: string,
-    validatedCandidates: BatchUploadCandidate[],
-    results: UploadResult[],
-  ): BatchUploadCandidate[] {
-    const seenOpIds = new Set<string>();
-    const uniqueCandidates: BatchUploadCandidate[] = [];
-    for (const candidate of validatedCandidates) {
-      if (seenOpIds.has(candidate.op.id)) {
-        results[candidate.resultIndex] = this.rejectedUploadResult(
-          userId,
-          clientId,
-          candidate.op,
-          'Duplicate operation ID',
-          SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-        );
-        continue;
-      }
-      seenOpIds.add(candidate.op.id);
-      uniqueCandidates.push(candidate);
-    }
-    return uniqueCandidates;
-  }
-
-  /**
-   * Stage 3: prefetch any already-persisted ops sharing an incoming id (one
+   * Stage 3: prefetch any currently persisted ops sharing an incoming id (one
    * query) and classify each as an idempotent retry (DUPLICATE_OPERATION) or
-   * an id collision with different content (INVALID_OP_ID). Survivors are
-   * returned for conflict detection.
+   * an id collision with different content (INVALID_OP_ID). If quota cleanup
+   * removed a row after the route's occupancy check, the request-start set
+   * still rejects that ID rather than letting it consume unestimated storage.
+   * Survivors are returned for conflict detection.
    */
   private async classifyExistingDuplicates(
     userId: number,
@@ -356,6 +475,7 @@ export class OperationUploadService {
     uniqueCandidates: BatchUploadCandidate[],
     tx: Prisma.TransactionClient,
     results: UploadResult[],
+    requestStartOccupiedIds?: ReadonlySet<string>,
   ): Promise<{
     duplicateFreeCandidates: BatchUploadCandidate[];
     dbRoundtrips: number;
@@ -372,6 +492,16 @@ export class OperationUploadService {
     for (const candidate of uniqueCandidates) {
       const existingOp = existingOpById.get(candidate.op.id);
       if (!existingOp) {
+        if (requestStartOccupiedIds?.has(candidate.op.id)) {
+          results[candidate.resultIndex] = this.rejectedUploadResult(
+            userId,
+            clientId,
+            candidate.op,
+            'Operation ID was already occupied before quota enforcement',
+            SYNC_ERROR_CODES.INVALID_OP_ID,
+          );
+          continue;
+        }
         duplicateFreeCandidates.push(candidate);
         continue;
       }
@@ -474,8 +604,14 @@ export class OperationUploadService {
         }
       }
 
-      pruneVectorClockForStorage(op);
-      const sized = computeOpStorageBytes(op);
+      if (isCausalFullStateOperation(op)) {
+        this.noteFullStateAuthor(tx, op.clientId);
+      }
+      const protectedIds = await this.getPruneProtectedIds(tx, userId, op);
+      pruneVectorClockForStorage(op, protectedIds);
+      // Reuse the payload byte size measured during validation; the clock is
+      // (re)measured inside computeOpStorageBytes because it was just pruned.
+      const sized = computeOpStorageBytes(op, candidate.payloadBytes);
       acceptedDeltaBytes += sized.bytes;
       if (sized.fallback) unserializableAccepted++;
 
@@ -492,6 +628,7 @@ export class OperationUploadService {
             entityType: op.entityType,
             entityId,
             clientId: op.clientId,
+            actionType: op.actionType,
             vectorClock: op.vectorClock,
           });
         }
@@ -540,6 +677,10 @@ export class OperationUploadService {
         opType: candidate.op.opType,
         entityType: candidate.op.entityType,
         entityId: candidate.op.entityId ?? null,
+        // Persist the full entity set for multi-entity ops so conflict detection
+        // can match a write to any touched entity across uploads, not just
+        // entityIds[0]; single-entity ops store [] and use the scalar (#8334).
+        entityIds: getStoredEntityIds(candidate.op),
         payload: candidate.op.payload as Prisma.InputJsonValue,
         payloadBytes: BigInt(candidate.storageBytes),
         vectorClock: candidate.op.vectorClock as Prisma.InputJsonValue,
@@ -548,6 +689,7 @@ export class OperationUploadService {
         receivedAt: BigInt(now),
         isPayloadEncrypted: candidate.op.isPayloadEncrypted ?? false,
         syncImportReason: candidate.op.syncImportReason ?? null,
+        repairBaseServerSeq: candidate.op.repairBaseServerSeq ?? null,
       })),
     });
     return 2;
@@ -593,38 +735,65 @@ export class OperationUploadService {
     op: Operation,
     now: number,
     tx: Prisma.TransactionClient,
-  ): Promise<UploadResult> {
+    prevalidatedResult?: ValidationResult,
+    wasOccupiedAtRequestStart?: boolean,
+    firstRequestOperation?: { op: Operation; originalTimestamp: number },
+  ): Promise<ProcessOperationResult> {
+    // Rejected ops have no storage cost; the caller only reads storageBytes when
+    // result.accepted is true.
+    const reject = (result: UploadResult): ProcessOperationResult => ({
+      result,
+      storageBytes: 0,
+      fallback: false,
+    });
+
     // Clamp future timestamps instead of rejecting them (prevents silent data
     // loss). Shares the exact clamp + audit with the batch path.
     const originalTimestamp = this.clampFutureTimestamp(userId, clientId, op, now);
 
     // Validate operation (including clientId match)
-    const validation = this.validationService.validateOp(op, clientId);
-    if (!validation.valid) {
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode: validation.errorCode,
-        reason: validation.error,
-        opType: op.opType,
-      });
-      return {
-        opId: op.id,
-        accepted: false,
-        error: validation.error,
-        errorCode: validation.errorCode,
-      };
+    const validation =
+      prevalidatedResult ?? this.validationService.validateOp(op, clientId);
+    if (firstRequestOperation) {
+      const isExactRetry = isSameIncomingOperation(
+        firstRequestOperation.op,
+        op,
+        firstRequestOperation.originalTimestamp,
+        originalTimestamp,
+      );
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          isExactRetry
+            ? 'Duplicate operation ID'
+            : 'Operation ID already belongs to a different operation',
+          isExactRetry
+            ? SYNC_ERROR_CODES.DUPLICATE_OPERATION
+            : SYNC_ERROR_CODES.INVALID_OP_ID,
+        ),
+      );
     }
+
+    if (!validation.valid) {
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          validation.error,
+          validation.errorCode,
+        ),
+      );
+    }
+
     // Capture the *unpruned* vector clock for full-state ops. The op row stores
     // the pruned clock (see `limitVectorClockSize` call below); persisting the
     // unpruned copy on `user_sync_state` lets the download path re-prune at
     // read time with knowledge of `preserveClientIds` (excludeClient, snapshot
     // author), keeping more relevant entries than a pre-pruned snapshot would.
-    const fullStateVectorClock = isFullStateOpType(op.opType)
+    const fullStateVectorClock = isCausalFullStateOperation(op)
       ? { ...op.vectorClock }
       : undefined;
 
@@ -646,42 +815,38 @@ export class OperationUploadService {
           originalTimestamp,
         )
       ) {
-        Logger.audit({
-          event: 'OP_REJECTED',
-          userId,
-          clientId,
-          opId: op.id,
-          entityType: op.entityType,
-          entityId: op.entityId,
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-          reason: 'Operation ID already belongs to a different operation',
-          opType: op.opType,
-        });
-        return {
-          opId: op.id,
-          accepted: false,
-          error: 'Operation ID already belongs to a different operation',
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-        };
+        return reject(
+          this.rejectedUploadResult(
+            userId,
+            clientId,
+            op,
+            'Operation ID already belongs to a different operation',
+            SYNC_ERROR_CODES.INVALID_OP_ID,
+          ),
+        );
       }
 
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-        reason: 'Duplicate operation ID (pre-check)',
-        opType: op.opType,
-      });
-      return {
-        opId: op.id,
-        accepted: false,
-        error: 'Duplicate operation ID',
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-      };
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          'Duplicate operation ID',
+          SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+        ),
+      );
+    }
+
+    if (wasOccupiedAtRequestStart) {
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          'Operation ID was already occupied before quota enforcement',
+          SYNC_ERROR_CODES.INVALID_OP_ID,
+        ),
+      );
     }
 
     // Check for conflicts with existing operations
@@ -692,24 +857,16 @@ export class OperationUploadService {
         conflict.conflictType === 'equal_different_client'
           ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
           : SYNC_ERROR_CODES.CONFLICT_SUPERSEDED;
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode,
-        reason: conflict.reason,
-        opType: op.opType,
-      });
-      return {
-        opId: op.id,
-        accepted: false,
-        error: conflict.reason,
-        errorCode,
-        existingClock: conflict.existingClock,
-      };
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          conflict.reason,
+          errorCode,
+          conflict.existingClock,
+        ),
+      );
     }
 
     // Get next sequence number
@@ -735,24 +892,16 @@ export class OperationUploadService {
         finalConflict.conflictType === 'equal_different_client'
           ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
           : SYNC_ERROR_CODES.CONFLICT_SUPERSEDED;
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode,
-        reason: `[RACE] ${finalConflict.reason}`,
-        opType: op.opType,
-      });
-      return {
-        opId: op.id,
-        accepted: false,
-        error: finalConflict.reason,
-        errorCode,
-        existingClock: finalConflict.existingClock,
-      };
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          finalConflict.reason,
+          errorCode,
+          finalConflict.existingClock,
+        ),
+      );
     }
 
     // Prune vector clock AFTER conflict detection but BEFORE storage.
@@ -763,13 +912,26 @@ export class OperationUploadService {
     // clock ID, causing the comparison to return CONCURRENT instead of GREATER_THAN,
     // leading to an infinite rejection loop.
     const beforeSize = Object.keys(op.vectorClock).length;
-    op.vectorClock = limitVectorClockSize(op.vectorClock, [op.clientId]);
+    // Note this op's own authorship first: a causal full-state op is its own
+    // active author, so the memo answers without a query (and later ops in the
+    // same transaction see it).
+    if (isCausalFullStateOperation(op)) {
+      this.noteFullStateAuthor(tx, op.clientId);
+    }
+    const protectedIds = await this.getPruneProtectedIds(tx, userId, op);
+    op.vectorClock = limitVectorClockSize(op.vectorClock, [op.clientId, ...protectedIds]);
     const afterSize = Object.keys(op.vectorClock).length;
     if (afterSize < beforeSize) {
       Logger.debug(
         `[client:${op.clientId}] Vector clock pruned from ${beforeSize} to ${afterSize} before storage`,
       );
     }
+
+    // Size the op once, here, after the clock prune above (so the stored clock is
+    // measured) and reusing the payload byte size from validation (so the
+    // payload isn't re-stringified). Reused for the payloadBytes column and the
+    // caller's acceptedDeltaBytes accumulation.
+    const sized = computeOpStorageBytes(op, validation.payloadBytes);
 
     const createResult = await tx.operation.createMany({
       data: [
@@ -782,14 +944,19 @@ export class OperationUploadService {
           opType: op.opType,
           entityType: op.entityType,
           entityId: op.entityId ?? null,
+          // Persist the full entity set for multi-entity ops so conflict detection
+          // can match a write to any touched entity across uploads, not just
+          // entityIds[0]; single-entity ops store [] and use the scalar (#8334).
+          entityIds: getStoredEntityIds(op),
           payload: op.payload as Prisma.InputJsonValue,
-          payloadBytes: BigInt(computeOpStorageBytes(op).bytes),
+          payloadBytes: BigInt(sized.bytes),
           vectorClock: op.vectorClock as Prisma.InputJsonValue,
           schemaVersion: op.schemaVersion,
           clientTimestamp: BigInt(op.timestamp),
           receivedAt: BigInt(now),
           isPayloadEncrypted: op.isPayloadEncrypted ?? false,
           syncImportReason: op.syncImportReason ?? null,
+          repairBaseServerSeq: op.repairBaseServerSeq ?? null,
         },
       ],
       skipDuplicates: true,
@@ -824,42 +991,26 @@ export class OperationUploadService {
           originalTimestamp,
         )
       ) {
-        Logger.audit({
-          event: 'OP_REJECTED',
-          userId,
-          clientId,
-          opId: op.id,
-          entityType: op.entityType,
-          entityId: op.entityId,
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-          reason: 'Operation ID already belongs to a different operation',
-          opType: op.opType,
-        });
-        return {
-          opId: op.id,
-          accepted: false,
-          error: 'Operation ID already belongs to a different operation',
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-        };
+        return reject(
+          this.rejectedUploadResult(
+            userId,
+            clientId,
+            op,
+            'Operation ID already belongs to a different operation',
+            SYNC_ERROR_CODES.INVALID_OP_ID,
+          ),
+        );
       }
 
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-        reason: 'Duplicate operation ID (insert race)',
-        opType: op.opType,
-      });
-      return {
-        opId: op.id,
-        accepted: false,
-        error: 'Duplicate operation ID',
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-      };
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          'Duplicate operation ID',
+          SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+        ),
+      );
     }
 
     if (fullStateVectorClock) {
@@ -877,9 +1028,9 @@ export class OperationUploadService {
     }
 
     return {
-      opId: op.id,
-      accepted: true,
-      serverSeq,
+      result: { opId: op.id, accepted: true, serverSeq },
+      storageBytes: sized.bytes,
+      fallback: sized.fallback,
     };
   }
 }

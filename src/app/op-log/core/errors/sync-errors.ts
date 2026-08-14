@@ -1,17 +1,19 @@
 import { IValidation } from 'typia';
 import type { SyncFilePrefixInvalidPrefixDetails } from '@sp/sync-core';
-import { toSyncLogError } from '@sp/sync-core';
 import {
   AdditionalLogErrorBase as PackageAdditionalLogErrorBase,
   extractErrorMessage as packageExtractErrorMessage,
 } from '@sp/sync-providers/errors';
 import { FILE_BASED_SYNC_CONSTANTS } from '../../sync-providers/file-based/file-based-sync.types';
-import { OP_LOG_SYNC_LOGGER } from '../sync-logger.adapter';
+import { KNOWN_ACTION_TYPES } from '../action-types.enum';
+
+/** Upper bound for the entity count reported in a sync diagnostic. */
+const MAX_REPORTED_ENTITY_COUNT = 9999;
 
 // Re-export provider-shared error classes from @sp/sync-providers.
 // Single class definition per error is critical for `instanceof` checks
-// across the codebase. See docs/plans/2026-05-12-pr5-dropbox-slice.md
-// action item A5 and sync-errors.identity.spec.ts.
+// across the codebase (one definition, re-exported — never re-declared).
+// Identity is covered by sync-errors.identity.spec.ts.
 export {
   AuthFailSPError,
   EmptyRemoteBodySPError,
@@ -27,6 +29,7 @@ export {
   RemoteFileNotFoundAPIError,
   TooManyRequestsAPIError,
   UploadRevToMatchMismatchAPIError,
+  WebDavNativeRequestError,
 } from '@sp/sync-providers/errors';
 
 export const extractErrorMessage = packageExtractErrorMessage;
@@ -45,20 +48,6 @@ const getValidationErrors = (
   return undefined;
 };
 
-const getValidationErrorPathSummary = (
-  validationResult?: IValidation<unknown>,
-): string | undefined => {
-  const errors = getValidationErrors(validationResult);
-  if (!errors) return undefined;
-
-  const pathSummary = errors
-    .slice(0, 3)
-    .map((error) => error.path)
-    .filter(Boolean)
-    .join(', ');
-  return pathSummary || undefined;
-};
-
 // AdditionalLogErrorBase is provided by @sp/sync-providers (without the
 // previous constructor-time logging side effect). The remaining app-only
 // errors below extend it; they MUST log at the catch site via
@@ -70,16 +59,6 @@ const AdditionalLogErrorBase = PackageAdditionalLogErrorBase;
 
 export class ImpossibleError extends Error {
   override name = ' ImpossibleError';
-}
-
-// --------------APP-SIDE-ONLY API ERRORS--------------
-
-export class NoEtagAPIError extends AdditionalLogErrorBase {
-  override name = ' NoEtagAPIError';
-}
-
-export class FileExistsAPIError extends Error {
-  override name = ' FileExistsAPIError';
 }
 
 // --------------OTHER SYNC ERRORS--------------
@@ -99,6 +78,15 @@ export class LocalDataConflictError extends Error {
     public readonly unsyncedCount: number,
     public readonly remoteSnapshotState: Record<string, unknown>,
     public readonly remoteVectorClock?: Record<string, number>,
+    // The client's vector clock as of its last successful sync. Used by the
+    // conflict dialog as an APPROXIMATE baseline for the per-client
+    // changes-since-last-sync delta. Note: compaction can fold still-unsynced ops
+    // into this clock, so the delta can under-count actual local changes — it is a
+    // display heuristic, not an exact "unsynced" figure. `null` for genuinely-fresh
+    // clients that have never synced (SPAP-7).
+    public readonly lastSyncedVectorClock?: Record<string, number> | null,
+    /** Actual `lastModified` recorded by the downloaded remote file. */
+    public readonly remoteLastModified?: number,
   ) {
     super(`Local data conflict: ${unsyncedCount} unsynced changes would be lost`);
   }
@@ -126,41 +114,122 @@ export class LockAcquisitionTimeoutError extends Error {
   }
 }
 
-export class RevMismatchForModelError extends AdditionalLogErrorBase<string> {
-  override name = 'RevMismatchForModelError';
-}
-
 export class UnknownSyncStateError extends Error {
   override name = 'UnknownSyncStateError';
 }
 
-export class SyncInvalidTimeValuesError extends AdditionalLogErrorBase {
-  override name = 'SyncInvalidTimeValuesError';
+export class ForceUploadFailedError extends Error {
+  override name = 'ForceUploadFailedError';
 }
 
-export class RevMapModelMismatchErrorOnDownload extends AdditionalLogErrorBase {
-  override name = 'RevMapModelMismatchErrorOnDownload';
+export class ForceUploadPendingOpsError extends Error {
+  override name = 'ForceUploadPendingOpsError';
 }
 
-export class RevMapModelMismatchErrorOnUpload extends AdditionalLogErrorBase {
-  override name = 'RevMapModelMismatchErrorOnUpload';
+/**
+ * The multi-entity conflict preflight refused to auto-resolve (#9405). The
+ * message is the whole diagnostic: it is shown to the user and written to the
+ * exportable log, so it carries only allowlisted metadata: a fixed code, the
+ * side, an action type that must be a known `ActionType`, and a clamped entity
+ * count. Never widen this to ids, payloads, or titles.
+ */
+export class UnsupportedMultiEntityConflictError extends Error {
+  override name = 'UnsupportedMultiEntityConflictError';
+
+  constructor(side: 'local' | 'remote', actionType: unknown, entityCount: unknown) {
+    const safeActionType =
+      typeof actionType === 'string' && KNOWN_ACTION_TYPES.has(actionType)
+        ? actionType
+        : 'UNKNOWN';
+    const safeEntityCount =
+      typeof entityCount === 'number' && Number.isInteger(entityCount) && entityCount >= 0
+        ? Math.min(entityCount, MAX_REPORTED_ENTITY_COUNT)
+        : 0;
+    super(
+      `SYNC_MULTI_ENTITY_UNSUPPORTED side=${side} actionType=${safeActionType} ` +
+        `entityCount=${safeEntityCount}`,
+    );
+  }
 }
 
-export class NoRemoteModelFile extends AdditionalLogErrorBase<string> {
-  override name = 'NoRemoteModelFile';
+/**
+ * The file-sync target changed (provider switch, account switch behind the same
+ * provider id, or an identity-affecting config/folder change) while a file
+ * upload was in flight — detected by a bumped adapter target generation before a
+ * remote write. The in-flight write carries the previous target's merged data,
+ * so it is abandoned rather than committed to the new target. The next sync
+ * re-reads and re-uploads against the current target from zero. Transient by
+ * design; not a corruption. (Task 2, docs/plans/2026-07-13-sync-simplification-plan.md.)
+ */
+export class FileSyncTargetChangedError extends Error {
+  override name = 'FileSyncTargetChangedError';
+
+  constructor(capturedGeneration: number, currentGeneration: number) {
+    super(
+      `File sync target changed mid-operation (generation ${capturedGeneration} → ${currentGeneration}); write abandoned.`,
+    );
+  }
 }
 
-export class NoRemoteMetaFile extends Error {
-  override name = 'NoRemoteMetaFile';
+/**
+ * The global sync epoch changed (provider switch, account/target move, or a
+ * destructive config operation such as an encryption change) while a sync
+ * cycle was in flight — detected by comparing the epoch captured at cycle
+ * start against `SyncProviderManager.syncEpoch` before a write. The stale
+ * cycle's remaining applies/acks/cursor writes are abandoned so they cannot
+ * land against the new epoch/target; the next sync runs against the current
+ * config from scratch. Transient by design; not a corruption. (#9074 — the
+ * cross-provider generalization of {@link FileSyncTargetChangedError}.)
+ */
+export class SyncEpochChangedError extends Error {
+  override name = 'SyncEpochChangedError';
+
+  constructor(capturedEpoch: number, currentEpoch: number, context: string) {
+    super(
+      `Sync epoch changed mid-cycle (${capturedEpoch} → ${currentEpoch}) at ${context}; write abandoned.`,
+    );
+  }
 }
 
-// --------------LOCKFILE ERRORS--------------
-export class LockPresentError extends Error {
-  override name = 'LockPresentError';
+/**
+ * A deferred action can never be persisted (invalid entity identifiers or an
+ * invalid operation payload) — a deterministic condition, not a transient
+ * I/O failure. The reducer already committed, so the action stays buffered and
+ * sync remains blocked until reload restores the last durable state.
+ */
+export class PermanentDeferredWriteError extends Error {
+  override name = 'PermanentDeferredWriteError';
 }
 
-export class LockFromLocalClientPresentError extends Error {
-  override name = 'LockFromLocalClientPresentError';
+/**
+ * A local action was captured while a USE_REMOTE rebuild held the op-log lock,
+ * after the destructive replacement committed. The attempt must abort — the
+ * raced action's reducer ran against live state the replay rewrites, so
+ * completing could let a later snapshot cover an op whose live effect is
+ * missing. The raced ops are preserved and re-applied by the retry/resume.
+ */
+export class CaptureRacedRebuildError extends Error {
+  override name = 'CaptureRacedRebuildError';
+
+  constructor() {
+    super(
+      'USE_REMOTE incomplete: a local change arrived during the rebuild and will be restored on retry.',
+    );
+  }
+}
+
+/** Previously downloaded operations have not completed reducer/archive recovery. */
+export class IncompleteRemoteOperationsError extends Error {
+  override name = 'IncompleteRemoteOperationsError';
+
+  constructor(cause?: unknown) {
+    super(
+      cause instanceof Error
+        ? cause.message
+        : 'Downloaded operations are not fully applied.',
+      cause === undefined ? undefined : { cause },
+    );
+  }
 }
 
 // -----ENCRYPTION & COMPRESSION----
@@ -168,8 +237,61 @@ export class DecryptNoPasswordError extends AdditionalLogErrorBase {
   override name = 'DecryptNoPasswordError';
 }
 
+/**
+ * Encryption is expected (isEncrypt=true) but no key is available at upload
+ * time — the dropped-credential signature (GHSA-9544-hjjr-fg8h). Uploading
+ * plaintext instead would silently break the E2EE promise, so the upload path
+ * throws this to trigger the enter-password recovery dialog.
+ * NEVER attach the payload that was about to be encrypted (user content).
+ */
+export class EncryptNoPasswordError extends AdditionalLogErrorBase {
+  override name = 'EncryptNoPasswordError';
+}
+
+/**
+ * The remote sync file is PLAINTEXT (its prefix carries no encryption flag) but
+ * local config expects encryption (GHSA-vrc7-775g-ggqc). The prefix flags live
+ * OUTSIDE the AEAD envelope, so a remote attacker (compromised Dropbox/WebDAV
+ * account, or a non-TLS WebDAV MITM) can strip the flag and serve
+ * attacker-authored plaintext. Deciding decrypt-or-not from that
+ * attacker-controlled prefix alone would silently accept the injected data and
+ * drop the E2EE authenticity guarantee, so the download path fails closed with
+ * this error instead — the download-side mirror of EncryptNoPasswordError.
+ * NEVER attach the payload: it is plaintext user (or attacker) content.
+ */
+export class PlaintextWhenEncryptionExpectedError extends AdditionalLogErrorBase<{
+  isCompressed: boolean;
+  modelVersion: number;
+}> {
+  override name = 'PlaintextWhenEncryptionExpectedError';
+
+  constructor(info: { isCompressed: boolean; modelVersion: number }) {
+    super(
+      'Remote sync file is unencrypted but local encryption is enabled — ' +
+        'refusing to accept plaintext (possibly a tampered or downgraded remote).',
+    );
+    this.additionalLog = info;
+  }
+}
+
 export class DecryptError extends AdditionalLogErrorBase {
   override name = 'DecryptError';
+}
+
+/**
+ * Thrown when a successfully-decrypted operation's UNAUTHENTICATED metadata is
+ * inconsistent with its AUTHENTICATED payload — the signature of sync-server
+ * (or MITM) tampering with the plaintext op fields that AES-GCM does not cover.
+ * GHSA-8pxh-mgc7-gp3g.
+ *
+ * Distinct from DecryptError on purpose: it must not carry the raw
+ * message to the user, and (being a sibling, not a subclass) it never matches
+ * the DecryptError branch. SyncWrapperService has a dedicated branch that fails
+ * closed (sync stops) and shows a calm, translated message instead of the raw
+ * technical/GHSA string.
+ */
+export class OperationIntegrityError extends AdditionalLogErrorBase {
+  override name = 'OperationIntegrityError';
 }
 
 export class CompressError extends AdditionalLogErrorBase {
@@ -237,12 +359,6 @@ export class JsonParseError extends Error {
       const end = Math.min(dataStr.length, position + 50);
       this.dataSample = `...${dataStr.substring(start, end)}...`;
     }
-
-    OP_LOG_SYNC_LOGGER.err('JsonParseError', toSyncLogError(originalError), {
-      position: this.position,
-      dataLength: dataStr?.length,
-      hasDataSample: this.dataSample !== undefined,
-    });
   }
 }
 
@@ -257,14 +373,6 @@ export class DBNotInitializedError extends Error {
 
 export class InvalidMetaError extends AdditionalLogErrorBase {
   override name = 'InvalidMetaError';
-}
-
-export class MetaNotReadyError extends AdditionalLogErrorBase {
-  override name = 'MetaNotReadyError';
-}
-
-export class InvalidRevMapError extends AdditionalLogErrorBase {
-  override name = 'InvalidRevMapError';
 }
 
 export class ModelIdWithoutCtrlError extends AdditionalLogErrorBase {
@@ -302,15 +410,6 @@ export class ModelValidationError extends Error {
     e?: unknown;
   }) {
     super('ModelValidationError');
-    OP_LOG_SYNC_LOGGER.log('ModelValidationError', {
-      id: params.id,
-      hasValidationResult: params.validationResult !== undefined,
-      validationErrorCount: getValidationErrors(params.validationResult)?.length,
-      validationPathSummary: getValidationErrorPathSummary(params.validationResult),
-      hasAdditionalError: params.e !== undefined,
-      additionalErrorName:
-        params.e !== undefined ? toSyncLogError(params.e).name : undefined,
-    });
 
     if (params.validationResult) {
       try {
@@ -319,12 +418,8 @@ export class ModelValidationError extends Error {
           const str = JSON.stringify(errors);
           this.additionalLog = `Model: ${params.id}, Errors: ${str.substring(0, 400)}`;
         }
-      } catch (e) {
-        OP_LOG_SYNC_LOGGER.err(
-          'Error stringifying validation errors',
-          toSyncLogError(e),
-          { id: params.id },
-        );
+      } catch {
+        // Ignore stringification errors
       }
     }
   }
@@ -337,10 +432,6 @@ export class DataValidationFailedError extends Error {
   constructor(validationResult: IValidation<unknown>) {
     const errorSummary = DataValidationFailedError._buildErrorSummary(validationResult);
     super(errorSummary);
-    OP_LOG_SYNC_LOGGER.log('DataValidationFailedError', {
-      validationErrorCount: getValidationErrors(validationResult)?.length,
-      validationPathSummary: getValidationErrorPathSummary(validationResult),
-    });
 
     try {
       const errors = getValidationErrors(validationResult);
@@ -348,8 +439,8 @@ export class DataValidationFailedError extends Error {
         const str = JSON.stringify(errors);
         this.additionalLog = str.substring(0, 400);
       }
-    } catch (e) {
-      OP_LOG_SYNC_LOGGER.err('Failed to stringify validation errors', toSyncLogError(e));
+    } catch {
+      // Ignore stringification errors
     }
   }
 
@@ -454,6 +545,25 @@ export class LegacySyncFormatDetectedError extends Error {
       'Sync format mismatch: the remote storage was last written by an older app version ' +
         '(v16.x or earlier) that uses a different sync format. Please update all your ' +
         'devices to the same app version so they use the same sync format.',
+    );
+  }
+}
+
+/**
+ * SPAP-11: thrown when a client with the split-file ("Surgical sync") setting
+ * OFF encounters a sync folder that has already been migrated to the split
+ * format (a v3 tombstone `sync-data.json` and/or a `sync-ops.json`). This is a
+ * SPECIFIC, actionable state — the caller surfaces a "turn on Surgical sync"
+ * notice and pauses safely — distinct from a generic corruption error. No
+ * upload happens, so there is no divergence.
+ */
+export class SplitSyncFormatDetectedError extends Error {
+  override name = 'SplitSyncFormatDetectedError';
+
+  constructor() {
+    super(
+      'This sync folder was upgraded to the split-file format. Enable "Surgical sync" ' +
+        'in Sync settings to continue.',
     );
   }
 }

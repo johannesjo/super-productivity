@@ -4,6 +4,7 @@ import { MarkdownModule } from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FORMLY_CONFIG, FormlyModule } from '@ngx-formly/core';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
+import { InputTimeFormlyComponent } from './input-time/input-time-formly/input-time-formly.component';
 import { ValidationModule } from './validation/validation.module';
 import { TranslateService } from '@ngx-translate/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
@@ -21,6 +22,7 @@ import { RepeatSectionTypeComponent } from '../features/config/repeat-section-ty
 import { FormlySliderComponent } from './formly-slider/formly-slider.component';
 import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
 import { FormlyBtnComponent } from './formly-button/formly-btn.component';
+import { FormlyLocalRestApiTokenComponent } from './formly-local-rest-api-token/formly-local-rest-api-token.component';
 import { FormlyImageInputComponent } from './formly-image-input/formly-image-input.component';
 import { ColorInputComponent } from '../features/config/color-input/color-input.component';
 import { StartPageSelectComponent } from '../features/config/start-page-select/start-page-select.component';
@@ -57,11 +59,22 @@ import { FormlyDatePickerComponent } from './formly-date-picker/formly-date-pick
           wrappers: ['form-field'],
         },
         {
+          name: 'time',
+          component: InputTimeFormlyComponent,
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
+        {
           name: 'tpl',
           component: FormlyTranslatedTemplateComponent,
         },
         { name: 'collapsible', component: FormlyCollapsibleComponent, wrappers: [] },
         { name: 'btn', component: FormlyBtnComponent, wrappers: [] },
+        {
+          name: 'local-rest-api-token',
+          component: FormlyLocalRestApiTokenComponent,
+          wrappers: [],
+        },
         {
           name: 'keyboard',
           component: KeyboardInputComponent,

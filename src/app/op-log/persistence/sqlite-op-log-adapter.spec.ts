@@ -69,6 +69,12 @@ class FakeSqliteDb implements SqliteDb {
       return { changes: 0 };
     }
     if (s === 'BEGIN IMMEDIATE' || s === 'BEGIN DEFERRED') {
+      // Real SQLite has no nested transactions — a BEGIN issued while one is
+      // already open throws. Modeling that here lets the fake catch the same
+      // interleaving bug the real sql.js engine does.
+      if (this.snapshot) {
+        throw new Error('cannot start a transaction within a transaction');
+      }
       this.snapshot = new Map(
         [...this.tables].map(([t, rows]) => [t, rows.map((r) => ({ ...r }))]),
       );
@@ -242,7 +248,7 @@ class FakeSqliteDb implements SqliteDb {
 const makeOpEntry = (
   id: string,
   source: 'local' | 'remote',
-  applicationStatus?: 'pending' | 'applied' | 'failed',
+  applicationStatus?: 'pending' | 'archive_pending' | 'applied' | 'failed',
   syncedAt?: number,
 ): Record<string, unknown> => ({
   op: { id },
@@ -586,6 +592,70 @@ const defineBehavioralContract = (
           await tx.put(STORE_NAMES.VECTOR_CLOCK, { clock: { a: 1 } }, 'current');
         }),
       ).toBeRejectedWithError(/outside this transaction's declared scope/);
+    });
+
+    // ── concurrency: transactions are mutually exclusive per connection ──────────
+    // The shared connection has no nested transactions: a second BEGIN landing
+    // inside the first throws, and a bare statement issued mid-transaction joins
+    // (and rolls back with) that foreign transaction. The adapter must serialize.
+
+    it('serializes concurrent read-write transactions instead of interleaving BEGINs', async () => {
+      const write = (id: string): Promise<number> =>
+        adapter.transaction([STORE_NAMES.OPS], 'readwrite', (tx) =>
+          tx.add(STORE_NAMES.OPS, makeOpEntry(id, 'local')),
+        );
+      // Fire both WITHOUT awaiting the first — the bug is a second BEGIN opening
+      // on the shared connection while the first transaction is still in flight.
+      const [s1, s2] = await Promise.all([write('a'), write('b')]);
+      expect(s1).not.toBe(s2);
+      expect(await adapter.count(STORE_NAMES.OPS)).toBe(2);
+      const ids = (await adapter.getAll<{ op: { id: string } }>(STORE_NAMES.OPS)).map(
+        (e) => e.op.id,
+      );
+      expect(ids.sort()).toEqual(['a', 'b']);
+    });
+
+    it('does not let a concurrent bare write join (and roll back with) a failing transaction', async () => {
+      const failing = adapter
+        .transaction([STORE_NAMES.OPS], 'readwrite', async (tx) => {
+          await tx.add(STORE_NAMES.OPS, makeOpEntry('in-tx', 'local'));
+          throw new Error('boom'); // forces ROLLBACK of this transaction
+        })
+        .catch(() => 'rolled-back' as const);
+      // Started while the transaction above is open: it must run in its own unit,
+      // not silently inside — and survive the transaction's rollback.
+      const standalone = adapter.add(STORE_NAMES.OPS, makeOpEntry('standalone', 'local'));
+      await Promise.all([failing, standalone]);
+
+      const ids = (await adapter.getAll<{ op: { id: string } }>(STORE_NAMES.OPS)).map(
+        (e) => e.op.id,
+      );
+      expect(ids).toEqual(['standalone']);
+    });
+
+    it('serializes across TWO adapters that share one connection (native op-log+archive topology)', async () => {
+      // The B3 rollout hands the op-log store and the archive store separate
+      // adapter instances over the SAME SqliteDb. A queue keyed to the adapter
+      // instance would let their BEGINs interleave on the shared connection; the
+      // queue must be keyed to the connection.
+      const shared = await makeDb();
+      const opLog = new SqliteOpLogAdapter(shared);
+      const archive = new SqliteOpLogAdapter(shared);
+      await opLog.init(); // one DDL pass; both adapters see the same tables
+
+      const [s1, s2] = await Promise.all([
+        opLog.transaction([STORE_NAMES.OPS], 'readwrite', (tx) =>
+          tx.add(STORE_NAMES.OPS, makeOpEntry('from-oplog', 'local')),
+        ),
+        archive.transaction([STORE_NAMES.OPS], 'readwrite', (tx) =>
+          tx.add(STORE_NAMES.OPS, makeOpEntry('from-archive', 'local')),
+        ),
+      ]);
+      expect(s1).not.toBe(s2);
+      const ids = (await opLog.getAll<{ op: { id: string } }>(STORE_NAMES.OPS)).map(
+        (e) => e.op.id,
+      );
+      expect(ids.sort()).toEqual(['from-archive', 'from-oplog']);
     });
   });
 };

@@ -634,6 +634,19 @@ test.describe('@webdav WebDAV Provider Switch', () => {
     if (conflictVisible) {
       const keepRemoteBtn = conflictDialog.locator('button', { hasText: /Keep remote/i });
       await keepRemoteBtn.click();
+
+      // A fresh client with no last-synced baseline now gets an overwrite
+      // confirmation (getChangeCount → null ⇒ shouldConfirmOverwrite, since #8785).
+      // Accept it — this is the "when user accepts confirmation" the test name
+      // describes. The confirmation is optional, so tolerate its absence.
+      const confirmDialog = pageB.locator('dialog-confirm');
+      try {
+        await confirmDialog.waitFor({ state: 'visible', timeout: 3000 });
+        await confirmDialog.locator('[e2e="confirmBtn"]').click();
+      } catch {
+        // No confirmation shown — fine.
+      }
+
       // Wait for dialog to close
       await conflictDialog.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
     }

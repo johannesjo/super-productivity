@@ -2,137 +2,241 @@ import { Injectable } from '@angular/core';
 import { EntityChange, OpType } from '../core/operation.types';
 import { PersistentAction } from '../core/persistent-action.interface';
 import { OpLog } from '../../core/log';
+import { BatchedTimeSyncEntry } from '../../core/util/batched-time-sync-accumulator';
 
 /**
- * Captures action payloads and queues them for persistence using a simple FIFO queue.
+ * Tracks how many local actions have been captured but not yet written to the
+ * operation log, and computes the `entityChanges` payload for an action.
  *
- * PERFORMANCE OPTIMIZATION: This service no longer performs expensive state diffing.
- * Instead, it relies on action payloads and meta.entityId/entityIds for sync.
+ * ## Pending counter (replaces the former positional FIFO queue)
  *
- * The entityChanges computed here are for backward compatibility with the operation
- * log format. The actual replay uses action payloads (extractActionPayload), and
- * conflict detection uses meta.entityId from the action.
+ * The meta-reducer increments the counter synchronously when it captures a
+ * local action; the persist effect decrements it in a `finally` after each
+ * write attempt completes (success OR failure). `flushPendingWrites()` polls
+ * `getPendingCount()` to know when every dispatched action has been processed.
  *
- * Flow:
- * 1. Meta-reducer calls `enqueue()` with the action
- * 2. Service queues entity changes (empty for most actions, extracted for TIME_TRACKING)
- * 3. Effect calls `dequeue()` to retrieve changes for persistence (FIFO order)
+ * The previous implementation kept a FIFO of `EntityChange[]` correlated with
+ * actions purely by position (meta-reducer `push`, effect `shift`). That
+ * positional contract leaked an entry whenever a write threw before its
+ * dequeue ran (e.g. a lock-acquisition timeout), permanently wedging the flush
+ * — issue #8306. A plain counter decremented in a `finally` cannot leak.
  *
- * The FIFO queue works because:
- * - NgRx reducers process actions sequentially
- * - Effect uses concatMap for sequential processing
- * - Order is preserved between enqueue and dequeue
+ * ## entityChanges extraction
+ *
+ * `extractEntityChanges()` is a pure function of the action — there is no state
+ * diffing. It returns `[]` for every action except `TIME_TRACKING` and the
+ * `[TimeTracking] Sync time spent` TASK action, whose reducers don't follow the
+ * standard entity-adapter pattern. The field is kept on the wire (even as `[]`)
+ * because the Android background provider reads `payload.entityChanges` for
+ * reminder scheduling and the `isMultiEntityPayload` guard requires it; replay
+ * and conflict detection use `actionPayload` / `meta.entityId` only.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class OperationCaptureService {
   /**
-   * Warning threshold for queue size.
-   * If effects fail to dequeue, we log a warning.
+   * Warning threshold for the pending counter.
+   * If the effect falls far behind the meta-reducer, log a warning.
    */
-  private readonly QUEUE_WARNING_THRESHOLD = 100;
+  private readonly PENDING_WARNING_THRESHOLD = 100;
 
   /**
-   * FIFO queue of pending entity changes.
+   * Count of actions captured (incremented by the meta-reducer) but not yet
+   * processed by the persist effect (decremented after each write attempt).
    */
-  private queue: EntityChange[][] = [];
+  private pendingCount = 0;
 
   /**
-   * Tracks if we've already warned about queue overflow to avoid log spam.
+   * Task-time actions update live task state before their operation is durable.
+   * Keep those deltas visible to snapshot projection until the matching write
+   * attempt completes, otherwise a snapshot can overlap its later tail op.
    */
-  private hasWarnedAboutQueueSize = false;
+  private pendingTaskTimeEntries = new Map<PersistentAction, BatchedTimeSyncEntry[]>();
 
   /**
-   * Enqueues entity changes for an action.
+   * Tracks if we've already warned about the pending counter growing large,
+   * to avoid log spam.
+   */
+  private hasWarnedAboutPending = false;
+
+  /**
+   * Sticky divergence marker (#8751): set when a captured action's write
+   * attempt failed for good (or its operation was rejected by validation),
+   * i.e. an optimistic NgRx state change has no durable op behind it.
+   * While set, compaction must not snapshot the live store — that would bake
+   * the phantom change into state_cache and turn a transient persistence
+   * failure into permanent, silent cross-device divergence.
+   * Deliberately in-memory and per tab: a reload rebuilds state purely from
+   * durable data, which discards the phantom and thereby resolves the
+   * divergence (the failure paths show a sticky reload snackbar for exactly
+   * that reason). Also deliberately NOT cleared by full-state replacements
+   * (SYNC_IMPORT/BACKUP_IMPORT) even though they discard the phantom too —
+   * keeping it sticky is conservatively simple, and the only cost is
+   * compaction staying suppressed until the reload the snackbar already
+   * demands.
+   */
+  private unrecoveredPersistFailure = false;
+
+  /**
+   * Records that a local action has been captured and is awaiting persistence.
    * Called synchronously by the operation-capture meta-reducer.
-   *
-   * For most actions, this queues empty entityChanges (the action payload is sufficient).
-   * For TIME_TRACKING and TASK time sync, it extracts changes from the action payload.
    */
-  enqueue(action: PersistentAction): void {
-    const entityChanges = this._extractEntityChanges(action);
+  incrementPending(action: PersistentAction): void {
+    this.pendingCount++;
+    const taskTimeEntry = this._getTaskTimeEntry(action);
+    if (taskTimeEntry) {
+      const entries = this.pendingTaskTimeEntries.get(action) ?? [];
+      entries.push(taskTimeEntry);
+      this.pendingTaskTimeEntries.set(action, entries);
+    }
 
-    // Warn if queue is growing large (indicates potential processing issue)
+    // Warn if the counter is growing large (indicates the effect is not keeping up)
     if (
-      this.queue.length >= this.QUEUE_WARNING_THRESHOLD &&
-      !this.hasWarnedAboutQueueSize
+      this.pendingCount >= this.PENDING_WARNING_THRESHOLD &&
+      !this.hasWarnedAboutPending
     ) {
       OpLog.warn(
-        `OperationCaptureService: Queue size (${this.queue.length}) exceeds warning threshold ` +
-          `(${this.QUEUE_WARNING_THRESHOLD}). Effects may not be processing operations.`,
+        `OperationCaptureService: Pending count (${this.pendingCount}) exceeds warning threshold ` +
+          `(${this.PENDING_WARNING_THRESHOLD}). Effect may not be processing operations.`,
       );
-      this.hasWarnedAboutQueueSize = true;
+      this.hasWarnedAboutPending = true;
     }
 
-    this.queue.push(entityChanges);
-
-    OpLog.verbose('OperationCaptureService: Enqueued operation', {
+    OpLog.verbose('OperationCaptureService: Captured action', {
       actionType: action.type,
-      changeCount: entityChanges.length,
-      queueSize: this.queue.length,
+      pendingCount: this.pendingCount,
     });
   }
 
   /**
-   * Dequeues the next batch of entity changes (FIFO).
-   * Called by the effect to retrieve pre-computed changes for persistence.
+   * Records that a captured action's write attempt has completed (success or
+   * failure). Called from the persist effect's `finally`, so a thrown write —
+   * e.g. a lock-acquisition timeout — can never leak a pending entry (#8306).
    */
-  dequeue(): EntityChange[] {
-    const entityChanges = this.queue.shift();
-
-    if (entityChanges === undefined) {
-      OpLog.warn('OperationCaptureService: No queued operation found');
-      return [];
+  decrementPending(action?: PersistentAction): void {
+    if (this.pendingCount <= 0) {
+      // Underflow guard: a decrement with no matching increment. This is only
+      // reachable in the degenerate window before the meta-reducer service is
+      // wired (operations are dropped with a warning there). Clamp at 0 so the
+      // flush signal stays correct.
+      OpLog.warn(
+        'OperationCaptureService: decrementPending called with no pending operations',
+      );
+      this.pendingCount = 0;
+      return;
     }
 
-    // Reset warning flag when queue drains below threshold so we can warn again if it fills up
+    this.pendingCount--;
+    if (action) {
+      const entries = this.pendingTaskTimeEntries.get(action);
+      if (entries?.length === 1) {
+        this.pendingTaskTimeEntries.delete(action);
+      } else if (entries && entries.length > 1) {
+        entries.shift();
+      }
+    }
+
+    // Reset warning flag once the backlog drains so we can warn again if it refills
     if (
-      this.queue.length < this.QUEUE_WARNING_THRESHOLD &&
-      this.hasWarnedAboutQueueSize
+      this.pendingCount < this.PENDING_WARNING_THRESHOLD &&
+      this.hasWarnedAboutPending
     ) {
-      this.hasWarnedAboutQueueSize = false;
+      this.hasWarnedAboutPending = false;
     }
 
-    OpLog.verbose('OperationCaptureService: Dequeued operation', {
-      changeCount: entityChanges.length,
-      queueSize: this.queue.length,
+    OpLog.verbose('OperationCaptureService: Processed action', {
+      pendingCount: this.pendingCount,
     });
-
-    return entityChanges;
   }
 
   /**
-   * Gets the current queue size (for monitoring).
+   * Returns the number of captured actions still awaiting persistence.
+   * Used by `flushPendingWrites()` to know when all writes have completed.
    */
-  getQueueSize(): number {
-    return this.queue.length;
+  getPendingCount(): number {
+    return this.pendingCount;
+  }
+
+  /** Returns task-time deltas that are captured but not yet durably written. */
+  getPendingTaskTimeEntries(): BatchedTimeSyncEntry[] {
+    const totals = new Map<string, BatchedTimeSyncEntry>();
+    for (const entries of this.pendingTaskTimeEntries.values()) {
+      for (const entry of entries) {
+        const key = `${entry.id}\u0000${entry.date}`;
+        const existing = totals.get(key);
+        if (existing) {
+          existing.duration += entry.duration;
+        } else {
+          totals.set(key, { ...entry });
+        }
+      }
+    }
+    return [...totals.values()];
   }
 
   /**
-   * Peeks at pending operations without removing them (for diagnostics).
-   * Returns a flat list of all entity changes in the queue.
+   * Marks that live NgRx state now contains a change with no durable op
+   * behind it (#8751). Consulted by compaction to suppress snapshotting.
    */
-  peekPendingOperations(): EntityChange[] {
-    return this.queue.flat();
+  markUnrecoveredPersistFailure(): void {
+    if (!this.unrecoveredPersistFailure) {
+      OpLog.err(
+        'OperationCaptureService: Unrecovered persist failure — live state is ahead of the op log; snapshotting is suppressed until reload',
+      );
+    }
+    this.unrecoveredPersistFailure = true;
+  }
+
+  /** True while live state contains changes that no durable op represents (#8751). */
+  hasUnrecoveredPersistFailure(): boolean {
+    return this.unrecoveredPersistFailure;
   }
 
   /**
-   * Clears all queued operations (for testing).
+   * Resets the pending counter (for testing and error recovery).
    */
   clear(): void {
-    this.queue = [];
-    this.hasWarnedAboutQueueSize = false;
+    this.pendingCount = 0;
+    this.hasWarnedAboutPending = false;
+    this.pendingTaskTimeEntries.clear();
+    this.unrecoveredPersistFailure = false;
+  }
+
+  private _getTaskTimeEntry(action: PersistentAction): BatchedTimeSyncEntry | undefined {
+    if (
+      action.type !== '[TimeTracking] Sync time spent' ||
+      action.meta.entityType !== 'TASK'
+    ) {
+      return undefined;
+    }
+
+    const actionPayload = action as unknown as Record<string, unknown>;
+    const taskId = actionPayload['taskId'];
+    const date = actionPayload['date'];
+    const duration = actionPayload['duration'];
+    if (
+      typeof taskId !== 'string' ||
+      typeof date !== 'string' ||
+      typeof duration !== 'number' ||
+      !Number.isFinite(duration)
+    ) {
+      return undefined;
+    }
+    return { id: taskId, date, duration };
   }
 
   /**
-   * Extracts entity changes from action payload.
+   * Extracts entity changes from an action payload.
    *
    * For most actions, returns empty array (action payload is sufficient for sync).
    * TIME_TRACKING and TASK time sync need special handling because their reducers
    * don't follow the standard entity adapter pattern.
+   *
+   * Pure function of the action — safe to call from the write path and idempotent
+   * across retries.
    */
-  private _extractEntityChanges(action: PersistentAction): EntityChange[] {
+  extractEntityChanges(action: PersistentAction): EntityChange[] {
     // TIME_TRACKING: Extract from action payload
     if (action.meta.entityType === 'TIME_TRACKING') {
       return this._captureTimeTrackingFromAction(action);
@@ -227,7 +331,11 @@ export class OperationCaptureService {
         entityType: 'TASK',
         entityId: taskId,
         opType: OpType.Update,
-        changes: { taskId, date, duration },
+        changes: {
+          taskId,
+          date,
+          duration,
+        },
       },
     ];
   }

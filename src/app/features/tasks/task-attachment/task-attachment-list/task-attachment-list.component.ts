@@ -19,6 +19,8 @@ import { MatIcon } from '@angular/material/icon';
 import { EnlargeImgDirective } from '../../../../ui/enlarge-img/enlarge-img.directive';
 import { MatAnchor, MatButton } from '@angular/material/button';
 import { ClipboardImageService } from '../../../../core/clipboard-image/clipboard-image.service';
+import { isPathSafeToOpen } from '../../../../../../electron/shared-with-frontend/is-external-url-allowed';
+import { Log } from '../../../../core/log';
 
 interface ResolvedAttachment extends TaskAttachment {
   resolvedPath?: string;
@@ -61,17 +63,26 @@ export class TaskAttachmentListComponent {
     if (!attachments) return [];
 
     return attachments.map((att) => {
-      const resolvedPath = att.path?.startsWith('indexeddb://clipboard-images/')
-        ? urlMap.get(att.path) || att.path
-        : att.path;
+      const resolvedPath =
+        att.path && this._isResolvableClipboardUrl(att.path)
+          ? urlMap.get(att.path) || att.path
+          : att.path;
 
       const imgPath = att.originalImgPath || att.path;
-      const resolvedOriginalPath = imgPath?.startsWith('indexeddb://clipboard-images/')
-        ? urlMap.get(imgPath) || imgPath
-        : imgPath;
+      const rawOriginalPath =
+        imgPath && this._isResolvableClipboardUrl(imgPath)
+          ? urlMap.get(imgPath) || imgPath
+          : imgPath;
+      // The <img> src auto-loads on render (no click), so a synced remote
+      // file://host / UNC path would silently leak the user's NTLM hash. Drop
+      // such srcs so they never reach the binding. See GHSA-hr87-735w-hfq3.
+      const resolvedOriginalPath = isPathSafeToOpen(rawOriginalPath)
+        ? rawOriginalPath
+        : undefined;
 
       const isLoading =
-        att.path?.startsWith('indexeddb://clipboard-images/') &&
+        !!att.path &&
+        this._isResolvableClipboardUrl(att.path) &&
         !urlMap.has(att.path) &&
         loadingUrls.has(att.path);
 
@@ -97,13 +108,14 @@ export class TaskAttachmentListComponent {
         try {
           const urlsToResolve: string[] = [];
 
-          if (att.path?.startsWith('indexeddb://clipboard-images/')) {
-            urlsToResolve.push(att.path);
+          if (this._isResolvableClipboardUrl(att.path)) {
+            urlsToResolve.push(att.path!);
           }
 
           const imgPath = att.originalImgPath || att.path;
           if (
-            imgPath?.startsWith('indexeddb://clipboard-images/') &&
+            imgPath &&
+            this._isResolvableClipboardUrl(imgPath) &&
             imgPath !== att.path
           ) {
             urlsToResolve.push(imgPath);
@@ -117,7 +129,8 @@ export class TaskAttachmentListComponent {
               return newSet;
             });
 
-            const resolved = await this._clipboardImageService.resolveIndexedDbUrl(url);
+            const resolved =
+              await this._clipboardImageService.resolveClipboardImageUrl(url);
             if (resolved) {
               this._resolvedUrlsMap.update((map) => {
                 const newMap = new Map(map);
@@ -134,10 +147,18 @@ export class TaskAttachmentListComponent {
             });
           }
         } catch (error) {
-          console.error('Error resolving clipboard image:', error);
+          Log.err('Error resolving clipboard image:', error);
         }
       });
     });
+  }
+
+  private _isResolvableClipboardUrl(url: string | undefined): boolean {
+    if (!url) return false;
+    return (
+      url.startsWith('indexeddb://clipboard-images/') ||
+      (url.startsWith('file:///') && url.includes('/clipboard-images/'))
+    );
   }
 
   openEditDialog(attachment?: TaskAttachment): void {
@@ -185,7 +206,7 @@ export class TaskAttachmentListComponent {
         this._copyWithFallback(attachment.path);
       }
     } catch (error) {
-      console.warn('Clipboard write failed, trying fallback method:', error);
+      Log.warn('Clipboard write failed, trying fallback method:', error);
       // Try fallback method if modern API fails
       this._copyWithFallback(attachment.path);
     }
@@ -213,7 +234,7 @@ export class TaskAttachmentListComponent {
         });
       }
     } catch (error) {
-      console.error('Fallback copy failed:', error);
+      Log.err('Fallback copy failed:', error);
       this._snackService.open({
         msg: 'Failed to copy to clipboard. Please copy manually.',
         type: 'ERROR',

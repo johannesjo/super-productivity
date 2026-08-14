@@ -9,10 +9,11 @@ import { VectorClockService } from '../sync/vector-clock.service';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
 import { OpLog } from '../../core/log';
 import { extractEntityKeysFromState } from './extract-entity-keys';
-import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
-import { limitVectorClockSize } from '../../core/util/vector-clock';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
+import { OperationCaptureService } from '../capture/operation-capture.service';
+import { getPhantomChangeRisk } from '../capture/phantom-change-guard.util';
+import { OperationWriteFlushService } from '../sync/operation-write-flush.service';
 
 type StateCache = MigratableStateCache;
 
@@ -34,7 +35,8 @@ export class OperationLogSnapshotService {
   private stateSnapshotService = inject(StateSnapshotService);
   private schemaMigrationService = inject(SchemaMigrationService);
   private validateStateService = inject(ValidateStateService);
-  private clientIdProvider: ClientIdProvider = inject(CLIENT_ID_PROVIDER);
+  private operationCapture = inject(OperationCaptureService);
+  private writeFlushService = inject(OperationWriteFlushService);
 
   /**
    * Validates that a snapshot has the expected structure and data.
@@ -78,56 +80,101 @@ export class OperationLogSnapshotService {
   /**
    * Saves the current NgRx state as a snapshot for faster future loads.
    * Called after replaying many operations to optimize next startup.
+   *
+   * Runs via flushThenRunExclusive (#8469): the capture pipeline is drained
+   * BEFORE the OPERATION_LOG lock is taken and the pending counter re-checked
+   * once inside it, so no counted action can be dispatched-but-unsequenced at
+   * the capture point. NgRx state mutates synchronously at dispatch while the
+   * op's seq is only assigned later in the persist effect — without the
+   * quiesce, an op whose reducer had already run but whose seq-write was
+   * still queued behind the lock would be baked into the snapshot state AND
+   * tail-replayed on the next boot, double-applying non-idempotent reducers
+   * (accumulating time/metric deltas, plain-append list branches).
+   *
+   * Deferred actions (buffered during a sync window, kept across windows
+   * after a failed drain) are NOT covered by the pending counter; they are
+   * handled by an explicit skip inside the body.
+   *
+   * Inside the lock, state is read first — synchronously, before any await
+   * can let a dispatch interleave — and lastSeq after. While the lock is held
+   * no new seq can be assigned, so every op with seq <= lastAppliedOpSeq has
+   * its effect in the captured state, and any later dispatch is absent from
+   * it and replays cleanly. This order relies on EVERY seq-assigning writer
+   * holding the OPERATION_LOG lock (persist effect, remote apply, repair,
+   * server migration — all do): a writer bypassing the lock would degrade
+   * this window to silent op-LOSS, strictly worse than the pre-quiesce
+   * re-replay bias.
+   *
+   * Failure (flush timeout, persistent dispatch activity) only skips the
+   * save: the snapshot is a boot-time cache and the op-log stays the source
+   * of truth.
+   *
+   * @returns Whether a snapshot was actually written. `false` means a guard
+   *   skipped it or the write failed — callers that branch on "is the on-disk
+   *   cache now current?" MUST use this rather than assuming resolution implies
+   *   a write (the hydrator's post-migration convergence gate does).
    */
-  async saveCurrentStateAsSnapshot(): Promise<void> {
+  async saveCurrentStateAsSnapshot(): Promise<boolean> {
     try {
-      // Get current state from NgRx
-      const currentState = this.stateSnapshotService.getStateSnapshot();
+      return await this.writeFlushService.flushThenRunExclusive(async () => {
+        // GUARD (#8751): never snapshot live state while it may contain
+        // changes with no durable op behind them (failed or still-pending
+        // writes, undrained deferred actions from the hydration sync window) —
+        // the cache write below would bake the phantom change in. Checked
+        // synchronously immediately before the snapshot read; skipping only
+        // costs a slower next boot.
+        const phantomRisk = getPhantomChangeRisk(this.operationCapture);
+        if (phantomRisk) {
+          OpLog.warn(
+            `OperationLogSnapshotService: Skipping snapshot save — ${phantomRisk} (#8751)`,
+          );
+          return false;
+        }
 
-      // GUARD (#7892): never cache an empty/degraded state over a good one.
-      // The snapshot is only a load-time cache — the op-log is the source of
-      // truth. If the live NgRx state has no user data (e.g. a transient
-      // hydration glitch left the store in its initial empty state), caching it
-      // would make the next boot trust empty data. Skipping the save is always
-      // safe for correctness: replaying the op-log reconstructs the true state
-      // (including legitimate full-wipe deletes), at most costing a slower boot.
-      if (!hasMeaningfulStateData(currentState)) {
-        OpLog.warn(
-          'OperationLogSnapshotService: Skipping snapshot save — current state has no ' +
-            'meaningful data (refusing to overwrite cache with empty state)',
-        );
-        return;
-      }
+        // Read state synchronously at the quiesce cutoff (no await before it)
+        // and lastSeq after — see JSDoc above.
+        const currentState = this.stateSnapshotService.getStateSnapshotForOperationLog();
+        const lastSeq = await this.opLogStore.getLastSeq();
 
-      // Get current vector clock and last seq
-      const vectorClock = await this.vectorClockService.getCurrentVectorClock();
-      const lastSeq = await this.opLogStore.getLastSeq();
+        // GUARD (#7892): never cache an empty/degraded state over a good one.
+        // The snapshot is only a load-time cache — the op-log is the source of
+        // truth. If the live NgRx state has no user data (e.g. a transient
+        // hydration glitch left the store in its initial empty state), caching it
+        // would make the next boot trust empty data. Skipping the save is always
+        // safe for correctness: replaying the op-log reconstructs the true state
+        // (including legitimate full-wipe deletes), at most costing a slower boot.
+        if (!hasMeaningfulStateData(currentState)) {
+          OpLog.warn(
+            'OperationLogSnapshotService: Skipping snapshot save — current state has no ' +
+              'meaningful data (refusing to overwrite cache with empty state)',
+          );
+          return false;
+        }
 
-      // Prune vector clock before persisting to prevent bloat (max 20 entries).
-      // Without this, clocks can grow unbounded across sync cycles and cause
-      // repeated conflict dialogs on every sync.
-      const clientId = await this.clientIdProvider.loadClientId();
-      const prunedClock = clientId
-        ? limitVectorClockSize(vectorClock, clientId)
-        : vectorClock;
+        // Get current vector clock; pruning happens inside saveStateCache
+        // (store-owned, #9096).
+        const vectorClock = await this.vectorClockService.getCurrentVectorClock();
 
-      // Extract entity keys for conflict detection after compaction
-      const snapshotEntityKeys = extractEntityKeysFromState(currentState);
+        // Extract entity keys for conflict detection after compaction
+        const snapshotEntityKeys = extractEntityKeysFromState(currentState);
 
-      // Save snapshot
-      await this.opLogStore.saveStateCache({
-        state: currentState,
-        lastAppliedOpSeq: lastSeq,
-        vectorClock: prunedClock,
-        compactedAt: Date.now(),
-        schemaVersion: CURRENT_SCHEMA_VERSION,
-        snapshotEntityKeys,
+        // Save snapshot
+        await this.opLogStore.saveStateCache({
+          state: currentState,
+          lastAppliedOpSeq: lastSeq,
+          vectorClock,
+          compactedAt: Date.now(),
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+          snapshotEntityKeys,
+        });
+
+        OpLog.normal('OperationLogSnapshotService: Saved new snapshot');
+        return true;
       });
-
-      OpLog.normal('OperationLogSnapshotService: Saved new snapshot');
     } catch (e) {
       // Don't fail hydration if snapshot save fails
       OpLog.warn('OperationLogSnapshotService: Failed to save snapshot', e);
+      return false;
     }
   }
 
@@ -135,9 +182,14 @@ export class OperationLogSnapshotService {
    * Migrates a snapshot with backup safety (A.7.12).
    * Creates a backup before migration and restores it if migration fails.
    *
+   * State-validation failures are non-fatal: the migrated snapshot is returned
+   * for hydration (unpersisted) rather than throwing. See the step-4 note.
+   *
    * @param snapshot - The snapshot to migrate
    * @returns The migrated snapshot
-   * @throws If migration fails and rollback also fails
+   * @throws On migration failure or metadata-validation failure. The backup is
+   *         rolled back first; if that rollback ALSO fails, a combined error is
+   *         thrown instead. State-validation failure does NOT throw (step 4).
    */
   async migrateSnapshotWithBackup(snapshot: StateCache): Promise<StateCache> {
     OpLog.normal(
@@ -157,16 +209,43 @@ export class OperationLogSnapshotService {
         throw new Error('Migrated snapshot metadata validation failed');
       }
 
-      // 4. Validate migrated snapshot state before persisting or clearing the backup.
-      // Otherwise an invalid current-schema cache could be trusted on next startup.
+      // 4. Validate migrated snapshot state before PERSISTING it — an invalid
+      // current-schema cache must not be trusted on next startup (Checkpoint B
+      // skips validation for a matching schema version). But a validation
+      // failure here is NOT fatal to hydration: many "invalid" shapes are
+      // reducer-healable — e.g. a snapshot from an older release missing a
+      // newly-required config field the loadAllData reducer backfills by
+      // default. Bailing to disaster recovery in that case bricks the app to an
+      // empty store on upgrade, even though the data is fine. So on failure we
+      // roll the on-disk cache back to the pre-migration backup (never persist
+      // the unvalidated migrated snapshot) yet still RETURN it, letting the
+      // hydrator load it through the reducer (which heals defaults) and boot
+      // with correct data.
+      //
+      // Caveat: this non-fatal path does NOT itself persist a clean snapshot.
+      // For fields with a migration backfill (below) validation passes and step 5
+      // persists a clean snapshot immediately, so that path is the real fix; this
+      // branch is the safety net for the not-yet-backfilled case. The hydrator
+      // completes it — see the post-migration convergence block in
+      // OperationLogHydratorService.hydrateStore, which persists a fresh
+      // CURRENT_SCHEMA_VERSION snapshot once the reducer-healed state validates.
       const validationResult = await this.validateStateService.validateState(
         migratedSnapshot.state as Record<string, unknown>,
       );
       if (!validationResult.isValid) {
-        throw new Error(
-          `Migrated snapshot validation failed (${validationResult.typiaErrors.length} typia errors` +
-            `${validationResult.crossModelError ? `, cross-model: ${validationResult.crossModelError}` : ''})`,
+        OpLog.warn(
+          'OperationLogSnapshotService: Migrated snapshot failed validation — ' +
+            'restoring backup and hydrating unpersisted so the reducer can heal it.',
+          {
+            typiaErrorCount: validationResult.typiaErrors.length,
+            crossModelError: validationResult.crossModelError,
+          },
         );
+        await this.opLogStore.restoreStateCacheFromBackup();
+        OpLog.normal(
+          'OperationLogSnapshotService: Backup restored; returning migrated snapshot for reducer-healed hydration.',
+        );
+        return migratedSnapshot;
       }
 
       // 5. Save migrated snapshot

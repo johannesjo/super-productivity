@@ -130,7 +130,12 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       evt.type === SVEType.SplitTask ||
       evt.type === SVEType.TaskPlannedForDay ||
       evt.type === SVEType.SplitTaskPlannedForDay ||
-      evt.type === SVEType.ScheduledTask
+      evt.type === SVEType.ScheduledTask ||
+      // continued segments carry the same task, so selecting and the context
+      // menu work on them too; dragging stays disabled via isDraggableSE()
+      // since only the head segment marks where the task starts
+      evt.type === SVEType.SplitTaskContinued ||
+      evt.type === SVEType.SplitTaskContinuedLast
     ) {
       return evt.data as TaskCopy;
     }
@@ -147,7 +152,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
   readonly scheduledClockStr = computed(() => {
     const evt = this.se();
-    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat();
     return getClockStringFromHours(
       is12Hour && evt.startHours > 12 ? evt.startHours - 12 : evt.startHours,
     );
@@ -159,7 +164,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
   readonly hoverTitle = computed(() => {
     const evt = this.se();
-    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat();
     const startClockStr = getClockStringFromHours(
       is12Hour && evt.startHours > 12 ? evt.startHours - 12 : evt.startHours,
     );
@@ -242,14 +247,10 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
   readonly style = computed(() => {
     const { overlap, style } = this.se();
-    // Arbitrarily chosen value that controls width reduction of this component
-    // whenever the underlying event duration overlaps with others
-    const overlapReductionFactor = 0.75;
     return (
       (!this.isMonthView() && !this.isDragPreview() && overlap
-        ? // eslint-disable-next-line no-mixed-operators -- conflicts with prettier formatting
-          `margin-left: ${100 - 100 * Math.pow(overlapReductionFactor, overlap.offset)}%; ` +
-          `width: calc(${Math.pow(overlapReductionFactor, overlap.count) * 100}% - var(--margin-right)); ` +
+        ? `margin-left: calc(${overlap.offset * (100 / overlap.count)}% + var(--margin-left)); ` +
+          `width: calc(${100 / overlap.count}% - var(--margin-left) - var(--margin-right)); ` +
           // Content inside the event element can spill out when the width is limited enough
           'overflow: hidden !important; '
         : '') + style
@@ -386,13 +387,15 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     } else if (
       evt.type === SVEType.RepeatProjection ||
       evt.type === SVEType.RepeatProjectionSplit ||
-      evt.type === SVEType.ScheduledRepeatProjection
+      evt.type === SVEType.ScheduledRepeatProjection ||
+      evt.type === SVEType.RepeatProjectionSplitContinued ||
+      evt.type === SVEType.RepeatProjectionSplitContinuedLast
     ) {
       const repeatCfg: TaskRepeatCfg = evt.data as TaskRepeatCfg;
       this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
         data: {
           repeatCfg,
-          targetDate: (evt.id.includes('_') && evt.id.split('_')[1]) || undefined,
+          targetDate: evt.sourceOccurrenceDate ?? evt.plannedForDay,
         },
       });
     } else if (evt.type === SVEType.CalendarEvent) {
@@ -412,6 +415,12 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     const evt = this.se();
     if (evt.type !== SVEType.CalendarEvent) return false;
     return !!(evt.data as ScheduleFromCalendarEvent).isReferenceCalendar;
+  });
+
+  readonly canRescheduleCalendarEvent = computed(() => {
+    const evt = this.se();
+    if (evt.type !== SVEType.CalendarEvent) return false;
+    return this._calEventActions.canMoveEvent(evt.data as ScheduleFromCalendarEvent);
   });
 
   async openCalendarEventLink(): Promise<void> {
@@ -469,7 +478,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
         delay(50),
       )
       .subscribe((task) => {
-        this._store.dispatch(TaskSharedActions.deleteTask({ task }));
+        this._taskService.remove(task);
       });
   }
 
@@ -529,12 +538,15 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
     const t = this.task();
     const evt = this.se();
-    // Allow resizing for all task types with a time estimate
+    // Allow resizing for all task types with a time estimate.
+    // NOT for continued segments: a split task already has a handle on its head,
+    // and SplitTaskContinuedLast is not reliably the final segment — every day
+    // slice of a multi-day scheduled task carries that type (see
+    // create-view-entries-for-block.ts), so the middle ones cannot grow at all.
     return (
       !!t &&
       (evt.type === SVEType.ScheduledTask ||
         evt.type === SVEType.Task ||
-        evt.type === SVEType.SplitTaskContinuedLast ||
         evt.type === SVEType.TaskPlannedForDay ||
         evt.type === SVEType.SplitTaskPlannedForDay) &&
       t.timeEstimate > 0

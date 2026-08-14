@@ -11,6 +11,10 @@ import { MetricService } from '../../metric/metric.service';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { TakeABreakService } from '../../take-a-break/take-a-break.service';
+import { NotifyService } from '../../../core/notify/notify.service';
+import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
+import { BannerId } from '../../../core/banner/banner.model';
+import { T } from '../../../t.const';
 import * as actions from './focus-mode.actions';
 import * as selectors from './focus-mode.selectors';
 import { FocusModeMode, FocusScreen, TimerState } from '../focus-mode.model';
@@ -25,9 +29,14 @@ import {
 import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
 import { take, toArray } from 'rxjs/operators';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
+import { DEFAULT_TASK } from '../../tasks/task.model';
 
 describe('FocusModeEffects', () => {
   let actions$: Observable<any>;
+  let takeABreakServiceMock: {
+    otherNoBreakTIme$: BehaviorSubject<number>;
+    resetTimer: jasmine.Spy;
+  };
   let effects: FocusModeEffects;
   let store: MockStore;
   let strategyFactoryMock: any;
@@ -36,6 +45,7 @@ describe('FocusModeEffects', () => {
   let metricServiceMock: any;
   let bannerServiceMock: any;
   let hydrationStateServiceMock: any;
+  let notifyServiceMock: any;
   let currentTaskId$: BehaviorSubject<string | null>;
 
   const createMockTimer = (overrides: Partial<TimerState> = {}): TimerState => ({
@@ -95,8 +105,13 @@ describe('FocusModeEffects', () => {
         .and.returnValue(false),
     };
 
-    const takeABreakServiceMock = {
+    takeABreakServiceMock = {
       otherNoBreakTIme$: new BehaviorSubject<number>(0),
+      resetTimer: jasmine.createSpy('resetTimer'),
+    };
+
+    notifyServiceMock = {
+      notify: jasmine.createSpy('notify').and.resolveTo(undefined),
     };
 
     TestBed.configureTestingModule({
@@ -137,6 +152,8 @@ describe('FocusModeEffects', () => {
         },
         { provide: HydrationStateService, useValue: hydrationStateServiceMock },
         { provide: TakeABreakService, useValue: takeABreakServiceMock },
+        { provide: NotifyService, useValue: notifyServiceMock },
+        { provide: IS_ANDROID_WEB_VIEW_TOKEN, useValue: false },
         {
           provide: GlobalTrackingIntervalService,
           useValue: {
@@ -152,6 +169,21 @@ describe('FocusModeEffects', () => {
 
   afterEach(() => {
     store.resetSelectors();
+  });
+
+  describe('resetBreakTimerOnBreakStart$', () => {
+    // #6064 / #9305: must go through resetTimer(), not otherNoBreakTIme$.next(0).
+    // The latter only zeroes the counter and skips the reminder teardown, so the
+    // "take a break" banner stays up and the lock-screen / fullscreen-blocker
+    // subjects stay latched at `true` for the rest of the session.
+    it('resets the break timer via resetTimer() when a break starts', (done) => {
+      actions$ = of(actions.startBreak({}));
+
+      effects.resetBreakTimerOnBreakStart$.subscribe(() => {
+        expect(takeABreakServiceMock.resetTimer).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
   });
 
   describe('syncDurationWithMode$', () => {
@@ -678,14 +710,22 @@ describe('FocusModeEffects', () => {
       });
     });
 
-    describe('offerFlowtimeBreakOnSessionEnd$', () => {
-      it('should dispatch offerFlowtimeBreak when mode is Flowtime, timer is work, and breakInfo is present', (done) => {
+    describe('autoStartFlowtimeBreakOnSessionEnd$', () => {
+      // The break must auto-start WITHOUT pausing itself. completeFocusSession is
+      // dispatched with isManual:FALSE so stopTrackingOnSessionEnd$ defers (it would
+      // otherwise enqueue unsetCurrentTask AFTER startBreak, making
+      // syncTrackingStopToSession$ pause the just-started break). The unset is done
+      // here, explicitly BEFORE startBreak, mirroring autoStartBreakOnSessionComplete$.
+      it('should complete (isManual:false), unset task, then startBreak when pause-tracking is on', (done) => {
         actions$ = of(actions.endFlowtimeSession({ pausedTaskId: 'task-123' }));
         store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
         store.overrideSelector(
           selectors.selectTimer,
           createMockTimer({ purpose: 'work', elapsed: 1500000 }),
         );
+        store.overrideSelector(selectFocusModeConfig, {
+          isPauseTrackingDuringBreak: true,
+        } as any);
         store.refreshState();
 
         strategyFactoryMock.getStrategy.and.returnValue({
@@ -693,19 +733,61 @@ describe('FocusModeEffects', () => {
           getBreakDuration: () => ({ duration: 300000, isLong: false }),
         });
 
-        effects.offerFlowtimeBreakOnSessionEnd$.pipe(take(1)).subscribe((action) => {
-          expect(action).toEqual(
-            actions.offerFlowtimeBreak({
-              duration: 300000,
-              isLongBreak: false,
-              pausedTaskId: 'task-123',
-            }),
-          );
-          done();
-        });
+        effects.autoStartFlowtimeBreakOnSessionEnd$
+          .pipe(toArray())
+          .subscribe((actionsArr) => {
+            expect(actionsArr.length).toBe(3);
+            expect(actionsArr[0]).toEqual(
+              actions.completeFocusSession({ isManual: false }),
+            );
+            expect(actionsArr[1]).toEqual(unsetCurrentTask());
+            expect(actionsArr[2]).toEqual(
+              actions.startBreak({
+                duration: 300000,
+                isLongBreak: false,
+                pausedTaskId: 'task-123',
+              }),
+            );
+            done();
+          });
       });
 
-      it('should dispatch completeFocusSession when mode is Flowtime, timer is work, but breakInfo is null', (done) => {
+      it('should complete (isManual:false) then startBreak without unsetting when pause-tracking is off', (done) => {
+        actions$ = of(actions.endFlowtimeSession({ pausedTaskId: 'task-123' }));
+        store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
+        store.overrideSelector(
+          selectors.selectTimer,
+          createMockTimer({ purpose: 'work', elapsed: 1500000 }),
+        );
+        store.overrideSelector(selectFocusModeConfig, {
+          isPauseTrackingDuringBreak: false,
+        } as any);
+        store.refreshState();
+
+        strategyFactoryMock.getStrategy.and.returnValue({
+          shouldStartBreakAfterSession: true,
+          getBreakDuration: () => ({ duration: 300000, isLong: false }),
+        });
+
+        effects.autoStartFlowtimeBreakOnSessionEnd$
+          .pipe(toArray())
+          .subscribe((actionsArr) => {
+            expect(actionsArr.length).toBe(2);
+            expect(actionsArr[0]).toEqual(
+              actions.completeFocusSession({ isManual: false }),
+            );
+            expect(actionsArr[1]).toEqual(
+              actions.startBreak({
+                duration: 300000,
+                isLongBreak: false,
+                pausedTaskId: undefined,
+              }),
+            );
+            done();
+          });
+      });
+
+      it('should dispatch only completeFocusSession when mode is Flowtime, timer is work, but breakInfo is null', (done) => {
         actions$ = of(actions.endFlowtimeSession({ pausedTaskId: 'task-123' }));
         store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
         store.overrideSelector(
@@ -719,10 +801,15 @@ describe('FocusModeEffects', () => {
           getBreakDuration: () => null,
         });
 
-        effects.offerFlowtimeBreakOnSessionEnd$.pipe(take(1)).subscribe((action) => {
-          expect(action).toEqual(actions.completeFocusSession({ isManual: true }));
-          done();
-        });
+        effects.autoStartFlowtimeBreakOnSessionEnd$
+          .pipe(toArray())
+          .subscribe((actionsArr) => {
+            expect(actionsArr.length).toBe(1);
+            expect(actionsArr[0]).toEqual(
+              actions.completeFocusSession({ isManual: true }),
+            );
+            done();
+          });
       });
 
       it('should skip effect if mode is not Flowtime', (done) => {
@@ -734,7 +821,7 @@ describe('FocusModeEffects', () => {
         );
         store.refreshState();
 
-        effects.offerFlowtimeBreakOnSessionEnd$
+        effects.autoStartFlowtimeBreakOnSessionEnd$
           .pipe(toArray())
           .subscribe((actionsArr) => {
             expect(actionsArr.length).toBe(0);
@@ -950,36 +1037,6 @@ describe('FocusModeEffects', () => {
     });
   });
 
-  describe('stopTrackingOnExitBreakToPlanning$', () => {
-    it('should dispatch unsetCurrentTask when a task is being tracked', (done) => {
-      actions$ = of(actions.exitBreakToPlanning({ pausedTaskId: null }));
-      store.overrideSelector(selectFocusModeConfig, {} as any);
-      store.refreshState();
-      currentTaskId$.next('task-123');
-
-      effects.stopTrackingOnExitBreakToPlanning$.subscribe((action) => {
-        expect(action).toEqual(unsetCurrentTask());
-        done();
-      });
-    });
-
-    it('should not dispatch when no task is being tracked', (done) => {
-      actions$ = of(actions.exitBreakToPlanning({ pausedTaskId: null }));
-      store.overrideSelector(selectFocusModeConfig, {} as any);
-      store.refreshState();
-      currentTaskId$.next(null);
-
-      const result: any[] = [];
-      effects.stopTrackingOnExitBreakToPlanning$.subscribe({
-        next: (action) => result.push(action),
-        complete: () => {
-          expect(result.length).toBe(0);
-          done();
-        },
-      });
-    });
-  });
-
   describe('pauseOnIdle$', () => {
     it('should dispatch pauseFocusSession when openIdleDialog is dispatched', (done) => {
       actions$ = of(
@@ -1008,22 +1065,6 @@ describe('FocusModeEffects', () => {
       expect(metricServiceMock.logFocusSession).toHaveBeenCalledWith(25 * 60 * 1000);
     });
 
-    it('should call metricService.logFocusSession with duration on offerFlowtimeBreak', () => {
-      actions$ = of(
-        actions.offerFlowtimeBreak({
-          duration: 5 * 60 * 1000,
-          isLongBreak: false,
-          pausedTaskId: 'task-123',
-        }),
-      );
-      store.overrideSelector(selectors.selectLastSessionDuration, 25 * 60 * 1000);
-      store.refreshState();
-
-      effects.logFocusSession$.subscribe();
-
-      expect(metricServiceMock.logFocusSession).toHaveBeenCalledWith(25 * 60 * 1000);
-    });
-
     it('should NOT log when duration is 0', () => {
       actions$ = of(actions.completeFocusSession({ isManual: false }));
       store.overrideSelector(selectors.selectLastSessionDuration, 0);
@@ -1032,6 +1073,200 @@ describe('FocusModeEffects', () => {
       effects.logFocusSession$.subscribe();
 
       expect(metricServiceMock.logFocusSession).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('surfaceSessionDoneOnCompletion$', () => {
+    // The effect is non-dispatching (dispatch:false); it has side effects only
+    // (notify + banner). Subscribing drives the tap; `complete` fires after the
+    // single `of(...)` action, by which point the side effects have run.
+    const run = (done: DoneFn, assertFn: () => void): void => {
+      effects.surfaceSessionDoneOnCompletion$.subscribe({
+        complete: () => {
+          assertFn();
+          done();
+        },
+      });
+    };
+
+    const expectExcluded = (done: DoneFn): void =>
+      run(done, () => {
+        expect(notifyServiceMock.notify).not.toHaveBeenCalled();
+        expect(bannerServiceMock.open).not.toHaveBeenCalled();
+      });
+
+    it('should banner + notify when Countdown auto-completes with the overlay hidden and app unfocused', (done) => {
+      spyOn(document, 'hasFocus').and.returnValue(false);
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectLastSessionDuration, 25 * 60 * 1000);
+      store.overrideSelector(selectors.selectIsOverlayShown, false);
+      store.refreshState();
+
+      run(done, () => {
+        expect(notifyServiceMock.notify).toHaveBeenCalledTimes(1);
+        expect(
+          notifyServiceMock.notify.calls.mostRecent().args[0].translateParams,
+        ).toEqual({ duration: '25m' });
+        expect(bannerServiceMock.open).toHaveBeenCalledTimes(1);
+        expect(bannerServiceMock.open.calls.mostRecent().args[0].id).toBe(
+          BannerId.FocusModeSessionDone,
+        );
+      });
+    });
+
+    it('banner action opens the overlay (it does not itself start a session)', (done) => {
+      spyOn(document, 'hasFocus').and.returnValue(true);
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectLastSessionDuration, 25 * 60 * 1000);
+      store.overrideSelector(selectors.selectIsOverlayShown, false);
+      store.refreshState();
+      const dispatchSpy = spyOn(store, 'dispatch');
+
+      run(done, () => {
+        const banner = bannerServiceMock.open.calls.mostRecent().args[0];
+        expect(banner.action.label).toBe(T.F.FOCUS_MODE.SESSION_COMPLETED_BANNER_ACTION);
+        banner.action.fn();
+        expect(dispatchSpy).toHaveBeenCalledWith(actions.showFocusOverlay());
+      });
+    });
+
+    it('should banner but NOT notify when the overlay is hidden and the app is focused', (done) => {
+      spyOn(document, 'hasFocus').and.returnValue(true);
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectLastSessionDuration, 25 * 60 * 1000);
+      store.overrideSelector(selectors.selectIsOverlayShown, false);
+      store.refreshState();
+
+      run(done, () => {
+        expect(notifyServiceMock.notify).not.toHaveBeenCalled();
+        expect(bannerServiceMock.open).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should NOT banner when the overlay is already shown (SessionDone is already visible)', (done) => {
+      spyOn(document, 'hasFocus').and.returnValue(true);
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectLastSessionDuration, 25 * 60 * 1000);
+      store.overrideSelector(selectors.selectIsOverlayShown, true);
+      store.refreshState();
+
+      run(done, () => {
+        expect(bannerServiceMock.open).not.toHaveBeenCalled();
+        expect(notifyServiceMock.notify).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should notify (overlay shown, app unfocused) without a banner', (done) => {
+      spyOn(document, 'hasFocus').and.returnValue(false);
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectLastSessionDuration, 25 * 60 * 1000);
+      store.overrideSelector(selectors.selectIsOverlayShown, true);
+      store.refreshState();
+
+      run(done, () => {
+        expect(notifyServiceMock.notify).toHaveBeenCalledTimes(1);
+        expect(bannerServiceMock.open).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should NOT fire on manual end (user-initiated, not silent)', (done) => {
+      actions$ = of(actions.completeFocusSession({ isManual: true }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.refreshState();
+      expectExcluded(done);
+    });
+
+    it('should NOT fire for Pomodoro (it transitions into a surfaced break, not a silent stop)', (done) => {
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.refreshState();
+      expectExcluded(done);
+    });
+
+    it('should NOT fire for Flowtime (it only ever stops on explicit user action)', (done) => {
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
+      store.refreshState();
+      expectExcluded(done);
+    });
+  });
+
+  // Self-contained module: Android needs IS_ANDROID_WEB_VIEW_TOKEN === true, which
+  // must be set before FocusModeEffects is constructed, so it can't reuse the
+  // shared beforeEach instance (built with the token false).
+  describe('surfaceSessionDoneOnCompletion$ on Android', () => {
+    let androidEffects: FocusModeEffects;
+    let androidNotify: jasmine.Spy;
+    let androidBannerOpen: jasmine.Spy;
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      androidNotify = jasmine.createSpy('notify').and.resolveTo(undefined);
+      androidBannerOpen = jasmine.createSpy('open');
+      TestBed.configureTestingModule({
+        providers: [
+          FocusModeEffects,
+          provideMockActions(() => actions$),
+          provideMockStore({
+            selectors: [
+              { selector: selectors.selectMode, value: FocusModeMode.Countdown },
+              {
+                selector: selectors.selectLastSessionDuration,
+                value: 25 * 60 * 1000,
+              },
+              { selector: selectors.selectIsOverlayShown, value: false },
+            ],
+          }),
+          { provide: FocusModeStrategyFactory, useValue: { getStrategy: () => ({}) } },
+          { provide: GlobalConfigService, useValue: { sound: () => ({ volume: 0 }) } },
+          {
+            provide: TaskService,
+            useValue: { currentTaskId$: new BehaviorSubject<string | null>(null) },
+          },
+          {
+            provide: BannerService,
+            useValue: { open: androidBannerOpen, dismiss: () => {} },
+          },
+          { provide: MetricService, useValue: { logFocusSession: () => {} } },
+          { provide: FocusModeStorageService, useValue: {} },
+          {
+            provide: HydrationStateService,
+            useValue: { isApplyingRemoteOps: () => false },
+          },
+          {
+            provide: TakeABreakService,
+            useValue: {
+              otherNoBreakTIme$: new BehaviorSubject<number>(0),
+              resetTimer: jasmine.createSpy('resetTimer'),
+            },
+          },
+          { provide: NotifyService, useValue: { notify: androidNotify } },
+          {
+            provide: GlobalTrackingIntervalService,
+            useValue: { todayStr$: new BehaviorSubject<string>('2024-01-19') },
+          },
+          { provide: IS_ANDROID_WEB_VIEW_TOKEN, useValue: true },
+        ],
+      });
+      androidEffects = TestBed.inject(FocusModeEffects);
+    });
+
+    it('should banner but NOT notify on Android (native posts the completion notification)', (done) => {
+      spyOn(document, 'hasFocus').and.returnValue(false);
+      actions$ = of(actions.completeFocusSession({ isManual: false }));
+
+      androidEffects.surfaceSessionDoneOnCompletion$.subscribe({
+        complete: () => {
+          expect(androidNotify).not.toHaveBeenCalled();
+          expect(androidBannerOpen).toHaveBeenCalledTimes(1);
+          done();
+        },
+      });
     });
   });
 
@@ -1064,13 +1299,14 @@ describe('FocusModeEffects', () => {
     });
 
     // Bug #7384 fix preserved: when the user is inside the focus-mode overlay
-    // (preparation screen visible) and `isSkipPreparation` is OFF, the effect
-    // must NOT auto-start the session — the user should click 'Start' manually
-    // to see the rocket animation.
-    it('should NOT dispatch when overlay is shown and isSkipPreparation is false (issue #7384)', (done) => {
+    // and has opted into the preparation screen (`isShowPreparation` ON), the
+    // effect must NOT auto-start the session — the user should click 'Start'
+    // manually to see the rocket countdown.
+    it('should NOT dispatch when overlay is shown and isShowPreparation is true (issue #7384)', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
         autoStartFocusOnPlay: true,
         isSkipPreparation: false,
+        isShowPreparation: true,
       });
       store.overrideSelector(selectors.selectTimer, createMockTimer());
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
@@ -1991,6 +2227,63 @@ describe('FocusModeEffects', () => {
   });
 
   describe('syncSessionStartToTracking$', () => {
+    it('should switch tracking to the explicitly selected focus task when the session starts', (done) => {
+      store.overrideSelector(selectors.selectPausedTaskId, 'paused-task');
+      store.overrideSelector(selectLastCurrentTask, null);
+      store.overrideSelector(selectTaskById, {
+        ...DEFAULT_TASK,
+        id: 'selected-task',
+        title: 'Selected Focus Task',
+        isDone: false,
+        projectId: '',
+      });
+      currentTaskId$.next('previously-tracked-task');
+      store.refreshState();
+
+      actions$ = of(
+        actions.startFocusSession({
+          duration: 25 * 60 * 1000,
+          taskId: 'selected-task',
+        }),
+      );
+
+      effects.syncSessionStartToTracking$.pipe(toArray()).subscribe((emitted) => {
+        expect(emitted).toEqual([setCurrentTask({ id: 'selected-task' })]);
+        done();
+      });
+    });
+
+    [null, 'previously-tracked-task'].forEach((currentTaskId) => {
+      it(`should reject an explicitly selected done task without changing ${
+        currentTaskId ? 'different' : 'empty'
+      } tracking`, (done) => {
+        store.overrideSelector(selectors.selectPausedTaskId, null);
+        store.overrideSelector(selectLastCurrentTask, null);
+        store.overrideSelector(selectTaskById, {
+          ...DEFAULT_TASK,
+          id: 'done-selected-task',
+          title: 'Done Selected Focus Task',
+          isDone: true,
+          projectId: '',
+        });
+        currentTaskId$.next(currentTaskId);
+        store.refreshState();
+
+        actions$ = of(
+          actions.startFocusSession({
+            duration: 25 * 60 * 1000,
+            taskId: 'done-selected-task',
+          }),
+        );
+
+        effects.syncSessionStartToTracking$.pipe(toArray()).subscribe((emitted) => {
+          const emittedTypes: string[] = emitted.map((action) => action.type);
+          expect(emittedTypes).toEqual([actions.selectFocusTask.type]);
+          done();
+        });
+      });
+    });
+
     it('should dispatch setCurrentTask when session starts with pausedTaskId and no current task', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
         isSkipPreparation: false,

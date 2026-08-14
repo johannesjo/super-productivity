@@ -28,6 +28,14 @@
   ></div>
 }
 <!-- -->
+<!--
+  Perf note: the @else branch means toggling the focus overlay destroys and
+  rebuilds the entire app shell (side nav, router outlet, work view, every task
+  row). @defer only delays loading the overlay; it does not keep the shell
+  alive. Rendering the overlay as an absolutely positioned sibling and hiding
+  the shell with CSS would avoid the teardown. Only visible when profiling
+  overlay *close*.
+-->
 @if (isShowFocusOverlay()) {
   @defer (on immediate) {
     <focus-mode-overlay @warp></focus-mode-overlay>
@@ -83,6 +91,7 @@
 @if (isShowOnboardingPresets()) {
   <onboarding-preset-selection
     (presetSelected)="onPresetSelected()"
+    (dismissed)="onOnboardingDismissed()"
   ></onboarding-preset-selection>
 }
 

@@ -19,7 +19,7 @@ import { OperationLogEffects } from '../capture/operation-log.effects';
  *                  the sp_op_log lock; the flush then runs inline rather
  *                  than re-acquiring (non-reentrant lock would deadlock).
  */
-export const processDeferredActionsAfterRemoteApply = async (
+export const processDeferredActions = async (
   injector: Injector,
   callerHoldsOperationLogLock: boolean,
 ): Promise<void> => {
@@ -27,3 +27,5 @@ export const processDeferredActionsAfterRemoteApply = async (
     callerHoldsOperationLogLock,
   });
 };
+
+export const processDeferredActionsAfterRemoteApply = processDeferredActions;

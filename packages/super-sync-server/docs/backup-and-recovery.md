@@ -8,12 +8,12 @@ This means disaster recovery is simpler than in a traditional server-authoritati
 
 ## What the Backup Protects
 
-| Data | Where it lives | Why back it up |
-|---|---|---|
-| User accounts (email, password hash) | Server only | Users can't authenticate without this |
-| Passkeys (WebAuthn credentials) | Server only | Can't be regenerated |
-| Operation log | Server + all clients | Last resort if all client devices are lost |
-| Task/project/tag data | Derived from operation log | Clients reconstruct from ops |
+| Data                                 | Where it lives             | Why back it up                             |
+| ------------------------------------ | -------------------------- | ------------------------------------------ |
+| User accounts (email, password hash) | Server only                | Users can't authenticate without this      |
+| Passkeys (WebAuthn credentials)      | Server only                | Can't be regenerated                       |
+| Operation log                        | Server + all clients       | Last resort if all client devices are lost |
+| Task/project/tag data                | Derived from operation log | Clients reconstruct from ops               |
 
 ## Backup Setup
 
@@ -36,14 +36,14 @@ Backups are saved to `backups/` next to the scripts directory.
 
 ### Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `BACKUP_DIR` | `../backups` | Where to store backup files |
-| `RETENTION_DAYS` | `14` | Delete backups older than this |
-| `DB_CONTAINER` | `supersync-postgres` | Docker container name |
-| `POSTGRES_USER` | `supersync` | Database user |
-| `POSTGRES_DB` | `supersync` | Database name |
-| `RCLONE_REMOTE` | (empty) | Optional rclone remote for off-site upload |
+| Variable         | Default              | Description                                |
+| ---------------- | -------------------- | ------------------------------------------ |
+| `BACKUP_DIR`     | `../backups`         | Where to store backup files                |
+| `RETENTION_DAYS` | `14`                 | Delete backups older than this             |
+| `DB_CONTAINER`   | `supersync-postgres` | Docker container name                      |
+| `POSTGRES_USER`  | `supersync`          | Database user                              |
+| `POSTGRES_DB`    | `supersync`          | Database name                              |
+| `RCLONE_REMOTE`  | (empty)              | Optional rclone remote for off-site upload |
 
 ### Off-site Backup (Optional)
 
@@ -65,6 +65,7 @@ RCLONE_REMOTE=b2:my-bucket/supersync ./scripts/backup.sh --upload
 This is the simplest and most reliable recovery method when at least one client device has been online recently.
 
 **How it works:**
+
 1. Restore the accounts-only dump (users + passkeys)
 2. Sync data (operations, snapshots) starts empty
 3. When clients reconnect, gap detection fires automatically
@@ -72,6 +73,7 @@ This is the simplest and most reliable recovery method when at least one client 
 5. All clients converge to a consistent state
 
 **Steps:**
+
 ```bash
 # 1. Restore accounts from backup
 gunzip -c backups/supersync_accounts_YYYYMMDD_HHMMSS.sql.gz | \
@@ -81,6 +83,7 @@ gunzip -c backups/supersync_accounts_YYYYMMDD_HHMMSS.sql.gz | \
 ```
 
 **Why this is preferred:**
+
 - Avoids `SYNC_IMPORT_EXISTS` conflicts that occur with partial restores
 - Clients hold the complete data — they are the authoritative source
 - Produces a clean, consistent server state
@@ -124,14 +127,73 @@ Server is down / data lost
 
 The procedures above recover the **whole server**. A different situation: one
 user's account is wiped — usually because a bad `SYNC_IMPORT` propagated an
-empty or stale snapshot across their devices — and you need to roll *that one
-user* back to a point in time.
+empty or stale snapshot across their devices — and you need to roll _that one
+user_ back to a point in time.
 
 The in-app **Restore from History** handles this for unencrypted accounts. It
 does **not** work for E2E-encrypted accounts: the server cannot decrypt the op
 payloads, so `generateSnapshotAtSeq` throws `EncryptedOpsNotSupportedError`.
 
-`scripts/recover-user.ts` fills that gap. It replays the user's operation log up
+### Diagnosing an encrypted download failure
+
+When an encrypted account fails to sync with a decryption error, do not assume
+the passphrase is globally wrong: one corrupt operation rejects its whole
+download batch with the same user-facing error. The client classifies the
+failing batch itself — ask the affected user for the
+`Encrypted operation batch could not be processed` entry from the exported
+Logs (**Settings → Logs**, an ordinary build). It contains only safe metadata:
+the failing operations' `serverSeq`/`opId`/failure stage/`errorName`,
+decrypted and parsed counts, and `passwordEvidence`. It never contains the
+passphrase, token, ciphertext, or decrypted content.
+
+Interpret `passwordEvidence` conservatively. `confirmed-for-some-operations`
+means the key decrypted at least one operation in that run, which rules out a
+globally wrong passphrase and points at the listed operations.
+`no-operation-decrypted` is **inconclusive**: a wrong passphrase, a wholly
+corrupt or differently keyed range, and a device that could not run
+decryption at all produce the same shape — read each failure's `errorName`
+case by case. `OperationError` is an AES-GCM authentication failure (wrong
+key or corrupt data), and devices without WebCrypto report the same
+authentication failure as a bare `Error` (fallback crypto).
+`InvalidCiphertextError`/`InvalidCharacterError` mean truncated or mangled
+ciphertext, and `WebCryptoNotAvailableError` is an environment failure —
+neither is password evidence.
+
+### Recovering a mixed encrypted/plaintext history
+
+An encryption-enabled client that logs
+`received a plaintext op while encryption is mandatory` is not reporting a
+wrong passphrase. It has found a plaintext row in an account that is expected
+to contain only encrypted payloads. The client rejects the complete download
+without applying its valid prefix or advancing its durable cursor.
+
+If an **updated** client still has a verified complete, current copy of the
+account, use the supported client recovery:
+
+1. Keep every other client offline and preserve the complete client unchanged.
+2. Export a full backup from that client and protect it as plaintext user data.
+3. In its sync settings, open **Advanced** and choose **Force Overwrite**.
+4. Wait for the encrypted clean-slate upload to finish before updating and
+   reconnecting the other clients one at a time.
+5. Verify the reconstructed data on a fresh client before deleting the backup.
+
+Force Overwrite deletes the mixed operation dataset and uploads the selected
+client's state as an encrypted full-state operation while preserving server
+sequence monotonicity. Do not run it from a fresh, incomplete, stale, or
+pre-fix client.
+
+Do **not** recover by changing `isPayloadEncrypted`, applying or skipping the
+plaintext row, deleting that row alone, or advancing a client cursor past it.
+The flag and surrounding envelope are unauthenticated, so those shortcuts can
+apply forged data or silently construct an incomplete state. If no client has
+a verified complete copy, preserve the clients and database, inspect only safe
+row metadata first, and treat any server-side reconstruction as an incident
+recovery against an isolated database restore rather than a normal sync path.
+
+The real-shape recovery regression is
+`e2e/tests/sync/supersync-plaintext-history-recovery-9439.spec.ts`.
+
+`scripts/recover-user.ts` fills the encrypted-recovery gap. It replays the user's operation log up
 to a chosen `serverSeq`, decrypting encrypted payloads with the user's
 passphrase, and writes an importable `AppDataComplete` JSON file. It is
 **read-only** on the database.
@@ -200,3 +262,4 @@ The backup recovery scenarios are covered by automated tests in `e2e/tests/sync/
 1. **Complete data loss** — server wiped, single client recovers all data
 2. **Partial revert** — server reverted to older state, client preserves local data
 3. **Accounts-only restore** — recommended recovery path with multi-client convergence
+4. **Mixed encrypted/plaintext history** — fail closed, then recover through an encrypted trusted-client Force Overwrite

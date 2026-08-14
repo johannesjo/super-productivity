@@ -1,8 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { WorkContextService } from './work-context.service';
+import { resolveContextTheme, WorkContextService } from './work-context.service';
+import { SYSTEM_ENTITY_THEMES } from './work-context-default-theme.util';
+import {
+  DEFAULT_TAG_COLOR,
+  isBackgroundImageSet,
+  WORK_CONTEXT_DEFAULT_THEME,
+} from './work-context.const';
+import { DEFAULT_PROJECT, INBOX_PROJECT } from '../project/project.const';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { provideMockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -11,8 +18,13 @@ import { GlobalTrackingIntervalService } from '../../core/global-tracking-interv
 import { DateService } from '../../core/date/date.service';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { TaskArchiveService } from '../archive/task-archive.service';
-import { TODAY_TAG } from '../tag/tag.const';
-import { WorkContextType } from './work-context.model';
+import { DEFAULT_TAG, IMPORTANT_TAG, TODAY_TAG, URGENT_TAG } from '../tag/tag.const';
+import { WorkContext, WorkContextThemeCfg, WorkContextType } from './work-context.model';
+import {
+  selectActiveContextId,
+  selectActiveWorkContext,
+} from './store/work-context.selectors';
+import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
 
 describe('WorkContextService - undoneTasks$ filtering', () => {
   let tagServiceMock: jasmine.SpyObj<TagService>;
@@ -136,6 +148,29 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
 
   afterEach(() => {
     jasmine.clock().uninstall();
+  });
+
+  describe('breakTimeToday$', () => {
+    it('exposes recorded break time for the current day', (done) => {
+      const today = '2023-06-13';
+      service.activeWorkContextTTData$ = of({
+        [today]: { bt: 10 * 60 * 1000 },
+      });
+
+      service.breakTimeToday$.subscribe((breakTime) => {
+        expect(breakTime).toBe(10 * 60 * 1000);
+        done();
+      });
+    });
+
+    it('defaults to zero when no break time is recorded', (done) => {
+      service.activeWorkContextTTData$ = of({});
+
+      service.breakTimeToday$.subscribe((breakTime) => {
+        expect(breakTime).toBe(0);
+        done();
+      });
+    });
   });
 
   // Test the filtering logic directly instead of testing the full observable chain
@@ -523,5 +558,453 @@ describe('WorkContextService - getDoneTodayInArchive', () => {
     const result = await service.getDoneTodayInArchive();
 
     expect(result).toBe(1);
+  });
+});
+
+describe('WorkContextService - activeWorkContext$ distinctUntilChanged', () => {
+  let timeTrackingServiceMock: jasmine.SpyObj<TimeTrackingService>;
+  let store: MockStore;
+  let service: WorkContextService;
+
+  const ctx1 = (): WorkContext =>
+    ({
+      id: TODAY_TAG.id,
+      type: WorkContextType.TAG,
+      title: 'x',
+      icon: null,
+      routerLink: 'tag/TODAY',
+      theme: {},
+      advancedCfg: {},
+      taskIds: [],
+      backlogTaskIds: [],
+      noteIds: [],
+    }) as unknown as WorkContext;
+
+  const CTX1 = ctx1();
+
+  beforeEach(() => {
+    const tagServiceMock = jasmine.createSpyObj('TagService', ['getTagById$']);
+    tagServiceMock.getTagById$.and.returnValue(of(TODAY_TAG));
+
+    const globalTrackingIntervalServiceMock = jasmine.createSpyObj(
+      'GlobalTrackingIntervalService',
+      [],
+      { todayDateStr$: of('2026-04-06') },
+    );
+
+    const dateServiceMock = jasmine.createSpyObj('DateService', ['todayStr']);
+    dateServiceMock.todayStr.and.returnValue('2026-04-06');
+
+    timeTrackingServiceMock = jasmine.createSpyObj('TimeTrackingService', [
+      'getWorkStartEndForWorkContext$',
+    ]);
+    timeTrackingServiceMock.getWorkStartEndForWorkContext$.and.returnValue(of({}));
+
+    const taskArchiveServiceMock = jasmine.createSpyObj('TaskArchiveService', [
+      'loadYoung',
+    ]);
+    taskArchiveServiceMock.loadYoung.and.returnValue(
+      Promise.resolve({ ids: [], entities: {} }),
+    );
+
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideMockStore({
+          initialState: {
+            workContext: { activeId: TODAY_TAG.id, activeType: 'TAG' },
+            tag: { entities: {}, ids: [] },
+            project: { entities: {}, ids: [] },
+            task: { entities: {}, ids: [] },
+          },
+        }),
+        // activeWorkContext$ is gated behind _afterDataLoadedOnce$, which only
+        // fires after the allDataWasLoaded action.
+        provideMockActions(() => of(allDataWasLoaded())),
+        { provide: Router, useValue: { events: of(), url: '/' } },
+        { provide: TagService, useValue: tagServiceMock },
+        {
+          provide: GlobalTrackingIntervalService,
+          useValue: globalTrackingIntervalServiceMock,
+        },
+        { provide: DateService, useValue: dateServiceMock },
+        { provide: TimeTrackingService, useValue: timeTrackingServiceMock },
+        { provide: TaskArchiveService, useValue: taskArchiveServiceMock },
+        WorkContextService,
+      ],
+    });
+
+    store = TestBed.inject(MockStore);
+    store.overrideSelector(selectActiveWorkContext, CTX1);
+    store.refreshState();
+
+    service = TestBed.inject(WorkContextService);
+  });
+
+  it('collapses per-tick no-op re-emissions but still emits real changes', () => {
+    const collected: WorkContext[] = [];
+    const sub = service.activeWorkContext$.subscribe((v) => collected.push(v));
+    // Subscribe to TTData$ so we can prove it does NOT re-subscribe on no-ops.
+    const ttSub = service.activeWorkContextTTData$.subscribe();
+
+    expect(collected.length).toBe(1);
+    expect(timeTrackingServiceMock.getWorkStartEndForWorkContext$.calls.count()).toBe(1);
+
+    // No-op: content-identical but new object reference (fresh taskIds array),
+    // exactly what the selector produces every tracking tick.
+    store.overrideSelector(selectActiveWorkContext, {
+      ...CTX1,
+      taskIds: [...CTX1.taskIds],
+    } as WorkContext);
+    store.refreshState();
+
+    expect(collected.length).toBe(1);
+    expect(timeTrackingServiceMock.getWorkStartEndForWorkContext$.calls.count()).toBe(1);
+
+    // Genuine change: different taskIds content -> must emit + re-subscribe TT.
+    store.overrideSelector(selectActiveWorkContext, {
+      ...CTX1,
+      taskIds: ['NEW'],
+    } as WorkContext);
+    store.refreshState();
+
+    expect(collected.length).toBe(2);
+    expect(timeTrackingServiceMock.getWorkStartEndForWorkContext$.calls.count()).toBe(2);
+
+    ttSub.unsubscribe();
+    sub.unsubscribe();
+  });
+});
+
+// #8843: `task.component.ts` read `workContextService.isTodayList` (a plain
+// mutable boolean) inside a `computed()`, so the computed had no signal producer
+// and never invalidated. `isTodayListSignal` is a `toSignal(isTodayList$)` mirror
+// that must reactively track the active work context.
+describe('WorkContextService - isTodayListSignal reactivity', () => {
+  let store: MockStore;
+  let service: WorkContextService;
+
+  beforeEach(() => {
+    const tagServiceMock = jasmine.createSpyObj('TagService', ['getTagById$']);
+    tagServiceMock.getTagById$.and.returnValue(of(TODAY_TAG));
+
+    const globalTrackingIntervalServiceMock = jasmine.createSpyObj(
+      'GlobalTrackingIntervalService',
+      [],
+      { todayDateStr$: of('2026-04-06') },
+    );
+
+    const dateServiceMock = jasmine.createSpyObj('DateService', ['todayStr']);
+    dateServiceMock.todayStr.and.returnValue('2026-04-06');
+
+    const timeTrackingServiceMock = jasmine.createSpyObj('TimeTrackingService', [
+      'getWorkStartEndForWorkContext$',
+    ]);
+    timeTrackingServiceMock.getWorkStartEndForWorkContext$.and.returnValue(of({}));
+
+    const taskArchiveServiceMock = jasmine.createSpyObj('TaskArchiveService', [
+      'loadYoung',
+    ]);
+    taskArchiveServiceMock.loadYoung.and.returnValue(
+      Promise.resolve({ ids: [], entities: {} }),
+    );
+
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideMockStore({
+          initialState: {
+            workContext: { activeId: TODAY_TAG.id, activeType: 'TAG' },
+            tag: { entities: {}, ids: [] },
+            project: { entities: {}, ids: [] },
+            task: { entities: {}, ids: [] },
+          },
+        }),
+        // activeWorkContextId$ is gated behind the allDataWasLoaded action.
+        provideMockActions(() => of(allDataWasLoaded())),
+        { provide: Router, useValue: { events: of(), url: '/' } },
+        { provide: TagService, useValue: tagServiceMock },
+        {
+          provide: GlobalTrackingIntervalService,
+          useValue: globalTrackingIntervalServiceMock,
+        },
+        { provide: DateService, useValue: dateServiceMock },
+        { provide: TimeTrackingService, useValue: timeTrackingServiceMock },
+        { provide: TaskArchiveService, useValue: taskArchiveServiceMock },
+        WorkContextService,
+      ],
+    });
+
+    store = TestBed.inject(MockStore);
+    store.overrideSelector(selectActiveContextId, TODAY_TAG.id);
+    store.refreshState();
+
+    service = TestBed.inject(WorkContextService);
+  });
+
+  it('is true on the Today list and flips to false when the context changes', () => {
+    expect(service.isTodayListSignal()).toBe(true);
+
+    store.overrideSelector(selectActiveContextId, 'some-other-context');
+    store.refreshState();
+
+    expect(service.isTodayListSignal()).toBe(false);
+  });
+});
+
+// The #9139 fix lives in `resolveContextTheme`, but `currentTheme$` is the only
+// thing in production that CALLS it — every crashing consumer (resolveBackground,
+// _setColorTheme) reads this stream, not the function. Without this block the
+// whole fix could be reverted at the `map()` and the suite stayed green: the
+// unit tests below pass a themeless context in by hand, so they never observe
+// the wiring. Tests the seam, deliberately, not the logic.
+describe('WorkContextService - currentTheme$ wiring (#9139)', () => {
+  let store: MockStore;
+  let service: WorkContextService;
+
+  // TODAY, with no `theme` at all — the exact entity and shape from the report,
+  // and the active context at startup.
+  const themelessToday = (): WorkContext => {
+    const ctx = {
+      id: TODAY_TAG.id,
+      type: WorkContextType.TAG,
+      title: 'Today',
+      icon: null,
+      routerLink: `tag/${TODAY_TAG.id}`,
+      advancedCfg: {},
+      taskIds: [],
+      backlogTaskIds: [],
+      noteIds: [],
+    } as unknown as WorkContext;
+    // Assert the premise rather than trusting it: if `theme` were somehow
+    // present the test would pass for the wrong reason.
+    expect('theme' in ctx).toBe(false);
+    return ctx;
+  };
+
+  beforeEach(() => {
+    const tagServiceMock = jasmine.createSpyObj('TagService', ['getTagById$']);
+    tagServiceMock.getTagById$.and.returnValue(of(TODAY_TAG));
+
+    const globalTrackingIntervalServiceMock = jasmine.createSpyObj(
+      'GlobalTrackingIntervalService',
+      [],
+      { todayDateStr$: of('2026-04-06') },
+    );
+
+    const dateServiceMock = jasmine.createSpyObj('DateService', ['todayStr']);
+    dateServiceMock.todayStr.and.returnValue('2026-04-06');
+
+    const timeTrackingServiceMock = jasmine.createSpyObj('TimeTrackingService', [
+      'getWorkStartEndForWorkContext$',
+    ]);
+    timeTrackingServiceMock.getWorkStartEndForWorkContext$.and.returnValue(of({}));
+
+    const taskArchiveServiceMock = jasmine.createSpyObj('TaskArchiveService', [
+      'loadYoung',
+    ]);
+    taskArchiveServiceMock.loadYoung.and.returnValue(
+      Promise.resolve({ ids: [], entities: {} }),
+    );
+
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideMockStore({
+          initialState: {
+            workContext: { activeId: TODAY_TAG.id, activeType: 'TAG' },
+            tag: { entities: {}, ids: [] },
+            project: { entities: {}, ids: [] },
+            task: { entities: {}, ids: [] },
+          },
+        }),
+        // activeWorkContext$ is gated behind _afterDataLoadedOnce$, which only
+        // fires after the allDataWasLoaded action.
+        provideMockActions(() => of(allDataWasLoaded())),
+        { provide: Router, useValue: { events: of(), url: '/' } },
+        { provide: TagService, useValue: tagServiceMock },
+        {
+          provide: GlobalTrackingIntervalService,
+          useValue: globalTrackingIntervalServiceMock,
+        },
+        { provide: DateService, useValue: dateServiceMock },
+        { provide: TimeTrackingService, useValue: timeTrackingServiceMock },
+        { provide: TaskArchiveService, useValue: taskArchiveServiceMock },
+        WorkContextService,
+      ],
+    });
+
+    store = TestBed.inject(MockStore);
+    store.overrideSelector(selectActiveWorkContext, themelessToday());
+    store.refreshState();
+
+    service = TestBed.inject(WorkContextService);
+  });
+
+  it('emits a real theme for a themeless active context instead of undefined', () => {
+    const emitted: (WorkContextThemeCfg | undefined)[] = [];
+    const sub = service.currentTheme$.subscribe((v) => emitted.push(v));
+
+    expect(emitted.length).toBe(1);
+    // The crash itself: consumers deref `.backgroundImageDark` / `.isAutoContrast`
+    // on whatever this emits, so `undefined` here IS the bug.
+    expect(emitted[0]).toBeDefined();
+    // TODAY's OWN theme, not the generic tag default — proves the stream routes
+    // through the id-aware fallback and not merely some non-null object.
+    expect(emitted[0]).toEqual(TODAY_TAG.theme);
+    expect(emitted[0]!.primary).not.toBe(DEFAULT_TAG.theme.primary);
+
+    sub.unsubscribe();
+  });
+});
+
+describe('resolveContextTheme()', () => {
+  // NOTE: a plain USER tag id by default. System entities (TODAY, INBOX, …)
+  // resolve to their own themes, so a system id here would silently stop these
+  // cases from exercising the generic default.
+  const buildCtx = (over: Record<string, unknown> = {}): WorkContext =>
+    ({
+      id: 'user-tag-1',
+      title: 'User tag',
+      type: WorkContextType.TAG,
+      routerLink: 'tag/user-tag-1',
+      taskIds: [],
+      noteIds: [],
+      color: null,
+      theme: { ...WORK_CONTEXT_DEFAULT_THEME, primary: '#123456' },
+      ...over,
+    }) as unknown as WorkContext;
+
+  describe('regression #9139: work context persisted with no theme', () => {
+    // A tag/project entity stored without `theme` propagated `undefined` into
+    // resolveBackground() and _setColorTheme(), crashing on every launch.
+    // The crashing consumers were resolveBackground() (reads backgroundImage*)
+    // and _setColorTheme() (reads isAutoContrast); both need a real object.
+    it('returns the default tag theme instead of undefined', () => {
+      const ctx = buildCtx();
+      delete (ctx as unknown as Record<string, unknown>).theme;
+
+      expect(resolveContextTheme(ctx)).toEqual(DEFAULT_TAG.theme);
+      // A COPY, never the module constant itself — a consumer mutating what it
+      // was handed would otherwise corrupt DEFAULT_TAG app-wide. Nothing
+      // freezes these constants, so this is the only thing enforcing it.
+      // (Safe for the stream: currentTheme$ dedups with isShallowEqual, which
+      // compares key-by-key and does not short-circuit on reference.)
+      expect(resolveContextTheme(ctx)).not.toBe(DEFAULT_TAG.theme);
+    });
+
+    it('returns the PROJECT default for a theme-less project', () => {
+      // Must match what auto-fix-typia-errors would later persist, else a
+      // theme-less project renders tag-purple then flips to project-teal.
+      const ctx = buildCtx({ type: WorkContextType.PROJECT });
+      delete (ctx as unknown as Record<string, unknown>).theme;
+
+      expect(resolveContextTheme(ctx)).toEqual(DEFAULT_PROJECT.theme);
+      expect(resolveContextTheme(ctx)).not.toBe(DEFAULT_PROJECT.theme);
+    });
+
+    it('handles an explicit null theme, not just a missing one', () => {
+      const ctx = buildCtx({ theme: null });
+
+      expect(resolveContextTheme(ctx)).toEqual(DEFAULT_TAG.theme);
+    });
+
+    // Regression: the read side was only type-aware while the on-disk heal was
+    // id-aware, so a theme-less TODAY — the active context at startup —
+    // rendered purple/tinted indefinitely (hydration validates but never
+    // repairs) and then flipped once a sync repair landed. Both sides now
+    // resolve through getDefaultWorkContextTheme.
+    //
+    // The loop below is driven from SYSTEM_ENTITY_THEMES itself so that a row
+    // ADDED to the Map is automatically covered. The cost is that it is blind in
+    // the other direction: deleting a row deletes its tests too, so they VANISH
+    // (silently, 32 -> 28) rather than fail. This assertion is the other half —
+    // it pins the roster so a removal is loud. Both halves are needed; neither
+    // catches what the other does.
+    it('covers exactly the known system entities', () => {
+      expect([...SYSTEM_ENTITY_THEMES.keys()].sort()).toEqual(
+        [TODAY_TAG.id, URGENT_TAG.id, IMPORTANT_TAG.id, INBOX_PROJECT.id].sort(),
+      );
+    });
+
+    [...SYSTEM_ENTITY_THEMES.entries()].forEach(([entityId, theme]) => {
+      const isTag = entityId !== INBOX_PROJECT.id;
+
+      it(`gives ${entityId} its own theme, not the generic default`, () => {
+        const ctx = buildCtx({
+          id: entityId,
+          type: isTag ? WorkContextType.TAG : WorkContextType.PROJECT,
+        });
+        delete (ctx as unknown as Record<string, unknown>).theme;
+
+        expect(resolveContextTheme(ctx)).toEqual(theme);
+        // System themes are module constants too — same aliasing hazard.
+        expect(resolveContextTheme(ctx)).not.toBe(theme);
+      });
+
+      it(`${entityId} has a theme that renders differently from the generic default`, () => {
+        const generic = isTag ? DEFAULT_TAG.theme : DEFAULT_PROJECT.theme;
+        // OBSERVABLE difference, not raw field inequality: the background-image
+        // fields reach the UI only through isBackgroundImageSet, so '' and null
+        // are the same thing. Comparing raw values would call IN_PROGRESS_TAG
+        // ('' vs null, nothing else) "different" and let an inert row back in.
+        const observable = (t: WorkContextThemeCfg): Record<string, unknown> => ({
+          ...t,
+          backgroundImageDark: isBackgroundImageSet(t.backgroundImageDark),
+          backgroundImageLight: isBackgroundImageSet(t.backgroundImageLight),
+        });
+        const a = observable(generic);
+        const b = observable(theme);
+
+        // If this fails the row is inert and should be DELETED, not kept —
+        // IN_PROGRESS_TAG was removed for exactly this reason.
+        expect(Object.keys({ ...a, ...b }).some((k) => a[k] !== b[k])).toBe(true);
+      });
+    });
+
+    it('yields a COMPLETE theme when the tag-color fallback applies', () => {
+      const ctx = buildCtx({ color: '#abcdef' });
+      delete (ctx as unknown as Record<string, unknown>).theme;
+
+      const res = resolveContextTheme(ctx);
+
+      // Spreading an undefined theme would have produced just `{ primary }`.
+      expect(res.primary).toBe('#abcdef');
+      expect(res.accent).toBe(WORK_CONTEXT_DEFAULT_THEME.accent);
+      expect(res.huePrimary).toBe(WORK_CONTEXT_DEFAULT_THEME.huePrimary);
+    });
+  });
+
+  describe('existing behaviour is preserved', () => {
+    it('keeps an explicit primary override over tag.color', () => {
+      const res = resolveContextTheme(
+        buildCtx({
+          theme: { ...WORK_CONTEXT_DEFAULT_THEME, primary: '#explicit' },
+          color: '#tagcolor',
+        }),
+      );
+      expect(res.primary).toBe('#explicit');
+    });
+
+    it('falls back to tag.color when primary is still the auto-default', () => {
+      const res = resolveContextTheme(
+        buildCtx({
+          theme: { ...WORK_CONTEXT_DEFAULT_THEME, primary: DEFAULT_TAG_COLOR },
+          color: '#tagcolor',
+        }),
+      );
+      expect(res.primary).toBe('#tagcolor');
+    });
+
+    it('does not apply the tag-color fallback for projects', () => {
+      const res = resolveContextTheme(
+        buildCtx({
+          type: WorkContextType.PROJECT,
+          theme: { ...WORK_CONTEXT_DEFAULT_THEME, primary: DEFAULT_TAG_COLOR },
+          color: '#tagcolor',
+        }),
+      );
+      expect(res.primary).toBe(DEFAULT_TAG_COLOR);
+    });
   });
 });

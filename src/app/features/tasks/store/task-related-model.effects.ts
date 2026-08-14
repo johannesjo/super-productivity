@@ -1,11 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
-import { Task } from '../task.model';
+import {
+  concatMap,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  switchMap,
+} from 'rxjs/operators';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { TaskService } from '../task.service';
 import { EMPTY, Observable } from 'rxjs';
 import { moveProjectTaskToRegularList } from '../../project/store/project.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
@@ -18,7 +23,6 @@ import { DateService } from '../../../core/date/date.service';
 @Injectable()
 export class TaskRelatedModelEffects {
   private _actions$ = inject(LOCAL_ACTIONS);
-  private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
   private _store = inject(Store);
   private _hydrationState = inject(HydrationStateService);
@@ -36,57 +40,46 @@ export class TaskRelatedModelEffects {
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),
-        // PERF: Skip during hydration/sync to avoid selector evaluation overhead
+        // PERF: Skip during hydration/sync before any further work.
         filter(() => !this._hydrationState.isApplyingRemoteOps()),
-        withLatestFrom(this._store.select(selectTodayTaskIds)),
-        filter(
-          ([{ task }, todayTaskIds]) =>
-            !task.dueDay &&
-            typeof task.dueWithTime !== 'number' &&
-            !todayTaskIds.includes(task.id) &&
-            (!task.parentId || !todayTaskIds.includes(task.parentId)),
-        ),
-        map(([{ task }]) =>
-          TaskSharedActions.planTasksForToday({
-            taskIds: [task.id],
-            today: this._dateService.todayStr(),
-            startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
-          }),
+        // Cheap field checks first: a task with its own due date is already
+        // handled by dueDay-based TODAY membership, so it can never need
+        // auto-adding here. Running these before any store read means the
+        // common "already-scheduled" tick short-circuits immediately.
+        filter(({ task }) => !task.dueDay && typeof task.dueWithTime !== 'number'),
+        // addTimeSpent fires every second while tracking; only (re)evaluate when
+        // the tracked task actually changes, not per tick.
+        distinctUntilChanged((a, b) => a.task.id === b.task.id),
+        // PERF: read TODAY membership lazily on-demand for the rare qualifying
+        // action instead of a continuously-subscribed withLatestFrom, which would
+        // recompute the O(n) selectTodayTaskIds scan every tick as task entities
+        // churn. Semantics are identical: the current value is read synchronously.
+        concatMap((action) =>
+          this._store.select(selectTodayTaskIds).pipe(
+            first(),
+            filter(
+              (todayTaskIds) =>
+                !todayTaskIds.includes(action.task.id) &&
+                (!action.task.parentId || !todayTaskIds.includes(action.task.parentId)),
+            ),
+            map(() =>
+              TaskSharedActions.planTasksForToday({
+                taskIds: [action.task.id],
+                today: this._dateService.todayStr(),
+                startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
+              }),
+            ),
+          ),
         ),
       ),
     ),
   );
 
-  autoAddTodayTagOnMarkAsDone = createEffect(() =>
-    this.ifAutoAddTodayEnabled$(
-      this._actions$.pipe(
-        ofType(TaskSharedActions.updateTask),
-        filter((a) => a.task.changes.isDone === true),
-        // PERF: Skip during hydration/sync to avoid service calls
-        filter(() => !this._hydrationState.isApplyingRemoteOps()),
-        // Use mergeMap instead of switchMap to ensure ALL mark-as-done actions
-        // trigger planTasksForToday, not just the last one. switchMap would cancel
-        // previous inner subscriptions when new actions arrive quickly.
-        mergeMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
-        // Only auto-plan unscheduled tasks. Completion records doneOn, but must not
-        // rewrite an existing dueDay/dueWithTime schedule.
-        filter(
-          (task: Task) =>
-            !!task &&
-            !task.parentId &&
-            !task.dueDay &&
-            typeof task.dueWithTime !== 'number',
-        ),
-        map((task) =>
-          TaskSharedActions.planTasksForToday({
-            taskIds: [task.id],
-            today: this._dateService.todayStr(),
-            startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
-          }),
-        ),
-      ),
-    ),
-  );
+  // NOTE: Completing a task no longer auto-dates it. Completion records only
+  // `doneOn`; it never synthesizes or freezes a `dueDay`. The Today "Done" list
+  // is driven by `isDone`/`doneOn`, so completed tasks still show there without a
+  // schedule. The `isAutoAddWorkedOnToToday` setting now gates ONLY the
+  // time-tracking auto-add path above (`autoAddTodayTagOnTracking`).
 
   // EXTERNAL ===> TASKS
   // -------------------

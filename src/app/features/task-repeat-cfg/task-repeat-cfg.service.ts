@@ -80,21 +80,23 @@ export class TaskRepeatCfgService {
     taskId: string,
     projectId: string | null,
     taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'>,
-  ): void {
+  ): string {
     // Note: First occurrence calculation and lastTaskCreationDay update
     // is handled by the updateTaskAfterMakingItRepeatable$ effect (#5594)
+    const repeatCfgId = nanoid();
     this._store$.dispatch(
       addTaskRepeatCfgToTask({
         taskRepeatCfg: {
           ...taskRepeatCfg,
           projectId,
-          id: nanoid(),
+          id: repeatCfgId,
         },
         taskId,
         startTime: taskRepeatCfg.startTime,
         remindAt: taskRepeatCfg.remindAt,
       }),
     );
+    return repeatCfgId;
   }
 
   deleteTaskRepeatCfg(id: string): void {
@@ -220,7 +222,22 @@ export class TaskRepeatCfgService {
     });
 
     if (taskAlreadyExists) {
-      return [];
+      // Task already exists for this date. Still advance lastTaskCreationDay so
+      // the transparent planner projection is suppressed. Without this update the
+      // projection lingers when a concurrent addAllDueToday() call or a date-change
+      // effect created the task first — the race leaves lastTaskCreationDay behind
+      // the actual creation date. (#7923)
+      return [
+        updateTaskRepeatCfg({
+          taskRepeatCfg: {
+            id: taskRepeatCfg.id as string,
+            changes: {
+              lastTaskCreation: targetCreated.getTime(),
+              lastTaskCreationDay: targetDateStr,
+            },
+          },
+        }),
+      ];
     }
     // Check if this date is in the deleted instances list
     // NOTE: needs to run after deriving targetDateStr so deletions for overdue instances work.

@@ -1,0 +1,62 @@
+<h2
+  mat-dialog-title
+  class="dialog-title"
+>
+  <mat-icon svgIcon="plainspace"></mat-icon>
+  {{ T.PLAINSPACE.CONNECT.TITLE | translate }}
+</h2>
+
+<mat-dialog-content>
+  <p class="intro">{{ T.PLAINSPACE.CONNECT.INTRO | translate }}</p>
+
+  <a
+    mat-stroked-button
+    color="primary"
+    class="open-link"
+    [href]="connectUrl"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <mat-icon>open_in_new</mat-icon>
+    {{ T.PLAINSPACE.CONNECT.OPEN_LINK | translate }}
+  </a>
+
+  <p class="hint">{{ T.PLAINSPACE.CONNECT.TOKEN_HELP | translate }}</p>
+
+  <mat-form-field class="token-field">
+    <mat-label>{{ T.PLAINSPACE.CONNECT.TOKEN_LABEL | translate }}</mat-label>
+    <input
+      matInput
+      type="password"
+      autocomplete="off"
+      [(ngModel)]="token"
+      [placeholder]="T.PLAINSPACE.CONNECT.TOKEN_PLACEHOLDER | translate"
+      (keydown.enter)="connect()"
+    />
+  </mat-form-field>
+
+  @if (hasError()) {
+    <p class="error">{{ T.PLAINSPACE.CONNECT.INVALID | translate }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    [disabled]="isConnecting()"
+    (click)="cancel()"
+  >
+    {{ T.G.CANCEL | translate }}
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="!token.trim() || isConnecting()"
+    (click)="connect()"
+  >
+    {{
+      (isConnecting() ? T.PLAINSPACE.CONNECT.CONNECTING : T.PLAINSPACE.CONNECT.CONNECT)
+        | translate
+    }}
+  </button>
+</mat-dialog-actions>

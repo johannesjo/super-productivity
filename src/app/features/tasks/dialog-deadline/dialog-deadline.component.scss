@@ -10,44 +10,14 @@
   justify-content: stretch;
   align-items: stretch;
   user-select: none;
-  width: 400px;
-  max-width: 100%;
+  width: max-content;
+  min-width: min(400px, calc(100vw - var(--s4)));
+  max-width: min(560px, 100%);
   display: block;
 
   :host-context([dir='rtl']) {
     direction: rtl;
   }
-
-  mat-form-field {
-    width: 100%;
-  }
-
-  ::ng-deep {
-    .mat-calendar-header {
-      padding-top: 0;
-    }
-
-    .mat-calendar-body-cell-content {
-      background: transparent !important;
-    }
-
-    .mat-calendar-body-cell:focus .mat-calendar-body-cell-content {
-      outline: 2px solid var(--c-accent);
-    }
-
-    .mat-calendar-body-selected {
-      background: var(--c-primary) !important;
-    }
-
-    .mat-calendar-controls {
-      margin-top: var(--s);
-      margin-bottom: var(--s);
-    }
-  }
-}
-
-.form-ctrl-wrapper {
-  margin: var(--s2) var(--s2) 0;
 }
 
 mat-dialog-content {
@@ -58,83 +28,23 @@ mat-dialog-content {
   ) !important;
 }
 
-.press-enter-msg {
-  text-align: center;
-  font-weight: bold;
-  padding: var(--s-half) 12px;
-  position: absolute;
-  left: 50%;
-  z-index: 11;
-  box-shadow: var(--whiteframe-shadow-1dp);
-  border-radius: var(--radius-md);
-  margin-top: calc(var(--s) * -1.5);
-  white-space: nowrap;
-  transform: translateX(-50%);
+mat-dialog-actions {
+  padding: 0 0 var(--s2) 0 !important;
+  row-gap: calc(var(--s) + var(--s-half));
 
-  background: var(--bg-lighter);
-}
-
-.quick-access {
-  display: flex;
-  justify-content: space-evenly;
-  @include extraBorder('-bottom');
-  height: 48px;
-
-  > button {
-    height: 48px;
-    flex-grow: 1;
-    border-radius: var(--card-border-radius) !important;
-
-    ::ng-deep .mat-mdc-button-persistent-ripple {
-      border-radius: var(--card-border-radius) !important;
+  // On very narrow phones (≤398px) the three action buttons don't fit with
+  // their icons and wrap onto a second row — drop the icons, keep the labels.
+  @include mq(xxxs, max) {
+    button mat-icon {
+      display: none;
     }
   }
-
-  button + button {
-    @include extraBorder('-left');
-  }
 }
 
-:host ::ng-deep mat-dialog-actions {
-  padding: 0 0 var(--s2) 0 !important;
+.dialog-actions-and-warnings {
+  margin: 0 var(--s2) var(--s2);
 }
 
-.deadline-actions {
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  width: 100%;
-  margin: 0 auto;
-  padding-bottom: var(--s);
-}
-
-.deadline-actions button {
-  flex: 1 1 0;
-  min-width: 0;
-  max-width: 100%;
-  height: auto;
-  min-height: 38px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: center;
-}
-
-.deadline-actions button:not(:last-child) {
-  margin-right: var(--s-quarter);
-}
-
-.dialog-cancel-btn {
-  display: block;
-  width: 100%;
-}
-
-.deadline-actions button,
-.dialog-cancel-btn {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: center;
-}
-
-.time-clear-btn {
-  cursor: pointer;
+.action-label {
+  white-space: nowrap;
 }

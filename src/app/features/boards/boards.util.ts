@@ -1,6 +1,13 @@
-import { BoardPanelCfg, BoardSortField } from './boards.model';
+import {
+  BoardPanelCfg,
+  BoardPanelCfgScheduledState,
+  BoardPanelCfgTaskDoneState,
+  BoardPanelCfgTaskTypeFilter,
+  BoardSortField,
+} from './boards.model';
 import { TaskCopy } from '../tasks/task.model';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
+import { TODAY_TAG } from '../tag/tag.const';
 
 const VALID_SORT_FIELDS: ReadonlySet<BoardSortField> = new Set([
   'dueDate',
@@ -8,6 +15,15 @@ const VALID_SORT_FIELDS: ReadonlySet<BoardSortField> = new Set([
   'title',
   'timeEstimate',
 ]);
+
+// Absent `projectIds` (legacy data that hasn't been sanitized yet) means
+// "All Projects", same as an array containing the "" sentinel.
+export const isAllProjects = (projectIds: string[] | undefined): boolean =>
+  !projectIds || projectIds.includes('');
+
+export const firstSpecificProjectId = (
+  projectIds: string[] | undefined,
+): string | undefined => projectIds?.find((id) => id !== '');
 
 /**
  * Normalizes a panel cfg for persistence and hydration:
@@ -18,6 +34,37 @@ const VALID_SORT_FIELDS: ReadonlySet<BoardSortField> = new Set([
  */
 export const sanitizePanelCfg = (panel: BoardPanelCfg): BoardPanelCfg => {
   const out: BoardPanelCfg = { ...panel };
+
+  // Migrate legacy `projectId` → `projectIds`.
+  // Preference given to legacy `projectId` if present (even if `projectIds`
+  // exists as [""] from overlaying DEFAULT_PANEL_CFG during migration).
+  // NOTE: This preference is deliberate to ensure we don't lose the user's
+  // choice if they had a specific project selected in an older version.
+  const legacyPanel = out as BoardPanelCfg & { projectId?: string };
+  if (legacyPanel.projectId !== undefined) {
+    if (
+      out.projectIds === undefined ||
+      (Array.isArray(out.projectIds) &&
+        out.projectIds.length === 1 &&
+        out.projectIds[0] === '')
+    ) {
+      out.projectIds = [legacyPanel.projectId || ''];
+    }
+    delete legacyPanel.projectId;
+  }
+
+  // Ensure `projectIds` is always an array (e.g. if loaded from older client
+  // that didn't run this migration yet).
+  if (!Array.isArray(out.projectIds)) {
+    out.projectIds = [''];
+  }
+
+  // Canonicalize any `projectIds` containing "" back to [""] (All Projects).
+  // This is lossy: if "" (All Projects) co-occurs with specific IDs, the specific IDs
+  // are dropped in favor of "All Projects".
+  if (isAllProjects(out.projectIds)) {
+    out.projectIds = [''];
+  }
 
   if (out.sortByDue === 'asc' || out.sortByDue === 'desc') {
     out.sortBy = 'dueDate';
@@ -71,6 +118,13 @@ const NO_OP_COMPARATOR = (): number => 0;
  *   - 'all': strip only the FIRST excluded tag when the task has ALL excluded
  *     tags (breaks the AND-exclude condition without over-removing).
  *
+ * TODAY_TAG is virtual: membership derives from dueDay/dueWithTime and it must
+ * never be written to `task.tagIds` (ARCHITECTURE-DECISIONS #2), so the result
+ * never contains it. Only the INCLUDE side ignores it — dropping it from the
+ * EXCLUDE side would let an AND-exclude fire here that `doesTaskMatchPanel` can
+ * never hit (it only ever sees real tags), stripping a real user tag to satisfy
+ * a filter that was already inert.
+ *
  * Duplicates are not de-duplicated here; callers that care should pass the
  * result through `unique()`.
  */
@@ -81,16 +135,18 @@ export const rewriteTagIdsForPanel = (
     'includedTagIds' | 'includedTagsMatch' | 'excludedTagIds' | 'excludedTagsMatch'
   >,
 ): string[] => {
-  let next: string[] = [...currentTagIds];
+  const includedTagIds = panelCfg.includedTagIds?.filter((id) => id !== TODAY_TAG.id);
+  // Also heals a legacy TODAY_TAG that an older build wrote into the task.
+  let next: string[] = currentTagIds.filter((id) => id !== TODAY_TAG.id);
 
-  if (panelCfg.includedTagIds?.length) {
+  if (includedTagIds?.length) {
     if (panelCfg.includedTagsMatch === 'any') {
-      const hasAny = panelCfg.includedTagIds.some((id) => next.includes(id));
+      const hasAny = includedTagIds.some((id) => next.includes(id));
       if (!hasAny) {
-        next = next.concat(panelCfg.includedTagIds[0]);
+        next = next.concat(includedTagIds[0]);
       }
     } else {
-      next = next.concat(panelCfg.includedTagIds);
+      next = next.concat(includedTagIds);
     }
   }
 
@@ -108,6 +164,98 @@ export const rewriteTagIdsForPanel = (
   }
 
   return next;
+};
+
+/**
+ * Pure membership predicate: does `task` belong in a panel/column with the
+ * given criteria? Companion to `rewriteTagIdsForPanel` (which rewrites a task's
+ * tags TO match) — the two encode the same tag rules and must stay in sync.
+ *
+ * `isInBacklog` is supplied by the caller because backlog membership derives
+ * from project state, not from the task itself. It is only consulted when
+ * `panelCfg.backlogState` requests backlog filtering.
+ */
+export const doesTaskMatchPanel = (
+  task: Readonly<TaskCopy>,
+  panelCfg: Pick<
+    BoardPanelCfg,
+    | 'includedTagIds'
+    | 'includedTagsMatch'
+    | 'excludedTagIds'
+    | 'excludedTagsMatch'
+    | 'isParentTasksOnly'
+    | 'taskDoneState'
+    | 'projectIds'
+    | 'scheduledState'
+    | 'backlogState'
+  >,
+  isInBacklog: (task: Readonly<TaskCopy>) => boolean,
+): boolean => {
+  const taskTagIds = task.tagIds ?? [];
+
+  if (panelCfg.includedTagIds?.length) {
+    const matches =
+      panelCfg.includedTagsMatch === 'any'
+        ? panelCfg.includedTagIds.some((tagId) => taskTagIds.includes(tagId))
+        : panelCfg.includedTagIds.every((tagId) => taskTagIds.includes(tagId));
+    if (!matches) return false;
+  }
+
+  if (panelCfg.excludedTagIds?.length) {
+    const hit =
+      panelCfg.excludedTagsMatch === 'all'
+        ? panelCfg.excludedTagIds.every((tagId) => taskTagIds.includes(tagId))
+        : panelCfg.excludedTagIds.some((tagId) => taskTagIds.includes(tagId));
+    if (hit) return false;
+  }
+
+  if (panelCfg.isParentTasksOnly && task.parentId) {
+    return false;
+  }
+
+  if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done && !task.isDone) {
+    return false;
+  }
+  if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone && task.isDone) {
+    return false;
+  }
+
+  if (
+    panelCfg.projectIds &&
+    panelCfg.projectIds.length > 0 &&
+    !isAllProjects(panelCfg.projectIds) &&
+    !panelCfg.projectIds.includes(task.projectId)
+  ) {
+    return false;
+  }
+
+  if (
+    panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled &&
+    !(task.dueWithTime || task.dueDay)
+  ) {
+    return false;
+  }
+  if (
+    panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled &&
+    (task.dueWithTime || task.dueDay)
+  ) {
+    return false;
+  }
+
+  if (
+    panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.OnlyBacklog &&
+    !isInBacklog(task)
+  ) {
+    return false;
+  }
+  if (
+    panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.NoBacklog &&
+    isInBacklog(task)
+  ) {
+    return false;
+  }
+
+  return true;
 };
 
 /**

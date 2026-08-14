@@ -1,16 +1,25 @@
-import { describe, expect, it } from 'vitest';
+import { Prisma } from '@prisma/client';
+import { describe, expect, it, vi } from 'vitest';
 import {
+  detectConflictForEntities,
+  getConflictEntityIds,
+  getEntityConflictKey,
   isSameDuplicateOperation,
+  isSameIncomingOperation,
   isSameDuplicateTimestamp,
+  prefetchLatestEntityOpsForBatch,
   pruneVectorClockForStorage,
   resolveConflictForExistingOp,
   stableJsonStringify,
 } from '../src/sync/conflict';
 import {
+  CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
   DuplicateOperationCandidate,
   MAX_VECTOR_CLOCK_SIZE,
   Operation,
 } from '../src/sync/sync.types';
+
+const TASK_TIME_DELTA_ACTION_TYPE = '[TimeTracking] Sync time spent';
 
 const op = (overrides: Partial<Operation> = {}): Operation => ({
   id: 'op-1',
@@ -36,6 +45,7 @@ const duplicateCandidate = (
   opType: 'CRT',
   entityType: 'TASK',
   entityId: 'task-1',
+  entityIds: [],
   payload: { title: 'A' },
   vectorClock: { 'client-a': 1 },
   schemaVersion: 1,
@@ -43,10 +53,68 @@ const duplicateCandidate = (
   receivedAt: 1_000,
   isPayloadEncrypted: false,
   syncImportReason: null,
+  repairBaseServerSeq: null,
   ...overrides,
 });
 
 describe('conflict helpers', () => {
+  it('matches causal REPAIR retries with the same base cursor', () => {
+    const repair = op({
+      opType: 'REPAIR',
+      entityType: 'ALL',
+      entityId: undefined,
+      repairBaseServerSeq: 10,
+    });
+
+    expect(
+      isSameIncomingOperation(
+        { ...repair, entityIds: [] },
+        { ...repair, entityIds: undefined },
+        0,
+        0,
+      ),
+    ).toBe(true);
+  });
+
+  it('builds a deduplicated incoming conflict set that includes a divergent scalar', () => {
+    expect(
+      getConflictEntityIds(op({ entityId: 'task-scalar', entityIds: ['task-array'] })),
+    ).toEqual(['task-scalar', 'task-array']);
+    expect(
+      getConflictEntityIds(op({ entityId: 'task-1', entityIds: ['task-1'] })),
+    ).toEqual(['task-1']);
+  });
+
+  it.each([false, true])(
+    'aliases legacy misc config writes to tasks when encrypted=%s',
+    (isPayloadEncrypted) => {
+      expect(
+        getConflictEntityIds(
+          op({
+            entityType: 'GLOBAL_CONFIG',
+            entityId: 'misc',
+            schemaVersion: 1,
+            isPayloadEncrypted,
+          }),
+        ),
+      ).toEqual(['misc', 'tasks']);
+    },
+  );
+
+  it.each([2, 3, 4])(
+    'does NOT alias a post-split (v%i) misc write to tasks',
+    (schemaVersion) => {
+      // The misc→tasks split was the v1→v2 migration; v2+ misc writes touch only
+      // misc. The legacy boundary must stay fixed at v2 so schema bumps do not
+      // fabricate conflicts between disjoint settings (regression: v3→v4 bump).
+      expect(
+        getConflictEntityIds(
+          op({ entityType: 'GLOBAL_CONFIG', entityId: 'misc', schemaVersion }),
+        ),
+      ).toEqual(['misc']);
+    },
+  );
+
   it('accepts matching duplicate operations regardless of JSON key order', () => {
     const incoming = op({
       payload: { title: 'A', nested: { b: 2, a: 1 } },
@@ -64,6 +132,63 @@ describe('conflict helpers', () => {
     expect(isSameDuplicateOperation(duplicateCandidate(), 1, incoming, 60_000)).toBe(
       false,
     );
+  });
+
+  it('rejects an otherwise-identical duplicate operation from a different user', () => {
+    expect(
+      isSameDuplicateOperation(duplicateCandidate({ userId: 2 }), 1, op(), 60_000),
+    ).toBe(false);
+  });
+
+  it('accepts batch retries with identical entityIds', () => {
+    const incoming = op({ entityIds: ['task-1', 'task-2'] });
+    const existing = duplicateCandidate({ entityIds: ['task-1', 'task-2'] });
+
+    expect(isSameDuplicateOperation(existing, 1, incoming, 60_000)).toBe(true);
+  });
+
+  it('rejects duplicate ids when entityIds differ', () => {
+    const incoming = op({ entityIds: ['task-1', 'task-3'] });
+    const existing = duplicateCandidate({ entityIds: ['task-1', 'task-2'] });
+
+    expect(isSameDuplicateOperation(existing, 1, incoming, 60_000)).toBe(false);
+  });
+
+  it('rejects duplicate ids when only one side has entityIds', () => {
+    const incomingWithBatch = op({ entityIds: ['task-1', 'task-2'] });
+    expect(
+      isSameDuplicateOperation(duplicateCandidate(), 1, incomingWithBatch, 60_000),
+    ).toBe(false);
+
+    const existingWithBatch = duplicateCandidate({ entityIds: ['task-1', 'task-2'] });
+    expect(isSameDuplicateOperation(existingWithBatch, 1, op(), 60_000)).toBe(false);
+  });
+
+  it('accepts single-entity retries whose entityIds collapse to the scalar entityId', () => {
+    // getStoredEntityIds persists [] when entityIds is exactly [entityId], so a
+    // retry that re-sends that redundant array must still match the stored row.
+    const incoming = op({ entityIds: ['task-1'] });
+
+    expect(isSameDuplicateOperation(duplicateCandidate(), 1, incoming, 60_000)).toBe(
+      true,
+    );
+  });
+
+  it('rejects encrypted retries when entityIds differ', () => {
+    // With both sides encrypted the payload comparison is skipped, so entityIds
+    // must independently block a batch-op id collision.
+    const incoming = op({
+      payload: 'BASE64-CIPHERTEXT-A',
+      isPayloadEncrypted: true,
+      entityIds: ['task-1', 'task-3'],
+    });
+    const existing = duplicateCandidate({
+      payload: 'BASE64-CIPHERTEXT-B',
+      isPayloadEncrypted: true,
+      entityIds: ['task-1', 'task-2'],
+    });
+
+    expect(isSameDuplicateOperation(existing, 1, incoming, 60_000)).toBe(false);
   });
 
   it('accepts encrypted retries whose ciphertext differs from the stored payload', () => {
@@ -143,6 +268,104 @@ describe('conflict helpers', () => {
     });
   });
 
+  it('accepts concurrent additive task-time deltas for the same task', () => {
+    const result = resolveConflictForExistingOp(
+      op({
+        actionType: TASK_TIME_DELTA_ACTION_TYPE,
+        vectorClock: { 'client-a': 1 },
+      }),
+      'task-1',
+      {
+        actionType: TASK_TIME_DELTA_ACTION_TYPE,
+        clientId: 'client-b',
+        vectorClock: { 'client-b': 1 },
+      },
+    );
+
+    expect(result).toEqual({ hasConflict: false });
+  });
+
+  it.each([
+    ['incoming delta', TASK_TIME_DELTA_ACTION_TYPE, 'UPDATE_TASK'],
+    ['stored delta', 'UPDATE_TASK', TASK_TIME_DELTA_ACTION_TYPE],
+  ])(
+    'keeps a one-sided task-time delta conflicting (%s)',
+    (_label, incomingActionType, storedActionType) => {
+      const result = resolveConflictForExistingOp(
+        op({
+          actionType: incomingActionType,
+          vectorClock: { 'client-a': 1 },
+        }),
+        'task-1',
+        {
+          actionType: storedActionType,
+          clientId: 'client-b',
+          vectorClock: { 'client-b': 1 },
+        },
+      );
+
+      expect(result).toMatchObject({
+        hasConflict: true,
+        conflictType: 'concurrent',
+        existingClock: { 'client-b': 1 },
+      });
+    },
+  );
+
+  it('still rejects a causally stale additive task-time delta', () => {
+    const result = resolveConflictForExistingOp(
+      op({
+        actionType: TASK_TIME_DELTA_ACTION_TYPE,
+        vectorClock: { 'client-a': 1 },
+      }),
+      'task-1',
+      {
+        actionType: TASK_TIME_DELTA_ACTION_TYPE,
+        clientId: 'client-a',
+        vectorClock: { 'client-a': 2 },
+      },
+    );
+
+    expect(result.hasConflict).toBe(true);
+    expect(result.conflictType).toBe('superseded');
+  });
+
+  it('does not alias a post-split misc row during batch prefetch', async () => {
+    const storedSchemaVersion = 2;
+    const postSplitMiscRow = {
+      actionType: '[Global Config] Update',
+      clientId: 'client-b',
+      vectorClock: { 'client-b': 1 },
+      serverSeq: 1,
+    };
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      operation: {
+        findFirst: vi
+          .fn()
+          .mockImplementation(
+            async (args: { where: { schemaVersion?: { lt?: number } } }) => {
+              const exclusiveUpperBound = args.where.schemaVersion?.lt;
+              return exclusiveUpperBound !== undefined &&
+                storedSchemaVersion >= exclusiveUpperBound
+                ? null
+                : postSplitMiscRow;
+            },
+          ),
+      },
+    };
+
+    const latestByEntity = await prefetchLatestEntityOpsForBatch(
+      1,
+      [{ entityType: 'GLOBAL_CONFIG', entityId: 'tasks' }],
+      tx as unknown as Prisma.TransactionClient,
+    );
+
+    expect(latestByEntity.has(getEntityConflictKey('GLOBAL_CONFIG', 'tasks'))).toBe(
+      false,
+    );
+  });
+
   it('classifies less-than vector clocks as superseded', () => {
     const result = resolveConflictForExistingOp(
       op({ vectorClock: { 'client-a': 1 } }),
@@ -156,6 +379,87 @@ describe('conflict helpers', () => {
       existingClock: { 'client-a': 2 },
     });
   });
+
+  it.each([
+    [
+      'clean exact-size batch',
+      CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
+      false,
+      [CONFLICT_DETECTION_ENTITY_BATCH_SIZE],
+    ],
+    [
+      'conflicting exact-size batch',
+      CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
+      true,
+      [CONFLICT_DETECTION_ENTITY_BATCH_SIZE],
+    ],
+    [
+      'conflicting overflow batch',
+      CONFLICT_DETECTION_ENTITY_BATCH_SIZE + 1,
+      true,
+      [CONFLICT_DETECTION_ENTITY_BATCH_SIZE, 1],
+    ],
+  ])(
+    'handles the boundary row and chunks correctly for a %s (%i entities)',
+    async (_label, entityCount, boundaryHasConflict, expectedBatchSizes) => {
+      const boundaryIndex = entityCount - 1;
+      const entityIds = Array.from(
+        { length: entityCount },
+        (_, index) => `task-${index}`,
+      );
+      const boundaryEntityId = entityIds[boundaryIndex];
+      const queriedBatchSizes: number[] = [];
+      const tx = {
+        $queryRaw: vi
+          .fn()
+          .mockImplementation(async (_strings: unknown, ...params: unknown[]) => {
+            // Located by shape, not by position: #9503 reordered the params and a
+            // positional index broke silently. `values.length > 0` is load-bearing —
+            // the shared array-branch CTE is ALSO a Prisma.Sql, with an EMPTY values
+            // array, so a bare Array.isArray check would match it if fragment order
+            // ever changed and would then report "no conflict" for every entity.
+            const idArrayParam = params.find(
+              (param): param is Prisma.Sql =>
+                !!param &&
+                typeof param === 'object' &&
+                Array.isArray((param as Prisma.Sql).values) &&
+                (param as Prisma.Sql).values.length > 0,
+            );
+            if (!idArrayParam) throw new Error('no entity-id array param in query');
+            const queriedEntityIds = idArrayParam.values;
+            queriedBatchSizes.push(queriedEntityIds.length);
+            if (!queriedEntityIds.includes(boundaryEntityId)) return [];
+
+            return [
+              {
+                entityId: boundaryEntityId,
+                clientId: boundaryHasConflict ? 'client-b' : 'client-a',
+                actionType: 'UPDATE_TASK',
+                vectorClock: boundaryHasConflict ? { 'client-b': 1 } : { 'client-a': 0 },
+              },
+            ];
+          }),
+      };
+
+      const result = await detectConflictForEntities(
+        1,
+        op({ vectorClock: { 'client-a': 1 } }),
+        entityIds,
+        tx as unknown as Prisma.TransactionClient,
+      );
+
+      expect(result).toMatchObject(
+        boundaryHasConflict
+          ? {
+              hasConflict: true,
+              conflictType: 'concurrent',
+              existingClock: { 'client-b': 1 },
+            }
+          : { hasConflict: false },
+      );
+      expect(queriedBatchSizes).toEqual(expectedBatchSizes);
+    },
+  );
 
   it('stable-stringifies object keys recursively', () => {
     expect(stableJsonStringify({ z: 1, a: { b: 2, a: 1 } })).toBe(
@@ -177,5 +481,25 @@ describe('conflict helpers', () => {
     expect(incoming.vectorClock).not.toBe(originalClock);
     expect(Object.keys(incoming.vectorClock)).toHaveLength(MAX_VECTOR_CLOCK_SIZE);
     expect(incoming.vectorClock['client-25']).toBe(25);
+  });
+
+  it('preserves the active full-state author while pruning', () => {
+    const fullStateAuthor = 'import-client';
+    const incoming = op({
+      clientId: 'upload-client',
+      vectorClock: {
+        [fullStateAuthor]: 1,
+        'upload-client': 2,
+        ...Object.fromEntries(
+          Array.from({ length: 25 }, (_, index) => [`old-client-${index}`, 100 + index]),
+        ),
+      },
+    });
+
+    pruneVectorClockForStorage(incoming, [fullStateAuthor]);
+
+    expect(Object.keys(incoming.vectorClock)).toHaveLength(MAX_VECTOR_CLOCK_SIZE);
+    expect(incoming.vectorClock[fullStateAuthor]).toBe(1);
+    expect(incoming.vectorClock['upload-client']).toBe(2);
   });
 });

@@ -64,3 +64,22 @@
     font-size: var(--planner-font-size);
   }
 }
+
+// Clock start time at the far right, mirroring a scheduled task's time badge.
+.start-time {
+  flex-shrink: 0;
+  align-self: center;
+  padding-right: var(--s);
+  text-align: right;
+  line-height: 1;
+  white-space: nowrap;
+  font-size: var(--planner-font-size-mobile);
+
+  @include mq(xs) {
+    font-size: var(--planner-font-size);
+  }
+
+  ::ng-deep span {
+    font-size: 10px;
+  }
+}

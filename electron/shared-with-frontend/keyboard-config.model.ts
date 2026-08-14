@@ -1,0 +1,76 @@
+export type KeyboardConfig = Readonly<{
+  globalShowHide?: string | null;
+  globalAddNote?: string | null;
+  globalAddTask?: string | null;
+  globalToggleTaskWidget?: string | null;
+  toggleBacklog?: string | null;
+  goToFocusMode?: string | null;
+  goToWorkView?: string | null;
+  goToTimeline?: string | null;
+  goToScheduledView?: string | null;
+  goToSettings?: string | null;
+  addNewTask?: string | null;
+  addNewProject?: string | null;
+  globalToggleTaskStart?: string | null;
+  showHelp?: string | null;
+  showSearchBar?: string | null;
+  addNewNote?: string | null;
+  focusSideNav?: string | null;
+  toggleSideNavMode?: string | null;
+  openProjectNotes?: string | null;
+  toggleTaskViewCustomizerPanel?: string | null;
+  toggleIssuePanel?: string | null;
+  zoomIn?: string | null;
+  zoomOut?: string | null;
+  zoomDefault?: string | null;
+  triggerSync?: string | null;
+
+  taskEditTitle?: string | null;
+  taskToggleDetailPanelOpen?: string | null;
+  taskOpenNotesPanel?: string | null;
+  taskOpenNotesFullscreen?: string | null;
+  taskOpenEstimationDialog?: string | null;
+  taskToggleDone?: string | null;
+  taskAddSubTask?: string | null;
+  taskAddAttachment?: string | null;
+  taskMoveToProject?: string | null;
+  taskOpenContextMenu?: string | null;
+  taskDelete?: string | null;
+  taskSchedule?: string | null;
+  taskScheduleToday?: string | null;
+  taskScheduleTomorrow?: string | null;
+  taskScheduleNextWeek?: string | null;
+  taskScheduleNextMonth?: string | null;
+  taskScheduleDeadline?: string | null;
+  taskUnschedule?: string | null;
+  selectPreviousTask?: string | null;
+  selectNextTask?: string | null;
+  moveTaskUp?: string | null;
+  moveTaskDown?: string | null;
+  moveTaskToTop?: string | null;
+  moveTaskToBottom?: string | null;
+  moveToBacklog?: string | null;
+  expandSubTasks?: string | null;
+  collapseSubTasks?: string | null;
+  togglePlay?: string | null;
+  taskEditTags?: string | null;
+
+  // Dynamic plugin shortcuts - added at runtime
+  [key: `plugin_${string}`]: string | null;
+}>;
+
+/** Shared frozen empty keyboard config so the "no shortcuts" path returns a
+ * referentially-stable value instead of allocating a fresh {} every CD pass. */
+export const EMPTY_KEYBOARD_CONFIG: KeyboardConfig = Object.freeze({}) as KeyboardConfig;
+
+export const keyboardConfigOrEmpty = (
+  keyboard: KeyboardConfig | undefined,
+): KeyboardConfig => keyboard ?? EMPTY_KEYBOARD_CONFIG;
+
+export const GLOBAL_KEY_CFG_KEYS: (keyof KeyboardConfig)[] = [
+  'globalShowHide',
+  'globalToggleTaskStart',
+  'globalAddNote',
+  'globalAddTask',
+  'globalToggleTaskWidget',
+];

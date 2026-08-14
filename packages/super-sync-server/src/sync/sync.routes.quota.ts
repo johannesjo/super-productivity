@@ -3,7 +3,7 @@ import { prisma } from '../db';
 import { Logger } from '../logger';
 import { getSyncService } from './sync.service';
 import { computeOpStorageBytes } from './sync.const';
-import { SYNC_ERROR_CODES } from './sync.types';
+import { Operation, SYNC_ERROR_CODES } from './sync.types';
 import { errorMessage, MAX_OPS_PER_BATCH } from './sync.routes.payload';
 
 /**
@@ -29,6 +29,43 @@ export const computeOpsStorageBytes = (
     if (sized.fallback) fallback += 1;
   }
   return { bytes, fallback };
+};
+
+export const computeOpsStorageBytesExcludingUnstorableIds = async (
+  ops: Operation[],
+  getCachedPayloadBytes?: (op: Operation) => number | undefined,
+): Promise<{
+  bytes: number;
+  fallback: number;
+  requestStartOccupiedIds: ReadonlySet<string>;
+}> => {
+  if (ops.length === 0) {
+    return { bytes: 0, fallback: 0, requestStartOccupiedIds: new Set() };
+  }
+
+  const existingOps = await prisma.operation.findMany({
+    where: { id: { in: Array.from(new Set(ops.map((op) => op.id))) } },
+    select: { id: true },
+  });
+  const requestStartOccupiedIds = new Set(existingOps.map((existingOp) => existingOp.id));
+
+  let bytes = 0;
+  let fallback = 0;
+  const seenIncomingIds = new Set<string>();
+  for (const op of ops) {
+    // uploadOps stores at most the first new operation for an ID. Any occupied
+    // ID (exact retry or collision) and every repeated incoming ID is terminally
+    // rejected, so charging it here can only poison the pre-write quota gate.
+    if (requestStartOccupiedIds.has(op.id) || seenIncomingIds.has(op.id)) {
+      continue;
+    }
+    seenIncomingIds.add(op.id);
+
+    const sized = computeOpStorageBytes(op, getCachedPayloadBytes?.(op));
+    bytes += sized.bytes;
+    if (sized.fallback) fallback += 1;
+  }
+  return { bytes, fallback, requestStartOccupiedIds };
 };
 
 export const computeJsonStorageBytes = (value: unknown, fallback: unknown): number => {

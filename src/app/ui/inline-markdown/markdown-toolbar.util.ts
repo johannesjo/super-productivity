@@ -3,6 +3,8 @@
  * Each function takes text + selection range and returns transformed text + new selection.
  */
 
+import { DatePrefixMatch, formatTodayPrefix, parseDatePrefix } from './date-prefix.util';
+
 export interface TextTransformResult {
   text: string;
   selectionStart: number;
@@ -210,6 +212,15 @@ const toggleLinePrefix = (
 
   // Adjust selection
   const lengthDiff = newContent.length - (lineEnd - lineStart);
+  if (selectionStart === selectionEnd) {
+    const newPos = Math.max(0, selectionStart + lengthDiff);
+    return {
+      text: newText,
+      selectionStart: newPos,
+      selectionEnd: newPos,
+    };
+  }
+
   return {
     text: newText,
     selectionStart: lineStart,
@@ -344,6 +355,15 @@ export const applyNumberedList = (
   const newText = text.substring(0, lineStart) + newContent + text.substring(lineEnd);
 
   const lengthDiff = newContent.length - (lineEnd - lineStart);
+
+  if (selectionStart === selectionEnd) {
+    const newPos = Math.max(0, selectionStart + lengthDiff);
+    return {
+      text: newText,
+      selectionStart: newPos,
+      selectionEnd: newPos,
+    };
+  }
   return {
     text: newText,
     selectionStart: lineStart,
@@ -391,6 +411,14 @@ export const applyTaskList = (
   const newText = text.substring(0, lineStart) + newContent + text.substring(lineEnd);
 
   const lengthDiff = newContent.length - (lineEnd - lineStart);
+  if (selectionStart === selectionEnd) {
+    const newPos = Math.max(0, selectionStart + lengthDiff);
+    return {
+      text: newText,
+      selectionStart: newPos,
+      selectionEnd: newPos,
+    };
+  }
   return {
     text: newText,
     selectionStart: lineStart,
@@ -460,10 +488,9 @@ export const insertLink = (
   const linkMarkdown = `[${selectedText}](${url})`;
   const newText =
     text.substring(0, selectionStart) + linkMarkdown + text.substring(selectionEnd);
-  // Place cursor at URL position: [ + text + ]( = 1 + text.length + 2 = text.length + 3
-  // But we want cursor AFTER the opening paren, which is at position: 1 + text.length + 2 = text.length + 3
-  // Test expects: for "hello" (5 chars), URL starts at 9 = 0 + 5 + 4
-  const urlStart = selectionStart + selectedText.length + 4; // After "[text]("
+  // Select the url so it is ready to be replaced. The url sits after "[text](",
+  // which is 1 ("[") + text.length + 2 ("](") = text.length + 3 characters.
+  const urlStart = selectionStart + selectedText.length + 3; // After "[text]("
   return {
     text: newText,
     selectionStart: urlStart,
@@ -495,9 +522,9 @@ export const insertImage = (
   const imageMarkdown = `![${selectedText}](${url})`;
   const newText =
     text.substring(0, selectionStart) + imageMarkdown + text.substring(selectionEnd);
-  // Place cursor at URL position: ![ + text + ]( = 2 + text.length + 2 = text.length + 4
-  // Test expects: for "hello" (5 chars), URL starts at 10 = 0 + 5 + 5
-  const urlStart = selectionStart + selectedText.length + 5; // After "![text]("
+  // Select the url so it is ready to be replaced. The url sits after "![text](",
+  // which is 2 ("![") + text.length + 2 ("](") = text.length + 4 characters.
+  const urlStart = selectionStart + selectedText.length + 4; // After "![text]("
   return {
     text: newText,
     selectionStart: urlStart,
@@ -559,11 +586,17 @@ const degradeEmptyPrefix = (
 /**
  * Handle Enter key on a list line.
  * Returns null if cursor is not on a list line (caller should not preventDefault).
+ *
+ * `today` is the logical "today" (from DateService.getLogicalTodayDate at the
+ * call site) used to continue a dated bullet — `- 18.06.: …` → `- <today>: …`
+ * (#8602). It is threaded in rather than read here so this stays a pure,
+ * deterministic transform.
  */
 export const handleEnterKey = (
   text: string,
   selectionStart: number,
   selectionEnd: number,
+  today: Date,
 ): TextTransformResult | null => {
   if (selectionStart !== selectionEnd) {
     return null;
@@ -581,10 +614,32 @@ export const handleEnterKey = (
     return null;
   }
   const contentAfterPrefix = currentLine.substring(prefixLen);
-  if (contentAfterPrefix.trim().length === 0) {
+
+  // #8602: dated-bullet continuation — plain bullets only (not checkbox/numbered
+  // in v1). Detect a leading "<date>: " and continue with today in the same
+  // layout. Skip the date fill when the cursor sits inside the date (before the
+  // full prefix): fall through to the normal bullet continuation rather than
+  // returning null, since a raw newline mid-date would be worse.
+  let datePrefix: DatePrefixMatch | null = null;
+  if (prefix === '- ') {
+    const parsed = parseDatePrefix(contentAfterPrefix);
+    if (parsed && cursorInLine >= prefixLen + parsed.length) {
+      datePrefix = parsed;
+    }
+  }
+
+  // Empty entry exits the list in one Enter. For a dated bullet, "empty" means
+  // nothing after the full "<date>: " prefix — the date itself is non-empty, so
+  // the bullet-only check would otherwise treat a bare dated entry as content.
+  const contentStart = prefixLen + (datePrefix?.length ?? 0);
+  if (currentLine.substring(contentStart).trim().length === 0) {
     return degradeEmptyPrefix(text, lineStart, lineEnd, whitespace, prefix);
   }
-  const continuation = buildContinuationPrefix(whitespace, prefix);
+
+  let continuation = buildContinuationPrefix(whitespace, prefix);
+  if (datePrefix) {
+    continuation += formatTodayPrefix(datePrefix.format, today);
+  }
   const before = text.substring(0, selectionStart);
   const after = text.substring(selectionStart);
   const newText = before + '\n' + continuation + after;
@@ -594,8 +649,10 @@ export const handleEnterKey = (
 
 /**
  * Handle Tab key to indent a list line by 2 spaces.
- * Only acts when cursor is at line start (position 0) or at prefix end with no content.
- * Returns null if conditions are not met (caller should not preventDefault).
+ * Acts whenever the (collapsed) cursor sits on a list line, regardless of the
+ * cursor column, so pressing Tab while typing an item indents it instead of
+ * moving focus out of the editor. Returns null for multi-char selections or
+ * non-list lines (caller should not preventDefault).
  */
 export const handleTabKey = (
   text: string,
@@ -607,16 +664,7 @@ export const handleTabKey = (
   }
   const { start: lineStart, end: lineEnd } = getLineRange(text, selectionStart);
   const currentLine = text.substring(lineStart, lineEnd);
-  const match = currentLine.match(LIST_PREFIX_REGEX);
-  if (!match) {
-    return null;
-  }
-  const [, whitespace, prefix, content] = match;
-  const prefixLen = whitespace.length + prefix.length;
-  const cursorInLine = selectionStart - lineStart;
-  const atLineStart = cursorInLine === 0;
-  const atEmptyPrefixEnd = cursorInLine === prefixLen && content.trim().length === 0;
-  if (!atLineStart && !atEmptyPrefixEnd) {
+  if (!currentLine.match(LIST_PREFIX_REGEX)) {
     return null;
   }
   const indent = '  ';
@@ -672,13 +720,16 @@ export const handleListKeydown = (
   key: string,
   shiftKey: boolean,
   ctrlKey: boolean,
-  metaKey: boolean = false,
+  metaKey: boolean,
+  // `today` is only used by the Enter path (dated-bullet continuation, #8602);
+  // the Tab / Shift-Tab branches ignore it.
+  today: Date,
 ): TextTransformResult | null => {
   if (ctrlKey || metaKey) {
     return null;
   }
   if (key === 'Enter' && !shiftKey) {
-    return handleEnterKey(text, selectionStart, selectionEnd);
+    return handleEnterKey(text, selectionStart, selectionEnd, today);
   }
   if (key === 'Tab' && !shiftKey) {
     return handleTabKey(text, selectionStart, selectionEnd);

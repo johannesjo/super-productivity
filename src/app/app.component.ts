@@ -21,6 +21,7 @@ import { TaskWidgetSettingsService } from './features/config/task-widget-setting
 import { LayoutService } from './core-ui/layout/layout.service';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
+import { IS_MAC } from './util/is-mac';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -30,6 +31,7 @@ import { LS } from './core/persistence/storage-keys.const';
 import { BannerId } from './core/banner/banner.model';
 import { T } from './t.const';
 import { GlobalThemeService } from './core/theme/global-theme.service';
+import { resolveBgImageToDataUrl } from './core/theme/resolve-bg-image-to-data-url.util';
 import { LanguageService } from './core/language/language.service';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
@@ -39,7 +41,10 @@ import { concatMap, first, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { recordSearchNavDebug } from './util/search-nav-debug';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
-import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
+import {
+  AddTaskBarComponent,
+  TaskAddEvent,
+} from './features/tasks/add-task-bar/add-task-bar.component';
 import { Dir } from '@angular/cdk/bidi';
 import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav.component';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
@@ -50,29 +55,31 @@ import { DOCUMENT } from '@angular/common';
 import { RightPanelComponent } from './features/right-panel/right-panel.component';
 import { selectIsOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { Store } from '@ngrx/store';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
+import { TaskAttachmentService } from './features/tasks/task-attachment/task-attachment.service';
 import { MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { NoteStartupBannerService } from './features/note/note-startup-banner.service';
+import { SyncSafetyBannerService } from './imex/sync/sync-safety-banner.service';
+import { SuperSyncEncryptionMigrationBannerService } from './imex/sync/super-sync-encryption-migration-banner.service';
 import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
-import {
-  WorkContextType,
-  type WorkContextThemeCfg,
-} from './features/work-context/work-context.model';
+import { WorkContextType } from './features/work-context/work-context.model';
 import { SectionService } from './features/section/section.service';
 import { DialogPromptComponent } from './ui/dialog-prompt/dialog-prompt.component';
 import { TODAY_TAG } from './features/tag/tag.const';
-import { normalizeBackgroundImageBlur } from './features/work-context/work-context.const';
-import type { WorkContextSettingsDialogData } from './features/work-context/dialog-work-context-settings/dialog-work-context-settings.component';
+import { openWorkContextSettingsDialog } from './features/work-context/dialog-work-context-settings/open-work-context-settings-dialog';
 import { isInputElement } from './util/dom-element';
+import { getDroppedUrl } from './core/drop-paste-input/drop-paste-input';
+import { readableUrl } from './util/readable-url';
 import { MobileBottomNavComponent } from './core-ui/mobile-bottom-nav/mobile-bottom-nav.component';
 import { StartupService } from './core/startup/startup.service';
 import { DataInitStateService } from './core/data-init/data-init-state.service';
+import { AppUriTaskActionsService } from './features/tasks/app-uri-actions/app-uri-task-actions.service';
 import { ExampleTasksService } from './core/example-tasks/example-tasks.service';
 import { KeyboardLayoutService } from './core/keyboard-layout/keyboard-layout.service';
 import { setKeyboardLayoutService } from './util/check-key-combo';
@@ -90,21 +97,6 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
-
-type WorkContextThemeSource =
-  | {
-      theme?: WorkContextThemeCfg | null;
-    }
-  | null
-  | undefined;
-
-export const getBackgroundOverlayOpacity = (context: WorkContextThemeSource): number => {
-  const baseOpacity = context?.theme?.backgroundOverlayOpacity ?? 20;
-  return baseOpacity * 0.01;
-};
-
-export const getBackgroundImageBlur = (context: WorkContextThemeSource): number =>
-  normalizeBackgroundImageBlur(context?.theme?.backgroundImageBlur);
 
 @Component({
   selector: 'app-root',
@@ -148,10 +140,16 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _matDialog = inject(MatDialog);
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
+  private _taskAttachmentService = inject(TaskAttachmentService);
+  private _translateService = inject(TranslateService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _destroyRef = inject(DestroyRef);
   private _noteStartupBannerService = inject(NoteStartupBannerService);
+  private _syncSafetyBannerService = inject(SyncSafetyBannerService);
+  private _superSyncEncryptionMigrationBannerService = inject(
+    SuperSyncEncryptionMigrationBannerService,
+  );
   private _ngZone = inject(NgZone);
   private _document = inject(DOCUMENT, { optional: true });
   private _startupService = inject(StartupService);
@@ -164,6 +162,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _keyboardLayoutService = inject(KeyboardLayoutService);
   private _dataInitStateService = inject(DataInitStateService);
   private _materialIconsLoaderService = inject(MaterialIconsLoaderService);
+  // Injected only to trigger its constructor eagerly at app start, so a
+  // cold-launch add-task/complete-task URL action is never missed.
+  private _appUriTaskActionsService = inject(AppUriTaskActionsService);
   readonly onboardingHintService = inject(OnboardingHintService);
 
   private _syncTriggerService = inject(SyncTriggerService);
@@ -173,6 +174,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   readonly _store = inject(Store);
   private _sectionService = inject(SectionService);
   private _browserTitleService = inject(BrowserTitleService);
+  private _hasShownLegacyFileBgSnack = false;
   readonly T = T;
   readonly TODAY_TAG_ID = TODAY_TAG.id;
   readonly isShowMobileButtonNav = this.layoutService.isShowMobileBottomNav;
@@ -217,10 +219,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     { initialValue: null },
   );
 
-  private readonly _activeWorkContext = toSignal(
-    this.workContextService.activeWorkContext$,
-    { initialValue: null },
-  );
   readonly resolvedBgImage = signal<string | null>(null);
 
   isShowOnboardingPresets = signal(
@@ -282,46 +280,42 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     effect(() => {
       const bgImage = this._globalThemeService.backgroundImg();
       const currentRequestId = ++bgResolveRequestId;
-      if (!bgImage) {
-        this.resolvedBgImage.set(null);
-        return;
-      }
-
-      if (!IS_ELECTRON || !bgImage.startsWith('file://')) {
-        this.resolvedBgImage.set(bgImage);
-        return;
-      }
-
-      const readLocalImageAsDataUrl = window.ea?.readLocalImageAsDataUrl;
-      if (!readLocalImageAsDataUrl) {
-        this.resolvedBgImage.set(null);
-        return;
-      }
-
-      readLocalImageAsDataUrl(bgImage)
-        .then((dataUrl) => {
-          if (currentRequestId === bgResolveRequestId) {
-            this.resolvedBgImage.set(dataUrl || null);
-          }
-        })
-        .catch(() => {
-          if (currentRequestId === bgResolveRequestId) {
-            this.resolvedBgImage.set(null);
-          }
+      if (
+        typeof bgImage === 'string' &&
+        bgImage.startsWith('file://') &&
+        !this._hasShownLegacyFileBgSnack
+      ) {
+        this._hasShownLegacyFileBgSnack = true;
+        this._snackService.open({
+          msg: T.F.PROJECT.FORM_THEME.S_BACKGROUND_IMAGE_RESELECT_REQUIRED,
+          type: 'WARNING',
+          config: { duration: 0 },
         });
+      }
+      void resolveBgImageToDataUrl(bgImage).then((resolved) => {
+        // Ignore stale resolutions when the source changed mid-read.
+        if (currentRequestId === bgResolveRequestId) {
+          this.resolvedBgImage.set(resolved);
+        }
+      });
     });
 
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$
       .pipe(take(1))
       .subscribe(() => {
         void this._noteStartupBannerService.showLastNoteIfNeeded();
+        this._syncSafetyBannerService.showReminderIfNeeded();
+        void this._superSyncEncryptionMigrationBannerService.showBannerIfNeeded();
       });
 
     // ! For keyboard shortcuts to work correctly with any layouts (QWERTZ/AZERTY/etc) - user's keyboard layout must be presaved
     // Connect the service to the utility functions
     setKeyboardLayoutService(this._keyboardLayoutService);
-    // Defer keyboard layout detection to idle time for better initial load performance
-    if (typeof requestIdleCallback === 'function') {
+    // Defer keyboard layout detection to idle time for better initial load performance,
+    // EXCEPT on macOS Electron where it is needed eagerly for the initial global shortcut registration.
+    if (IS_ELECTRON && IS_MAC) {
+      void this._keyboardLayoutService.saveUserLayout();
+    } else if (typeof requestIdleCallback === 'function') {
       requestIdleCallback(() => this._keyboardLayoutService.saveUserLayout());
     } else {
       setTimeout(() => this._keyboardLayoutService.saveUserLayout(), 0);
@@ -439,18 +433,20 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     return this._activeWorkContextId() ?? null;
   }
 
-  onTaskAdded({ taskId }: { taskId: string; isAddToBottom: boolean }): void {
+  onTaskAdded({ taskId }: TaskAddEvent): void {
     this.layoutService.setPendingFocusTaskId(taskId);
     this.layoutService.scrollToNewTask(taskId);
+    if (this.onboardingHintService.shouldAutoCloseFirstTaskComposer(taskId)) {
+      this.layoutService.hideAddTaskBar(taskId);
+    }
   }
 
-  readonly bgOverlayOpacity = computed((): number => {
-    return getBackgroundOverlayOpacity(this._activeWorkContext());
-  });
-
-  readonly bgImageBlur = computed((): number => {
-    return getBackgroundImageBlur(this._activeWorkContext());
-  });
+  // Opacity + blur follow the resolved background source (per-context image or
+  // the global wallpaper), resolved centrally by GlobalThemeService — on
+  // non-context pages the active context is the sticky "Today" default and must
+  // not style the wallpaper.
+  readonly bgOverlayOpacity = this._globalThemeService.bgOverlayOpacity;
+  readonly bgImageBlur = this._globalThemeService.bgImageBlur;
 
   readonly bgImageBlurFilter = computed((): string => {
     const blur = this.bgImageBlur();
@@ -468,16 +464,13 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     const entity = isForProject
       ? await firstValueFrom(this._projectService.getByIdOnce$(contextId))
       : await firstValueFrom(this._tagService.getTagById$(contextId).pipe(first()));
+    if (!entity) {
+      return;
+    }
 
-    const { DialogWorkContextSettingsComponent } =
-      await import('./features/work-context/dialog-work-context-settings/dialog-work-context-settings.component');
-    this._matDialog.open(DialogWorkContextSettingsComponent, {
-      restoreFocus: true,
-      backdropClass: 'cdk-overlay-transparent-backdrop',
-      data: {
-        isProject: isForProject,
-        entity,
-      } as WorkContextSettingsDialogData,
+    await openWorkContextSettingsDialog(this._matDialog, {
+      isProject: isForProject,
+      entity,
     });
   }
 
@@ -508,6 +501,12 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     }, ONBOARDING_ENTRANCE_COMPLETE_DELAY);
   }
 
+  // Returning user set up sync from onboarding: just reveal the app with their
+  // synced data — no preset applied, no new-user hint tour.
+  onOnboardingDismissed(): void {
+    this.isShowOnboardingPresets.set(false);
+  }
+
   ngAfterViewInit(): void {
     this._ngZone.runOutsideAngular(() => {
       const doc = this._document!;
@@ -519,9 +518,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         ev.preventDefault();
       };
 
-      // Ensure accidental file drops don’t replace the SPA with the dropped file
+      // Ensure accidental file drops don’t replace the SPA with the dropped file,
+      // and turn a web link dropped on empty app chrome into a "Check <url>" task.
       const onDrop = (ev: DragEvent): void => {
         ev.preventDefault();
+        this._createTaskFromDroppedLink(ev);
       };
 
       const onKeyDown = (ev: KeyboardEvent): void => {
@@ -544,6 +545,41 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+  }
+
+  // Drops onto tasks/notes/panels stopPropagation in their own handlers, so this
+  // document-level drop only sees links dropped on empty app chrome — mirroring
+  // the Android "share a link" flow by creating a "Check <url>" task.
+  private _createTaskFromDroppedLink(ev: DragEvent): void {
+    if (isInputElement(ev.target as HTMLElement)) {
+      return;
+    }
+    const url = getDroppedUrl(ev);
+    if (!url) {
+      return;
+    }
+    // Re-enter Angular: the drop listener runs outside the zone (see above).
+    this._ngZone.run(() => {
+      // Mirror the Android share flow: a readable title plus the raw URL as a
+      // clickable attachment (so the task stays legible and the link opens).
+      const taskId = this._taskService.add(
+        this._translateService.instant(T.APP.DROP_LINK.TASK_TITLE, {
+          url: readableUrl(url),
+        }),
+      );
+      this._taskAttachmentService.addAttachment(taskId, {
+        id: null,
+        type: 'LINK',
+        path: url,
+        title: url,
+        icon: 'link',
+      });
+      this._snackService.open({
+        type: 'SUCCESS',
+        ico: 'add_task',
+        msg: T.APP.DROP_LINK.SNACK,
+      });
+    });
   }
 
   /**

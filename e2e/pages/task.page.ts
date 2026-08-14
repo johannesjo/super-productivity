@@ -53,6 +53,14 @@ export class TaskPage extends BasePage {
    */
   async markTaskAsDone(task: Locator): Promise<void> {
     await task.waitFor({ state: 'visible' });
+    // The done-confirmation strategy differs for real <task> rows vs. wrapper
+    // components (<planner-task> etc.) that render the same done-toggle. Key it
+    // off the element actually being a <task>, not off `data-task-id` presence:
+    // <planner-task> also carries `data-task-id` in the Planner overdue list
+    // (#8851), but querying `document.querySelectorAll('task')` for it finds
+    // nothing, so the <task> strategy would hang for a wrapper.
+    const isTaskHost = (await task.evaluate((el) => el.tagName.toLowerCase())) === 'task';
+    const taskId = isTaskHost ? await task.getAttribute('data-task-id') : null;
     await task.hover();
 
     // Give hover effects time to settle
@@ -62,8 +70,29 @@ export class TaskPage extends BasePage {
     await doneBtn.waitFor({ state: 'visible', timeout: 5000 });
     await doneBtn.click();
 
-    // Wait for the done animation delay (200ms) and state change to settle
-    await this.page.waitForTimeout(300);
+    if (taskId) {
+      // <task> rows: the done animation can briefly render old and new rows
+      // with the same id, so wait until every matching row reflects done.
+      await this.page.waitForFunction(
+        (id) => {
+          const matchingTasks = Array.from(document.querySelectorAll('task')).filter(
+            (el) => el.getAttribute('data-task-id') === id,
+          );
+          return (
+            matchingTasks.length > 0 &&
+            matchingTasks.every((el) => el.classList.contains('isDone'))
+          );
+        },
+        taskId,
+        { timeout: 10000 },
+      );
+    } else {
+      // Wrappers like <planner-task> (Boards) can relocate the task to another
+      // panel on done (e.g. IN_PROGRESS → DONE), detaching this locator — so a
+      // done-state assertion here is unreliable. Let the toggle's 200ms
+      // animation and state change settle; callers assert the resulting panel.
+      await this.page.waitForTimeout(300);
+    }
     await waitForAngularStability(this.page);
   }
 
@@ -179,7 +208,7 @@ export class TaskPage extends BasePage {
   async waitForTaskCount(expectedCount: number, timeout: number = 10000): Promise<void> {
     await this.page.waitForFunction(
       (args) => {
-        const currentCount = document.querySelectorAll('task').length;
+        const currentCount = document.querySelectorAll('task, planner-task').length;
         return currentCount === args.expectedCount;
       },
       { expectedCount },

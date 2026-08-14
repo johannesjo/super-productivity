@@ -29,14 +29,19 @@ import {
 import { TODAY_TAG } from '../tag/tag.const';
 import { Tag } from '../tag/tag.model';
 import { DEFAULT_TAG_COLOR } from './work-context.const';
+import { getDefaultWorkContextTheme } from './work-context-default-theme.util';
 import { TagService } from '../tag/tag.service';
 import { ArchiveTask, Task, TaskWithSubTasks } from '../tasks/task.model';
-import { hasTasksToWorkOn, mapEstimateRemainingFromTasks } from './work-context.util';
+import {
+  hasTasksToWorkOn,
+  mapEstimateRemainingFromTasks,
+  sortDoneTasksByDoneDate,
+} from './work-context.util';
 import {
   flattenTasks,
   selectAllTasks,
   selectAllTasksWithSubTasks,
-  selectTasksWithSubTasksByIds,
+  selectTasksWithSubTasksByIdsFactory,
 } from '../tasks/store/task.selectors';
 import { ofType } from '@ngrx/effects';
 import { WorklogExportSettings } from '../worklog/worklog.model';
@@ -58,6 +63,7 @@ import { selectNotesById } from '../note/store/note.reducer';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import { fastArrayCompare } from '../../util/fast-array-compare';
+import { isSameActiveWorkContext } from './is-same-active-work-context.util';
 import { isShallowEqual } from '../../util/is-shallow-equal';
 import { distinctUntilChangedObject } from '../../util/distinct-until-changed-object';
 import { DateService } from 'src/app/core/date/date.service';
@@ -70,6 +76,48 @@ import { selectProjectById } from '../project/store/project.selectors';
 import { Project } from '../project/project.model';
 import { Log } from '../../core/log';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
+
+/**
+ * Resolve the theme to apply for a work context.
+ *
+ * `WorkContextCommon.theme` is declared required, but persisted data can lack
+ * it: validation at hydration is non-fatal, so a snapshot holding a theme-less
+ * tag loads anyway and every consumer then dereferences `undefined` (#9139 —
+ * this crashed both `resolveBackground` and `_setColorTheme` on every launch).
+ *
+ * Scope: this covers every consumer of `currentTheme$`, i.e. the *active*
+ * work context. It is NOT an app-wide guarantee — code that iterates over all
+ * projects/tags reads the raw entity and must still guard `theme?.` itself.
+ *
+ * The FALLBACK comes from `getDefaultWorkContextTheme`, shared with the on-disk
+ * heal, so the theme rendered for a theme-less context and the one a later
+ * repair persists cannot differ. The tag-color override below sits on top and
+ * is read-side only — it is re-applied after any repair, so it does not flip.
+ */
+export const resolveContextTheme = (awc: WorkContext): WorkContextThemeCfg => {
+  const isTag = awc.type === WorkContextType.TAG;
+  // COPY the fallback, never hand out the module constant itself: a consumer
+  // that mutated what this returns would write straight through into
+  // DEFAULT_TAG / TODAY_TAG for the whole app, and those are plain object
+  // literals with nothing freezing them. The on-disk heal already spreads for
+  // the same reason; keeping only one side aliased is the asymmetry that turns
+  // into a bug the first time someone writes to a theme they were handed.
+  // Cheap: `distinctUntilChanged(isShallowEqual)` on currentTheme$ compares
+  // key-by-key, so a fresh object per emission causes no extra emissions.
+  const theme = awc.theme ?? { ...getDefaultWorkContextTheme(awc.type, awc.id) };
+  // For tags: theme.primary is the explicit override. If it's still at
+  // the auto-default (or unset) and tag.color is set, fall back to
+  // tag.color so newly created tags drive Material theming with their
+  // randomized color while still letting users override explicitly.
+  if (isTag) {
+    const tagColor = (awc as unknown as Tag).color;
+    const primary = theme.primary;
+    if (tagColor && (!primary || primary === DEFAULT_TAG_COLOR)) {
+      return { ...theme, primary: tagColor };
+    }
+  }
+  return theme;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -147,6 +195,7 @@ export class WorkContextService {
 
   activeWorkContext$: Observable<WorkContext> = this._afterDataLoadedOnce$.pipe(
     switchMap(() => this._store$.select(selectActiveWorkContext)),
+    distinctUntilChanged(isSameActiveWorkContext),
     shareReplay(1),
   );
 
@@ -224,20 +273,7 @@ export class WorkContextService {
   );
 
   currentTheme$: Observable<WorkContextThemeCfg> = this.activeWorkContext$.pipe(
-    map((awc) => {
-      // For tags: theme.primary is the explicit override. If it's still at
-      // the auto-default (or unset) and tag.color is set, fall back to
-      // tag.color so newly created tags drive Material theming with their
-      // randomized color while still letting users override explicitly.
-      if (awc.type === WorkContextType.TAG) {
-        const tagColor = (awc as unknown as Tag).color;
-        const primary = awc.theme?.primary;
-        if (tagColor && (!primary || primary === DEFAULT_TAG_COLOR)) {
-          return { ...awc.theme, primary: tagColor };
-        }
-      }
-      return awc.theme;
-    }),
+    map(resolveContextTheme),
     distinctUntilChanged<WorkContextThemeCfg>(isShallowEqual),
   );
 
@@ -283,6 +319,10 @@ export class WorkContextService {
   mainListTasks$: Observable<TaskWithSubTasks[]> = this.mainListTaskIds$.pipe(
     // tap((taskIds: string[]) => Log.log('[WorkContext] Today task IDs:', taskIds)),
     switchMap((taskIds: string[]) => this._getTasksByIds$(taskIds)),
+    // SPAP-19: with per-task referential stability upstream, an unchanged list
+    // is length + per-element === equal, so this stops needless re-emissions
+    // (and the OnPush row re-renders they trigger) every time a task ticks.
+    distinctUntilChanged(fastArrayCompare),
     // TODO find out why this is triggered so often
     // tap((tasks: TaskWithSubTasks[]) =>
     //   Log.log('[WorkContext] Today tasks loaded:', tasks.length, 'tasks'),
@@ -293,7 +333,7 @@ export class WorkContextService {
 
   // Filter project tasks to show only those scheduled for today
   // TODAY_TAG is a virtual tag - membership is determined by task.dueDay, not task.tagIds
-  // See: docs/ai/today-tag-architecture.md
+  // See: ARCHITECTURE-DECISIONS.md Decision #2
   mainListTasksInProject$: Observable<TaskWithSubTasks[]> = this.mainListTasks$.pipe(
     map((tasks) => {
       const todayStr = this._dateService.todayStr();
@@ -320,6 +360,9 @@ export class WorkContextService {
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this.backlogTaskIds$.pipe(
     switchMap((ids) => this._getTasksByIds$(ids)),
+    // SPAP-19: see mainListTasks$ — suppress no-op re-emissions of an
+    // unchanged (element-wise identical) backlog array.
+    distinctUntilChanged(fastArrayCompare),
   );
 
   allTasksForCurrentContext$: Observable<TaskWithSubTasks[]> = combineLatest([
@@ -343,6 +386,13 @@ export class WorkContextService {
     switchMap((worklogStrDate) => this.getTimeWorkedForDay$(worklogStrDate)),
   );
 
+  breakTimeToday$: Observable<number> =
+    this._globalTrackingIntervalService.todayDateStr$.pipe(
+      switchMap((day) => this.getBreakTime$(day)),
+      map((breakTime) => breakTime ?? 0),
+      distinctUntilChanged(),
+    );
+
   workingTodayArchived$: Observable<number> =
     this._globalTrackingIntervalService.todayDateStr$.pipe(
       switchMap((worklogStrDate) =>
@@ -360,6 +410,11 @@ export class WorkContextService {
     map((id) => id === TODAY_TAG.id),
     shareReplay(1),
   );
+  // Signal mirror of `isTodayList$`. The `isTodayList` boolean above is a plain
+  // mutable field kept in sync via subscribe, so reading it inside a `computed()`
+  // never invalidates the computed (a non-signal is not a producer, #8843). Reactive
+  // consumers should read this signal instead; the boolean stays for synchronous reads.
+  readonly isTodayListSignal = toSignal(this.isTodayList$, { initialValue: false });
 
   isHasTasksToWorkOn$: Observable<boolean> = combineLatest([
     this.mainListTasks$,
@@ -392,12 +447,28 @@ export class WorkContextService {
   //   ]))
   // );
 
-  flatDoneTodayNr$: Observable<number> = this.mainListTasks$.pipe(
-    map((tasks) => flattenTasks(tasks)),
-    map((tasks) => {
-      const done = tasks.filter((task) => task.isDone);
-      return done.length;
-    }),
+  // Counts tasks completed today (feeds the done-sound pitch). On the Today list a
+  // completion records only `doneOn` and no `dueDay`, so unscheduled done tasks are
+  // not in `mainListTasks$`; count them via `doneOn` is-today across all tasks
+  // instead. Other contexts keep counting the context's own done main-list tasks.
+  flatDoneTodayNr$: Observable<number> = this.isTodayList$.pipe(
+    switchMap((isToday) =>
+      isToday
+        ? // `selectAllTasks` is already flat (parents + subtasks) — no flattenTasks needed
+          this._store$
+            .select(selectAllTasks)
+            .pipe(
+              map(
+                (tasks) =>
+                  tasks.filter(
+                    (t) => t.isDone && t.doneOn && this._dateService.isToday(t.doneOn),
+                  ).length,
+              ),
+            )
+        : this.mainListTasks$.pipe(
+            map((tasks) => flattenTasks(tasks).filter((t) => t.isDone).length),
+          ),
+    ),
     distinctUntilChanged(), // Only emit when count actually changes
   );
 
@@ -413,10 +484,16 @@ export class WorkContextService {
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this.isTodayList$.pipe(
+    // Perf note: the isToday branch hydrates EVERY task in the workspace, not
+    // just today's, so this is O(all tasks) whenever Today is the active
+    // context. Tracking done IDs per context (Today included) would avoid the
+    // workspace-wide scan.
     switchMap((isToday) =>
       isToday ? this._store$.select(selectAllTasksWithSubTasks) : this.mainListTasks$,
     ),
-    map((tasks) => tasks.filter((task) => task && task.isDone)),
+    // Show completed tasks newest-first (by completion time) so the task you
+    // just finished is at the top of the Done list.
+    map((tasks) => sortDoneTasksByDoneDate(tasks.filter((task) => task && task.isDone))),
   );
 
   constructor() {
@@ -708,7 +785,10 @@ export class WorkContextService {
       Log.log({ ids });
       throw new Error('Invalid param provided for getByIds$ :(');
     }
-    return this._store$.select(selectTasksWithSubTasksByIds, { ids });
+    // SPAP-19: mint a fresh per-id-set factory selector (called inside the
+    // switchMap at each call site) so each subscription owns its own memo and
+    // its per-task referential-stability cache.
+    return this._store$.select(selectTasksWithSubTasksByIdsFactory(ids));
   }
 
   private _filterFutureScheduledTasksForToday(

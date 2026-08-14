@@ -15,12 +15,70 @@ export interface PluginIframeConfig {
   indexHtml: string;
   baseCfg: PluginBaseCfg;
   pluginBridge: PluginBridgeService;
+  bridgeToken: string;
+  bridgeGeneration: number;
   boundMethods?: ReturnType<typeof PluginBridgeService.prototype.createBoundMethods>;
 }
 
-// Simple sandbox - allow what plugins need
+// `allow-same-origin` is required: without it the iframe runs on an opaque origin
+// that does NOT paint when the host page is served over file:// (packaged desktop),
+// blanking every plugin UI (#8467) — even though scripts run and the DOM builds.
+//
+// The trade-off is that a same-origin iframe can read `window.parent.ea` directly,
+// bypassing the filtered postMessage bridge. That gap is accepted for now because it
+// only affects explicitly-installed plugins and the same `window.ea` reach already
+// exists via the background `plugin.js` runner (new Function in the host renderer);
+// the most dangerous capability (nodeExecution) stays gated by main-process consent.
+// The durable fix that restores opaque-origin isolation AND rendering is serving the
+// renderer from a registered `app://` scheme instead of file:// (tracked separately).
 export const PLUGIN_IFRAME_SANDBOX =
   'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
+
+const ALLOWED_IFRAME_API_METHODS = new Set([
+  'getTasks',
+  'getArchivedTasks',
+  'getCurrentContextTasks',
+  'getSelectedTask',
+  'getFocusedTask',
+  'selectTask',
+  'reInitData',
+  'updateTask',
+  'addTask',
+  'deleteTask',
+  'batchUpdateForProject',
+  'reorderTasks',
+  'getAllProjects',
+  'addProject',
+  'updateProject',
+  'getAllTags',
+  'addTag',
+  'updateTag',
+  'showSnack',
+  'notify',
+  'request',
+  'translate',
+  'formatDate',
+  'getCurrentLanguage',
+  'openDialog',
+  'showIndexHtmlAsView',
+  'showIndexHtmlInSidePanel',
+  'showInWorkContext',
+  'closeWorkContextView',
+  'getActiveWorkContext',
+  'getAppState',
+  'persistDataSynced',
+  'loadPersistedData',
+  'registerHook',
+  'registerWorkContextHeaderButton',
+  'executeNodeScript',
+  'dispatchAction',
+  'setCounter',
+  'getCounter',
+  'incrementCounter',
+  'decrementCounter',
+  'deleteCounter',
+  'getAllCounters',
+]);
 
 const isTransparentCssValue = (value: string): boolean => {
   const normalized = value.trim().replace(/\s+/g, '').toLowerCase();
@@ -46,6 +104,8 @@ const getPluginSurfaceVar = (
   }
   return isTransparentCssValue(fallbackSurface) ? baseSurface : fallbackSurface;
 };
+
+const HAS_DIALOG_BUTTON_HANDLER = '__hasDialogButtonHandler';
 
 /**
  * Create CSS injection for plugins - KISS approach
@@ -187,6 +247,8 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
     <script>
       (function() {
         let callId = 0;
+        const bridgeToken = ${JSON.stringify(config.bridgeToken)};
+        const bridgeGeneration = ${JSON.stringify(config.bridgeGeneration)};
         const pendingCalls = new Map();
         const dialogButtonHandlers = new Map();
         const hookHandlers = new Map(); // Store hook handlers by hook type
@@ -218,22 +280,28 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
             const key = data.dialogCallId + ':' + data.buttonIndex;
             const handler = dialogButtonHandlers.get(key);
             if (handler) {
-              try {
-                const result = handler();
-                window.parent.postMessage({
-                  type: '${PluginIframeMessageType.DIALOG_BUTTON_RESPONSE}',
-                  dialogCallId: data.dialogCallId,
-                  buttonIndex: data.buttonIndex,
-                  result: result
-                }, '*');
-              } catch (error) {
-                window.parent.postMessage({
-                  type: '${PluginIframeMessageType.DIALOG_BUTTON_RESPONSE}',
-                  dialogCallId: data.dialogCallId,
-                  buttonIndex: data.buttonIndex,
-                  error: error.message
-                }, '*');
-              }
+              Promise.resolve()
+                .then(() => handler())
+                .then((result) => {
+                  window.parent.postMessage({
+                    type: '${PluginIframeMessageType.DIALOG_BUTTON_RESPONSE}',
+                    bridgeToken: bridgeToken,
+                    bridgeGeneration: bridgeGeneration,
+                    dialogCallId: data.dialogCallId,
+                    buttonIndex: data.buttonIndex,
+                    result: result
+                  }, '*');
+                })
+                .catch((error) => {
+                  window.parent.postMessage({
+                    type: '${PluginIframeMessageType.DIALOG_BUTTON_RESPONSE}',
+                    bridgeToken: bridgeToken,
+                    bridgeGeneration: bridgeGeneration,
+                    dialogCallId: data.dialogCallId,
+                    buttonIndex: data.buttonIndex,
+                    error: error instanceof Error ? error.message : 'Unknown dialog button error'
+                  }, '*');
+                });
             }
           } else if (data?.type === '${PluginIframeMessageType.WORK_CONTEXT_BTN_CLICK}') {
             const handler = workContextBtnHandlers.get(data.buttonHandlerId);
@@ -278,7 +346,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
                     dialogButtonHandlers.set(key, button.onClick);
                     // Remove onClick from serialized data
                     const { onClick, ...buttonWithoutHandler } = button;
-                    return buttonWithoutHandler;
+                    return { ...buttonWithoutHandler, ${HAS_DIALOG_BUTTON_HANDLER}: true };
                   }
                   return button;
                 })
@@ -304,6 +372,8 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
 
             window.parent.postMessage({
               type: '${PluginIframeMessageType.API_CALL}',
+              bridgeToken: bridgeToken,
+              bridgeGeneration: bridgeGeneration,
               method: method,
               args: processedArgs || [],
               callId: id
@@ -319,6 +389,12 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           });
         }
 
+        function unsupportedIframeRegistration(method) {
+          return () => Promise.reject(
+            new Error(method + ' is only supported in plugin.js, not iframe index.html')
+          );
+        }
+
         // Create the PluginAPI object with all methods
         window.PluginAPI = {
           cfg: ${JSON.stringify(config.baseCfg)},
@@ -331,6 +407,8 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           getTasks: () => callApi('getTasks'),
           getArchivedTasks: () => callApi('getArchivedTasks'),
           getCurrentContextTasks: () => callApi('getCurrentContextTasks'),
+          getSelectedTask: () => callApi('getSelectedTask'),
+          getFocusedTask: () => callApi('getFocusedTask'),
           selectTask: (taskId) => callApi('selectTask', [taskId]),
           reInitData: () => callApi('reInitData'),
           updateTask: (taskId, updates) => callApi('updateTask', [taskId, updates]),
@@ -354,6 +432,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           // UI methods
           showSnack: (cfg) => callApi('showSnack', [cfg]),
           notify: (cfg) => callApi('notify', [cfg]),
+          request: (url, options) => callApi('request', [url, options]),
           openDialog: (cfg) => callApi('openDialog', [cfg]),
           showIndexHtmlAsView: () => callApi('showIndexHtmlAsView'),
           showIndexHtmlInSidePanel: () => callApi('showIndexHtmlInSidePanel'),
@@ -369,11 +448,11 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
 
           // Registration methods
           registerHook: (hook, handler) => callApi('registerHook', [hook, handler]),
-          registerHeaderButton: (cfg) => callApi('registerHeaderButton', [cfg]),
-          registerMenuEntry: (cfg) => callApi('registerMenuEntry', [cfg]),
-          registerConfigHandler: (handler) => callApi('registerConfigHandler', [handler]),
-          registerShortcut: (cfg) => callApi('registerShortcut', [cfg]),
-          registerSidePanelButton: (cfg) => callApi('registerSidePanelButton', [cfg]),
+          registerHeaderButton: unsupportedIframeRegistration('registerHeaderButton'),
+          registerMenuEntry: unsupportedIframeRegistration('registerMenuEntry'),
+          registerConfigHandler: unsupportedIframeRegistration('registerConfigHandler'),
+          registerShortcut: unsupportedIframeRegistration('registerShortcut'),
+          registerSidePanelButton: unsupportedIframeRegistration('registerSidePanelButton'),
           registerWorkContextHeaderButton: (cfg) => {
             // onClick is not structured-cloneable across postMessage; keep it
             // locally, keyed by the button's label, and send the rest of the
@@ -400,6 +479,11 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           deleteCounter: (id) => callApi('deleteCounter', [id]),
           getAllCounters: () => callApi('getAllCounters'),
 
+          // i18n
+          translate: (key, params) => callApi('translate', [key, params]),
+          formatDate: (date, format) => callApi('formatDate', [date, format]),
+          getCurrentLanguage: () => callApi('getCurrentLanguage'),
+
           // Readiness signal for iframe plugins.
           //
           // NOTE — semantic difference from host-side onReady:
@@ -423,6 +507,11 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
               }
             });
           },
+
+          // Teardown signal — no-op in iframes: the host unmounts the iframe on
+          // unload, which takes its timers/listeners with it. Provided so plugin
+          // code can call onUnload unconditionally on both execution paths.
+          onUnload: (fn) => {},
 
           // Message handling
           onMessage: (handler) => {
@@ -455,6 +544,8 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
         // Notify parent that plugin is ready
         window.parent.postMessage({
           type: '${PluginIframeMessageType.READY}',
+          bridgeToken: bridgeToken,
+          bridgeGeneration: bridgeGeneration,
           pluginId: '${config.pluginId}'
         }, '*');
       })();
@@ -462,13 +553,16 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
   `;
 };
 
-// Store blob URLs for cleanup
-const activeBlobUrls = new Set<string>();
-
 /**
- * Create iframe URL with injected API using blob URLs instead of data URLs
+ * Build the full HTML document for a plugin UI iframe: the plugin's index.html
+ * with the host CSS and the postMessage API bridge injected.
+ *
+ * Returned as a string for `iframe.srcdoc`, NOT a `blob:` URL: srcdoc is parsed
+ * inline, so there is no blob URL lifecycle to track and revoke. The iframe is
+ * same-origin with the host (see PLUGIN_IFRAME_SANDBOX — `allow-same-origin` is
+ * required so it renders on packaged `file://` builds).
  */
-export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
+export const buildPluginIframeHtml = (config: PluginIframeConfig): string => {
   const apiScript = createPluginApiScript(config);
   const cssInjection = createPluginCssInjection();
   const fullCssInjection =
@@ -495,34 +589,7 @@ export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
     html = html + apiScript;
   }
 
-  // Create blob URL instead of data URL
-  const blob = new Blob([html], { type: 'text/html' });
-  const blobUrl = URL.createObjectURL(blob);
-
-  // Track the blob URL for cleanup
-  activeBlobUrls.add(blobUrl);
-
-  return blobUrl;
-};
-
-/**
- * Clean up a blob URL when iframe is no longer needed
- */
-export const cleanupPluginIframeUrl = (url: string): void => {
-  if (url.startsWith('blob:') && activeBlobUrls.has(url)) {
-    URL.revokeObjectURL(url);
-    activeBlobUrls.delete(url);
-  }
-};
-
-/**
- * Clean up all active blob URLs (useful for cleanup on destroy)
- */
-export const cleanupAllPluginIframeUrls = (): void => {
-  activeBlobUrls.forEach((url) => {
-    URL.revokeObjectURL(url);
-  });
-  activeBlobUrls.clear();
+  return html;
 };
 
 /**
@@ -535,6 +602,7 @@ export const handlePluginMessage = async (
   const { data } = event;
 
   if (!data || typeof data !== 'object') return;
+  if (!isValidBridgeMessage(data, config)) return;
 
   // Ensure we have bound methods
   if (!config.boundMethods) {
@@ -546,9 +614,13 @@ export const handlePluginMessage = async (
 
   // Handle API calls
   if (data.type === PluginIframeMessageType.API_CALL && data.callId) {
-    const { method, args, callId } = data;
+    const { method, args = [], callId } = data;
 
     try {
+      if (!ALLOWED_IFRAME_API_METHODS.has(method)) {
+        throw new Error(`Unknown API method: ${method}`);
+      }
+
       // For iframe plugins, we need to handle API calls differently
       // Some methods need special handling because the bridge methods have different signatures
 
@@ -622,9 +694,7 @@ export const handlePluginMessage = async (
             };
             result = await bridge.registerHook(config.pluginId, hook, handler);
           } else {
-            // Legacy string handler support
-            const handler = new Function('return ' + handlerPlaceholder)();
-            result = await bridge.registerHook(config.pluginId, hook, handler);
+            throw new Error('Iframe registerHook calls must use IFRAME_HANDLER');
           }
           event.source?.postMessage(
             {
@@ -670,15 +740,14 @@ export const handlePluginMessage = async (
         // Special handling for dialog with button onClick handlers
         const dialogCfg = args[0];
         if (dialogCfg.buttons) {
-          // Create a mapping of button indices to their handlers
-          const buttonHandlers = new Map();
           dialogCfg.buttons = dialogCfg.buttons.map(
             (button: Record<string, unknown>, index: number) => {
-              if (button.onClick) {
-                buttonHandlers.set(index, button.onClick);
+              if (button[HAS_DIALOG_BUTTON_HANDLER]) {
+                const buttonCfg = { ...button };
+                delete buttonCfg[HAS_DIALOG_BUTTON_HANDLER];
                 // Replace function with a proxy that sends message back to iframe
                 return {
-                  ...button,
+                  ...buttonCfg,
                   onClick: async () => {
                     // Send message to iframe to execute the button handler
                     (event.source as Window)?.postMessage(
@@ -690,16 +759,23 @@ export const handlePluginMessage = async (
                       { targetOrigin: '*' },
                     );
                     // Wait for response
-                    return new Promise((resolve) => {
+                    return new Promise((resolve, reject) => {
                       const handleResponse = (e: MessageEvent): void => {
                         if (
+                          e.source === event.source &&
+                          e.data?.bridgeToken === config.bridgeToken &&
+                          e.data?.bridgeGeneration === config.bridgeGeneration &&
                           e.data?.type ===
                             PluginIframeMessageType.DIALOG_BUTTON_RESPONSE &&
                           e.data?.dialogCallId === callId &&
                           e.data?.buttonIndex === index
                         ) {
                           window.removeEventListener('message', handleResponse);
-                          resolve(e.data.result);
+                          if (e.data.error) {
+                            reject(new Error(e.data.error));
+                          } else {
+                            resolve(e.data.result);
+                          }
                         }
                       };
                       window.addEventListener('message', handleResponse);
@@ -778,4 +854,28 @@ export const handlePluginMessage = async (
   if (data.type === PluginIframeMessageType.READY && data.pluginId === config.pluginId) {
     PluginLog.log(`Plugin ${config.pluginId} is ready`);
   }
+};
+
+const isValidBridgeMessage = (
+  data: Record<string, unknown>,
+  config: PluginIframeConfig,
+): boolean => {
+  const hostHandledTypes = new Set<unknown>([
+    PluginIframeMessageType.API_CALL,
+    PluginIframeMessageType.MESSAGE,
+    PluginIframeMessageType.READY,
+  ]);
+  if (!hostHandledTypes.has(data.type)) {
+    return true;
+  }
+  if (data.type === PluginIframeMessageType.MESSAGE) {
+    // Legacy iframe UIs post raw plugin-to-plugin messages. PluginIndexComponent
+    // source-checks the mounted iframe and verifies the current bridge generation
+    // before calling into this handler.
+    return true;
+  }
+  return (
+    data.bridgeToken === config.bridgeToken &&
+    data.bridgeGeneration === config.bridgeGeneration
+  );
 };

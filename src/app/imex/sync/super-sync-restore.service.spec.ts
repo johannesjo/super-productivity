@@ -2,15 +2,18 @@ import { TestBed } from '@angular/core/testing';
 import { SuperSyncRestoreService } from './super-sync-restore.service';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { RestorePoint } from '../../op-log/sync-providers/provider.interface';
 import { T } from '../../t.const';
+import { SyncLog } from '../../core/log';
 
 describe('SuperSyncRestoreService', () => {
   let service: SuperSyncRestoreService;
   let mockProviderManager: jasmine.SpyObj<SyncProviderManager>;
   let mockBackupService: jasmine.SpyObj<BackupService>;
+  let mockLocalDraftService: jasmine.SpyObj<LocalDraftService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockProvider: any;
 
@@ -29,17 +32,22 @@ describe('SuperSyncRestoreService', () => {
 
     mockBackupService = jasmine.createSpyObj('BackupService', ['importCompleteBackup']);
 
+    mockLocalDraftService = jasmine.createSpyObj('LocalDraftService', [
+      'deleteDraftsForActiveProfile',
+    ]);
+
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
 
-    // Spy on console methods for retry logging tests
-    spyOn(console, 'warn');
-    spyOn(console, 'error');
+    // Spy on logger methods for retry logging tests
+    spyOn(SyncLog, 'warn');
+    spyOn(SyncLog, 'err');
 
     TestBed.configureTestingModule({
       providers: [
         SuperSyncRestoreService,
         { provide: SyncProviderManager, useValue: mockProviderManager },
         { provide: BackupService, useValue: mockBackupService },
+        { provide: LocalDraftService, useValue: mockLocalDraftService },
         { provide: SnackService, useValue: mockSnackService },
       ],
     });
@@ -169,6 +177,24 @@ describe('SuperSyncRestoreService', () => {
       });
     });
 
+    it('should clear the active profiles crash-safe drafts after a restore', async () => {
+      // The restore replaced this profile's notes wholesale, so every draft's
+      // baseContent now refers to content that no longer exists.
+      await service.restoreToPoint(100);
+
+      expect(mockLocalDraftService.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not clear drafts when the restore fails', async () => {
+      mockBackupService.importCompleteBackup.and.returnValue(
+        Promise.reject(new Error('validation failed')),
+      );
+
+      await expectAsync(service.restoreToPoint(100)).toBeRejected();
+
+      expect(mockLocalDraftService.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
+    });
+
     it('should show error snack and rethrow on failure after retries', async () => {
       jasmine.clock().install();
 
@@ -215,7 +241,7 @@ describe('SuperSyncRestoreService', () => {
       await Promise.resolve();
       await Promise.resolve();
       expect(mockProvider.getStateAtSeq).toHaveBeenCalledTimes(1);
-      expect(console.warn).toHaveBeenCalledWith(
+      expect(SyncLog.warn).toHaveBeenCalledWith(
         jasmine.stringContaining('Restore failed due to network error, retrying (1/2)'),
         error,
       );
@@ -229,7 +255,7 @@ describe('SuperSyncRestoreService', () => {
       await Promise.resolve();
       await Promise.resolve();
       expect(mockProvider.getStateAtSeq).toHaveBeenCalledTimes(2);
-      expect(console.warn).toHaveBeenCalledWith(
+      expect(SyncLog.warn).toHaveBeenCalledWith(
         jasmine.stringContaining('Restore failed due to network error, retrying (2/2)'),
         error,
       );
@@ -264,6 +290,29 @@ describe('SuperSyncRestoreService', () => {
       // Should only attempt once (no retries for non-network errors)
       expect(mockProvider.getStateAtSeq).toHaveBeenCalledTimes(1);
       expect(mockSnackService.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.RESTORE_ERROR,
+      });
+    });
+
+    it('should show an encryption-specific message when the server blocks restore (#8107)', async () => {
+      // Server can't replay E2E-encrypted ops → 400 whose reason mentions
+      // encryption (embedded in the thrown message by the provider).
+      const error = new Error(
+        'HTTP 400 Bad Request — Server-side snapshot is unavailable because ' +
+          'operations are end-to-end encrypted.',
+      );
+      mockProvider.getStateAtSeq.and.returnValue(Promise.reject(error));
+
+      await expectAsync(service.restoreToPoint(100)).toBeRejectedWith(error);
+
+      // Not a network error → no retry.
+      expect(mockProvider.getStateAtSeq).toHaveBeenCalledTimes(1);
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.RESTORE_ENCRYPTED,
+      });
+      expect(mockSnackService.open).not.toHaveBeenCalledWith({
         type: 'ERROR',
         msg: T.F.SYNC.S.RESTORE_ERROR,
       });

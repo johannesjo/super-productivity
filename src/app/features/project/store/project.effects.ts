@@ -14,12 +14,14 @@ import { T } from '../../../t.const';
 import { Project } from '../project.model';
 import { INBOX_PROJECT } from '../project.const';
 import { Observable } from 'rxjs';
+import { LocalDraftService } from '../../../core/draft/local-draft.service';
 
 @Injectable()
 export class ProjectEffects {
   private _actions$ = inject(LOCAL_ACTIONS);
   private _snackService = inject(SnackService);
   private _globalConfigService = inject(GlobalConfigService);
+  private _localDraftService = inject(LocalDraftService);
 
   /**
    * Handles non-archive cleanup when a project is deleted.
@@ -107,7 +109,8 @@ export class ProjectEffects {
   snackUpdateBaseSettings$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateProject.type),
+        ofType(updateProject),
+        filter((a) => !a.isSkipSnack),
         tap(() => {
           this._snackService.open({
             type: 'SUCCESS',
@@ -129,6 +132,23 @@ export class ProjectEffects {
             msg: T.F.PROJECT.S.CREATED,
             translateParams: { title: (project as Project).title },
           });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  /**
+   * Deleting a project deletes its notes in the same reducer pass; clear any
+   * crash-leftover drafts for them so a deleted note's text does not linger
+   * in localStorage. Remote project deletions do not reach LOCAL_ACTIONS;
+   * their leftover drafts age out via the 14-day startup sweep instead.
+   */
+  clearNoteDraftsOnProjectDelete: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.deleteProject),
+        tap(({ noteIds }) => {
+          noteIds.forEach((id) => this._localDraftService.clearDraft('NOTE', id));
         }),
       ),
     { dispatch: false },

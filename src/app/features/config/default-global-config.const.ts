@@ -7,6 +7,7 @@ import {
 import { TaskReminderOptionId } from '../tasks/task.model';
 import { GlobalConfigState } from './global-config.model';
 import { INBOX_PROJECT } from '../project/project.const';
+import { DEFAULT_MAX_BACKUP_FILES } from '../../../../electron/shared-with-frontend/backup-file-cleanup.util';
 
 const minute = 60 * 1000;
 const defaultTaskNotesTemplate = `**How can I best achieve it now?**
@@ -53,6 +54,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isConfirmBeforeExitWithoutFinishDay: true,
     isMinimizeToTray: false,
     isLocalRestApiEnabled: false,
+    isCheckForUpdates: true,
     isTrayShowCurrentCountdown: true,
     startOfNextDay: 0,
     startOfNextDayTime: '00:00',
@@ -62,15 +64,19 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     // NOTE: isUseCustomWindowTitleBar is intentionally NOT defaulted here. A
     // persisted default would be pushed to Electron on every launch and override
     // a legacy `isUseObsidianStyleHeader` choice. Its effective default is resolved
-    // at read time (main-window.ts / global-theme.service.ts: `?? !IS_GNOME_DESKTOP`)
-    // and the settings checkbox is seeded display-only in misc-settings-form (#7891).
+    // at read time (main-window.ts / global-theme.service.ts: defaults on, forced
+    // off only on GNOME+Wayland) and the settings checkbox is seeded display-only
+    // in misc-settings-form (#7891).
     isShowProductivityTipLonger: false,
     customTheme: 'default',
     defaultStartPage: 0,
+    backgroundImageDark: null,
+    backgroundImageLight: null,
   },
   shortSyntax: {
     isEnableProject: true,
     isEnableDue: true,
+    isEnableDeadline: false,
     isEnableTag: true,
     urlBehavior: 'keep',
   },
@@ -79,6 +85,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,
+    isSuppressIdleDuringFocusMode: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
   },
@@ -104,6 +111,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   focusMode: {
     isSkipPreparation: false,
+    isShowPreparation: false,
     isPlayTick: false,
     focusModeSound: 'off',
     isPauseTrackingDuringBreak: true,
@@ -130,6 +138,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     globalToggleTaskStart: null,
     globalAddNote: null,
     globalAddTask: null,
+    globalToggleTaskWidget: null,
     addNewTask: 'Shift+A',
     addNewProject: 'Shift+P',
     addNewNote: 'Alt+N',
@@ -158,6 +167,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskOpenNotesFullscreen: null,
     taskOpenEstimationDialog: 'T',
     taskSchedule: 'S',
+    taskScheduleToday: 'Shift+T',
+    taskScheduleTomorrow: null,
+    taskScheduleNextWeek: null,
+    taskScheduleNextMonth: null,
+    taskScheduleDeadline: 'Shift+S',
     taskUnschedule: 'U',
     taskToggleDone: 'D',
     taskAddSubTask: 'A',
@@ -172,7 +186,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     moveTaskToTop: 'Ctrl+Alt+ArrowUp',
     moveTaskToBottom: 'Ctrl+Alt+ArrowDown',
     moveToBacklog: 'Shift+B',
-    moveToTodaysTasks: 'Shift+T',
     expandSubTasks: null,
     collapseSubTasks: null,
     togglePlay: 'Y',
@@ -180,6 +193,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   localBackup: {
     isEnabled: true,
+    maxBackupFiles: DEFAULT_MAX_BACKUP_FILES,
   },
   sound: {
     volume: 75,
@@ -222,6 +236,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     // TODO maybe enable later if it works well
     isCompressionEnabled: false,
     isEncryptionEnabled: false,
+    // SPAP-11: opt-in split-file ("Surgical") sync. Default OFF (single-file v2).
+    isUseSplitSyncFiles: false,
     encryptKey: null,
     syncProvider: null,
     syncInterval: minute,

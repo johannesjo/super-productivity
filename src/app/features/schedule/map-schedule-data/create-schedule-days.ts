@@ -97,10 +97,15 @@ export const createScheduleDays = (
       }
     }
 
+    // Which cfgs are due is a property of the calendar day, not of where the
+    // clock happens to sit. Anchoring this on startTime (which is `now` for
+    // i === 0) only agrees with dayDate while day 0 contains now -- an
+    // invariant month view breaks, since its day 0 is the first grid cell and
+    // usually lands in the previous month.
     const nonScheduledRepeatCfgsDueOnDay = selectTaskRepeatCfgsForExactDay.projector(
       unScheduledTaskRepeatCfgs,
       {
-        dayDate: startTime,
+        dayDate: dayStartTime,
       },
     );
 
@@ -154,10 +159,24 @@ export const createScheduleDays = (
       (task) => !isDayAssignedTask(task),
     );
 
+    // Suppress an untimed repeat projection on a day that already has a concrete
+    // instance of the same cfg — otherwise the schedule shows the real task AND
+    // its projection (#7853). This is the untimed counterpart of the guard in
+    // create-sorted-blocker-blocks.ts for timed projections; the projection is a
+    // placeholder for "an instance will exist", so it is redundant once one does.
+    const concreteRepeatCfgIdsForDay = new Set(
+      flowTasksForDay.map((task) => task.repeatCfgId).filter((id): id is string => !!id),
+    );
+    const repeatCfgsToProjectForDay = concreteRepeatCfgIdsForDay.size
+      ? nonScheduledRepeatCfgsDueOnDay.filter(
+          (cfg) => !concreteRepeatCfgIdsForDay.has(cfg.id),
+        )
+      : nonScheduledRepeatCfgsDueOnDay;
+
     viewEntries = createViewEntriesForDay(
       dayDate,
       startTime,
-      nonScheduledRepeatCfgsDueOnDay,
+      repeatCfgsToProjectForDay,
       within,
       blockerBlocksForDay,
       viewEntriesPushedToNextDay,

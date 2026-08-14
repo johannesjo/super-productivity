@@ -8,6 +8,8 @@ vi.mock('../src/db', async () => {
   const {
     applyOperationSelect,
     hasOperationUniqueConflict,
+    isEntityArrayBranchQuery,
+    entityArrayBranchRows,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -63,6 +65,11 @@ vi.mock('../src/db', async () => {
             applyOperationSelect(state.operations.get(args.where.id), args.select) || null
           );
         }
+        // Single-entity conflict lookup, scalar branch: where { userId, entityType,
+        // entityId }. The entity_ids half is a separate $queryRaw call below — the
+        // two were one OR filter until it degenerated into a full history scan in
+        // production (see the PERF note in conflict.ts detectConflictForEntity).
+        // Scalar-only lookup (other callers): where { userId, entityType, entityId }.
         if (args.where?.entityId && args.where?.entityType) {
           state.entityConflictFindFirstCount++;
           const ops = Array.from(state.operations.values())
@@ -98,6 +105,15 @@ vi.mock('../src/db', async () => {
           .slice(0, args.take || 500);
       }),
       findUnique: vi.fn().mockImplementation(async (args: any) => {
+        // (user_id, server_seq) compound unique — fetches the array branch's winner.
+        const compound = args.where?.userId_serverSeq;
+        if (compound) {
+          const match = Array.from(state.operations.values()).find(
+            (op: any) =>
+              op.userId === compound.userId && op.serverSeq === compound.serverSeq,
+          );
+          return applyOperationSelect(match, args.select) || null;
+        }
         if (args.where?.id) {
           return (
             applyOperationSelect(state.operations.get(args.where.id), args.select) || null
@@ -165,6 +181,12 @@ vi.mock('../src/db', async () => {
     $executeRaw: vi.fn().mockResolvedValue(0),
     $queryRaw: vi.fn().mockImplementation(async (strings: any, ...params: unknown[]) => {
       const sql = Array.isArray(strings) ? strings.join('') : String(strings);
+      // Array branch of the single-entity conflict lookup: MAX(server_seq) over
+      // `entity_ids @> ARRAY[id]`, kept separate from the scalar findFirst above.
+      if (isEntityArrayBranchQuery(strings)) {
+        state.entityConflictArrayQueryCount++;
+        return entityArrayBranchRows(state.operations, params);
+      }
       // Full-state op uploads aggregate prior vector clocks via $queryRaw.
       if (sql.includes('jsonb_each_text(vector_clock)')) {
         const [txUserId, beforeServerSeq] = params as [number, number];
@@ -188,9 +210,49 @@ vi.mock('../src/db', async () => {
         }));
       }
 
-      const [userId, entityType, entityIdsSql] = params as [number, string, Prisma.Sql];
+      if (sql.includes('FROM user_sync_state') && sql.includes('FOR UPDATE')) {
+        const [txUserId] = params as [number];
+        return [{ lastSeq: state.userSyncStates.get(txUserId)?.lastSeq ?? 0 }];
+      }
+
+      // Anything left must be the batched multi-entity conflict lookup. Assert that
+      // rather than assuming it: falling through and reinterpreting an unrelated
+      // query as this one is how a mock silently answers a call it never modelled.
+      // `DISTINCT ON` alone stopped discriminating once #9503 gave BOTH batch queries
+      // that clause, so key on detect's own CTE and exclude prefetch's — otherwise a
+      // future batchUpload test lands here, finds no bare string to read entityType
+      // from, matches no ops and silently reports "no conflict".
+      if (!sql.includes('scalar_hits') || sql.includes('touched(entity_type')) {
+        throw new Error(`Unmocked raw query in tx: ${sql}`);
+      }
+      // Located by shape, not by position: #9503 reordered the params (and repeated
+      // userId/entityType), so a positional destructure is wrong. Shape lookup is
+      // type-ambiguous, though, so assert the shape instead of trusting it — a future
+      // numeric param (a LIMIT, a schema version) would otherwise silently rebind
+      // userId and quietly disable the tenant scoping this mock exists to model.
+      const numberParams = params.filter((p): p is number => typeof p === 'number');
+      const stringParams = params.filter((p): p is string => typeof p === 'string');
+      if (new Set(numberParams).size !== 1 || new Set(stringParams).size !== 1) {
+        throw new Error(
+          `Batched conflict query params no longer identify userId/entityType by shape: ` +
+            `${numberParams.length} numbers, ${stringParams.length} strings`,
+        );
+      }
+      const userId = numberParams[0];
+      const entityType = stringParams[0];
+      // `values.length > 0` is load-bearing: the shared array-branch CTE is also a
+      // Prisma.Sql, with an EMPTY values array, so a bare Array.isArray check would
+      // match it if fragment order ever changed — and an empty id set matches no op,
+      // i.e. a silent "no conflict" for every entity.
+      const entityIdsSql = params.find(
+        (p): p is Prisma.Sql =>
+          !!p &&
+          typeof p === 'object' &&
+          Array.isArray((p as Prisma.Sql).values) &&
+          (p as Prisma.Sql).values.length > 0,
+      );
       state.batchConflictQueryCount++;
-      if (!Array.isArray(entityIdsSql.values)) {
+      if (!entityIdsSql || !Array.isArray(entityIdsSql.values)) {
         throw new Error(
           'Expected batched conflict query entity IDs to be passed via Prisma.join(...)',
         );
@@ -200,23 +262,31 @@ vi.mock('../src/db', async () => {
           (entityId): entityId is string => typeof entityId === 'string',
         ),
       );
+      // An op covers every entity in its entity_ids set UNION its scalar
+      // entity_id — mirrors the array branch UNION ALL the scalar branch. The
+      // scalar is always folded in (not just for empty/pre-migration rows) so a
+      // divergent scalar entity_id is never missed; the Set below dedupes the
+      // common entity_id = entityIds[0] overlap. (#8334)
+      const coveredEntityIds = (op: any): string[] => {
+        const ids = Array.isArray(op.entityIds) ? [...op.entityIds] : [];
+        if (op.entityId != null) ids.push(op.entityId);
+        return ids;
+      };
       const latestByEntityId = new Map<string, any>();
       const ops = Array.from(state.operations.values())
-        .filter(
-          (op: any) =>
-            op.userId === userId &&
-            op.entityType === entityType &&
-            batchEntityIds.has(op.entityId),
-        )
+        .filter((op: any) => op.userId === userId && op.entityType === entityType)
         .sort((a: any, b: any) => b.serverSeq - a.serverSeq);
 
       for (const op of ops) {
-        if (!op.entityId || latestByEntityId.has(op.entityId)) continue;
-        latestByEntityId.set(op.entityId, op);
+        for (const eid of coveredEntityIds(op)) {
+          if (batchEntityIds.has(eid) && !latestByEntityId.has(eid)) {
+            latestByEntityId.set(eid, op);
+          }
+        }
       }
 
-      return Array.from(latestByEntityId.values()).map((op: any) => ({
-        entityId: op.entityId,
+      return Array.from(latestByEntityId.entries()).map(([eid, op]) => ({
+        entityId: eid,
         clientId: op.clientId,
         vectorClock: op.vectorClock,
       }));
@@ -272,6 +342,7 @@ vi.mock('../src/db', async () => {
 });
 
 import { initSyncService, getSyncService } from '../src/sync/sync.service';
+import { OperationDownloadService } from '../src/sync/services/operation-download.service';
 import {
   Operation,
   SYNC_ERROR_CODES,
@@ -283,6 +354,7 @@ describe('Conflict Detection', () => {
   const userId = 1;
   const clientA = 'client-a';
   const clientB = 'client-b';
+  let operationDownloadService: OperationDownloadService;
 
   const createOp = (overrides: Partial<Operation> & { entityId: string }): Operation => ({
     id: uuidv7(),
@@ -310,6 +382,7 @@ describe('Conflict Detection', () => {
 
     vi.clearAllMocks();
     initSyncService();
+    operationDownloadService = new OperationDownloadService();
   });
 
   describe('Vector Clock Comparison', () => {
@@ -557,15 +630,16 @@ describe('Conflict Detection', () => {
       });
       await service.uploadOps(userId, clientA, [op1]);
 
-      // REPAIR with superseded clock should still be accepted
+      // A causal REPAIR with a current base should bypass vector-clock conflicts.
       const op2 = createOp({
         entityId,
         clientId: clientB,
         vectorClock: {},
         opType: 'REPAIR',
         entityType: 'RECOVERY',
+        repairBaseServerSeq: 1,
       });
-      const result = await service.uploadOps(userId, clientB, [op2]);
+      const result = await service.uploadOps(userId, clientB, [op2], false, undefined, 1);
       expect(result[0].accepted).toBe(true);
     });
 
@@ -830,7 +904,7 @@ describe('Conflict Detection', () => {
       // Verify the clock was pruned to MAX_VECTOR_CLOCK_SIZE (20) before storage.
       // clientA ('client-a') is not in the clock, so only the MAX most active
       // clients are kept (the ones with highest counters).
-      const ops = await service.getOpsSince(userId, 0);
+      const ops = (await operationDownloadService.getOpsSinceWithSeq(userId, 0)).ops;
       const storedClock = ops[0].op.vectorClock;
       expect(Object.keys(storedClock).length).toBe(MAX_VECTOR_CLOCK_SIZE);
       // The most active clients should be preserved (top MAX entries by counter)
@@ -860,7 +934,7 @@ describe('Conflict Detection', () => {
       expect(result[0].accepted).toBe(true);
 
       // Verify the clock was pruned to MAX_VECTOR_CLOCK_SIZE
-      const ops = await service.getOpsSince(userId, 0);
+      const ops = (await operationDownloadService.getOpsSinceWithSeq(userId, 0)).ops;
       const storedClock = ops[0].op.vectorClock;
       expect(Object.keys(storedClock).length).toBe(MAX_VECTOR_CLOCK_SIZE);
       // clientA should be preserved despite having the lowest counter
@@ -914,7 +988,7 @@ describe('Conflict Detection', () => {
       expect(resolvedResult[0].accepted).toBe(true);
 
       // Verify the stored clock was pruned to MAX after acceptance
-      const ops = await service.getOpsSince(userId, 0);
+      const ops = (await operationDownloadService.getOpsSinceWithSeq(userId, 0)).ops;
       const latestOp = ops.find((o: any) => o.op.id === resolvedOp.id);
       expect(latestOp).toBeDefined();
       const storedClock = latestOp!.op.vectorClock;
@@ -966,6 +1040,76 @@ describe('Conflict Detection', () => {
         accepted: false,
         errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
         existingClock: { [clientB]: 1 },
+      });
+      expect(result[0].error).toContain('TASK:task-2');
+    });
+
+    // Regression for #8334. The test above proves an *incoming* multi-entity op
+    // is checked against all its ids. These two prove the reverse — a *stored*
+    // multi-entity op exposes every entity to later conflict lookups, not just
+    // entityIds[0] — across both the single-entity and batch lookup paths.
+    it('#8334 single path: stale write to a non-first stored entity conflicts', async () => {
+      const service = getSyncService();
+
+      // clientA stores a multi-entity op over [task-1, task-2]
+      // (persisted scalar entity_id = task-1, entity_ids = both).
+      const stored = await service.uploadOps(userId, clientA, [
+        createOp({
+          entityId: 'task-1',
+          entityIds: ['task-1', 'task-2'],
+          clientId: clientA,
+          vectorClock: { [clientA]: 1 },
+        }),
+      ]);
+      expect(stored[0].accepted).toBe(true);
+
+      // clientB sends a stale single-entity op for task-2 (the SECOND entity).
+      // {clientB:1} is CONCURRENT with {clientA:1}.
+      const result = await service.uploadOps(userId, clientB, [
+        createOp({
+          entityId: 'task-2',
+          clientId: clientB,
+          vectorClock: { [clientB]: 1 },
+        }),
+      ]);
+
+      expect(result[0]).toMatchObject({
+        accepted: false,
+        errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
+      });
+    });
+
+    // NOTE: with the default (non-batch) upload config this exercises
+    // `detectConflictForEntities`. The `prefetchLatestEntityOpsForBatch` variant
+    // (batchUpload=true) shares the same entity_ids matching SQL but is not driven
+    // here; its raw query is validated separately against real Postgres.
+    it('#8334 batch path: incoming multi-entity op hits a non-first stored entity', async () => {
+      const service = getSyncService();
+
+      const stored = await service.uploadOps(userId, clientA, [
+        createOp({
+          entityId: 'task-1',
+          entityIds: ['task-1', 'task-2'],
+          clientId: clientA,
+          vectorClock: { [clientA]: 1 },
+        }),
+      ]);
+      expect(stored[0].accepted).toBe(true);
+
+      // Incoming *multi-entity* op (→ batch lookup path) touching task-2.
+      const result = await service.uploadOps(userId, clientB, [
+        createOp({
+          entityId: 'task-2',
+          entityIds: ['task-2', 'task-9'],
+          clientId: clientB,
+          vectorClock: { [clientB]: 1 },
+        }),
+      ]);
+
+      expect(testState.batchConflictQueryCount).toBeGreaterThan(0);
+      expect(result[0]).toMatchObject({
+        accepted: false,
+        errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
       });
       expect(result[0].error).toContain('TASK:task-2');
     });

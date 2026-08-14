@@ -1,0 +1,3 @@
+- Keep the task list anchored when scheduling from the context menu
+- Hide lock-timeout notifications during automatic syncs
+- Updated Turkish translations

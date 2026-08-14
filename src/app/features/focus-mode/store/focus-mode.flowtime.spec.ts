@@ -18,6 +18,7 @@ import { FocusModeStorageService } from '../focus-mode-storage.service';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { TakeABreakService } from '../../take-a-break/take-a-break.service';
+import { NotifyService } from '../../../core/notify/notify.service';
 
 describe('FocusMode Flowtime behavior', () => {
   describe('Reducer: startFocusSession', () => {
@@ -97,6 +98,7 @@ describe('FocusMode Flowtime behavior', () => {
     let effects: FocusModeEffects;
     const takeABreakServiceMock = {
       otherNoBreakTIme$: new BehaviorSubject<number>(0),
+      resetTimer: jasmine.createSpy('resetTimer'),
     };
 
     beforeEach(() => {
@@ -135,6 +137,10 @@ describe('FocusMode Flowtime behavior', () => {
             ]),
           },
           { provide: TakeABreakService, useValue: takeABreakServiceMock },
+          {
+            provide: NotifyService,
+            useValue: { notify: jasmine.createSpy('notify') },
+          },
           {
             provide: GlobalTrackingIntervalService,
             useValue: {
@@ -329,6 +335,7 @@ describe('FocusMode Flowtime behavior', () => {
     };
     const takeABreakServiceMock = {
       otherNoBreakTIme$: new BehaviorSubject<number>(0),
+      resetTimer: jasmine.createSpy('resetTimer'),
     };
 
     beforeEach(() => {
@@ -367,6 +374,10 @@ describe('FocusMode Flowtime behavior', () => {
             ]),
           },
           { provide: TakeABreakService, useValue: takeABreakServiceMock },
+          {
+            provide: NotifyService,
+            useValue: { notify: jasmine.createSpy('notify') },
+          },
           {
             provide: GlobalTrackingIntervalService,
             useValue: {
@@ -434,6 +445,7 @@ describe('FocusMode Flowtime behavior', () => {
     let getStrategySpy: jasmine.Spy;
     const takeABreakServiceMock = {
       otherNoBreakTIme$: new BehaviorSubject<number>(0),
+      resetTimer: jasmine.createSpy('resetTimer'),
     };
 
     beforeEach(() => {
@@ -475,6 +487,10 @@ describe('FocusMode Flowtime behavior', () => {
             ]),
           },
           { provide: TakeABreakService, useValue: takeABreakServiceMock },
+          {
+            provide: NotifyService,
+            useValue: { notify: jasmine.createSpy('notify') },
+          },
           {
             provide: GlobalTrackingIntervalService,
             useValue: {

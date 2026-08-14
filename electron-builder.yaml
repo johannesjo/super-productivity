@@ -37,6 +37,8 @@ files:
 directories:
   output: './.tmp/app-builds'
 
+beforePack: ./tools/beforePack.js
+
 # Post-pack hook that installs a shell wrapper for Linux builds to force
 # --ozone-platform=x11 in Snap+Wayland sessions.
 # See tools/afterPack.js + build/linux/snap-wrapper.sh and
@@ -61,6 +63,13 @@ nsis:
   # allow to install to custom location
   oneClick: false
   allowToChangeInstallationDirectory: true
+  # We ship no in-app auto-updater: electron-updater is not a dependency and the
+  # autoUpdater block in electron/start-app.ts is commented out. elevate.exe is
+  # only ever invoked by electron-updater to apply privileged (per-machine)
+  # updates, so electron-builder bundles it here as dead weight that AV engines
+  # frequently false-positive on. Drop it. Safe because perMachine is not true
+  # (with perMachine: true, packElevateHelper: false is ignored). See #8135.
+  packElevateHelper: false
 portable:
   artifactName: ${name}-${arch}.${ext}
 appx:
@@ -175,6 +184,7 @@ flatpak:
 
 mac:
   appId: com.super-productivity.app
+  icon: build/icon.icns
   type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist

@@ -15,22 +15,27 @@ import {
   MatMenuTrigger,
 } from '@angular/material/menu';
 import { TaskCopy } from '../../tasks/task.model';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../tag.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPromptComponent } from '../../../ui/dialog-prompt/dialog-prompt.component';
 import { T } from '../../../t.const';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TaskService } from '../../tasks/task.service';
-import { isSingleEmoji } from '../../../util/extract-first-emoji';
 import { MenuTreeService } from '../../menu-tree/menu-tree.service';
-import { MenuTreeKind, MenuTreeViewNode } from '../../menu-tree/store/menu-tree.model';
-import { Tag } from '../tag.model';
+import { SelectOptionRowComponent } from '../../../ui/select-option-row/select-option-row.component';
 
 @Component({
   selector: 'tag-toggle-menu-list',
   standalone: true,
-  imports: [MatIcon, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger, TranslatePipe],
+  imports: [
+    MatIcon,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatMenuTrigger,
+    TranslatePipe,
+    SelectOptionRowComponent,
+  ],
   templateUrl: './tag-toggle-menu-list.component.html',
   styleUrl: './tag-toggle-menu-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,40 +52,8 @@ export class TagToggleMenuListComponent {
   afterClose = output<void>();
   addNewTag = output<string>();
 
-  private _tagList = toSignal(this._tagService.tagsNoMyDayAndNoList$, {
-    initialValue: [],
-  });
-
-  // Build tree from tags to maintain menu tree ordering
-  private _tagTree = computed(() => {
-    const tags = this._tagList();
-    return this._menuTreeService.buildTagViewTree(tags);
-  });
-
-  // Extract tags in tree order (flattened)
-  toggleTagList = computed(() => {
-    const tree = this._tagTree();
-    const tags: Tag[] = [];
-
-    // Recursive function to extract tags maintaining order
-    const extractTags = (nodes: MenuTreeViewNode[]): void => {
-      for (const node of nodes) {
-        if (node.k === MenuTreeKind.TAG) {
-          tags.push(node.tag);
-        } else if (node.k === MenuTreeKind.FOLDER) {
-          extractTags(node.children);
-        }
-      }
-    };
-
-    extractTags(tree);
-
-    // Map to include isEmojiIcon
-    return tags.map((tag) => ({
-      ...tag,
-      isEmojiIcon: tag.icon ? isSingleEmoji(tag.icon) : false,
-    }));
-  });
+  tagFolderMap = computed(() => this._menuTreeService.tagFolderMap());
+  toggleTagList = this._tagService.tagsNoMyDayAndNoListInTreeOrder;
   menuEl = viewChild('menuEl', {
     // read: MatMenu,
   });

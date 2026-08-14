@@ -1,12 +1,57 @@
+import { InjectionToken } from '@angular/core';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
+import { IS_IOS_NATIVE } from './util/is-native-platform';
 
 export const IS_ELECTRON = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
+
+/**
+ * Injection token for IS_ELECTRON to enable testing.
+ * New DI-tested effects/services should prefer this token over the IS_ELECTRON
+ * constant to ensure testability and prevent logic drift.
+ */
+export const IS_ELECTRON_TOKEN = new InjectionToken<boolean>('IS_ELECTRON', {
+  providedIn: 'root',
+  factory: () => IS_ELECTRON,
+});
 // effectively IS_BROWSER
 export const IS_WEB_BROWSER = !IS_ELECTRON && !IS_ANDROID_WEB_VIEW;
-export const IS_GNOME_DESKTOP = IS_ELECTRON && window.ea.isGnomeDesktop();
+// Only GNOME+Wayland force-disables the custom title bar (the Window-Controls-
+// Overlay won't render there). Mirrors electron/common.const.ts so the renderer
+// and main process agree. See global-theme.service.ts / main-window.ts.
+// (window.ea.isGnomeDesktop() still exists on the bridge for plugin use.)
+export const IS_GNOME_WAYLAND = IS_ELECTRON && window.ea.isGnomeWayland();
 // True only inside the Electron build — preload exposes process.arch.
 // Web builds can't reliably distinguish Apple Silicon from Intel and stay false.
 export const IS_APPLE_SILICON = IS_ELECTRON && window.ea.isAppleSilicon();
+interface DonationUiPlatformContext {
+  isIosNative: boolean;
+  isElectron: boolean;
+  isMacOS: boolean;
+}
+
+export const isDonationUiRestricted = ({
+  isIosNative,
+  isElectron,
+  isMacOS,
+}: DonationUiPlatformContext): boolean => isIosNative || (isElectron && isMacOS);
+
+// Apple's App Store guidelines forbid donation/contribution links that route
+// around In-App Purchase (Guideline 3.1.1). Apply the restriction to every
+// macOS Electron build so App Store, direct-download and local review behavior
+// cannot diverge based on the unreliable process.mas signal.
+export const IS_DONATION_UI_RESTRICTED = isDonationUiRestricted({
+  isIosNative: IS_IOS_NATIVE,
+  isElectron: IS_ELECTRON,
+  isMacOS: IS_ELECTRON && window.ea.isMacOS(),
+});
+
+export const IS_DONATION_UI_RESTRICTED_TOKEN = new InjectionToken<boolean>(
+  'IS_DONATION_UI_RESTRICTED',
+  {
+    providedIn: 'root',
+    factory: () => IS_DONATION_UI_RESTRICTED,
+  },
+);
 
 export const TRACKING_INTERVAL = 1000;
 
@@ -16,6 +61,15 @@ export const DRAG_DELAY_FOR_TOUCH = 500;
 // in the background. Larger gaps are capped to this value so an overnight
 // charge can't silently add 8 h to the active task.
 export const MOBILE_BACKGROUND_IDLE_CAP_MS = 4 * 60 * 60 * 1000;
+
+// Maximum wall-clock gap credited to generic tick$ consumers (running
+// stopwatch counters, break tracking) when the Android tick interval — paused
+// while backgrounded (#8243) — restarts on resume. Deliberately more generous
+// than the iOS cap above (a stopwatch left running through a workday away
+// from the app keeps counting): unlike iOS, the active task is unaffected by
+// this cap either way, since it reconciles from the native foreground-service
+// counter.
+export const ANDROID_BACKGROUND_TICK_CAP_MS = 8 * 60 * 60 * 1000;
 
 // TODO use
 // const CORS_SKIP_EXTRA_HEADER_PROP = 'sp_cors_skip' as const;
@@ -57,6 +111,7 @@ export enum BodyClass {
   isFullScreen = 'isFullScreen',
   isAddTaskBarOpen = 'isAddTaskBarOpen',
   isMaterialSymbolsLoaded = 'isMaterialSymbolsLoaded',
+  hasAndroidWebViewTextZoom = 'hasAndroidWebViewTextZoom',
 
   // iOS-specific classes
   isIOS = 'isIOS',

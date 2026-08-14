@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { LayoutService } from './layout.service';
 import { hideAddTaskBar, showAddTaskBar } from './store/layout.actions';
@@ -61,6 +61,15 @@ describe('LayoutService', () => {
     mockStore = TestBed.inject(Store) as jasmine.SpyObj<Store>;
   });
 
+  it('uses the same exclusive max-width boundaries as the shared SCSS breakpoints', () => {
+    const breakpointObserver = TestBed.inject(
+      BreakpointObserver,
+    ) as jasmine.SpyObj<BreakpointObserver>;
+
+    expect(breakpointObserver.observe).toHaveBeenCalledWith('(max-width: 599px)');
+    expect(breakpointObserver.observe).toHaveBeenCalledWith('(max-width: 397px)');
+  });
+
   describe('Focus restoration', () => {
     let mockTaskElement: HTMLElement;
 
@@ -73,18 +82,24 @@ describe('LayoutService', () => {
     });
 
     afterEach(() => {
+      // These tests shadow the native document.activeElement getter with an own
+      // data property via Object.defineProperty. Delete it so the prototype
+      // accessor shows through again; otherwise a stale activeElement leaks into
+      // later specs (e.g. TaskService.focusTaskById reads the clobbered value).
+      Reflect.deleteProperty(document, 'activeElement');
       if (mockTaskElement && mockTaskElement.parentNode) {
         mockTaskElement.parentNode.removeChild(mockTaskElement);
       }
+      // Restore the native activeElement getter — the tests below shadow it with
+      // a static own property via Object.defineProperty, which otherwise leaks
+      // into later specs and freezes document.activeElement (e.g. breaking
+      // task.service focusTaskById, which reads the real activeElement).
+      delete (document as unknown as { activeElement?: unknown }).activeElement;
     });
 
     it('should store focused task element when showing add task bar', () => {
       // Focus the task element
-      Object.defineProperty(document, 'activeElement', {
-        value: mockTaskElement,
-        writable: true,
-        configurable: true,
-      });
+      spyOnProperty(document, 'activeElement').and.returnValue(mockTaskElement);
 
       // Show add task bar
       service.showAddTaskBar();
@@ -141,11 +156,7 @@ describe('LayoutService', () => {
       spyOn(mockTaskElement, 'focus');
 
       // Set as active element
-      Object.defineProperty(document, 'activeElement', {
-        value: mockTaskElement,
-        writable: true,
-        configurable: true,
-      });
+      spyOnProperty(document, 'activeElement').and.returnValue(mockTaskElement);
 
       // Show add task bar (which stores the focused element)
       service.showAddTaskBar();
@@ -168,11 +179,7 @@ describe('LayoutService', () => {
       const nonTaskElement = document.createElement('input');
       nonTaskElement.id = 'some-input';
       document.body.appendChild(nonTaskElement);
-      Object.defineProperty(document, 'activeElement', {
-        value: nonTaskElement,
-        writable: true,
-        configurable: true,
-      });
+      spyOnProperty(document, 'activeElement').and.returnValue(nonTaskElement);
 
       // Show add task bar
       service.showAddTaskBar();
@@ -193,11 +200,7 @@ describe('LayoutService', () => {
       spyOn(mockTaskElement, 'focus');
 
       // Set as active element
-      Object.defineProperty(document, 'activeElement', {
-        value: mockTaskElement,
-        writable: true,
-        configurable: true,
-      });
+      spyOnProperty(document, 'activeElement').and.returnValue(mockTaskElement);
 
       // Show add task bar (which stores the focused element)
       service.showAddTaskBar();
@@ -220,11 +223,7 @@ describe('LayoutService', () => {
     it('should fallback to previously focused task when new task element is missing', (done) => {
       spyOn(mockTaskElement, 'focus');
 
-      Object.defineProperty(document, 'activeElement', {
-        value: mockTaskElement,
-        writable: true,
-        configurable: true,
-      });
+      spyOnProperty(document, 'activeElement').and.returnValue(mockTaskElement);
 
       service.showAddTaskBar();
 
@@ -350,5 +349,20 @@ describe('LayoutService', () => {
         done();
       }, 400);
     });
+
+    it('should invoke onFailure (and not onSuccess) once the retries are exhausted', fakeAsync(() => {
+      const onSuccess = jasmine.createSpy('onSuccess');
+      const onFailure = jasmine.createSpy('onFailure');
+
+      // No element with id `t-never-rendered` exists, so the task never becomes
+      // focusable. Use a small retry budget so the loop exhausts quickly.
+      service.focusTaskInViewWhenReady('never-rendered', onSuccess, onFailure, 2);
+
+      // 2 retries * 250ms delay; tick generously to drain every scheduled retry.
+      tick(1000);
+
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(onFailure).toHaveBeenCalledTimes(1);
+    }));
   });
 });

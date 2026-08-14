@@ -18,16 +18,19 @@ import {
 import { Task, TaskState } from '../task.model';
 import { EMPTY, of } from 'rxjs';
 import { WorkContextService } from '../../work-context/work-context.service';
+import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
 } from '../../project/store/project.actions';
+import { DateService } from '../../../core/date/date.service';
 
 @Injectable()
 export class TaskInternalEffects {
   private _actions$ = inject(LOCAL_ACTIONS);
   private _store$ = inject(Store);
   private _workContextSession = inject(WorkContextService);
+  private _dateService = inject(DateService);
 
   onAllSubTasksDone$ = createEffect(() =>
     this._actions$.pipe(
@@ -88,6 +91,44 @@ export class TaskInternalEffects {
           },
         }),
       ),
+    ),
+  );
+
+  planStartedTaskForToday$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(setCurrentTask),
+      withLatestFrom(
+        this._store$.pipe(select(selectTaskFeatureState)),
+        this._store$.pipe(select(selectTodayTaskIds)),
+        this._store$.pipe(select(selectTasksConfig)),
+      ),
+      mergeMap(([, state, todayTaskIds, tasksCfg]) => {
+        const currentTaskId = state.currentTaskId;
+        if (!currentTaskId) {
+          return EMPTY;
+        }
+
+        const currentTask = state.entities[currentTaskId] as Task | undefined;
+        if (
+          !tasksCfg.isAutoAddWorkedOnToToday ||
+          !currentTask ||
+          !!currentTask.dueDay ||
+          typeof currentTask.dueWithTime === 'number' ||
+          todayTaskIds.includes(currentTaskId) ||
+          (!!currentTask.parentId && todayTaskIds.includes(currentTask.parentId))
+        ) {
+          return EMPTY;
+        }
+
+        return of(
+          TaskSharedActions.planTasksForToday({
+            taskIds: [currentTaskId],
+            today: this._dateService.todayStr(),
+            startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
+            parentTaskMap: { [currentTaskId]: currentTask.parentId },
+          }),
+        );
+      }),
     ),
   );
 

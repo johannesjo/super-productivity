@@ -6,7 +6,13 @@ import { Logger } from '../logger';
 import { getAuthUser } from '../middleware';
 import { getSyncService } from './sync.service';
 import { getWsConnectionService } from './services/websocket-connection.service';
-import { SYNC_ERROR_CODES, UploadResult } from './sync.types';
+import {
+  DUPLICATE_OP_SELECT,
+  Operation,
+  SYNC_ERROR_CODES,
+  UploadResult,
+} from './sync.types';
+import { isSameIncomingOperation } from './conflict';
 import {
   isSingleTokenGzipEncoding,
   parseCompressedJsonBody,
@@ -18,6 +24,8 @@ import {
   MAX_COMPRESSED_SIZE_SNAPSHOT,
   MAX_DECOMPRESSED_SIZE_SNAPSHOT,
   sendCompressedBodyParseFailure,
+  sendE2eeRequiredReply,
+  violatesE2eeGate,
 } from './sync.routes.payload';
 import {
   applyStorageUsageDelta,
@@ -29,6 +37,7 @@ import {
   sendQuotaExceededReply,
   sendSyncImportExistsReply,
 } from './sync.routes.quota';
+import { createSnapshotRequestFingerprint } from './services/request-deduplication.service';
 
 export const uploadSnapshotHandler = async (
   req: FastifyRequest<{ Body: unknown }>,
@@ -84,6 +93,7 @@ export const uploadSnapshotHandler = async (
 
     const snapshotRequest = parseResult.data as typeof parseResult.data & {
       requestId?: string;
+      repairBaseServerSeq?: number;
     };
     const {
       state,
@@ -96,12 +106,57 @@ export const uploadSnapshotHandler = async (
       isCleanSlate,
       snapshotOpType,
       syncImportReason,
+      repairBaseServerSeq,
       requestId,
     } = snapshotRequest;
+    const shouldCleanSlate = snapshotOpType === 'REPAIR' ? false : isCleanSlate;
+    const isLegacyRepairUpload =
+      snapshotOpType === 'REPAIR' &&
+      repairBaseServerSeq === undefined &&
+      isCleanSlate === true;
+
+    // Encrypted-only ingress gate: applies to every snapshot op type,
+    // including SYNC_IMPORT, BACKUP_IMPORT, and REPAIR — the legacy plaintext
+    // repair upload is no longer externally reachable. Runs BEFORE
+    // fingerprinting, dedup, quota work, and prepareSnapshotCache, so a
+    // rejected upload leaves no server-side trace and burns no CPU on the
+    // full-state hash or gzip.
+    if (violatesE2eeGate({ isPayloadEncrypted, payload: state })) {
+      return sendE2eeRequiredReply(reply, userId, {
+        clientId,
+        surface: 'snapshot',
+        opsCount: 1,
+      });
+    }
+
     const syncService = getSyncService();
+    // Lazy + memoized: fingerprinting stable-stringifies + SHA-256-hashes the
+    // full (possibly multi-MB plaintext) snapshot state. It must not run
+    // before the pre-quota gate below, and first-time requests never need it —
+    // the dedup check only invokes it when an entry for this requestId exists
+    // (a genuine retry).
+    let memoizedFingerprint: string | undefined;
+    const getRequestFingerprint = (): string =>
+      (memoizedFingerprint ??= createSnapshotRequestFingerprint({
+        state,
+        clientId,
+        reason,
+        vectorClock,
+        schemaVersion,
+        isPayloadEncrypted,
+        syncImportReason,
+        opId,
+        isCleanSlate: shouldCleanSlate,
+        snapshotOpType,
+        repairBaseServerSeq,
+      }));
 
     if (requestId) {
-      const cachedResponse = syncService.checkSnapshotRequestDedup(userId, requestId);
+      const cachedResponse = syncService.checkSnapshotRequestDedup(
+        userId,
+        requestId,
+        getRequestFingerprint,
+      );
       if (cachedResponse) {
         Logger.info(
           `[user:${userId}] Returning cached snapshot result for request ${requestId}`,
@@ -110,13 +165,24 @@ export const uploadSnapshotHandler = async (
       }
     }
 
+    // Defense in depth: the contract superRefine already requires opId for
+    // clean-slate uploads, but the destructive wipe below must never depend on
+    // a schema in another package staying strict. Keep the invariant local.
+    if (isCleanSlate && !opId) {
+      return reply.code(400).send({
+        error: 'opId is required for clean-slate snapshot idempotency',
+      });
+    }
+
     // Cheap pre-quota gate BEFORE prepareSnapshotCache so quota-exhausted
     // clients can't burn CPU on JSON.stringify + zlib.gzipSync. Uses only
     // the cached counter; if it says we're already at quota, reconcile
     // once before rejecting — a stale-high counter would otherwise lock
     // out a user whose new snapshot would actually shrink storage. Skip
-    // for clean-slate which wipes existing usage.
-    if (!isCleanSlate) {
+    // for clean-slate which wipes existing usage. REPAIR also skips this cheap
+    // gate so a response-loss retry can reach the durable op-id check inside
+    // the lock; a genuinely new REPAIR still gets the full quota check below.
+    if (!shouldCleanSlate && snapshotOpType !== 'REPAIR') {
       let cachedInfo = await syncService.getStorageInfo(userId);
       if (cachedInfo.storageUsedBytes >= cachedInfo.storageQuotaBytes) {
         try {
@@ -137,6 +203,13 @@ export const uploadSnapshotHandler = async (
       }
     }
 
+    // Pin the fingerprint BEFORE processing mutates anything, but AFTER the
+    // pre-quota gate above so quota-exhausted clients cannot burn CPU on the
+    // full-state hash.
+    if (requestId) {
+      getRequestFingerprint();
+    }
+
     // Reject duplicate SYNC_IMPORT before we acquire the per-user lock — a
     // duplicate rejection is cheap (one indexed lookup) and skipping the
     // lock lets concurrent legitimate clients keep moving.
@@ -145,7 +218,7 @@ export const uploadSnapshotHandler = async (
     // - 'migration': Legacy data migration (should be allowed to override)
     // - 'isCleanSlate': Password change or explicit clean slate request
     // Only 'initial' (first-time server migration) should be rejected if one exists.
-    if (reason === 'initial' && !isCleanSlate) {
+    if (reason === 'initial' && !shouldCleanSlate) {
       const existingImport = await findExistingSyncImport(userId, opId);
 
       if (existingImport) {
@@ -180,8 +253,11 @@ export const uploadSnapshotHandler = async (
       vectorClock,
       timestamp: Date.now(),
       schemaVersion: schemaVersion ?? 1,
+      // Always true post-E2EE gate; the `?? false` fallback is dead and goes
+      // with the rest of the plaintext handling in eradication plan Step 3.
       isPayloadEncrypted: isPayloadEncrypted ?? false,
       syncImportReason,
+      repairBaseServerSeq,
     };
 
     const preparedSnapshot = await syncService.prepareSnapshotCache(state);
@@ -191,7 +267,79 @@ export const uploadSnapshotHandler = async (
     const result = await syncService.runWithStorageUsageLock<UploadResult | null>(
       userId,
       async () => {
-        if (reason === 'initial' && !isCleanSlate) {
+        // Request-cache deduplication is process-local and expires. Destructive
+        // clean-slate uploads need a durable check before deletion; REPAIR needs
+        // the same check before its old base cursor can be rejected as stale
+        // after a response-loss retry. The client-supplied opId is the durable
+        // idempotency key.
+        if ((shouldCleanSlate || snapshotOpType === 'REPAIR') && opId) {
+          const existingFullStateOp = await prisma.operation.findUnique({
+            where: { id: opId },
+            select: { ...DUPLICATE_OP_SELECT, serverSeq: true },
+          });
+          if (existingFullStateOp) {
+            const existingOperation: Operation = {
+              id: existingFullStateOp.id,
+              clientId: existingFullStateOp.clientId,
+              actionType: existingFullStateOp.actionType,
+              opType: existingFullStateOp.opType as Operation['opType'],
+              entityType: existingFullStateOp.entityType,
+              entityId: existingFullStateOp.entityId ?? undefined,
+              entityIds: existingFullStateOp.entityIds,
+              payload: existingFullStateOp.payload,
+              vectorClock: existingFullStateOp.vectorClock as Operation['vectorClock'],
+              timestamp: op.timestamp,
+              schemaVersion: existingFullStateOp.schemaVersion,
+              isPayloadEncrypted: existingFullStateOp.isPayloadEncrypted,
+              syncImportReason: existingFullStateOp.syncImportReason ?? undefined,
+              repairBaseServerSeq: existingFullStateOp.repairBaseServerSeq ?? undefined,
+            };
+            const isExactRetry =
+              existingFullStateOp.userId === userId &&
+              (existingFullStateOp.opType === 'SYNC_IMPORT' ||
+                existingFullStateOp.opType === 'BACKUP_IMPORT' ||
+                existingFullStateOp.opType === 'REPAIR') &&
+              isSameIncomingOperation(existingOperation, op, 0, 0);
+            if (isExactRetry) {
+              Logger.info(
+                `[user:${userId}] Idempotent full-state retry from client ${clientId} ` +
+                  `for existing op seq=${existingFullStateOp.serverSeq}`,
+              );
+              return {
+                opId,
+                accepted: true,
+                serverSeq: existingFullStateOp.serverSeq,
+              };
+            }
+            return {
+              opId,
+              accepted: false,
+              error: 'Operation ID already belongs to a different operation',
+              errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
+            };
+          }
+        }
+
+        // The quota gate may delete restore points and old operations to make
+        // room. Reject stale or missing causal REPAIR bases before cleanup can
+        // mutate storage. uploadOps repeats this check under the database row
+        // lock, covering a concurrent writer between this check and the insert.
+        if (snapshotOpType === 'REPAIR' && !isLegacyRepairUpload) {
+          const currentServerSeq = await syncService.getLatestSeq(userId);
+          if (
+            repairBaseServerSeq === undefined ||
+            repairBaseServerSeq !== currentServerSeq
+          ) {
+            reply.send({
+              accepted: false,
+              error: 'REPAIR snapshot does not include current server state',
+              errorCode: SYNC_ERROR_CODES.REPAIR_STALE,
+            });
+            return null;
+          }
+        }
+
+        if (reason === 'initial' && !shouldCleanSlate) {
           const existingImport = await findExistingSyncImport(userId, opId);
 
           if (existingImport) {
@@ -217,10 +365,16 @@ export const uploadSnapshotHandler = async (
         // snapshots, include the operation payload plus the cached snapshot
         // replacement delta; checking only the request body can under-count by
         // nearly 2x because the server stores both the op and snapshot cache.
-        if (isCleanSlate) {
+        if (shouldCleanSlate) {
+          // Encrypted snapshots are never cached (cacheSnapshotIfReplayable
+          // skips them), so their replacement footprint is the op row alone;
+          // charging the phantom cache bytes would 413 near-quota clean-slate
+          // uploads for storage that never materializes.
           const finalStorageBytes =
             estimatedOpStorageBytes +
-            (preparedSnapshot.cacheable ? preparedSnapshot.bytes : 0);
+            (preparedSnapshot.cacheable && !op.isPayloadEncrypted
+              ? preparedSnapshot.bytes
+              : 0);
           const quotaOk = await enforceCleanSlateStorageQuota(
             userId,
             finalStorageBytes,
@@ -228,6 +382,8 @@ export const uploadSnapshotHandler = async (
           );
           if (!quotaOk) return null;
         } else {
+          // Unreachable post-E2EE gate (op.isPayloadEncrypted is always
+          // true here); removed in eradication plan Step 3.
           // Encrypted ops never use the server snapshot cache (server can't
           // decrypt), so the cache delta is exactly zero for them. For
           // unencrypted ops, the eventual cacheSnapshot call either writes
@@ -237,7 +393,7 @@ export const uploadSnapshotHandler = async (
           // on-disk change because the op-row is always counted via
           // estimatedOpStorageBytes.
           let estimatedSnapshotCacheDelta = 0;
-          if (!op.isPayloadEncrypted) {
+          if (!op.isPayloadEncrypted && !isLegacyRepairUpload) {
             const previousSnapshotBytes =
               await syncService.getCachedSnapshotBytes(userId);
             estimatedSnapshotCacheDelta = preparedSnapshot.cacheable
@@ -249,10 +405,22 @@ export const uploadSnapshotHandler = async (
           if (!quotaOk) return null;
         }
 
-        const results = await syncService.uploadOps(userId, clientId, [op], isCleanSlate);
+        const results = await syncService.uploadOps(
+          userId,
+          clientId,
+          [op],
+          shouldCleanSlate,
+          undefined,
+          repairBaseServerSeq,
+          isLegacyRepairUpload,
+        );
         const uploadResult = results[0];
 
-        if (uploadResult.accepted && uploadResult.serverSeq !== undefined) {
+        if (
+          uploadResult.accepted &&
+          uploadResult.serverSeq !== undefined &&
+          !isLegacyRepairUpload
+        ) {
           // Cache the snapshot — but only if the payload is server-replayable.
           // Encrypted snapshots remain available as ops but can't back
           // server-side restore, so we skip caching their blob.
@@ -328,12 +496,25 @@ export const uploadSnapshotHandler = async (
       accepted: finalResult.accepted,
       serverSeq: finalResult.serverSeq,
       error: finalResult.error,
+      errorCode: finalResult.errorCode,
     };
     // Skip caching when the result is a residual DUPLICATE_OPERATION (the
     // existing-op lookup just above failed) so a concurrent retry that
     // lost the insert race cannot overwrite the winner's success entry.
-    if (requestId && finalResult.errorCode !== SYNC_ERROR_CODES.DUPLICATE_OPERATION) {
-      syncService.cacheSnapshotRequestResult(userId, requestId, responseBody);
+    // Also skip transaction rollbacks (INTERNAL_ERROR): nothing was committed,
+    // so the deterministic-requestId retry must re-process instead of being
+    // served the cached transient failure for the dedup TTL (5 min). #8332
+    if (
+      requestId &&
+      finalResult.errorCode !== SYNC_ERROR_CODES.DUPLICATE_OPERATION &&
+      finalResult.errorCode !== SYNC_ERROR_CODES.INTERNAL_ERROR
+    ) {
+      syncService.cacheSnapshotRequestResult(
+        userId,
+        requestId,
+        responseBody,
+        getRequestFingerprint(),
+      );
     }
 
     return reply.send(responseBody);

@@ -1,4 +1,6 @@
 import { expect, test } from '../../fixtures/test.fixture';
+import { openRecurDialog, saveRecurDialog } from '../../utils/recurring-task-helpers';
+import { waitForStatePersistence } from '../../utils/waits';
 
 /**
  * Bug: https://github.com/super-productivity/super-productivity/issues/7344
@@ -38,6 +40,9 @@ test.describe('Recurring Task - preserve past dueDay (#7344)', () => {
     // 2. Advance the clock ~3 weeks so the task's dueDay is now in the past,
     //    reload so the app picks up the new "today".
     await page.clock.setFixedTime(new Date('2026-04-23T10:00:00'));
+    // Let the addTask op-log/IndexedDB writes settle before reloading; a reload
+    // racing with an in-flight flush can hang the navigation (#7344 CI flake).
+    await waitForStatePersistence(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await workViewPage.waitForTaskList();
 
@@ -51,14 +56,7 @@ test.describe('Recurring Task - preserve past dueDay (#7344)', () => {
     // 3. Open the repeat dialog via the task detail panel.
     const reopenedTask = taskPage.getTaskByText(taskTitle).first();
     await taskPage.openTaskDetail(reopenedTask);
-    const recurItem = page
-      .locator('task-detail-item')
-      .filter({ has: page.locator('mat-icon', { hasText: /^repeat$/ }) });
-    await expect(recurItem).toBeVisible({ timeout: 5000 });
-    await recurItem.click();
-
-    const repeatDialog = page.locator('mat-dialog-container');
-    await repeatDialog.waitFor({ state: 'visible', timeout: 10000 });
+    const repeatDialog = await openRecurDialog(page);
 
     // 4. Switch to CUSTOM so repeatCycle becomes editable without overriding
     //    startDate (picking YEARLY_CURRENT_DATE would reset startDate to today).
@@ -75,16 +73,18 @@ test.describe('Recurring Task - preserve past dueDay (#7344)', () => {
     await yearlyOption.click();
 
     // 6. Save the repeat config.
-    const saveBtn = repeatDialog.getByRole('button', { name: /Save/i });
-    await expect(saveBtn).toBeEnabled({ timeout: 5000 });
-    await saveBtn.click();
-    await repeatDialog.waitFor({ state: 'hidden', timeout: 10000 });
+    await saveRecurDialog(page);
     await page.keyboard.press('Escape');
 
     // 7. ASSERTION: after reload, the task remains visible in Today view.
     //    Before the fix: task.dueDay was auto-shifted to 2027-04-01 and the
     //    task disappeared from Today. After the fix: task.dueDay is preserved
     //    at 2026-04-01 (past, still overdue) and the task stays visible.
+    //
+    //    Saving the repeat config enqueues a burst of op-log writes; wait for
+    //    them to persist before reloading so the navigation doesn't race an
+    //    in-flight flush and hang (root cause of the CI Timeout-on-reload flake).
+    await waitForStatePersistence(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await workViewPage.waitForTaskList();
     await expect(taskPage.getTaskByText(taskTitle).first()).toBeVisible({

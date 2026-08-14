@@ -11,6 +11,7 @@ import {
   selectTaskEntities,
   selectTaskEntitiesInActiveProjects,
   selectTaskFeatureState,
+  selectTaskSchedulingSnapshotRecord,
 } from '../../tasks/store/task.selectors';
 import { Task, TaskWithDueTime, TaskWithSubTasks } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
@@ -36,7 +37,7 @@ export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
  * Fallback: Tasks with dueWithTime for today (but no/stale dueDay) are also included.
  * This handles edge cases like imported tasks with scheduled times.
  *
- * See: docs/ai/today-tag-architecture.md
+ * See: ARCHITECTURE-DECISIONS.md Decision #2
  */
 const computeOrderedTaskIdsForToday = (
   todayTag: Tag | undefined,
@@ -60,7 +61,7 @@ const computeOrderedTaskIdsForToday = (
   // - Only check dueDay if dueWithTime is not set
   // - If dueWithTime is set, do NOT check dueDay (even for legacy data with both fields)
   // - This ensures correct behavior with both new data (only one field set) and legacy data (both fields set)
-  // See: docs/ai/dueDay-dueWithTime-mutual-exclusivity.md
+  // See: ARCHITECTURE-DECISIONS.md Decision #1
   const tasksForToday: string[] = [];
   for (const taskId of Object.keys(taskEntities)) {
     const task = taskEntities[taskId];
@@ -208,7 +209,10 @@ export const selectActiveWorkContext = createSelector(
       }
       return {
         ...project,
-        icon: null,
+        // Keep the project's own icon so consumers (e.g. the header title icon)
+        // match the side nav; fall back to null when unset. `...project` already
+        // carries `icon`, but stay explicit since this used to force null.
+        icon: project.icon ?? null,
         taskIds: project.taskIds || [],
         isEnableBacklog: project.isEnableBacklog,
         backlogTaskIds: project.backlogTaskIds || [],
@@ -325,11 +329,15 @@ export const selectDoneBacklogTaskIdsForActiveContext = createSelector(
  * NOT by task.tagIds (TODAY_TAG should NEVER be in task.tagIds).
  * TODAY_TAG.taskIds only stores the ordering.
  *
- * See: docs/ai/today-tag-architecture.md
+ * See: ARCHITECTURE-DECISIONS.md Decision #2
  */
+// SPAP-20: fed by the scheduling snapshot (as a Record) instead of the full
+// active-project task entities, so a `timeSpent`-only tick — which does not
+// change any field computeOrderedTaskIdsForToday reads (id/dueDay/dueWithTime/
+// parentId) — leaves the snapshot ref stable and this selector is skipped.
 export const selectTodayTaskIds = createSelector(
   selectTagFeatureState,
-  selectTaskEntitiesInActiveProjects,
+  selectTaskSchedulingSnapshotRecord,
   selectTodayStr,
   selectStartOfNextDayDiffMs,
   (tagState, activeTaskEntities, todayStr, startOfNextDayDiffMs): string[] => {
@@ -350,6 +358,23 @@ export const selectUndoneTodayTaskIds = createSelector(
     // selectTodayTaskIds already uses board-style pattern
     return todayTaskIds.filter((taskId) => taskState.entities[taskId]?.isDone === false);
   },
+);
+
+/**
+ * Done vs total count of today's top-level tasks, from a single composed
+ * selector so `done`/`total` are always read from the SAME settled state.
+ * Deriving them from two separate store.select subscriptions (combineLatest)
+ * glitches: a task-add emits the new total with a stale undone count,
+ * transiently inflating `done`. Since `undone ⊆ all`, `done` never goes
+ * negative. Used by the rating-prompt "productive win" signal.
+ */
+export const selectTodayProgress = createSelector(
+  selectTodayTaskIds,
+  selectUndoneTodayTaskIds,
+  (allIds, undoneIds): { done: number; total: number } => ({
+    done: allIds.length - undoneIds.length,
+    total: allIds.length,
+  }),
 );
 
 export const selectTimelineTasks = createSelector(
@@ -397,7 +422,7 @@ export const selectTimelineTasks = createSelector(
  * This is used by ValidateStateService to repair state after sync, preventing
  * divergence caused by per-entity conflict resolution of multi-entity operations.
  *
- * See: docs/ai/today-tag-architecture.md
+ * See: ARCHITECTURE-DECISIONS.md Decision #2
  */
 export const selectTodayTagRepair = createSelector(
   selectTagFeatureState,

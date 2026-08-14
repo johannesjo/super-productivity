@@ -14,19 +14,31 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
+import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
 
 @Component({
   selector: 'planner-calendar-event',
   templateUrl: './planner-calendar-event.component.html',
   styleUrl: './planner-calendar-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatIcon, MsToStringPipe, MatMenu, MatMenuItem, MatMenuTrigger, TranslatePipe],
+  imports: [
+    MatIcon,
+    MsToStringPipe,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    TranslatePipe,
+    ShortPlannedAtPipe,
+  ],
 })
 export class PlannerCalendarEventComponent {
   T = T;
   private _calEventActions = inject(CalendarEventActionsService);
 
   readonly calendarEvent = input.required<ScheduleFromCalendarEvent>();
+  // Show the event's clock start time (right-aligned, like a scheduled task).
+  // Used in the "Later Today" list where the start time isn't shown elsewhere.
+  readonly showStartTime = input<boolean>(false);
   isBeingSubmitted = false;
 
   @HostBinding('attr.title') title = '';

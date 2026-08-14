@@ -87,7 +87,12 @@
       </div>
       <mat-card-title>{{ plugin.manifest.name }}</mat-card-title>
       <mat-card-subtitle>
-        v{{ plugin.manifest.version }}
+        <span>v{{ plugin.manifest.version }}</span>
+        @if (getPluginAuthor(plugin); as author) {
+          <span class="plugin-author">
+            {{ T.PLUGINS.AUTHORED_BY | translate: { author } }}
+          </span>
+        }
         @if (isPluginLoading(plugin)) {
           <mat-chip color="accent">
             <mat-icon class="loading-icon">autorenew</mat-icon>
@@ -161,7 +166,8 @@
 
       @if (
         (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) ||
-        (plugin.manifest.permissions && plugin.manifest.permissions.length > 0)
+        (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) ||
+        getNetworkReachHosts(plugin).length > 0
       ) {
         <collapsible [title]="getPermissionsHooksTitle(plugin)">
           @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
@@ -173,6 +179,18 @@
                 }
               </mat-chip-set>
             </div>
+          }
+          @if (getNetworkReachHosts(plugin); as networkHosts) {
+            @if (networkHosts.length > 0) {
+              <div class="plugin-info-section">
+                <div class="label">{{ T.PLUGINS.ALLOWED_HOSTS | translate }}:</div>
+                <mat-chip-set>
+                  @for (host of networkHosts; track host) {
+                    <mat-chip>{{ host }}</mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
           }
           @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
             <div class="plugin-info-section">
@@ -188,17 +206,32 @@
       }
     </mat-card-content>
 
-    @if (isUploadedPlugin(plugin)) {
+    @if (
+      (isIssueProviderPlugin(plugin) && plugin.isEnabled) || isUploadedPlugin(plugin)
+    ) {
       <mat-card-actions [align]="'end'">
-        <button
-          mat-button
-          color="warn"
-          (click)="removeUploadedPlugin(plugin)"
-          [disabled]="isUploading()"
-        >
-          <mat-icon>delete</mat-icon>
-          {{ T.PLUGINS.REMOVE | translate }}
-        </button>
+        @if (isIssueProviderPlugin(plugin) && plugin.isEnabled) {
+          <button
+            mat-button
+            color="primary"
+            (click)="goToIssuePanel()"
+            [disabled]="isPluginLoading(plugin)"
+          >
+            <mat-icon>arrow_forward</mat-icon>
+            {{ T.PLUGINS.SETUP_ISSUE_PROVIDER | translate }}
+          </button>
+        }
+        @if (isUploadedPlugin(plugin)) {
+          <button
+            mat-button
+            color="warn"
+            (click)="removeUploadedPlugin(plugin)"
+            [disabled]="isUploading()"
+          >
+            <mat-icon>delete</mat-icon>
+            {{ T.PLUGINS.REMOVE | translate }}
+          </button>
+        }
       </mat-card-actions>
     }
   </mat-card>

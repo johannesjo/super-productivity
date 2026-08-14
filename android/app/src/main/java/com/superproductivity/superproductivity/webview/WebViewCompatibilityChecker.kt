@@ -51,6 +51,7 @@ object WebViewCompatibilityChecker {
         "com.chrome.canary",
         "com.sec.android.app.sbrowser",
         "com.huawei.webview",
+        "app.vanadium.webview",
     )
 
     enum class Status {
@@ -72,7 +73,7 @@ object WebViewCompatibilityChecker {
 
     enum class BlockScreenAction {
         UPDATE_WEBVIEW,
-        OPEN_WEBVIEW_SETTINGS_WITH_WARNING,
+        OPEN_WEBVIEW_APP_INFO_WITH_WARNING,
     }
 
     data class BlockScreenConfig(
@@ -257,6 +258,9 @@ object WebViewCompatibilityChecker {
         providerPackageIsCurrent && packageMajor != null && packageMajor >= MIN_CHROMIUM_VERSION
 
     @VisibleForTesting
+    internal fun knownWebViewPackages(): List<String> = KNOWN_WEBVIEW_PACKAGES
+
+    @VisibleForTesting
     internal fun blockScreenConfig(
         source: VersionSource,
         hasProviderDetails: Boolean,
@@ -276,7 +280,7 @@ object WebViewCompatibilityChecker {
                 R.string.webview_init_failure_details_without_provider
             },
             action = if (isInitFailure) {
-                BlockScreenAction.OPEN_WEBVIEW_SETTINGS_WITH_WARNING
+                BlockScreenAction.OPEN_WEBVIEW_APP_INFO_WITH_WARNING
             } else {
                 BlockScreenAction.UPDATE_WEBVIEW
             },
@@ -468,6 +472,32 @@ object WebViewCompatibilityChecker {
         openWebViewUpdatePage(context, providerPackage)
     }
 
+    /**
+     * Opens the WebView provider's App Info page, from which the user can reach
+     * Storage → Clear storage. Clearing WebView's storage resets a corrupted
+     * provider data dir / variations seed — the most common cause of an init
+     * failure on a device whose WebView version is otherwise current (the version
+     * picker and Play Store that [openWebViewSettingsPage] targets do not fix
+     * this). Defaults to the standard system WebView package when the active
+     * provider could not be resolved (the norm for an init failure, where
+     * getCurrentWebViewPackage() threw).
+     */
+    fun openWebViewAppInfoPage(context: Context, providerPackage: String?) {
+        val pkg = providerPackageOrDefault(providerPackage)
+        if (startActivitySafely(context, webViewProviderDetailsIntent(pkg))) {
+            return
+        }
+
+        // App Info unavailable (rare): fall back to the provider picker, then the
+        // Play Store listing, so the button always lands somewhere actionable.
+        if (startActivitySafely(context, webViewSettingsIntent())) {
+            return
+        }
+
+        Log.w(TAG, "No activity available to open WebView app info; falling back to Play Store")
+        openWebViewUpdatePage(context, pkg)
+    }
+
     @VisibleForTesting
     internal fun webViewSettingsIntent(): Intent =
         Intent(Settings.ACTION_WEBVIEW_SETTINGS)
@@ -491,10 +521,12 @@ object WebViewCompatibilityChecker {
         "package:$providerPackage"
 
     @VisibleForTesting
-    internal fun webViewUpdatePageUrl(providerPackage: String? = null): String {
-        val packageName = providerPackage?.takeIf { it.isNotBlank() } ?: DEFAULT_WEBVIEW_PACKAGE
-        return "https://play.google.com/store/apps/details?id=$packageName"
-    }
+    internal fun webViewUpdatePageUrl(providerPackage: String? = null): String =
+        "https://play.google.com/store/apps/details?id=${providerPackageOrDefault(providerPackage)}"
+
+    @VisibleForTesting
+    internal fun providerPackageOrDefault(providerPackage: String?): String =
+        providerPackage?.takeIf { it.isNotBlank() } ?: DEFAULT_WEBVIEW_PACKAGE
 
     private fun startActivitySafely(context: Context, intent: Intent): Boolean {
         return try {

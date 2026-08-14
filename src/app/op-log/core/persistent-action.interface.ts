@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { EntityType, OpType } from './operation.types';
+import { EntityType, LwwUpdateMode, OpType } from './operation.types';
 
 export interface PersistentActionMeta {
   isPersistent?: boolean; // When false, the action is blacklisted and not persisted
@@ -8,7 +8,20 @@ export interface PersistentActionMeta {
   entityIds?: string[]; // For batch operations
   opType: OpType;
   isRemote?: boolean; // TRUE if from Sync (prevents re-logging)
+  // TRUE only when the op being applied was authored by a DIFFERENT client
+  // (set during bulk apply when op.clientId !== this device's clientId).
+  // Distinct from isRemote, which is also TRUE for replay of the device's OWN
+  // ops during hydration. Reducers that preserve per-device "local-only"
+  // settings (e.g. sync config) must key off THIS flag, not isRemote, so they
+  // don't clobber the device's own settings while replaying its own ops.
+  isApplyingFromOtherClient?: boolean;
   isBulk?: boolean; // TRUE for batch operations
+  lwwUpdateMode?: LwwUpdateMode;
+  recreatesEntityAfterDelete?: boolean;
+  // Authenticated project-move footprint surfaced from the encrypted
+  // LwwUpdatePayload.projectMoveFootprint. Reducers relocate task families from
+  // THIS field, never the plaintext `entityIds` envelope. GHSA-8pxh-mgc7-gp3g.
+  projectMoveFootprint?: readonly string[];
 }
 
 export interface PersistentAction extends Action {

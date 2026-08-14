@@ -23,6 +23,9 @@
 // survive between tests.
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
+import { asyncScheduler } from 'rxjs';
+import { clearDeferredActions } from './app/op-log/capture/operation-capture.meta-reducer';
+import { _resetDevErrorState } from './app/util/dev-error';
 
 import { getTestBed, TestBed } from '@angular/core/testing';
 import {
@@ -31,6 +34,55 @@ import {
 } from '@angular/platform-browser-dynamic/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
+
+// Harden the suite against leaked rxjs scheduler actions. When a time-based
+// operator (debounceTime / delay / timer / interval …) schedules an action
+// and the owning subscription is torn down before its timer fires, the
+// AsyncAction becomes `closed`, but a still-pending IDB-callback-queued timer
+// can fire `scheduler.flush(action)` anyway. rxjs's AsyncAction.execute then
+// returns `new Error('executing a cancelled action')`, which AsyncScheduler
+// .flush RETHROWS synchronously inside the setInterval callback. That throw
+// surfaces in whatever spec happens to be tearing down at the time ("An error
+// was thrown in afterAll"), wedges Chrome, and disconnects the whole Karma
+// session — a documented, order-dependent flake from op-log / sync specs.
+//
+// A cancelled action must not run its work regardless, so executing it as a
+// no-op is semantically correct; we only drop rxjs's diagnostic Error (which
+// no production code or spec relies on) to stop one leaked timer from killing
+// the run. `asyncScheduler.schedulerActionCtor` is the base `AsyncAction`
+// class; AsapAction / AnimationFrameAction / QueueAction extend it and inherit
+// `execute`, so patching this one prototype covers every scheduler.
+interface CancellableSchedulerAction {
+  closed: boolean;
+  execute(state: unknown, delay: number): unknown;
+}
+const asyncActionProto = (
+  asyncScheduler as unknown as {
+    schedulerActionCtor: { prototype: CancellableSchedulerAction };
+  }
+).schedulerActionCtor?.prototype;
+if (asyncActionProto && typeof asyncActionProto.execute === 'function') {
+  const originalExecute = asyncActionProto.execute;
+  let warnedOnce = false;
+  asyncActionProto.execute = function (
+    this: CancellableSchedulerAction,
+    state: unknown,
+    delay: number,
+  ): unknown {
+    if (this.closed) {
+      if (!warnedOnce) {
+        warnedOnce = true;
+        console.warn(
+          '[test] Suppressed a leaked rxjs scheduler action (a cancelled ' +
+            "action's timer fired after teardown). A spec is not tearing down " +
+            'a time-based subscription; see the comment in src/test.ts.',
+        );
+      }
+      return undefined;
+    }
+    return originalExecute.call(this, state, delay);
+  };
+}
 
 beforeAll(() => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;
@@ -51,6 +103,24 @@ beforeEach(() => {
     configurable: true,
     writable: true,
   });
+
+  // The deferred-action buffer is module-level state shared by every spec in
+  // the Karma context. Actions left in it leak into later spec FILES, where
+  // the phantom-change guard (#8751) reads it and silently skips compaction
+  // and snapshot saves — an order-dependent failure that passes standalone.
+  clearDeferredActions();
+
+  // The dialog spies below are created once at module load, so reset their
+  // call history before every spec to prevent assertions from passing on a
+  // stale call from an unrelated test. Re-arm devError's alert latch as well
+  // so legitimate alerts remain observable regardless of spec order.
+  if (jasmine.isSpy(window.alert)) {
+    (window.alert as jasmine.Spy).calls.reset();
+  }
+  if (jasmine.isSpy(window.confirm)) {
+    (window.confirm as jasmine.Spy).calls.reset();
+  }
+  _resetDevErrorState();
 });
 
 // Mock browser dialogs globally for tests

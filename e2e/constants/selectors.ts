@@ -48,7 +48,7 @@ export const cssSelectors = {
   // ============================================================================
   // ADD TASK BAR SELECTORS
   // ============================================================================
-  ADD_TASK_INPUT: 'add-task-bar.global input',
+  ADD_TASK_INPUT: 'add-task-bar.global .main-input',
   ADD_TASK_SUBMIT: '.e2e-add-task-submit',
   ADD_BTN: '.tour-addBtn',
   SWITCH_ADD_TO_BTN: '.switch-add-to-btn',
@@ -128,7 +128,7 @@ export const cssSelectors = {
   // TASK DETAIL PANEL SELECTORS
   // ============================================================================
   RIGHT_PANEL: '.right-panel',
-  DETAIL_PANEL: 'dialog-task-detail-panel, task-detail-panel',
+  DETAIL_PANEL: 'task-detail-panel',
   DETAIL_PANEL_BTN: '.show-additional-info-btn',
   SCHEDULE_TASK_ITEM:
     'task-detail-item:has(mat-icon:text("alarm")), task-detail-item:has(mat-icon:text("today")), task-detail-item:has(mat-icon:text("schedule"))',

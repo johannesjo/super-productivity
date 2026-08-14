@@ -7,11 +7,12 @@ import {
 import { prisma } from '../../db';
 import { Logger } from '../../logger';
 import { gunzipAsync, gzipAsync } from '../gzip';
-import type { SnapshotResult } from '../sync.types';
+import { CAUSAL_FULL_STATE_OPERATION_WHERE, type SnapshotResult } from '../sync.types';
 import {
   _resolveExpectedFirstSeq,
   assertContiguousReplayBatch,
   EncryptedOpsNotSupportedError,
+  LegacyRepairReplayUnsupportedError,
   replayOpsToState,
 } from '../op-replay';
 
@@ -40,9 +41,13 @@ const REPLAY_OPERATION_SELECT = {
   opType: true,
   entityType: true,
   entityId: true,
+  // Multi-entity batch deletes must replay against the full set, not just the
+  // scalar entityId, or entities 2..n survive in restore snapshots (#8340).
+  entityIds: true,
   payload: true,
   schemaVersion: true,
   isPayloadEncrypted: true,
+  repairBaseServerSeq: true,
 } as const;
 
 export class SnapshotGenerationService {
@@ -471,7 +476,7 @@ export class SnapshotGenerationService {
       where: {
         userId,
         serverSeq: { lte: startSeq },
-        opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+        ...CAUSAL_FULL_STATE_OPERATION_WHERE,
         isPayloadEncrypted: false,
       },
       orderBy: { serverSeq: 'desc' },
@@ -491,6 +496,22 @@ export class SnapshotGenerationService {
 
     if (encryptedOpCount > 0) {
       throw new EncryptedOpsNotSupportedError(encryptedOpCount);
+    }
+
+    const legacyRepairCount = await tx.operation.count({
+      where: {
+        userId,
+        serverSeq: {
+          gt: latestUnencryptedFullStateOp?.serverSeq ?? 0,
+          lte: startSeq,
+        },
+        opType: 'REPAIR',
+        repairBaseServerSeq: null,
+      },
+    });
+
+    if (legacyRepairCount > 0) {
+      throw new LegacyRepairReplayUnsupportedError();
     }
   }
 }

@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { registerLocaleData } from '@angular/common';
+import localeSv from '@angular/common/locales/sv';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -10,11 +12,14 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import { ScheduleEvent } from '../schedule.model';
 import { SVEType } from '../schedule.const';
+import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
 
 describe('ScheduleWeekComponent', () => {
   let fixture: ComponentFixture<ScheduleWeekComponent>;
 
   beforeEach(async () => {
+    registerLocaleData(localeSv, 'sv');
+
     await TestBed.configureTestingModule({
       imports: [NoopAnimationsModule, ScheduleWeekComponent, TranslateModule.forRoot()],
       providers: [
@@ -23,7 +28,8 @@ describe('ScheduleWeekComponent', () => {
           provide: DateTimeFormatService,
           useValue: {
             is24HourFormat: signal(true),
-            currentLocale: signal('en-US'),
+            currentLocale: signal('sv'),
+            isoTextLocale: signal('en-US'),
           },
         },
         {
@@ -31,6 +37,13 @@ describe('ScheduleWeekComponent', () => {
           useValue: {
             cfg: signal(DEFAULT_GLOBAL_CONFIG),
           },
+        },
+        {
+          provide: CalendarEventActionsService,
+          useValue: jasmine.createSpyObj<CalendarEventActionsService>(
+            'CalendarEventActionsService',
+            ['canMoveEvent'],
+          ),
         },
       ],
     })
@@ -41,6 +54,15 @@ describe('ScheduleWeekComponent', () => {
       .compileComponents();
 
     fixture = TestBed.createComponent(ScheduleWeekComponent);
+  });
+
+  it('uses the UI language for weekday headers with ISO formatting enabled', () => {
+    fixture.componentRef.setInput('daysToShow', ['2026-05-11']);
+
+    expect(fixture.componentInstance.dayHeaderLabels()['2026-05-11']).toEqual({
+      num: '11',
+      day: 'Mon',
+    });
   });
 
   it('should dedupe visible and hidden beyond-budget tasks in the day badge', () => {

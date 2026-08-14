@@ -22,7 +22,8 @@ import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { ArchiveModel } from '../../features/archive/archive.model';
 import { ArchiveDbAdapter } from '../../core/persistence/archive-db-adapter.service';
 import { OpType } from '../core/operation.types';
-import { confirmDialog } from '../../util/native-dialogs';
+import { LockService } from '../sync/lock.service';
+import { LOCK_NAMES } from '../core/operation-log.const';
 
 /**
  * Creates an empty ArchiveModel with default values.
@@ -36,6 +37,15 @@ const createEmptyArchiveModel = (): ArchiveModel => ({
 
 /**
  * Action types that affect archive storage and require special handling.
+ *
+ * INVARIANT: every archive side effect for these actions must be idempotent
+ * even when it already fully succeeded once. Crash recovery marks interrupted
+ * remote ops `archive_pending` (OperationLogRecoveryService) and the hydrator
+ * retry re-runs their archive work with `skipReducerDispatch` — the crash
+ * window is between archive completion and `markApplied()`, so a re-run can hit
+ * an archive that is already up to date. Use id-keyed writes / overwrites, never
+ * additive merges (e.g. `archiveTT[...] = value`, not `+=`); an additive path
+ * here would silently double-count time-tracking / counter deltas on this path.
  */
 const ARCHIVE_AFFECTING_ACTION_TYPES: string[] = [
   TaskSharedActions.moveToArchive.type,
@@ -95,7 +105,11 @@ export const isArchiveAffectingAction = (action: Action): action is PersistentAc
  *
  * ## Important Notes
  *
- * - For remote operations, uses `isIgnoreDBLock: true` because sync processing has the DB locked
+ * - Task/archive model writes, full-state archive replacement, flush, and
+ *   compression serialize behind the TASK_ARCHIVE mutex (separate from the
+ *   OPERATION_LOG lock sync holds)
+ * - TimeTrackingService's project/tag cleanup paths are not yet covered by that
+ *   mutex (tracked in #8941)
  * - All operations are idempotent - safe to run multiple times
  * - Use `isArchiveAffectingAction()` helper to check if an action needs archive handling
  */
@@ -119,6 +133,7 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
   // ═══════════════════════════════════════════════════════════════════════════
   private _injector = inject(Injector);
   private _archiveDbAdapter = inject(ArchiveDbAdapter);
+  private _lockService = inject(LockService);
   private _getArchiveService = lazyInject(this._injector, ArchiveService);
   private _getTaskArchiveService = lazyInject(this._injector, TaskArchiveService);
   private _getTimeTrackingService = lazyInject(this._injector, TimeTrackingService);
@@ -130,9 +145,12 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
   /**
    * Process an action and handle any archive-related side effects.
    *
-   * This method handles both local and remote operations. For remote operations
-   * (action.meta.isRemote === true), it uses isIgnoreDBLock: true because sync
-   * processing has the database locked.
+   * This method handles both local and remote operations. Remote operations
+   * run while sync holds the OPERATION_LOG lock. Archive mutations performed by
+   * the task archive, direct adapter, and compression paths additionally
+   * serialize behind the separate TASK_ARCHIVE mutex (the legacy
+   * isIgnoreDBLock option no longer bypasses it). Time-tracking cleanup remains
+   * a documented exception (#8941).
    *
    * @param action The action that was dispatched
    * @returns Promise that resolves when archive operations are complete
@@ -208,7 +226,7 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * Removes a restored task from archive storage.
    *
    * @localBehavior Executes normally (acquires DB lock)
-   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
+   * @remoteBehavior Executes under the TASK_ARCHIVE mutex
    */
   private async _handleRestoreTask(action: PersistentAction): Promise<void> {
     const task = (action as ReturnType<typeof TaskSharedActions.restoreTask>).task;
@@ -304,26 +322,32 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
 
     const timestamp = (action as ReturnType<typeof flushYoungToOld>).timestamp;
 
-    // Load current state using ArchiveDbAdapter
-    // Default to empty archives if they don't exist (first-time usage)
-    const currentArchiveYoung =
-      (await this._archiveDbAdapter.loadArchiveYoung()) ?? createEmptyArchiveModel();
-    const currentArchiveOld =
-      (await this._archiveDbAdapter.loadArchiveOld()) ?? createEmptyArchiveModel();
+    // Serialize against local archive mutations: this is a read-modify-write
+    // over BOTH archives, so an unlocked run could silently drop a concurrent
+    // locked local write. TASK_ARCHIVE is separate from OPERATION_LOG, so
+    // acquiring it while sync holds the op-log lock is safe.
+    await this._lockService.request(LOCK_NAMES.TASK_ARCHIVE, async () => {
+      // Load current state using ArchiveDbAdapter
+      // Default to empty archives if they don't exist (first-time usage)
+      const currentArchiveYoung =
+        (await this._archiveDbAdapter.loadArchiveYoung()) ?? createEmptyArchiveModel();
+      const currentArchiveOld =
+        (await this._archiveDbAdapter.loadArchiveOld()) ?? createEmptyArchiveModel();
 
-    const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
-      archiveYoung: currentArchiveYoung,
-      archiveOld: currentArchiveOld,
-      threshold: ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD,
-      now: timestamp,
+      const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
+        archiveYoung: currentArchiveYoung,
+        archiveOld: currentArchiveOld,
+        threshold: ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD,
+        now: timestamp,
+      });
+
+      // Atomic write: both archives written in a single IndexedDB transaction.
+      // If either write fails, the entire transaction is rolled back automatically.
+      await this._archiveDbAdapter.saveArchivesAtomic(
+        { ...newSorted.archiveYoung, lastTimeTrackingFlush: timestamp },
+        { ...newSorted.archiveOld, lastTimeTrackingFlush: timestamp },
+      );
     });
-
-    // Atomic write: both archives written in a single IndexedDB transaction.
-    // If either write fails, the entire transaction is rolled back automatically.
-    await this._archiveDbAdapter.saveArchivesAtomic(
-      { ...newSorted.archiveYoung, lastTimeTrackingFlush: timestamp },
-      { ...newSorted.archiveOld, lastTimeTrackingFlush: timestamp },
-    );
 
     OpLog.log(
       '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via remote op handler)\n_______________________',
@@ -354,7 +378,7 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * Removes all archived tasks for a deleted project.
    *
    * @localBehavior Executes (cleans up archive for deleted project)
-   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
+   * @remoteBehavior Task archive cleanup uses the mutex; time-tracking cleanup is separate (#8941)
    */
   private async _handleDeleteProject(action: PersistentAction): Promise<void> {
     const projectId = (action as ReturnType<typeof TaskSharedActions.deleteProject>)
@@ -371,7 +395,7 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * Removes tag references from archived tasks and deletes orphaned tasks.
    *
    * @localBehavior Executes (cleans up archive for deleted tags)
-   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
+   * @remoteBehavior Task archive cleanup uses the mutex; time-tracking cleanup is separate (#8941)
    */
   private async _handleDeleteTags(action: PersistentAction): Promise<void> {
     const tagIdsToRemove =
@@ -394,7 +418,7 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * Removes repeatCfgId from archived tasks.
    *
    * @localBehavior Executes (cleans up archive for deleted repeat config)
-   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
+   * @remoteBehavior Executes under the TASK_ARCHIVE mutex
    */
   private async _handleDeleteTaskRepeatCfg(action: PersistentAction): Promise<void> {
     const repeatCfgId = (
@@ -411,7 +435,7 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * Unlinks issue data from archived tasks for a deleted issue provider.
    *
    * @localBehavior Executes (cleans up archive for deleted provider)
-   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
+   * @remoteBehavior Executes under the TASK_ARCHIVE mutex
    */
   private async _handleDeleteIssueProvider(action: PersistentAction): Promise<void> {
     const issueProviderId = (
@@ -428,7 +452,7 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * Unlinks issue data from archived tasks for multiple deleted issue providers.
    *
    * @localBehavior Executes (cleans up archive for deleted providers)
-   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
+   * @remoteBehavior Executes under the TASK_ARCHIVE mutex
    */
   private async _handleDeleteIssueProviders(action: PersistentAction): Promise<void> {
     const ids = (action as ReturnType<typeof TaskSharedActions.deleteIssueProviders>).ids;
@@ -446,8 +470,8 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
    * Fixes bug where SYNC_IMPORT updated NgRx state but never persisted archive
    * data to IndexedDB on remote client, causing data loss on restart.
    *
-   * Uses rollback for atomicity - if archiveOld write fails after archiveYoung
-   * succeeds, we restore archiveYoung to its original state.
+   * Both archive halves are preflighted before writing and, whenever both are
+   * available, committed in one IndexedDB transaction.
    *
    * @localBehavior SKIP - Archive written by BackupService.importCompleteBackup()
    * @remoteBehavior Executes - Uses ArchiveDbAdapter for direct IndexedDB access
@@ -464,116 +488,92 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
       .archiveYoung;
     const archiveOld = (appDataComplete as { archiveOld?: ArchiveModel }).archiveOld;
 
-    // Load original state for potential rollback and safety checks
-    const originalArchiveYoung = await this._archiveDbAdapter.loadArchiveYoung();
-    const originalArchiveOld = await this._archiveDbAdapter.loadArchiveOld();
+    const didWrite = await this._lockService.request(
+      LOCK_NAMES.TASK_ARCHIVE,
+      async () => {
+        // Load both originals before evaluating either guard. A refused/missing half
+        // is preserved in the same transaction as an accepted incoming half.
+        const originalArchiveYoung = await this._archiveDbAdapter.loadArchiveYoung();
+        const originalArchiveOld = await this._archiveDbAdapter.loadArchiveOld();
 
-    // Safety guard: Check if we're about to overwrite non-empty archives with empty ones
-    // This can happen if a full-state op (SYNC_IMPORT/REPAIR) was created with the sync
-    // getStateSnapshot() instead of getStateSnapshotAsync(), which returns
-    // DEFAULT_ARCHIVE (empty)
-    const hasExistingYoung = (originalArchiveYoung?.task?.ids?.length ?? 0) > 0;
-    const hasExistingOld = (originalArchiveOld?.task?.ids?.length ?? 0) > 0;
-    const isIncomingYoungEmpty = !archiveYoung?.task?.ids?.length;
-    const isIncomingOldEmpty = !archiveOld?.task?.ids?.length;
+        const shouldWriteYoung =
+          archiveYoung !== undefined &&
+          (await this._guardArchiveOverwrite({
+            label: 'archiveYoung',
+            existing: originalArchiveYoung,
+            incoming: archiveYoung,
+            opType: action.meta.opType,
+          }));
+        const shouldWriteOld =
+          archiveOld !== undefined &&
+          (await this._guardArchiveOverwrite({
+            label: 'archiveOld',
+            existing: originalArchiveOld,
+            incoming: archiveOld,
+            opType: action.meta.opType,
+          }));
 
-    // Write archiveYoung if present in the import data
-    if (archiveYoung !== undefined) {
-      if (hasExistingYoung && isIncomingYoungEmpty) {
-        const existingCount = originalArchiveYoung?.task?.ids?.length ?? 0;
-        if (
-          action.meta.opType === OpType.SyncImport ||
-          action.meta.opType === OpType.Repair
-        ) {
-          // SYNC_IMPORT/REPAIR with empty archives is most often a bug (full-state
-          // op built with the sync getStateSnapshot() instead of
-          // getStateSnapshotAsync()). Preserve local archives: discarding non-empty
-          // local data for an empty payload is never the safe choice.
-          OpLog.warn(
-            `[ArchiveOperationHandler] ${action.meta.opType} has empty archiveYoung but local has ${existingCount} tasks. ` +
-              'Preserving local archives (this is likely a bug in the full-state op source).',
-          );
-          // Skip writing empty archive - preserve local
-        } else if (action.meta.opType === OpType.BackupImport) {
-          // BACKUP_IMPORT is an explicit user action - ask for confirmation
-          const confirmed = confirmDialog(
-            `This backup has empty archives, but you have ${existingCount} archived tasks locally. ` +
-              'Restoring will delete your archived data. Continue?',
-          );
-          if (!confirmed) {
-            throw new Error(
-              '[ArchiveOperationHandler] User cancelled backup import to preserve archives',
-            );
-          }
-          await this._archiveDbAdapter.saveArchiveYoung(archiveYoung);
-        } else {
-          await this._archiveDbAdapter.saveArchiveYoung(archiveYoung);
+        if (!shouldWriteYoung && !shouldWriteOld) {
+          return false;
         }
-      } else {
-        await this._archiveDbAdapter.saveArchiveYoung(archiveYoung);
-      }
-    }
 
-    // Write archiveOld if present in the import data
-    if (archiveOld !== undefined) {
-      let shouldWriteArchiveOld = true;
+        const nextArchiveYoung = shouldWriteYoung ? archiveYoung : originalArchiveYoung;
+        const nextArchiveOld = shouldWriteOld ? archiveOld : originalArchiveOld;
 
-      if (hasExistingOld && isIncomingOldEmpty) {
-        const existingCount = originalArchiveOld?.task?.ids?.length ?? 0;
-        if (
-          action.meta.opType === OpType.SyncImport ||
-          action.meta.opType === OpType.Repair
-        ) {
-          // SYNC_IMPORT/REPAIR with empty archives is most often a bug (full-state
-          // op built with the sync getStateSnapshot() instead of
-          // getStateSnapshotAsync()). Preserve local archives: discarding non-empty
-          // local data for an empty payload is never the safe choice.
-          OpLog.warn(
-            `[ArchiveOperationHandler] ${action.meta.opType} has empty archiveOld but local has ${existingCount} tasks. ` +
-              'Preserving local archives (this is likely a bug in the full-state op source).',
+        if (nextArchiveYoung !== undefined && nextArchiveOld !== undefined) {
+          await this._archiveDbAdapter.saveArchivesAtomic(
+            nextArchiveYoung,
+            nextArchiveOld,
           );
-          shouldWriteArchiveOld = false;
-        } else if (action.meta.opType === OpType.BackupImport) {
-          // BACKUP_IMPORT is an explicit user action - ask for confirmation
-          const confirmed = confirmDialog(
-            `This backup has empty old archives, but you have ${existingCount} old archived tasks locally. ` +
-              'Restoring will delete your old archived data. Continue?',
-          );
-          if (!confirmed) {
-            throw new Error(
-              '[ArchiveOperationHandler] User cancelled backup import to preserve archives',
-            );
-          }
+        } else if (shouldWriteYoung && nextArchiveYoung !== undefined) {
+          await this._archiveDbAdapter.saveArchiveYoung(nextArchiveYoung);
+        } else if (shouldWriteOld && nextArchiveOld !== undefined) {
+          await this._archiveDbAdapter.saveArchiveOld(nextArchiveOld);
         }
-      }
-
-      if (shouldWriteArchiveOld) {
-        try {
-          await this._archiveDbAdapter.saveArchiveOld(archiveOld);
-        } catch (e) {
-          // Attempt rollback: restore archiveYoung to original state
-          OpLog.err(
-            '[ArchiveOperationHandler] archiveOld write failed, attempting rollback...',
-            e,
-          );
-          try {
-            if (originalArchiveYoung !== undefined) {
-              await this._archiveDbAdapter.saveArchiveYoung(originalArchiveYoung);
-              OpLog.log('[ArchiveOperationHandler] Rollback successful');
-            }
-          } catch (rollbackErr) {
-            OpLog.err(
-              '[ArchiveOperationHandler] Rollback FAILED - archive may be inconsistent',
-              rollbackErr,
-            );
-          }
-          throw e; // Re-throw original error
-        }
-      }
-    }
-
-    OpLog.log(
-      '[ArchiveOperationHandler] Wrote archive data from SYNC_IMPORT/BACKUP_IMPORT',
+        return true;
+      },
     );
+
+    if (didWrite) {
+      OpLog.log(
+        '[ArchiveOperationHandler] Wrote archive data from SYNC_IMPORT/BACKUP_IMPORT',
+      );
+    }
+  }
+
+  /**
+   * Safety guard: prevents overwriting a non-empty local archive with an empty
+   * incoming one. Returns true if the caller should proceed with the write.
+   *
+   * Handles two opType paths:
+   * - SYNC_IMPORT / REPAIR: silently preserves local (empty incoming is likely a bug)
+   * - BACKUP_IMPORT / default: allows the write. BACKUP_IMPORT is already an
+   *   explicit user decision on the originating client, so remote replay must
+   *   be deterministic and cannot prompt independently on every other client.
+   */
+  private async _guardArchiveOverwrite(opts: {
+    label: 'archiveYoung' | 'archiveOld';
+    existing: ArchiveModel | undefined;
+    incoming: ArchiveModel | undefined;
+    opType: OpType;
+  }): Promise<boolean> {
+    const hasExisting = (opts.existing?.task?.ids?.length ?? 0) > 0;
+    const isIncomingEmpty = !opts.incoming?.task?.ids?.length;
+
+    if (!hasExisting || !isIncomingEmpty) {
+      return true;
+    }
+
+    const existingCount = opts.existing?.task?.ids?.length ?? 0;
+
+    if (opts.opType === OpType.SyncImport || opts.opType === OpType.Repair) {
+      OpLog.warn(
+        `[ArchiveOperationHandler] ${opts.opType} has empty ${opts.label} but local has ${existingCount} tasks. ` +
+          'Preserving local archives (this is likely a bug in the full-state op source).',
+      );
+      return false;
+    }
+
+    return true;
   }
 }

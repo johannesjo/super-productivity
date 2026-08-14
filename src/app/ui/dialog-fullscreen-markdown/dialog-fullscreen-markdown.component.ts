@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
@@ -23,10 +23,11 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { auditTime, debounceTime } from 'rxjs/operators';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { T } from '../../t.const';
 import { isSmallScreen } from '../../util/is-small-screen';
+import { DateService } from '../../core/date/date.service';
 import {
   handleListKeydown,
   TextTransformResult,
@@ -45,12 +46,22 @@ import {
   insertTable,
 } from '../inline-markdown/markdown-toolbar.util';
 import { ClipboardImageService } from '../../core/clipboard-image/clipboard-image.service';
+import { DialogConfirmComponent } from '../dialog-confirm/dialog-confirm.component';
 import { TaskAttachmentService } from '../../features/tasks/task-attachment/task-attachment.service';
 import { ClipboardPasteHandlerService } from '../../core/clipboard-image/clipboard-paste-handler.service';
+import { toggleChecklistItemAtIndex } from '../../features/markdown-checklist/checklist-operations';
 import { HISTORY_STATE } from 'src/app/app.constants';
 import { IS_MOBILE } from 'src/app/util/is-mobile';
 import { IS_IOS } from 'src/app/util/is-ios';
 import { Keyboard } from '@capacitor/keyboard';
+import { DialogMarkdownShortcutsComponent } from './dialog-markdown-shortcuts.component';
+import {
+  isShortcutWithKey,
+  MARKDOWN_SHORTCUTS,
+  MarkdownShortcut,
+  shortcutLabels,
+  ShortcutNames,
+} from './markdown-shortcuts.const';
 
 type ViewMode = 'SPLIT' | 'PARSED' | 'TEXT_ONLY';
 const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TEXT_ONLY'];
@@ -79,8 +90,17 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   private readonly _taskAttachmentService = inject(TaskAttachmentService);
   private readonly _clipboardPasteHandler = inject(ClipboardPasteHandlerService);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _dateService = inject(DateService);
   _matDialogRef = inject<MatDialogRef<DialogFullscreenMarkdownComponent>>(MatDialogRef);
-  data: { content: string; taskId?: string } = inject(MAT_DIALOG_DATA) || { content: '' };
+  data: {
+    content: string;
+    taskId?: string;
+    originalContent?: string;
+  } = inject(MAT_DIALOG_DATA) || { content: '' };
+  // Reference for the discard confirmation. `originalContent` wins when the
+  // dialog is seeded with recovered draft content that differs from the
+  // persisted entity content.
+  protected _initialContent: string = this.data.originalContent ?? this.data.content;
 
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
@@ -89,7 +109,8 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   readonly contentChanged = output<string>();
   private readonly _contentChanges$ = new Subject<string>();
   private _currentPastePlaceholder: string | null = null;
-
+  private readonly _matDialog = inject(MatDialog);
+  readonly shortcutLabels = shortcutLabels;
   /**
    * Resolved content with blob URLs for images (for preview rendering).
    * Initialized in ngOnInit with raw content, updated asynchronously when images resolve.
@@ -97,6 +118,14 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   resolvedContent = signal<string>('');
   // Plain property for markdown component compatibility
   resolvedContentData: string | undefined;
+  /**
+   * True while the discard confirmation is up. This dialog stays OPEN behind
+   * that confirm, so anything closing it on an external signal must stand down
+   * until the user has answered — see openFullscreenMarkdownDialog, whose
+   * Location handler would otherwise close through the SAVE path, the exact
+   * opposite of the Discard the user just clicked (#8982 review).
+   */
+  isDiscardConfirmOpen = false;
 
   constructor() {
     // Set initial content synchronously for immediate rendering
@@ -122,9 +151,13 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       this._cdr.markForCheck();
     });
 
-    // Auto-save with debounce
+    // Checkpoint cadence: auditTime, not debounceTime — with a debounce,
+    // continuous typing resets the timer on every keystroke and a crash
+    // mid-burst would lose the whole burst. auditTime keeps emitting the
+    // latest value every 500 ms while typing goes on. The draft checkpoint
+    // is this output's only consumer.
     this._contentChanges$
-      .pipe(debounceTime(500), takeUntilDestroyed(this._destroyRef))
+      .pipe(auditTime(500), takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => {
         this.contentChanged.emit(value);
       });
@@ -180,16 +213,80 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
     this.textareaEl()?.nativeElement?.focus();
   }
 
+  openShortcutsHelp(): void {
+    this._matDialog.open(DialogMarkdownShortcutsComponent, {
+      maxWidth: '100vw',
+      width: '402px',
+    });
+  }
+
+  private _executeShortcutByName(name: ShortcutNames): void {
+    switch (name) {
+      case 'bold':
+        this.onApplyBold();
+        break;
+      case 'italic':
+        this.onApplyItalic();
+        break;
+      case 'link':
+        this.onInsertLink();
+        break;
+      case 'strikethrough':
+        this.onApplyStrikethrough();
+        break;
+      case 'bullet':
+        this.onApplyBulletList();
+        break;
+      case 'numbered':
+        this.onApplyNumberedList();
+        break;
+      case 'code':
+        this.onApplyInlineCode();
+        break;
+      case 'quote':
+        this.onApplyQuote();
+        break;
+      default: {
+        const _exhaustive: never = name;
+        return _exhaustive;
+      }
+    }
+  }
+
   keydownHandler(ev: KeyboardEvent): void {
     if (ev.key === 'Enter' && ev.ctrlKey) {
       this.close();
       return;
     }
 
+    // Accept both Ctrl and Meta intentionally; the displayed shortcut label shows only one.
+    const hasModifier = (ev.ctrlKey || ev.metaKey) && !ev.altKey;
+
     const textarea = this.textareaEl()?.nativeElement;
     if (!textarea) {
       return;
     }
+
+    if (hasModifier) {
+      const shortcutIndex = (MARKDOWN_SHORTCUTS as readonly MarkdownShortcut[]).findIndex(
+        (s) => {
+          const keyMatch = isShortcutWithKey(s)
+            ? ev.key.toLowerCase() === s.key
+            : ev.code === s.code;
+          return keyMatch && ev.shiftKey === s.shiftKey;
+        },
+      );
+
+      const shortcut =
+        shortcutIndex !== -1 ? MARKDOWN_SHORTCUTS[shortcutIndex] : undefined;
+
+      if (shortcut) {
+        ev.preventDefault();
+        this._executeShortcutByName(shortcut.name);
+        return;
+      }
+    }
+
     const result = handleListKeydown(
       textarea.value,
       textarea.selectionStart,
@@ -198,6 +295,7 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       ev.shiftKey,
       ev.ctrlKey,
       ev.metaKey,
+      this._dateService.getLogicalTodayDate(),
     );
     if (result) {
       ev.preventDefault();
@@ -229,9 +327,17 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   }
 
   close(isSkipSave: boolean = false): void {
-    // When the "Close" button is hit by the user, the note is closed without saving.
+    // When the "Discard" button is hit by the user, the note is closed without saving
+    // (after confirmation if the content was modified). The explicit result lets
+    // callers tell a user-confirmed discard from the dialog being disposed some
+    // other way (e.g. MatDialog.closeAll()), which emits undefined — the note's
+    // crash-safe draft handling clears its draft only on the former.
     if (isSkipSave) {
-      this._matDialogRef.close();
+      // Confirm before discarding modified content, for every caller of this
+      // shared dialog. The "Close" action was renamed to "Discard" (more final),
+      // so confirming is the matching guard. _confirmDiscardIfNeeded no-ops when
+      // nothing was modified, so an unmodified close still closes instantly.
+      this._confirmDiscardIfNeeded(() => this._matDialogRef.close({ action: 'DISCARD' }));
       // When the note is made empty manually by the user and the "Save" button is hit, the note is automatically deleted instead of being left blank.
     } else if (!this.data?.content && this.data.content.trim().length < 1) {
       this._matDialogRef.close({ action: 'DELETE' });
@@ -241,44 +347,61 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
     }
   }
 
+  protected _confirmDiscardIfNeeded(onDiscard: () => void): void {
+    if ((this.data?.content || '') === this._initialContent) {
+      onDiscard();
+      return;
+    }
+    this.isDiscardConfirmOpen = true;
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          message: T.F.NOTE.D_FULLSCREEN.CONFIRM_DISCARD_MSG,
+          okTxt: T.G.DISCARD,
+        },
+      })
+      .afterClosed()
+      .subscribe((isConfirm: boolean) => {
+        // Cleared on every outcome, including the confirm being disposed by a
+        // navigation (it keeps MatDialog's default closeOnNavigation) — the
+        // editor stays open and usable in that case.
+        this.isDiscardConfirmOpen = false;
+        if (isConfirm) {
+          onDiscard();
+        }
+      });
+  }
+
   onViewModeChange(): void {
     localStorage.setItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE, this.viewMode);
   }
 
   clickPreview($event: MouseEvent): void {
-    if (($event.target as HTMLElement).tagName === 'A') {
+    const target = $event.target as HTMLElement;
+    if (target.closest('a')) {
       // links are already handled by the markdown component
-    } else if (
-      $event?.target &&
-      ($event.target as HTMLElement).classList.contains('checkbox')
-    ) {
-      this._handleCheckboxClick(
-        ($event.target as HTMLElement).parentElement as HTMLElement,
-      );
+      return;
+    }
+
+    const wrapper = target.closest('.checkbox-wrapper') as HTMLElement | null;
+    if (wrapper) {
+      this._handleCheckboxClick(wrapper);
     }
   }
 
   private _handleCheckboxClick(targetEl: HTMLElement): void {
     const allCheckboxes =
       this.previewEl()?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
-
     const checkIndex = Array.from(allCheckboxes || []).findIndex((el) => el === targetEl);
-    if (checkIndex !== -1 && this.data.content) {
-      const allLines = this.data.content.split('\n');
-      const todoAllLinesIndexes = allLines
-        .map((line, index) => (line.includes('- [') ? index : null))
-        .filter((i) => i !== null);
-
-      const itemIndex = todoAllLinesIndexes[checkIndex];
-      if (typeof itemIndex === 'number' && itemIndex > -1) {
-        const item = allLines[itemIndex];
-        allLines[itemIndex] = item.includes('[ ]')
-          ? item.replace('[ ]', '[x]').replace('[]', '[x]')
-          : item.replace('[x]', '[ ]');
-        this.data.content = allLines.join('\n');
-        // Emit change for auto-save
-        this._contentChanges$.next(this.data.content);
-      }
+    if (checkIndex === -1 || !this.data.content) {
+      return;
+    }
+    const next = toggleChecklistItemAtIndex(this.data.content, checkIndex);
+    if (next !== this.data.content) {
+      this.data.content = next;
+      // Emit change for auto-save
+      this._contentChanges$.next(this.data.content);
     }
   }
 

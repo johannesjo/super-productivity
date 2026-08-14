@@ -1,11 +1,16 @@
 import { effect, Injectable, signal, WritableSignal } from '@angular/core';
 import { Tag } from '../../tag/tag.model';
-import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
+import {
+  AddTaskBarRepeat,
+  AddTaskBarState,
+  INITIAL_ADD_TASK_BAR_STATE,
+} from './add-task-bar.const';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
-import { RepeatQuickSetting } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { ShortSyntaxRange } from '../short-syntax';
+import { normalizeClockStr } from '../../../util/normalize-clock-str';
 
 @Injectable()
 export class AddTaskBarStateService {
@@ -18,9 +23,36 @@ export class AddTaskBarStateService {
   readonly state = this._taskInputState.asReadonly();
   readonly isAutoDetected = signal(false);
 
+  // Free-form note/description entered alongside the task. Kept separate from
+  // the parsed `inputTxt` state since it is prose, not short-syntax tokens.
+  // Persisted like `inputTxt` so a draft note survives closing/reopening the
+  // bar (e.g. an Escape in the title input) and a reload, instead of being lost.
+  readonly noteTxt = signal(sessionStorage.getItem(SS.ADD_TASK_BAR_NOTE) || '');
+  // Start expanded when reopening with a persisted draft note, so it is visible
+  // rather than hidden behind the collapsed toggle.
+  readonly isNoteExpanded = signal(!!this.noteTxt());
+
+  // Positions of detected short syntax in the current input, for the inline
+  // highlight overlay. `forText` pins the ranges to the exact input string they
+  // were computed for — the parse is async, so the overlay must not apply
+  // stale ranges to newer text.
+  readonly syntaxHighlight = signal<{
+    forText: string;
+    ranges: ShortSyntaxRange[];
+  } | null>(null);
+
+  updateSyntaxHighlight(
+    syntaxHighlight: { forText: string; ranges: ShortSyntaxRange[] } | null,
+  ): void {
+    this.syntaxHighlight.set(syntaxHighlight);
+  }
+
   constructor() {
     effect(() => {
       sessionStorage.setItem(SS.ADD_TASK_BAR_TXT, this.inputTxt());
+    });
+    effect(() => {
+      sessionStorage.setItem(SS.ADD_TASK_BAR_NOTE, this.noteTxt());
     });
   }
 
@@ -30,16 +62,20 @@ export class AddTaskBarStateService {
     this.isAutoDetected.set(false);
   }
 
-  updateDate(date: string | null, time?: string | null): void {
+  updateDate(date: string | null, time?: string | null, cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => ({
       ...state,
       date,
-      time: time !== undefined ? time : state.time,
+      time: time !== undefined ? this._normTime(time) : state.time,
+      isDateExplicitlyCleared: date ? false : state.isDateExplicitlyCleared,
     }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   updateTime(time: string | null): void {
-    this._taskInputState.update((state) => ({ ...state, time }));
+    this._taskInputState.update((state) => ({ ...state, time: this._normTime(time) }));
   }
 
   updateSpent(spent: TimeSpentOnDay | null): void {
@@ -50,8 +86,11 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, remindOption }));
   }
 
-  updateEstimate(estimate: number | null): void {
+  updateEstimate(estimate: number | null, cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => ({ ...state, estimate }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   toggleTag(tag: Tag, cleanedInputTxt?: string): void {
@@ -102,7 +141,12 @@ export class AddTaskBarStateService {
   }
 
   clearDate(cleanedInputTxt?: string): void {
-    this._taskInputState.update((state) => ({ ...state, date: null, time: null }));
+    this._taskInputState.update((state) => ({
+      ...state,
+      date: null,
+      time: null,
+      isDateExplicitlyCleared: true,
+    }));
     if (cleanedInputTxt !== undefined) {
       this.inputTxt.set(cleanedInputTxt);
     }
@@ -126,12 +170,57 @@ export class AddTaskBarStateService {
     }
   }
 
-  updateRepeatSetting(repeatQuickSetting: RepeatQuickSetting): void {
-    this._taskInputState.update((state) => ({ ...state, repeatQuickSetting }));
+  updateRepeatSetting(repeat: AddTaskBarRepeat, cleanedInputTxt?: string): void {
+    this._taskInputState.update((state) => ({ ...state, repeat }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
-  clearRepeatSetting(): void {
-    this._taskInputState.update((state) => ({ ...state, repeatQuickSetting: null }));
+  clearRepeatSetting(cleanedInputTxt?: string): void {
+    this._taskInputState.update((state) => ({ ...state, repeat: null }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
+  }
+
+  updateDeadline(
+    deadlineDate: string | null,
+    deadlineTime?: string | null,
+    cleanedInputTxt?: string,
+  ): void {
+    this._taskInputState.update((state) => ({
+      ...state,
+      deadlineDate,
+      deadlineTime:
+        deadlineTime !== undefined ? this._normTime(deadlineTime) : state.deadlineTime,
+    }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
+  }
+
+  // Recover a stray seconds component (e.g. a pasted `13:30:00`) so a time the
+  // user intended survives validation at task creation instead of being dropped
+  // to a date-only due/deadline (#7802). Empty/null values pass through.
+  private _normTime(time: string | null): string | null {
+    return time ? normalizeClockStr(time) : time;
+  }
+
+  updateDeadlineRemindOption(deadlineRemindOption: TaskReminderOptionId | null): void {
+    this._taskInputState.update((state) => ({ ...state, deadlineRemindOption }));
+  }
+
+  clearDeadline(cleanedInputTxt?: string): void {
+    this._taskInputState.update((state) => ({
+      ...state,
+      deadlineDate: null,
+      deadlineTime: null,
+      deadlineRemindOption: null,
+    }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   resetAfterAdd(): void {
@@ -143,9 +232,16 @@ export class AddTaskBarStateService {
       newTagTitles: [],
       cleanText: null,
       attachments: [],
-      repeatQuickSetting: null,
+      repeat: null,
+      deadlineDate: null,
+      deadlineTime: null,
+      deadlineRemindOption: null,
     }));
     this.inputTxt.set('');
+    this.syntaxHighlight.set(null);
+    // Clear the note text but keep the panel expanded so consecutive
+    // note-tasks stay convenient (mirrors how project/date are preserved).
+    this.noteTxt.set('');
     // Keep isAutoDetected as is to preserve project selection
   }
 

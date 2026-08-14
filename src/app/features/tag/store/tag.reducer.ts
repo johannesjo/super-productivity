@@ -9,7 +9,7 @@
  * - Move handlers below work uniformly for ALL tags including TODAY
  *
  * This pattern keeps move operations (drag/drop, Ctrl+↑/↓) simple.
- * See: docs/ai/today-tag-architecture.md
+ * See: ARCHITECTURE-DECISIONS.md Decision #2
  */
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
@@ -64,7 +64,7 @@ export const selectAllTagsWithoutMyDay = createSelector(
  * and is self-healing.
  * Exception: cleanup code that removes stale raw TODAY_TAG ids needs this stored order.
  *
- * See: docs/ai/today-tag-architecture.md
+ * See: ARCHITECTURE-DECISIONS.md Decision #2
  */
 export const selectTodayTagTaskIds = createSelector(
   selectTagFeatureState,
@@ -226,7 +226,7 @@ export const tagReducer = createReducer<TagState>(
   // Move handlers work uniformly for ALL tags, including TODAY_TAG.
   // This is why we keep TODAY_TAG.taskIds separate from planner.days -
   // it allows drag/drop and keyboard shortcuts (Ctrl+↑/↓) to use the same
-  // code path for today as for any other tag. See: docs/ai/today-tag-architecture.md
+  // code path for today as for any other tag. See: ARCHITECTURE-DECISIONS.md Decision #2
   on(
     moveTaskInTodayList,
     (
@@ -353,7 +353,10 @@ export const tagReducer = createReducer<TagState>(
 
   on(updateTagOrder, (state: TagState, { ids }) => {
     if (ids.length !== state.ids.length) {
-      Log.log({ state, ids });
+      Log.log({
+        currentTagCount: state.ids.length,
+        nextTagCount: ids.length,
+      });
       throw new Error('Tag length should not change on re-order');
     }
 

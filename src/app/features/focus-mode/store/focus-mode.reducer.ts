@@ -91,13 +91,21 @@ export const focusModeReducer = createReducer(
   on(a.hideFocusOverlay, (state) => ({
     ...state,
     isOverlayShown: false,
+    // The preparation task is local to the overlay. Closing before the session
+    // starts cancels the countdown so reopening cannot continue without it.
+    mainState:
+      state.mainState === FocusMainUIState.Countdown && state.timer.purpose === null
+        ? FocusMainUIState.Preparation
+        : state.mainState,
   })),
 
   // Screen navigation
   on(a.selectFocusTask, (state) => ({
     ...state,
+    timer: createIdleTimer(),
     currentScreen: FocusScreen.Main,
     mainState: FocusMainUIState.Preparation,
+    _isOvertimeEnabled: false,
   })),
 
   on(a.selectFocusDuration, (state) => ({
@@ -148,7 +156,6 @@ export const focusModeReducer = createReducer(
   on(a.unPauseFocusSession, (state) => {
     // Allow resuming both work sessions and breaks
     if (state.timer.purpose === null) return state;
-    if (state.mainState === FocusMainUIState.BreakOffer) return state;
 
     return {
       ...state,
@@ -157,7 +164,7 @@ export const focusModeReducer = createReducer(
         isRunning: true,
         startedAt: Date.now() - state.timer.elapsed,
       },
-      // Restore InProgress state (fixes UI showing preparation or BreakOffer instead of active session)
+      // Restore InProgress state (fixes UI showing preparation instead of active session)
       mainState: FocusMainUIState.InProgress,
       currentScreen:
         state.timer.purpose === 'work' ? FocusScreen.Main : FocusScreen.Break,
@@ -194,13 +201,11 @@ export const focusModeReducer = createReducer(
     _isOvertimeEnabled: false,
   })),
 
-  // Flowtime end-of-session: store elapsed duration, pause the timer, but DON'T
-  // reset the screen — offerFlowtimeBreak reads the current timer state and
-  // transitions to the Break screen.
-  //
-  // IMPORTANT:
-  // lastCompletedDuration must remain populated across the offerFlowtimeBreak
-  // transition because logFocusSession$ relies on it for session logging.
+  // Flowtime end-of-session: store elapsed duration and pause the timer. The
+  // autoStartFlowtimeBreakOnSessionEnd$ effect then dispatches
+  // completeFocusSession + startBreak (or just completeFocusSession when no
+  // break is due). lastCompletedDuration is kept populated so logFocusSession$
+  // can log the session via completeFocusSession.
   on(a.endFlowtimeSession, (state, { pausedTaskId }) => {
     if (state.timer.purpose !== 'work') return state;
     return {
@@ -239,38 +244,6 @@ export const focusModeReducer = createReducer(
     mainState: FocusMainUIState.Preparation,
     pausedTaskId: null,
   })),
-
-  // Exit break to planning - same as skip/complete but doesn't trigger auto-start effect
-  on(a.exitBreakToPlanning, (state) => ({
-    ...state,
-    timer: createIdleTimer(),
-    currentScreen: FocusScreen.Main,
-    mainState: FocusMainUIState.Preparation,
-    pausedTaskId: null,
-  })),
-
-  // Flowtime break offer - show break screen but don't start timer yet
-  // Uses dedicated BreakOffer state so it can be distinguished from active/paused breaks
-  on(a.offerFlowtimeBreak, (state, { duration, isLongBreak, pausedTaskId }) => {
-    const breakTimer: TimerState = {
-      isRunning: false,
-      startedAt: null,
-      elapsed: 0,
-      duration,
-      purpose: 'break',
-      isLongBreak: isLongBreak ?? false,
-    };
-
-    return {
-      ...state,
-      timer: breakTimer,
-      currentScreen: FocusScreen.Break,
-      mainState: FocusMainUIState.BreakOffer,
-      pausedTaskId: pausedTaskId ?? state.pausedTaskId,
-      _isResumingBreak: false,
-      _isOvertimeEnabled: false,
-    };
-  }),
 
   // Timer updates - much simpler!
   on(a.tick, (state) => {

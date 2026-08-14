@@ -1,0 +1,89 @@
+# super-sync-server unit tests (vitest), gated on PRs that touch server code.
+# Previously these ran only nightly / on push to master via e2e-scheduled.yml, so
+# server fixes were never gated by a PR check. The workflow-level `paths` filter keeps
+# this off PRs that don't touch the server or its workspace deps.
+name: SuperSync Server Tests
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - 'packages/super-sync-server/**'
+      - 'packages/shared-schema/**' # @sp/shared-schema is a direct dep
+      - 'packages/sync-core/**' # transitive dep via @sp/shared-schema
+      - '.github/workflows/supersync-server-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  supersync-server-tests:
+    name: SuperSync Server Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # DATABASE_URL is set PER STEP, not here. Job-level it also reached the unit step, and
+    # the unit suite is written for a machine with no database: monitoring-db.ts adds a
+    # `datasources` override only when DATABASE_URL is set, so monitoring-scripts.spec.ts's
+    # exact-match assertion passed locally and failed on every CI run. That failure then
+    # skipped the two steps below, so the PostgreSQL integration suite never ran here at
+    # all while the check still reported on it.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: supersync
+          POSTGRES_PASSWORD: superpassword
+          POSTGRES_DB: supersync_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U supersync -d supersync_db"
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: 22
+          cache: 'npm'
+      # work around for npm installs from git+https://github.com/johannesjo/J2M.git
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf
+          ssh://git@github.com/
+      - name: Install npm Packages
+        run: npm i
+      - name: Verify Helm upgrade value compatibility
+        working-directory: packages/super-sync-server
+        run: |
+          set -euo pipefail
+          chart_args=(
+            supersync helm/supersync
+            --show-only templates/deployment.yaml
+            --set postgresql.password=test
+            --set supersync.secret.jwtSecret=01234567890123456789012345678901
+          )
+          helm template "${chart_args[@]}" --set postgresql.connectionLimit=null |
+            grep -Fq 'connection_limit=20&pool_timeout=10'
+          if helm template "${chart_args[@]}" --set postgresql.connectionLimit=0 >/dev/null 2>&1; then
+            echo 'connectionLimit=0 unexpectedly passed Helm validation' >&2
+            exit 1
+          fi
+      - name: Run SuperSync Server Tests
+        run: cd packages/super-sync-server && npm test
+      - name: Apply PostgreSQL Test Schema
+        working-directory: packages/super-sync-server
+        env:
+          DATABASE_URL: postgresql://supersync:superpassword@localhost:5432/supersync_db
+        run: npx prisma db push --skip-generate
+      - name: Run SuperSync PostgreSQL Integration Tests
+        working-directory: packages/super-sync-server
+        env:
+          DATABASE_URL: postgresql://supersync:superpassword@localhost:5432/supersync_db
+        run: npm run test:integration:postgres

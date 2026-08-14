@@ -40,8 +40,16 @@
       <div class="header-spacer"></div>
       @for (day of days(); track day.str) {
         <div class="day-header">
-          <div class="day-name">{{ day.date | localeDate: 'EEE' }}</div>
-          <div class="day-date">{{ day.date | localeDate: 'dd' }}</div>
+          <div class="day-name">
+            @if (day.weekdayLabel) {
+              {{ day.weekdayLabel }}
+            } @else {
+              {{ day.date | localeDate: 'EEE' : undefined : locale() }}
+            }
+          </div>
+          <div class="day-date">
+            {{ day.date | localeDate: 'dd' : undefined : locale() }}
+          </div>
         </div>
       }
     </div>

@@ -19,6 +19,24 @@
 | Custom z-index values                | Z-index variables (`--z-main-header`, `--z-backdrop`, etc.)               |
 | New styled elements without checking | Check `src/app/ui/` for existing reusable components first                |
 
+## Dialog action buttons
+
+One treatment per role so dialogs feel consistent. Classify by **function, not label** ("Close" that dismisses a read-only view is secondary; "Close" that commits is primary).
+
+| Role                             | Treatment                         | Notes                                                            |
+| -------------------------------- | --------------------------------- | ---------------------------------------------------------------- |
+| Primary / confirming             | `mat-flat-button color="primary"` | Save, OK, Submit, Create, Schedule — the main affirmative action |
+| Cancel / dismiss / secondary     | `mat-button` (no `color`)         | De-emphasized text button                                        |
+| Destructive                      | `color="warn"` (keep the variant) | Delete, Remove, Unschedule — never folded into primary           |
+| Genuine alternative (not cancel) | `mat-stroked-button`              | e.g. "Skip instance", "Configure" next to a primary action       |
+
+Rules:
+
+- **Icons:** drop generic `check`/`close` icons on OK/Cancel/Save/Submit — they add nothing. Keep icons that carry meaning (`alarm`/`today`/`event_busy` in scheduling, `wb_sunny`, `save`, `cloud_upload`, `delete_forever`).
+- **No `color` on cancel/close** — leftover `color="primary"` on a Cancel just tints it; remove it.
+- **No dead classes** — the legacy Bootstrap `btn btn-primary` classes are gone; don't reintroduce them. `submit-button` is only styled inside `dialog-create-tag`.
+- **Symmetric choice dialogs** (e.g. sync "use remote" vs "use local") may use two matched `mat-stroked-button`s — there is no single primary.
+
 ## Key Files
 
 | File                             | Purpose                                                       |
@@ -102,11 +120,14 @@ When migrating hardcoded durations, pick the nearest bucket — up to ~15% drift
 
 Keyboard-accessibility tokens for custom interactive elements. Material components keep their own focus treatment; use these for non-Material buttons, cards, and custom controls.
 
-| Variable              | Value                        |
-| --------------------- | ---------------------------- |
-| `--focus-ring-width`  | 2px                          |
-| `--focus-ring-offset` | 2px                          |
-| `--focus-ring-color`  | `var(--palette-primary-500)` |
+| Variable              | Value               |
+| --------------------- | ------------------- |
+| `--focus-ring-width`  | 2px                 |
+| `--focus-ring-offset` | 2px                 |
+| `--focus-ring`        | `var(--brand)`      |
+| `--focus-ring-color`  | `var(--focus-ring)` |
+
+Themes should override the public `--focus-ring` primitive on `body` / `body.isDarkTheme`. `--focus-ring-color` is the compatibility alias consumed by existing components.
 
 Quickest adoption — add the `.focus-ring` utility class from `util.scss`, which applies an `outline` on `:focus-visible` only (so it doesn't fire on mouse clicks).
 
@@ -120,17 +141,18 @@ Quickest adoption — add the `.focus-ring` utility class from `util.scss`, whic
 
 ## Z-Index Layers
 
-| Variable                | Value | Purpose                  |
-| ----------------------- | ----- | ------------------------ |
-| `--z-check-done`        | 11    | Task done checkbox       |
-| `--z-main-header`       | 12    | Main header              |
-| `--z-task-title-focus`  | 32    | Focused task title       |
-| `--z-mobile-bottom-nav` | 50    | Mobile bottom navigation |
-| `--z-side-nav`          | 60    | Side navigation          |
-| `--z-backdrop`          | 222   | Backdrop overlay         |
-| `--z-add-task-bar`      | 999   | Add task bar             |
-| `--z-search-bar`        | 999   | Search bar               |
-| `--z-tour`              | 1001  | Tour overlay             |
+| Variable                 | Value | Purpose                  |
+| ------------------------ | ----- | ------------------------ |
+| `--z-check-done`         | 11    | Task done checkbox       |
+| `--z-main-header`        | 12    | Main header              |
+| `--z-task-title-focus`   | 32    | Focused task title       |
+| `--z-mobile-bottom-nav`  | 50    | Mobile bottom navigation |
+| `--z-side-nav`           | 60    | Side navigation          |
+| `--z-backdrop`           | 222   | Backdrop overlay         |
+| `--z-add-task-bar`       | 999   | Add task bar             |
+| `--z-search-bar`         | 999   | Search bar               |
+| `--z-onboarding-presets` | 999   | Onboarding preset screen |
+| `--z-tour`               | 1001  | Tour overlay             |
 
 ## Layout Variables
 
@@ -145,16 +167,16 @@ Quickest adoption — add the `.focus-ring` utility class from `util.scss`, whic
 
 ## Responsive Breakpoints
 
-Available as CSS vars (`--layout-xxxs` through `--layout-xl`) and as SCSS mixins in `src/styles/mixins/_media-queries.scss`:
+Available as CSS vars (`--layout-xxxs` through `--layout-xl`) and as SCSS variables and mixins in `src/styles/mixins/_media-queries.scss`:
 
 | Breakpoint | Value  |
 | ---------- | ------ |
 | `xxxs`     | 398px  |
-| `xxs`      | 450px  |
+| `xxs`      | 440px  |
 | `xs`       | 600px  |
-| `s`        | 800px  |
-| `m`        | 1000px |
-| `l`        | 1200px |
+| `sm`       | 960px  |
+| `md`       | 1280px |
+| `lg`       | 1920px |
 | `xl`       | 2000px |
 
 ## Utility Classes

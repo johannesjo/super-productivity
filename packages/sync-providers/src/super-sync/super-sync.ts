@@ -123,6 +123,9 @@ export class SuperSyncProvider
   readonly maxConcurrentRequests = 10;
   readonly supportsOperationSync = true;
   readonly providerMode = 'superSyncOps' as const;
+  // SuperSync is E2EE-mandatory: the upload path must never push plaintext ops.
+  // See `isEncryptionMandatory` on OperationSyncCapable (GHSA-9v8x-68pf-p5x7).
+  readonly isEncryptionMandatory = true;
 
   public privateCfg: SyncCredentialStorePort<
     typeof PROVIDER_ID_SUPER_SYNC,
@@ -130,6 +133,7 @@ export class SuperSyncProvider
   >;
 
   private _cachedServerSeqKey: string | null = null;
+  private _causalRepairSnapshotsSupported = false;
 
   constructor(private readonly _deps: SuperSyncDeps) {
     this.privateCfg = _deps.credentialStore;
@@ -147,11 +151,45 @@ export class SuperSyncProvider
 
   async isReady(): Promise<boolean> {
     const cfg = await this.privateCfg.load();
-    return !!(cfg && cfg.accessToken);
+    if (!cfg || !cfg.accessToken) {
+      return false;
+    }
+    // A self-inconsistent encrypted config — encryption flagged on but no key — is
+    // NOT ready. Auto-syncing in this state downloads ops we cannot decrypt and could
+    // push unencrypted ops into an encrypted dataset. This is the dropped-credential
+    // signature documented in SyncCredentialStore.load(); staying not-ready keeps the
+    // client out of destructive auto-recovery until the password is re-entered.
+    if (this._isEncryptionHalfConfigured(cfg)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Whether the host has flagged encryption as enabled for this provider,
+   * regardless of whether a usable key is present. Used by the op-log download
+   * service to keep the "encrypted ops, no key" log loud (it is the
+   * dropped-credential signature) even for a client whose local op store was
+   * wiped — distinct from a genuinely-fresh client that never had encryption.
+   */
+  async isEncryptionEnabled(): Promise<boolean> {
+    const cfg = await this.privateCfg.load();
+    return !!cfg?.isEncryptionEnabled;
+  }
+
+  /**
+   * A "half-configured" encrypted config: encryption is flagged on but no key is
+   * present. The client can neither decrypt remote ops nor safely encrypt its own
+   * uploads in this state. Shared by `isReady()` (gate auto-sync) and
+   * `getEncryptKey()` (no usable key).
+   */
+  private _isEncryptionHalfConfigured(cfg: SuperSyncPrivateCfg): boolean {
+    return !!cfg.isEncryptionEnabled && !cfg.encryptKey;
   }
 
   async setPrivateCfg(cfg: SuperSyncPrivateCfg): Promise<void> {
     this._cachedServerSeqKey = null;
+    this._causalRepairSnapshotsSupported = false;
     await this.privateCfg.setComplete(cfg);
   }
 
@@ -241,7 +279,14 @@ export class SuperSyncProvider
       { method: 'GET' },
     );
 
-    return this._deps.responseValidators.validateOpDownload(response);
+    const validated = this._deps.responseValidators.validateOpDownload(response);
+    this._causalRepairSnapshotsSupported =
+      validated.capabilities?.causalRepairSnapshots === true;
+    return validated;
+  }
+
+  supportsCausalRepairSnapshots(): boolean {
+    return this._causalRepairSnapshotsSupported;
   }
 
   async getLastServerSeq(): Promise<number> {
@@ -266,6 +311,7 @@ export class SuperSyncProvider
     isCleanSlate?: boolean,
     snapshotOpType?: string,
     syncImportReason?: string,
+    repairBaseServerSeq?: number,
   ): Promise<SnapshotUploadResponse> {
     this._deps.logger.normal(`${this._logLabel}: uploadSnapshot: Starting...`, {
       clientId,
@@ -275,6 +321,7 @@ export class SuperSyncProvider
       opId,
       isCleanSlate,
       snapshotOpType,
+      repairBaseServerSeq,
     });
     const cfg = await this._cfgOrError();
 
@@ -290,6 +337,7 @@ export class SuperSyncProvider
       isCleanSlate,
       snapshotOpType,
       ...(syncImportReason ? { syncImportReason } : {}),
+      ...(repairBaseServerSeq !== undefined ? { repairBaseServerSeq } : {}),
       requestId,
     });
 
@@ -450,10 +498,11 @@ export class SuperSyncProvider
    */
   async getEncryptKey(): Promise<string | undefined> {
     const cfg = await this.privateCfg.load();
-    if (cfg?.isEncryptionEnabled && cfg.encryptKey) {
-      return cfg.encryptKey;
+    // No usable key when encryption is off, or half-configured (flagged on, key missing).
+    if (!cfg?.isEncryptionEnabled || this._isEncryptionHalfConfigured(cfg)) {
+      return undefined;
     }
-    return undefined;
+    return cfg.encryptKey;
   }
 
   // === Private Helper Methods ===

@@ -19,6 +19,10 @@ import {
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
+const escapeCsvField = (value: string | number | undefined): string => {
+  const field = value === undefined ? '' : String(value);
+  return /[;"\r\n]/.test(field) ? `"${field.replace(/"/g, '""')}"` : field;
+};
 
 /**
  * Depending on groupBy it gets a map of RowItems by groupKeys (date, task.id, date_task.id).
@@ -49,7 +53,7 @@ export const createRows = (
       rows.push(groups[key]);
     });
 
-  return rows;
+  return groupBy === WorklogGrouping.WORKLOG ? clearRepeatedWorklogDayTimes(rows) : rows;
 };
 
 /**
@@ -183,6 +187,22 @@ const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
     });
   }
   return taskGroups;
+};
+
+const clearRepeatedWorklogDayTimes = (rows: RowItem[]): RowItem[] => {
+  const seenDays = new Set<string>();
+  return rows.map((row) => {
+    const day = row.dates[0];
+    if (seenDays.has(day)) {
+      return {
+        ...row,
+        workStart: 0,
+        workEnd: 0,
+      };
+    }
+    seenDays.add(day);
+    return row;
+  });
 };
 
 /**
@@ -330,7 +350,7 @@ export const formatText = (
   rows: (string | number | undefined)[][],
 ): string => {
   let txt = '';
-  txt += headlineCols.join(';') + LINE_SEPARATOR;
-  txt += rows.map((cols) => cols.join(';')).join(LINE_SEPARATOR);
+  txt += headlineCols.map(escapeCsvField).join(';') + LINE_SEPARATOR;
+  txt += rows.map((cols) => cols.map(escapeCsvField).join(';')).join(LINE_SEPARATOR);
   return txt;
 };

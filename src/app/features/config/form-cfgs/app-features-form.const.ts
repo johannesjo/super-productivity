@@ -1,5 +1,6 @@
 import { ConfigFormSection, AppFeaturesConfig } from '../global-config.model';
 import { T } from '../../../t.const';
+import { IS_DONATION_UI_RESTRICTED } from '../../../app.constants';
 
 export const EXPERIMENTAL_APP_FEATURE_KEYS: ReadonlyArray<keyof AppFeaturesConfig> = [
   'isEnableUserProfiles',
@@ -93,6 +94,9 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
     {
       key: 'isDonatePageEnabled',
       type: 'slide-toggle',
+      // Donations are fully hidden on native iOS and macOS desktop builds, so
+      // this toggle would be inert there — hide it to avoid a dead control.
+      hideExpression: () => IS_DONATION_UI_RESTRICTED,
       templateOptions: {
         label: T.GCF.APP_FEATURES.DONATE_PAGE,
         icon: 'favorite',
@@ -128,7 +132,7 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
       type: 'tpl',
       templateOptions: {
         tag: 'div',
-        text: T.GCF.APP_FEATURES.USER_PROFILES_WARNING,
+        text: T.USER_PROFILES.REMOVAL_WARNING,
         class: 'sync-warning',
       },
     },

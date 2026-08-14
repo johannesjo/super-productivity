@@ -5,6 +5,7 @@ import {
   DEFAULT_TAG_COLOR,
   DEFAULT_TODAY_TAG_COLOR,
 } from '../../work-context/work-context.const';
+import { DEFAULT_PROJECT_ICON } from '../../project/project.const';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
@@ -12,6 +13,7 @@ import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { TaskLog } from '../../../core/log';
 
 export interface ShortSyntaxTag {
+  id?: string;
   title: string;
   color: string;
   icon: string;
@@ -41,6 +43,9 @@ export const shortSyntaxToTags = async ({
     shortSyntaxConfig,
     tags,
     projects,
+    undefined,
+    'combine',
+    true,
   );
   const shortSyntaxTags: ShortSyntaxTag[] = [];
 
@@ -54,10 +59,11 @@ export const shortSyntaxToTags = async ({
       throw new Error('Project not found');
     }
     shortSyntaxTags.push({
+      id: project.id,
       title: project.title,
       color: project.theme?.primary || DEFAULT_PROJECT_COLOR,
       projectId: r.projectId,
-      icon: 'list',
+      icon: project.icon || DEFAULT_PROJECT_ICON,
     });
   }
 
@@ -136,9 +142,10 @@ export const shortSyntaxToTags = async ({
         throw new Error('Tag not found');
       }
       shortSyntaxTags.push({
+        id: tag.id,
         title: tag.title,
         color: tag.color || tag.theme?.primary || DEFAULT_TAG_COLOR,
-        icon: tag.icon || 'style',
+        icon: tag.icon || 'label',
       });
     });
   }
@@ -150,7 +157,7 @@ export const shortSyntaxToTags = async ({
         shortSyntaxTags.push({
           title: tagTitle,
           color: DEFAULT_TODAY_TAG_COLOR,
-          icon: 'style',
+          icon: 'label',
         });
       });
   }

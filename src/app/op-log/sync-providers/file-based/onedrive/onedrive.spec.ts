@@ -276,6 +276,49 @@ describe('OneDrive', () => {
     expect(postCount).toBe(0);
   });
 
+  it('resolves an upload when the stored size matches the sent bytes (#8604)', async () => {
+    cfgStoreSpy.load.and.resolveTo(baseCfg);
+    fetchSpy.and.callFake(async (_url: string, init?: RequestInit) => {
+      if (init?.method === 'PUT') {
+        return {
+          ok: true,
+          status: 200,
+          // '{"a":1}' is 7 ASCII bytes — size matches, upload accepted.
+          json: async () => ({ eTag: 'etag-1', size: 7 }),
+          text: async () => '',
+        } as Response;
+      }
+      return { ok: true, status: 200, text: async () => '' } as Response;
+    });
+
+    await expectAsync(
+      provider.uploadFile('file-1.json', '{"a":1}', null, true),
+    ).toBeResolved();
+  });
+
+  it('throws when OneDrive stored a truncated (smaller) ASCII payload (#8604)', async () => {
+    cfgStoreSpy.load.and.resolveTo(baseCfg);
+    fetchSpy.and.callFake(async (_url: string, init?: RequestInit) => {
+      if (init?.method === 'PUT') {
+        return {
+          ok: true,
+          status: 200,
+          // Graph reports storing fewer bytes than the 7 we sent → truncation.
+          json: async () => ({ eTag: 'etag-1', size: 3 }),
+          text: async () => '',
+        } as Response;
+      }
+      return { ok: true, status: 200, text: async () => '' } as Response;
+    });
+
+    try {
+      await provider.uploadFile('file-1.json', '{"a":1}', null, true);
+      fail('should have thrown');
+    } catch (e) {
+      expect((e as Error).name).toBe('UploadRevToMatchMismatchAPIError');
+    }
+  });
+
   it('should refresh token and retry on 401', async () => {
     let firstRequest = true;
     cfgStoreSpy.load.and.resolveTo(baseCfg);
@@ -402,6 +445,68 @@ describe('OneDrive', () => {
         (call) => call.args[0]?.accessToken === '' && call.args[0]?.refreshToken === '',
       );
     expect(clearCalls.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should surface the Azure error_description and log the OAuth error code on auth-code 400', async () => {
+    // The common misconfigured-public-client failure: the authorize step
+    // succeeds, then the authorization_code token exchange 400s. The Azure
+    // error_description (AADSTSxxxxx) must reach the UI via `.detail`, while
+    // only the short `error` code goes to the structured log.
+    const warnSpy = jasmine.createSpy('warn');
+    const deps: OneDriveDeps = {
+      ...mockDeps,
+      logger: { ...mockDeps.logger, warn: warnSpy },
+      credentialStore: cfgStoreSpy as unknown as OneDriveDeps['credentialStore'],
+      isElectron: true,
+    };
+    const electronProvider = new PackageOneDrive({}, deps);
+    cfgStoreSpy.load.and.resolveTo(baseCfg);
+
+    const aadstsDescription =
+      "AADSTS7000218: The request body must contain the following parameter: 'client_assertion' or 'client_secret'.";
+    fetchSpy.and.callFake(async (url: string) => {
+      if (url.includes('/oauth2/v2.0/token')) {
+        return {
+          ok: false,
+          status: 400,
+          statusText: 'Bad Request',
+          text: async () =>
+            JSON.stringify({
+              error: 'unauthorized_client',
+              error_description: aadstsDescription,
+            }),
+        } as Response;
+      }
+      return { ok: true, status: 200, text: async () => '' } as Response;
+    });
+
+    const authHelper = await electronProvider.getAuthHelper();
+    if (!authHelper.verifyCodeChallenge) {
+      fail('expected verifyCodeChallenge helper');
+      return;
+    }
+
+    let thrown: { name?: string; detail?: string; response?: Response } | undefined;
+    try {
+      await authHelper.verifyCodeChallenge('auth-code-123');
+      fail('should have thrown');
+    } catch (e) {
+      thrown = e as typeof thrown;
+    }
+
+    expect(thrown?.name).toBe('HttpNotOkAPIError');
+    expect(thrown?.response?.status).toBe(400);
+    // AADSTS message surfaced to the UI for self-diagnosis.
+    expect(thrown?.detail).toContain('AADSTS7000218');
+    // Short, safe OAuth error code logged...
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[OneDrive] OAuth token request failed',
+      jasmine.objectContaining({ status: 400, error: 'unauthorized_client' }),
+    );
+    // ...but the verbose description is NOT placed in the exportable log.
+    expect(JSON.stringify(warnSpy.calls.mostRecent().args[1])).not.toContain(
+      'AADSTS7000218',
+    );
   });
 
   it('should map 412 responses to UploadRevToMatchMismatchAPIError', async () => {

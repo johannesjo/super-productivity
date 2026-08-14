@@ -1,11 +1,7 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from '../../../t.const';
-import { isValidSplitTime } from '../../../util/is-valid-split-time';
-import { TASK_REMINDER_OPTIONS } from '../../planner/dialog-schedule-task/task-reminder-options.const';
-import { getDbDateStr } from '../../../util/get-db-date-str';
 import { RepeatQuickSetting, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
-import { TaskReminderOptionId } from '../../tasks/task.model';
 
 const updateParent = (
   field: FormlyFieldConfig,
@@ -26,19 +22,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
       label: T.F.TASK_REPEAT.F.TITLE,
     },
   },
-  {
-    key: 'startDate',
-    type: 'date',
-    // Default to a 'YYYY-MM-DD' string (not a Date): Formly skips `parsers` on
-    // `defaultValue`, so a raw Date would slip into the model and downstream
-    // `dateStrToUtcDate` would choke on it, crashing the dialog (#7945).
-    defaultValue: getDbDateStr(),
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.START_DATE,
-      required: true,
-    },
-    parsers: [(val: unknown) => (val instanceof Date ? getDbDateStr(val) : val)],
-  },
+
   {
     key: 'quickSetting',
     type: 'select',
@@ -111,6 +95,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
             defaultValue: null,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.WEEK_OF_MONTH,
+              description: T.F.TASK_REPEAT.F.MONTHLY_MODE_DAY_OF_MONTH_DESCRIPTION,
               options: [
                 { value: null, label: T.F.TASK_REPEAT.F.MONTHLY_MODE_DAY_OF_MONTH },
                 { value: 1, label: T.F.TASK_REPEAT.F.ORD_FIRST },
@@ -143,13 +128,25 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
         ],
       },
       {
+        // Hide via a dynamic CSS class instead of `hideExpression`. With formly's
+        // default `lazyRender`, hiding a field group destroys its child views and
+        // recreates them on re-show, and the recreated mat-checkboxes lose their
+        // wiring to the (re-registered) FormControls. After a cycle round-trip
+        // (Week -> Month -> Week) the checkboxes then look enabled but are inert:
+        // clicks no longer update the model (#8025). Keeping the group mounted and
+        // toggling only its visibility preserves the control/view binding.
+        // `resetOnHide: false` on each checkbox keeps the selection when the
+        // CUSTOM container itself is hidden (quickSetting != CUSTOM).
         fieldGroupClassName: 'weekdays',
-        resetOnHide: false,
-        hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
+        expressionProperties: {
+          className: (model: TaskRepeatCfg) =>
+            model.repeatCycle === 'WEEKLY' ? '' : 'repeat-cfg-hidden',
+        },
         fieldGroup: [
           {
             key: 'monday',
             type: 'checkbox',
+            resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.MONDAY,
             },
@@ -157,6 +154,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           {
             key: 'tuesday',
             type: 'checkbox',
+            resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.TUESDAY,
             },
@@ -164,6 +162,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           {
             key: 'wednesday',
             type: 'checkbox',
+            resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.WEDNESDAY,
             },
@@ -171,6 +170,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           {
             key: 'thursday',
             type: 'checkbox',
+            resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.THURSDAY,
             },
@@ -178,6 +178,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           {
             key: 'friday',
             type: 'checkbox',
+            resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.FRIDAY,
             },
@@ -185,6 +186,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           {
             key: 'saturday',
             type: 'checkbox',
+            resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.SATURDAY,
             },
@@ -192,6 +194,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           {
             key: 'sunday',
             type: 'checkbox',
+            resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.SUNDAY,
             },
@@ -216,38 +219,7 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       updateOn: 'blur',
     },
   },
-  {
-    fieldGroupClassName: 'formly-row',
-    fieldGroup: [
-      {
-        key: 'startTime',
-        type: 'input',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.START_TIME,
-          description: T.F.TASK_REPEAT.F.START_TIME_DESCRIPTION,
-        },
-        validators: {
-          validTimeString: (c: { value: string | undefined }) => {
-            return !c.value || isValidSplitTime(c.value);
-          },
-        },
-      },
-      {
-        key: 'remindAt',
-        type: 'select',
-        defaultValue: TaskReminderOptionId.AtStart,
-        hideExpression: '!model.startTime',
-        templateOptions: {
-          required: true,
-          label: T.F.TASK_REPEAT.F.REMIND_AT,
-          options: TASK_REMINDER_OPTIONS,
-          valueProp: 'value',
-          labelProp: 'label',
-          placeholder: T.F.TASK_REPEAT.F.REMIND_AT_PLACEHOLDER,
-        },
-      },
-    ],
-  },
+
   {
     key: 'notes',
     type: 'textarea',

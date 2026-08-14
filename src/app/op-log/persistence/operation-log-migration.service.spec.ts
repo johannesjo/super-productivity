@@ -29,10 +29,8 @@ describe('OperationLogMigrationService', () => {
       'loadStateCache',
       'getOpsAfterSeq',
       'deleteOpsWhere',
-      'append',
-      'getLastSeq',
-      'saveStateCache',
-      'setVectorClock',
+      'clearAllOperations',
+      'appendOperationAndSnapshot',
     ]);
 
     mockLegacyPfDb = jasmine.createSpyObj('LegacyPfDbService', [
@@ -188,7 +186,7 @@ describe('OperationLogMigrationService', () => {
             source: 'local',
           },
         ]);
-        mockOpLogStore.deleteOpsWhere.and.resolveTo();
+        mockOpLogStore.clearAllOperations.and.resolveTo();
         // Legacy data exists - orphan ops should be cleared before migration
         mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
         // Lock acquisition fails - prevents migration from proceeding (test focuses on clearing)
@@ -199,7 +197,8 @@ describe('OperationLogMigrationService', () => {
         expect(OpLog.warn).toHaveBeenCalledWith(
           jasmine.stringContaining('Found 2 orphan operations'),
         );
-        expect(mockOpLogStore.deleteOpsWhere).toHaveBeenCalled();
+        expect(mockOpLogStore.clearAllOperations).toHaveBeenCalled();
+        expect(mockOpLogStore.deleteOpsWhere).not.toHaveBeenCalled();
         expect(mockLegacyPfDb.hasUsableEntityData).toHaveBeenCalled();
       });
 
@@ -392,16 +391,12 @@ describe('OperationLogMigrationService', () => {
               schemaVersion: CURRENT_SCHEMA_VERSION,
             };
 
-            await mockOpLogStore.append(migrationOp as any);
-            const lastSeq = await mockOpLogStore.getLastSeq();
-            await mockOpLogStore.saveStateCache({
+            await mockOpLogStore.appendOperationAndSnapshot(migrationOp as any, 'local', {
               state: legacyData,
-              lastAppliedOpSeq: lastSeq,
               vectorClock: migrationOp.vectorClock,
               compactedAt: Date.now(),
               schemaVersion: CURRENT_SCHEMA_VERSION,
             });
-            await mockOpLogStore.setVectorClock(migrationOp.vectorClock);
             mockStore.dispatch(loadAllData({ appDataComplete: legacyData as any }));
 
             dialogRef.componentInstance.status.set('complete');
@@ -409,10 +404,7 @@ describe('OperationLogMigrationService', () => {
         );
 
         // Mock opLogStore methods used during migration
-        mockOpLogStore.append.and.resolveTo(1);
-        mockOpLogStore.getLastSeq.and.resolveTo(1);
-        mockOpLogStore.saveStateCache.and.resolveTo();
-        mockOpLogStore.setVectorClock.and.resolveTo();
+        mockOpLogStore.appendOperationAndSnapshot.and.resolveTo(1);
       });
 
       it('should call persistClientId with legacy client ID when it exists', async () => {
@@ -428,7 +420,7 @@ describe('OperationLogMigrationService', () => {
           'legacyClientId1234',
         );
         expect(mockClientIdService.getOrGenerateClientId).not.toHaveBeenCalled();
-        expect(mockOpLogStore.append).toHaveBeenCalled();
+        expect(mockOpLogStore.appendOperationAndSnapshot).toHaveBeenCalled();
       });
 
       it('should generate new client ID and NOT call persistClientId when legacy ID is null', async () => {
@@ -440,7 +432,7 @@ describe('OperationLogMigrationService', () => {
 
         expect(mockClientIdService.getOrGenerateClientId).toHaveBeenCalled();
         expect(mockClientIdService.persistClientId).not.toHaveBeenCalled();
-        expect(mockOpLogStore.append).toHaveBeenCalled();
+        expect(mockOpLogStore.appendOperationAndSnapshot).toHaveBeenCalled();
       });
     });
   });

@@ -13,7 +13,7 @@ import { CONFIG } from './CONFIG';
 import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { initIndicator } from './indicator';
 import { quitApp, showOrFocus } from './various-shared';
-import { closeWinAndQuit, createWindow } from './main-window';
+import { closeWinAndQuit, createWindow, getIsAppReady } from './main-window';
 import { IdleTimeHandler } from './idle-time-handler';
 import { destroyTaskWidget } from './task-widget/task-widget';
 import {
@@ -26,6 +26,7 @@ import { evaluateGpuStartupGuard } from './gpu-startup-guard';
 import * as fs from 'fs';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
+const APP_DISPLAY_NAME = 'Super Productivity';
 const IS_MAC = process.platform === 'darwin';
 // const DESKTOP_ENV = process.env.DESKTOP_SESSION;
 // const IS_GNOME = DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg';
@@ -150,6 +151,14 @@ export const startApp = (): void => {
     // set userDa dir to common data to avoid the data being accessed by the update process
     app.setPath('userData', newPath);
     app.setAppLogsPath();
+  }
+
+  if (process.platform === 'linux') {
+    // Preserve the historical userData path based on package.json `name`, while
+    // exposing a human-readable app name to Linux desktop environments.
+    const userDataPath = app.getPath('userData');
+    app.setPath('userData', userDataPath);
+    app.setName(APP_DISPLAY_NAME);
   }
 
   // Defense-in-depth against GPU init failures on confined Linux packages
@@ -507,10 +516,17 @@ export const startApp = (): void => {
 
     initPluginOAuth(mainWin);
 
-    // Process any pending protocol URLs after window is created
-    setTimeout(() => {
-      processPendingProtocolUrls(mainWin);
-    }, 1000);
+    // Process pending protocol URLs once the renderer has fully booted
+    // (signaled via IPC.APP_READY, which Angular init fires) rather than
+    // guessing with a fixed timer — cold-start boot time varies with
+    // machine load and OS disk caching, and a URL delivered before the
+    // renderer subscribes would otherwise race app startup.
+    const win = mainWin;
+    if (getIsAppReady()) {
+      processPendingProtocolUrls(win);
+    } else {
+      ipcMain.once(IPC.APP_READY, () => processPendingProtocolUrls(win));
+    }
   }
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions

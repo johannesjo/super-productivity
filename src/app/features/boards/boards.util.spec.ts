@@ -1,8 +1,19 @@
-import { buildComparator, rewriteTagIdsForPanel, sanitizePanelCfg } from './boards.util';
-import { BoardPanelCfg } from './boards.model';
+import {
+  buildComparator,
+  doesTaskMatchPanel,
+  rewriteTagIdsForPanel,
+  sanitizePanelCfg,
+} from './boards.util';
+import {
+  BoardPanelCfg,
+  BoardPanelCfgScheduledState,
+  BoardPanelCfgTaskDoneState,
+  BoardPanelCfgTaskTypeFilter,
+} from './boards.model';
 import { TaskCopy } from '../tasks/task.model';
+import { TODAY_TAG } from '../tag/tag.const';
 
-const basePanel: BoardPanelCfg = {
+const basePanel: any = {
   id: 'p1',
   title: 'Panel',
   taskIds: [],
@@ -11,25 +22,62 @@ const basePanel: BoardPanelCfg = {
   taskDoneState: 1,
   scheduledState: 1,
   isParentTasksOnly: false,
-} as BoardPanelCfg;
+  projectIds: [''],
+};
 
 describe('sanitizePanelCfg', () => {
+  it('migrates legacy projectId to projectIds array', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { projectIds, ...inputWithoutProjectIds } = basePanel;
+    const out = sanitizePanelCfg({ ...inputWithoutProjectIds, projectId: 'p1' } as any);
+    expect(out.projectIds).toEqual(['p1']);
+    expect('projectId' in out).toBe(false);
+  });
+
+  it('migrates legacy empty projectId to projectIds [""]', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { projectIds, ...inputWithoutProjectIds } = basePanel;
+    const out = sanitizePanelCfg({ ...inputWithoutProjectIds, projectId: '' } as any);
+    expect(out.projectIds).toEqual(['']);
+    expect('projectId' in out).toBe(false);
+  });
+
+  it('ensures projectIds is always an array', () => {
+    const out = sanitizePanelCfg({ ...basePanel, projectIds: null as any } as any);
+    expect(out.projectIds).toEqual(['']);
+  });
+
+  it('migrates legacy projectId even if projectIds is already defaulted to [""]', () => {
+    const out = sanitizePanelCfg({
+      ...basePanel,
+      projectIds: [''],
+      projectId: 'p1',
+    } as any);
+    expect(out.projectIds).toEqual(['p1']);
+    expect('projectId' in out).toBe(false);
+  });
+
+  it('deliberately drops specific IDs when "" co-occurs (lossy canonicalization)', () => {
+    const out = sanitizePanelCfg({ ...basePanel, projectIds: ['', 'p1', 'p2'] } as any);
+    expect(out.projectIds).toEqual(['']);
+  });
+
   it('migrates sortByDue=asc to sortBy=dueDate/asc and drops sortByDue', () => {
-    const out = sanitizePanelCfg({ ...basePanel, sortByDue: 'asc' });
+    const out = sanitizePanelCfg({ ...basePanel, sortByDue: 'asc' } as any);
     expect(out.sortBy).toBe('dueDate');
     expect(out.sortDir).toBe('asc');
     expect('sortByDue' in out).toBe(false);
   });
 
   it('migrates sortByDue=desc to sortBy=dueDate/desc', () => {
-    const out = sanitizePanelCfg({ ...basePanel, sortByDue: 'desc' });
+    const out = sanitizePanelCfg({ ...basePanel, sortByDue: 'desc' } as any);
     expect(out.sortBy).toBe('dueDate');
     expect(out.sortDir).toBe('desc');
     expect('sortByDue' in out).toBe(false);
   });
 
   it('drops sortByDue=off without adding sortBy', () => {
-    const out = sanitizePanelCfg({ ...basePanel, sortByDue: 'off' });
+    const out = sanitizePanelCfg({ ...basePanel, sortByDue: 'off' } as any);
     expect(out.sortBy).toBeUndefined();
     expect(out.sortDir).toBeUndefined();
     expect('sortByDue' in out).toBe(false);
@@ -42,7 +90,7 @@ describe('sanitizePanelCfg', () => {
       sortDir: null as any,
       includedTagsMatch: null as any,
       excludedTagsMatch: null as any,
-    });
+    } as any);
     expect('sortBy' in out).toBe(false);
     expect('sortDir' in out).toBe(false);
     expect('includedTagsMatch' in out).toBe(false);
@@ -54,7 +102,7 @@ describe('sanitizePanelCfg', () => {
       ...basePanel,
       sortBy: 'priority' as any,
       sortDir: 'asc',
-    });
+    } as any);
     expect('sortBy' in out).toBe(false);
     // sortDir stays — it's valid on its own; it'll just go unused.
     expect(out.sortDir).toBe('asc');
@@ -67,7 +115,7 @@ describe('sanitizePanelCfg', () => {
       sortDir: 'desc',
       includedTagsMatch: 'any',
       excludedTagsMatch: 'all',
-    });
+    } as any);
     expect(out.sortBy).toBe('title');
     expect(out.sortDir).toBe('desc');
     expect(out.includedTagsMatch).toBe('any');
@@ -75,7 +123,7 @@ describe('sanitizePanelCfg', () => {
   });
 
   it('is idempotent', () => {
-    const once = sanitizePanelCfg({ ...basePanel, sortByDue: 'asc' });
+    const once = sanitizePanelCfg({ ...basePanel, sortByDue: 'asc' } as any);
     const twice = sanitizePanelCfg(once);
     expect(twice).toEqual(once);
   });
@@ -285,5 +333,236 @@ describe('rewriteTagIdsForPanel', () => {
     // Act + Assert — would throw if mutated
     expect(() => rewriteTagIdsForPanel(tags, panel)).not.toThrow();
     expect(tags).toEqual(['x', 'y']);
+  });
+
+  // TODAY_TAG is virtual: membership derives from dueDay/dueWithTime and it must
+  // never land in task.tagIds (ARCHITECTURE-DECISIONS #2). The rewrite therefore
+  // has to agree with `doesTaskMatchPanel`, which can only ever see real tags.
+  describe('TODAY_TAG (virtual)', () => {
+    it('"all" include mode: appends the real required tags but never TODAY_TAG', () => {
+      // Arrange
+      const tags = ['keep'];
+      const panel = mkPanel({ includedTagIds: [TODAY_TAG.id, 'need'] });
+
+      // Act
+      const out = rewriteTagIdsForPanel(tags, panel);
+
+      // Assert
+      expect(out).toEqual(['keep', 'need']);
+    });
+
+    it('"any" include mode: appends the first REAL required tag, not TODAY_TAG', () => {
+      // Arrange
+      const tags = ['keep'];
+      const panel = mkPanel({
+        includedTagIds: [TODAY_TAG.id, 'need'],
+        includedTagsMatch: 'any',
+      });
+
+      // Act
+      const out = rewriteTagIdsForPanel(tags, panel);
+
+      // Assert
+      expect(out).toEqual(['keep', 'need']);
+    });
+
+    it('include mode: adds nothing when TODAY_TAG is the only required tag', () => {
+      // Arrange
+      const tags = ['keep'];
+      const panel = mkPanel({ includedTagIds: [TODAY_TAG.id] });
+
+      // Act
+      const out = rewriteTagIdsForPanel(tags, panel);
+
+      // Assert
+      expect(out).toEqual(['keep']);
+    });
+
+    it('"all" exclude mode: keeps every real tag, because the AND-exclude can never fire', () => {
+      // Arrange — `doesTaskMatchPanel` needs ALL of TODAY/x/y present to exclude,
+      // and TODAY can never be present, so nothing may be stripped here either.
+      const tags = ['x', 'y', 'keep'];
+      const panel = mkPanel({
+        excludedTagIds: [TODAY_TAG.id, 'x', 'y'],
+        excludedTagsMatch: 'all',
+      });
+
+      // Act
+      const out = rewriteTagIdsForPanel(tags, panel);
+
+      // Assert — rewrite agrees with the predicate: no change
+      expect(out).toEqual(['x', 'y', 'keep']);
+      expect(
+        doesTaskMatchPanel(
+          { id: 't', title: '', projectId: 'INBOX', tagIds: out } as TaskCopy,
+          { ...basePanel, ...panel } as BoardPanelCfg,
+          () => false,
+        ),
+      ).toBe(true);
+    });
+
+    it('strips a legacy TODAY_TAG carried in the task’s own tags', () => {
+      // Arrange — corrupt data written by an older build
+      const tags = [TODAY_TAG.id, 'keep'];
+      const panel = mkPanel();
+
+      // Act
+      const out = rewriteTagIdsForPanel(tags, panel);
+
+      // Assert
+      expect(out).toEqual(['keep']);
+    });
+  });
+});
+
+describe('doesTaskMatchPanel', () => {
+  const mkPanel = (overrides: Partial<BoardPanelCfg> = {}): BoardPanelCfg =>
+    ({ ...basePanel, ...overrides }) as BoardPanelCfg;
+
+  const mkTask = (partial: Partial<TaskCopy> = {}): TaskCopy =>
+    ({ id: 't', title: '', tagIds: [], projectId: 'INBOX', ...partial }) as TaskCopy;
+
+  // Most criteria don't involve backlog; default the (required) predicate to
+  // "nothing is in backlog" so those cases stay terse.
+  const noBacklog = (): boolean => false;
+  const match = (
+    task: TaskCopy,
+    panel: BoardPanelCfg,
+    isInBacklog: (t: Readonly<TaskCopy>) => boolean = noBacklog,
+  ): boolean => doesTaskMatchPanel(task, panel, isInBacklog);
+
+  it('matches any task when no criteria are set', () => {
+    expect(match(mkTask(), mkPanel())).toBe(true);
+  });
+
+  describe('included tags', () => {
+    it('default ("all"): requires every included tag', () => {
+      const panel = mkPanel({ includedTagIds: ['a', 'b'] });
+      expect(match(mkTask({ tagIds: ['a', 'b', 'c'] }), panel)).toBe(true);
+      expect(match(mkTask({ tagIds: ['a'] }), panel)).toBe(false);
+    });
+
+    it('"any": requires at least one included tag', () => {
+      const panel = mkPanel({ includedTagIds: ['a', 'b'], includedTagsMatch: 'any' });
+      expect(match(mkTask({ tagIds: ['b'] }), panel)).toBe(true);
+      expect(match(mkTask({ tagIds: ['x'] }), panel)).toBe(false);
+    });
+  });
+
+  describe('excluded tags', () => {
+    it('default ("any"): excludes when any excluded tag is present', () => {
+      const panel = mkPanel({ excludedTagIds: ['a', 'b'] });
+      expect(match(mkTask({ tagIds: ['a'] }), panel)).toBe(false);
+      expect(match(mkTask({ tagIds: ['x'] }), panel)).toBe(true);
+    });
+
+    it('"all": excludes only when every excluded tag is present', () => {
+      const panel = mkPanel({ excludedTagIds: ['a', 'b'], excludedTagsMatch: 'all' });
+      expect(match(mkTask({ tagIds: ['a', 'b'] }), panel)).toBe(false);
+      expect(match(mkTask({ tagIds: ['a'] }), panel)).toBe(true);
+    });
+  });
+
+  it('isParentTasksOnly: excludes sub-tasks', () => {
+    const panel = mkPanel({ isParentTasksOnly: true });
+    expect(match(mkTask({ parentId: undefined }), panel)).toBe(true);
+    expect(match(mkTask({ parentId: 'parent' }), panel)).toBe(false);
+  });
+
+  describe('taskDoneState', () => {
+    it('Done: requires isDone', () => {
+      const panel = mkPanel({ taskDoneState: BoardPanelCfgTaskDoneState.Done });
+      expect(match(mkTask({ isDone: true }), panel)).toBe(true);
+      expect(match(mkTask({ isDone: false }), panel)).toBe(false);
+    });
+
+    it('UnDone: requires not isDone', () => {
+      const panel = mkPanel({ taskDoneState: BoardPanelCfgTaskDoneState.UnDone });
+      expect(match(mkTask({ isDone: false }), panel)).toBe(true);
+      expect(match(mkTask({ isDone: true }), panel)).toBe(false);
+    });
+  });
+
+  describe('projectIds', () => {
+    it('All Projects ([""]): matches any project', () => {
+      const panel = mkPanel({ projectIds: [''] });
+      expect(match(mkTask({ projectId: 'p1' }), panel)).toBe(true);
+    });
+
+    it('specific: matches only the listed projects', () => {
+      const panel = mkPanel({ projectIds: ['p1'] });
+      expect(match(mkTask({ projectId: 'p1' }), panel)).toBe(true);
+      expect(match(mkTask({ projectId: 'p2' }), panel)).toBe(false);
+    });
+  });
+
+  describe('scheduledState', () => {
+    it('Scheduled: requires a due date', () => {
+      const panel = mkPanel({ scheduledState: BoardPanelCfgScheduledState.Scheduled });
+      expect(match(mkTask({ dueDay: '2026-01-01' }), panel)).toBe(true);
+      expect(match(mkTask(), panel)).toBe(false);
+    });
+
+    it('NotScheduled: requires no due date', () => {
+      const panel = mkPanel({ scheduledState: BoardPanelCfgScheduledState.NotScheduled });
+      expect(match(mkTask(), panel)).toBe(true);
+      expect(match(mkTask({ dueWithTime: 123 }), panel)).toBe(false);
+    });
+  });
+
+  describe('backlogState', () => {
+    const isInBacklog = (t: Readonly<TaskCopy>): boolean => t.id === 'backlogged';
+
+    it('OnlyBacklog: keeps only backlog tasks', () => {
+      const panel = mkPanel({ backlogState: BoardPanelCfgTaskTypeFilter.OnlyBacklog });
+      expect(match(mkTask({ id: 'backlogged' }), panel, isInBacklog)).toBe(true);
+      expect(match(mkTask({ id: 'regular' }), panel, isInBacklog)).toBe(false);
+    });
+
+    it('NoBacklog: drops backlog tasks', () => {
+      const panel = mkPanel({ backlogState: BoardPanelCfgTaskTypeFilter.NoBacklog });
+      expect(match(mkTask({ id: 'regular' }), panel, isInBacklog)).toBe(true);
+      expect(match(mkTask({ id: 'backlogged' }), panel, isInBacklog)).toBe(false);
+    });
+  });
+
+  it('combines multiple criteria (AND across dimensions)', () => {
+    const panel = mkPanel({
+      includedTagIds: ['a'],
+      excludedTagIds: ['x'],
+      taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
+      projectIds: ['p1'],
+    });
+    expect(match(mkTask({ tagIds: ['a'], isDone: false, projectId: 'p1' }), panel)).toBe(
+      true,
+    );
+    // fails the exclude dimension only
+    expect(
+      match(mkTask({ tagIds: ['a', 'x'], isDone: false, projectId: 'p1' }), panel),
+    ).toBe(false);
+  });
+
+  it('ANDs every dimension, including scheduled + backlog', () => {
+    const inBacklog = (t: Readonly<TaskCopy>): boolean => t.id === 'b';
+    const panel = mkPanel({
+      includedTagIds: ['a'],
+      excludedTagIds: ['x'],
+      taskDoneState: BoardPanelCfgTaskDoneState.UnDone,
+      projectIds: ['p1'],
+      scheduledState: BoardPanelCfgScheduledState.Scheduled,
+      backlogState: BoardPanelCfgTaskTypeFilter.OnlyBacklog,
+    });
+    const matching = mkTask({
+      id: 'b',
+      tagIds: ['a'],
+      isDone: false,
+      projectId: 'p1',
+      dueDay: '2026-01-01',
+    });
+    expect(doesTaskMatchPanel(matching, panel, inBacklog)).toBe(true);
+    // identical except it fails ONLY the backlog dimension
+    expect(doesTaskMatchPanel({ ...matching, id: 'not-b' }, panel, inBacklog)).toBe(
+      false,
+    );
   });
 });

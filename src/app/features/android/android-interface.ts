@@ -13,6 +13,11 @@ export interface AndroidShareData {
 
 export interface AndroidInterface {
   getVersion?(): string;
+  getTextZoom?(): number;
+
+  // Launches the native Play In-App Review card (play flavor). No-op on fdroid.
+  // The outcome is intentionally opaque (Play policy) — nothing is returned.
+  requestReview?(): void;
 
   showToast(s: string): void;
 
@@ -96,6 +101,13 @@ export interface AndroidInterface {
   // Widget task queue - get queued tasks from home screen widget
   getWidgetTaskQueue?(): string | null;
 
+  // Widget done queue - get pending done-state changes from the home screen
+  // widget as a JSON object string `{taskId: targetIsDone}` and clear the queue
+  getWidgetDoneQueue?(): string | null;
+
+  // Re-render the home screen widget from the current widget_data snapshot
+  updateWidget?(): void;
+
   // Startup overlay
   getStartupOverlayPartialText?(): string | null;
   hideStartupOverlay?(): void;
@@ -132,6 +144,11 @@ export interface AndroidInterface {
   onReminderSnooze$: ReplaySubject<{ taskId: string; newRemindAt: number }>; // emits snooze events
   getReminderSnoozeQueue?(): string | null;
 
+  // Contentless "drain now" signal after a widget done-checkbox tap while the app
+  // is alive; the queued IDs are always pulled via getWidgetDoneQueue() (cold
+  // start/resume drains are triggered by onResume$ instead)
+  onWidgetDoneDrainRequest$: Subject<void>;
+
   // Background sync credential bridge (for WorkManager-based reminder cancellation)
   setSuperSyncCredentials?(baseUrl: string, accessToken: string): void;
   clearSuperSyncCredentials?(): void;
@@ -166,6 +183,7 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onReminderTap$ = new ReplaySubject(5);
   androidInterface.onReminderDone$ = new ReplaySubject(20);
   androidInterface.onReminderSnooze$ = new ReplaySubject(20);
+  androidInterface.onWidgetDoneDrainRequest$ = new Subject();
   androidInterface.onShareWithAttachment$ = new ReplaySubject(1);
   androidInterface.isKeyboardShown$ = new BehaviorSubject(false);
 

@@ -28,6 +28,7 @@ import {
   animationFrameScheduler,
   from,
   fromEvent,
+  interval,
   Observable,
   ReplaySubject,
   Subscription,
@@ -35,14 +36,17 @@ import {
   zip,
 } from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, filter, map, observeOn, switchMap } from 'rxjs/operators';
+import { delay, filter, map, observeOn, startWith, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
-import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
+import {
+  CustomizedUndoneTasks,
+  TaskViewCustomizerService,
+} from '../task-view-customizer/task-view-customizer.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { SectionService } from '../section/section.service';
 import { Section } from '../section/section.model';
@@ -67,6 +71,14 @@ import {
   selectLaterTodayTasksWithSubTasks,
   selectOverdueTasksWithSubTasks,
 } from '../tasks/store/task.selectors';
+import {
+  selectStartOfNextDayDiffMs,
+  selectTodayStr,
+} from '../../root-store/app-state/app-state.selectors';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { PlannerCalendarEventComponent } from '../planner/planner-calendar-event/planner-calendar-event.component';
+import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
+import { getLaterTodayCalendarEvents } from './get-later-today-calendar-events';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -87,6 +99,13 @@ import { dragDelayForTouch } from '../../util/input-intent';
 import { DateService } from '../../core/date/date.service';
 import { PluginIndexComponent } from '../../plugins/ui/plugin-index/plugin-index.component';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { PlainspaceClaimPoolComponent } from '../plainspace/claim-pool/claim-pool.component';
+import { PlainspaceSharedTask } from '../plainspace/plainspace-shared-task.model';
+
+// Stable reference used as the toSignal initial value below so the deselect
+// effect can tell "the customized list hasn't emitted yet" apart from a
+// genuinely empty filtered result. See _getVisibleUndoneTasksForSelection.
+const INITIAL_CUSTOMIZED_UNDONE_TASKS: CustomizedUndoneTasks = { list: [] };
 
 @Component({
   selector: 'work-view',
@@ -121,6 +140,8 @@ import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
     ScheduledDateGroupPipe,
     RepeatCfgPreviewComponent,
     PluginIndexComponent,
+    PlainspaceClaimPoolComponent,
+    PlannerCalendarEventComponent,
   ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy {
@@ -143,6 +164,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   private _destroyRef = inject(DestroyRef);
   private _dateService = inject(DateService);
   private _pluginBridge = inject(PluginBridgeService);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
   protected readonly dragDelayForTouch = dragDelayForTouch;
 
   isProjectContext = toSignal(this.workContextService.isActiveWorkContextProject$, {
@@ -188,10 +210,42 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   laterTodayTasks = toSignal(this._store.select(selectLaterTodayTasksWithSubTasks), {
     initialValue: [],
   });
+  // Calendar events are not in the store — sourced live (cached + polled,
+  // shareReplay/refCount) from the calendar integration. Shown as read-only
+  // outlines in the "Later Today" section, mirroring the planner.
+  private _calendarEventEntries = toSignal(
+    this._calendarIntegrationService.calendarEvents$,
+    { initialValue: [] as ScheduleCalendarMapEntry[] },
+  );
+  private _todayStr = toSignal(this._store.select(selectTodayStr), {
+    initialValue: '',
+  });
+  // Exposed for the `scheduledDateGroup` pipe (now pure): passing today as an
+  // arg lets the pipe stay pure while still resolving the "Today" group label.
+  readonly todayStr = this._todayStr;
+  private _startOfNextDayDiffMs = toSignal(
+    this._store.select(selectStartOfNextDayDiffMs),
+    { initialValue: 0 },
+  );
+  // Re-evaluate the now/end-of-today window on a coarse tick so events drop out
+  // of "Later Today" once they start, without waiting for the next calendar
+  // poll (iCal polls up to every 2h). Mirrors ScheduleService.scheduleRefreshTick.
+  private _refreshTick = toSignal(interval(2 * 60 * 1000).pipe(startWith(0)), {
+    initialValue: 0,
+  });
+  laterTodayCalendarEvents = computed(() => {
+    this._refreshTick();
+    return getLaterTodayCalendarEvents(
+      this._calendarEventEntries(),
+      this._todayStr(),
+      this._startOfNextDayDiffMs(),
+      Date.now(),
+    );
+  });
   undoneTasks = input.required<TaskWithSubTasks[]>();
   customizedUndoneTasks = toSignal(
     this.customizerService.customizeUndoneTasks(this.workContextService.undoneTasks$),
-    { initialValue: { list: [] } },
+    { initialValue: INITIAL_CUSTOMIZED_UNDONE_TASKS },
   );
   doneTasks = input.required<TaskWithSubTasks[]>();
   backlogTasks = input.required<TaskWithSubTasks[]>();
@@ -206,12 +260,27 @@ export class WorkViewComponent implements OnInit, OnDestroy {
     initialValue: 0,
   });
   workingToday = toSignal(this.workContextService.workingToday$, { initialValue: 0 });
+  breakTimeToday = toSignal(this.workContextService.breakTimeToday$, {
+    initialValue: 0,
+  });
   selectedTaskId = this.taskService.selectedTaskId;
   isOnTodayList = toSignal(this.workContextService.isTodayList$, { initialValue: false });
   isDoneHidden = signal(!!localStorage.getItem(LS.DONE_TASKS_HIDDEN));
   isLaterTodayHidden = signal(!!localStorage.getItem(LS.LATER_TODAY_TASKS_HIDDEN));
   isOverdueHidden = signal(!!localStorage.getItem(LS.OVERDUE_TASKS_HIDDEN));
   isRepeatCfgsHidden = signal(!!localStorage.getItem(LS.REPEAT_CFGS_HIDDEN));
+  // Claim pool is tucked away (collapsed) by default.
+  isClaimPoolHidden = signal(
+    localStorage.getItem(LS.PLAINSPACE_CLAIM_POOL_HIDDEN) !== 'false',
+  );
+
+  // Unclaimed Plainspace tasks for a shared project, fed from project-task-page
+  // (PlainspaceClaimPoolService). Read-only until claimed; never enters the SP
+  // task store / op-log sync. Empty for non-shared projects and tags.
+  readonly unclaimedTasks = input<PlainspaceSharedTask[]>([]);
+  isShowClaimPool = computed(
+    () => this.isProjectContext() && this.unclaimedTasks().length > 0,
+  );
 
   repeatCfgsForContext = toSignal(
     this.workContextService.activeWorkContextTypeAndId$.pipe(
@@ -333,7 +402,10 @@ export class WorkViewComponent implements OnInit, OnDestroy {
       const currentSelectedId = this.selectedTaskId();
       if (!currentSelectedId) return;
 
-      if (this._hasTaskInList(this.undoneTasks(), currentSelectedId)) return;
+      const visibleUndoneTasks = this._getVisibleUndoneTasksForSelection();
+      if (!visibleUndoneTasks) return;
+
+      if (this._hasTaskInList(visibleUndoneTasks, currentSelectedId)) return;
       if (this._hasTaskInList(this.doneTasks(), currentSelectedId)) return;
       if (this._hasTaskInList(this.laterTodayTasks(), currentSelectedId)) return;
 
@@ -383,6 +455,15 @@ export class WorkViewComponent implements OnInit, OnDestroy {
         localStorage.setItem(LS.REPEAT_CFGS_HIDDEN, 'true');
       } else {
         localStorage.removeItem(LS.REPEAT_CFGS_HIDDEN);
+      }
+    });
+
+    effect(() => {
+      // Persist 'false' when expanded; default (absent) means collapsed.
+      if (this.isClaimPoolHidden()) {
+        localStorage.removeItem(LS.PLAINSPACE_CLAIM_POOL_HIDDEN);
+      } else {
+        localStorage.setItem(LS.PLAINSPACE_CLAIM_POOL_HIDDEN, 'false');
       }
     });
 
@@ -522,6 +603,29 @@ export class WorkViewComponent implements OnInit, OnDestroy {
         }
       }),
     );
+  }
+
+  /**
+   * The list of undone tasks actually visible to the user, used by the deselect
+   * effect to decide whether the selected task has been filtered out of view.
+   * Returns `null` while a customizer filter is active but its list has not
+   * emitted yet — the caller then skips deselecting for this run.
+   *
+   * `isCustomized()` is synchronous, but `customizeUndoneTasks` defers the
+   * customized branch by one animation frame (observeOn(animationFrameScheduler)),
+   * so the two can be momentarily out of step. Until the first emission `toSignal`
+   * still holds the exact INITIAL_CUSTOMIZED_UNDONE_TASKS reference; compare by
+   * identity (not by length) so a genuinely empty filtered result `{ list: [] }`
+   * still counts as "ready" and correctly deselects a now-hidden task.
+   */
+  private _getVisibleUndoneTasksForSelection(): TaskWithSubTasks[] | null {
+    if (!this.customizerService.isCustomized()) {
+      return this.undoneTasks();
+    }
+
+    const customized = this.customizedUndoneTasks();
+    const isCustomizedListReady = customized !== INITIAL_CUSTOMIZED_UNDONE_TASKS;
+    return isCustomizedListReady ? customized.list : null;
   }
 
   private _focusItemInWorkViewWhenReady(

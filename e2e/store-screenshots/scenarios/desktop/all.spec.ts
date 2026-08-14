@@ -76,13 +76,14 @@ const captureDarkScenes = async (
     .locator('focus-mode-overlay, focus-mode-main')
     .first()
     .waitFor({ state: 'visible', timeout: 10_000 });
-  // Start the session, then skip the rocket countdown (5s + 900ms launch).
-  // The fixture pinned the clock with `page.clock.install`, so we have to
-  // advance simulated time to fire the rocket's RxJS timer + setTimeout.
+  // Start the session. By default (prep screen opt-in, off) this plays a brief
+  // inline rocket launch (~800ms) before the session begins. The fixture pinned
+  // the clock with `page.clock.install`, so advance simulated time past the
+  // launch to fire its RxJS timer.
   await page.locator('focus-mode-main .play-button').click();
   await page.clock.runFor(6500);
   await page
-    .locator('focus-mode-main .pause-resume-btn')
+    .locator('focus-mode-main focus-mode-task-tracking')
     .waitFor({ state: 'visible', timeout: 10_000 });
   // Tick a minute of session time so the clock face shows progress and the
   // remaining time isn't exactly the starting duration.

@@ -6,18 +6,21 @@
 
 .mobile-bottom-nav {
   position: fixed;
-  bottom: 0;
+  bottom: var(--bottom-nav-extra-offset);
   left: 0;
   right: 0;
-  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) / 2);
+  // Background fills the full height incl. the reserved system-bar area; the
+  // padding-bottom below keeps the buttons above it (see --bottom-nav-safe-area).
+  height: calc(var(--bottom-nav-height) + var(--bottom-nav-safe-area));
   box-sizing: border-box;
   background: var(--bottom-nav-bg);
   border-top: 1px solid var(--separator-color);
-  box-shadow: var(--bottom-nav-shadow);
+  // Flat nav bar: the top divider separates it from content; a resting shadow on
+  // top of it just reads as a floating bar.
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--s);
-  padding-bottom: calc(env(safe-area-inset-bottom) / 2);
+  padding-bottom: var(--bottom-nav-safe-area);
   z-index: var(--z-mobile-bottom-nav);
   display: flex;
 
@@ -28,13 +31,13 @@
   }
 
   .nav-button {
-    flex: 1;
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: var(--bottom-nav-height);
-    min-width: 64px;
+    min-width: 0;
     border-radius: var(--radius-xl);
     transition: var(--transition-standard);
 
@@ -75,8 +78,9 @@
   }
 
   .add-task-button {
-    width: 56px;
-    height: 56px;
+    flex: 0 0 var(--s7);
+    width: var(--s7);
+    height: var(--s7);
     margin-left: var(--s);
     margin-right: var(--s);
     margin-bottom: var(--s3);
@@ -93,10 +97,12 @@
     }
 
     &.smaller {
-      height: 40px;
+      flex-basis: var(--bottom-nav-height);
+      width: var(--bottom-nav-height);
+      height: var(--bottom-nav-height);
       margin-left: var(--s);
       margin-right: var(--s);
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
 
     mat-icon {
@@ -115,17 +121,17 @@
   }
 }
 
-// iOS: nav extends its background into the home indicator area,
-// padding keeps buttons above it
-:host-context(.isIOS) .mobile-bottom-nav {
-  padding-bottom: calc(env(safe-area-inset-bottom) / 2);
-}
-
 // Material Design touch target improvements
 .nav-button,
 .add-task-button {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    // Keep the ring visible when the bar sits flush with the viewport edge.
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+  }
 }
 
 @keyframes slide-up-from-bottom {

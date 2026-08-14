@@ -28,6 +28,28 @@ const CDK_OVERLAY_CONTAINER_CLASS = 'cdk-overlay-container';
 const CDK_OVERLAY_PANE_CLASS = 'cdk-overlay-pane';
 const MAT_TOOLTIP_PANEL_CLASS = 'mat-mdc-tooltip-panel';
 
+// The default binding '?' cannot go through checkKeyCombo, since that compares
+// ev.code and can never produce '?'. So the literal '?' is matched on ev.key (the
+// character the layout actually emitted, which also covers non-QWERTY layouts and
+// AltGr), while any other/custom binding is delegated to checkKeyCombo as usual.
+export const isHelpKeyCombo = (
+  ev: KeyboardEvent,
+  showHelp: string | null | undefined,
+): boolean => {
+  if (!showHelp) {
+    return false;
+  }
+  if (showHelp !== '?') {
+    return checkKeyCombo(ev, showHelp);
+  }
+  if (ev.key !== '?') {
+    return false;
+  }
+  // Layouts that produce '?' via AltGr report it as AltGraph (or Ctrl+Alt on Windows).
+  const isAltGraph = ev.getModifierState('AltGraph') || (ev.ctrlKey && ev.altKey);
+  return isAltGraph || (!ev.ctrlKey && !ev.metaKey && !ev.altKey);
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -110,6 +132,11 @@ export class ShortcutService {
       return;
     }
 
+    // Handle task-specific shortcuts first when a task is focused
+    if (this._taskShortcutService.handleTaskShortcuts(ev)) {
+      return;
+    }
+
     if (
       checkKeyCombo(ev, keys.toggleBacklog) &&
       this._workContextService.activeWorkContextType === WorkContextType.PROJECT
@@ -176,6 +203,16 @@ export class ShortcutService {
             });
         }
       }
+    } else if (isHelpKeyCombo(ev, keys.showHelp)) {
+      if (this._matDialog.openDialogs.length === 0) {
+        ev.preventDefault();
+        const { DialogKeyboardShortcutsComponent } =
+          await import('./dialog-keyboard-shortcuts/dialog-keyboard-shortcuts.component');
+        // re-check, since further presses can arrive while the chunk is still loading
+        if (this._matDialog.openDialogs.length === 0) {
+          this._matDialog.open(DialogKeyboardShortcutsComponent, { restoreFocus: true });
+        }
+      }
     } else if (checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
         this._matDialog.open(DialogAddNoteComponent, {
@@ -200,6 +237,8 @@ export class ShortcutService {
       if (await this._syncWrapperService.isEnabledAndReady$.pipe(first()).toPromise()) {
         this._syncWrapperService.sync(true);
       }
+    } else if (this._taskShortcutService.handleTogglePlayFallback(ev)) {
+      return;
     } else if (
       checkKeyCombo(ev, 'Ctrl+Shift+*') &&
       document.activeElement &&
@@ -219,11 +258,6 @@ export class ShortcutService {
       } else if (checkKeyCombo(ev, keys.zoomDefault)) {
         this._uiHelperService.zoomTo(1);
       }
-    }
-
-    // Handle task-specific shortcuts
-    if (this._taskShortcutService.handleTaskShortcuts(ev)) {
-      return;
     }
 
     // Check plugin shortcuts (exec last)

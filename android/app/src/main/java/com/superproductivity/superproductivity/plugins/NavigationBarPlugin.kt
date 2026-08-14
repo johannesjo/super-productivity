@@ -1,6 +1,7 @@
 package com.superproductivity.superproductivity.plugins
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.view.WindowInsetsController
 import com.getcapacitor.Plugin
@@ -58,12 +59,16 @@ class NavigationBarPlugin : Plugin() {
     }
 
     /**
-     * Paint the WebView's backing surface so the adjustResize keyboard
-     * animation never reveals the default white surface between a layout pass
-     * and the next page repaint. Kept in sync with the app theme from JS
-     * because the activity is not recreated on a live light/dark switch
-     * (uiMode is in configChanges), so the resource-qualifier default set at
-     * WebView init would otherwise go stale.
+     * Paint both the WebView's backing surface AND the window decor behind it
+     * so the adjustResize keyboard animation never reveals a default (white)
+     * surface between a layout pass and the next page repaint. Two distinct
+     * layers can be exposed during the IME slide: the WebView's own surface and,
+     * for the frames where the resized window outruns the WebView, the window
+     * decor background. Both are kept in sync with the app theme from JS because
+     * the activity is not recreated on a live light/dark switch (uiMode is in
+     * configChanges), so the resource-qualifier defaults set at WebView init /
+     * via @color/windowBackground would otherwise go stale when the in-app theme
+     * diverges from the system day/night setting.
      */
     @PluginMethod
     fun setWebViewBackgroundColor(call: PluginCall) {
@@ -75,6 +80,7 @@ class NavigationBarPlugin : Plugin() {
             val parsedColor = Color.parseColor(color)
             activity.runOnUiThread {
                 bridge?.webView?.setBackgroundColor(parsedColor)
+                activity.window.setBackgroundDrawable(ColorDrawable(parsedColor))
                 call.resolve()
             }
         } catch (e: Exception) {

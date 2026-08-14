@@ -1,6 +1,9 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from './base.page';
 
+export const isProjectTasksRoute = (url: string): boolean =>
+  /\/#\/project\/[^/]+\/tasks(?:[/?#]|$)/.test(url);
+
 export class ProjectPage extends BasePage {
   readonly sidenav: Locator;
   readonly createProjectBtn: Locator;
@@ -144,6 +147,10 @@ export class ProjectPage extends BasePage {
 
     // Helper function to check if we're already on the project
     const isAlreadyOnProject = async (): Promise<boolean> => {
+      if (!isProjectTasksRoute(this.page.url())) {
+        return false;
+      }
+
       try {
         // Use page.evaluate for direct DOM check (most reliable)
         return await this.page.evaluate((name) => {
@@ -677,5 +684,34 @@ export class ProjectPage extends BasePage {
 
     // Wait for project to be removed from sidebar
     await projectTreeItem.waitFor({ state: 'hidden', timeout: 5000 });
+  }
+
+  /**
+   * Opens the right-click context menu for a project in the sidebar.
+   */
+  async openProjectContextMenu(projectName: string): Promise<void> {
+    const fullProjectName = this.applyPrefix(projectName);
+
+    const projectsTree = this.page
+      .locator('nav-list-tree')
+      .filter({ hasText: 'Projects' });
+
+    // Ensure the Projects group is expanded
+    const projectsGroupBtn = projectsTree.locator('nav-item button').first();
+    const projectTreeItem = projectsTree
+      .locator('[role="treeitem"]')
+      .filter({ hasText: fullProjectName })
+      .first();
+    await projectsGroupBtn.waitFor({ state: 'visible', timeout: 5000 });
+    if ((await projectsGroupBtn.getAttribute('aria-expanded')) !== 'true') {
+      await projectsGroupBtn.click();
+    }
+
+    await projectTreeItem.waitFor({ state: 'visible', timeout: 5000 });
+    await projectTreeItem.click({ button: 'right' });
+
+    await this.page
+      .locator('.mat-mdc-menu-content')
+      .waitFor({ state: 'visible', timeout: 3000 });
   }
 }

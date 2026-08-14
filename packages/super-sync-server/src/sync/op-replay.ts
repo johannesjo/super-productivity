@@ -87,15 +87,35 @@ export class EncryptedOpsNotSupportedError extends Error {
   }
 }
 
+/**
+ * Markerless repairs came from clients that did not report which server
+ * prefix their full state already contains. They remain downloadable for
+ * client-side compatibility, but server-side replay cannot safely decide
+ * whether operations before the repair must be retained or discarded.
+ */
+export class LegacyRepairReplayUnsupportedError extends Error {
+  constructor() {
+    super(
+      'LEGACY_REPAIR_REPLAY_UNSUPPORTED: Cannot generate a server snapshot across a repair without a causal base.',
+    );
+    this.name = 'LegacyRepairReplayUnsupportedError';
+  }
+}
+
 export type ReplayOperationRow = {
   id: string;
   serverSeq: number;
   opType: string;
   entityType: string;
   entityId: string | null;
+  // Full entity set for multi-entity (batch) ops; empty for single-entity and
+  // pre-migration rows, which fall back to the scalar entityId. Optional so the
+  // many manually-built test rows don't need it (#8340).
+  entityIds?: string[];
   payload: unknown;
   schemaVersion: number;
   isPayloadEncrypted: boolean;
+  repairBaseServerSeq?: number | null;
 };
 
 export const assertContiguousReplayBatch = (
@@ -139,6 +159,9 @@ export const replayOpsToState = (
     // ranges upfront; this guard prevents accidental partial replays.
     if (row.isPayloadEncrypted) {
       throw new EncryptedOpsNotSupportedError(1);
+    }
+    if (row.opType === 'REPAIR' && row.repairBaseServerSeq == null) {
+      throw new LegacyRepairReplayUnsupportedError();
     }
 
     let opType = row.opType as Operation['opType'];
@@ -269,11 +292,26 @@ export const replayOpsToState = (
             };
           }
           break;
-        case 'DEL':
-          if (processEntityId) {
-            delete state[processEntityType][processEntityId];
+        case 'DEL': {
+          // A batch delete (deleteTasks) stores its full set in entityIds and
+          // sets the scalar entityId to entityIds[0]. Delete every member, not
+          // just the scalar — otherwise entities 2..n survive in restore
+          // snapshots and feed back to clients (#8340). Single-entity and
+          // pre-migration ops have an empty/absent array and fall back to the
+          // scalar. (Migration never splits multi-entity ops, so reading the
+          // row's entityIds here is equivalent to the per-op scalar.)
+          const idsToDelete = row.entityIds?.length
+            ? row.entityIds
+            : processEntityId
+              ? [processEntityId]
+              : [];
+          for (const delId of idsToDelete) {
+            // Same prototype-pollution guard as the scalar entityId path.
+            if (isUnsafeEntityKey(delId)) continue;
+            delete state[processEntityType][delId];
           }
           break;
+        }
         case 'MOV':
           if (processEntityId && processPayload) {
             state[processEntityType][processEntityId] = {
@@ -358,7 +396,7 @@ export const _resolveExpectedFirstSeq = (
   const isFullStateOp =
     firstOp.opType === 'SYNC_IMPORT' ||
     firstOp.opType === 'BACKUP_IMPORT' ||
-    firstOp.opType === 'REPAIR';
+    (firstOp.opType === 'REPAIR' && firstOp.repairBaseServerSeq != null);
   if (!isFullStateOp) {
     throw new Error(
       `SNAPSHOT_REPLAY_INCOMPLETE: Expected operation serverSeq ${currentSeq + 1} but got ${firstOp.serverSeq} while replaying to ${targetSeq}`,

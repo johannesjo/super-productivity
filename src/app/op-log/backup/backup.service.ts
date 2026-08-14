@@ -2,7 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { StateSnapshotService } from './state-snapshot.service';
-import { OperationLogStoreService } from '../persistence/operation-log-store.service';
+import {
+  ImportBackupRef,
+  OperationLogStoreService,
+} from '../persistence/operation-log-store.service';
 import { generateClientId } from '../../core/util/generate-client-id';
 import { Operation, OpType, ActionType } from '../core/operation.types';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
@@ -21,7 +24,9 @@ import { normalizeGlobalConfigStartOfNextDay } from '../../features/config/norma
 import { extractEntityKeysFromState } from '../persistence/extract-entity-keys';
 import { OperationWriteFlushService } from '../sync/operation-write-flush.service';
 import { LockService } from '../sync/lock.service';
+import { ConflictJournalService } from '../sync/conflict-journal.service';
 import { LOCK_NAMES } from '../core/operation-log.const';
+import { TaskTimeSyncService } from '../../features/tasks/task-time-sync.service';
 
 /**
  * Service for handling backup import and export operations.
@@ -42,6 +47,8 @@ export class BackupService {
   private _opLogStore = inject(OperationLogStoreService);
   private _operationWriteFlushService = inject(OperationWriteFlushService);
   private _lockService = inject(LockService);
+  private _conflictJournalService = inject(ConflictJournalService);
+  private _taskTimeSyncService = inject(TaskTimeSyncService);
 
   /**
    * Loads a complete backup of all application data.
@@ -73,13 +80,24 @@ export class BackupService {
    * @param isSkipLegacyWarnings - If true, skip legacy data format warnings
    * @param isSkipReload - If true, don't reload the page after import
    * @param isForceConflict - If true, reload page after import
+   * @param isSkipPreImportBackup - Keep an existing recovery backup in its
+   *   single slot while restoring that exact backup.
+   * @param requiredImportBackupId - Abort the destructive commit unless this
+   *   backup still occupies the single recovery slot.
    */
   async importCompleteBackup(
     data: AppDataComplete | CompleteBackup<AllModelConfig>,
     isSkipLegacyWarnings: boolean = false,
     isSkipReload: boolean = false,
     isForceConflict: boolean = false,
+    isSkipPreImportBackup: boolean = false,
+    requiredImportBackupId?: string,
   ): Promise<void> {
+    if (isSkipPreImportBackup !== (requiredImportBackupId !== undefined)) {
+      throw new Error(
+        'BackupService: Skipping the pre-import backup requires exactly one verified recovery backup ID.',
+      );
+    }
     try {
       this._imexViewService.setDataImportInProgress(true);
 
@@ -147,10 +165,29 @@ export class BackupService {
       // 4. Persist to operation log
       await this._operationWriteFlushService.flushPendingWrites();
       await this._lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
-        await this._persistImportToOperationLog(validatedData);
+        await this._persistImportToOperationLog(
+          validatedData,
+          isSkipPreImportBackup,
+          requiredImportBackupId,
+        );
+
+        // 4b. The conflict journal is a device-local side store describing
+        // conflicts in the op history that was JUST replaced — every import
+        // path (profile switch, JSON import, local-backup restore, SuperSync
+        // restore) funnels through here, and without this the badge keeps its
+        // pre-restore count and the review page lists entries from the
+        // replaced dataset. Cleared INSIDE the op-log lock: a concurrent
+        // (cross-tab) conflict resolution serializes on this lock, so its
+        // fresh post-import journal entries cannot land before the clear and
+        // be wiped. clearAll swallows its own errors (must not fail the import).
+        await this._conflictJournalService.clearAll();
+
+        // The imported full state replaces the live task totals. Any batch from
+        // the pre-import state must not flush later onto that new baseline.
+        this._taskTimeSyncService.clear();
       });
 
-      // 4b. Reset all sync providers' lastServerSeq to 0.
+      // 4c. Reset all sync providers' lastServerSeq to 0.
       // After a backup import, the client must re-sync from the beginning to ensure
       // that any ops on the server (which may conflict with the backup) are properly
       // filtered by the local BACKUP_IMPORT operation.
@@ -173,8 +210,66 @@ export class BackupService {
     }
   }
 
+  /**
+   * Captures a snapshot of the current state into the single-slot import backup
+   * store, so it can be restored after a destructive state replacement (e.g. the
+   * sync "Use Server Data" path, which clears local ops and replaces NgRx state).
+   *
+   * Mirrors the pre-import backup taken in `_persistImportToOperationLog`. Errors
+   * propagate so the caller can abort the destructive operation rather than wipe
+   * local data without a recovery point. Returns the backup's opaque ID plus its
+   * display timestamp so the caller can verify that the single slot has not been
+   * replaced by an unrelated write before restoring it. (#8107)
+   */
+  async captureImportBackup(): Promise<ImportBackupRef> {
+    const currentState = await this._stateSnapshotService.getStateSnapshotAsync();
+    return this._opLogStore.saveImportBackup(currentState);
+  }
+
+  /**
+   * Restores the import backup snapshot saved by `captureImportBackup()` (or
+   * before a backup import) — if one exists. Returns false when there is nothing
+   * to restore. Used by the post-replace "Undo" affordance.
+   *
+   * The backup state is read before `importCompleteBackup` runs. This recovery
+   * path skips the normal pre-import snapshot so the original remains durable
+   * until the destructive import has fully succeeded.
+   *
+   * @param expectedBackup - When provided, only restore if the stored backup
+   *   still carries this opaque backup ID. The slot is shared with the backup-
+   *   import flow, so an intervening import (or a second "Use Server Data")
+   *   would overwrite it; restoring that wrong snapshot is silent data loss.
+   */
+  async restoreImportBackup(expectedBackup?: ImportBackupRef): Promise<boolean> {
+    const backup = await this._opLogStore.loadImportBackup();
+    if (!backup) {
+      return false;
+    }
+    if (expectedBackup && backup.backupId !== expectedBackup.backupId) {
+      OpLog.warn(
+        'BackupService: Import backup was superseded since capture; skipping restore to avoid restoring the wrong snapshot.',
+      );
+      return false;
+    }
+    await this.importCompleteBackup(
+      backup.state as AppDataComplete,
+      true, // isSkipLegacyWarnings
+      true, // isSkipReload - loadAllData updates state live
+      true, // isForceConflict
+      true, // keep this exact recovery backup until the full restore succeeds
+      backup.backupId,
+    );
+    // Retire the restored slot only if it still has the same opaque identity.
+    // The import path or another tab may have created a newer safety backup
+    // while the async restore ran; that newer backup must survive. (#8107)
+    await this._opLogStore.clearImportBackup(backup.backupId);
+    return true;
+  }
+
   private async _persistImportToOperationLog(
     importedData: AppDataComplete,
+    isSkipPreImportBackup: boolean,
+    requiredImportBackupId?: string,
   ): Promise<void> {
     OpLog.normal('BackupService: Persisting import to operation log...');
 
@@ -183,20 +278,22 @@ export class BackupService {
     // after this method returns, so silently skipping the destructive write
     // would leave the device in a hybrid state (imported NgRx/archives, old
     // op-log) that is worse than either outcome.
-    try {
-      const currentState = await this._stateSnapshotService.getStateSnapshotAsync();
-      OpLog.normal('BackupService: Backing up current state before import...');
-      await this._opLogStore.saveImportBackup(currentState);
-    } catch (e) {
-      // `message` is intentionally omitted: log history is user-exportable
-      // (CLAUDE.md sync rule 9), and a future validator/IDB error type could
-      // interpolate user content into its message. Log the error `name` only.
-      OpLog.warn('BackupService: Failed to backup state before import:', {
-        name: (e as Error | undefined)?.name,
-      });
-      throw new Error(
-        'BackupService: Pre-import backup failed; aborting import to preserve local state.',
-      );
+    if (!isSkipPreImportBackup) {
+      try {
+        const currentState = await this._stateSnapshotService.getStateSnapshotAsync();
+        OpLog.normal('BackupService: Backing up current state before import...');
+        await this._opLogStore.saveImportBackup(currentState);
+      } catch (e) {
+        // `message` is intentionally omitted: log history is user-exportable
+        // (CLAUDE.md sync rule 9), and a future validator/IDB error type could
+        // interpolate user content into its message. Log the error `name` only.
+        OpLog.warn('BackupService: Failed to backup state before import:', {
+          name: (e as Error | undefined)?.name,
+        });
+        throw new Error(
+          'BackupService: Pre-import backup failed; aborting import to preserve local state.',
+        );
+      }
     }
 
     // Mint a fresh clientId for the new sync baseline. It is pure here —
@@ -233,6 +330,7 @@ export class BackupService {
       snapshotEntityKeys: extractEntityKeysFromState(importedData),
       archiveYoung: importedData.archiveYoung,
       archiveOld: importedData.archiveOld,
+      requiredImportBackupId,
     });
 
     OpLog.normal('BackupService: Import persisted to operation log.');

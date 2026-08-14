@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { TranslateModule } from '@ngx-translate/core';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 
 import { WorkViewComponent } from './work-view.component';
 import { TaskService } from '../tasks/task.service';
@@ -27,28 +27,47 @@ import {
   selectTaskRepeatCfgsByProjectId,
   selectTaskRepeatCfgsByTagId,
 } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import {
+  selectStartOfNextDayDiffMs,
+  selectTodayStr,
+} from '../../root-store/app-state/app-state.selectors';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { TODAY_TAG } from '../tag/tag.const';
 
 /**
  * Tests for the constructor effect() in WorkViewComponent that deselects the
  * currently selected task when it is no longer present in any visible task list
- * (undone / done / later / overdue / backlog). The customizer's list is
- * intentionally NOT consulted: after #7279 it is always a subset of the context's
- * undoneTasks, so checking undoneTasks is sufficient. These tests exercise the
- * real component; the template is overridden to a no-op so we don't have to
- * stand up every child component.
+ * (undone / done / later / overdue / backlog). When the task view customizer
+ * filters the undone list, the selected task must also be present in the
+ * customized visible list. These tests exercise the real component; the
+ * template is overridden to a no-op so we don't have to stand up every child
+ * component.
  */
 
 const buildTask = (id: string, subTasks: TaskWithSubTasks[] = []): TaskWithSubTasks =>
   ({ id, subTasks }) as unknown as TaskWithSubTasks;
 
 describe('WorkViewComponent', () => {
+  let store: MockStore;
+
+  // overrideSelector() calls setResult() on the GLOBAL selector singletons, and
+  // NgRx MockStore does not auto-clear them between specs. Without this, the
+  // frozen today/offset values (selectTodayStr, selectStartOfNextDayDiffMs) leak
+  // into later specs (e.g. planner.selectors, task.selectors) under Jasmine's
+  // randomized spec order and make their "today" assertions fail intermittently.
+  afterEach(() => {
+    store?.resetSelectors();
+  });
+
   describe('selected task retention effect', () => {
     let selectedTaskId: ReturnType<typeof signal<string | null>>;
     let setSelectedId: jasmine.Spy;
     let customized$: BehaviorSubject<{ list: TaskWithSubTasks[] }>;
+    // Indirection so a single test can swap in a source that hasn't emitted yet
+    // (a plain Subject) to exercise the sentinel/readiness guard.
+    let customizeSource: () => Observable<{ list: TaskWithSubTasks[] }>;
+    let isCustomized: ReturnType<typeof signal<boolean>>;
     let activeWorkContextId: string;
-    let store: MockStore;
 
     const createComponent = async (
       inputs: {
@@ -70,6 +89,8 @@ describe('WorkViewComponent', () => {
       selectedTaskId = signal<string | null>(null);
       setSelectedId = jasmine.createSpy('setSelectedId');
       customized$ = new BehaviorSubject<{ list: TaskWithSubTasks[] }>({ list: [] });
+      customizeSource = () => customized$.asObservable();
+      isCustomized = signal(false);
       activeWorkContextId = 'some-project-id';
 
       TestBed.configureTestingModule({
@@ -97,8 +118,8 @@ describe('WorkViewComponent', () => {
           {
             provide: TaskViewCustomizerService,
             useValue: {
-              customizeUndoneTasks: () => customized$.asObservable(),
-              isCustomized: signal(false),
+              customizeUndoneTasks: () => customizeSource(),
+              isCustomized,
             },
           },
           {
@@ -111,6 +132,7 @@ describe('WorkViewComponent', () => {
               todayRemainingInProject$: of(0),
               estimateRemainingToday$: of(0),
               workingToday$: of(0),
+              breakTimeToday$: of(0),
               isTodayList$: of(false),
               activeWorkContextId$: of(null),
               activeWorkContextTypeAndId$: of({
@@ -135,6 +157,10 @@ describe('WorkViewComponent', () => {
           },
           { provide: SnackService, useValue: { open: () => {} } },
           {
+            provide: CalendarIntegrationService,
+            useValue: { calendarEvents$: of([]) },
+          },
+          {
             provide: GlobalConfigService,
             useValue: {
               appFeatures: signal({ isFinishDayEnabled: false }),
@@ -157,6 +183,8 @@ describe('WorkViewComponent', () => {
       store.overrideSelector(selectLaterTodayTasksWithSubTasks, []);
       store.overrideSelector(selectTaskRepeatCfgsByProjectId, []);
       store.overrideSelector(selectTaskRepeatCfgsByTagId, []);
+      store.overrideSelector(selectTodayStr, '2026-06-23');
+      store.overrideSelector(selectStartOfNextDayDiffMs, 0);
     });
 
     it('deselects when the task is absent from every list', async () => {
@@ -173,6 +201,52 @@ describe('WorkViewComponent', () => {
       TestBed.flushEffects();
 
       expect(setSelectedId).not.toHaveBeenCalled();
+    });
+
+    it('deselects when the customizer filters the selected undone task out', async () => {
+      isCustomized.set(true);
+      customized$.next({ list: [buildTask('visible-1')] });
+
+      await createComponent({ undone: [buildTask('hidden-1'), buildTask('visible-1')] });
+      selectedTaskId.set('hidden-1');
+      TestBed.flushEffects();
+
+      expect(setSelectedId).toHaveBeenCalledOnceWith(null);
+    });
+
+    it('keeps the selection when the selected undone task remains in the customized list', async () => {
+      isCustomized.set(true);
+      customized$.next({ list: [buildTask('visible-1')] });
+
+      await createComponent({ undone: [buildTask('hidden-1'), buildTask('visible-1')] });
+      selectedTaskId.set('visible-1');
+      TestBed.flushEffects();
+
+      expect(setSelectedId).not.toHaveBeenCalled();
+    });
+
+    it('does not deselect while the customized list has not emitted yet, then deselects once it does', async () => {
+      // isCustomized() flips synchronously, but customizeUndoneTasks defers the
+      // customized branch by one animation frame, so the list can lag. Use a
+      // source that has not emitted: the signal stays at the sentinel initial
+      // value and the deselect must be skipped (returning null) rather than
+      // firing against a not-yet-ready list.
+      const pendingCustomized$ = new Subject<{ list: TaskWithSubTasks[] }>();
+      customizeSource = () => pendingCustomized$;
+      isCustomized.set(true);
+
+      await createComponent({ undone: [buildTask('hidden-1')] });
+      selectedTaskId.set('hidden-1');
+      TestBed.flushEffects();
+
+      // List not ready yet -> skip, do not close the panel on the selected task.
+      expect(setSelectedId).not.toHaveBeenCalled();
+
+      // The filtered list lands without the selected task -> now it deselects.
+      pendingCustomized$.next({ list: [buildTask('other-1')] });
+      TestBed.flushEffects();
+
+      expect(setSelectedId).toHaveBeenCalledOnceWith(null);
     });
 
     it('keeps the selection when the task is in doneTasks (existing behaviour)', async () => {
@@ -275,6 +349,7 @@ describe('WorkViewComponent', () => {
               todayRemainingInProject$: of(0),
               estimateRemainingToday$: of(0),
               workingToday$: of(0),
+              breakTimeToday$: of(0),
               isTodayList$: of(false),
               activeWorkContextId$: of('ctx'),
               activeWorkContextTypeAndId$: of({
@@ -299,6 +374,10 @@ describe('WorkViewComponent', () => {
           },
           { provide: SnackService, useValue: { open: () => {} } },
           {
+            provide: CalendarIntegrationService,
+            useValue: { calendarEvents$: of([]) },
+          },
+          {
             provide: GlobalConfigService,
             useValue: {
               appFeatures: signal({ isFinishDayEnabled: false }),
@@ -311,11 +390,13 @@ describe('WorkViewComponent', () => {
       TestBed.overrideComponent(WorkViewComponent, {
         set: { template: '', imports: [], styles: [''] },
       });
-      const store = TestBed.inject(MockStore);
+      store = TestBed.inject(MockStore);
       store.overrideSelector(selectOverdueTasksWithSubTasks, []);
       store.overrideSelector(selectLaterTodayTasksWithSubTasks, []);
       store.overrideSelector(selectTaskRepeatCfgsByProjectId, []);
       store.overrideSelector(selectTaskRepeatCfgsByTagId, []);
+      store.overrideSelector(selectTodayStr, '2026-06-23');
+      store.overrideSelector(selectStartOfNextDayDiffMs, 0);
 
       await TestBed.compileComponents();
       const fixture = TestBed.createComponent(WorkViewComponent);

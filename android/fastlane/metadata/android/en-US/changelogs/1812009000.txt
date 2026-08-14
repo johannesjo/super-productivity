@@ -1,0 +1,2 @@
+Version 18.12.0
+Improved Android keyboard handling and removed the keyboard-related white flash. Focus Mode now shows session completion and sends countdown notifications. Added Plainspace shared-project integration and Vikunja discovery through CalDAV. Azure DevOps and Trello providers are now plugins. Also fixes task ordering and completion, Flowtime settings, Linux display issues, Nextcloud errors, theme settings, and legacy backup migration.

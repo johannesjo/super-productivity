@@ -41,6 +41,7 @@ export interface IssueServiceInterface {
 
   // OPTIONAL
   // --------
+
   getMappedAttachments?(issueData: IssueData): TaskAttachment[];
 
   getNewIssuesToAddToBacklog?(

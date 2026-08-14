@@ -24,6 +24,9 @@ import { DroidLog } from '../../../core/log';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { Task } from '../../tasks/task.model';
+
+type FocusNotificationTask = Pick<Task, 'id' | 'title'> | null | undefined;
 
 /**
  * On app resume, fire a single `tick()` so the wall-clock-based focus reducer
@@ -36,16 +39,27 @@ export const createFocusResumeTick$ = (onResume$: Observable<void>): Observable<
 
 /**
  * Whether the focus-mode notification needs a fresh push to the native service.
- * Elapsed-only changes are throttled to 5s (the native handler already ticks
- * every second), but pause/purpose changes — and the large elapsed jump a resume
- * `tick()` produces (#7856) — must propagate immediately so the notification
- * reconciles with the corrected in-app countdown.
+ * The notification's chronometer ticks natively, so steady-state elapsed
+ * changes need no push at all — and since prev/curr are consecutive per-tick
+ * emissions (~1s apart), the 5s gate suppresses them entirely (#8243). Do not
+ * weaken it: every push re-runs startForeground + a notification rebuild.
+ * Pause/purpose and displayed-task changes — and the large elapsed jump a
+ * resume `tick()` produces (#7856) — must propagate immediately so the
+ * notification reconciles with the corrected in-app state. (The 5000 here and
+ * TIME_SPENT_JUMP_THRESHOLD_MS in android-foreground-tracking.effects.ts
+ * encode the same "larger than any tick" idea but differ in semantics —
+ * abs() vs decrease-always-passes — so they are deliberately not shared.)
  */
 export const hasFocusNotificationStateChanged = (
   prevTimer: TimerState | undefined,
   currTimer: TimerState,
+  prevTask?: FocusNotificationTask,
+  currTask?: FocusNotificationTask,
 ): boolean => {
   if (!prevTimer) return true;
+  // The task title is part of the native notification payload, even though the
+  // focus timer itself is unchanged when tracking switches to another task.
+  if (prevTask?.id !== currTask?.id || prevTask?.title !== currTask?.title) return true;
   // Pause state changed
   if (prevTimer.isRunning !== currTimer.isRunning) return true;
   // Purpose changed (work -> break or vice versa)
@@ -55,20 +69,63 @@ export const hasFocusNotificationStateChanged = (
 };
 
 /**
+ * Wall-clock slack (ms) for the "session has reached its scheduled end" check
+ * below. The native completion arrives at (or, after bridge/broadcast latency,
+ * just past) `startedAt + duration`, so a small positive slack absorbs latency
+ * and clock jitter without ever admitting the #8805 stale-completion case — a
+ * freshly-started session sits minutes away from its end, not seconds.
+ */
+const NATIVE_COMPLETE_TOLERANCE_MS = 2000;
+
+/**
  * Whether a native timer-complete event should drive a state change. The native
  * foreground service fires this when its countdown reaches 0; we act on it only
- * while the matching session is still active in app state — a break event needs an
- * active break, a work event needs a still-running work session. The work guard is
- * what makes the native completion a no-op once a resume `tick()` has already
- * completed the session on return from the background (#7856), so the two never
- * double-complete. Pure + exported so the `IS_ANDROID_WEB_VIEW`-gated effect's guard
- * is unit-testable.
+ * while the matching session is still active in app state (a break event needs an
+ * active break, a work event a still-running work session) AND that session has
+ * actually reached its scheduled end by the WALL CLOCK (`now - startedAt >=
+ * duration`).
+ *
+ * The purpose/isRunning guard makes a work completion a no-op once a resume
+ * `tick()` has already completed the session on return from the background
+ * (#7856), so the two never double-complete.
+ *
+ * The wall-clock guard additionally rejects a STALE or duplicate native
+ * completion that lands on a *different*, still-running session than the one it
+ * was fired for — e.g. the work session the user just started by advancing from a
+ * break with the "next session" arrow. Without it that fresh session is completed
+ * immediately, and in Pomodoro completing a work session auto-spawns a break, so
+ * the arrow appears to "start another break" instead of the session (#8805). We
+ * compare against the wall clock rather than the stored `timer.elapsed` because a
+ * backgrounded session's `elapsed` is frozen and stale, whereas `now - startedAt`
+ * stays accurate — the same basis the reducer's `tick` uses (`elapsed =
+ * Date.now() - startedAt`), so a genuine over-run completion on resume (#7856)
+ * still passes even though its last in-app tick is far behind.
+ *
+ * `now` is injectable so the guard stays deterministically unit-testable.
  */
 export const shouldHandleNativeTimerComplete = (
   isBreak: boolean,
   timer: TimerState,
-): boolean =>
-  isBreak ? timer.purpose === 'break' : timer.purpose === 'work' && timer.isRunning;
+  now: number = Date.now(),
+): boolean => {
+  // Must match the kind of session the event was fired for.
+  if (isBreak ? timer.purpose !== 'break' : timer.purpose !== 'work') {
+    return false;
+  }
+  // A work completion is void once the in-app tick already stopped the session
+  // (#7856). Breaks keep their prior semantics (no isRunning requirement): a
+  // finished break stays on-screen, stopped, until the user leaves it.
+  if (!isBreak && !timer.isRunning) {
+    return false;
+  }
+  // A running timer always has a startedAt, and fixed-duration timers have
+  // duration > 0 (Flowtime work — duration 0 — never schedules a native
+  // completion, so it never reaches here); guard defensively regardless.
+  if (timer.startedAt == null || timer.duration <= 0) {
+    return false;
+  }
+  return now - timer.startedAt >= timer.duration - NATIVE_COMPLETE_TOLERANCE_MS;
+};
 
 export type NativeFocusModeData = {
   durationMs: number;
@@ -204,7 +261,14 @@ export class AndroidFocusModeEffects {
                   'Failed to start focus mode notification',
                   true,
                 );
-              } else if (hasFocusNotificationStateChanged(prev?.timer, timer)) {
+              } else if (
+                hasFocusNotificationStateChanged(
+                  prev?.timer,
+                  timer,
+                  prev?.currentTask,
+                  currentTask,
+                )
+              ) {
                 // Only update if something significant changed
                 DroidLog.log('AndroidFocusModeEffects: Updating focus mode service', {
                   title,

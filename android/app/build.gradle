@@ -20,9 +20,9 @@ android {
         minSdkVersion 24
         targetSdkVersion 36
         compileSdk 36
-        versionCode 18_08_00_9000
-        versionName "18.8.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 18_19_00_9000
+        versionName "18.19.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 hostName       : "app.super-productivity.com",
                 defaultUrl     : "https://app.super-productivity.com",
@@ -105,6 +105,9 @@ dependencies {
     implementation "com.anggrayudi:storage:1.5.4"
 
     playImplementation "com.google.android.gms:play-services-auth:21.3.0"
+    // Play In-App Review (native rating card). play flavor ONLY — this is a
+    // proprietary Google library and must never enter the F-Droid build.
+    playImplementation "com.google.android.play:review:2.0.2"
 
     implementation project(':capacitor-android')
 
@@ -119,10 +122,15 @@ dependencies {
     }
 
     testImplementation "junit:junit:4.13.2"
+    // Real org.json for JVM unit tests (android.jar only ships stubs); used by
+    // WidgetDataTest to lock the widget_data blob contract.
+    testImplementation "org.json:json:20240303"
 
+    androidTestImplementation "androidx.test:core:1.6.1"
     androidTestImplementation "androidx.test:rules:1.6.1"
     androidTestImplementation "com.android.support.test:runner:1.0.2"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
+    androidTestImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
 }
 
 apply from: 'capacitor.build.gradle'

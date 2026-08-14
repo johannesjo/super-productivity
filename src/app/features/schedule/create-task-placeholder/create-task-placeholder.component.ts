@@ -27,21 +27,37 @@ import { devError } from '../../../util/dev-error';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { TranslatePipe } from '@ngx-translate/core';
+import { T } from '../../../t.const';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 type Timeout = NodeJS.Timeout | number | undefined;
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, LocaleDatePipe, ShortTimeHtmlPipe, SelectTaskMinimalComponent],
+  imports: [
+    MatIcon,
+    LocaleDatePipe,
+    ShortTimeHtmlPipe,
+    SelectTaskMinimalComponent,
+    TranslatePipe,
+  ],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateTaskPlaceholderComponent implements OnDestroy {
+  T: typeof T = T;
+
   private _taskService = inject(TaskService);
   private _store = inject(Store);
   private readonly _snackService = inject(SnackService);
   private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
+
+  // Exposed so the template can pass the reactive locale to the now-pure
+  // `localeDate` pipe, preserving re-render on a locale change.
+  readonly locale = this._dateTimeFormatService.currentLocale;
 
   isEditMode = input.required<boolean>();
   time = input<string>();

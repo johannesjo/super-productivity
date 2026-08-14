@@ -11,7 +11,9 @@ import { ArchiveOperationHandler } from './archive-operation-handler.service';
 import { HydrationStateService } from './hydration-state.service';
 import { remoteArchiveDataApplied } from '../../features/archive/store/archive.actions';
 import { bulkApplyOperations } from './bulk-hydration.action';
+import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { OperationLogEffects } from '../capture/operation-log.effects';
+import { reportBulkReplayReducerFailure } from './bulk-replay-failure-collector';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
@@ -19,6 +21,7 @@ describe('OperationApplierService', () => {
   let mockArchiveOperationHandler: jasmine.SpyObj<ArchiveOperationHandler>;
   let mockHydrationState: jasmine.SpyObj<HydrationStateService>;
   let mockOperationLogEffects: jasmine.SpyObj<OperationLogEffects>;
+  let mockClientIdProvider: jasmine.SpyObj<ClientIdProvider>;
 
   const createMockOperation = (
     id: string,
@@ -53,9 +56,15 @@ describe('OperationApplierService', () => {
     mockOperationLogEffects = jasmine.createSpyObj('OperationLogEffects', [
       'processDeferredActions',
     ]);
+    mockClientIdProvider = jasmine.createSpyObj('ClientIdProvider', [
+      'loadClientId',
+      'getOrGenerateClientId',
+      'clearCache',
+    ]);
 
     mockArchiveOperationHandler.handleOperation.and.returnValue(Promise.resolve());
     mockOperationLogEffects.processDeferredActions.and.returnValue(Promise.resolve());
+    mockClientIdProvider.loadClientId.and.resolveTo('testClient');
 
     TestBed.configureTestingModule({
       providers: [
@@ -64,6 +73,7 @@ describe('OperationApplierService', () => {
         { provide: ArchiveOperationHandler, useValue: mockArchiveOperationHandler },
         { provide: HydrationStateService, useValue: mockHydrationState },
         { provide: OperationLogEffects, useValue: mockOperationLogEffects },
+        { provide: CLIENT_ID_PROVIDER, useValue: mockClientIdProvider },
       ],
     });
 
@@ -79,7 +89,7 @@ describe('OperationApplierService', () => {
 
       expect(result.appliedOps).toEqual([op]);
       expect(mockStore.dispatch).toHaveBeenCalledOnceWith(
-        bulkApplyOperations({ operations: [op] }),
+        bulkApplyOperations({ operations: [op], localClientId: 'testClient' }),
       );
     });
 
@@ -220,6 +230,31 @@ describe('OperationApplierService', () => {
   });
 
   describe('error paths', () => {
+    it('should report and skip reducer-failed operations before archive handling', async () => {
+      const op1 = createMockOperation('op-1');
+      const op2 = createMockOperation('op-2');
+      const op3 = createMockOperation('op-3');
+      const reducerError = new Error('Reducer failed');
+      const onReducersCommitted = jasmine
+        .createSpy('onReducersCommitted')
+        .and.resolveTo();
+      mockStore.dispatch.and.callFake((() => {
+        reportBulkReplayReducerFailure(op2, reducerError);
+      }) as never);
+
+      const result = await service.applyOperations([op1, op2, op3], {
+        onReducersCommitted,
+      });
+
+      expect(onReducersCommitted).toHaveBeenCalledOnceWith(
+        [op1, op3],
+        [{ op: op2, error: reducerError }],
+      );
+      expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(2);
+      expect(result.appliedOps).toEqual([op1, op3]);
+      expect(result.reducerFailures).toEqual([{ op: op2, error: reducerError }]);
+    });
+
     it('should return failed op when archiveOperationHandler throws', async () => {
       const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
       const archiveError = new Error('Archive write failed');
@@ -475,6 +510,9 @@ describe('OperationApplierService', () => {
       }) as typeof window.setTimeout);
 
       const applyPromise = service.applyOperations([op]);
+      // applyOperations awaits the (cached) clientId load before dispatching, so
+      // flush that one microtask before asserting the synchronous dispatch.
+      await Promise.resolve();
 
       expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
       expect(archiveCalls).toEqual([]);
@@ -542,7 +580,10 @@ describe('OperationApplierService', () => {
 
       const result = await service.applyOperations(ops);
 
-      // Bulk dispatch succeeded (all ops applied to NgRx state)
+      // Bulk dispatch succeeded: the reducer effects of ALL FIVE ops are
+      // committed to NgRx state, including the "failed" ones — failedOp only
+      // means their archive side effects are outstanding. That is why retry
+      // paths must use skipReducerDispatch (see test below).
       expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
 
       // But archive handling failed on op-3
@@ -553,6 +594,44 @@ describe('OperationApplierService', () => {
 
       // Archive handler was called 3 times (op-1, op-2, op-3)
       expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(3);
+    });
+
+    it('should not re-run reducers when retrying the failed slice with skipReducerDispatch', async () => {
+      const ops = [
+        createMockOperation('op-1', 'TASK', OpType.Update, { title: 'First' }),
+        createMockOperation('op-2', 'TASK', OpType.Update, { title: 'Second' }),
+        createMockOperation('op-3', 'TASK', OpType.Update, { title: 'Third' }),
+        createMockOperation('op-4', 'TASK', OpType.Update, { title: 'Fourth' }),
+        createMockOperation('op-5', 'TASK', OpType.Update, { title: 'Fifth' }),
+      ];
+
+      let callCount = 0;
+      mockArchiveOperationHandler.handleOperation.and.callFake(() => {
+        callCount++;
+        return callCount === 3
+          ? Promise.reject(new Error('Archive write failed on op-3'))
+          : Promise.resolve();
+      });
+
+      const firstPass = await service.applyOperations(ops);
+      expect(firstPass.failedOp!.op.id).toBe('op-3');
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+
+      mockStore.dispatch.calls.reset();
+      mockArchiveOperationHandler.handleOperation.calls.reset();
+      mockArchiveOperationHandler.handleOperation.and.returnValue(Promise.resolve());
+
+      // Retry the failed slice the way retryFailedRemoteOps does: archive only.
+      const retry = await service.applyOperations(ops.slice(2), {
+        skipReducerDispatch: true,
+      });
+
+      // No reducer re-dispatch — additive reducers (e.g. syncTimeSpent,
+      // increaseSimpleCounterCounterToday) cannot double-apply on retry.
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+      expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(3);
+      expect(retry.appliedOps).toEqual(ops.slice(2));
+      expect(retry.failedOp).toBeUndefined();
     });
   });
 
@@ -673,6 +752,19 @@ describe('OperationApplierService', () => {
       });
 
       expect(mockOperationLogEffects.processDeferredActions).not.toHaveBeenCalled();
+    });
+
+    it('should leave an already-open remote apply window to its caller', async () => {
+      const op = createMockOperation('op-1');
+
+      await service.applyOperations([op], {
+        remoteApplyWindowAlreadyOpen: true,
+        skipDeferredLocalActions: true,
+      });
+
+      expect(mockHydrationState.startApplyingRemoteOps).not.toHaveBeenCalled();
+      expect(mockHydrationState.startPostSyncCooldown).not.toHaveBeenCalled();
+      expect(mockHydrationState.endApplyingRemoteOps).not.toHaveBeenCalled();
     });
 
     it('should call processDeferredActions after endApplyingRemoteOps', async () => {

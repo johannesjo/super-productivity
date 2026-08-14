@@ -10,13 +10,14 @@ import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { IssueProviderService } from '../issue-provider.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { IssueSyncAdapterRegistryService } from './issue-sync-adapter-registry.service';
-import { computePushDecisions } from './compute-push-decisions';
+import { computePushDecisions, issueValuesEqual } from './compute-push-decisions';
 import { FieldMapping, FieldSyncConfig } from './issue-sync.model';
 import { IssueSyncAdapter } from './issue-sync-adapter.interface';
 import { IssueProvider, IssueProviderKey } from '../issue.model';
 import { IssueLog } from '../../../core/log';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
+import { PlainspaceSyncAdapterService } from '../providers/plainspace/plainspace-sync-adapter.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import {
   DeletedTaskIssueSidecarService,
@@ -26,12 +27,10 @@ import { DeletedTagTitlesSidecarService } from './deleted-tag-titles-sidecar.ser
 import { selectEnabledIssueProviders } from '../store/issue-provider.selectors';
 import { getErrorTxt } from '../../../util/get-error-text';
 import { T } from '../../../t.const';
-import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
-import { PluginHttpService } from '../../../plugins/issue-provider/plugin-http.service';
-import { TagService } from '../../tag/tag.service';
-import { createPluginSyncAdapter } from '../../../plugins/issue-provider/plugin-sync-adapter.service';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteTag, deleteTags } from '../../tag/store/tag.actions';
+import { IssueSyncAdapterResolverService } from './issue-sync-adapter-resolver.service';
+import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
 
 const SYNCABLE_TASK_FIELDS: ReadonlySet<string> = new Set([
   'isDone',
@@ -42,6 +41,19 @@ const SYNCABLE_TASK_FIELDS: ReadonlySet<string> = new Set([
   'timeEstimate',
   'tagIds',
 ]);
+
+/**
+ * A provider's write may reject with this marker to signal an *expected*
+ * limitation rather than a real failure — e.g. the CalDAV plugin can't yet edit
+ * or delete a single occurrence of a recurring event (#7492). When it does,
+ * two-way sync stays silent: the user changed/removed their task, not the
+ * calendar. Explicit calendar actions (agenda reschedule/delete) don't consult
+ * this and still surface the message, which is the honest feedback there.
+ */
+const isExpectedSyncSkipError = (err: unknown): boolean =>
+  typeof err === 'object' &&
+  err !== null &&
+  (err as { isExpectedSyncSkip?: boolean }).isExpectedSyncSkip === true;
 
 const toSortedStringArray = (value: unknown): string[] =>
   Array.isArray(value)
@@ -111,15 +123,16 @@ export class IssueTwoWaySyncEffects {
   private readonly _snackService = inject(SnackService);
   private readonly _deletedTaskIssueSidecar = inject(DeletedTaskIssueSidecarService);
   private readonly _deletedTagTitlesSidecar = inject(DeletedTagTitlesSidecarService);
+  private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
-  private readonly _pluginHttp = inject(PluginHttpService);
-  private readonly _tagService = inject(TagService);
   private _syncOriginatedTaskIds = new Set<string>();
   private static readonly _MAX_SYNC_ORIGINATED_IDS = 1000;
 
   constructor() {
     const caldavAdapter = inject(CaldavSyncAdapterService);
     this._adapterRegistry.register('CALDAV', caldavAdapter);
+    const plainspaceAdapter = inject(PlainspaceSyncAdapterService);
+    this._adapterRegistry.register('PLAINSPACE', plainspaceAdapter);
   }
 
   pushFieldsOnTaskUpdate$: Observable<unknown> = createEffect(
@@ -168,6 +181,11 @@ export class IssueTwoWaySyncEffects {
         concatMap(({ fullTask, changes }) =>
           this._pushChanges$(fullTask, changes).pipe(
             catchError((err) => {
+              // Expected provider limitation (e.g. a single recurring occurrence,
+              // #7492) — the local task edit stands; don't alarm the user.
+              if (isExpectedSyncSkipError(err)) {
+                return EMPTY;
+              }
               IssueLog.err('Two-way sync push failed', err);
               this._snackService.open({
                 type: 'ERROR',
@@ -214,6 +232,9 @@ export class IssueTwoWaySyncEffects {
         concatMap((task) =>
           this._pushChanges$(task, { tagIds: task.tagIds }).pipe(
             catchError((err) => {
+              if (isExpectedSyncSkipError(err)) {
+                return EMPTY;
+              }
               IssueLog.err('Two-way sync tag delete push failed', err);
               this._snackService.open({
                 type: 'ERROR',
@@ -397,6 +418,16 @@ export class IssueTwoWaySyncEffects {
     if (this._pluginRegistry.getUseAgendaView(provider.issueProviderKey)) {
       return false;
     }
+    // Plainspace-backed projects are collaborative by definition: a task added
+    // there is pushed up so the team sees it (symmetric with auto-import). The
+    // bound provider is itself the opt-in, so there is no separate flag — but
+    // only once it is actually configured. An enabled-but-unbound provider
+    // (mid-connect, spaceId/token still null) would otherwise POST an invalid
+    // create and error-snack on every add; skip silently until it's ready.
+    if (provider.issueProviderKey === 'PLAINSPACE') {
+      const ps = provider as { spaceId?: string | null; token?: string | null };
+      return !!ps.spaceId && !!ps.token;
+    }
     // Check for plugin providers (both plugin:* and migrated keys like GITHUB)
     const pluginCfg = (provider as { pluginConfig?: Record<string, unknown> })
       .pluginConfig;
@@ -443,32 +474,7 @@ export class IssueTwoWaySyncEffects {
   }
 
   private _getAdapter(issueType: string): IssueSyncAdapter<unknown> | undefined {
-    const existing = this._adapterRegistry.get(issueType);
-    if (existing) return existing;
-
-    const provider = this._pluginRegistry.getProvider(issueType);
-    const definition = provider?.definition;
-    if (
-      !provider ||
-      !definition ||
-      (!definition.createIssue &&
-        !definition.deleteIssue &&
-        !(definition.fieldMappings?.length && definition.updateIssue))
-    ) {
-      return undefined;
-    }
-
-    const adapter = createPluginSyncAdapter(
-      definition,
-      (getHeadersFn) =>
-        this._pluginHttp.createHttpHelper(getHeadersFn, {
-          allowPrivateNetwork: provider.allowPrivateNetwork,
-        }),
-      this._tagService,
-    );
-
-    this._adapterRegistry.register(issueType, adapter);
-    return adapter;
+    return this._adapterResolver.getAdapter(issueType);
   }
 
   private _deleteRemoteIssue$(info: DeletedTaskIssueInfo | Task): Observable<unknown> {
@@ -488,6 +494,11 @@ export class IssueTwoWaySyncEffects {
         concatMap((cfg) =>
           from(adapter.deleteIssue!(issueId, cfg)).pipe(
             catchError((err) => {
+              // Expected provider limitation (e.g. a single recurring occurrence,
+              // #7492) — the local task is already removed; stay silent.
+              if (isExpectedSyncSkipError(err)) {
+                return EMPTY;
+              }
               // 404/410 means the remote issue is already gone — treat as success
               // to avoid false "delete failed" toasts (e.g. when polling detects
               // a remote deletion and then deleteIssue is called on the same issue)
@@ -580,11 +591,34 @@ export class IssueTwoWaySyncEffects {
         }
 
         const pushedDecisions = decisions.filter((d) => d.action === 'push');
+        const pushedIssueFields = new Set(pushedDecisions.map((d) => d.field));
         const hasProviderOwnedSkip = decisions.some(
           (d) =>
             d.action === 'skip' &&
             (d.reasonCode === 'provider-changed' || d.reasonCode === 'no-baseline'),
         );
+
+        // Detect remote changes in mapped fields we did NOT push this cycle — e.g.
+        // the task was completed in Plainspace (isDone flipped) while the user was
+        // pushing an unrelated rename/reschedule from SP. `freshIssue` was fetched
+        // before our write, so `freshValues` still carries that un-pulled change.
+        // Advancing issueLastUpdated past it would make the poll's "updatedAt
+        // unchanged" guard treat it as already-seen and never pull it — silently
+        // dropping the remote completion. Keep the old marker so the next poll
+        // reconciles it. (hasProviderOwnedSkip already covers the changed fields.)
+        const hasUnpulledRemoteChange = fieldMappings.some((m) => {
+          if (pushedIssueFields.has(m.issueField)) {
+            return false;
+          }
+          if (!(m.issueField in lastSyncedValues)) {
+            return false;
+          }
+          return !issueValuesEqual(
+            freshValues[m.issueField],
+            lastSyncedValues[m.issueField],
+          );
+        });
+        const keepIssueLastUpdatedStale = hasProviderOwnedSkip || hasUnpulledRemoteChange;
 
         // Only advance baselines for fields we actually wrote. Fresh provider
         // values for skipped or unrelated fields still need the polling path to
@@ -598,19 +632,20 @@ export class IssueTwoWaySyncEffects {
         // (e.g. CalDAV etag changes on write). Fall back to Date.now() for
         // providers that don't implement getIssueLastUpdated.
         let issueLastUpdated = Date.now();
-        if (didPush && !hasProviderOwnedSkip && adapter.getIssueLastUpdated) {
+        if (didPush && !keepIssueLastUpdatedStale && adapter.getIssueLastUpdated) {
           const postPushIssue = await adapter.fetchIssue(issueId, cfg);
           issueLastUpdated = adapter.getIssueLastUpdated(postPushIssue);
         }
 
         // Update sync values and issueLastUpdated to prevent poll from
         // treating our own push as an external update. If any changed field was
-        // provider-owned, keep the old issueLastUpdated so polling can pull it.
+        // provider-owned, or the remote has an un-pulled change in another mapped
+        // field, keep the old issueLastUpdated so polling can pull it.
         this._trackSyncOriginatedTask(task.id);
         try {
           this._taskService.update(task.id, {
             issueLastSyncedValues: updatedSyncValues,
-            ...(hasProviderOwnedSkip ? {} : { issueLastUpdated }),
+            ...(keepIssueLastUpdatedStale ? {} : { issueLastUpdated }),
           });
         } catch (e) {
           this._syncOriginatedTaskIds.delete(task.id);

@@ -53,7 +53,14 @@
               @if (isShowTimeWorkedWithoutBreak) {
                 <div class="item hide-xs">
                   <span class="label">{{ T.WW.WITHOUT_BREAK | translate }} </span>
-                  <span class="no-wrap">
+                  <span
+                    class="no-wrap"
+                    matTooltip="{{ T.F.TIME_TRACKING.D_IDLE.BREAK | translate }}: {{
+                      breakTimeToday() | msToString
+                    }}"
+                    [matTooltipDisabled]="!breakTimeToday()"
+                    matTooltipPosition="above"
+                  >
                     <strong class="time-val">{{
                       takeABreakService.timeWorkingWithoutABreak$ | async | msToString
                     }}</strong
@@ -132,20 +139,22 @@
           }
           @if (customizedUndoneTasks(); as customized) {
             @if (customized.grouped) {
-              @for (group of customized.grouped | keyvalue; track group.key) {
+              @for (
+                groupKey of customizerService.getOrderedGroupKeys(customized.grouped);
+                track groupKey
+              ) {
                 <collapsible
-                  [title]="group.key | scheduledDateGroup"
+                  [title]="groupKey | scheduledDateGroup: todayStr()"
                   [isIconBefore]="true"
-                  [isExpanded]="
-                    !customizerService.collapsedGroupIds().includes(group.key)
-                  "
-                  (isExpandedChange)="customizerService.toggleGroupExpansion(group.key)"
+                  [isExpanded]="!customizerService.collapsedGroupIds().includes(groupKey)"
+                  (isExpandedChange)="customizerService.toggleGroupExpansion(groupKey)"
                   [isGroup]="true"
                 >
                   <task-list
-                    [tasks]="group.value"
+                    [tasks]="customized.grouped[groupKey]"
                     listId="PARENT"
                     listModelId="UNDONE"
+                    [groupTagId]="customized.groupTagIdByKey?.[groupKey]"
                   ></task-list>
                 </collapsible>
               }
@@ -178,7 +187,9 @@
                     [cdkDragLockAxis]="'y'"
                   >
                     <collapsible
-                      [title]="section.title"
+                      [title]="
+                        section.title + ' (' + bySection.dict[section.id].length + ')'
+                      "
                       [isIconBefore]="true"
                       [isExpanded]="section.isExpanded"
                       (isExpandedChange)="
@@ -277,7 +288,10 @@
             </section>
           }
 
-          @if (laterTodayTasks().length > 0 && isOnTodayList()) {
+          @if (
+            (laterTodayTasks().length > 0 || laterTodayCalendarEvents().length > 0) &&
+            isOnTodayList()
+          ) {
             <div
               @expand
               class="collapsible-section"
@@ -286,7 +300,7 @@
                 [title]="
                   (T.WW.LATER_TODAY | translate) +
                   ' (' +
-                  (laterTodayTasks()?.length || 0) +
+                  (laterTodayTasks().length + laterTodayCalendarEvents().length) +
                   ')'
                 "
                 [isExpanded]="!isLaterTodayHidden()"
@@ -300,6 +314,16 @@
                   listId="PARENT"
                   listModelId="LATER_TODAY"
                 ></task-list>
+                @if (laterTodayCalendarEvents().length) {
+                  <div class="later-today-cal-events">
+                    @for (calEv of laterTodayCalendarEvents(); track calEv.id) {
+                      <planner-calendar-event
+                        [calendarEvent]="calEv"
+                        [showStartTime]="true"
+                      ></planner-calendar-event>
+                    }
+                  </div>
+                }
               </collapsible>
             </div>
           }
@@ -375,6 +399,31 @@
                     <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
                   }
                 </div>
+              </collapsible>
+            </div>
+          }
+
+          @if (isShowClaimPool()) {
+            <div
+              @expand
+              class="collapsible-section"
+            >
+              <collapsible
+                [title]="
+                  (T.PLAINSPACE.CLAIM_POOL_TITLE | translate) +
+                  ' (' +
+                  unclaimedTasks().length +
+                  ')'
+                "
+                [isExpanded]="!isClaimPoolHidden()"
+                (isExpandedChange)="isClaimPoolHidden.set(!$event)"
+                [isIconBefore]="true"
+                [isGroup]="true"
+              >
+                <plainspace-claim-pool
+                  [tasks]="unclaimedTasks()"
+                  [projectId]="workContextService.activeWorkContextId || ''"
+                ></plainspace-claim-pool>
               </collapsible>
             </div>
           }

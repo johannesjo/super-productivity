@@ -3,7 +3,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 import { LanguageCode, DateTimeLocale } from '../../core/locale.constants';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { ProjectCfgFormKey } from '../project/project.model';
-import { KeyboardConfig } from './keyboard-config.model';
+import { KeyboardConfig } from '@sp/keyboard-config';
 import { TaskReminderOptionId } from '../tasks/task.model';
 
 export type AppFeaturesConfig = Readonly<{
@@ -28,6 +28,9 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExitWithoutFinishDay: boolean;
   isMinimizeToTray: boolean;
   isLocalRestApiEnabled?: boolean;
+  // Desktop-only daily check for a newer GitHub release (#5463). Optional
+  // because it was added later; a missing key means ON (see UpdateCheckService).
+  isCheckForUpdates?: boolean;
   /** @deprecated Legacy hour-only representation. Use `startOfNextDayTime` as canonical source of truth. */
   startOfNextDay: number;
   /** Canonical start-of-next-day value, including minute precision. */
@@ -46,6 +49,12 @@ export type MiscConfig = Readonly<{
   // number: one of DefaultStartPage. string: project id.
   defaultStartPage?: number | string;
   unsplashApiKey?: string | null;
+  // Global wallpaper: shown on pages that don't provide their own background
+  // (Planner, Schedule, Boards, Config, and tags/projects without an image).
+  backgroundImageDark?: string | null;
+  backgroundImageLight?: string | null;
+  backgroundOverlayOpacity?: number;
+  backgroundImageBlur?: number;
 
   // @todo: remove deprecated items in future major releases, after giving users time to migrate
   isConfirmBeforeTaskDelete?: boolean; // Deprecated
@@ -72,6 +81,7 @@ export type TasksConfig = Readonly<{
 export type ShortSyntaxConfig = Readonly<{
   isEnableProject: boolean;
   isEnableDue: boolean;
+  isEnableDeadline?: boolean;
   isEnableTag: boolean;
   urlBehavior?: 'keep' | 'extract' | 'keep-and-attach';
 }>;
@@ -96,6 +106,7 @@ export type IdleConfig = Readonly<{
   isEnableIdleTimeTracking: boolean;
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
+  isSuppressIdleDuringFocusMode: boolean;
 }>;
 
 export type TakeABreakConfig = Readonly<{
@@ -176,6 +187,8 @@ export interface LocalFileSyncConfig {
 
 export type LocalBackupConfig = Readonly<{
   isEnabled: boolean;
+  /** Desktop only. Optional for persisted data created before this setting existed. */
+  maxBackupFiles?: number | null;
 }>;
 
 /**
@@ -203,6 +216,13 @@ export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled?: boolean;
   isCompressionEnabled?: boolean;
+  /**
+   * SPAP-11: opt-in "Surgical sync" — store file-based sync as a small always-read
+   * ops file (`sync-ops.json`) plus a rarely-rewritten snapshot (`sync-state.json`)
+   * for O(delta) syncs. Default OFF. One-way per sync folder: once a client with
+   * this ON migrates the folder, other clients must also turn it on to continue.
+   */
+  isUseSplitSyncFiles?: boolean;
   syncProvider: SyncProviderId | null;
   syncInterval: number;
   isManualSyncOnly?: boolean;
@@ -260,7 +280,19 @@ export type DominaModeConfig = Readonly<{
 }>;
 
 export type FocusModeConfig = Readonly<{
+  /**
+   * @deprecated Replaced by the opt-in `isShowPreparation`. The full-screen
+   * preparation countdown is now off by default; pressing start plays a brief
+   * inline rocket launch instead. Kept (still written with its default) so older
+   * clients that require this field keep validating synced config — no longer read.
+   */
   isSkipPreparation: boolean;
+  /**
+   * Opt-in: when true, starting a focus session first shows the full-screen
+   * preparation countdown (the "Get ready" checklist + rocket). Off/absent by
+   * default — the default start plays a quick inline rocket launch and begins.
+   */
+  isShowPreparation?: boolean;
   focusModeSound?: 'off' | 'tick' | 'whiteNoise';
   /** @deprecated Use focusModeSound instead. Kept for backward-compat validation of old data. */
   isPlayTick?: boolean;
@@ -286,6 +318,10 @@ export type TaskWidgetConfig = Readonly<{
   isEnabled?: boolean;
   isAlwaysShow?: boolean;
   opacity?: number;
+}>;
+
+export type FocusModeLocalConfig = Readonly<{
+  isLoopBreakEndAlarm?: boolean;
 }>;
 
 export type ClipboardImagesConfig = Readonly<{
@@ -334,7 +370,10 @@ export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
 // handler. Kept separate from `GlobalConfigSectionKey` so it cannot leak into
 // `updateGlobalConfigSection` action payloads (which would create phantom ops
 // in the sync log).
-export type GlobalConfigFormSectionKey = GlobalConfigSectionKey | 'taskWidget';
+export type GlobalConfigFormSectionKey =
+  | GlobalConfigSectionKey
+  | 'taskWidget'
+  | 'focusModeLocal';
 
 export type GlobalSectionConfig =
   | MiscConfig
@@ -347,14 +386,15 @@ export type GlobalSectionConfig =
   | DailySummaryNote
   | SyncConfig
   | ClipboardImagesConfig
-  | TaskWidgetConfig;
+  | TaskWidgetConfig
+  | FocusModeLocalConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export interface LimitedFormlyFieldConfig<FormModel> extends Omit<
   FormlyFieldConfig,
   'key'
 > {
-  key?: keyof FormModel;
+  key?: keyof FormModel & (string | number);
 }
 
 export type CustomCfgSection =
@@ -362,6 +402,12 @@ export type CustomCfgSection =
   | 'JIRA_CFG'
   | 'OPENPROJECT_CFG'
   | 'CLIPBOARD_IMAGES_CFG';
+
+export interface ConfigSectionAction {
+  label: string;
+  icon?: string;
+  onClick: () => void | Promise<void>;
+}
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {
@@ -371,6 +417,7 @@ export interface ConfigFormSection<FormModel> {
   helpArr?: { h?: string; p: string; p2?: string; p3?: string; p4?: string }[];
   customSection?: CustomCfgSection;
   items?: LimitedFormlyFieldConfig<FormModel>[];
+  actions?: ConfigSectionAction[];
   isElectronOnly?: boolean;
   isHideForAndroidApp?: boolean;
 }

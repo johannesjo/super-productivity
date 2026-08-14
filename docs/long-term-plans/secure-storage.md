@@ -1,6 +1,6 @@
 # Secure Secret Storage Plan
 
-Status: planned
+Status: planned (revised 2026-07-03)
 
 This plan replaces the older sync-credential-only secure storage sketch and
 folds in the independent broader draft. The target is a secure storage
@@ -8,273 +8,182 @@ architecture for all app-managed secrets: sync credentials, sync encryption
 passphrases, issue-provider tokens/passwords, plugin config secrets, plugin
 OAuth tokens, and native background-sync credentials.
 
+Revision note (2026-07-03): reconciled with shipped work (plugin secret
+storage API #8633, setup-time E2EE offers #8709, E2EE-mandatory SuperSync
+uploads GHSA-9v8x, issue-provider-to-plugin migrations). Headline changes:
+the sync-E2EE-wrapped portable vault moves into V1b so E2EE users never
+re-enter credentials; the blocking compatibility warning becomes a silent
+dual-write gate; the local profile store covers all platforms; recovery keys,
+device pairing, the vault DEK/manifest machinery, and speculative capability
+modes are cut; `SecretAccessContext` is reframed honestly as misuse
+prevention, not a security boundary; Electron main-process logs join the
+redaction/canary surface.
+
+## Scope Reality Check: What Actually Syncs Today
+
+Before weighing tradeoffs, be precise about the surface:
+
+- Sync provider credentials (WebDAV/Nextcloud passwords, Dropbox tokens,
+  SuperSync tokens) and every provider's `encryptKey` are **already
+  device-local** (`sup-sync` IndexedDB, never synced). Users already re-enter
+  these once per device today.
+- Plugin OAuth tokens (`sup-plugin-oauth`) and plugin `setSecret` values
+  (`sup-plugin-secrets`, shipped in #8633) are **already device-local**.
+- The only secrets that sync are: secret fields of the seven built-in issue
+  providers (Jira, GitLab, CalDAV, OpenProject, Redmine, Nextcloud Deck,
+  Plainspace) and `type: 'password'` config fields of issue-provider plugins
+  (GitHub, ClickUp, Gitea, Linear, Trello, Azure DevOps). A typical user has
+  0–3 of these configured.
+- SuperSync uploads are E2EE-mandatory (GHSA-9v8x fix), file-based providers
+  offer E2EE at setup (#8709), and legacy unencrypted SuperSync users get a
+  calm migration banner (#8672). The E2EE cohort is the default and growing.
+
+So the "everything arrives through sync" experience this plan disturbs is
+limited to issue-provider and plugin credentials, and for the dominant
+E2EE cohort the portable vault (V1b) preserves it entirely.
+
 ## Core Tradeoff
 
-Moving secrets out of synced state is a deliberate UX tradeoff.
+Moving secrets out of synced state trades a small, targeted UX cost for
+keeping raw secrets out of synced state, op-log operations, snapshots,
+backups, plugin synced data, and logs.
 
-By default, secrets become device-local. A second client can sync non-sensitive
-configuration metadata, but it cannot receive the raw token/password from sync.
-The user will need to re-enter, reauthenticate, or unlock a separate portable
-vault on each client.
+With the V1b portable vault, the cost lands only on users **without** sync
+E2EE:
 
-This is a degradation compared with today's "everything arrives through sync"
-experience for issue/provider credentials, but it is the safer default because
-synced state, op-log operations, backups, and retained server history are not
-appropriate places for raw secrets.
+- **Sync E2EE enabled (default cohort):** issue-provider and plugin secrets
+  move into a portable vault encrypted with a key derived from the existing
+  sync E2EE material. New devices already enter the sync passphrase to sync
+  at all; the vault unlocks from the same material. Zero new prompts, zero
+  re-entry.
+- **Sync without E2EE:** existing synced secrets stay where they are (see
+  "Sync without E2EE" below); newly entered secrets become device-local and
+  must be re-entered per device. The already-shipped E2EE nudges shrink this
+  cohort over time, and enabling E2EE migrates secrets into the vault
+  silently.
+- **No sync:** nothing changes.
 
-UX mitigation:
+UX mitigation for the device-local cases:
 
 - Keep provider metadata synced so setup forms are prefilled except for the
   missing secret.
-- Show clear per-device states: "credential saved on this device",
-  "credential missing on this device", and "secure storage unavailable".
+- Show clear per-device states: "credential saved on this device" and
+  "credential missing on this device".
 - Provide direct reauth/re-enter actions from each affected integration.
-- Add a future opt-in portable encrypted vault for users who explicitly want
-  selected integration secrets to move between devices.
 
-## Can We Avoid This Tradeoff?
+Every vaulted or device-local secret is recoverable by reauthenticating with
+the third-party service, so the worst case of any vault/storage loss is the
+device-local baseline, never data loss.
 
-Not completely. Any design that avoids per-device re-entry must sync or transfer
-the secret, a secret-encryption key, or enough material to recover one. That can
-be a valid product choice, but it changes the trust model.
+## Sync without E2EE
 
-Viable alternatives:
+For users who sync without E2EE, do not prompt and do not silently migrate:
 
-- **Portable encrypted vault:** sync encrypted secret blobs and require the user
-  to unlock them on each new device with a vault passphrase, recovery key, or
-  enrolled device key. This gives good multi-device UX after one unlock per
-  device, but adds password/recovery UX and exposes users with weak vault
-  passphrases to offline brute-force risk.
-- **Device-to-device vault transfer:** a trusted existing device encrypts the
-  vault key for a new device, for example via QR code or pairing flow. This is a
-  strong compromise when an old device is available, but it does not help fresh
-  installs after all devices are gone.
-- **Server-assisted or account-derived vault key:** derive or unwrap the vault
-  key from SuperSync login/account material. This is the smoothest UX, but it
-  either makes the server part of the secret recovery trust boundary or creates
-  hard recovery problems when passwords are reset.
-- **OS cloud keychain:** rely on iCloud Keychain, Google Password Manager, or a
-  similar platform facility. This can be good UX within a platform ecosystem,
-  but it is fragmented, hard to make uniform across Electron/Web/Android/iOS,
-  and outside Super Productivity's sync semantics.
-
-Recommended default:
-
-- Use device-local storage for sync credentials and sync encryption
-  passphrases.
-- Make a portable encrypted vault an explicit opt-in for selected integration
-  secrets.
-- Consider device-to-device vault transfer as a later UX improvement.
-
-## Post-V1 - Low-Friction Portable Vault Variant
-
-For a cheaper, lower-maintenance improvement with no new password prompt for
-users who already use sync E2EE, use the existing sync E2EE unlock material to
-wrap the portable vault key.
-
-This variant is deliberately less ambitious than a standalone vault passphrase:
-
-- It requires no new server.
-- It requires no new password, recovery key, or separate vault account.
-- It gives no additional protection if sync E2EE is disabled.
-- It does not create a security boundary stronger than the existing sync
-  encryption passphrase.
-- It must not silently enable portable synced secrets for users with weak or
-  disabled sync E2EE.
-
-Recommended behavior:
-
-- Keep sync provider credentials and sync encryption passphrases device-local in
-  OS-backed storage. Do not store the only sync unlock secret inside the vault
-  that depends on sync unlock.
-- For synced issue-provider and plugin secrets, store only `SecretRef` metadata
-  in normal app state.
-- Store the actual secret values in a synced portable vault record encrypted
-  with a random `vaultDek`.
-- Wrap `vaultDek` with a vault wrapping key derived from existing sync E2EE
-  material:
-  - If the input is a user passphrase, derive the wrapping key with Argon2id,
-    per-vault salt, versioned parameters, and domain separation.
-  - If the input is an existing high-entropy sync key, derive a separate wrapping
-    key with HKDF-SHA-256, vault-specific salt, and an `info` string such as
-    `super-productivity-portable-vault-v1`.
-  - Never use the sync content-encryption key directly as a vault wrapping key.
-- Store an OS-protected wrapped copy of `vaultDek` locally so already-configured
-  devices unlock silently. Keep the plaintext `vaultDek` only in memory while
-  the vault is unlocked.
-- On sync E2EE passphrase/key rotation, unlock the current vault, create a new
-  wrapper, and sync the updated manifest atomically. Keep old wrappers for a
-  bounded grace period so offline devices can migrate; document that a device
-  without the old unlock material may need integration reauth.
-- If sync E2EE is not enabled, offer only device-local secure storage for real
-  protection. Do not create new portable synced secret records.
-
-User experience:
-
-- Existing devices can migrate silently once they have the sync E2EE key and a
-  usable local secure-storage backend.
-- New devices get the same prompt they already need for sync E2EE. After sync
-  decrypts, the vault unlocks automatically from the same material.
-- No extra vault password is introduced.
-- No integration token needs to be re-entered as long as the user has the
-  existing sync E2EE unlock material.
-
-Security improvement:
-
-- Raw integration secrets no longer live in NgRx state, op-log operations,
-  snapshots, normal backups, plugin synced data, or diagnostic logs.
-- Remote sync storage still sees only ciphertext when sync E2EE is enabled.
-- Local OS-backed storage protects cached vault material at rest on each device.
-
-Limitations:
-
-- An attacker who can brute-force or obtain the sync E2EE key can also unlock
-  the portable secret vault.
-- If a user chose a weak sync E2EE passphrase, the low-friction vault inherits
-  that weakness. Do not silently enable portable vault sync when existing
-  passphrase-strength checks fail.
-- A compromised running client can still read secrets after vault unlock.
-- Users without sync E2EE get only local hardening, not secure portable synced
-  secrets.
-- Old synced history may still contain previously stored plaintext secrets until
-  compaction/retention cleanup is complete.
-
-E2EE-disabled fallback:
-
-- A fixed app key, static "standard key", encoding, or bundled public secret is
-  only obfuscation. It prevents casual plaintext grepping but does not protect
-  against anyone who can inspect the app code or synced data format.
-- Do not use fixed-key obfuscation for new synced secret writes.
-- If fixed-key obfuscation is used at all, restrict it to one-time legacy
-  read/migration compatibility, call it "plaintext-equivalent compatibility
-  encoding" internally, and define an expiry/removal release.
-- A per-device random key stored in OS secure storage is real local protection,
-  but it cannot decrypt secrets on another device and therefore is not a
-  no-friction sync solution.
-- Real portable protection without sync E2EE requires some other key source:
-  user passphrase, platform cloud keychain, device-to-device transfer, passkey
-  escrow, or a trusted server-side recovery design.
-- For sync without E2EE, do not silently migrate synced integration secrets.
-  Prompt once with explicit choices: enable sync E2EE and migrate later, or move
-  credentials to this device only. New credentials default to device-local unless
-  a real portable vault is available.
+- Existing synced integration secrets stay in synced config unmigrated. Their
+  entire task dataset already syncs in plaintext to the same target; token
+  confidentiality against that target is marginal, and a migration prompt
+  would be exactly the imposed decision the manifesto rejects.
+- New/replaced secrets are written as device-local `SecretRef` values (never
+  raw into synced state), so the plaintext surface stops growing.
+- The existing calm E2EE banner and setup-time offer remain the migration
+  path. When the user enables sync E2EE, existing raw synced secrets migrate
+  into the portable vault silently on each upgraded device.
+- A fixed app key, static "standard key", or bundled obfuscation secret is
+  only obfuscation and must not be used for new synced secret writes. If used
+  at all, restrict it to one-time legacy read/migration compatibility with a
+  defined removal release.
 
 ## Goals
 
 - Keep passwords, access tokens, refresh tokens, API keys, and encryption
   passphrases out of NgRx state, op-log payloads, snapshots, normal backups,
-  plugin synced data, and diagnostic logs.
-- Use OS-backed secret storage where available.
-- Make degraded platforms explicit instead of silently falling back to plaintext.
-- Preserve existing masked-field UX with explicit unchanged/replace/clear
-  behavior.
-- Migrate existing plaintext local secrets without breaking sync provider auth,
-  and migrate synced integration secrets only after compatibility gates are
-  satisfied.
-- Add tests that fail when canary secret values appear in serialized app state,
-  operation payloads, backups, or logs.
+  plugin synced data, and diagnostic logs — renderer **and** Electron main
+  process.
+- Preserve the multi-device experience for sync E2EE users: no credential
+  re-entry beyond the sync passphrase they already enter.
+- Use OS-backed secret storage where available (post-V1 hardening).
+- Make degraded platforms explicit instead of silently falling back to
+  plaintext.
+- Preserve masked-field UX with a simple empty-control model.
+- Migrate existing plaintext secrets without breaking auth, without blocking
+  dialogs, and only behind compatibility gates where synced schema changes.
+- Add tests that fail when canary secret values appear in serialized app
+  state, operation payloads, backups, or logs.
 
 ## Non-Goals
 
-- This is not a general password manager.
-- This does not protect secrets after a compromised renderer, malicious plugin,
-  browser extension, malware, or injected script has runtime access to a
-  resolved secret.
-- This does not remove the need for SuperSync/file-sync E2E encryption for user
-  content.
+- This is not a general password manager (no recovery keys, no device
+  pairing, no passkey escrow — reauth with the upstream service is the
+  recovery path).
+- This does not protect secrets after a compromised renderer, malicious
+  plugin, browser extension, malware, or injected script has runtime access.
+  In particular, it does **not** create a boundary between app code and
+  plugin code — see "Honest threat model" below.
+- This does not remove the need for sync E2EE for user content.
 - This does not make third-party tokens safer than their upstream scopes.
-- The first release does not add native OS-backed storage, a portable vault,
-  browser persistent secret storage, or deep cleanup of historical remote sync
-  history.
+- The first release does not add native OS-backed storage or deep cleanup of
+  historical remote sync history.
 
-## Release Split
+## Honest Threat Model
 
-### V1 - KISS Scope
+What each tier actually buys — write user-facing and internal docs to these
+claims, never stronger ones:
 
-V1 focuses on the highest-value security improvement: stop raw integration
-secrets from entering synced state, op-log payloads, backups, plugin synced data,
-and logs.
-
-Because migrating synced config to `SecretRef` is schema-breaking, V1 is split
-into two coordinated releases:
-
-`V1a - compatibility and guardrails`:
-
-- Secret registry, redaction, and canary tests.
-- An Electron-profile `indexedDbProfile` `LocalSecretStore` backend.
-- SecretRef-tolerant readers that preserve unknown/unsupported `SecretRef`
-  values without overwriting them.
-- Pre-dispatch and op-log guardrails that prevent new raw secret writes where
-  the new flow is active.
-- Backup/import/sync-hydration/state-cache sanitizers.
-- `persistDataSynced` marked and tested as non-secret storage.
-
-`V1b - synced-secret migration`:
-
-- Built-in issue-provider secret fields stored as `SecretRef` plus local secret
-  values.
-- Plugin schema `password` fields stored as `SecretRef` plus local secret
-  values.
-- Simple per-provider states: saved on this device, missing on this device,
-  storage unavailable.
-- A hard compatibility gate proving all supported clients preserve `SecretRef`
-  values before raw synced credentials are removed.
-
-V1 explicitly defers:
-
-- Sync provider private config, SuperSync access tokens, and `encryptKey`
-  migration.
-- Plugin OAuth token migration.
-- Android background sync token hardening.
-- Electron `safeStorage`, Android Keystore, and iOS Keychain backends.
-- Portable synced vault, recovery keys, device pairing, and vault export/import.
-- Browser persistent passphrase vault.
-- Full historical cleanup of old remote ops/snapshots and old backup files.
-- The broader "Connections on this device" checklist UI.
-
-V1 storage capability matrix:
-
-| Platform              | V1 persistent local secret store | Notes                                                                                  |
-| --------------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| Electron desktop      | Yes, `indexedDbProfile`          | Local-isolation tier only; not OS-backed at-rest protection                            |
-| Browser/PWA           | No                               | Use session-only or unavailable mode in V1                                             |
-| Android/iOS Capacitor | No                               | Use session-only or unavailable mode until native storage/backup rules are implemented |
-
-V1 does not improve local at-rest protection for persisted Electron profile
-data. Its main win is removing raw integration secrets from synced state, op-log
-payloads, backups, plugin synced data, and logs.
+- **V1 local profile store (`indexedDbProfile`):** local _isolation_ only.
+  Secrets leave synced state, backups, exports, and logs. Anyone with disk
+  access to the profile — or any code running in the app origin, including
+  plugins — can still read them, exactly like the existing `sup-sync`,
+  `sup-plugin-oauth`, and `sup-plugin-secrets` stores today. This is not an
+  at-rest encryption claim.
+- **Portable vault:** confidentiality of integration secrets against the
+  sync target/storage provider, layered under sync E2EE. It inherits the
+  strength of the sync E2EE passphrase and adds no new offline brute-force
+  exposure beyond what sync E2EE already has (same key material protects the
+  full dataset today). A malicious storage provider can still withhold or
+  roll back vault records along with the rest of the synced data;
+  confidentiality holds, freshness does not. Rotation: see "Rotation".
+- **Post-V1 OS-backed stores (safeStorage/Keystore/Keychain):** at-rest
+  protection for the local device (stolen-disk, other-OS-user). Still no
+  app-vs-plugin separation: plugins execute in the host renderer
+  (`src/app/plugins/plugin-runner.ts`, iframe plugins are
+  `allow-same-origin`), so IPC calls are indistinguishable by caller. A real
+  plugin boundary requires the separate plugin process/origin isolation work
+  plus main-process enforcement keyed to the isolated caller; this plan
+  should not claim it.
 
 ## Current Secret Inventory
 
-### Sync Provider Secrets
+### Sync Provider Secrets (device-local today)
 
-Current storage:
-
-- `SyncCredentialStore` stores private provider config in the `sup-sync`
-  IndexedDB database.
-- Private config can include WebDAV/Nextcloud passwords, Dropbox access and
-  refresh tokens, SuperSync access and refresh tokens, and `encryptKey`.
-- The data is local-only from a sync model perspective, but plaintext in
-  IndexedDB.
+- `SyncCredentialStore` stores private provider config plaintext in the
+  `sup-sync` IndexedDB database. Local-only, never synced.
+- Secret fields: WebDAV/Nextcloud `password` + optional bearer `accessToken`,
+  Dropbox `accessToken` + `refreshToken`, SuperSync `accessToken` +
+  `refreshToken`, and `encryptKey` on all providers (incl. local file).
+- Note: the store deliberately logs `encryptKey` length only, never the
+  value.
 
 Relevant files:
 
 - [`src/app/op-log/sync-providers/credential-store.service.ts`](../../src/app/op-log/sync-providers/credential-store.service.ts)
 - [`src/app/op-log/core/types/sync.types.ts`](../../src/app/op-log/core/types/sync.types.ts)
 - [`packages/sync-providers/src/super-sync/super-sync.model.ts`](../../packages/sync-providers/src/super-sync/super-sync.model.ts)
-- [`src/app/op-log/sync-providers/file-based/webdav/webdav.model.ts`](../../src/app/op-log/sync-providers/file-based/webdav/webdav.model.ts)
-- [`src/app/op-log/sync-providers/file-based/dropbox/dropbox.ts`](../../src/app/op-log/sync-providers/file-based/dropbox/dropbox.ts)
+- [`packages/sync-providers/src/file-based/webdav/webdav.model.ts`](../../packages/sync-providers/src/file-based/webdav/webdav.model.ts)
+- [`packages/sync-providers/src/file-based/dropbox/dropbox.ts`](../../packages/sync-providers/src/file-based/dropbox/dropbox.ts)
 
-### Android Background Sync Secrets
-
-Current storage:
+### Android Background Sync Secrets (device-local today)
 
 - SuperSync access tokens are mirrored from the WebView into native Android
   storage for background sync/reminder cancellation.
-- Native storage uses `EncryptedSharedPreferences`, but currently falls back to
-  standard `SharedPreferences` if encrypted preferences fail.
-- `android:allowBackup="true"` is enabled and no backup exclusion rule for
-  these encrypted preferences is present in the current tree.
+- `BackgroundSyncCredentialStore` uses `EncryptedSharedPreferences` but falls
+  back to standard plaintext `SharedPreferences` if encrypted preferences
+  fail.
+- `android:allowBackup="true"` is set, and backup rule files
+  (`data_extraction_rules.xml`, `backup_rules.xml`) already exist — but they
+  do **not** exclude the `SuperProductivitySync` preferences file, so the
+  (encrypted or fallback-plaintext) token store is currently backed up. The
+  fix is one `<exclude>` entry per rules file, not new infrastructure — see
+  "Quick Wins".
 
 Relevant files:
 
@@ -282,24 +191,22 @@ Relevant files:
 - [`src/app/features/android/store/android-sync-bridge.effects.ts`](../../src/app/features/android/store/android-sync-bridge.effects.ts)
 - [`android/app/src/main/AndroidManifest.xml`](../../android/app/src/main/AndroidManifest.xml)
 
-### Built-In Issue Provider Secrets
+### Built-In Issue Provider Secrets (synced today — primary V1b target)
 
-Current storage:
-
-- Built-in issue provider configs live in the `issueProvider` NgRx state.
-- `issueProvider` is part of the op-log model config, snapshots, sync data, and
+- Built-in issue provider configs live in the `issueProvider` NgRx state,
+  which is part of the op-log model config, snapshots, sync data, and
   backups.
-- Secret fields include:
+- Secret fields:
   - Jira: `password`
   - GitLab: `token`
   - CalDAV: `password`
   - OpenProject: `token`
-  - Gitea: `token`
   - Redmine: `api_key`
-  - Trello: `apiKey`, `token`
-  - Linear: `apiKey`
-  - Azure DevOps: `token`
   - Nextcloud Deck: `password`
+  - Plainspace: `token`
+- Gitea, Trello, Linear, Azure DevOps, GitHub, and ClickUp are **no longer
+  built-in** — they migrated to plugins and their secrets are plugin config
+  fields (next section).
 
 Relevant files:
 
@@ -310,43 +217,96 @@ Relevant files:
 
 ### Plugin Secrets
 
-Current storage:
+Three distinct stores exist today:
 
-- Plugin OAuth tokens are local-only in the `sup-plugin-oauth` IndexedDB
-  database, but plaintext.
-- Plugin config is stored via `PluginUserPersistenceService`, which is part of
-  synced `pluginUserData`.
-- Password fields in plugin issue-provider schemas are currently regular plugin
-  config values. For example, GitHub and ClickUp issue-provider tokens can end
-  up in synced plugin config.
+- **Plugin config (synced — V1b target):** plugin issue-provider schemas
+  declare `type: 'password'` fields (e.g. GitHub `token`, ClickUp `apiKey`)
+  that are stored as regular values in synced `pluginUserData` via
+  `PluginUserPersistenceService`. This is the plugin-side twin of the
+  built-in issue-provider leak.
+- **Plugin secret store (device-local, shipped #8633):**
+  `setSecret`/`getSecret`/`deleteSecret` on the plugin API, backed by the
+  dedicated `sup-plugin-secrets` IndexedDB. Local-only, plaintext at rest,
+  namespaced per plugin, purged on plugin uninstall **and** plugin
+  cache-clear. This is the canonical plugin-facing secret store; this plan
+  builds on it rather than adding a parallel one.
+- **Plugin OAuth tokens (device-local):** `sup-plugin-oauth` IndexedDB,
+  local-only, plaintext, purged on uninstall/cache-clear.
 
 Relevant files:
 
+- [`src/app/plugins/secret/plugin-secret-store.ts`](../../src/app/plugins/secret/plugin-secret-store.ts)
+- [`src/app/plugins/secret/plugin-secret.service.ts`](../../src/app/plugins/secret/plugin-secret.service.ts)
 - [`src/app/plugins/oauth/plugin-oauth-token-store.ts`](../../src/app/plugins/oauth/plugin-oauth-token-store.ts)
 - [`src/app/plugins/plugin-user-persistence.service.ts`](../../src/app/plugins/plugin-user-persistence.service.ts)
 - [`src/app/plugins/plugin-config.service.ts`](../../src/app/plugins/plugin-config.service.ts)
-- [`src/app/features/issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component.ts`](../../src/app/features/issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component.ts)
+
+### Electron Main-Process Leaks (missing from earlier drafts)
+
+- `electron/jira.ts` receives the full Jira config (including `password`)
+  over IPC and logs raw error responses to disk via electron-log.
+- The renderer's global error handler forwards error objects wholesale to
+  main-process electron-log; stringified HTTP errors routinely embed request
+  config with `Authorization` headers.
+- electron-log files persist on disk and are covered by no current masking.
+
+Relevant files:
+
+- [`electron/jira.ts`](../../electron/jira.ts)
+- [`src/app/core/error-handler/global-error-handler.class.ts`](../../src/app/core/error-handler/global-error-handler.class.ts)
+
+### Existing Building Blocks (favorable)
+
+- `packages/sync-core/src/encryption*` already ships Argon2id KDF, AES-256-GCM
+  (WebCrypto with `@noble/ciphers` fallback), versioned KDF parameters, and a
+  session key cache. HKDF is available natively via WebCrypto. The portable
+  vault needs no new crypto dependency.
+- `src/app/imex/file-imex/privacy-export.ts` already masks `password`,
+  `token`, `apiKey`, `secret`, `authorization`, `accessToken`, `authCode`,
+  `api_key` — but misses `refreshToken`, `clientSecret`/`client_secret`,
+  `encryptKey`, `apiToken`, and is exact-key case-sensitive. See "Quick
+  Wins".
+- `PluginAPI.persistDataSynced` already logs only key length, never payloads,
+  with a spec enforcing it.
+- `src/app/plugins/util/plugin-persistence-key.util.ts` (`composeId`) is the
+  reference implementation for delimiter-safe composite ids.
+
+## Quick Wins (ship immediately, independent of V1)
+
+Each is small, has no schema or UX impact, and closes a real hole:
+
+1. Add `<exclude>` entries for the `SuperProductivitySync` preferences file
+   to `data_extraction_rules.xml` and `backup_rules.xml` (KeyStore keys do
+   not survive restore anyway, so backed-up ciphertext is dead weight at
+   best and a plaintext-fallback leak at worst).
+2. Stop logging raw Jira responses in `electron/jira.ts`; log status +
+   redacted metadata only.
+3. Extend privacy-export masking: add `refreshToken`, `clientSecret`,
+   `client_secret`, `encryptKey`, `apiToken`; make matching
+   case-insensitive.
+4. Scrub or truncate error objects before forwarding renderer errors to
+   main-process electron-log (drop request-config/header blobs).
 
 ## Architecture
 
-Introduce two separate concepts:
+Two concepts:
 
-- `LocalSecretStore`: device-local secret/key storage. The first release may use
-  the existing local IndexedDB profile storage with secret-specific boundaries;
-  native OS-backed stores are a later hardening phase.
-- `PortableVault`: synced encrypted secret records that can be unlocked only
-  with valid vault key material.
+- `LocalSecretStore`: device-local secret storage. V1 uses a dedicated
+  local-only IndexedDB (`indexedDbProfile`) on **all** platforms; native
+  OS-backed backends replace the storage implementation post-V1 behind the
+  same interface.
+- `PortableVault`: synced, vault-encrypted secret records for sync-E2EE
+  users, carried as ordinary op-log entities.
 
-`SecretRef` is metadata, not an authorization capability. Possession of a
-`SecretRef` must not be enough to resolve a secret. Every resolution must enforce
-the caller domain, plugin identity when applicable, `ownerType`, `ownerId`, and
-`field`.
+`SecretRef` is metadata. Only `SecretRef` and non-sensitive metadata may be
+stored in NgRx state, op-log operations, snapshots, backups, and plugin
+synced data; secret values live behind `LocalSecretStore` or `PortableVault`.
 
 ```ts
 export interface SecretRef {
   kind: 'SecretRef';
   version: 1;
-  id: string;
+  id: string; // delimiter-safe composite, see "Slot ids"
   ownerType:
     | 'syncProvider'
     | 'issueProvider'
@@ -357,7 +317,6 @@ export interface SecretRef {
   field: string;
   storageMode: 'device' | 'portableEncrypted';
   updatedAt: number;
-  versionToken?: string;
 }
 
 export type SecretAccessContext =
@@ -376,23 +335,11 @@ export type SecretAccessContext =
     };
 
 export interface LocalSecretStoreCapabilities {
-  mode:
-    | 'localProfile'
-    | 'osBacked'
-    | 'passphraseProtected'
-    | 'sessionOnly'
-    | 'plaintextEquivalent'
-    | 'unavailable';
-  backend:
-    | 'indexedDbProfile'
-    | 'electronSafeStorage'
-    | 'androidKeystore'
-    | 'iosKeychain'
-    | 'webSession'
-    | 'webPassphrase';
+  // extend these unions only when a backend actually ships (YAGNI)
+  mode: 'localProfile' | 'unavailable';
+  backend: 'indexedDbProfile';
   canPersistDeviceSecrets: boolean;
   canUsePortableVault: boolean;
-  securityNotes?: string;
 }
 
 export interface LocalSecretStore {
@@ -412,613 +359,464 @@ export interface LocalSecretStore {
 }
 ```
 
-Only `SecretRef` and non-sensitive metadata may be stored in NgRx state, op-log
-operations, snapshots, backups, and plugin synced data. The actual secret value
-must live behind `LocalSecretStore` or `PortableVault`.
+**What `SecretAccessContext` is — and is not:** it is a misuse-prevention
+assertion that catches accidental cross-owner reads and wrong-wiring bugs
+(wrong owner type/id/field is rejected; the host maps plugin-owned refs by
+`callerId === ownerId`). It is **not** a security boundary: the context is a
+caller-supplied object in a single JS realm, and plugins execute in the host
+renderer, so a malicious plugin can forge an `app` context or open the
+IndexedDB directly. Tests for it are API-contract tests, not security tests.
+A real caller boundary arrives only with plugin process/origin isolation plus
+main-process enforcement, and no release note may claim otherwise.
 
-`versionToken` must not be a raw hash, prefix, suffix, checksum, or reusable
-derivative of the secret. If needed, it should be a random opaque marker or a
-keyed HMAC with a non-synced key. Otherwise omit it. V1 has no required use case
-for `versionToken`; prefer omitting it until a concrete need exists.
+### Slot ids
+
+Synced config must not contain per-device random secret ids. Use a
+deterministic slot id from stable metadata so two devices migrating the same
+provider mint the same `SecretRef` and LWW cannot orphan either side.
+
+- Encode each segment delimiter-safely (reuse/align with `composeId` in
+  `plugin-persistence-key.util.ts`); plugin ids and schema field names are
+  third-party-controlled strings, so naive `v1:${ownerType}:${ownerId}:${field}`
+  joining is ambiguous (`("a","b:c")` vs `("a:b","c")`).
+- Validate `ownerType` against the closed enum.
+- Orphan GC: periodically sweep local-store entries whose owning config no
+  longer exists, with a grace window for sync races. Clearing an integration
+  removes the synced `SecretRef` and the local/vault value; replacing a
+  secret value on one device must not invalidate another device's local
+  entry while the integration remains configured (value replacement updates
+  the store, not synced metadata).
 
 ### Storage Modes
 
-`device`:
+`device` (default for non-E2EE sync and all non-synced secrets):
 
-- Default mode.
-- Stored only on the current device.
-- Used for sync provider credentials, sync encryption passphrases, plugin OAuth
-  tokens, and native background-sync credentials.
-- Other devices must reauthenticate or re-enter these values.
-- In V1, synced config must not contain a per-device random secret id. Use a
-  deterministic secret slot id derived from stable metadata, for example
-  `v1:${ownerType}:${ownerId}:${field}` with plugin id included in `ownerId` for
-  plugin-owned secrets.
-- Replacing a device-local secret value updates only the local secret store once
-  the synced `SecretRef` slot exists. It must not update synced metadata such as
-  `updatedAt` merely because the local secret value changed.
-- Clearing an integration removes the synced `SecretRef`; clearing or replacing
-  a secret on one device must not make another device's local secret missing if
-  the integration remains configured.
+- Stored only on the current device in `LocalSecretStore`.
+- Other devices show "credential missing on this device" and offer re-entry.
 
-`portableEncrypted`:
+`portableEncrypted` (default when sync E2EE is enabled):
 
-- Future opt-in mode for selected integration credentials.
-- Secret ciphertext may sync, but only after being encrypted with a separate
-  portable-vault key.
-- The portable-vault key is unlocked by sync E2EE material, user passphrase,
-  passkey/device key enrollment, or an explicit export/import flow.
-- This mode must not be used to bootstrap SuperSync access tokens or the only
-  copy of a sync encryption passphrase.
-- `SecretRef.id` for portable records is minted once and synced with the owning
-  config so every device can find the same vault record. Device-local refs must
-  not be interpreted as portable ids on other devices.
+- Secret ciphertext syncs as ordinary op-log records, encrypted by the vault
+  before it ever reaches state/op-log/snapshot code (so it is double-wrapped
+  by sync E2EE on the wire).
+- Must not be used to bootstrap SuperSync access tokens or the only copy of
+  a sync encryption passphrase — sync credentials and `encryptKey` stay
+  device-local so vault unlock never depends on itself.
 
-### Post-V1 Portable Encrypted Vault Mechanics
+### Portable Vault Mechanics (V1b, E2EE users)
 
-A portable encrypted vault does not require a new server. Existing sync can
-carry the vault manifest and encrypted records as normal app data because the
-vault encrypts secrets before they reach normal state, op-log, and snapshot
-code. When SuperSync or file-sync E2E encryption is enabled, portable vault
-records are encrypted twice: once by the vault and again by sync payload
-encryption.
+Deliberately minimal — the vault holds a handful of sub-kilobyte records, so
+it needs none of the DEK/manifest/epoch machinery of a general vault:
 
-Why this is still useful when sync is E2E encrypted:
+- **Key:** `vaultKey = HKDF-SHA-256(syncE2EEKey, salt = per-vault random salt,
+info = 'super-productivity-portable-vault-v1')`. The salt is random,
+  minted at vault creation, and stored as plaintext metadata in the synced
+  vault config record (salts are not secret). Never use the sync content
+  key directly. If the E2EE input is a passphrase, it already passes through
+  the existing Argon2id KDF (same implementation and parameter-versioning as
+  sync E2EE — no PBKDF2 fork, no second KDF to maintain).
+- **Records:** each secret is encrypted with AES-256-GCM under `vaultKey`
+  with a **fresh CSPRNG nonce on every encryption** (including updates —
+  multiple devices encrypt under the same key, so nonces must never be
+  counter- or metadata-derived) and AAD binding
+  `{recordId, ownerType, ownerId, field, schemaVersion, updatedAt}`.
+- **Sync:** records are ordinary synced entities, so LWW conflict handling
+  and deletion tombstones come from the existing op-log for free. No
+  separate manifest.
+- **Unlock:** derive `vaultKey` whenever the sync E2EE key is available (the
+  existing session cache makes this free). Optionally persist a wrapped copy
+  in `LocalSecretStore` for access before sync unlock; never persist the
+  plaintext key.
+- **Rotation:** changing the sync E2EE passphrase derives a new `vaultKey`
+  (new salt) and re-encrypts all records — trivial at this record count, and
+  it is _true_ rotation: old ciphertext in retained sync history becomes
+  undecryptable under material derived from the old passphrase only if the
+  attacker never had it. Be explicit in docs: rotating after a suspected
+  passphrase compromise protects future records, but anything the attacker
+  could already decrypt (including old history) must be treated as exposed —
+  the honest remedy is rotating the third-party tokens themselves, and the
+  UI should say so.
+- **Residual risk (document, don't engineer around):** a malicious sync
+  target can roll the whole dataset back to an older state, resurrecting a
+  deleted vault record along with everything else. That is the existing sync
+  trust model (E2EE gives confidentiality, not freshness) and the recovered
+  record is at worst a stale credential the user can revoke upstream. A
+  per-vault epoch/MAC scheme is not worth its complexity here; revisit only
+  if the vault ever outgrows this scale.
+- **No weak-passphrase gate:** the same key material already protects the
+  user's full synced dataset, so vaulting secrets under it adds zero new
+  brute-force exposure. Passphrase-strength nudges belong to sync E2EE
+  setup, not the vault.
 
-- Sync E2EE protects remote payloads from the sync server or storage provider.
-- After sync decryption, normal app state is plaintext on the client. If raw
-  secrets remain in issue or plugin config, they can enter local state, backups,
-  logs, and plugin persistence.
-- Sync E2EE does not bootstrap new devices by itself. The current sync
-  encryption passphrase/private config is local-only and still needs to be
-  supplied per device.
-- The sync target still sees ciphertext metadata and can delete, replay, or
-  withhold records. Sync E2EE gives confidentiality, not full freshness,
-  integrity, or availability against a malicious storage provider.
-
-Recommended key structure:
-
-- Generate a random 256-bit `vaultDek` when the user enables the portable vault.
-- Encrypt each secret record with AES-256-GCM or XChaCha20-Poly1305 using
-  `vaultDek`, a unique nonce, and authenticated data containing record id,
-  owner, field, and schema version.
-- Sync only `SecretRef` metadata, the vault manifest, encrypted secret records,
-  and wrapped copies of `vaultDek`.
-- Store an authenticated manifest with manifest version, vault epoch, wrapper
-  metadata, record ids, and tombstones for deleted records.
-- Define conflict and rollback behavior for stale manifests, resurrected
-  records, wrapper-set rollback, and `SecretRef.updatedAt` rollback.
-- Never sync plaintext `vaultDek`. Persist only wrapped copies of it. Keep the
-  plaintext `vaultDek` only in memory while the vault is unlocked.
-
-Unlock methods:
-
-- `device`: wrap `vaultDek` with the OS-backed local `LocalSecretStore` for fast
-  unlock on already-enrolled devices.
-- `passphrase`: derive a wrapping key with Argon2id, per-vault salt, versioned
-  parameters, and domain separation, then wrap `vaultDek`. This supports
-  recovery and new-device unlock without an old device.
-- `recoveryKey`: optional high-entropy recovery key displayed once or exported
-  explicitly.
-- `devicePairing`: optional later flow where an old device encrypts `vaultDek`
-  for a new device public key.
-- `syncE2EE`: low-friction mode deriving a distinct vault wrapping key from
-  existing sync E2EE material as described above. Never reuse the sync content
-  key directly.
-
-New device flow:
-
-1. Sync downloads `SecretRef` metadata plus vault ciphertext.
-2. The app shows affected integrations as "credential locked" instead of
-   "credential missing".
-3. The user unlocks with the vault passphrase/recovery key or pairs with an
-   existing device.
-4. The client unwraps `vaultDek` and stores an OS-protected wrapped copy locally.
-5. Subsequent use resolves the secret through `PortableVault` and
-   `LocalSecretStore` without storing the plaintext in synced state.
-
-Server role:
-
-- No custom vault server is required for the baseline design.
-- The server or sync target stores ciphertext plus vault metadata only.
-- A server would only be needed for optional account recovery, remote device
-  approval queues, passkey/account-based escrow, or push-assisted pairing.
-- Do not use SuperSync access tokens as vault keys.
-- Using the existing sync encryption passphrase or key as vault unlock material
-  is possible, but must be explicit because it couples vault security and
-  recovery to sync encryption configuration.
+Cut from earlier drafts (reauth-with-upstream covers recovery, and the
+"not a password manager" non-goal applies to the plan itself): `vaultDek`
+indirection, authenticated manifests, vault epochs, wrapper sets, grace-period
+rewrap, `recoveryKey`, `devicePairing`, passkey escrow, vault export/import.
 
 ## Platform Backends
 
-Native OS-backed stores are not required for the first release. The first
-release can use an Electron local profile store and focus on removing raw
-secrets from sync state, op-log payloads, backups, plugin synced data, and logs.
-Native stores should be implemented later as platform hardening.
+### V1 — Local Profile Store (all platforms)
 
-### First Release - Local Profile Store
+One backend everywhere: a dedicated local-only IndexedDB for secret values,
+separate from synced model data, on Electron, browser/PWA, and Android/iOS
+Capacitor alike.
 
-On Electron desktop, use a dedicated local IndexedDB store for secret values.
-Browser/PWA and Android/iOS Capacitor builds do not persist secrets in V1.
+Rationale: `sup-sync` already stores WebDAV passwords and `encryptKey` in
+plaintext IndexedDB on every platform, so refusing the same tier for issue
+tokens on mobile/web would protect nothing while making V1b a mobile
+showstopper (integrations dying or demanding re-entry every session). A
+uniform backend also deletes the session-only/unavailable UX states from V1
+entirely. On web, IndexedDB eviction risk equals that of the app data
+itself — no worse.
 
-Implementation sketch:
+- Store only `SecretRef` metadata in synced app state; values in the local
+  DB.
+- Do not sync, back up, log, or export this database through normal app
+  flows.
+- Keep the `LocalSecretStore` interface so native backends can replace the
+  storage implementation later without a second data-model migration.
+- For `pluginConfig`-owned values, back the store with the existing
+  `sup-plugin-secrets` database (host-reserved key namespace) instead of a
+  second plugin-secret surface — its per-plugin purge on uninstall and
+  cache-clear then applies automatically. Decision recorded below.
 
-- Store only `SecretRef` metadata in synced app state.
-- Store secret values in a local-only database separate from synced model data.
-- Encrypt with sync E2EE-derived vault material only when that material is
-  already available. Otherwise treat this as local isolation, not strong
-  at-rest encryption.
-- Do not sync, back up, log, or export this database through normal app flows.
-- Keep the same `LocalSecretStore` API so native backends can replace the
-  storage implementation later.
+### Post-V1 — Electron `safeStorage`
 
-### Deferred - Electron Desktop
+Main-process IPC as the only bridge; buys at-rest OS-keychain protection and
+keeps secrets out of the renderer-readable profile DB. It does **not** buy
+plugin separation (see Honest Threat Model).
 
-Use Electron main-process IPC as the only bridge to the vault.
+- `electron/ipc-handlers/local-secret-store.ts`, registered in
+  `electron/ipc-handler.ts`; narrow preload methods
+  (`localSecretStoreSet/Resolve/Delete/Capabilities`) in
+  `electron/preload.ts` + `electron/electronAPI.d.ts`.
+- `safeStorage.encryptString()`/`decryptString()` in the main process;
+  encrypted blobs in a small file/db under `app.getPath('userData')`.
+- Linux `basic_text` backend must not be a silent plaintext-equivalent
+  fallback: require explicit degraded consent or offer session-only. On
+  upgrade with legacy plaintext credentials present, show an explicit choice
+  rather than deleting silently.
 
-Implementation sketch:
+### Post-V1 — Android
 
-- Add `electron/ipc-handlers/local-secret-store.ts`.
-- Register the handler in `electron/ipc-handler.ts`.
-- Add narrow preload methods in `electron/preload.ts` and
-  `electron/electronAPI.d.ts`:
-  - `localSecretStoreSet`
-  - `localSecretStoreResolve`
-  - `localSecretStoreDelete`
-  - `localSecretStoreCapabilities`
-- Use `safeStorage.encryptString()` and `safeStorage.decryptString()` in the
-  main process.
-- Store encrypted blobs in a small app-data file or a dedicated local database
-  under `app.getPath('userData')`.
-- Reject persistent device-secret storage or require explicit degraded consent
-  when Linux reports the `basic_text` backend. That backend must not be a
-  silent plaintext-equivalent fallback.
-- On upgrade, if Linux reports `basic_text` and legacy plaintext credentials
-  exist, do not delete them silently. Show an explicit choice: keep legacy
-  plaintext with warning, switch to passphrase-protected storage, or use
-  session-only storage and reauth when needed.
+- Native `LocalSecretStore` backed by an AES-GCM key in `AndroidKeyStore`;
+  ciphertext in private app storage. No plaintext `SharedPreferences`
+  fallback — "store encrypted" or "do not persist".
+- The Quick Wins backup excludes must land before native secret writes;
+  extend them to cover the new secret-store files. KeyStore keys may not
+  survive restore, so restored ciphertext is treated as unavailable and
+  triggers reauth.
+- Replace the current `BackgroundSyncCredentialStore` plaintext fallback.
 
-### Deferred - Android
+### Post-V1 — iOS
 
-Use a native Capacitor/JavaScript bridge backed by Android Keystore.
+- Keychain Services via a native Capacitor bridge; device-local accessibility
+  classes (`kSecAttrSynchronizable=false`; `whenUnlockedThisDeviceOnly`, or
+  `afterFirstUnlockThisDeviceOnly` only where background tasks require it);
+  explicit access group.
+- Keychain items can survive uninstall: detect and clear stale tokens during
+  first-run setup.
 
-Implementation sketch:
+### Web/PWA notes
 
-- Add a native `LocalSecretStore`.
-- Generate an AES-GCM key in `AndroidKeyStore`.
-- Store ciphertext and metadata in private app storage or SharedPreferences.
-- Do not fall back to plaintext `SharedPreferences`.
-- Exclude vault ciphertext and encrypted preference files from Android Auto
-  Backup. KeyStore keys may not survive restore, so restored ciphertext should
-  be treated as unavailable and trigger reauth.
-- Add `android:dataExtractionRules` for API 31+ and `android:fullBackupContent`
-  rules for older devices. Exclude both the legacy background-sync preferences
-  and the new local secret-store files before Phase 1 writes new secrets.
-- Replace the current `BackgroundSyncCredentialStore` fallback with either
-  "store encrypted" or "do not persist".
-
-### Deferred - iOS
-
-Use Keychain Services through a native Capacitor bridge.
-
-- Store small secrets as keychain items.
-- Use a non-iCloud, device-local accessibility class for device-only secrets.
-- Set `kSecAttrSynchronizable=false` for device-local secrets.
-- Define the keychain access group explicitly.
-- Pick accessibility based on runtime need:
-  - `whenUnlockedThisDeviceOnly` for secrets that do not need background access.
-  - `afterFirstUnlockThisDeviceOnly` only where background tasks require access.
-- Document app reinstall behavior. iOS keychain items can survive uninstall, so
-  stale tokens must be detected and cleared or replaced during first-run setup.
-
-### Web/PWA
-
-The browser build cannot offer OS-level secret storage through standard web
-APIs.
-
-Recommended behavior:
-
-- Default to session-only secret retention for the most sensitive values.
-- Do not offer persistent browser secret storage in the first release.
-- Defer browser passphrase vault work. If implemented later, pin the KDF first:
-  WebCrypto gives PBKDF2 natively, while Argon2id requires a WASM dependency and
-  explicit bundle-size acceptance.
-- If "remember on this browser" is implemented later, store only
-  non-extractable `CryptoKey` material where available and make the degraded
-  security model explicit.
-- Never claim browser persistent storage is equivalent to OS keychain storage.
+- V1 uses the same `indexedDbProfile` tier as everywhere else (local
+  isolation, honestly labeled).
+- If a stronger browser story is ever wanted, "session-only" means in-memory
+  service state only — never `sessionStorage`, `localStorage`, `window.name`,
+  or `BroadcastChannel` (browsers persist `sessionStorage` to disk for
+  session restore). Add a canary test for those sinks.
+- Never claim browser storage is equivalent to OS keychain storage.
 
 ## Data Flow
 
 ### Forms
 
-Password/token fields should have three states:
+Secret fields use an initially **empty control** with a per-device hint
+("credential saved on this device" / "missing on this device"):
 
-- `unchanged`: a `SecretRef` exists and the user did not type a replacement.
-- `replace`: the user typed a new secret, so the vault is updated and state
-  receives the new `SecretRef`.
-- `clear`: the user explicitly deletes the secret, so the vault entry and state
-  reference are removed.
+- untouched or emptied control → `unchanged` (dirty-state tracking gives the
+  "typed then reverted" collapse for free);
+- typed value → `replace` (value goes to the vault/local store; only the new
+  `SecretRef` is dispatched);
+- explicit remove affordance → `clear` (store entry and synced ref removed).
 
-The form model must not emit the existing secret value to NgRx. Masked
-placeholders are display-only.
-
-Secret-bearing UI paths must vault replacement values and dispatch only
-`SecretRef` values before any persistent action is emitted. The vault layer must
-reject masked placeholder sentinels such as `********` as real secret values, and
-forms must use dirty-state tracking instead of comparing placeholder strings.
-If a user starts editing a secret field and then reverts it to its original
-masked/empty display state, the form should collapse back to `unchanged`, not
-`clear` or `replace`.
+No masked sentinel (`********`) ever exists in the model, so no sentinel
+rejection layer is needed. The form model must never emit a secret value to
+NgRx; the vault/local-store write happens before any persistent action is
+dispatched.
 
 ### Runtime Resolution
 
-Services that need credentials resolve them as late as possible:
+Services resolve credentials as late as possible:
 
 1. Load public config from NgRx or provider private config.
-2. Resolve required `SecretRef` values through `LocalSecretStore` or
+2. Resolve required `SecretRef` values through `LocalSecretStore` /
    `PortableVault` with a `SecretAccessContext`.
-3. Build a short-lived runtime config object.
-4. Use it for the request.
-5. Do not dispatch, persist, or log the resolved object.
+3. Build a short-lived runtime config object, use it for the request.
+4. Never dispatch, persist, or log the resolved object. When a resolved
+   secret must cross IPC (e.g. Jira via Electron main), the receiving side
+   is part of the redaction surface too.
 
 ### Plugin Config
 
-Plugin JSON schema fields with `type: "password"` should be intercepted by the
-host app.
+- Plugin JSON-schema fields with `type: 'password'` are intercepted by the
+  host: synced plugin config stores `SecretRef` values; the actual values
+  live in the `sup-plugin-secrets`-backed store (device mode) or the
+  portable vault (E2EE mode).
+- `PluginAPI.getConfig()` returns config metadata and `SecretRef` values,
+  never resolved secrets. Resolution goes through a narrow
+  `PluginAPI.useSecret(ref, fn)` where the host asserts
+  `callerId === ownerId` (misuse prevention; see Honest Threat Model for
+  what this does not claim).
+- The shipped `setSecret`/`getSecret`/`deleteSecret` API stays as-is for
+  plugin-managed secrets; schema-`password` interception is the host-managed
+  complement, sharing the same store and purge lifecycle.
+- `persistDataSynced` remains non-secret storage: payload logging is already
+  removed and spec-enforced; add registry canaries so registered secret
+  values are rejected in tests.
+- Plugin OAuth token migration is deferred; V1 registers those values for
+  redaction/canary checks only.
 
-- Synced plugin config stores `SecretRef` values instead of raw secret strings.
-- `PluginAPI.getConfig()` should return config metadata and `SecretRef` values,
-  not resolved secret strings.
-- Resolved plugin secrets should be exposed through a short-lived, namespaced API
-  such as `PluginAPI.useSecret(ref, fn)`. The host validates that the ref belongs
-  to the calling plugin before resolving it. The first implementation maps
-  plugin-owned refs by `callerId === ownerId`.
-- `persistDataSynced` is explicitly non-secret storage. It must not log payloads
-  and should reject active canary/registered secret values in tests.
-- Defer broader plugin secret APIs such as `persistSecret`, `loadSecret`, and
-  `deleteSecret`. Initially support schema `password` fields and
-  `PluginAPI.useSecret(ref, fn)` only.
-- Plugin OAuth token migration is deferred. V1 only ensures plugin OAuth values
-  remain registered for redaction/canary checks and are not newly leaked through
-  logs, exports, or backups.
+### Sync Provider Config (stays device-local; deferred hardening)
 
-### Deferred Sync Provider Config
-
-Continue treating provider private config as local-only in V1. Do not change
-writes to `sup-sync` in V1. A later platform-hardening phase can store these
-secret fields behind refs or native/OS-backed storage:
-
-- WebDAV/Nextcloud: `password`, optional bearer `accessToken`, `encryptKey`
-- Dropbox: `accessToken`, `refreshToken`, `encryptKey`
-- SuperSync: `accessToken`, `refreshToken`, `encryptKey`
-- Local file: `encryptKey`
-
-Non-secret fields such as base URLs and folder paths can remain normal config.
-
-V1 still registers these fields for redaction and canary checks so `encryptKey`,
-access tokens, refresh tokens, and passwords do not newly appear in op-log
-payloads, snapshots, backups, logs, or exports.
-
-Deferred provider work:
-
-- Provider APIs should expose public config separately from secrets.
-- Call paths that need private values should resolve them asynchronously through
-  `SecretRef`s.
-- Android native mirroring resolves a SuperSync token only for the bridge write,
-  refuses plaintext fallback or marks storage as unavailable, and relies on
-  backup exclusions for restored devices.
+Provider private config in `sup-sync` (passwords, tokens, `encryptKey`) does
+not change in V1 — it is already local-only and does not drive the synced
+leak risk. Post-V1, move it behind the OS-backed `LocalSecretStore` backends.
+V1 still registers all these fields for redaction and canary checks so they
+never newly appear in op-log payloads, snapshots, backups, logs, or exports.
 
 ## Migration Strategy
 
-### Phase 0 - Secret Registry and Guards
+### Phase 0 — Registry, Redaction, Guards (with V1a)
 
-- Add a typed registry of sensitive paths by domain:
-  - sync provider private config fields
-  - built-in issue provider fields
-  - migrated GitHub/ClickUp plugin config fields
-  - plugin schema `password` fields
-  - plugin OAuth token records
-- Add test helpers that scan snapshots, operation payloads, and backups for
-  canary secret values.
-- Add an op-log capture guard that rejects or fails tests when registered canary
-  secrets appear in persistent action payloads.
-- Add a pre-persistence `AppDataComplete` secret migration/sanitizer used by
-  backup import, remote sync hydration, file-sync snapshot download, full-state
-  tail-op hydration, state-cache writes, and `loadAllData`.
-- Handle `SYNC_IMPORT` and `BACKUP_IMPORT` replacement semantics explicitly:
-  block concurrent secret writes during import/hydration, then rerun the
-  sanitizer and re-emit deterministic `SecretRef` metadata if an import replaced
-  it. Secret refs must not be lost while local secret-store entries remain
-  orphaned.
-- Introduce one registry-backed `redactSecrets(value)` used by log recording,
-  log export, privacy export, crash/error additional data, and plugin/config
-  payload logging.
-- Extend redaction to include `apiKey`, `api_key`, `clientSecret`,
-  `client_secret`, `authorization`, case variants, and nested plugin config
-  password fields.
-- Mark `persistDataSynced` as non-secret storage and remove payload logging.
-- Store migration markers only in local profile storage, never in synced NgRx
-  state.
-- V1 canary exit criterion: after migration, newly produced/current serialized
-  outputs contain zero raw secret hits. This includes current state, new
-  persistent actions, new op-log entries, new snapshots, new backups, logs,
-  privacy export, and plugin synced data.
-- Old local/remote op history and old backup files may still contain previously
-  stored secrets until deferred historical cleanup. V1 should warn about those
-  artifacts rather than claim they were purged.
+- Typed registry of sensitive paths by domain: sync provider private config,
+  built-in issue provider fields, migrated GitHub/ClickUp plugin config,
+  plugin schema `password` fields, plugin OAuth token records, plugin
+  `setSecret` values.
+- One registry-backed `redactSecrets(value)` used by log recording, log
+  export, privacy export, crash/error additional data, plugin/config payload
+  logging, **and the Electron main process** (electron-log writes, forwarded
+  renderer errors, `electron/jira.ts`).
+- Redaction key set includes `apiKey`, `api_key`, `apiToken`, `refreshToken`,
+  `clientSecret`, `client_secret`, `encryptKey`, `authorization`, case
+  variants, and nested plugin config password fields.
+- Canary test helpers that scan snapshots, operation payloads, backups, and
+  both renderer and main-process log output for canary secret values; an
+  op-log capture guard that fails tests when registered canaries appear in
+  persistent action payloads.
+- Pre-persistence `AppDataComplete` sanitizer used by backup import, remote
+  sync hydration, file-sync snapshot download, full-state tail-op hydration,
+  state-cache writes, and `loadAllData`. Handle `SYNC_IMPORT` /
+  `BACKUP_IMPORT` replacement semantics explicitly: block concurrent secret
+  writes during import/hydration, rerun the sanitizer, re-emit deterministic
+  `SecretRef` metadata if an import replaced it (refs must not be lost while
+  local entries remain orphaned).
+- Migration markers live in local profile storage only, never synced state.
+- Exit criterion (falsifiable): zero raw registered-secret hits in all newly
+  produced serialized outputs — current state, persistent actions, op-log
+  entries, snapshots, backups, renderer and main-process logs, privacy
+  export, plugin synced data. Old history/backups may still contain secrets
+  until deferred cleanup; V1 warns rather than claims purging.
 
-### Phase 1 - V1 Local Profile Store
+### V1a — Compatibility and Guardrails (ships alone, no schema break)
 
-- Implement the common `LocalSecretStore` interface.
-- Add an `indexedDbProfile` backend first for Electron desktop only.
-- Surface capabilities in the UI so users can distinguish `localProfile`,
-  `sessionOnly`, and `unavailable` storage in the first release.
-- Keep browser/PWA and Android/iOS persistent secret storage out of the first
-  release; use session-only or unavailable mode there.
-- Defer Electron `safeStorage`, Android Keystore, iOS Keychain, Android backup
-  exclusions, and Linux `basic_text` handling to post-V1 platform hardening.
+- Everything in Phase 0.
+- `LocalSecretStore` with the `indexedDbProfile` backend on all platforms.
+- SecretRef-tolerant readers that preserve unknown/unsupported `SecretRef`
+  values without overwriting them.
+- Dual-write plumbing (see gate below) behind a flag, dark.
+- This release already captures most of the practical value for E2EE users
+  (whose remote payloads are ciphertext anyway): local artifacts — backups,
+  exports, logs — stop leaking. Ship it early and independently.
 
-### Deferred - Local-Only Sync Secrets
+### V1b — Synced-Secret Migration + Portable Vault
 
-Do not migrate these in V1. They are local-only already, so they do not drive
-the main synced-state/op-log leak risk. Move them after the V1 leak-path cleanup
-or combine them with native platform hardening.
+Migrates built-in issue provider secrets, plugin schema `password` fields,
+and legacy migrated GitHub/ClickUp config; ships the portable vault in the
+same release so E2EE users never re-enter credentials and no second
+schema/compat event is needed later.
 
-- Sync provider private config in `sup-sync`.
-- Plugin OAuth tokens in `sup-plugin-oauth`.
-- Android background SuperSync credential mirror only if the native hardening
-  phase is pulled forward.
+**Transition = silent dual-write, no blocking dialogs:**
 
-Migration flow:
+1. Upgraded clients write both the `SecretRef` (+ vault/local value) and the
+   legacy raw field. Sync-visible security is unchanged during transition
+   (the raw field was already there); UX cost is zero.
+2. Raw fields are stripped only when the compatibility gate for that
+   account clears (below). Stripping is automatic and silent.
+3. If a raw secret arrives via sync **after** stripping (a straggler old
+   client wrote it), sanitize it into the vault/local store and surface a
+   one-time, non-blocking hint that the credential may exist in sync
+   history/backups and can be rotated. Never silently swallow the event, and
+   never block sync.
 
-1. Check migration marker for the profile and backend.
-2. For each known local-only secret source, check if a vault entry already
-   exists.
-3. Load plaintext legacy value.
-4. Store value in `LocalSecretStore`.
-5. Replace persisted value with a `SecretRef` or remove it if the owning config
-   can derive the ref deterministically.
-6. Clear plaintext legacy value only after a successful vault write.
-7. Retry idempotently on next startup if migration fails mid-way.
-8. On migration failure, keep the raw value only in its original legacy source
-   for retry. Do not write the raw value into NgRx, persistent actions, imports,
-   backups, or synced state.
+**Compatibility gate, split by transport (an old client cannot emit the new
+signal, so absence of a signal is never proof — hence dual-write + sanitize
+rather than trust):**
 
-After successful migration:
+- SuperSync: server-enforced `minClientVersion` on op upload — the only hard
+  arbiter. Do not rely on vector-clock entries (bounded, prunable).
+- File-based sync (WebDAV/Dropbox/local): verify empirically whether current
+  released clients refuse to write when the sync format version is bumped.
+  If they do, a format bump is the gate; if they ignore unknown versions,
+  document that file-based sync has **no hard gate** and rely on
+  dual-write + sanitize-on-receive + the rotation hint indefinitely (strip
+  raw fields after a long deprecation window instead).
 
-- Delete plaintext legacy values.
-- Clear in-memory caches where relevant.
-- Keep compatibility reads for one or two releases, but never write plaintext
-  secrets again.
+**Migration mechanics:**
 
-### Phase 2 - V1 Synced Issue and Plugin Config Secrets
+- Deterministic slot ids (see "Slot ids") make migration idempotent across
+  devices; LWW on identical metadata cannot orphan either device's value.
+- E2EE users: existing raw synced secrets migrate into the portable vault
+  silently; nothing to re-enter on any device that has the sync passphrase.
+- Non-E2EE users: existing synced secrets stay unmigrated (see "Sync without
+  E2EE"); new/replaced secrets become device-local refs.
+- Legacy GitHub/ClickUp reducer migration must not copy raw fields into
+  plugin config; raw values go to the store, refs to config.
+- On failed store writes, keep the legacy value only in its original legacy
+  source for idempotent retry on next startup; never re-persist raw values
+  through NgRx, persistent actions, imports, backups, or synced state.
+- After a device's migration succeeds and the gate has stripped synced raw
+  fields: delete plaintext legacy values, keep compatibility reads for one
+  or two releases, never write plaintext again.
 
-Migrate high-risk synced secrets next:
+### Deferred — Local-Only Secret Hardening
 
-- Built-in issue provider tokens/passwords.
-- Plugin config fields marked as password.
-- Legacy migrated GitHub/ClickUp provider config.
+`sup-sync` private config, `sup-plugin-oauth`, `sup-plugin-secrets` values,
+and the Android background-sync mirror move behind OS-backed backends in the
+post-V1 platform-hardening phase (same migration flow: marker → store write →
+replace/remove legacy → clear plaintext only after success).
 
-This phase is a schema-breaking sync boundary unless client-version gating or
-op migration exists.
+### Deferred — Historical Data Cleanup
 
-Rollout gate:
+Old local op logs, remote history, snapshots, and backups may contain
+previously stored secrets. V1 prevents new leaks and warns; cleanup is a
+follow-up:
 
-- `V1a` is the compatibility release. All supported clients must be able to read
-  and preserve `SecretRef` values before any client removes raw synced
-  credentials.
-- Define an explicit sync `schemaVersion` or `minClientVersion` signal on
-  operations/snapshots before `V1b`. Do not rely on vector-clock entries as a
-  durable old-client detector; vector clocks are bounded and can be pruned.
-- If older clients may still sync, show a blocking upgrade warning and keep
-  affected providers read-only or unmigrated until the user confirms the risk.
-- Do not run historical cleanup while the explicit compatibility signal says a
-  pre-migration client can still publish plaintext credentials.
-
-First-release scope:
-
-- Use device-local migration for `V1b`. Migrate synced integration secrets into
-  device-local storage. Every device must reconnect integrations once.
-- Defer E2EE portable migration to the post-V1 portable vault phase. Do not
-  implement portable vault migration, key rotation, recovery keys, device
-  pairing, export/import, or rollback handling in V1.
-- Make migration idempotent by deterministic secret slot
-  `(ownerType, ownerId, field)`. Two upgraded devices migrating the same
-  provider should produce the same synced `SecretRef` metadata, so last-writer
-  wins does not orphan either device's local secret.
-
-For sync without E2EE:
-
-- Do not silently migrate synced integration secrets into a portable synced
-  store.
-- Prompt once with explicit choices: enable sync E2EE and migrate later, or move
-  credentials to this device only.
-- New credentials default to device-local unless a real portable vault is
-  available in a later release.
-
-Legacy GitHub/ClickUp migration:
-
-- Read legacy plaintext fields.
-- Store them in `LocalSecretStore`.
-- Remove raw `token`, `apiKey`, and password-like fields from migrated entities.
-- Do not copy raw legacy fields into plugin config during reducer migration.
-
-### Deferred - Historical Data Cleanup
-
-Removing current state fields is not enough because local op logs, remote
-operation history, snapshots, backups, and old exported files may already
-contain raw secrets.
-
-This is not required for V1. V1 should prevent new leaks and warn that old
-history/backups may still contain previously stored secrets.
-
-Deferred cleanup:
-
-- Rewrite or purge `OPS`, `STATE_CACHE` current/backup, `IMPORT_BACKUP`,
-  `PROFILE_DATA`, file-sync `sync-data.json.state`, file-sync `recentOps`, and
-  remote SuperSync snapshots/ops where supported.
-- Compact local operation logs after migration and after compatibility gates are
-  satisfied.
-- Rewrite current snapshots with sanitized state.
-- For file-based sync, force-upload a stripped snapshot.
-- For SuperSync, ensure server-side retained history no longer exposes raw
-  secrets after compaction/retention. If no such retention guarantee exists,
-  document that old server-side records may still contain legacy secrets.
-- Delete migrated plaintext values from legacy IndexedDB stores.
-- Update privacy export masking to include all registry keys.
-- Warn users that older backups, copied sync files, and retained sync history may
-  still contain previously saved tokens/passwords. Recommend deleting/protecting
-  old backup files and rotating third-party tokens if those files may have been
-  shared or exposed.
-
-### Post-V1 - Native Stores and Optional Portable Vault
-
-Only after device-local storage and compatibility gates are stable:
-
-- Add Electron `safeStorage`, Android Keystore, and iOS Keychain backends.
-- Add Android backup exclusion resources before Android native secret writes.
-- Add explicit opt-in for syncing selected integration secrets.
-- Use a separate `vaultDek`, not a SuperSync access token or the sync content
-  encryption key.
-- Add authenticated manifest versioning, tombstones, wrapper metadata, and
-  rollback/replay handling.
-- Allow encrypted export/import of vault contents for backup.
-- Never include device-local sync credentials in portable vault export by
-  default.
+- Rewrite/purge `OPS`, `STATE_CACHE` current/backup, `IMPORT_BACKUP`,
+  `PROFILE_DATA`, file-sync `sync-data.json.state` + `recentOps`, and remote
+  SuperSync snapshots/ops where supported; compact local op logs after the
+  gate clears; force-upload stripped snapshots for file-based sync.
+- For SuperSync, verify whether retention/compaction bounds old raw payloads;
+  if not, document that server-side history may retain legacy secrets.
+- Release notes: new backups no longer include raw credentials; older
+  backups, copied sync files, and retained history may — delete/protect old
+  backup files and rotate third-party tokens if they may have been exposed.
 
 ## Error Handling
 
-| Scenario                                           | Handling                                                                                                                               |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| V1 device-local entry missing                      | Show "credential missing on this device" and offer reauth/re-enter                                                                     |
-| V1 local profile store unavailable                 | Mark affected integration missing/read-only on this device; do not write raw fallback state                                            |
-| V1 corrupted local entry                           | Do not delete the `SecretRef` automatically; offer reconnect/replace and diagnostic export without the secret                          |
-| Migration fails mid-way                            | Keep the legacy value only in its original legacy source for retry; do not re-persist it through NgRx, op-log, backup, or synced state |
-| Secret lookup fails during sync                    | Stop sync and ask for credential; do not overwrite or disable config                                                                   |
-| Older client still syncing                         | Keep affected providers read-only or unmigrated until compatibility gate is satisfied                                                  |
-| Post-V1 portable vault locked                      | Show "credential locked" and offer the existing sync E2EE unlock, vault passphrase, recovery key, or device-pairing flow               |
-| Post-V1 OS-backed storage unavailable              | Use session-only storage or explicit passphrase-protected/degraded mode                                                                |
-| Post-V1 Linux `basic_text` backend                 | Do not silently persist secrets; require explicit plaintext-equivalent consent or passphrase/session-only alternative                  |
-| Post-V1 sync E2EE key rotation cannot rewrap vault | Keep old wrapper during grace period; if unavailable, require old unlock material or integration reauth                                |
+| Scenario                              | Handling                                                                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Device-local entry missing            | "Credential missing on this device" + direct re-enter/reauth action                                                                    |
+| Local profile store unavailable       | Mark affected integration missing/read-only on this device; never write raw fallback state                                             |
+| Corrupted local entry                 | Do not delete the `SecretRef` automatically; offer reconnect/replace and diagnostic export without the secret                          |
+| Migration fails mid-way               | Keep the legacy value only in its original legacy source for retry; do not re-persist it through NgRx, op-log, backup, or synced state |
+| Secret lookup fails during sync       | Stop sync and ask for the credential; do not overwrite or disable config                                                               |
+| Raw secret arrives post-strip         | Sanitize into store/vault; one-time non-blocking rotation hint; never block sync                                                       |
+| Vault record fails AAD/decrypt        | Treat as missing (not corrupted config); offer re-enter; log a redacted diagnostic                                                     |
+| Post-V1 OS-backed storage unavailable | Session-only (in-memory) or explicit degraded mode; Linux `basic_text` requires explicit consent, never a silent plaintext-equivalent  |
 
 ## Backup and Restore Rules
 
-- Normal app backups must never contain raw device secrets.
-- For device-local secrets, backups contain only `SecretRef` metadata and
-  provider metadata.
-- For post-V1 portable vault secrets, backups may include portable vault ciphertext and
-  non-device wrappers, but never plaintext secrets or device-local wrappers.
-  This gives restore support while preserving the same offline brute-force risk
-  as the portable vault itself.
-- Post-V1 automatic platform backups must exclude native secret ciphertext if the
-  decrypting key is device-bound.
-- Manual encrypted vault export can be a separate artifact:
-  - user supplies an export passphrase
-  - export uses fresh salt and authenticated encryption
-  - import requires explicit confirmation and conflict handling
-- Restoring an app backup on a new device should show integrations as
-  "configured, credentials missing" or "credential locked" with direct reauth or
-  unlock actions.
+- Normal app backups contain only `SecretRef` + provider metadata for
+  device-local secrets, and portable-vault ciphertext for vaulted secrets
+  (same offline exposure as the vault itself) — never plaintext values.
+- Restoring a backup on a new device shows integrations as "configured,
+  credential missing" (device-local) or working-after-sync-unlock (vaulted),
+  with direct reauth actions.
+- Post-V1 platform backups exclude native secret ciphertext where the
+  decrypting key is device-bound (Android rules per Quick Wins/native
+  phase).
 
 ## UX Requirements
 
-- V1 settings pages need only simple stable states: "credential saved on this
-  device", "missing on this device", and "storage unavailable".
-- Defer "credential locked", "restored but key unavailable", "unrecoverable on
-  this device", and the broader "Connections on this device" checklist to the
-  portable/native hardening phases.
-- Reauth is explicit and provider-specific.
-- Clearing an integration deletes both the config reference and vault secret.
-- Failed secret lookup must not silently disable sync or overwrite config.
-- On degraded Linux storage, the user chooses between session-only storage and a
-  passphrase-protected local store. On web/PWA, first release behavior is
-  session-only or unavailable.
-- Device-local behavior must be documented in the sync and integration settings:
-  secrets are intentionally not synced by default.
+- V1 settings need exactly two per-integration states: "credential saved on
+  this device" and "missing on this device" (plus a rare "storage
+  unavailable"). Vaulted credentials on an E2EE-synced device simply work
+  and need no state chip at all.
+- No blocking upgrade dialogs, no migration prompts, no consent modals in
+  V1. The only new user-visible text is the per-device state hints and the
+  one-time post-strip rotation hint.
+- Reauth is explicit and provider-specific; failed secret lookup never
+  silently disables sync or overwrites config.
+- Settings docs state plainly: sync provider credentials and encryption
+  passphrases are intentionally per-device; integration credentials travel
+  inside the encrypted vault only when sync E2EE is on.
 - Release notes must say that new backups no longer include raw integration
-  credentials, while older backups or sync history may still contain previously
-  saved tokens/passwords. Users should delete/protect old backups and rotate
-  third-party tokens if those files may have been exposed.
+  credentials, while older backups/sync history may still contain previously
+  saved values, with rotation advice.
 
 ## Security Invariants
 
 V1a guardrail invariants:
 
 - No new raw secret values in persistent action capture, op-log operations,
-  `BACKUP_IMPORT`, `SYNC_IMPORT`, state cache, hydration payloads, plugin synced
-  data, `persistDataSynced` payloads, logs, error additional data, stack traces,
-  privacy export, or log export for paths covered by the registry.
-- Deferred local-only secrets such as `encryptKey`, sync access tokens, and
-  plugin OAuth tokens stay in their existing stores, but registry/canary tests
-  must verify they are not newly leaked through logs, exports, backups, or sync
-  payloads.
+  `BACKUP_IMPORT`, `SYNC_IMPORT`, state cache, hydration payloads, plugin
+  synced data, `persistDataSynced` payloads, renderer logs, **main-process
+  logs**, error additional data, privacy export, or log export for
+  registry-covered paths.
+- Deferred local-only secrets (`encryptKey`, sync tokens, plugin OAuth,
+  plugin `setSecret` values) stay in their existing stores, with
+  registry/canary coverage proving no new leak paths.
 - No fixed-key obfuscation for new synced secret writes.
 
-V1b migrated-secret invariants:
+V1b invariants:
 
-- Migrated built-in issue-provider and plugin schema `password` values do not
-  appear as raw values in NgRx state, action payloads, op-log operations,
-  complete backup snapshots, plugin synced data, or logs.
-- If migration cannot write to `LocalSecretStore`, the integration becomes
-  missing or read-only on that device. Raw fallback state is not written.
-- `SecretRef` is not an authorization capability; resolution validates caller
-  identity and owner metadata.
-- For V1 `indexedDbProfile`, `SecretRef` is useless without the local profile
-  store from the same device/profile. This is not an at-rest encryption claim:
-  anyone with local profile disk access may be able to read the local store.
-- Runtime-resolved config objects stay local to the call path that needs them.
-
-Post-V1 invariants:
-
-- No plaintext native fallback for native OS-backed persistent storage.
-- Plaintext `vaultDek` is never synced or persisted; it exists only in memory
-  while the portable vault is unlocked.
+- Migrated secrets never appear raw in NgRx state, action payloads, op-log
+  operations, backups, plugin synced data, or logs once the strip gate has
+  cleared for the account; during dual-write, exposure equals the status quo
+  and never exceeds it.
+- If the store write fails, the integration becomes missing/read-only on
+  that device; raw fallback state is never written.
+- Resolution asserts declared owner metadata (misuse prevention); caller
+  identity is **not** verifiable in-renderer and no stronger claim is made.
+- `SecretRef` plus the local profile DB from another device resolves
+  nothing; this is an isolation claim, not an at-rest encryption claim.
+- Plaintext `vaultKey` material is never synced or persisted unwrapped; it
+  exists in memory (and the existing E2EE session cache) only.
+- Runtime-resolved config objects stay local to the call path.
 
 ## Testing Strategy
 
 V1 tests:
 
-- Unit tests for `indexedDbProfile` `LocalSecretStore` using canary values.
-- Unit tests for `SecretRef` authorization boundaries:
-  - wrong owner type/id/field is denied
-  - plugin A cannot resolve plugin B's ref
-  - a copied or stale ref is not sufficient to access a secret
-- Multi-device tests for deterministic device-local slots: client A and client B
-  can both reconnect the same integration, and syncing B's metadata does not
-  make A's local credential missing.
-- Migration tests for fresh install, existing issue/plugin credentials, partial
-  migration, and failed local-store writes.
-- Form tests for unchanged/replace/clear behavior, including masked sentinel
-  rejection and "typed then reverted" collapsing back to `unchanged`.
-- Plugin config tests for schema password fields.
-- Compatibility-release tests:
-  - new clients preserve existing raw config before migration
-  - compatibility clients preserve `SecretRef` values
-  - unsupported peers trigger read-only/blocking behavior
-  - older-client overwrite of refs with raw/empty values is blocked or detected
-- Snapshot/backup/op-log tests that fail if canary secrets appear in serialized
-  state.
-- Registry/redaction tests for case variants and nested keys such as `apiKey`,
-  `api_key`, `authorization`, `clientSecret`, and plugin config password fields.
-- `encryptKey` and sync-token canaries even though their migration is deferred.
-- Integration canaries for persistent action capture, `OPS`, `BACKUP_IMPORT`,
-  `SYNC_IMPORT`, `STATE_CACHE`, file-sync `sync-data.json.state`, file-sync
-  `recentOps`, SuperSync snapshot upload, plugin `persistDataSynced`, log
-  export, and privacy export.
-- E2E smoke tests for:
-  - Electron desktop: configure provider, reload app, credential still works
-  - restore backup on a new device/profile, credential is missing but config
-    metadata remains
-  - sync between two upgraded clients without leaking issue-provider secrets
-  - configure on client A, sync to client B, and assert no canary token appears
-    in persisted stores, op-log files, or server/file-sync snapshots
+- `indexedDbProfile` `LocalSecretStore` unit tests with canary values, on
+  the web/Capacitor build targets too (single backend everywhere).
+- API-contract tests for `SecretAccessContext` (wrong owner type/id/field
+  denied; plugin refs resolve only for `callerId === ownerId`) — labeled as
+  contract tests, not security tests.
+- Slot-id encoding tests: delimiter-containing plugin ids/field names cannot
+  alias another slot.
+- Multi-device determinism: clients A and B migrate the same integration;
+  syncing B's metadata does not orphan A's value.
+- Vault tests: AAD mismatch rejected; fresh-nonce-per-write; passphrase
+  change re-encrypts records and old-key material no longer decrypts new
+  records; unlock via session-cached E2EE material requires no prompt.
+- Dual-write/gate tests: transition writes both forms; strip only after gate
+  signal; post-strip raw arrival is sanitized + hinted, sync not blocked;
+  compatibility clients preserve `SecretRef` values; older-client raw/empty
+  overwrite of refs is detected and repaired from the local store.
+- Form tests for the empty-control model (untouched/emptied → unchanged,
+  typed → replace, remove → clear).
+- Migration tests: fresh install, existing credentials, partial migration,
+  failed store writes, E2EE-enable triggering silent vault migration.
+- Canary integration tests: persistent action capture, `OPS`,
+  `BACKUP_IMPORT`, `SYNC_IMPORT`, `STATE_CACHE`, file-sync
+  `sync-data.json.state` + `recentOps`, SuperSync snapshot upload, plugin
+  `persistDataSynced`, log export, privacy export, **electron-log output**
+  (main + forwarded renderer errors), and the in-memory-only rule for any
+  session-mode (no `sessionStorage`/`localStorage`/`window.name` sinks).
+- Redaction tests for case variants and nested keys (`apiKey`, `api_key`,
+  `apiToken`, `refreshToken`, `authorization`, `clientSecret`,
+  `client_secret`, `encryptKey`, plugin password fields).
+- E2E smoke: configure provider on Electron, reload, credential works;
+  restore backup on a new profile → config present, credential
+  missing/locked as designed; two upgraded E2EE clients sync an issue
+  provider with zero canary hits in persisted stores, op-log files, or
+  sync snapshots, and client B needs no re-entry.
 
-Deferred tests:
-
-- Electron tests for `safeStorage` unavailable and Linux `basic_text`.
-- Android tests for KeyStore failure behavior and backup exclusion metadata.
-- Portable vault tests for unlock, rewrap, rollback/tombstone behavior, and
-  export/import.
+Deferred tests: Electron `safeStorage` unavailable / Linux `basic_text`;
+Android KeyStore failure + backup-exclusion metadata; iOS keychain
+survive-uninstall handling.
 
 ## Implementation Sketch
 
@@ -1028,50 +826,52 @@ V1 likely new files:
 - `src/app/core/secret-storage/local-secret-store.service.ts`
 - `src/app/core/secret-storage/secret-registry.ts`
 - `src/app/core/secret-storage/secret-migration.service.ts`
-- `src/app/core/secret-storage/redact-secrets.ts`
+- `src/app/core/secret-storage/redact-secrets.ts` (shared with `electron/`)
+- `src/app/core/secret-storage/portable-vault.service.ts` (V1b)
 
 V1 likely changed areas:
 
 - issue provider config forms and API service resolution
 - issue provider action creation before persistent dispatch
-- plugin config service, plugin bridge, and `persistDataSynced`
-- backup import, sync hydration, snapshot download, state-cache writes, and
+- plugin config service, plugin bridge (`useSecret`), schema-password
+  interception into the `sup-plugin-secrets`-backed store
+- backup import, sync hydration, snapshot download, state-cache writes,
   privacy/log export
+- `electron/jira.ts`, main-process log wiring (redaction)
+- op-log entity registry + validation for the vault record type (V1b)
 
-Deferred likely files/areas:
-
-- `src/app/core/secret-storage/portable-vault.service.ts`
-- `electron/ipc-handlers/local-secret-store.ts`
-- `android/app/src/main/java/com/superproductivity/superproductivity/service/LocalSecretStore.kt`
-- Android backup exclusion resources for legacy background-sync prefs and new
-  local secret-store files
-- sync provider private config loading/saving
-- plugin OAuth token store
-- Android backup rules and background sync credential bridge
+Deferred: `electron/ipc-handlers/local-secret-store.ts`, Android/iOS native
+stores + backup rules, sync provider private config re-homing, plugin OAuth
+store hardening.
 
 ## Decisions Required Before V1a
 
 - How long should legacy plaintext read compatibility remain?
-- Should browser/PWA and Android/iOS show session-only secret retention or mark
-  persistent secret storage unavailable?
+- Confirm: back `pluginConfig`-owned host secrets with the existing
+  `sup-plugin-secrets` DB (recommended — inherits purge lifecycle) vs. a
+  separate namespace in the new store.
+- Cost out skipping `indexedDbProfile` on Electron in favor of going straight
+  to the main-process `safeStorage` backend (web/mobile keep
+  `indexedDbProfile` either way). Recommended default: uniform
+  `indexedDbProfile` first — one backend, one migration path, and the
+  interface swap to `safeStorage` later is internal to `LocalSecretStore`.
 
-## Required Before V1b Synced-Secret Migration
+## Required Before V1b
 
-- Define an explicit `schemaVersion` or `minClientVersion` signal proving that
-  supported clients preserve `SecretRef` values.
-- What user-facing upgrade warning is acceptable before moving synced
-  integration credentials to device-local storage?
+- Implement the SuperSync server `minClientVersion` upload rejection.
+- Empirically verify old released clients' behavior on a file-based sync
+  format-version bump (gate exists vs. dual-write-forever, see gate
+  section).
+- Verify the op-log entity registry + typia validation can carry the new
+  vault record type without breaking pre-V1a clients (if a new entity kind
+  breaks old-client validation, vault records must wait behind the same
+  dual-write gate — same release, ordered rollout).
 
 ## Decisions Deferred To Post-V1
 
-- Does SuperSync retention/compaction currently guarantee old raw secret
-  payloads disappear after migration?
-- What minimum sync E2EE passphrase-strength rule is required before enabling
-  the low-friction portable vault?
-- How will sync E2EE passphrase/key rotation rewrap existing portable vault
-  keys?
-- Should portable vault backup/export be part of normal backup or a separate
-  explicit export?
+- Does SuperSync retention/compaction bound old raw secret payloads after
+  migration?
+- Scope of historical cleanup automation vs. documented rotation advice.
 
 ## References
 
@@ -1080,3 +880,5 @@ Deferred likely files/areas:
 - Android `EncryptedSharedPreferences` reference: https://developer.android.com/reference/androidx/security/crypto/EncryptedSharedPreferences
 - Apple Keychain Services: https://developer.apple.com/documentation/security/keychain-services
 - MDN SubtleCrypto/Web Crypto API: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto
+- Shipped plugin secret storage (#8633): `src/app/plugins/secret/`
+- Sync E2EE primitives: `packages/sync-core/src/encryption*`

@@ -1,19 +1,62 @@
-import { computed, effect, inject, Injectable } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { DateAdapter } from '@angular/material/core';
-import { DEFAULT_LOCALE, DateTimeLocale } from 'src/app/core/locale.constants';
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_LOCALE,
+  DateTimeLocale,
+  DateTimeLocales,
+} from 'src/app/core/locale.constants';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DateTimeFormatService {
   private readonly _globalConfigService = inject(GlobalConfigService);
-  private _dateAdapter = inject(DateAdapter);
+  private _dateAdapter = inject(DateAdapter, { optional: true });
+  private readonly _translateService = inject(TranslateService);
+  private readonly _localeSig = signal<DateTimeLocale>(DEFAULT_LOCALE);
+  // UI translation language, pushed in by LanguageService. Used for ISO text
+  // labels and as a fallback when no explicit dateTimeLocale override is set.
+  // Kept as a signal so locale-dependent computed values update reactively.
+  private readonly _uiLangSig = signal<string | null>(null);
 
   // Signal for the locale to use
   readonly currentLocale = computed<DateTimeLocale>(() => {
-    return this._globalConfigService.localization()?.dateTimeLocale || DEFAULT_LOCALE;
+    return this._globalConfigService.localization()?.dateTimeLocale || this._localeSig();
   });
+
+  /**
+   * UI locale for ISO weekday labels. `null` preserves the existing formatter
+   * for every non-ISO option. The ISO option persists `sv` as a
+   * backward-compatible sync marker.
+   */
+  readonly isoTextLocale = computed<string | null>(() => {
+    const configuredLocale = this._globalConfigService.localization()?.dateTimeLocale;
+
+    if (configuredLocale !== DateTimeLocales.sv) {
+      return null;
+    }
+
+    return (
+      this._uiLangSig() ||
+      this._translateService.currentLang ||
+      this._translateService.defaultLang ||
+      DEFAULT_LANGUAGE
+    );
+  });
+
+  /**
+   * Locale for spelled-out weekday/month names (e.g. "Wed", "July"). Under the
+   * ISO 8601 option this resolves to the UI language, so names aren't shown in
+   * Swedish (the `sv` sync sentinel) — mirrors the calendar fix in `CustomDateAdapter`.
+   * Numeric dates and clock times must keep `currentLocale()` instead, so ISO
+   * stays YYYY-MM-DD and the 24h clock is preserved (#8987 follow-up).
+   */
+  readonly textLocale = computed<string>(
+    () => this.isoTextLocale() ?? this.currentLocale(),
+  );
 
   /** Test formats to detect locale-specific time and date formats (e.g., 24h vs 12h, DD/MM vs MM/DD) */
   private readonly _testFormats = computed(() => {
@@ -52,16 +95,54 @@ export class DateTimeFormatService {
   });
 
   constructor() {
-    // Use effect to reactively update date adapter locale when config changes
+    // This effect is the single owner of the date adapter locale: it resolves
+    // the effective locale (explicit override first, UI language only as a
+    // fallback) and is the sole writer. Other services must register intent via
+    // setUiLanguage() rather than set the adapter, otherwise an explicit
+    // dateTimeLocale override gets clobbered (e.g. #8565: 24h ja-jp shown 12h).
     effect(() => {
       const cfgValue = this._globalConfigService.localization()?.dateTimeLocale;
-      if (cfgValue) this.setDateAdapterLocale(cfgValue);
+      // Track the UI language so a language change re-applies the fallback.
+      const uiLang = this._uiLangSig();
+      if (cfgValue) {
+        this._setDateAdapterLocale(cfgValue);
+      } else {
+        // No explicit date/time override: follow the browser's regional locale
+        // (e.g. 'en-GB' → DD/MM/YYYY) rather than the UI translation language.
+        // The UI language is region-agnostic — 'en' resolves to US MM/DD/YYYY,
+        // which would mis-format dates for en-GB/en-AU/etc. users who never
+        // picked a date locale. Fall back to UI language, then the default.
+        const fallbackLocale =
+          this._translateService.getBrowserCultureLang?.()?.toLowerCase() ||
+          uiLang ||
+          this._translateService.currentLang ||
+          this._translateService.defaultLang ||
+          DEFAULT_LOCALE;
+        this._setDateAdapterLocale(fallbackLocale as DateTimeLocale);
+      }
     });
   }
 
-  /** Set the locale for the date adapter formatting */
-  setDateAdapterLocale(locale: DateTimeLocale): void {
-    this._dateAdapter.setLocale(locale);
+  /**
+   * Register the active UI translation language as a fallback for the date
+   * adapter locale (used only when no explicit dateTimeLocale is set). The
+   * owning effect resolves and applies the effective locale — this is how other
+   * services influence the adapter without clobbering an override (see #8565).
+   */
+  setUiLanguage(lng: string): void {
+    this._uiLangSig.set(lng);
+  }
+
+  /**
+   * Apply the locale to the date adapter. Private by design: only the owning
+   * effect may write the adapter locale, so an explicit dateTimeLocale override
+   * cannot be clobbered (see #8565).
+   */
+  private _setDateAdapterLocale(locale: DateTimeLocale): void {
+    if (this._dateAdapter && typeof this._dateAdapter.setLocale === 'function') {
+      this._dateAdapter.setLocale(locale);
+    }
+    this._localeSig.set(locale);
   }
 
   /**

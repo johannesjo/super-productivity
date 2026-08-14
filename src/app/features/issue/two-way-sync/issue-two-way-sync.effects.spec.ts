@@ -6,7 +6,9 @@ import { IssueTwoWaySyncEffects } from './issue-two-way-sync.effects';
 import { TaskService } from '../../tasks/task.service';
 import { IssueProviderService } from '../issue-provider.service';
 import { IssueSyncAdapterRegistryService } from './issue-sync-adapter-registry.service';
+import { IssueSyncAdapterResolverService } from './issue-sync-adapter-resolver.service';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
+import { PlainspaceSyncAdapterService } from '../providers/plainspace/plainspace-sync-adapter.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
@@ -107,6 +109,14 @@ describe('IssueTwoWaySyncEffects', () => {
     toTaskValue: (val: unknown) => val,
   };
 
+  const titleFieldMapping: FieldMapping = {
+    taskField: 'title',
+    issueField: 'summary',
+    defaultDirection: 'both',
+    toIssueValue: (val: unknown) => val,
+    toTaskValue: (val: unknown) => val,
+  };
+
   beforeEach(() => {
     actions$ = new Subject<any>();
 
@@ -117,6 +127,14 @@ describe('IssueTwoWaySyncEffects', () => {
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
 
     const caldavSpy = jasmine.createSpyObj('CaldavSyncAdapterService', [
+      'getFieldMappings',
+      'getSyncConfig',
+      'fetchIssue',
+      'pushChanges',
+      'extractSyncValues',
+    ]);
+
+    const plainspaceSpy = jasmine.createSpyObj('PlainspaceSyncAdapterService', [
       'getFieldMappings',
       'getSyncConfig',
       'fetchIssue',
@@ -135,7 +153,15 @@ describe('IssueTwoWaySyncEffects', () => {
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: IssueProviderService, useValue: issueProviderServiceSpy },
         { provide: CaldavSyncAdapterService, useValue: caldavSpy },
+        { provide: PlainspaceSyncAdapterService, useValue: plainspaceSpy },
         { provide: SnackService, useValue: snackServiceSpy },
+        {
+          provide: IssueSyncAdapterResolverService,
+          useFactory: (registry: IssueSyncAdapterRegistryService) => ({
+            getAdapter: (issueType: string) => registry.get(issueType),
+          }),
+          deps: [IssueSyncAdapterRegistryService],
+        },
       ],
     });
 
@@ -339,6 +365,127 @@ describe('IssueTwoWaySyncEffects', () => {
         dtstart: '2026-03-19',
       });
       expect('issueLastUpdated' in updateChanges).toBeFalse();
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
+    it('keeps issueLastUpdated stale when an unrelated mapped field changed remotely (completed in Plainspace while renaming in SP)', fakeAsync(() => {
+      // The user renamed the task in SP (pushable) but had already completed it in
+      // Plainspace. `fetchIssue` (called before our write) reflects that completion
+      // (status COMPLETED) in a field we are NOT pushing this cycle. Advancing
+      // issueLastUpdated past it would make the poll skip it forever — the
+      // completion would never reach SP. So the marker must stay stale.
+      const adapter = createMockAdapter({
+        getFieldMappings: jasmine
+          .createSpy('getFieldMappings')
+          .and.returnValue([titleFieldMapping, isDoneFieldMapping]),
+        getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+        fetchIssue: jasmine
+          .createSpy('fetchIssue')
+          .and.resolveTo({ summary: 'Old title', status: 'COMPLETED' }),
+        extractSyncValues: jasmine
+          .createSpy('extractSyncValues')
+          .and.callFake((issue: { summary: unknown; status: unknown }) => ({
+            summary: issue.summary,
+            status: issue.status,
+          })),
+        getIssueLastUpdated: jasmine
+          .createSpy('getIssueLastUpdated')
+          .and.returnValue(999),
+      });
+      adapterRegistry.register('TEST_PROVIDER', adapter);
+
+      const task = createMockTask({
+        id: 'task-1',
+        issueType: 'TEST_PROVIDER' as any,
+        issueId: 'issue-1',
+        issueProviderId: 'provider-1',
+        title: 'New title',
+        isDone: false,
+        issueLastSyncedValues: { summary: 'Old title', status: 'NEEDS-ACTION' },
+        issueLastUpdated: 123,
+      });
+
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
+
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { title: 'New title' } },
+        }),
+      );
+
+      tick();
+
+      // The rename is still pushed...
+      expect(adapter.pushChanges).toHaveBeenCalledWith(
+        'issue-1',
+        { summary: 'New title' },
+        jasmine.any(Object),
+      );
+      const updateChanges = taskServiceSpy.update.calls.mostRecent()
+        .args[1] as Partial<Task>;
+      // ...the title baseline advances, the remote completion is left untouched...
+      expect(updateChanges.issueLastSyncedValues).toEqual({
+        summary: 'New title',
+        status: 'NEEDS-ACTION',
+      });
+      // ...and issueLastUpdated is NOT advanced, so the next poll still pulls done.
+      expect('issueLastUpdated' in updateChanges).toBeFalse();
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
+    it('advances issueLastUpdated after a clean push with no un-pulled remote changes', fakeAsync(() => {
+      const adapter = createMockAdapter({
+        getFieldMappings: jasmine
+          .createSpy('getFieldMappings')
+          .and.returnValue([titleFieldMapping, isDoneFieldMapping]),
+        getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+        fetchIssue: jasmine
+          .createSpy('fetchIssue')
+          .and.resolveTo({ summary: 'Old title', status: 'NEEDS-ACTION' }),
+        extractSyncValues: jasmine
+          .createSpy('extractSyncValues')
+          .and.callFake((issue: { summary: unknown; status: unknown }) => ({
+            summary: issue.summary,
+            status: issue.status,
+          })),
+        getIssueLastUpdated: jasmine
+          .createSpy('getIssueLastUpdated')
+          .and.returnValue(999),
+      });
+      adapterRegistry.register('TEST_PROVIDER', adapter);
+
+      const task = createMockTask({
+        id: 'task-1',
+        issueType: 'TEST_PROVIDER' as any,
+        issueId: 'issue-1',
+        issueProviderId: 'provider-1',
+        title: 'New title',
+        isDone: false,
+        issueLastSyncedValues: { summary: 'Old title', status: 'NEEDS-ACTION' },
+        issueLastUpdated: 123,
+      });
+
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
+
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { title: 'New title' } },
+        }),
+      );
+
+      tick();
+
+      const updateChanges = taskServiceSpy.update.calls.mostRecent()
+        .args[1] as Partial<Task>;
+      expect(updateChanges.issueLastUpdated).toBe(999);
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
@@ -710,6 +857,48 @@ describe('IssueTwoWaySyncEffects', () => {
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
+
+    it('should NOT show a snack when push rejects with an expected sync-skip marker (#7492)', fakeAsync(() => {
+      // The marker normally originates from a provider's updateIssue (e.g. a
+      // single recurring CalDAV occurrence); injected here via fetchIssue, which
+      // surfaces through the same push-pipe catch.
+      const expectedSkip = Object.assign(new Error('single occurrence'), {
+        isExpectedSyncSkip: true,
+      });
+      const adapter = createMockAdapter({
+        getFieldMappings: jasmine
+          .createSpy('getFieldMappings')
+          .and.returnValue([isDoneFieldMapping]),
+        getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+        fetchIssue: jasmine.createSpy('fetchIssue').and.rejectWith(expectedSkip),
+      });
+      adapterRegistry.register('TEST_PROVIDER', adapter);
+
+      const task = createMockTask({
+        id: 'task-1',
+        issueType: 'TEST_PROVIDER' as any,
+        issueId: 'issue-1',
+        issueProviderId: 'provider-1',
+        issueLastSyncedValues: { status: 'NEEDS-ACTION' },
+      });
+
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
+
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { isDone: true } },
+        }),
+      );
+
+      tick();
+
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
   });
 
   describe('pushTagChangesAfterTagDelete$', () => {
@@ -892,6 +1081,38 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(snackServiceSpy.open).toHaveBeenCalledWith(
         jasmine.objectContaining({ type: 'ERROR' }),
       );
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
+    it('should NOT show a snack when delete rejects with an expected sync-skip marker (#7492)', fakeAsync(() => {
+      const expectedSkip = Object.assign(new Error('single occurrence'), {
+        isExpectedSyncSkip: true,
+      });
+      const deleteIssueSpy = jasmine
+        .createSpy('deleteIssue')
+        .and.rejectWith(expectedSkip);
+      const adapter = createMockAdapter({ deleteIssue: deleteIssueSpy });
+      adapterRegistry.register('TEST_PROVIDER', adapter);
+
+      const cfg = createMockIssueProvider();
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+
+      const task = createMockTask({
+        id: 'task-1',
+        issueType: 'TEST_PROVIDER' as any,
+        issueId: 'issue-1',
+        issueProviderId: 'provider-1',
+      }) as TaskWithSubTasks;
+      (task as any).subTasks = [];
+
+      effects.deleteIssueOnTaskDelete$.subscribe();
+
+      actions$.next(TaskSharedActions.deleteTask({ task }));
+
+      tick();
+
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
@@ -1181,6 +1402,124 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(createIssueSpy).not.toHaveBeenCalled();
 
       adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
+    it('should create issue for a native PLAINSPACE provider without a pluginConfig flag (collaborative by default)', fakeAsync(() => {
+      // Contrast with the TEST_PROVIDER case above: a native provider with no
+      // `pluginConfig.isAutoCreateIssues` normally does NOT auto-create. A bound
+      // Plainspace provider does — the binding itself is the opt-in, so tasks
+      // added to a shared project reach the team.
+      const createIssueSpy = jasmine.createSpy('createIssue').and.resolveTo({
+        issueId: 'ps-issue-1',
+        issueData: { isDone: false, title: 'New Task', scheduledAt: null },
+      });
+      const adapter = createMockAdapter({
+        createIssue: createIssueSpy,
+        getFieldMappings: jasmine.createSpy('getFieldMappings').and.returnValue([]),
+        getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+      });
+      // Override the Plainspace adapter the effects constructor registered.
+      adapterRegistry.register('PLAINSPACE', adapter);
+
+      const provider = createMockIssueProvider({
+        id: 'provider-1',
+        issueProviderKey: 'PLAINSPACE',
+        defaultProjectId: 'project-1',
+        // Configured (bound), but deliberately NO pluginConfig / isAutoCreateIssues.
+        spaceId: 'space-1',
+        token: 'pat_x',
+      });
+
+      store.overrideSelector(selectEnabledIssueProviders, [provider]);
+      store.refreshState();
+
+      const cfg = createMockIssueProvider({
+        id: 'provider-1',
+        issueProviderKey: 'PLAINSPACE',
+      });
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+
+      const task = createMockTask({
+        id: 'task-new',
+        title: 'New Task',
+        projectId: 'project-1',
+        parentId: undefined,
+        issueId: undefined,
+      });
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+
+      effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.addTask({
+          task,
+          workContextId: 'project-1',
+          workContextType: WorkContextType.PROJECT,
+          isAddToBacklog: false,
+          isAddToBottom: false,
+        }),
+      );
+
+      tick();
+
+      expect(createIssueSpy).toHaveBeenCalledWith('New Task', cfg);
+      expect(taskServiceSpy.update).toHaveBeenCalledWith(
+        'task-new',
+        jasmine.objectContaining({
+          issueId: 'ps-issue-1',
+          issueType: 'PLAINSPACE',
+          issueProviderId: 'provider-1',
+        }),
+      );
+    }));
+
+    it('should NOT create issue for a PLAINSPACE provider that is enabled but not yet configured (no spaceId/token)', fakeAsync(() => {
+      // selectEnabledIssueProviders filters on the isEnabled flag only, so a
+      // mid-connect provider (enabled, bound to the project, but spaceId/token
+      // still null) reaches the gate. It must NOT auto-create — otherwise every
+      // add POSTs an invalid create and error-snacks.
+      const createIssueSpy = jasmine.createSpy('createIssue').and.resolveTo({
+        issueId: 'ps-issue-1',
+        issueData: {},
+      });
+      const adapter = createMockAdapter({ createIssue: createIssueSpy });
+      adapterRegistry.register('PLAINSPACE', adapter);
+
+      const provider = createMockIssueProvider({
+        id: 'provider-1',
+        issueProviderKey: 'PLAINSPACE',
+        defaultProjectId: 'project-1',
+        spaceId: null,
+        token: null,
+      });
+
+      store.overrideSelector(selectEnabledIssueProviders, [provider]);
+      store.refreshState();
+
+      const task = createMockTask({
+        id: 'task-new',
+        title: 'New Task',
+        projectId: 'project-1',
+        issueId: undefined,
+      });
+
+      effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.addTask({
+          task,
+          workContextId: 'project-1',
+          workContextType: WorkContextType.PROJECT,
+          isAddToBacklog: false,
+          isAddToBottom: false,
+        }),
+      );
+
+      tick();
+
+      expect(createIssueSpy).not.toHaveBeenCalled();
+
+      adapterRegistry.unregister('PLAINSPACE');
     }));
 
     it('should not create issue when task has no projectId', fakeAsync(() => {

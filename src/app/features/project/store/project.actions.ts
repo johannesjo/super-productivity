@@ -31,7 +31,9 @@ export const addProjects = createAction(
 
 export const updateProject = createAction(
   '[Project] Update Project',
-  (projectProps: { project: Update<Project> }) => ({
+  // isSkipSnack: suppress the unconditional "Project updated" snack — used by
+  // flows that surface their own outcome (e.g. the conflict-review flip).
+  (projectProps: { project: Update<Project>; isSkipSnack?: boolean }) => ({
     ...projectProps,
     meta: {
       isPersistent: true,
@@ -88,6 +90,32 @@ export const archiveProject = createAction(
 
 export const unarchiveProject = createAction(
   '[Project] Unarchive Project',
+  (projectProps: { id: string }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.id,
+      opType: OpType.Update,
+    } satisfies PersistentActionMeta,
+  }),
+);
+
+export const completeProject = createAction(
+  '[Project] Complete Project',
+  (projectProps: { id: string; doneOn: number }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.id,
+      opType: OpType.Update, // Completing is an update (also flips isArchived)
+    } satisfies PersistentActionMeta,
+  }),
+);
+
+export const reopenProject = createAction(
+  '[Project] Reopen Project',
   (projectProps: { id: string }) => ({
     ...projectProps,
     meta: {

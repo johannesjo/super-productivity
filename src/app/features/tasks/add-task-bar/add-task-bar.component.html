@@ -4,114 +4,205 @@
   @blendInOut
 >
   <div class="input-section">
-    <input
-      #inputEl
-      class="main-input nr-of-btns-{{ nrOfRightBtns() }}"
-      [(ngModel)]="stateService.inputTxt"
-      [tabindex]="tabindex()"
-      [mention]="tagMentions$ | async"
-      [mentionConfig]="mentionCfg$ | async"
-      (listShownChange)="updateListShown($event)"
-      [matAutocomplete]="taskAutoCompleteEl"
-      [placeholder]="
-        isSearchMode()
-          ? (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH | translate)
-          : (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE | translate)
-      "
-      matInput
-      spellcheck="false"
-      (keydown)="onInputKeydown($event)"
-      (input)="onInputChange($event)"
-      (paste)="onPaste($event)"
-    />
+    <!-- Wrapper carries the vertical padding: cdkTextareaAutosize sizes the
+         textarea to rows*line-height and ignores its own padding, so the
+         breathing room lives here while the field grows by a line at a time. -->
+    <div class="main-input-wrap">
+      <div class="main-input-stack">
+        <!-- Mirror overlay: paints a background behind detected short-syntax
+             spans; its text is transparent and the textarea's text renders on
+             top, so typography must stay identical to .main-input. -->
+        <!-- Every segment is a whitespace-tight span: bare text nodes here
+             would pick up the template's own indentation as a literal space
+             (Angular collapses static whitespace around interpolations) and
+             shift the mirrored text out of sync with the textarea. -->
+        <div
+          #highlightEl
+          class="main-input-highlight"
+          aria-hidden="true"
+        >
+          @for (seg of highlightSegments(); track $index) {
+            <span [class.syntax-highlight]="!!seg.type">{{ seg.text }}</span>
+          }
+        </div>
+        <textarea
+          #inputEl
+          class="main-input"
+          [(ngModel)]="stateService.inputTxt"
+          [tabindex]="tabindex()"
+          [mention]="tagMentions$ | async"
+          [mentionConfig]="mentionCfg$ | async"
+          [mentionListTemplate]="mentionListTemplate"
+          (listShownChange)="updateListShown($event)"
+          [matAutocomplete]="taskAutoCompleteEl"
+          [placeholder]="
+            isSearchMode()
+              ? (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH | translate)
+              : (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE | translate)
+          "
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="1"
+          cdkAutosizeMaxRows="4"
+          rows="1"
+          spellcheck="false"
+          (keydown)="onInputKeydown($event)"
+          (input)="onInputChange($event)"
+          (scroll)="syncHighlightScroll()"
+          (paste)="onPaste($event)"
+        ></textarea>
+      </div>
+    </div>
 
     <div class="right-button-controls">
-      @if (stateService.inputTxt() && !isSearchMode()) {
-        <div class="separator-box">
-          <button
-            mat-icon-button
-            class="switch-add-to-btn e2e-add-task-submit"
-            (click)="addTask()"
-            type="submit"
-            [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TASK | translate"
-            matTooltipPosition="above"
-          >
-            <mat-icon>add</mat-icon>
-          </button>
-        </div>
+      <!-- Always in the layout so its space is reserved and the input width never
+           jumps; only shown while composing (visibility, not display). -->
+      <div
+        class="separator-box"
+        [class.is-invisible]="!isSubmitVisible()"
+      >
+        <button
+          mat-icon-button
+          class="e2e-add-task-submit add-task-submit-btn"
+          (click)="onSubmitBtnClick()"
+          type="submit"
+          [disabled]="!isSubmitVisible()"
+          [attr.aria-label]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TASK | translate"
+          [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TASK | translate"
+          matTooltipPosition="above"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      @if (currentProject()?.isEnableBacklog) {
+        @let backlogLabel =
+          isAddToBacklog()
+            ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TODAY | translate)
+            : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BACKLOG | translate);
+        <button
+          mat-icon-button
+          class="switch-add-to-btn"
+          (click)="toggleIsAddToBacklog()"
+          [attr.aria-label]="backlogLabel"
+          [matTooltip]="backlogLabel"
+          matTooltipPosition="above"
+        >
+          <mat-icon>{{ isAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Add-to-top/bottom and search toggles. They are prepended to the actions
+       row (create mode) or the search info row so they scroll together with the
+       rest of that row, instead of overlaying the input. -->
+  <ng-template #inlineActionControls>
+    <div class="inline-action-controls">
+      @let searchLabel =
+        isSearchMode()
+          ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_DISABLE_SEARCH | translate)
+          : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ENABLE_SEARCH | translate);
+      <button
+        mat-icon-button
+        class="search-toggle-btn"
+        [class.active]="isSearchMode()"
+        [attr.aria-pressed]="isSearchMode()"
+        (click)="toggleSearchMode()"
+        [attr.aria-label]="searchLabel"
+        [matTooltip]="searchLabel"
+        matTooltipPosition="above"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
+
+      <!-- Note toggle only makes sense while composing a task (the note field
+           lives in create mode), so it is hidden in search mode. -->
+      @if (!isSearchMode()) {
+        <button
+          mat-icon-button
+          class="note-toggle-btn"
+          data-test="add-task-bar-note-btn"
+          [class.active]="stateService.isNoteExpanded()"
+          [class.has-value]="!!stateService.noteTxt()"
+          [attr.aria-pressed]="stateService.isNoteExpanded()"
+          (click)="toggleNote()"
+          [attr.aria-label]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_NOTE | translate"
+          [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_NOTE | translate"
+          matTooltipPosition="above"
+        >
+          <!-- Filled bubble once a note has text, outline while empty — mirrors
+               the detail panel's has-notes / empty-notes icon states. -->
+          <mat-icon>{{
+            stateService.noteTxt() ? 'chat' : 'chat_bubble_outline'
+          }}</mat-icon>
+        </button>
       }
 
+      @let addToBottomLabel =
+        isAddToBottom()
+          ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TOP | translate)
+          : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BOTTOM | translate);
       <button
         mat-icon-button
         class="switch-add-to-bot-btn"
         (click)="toggleIsAddToBottom()"
-        [matTooltip]="
-          isAddToBottom()
-            ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TOP | translate)
-            : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BOTTOM | translate)
-        "
+        [attr.aria-label]="addToBottomLabel"
+        [matTooltip]="addToBottomLabel"
         matTooltipPosition="above"
       >
         <mat-icon
           >{{ isAddToBottom() ? 'vertical_align_bottom' : 'vertical_align_top' }}
         </mat-icon>
       </button>
-
-      @if (currentProject()?.isEnableBacklog) {
-        <button
-          mat-icon-button
-          class="switch-add-to-btn"
-          (click)="toggleIsAddToBacklog()"
-          [matTooltip]="
-            isAddToBacklog()
-              ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TODAY | translate)
-              : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BACKLOG | translate)
-          "
-          matTooltipPosition="above"
-        >
-          <mat-icon>{{ isAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
-        </button>
-      }
-
-      <button
-        mat-icon-button
-        class="search-toggle-btn"
-        [class.active]="isSearchMode()"
-        (click)="toggleSearchMode()"
-        [matTooltip]="
-          isSearchMode()
-            ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_DISABLE_SEARCH | translate)
-            : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ENABLE_SEARCH | translate)
-        "
-        matTooltipPosition="above"
-      >
-        <mat-icon>search</mat-icon>
-      </button>
     </div>
-  </div>
+  </ng-template>
 
   @if (isSearchMode()) {
-    @if (activatedIssueTask() && activatedIssueTask()!.issueType === undefined) {
-      <div class="add-issue-info-text bold">
-        <mat-icon>playlist_add</mat-icon>
-        {{
-          T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK
-            | translate: { taskTitle: activatedIssueTask()!.title }
-        }}
-      </div>
-    } @else {
-      <div class="add-issue-info-text">
-        <mat-icon>playlist_add</mat-icon>
-        {{ T.F.TASK.ADD_TASK_BAR.SEARCH_INFO_TEXT | translate }}
-      </div>
-    }
+    <div class="search-action-bar">
+      <ng-container [ngTemplateOutlet]="inlineActionControls"></ng-container>
+
+      @if (activatedIssueTask() && activatedIssueTask()!.issueType === undefined) {
+        <div class="add-issue-info-text bold">
+          <mat-icon>playlist_add</mat-icon>
+          {{
+            T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK
+              | translate: { taskTitle: activatedIssueTask()!.title }
+          }}
+        </div>
+      } @else {
+        <div class="add-issue-info-text">
+          <mat-icon>playlist_add</mat-icon>
+          {{ T.F.TASK.ADD_TASK_BAR.SEARCH_INFO_TEXT | translate }}
+        </div>
+      }
+    </div>
   } @else {
     <add-task-bar-actions
       [isHideTagBtn]="!!planForDay()"
       [isHideDueBtn]="!!planForDay()"
       (refocus)="focusInput()"
       (scheduleDialogOpenChange)="onScheduleDialogOpenChange($event)"
-    ></add-task-bar-actions>
+    >
+      <ng-container [ngTemplateOutlet]="inlineActionControls"></ng-container>
+    </add-task-bar-actions>
+
+    @if (stateService.isNoteExpanded()) {
+      <div
+        class="note-input-section"
+        @expandFade
+      >
+        <textarea
+          #noteEl
+          class="note-input"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="3"
+          cdkAutosizeMaxRows="8"
+          [(ngModel)]="stateService.noteTxt"
+          [placeholder]="T.F.TASK.ADD_TASK_BAR.NOTE_PLACEHOLDER | translate"
+          (keydown)="onNoteKeydown($event)"
+        ></textarea>
+      </div>
+    }
   }
 </div>
 
@@ -136,16 +227,32 @@
       } @else if (!item.ctx) {
         <mat-icon>library_books</mat-icon>
       }
+      <span [innerHTML]="item?.titleHighlighted || item?.title"></span>
       @if (item.ctx) {
         <tag
           [tag]="item.ctx"
           [isHideTitle]="isHideTagTitles()"
         ></tag>
       }
-      <span [innerHTML]="item?.titleHighlighted || item?.title"></span>
     </mat-option>
   }
 </mat-autocomplete>
+
+<ng-template
+  #mentionListTemplate
+  let-item="item"
+>
+  @if (item.id) {
+    <select-option-row
+      [title]="item.title"
+      [icon]="item.icon"
+      [color]="item.color"
+      [folderPath]="getFolderPath(item.id)"
+    ></select-option-row>
+  } @else {
+    {{ item.title }}
+  }
+</ng-template>
 
 @if (isSearchLoading()) {
   <div class="spinner">

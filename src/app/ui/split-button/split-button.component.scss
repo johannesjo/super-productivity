@@ -1,0 +1,6 @@
+// Joined treatment (squared inner corners, shared border, compact centered
+// trigger) lives in the shared layer so it can pierce Material's internal
+// elements: styles/components/split-button.scss (.g-split-btn).
+:host {
+  display: inline-flex;
+}

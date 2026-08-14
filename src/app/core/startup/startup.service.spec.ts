@@ -5,7 +5,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { LocalBackupService } from '../../imex/local-backup/local-backup.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { SnackService } from '../snack/snack.service';
-import { MatDialog } from '@angular/material/dialog';
 import { PluginService } from '../../plugins/plugin.service';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { BannerService } from '../banner/banner.service';
@@ -22,12 +21,14 @@ import { LS } from '../persistence/storage-keys.const';
 import { provideMockStore } from '@ngrx/store/testing';
 import { selectSyncConfig } from '../../features/config/store/global-config.reducer';
 import { selectEnabledIssueProviders } from '../../features/issue/store/issue-provider.selectors';
-import { getDbDateStr } from '../../util/get-db-date-str';
+import { RatePromptService } from '../../features/dialog-please-rate/rate-prompt.service';
+import { JiraElectronBridgeService } from '../../features/issue/providers/jira/jira-electron-bridge.service';
 
 describe('StartupService', () => {
   let service: StartupService;
-  let matDialog: jasmine.SpyObj<MatDialog>;
   let pluginService: jasmine.SpyObj<PluginService>;
+  let ratePromptService: jasmine.SpyObj<RatePromptService>;
+  let jiraElectronBridge: jasmine.SpyObj<JiraElectronBridgeService>;
 
   beforeEach(() => {
     // Mock localStorage
@@ -73,11 +74,13 @@ describe('StartupService', () => {
     });
 
     const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
-    const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    matDialogSpy.open.and.returnValue({ afterClosed: () => of(undefined) });
+    const ratePromptServiceSpy = jasmine.createSpyObj('RatePromptService', ['init']);
 
     const pluginServiceSpy = jasmine.createSpyObj('PluginService', ['initializePlugins']);
     pluginServiceSpy.initializePlugins.and.returnValue(Promise.resolve());
+    const jiraElectronBridgeSpy = jasmine.createSpyObj('JiraElectronBridgeService', [
+      'initialize',
+    ]);
 
     const syncWrapperServiceSpy = jasmine.createSpyObj('SyncWrapperService', [
       'isSyncInProgressSync',
@@ -128,8 +131,9 @@ describe('StartupService', () => {
         { provide: LocalBackupService, useValue: localBackupServiceSpy },
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
         { provide: SnackService, useValue: snackServiceSpy },
-        { provide: MatDialog, useValue: matDialogSpy },
+        { provide: RatePromptService, useValue: ratePromptServiceSpy },
         { provide: PluginService, useValue: pluginServiceSpy },
+        { provide: JiraElectronBridgeService, useValue: jiraElectronBridgeSpy },
         { provide: SyncWrapperService, useValue: syncWrapperServiceSpy },
         { provide: BannerService, useValue: bannerServiceSpy },
         { provide: UiHelperService, useValue: uiHelperServiceSpy },
@@ -152,13 +156,23 @@ describe('StartupService', () => {
     });
 
     service = TestBed.inject(StartupService);
-    matDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
     pluginService = TestBed.inject(PluginService) as jasmine.SpyObj<PluginService>;
+    ratePromptService = TestBed.inject(
+      RatePromptService,
+    ) as jasmine.SpyObj<RatePromptService>;
+    jiraElectronBridge = TestBed.inject(
+      JiraElectronBridgeService,
+    ) as jasmine.SpyObj<JiraElectronBridgeService>;
   });
 
   describe('init', () => {
     // Note: Full init() testing requires complex BroadcastChannel mocking
     // These tests cover the testable parts
+
+    it('claims the Jira Electron capability before deferred plugin initialization', () => {
+      expect(jiraElectronBridge.initialize).toHaveBeenCalledOnceWith();
+      expect(pluginService.initializePlugins).not.toHaveBeenCalled();
+    });
 
     it('should check for stray backups during initialization', fakeAsync(() => {
       // Mock BroadcastChannel to prevent multi-instance blocking
@@ -177,6 +191,9 @@ describe('StartupService', () => {
       tick(200); // Wait for single instance check
 
       flush();
+
+      // Deferred init hands the rating prompt off to RatePromptService.
+      expect(ratePromptService.init).toHaveBeenCalled();
 
       // Restore
       (window as any).BroadcastChannel = originalBroadcastChannel;
@@ -219,106 +236,56 @@ describe('StartupService', () => {
     });
   });
 
-  describe('_handleAppStartRating (private, tested via init)', () => {
-    it('should increment app start count on new day', () => {
-      (localStorage.getItem as jasmine.Spy).and.callFake((key: string) => {
-        if (key === LS.APP_START_COUNT) return '5';
-        if (key === LS.APP_START_COUNT_LAST_START_DAY) return '2026-01-04';
-        return null;
+  describe('raw rebuild recovery', () => {
+    const callRecoveryCheck = async (): Promise<void> => {
+      await (
+        service as unknown as {
+          _offerInterruptedRebuildRecoveryIfNeeded: () => Promise<void>;
+        }
+      )._offerInterruptedRebuildRecoveryIfNeeded();
+    };
+
+    it('should re-offer Undo after reload when a completed recovery token exists', async () => {
+      const opLogStore = jasmine.createSpyObj('OperationLogStoreService', [
+        'isRawRebuildIncomplete',
+        'loadRawRebuildRecovery',
+      ]);
+      opLogStore.isRawRebuildIncomplete.and.resolveTo(false);
+      opLogStore.loadRawRebuildRecovery.and.resolveTo({
+        backupId: 'backup-4242',
+        backupSavedAt: 4242,
+        completedAt: 5000,
+      });
+      const syncService = jasmine.createSpyObj('OperationLogSyncService', [
+        'offerInterruptedRebuildRecovery',
+      ]);
+      syncService.offerInterruptedRebuildRecovery.and.resolveTo();
+      Object.assign(service as object, {
+        _opLogStore: opLogStore,
+        _injector: { get: () => syncService },
       });
 
-      (service as any)._handleAppStartRating();
+      await callRecoveryCheck();
 
-      expect(localStorage.setItem).toHaveBeenCalledWith(LS.APP_START_COUNT, '6');
+      expect(syncService.offerInterruptedRebuildRecovery).toHaveBeenCalled();
     });
 
-    it('should not double-increment count on the dialog trigger day', () => {
-      (localStorage.getItem as jasmine.Spy).and.callFake((key: string) => {
-        if (key === LS.APP_START_COUNT) return '31';
-        if (key === LS.APP_START_COUNT_LAST_START_DAY) return '2026-01-04';
-        return null;
+    it('should not instantiate sync recovery when no marker exists', async () => {
+      const opLogStore = jasmine.createSpyObj('OperationLogStoreService', [
+        'isRawRebuildIncomplete',
+        'loadRawRebuildRecovery',
+      ]);
+      opLogStore.isRawRebuildIncomplete.and.resolveTo(false);
+      opLogStore.loadRawRebuildRecovery.and.resolveTo(null);
+      const get = jasmine.createSpy('get');
+      Object.assign(service as object, {
+        _opLogStore: opLogStore,
+        _injector: { get },
       });
 
-      (service as any)._handleAppStartRating();
+      await callRecoveryCheck();
 
-      const incrementCalls = (localStorage.setItem as jasmine.Spy).calls
-        .allArgs()
-        .filter(([k]) => k === LS.APP_START_COUNT);
-      expect(incrementCalls.length).toBe(1);
-      expect(incrementCalls[0][1]).toBe('32');
-    });
-
-    it('should show rating dialog at the day-32 tier on a fresh state', () => {
-      (localStorage.getItem as jasmine.Spy).and.callFake((key: string) => {
-        if (key === LS.APP_START_COUNT) return '31';
-        if (key === LS.APP_START_COUNT_LAST_START_DAY) return '2026-01-04';
-        return null;
-      });
-
-      (service as any)._handleAppStartRating();
-
-      expect(matDialog.open).toHaveBeenCalled();
-    });
-
-    it('should show rating dialog at the day-96 tier when previously shown at day 32', () => {
-      (localStorage.getItem as jasmine.Spy).and.callFake((key: string) => {
-        if (key === LS.APP_START_COUNT) return '95';
-        if (key === LS.APP_START_COUNT_LAST_START_DAY) return '2026-01-04';
-        if (key === LS.RATE_DIALOG_STATE)
-          return JSON.stringify({ lastShownAppStartDay: 32, permanentOptOut: false });
-        return null;
-      });
-
-      (service as any)._handleAppStartRating();
-
-      expect(matDialog.open).toHaveBeenCalled();
-    });
-
-    it('should not show rating dialog if already shown at the current tier', () => {
-      (localStorage.getItem as jasmine.Spy).and.callFake((key: string) => {
-        if (key === LS.APP_START_COUNT) return '49';
-        if (key === LS.APP_START_COUNT_LAST_START_DAY) return '2026-01-04';
-        if (key === LS.RATE_DIALOG_STATE)
-          return JSON.stringify({ lastShownAppStartDay: 32, permanentOptOut: false });
-        return null;
-      });
-
-      (service as any)._handleAppStartRating();
-
-      expect(matDialog.open).not.toHaveBeenCalled();
-    });
-
-    it('should not show rating dialog when permanentOptOut is true', () => {
-      (localStorage.getItem as jasmine.Spy).and.callFake((key: string) => {
-        if (key === LS.APP_START_COUNT) return '95';
-        if (key === LS.APP_START_COUNT_LAST_START_DAY) return '2026-01-04';
-        if (key === LS.RATE_DIALOG_STATE)
-          return JSON.stringify({ lastShownAppStartDay: 32, permanentOptOut: true });
-        return null;
-      });
-
-      (service as any)._handleAppStartRating();
-
-      expect(matDialog.open).not.toHaveBeenCalled();
-    });
-
-    it('should not increment count if same day', () => {
-      const todayStr = getDbDateStr();
-      (localStorage.getItem as jasmine.Spy).and.callFake((key: string) => {
-        if (key === LS.APP_START_COUNT) return '10';
-        if (key === LS.APP_START_COUNT_LAST_START_DAY) return todayStr;
-        return null;
-      });
-
-      (service as any)._handleAppStartRating();
-
-      // Should not have set a new count since it's the same day
-      // (the method only sets when lastStartDay !== todayStr)
-      const setItemCalls = (localStorage.setItem as jasmine.Spy).calls.all();
-      const countSetCalls = setItemCalls.filter(
-        (call) => call.args[0] === LS.APP_START_COUNT,
-      );
-      expect(countSetCalls.length).toBe(0);
+      expect(get).not.toHaveBeenCalled();
     });
   });
 

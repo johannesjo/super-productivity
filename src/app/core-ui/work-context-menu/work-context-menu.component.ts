@@ -16,7 +16,20 @@ import { first, map } from 'rxjs/operators';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 
-import { ProjectService } from '../../features/project/project.service';
+import {
+  ProjectCompletionInfo,
+  ProjectService,
+} from '../../features/project/project.service';
+import { Project } from '../../features/project/project.model';
+import {
+  getProjectCompletionStats,
+  ProjectCompletionStats,
+} from '../../features/project/project-completion-stats.util';
+import { DialogProjectCompleteComponent } from '../../features/project/dialog-project-complete/dialog-project-complete.component';
+import {
+  DialogCompleteResolveTasksComponent,
+  ResolveUnfinishedTasksChoice,
+} from '../../features/project/dialog-complete-resolve-tasks/dialog-complete-resolve-tasks.component';
 import { SectionService } from '../../features/section/section.service';
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import { MatMenuItem } from '@angular/material/menu';
@@ -31,7 +44,11 @@ import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import type { WorkContextSettingsDialogData } from '../../features/work-context/dialog-work-context-settings/dialog-work-context-settings.component';
+import { DateService } from '../../core/date/date.service';
+import { openWorkContextSettingsDialog } from '../../features/work-context/dialog-work-context-settings/open-work-context-settings-dialog';
+import { Log } from '../../core/log';
+import { PlainspaceShareService } from '../../features/issue/providers/plainspace/plainspace-share.service';
+import { selectIsProjectSharedOnPlainspace } from '../../features/issue/store/issue-provider.selectors';
 
 @Component({
   selector: 'work-context-menu',
@@ -52,6 +69,8 @@ export class WorkContextMenuComponent implements OnInit {
   private _shareService = inject(ShareService);
   private _cd = inject(ChangeDetectorRef);
   private _store = inject(Store);
+  private _dateService = inject(DateService);
+  private _plainspaceShareService = inject(PlainspaceShareService);
 
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
@@ -61,6 +80,8 @@ export class WorkContextMenuComponent implements OnInit {
   TODAY_TAG_ID: string = TODAY_TAG.id as string;
   isForProject: boolean = true;
   isArchived$: Observable<boolean> = of(false);
+  isDone$: Observable<boolean> = of(false);
+  isSharedOnPlainspace$: Observable<boolean> = of(false);
   base: string = 'project';
   shareSupport: ShareSupport = 'none';
 
@@ -76,6 +97,12 @@ export class WorkContextMenuComponent implements OnInit {
       this.isArchived$ = this._projectService
         .getByIdLive$(this.contextId)
         .pipe(map((project) => !!project?.isArchived));
+      this.isDone$ = this._projectService
+        .getByIdLive$(this.contextId)
+        .pipe(map((project) => !!project?.isDone));
+      this.isSharedOnPlainspace$ = this._store.select(
+        selectIsProjectSharedOnPlainspace(this.contextId),
+      );
     }
     const support = await this._shareService.getShareSupport();
     this._setShareSupport(support);
@@ -131,37 +158,161 @@ export class WorkContextMenuComponent implements OnInit {
     }
   }
 
-  async archiveProject(): Promise<void> {
+  async completeProject(): Promise<void> {
     const project = await firstValueFrom(
       this._projectService.getByIdOnce$(this.contextId),
     );
     if (!project) {
       return;
     }
-    const isConfirmed = await firstValueFrom(
+
+    const info = await this._getCompletionInfoOrNotify();
+    if (!info) {
+      return;
+    }
+
+    let resolution: ResolveUnfinishedTasksChoice | undefined;
+    // Auto-archiving would otherwise bury live, undone work — ask first.
+    if (info.unfinishedTasks.length) {
+      resolution = await this._promptResolveUnfinishedTasks(
+        project.title,
+        info.unfinishedTasks.length,
+      );
+      if (!resolution) {
+        return;
+      }
+    }
+
+    if (!(await this._confirmCompletion(project.title))) {
+      return;
+    }
+
+    // Resolve unfinished work via the normal per-task actions BEFORE completing,
+    // so every downstream effect (issue sync, reminders, repeat-cfg) and
+    // per-entity conflict detection fires naturally. Completion itself is then a
+    // plain single-entity project flag flip.
+    await this._applyResolution(resolution, info);
+
+    // Recompute after resolution so the stats reflect the final task list.
+    let statsInfo = info;
+    if (resolution) {
+      const refreshed = await this._getCompletionInfoOrNotify();
+      if (!refreshed) {
+        return;
+      }
+      statsInfo = refreshed;
+    }
+
+    const doneOn = this._dateService.getLogicalTodayDate().getTime();
+    const stats = getProjectCompletionStats(
+      statsInfo.topLevelTasks,
+      statsInfo.allTasks,
+      doneOn,
+    );
+
+    const activeId = this._workContextService.activeWorkContextId;
+    this._projectService.complete(this.contextId, doneOn);
+
+    // Navigate away BEFORE opening the celebration: MatDialog's closeOnNavigation
+    // (default true) would otherwise dismiss the dialog the moment we leave the
+    // now-completed project's route.
+    if (activeId === this.contextId) {
+      await this._router.navigateByUrl('/');
+    }
+
+    this._openCelebrationDialog(project, stats);
+  }
+
+  private async _applyResolution(
+    resolution: ResolveUnfinishedTasksChoice | undefined,
+    info: ProjectCompletionInfo,
+  ): Promise<void> {
+    if (resolution === 'inbox') {
+      await this._projectService.moveTasksToInbox(info.topLevelTasksWithUnfinishedWork);
+    } else if (resolution === 'markDone') {
+      await this._projectService.markTasksDone(info.unfinishedTasks);
+    }
+  }
+
+  private _openCelebrationDialog(project: Project, stats: ProjectCompletionStats): void {
+    // Fullscreen sizing lives in the .project-complete-fullscreen-dialog
+    // panelClass (handles dvh + mobile safe-areas); don't duplicate it here.
+    this._matDialog.open(DialogProjectCompleteComponent, {
+      restoreFocus: true,
+      panelClass: 'project-complete-fullscreen-dialog',
+      ariaLabelledBy: 'project-complete-title',
+      data: { project, stats },
+    });
+  }
+
+  private async _getCompletionInfoOrNotify(): Promise<ProjectCompletionInfo | null> {
+    try {
+      return await this._projectService.getCompletionInfo(this.contextId);
+    } catch (err) {
+      Log.err(err);
+      this._snackService.open({ type: 'ERROR', msg: T.F.PROJECT.COMPLETE.ERROR });
+      return null;
+    }
+  }
+
+  private _promptResolveUnfinishedTasks(
+    title: string,
+    nr: number,
+  ): Promise<ResolveUnfinishedTasksChoice | undefined> {
+    return firstValueFrom(
+      this._matDialog
+        .open(DialogCompleteResolveTasksComponent, {
+          restoreFocus: true,
+          data: { title, nr },
+        })
+        .afterClosed(),
+    );
+  }
+
+  private _confirmCompletion(title: string): Promise<boolean> {
+    return firstValueFrom(
       this._matDialog
         .open(DialogConfirmComponent, {
           restoreFocus: true,
           data: {
-            message: T.F.PROJECT.D_CONFIRM_ARCHIVE.MSG,
-            okTxt: T.F.PROJECT.D_CONFIRM_ARCHIVE.OK,
-            translateParams: { title: project.title },
+            title: T.F.PROJECT.COMPLETE.CONFIRM.TITLE,
+            titleIcon: 'check_circle',
+            message: T.F.PROJECT.COMPLETE.CONFIRM.MSG,
+            translateParams: { title },
+            okTxt: T.MH.COMPLETE_PROJECT,
           },
         })
         .afterClosed(),
     );
-    if (!isConfirmed) {
-      return;
-    }
-    const activeId = this._workContextService.activeWorkContextId;
-    this._projectService.archive(this.contextId);
-    if (activeId === this.contextId) {
-      await this._router.navigateByUrl('/');
-    }
   }
 
   async restoreProject(): Promise<void> {
-    await this._projectService.unarchive(this.contextId);
+    const project = await firstValueFrom(
+      this._projectService.getByIdOnce$(this.contextId),
+    );
+    if (!project) {
+      return;
+    }
+    if (project.isDone) {
+      this._projectService.reopen(this.contextId, project);
+    } else {
+      await this._projectService.unarchive(this.contextId);
+    }
+  }
+
+  async shareProjectOnPlainspace(): Promise<void> {
+    const project = await firstValueFrom(
+      this._projectService.getByIdOnce$(this.contextId),
+    );
+    if (!project) {
+      return;
+    }
+    // Self-contained: prompts for sign-in + space, and surfaces its own
+    // success/failure snack. Never rejects, so no try/catch needed here.
+    await this._plainspaceShareService.shareProjectOnPlainspace(
+      project.id,
+      project.title,
+    );
   }
 
   async duplicateProject(): Promise<void> {
@@ -173,7 +324,7 @@ export class WorkContextMenuComponent implements OnInit {
         msg: T.GLOBAL_SNACK.DUPLICATE_PROJECT_ERROR,
         type: 'ERROR',
       });
-      console.error(err);
+      Log.err(err);
     }
   }
 
@@ -306,23 +457,20 @@ export class WorkContextMenuComponent implements OnInit {
         : await firstValueFrom(
             this._tagService.getTagById$(this.contextId).pipe(first()),
           );
+      if (!entity) {
+        throw new Error(`Unable to find work context ${this.contextId}`);
+      }
 
-      const { DialogWorkContextSettingsComponent } =
-        await import('../../features/work-context/dialog-work-context-settings/dialog-work-context-settings.component');
-      this._matDialog.open(DialogWorkContextSettingsComponent, {
-        restoreFocus: true,
-        backdropClass: 'cdk-overlay-transparent-backdrop',
-        data: {
-          isProject: this.isForProject,
-          entity,
-        } as WorkContextSettingsDialogData,
+      await openWorkContextSettingsDialog(this._matDialog, {
+        isProject: this.isForProject,
+        entity,
       });
     } catch (err) {
       this._snackService.open({
         msg: T.GLOBAL_SNACK.OPEN_SETTINGS_ERROR,
         type: 'ERROR',
       });
-      console.error(err);
+      Log.err(err);
     }
   }
 

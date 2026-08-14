@@ -4,7 +4,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { LocalBackupService } from '../../imex/local-backup/local-backup.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { SnackService } from '../snack/snack.service';
-import { MatDialog } from '@angular/material/dialog';
 import { PluginService } from '../../plugins/plugin.service';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { BannerService } from '../banner/banner.service';
@@ -15,19 +14,12 @@ import { IS_ELECTRON } from '../../app.constants';
 import { Log } from '../log';
 import { T } from '../../t.const';
 import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
+import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
 import { LegacyPfDbService } from '../persistence/legacy-pf-db.service';
 import { BannerId } from '../banner/banner.model';
 import { isOnline$ } from '../../util/is-online';
 import { LS } from '../persistence/storage-keys.const';
-import { getDbDateStr } from '../../util/get-db-date-str';
-import { DialogPleaseRateComponent } from '../../features/dialog-please-rate/dialog-please-rate.component';
-import {
-  applyRateDialogResult,
-  loadRateDialogState,
-  saveRateDialogState,
-  shouldShowRateDialog,
-} from '../../features/dialog-please-rate/rate-dialog-state';
-import { getMsSinceLastCriticalError } from '../../util/critical-error-signal';
+import { RatePromptService } from '../../features/dialog-please-rate/rate-prompt.service';
 import { map, switchMap, take } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -35,7 +27,6 @@ import { selectSyncConfig } from '../../features/config/store/global-config.redu
 import { selectEnabledIssueProviders } from '../../features/issue/store/issue-provider.selectors';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
-import { IpcRendererEvent } from 'electron';
 import { environment } from '../../../environments/environment';
 import { TrackingReminderService } from '../../features/tracking-reminder/tracking-reminder.service';
 import { CapacitorPlatformService } from '../platform/capacitor-platform.service';
@@ -44,6 +35,8 @@ import { DataInitStateService } from '../data-init/data-init-state.service';
 import { OnboardingHintService } from '../../features/onboarding/onboarding-hint.service';
 import { LocalRestApiHandlerService } from '../electron/local-rest-api-handler.service';
 import { CustomThemeService } from '../theme/custom-theme.service';
+import { UpdateCheckService } from '../update-check/update-check.service';
+import { JiraElectronBridgeService } from '../../features/issue/providers/jira/jira-electron-bridge.service';
 
 const w = window as Window & { productivityTips?: string[][]; randomIndex?: number };
 
@@ -67,7 +60,7 @@ export class StartupService {
   private _localBackupService = inject(LocalBackupService);
   private _globalConfigService = inject(GlobalConfigService);
   private _snackService = inject(SnackService);
-  private _matDialog = inject(MatDialog);
+  private _ratePromptService = inject(RatePromptService);
   private _pluginService = inject(PluginService);
   private _syncWrapperService = inject(SyncWrapperService);
   private _bannerService = inject(BannerService);
@@ -75,6 +68,7 @@ export class StartupService {
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
   private _projectService = inject(ProjectService);
   private _trackingReminderService = inject(TrackingReminderService);
+  private _updateCheckService = inject(UpdateCheckService);
   private _opLogStore = inject(OperationLogStoreService);
   private _legacyPfDb = inject(LegacyPfDbService);
   private _store = inject(Store);
@@ -82,12 +76,21 @@ export class StartupService {
   private _dataInitStateService = inject(DataInitStateService);
   private _injector = inject(Injector);
   private _customThemeService = inject(CustomThemeService);
+  private _jiraElectronBridge = inject(JiraElectronBridgeService);
 
   constructor() {
+    // Claim the privileged Jira IPC capability here, in trusted startup code,
+    // before any untrusted renderer code (plugins) is loaded. This one-shot
+    // ordering — not the main-frame IPC check — is the real security boundary:
+    // same-origin plugin iframes can reach window.top.ea, so the frame check
+    // alone is bypassable. Once consumed, consumeJiraApi() returns null to
+    // everyone else. Do NOT move plugin/3rd-party loading before this call.
+    this._jiraElectronBridge.initialize();
+
     // Initialize electron error handler in an effect
     if (IS_ELECTRON) {
       effect(() => {
-        window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
+        window.ea.on(IPC.ERROR, (...args: unknown[]) => {
           const data = args[0] as {
             error: unknown;
             stack: unknown;
@@ -136,6 +139,7 @@ export class StartupService {
     // deferred init
     window.setTimeout(async () => {
       this._trackingReminderService.init();
+      this._updateCheckService.init();
       this._checkAvailableStorage();
       this._initOfflineBanner();
 
@@ -173,8 +177,11 @@ export class StartupService {
         }
       }
 
-      this._handleAppStartRating();
+      this._ratePromptService.init();
       await this._initPlugins();
+      // Last in the deferred body: the snack it may open is persistent and the
+      // single snack slot must not be reclaimed by the productivity tip above.
+      await this._offerInterruptedRebuildRecoveryIfNeeded();
     }, DEFERRED_INIT_DELAY_MS);
 
     if (IS_ELECTRON) {
@@ -227,26 +234,66 @@ export class StartupService {
       // If no state cache exists, check if this is truly a fresh instance
       // or if there's legacy v16 data waiting to be migrated
       if (!stateCache) {
-        // Check for legacy data - if it exists, don't show restore dialog
-        // The migration service will handle the legacy data
-        let hasLegacyData = false;
-        try {
-          hasLegacyData = await this._legacyPfDb.hasUsableEntityData();
-        } catch (e) {
-          // If legacy check fails, it means the database exists but can't be read
-          // The migration service will handle this error properly
-          Log.warn('StartupService: Legacy data check failed, skipping backup prompt', e);
-          hasLegacyData = true; // Assume there might be data, don't show backup dialog
-        }
+        // #7901: only consider a backup restore when the op-log is ALSO empty. A
+        // null state cache alone just means "no snapshot saved yet" — the op-log
+        // may still hold real operations the hydrator is concurrently replaying.
+        // Restoring then would be unnecessary (the hydrator loads that data) and
+        // would race the hydrator's replay against importCompleteBackup's
+        // destructive op-log replacement. Gating on an empty op-log restricts
+        // restore to a genuinely blank store (fresh install / evicted storage),
+        // where the hydrator has nothing to replay.
+        const lastSeq = await this._opLogStore.getLastSeq();
+        if (lastSeq === 0) {
+          // Check for legacy data - if it exists, don't show restore dialog
+          // The migration service will handle the legacy data
+          let hasLegacyData = false;
+          try {
+            hasLegacyData = await this._legacyPfDb.hasUsableEntityData();
+          } catch (e) {
+            // If legacy check fails, it means the database exists but can't be read
+            // The migration service will handle this error properly
+            Log.warn(
+              'StartupService: Legacy data check failed, skipping backup prompt',
+              e,
+            );
+            hasLegacyData = true; // Assume there might be data, don't show backup dialog
+          }
 
-        // Only offer to restore from backup if this is truly a fresh install
-        // (no state cache AND no legacy data)
-        if (!hasLegacyData) {
-          await this._localBackupService.askForFileStoreBackupIfAvailable();
+          // Only offer to restore from backup if this is truly a fresh install
+          // (no state cache, no op-log, and no legacy data)
+          if (!hasLegacyData) {
+            await this._localBackupService.askForFileStoreBackupIfAvailable();
+          }
         }
       }
       // trigger backup init after
       this._localBackupService.init();
+    }
+  }
+
+  /**
+   * An interrupted USE_REMOTE rebuild leaves the user booting into the rebuild
+   * baseline instead of their data. Sync (when it runs) resumes the rebuild by
+   * itself — but when it cannot (offline, or the user disabled sync after
+   * finding the app "emptied" by the crash), the pre-replace backup would have
+   * no visible entry point. Surfaces the persistent restore snack in that case.
+   */
+  private async _offerInterruptedRebuildRecoveryIfNeeded(): Promise<void> {
+    try {
+      const [isIncomplete, completedRecovery] = await Promise.all([
+        this._opLogStore.isRawRebuildIncomplete(),
+        this._opLogStore.loadRawRebuildRecovery(),
+      ]);
+      if (isIncomplete || completedRecovery) {
+        await this._injector
+          .get(OperationLogSyncService)
+          .offerInterruptedRebuildRecovery();
+      }
+    } catch (err) {
+      Log.err({
+        stage: 'interrupted-rebuild-recovery-check',
+        error: (err as Error)?.message,
+      });
     }
   }
 
@@ -419,33 +466,6 @@ export class StartupService {
         });
       }
     }
-  }
-
-  private _handleAppStartRating(): void {
-    const lastStartDay = localStorage.getItem(LS.APP_START_COUNT_LAST_START_DAY);
-    const todayStr = getDbDateStr();
-    let appStarts = +(localStorage.getItem(LS.APP_START_COUNT) || 0);
-    if (lastStartDay !== todayStr) {
-      appStarts += 1;
-      localStorage.setItem(LS.APP_START_COUNT, appStarts.toString());
-      localStorage.setItem(LS.APP_START_COUNT_LAST_START_DAY, todayStr);
-    }
-
-    const state = loadRateDialogState();
-    if (!shouldShowRateDialog(state, appStarts, getMsSinceLastCriticalError())) {
-      return;
-    }
-    this._matDialog
-      .open(DialogPleaseRateComponent)
-      .afterClosed()
-      .subscribe((result) => {
-        const next = applyRateDialogResult(
-          loadRateDialogState(),
-          result ?? null,
-          appStarts,
-        );
-        saveRateDialogState(next);
-      });
   }
 
   private async _initPlugins(): Promise<void> {

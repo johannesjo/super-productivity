@@ -10,7 +10,10 @@ import { CalendarIntegrationEvent } from '../calendar-integration.model';
 import { isCalenderEventDue } from '../is-calender-event-due';
 import { CalendarIntegrationService } from '../calendar-integration.service';
 import { BannerId } from '../../../core/banner/banner.model';
-import { selectTaskByIssueId } from '../../tasks/store/task.selectors';
+import {
+  selectTaskByIssueId,
+  selectTaskFeatureState,
+} from '../../tasks/store/task.selectors';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
 import { T } from '../../../t.const';
 import { isValidUrl } from '../../../util/is-valid-url';
@@ -50,6 +53,7 @@ export class CalendarIntegrationEffects {
   private _translateStore = inject(TranslateStore);
   private _syncTriggerService = inject(SyncTriggerService);
   private _hydrationStateService = inject(HydrationStateService);
+  private _taskState = this._store.selectSignal(selectTaskFeatureState);
 
   /**
    * Poll external calendar providers for events and auto-import them as tasks.
@@ -101,19 +105,33 @@ export class CalendarIntegrationEffects {
                 switchMap((allEventsToday) =>
                   timer(0, CHECK_TO_SHOW_INTERVAL).pipe(
                     tap(async () => {
-                      if (
+                      const isAutoImportAllowed =
                         calProvider.isAutoImportForCurrentDay &&
                         this._syncTriggerService.isInitialSyncDoneSync() &&
-                        !this._hydrationStateService.isInSyncWindow()
-                      ) {
-                        const allIssueIds =
-                          await this._taskService.getAllIssueIdsForProviderEverywhere(
-                            calProvider.id,
-                          );
+                        !this._hydrationStateService.isInSyncWindow();
+                      let allIssueIdsForProvider: string[] | undefined;
+                      const getAllIssueIdsForProvider = async (): Promise<string[]> => {
+                        if (!allIssueIdsForProvider) {
+                          allIssueIdsForProvider =
+                            await this._taskService.getAllIssueIdsForProviderEverywhere(
+                              calProvider.id,
+                            );
+                        }
+                        return allIssueIdsForProvider;
+                      };
+
+                      if (isAutoImportAllowed) {
+                        const allIssueIds = await getAllIssueIdsForProvider();
                         // Re-check after the IDB read: a sync window can open
                         // during the await (e.g. tab resume → openSyncWindow()),
                         // and importing now would still emit a duplicate CRT op.
                         if (!this._hydrationStateService.isInSyncWindow()) {
+                          const dismissedIdsByProvider =
+                            this._taskState()
+                              .dismissedCalendarAutoImportEventIdsByProvider;
+                          const dismissedEventIds = new Set(
+                            dismissedIdsByProvider?.[calProvider.id] ?? [],
+                          );
                           allEventsToday.forEach((calEv) => {
                             if (
                               passesCalendarEventRegexFilter(
@@ -122,7 +140,10 @@ export class CalendarIntegrationEffects {
                                 calProvider.filterExcludeRegex,
                               ) &&
                               this._dateService.isToday(calEv.start) &&
-                              !matchesAnyCalendarEventId(calEv, allIssueIds)
+                              !matchesAnyCalendarEventId(calEv, allIssueIds) &&
+                              !getCalendarEventIdCandidates(calEv).some((id) =>
+                                dismissedEventIds.has(id),
+                              )
                             ) {
                               this._issueService.addTaskFromIssue({
                                 issueProviderKey:
@@ -131,13 +152,17 @@ export class CalendarIntegrationEffects {
                                 issueDataReduced: calEv,
                                 // from this context we should always add to the default project rather than current context
                                 isForceDefaultProject: true,
+                                // Automatic auto-import fires regardless of what
+                                // the user is viewing; don't stamp the incidentally
+                                // active tag onto the event task (#8673).
+                                isAutoImport: true,
                               });
                             }
                           });
                         }
                       }
 
-                      const eventsToShowBannerFor = allEventsToday.filter(
+                      const dueEventsToShowBannerFor = allEventsToday.filter(
                         (calEv) =>
                           passesCalendarEventRegexFilter(
                             calEv,
@@ -152,6 +177,16 @@ export class CalendarIntegrationEffects {
                           ) &&
                           !calEv.isReferenceCalendar,
                       );
+                      const eventsToShowBannerFor: CalendarIntegrationEvent[] = [];
+                      const archivedLinkedEvents: CalendarIntegrationEvent[] = [];
+                      for (const calEv of dueEventsToShowBannerFor) {
+                        if (await this._isLinkedToArchivedTask(calEv, calProvider)) {
+                          archivedLinkedEvents.push(calEv);
+                        } else {
+                          eventsToShowBannerFor.push(calEv);
+                        }
+                      }
+                      this._removeArchivedLinkedBanners(archivedLinkedEvents);
                       eventsToShowBannerFor.forEach((calEv) => {
                         this._addEvToShow(calEv, calProvider);
                       });
@@ -304,5 +339,46 @@ export class CalendarIntegrationEffects {
             },
           },
     });
+  }
+
+  private async _isLinkedToArchivedTask(
+    calEv: CalendarIntegrationEvent,
+    calProvider: IssueProviderCalendar,
+  ): Promise<boolean> {
+    const issueProviderKey = (calEv.issueProviderKey as IssueProviderKey) || 'ICAL';
+    const issueIdsToCheck = Array.from(
+      new Set([calEv.id, ...getCalendarEventIdCandidates(calEv)]),
+    );
+
+    for (const issueId of issueIdsToCheck) {
+      const linkedTask = await this._taskService.checkForTaskWithIssueEverywhere(
+        issueId,
+        issueProviderKey,
+        calProvider.id,
+      );
+      if (linkedTask) {
+        return linkedTask.isFromArchive;
+      }
+    }
+
+    return false;
+  }
+
+  private _removeArchivedLinkedBanners(
+    archivedLinkedEvents: CalendarIntegrationEvent[],
+  ): void {
+    if (!archivedLinkedEvents.length) {
+      return;
+    }
+
+    const nextBanners = this._currentlyShownBanners$
+      .getValue()
+      .filter(
+        ({ calEv }) =>
+          !archivedLinkedEvents.some((archivedLinkedEvent) =>
+            shareCalendarEventId(calEv, archivedLinkedEvent),
+          ),
+      );
+    this._currentlyShownBanners$.next(nextBanners);
   }
 }

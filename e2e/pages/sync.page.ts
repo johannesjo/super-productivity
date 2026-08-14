@@ -23,7 +23,7 @@ export class SyncPage extends BasePage {
     this.userNameInput = page.locator('.e2e-userName input');
     this.passwordInput = page.locator('.e2e-password input');
     this.syncFolderInput = page.locator('.e2e-syncFolderPath input');
-    this.saveBtn = page.locator('mat-dialog-actions button[mat-stroked-button]');
+    this.saveBtn = page.locator('mat-dialog-actions button[mat-flat-button]');
     this.syncSpinner = page.locator('.sync-btn mat-icon.spin');
     this.syncCheckIcon = page.locator('.sync-btn mat-icon.sync-state-ico');
     // Encryption-related locators
@@ -39,14 +39,34 @@ export class SyncPage extends BasePage {
     this.disableEncryptionBtn = page.locator('.e2e-disable-encryption-btn button');
   }
 
-  async setupWebdavSync(config: {
-    baseUrl: string;
-    username: string;
-    password: string;
-    syncFolderPath: string;
-    isEncryptionEnabled?: boolean;
-    encryptionPassword?: string;
-  }): Promise<void> {
+  /**
+   * Click the header's sync button. The action row is a horizontal scroller
+   * (#9480), so on a narrow header the button can be past the trailing edge —
+   * Playwright's own actionability scroll brings it back into view, which is
+   * why this needs nothing beyond a click.
+   */
+  async clickSyncBtn(options?: Parameters<Locator['click']>[0]): Promise<void> {
+    await this.page.locator('button.sync-btn').first().click(options);
+  }
+
+  async setupWebdavSync(
+    config: {
+      baseUrl: string;
+      username: string;
+      password: string;
+      syncFolderPath: string;
+      isEncryptionEnabled?: boolean;
+      encryptionPassword?: string;
+      isUseSplitSyncFiles?: boolean;
+      /**
+       * Set the encryption password in the setup-time "Encrypt before first
+       * upload?" dialog (instead of the post-setup Enable Encryption button), so
+       * the very first sync is encrypted. Requires `encryptionPassword`.
+       */
+      encryptAtSetup?: boolean;
+    },
+    options: { isReconfigure?: boolean } = {},
+  ): Promise<void> {
     // Try entire setup flow up to 2 times (dialog-level retry)
     for (let dialogAttempt = 0; dialogAttempt < 2; dialogAttempt++) {
       if (dialogAttempt > 0) {
@@ -77,7 +97,11 @@ export class SyncPage extends BasePage {
 
       // Click sync button to open settings dialog
       // Use noWaitAfter to prevent blocking on Angular hash navigation
-      await this.syncBtn.click({ timeout: 5000, noWaitAfter: true });
+      await this.syncBtn.click({
+        button: options.isReconfigure ? 'right' : 'left',
+        timeout: 5000,
+        noWaitAfter: true,
+      });
 
       // Wait for dialog to appear
       const dialog = this.page.locator('mat-dialog-container, .mat-mdc-dialog-container');
@@ -89,7 +113,11 @@ export class SyncPage extends BasePage {
       // If dialog didn't open, try clicking again
       if (!dialogVisible) {
         await this.page.waitForTimeout(500);
-        await this.syncBtn.click({ force: true, noWaitAfter: true });
+        await this.syncBtn.click({
+          button: options.isReconfigure ? 'right' : 'left',
+          force: true,
+          noWaitAfter: true,
+        });
         await dialog.waitFor({ state: 'visible', timeout: 5000 });
       }
 
@@ -194,14 +222,41 @@ export class SyncPage extends BasePage {
         await this.passwordInput.fill(config.password);
         await this.syncFolderInput.fill(config.syncFolderPath);
 
+        if (config.isUseSplitSyncFiles !== undefined) {
+          await this.expandAdvancedSettings();
+          const splitSyncCheckbox = dialog.getByRole('checkbox', {
+            name: /Surgical sync/i,
+          });
+          await splitSyncCheckbox.setChecked(config.isUseSplitSyncFiles);
+          await expect(splitSyncCheckbox).toBeChecked({
+            checked: config.isUseSplitSyncFiles,
+          });
+        }
+
         // Save the configuration
         await this.saveBtn.click();
+
+        // A fresh file-based setup now opens the optional "Encrypt before first
+        // upload?" dialog (disableClose) before the config is persisted. Either
+        // set the password here (setup-time E2EE) or skip it so setup proceeds
+        // unencrypted.
+        if (config.encryptAtSetup && config.encryptionPassword) {
+          await this._fillSetupEncryptionDialog(config.encryptionPassword);
+        } else {
+          await this._skipSetupEncryptionDialogIfPresent();
+        }
 
         // Wait for dialog to close
         await dialog.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
         await this.page.waitForTimeout(500);
 
-        if (config.isEncryptionEnabled && config.encryptionPassword) {
+        // Legacy path: enable encryption via the post-setup Enable Encryption
+        // button (skipped when it was already set at setup above).
+        if (
+          config.isEncryptionEnabled &&
+          config.encryptionPassword &&
+          !config.encryptAtSetup
+        ) {
           await this.waitForSyncReady();
           await this.enableEncryption(config.encryptionPassword);
         }
@@ -223,6 +278,61 @@ export class SyncPage extends BasePage {
     throw new Error(
       '[setupWebdavSync] Failed to setup WebDAV sync after multiple dialog-level retries',
     );
+  }
+
+  /**
+   * Dismisses the optional "Encrypt before first upload?" setup dialog that
+   * opens on a fresh file-based setup (see DialogSyncCfgComponent.save()). Clicks
+   * Skip so setup stays unencrypted. No-op if the dialog did not appear.
+   */
+  private async _skipSetupEncryptionDialogIfPresent(): Promise<void> {
+    // The dialog opens only AFTER save()'s awaited provider-auth/connection check
+    // and a lazy import() of the dialog chunk, so it appears a beat after the
+    // Save click — often after CI load stalls it for a second or more. Use
+    // waitFor(), NOT isVisible(): isVisible() returns the CURRENT state
+    // immediately (its `timeout` never polls), so it raced the dialog and
+    // returned false, leaving the disableClose modal open with its backdrop
+    // blocking the rest of the test. waitFor() actually polls until it appears.
+    const skipBtn = this.page.locator('.e2e-setup-encrypt-skip');
+    const appeared = await skipBtn
+      .waitFor({ state: 'visible', timeout: 20000 })
+      .then(() => true)
+      .catch(() => false);
+    if (appeared) {
+      await skipBtn.click();
+      await skipBtn.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+    }
+  }
+
+  /**
+   * Fills the setup-time "Encrypt before first upload?" dialog with the given
+   * password and submits, so the config save persists the key and the first
+   * sync is encrypted. Mirrors the robust fill used by enableEncryption().
+   */
+  private async _fillSetupEncryptionDialog(password: string): Promise<void> {
+    const passwordInput = this.page.locator('.e2e-setup-encrypt-password');
+    const confirmInput = this.page.locator('.e2e-setup-encrypt-confirm-password');
+    const submitBtn = this.page.locator('.e2e-setup-encrypt-submit');
+
+    // The dialog opens only after save()'s awaited auth check + lazy import(),
+    // which can exceed 5s under CI load (see _skipSetupEncryptionDialogIfPresent).
+    await passwordInput.waitFor({ state: 'visible', timeout: 20000 });
+    await passwordInput.click();
+    await passwordInput.fill(password);
+    await expect(passwordInput).toHaveValue(password);
+
+    // Insert into the focused confirm field — fill() has occasionally left the
+    // value on the first field in CI (see enableEncryption()).
+    await confirmInput.click();
+    await expect(confirmInput).toBeFocused();
+    await this.page.keyboard.press('ControlOrMeta+A');
+    await this.page.keyboard.insertText(password);
+    await expect(confirmInput).toHaveValue(password);
+    await expect(passwordInput).toHaveValue(password);
+
+    await expect(submitBtn).toBeEnabled({ timeout: 5000 });
+    await submitBtn.click();
+    await submitBtn.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
   }
 
   async triggerSync(): Promise<void> {
@@ -358,14 +468,20 @@ export class SyncPage extends BasePage {
 
     // Fill password field
     await passwordInput.waitFor({ state: 'visible', timeout: 5000 });
+    await passwordInput.click();
     await passwordInput.fill(password);
+    await expect(passwordInput).toHaveValue(password);
 
-    // Fill confirm password field
+    // Fill confirm password field. In CI, fill() has occasionally left focus on
+    // the first password field, duplicating the value there and leaving confirm
+    // empty. Insert through the focused confirm input and assert both values.
     await confirmInput.waitFor({ state: 'visible', timeout: 5000 });
-    await confirmInput.fill(password);
-
-    // Wait a moment for validation
-    await this.page.waitForTimeout(300);
+    await confirmInput.click();
+    await expect(confirmInput).toBeFocused();
+    await this.page.keyboard.press('ControlOrMeta+A');
+    await this.page.keyboard.insertText(password);
+    await expect(confirmInput).toHaveValue(password);
+    await expect(passwordInput).toHaveValue(password);
 
     // Click the "Enable Encryption" button in this dialog
     // It's the mat-flat-button with a lock icon

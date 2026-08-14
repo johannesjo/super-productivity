@@ -23,15 +23,13 @@ export const selectUnarchivedVisibleProjects = createSelector(
       (p) => !p.isArchived && !p.isHiddenFromMenu && p.id !== INBOX_PROJECT.id,
     ),
 );
-export const selectUnarchivedHiddenProjectIds = createSelector(
-  selectAllProjects,
-  (projects) =>
-    projects.filter((p) => !p.isArchived && p.isHiddenFromMenu).map((p) => p.id),
-);
 
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) =>
   projects.filter((p) => p.isArchived),
 );
+// NOTE: completing a project also sets isArchived, so completed projects are a
+// subset of selectArchivedProjects — keep that one as-is, since it drives
+// active-task filtering (selectArchivedProjectIds in task.selectors).
 export const selectArchivedProjectsSortedByTitle = createSelector(
   selectArchivedProjects,
   (projects) => [...projects].sort((a, b) => a.title.localeCompare(b.title)),
@@ -42,18 +40,6 @@ export const selectArrayOfArchivedProjectIds = createSelector(
 );
 export const selectArchivedProjectIds = createSelector(
   selectArrayOfArchivedProjectIds,
-  (ids): Set<string> => new Set(ids),
-);
-export const selectArrayOfHiddenProjectIds = createSelector(
-  selectAllProjects,
-  (projects) =>
-    projects
-      .filter((p) => p.isHiddenFromMenu)
-      .map((p) => p.id)
-      .sort(),
-);
-export const selectHiddenProjectIds = createSelector(
-  selectArrayOfHiddenProjectIds,
   (ids): Set<string> => new Set(ids),
 );
 export const selectAllProjectColors = createSelector(selectAllProjects, (projects) =>

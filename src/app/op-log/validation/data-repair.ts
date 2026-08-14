@@ -60,13 +60,13 @@ export const dataRepair = (
     typeErrorsFixed: 0,
   };
 
-  // NOTE deep copy is important to prevent readonly errors from frozen NgRx state
-  // We detect if the state is frozen and only deep clone in that case for performance
-  const isFrozen =
-    Object.isFrozen(data) ||
-    (data.task && Object.isFrozen(data.task)) ||
-    (data.project && Object.isFrozen(data.project));
-  let dataOut: AppDataComplete = isFrozen ? structuredClone(data) : { ...data };
+  // Deep clone before any repair runs: the fixers below mutate nested entities
+  // in place, and prod builds disable NgRx runtime freezing (src/main.ts) so
+  // `data` is a live, writable store reference. A shallow `{ ...data }` shares
+  // every nested object, letting repair corrupt store-owned state before
+  // `loadAllData` is dispatched (#8333). Only runs after a rare validation
+  // failure, so the unconditional clone is cheap.
+  let dataOut: AppDataComplete = structuredClone(data);
 
   // Ensure archive structures exist
   if (!dataOut.archiveYoung) {
@@ -112,7 +112,6 @@ export const dataRepair = (
   dataOut = _removeNonExistentProjectIdsFromIssueProviders(dataOut, summary);
   dataOut = _removeNonExistentProjectIdsFromTaskRepeatCfg(dataOut, summary);
   dataOut = _removeNonExistentRepeatCfgIdsFromTasks(dataOut, summary);
-  dataOut = _addOrphanedTasksToProjectLists(dataOut, summary);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut, summary);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut, summary);
   dataOut = _cleanupOrphanedSubTasks(dataOut, summary);
@@ -132,6 +131,10 @@ export const dataRepair = (
   dataOut = _removeNonExistentProjectIdsFromTasks(dataOut, summary);
   dataOut = _removeNonExistentTagsFromTasks(dataOut, summary);
   dataOut = _addInboxProjectIdIfNecessary(dataOut, summary);
+  // Earlier repair passes can create new top-level tasks or reassign a dangling
+  // projectId to the Inbox. Reconcile project-list membership after those passes
+  // so the repaired tasks are reachable from their owning project. (#8780)
+  dataOut = _addOrphanedTasksToProjectLists(dataOut, summary);
   dataOut = _repairMenuTree(dataOut, summary);
   dataOut = _repairSections(dataOut, summary);
   dataOut = autoFixTypiaErrors(dataOut, errors);
@@ -386,13 +389,18 @@ const _removeDuplicatesFromArchive = (
   const taskIds = data.task.ids as string[];
   const archiveYoungTaskIds = data.archiveYoung.task.ids as string[];
   const archiveOldTaskIds = data.archiveOld.task.ids as string[];
+  // Set membership instead of Array.includes — these cross-array dedup scans
+  // were O(n*m) in task/archive size and could take 20s+ of single-threaded CPU
+  // on a large store, hanging/crashing the restore path (#8540). Snapshots are
+  // correct: each source array is read, not mutated, while its Set is in use.
+  const archiveYoungIdSet = new Set<string>(archiveYoungTaskIds);
+  const archiveOldIdSet = new Set<string>(archiveOldTaskIds);
 
   // Remove duplicates between main tasks and archiveYoung
-  const duplicateYoungIds = taskIds.filter((id) => archiveYoungTaskIds.includes(id));
+  const duplicateYoungIds = taskIds.filter((id) => archiveYoungIdSet.has(id));
   if (duplicateYoungIds.length) {
-    data.archiveYoung.task.ids = archiveYoungTaskIds.filter(
-      (id) => !duplicateYoungIds.includes(id),
-    );
+    const dupYoungSet = new Set<string>(duplicateYoungIds);
+    data.archiveYoung.task.ids = archiveYoungTaskIds.filter((id) => !dupYoungSet.has(id));
     duplicateYoungIds.forEach((id) => {
       if (data.archiveYoung.task.entities[id]) {
         delete data.archiveYoung.task.entities[id];
@@ -405,11 +413,10 @@ const _removeDuplicatesFromArchive = (
   }
 
   // Remove duplicates between main tasks and archiveOld
-  const duplicateOldIds = taskIds.filter((id) => archiveOldTaskIds.includes(id));
+  const duplicateOldIds = taskIds.filter((id) => archiveOldIdSet.has(id));
   if (duplicateOldIds.length) {
-    data.archiveOld.task.ids = archiveOldTaskIds.filter(
-      (id) => !duplicateOldIds.includes(id),
-    );
+    const dupOldSet = new Set<string>(duplicateOldIds);
+    data.archiveOld.task.ids = archiveOldTaskIds.filter((id) => !dupOldSet.has(id));
     duplicateOldIds.forEach((id) => {
       if (data.archiveOld.task.entities[id]) {
         delete data.archiveOld.task.entities[id];
@@ -423,11 +430,12 @@ const _removeDuplicatesFromArchive = (
 
   // Remove duplicates between archiveYoung and archiveOld (keep in archiveOld as it's older)
   const duplicateBetweenArchives = archiveYoungTaskIds.filter((id) =>
-    archiveOldTaskIds.includes(id),
+    archiveOldIdSet.has(id),
   );
   if (duplicateBetweenArchives.length) {
+    const dupBetweenSet = new Set<string>(duplicateBetweenArchives);
     data.archiveYoung.task.ids = archiveYoungTaskIds.filter(
-      (id) => !duplicateBetweenArchives.includes(id),
+      (id) => !dupBetweenSet.has(id),
     );
     duplicateBetweenArchives.forEach((id) => {
       if (data.archiveYoung.task.entities[id]) {
@@ -474,22 +482,38 @@ const _moveArchivedSubTasksToUnarchivedParents = (
   const taskArchiveYoungState: TaskArchive = data.archiveYoung.task;
   const taskArchiveOldState: TaskArchive = data.archiveOld.task;
 
-  // Handle orphaned subtasks in archiveYoung
+  // Handle orphaned subtasks in archiveYoung.
+  // Set membership instead of Array.includes: this filter runs once per archived
+  // task and the includes() was itself O(n), making orphan detection O(n^2) in
+  // archive size — ~20s+ of single-threaded CPU on a large archive, which could
+  // hang/crash the restore path (#8540). The arrays aren't mutated until the
+  // forEach below, so a snapshot Set is correct here.
+  const youngIdSet = new Set<string>(taskArchiveYoungState.ids as string[]);
+  const oldIdSet = new Set<string>(taskArchiveOldState.ids as string[]);
   const orphanArchivedYoungSubTasks: TaskCopy[] = taskArchiveYoungState.ids
     .map((id: string) => taskArchiveYoungState.entities[id] as TaskCopy)
     .filter(
       (t: TaskCopy) =>
-        t.parentId &&
-        !taskArchiveYoungState.ids.includes(t.parentId) &&
-        !taskArchiveOldState.ids.includes(t.parentId),
+        t.parentId && !youngIdSet.has(t.parentId) && !oldIdSet.has(t.parentId),
     );
 
   OpLog.log('orphanArchivedYoungSubTasks', orphanArchivedYoungSubTasks);
   const promotedYoungSubTaskIds: string[] = [];
+  // Reconcile orphans in O(n) too (#8540): the per-orphan taskState.ids.includes()
+  // and the archive .ids.filter() rebuild were each O(n), so a corruption that
+  // orphans many archived subtasks (exactly the shape this restore path exists
+  // for) stayed O(orphans*n) even after the detection scan above was fixed.
+  // `taskMainIdSet` is a faithful snapshot kept in sync with the push below; an
+  // orphan's id/parentId can never collide with another orphan's pushed id
+  // (ids are distinct; an orphan's parent is by definition not an archived id),
+  // so membership matches the original live `.includes`. Removals from
+  // archiveYoung.ids are collected and applied once after the loop.
+  const taskMainIdSet = new Set<string>(taskState.ids as string[]);
+  const removedYoungArchiveIds = new Set<string>();
   orphanArchivedYoungSubTasks.forEach((t: TaskCopy) => {
     // delete archived if duplicate
-    if (taskState.ids.includes(t.id as string)) {
-      taskArchiveYoungState.ids = taskArchiveYoungState.ids.filter((id) => t.id !== id);
+    if (taskMainIdSet.has(t.id as string)) {
+      removedYoungArchiveIds.add(t.id);
       delete taskArchiveYoungState.entities[t.id];
       // if entity is empty for some reason
       if (!taskState.entities[t.id]) {
@@ -497,16 +521,16 @@ const _moveArchivedSubTasksToUnarchivedParents = (
       }
     }
     // copy to today if parent exists
-    else if (taskState.ids.includes(t.parentId as string)) {
+    else if (taskMainIdSet.has(t.parentId as string)) {
       taskState.ids.push(t.id);
+      taskMainIdSet.add(t.id);
       taskState.entities[t.id] = t;
       const par: TaskCopy = taskState.entities[t.parentId as string] as TaskCopy;
 
       par.subTaskIds = unique([...(par.subTaskIds || []), t.id]);
 
       // and delete from archive
-      taskArchiveYoungState.ids = taskArchiveYoungState.ids.filter((id) => t.id !== id);
-
+      removedYoungArchiveIds.add(t.id);
       delete taskArchiveYoungState.entities[t.id];
     }
     // make main if it doesn't
@@ -515,6 +539,11 @@ const _moveArchivedSubTasksToUnarchivedParents = (
       t.parentId = undefined;
     }
   });
+  if (removedYoungArchiveIds.size > 0) {
+    taskArchiveYoungState.ids = (taskArchiveYoungState.ids as string[]).filter(
+      (id) => !removedYoungArchiveIds.has(id),
+    );
+  }
   if (promotedYoungSubTaskIds.length > 0) {
     OpLog.warn(
       `[data-repair] ${promotedYoungSubTaskIds.length} archived subtask(s) promoted to standalone tasks due to missing parent:`,
@@ -523,22 +552,29 @@ const _moveArchivedSubTasksToUnarchivedParents = (
   }
   summary.relationshipsFixed += orphanArchivedYoungSubTasks.length;
 
-  // Handle orphaned subtasks in archiveOld
+  // Handle orphaned subtasks in archiveOld. Sets rebuilt from the current arrays
+  // (the young block above may have mutated archiveYoung.ids) to preserve the
+  // original sequential semantics while keeping detection O(n) (#8540).
+  const oldIdSet2 = new Set<string>(taskArchiveOldState.ids as string[]);
+  const youngIdSet2 = new Set<string>(taskArchiveYoungState.ids as string[]);
   const orphanArchivedOldSubTasks: TaskCopy[] = taskArchiveOldState.ids
     .map((id: string) => taskArchiveOldState.entities[id] as TaskCopy)
     .filter(
       (t: TaskCopy) =>
-        t.parentId &&
-        !taskArchiveOldState.ids.includes(t.parentId) &&
-        !taskArchiveYoungState.ids.includes(t.parentId),
+        t.parentId && !oldIdSet2.has(t.parentId) && !youngIdSet2.has(t.parentId),
     );
 
   OpLog.log('orphanArchivedOldSubTasks', orphanArchivedOldSubTasks);
   const promotedOldSubTaskIds: string[] = [];
+  // Same O(n) reconciliation as the young block (#8540). `taskMainIdSet2` snapshots
+  // taskState.ids *after* the young block's pushes; removals from archiveOld.ids
+  // are applied once after the loop.
+  const taskMainIdSet2 = new Set<string>(taskState.ids as string[]);
+  const removedOldArchiveIds = new Set<string>();
   orphanArchivedOldSubTasks.forEach((t: TaskCopy) => {
     // delete archived if duplicate
-    if (taskState.ids.includes(t.id as string)) {
-      taskArchiveOldState.ids = taskArchiveOldState.ids.filter((id) => t.id !== id);
+    if (taskMainIdSet2.has(t.id as string)) {
+      removedOldArchiveIds.add(t.id);
       delete taskArchiveOldState.entities[t.id];
       // if entity is empty for some reason
       if (!taskState.entities[t.id]) {
@@ -546,16 +582,16 @@ const _moveArchivedSubTasksToUnarchivedParents = (
       }
     }
     // copy to today if parent exists
-    else if (taskState.ids.includes(t.parentId as string)) {
+    else if (taskMainIdSet2.has(t.parentId as string)) {
       taskState.ids.push(t.id);
+      taskMainIdSet2.add(t.id);
       taskState.entities[t.id] = t;
       const par: TaskCopy = taskState.entities[t.parentId as string] as TaskCopy;
 
       par.subTaskIds = unique([...(par.subTaskIds || []), t.id]);
 
       // and delete from archive
-      taskArchiveOldState.ids = taskArchiveOldState.ids.filter((id) => t.id !== id);
-
+      removedOldArchiveIds.add(t.id);
       delete taskArchiveOldState.entities[t.id];
     }
     // make main if it doesn't
@@ -564,6 +600,11 @@ const _moveArchivedSubTasksToUnarchivedParents = (
       t.parentId = undefined;
     }
   });
+  if (removedOldArchiveIds.size > 0) {
+    taskArchiveOldState.ids = (taskArchiveOldState.ids as string[]).filter(
+      (id) => !removedOldArchiveIds.has(id),
+    );
+  }
   if (promotedOldSubTaskIds.length > 0) {
     OpLog.warn(
       `[data-repair] ${promotedOldSubTaskIds.length} old archived subtask(s) promoted to standalone tasks due to missing parent:`,
@@ -583,23 +624,34 @@ const _moveUnArchivedSubTasksToArchivedParents = (
   const taskState: TaskState = data.task;
   const taskArchiveYoungState: TaskArchive = data.archiveYoung.task;
   const taskArchiveOldState: TaskArchive = data.archiveOld.task;
+  // Set membership keeps orphan detection O(n) rather than O(n^2) in task count
+  // (#8540). Snapshot is correct: taskState.ids isn't mutated until the forEach.
+  const taskIdSet = new Set<string>(taskState.ids as string[]);
   const orphanUnArchivedSubTasks: TaskCopy[] = taskState.ids
     .map((id: string) => taskState.entities[id] as TaskCopy)
-    .filter((t: TaskCopy) => t.parentId && !taskState.ids.includes(t.parentId));
+    .filter((t: TaskCopy) => t.parentId && !taskIdSet.has(t.parentId));
 
   OpLog.log('orphanUnArchivedSubTasks', orphanUnArchivedSubTasks);
   const promotedUnArchivedSubTaskIds: string[] = [];
+  // Reconcile orphans in O(n) (#8540): the per-orphan archive .ids.includes() and
+  // the taskState.ids.filter() rebuild were each O(n), leaving this O(orphans*n)
+  // on the corruption shape this path handles. The archive Sets are kept in sync
+  // with the pushes below so membership matches the original live `.includes`;
+  // removals from taskState.ids are collected and applied once after the loop.
+  const youngArchiveIdSet = new Set<string>(taskArchiveYoungState.ids as string[]);
+  const oldArchiveIdSet = new Set<string>(taskArchiveOldState.ids as string[]);
+  const removedMainIds = new Set<string>();
   orphanUnArchivedSubTasks.forEach((t: TaskCopy) => {
     // delete un-archived if duplicate in either archive
-    if (taskArchiveYoungState.ids.includes(t.id as string)) {
-      taskState.ids = taskState.ids.filter((id) => t.id !== id);
+    if (youngArchiveIdSet.has(t.id as string)) {
+      removedMainIds.add(t.id);
       delete taskState.entities[t.id];
       // if entity is empty for some reason
       if (!taskArchiveYoungState.entities[t.id]) {
         taskArchiveYoungState.entities[t.id] = t;
       }
-    } else if (taskArchiveOldState.ids.includes(t.id as string)) {
-      taskState.ids = taskState.ids.filter((id) => t.id !== id);
+    } else if (oldArchiveIdSet.has(t.id as string)) {
+      removedMainIds.add(t.id);
       delete taskState.entities[t.id];
       // if entity is empty for some reason
       if (!taskArchiveOldState.entities[t.id]) {
@@ -607,8 +659,9 @@ const _moveUnArchivedSubTasksToArchivedParents = (
       }
     }
     // copy to archiveYoung if parent exists there
-    else if (taskArchiveYoungState.ids.includes(t.parentId as string)) {
+    else if (youngArchiveIdSet.has(t.parentId as string)) {
       taskArchiveYoungState.ids.push(t.id);
+      youngArchiveIdSet.add(t.id);
       taskArchiveYoungState.entities[t.id] = t;
 
       const par: TaskCopy = taskArchiveYoungState.entities[
@@ -617,12 +670,13 @@ const _moveUnArchivedSubTasksToArchivedParents = (
       par.subTaskIds = unique([...(par.subTaskIds || []), t.id]);
 
       // and delete from today
-      taskState.ids = taskState.ids.filter((id) => t.id !== id);
+      removedMainIds.add(t.id);
       delete taskState.entities[t.id];
     }
     // copy to archiveOld if parent exists there
-    else if (taskArchiveOldState.ids.includes(t.parentId as string)) {
+    else if (oldArchiveIdSet.has(t.parentId as string)) {
       taskArchiveOldState.ids.push(t.id);
+      oldArchiveIdSet.add(t.id);
       taskArchiveOldState.entities[t.id] = t;
 
       const par: TaskCopy = taskArchiveOldState.entities[
@@ -631,7 +685,7 @@ const _moveUnArchivedSubTasksToArchivedParents = (
       par.subTaskIds = unique([...(par.subTaskIds || []), t.id]);
 
       // and delete from today
-      taskState.ids = taskState.ids.filter((id) => t.id !== id);
+      removedMainIds.add(t.id);
       delete taskState.entities[t.id];
     }
     // make main if parent doesn't exist anywhere
@@ -640,6 +694,9 @@ const _moveUnArchivedSubTasksToArchivedParents = (
       t.parentId = undefined;
     }
   });
+  if (removedMainIds.size > 0) {
+    taskState.ids = (taskState.ids as string[]).filter((id) => !removedMainIds.has(id));
+  }
   if (promotedUnArchivedSubTaskIds.length > 0) {
     OpLog.warn(
       `[data-repair] ${promotedUnArchivedSubTaskIds.length} unarchived subtask(s) promoted to standalone tasks due to missing parent:`,
@@ -660,28 +717,35 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
   const taskArchiveYoungIds: string[] = archiveYoung.task.ids as string[];
   const taskArchiveOldIds: string[] = archiveOld.task.ids as string[];
   const taskIdsToRestoreFromArchive: string[] = [];
+  // Set membership instead of Array.includes — these scans run per project/tag
+  // task-ref and were O(n*m) in task/archive size, a 20s+ single-threaded hang
+  // on a large store that could crash the restore path (#8540). Snapshots are
+  // correct: these source arrays aren't mutated until after the loops below.
+  const taskIdSet = new Set<string>(taskIds);
+  const archiveYoungIdSet = new Set<string>(taskArchiveYoungIds);
+  const archiveOldIdSet = new Set<string>(taskArchiveOldIds);
 
   project.ids.forEach((pId: string | number) => {
     const projectItem = project.entities[pId] as ProjectCopy;
 
     const origTaskIdsLen = projectItem.taskIds.length;
     projectItem.taskIds = projectItem.taskIds.filter((id: string): boolean => {
-      if (taskArchiveYoungIds.includes(id) || taskArchiveOldIds.includes(id)) {
+      if (archiveYoungIdSet.has(id) || archiveOldIdSet.has(id)) {
         taskIdsToRestoreFromArchive.push(id);
         return true;
       }
-      return taskIds.includes(id);
+      return taskIdSet.has(id);
     });
     summary.invalidReferencesRemoved += origTaskIdsLen - projectItem.taskIds.length;
 
     const origBacklogLen = projectItem.backlogTaskIds.length;
     projectItem.backlogTaskIds = projectItem.backlogTaskIds.filter(
       (id: string): boolean => {
-        if (taskArchiveYoungIds.includes(id) || taskArchiveOldIds.includes(id)) {
+        if (archiveYoungIdSet.has(id) || archiveOldIdSet.has(id)) {
           taskIdsToRestoreFromArchive.push(id);
           return true;
         }
-        return taskIds.includes(id);
+        return taskIdSet.has(id);
       },
     );
     summary.invalidReferencesRemoved +=
@@ -691,7 +755,7 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
   tag.ids.forEach((tId: string | number) => {
     const tagItem = tag.entities[tId] as TagCopy;
     const origLen = tagItem.taskIds.length;
-    tagItem.taskIds = tagItem.taskIds.filter((id) => taskIds.includes(id));
+    tagItem.taskIds = tagItem.taskIds.filter((id) => taskIdSet.has(id));
     summary.invalidReferencesRemoved += origLen - tagItem.taskIds.length;
   });
 
@@ -706,12 +770,9 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
     }
   });
   task.ids = [...taskIds, ...taskIdsToRestoreFromArchive];
-  archiveYoung.task.ids = taskArchiveYoungIds.filter(
-    (id) => !taskIdsToRestoreFromArchive.includes(id),
-  );
-  archiveOld.task.ids = taskArchiveOldIds.filter(
-    (id) => !taskIdsToRestoreFromArchive.includes(id),
-  );
+  const restoreSet = new Set<string>(taskIdsToRestoreFromArchive);
+  archiveYoung.task.ids = taskArchiveYoungIds.filter((id) => !restoreSet.has(id));
+  archiveOld.task.ids = taskArchiveOldIds.filter((id) => !restoreSet.has(id));
 
   if (taskIdsToRestoreFromArchive.length > 0) {
     OpLog.log(
@@ -750,10 +811,37 @@ const _resetEntityIdsFromObjects = <T extends AppBaseDataEntityLikeStates>(
     {} as AppBaseDataEntityLikeStates['entities'],
   );
 
+  // Preserve the user-defined order held in `ids`. Reorder actions
+  // (updateSimpleCounterOrder / updateNoteOrder / updateTagOrder) mutate only
+  // `ids`, never the `entities` dict, so `Object.keys(entities)` reflects
+  // creation order — not the order the user sees. Rebuilding `ids` from the
+  // dict silently reverted habit/tag/note ordering on every repair and then
+  // propagated it via the full-state REPAIR op (#8257). Keep the existing
+  // `ids` order, drop ids whose entity didn't survive sanitization, dedupe,
+  // then append any sanitized entity that `ids` didn't already list.
+  const orderedIds: string[] = [];
+  const seen = new Set<string>();
+  const prevIds: readonly (string | number)[] = Array.isArray(data.ids) ? data.ids : [];
+  for (const id of prevIds) {
+    // `ids` is typed string[] | number[]; entity dict keys are always strings.
+    // Normalize so the lookup, dedupe Set, and output stay consistently typed.
+    const idStr = String(id);
+    if (sanitizedEntities[idStr] && !seen.has(idStr)) {
+      orderedIds.push(idStr);
+      seen.add(idStr);
+    }
+  }
+  for (const id of Object.keys(sanitizedEntities)) {
+    if (!seen.has(id)) {
+      orderedIds.push(id);
+      seen.add(id);
+    }
+  }
+
   return {
     ...data,
     entities: sanitizedEntities,
-    ids: Object.keys(sanitizedEntities),
+    ids: orderedIds,
   };
 };
 
@@ -771,28 +859,46 @@ const _addOrphanedTasksToProjectLists = (
       projectItem.backlogTaskIds,
     );
   });
+  // Set membership instead of Array.includes — this scan runs per task against
+  // the concatenated project lists and was O(n*m), a single-threaded hang on a
+  // large store that could crash the restore path (#8540).
+  const onProjectListsSet = new Set<string>(allTaskIdsOnProjectLists);
   const orphanedTaskIds: string[] = task.ids.filter((tid) => {
     const taskItem = task.entities[tid];
     if (!taskItem) {
       return false; // Skip orphaned IDs (already handled by _fixEntityStates)
     }
-    return (
-      !taskItem.parentId && !allTaskIdsOnProjectLists.includes(tid) && taskItem.projectId
-    );
+    return !taskItem.parentId && !onProjectListsSet.has(tid) && taskItem.projectId;
   });
 
+  // Group additions per project and splice them in with a single spread each.
+  // The previous `taskIds: [...targetProject.taskIds, tid]` ran per orphan, so a
+  // corruption that orphans every task of one project (e.g. its list was lost
+  // but the tasks still carry the projectId) rebuilt the list once per task —
+  // O(n^2) on the restore path (#8540). Map preserves orphan order per project.
+  const additionsByProjectId = new Map<string, string[]>();
   orphanedTaskIds.forEach((tid) => {
     const taskItem = task.entities[tid];
     if (!taskItem) {
       return; // Skip orphaned IDs (already handled by _fixEntityStates)
     }
-    const targetProject = project.entities[taskItem.projectId as string];
-    if (targetProject) {
-      project.entities[taskItem.projectId as string] = {
-        ...targetProject,
-        taskIds: [...targetProject.taskIds, tid],
-      };
+    const pId = taskItem.projectId as string;
+    if (!project.entities[pId]) {
+      return;
     }
+    const existing = additionsByProjectId.get(pId);
+    if (existing) {
+      existing.push(tid);
+    } else {
+      additionsByProjectId.set(pId, [tid]);
+    }
+  });
+  additionsByProjectId.forEach((tids, pId) => {
+    const targetProject = project.entities[pId] as ProjectCopy;
+    project.entities[pId] = {
+      ...targetProject,
+      taskIds: [...targetProject.taskIds, ...tids],
+    };
   });
 
   if (orphanedTaskIds.length > 0) {
@@ -820,16 +926,15 @@ const _addInboxProjectIdIfNecessary = (
     data.project.ids = [INBOX_PROJECT.id, ...data.project.ids] as string[];
   }
 
+  // Collect the inbox additions and splice them in once. Spreading
+  // inbox.taskIds per task was O(n^2) when many tasks lack a projectId — a
+  // realistic corruption shape on the restore path (#8540).
+  const inboxTaskIdsToAdd: string[] = [];
   taskIds.forEach((id) => {
     const t = task.entities[id] as TaskCopy;
     if (!t.projectId) {
       OpLog.log('Set inbox project id for task  ' + t.id);
-
-      const inboxProject = data.project.entities[INBOX_PROJECT.id]!;
-      data.project.entities[INBOX_PROJECT.id] = {
-        ...inboxProject,
-        taskIds: [...(inboxProject.taskIds as string[]), t.id],
-      };
+      inboxTaskIdsToAdd.push(t.id);
       t.projectId = INBOX_PROJECT.id;
       summary.relationshipsFixed++;
     }
@@ -839,6 +944,13 @@ const _addInboxProjectIdIfNecessary = (
       t.tagIds = t.tagIds.filter((idI) => idI !== TODAY_TAG.id);
     }
   });
+  if (inboxTaskIdsToAdd.length > 0) {
+    const inboxProject = data.project.entities[INBOX_PROJECT.id]!;
+    data.project.entities[INBOX_PROJECT.id] = {
+      ...inboxProject,
+      taskIds: [...(inboxProject.taskIds as string[]), ...inboxTaskIdsToAdd],
+    };
+  }
 
   // Archive tasks: set INBOX for missing projectId and enforce TODAY_TAG invariant.
   // These are structural/invariant fixes, not stale-reference cleanup (#6270).
@@ -1110,6 +1222,11 @@ const _fixOrphanedNotes = (
   data: AppDataComplete,
   summary: RepairSummary,
 ): AppDataComplete => {
+  // NOTE: the per-note `noteIds.includes()` + `[...noteIds, id]` / `[...todayOrder, id]`
+  // spreads below are the same O(n^2) class fixed elsewhere for #8540. Left as-is
+  // deliberately: notes are far fewer than tasks/archive entries, so this is not a
+  // realistic restore-path bottleneck. Apply the same Set-membership + batched-append
+  // transform here if a large-note-store report ever shows it mattering.
   const noteIds: string[] = data.note.ids as string[];
   noteIds.forEach((nId) => {
     const note = data.note.entities[nId];

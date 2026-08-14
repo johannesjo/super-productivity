@@ -35,7 +35,10 @@ export const mapScheduleDaysToScheduleEvents = (
       };
     });
 
-    const activeEntries: typeof day.entries = [];
+    const activeEntries: (
+      | { entry: (typeof day.entries)[number]; eventIndex: number }
+      | undefined
+    )[] = [];
 
     day.entries.forEach((entry) => {
       if (entry.type !== SVEType.WorkdayEnd && entry.type !== SVEType.WorkdayStart) {
@@ -53,6 +56,7 @@ export const mapScheduleDaysToScheduleEvents = (
         const timeLeftInHours = Math.floor(timeLeft / 1000 / 60) / 60;
         const rowSpan = Math.max(1, Math.round(timeLeftInHours * FH));
 
+        const eventIndex = eventsFlat.length;
         eventsFlat.push({
           dayOfMonth: getDayOfMonth(
             (entry.data as TaskWithPlannedForDayIndication)?.plannedForDay,
@@ -64,18 +68,22 @@ export const mapScheduleDaysToScheduleEvents = (
           style: `grid-column: ${dayIndex + 2};  grid-row: ${startRow} / span ${rowSpan}`,
           data: entry.data,
           plannedForDay: entry.plannedForDay,
+          ...(entry.sourceOccurrenceDate
+            ? { sourceOccurrenceDate: entry.sourceOccurrenceDate }
+            : {}),
           isBeyondBudget: entry.isBeyondBudget,
         });
 
         let overlapCount = 0;
         for (let i = 0; i < activeEntries.length; i++) {
-          if (!activeEntries[i]) {
+          const activeEntry = activeEntries[i];
+          if (!activeEntry) {
             continue;
           }
           const entryEnd = entry.start + Math.max(entry.duration, 1);
           const activeEnd =
-            activeEntries[i].start + Math.max(activeEntries[i].duration, 1);
-          if (entryEnd <= activeEntries[i].start || activeEnd <= entry.start) {
+            activeEntry.entry.start + Math.max(activeEntry.entry.duration, 1);
+          if (entryEnd <= activeEntry.entry.start || activeEnd <= entry.start) {
             delete activeEntries[i];
           } else {
             overlapCount += 1;
@@ -87,13 +95,34 @@ export const mapScheduleDaysToScheduleEvents = (
           nextInactiveSlot = activeEntries.length === 0 ? 0 : activeEntries.length;
         }
 
-        activeEntries[nextInactiveSlot] = entry;
+        activeEntries[nextInactiveSlot] = { entry, eventIndex };
 
         if (overlapCount > 0 || nextInactiveSlot > 0) {
-          eventsFlat[eventsFlat.length - 1].overlap = {
-            count: overlapCount,
-            offset: nextInactiveSlot,
-          };
+          const activeEventSlots = activeEntries
+            .map((activeEntry, offset) => ({ activeEntry, offset }))
+            .filter(
+              (
+                activeEventSlot,
+              ): activeEventSlot is {
+                activeEntry: { entry: (typeof day.entries)[number]; eventIndex: number };
+                offset: number;
+              } => !!activeEventSlot.activeEntry,
+            );
+          const laneCount = Math.max(
+            ...activeEventSlots.map(({ activeEntry, offset }) =>
+              Math.max(
+                offset + 1,
+                eventsFlat[activeEntry.eventIndex].overlap?.count ?? 1,
+              ),
+            ),
+          );
+
+          activeEventSlots.forEach(({ activeEntry, offset }) => {
+            eventsFlat[activeEntry.eventIndex].overlap = {
+              count: laneCount,
+              offset,
+            };
+          });
         }
       }
     });

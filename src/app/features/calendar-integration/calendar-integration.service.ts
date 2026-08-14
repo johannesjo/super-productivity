@@ -27,7 +27,10 @@ import { getStartOfDayTimestamp } from '../../util/get-start-of-day-timestamp';
 import { getEndOfDayTimestamp } from '../../util/get-end-of-day-timestamp';
 import { CalendarIntegrationEvent } from './calendar-integration.model';
 import { fastArrayCompare } from '../../util/fast-array-compare';
-import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
+import {
+  isCalendarIssueTask,
+  selectAllCalendarTaskEventIds,
+} from '../tasks/store/task.selectors';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
@@ -56,8 +59,11 @@ import { PluginHttpService } from '../../plugins/issue-provider/plugin-http.serv
 import { selectEnabledIssueProviders } from '../issue/store/issue-provider.selectors';
 import { PluginSearchResult } from '../../plugins/issue-provider/plugin-issue-provider.model';
 import { HiddenCalendarEventsService } from './hidden-calendar-events.service';
+import { TaskArchiveService } from '../archive/task-archive.service';
 import { passesCalendarEventRegexFilter } from './calendar-event-regex-filter';
 import { NotIcalResponseError } from '../schedule/ical/is-likely-ical';
+import { sanitizeIcalUrlForDisplay } from '../issue/mapping-helper/get-issue-provider-tooltip';
+import { isCalendarProviderDisabledOnCurrentPlatform } from '../issue/providers/calendar/is-calendar-provider-disabled-on-current-platform.util';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 const ONE_WEEK = 60 * 60 * 1000 * 24 * 7;
@@ -73,14 +79,59 @@ export class CalendarIntegrationService {
   private _pluginRegistry = inject(PluginIssueProviderRegistryService);
   private _pluginHttp = inject(PluginHttpService);
   private _hiddenEventsService = inject(HiddenCalendarEventsService);
+  private _taskArchiveService = inject(TaskArchiveService);
   private _refreshTrigger$ = new Subject<void>();
+
+  /**
+   * Event ids of every calendar task the user has already handled — both live tasks
+   * (`selectAllCalendarTaskEventIds`) and ones moved to the archive via "Finish Day",
+   * which leave the live NgRx state. The archive is re-read whenever the set of live
+   * calendar-task event ids actually changes (archiving a task removes its id from that
+   * set → emits here), so a completed-and-archived calendar event stays hidden from the
+   * schedule instead of re-surfacing as "not yet added" the next day (#7971).
+   */
+  private _allLinkedCalendarEventIds$: Observable<string[]> = this._store
+    .select(selectAllCalendarTaskEventIds)
+    .pipe(
+      // Gate the archive read on a real value change: selectAllCalendarTaskEventIds emits
+      // a new array reference on every task mutation (incl. the per-second time-tracking
+      // tick), and store.select only dedups by reference. Without this guard the
+      // full-archive load() below would run on each of those.
+      distinctUntilChanged(fastArrayCompare),
+      switchMap((activeIds) =>
+        from(this._taskArchiveService.load()).pipe(
+          map((archive) => {
+            const archivedEventIds = archive.ids
+              .map((id) => archive.entities[id])
+              .filter(isCalendarIssueTask)
+              .map((task) => task.issueId as string);
+            return [...activeIds, ...archivedEventIds];
+          }),
+          catchError(() => of(activeIds)),
+        ),
+      ),
+      distinctUntilChanged(fastArrayCompare),
+      // Cold field shared by the cache path and every poll/refresh cycle; share so the
+      // archive is loaded once per change instead of once per subscriber.
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
 
   calendarEvents$: Observable<ScheduleCalendarMapEntry[]> = combineLatest([
     this._store
       .select(selectCalendarProviders)
       .pipe(distinctUntilChanged(fastArrayCompare)),
-    this._store.select(selectEnabledIssueProviders).pipe(
-      map((providers) =>
+    // `registrationChanges$` emits when a plugin (un)registers. Plugins load
+    // asynchronously after bootstrap, while the issue-provider store is hydrated
+    // early — so without this trigger `getUseAgendaView` is read once (before the
+    // plugin registers, returning false), the store never re-emits, and the
+    // plugin's calendar events stay absent until a re-subscription forces a
+    // re-projection (e.g. navigating away and back). Re-run the filter on
+    // registration so agenda-view plugin events surface without navigation.
+    combineLatest([
+      this._store.select(selectEnabledIssueProviders),
+      this._pluginRegistry.registrationChanges$,
+    ]).pipe(
+      map(([providers]) =>
         providers.filter(
           (p): p is IssueProviderPluginType =>
             isPluginIssueProvider(p.issueProviderKey) &&
@@ -219,9 +270,7 @@ export class CalendarIntegrationService {
     ]);
 
     return combineLatest([
-      this._store
-        .select(selectAllCalendarTaskEventIds)
-        .pipe(distinctUntilChanged(fastArrayCompare)),
+      this._allLinkedCalendarEventIds$,
       this.skippedEventIds$.pipe(distinctUntilChanged(fastArrayCompare)),
       this._hiddenEventsService.hiddenEventIds$.pipe(
         distinctUntilChanged(fastArrayCompare),
@@ -379,8 +428,9 @@ export class CalendarIntegrationService {
     end = getEndOfDayTimestamp(),
     isForwardError = false,
   ): Observable<CalendarIntegrationEvent[]> {
-    // allow calendars to be disabled for web apps if CORS will fail to prevent errors
-    if (calProvider.isDisabledForWebApp && IS_WEB_BROWSER) {
+    // Allow calendars to be disabled where the app uses browser/WebView requests
+    // that often fail due to remote calendar CORS or redirect behavior.
+    if (isCalendarProviderDisabledOnCurrentPlatform(calProvider, IS_WEB_BROWSER)) {
       return of([]);
     }
     return this._http
@@ -408,18 +458,35 @@ export class CalendarIntegrationService {
           })),
         ),
         catchError((err) => {
-          Log.err(err);
+          // iCal feed URLs frequently embed a secret token (Google/Outlook
+          // private feeds). HttpErrorResponse puts the full URL in `.url` and
+          // `.message`, and the log history is exportable — so log only the
+          // sanitized host plus the error name/status, never the raw error.
+          Log.err('CAL_PROVIDER_REQUEST_ERROR', {
+            icalHost: sanitizeIcalUrlForDisplay(calProvider.icalUrl),
+            name: (err as Error)?.name,
+            status: (err as { status?: number })?.status,
+          });
           if (err instanceof NotIcalResponseError) {
             this._snackService.open({
               type: 'ERROR',
               msg: T.F.CALENDARS.S.CAL_PROVIDER_NOT_ICAL,
             });
           } else {
+            // Replace the raw iCal URL (which may embed a secret token) with
+            // the sanitized host so the user-visible snackbar can't leak it
+            // via screenshot/screenshare.
+            const rawErrTxt = getErrorTxt(err);
+            const errTxt = calProvider.icalUrl
+              ? rawErrTxt
+                  .split(calProvider.icalUrl)
+                  .join(sanitizeIcalUrlForDisplay(calProvider.icalUrl))
+              : rawErrTxt;
             this._snackService.open({
               type: 'ERROR',
               msg: T.F.CALENDARS.S.CAL_PROVIDER_ERROR,
               translateParams: {
-                errTxt: getErrorTxt(err),
+                errTxt,
               },
             });
           }

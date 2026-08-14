@@ -10,6 +10,8 @@ import { AppDataComplete } from '../../op-log/model/model-config';
 import { T } from '../../t.const';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
+import { SyncLog } from '../../core/log';
 
 /**
  * Service for restoring state from Super Sync server history.
@@ -20,6 +22,7 @@ export class SuperSyncRestoreService {
   private _snackService = inject(SnackService);
   private _providerManager = inject(SyncProviderManager);
   private _backupService = inject(BackupService);
+  private _localDraftService = inject(LocalDraftService);
 
   /**
    * Check if Super Sync restore is available.
@@ -66,6 +69,10 @@ export class SuperSyncRestoreService {
           true, // isForceConflict - gates page reload (isSkipReload=true overrides)
         );
 
+        // This profile's notes were just replaced wholesale, so every draft's
+        // baseContent refers to content that no longer exists.
+        this._localDraftService.deleteDraftsForActiveProfile();
+
         this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.SYNC.S.RESTORE_SUCCESS,
@@ -81,7 +88,7 @@ export class SuperSyncRestoreService {
 
         if (isNetworkError && retryCount < MAX_RETRIES) {
           retryCount++;
-          console.warn(
+          SyncLog.warn(
             `Restore failed due to network error, retrying (${retryCount}/${MAX_RETRIES}):`,
             error,
           );
@@ -90,10 +97,17 @@ export class SuperSyncRestoreService {
           continue;
         }
 
-        console.error('Failed to restore from point:', error);
+        SyncLog.err('Failed to restore from point:', error);
+        // The server can't replay end-to-end-encrypted ops to reconstruct an
+        // earlier state, so it rejects the restore with a reason mentioning
+        // encryption (surfaced in the thrown error message). Show an actionable
+        // explanation instead of the generic "Failed to restore data". (#8107)
+        const isEncryptionBlocked = errorMsg.includes('encrypt');
         this._snackService.open({
           type: 'ERROR',
-          msg: T.F.SYNC.S.RESTORE_ERROR,
+          msg: isEncryptionBlocked
+            ? T.F.SYNC.S.RESTORE_ENCRYPTED
+            : T.F.SYNC.S.RESTORE_ERROR,
         });
         throw error;
       }

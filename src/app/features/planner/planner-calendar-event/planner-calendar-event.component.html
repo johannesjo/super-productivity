@@ -9,6 +9,12 @@
   <div class="planner-time-remaining-shared">
     {{ calendarEvent().duration | msToString }}
   </div>
+  @if (showStartTime()) {
+    <div
+      class="start-time"
+      [innerHTML]="calendarEvent().start | shortPlannedAt"
+    ></div>
+  }
 </div>
 
 <div

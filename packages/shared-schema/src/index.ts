@@ -2,7 +2,7 @@
 export {
   CURRENT_SCHEMA_VERSION,
   MIN_SUPPORTED_SCHEMA_VERSION,
-  MAX_VERSION_SKIP,
+  PROJECT_DELETE_WINS_SCHEMA_VERSION,
 } from './schema-version';
 
 // Types
@@ -26,15 +26,6 @@ export {
 
 // Migration registry (for inspection/debugging)
 export { MIGRATIONS } from './migrations/index';
-
-// Vector clock types and comparison (shared between client and server)
-export type { VectorClock, VectorClockComparison } from './vector-clock';
-export {
-  compareVectorClocks,
-  mergeVectorClocks,
-  limitVectorClockSize,
-  MAX_VECTOR_CLOCK_SIZE,
-} from './vector-clock';
 
 // Entity types (shared between client and server)
 export type { EntityType } from './entity-types';

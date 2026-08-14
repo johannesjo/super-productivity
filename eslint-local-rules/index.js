@@ -14,4 +14,6 @@ module.exports = {
   'require-entity-registry': require('./rules/require-entity-registry'),
   'no-actions-in-effects': require('./rules/no-actions-in-effects'),
   'no-multi-entity-effect': require('./rules/no-multi-entity-effect'),
+  'no-adapter-in-tx': require('./rules/no-adapter-in-tx'),
+  'require-text-locale': require('./rules/require-text-locale'),
 };

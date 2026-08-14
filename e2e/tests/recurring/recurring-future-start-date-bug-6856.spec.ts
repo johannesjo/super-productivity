@@ -1,4 +1,9 @@
 import { expect, test } from '../../fixtures/test.fixture';
+import {
+  openRecurDialog,
+  openRecurScheduleDialog,
+  saveRecurDialog,
+} from '../../utils/recurring-task-helpers';
 
 /**
  * Bug: https://github.com/super-productivity/super-productivity/issues/6856
@@ -34,42 +39,33 @@ test.describe('Recurring Task - Future Start Date (#6856)', () => {
     await expect(detailBtn).toBeVisible({ timeout: 5000 });
     await detailBtn.click();
 
-    const recurItem = page
-      .locator('task-detail-item')
-      .filter({ has: page.locator('mat-icon', { hasText: /^repeat$/ }) });
-    await expect(recurItem).toBeVisible({ timeout: 5000 });
-    await recurItem.click();
-
     // 3. Wait for the repeat dialog and set a future start date via calendar
-    const repeatDialog = page.locator('mat-dialog-container');
-    await repeatDialog.waitFor({ state: 'visible', timeout: 10000 });
+    await openRecurDialog(page);
+    const scheduleDialog = await openRecurScheduleDialog(page);
 
-    // Open the calendar popup
-    const calendarToggle = repeatDialog.locator('mat-datepicker-toggle button');
-    await calendarToggle.click();
-
-    const calendar = page.locator('.mat-calendar');
+    const calendar = scheduleDialog.locator('mat-calendar');
     await expect(calendar).toBeVisible({ timeout: 5000 });
 
     // Navigate to next month to ensure the date is in the future
-    const nextMonthBtn = page.getByRole('button', { name: /next month/i });
+    const nextMonthBtn = scheduleDialog.getByRole('button', { name: /next month/i });
     await nextMonthBtn.click();
 
     // Select the first available day in next month
-    const firstDay = page
+    const firstDay = scheduleDialog
       .locator('.mat-calendar-body-cell:not(.mat-calendar-body-disabled)')
       .first();
     await expect(firstDay).toBeVisible({ timeout: 5000 });
     await firstDay.click();
 
-    // Wait for calendar to close
-    await expect(calendar).not.toBeVisible({ timeout: 5000 });
+    // Click Schedule button
+    const scheduleSubmitBtn = scheduleDialog.locator(
+      '[data-test-id="schedule-submit-btn"]',
+    );
+    await scheduleSubmitBtn.click();
+    await scheduleDialog.waitFor({ state: 'hidden', timeout: 5000 });
 
     // Save the repeat config — wait for the button to be enabled first
-    const saveBtn = repeatDialog.getByRole('button', { name: /Save/i });
-    await expect(saveBtn).toBeEnabled({ timeout: 5000 });
-    await saveBtn.click();
-    await repeatDialog.waitFor({ state: 'hidden', timeout: 10000 });
+    await saveRecurDialog(page);
 
     // 4. Assert in-session first: the task should disappear from Today as soon
     // as the side-effect actions (updateTask + planTaskForDay) settle. This is

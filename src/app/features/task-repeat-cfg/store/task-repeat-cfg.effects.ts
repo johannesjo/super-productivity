@@ -18,7 +18,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
+import { TaskRepeatCfg, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
@@ -30,7 +30,6 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskArchiveService } from '../../archive/task-archive.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { DateService } from '../../../core/date/date.service';
-import { Log } from '../../../core/log';
 import {
   addSubTask,
   moveSubTask,
@@ -450,42 +449,46 @@ export class TaskRepeatCfgEffects {
               }
               const repeatCfgId = parent.repeatCfgId;
               // Load config and verify flags
-              return this._taskRepeatCfgService.getTaskRepeatCfgById$(repeatCfgId).pipe(
-                first(),
-                switchMap((cfg) => {
-                  if (!cfg.shouldInheritSubtasks) {
-                    return EMPTY;
-                  }
-                  // auto-update is default unless explicitly disabled
-                  const isAutoEnabled = !cfg.disableAutoUpdateSubtasks;
-                  if (!isAutoEnabled) {
-                    return EMPTY;
-                  }
-                  // Ensure parent is the newest live instance
-                  return this._taskService.getTasksByRepeatCfgId$(repeatCfgId).pipe(
-                    first(),
-                    switchMap((liveInstances) => {
-                      if (!liveInstances || liveInstances.length === 0) {
-                        return EMPTY;
-                      }
-                      const newest = liveInstances.reduce((a, b) =>
-                        a.created > b.created ? a : b,
-                      );
-                      if (newest.id !== parent.id) {
-                        return EMPTY;
-                      }
-                      // Build templates from newest.subTaskIds order
-                      return rxOf({
-                        cfg,
-                        newest,
-                      } as {
-                        cfg: TaskRepeatCfgCopy;
-                        newest: Task;
-                      });
-                    }),
-                  );
-                }),
-              );
+              return this._taskRepeatCfgService
+                .getTaskRepeatCfgByIdAllowUndefined$(repeatCfgId)
+                .pipe(
+                  first(),
+                  switchMap((cfg) => {
+                    // Config may be gone (e.g. deleted via cross-client sync) while a
+                    // task still references it — skip instead of crashing. See #8715.
+                    if (!cfg || !cfg.shouldInheritSubtasks) {
+                      return EMPTY;
+                    }
+                    // auto-update is default unless explicitly disabled
+                    const isAutoEnabled = !cfg.disableAutoUpdateSubtasks;
+                    if (!isAutoEnabled) {
+                      return EMPTY;
+                    }
+                    // Ensure parent is the newest live instance
+                    return this._taskService.getTasksByRepeatCfgId$(repeatCfgId).pipe(
+                      first(),
+                      switchMap((liveInstances) => {
+                        if (!liveInstances || liveInstances.length === 0) {
+                          return EMPTY;
+                        }
+                        const newest = liveInstances.reduce((a, b) =>
+                          a.created > b.created ? a : b,
+                        );
+                        if (newest.id !== parent.id) {
+                          return EMPTY;
+                        }
+                        // Build templates from newest.subTaskIds order
+                        return rxOf({
+                          cfg,
+                          newest,
+                        } as {
+                          cfg: TaskRepeatCfgCopy;
+                          newest: Task;
+                        });
+                      }),
+                    );
+                  }),
+                );
             }),
             filter((res): res is { cfg: TaskRepeatCfgCopy; newest: Task } => !!res),
             switchMap(({ cfg, newest }) =>
@@ -624,15 +627,20 @@ export class TaskRepeatCfgEffects {
       ),
       filter((task): task is Task => !!task?.repeatCfgId),
       switchMap((task) =>
-        this._taskRepeatCfgService.getTaskRepeatCfgById$(task.repeatCfgId as string).pipe(
-          take(1),
-          map((cfg) => ({ task, cfg })),
-        ),
+        // Use the non-throwing lookup: a completed instance can reference a
+        // repeat config that was already deleted (e.g. via cross-client sync).
+        // The throwing selector would crash the whole app here (#8715).
+        this._taskRepeatCfgService
+          .getTaskRepeatCfgByIdAllowUndefined$(task.repeatCfgId as string)
+          .pipe(
+            take(1),
+            map((cfg) => ({ task, cfg })),
+          ),
       ),
       filter(
-        ({ cfg }) =>
-          !!cfg &&
-          (cfg.repeatFromCompletionDate === true || cfg.waitForCompletion === true),
+        (v): v is { task: Task; cfg: TaskRepeatCfg } =>
+          !!v.cfg &&
+          (v.cfg.repeatFromCompletionDate === true || v.cfg.waitForCompletion === true),
       ),
       concatMap(({ task, cfg }) => {
         const today = this._dateService.todayStr();
@@ -706,8 +714,6 @@ export class TaskRepeatCfgEffects {
               ),
               tap(([isConfirm, completeCfg]) => {
                 if (isConfirm) {
-                  Log.log(changes);
-                  Log.log(todayTasks, archiveTasks);
                   // NOTE: keep in mind that it's very likely that there will be only one task for today
                   // TODO update reminders if given
                   todayTasks.forEach((task) =>
@@ -747,7 +753,6 @@ export class TaskRepeatCfgEffects {
                     ) {
                       changesForArchiveTask.timeEstimate = changes.defaultEstimate;
                     }
-                    Log.log('updateArchiveTask', changesForArchiveTask);
                     return { id: task.id, changes: changesForArchiveTask };
                   });
                   this._taskService.updateArchiveTasks(archiveUpdates);

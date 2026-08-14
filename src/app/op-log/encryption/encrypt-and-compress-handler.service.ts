@@ -7,7 +7,9 @@ import { OP_LOG_SYNC_LOGGER } from '../core/sync-logger.adapter';
 import {
   DecryptError,
   DecryptNoPasswordError,
+  EncryptNoPasswordError,
   JsonParseError,
+  PlaintextWhenEncryptionExpectedError,
 } from '../core/errors/sync-errors';
 import {
   compressWithGzipToString,
@@ -45,6 +47,10 @@ export class EncryptAndCompressHandlerService {
       await this.decompressAndDecrypt<T>({
         dataStr,
         encryptKey,
+        // GHSA-vrc7-775g-ggqc: pass the local encryption intent so the decode
+        // fails closed on a plaintext blob instead of trusting the (attacker-
+        // controllable) remote prefix alone.
+        isEncryptExpected: cfg.isEncrypt,
       })
     ).data;
   }
@@ -82,7 +88,14 @@ export class EncryptAndCompressHandlerService {
     }
     if (isEncrypt) {
       if (!encryptKey || encryptKey.length === 0) {
-        throw new Error('No encryption password provided');
+        // GHSA-9544-hjjr-fg8h: this is the single chokepoint every file-based
+        // upload passes through. Encryption expected but key missing (e.g.
+        // silently dropped credentials) must hard-stop here — falling back to
+        // plaintext would leak the full sync data to the remote.
+        // No payload in the error: it is user content.
+        throw new EncryptNoPasswordError(
+          'Encryption is enabled but no encryption password is available',
+        );
       }
 
       dataStr = await encrypt(dataStr, encryptKey);
@@ -94,9 +107,15 @@ export class EncryptAndCompressHandlerService {
   async decompressAndDecrypt<T>({
     dataStr,
     encryptKey,
+    isEncryptExpected,
   }: {
     dataStr: string;
     encryptKey?: string;
+    // Local encryption intent. REQUIRED (no fail-open default): the guard below
+    // is only as safe as this flag, so every caller must state whether encryption
+    // is expected. The sole production caller is decompressAndDecryptData, which
+    // forwards cfg.isEncrypt.
+    isEncryptExpected: boolean;
   }): Promise<{
     data: T;
     modelVersion: number;
@@ -107,6 +126,19 @@ export class EncryptAndCompressHandlerService {
       `${EncryptAndCompressHandlerService.L}.${this.decompressAndDecrypt.name}()`,
       { isCompressed, isEncrypted, modelVersion },
     );
+
+    // GHSA-vrc7-775g-ggqc: fail closed when encryption is expected but the blob
+    // is plaintext. The prefix's `E` flag lives OUTSIDE the AEAD envelope, so a
+    // remote attacker (compromised Dropbox/WebDAV account, or a non-TLS WebDAV
+    // MITM) can strip it and serve attacker-authored plaintext. Deciding
+    // decrypt-or-not purely from that attacker-controlled prefix would silently
+    // accept the injected data. Local encryption intent wins over the remote's
+    // self-declaration — the download-side mirror of the compressAndEncrypt()
+    // upload chokepoint. No payload in the error: it may be user content.
+    if (isEncryptExpected && !isEncrypted) {
+      throw new PlaintextWhenEncryptionExpectedError({ isCompressed, modelVersion });
+    }
+
     let outStr = cleanDataStr;
 
     if (isEncrypted) {

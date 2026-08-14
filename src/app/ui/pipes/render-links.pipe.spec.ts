@@ -213,18 +213,43 @@ describe('RenderLinksPipe', () => {
       expect(result).not.toContain('<a ');
     });
 
-    it('should reject tel: URLs in markdown links', () => {
+    it('should render tel: URLs in markdown links (shared allowlist)', () => {
       const result = html(pipe.transform('[Call us](tel:+1234567890)'));
-      expect(result).toContain('Call us');
-      expect(result).not.toContain('<a ');
-      expect(result).not.toContain('href=');
+      expect(result).toContain('href="tel:+1234567890"');
+      expect(result).toContain('>Call us</a>');
     });
 
-    it('should reject mailto: URLs in markdown links', () => {
+    it('should render mailto: URLs in markdown links (shared allowlist)', () => {
       const result = html(pipe.transform('[Email](mailto:user@example.com)'));
-      expect(result).toContain('Email');
-      expect(result).not.toContain('<a ');
-      expect(result).not.toContain('href=');
+      expect(result).toContain('href="mailto:user@example.com"');
+      expect(result).toContain('>Email</a>');
+    });
+
+    // #8429: app deep-links must behave the same here as in markdown notes.
+    it('should render app deep-link schemes (obsidian:, vscode:) verbatim as links', () => {
+      const result = html(
+        pipe.transform(
+          '[Note](obsidian://open?vault=Notes) and [Code](vscode://file/home/x.ts)',
+        ),
+      );
+      expect(result).toContain('href="obsidian://open?vault=Notes"');
+      expect(result).toContain('href="vscode://file/home/x.ts"');
+      // schemes are preserved verbatim — never prefixed with http://
+      expect(result).not.toContain('http://obsidian');
+      expect(result).not.toContain('http://vscode');
+      expect((result.match(/<a /g) || []).length).toBe(2);
+    });
+
+    it('should auto-link plain webexteams:// URIs and preserve query params', () => {
+      const uri =
+        'webexteams://im?space=ff135070-68f8-11f1-9229-c7e6cca7a7cd&message=f4f13440-6b50-11f1-8868-03e71232fa87';
+      const result = html(pipe.transform(`Open ${uri}`));
+
+      expect(result).toContain(`href="${uri.replace(/&/g, '&amp;')}"`);
+      expect(result).toContain(
+        '>webexteams://im?space=ff135070-68f8-11f1-9229-c7e6cca7a7cd&amp;message=f4f13440-6b50-11f1-8868-03e71232fa87</a>',
+      );
+      expect(result).not.toContain('http://webexteams');
     });
 
     it('should reject empty URLs in markdown links', () => {

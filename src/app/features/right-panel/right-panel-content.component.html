@@ -19,7 +19,11 @@
   }
 } @else {
   @if (selectedTaskWithDelayForNone(); as task) {
-    @defer (prefetch on idle) {
+    <!-- Render `on immediate`, not `on idle`: the task panel is the default and
+         most common right-panel content. An idle-starved trigger (e.g. under load)
+         could otherwise leave the panel shell open but its content empty. The
+         component is still code-split and idle-prefetched, so the bundle win holds. -->
+    @defer (on immediate; prefetch on idle) {
       <task-detail-panel
         [@taskDetailPanelTaskChange]="task.id"
         [@.disabled]="isDisableTaskPanelAni()"

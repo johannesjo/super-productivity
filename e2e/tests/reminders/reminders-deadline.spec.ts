@@ -83,8 +83,8 @@ test.describe('Deadline Reminders', () => {
     const dueForText = await dueForEl.textContent();
     expect(dueForText!.trim().length).toBeGreaterThan(0);
 
-    // Dismiss by marking the task as done
-    await page.locator(REMINDER_DIALOG).locator('button:has-text("Done")').click();
+    // Dismiss by marking the task as done via the dedicated done button
+    await page.locator(REMINDER_DIALOG).locator('button.done-btn').click();
 
     // Wait for the reminder dialog to close
     await page.locator(REMINDER_DIALOG).waitFor({ state: 'hidden', timeout: 10000 });
@@ -94,7 +94,7 @@ test.describe('Deadline Reminders', () => {
     await expect(page.locator(REMINDER_DIALOG)).not.toBeVisible();
   });
 
-  test('should not reappear after ESC/backdrop dismissal of the deadline reminder dialog', async ({
+  test('should dismiss the deadline reminder dialog on Escape without re-triggering', async ({
     page,
     workViewPage,
     testPrefix,
@@ -143,11 +143,13 @@ test.describe('Deadline Reminders', () => {
       state: 'visible',
       timeout: SCHEDULE_MAX_WAIT_TIME,
     });
-    await expect(page.locator(REMINDER_DIALOG)).toBeVisible();
+    const reminderDialog = page.locator(REMINDER_DIALOG);
+    await expect(reminderDialog).toBeVisible();
 
-    // Dismiss via ESC (simulates user closing the dialog without a dedicated action)
+    // Pressing Escape dismisses the reminder (clearing the reminder timestamp
+    // while keeping the task and its deadline) and closes the dialog.
     await page.keyboard.press('Escape');
-    await page.locator(REMINDER_DIALOG).waitFor({ state: 'hidden', timeout: 10000 });
+    await reminderDialog.waitFor({ state: 'hidden', timeout: 10000 });
 
     // Poll over a window longer than the 10s reminder worker tick. If the
     // worker re-fires the past-due deadline, the dialog becomes visible and
@@ -211,12 +213,12 @@ test.describe('Deadline Reminders', () => {
     await page.waitForSelector(REMINDER_DIALOG_TASK_1, { state: 'visible' });
     await expect(page.locator(REMINDER_DIALOG_TASK_1)).toContainText(taskTitle);
 
-    // Click "Snooze" to open snooze menu, then "Reschedule until tomorrow"
-    const snoozeBtn = page
+    // Open the overflow menu (the split-button dropdown right of snooze), then
+    // pick "Reschedule for tomorrow". The main snooze button snoozes 10m directly.
+    const snoozeMenuBtn = page
       .locator(REMINDER_DIALOG)
-      .locator('button:has(mat-icon:text("snooze"))')
-      .first();
-    await snoozeBtn.click();
+      .locator('button[aria-label="More actions"]');
+    await snoozeMenuBtn.click();
 
     const rescheduleOption = page.locator(
       'button[mat-menu-item]:has-text("Reschedule for tomorrow")',

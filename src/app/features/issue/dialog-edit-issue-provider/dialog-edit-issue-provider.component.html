@@ -183,6 +183,21 @@
                 {{ T.F.ISSUE.DIALOG.LOAD_OPTIONS_FAILED | translate }}
               </span>
             }
+            @case ('empty') {
+              <button
+                mat-stroked-button
+                type="button"
+                color="primary"
+                (click)="loadDynamicOptions()"
+              >
+                <mat-icon>refresh</mat-icon>
+                {{ T.F.ISSUE.DIALOG.RELOAD_OPTIONS | translate }}
+              </button>
+              <span class="empty-status">
+                <mat-icon class="empty-status-icon">info</mat-icon>
+                {{ T.F.ISSUE.DIALOG.NO_OPTIONS_FOUND_HELP | translate }}
+              </span>
+            }
             @default {
               <button
                 mat-stroked-button
@@ -233,14 +248,6 @@
           ></open-project-additional-cfg>
           <!-- -->
         }
-        @case ('TRELLO') {
-          <trello-additional-cfg
-            [section]="configFormSection"
-            [cfg]="model"
-            (modelChange)="customCfgCmpSave($event)"
-          ></trello-additional-cfg>
-          <!-- -->
-        }
         @case ('NEXTCLOUD_DECK') {
           <nextcloud-deck-additional-cfg
             [section]="configFormSection"
@@ -256,7 +263,6 @@
   <mat-dialog-actions align="end">
     <button
       (click)="cancel()"
-      color="primary"
       mat-button
       type="button"
     >
@@ -304,7 +310,7 @@
     }
     <button
       color="primary"
-      mat-stroked-button
+      mat-flat-button
       type="submit"
       [disabled]="form.invalid"
     >

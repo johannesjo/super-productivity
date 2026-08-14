@@ -7,8 +7,8 @@ import {
   DEFAULT_SYNC_CONFIG,
   VectorClock,
   SYNC_ERROR_CODES,
+  createStateReplacementRequiredResults,
 } from './sync.types';
-import { computeOpStorageBytes } from './sync.const';
 import { Logger } from '../logger';
 import { Prisma } from '@prisma/client';
 import {
@@ -24,6 +24,7 @@ import {
   type CacheSnapshotResult,
   type SnapshotDedupResponse,
 } from './services';
+import type { ValidationResult } from './services/validation.service';
 const getPrismaP2002TargetTokens = (
   err: Prisma.PrismaClientKnownRequestError,
 ): string[] => {
@@ -60,6 +61,12 @@ const isRetryableOperationUniqueViolation = (err: unknown): boolean => {
   );
 };
 
+class CleanSlateUploadRejectedError extends Error {
+  constructor(readonly results: UploadResult[]) {
+    super('Clean-slate replacement was rejected');
+  }
+}
+
 /**
  * Main sync orchestration service.
  *
@@ -83,6 +90,7 @@ export class SyncService {
   private storageQuotaService: StorageQuotaService;
   private snapshotService: SnapshotService;
   private operationUploadService: OperationUploadService;
+  private prevalidatedOps = new WeakMap<Operation, ValidationResult>();
 
   constructor(config: Partial<SyncConfig> = {}) {
     this.config = { ...DEFAULT_SYNC_CONFIG, ...config };
@@ -99,6 +107,31 @@ export class SyncService {
     );
   }
 
+  getMaxClockDriftMs(): number {
+    return this.config.maxClockDriftMs;
+  }
+
+  /**
+   * Return only operations that can consume storage if this upload commits.
+   * Invalid siblings still reach uploadOps so the client receives a terminal
+   * per-operation rejection, but they must not inflate the pre-write quota gate
+   * and block otherwise valid operations in the same request.
+   */
+  filterValidOpsForQuota(ops: Operation[], clientId: string): Operation[] {
+    const seenOperationIds = new Set<string>();
+    return ops.filter((op) => {
+      const isFirstOccurrence = !seenOperationIds.has(op.id);
+      seenOperationIds.add(op.id);
+      const validation = this.validationService.validateOp(op, clientId);
+      this.prevalidatedOps.set(op, validation);
+      return isFirstOccurrence && validation.valid;
+    });
+  }
+
+  getPrevalidatedPayloadBytes(op: Operation): number | undefined {
+    return this.prevalidatedOps.get(op)?.payloadBytes;
+  }
+
   // === Upload Operations ===
 
   async uploadOps(
@@ -106,18 +139,166 @@ export class SyncService {
     clientId: string,
     ops: Operation[],
     isCleanSlate?: boolean,
+    requestStartOccupiedIds?: ReadonlySet<string>,
+    repairBaseServerSeq?: number,
+    allowLegacyRepairWithoutBase: boolean = false,
+    lastKnownServerSeq?: number,
   ): Promise<UploadResult[]> {
+    if (isCleanSlate && ops.length === 0) {
+      return [];
+    }
+
     const results: UploadResult[] = [];
     const now = Date.now();
     const txStartedAt = Date.now();
     let uploadDbRoundtrips = 0;
+    const prevalidatedResults = new Map<Operation, ValidationResult>();
+    const containsRepair = ops.some((op) => op.opType === 'REPAIR');
+    const isLegacyRepairUpload =
+      containsRepair && repairBaseServerSeq === undefined && allowLegacyRepairWithoutBase;
+    const shouldCleanSlate = !!isCleanSlate && !containsRepair;
+    if (isCleanSlate && containsRepair) {
+      Logger.warn(
+        `[user:${userId}] Ignoring destructive clean-slate flag for REPAIR upload`,
+      );
+    }
+    for (const op of ops) {
+      const validation = this.prevalidatedOps.get(op);
+      if (validation) {
+        prevalidatedResults.set(op, validation);
+      }
+    }
+
+    if (isCleanSlate) {
+      const validations = ops.map((op) => {
+        const validation =
+          prevalidatedResults.get(op) ?? this.validationService.validateOp(op, clientId);
+        prevalidatedResults.set(op, validation);
+        return validation;
+      });
+      if (validations.some(({ valid }) => !valid)) {
+        return ops.map((op, index) => {
+          const validation = validations[index];
+          return validation.valid
+            ? {
+                opId: op.id,
+                accepted: false,
+                error: 'Clean-slate batch contains an invalid operation',
+                errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+              }
+            : {
+                opId: op.id,
+                accepted: false,
+                error: validation.error ?? 'Invalid operation',
+                errorCode: validation.errorCode,
+              };
+        });
+      }
+    }
 
     try {
       // Use transaction to acquire write lock and ensure atomicity
       await prisma.$transaction(
         async (tx) => {
+          const needsSyncStateLock =
+            shouldCleanSlate ||
+            lastKnownServerSeq !== undefined ||
+            (containsRepair && !isLegacyRepairUpload);
+          let currentServerSeq = 0;
+          if (needsSyncStateLock) {
+            // Serialize state replacements, cursor checks, and later inserts on
+            // the same per-user row. Whichever request acquires this lock first
+            // defines the safe order seen by every other server instance.
+            await tx.userSyncState.upsert({
+              where: { userId },
+              create: { userId, lastSeq: 0 },
+              update: {},
+            });
+            const rows = await tx.$queryRaw<
+              Array<{
+                lastSeq: number;
+                latestStateReplacementSeq: number | null;
+              }>
+            >`
+              SELECT
+                last_seq AS "lastSeq",
+                latest_state_replacement_seq AS "latestStateReplacementSeq"
+              FROM user_sync_state
+              WHERE user_id = ${userId}
+              FOR UPDATE
+            `;
+            currentServerSeq = rows[0]?.lastSeq ?? 0;
+            let latestStateReplacementSeq = rows[0]?.latestStateReplacementSeq ?? null;
+            if (latestStateReplacementSeq === null) {
+              // The column is intentionally not backfilled during migration:
+              // the supported Compose deploy keeps the old process serving
+              // while migrations run. Resolve retained replacements lazily
+              // after the new process owns the write path, then persist the
+              // answer for subsequent uploads.
+              const retainedReplacement = await tx.operation.findFirst({
+                where: {
+                  userId,
+                  opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] },
+                },
+                orderBy: { serverSeq: 'desc' },
+                select: { serverSeq: true },
+              });
+              // Zero is a resolved "no retained replacement" sentinel. Keeping
+              // null exclusively for unresolved upgrade rows avoids repeating
+              // this indexed lookup on every upload for ordinary accounts.
+              latestStateReplacementSeq = retainedReplacement?.serverSeq ?? 0;
+              await tx.userSyncState.update({
+                where: { userId },
+                data: { latestStateReplacementSeq },
+              });
+              uploadDbRoundtrips++;
+            }
+            if (
+              lastKnownServerSeq !== undefined &&
+              latestStateReplacementSeq !== null &&
+              lastKnownServerSeq < latestStateReplacementSeq
+            ) {
+              Logger.warn(
+                `[user:${userId}] Rejecting upload from stale state replacement cursor ` +
+                  `(client=${lastKnownServerSeq}, required=${latestStateReplacementSeq})`,
+              );
+              results.push(...createStateReplacementRequiredResults(ops));
+              return;
+            }
+          }
+
+          if (containsRepair && !isLegacyRepairUpload) {
+            if (
+              repairBaseServerSeq === undefined ||
+              repairBaseServerSeq !== currentServerSeq
+            ) {
+              Logger.warn(
+                `[user:${userId}] Rejecting stale REPAIR snapshot ` +
+                  `(base=${repairBaseServerSeq ?? 'missing'}, current=${currentServerSeq})`,
+              );
+              results.push(
+                ...ops.map((op) =>
+                  op.opType === 'REPAIR'
+                    ? {
+                        opId: op.id,
+                        accepted: false,
+                        error: 'REPAIR snapshot does not include current server state',
+                        errorCode: SYNC_ERROR_CODES.REPAIR_STALE,
+                      }
+                    : {
+                        opId: op.id,
+                        accepted: false,
+                        error: 'Batch deferred because its REPAIR snapshot is stale',
+                        errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+                      },
+                ),
+              );
+              return;
+            }
+          }
+
           // If clean slate requested, delete all existing data first
-          if (isCleanSlate) {
+          if (shouldCleanSlate) {
             Logger.info(
               `[user:${userId}] Clean slate requested - deleting all user data`,
             );
@@ -140,6 +321,7 @@ export class SyncService {
                 snapshotAt: null,
                 latestFullStateSeq: null,
                 latestFullStateVectorClock: Prisma.DbNull,
+                latestStateReplacementSeq: null,
               },
             });
 
@@ -168,6 +350,8 @@ export class SyncService {
               ops,
               now,
               tx,
+              prevalidatedResults,
+              requestStartOccupiedIds,
             );
             results.push(...batchResult.results);
             acceptedDeltaBytes = batchResult.acceptedDeltaBytes;
@@ -178,33 +362,102 @@ export class SyncService {
             // We assume user exists in `users` table because of foreign key,
             // but if `uploadOps` is called, authentication should have verified user existence.
             // However, `user_sync_state` might not exist yet.
-            await tx.userSyncState.upsert({
-              where: { userId },
-              create: { userId, lastSeq: 0 },
-              update: {}, // No-op update to ensure it exists
-            });
-            uploadDbRoundtrips++;
+            if (!needsSyncStateLock) {
+              await tx.userSyncState.upsert({
+                where: { userId },
+                create: { userId, lastSeq: 0 },
+                update: {}, // No-op update to ensure it exists
+              });
+              uploadDbRoundtrips++;
+            }
+
+            const firstOperationById = new Map<
+              string,
+              { op: Operation; originalTimestamp: number }
+            >();
 
             for (const op of ops) {
-              const result = await this.operationUploadService.processOperation(
-                userId,
-                clientId,
-                op,
-                now,
-                tx,
-              );
+              const firstRequestOperation = firstOperationById.get(op.id);
+              if (!firstRequestOperation) {
+                firstOperationById.set(op.id, {
+                  op,
+                  originalTimestamp: op.timestamp,
+                });
+              }
+              const validation =
+                prevalidatedResults.get(op) ??
+                this.validationService.validateOp(op, clientId);
+              prevalidatedResults.set(op, validation);
+
+              const { result, storageBytes, fallback } =
+                await this.operationUploadService.processOperation(
+                  userId,
+                  clientId,
+                  op,
+                  now,
+                  tx,
+                  validation,
+                  requestStartOccupiedIds?.has(op.id),
+                  firstRequestOperation,
+                );
               results.push(result);
               if (result.accepted) {
-                const sized = computeOpStorageBytes(op);
-                acceptedDeltaBytes += sized.bytes;
-                if (sized.fallback) unserializableAccepted += 1;
+                // Reuse the size computed in processOperation instead of
+                // re-measuring (the payload can be multi-MB).
+                acceptedDeltaBytes += storageBytes;
+                if (fallback) unserializableAccepted += 1;
               }
             }
           }
+
+          let latestAcceptedStateReplacementSeq: number | undefined;
+          for (let index = 0; index < ops.length; index++) {
+            const op = ops[index];
+            const result = results[index];
+            if (
+              result?.accepted &&
+              result.serverSeq !== undefined &&
+              (op.opType === 'SYNC_IMPORT' || op.opType === 'BACKUP_IMPORT')
+            ) {
+              latestAcceptedStateReplacementSeq = Math.max(
+                latestAcceptedStateReplacementSeq ?? 0,
+                result.serverSeq,
+              );
+            }
+          }
+          if (latestAcceptedStateReplacementSeq !== undefined) {
+            await tx.userSyncState.update({
+              where: { userId },
+              data: {
+                latestStateReplacementSeq: latestAcceptedStateReplacementSeq,
+              },
+            });
+            uploadDbRoundtrips++;
+          }
+
           if (unserializableAccepted > 0) {
             Logger.warn(
               `computeOpsStorageBytes: ${unserializableAccepted} unserializable op(s) ` +
                 `charged at APPROX_BYTES_PER_OP for user=${userId} (uploadOps)`,
+            );
+          }
+
+          if (
+            isCleanSlate &&
+            (results.length !== ops.length || results.some(({ accepted }) => !accepted))
+          ) {
+            throw new CleanSlateUploadRejectedError(
+              ops.map((op, index) => {
+                const result = results[index];
+                return result && !result.accepted
+                  ? result
+                  : {
+                      opId: op.id,
+                      accepted: false,
+                      error: 'Clean-slate replacement was rolled back',
+                      errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+                    };
+              }),
             );
           }
 
@@ -240,7 +493,7 @@ export class SyncService {
           // advisory; reconcile self-heals if it ever drifts). Clean slate
           // already reset the counter to zero above, so SET (rather than
           // increment) avoids double-counting anything left in the row.
-          if (acceptedDeltaBytes > 0 && !isCleanSlate) {
+          if (acceptedDeltaBytes > 0 && !shouldCleanSlate) {
             const delta = BigInt(Math.floor(acceptedDeltaBytes));
             await tx.$executeRaw`
               UPDATE users
@@ -248,7 +501,7 @@ export class SyncService {
               WHERE id = ${userId}
             `;
             uploadDbRoundtrips++;
-          } else if (acceptedDeltaBytes > 0 && isCleanSlate) {
+          } else if (acceptedDeltaBytes > 0 && shouldCleanSlate) {
             const delta = BigInt(Math.floor(acceptedDeltaBytes));
             await tx.$executeRaw`
               UPDATE users
@@ -273,7 +526,7 @@ export class SyncService {
       // Clear caches after clean slate transaction completes successfully.
       // Include request dedup so a retry from before the wipe cannot return
       // cached results that reference now-deleted state.
-      if (isCleanSlate) {
+      if (shouldCleanSlate) {
         this.rateLimitService.clearForUser(userId);
         this.snapshotService.clearForUser(userId);
         this.storageQuotaService.clearForUser(userId);
@@ -291,6 +544,13 @@ export class SyncService {
         batchUpload: this.config.batchUpload,
       });
     } catch (err) {
+      if (err instanceof CleanSlateUploadRejectedError) {
+        Logger.warn(
+          `[user:${userId}] Clean-slate replacement rejected; existing data preserved`,
+        );
+        return err.results;
+      }
+
       // Transaction failed - all operations were rolled back
       const errorMessage = (err as Error).message || 'Unknown error';
 
@@ -342,20 +602,6 @@ export class SyncService {
   // === Download Operations ===
   // Delegated to OperationDownloadService
 
-  async getOpsSince(
-    userId: number,
-    sinceSeq: number,
-    excludeClient?: string,
-    limit: number = 500,
-  ): Promise<ServerOperation[]> {
-    return this.operationDownloadService.getOpsSince(
-      userId,
-      sinceSeq,
-      excludeClient,
-      limit,
-    );
-  }
-
   async getOpsSinceWithSeq(
     userId: number,
     sinceSeq: number,
@@ -385,15 +631,6 @@ export class SyncService {
   // === Snapshot Management ===
   // Delegated to SnapshotService
 
-  async getCachedSnapshot(userId: number): Promise<{
-    state: unknown;
-    serverSeq: number;
-    generatedAt: number;
-    schemaVersion: number;
-  } | null> {
-    return this.snapshotService.getCachedSnapshot(userId);
-  }
-
   async prepareSnapshotCache(state: unknown): Promise<PreparedSnapshotCache> {
     return this.snapshotService.prepareSnapshotCache(state);
   }
@@ -404,15 +641,6 @@ export class SyncService {
 
   async getCachedSnapshotGeneratedAt(userId: number): Promise<number | null> {
     return this.snapshotService.getCachedSnapshotGeneratedAt(userId);
-  }
-
-  async cacheSnapshot(
-    userId: number,
-    state: unknown,
-    serverSeq: number,
-    preparedSnapshot?: PreparedSnapshotCache,
-  ): Promise<CacheSnapshotResult> {
-    return this.snapshotService.cacheSnapshot(userId, state, serverSeq, preparedSnapshot);
   }
 
   async cacheSnapshotIfReplayable(
@@ -481,26 +709,64 @@ export class SyncService {
     return this.rateLimitService.cleanupExpiredCounters();
   }
 
-  checkOpsRequestDedup(userId: number, requestId: string): UploadResult[] | null {
-    return this.requestDeduplicationService.checkDeduplication(userId, 'ops', requestId);
+  checkOpsRequestDedup(
+    userId: number,
+    requestId: string,
+    getFingerprint?: () => string,
+  ): UploadResult[] | null {
+    return this.requestDeduplicationService.checkDeduplication(
+      userId,
+      'ops',
+      requestId,
+      getFingerprint,
+    );
+  }
+
+  async getLatestStateReplacementSeq(userId: number): Promise<number | null> {
+    const syncState = await prisma.userSyncState.findUnique({
+      where: { userId },
+      select: { latestStateReplacementSeq: true },
+    });
+    const latestStateReplacementSeq = syncState?.latestStateReplacementSeq;
+    if (typeof latestStateReplacementSeq === 'number') {
+      return latestStateReplacementSeq;
+    }
+    const retainedReplacement = await prisma.operation.findFirst({
+      where: {
+        userId,
+        opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] },
+      },
+      orderBy: { serverSeq: 'desc' },
+      select: { serverSeq: true },
+    });
+    return retainedReplacement?.serverSeq ?? null;
   }
 
   cacheOpsRequestResults(
     userId: number,
     requestId: string,
     results: UploadResult[],
+    fingerprint?: string,
   ): void {
-    this.requestDeduplicationService.cacheResults(userId, 'ops', requestId, results);
+    this.requestDeduplicationService.cacheResults(
+      userId,
+      'ops',
+      requestId,
+      results,
+      fingerprint,
+    );
   }
 
   checkSnapshotRequestDedup(
     userId: number,
     requestId: string,
+    getFingerprint?: () => string,
   ): SnapshotDedupResponse | null {
     return this.requestDeduplicationService.checkDeduplication(
       userId,
       'snapshot',
       requestId,
+      getFingerprint,
     );
   }
 
@@ -508,12 +774,14 @@ export class SyncService {
     userId: number,
     requestId: string,
     response: SnapshotDedupResponse,
+    fingerprint?: string,
   ): void {
     this.requestDeduplicationService.cacheResults(
       userId,
       'snapshot',
       requestId,
       response,
+      fingerprint,
     );
   }
 
@@ -523,15 +791,6 @@ export class SyncService {
 
   // === Storage Quota ===
   // Delegated to StorageQuotaService
-
-  async calculateStorageUsage(userId: number): Promise<{
-    operationsBytes: number;
-    snapshotBytes: number;
-    totalBytes: number;
-    hasUnbackfilledRows: boolean;
-  }> {
-    return this.storageQuotaService.calculateStorageUsage(userId);
-  }
 
   async assertPayloadBytesBackfillComplete(): Promise<void> {
     return this.storageQuotaService.assertPayloadBytesBackfillComplete();
@@ -616,8 +875,7 @@ export class SyncService {
       // Delete sync state entirely, resetting lastSeq to 0.
       // Unlike uploadOps clean slate (which preserves lastSeq), account reset
       // intentionally wipes everything. Clients detect the wipe via latestSeq=0
-      // and trigger a full state re-upload. This is correct because account reset
-      // (e.g., encryption password change) requires ALL clients to re-sync.
+      // and trigger a full state re-upload.
       await tx.userSyncState.deleteMany({ where: { userId } });
 
       // Reset storage usage
@@ -635,14 +893,6 @@ export class SyncService {
     this.snapshotService.clearForUser(userId);
     this.storageQuotaService.clearForUser(userId);
     this.requestDeduplicationService.clearForUser(userId);
-  }
-
-  async isDeviceOwner(userId: number, clientId: string): Promise<boolean> {
-    return this.deviceService.isDeviceOwner(userId, clientId);
-  }
-
-  async getAllUserIds(): Promise<number[]> {
-    return this.deviceService.getAllUserIds();
   }
 
   async getOnlineDeviceCount(userId: number): Promise<number> {

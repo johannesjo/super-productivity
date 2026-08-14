@@ -17,8 +17,15 @@ import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { GlobalThemeService } from '../global-theme.service';
-import { CustomTheme, CustomThemeRef, CustomThemeService } from '../custom-theme.service';
+import { DialogWallpaperComponent } from '../dialog-wallpaper/dialog-wallpaper.component';
+import {
+  CustomTheme,
+  CustomThemeRef,
+  CustomThemeService,
+  getRequiredThemeMode,
+} from '../custom-theme.service';
 import { ThemeStorageService } from '../theme-storage.service';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
@@ -61,6 +68,7 @@ const valueToRef = (value: string): CustomThemeRef => {
           name="darkMode"
           [attr.aria-label]="T.GCF.MISC.DARK_MODE_ARIA_LABEL | translate"
           [value]="globalThemeService.darkMode()"
+          [disabled]="activeRequiredMode() !== undefined"
           (change)="updateDarkMode($event)"
         >
           <mat-button-toggle value="system">
@@ -86,7 +94,7 @@ const valueToRef = (value: string): CustomThemeRef => {
             [value]="activeValue()"
             (selectionChange)="updateCustomTheme($event)"
           >
-            @for (theme of customThemeService.themes(); track theme.id) {
+            @for (theme of customThemeService.themes(); track optionValue(theme)) {
               <mat-option [value]="optionValue(theme)">
                 <span class="theme-option-row">
                   <span class="theme-option-label">{{ theme.name }}</span>
@@ -129,6 +137,18 @@ const valueToRef = (value: string): CustomThemeRef => {
           (change)="onFileSelected($event)"
         />
       </div>
+
+      <div class="wallpaper-select">
+        <h3>{{ T.GCF.MISC.WALLPAPER | translate }}</h3>
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="openWallpaperDialog()"
+        >
+          <mat-icon>wallpaper</mat-icon>
+          {{ T.GCF.MISC.WALLPAPER_BUTTON | translate }}
+        </button>
+      </div>
     </div>
   `,
   styles: [
@@ -141,7 +161,8 @@ const valueToRef = (value: string): CustomThemeRef => {
       }
 
       .dark-mode-select,
-      .theme-select {
+      .theme-select,
+      .wallpaper-select {
         display: flex;
         align-items: center;
         gap: 16px;
@@ -182,7 +203,8 @@ const valueToRef = (value: string): CustomThemeRef => {
 
       @media (max-width: 600px) {
         .dark-mode-select,
-        .theme-select {
+        .theme-select,
+        .wallpaper-select {
           flex-direction: column;
           align-items: flex-start;
         }
@@ -200,31 +222,37 @@ export class ThemeSelectorComponent {
   readonly customThemeService = inject(CustomThemeService);
   private readonly _themeStorage = inject(ThemeStorageService);
   private readonly _snackService = inject(SnackService);
+  private readonly _matDialog = inject(MatDialog);
   readonly T = T;
 
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
   readonly activeValue = computed(() => refToValue(this.customThemeService.activeRef()));
 
+  readonly activeRequiredMode = computed(() =>
+    getRequiredThemeMode(this.customThemeService.activeRef()),
+  );
+
   optionValue(theme: CustomTheme): string {
     return refToValue({ kind: theme.kind, id: theme.id });
   }
 
   updateDarkMode(ev: MatButtonToggleChange): void {
-    if (ev.value) {
+    if (!this.activeRequiredMode() && ev.value) {
       this.globalThemeService.darkMode.set(ev.value);
     }
   }
 
   async updateCustomTheme(ev: MatSelectChange): Promise<void> {
     const ref = valueToRef(ev.value);
-    await this.customThemeService.setActiveTheme(ref);
+    const wasActivated = await this.customThemeService.setActiveTheme(ref);
+    if (!wasActivated) return;
 
     if (ref.kind === 'builtin') {
       const theme = this.customThemeService
         .themes()
         .find((t) => t.kind === 'builtin' && t.id === ref.id);
-      if (theme?.requiredMode) {
+      if (theme?.requiredMode && theme.requiredMode !== 'system') {
         this.globalThemeService.darkMode.set(theme.requiredMode);
       }
     }
@@ -232,6 +260,10 @@ export class ThemeSelectorComponent {
 
   openFilePicker(): void {
     this.fileInput()?.nativeElement.click();
+  }
+
+  openWallpaperDialog(): void {
+    this._matDialog.open(DialogWallpaperComponent, { autoFocus: false });
   }
 
   async onFileSelected(event: Event): Promise<void> {

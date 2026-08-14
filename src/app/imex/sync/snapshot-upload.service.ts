@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
+import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
 import {
   AppStateSnapshot,
   StateSnapshotService,
@@ -23,6 +24,9 @@ import { VectorClock } from '../../core/util/vector-clock';
 import { OperationEncryptionService } from '../../op-log/sync/operation-encryption.service';
 import { isCryptoSubtleAvailable } from '@sp/sync-core';
 import { WebCryptoNotAvailableError } from '../../op-log/core/errors/sync-errors';
+import { stripLocalOnlySyncSettingsFromAppData } from '../../features/config/local-only-sync-settings.util';
+import { LockService } from '../../op-log/sync/lock.service';
+import { LOCK_NAMES } from '../../op-log/core/operation-log.const';
 
 /**
  * Data gathered for a snapshot upload operation.
@@ -68,6 +72,8 @@ export class SnapshotUploadService {
   private _vectorClockService = inject(VectorClockService);
   private _clientIdProvider: ClientIdProvider = inject(CLIENT_ID_PROVIDER);
   private _encryptionService = inject(OperationEncryptionService);
+  private _opLogStore = inject(OperationLogStoreService);
+  private _lockService = inject(LockService);
 
   /**
    * Validates that the active provider is SuperSync and operation-sync capable.
@@ -118,7 +124,9 @@ export class SnapshotUploadService {
     // IMPORTANT: Must use async version to load real archives from IndexedDB
     // The sync getStateSnapshot() returns DEFAULT_ARCHIVE (empty) which causes data loss
     SyncLog.normal(`${prefix}Getting current state...`);
-    const state = await this._stateSnapshotService.getStateSnapshotAsync();
+    const state = stripLocalOnlySyncSettingsFromAppData(
+      await this._stateSnapshotService.getStateSnapshotForOperationLogAsync(),
+    ) as AppStateSnapshot;
     const vectorClock = await this._vectorClockService.getCurrentVectorClock();
     const clientId = await this._clientIdProvider.getOrGenerateClientId();
 
@@ -218,8 +226,41 @@ export class SnapshotUploadService {
       );
     }
 
-    const { syncProvider, existingCfg, state, vectorClock, clientId } =
-      await this.gatherSnapshotData(logPrefix);
+    // Capture the pending ops this full-state snapshot subsumes BEFORE taking the
+    // state snapshot below, so every captured op is guaranteed to be reflected in
+    // that snapshot. (If ordered the other way, an op landing between the state
+    // snapshot and this capture would be marked synced yet absent from the
+    // snapshot — silently lost.) A concurrent op arriving *after* this capture is
+    // simply left unsynced and re-uploaded on the next sync (safe, idempotent by
+    // op id), never dropped. After the snapshot lands, these ops are fully
+    // represented on the server, so we mark them synced to avoid a redundant
+    // re-upload on the next sync (for first-time SuperSync setup that would
+    // otherwise re-push the entire local history on top of the snapshot). Mirrors
+    // planRegularOpsAfterFullStateUpload in the op-log upload path, which this
+    // direct snapshot upload bypasses.
+    const { opsSubsumedBySnapshot, snapshotData } = await this._lockService.request(
+      LOCK_NAMES.OPERATION_LOG,
+      async () => ({
+        opsSubsumedBySnapshot: await this._opLogStore.getUnsynced(),
+        snapshotData: await this.gatherSnapshotData(logPrefix),
+      }),
+    );
+    const { syncProvider, existingCfg, state, vectorClock, clientId } = snapshotData;
+
+    // GHSA-9v8x-68pf-p5x7 defense-in-depth: a provider that mandates E2E
+    // encryption (SuperSync) must never have a plaintext snapshot pushed. Fail
+    // closed — before any destructive delete — if this call would upload
+    // unencrypted (encryption turned off, or on without a usable key) rather
+    // than silently leaking. Complements the op-upload guard in
+    // OperationLogUploadService so the invariant holds regardless of caller
+    // (e.g. a keyless import, or a future disable-encryption wiring — currently
+    // UI-unreachable for SuperSync).
+    if (syncProvider.isEncryptionMandatory && !(isEncryptionEnabled && encryptKey)) {
+      throw new Error(
+        `${logPrefix}: refusing to upload an unencrypted snapshot for an ` +
+          'encryption-mandatory provider',
+      );
+    }
 
     // Encrypt before delete (fail-early)
     let payload: unknown = state;
@@ -256,6 +297,15 @@ export class SnapshotUploadService {
     }
 
     await this.updateLastServerSeq(syncProvider, result.serverSeq, logPrefix);
+
+    // Consolidate: the snapshot now represents these ops on the server, so mark
+    // them synced instead of leaving them to re-upload incrementally next sync.
+    if (opsSubsumedBySnapshot.length > 0) {
+      await this._opLogStore.markSynced(opsSubsumedBySnapshot.map((entry) => entry.seq));
+      SyncLog.normal(
+        `${logPrefix}: Marked ${opsSubsumedBySnapshot.length} op(s) synced (subsumed by snapshot).`,
+      );
+    }
 
     return { ...result, existingCfg };
   }

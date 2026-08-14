@@ -7,6 +7,7 @@ import {
   bufferDeferredAction,
   getDeferredActions,
   clearDeferredActions,
+  DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD,
 } from './operation-capture.meta-reducer';
 import { OperationCaptureService } from './operation-capture.service';
 import { Action } from '@ngrx/store';
@@ -52,9 +53,9 @@ describe('operationCaptureMetaReducer', () => {
 
   beforeEach(() => {
     mockCaptureService = jasmine.createSpyObj('OperationCaptureService', [
-      'enqueue',
-      'dequeue',
-      'getQueueSize',
+      'incrementPending',
+      'decrementPending',
+      'getPendingCount',
       'clear',
     ]);
 
@@ -75,7 +76,7 @@ describe('operationCaptureMetaReducer', () => {
   describe('setOperationCaptureService', () => {
     it('should set the capture service instance', () => {
       const newCaptureService = jasmine.createSpyObj('OperationCaptureService', [
-        'enqueue',
+        'incrementPending',
       ]);
 
       setOperationCaptureService(newCaptureService);
@@ -108,14 +109,14 @@ describe('operationCaptureMetaReducer', () => {
       expect(result).toBe(mockModifiedState);
     });
 
-    it('should enqueue action for persistent local actions', () => {
+    it('should capture action for persistent local actions', () => {
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       const action = createMockAction();
 
       wrappedReducer(mockState, action);
 
-      // Should call enqueue with just the action (no state params)
-      expect(mockCaptureService.enqueue).toHaveBeenCalledWith(action);
+      // Should increment the pending counter with just the action (no state params)
+      expect(mockCaptureService.incrementPending).toHaveBeenCalledWith(action);
     });
 
     it('should NOT process remote actions', () => {
@@ -132,7 +133,7 @@ describe('operationCaptureMetaReducer', () => {
 
       wrappedReducer(mockState, action);
 
-      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.incrementPending).not.toHaveBeenCalled();
     });
 
     it('should NOT process non-persistent actions', () => {
@@ -141,7 +142,7 @@ describe('operationCaptureMetaReducer', () => {
 
       wrappedReducer(mockState, action);
 
-      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.incrementPending).not.toHaveBeenCalled();
     });
 
     it('should process even when state is undefined (initial state)', () => {
@@ -151,7 +152,7 @@ describe('operationCaptureMetaReducer', () => {
 
       wrappedReducer(undefined, action);
 
-      expect(mockCaptureService.enqueue).toHaveBeenCalledWith(action);
+      expect(mockCaptureService.incrementPending).toHaveBeenCalledWith(action);
     });
 
     it('should work without service (graceful degradation)', () => {
@@ -164,7 +165,7 @@ describe('operationCaptureMetaReducer', () => {
     });
 
     it('should handle errors in capture service gracefully', () => {
-      mockCaptureService.enqueue.and.throwError('Test error');
+      mockCaptureService.incrementPending.and.throwError('Test error');
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       const action = createMockAction();
 
@@ -175,8 +176,8 @@ describe('operationCaptureMetaReducer', () => {
     });
   });
 
-  describe('enqueue ordering', () => {
-    it('should call reducer before enqueuing action', () => {
+  describe('capture ordering', () => {
+    it('should call reducer before capturing action', () => {
       const callOrder: string[] = [];
 
       mockReducer.and.callFake(() => {
@@ -184,15 +185,15 @@ describe('operationCaptureMetaReducer', () => {
         return mockModifiedState;
       });
 
-      mockCaptureService.enqueue.and.callFake(() => {
-        callOrder.push('enqueue');
+      mockCaptureService.incrementPending.and.callFake(() => {
+        callOrder.push('capture');
       });
 
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       wrappedReducer(mockState, createMockAction());
 
-      // Reducer should be called first, then enqueue
-      expect(callOrder).toEqual(['reducer', 'enqueue']);
+      // Reducer should be called first, then capture
+      expect(callOrder).toEqual(['reducer', 'capture']);
     });
   });
 
@@ -208,10 +209,10 @@ describe('operationCaptureMetaReducer', () => {
       ];
 
       actionTypes.forEach((type) => {
-        mockCaptureService.enqueue.calls.reset();
+        mockCaptureService.incrementPending.calls.reset();
         const action = createMockAction({ type });
         wrappedReducer(mockState, action);
-        expect(mockCaptureService.enqueue).toHaveBeenCalled();
+        expect(mockCaptureService.incrementPending).toHaveBeenCalled();
       });
     });
   });
@@ -247,7 +248,7 @@ describe('operationCaptureMetaReducer', () => {
         expect(buffered).toEqual([]);
       });
 
-      it('should clear buffer after returning actions', () => {
+      it('should return a non-destructive snapshot until actions are acknowledged', () => {
         const action = createMockAction();
         bufferDeferredAction(action);
 
@@ -255,7 +256,7 @@ describe('operationCaptureMetaReducer', () => {
         const secondCall = getDeferredActions();
 
         expect(firstCall).toEqual([action]);
-        expect(secondCall).toEqual([]);
+        expect(secondCall).toEqual([action]);
       });
     });
 
@@ -267,6 +268,103 @@ describe('operationCaptureMetaReducer', () => {
         clearDeferredActions();
 
         expect(getDeferredActions()).toEqual([]);
+      });
+    });
+
+    describe('buffer limits', () => {
+      // devError shows a native alert + confirm (and throws if confirm returns
+      // true), so force confirm to return false. src/test.ts installs a
+      // PERMANENT global confirm spy (jasmine.createSpy, never auto-restored),
+      // so reset its accumulated calls per test and restore the global
+      // returnValue(true) default afterwards.
+      const spyNativeDialogs = (): jasmine.Spy => {
+        if (!jasmine.isSpy(window.alert)) {
+          spyOn(window, 'alert');
+        }
+        const confirmSpy = jasmine.isSpy(window.confirm)
+          ? (window.confirm as jasmine.Spy)
+          : spyOn(window, 'confirm');
+        confirmSpy.calls.reset();
+        confirmSpy.and.returnValue(false);
+        return confirmSpy;
+      };
+
+      afterEach(() => {
+        if (jasmine.isSpy(window.confirm)) {
+          (window.confirm as jasmine.Spy).and.returnValue(true);
+        }
+      });
+
+      const createManyActions = (count: number): PersistentAction[] =>
+        Array.from({ length: count }, (_, i) =>
+          createMockAction({ type: `[Test] Action ${i}` }),
+        );
+
+      it('should preserve ALL actions in order past the reload-warning threshold', () => {
+        spyNativeDialogs();
+        const actions = createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD + 50);
+
+        actions.forEach((a) => bufferDeferredAction(a));
+
+        // Nothing may be dropped: each buffered action's state change was
+        // already accepted into NgRx — dropping = permanent unsyncable divergence.
+        expect(getDeferredActions()).toEqual(actions);
+      });
+
+      it('should fire devError at the reload-warning threshold without dropping', () => {
+        const confirmSpy = spyNativeDialogs();
+        const actions = createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD);
+        const reloadWarningCalls = (): unknown[][] =>
+          confirmSpy.calls
+            .allArgs()
+            .filter((args) => /consider reloading/.test(String(args[0])));
+
+        actions.slice(0, -1).forEach((a) => bufferDeferredAction(a));
+        expect(reloadWarningCalls().length).toBe(0);
+
+        bufferDeferredAction(actions[actions.length - 1]);
+        expect(reloadWarningCalls().length).toBe(1);
+
+        expect(getDeferredActions()).toEqual(actions);
+      });
+
+      it('should fire the reload warning only once per stuck window (no per-action spam)', () => {
+        const confirmSpy = spyNativeDialogs();
+        const actions = createManyActions(
+          DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD + 200,
+        );
+        const reloadWarningCalls = (): unknown[][] =>
+          confirmSpy.calls
+            .allArgs()
+            .filter((args) => /consider reloading/.test(String(args[0])));
+
+        actions.forEach((a) => bufferDeferredAction(a));
+
+        // In dev builds devError opens a blocking dialog; firing it on every
+        // buffered action past the threshold would freeze the session exactly
+        // when sync is stuck.
+        expect(reloadWarningCalls().length).toBe(1);
+        expect(getDeferredActions()).toEqual(actions);
+      });
+
+      it('should warn again after the buffer drained and a new stuck window crosses the threshold', () => {
+        const confirmSpy = spyNativeDialogs();
+        const reloadWarningCalls = (): unknown[][] =>
+          confirmSpy.calls
+            .allArgs()
+            .filter((args) => /consider reloading/.test(String(args[0])));
+
+        createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD).forEach((a) =>
+          bufferDeferredAction(a),
+        );
+        expect(reloadWarningCalls().length).toBe(1);
+
+        clearDeferredActions();
+
+        createManyActions(DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD).forEach((a) =>
+          bufferDeferredAction(a),
+        );
+        expect(reloadWarningCalls().length).toBe(2);
       });
     });
   });
@@ -297,7 +395,7 @@ describe('operationCaptureMetaReducer', () => {
       wrappedReducer(mockState, action);
 
       // Should NOT immediately capture - sync is in progress
-      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.incrementPending).not.toHaveBeenCalled();
 
       // But action should be buffered for later processing
       const buffered = getDeferredActions();
@@ -314,7 +412,7 @@ describe('operationCaptureMetaReducer', () => {
       wrappedReducer(mockState, action1);
       wrappedReducer(mockState, action2);
 
-      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.incrementPending).not.toHaveBeenCalled();
 
       const buffered = getDeferredActions();
       expect(buffered).toEqual([action1, action2]);
@@ -328,12 +426,12 @@ describe('operationCaptureMetaReducer', () => {
       // During sync - action is buffered
       setIsApplyingRemoteOps(true);
       wrappedReducer(mockState, syncAction);
-      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.incrementPending).not.toHaveBeenCalled();
 
       // After sync - actions are captured immediately
       setIsApplyingRemoteOps(false);
       wrappedReducer(mockState, normalAction);
-      expect(mockCaptureService.enqueue).toHaveBeenCalledWith(normalAction);
+      expect(mockCaptureService.incrementPending).toHaveBeenCalledWith(normalAction);
 
       // Verify the sync action was buffered
       const buffered = getDeferredActions();

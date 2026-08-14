@@ -19,20 +19,37 @@ import { FormsModule } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MarkdownComponent } from 'ngx-markdown';
 import { IS_ELECTRON } from '../../app.constants';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { isMarkdownChecklist } from '../../features/markdown-checklist/is-markdown-checklist';
+import {
+  removeCheckedChecklistItems,
+  setAllChecklistItemsChecked,
+  toggleChecklistItemAtIndex,
+} from '../../features/markdown-checklist/checklist-operations';
+import { T } from '../../t.const';
 import { fadeInAnimation } from '../animations/fade.ani';
-import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
+import { openFullscreenMarkdownDialog } from '../dialog-fullscreen-markdown/open-fullscreen-markdown-dialog';
 import { ClipboardImageService } from '../../core/clipboard-image/clipboard-image.service';
 import { TaskAttachmentService } from '../../features/tasks/task-attachment/task-attachment.service';
 import { ResolveClipboardImagesDirective } from '../../core/clipboard-image/resolve-clipboard-images.directive';
 import { ClipboardPasteHandlerService } from '../../core/clipboard-image/clipboard-paste-handler.service';
+import { Store } from '@ngrx/store';
+import { Location } from '@angular/common';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
+import { Log } from '../../core/log';
 import { handleListKeydown } from './markdown-toolbar.util';
+import { DateService } from '../../core/date/date.service';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
+
+// A pointer that moves more than this between mousedown and click is treated as
+// a drag-select rather than a click, so it must not flip the note into edit mode.
+const DRAG_THRESHOLD_PX = 5;
 
 @Component({
   selector: 'inline-markdown',
@@ -46,6 +63,10 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
     MatIconButton,
     MatTooltip,
     MatIcon,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    TranslatePipe,
     ResolveClipboardImagesDirective,
   ],
 })
@@ -56,14 +77,31 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   private _clipboardImageService = inject(ClipboardImageService);
   private _taskAttachmentService = inject(TaskAttachmentService);
   private _clipboardPasteHandler = inject(ClipboardPasteHandlerService);
+  private _store = inject(Store);
+  private _location = inject(Location);
+  private _dateService = inject(DateService);
   private _currentPastePlaceholder: string | null = null;
   private _isFullscreenDialogOpen = false;
+  private _isDestroyed = false;
   private _resolveGeneration = 0;
+  private _mousedownX = 0;
+  private _mousedownY = 0;
+  private _hasSelectionOnMousedown = false;
 
   readonly isLock = input<boolean>(false);
   readonly isShowControls = input<boolean>(false);
+  // When true, the rendered preview is shown in read mode but hidden while
+  // editing, so the editor is a plain textarea (no dimmed live preview below).
+  // Used by the compact focus-mode notes panel; the detail panel keeps the
+  // live preview.
+  readonly isHidePreviewWhileEditing = input<boolean>(false);
   readonly isShowChecklistToggle = input<boolean>(false);
   readonly isDefaultText = input<boolean>(false);
+  // The default/placeholder text currently shown when there are no real notes.
+  // When set and still unmodified, the checklist button REPLACES it with a fresh
+  // checklist instead of appending below it (see toggleChecklistMode). Callers
+  // only pass this for throwaway default text, never for user content (#7786).
+  readonly defaultText = input<string>('');
   readonly placeholderTxt = input<string | undefined>(undefined);
   readonly taskId = input<string | undefined>(undefined);
 
@@ -89,6 +127,27 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   });
 
   isTurnOffMarkdownParsing = computed(() => !this.isMarkdownFormattingEnabled());
+
+  // The rendered preview shows in read mode, and also below the textarea while
+  // editing (live preview) — unless the consumer opts out via
+  // isHidePreviewWhileEditing (the compact focus-mode panel does, to stay a
+  // single view). Hidden entirely when markdown parsing is off.
+  isShowPreview = computed(
+    () =>
+      !this.isTurnOffMarkdownParsing() &&
+      !(this.isHidePreviewWhileEditing() && this.isShowEdit()),
+  );
+
+  // True when the current notes are a markdown checklist — gates the checklist
+  // bulk actions (check all / uncheck all / clear completed) in the UI.
+  isCurrentlyChecklist = computed(
+    () =>
+      this.isShowChecklistToggle() &&
+      this.isMarkdownFormattingEnabled() &&
+      isMarkdownChecklist(this.modelCopy() || ''),
+  );
+
+  readonly T = T;
   private _hideOverFlowTimeout: number | undefined;
 
   constructor() {
@@ -117,12 +176,22 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     this._model = v || '';
     this.modelCopy.set(v || '');
 
-    // Start resolving but don't update the rendered model yet
     this._resolveGeneration++;
     if (v) {
-      this._updateResolvedModel(v);
+      if (this._clipboardImageService.hasResolvableImages(v)) {
+        // Has clipboard images whose URLs must be resolved to blob: URLs first;
+        // defer the render until then so we don't flash a broken image.
+        this._updateResolvedModel(v);
+      } else {
+        // Nothing to resolve: render the parsed markdown on the first paint
+        // instead of a tick later, which briefly showed the raw notes as plain
+        // text before the async (no-op) resolution settled.
+        this.resolvedModel.set(v);
+        this.resolvedMarkdownData = v;
+      }
     } else {
       this.resolvedModel.set('');
+      this.resolvedMarkdownData = '';
     }
 
     if (!this.isShowEdit()) {
@@ -159,6 +228,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this._isDestroyed = true;
     if (this._hideOverFlowTimeout) {
       window.clearTimeout(this._hideOverFlowTimeout);
     }
@@ -176,6 +246,35 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   checklistToggle(): void {
     this.isChecklistMode.set(!this.isChecklistMode());
+  }
+
+  checkAllChecklistItems(): void {
+    this._applyChecklistTransform((notes) => setAllChecklistItemsChecked(notes, true));
+  }
+
+  uncheckAllChecklistItems(): void {
+    this._applyChecklistTransform((notes) => setAllChecklistItemsChecked(notes, false));
+  }
+
+  clearCompletedChecklistItems(): void {
+    this._applyChecklistTransform(removeCheckedChecklistItems);
+  }
+
+  private _applyChecklistTransform(transform: (notes: string) => string): void {
+    // Read the freshest content: the textarea when editing, else the model.
+    const textareaEl = this.textareaEl();
+    const current = textareaEl ? textareaEl.nativeElement.value : this._model || '';
+    const next = transform(current);
+    if (next === current) {
+      return;
+    }
+    // The `model` setter syncs `modelCopy` and re-resolves the rendered markdown.
+    this.model = next;
+    if (textareaEl) {
+      textareaEl.nativeElement.value = next;
+    }
+    this.changed.emit(next);
+    window.setTimeout(() => this.resizeParsedToFit());
   }
 
   keypressHandler(ev: KeyboardEvent): void {
@@ -208,6 +307,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       ev.shiftKey,
       ev.ctrlKey,
       ev.metaKey,
+      this._dateService.getLogicalTodayDate(),
     );
     if (result) {
       ev.preventDefault();
@@ -240,21 +340,41 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     });
   }
 
+  previewMousedown($event: MouseEvent): void {
+    if ($event.button !== 0) {
+      return;
+    }
+    this._mousedownX = $event.clientX ?? 0;
+    this._mousedownY = $event.clientY ?? 0;
+    this._hasSelectionOnMousedown = !!window.getSelection()?.toString();
+  }
+
   clickPreview($event: MouseEvent): void {
-    if (($event.target as HTMLElement).tagName === 'A') {
+    const target = $event.target as HTMLElement;
+    if (target.tagName === 'A') {
       // Let links work normally
       return;
     }
 
-    // Check if click is anywhere inside a checkbox-wrapper (text or checkbox icon)
-    const wrapper = ($event.target as HTMLElement).closest(
-      '.checkbox-wrapper',
-    ) as HTMLElement;
+    // Only the checkbox icon and the item's text label toggle the item. Clicks
+    // on the empty rest of the row fall through to opening the editor.
+    const hit = target.closest('.checkbox, .checkbox-label') as HTMLElement | null;
+    const wrapper = hit?.closest('.checkbox-wrapper') as HTMLElement | null;
     if (wrapper) {
       this._handleCheckboxClick(wrapper);
-    } else {
-      this._toggleShowEdit();
+      return;
     }
+
+    const dx = ($event.clientX ?? 0) - this._mousedownX;
+    const dy = ($event.clientY ?? 0) - this._mousedownY;
+    const isDrag = Math.hypot(dx, dy) > DRAG_THRESHOLD_PX;
+    const hasCurrentSelection = !!window.getSelection()?.toString();
+
+    if (this._hasSelectionOnMousedown || hasCurrentSelection || isDrag) {
+      return;
+    }
+
+    this._toggleShowEdit();
   }
 
   untoggleShowEdit(): void {
@@ -294,31 +414,72 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   openFullScreen(): void {
     this._isFullscreenDialogOpen = true;
+    const taskId = this.taskId();
     // Read directly from textarea since modelCopy may be stale (one-way ngModel binding)
     const textareaEl = this.textareaEl();
     const currentContent = textareaEl ? textareaEl.nativeElement.value : this.modelCopy();
-    const dialogRef = this._matDialog.open(DialogFullscreenMarkdownComponent, {
-      minWidth: '100vw',
-      height: '100vh',
-      restoreFocus: true,
-      autoFocus: 'textarea',
-      data: {
-        content: currentContent,
-        taskId: this.taskId(),
-      },
+    // Saves-and-closes on a navigation (resize crossing the mobile breakpoint,
+    // Android back) instead of dropping the edit — see openFullscreenMarkdownDialog
+    // (#8434).
+    const dialogRef = openFullscreenMarkdownDialog(this._matDialog, this._location, {
+      content: currentContent ?? '',
+      taskId,
     });
 
+    // Intentionally NOT torn down with takeUntilDestroyed: this MUST still fire
+    // after the component is destroyed — see the `_isDestroyed` branch below.
+    // afterClosed emits once then completes, so there is no leak.
     dialogRef.afterClosed().subscribe((res) => {
       this._isFullscreenDialogOpen = false;
-      // This resets the task note to its default text
+      // DELETE resets the note to its default text; a string is the saved note.
+      // A missing result (Close without saving) leaves the note untouched.
+      let newVal: string | null = null;
       if (res?.action === 'DELETE') {
-        this.modelCopy.set('');
-        this.changed.emit('');
-        // This updates the task note on click of the "Save" button only if it contains text.
+        newVal = '';
       } else if (typeof res === 'string') {
-        this.modelCopy.set(res);
-        this.changed.emit(res);
+        newVal = res;
       }
+      if (newVal === null) {
+        return;
+      }
+      this.modelCopy.set(newVal);
+
+      // The fullscreen editor is a detached overlay that outlives this
+      // component: a focus session can end mid-edit and swap the focus-mode
+      // screen, destroying us while the dialog stays open. Our `changed` output
+      // then has no listener, so emitting it would silently drop the user's
+      // note. When we've been destroyed, persist the note directly so the save
+      // survives the teardown.
+      if (this._isDestroyed) {
+        // Skip when the content is effectively unchanged from what we loaded:
+        // avoids a redundant op and stops the unmodified default-text
+        // placeholder being written back as a real note. Trimmed compare to
+        // ignore whitespace-only diffs the editor may introduce. This
+        // approximates (not duplicates) the parent's default-text guard —
+        // comparing against the loaded model is the closest signal we have here.
+        if (newVal.trim() !== (this._model ?? '').trim()) {
+          if (taskId) {
+            // shortcut: a shared ui/ component dispatching a task action is a
+            // layering compromise (TaskService can't be injected here — its
+            // eager effects need a full GlobalConfigService under test). Clean
+            // upgrade: give the surviving focus-mode container ownership of the
+            // fullscreen dialog so the save never depends on this lifetime.
+            this._store.dispatch(
+              TaskSharedActions.updateTask({
+                task: { id: taskId, changes: { notes: newVal } },
+              }),
+            );
+          } else {
+            // No task to persist to and our `changed` listener is gone — the
+            // edit cannot be saved. Surface it rather than dropping it silently.
+            Log.warn(
+              'inline-markdown: fullscreen note edit dropped on destroy (no taskId)',
+            );
+          }
+        }
+        return;
+      }
+      this.changed.emit(newVal);
     });
   }
 
@@ -376,7 +537,15 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
     const INSERT_TEXT = '\n- [ ] ';
 
-    if (this.isDefaultText() && !currentText) {
+    // Replace the field with a fresh checklist when it shows only default text:
+    // either nothing at all, or the unmodified default template. We never reach
+    // here with user-typed content because `currentText` reflects the live
+    // textarea value, so any edit breaks the equality check below.
+    const defaultText = this.defaultText();
+    const isUnmodifiedDefault =
+      !!defaultText && currentText.trim() === defaultText.trim();
+
+    if (this.isDefaultText() && (!currentText || isUnmodifiedDefault)) {
       const newValue = '- [ ] ';
       this.model = newValue;
       this.isChecklistMode.set(true);
@@ -523,31 +692,15 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   private _handleCheckboxClick(targetEl: HTMLElement): void {
     const allCheckboxes =
       this.previewEl()?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
-
     const checkIndex = Array.from(allCheckboxes || []).findIndex((el) => el === targetEl);
-    if (checkIndex !== -1 && this._model) {
-      const allLines = this._model.split('\n');
-      const todoAllLinesIndexes = allLines
-        .map((line, index) => (line.includes('- [') ? index : null))
-        .filter((i) => i !== null);
-
-      // Find all to-do items in the markdown string
-      // Log.log(checkIndex, todoAllLinesIndexes, allLines);
-
-      const itemIndex = todoAllLinesIndexes[checkIndex];
-      if (typeof itemIndex === 'number' && itemIndex > -1) {
-        const item = allLines[itemIndex];
-        allLines[itemIndex] = item.includes('[ ]')
-          ? item.replace('[ ]', '[x]').replace('[]', '[x]')
-          : item.replace('[x]', '[ ]');
-        this.modelCopy.set(allLines.join('\n'));
-
-        // Update the markdown string
-        if (this.modelCopy() !== this.model) {
-          this.model = this.modelCopy() || '';
-          this.changed.emit(this.modelCopy() as string);
-        }
-      }
+    if (checkIndex === -1 || !this._model) {
+      return;
+    }
+    const next = toggleChecklistItemAtIndex(this._model, checkIndex);
+    if (next !== this._model) {
+      this.modelCopy.set(next);
+      this.model = next;
+      this.changed.emit(next);
     }
   }
 

@@ -4,13 +4,18 @@ import {
   Component,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { TaskWidgetSettingsService } from '../../features/config/task-widget-settings.service';
-import { TaskWidgetConfig } from '../../features/config/global-config.model';
+import { FocusModeLocalSettingsService } from '../../features/config/focus-mode-local-settings.service';
+import {
+  FocusModeLocalConfig,
+  TaskWidgetConfig,
+} from '../../features/config/global-config.model';
 import {
   GLOBAL_GENERAL_FORM_CONFIG,
   GLOBAL_IMEX_FORM_CONFIG,
@@ -21,6 +26,7 @@ import {
 } from '../../features/config/global-config-form-config.const';
 import {
   ConfigFormConfig,
+  GenericConfigFormSection,
   GlobalConfigFormSectionKey,
   GlobalConfigSectionKey,
   GlobalConfigState,
@@ -33,12 +39,14 @@ import { ProjectCfgFormKey } from '../../features/project/project.model';
 import { T } from '../../t.const';
 import { versions } from '../../../environments/versions';
 import { IS_ELECTRON } from '../../app.constants';
-import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../util/is-android-web-view';
 import { getAutomaticBackUpFormCfg } from '../../features/config/form-cfgs/automatic-backups-form.const';
 import { getAppVersionStr } from '../../util/get-app-version-str';
+import { UpdateCheckService } from '../../core/update-check/update-check.service';
+import { isUpdateCheckPossible } from '../../core/update-check/is-update-check-possible.util';
 import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
 import { ConfigSoundFormComponent } from '../../features/config/config-sound-form/config-sound-form.component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EXPERIMENTAL_APP_FEATURE_KEYS } from '../../features/config/form-cfgs/app-features-form.const';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
 import { SyncConfigService } from '../../imex/sync/sync-config.service';
@@ -60,7 +68,26 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { NgTemplateOutlet } from '@angular/common';
+import { LocalBackupService } from '../../imex/local-backup/local-backup.service';
+import { FormsModule } from '@angular/forms';
+import {
+  MatFormField,
+  MatLabel,
+  MatPrefix,
+  MatSuffix,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import {
+  searchSettings,
+  SettingsSearchTarget,
+} from '../../features/config/settings-search.util';
+
+/** Kept in sync with `animationDuration` on the settings `mat-tab-group`. */
+const TAB_ANIMATION_DURATION_MS = 200;
 
 @Component({
   selector: 'config-page',
@@ -79,10 +106,23 @@ import { MatButton } from '@angular/material/button';
     MatIcon,
     MatTooltip,
     MatButton,
+    MatIconButton,
+    RouterLink,
+    NgTemplateOutlet,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatPrefix,
+    MatSuffix,
+    MatAutocomplete,
+    MatAutocompleteTrigger,
+    MatOption,
   ],
 })
 export class ConfigPageComponent implements OnInit {
   private readonly _cd = inject(ChangeDetectorRef);
+  private readonly _elRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _route = inject(ActivatedRoute);
   private readonly _providerManager = inject(SyncProviderManager);
   private readonly _syncWrapperService = inject(SyncWrapperService);
@@ -91,15 +131,24 @@ export class ConfigPageComponent implements OnInit {
   private readonly _shareService = inject(ShareService);
   private readonly _userProfileService = inject(UserProfileService);
   private readonly _matDialog = inject(MatDialog);
+  private readonly _localBackupService = inject(LocalBackupService);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _isAndroidWebView = inject(IS_ANDROID_WEB_VIEW_TOKEN);
+  private readonly _updateCheckService = inject(UpdateCheckService);
 
   readonly configService = inject(GlobalConfigService);
   readonly syncSettingsService = inject(SyncConfigService);
   readonly taskWidgetSettingsService = inject(TaskWidgetSettingsService);
+  readonly focusModeLocalSettingsService = inject(FocusModeLocalSettingsService);
 
   T: typeof T = T;
 
   selectedTabIndex = 0;
   expandedSection: string | null = null;
+
+  searchQuery = '';
+  /** Flat, cross-tab search hits in tab order. Empty while not searching. */
+  searchResults: SettingsSearchTarget[] = [];
 
   // @todo - find better names for tabs configs forms
   // Tab-specific form configurations
@@ -148,6 +197,7 @@ export class ConfigPageComponent implements OnInit {
 
   appVersion: string = getAppVersionStr();
   versions?: typeof versions = versions;
+  isUpdateCheckPossible: boolean = isUpdateCheckPossible();
 
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -161,8 +211,22 @@ export class ConfigPageComponent implements OnInit {
     this.globalTasksFormCfg = GLOBAL_TASKS_FORM_CONFIG.slice();
 
     // NOTE: needs special handling cause of the async stuff
-    if (IS_ANDROID_WEB_VIEW) {
-      this.globalImexFormCfg = [...this.globalImexFormCfg, getAutomaticBackUpFormCfg()];
+    if (this._isAndroidWebView) {
+      this.globalImexFormCfg = [
+        ...this.globalImexFormCfg,
+        getAutomaticBackUpFormCfg(
+          undefined,
+          [
+            {
+              label: T.GCF.AUTO_BACKUPS.RESTORE_LATEST,
+              icon: 'settings_backup_restore',
+              onClick: () =>
+                this._localBackupService.restoreLatestMobileBackupFromSettings(),
+            },
+          ],
+          this._lastBackupInfo(),
+        ),
+      ];
     } else if (IS_ELECTRON) {
       window.ea.getBackupPath().then((backupPath) => {
         this.globalImexFormCfg = [
@@ -178,6 +242,23 @@ export class ConfigPageComponent implements OnInit {
       const shortcuts = this._pluginBridgeService.shortcuts();
       Log.log('Plugin shortcuts changed:', { shortcuts });
       this._updateKeyboardFormWithPluginShortcuts(shortcuts);
+    });
+  }
+
+  /**
+   * Pre-formatted "Last backup: <date>" line for the mobile auto-backups section
+   * (#7901), or undefined when no local backup has run yet. Reflects the time as
+   * of opening Settings — good enough for a "you're protected" indicator without
+   * wiring a live subscription. Uses toLocaleString() to match the Electron
+   * restore prompt's date formatting.
+   */
+  private _lastBackupInfo(): string | undefined {
+    const ts = this._localBackupService.getLastBackupTime();
+    if (ts === null) {
+      return undefined;
+    }
+    return this._translateService.instant(T.GCF.AUTO_BACKUPS.LAST_BACKUP_INFO, {
+      date: new Date(ts).toLocaleString(),
     });
   }
 
@@ -291,6 +372,12 @@ export class ConfigPageComponent implements OnInit {
       return;
     }
 
+    // focusModeLocal is per-instance (not synced) — handled by a dedicated service
+    if (formSectionKey === 'focusModeLocal') {
+      this.focusModeLocalSettingsService.update(config as Partial<FocusModeLocalConfig>);
+      return;
+    }
+
     // From here on we know it's a real GlobalConfigState section.
     const sectionKey = formSectionKey as GlobalConfigSectionKey;
 
@@ -369,11 +456,66 @@ export class ConfigPageComponent implements OnInit {
     return !!(await firstValueFrom(dialogRef.afterClosed()));
   }
 
+  /**
+   * Recomputes the result list. Done on input rather than in a `computed()`
+   * because the per-tab configs are plain fields reassigned after construction
+   * (plugin shortcuts, the Electron backup path).
+   */
+  onSearchChange(query: unknown): void {
+    // Picking an option makes the autocomplete write the result object back
+    // into the model — ignore it, `goToSearchResult` clears the field anyway.
+    this.searchQuery = typeof query === 'string' ? query : '';
+    // Tab order must match the `mat-tab-group` — the index is what we navigate to.
+    this.searchResults = searchSettings(
+      [
+        { labelKey: T.PS.TABS.GENERAL, sections: this.generalFormCfg },
+        { labelKey: T.PS.TABS.TASKS, sections: this.globalTasksFormCfg },
+        { labelKey: T.PS.TABS.TIME_TRACKING, sections: this.timeTrackingFormCfg },
+        {
+          labelKey: T.PS.TABS.PRODUCTIVITY,
+          sections: this.globalProductivityConfigFormCfg,
+        },
+        { labelKey: T.PS.TABS.PLUGINS, sections: this.pluginsShortcutsFormCfg },
+        { labelKey: T.PS.TABS.SYNC_BACKUP, sections: this.globalImexFormCfg },
+      ],
+      this.searchQuery,
+      (key) => this._translateService.instant(key),
+    );
+  }
+
+  /** Jumps to a hit: right tab, section expanded, scrolled into view. */
+  goToSearchResult(target: SettingsSearchTarget): void {
+    this.onSearchChange('');
+    this.selectedTabIndex = target.tabIndex;
+    this.expandedSection = target.sectionKey ?? null;
+    this._cd.detectChanges();
+    // The tab body swaps in over `animationDuration`, so the element doesn't
+    // exist yet; wait it out before scrolling.
+    // shortcut: a fixed delay, not an animation-done hook. Switch to
+    // `MatTabGroup.animationDone` if the duration ever stops being a constant.
+    setTimeout(() => {
+      this._elRef.nativeElement
+        .querySelector(target.scrollSelector)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, TAB_ANIMATION_DURATION_MS);
+  }
+
+  /** Shared `[isExpanded]` check for the `config-section` repeated across every tab. */
+  isSectionExpanded(section: GenericConfigFormSection): boolean {
+    return (
+      section.key === this.expandedSection ||
+      section.customSection === this.expandedSection
+    );
+  }
+
   getGlobalCfgSection(
     sectionKey: GlobalConfigFormSectionKey | ProjectCfgFormKey,
   ): GlobalSectionConfig {
     if (sectionKey === 'taskWidget') {
       return this.taskWidgetSettingsService.settings() as GlobalSectionConfig;
+    }
+    if (sectionKey === 'focusModeLocal') {
+      return this.focusModeLocalSettingsService.settings() as GlobalSectionConfig;
     }
     return (this.globalCfg as unknown as Record<string, GlobalSectionConfig>)[sectionKey];
   }
@@ -384,6 +526,10 @@ export class ConfigPageComponent implements OnInit {
       maxWidth: '95vw',
       data: { logs: Log.exportLogHistory() },
     });
+  }
+
+  checkForUpdates(): void {
+    this._updateCheckService.checkForUpdate({ isUserTriggered: true });
   }
 
   async copyVersionToClipboard(text: string): Promise<void> {

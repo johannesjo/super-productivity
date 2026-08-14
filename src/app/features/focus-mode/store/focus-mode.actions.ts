@@ -21,7 +21,7 @@ export const startFocusPreparation = createAction('[FocusMode] Start Preparation
 
 export const startFocusSession = createAction(
   '[FocusMode] Start Session',
-  props<{ duration?: number }>(),
+  props<{ duration?: number; taskId?: string }>(),
 );
 
 export const navigateToMainScreen = createAction('[FocusMode] Navigate To Main Screen');
@@ -57,20 +57,6 @@ export const skipBreak = createAction(
 export const completeBreak = createAction(
   '[FocusMode] Complete Break',
   props<{ pausedTaskId?: string | null }>(),
-);
-
-export const exitBreakToPlanning = createAction(
-  '[FocusMode] Exit Break To Planning',
-  props<{ pausedTaskId?: string | null }>(),
-);
-
-export const offerFlowtimeBreak = createAction(
-  '[FocusMode] Offer Flowtime Break',
-  props<{
-    duration: number;
-    isLongBreak?: boolean;
-    pausedTaskId?: string | null;
-  }>(),
 );
 
 export const incrementCycle = createAction('[FocusMode] Next Cycle');

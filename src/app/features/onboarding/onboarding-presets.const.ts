@@ -44,6 +44,7 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
     features: {
       ...BASE_FEATURES,
       isTimeTrackingEnabled: true,
+      isFocusModeEnabled: true,
       isPlannerEnabled: true,
       isFinishDayEnabled: true,
       isScheduleDayPanelEnabled: true,
@@ -66,6 +67,7 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
       isIssuesPanelEnabled: true,
       isProjectNotesEnabled: true,
       isHabitsEnabled: true,
+      isFinishDayEnabled: true,
     },
   },
 ];

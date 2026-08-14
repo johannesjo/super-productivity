@@ -19,13 +19,10 @@ import { TODAY_TAG } from '../tag/tag.const';
 import { ICalIssueReduced } from './providers/calendar/calendar.model';
 import { SnackParams } from '../../core/snack/snack.model';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
-import { TrelloCommonInterfacesService } from './providers/trello/trello-common-interfaces.service';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
-import { GiteaCommonInterfacesService } from './providers/gitea/gitea-common-interfaces.service';
 import { RedmineCommonInterfacesService } from './providers/redmine/redmine-common-interfaces.service';
-import { LinearCommonInterfacesService } from './providers/linear/linear-common-interfaces.service';
 import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
 import { PluginIssueProviderAdapterService } from '../../plugins/issue-provider/plugin-issue-provider-adapter.service';
 import { PluginIssueProviderRegistryService } from '../../plugins/issue-provider/plugin-issue-provider-registry.service';
@@ -79,6 +76,9 @@ describe('IssueService', () => {
       'addAndSchedule',
       'addSubTaskTo',
       'restoreTask',
+      'update',
+      'remove',
+      'removeMultipleTasks',
     ]);
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     workContextServiceSpy = jasmine.createSpyObj('WorkContextService', [], {
@@ -156,16 +156,13 @@ describe('IssueService', () => {
         { provide: GlobalProgressBarService, useValue: globalProgressBarServiceSpy },
         { provide: NavigateToTaskService, useValue: navigateToTaskServiceSpy },
         { provide: JiraCommonInterfacesService, useValue: mockCommonInterfaceService },
-        { provide: TrelloCommonInterfacesService, useValue: mockCommonInterfaceService },
         { provide: GitlabCommonInterfacesService, useValue: mockCommonInterfaceService },
         { provide: CaldavCommonInterfacesService, useValue: mockCommonInterfaceService },
         {
           provide: OpenProjectCommonInterfacesService,
           useValue: mockCommonInterfaceService,
         },
-        { provide: GiteaCommonInterfacesService, useValue: mockCommonInterfaceService },
         { provide: RedmineCommonInterfacesService, useValue: mockCommonInterfaceService },
-        { provide: LinearCommonInterfacesService, useValue: mockCommonInterfaceService },
         {
           provide: CalendarCommonInterfacesService,
           useValue: mockCommonInterfaceService,
@@ -494,6 +491,65 @@ describe('IssueService', () => {
       const addCall = taskServiceSpy.add.calls.mostRecent();
       const taskData = addCall.args[2] as Partial<Task>;
       expect(taskData.notes).toBe('Provider-set notes');
+    });
+  });
+
+  describe('addTaskFromIssue - auto-import tag inheritance (#8673)', () => {
+    const jiraIssue = { id: 'JIRA-8673', title: 'Auto Import' };
+
+    const setActiveTag = (tagId: string): void => {
+      Object.defineProperty(workContextServiceSpy, 'activeWorkContextType', {
+        get: () => WorkContextType.TAG,
+        configurable: true,
+      });
+      Object.defineProperty(workContextServiceSpy, 'activeWorkContextId', {
+        get: () => tagId,
+        configurable: true,
+      });
+    };
+
+    beforeEach(() => {
+      taskServiceSpy.checkForTaskWithIssueEverywhere.and.resolveTo(null);
+      taskServiceSpy.add.and.returnValue('new-task-id');
+      (service.ISSUE_SERVICE_MAP['JIRA'] as any).getAddTaskData = () => ({
+        title: 'Auto Import',
+      });
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(
+        of({
+          defaultProjectId: 'proj-1',
+          defaultTagIds: ['default-tag'],
+        } as any),
+      );
+      // Auto-imports always target the backlog; the leak only surfaces via the
+      // non-PROJECT branch, i.e. while a non-Today tag is the active context.
+      setActiveTag('errands-tag');
+    });
+
+    it('inherits the ambient tag for a foreground import (isAutoImport unset)', async () => {
+      await service.addTaskFromIssue({
+        issueDataReduced: jiraIssue as any,
+        issueProviderId: 'jira-provider-1',
+        issueProviderKey: 'JIRA',
+        isAddToBacklog: true,
+      });
+
+      const taskData = taskServiceSpy.add.calls.mostRecent().args[2] as Partial<Task>;
+      expect(taskData.tagIds).toEqual(['errands-tag', 'default-tag']);
+      expect(taskData.projectId).toBe('proj-1');
+    });
+
+    it('does NOT inherit the ambient tag for an automatic import', async () => {
+      await service.addTaskFromIssue({
+        issueDataReduced: jiraIssue as any,
+        issueProviderId: 'jira-provider-1',
+        issueProviderKey: 'JIRA',
+        isAddToBacklog: true,
+        isAutoImport: true,
+      });
+
+      const taskData = taskServiceSpy.add.calls.mostRecent().args[2] as Partial<Task>;
+      expect(taskData.tagIds).toEqual(['default-tag']);
+      expect(taskData.projectId).toBe('proj-1');
     });
   });
 

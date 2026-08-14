@@ -16,11 +16,13 @@ describe('ValidationService', () => {
   const createValidOp = (overrides: Record<string, unknown> = {}) => ({
     id: 'op-1',
     clientId,
+    actionType: '[Task] Add Task',
     opType: 'CRT' as const,
     entityType: 'TASK',
     entityId: 'entity-1',
     payload: { name: 'Test' },
     timestamp: Date.now(),
+    schemaVersion: 1,
     vectorClock: { [clientId]: 1 },
     ...overrides,
   });
@@ -109,6 +111,37 @@ describe('ValidationService', () => {
 
     it('should reject non-string entityId', () => {
       const op = createValidOp({ entityId: 123 });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_ID);
+    });
+
+    // === entityIds (multi-entity batch ops) validation (#8334) ===
+
+    it('should accept a valid entityIds array', () => {
+      const op = createValidOp({ entityIds: ['task-1', 'task-2'] });
+      expect(validationService.validateOp(op, clientId).valid).toBe(true);
+    });
+
+    it('should reject an entityIds element longer than 255 characters', () => {
+      const op = createValidOp({ entityIds: ['ok', 'x'.repeat(256)] });
+      const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_ID);
+    });
+
+    it('should reject a non-string / empty entityIds element', () => {
+      expect(
+        validationService.validateOp(createValidOp({ entityIds: [123] }), clientId).valid,
+      ).toBe(false);
+      expect(
+        validationService.validateOp(createValidOp({ entityIds: ['  '] }), clientId)
+          .valid,
+      ).toBe(false);
+    });
+
+    it('should reject more than SUPER_SYNC_MAX_ENTITY_IDS_PER_OP entries', () => {
+      const op = createValidOp({ entityIds: new Array(1001).fill('id') });
       const result = validationService.validateOp(op, clientId);
       expect(result.valid).toBe(false);
       expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_ID);
@@ -270,6 +303,61 @@ describe('ValidationService', () => {
       expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_PAYLOAD);
     });
 
+    it('should validate additive task-time payload identity and arithmetic', () => {
+      const validPayload = {
+        actionPayload: {
+          taskId: 'entity-1',
+          date: '2024-02-29',
+          duration: 5000,
+        },
+        entityChanges: [],
+      };
+      expect(
+        validationService.validateOp(
+          createValidOp({
+            actionType: '[TimeTracking] Sync time spent',
+            opType: 'UPD',
+            payload: validPayload,
+          }),
+          clientId,
+        ).valid,
+      ).toBe(true);
+      expect(
+        validationService.validateOp(
+          createValidOp({
+            actionType: '[TimeTracking] Sync time spent',
+            opType: 'UPD',
+            payload: {
+              actionPayload: {
+                taskId: 'entity-1',
+                date: '0099-12-31',
+                duration: 5000,
+              },
+              entityChanges: [],
+            },
+          }),
+          clientId,
+        ).valid,
+      ).toBe(true);
+
+      for (const actionPayload of [
+        { taskId: 'other-task', date: '2024-02-29', duration: 5000 },
+        { taskId: 'entity-1', date: '2024-02-30', duration: 5000 },
+        { taskId: 'entity-1', date: '2024-02-29', duration: -1 },
+      ]) {
+        const result = validationService.validateOp(
+          createValidOp({
+            actionType: '[TimeTracking] Sync time spent',
+            opType: 'UPD',
+            payload: { actionPayload, entityChanges: [] },
+          }),
+          clientId,
+        );
+        expect(result.valid).toBe(false);
+        expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_PAYLOAD);
+      }
+    });
+
     it('should reject schema version less than 1', () => {
       const op = createValidOp({ schemaVersion: 0 });
       const result = validationService.validateOp(op, clientId);
@@ -280,6 +368,16 @@ describe('ValidationService', () => {
     it('should reject schema version greater than 100', () => {
       const op = createValidOp({ schemaVersion: 101 });
       const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_SCHEMA_VERSION);
+    });
+
+    it('should reject non-integer schema versions', () => {
+      const result = validationService.validateOp(
+        createValidOp({ schemaVersion: 1.5 }),
+        clientId,
+      );
+
       expect(result.valid).toBe(false);
       expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_SCHEMA_VERSION);
     });
@@ -360,6 +458,43 @@ describe('ValidationService', () => {
       expect(result.errorCode).toBe(SYNC_ERROR_CODES.PAYLOAD_TOO_LARGE);
     });
 
+    it('should measure the size limit in UTF-8 bytes, not UTF-16 code units', () => {
+      // '✓' (U+2713) is one UTF-16 code unit but three UTF-8 bytes.
+      // JSON.stringify({ data: '✓'×100 }) is 111 UTF-16 code units but 311 UTF-8
+      // bytes. With a 200-byte limit the old String#length check (111) wrongly
+      // passed; the UTF-8 byte measure (311) correctly rejects.
+      const service = new ValidationService({
+        ...DEFAULT_SYNC_CONFIG,
+        maxPayloadSizeBytes: 200,
+      });
+      const payload = { data: '✓'.repeat(100) };
+      expect(JSON.stringify(payload).length).toBeLessThanOrEqual(200);
+      expect(Buffer.byteLength(JSON.stringify(payload), 'utf8')).toBeGreaterThan(200);
+      const result = service.validateOp(createValidOp({ payload }), clientId);
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe(SYNC_ERROR_CODES.PAYLOAD_TOO_LARGE);
+    });
+
+    it('returns the UTF-8 payload byte size on the valid result', () => {
+      const asciiOp = createValidOp({ payload: { name: 'Test' } });
+      const asciiResult = validationService.validateOp(asciiOp, clientId);
+      expect(asciiResult.valid).toBe(true);
+      expect(asciiResult.payloadBytes).toBe(
+        Buffer.byteLength(JSON.stringify(asciiOp.payload), 'utf8'),
+      );
+
+      // Non-ASCII: byte size exceeds the UTF-16 code-unit count.
+      const unicodeOp = createValidOp({ payload: { note: '日本語✓' } });
+      const unicodeResult = validationService.validateOp(unicodeOp, clientId);
+      expect(unicodeResult.valid).toBe(true);
+      expect(unicodeResult.payloadBytes).toBe(
+        Buffer.byteLength(JSON.stringify(unicodeOp.payload), 'utf8'),
+      );
+      expect(unicodeResult.payloadBytes).toBeGreaterThan(
+        JSON.stringify(unicodeOp.payload).length,
+      );
+    });
+
     it('should accept timestamps in the future (clamping handled during upload)', () => {
       // Future timestamp validation removed - clamping is handled in OperationUploadService.
       const futureTime = Date.now() + 10 * 60 * 1000; // 10 minutes in future
@@ -368,13 +503,31 @@ describe('ValidationService', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('should reject timestamps too old', () => {
+    it('should accept timestamps older than server retention', () => {
       const oldTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago (beyond 45-day retention)
       const op = createValidOp({ timestamp: oldTime });
       const result = validationService.validateOp(op, clientId);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject a non-integer timestamp that would throw on BigInt persistence', () => {
+      const result = validationService.validateOp(
+        createValidOp({ timestamp: Date.now() + 0.5 }),
+        clientId,
+      );
       expect(result.valid).toBe(false);
       expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_TIMESTAMP);
-      expect(result.error).toContain('too old');
+    });
+
+    it('should reject a non-finite timestamp', () => {
+      for (const timestamp of [Infinity, NaN]) {
+        const result = validationService.validateOp(
+          createValidOp({ timestamp }),
+          clientId,
+        );
+        expect(result.valid).toBe(false);
+        expect(result.errorCode).toBe(SYNC_ERROR_CODES.INVALID_TIMESTAMP);
+      }
     });
   });
 

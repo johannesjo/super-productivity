@@ -42,87 +42,70 @@
     }
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <div class="wrap-buttons">
-      <button
-        (dblclick)="snoozeAll(10)"
-        [disabled]="isDisableControls"
-        [matMenuTriggerFor]="snoozeAllMenu"
-        color="primary"
-        mat-button
-        type="button"
-      >
-        <mat-icon>snooze</mat-icon>
-        {{
-          (isMultiple
-            ? T.F.TASK.D_REMINDER_VIEW.SNOOZE_ALL
-            : T.F.TASK.D_REMINDER_VIEW.SNOOZE
-          ) | translate
-        }}
-      </button>
+    <div class="footer-wrapper">
       @if (isMultiple) {
-        <button
-          (click)="markAllAsDone()"
-          [disabled]="isDisableControls"
-          mat-button
-          color="primary"
-          type="button"
-        >
-          <mat-icon>check</mat-icon>
-          {{ T.F.TASK.D_REMINDER_VIEW.COMPLETE_ALL | translate }}
-        </button>
+        <div class="bulk-actions-header">
+          {{ T.F.TASK.D_REMINDER_VIEW.OR_DIRECTLY_FOR_ALL | translate }}
+        </div>
       }
-      @if (!isMultiple) {
-        <button
-          (click)="markSingleAsDone()"
+      <div class="wrap-buttons">
+        <split-button
           [disabled]="isDisableControls"
-          color="primary"
-          mat-stroked-button
-          type="button"
+          [menu]="footerMenu"
+          [mainLabel]="T.F.TASK.D_REMINDER_VIEW.SNOOZE_FOR | translate: { m: 10 }"
+          [triggerLabel]="T.F.TASK.D_REMINDER_VIEW.MORE_ACTIONS"
+          (mainClick)="snoozeAll(10)"
         >
-          <mat-icon>check</mat-icon>
-          {{ T.F.TASK.D_REMINDER_VIEW.DONE | translate }}
-        </button>
-      }
-      @if (!(isSingleOnToday$ | async)) {
-        <button
-          (click)="addAllToToday()"
-          [disabled]="isDisableControls"
-          color="primary"
-          mat-stroked-button
-          type="button"
-        >
-          <mat-icon>wb_sunny</mat-icon>
-          {{
-            (isMultiple
-              ? T.F.TASK.D_REMINDER_VIEW.ADD_ALL_TO_TODAY
-              : T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY
-            ) | translate
-          }}
-        </button>
-      }
-      @if (!isMultiple || (isSingleOnToday$ | async)) {
-        <button
-          (click)="play()"
-          [disabled]="isDisableControls"
-          color="primary"
-          mat-stroked-button
-          type="button"
-        >
-          <mat-icon>play_arrow</mat-icon>
-          {{ T.F.TASK.D_REMINDER_VIEW.START | translate }}
-        </button>
-      }
+          <mat-icon>snooze</mat-icon>
+          {{ T.F.TASK.D_REMINDER_VIEW.SNOOZE_FOR_SHORT | translate: { m: 10 } }}
+        </split-button>
+        @if (!isMultiple) {
+          <button
+            class="done-btn"
+            (click)="markSingleAsDone()"
+            [disabled]="isDisableControls"
+            [matTooltip]="T.F.TASK.D_REMINDER_VIEW.MARK_AS_DONE | translate"
+            [attr.aria-label]="T.F.TASK.D_REMINDER_VIEW.MARK_AS_DONE | translate"
+            color="primary"
+            mat-stroked-button
+            matTooltipShowDelay="0"
+            type="button"
+          >
+            <mat-icon>check</mat-icon>
+          </button>
+        }
+        @if (isMultiple || isAllDeadline) {
+          <button
+            (click)="addAllToToday()"
+            [disabled]="isDisableControls"
+            color="primary"
+            mat-flat-button
+            type="button"
+          >
+            <mat-icon>wb_sunny</mat-icon>
+            {{
+              (isAllDeadline
+                ? T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY
+                : T.F.TASK.D_REMINDER_VIEW.KEEP_IN_TODAY
+              ) | translate
+            }}
+          </button>
+        } @else {
+          <button
+            (click)="play()"
+            [disabled]="isDisableControls"
+            color="primary"
+            mat-flat-button
+            type="button"
+          >
+            <mat-icon>play_arrow</mat-icon>
+            {{ T.F.TASK.D_REMINDER_VIEW.START | translate }}
+          </button>
+        }
+      </div>
     </div>
   </mat-dialog-actions>
-  <mat-menu #snoozeAllMenu="matMenu">
-    <button
-      (click)="snoozeAll(10)"
-      [disabled]="isDisableControls"
-      mat-menu-item
-    >
-      <mat-icon>snooze</mat-icon>
-      {{ T.G.MINUTES | translate: { m: 10 } }}
-    </button>
+  <mat-menu #footerMenu="matMenu">
     <button
       (click)="snoozeAll(30)"
       [disabled]="isDisableControls"
@@ -156,6 +139,36 @@
         {{ T.F.TASK.D_REMINDER_VIEW.RESCHEDULE_EDIT | translate }}
       </button>
     }
+    <mat-divider></mat-divider>
+    @if (isMultiple) {
+      <button
+        (click)="markAllAsDone()"
+        [disabled]="isDisableControls"
+        mat-menu-item
+      >
+        <mat-icon>done_all</mat-icon>
+        {{ T.F.TASK.D_REMINDER_VIEW.COMPLETE | translate }}
+      </button>
+    } @else if (isAllDeadline) {
+      <button
+        (click)="play()"
+        [disabled]="isDisableControls"
+        mat-menu-item
+      >
+        <mat-icon>play_arrow</mat-icon>
+        {{ T.F.TASK.D_REMINDER_VIEW.START | translate }}
+      </button>
+    }
+    @if (!isMultiple && !isAllDeadline && !(isSingleOnToday$ | async)) {
+      <button
+        (click)="addAllToToday()"
+        [disabled]="isDisableControls"
+        mat-menu-item
+      >
+        <mat-icon>wb_sunny</mat-icon>
+        {{ T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY | translate }}
+      </button>
+    }
     <button
       (click)="dismissAll()"
       [disabled]="isDisableControls"
@@ -186,26 +199,53 @@
         ) | translate
       }}
     </button>
+    @if (!isMultiple) {
+      <mat-divider></mat-divider>
+      <button
+        (click)="deleteTask(tasks[0])"
+        [disabled]="isDisableControls"
+        mat-menu-item
+      >
+        <mat-icon>delete</mat-icon>
+        {{ T.F.TASK.D_REMINDER_VIEW.DELETE | translate }}
+      </button>
+    }
   </mat-menu>
 
   <ng-template
     #taskRow
     let-task
   >
-    <div class="task">
+    <div
+      class="task"
+      [attr.data-id]="task.id"
+    >
       <div class="title-wrapper">
         <div
           class="due-for"
           [class.emphasized]="(task.dueWithTime || 0) < overdueThreshold"
         >
           @if (task.isDeadlineReminder && task.deadlineWithTime) {
-            {{ task.deadlineWithTime | localeDate: 'short' }}
+            {{ task.deadlineWithTime | localeDate: 'short' : undefined : locale() }}
           } @else if (task.isDeadlineReminder && task.deadlineDay) {
             {{ task.deadlineDay | localDateStr: '' }}
           } @else {
-            {{ task.dueWithTime | localeDate: 'short' }}
+            {{ task.dueWithTime | localeDate: 'short' : undefined : locale() }}
           }
         </div>
+        @if (shouldShowDeadlineScheduleHint(task)) {
+          <div class="schedule-hint">
+            <mat-icon>event</mat-icon>
+            <span>
+              {{ T.F.TASK.D_REMINDER_VIEW.SCHEDULED_FOR | translate }}
+              @if (task.dueWithTime) {
+                {{ task.dueWithTime | localeDate: 'short' : undefined : locale() }}
+              } @else {
+                {{ task.dueDay | localDateStr: '' }}
+              }
+            </span>
+          </div>
+        }
         <div class="title">{{ task.title }}</div>
         <tag-list
           [isShowProjectTagAlways]="true"
@@ -216,7 +256,9 @@
         <div class="actions">
           <button
             (click)="markTaskAsDone(task)"
-            [title]="T.F.TASK.D_REMINDER_VIEW.COMPLETE | translate"
+            [matTooltip]="T.F.TASK.D_REMINDER_VIEW.MARK_AS_DONE | translate"
+            [attr.aria-label]="T.F.TASK.D_REMINDER_VIEW.MARK_AS_DONE | translate"
+            matTooltipShowDelay="0"
             color=""
             mat-icon-button
             type="button"
@@ -229,12 +271,19 @@
               !(task.projectId || task.parentId || task.tagIds.length > 0)
             "
             (click)="dismiss(task)"
-            [title]="
+            [matTooltip]="
               (task.isDeadlineReminder
                 ? T.F.TASK.D_REMINDER_VIEW.CLEAR_REMINDER
                 : T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE
               ) | translate
             "
+            [attr.aria-label]="
+              (task.isDeadlineReminder
+                ? T.F.TASK.D_REMINDER_VIEW.CLEAR_REMINDER
+                : T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE
+              ) | translate
+            "
+            matTooltipShowDelay="0"
             class="hide-xs"
             color=""
             mat-icon-button
@@ -247,7 +296,9 @@
           <button
             (dblclick)="snooze(task, 10)"
             [matMenuTriggerFor]="snoozeMenu"
-            [title]="T.F.TASK.D_REMINDER_VIEW.SNOOZE | translate"
+            [matTooltip]="T.F.TASK.D_REMINDER_VIEW.SNOOZE | translate"
+            [attr.aria-label]="T.F.TASK.D_REMINDER_VIEW.SNOOZE | translate"
+            matTooltipShowDelay="0"
             color=""
             mat-icon-button
             type="button"
@@ -256,7 +307,21 @@
           </button>
           <button
             (click)="addToToday(task)"
-            [title]="T.F.TASK.D_REMINDER_VIEW.ADD_TO_TODAY | translate"
+            [matTooltip]="
+              ((todayTaskIds$ | async)?.includes(task.id) &&
+              (task.dueWithTime || 0) < overdueThreshold
+                ? T.F.TASK.D_REMINDER_VIEW.DROP_TIME_KEEP_TODAY
+                : T.F.TASK.D_REMINDER_VIEW.SCHEDULE_FOR_TODAY
+              ) | translate
+            "
+            [attr.aria-label]="
+              ((todayTaskIds$ | async)?.includes(task.id) &&
+              (task.dueWithTime || 0) < overdueThreshold
+                ? T.F.TASK.D_REMINDER_VIEW.DROP_TIME_KEEP_TODAY
+                : T.F.TASK.D_REMINDER_VIEW.SCHEDULE_FOR_TODAY
+              ) | translate
+            "
+            matTooltipShowDelay="0"
             color=""
             mat-icon-button
             type="button"

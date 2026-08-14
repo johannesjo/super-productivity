@@ -6,8 +6,8 @@
   >
     @if (note.imgUrl) {
       <img
-        [enlargeImg]="note.imgUrl"
-        [src]="note.imgUrl"
+        [enlargeImg]="safeImgUrl"
+        [src]="safeImgUrl"
         (longPress)="editFullscreen($event)"
         class="note-img"
       />
@@ -58,6 +58,7 @@
       <button
         [matMenuTriggerFor]="menu"
         mat-icon-button
+        [attr.aria-label]="T.G.MORE_ACTIONS | translate"
       >
         <mat-icon>more_vert</mat-icon>
       </button>
@@ -118,9 +119,9 @@
             mat-menu-item
           >
             <mat-icon
-              [style.color]="project.theme.primary"
+              [style.color]="project.theme?.primary"
               class="tag-ico"
-              >{{ project.icon || 'list' }}</mat-icon
+              >{{ project.icon || DEFAULT_PROJECT_ICON }}</mat-icon
             >
             {{ project.title }}
           </button>

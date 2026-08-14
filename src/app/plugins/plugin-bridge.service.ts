@@ -6,6 +6,7 @@ import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
 import {
   DialogCfg,
+  DialogResult,
   Hooks,
   NotifyCfg,
   PluginCreateTaskData,
@@ -35,6 +36,7 @@ import {
   PluginAppState,
   PluginManifest,
   PluginNote,
+  PluginRequestOptions,
   PluginSimpleCounterFull,
   PluginTaskRepeatCfg,
   SnackCfg,
@@ -42,6 +44,7 @@ import {
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
+import { TaskFocusService } from '../features/tasks/task-focus.service';
 import { addSubTask } from '../features/tasks/store/task.actions';
 import { selectTaskFeatureState } from '../features/tasks/store/task.selectors';
 import { parseTimeSpentChanges } from '../features/tasks/short-syntax';
@@ -82,8 +85,30 @@ import { IssueSyncAdapterRegistryService } from '../features/issue/two-way-sync/
 import { PluginHttpService } from './issue-provider/plugin-http.service';
 import { createPluginSyncAdapter } from './issue-provider/plugin-sync-adapter.service';
 import { PluginOAuthBridgeService } from './oauth/plugin-oauth-bridge.service';
+import { PluginSecretService } from './secret/plugin-secret.service';
 import { ISSUE_PROVIDER_TYPES } from '../features/issue/issue.const';
 import { PluginService } from './plugin.service';
+import { PluginI18nService } from './plugin-i18n.service';
+import { formatDateForPlugin } from './plugin-i18n-date.util';
+
+/**
+ * Relational fields `updateTask` refuses: they are applied to the store as
+ * plain values, so writing them corrupts the parent<->child links rather than
+ * moving a task. Mirrors `REJECTED_TASK_FIELDS` in the local REST API.
+ */
+const REJECTED_UPDATE_FIELDS = ['parentId', 'subTaskIds'] as const;
+
+const toPluginTaskCopy = (
+  task: (TaskCopy & { subTasks?: unknown }) | null | undefined,
+): TaskCopy | null => {
+  if (!task) {
+    return null;
+  }
+
+  const taskCopy = { ...task };
+  delete taskCopy.subTasks;
+  return taskCopy;
+};
 
 // New imports for simple counters
 import { selectAllSimpleCounters } from '../features/simple-counter/store/simple-counter.reducer';
@@ -101,6 +126,9 @@ import {
 } from '../features/simple-counter/store/simple-counter.actions';
 import { getDbDateStr } from '../util/get-db-date-str';
 import { DataInitService } from '../core/data-init/data-init.service';
+import { PluginNodeExecutionElectronApi } from '../../../electron/shared-with-frontend/plugin-node-execution.model';
+
+type PluginDateFormat = 'short' | 'medium' | 'long' | 'time' | 'datetime';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -120,6 +148,7 @@ export class PluginBridgeService implements OnDestroy {
   private _store = inject(Store);
   private _pluginHooksService = inject(PluginHooksService);
   private _taskService = inject(TaskService);
+  private _taskFocusService = inject(TaskFocusService);
   private _workContextService = inject(WorkContextService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
@@ -135,8 +164,11 @@ export class PluginBridgeService implements OnDestroy {
   private _syncAdapterRegistry = inject(IssueSyncAdapterRegistryService);
   private _pluginHttpService = inject(PluginHttpService);
   private _pluginOAuthBridge = inject(PluginOAuthBridgeService);
+  private _pluginSecretService = inject(PluginSecretService);
   private _dataInitService = inject(DataInitService);
   private _globalConfigService = inject(GlobalConfigService);
+  readonly #nodeExecutionGrantTokens = new Map<string, string>();
+  readonly #nodeExecutionApi = this._consumeNodeExecutionApi();
 
   // Track header buttons registered by plugins
   private readonly _headerButtons = signal<PluginHeaderBtnCfg[]>([]);
@@ -221,6 +253,8 @@ export class PluginBridgeService implements OnDestroy {
     showInWorkContext: () => void;
     closeWorkContextView: () => void;
     getActiveWorkContext: () => Promise<ActiveWorkContext | null>;
+    getSelectedTask: () => Promise<TaskCopy | null>;
+    getFocusedTask: () => Promise<TaskCopy | null>;
     triggerSync: () => Promise<void>;
     dispatchAction: (action: { type: string; [key: string]: unknown }) => void;
     executeNodeScript: (
@@ -246,6 +280,13 @@ export class PluginBridgeService implements OnDestroy {
     startOAuthFlow: (config: OAuthFlowConfig) => Promise<OAuthTokenResult>;
     getOAuthToken: () => Promise<string | null>;
     clearOAuthToken: () => Promise<void>;
+    setSecret: (key: string, value: string) => Promise<void>;
+    getSecret: (key: string) => Promise<string | null>;
+    deleteSecret: (key: string) => Promise<void>;
+    request: <T = unknown>(url: string, options?: PluginRequestOptions) => Promise<T>;
+    translate: (key: string, params?: Record<string, string | number>) => string;
+    formatDate: (date: Date | string | number, format: PluginDateFormat) => string;
+    getCurrentLanguage: () => string;
     log: ReturnType<typeof Log.withContext>;
   } {
     return {
@@ -276,6 +317,8 @@ export class PluginBridgeService implements OnDestroy {
       showInWorkContext: () => this._showInWorkContext(pluginId),
       closeWorkContextView: () => this._closeWorkContextView(pluginId),
       getActiveWorkContext: () => this.getActiveWorkContext(),
+      getSelectedTask: () => this.getSelectedTask(),
+      getFocusedTask: () => this.getFocusedTask(),
 
       // Sync
       triggerSync: () => this._triggerSync(pluginId),
@@ -334,6 +377,28 @@ export class PluginBridgeService implements OnDestroy {
         ),
       clearOAuthToken: (): Promise<void> =>
         this._pluginOAuthBridge.clearOAuthTokens(pluginId),
+
+      // Secret storage (local-only, per-plugin, never synced)
+      setSecret: (key: string, value: string): Promise<void> =>
+        this._pluginSecretService.setSecret(pluginId, key, value),
+      getSecret: (key: string): Promise<string | null> =>
+        this._pluginSecretService.getSecret(pluginId, key),
+      deleteSecret: (key: string): Promise<void> =>
+        this._pluginSecretService.deleteSecret(pluginId, key),
+      request: <T = unknown>(url: string, options?: PluginRequestOptions): Promise<T> =>
+        this.request<T>(url, options, manifest?.allowedHosts, manifest?.permissions),
+
+      // i18n
+      translate: (key: string, params?: Record<string, string | number>): string =>
+        this._injector.get(PluginI18nService).translate(pluginId, key, params),
+      formatDate: (date: Date | string | number, format: PluginDateFormat): string =>
+        formatDateForPlugin(
+          date,
+          format,
+          this._injector.get(PluginI18nService).getCurrentLanguage(),
+        ),
+      getCurrentLanguage: (): string =>
+        this._injector.get(PluginI18nService).getCurrentLanguage(),
 
       // Logging
       log: Log.withContext(`${pluginId}`),
@@ -447,6 +512,78 @@ export class PluginBridgeService implements OnDestroy {
     return this._pluginOAuthBridge.clearOAuthTokens(pluginId);
   }
 
+  async request<T = unknown>(
+    url: string,
+    options?: PluginRequestOptions,
+    allowedHosts?: string[],
+    permissions?: string[],
+  ): Promise<T> {
+    // Enforce the plugin's declared capability + host allowlist (both fail-closed)
+    // BEFORE the shared HTTP layer applies its URL/private-network (SSRF) guards.
+    this._assertRequestAllowed(url, allowedHosts, permissions);
+
+    const { method = 'GET', body } = options ?? {};
+    const requestOptions = options
+      ? {
+          params: options.params,
+          headers: options.headers,
+          timeout: options.timeout,
+          responseType: options.responseType,
+        }
+      : undefined;
+
+    return this._pluginHttpService
+      .createHttpHelper(() => ({}), { blockRedirects: true })
+      .request<T>(method, url, body, requestOptions);
+  }
+
+  /**
+   * Gate `PluginAPI.request`. Two fail-closed checks, both host-enforced (never
+   * in plugin code):
+   *   1. Capability — the plugin must declare `"permissions": ["http"]`. Network
+   *      egress is an opt-in capability, like `nodeExecution`; it is never an
+   *      implicit grant from merely listing hosts.
+   *   2. Host allowlist — the exact hostnames in `allowedHosts`. Host-only,
+   *      case-insensitive, trailing-dot tolerant, port-agnostic exact match.
+   * Either check failing (or an empty/undefined value) blocks the request.
+   */
+  private _assertRequestAllowed(
+    url: string,
+    allowedHosts?: string[],
+    permissions?: string[],
+  ): void {
+    if (!(permissions ?? []).includes('http')) {
+      throw new Error(
+        '[PluginHttp] PluginAPI.request is blocked: this plugin does not declare the "http" permission. Add "http" to the manifest "permissions".',
+      );
+    }
+    let hostname: string;
+    try {
+      // URL parsing resolves userinfo tricks (https://ok.com@evil.com -> evil.com).
+      // NOTE: unlike PluginHttpService._validateUrl we deliberately do NOT strip
+      // IPv6 brackets here. validatePluginManifest rejects any allowedHosts entry
+      // containing ':' (so no IPv6 literal can ever be declared), which means a
+      // bracketed IPv6 request hostname can never match an allowed entry and is
+      // always fail-closed. Keeping the normalizations distinct on purpose.
+      hostname = new URL(url).hostname.toLowerCase().replace(/\.$/, '');
+    } catch {
+      throw new Error(`[PluginHttp] Invalid URL for PluginAPI.request: ${url}`);
+    }
+    const allowed = (allowedHosts ?? [])
+      .map((h) => h.trim().toLowerCase().replace(/\.$/, ''))
+      .filter((h) => h.length > 0);
+    if (allowed.length === 0) {
+      throw new Error(
+        '[PluginHttp] PluginAPI.request is blocked: this plugin declares no "allowedHosts" in its manifest. Declare the exact host(s) it needs.',
+      );
+    }
+    if (!allowed.includes(hostname)) {
+      throw new Error(
+        `[PluginHttp] PluginAPI.request to "${hostname}" is blocked: not in the plugin's declared allowedHosts (${allowed.join(', ')}).`,
+      );
+    }
+  }
+
   async restoreAndCheckOAuthTokens(pluginId: string): Promise<boolean> {
     return this._pluginOAuthBridge.restoreAndCheckOAuthTokens(
       pluginId,
@@ -502,10 +639,10 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Open a dialog using Angular Material
    */
-  async openDialog(dialogCfg: DialogCfg): Promise<void> {
+  async openDialog(dialogCfg: DialogCfg): Promise<DialogResult> {
     typia.assert<DialogCfg>(dialogCfg);
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<DialogResult>((resolve, reject) => {
       try {
         const dialogRef = this._dialog.open(PluginDialogComponent, {
           data: dialogCfg,
@@ -521,7 +658,7 @@ export class PluginBridgeService implements OnDestroy {
 
         dialogRef.afterClosed().subscribe((result) => {
           PluginLog.log('PluginBridge: Dialog closed');
-          resolve();
+          resolve(result);
         });
       } catch (error) {
         PluginLog.err('PluginBridge: Failed to open dialog:', error);
@@ -534,7 +671,7 @@ export class PluginBridgeService implements OnDestroy {
    * Internal method to show plugin index.html as view
    */
   private _showIndexHtmlAsView(pluginId: string): void {
-    console.log('PluginBridge: Navigating to plugin index view', {
+    PluginLog.log('PluginBridge: Navigating to plugin index view', {
       pluginId,
     });
     // Navigate to the plugin index route
@@ -712,12 +849,24 @@ export class PluginBridgeService implements OnDestroy {
     typia.assert<string>(taskId);
     typia.assert<Partial<TaskCopy>>(updates);
 
-    // Validate that referenced project, tags and parent task exist if they are being updated
-    await this._validateTaskReferences(
-      updates.projectId,
-      updates.tagIds,
-      updates.parentId,
-    );
+    // Relational fields are rejected rather than applied: they reach the reducer
+    // as plain values, so setting `parentId` writes a task that no parent lists
+    // in `subTaskIds` — an orphan invisible in both the main list and the
+    // parent, which no repair pass reconciles. Same rule and reason as the local
+    // REST API's REJECTED_TASK_FIELDS on PATCH. Create subtasks via
+    // addTask({ parentId }); restructure existing trees via
+    // batchUpdateForProject, which maintains both sides of the link.
+    const rejectedField = REJECTED_UPDATE_FIELDS.find((field) => field in updates);
+    if (rejectedField) {
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.FIELD_NOT_UPDATABLE, {
+          field: rejectedField,
+        }),
+      );
+    }
+
+    // Validate that referenced project and tags exist if they are being updated
+    await this._validateTaskReferences(updates.projectId, updates.tagIds);
 
     const { projectId, ...otherUpdates } = updates;
 
@@ -775,23 +924,37 @@ export class PluginBridgeService implements OnDestroy {
       taskData.parentId,
     );
 
+    // One mapping from PluginCreateTaskData to task defaults for both branches:
+    // maintaining it twice is how `dueDay` came to be honoured for main tasks
+    // and silently dropped for subtasks.
+    const additional: Partial<TaskCopy> = {
+      projectId: taskData.projectId || undefined,
+      tagIds: taskData.tagIds || [],
+      notes: taskData.notes || '',
+      timeEstimate: taskData.timeEstimate || 0,
+      isDone: taskData.isDone || false,
+      // The dueDay key must always be present, even when undefined:
+      // createNewTaskWithDefaults only auto-assigns today's date while
+      // `'dueDay' in additional` is false, and a task created through the API
+      // must not inherit a due date from whichever view the user happened to be
+      // on. Matches TaskService.addSubTaskTo().
+      dueDay: taskData.dueDay ?? undefined,
+    };
+
     let createdTask: Task;
     if (taskData.parentId) {
-      // For subtasks, we need to use the addSubTask action to properly update parent.
-      // Short-syntax (e.g. "15m") is normally applied by ShortSyntaxEffects, but that
-      // effect only listens to `addTask`/`updateTask` — not `addSubTask`. So the
-      // bridge has to parse subtask titles itself, mirroring MarkdownPasteService.
-      // Tags/projects are intentionally not parsed: subtasks always inherit them
-      // from the parent (see addSubTask reducer).
+      // For subtasks, we use the addSubTask action to properly update the parent.
+      // ShortSyntaxEffects now also parses addSubTask, but we opt this path out via
+      // `isIgnoreShortSyntax` and parse only time here (mirroring MarkdownPasteService):
+      // subtasks created via the plugin API intentionally inherit tags/project from
+      // the parent and must not have them reassigned from the title (see addSubTask
+      // reducer).
       const subTaskTitleProps = this._parseSubTaskTitleTimeProps(taskData.title);
       const newTask = this._taskService.createNewTaskWithDefaults({
         title: subTaskTitleProps.title,
         additional: {
-          notes: taskData.notes || '',
-          timeEstimate: taskData.timeEstimate || 0,
-          isDone: (taskData as { isDone?: boolean }).isDone || false,
+          ...additional,
           tagIds: [], // Subtasks don't have tags
-          projectId: taskData.projectId || undefined,
           ...subTaskTitleProps.timeProps,
         },
       });
@@ -801,6 +964,7 @@ export class PluginBridgeService implements OnDestroy {
         addSubTask({
           task: newTask,
           parentId: taskData.parentId,
+          isIgnoreShortSyntax: true,
         }),
       );
       createdTask = newTask;
@@ -812,16 +976,6 @@ export class PluginBridgeService implements OnDestroy {
       return createdTask.id;
     } else {
       // For main tasks, use the regular add method
-      const additional: Partial<TaskCopy> = {
-        projectId: taskData.projectId || undefined,
-        tagIds: taskData.tagIds || [],
-        notes: taskData.notes || '',
-        timeEstimate: taskData.timeEstimate || 0,
-        isDone: (taskData as { isDone?: boolean }).isDone || false,
-        dueDay: taskData.dueDay ?? undefined,
-      };
-
-      // Add the task using TaskService
       const taskId = this._taskService.add(
         taskData.title,
         false, // isAddToBacklog
@@ -856,12 +1010,12 @@ export class PluginBridgeService implements OnDestroy {
       // Use the TaskService remove method which handles deletion properly
       this._taskService.remove(taskWithSubTasks);
 
-      console.log('PluginBridge: Task deleted successfully', {
+      PluginLog.log('PluginBridge: Task deleted successfully', {
         taskId,
         hadSubTasks: taskWithSubTasks.subTasks.length > 0,
       });
     } catch (error) {
-      console.error('PluginBridge: Failed to delete task:', error);
+      PluginLog.err('PluginBridge: Failed to delete task:', error);
       throw error;
     }
   }
@@ -1055,6 +1209,21 @@ export class PluginBridgeService implements OnDestroy {
     PluginLog.log('PluginBridge: Task selected', { taskId });
   }
 
+  async getSelectedTask(): Promise<TaskCopy | null> {
+    return toPluginTaskCopy(await firstValueFrom(this._taskService.selectedTask$));
+  }
+
+  async getFocusedTask(): Promise<TaskCopy | null> {
+    const focusedTaskId = this._taskFocusService.focusedTaskId();
+    if (!focusedTaskId) {
+      return null;
+    }
+
+    return toPluginTaskCopy(
+      await firstValueFrom(this._taskService.getByIdOnce$(focusedTaskId)),
+    );
+  }
+
   /**
    * Batch update tasks for a project
    * Only generate IDs here - let the reducer handle all validation
@@ -1075,6 +1244,7 @@ export class PluginBridgeService implements OnDestroy {
 
     // Chunk large operations to prevent oversized payloads
     const chunks = this._chunkOperations(request.operations);
+    const createdTaskTimestamp = Date.now();
 
     if (chunks.length > 1) {
       PluginLog.log('PluginBridge: Chunking large batch operation', {
@@ -1091,6 +1261,7 @@ export class PluginBridgeService implements OnDestroy {
           projectId: request.projectId,
           operations: chunk,
           createdTaskIds, // Same IDs mapping for all chunks
+          createdTaskTimestamp,
         }),
       );
     });
@@ -1137,7 +1308,7 @@ export class PluginBridgeService implements OnDestroy {
       // below as a normal Error.
       const entityId = composeId(pluginId, key);
       this._pluginUserPersistenceService.persistPluginUserData(entityId, dataStr);
-      console.log('PluginBridge: Plugin data persisted successfully', {
+      PluginLog.log('PluginBridge: Plugin data persisted successfully', {
         pluginId,
         keyLen: key?.length ?? 0,
         dataSize: new Blob([dataStr]).size,
@@ -1193,7 +1364,7 @@ export class PluginBridgeService implements OnDestroy {
    */
   private async _triggerSync(pluginId: string): Promise<void> {
     try {
-      console.log('PluginBridge: Triggering sync for plugin', pluginId);
+      PluginLog.log('PluginBridge: Triggering sync for plugin', pluginId);
       await this._syncWrapperService.sync();
       PluginLog.log('PluginBridge: Sync completed successfully');
     } catch (error) {
@@ -1241,7 +1412,7 @@ export class PluginBridgeService implements OnDestroy {
       this._syncAdapterRegistry.unregister(registeredKey);
     }
 
-    console.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
+    PluginLog.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
   }
 
   /**
@@ -1261,7 +1432,7 @@ export class PluginBridgeService implements OnDestroy {
     const currentButtons = this._headerButtons();
     this._headerButtons.set([...currentButtons, newButton]);
 
-    console.log('PluginBridge: Header button registered', {
+    PluginLog.log('PluginBridge: Header button registered', {
       pluginId,
       headerBtnCfg,
     });
@@ -1533,8 +1704,9 @@ export class PluginBridgeService implements OnDestroy {
    */
   // Mirrors MarkdownPasteService._parseTimeProps: respects the user's
   // shortSyntax.isEnableDue config, returns the cleaned title and any parsed
-  // time fields. Used for subtasks because `addSubTask` doesn't trigger the
-  // ShortSyntaxEffects pipeline.
+  // time fields. Used for subtasks created via the plugin API, which opt out of
+  // the ShortSyntaxEffects pipeline (isIgnoreShortSyntax) to parse time only and
+  // keep tags/project inherited from the parent.
   private _parseSubTaskTitleTimeProps(originalTitle: string): {
     title: string;
     timeProps: Partial<TaskCopy>;
@@ -1585,17 +1757,23 @@ export class PluginBridgeService implements OnDestroy {
       }
     }
 
-    // Validate parent task exists if provided
+    // Validate parent task exists and is not itself a subtask if provided
     if (parentId) {
       const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
 
-      const parentExists = tasks?.some((task) => task.id === parentId);
-      if (!parentExists) {
+      const parent = tasks?.find((task) => task.id === parentId);
+      if (!parent) {
         errors.push(
           this._translateService.instant(T.PLUGINS.PARENT_TASK_DOES_NOT_EXIST, {
             parentId,
           }),
         );
+      } else if (parent.parentId) {
+        // The task model is two levels deep; the reducer would happily write a
+        // 3-level tree. Mirrors the local REST API's INVALID_PARENT rejection.
+        // Guards addTask only — batchUpdateForProject validates in its own
+        // reducer and still accepts a subtask as parent.
+        errors.push(this._translateService.instant(T.PLUGINS.CANNOT_NEST_SUBTASKS));
       }
     }
 
@@ -1623,7 +1801,7 @@ export class PluginBridgeService implements OnDestroy {
       );
       throw new Error(
         this._translateService.instant(T.PLUGINS.ACTION_TYPE_NOT_ALLOWED, {
-          actionType: action.type,
+          type: action.type,
         }),
       );
     }
@@ -1637,6 +1815,45 @@ export class PluginBridgeService implements OnDestroy {
     );
   }
 
+  setNodeExecutionGrantToken(pluginId: string, grantToken: string): void {
+    this.#nodeExecutionGrantTokens.set(pluginId, grantToken);
+  }
+
+  hasNodeExecutionGrantToken(pluginId: string): boolean {
+    return this.#nodeExecutionGrantTokens.has(pluginId);
+  }
+
+  getNodeExecutionGrantToken(pluginId: string): string | undefined {
+    return this.#nodeExecutionGrantTokens.get(pluginId);
+  }
+
+  async requestNodeExecutionGrant(
+    pluginId: string,
+    displayInfo?: { name?: string; version?: string },
+  ): Promise<{ token: string } | null> {
+    return (await this.#nodeExecutionApi?.requestGrant(pluginId, displayInfo)) ?? null;
+  }
+
+  revokeNodeExecutionGrantToken(pluginId: string): string | undefined {
+    const token = this.#nodeExecutionGrantTokens.get(pluginId);
+    this.#nodeExecutionGrantTokens.delete(pluginId);
+    return token;
+  }
+
+  async revokeNodeExecutionGrant(pluginId: string, grantToken: string): Promise<void> {
+    await this.#nodeExecutionApi?.revokeGrant(pluginId, grantToken);
+  }
+
+  /**
+   * Drop both the in-renderer session token and the main-owned persisted consent for a
+   * plugin (issue #8512 Phase 2). Used on disable / uninstall / re-upload so the next
+   * node call re-prompts. No-op on web (no node execution API).
+   */
+  async clearNodeExecutionConsent(pluginId: string): Promise<void> {
+    this.#nodeExecutionGrantTokens.delete(pluginId);
+    await this.#nodeExecutionApi?.clearConsent(pluginId);
+  }
+
   /**
    * Internal method to execute Node.js script
    */
@@ -1645,7 +1862,7 @@ export class PluginBridgeService implements OnDestroy {
     manifest: PluginManifest | null,
     request: PluginNodeScriptRequest,
   ): Promise<PluginNodeScriptResult> {
-    if (!IS_ELECTRON) {
+    if (!this._isElectronRuntime()) {
       return {
         success: false,
         error: this._translateService.instant(T.PLUGINS.NODE_ONLY_DESKTOP),
@@ -1662,8 +1879,17 @@ export class PluginBridgeService implements OnDestroy {
         };
       }
 
-      // Check if Electron API is available
-      if (!window.ea || typeof window.ea.pluginExecNodeScript !== 'function') {
+      const grantToken = this.#nodeExecutionGrantTokens.get(pluginId);
+      if (!grantToken) {
+        return {
+          success: false,
+          error: this._translateService.instant(
+            T.PLUGINS.NODE_EXECUTION_PERMISSION_DENIED,
+          ),
+        };
+      }
+
+      if (!this.#nodeExecutionApi) {
         return {
           success: false,
           error: this._translateService.instant(T.PLUGINS.ELECTRON_API_NOT_AVAILABLE),
@@ -1671,7 +1897,11 @@ export class PluginBridgeService implements OnDestroy {
       }
 
       // Call Electron main process via IPC
-      const result = await window.ea.pluginExecNodeScript(pluginId, manifest, request);
+      const result = await this.#nodeExecutionApi.executeScript(
+        pluginId,
+        grantToken,
+        request,
+      );
 
       return result;
     } catch (error) {
@@ -1684,6 +1914,32 @@ export class PluginBridgeService implements OnDestroy {
             : this._translateService.instant(T.PLUGINS.FAILED_TO_EXECUTE_SCRIPT),
       };
     }
+  }
+
+  private _isElectronRuntime(): boolean {
+    return IS_ELECTRON;
+  }
+
+  /**
+   * Consume the one-shot node-execution IPC handed off by the preload.
+   *
+   * SECURITY INVARIANT — must run at app bootstrap, before any plugin code
+   * executes. The handoff lives on the shared `window.ea`, and plugin code
+   * runs via `new Function` in this same renderer realm, so whoever calls
+   * `consumePluginNodeExecutionApi()` first owns the privileged node channel.
+   * This service is constructed during startup (PluginService injects it)
+   * and plugins only load later (post-sync, in `initializePlugins`), so the
+   * trusted side wins the race. The preload makes the handoff one-shot
+   * (returns null after the first read) as a backstop, but the ordering is
+   * the real guarantee: do NOT make this service lazy, and do not run plugin
+   * code before it is instantiated. Real fix = plugin realm isolation
+   * (tracked with the broader window.ea hardening).
+   */
+  private _consumeNodeExecutionApi(): PluginNodeExecutionElectronApi | null {
+    if (!window.ea || typeof window.ea.consumePluginNodeExecutionApi !== 'function') {
+      return null;
+    }
+    return window.ea.consumePluginNodeExecutionApi();
   }
 
   /**
@@ -1764,7 +2020,7 @@ export class PluginBridgeService implements OnDestroy {
       try {
         handler(isFocused);
       } catch (error) {
-        console.error('Error in window focus handler:', error);
+        PluginLog.err('Error in window focus handler:', error);
       }
     });
   }

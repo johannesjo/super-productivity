@@ -2,7 +2,8 @@ import { App, BrowserWindow } from 'electron';
 import { log } from 'electron-log/main';
 import * as path from 'path';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { showOrFocus } from './various-shared';
+import { getIsAppReady } from './main-window';
+import { showOrFocus, toggleWindowVisibility } from './various-shared';
 
 export const PROTOCOL_NAME = 'superproductivity';
 export const PROTOCOL_PREFIX = `${PROTOCOL_NAME}://`;
@@ -10,30 +11,68 @@ export const PROTOCOL_PREFIX = `${PROTOCOL_NAME}://`;
 // Store pending URLs to process after window is ready
 let pendingUrls: string[] = [];
 
+// When the app is COLD-LAUNCHED by `superproductivity://toggle-visibility` (it was not
+// already running), the freshly-created window must just be SHOWN — never toggled, which
+// would immediately hide the window the launch was meant to reveal (#7114). The cold-start
+// argv scan sets this one-shot flag instead of routing that URL through the toggle, and the
+// window-ready drain (processPendingProtocolUrls) consumes it with a single showOrFocus.
+let coldStartShowPending = false;
+
+/**
+ * Parse the action (host) of a `superproductivity://` URL, or `null` if it is
+ * missing/unparseable. Used by the `second-instance` handler to special-case actions
+ * whose behavior the generic pre-focus would otherwise break.
+ */
+export const getProtocolAction = (url: string | undefined): string | null => {
+  if (!url) {
+    return null;
+  }
+  try {
+    // Custom URL schemes are non-special per the WHATWG URL spec, so the host is
+    // not auto-lowercased (unlike http/https). Normalize here so callers — the
+    // `second-instance` pre-focus exemption and the cold-start flag — match a
+    // mixed-case action (e.g. `Toggle-Visibility`) the same way `processProtocolUrl`
+    // does; otherwise those #7114 guards miss and the window shows-then-hides.
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+};
+
 export const processProtocolUrl = (url: string, mainWin: BrowserWindow | null): void => {
-  // Redact query params before logging — OAuth code/state are credentials
-  const redactedUrl = url.split('?')[0].split('#')[0];
-  log('Processing protocol URL:', redactedUrl);
+  // Log only the scheme + action host. The query/fragment carry OAuth credentials and the
+  // path carries user content (e.g. a create-task title); the log is exportable, so neither
+  // may be written to it.
+  log('Processing protocol URL:', `${PROTOCOL_PREFIX}${getProtocolAction(url) ?? ''}`);
 
-  // Only process after window is ready
-  if (!mainWin || !mainWin.webContents) {
-    log('Window not ready, deferring protocol URL processing');
+  // Only process once the renderer can actually receive the message. A freshly
+  // created BrowserWindow already has `webContents` long before Angular boots and
+  // registers its `window.ea.on(...)` listeners, so a URL arriving in that gap
+  // would be `send()`-t into the void (no listener, no ReplaySubject yet) and
+  // silently dropped — the primary cold-launch case. Defer until the app signals
+  // ready (drained by the APP_READY hook in start-app.ts), mirroring the
+  // `getIsAppReady()` gate the REST API uses on its own external-automation path.
+  if (!mainWin || !mainWin.webContents || !getIsAppReady()) {
+    log('App not ready, deferring protocol URL processing');
     pendingUrls.push(url);
-
-    // Process any pending protocol URLs after window is created
-    setTimeout(() => {
-      processPendingProtocolUrls(mainWin);
-    }, 10000);
+    // No retry timer: the `APP_READY` hook in start-app.ts owns the drain. A
+    // per-URL timer here re-queued still-not-ready URLs and multiplied ×N per
+    // wave, and if the renderer never signals ready it could not receive the
+    // message anyway.
     return;
   }
 
   try {
     const urlObj = new URL(url);
-    const action = urlObj.hostname;
+    // Custom URL schemes are non-special per the WHATWG URL spec, so the
+    // host component is not auto-lowercased (unlike http/https) — normalize
+    // explicitly, matching the mobile-side parser's own handling.
+    const action = urlObj.hostname.toLowerCase();
     const pathParts = urlObj.pathname.split('/').filter(Boolean);
 
     log('Protocol action:', action);
-    log('Protocol path parts:', pathParts);
+    // Log the count only — path parts can hold user content (e.g. a create-task title).
+    log('Protocol path part count:', pathParts.length);
 
     switch (action) {
       case 'oauth-callback':
@@ -43,32 +82,106 @@ export const processProtocolUrl = (url: string, mainWin: BrowserWindow | null): 
           showOrFocus(mainWin);
         }
         break;
-      case 'create-task':
-        if (pathParts.length > 0) {
-          const taskTitle = decodeURIComponent(pathParts[0]);
-          log('Creating task with title:', taskTitle);
+      case 'create-task': {
+        // Title may come from the path segment (legacy/existing form,
+        // `create-task/<title>`) or a `title` query param — either works.
+        const taskTitle =
+          pathParts.length > 0
+            ? decodeURIComponent(pathParts[0])
+            : urlObj.searchParams.get('title');
+        // Forward when the title is present at all, including an empty/whitespace
+        // `?title=` (`!== null`, not truthiness): the renderer surfaces the
+        // empty-title error snack, so an empty title fails loudly rather than
+        // silently. A missing param (`null`) is a no-op.
+        if (taskTitle !== null) {
+          // Don't log the title — the log is exportable and must not contain user content.
+          log('Creating task from protocol URL');
 
-          // Send IPC message to create task
           if (mainWin && mainWin.webContents) {
-            mainWin.webContents.send(IPC.ADD_TASK_FROM_APP_URI, { title: taskTitle });
+            // Surface the window so the success/error snack — the only
+            // feedback channel for a URL-triggered action — is actually
+            // seen, matching every other protocol action below. Without
+            // this, macOS's `open-url` path (and any platform started
+            // minimized to tray) never brings the window forward.
+            showOrFocus(mainWin);
+            mainWin.webContents.send(IPC.ADD_TASK_FROM_APP_URI, {
+              title: taskTitle,
+              notes: urlObj.searchParams.get('notes') ?? undefined,
+              projectId: urlObj.searchParams.get('projectId') ?? undefined,
+            });
           }
         }
         break;
+      }
+      case 'complete-task': {
+        const taskTitle = urlObj.searchParams.get('title');
+        // See the `create-task` note: forward a present-but-empty title so the
+        // renderer surfaces the error snack; a missing param is a no-op.
+        if (taskTitle !== null) {
+          // Don't log the title — see note above.
+          log('Completing task from protocol URL');
+
+          if (mainWin && mainWin.webContents) {
+            // See the showOrFocus note in the `create-task` case above.
+            showOrFocus(mainWin);
+            mainWin.webContents.send(IPC.COMPLETE_TASK_FROM_APP_URI, {
+              title: taskTitle,
+            });
+          }
+        }
+        break;
+      }
       case 'task-toggle-start':
         // Send IPC message to toggle task start
         if (mainWin && mainWin.webContents) {
           mainWin.webContents.send(IPC.TASK_TOGGLE_START);
         }
         break;
+      case 'plainspace-connect':
+        // Bounce-back from the plainspace.org connect flow ("Open Super
+        // Productivity"): just surface the window. The user pastes the token
+        // they copied there; no payload to forward.
+        if (mainWin && mainWin.webContents) {
+          showOrFocus(mainWin);
+        }
+        break;
+      // The following three mirror the `globalShowHide` / `globalAddNote` / `globalAddTask`
+      // global shortcuts. On Wayland the compositor owns global hotkeys, so users bind keys
+      // to `xdg-open superproductivity://<action>` instead (#7114).
+      case 'toggle-visibility':
+        toggleWindowVisibility(mainWin);
+        break;
+      case 'add-note':
+        showOrFocus(mainWin);
+        mainWin.webContents.send(IPC.ADD_NOTE);
+        break;
+      case 'add-task':
+        showOrFocus(mainWin);
+        mainWin.webContents.send(IPC.SHOW_ADD_TASK_BAR);
+        break;
       default:
         log('Unknown protocol action:', action);
     }
   } catch (error) {
-    log('Error processing protocol URL:', error);
+    // Log a non-identifying descriptor only — never the error object. Node's
+    // `ERR_INVALID_URL` carries an enumerable `input` property holding the raw
+    // URL (title/notes/credentials), which `console.log`/`util.inspect` print;
+    // the log is exportable, so this would leak user content (rule #9).
+    const code =
+      error && typeof error === 'object' && 'code' in error
+        ? (error as { code?: unknown }).code
+        : undefined;
+    log('Error processing protocol URL:', code ?? 'unknown error');
   }
 };
 
 export const processPendingProtocolUrls = (mainWin: BrowserWindow): void => {
+  if (coldStartShowPending) {
+    coldStartShowPending = false;
+    // Cold-start toggle-visibility: show the window (works even if start-minimized-to-tray
+    // left it hidden) instead of toggling it back off.
+    showOrFocus(mainWin);
+  }
   if (pendingUrls.length > 0) {
     log(`Processing ${pendingUrls.length} pending protocol URLs`);
     const urls = [...pendingUrls];
@@ -104,14 +217,17 @@ export const initializeProtocolHandling = (
   // Handle protocol on Windows/Linux via second instance
   appInstance.on('second-instance', (event, commandLine) => {
     const mainWin = getMainWindow();
+    const url = commandLine.find((arg) => arg.startsWith(PROTOCOL_PREFIX));
 
-    // Someone tried to run a second instance, we should focus our window instead.
-    if (mainWin) {
+    // A second launch should normally bring our window to front. But `toggle-visibility`
+    // must observe the *pre-press* window state — pre-focusing here would make the toggle
+    // always read "visible" and hide the window the user actually asked to show (#7114),
+    // so let that action manage visibility itself.
+    if (mainWin && getProtocolAction(url) !== 'toggle-visibility') {
       showOrFocus(mainWin);
     }
 
     // Handle protocol url from second instance
-    const url = commandLine.find((arg) => arg.startsWith(PROTOCOL_PREFIX));
     if (url) {
       processProtocolUrl(url, mainWin);
     }
@@ -128,7 +244,17 @@ export const initializeProtocolHandling = (
   // Handle protocol URL passed as command line argument for testing
   process.argv.forEach((val) => {
     if (val && val.startsWith(PROTOCOL_PREFIX)) {
-      log('Protocol URL from command line:', val.split('?')[0].split('#')[0]);
+      log(
+        'Protocol URL from command line:',
+        `${PROTOCOL_PREFIX}${getProtocolAction(val) ?? ''}`,
+      );
+      // A toggle-visibility that cold-launched the app must SHOW the new window, not toggle
+      // it (see coldStartShowPending) — running the normal toggle would hide the window the
+      // user just asked to see (#7114). Flag it for the window-ready drain instead.
+      if (getProtocolAction(val) === 'toggle-visibility') {
+        coldStartShowPending = true;
+        return;
+      }
       // Process after app is ready
       appInstance.whenReady().then(() => {
         processProtocolUrl(val, getMainWindow());

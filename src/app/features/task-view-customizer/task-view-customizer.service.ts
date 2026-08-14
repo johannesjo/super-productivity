@@ -1,20 +1,20 @@
-import { Injectable, signal, inject, effect } from '@angular/core';
+import { computed, effect, Injectable, inject, signal } from '@angular/core';
 import { Observable, animationFrameScheduler, combineLatest, of } from 'rxjs';
 import { map, observeOn, switchMap, take } from 'rxjs/operators';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { selectAllProjects } from '../project/store/project.selectors';
-import { selectAllTags } from './../tag/store/tag.reducer';
 import { Store } from '@ngrx/store';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
+import { TODAY_TAG } from '../tag/tag.const';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { computed } from '@angular/core';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { getWeekRange } from '../../util/get-week-range';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { ProjectService } from '../project/project.service';
 import { TagService } from '../tag/tag.service';
+import { MenuTreeService } from '../menu-tree/menu-tree.service';
 import {
   SortOption,
   CustomizerContextState,
@@ -28,6 +28,7 @@ import {
   SORT_ORDER,
   FILTER_COMMON,
   OPTIONS,
+  NO_TAG_GROUP_ID,
 } from './types';
 import { DateAdapter } from '@angular/material/core';
 import { lsGetJSON, lsSetJSON } from '../../util/ls-util';
@@ -40,6 +41,24 @@ const GROUP_OPTIONS_NO_PROJECT = OPTIONS.group.list.filter(
   (opt) => opt.type !== GROUP_OPTION_TYPE.project,
 );
 
+// Display keys for the two virtual tag-group buckets (kept as constants so the
+// grouping and the drag-to-retag id-map agree on the exact strings).
+const NO_TAG_GROUP_KEY = 'No tag';
+const UNKNOWN_TAG_GROUP_KEY = 'Unknown tag';
+
+/** Result of {@link TaskViewCustomizerService.customizeUndoneTasks}. */
+export interface CustomizedUndoneTasks {
+  list: TaskWithSubTasks[];
+  grouped?: Record<string, TaskWithSubTasks[]>;
+  /**
+   * Tag grouping only: group-header title → its tagId, or `null` for buckets
+   * with no single tag ('No tag', 'Unknown tag', or a title shared by several
+   * tags). Drives drag-to-retag in the work view (dragging a task into another
+   * tag group reassigns its tags). Absent for non-tag groupings.
+   */
+  groupTagIdByKey?: Record<string, string | null>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
   private store = inject(Store);
@@ -47,6 +66,7 @@ export class TaskViewCustomizerService {
   private _dateAdapter = inject(DateAdapter);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
+  private _menuTreeService = inject(MenuTreeService);
   private _languageService = inject(LanguageService);
   private _translateService = inject(TranslateService);
   private _collator: Intl.Collator | null = null;
@@ -93,7 +113,7 @@ export class TaskViewCustomizerService {
         const stored = this._stateByContext[this._currentContextKey];
         this.selectedSort.set(stored?.sort ?? DEFAULT_OPTIONS.sort);
         this.selectedGroup.set(this._sanitizeGroupForContext(stored?.group, activeType));
-        this.selectedFilter.set(stored?.filter ?? DEFAULT_OPTIONS.filter);
+        this.selectedFilter.set(this._sanitizeFilter(stored?.filter));
         this.collapsedGroupIds.set(stored?.collapsedGroupIds ?? []);
       });
 
@@ -139,8 +159,7 @@ export class TaskViewCustomizerService {
 
   private _initTags(): void {
     if (!this._tagsLoaded) {
-      this.store
-        .select(selectAllTags)
+      toObservable(this._tagService.tagsInTreeOrder)
         .pipe(takeUntilDestroyed())
         .subscribe((tags) => {
           this._allTags = tags;
@@ -163,10 +182,25 @@ export class TaskViewCustomizerService {
     return stored;
   }
 
-  customizeUndoneTasks(undoneTasks$: Observable<TaskWithSubTasks[]>): Observable<{
-    list: TaskWithSubTasks[];
-    grouped?: Record<string, TaskWithSubTasks[]>;
-  }> {
+  // Unlike _sanitizeGroupForContext (which passes the stored value through),
+  // re-resolve the option from the current OPTIONS.filter.list and keep only the
+  // user's `preset`. The persisted `label` can be stale after a translation-key
+  // change (the panel renders selectedFilter().label directly), so we always
+  // adopt the current label; an unknown stored `type` falls back to the default.
+  private _sanitizeFilter(stored: FilterOption | undefined): FilterOption {
+    if (!stored) return DEFAULT_OPTIONS.filter;
+
+    const currentFilter = OPTIONS.filter.list.find(
+      (option) => option.type === stored.type,
+    );
+    return currentFilter
+      ? { ...currentFilter, preset: stored.preset ?? null }
+      : DEFAULT_OPTIONS.filter;
+  }
+
+  customizeUndoneTasks(
+    undoneTasks$: Observable<TaskWithSubTasks[]>,
+  ): Observable<CustomizedUndoneTasks> {
     return combineLatest([
       undoneTasks$,
       toObservable(this.selectedSort),
@@ -194,8 +228,12 @@ export class TaskViewCustomizerService {
         const grouped = !isDefaultGroup
           ? this.applyGrouping(sorted, group.type)
           : undefined;
+        const groupTagIdByKey =
+          grouped && group.type === GROUP_OPTION_TYPE.tag
+            ? this._buildGroupTagIdByKey(grouped)
+            : undefined;
 
-        return { result: { list: sorted, grouped }, isDefault: false };
+        return { result: { list: sorted, grouped, groupTagIdByKey }, isDefault: false };
       }),
       // Emit the default (uncustomized) list synchronously, but keep the
       // customized path on the animation-frame scheduler. The customized branch
@@ -288,41 +326,42 @@ export class TaskViewCustomizerService {
       return collator.compare(a, b) * multiplier;
     };
 
-    const sortByTagTitle = (a: TaskWithSubTasks, b: TaskWithSubTasks): number => {
-      // Helper function to get the first tag title from a task
-      const getFirstTagTitle = (t: TaskWithSubTasks): string | null => {
-        const titles = t.tagIds
-          .map((id) => this._allTags.find((tag) => tag.id === id)?.title)
-          .filter((v) => typeof v === 'string');
+    const tagsInSidebarOrder = this._tagsInSidebarOrder();
+    const tagOrderById = new Map(tagsInSidebarOrder.map((tag, index) => [tag.id, index]));
+    const unknownTagRank = tagsInSidebarOrder.length;
+    const noTagRank = unknownTagRank + 1;
 
-        return titles.sort(sortByTitle)[0] ?? null;
-      };
-
-      const aTitle = getFirstTagTitle(a);
-      const bTitle = getFirstTagTitle(b);
-
-      // If both with tags
-      if (aTitle && bTitle) {
-        // If same - sort by task title
-        if (aTitle === bTitle) return sortByTitle(a.title, b.title, factor);
-
-        // Sort by tag title
-        return sortByTitle(aTitle, bTitle, factor);
+    // A task is placed by its highest-priority tag = the one with the lowest
+    // sidebar (menu-tree) index. Unknown tag ids rank after all known tags,
+    // untagged tasks last. (#8400)
+    const getPrimaryTagRank = (task: TaskWithSubTasks): number => {
+      if (!task.tagIds?.length) {
+        return noTagRank;
       }
 
-      // If both without tags - sort by task title
-      if (!aTitle && !bTitle) return sortByTitle(a.title, b.title, factor);
-
-      // If one task has a tag title, give it priority
-      return aTitle ? -1 * factor : 1 * factor;
+      let min = unknownTagRank;
+      for (const tagId of task.tagIds) {
+        const rank = tagOrderById.get(tagId) ?? unknownTagRank;
+        if (rank < min) min = rank;
+      }
+      return min;
     };
+
+    // Order by the primary tag's sidebar position. Equal ranks (same tag group)
+    // return 0, so the stable sort keeps the user's manual ordering within a tag
+    // instead of re-sorting it by task title (#8486). Note this makes DESC flip
+    // only the group order, not the order within a group - that asymmetry is
+    // intentional; re-sorting within a group would bring the bug back.
+    const sortByTagRank = (a: TaskWithSubTasks, b: TaskWithSubTasks): number =>
+      (getPrimaryTagRank(a) - getPrimaryTagRank(b)) * factor;
 
     switch (sortType) {
       case SORT_OPTION_TYPE.name:
         return tasksCopy.sort((a, b) => sortByTitle(a.title, b.title, factor));
 
-      case SORT_OPTION_TYPE.tag:
-        return tasksCopy.sort(sortByTagTitle);
+      case SORT_OPTION_TYPE.tag: {
+        return tasksCopy.sort(sortByTagRank);
+      }
 
       case SORT_OPTION_TYPE.creationDate:
         return tasksCopy.sort((a, b) => (a.created - b.created) * factor);
@@ -364,21 +403,13 @@ export class TaskViewCustomizerService {
     tasks: TaskWithSubTasks[],
     groupType: GROUP_OPTION_TYPE | null,
   ): Record<string, TaskWithSubTasks[]> {
+    if (groupType === GROUP_OPTION_TYPE.tag) {
+      return this._groupByTag(tasks);
+    }
+
     return tasks.reduce(
       (acc, task) => {
-        if (groupType === GROUP_OPTION_TYPE.tag) {
-          if (task.tagIds && task.tagIds.length > 0) {
-            task.tagIds.forEach((tagId) => {
-              const tag = this._allTags.find((t) => t.id === tagId);
-              const key = tag ? tag.title : 'Unknown tag';
-              acc[key] = acc[key] || [];
-              acc[key].push(task);
-            });
-          } else {
-            acc['No tag'] = acc['No tag'] || [];
-            acc['No tag'].push(task);
-          }
-        } else if (groupType === GROUP_OPTION_TYPE.project) {
+        if (groupType === GROUP_OPTION_TYPE.project) {
           const project = this._allProjects.find((p) => p.id === task.projectId);
           const key = project ? project.title : 'No project';
           acc[key] = acc[key] || [];
@@ -404,6 +435,144 @@ export class TaskViewCustomizerService {
       },
       {} as Record<string, TaskWithSubTasks[]>,
     );
+  }
+
+  /**
+   * Order group headers for display. Tag groups follow the sidebar (menu-tree)
+   * order so they match the tag-toggle menu (#8400); other group types keep the
+   * natural ascending order the keyvalue pipe used previously. Special tag
+   * buckets ('No tag', 'Unknown tag') sort after the real tags.
+   */
+  getOrderedGroupKeys(grouped: Record<string, TaskWithSubTasks[]>): string[] {
+    const keys = Object.keys(grouped);
+    const ascending = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+    if (this.selectedGroup().type !== GROUP_OPTION_TYPE.tag) {
+      return keys.sort(ascending);
+    }
+
+    const titleOrder = this._getTagTitleOrderMap();
+    return keys.sort((a, b) => {
+      const ai = titleOrder.get(a);
+      const bi = titleOrder.get(b);
+      if (ai !== undefined && bi !== undefined) return ai - bi;
+      if (ai !== undefined) return -1;
+      if (bi !== undefined) return 1;
+      return ascending(a, b);
+    });
+  }
+
+  /**
+   * Tags in sidebar (menu-tree) order. The virtual TODAY tag is excluded so this
+   * matches the tag-toggle menus, which are fed the my-day-excluded list, and so
+   * its trailing index can never leak into ordering (it's never a real task tag).
+   */
+  private _tagsInSidebarOrder(): Tag[] {
+    return this._menuTreeService.buildTagListInTreeOrder(
+      this._allTags.filter((t) => t.id !== TODAY_TAG.id),
+    );
+  }
+
+  /**
+   * Per-title metadata in sidebar (menu-tree) order — the single source for both
+   * group ordering and the drag-to-retag id-map, so the two can't drift:
+   * - `index`: lowest sidebar index among tags with that title (for ordering).
+   * - `id`: the tagId, or `null` when several tags share the title (ambiguous,
+   *   so retag can't pick one).
+   * Duplicate-titled tags collapse to one slot, matching {@link _groupByTag}
+   * which also keys its buckets by title. TODAY is excluded by
+   * {@link _tagsInSidebarOrder} (virtual membership, never a real tagId), so it
+   * can never appear — see ARCHITECTURE-DECISIONS #2 / sync rule #5.
+   */
+  private _tagMetaByTitle(): Map<string, { id: string | null; index: number }> {
+    const byTitle = new Map<string, { id: string | null; index: number }>();
+    this._tagsInSidebarOrder().forEach((tag, index) => {
+      const existing = byTitle.get(tag.title);
+      if (existing) {
+        existing.id = null; // duplicate title → ambiguous
+      } else {
+        byTitle.set(tag.title, { id: tag.id, index });
+      }
+    });
+    return byTitle;
+  }
+
+  private _getTagTitleOrderMap(): Map<string, number> {
+    const order = new Map<string, number>();
+    this._tagMetaByTitle().forEach((meta, title) => order.set(title, meta.index));
+    return order;
+  }
+
+  /**
+   * Map each tag-group header title to its drag-to-retag target:
+   * - a real tagId for a single-tag group,
+   * - {@link NO_TAG_GROUP_ID} for the 'No tag' bucket (a drop there clears tags),
+   * - `null` for the 'Unknown tag' bucket or a title shared by several tags
+   *   (ambiguous — can't be retagged).
+   */
+  private _buildGroupTagIdByKey(
+    grouped: Record<string, TaskWithSubTasks[]>,
+  ): Record<string, string | null> {
+    const meta = this._tagMetaByTitle();
+    const out: Record<string, string | null> = {};
+    Object.keys(grouped).forEach((key) => {
+      const realTag = meta.get(key);
+      // A real tag owning this title wins (its id, or null when several tags
+      // share it). This guards the case of a user tag literally titled "No tag":
+      // dropping there adds that tag instead of hitting the clear-tags sentinel,
+      // which is reserved for the genuine virtual untagged bucket.
+      if (realTag) {
+        out[key] = realTag.id;
+      } else if (key === NO_TAG_GROUP_KEY) {
+        out[key] = NO_TAG_GROUP_ID;
+      } else {
+        out[key] = null;
+      }
+    });
+    return out;
+  }
+
+  private _groupByTag(tasks: TaskWithSubTasks[]): Record<string, TaskWithSubTasks[]> {
+    const tagById = new Map(this._allTags.map((tag) => [tag.id, tag]));
+    const groupedByTagId = new Map<string, TaskWithSubTasks[]>();
+    const unknownTagTasks: TaskWithSubTasks[] = [];
+    const noTagTasks: TaskWithSubTasks[] = [];
+
+    tasks.forEach((task) => {
+      if (!task.tagIds?.length) {
+        noTagTasks.push(task);
+        return;
+      }
+
+      task.tagIds.forEach((tagId) => {
+        if (tagById.has(tagId)) {
+          const tagTasks = groupedByTagId.get(tagId) ?? [];
+          tagTasks.push(task);
+          groupedByTagId.set(tagId, tagTasks);
+        } else {
+          unknownTagTasks.push(task);
+        }
+      });
+    });
+
+    const grouped: Record<string, TaskWithSubTasks[]> = {};
+    this._allTags.forEach((tag) => {
+      const tagTasks = groupedByTagId.get(tag.id);
+      if (tagTasks?.length) {
+        // Distinct tags can share a title; merge their tasks into the same
+        // title-keyed bucket instead of overwriting, matching the previous
+        // grouping behavior and _getTagTitleOrderMap's single-slot contract.
+        grouped[tag.title] = (grouped[tag.title] ?? []).concat(tagTasks);
+      }
+    });
+    if (unknownTagTasks.length) {
+      grouped[UNKNOWN_TAG_GROUP_KEY] = unknownTagTasks;
+    }
+    if (noTagTasks.length) {
+      grouped[NO_TAG_GROUP_KEY] = noTagTasks;
+    }
+
+    return grouped;
   }
 
   private _filterByDateFields(

@@ -75,6 +75,102 @@ export const issueProviderReducer = createReducer(
           },
         } as unknown as IssueProvider;
       }
+
+      // Migrate pre-plugin GITEA providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'GITEA' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        // TODO: Remove legacy field preservation after a few releases.
+        // Spread original provider so legacy fields (host, token, etc.) survive
+        // for older clients that haven't upgraded yet.
+        migratedEntities[id] = {
+          ...provider,
+          pluginId: 'gitea-issue-provider',
+          pluginConfig: {
+            host: provider['host'] ?? '',
+            token: provider['token'] ?? '',
+            repoFullname: provider['repoFullname'] ?? '',
+            scope: provider['scope'] ?? 'created-by-me',
+            filterLabels: provider['filterLabels'] ?? '',
+            excludeLabels: provider['excludeLabels'] ?? '',
+          },
+        } as unknown as IssueProvider;
+      }
+
+      // Migrate pre-plugin LINEAR providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'LINEAR' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        // TODO: Remove legacy field preservation after a few releases.
+        // Spread original provider so legacy fields (apiKey, teamId, etc.) survive
+        // for older clients that haven't upgraded yet.
+        migratedEntities[id] = {
+          ...provider,
+          pluginId: 'linear-issue-provider',
+          pluginConfig: {
+            apiKey: provider['apiKey'] ?? '',
+            teamId: provider['teamId'] ?? '',
+            projectId: provider['projectId'] ?? '',
+          },
+        } as unknown as IssueProvider;
+      }
+
+      // Migrate pre-plugin TRELLO providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'TRELLO' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        // TODO: Remove legacy field preservation after a few releases.
+        // Spread original provider so legacy fields (apiKey, token, boardId, etc.)
+        // survive for older clients that haven't upgraded yet. boardName is listed
+        // first so the provider tooltip/initials (which show the first non-secret
+        // config string) keep displaying the board name.
+        migratedEntities[id] = {
+          ...provider,
+          pluginId: 'trello-issue-provider',
+          pluginConfig: {
+            boardName: provider['boardName'] ?? '',
+            apiKey: provider['apiKey'] ?? '',
+            token: provider['token'] ?? '',
+            boardId: provider['boardId'] ?? '',
+            filterUsername: provider['filterUsername'] ?? '',
+          },
+        } as unknown as IssueProvider;
+      }
+
+      // Migrate pre-plugin AZURE_DEVOPS providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'AZURE_DEVOPS' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        // TODO: Remove legacy field preservation after a few releases.
+        // Spread original provider so legacy fields (host, token, project, etc.)
+        // survive for older clients that haven't upgraded yet. project is listed
+        // first so the provider tooltip/initials (which show the first non-secret
+        // config string) keep displaying the project name.
+        migratedEntities[id] = {
+          ...provider,
+          pluginId: 'azure-devops-issue-provider',
+          pluginConfig: {
+            project: provider['project'] ?? '',
+            host: provider['host'] ?? '',
+            token: provider['token'] ?? '',
+            organization: provider['organization'] ?? '',
+            scope: provider['scope'] ?? 'assigned-to-me',
+            autoImportLimit: provider['autoImportLimit'] ?? 50,
+          },
+        } as unknown as IssueProvider;
+      }
     }
     if (!needsMigration) {
       return state;

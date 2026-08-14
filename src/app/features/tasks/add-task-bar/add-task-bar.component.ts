@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
@@ -16,15 +17,15 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MentionModule } from '../../../ui/mentions';
-import { MatInput } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy, TaskReminderOptionId } from '../task.model';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -61,14 +62,21 @@ import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
+import { rollWeekendDateForRepeat } from './roll-weekend-date-for-repeat';
+import { ShortSyntaxSegment, splitTextByRanges } from '../short-syntax-ranges';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 import { MarkdownPasteService } from '../markdown-paste.service';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { isValidSplitTime } from '../../../util/is-valid-split-time';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
 import { unique } from '../../../util/unique';
 import { MentionConfigService } from '../mention-config.service';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DEFAULT_TASK_REPEAT_CFG } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getQuickSettingUpdates } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-quick-setting-updates';
+import { getIntervalRepeatUpdates } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-interval-repeat-updates';
+import { getDefaultSkipOverdue } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/get-default-skip-overdue';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
@@ -79,21 +87,30 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const'
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { DateService } from '../../../core/date/date.service';
+import { MenuTreeService } from '../../menu-tree/menu-tree.service';
+import { SelectOptionRowComponent } from '../../../ui/select-option-row/select-option-row.component';
+
+export interface TaskAddEvent {
+  taskId: string;
+  isAddToBottom: boolean;
+  isNewTask: boolean;
+}
 
 @Component({
   selector: 'add-task-bar',
   templateUrl: './add-task-bar.component.html',
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [blendInOutAnimation, fadeAnimation],
+  animations: [blendInOutAnimation, expandFadeAnimation],
   standalone: true,
   imports: [
     FormsModule,
-    MatInput,
+    CdkTextareaAutosize,
     MatIconButton,
     MatIcon,
     MatTooltip,
     AsyncPipe,
+    NgTemplateOutlet,
     MentionModule,
     MatAutocomplete,
     MatAutocompleteTrigger,
@@ -103,6 +120,7 @@ import { DateService } from '../../../core/date/date.service';
     TagComponent,
     AddTaskBarActionsComponent,
     TranslateModule,
+    SelectOptionRowComponent,
   ],
   providers: [AddTaskBarStateService, AddTaskBarParserService],
 })
@@ -122,6 +140,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private readonly _markdownPasteService = inject(MarkdownPasteService);
   private readonly _dateService = inject(DateService);
+  private readonly _menuTreeService = inject(MenuTreeService);
   readonly stateService = inject(AddTaskBarStateService);
 
   T = T;
@@ -138,7 +157,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   planForDay = input<string>();
 
   // Outputs
-  afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
+  afterTaskAdd = output<TaskAddEvent>();
   closed = output<void>();
   done = output<void>();
 
@@ -153,8 +172,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isMentionListShown = signal(false);
   isScheduleDialogOpen = signal(false);
 
-  // Computed signals for projects and tags (sorted for consistency)
-  projects = this._projectService.listSortedForUI;
+  // Computed signals for projects and tags
+  projects = this._projectService.listInTreeOrderForUI;
   // Observable version for compatibility with existing code
   projects$ = toObservable(this.projects);
   tags$ = this._tagService.tags$;
@@ -162,20 +181,24 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   activatedIssueTask = toSignal(this.activatedSuggestion$, { initialValue: null });
 
   // Computed values
+  projectFolderMap = computed(() => this._menuTreeService.projectFolderMap());
+  tagFolderMap = computed(() => this._menuTreeService.tagFolderMap());
+
+  getFolderPath(id?: string): string | null {
+    if (!id) return null;
+    return this.projectFolderMap().get(id) || this.tagFolderMap().get(id) || null;
+  }
+
   hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
   currentProject = computed(() =>
     this.projects().find((p) => p.id === this.stateService.state().projectId),
   );
-  nrOfRightBtns = computed(() => {
-    let count = 2;
-    if (this.stateService.inputTxt().length > 0) {
-      count++;
-    }
-    if (this.currentProject()?.isEnableBacklog) {
-      count++;
-    }
-    return count;
-  });
+  // The submit (+) button is always in the layout so its space is reserved; it
+  // is only visually shown while composing a task (hidden via visibility, not
+  // display, so the input width never jumps).
+  isSubmitVisible = computed(
+    () => !this.isSearchMode() && this.stateService.inputTxt().length > 0,
+  );
 
   defaultProject$ = combineLatest([
     this.projects$,
@@ -253,9 +276,61 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   mentionCfg$ = inject(MentionConfigService).mentionConfig$;
 
   // View children
-  inputEl = viewChild<ElementRef>('inputEl');
+  inputEl = viewChild<ElementRef<HTMLTextAreaElement>>('inputEl');
+  noteEl = viewChild<ElementRef<HTMLTextAreaElement>>('noteEl');
+  highlightEl = viewChild<ElementRef<HTMLElement>>('highlightEl');
   taskAutoCompleteEl = viewChild<MatAutocomplete>('taskAutoCompleteEl');
   actionsComponent = viewChild(AddTaskBarActionsComponent);
+
+  // Segments of the raw input for the highlight overlay behind the textarea.
+  // Ranges are pinned to the text they were parsed from (the parse is async),
+  // so they are only ever applied to that exact text or to the part of a newer
+  // text they cannot have moved in.
+  highlightSegments = computed<ShortSyntaxSegment[]>(() => {
+    const txt = this.stateService.inputTxt();
+    if (!txt || this.isSearchMode()) {
+      return [];
+    }
+    const highlight = this.stateService.syntaxHighlight();
+    if (!highlight || highlight.ranges.length === 0) {
+      return [{ text: txt, type: null }];
+    }
+    if (highlight.forText === txt) {
+      return splitTextByRanges(txt, highlight.ranges);
+    }
+    // The parse is async, so every keystroke renders once with ranges from the
+    // previous text. Dropping them all blanks the highlights for a frame
+    // (visible flicker), so keep the ones the edit cannot have moved: those
+    // that end inside the unchanged common prefix. A highlight is then never
+    // mispositioned, only at most one keystroke stale.
+    let common = 0;
+    const max = Math.min(highlight.forText.length, txt.length);
+    while (common < max && highlight.forText[common] === txt[common]) {
+      common++;
+    }
+    const stillValid = highlight.ranges.filter((r) => r.end <= common);
+    return stillValid.length
+      ? splitTextByRanges(txt, stillValid)
+      : [{ text: txt, type: null }];
+  });
+
+  // The overlay must track the textarea's scroll position (cdkTextareaAutosize
+  // caps growth at 4 rows, after which the field scrolls)
+  syncHighlightScroll(): void {
+    const inputElement = this.inputEl()?.nativeElement;
+    const overlay = this.highlightEl()?.nativeElement;
+    if (inputElement && overlay) {
+      overlay.scrollTop = inputElement.scrollTop;
+    }
+  }
+
+  // Once the field scrolls, the textarea's caret-scroll happens before the
+  // overlay re-renders, so the (scroll)-listener alone would clamp against
+  // still-short overlay content — re-sync after each segments render.
+  private readonly _overlayScrollSyncEffect = afterRenderEffect(() => {
+    this.highlightSegments();
+    this.syncHighlightScroll();
+  });
 
   private _focusTimeout?: number;
   private _autocompleteTimeout?: number;
@@ -433,14 +508,60 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
             : additionalFields?.attachments || [],
       };
 
+      const note = this.stateService.noteTxt().trim();
+      if (note) {
+        taskData.notes = note;
+      }
+
       if (state.spent) {
         taskData.timeSpentOnDay = state.spent;
       }
 
+      if (state.deadlineDate) {
+        if (state.deadlineTime && isValidSplitTime(state.deadlineTime)) {
+          const deadlineDateObj = dateStrToUtcDate(state.deadlineDate);
+          const deadlineTimestamp = getDateTimeFromClockString(
+            state.deadlineTime,
+            deadlineDateObj,
+          );
+          taskData.deadlineWithTime = deadlineTimestamp;
+          if (
+            state.deadlineRemindOption &&
+            state.deadlineRemindOption !== TaskReminderOptionId.DoNotRemind
+          ) {
+            taskData.deadlineRemindAt = remindOptionToMilliseconds(
+              deadlineTimestamp,
+              state.deadlineRemindOption,
+            );
+          }
+        } else {
+          taskData.deadlineDay = state.deadlineDate;
+        }
+      }
+
+      // One day for the whole submit. A Monday-to-Friday schedule has no
+      // weekend occurrence, so a weekend day is one the task never starts on:
+      // the occurrence engine moves it to the following Monday off the config's
+      // weekday flags (getFirstRepeatOccurrence), while the weekend day stays
+      // behind in the config's `startDate` — where the repeat dialog re-derives
+      // every later quick setting from it, turning "weekly on current weekday"
+      // into a Saturday recurrence.
+      //
+      // Rolled here rather than on the date chip, so the day the user picked
+      // stays the day the bar shows and the repeat menu's labels are built
+      // from. Computed once, so the task's due day and the config's start date
+      // cannot disagree across a logical-day rollover between two `todayStr()`
+      // calls. The effects would correct the due day anyway; writing it here
+      // just spares the user a task that first appears on the Saturday.
+      const startDay = rollWeekendDateForRepeat(
+        state.date || this._dateService.todayStr(),
+        state.repeat,
+      );
+
       if (state.date) {
         // Parse date components to create date in local timezone
         // This avoids timezone issues when parsing date strings like "2024-01-15"
-        const [year, month, day] = state.date.split('-').map(Number);
+        const [year, month, day] = startDay.split('-').map(Number);
         const date = new Date(year, month - 1, day);
 
         if (state.time) {
@@ -450,19 +571,17 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           taskData.dueWithTime = date.getTime();
           taskData.hasPlannedTime = true;
         } else {
-          taskData.dueDay = state.date;
+          taskData.dueDay = startDay;
         }
-      } else if (state.repeatQuickSetting && state.repeatQuickSetting !== 'CUSTOM') {
-        // When a repeat preset is selected without an explicit date, set dueDay to today
+      } else if (state.repeat && state.repeat.type !== 'DIALOG') {
+        // When a recurrence is set without an explicit date, set dueDay to today
         // so the first task instance appears as today's occurrence instead of staying in inbox
-        taskData.dueDay = this._dateService.todayStr();
+        taskData.dueDay = startDay;
       } else {
         // Explicitly set dueDay to undefined when no date is selected
         // This prevents automatic assignment of today's date in TODAY context
         taskData.dueDay = undefined;
       }
-
-      Log.x(taskData);
 
       const taskId = this._taskService.add(
         title,
@@ -481,9 +600,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       // effect already handles scheduling via scheduleTaskWithTime, so calling both
       // would cause double-scheduling.
       const isTimedRepeatTask =
-        !!state.repeatQuickSetting &&
-        state.repeatQuickSetting !== 'CUSTOM' &&
-        !!state.time;
+        !!state.repeat && state.repeat.type !== 'DIALOG' && !!state.time;
       if (taskData.dueWithTime && !isTimedRepeatTask) {
         this._taskService
           .getByIdOnce$(taskId)
@@ -499,33 +616,69 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
 
       // Create repeat config if a repeat setting was selected
-      if (state.repeatQuickSetting) {
-        if (state.repeatQuickSetting === 'CUSTOM') {
+      if (state.repeat) {
+        const repeat = state.repeat;
+        if (repeat.type === 'DIALOG') {
           this._openRepeatDialogForTask(taskId, resolvedRemindOption);
         } else {
-          const startDate = state.date || this._dateService.todayStr();
-          const referenceDate = dateStrToUtcDate(startDate);
-          const quickSettingUpdates =
-            getQuickSettingUpdates(state.repeatQuickSetting, referenceDate) || {};
-          this._taskRepeatCfgService.addTaskRepeatCfgToTask(taskId, state.projectId, {
+          const referenceDate = dateStrToUtcDate(startDay);
+          // An interval ("@every 2 days") has no preset to expand — it maps to a
+          // CUSTOM config carrying the cycle and interval directly.
+          const repeatUpdates =
+            repeat.type === 'INTERVAL'
+              ? getIntervalRepeatUpdates(
+                  repeat.repeatCycle,
+                  repeat.repeatEvery,
+                  referenceDate,
+                )
+              : {
+                  quickSetting: repeat.quickSetting,
+                  ...getQuickSettingUpdates(repeat.quickSetting, referenceDate),
+                };
+          const newRepeatCfg = {
             ...DEFAULT_TASK_REPEAT_CFG,
-            startDate,
-            ...quickSettingUpdates,
+            startDate: startDay,
+            ...repeatUpdates,
             title,
-            quickSetting: state.repeatQuickSetting,
+            notes: taskData.notes,
             tagIds: taskData.tagIds ?? [],
             defaultEstimate: state.estimate || 0,
             startTime: state.time || undefined,
             remindAt: state.time ? resolvedRemindOption : undefined,
+          };
+          // Seed the skipOverdue default from the chosen schedule, same as the
+          // repeat dialog (there is no advanced toggle in the inline add-bar).
+          this._taskRepeatCfgService.addTaskRepeatCfgToTask(taskId, state.projectId, {
+            ...newRepeatCfg,
+            skipOverdue: getDefaultSkipOverdue(newRepeatCfg),
           });
         }
       }
 
-      this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
+      this.afterTaskAdd.emit({
+        taskId,
+        isAddToBottom: this.isAddToBottom(),
+        isNewTask: true,
+      });
       this._resetAfterAdd();
     } finally {
       this._isAddingTask = false;
     }
+  }
+
+  onSubmitBtnClick(): void {
+    // Clicking the + button moves focus onto the button, which then vanishes
+    // once the input clears — refocus the input so the next task can be typed
+    // right away. (The Enter-key submit path never loses input focus.)
+    // Skip the refocus for the custom-config entry: addTask() opens the
+    // repeat-config dialog asynchronously, and refocusing would steal focus
+    // from it.
+    const willOpenRepeatDialog = this.stateService.state().repeat?.type === 'DIALOG';
+    void this.addTask().finally(() => {
+      if (!willOpenRepeatDialog) {
+        this.focusInput();
+      }
+    });
   }
 
   onTaskSuggestionActivated(suggestion: AddTaskSuggestion | null): void {
@@ -550,7 +703,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     const planForDay = this.planForDay();
     let didPlanForDay = false;
 
-    if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
+    if (suggestion.taskId && this.isNoDefaults() && !suggestion.isArchivedTask) {
+      taskId = suggestion.taskId;
+    } else if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
       if (planForDay) {
         await this._planTaskForCurrentDay(suggestion.taskId);
         didPlanForDay = true;
@@ -611,6 +766,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       this.afterTaskAdd.emit({
         taskId,
         isAddToBottom: false,
+        isNewTask: !suggestion.taskId,
       });
     }
 
@@ -622,8 +778,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // UI event handlers
   onInputChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const value = target.value;
+    const target = event.target as HTMLTextAreaElement;
+    // The title is single-line even though the field is now an auto-growing
+    // textarea (so long titles wrap). Enter submits, but a paste can still carry
+    // newlines — collapse them to spaces before they reach the parsed state.
+    const value = target.value.replace(/[\r\n]+/g, ' ');
+    if (value !== target.value) {
+      target.value = value;
+    }
     this.stateService.updateInputTxt(value);
   }
 
@@ -679,8 +841,21 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Handle Escape key
     if (event.key === 'Escape') {
+      // Progressive dismissal: if the task-suggestion panel is open, let Material
+      // close it first instead of tearing down the whole bar.
+      if (this.taskAutoCompleteEl()?.isOpen) {
+        return;
+      }
       event.preventDefault();
       this.closed.emit();
+      return;
+    }
+
+    // Ctrl/Cmd+Enter reveals the note field instead of submitting, so a note
+    // can be added without leaving the keyboard.
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.isComposing) {
+      event.preventDefault();
+      this.expandNote();
       return;
     }
 
@@ -705,24 +880,34 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _handleCtrlShortcut(event: KeyboardEvent): void {
-    const shortcutMap: Record<string, () => void> = {
-      ['1']: () => this.toggleIsAddToBottom(),
-      ['2']: () => this.toggleSearchMode(),
-      ['3']: () => this._callActionMethod('openProjectMenu'),
-      ['4']: () => this._callActionMethod('openScheduleDialog'),
-      ['5']: () => this._callActionMethod('openTagsMenu'),
-      ['6']: () => this._callActionMethod('openEstimateMenu'),
-      ['7']: () => this._callActionMethod('openRepeatMenu'),
+    // Numbers 1-3 match the left-to-right order of the icon toggles below the
+    // input (search · note · add-to-top/bottom); these are local and harmless to
+    // let bubble.
+    const localToggles: Record<string, () => void> = {
+      ['1']: () => this.toggleSearchMode(),
+      ['2']: () => this.toggleNote(),
+      ['3']: () => this.toggleIsAddToBottom(),
+    };
+    // 4-9 open the action chips' menus/dialogs; stop propagation so the keystroke
+    // doesn't also reach a global handler.
+    const actionShortcuts: Record<string, () => void> = {
+      ['4']: () => this._callActionMethod('openProjectMenu'),
+      ['5']: () => this._callActionMethod('openScheduleDialog'),
+      ['6']: () => this._callActionMethod('openTagsMenu'),
+      ['7']: () => this._callActionMethod('openEstimateMenu'),
+      ['8']: () => this._callActionMethod('openRepeatMenu'),
+      ['9']: () => this._callActionMethod('openDeadlineDialog'),
     };
 
-    const action = shortcutMap[event.key];
-    if (action) {
+    const localToggle = localToggles[event.key];
+    const actionShortcut = actionShortcuts[event.key];
+    if (localToggle) {
       event.preventDefault();
-      // Add stopPropagation for action menu shortcuts (3-7)
-      if (['3', '4', '5', '6', '7'].includes(event.key)) {
-        event.stopPropagation();
-      }
-      action();
+      localToggle();
+    } else if (actionShortcut) {
+      event.preventDefault();
+      event.stopPropagation();
+      actionShortcut();
     }
   }
 
@@ -848,6 +1033,54 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }, 50);
     }
+  }
+
+  toggleNote(): void {
+    // The note field only renders in create mode, so the toggle (incl. its
+    // Ctrl+2 shortcut) is a no-op while searching.
+    if (this.isSearchMode()) {
+      return;
+    }
+    const willExpand = !this.stateService.isNoteExpanded();
+    this.stateService.isNoteExpanded.set(willExpand);
+    if (willExpand) {
+      this._focusNote();
+    } else {
+      this.focusInput();
+    }
+  }
+
+  expandNote(): void {
+    // The note field only renders in create mode; guard like toggleNote() so
+    // Ctrl+Enter while searching cannot leave isNoteExpanded stuck on.
+    if (this.isSearchMode()) {
+      return;
+    }
+    this.stateService.isNoteExpanded.set(true);
+    this._focusNote();
+  }
+
+  onNoteKeydown(event: KeyboardEvent): void {
+    // Ctrl/Cmd+Enter submits from the note field; plain Enter inserts a newline.
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.isComposing) {
+      event.preventDefault();
+      void this.addTask();
+      return;
+    }
+
+    // Escape collapses the note and returns focus to the title without
+    // closing the whole bar (a second Escape on the title closes it).
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.stateService.isNoteExpanded.set(false);
+      this.focusInput();
+    }
+  }
+
+  private _focusNote(): void {
+    // Defer so the textarea has been rendered by the `@if` before focusing.
+    window.setTimeout(() => this.noteEl()?.nativeElement.focus());
   }
 
   updateListShown(isShown: boolean): void {

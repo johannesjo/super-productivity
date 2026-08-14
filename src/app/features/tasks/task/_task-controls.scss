@@ -109,7 +109,6 @@
   z-index: var(--z-time-wrapper);
   // note: fixes styles for empty time for very small mobile
   min-width: 25px;
-  //border: 1px solid red;
 
   @include mq(xxs) {
     min-width: 0;
@@ -274,16 +273,10 @@ progress-bar {
 }
 
 done-toggle {
-  --done-toggle-size: 34px;
+  --done-toggle-size: 40px;
 
   margin-left: var(--s);
   margin-right: 0;
-
-  @include verySmallMainContainer {
-    width: 8px;
-    min-width: 0;
-    opacity: 0;
-  }
 }
 
 //
@@ -395,18 +388,28 @@ done-toggle {
 
 .schedule-btn {
   position: relative;
-
-  &.mat-warn mat-icon {
-    color: var(--c-warn) !important;
-  }
 }
 
-:host.hasTimeConflict {
-  .schedule-btn mat-icon,
-  .schedule-btn .time-badge {
-    color: var(--text-color-muted);
-    border-color: color-mix(in srgb, var(--text-color-muted) 45%, transparent);
-  }
+// Overdue indicator = the schedule icon itself, in the danger color. Driven by
+// the semantic :host.isOverdue host state rather than Material's `color="warn"`
+// modifier class, so the cue is decoupled from Material's theming internals and
+// reads the same across light/dark/custom themes. !important wins over the
+// Material icon-color token.
+:host.isOverdue .schedule-btn mat-icon {
+  color: var(--c-warn) !important;
+}
+
+// Time conflict indicator: a danger "!" shown next to the schedule control,
+// replacing the former task-box border. It's a bare <mat-icon> dropped into the
+// stretch-aligned controls row, so it needs explicit centering and sizing.
+.time-conflict-ico {
+  align-self: center;
+  color: var(--c-warn);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  // tuck it close to the schedule button on its left, which it annotates
+  margin-left: calc(-1 * var(--s-quarter));
 }
 
 .deadline-btn {
@@ -445,6 +448,36 @@ done-toggle {
 
   ::ng-deep span {
     font-size: 10px;
+  }
+}
+
+.checklist-progress-btn {
+  position: relative;
+
+  &.isComplete mat-icon {
+    color: var(--c-success, var(--c-accent));
+  }
+}
+
+.checklist-progress-badge {
+  @include center;
+  margin-top: 10px;
+  font-size: 10px;
+  z-index: 10;
+  line-height: 1;
+  text-align: center;
+  padding: 1px var(--s-quarter) 0;
+  @include extraBorder();
+  border-radius: var(--card-border-radius);
+  white-space: nowrap;
+  background: var(--card-bg);
+
+  // let clicks fall through to the button
+  pointer-events: none;
+
+  @include darkTheme() {
+    border-color: var(--extra-border-color);
+    background: var(--bg-lighter);
   }
 }
 

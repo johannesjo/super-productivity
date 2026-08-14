@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Task, TaskDetailTargetPanel, TaskState } from '../task.model';
+import { HideSubTasksMode, Task, TaskDetailTargetPanel, TaskState } from '../task.model';
 import { initialTaskState, taskReducer } from './task.reducer';
+import { convertOpToAction } from '../../../op-log/apply/operation-converter.util';
 import * as fromActions from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { INBOX_PROJECT } from '../../project/project.const';
@@ -11,6 +12,7 @@ import {
 import { _resetDevErrorState } from '../../../util/dev-error';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { ActionType, OpType, Operation } from '../../../op-log/core/operation.types';
 
 describe('Task Reducer', () => {
   const createTask = (id: string, partial: Partial<Task> = {}): Task => ({
@@ -183,6 +185,35 @@ describe('Task Reducer', () => {
 
       expect(result.entities['parent']!.subTaskIds).toEqual(['subTask']);
       expect(result.entities['parent']!.timeEstimate).toBe(2.5 * 60 * 60 * 1000);
+    });
+
+    // Both the plugin API and the local REST API forward `dueDay` when creating
+    // a subtask. The reducer overrides exactly three fields — parentId, tagIds
+    // and projectId — and must leave everything else intact; without this,
+    // "the caller forwards dueDay" is only ever asserted on the dispatched
+    // action, never on the state that results from it.
+    it('should keep a forwarded dueDay while overriding the inherited fields', () => {
+      const parent = createTask('parent', { projectId: 'parent-project' });
+      const subTask = createTask('subTask', {
+        dueDay: '2026-09-01',
+        tagIds: ['dropped-by-reducer'],
+        projectId: 'replaced-by-reducer',
+      });
+      const state: TaskState = {
+        ...initialTaskState,
+        ids: ['parent'],
+        entities: { parent },
+      };
+
+      const result = taskReducer(
+        state,
+        fromActions.addSubTask({ task: subTask, parentId: 'parent' }),
+      );
+
+      expect(result.entities['subTask']!.dueDay).toBe('2026-09-01');
+      expect(result.entities['subTask']!.parentId).toBe('parent');
+      expect(result.entities['subTask']!.tagIds).toEqual([]);
+      expect(result.entities['subTask']!.projectId).toBe('parent-project');
     });
   });
 
@@ -621,6 +652,25 @@ describe('Task Reducer', () => {
 
       // The removed tasks should be moved to the beginning while maintaining their relative order
       expect(state.ids).toEqual(['task2', 'task4', 'task1', 'task3']);
+      // Ordering-only invariant (#9426): conflict resolution rejects
+      // conflicted rows of this action outright, which is lossless only while
+      // the handler never touches task entities. If this fails, remove the
+      // action from ORDERING_ONLY_MULTI_ACTIONS in conflict-resolution.service.ts
+      // (or give it a preserve path) BEFORE shipping the reducer change.
+      expect(state.entities).toBe(stateWithOrderedTasks.entities);
+    });
+
+    it('must not handle moveTaskInTodayTagList at all (ordering-only invariant #9426)', () => {
+      // The task feature reducer currently has NO handler for this action; a
+      // future one that touches entities would invalidate the ordering-only
+      // rejection in conflict resolution. Same remediation as above.
+      const action = TaskSharedActions.moveTaskInTodayTagList({
+        toTaskId: 'task1',
+        fromTaskId: 'task2',
+      });
+      const state = taskReducer(stateWithTasks, action);
+
+      expect(state).toBe(stateWithTasks);
     });
 
     it('should ignore all invalid IDs and leave state unchanged', () => {
@@ -958,6 +1008,104 @@ describe('Task Reducer', () => {
       expect(state.entities['task-r']!.timeSpent).toBe(8000);
     });
 
+    it('should add consecutive durations from stale task action snapshots', () => {
+      const staleTask = createTask('task-r', {
+        timeSpentOnDay: { '2024-01-01': 100 },
+        timeSpent: 100,
+      });
+      const stateWithTime: TaskState = {
+        ...initialTaskState,
+        ids: ['task-r'],
+        entities: { 'task-r': staleTask },
+      };
+
+      const afterFirstCredit = taskReducer(
+        stateWithTime,
+        TimeTrackingActions.addTimeSpent({
+          task: staleTask,
+          date: '2024-01-01',
+          duration: 20,
+          isFromTrackingReminder: false,
+        }),
+      );
+      const afterSecondCredit = taskReducer(
+        afterFirstCredit,
+        TimeTrackingActions.addTimeSpent({
+          task: staleTask,
+          date: '2024-01-01',
+          duration: 30,
+          isFromTrackingReminder: false,
+        }),
+      );
+
+      expect(afterSecondCredit.entities['task-r']!.timeSpentOnDay['2024-01-01']).toBe(
+        150,
+      );
+      expect(afterSecondCredit.entities['task-r']!.timeSpent).toBe(150);
+    });
+
+    it('should keep own time sync additive when client identity is unavailable', () => {
+      const taskWithLocalTime = createTask('task-r', {
+        timeSpentOnDay: { '2024-01-01': 3000 },
+        timeSpent: 3000,
+      });
+      const stateWithLocalTime: TaskState = {
+        ...initialTaskState,
+        ids: ['task-r'],
+        entities: { 'task-r': taskWithLocalTime },
+      };
+      const action = {
+        ...syncTimeSpent({
+          taskId: 'task-r',
+          date: '2024-01-01',
+          duration: 5000,
+        }),
+        timeSpentForDay: 5000,
+      };
+      const ownReplayAction = {
+        ...action,
+        meta: { ...action.meta, isRemote: true },
+      };
+
+      const state = taskReducer(stateWithLocalTime, ownReplayAction);
+
+      expect(state.entities['task-r']!.timeSpentOnDay['2024-01-01']).toBe(8000);
+      expect(state.entities['task-r']!.timeSpent).toBe(8000);
+    });
+
+    it('should keep foreign time sync additive to preserve concurrent tracking', () => {
+      const taskWithLocalTime = createTask('task-r', {
+        timeSpentOnDay: { '2024-01-01': 3000 },
+        timeSpent: 3000,
+      });
+      const stateWithLocalTime: TaskState = {
+        ...initialTaskState,
+        ids: ['task-r'],
+        entities: { 'task-r': taskWithLocalTime },
+      };
+      const action = {
+        ...syncTimeSpent({
+          taskId: 'task-r',
+          date: '2024-01-01',
+          duration: 5000,
+        }),
+        timeSpentForDay: 5000,
+      };
+      const foreignAction = {
+        ...action,
+        meta: {
+          ...action.meta,
+          isRemote: true,
+          isApplyingFromOtherClient: true,
+        },
+      };
+
+      const state = taskReducer(stateWithLocalTime, foreignAction);
+
+      expect(state.entities['task-r']!.timeSpentOnDay['2024-01-01']).toBe(8000);
+      expect(state.entities['task-r']!.timeSpent).toBe(8000);
+    });
+
     it('should handle remote dispatch for missing task gracefully', () => {
       const action = syncTimeSpent({
         taskId: 'nonexistent',
@@ -1011,6 +1159,23 @@ describe('Task Reducer', () => {
   // -----------------------------------------------------------------------
 
   describe('loadAllData - timeSpentOnDay normalization', () => {
+    it('should default calendar event dismissals missing from older persisted state', () => {
+      const appDataComplete = {
+        task: {
+          ids: [],
+          entities: {},
+          currentTaskId: null,
+          selectedTaskId: null,
+          lastCurrentTaskId: null,
+          isDataLoaded: false,
+        },
+      } as any;
+
+      const result = taskReducer(initialTaskState, loadAllData({ appDataComplete }));
+
+      expect(result.dismissedCalendarAutoImportEventIdsByProvider).toEqual({});
+    });
+
     it('should normalize tasks with undefined timeSpentOnDay to {} on load', () => {
       const taskWithUndefined = createTask('t1', { timeSpentOnDay: undefined as any });
       const appDataComplete = {
@@ -1112,6 +1277,71 @@ describe('Task Reducer', () => {
       });
 
       expect(() => taskReducer(stateWithUndefined, action)).not.toThrow();
+    });
+  });
+
+  // Regression: subtask collapse state (_hideSubTasksMode) must survive a restart.
+  // It only persists if the action that writes it is captured to the op-log,
+  // which requires isPersistent metadata. `updateTaskUi` carries an absolute
+  // value (replay-safe); toggleSubTaskMode resolves the value and dispatches it.
+  // See issue #8781.
+  describe('updateTaskUi persistence metadata', () => {
+    it('should be a persistent TASK Update action', () => {
+      const action = fromActions.updateTaskUi({
+        task: { id: 'task1', changes: { _hideSubTasksMode: undefined } },
+      });
+
+      expect(action.meta).toBeDefined();
+      expect(action.meta.isPersistent).toBe(true);
+      expect(action.meta.entityType).toBe('TASK');
+      expect(action.meta.entityId).toBe('task1');
+      expect(action.meta.opType).toBe(OpType.Update);
+    });
+
+    // The metadata assertion above proves the change is *eligible* for capture.
+    // This one proves it actually survives the whole op-log path end to end:
+    // dispatch -> capture into an operation payload -> serialize -> convert the
+    // op back to an action -> replay through the reducer. The JSON serialize hop
+    // mirrors the sync transport and the SQLite op-log backend, both of which
+    // round-trip op payloads as JSON, so it is where a lost value would regress.
+    // See issue #8781.
+    it('should round-trip _hideSubTasksMode through capture, serialization and replay', () => {
+      const stateShown: TaskState = {
+        ...initialTaskState,
+        ids: ['task1'],
+        entities: { task1: createTask('task1') },
+      };
+
+      // 1. Dispatch: the persistent action toggleSubTaskMode dispatches on collapse.
+      const action = fromActions.updateTaskUi({
+        task: {
+          id: 'task1',
+          changes: { _hideSubTasksMode: HideSubTasksMode.HideAll },
+        },
+      });
+
+      // 2. Capture: the effects store the action fields under payload.actionPayload.
+      const op: Operation = {
+        id: 'op-8781',
+        actionType: action.type as ActionType,
+        opType: action.meta.opType,
+        entityType: action.meta.entityType,
+        entityId: action.meta.entityId as string,
+        payload: { actionPayload: { task: action.task }, entityChanges: [] },
+        clientId: 'clientA',
+        vectorClock: { clientA: 1 },
+        timestamp: 0,
+        schemaVersion: 1,
+      };
+
+      // 3. Serialize over the wire / into the op-log, then read it back.
+      const wireOp = JSON.parse(JSON.stringify(op)) as Operation;
+
+      // 4. Convert the persisted op back into a replayable action and replay it.
+      const replayAction = convertOpToAction(wireOp);
+      const replayed = taskReducer(stateShown, replayAction);
+
+      expect(replayed.entities.task1?._hideSubTasksMode).toBe(HideSubTasksMode.HideAll);
     });
   });
 });

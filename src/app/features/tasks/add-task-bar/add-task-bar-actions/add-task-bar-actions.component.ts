@@ -18,6 +18,7 @@ import { ProjectService } from '../../../project/project.service';
 import { TagService } from '../../../tag/tag.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { DialogDeadlineComponent } from '../../dialog-deadline/dialog-deadline.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
 import { AddTaskBarParserService } from '../add-task-bar-parser.service';
 import { ESTIMATE_OPTIONS } from '../add-task-bar.const';
@@ -27,15 +28,33 @@ import { T } from '../../../../t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
 import { getDateTimeFromClockString } from '../../../../util/get-date-time-from-clock-string';
+import { isValidSplitTime } from '../../../../util/is-valid-split-time';
+import { normalizeClockStr } from '../../../../util/normalize-clock-str';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { isSingleEmoji } from '../../../../util/extract-first-emoji';
-import { DEFAULT_PROJECT_ICON } from '../../../project/project.const';
+import { DEFAULT_PROJECT_ICON, INBOX_PROJECT } from '../../../project/project.const';
+import { Project } from '../../../project/project.model';
 import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
-import { RepeatQuickSetting } from '../../../task-repeat-cfg/task-repeat-cfg.model';
+import {
+  RepeatCycleOption,
+  RepeatQuickSetting,
+} from '../../../task-repeat-cfg/task-repeat-cfg.model';
 import { buildRepeatQuickSettingOptions } from '../../../task-repeat-cfg/dialog-edit-task-repeat-cfg/build-repeat-quick-setting-options';
 import { DateService } from '../../../../core/date/date.service';
+import { MenuTreeService } from '../../../menu-tree/menu-tree.service';
+import { SelectOptionRowComponent } from '../../../../ui/select-option-row/select-option-row.component';
 
 type MenuType = 'project' | 'tags' | 'estimate' | 'repeat';
+
+// Label for an interval recurrence, which has no entry in the quick-setting
+// list. Only reached for counts >= 2 (an interval of 1 is parsed as the
+// equivalent preset), so the plural wording always fits.
+const INTERVAL_LABEL_KEYS: Record<RepeatCycleOption, string> = {
+  DAILY: T.F.TASK_REPEAT.F.Q_EVERY_X_DAYS,
+  WEEKLY: T.F.TASK_REPEAT.F.Q_EVERY_X_WEEKS,
+  MONTHLY: T.F.TASK_REPEAT.F.Q_EVERY_X_MONTHS,
+  YEARLY: T.F.TASK_REPEAT.F.Q_EVERY_X_YEARS,
+};
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -51,6 +70,7 @@ type MenuType = 'project' | 'tags' | 'estimate' | 'repeat';
     MatMenuTrigger,
     MatMenuItem,
     TranslateModule,
+    SelectOptionRowComponent,
   ],
 })
 export class AddTaskBarActionsComponent {
@@ -62,6 +82,7 @@ export class AddTaskBarActionsComponent {
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _translateService = inject(TranslateService);
   private _dateService = inject(DateService);
+  private _menuTreeService = inject(MenuTreeService);
   stateService = inject(AddTaskBarStateService);
 
   T = T;
@@ -86,12 +107,14 @@ export class AddTaskBarActionsComponent {
   hasNewTags = computed(() => this.state().newTagTitles.length > 0);
   isAutoDetected = computed(() => this.stateService.isAutoDetected());
 
-  // Signals for projects and tags (sorted for consistency)
-  allProjects = this._projectService.listSortedForUI;
+  // Signals for projects and tags
+  allProjects = this._projectService.listInTreeOrderForUI;
+  projectFolderMap = computed(() => this._menuTreeService.projectFolderMap());
   selectedProject = computed(() =>
     this.allProjects().find((p) => p.id === this.state().projectId),
   );
-  allTags = this._tagService.tagsNoMyDayAndNoListSorted;
+  allTags = this._tagService.tagsNoMyDayAndNoListInTreeOrder;
+  tagFolderMap = computed(() => this._menuTreeService.tagFolderMap());
   selectedTags = computed(() =>
     this.allTags().filter(
       (t) =>
@@ -126,7 +149,34 @@ export class AddTaskBarActionsComponent {
     if (!state.time && this.isSameDate(date, tomorrow)) {
       return this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TOMORROW);
     }
-    const dateStr = date.toLocaleDateString(this._dateTimeFormatService.currentLocale(), {
+    // Spelled-out `month: 'short'` name follows the UI language under the ISO
+    // option, so it isn't shown in Swedish (the `sv` sentinel); #8987 follow-up.
+    const dateStr = date.toLocaleDateString(this._dateTimeFormatService.textLocale(), {
+      month: 'short',
+      day: 'numeric',
+    });
+    return timeStr ? `${dateStr} ${timeStr}` : dateStr;
+  });
+
+  deadlineDateDisplay = computed(() => {
+    const state = this.state();
+    if (!state.deadlineDate) return null;
+    const today = this._dateService.getLogicalTodayDate();
+    const date = dateStrToUtcDate(state.deadlineDate);
+    const timeStr = state.deadlineTime
+      ? this._formatTimeForDisplay(state.deadlineTime)
+      : null;
+    if (this.isSameDate(date, today)) {
+      return timeStr || this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TODAY);
+    }
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (!state.deadlineTime && this.isSameDate(date, tomorrow)) {
+      return this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TOMORROW);
+    }
+    // Spelled-out `month: 'short'` name follows the UI language under the ISO
+    // option, so it isn't shown in Swedish (the `sv` sentinel); #8987 follow-up.
+    const dateStr = date.toLocaleDateString(this._dateTimeFormatService.textLocale(), {
       month: 'short',
       day: 'numeric',
     });
@@ -134,8 +184,15 @@ export class AddTaskBarActionsComponent {
   });
 
   private _formatTimeForDisplay(timeStr: string): string {
+    // Never let a malformed time crash change detection via the "Invalid clock
+    // string" guard (#7802). Recover a stray seconds component, then fall back
+    // to the raw string for genuinely invalid values rather than throwing.
+    const normalized = normalizeClockStr(timeStr);
+    if (!isValidSplitTime(normalized)) {
+      return timeStr;
+    }
     return this._dateTimeFormatService.formatTime(
-      getDateTimeFromClockString(timeStr, new Date()),
+      getDateTimeFromClockString(normalized, new Date()),
     );
   }
 
@@ -144,20 +201,52 @@ export class AddTaskBarActionsComponent {
     return estimate ? msToString(estimate) : null;
   });
 
-  repeatQuickOptions = computed(() => {
+  // The day the user chose, which is what every option here re-derives from —
+  // so a label can never name a different weekday than the config it saves
+  // recurs on. Not always the config's `startDate`: submitting a workday
+  // recurrence rolls a weekend day forward to the Monday. That does not break
+  // the guarantee, because the only preset that is rolled is the one whose
+  // label names no weekday ("Workdays"); a preset whose label does name one
+  // derives its own anchor from this date and is never rolled.
+  //
+  // The no-date fallback is the *logical* today, matching the `todayStr()` the
+  // submit path falls back to. A wall-clock `new Date()` would name yesterday's
+  // weekday between midnight and the configured start of the next day, so the
+  // label and the saved config would disagree in exactly that window.
+  private _repeatRefDate = computed(() => {
     const dateStr = this.state().date;
-    const refDate = dateStr ? dateStrToUtcDate(dateStr) : new Date();
+    return dateStr ? dateStrToUtcDate(dateStr) : this._dateService.getLogicalTodayDate();
+  });
+
+  repeatQuickOptions = computed(() => {
+    const refDate = this._repeatRefDate();
     return buildRepeatQuickSettingOptions(
       refDate,
       this._dateTimeFormatService.currentLocale(),
       this._translateService,
+      // Spelled-out weekday follows the UI language under the ISO option, so it
+      // isn't shown in Swedish (the `sv` sentinel); #8987 follow-up.
+      this._dateTimeFormatService.textLocale(),
     );
   });
 
   repeatDisplay = computed(() => {
-    const setting = this.state().repeatQuickSetting;
-    if (!setting) return null;
-    return this.repeatQuickOptions().find((o) => o.value === setting)?.label ?? null;
+    const repeat = this.state().repeat;
+    if (!repeat) return null;
+    if (repeat.type === 'INTERVAL') {
+      return this._translateService.instant(INTERVAL_LABEL_KEYS[repeat.repeatCycle], {
+        count: repeat.repeatEvery,
+        // Only read by the weekly label; a weekly cycle always recurs on the
+        // first occurrence's weekday, whether the phrase named it ("@every 2
+        // fridays") or took today's ("@every 2 weeks")
+        weekdayStr: this._repeatRefDate().toLocaleDateString(
+          this._dateTimeFormatService.textLocale(),
+          { weekday: 'long' },
+        ),
+      });
+    }
+    const value = repeat.type === 'DIALOG' ? 'CUSTOM' : repeat.quickSetting;
+    return this.repeatQuickOptions().find((o) => o.value === value)?.label ?? null;
   });
 
   // Emoji detection for project icons
@@ -167,10 +256,8 @@ export class AddTaskBarActionsComponent {
     return isSingleEmoji(icon);
   });
 
-  // Emoji detection for tag icons
-  isTagEmojiIcon(tag: any): boolean {
-    const icon = tag?.icon || 'label';
-    return isSingleEmoji(icon);
+  isDefaultInboxProject(project: Project | null | undefined): boolean {
+    return project?.id === INBOX_PROJECT.id && project.title === INBOX_PROJECT.title;
   }
 
   openScheduleDialog(): void {
@@ -192,9 +279,50 @@ export class AddTaskBarActionsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
-        this.stateService.updateDate(getDbDateStr(result.date), result.time);
-        // No UI access to reminder without a time being set
-        this.stateService.updateRemindOption(result.remindOption);
+        this._parserService.applyUserDatePick(
+          getDbDateStr(result.date),
+          result.time ?? null,
+          result.remindOption ?? null,
+        );
+      }
+      this.refocus.emit();
+      window.setTimeout(() => {
+        if (!this._destroyRef.destroyed) {
+          this.scheduleDialogOpenChange.emit(false);
+        }
+      });
+    });
+  }
+
+  openDeadlineDialog(): void {
+    const state = this.state();
+    this.scheduleDialogOpenChange.emit(true);
+    let dialogRef!: MatDialogRef<DialogDeadlineComponent>;
+    try {
+      dialogRef = this._matDialog.open(DialogDeadlineComponent, {
+        data: {
+          targetDeadlineDay: state.deadlineDate || undefined,
+          targetDeadlineTime: state.deadlineTime || undefined,
+          targetDeadlineRemindOption: state.deadlineRemindOption ?? undefined,
+          isSelectDeadlineOnly: true,
+        },
+      });
+    } catch (err) {
+      this.scheduleDialogOpenChange.emit(false);
+      throw err;
+    }
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && typeof result === 'object') {
+        if (result.date) {
+          this._parserService.applyUserDeadlinePick(
+            getDbDateStr(result.date),
+            result.time ?? null,
+            result.remindOption ?? null,
+          );
+        } else if (result.date === null) {
+          this.stateService.clearDeadline();
+        }
       }
       this.refocus.emit();
       window.setTimeout(() => {
@@ -212,7 +340,7 @@ export class AddTaskBarActionsComponent {
   onEstimateInput(value: string): void {
     const ms = stringToMs(value);
     if (ms > 0) {
-      this.stateService.updateEstimate(ms);
+      this._parserService.applyUserEstimatePick(ms);
       this.estimateChanged.emit(value);
     }
   }
@@ -251,11 +379,20 @@ export class AddTaskBarActionsComponent {
   }
 
   selectRepeatQuickSetting(setting: RepeatQuickSetting): void {
-    this.stateService.updateRepeatSetting(setting);
+    this._parserService.applyUserRepeatPick(
+      setting === 'CUSTOM'
+        ? { type: 'DIALOG' }
+        : { type: 'PRESET', quickSetting: setting },
+    );
   }
 
   clearRepeatSetting(): void {
-    this.stateService.clearRepeatSetting();
+    const currentInput = this.stateService.inputTxt();
+    const cleanedInput = this._parserService.removeShortSyntaxFromInput(
+      currentInput,
+      'repeat',
+    );
+    this.stateService.clearRepeatSetting(cleanedInput);
     this.refocus.emit();
   }
 
@@ -319,6 +456,16 @@ export class AddTaskBarActionsComponent {
           trigger: this.repeatMenuTrigger(),
         };
     }
+  }
+
+  clearDeadlineWithSyntax(): void {
+    const currentInput = this.stateService.inputTxt();
+    const cleanedInput = this._parserService.removeShortSyntaxFromInput(
+      currentInput,
+      'deadline',
+    );
+    this.stateService.clearDeadline(cleanedInput);
+    this.refocus.emit();
   }
 
   clearDateWithSyntax(): void {

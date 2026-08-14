@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -26,6 +26,7 @@ import { By } from '@angular/platform-browser';
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
 import { MarkdownModule } from 'ngx-markdown';
 import { MentionConfigService } from '../../tasks/mention-config.service';
+import { LayoutService } from '../../../core-ui/layout/layout.service';
 
 @Component({
   selector: 'focus-mode-task-selector',
@@ -37,6 +38,25 @@ class MockFocusModeTaskSelectorComponent {
   @Output() closed = new EventEmitter<void>();
 }
 
+// Fakes `matchMedia` so the inline-launch tests don't read the CI host's real
+// OS setting. macOS/Windows GitHub runners report `prefers-reduced-motion:
+// reduce`, which makes the component skip the rocket animation and broke the
+// release build (run 28593603470). Linux reports false, hiding the
+// non-hermetic dependency locally.
+const matchMediaFake =
+  (prefersReducedMotion: boolean) =>
+  (query: string): MediaQueryList =>
+    ({
+      matches: query.includes('prefers-reduced-motion') ? prefersReducedMotion : false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
+
 describe('FocusModeMainComponent', () => {
   let component: FocusModeMainComponent;
   let fixture: ComponentFixture<FocusModeMainComponent>;
@@ -46,6 +66,7 @@ describe('FocusModeMainComponent', () => {
   let mockIssueService: jasmine.SpyObj<IssueService>;
   let focusModeServiceSpy: jasmine.SpyObj<FocusModeService>;
   let currentTaskSubject: BehaviorSubject<TaskCopy | null>;
+  let mainStateSignal: WritableSignal<FocusMainUIState>;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
 
   const mockTask: TaskCopy = {
@@ -67,6 +88,7 @@ describe('FocusModeMainComponent', () => {
   } as TaskCopy;
 
   beforeEach(async () => {
+    mainStateSignal = signal(FocusMainUIState.Preparation);
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       tasks: jasmine.createSpy().and.returnValue({
         notesTemplate: 'Default task notes template',
@@ -109,10 +131,11 @@ describe('FocusModeMainComponent', () => {
       currentCycle: jasmine.createSpy().and.returnValue(1),
       sessionDuration: jasmine.createSpy().and.returnValue(0),
       mode: jasmine.createSpy().and.returnValue(FocusModeMode.Pomodoro),
-      mainState: jasmine.createSpy().and.returnValue(FocusMainUIState.Preparation),
+      mainState: mainStateSignal,
       focusModeConfig: jasmine.createSpy().and.returnValue({
         isSkipPreparation: false,
       }),
+      pomodoroConfig: jasmine.createSpy().and.returnValue(undefined),
       isInOvertime: jasmine.createSpy().and.returnValue(false),
       isSessionPaused: jasmine.createSpy().and.returnValue(false),
     });
@@ -135,6 +158,7 @@ describe('FocusModeMainComponent', () => {
         { provide: FocusModeService, useValue: focusModeServiceSpy },
         { provide: MatDialog, useValue: mockMatDialog },
         { provide: MentionConfigService, useValue: { mentionConfig$: EMPTY } },
+        { provide: LayoutService, useValue: { isXs: signal(false) } },
       ],
     })
       .overrideComponent(FocusModeMainComponent, {
@@ -177,6 +201,37 @@ describe('FocusModeMainComponent', () => {
 
     it('should initialize isDragOver to false', () => {
       expect(component.isDragOver()).toBe(false);
+    });
+
+    it('should constrain long task titles in focus mode layout (issue #8012)', () => {
+      currentTaskSubject.next({
+        ...mockTask,
+        title: 'A'.repeat(1000),
+      });
+      fixture.detectChanges();
+
+      const taskSection = fixture.nativeElement.querySelector(
+        '.task-section',
+      ) as HTMLElement | null;
+      const taskTitle = fixture.nativeElement.querySelector(
+        'task-title.task-title',
+      ) as HTMLElement | null;
+
+      expect(taskSection).not.toBeNull();
+      expect(taskTitle).not.toBeNull();
+
+      if (!taskSection || !taskTitle) {
+        return;
+      }
+
+      const sectionStyles = window.getComputedStyle(taskSection);
+      const titleStyles = window.getComputedStyle(taskTitle);
+
+      expect(sectionStyles.maxWidth).not.toBe('none');
+      expect(titleStyles.maxWidth).not.toBe('none');
+      expect(titleStyles.maxHeight).not.toBe('none');
+      expect(titleStyles.overflowX).toBe('hidden');
+      expect(titleStyles.overflowY).toBe('auto');
     });
   });
 
@@ -387,6 +442,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should open task selector and NOT dispatch selectFocusTask when session is running', () => {
+      mainStateSignal.set(FocusMainUIState.InProgress);
       focusModeServiceSpy.isSessionRunning.and.returnValue(true);
       component.finishCurrentTask();
 
@@ -405,20 +461,38 @@ describe('FocusModeMainComponent', () => {
         }),
       );
     });
+
+    it('should preserve a paused session while choosing the next task', () => {
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      focusModeServiceSpy.isSessionRunning.and.returnValue(false);
+      focusModeServiceSpy.isSessionPaused.and.returnValue(true);
+
+      component.finishCurrentTask();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.completeTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(component.isTaskSelectorOpen()).toBe(true);
+    });
   });
 
   describe('startSession', () => {
+    let matchMediaSpy: jasmine.Spy;
+
     beforeEach(() => {
       (mockStore.dispatch as jasmine.Spy).calls.reset();
       focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Pomodoro);
       focusModeServiceSpy.focusModeConfig.and.returnValue({
         isSkipPreparation: false,
       });
+      // Motion allowed by default so the inline rocket path is exercised
+      // deterministically regardless of the host OS setting.
+      matchMediaSpy = spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
     });
 
-    it('should dispatch startFocusPreparation when skip is disabled', () => {
+    it('should dispatch startFocusPreparation when the prep screen is opted in', () => {
       focusModeServiceSpy.focusModeConfig.and.returnValue({
         isSkipPreparation: false,
+        isShowPreparation: true,
       });
 
       component.startSession();
@@ -426,31 +500,81 @@ describe('FocusModeMainComponent', () => {
       expect(mockStore.dispatch).toHaveBeenCalledWith(actions.startFocusPreparation());
     });
 
-    it('should dispatch startFocusSession with duration when skip is enabled', () => {
+    it('should play the inline rocket then dispatch startFocusSession by default', fakeAsync(() => {
       component.displayDuration.set(900000);
       focusModeServiceSpy.focusModeConfig.and.returnValue({
-        isSkipPreparation: true,
+        isSkipPreparation: false,
       });
 
       component.startSession();
 
-      expect(mockStore.dispatch).toHaveBeenCalledWith(
+      // The rocket launches first; the session does not start immediately.
+      expect(component.isLaunching()).toBe(true);
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
         actions.startFocusSession({ duration: 900000 }),
       );
-    });
 
-    it('should use zero duration for Flowtime when skipping preparation', () => {
+      tick(800);
+
+      expect(component.isLaunching()).toBe(false);
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({ duration: 900000, taskId: mockTask.id }),
+      );
+    }));
+
+    it('should skip the inline rocket and dispatch immediately under reduced motion', fakeAsync(() => {
+      matchMediaSpy.and.callFake(matchMediaFake(true));
+      component.displayDuration.set(900000);
       focusModeServiceSpy.focusModeConfig.and.returnValue({
-        isSkipPreparation: true,
+        isSkipPreparation: false,
+      });
+
+      component.startSession();
+
+      // No animation delay: the session starts synchronously.
+      expect(component.isLaunching()).toBe(false);
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({ duration: 900000, taskId: mockTask.id }),
+      );
+    }));
+
+    it('should ignore a re-entrant start while the inline launch is playing', fakeAsync(() => {
+      component.displayDuration.set(900000);
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
+      });
+
+      component.startSession();
+      expect(component.isLaunching()).toBe(true);
+
+      // A second start during the launch window (e.g. keyboard Enter on the
+      // still-focused play button) must be a no-op — not a second timer that
+      // would dispatch startFocusSession again and reset the session.
+      component.startSession();
+
+      tick(800);
+
+      const startSessionDispatchCount = (mockStore.dispatch as jasmine.Spy).calls
+        .allArgs()
+        .filter(
+          ([action]) => action.type === actions.startFocusSession({ duration: 0 }).type,
+        ).length;
+      expect(startSessionDispatchCount).toBe(1);
+    }));
+
+    it('should use zero duration for Flowtime on the default inline-start path', fakeAsync(() => {
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
       });
       focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Flowtime);
 
       component.startSession();
+      tick(800);
 
       expect(mockStore.dispatch).toHaveBeenCalledWith(
-        actions.startFocusSession({ duration: 0 }),
+        actions.startFocusSession({ duration: 0, taskId: mockTask.id }),
       );
-    });
+    }));
 
     it('should open the task selector when no task is selected', () => {
       currentTaskSubject.next(null);
@@ -547,6 +671,27 @@ describe('FocusModeMainComponent', () => {
       // Default setup has: mainState=Preparation
       expect(component.isShowModeSelector()).toBe(true);
     });
+
+    it('should mark the layout so mobile spacing can keep the close button clear', () => {
+      const layout = fixture.nativeElement.querySelector(
+        'focus-mode-layout',
+      ) as HTMLElement;
+
+      expect(layout.classList.contains('has-mode-selector')).toBe(true);
+    });
+  });
+
+  describe('accessible names', () => {
+    it('should label all icon-only preparation controls', () => {
+      const buttons = Array.from(
+        fixture.nativeElement.querySelectorAll('.play-actions button'),
+      ) as HTMLButtonElement[];
+
+      expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
+        'F.FOCUS_MODE.START_FOCUS_SESSION',
+        'F.FOCUS_MODE.POMODORO_SETTINGS',
+      ]);
+    });
   });
 
   describe('selectMode', () => {
@@ -594,6 +739,8 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
   let mainStateSignal: WritableSignal<FocusMainUIState>;
   let modeSignal: WritableSignal<FocusModeMode>;
   let isSessionRunningSignal: WritableSignal<boolean>;
+  let isXsSignal: WritableSignal<boolean>;
+  let mockIssueService: jasmine.SpyObj<IssueService>;
 
   const mockTask: TaskCopy = {
     id: 'task-1',
@@ -608,6 +755,10 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
     timeSpentOnDay: {},
     attachments: [],
     tagIds: [],
+    issueType: 'GITHUB',
+    issueId: '123',
+    issueProviderId: 'provider-1',
+    issuePoints: 5,
   } as TaskCopy;
 
   beforeEach(async () => {
@@ -615,6 +766,7 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
     mainStateSignal = signal(FocusMainUIState.InProgress);
     modeSignal = signal(FocusModeMode.Pomodoro);
     isSessionRunningSignal = signal(true);
+    isXsSignal = signal(true);
 
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       tasks: jasmine.createSpy().and.returnValue({
@@ -631,8 +783,8 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
       'createFromDrop',
     ]);
 
-    const issueServiceSpy = jasmine.createSpyObj('IssueService', ['issueLink']);
-    issueServiceSpy.issueLink.and.returnValue(Promise.resolve('https://example.com'));
+    mockIssueService = jasmine.createSpyObj('IssueService', ['issueLink']);
+    mockIssueService.issueLink.and.returnValue(Promise.resolve('https://example.com'));
 
     const simpleCounterServiceSpy = jasmine.createSpyObj('SimpleCounterService', [''], {
       enabledSimpleCounters$: of([]),
@@ -659,6 +811,7 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
       focusModeConfig: signal({
         isSkipPreparation: false,
       }),
+      pomodoroConfig: signal(undefined),
       isInOvertime: signal(false),
     };
 
@@ -676,11 +829,12 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: TaskAttachmentService, useValue: taskAttachmentServiceSpy },
-        { provide: IssueService, useValue: issueServiceSpy },
+        { provide: IssueService, useValue: mockIssueService },
         { provide: SimpleCounterService, useValue: simpleCounterServiceSpy },
         { provide: FocusModeService, useValue: focusModeServiceMock },
         { provide: MatDialog, useValue: mockMatDialog },
         { provide: MentionConfigService, useValue: { mentionConfig$: EMPTY } },
+        { provide: LayoutService, useValue: { isXs: isXsSignal } },
       ],
     })
       .overrideComponent(FocusModeMainComponent, {
@@ -699,6 +853,16 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
 
   it('should hide the mode selector while a focus session is in progress', () => {
     expect(component.isShowModeSelector()).toBe(false);
+  });
+
+  it('should remove the mode selector from the DOM (not just visually hide it) while in progress', () => {
+    // Regression: a visibility:hidden selector still left its mat-icons painted,
+    // because the global `body.isMaterialSymbolsLoaded mat-icon` rule forces
+    // visibility:visible (an explicit value beats the inherited hidden one).
+    // The selector must be removed from the DOM so no icons can remain.
+    const selector = fixture.nativeElement.querySelector('segmented-button-group');
+
+    expect(selector).toBeNull();
   });
 
   it('should hide the mode selector while a Flowtime session is in progress', () => {
@@ -730,6 +894,92 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
     component.selectMode(FocusModeMode.Countdown);
 
     expect(mockStore.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should keep the primary session actions visible and group secondary actions on mobile', () => {
+    const controls = fixture.nativeElement.querySelector(
+      '.bottom-controls',
+    ) as HTMLElement;
+    const buttons = Array.from(
+      controls.querySelectorAll(':scope > button, :scope > a'),
+    ) as HTMLElement[];
+
+    expect(buttons.length).toBe(4);
+    expect(controls.querySelector('.secondary-actions-menu-btn')).not.toBeNull();
+  });
+
+  it('should restore direct secondary session actions and issue points on desktop', () => {
+    isXsSignal.set(false);
+    fixture.detectChanges();
+
+    const controls = fixture.nativeElement.querySelector(
+      '.bottom-controls',
+    ) as HTMLElement;
+    const buttons = Array.from(
+      controls.querySelectorAll(':scope > button, :scope > a'),
+    ) as HTMLElement[];
+
+    expect(buttons.length).toBe(6);
+    expect(controls.querySelector('.secondary-actions-menu-btn')).toBeNull();
+    expect(controls.querySelector('.reset-cycles-btn')).not.toBeNull();
+    expect(controls.querySelector('.open-issue-btn')).not.toBeNull();
+    expect(controls.querySelector('.show-notes-btn')).not.toBeNull();
+    expect(controls.querySelector('.mini-badge')?.textContent?.trim()).toBe('5');
+  });
+
+  it('should defer resolving the issue URL until the mobile More menu opens', async () => {
+    expect(mockIssueService.issueLink).not.toHaveBeenCalled();
+
+    const trigger = fixture.nativeElement.querySelector(
+      '.secondary-actions-menu-btn',
+    ) as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(mockIssueService.issueLink).toHaveBeenCalledOnceWith(
+      'GITHUB',
+      '123',
+      'provider-1',
+    );
+  });
+
+  it('should open the secondary actions menu and toggle notes', async () => {
+    const trigger = fixture.nativeElement.querySelector(
+      '.secondary-actions-menu-btn',
+    ) as HTMLButtonElement;
+
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const menuItems = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.mat-mdc-menu-panel button'),
+    );
+    const notesButton = menuItems.find((button) =>
+      button.textContent?.includes('F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS'),
+    );
+
+    expect(notesButton).toBeDefined();
+    expect(component.isFocusNotes()).toBe(false);
+
+    notesButton!.click();
+    fixture.detectChanges();
+
+    expect(component.isFocusNotes()).toBe(true);
+  });
+
+  it('should label every icon-only primary session action', () => {
+    const controls = fixture.nativeElement.querySelector(
+      '.bottom-controls',
+    ) as HTMLElement;
+    const buttons = Array.from(
+      controls.querySelectorAll(':scope > button, :scope > a'),
+    ) as HTMLElement[];
+
+    expect(buttons.every((button) => Boolean(button.getAttribute('aria-label')))).toBe(
+      true,
+    );
   });
 
   it('should pass isDefaultText=false to inline-markdown when task has notes', () => {
@@ -815,8 +1065,12 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
   let component: FocusModeMainComponent;
   let fixture: ComponentFixture<FocusModeMainComponent>;
   let mockStore: jasmine.SpyObj<Store>;
+  let mockTaskService: jasmine.SpyObj<TaskService>;
   let currentTaskSubject: BehaviorSubject<TaskCopy | null>;
+  let selectedTaskSubject: BehaviorSubject<TaskCopy>;
   let focusModeConfigSignal: WritableSignal<any>;
+  let mainStateSignal: WritableSignal<FocusMainUIState>;
+  let isSessionPausedSignal: WritableSignal<boolean>;
 
   const mockTask: TaskCopy = {
     id: 'task-1',
@@ -833,14 +1087,27 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
     tagIds: [],
   } as TaskCopy;
 
+  const selectedTask: TaskCopy = {
+    ...mockTask,
+    id: 'task-2',
+    title: 'Selected Focus Task',
+  };
+
   beforeEach(async () => {
     // Create writable signal for focusModeConfig to test computed signals
     focusModeConfigSignal = signal({
       isSkipPreparation: false,
     });
+    mainStateSignal = signal(FocusMainUIState.Preparation);
+    isSessionPausedSignal = signal(false);
 
-    const storeSpy = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    const storeSpy = jasmine.createSpyObj('Store', [
+      'dispatch',
+      'select',
+      'selectSignal',
+    ]);
     storeSpy.select.and.returnValue(of([]));
+    storeSpy.selectSignal.and.returnValue(signal(null));
 
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       tasks: jasmine.createSpy().and.returnValue({
@@ -849,13 +1116,17 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
     });
 
     currentTaskSubject = new BehaviorSubject<TaskCopy | null>(mockTask);
+    selectedTaskSubject = new BehaviorSubject<TaskCopy>(selectedTask);
     const taskServiceSpy = jasmine.createSpyObj(
       'TaskService',
-      ['update', 'setCurrentId'],
+      ['getByIdLive$', 'update', 'setCurrentId'],
       {
         currentTask$: currentTaskSubject.asObservable(),
         currentTaskId: jasmine.createSpy().and.returnValue(null),
       },
+    );
+    taskServiceSpy.getByIdLive$.and.callFake((taskId: string) =>
+      taskId === selectedTask.id ? selectedTaskSubject : of(mockTask),
     );
 
     const taskAttachmentServiceSpy = jasmine.createSpyObj('TaskAttachmentService', [
@@ -881,13 +1152,14 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
       progress: signal(0),
       timeRemaining: signal(1500000),
       isSessionRunning: signal(false),
-      isSessionPaused: signal(false),
+      isSessionPaused: isSessionPausedSignal,
       isBreakActive: signal(false),
       currentCycle: signal(1),
       sessionDuration: signal(0),
       mode: signal(FocusModeMode.Pomodoro),
-      mainState: signal(FocusMainUIState.Preparation),
+      mainState: mainStateSignal,
       focusModeConfig: focusModeConfigSignal,
+      pomodoroConfig: signal(undefined),
       isInOvertime: signal(false),
     };
 
@@ -909,6 +1181,7 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
         { provide: FocusModeService, useValue: focusModeServiceMock },
         { provide: MatDialog, useValue: mockMatDialog },
         { provide: MentionConfigService, useValue: { mentionConfig$: EMPTY } },
+        { provide: LayoutService, useValue: { isXs: signal(false) } },
       ],
     })
       .overrideComponent(FocusModeMainComponent, {
@@ -920,8 +1193,276 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
     fixture = TestBed.createComponent(FocusModeMainComponent);
     component = fixture.componentInstance;
     mockStore = TestBed.inject(Store) as jasmine.SpyObj<Store>;
+    mockTaskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
     fixture.detectChanges();
     mockStore.dispatch.calls.reset();
+  });
+
+  describe('task selection (issue #9399)', () => {
+    it('keeps a preparation selection passive while displaying it as the focus task', () => {
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
+
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      expect(mockTaskService.setCurrentId).not.toHaveBeenCalled();
+      expect(component.displayedTask()).toBe(selectedTask);
+      expect(component.isPlayButtonDisabled()).toBe(false);
+    });
+
+    it('does not replace an already tracked task until the focus session starts', () => {
+      currentTaskSubject.next(mockTask);
+      fixture.detectChanges();
+
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      expect(mockTaskService.setCurrentId).not.toHaveBeenCalled();
+      expect(component.currentTask()).toBe(mockTask);
+      expect(component.displayedTask()).toBe(selectedTask);
+    });
+
+    it('switches tasks immediately when a focus session is already in progress', () => {
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      fixture.detectChanges();
+
+      component.onTaskSelected(selectedTask.id);
+
+      expect(mockTaskService.setCurrentId).toHaveBeenCalledOnceWith(selectedTask.id);
+    });
+
+    it('switches tasks immediately when a focus session is paused', () => {
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      isSessionPausedSignal.set(true);
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
+
+      component.onTaskSelected(selectedTask.id);
+
+      expect(mockTaskService.setCurrentId).toHaveBeenCalledOnceWith(selectedTask.id);
+    });
+
+    it('ignores a stale passive selection after another path starts a session', () => {
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      currentTaskSubject.next(mockTask);
+      fixture.detectChanges();
+
+      expect(component.displayedTask()).toBe(mockTask);
+    });
+
+    it('does not cancel a session started for another task during inline launch', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      component.startSession();
+
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      currentTaskSubject.next(mockTask);
+      fixture.detectChanges();
+      mockStore.dispatch.calls.reset();
+      tick(800);
+
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(false);
+
+      mainStateSignal.set(FocusMainUIState.Preparation);
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
+      expect(component.displayedTask()).toBeNull();
+    }));
+
+    it('does not restart a session started for the staged task during inline launch', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      component.startSession();
+
+      mainStateSignal.set(FocusMainUIState.InProgress);
+      currentTaskSubject.next(selectedTask);
+      fixture.detectChanges();
+      mockStore.dispatch.calls.reset();
+      tick(800);
+
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(false);
+    }));
+
+    it('passes the passive task selection to the focus-session start', fakeAsync(() => {
+      currentTaskSubject.next(null);
+      component.displayDuration.set(1500000);
+      fixture.detectChanges();
+
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      component.startSession();
+      tick(800);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: actions.startFocusSession.type,
+          duration: 1500000,
+          taskId: selectedTask.id,
+        }),
+      );
+    }));
+
+    it('returns to task selection if the passive task disappears during inline launch', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      component.startSession();
+      selectedTaskSubject.next(undefined as unknown as TaskCopy);
+      fixture.detectChanges();
+      tick(800);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(true);
+    }));
+
+    it('does not retarget an inline launch after finishing the passive task', fakeAsync(() => {
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      component.startSession();
+      component.finishCurrentTask();
+      component.onTaskSelected(mockTask.id);
+      tick(800);
+
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.displayedTask()).toBe(mockTask);
+      expect(component.isTaskSelectorOpen()).toBe(false);
+    }));
+
+    it('carries a valid passive selection through the full preparation countdown', () => {
+      currentTaskSubject.next(null);
+      focusModeConfigSignal.set({
+        ...focusModeConfigSignal(),
+        isShowPreparation: true,
+      });
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      component.startSession();
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.startFocusPreparation());
+
+      mainStateSignal.set(FocusMainUIState.Countdown);
+      mockStore.dispatch.calls.reset();
+      component.onCountdownComplete();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({
+          duration: component.displayDuration(),
+          taskId: selectedTask.id,
+        }),
+      );
+    });
+
+    it('returns to task selection if the passive task is completed during countdown', () => {
+      currentTaskSubject.next(null);
+      focusModeConfigSignal.set({
+        ...focusModeConfigSignal(),
+        isShowPreparation: true,
+      });
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      component.startSession();
+
+      mainStateSignal.set(FocusMainUIState.Countdown);
+      selectedTaskSubject.next({ ...selectedTask, isDone: true });
+      fixture.detectChanges();
+      mockStore.dispatch.calls.reset();
+      component.onCountdownComplete();
+
+      expect(component.isPlayButtonDisabled()).toBe(true);
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(true);
+    });
+
+    it('disables the play button when the staged task is completed elsewhere', () => {
+      currentTaskSubject.next(null);
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+      expect(component.isPlayButtonDisabled()).toBe(false);
+
+      // e.g. a remote op (or the task list) marks the staged task done while it
+      // still sits in preparation waiting for Start.
+      selectedTaskSubject.next({ ...selectedTask, isDone: true });
+      fixture.detectChanges();
+
+      // Assert the staged task is still displayed, so that a null displayedTask
+      // cannot satisfy the isPlayButtonDisabled expectation below — only the
+      // isDone check can. Without this, dropping that check keeps the spec green.
+      expect(component.displayedTask()).toEqual(
+        jasmine.objectContaining({ id: selectedTask.id, isDone: true }),
+      );
+      expect(component.isPlayButtonDisabled()).toBe(true);
+    });
+
+    it('edits the passively selected task rather than an already tracked task', () => {
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      component.updateTaskTitleIfChanged(true, 'Updated Focus Task');
+
+      expect(mockTaskService.update).toHaveBeenCalledWith(selectedTask.id, {
+        title: 'Updated Focus Task',
+      });
+    });
+
+    it('completes the passively selected task rather than an already tracked task', () => {
+      component.onTaskSelected(selectedTask.id);
+      fixture.detectChanges();
+
+      component.finishCurrentTask();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: {
+            id: selectedTask.id,
+            changes: {
+              isDone: true,
+              doneOn: jasmine.any(Number) as unknown as number,
+            },
+          },
+        }),
+      );
+      expect(mockTaskService.setCurrentId).not.toHaveBeenCalled();
+      expect(component.isTaskSelectorOpen()).toBe(true);
+    });
+
+    it('returns to task selection if the passive task disappears before countdown completion', () => {
+      mockTaskService.getByIdLive$.and.returnValue(of(undefined as unknown as TaskCopy));
+
+      component.onTaskSelected('deleted-task');
+      fixture.detectChanges();
+      component.onCountdownComplete();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+      expect(component.isTaskSelectorOpen()).toBe(true);
+    });
   });
 
   describe('isPlayButtonDisabled', () => {
@@ -972,6 +1513,12 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
   });
 
   describe('startSession', () => {
+    beforeEach(() => {
+      // Deterministic motion setting so the inline rocket path is exercised
+      // regardless of the host OS (macOS/Windows CI report reduced motion).
+      spyOn(globalThis, 'matchMedia').and.callFake(matchMediaFake(false));
+    });
+
     it('should open task selector when no task is selected', () => {
       focusModeConfigSignal.set({
         isSkipPreparation: false,
@@ -985,9 +1532,10 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
       expect(component.isTaskSelectorOpen()).toBe(true);
     });
 
-    it('should dispatch startFocusPreparation when a task is selected and skip preparation is off', () => {
+    it('should dispatch startFocusPreparation when a task is selected and the prep screen is opted in', () => {
       focusModeConfigSignal.set({
         isSkipPreparation: false,
+        isShowPreparation: true,
       });
       currentTaskSubject.next(mockTask);
       fixture.detectChanges();
@@ -998,21 +1546,26 @@ describe('FocusModeMainComponent - sync with tracking (issue #6009)', () => {
       expect(component.isTaskSelectorOpen()).toBe(false);
     });
 
-    it('should dispatch startFocusSession when task is selected and skip preparation is enabled', () => {
+    it('should play the inline rocket then dispatch startFocusSession by default', fakeAsync(() => {
       component.displayDuration.set(1500000);
       focusModeConfigSignal.set({
-        isSkipPreparation: true,
+        isSkipPreparation: false,
       });
       currentTaskSubject.next(mockTask);
       fixture.detectChanges();
 
       component.startSession();
+      expect(component.isLaunching()).toBe(true);
 
+      tick(800);
+
+      expect(component.isLaunching()).toBe(false);
       expect(mockStore.dispatch).toHaveBeenCalledWith(
         actions.startFocusSession({
           duration: 1500000,
+          taskId: mockTask.id,
         }),
       );
-    });
+    }));
   });
 });

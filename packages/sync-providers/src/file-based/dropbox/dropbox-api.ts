@@ -13,6 +13,7 @@ import {
   TooManyRequestsAPIError,
   UploadRevToMatchMismatchAPIError,
 } from '../../errors';
+import { assertUploadedSizeMatches } from '../verify-upload-size';
 import { executeNativeRequestWithRetry } from '../../http/native-http-retry';
 import type { NativeHttpResponse } from '../../http/native-http-retry';
 import type { DropboxDeps, DropboxPrivateCfg } from './dropbox';
@@ -270,6 +271,12 @@ export class DropboxApi {
         throw new NoRevAPIError();
       }
 
+      // Fail loudly on a truncated/partial write instead of silently storing a
+      // corrupt sync file (#8604). See assertUploadedSizeMatches.
+      if (typeof data === 'string') {
+        assertUploadedSizeMatches(data, result.size, targetPath);
+      }
+
       return result;
     } catch (e) {
       this._deps.logger.critical(
@@ -521,10 +528,7 @@ export class DropboxApi {
 
         if (!response.ok) {
           const bodyStr = await response.text();
-          throw new HttpNotOkAPIError(
-            new Response(bodyStr, { status: response.status }),
-            bodyStr,
-          );
+          throw new HttpNotOkAPIError(response, bodyStr);
         }
 
         data = (await response.json()) as TokenResponse;
@@ -708,7 +712,6 @@ export class DropboxApi {
     // On native platforms (except iOS), use CapacitorHttp.
     // iOS uses fetch (via CapacitorWebFetch) to bypass Capacitor's URLSession.shared,
     // which causes persistent -1005 "The network connection was lost" errors.
-    // See: docs/long-term-plans/ios-dropbox-sync-reliability.md
     if (
       this._deps.platformInfo.isNativePlatform &&
       !this._deps.platformInfo.isIosNative

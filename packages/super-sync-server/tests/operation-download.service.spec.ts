@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import type { Prisma } from '@prisma/client';
 import { OperationDownloadService } from '../src/sync/services/operation-download.service';
-import { Operation, ServerOperation } from '../src/sync/sync.types';
 
 // Mock prisma
 vi.mock('../src/db', () => ({
@@ -36,6 +36,7 @@ const EXPECTED_OPERATION_DOWNLOAD_SELECT = {
   opType: true,
   entityType: true,
   entityId: true,
+  entityIds: true,
   payload: true,
   vectorClock: true,
   schemaVersion: true,
@@ -43,6 +44,7 @@ const EXPECTED_OPERATION_DOWNLOAD_SELECT = {
   receivedAt: true,
   isPayloadEncrypted: true,
   syncImportReason: true,
+  repairBaseServerSeq: true,
 };
 
 // Helper to create a mock operation row (as returned by Prisma)
@@ -55,6 +57,7 @@ const createMockOpRow = (
     actionType: string;
     entityType: string;
     entityId: string | null;
+    entityIds: string[];
     payload: unknown;
     vectorClock: Record<string, number>;
     schemaVersion: number;
@@ -62,6 +65,7 @@ const createMockOpRow = (
     receivedAt: bigint;
     isPayloadEncrypted: boolean;
     syncImportReason: string | null;
+    repairBaseServerSeq: number | null;
   }> = {},
 ) => ({
   id: overrides.id ?? `op-${serverSeq}`,
@@ -72,6 +76,7 @@ const createMockOpRow = (
   entityType: overrides.entityType ?? 'Task',
   // Use 'in' check to allow null to be explicitly set
   entityId: 'entityId' in overrides ? overrides.entityId : `task-${serverSeq}`,
+  entityIds: overrides.entityIds ?? [],
   payload: overrides.payload ?? { title: `Task ${serverSeq}` },
   vectorClock: overrides.vectorClock ?? { [clientId]: serverSeq },
   schemaVersion: overrides.schemaVersion ?? 1,
@@ -79,6 +84,7 @@ const createMockOpRow = (
   receivedAt: overrides.receivedAt ?? BigInt(Date.now()),
   isPayloadEncrypted: overrides.isPayloadEncrypted ?? false,
   syncImportReason: overrides.syncImportReason ?? null,
+  repairBaseServerSeq: overrides.repairBaseServerSeq ?? null,
 });
 
 // The download flow calls operation.findFirst twice: first the latest
@@ -115,107 +121,6 @@ describe('OperationDownloadService', () => {
 
   afterEach(() => {
     vi.useRealTimers();
-  });
-
-  describe('getOpsSince', () => {
-    it('should return empty array when no operations exist', async () => {
-      vi.mocked(prisma.operation.findMany).mockResolvedValue([]);
-
-      const result = await service.getOpsSince(1, 0);
-
-      expect(result).toEqual([]);
-      expect(prisma.operation.findMany).toHaveBeenCalledWith({
-        where: {
-          userId: 1,
-          serverSeq: { gt: 0 },
-        },
-        orderBy: { serverSeq: 'asc' },
-        take: 500,
-        select: EXPECTED_OPERATION_DOWNLOAD_SELECT,
-      });
-    });
-
-    it('should return operations mapped to ServerOperation format', async () => {
-      const mockOps = [createMockOpRow(1), createMockOpRow(2)];
-      vi.mocked(prisma.operation.findMany).mockResolvedValue(mockOps as any);
-
-      const result = await service.getOpsSince(1, 0);
-
-      expect(result).toHaveLength(2);
-      expect(result[0].serverSeq).toBe(1);
-      expect(result[0].op.id).toBe('op-1');
-      expect(result[0].op.opType).toBe('ADD');
-      expect(result[1].serverSeq).toBe(2);
-    });
-
-    it('should exclude operations from specified client', async () => {
-      vi.mocked(prisma.operation.findMany).mockResolvedValue([]);
-
-      await service.getOpsSince(1, 0, 'excluded-client');
-
-      expect(prisma.operation.findMany).toHaveBeenCalledWith({
-        where: {
-          userId: 1,
-          serverSeq: { gt: 0 },
-          clientId: { not: 'excluded-client' },
-        },
-        orderBy: { serverSeq: 'asc' },
-        take: 500,
-        select: EXPECTED_OPERATION_DOWNLOAD_SELECT,
-      });
-    });
-
-    it('should respect custom limit', async () => {
-      vi.mocked(prisma.operation.findMany).mockResolvedValue([]);
-
-      await service.getOpsSince(1, 0, undefined, 100);
-
-      expect(prisma.operation.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ take: 100 }),
-      );
-    });
-
-    it('should correctly map operation fields including optional entityId', async () => {
-      const opWithNullEntityId = createMockOpRow(1, 'client-1', { entityId: null });
-      vi.mocked(prisma.operation.findMany).mockResolvedValue([opWithNullEntityId as any]);
-
-      const result = await service.getOpsSince(1, 0);
-
-      expect(result[0].op.entityId).toBeUndefined();
-    });
-
-    it('should convert timestamps from bigint to number', async () => {
-      const mockOp = createMockOpRow(1, 'client-1', {
-        clientTimestamp: BigInt(1700000000000),
-        receivedAt: BigInt(1700000001000),
-      });
-      vi.mocked(prisma.operation.findMany).mockResolvedValue([mockOp as any]);
-
-      const result = await service.getOpsSince(1, 0);
-
-      expect(result[0].op.timestamp).toBe(1700000000000);
-      expect(result[0].receivedAt).toBe(1700000001000);
-    });
-
-    it('should handle operations with encrypted payloads', async () => {
-      const encryptedOp = createMockOpRow(1, 'client-1', { isPayloadEncrypted: true });
-      vi.mocked(prisma.operation.findMany).mockResolvedValue([encryptedOp as any]);
-
-      const result = await service.getOpsSince(1, 0);
-
-      expect(result[0].op.isPayloadEncrypted).toBe(true);
-    });
-
-    it('should map sync import reason when present', async () => {
-      const importOp = createMockOpRow(1, 'client-1', {
-        syncImportReason: 'recovery',
-      });
-      vi.mocked(prisma.operation.findMany).mockResolvedValue([importOp as any]);
-
-      const result = await service.getOpsSince(1, 0);
-
-      expect(result[0].op.syncImportReason).toBe('recovery');
-    });
   });
 
   describe('getOpsSinceWithSeq', () => {
@@ -362,7 +267,10 @@ describe('OperationDownloadService', () => {
         where: {
           userId: 1,
           serverSeq: { lte: 20 },
-          opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+          OR: [
+            { opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] } },
+            { opType: 'REPAIR', repairBaseServerSeq: { not: null } },
+          ],
         },
         orderBy: { serverSeq: 'desc' },
         select: { serverSeq: true, clientId: true },
@@ -458,6 +366,30 @@ describe('OperationDownloadService', () => {
           }),
         }),
       );
+    });
+
+    it('should round-trip batch entityIds in downloaded operations', async () => {
+      vi.mocked(prisma.$transaction).mockImplementation(
+        async (fn: (tx: Prisma.TransactionClient) => Promise<unknown>) =>
+          fn({
+            operation: {
+              findFirst: vi.fn().mockResolvedValue(null),
+              findMany: vi.fn().mockResolvedValue([
+                createMockOpRow(1, 'batch-client', {
+                  entityId: 'task-1',
+                  entityIds: ['task-1', 'task-2'],
+                }),
+              ]),
+            },
+            userSyncState: {
+              findUnique: vi.fn().mockResolvedValue({ lastSeq: 1 }),
+            },
+          } as unknown as Prisma.TransactionClient),
+      );
+
+      const result = await service.getOpsSinceWithSeq(1, 0);
+
+      expect(result.ops[0].op.entityIds).toEqual(['task-1', 'task-2']);
     });
 
     it('should detect gap when client is ahead of server', async () => {
@@ -604,7 +536,10 @@ describe('OperationDownloadService', () => {
         where: {
           userId: 1,
           serverSeq: { lte: 42 },
-          opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+          OR: [
+            { opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] } },
+            { opType: 'REPAIR', repairBaseServerSeq: { not: null } },
+          ],
         },
         orderBy: { serverSeq: 'desc' },
         select: { serverSeq: true, clientId: true },

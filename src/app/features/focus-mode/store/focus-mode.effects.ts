@@ -22,6 +22,8 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { playSound } from '../../../util/play-sound';
 import { startWhiteNoise, stopWhiteNoise } from '../../../util/white-noise';
+import { startBreakEndAlarm, stopBreakEndAlarm } from '../../../util/break-end-alarm';
+import { FocusModeLocalSettingsService } from '../../config/focus-mode-local-settings.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';
 import { selectLastCurrentTask, selectTaskById } from '../../tasks/store/task.selectors';
@@ -33,10 +35,21 @@ import {
   selectPomodoroConfig,
 } from '../../config/store/global-config.reducer';
 import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
-import { FocusModeMode, FocusScreen, getBreakCycle } from '../focus-mode.model';
+import {
+  FocusModeMode,
+  FocusScreen,
+  getBreakCycle,
+  TimerState,
+} from '../focus-mode.model';
 import { MetricService } from '../../metric/metric.service';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
 import { TakeABreakService } from '../../take-a-break/take-a-break.service';
+import { NotifyService } from '../../../core/notify/notify.service';
+import { msToString } from '../../../ui/duration/ms-to-string.pipe';
+import { T } from '../../../t.const';
+import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
+import { BannerService } from '../../../core/banner/banner.service';
+import { BannerId } from '../../../core/banner/banner.model';
 
 const SESSION_DONE_SOUND = 'positive.mp3';
 const TICK_SOUND = 'tick.mp3';
@@ -53,6 +66,10 @@ export class FocusModeEffects {
   private metricService = inject(MetricService);
   private storageService = inject(FocusModeStorageService);
   private takeABreakService = inject(TakeABreakService);
+  private notifyService = inject(NotifyService);
+  private bannerService = inject(BannerService);
+  private isAndroidWebView = inject(IS_ANDROID_WEB_VIEW_TOKEN);
+  private focusModeLocalSettingsService = inject(FocusModeLocalSettingsService);
 
   // Sync: When tracking starts → resume/skip-break or auto-spawn a new session.
   //
@@ -62,8 +79,8 @@ export class FocusModeEffects {
   // Auto-spawn (opt-in via `autoStartFocusOnPlay`): if no session is active and
   // the user has opted in, start a new session quietly. The overlay is NOT
   // dispatched — surface comes from the existing banner / future indicator.
-  // Inside the overlay we still respect `isSkipPreparation` so #7384's
-  // rocket-prep flow keeps working for users who entered via F-key.
+  // Inside the overlay we still respect `isShowPreparation` so #7384's
+  // rocket-prep flow keeps working for users who opted into the prep screen.
   syncTrackingStartToSession$ = createEffect(() =>
     this.taskService.currentTaskId$.pipe(
       skipWhileApplyingRemoteOps(),
@@ -116,10 +133,11 @@ export class FocusModeEffects {
             if (!cfg?.autoStartFocusOnPlay) {
               return EMPTY;
             }
-            // Bug #7384: respect isSkipPreparation only inside the overlay
-            // (preparation screen is overlay-bound). For the quiet auto-spawn
-            // path there's no overlay → no rocket → bypass the prep gate.
-            if (isOverlayShown && !cfg?.isSkipPreparation) {
+            // Bug #7384: respect isShowPreparation only inside the overlay
+            // (preparation screen is overlay-bound). When the user opted into the
+            // prep screen, let the manual Start click drive it; the quiet
+            // auto-spawn path (no overlay) has no rocket and bypasses the gate.
+            if (isOverlayShown && cfg?.isShowPreparation) {
               return EMPTY;
             }
             const strategy = this.strategyFactory.getStrategy(mode);
@@ -216,7 +234,8 @@ export class FocusModeEffects {
     ),
   );
 
-  // Sync: When focus session starts → start tracking (if not already tracking)
+  // Sync: When focus session starts → start or switch tracking
+  // An explicitly selected task takes precedence over existing and resumable tasks.
   // Checks that the paused task still exists before starting tracking
   // Bug #5954 fix: Falls back to lastCurrentTask if no pausedTaskId (e.g., after app restart)
   // Bug #5954 fix: Shows focus overlay if no valid (undone) task is available
@@ -228,21 +247,24 @@ export class FocusModeEffects {
         this.taskService.currentTaskId$,
         this.store.select(selectLastCurrentTask),
       ),
-      filter(
-        ([_action, pausedTaskId, currentTaskId, lastCurrentTask]) =>
-          !currentTaskId && (!!pausedTaskId || !!lastCurrentTask),
+      filter(([action, pausedTaskId, currentTaskId, lastCurrentTask]) =>
+        action.taskId
+          ? action.taskId !== currentTaskId
+          : !currentTaskId && (!!pausedTaskId || !!lastCurrentTask),
       ),
-      switchMap(([_action, pausedTaskId, _currentTaskId, lastCurrentTask]) => {
-        // Prefer pausedTaskId, fall back to lastCurrentTask
-        const taskIdToResume = pausedTaskId || lastCurrentTask?.id;
+      switchMap(([action, pausedTaskId, _currentTaskId, lastCurrentTask]) => {
+        // Prefer an explicit selection, then pausedTaskId, then lastCurrentTask.
+        const taskIdToResume = action.taskId || pausedTaskId || lastCurrentTask?.id;
         if (!taskIdToResume) return EMPTY;
 
         return this.store.select(selectTaskById, { id: taskIdToResume }).pipe(
           take(1),
-          map((task) =>
+          switchMap((task) =>
             task && !task.isDone
-              ? setCurrentTask({ id: taskIdToResume })
-              : actions.showFocusOverlay(),
+              ? of(setCurrentTask({ id: taskIdToResume }))
+              : action.taskId
+                ? of(actions.selectFocusTask())
+                : of(actions.showFocusOverlay()),
           ),
         );
       }),
@@ -282,19 +304,42 @@ export class FocusModeEffects {
     () =>
       this.store.select(selectors.selectTimer).pipe(
         skipWhileApplyingRemoteOps(),
-        filter(
-          (timer) =>
-            timer.purpose === 'break' &&
-            !timer.isRunning &&
-            timer.startedAt !== null &&
-            timer.elapsed >= timer.duration,
-        ),
+        filter((timer) => this._isBreakTimeUp(timer)),
         distinctUntilChanged(
           (prev, curr) =>
             prev.elapsed === curr.elapsed && prev.startedAt === curr.startedAt,
         ),
         tap(() => {
-          this._notifyUser();
+          // When the looping break-end alarm is enabled it owns the break-end
+          // sound (breakEndAlarmSound$); skip the one-shot here so they don't
+          // double up. The window focus/flash still fires.
+          this._notifyUser(false, this._isLoopBreakEndAlarmOn());
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  // Loop the break-end sound until the break is dismissed, when the user has
+  // opted in (per-device setting — see FocusModeLocalSettingsService / #8593).
+  // Mirrors whiteNoiseSound$: a single selector-based effect owns the loop
+  // lifecycle, so any leave-break transition (completeBreak / skipBreak /
+  // starting the next session — all of which flip timer.purpose away from
+  // 'break' or set it running again) naturally stops the loop via
+  // distinctUntilChanged. A hard safety ceiling inside startBreakEndAlarm()
+  // stops it regardless if the user truly walked away.
+  breakEndAlarmSound$ = createEffect(
+    () =>
+      this.store.select(selectors.selectTimer).pipe(
+        skipWhileApplyingRemoteOps(),
+        map((timer) => this._isBreakTimeUp(timer) && this._isLoopBreakEndAlarmOn()),
+        distinctUntilChanged(),
+        tap((shouldAlarm) => {
+          if (shouldAlarm) {
+            const soundVolume = this.globalConfigService.sound()?.volume || 0;
+            startBreakEndAlarm(SESSION_DONE_SOUND, soundVolume);
+          } else {
+            stopBreakEndAlarm();
+          }
         }),
       ),
     { dispatch: false },
@@ -404,22 +449,36 @@ export class FocusModeEffects {
     ),
   );
 
-  // Effect 3b: Offer Flowtime breaks when user explicitly ends their session
-  // Triggers on endFlowtimeSession — NOT pauseFocusSession (which is fired by
-  // sync-stop, idle, and the regular pause button)
-  offerFlowtimeBreakOnSessionEnd$ = createEffect(() =>
+  // Effect 3b: Auto-start the Flowtime break when the user explicitly ends their
+  // session. Triggers on endFlowtimeSession — NOT pauseFocusSession (which is
+  // fired by sync-stop, idle, and the regular pause button).
+  //
+  // Mirrors autoStartBreakOnSessionComplete$ (Pomodoro). The action ORDER matters:
+  // completeFocusSession (isManual:FALSE) → [unsetCurrentTask] → startBreak.
+  //  - isManual:false keeps stopTrackingOnSessionEnd$ out of it (it defers the
+  //    tracking-pause to break-start). If we used isManual:true, that effect would
+  //    enqueue its own unsetCurrentTask AFTER startBreak, and syncTrackingStopToSession$
+  //    would then pause the just-started break.
+  //  - We unset the task HERE, explicitly before startBreak, so the tracking-stop is
+  //    seen while the timer is still idle (syncTrackingStopToSession$ only pauses a
+  //    RUNNING timer), not after the break is running.
+  // completeFocusSession also logs the session (logFocusSession$). When no break is
+  // due we complete with isManual:true (stops tracking) and show the SessionDone screen.
+  autoStartFlowtimeBreakOnSessionEnd$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.endFlowtimeSession),
       withLatestFrom(
         this.store.select(selectors.selectMode),
         this.store.select(selectors.selectTimer),
+        this.store.select(selectFocusModeConfig),
+        this.taskService.currentTaskId$,
       ),
       filter(([_action, mode, timer]) => {
         if (mode !== FocusModeMode.Flowtime) return false;
         if (timer.purpose !== 'work') return false;
         return true;
       }),
-      switchMap(([action, mode, timer]) => {
+      switchMap(([action, mode, timer, config, currentTaskId]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const breakInfo = strategy.getBreakDuration(timer.elapsed);
 
@@ -427,13 +486,21 @@ export class FocusModeEffects {
           return [actions.completeFocusSession({ isManual: true })];
         }
 
-        return [
-          actions.offerFlowtimeBreak({
+        const pausedTaskId = action.pausedTaskId ?? currentTaskId;
+        const shouldPauseTracking =
+          !!config?.isPauseTrackingDuringBreak && !!pausedTaskId;
+        const actionsArr: Action[] = [actions.completeFocusSession({ isManual: false })];
+        if (shouldPauseTracking) {
+          actionsArr.push(unsetCurrentTask());
+        }
+        actionsArr.push(
+          actions.startBreak({
             duration: breakInfo.duration,
             isLongBreak: breakInfo.isLong,
-            pausedTaskId: action.pausedTaskId,
+            pausedTaskId: shouldPauseTracking ? pausedTaskId : undefined,
           }),
-        ];
+        );
+        return actionsArr;
       }),
     ),
   );
@@ -444,6 +511,64 @@ export class FocusModeEffects {
       this.actions$.pipe(
         ofType(actions.completeFocusSession),
         tap(() => this._notifyUser()),
+      ),
+    { dispatch: false },
+  );
+
+  // Effect 4b: Don't let a Countdown session end silently. Countdown is the only
+  // mode that auto-stops with no follow-up: Pomodoro transitions straight into a
+  // break (its own surfaced screen) and Flowtime only ever stops on an explicit
+  // user action — neither is a silent stop. Manual end (isManual) is excluded.
+  //
+  // The reducer already routes completeFocusSession to the SessionDone screen, so
+  // if the overlay is open the user sees it. We only intervene when the overlay
+  // is hidden (user working elsewhere): rather than seize the whole screen, we
+  // surface a non-modal banner that points back to the SessionDone screen and
+  // self-dismisses once the overlay opens. We also raise an OS notification, but
+  // only when it adds something — skipped while the app is focused (the surfaced
+  // banner/overlay + desktop window flash are alert enough, and it would fire
+  // spuriously on idle-resume) and on Android, where the native foreground
+  // service already posts its own completion notification (see
+  // FocusModeForegroundService.onTimerComplete), so this would duplicate.
+  surfaceSessionDoneOnCompletion$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(actions.completeFocusSession),
+        withLatestFrom(
+          this.store.select(selectors.selectMode),
+          this.store.select(selectors.selectLastSessionDuration),
+          this.store.select(selectors.selectIsOverlayShown),
+        ),
+        filter(([action, mode]) => mode === FocusModeMode.Countdown && !action.isManual),
+        tap(([_action, _mode, duration, isOverlayShown]) => {
+          if (!document.hasFocus() && !this.isAndroidWebView) {
+            this.notifyService.notify({
+              title: T.F.FOCUS_MODE.SESSION_COMPLETED,
+              body: T.F.FOCUS_MODE.SESSION_COMPLETED_NOTIFICATION_BODY,
+              translateParams: { duration: msToString(duration, true) },
+            });
+          }
+          if (!isOverlayShown) {
+            this.bannerService.open({
+              id: BannerId.FocusModeSessionDone,
+              ico: 'celebration',
+              msg: T.F.FOCUS_MODE.SESSION_COMPLETED_BANNER,
+              translateParams: { duration: msToString(duration, true) },
+              action: {
+                // Opens the overlay onto the SessionDone screen (where the user
+                // picks start-next vs back-to-planning) — it does not itself
+                // start a session, so the label must not promise that.
+                label: T.F.FOCUS_MODE.SESSION_COMPLETED_BANNER_ACTION,
+                fn: () => this.store.dispatch(actions.showFocusOverlay()),
+              },
+              // Self-dismiss once the overlay opens (via the action above, the
+              // idle-resume flow, or the user opening focus mode manually).
+              hideWhen$: this.store
+                .select(selectors.selectIsOverlayShown)
+                .pipe(filter((isShown) => isShown)),
+            });
+          }
+        }),
       ),
     { dispatch: false },
   );
@@ -576,9 +701,10 @@ export class FocusModeEffects {
       this.actions$.pipe(
         ofType(actions.startBreak),
         tap(() => {
-          // Signal TakeABreakService to reset its timer
-          // otherNoBreakTIme$ feeds into the break timer's tick stream
-          this.takeABreakService.otherNoBreakTIme$.next(0);
+          // Signal TakeABreakService to reset its timer. Must be resetTimer()
+          // rather than otherNoBreakTIme$.next(0): the latter only zeroes the
+          // counter and skips the reminder teardown, leaving a stale banner up.
+          this.takeABreakService.resetTimer();
         }),
       ),
     { dispatch: false },
@@ -588,17 +714,6 @@ export class FocusModeEffects {
   cancelSession$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.cancelFocusSession),
-      map(() => unsetCurrentTask()),
-    ),
-  );
-
-  // Stop tracking when exiting break to planning
-  // Without this, tracking continues running orphaned after the focus session is reset
-  stopTrackingOnExitBreakToPlanning$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(actions.exitBreakToPlanning),
-      withLatestFrom(this.taskService.currentTaskId$),
-      filter(([_, currentTaskId]) => !!currentTaskId),
       map(() => unsetCurrentTask()),
     ),
   );
@@ -617,9 +732,9 @@ export class FocusModeEffects {
   logFocusSession$ = createEffect(
     () =>
       this.actions$.pipe(
-        // Flowtime sessions are logged when the break is offered, even if the
-        // user declines the break and never starts it.
-        ofType(actions.completeFocusSession, actions.offerFlowtimeBreak),
+        // Every completed session (including Flowtime, which dispatches
+        // completeFocusSession before auto-starting its break) is logged here.
+        ofType(actions.completeFocusSession),
         withLatestFrom(this.store.select(selectors.selectLastSessionDuration)),
         tap(([, duration]) => {
           if (duration > 0) {
@@ -755,6 +870,7 @@ export class FocusModeEffects {
             actions.completeBreak,
             actions.completeFocusSession,
             actions.cancelFocusSession,
+            actions.selectFocusTask,
           ),
           // Throttle to prevent excessive IPC calls (timer ticks every 1s)
           // Use leading + trailing to ensure immediate feedback and final state
@@ -841,11 +957,27 @@ export class FocusModeEffects {
     { dispatch: false },
   );
 
-  private _notifyUser(isHideBar = false): void {
+  private _isBreakTimeUp(timer: TimerState): boolean {
+    return (
+      timer.purpose === 'break' &&
+      !timer.isRunning &&
+      timer.startedAt !== null &&
+      timer.elapsed >= timer.duration
+    );
+  }
+
+  private _isLoopBreakEndAlarmOn(): boolean {
+    return (
+      this.focusModeLocalSettingsService.settings().isLoopBreakEndAlarm &&
+      (this.globalConfigService.sound()?.volume || 0) > 0
+    );
+  }
+
+  private _notifyUser(isHideBar = false, isSkipSound = false): void {
     const soundVolume = this.globalConfigService.sound()?.volume || 0;
 
-    // Play sound if enabled
-    if (soundVolume > 0) {
+    // Play sound if enabled (skipped when the looping break-end alarm owns it)
+    if (!isSkipSound && soundVolume > 0) {
       playSound(SESSION_DONE_SOUND, soundVolume);
     }
 

@@ -13,7 +13,7 @@
  * - Singleton stores (`vector_clock`, `client_id`, `state_cache`,
  *   `import_backup`, archive) are keyed by a known string key.
  * - Two flows require atomic multi-store writes:
- *   `appendWithVectorClockUpdate` (OPS + VECTOR_CLOCK) and
+ *   `appendWithVectorClockOverwrite` (OPS + VECTOR_CLOCK) and
  *   `runDestructiveStateReplacement` (OPS + STATE_CACHE + VECTOR_CLOCK +
  *   CLIENT_ID + archive). Hence the callback-based {@link transaction}: commit
  *   on resolve, roll back on throw — the one shape both IDB auto-commit and
@@ -134,11 +134,23 @@ export interface OpLogTx {
  * Non-transactional methods are convenience single-store operations (each runs
  * in its own implicit transaction); use {@link transaction} whenever two or
  * more writes must be atomic.
+ *
+ * Concurrency: callers may issue operations concurrently — the op-log does
+ * (capture append, archive write and compaction overlap). Transactions are
+ * mutually exclusive per overlapping store scope, and no bare operation may
+ * interleave into an open transaction. IndexedDB provides this natively
+ * (transactions with overlapping scopes are serialized; disjoint-scope ones may
+ * run concurrently); a backend over a single connection with no nested
+ * transactions (SQLite) MUST serialize internally and provides the stronger
+ * whole-connection exclusion via its FIFO queue. Callers therefore never need
+ * to lock around these methods themselves.
  */
 export interface OpLogDbAdapter {
   /**
-   * Open/create the database against {@link OpLogDbSchema}. Idempotent: safe to
-   * call concurrently; implementations dedupe via an in-flight promise.
+   * Open/create the database against {@link OpLogDbSchema}. Idempotent and safe
+   * to call concurrently — implementations either dedupe via an in-flight
+   * promise (IndexedDB) or serialize idempotent `CREATE … IF NOT EXISTS` DDL
+   * (SQLite).
    */
   init(): Promise<void>;
 

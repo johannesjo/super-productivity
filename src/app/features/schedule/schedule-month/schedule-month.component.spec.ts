@@ -1,8 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, Input, signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de';
+import localeSv from '@angular/common/locales/sv';
 import { ScheduleMonthComponent } from './schedule-month.component';
 import { ScheduleService } from '../schedule.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
+import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
+import { ScheduleEvent } from '../schedule.model';
+import { SVEType } from '../schedule.const';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 describe('ScheduleMonthComponent', () => {
   let component: ScheduleMonthComponent;
@@ -21,16 +31,37 @@ describe('ScheduleMonthComponent', () => {
     mockScheduleService.getEventDayStr.and.returnValue(null);
 
     mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', ['-'], {
-      currentLocale: () => 'en-US',
+      currentLocale: () => 'sv',
+      isoTextLocale: () => 'de',
     });
 
+    registerLocaleData(localeSv, 'sv');
+
     await TestBed.configureTestingModule({
-      imports: [ScheduleMonthComponent],
+      imports: [ScheduleMonthComponent, TranslateModule.forRoot()],
       providers: [
         { provide: ScheduleService, useValue: mockScheduleService },
         { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(ScheduleMonthComponent, {
+        remove: { imports: [ScheduleEventComponent] },
+        add: { imports: [ScheduleEventStubComponent] },
+      })
+      .compileComponents();
+
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('en', {
+      F: {
+        SCHEDULE: {
+          MORE_EVENTS: {
+            ONE: '{{count}} more event',
+            OTHER: '{{count}} more events',
+          },
+        },
+      },
+    });
+    translateService.use('en');
 
     fixture = TestBed.createComponent(ScheduleMonthComponent);
     component = fixture.componentInstance;
@@ -141,6 +172,138 @@ describe('ScheduleMonthComponent', () => {
       const middleDay = parseDbDateStr(days[21]);
       expect(result.getFullYear()).toBe(middleDay.getFullYear());
       expect(result.getMonth()).toBe(middleDay.getMonth());
+    });
+  });
+
+  describe('month event drag behavior', () => {
+    it('should render month events with drag disabled', () => {
+      // Arrange
+      const scheduleEvent = createTaskScheduleEvent('task-1', '2026-01-15');
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue([scheduleEvent]);
+
+      // Act
+      fixture.detectChanges();
+
+      // Assert
+      const eventDebugEl = fixture.debugElement.query(
+        By.directive(ScheduleEventStubComponent),
+      );
+      const scheduleEventCmp =
+        eventDebugEl.componentInstance as ScheduleEventStubComponent;
+      expect(scheduleEventCmp.event).toBe(scheduleEvent);
+      expect(scheduleEventCmp.isMonthView).toBe(true);
+      expect(scheduleEventCmp.cdkDragDisabled).toBe(true);
+    });
+
+    it('should show how many events are hidden by the compact mobile layout', () => {
+      const events = [
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+        createTaskScheduleEvent('task-2', '2026-01-15'),
+        createTaskScheduleEvent('task-3', '2026-01-15'),
+      ];
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue(events);
+
+      fixture.detectChanges();
+
+      const moreEvents = fixture.nativeElement.querySelector('.month-more-events');
+      expect(moreEvents).not.toBeNull();
+      const visibleCount = moreEvents.querySelector('.month-more-events-count');
+      const accessibleCount = moreEvents.querySelector('.cdk-visually-hidden');
+      expect(moreEvents.getAttribute('aria-label')).toBeNull();
+      expect(visibleCount.textContent.trim()).toBe('+2');
+      expect(visibleCount.getAttribute('aria-hidden')).toBe('true');
+      expect(accessibleCount.textContent.trim()).toBe('2 more events');
+    });
+
+    it('should announce one hidden event with singular grammar', () => {
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue([
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+        createTaskScheduleEvent('task-2', '2026-01-15'),
+      ]);
+
+      fixture.detectChanges();
+
+      const moreEvents = fixture.nativeElement.querySelector('.month-more-events');
+      expect(
+        moreEvents.querySelector('.month-more-events-count').textContent.trim(),
+      ).toBe('+1');
+      expect(moreEvents.querySelector('.cdk-visually-hidden').textContent.trim()).toBe(
+        '1 more event',
+      );
+    });
+
+    it('should use the current language plural category for hidden events', async () => {
+      const translateService = TestBed.inject(TranslateService);
+      translateService.setTranslation('pl', {
+        F: {
+          SCHEDULE: {
+            MORE_EVENTS: {
+              FEW: 'Jeszcze {{count}} wydarzenia',
+              OTHER: 'Jeszcze {{count}} wydarzeń',
+            },
+          },
+        },
+      });
+      await firstValueFrom(translateService.use('pl'));
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue([
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+        createTaskScheduleEvent('task-2', '2026-01-15'),
+        createTaskScheduleEvent('task-3', '2026-01-15'),
+      ]);
+
+      fixture.detectChanges();
+
+      const accessibleCount = fixture.nativeElement.querySelector(
+        '.month-more-events .cdk-visually-hidden',
+      );
+      expect(accessibleCount.textContent.trim()).toBe('Jeszcze 2 wydarzenia');
+    });
+
+    it('should make the hidden-event count visible at the mobile breakpoint', () => {
+      const findMobileVisibilityRule = (
+        rules: CSSRuleList,
+        isInsideMobileQuery = false,
+      ): CSSStyleRule | undefined => {
+        for (const rule of Array.from(rules)) {
+          if (rule instanceof CSSMediaRule) {
+            const isMobileQuery =
+              isInsideMobileQuery || rule.conditionText.includes('max-width: 599px');
+            const match = findMobileVisibilityRule(rule.cssRules, isMobileQuery);
+            if (match) {
+              return match;
+            }
+          } else if (
+            isInsideMobileQuery &&
+            rule instanceof CSSStyleRule &&
+            rule.selectorText.includes('.month-more-events') &&
+            rule.style.display === 'block'
+          ) {
+            return rule;
+          }
+        }
+        return undefined;
+      };
+
+      const visibilityRule = Array.from(document.styleSheets)
+        .map((styleSheet) => findMobileVisibilityRule(styleSheet.cssRules))
+        .find((rule) => rule !== undefined);
+
+      expect(visibilityRule).toBeDefined();
+    });
+
+    it('should not show a hidden-event count when every event fits', () => {
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+      mockScheduleService.getEventsForDay.and.returnValue([
+        createTaskScheduleEvent('task-1', '2026-01-15'),
+      ]);
+
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.month-more-events')).toBeNull();
     });
   });
 
@@ -267,7 +430,7 @@ describe('ScheduleMonthComponent', () => {
 
       // Assert
       // Sunday should be first
-      expect(headers[0]).toContain('Sun');
+      expect(headers[0]).toBe('So');
     });
 
     it('should start with Monday when firstDayOfWeek is 1', () => {
@@ -280,7 +443,7 @@ describe('ScheduleMonthComponent', () => {
 
       // Assert
       // Monday should be first
-      expect(headers[0]).toContain('Mon');
+      expect(headers[0]).toBe('Mo');
     });
 
     it('should cycle correctly for all days of week', () => {
@@ -389,4 +552,123 @@ describe('ScheduleMonthComponent', () => {
       expect(component.firstDayOfWeek()).toBe(1);
     });
   });
+});
+
+/**
+ * SPAP-26: the month grid previously formatted up to 42 day-number cells with a
+ * per-cell impure `localeDate` pipe on every change-detection cycle. It now uses
+ * a single `dayNumberByDay` computed keyed on (daysToShow + currentLocale), so
+ * no date formatting runs during CD. These tests verify that computed builder in
+ * isolation: correct labels + recompute-only-when-days/locale-change. This is the
+ * "isolated computed" verification of the 42->0 win (documented in the report).
+ */
+describe('ScheduleMonthComponent dayNumberByDay (SPAP-26)', () => {
+  const localeSig = signal<string>('en-US');
+
+  beforeAll(() => {
+    // DatePipe/formatDate needs locale data registered for non-default locales.
+    registerLocaleData(localeDe, 'de-DE');
+  });
+
+  beforeEach(async () => {
+    localeSig.set('en-US');
+    const scheduleServiceStub = jasmine.createSpyObj('ScheduleService', [
+      'getDayClass',
+      'getEventsForDay',
+      'getEventDayStr',
+    ]);
+
+    await TestBed.configureTestingModule({
+      imports: [ScheduleMonthComponent, TranslateModule.forRoot()],
+      providers: [
+        { provide: ScheduleService, useValue: scheduleServiceStub },
+        {
+          provide: DateTimeFormatService,
+          useValue: { currentLocale: localeSig, isoTextLocale: () => null },
+        },
+      ],
+    })
+      .overrideComponent(ScheduleMonthComponent, {
+        remove: { imports: [ScheduleEventComponent] },
+        add: { imports: [ScheduleEventStubComponent] },
+      })
+      .compileComponents();
+  });
+
+  const create = (): {
+    comp: ScheduleMonthComponent;
+    setDays: (days: string[]) => void;
+  } => {
+    const fixture = TestBed.createComponent(ScheduleMonthComponent);
+    return {
+      comp: fixture.componentInstance,
+      setDays: (days: string[]) => fixture.componentRef.setInput('daysToShow', days),
+    };
+  };
+
+  it('produces the correct day-of-month label for each visible day', () => {
+    const { comp, setDays } = create();
+    setDays(['2024-01-05', '2024-01-06', '2024-02-28']);
+
+    const map = comp.dayNumberByDay();
+    expect(map['2024-01-05']).toBe('5');
+    expect(map['2024-01-06']).toBe('6');
+    expect(map['2024-02-28']).toBe('28');
+  });
+
+  it('memoizes: re-reading without a dependency change does not recompute', () => {
+    const { comp, setDays } = create();
+    setDays(['2024-01-05']);
+
+    const first = comp.dayNumberByDay();
+    const second = comp.dayNumberByDay();
+    expect(second).toBe(first); // same object reference => not recomputed
+  });
+
+  it('recomputes when the days input changes', () => {
+    const { comp, setDays } = create();
+    setDays(['2024-01-05']);
+    const first = comp.dayNumberByDay();
+
+    setDays(['2024-01-05', '2024-01-06']);
+    const second = comp.dayNumberByDay();
+
+    expect(second).not.toBe(first);
+    expect(second['2024-01-06']).toBe('6');
+  });
+
+  it('recomputes when the locale changes (reactivity preserved)', () => {
+    const { comp, setDays } = create();
+    setDays(['2024-01-05']);
+    const first = comp.dayNumberByDay();
+
+    localeSig.set('de-DE');
+    const second = comp.dayNumberByDay();
+
+    expect(second).not.toBe(first); // locale dependency changed => recomputed
+    expect(second['2024-01-05']).toBe('5');
+  });
+});
+
+@Component({
+  selector: 'schedule-event',
+  standalone: true,
+  template: '',
+})
+class ScheduleEventStubComponent {
+  @Input() event?: ScheduleEvent;
+  @Input() isMonthView?: boolean;
+  @Input() cdkDragDisabled?: boolean;
+}
+
+const createTaskScheduleEvent = (id: string, plannedForDay: string): ScheduleEvent => ({
+  id,
+  type: SVEType.TaskPlannedForDay,
+  style: '',
+  startHours: 10,
+  timeLeftInHours: 1,
+  data: {
+    id,
+  } as ScheduleEvent['data'],
+  plannedForDay,
 });

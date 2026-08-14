@@ -287,6 +287,15 @@ finish-day-btn,
   padding: var(--s-half);
 }
 
+// Read-only calendar event outlines below the Later Today task list.
+.later-today-cal-events {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-half);
+  margin-top: var(--s);
+  padding: 0 var(--s-half);
+}
+
 .no-section,
 .section-container {
   margin-bottom: var(--s3);

@@ -25,7 +25,7 @@ import { throttle } from '../../util/decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { merge, of, timer, interval, firstValueFrom } from 'rxjs';
+import { merge, of, timer, interval, firstValueFrom, Observable } from 'rxjs';
 import { TaskService } from '../tasks/task.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from 'src/app/t.const';
@@ -77,12 +77,23 @@ export class ReminderModule {
         delay(1000),
         concatMap(() =>
           this._reminderService.onRemindersActive$.pipe(
+            // Drop reminders the user dismissed without acting on (backdrop /
+            // Escape / Android back): they are in a short UI cooldown so the
+            // worker (~10s tick) cannot immediately re-open the modal and freeze
+            // the app. The cooldown is in-memory only — a cold start re-nudges.
+            map((reminders) =>
+              (reminders || []).filter((r) => {
+                const remindAt = r.reminderData?.remindAt;
+                return (
+                  remindAt == null ||
+                  !this._reminderService.isReminderUiSuppressed(r.id, remindAt)
+                );
+              }),
+            ),
             // NOTE: we simply filter for open dialogs, as reminders are re-queried quite often
             filter(
               (reminders) =>
-                this._matDialog.openDialogs.length === 0 &&
-                !!reminders &&
-                reminders.length > 0,
+                this._matDialog.openDialogs.length === 0 && reminders.length > 0,
             ),
             // don't show reminders while add task bar is open
             switchMap((reminders: TaskWithReminderData[]) => {
@@ -188,6 +199,9 @@ export class ReminderModule {
         } else {
           this._matDialog.open(DialogViewTaskRemindersComponent, {
             restoreFocus: true,
+            // Backdrop click / Escape closes the dialog. Deadline reminders are
+            // cleared on destroy; scheduled reminders stay active and the worker
+            // re-shows them until the user acts on them.
             data: {
               reminders,
             },
@@ -237,10 +251,44 @@ export class ReminderModule {
       Log.log('ReminderModule: iOS notification actions initialized');
     });
 
-    // Handle notification action events
-    this._capacitorReminderService.action$.subscribe((event: NotificationActionEvent) => {
-      this._handleIOSNotificationAction(event);
-    });
+    // Handle notification action events (gated on the initial data load — see
+    // _handleAfterDataLoaded / #8551).
+    this._handleAfterDataLoaded(
+      this._capacitorReminderService.action$,
+      (event: NotificationActionEvent) => this._handleIOSNotificationAction(event),
+    );
+  }
+
+  /**
+   * Subscribe to a notification-action stream, but defer handling of each event
+   * until the initial data load (and initial sync, mirroring the reminder dialog
+   * gate) has completed.
+   *
+   * On cold start these events are delivered before the NgRx store is hydrated
+   * from persistence. Reading the task that early makes getByIdOnce$() return
+   * undefined, which the done/tap handlers treat as "task already done" and
+   * silently drop the action — so a task marked done from the notification
+   * reappears as not-done on open (#8551).
+   *
+   * We subscribe immediately (rather than gating the subscription itself) so no
+   * event from a non-buffering Subject — e.g. the iOS action$ — is missed while
+   * we wait. concatMap preserves event order and, once data is loaded, lets each
+   * event through without further delay.
+   */
+  private _handleAfterDataLoaded<T>(
+    stream$: Observable<T>,
+    handler: (val: T) => void,
+  ): void {
+    stream$
+      .pipe(
+        concatMap((val) =>
+          this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
+            first(),
+            map(() => val),
+          ),
+        ),
+      )
+      .subscribe(handler);
   }
 
   /**
@@ -319,15 +367,19 @@ export class ReminderModule {
       return;
     }
 
-    androidInterface.onReminderTap$.subscribe((taskId: string) => {
+    // Defer handling until the store is hydrated — see _handleAfterDataLoaded /
+    // #8551. On cold start these queued actions are replayed from ReplaySubjects
+    // the moment we subscribe, which is before persistence has loaded.
+    this._handleAfterDataLoaded(androidInterface.onReminderTap$, (taskId: string) => {
       this._handleTapAction(taskId);
     });
 
-    androidInterface.onReminderDone$.subscribe((taskId: string) => {
+    this._handleAfterDataLoaded(androidInterface.onReminderDone$, (taskId: string) => {
       this._handleDoneAction(taskId);
     });
 
-    androidInterface.onReminderSnooze$.subscribe(
+    this._handleAfterDataLoaded(
+      androidInterface.onReminderSnooze$,
       (event: { taskId: string; newRemindAt: number }) => {
         this._handleSnoozeAction(event.taskId, event.newRemindAt);
       },

@@ -4,8 +4,19 @@
     <meta charset="utf-8" />
     <title>Super Productivity</title>
 
+    <!--
+      interactive-widget=resizes-content makes the virtual keyboard shrink the
+      *layout* viewport on mobile web (Chrome/Android) instead of only the
+      visual viewport (the default `resizes-visual`). This mirrors what the
+      native builds already do — Android `adjustResize` and iOS Keyboard
+      `resize: 'native'` both resize the WebView — so the fixed global add-task
+      bar (position: fixed; bottom) re-anchors above the keyboard on the web app
+      the same way it does natively. Ignored where it doesn't apply: native
+      WebViews (keyboard handled natively), iOS Safari (unsupported → falls back
+      to the JS `--keyboard-height` visualViewport tracking), and desktop.
+    -->
     <meta
-      content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
       name="viewport"
     />
     <link
@@ -71,10 +82,19 @@
       content="assets/icons/browserconfig.xml"
       name="msapplication-config"
     />
-    <!-- Enable all requests and inline styles for painless development.
-TODO configure more restrictive Content-Security-Policy
-@see https://content-security-policy.com/
-@see https://www.html5rocks.com/en/tutorials/security/content-security-policy/ -->
+    <!-- Content-Security-Policy. See GHSA-78rv-m663-4fph.
+      'unsafe-eval' and 'unsafe-inline' currently CANNOT be dropped:
+        - the plugin runtime runs plugin code via `new Function`
+          (src/app/plugins/plugin-runner.ts) → needs 'unsafe-eval';
+        - the inline browser-compat bootstrap <script> below also uses
+          `new Function` and is inline → needs both.
+      The packaged app loads the renderer over file:// (electron/main-window.ts),
+      where 'self' is an opaque origin, so tightening script-src to 'self' is
+      unreliable. A real lockdown (dropping unsafe-inline/unsafe-eval) needs:
+      a registered app:// scheme instead of file://, plugin execution moved into
+      a sandboxed iframe/worker, and the inline bootstrap externalized.
+      object-src 'none' is safe to set now (the app embeds no <object>/<embed>).
+      @see https://content-security-policy.com/ -->
     <meta
       content="default-src * uploaded:;
           connect-src * data: blob: filesystem: uploaded:;
@@ -82,6 +102,7 @@ TODO configure more restrictive Content-Security-Policy
           font-src * data:;
           img-src * data: blob: filesystem: file:;
           style-src * 'unsafe-inline' ;
+          object-src 'none';
           script-src * 'self' 'unsafe-inline' 'unsafe-eval' blob:"
       http-equiv="Content-Security-Policy"
     />

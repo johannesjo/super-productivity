@@ -60,7 +60,10 @@ export class LanguageService {
     this._isRTL.set(this._checkIsRTL(lng));
     this._translateService.use(lng);
 
-    this._dateTimeFormatService.setDateAdapterLocale(lng);
+    // Register the UI language for ISO text labels and as the locale fallback.
+    // DateTimeFormatService owns the adapter locale so an explicit date/time
+    // override keeps winning (#8565).
+    this._dateTimeFormatService.setUiLanguage(lng);
   }
 
   private _checkIsRTL(lng: LanguageCode): boolean {

@@ -16,10 +16,14 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
 import { AddTaskInlineComponent } from '../../planner/add-task-inline/add-task-inline.component';
 import { selectUnarchivedProjects } from '../../project/store/project.selectors';
-import { selectAllTasksWithoutHiddenProjects } from '../../tasks/store/task.selectors';
+import {
+  selectAllTasksInActiveProjects,
+  selectTaskById,
+} from '../../tasks/store/task.selectors';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { signal } from '@angular/core';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 describe('BoardPanelComponent - Backlog Feature', () => {
   let component: BoardPanelComponent;
@@ -37,7 +41,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
     includedTagIds: [],
     excludedTagIds: [],
     isParentTasksOnly: false,
-    projectId: undefined,
+    projectIds: [''],
   };
 
   const mockTasks: TaskCopy[] = [
@@ -81,7 +85,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
       select: (selectorFn: any) => {
         if (selectorFn === selectUnarchivedProjects) {
           return of(mockProjects);
-        } else if (selectorFn === selectAllTasksWithoutHiddenProjects) {
+        } else if (selectorFn === selectAllTasksInActiveProjects) {
           return of(mockTasks);
         }
         return of([]);
@@ -173,6 +177,7 @@ describe('BoardPanelComponent - Hidden Project Backlog', () => {
   let actions$: ReplaySubject<any>;
 
   const hiddenProjectBacklogTaskId = 'hidden-backlog-task';
+  const hiddenProjectRegularTaskId = 'hidden-regular-task';
   const regularTaskId = 'regular-task';
 
   const mockPanelCfg: Partial<BoardPanelCfg> = {
@@ -183,13 +188,26 @@ describe('BoardPanelComponent - Hidden Project Backlog', () => {
     includedTagIds: [],
     excludedTagIds: [],
     isParentTasksOnly: false,
-    projectId: undefined,
+    projectIds: [''],
   };
 
   const mockTasks: TaskCopy[] = [
     {
       id: hiddenProjectBacklogTaskId,
       title: 'Task from hidden project backlog',
+      projectId: 'hidden-project',
+      timeSpentOnDay: {},
+      attachments: [],
+      timeEstimate: 0,
+      timeSpent: 0,
+      isDone: false,
+      tagIds: ['important-tag'],
+      created: Date.now(),
+      subTaskIds: [],
+    } as TaskCopy,
+    {
+      id: hiddenProjectRegularTaskId,
+      title: 'Regular task from hidden project',
       projectId: 'hidden-project',
       timeSpentOnDay: {},
       attachments: [],
@@ -232,7 +250,7 @@ describe('BoardPanelComponent - Hidden Project Backlog', () => {
       select: (selectorFn: any) => {
         if (selectorFn === selectUnarchivedProjects) {
           return of(mockProjects);
-        } else if (selectorFn === selectAllTasksWithoutHiddenProjects) {
+        } else if (selectorFn === selectAllTasksInActiveProjects) {
           return of(mockTasks);
         }
         return of([]);
@@ -271,7 +289,7 @@ describe('BoardPanelComponent - Hidden Project Backlog', () => {
     fixture.detectChanges();
   });
 
-  it('should exclude backlog tasks from hidden projects when backlogState is NoBacklog', () => {
+  it('should include regular tasks from hidden projects when backlogState is NoBacklog', () => {
     fixture.componentRef.setInput('panelCfg', {
       ...mockPanelCfg,
       backlogState: BoardPanelCfgTaskTypeFilter.NoBacklog,
@@ -279,8 +297,10 @@ describe('BoardPanelComponent - Hidden Project Backlog', () => {
     fixture.detectChanges();
 
     const tasks = component.tasks();
-    expect(tasks.length).toBe(1);
-    expect(tasks[0].id).toBe(regularTaskId);
+    expect(tasks.map((task) => task.id)).toEqual([
+      hiddenProjectRegularTaskId,
+      regularTaskId,
+    ]);
     expect(tasks.find((t) => t.id === hiddenProjectBacklogTaskId)).toBeFalsy();
   });
 
@@ -324,7 +344,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
       select: (selectorFn: any) => {
         if (selectorFn === selectUnarchivedProjects)
           return of([{ id: 'p1', backlogTaskIds: [] }]);
-        if (selectorFn === selectAllTasksWithoutHiddenProjects) return of(tasks);
+        if (selectorFn === selectAllTasksInActiveProjects) return of(tasks);
         return of([]);
       },
       dispatch: jasmine.createSpy('dispatch'),
@@ -374,6 +394,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -396,6 +417,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -421,6 +443,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -442,10 +465,76 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
       expect(component.tasks().map((t) => t.id)).toEqual(['some']);
+    });
+  });
+
+  describe('multi-project filtering', () => {
+    it('should include tasks matching any of the specified projectIds', async () => {
+      await setup([
+        mkTask({ id: 'p1-task', projectId: 'p1' }),
+        mkTask({ id: 'p2-task', projectId: 'p2' }),
+        mkTask({ id: 'other-task', projectId: 'other' }),
+      ]);
+      fixture.componentRef.setInput('panelCfg', {
+        id: 'p',
+        title: 'P',
+        taskIds: [],
+        includedTagIds: [],
+        excludedTagIds: [],
+        taskDoneState: 1,
+        scheduledState: 1,
+        isParentTasksOnly: false,
+        projectIds: ['p1', 'p2'],
+      } as BoardPanelCfg);
+      fixture.detectChanges();
+
+      const ids = component.tasks().map((t) => t.id);
+      expect(ids).toContain('p1-task');
+      expect(ids).toContain('p2-task');
+      expect(ids).not.toContain('other-task');
+    });
+  });
+
+  describe('additionalTaskFields - projectId assignment', () => {
+    it('assigns the first specific projectId when only specific projects are selected', async () => {
+      await setup([]);
+      fixture.componentRef.setInput('panelCfg', {
+        id: 'p',
+        title: 'P',
+        taskIds: [],
+        includedTagIds: [],
+        excludedTagIds: [],
+        taskDoneState: 1,
+        scheduledState: 1,
+        isParentTasksOnly: false,
+        projectIds: ['p1', 'p2'],
+      } as BoardPanelCfg);
+      fixture.detectChanges();
+
+      expect(component.additionalTaskFields().projectId).toBe('p1');
+    });
+
+    it('does NOT assign a projectId when only "All Projects" ("") is selected', async () => {
+      await setup([]);
+      fixture.componentRef.setInput('panelCfg', {
+        id: 'p',
+        title: 'P',
+        taskIds: [],
+        includedTagIds: [],
+        excludedTagIds: [],
+        taskDoneState: 1,
+        scheduledState: 1,
+        isParentTasksOnly: false,
+        projectIds: [''],
+      } as BoardPanelCfg);
+      fixture.detectChanges();
+
+      expect(component.additionalTaskFields().projectId).toBeUndefined();
     });
   });
 
@@ -465,6 +554,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
         sortBy: 'title',
       } as BoardPanelCfg);
       fixture.detectChanges();
@@ -487,6 +577,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
         sortBy: 'timeEstimate',
         sortDir: 'desc',
       } as BoardPanelCfg);
@@ -508,6 +599,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -525,6 +617,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
         sortBy: 'title',
       } as BoardPanelCfg);
       fixture.detectChanges();
@@ -545,6 +638,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -563,6 +657,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -582,6 +677,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -600,6 +696,7 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
         taskDoneState: 1,
         scheduledState: 1,
         isParentTasksOnly: false,
+        projectIds: [''],
       } as BoardPanelCfg);
       fixture.detectChanges();
 
@@ -658,10 +755,12 @@ describe('BoardPanelComponent - drop()', () => {
     updateTagsSpy = jasmine.createSpy('updateTags');
 
     const storeMock = {
-      select: (selectorFn: any) => {
+      select: (selectorFn: any, props?: { id: string }) => {
         if (selectorFn === selectUnarchivedProjects)
           return of([{ id: 'p1', backlogTaskIds: [] }]);
-        if (selectorFn === selectAllTasksWithoutHiddenProjects) return of(tasks);
+        if (selectorFn === selectAllTasksInActiveProjects) return of(tasks);
+        if (selectorFn === selectTaskById)
+          return of(tasks.find((task) => task.id === props?.id));
         return of([]);
       },
       pipe: () => ({ toPromise: () => Promise.resolve(undefined) }),
@@ -715,6 +814,7 @@ describe('BoardPanelComponent - drop()', () => {
       taskDoneState: 1,
       scheduledState: 1,
       isParentTasksOnly: false,
+      projectIds: [''],
       sortBy: 'title',
     } as BoardPanelCfg;
     fixture.componentRef.setInput('panelCfg', panelCfg);
@@ -749,6 +849,7 @@ describe('BoardPanelComponent - drop()', () => {
       taskDoneState: 1,
       scheduledState: 1,
       isParentTasksOnly: false,
+      projectIds: [''],
     } as BoardPanelCfg;
     fixture.componentRef.setInput('panelCfg', panelCfg);
     fixture.detectChanges();
@@ -778,6 +879,7 @@ describe('BoardPanelComponent - drop()', () => {
       taskDoneState: 1,
       scheduledState: 1,
       isParentTasksOnly: false,
+      projectIds: [''],
     } as BoardPanelCfg;
     fixture.componentRef.setInput('panelCfg', panelCfg);
     fixture.detectChanges();
@@ -792,5 +894,99 @@ describe('BoardPanelComponent - drop()', () => {
     const [taskArg, tagsArg] = updateTagsSpy.calls.mostRecent().args;
     expect(taskArg).toBe(task);
     expect(tagsArg).toEqual(['other', 'need']);
+  });
+
+  // TODAY_TAG is selectable in the board tag picker (isShowMyDayTag), but it is
+  // virtual — writing it to task.tagIds violates ARCHITECTURE-DECISIONS #2 and
+  // syncs the corruption to every device.
+  it('cross-panel drop never writes the virtual TODAY_TAG into the task', async () => {
+    // Arrange
+    await setup([]);
+    const panelCfg = {
+      id: 'target',
+      title: 'Target',
+      taskIds: [],
+      includedTagIds: [TODAY_TAG.id, 'need'],
+      excludedTagIds: [],
+      taskDoneState: 1,
+      scheduledState: 1,
+      isParentTasksOnly: false,
+      projectIds: [''],
+    } as BoardPanelCfg;
+    fixture.componentRef.setInput('panelCfg', panelCfg);
+    fixture.detectChanges();
+
+    const task = mkTask({ id: 't1', tagIds: ['other'] });
+
+    // Act
+    await component.drop(mkDropEvent({ panelCfg, task }));
+
+    // Assert — only the real required tag is applied
+    expect(updateTagsSpy).toHaveBeenCalledTimes(1);
+    const [, tagsArg] = updateTagsSpy.calls.mostRecent().args;
+    expect(tagsArg).toEqual(['other', 'need']);
+  });
+
+  // The AND-exclude list contains My Day, which `doesTaskMatchPanel` can never
+  // see on a task — so that exclusion is already inert and no real tag ('x'/'y')
+  // may be stripped to satisfy it. Only the legacy TODAY_TAG on the task itself
+  // and the missing required tag are rewritten.
+  it('adds an existing task by rewriting real tags without updating board order', async () => {
+    const task = mkTask({
+      id: 't1',
+      tagIds: [TODAY_TAG.id, 'x', 'y', 'keep'],
+    });
+    await setup([task]);
+    const panelCfg = {
+      id: 'target',
+      title: 'Target',
+      taskIds: [],
+      includedTagIds: [TODAY_TAG.id, 'need'],
+      includedTagsMatch: 'any',
+      excludedTagIds: [TODAY_TAG.id, 'x', 'y'],
+      excludedTagsMatch: 'all',
+      taskDoneState: 1,
+      scheduledState: 3,
+      isParentTasksOnly: false,
+      projectIds: [''],
+    } as BoardPanelCfg;
+    fixture.componentRef.setInput('panelCfg', panelCfg);
+    fixture.detectChanges();
+
+    await component.afterTaskAdd({
+      taskId: task.id,
+      isAddToBottom: false,
+      isNewTask: false,
+    });
+
+    expect(updateTagsSpy).toHaveBeenCalledOnceWith(task, ['x', 'y', 'keep', 'need']);
+    expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('never writes the virtual TODAY_TAG into a task when the column requires My Day', async () => {
+    const task = mkTask({ id: 't1', tagIds: ['keep'] });
+    await setup([task]);
+    const panelCfg = {
+      id: 'target',
+      title: 'Target',
+      taskIds: [],
+      includedTagIds: [TODAY_TAG.id, 'need'],
+      includedTagsMatch: 'all',
+      excludedTagIds: [],
+      taskDoneState: 1,
+      scheduledState: 3,
+      isParentTasksOnly: false,
+      projectIds: [''],
+    } as BoardPanelCfg;
+    fixture.componentRef.setInput('panelCfg', panelCfg);
+    fixture.detectChanges();
+
+    await component.afterTaskAdd({
+      taskId: task.id,
+      isAddToBottom: false,
+      isNewTask: false,
+    });
+
+    expect(updateTagsSpy).toHaveBeenCalledOnceWith(task, ['keep', 'need']);
   });
 });

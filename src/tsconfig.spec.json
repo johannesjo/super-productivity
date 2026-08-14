@@ -24,9 +24,13 @@
         "packages/sync-providers/src/provider-types.ts"
       ],
       "@sp/sync-providers/log": ["packages/sync-providers/src/log.ts"],
-      "@sp/sync-providers/onedrive": ["packages/sync-providers/src/onedrive.ts"]
+      "@sp/sync-providers/onedrive": ["packages/sync-providers/src/onedrive.ts"],
+      "@sp/keyboard-config": ["electron/shared-with-frontend/keyboard-config.model.ts"]
     }
   },
   "files": ["test.ts", "polyfills.ts"],
-  "include": ["**/*.spec.ts", "**/*.d.ts"]
+  // `**/*.benchmark.ts` files are part of the spec TS program so they compile
+  // (and are type-checked in CI), but they are NOT auto-run: the Karma builder's
+  // default `include` is `**/*.spec.ts`, so benchmarks need to be run manually.
+  "include": ["**/*.spec.ts", "**/*.benchmark.ts", "**/*.d.ts"]
 }

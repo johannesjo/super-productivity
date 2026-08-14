@@ -71,6 +71,109 @@ describe('CaldavClientService._getParentRelatedTo', () => {
   });
 });
 
+// ─── _mapTask – completion normalization ──────────────────────────────────────
+
+// Regression tests parsing raw VTODO data through the real ical.js: RFC 5545
+// lists COMPLETED, STATUS, and PERCENT-COMPLETE as independent optional
+// properties, and servers may send any one of them alone to mark a todo done.
+describe('CaldavClientService._mapTask – completion normalization', () => {
+  const mapTask = (vtodoLines: string[]): Promise<CaldavIssue> =>
+    (CaldavClientService as any)._mapTask({
+      url: 'https://cal.example.com/task.ics',
+      etag: '"etag-1"',
+      data: [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Test//EN',
+        'BEGIN:VTODO',
+        'UID:todo-raw-1',
+        'SUMMARY:Raw todo',
+        ...vtodoLines,
+        'END:VTODO',
+        'END:VCALENDAR',
+      ].join('\r\n'),
+    });
+
+  it('should parse a VTODO without completion signals as open', async () => {
+    const issue = await mapTask([]);
+    expect(issue.completed).toBeFalse();
+  });
+
+  it('should treat a COMPLETED timestamp as completed', async () => {
+    const issue = await mapTask(['COMPLETED:20260401T120000Z']);
+    expect(issue.completed).toBeTrue();
+  });
+
+  it('should treat STATUS:COMPLETED without a COMPLETED timestamp as completed', async () => {
+    const issue = await mapTask(['STATUS:COMPLETED']);
+    expect(issue.completed).toBeTrue();
+  });
+
+  it('should treat PERCENT-COMPLETE:100 without STATUS or COMPLETED as completed', async () => {
+    const issue = await mapTask(['PERCENT-COMPLETE:100']);
+    expect(issue.completed).toBeTrue();
+  });
+
+  it('should keep a partially complete in-process VTODO open', async () => {
+    const issue = await mapTask(['PERCENT-COMPLETE:50', 'STATUS:IN-PROCESS']);
+    expect(issue.completed).toBeFalse();
+  });
+});
+
+// ─── updateFields$ – completion push dirty-check ──────────────────────────────
+
+describe('CaldavClientService.updateFields$ – completion push', () => {
+  let svc: CaldavClientService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        CaldavClientService,
+        {
+          provide: SnackService,
+          useValue: jasmine.createSpyObj('SnackService', ['open']),
+        },
+      ],
+    });
+    svc = TestBed.inject(CaldavClientService);
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  // The push dirty-check must use the same completion normalization as the
+  // poll mapping: with the old COMPLETED-timestamp-only check, reopening a
+  // STATUS-only completed todo compared false !== false and never wrote to
+  // the server, so the next poll immediately re-completed the local task.
+  it('should clear STATUS:COMPLETED when reopening a todo completed via STATUS only', async () => {
+    const davTask = {
+      data: [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Test//EN',
+        'BEGIN:VTODO',
+        'UID:todo-push-1',
+        'SUMMARY:Status only',
+        'STATUS:COMPLETED',
+        'END:VTODO',
+        'END:VCALENDAR',
+      ].join('\r\n'),
+      url: 'https://cal.example.com/todo-push-1.ics',
+      etag: '"etag-1"',
+      update: jasmine.createSpy('update').and.resolveTo(undefined),
+    };
+    spyOn(svc as any, '_getCalendar').and.resolveTo({ readOnly: false });
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([davTask]);
+
+    await firstValueFrom(
+      svc.updateFields$(MOCK_CFG, 'todo-push-1', { completed: false }),
+    );
+
+    expect(davTask.update).toHaveBeenCalled();
+    expect(davTask.data).toContain('STATUS:NEEDS-ACTION');
+    expect(davTask.data).not.toContain('STATUS:COMPLETED');
+  });
+});
+
 // ─── _getXhrProvider / _getAndroidXhrProvider ─────────────────────────────────
 
 const MOCK_CFG: CaldavCfg = {
@@ -91,6 +194,61 @@ const makeIssue = (id: string): CaldavIssue => ({
   summary: id,
   labels: [],
   etag_hash: 1,
+});
+
+interface TestCalendarLike {
+  displayname?: string;
+  url: string;
+  calendarQuery: jasmine.Spy;
+}
+
+interface TestCalendarHomeLike {
+  displayname?: string;
+  url: string;
+  findAllCalendars: jasmine.Spy<() => Promise<TestCalendarLike[]>>;
+}
+
+interface TestClientCacheLike {
+  client: { calendarHomes: TestCalendarHomeLike[] };
+  calendars: Map<string, TestCalendarLike>;
+}
+
+interface TestGetClientTarget {
+  _get_client: (cfg: CaldavCfg) => Promise<TestClientCacheLike>;
+}
+
+interface TestGetCalendarTarget {
+  _getCalendar: (cfg: CaldavCfg) => Promise<TestCalendarLike>;
+}
+
+const makeCalendar = (
+  url: string,
+  displayname?: string,
+  canQuery = true,
+): TestCalendarLike => ({
+  url,
+  displayname,
+  calendarQuery: jasmine.createSpy('calendarQuery').and.resolveTo(canQuery ? [] : null),
+});
+
+const makeCalendarHome = (
+  url: string,
+  calendars: TestCalendarLike[],
+  displayname?: string,
+): TestCalendarHomeLike => ({
+  url,
+  displayname,
+  findAllCalendars: jasmine.createSpy('findAllCalendars').and.resolveTo(calendars),
+});
+
+const makeFailingCalendarHome = (
+  url: string,
+  error: Error,
+  displayname?: string,
+): TestCalendarHomeLike => ({
+  url,
+  displayname,
+  findAllCalendars: jasmine.createSpy('findAllCalendars').and.rejectWith(error),
 });
 
 /** Subclass that makes platform detection and native HTTP injectable for tests. */
@@ -158,6 +316,20 @@ describe('CaldavClientService._getXhrProvider – web platform', () => {
     expect(headers['Authorization']).toBe(EXPECTED_AUTH);
     expect(headers['X-Requested-With']).toBe('SuperProductivity');
   });
+
+  it('returns an empty DAV response header when the server does not expose it', () => {
+    spyOn(XMLHttpRequest.prototype, 'getResponseHeader').and.returnValue(null);
+    const factory: () => XMLHttpRequest = (svc as any)._getXhrProvider(MOCK_CFG);
+    const xhr = factory();
+    expect(xhr.getResponseHeader('DAV')).toBe('');
+  });
+
+  it('preserves non-DAV missing response headers as null', () => {
+    spyOn(XMLHttpRequest.prototype, 'getResponseHeader').and.returnValue(null);
+    const factory: () => XMLHttpRequest = (svc as any)._getXhrProvider(MOCK_CFG);
+    const xhr = factory();
+    expect(xhr.getResponseHeader('content-type')).toBeNull();
+  });
 });
 
 describe('CaldavClientService.getByIds$', () => {
@@ -188,6 +360,184 @@ describe('CaldavClientService.getByIds$', () => {
     const result = await firstValueFrom(svc.getByIds$(['task-10', 'other'], MOCK_CFG));
 
     expect(result.map((issue) => issue.id)).toEqual(['task-10', 'other']);
+  });
+});
+
+describe('CaldavClientService._getCalendar', () => {
+  let svc: TestableCaldavClientService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: CaldavClientService, useClass: TestableCaldavClientService },
+        {
+          provide: SnackService,
+          useValue: jasmine.createSpyObj('SnackService', ['open']),
+        },
+      ],
+    });
+    svc = TestBed.inject(CaldavClientService) as TestableCaldavClientService;
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('finds a calendar from later calendar homes when the first home has no match', async () => {
+    const laterCalendar = makeCalendar('/dav/projects/12/', 'Inbox');
+    const firstHome = makeCalendarHome('/dav/calendars/', [
+      makeCalendar('/dav/calendars/archive/', 'Archive'),
+    ]);
+    const secondHome = makeCalendarHome('/dav/projects/', [laterCalendar]);
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [firstHome, secondHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    const calendar = await (svc as unknown as TestGetCalendarTarget)._getCalendar({
+      ...MOCK_CFG,
+      resourceName: 'Inbox',
+    });
+
+    expect(calendar).toBe(laterCalendar);
+    expect(firstHome.findAllCalendars).toHaveBeenCalledTimes(1);
+    expect(secondHome.findAllCalendars).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves displayname precedence over matching URL segments', async () => {
+    const urlSegmentMatch = makeCalendar('/dav/projects/Personal/', 'Work');
+    const displayNameMatch = makeCalendar('/dav/projects/b123/', 'Personal');
+    const projectsHome = makeCalendarHome('/dav/projects/', [
+      urlSegmentMatch,
+      displayNameMatch,
+    ]);
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [projectsHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    const calendar = await (svc as unknown as TestGetCalendarTarget)._getCalendar({
+      ...MOCK_CFG,
+      resourceName: 'Personal',
+    });
+
+    expect(calendar).toBe(displayNameMatch);
+  });
+
+  it('does not select the Vikunja projects home when resourceName matches the home', async () => {
+    const projectsHomeCollection = makeCalendar('/dav/projects/', 'projects', false);
+    const projectsHome = makeCalendarHome('/dav/projects/', [projectsHomeCollection]);
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [projectsHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    await expectAsync(
+      (svc as unknown as TestGetCalendarTarget)._getCalendar({
+        ...MOCK_CFG,
+        caldavUrl: 'http://192.168.0.5:3456/dav/principals/loki/',
+        resourceName: 'projects',
+        username: 'loki',
+      }),
+    ).toBeRejectedWithError('CALENDAR NOT FOUND: projects');
+  });
+
+  it('does not silently map a home resource to the only concrete project', async () => {
+    const inboxProject = makeCalendar('/dav/projects/12/', 'Inbox');
+    const projectsHome = makeCalendarHome('/dav/projects/', [inboxProject]);
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [projectsHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    await expectAsync(
+      (svc as unknown as TestGetCalendarTarget)._getCalendar({
+        ...MOCK_CFG,
+        caldavUrl: 'http://192.168.0.5:3456/dav/principals/loki/',
+        resourceName: 'projects',
+        username: 'loki',
+      }),
+    ).toBeRejectedWithError('CALENDAR NOT FOUND: projects');
+  });
+
+  it('selects a concrete Vikunja project by display name while skipping the home collection', async () => {
+    const projectsHomeCollection = makeCalendar('/dav/projects/', 'projects', false);
+    const inboxProject = makeCalendar('/dav/projects/12/', 'Inbox');
+    const projectsHome = makeCalendarHome('/dav/projects/', [
+      projectsHomeCollection,
+      inboxProject,
+    ]);
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [projectsHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    const calendar = await (svc as unknown as TestGetCalendarTarget)._getCalendar({
+      ...MOCK_CFG,
+      caldavUrl: 'http://192.168.0.5:3456/dav/principals/loki/',
+      resourceName: 'Inbox',
+      username: 'loki',
+    });
+
+    expect(calendar).toBe(inboxProject);
+  });
+
+  it('selects a concrete Vikunja project by final URL segment while skipping the home collection', async () => {
+    const projectsHomeCollection = makeCalendar('/dav/projects/', 'projects', false);
+    const inboxProject = makeCalendar('/dav/projects/12/', 'Inbox');
+    const projectsHome = makeCalendarHome('/dav/projects/', [
+      projectsHomeCollection,
+      inboxProject,
+    ]);
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [projectsHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    const calendar = await (svc as unknown as TestGetCalendarTarget)._getCalendar({
+      ...MOCK_CFG,
+      caldavUrl: 'http://192.168.0.5:3456/dav/principals/loki/',
+      resourceName: '12',
+      username: 'loki',
+    });
+
+    expect(calendar).toBe(inboxProject);
+  });
+
+  it('continues to later calendar homes when an earlier home fails', async () => {
+    const firstHome = makeFailingCalendarHome(
+      '/dav/broken/',
+      new Error('temporary failure'),
+    );
+    const secondHomeCalendar = makeCalendar('/dav/projects/12/', 'Inbox');
+    const secondHome = makeCalendarHome('/dav/projects/', [secondHomeCalendar]);
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [firstHome, secondHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    const calendar = await (svc as unknown as TestGetCalendarTarget)._getCalendar({
+      ...MOCK_CFG,
+      resourceName: 'Inbox',
+    });
+
+    expect(calendar).toBe(secondHomeCalendar);
+    expect(firstHome.findAllCalendars).toHaveBeenCalledTimes(1);
+    expect(secondHome.findAllCalendars).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces a network error when all calendar homes fail', async () => {
+    const firstHome = makeFailingCalendarHome('/dav/broken-1/', new Error('failure 1'));
+    const secondHome = makeFailingCalendarHome('/dav/broken-2/', new Error('failure 2'));
+    spyOn(svc as unknown as TestGetClientTarget, '_get_client').and.resolveTo({
+      client: { calendarHomes: [firstHome, secondHome] },
+      calendars: new Map<string, TestCalendarLike>(),
+    });
+
+    await expectAsync(
+      (svc as unknown as TestGetCalendarTarget)._getCalendar({
+        ...MOCK_CFG,
+        resourceName: 'Inbox',
+      }),
+    ).toBeRejectedWithError(/CALDAV NETWORK ERROR/);
   });
 });
 
@@ -356,6 +706,20 @@ describe('CaldavClientService._getNativeXhrProvider – native platform', () => 
     xhr.send(null);
     await Promise.resolve();
     expect(xhr.getResponseHeader('content-type')).toBe('application/xml; charset=utf-8');
+  });
+
+  it('returns an empty DAV response header when native HTTP omits it', async () => {
+    svc.webDavRequestSpy.and.resolveTo({
+      status: 207,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      headers: { 'content-type': 'application/xml' },
+      data: '',
+    });
+    const xhr = getFakeXhr();
+    xhr.open('REPORT', 'https://cal.example.com/');
+    xhr.send(null);
+    await Promise.resolve();
+    expect(xhr.getResponseHeader('DAV')).toBe('');
   });
 
   it('getAllResponseHeaders returns formatted header string after send()', async () => {

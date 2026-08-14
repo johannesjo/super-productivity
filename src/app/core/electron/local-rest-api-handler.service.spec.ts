@@ -4,6 +4,7 @@ import { LocalRestApiHandlerService } from './local-rest-api-handler.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { TaskArchiveService } from '../../features/archive/task-archive.service';
 import { ProjectService } from '../../features/project/project.service';
+import { Project } from '../../features/project/project.model';
 import { TagService } from '../../features/tag/tag.service';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DateService } from '../date/date.service';
@@ -20,6 +21,7 @@ describe('LocalRestApiHandlerService', () => {
   let projectServiceMock: jasmine.SpyObj<ProjectService>;
   let tagServiceMock: jasmine.SpyObj<TagService>;
   let dateServiceMock: jasmine.SpyObj<DateService>;
+  let activeProjects: Project[];
   let requestHandler: ((payload: LocalRestApiRequestPayload) => void) | null = null;
   let responsePromiseResolve: ((response: LocalRestApiResponsePayload) => void) | null =
     null;
@@ -100,6 +102,7 @@ describe('LocalRestApiHandlerService', () => {
   beforeEach(() => {
     requestHandler = null;
     responsePromiseResolve = null;
+    activeProjects = [];
 
     mockElectronApi();
 
@@ -142,6 +145,9 @@ describe('LocalRestApiHandlerService', () => {
         list$: of([]),
       },
     );
+    Object.defineProperty(projectServiceMock, 'list', {
+      value: (() => activeProjects) as ProjectService['list'],
+    });
 
     tagServiceMock = jasmine.createSpyObj(
       'TagService',
@@ -537,6 +543,19 @@ describe('LocalRestApiHandlerService', () => {
         });
       });
 
+      it('should return 400 when an allowed field has an invalid type', async () => {
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks', {
+            body: { title: 'New Task', timeEstimate: 'not-a-number' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(false);
+        expect(response.status).toBe(400);
+        expect((response.body as any).error.code).toBe('INVALID_INPUT');
+        expect(taskServiceMock.add).not.toHaveBeenCalled();
+      });
+
       it('should reject subTaskIds in body with 400', async () => {
         const response = await sendRequestAndWait(
           createRequest('POST', '/tasks', {
@@ -778,6 +797,265 @@ describe('LocalRestApiHandlerService', () => {
         expect(response.body.ok).toBe(false);
         expect(response.status).toBe(400);
         expect((response.body as any).error.code).toBe('UNSUPPORTED_FIELD');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should return 400 (not dispatch) when a field has an invalid type', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { tagIds: 123, timeEstimate: 'abc' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(false);
+        expect(response.status).toBe(400);
+        expect((response.body as any).error.code).toBe('INVALID_INPUT');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should accept valid typed fields and dispatch them', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { tagIds: ['tag-1'], timeEstimate: 1000, isDone: true },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledWith('task-1', {
+          tagIds: ['tag-1'],
+          timeEstimate: 1000,
+          isDone: true,
+        });
+      });
+
+      it('should update projectId together with other fields in one dispatch', async () => {
+        let mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        taskServiceMock.update.and.callFake((id, changes) => {
+          if (id === mockTask.id) {
+            mockTask = { ...mockTask, ...changes };
+          }
+        });
+        activeProjects = [{ id: 'project-2' } as Project];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'project-2', title: 'Moved task' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
+          projectId: 'project-2',
+          title: 'Moved task',
+        });
+        if (!response.body.ok) {
+          throw new Error('Expected a success response');
+        }
+        expect(response.body.data).toEqual(
+          jasmine.objectContaining({
+            projectId: 'project-2',
+            title: 'Moved task',
+          }),
+        );
+      });
+
+      it('should reject projectId changes for subtasks', async () => {
+        const mockTask = createMockTask('subtask-1', {
+          parentId: 'parent-1',
+          projectId: 'project-1',
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/subtask-1', {
+            body: { projectId: 'project-2' },
+          }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('UNSUPPORTED_FIELD');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should allow an unchanged inherited projectId on subtasks', async () => {
+        let mockTask = createMockTask('subtask-1', {
+          parentId: 'parent-1',
+          projectId: 'project-1',
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        taskServiceMock.update.and.callFake((id, changes) => {
+          if (id === mockTask.id) {
+            mockTask = { ...mockTask, ...changes };
+          }
+        });
+        activeProjects = [{ id: 'project-1' } as Project];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/subtask-1', {
+            body: { projectId: 'project-1', title: 'Round-tripped subtask' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('subtask-1', {
+          projectId: 'project-1',
+          title: 'Round-tripped subtask',
+        });
+      });
+
+      it('should allow an unchanged archived projectId in a task round trip', async () => {
+        const mockTask = createMockTask('task-1', {
+          projectId: 'archived-project',
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: {
+              projectId: 'archived-project',
+              title: 'Round-tripped task',
+            },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
+          projectId: 'archived-project',
+          title: 'Round-tripped task',
+        });
+      });
+
+      it('should reject an unknown destination project', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'missing-project' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject an archived destination project', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        activeProjects = [
+          {
+            id: 'archived-project',
+            isArchived: true,
+          } as Project,
+        ];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'archived-project' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject prototype-property names as missing project ids', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'constructor' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject prototype-property names as missing task ids', async () => {
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(Object.prototype as Task),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/constructor', {
+            body: { title: 'Ignored' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('TASK_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject empty or whitespace-only projectIds', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        for (const projectId of ['', '   ']) {
+          const response = await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', {
+              body: { projectId },
+            }),
+          );
+
+          expect(response.status).toBe(400);
+          expect(response.body.ok).toBe(false);
+          if (response.body.ok) {
+            throw new Error('Expected an error response');
+          }
+          expect(response.body.error.code).toBe('INVALID_INPUT');
+        }
         expect(taskServiceMock.update).not.toHaveBeenCalled();
       });
     });

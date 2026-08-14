@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { SnackParams } from './snack.model';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { DEFAULT_SNACK_CFG } from './snack.const';
 import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { TranslateService } from '@ngx-translate/core';
@@ -23,6 +23,7 @@ export class SnackService {
   private _matSnackBar = inject(MatSnackBar);
 
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
+  private _hasPendingPersistentAction = false;
 
   constructor() {
     const _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
@@ -37,10 +38,29 @@ export class SnackService {
     if (typeof params === 'string') {
       params = { msg: params };
     }
+    const isPersistentAction = !!(params.actionStr && params.config?.duration === 0);
+    // A sticky recovery/update action must survive unrelated success, info and
+    // error feedback in the app's single snack slot. Another sticky actionable
+    // snack may still replace it intentionally.
+    if (this._hasPendingPersistentAction && !isPersistentAction) {
+      return;
+    }
+    // Track a persistent recovery action (a sticky, actionable snack)
+    // synchronously, before the debounced render, so an immediate follow-up
+    // check (e.g. the header's post-sync success feedback) cannot unknowingly
+    // replace it. `_openSnack` is debounced trailing-edge, so this last-writer
+    // value matches the snack it will actually render — including the case
+    // where a non-persistent snack supersedes a persistent one.
+    this._hasPendingPersistentAction = isPersistentAction;
     this._openSnack(params);
   }
 
+  hasPendingPersistentAction(): boolean {
+    return this._hasPendingPersistentAction;
+  }
+
   close(): void {
+    this._hasPendingPersistentAction = false;
     if (this._ref) {
       this._ref.dismiss();
     }
@@ -105,6 +125,30 @@ export class SnackService {
         this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
         break;
       }
+    }
+
+    // The pending-persistent-action flag is set authoritatively in open()
+    // before this debounced render. Here we only clear it once this specific
+    // snack is dismissed (guarded so a newer snack's flag isn't cleared).
+    const openedRef = this._ref;
+    openedRef
+      ?.afterDismissed()
+      .pipe(take(1))
+      .subscribe(() => {
+        if (this._ref === openedRef) {
+          this._hasPendingPersistentAction = false;
+        }
+      });
+
+    if (actionStr && openedRef) {
+      openedRef
+        .onAction()
+        .pipe(take(1))
+        .subscribe(() => {
+          if (this._ref === openedRef) {
+            this._hasPendingPersistentAction = false;
+          }
+        });
     }
 
     if (actionStr && actionId && this._ref) {

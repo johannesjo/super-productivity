@@ -11,14 +11,17 @@ import {
 } from 'electron';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
 import * as path from 'path';
-import { join, normalize } from 'path';
+import { pathToFileURL } from 'node:url';
 import { IPC } from './shared-with-frontend/ipc-events.const';
+import { isExternalUrlSchemeAllowed } from './shared-with-frontend/is-external-url-allowed';
+import { isLocalFileUrl, openLocalPath } from './open-url';
 import { readFileSync, stat, writeFileSync } from 'fs';
 import { error, log } from 'electron-log/main';
-import { IS_MAC, IS_GNOME_DESKTOP } from './common.const';
+import { IS_MAC, IS_GNOME_WAYLAND } from './common.const';
 import {
   destroyTaskWidget,
   getIsTaskWidgetAlwaysShow,
+  getIsTaskWidgetUserForcedVisible,
   hideTaskWidget,
   showTaskWidget,
 } from './task-widget/task-widget';
@@ -27,8 +30,17 @@ import { getIsMinimizeToTray, getIsQuiting, setIsQuiting } from './shared-state'
 import { loadSimpleStoreAll } from './simple-store';
 import { SimpleStoreKey } from './shared-with-frontend/simple-store.const';
 import { markGpuStartupSuccess } from './gpu-startup-guard';
+import { isAppOriginUrl } from './navigation-guard';
+import { assertSecureWebPreferences } from './web-preferences-guard';
+import { applyJiraImageAuth } from './jira-image-auth';
 
 let mainWin: BrowserWindow;
+
+// The URL passed to `mainWin.loadURL()` — the single source of truth for
+// "what is the app's own origin?". Read by the will-navigate / will-redirect
+// guards in `initWinEventListeners`. Set in `createWindow`, before listeners
+// are wired, so the guard never sees `undefined` at runtime.
+let appLoadedUrl: string | undefined;
 
 // Compact WCO band on Win/Linux. Native button width is OS-controlled
 // (~138px total); only height is configurable. Lower values may be
@@ -139,10 +151,12 @@ export const createWindow = async ({
   const userPrefersCustomWindowTitleBar =
     persistedIsUseCustomWindowTitleBar ??
     legacyIsUseObsidianStyleHeader ??
-    !IS_GNOME_DESKTOP;
-  // GNOME + Wayland combinations can miss native controls when titleBarStyle is hidden.
-  // Force native decorations on GNOME to keep window controls available.
-  const isUseCustomWindowTitleBar = IS_GNOME_DESKTOP
+    !IS_GNOME_WAYLAND;
+  // GNOME + Wayland can't render the Window-Controls-Overlay when titleBarStyle
+  // is 'hidden', leaving the window with no min/max/close controls. Force native
+  // decorations only for that combination; GNOME-on-X11 and every other desktop
+  // honor the user's preference. Keep in sync with global-theme.service.ts.
+  const isUseCustomWindowTitleBar = IS_GNOME_WAYLAND
     ? false
     : userPrefersCustomWindowTitleBar;
   // On macOS use 'hiddenInset' so AppKit positions the traffic lights at the
@@ -174,6 +188,28 @@ export const createWindow = async ({
   // the env var the screenshot fixture sets so normal users still get
   // the default screen-clamping behavior.
   const isScreenshotMode = process.env.SP_SCREENSHOT_MODE === '1';
+  const webPreferences: BrowserWindowConstructorOptions['webPreferences'] = {
+    scrollBounce: true,
+    backgroundThrottling: false,
+    webSecurity: true,
+    preload: path.join(__dirname, 'preload.js'),
+    nodeIntegration: false,
+    // make remote module work with those two settings
+    contextIsolation: true,
+    // Untrusted plugin code runs in sub-frame iframes; keep node integration out
+    // of them explicitly (already the default) so the assert below has a concrete
+    // value to guard.
+    nodeIntegrationInSubFrames: false,
+    // Additional settings for better Linux/Wayland compatibility
+    enableBlinkFeatures: 'OverlayScrollbar',
+    // Disable spell checker to prevent connections to Google services (#5314)
+    // This maintains our "offline-first with zero data collection" promise
+    spellcheck: false,
+  };
+  // Fail closed if the renderer's IPC trust boundary ever silently regresses:
+  // contextIsolation/nodeIntegration are what keep require/ipcRenderer out of
+  // the main world, which every IPC gate (Jira, plugin node-exec) relies on.
+  assertSecureWebPreferences(webPreferences, 'main');
   mainWin = new BrowserWindow({
     x: mainWindowState.x,
     y: mainWindowState.y,
@@ -186,20 +222,7 @@ export const createWindow = async ({
     titleBarOverlay,
     enableLargerThanScreen: isScreenshotMode,
     show: false,
-    webPreferences: {
-      scrollBounce: true,
-      backgroundThrottling: false,
-      webSecurity: true,
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      // make remote module work with those two settings
-      contextIsolation: true,
-      // Additional settings for better Linux/Wayland compatibility
-      enableBlinkFeatures: 'OverlayScrollbar',
-      // Disable spell checker to prevent connections to Google services (#5314)
-      // This maintains our "offline-first with zero data collection" promise
-      spellcheck: false,
-    },
+    webPreferences,
     icon: ICONS_FOLDER + '/icon_256x256.png',
     // Wayland compatibility: disable transparent/frameless features that can cause issues
     transparent: false,
@@ -232,6 +255,7 @@ export const createWindow = async ({
     ) {
       removeKeyInAnyCase(requestHeaders, 'User-Agent');
     }
+    applyJiraImageAuth(details.url, requestHeaders, details.resourceType);
     callback({ requestHeaders });
   });
 
@@ -292,7 +316,13 @@ export const createWindow = async ({
     ? customUrl
     : IS_DEV
       ? 'http://localhost:4200'
-      : `file://${normalize(join(__dirname, '../.tmp/angular-dist/browser/index.html'))}`;
+      : pathToFileURL(path.join(__dirname, '../.tmp/angular-dist/browser/index.html'))
+          .href;
+
+  // Capture the loaded URL so the navigation guard (initWinEventListeners →
+  // will-navigate) can compare against the actual app origin, not a derived
+  // guess. Any URL change here automatically tightens the guard.
+  appLoadedUrl = url;
 
   mainWin.loadURL(url).then(() => {
     // Set window title for dev mode
@@ -413,6 +443,22 @@ export const setWasMaximizedBeforeHide = (value: boolean): void => {
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initWinEventListeners(app: Electron.App): void {
   const openUrlInBrowser = (url: string): void => {
+    // Defense in depth: never hand an unsafe scheme to the OS handler, even if
+    // a renderer-side guard is bypassed (e.g. a link click that falls through
+    // to navigation rather than the explicit openExternalUrl IPC). The blocked
+    // schemes are OS protocol handlers / UNC paths. See GHSA-hr87-735w-hfq3.
+    if (!isExternalUrlSchemeAllowed(url)) {
+      error('Refused to open URL with disallowed scheme via openExternal');
+      return;
+    }
+    // A local file: URL (a folder/file linked from a task) must open via
+    // openPath, not openExternal: openExternal percent-encodes the path and
+    // Windows' ShellExecute then can't resolve non-ASCII names or spaces.
+    // See openLocalPath / issue #8695.
+    if (isLocalFileUrl(url)) {
+      openLocalPath(url);
+      return;
+    }
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
     urlObj.pathname = urlObj.pathname.replace('//', '/');
@@ -436,37 +482,79 @@ function initWinEventListeners(app: Electron.App): void {
     });
   };
 
-  // open new window links in browser
+  // Compare the navigation target against the URL the app actually loaded
+  // (captured at loadURL time in createWindow). Anything else is treated as
+  // external and routed through the scheme-guarded `openUrlInBrowser`.
+  //
+  // The main window has Node integration via the preload bridge (`window.ea`).
+  // Allowing in-window navigation to ANY other origin — including
+  // http://127.0.0.1:<any-port> — would expose that bridge to whatever page
+  // happens to be served there (a malicious local web server, a sibling
+  // electron app, etc.). The previous host-only check accepted those.
+  //
+  // Hash-only changes do NOT fire will-navigate, so this never fires for
+  // the app's own hash routes (HashLocationStrategy in src/main.ts).
+  const guardNavigation = (
+    ev: { preventDefault: () => void },
+    url: string,
+    eventLabel: string,
+  ): void => {
+    if (appLoadedUrl && isAppOriginUrl(url, appLoadedUrl)) return;
+    ev.preventDefault();
+    log(`Blocked in-window navigation (${eventLabel})`);
+    openUrlInBrowser(url);
+  };
+
   mainWin.webContents.on('will-navigate', (ev, url) => {
-    if (!url.includes('localhost')) {
-      ev.preventDefault();
-      openUrlInBrowser(url);
-    }
+    guardNavigation(ev, url, 'will-navigate');
+  });
+  // Defense in depth: a same-origin navigation could redirect to a different
+  // origin server-side. Re-run the same check on the redirect target so a
+  // ‘302 → http://127.0.0.1:1337’ cannot land the bridge on an attacker page.
+  mainWin.webContents.on('will-redirect', (ev, url) => {
+    guardNavigation(ev, url, 'will-redirect');
   });
   mainWin.webContents.setWindowOpenHandler((details) => {
     openUrlInBrowser(details.url);
     return { action: 'deny' };
+  });
+  // Defense in depth: setWindowOpenHandler already denies, so this should
+  // never fire. If a future code path ever enables window creation, destroy
+  // the spawned window rather than letting it inherit the preload bridge.
+  mainWin.webContents.on('did-create-window', (childWin) => {
+    error('did-create-window fired despite deny handler — destroying child');
+    try {
+      childWin.destroy();
+    } catch (e) {
+      error('Failed to destroy unexpected child window:', e);
+    }
   });
 
   // TODO refactor quitting mess
   appCloseHandler(app);
   appMinimizeHandler(app);
 
-  // Handle restore and show events to hide task widget
+  // Handle restore and show events to hide task widget. `getIsTaskWidgetUserForcedVisible()`
+  // keeps the widget up when the user explicitly revealed it via the global shortcut.
   mainWin.on('restore', () => {
-    if (!getIsTaskWidgetAlwaysShow()) {
+    if (!getIsTaskWidgetAlwaysShow() && !getIsTaskWidgetUserForcedVisible()) {
       hideTaskWidget();
     }
   });
 
   mainWin.on('show', () => {
-    if (!getIsTaskWidgetAlwaysShow()) {
+    if (!getIsTaskWidgetAlwaysShow() && !getIsTaskWidgetUserForcedVisible()) {
       hideTaskWidget();
     }
   });
 
   mainWin.on('focus', () => {
-    if (mainWin.isVisible() && !mainWin.isMinimized() && !getIsTaskWidgetAlwaysShow()) {
+    if (
+      mainWin.isVisible() &&
+      !mainWin.isMinimized() &&
+      !getIsTaskWidgetAlwaysShow() &&
+      !getIsTaskWidgetUserForcedVisible()
+    ) {
       hideTaskWidget();
     }
   });
@@ -491,11 +579,11 @@ function createMenu(quitApp: () => void): void {
   // Create application menu to enable copy & pasting on MacOS
   const menuTpl: MenuItemConstructorOptions[] = [
     {
-      label: 'Application',
+      label: 'Super Productivity',
       submenu: [
-        { role: 'about' },
+        { role: 'about', label: 'About Super Productivity' },
         { type: 'separator' },
-        { role: 'hide' },
+        { role: 'hide', label: 'Hide Super Productivity' },
         { role: 'hideOthers' },
         { role: 'unhide' },
         { type: 'separator' },

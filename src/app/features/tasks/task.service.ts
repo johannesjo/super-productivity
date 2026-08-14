@@ -30,13 +30,12 @@ import {
   setCurrentTask,
   setSelectedTask,
   toggleStart,
-  toggleTaskHideSubTasks,
   unsetCurrentTask,
   updateTaskUi,
 } from './store/task.actions';
+import { getNextHideSubTasksMode } from './util/get-next-hide-sub-tasks-mode';
 import { IssueProviderKey } from '../issue/issue.model';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { BatchedTimeSyncAccumulator } from '../../core/util/batched-time-sync-accumulator';
 import {
   selectAllTasks,
   selectCurrentTask,
@@ -52,10 +51,11 @@ import {
   selectTaskDetailTargetPanel,
   selectTaskEntities,
   selectTaskFeatureState,
-  selectTasksById,
+  selectTasksByIdFactory,
   selectTasksByRepeatConfigId,
   selectTasksByTag,
   selectTaskWithSubTasksByRepeatConfigId,
+  selectTimeConflictTaskIds,
 } from './store/task.selectors';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { RoundTimeOption } from '../project/project.model';
@@ -105,6 +105,7 @@ import { TaskFocusService } from './task-focus.service';
 import { DeletedTaskIssueSidecarService } from '../issue/two-way-sync/deleted-task-issue-sidecar.service';
 import { TimeBlockDeleteSidecarService } from '../calendar-integration/time-block/time-block-delete-sidecar.service';
 import { getDeadlineAutoPlanFields } from './util/get-deadline-auto-plan-fields';
+import { TaskTimeSyncService } from './task-time-sync.service';
 
 @Injectable({
   providedIn: 'root',
@@ -122,6 +123,8 @@ export class TaskService {
   private readonly _taskFocusService = inject(TaskFocusService);
   private readonly _deletedTaskIssueSidecar = inject(DeletedTaskIssueSidecarService);
   private readonly _timeBlockDeleteSidecar = inject(TimeBlockDeleteSidecarService);
+  private readonly _archiveTaskPromisesById = new Map<string, Promise<void>>();
+  private readonly _taskTimeSync = inject(TaskTimeSyncService);
 
   currentTaskId$: Observable<string | null> = this._store.pipe(
     select(selectCurrentTaskId),
@@ -152,6 +155,11 @@ export class TaskService {
 
   // Set version for O(1) lookup - used by task components to check membership
   todayListSet = computed(() => new Set(this.todayList()));
+
+  // Shared signal to avoid one store subscription per rendered task component
+  timeConflictTaskIds = toSignal(this._store.pipe(select(selectTimeConflictTaskIds)), {
+    initialValue: new Set<string>(),
+  });
 
   selectedTask$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectSelectedTask),
@@ -193,13 +201,6 @@ export class TaskService {
   private _allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
   private _taskEntities = this._store.selectSignal(selectTaskEntities);
 
-  // Batch sync for time tracking: accumulates duration per task, syncs every 5 minutes
-  private static readonly SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-  private _timeAccumulator = new BatchedTimeSyncAccumulator(
-    TaskService.SYNC_INTERVAL_MS,
-    (taskId, date, duration) =>
-      this._store.dispatch(syncTimeSpent({ taskId, date, duration })),
-  );
   private _unsyncedContexts: Map<
     string,
     { contextType: 'TAG' | 'PROJECT'; contextId: string; date: string }
@@ -231,13 +232,13 @@ export class TaskService {
           this.addTimeSpent(currentTask, tick.duration, tick.date);
 
           // Accumulate for batch sync
-          this._timeAccumulator.accumulate(currentTask.id, tick.duration, tick.date);
+          this._taskTimeSync.accumulate(currentTask.id, tick.duration, tick.date);
 
           // Track contexts for TIME_TRACKING sync
           this._trackContextsForSync(currentTask, tick.date);
 
           // Check if it's time to sync (every 5 minutes)
-          if (this._timeAccumulator.shouldFlush()) {
+          if (this._taskTimeSync.shouldFlush()) {
             this._flushAccumulatedTimeSpent();
           }
         }
@@ -285,7 +286,7 @@ export class TaskService {
    */
   private _flushAccumulatedTimeSpent(): void {
     // Sync task.timeSpent totals
-    this._timeAccumulator.flush();
+    this._taskTimeSync.flush();
 
     // Sync TIME_TRACKING session data (start/end times)
     if (this._unsyncedContexts.size > 0) {
@@ -392,6 +393,11 @@ export class TaskService {
     isAddToBacklog: boolean = false,
     additional: Partial<Task> = {},
     isAddToBottom: boolean = false,
+    // Set for tasks built from untrusted/external content (e.g. an imported
+    // email subject) so the ShortSyntaxEffects don't parse #tag/@date/+project
+    // tokens out of the title. Only spread when true to keep the dispatched
+    // action byte-identical for all existing callers.
+    isIgnoreShortSyntax: boolean = false,
   ): string {
     const workContextId = this._workContextService.activeWorkContextId as string;
     const workContextType = this._workContextService
@@ -412,6 +418,7 @@ export class TaskService {
         workContextType,
         isAddToBacklog,
         isAddToBottom,
+        ...(isIgnoreShortSyntax ? { isIgnoreShortSyntax: true } : {}),
         ...getDeadlineAutoPlanFields(
           this._dateService,
           task.deadlineDay,
@@ -450,18 +457,43 @@ export class TaskService {
     );
   }
 
+  /**
+   * Schedules a task for today by id (same effect as the "Add to My Day"
+   * button / Schedule → Today). Used by the id-based schedule-today shortcut
+   * path so it works from views without a live `<task>` component (e.g. the
+   * Planner overdue list, which renders `<planner-task>`). (#8851)
+   */
+  scheduleForTodayById(taskId: string): void {
+    const task = this._taskEntities()[taskId];
+    this._store.dispatch(
+      TaskSharedActions.planTasksForToday({
+        taskIds: [taskId],
+        today: this._dateService.todayStr(),
+        startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
+        parentTaskMap: task ? { [taskId]: task.parentId } : undefined,
+      }),
+    );
+  }
+
   remove(task: TaskWithSubTasks): void {
+    this._taskTimeSync.clearOne(task.id);
+    // Clear via subTaskIds (always present) not subTasks: the keyboard-delete path
+    // passes a raw Task entity whose subTasks array is undefined (see #9280).
+    task.subTaskIds.forEach((id) => this._taskTimeSync.clearOne(id));
     this._store.dispatch(TaskSharedActions.deleteTask({ task }));
   }
 
   removeMultipleTasks(taskIds: string[]): void {
     // Store issue metadata in the sidecar *before* dispatching, so the
-    // deleteIssueOnBulkTaskDelete$ effect can pick it up. This keeps
-    // full Task objects out of the action payload and the op-log.
+    // deleteIssueOnBulkTaskDelete$ effect can pick it up.
     const entities = this._taskEntities();
-    const tasks = taskIds
+    const affectedTaskIds = Array.from(
+      new Set(taskIds.flatMap((id) => [id, ...(entities[id]?.subTaskIds ?? [])])),
+    );
+    const tasks = affectedTaskIds
       .map((id) => entities[id])
       .filter((task): task is Task => !!task);
+    affectedTaskIds.forEach((id) => this._taskTimeSync.clearOne(id));
     this._deletedTaskIssueSidecar.set(
       tasks
         .filter((t) => !!t.issueId && !!t.issueType && !!t.issueProviderId)
@@ -474,13 +506,35 @@ export class TaskService {
     this._timeBlockDeleteSidecar.set(
       tasks.filter((t) => !!t.dueWithTime).map((t) => t.id),
     );
-    this._store.dispatch(TaskSharedActions.deleteTasks({ taskIds }));
+    this._store.dispatch(TaskSharedActions.deleteTasks({ taskIds, tasks }));
   }
 
   update(id: string, changedFields: Partial<Task>): void {
+    if (Object.prototype.hasOwnProperty.call(changedFields, 'timeSpentOnDay')) {
+      this._taskTimeSync.flushOne(id);
+    }
+
+    const entities = this._taskEntities();
+    const task = entities[id];
+    const projectMoveSubTaskIds =
+      Object.prototype.hasOwnProperty.call(changedFields, 'projectId') &&
+      task &&
+      !task.parentId
+        ? unique([
+            ...task.subTaskIds,
+            ...Object.values(entities)
+              .filter(
+                (candidate): candidate is Task =>
+                  !!candidate && candidate.parentId === id,
+              )
+              .map((subTask) => subTask.id),
+          ])
+        : undefined;
+
     this._store.dispatch(
       TaskSharedActions.updateTask({
         task: { id, changes: changedFields },
+        ...(projectMoveSubTaskIds !== undefined && { projectMoveSubTaskIds }),
       }),
     );
   }
@@ -769,7 +823,9 @@ export class TaskService {
       }),
     );
 
-    this.focusTaskById(task.id, !task.title?.trim().length);
+    if (!task.title?.trim().length) {
+      this.focusTaskById(task.id, true);
+    }
 
     return task.id;
   }
@@ -789,12 +845,19 @@ export class TaskService {
         // the parent's sub-task list). Focusing the panel copy preserves the
         // user's current context (parent stays selected) and on mobile lands
         // on a visible input rather than the main-list copy that the panel
-        // overlays (#7120).
+        // overlays (#7120). Fall back to an earlier copy when the last one
+        // can't take focus — e.g. the side panel's sub-task section is
+        // collapsed, so its copy is in the DOM but not focusable.
         const allEls = document.querySelectorAll<HTMLElement>(`#t-${CSS.escape(taskId)}`);
-        const taskElement = allEls[allEls.length - 1];
+        let taskElement: HTMLElement | undefined;
+        for (let i = allEls.length - 1; i >= 0; i--) {
+          allEls[i].focus();
+          if (document.activeElement === allEls[i]) {
+            taskElement = allEls[i];
+            break;
+          }
+        }
         if (!taskElement) return;
-
-        taskElement.focus();
 
         if (shouldStartEditing) {
           const taskComponent = this._taskFocusService.lastFocusedTaskComponent();
@@ -830,9 +893,16 @@ export class TaskService {
     if (duration <= 0) {
       return;
     }
+    this._taskTimeSync.flushOne(task.id);
     const date = this._dateService.todayStr();
     this.addTimeSpent(task, duration, date);
-    this._store.dispatch(syncTimeSpent({ taskId: task.id, date, duration }));
+    this._store.dispatch(
+      syncTimeSpent({
+        taskId: task.id,
+        date,
+        duration,
+      }),
+    );
   }
 
   removeTimeSpent(
@@ -840,6 +910,7 @@ export class TaskService {
     duration: number,
     date: string = this._dateService.todayStr(),
   ): void {
+    this._taskTimeSync.flushOne(id);
     this._store.dispatch(removeTimeSpent({ id, date, duration }));
   }
 
@@ -926,15 +997,60 @@ export class TaskService {
       }
     }
 
-    if (parentTasks.length) {
-      TaskLog.log('[TaskService] Dispatching moveToArchive action for parent tasks');
+    const parentTasksToArchive: TaskWithSubTasks[] = [];
+    const reservedTaskIds = new Set<string>();
+    const existingArchivePromises = new Set<Promise<void>>();
+    for (const task of parentTasks) {
+      if (task.id) {
+        const existingArchivePromise = this._archiveTaskPromisesById.get(task.id);
+        if (existingArchivePromise) {
+          TaskLog.log('[TaskService] Archive already in progress', { id: task.id });
+          existingArchivePromises.add(existingArchivePromise);
+          continue;
+        }
+        if (reservedTaskIds.has(task.id)) {
+          continue;
+        }
+        reservedTaskIds.add(task.id);
+      }
+      parentTasksToArchive.push(task);
+    }
+
+    if (parentTasksToArchive.length) {
       // Only move parent tasks to archive, never subtasks
-      // Note: Full task payload required for sync - see docs/archive-operation-redesign.md
-      this._store.dispatch(TaskSharedActions.moveToArchive({ tasks: parentTasks }));
-      // Only archive parent tasks to prevent orphaned subtasks
-      TaskLog.log('[TaskService] Calling archive service to persist tasks');
-      await this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(parentTasks);
-      TaskLog.log('[TaskService] Archive operation completed successfully');
+      // Note: Full task payload required for sync - see docs/sync-and-op-log/operation-log-architecture.md
+      // Persist first: dispatch removes the tasks from NgRx and makes the captured
+      // operation eligible for a full-state snapshot. If archive persistence were
+      // still in flight, that snapshot could acknowledge the operation while
+      // omitting its archived task data.
+      const archivePromise = (async (): Promise<void> => {
+        TaskLog.log('[TaskService] Calling archive service to persist tasks');
+        await this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(
+          parentTasksToArchive,
+        );
+        TaskLog.log('[TaskService] Dispatching moveToArchive action for parent tasks');
+        this._store.dispatch(
+          TaskSharedActions.moveToArchive({ tasks: parentTasksToArchive }),
+        );
+        TaskLog.log('[TaskService] Archive operation completed successfully');
+      })();
+      for (const taskId of reservedTaskIds) {
+        this._archiveTaskPromisesById.set(taskId, archivePromise);
+      }
+
+      try {
+        await Promise.all([...existingArchivePromises, archivePromise]);
+      } finally {
+        for (const taskId of reservedTaskIds) {
+          if (this._archiveTaskPromisesById.get(taskId) === archivePromise) {
+            this._archiveTaskPromisesById.delete(taskId);
+          }
+        }
+      }
+    } else if (existingArchivePromises.size > 0) {
+      // A duplicate caller observes the same success/failure and does not return
+      // before the durable archive write plus NgRx removal have completed.
+      await Promise.all(existingArchivePromises);
     } else {
       TaskLog.log('[TaskService] No parent tasks to archive');
     }
@@ -1007,6 +1123,7 @@ export class TaskService {
     });
 
     // today
+    todayIds.forEach((taskId) => this._taskTimeSync.flushOne(taskId));
     this._store.dispatch(
       roundTimeSpentForDay({ day, taskIds: todayIds, roundTo, isRoundUp, projectId }),
     );
@@ -1070,7 +1187,9 @@ export class TaskService {
   }
 
   getByIdsLive$(ids: string[]): Observable<Task[]> {
-    return this._store.pipe(select(selectTasksById, { ids }));
+    // SPAP-19: fresh per-call factory selector so concurrent subscribers with
+    // different id-sets don't evict each other's memo.
+    return this._store.pipe(select(selectTasksByIdFactory(ids)));
   }
 
   getByIdWithSubTaskData$(id: string): Observable<TaskWithSubTasks> {
@@ -1139,7 +1258,28 @@ export class TaskService {
     isShowLess: boolean = true,
     isEndless: boolean = false,
   ): void {
-    this._store.dispatch(toggleTaskHideSubTasks({ taskId, isShowLess, isEndless }));
+    const entities = this._taskEntities();
+    const task = entities[taskId];
+    if (!task) {
+      return;
+    }
+    const subTasks = task.subTaskIds
+      .map((id) => entities[id])
+      .filter((t): t is Task => !!t);
+    const doneCount = subTasks.filter((t) => t.isDone).length;
+    // Persist the resolved absolute value via updateTaskUi (replay-safe) rather
+    // than a relative toggle command, so the collapse state survives a restart.
+    // Replaying a relative command would recompute from live state and diverge
+    // across devices. See issue #8781.
+    this.updateUi(taskId, {
+      _hideSubTasksMode: getNextHideSubTasksMode(
+        task._hideSubTasksMode,
+        doneCount,
+        subTasks.length,
+        isShowLess,
+        isEndless,
+      ),
+    });
   }
 
   hideSubTasks(id: string): void {
@@ -1148,11 +1288,14 @@ export class TaskService {
 
   async convertToMainTask(task: Task): Promise<void> {
     const parent = await this.getByIdOnce$(task.parentId as string).toPromise();
+    const now = Date.now();
     this._store.dispatch(
       TaskSharedActions.convertToMainTask({
         task,
         parentTagIds: parent.tagIds,
         isPlanForToday: this._workContextService.activeWorkContextId === TODAY_TAG.id,
+        today: this._dateService.todayStr(),
+        modified: now,
       }),
     );
   }

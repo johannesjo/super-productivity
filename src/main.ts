@@ -1,5 +1,6 @@
 import {
   APP_INITIALIZER,
+  provideAppInitializer,
   enableProdMode,
   EnvironmentInjector,
   ErrorHandler,
@@ -13,13 +14,14 @@ import { registerLocaleData } from '@angular/common';
 
 import { environment } from './environments/environment';
 import { IS_ELECTRON } from './app/app.constants';
+import { DEFAULT_LANGUAGE, LocaleImportFns } from './app/core/locale.constants';
 import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_LOCALE_DATA,
-  LocaleImportFns,
-} from './app/core/locale.constants';
+  registerDefaultLocale,
+  registerNavigatorLocale,
+} from './app/core/locale-registration';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
+import { AndroidBackButtonService } from './app/features/android/android-back-button.service';
 import { IS_IOS_NATIVE, IS_NATIVE_PLATFORM } from './app/util/is-native-platform';
 import { DataInitStateService } from './app/core/data-init/data-init-state.service';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
@@ -43,6 +45,7 @@ import {
   MatDateFormats,
   DateAdapter,
 } from '@angular/material/core';
+import { MatDatepickerIntl } from '@angular/material/datepicker';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
@@ -62,6 +65,8 @@ import { StoreModule, Store } from '@ngrx/store';
 import { META_REDUCERS } from './app/root-store/meta/meta-reducer-registry';
 import { setOperationCaptureService } from './app/root-store/meta/task-shared-meta-reducers';
 import { OperationCaptureService } from './app/op-log/capture/operation-capture.service';
+import { ConflictJournalService } from './app/op-log/sync/conflict-journal.service';
+import { LocalDraftService } from './app/core/draft/local-draft.service';
 import { EncryptionPasswordDialogOpenerService } from './app/imex/sync/encryption-password-dialog-opener.service';
 import { DataInitService } from './app/core/data-init/data-init.service';
 import { EffectsModule } from '@ngrx/effects';
@@ -88,8 +93,10 @@ import { GlobalConfigService } from './app/features/config/global-config.service
 import { LocaleDatePipe } from './app/ui/pipes/locale-date.pipe';
 import { DateTimeFormatService } from './app/core/date-time-format/date-time-format.service';
 import { CustomDateAdapter } from './app/core/date-time-format/custom-date-adapter';
-import { unlockAudioContext } from './app/util/audio-context';
+import { TranslateMatDatepickerIntl } from './app/core/date-time-format/translate-mat-datepicker-intl';
+import { suspendAudioContext, unlockAudioContext } from './app/util/audio-context';
 import { NetworkRetryInterceptorService } from './app/core/http/network-retry-interceptor.service';
+import { routeCapacitorAppUrl } from './app/core/app-url-open-router';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -117,8 +124,20 @@ setLegacyKdfWarningHandler(() => {
   );
 });
 
+// Register default locale data before bootstrap: LocaleDatePipe is pure, so a
+// date rendered before registration would cache Angular's built-in en-US
+// resolution for the session (bootstrapApplication's .then runs after first
+// render, which is too late).
+registerDefaultLocale();
+
 bootstrapApplication(AppComponent, {
   providers: [
+    // Await the browser's own regional locale (en-AU, en-CA, … — navigator-only
+    // variants backing "System default") before first render, for the same
+    // pure-pipe reason as above. Never rejects and self-limits to a short
+    // timeout, so a failed or stalled chunk load degrades to the default locale
+    // instead of failing bootstrap or holding up first render indefinitely.
+    provideAppInitializer(() => registerNavigatorLocale()),
     // Provide configuration for TranslateHttpLoader
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
@@ -201,6 +220,7 @@ bootstrapApplication(AppComponent, {
     ShortTimeHtmlPipe,
     ShortTimePipe,
     { provide: DateAdapter, useClass: CustomDateAdapter },
+    { provide: MatDatepickerIntl, useClass: TranslateMatDatepickerIntl },
     {
       provide: MAT_DATE_FORMATS,
       useFactory: (dateTimeFormatService: DateTimeFormatService): MatDateFormats => {
@@ -216,7 +236,7 @@ bootstrapApplication(AppComponent, {
             get dateInput(): string {
               return dateTimeFormatService.dateFormat().raw;
             },
-            monthYearLabel: { year: 'numeric', month: 'short' },
+            monthYearLabel: { year: 'numeric', month: 'long' },
             dateA11yLabel: { year: 'numeric', month: 'long', day: 'numeric' },
             monthYearA11yLabel: { year: 'numeric', month: 'long' },
             timeInput: { hour: 'numeric', minute: 'numeric' },
@@ -290,15 +310,42 @@ bootstrapApplication(AppComponent, {
       deps: [PluginOAuthRedirectHandler],
       multi: true,
     },
-    // Ensure OAuthCallbackHandlerService is instantiated at bootstrap on native platforms.
-    // Its constructor registers Capacitor's appUrlOpen listener that bridges
-    // both Dropbox and plugin OAuth redirect callbacks.
+    // Ensure OAuthCallbackHandlerService is instantiated at bootstrap on native
+    // platforms. Its constructor subscribes to the OAuth URLs routed from the
+    // single appUrlOpen listener below; it does not register a listener itself.
     {
       provide: APP_INITIALIZER,
       useFactory: (_handler: OAuthCallbackHandlerService) => {
         return () => {};
       },
       deps: [OAuthCallbackHandlerService],
+      multi: true,
+    },
+    // SPAP-13: prune the device-local conflict journal to its retention bound
+    // (14 days / 200 entries) on app start. Fire-and-forget — pruneOnStart opens
+    // its own IndexedDB lazily and swallows its own errors, so it can never block
+    // or fail bootstrap.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (journal: ConflictJournalService) => {
+        return () => {
+          void journal.pruneOnStart();
+        };
+      },
+      deps: [ConflictJournalService],
+      multi: true,
+    },
+    // Remove crash-leftover note drafts past their retention window on app
+    // start, same rationale as the conflict journal above. Synchronous
+    // localStorage sweep over a handful of keys; swallows its own errors.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (localDraft: LocalDraftService) => {
+        return () => {
+          localDraft.pruneOnStart();
+        };
+      },
+      deps: [LocalDraftService],
       multi: true,
     },
     // Note: ImmediateUploadService now initializes itself in constructor
@@ -334,16 +381,18 @@ bootstrapApplication(AppComponent, {
   // Initialize touch fix for Material menus
   initializeMatMenuTouchFix();
 
-  // Register default locale immediately (statically imported, no network fetch)
-  registerLocaleData(DEFAULT_LOCALE_DATA, DEFAULT_LANGUAGE);
-
-  // Lazily load and register remaining locales during idle time
+  // Lazily load and register remaining locales during idle time. The
+  // navigator-only regional variants are NOT loaded here — only the entry
+  // matching the browser culture language is ever needed, and the app
+  // initializer above already registered it before first render.
   const registerRemainingLocales = (): void => {
     Object.keys(LocaleImportFns).forEach((locale) => {
       if (locale !== DEFAULT_LANGUAGE) {
-        LocaleImportFns[locale as keyof typeof LocaleImportFns]().then((m) => {
-          registerLocaleData(m.default, locale);
-        });
+        LocaleImportFns[locale as keyof typeof LocaleImportFns]()
+          .then((m) => {
+            registerLocaleData(m.default, locale);
+          })
+          .catch((e) => Log.err(`Failed to load locale ${locale}`, e));
       }
     });
   };
@@ -449,7 +498,13 @@ if (!(environment.production || environment.stage) && IS_ANDROID_WEB_VIEW) {
 // Android-specific: Handle back button
 if (IS_ANDROID_WEB_VIEW) {
   CapacitorApp.addListener('backButton', ({ canGoBack }) => {
-    if (!canGoBack) {
+    // Delegate to the Angular service so back from a top-level destination pops
+    // to the start destination / exits per Android guidelines (issue #7972).
+    const backButtonService = appInjector?.get(AndroidBackButtonService);
+    if (backButtonService) {
+      backButtonService.handleBackButton(canGoBack);
+    } else if (!canGoBack) {
+      // Pre-bootstrap fallback (back pressed before Angular is ready).
       CapacitorApp.minimizeApp();
     } else {
       window.history.back();
@@ -476,6 +531,9 @@ if (IS_ANDROID_WEB_VIEW) {
     if (isActive) {
       return;
     }
+    // Release the audio output stream so a silent-but-running AudioContext does
+    // not keep the audio hardware (and the process) awake in the background (#8243).
+    suspendAudioContext();
     const taskId = await BackgroundTask.beforeExit(async () => {
       try {
         await flushPendingOperations('Android');
@@ -493,6 +551,9 @@ if (IS_IOS_NATIVE) {
     if (isActive) {
       return;
     }
+    // Release the audio output stream so a silent-but-running AudioContext does
+    // not keep the audio hardware (and the process) awake in the background (#8243).
+    suspendAudioContext();
     const taskId = await BackgroundTask.beforeExit(async () => {
       try {
         // Dispatch any accumulated tracked time so it is enqueued before the
@@ -506,11 +567,28 @@ if (IS_IOS_NATIVE) {
       BackgroundTask.finish({ taskId });
     });
   });
+}
 
-  // Handle app URL open (for OAuth callbacks, deep links, etc.)
+// Handle app URL open (for OAuth callbacks, deep links, etc.) on iOS *and*
+// Android: Android declares no task-action host, but its VIEW intent filters
+// do carry plugin OAuth callbacks, so gating this on iOS alone leaves that
+// callback with no listener at all.
+//
+// This must be the ONLY `appUrlOpen` listener in the app. `@capacitor/app`
+// emits a cold-start URL with `retainUntilConsumed: true`, and Capacitor
+// drains and clears those retained arguments when the *first* listener for
+// the event is added (`CAPPlugin.m`, `addEventListener` →
+// `sendRetainedArgumentsForEvent`). A second listener added later never
+// receives it, so registering one here and another in
+// OAuthCallbackHandlerService meant whichever came second silently lost
+// every cold-launch URL. Instead, route the single event to both consumers.
+if (IS_NATIVE_PLATFORM) {
   CapacitorApp.addListener('appUrlOpen', (event) => {
-    Log.log('iOS app URL open', event.url);
-    // Handle OAuth callbacks or deep links here
-    // The URL will be passed to the app when opened via custom scheme
+    const isTaskAction = routeCapacitorAppUrl(event.url);
+    // Never log the raw URL — it carries the task title/notes for task
+    // actions and an auth code for OAuth callbacks, and log history is
+    // exportable in bug reports. Log only that the event fired and how it
+    // was routed.
+    Log.log('Native app URL open', { isTaskAction });
   });
 }

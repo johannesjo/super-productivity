@@ -1,6 +1,72 @@
 <div class="page-settings page-wrapper">
   @if (globalCfg) {
     <div class="settings-container">
+      <!-- Shared by every tab's `mat-tab-label`: an icon + translated title. -->
+      <ng-template
+        #tabLabel
+        let-icon
+        let-labelKey="labelKey"
+      >
+        <mat-icon
+          class="tab-icon"
+          [matTooltip]="labelKey | translate"
+          >{{ icon }}</mat-icon
+        >
+        <span class="tab-label">{{ labelKey | translate }}</span>
+      </ng-template>
+
+      <mat-form-field
+        class="settings-search"
+        appearance="outline"
+        subscriptSizing="dynamic"
+      >
+        <mat-icon matPrefix>search</mat-icon>
+        <mat-label>{{ T.PS.SEARCH_PLACEHOLDER | translate }}</mat-label>
+        <input
+          matInput
+          [matAutocomplete]="settingsSearchAutoEl"
+          [ngModel]="searchQuery"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        @if (searchQuery) {
+          <button
+            (click)="onSearchChange('')"
+            [attr.aria-label]="T.G.CLEAR | translate"
+            mat-icon-button
+            matSuffix
+            type="button"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <mat-autocomplete
+        #settingsSearchAutoEl="matAutocomplete"
+        class="settings-search-panel"
+        (optionSelected)="goToSearchResult($event.option.value)"
+        [autoActiveFirstOption]="true"
+      >
+        <!-- Guarded so an empty panel (and "no results") can't pop open on focus. -->
+        @if (searchQuery) {
+          @for (result of searchResults; track $index) {
+            <mat-option [value]="result">
+              <span>{{ result.labelKey | translate }}</span>
+              <span class="search-result__path">
+                {{ result.tabLabelKey | translate }}
+                @if (result.matchedLabelKey) {
+                  › {{ result.matchedLabelKey | translate }}
+                }
+              </span>
+            </mat-option>
+          } @empty {
+            <mat-option [disabled]="true">{{
+              T.PS.SEARCH_NO_RESULTS | translate
+            }}</mat-option>
+          }
+        }
+      </mat-autocomplete>
+
       <mat-tab-group
         class="settings-tabs"
         [(selectedIndex)]="selectedTabIndex"
@@ -9,12 +75,12 @@
         <!-- Tab: General -->
         <mat-tab>
           <ng-template mat-tab-label>
-            <mat-icon
-              class="tab-icon"
-              [matTooltip]="'PS.TABS.GENERAL' | translate"
-              >settings</mat-icon
-            >
-            <span class="tab-label">{{ 'PS.TABS.GENERAL' | translate }}</span>
+            <ng-container
+              *ngTemplateOutlet="
+                tabLabel;
+                context: { $implicit: 'settings', labelKey: 'PS.TABS.GENERAL' }
+              "
+            ></ng-container>
           </ng-template>
           <div class="tab-content">
             <h2 class="mat-h2 section-title">
@@ -26,10 +92,7 @@
                 <config-section
                   (save)="saveGlobalCfg($event)"
                   [cfg]="getGlobalCfgSection(section.key)"
-                  [isExpanded]="
-                    section.key === expandedSection ||
-                    section.customSection === expandedSection
-                  "
+                  [isExpanded]="isSectionExpanded(section)"
                   [section]="section"
                 ></config-section>
               </section>
@@ -40,12 +103,12 @@
         <!-- Tab: Tasks -->
         <mat-tab>
           <ng-template mat-tab-label>
-            <mat-icon
-              class="tab-icon"
-              [matTooltip]="'PS.TABS.TASKS' | translate"
-              >task</mat-icon
-            >
-            <span class="tab-label">{{ 'PS.TABS.TASKS' | translate }}</span>
+            <ng-container
+              *ngTemplateOutlet="
+                tabLabel;
+                context: { $implicit: 'task', labelKey: 'PS.TABS.TASKS' }
+              "
+            ></ng-container>
           </ng-template>
           <div class="tab-content">
             <h2 class="mat-h2 section-title">
@@ -56,10 +119,7 @@
                 <config-section
                   (save)="saveGlobalCfg($event)"
                   [cfg]="getGlobalCfgSection(section.key)"
-                  [isExpanded]="
-                    section.key === expandedSection ||
-                    section.customSection === expandedSection
-                  "
+                  [isExpanded]="isSectionExpanded(section)"
                   [section]="section"
                 ></config-section>
               </section>
@@ -68,7 +128,7 @@
             <!-- @todo: Create a single style for forming all the settings elements.
                         Make all as "sections" or as "forms" consistently.
             -->
-            <section class="config-section">
+            <section class="config-section sound-section">
               <config-sound-form
                 [cfg]="getGlobalCfgSection('sound')"
                 (save)="saveGlobalCfg($event)"
@@ -80,12 +140,12 @@
         <!-- Tab: Time & Tracking -->
         <mat-tab>
           <ng-template mat-tab-label>
-            <mat-icon
-              class="tab-icon"
-              [matTooltip]="'PS.TABS.TIME_TRACKING' | translate"
-              >timer</mat-icon
-            >
-            <span class="tab-label">{{ 'PS.TABS.TIME_TRACKING' | translate }}</span>
+            <ng-container
+              *ngTemplateOutlet="
+                tabLabel;
+                context: { $implicit: 'timer', labelKey: 'PS.TABS.TIME_TRACKING' }
+              "
+            ></ng-container>
           </ng-template>
           <div class="tab-content">
             <h2 class="mat-h2 section-title">
@@ -96,10 +156,7 @@
                 <config-section
                   (save)="saveGlobalCfg($event)"
                   [cfg]="getGlobalCfgSection(section.key)"
-                  [isExpanded]="
-                    section.key === expandedSection ||
-                    section.customSection === expandedSection
-                  "
+                  [isExpanded]="isSectionExpanded(section)"
                   [section]="section"
                 ></config-section>
               </section>
@@ -110,26 +167,23 @@
         <!-- Tab: Productivity -->
         <mat-tab>
           <ng-template mat-tab-label>
-            <mat-icon
-              class="tab-icon"
-              [matTooltip]="'PS.TABS.PRODUCTIVITY' | translate"
-              >trending_up</mat-icon
-            >
-            <span class="tab-label">{{ 'PS.TABS.PRODUCTIVITY' | translate }}</span>
+            <ng-container
+              *ngTemplateOutlet="
+                tabLabel;
+                context: { $implicit: 'trending_up', labelKey: 'PS.TABS.PRODUCTIVITY' }
+              "
+            ></ng-container>
           </ng-template>
           <div class="tab-content tour-productivityHelper">
             <h2 class="mat-h2 section-title">
               {{ 'PS.TABS.PRODUCTIVITY' | translate }}
             </h2>
             @for (section of globalProductivityConfigFormCfg; track section.key) {
-              <section class="config-section">
+              <section class="config-section section-{{ section.key }}">
                 <config-section
                   (save)="saveGlobalCfg($event)"
                   [cfg]="getGlobalCfgSection(section.key)"
-                  [isExpanded]="
-                    section.key === expandedSection ||
-                    section.customSection === expandedSection
-                  "
+                  [isExpanded]="isSectionExpanded(section)"
                   [section]="section"
                 ></config-section>
               </section>
@@ -140,12 +194,12 @@
         <!-- Tab: Plugins -->
         <mat-tab>
           <ng-template mat-tab-label>
-            <mat-icon
-              class="tab-icon"
-              [matTooltip]="'PS.TABS.PLUGINS' | translate"
-              >extension</mat-icon
-            >
-            <span class="tab-label">{{ 'PS.TABS.PLUGINS' | translate }}</span>
+            <ng-container
+              *ngTemplateOutlet="
+                tabLabel;
+                context: { $implicit: 'extension', labelKey: 'PS.TABS.PLUGINS' }
+              "
+            ></ng-container>
           </ng-template>
           <div class="tab-content">
             <h2 class="mat-h2 section-title">
@@ -159,10 +213,7 @@
                 <config-section
                   (save)="saveGlobalCfg($event)"
                   [cfg]="getGlobalCfgSection(section.key)"
-                  [isExpanded]="
-                    section.key === expandedSection ||
-                    section.customSection === expandedSection
-                  "
+                  [isExpanded]="isSectionExpanded(section)"
                   [section]="section"
                 ></config-section>
               </section>
@@ -173,12 +224,12 @@
         <!-- Tab: Sync & Backup -->
         <mat-tab>
           <ng-template mat-tab-label>
-            <mat-icon
-              class="tab-icon"
-              [matTooltip]="'PS.TABS.SYNC_BACKUP' | translate"
-              >cloud_sync</mat-icon
-            >
-            <span class="tab-label">{{ 'PS.TABS.SYNC_BACKUP' | translate }}</span>
+            <ng-container
+              *ngTemplateOutlet="
+                tabLabel;
+                context: { $implicit: 'cloud_sync', labelKey: 'PS.TABS.SYNC_BACKUP' }
+              "
+            ></ng-container>
           </ng-template>
           <div class="tab-content">
             <h2 class="mat-h2 section-title">
@@ -194,7 +245,7 @@
                   <button
                     (click)="openSyncCfgDialog()"
                     color="primary"
-                    mat-raised-button
+                    mat-flat-button
                     type="button"
                   >
                     <mat-icon>cloud_sync</mat-icon>
@@ -223,7 +274,7 @@
                   <button
                     (click)="triggerSync()"
                     color="primary"
-                    mat-raised-button
+                    mat-flat-button
                     type="button"
                   >
                     <mat-icon>sync</mat-icon>
@@ -237,19 +288,24 @@
                     <mat-icon>tune</mat-icon>
                     {{ 'PS.SYNC.CONFIGURE' | translate }}
                   </button>
+                  <button
+                    routerLink="/sync-conflicts"
+                    mat-stroked-button
+                    type="button"
+                  >
+                    <mat-icon>rule</mat-icon>
+                    {{ 'F.SYNC.CONFLICT_REVIEW.CONFIG_LINK' | translate }}
+                  </button>
                 </div>
               }
             </section>
 
             @for (section of globalImexFormCfg; track section.key) {
-              <section class="config-section imex-section">
+              <section class="config-section imex-section section-{{ section.key }}">
                 <config-section
                   (save)="saveGlobalCfg($event)"
                   [cfg]="getGlobalCfgSection(section.key)"
-                  [isExpanded]="
-                    section.key === expandedSection ||
-                    section.customSection === expandedSection
-                  "
+                  [isExpanded]="isSectionExpanded(section)"
                   [section]="section"
                 ></config-section>
               </section>
@@ -279,6 +335,14 @@
     target="_blank"
     >Changelog</a
   >
+  @if (isUpdateCheckPossible) {
+    –
+    <a
+      (click)="checkForUpdates(); $event?.preventDefault()"
+      href="#"
+      >{{ T.PS.CHECK_FOR_UPDATES | translate }}</a
+    >
+  }
   –
   <a
     (click)="showLogs(); $event?.preventDefault()"

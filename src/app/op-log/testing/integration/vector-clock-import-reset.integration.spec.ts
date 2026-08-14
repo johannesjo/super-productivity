@@ -8,10 +8,10 @@ import { SimulatedClient } from './helpers/simulated-client.helper';
 import { createMinimalTaskPayload } from './helpers/operation-factory.helper';
 import {
   compareVectorClocks,
+  limitVectorClockSize,
   VectorClockComparison,
 } from '../../../core/util/vector-clock';
 import { MAX_VECTOR_CLOCK_SIZE } from '../../core/operation-log.const';
-import { limitVectorClockSize } from '@sp/shared-schema';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { SyncImportFilterService } from '../../sync/sync-import-filter.service';
 
@@ -462,7 +462,10 @@ describe('Vector Clock Import Reset Integration', () => {
       );
       // With minimal clocks, B's op is CONCURRENT (missing old entries)
       // but should still be kept by the import-client-counter exception
-      expect([VectorClockComparison.GREATER_THAN, VectorClockComparison.CONCURRENT])
+      expect([
+        VectorClockComparison.GREATER_THAN,
+        VectorClockComparison.CONCURRENT,
+      ] as VectorClockComparison[])
         .withContext(
           `Post-import op from B should be GREATER_THAN or CONCURRENT, got ${comparisonB}`,
         )

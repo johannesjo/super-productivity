@@ -10,6 +10,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'user-profile-button',
@@ -67,10 +68,6 @@ import { T } from '../../../t.const';
   `,
   styles: [
     `
-      .profile-btn {
-        margin-left: 8px;
-      }
-
       .profile-menu-header {
         padding: 8px 16px;
         border-bottom: 1px solid rgba(0, 0, 0, 0.12);
@@ -94,7 +91,7 @@ export class UserProfileButtonComponent {
     try {
       await this.profileService.switchProfile(profileId);
     } catch (error) {
-      console.error('Failed to switch profile:', error);
+      Log.err('Failed to switch profile:', error);
     } finally {
       this.isLoading.set(false);
     }

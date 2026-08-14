@@ -265,6 +265,65 @@ describe('loadConfigFromEnv - SuperSync rollout flags', () => {
   });
 });
 
+describe('loadConfigFromEnv - server bind address', () => {
+  beforeEach(() => {
+    resetEnv();
+  });
+
+  afterEach(() => {
+    resetEnv();
+  });
+
+  it('should bind to all IPv4 interfaces by default', async () => {
+    const { loadConfigFromEnv } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.host).toBe('0.0.0.0');
+  });
+
+  it('should load HOST from environment', async () => {
+    process.env.HOST = '::';
+
+    const { loadConfigFromEnv } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.host).toBe('::');
+  });
+
+  it('should trim HOST from environment', async () => {
+    process.env.HOST = '  127.0.0.1  ';
+
+    const { loadConfigFromEnv } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.host).toBe('127.0.0.1');
+  });
+
+  it('should reject an empty HOST', async () => {
+    process.env.HOST = '';
+
+    const { loadConfigFromEnv } = await importConfig();
+
+    expect(() => loadConfigFromEnv()).toThrow('Invalid HOST: must not be empty');
+  });
+
+  it('should reject a whitespace-only HOST', async () => {
+    process.env.HOST = '   ';
+
+    const { loadConfigFromEnv } = await importConfig();
+
+    expect(() => loadConfigFromEnv()).toThrow('Invalid HOST: must not be empty');
+  });
+
+  it('should reject HOST values with protocol or path', async () => {
+    process.env.HOST = 'http://0.0.0.0';
+
+    const { loadConfigFromEnv } = await importConfig();
+
+    expect(() => loadConfigFromEnv()).toThrow('without protocol or path');
+  });
+});
+
 describe('DEFAULT_CORS_ORIGINS', () => {
   beforeEach(() => {
     resetEnv();
@@ -274,37 +333,28 @@ describe('DEFAULT_CORS_ORIGINS', () => {
     resetEnv();
   });
 
-  it('should match valid preview deployment URLs', async () => {
+  it('should default to the stable app origin only', async () => {
     const { loadConfigFromEnv } = await importConfig();
     const config = loadConfigFromEnv();
-    const pattern = config.cors.allowedOrigins![1] as RegExp;
 
-    expect(pattern.test('https://f5382282.super-productivity-preview.pages.dev')).toBe(
-      true,
-    );
-    expect(pattern.test('https://abc-123.super-productivity-preview.pages.dev')).toBe(
-      true,
-    );
+    expect(config.cors.allowedOrigins).toEqual(['https://app.super-productivity.com']);
   });
 
-  it('should reject domain confusion attacks', async () => {
+  // Every self-hosted instance inherits this default with `credentials: true`. A pattern
+  // here grants credentialed cross-origin access to infrastructure the operator does not
+  // control, so the default must stay free of wildcards. Preview origins belong in our
+  // own deployment's CORS_ORIGINS. (Wildcard PARSING is still supported and covered by
+  // the parseCorsOrigin tests above — this guards only what ships as the default.)
+  it('should not ship any wildcard or preview origin as a default', async () => {
     const { loadConfigFromEnv } = await importConfig();
     const config = loadConfigFromEnv();
-    const pattern = config.cors.allowedOrigins![1] as RegExp;
 
-    expect(pattern.test('https://evil.com.super-productivity-preview.pages.dev')).toBe(
-      false,
-    );
-    expect(pattern.test('https://a.b.super-productivity-preview.pages.dev')).toBe(false);
-  });
-
-  it('should reject URLs with paths', async () => {
-    const { loadConfigFromEnv } = await importConfig();
-    const config = loadConfigFromEnv();
-    const pattern = config.cors.allowedOrigins![1] as RegExp;
-
-    expect(pattern.test('https://abc.super-productivity-preview.pages.dev/path')).toBe(
-      false,
-    );
+    const origins = config.cors.allowedOrigins!;
+    expect(origins.some((origin) => origin instanceof RegExp)).toBe(false);
+    expect(
+      origins.some(
+        (origin) => typeof origin === 'string' && origin.includes('preview.pages.dev'),
+      ),
+    ).toBe(false);
   });
 });

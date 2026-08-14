@@ -23,7 +23,7 @@ import {
   SYNC_FORM,
   SyncCollapsibleProps,
 } from '../../../features/config/form-cfgs/sync-form.const';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { SyncConfig } from '../../../features/config/global-config.model';
 import {
@@ -32,10 +32,13 @@ import {
 } from '../../../op-log/sync-providers/provider.const';
 import { SyncConfigService } from '../sync-config.service';
 import { SyncWrapperService } from '../sync-wrapper.service';
-import { first, skip } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { toSyncProviderId } from '../../../op-log/sync-exports';
+import { isFileBasedProviderId } from '../../../op-log/sync/operation-sync.util';
 import { SyncLog } from '../../../core/log';
 import { SyncProviderManager } from '../../../op-log/sync-providers/provider-manager.service';
+import { isSyncTargetChanged } from '../../../op-log/sync-providers/sync-target-identity.util';
 
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { isOnline } from '../../../util/is-online';
@@ -47,7 +50,20 @@ import {
   type WebdavPrivateCfg,
 } from '@sp/sync-providers/webdav';
 import { testWebdavConnection } from '../../../op-log/sync-providers/file-based/webdav/test-webdav-connection';
+import { discoverNextcloudUserId } from '../../../op-log/sync-providers/file-based/webdav/discover-nextcloud-user-id';
 import type { OneDrivePrivateCfg } from '../../../op-log/sync-providers/file-based/onedrive/onedrive.model';
+import type { LocalFileSyncPrivateCfg } from '@sp/sync-providers/local-file';
+import type { SuperSyncPrivateCfg } from '@sp/sync-providers/super-sync';
+
+// `testWebdavConnection` reports a 404 (auth ok, wrong DAV path) via this
+// HTTP status; the package-side `WebDavHttpStatus` enum is not exported to
+// the app, so the discriminator value is named locally instead of inlined.
+const HTTP_NOT_FOUND = 404;
+
+type SyncFormModel = SyncConfig & {
+  _isInitialSetup?: boolean;
+  _activeProviderId?: SyncProviderId | null;
+};
 
 @Component({
   selector: 'dialog-sync-cfg',
@@ -108,7 +124,11 @@ export class DialogSyncCfgComponent implements AfterViewInit {
     if (item.key === 'nextcloud' && item.fieldGroup) {
       return {
         ...item,
-        fieldGroup: [...item.fieldGroup, this._nextcloudTestConnectionBtn()],
+        fieldGroup: [
+          ...item.fieldGroup,
+          this._nextcloudDetectUserIdBtn(),
+          this._nextcloudTestConnectionBtn(),
+        ],
       };
     }
     if (
@@ -189,6 +209,14 @@ export class DialogSyncCfgComponent implements AfterViewInit {
     });
   }
 
+  private _nextcloudDetectUserIdBtn(): FormlyFieldConfig {
+    return this._actionBtn({
+      text: T.F.SYNC.FORM.NEXTCLOUD.L_DETECT_USER_ID,
+      className: 'mt3 block',
+      onClick: (model) => this._detectNextcloudUserId(model as NextcloudPrivateCfg),
+    });
+  }
+
   private _forceOverwriteBtn(): FormlyFieldConfig {
     return this._actionBtn({
       text: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
@@ -232,14 +260,88 @@ export class DialogSyncCfgComponent implements AfterViewInit {
       });
       return;
     }
-    await this._testWebDavConnection({
-      ...cfg,
-      baseUrl: NextcloudProvider.buildBaseUrl(cfg),
-      userName: NextcloudProvider.getAuthUserName(cfg),
-    } as WebdavPrivateCfg);
+    await this._testWebDavConnection(
+      {
+        ...cfg,
+        baseUrl: NextcloudProvider.buildBaseUrl(cfg),
+        userName: NextcloudProvider.getAuthUserName(cfg),
+      } as WebdavPrivateCfg,
+      // A 404 on the Nextcloud base root means auth succeeded but the DAV
+      // path /remote.php/dav/files/<userName>/ doesn't exist — i.e. the
+      // "Username" field holds an email/display name instead of the
+      // account's user ID. Surface that instead of the cryptic bare-host
+      // message users misread as a stripped URL (issue #7617).
+      T.F.SYNC.FORM.NEXTCLOUD.S_TEST_FAIL_USER_NOT_FOUND,
+    );
   }
 
-  private async _testWebDavConnection(webDavCfg: WebdavPrivateCfg): Promise<void> {
+  /**
+   * Ask the Nextcloud server for the account's canonical user ID and write it
+   * into the "Username" field, so users don't have to hunt for it by hand
+   * (issue #7617). Authenticates with the login name / email (or whatever is
+   * in "Username") + app password; a 401 cleanly reports bad credentials.
+   */
+  private async _detectNextcloudUserId(cfg: NextcloudPrivateCfg): Promise<void> {
+    const login = cfg?.loginName?.trim() || cfg?.userName?.trim();
+    if (!cfg?.serverUrl?.trim() || !login || !cfg?.password) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.FORM.NEXTCLOUD.S_DETECT_USER_ID_NEED_LOGIN,
+      });
+      return;
+    }
+    this._applyDetectedUserIdResult(await discoverNextcloudUserId(cfg));
+  }
+
+  /**
+   * Apply a `discoverNextcloudUserId` result: on success fill the "Username"
+   * field with the detected user ID and confirm; otherwise surface the
+   * readable failure. Split from the network call so it is unit-testable
+   * without a live server (mirrors `_reportWebdavTestResult`).
+   */
+  private _applyDetectedUserIdResult(result: {
+    success: boolean;
+    userId?: string;
+    error?: string;
+  }): void {
+    if (result.success && result.userId) {
+      // formly builds the form dynamically, so the controls are untyped here.
+      const userNameCtrl = this.form.get('nextcloud.userName') as AbstractControl | null;
+      const loginNameCtrl = this.form.get(
+        'nextcloud.loginName',
+      ) as AbstractControl | null;
+      // Preserve the credential that just authenticated: if "Login name" is
+      // empty and the user typed their login (e.g. email) into "Username",
+      // keep it as the login name before overwriting Username with the user
+      // ID — otherwise the next sync would auth as the ID, which some servers
+      // reject (turning a wrong-path 404 into an auth 401). See issue #7617.
+      const priorUserName = ((userNameCtrl?.value as string) ?? '').trim();
+      if (
+        !((loginNameCtrl?.value as string) ?? '').trim() &&
+        priorUserName &&
+        priorUserName !== result.userId
+      ) {
+        loginNameCtrl?.setValue(priorUserName);
+      }
+      userNameCtrl?.setValue(result.userId);
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.SYNC.FORM.NEXTCLOUD.S_DETECT_USER_ID_SUCCESS,
+        translateParams: { userId: result.userId },
+      });
+    } else {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.FORM.NEXTCLOUD.S_DETECT_USER_ID_FAIL,
+        translateParams: { error: result.error || 'Unknown error' },
+      });
+    }
+  }
+
+  private async _testWebDavConnection(
+    webDavCfg: WebdavPrivateCfg,
+    notFoundMsg?: string,
+  ): Promise<void> {
     if (
       !webDavCfg?.baseUrl ||
       !webDavCfg?.userName ||
@@ -255,22 +357,7 @@ export class DialogSyncCfgComponent implements AfterViewInit {
 
     try {
       const result = await testWebdavConnection(webDavCfg);
-      if (result.success) {
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_SUCCESS,
-          translateParams: { url: result.fullUrl },
-        });
-      } else {
-        this._snackService.open({
-          type: 'ERROR',
-          msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_FAIL,
-          translateParams: {
-            error: result.error || 'Unknown error',
-            url: result.fullUrl,
-          },
-        });
-      }
+      this._reportWebdavTestResult(result, notFoundMsg);
     } catch (e) {
       this._snackService.open({
         type: 'ERROR',
@@ -282,9 +369,43 @@ export class DialogSyncCfgComponent implements AfterViewInit {
       });
     }
   }
-  // Note: _isInitialSetup flag is checked by sync-form.const.ts hideExpressions
-  // to hide the encryption button/warning (encryption is handled by _promptSuperSyncEncryptionIfNeeded after sync)
-  _tmpUpdatedCfg: SyncConfig & { _isInitialSetup?: boolean } = {
+
+  /**
+   * Open the success/failure snack for a connection-test result. When
+   * `notFoundMsg` is given (Nextcloud) and the failure is a 404, show that
+   * provider-specific hint instead of the generic message — a base-root 404
+   * means auth worked but the DAV user-id path is wrong (issue #7617).
+   */
+  private _reportWebdavTestResult(
+    result: { success: boolean; error?: string; fullUrl: string; errorCode?: number },
+    notFoundMsg?: string,
+  ): void {
+    if (result.success) {
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_SUCCESS,
+        translateParams: { url: result.fullUrl },
+      });
+    } else if (notFoundMsg && result.errorCode === HTTP_NOT_FOUND) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: notFoundMsg,
+        translateParams: { url: result.fullUrl },
+      });
+    } else {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_FAIL,
+        translateParams: {
+          error: result.error || 'Unknown error',
+          url: result.fullUrl,
+        },
+      });
+    }
+  }
+  // Form-only flags are checked by sync-form.const.ts hideExpressions.
+  // Encryption actions must target only the active, persisted provider.
+  _tmpUpdatedCfg: SyncFormModel = {
     isEnabled: true,
     syncProvider: SyncProviderId.SuperSync,
     syncInterval: 300000,
@@ -295,14 +416,27 @@ export class DialogSyncCfgComponent implements AfterViewInit {
     nextcloud: {},
     superSync: {},
     _isInitialSetup: true,
+    _activeProviderId: null,
   };
 
   private _matDialogRef = inject<MatDialogRef<DialogSyncCfgComponent>>(MatDialogRef);
+  private _initialProviderId: SyncProviderId | null = null;
+  private _providerConfigLoad: Promise<void> = Promise.resolve();
+  private _providerConfigLoadId = 0;
+  private _selectedProviderWasConfigured = false;
 
   constructor() {
+    // A pending LocalFile folder pick must never outlive this settings
+    // session (#9075). save() commits it (clearing the main-side slot), so
+    // every other exit — Cancel, Escape, backdrop click, navigation — lands
+    // here with the slot still set and discards it. Runs after a save too,
+    // where it is a no-op.
+    this._destroyRef.onDestroy(() => this._discardPendingLocalFileDir());
     this.syncConfigService.syncSettingsForm$
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe((v) => {
+        this._initialProviderId = toSyncProviderId(v.syncProvider);
+        this._selectedProviderWasConfigured = v.isEnabled;
         if (v.isEnabled) {
           this.isWasEnabled.set(true);
         }
@@ -313,6 +447,7 @@ export class DialogSyncCfgComponent implements AfterViewInit {
           ...v,
           isEnabled: true,
           _isInitialSetup: !v.isEnabled,
+          _activeProviderId: this._initialProviderId,
         });
       });
   }
@@ -329,8 +464,8 @@ export class DialogSyncCfgComponent implements AfterViewInit {
 
       // Listen for provider changes and reload provider-specific configuration
       syncProviderControl.valueChanges
-        .pipe(skip(1), takeUntilDestroyed(this._destroyRef))
-        .subscribe(async (newProvider: SyncProviderId | null) => {
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe((newProvider: SyncProviderId | null) => {
           if (!newProvider) {
             return;
           }
@@ -341,77 +476,93 @@ export class DialogSyncCfgComponent implements AfterViewInit {
             return;
           }
 
-          // Load the provider's stored configuration
-          const provider = await this._providerManager.getProviderById(providerId);
-          if (!provider) {
-            // Provider not yet configured, keep current form state
-            return;
-          }
-
-          const privateCfg = await provider.privateCfg.load();
-          const globalCfg = await this._globalConfigService.sync$
-            .pipe(first())
-            .toPromise();
-
-          // Create provider-specific config based on provider type
-          let providerSpecificUpdate: Partial<SyncConfig> = {};
-
-          if (newProvider === SyncProviderId.SuperSync && privateCfg) {
-            providerSpecificUpdate = {
-              superSync: privateCfg as any,
-              encryptKey: privateCfg.encryptKey || '',
-              // SuperSync stores isEncryptionEnabled in privateCfg, not globalCfg
-              isEncryptionEnabled: (privateCfg as any).isEncryptionEnabled || false,
-            };
-          } else if (newProvider === SyncProviderId.WebDAV && privateCfg) {
-            providerSpecificUpdate = {
-              webDav: privateCfg as any,
-              encryptKey: privateCfg.encryptKey || '',
-            };
-          } else if (newProvider === SyncProviderId.LocalFile && privateCfg) {
-            providerSpecificUpdate = {
-              localFileSync: privateCfg as any,
-              encryptKey: privateCfg.encryptKey || '',
-            };
-          } else if (newProvider === SyncProviderId.Nextcloud && privateCfg) {
-            providerSpecificUpdate = {
-              nextcloud: privateCfg as any,
-              encryptKey: privateCfg.encryptKey || '',
-            };
-          } else if (newProvider === SyncProviderId.Dropbox && privateCfg) {
-            providerSpecificUpdate = {
-              encryptKey: privateCfg.encryptKey || '',
-            };
-          } else if (newProvider === SyncProviderId.OneDrive && privateCfg) {
-            providerSpecificUpdate = {
-              oneDrive: privateCfg as any,
-              encryptKey: privateCfg.encryptKey || '',
-            };
-          }
-
-          // Update the model, preserving non-provider-specific fields
-          this._tmpUpdatedCfg = {
-            ...this._tmpUpdatedCfg,
-            ...providerSpecificUpdate,
-            syncProvider: newProvider,
-            // Preserve global settings (?? not || so explicit `false` is honoured)
-            isEnabled: this._tmpUpdatedCfg.isEnabled,
-            syncInterval: globalCfg?.syncInterval ?? this._tmpUpdatedCfg.syncInterval,
-            isManualSyncOnly:
-              globalCfg?.isManualSyncOnly ?? this._tmpUpdatedCfg.isManualSyncOnly,
-            isCompressionEnabled:
-              globalCfg?.isCompressionEnabled ?? this._tmpUpdatedCfg.isCompressionEnabled,
-          };
-
-          // For non-SuperSync providers, update encryption from global config
-          if (newProvider !== SyncProviderId.SuperSync) {
-            this._tmpUpdatedCfg = {
-              ...this._tmpUpdatedCfg,
-              isEncryptionEnabled: globalCfg?.isEncryptionEnabled ?? false,
-            };
-          }
+          this._providerConfigLoad = this._loadProviderConfig(providerId);
         });
     }, 0);
+  }
+
+  private async _loadProviderConfig(providerId: SyncProviderId): Promise<void> {
+    const loadId = ++this._providerConfigLoadId;
+    this._selectedProviderWasConfigured = false;
+
+    // Clear provider-owned encryption synchronously. Save waits for this load,
+    // but the immediate reset also prevents the previous provider's key from
+    // remaining in the Formly model while the new private config is loading.
+    Object.assign(this._tmpUpdatedCfg, {
+      syncProvider: providerId,
+      encryptKey: '',
+      isEncryptionEnabled: false,
+    });
+
+    const provider = await this._providerManager.getProviderById(providerId);
+    const privateCfg = provider ? await provider.privateCfg.load() : null;
+    const globalCfg = await firstValueFrom(this._globalConfigService.sync$);
+
+    // A later provider selection owns the form now. Never let an older async
+    // load restore stale credentials or encryption state.
+    if (loadId !== this._providerConfigLoadId) {
+      return;
+    }
+
+    this._selectedProviderWasConfigured = privateCfg !== null;
+    const encryptionCfg = privateCfg as {
+      encryptKey?: string;
+      isEncryptionEnabled?: boolean;
+    } | null;
+    const encryptKey = encryptionCfg?.encryptKey ?? '';
+    let providerSpecificUpdate: Partial<SyncConfig> = {
+      encryptKey,
+      isEncryptionEnabled:
+        providerId === SyncProviderId.SuperSync
+          ? (encryptionCfg?.isEncryptionEnabled ?? false)
+          : (encryptionCfg?.isEncryptionEnabled ?? !!encryptKey),
+    };
+
+    if (providerId === SyncProviderId.SuperSync && privateCfg) {
+      providerSpecificUpdate = {
+        ...providerSpecificUpdate,
+        superSync: privateCfg as SuperSyncPrivateCfg,
+      };
+    } else if (providerId === SyncProviderId.WebDAV && privateCfg) {
+      providerSpecificUpdate = {
+        ...providerSpecificUpdate,
+        webDav: privateCfg as WebdavPrivateCfg,
+      };
+    } else if (providerId === SyncProviderId.LocalFile && privateCfg) {
+      providerSpecificUpdate = {
+        ...providerSpecificUpdate,
+        localFileSync: privateCfg as LocalFileSyncPrivateCfg,
+      };
+    } else if (providerId === SyncProviderId.Nextcloud && privateCfg) {
+      providerSpecificUpdate = {
+        ...providerSpecificUpdate,
+        nextcloud: privateCfg as NextcloudPrivateCfg,
+      };
+    } else if (providerId === SyncProviderId.OneDrive && privateCfg) {
+      providerSpecificUpdate = {
+        ...providerSpecificUpdate,
+        oneDrive: privateCfg as OneDrivePrivateCfg,
+      };
+    }
+
+    Object.assign(this._tmpUpdatedCfg, providerSpecificUpdate, {
+      syncProvider: providerId,
+      // Preserve global settings (?? not || so explicit `false` is honoured)
+      isEnabled: this._tmpUpdatedCfg.isEnabled,
+      syncInterval: globalCfg.syncInterval ?? this._tmpUpdatedCfg.syncInterval,
+      isManualSyncOnly:
+        globalCfg.isManualSyncOnly ?? this._tmpUpdatedCfg.isManualSyncOnly,
+      isCompressionEnabled:
+        globalCfg.isCompressionEnabled ?? this._tmpUpdatedCfg.isCompressionEnabled,
+    });
+  }
+
+  private async _waitForCurrentProviderConfig(): Promise<void> {
+    let pendingLoad: Promise<void>;
+    do {
+      pendingLoad = this._providerConfigLoad;
+      await pendingLoad;
+    } while (pendingLoad !== this._providerConfigLoad);
   }
 
   close(): void {
@@ -474,6 +625,17 @@ export class DialogSyncCfgComponent implements AfterViewInit {
         tokenExpiresAt: identityChanged ? 0 : existingCfg?.tokenExpiresAt,
       };
       await oneDriveProvider.privateCfg.setComplete(mergedCfg);
+
+      // This write bypasses setProviderConfig() (the OAuth flow below reads
+      // clientId/tenantId straight from the store), so the save's later
+      // setProviderConfig sees THIS cfg on both sides of its diff and can't
+      // infer the move — `syncFolderPath` would change while the old folder's
+      // cursor stays keyed under 'OneDrive'. Raise the signal here instead.
+      // Gated because this runs on EVERY save: an unconditional notify would
+      // wipe the seq cursor on a no-op save. See `providerConfigChanged$`.
+      if (isSyncTargetChanged(existingCfg, mergedCfg)) {
+        this._providerManager.notifyProviderTargetChanged();
+      }
     }
   }
 
@@ -486,6 +648,8 @@ export class DialogSyncCfgComponent implements AfterViewInit {
       return;
     }
 
+    await this._waitForCurrentProviderConfig();
+
     // Explicitly sync form values to _tmpUpdatedCfg in case modelChange didn't fire
     // This is especially important on Android WebView where change detection can be unreliable
     this._tmpUpdatedCfg = {
@@ -493,15 +657,24 @@ export class DialogSyncCfgComponent implements AfterViewInit {
       ...this.form.value,
     };
 
-    // Strip _isInitialSetup before saving — it's only for form hideExpressions
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _isInitialSetup, ...cfgWithoutFlag } = this._tmpUpdatedCfg;
+    const isInitialSetup = this._tmpUpdatedCfg._isInitialSetup;
     const configToSave = {
-      ...cfgWithoutFlag,
+      ...this._tmpUpdatedCfg,
       isEnabled: this._tmpUpdatedCfg.isEnabled || !this.isWasEnabled(),
     };
+    // These flags drive only the form UI and setup decision.
+    delete configToSave._isInitialSetup;
+    delete configToSave._activeProviderId;
 
     const providerId = toSyncProviderId(this._tmpUpdatedCfg.syncProvider);
+    // Switching providers is a first setup only when the target has no stored
+    // private config. Returning providers must keep their existing encryption
+    // contract instead of being offered a new, incompatible key.
+    const isProviderSetup =
+      isInitialSetup ||
+      (providerId !== this._initialProviderId && !this._selectedProviderWasConfigured);
+    let selectedProvider: Awaited<ReturnType<SyncProviderManager['getProviderById']>> =
+      undefined;
     if (providerId && this._tmpUpdatedCfg.isEnabled) {
       if (providerId === SyncProviderId.OneDrive) {
         await this._persistOneDriveFormCfgBeforeAuth(providerId);
@@ -513,8 +686,66 @@ export class DialogSyncCfgComponent implements AfterViewInit {
       // the auth dialog was cancelled or failed. Keep the dialog open so the
       // user can retry, and do not persist isEnabled:true with missing credentials
       // (which would trigger the "Sync credentials are missing" snack loop — issue #7131).
-      const provider = await this._providerManager.getProviderById(providerId);
-      if (provider?.getAuthHelper && !(await provider.isReady())) {
+      selectedProvider = await this._providerManager.getProviderById(providerId);
+      if (selectedProvider?.getAuthHelper && !(await selectedProvider.isReady())) {
+        return;
+      }
+    }
+
+    // The Formly value can briefly retain the previous provider's root-level
+    // encryption fields during a provider switch. The selected provider's
+    // private config is the authority, so re-derive both fields at the save
+    // boundary before any setup prompt or persistence occurs.
+    if (providerId) {
+      selectedProvider ??= await this._providerManager.getProviderById(providerId);
+      const privateCfg = selectedProvider?.privateCfg
+        ? await selectedProvider.privateCfg.load()
+        : null;
+      const encryptionCfg = privateCfg as {
+        encryptKey?: string;
+        isEncryptionEnabled?: boolean;
+      } | null;
+      const encryptKey = encryptionCfg?.encryptKey ?? '';
+      configToSave.encryptKey = encryptKey;
+      configToSave.isEncryptionEnabled =
+        providerId === SyncProviderId.SuperSync
+          ? (encryptionCfg?.isEncryptionEnabled ?? false)
+          : (encryptionCfg?.isEncryptionEnabled ?? !!encryptKey);
+    }
+
+    // File-based providers support OPTIONAL E2EE but (unlike SuperSync) have no
+    // mandatory-encryption upload guard. So instead of prompting AFTER the first
+    // sync (which would already have shipped plaintext, and would race the auto
+    // "just enabled" sync), offer to set the encryption password here and persist
+    // it as part of THIS config save. The key lands in the provider's privateCfg
+    // and `isEncryptionEnabled` in the global config atomically with `isEnabled`,
+    // so the normal first sync encrypts from the very first op — no separate
+    // snapshot-overwrite, no plaintext-upload window. Skipping keeps today's
+    // unencrypted behavior. No network needed, so this also covers offline setup.
+    if (
+      isProviderSetup &&
+      providerId &&
+      isFileBasedProviderId(providerId) &&
+      !configToSave.isEncryptionEnabled
+    ) {
+      const encryptKey = await this._collectFileBasedSetupEncryptionKey();
+      if (encryptKey) {
+        configToSave.encryptKey = encryptKey;
+        configToSave.isEncryptionEnabled = true;
+      }
+    }
+
+    // Commit a pending Electron LocalFile folder pick (#9075) directly before
+    // the config save and the closing sync(true) — picking is prepare-only
+    // and Save is the commit point. Placed here (after auth checks and the
+    // encryption prompt) so no other save step can throw or dead-end between
+    // the folder going live and the settings being persisted. On failure,
+    // keep the dialog open: the old folder stays live and the user can
+    // re-pick or cancel. Saving a different provider skips this; the
+    // untouched candidate is discarded when the dialog closes.
+    if (providerId === SyncProviderId.LocalFile) {
+      const isCommitOk = await this._commitPendingLocalFileDir();
+      if (!isCommitOk) {
         return;
       }
     }
@@ -522,12 +753,99 @@ export class DialogSyncCfgComponent implements AfterViewInit {
     await this.syncConfigService.updateSettingsFromForm(configToSave as SyncConfig, true);
     this._matDialogRef.close();
 
+    // Enabling SuperSync from a previously-disabled state: arm the one-time setup
+    // encryption modal for the setup sync. Done OUTSIDE the isOnline() guard because
+    // an offline save still needs the flag armed for whenever the setup sync finally
+    // runs (else the prompt is silently skipped and the account syncs unencrypted).
+    // Established/returning accounts are nudged by the calm migration banner instead.
+    if (isProviderSetup && providerId === SyncProviderId.SuperSync) {
+      this.syncWrapperService.markPromptEncryptionAfterSetupSync();
+    }
+
     if (isOnline()) {
       this.syncWrapperService.sync(true);
     }
   }
 
-  updateTmpCfg(cfg: SyncConfig & { _isInitialSetup?: boolean }): void {
+  /**
+   * Commits the main-side pending LocalFile folder pick (#9075) straight over
+   * the Electron bridge — like the picker itself, the pick lifecycle is
+   * main-owned and never round-trips a path through the renderer (#8228).
+   * Returns false when persisting failed (folder deleted between pick and
+   * Save, EACCES) — the candidate is kept main-side so a retry stays loud.
+   * No-op (true) on platforms without a main-side pending slot (Android/web)
+   * and when nothing was picked this session.
+   */
+  private async _commitPendingLocalFileDir(): Promise<boolean> {
+    if (!window.ea?.commitPickedDirectory) {
+      return true;
+    }
+    try {
+      const committed = await window.ea.commitPickedDirectory();
+      // Main reports persist/validation failure as a safe Error VALUE (same
+      // contract as the other file-sync IPCs) — treat it as the failure path.
+      if (committed instanceof Error) {
+        throw committed;
+      }
+      if (committed?.isChanged) {
+        // The commit persists main-side, bypassing setProviderConfig(), so no
+        // config diff exists to infer the target move from — assert it
+        // explicitly. Gated on isChanged: re-picking the already-configured
+        // folder must not wipe per-target sync state (cursor/rev caches).
+        // On first-ever setup this double-fires (setProviderConfig's !prevCfg
+        // diff also reports a move) — benign, as no per-target state exists
+        // yet to wipe; do not "fix" it by skipping this notify, or an
+        // existing-config folder move would go unsignalled.
+        this._providerManager.notifyProviderTargetChanged();
+      }
+      return true;
+    } catch (e) {
+      SyncLog.err('LocalFile folder commit failed', { name: _redactErrorName(e) });
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.FORM.LOCAL_FILE.S_COMMIT_FOLDER_ERROR,
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Fire-and-forget: dropping the candidate must never block dialog close.
+   * Straight over the Electron bridge on purpose — routing through
+   * getProviderById() would lazy-load every provider bundle on each dialog
+   * close just to clear a slot that is usually empty. No-op outside Electron.
+   */
+  private _discardPendingLocalFileDir(): void {
+    window.ea?.discardPickedDirectory?.().catch((e) => {
+      SyncLog.err('LocalFile pending folder discard failed', {
+        name: _redactErrorName(e),
+      });
+    });
+  }
+
+  /**
+   * Open the encryption dialog in collect-only mode to gather an optional
+   * setup password for a file-based provider. Returns the password, or `null`
+   * if the user skipped. Performs no side effect — the caller persists the key
+   * as part of the sync config so the normal first sync encrypts from op #1.
+   */
+  private async _collectFileBasedSetupEncryptionKey(): Promise<string | null> {
+    const { DialogEnableEncryptionComponent } =
+      await import('../dialog-enable-encryption/dialog-enable-encryption.component');
+    const dialogRef = this._matDialog.open(DialogEnableEncryptionComponent, {
+      width: '450px',
+      disableClose: true,
+      data: {
+        providerType: 'file-based',
+        initialSetup: true,
+        collectPasswordOnly: true,
+      },
+    });
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    return result?.success && result.password ? result.password : null;
+  }
+
+  updateTmpCfg(cfg: SyncFormModel): void {
     // Use Object.assign to preserve the object reference for Formly
     // This ensures Formly detects changes to the model
     Object.assign(this._tmpUpdatedCfg, cfg);

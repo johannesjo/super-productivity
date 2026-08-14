@@ -13,7 +13,10 @@ import {
   ScheduleItemTask,
   ScheduleItemType,
 } from '../planner.model';
-import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
+import {
+  isAllDayCalendarEvent,
+  ScheduleFromCalendarEvent,
+} from '../../schedule/schedule.model';
 import { Task, TaskCopy, TaskWithDueDay, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -32,7 +35,6 @@ import {
 } from '../../../root-store/app-state/app-state.selectors';
 import { isTodayWithOffset } from '../../../util/is-today.util';
 import { selectTaskRepeatCfgsForExactDay } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
-import { oneDayInMilliseconds } from '../../../util/month-time-conversion';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
@@ -92,7 +94,6 @@ export const selectTasksForPlannerDay = (day: string) => {
   );
 };
 
-// Updated selectPlannerDays
 export const selectPlannerDays = (
   dayDates: string[],
   taskRepeatCfgs: TaskRepeatCfg[],
@@ -112,21 +113,13 @@ export const selectPlannerDays = (
     selectTimelineConfig,
     selectStartOfNextDayDiffMs,
     (activeTasks, plannerState, scheduleConfig, startOfNextDayDiffMs): PlannerDay[] => {
-      const allDatesWithData = Object.keys(plannerState.days);
-      const dayDatesToUse = [
-        ...dayDates,
-        ...allDatesWithData
-          .filter((d) => plannerState.days[d].length && !dayDates.includes(d))
-          .sort((a, b) => a.localeCompare(b)),
-      ];
-
       // Pre-compute deadline tasks grouped by day (O(N) once, then O(1) per day)
       const deadlineMap = groupDeadlineTasksByDay(
         activeTasks.values(),
         startOfNextDayDiffMs,
       );
 
-      return dayDatesToUse.map((dayDate) =>
+      return dayDates.map((dayDate) =>
         getPlannerDay(
           dayDate,
           todayStr,
@@ -186,13 +179,38 @@ const getPlannerDay = (
     // Filter out tasks with dueDay in future if it is Today's column
     .filter((t) => !isTodayI || !t.dueDay || t.dueDay <= todayStr);
 
-  const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
-    getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);
+  const {
+    repeatProjectionsForDay: allRepeatProjectionsForDay,
+    noStartTimeRepeatProjections: allNoStartTimeRepeatProjections,
+  } = getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);
 
   const scheduledTaskItems = getScheduledTaskItems(
     allPlannedTasks,
     dayDate,
     startOfNextDayDiffMs,
+  );
+
+  // A recurring task can already have a real instance in this day, either in
+  // normalTasks (untimed instance, or any non-Today column) or in
+  // scheduledTaskItems (timed `dueWithTime` instance on Today — excluded from
+  // normalTasks because allPlannedTasks owns it). Drop the projection for any
+  // config that already has an instance here so the same recurring task is not
+  // counted twice — once as the real (done-aware) task and once as a full-
+  // estimate projection. The "Today" view only ever counts the real task, so
+  // without this the two views disagree on remaining time for done recurring
+  // tasks. See #8220, #8232.
+  const coveredRepeatCfgIds = new Set<string>();
+  for (const t of normalTasks) {
+    if (t.repeatCfgId) coveredRepeatCfgIds.add(t.repeatCfgId);
+  }
+  for (const si of scheduledTaskItems) {
+    if (si.task.repeatCfgId) coveredRepeatCfgIds.add(si.task.repeatCfgId);
+  }
+  const repeatProjectionsForDay = allRepeatProjectionsForDay.filter(
+    (rp) => !coveredRepeatCfgIds.has(rp.repeatCfg.id),
+  );
+  const noStartTimeRepeatProjections = allNoStartTimeRepeatProjections.filter(
+    (rp) => !coveredRepeatCfgIds.has(rp.repeatCfg.id),
   );
   const { timedEvents, allDayEvents } = getIcalEventsForDay(
     calendarEvents,
@@ -326,7 +344,11 @@ const getScheduledTaskItems = (
     )
     .map((task) => {
       const start = task.dueWithTime;
-      const end = start + Math.max(task.timeEstimate - task.timeSpent, 0);
+      // Mirror normalTasks: a done task contributes 0 remaining time. Without
+      // this, a done timed task still adds its full estimate to the day total
+      // (and a done timed recurring task double-counted with its projection
+      // before the dedup above). See #8232.
+      const end = start + (task.isDone ? 0 : getTimeLeftForTask(task));
       return {
         id: task.id,
         type: ScheduleItemType.Task,
@@ -353,7 +375,7 @@ const getIcalEventsForDay = (
     icalMapEntry.items.forEach((calEv) => {
       const start = calEv.start;
       if (getDbDateStr(new Date(start - startOfNextDayDiffMs)) === dayDate) {
-        if (isPlannerAllDayCalendarEvent(calEv)) {
+        if (isAllDayCalendarEvent(calEv)) {
           // Some providers expose all-day events as 24h timed events.
           allDayEvents.push({ ...calEv, isAllDay: true });
         } else {
@@ -374,9 +396,6 @@ const getIcalEventsForDay = (
   });
   return { timedEvents, allDayEvents };
 };
-
-const isPlannerAllDayCalendarEvent = (calEv: ScheduleFromCalendarEvent): boolean =>
-  calEv.isAllDay === true || calEv.duration >= oneDayInMilliseconds;
 
 /**
  * Groups all undone deadline tasks by their effective day string.

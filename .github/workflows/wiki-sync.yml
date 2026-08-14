@@ -16,26 +16,27 @@ name: Wiki Update
       - .github/annotations/wiki-lint-problem-matcher.json
 
 concurrency:
-  group: wiki
+  group: wiki-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       GH_A9S: .github/annotations
       GH_W7S: .github/workflows
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.13'
 
@@ -51,7 +52,10 @@ jobs:
       - name: Lint with yamllint
         id: yamllint
         run: |
+          # SHA-pinned `uses:` lines legitimately exceed 80 chars and carry a
+          # single-space `# vX.Y.Z` version comment, so relax both defaults.
           yamllint \
+            -d "{extends: default, rules: {line-length: {max: 120}, comments: {min-spaces-from-content: 1}}}" \
             --format github \
           "${GH_W7S}/wiki-sync.yml"
 
@@ -69,6 +73,9 @@ jobs:
     if: github.event_name == 'push'
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     env:
       # Using [standard bot credentials](https://github.com/actions/checkout)
       GIT_AUTHOR_NAME: github-actions[bot]
@@ -82,7 +89,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ github.repository }}
           path: ${{ env.CODE_ROOT }}
@@ -92,7 +99,7 @@ jobs:
         # includeIf matcher, which intermittently leaves the wiki push without
         # credentials on github-hosted runners (run 26335467138). v5 uses the
         # path-independent extraheader and is stable for this second checkout.
-        uses: actions/checkout@v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ github.repository }}.wiki
           path: ${{ env.WIKI_ROOT }}

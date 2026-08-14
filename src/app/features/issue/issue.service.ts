@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { unique } from '../../util/unique';
 import { generateCalendarTaskId } from '../calendar-integration/generate-calendar-task-id';
+import { generatePlainspaceTaskId } from './providers/plainspace/generate-plainspace-task-id';
 import {
   BuiltInIssueProviderKey,
   IssueData,
@@ -15,7 +16,6 @@ import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 import { firstValueFrom, forkJoin, from, merge, Observable, of, Subject } from 'rxjs';
 import {
   CALDAV_TYPE,
-  GITEA_TYPE,
   GITLAB_TYPE,
   ICAL_TYPE,
   ISSUE_PROVIDER_HUMANIZED,
@@ -24,28 +24,27 @@ import {
   DEFAULT_ISSUE_STRS,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
-  TRELLO_TYPE,
   REDMINE_TYPE,
-  LINEAR_TYPE,
-  AZURE_DEVOPS_TYPE,
   NEXTCLOUD_DECK_TYPE,
+  PLAINSPACE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
 import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
-import { TrelloCommonInterfacesService } from './providers/trello/trello-common-interfaces.service';
+// Trello is now a plugin — no built-in service needed
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { IssueLog } from '../../core/log';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
-import { GiteaCommonInterfacesService } from './providers/gitea/gitea-common-interfaces.service';
+// Gitea is now a plugin — no built-in service needed
 import { RedmineCommonInterfacesService } from './providers/redmine/redmine-common-interfaces.service';
-import { LinearCommonInterfacesService } from './providers/linear/linear-common-interfaces.service';
+// Linear is now a plugin — no built-in service needed
 // ClickUp is now a plugin — no built-in service needed
-import { AzureDevOpsCommonInterfacesService } from './providers/azure-devops/azure-devops-common-interfaces.service';
+// Azure DevOps is now a plugin — no built-in service needed
 import { NextcloudDeckCommonInterfacesService } from './providers/nextcloud-deck/nextcloud-deck-common-interfaces.service';
+import { PlainspaceCommonInterfacesService } from './providers/plainspace/plainspace-common-interfaces.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
@@ -75,17 +74,14 @@ import { PluginIssueProviderRegistryService } from '../../plugins/issue-provider
 export class IssueService {
   private _taskService = inject(TaskService);
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
-  private _trelloCommonInterfacesService = inject(TrelloCommonInterfacesService);
   private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
   private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
   private _openProjectInterfaceService = inject(OpenProjectCommonInterfacesService);
-  private _giteaInterfaceService = inject(GiteaCommonInterfacesService);
   private _redmineInterfaceService = inject(RedmineCommonInterfacesService);
-  private _linearCommonInterfaceService = inject(LinearCommonInterfacesService);
-  private _azureDevOpsCommonInterfaceService = inject(AzureDevOpsCommonInterfacesService);
   private _nextcloudDeckCommonInterfaceService = inject(
     NextcloudDeckCommonInterfacesService,
   );
+  private _plainspaceCommonInterfaceService = inject(PlainspaceCommonInterfacesService);
   private _calendarCommonInterfaceService = inject(CalendarCommonInterfacesService);
   private _issueProviderService = inject(IssueProviderService);
   private _workContextService = inject(WorkContextService);
@@ -104,15 +100,10 @@ export class IssueService {
     [JIRA_TYPE]: this._jiraCommonInterfacesService,
     [CALDAV_TYPE]: this._caldavCommonInterfaceService,
     [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
-    [GITEA_TYPE]: this._giteaInterfaceService,
     [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
-    [LINEAR_TYPE]: this._linearCommonInterfaceService,
-    [AZURE_DEVOPS_TYPE]: this._azureDevOpsCommonInterfaceService,
     [NEXTCLOUD_DECK_TYPE]: this._nextcloudDeckCommonInterfaceService,
-
-    // trello
-    [TRELLO_TYPE]: this._trelloCommonInterfacesService,
+    [PLAINSPACE_TYPE]: this._plainspaceCommonInterfaceService,
   };
 
   ISSUE_REFRESH_MAP: {
@@ -249,22 +240,28 @@ export class IssueService {
   async checkAndImportNewIssuesToBacklogForProject(
     providerKey: IssueProviderKey,
     issueProviderId: string,
+    isBackgroundPoll = false,
   ): Promise<void> {
     const service = this._getService(providerKey);
     if (!service?.getNewIssuesToAddToBacklog) {
       return;
     }
-    this._snackService.open({
-      svgIco: this._getProviderIcon(providerKey),
-      msg: T.F.ISSUE.S.POLLING_BACKLOG,
-      isSpinner: true,
-      translateParams: {
-        issueProviderName: this._getProviderName(providerKey),
-        issuesStr: this._translateService.instant(
-          this._getIssueStrings(providerKey).ISSUES_STR,
-        ),
-      },
-    });
+    // Background ('always'-mode) polls run every few minutes regardless of
+    // navigation, so keep them quiet — only the import result snack below is
+    // shown, and only when something is actually added.
+    if (!isBackgroundPoll) {
+      this._snackService.open({
+        svgIco: this._getProviderIcon(providerKey),
+        msg: T.F.ISSUE.S.POLLING_BACKLOG,
+        isSpinner: true,
+        translateParams: {
+          issueProviderName: this._getProviderName(providerKey),
+          issuesStr: this._translateService.instant(
+            this._getIssueStrings(providerKey).ISSUES_STR,
+          ),
+        },
+      });
+    }
 
     const allExistingIssueIds: string[] | number[] =
       await this._taskService.getAllIssueIdsForProviderEverywhere(issueProviderId);
@@ -280,11 +277,17 @@ export class IssueService {
 
     issuesToAdd.forEach((issue: IssueDataReduced) => {
       // TODO add correct project id
+      // Every import here is an automatic backlog poll targeting the provider's
+      // default project, so the currently-viewed context is incidental and must
+      // not leak its tag onto the task (#8673). Flagging it here (rather than in
+      // the effect) also covers the classic poll's mid-fetch context-switch race
+      // — getTaskDefaults reads the *live* context after several awaits.
       this.addTaskFromIssue({
         issueDataReduced: issue,
         issueProviderId,
         issueProviderKey: providerKey,
         isAddToBacklog: true,
+        isAutoImport: true,
       });
     });
 
@@ -406,16 +409,18 @@ export class IssueService {
         labelParams: pollingLabelParams,
       });
 
+      const service = this._getService(providerKey);
+      if (!service) {
+        this._globalProgressBarService.countDown();
+        continue;
+      }
+
       let updates: {
         task: Task;
         taskChanges: Partial<Task>;
         issue: IssueData;
       }[] = [];
       try {
-        const service = this._getService(providerKey);
-        if (!service) {
-          continue;
-        }
         updates = await service.getFreshDataForIssueTasks(
           tasksIssueIdsByIssueProviderKey[providerKey],
         );
@@ -473,6 +478,7 @@ export class IssueService {
     additional = {},
     isAddToBacklog = false,
     isForceDefaultProject = false,
+    isAutoImport = false,
   }: {
     issueDataReduced: IssueDataReduced;
     issueProviderId: string;
@@ -480,6 +486,10 @@ export class IssueService {
     additional?: Partial<Task>;
     isAddToBacklog?: boolean;
     isForceDefaultProject?: boolean;
+    // Automatic (non-user-initiated) import — a background backlog poll or
+    // calendar auto-import. Such imports fire regardless of what the user is
+    // viewing, so they must not inherit the active context's tag (#8673).
+    isAutoImport?: boolean;
   }): Promise<string | undefined> {
     if (!issueDataReduced || !issueDataReduced.id || !issueProviderId) {
       throw new Error('No issueData');
@@ -506,6 +516,14 @@ export class IssueService {
       additional = {
         ...additional,
         id: generateCalendarTaskId(issueProviderId, issueDataReduced.id.toString()),
+      };
+    } else if (issueProviderKey === PLAINSPACE_TYPE) {
+      // Plainspace auto-imports in the background on every device, so concurrent
+      // imports of the same issue must converge on one task id (see
+      // generatePlainspaceTaskId) instead of creating cross-device duplicates.
+      additional = {
+        ...additional,
+        id: generatePlainspaceTaskId(issueProviderId, issueDataReduced.id.toString()),
       };
     }
 
@@ -553,7 +571,13 @@ export class IssueService {
         }
         return result;
       } else {
+        // An automatic import (background backlog poll / calendar auto-import)
+        // fires regardless of what the user is currently viewing, so the active
+        // tag is incidental. Inheriting it would stamp an unrelated tag onto the
+        // imported task and sync that stray tag to every device. Only inherit the
+        // ambient tag for user-initiated (foreground) imports.
         const contextTagIds =
+          !isAutoImport &&
           this._workContextService.activeWorkContextType === WorkContextType.TAG &&
           this._workContextService.activeWorkContextId !== TODAY_TAG.id
             ? [this._workContextService.activeWorkContextId]
@@ -665,7 +689,7 @@ export class IssueService {
         const subTaskData = this._getAddTaskData(issueProviderKey, subtask);
         const { title: subTaskTitle, ...subTaskAdditional } = subTaskData;
 
-        await this._taskService.addSubTaskTo(parentTaskId, {
+        this._taskService.addSubTaskTo(parentTaskId, {
           title: subTaskTitle,
           issueType: issueProviderKey,
           issueProviderId: issueProviderId,
@@ -714,7 +738,7 @@ export class IssueService {
     // sub-task (has a parentId), attach to its root parent so the new task
     // becomes a sibling of the parent rather than a grandchild.
     const effectiveParentId = parentTask.task.parentId || parentTask.task.id;
-    const taskId = await this._taskService.addSubTaskTo(effectiveParentId, subTaskData);
+    const taskId = this._taskService.addSubTaskTo(effectiveParentId, subTaskData);
     return { taskId, parentTaskId: effectiveParentId };
   }
 

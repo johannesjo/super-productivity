@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { TaskViewCustomizerService } from './task-view-customizer.service';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { provideMockStore } from '@ngrx/store/testing';
 import { selectAllProjects } from '../project/store/project.selectors';
-import { selectAllTags } from '../tag/store/tag.reducer';
 import { getTomorrow } from '../../util/get-tomorrow';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -15,6 +15,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { selectAllTasksWithSubTasks } from '../tasks/store/task.selectors';
 import { ProjectService } from '../project/project.service';
 import { TagService } from '../tag/tag.service';
+import { MenuTreeService } from '../menu-tree/menu-tree.service';
 import {
   DEFAULT_OPTIONS,
   FILTER_COMMON,
@@ -23,6 +24,7 @@ import {
   FilterOption,
   GROUP_OPTION_TYPE,
   GroupOption,
+  NO_TAG_GROUP_ID,
   SORT_OPTION_TYPE,
   SORT_ORDER,
   SortOption,
@@ -32,6 +34,7 @@ import { DEFAULT_FIRST_DAY_OF_WEEK, DEFAULT_LOCALE } from 'src/app/core/locale.c
 import { LS } from '../../core/persistence/storage-keys.const';
 import { LanguageService } from 'src/app/core/language/language.service';
 import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../t.const';
 
 describe('TaskViewCustomizerService', () => {
   let service: TaskViewCustomizerService;
@@ -48,6 +51,9 @@ describe('TaskViewCustomizerService', () => {
   };
   let projectUpdateSpy: jasmine.Spy;
   let tagUpdateSpy: jasmine.Spy;
+  // Stand-in for the sidebar (menu-tree) order. Defaults to identity so tags keep
+  // their _allTags order; individual tests override it to assert a custom order.
+  let menuTreeFlattenFn: (tags: Tag[]) => Tag[];
   const mockLanguageService = { detect: () => DEFAULT_LOCALE };
 
   const todayStr = getDbDateStr(new Date());
@@ -127,6 +133,7 @@ describe('TaskViewCustomizerService', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
+    menuTreeFlattenFn = (tags) => tags;
 
     mockWorkContextService = {
       activeWorkContextId: null,
@@ -159,12 +166,16 @@ describe('TaskViewCustomizerService', () => {
         { provide: DateAdapter, useValue: dateAdapter },
         { provide: WorkContextService, useValue: mockWorkContextService },
         { provide: ProjectService, useValue: { update: projectUpdateSpy } },
-        { provide: TagService, useValue: { updateTag: tagUpdateSpy } },
+        {
+          provide: TagService,
+          useValue: { updateTag: tagUpdateSpy, tagsInTreeOrder: signal(mockTags) },
+        },
+        {
+          provide: MenuTreeService,
+          useValue: { buildTagListInTreeOrder: (tags: Tag[]) => menuTreeFlattenFn(tags) },
+        },
         provideMockStore({
-          selectors: [
-            { selector: selectAllProjects, value: mockProjects },
-            { selector: selectAllTags, value: mockTags },
-          ],
+          selectors: [{ selector: selectAllProjects, value: mockProjects }],
         }),
       ],
     });
@@ -347,7 +358,11 @@ describe('TaskViewCustomizerService', () => {
     ]);
   });
 
-  it('should sort by tag (primary alphabetical tag title), with untagged last', () => {
+  it('should sort by primary-tag sidebar order, keeping manual order within a tag', () => {
+    (service as unknown as { _allTags: Tag[] })._allTags = [
+      { id: 'Tag B', title: 'Tag B' } as Tag,
+      { id: 'Tag A', title: 'Tag A' } as Tag,
+    ];
     const extra: TaskWithSubTasks[] = [
       {
         id: 'Aardvark(-)',
@@ -364,26 +379,119 @@ describe('TaskViewCustomizerService', () => {
         attachments: [],
       },
     ];
-    const arr: TaskWithSubTasks[] = [...mockTasks, ...extra];
+    // Input order is deliberately anti-alphabetical within each tag group
+    // (Third Task before Beta in Tag B; Zebra before Aardvark when untagged) so
+    // the assertions fail under the old by-title tie-break, not just by luck.
+    const arr: TaskWithSubTasks[] = [
+      mockTasks[0], // Alpha (Tag A)
+      mockTasks[2], // Third Task (Tag A, Tag B) -> primary Tag B
+      mockTasks[1], // Beta (Tag B)
+      mockTasks[3], // Zebra (untagged)
+      ...extra, // Aardvark (untagged)
+    ];
 
     const sorted = {
       asc: service['applySort'](arr, SORT_OPTION_TYPE.tag, SORT_ORDER.ASC),
       desc: service['applySort'](arr, SORT_OPTION_TYPE.tag, SORT_ORDER.DESC),
     };
 
+    // Tag groups follow sidebar order ([Tag B, Tag A]) and flip with the
+    // direction, but within a group the input (manual) order is preserved -
+    // it does NOT re-sort by task title, so DESC is not a plain reverse.
     const resultAsc = [
+      'Third Task(Tag A, Tag B)',
+      'Beta(Tag B)',
+      'Alpha(Tag A)',
+      'Zebra(-)',
+      'Aardvark(-)',
+    ];
+    const resultDesc = [
+      'Zebra(-)',
+      'Aardvark(-)',
       'Alpha(Tag A)',
       'Third Task(Tag A, Tag B)',
       'Beta(Tag B)',
-      'Aardvark(-)',
-      'Zebra(-)',
     ];
 
     expect(sorted.asc.map((t) => t.id)).toEqual(resultAsc);
-    expect(sorted.desc.map((t) => t.id)).toEqual(resultAsc.reverse());
+    expect(sorted.desc.map((t) => t.id)).toEqual(resultDesc);
   });
 
-  it('should sort by title for tasks with the same primary tag', () => {
+  it('should sort tasks with unknown tag ids after known tree-ordered tags', () => {
+    (service as unknown as { _allTags: Tag[] })._allTags = [
+      { id: 'Tag B', title: 'Tag B' } as Tag,
+      { id: 'Tag A', title: 'Tag A' } as Tag,
+    ];
+    const tasks: TaskWithSubTasks[] = [
+      {
+        id: 'unknown-tag',
+        title: 'Unknown tag task',
+        tagIds: ['missing-tag'],
+        projectId: 'Project A',
+        created: 1,
+        subTasks: [],
+        subTaskIds: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        timeSpentOnDay: {},
+        isDone: false,
+        attachments: [],
+      },
+      {
+        id: 'known-a',
+        title: 'Known A task',
+        tagIds: ['Tag A'],
+        projectId: 'Project A',
+        created: 2,
+        subTasks: [],
+        subTaskIds: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        timeSpentOnDay: {},
+        isDone: false,
+        attachments: [],
+      },
+      {
+        id: 'known-b',
+        title: 'Known B task',
+        tagIds: ['Tag B'],
+        projectId: 'Project A',
+        created: 3,
+        subTasks: [],
+        subTaskIds: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        timeSpentOnDay: {},
+        isDone: false,
+        attachments: [],
+      },
+      {
+        id: 'no-tag',
+        title: 'No tag task',
+        tagIds: [],
+        projectId: 'Project A',
+        created: 4,
+        subTasks: [],
+        subTaskIds: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        timeSpentOnDay: {},
+        isDone: false,
+        attachments: [],
+      },
+    ];
+
+    const sorted = service['applySort'](tasks, SORT_OPTION_TYPE.tag, SORT_ORDER.ASC);
+
+    expect(sorted.map((t) => t.id)).toEqual([
+      'known-b',
+      'known-a',
+      'unknown-tag',
+      'no-tag',
+    ]);
+  });
+
+  it('should keep manual order for tasks with the same primary tag', () => {
     const samePrimary: TaskWithSubTasks[] = [
       {
         id: 'tA',
@@ -414,15 +522,23 @@ describe('TaskViewCustomizerService', () => {
         attachments: [],
       },
     ];
-    const sorted = service['applySort'](samePrimary, SORT_OPTION_TYPE.tag);
+    const asc = service['applySort'](samePrimary, SORT_OPTION_TYPE.tag, SORT_ORDER.ASC);
+    const desc = service['applySort'](samePrimary, SORT_OPTION_TYPE.tag, SORT_ORDER.DESC);
 
-    expect(sorted.map((t) => t.id)).toEqual(['tB', 'tA']);
+    // Input order is preserved (tA="Zed" before tB="Alpha2") rather than re-sorted
+    // by title, and the direction does not re-order within a tag: ASC === DESC.
+    // (Under the old by-title tie-break these would differ: ASC=[tB,tA], DESC=[tA,tB].)
+    expect(asc.map((t) => t.id)).toEqual(['tA', 'tB']);
+    expect(desc.map((t) => t.id)).toEqual(['tA', 'tB']);
   });
 
   it('should group by tag', () => {
+    (service as unknown as { _allTags: Tag[] })._allTags = [
+      { id: 'Tag B', title: 'Tag B' } as Tag,
+      { id: 'Tag A', title: 'Tag A' } as Tag,
+    ];
     const grouped = service['applyGrouping'](mockTasks, GROUP_OPTION_TYPE.tag);
-    expect(Object.keys(grouped)).toContain('Tag A');
-    expect(Object.keys(grouped)).toContain('Tag B');
+    expect(Object.keys(grouped)).toEqual(['Tag B', 'Tag A', 'No tag']);
     expect(grouped['Tag A'][0].id).toBe('Alpha(Tag A)');
     expect(grouped['Tag B'][0].id).toBe('Beta(Tag B)');
   });
@@ -443,6 +559,25 @@ describe('TaskViewCustomizerService', () => {
     expect(grouped['Tag A'][1].id).toBe('Third Task(Tag A, Tag B)');
     expect(grouped['Tag B'][0].id).toBe('Beta(Tag B)');
     expect(grouped['Tag B'][1].id).toBe('Third Task(Tag A, Tag B)');
+  });
+
+  it('should merge distinct tags that share a title into a single group', () => {
+    // Two different tag entities can carry the same title; their tasks must all
+    // land in the single title-keyed bucket instead of one tag overwriting the
+    // other (regression: the second tag used to clobber the first's tasks).
+    (service as unknown as { _allTags: Tag[] })._allTags = [
+      { id: 'work-1', title: 'Work' } as Tag,
+      { id: 'work-2', title: 'Work' } as Tag,
+    ];
+    const tasks = [
+      { ...mockTasks[0], id: 'task-work-1', tagIds: ['work-1'] },
+      { ...mockTasks[0], id: 'task-work-2', tagIds: ['work-2'] },
+    ] as TaskWithSubTasks[];
+
+    const grouped = service['applyGrouping'](tasks, GROUP_OPTION_TYPE.tag);
+
+    expect(Object.keys(grouped)).toEqual(['Work']);
+    expect(grouped['Work'].map((t) => t.id)).toEqual(['task-work-1', 'task-work-2']);
   });
 
   it('should group by scheduledDate using dueDay', () => {
@@ -505,6 +640,101 @@ describe('TaskViewCustomizerService', () => {
     expect(Object.keys(grouped)).toContain('No date');
     expect(grouped['No date'].length).toBe(1);
     expect(grouped['No date'][0].id).toBe('task-no-date');
+  });
+
+  describe('tag order matches the sidebar (issue #8400)', () => {
+    beforeEach(() => {
+      // Sidebar order that is intentionally NOT alphabetical: Tag B before Tag A.
+      menuTreeFlattenFn = () => [mockTags[1], mockTags[0]];
+    });
+
+    it('should sort by tag following the sidebar order, not alphabetically', () => {
+      const sorted = service['applySort'](
+        mockTasks,
+        SORT_OPTION_TYPE.tag,
+        SORT_ORDER.ASC,
+      );
+      // Tag B leads the sidebar, so its task comes first; the multi-tag task is
+      // placed by its highest-priority (lowest-index) tag, which is Tag B.
+      expect(sorted.map((t) => t.id)).toEqual([
+        'Beta(Tag B)',
+        'Third Task(Tag A, Tag B)',
+        'Alpha(Tag A)',
+        'Zebra(-)',
+      ]);
+    });
+
+    it('should order tag group headers by sidebar order with untagged last', () => {
+      service.selectedGroup.set({ type: GROUP_OPTION_TYPE.tag } as GroupOption);
+      const grouped = service['applyGrouping'](mockTasks, GROUP_OPTION_TYPE.tag);
+
+      expect(service.getOrderedGroupKeys(grouped)).toEqual(['Tag B', 'Tag A', 'No tag']);
+    });
+
+    it('should keep non-tag group headers in ascending order', () => {
+      service.selectedGroup.set({ type: GROUP_OPTION_TYPE.project } as GroupOption);
+      const grouped = service['applyGrouping'](mockTasks, GROUP_OPTION_TYPE.project);
+
+      expect(service.getOrderedGroupKeys(grouped)).toEqual([
+        'No project',
+        'Project A',
+        'Project B',
+      ]);
+    });
+  });
+
+  describe('_buildGroupTagIdByKey (drag-to-retag mapping)', () => {
+    // Build a grouped record dynamically: bucket keys are tag titles, which
+    // contain spaces and so can't be object-literal property names under the
+    // naming-convention lint rule.
+    const groupedOf = (...keys: string[]): Record<string, TaskWithSubTasks[]> =>
+      Object.fromEntries(keys.map((k) => [k, []]));
+
+    const build = (
+      grouped: Record<string, TaskWithSubTasks[]>,
+    ): Record<string, string | null> =>
+      (
+        service as unknown as {
+          _buildGroupTagIdByKey: (
+            g: Record<string, TaskWithSubTasks[]>,
+          ) => Record<string, string | null>;
+        }
+      )._buildGroupTagIdByKey(grouped);
+
+    it('maps each real tag-title group to its tagId', () => {
+      (service as unknown as { _allTags: Tag[] })._allTags = mockTags;
+      const res = build(groupedOf('Tag A', 'Tag B'));
+      expect(res['Tag A']).toBe('Tag A');
+      expect(res['Tag B']).toBe('Tag B');
+    });
+
+    it('maps the No-tag bucket to the clear-tags sentinel and Unknown-tag to null', () => {
+      (service as unknown as { _allTags: Tag[] })._allTags = mockTags;
+      const res = build(groupedOf('Tag A', 'No tag', 'Unknown tag'));
+      expect(res['Tag A']).toBe('Tag A');
+      expect(res['No tag']).toBe(NO_TAG_GROUP_ID);
+      expect(res['Unknown tag']).toBeNull();
+    });
+
+    it('maps a title shared by multiple tags to null (ambiguous, cannot retag)', () => {
+      (service as unknown as { _allTags: Tag[] })._allTags = [
+        { id: 'id1', title: 'Dup' } as Tag,
+        { id: 'id2', title: 'Dup' } as Tag,
+        { id: 'id3', title: 'Unique' } as Tag,
+      ];
+      const res = build(groupedOf('Dup', 'Unique'));
+      expect(res['Dup']).toBeNull();
+      expect(res['Unique']).toBe('id3');
+    });
+
+    it('prefers a real tag titled "No tag" over the clear-tags sentinel', () => {
+      // Guards against silently clearing tags when a user names a tag "No tag".
+      (service as unknown as { _allTags: Tag[] })._allTags = [
+        { id: 'real-no-tag', title: 'No tag' } as Tag,
+      ];
+      const res = build(groupedOf('No tag'));
+      expect(res['No tag']).toBe('real-no-tag');
+    });
   });
 
   // === DEADLINE FILTER ===
@@ -1018,6 +1248,10 @@ describe('TaskViewCustomizerService', () => {
       preset: 'Tag A',
       label: 'Tag',
     };
+    const restoredSavedFilter: FilterOption = {
+      ...savedFilter,
+      label: T.F.TASK_VIEW.CUSTOMIZER.FILTER_TAG,
+    };
 
     const buildService = (
       ctx$: Observable<{ activeId: string; activeType: WorkContextType }>,
@@ -1046,12 +1280,16 @@ describe('TaskViewCustomizerService', () => {
             },
           },
           { provide: ProjectService, useValue: { update: projectUpdateSpy } },
-          { provide: TagService, useValue: { updateTag: tagUpdateSpy } },
+          {
+            provide: TagService,
+            useValue: { updateTag: tagUpdateSpy, tagsInTreeOrder: signal(mockTags) },
+          },
+          {
+            provide: MenuTreeService,
+            useValue: { buildTagListInTreeOrder: (tags: Tag[]) => tags },
+          },
           provideMockStore({
-            selectors: [
-              { selector: selectAllProjects, value: mockProjects },
-              { selector: selectAllTags, value: mockTags },
-            ],
+            selectors: [{ selector: selectAllProjects, value: mockProjects }],
           }),
         ],
       });
@@ -1083,7 +1321,7 @@ describe('TaskViewCustomizerService', () => {
 
       expect(newService.selectedSort()).toEqual(savedSort);
       expect(newService.selectedGroup()).toEqual(savedGroup);
-      expect(newService.selectedFilter()).toEqual(savedFilter);
+      expect(newService.selectedFilter()).toEqual(restoredSavedFilter);
     });
 
     it('should load defaults for a context with no saved state', () => {
@@ -1136,7 +1374,7 @@ describe('TaskViewCustomizerService', () => {
 
         // Return to TODAY — saved filter should be restored
         ctx$.next({ activeId: 'TODAY', activeType: WorkContextType.TAG });
-        expect(newService.selectedFilter()).toEqual(savedFilter);
+        expect(newService.selectedFilter()).toEqual(restoredSavedFilter);
         done();
       }, 50);
     });
@@ -1226,11 +1464,17 @@ describe('TaskViewCustomizerService', () => {
           { provide: DateAdapter, useValue: dateAdapter },
           { provide: WorkContextService, useValue: mockWorkContextService },
           { provide: ProjectService, useValue: { update: projectUpdateSpy } },
-          { provide: TagService, useValue: { updateTag: tagUpdateSpy } },
+          {
+            provide: TagService,
+            useValue: { updateTag: tagUpdateSpy, tagsInTreeOrder: signal(mockTags) },
+          },
+          {
+            provide: MenuTreeService,
+            useValue: { buildTagListInTreeOrder: (tags: Tag[]) => tags },
+          },
           provideMockStore({
             selectors: [
               { selector: selectAllProjects, value: allProjects },
-              { selector: selectAllTags, value: mockTags },
               {
                 selector: selectAllTasksWithSubTasks,
                 value: [projectATask, projectBTask],
@@ -1262,6 +1506,9 @@ describe('TaskViewCustomizerService', () => {
           expect(Object.keys(result.grouped!)).toEqual(['Tag A']);
           expect(result.grouped!['Tag A']?.length).toBe(1);
           expect(result.grouped!['Tag A']?.[0].id).toBe('project-a-task');
+          // Tag grouping emits the retag id-map.
+          expect(result.groupTagIdByKey).toBeDefined();
+          expect(result.groupTagIdByKey!['Tag A']).toBe('Tag A');
           done();
         });
       });
@@ -1284,6 +1531,8 @@ describe('TaskViewCustomizerService', () => {
           const groupKeys = Object.keys(result.grouped!);
           expect(groupKeys).toEqual(['Project A']);
           expect(groupKeys).not.toContain('Project B');
+          // The retag id-map is tag-grouping-only.
+          expect(result.groupTagIdByKey).toBeUndefined();
           done();
         });
       });

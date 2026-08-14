@@ -137,6 +137,20 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
     expect(res.eventsFlat[0].isBeyondBudget).toBe(true);
   });
 
+  it('preserves the source occurrence date of a continued repeat projection', () => {
+    const entry = {
+      ...fakeTaskEntry('CONTINUED', {
+        plannedForDay: '2026-07-31',
+        start: new Date(2026, 6, 31, 0, 0).getTime(),
+      }),
+      sourceOccurrenceDate: '2026-07-30',
+    };
+
+    const res = mapScheduleDaysToScheduleEvents([fakeDay({ entries: [entry] })], FH);
+
+    expect(res.eventsFlat[0].sourceOccurrenceDate).toBe('2026-07-30');
+  });
+
   it('should set calendar badge day for beyond budget planned tasks', () => {
     const res = mapScheduleDaysToScheduleEvents(
       [
@@ -180,7 +194,8 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
       ],
       FH,
     );
-    expect(res.eventsFlat[1].overlap).toEqual({ count: 1, offset: 1 });
+    expect(res.eventsFlat[0].overlap).toEqual({ count: 2, offset: 0 });
+    expect(res.eventsFlat[1].overlap).toEqual({ count: 2, offset: 1 });
   });
 
   it('should detect overlap for three zero-duration events at the same time', () => {
@@ -197,8 +212,9 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
       ],
       FH,
     );
-    expect(res.eventsFlat[1].overlap).toEqual({ count: 1, offset: 1 });
-    expect(res.eventsFlat[2].overlap).toEqual({ count: 2, offset: 2 });
+    expect(res.eventsFlat[0].overlap).toEqual({ count: 3, offset: 0 });
+    expect(res.eventsFlat[1].overlap).toEqual({ count: 3, offset: 1 });
+    expect(res.eventsFlat[2].overlap).toEqual({ count: 3, offset: 2 });
   });
 
   it('should detect overlap for two events with normal duration at the same time', () => {
@@ -214,7 +230,8 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
       ],
       FH,
     );
-    expect(res.eventsFlat[1].overlap).toEqual({ count: 1, offset: 1 });
+    expect(res.eventsFlat[0].overlap).toEqual({ count: 2, offset: 0 });
+    expect(res.eventsFlat[1].overlap).toEqual({ count: 2, offset: 1 });
   });
 
   it('should NOT detect overlap for two zero-duration events at different times', () => {
