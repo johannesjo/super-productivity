@@ -121,15 +121,14 @@ export class OperationLogHydratorService {
     // version AFTER the migration chain has actually run, which is safe.
     let snapshotPersistedDuringHydration = false;
 
-    // #9084: held for the whole run, including the await boundaries between
-    // dispatching the snapshot's loadAllData and actually replaying the tail
-    // ops on top of it. A write landing in that window is durable and can
-    // trigger compaction before the tail ops are re-dispatched, which would
-    // cache state missing their effects — see the guard in
-    // OperationLogCompactionService._doCompact.
-    this.hydrationStateService.setHydrationInProgress(true);
-
     try {
+      // #9084: held for the whole run so compaction cannot capture the gap
+      // between the loadAllData dispatch and the tail replay — see the guard
+      // in OperationLogCompactionService._doCompact. Inside the try so a
+      // throw still reaches the recovery path below; the finally always
+      // clears it.
+      this.hydrationStateService.setHydrationInProgress(true);
+
       // PERF: Parallel startup operations - all access different IndexedDB stores
       // and don't depend on each other's results, so they can run concurrently.
       const [pendingRemoteOps, , hasBackup] = await Promise.all([

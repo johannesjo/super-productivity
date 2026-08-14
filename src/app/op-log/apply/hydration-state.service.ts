@@ -130,17 +130,10 @@ export class HydrationStateService implements RemoteApplyWindowPort {
 
   /**
    * #9084: true for the full duration of OperationLogHydratorService's
-   * hydrateStore() run, from before the snapshot's loadAllData dispatch until
-   * the tail ops it implies have actually been replayed into the store. A
-   * write landing in that window (e.g. TODAY_TAG repair reacting to
-   * loadAllData) is durable and unblocks the compaction counter before the
-   * tail ops are re-dispatched, so none of compact()'s other guards see it:
-   * getPendingRemoteOps is empty (the tail ops are local, already
-   * 'applied' from their original session) and nothing is pending or
-   * deferred. Without this flag compact() would cache a state missing the
-   * tail ops' effects under a lastAppliedOpSeq that covers them, and prune
-   * the very ops the next boot needs to recover them. Set/cleared by
-   * OperationLogHydratorService around each hydrateStore() run.
+   * hydrateStore() run, covering the gap between the snapshot's loadAllData
+   * dispatch and the tail-op replay on top of it. Compaction must not run in
+   * that gap — see the guard in OperationLogCompactionService._doCompact for
+   * the full reasoning. Set/cleared by the hydrator around each run.
    */
   isHydrationInProgress(): boolean {
     return this._isHydrationInProgress;

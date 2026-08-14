@@ -154,12 +154,9 @@ describe('OperationLogCompactionService', () => {
       expect(mockOpLogStore.saveStateCache).not.toHaveBeenCalled();
     });
 
-    // #9084: boot hydration dispatches the snapshot's loadAllData, then
-    // replays tail ops on top of it with await boundaries (and no lock) in
-    // between. A write landing in that window can trigger compaction before
-    // the tail ops are re-dispatched, baking a state cache that is missing
-    // their effects under a lastAppliedOpSeq that already covers them.
-    it('should skip compaction while boot hydration replay is in progress (#9084)', async () => {
+    // #9084: compaction must skip while hydration is between the snapshot's
+    // loadAllData dispatch and the tail-op replay — see the guard in _doCompact.
+    it('should skip compaction while hydration replay is in progress (#9084)', async () => {
       TestBed.inject(HydrationStateService).setHydrationInProgress(true);
 
       const result = await service.compact();
@@ -169,7 +166,7 @@ describe('OperationLogCompactionService', () => {
       expect(mockOpLogStore.deleteOpsWhere).not.toHaveBeenCalled();
     });
 
-    it('should also block emergency compaction while boot hydration replay is in progress', async () => {
+    it('should also block emergency compaction while hydration replay is in progress', async () => {
       TestBed.inject(HydrationStateService).setHydrationInProgress(true);
 
       const result = await service.emergencyCompact();

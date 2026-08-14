@@ -516,13 +516,9 @@ describe('OperationLogHydratorService', () => {
         expect(mockHydrationStateService.endApplyingRemoteOps).toHaveBeenCalled();
       });
 
-      // #9084: compaction can race the gap between the snapshot's loadAllData
-      // dispatch and the tail ops actually being replayed on top of it — a
-      // write landing there (e.g. TODAY_TAG repair) is durable and can trigger
-      // compaction while the tail ops' effects are still missing from state.
-      // isHydrationInProgress must stay set for the whole run so compaction's
-      // guard (#9084) covers that gap, not just the bulk-dispatch call itself
-      // (already covered by start/endApplyingRemoteOps above).
+      // #9084: the flag must bracket the whole run — from before the snapshot
+      // dispatch until after the tail replay — so the compaction guard covers
+      // the gap between them, not just the bulk-dispatch call itself.
       it('should hold hydration-in-progress across the full run, from before the snapshot dispatch until after the tail replay (#9084)', async () => {
         const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
         const tailOps = [createMockEntry(6, createMockOperation('op-6'))];
