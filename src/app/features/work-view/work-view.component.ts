@@ -79,7 +79,6 @@ import { CalendarIntegrationService } from '../calendar-integration/calendar-int
 import { PlannerCalendarEventComponent } from '../planner/planner-calendar-event/planner-calendar-event.component';
 import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 import { getLaterTodayCalendarEvents } from './get-later-today-calendar-events';
-import { findCollapsedGroupForTask } from './find-collapsed-group-for-task';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -692,14 +691,16 @@ export class WorkViewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // A collapsed group unmounts its whole task-list, so retrying alone would
-    // poll for a row that can never appear. Expanding is idempotent here: once
-    // the key leaves collapsedGroupIds the next attempt no longer matches it.
-    this._expandCollapsedGroupFor(taskId);
-
     if (retriesLeft <= 0) {
       return;
     }
+
+    // A collapsed group unmounts its whole task-list, so retrying alone would
+    // poll for a row that can never appear. Below the give-up guard: on the
+    // final attempt there is no retry left to use the expansion, and expanding
+    // then would only persist a collapse change the user never sees resolved.
+    // Idempotent — once the key leaves collapsedGroupIds it no longer matches.
+    this._expandCollapsedGroupFor(taskId);
 
     this._pendingFocusItemTimeout = window.setTimeout(() => {
       this._pendingFocusItemTimeout = undefined;
@@ -709,15 +710,27 @@ export class WorkViewComponent implements OnInit, OnDestroy {
 
   /** Reveals a task hidden inside a collapsed customizer group. (#8780) */
   private _expandCollapsedGroupFor(taskId: string): void {
-    const groupKey = findCollapsedGroupForTask(
-      this.customizedUndoneTasks().grouped,
-      this.customizerService.collapsedGroupIds(),
-      taskId,
+    const grouped = this.customizedUndoneTasks().grouped;
+    if (!grouped) {
+      return;
+    }
+    const collapsedGroupIds = this.customizerService.collapsedGroupIds();
+    // Iterate the record's OWN keys rather than indexing it by the collapsed
+    // ids: group keys are user-authored project/tag titles, so a stale id like
+    // `constructor` would otherwise resolve off Object.prototype.
+    const groupKey = Object.keys(grouped).find(
+      (key) =>
+        collapsedGroupIds.includes(key) && this._hasTaskInList(grouped[key], taskId),
     );
     if (!groupKey) {
       return;
     }
-    recordSearchNavDebug('workView:expandCollapsedGroup', { taskId, groupKey });
+    // Never log groupKey: it is a project/tag TITLE, and log history is
+    // exportable. Its index is enough to read a reporter's trace. (rule 9)
+    recordSearchNavDebug('workView:expandCollapsedGroup', {
+      taskId,
+      groupIndex: Object.keys(grouped).indexOf(groupKey),
+    });
     this.customizerService.toggleGroupExpansion(groupKey);
   }
 

@@ -50,12 +50,16 @@ describe('NavigateToTaskService', () => {
 
   // The service reads project/task membership straight from the store, so the
   // store IS the fixture — there is no second mock to keep in sync.
-  const setStoreState = (tasks: Task[], projects: Project[]): void => {
+  const setStoreState = (
+    tasks: Task[],
+    projects: Project[],
+    currentTaskId: string | null = null,
+  ): void => {
     store.setState({
       [TASK_FEATURE_NAME]: {
         ids: tasks.map(({ id }) => id),
         entities: Object.fromEntries(tasks.map((task) => [task.id, task])),
-        currentTaskId: null,
+        currentTaskId,
         selectedTaskId: null,
         taskDetailTargetPanel: null,
         isDataLoaded: true,
@@ -408,6 +412,7 @@ describe('NavigateToTaskService', () => {
     const setUpSubTask = (
       parentChanges: Partial<Task>,
       childChanges: Partial<Task> = {},
+      currentTaskId: string | null = null,
     ): Task => {
       const parent = createTask({
         id: 'parent-1',
@@ -421,7 +426,7 @@ describe('NavigateToTaskService', () => {
         projectId: parent.projectId,
         ...childChanges,
       });
-      setStoreState([parent, child], [createProject('p1', [parent.id])]);
+      setStoreState([parent, child], [createProject('p1', [parent.id])], currentTaskId);
       taskService.getByIdFromEverywhere.and.callFake((id: string) =>
         Promise.resolve(id === child.id ? child : parent),
       );
@@ -463,6 +468,34 @@ describe('NavigateToTaskService', () => {
       await service.navigate(child.id);
 
       expect(taskService.showSubTasks).not.toHaveBeenCalled();
+    });
+
+    it('leaves a HideAll parent alone when the target is the TRACKED task', async () => {
+      // filterDoneTasks exempts the tracked task from HideAll, so its row is
+      // already on screen. The tracked-task pill navigates to exactly this task,
+      // so without the guard every pill click would emit a synced op and destroy
+      // the user's collapse state on every device.
+      const child = setUpSubTask(
+        { _hideSubTasksMode: HideSubTasksMode.HideAll },
+        {},
+        'child-1',
+      );
+
+      await service.navigate(child.id);
+
+      expect(taskService.showSubTasks).not.toHaveBeenCalled();
+    });
+
+    it('still expands for a NON-tracked sibling under a HideAll parent', async () => {
+      const child = setUpSubTask(
+        { _hideSubTasksMode: HideSubTasksMode.HideAll },
+        {},
+        'some-other-task',
+      );
+
+      await service.navigate(child.id);
+
+      expect(taskService.showSubTasks).toHaveBeenCalledOnceWith('parent-1');
     });
 
     it('leaves an already expanded parent alone', async () => {

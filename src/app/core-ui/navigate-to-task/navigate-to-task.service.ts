@@ -15,7 +15,10 @@ import { LayoutService } from '../layout/layout.service';
 import { recordSearchNavDebug } from '../../util/search-nav-debug';
 import { Store } from '@ngrx/store';
 import { RootState } from '../../root-store/root-state';
-import { selectTaskEntities } from '../../features/tasks/store/task.selectors';
+import {
+  selectCurrentTaskId,
+  selectTaskEntities,
+} from '../../features/tasks/store/task.selectors';
 import { selectProjectFeatureState } from '../../features/project/store/project.selectors';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
@@ -36,6 +39,7 @@ export class NavigateToTaskService {
   private _dateService = inject(DateService);
   private _layoutService = inject(LayoutService);
   private _taskEntities = this._store.selectSignal(selectTaskEntities);
+  private _currentTaskId = this._store.selectSignal(selectCurrentTaskId);
   private _projectState = this._store.selectSignal(selectProjectFeatureState);
 
   async navigate(taskId: string, isArchiveTask: boolean = false): Promise<void> {
@@ -61,7 +65,6 @@ export class NavigateToTaskService {
       if (repairTargetProjectId) {
         this._repairProjectMembership(contextTask.id, repairTargetProjectId);
       }
-      this._expandCollapsedParent(task, isArchiveTask);
       recordSearchNavDebug('navigateToTask:start', {
         taskId,
         isArchiveTask,
@@ -71,6 +74,9 @@ export class NavigateToTaskService {
         projectId: task.projectId || null,
         firstTagId: task.tagIds?.[0] || null,
       });
+      // After the `start` record so a captured trace reads in causal order, and
+      // still well before the navigation below.
+      this._expandCollapsedParent(task, isArchiveTask);
 
       if (this._router.url.startsWith(location)) {
         recordSearchNavDebug('navigateToTask:sameContext', {
@@ -225,8 +231,13 @@ export class NavigateToTaskService {
     if (parent?.id !== task.parentId) {
       return;
     }
+    // `filterDoneTasks` exempts the currently TRACKED task from HideAll, so that
+    // one row renders even inside a collapsed parent. Without this check the
+    // tracked-task pill — which navigates to exactly that task — would expand
+    // the parent on every device to reveal a row already on screen.
     const isHiddenByParent =
-      parent._hideSubTasksMode === HideSubTasksMode.HideAll ||
+      (parent._hideSubTasksMode === HideSubTasksMode.HideAll &&
+        this._currentTaskId() !== task.id) ||
       (parent._hideSubTasksMode === HideSubTasksMode.HideDone && task.isDone);
     if (!isHiddenByParent) {
       return;
