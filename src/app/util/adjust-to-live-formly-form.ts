@@ -15,12 +15,18 @@ export const adjustToLiveFormlyForm = (
         type: 'toggle',
       };
     }
+    // `updateOn: 'blur'` is load-bearing, not a nicety: the config form binds
+    // `[model]="cfg()"`, so committing per keystroke round-trips through the
+    // store and hands formly a fresh model object, which rebuilds the field
+    // mid-edit and discards the native control's in-progress editing state.
+    // For `time` that ate the first digit of every hour typed (#9548).
     if (
       item.type === 'input' ||
       item.type === 'textarea' ||
       item.type === 'duration' ||
       item.type === 'icon' ||
-      item.type === 'color'
+      item.type === 'color' ||
+      item.type === 'time'
     ) {
       return {
         ...item,
