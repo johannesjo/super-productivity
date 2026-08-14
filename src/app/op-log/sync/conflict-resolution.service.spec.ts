@@ -8611,6 +8611,24 @@ describe('ConflictResolutionService', () => {
       expect(extractActionPayload(op.payload)['id']).toBe('task-canonical');
     });
 
+    it('should force payload.id to the canonical entityId for array entities (#9526 lockstep)', () => {
+      // Array LWW ops are applied by payload identity since #9526, so
+      // assertDecryptedOpMetadataIntegrity fails CLOSED when an encrypted
+      // array op's payload.id disagrees with op.entityId. This pins the
+      // producer side of that lockstep: a payload without a matching id would
+      // turn every legitimate array conflict winner into an integrity reject.
+      const op = service.createLWWUpdateOp(
+        'PLUGIN_USER_DATA',
+        'plugin-canonical',
+        { id: 'stale-id', data: '{"v":1}' },
+        TEST_CLIENT_ID,
+        { [TEST_CLIENT_ID]: 1 },
+        Date.now(),
+      );
+
+      expect(extractActionPayload(op.payload)['id']).toBe('plugin-canonical');
+    });
+
     it('should preserve and normalize an explicit operation footprint', () => {
       const op = service.createLWWUpdateOp(
         'TASK',
