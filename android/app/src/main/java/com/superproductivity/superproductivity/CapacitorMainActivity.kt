@@ -346,7 +346,7 @@ class CapacitorMainActivity : BridgeActivity() {
         // tail. See pushStatusBarOverlapBelowApi30.
         lastStatusBarOverlapCssPx = -1
         pendingShareIntent?.let {
-            Log.d("SP_SHARE", "Flushing pending share intent: $it")
+            Log.d("SP_SHARE", "Flushing pending share intent")
             callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", it.toString())
             pendingShareIntent = null
             ShareIntentQueue.getAndClear(this)
@@ -420,9 +420,13 @@ class CapacitorMainActivity : BridgeActivity() {
                 // "Shared Content" here masks that derivation (issue: blank shared tasks).
                 val sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE) ?: ""
                 val sharedSubject = intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: ""
-                Log.d("SP_SHARE", "Shared text: $sharedText")
-                Log.d("SP_SHARE", "Shared title: $sharedTitle")
-                Log.d("SP_SHARE", "Shared subject: $sharedSubject")
+                // Shape only, never the content: logcat is world-readable to adb and
+                // ends up in bug reports, and this carries whatever the user shared.
+                Log.d(
+                    "SP_SHARE",
+                    "Received share: textLen=${sharedText?.length ?: 0} " +
+                        "hasTitle=${sharedTitle.isNotEmpty()} hasSubject=${sharedSubject.isNotEmpty()}",
+                )
 
                 // Ignore empty/blank shares — they only produce useless blank tasks.
                 if (!sharedText.isNullOrBlank()) {
@@ -437,12 +441,12 @@ class CapacitorMainActivity : BridgeActivity() {
                     ShareIntentQueue.setPending(this, json.toString())
 
                     if (isFrontendReady) {
-                        Log.d("SP_SHARE", "Frontend ready, sending directly: $json")
+                        Log.d("SP_SHARE", "Frontend ready, sending directly (type=$type)")
                         callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", json.toString())
                         pendingShareIntent = null
                         ShareIntentQueue.getAndClear(this)
                     } else {
-                        Log.d("SP_SHARE", "Frontend NOT ready, queueing: $json")
+                        Log.d("SP_SHARE", "Frontend NOT ready, queueing (type=$type)")
                         pendingShareIntent = json
                         Toast.makeText(this, R.string.share_received, Toast.LENGTH_SHORT).show()
                     }
