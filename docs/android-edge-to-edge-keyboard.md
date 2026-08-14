@@ -347,10 +347,21 @@ the `position: fixed` bar stays at the bottom of a viewport that extends behind
 the IME. The reporters' before/after screenshots are pixel-identical, which is
 exactly this signature.
 
+**Why `adjustResize` does not save us.** The manifest declares
+`windowSoftInputMode="adjustResize"`, so the obvious question is why the window
+does not simply shrink. Because Capacitor's StatusBar plugin runs with
+`overlaysWebView: true` (`capacitor.config.ts`), which applies
+`SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN` to the decor
+view (`StatusBar.setOverlaysWebView`) — and under layout-fullscreen `adjustResize`
+stops resizing for the IME. That is the long-standing Android behaviour the
+`getWindowVisibleDisplayFrame` + explicit-height workaround exists for, and it is
+SDK-independent below 35, which is why the symptom never depended on the API
+level the original gate keyed off.
+
 **Why the old gate's assumption failed.** `SDK_INT < 30` encoded "API >= 30
 implies a current WebView, because it auto-updates." Not on a custom ROM:
 crDroid ships its own `com.android.webview` (124) and the Play-updated
-`com.google.android.webview` (150) is *installed but disabled*. Settings shows
+`com.google.android.webview` (150) is _installed but disabled_. Settings shows
 150; `dumpsys webviewupdate` shows the **active** provider is 124. Always read
 the `Current WebView package` line, never the Settings screen.
 
@@ -360,14 +371,29 @@ A/B isolating the WebView version, and a direct confirmation of the 140 boundary
 
 **Fix — `NativeInsetShimGate.shouldRunShim(sdkInt, webViewMajor)`**, now shared by
 `adjustWebViewHeightForKeyboard` and `pushStatusBarOverlap` (both lost their
-`BelowApi30` suffix — the gate is no longer SDK 30). It is the exact complement of
+`BelowApi30` suffix — the gate is no longer SDK 30). It is the complement of
 SystemBars' two ownership branches: run iff `sdkInt < 35 && (webViewMajor == null
 || webViewMajor < 140)`. An unreadable version runs the shim, because SystemBars
 treats an unreadable version as `0` and skips its passthrough too — both off would
 strand the device with no inset owner. Unit-covered in `NativeInsetShimGateTest`.
 
+Two caveats on "complement":
+
+- Branch 1 additionally requires **`viewport-fit=cover`**, which SystemBars only
+  learns at `onDOMReady`. `src/index.html` sets it (there is a comment there
+  saying so — keep it), leaving only the pre-DOM-ready window uncovered, where the
+  IME cannot be up yet.
+- The gate must read the **active** provider, the same thing SystemBars reads
+  (`WebView.getCurrentWebViewPackage()`, failure treated as `0`).
+  `WebViewCompatibilityChecker` answers a different question and can fall back to
+  scanning installed packages, which on the crDroid layout above reports the
+  disabled 150 rather than the active 124 — that number would switch the shim off
+  on exactly the devices it is for. `NativeInsetShimGate.activeProviderMajor()`
+  therefore accepts only `getCurrentWebViewPackage()` or user-agent readings and
+  degrades anything else to `null` (→ run the shim).
+
 **Why this does not re-arm #8508.** The rule from that saga is that any inset must
-be *resize-detecting*. This shim already is, structurally: it sets the WebView's
+be _resize-detecting_. This shim already is, structurally: it sets the WebView's
 layout height to an **absolute** target read from the visible frame
 (`rect.bottom − webViewTop`), not a delta. On a device where the window already
 shrank for the IME, the WebView bottom is already at `rect.bottom`, so the
@@ -377,6 +403,24 @@ makes broadening the gate safe; do not replace it with a delta-based inset.
 **Still REQUIRED before release:** the widened band (API 30–34) is not covered by
 any device on hand — validate via a test build with the #9316 reporters, plus the
 matrix below to confirm API >= 35 and WebView >= 140 are untouched.
+
+**Validate the mechanism, not just the symptom.** The shim is a strict no-op
+wherever the window already resizes, so "the bar looks fixed" cannot distinguish a
+working shim from one that never ran — and a coincidental fix would send the next
+regression hunt down the wrong path. `logImeGeometryOnTransition` prints the gate
+inputs and geometry once per keyboard transition; it is off unless enabled, so ask
+the reporter for:
+
+```
+adb shell setprop log.tag.SUPKeyboard DEBUG   # then restart the app
+adb logcat -s SUPKeyboard
+adb shell dumpsys webviewupdate | grep -i 'Current WebView package'
+```
+
+A fixed device must show `shim=true` with `paramsHeight` dropping to roughly
+`rectBottom − webViewTop` while `ime=true`, and the provider version from
+`dumpsys` must match the `wvMajor=` the gate read. If `shim=false`, the version
+source is wrong, not the theory.
 
 ## What NOT to do
 

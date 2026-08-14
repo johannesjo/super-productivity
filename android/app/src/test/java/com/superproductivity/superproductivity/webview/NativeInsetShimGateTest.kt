@@ -1,6 +1,8 @@
 package com.superproductivity.superproductivity.webview
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -45,4 +47,75 @@ class NativeInsetShimGateTest {
         assertTrue(NativeInsetShimGate.shouldRunShim(sdkInt = 34, webViewMajor = null))
         assertTrue(NativeInsetShimGate.shouldRunShim(sdkInt = 28, webViewMajor = null))
     }
+
+    @Test
+    fun `ignores a version scanned from an installed-but-disabled provider`() {
+        // The crDroid layout in #9316: getCurrentWebViewPackage() failed, so the
+        // checker's PackageManager scan reported the *disabled* Google package
+        // (150) while the active provider is com.android.webview 124. SystemBars
+        // reads 0 there and does nothing, so trusting 150 would leave the device
+        // with no inset owner — the exact bug. Degrade to null and run the shim.
+        val scanned = result(
+            majorVersion = 150,
+            source = WebViewCompatibilityChecker.VersionSource.PACKAGE,
+            providerPackageIsCurrent = false,
+        )
+        assertNull(NativeInsetShimGate.activeProviderMajor(scanned))
+        assertTrue(
+            NativeInsetShimGate.shouldRunShim(
+                sdkInt = 34,
+                webViewMajor = NativeInsetShimGate.activeProviderMajor(scanned),
+            )
+        )
+    }
+
+    @Test
+    fun `trusts versions that describe the provider actually in use`() {
+        // getCurrentWebViewPackage() and the user-agent string both describe the
+        // active provider, which is what SystemBars branches on.
+        assertEquals(
+            124,
+            NativeInsetShimGate.activeProviderMajor(
+                result(
+                    majorVersion = 124,
+                    source = WebViewCompatibilityChecker.VersionSource.PACKAGE,
+                    providerPackageIsCurrent = true,
+                )
+            )
+        )
+        assertEquals(
+            126,
+            NativeInsetShimGate.activeProviderMajor(
+                result(
+                    majorVersion = 126,
+                    source = WebViewCompatibilityChecker.VersionSource.USER_AGENT,
+                    providerPackageIsCurrent = false,
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `runs when the compatibility check produced no result at all`() {
+        assertNull(NativeInsetShimGate.activeProviderMajor(null))
+        assertTrue(
+            NativeInsetShimGate.shouldRunShim(
+                sdkInt = 34,
+                webViewMajor = NativeInsetShimGate.activeProviderMajor(null),
+            )
+        )
+    }
+
+    private fun result(
+        majorVersion: Int?,
+        source: WebViewCompatibilityChecker.VersionSource,
+        providerPackageIsCurrent: Boolean,
+    ) = WebViewCompatibilityChecker.Result(
+        status = WebViewCompatibilityChecker.Status.OK,
+        majorVersion = majorVersion,
+        providerPackage = null,
+        providerVersionName = null,
+        source = source,
+        providerPackageIsCurrent = providerPackageIsCurrent,
+    )
 }
