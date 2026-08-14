@@ -18,6 +18,11 @@ import { OpLog } from '../../core/log';
  * - `establishFrontier(seq)` — the live state now reflects exactly the ops up
  *   to `seq`. Called when hydration finishes a replay and when the store
  *   atomically installs a new state-cache baseline. Clears any divergence.
+ *   `seq === 0` (empty ops store) resets to unestablished instead: ops wipes
+ *   preserve the auto-increment generator on BOTH backends, so the next
+ *   append's seq is unknowable and anchoring at 0 would fabricate a gap →
+ *   sticky false divergence (reachable via USE_REMOTE force-download and the
+ *   boot after an interrupted rebuild).
  * - `observeOwnWrite(seq)` — this tab appended an op whose reducer effect is
  *   in its state (capture persists after the reducer ran; remote applies hold
  *   the op-log lock across append+apply, so saves cannot observe the gap).
@@ -31,14 +36,25 @@ import { OpLog } from '../../core/log';
  *   anchor at `globalLastSeq`. While no frontier is established this returns
  *   true: hydration establishes before any save path runs in production, and
  *   defaulting open keeps the pre-#9438 behavior on any path that never
- *   establishes (a wiring gap then means "no new protection", never
- *   "snapshots permanently disabled").
+ *   establishes.
+ *
+ * ## Wiring invariant (asymmetric failure modes)
+ *
+ * Every `OperationLogStoreService` method that adds rows to the OPS store
+ * MUST report the committed seqs to this tracker. The two possible wiring
+ * gaps fail very differently: a missed `establishFrontier` merely leaves the
+ * tracker default-open ("no new protection"); a missed `observeOwnWrite`
+ * makes the next observed own write look like a foreign gap → sticky
+ * divergence → snapshot saves AND compaction silently disabled for the rest
+ * of the session, on ALL platforms including single-instance Electron. Keep
+ * that in mind when the divergence warning fires on a platform where no
+ * concurrent tab can exist — it then indicates a wiring gap, not multi-tab.
  *
  * Divergence only clears on the next `establishFrontier` (re-hydration or a
  * baseline install), matching the skip-on-risk shape of the #8751/#7892
  * guards: skipping a save costs at most a slower next boot; the op-log stays
- * the source of truth. Single-instance platforms (Electron/Android) can never
- * observe a gap, so the guard is inert there.
+ * the source of truth. Single-instance platforms can never see a genuine
+ * foreign gap, so with complete wiring the guard is inert there.
  */
 @Injectable({ providedIn: 'root' })
 export class TabSeqFrontierService {
@@ -46,6 +62,13 @@ export class TabSeqFrontierService {
   private _hasForeignWrites = false;
 
   establishFrontier(seq: number): void {
+    if (seq === 0) {
+      // Empty ops store: wipes keep the seq generator, so the next append's
+      // seq is unknowable — see the class doc. Default-open until a real
+      // baseline exists.
+      this.resetToUnestablished();
+      return;
+    }
     this._frontier = seq;
     this._hasForeignWrites = false;
   }
@@ -58,8 +81,9 @@ export class TabSeqFrontierService {
       this._hasForeignWrites = true;
       OpLog.warn(
         'TabSeqFrontierService: own append skipped past the applied frontier — ' +
-          'a concurrent tab is writing; state-derived cache writes are disabled ' +
-          'until the next hydration (#9438)',
+          'a concurrent tab is writing (or, on single-instance platforms, an ' +
+          'append path is missing its observe call); state-derived cache ' +
+          'writes are disabled until the next hydration (#9438)',
         { frontier: this._frontier, observedSeq: seq },
       );
     }
@@ -79,5 +103,21 @@ export class TabSeqFrontierService {
       return true;
     }
     return !this._hasForeignWrites && globalLastSeq === this._frontier;
+  }
+
+  /**
+   * Sticky-divergence probe for cheap pre-lock fast-paths (mirrors the #8751
+   * fast-path shape): once true, every save attempt would skip anyway, so
+   * callers can bail before paying the flush + cross-tab lock + state
+   * capture. The scalar `isSaveSafeAt` check cannot be hoisted the same way —
+   * it needs the in-lock `getLastSeq()`.
+   */
+  hasKnownForeignWrites(): boolean {
+    return this._hasForeignWrites;
+  }
+
+  /** Current frontier for diagnostics only; null while unestablished. */
+  get frontierSeq(): number | null {
+    return this._frontier;
   }
 }

@@ -149,6 +149,7 @@ export class OperationLogSnapshotService {
             'OperationLogSnapshotService: Skipping snapshot save — the op log ' +
               'contains writes from a concurrent tab that are not in this ' +
               "tab's state (#9438)",
+            { lastSeq, frontier: this.tabSeqFrontier.frontierSeq },
           );
           return false;
         }

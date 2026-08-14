@@ -73,6 +73,19 @@ export class OperationLogCompactionService {
       );
       return false;
     }
+    // Same fast-path rationale for the sticky #9438 divergence flag: it only
+    // clears on re-hydration/baseline install, compact() re-fires after every
+    // write once the counter sits at the threshold, and each attempt would
+    // otherwise pay the flush + cross-tab lock + state capture below before
+    // the in-lock guard skips anyway. The scalar frontier check stays in-lock
+    // (it needs getLastSeq()); only the sticky half can be hoisted. Emergency
+    // compaction is exempt from the #9438 guard, so it must not bail here.
+    if (!isEmergency && this.tabSeqFrontier.hasKnownForeignWrites()) {
+      OpLog.warn(
+        'OperationLogCompactionService: Skipping compaction — sticky concurrent-tab divergence (#9438)',
+      );
+      return false;
+    }
     const compactExclusively = async (): Promise<boolean> => {
       const startTime = Date.now();
       const label = isEmergency ? 'emergency ' : '';
@@ -171,14 +184,20 @@ export class OperationLogCompactionService {
       // concurrent tab's op is counted there while its effect is absent from
       // this tab's state. Anchoring the cache past it would make the next
       // boot's tail replay silently skip that op (and step 7 would prune ops
-      // behind the false anchor). Emergency compaction is exempt: it already
-      // accepts a residual re-replay window (see the lock note below) and
-      // must stay able to free space during quota recovery.
+      // behind the false anchor). Emergency compaction is exempt so quota
+      // recovery cannot wedge on a diverged tab — a real trade-off: a
+      // diverged emergency compact could still write the stale anchor this
+      // guard prevents (permanent op skip, NOT the bounded re-replay window
+      // the bare-lock note below accepts). Today that is unreachable in the
+      // quota path (the #8751 phantom guard skips deterministically there —
+      // see the reachability note in operation-log.effects.ts); re-evaluate
+      // this exemption if emergency compaction ever becomes completable.
       if (!isEmergency && !this.tabSeqFrontier.isSaveSafeAt(lastSeq)) {
         OpLog.warn(
           'OperationLogCompactionService: Skipping compaction — the op log ' +
             "contains writes from a concurrent tab that are not in this tab's " +
             'state (#9438)',
+          { lastSeq, frontier: this.tabSeqFrontier.frontierSeq },
         );
         return false;
       }

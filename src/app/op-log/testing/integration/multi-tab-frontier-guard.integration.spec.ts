@@ -210,6 +210,43 @@ describe('Multi-tab frontier guard (#9438)', () => {
     expect(cache?.lastAppliedOpSeq).toBe(lastOwnSeq);
   });
 
+  it('does not false-positive after an ops wipe whose baseline commit sees an empty store (seq generator survives clear)', async () => {
+    // Regression for the USE_REMOTE force-download shape: ops wiped (the
+    // auto-increment generator is NOT reset by clear() on either backend),
+    // then a baseline committed against the empty store, then appends resume
+    // at the preserved generator value. Establishing a frontier of 0 here
+    // would make that first append look like a foreign gap → sticky
+    // divergence on single-instance platforms.
+    const preWipeSeq = await appendOwnOps(3, 'own');
+    frontier.establishFrontier(preWipeSeq);
+    await storeService.clearAllOperations();
+
+    await storeService.commitFileSnapshotBaseline({
+      state: meaningfulState,
+      lastAppliedOpSeq: 0,
+      vectorClock: {},
+      compactedAt: Date.now(),
+      snapshotIncludedOps: [],
+    });
+
+    const postWipeSeq = await storeService.append(
+      createTaskOperation(client, 'post-wipe-task', OpType.Create, {
+        title: 'first op after wipe',
+      }),
+      'local',
+    );
+    // Documents the premise: clear() preserved the generator.
+    expect(postWipeSeq).toBe(preWipeSeq + 1);
+
+    const didSave = await snapshotService.saveCurrentStateAsSnapshot();
+
+    // Unestablished after the wipe → default-open (pre-#9438 semantics), not
+    // a sticky skip.
+    expect(didSave).toBe(true);
+    const cache = await storeService.loadStateCache();
+    expect(cache?.lastAppliedOpSeq).toBe(postWipeSeq);
+  });
+
   it('stays default-open while no frontier was established (pre-hydration behavior unchanged)', async () => {
     await appendOwnOps(3, 'own');
     const foreignSeq = await foreignStore.append(

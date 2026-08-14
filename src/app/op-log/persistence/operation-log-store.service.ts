@@ -398,8 +398,13 @@ const rebaseLocalClockOnDurable = (
 export class OperationLogStoreService implements RemoteOperationApplyStorePort<Operation> {
   private clientIdProvider: ClientIdProvider = inject(CLIENT_ID_PROVIDER);
   private readonly _lockService = inject(LockService);
-  // #9438: every seq this instance writes is reported so state-derived cache
-  // writers (snapshot save, compaction) can detect concurrent-tab appends.
+  // #9438 INVARIANT: every method that adds rows to STORE_NAMES.OPS must
+  // report the committed seqs after its transaction commits — observeOwnWrite
+  // for plain appends, establishFrontier only when the method also installs
+  // the state cache the live store will match. A missed observe makes the
+  // next observed write look like a foreign gap and silently disables
+  // snapshot saves + compaction for the session (all platforms) — see the
+  // TabSeqFrontierService doc.
   private readonly _tabSeqFrontier = inject(TabSeqFrontierService);
   private _db?: IDBPDatabase<OpLogDB>;
   private _initPromise?: Promise<void>;

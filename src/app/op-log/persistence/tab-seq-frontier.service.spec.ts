@@ -73,4 +73,29 @@ describe('TabSeqFrontierService (#9438)', () => {
     service.establishFrontier(10);
     expect(service.isSaveSafeAt(12)).toBe(false);
   });
+
+  it('treats establishFrontier(0) as a reset — ops wipes keep the seq generator, so the next seq is unknowable', () => {
+    service.establishFrontier(0);
+    // Post-wipe first append continues from the preserved generator (e.g. 4);
+    // that must NOT read as a foreign gap.
+    service.observeOwnWrite(4);
+    expect(service.hasKnownForeignWrites()).toBe(false);
+    expect(service.isSaveSafeAt(4)).toBe(true);
+  });
+
+  it('establishFrontier(0) also clears an earlier sticky divergence back to default-open', () => {
+    service.establishFrontier(4);
+    service.observeOwnWrite(6);
+    expect(service.hasKnownForeignWrites()).toBe(true);
+    service.establishFrontier(0);
+    expect(service.hasKnownForeignWrites()).toBe(false);
+    expect(service.isSaveSafeAt(99)).toBe(true);
+  });
+
+  it('exposes sticky divergence for pre-lock fast-paths', () => {
+    service.establishFrontier(4);
+    expect(service.hasKnownForeignWrites()).toBe(false);
+    service.observeOwnWrite(6);
+    expect(service.hasKnownForeignWrites()).toBe(true);
+  });
 });
