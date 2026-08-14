@@ -349,7 +349,11 @@ describe('NavigateToTaskService', () => {
     );
   });
 
-  it('opens the backlog when navigating to a subtask whose parent is there', async () => {
+  // Asserts the param only. It does NOT prove the task ends up focused: the
+  // backlog renders outside `#splitTopEl`, which both reveal loops require, so a
+  // backlog row is shown but never scrolled to. Pre-existing gap, see the note in
+  // `_focusTaskElement`. (#8780)
+  it('sends isInBacklog when navigating to a subtask whose parent is in the backlog', async () => {
     const parent = createTask({
       id: 'backlog-parent',
       projectId: 'p1',
@@ -496,6 +500,32 @@ describe('NavigateToTaskService', () => {
       await service.navigate(child.id);
 
       expect(taskService.showSubTasks).toHaveBeenCalledOnceWith('parent-1');
+    });
+
+    it('expands for an out-of-enum hide mode, which the template still hides', async () => {
+      // The template binds `isHideAll="!!t._hideSubTasksMode"`, so ANY truthy
+      // value hides the subtask. A strict `=== HideAll` check would miss legacy
+      // or corrupt values and leave the reveal failing exactly as it did before.
+      const child = setUpSubTask({
+        _hideSubTasksMode: 99 as unknown as HideSubTasksMode,
+      });
+
+      await service.navigate(child.id);
+
+      expect(taskService.showSubTasks).toHaveBeenCalledWith('parent-1');
+    });
+
+    it('expands in the same-context branch too, where no route change happens', async () => {
+      // The expansion runs before the same-context check, so it must apply on
+      // the branch that only polls the DOM instead of routing.
+      router.url = '/project/p1/tasks';
+      const child = setUpSubTask({ _hideSubTasksMode: HideSubTasksMode.HideAll });
+
+      await service.navigate(child.id);
+
+      expect(router.navigate).not.toHaveBeenCalled();
+      expect(taskService.showSubTasks).toHaveBeenCalledWith('parent-1');
+      expect(layoutService.focusTaskInViewWhenReady).toHaveBeenCalled();
     });
 
     it('leaves an already expanded parent alone', async () => {
