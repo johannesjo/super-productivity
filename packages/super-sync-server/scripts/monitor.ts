@@ -13,6 +13,23 @@ const USAGE_METRIC_VERSION = 2;
 const RECENT_OPS_PER_USER = 5;
 const ONE_DAY = 24 * 60 * 60 * 1000;
 
+/**
+ * Widest window an operations-derived count can honestly claim.
+ *
+ * Cleanup deletes `sync_devices` rows unseen this long outright
+ * (`deleteStaleDevices`), while the old-ops sweep SKIPS any user whose snapshot
+ * predates the same cutoff (`deleteOldSyncedOpsForAllUsers`). The two are not
+ * merely asymmetric, they are inverted: the lapsed cohort keeps its operations
+ * and loses its heartbeat. So a window wider than this counts users the
+ * device-scoped driver cannot see, and would silently under-report.
+ *
+ * Mirrors `RETENTION_DAYS` in `src/sync/sync.types.ts`, deliberately not
+ * imported — these scripts stay independent of the server modules.
+ * monitoring-scripts.spec.ts pins the two together, so changing retention fails
+ * a test instead of quietly making a window lie.
+ */
+const RETENTION_WINDOW_DAYS = 45;
+
 const maskEmail = (email: string): string => {
   const [local, domain] = email.split('@');
   if (!domain) return '***';
@@ -667,13 +684,21 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
       { label: 'Last 24 hours', ms: ONE_DAY },
       { label: 'Last 7 days', ms: 7 * ONE_DAY },
       { label: 'Last 30 days', ms: 30 * ONE_DAY },
-      { label: 'Last 90 days', ms: 90 * ONE_DAY },
+      // Retention, not 90 days: both tables are pruned at this bound, so a
+      // wider window reports nothing a narrower one does not, and the operations
+      // side of it cannot be answered exactly. See RETENTION_WINDOW_DAYS.
+      {
+        label: `Last ${RETENTION_WINDOW_DAYS} days`,
+        ms: RETENTION_WINDOW_DAYS * ONE_DAY,
+      },
     ].map((period) => ({ ...period, threshold: BigInt(now - period.ms) }));
     // The widest window bounds the driver, so every narrower one is answered
     // from the same pass.
     const widestThreshold = periods[periods.length - 1].threshold;
 
-    console.log('\n--- Active Users (by device heartbeat / by sync operations) ---');
+    console.log(
+      `\n--- Active Users (by device heartbeat / by sync operations, ${RETENTION_WINDOW_DAYS}d retention) ---`,
+    );
     // One statement for all four windows, driven from the users that hold a
     // device heartbeat inside the widest one.
     //
@@ -686,19 +711,24 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
     // by the size of the answer, and it was paid four times per report.
     //
     // Scoping the probe to device-active users is what bounds it, and the bound
-    // is exact rather than an approximation: sync.service.ts upserts
-    // `sync_devices.last_seen_at` INSIDE the upload transaction, so a user with
-    // an operation in a window necessarily has a heartbeat in that same window.
+    // is exact FOR WINDOWS AT OR BELOW RETENTION_WINDOW_DAYS: sync.service.ts
+    // upserts `sync_devices.last_seen_at` INSIDE the upload transaction, so a
+    // user with an operation in such a window necessarily still has a heartbeat
+    // in it. Above that bound the guarantee inverts and this would under-report,
+    // which is why the widest window is retention -- see RETENTION_WINDOW_DAYS
+    // for the retention asymmetry that causes it.
+    //
     // Each user's MAX(received_at) is then one backwards descent of
     // (user_id, received_at). Same fixture: 11,165 buffers in a single round
-    // trip, identical counts in all four windows, and flat as `operations` grows.
+    // trip, identical counts in every window, and flat as `operations` grows.
     //
     // A per-user probe was tried once before and reverted, driven from `users`
     // rather than from `sync_devices` -- that pays a descent for every registered
     // account, including every one that never synced at all (7,061 of the
-    // fixture's 10,561; the "never registered a device" line at the end of this
-    // report is the same number for whatever instance you are looking at). The
-    // driver is the whole point; do not widen it back to `users`.
+    // fixture's 10,561). The driver is the whole point; do not widen it back to
+    // `users`. monitoring-scripts.spec.ts asserts the driver table, because
+    // widening it is a cost regression that produces identical output and so
+    // cannot be caught by checking the numbers.
     const activity: ActivityWindowRow[] = await prisma.$queryRaw`
       WITH active_devices AS MATERIALIZED (
         SELECT user_id, MAX(last_seen_at) AS last_seen
@@ -853,6 +883,11 @@ const showActiveUsers = async (args: string[]): Promise<void> => {
       console.log(
         '\n--- Engaged Users: skipped (pass --engaged; reads 2 weeks of operations) ---',
       );
+      // `--threshold` tunes only this section. Silently ignoring it would let an
+      // operator read the numbers above as filtered when they are not.
+      if (args.includes('--threshold')) {
+        console.log('  (--threshold applies only with --engaged; ignored)');
+      }
     }
 
     // Users who never synced (no device ever registered)

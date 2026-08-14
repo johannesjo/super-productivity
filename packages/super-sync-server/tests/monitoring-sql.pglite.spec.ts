@@ -1,4 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
+import { RETENTION_DAYS } from '../src/sync/sync.types';
 import {
   afterAll,
   afterEach,
@@ -27,6 +28,13 @@ import {
  * production query cost — the fixture has no realistic index set or row count.
  * Semantics stay pinned by the string assertions in monitoring-scripts.spec.ts;
  * the two specs are complementary.
+ *
+ * The `active-users` report is the exception: monitoring-scripts.spec.ts carries no
+ * assertions on it, so the few SQL-shape assertions it needs live here alongside its
+ * behavioural ones. They exist because its two known regressions — widening the
+ * window driver back to `users`, and re-splitting the windows into one statement
+ * each — are pure COST regressions that emit byte-identical output, so nothing an
+ * assertion on the numbers can see would catch them.
  */
 
 const mocks = vi.hoisted(() => {
@@ -127,7 +135,15 @@ const LAPSED_USER = 4;
 const LAPSED_LAST_SEEN_AGO = 10 * ONE_DAY;
 const LAPSED_LAST_OP_AGO = 40 * ONE_DAY;
 const NEVER_SYNCED_USER = 5; // no device, no ops, no sync state
-const TOTAL_USERS = 5;
+// The cohort daily cleanup actually produces: operations with NO sync_devices
+// row. `deleteStaleDevices` prunes every device unseen for RETENTION_DAYS, while
+// `deleteOldSyncedOpsForAllUsers` SKIPS users whose snapshot predates the same
+// cutoff -- so a long-lapsed user keeps its operations and loses its heartbeat.
+// A fixture without this user cannot detect a window widened past retention,
+// where the device-scoped driver silently stops seeing these accounts.
+const PRUNED_DEVICE_USER = 6;
+const PRUNED_LAST_OP_AGO = 60 * ONE_DAY;
+const TOTAL_USERS = 6;
 const OPS_PER_USER = 20;
 const MULTI_DEVICE_USER = 1;
 const MULTI_DEVICE_COUNT = 3;
@@ -266,6 +282,39 @@ describe('monitoring report SQL (PGlite)', () => {
       `INSERT INTO users (id, email, is_verified, storage_used_bytes)
        VALUES ($1, $2, 0, 0)`,
       [NEVER_SYNCED_USER, `user${NEVER_SYNCED_USER}@example.com`],
+    );
+
+    // Long-lapsed: operations survive, the device row has been pruned. See
+    // PRUNED_DEVICE_USER for why this state is the normal outcome of cleanup
+    // rather than a corrupt fixture.
+    await db.query(
+      `INSERT INTO users (id, email, is_verified, storage_used_bytes)
+       VALUES ($1, $2, 1, 300)`,
+      [PRUNED_DEVICE_USER, `user${PRUNED_DEVICE_USER}@example.com`],
+    );
+    await db.query(`INSERT INTO user_sync_state (user_id, last_seq) VALUES ($1, $2)`, [
+      PRUNED_DEVICE_USER,
+      1,
+    ]);
+    await db.query(
+      `INSERT INTO operations
+         (id, user_id, client_id, server_seq, action_type, op_type, entity_type,
+          entity_id, payload, payload_bytes, vector_clock, schema_version,
+          client_timestamp, received_at)
+       VALUES ($1,$2,$3,1,$4,$5,$6,$7,$8,$9,$10,1,$11,$11)`,
+      [
+        `op-${PRUNED_DEVICE_USER}-1`,
+        PRUNED_DEVICE_USER,
+        `client-${PRUNED_DEVICE_USER}-1`,
+        '[Task] Update Task',
+        'UPD',
+        'TASK',
+        'task-1',
+        JSON.stringify({ title: 'pruned' }),
+        100,
+        JSON.stringify({ [`client-${PRUNED_DEVICE_USER}-1`]: 1 }),
+        now - PRUNED_LAST_OP_AGO,
+      ],
     );
   };
 
@@ -449,8 +498,27 @@ describe('monitoring report SQL (PGlite)', () => {
       `  Last 30 days: ${SYNCING_USERS + 1} connected / ${SYNCING_USERS} syncing`,
     );
     expect(consoleLog).toHaveBeenCalledWith(
-      `  Last 90 days: ${SYNCING_USERS + 1} connected / ${SYNCING_USERS + 1} syncing`,
+      `  Last 45 days: ${SYNCING_USERS + 1} connected / ${SYNCING_USERS + 1} syncing`,
     );
+  });
+
+  it('never claims a window wider than the operations it can still see', async () => {
+    await run('monitor', ['active-users']);
+
+    // The device-scoped driver is exact only at or below retention. Past it,
+    // PRUNED_DEVICE_USER -- operations at 60 days, device row already swept --
+    // is invisible to the driver but WOULD be counted by a direct scan of
+    // `operations`, so a wider window under-reports without any sign of it.
+    // Widening the last window back to 90 days makes this fail.
+    const windowLines: string[] = consoleLog.mock.calls
+      .map((call: unknown[]) => String(call[0]))
+      .filter((line: string) => / connected \/ .* syncing$/.test(line));
+    expect(windowLines).toHaveLength(4);
+    expect(windowLines.some((line: string) => line.includes('Last 90 days'))).toBe(false);
+    // Pinned to the server's retention constant, not to the literal 45: lowering
+    // RETENTION_DAYS shrinks the window the driver can answer exactly, and
+    // nothing in monitor.ts would otherwise notice.
+    expect(windowLines[3]).toContain(`Last ${RETENTION_DAYS} days`);
   });
 
   it('answers every window from one pass over the operations table', async () => {
@@ -469,7 +537,18 @@ describe('monitoring report SQL (PGlite)', () => {
       [],
     );
     // All four windows come back from a single bucketed pass instead.
-    expect(statements.filter((sql) => sql.includes('windows (bucket)'))).toHaveLength(1);
+    const windowed = statements.filter((sql: string) => sql.includes('windows (bucket)'));
+    expect(windowed).toHaveLength(1);
+
+    // The driver table, pinned. Widening it back to `users` -- the shape that
+    // was tried and reverted -- pays an index descent for every registered
+    // account including those that never synced, but produces byte-identical
+    // output on any fixture. No assertion on the numbers can catch that; only
+    // an assertion on the SQL can.
+    expect(windowed[0]).toMatch(
+      /active_devices AS MATERIALIZED[\s\S]*?FROM sync_devices/,
+    );
+    expect(windowed[0]).not.toMatch(/active_devices AS MATERIALIZED[\s\S]*?FROM users/);
   });
 
   it('leaves the operations-bound engaged section out of the default report', async () => {
