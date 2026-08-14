@@ -15,11 +15,15 @@ export const adjustToLiveFormlyForm = (
         type: 'toggle',
       };
     }
-    // `updateOn: 'blur'` is load-bearing, not a nicety: the config form binds
-    // `[model]="cfg()"`, so committing per keystroke round-trips through the
-    // store and hands formly a fresh model object, which rebuilds the field
-    // mid-edit and discards the native control's in-progress editing state.
-    // For `time` that ate the first digit of every hour typed (#9548).
+    // `updateOn: 'blur'` is load-bearing, not a nicety. formly runs with
+    // `extras: { immutable: true }` (formly-config.module.ts), so a new `[model]`
+    // object identity replaces the root field config and formly re-creates every
+    // rendered field. `ConfigFormComponent` binds `[model]="cfg()"` and the store
+    // returns a fresh object per update, so committing per keystroke destroys the
+    // focused element mid-edit — losing any state the browser keeps on the node
+    // itself. For `time` that ate the first digit of every hour typed (#9548).
+    // The general fix is for the config form to ignore an incoming `cfg` that
+    // deep-equals what it just emitted; until then, input-like types opt in here.
     if (
       item.type === 'input' ||
       item.type === 'textarea' ||
