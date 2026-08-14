@@ -115,14 +115,29 @@ const SCHEMA = `
   );
 `;
 
+const ONE_DAY = 24 * 60 * 60 * 1000;
+
 const SYNCING_USERS = 3;
-const TOTAL_USERS = 4; // user 4 has never synced: no sync state, no device, no ops
+// Heartbeat 10 days old, newest operation 40 days old. Straddles the 7d/30d/90d
+// boundaries in DIFFERENT places for the two columns, which is what makes
+// "connected" and "syncing" separable: a fixture where every user is inside
+// every window cannot tell the per-window counts apart at all, and cannot catch
+// a probe that reports the heartbeat where it means the operation.
+const LAPSED_USER = 4;
+const LAPSED_LAST_SEEN_AGO = 10 * ONE_DAY;
+const LAPSED_LAST_OP_AGO = 40 * ONE_DAY;
+const NEVER_SYNCED_USER = 5; // no device, no ops, no sync state
+const TOTAL_USERS = 5;
 const OPS_PER_USER = 20;
 const MULTI_DEVICE_USER = 1;
 const MULTI_DEVICE_COUNT = 3;
 // Heartbeats are staggered so the "most recently active users" cap has a defined
 // order to cut on; the highest-numbered syncing user is the newest.
 const NEWEST_USER = SYNCING_USERS;
+// Operations of the syncing users spread over this many distinct UTC days, all
+// inside the 7-day window. Engagement is counted in distinct days, so a fixture
+// packed into one day leaves the engaged-users report permanently empty.
+const ENGAGED_ACTIVE_DAYS = 5;
 
 interface TableRow {
   [column: string]: unknown;
@@ -190,18 +205,67 @@ describe('monitoring report SQL (PGlite)', () => {
             seq % 2 === 0 ? 100 * seq : 0,
             JSON.stringify({ [`client-${userId}-1`]: seq }),
             // Newer ops carry a higher server_seq, matching production ordering.
-            now - (OPS_PER_USER - seq) * 1000,
+            // Spread over ENGAGED_ACTIVE_DAYS distinct days but still inside the
+            // 7-day window, so the newest op of every syncing user is `now`.
+            now - ((OPS_PER_USER - seq) % ENGAGED_ACTIVE_DAYS) * ONE_DAY,
           ],
         );
       }
     }
+
+    // A user who still opens the app but has stopped changing anything: the
+    // heartbeat is 10 days old while the newest operation is 40 days old, so the
+    // two columns of every window disagree for exactly one account.
+    await db.query(
+      `INSERT INTO users (id, email, is_verified, storage_used_bytes)
+       VALUES ($1, $2, 1, 500)`,
+      [LAPSED_USER, `user${LAPSED_USER}@example.com`],
+    );
+    // Sync state without a snapshot: the upload path always writes this row, but
+    // holding no snapshot keeps this user out of the snapshot ranking.
+    await db.query(`INSERT INTO user_sync_state (user_id, last_seq) VALUES ($1, $2)`, [
+      LAPSED_USER,
+      1,
+    ]);
+    await db.query(
+      `INSERT INTO sync_devices
+         (client_id, user_id, device_name, last_seen_at, created_at)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        `client-${LAPSED_USER}-1`,
+        LAPSED_USER,
+        `Device ${LAPSED_USER}-1`,
+        now - LAPSED_LAST_SEEN_AGO,
+        now - 90 * ONE_DAY,
+      ],
+    );
+    await db.query(
+      `INSERT INTO operations
+         (id, user_id, client_id, server_seq, action_type, op_type, entity_type,
+          entity_id, payload, payload_bytes, vector_clock, schema_version,
+          client_timestamp, received_at)
+       VALUES ($1,$2,$3,1,$4,$5,$6,$7,$8,$9,$10,1,$11,$11)`,
+      [
+        `op-${LAPSED_USER}-1`,
+        LAPSED_USER,
+        `client-${LAPSED_USER}-1`,
+        '[Task] Update Task',
+        'UPD',
+        'TASK',
+        'task-1',
+        JSON.stringify({ title: 'lapsed' }),
+        100,
+        JSON.stringify({ [`client-${LAPSED_USER}-1`]: 1 }),
+        now - LAPSED_LAST_OP_AGO,
+      ],
+    );
 
     // A registered user who never synced: exercises the LEFT JOIN / COALESCE /
     // GREATEST branches that a fully populated fixture never reaches.
     await db.query(
       `INSERT INTO users (id, email, is_verified, storage_used_bytes)
        VALUES ($1, $2, 0, 0)`,
-      [TOTAL_USERS, `user${TOTAL_USERS}@example.com`],
+      [NEVER_SYNCED_USER, `user${NEVER_SYNCED_USER}@example.com`],
     );
   };
 
@@ -268,6 +332,7 @@ describe('monitoring report SQL (PGlite)', () => {
   // only reachable directly (documented in MONITORING-README.md and docker-monitor.sh).
   const REPORTS: Array<[string, keyof typeof SCRIPTS, string[]]> = [
     ['monitor active-users (direct command only)', 'monitor', ['active-users']],
+    ['monitor active-users --engaged', 'monitor', ['active-users', '--engaged']],
     ['monitor active-users-quick', 'monitor', ['active-users-quick']],
     ['monitor ops (all users)', 'monitor', ['ops']],
     ['monitor ops (single user)', 'monitor', ['ops', '--user', '1']],
@@ -367,17 +432,83 @@ describe('monitoring report SQL (PGlite)', () => {
 
     // SYNCING_USERS connected, not SYNCING_USERS + (MULTI_DEVICE_COUNT - 1):
     // the per-user maxima collapse a user's devices before anything is counted.
-    // And the registered-but-never-synced user is in neither total.
-    for (const label of [
-      'Last 24 hours',
-      'Last 7 days',
-      'Last 30 days',
-      'Last 90 days',
-    ]) {
-      expect(consoleLog).toHaveBeenCalledWith(
-        `  ${label}: ${SYNCING_USERS} connected / ${SYNCING_USERS} syncing`,
-      );
-    }
+    // And the registered-but-never-synced user is in no window at all.
+    //
+    // The lapsed user is what separates the two columns. It enters "connected"
+    // at 30d (heartbeat 10 days old) but "syncing" only at 90d (newest operation
+    // 40 days old), so a probe that read the heartbeat where it means the
+    // operation would report SYNCING_USERS + 1 syncing at 30d, and a driver
+    // narrowed to a window smaller than the widest would drop it from both.
+    expect(consoleLog).toHaveBeenCalledWith(
+      `  Last 24 hours: ${SYNCING_USERS} connected / ${SYNCING_USERS} syncing`,
+    );
+    expect(consoleLog).toHaveBeenCalledWith(
+      `  Last 7 days: ${SYNCING_USERS} connected / ${SYNCING_USERS} syncing`,
+    );
+    expect(consoleLog).toHaveBeenCalledWith(
+      `  Last 30 days: ${SYNCING_USERS + 1} connected / ${SYNCING_USERS} syncing`,
+    );
+    expect(consoleLog).toHaveBeenCalledWith(
+      `  Last 90 days: ${SYNCING_USERS + 1} connected / ${SYNCING_USERS + 1} syncing`,
+    );
+  });
+
+  it('answers every window from one pass over the operations table', async () => {
+    await run('monitor', ['active-users']);
+
+    const statements = mocks.prisma.$queryRaw.mock.calls.map((call: unknown[]) =>
+      (call[0] as TemplateStringsArray).join('?'),
+    );
+
+    // The shape this replaced issued `COUNT(DISTINCT user_id) FROM operations`
+    // once per window. `received_at` is the non-leading column of the only index
+    // covering it, so each of those walked the whole index -- a cost set by the
+    // size of `operations` rather than by the size of the answer, and charged
+    // four times per report.
+    expect(statements.filter((sql) => sql.includes('COUNT(DISTINCT user_id)'))).toEqual(
+      [],
+    );
+    // All four windows come back from a single bucketed pass instead.
+    expect(statements.filter((sql) => sql.includes('windows (bucket)'))).toHaveLength(1);
+  });
+
+  it('leaves the operations-bound engaged section out of the default report', async () => {
+    await run('monitor', ['active-users']);
+
+    // The default report has to be answerable from the active-user set alone.
+    // Engagement is counted in distinct active days, so it must visit every
+    // operation in a two-week window -- more work than the windowed count that
+    // was already exceeding statement_timeout on the hosted instance.
+    const statements = mocks.prisma.$queryRaw.mock.calls.map((call: unknown[]) =>
+      (call[0] as TemplateStringsArray).join('?'),
+    );
+    expect(statements.filter((sql) => sql.includes('active_days'))).toEqual([]);
+    expect(rowsWithColumn('Active Days')).toEqual([]);
+    expect(consoleLog).toHaveBeenCalledWith(
+      '\n--- Engaged Users: skipped (pass --engaged; reads 2 weeks of operations) ---',
+    );
+  });
+
+  it('reports the true engaged-user count while paging the table', async () => {
+    await run('monitor', ['active-users', '--engaged', '--limit', '2']);
+
+    // Every syncing user is engaged: their operations span ENGAGED_ACTIVE_DAYS
+    // distinct UTC days, above the default threshold of 3.
+    expect(consoleLog).toHaveBeenCalledWith(`Count: ${SYNCING_USERS}`);
+    expect(consoleLog).toHaveBeenCalledWith(`(showing the top 2 of ${SYNCING_USERS})`);
+    // The count above is what the section is for; the row list is a sample of it
+    // and must honour --limit, as every other table in this report does.
+    expect(rowsWithColumn('Active Days')).toHaveLength(2);
+  });
+
+  it('still reports the engaged count when asked for no rows', async () => {
+    await run('monitor', ['active-users', '--engaged', '--limit', '0']);
+
+    // `--limit 0` is a legal way to ask for counts without a table. The count
+    // rides back on the rows, so fetching literally zero of them would print
+    // "Count: 0" for a fleet of thousands -- a wrong number, not a missing one.
+    expect(consoleLog).toHaveBeenCalledWith(`Count: ${SYNCING_USERS}`);
+    expect(rowsWithColumn('Active Days')).toEqual([]);
   });
 
   it('buckets per-user sizes across backfilled and unbackfilled rows', async () => {
