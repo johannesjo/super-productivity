@@ -122,6 +122,13 @@ export class OperationLogHydratorService {
     let snapshotPersistedDuringHydration = false;
 
     try {
+      // #9084: held for the whole run so compaction cannot capture the gap
+      // between the loadAllData dispatch and the tail replay — see the guard
+      // in OperationLogCompactionService._doCompact. Inside the try so a
+      // throw still reaches the recovery path below; the finally always
+      // clears it.
+      this.hydrationStateService.setHydrationInProgress(true);
+
       // PERF: Parallel startup operations - all access different IndexedDB stores
       // and don't depend on each other's results, so they can run concurrently.
       const [pendingRemoteOps, , hasBackup] = await Promise.all([
@@ -412,6 +419,8 @@ export class OperationLogHydratorService {
         });
         throw recoveryErr;
       }
+    } finally {
+      this.hydrationStateService.setHydrationInProgress(false);
     }
   }
 

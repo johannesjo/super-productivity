@@ -157,6 +157,7 @@ describe('OperationLogHydratorService', () => {
       'startApplyingRemoteOps',
       'endApplyingRemoteOps',
       'setHydrationFallbackActive',
+      'setHydrationInProgress',
     ]);
     mockSnapshotService = jasmine.createSpyObj('OperationLogSnapshotService', [
       'isValidSnapshot',
@@ -513,6 +514,35 @@ describe('OperationLogHydratorService', () => {
         // Hydration state is managed around the dispatch
         expect(mockHydrationStateService.startApplyingRemoteOps).toHaveBeenCalled();
         expect(mockHydrationStateService.endApplyingRemoteOps).toHaveBeenCalled();
+      });
+
+      // #9084: the flag must bracket the whole run — from before the snapshot
+      // dispatch until after the tail replay — so the compaction guard covers
+      // the gap between them, not just the bulk-dispatch call itself.
+      it('should hold hydration-in-progress across the full run, from before the snapshot dispatch until after the tail replay (#9084)', async () => {
+        const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
+        const tailOps = [createMockEntry(6, createMockOperation('op-6'))];
+        mockOpLogStore.loadStateCache.and.resolveTo(snapshot);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo(tailOps);
+
+        const callOrder: string[] = [];
+        mockHydrationStateService.setHydrationInProgress.and.callFake(((
+          isInProgress: boolean,
+        ) => {
+          callOrder.push(isInProgress ? 'in-progress:true' : 'in-progress:false');
+        }) as never);
+        mockStore.dispatch.and.callFake(((action: { type: string }) => {
+          callOrder.push(`dispatch:${action.type}`);
+        }) as never);
+
+        await service.hydrateStore();
+
+        expect(callOrder).toEqual([
+          'in-progress:true',
+          `dispatch:${loadAllData.type}`,
+          `dispatch:${bulkApplyHydrationOperations.type}`,
+          'in-progress:false',
+        ]);
       });
 
       it('should replay a tail op with a malformed stored schemaVersion verbatim instead of failing into recovery', async () => {
