@@ -3,7 +3,7 @@ import { SearchQueryParams } from '../../pages/search-page/search-page.model';
 import { devError } from '../../util/dev-error';
 import { TaskService } from '../../features/tasks/task.service';
 import { Router } from '@angular/router';
-import { Task } from '../../features/tasks/task.model';
+import { HideSubTasksMode, Task } from '../../features/tasks/task.model';
 import { INBOX_PROJECT } from '../../features/project/project.const';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { DateService } from '../../core/date/date.service';
@@ -15,7 +15,10 @@ import { LayoutService } from '../layout/layout.service';
 import { recordSearchNavDebug } from '../../util/search-nav-debug';
 import { Store } from '@ngrx/store';
 import { RootState } from '../../root-store/root-state';
-import { selectTaskEntities } from '../../features/tasks/store/task.selectors';
+import {
+  selectCurrentTaskId,
+  selectTaskEntities,
+} from '../../features/tasks/store/task.selectors';
 import { selectProjectFeatureState } from '../../features/project/store/project.selectors';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
@@ -36,6 +39,7 @@ export class NavigateToTaskService {
   private _dateService = inject(DateService);
   private _layoutService = inject(LayoutService);
   private _taskEntities = this._store.selectSignal(selectTaskEntities);
+  private _currentTaskId = this._store.selectSignal(selectCurrentTaskId);
   private _projectState = this._store.selectSignal(selectProjectFeatureState);
 
   async navigate(taskId: string, isArchiveTask: boolean = false): Promise<void> {
@@ -70,6 +74,9 @@ export class NavigateToTaskService {
         projectId: task.projectId || null,
         firstTagId: task.tagIds?.[0] || null,
       });
+      // After the `start` record so a captured trace reads in causal order, and
+      // still well before the navigation below.
+      this._expandCollapsedParent(task, isArchiveTask);
 
       if (this._router.url.startsWith(location)) {
         recordSearchNavDebug('navigateToTask:sameContext', {
@@ -203,6 +210,44 @@ export class NavigateToTaskService {
       (owningProject.taskIds ?? []).includes(taskId) ||
       (owningProject.backlogTaskIds ?? []).includes(taskId);
     return isListed ? null : owningProject.id;
+  }
+
+  /**
+   * A collapsed parent renders NO row for its subtasks — `filterDoneTasks`
+   * returns `[]` for `isHideAll` — so the reveal step would poll for an element
+   * that can never appear and give up silently after ~5s. Since
+   * `_hideSubTasksMode` is persisted (#8781), that made the search result
+   * permanently unreachable, which is what the reporter's trace shows. (#8780)
+   *
+   * Expand only when the target really is hidden, so navigating never emits a
+   * synced `updateTaskUi` op it doesn't need to.
+   */
+  private _expandCollapsedParent(task: Task, isArchiveTask: boolean): void {
+    // Navigating into the archive must never write live task UI state.
+    if (isArchiveTask || !task.parentId) {
+      return;
+    }
+    const parent = this._taskEntities()[task.parentId];
+    if (parent?.id !== task.parentId) {
+      return;
+    }
+    // `filterDoneTasks` exempts the currently TRACKED task from HideAll, so that
+    // one row renders even inside a collapsed parent. Without this check the
+    // tracked-task pill — which navigates to exactly that task — would expand
+    // the parent on every device to reveal a row already on screen.
+    const isHiddenByParent =
+      (parent._hideSubTasksMode === HideSubTasksMode.HideAll &&
+        this._currentTaskId() !== task.id) ||
+      (parent._hideSubTasksMode === HideSubTasksMode.HideDone && task.isDone);
+    if (!isHiddenByParent) {
+      return;
+    }
+    recordSearchNavDebug('navigateToTask:expandParent', {
+      taskId: task.id,
+      parentId: parent.id,
+      hideSubTasksMode: parent._hideSubTasksMode ?? null,
+    });
+    this._taskService.showSubTasks(parent.id);
   }
 
   private _repairProjectMembership(taskId: string, targetProjectId: string): void {
