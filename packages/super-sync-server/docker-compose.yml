@@ -24,6 +24,10 @@ x-logging-app: &app-logging
 
 services:
   supersync:
+    # This default is the PRIVATE package behind the hosted SuperSync instance; it is
+    # not publicly pullable and there is no public or release-tagged image (#6225).
+    # Self-hosters: use `./scripts/deploy.sh --build`, or set SUPERSYNC_IMAGE to an
+    # image you publish yourself. Pulling this ref anonymously fails `unauthorized`.
     image: ${SUPERSYNC_IMAGE:-ghcr.io/super-productivity/supersync:latest}
     container_name: supersync-server
     restart: unless-stopped

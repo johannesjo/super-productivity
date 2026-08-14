@@ -38,6 +38,13 @@ Deploy hosts need Docker with the Compose plugin, `curl`, `git`, and `jq`.
 The image revision check requires Docker Compose support for
 `docker compose config --format json`.
 
+> **Self-hosters: build the image, do not pull it.** The default image reference
+> `ghcr.io/super-productivity/supersync:latest` is the private package that runs the
+> hosted SuperSync instance — it is not published for public use, and pulling it
+> anonymously fails with `unauthorized`. There is no official public image and no
+> release-tagged one (#6225). Run `./scripts/deploy.sh --build` to build from this
+> checkout, or publish your own image and point `SUPERSYNC_IMAGE` at it.
+
 ```bash
 # 1. Copy environment example
 cp env.example .env
@@ -45,9 +52,16 @@ cp env.example .env
 # 2. Configure .env (Set JWT_SECRET, DOMAIN, POSTGRES_PASSWORD)
 nano .env
 
-# 3. Deploy the stack and run database migrations
-./scripts/deploy.sh
+# 3. Build the image, deploy the stack and run database migrations
+./scripts/deploy.sh --build
 ```
+
+`--build` builds from the current checkout, so it requires the SuperSync image
+inputs (`packages/super-sync-server`, `packages/sync-core`,
+`packages/shared-schema`, `package*.json`, `.dockerignore`, and the image
+workflow) to be free of uncommitted and untracked changes — the resulting image
+is labelled with the commit it was built from. Drop `--build` only if you have
+access to a published image.
 
 `docker compose up` is not a deployment substitute: container startup migrations
 are disabled by default so app restarts cannot race the deploy migrator.
