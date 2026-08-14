@@ -1,11 +1,4 @@
 SuperSync has been deployed!
-{{- if eq .Values.image.repository "ghcr.io/super-productivity/supersync" }}
-
-WARNING: image.repository still points at the private package serving the hosted
-SuperSync instance. It is not publicly pullable, so this install will end in
-ImagePullBackOff. Build and publish your own image (see
-packages/super-sync-server/scripts/build-and-push.sh) and set image.repository.
-{{- end }}
 {{- if not .Values.supersync.publicUrl }}
 
 WARNING: supersync.publicUrl is not set. Server will reject requests in production mode.

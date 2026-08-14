@@ -2,11 +2,11 @@
 #
 # Usage:
 #   1. Copy env.example to .env and configure your settings
-#   2. Run: ./scripts/deploy.sh --build   (see the image: note below)
+#   2. Run: ./scripts/deploy.sh
 #   3. View logs: docker-compose logs -f
 #
-# Drop --build only if you have a published image to pull:
-#   ./scripts/deploy.sh
+# For local builds (development):
+#   ./scripts/deploy.sh --build
 
 x-logging: &default-logging
   driver: 'json-file'
@@ -24,9 +24,8 @@ x-logging-app: &app-logging
 
 services:
   supersync:
-    # This default is the PRIVATE package serving the hosted instance — anonymous
-    # pulls fail, and there is no public image (#6225). Self-hosters: run
-    # `./scripts/deploy.sh --build`, or set SUPERSYNC_IMAGE to your own image.
+    # Only `latest` and `master-<sha>` are published, both built from master — there
+    # are no release tags. Pin SUPERSYNC_IMAGE to a master-<sha> for a fixed version.
     image: ${SUPERSYNC_IMAGE:-ghcr.io/super-productivity/supersync:latest}
     container_name: supersync-server
     restart: unless-stopped

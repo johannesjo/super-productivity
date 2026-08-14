@@ -38,16 +38,13 @@ Deploy hosts need Docker with the Compose plugin, `curl`, `git`, and `jq`.
 The image revision check requires Docker Compose support for
 `docker compose config --format json`.
 
-> **Self-hosters: build the image, do not pull it.** The default
-> `ghcr.io/super-productivity/supersync:latest` is a private package serving the
-> hosted instance; anonymous pulls fail with `unauthorized`, and no public image
-> exists
-> ([#6225](https://github.com/super-productivity/super-productivity/issues/6225)).
-> Build it yourself with `./scripts/deploy.sh --build`, or publish your own image
-> and set `SUPERSYNC_IMAGE` to it.
+> **There are no release tags.** `ghcr.io/super-productivity/supersync` publishes
+> only `latest` and `master-<sha>`, both built from `master`, so a default deploy
+> tracks upstream `master` rather than a released version. Pin `SUPERSYNC_IMAGE`
+> to a `master-<sha>` tag if you need a fixed one.
 
 ```bash
-# 1. Clone the repo (the build needs the whole monorepo) and enter this directory
+# 1. Clone the repo (deploy.sh runs from this checkout) and enter this directory
 git clone https://github.com/super-productivity/super-productivity.git
 cd super-productivity/packages/super-sync-server
 
@@ -57,22 +54,18 @@ cp env.example .env
 # 3. Configure .env (Set JWT_SECRET, DOMAIN, POSTGRES_PASSWORD)
 nano .env
 
-# 4. Build the image, deploy the stack and run database migrations
-./scripts/deploy.sh --build
+# 4. Deploy the stack and run database migrations
+./scripts/deploy.sh
 ```
 
-`--build` compiles the whole monorepo **on the deploy host**, beside the running
-stack: expect several minutes and a peak above 1.5 GB of RAM on top of the ~2.5 GB
-the containers already reserve, plus a BuildKit cache that grows by ~1.4 GB per
-build and is never pruned for you. On a small VPS, build elsewhere and set
-`SUPERSYNC_IMAGE` instead (pass the same `VCS_REF`, see below). `deploy.sh` also
-runs `git pull --ff-only` first, so `--build` deploys upstream `master`, not a
-release — pin the checkout if you need a fixed version.
-
-`--build` refuses to run if the image inputs have uncommitted or untracked
-changes; the error names the offending files. Keep customizations on a local
-branch — but note that also makes the `git pull` above fail, after which deploys
-warn and continue with your files.
+`./scripts/deploy.sh --build` builds the image locally instead of pulling it.
+That compiles the whole monorepo **on the deploy host**, beside the running
+stack: expect several minutes and a peak above 1.5 GB of RAM on top of the
+~2.5 GB the containers already reserve, plus a BuildKit cache that grows by
+~1.4 GB per build and is never pruned for you. On a small VPS, prefer the pull,
+or build elsewhere and set `SUPERSYNC_IMAGE` (passing the same `VCS_REF`, see
+below). `--build` also refuses to run if the image inputs have uncommitted or
+untracked changes; the error names the offending files.
 
 `docker compose up` is not a deployment substitute: container startup migrations
 are disabled by default so app restarts cannot race the deploy migrator.
@@ -86,8 +79,8 @@ connection uses `postgres:5432`; existing installs that already set
 
 > **Upgrade note:** because `RUN_MIGRATIONS_ON_STARTUP` defaults to `false`,
 > `docker compose pull && docker compose up -d` can leave the app running
-> against unapplied migrations. Use `./scripts/deploy.sh --build` for production
-> updates, or plain `./scripts/deploy.sh` if you have a published image to pull.
+> against unapplied migrations. Use `./scripts/deploy.sh` for production
+> updates, or `./scripts/deploy.sh --build` for local image builds.
 
 `deploy.sh` verifies that the pulled/built `supersync` image has an
 `org.opencontainers.image.revision` label matching the latest commit that

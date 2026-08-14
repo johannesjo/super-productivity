@@ -3,14 +3,7 @@
 replicaCount: 1
 
 image:
-  # -- SuperSync container image repository. The default is a PRIVATE package serving
-  # the hosted instance, so a default install ends in ImagePullBackOff with an
-  # authentication error (`unauthorized`/`denied`); there is no public image (#6225).
-  # Build and publish your own — see packages/super-sync-server/scripts/build-and-push.sh,
-  # and note the Dockerfile needs the repo root as build context — then point this at
-  # it, supplying that registry's credentials via imagePullSecrets if it is private.
-  # A locally built image works with no registry at all: side-load it into the nodes
-  # (kind load / minikube image load / ctr images import) and keep pullPolicy below.
+  # -- SuperSync container image repository
   repository: ghcr.io/super-productivity/supersync
   # -- Image pull policy
   pullPolicy: IfNotPresent
