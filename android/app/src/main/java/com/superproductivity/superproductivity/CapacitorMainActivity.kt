@@ -303,22 +303,16 @@ class CapacitorMainActivity : BridgeActivity() {
         } else {
             Log.e("CapacitorMainActivity", "$message - finishing activity", error)
         }
+        // The block screen no longer shows the pre-flight version (it is misleading on
+        // this path), so log it — otherwise a user report carries no trace of it at all.
+        Log.w("CapacitorMainActivity", "WebView init failure preflight: $webViewCompatibility")
         webViewBlocked = true
-        WebViewBlockActivity.present(this, webViewInitFailureResult())
+        WebViewBlockActivity.present(
+            this,
+            WebViewCompatibilityChecker.initFailureResult(webViewCompatibility),
+        )
         finish()
     }
-
-    private fun webViewInitFailureResult(): WebViewCompatibilityChecker.Result =
-        (webViewCompatibility ?: WebViewCompatibilityChecker.Result(
-            status = WebViewCompatibilityChecker.Status.BLOCK,
-            majorVersion = null,
-            providerPackage = null,
-            providerVersionName = null,
-            source = WebViewCompatibilityChecker.VersionSource.INIT_FAILURE,
-        )).copy(
-            status = WebViewCompatibilityChecker.Status.BLOCK,
-            source = WebViewCompatibilityChecker.VersionSource.INIT_FAILURE,
-        )
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
