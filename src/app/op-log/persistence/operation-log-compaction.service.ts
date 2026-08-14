@@ -18,6 +18,7 @@ import { OperationCaptureService } from '../capture/operation-capture.service';
 import { getPhantomChangeRisk } from '../capture/phantom-change-guard.util';
 import { OperationWriteFlushService } from '../sync/operation-write-flush.service';
 import { HydrationStateService } from '../apply/hydration-state.service';
+import { TabSeqFrontierService } from './tab-seq-frontier.service';
 
 /**
  * Manages the compaction (garbage collection) of the operation log.
@@ -36,6 +37,7 @@ export class OperationLogCompactionService {
   private operationCapture = inject(OperationCaptureService);
   private writeFlushService = inject(OperationWriteFlushService);
   private hydrationState = inject(HydrationStateService);
+  private tabSeqFrontier = inject(TabSeqFrontierService);
 
   async compact(): Promise<boolean> {
     return this._doCompact(COMPACTION_RETENTION_MS, false);
@@ -164,6 +166,22 @@ export class OperationLogCompactionService {
       // 3. Get lastSeq IMMEDIATELY before writing cache to minimize race window
       // This ensures new ops written after this point have seq > lastSeq
       const lastSeq = await this.opLogStore.getLastSeq();
+
+      // GUARD (#9438): lastSeq is the global max across the SHARED store — a
+      // concurrent tab's op is counted there while its effect is absent from
+      // this tab's state. Anchoring the cache past it would make the next
+      // boot's tail replay silently skip that op (and step 7 would prune ops
+      // behind the false anchor). Emergency compaction is exempt: it already
+      // accepts a residual re-replay window (see the lock note below) and
+      // must stay able to free space during quota recovery.
+      if (!isEmergency && !this.tabSeqFrontier.isSaveSafeAt(lastSeq)) {
+        OpLog.warn(
+          'OperationLogCompactionService: Skipping compaction — the op log ' +
+            "contains writes from a concurrent tab that are not in this tab's " +
+            'state (#9438)',
+        );
+        return false;
+      }
 
       // 4. Extract entity keys for conflict detection after compaction
       // This allows us to distinguish between entities that existed at snapshot time
