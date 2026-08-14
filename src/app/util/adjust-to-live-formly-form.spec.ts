@@ -140,7 +140,7 @@ describe('adjustToLiveFormlyForm', () => {
       expect(result[0].modelOptions?.updateOn).toBe('blur');
     });
 
-    // #9548: committing per keystroke rebuilt the field mid-edit, so a native
+    // #9548: committing per keystroke re-created the field mid-edit, so a native
     // <input type="time"> lost the first digit of the hour ('18' became '08').
     it('should add blur update behavior to time fields', () => {
       const items: FormlyFieldConfig[] = [{ key: 'timeField', type: 'time' }];
@@ -148,6 +148,8 @@ describe('adjustToLiveFormlyForm', () => {
       const result = adjustToLiveFormlyForm(items);
 
       expect(result[0].modelOptions?.updateOn).toBe('blur');
+      // the same branch also opts `time` into Enter-to-commit
+      expect(result[0].templateOptions?.keydown).toBeDefined();
     });
   });
 
