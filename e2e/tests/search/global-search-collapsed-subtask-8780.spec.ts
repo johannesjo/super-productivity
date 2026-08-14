@@ -21,6 +21,29 @@ const openGlobalSearch = async (page: Page): Promise<void> => {
   await expect(page.locator('search-page')).toBeVisible();
 };
 
+/**
+ * Turns on "Group By: Project" and collapses every resulting group, entirely
+ * through the real UI. Driving the menu rather than seeding localStorage keeps
+ * the collapse state in the exact shape the app writes, so the fixture cannot
+ * drift from production.
+ */
+const groupByProjectAndCollapseAll = async (page: Page): Promise<void> => {
+  await page.locator('.task-filter-btn').click();
+  const groupByItem = page.locator('.mat-mdc-menu-item', { hasText: 'Group By' });
+  await expect(groupByItem).toBeVisible();
+  await groupByItem.click();
+  const projectOption = page.locator('.mat-mdc-menu-item', { hasText: 'Project' }).last();
+  await expect(projectOption).toBeVisible();
+  await projectOption.click();
+  await page.keyboard.press('Escape');
+
+  const groupHeaders = page.locator('work-view collapsible .collapsible-header');
+  await expect(groupHeaders.first()).toBeVisible();
+  for (let i = 0, count = await groupHeaders.count(); i < count; i++) {
+    await groupHeaders.nth(i).click();
+  }
+};
+
 test.describe('Global Search — collapsed parent (#8780)', () => {
   test('reveals and focuses a subtask whose parent is collapsed', async ({
     page,
@@ -71,5 +94,46 @@ test.describe('Global Search — collapsed parent (#8780)', () => {
     await expect
       .poll(() => page.evaluate(() => document.activeElement?.id ?? ''))
       .toBe(`t-${subTaskId}`);
+  });
+
+  /**
+   * The second container the reporter described: a collapsed customizer group
+   * unmounts its whole task-list (`collapsible` renders its panel behind
+   * `@if (isExpanded)`), so the row can never appear no matter how long the
+   * reveal loop retries.
+   */
+  test('reveals and focuses a task inside a collapsed customizer group', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const taskName = `${testPrefix}-GroupedTask`;
+    await workViewPage.addTask(taskName);
+
+    const taskEl = taskPage.getTaskByText(taskName);
+    await expect(taskEl).toBeVisible();
+    const taskId = await taskEl.getAttribute('data-task-id');
+    expect(taskId).toBeTruthy();
+    const taskRow = page.locator(`task[data-task-id="${taskId}"]`);
+
+    await groupByProjectAndCollapseAll(page);
+
+    // Precondition: the collapsed group unmounted the row entirely.
+    await expect(taskRow).toHaveCount(0);
+
+    await openGlobalSearch(page);
+    await page.locator('search-page .search-field input').fill(taskName);
+    const result = page
+      .locator('search-page mat-list-item')
+      .filter({ hasText: taskName });
+    await expect(result).toHaveCount(1);
+    await result.click();
+
+    await expect(taskRow).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => document.activeElement?.id ?? ''))
+      .toBe(`t-${taskId}`);
   });
 });
