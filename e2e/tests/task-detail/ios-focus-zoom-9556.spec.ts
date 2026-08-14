@@ -90,6 +90,13 @@ test.describe('Task detail iOS focus zoom', () => {
     expect(await getFontSizePx(page, '.e2e-add-subtask-input')).toBeGreaterThanOrEqual(
       IOS_ZOOM_THRESHOLD_PX,
     );
+
+    // The panel title is not asserted. `.task-title` is 17px below 600px, so
+    // phones already clear the threshold; its >=600px rule stays at 15px, so a
+    // touch tablet can still trip the zoom there. Knowingly left — raising it
+    // would change desktop for a case nobody has reported. Reading it here
+    // would also need a viewport resize mid-test, which reports transitional
+    // values before the layout settles.
   });
 
   // Controls with a non-focusable display counterpart (rendered markdown, the

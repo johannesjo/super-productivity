@@ -42,9 +42,13 @@ input {
   color: var(--text-color);
   padding: var(--s-half) var(--s-half);
   text-align: center;
-  // Only visible while editing, so there is no display counterpart to stay in
-  // sync with — safe to raise unconditionally (#9556).
-  @include noIosFocusZoom();
+  font-size: 14px;
+  // Overlays .value-wrapper, which has no size of its own and inherits from
+  // whatever row hosts it. Raising this unconditionally would resize the
+  // overlay on plain desktop hover (see the :host:hover rule below), so it is
+  // scoped to touch where the zoom is the real problem (#9556). The 14px above
+  // must stay: without it the untouched path falls to the ~13px UA default.
+  @include noIosFocusZoomOnTouch();
   min-height: 100%;
 
   @include inlineEditElevation();
