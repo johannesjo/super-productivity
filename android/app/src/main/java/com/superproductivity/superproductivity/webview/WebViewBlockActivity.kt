@@ -148,16 +148,14 @@ class WebViewBlockActivity : AppCompatActivity() {
         // Name the package the button will actually open. On an init failure the active
         // provider often can't be read, so this is a best-effort guess — saying so lets
         // the user back out instead of clearing an unrelated app's storage. → #7229.
+        // Resolved once and passed to both, so the dialog cannot name one package while
+        // the button opens another.
+        val pkg = WebViewCompatibilityChecker.providerPackageOrDefault(provider)
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.webview_clear_storage_warning_title)
-            .setMessage(
-                getString(
-                    R.string.webview_clear_storage_warning_message,
-                    WebViewCompatibilityChecker.providerPackageOrDefault(provider),
-                ),
-            )
+            .setMessage(getString(R.string.webview_clear_storage_warning_message, pkg))
             .setPositiveButton(R.string.webview_manage_warning_continue) { _, _ ->
-                WebViewCompatibilityChecker.openWebViewAppInfoPage(this, provider)
+                WebViewCompatibilityChecker.openWebViewAppInfoPage(this, pkg)
             }
             .setNegativeButton(R.string.webview_override_warning_cancel, null)
             .setCancelable(true)
