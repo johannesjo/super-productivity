@@ -28,12 +28,17 @@
 }
 
 :host-context(.isNoMac.isObsidianStyleHeader.isElectron) {
-  // Dynamic window controls width using Window Controls Overlay CSS env vars
-  // env(titlebar-area-width) = available width (viewport - controls)
-  // So: controls width = 100vw - titlebar-area-width
-  // Fallback calc ensures 140px when env vars unavailable
-  // Only on non-Mac: macOS window controls are on the left, no right padding needed
-  padding-right: calc(100vw - env(titlebar-area-width, calc(100vw - 140px)));
+  // Keep header content inside the Window Controls Overlay safe area:
+  // env(titlebar-area-x) = left inset, env(titlebar-area-width) = safe width.
+  // Since Electron 43, Linux WCO follows the native button layout, so controls
+  // can sit left, right, or on both sides — pad both edges instead of assuming
+  // right-side controls. Fallbacks (0 left / 140px right) preserve the old
+  // behavior when the env vars are unavailable.
+  // Only on non-Mac: macOS uses hiddenInset traffic lights, handled above.
+  padding-left: env(titlebar-area-x, 0px);
+  padding-right: calc(
+    100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, calc(100vw - 140px))
+  );
 
   // Prevent header content from overflowing into the window controls area
   // when the window is resized to a narrow width (fixes #6365).
