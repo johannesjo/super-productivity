@@ -120,12 +120,15 @@ export const COMPACTION_THRESHOLD = 500;
  * anything ever being pruned — it tracks snapshot staleness, while total count
  * tracks the actual symptom: un-pruned log growth.
  *
- * Note: compaction only prunes *synced* ops past the retention window, so a large
- * unsynced backlog (offline / sync-stalled client) can stay above the threshold and
- * re-trigger every boot. Safe but not free: each re-fire is a full background
- * compaction pass (state-cache snapshot write + op scan) that prunes nothing, once
- * per boot — accepted, since it also keeps the boot snapshot fresh and pruning
- * resumes as soon as the backlog syncs. See OperationLogCompactionService.
+ * Note: compaction only prunes *synced* ops past the retention window. A log that
+ * has never synced therefore holds nothing prunable, and the trigger skips it
+ * outright (hasSyncedOps() gate) instead of paying a pointless full pass every
+ * boot. The residual case is a client WITH synced history but a large unsynced
+ * backlog (offline / sync-stalled): it can stay above the threshold and re-fire
+ * every boot. Safe but not free: each re-fire is a full background compaction pass
+ * (state-cache snapshot write + op scan) that prunes little or nothing, once per
+ * boot — accepted, since it also keeps the boot snapshot fresh and pruning resumes
+ * as soon as the backlog syncs. See OperationLogCompactionService.
  */
 export const STARTUP_COMPACTION_OP_THRESHOLD = 5000;
 

@@ -430,8 +430,13 @@ export class OperationLogHydratorService {
     // hydration-in-progress flag (the #9084 guard skips compaction while it
     // is up), and only after a fully successful run so recovery boots never
     // prune; fallback boots are additionally covered by the #9140 guard.
+    // Fire-and-forget: hydrateStore() gates app boot, so nothing here may
+    // block or reject it. compactIfBloated never rejects by contract; the
+    // catch is a belt for that contract.
     if (hydrationCompletedNormally) {
-      await this.compactionService.compactIfBloated();
+      this.compactionService.compactIfBloated().catch((e) => {
+        OpLog.err('OperationLogHydratorService: startup compaction check failed', e);
+      });
     }
   }
 
