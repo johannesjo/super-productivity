@@ -138,11 +138,9 @@ export class OperationLogHydratorService {
 
       // PERF: Parallel startup operations - all access different IndexedDB stores
       // and don't depend on each other's results, so they can run concurrently.
-      const [pendingRemoteOps, , hasBackup] = await Promise.all([
+      const [pendingRemoteOps, hasBackup] = await Promise.all([
         // Check for pending remote ops from crashed sync (touches 'ops' store)
         this.recoveryService.recoverPendingRemoteOps(),
-        // Legacy migration placeholder - kept for future DB migrations if needed
-        this._runLegacyMigrationIfNeeded(),
         // A.7.12: Check for interrupted migration (touches 'state_cache' store)
         this.opLogStore.hasStateCacheBackup(),
       ]);
@@ -320,9 +318,6 @@ export class OperationLogHydratorService {
         snapshotPersistedDuringHydration =
           await this._replayAllOpsFromScratch(pendingRemoteOps);
       }
-
-      // Legacy cleanup placeholder - kept for future maintenance operations if needed
-      await this._runLegacyCleanupIfNeeded();
 
       // Retry any failed remote ops from previous conflict resolution attempts
       // Now that state is fully hydrated, dependencies might be resolved
@@ -1027,14 +1022,6 @@ export class OperationLogHydratorService {
   }
 
   /**
-   * Legacy cleanup placeholder.
-   * Kept for future maintenance operations if needed.
-   */
-  private async _runLegacyCleanupIfNeeded(): Promise<void> {
-    // No-op: placeholder for future cleanup operations
-  }
-
-  /**
    * Retries failed remote operations from previous conflict resolution attempts.
    * Called after hydration to give failed ops another chance to apply now that
    * more state might be available (e.g., dependencies resolved by sync).
@@ -1137,14 +1124,6 @@ export class OperationLogHydratorService {
         );
       }
     }
-  }
-
-  /**
-   * Legacy migration placeholder.
-   * Kept for future DB migrations if needed.
-   */
-  private async _runLegacyMigrationIfNeeded(): Promise<void> {
-    // No-op: placeholder for future migrations
   }
 
   /**
