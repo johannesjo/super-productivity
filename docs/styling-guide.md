@@ -60,9 +60,15 @@ clone with its own `rgba(255, 152, 0, …)`, which is invisible to the 15 themes
 
 One tone token (`--callout-c`) drives icon color, border and fill, the latter two
 via `color-mix()` — so every tone is theme-aware and a new tone is one
-declaration. The icon element is optional; the class also works on a bare `<p>`.
-Outer spacing stays with the consumer (`.callout { margin-bottom: var(--s2); }`
-in the dialog's own SCSS), the primitive owns no margin.
+declaration. Outer spacing stays with the consumer
+(`.callout { margin-bottom: var(--s2); }` in the dialog's own SCSS), the
+primitive owns no margin.
+
+The icon is optional, but the copy must be a single child element — one `<p>`, or
+a `<div>` wrapping several. `.callout` is a flex row, so putting the class on a
+`<p>` and leaving the text bare turns every inline child into its own flex item:
+`<strong>Note:</strong> …` renders as two columns with a gap and a hanging indent
+on the wrap.
 
 Sibling: `.info-panel` (`_info-panel.scss`) is the same idea for
 formly-generated markup, where no icon element can be added and the glyph has to

@@ -16,7 +16,10 @@ h1 {
 }
 
 .import-info {
-  background: var(--bg-lighter);
+  // Ink-on-surface overlay, not a surface token: the base light theme collapses
+  // --surface-2/-3/-4 to #fff, so --bg-lighter on a dialog card renders as
+  // nothing there (themes with a real ladder, e.g. plainspace, are unaffected).
+  background: var(--state-hover);
   border-radius: 8px;
   padding: 12px var(--s2);
   margin-bottom: var(--s);
