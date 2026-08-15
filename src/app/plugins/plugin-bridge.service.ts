@@ -1061,13 +1061,17 @@ export class PluginBridgeService implements OnDestroy {
     // The Inbox is the fallback target for tasks that belong nowhere, so it is not
     // a project a caller may remove — the UI does not offer it either.
     if (projectId === INBOX_PROJECT.id) {
-      throw new Error('The Inbox project cannot be deleted');
+      throw new Error(this._translateService.instant(T.PLUGINS.CANNOT_DELETE_INBOX));
     }
 
     const project = await firstValueFrom(this._projectService.getByIdOnce$(projectId));
 
     if (!project) {
-      throw new Error(`Project not found: ${projectId}`);
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.PROJECT_NOT_FOUND, {
+          contextId: projectId,
+        }),
+      );
     }
 
     // Delegate to ProjectService so the cascade (tasks, backlog, subtasks, their
