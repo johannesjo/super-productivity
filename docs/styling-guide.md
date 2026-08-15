@@ -7,6 +7,7 @@
 - **Check `src/app/ui/` first** before creating new styled elements — 40+ reusable components exist.
 - **Component SCSS should be minimal** — shared styles belong in `src/styles/components/` or as a mixin.
 - **Material overlay components** (menus, dialogs, tooltips) render outside component scope — style them in `src/styles/components/` and add a comment in the component pointing there.
+- **Only reference custom properties that can reach the rule** — a `var(--x)` whose `--x` is undeclared, or declared only inside some component's `:host`, silently voids the whole declaration. Enforced across SCSS, theme CSS and inline `styles:`/`[ngStyle]` by `npm run lint:css-vars` (`tools/check-css-vars.js`), which explains the fix when it fails.
 
 ## Anti-Patterns
 
