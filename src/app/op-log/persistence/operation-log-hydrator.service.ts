@@ -11,6 +11,7 @@ import {
 } from './schema-migration.service';
 import { OperationLogSnapshotService } from './operation-log-snapshot.service';
 import { TabSeqFrontierService } from './tab-seq-frontier.service';
+import { OperationLogCompactionService } from './operation-log-compaction.service';
 import { OperationLogRecoveryService } from './operation-log-recovery.service';
 import { SyncHydrationService } from './sync-hydration.service';
 import { ArchiveMigrationService } from './archive-migration.service';
@@ -81,6 +82,7 @@ export class OperationLogHydratorService {
 
   // Extracted services
   private snapshotService = inject(OperationLogSnapshotService);
+  private compactionService = inject(OperationLogCompactionService);
   private recoveryService = inject(OperationLogRecoveryService);
   private syncHydrationService = inject(SyncHydrationService);
   private archiveMigrationService = inject(ArchiveMigrationService);
@@ -122,6 +124,9 @@ export class OperationLogHydratorService {
     // a cache Checkpoint B then trusts unvalidated. Convergence only stamps a
     // version AFTER the migration chain has actually run, which is safe.
     let snapshotPersistedDuringHydration = false;
+    // Set only when the try block below ran to completion; gates the startup
+    // compaction check after the finally so recovery/aborted boots never prune.
+    let hydrationCompletedNormally = false;
 
     try {
       // #9084: held for the whole run so compaction cannot capture the gap
@@ -133,11 +138,9 @@ export class OperationLogHydratorService {
 
       // PERF: Parallel startup operations - all access different IndexedDB stores
       // and don't depend on each other's results, so they can run concurrently.
-      const [pendingRemoteOps, , hasBackup] = await Promise.all([
+      const [pendingRemoteOps, hasBackup] = await Promise.all([
         // Check for pending remote ops from crashed sync (touches 'ops' store)
         this.recoveryService.recoverPendingRemoteOps(),
-        // Legacy migration placeholder - kept for future DB migrations if needed
-        this._runLegacyMigrationIfNeeded(),
         // A.7.12: Check for interrupted migration (touches 'state_cache' store)
         this.opLogStore.hasStateCacheBackup(),
       ]);
@@ -316,9 +319,6 @@ export class OperationLogHydratorService {
           await this._replayAllOpsFromScratch(pendingRemoteOps);
       }
 
-      // Legacy cleanup placeholder - kept for future maintenance operations if needed
-      await this._runLegacyCleanupIfNeeded();
-
       // Retry any failed remote ops from previous conflict resolution attempts
       // Now that state is fully hydrated, dependencies might be resolved
       await this.retryFailedRemoteOps();
@@ -391,6 +391,7 @@ export class OperationLogHydratorService {
       // tab session gets the auto-reload treatment again rather than going straight
       // to the manual recovery dialog.
       sessionStorage.removeItem(IDB_OPEN_ERROR_RELOAD_KEY);
+      hydrationCompletedNormally = true;
     } catch (e) {
       OpLog.err('OperationLogHydratorService: Error during hydration', e);
 
@@ -423,6 +424,19 @@ export class OperationLogHydratorService {
       }
     } finally {
       this.hydrationStateService.setHydrationInProgress(false);
+    }
+
+    // #8336 safety net: must run AFTER the finally above has dropped the
+    // hydration-in-progress flag (the #9084 guard skips compaction while it
+    // is up), and only after a fully successful run so recovery boots never
+    // prune; fallback boots are additionally covered by the #9140 guard.
+    // Fire-and-forget: hydrateStore() gates app boot, so nothing here may
+    // block or reject it. compactIfBloated never rejects by contract; the
+    // catch is a belt for that contract.
+    if (hydrationCompletedNormally) {
+      this.compactionService.compactIfBloated().catch((e) => {
+        OpLog.err('OperationLogHydratorService: startup compaction check failed', e);
+      });
     }
   }
 
@@ -1013,14 +1027,6 @@ export class OperationLogHydratorService {
   }
 
   /**
-   * Legacy cleanup placeholder.
-   * Kept for future maintenance operations if needed.
-   */
-  private async _runLegacyCleanupIfNeeded(): Promise<void> {
-    // No-op: placeholder for future cleanup operations
-  }
-
-  /**
    * Retries failed remote operations from previous conflict resolution attempts.
    * Called after hydration to give failed ops another chance to apply now that
    * more state might be available (e.g., dependencies resolved by sync).
@@ -1123,14 +1129,6 @@ export class OperationLogHydratorService {
         );
       }
     }
-  }
-
-  /**
-   * Legacy migration placeholder.
-   * Kept for future DB migrations if needed.
-   */
-  private async _runLegacyMigrationIfNeeded(): Promise<void> {
-    // No-op: placeholder for future migrations
   }
 
   /**
