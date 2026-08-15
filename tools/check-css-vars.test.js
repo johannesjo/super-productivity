@@ -25,6 +25,10 @@ const runOn = (files) => {
       const stdout = execFileSync(process.execPath, [CHECKER, root], {
         encoding: 'utf8',
         timeout: 30_000,
+        // Without an explicit stdio, execFileSync also echoes the child's stderr
+        // to ours — so the expected-failure cases spam the report into the
+        // terminal on a fully passing run.
+        stdio: ['ignore', 'pipe', 'pipe'],
       });
       return { ok: true, output: stdout };
     } catch (err) {
