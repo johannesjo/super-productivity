@@ -1,0 +1,109 @@
+name: 'Upload snap to the Snap Store'
+description: >
+  Uploads a .snap with snapcraft's official container and retries transient
+  failures. Unlike a blind retry it treats the store's content-dedupe rejection
+  as success, because that rejection is proof the snap already reached the
+  store — re-uploading identical bytes can never succeed.
+
+inputs:
+  snap-dir:
+    description: Directory containing the snap; mounted at /project in the container.
+    required: true
+  snap-file:
+    description: File name of the snap inside snap-dir.
+    required: false
+    default: sp.snap
+  channels:
+    description: Comma-separated channels to release to, e.g. "edge" or "edge,stable".
+    required: true
+  store-credentials:
+    description: Value for SNAPCRAFT_STORE_CREDENTIALS.
+    required: true
+  max-attempts:
+    description: How often to run snapcraft before giving up.
+    required: false
+    default: '3'
+  attempt-timeout-minutes:
+    description: >
+      Per-attempt wall-clock limit. snapcraft blocks until the store finishes
+      scanning the upload, which can outlast this; a timeout here does not
+      cancel the upload the store already accepted.
+    required: false
+    default: '15'
+  retry-wait-seconds:
+    description: Pause between attempts.
+    required: false
+    default: '60'
+
+runs:
+  using: 'composite'
+  steps:
+    # The snapcraft-rocks image's wrapper already runs `snapcraft "$@"`, so the
+    # docker CMD must NOT include a leading `snapcraft` word — that gets passed
+    # as the subcommand and snapcraft errors with "no such command 'snapcraft'".
+    # The container runs snapcraft as a pebble service whose working-dir is
+    # hard-coded to /project, so docker's -w flag is ignored — mount the snap
+    # directory at /project so `snapcraft upload <file>` resolves correctly.
+    - name: Run snapcraft upload
+      shell: bash
+      env:
+        SNAP_DIR: ${{ inputs.snap-dir }}
+        SNAP_FILE: ${{ inputs.snap-file }}
+        CHANNELS: ${{ inputs.channels }}
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ inputs.store-credentials }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+        ATTEMPT_TIMEOUT_MINUTES: ${{ inputs.attempt-timeout-minutes }}
+        RETRY_WAIT_SECONDS: ${{ inputs.retry-wait-seconds }}
+        # Workaround for https://github.com/snapcore/snapcraft/issues/4439
+        SNAPCRAFT_HAS_TTY: 'true'
+      run: |
+        set -uo pipefail
+
+        snap_dir="$(cd "$SNAP_DIR" && pwd)"
+        log="$(mktemp)"
+
+        for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
+          echo "::group::snapcraft upload $SNAP_FILE --release $CHANNELS (attempt $attempt/$MAX_ATTEMPTS)"
+          timeout --kill-after=60s "${ATTEMPT_TIMEOUT_MINUTES}m" \
+            docker run --rm \
+              -v "$snap_dir:/project" \
+              -e SNAPCRAFT_STORE_CREDENTIALS \
+              -e SNAPCRAFT_HAS_TTY \
+              ghcr.io/canonical/snapcraft:8_core24 \
+              upload "$SNAP_FILE" --release "$CHANNELS" 2>&1 | tee "$log"
+          status=${PIPESTATUS[0]}
+          echo "::endgroup::"
+
+          if [ "$status" -eq 0 ]; then
+            exit 0
+          fi
+
+          # The store rejects a second upload of byte-identical content with
+          # "A file with this exact same content has already been uploaded".
+          # That means an earlier attempt's upload was accepted: the revision
+          # exists and `--release` intent travels with the upload request, so
+          # the store releases it to the requested channels once its scan
+          # passes, whether or not we are still polling. Retrying is therefore
+          # not just futile but the reason the whole job failed after a poll
+          # that ran past the per-attempt timeout.
+          if grep -qF 'has already been uploaded' "$log"; then
+            echo "Store reports identical content already uploaded — the revision from an"
+            echo "earlier attempt is in the store with release intent '$CHANNELS'. Treating"
+            echo "this as success. Check https://snapcraft.io/snaps if the channel looks stale;"
+            echo "a failed store review would leave the channel on its previous revision."
+            exit 0
+          fi
+
+          if [ "$status" -eq 124 ] || [ "$status" -eq 137 ]; then
+            echo "Attempt $attempt hit the ${ATTEMPT_TIMEOUT_MINUTES}m limit while waiting for the store to finish processing."
+          else
+            echo "Attempt $attempt failed with exit code $status."
+          fi
+
+          if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
+            sleep "$RETRY_WAIT_SECONDS"
+          fi
+        done
+
+        echo "snapcraft upload failed after $MAX_ATTEMPTS attempts."
+        exit 1

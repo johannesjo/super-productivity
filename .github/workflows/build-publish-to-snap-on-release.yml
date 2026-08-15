@@ -16,13 +16,17 @@ jobs:
   snap-release:
     runs-on: ubuntu-latest
     env:
-      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-      SNAPCRAFT_HAS_TTY: 'true' # Workaround for https://github.com/snapcore/snapcraft/issues/4439
       RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag_name }}
 
     if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
 
     steps:
+      # Only needed for the local composite action below.
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
+
       - name: Download release snap
         env:
           GH_TOKEN: ${{ github.token }}
@@ -42,23 +46,16 @@ jobs:
 
           mv .tmp/snap-release/*.snap .tmp/snap-release/sp.snap
 
-      # Run snapcraft from Canonical's official container so we don't depend on
-      # `sudo snap install snapcraft --classic` working on the runner. The
-      # container wrapper already runs `snapcraft "$@"`, so the docker CMD must
-      # not include a leading `snapcraft` word.
+      # Runs snapcraft from Canonical's official container so we don't depend on
+      # `sudo snap install snapcraft --classic` working on the runner, which has
+      # been a recurring source of "unable to contact snap store" failures.
       - name: Upload release snap to edge and stable
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
+        uses: ./.github/actions/snapcraft-upload
         with:
-          max_attempts: 5
-          timeout_minutes: 15
-          retry_wait_seconds: 60
-          command: |
-            docker run --rm \
-              -v "$PWD/.tmp/snap-release:/project" \
-              -e SNAPCRAFT_STORE_CREDENTIALS \
-              -e SNAPCRAFT_HAS_TTY=true \
-              ghcr.io/canonical/snapcraft:8_core24 \
-              upload sp.snap --release edge,stable
+          snap-dir: .tmp/snap-release
+          channels: edge,stable
+          store-credentials: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+          max-attempts: '5'
 
 #      - uses: actions/setup-node@v3
 #        with:
