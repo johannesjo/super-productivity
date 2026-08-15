@@ -24,13 +24,21 @@ export const adjustToLiveFormlyForm = (
     // itself. For `time` that ate the first digit of every hour typed (#9548).
     // The general fix is for the config form to ignore an incoming `cfg` that
     // deep-equals what it just emitted; until then, input-like types opt in here.
+    //
+    // The cost is not always visible state loss. `image-input` is a plain text
+    // input used for the project/tag background image, and the settings dialog
+    // assigns the emitted model straight back, so no field rebuild happens
+    // there — but every keystroke still reached `updateProject`, which is
+    // op-log captured, emitting one persisted and synced op per character
+    // typed (#9591).
     if (
       item.type === 'input' ||
       item.type === 'textarea' ||
       item.type === 'duration' ||
       item.type === 'icon' ||
       item.type === 'color' ||
-      item.type === 'time'
+      item.type === 'time' ||
+      item.type === 'image-input'
     ) {
       return {
         ...item,

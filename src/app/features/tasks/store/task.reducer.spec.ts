@@ -1280,6 +1280,35 @@ describe('Task Reducer', () => {
     });
   });
 
+  describe('roundTimeSpentForDay - unknown task ids (remote replay, #9601)', () => {
+    // A remote/replayed rounding op may list tasks this client has archived or
+    // deleted meanwhile. The whole op must not abort — remaining tasks round.
+    it('should skip unknown task ids and round the remaining ones', () => {
+      const state: TaskState = {
+        ...initialTaskState,
+        ids: ['t1'],
+        entities: {
+          t1: createTask('t1', {
+            subTaskIds: [],
+            timeSpentOnDay: { '2026-04-02': 70000 },
+          }),
+        },
+      };
+      const action = fromActions.roundTimeSpentForDay({
+        day: '2026-04-02',
+        taskIds: ['archived-elsewhere', 't1'],
+        isRoundUp: true,
+        roundTo: '5M',
+        projectId: undefined,
+      });
+
+      expect(() => taskReducer(state, action)).not.toThrow();
+      const result = taskReducer(state, action);
+      expect(result.entities['t1']!.timeSpentOnDay['2026-04-02']).toBe(300000);
+      expect(result.ids).toEqual(['t1']);
+    });
+  });
+
   // Regression: subtask collapse state (_hideSubTasksMode) must survive a restart.
   // It only persists if the action that writes it is captured to the op-log,
   // which requires isPersistent metadata. `updateTaskUi` carries an absolute

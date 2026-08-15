@@ -151,6 +151,18 @@ describe('adjustToLiveFormlyForm', () => {
       // the same branch also opts `time` into Enter-to-commit
       expect(result[0].templateOptions?.keydown).toBeDefined();
     });
+
+    // #9591: the project/tag background image URL committed per keystroke, and
+    // `updateProject` is op-log captured, so a 60-character URL emitted ~60
+    // persisted and synced ops instead of one.
+    it('should add blur update behavior to image-input fields', () => {
+      const items: FormlyFieldConfig[] = [{ key: 'imageField', type: 'image-input' }];
+
+      const result = adjustToLiveFormlyForm(items);
+
+      expect(result[0].modelOptions?.updateOn).toBe('blur');
+      expect(result[0].templateOptions?.keydown).toBeDefined();
+    });
   });
 
   describe('fieldGroup processing', () => {

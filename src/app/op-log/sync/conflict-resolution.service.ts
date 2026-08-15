@@ -339,6 +339,12 @@ const isRoundTimePayloadValidForStaticFields = (op: Operation): boolean => {
     return false;
   }
   const actionPayload = extractActionPayload(op.payload);
+  // The gate runs on remote (attacker-influenceable) input and the download
+  // path never re-validates payload shape — stay total instead of throwing a
+  // raw TypeError out of the preflight on a null/missing actionPayload.
+  if (typeof actionPayload !== 'object' || actionPayload === null) {
+    return false;
+  }
   const taskIds = actionPayload['taskIds'];
   if (
     !Array.isArray(taskIds) ||
@@ -369,6 +375,27 @@ const isRoundTimePayloadValidForStaticFields = (op: Operation): boolean => {
     declaredIds.size === operationIds.length &&
     operationIds.every((id) => declaredIds.has(id))
   );
+};
+
+/**
+ * Mirror of the rounding reducer's write filter (`roundTimeSpentForDay` in
+ * task.reducer.ts): the op declares every task id of the day, but the reducer
+ * skips parents-with-subtasks and — when the payload carries a project limit
+ * (a string id or the explicit `null` no-project bucket) — tasks of other
+ * projects. Used to spot conflict targets the replay cannot write on this
+ * client. Keep in sync with the reducer's filter.
+ */
+const doesRoundTimeOpWriteTask = (
+  op: Operation,
+  task: Record<string, unknown>,
+): boolean => {
+  const actionPayload = extractActionPayload(op.payload);
+  const projectId = actionPayload['projectId'];
+  const isLimitToProject = !!projectId || projectId === null;
+  const subTaskIds = task['subTaskIds'];
+  const isDirectlyRoundable =
+    (Array.isArray(subTaskIds) ? subTaskIds.length === 0 : true) || !!task['parentId'];
+  return isDirectlyRoundable && (!isLimitToProject || task['projectId'] === projectId);
 };
 
 const INDEPENDENT_MULTI_DELETE_ACTIONS = new Set<ActionType>([
@@ -2033,6 +2060,7 @@ export class ConflictResolutionService {
         toEntityKey(entityType as EntityType, entityId),
     });
     this._assertMultiEntityPlansAreSafe(plans);
+    await this._forceLocalWinForUnwritableRoundTimeTargets(plans);
 
     // A rejected local bulk op was already applied optimistically. If the
     // remote winner changes only part of one entity, rejecting the whole row
@@ -2371,6 +2399,54 @@ export class ConflictResolutionService {
   }
 
   /**
+   * A rounding op declares EVERY task id of the day, but its reducer writes
+   * only tasks passing the payload's project limit that are not
+   * parents-with-subtasks (`doesRoundTimeOpWriteTask`). Letting such a row
+   * resolve as a remote win would reject the local pending ops while the
+   * replay writes nothing to the entity — the local edit would stay visible
+   * on this client but silently never upload. Force those rows to LOCAL wins:
+   * the compensation snapshot re-asserts and re-uploads the local state, and
+   * the mixed-winner machinery still applies the atomic row once for its
+   * writable targets. This is not a compromise — the sender's own dispatch
+   * filtered the same ids, so the entity was never rounded anywhere.
+   *
+   * Rows whose entity is absent from the live store are left untouched:
+   * delete/archive precedence already classifies them, and no snapshot could
+   * be built for an entity that is gone.
+   */
+  private async _forceLocalWinForUnwritableRoundTimeTargets(
+    plans: LwwConflictResolutionPlan<EntityConflict>[],
+  ): Promise<void> {
+    for (const plan of plans) {
+      if (plan.winner !== 'remote' || plan.conflict.entityType !== 'TASK') {
+        continue;
+      }
+      const isRoundTimeOnlyRow =
+        plan.conflict.remoteOps.length > 0 &&
+        plan.conflict.remoteOps.every(
+          (op) =>
+            isMultiEntityOperation(op) && isRoundTimePayloadValidForStaticFields(op),
+        );
+      if (!isRoundTimeOnlyRow) {
+        continue;
+      }
+      const task = await this.getCurrentEntityState('TASK', plan.conflict.entityId);
+      if (task === null || typeof task !== 'object') {
+        continue;
+      }
+      const taskRecord = task as Record<string, unknown>;
+      if (
+        plan.conflict.remoteOps.some((op) => doesRoundTimeOpWriteTask(op, taskRecord))
+      ) {
+        continue;
+      }
+      plan.winner = 'local';
+      plan.reason = 'local-timestamp';
+      plan.localWinOperationKind = 'update';
+    }
+  }
+
+  /**
    * Generic multi-entity operations cannot be partially compensated safely.
    * Fail before op-log mutation unless every multi-entity op in the plan has an
    * explicit resolution path: bulk archives are re-created when they win
@@ -2378,6 +2454,27 @@ export class ConflictResolutionService {
    * when they lose (`_preservePartiallyRejectedLocalBulkArchives`, #9537),
    * independent bulk deletes are re-scoped, and the local legacy rounding
    * action has an explicit per-entity reconciliation path above.
+   *
+   * A REMOTE `roundTimeSpentForDay` (#9601 — "Finish day" on device A races
+   * next-morning edits on device B) resolves via the generic mixed-winner
+   * machinery: the atomic row replays once, then local-win compensation
+   * snapshots re-assert and re-upload each local winner after it. Targets the
+   * replay cannot write on this client are forced to local wins first
+   * (`_forceLocalWinForUnwritableRoundTimeTargets`). The gate's set-equality
+   * check guarantees every DIRECT write target is conflict-checked (an id in
+   * `taskIds` but not `entityIds` would be an unchecked write, so that shape
+   * stays blocked); the reducer additionally recalculates parents of listed
+   * subtasks — undeclared, but derived-fields-only.
+   *
+   * Accepted bounded divergence, both confined to `timeSpent`/
+   * `timeSpentOnDay[day]` and chosen over the permanent sync wedge: a
+   * remote-win target keeps rounded(local value) rather than the sender's
+   * rounded value, and pre-rounding time deltas piggybacking in the SAME
+   * download batch replay after the rounding (resolution rows are appended
+   * before non-conflicting ops), yielding round(base)+delta vs the sender's
+   * round(base+delta). Degenerate histories where a local winner has no
+   * creatable compensation snapshot still fail closed via the mixed-winner
+   * "Cannot safely compensate" throw.
    *
    * The Today-list ops that used to make this reachable from ordinary use —
    * `planTasksForToday` (dispatched with every due task id by the automatic
@@ -2396,7 +2493,8 @@ export class ConflictResolutionService {
           isMultiEntityOperation(op) &&
           op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
           !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) &&
-          !isResolvableTodayListAction(op.actionType),
+          !isResolvableTodayListAction(op.actionType) &&
+          !isRoundTimePayloadValidForStaticFields(op),
       );
       if (unsafeRemoteOp) {
         throw new UnsupportedMultiEntityConflictError(
