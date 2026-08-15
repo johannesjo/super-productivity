@@ -2093,10 +2093,10 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
 
   /**
    * Returns the total number of operations currently in the op-log store.
-   * Backed by the adapter's `count()` — O(1) on IndexedDB (a maintained store count,
-   * not a scan) and a cheap COUNT(*) index walk on SQLite — so it is fine to call on
-   * every startup. Used to detect an op-log that has grown large enough to warrant
-   * compaction (see STARTUP_COMPACTION_OP_THRESHOLD).
+   * Backed by the adapter's `count()` — a single native count query (an engine-side
+   * key walk on IndexedDB, COUNT(*) on SQLite), milliseconds even at 100k+ ops — so
+   * it is fine to call on every startup. Used to detect an op-log that has grown
+   * large enough to warrant compaction (see STARTUP_COMPACTION_OP_THRESHOLD).
    */
   async countOps(): Promise<number> {
     await this._ensureInit();
@@ -2252,7 +2252,8 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
   // has no production callers (it is never persisted as non-zero, and every
   // `saveStateCache` put wipes the field), so `getCompactionCounter` effectively
   // always returns 0. Cross-restart op-log growth is now bounded by the startup
-  // op-count check in OperationLogHydratorService (STARTUP_COMPACTION_OP_THRESHOLD).
+  // op-count check in OperationLogCompactionService.compactIfBloated(), invoked by
+  // the hydrator after each successful boot (STARTUP_COMPACTION_OP_THRESHOLD).
   // The mid-session trigger uses only the in-memory counter in OperationLogEffects.
   // Removing this plumbing is a worthwhile follow-up but is deferred: `getCompactionCounter`
   // currently doubles as the seed seam for the effect's compaction-threshold unit

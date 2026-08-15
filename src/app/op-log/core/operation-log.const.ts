@@ -114,10 +114,18 @@ export const COMPACTION_THRESHOLD = 500;
  * healthy ~7-day steady state so that for a normally-synced log compaction's prune
  * drops the count back below the threshold and it won't re-fire next boot.
  *
+ * Metric choice: total op count, NOT `lastSeq - stateCache.lastAppliedOpSeq` (the
+ * fix #8336 proposed). The hydrator already persists a fresh snapshot whenever a
+ * boot replays >10 tail ops, so that delta re-zeroes nearly every boot without
+ * anything ever being pruned — it tracks snapshot staleness, while total count
+ * tracks the actual symptom: un-pruned log growth.
+ *
  * Note: compaction only prunes *synced* ops past the retention window, so a large
  * unsynced backlog (offline / sync-stalled client) can stay above the threshold and
- * re-trigger every boot. That is harmless — the trigger is fire-and-forget and
- * self-skipping — just not self-limiting in that case. See OperationLogHydratorService.
+ * re-trigger every boot. Safe but not free: each re-fire is a full background
+ * compaction pass (state-cache snapshot write + op scan) that prunes nothing, once
+ * per boot — accepted, since it also keeps the boot snapshot fresh and pruning
+ * resumes as soon as the backlog syncs. See OperationLogCompactionService.
  */
 export const STARTUP_COMPACTION_OP_THRESHOLD = 5000;
 
