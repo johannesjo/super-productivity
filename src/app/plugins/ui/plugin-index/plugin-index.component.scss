@@ -97,15 +97,3 @@
     visibility: hidden;
   }
 }
-
-// Dark theme support
-.dark-theme {
-  .header {
-    background: var(--bg);
-    border-color: var(--extra-border-color);
-  }
-
-  .plugin-iframe {
-    background: var(--bg);
-  }
-}

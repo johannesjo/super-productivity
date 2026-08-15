@@ -67,11 +67,13 @@ export interface DisableProfilesDialogData {
         </ol>
       </div>
 
-      <p class="note callout callout--info">
+      <div class="note callout callout--info">
         <mat-icon aria-hidden="true">info</mat-icon>
-        <strong>Note:</strong> No data will be deleted. You can re-enable this feature at
-        any time.
-      </p>
+        <p>
+          <strong>Note:</strong> No data will be deleted. You can re-enable this feature
+          at any time.
+        </p>
+      </div>
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
@@ -104,7 +106,7 @@ export interface DisableProfilesDialogData {
       .recovery-info {
         margin: 16px 0;
         padding: 12px;
-        background: rgba(0, 0, 0, 0.05);
+        background: var(--state-hover);
         border-radius: 4px;
       }
 
@@ -125,10 +127,11 @@ export interface DisableProfilesDialogData {
       }
 
       code {
-        background: rgba(0, 0, 0, 0.1);
+        /* One step up the state ladder from the --state-hover panel it sits in,
+           so the chip stays legible against its own container. */
+        background: var(--state-pressed);
         padding: 2px 6px;
         border-radius: 3px;
-        font-family: 'Courier New', monospace;
         font-size: 13px;
       }
 
