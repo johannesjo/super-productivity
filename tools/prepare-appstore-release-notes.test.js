@@ -3,10 +3,16 @@ const assert = require('node:assert/strict');
 
 const {
   buildAppStoreReleaseNotes,
+  stripEmoji,
   stripOtherPlatformLines,
   toPlainText,
   truncateToMaxChars,
 } = require('./prepare-appstore-release-notes');
+
+// Matches how App Store Connect reports the rejection: any emoji left in the
+// text is a failed release lane.
+const assertNoEmoji = (text) =>
+  assert.doesNotMatch(text, /\p{Extended_Pictographic}|\p{Regional_Indicator}/u);
 
 test('strips bullets that name a non-Apple platform', () => {
   const markdown = [
@@ -131,6 +137,65 @@ test('end-to-end: produces clean plain-text What’s New without platform names'
   // Apple-relevant content is kept and bulletized (scope prefix retained).
   assert.match(text, /• focus-mode: surface session-done/);
   assert.match(text, /• tasks: preserve manual order within a tag/);
+});
+
+test('strips the emoji App Store Connect rejected for 18.20.0', () => {
+  // Verbatim shape of the bullet that failed both Apple release lanes: the
+  // bug-report issue template prefixes titles with "🚨 " and the squash merge
+  // carried it into the commit subject.
+  const markdown = [
+    '### Other Changes',
+    '',
+    '- 🚨 Cannot connect to CalDAV Todo issue provider (#9530)',
+  ].join('\n');
+
+  const text = buildAppStoreReleaseNotes(markdown);
+
+  assertNoEmoji(text);
+  // The note itself survives, with the gap the emoji left closed up.
+  assert.match(text, /• Cannot connect to CalDAV Todo issue provider \(#9530\)/);
+});
+
+test('strips emoji anywhere in the notes, keeping non-emoji symbols', () => {
+  const markdown = [
+    '🎉 A big release!',
+    '',
+    '### ✨ Features',
+    '',
+    '- Add focus mode 1️⃣ with a 👨‍👩‍👧 group view — see the guide → settings',
+    '- Fix the 🇩🇪 locale ✓',
+  ].join('\n');
+
+  const text = stripEmoji(markdown);
+
+  assertNoEmoji(text);
+  // Punctuation and arrows are not pictographs and must survive untouched.
+  assert.match(text, /A big release!/);
+  assert.match(text, /### Features/);
+  assert.match(text, /Add focus mode 1 with a group view — see the guide → settings/);
+  assert.match(text, /Fix the locale ✓/);
+});
+
+test('drops a heading whose only bullet was pure emoji decoration', () => {
+  const markdown = ['### Features', '', '- 🎉', '', '### Fixes', '', '- Fix sync'].join(
+    '\n',
+  );
+
+  const text = buildAppStoreReleaseNotes(markdown);
+
+  // No bare "•" bullet and no heading left hanging over nothing.
+  assert.doesNotMatch(text, /^\s*[•\-]\s*$/m);
+  assert.doesNotMatch(text, /Features/);
+  assert.match(text, /Fixes/);
+  assert.match(text, /• Fix sync/);
+});
+
+test('leaves emoji-free notes byte-for-byte unchanged', () => {
+  const markdown = ['### Fixes', '', '- **tasks:** keep the list anchored (#8533)'].join(
+    '\n',
+  );
+
+  assert.equal(stripEmoji(markdown), markdown);
 });
 
 test('toPlainText converts markdown bullets/links/emphasis to plain text', () => {
