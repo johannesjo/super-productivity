@@ -290,7 +290,7 @@ import { KeyboardConfig } from '@sp/keyboard-config';
         }
 
         &:hover:not(.isCustomized):not(:disabled) {
-          background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
+          background-color: var(--state-hover);
         }
 
         &:disabled {
