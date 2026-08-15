@@ -176,7 +176,7 @@ test('rejects invented palette names', () => {
   });
   assert.equal(ok, false, output);
   for (const name of invented) {
-    assert.match(output, new RegExp(name.replace(/-/g, '\\-')), `${name} not rejected`);
+    assert.ok(output.includes(name), `${name} not rejected`);
   }
 });
 
