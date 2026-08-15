@@ -74,14 +74,18 @@ const OTHER_PLATFORM_PATTERNS = [
 // Deliberately aggressive, mirroring OTHER_PLATFORM_PATTERNS: a missed emoji
 // fails the release, while an over-eager match only costs decoration (©, ® and ™
 // are pictographs too and go with it — they have never appeared in a changelog
-// entry here, and Apple accepts the text either way).
+// entry here, and Apple accepts the text either way). The trailing TAG block is
+// the tail of a tag sequence (e.g. the England flag): invisible on its own, so
+// leaving it behind would send Apple an unrenderable character and produce a CI
+// error naming nothing.
 const EMOJI_PATTERN =
-  /[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Regional_Indicator}\u{FE0E}\u{FE0F}\u{20E3}\u{200D}]/gu;
+  /[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Regional_Indicator}\u{FE0E}\u{FE0F}\u{20E3}\u{200D}\u{E0020}-\u{E007F}]/gu;
 
-// Bullet/heading markers, i.e. everything that can legitimately precede the text
-// of a line. A line left with only these once its emoji are gone had no prose to
-// begin with.
-const LINE_MARKERS_ONLY = /^[\s*•\-#]*$/;
+// Bullet/heading and emphasis markers, i.e. everything that can legitimately
+// precede the text of a line. A line left with only these once its emoji are
+// gone had no prose to begin with. Covers the markers the AI generation path can
+// emit ("+", "_", ">"), not just the "- " the deterministic generator produces.
+const LINE_MARKERS_ONLY = /^[\s*•\-#+_>]*$/;
 
 const isMarkdownHeading = (line) => /^\s*#{1,6}\s/.test(line);
 
@@ -220,6 +224,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  EMOJI_PATTERN,
   MAX_CHARS,
   OTHER_PLATFORM_PATTERNS,
   buildAppStoreReleaseNotes,

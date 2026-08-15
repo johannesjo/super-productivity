@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
+  EMOJI_PATTERN,
   buildAppStoreReleaseNotes,
   stripEmoji,
   stripOtherPlatformLines,
@@ -9,10 +10,13 @@ const {
   truncateToMaxChars,
 } = require('./prepare-appstore-release-notes');
 
-// Matches how App Store Connect reports the rejection: any emoji left in the
-// text is a failed release lane.
+// Any emoji left in the text is a failed release lane, so assert against the
+// very pattern the code strips with: a hand-written subset here would silently
+// stop covering a member that a later edit drops from EMOJI_PATTERN. Rebuilt
+// without the /g flag, since a global regex reused across `test()` calls carries
+// lastIndex between them.
 const assertNoEmoji = (text) =>
-  assert.doesNotMatch(text, /\p{Extended_Pictographic}|\p{Regional_Indicator}/u);
+  assert.doesNotMatch(text, new RegExp(EMOJI_PATTERN.source, 'u'));
 
 test('strips bullets that name a non-Apple platform', () => {
   const markdown = [
@@ -174,6 +178,29 @@ test('strips emoji anywhere in the notes, keeping non-emoji symbols', () => {
   assert.match(text, /### Features/);
   assert.match(text, /Add focus mode 1 with a group view — see the guide → settings/);
   assert.match(text, /Fix the locale ✓/);
+});
+
+// Each of these is a separate member of EMOJI_PATTERN whose residue is invisible
+// in a diff, so without a case per member a later edit could drop one and leave
+// the suite green while shipping a character Apple rejects.
+test('strips the invisible emoji parts, leaving no residue', () => {
+  const cases = [
+    // Skin-tone modifier (\p{Emoji_Modifier}): the base is a pictograph, the
+    // modifier is not, so dropping either half leaves a stray character.
+    ['- Wave 👋🏽 goodbye to stale caches', /• Wave goodbye to stale caches/],
+    // Text-presentation selector (U+FE0E) trailing a dingbat.
+    ['- Mark done ✔︎ faster', /• Mark done faster/],
+    // Tag sequence (U+E0020-U+E007F): six invisible tag chars after the flag.
+    ['- Fix 🏴󠁧󠁢󠁥󠁮󠁧󠁿 English sorting', /• Fix English sorting/],
+  ];
+
+  for (const [markdown, expected] of cases) {
+    const text = buildAppStoreReleaseNotes(markdown);
+    assertNoEmoji(text);
+    assert.match(text, expected);
+    // Nothing invisible survives either: the line must be plain ASCII prose.
+    assert.doesNotMatch(text, /[^\x20-\x7E\n•]/);
+  }
 });
 
 test('drops a heading whose only bullet was pure emoji decoration', () => {
