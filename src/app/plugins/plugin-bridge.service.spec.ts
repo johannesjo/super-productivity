@@ -41,6 +41,8 @@ import { Log } from '../core/log';
 import { updateGlobalConfigSection } from '../features/config/store/global-config.actions';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
 import { T } from '../t.const';
+import { INBOX_PROJECT } from '../features/project/project.const';
+import { Project } from '../features/project/project.model';
 
 describe('PluginBridgeService - Counter Methods', () => {
   let service: PluginBridgeService;
@@ -879,5 +881,76 @@ describe('PluginBridgeService - getAppState credential redaction', () => {
     expect((snapshot.globalConfig.misc as Record<string, unknown>).isDarkMode).toBe(
       false,
     );
+  });
+});
+
+describe('PluginBridgeService - deleteProject', () => {
+  let service: PluginBridgeService;
+  let projectServiceSpy: jasmine.SpyObj<ProjectService>;
+
+  const mockProject = { id: 'project-1', title: 'Work' } as Project;
+
+  beforeEach(() => {
+    projectServiceSpy = jasmine.createSpyObj('ProjectService', [
+      'getByIdOnce$',
+      'remove',
+    ]);
+    projectServiceSpy.getByIdOnce$.and.returnValue(of(mockProject));
+    projectServiceSpy.remove.and.resolveTo();
+
+    TestBed.configureTestingModule({
+      providers: [
+        PluginBridgeService,
+        provideMockStore(),
+        { provide: SnackService, useValue: {} },
+        { provide: NotifyService, useValue: {} },
+        { provide: MatDialog, useValue: {} },
+        { provide: PluginHooksService, useValue: {} },
+        { provide: TaskService, useValue: {} },
+        { provide: WorkContextService, useValue: { activeWorkContext$: of(null) } },
+        { provide: ProjectService, useValue: projectServiceSpy },
+        { provide: TagService, useValue: {} },
+        { provide: PluginUserPersistenceService, useValue: {} },
+        { provide: PluginConfigService, useValue: {} },
+        { provide: TaskArchiveService, useValue: {} },
+        { provide: Router, useValue: {} },
+        {
+          provide: TranslateService,
+          useValue: { instant: (key: string): string => key },
+        },
+        { provide: SyncWrapperService, useValue: {} },
+        { provide: GlobalThemeService, useValue: {} },
+        { provide: PluginIssueProviderRegistryService, useValue: {} },
+        { provide: IssueSyncAdapterRegistryService, useValue: {} },
+        { provide: PluginHttpService, useValue: {} },
+        { provide: DataInitService, useValue: {} },
+      ],
+    });
+
+    service = TestBed.inject(PluginBridgeService);
+  });
+
+  it('deletes via ProjectService so the cascade stays in one place', async () => {
+    await service.deleteProject('project-1');
+
+    expect(projectServiceSpy.remove).toHaveBeenCalledOnceWith(mockProject);
+  });
+
+  it('refuses to delete the Inbox', async () => {
+    await expectAsync(service.deleteProject(INBOX_PROJECT.id)).toBeRejectedWithError(
+      T.PLUGINS.CANNOT_DELETE_INBOX,
+    );
+
+    expect(projectServiceSpy.remove).not.toHaveBeenCalled();
+  });
+
+  it('throws for an unknown project instead of removing nothing silently', async () => {
+    projectServiceSpy.getByIdOnce$.and.returnValue(of(undefined as unknown as Project));
+
+    await expectAsync(service.deleteProject('does-not-exist')).toBeRejectedWithError(
+      T.PLUGINS.PROJECT_NOT_FOUND,
+    );
+
+    expect(projectServiceSpy.remove).not.toHaveBeenCalled();
   });
 });
