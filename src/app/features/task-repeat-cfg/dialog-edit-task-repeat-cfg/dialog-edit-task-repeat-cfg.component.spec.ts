@@ -979,7 +979,8 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       fixture.componentInstance.save();
 
       expect(mockTaskRepeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledTimes(1);
-      expect(changes().startDate).toBeUndefined();
+      // `rescheduleTaskOnRepeatCfgUpdate$` filters on `field in changes`, so key
+      // absence is the assertion that matches the effect.
       expect('startDate' in changes()).toBe(false);
     });
 
@@ -997,7 +998,6 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
 
       fixture.componentInstance.save();
 
-      expect(changes().startDate).toBeUndefined();
       expect('startDate' in changes()).toBe(false);
     });
   });

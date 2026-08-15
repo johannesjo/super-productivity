@@ -36,6 +36,12 @@ export const MONTHLY_ANCHOR_RESET: Partial<TaskRepeatCfg> = {
 // recurrence is being set up for — the picked date in the add bar, the config's
 // own start date in the dialog — floored at today so a stale start date cannot
 // drag a freshly chosen preset into the past (#7726).
+//
+// Both day-of-month presets below then take the first day matching their own
+// pattern that falls on or after that anchor, so a recurrence never starts
+// before the day it was set up for. That one rule puts them in different
+// months for the same anchor (2099-12-15 → 2100-01-01 for the 1st, 2099-12-31
+// for the last day), because the two patterns sit at opposite ends of a month.
 const anchorDayFor = (referenceDate: Date | undefined, today: Date): Date =>
   referenceDate && referenceDate.getTime() > today.getTime() ? referenceDate : today;
 
@@ -87,10 +93,9 @@ export const getQuickSettingUpdates = (
     }
 
     case 'MONTHLY_FIRST_DAY': {
-      // Anchor to the first 1st-of-month on or after the anchor day, so the
-      // first generated instance is never backdated (#7726) and lands in the
-      // month the recurrence was set up for rather than the month it happens to
-      // be saved in. `month + 1` rolls the year over correctly in December.
+      // The first 1st-of-month on or after the anchor day: the anchor's own
+      // month when the anchor already is the 1st, the next month otherwise.
+      // `month + 1` rolls the year over correctly in December.
       const anchor = anchorDayFor(referenceDate, today);
       const firstDay =
         anchor.getDate() === 1
@@ -105,8 +110,8 @@ export const getQuickSettingUpdates = (
     }
 
     case 'MONTHLY_LAST_DAY': {
-      // First occurrence = the last day of the anchor day's month, which is
-      // always that day or later. The `monthlyLastDay` flag tells the
+      // The last day of the anchor day's month, which is always that day or
+      // later — the same on-or-after rule. The `monthlyLastDay` flag tells the
       // occurrence engine to clamp to month-end every month, so `startDate`'s
       // day-of-month no longer needs to be a hardcoded 31 (#7726).
       const anchor = anchorDayFor(referenceDate, today);
