@@ -25,6 +25,18 @@
             <span [class.syntax-highlight]="!!seg.type">{{ seg.text }}</span>
           }
         </div>
+        <!-- The placeholder attribute is only attached while the field is
+             empty: cdkTextareaAutosize measures a present placeholder by
+             temporarily swapping it into textarea.value (on every window
+             resize — incl. the synthetic ones for mobile keyboard show/hide —
+             and on every placeholder change), and each swap resets the caret
+             to the end, mangling mid-text typing. Without the attribute the
+             directive skips that measurement entirely; the aria-label keeps
+             the accessible name stable while the placeholder is detached. -->
+        @let inputPlaceholder =
+          isSearchMode()
+            ? (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH | translate)
+            : (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE | translate);
         <textarea
           #inputEl
           class="main-input"
@@ -35,11 +47,8 @@
           [mentionListTemplate]="mentionListTemplate"
           (listShownChange)="updateListShown($event)"
           [matAutocomplete]="taskAutoCompleteEl"
-          [placeholder]="
-            isSearchMode()
-              ? (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH | translate)
-              : (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE | translate)
-          "
+          [placeholder]="stateService.inputTxt() ? '' : inputPlaceholder"
+          [attr.aria-label]="inputPlaceholder"
           cdkTextareaAutosize
           cdkAutosizeMinRows="1"
           cdkAutosizeMaxRows="4"
@@ -191,6 +200,9 @@
         class="note-input-section"
         @expandFade
       >
+        <!-- Placeholder only while empty — same caret-preserving reason as the
+             main input above. -->
+        @let notePlaceholder = T.F.TASK.ADD_TASK_BAR.NOTE_PLACEHOLDER | translate;
         <textarea
           #noteEl
           class="note-input"
@@ -198,7 +210,8 @@
           cdkAutosizeMinRows="3"
           cdkAutosizeMaxRows="8"
           [(ngModel)]="stateService.noteTxt"
-          [placeholder]="T.F.TASK.ADD_TASK_BAR.NOTE_PLACEHOLDER | translate"
+          [placeholder]="stateService.noteTxt() ? '' : notePlaceholder"
+          [attr.aria-label]="notePlaceholder"
           (keydown)="onNoteKeydown($event)"
         ></textarea>
       </div>
