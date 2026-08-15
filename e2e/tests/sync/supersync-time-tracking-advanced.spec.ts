@@ -8,9 +8,9 @@ import {
   startTimeTracking,
   stopTimeTracking,
   waitForTaskTimeSpent,
-  getTaskTimeSpentFromState,
   markTaskDone,
   recordTaskTimeDelta,
+  expectExactTaskTime,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 import { expectTaskVisible } from '../../utils/supersync-assertions';
@@ -18,19 +18,6 @@ import { waitForAppReady } from '../../utils/waits';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
-
-const expectExactTaskTime = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-  expectedTimeSpent: number,
-): Promise<void> => {
-  await expect
-    .poll(() => getTaskTimeSpentFromState(client, taskName), {
-      timeout: 30000,
-      intervals: [250, 500, 1000],
-    })
-    .toBe(expectedTimeSpent);
-};
 
 /**
  * SuperSync Time Tracking Advanced E2E Tests

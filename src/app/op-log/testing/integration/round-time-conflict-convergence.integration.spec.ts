@@ -287,4 +287,92 @@ describe('round-time conflict convergence integration (#8944)', () => {
       taskSyncProjection(localState, TASK_Y),
     );
   });
+
+  it('resolves a REMOTE bulk rounding op against a newer local edit and converges (#9601)', async () => {
+    const capture = TestBed.inject(OperationCaptureService);
+    const resolver = TestBed.inject(ConflictResolutionService);
+    const server = new MockSyncServer();
+    const clientA = new TestClient(CLIENT_A);
+    const clientB = new TestClient(CLIENT_B);
+
+    // Device B ("finish day"): rounds BOTH tasks up to the quarter hour in one
+    // atomic op and uploads it. X: 10m → 15m, Y: 20m → 30m on device B.
+    const roundAction = roundTimeSpentForDay({
+      day: DAY,
+      taskIds: [TASK_X, TASK_Y],
+      roundTo: 'QUARTER',
+      isRoundUp: true,
+    }) as PersistentAction;
+    let remoteState = reducer(initialState, roundAction);
+    const remoteRoundOp = captureOperation(roundAction, clientB, capture, 1_000);
+    server.uploadOps([remoteRoundOp], CLIENT_B);
+
+    // This device (A, next morning): a NEWER pending edit on task Y.
+    const localEditAction = TaskSharedActions.updateTask({
+      task: { id: TASK_Y, changes: { title: 'Local title for Y' } },
+    }) as PersistentAction;
+    localState = reducer(localState, localEditAction);
+    const localEditOp = captureOperation(localEditAction, clientA, capture, 2_000);
+    await opLogStore.append(localEditOp, 'local');
+
+    const detection = await resolver.checkOpForConflicts(remoteRoundOp, {
+      localPendingOpsByEntity: await opLogStore.getUnsyncedByEntity(),
+      appliedFrontierByEntity: new Map(),
+      retainedOpsByEntity: new Map(),
+      snapshotVectorClock: undefined,
+      snapshotEntityKeys: undefined,
+      hasNoSnapshotClock: true,
+    });
+    expect(detection.conflicts.length).toBe(1);
+    expect(detection.conflicts[0]?.entityId).toBe(TASK_Y);
+
+    const resolution = await resolver.autoResolveConflictsLWW(detection.conflicts);
+    expect(resolution.localWinOpsCreated).toBe(1);
+
+    // The original edit is superseded by the compensation snapshot.
+    const rejectedEdit = await opLogStore.getOpById(localEditOp.id);
+    expect(rejectedEdit?.rejectedAt).toBeDefined();
+    const pendingEntries = await opLogStore.getUnsynced();
+    expect(pendingEntries.length).toBe(1);
+    const compensationOp = pendingEntries[0].op;
+    expect(compensationOp.entityId).toBe(TASK_Y);
+
+    // Through the REAL reducer: the uncontested sibling X converges to the
+    // sender's rounded value; the local winner Y keeps its title AND its
+    // unrounded time (the atomic replay's transient rounding of Y is undone by
+    // the compensation snapshot applied after it).
+    expect(getTask(localState, TASK_X).timeSpent).toBe(15 * MINUTE);
+    expect(getTask(localState, TASK_Y).title).toBe('Local title for Y');
+    expect(getTask(localState, TASK_Y).timeSpent).toBe(20 * MINUTE);
+
+    // Device B downloads the compensation and converges on both tasks.
+    server.uploadOps([compensationOp], CLIENT_A);
+    const downloadedByB = server
+      .downloadOps(1, CLIENT_B)
+      .ops.map((entry) => entry.op as Operation);
+    expect(downloadedByB.map(({ id }) => id)).toEqual([compensationOp.id]);
+    for (const op of downloadedByB) {
+      remoteState = reducer(remoteState, convertOpToAction(op));
+    }
+    expect(taskSyncProjection(remoteState, TASK_X)).toEqual(
+      taskSyncProjection(localState, TASK_X),
+    );
+    expect(taskSyncProjection(remoteState, TASK_Y)).toEqual(
+      taskSyncProjection(localState, TASK_Y),
+    );
+
+    // Status-blind restart: replaying the durable log by seq (rejected edit,
+    // remote rounding row, compensation) reproduces the live-apply result.
+    let restartedState = initialState;
+    const durableEntries = await opLogStore.getOpsAfterSeq(0);
+    for (const entry of durableEntries) {
+      restartedState = reducer(restartedState, convertOpToAction(entry.op));
+    }
+    expect(taskSyncProjection(restartedState, TASK_X)).toEqual(
+      taskSyncProjection(localState, TASK_X),
+    );
+    expect(taskSyncProjection(restartedState, TASK_Y)).toEqual(
+      taskSyncProjection(localState, TASK_Y),
+    );
+  });
 });

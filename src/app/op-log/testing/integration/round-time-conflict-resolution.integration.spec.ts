@@ -13,7 +13,12 @@ import { clearDeferredActions } from '../../capture/operation-capture.meta-reduc
 import { OperationLogEffects } from '../../capture/operation-log.effects';
 import { buildEntityRegistry, ENTITY_REGISTRY } from '../../core/entity-registry';
 import { UnsupportedMultiEntityConflictError } from '../../core/errors/sync-errors';
-import { ActionType, EntityConflict, Operation } from '../../core/operation.types';
+import {
+  ActionType,
+  EntityConflict,
+  Operation,
+  OpType,
+} from '../../core/operation.types';
 import {
   isPersistentAction,
   PersistentAction,
@@ -186,12 +191,14 @@ describe('remote round-time-spent conflict resolution integration (#9601)', () =
     taskIds: string[],
     timestamp: number,
     entityIds: string[] = taskIds,
+    projectId?: string | null,
   ): Operation => {
     const remoteAction = roundTimeSpentForDay({
       day: ROUND_DAY,
       taskIds,
       roundTo: '5M',
       isRoundUp: true,
+      projectId,
     }) as PersistentAction;
     const { type, meta, ...actionPayload } = remoteAction;
     return {
@@ -291,6 +298,15 @@ describe('remote round-time-spent conflict resolution integration (#9601)', () =
         task: { id: TASK_A, changes: { title: 'Older local edit' } },
       }) as PersistentAction,
     );
+    // The conflicted task IS writable by the rounding op (no project limit, no
+    // subtasks) — pins that the unwritable-target local-win override below
+    // does NOT fire for genuinely rounded targets.
+    taskStateById[TASK_A] = {
+      ...DEFAULT_TASK,
+      id: TASK_A,
+      title: 'Older local edit',
+      projectId: 'project1',
+    };
 
     const remoteRoundOp = buildRemoteRoundTimeOp(
       remoteClient(),
@@ -305,6 +321,96 @@ describe('remote round-time-spent conflict resolution integration (#9601)', () =
     // rejected, and nothing is left pending — no compensation is needed.
     expect(appliedOps().map(({ id }) => id)).toContain(remoteRoundOp.id);
     expect(await unsyncedOps()).toEqual([]);
+  });
+
+  /**
+   * A production rounding op declares EVERY task id of the day, but its
+   * reducer writes only tasks matching the payload's project limit that are
+   * not parents-with-subtasks. A remote win on a declared-but-unwritten
+   * target would reject the local pending edit while the replay writes
+   * nothing to that entity — the edit would stay visible locally but never
+   * upload. Such rows must resolve as LOCAL wins instead, re-asserting and
+   * re-uploading the local state via a compensation snapshot.
+   */
+  describe('declared-but-unwritten targets resolve as local wins', () => {
+    const expectLocalStatePreserved = async (
+      localEditOp: Operation,
+      remoteRoundOp: Operation,
+      expectedTitle: string,
+    ): Promise<void> => {
+      const pending = await unsyncedOps();
+      expect(pending.length).toBe(1);
+      const compensation = pending[0];
+      expect(compensation.id).not.toBe(localEditOp.id);
+      expect(compensation.entityId).toBe(TASK_A);
+      expect(
+        (compensation.payload as { actionPayload?: { title?: string } }).actionPayload
+          ?.title,
+      ).toBe(expectedTitle);
+      expectDominates(compensation, localEditOp);
+      expectDominates(compensation, remoteRoundOp);
+
+      // The rounding op still applies atomically for its writable targets.
+      const appliedIds = appliedOps().map(({ id }) => id);
+      expect(appliedIds).toContain(remoteRoundOp.id);
+      expect(appliedIds).toContain(compensation.id);
+    };
+
+    it('keeps an OLDER local edit when the op is limited to another project', async () => {
+      const [localEditOp] = await dispatchAndFlush(
+        TaskSharedActions.updateTask({
+          task: { id: TASK_A, changes: { title: 'Cross-project edit' } },
+        }) as PersistentAction,
+      );
+      taskStateById[TASK_A] = {
+        ...DEFAULT_TASK,
+        id: TASK_A,
+        title: 'Cross-project edit',
+        projectId: 'project1',
+      };
+
+      // The remote per-project rounding covers only 'other-project' tasks but
+      // declares task A anyway; its timestamp is NEWER, so plain LWW would
+      // pick remote and silently drop the local edit from the upload stream.
+      const remoteRoundOp = buildRemoteRoundTimeOp(
+        remoteClient(),
+        [TASK_A, TASK_B, TASK_C],
+        localEditOp.timestamp + 1,
+        [TASK_A, TASK_B, TASK_C],
+        'other-project',
+      );
+      const conflicts = await detectConflictsFor(remoteRoundOp);
+
+      await resolver.autoResolveConflictsLWW(conflicts);
+
+      await expectLocalStatePreserved(localEditOp, remoteRoundOp, 'Cross-project edit');
+    });
+
+    it('keeps an OLDER local edit when the conflicted task is a parent with subtasks', async () => {
+      const [localEditOp] = await dispatchAndFlush(
+        TaskSharedActions.updateTask({
+          task: { id: TASK_A, changes: { title: 'Parent edit' } },
+        }) as PersistentAction,
+      );
+      taskStateById[TASK_A] = {
+        ...DEFAULT_TASK,
+        id: TASK_A,
+        title: 'Parent edit',
+        projectId: 'project1',
+        subTaskIds: ['task-a-sub-1'],
+      };
+
+      const remoteRoundOp = buildRemoteRoundTimeOp(
+        remoteClient(),
+        [TASK_A, TASK_B, TASK_C],
+        localEditOp.timestamp + 1,
+      );
+      const conflicts = await detectConflictsFor(remoteRoundOp);
+
+      await resolver.autoResolveConflictsLWW(conflicts);
+
+      await expectLocalStatePreserved(localEditOp, remoteRoundOp, 'Parent edit');
+    });
   });
 
   it('fails closed when the declared entity ids disagree with the replay write set', async () => {
@@ -339,6 +445,41 @@ describe('remote round-time-spent conflict resolution integration (#9601)', () =
     expect(operationApplier.applyOperations).not.toHaveBeenCalled();
     expect(await journal.list('history')).toEqual([]);
     // Fail-closed means pre-mutation: the local edit stays pending untouched.
+    expect((await unsyncedOps()).map(({ id }) => id)).toEqual([localEditOp.id]);
+  });
+
+  it('fails closed with the TYPED error on a rounding op without an action payload', async () => {
+    // The gate runs on attacker-influenceable remote input: a payload shaped
+    // `{entityChanges: []}` (no actionPayload) must yield the typed
+    // fail-closed error, not a TypeError thrown from inside the validator.
+    const [localEditOp] = await dispatchAndFlush(
+      TaskSharedActions.updateTask({
+        task: { id: TASK_A, changes: { title: 'Local edit' } },
+      }) as PersistentAction,
+    );
+
+    const malformedRemoteOp: Operation = {
+      ...remoteClient().createOperation({
+        actionType: ActionType.TASK_ROUND_TIME_SPENT,
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: TASK_A,
+        entityIds: [TASK_A, TASK_B],
+        payload: { entityChanges: [] },
+      }),
+      timestamp: localEditOp.timestamp - 1,
+    };
+    const conflicts = await detectConflictsFor(malformedRemoteOp);
+
+    let thrown: unknown;
+    try {
+      await resolver.autoResolveConflictsLWW(conflicts);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(UnsupportedMultiEntityConflictError);
+    expect(operationApplier.applyOperations).not.toHaveBeenCalled();
     expect((await unsyncedOps()).map(({ id }) => id)).toEqual([localEditOp.id]);
   });
 });

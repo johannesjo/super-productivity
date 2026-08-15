@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/supersync.fixture';
+import { test } from '../../fixtures/supersync.fixture';
 import {
   createTestUser,
   getSuperSyncConfig,
@@ -7,7 +7,7 @@ import {
   waitForTask,
   renameTask,
   recordTaskTimeDelta,
-  getTaskTimeSpentFromState,
+  expectExactTaskTime,
   navigateToWorkView,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
@@ -38,19 +38,6 @@ const localDateStr = (): string => {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${d.getFullYear()}-${month}-${day}`;
-};
-
-const expectExactTaskTime = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-  expectedTimeSpent: number,
-): Promise<void> => {
-  await expect
-    .poll(() => getTaskTimeSpentFromState(client, taskName), {
-      timeout: 30000,
-      intervals: [250, 500, 1000],
-    })
-    .toBe(expectedTimeSpent);
 };
 
 test.describe('@supersync Round Time Spent Conflict Resolution', () => {
@@ -132,11 +119,14 @@ test.describe('@supersync Round Time Spent Conflict Resolution', () => {
       const roundMenuBtn = clientA.page
         .locator('task-summary-tables button', { hasText: 'Round Time Spent' })
         .first();
-      await roundMenuBtn.waitFor({ state: 'visible' });
       await roundMenuBtn.click();
       await clientA.page
-        .locator('button', { hasText: 'Round UP all tasks to 5 minutes' })
+        .getByRole('menuitem', { name: 'Round UP all tasks to 5 minutes' })
         .click();
+      // T1 rounding on A is the PREMISE of the conflict below: without it, B's
+      // rename would not race a rounded task and every later assertion would
+      // pass in a conflict-free run too.
+      await expectExactTaskTime(clientA, task1Name, roundedTime);
       await expectExactTaskTime(clientA, task2Name, roundedTime);
       await expectExactTaskTime(clientA, task3Name, roundedTime);
       console.log('[RoundConflict] Client A rounded all tasks UP to 5m');

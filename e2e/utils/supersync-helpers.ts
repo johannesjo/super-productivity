@@ -1070,6 +1070,26 @@ export const waitForTaskTimeSpent = async (
 };
 
 /**
+ * Poll until a task's persisted timeSpent equals the exact expected value.
+ *
+ * @param client - The simulated E2E client
+ * @param taskName - The task name
+ * @param expectedTimeSpent - The expected timeSpent in milliseconds
+ */
+export const expectExactTaskTime = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+  expectedTimeSpent: number,
+): Promise<void> => {
+  await expect
+    .poll(() => getTaskTimeSpentFromState(client, taskName), {
+      timeout: 30000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(expectedTimeSpent);
+};
+
+/**
  * Record an exact local time delta through the same two actions used by the
  * production timer: one updates local state, the other writes the replayable op.
  *
