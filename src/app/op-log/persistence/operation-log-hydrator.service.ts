@@ -11,6 +11,7 @@ import {
 } from './schema-migration.service';
 import { OperationLogSnapshotService } from './operation-log-snapshot.service';
 import { TabSeqFrontierService } from './tab-seq-frontier.service';
+import { OperationLogCompactionService } from './operation-log-compaction.service';
 import { OperationLogRecoveryService } from './operation-log-recovery.service';
 import { SyncHydrationService } from './sync-hydration.service';
 import { ArchiveMigrationService } from './archive-migration.service';
@@ -81,6 +82,7 @@ export class OperationLogHydratorService {
 
   // Extracted services
   private snapshotService = inject(OperationLogSnapshotService);
+  private compactionService = inject(OperationLogCompactionService);
   private recoveryService = inject(OperationLogRecoveryService);
   private syncHydrationService = inject(SyncHydrationService);
   private archiveMigrationService = inject(ArchiveMigrationService);
@@ -122,6 +124,9 @@ export class OperationLogHydratorService {
     // a cache Checkpoint B then trusts unvalidated. Convergence only stamps a
     // version AFTER the migration chain has actually run, which is safe.
     let snapshotPersistedDuringHydration = false;
+    // Set only when the try block below ran to completion; gates the startup
+    // compaction check after the finally so recovery/aborted boots never prune.
+    let hydrationCompletedNormally = false;
 
     try {
       // #9084: held for the whole run so compaction cannot capture the gap
@@ -391,6 +396,7 @@ export class OperationLogHydratorService {
       // tab session gets the auto-reload treatment again rather than going straight
       // to the manual recovery dialog.
       sessionStorage.removeItem(IDB_OPEN_ERROR_RELOAD_KEY);
+      hydrationCompletedNormally = true;
     } catch (e) {
       OpLog.err('OperationLogHydratorService: Error during hydration', e);
 
@@ -423,6 +429,14 @@ export class OperationLogHydratorService {
       }
     } finally {
       this.hydrationStateService.setHydrationInProgress(false);
+    }
+
+    // #8336 safety net: must run AFTER the finally above has dropped the
+    // hydration-in-progress flag (the #9084 guard skips compaction while it
+    // is up), and only after a fully successful run so recovery boots never
+    // prune; fallback boots are additionally covered by the #9140 guard.
+    if (hydrationCompletedNormally) {
+      await this.compactionService.compactIfBloated();
     }
   }
 

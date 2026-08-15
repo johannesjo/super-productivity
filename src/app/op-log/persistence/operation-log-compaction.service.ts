@@ -6,6 +6,7 @@ import {
   EMERGENCY_COMPACTION_RETENTION_MS,
   LOCK_NAMES,
   SLOW_COMPACTION_THRESHOLD_MS,
+  STARTUP_COMPACTION_OP_THRESHOLD,
 } from '../core/operation-log.const';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
@@ -41,6 +42,45 @@ export class OperationLogCompactionService {
 
   async compact(): Promise<boolean> {
     return this._doCompact(COMPACTION_RETENTION_MS, false);
+  }
+
+  /**
+   * Startup safety net for op-log growth (#8336): threshold compaction is
+   * driven by an in-memory counter that resets every restart (the persisted
+   * counter is never incremented in production), so sessions that stay under
+   * COMPACTION_THRESHOLD never prune and the log grows unbounded across
+   * restarts. Checks the actual op count (O(1)) and fires a background
+   * compaction when the log is genuinely large.
+   *
+   * Called by OperationLogHydratorService AFTER hydrateStore()'s finally has
+   * dropped the hydration-in-progress flag — the #9084 guard skips any
+   * compaction started while it is up.
+   *
+   * Fire-and-forget and fully self-contained: failures are logged and
+   * swallowed, never escalated to the COMPACTION_FAILED snack/reload prompt —
+   * interrupting startup with a reload dialog is worse UX than a silent retry
+   * on the next boot. Known gap: a restart-heavy user (the very population
+   * this targets) whose compaction keeps failing won't be notified, since they
+   * may never cross COMPACTION_THRESHOLD in-session to reach the escalating
+   * path. Accepted — the swallow is safe (the log grows but stays correct) and
+   * the check re-runs every boot.
+   */
+  async compactIfBloated(): Promise<void> {
+    try {
+      const opCount = await this.opLogStore.countOps();
+      if (opCount > STARTUP_COMPACTION_OP_THRESHOLD) {
+        OpLog.normal(
+          `OperationLogCompactionService: op-log has ${opCount} ops ` +
+            `(> ${STARTUP_COMPACTION_OP_THRESHOLD}) — triggering startup compaction`,
+        );
+        // Not awaited: compaction runs in the background after startup.
+        this.compact().catch((e) => {
+          OpLog.err('OperationLogCompactionService: Startup compaction failed', e);
+        });
+      }
+    } catch (e) {
+      OpLog.warn('OperationLogCompactionService: op-log bloat check failed', e);
+    }
   }
 
   /**

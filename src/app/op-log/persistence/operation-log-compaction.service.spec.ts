@@ -7,6 +7,7 @@ import { VectorClockService } from '../sync/vector-clock.service';
 import {
   COMPACTION_RETENTION_MS,
   SLOW_COMPACTION_THRESHOLD_MS,
+  STARTUP_COMPACTION_OP_THRESHOLD,
 } from '../core/operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { OperationLogEntry, OpType } from '../core/operation.types';
@@ -57,6 +58,7 @@ describe('OperationLogCompactionService', () => {
       'resetCompactionCounter',
       'deleteOpsWhere',
       'getPendingRemoteOps',
+      'countOps',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
     mockStateSnapshot = jasmine.createSpyObj('StateSnapshotService', [
@@ -1397,6 +1399,45 @@ describe('OperationLogCompactionService', () => {
         expect(e.message).toContain('during');
         expect(e.message).toContain('Consider reducing state size');
       }
+    });
+  });
+
+  describe('compactIfBloated (startup safety net, #8336)', () => {
+    beforeEach(() => {
+      spyOn(service, 'compact').and.resolveTo(true);
+    });
+
+    it('triggers compaction when the op-log has grown past the threshold', async () => {
+      mockOpLogStore.countOps.and.resolveTo(STARTUP_COMPACTION_OP_THRESHOLD + 1);
+
+      await service.compactIfBloated();
+
+      expect(service.compact).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT trigger compaction at or below the threshold', async () => {
+      mockOpLogStore.countOps.and.resolveTo(STARTUP_COMPACTION_OP_THRESHOLD);
+
+      await service.compactIfBloated();
+
+      expect(service.compact).not.toHaveBeenCalled();
+    });
+
+    it('resolves without throwing if the op-count check fails', async () => {
+      // Self-contained: a failure must never abort the caller's startup path.
+      mockOpLogStore.countOps.and.rejectWith(new Error('count failed'));
+
+      await expectAsync(service.compactIfBloated()).toBeResolved();
+      expect(service.compact).not.toHaveBeenCalled();
+    });
+
+    it('resolves without throwing if the background compaction fails', async () => {
+      mockOpLogStore.countOps.and.resolveTo(STARTUP_COMPACTION_OP_THRESHOLD + 1);
+      (service.compact as jasmine.Spy).and.rejectWith(new Error('compaction failed'));
+
+      // compact() is fire-and-forget; its rejection is caught internally.
+      await expectAsync(service.compactIfBloated()).toBeResolved();
+      expect(service.compact).toHaveBeenCalledTimes(1);
     });
   });
 });

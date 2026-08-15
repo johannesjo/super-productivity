@@ -107,6 +107,21 @@ export const LOCK_ACQUISITION_TIMEOUT_MS = 30000;
 export const COMPACTION_THRESHOLD = 500;
 
 /**
+ * Total op-log size (in ops) above which a compaction is triggered once at
+ * startup. Safety net for the COMPACTION_THRESHOLD in-memory counter, which only
+ * fires within a single session — users whose sessions stay below it never prune
+ * across restarts and accumulate ops indefinitely. Sits well above a heavy user's
+ * healthy ~7-day steady state so that for a normally-synced log compaction's prune
+ * drops the count back below the threshold and it won't re-fire next boot.
+ *
+ * Note: compaction only prunes *synced* ops past the retention window, so a large
+ * unsynced backlog (offline / sync-stalled client) can stay above the threshold and
+ * re-trigger every boot. That is harmless — the trigger is fire-and-forget and
+ * self-skipping — just not self-limiting in that case. See OperationLogHydratorService.
+ */
+export const STARTUP_COMPACTION_OP_THRESHOLD = 5000;
+
+/**
  * Maximum consecutive compaction failures before notifying the user.
  * After this many failures, a warning is shown to prompt user action.
  */
