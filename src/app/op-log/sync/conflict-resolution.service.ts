@@ -2379,6 +2379,17 @@ export class ConflictResolutionService {
    * independent bulk deletes are re-scoped, and the local legacy rounding
    * action has an explicit per-entity reconciliation path above.
    *
+   * A REMOTE `roundTimeSpentForDay` (#9601 — "Finish day" on device A races
+   * next-morning edits on device B) resolves via the generic mixed-winner
+   * machinery: the atomic row replays once, then local-win compensation
+   * snapshots re-assert and re-upload each local winner after it. Uncontested
+   * siblings converge exactly (no concurrent ops means their values equal the
+   * sender's pre-rounding input); a remote-win target keeps rounded(local
+   * value) — a bounded divergence in the two time fields, accepted over the
+   * permanent sync wedge. Gated on the static-payload check so `entityIds`
+   * faithfully declare the replay write set: an id in `taskIds` but not
+   * `entityIds` was never conflict-checked, so that shape stays blocked.
+   *
    * The Today-list ops that used to make this reachable from ordinary use —
    * `planTasksForToday` (dispatched with every due task id by the automatic
    * day-rollover) and the ordering-only Today ops — now resolve via
@@ -2396,7 +2407,8 @@ export class ConflictResolutionService {
           isMultiEntityOperation(op) &&
           op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
           !INDEPENDENT_MULTI_DELETE_ACTIONS.has(op.actionType) &&
-          !isResolvableTodayListAction(op.actionType),
+          !isResolvableTodayListAction(op.actionType) &&
+          !isRoundTimePayloadValidForStaticFields(op),
       );
       if (unsafeRemoteOp) {
         throw new UnsupportedMultiEntityConflictError(

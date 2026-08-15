@@ -10,6 +10,7 @@ import {
   waitForTaskTimeSpent,
   getTaskTimeSpentFromState,
   markTaskDone,
+  recordTaskTimeDelta,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 import { expectTaskVisible } from '../../utils/supersync-assertions';
@@ -17,98 +18,6 @@ import { waitForAppReady } from '../../utils/waits';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
-
-/**
- * Record an exact local time delta through the same two actions used by the
- * production timer: one updates local state, the other writes the replayable op.
- */
-const recordTaskTimeDelta = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-  date: string,
-  duration: number,
-): Promise<void> => {
-  await client.page.evaluate(
-    async ({ name, taskDate, delta }) => {
-      const isRecordInPage = (value: unknown): value is Record<string, unknown> =>
-        typeof value === 'object' && value !== null;
-
-      type StoreSubscription = { unsubscribe: () => void };
-      type StoreLike = {
-        subscribe: (next: (state: unknown) => void) => StoreSubscription;
-        dispatch: (action: unknown) => void;
-      };
-
-      const store = (
-        window as unknown as {
-          __e2eTestHelpers?: { store?: StoreLike };
-        }
-      ).__e2eTestHelpers?.store;
-
-      if (!store) {
-        throw new Error('E2E store helper is unavailable');
-      }
-
-      const rootState = await new Promise<Record<string, unknown>>((resolve, reject) => {
-        const subscriptionRef: { current?: StoreSubscription } = {};
-        let isDone = false;
-        const timeoutId = window.setTimeout(() => {
-          if (!isDone) {
-            isDone = true;
-            subscriptionRef.current?.unsubscribe();
-            reject(new Error('Timed out reading the NgRx state'));
-          }
-        }, 1000);
-
-        subscriptionRef.current = store.subscribe((state) => {
-          if (isDone || !isRecordInPage(state)) {
-            return;
-          }
-          isDone = true;
-          window.clearTimeout(timeoutId);
-          window.setTimeout(() => subscriptionRef.current?.unsubscribe());
-          resolve(state);
-        });
-      });
-
-      const taskState = rootState.tasks ?? rootState.task;
-      if (!isRecordInPage(taskState) || !isRecordInPage(taskState.entities)) {
-        throw new Error('Task state is unavailable');
-      }
-
-      const task = Object.values(taskState.entities).find(
-        (value) =>
-          isRecordInPage(value) &&
-          typeof value.title === 'string' &&
-          value.title.includes(name),
-      );
-      if (!isRecordInPage(task) || typeof task.id !== 'string') {
-        throw new Error(`Task not found: ${name}`);
-      }
-
-      store.dispatch({
-        type: '[TimeTracking] Add time spent',
-        task,
-        date: taskDate,
-        duration: delta,
-        isFromTrackingReminder: false,
-      });
-      store.dispatch({
-        type: '[TimeTracking] Sync time spent',
-        taskId: task.id,
-        date: taskDate,
-        duration: delta,
-        meta: {
-          isPersistent: true,
-          entityType: 'TASK',
-          entityId: task.id,
-          opType: 'UPD',
-        },
-      });
-    },
-    { name: taskName, taskDate: date, delta: duration },
-  );
-};
 
 const expectExactTaskTime = async (
   client: SimulatedE2EClient,
