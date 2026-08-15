@@ -1428,5 +1428,22 @@ describe('AddTaskBarComponent', () => {
       expect(inputEl.selectionStart).toBe(9);
       expect(inputEl.selectionEnd).toBe(9);
     });
+
+    it('detaches the note placeholder while the note has text', () => {
+      component.stateService.isNoteExpanded.set(true);
+      fixture.detectChanges();
+      const noteEl: HTMLTextAreaElement =
+        fixture.debugElement.nativeElement.querySelector('.note-input');
+      expect(noteEl.getAttribute('placeholder')).toBeTruthy();
+      const emptyLabel = noteEl.getAttribute('aria-label');
+      expect(emptyLabel).toBeTruthy();
+
+      noteEl.value = 'a note';
+      noteEl.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(noteEl.hasAttribute('placeholder')).toBe(false);
+      expect(noteEl.getAttribute('aria-label')).toBe(emptyLabel);
+    });
   });
 });
