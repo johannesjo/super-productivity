@@ -165,3 +165,25 @@ for development-only labels, secrets, and personal data before upload.
   release.
 - Record the release URL and any intentionally skipped or manually completed
   channel in the release discussion.
+- A failing SignPath step prints only what the connector returns, which can be a
+  bare `Invalid request to SignPath API.` with no detail (v18.20.0, run
+  31883046355). The workflow log cannot say more: diagnose it in the SignPath
+  web UI, where the signing request record carries the real reason. Check, in
+  order, that `SIGNPATH_API_TOKEN` is still valid, that the `super-productivity`
+  project with the `release-signing` policy and `github-zip-pe` artifact
+  configuration still exist under those exact slugs, and that the GitHub trusted
+  build system is still authorized for the organization. The submitted artifact
+  size is a further suspect — it reached ~930 MB for v18.20.0 against ~900 MB
+  for the last accepted submission — and can be halved by submitting the
+  installers and the portables as two separate artifacts.
+- If the SignPath side checks out, treat it as a platform-side regression and
+  report it to SignPath support with the run URL and submission timestamp. Their
+  application and pipeline connector ship continuously, and releases here are
+  weeks apart, so a release can be the first build to meet a new version:
+  application 1.218.0 (2026-08-11) and pipeline connector 0.7.4 (2026-08-13)
+  both landed between the last accepted submission and the v18.20.0 failure.
+  Signing is also the one release step with no local reproduction — the log is
+  a relay, so their support seeing the server-side record beats guessing here.
+- Windows signing runs only on a `v*` tag, so a signing fix can only be
+  exercised by re-running `windows-bin` or by pushing a pre-release tag. Never
+  move a released tag to retest.

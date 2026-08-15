@@ -128,6 +128,7 @@ jobs:
           name: e2eResults
           path: .tmp/e2e-test-results/**/*.*
           retention-days: 14
+          overwrite: true # so a re-run of this job does not fail on the existing artifact
 
       - name: Build Frontend & Electron
         run: npm run build
@@ -359,6 +360,10 @@ jobs:
           path: .tmp/app-builds/*.exe
           if-no-files-found: error
           retention-days: 1
+          # Artifacts are scoped to the run, not the attempt, and uploading a
+          # name that already exists fails. Without this, re-running this job
+          # after a signing failure dies here instead of retrying the signing.
+          overwrite: true
 
       - name: Sign Windows executables with SignPath
         uses: signpath/github-action-submit-signing-request@b9d91eadd323de506c0c81cf0c7fe7438f3360fd # v2
