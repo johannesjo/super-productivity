@@ -47,7 +47,7 @@ type SyncCompletionSnapshot = {
   unsyncedCount: number | null;
 };
 
-type NativeSyncConfirmIntent = 'fresh' | 'use-local' | 'use-remote';
+type NativeSyncConfirmIntent = 'fresh' | 'use-local' | 'use-remote' | 'repair';
 
 /**
  * The complete set of native `window.confirm()` prompts production may raise
@@ -80,6 +80,17 @@ const NATIVE_SYNC_CONFIRMS: ReadonlyArray<{
   {
     intent: 'use-remote',
     pattern: translationRegex('F.SYNC.D_SYNC_IMPORT_CONFLICT.USE_REMOTE_CONFIRM'),
+  },
+  {
+    // validate-state.service renders this one as `TITLE\n\nMSG`. It fires on the
+    // USE_REMOTE recovery path when the downloaded snapshot needs repair, and
+    // declining it aborts the sync with "User declined repair" — so it must be
+    // accepted regardless of the expected local/remote choice.
+    intent: 'repair',
+    pattern: translationRegex(
+      'F.SYNC.D_DATA_REPAIR_CONFIRM.TITLE',
+      'F.SYNC.D_DATA_REPAIR_CONFIRM.MSG',
+    ),
   },
 ];
 
@@ -1663,7 +1674,8 @@ export class SuperSyncPage extends BasePage {
 
     const intent =
       dialog.type() === 'confirm' ? this._getNativeSyncConfirmIntent(message) : undefined;
-    const isExpectedConfirm = intent === 'fresh' || intent === `use-${expectedChoice}`;
+    const isExpectedConfirm =
+      intent === 'fresh' || intent === 'repair' || intent === `use-${expectedChoice}`;
 
     if (isExpectedConfirm) {
       console.log(
@@ -1782,17 +1794,15 @@ export class SuperSyncPage extends BasePage {
       return true;
     }
 
-    // 3. Sync import conflict dialog
+    // 3. Sync import conflict dialog. Both choices can raise a native confirm
+    //    before the dialog closes, so this must go through the scoped resolver —
+    //    triggerSync()/waitForSyncToComplete() reach here with no dialog
+    //    handler installed, and a raw click would hang on the unanswered prompt.
     if (await this.syncImportConflictDialog.isVisible().catch(() => false)) {
       console.log(
         `[syncAndWait] Sync import conflict detected, using ${useLocal ? 'local' : 'remote'} data...`,
       );
-      if (useLocal) {
-        await this.syncImportUseLocalBtn.click();
-      } else {
-        await this.syncImportUseRemoteBtn.click();
-      }
-      await this.syncImportConflictDialog.waitFor({ state: 'hidden', timeout: 5000 });
+      await this._chooseSyncImportResolution(useLocal ? 'local' : 'remote', 10000);
       return true;
     }
 

@@ -260,45 +260,49 @@ export const waitForSyncComplete = async (
   const terminalState: { value: TerminalSyncState } = { value: null };
   let consecutiveSuccessChecks = 0;
 
-  await expect
-    .poll(
-      async () => {
-        const state = await readTerminalSyncState(
-          page,
-          syncPage,
-          allowResponseOnlyCompletion,
-        );
-        if (state?.kind === 'success') {
-          consecutiveSuccessChecks++;
-          terminalState.value =
-            consecutiveSuccessChecks >= 3 ? state : terminalState.value;
-        } else {
-          consecutiveSuccessChecks = 0;
-          terminalState.value = state;
-        }
-        return terminalState.value?.kind ?? 'pending';
-      },
-      {
-        timeout: terminalTimeout,
-        message: 'Expected sync to reach a terminal success, conflict, or error state',
-      },
-    )
-    .not.toBe('pending');
+  try {
+    await expect
+      .poll(
+        async () => {
+          const state = await readTerminalSyncState(
+            page,
+            syncPage,
+            allowResponseOnlyCompletion,
+          );
+          if (state?.kind === 'success') {
+            consecutiveSuccessChecks++;
+            terminalState.value =
+              consecutiveSuccessChecks >= 3 ? state : terminalState.value;
+          } else {
+            consecutiveSuccessChecks = 0;
+            terminalState.value = state;
+          }
+          return terminalState.value?.kind ?? 'pending';
+        },
+        {
+          timeout: terminalTimeout,
+          message: 'Expected sync to reach a terminal success, conflict, or error state',
+        },
+      )
+      .not.toBe('pending');
+  } finally {
+    // Consume the witness on EVERY exit, including a poll timeout. A resolved
+    // witness left behind would satisfy the next wait instantly — the exact
+    // stale-cycle false positive this contract exists to prevent.
+    syncPage.completeTriggeredSyncCycle();
+  }
 
   const state = terminalState.value;
   if (!state) {
     throw new Error(`Sync timeout after ${timeout}ms: no terminal state appeared`);
   }
   if (state.kind === 'error') {
-    syncPage.completeTriggeredSyncCycle();
     throw new Error(`Sync failed with error: ${state.message}`);
   }
   if (state.kind === 'conflict') {
-    syncPage.completeTriggeredSyncCycle();
     return 'conflict';
   }
 
-  syncPage.completeTriggeredSyncCycle();
   return 'success';
 };
 

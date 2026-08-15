@@ -257,9 +257,19 @@ export const createSimulatedClient = async (
     viewport: { width: 1920, height: 1080 },
   });
 
+  // Install the devError/beforeunload fallback on EVERY page this context ever
+  // creates, not just the first one: several import specs close the page and
+  // re-open it via `context.newPage()`. On such a listener-less page Playwright
+  // auto-DISMISSES native dialogs, silently answering sync confirmations with
+  // "cancel" (the import dialog then never closes). The strict sync helpers
+  // also deliberately leave beforeunload/devERR dialogs to this fallback and
+  // block the renderer if it is missing.
+  context.on('page', (contextPage) => {
+    installDevErrorDialogHandler(contextPage, `Client ${clientName}`);
+  });
+
   const page = await context.newPage();
   const runtimeErrors = attachPageErrorCollector(page, `Client ${clientName}`);
-  installDevErrorDialogHandler(page, `Client ${clientName}`);
 
   // Skip onboarding, hints, and example tasks before the app boots.
   // This runs before any page JavaScript, so Angular sees the flags immediately.
