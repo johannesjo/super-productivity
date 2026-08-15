@@ -2496,5 +2496,27 @@ describe('OperationLogHydratorService', () => {
       expect(mockRecoveryService.attemptRecovery).toHaveBeenCalled();
       expect(mockCompactionService.compactIfBloated).not.toHaveBeenCalled();
     });
+
+    it('does not block hydration on the bloat check (fire-and-forget)', async () => {
+      // hydrateStore() gates app boot; if the call site regresses to awaiting
+      // the check, this spec hangs into the jasmine timeout and fails.
+      let releaseCheck!: () => void;
+      mockCompactionService.compactIfBloated.and.returnValue(
+        new Promise<void>((resolve) => (releaseCheck = resolve)),
+      );
+
+      await service.hydrateStore();
+
+      expect(mockCompactionService.compactIfBloated).toHaveBeenCalledTimes(1);
+      releaseCheck();
+    });
+
+    it('still resolves hydration when the bloat check rejects (belt for the never-rejects contract)', async () => {
+      mockCompactionService.compactIfBloated.and.rejectWith(
+        new Error('bloat check broke its contract'),
+      );
+
+      await expectAsync(service.hydrateStore()).toBeResolved();
+    });
   });
 });

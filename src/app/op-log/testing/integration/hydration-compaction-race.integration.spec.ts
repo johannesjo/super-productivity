@@ -18,6 +18,10 @@ import { VectorClockService } from '../../sync/vector-clock.service';
 import { OperationCaptureService } from '../../capture/operation-capture.service';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../../util/client-id.provider';
 import { OpType } from '../../core/operation.types';
+import {
+  COMPACTION_RETENTION_MS,
+  STARTUP_COMPACTION_OP_THRESHOLD,
+} from '../../core/operation-log.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { TestClient, resetTestUuidCounter } from './helpers/test-client.helper';
 import { clearDeferredActions } from '../../capture/operation-capture.meta-reducer';
@@ -207,24 +211,36 @@ describe('Hydration-replay vs compaction race (integration, real store, #9084)',
     });
 
     const hydration = hydrator.hydrateStore();
-    await gapReached;
+    try {
+      // Racing hydration in surfaces an early hydration error here instead of
+      // hanging this await into the jasmine timeout (the race also consumes a
+      // rejection, so it can't strand as an unhandled one).
+      await Promise.race([gapReached, hydration]);
 
-    // The snapshot state is live but the tail ops' effects are not yet.
-    const dispatchedTypes = ngrxStore.dispatch.calls
-      .allArgs()
-      .map(([action]) => (action as unknown as { type: string }).type);
-    expect(dispatchedTypes).toContain(loadAllData.type);
+      // The snapshot state is live but the tail ops' effects are not yet.
+      const dispatchedTypes = ngrxStore.dispatch.calls
+        .allArgs()
+        .map(([action]) => (action as unknown as { type: string }).type);
+      expect(dispatchedTypes).toContain(loadAllData.type);
 
-    // An early write's compaction trigger fires now: the REAL compact()
-    // pipeline must skip via the #9084 guard, leaving the pre-hydration cache
-    // and the tail ops untouched.
-    expect(await compactionService.compact()).toBe(false);
-    const cacheDuring = await storeService.loadStateCache();
-    expect(cacheDuring!.lastAppliedOpSeq).toBe(snapshotSeq);
-    expect(cachedTaskIds(cacheDuring!.state)).toEqual([SNAPSHOT_TASK]);
-    expect((await realGetOpsAfterSeq(snapshotSeq)).length).toBe(2);
-
-    releaseBarrier();
+      // An early write's compaction trigger fires now: the REAL compact()
+      // pipeline must skip via the #9084 guard, leaving the pre-hydration cache
+      // and the tail ops untouched.
+      // NB: `false` is attributable to #9084 only because every guard ahead of
+      // it is verifiably disarmed here (no pending remote ops, capture/deferred
+      // buffers cleared, no fallback, frontier still unestablished) — a future
+      // guard inserted earlier in _doCompact could silently take over this
+      // assertion.
+      expect(await compactionService.compact()).toBe(false);
+      const cacheDuring = await storeService.loadStateCache();
+      expect(cacheDuring!.lastAppliedOpSeq).toBe(snapshotSeq);
+      expect(cachedTaskIds(cacheDuring!.state)).toEqual([SNAPSHOT_TASK]);
+      expect((await realGetOpsAfterSeq(snapshotSeq)).length).toBe(2);
+    } finally {
+      // A failed assertion above must not leave hydrateStore() parked forever
+      // on the barrier across TestBed teardown.
+      releaseBarrier();
+    }
     await hydration;
 
     // Hydration finished; the tail ops are now reflected in live state and
@@ -236,5 +252,44 @@ describe('Hydration-replay vs compaction race (integration, real store, #9084)',
     const cacheAfter = await storeService.loadStateCache();
     expect(cacheAfter!.lastAppliedOpSeq).toBeGreaterThan(snapshotSeq);
     expect(cacheAfter!.snapshotEntityKeys).toContain(`TASK:${TAIL_TASK}`);
+  });
+
+  it('prunes old synced ops through the real pipeline when the log is bloated at boot (#8336)', async () => {
+    const client = new TestClient('client-8336-prune');
+
+    // Backdate the seeding: appliedAt/syncedAt land past the retention window,
+    // making the two synced tail ops genuinely prunable. new Date() is
+    // independent of the Date.now spy, so the base is real current time.
+    const oneHourMs = 60 * 60 * 1000;
+    const nowSpy = spyOn(Date, 'now').and.returnValue(
+      new Date().getTime() - COMPACTION_RETENTION_MS - oneHourMs,
+    );
+    const snapshotSeq = await seedSnapshotAndTailOps(client);
+    nowSpy.and.callThrough();
+
+    // Trip the threshold without seeding 5000 real rows: only the trigger
+    // METRIC is stubbed — everything it fires (hasSyncedOps gate, compact(),
+    // the prune) runs for real against the real store.
+    spyOn(storeService, 'countOps').and.resolveTo(STARTUP_COMPACTION_OP_THRESHOLD + 1);
+    const bloatCheck = spyOn(compactionService, 'compactIfBloated').and.callThrough();
+    // Post-hydration live state includes the replayed tail task, so the
+    // compaction snapshot may legitimately advance past the tail ops.
+    mockStateSnapshot.getStateSnapshot.and.returnValue(
+      stateWithTasks([SNAPSHOT_TASK, TAIL_TASK]) as any,
+    );
+
+    await hydrator.hydrateStore();
+
+    // hydrateStore() fire-and-forgets the check — await the promise the real
+    // compactIfBloated returned so the assertion below is deterministic.
+    expect(bloatCheck).toHaveBeenCalledTimes(1);
+    await bloatCheck.calls.mostRecent().returnValue;
+
+    // Both old synced tail ops are pruned; the never-synced snapshot op stays;
+    // the cache anchor advanced past the pruned range.
+    const survivingSeqs = (await storeService.getOpsAfterSeq(0)).map((e) => e.seq);
+    expect(survivingSeqs).toEqual([snapshotSeq]);
+    const cacheAfter = await storeService.loadStateCache();
+    expect(cacheAfter!.lastAppliedOpSeq).toBeGreaterThan(snapshotSeq);
   });
 });
