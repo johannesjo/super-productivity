@@ -544,7 +544,12 @@ export const taskReducer = createReducer<TaskState>(
     const isLimitToProject: boolean = !!projectId || projectId === null;
 
     const idsToUpdateDirectly: string[] = taskIds.filter((id) => {
-      const task: Task = getTaskById(id, state);
+      // A remote/replayed op may list tasks this client archived or deleted
+      // meanwhile — skip them instead of aborting the whole rounding (#9601).
+      const task: Task | undefined = state.entities[id];
+      if (!task) {
+        return false;
+      }
       return (
         (task.subTaskIds.length === 0 || !!task.parentId) &&
         (!isLimitToProject || task.projectId === projectId)

@@ -1070,6 +1070,123 @@ export const waitForTaskTimeSpent = async (
 };
 
 /**
+ * Poll until a task's persisted timeSpent equals the exact expected value.
+ *
+ * @param client - The simulated E2E client
+ * @param taskName - The task name
+ * @param expectedTimeSpent - The expected timeSpent in milliseconds
+ */
+export const expectExactTaskTime = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+  expectedTimeSpent: number,
+): Promise<void> => {
+  await expect
+    .poll(() => getTaskTimeSpentFromState(client, taskName), {
+      timeout: 30000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(expectedTimeSpent);
+};
+
+/**
+ * Record an exact local time delta through the same two actions used by the
+ * production timer: one updates local state, the other writes the replayable op.
+ *
+ * @param client - The simulated E2E client
+ * @param taskName - The task name to record time on
+ * @param date - The worklog day string (YYYY-MM-DD) to book the time on
+ * @param duration - The time delta in milliseconds
+ */
+export const recordTaskTimeDelta = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+  date: string,
+  duration: number,
+): Promise<void> => {
+  await client.page.evaluate(
+    async ({ name, taskDate, delta }) => {
+      const isRecordInPage = (value: unknown): value is Record<string, unknown> =>
+        typeof value === 'object' && value !== null;
+
+      type StoreSubscription = { unsubscribe: () => void };
+      type StoreLike = {
+        subscribe: (next: (state: unknown) => void) => StoreSubscription;
+        dispatch: (action: unknown) => void;
+      };
+
+      const store = (
+        window as unknown as {
+          __e2eTestHelpers?: { store?: StoreLike };
+        }
+      ).__e2eTestHelpers?.store;
+
+      if (!store) {
+        throw new Error('E2E store helper is unavailable');
+      }
+
+      const rootState = await new Promise<Record<string, unknown>>((resolve, reject) => {
+        const subscriptionRef: { current?: StoreSubscription } = {};
+        let isDone = false;
+        const timeoutId = window.setTimeout(() => {
+          if (!isDone) {
+            isDone = true;
+            subscriptionRef.current?.unsubscribe();
+            reject(new Error('Timed out reading the NgRx state'));
+          }
+        }, 1000);
+
+        subscriptionRef.current = store.subscribe((state) => {
+          if (isDone || !isRecordInPage(state)) {
+            return;
+          }
+          isDone = true;
+          window.clearTimeout(timeoutId);
+          window.setTimeout(() => subscriptionRef.current?.unsubscribe());
+          resolve(state);
+        });
+      });
+
+      const taskState = rootState.tasks ?? rootState.task;
+      if (!isRecordInPage(taskState) || !isRecordInPage(taskState.entities)) {
+        throw new Error('Task state is unavailable');
+      }
+
+      const task = Object.values(taskState.entities).find(
+        (value) =>
+          isRecordInPage(value) &&
+          typeof value.title === 'string' &&
+          value.title.includes(name),
+      );
+      if (!isRecordInPage(task) || typeof task.id !== 'string') {
+        throw new Error(`Task not found: ${name}`);
+      }
+
+      store.dispatch({
+        type: '[TimeTracking] Add time spent',
+        task,
+        date: taskDate,
+        duration: delta,
+        isFromTrackingReminder: false,
+      });
+      store.dispatch({
+        type: '[TimeTracking] Sync time spent',
+        taskId: task.id,
+        date: taskDate,
+        duration: delta,
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityId: task.id,
+          opType: 'UPD',
+        },
+      });
+    },
+    { name: taskName, taskDate: date, delta: duration },
+  );
+};
+
+/**
  * Check if a task has the given text (exists on client).
  *
  * @param client - The simulated E2E client
