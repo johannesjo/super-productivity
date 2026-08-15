@@ -630,17 +630,10 @@ export const selectLaterTodayStructure = createSelector(
     const scheduledParentTasks: SchedulingSnapshot[] = [];
     const scheduledSubtasks: SchedulingSnapshot[] = [];
     const unscheduledParentsInToday: SchedulingSnapshot[] = [];
-    const subtaskIdsByParentId: Record<string, string[]> = {};
     const dueWithTimeById = new Map<string, number | null>();
 
     for (const snap of snapshot) {
       dueWithTimeById.set(snap.id, snap.dueWithTime);
-      if (snap.parentId) {
-        if (!subtaskIdsByParentId.hasOwnProperty(snap.parentId)) {
-          subtaskIdsByParentId[snap.parentId] = [];
-        }
-        subtaskIdsByParentId[snap.parentId].push(snap.id);
-      }
 
       if (snap.isDone || !isInToday(snap)) continue;
 
@@ -685,8 +678,12 @@ export const selectLaterTodayStructure = createSelector(
 
     // Sort by earliest scheduled time (parent's own dueWithTime or its subtasks').
     // PERF: Pre-compute earliest times to avoid recalculating in sort comparator.
+    // NOTE: subtask order MUST come from the parent's subTaskIds (the single
+    // source of truth for manual ordering, like selectAllTasksWithSubTasksStructure)
+    // and NOT from snapshot iteration order - the entity insertion order never
+    // changes on reorder, so the panel would ignore drag & drop (#9614).
     const withTimes = allTopLevel.map((snap) => {
-      const childIds = subtaskIdsByParentId[snap.id] ?? [];
+      const childIds = snap.subTaskIds;
       const earliestTime = Math.min(
         snap.dueWithTime || Infinity,
         ...childIds.map((cid) => dueWithTimeById.get(cid) || Infinity),

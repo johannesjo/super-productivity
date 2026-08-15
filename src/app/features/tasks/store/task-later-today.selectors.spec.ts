@@ -618,6 +618,39 @@ describe('selectLaterTodayTasksWithSubTasks', () => {
     expect(subTaskIds).toContain('SUB_UNSCHEDULED_M');
   });
 
+  it('should order subtasks by parent subTaskIds, not by store insertion order (#9614)', () => {
+    // Reordering subtasks (drag & drop / move up / down) only updates
+    // parent.subTaskIds - the entity insertion order in the store never changes.
+    // The Later Today panel must follow subTaskIds like every other list.
+    const parentTask = createMockTask({
+      id: 'PARENT_REORDERED',
+      title: 'Parent with reordered subtasks',
+      dueWithTime: todayAt(22, 0),
+      dueDay: todayStr,
+      subTaskIds: ['SUB_R2', 'SUB_R1'], // user moved SUB_R2 to the top
+    });
+
+    const subR1 = createMockTask({
+      id: 'SUB_R1',
+      title: 'Subtask created first',
+      parentId: 'PARENT_REORDERED',
+      dueDay: todayStr,
+    });
+
+    const subR2 = createMockTask({
+      id: 'SUB_R2',
+      title: 'Subtask created second',
+      parentId: 'PARENT_REORDERED',
+      dueDay: todayStr,
+    });
+
+    // Store insertion order (creation order): SUB_R1 before SUB_R2
+    const result = runLaterToday([parentTask, subR1, subR2], todayStr, 0);
+
+    expect(result.length).toBe(1);
+    expect(result[0].subTasks?.map((st) => st.id)).toEqual(['SUB_R2', 'SUB_R1']);
+  });
+
   it('should expose scheduled nested subtasks as top-level when their direct parent is not included', () => {
     const grandparent = createMockTask({
       id: 'GRANDPARENT',
