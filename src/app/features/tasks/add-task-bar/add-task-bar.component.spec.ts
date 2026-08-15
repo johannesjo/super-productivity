@@ -1379,4 +1379,54 @@ describe('AddTaskBarComponent', () => {
       expect(inputEl.value).toBe('first line second third');
     });
   });
+
+  // cdkTextareaAutosize measures a present placeholder by temporarily swapping
+  // it into textarea.value, and each swap resets the caret to the end — so the
+  // placeholder must be detached whenever the field has text (the only time a
+  // caret position exists worth preserving).
+  describe('caret preservation via detached placeholder', () => {
+    let inputEl: HTMLTextAreaElement;
+
+    const typeText = (text: string): void => {
+      inputEl.value = text;
+      inputEl.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      fixture.detectChanges();
+      inputEl = fixture.debugElement.nativeElement.querySelector('.main-input');
+    });
+
+    it('shows the placeholder only while the field is empty', () => {
+      expect(inputEl.getAttribute('placeholder')).toBeTruthy();
+
+      typeText('water the plants');
+      expect(inputEl.hasAttribute('placeholder')).toBe(false);
+
+      typeText('');
+      expect(inputEl.getAttribute('placeholder')).toBeTruthy();
+    });
+
+    it('keeps a stable accessible name while the placeholder is detached', () => {
+      const emptyLabel = inputEl.getAttribute('aria-label');
+      expect(emptyLabel).toBeTruthy();
+
+      typeText('water the plants');
+      expect(inputEl.getAttribute('aria-label')).toBe(emptyLabel);
+    });
+
+    it('keeps a mid-text caret when the placeholder-affecting search mode toggles', () => {
+      typeText('water the plants');
+      inputEl.focus();
+      inputEl.setSelectionRange(9, 9);
+
+      component.toggleSearchMode();
+      fixture.detectChanges();
+
+      expect(inputEl.value).toBe('water the plants');
+      expect(inputEl.selectionStart).toBe(9);
+      expect(inputEl.selectionEnd).toBe(9);
+    });
+  });
 });
