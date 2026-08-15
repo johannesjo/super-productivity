@@ -48,8 +48,9 @@ export interface ElectronAPI {
    * - `string`: the new backup folder; equal to the default one when the user
    *   picked that folder back
    * - `undefined`: the user cancelled the picker
-   * Rejects when the folder cannot be used, e.g. because it is inside the app's
-   * private dir. Existing backups are not moved.
+   * Rejects when the folder cannot be used: it is inside the app's private dir,
+   * or a probe write into it fails (permissions, sandbox confinement, read-only
+   * or disconnected location). Existing backups are not moved.
    */
   pickBackupFolder(): Promise<string | undefined>;
 

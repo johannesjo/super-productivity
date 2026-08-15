@@ -261,7 +261,7 @@ export class ConfigPageComponent implements OnInit {
                 Log.err(err);
                 this._snackService.open({
                   type: 'ERROR',
-                  msg: T.GCF.AUTO_BACKUPS.S_FOLDER_NOT_ALLOWED,
+                  msg: T.GCF.AUTO_BACKUPS.S_FOLDER_NOT_USABLE,
                 });
               }
             },

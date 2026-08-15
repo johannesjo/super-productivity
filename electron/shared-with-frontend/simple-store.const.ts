@@ -6,7 +6,7 @@ export enum SimpleStoreKey {
   ALLOWED_COMMANDS = 'allowedCommands',
   // Main-owned sync folder path (issue #8228); the renderer no longer holds it.
   SYNC_FOLDER_PATH = 'syncFolderPath',
-  // Main-owned automatic backup folder (issue #9342). Unset means the default
+  // Main-owned automatic backup folder (issue #7054). Unset means the default
   // `<userData>/backups`. Device-specific, so it must not live in the synced
   // globalConfig, and main-owned so the renderer cannot redirect backup writes.
   BACKUP_FOLDER_PATH = 'backupFolderPath',

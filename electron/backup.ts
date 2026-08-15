@@ -1,5 +1,6 @@
 import { app, dialog, ipcMain } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
+import { randomBytes } from 'crypto';
 import {
   existsSync,
   mkdirSync,
@@ -86,9 +87,56 @@ export const getBackupDir = async (): Promise<string> => {
   return typeof raw === 'string' && raw.length > 0 ? raw : BACKUP_DIR;
 };
 
+// Path-free (the offending path never goes back to the untrusted renderer) and
+// distinct from PathNotAllowedError only in name, so the two pick-time refusals
+// stay tellable apart in logs.
+const folderNotWritable = (): Error => {
+  const e = new Error('Backup folder is not writable');
+  e.name = 'FolderNotWritableError';
+  delete (e as { stack?: string }).stack;
+  return e;
+};
+
+/**
+ * Prove the folder can actually be written to, at pick time, before it becomes
+ * the backup folder.
+ *
+ * Nothing downstream can report this: `backupData` catches every write error and
+ * only logs, so the pick would succeed, the UI would show the new path, and
+ * automatic backups would stop with nothing the user could ever see. Ordinary
+ * picks land there. Snap is `confinement: strict` with `home` + `removable-media`
+ * and `home` excludes dot-directories; Flatpak has `--filesystem=home` only;
+ * macOS prompts for Documents/Desktop/Downloads on first access, which is the
+ * backup timer minutes later rather than the pick, and a dismissal is permanent;
+ * read-only folders and disconnected network shares exist everywhere.
+ *
+ * A probe write is what proves it: the folder can be listable and still refuse
+ * writes, and `access()` answers a different question than "did a write work".
+ */
+const assertFolderWritable = (folder: string): void => {
+  const probePath = path.join(
+    folder,
+    `.sp-backup-probe.${process.pid}.${randomBytes(8).toString('hex')}.tmp`,
+  );
+  try {
+    writeFileSync(probePath, '');
+  } catch (e) {
+    error(e);
+    throw folderNotWritable();
+  }
+  try {
+    unlinkSync(probePath);
+  } catch (e) {
+    // Written but not removable is still a usable backup folder, and cleanup
+    // only ever touches backup-shaped filenames, so this is worth a log and
+    // nothing more.
+    error(e);
+  }
+};
+
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function initBackupAdapter(): void {
-  getBackupDir().then((backupDir) => {
+  void getBackupDir().then((backupDir) => {
     console.log('Saving backups to', backupDir);
     log('Saving backups to', backupDir);
   });
@@ -131,16 +179,20 @@ export function initBackupAdapter(): void {
       // `backupPath` comes from the renderer, which runs untrusted plugin code,
       // so it must be constrained to the backup directory. Otherwise any plugin
       // (or XSS payload) could read arbitrary files via window.ea.loadBackupData.
-      // See GHSA-x937-wf3j-88q3. The regular, the Windows-Store and the
-      // user-picked backup dirs are accepted (the latter is main-owned and always
-      // outside userData, see below); the legitimate caller only ever passes paths
-      // built from the live backup dir (see IPC.BACKUP_IS_AVAILABLE above).
+      // See GHSA-x937-wf3j-88q3. Only the live backup dir (the default one or a
+      // user-picked one, which is main-owned and always outside userData, see
+      // below) and its Windows-Store redirection are accepted; the legitimate
+      // caller only ever passes paths built from the live backup dir (see
+      // IPC.BACKUP_IS_AVAILABLE above), so a stale default-dir path is never
+      // produced and allow-listing one would only widen the read surface.
       const backupDir = await getBackupDir();
-      if (
-        !isPathInsideDir(backupDir, backupPath) &&
-        !isPathInsideDir(BACKUP_DIR, backupPath) &&
-        !isPathInsideDir(BACKUP_DIR_WINSTORE, backupPath)
-      ) {
+      const isAllowedRoot =
+        isPathInsideDir(backupDir, backupPath) ||
+        // Same narrowing as getBackupDirForDisplay: the Store redirection is a
+        // property of the package's own userData, so it can only ever apply
+        // while the default dir is in use.
+        (backupDir === BACKUP_DIR && isPathInsideDir(BACKUP_DIR_WINSTORE, backupPath));
+      if (!isAllowedRoot) {
         throw new Error('BACKUP_LOAD_DATA: refused path outside backup directory');
       }
       if (!isAutoBackupFilename(path.basename(backupPath))) {
@@ -157,15 +209,26 @@ export function initBackupAdapter(): void {
     const { canceled, filePaths } = await dialog.showOpenDialog(getWin(), {
       title: 'Select backup folder',
       buttonLabel: 'Select Folder',
+      // Open where the backups currently are, so "which folder am I on now" and
+      // "put it back to the default" are both reachable without hunting down a
+      // hidden path inside userData.
+      defaultPath: await getBackupDirForDisplay(),
       properties: ['openDirectory', 'createDirectory', 'dontAddToRecent'],
     });
     if (canceled || !filePaths[0]) {
       return undefined;
     }
     const picked = path.resolve(filePaths[0]);
-    // Picking the default folder means "use the default again" — it lives
-    // inside userData, which the guard below refuses.
-    if (picked === path.resolve(BACKUP_DIR)) {
+    // Picking the default folder means "use the default again": it lives inside
+    // userData, which the guard below refuses. On a virtualized Store package
+    // the folder the user sees (and that getBackupDirForDisplay hands to the
+    // picker above) is the LocalCache one, so that has to count as the default
+    // too, or picking back the very path we displayed either gets refused or
+    // pins a "custom" folder to LocalCache.
+    if (
+      picked === path.resolve(BACKUP_DIR) ||
+      (process.windowsStore && picked === path.resolve(BACKUP_DIR_WINSTORE))
+    ) {
       await saveSimpleStore(SimpleStoreKey.BACKUP_FOLDER_PATH, null);
       return picked;
     }
@@ -173,6 +236,7 @@ export function initBackupAdapter(): void {
     // and, more importantly, whitelisted for reads by BACKUP_LOAD_DATA above,
     // which the renderer can call. Throws a path-free PathNotAllowedError.
     assertPathOutside(app.getPath('userData'), picked);
+    assertFolderWritable(picked);
     await saveSimpleStore(SimpleStoreKey.BACKUP_FOLDER_PATH, picked);
     log('New backup folder picked');
     return picked;
@@ -202,14 +266,19 @@ async function backupData(
     : DEFAULT_MAX_BACKUP_FILES;
 
   try {
-    // Inside the try because a picked folder can be gone by now (removed
-    // drive, deleted folder) — that must be logged like a failed write, not
-    // rejected back into the renderer's backup interval.
+    // Inside the try because a picked folder can be gone by now (removed drive,
+    // deleted folder), and that must be logged like a failed write rather than
+    // rejected back into the renderer's backup interval. Deliberately not
+    // recursive: the only case a missing parent can mean is that the folder the
+    // user picked has gone away, and re-creating it (an uninstalled Dropbox, an
+    // ejected volume) would fill a resurrected directory with backups nothing
+    // syncs, or leave a phantom dir sitting on a mount point. userData always
+    // exists for the default dir, and a picked folder exists at pick time.
     if (!existsSync(backupDir)) {
-      mkdirSync(backupDir, { recursive: true });
+      mkdirSync(backupDir);
     }
     const backup = JSON.stringify(data);
-    writeFileSync(`${backupDir}/${getBackupTimestamp()}.json`, backup);
+    writeFileSync(path.join(backupDir, `${getBackupTimestamp()}.json`), backup);
     cleanupOldBackups(backupDir, maxBackupFiles);
   } catch (e) {
     log('Error while backing up');

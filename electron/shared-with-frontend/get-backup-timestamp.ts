@@ -23,7 +23,7 @@ export const getBackupTimestamp = (): string => {
 /**
  * Matches only filenames produced by getBackupTimestamp(). Used to keep backup
  * discovery, cleanup and restore from touching unrelated files in a user-picked
- * backup folder (#9482).
+ * backup folder (#7054).
  */
 export const isAutoBackupFilename = (f: string): boolean =>
   /^\d{4}-\d{2}-\d{2}_\d{6}\.json$/.test(f);
