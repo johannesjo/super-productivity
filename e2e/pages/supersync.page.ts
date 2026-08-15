@@ -7,6 +7,7 @@ import {
   expect,
 } from '@playwright/test';
 import { BasePage } from './base.page';
+import { normalizeDialogMessage, translationRegex } from '../utils/i18n-strings';
 
 export interface SuperSyncConfig {
   baseUrl: string;
@@ -47,6 +48,40 @@ type SyncCompletionSnapshot = {
 };
 
 type NativeSyncConfirmIntent = 'fresh' | 'use-local' | 'use-remote';
+
+/**
+ * The complete set of native `window.confirm()` prompts production may raise
+ * during a sync the suite drives. Anything outside this list is treated as an
+ * unexpected dialog and fails the helper rather than being blindly accepted —
+ * a stray confirm during sync is almost always a destructive prompt.
+ *
+ * Patterns are derived from `src/assets/i18n/en.json` so a copy edit breaks
+ * here (as an "unexpected native dialog" naming the new text) instead of
+ * silently un-matching, and there is no second copy of the sentences to update.
+ */
+const NATIVE_SYNC_CONFIRMS: ReadonlyArray<{
+  intent: NativeSyncConfirmIntent;
+  pattern: RegExp;
+}> = [
+  {
+    intent: 'fresh',
+    // sync-local-state.service renders this one as `TITLE\n\nMESSAGE`.
+    pattern: translationRegex(
+      'F.SYNC.D_FRESH_CLIENT_CONFIRM.TITLE',
+      'F.SYNC.D_FRESH_CLIENT_CONFIRM.MESSAGE',
+    ),
+  },
+  {
+    intent: 'use-local',
+    pattern: translationRegex(
+      'F.SYNC.D_SYNC_IMPORT_CONFLICT.FIRST_SYNC_USE_LOCAL_CONFIRM',
+    ),
+  },
+  {
+    intent: 'use-remote',
+    pattern: translationRegex('F.SYNC.D_SYNC_IMPORT_CONFLICT.USE_REMOTE_CONFIRM'),
+  },
+];
 
 /**
  * Budget left of `total` since `startedAt`, floored at 1ms so a spent budget
@@ -1607,30 +1642,9 @@ export class SuperSyncPage extends BasePage {
   private _getNativeSyncConfirmIntent(
     message: string,
   ): NativeSyncConfirmIntent | undefined {
-    const normalized = message.replace(/\s+/g, ' ').toLowerCase();
+    const normalized = normalizeDialogMessage(message);
 
-    if (
-      /^initial sync this appears to be a fresh installation\. remote data with \d+ changes was found\. do you want to download and overwrite your local data with it\?$/.test(
-        normalized,
-      )
-    ) {
-      return 'fresh';
-    }
-    if (
-      normalized ===
-      'this device has never synced before. "use my data" will permanently replace the data on the server with this device\'s local data. this cannot be undone. continue?'
-    ) {
-      return 'use-local';
-    }
-    if (
-      /^this replaces this device's data with the server's and discards \d+ local change\(s\)\. continue\?$/.test(
-        normalized,
-      )
-    ) {
-      return 'use-remote';
-    }
-
-    return undefined;
+    return NATIVE_SYNC_CONFIRMS.find(({ pattern }) => pattern.test(normalized))?.intent;
   }
 
   private async _handleNativeSyncDialog(
@@ -1682,6 +1696,60 @@ export class SuperSyncPage extends BasePage {
     const unexpectedDialog = this._unexpectedNativeDialog;
     this._unexpectedNativeDialog = undefined;
     throw new Error(`Unexpected native dialog during SuperSync: ${unexpectedDialog}`);
+  }
+
+  /**
+   * Resolve the sync-import-conflict dialog by keeping this device's data.
+   *
+   * Both choices can raise a *native* `window.confirm()` before the dialog
+   * closes (`FIRST_SYNC_USE_LOCAL_CONFIRM` on a never-synced device,
+   * `USE_REMOTE_CONFIRM` when the import discards local changes). Playwright
+   * only auto-dismisses native dialogs while *no* listener is registered, and
+   * `installDevErrorDialogHandler()` registers one on every page — so an
+   * unanswered confirm blocks the click until it times out. Clicking these
+   * buttons directly is therefore never safe; always go through these methods,
+   * which install the strict handler for exactly the click plus the
+   * dialog-close wait and then remove it again.
+   */
+  async chooseSyncImportUseLocal(options: { timeout?: number } = {}): Promise<void> {
+    await this._chooseSyncImportResolution('local', options.timeout ?? 15000);
+  }
+
+  /** Resolve the sync-import-conflict dialog by accepting the server's data. */
+  async chooseSyncImportUseRemote(options: { timeout?: number } = {}): Promise<void> {
+    await this._chooseSyncImportResolution('remote', options.timeout ?? 15000);
+  }
+
+  private async _chooseSyncImportResolution(
+    choice: 'local' | 'remote',
+    timeout: number,
+  ): Promise<void> {
+    const button =
+      choice === 'local' ? this.syncImportUseLocalBtn : this.syncImportUseRemoteBtn;
+    const context =
+      choice === 'local' ? 'chooseSyncImportUseLocal' : 'chooseSyncImportUseRemote';
+    const dialogHandler = async (dialog: Dialog): Promise<void> => {
+      await this._handleNativeSyncDialog(dialog, context, choice);
+    };
+
+    this.page.on('dialog', dialogHandler);
+    try {
+      await button.click({ timeout });
+      // The confirm is answered synchronously inside the click, so the dialog
+      // must be gone before the handler is removed — otherwise a late prompt
+      // would hang the next action instead of failing here.
+      await this.syncImportConflictDialog.waitFor({ state: 'hidden', timeout });
+    } catch (error) {
+      // An unexpected confirm is dismissed, which cancels the resolution and
+      // leaves the dialog open. Report that cause instead of the timeout it
+      // produces here, which says nothing about why the click did not take.
+      this._throwIfUnexpectedNativeDialog();
+      throw error;
+    } finally {
+      this.page.off('dialog', dialogHandler);
+    }
+
+    this._throwIfUnexpectedNativeDialog();
   }
 
   /**

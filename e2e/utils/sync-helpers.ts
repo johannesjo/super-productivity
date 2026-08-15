@@ -13,6 +13,17 @@ import {
   guardContextCloseWithRuntimeErrorCheck,
   installDevErrorDialogHandler,
 } from './runtime-errors';
+import { normalizeDialogMessage, translationRegex } from './i18n-strings';
+
+/**
+ * The only native confirmation a WebDAV sync client may answer on its own.
+ * Built from `en.json` so a copy edit surfaces as an explicit "unexpected
+ * confirm dialog" failure instead of a silently non-matching literal.
+ */
+const FRESH_CLIENT_CONFIRM = translationRegex(
+  'F.SYNC.D_FRESH_CLIENT_CONFIRM.TITLE',
+  'F.SYNC.D_FRESH_CLIENT_CONFIRM.MESSAGE',
+);
 
 /**
  * WebDAV configuration interface
@@ -135,12 +146,7 @@ export const setupSyncClient = async (
     }
 
     if (dialog.type() === 'confirm') {
-      const normalizedMessage = message.replace(/\s+/g, ' ').toLowerCase();
-      const isExpectedDialog =
-        normalizedMessage.includes('initial sync') &&
-        normalizedMessage.includes('fresh installation') &&
-        normalizedMessage.includes('remote data') &&
-        normalizedMessage.includes('overwrite your local data');
+      const isExpectedDialog = FRESH_CLIENT_CONFIRM.test(normalizeDialogMessage(message));
 
       if (!isExpectedDialog) {
         console.error(`[E2E] Unexpected confirm dialog: "${message}"`);

@@ -8,6 +8,7 @@ import {
   waitForTask,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
+import { translationText } from '../../utils/i18n-strings';
 
 /**
  * SuperSync Wrong Password Error E2E Tests
@@ -319,9 +320,11 @@ test.describe('@supersync @encryption Wrong Password Error Handling', () => {
         }
       })();
 
+      // Both destructive prompts must be shown, in this order. Sourced from
+      // en.json so a copy edit fails here instead of quietly matching nothing.
       expect(confirmationMessages).toEqual([
-        "This will REPLACE the encrypted data on the server with this device's local copy and re-encrypt it with the new password. All other devices will need to re-enter the password and download the replaced data. Any unsynced changes on those devices will be permanently lost. Continue?",
-        "This will REPLACE all data on the server and on every other device with this device's local copy. Any unsynced changes on those devices will be permanently lost. Continue?",
+        translationText('F.SYNC.C.DECRYPT_OVERWRITE'),
+        translationText('F.SYNC.C.FORCE_UPLOAD'),
       ]);
       expect(await response.finished()).toBeNull();
       await decryptErrorDialog.waitFor({ state: 'hidden', timeout: 10000 });

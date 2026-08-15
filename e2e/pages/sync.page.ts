@@ -65,6 +65,14 @@ export class SyncPage extends BasePage {
     await this.page.locator('button.sync-btn').first().click(options);
   }
 
+  /**
+   * Configures the WebDAV provider and saves it, which starts the initial sync.
+   *
+   * Saving **arms the response witness** for that automatic cycle, so the next
+   * `waitForSyncComplete()` waits for the initial sync rather than reusing an
+   * older one. This method returns while that cycle may still be running; see
+   * the contract on {@link triggerSync}.
+   */
   async setupWebdavSync(
     config: {
       baseUrl: string;
@@ -355,6 +363,36 @@ export class SyncPage extends BasePage {
     await submitBtn.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
   }
 
+  /**
+   * Starts a sync cycle and **arms the response witness** for it.
+   *
+   * ## The armed-witness contract
+   *
+   * A completed sync leaves its success icon on screen for up to a minute, so
+   * "the icon is visible" cannot distinguish *this* cycle from the previous
+   * one — waiting on it alone silently passes before any new work happens.
+   * Instead, every start point records a promise that resolves only once a
+   * provider response belonging to the cycle it started has fully arrived:
+   *
+   * - `triggerSync()` — arms before clicking the sync button.
+   * - `setupWebdavSync()` — arms before saving the provider config, because
+   *   saving starts the initial sync on its own.
+   * - `prepareForNextSyncCycle(intent)` — arms for a cycle the *application*
+   *   will start next, e.g. the automatic re-sync after a conflict choice.
+   *   Call it before the click that causes it, never after.
+   *
+   * Each wait then **consumes** the armed witness: `waitForSyncComplete()`
+   * here, and the `sync-helpers` free function of the same name, release it on
+   * success, conflict, and error alike.
+   *
+   * ### The failure mode this prevents, and the one it introduces
+   *
+   * Waiting twice for a single trigger throws `'No sync cycle is pending'` on
+   * the second wait. That is deliberate: without it, the second wait would
+   * observe the *first* cycle's leftover UI and report success for a sync that
+   * never ran. When you hit that error, arm another cycle at the point the new
+   * sync actually starts — do not drop the second wait.
+   */
   async triggerSync(): Promise<void> {
     await this._settlePendingCycleBeforeManualTrigger();
 
@@ -380,6 +418,16 @@ export class SyncPage extends BasePage {
     await this.syncBtn.click({ noWaitAfter: true });
   }
 
+  /**
+   * Waits for the cycle armed by the last `triggerSync()` /
+   * `setupWebdavSync()` / `prepareForNextSyncCycle()` to reach a successful,
+   * remote-confirmed end state, then consumes the witness.
+   *
+   * @throws `'No sync cycle is pending'` when no witness is armed — see the
+   * contract on {@link triggerSync}. That is what a double-wait looks like.
+   * @throws when the sync ends in the error state, or when no provider
+   * response for this cycle arrives within 20s.
+   */
   async waitForSyncComplete(): Promise<void> {
     await this.waitForTriggeredSyncResponse(20000);
 
@@ -398,6 +446,12 @@ export class SyncPage extends BasePage {
    * Waits for a provider response observed after the latest setup/save or sync
    * button click. This prevents completion helpers from accepting UI left over
    * from an earlier sync cycle.
+   *
+   * Does **not** consume the witness on success — the caller still has to
+   * decide what the terminal UI state was and then call
+   * {@link completeTriggeredSyncCycle}. A timeout does clear it, so a failed
+   * cycle cannot later be mistaken for a pending one. See {@link triggerSync}
+   * for the full contract.
    */
   async waitForTriggeredSyncResponse(timeout: number): Promise<void> {
     const pendingResponse = this._pendingSyncResponse;
@@ -429,7 +483,12 @@ export class SyncPage extends BasePage {
     );
   }
 
-  /** Marks a successfully completed cycle so it cannot be reused by a later wait. */
+  /**
+   * Consumes the armed witness so a later wait cannot be satisfied by this
+   * cycle's response. Call it once a terminal state has been established —
+   * including a conflict or an error, which are real outcomes of the cycle.
+   * See {@link triggerSync} for the full contract.
+   */
   completeTriggeredSyncCycle(): void {
     this._pendingSyncResponse = null;
   }
@@ -437,6 +496,15 @@ export class SyncPage extends BasePage {
   /**
    * Arms the response witness for a sync that the application will start next,
    * such as the automatic retry after a conflict-resolution choice.
+   *
+   * Call this immediately *before* the action that triggers the sync (the
+   * conflict-dialog button click). Arming afterwards races the response and can
+   * miss it entirely, which surfaces as a spurious timeout.
+   *
+   * @param intent narrows which provider request counts as the witness:
+   * `'read'` for a download-only cycle, `'write'` for one that must upload.
+   * A `'write'` witness deliberately ignores auxiliary state/meta uploads so a
+   * successful side-file write cannot mask a failed primary upload.
    */
   prepareForNextSyncCycle(intent: Exclude<SyncCycleIntent, 'any'>): void {
     this._armSyncCycleResponse(intent);

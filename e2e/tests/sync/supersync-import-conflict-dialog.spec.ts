@@ -204,12 +204,9 @@ test.describe('@supersync @import-conflict Sync Import Conflict Dialog', () => {
       const dialog = clientB.page.locator('dialog-sync-import-conflict');
       await expect(dialog).toBeVisible({ timeout: 15000 });
 
-      // Click "Use My Data" button
-      const useLocalButton = dialog.getByRole('button', { name: /my data/i });
-      await useLocalButton.click();
-
-      // Wait for dialog to close and sync to complete
-      await expect(dialog).not.toBeVisible({ timeout: 10000 });
+      // Click "Use My Data" (the page object also answers the native confirm).
+      await clientB.sync.chooseSyncImportUseLocal();
+      await expect(dialog).not.toBeVisible();
       await clientB.page.waitForTimeout(2000);
       console.log('[USE_LOCAL] Client B chose USE_LOCAL');
 
@@ -314,12 +311,9 @@ test.describe('@supersync @import-conflict Sync Import Conflict Dialog', () => {
       const dialog = clientB.page.locator('dialog-sync-import-conflict');
       await expect(dialog).toBeVisible({ timeout: 15000 });
 
-      // Click "Use Server Data" button
-      const useRemoteButton = dialog.getByRole('button', { name: /server/i });
-      await useRemoteButton.click();
-
-      // Wait for dialog to close and sync to complete
-      await expect(dialog).not.toBeVisible({ timeout: 10000 });
+      // Click "Use Server Data" (the page object also answers the native confirm).
+      await clientB.sync.chooseSyncImportUseRemote();
+      await expect(dialog).not.toBeVisible();
 
       // Wait for sync to fully complete after USE_REMOTE (downloads server state)
       // This is more reliable than a fixed timeout as it waits for actual sync completion
@@ -710,8 +704,8 @@ test.describe('@supersync @import-conflict Sync Import Conflict Dialog', () => {
       // ============ PHASE 7: Adopt server data → reconverge ============
       console.log('[#8304] Phase 7: Client B chooses USE_REMOTE to reconverge');
 
-      await dialog.getByRole('button', { name: /server/i }).click();
-      await expect(dialog).not.toBeVisible({ timeout: 10000 });
+      await clientB.sync.chooseSyncImportUseRemote();
+      await expect(dialog).not.toBeVisible();
       await clientB.sync.waitForSyncToComplete();
 
       await clientB.page.goto('/#/work-view');

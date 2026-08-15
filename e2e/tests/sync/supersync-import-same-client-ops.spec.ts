@@ -102,8 +102,7 @@ test.describe('@supersync Import client post-import ops sync correctly', () => {
 
       if (syncResult === 'dialog') {
         // Choose "Use My Data" to preserve the import (not "Use Server Data" which discards it)
-        await clientA.sync.syncImportUseLocalBtn.click();
-        await syncImportDialog.waitFor({ state: 'hidden', timeout: 5000 });
+        await clientA.sync.chooseSyncImportUseLocal();
         // Wait for sync to complete after dialog handling
         await clientA.sync.syncCheckIcon.waitFor({ state: 'visible', timeout: 30000 });
       }
@@ -247,8 +246,7 @@ test.describe('@supersync Import client post-import ops sync correctly', () => {
       ]);
 
       if (syncResult2 === 'dialog') {
-        await clientA.sync.syncImportUseLocalBtn.click();
-        await syncImportDialog2.waitFor({ state: 'hidden', timeout: 5000 });
+        await clientA.sync.chooseSyncImportUseLocal();
         await clientA.sync.syncCheckIcon.waitFor({ state: 'visible', timeout: 30000 });
       }
 
