@@ -114,6 +114,18 @@ class WidgetDataTest {
     }
 
     @Test
+    fun projectWithoutTasksFallsBackToTodayForHeaderAndTasks() {
+        val json =
+            """{"v":1,"tasks":[{"id":"t1","title":"Today","isDone":false}],"projects":[{"id":"deleted","title":"Deleted"}]}"""
+
+        assertEquals(
+            WidgetData.parse(json),
+            WidgetData.parse(json, selectedProjectId = "deleted")
+        )
+        assertNull(WidgetData.projectTitle(json, "deleted"))
+    }
+
+    @Test
     fun completedProjectTaskDisappearsAfterFiveSecondGracePeriod() {
         assertEquals(
             emptyList<WidgetTask>(),

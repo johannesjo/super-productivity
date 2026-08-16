@@ -14,6 +14,9 @@ unarchived visible project. The selection is stored only for that widget ID;
 existing widgets and a selection whose project is no longer available fall back
 to Today.
 
+Opening a project widget opens that project's task list in the app. Today widgets
+retain the normal default-app behavior.
+
 In a selected-project widget, a completed task stays visible for five seconds before
 leaving the widget. It remains completed and available in the app's normal done-task
 list. Today retains its existing completed-task display.

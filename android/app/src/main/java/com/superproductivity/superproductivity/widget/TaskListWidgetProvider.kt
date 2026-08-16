@@ -69,6 +69,10 @@ class TaskListWidgetProvider : AppWidgetProvider() {
             }
 
             intent.getBooleanExtra(EXTRA_OPEN_APP, false) -> {
+                val projectId = intent.getStringExtra(EXTRA_OPEN_PROJECT_ID)
+                if (projectId != null) {
+                    queueProjectToOpen(context, projectId)
+                }
                 try {
                     context.startActivity(
                         Intent(context, CapacitorMainActivity::class.java).apply {
@@ -76,10 +80,13 @@ class TaskListWidgetProvider : AppWidgetProvider() {
                                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                         }
                     )
+                    if (projectId != null) {
+                        LocalBroadcastManager.getInstance(context)
+                            .sendBroadcast(Intent(ACTION_WIDGET_PROJECT_OPEN_DRAIN))
+                    }
                 } catch (e: Exception) {
                     // Background-activity-launch restrictions may block this on some
-                    // API levels/OEMs; the header tap (direct activity PendingIntent)
-                    // remains as the reliable way in.
+                    // API levels/OEMs.
                     Log.w(TAG, "Failed to open app from widget row tap", e)
                 }
             }
@@ -91,9 +98,12 @@ class TaskListWidgetProvider : AppWidgetProvider() {
         const val ACTION_CLICK = "com.superproductivity.superproductivity.WIDGET_CLICK"
         const val ACTION_WIDGET_DONE_DRAIN =
             "com.superproductivity.superproductivity.WIDGET_DONE_DRAIN"
+        const val ACTION_WIDGET_PROJECT_OPEN_DRAIN =
+            "com.superproductivity.superproductivity.WIDGET_PROJECT_OPEN_DRAIN"
         const val EXTRA_TASK_ID = "WIDGET_TASK_ID"
         const val EXTRA_SET_DONE = "WIDGET_SET_DONE"
         const val EXTRA_OPEN_APP = "WIDGET_OPEN_APP"
+        const val EXTRA_OPEN_PROJECT_ID = "WIDGET_OPEN_PROJECT_ID"
 
         private fun widgetIds(context: Context, appWidgetManager: AppWidgetManager): IntArray =
             appWidgetManager.getAppWidgetIds(
@@ -240,12 +250,18 @@ class TaskListWidgetProvider : AppWidgetProvider() {
             )
             views.setPendingIntentTemplate(R.id.widget_task_list, clickPendingIntent)
 
-            // Header tap → open app
-            val openAppIntent = Intent(context, CapacitorMainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            // Header/empty tap → open this widget's configured source. These use the
+            // same provider path as rows so a project ID reaches Angular on cold start.
+            val openAppIntent = Intent(context, TaskListWidgetProvider::class.java).apply {
+                action = ACTION_CLICK
+                putExtra(EXTRA_OPEN_APP, true)
+                selectedProjectId(context, appWidgetId)?.let { projectId ->
+                    putExtra(EXTRA_OPEN_PROJECT_ID, projectId)
+                }
+                data = Uri.parse("widget-open:$appWidgetId")
             }
-            val openAppPendingIntent = PendingIntent.getActivity(
-                context, 0, openAppIntent,
+            val openAppPendingIntent = PendingIntent.getBroadcast(
+                context, appWidgetId, openAppIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_header, openAppPendingIntent)
@@ -257,6 +273,24 @@ class TaskListWidgetProvider : AppWidgetProvider() {
         fun selectedProjectId(context: Context, appWidgetId: Int): String? =
             context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
                 .getString(selectionKey(appWidgetId), null)
+
+        @Synchronized
+        fun queueProjectToOpen(context: Context, projectId: String) {
+            context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putString(PENDING_OPEN_PROJECT_KEY, projectId)
+                .commit()
+        }
+
+        @Synchronized
+        fun getAndClearProjectToOpen(context: Context): String? {
+            val prefs = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+            val projectId = prefs.getString(PENDING_OPEN_PROJECT_KEY, null)
+            if (projectId != null) {
+                prefs.edit().remove(PENDING_OPEN_PROJECT_KEY).commit()
+            }
+            return projectId
+        }
 
         fun setSelectedProjectId(context: Context, appWidgetId: Int, projectId: String?) {
             context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit().apply {
@@ -272,6 +306,7 @@ class TaskListWidgetProvider : AppWidgetProvider() {
         private fun selectionKey(appWidgetId: Int): String = "project_$appWidgetId"
 
         private const val PREFERENCES_NAME = "task_list_widget"
+        private const val PENDING_OPEN_PROJECT_KEY = "pending_open_project"
         private val refreshHandler = Handler(Looper.getMainLooper())
         private var scheduledProjectTaskRefresh: Runnable? = null
         private var scheduledProjectTaskRefreshAt: Long? = null

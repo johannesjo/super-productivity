@@ -79,14 +79,8 @@ object WidgetData {
         if (root.optInt("v", -1) != SUPPORTED_VERSION) {
             return emptyList()
         }
-        val projectTasks = selectedProjectId?.let { projectId ->
-            root.optJSONArray("projects")?.let { projects ->
-                (0 until projects.length())
-                    .map { projects.getJSONObject(it) }
-                    .firstOrNull { it.optString("id") == projectId }
-                    ?.optJSONArray("tasks")
-            }
-        }
+        val projectTasks = selectedProjectId
+            ?.let { projectId -> selectedProject(root, projectId)?.optJSONArray("tasks") }
         // A selection can outlive a project deleted on another device. Fall back to
         // Today, which is also the backward-compatible default for existing widgets.
         val selectedTasks = projectTasks ?: root.optJSONArray("tasks") ?: return emptyList()
@@ -138,8 +132,23 @@ object WidgetData {
         }
     }
 
-    fun projectTitle(json: String, projectId: String): String? =
-        parseProjects(json).firstOrNull { it.id == projectId }?.title
+    fun projectTitle(json: String, projectId: String): String? {
+        val root = JSONObject(json)
+        if (root.optInt("v", -1) != SUPPORTED_VERSION) {
+            return null
+        }
+        return selectedProject(root, projectId)
+            ?.takeIf { it.optJSONArray("tasks") != null }
+            ?.optString("title")
+            ?.takeIf { it.isNotEmpty() }
+    }
+
+    private fun selectedProject(root: JSONObject, projectId: String): JSONObject? =
+        root.optJSONArray("projects")?.let { projects ->
+            (0 until projects.length())
+                .map { projects.getJSONObject(it) }
+                .firstOrNull { it.optString("id") == projectId }
+        }
 
     /**
      * Reads only the staleness stamp — the task list is loaded separately, in the

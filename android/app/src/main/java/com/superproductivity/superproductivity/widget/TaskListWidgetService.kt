@@ -28,6 +28,7 @@ private class TaskListRemoteViewsFactory(
 ) : RemoteViewsService.RemoteViewsFactory {
 
     private var tasks: List<WidgetTask> = emptyList()
+    private var projectIdToOpen: String? = null
 
     override fun onCreate() {}
 
@@ -36,13 +37,16 @@ private class TaskListRemoteViewsFactory(
             val json = (context.applicationContext as App).keyValStore
                 .get(WidgetData.KEYVAL_KEY, "{}")
             val selectedProjectId = TaskListWidgetProvider.selectedProjectId(context, appWidgetId)
+            projectIdToOpen = selectedProjectId?.takeIf { projectId ->
+                WidgetData.projectTitle(json, projectId) != null
+            }
             val parsedTasks = WidgetData.parse(
                 json,
                 WidgetDoneQueue.peek(context),
                 WidgetDoneQueue.peekDoneTimestamps(context),
                 selectedProjectId
             )
-            if (selectedProjectId != null && WidgetData.projectTitle(json, selectedProjectId) != null) {
+            if (projectIdToOpen != null) {
                 parsedTasks
                     .mapNotNull { task ->
                         task.doneOn?.takeIf { task.isDone }
@@ -110,7 +114,12 @@ private class TaskListRemoteViewsFactory(
         )
         rv.setOnClickFillInIntent(
             R.id.widget_task_row,
-            Intent().putExtra(TaskListWidgetProvider.EXTRA_OPEN_APP, true)
+            Intent().apply {
+                putExtra(TaskListWidgetProvider.EXTRA_OPEN_APP, true)
+                projectIdToOpen?.let { projectId ->
+                    putExtra(TaskListWidgetProvider.EXTRA_OPEN_PROJECT_ID, projectId)
+                }
+            }
         )
 
         return rv
