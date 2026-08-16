@@ -134,6 +134,19 @@ describe('selectAndroidWidgetData', () => {
     expect('projectId' in result.tasks[0]).toBe(false);
   });
 
+  it('should serialize a completed task timestamp for native project-widget expiry', () => {
+    const result = selectAndroidWidgetData.projector(
+      ['t1'],
+      { t1: task('t1', { isDone: true, doneOn: 123 }) },
+      projectState([]),
+      [],
+      DAY,
+      0,
+    );
+
+    expect(result.tasks[0].doneOn).toBe(123);
+  });
+
   it('should not include colors for projects without a theme primary', () => {
     const result = selectAndroidWidgetData.projector(
       ['t1'],
@@ -190,7 +203,12 @@ describe('selectAndroidWidgetData', () => {
       [],
       {
         t1: task('t1', { title: 'First', projectId: 'work' }),
-        t2: task('t2', { title: 'Second', projectId: 'work', isDone: true }),
+        t2: task('t2', {
+          title: 'Second',
+          projectId: 'work',
+          isDone: true,
+          doneOn: 123,
+        }),
       },
       projectState([work]),
       [work],
@@ -203,7 +221,7 @@ describe('selectAndroidWidgetData', () => {
         id: 'work',
         title: 'Project work',
         tasks: [
-          { id: 't2', title: 'Second', isDone: true, projectId: 'work' },
+          { id: 't2', title: 'Second', isDone: true, doneOn: 123, projectId: 'work' },
           { id: 't1', title: 'First', isDone: false, projectId: 'work' },
         ],
       },

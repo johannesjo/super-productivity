@@ -35,11 +35,25 @@ private class TaskListRemoteViewsFactory(
         tasks = try {
             val json = (context.applicationContext as App).keyValStore
                 .get(WidgetData.KEYVAL_KEY, "{}")
-            WidgetData.parse(
+            val selectedProjectId = TaskListWidgetProvider.selectedProjectId(context, appWidgetId)
+            val parsedTasks = WidgetData.parse(
                 json,
                 WidgetDoneQueue.peek(context),
-                TaskListWidgetProvider.selectedProjectId(context, appWidgetId)
-            ).take(MAX_TASKS)
+                WidgetDoneQueue.peekDoneTimestamps(context),
+                selectedProjectId
+            )
+            if (selectedProjectId != null && WidgetData.projectTitle(json, selectedProjectId) != null) {
+                parsedTasks
+                    .mapNotNull { task ->
+                        task.doneOn?.takeIf { task.isDone }
+                            ?.plus(WidgetData.PROJECT_DONE_TASK_GRACE_MS)
+                    }
+                    .minOrNull()
+                    ?.let { refreshAt ->
+                        TaskListWidgetProvider.scheduleProjectTaskExpiryRefresh(context, refreshAt)
+                    }
+            }
+            parsedTasks.take(MAX_TASKS)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse widget data", e)
             emptyList()

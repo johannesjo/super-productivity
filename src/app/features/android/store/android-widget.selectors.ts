@@ -68,6 +68,9 @@ export const selectAndroidWidgetData = createSelector(
         title: task.title,
         isDone: task.isDone,
       };
+      if (task.isDone && typeof task.doneOn === 'number') {
+        widgetTask.doneOn = task.doneOn;
+      }
       if (task.projectId) {
         widgetTask.projectId = task.projectId;
         const color = projectState.entities[task.projectId]?.theme?.primary;

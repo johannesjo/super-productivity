@@ -7,6 +7,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.RemoteViews
@@ -173,6 +175,28 @@ class TaskListWidgetProvider : AppWidgetProvider() {
             updateAll(context, AppWidgetManager.getInstance(context), intArrayOf(appWidgetId))
         }
 
+        @Synchronized
+        fun scheduleProjectTaskExpiryRefresh(context: Context, refreshAtMs: Long) {
+            if (scheduledProjectTaskRefreshAt?.let { it <= refreshAtMs } == true) {
+                return
+            }
+            scheduledProjectTaskRefresh?.let { refreshHandler.removeCallbacks(it) }
+            val appContext = context.applicationContext
+            val refreshRunnable = Runnable {
+                synchronized(this) {
+                    scheduledProjectTaskRefresh = null
+                    scheduledProjectTaskRefreshAt = null
+                }
+                refreshAll(appContext)
+            }
+            scheduledProjectTaskRefresh = refreshRunnable
+            scheduledProjectTaskRefreshAt = refreshAtMs
+            refreshHandler.postDelayed(
+                refreshRunnable,
+                (refreshAtMs - System.currentTimeMillis()).coerceAtLeast(0L)
+            )
+        }
+
         /** Rebuilds every passed widget using that instance's selected source. */
         private fun updateAll(
             context: Context,
@@ -248,5 +272,8 @@ class TaskListWidgetProvider : AppWidgetProvider() {
         private fun selectionKey(appWidgetId: Int): String = "project_$appWidgetId"
 
         private const val PREFERENCES_NAME = "task_list_widget"
+        private val refreshHandler = Handler(Looper.getMainLooper())
+        private var scheduledProjectTaskRefresh: Runnable? = null
+        private var scheduledProjectTaskRefreshAt: Long? = null
     }
 }

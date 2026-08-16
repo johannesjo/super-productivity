@@ -8,7 +8,8 @@ data class WidgetTask(
     val id: String,
     val title: String,
     val isDone: Boolean,
-    val projectColor: String?
+    val projectColor: String?,
+    val doneOn: Long? = null
 )
 
 data class WidgetProject(
@@ -58,6 +59,7 @@ sealed interface WidgetHeader {
  */
 object WidgetData {
     const val KEYVAL_KEY = "widget_data"
+    const val PROJECT_DONE_TASK_GRACE_MS = 5_000L
     private const val SUPPORTED_VERSION = 1
     private const val DAY_STR_PATTERN = "yyyy-MM-dd"
 
@@ -69,42 +71,55 @@ object WidgetData {
     fun parse(
         json: String,
         pendingDoneTargets: Map<String, Boolean> = emptyMap(),
-        projectId: String? = null
+        pendingDoneTimestamps: Map<String, Long> = emptyMap(),
+        selectedProjectId: String? = null,
+        nowMs: Long = System.currentTimeMillis()
     ): List<WidgetTask> {
         val root = JSONObject(json)
         if (root.optInt("v", -1) != SUPPORTED_VERSION) {
             return emptyList()
         }
-        val tasksArray = projectId?.let { selectedProjectId ->
+        val projectTasks = selectedProjectId?.let { projectId ->
             root.optJSONArray("projects")?.let { projects ->
                 (0 until projects.length())
                     .map { projects.getJSONObject(it) }
-                    .firstOrNull { it.optString("id") == selectedProjectId }
+                    .firstOrNull { it.optString("id") == projectId }
                     ?.optJSONArray("tasks")
             }
-        } ?: root.optJSONArray("tasks")
+        }
         // A selection can outlive a project deleted on another device. Fall back to
         // Today, which is also the backward-compatible default for existing widgets.
-        val selectedTasks = tasksArray ?: root.optJSONArray("tasks") ?: return emptyList()
+        val selectedTasks = projectTasks ?: root.optJSONArray("tasks") ?: return emptyList()
         val projectColors = root.optJSONObject("projectColors")
         val result = mutableListOf<WidgetTask>()
         for (i in 0 until selectedTasks.length()) {
             val task = selectedTasks.getJSONObject(i)
             val id = task.getString("id")
             // isNull guard: optString maps JSON null to the literal string "null"
-            val projectId =
+            val taskProjectId =
                 if (task.isNull("projectId")) null else task.optString("projectId", null)
-            val color = projectId?.let { pId ->
+            val color = taskProjectId?.let { pId ->
                 projectColors?.takeIf { !it.isNull(pId) }?.optString(pId, null)
             }
-            result.add(
-                WidgetTask(
-                    id = id,
-                    title = task.getString("title"),
-                    isDone = pendingDoneTargets[id] ?: task.optBoolean("isDone", false),
-                    projectColor = color
-                )
+            val pendingDoneTarget = pendingDoneTargets[id]
+            val widgetTask = WidgetTask(
+                id = id,
+                title = task.getString("title"),
+                isDone = pendingDoneTarget ?: task.optBoolean("isDone", false),
+                projectColor = color,
+                doneOn = if (pendingDoneTarget == true) pendingDoneTimestamps[id] ?: nowMs
+                else task.optLong("doneOn", 0L).takeIf { it > 0L }
             )
+            // Today retains completed tasks. Project widgets keep a completed task
+            // briefly, then remove it from the native projection; the task itself is
+            // still completed and available in the app's normal done list.
+            if (
+                projectTasks == null ||
+                !widgetTask.isDone ||
+                (widgetTask.doneOn != null && nowMs < widgetTask.doneOn + PROJECT_DONE_TASK_GRACE_MS)
+            ) {
+                result.add(widgetTask)
+            }
         }
         return result
     }
