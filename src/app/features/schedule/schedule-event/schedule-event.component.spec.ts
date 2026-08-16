@@ -12,6 +12,7 @@ import { CalendarEventActionsService } from '../../calendar-integration/calendar
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 const makeCalendarScheduleEvent = (isReferenceCalendar: boolean): ScheduleEvent => ({
   id: 'cal-1',
@@ -336,6 +337,37 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
   }));
 
   describe('style', () => {
+    it('should add the compact month presentation class only in month view', () => {
+      fixture.componentRef.setInput('event', makeTaskScheduleEvent());
+      fixture.componentRef.setInput('isMonthView', true);
+      fixture.detectChanges();
+
+      expect((fixture.nativeElement as HTMLElement).classList).toContain(
+        'month-schedule-event',
+      );
+    });
+
+    it('should complete a task from the month-view checkbox without selecting it', () => {
+      const store = TestBed.inject(MockStore);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      fixture.componentRef.setInput('event', makeTaskScheduleEvent());
+      fixture.componentRef.setInput('isMonthView', true);
+      fixture.detectChanges();
+
+      const checkbox = fixture.nativeElement.querySelector(
+        '.month-task-check',
+      ) as HTMLButtonElement;
+      checkbox.click();
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { isDone: true } },
+        }),
+      );
+      const taskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
+      expect(taskService.setSelectedId).not.toHaveBeenCalled();
+    });
+
     it('should render overlapping events in equal-width lanes', () => {
       fixture.componentRef.setInput(
         'event',

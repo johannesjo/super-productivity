@@ -242,7 +242,22 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       addClass += ' is-beyond-budget';
     }
 
+    if (this.isMonthView()) {
+      addClass += ' month-schedule-event';
+    }
+
     return evt.type + '  ' + addClass;
+  });
+
+  readonly isTaskDone = computed(() => this.task()?.isDone ?? false);
+
+  readonly monthTimeLabel = computed(() => {
+    if (!this.isMonthView()) return null;
+
+    const type = this.se().type;
+    return type === SVEType.ScheduledTask || type === SVEType.CalendarEvent
+      ? this.scheduledClockStr()
+      : null;
   });
 
   readonly style = computed(() => {
@@ -521,6 +536,15 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
         },
       }),
     );
+  }
+
+  toggleMonthTaskStatus(event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.isTaskDone()) {
+      this.markAsUnDone();
+    } else {
+      this.markAsDone();
+    }
   }
 
   // Resize functionality

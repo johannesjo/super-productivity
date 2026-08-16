@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
@@ -13,6 +15,80 @@ import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-f
 import { parseDbDateStr } from 'src/app/util/parse-db-date-str';
 import { TranslatePipe, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { getPluralKey } from '../../../util/get-plural-key';
+
+const MONTH_EVENT_HEIGHT_PX = 22;
+
+interface MonthLayoutMetrics {
+  maxEvents: number;
+  minGridHeight: number;
+  viewportOffset: number;
+  weekdayHeaderHeight: number;
+  dayHeaderHeight: number;
+  eventAreaBottomPadding: number;
+  eventGap: number;
+}
+
+const getMonthLayoutMetrics = (
+  viewportWidth: number,
+  weeksToShow: number,
+): MonthLayoutMetrics => {
+  const maxEvents =
+    weeksToShow === 3 ? 8 : weeksToShow === 4 ? 6 : weeksToShow === 5 ? 5 : 4;
+
+  if (viewportWidth <= 599) {
+    return {
+      maxEvents,
+      minGridHeight: 320,
+      viewportOffset: 148,
+      weekdayHeaderHeight: 28,
+      dayHeaderHeight: 24,
+      eventAreaBottomPadding: 1,
+      eventGap: 1,
+    };
+  }
+
+  if (viewportWidth <= 959) {
+    return {
+      maxEvents,
+      minGridHeight: 400,
+      viewportOffset: 128,
+      weekdayHeaderHeight: 32,
+      dayHeaderHeight: 28,
+      eventAreaBottomPadding: 2,
+      eventGap: 2,
+    };
+  }
+
+  return {
+    maxEvents,
+    minGridHeight: 460,
+    viewportOffset: 118,
+    weekdayHeaderHeight: 38,
+    dayHeaderHeight: 34,
+    eventAreaBottomPadding: 4,
+    eventGap: 3,
+  };
+};
+
+export const calculateMonthEventLimit = (
+  viewportWidth: number,
+  viewportHeight: number,
+  weeksToShow: number,
+): number => {
+  const metrics = getMonthLayoutMetrics(viewportWidth, weeksToShow);
+  const gridHeight = Math.max(
+    metrics.minGridHeight,
+    viewportHeight - metrics.viewportOffset,
+  );
+  const dayCellHeight = (gridHeight - metrics.weekdayHeaderHeight) / weeksToShow;
+  const eventAreaHeight =
+    dayCellHeight - metrics.dayHeaderHeight - metrics.eventAreaBottomPadding;
+  const eventsThatFit = Math.floor(
+    (eventAreaHeight + metrics.eventGap) / (MONTH_EVENT_HEIGHT_PX + metrics.eventGap),
+  );
+
+  return Math.max(1, Math.min(metrics.maxEvents, eventsThatFit));
+};
 
 @Component({
   selector: 'schedule-month',
@@ -32,6 +108,12 @@ export class ScheduleMonthComponent {
   readonly daysToShow = input<string[]>([]);
   readonly weeksToShow = input<number>(6);
   readonly firstDayOfWeek = input<number>(1);
+  private readonly _viewportSize = signal(this.getViewportSize());
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this._viewportSize.set(this.getViewportSize());
+  }
 
   // Generate weekday headers based on firstDayOfWeek setting
   readonly weekdayHeaders = computed(() => {
@@ -98,6 +180,25 @@ export class ScheduleMonthComponent {
 
   getEventsForDay(day: string): ScheduleEvent[] {
     return this._scheduleService.getEventsForDay(day, this.events() || []);
+  }
+
+  getVisibleEvents(events: ScheduleEvent[]): ScheduleEvent[] {
+    return events.slice(0, this.getVisibleEventLimit());
+  }
+
+  getHiddenEventCount(events: ScheduleEvent[]): number {
+    return Math.max(0, events.length - this.getVisibleEventLimit());
+  }
+
+  private getVisibleEventLimit(): number {
+    const viewport = this._viewportSize();
+    return calculateMonthEventLimit(viewport.width, viewport.height, this.weeksToShow());
+  }
+
+  private getViewportSize(): { width: number; height: number } {
+    return typeof window === 'undefined'
+      ? { width: 1280, height: 800 }
+      : { width: window.innerWidth, height: window.innerHeight };
   }
 
   getMoreEventsKey(count: number): string {

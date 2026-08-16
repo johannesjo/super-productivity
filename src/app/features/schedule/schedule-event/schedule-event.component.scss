@@ -547,3 +547,91 @@
   height: 0;
   visibility: hidden;
 }
+
+:host.month-schedule-event {
+  min-height: 22px;
+  height: 22px;
+  align-items: center;
+  margin: 0;
+  overflow: hidden !important;
+  border: 0;
+  border-left: 2px solid var(--project-color, var(--separator-color));
+  border-radius: 3px;
+  background: color-mix(
+    in srgb,
+    var(--project-color, var(--schedule-event-bg)) 18%,
+    var(--schedule-event-bg)
+  );
+
+  &::before {
+    display: none;
+  }
+
+  .ico-wrapper {
+    display: none;
+  }
+
+  .month-task-check {
+    display: grid;
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    place-items: center;
+    margin: 0 4px 0 5px;
+    padding: 0;
+    border: 1px solid var(--text-color-muted);
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--c-primary);
+      outline-offset: 1px;
+    }
+
+    &[aria-checked='true'] {
+      border-color: var(--project-color, var(--c-primary));
+      background: var(--project-color, var(--c-primary));
+
+      span::after {
+        content: '✓';
+        color: var(--text-color-most-intense);
+        font-size: 11px;
+        font-weight: var(--font-weight-bold);
+        line-height: 1;
+      }
+    }
+  }
+
+  .title {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    color: var(--text-color);
+    font-size: 12px;
+    line-height: 20px;
+    white-space: nowrap;
+
+    .title-text {
+      display: block;
+      max-height: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .month-time {
+    flex: 0 0 auto;
+    margin-left: 6px;
+    margin-right: 6px;
+    color: var(--text-color-muted);
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  &:hover {
+    filter: brightness(0.98);
+  }
+}

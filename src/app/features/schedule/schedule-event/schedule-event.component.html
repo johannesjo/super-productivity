@@ -1,3 +1,16 @@
+@if (isMonthView() && task()) {
+  <button
+    type="button"
+    class="month-task-check"
+    role="checkbox"
+    [attr.aria-checked]="isTaskDone()"
+    [attr.aria-label]="title()"
+    (click)="toggleMonthTaskStatus($event)"
+  >
+    <span aria-hidden="true"></span>
+  </button>
+}
+
 <div class="ico-wrapper">
   @switch (icoType()) {
     <!-- -->
@@ -89,6 +102,10 @@
     }
   </span>
 </div>
+
+@if (monthTimeLabel()) {
+  <span class="month-time">{{ monthTimeLabel() }}</span>
+}
 
 @if (task()) {
   <task-context-menu

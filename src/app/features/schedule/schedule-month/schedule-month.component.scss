@@ -286,3 +286,192 @@
     display: none;
   }
 }
+
+// Dense desktop month presentation. These overrides intentionally keep the
+// existing responsive data model while replacing the card-like grid chrome.
+.month-grid-container {
+  grid-template-rows: 38px repeat(var(--nr-of-weeks), minmax(0, 1fr));
+  gap: 0;
+  height: calc(100vh - 118px);
+  min-height: 460px;
+  overflow: hidden;
+  border-top: 1px solid var(--separator-color);
+  border-left: 1px solid var(--separator-color);
+}
+
+.weekday-header {
+  display: grid;
+  min-width: 0;
+  height: auto;
+  place-items: center;
+  padding: 0 var(--s);
+  border: 0;
+  border-right: 1px solid var(--separator-color);
+  border-bottom: 1px solid var(--separator-color);
+  color: var(--text-color-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.month-day-cell {
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-right: 1px solid var(--separator-color);
+  border-bottom: 1px solid var(--separator-color);
+
+  &.other-month {
+    opacity: 1;
+
+    .month-day-header,
+    .month-day-events {
+      opacity: 0.38;
+    }
+  }
+
+  &:hover,
+  &.drag-over {
+    background: var(--bg-lighter);
+  }
+
+  &.drag-over {
+    border-color: var(--separator-color);
+    box-shadow: inset 0 0 0 1px var(--c-primary);
+  }
+
+  &.today .month-day-number {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--c-primary);
+    color: var(--text-color-most-intense);
+  }
+}
+
+.month-day-header {
+  min-height: 34px;
+  padding: 0 var(--s);
+  border: 0;
+}
+
+.month-day-number {
+  color: var(--text-color);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.month-day-events {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 var(--s-half) var(--s-half);
+  overflow: hidden;
+  max-height: none;
+
+  .month-event:nth-child(n) {
+    display: block;
+  }
+}
+
+.month-event {
+  min-width: 0;
+  margin: 0;
+
+  .month-schedule-event {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+  }
+}
+
+.month-more-events {
+  display: block;
+  min-width: 0;
+  padding: 0 var(--s-half);
+  color: var(--text-color-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+@include mq(md, max) {
+  .month-grid-container {
+    grid-template-rows: 32px repeat(var(--nr-of-weeks), minmax(0, 1fr));
+    height: calc(100vh - 128px);
+    min-height: 400px;
+  }
+
+  .weekday-header {
+    font-size: 12px;
+  }
+
+  .month-day-header {
+    min-height: 28px;
+    padding: 0 var(--s-half);
+  }
+
+  .month-day-number {
+    font-size: 13px;
+  }
+
+  .month-day-cell.today .month-day-number {
+    width: 24px;
+    height: 24px;
+  }
+
+  .month-day-events {
+    gap: 2px;
+    padding: 0 var(--s-quarter) var(--s-quarter);
+
+    .month-event:nth-child(n) {
+      display: block;
+    }
+  }
+}
+
+@include mq(xs, max) {
+  .month-grid-container {
+    grid-template-rows: 28px repeat(var(--nr-of-weeks), minmax(0, 1fr));
+    height: calc(100vh - 148px);
+    min-height: 320px;
+  }
+
+  .weekday-header {
+    padding: 0 var(--s-quarter);
+    font-size: 11px;
+  }
+
+  .month-day-header {
+    min-height: 24px;
+    padding: 0 var(--s-quarter);
+  }
+
+  .month-day-number {
+    font-size: 12px;
+  }
+
+  .month-day-cell.today .month-day-number {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .month-day-events {
+    gap: 1px;
+    padding: 0 1px 1px;
+
+    .month-event:nth-child(n) {
+      display: block;
+    }
+  }
+
+  .month-more-events {
+    padding: 0 2px;
+    font-size: 10px;
+  }
+}

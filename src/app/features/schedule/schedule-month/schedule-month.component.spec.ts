@@ -4,7 +4,10 @@ import { By } from '@angular/platform-browser';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import localeSv from '@angular/common/locales/sv';
-import { ScheduleMonthComponent } from './schedule-month.component';
+import {
+  calculateMonthEventLimit,
+  ScheduleMonthComponent,
+} from './schedule-month.component';
 import { ScheduleService } from '../schedule.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
@@ -196,12 +199,15 @@ describe('ScheduleMonthComponent', () => {
       expect(scheduleEventCmp.cdkDragDisabled).toBe(true);
     });
 
-    it('should show how many events are hidden by the compact mobile layout', () => {
-      const events = [
-        createTaskScheduleEvent('task-1', '2026-01-15'),
-        createTaskScheduleEvent('task-2', '2026-01-15'),
-        createTaskScheduleEvent('task-3', '2026-01-15'),
-      ];
+    it('should show how many events are hidden by the compact month layout', () => {
+      const visibleLimit = calculateMonthEventLimit(
+        window.innerWidth,
+        window.innerHeight,
+        6,
+      );
+      const events = Array.from({ length: visibleLimit + 2 }, (_, index) =>
+        createTaskScheduleEvent(`task-${index + 1}`, '2026-01-15'),
+      );
       fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
       mockScheduleService.getEventsForDay.and.returnValue(events);
 
@@ -218,11 +224,17 @@ describe('ScheduleMonthComponent', () => {
     });
 
     it('should announce one hidden event with singular grammar', () => {
+      const visibleLimit = calculateMonthEventLimit(
+        window.innerWidth,
+        window.innerHeight,
+        6,
+      );
       fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
-      mockScheduleService.getEventsForDay.and.returnValue([
-        createTaskScheduleEvent('task-1', '2026-01-15'),
-        createTaskScheduleEvent('task-2', '2026-01-15'),
-      ]);
+      mockScheduleService.getEventsForDay.and.returnValue(
+        Array.from({ length: visibleLimit + 1 }, (_, index) =>
+          createTaskScheduleEvent(`task-${index + 1}`, '2026-01-15'),
+        ),
+      );
 
       fixture.detectChanges();
 
@@ -248,12 +260,17 @@ describe('ScheduleMonthComponent', () => {
         },
       });
       await firstValueFrom(translateService.use('pl'));
+      const visibleLimit = calculateMonthEventLimit(
+        window.innerWidth,
+        window.innerHeight,
+        6,
+      );
       fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
-      mockScheduleService.getEventsForDay.and.returnValue([
-        createTaskScheduleEvent('task-1', '2026-01-15'),
-        createTaskScheduleEvent('task-2', '2026-01-15'),
-        createTaskScheduleEvent('task-3', '2026-01-15'),
-      ]);
+      mockScheduleService.getEventsForDay.and.returnValue(
+        Array.from({ length: visibleLimit + 2 }, (_, index) =>
+          createTaskScheduleEvent(`task-${index + 1}`, '2026-01-15'),
+        ),
+      );
 
       fixture.detectChanges();
 
@@ -304,6 +321,87 @@ describe('ScheduleMonthComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('.month-more-events')).toBeNull();
+    });
+  });
+
+  describe('month grid semantics', () => {
+    it('should expose a grid cell for every visible calendar day', () => {
+      // Arrange
+      fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
+
+      // Act
+      fixture.detectChanges();
+
+      // Assert
+      const cell = fixture.nativeElement.querySelector(
+        '[data-day="2026-01-15"]',
+      ) as HTMLElement;
+      expect(cell.getAttribute('aria-label')).toContain('15');
+    });
+
+    it('should keep the overflow count in sync with the rendered event limit', () => {
+      // Arrange
+      const events = Array.from({ length: 7 }, (_, index) =>
+        createTaskScheduleEvent(`task-${index}`, '2026-01-15'),
+      );
+      fixture.componentRef.setInput('weeksToShow', 6);
+
+      // Act
+      const visibleEvents = component.getVisibleEvents(events);
+      const hiddenEventCount = component.getHiddenEventCount(events);
+
+      // Assert
+      const visibleLimit = calculateMonthEventLimit(
+        window.innerWidth,
+        window.innerHeight,
+        6,
+      );
+      expect(visibleEvents).toHaveSize(visibleLimit);
+      expect(hiddenEventCount).toBe(7 - visibleLimit);
+    });
+
+    it('should adjust the rendered event limit to the visible week count', () => {
+      const events = Array.from({ length: 9 }, (_, index) =>
+        createTaskScheduleEvent(`task-${index}`, '2026-01-15'),
+      );
+
+      const cases = [
+        { weeks: 3, visible: 8 },
+        { weeks: 4, visible: 6 },
+        { weeks: 5, visible: 5 },
+        { weeks: 6, visible: 4 },
+      ];
+
+      for (const testCase of cases) {
+        fixture.componentRef.setInput('weeksToShow', testCase.weeks);
+        const visibleLimit = calculateMonthEventLimit(
+          window.innerWidth,
+          window.innerHeight,
+          testCase.weeks,
+        );
+        expect(component.getVisibleEvents(events)).toHaveSize(visibleLimit);
+        expect(component.getHiddenEventCount(events)).toBe(9 - visibleLimit);
+      }
+    });
+
+    it('should bind the rendered grid row count to the visible week count', () => {
+      fixture.componentRef.setInput('weeksToShow', 3);
+      fixture.detectChanges();
+
+      const grid = fixture.nativeElement.querySelector(
+        '.month-grid-container',
+      ) as HTMLElement;
+      expect(grid.style.getPropertyValue('--nr-of-weeks')).toBe('3');
+
+      fixture.componentRef.setInput('weeksToShow', 6);
+      fixture.detectChanges();
+
+      expect(grid.style.getPropertyValue('--nr-of-weeks')).toBe('6');
+    });
+
+    it('should calculate a non-clipping event limit for compact desktop heights', () => {
+      expect(calculateMonthEventLimit(1024, 768, 6)).toBe(2);
+      expect(calculateMonthEventLimit(2560, 1180, 5)).toBe(5);
     });
   });
 

@@ -1,4 +1,7 @@
-<div class="month-grid-container">
+<div
+  class="month-grid-container"
+  [style.--nr-of-weeks]="weeksToShow()"
+>
   @for (header of weekdayHeaders(); track $index) {
     <div class="weekday-header">{{ header }}</div>
   }
@@ -8,16 +11,19 @@
     @let dayIndex = getDayIndex($index);
     @if (weekIndex < weeksToShow()) {
       @let dayEvents = getEventsForDay(day) ?? [];
+      @let visibleDayEvents = getVisibleEvents(dayEvents);
+      @let hiddenEventCount = getHiddenEventCount(dayEvents);
       <div
         class="month-day-cell {{ getDayClass(day) }}"
         [attr.data-day]="day"
+        [attr.aria-label]="day"
         style="grid-row: {{ weekIndex + 2 }}; grid-column: {{ dayIndex + 1 }}"
       >
         <div class="month-day-header">
           <span class="month-day-number">{{ dayNumberByDay()[day] }}</span>
         </div>
         <div class="month-day-events">
-          @for (ev of dayEvents; track ev.id) {
+          @for (ev of visibleDayEvents; track ev.id) {
             <div
               class="month-event"
               [class]="ev.type"
@@ -30,8 +36,7 @@
               ></schedule-event>
             </div>
           }
-          @if (dayEvents.length > 1) {
-            @let hiddenEventCount = dayEvents.length - 1;
+          @if (hiddenEventCount > 0) {
             <span class="month-more-events">
               <span
                 class="month-more-events-count"
