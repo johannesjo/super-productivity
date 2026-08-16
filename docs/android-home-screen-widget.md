@@ -4,14 +4,21 @@
 >
 > **Last verified:** 2026-07-29
 
-The widget displays up to 20 tasks from the app's last snapshot of the Today
-view and lets the user toggle completion. It is a native projection of Angular
-state, not an independent task or calendar engine.
+The widget displays up to 20 tasks from the app's last snapshot of either the
+Today view or one selected active project and lets the user toggle completion.
+It is a native projection of Angular state, not an independent task or calendar
+engine.
+
+Each new widget uses Android's configuration screen to select Today or an
+unarchived visible project. The selection is stored only for that widget ID;
+existing widgets and a selection whose project is no longer available fall back
+to Today.
 
 ## Contract and ownership
 
 - Angular's `WidgetDataService` is the only writer of the `widget_data` JSON
-  snapshot. The TypeScript contract is
+  snapshot, including the projected task lists for selectable projects. The
+  TypeScript contract is
   `src/app/features/android/android-widget.model.ts`.
 - Kotlin parses the versioned `v: 1` shape in
   `android/app/src/main/java/com/superproductivity/superproductivity/widget/WidgetData.kt`.

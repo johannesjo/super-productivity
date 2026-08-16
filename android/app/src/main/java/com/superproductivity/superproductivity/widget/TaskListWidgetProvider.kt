@@ -16,8 +16,8 @@ import com.superproductivity.superproductivity.CapacitorMainActivity
 import com.superproductivity.superproductivity.R
 
 /**
- * Home screen widget listing today's tasks from the `widget_data` KeyValStore
- * snapshot pushed by Angular. Checkbox taps enqueue the task ID in
+ * Home screen widget listing Today or one selected project's tasks from the
+ * `widget_data` KeyValStore snapshot pushed by Angular. Checkbox taps enqueue the task ID in
  * [WidgetDoneQueue]; Angular drains the queue (instantly via the local drain
  * broadcast when alive, otherwise on next resume/cold start).
  */
@@ -29,6 +29,14 @@ class TaskListWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         updateAll(context, appWidgetManager, appWidgetIds)
+    }
+
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit().apply {
+            appWidgetIds.forEach { remove(selectionKey(it)) }
+            apply()
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -98,22 +106,26 @@ class TaskListWidgetProvider : AppWidgetProvider() {
          * process that stayed dead across midnight leaves yesterday's blob in place.
          * Name the day actually on screen rather than mislabelling it "Today" (#9098).
          *
-         * Reads the blob itself: the header lives in the provider's RemoteViews while
-         * the rows are built in a separate RemoteViewsFactory, with no shared lifetime
-         * to hand it down. Call once per refresh — the result is the same for every
-         * widget id.
+         * Project widgets use the selected snapshot project's title. A missing selection
+         * falls back to the Today header and list together.
          */
-        private fun headerTitle(context: Context): CharSequence {
-            val meta = try {
-                WidgetData.parseMeta(
-                    (context.applicationContext as App).keyValStore
-                        .get(WidgetData.KEYVAL_KEY, "{}")
-                )
+        private fun headerTitle(context: Context, appWidgetId: Int): CharSequence {
+            val snapshot = try {
+                (context.applicationContext as App).keyValStore
+                    .get(WidgetData.KEYVAL_KEY, "{}")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to read widget data for header", e)
                 // Unknown stamp: keep the pre-#9098 behaviour rather than cry stale.
                 return context.getString(R.string.widget_header_title)
             }
+            selectedProjectId(context, appWidgetId)?.let { projectId ->
+                try {
+                    WidgetData.projectTitle(snapshot, projectId)?.let { return it }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to read selected project for widget header", e)
+                }
+            }
+            val meta = WidgetData.parseMeta(snapshot)
             // The verdict lives in WidgetData.headerFor (pure, tested); this only renders it.
             return when (val header = WidgetData.headerFor(meta, System.currentTimeMillis())) {
                 is WidgetHeader.Today -> context.getString(R.string.widget_header_title)
@@ -157,15 +169,18 @@ class TaskListWidgetProvider : AppWidgetProvider() {
             updateAll(context, appWidgetManager, ids)
         }
 
-        /** Rebuilds each passed widget, reading the header once for all of them. */
+        fun refresh(context: Context, appWidgetId: Int) {
+            updateAll(context, AppWidgetManager.getInstance(context), intArrayOf(appWidgetId))
+        }
+
+        /** Rebuilds every passed widget using that instance's selected source. */
         private fun updateAll(
             context: Context,
             appWidgetManager: AppWidgetManager,
             appWidgetIds: IntArray
         ) {
-            val header = headerTitle(context)
             for (appWidgetId in appWidgetIds) {
-                updateWidget(context, appWidgetManager, appWidgetId, header)
+                updateWidget(context, appWidgetManager, appWidgetId, headerTitle(context, appWidgetId))
             }
             // setRemoteAdapter alone does not re-invoke the factory's onDataSetChanged()
             // when the adapter intent is unchanged (it always is — same widget id, same
@@ -214,5 +229,24 @@ class TaskListWidgetProvider : AppWidgetProvider() {
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
+
+        fun selectedProjectId(context: Context, appWidgetId: Int): String? =
+            context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .getString(selectionKey(appWidgetId), null)
+
+        fun setSelectedProjectId(context: Context, appWidgetId: Int, projectId: String?) {
+            context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit().apply {
+                if (projectId == null) {
+                    remove(selectionKey(appWidgetId))
+                } else {
+                    putString(selectionKey(appWidgetId), projectId)
+                }
+                apply()
+            }
+        }
+
+        private fun selectionKey(appWidgetId: Int): String = "project_$appWidgetId"
+
+        private const val PREFERENCES_NAME = "task_list_widget"
     }
 }

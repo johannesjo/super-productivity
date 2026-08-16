@@ -11,6 +11,11 @@ data class WidgetTask(
     val projectColor: String?
 )
 
+data class WidgetProject(
+    val id: String,
+    val title: String
+)
+
 /**
  * When the snapshot stops describing "today", and which day it describes.
  *
@@ -63,17 +68,28 @@ object WidgetData {
      */
     fun parse(
         json: String,
-        pendingDoneTargets: Map<String, Boolean> = emptyMap()
+        pendingDoneTargets: Map<String, Boolean> = emptyMap(),
+        projectId: String? = null
     ): List<WidgetTask> {
         val root = JSONObject(json)
         if (root.optInt("v", -1) != SUPPORTED_VERSION) {
             return emptyList()
         }
-        val tasksArray = root.optJSONArray("tasks") ?: return emptyList()
+        val tasksArray = projectId?.let { selectedProjectId ->
+            root.optJSONArray("projects")?.let { projects ->
+                (0 until projects.length())
+                    .map { projects.getJSONObject(it) }
+                    .firstOrNull { it.optString("id") == selectedProjectId }
+                    ?.optJSONArray("tasks")
+            }
+        } ?: root.optJSONArray("tasks")
+        // A selection can outlive a project deleted on another device. Fall back to
+        // Today, which is also the backward-compatible default for existing widgets.
+        val selectedTasks = tasksArray ?: root.optJSONArray("tasks") ?: return emptyList()
         val projectColors = root.optJSONObject("projectColors")
         val result = mutableListOf<WidgetTask>()
-        for (i in 0 until tasksArray.length()) {
-            val task = tasksArray.getJSONObject(i)
+        for (i in 0 until selectedTasks.length()) {
+            val task = selectedTasks.getJSONObject(i)
             val id = task.getString("id")
             // isNull guard: optString maps JSON null to the literal string "null"
             val projectId =
@@ -92,6 +108,23 @@ object WidgetData {
         }
         return result
     }
+
+    /** Projects that the Angular snapshot explicitly made selectable. */
+    fun parseProjects(json: String): List<WidgetProject> {
+        val root = JSONObject(json)
+        if (root.optInt("v", -1) != SUPPORTED_VERSION) {
+            return emptyList()
+        }
+        val projects = root.optJSONArray("projects") ?: return emptyList()
+        return (0 until projects.length()).map { index ->
+            projects.getJSONObject(index).let { project ->
+                WidgetProject(project.getString("id"), project.getString("title"))
+            }
+        }
+    }
+
+    fun projectTitle(json: String, projectId: String): String? =
+        parseProjects(json).firstOrNull { it.id == projectId }?.title
 
     /**
      * Reads only the staleness stamp — the task list is loaded separately, in the

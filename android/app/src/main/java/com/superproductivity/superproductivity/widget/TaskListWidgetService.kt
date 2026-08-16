@@ -1,5 +1,6 @@
 package com.superproductivity.superproductivity.widget
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -11,12 +12,19 @@ import com.superproductivity.superproductivity.R
 
 class TaskListWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
-        return TaskListRemoteViewsFactory(applicationContext)
+        return TaskListRemoteViewsFactory(
+            applicationContext,
+            intent.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID
+            )
+        )
     }
 }
 
 private class TaskListRemoteViewsFactory(
-    private val context: Context
+    private val context: Context,
+    private val appWidgetId: Int
 ) : RemoteViewsService.RemoteViewsFactory {
 
     private var tasks: List<WidgetTask> = emptyList()
@@ -27,7 +35,11 @@ private class TaskListRemoteViewsFactory(
         tasks = try {
             val json = (context.applicationContext as App).keyValStore
                 .get(WidgetData.KEYVAL_KEY, "{}")
-            WidgetData.parse(json, WidgetDoneQueue.peek(context)).take(MAX_TASKS)
+            WidgetData.parse(
+                json,
+                WidgetDoneQueue.peek(context),
+                TaskListWidgetProvider.selectedProjectId(context, appWidgetId)
+            ).take(MAX_TASKS)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse widget data", e)
             emptyList()
