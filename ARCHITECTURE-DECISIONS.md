@@ -2,6 +2,8 @@
 
 This document tracks significant architectural decisions and patterns in the Super Productivity codebase. When making changes that affect these patterns, reference this document and update it if needed.
 
+It is also the **index** of accepted decisions: a decision recorded somewhere else — because it is long enough to stand alone, or because it is enforced as a contributor rule — must still be listed under [Decisions Recorded Elsewhere](#decisions-recorded-elsewhere).
+
 ## Active Patterns & Decisions
 
 ### 1. dueDay/dueWithTime Mutual Exclusivity Pattern
@@ -330,6 +332,20 @@ recoverable via local undo, not via sync.
 
 ---
 
+## Decisions Recorded Elsewhere
+
+These carry the same authority as the numbered records above. They live outside this file because they are long enough to stand alone, or because they are enforced as contributor/agent rules that must be read before touching the subsystem. Keep this table complete — if you record a decision somewhere else, add a row here.
+
+| Decision                                                                                                                                                  | Where it lives                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SuperSync database encryption at rest** — no project-managed volume encryption; the LUKS and PostgreSQL-TDE attempts are retired as OpenVZ-incompatible | [`docs/supersync-encryption-at-rest-decision.md`](docs/supersync-encryption-at-rest-decision.md)                                                                                                                                                                 |
+| **Schema-version bump policy** — default to NOT bumping `CURRENT_SCHEMA_VERSION`; a bump never protects the released fleet and cannot be reverted         | [`operation-log-architecture.md` §A.7.11 Bump Policy](docs/sync-and-op-log/operation-log-architecture.md#bump-policy--a-bump-does-not-protect-the-released-fleet), [`schema-version.ts`](packages/shared-schema/src/schema-version.ts), `AGENTS.md` sync rule 10 |
+| **Required fields on persisted models** — a new field on a persisted model is optional (`?`) plus a runtime default, never required                       | [`docs/sync-and-op-log/persisted-model-fields.md`](docs/sync-and-op-log/persisted-model-fields.md), `AGENTS.md` sync rule 11                                                                                                                                     |
+| **One user intent = one op** — effects inject `LOCAL_ACTIONS`; a multi-entity change is a meta-reducer, not an effect fan-out                             | [`docs/sync-and-op-log/contributor-sync-model.md`](docs/sync-and-op-log/contributor-sync-model.md), `AGENTS.md` sync rules 1–3 and 6                                                                                                                             |
+| **`src/app` layer boundary** — `core/` and `ui/` must not import `features/`; lint-enforced, with a shrink-only grandfathered list                        | [`src/app/README.md`](src/app/README.md), [`eslint.config.js`](eslint.config.js) (`FEATURE_LAYER_FENCE`)                                                                                                                                                         |
+
+---
+
 ## How to Use This Document
 
 ### When Making Architectural Changes
@@ -350,12 +366,24 @@ Add a new decision record when:
 - The pattern needs to be followed consistently across the codebase
 - The decision prevents a specific class of bugs
 
+### When a Decision Changes
+
+**Do not rewrite a record's rationale in place when the answer itself is reversed.** The reasoning history — why the old answer looked right, and what evidence flipped it — is the thing that stops the same idea being re-proposed a year later, and it is invisible in `git blame`. Instead:
+
+1. Set the old record's status to `❌ Superseded by #N` and **leave it where it is**. Numbering must stay stable: ~30 code comments cite decisions by number.
+2. Strip the superseded record down to **Decision** + **Rationale** — its _Implementation_ and _Key Files_ go stale the moment the code is gone — and add one line stating what new evidence or cost made it wrong.
+3. Write the replacement as a new numbered decision whose rationale names the record it supersedes.
+
+No record has been superseded yet, so there is no worked example. Decision #5 is the closest model for the _content_ of step 2 — it records a rejected design, what it actually cost (~1,565 LOC of cross-cutting machinery for a single producer), why the headline benefit was never realized, and the commit (`0893a86162`) preserving the prior implementation. It is itself `✅ Active` and does not demonstrate the status/replacement mechanics of steps 1 and 3.
+
+This applies only when the answer changes. Fixing wording, adding a key file, or clarifying an existing decision is ordinary editing.
+
 ### Decision Record Template
 
 ```markdown
 ### N. [Pattern/Decision Name]
 
-**Status**: ✅ Active | 🚧 Draft | ⚠️ Deprecated | ❌ Superseded
+**Status**: ✅ Active | 🚧 Draft | ⚠️ Deprecated | ❌ Superseded by #N
 
 **Decision**: [One-sentence summary of the decision]
 
@@ -376,10 +404,22 @@ Add a new decision record when:
 **When to Update This Pattern**: [Scenarios when someone should review/update this]
 ```
 
+### Why One File
+
+This log deliberately does **not** use one-file-per-decision (`docs/adr/NNNN-*.md`):
+
+- The numbered records are one read for a contributor or an agent. Unlike the lint-enforced rules in [`AGENTS.md`](AGENTS.md), a decision record's only teeth are being read — spreading them over 30 files means nobody reads all of them.
+- `docs/` already separates plans, long-term-plans, research, sync-and-op-log and wiki. A further location makes decisions harder to find, not easier.
+
+Note this is "one index, many locations", not "one file": [Decisions Recorded Elsewhere](#decisions-recorded-elsewhere) deliberately sanctions authoritative decisions living in their own documents. What stays consolidated is the **entry point**, so that ~30 in-code citations (`// See: ARCHITECTURE-DECISIONS.md Decision #2`) resolve to one place.
+
+Revisit when supersession chains actually accumulate, or when this file passes ~1000 lines. Then split **by subsystem**, not one file per decision, and keep the existing numbering so those citations stay valid.
+
 ---
 
 ## Related Documentation
 
+- [`src/app/README.md`](src/app/README.md) - Layer map: where things live and which dependency directions are lint-enforced
 - [`docs/sync-and-op-log/`](docs/sync-and-op-log/) - Operation log architecture
 - [`docs/long-term-plans/`](docs/long-term-plans/) - Future architectural plans
 

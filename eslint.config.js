@@ -5,6 +5,32 @@ const prettierRecommended = require('eslint-plugin-prettier/recommended');
 const preferArrow = require('eslint-plugin-prefer-arrow');
 const localRules = require('eslint-plugin-local-rules');
 
+// Layer boundary, pointed inward: `src/app/ui` and `src/app/core` are the
+// shared building blocks that features compose, so the dependency arrow runs
+// features -> core/ui and never back.
+//
+// This rides on `@typescript-eslint/no-restricted-imports`, NOT the base rule,
+// and that is load-bearing: flat config replaces a rule entry wholesale —
+// severity included — so sharing one rule id with the durable-clock fence
+// (#9096, below) would silently demote that fence to `warn` on every file the
+// grandfathering block lists. Separate rule ids keep the two severities
+// independent. Do not merge them.
+const FEATURE_LAYER_FENCE = {
+  group: ['**/features/*', '**/features/**'],
+  message:
+    'Layer boundary: src/app/ui and src/app/core must not import from src/app/features (the arrow points features -> core/ui). Move the shared piece down into core/ui, or invert with an injected callback/token.',
+};
+
+// `no-restricted-imports` only inspects static import/export declarations, so a
+// dynamic `import('../../features/x')` walks straight through it. The packages/
+// fences close the same hole with an ImportExpression ban; core/ui has ~7
+// legitimate dynamic imports, so this narrows the ban to feature paths.
+const FEATURE_LAYER_DYNAMIC_IMPORT_FENCE = {
+  selector: 'ImportExpression > Literal[value=/features\\//]',
+  message:
+    'Layer boundary: src/app/ui and src/app/core must not dynamically import from src/app/features either.',
+};
+
 module.exports = tseslint.config(
   // Global ignores
   {
@@ -314,6 +340,93 @@ module.exports = tseslint.config(
           ],
         },
       ],
+    },
+  },
+  // Layer boundary (inward): features compose core/ui/util, never the reverse.
+  // The packages/ boundary rules above are the argument for this one — they
+  // are lint-enforced and hold at zero violations, while the identical
+  // layering inside src/app was convention-only and drifted to 36 files.
+  // Specs are exempt: a spec legitimately imports feature fixtures.
+  {
+    files: ['src/app/ui/**/*.ts', 'src/app/core/**/*.ts', 'src/app/util/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        { patterns: [FEATURE_LAYER_FENCE] },
+      ],
+      'no-restricted-syntax': ['error', FEATURE_LAYER_DYNAMIC_IMPORT_FENCE],
+    },
+  },
+  // Grandfathered layer-boundary offenders: files that already reach into
+  // features/, downgraded to a (non-failing) warning so they don't red-CI
+  // while the layering is untangled. They still warn, so the debt stays
+  // visible in lint output.
+  // This list may only ever SHRINK — a new entry means the boundary was
+  // bypassed. Delete the block once it is empty.
+  //
+  // Known caveat: the key is the FILE, so a listed file can add further
+  // features/ imports without failing CI. A per-import ratchet would need
+  // ~75 inline eslint-disable comments; that trade was made consciously.
+  //
+  // Roughly a third of the list is four misplaced pieces, not stray imports:
+  // GlobalConfigService (features/config, 69 importers app-wide) and
+  // androidInterface (features/android) are de facto core services, while
+  // core/startup + core/electron/local-rest-api-handler are app-shell
+  // composition roots that belong above features rather than below them.
+  // Relocating all four clears ~11 entries. The rest import 15 distinct
+  // feature areas and are genuine per-file work — this list will not fall to
+  // one refactor. It started at 38; moving work-context-color.ts into ui/
+  // (a colour palette only ui/ consumed) cleared the first two.
+  {
+    files: [
+      'src/app/core/app-url-open-router.ts',
+      'src/app/core/browser-title/browser-title.service.ts',
+      'src/app/core/clipboard-image/clipboard-image.service.ts',
+      'src/app/core/clipboard-image/clipboard-paste-handler.service.ts',
+      'src/app/core/confetti/confetti.service.ts',
+      'src/app/core/data-init/data-init.service.ts',
+      'src/app/core/date-time-format/custom-date-adapter.ts',
+      'src/app/core/date-time-format/date-time-format.service.ts',
+      'src/app/core/draft/local-draft.service.ts',
+      'src/app/core/drop-paste-input/eml-drop.service.ts',
+      'src/app/core/electron/local-rest-api-handler.service.ts',
+      'src/app/core/example-tasks/example-tasks.service.ts',
+      'src/app/core/global-tracking-interval/global-tracking-interval.service.ts',
+      'src/app/core/notify/notify.service.ts',
+      'src/app/core/persistence/archive-db-adapter.service.ts',
+      'src/app/core/persistence/legacy-pf-db.service.ts',
+      'src/app/core/platform/capacitor-reminder.service.ts',
+      'src/app/core/snack/snack.service.ts',
+      'src/app/core/startup-overlay/startup-overlay.service.ts',
+      'src/app/core/startup/startup.service.ts',
+      'src/app/core/theme/dialog-wallpaper/dialog-wallpaper.component.ts',
+      'src/app/core/theme/global-theme.service.ts',
+      'src/app/core/update-check/update-check.service.ts',
+      'src/app/ui/chip-list-input/chip-list-input.component.ts',
+      'src/app/ui/datetime-picker/datetime-picker.component.ts',
+      'src/app/ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component.ts',
+      'src/app/ui/formly-config.module.ts',
+      'src/app/ui/formly-tag-selection/formly-tag-selection.component.ts',
+      'src/app/ui/inline-markdown/inline-markdown.component.ts',
+      'src/app/ui/material-icons-loader.service.ts',
+      'src/app/ui/task-title/task-title.component.ts',
+      // util/ offenders. `app-data-mock.ts` is test-fixture data, the rest are
+      // pure helpers typed against feature models (Task, RoundTimeOption).
+      // Those types belong in the helper or in a shared model, not the other
+      // way round — none of these needs a feature at runtime.
+      'src/app/util/app-data-mock.ts',
+      'src/app/util/get-app-version-str.ts',
+      'src/app/util/get-time-left-for-task.ts',
+      'src/app/util/round-duration.ts',
+      'src/app/util/round-time.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'warn',
+        { patterns: [FEATURE_LAYER_FENCE] },
+      ],
+      'no-restricted-syntax': ['warn', FEATURE_LAYER_DYNAMIC_IMPORT_FENCE],
     },
   },
   // Service size cap (AGENTS.md → Project rules): no service may exceed 1200
