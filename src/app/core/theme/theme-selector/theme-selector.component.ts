@@ -74,17 +74,32 @@ const valueToRef = (value: string): CustomThemeRef => {
           [disabled]="activeRequiredMode() !== undefined"
           (change)="updateDarkMode($event)"
         >
-          <mat-button-toggle value="system">
+          <mat-button-toggle
+            value="system"
+            [attr.aria-label]="T.GCF.MISC.DARK_MODE_SYSTEM | translate"
+          >
             <mat-icon>computer</mat-icon>
-            {{ T.GCF.MISC.DARK_MODE_SYSTEM | translate }}
+            <span class="dark-mode-toggle__label">
+              {{ T.GCF.MISC.DARK_MODE_SYSTEM | translate }}
+            </span>
           </mat-button-toggle>
-          <mat-button-toggle value="dark">
+          <mat-button-toggle
+            value="dark"
+            [attr.aria-label]="T.GCF.MISC.DARK_MODE_DARK | translate"
+          >
             <mat-icon>dark_mode</mat-icon>
-            {{ T.GCF.MISC.DARK_MODE_DARK | translate }}
+            <span class="dark-mode-toggle__label">
+              {{ T.GCF.MISC.DARK_MODE_DARK | translate }}
+            </span>
           </mat-button-toggle>
-          <mat-button-toggle value="light">
+          <mat-button-toggle
+            value="light"
+            [attr.aria-label]="T.GCF.MISC.DARK_MODE_LIGHT | translate"
+          >
             <mat-icon>light_mode</mat-icon>
-            {{ T.GCF.MISC.DARK_MODE_LIGHT | translate }}
+            <span class="dark-mode-toggle__label">
+              {{ T.GCF.MISC.DARK_MODE_LIGHT | translate }}
+            </span>
           </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
@@ -127,6 +142,7 @@ const valueToRef = (value: string): CustomThemeRef => {
             </mat-select>
           </mat-form-field>
           <button
+            class="install-theme-btn"
             mat-stroked-button
             type="button"
             [matTooltip]="T.GCF.MISC.THEME_INSTALL_TOOLTIP | translate"
@@ -184,13 +200,11 @@ const valueToRef = (value: string): CustomThemeRef => {
       }
 
       .setting-label {
-        font-size: var(--font-size-sm);
-        color: var(--text-color-muted);
+        font-size: var(--font-size-md);
       }
 
       mat-form-field {
         width: 100%;
-        max-width: 320px;
         margin-bottom: 0;
         --mat-form-field-container-height: var(--bar-height-small);
         --mat-form-field-container-vertical-padding: var(--s);
@@ -198,21 +212,32 @@ const valueToRef = (value: string): CustomThemeRef => {
       }
 
       .theme-select__controls {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
-        flex-wrap: wrap;
         gap: var(--s);
+        width: 100%;
+      }
+
+      .install-theme-btn {
+        --mat-button-outlined-container-height: var(--bar-height-small);
       }
 
       .dark-mode-toggle {
-        width: fit-content;
+        display: flex;
+        align-items: stretch;
+        width: 100%;
         --mat-button-toggle-height: var(--bar-height-small);
         --mat-button-toggle-label-text-size: var(--font-size-md);
         --mat-button-toggle-shape: var(--input-border-radius);
       }
 
       .dark-mode-toggle mat-button-toggle {
-        min-width: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 0;
+        min-width: 0;
       }
 
       .dark-mode-toggle mat-icon {
@@ -221,6 +246,11 @@ const valueToRef = (value: string): CustomThemeRef => {
         width: 20px;
         height: 20px;
         vertical-align: middle;
+      }
+
+      .dark-mode-toggle__label {
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .theme-option-row {
@@ -262,17 +292,14 @@ const valueToRef = (value: string): CustomThemeRef => {
         }
 
         .theme-select__controls {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
           width: 100%;
         }
 
         .dark-mode-toggle {
-          display: flex;
           width: 100%;
-        }
-
-        .dark-mode-toggle mat-button-toggle {
-          flex: 1 1 0;
-          min-width: 0;
         }
       }
     `,

@@ -2629,8 +2629,8 @@
     },
     "MISC": {
       "APPEARANCE": "Appearance",
-      "DARK_MODE": "Dark Mode",
-      "DARK_MODE_ARIA_LABEL": "Dark mode selection",
+      "DARK_MODE": "Color mode",
+      "DARK_MODE_ARIA_LABEL": "Color mode selection",
       "DARK_MODE_DARK": "Dark",
       "DARK_MODE_LIGHT": "Light",
       "DARK_MODE_SYSTEM": "System",
