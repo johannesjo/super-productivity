@@ -65,6 +65,7 @@ const valueToRef = (value: string): CustomThemeRef => {
       <div class="dark-mode-select">
         <h3>{{ T.GCF.MISC.DARK_MODE | translate }}</h3>
         <mat-button-toggle-group
+          class="dark-mode-toggle"
           name="darkMode"
           [attr.aria-label]="T.GCF.MISC.DARK_MODE_ARIA_LABEL | translate"
           [value]="globalThemeService.darkMode()"
@@ -88,54 +89,59 @@ const valueToRef = (value: string): CustomThemeRef => {
 
       <div class="theme-select">
         <h3>{{ T.GCF.MISC.THEME_EXPERIMENTAL | translate }}</h3>
-        <mat-form-field appearance="outline">
-          <mat-label>{{ T.GCF.MISC.THEME_SELECT_LABEL | translate }}</mat-label>
-          <mat-select
-            [value]="activeValue()"
-            (selectionChange)="updateCustomTheme($event)"
+        <div class="theme-select__controls">
+          <mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
           >
-            @for (theme of customThemeService.themes(); track optionValue(theme)) {
-              <mat-option [value]="optionValue(theme)">
-                <span class="theme-option-row">
-                  <span class="theme-option-label">{{ theme.name }}</span>
-                  @if (theme.requiredMode && theme.requiredMode !== 'system') {
-                    <span class="theme-mode-indicator">
-                      ({{ theme.requiredMode === 'dark' ? '🌙' : '☀️' }})
-                    </span>
-                  }
-                  @if (theme.kind === 'user') {
-                    <button
-                      mat-icon-button
-                      type="button"
-                      class="remove-theme-btn"
-                      [attr.aria-label]="T.GCF.MISC.THEME_REMOVE_BUTTON | translate"
-                      (click)="removeUserTheme($event, theme.id)"
-                    >
-                      <mat-icon color="warn">delete</mat-icon>
-                    </button>
-                  }
-                </span>
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <button
-          mat-stroked-button
-          type="button"
-          [matTooltip]="T.GCF.MISC.THEME_INSTALL_TOOLTIP | translate"
-          matTooltipPosition="above"
-          (click)="openFilePicker()"
-        >
-          <mat-icon>upload</mat-icon>
-          {{ T.GCF.MISC.THEME_INSTALL_BUTTON | translate }}
-        </button>
-        <input
-          #fileInput
-          type="file"
-          accept=".css,text/css"
-          hidden
-          (change)="onFileSelected($event)"
-        />
+            <mat-label>{{ T.GCF.MISC.THEME_SELECT_LABEL | translate }}</mat-label>
+            <mat-select
+              [value]="activeValue()"
+              (selectionChange)="updateCustomTheme($event)"
+            >
+              @for (theme of customThemeService.themes(); track optionValue(theme)) {
+                <mat-option [value]="optionValue(theme)">
+                  <span class="theme-option-row">
+                    <span class="theme-option-label">{{ theme.name }}</span>
+                    @if (theme.requiredMode && theme.requiredMode !== 'system') {
+                      <span class="theme-mode-indicator">
+                        ({{ theme.requiredMode === 'dark' ? '🌙' : '☀️' }})
+                      </span>
+                    }
+                    @if (theme.kind === 'user') {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="remove-theme-btn"
+                        [attr.aria-label]="T.GCF.MISC.THEME_REMOVE_BUTTON | translate"
+                        (click)="removeUserTheme($event, theme.id)"
+                      >
+                        <mat-icon color="warn">delete</mat-icon>
+                      </button>
+                    }
+                  </span>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button
+            mat-stroked-button
+            type="button"
+            [matTooltip]="T.GCF.MISC.THEME_INSTALL_TOOLTIP | translate"
+            matTooltipPosition="above"
+            (click)="openFilePicker()"
+          >
+            <mat-icon>upload</mat-icon>
+            {{ T.GCF.MISC.THEME_INSTALL_BUTTON | translate }}
+          </button>
+          <input
+            #fileInput
+            type="file"
+            accept=".css,text/css"
+            hidden
+            (change)="onFileSelected($event)"
+          />
+        </div>
       </div>
 
       <div class="wallpaper-select">
@@ -156,26 +162,58 @@ const valueToRef = (value: string): CustomThemeRef => {
       .theme-selector-container {
         display: flex;
         flex-direction: column;
-        gap: 24px;
-        margin: 20px 0;
+        gap: var(--s2);
+        padding: var(--s2);
       }
 
       .dark-mode-select,
       .theme-select,
       .wallpaper-select {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(120px, 1fr) minmax(0, 3fr);
         align-items: center;
-        gap: 16px;
+        gap: var(--s2);
       }
 
       h3 {
         margin: 0;
-        min-width: 100px;
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-medium);
       }
 
       mat-form-field {
-        flex: 1;
-        max-width: 300px;
+        width: 100%;
+        max-width: 320px;
+        margin-bottom: 0;
+        --mat-form-field-container-height: var(--bar-height-small);
+        --mat-form-field-container-vertical-padding: var(--s);
+        --mat-form-field-outlined-container-shape: var(--input-border-radius);
+      }
+
+      .theme-select__controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--s);
+      }
+
+      .dark-mode-toggle {
+        width: fit-content;
+        --mat-button-toggle-height: var(--bar-height-small);
+        --mat-button-toggle-label-text-size: var(--font-size-md);
+        --mat-button-toggle-shape: var(--input-border-radius);
+      }
+
+      .dark-mode-toggle mat-button-toggle {
+        min-width: 96px;
+      }
+
+      .dark-mode-toggle mat-icon {
+        margin-inline-end: var(--s-half);
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        vertical-align: middle;
       }
 
       .theme-option-row {
@@ -192,12 +230,12 @@ const valueToRef = (value: string): CustomThemeRef => {
       }
 
       .theme-mode-indicator {
-        opacity: 0.7;
-        margin-left: 4px;
+        opacity: var(--muted-alpha);
+        margin-inline-start: var(--s-half);
       }
 
       .remove-theme-btn {
-        margin-left: 8px;
+        margin-inline-start: var(--s);
         flex: 0 0 auto;
       }
 
@@ -205,13 +243,29 @@ const valueToRef = (value: string): CustomThemeRef => {
         .dark-mode-select,
         .theme-select,
         .wallpaper-select {
+          display: flex;
           flex-direction: column;
           align-items: flex-start;
+          gap: var(--s);
         }
 
         mat-form-field {
           width: 100%;
           max-width: none;
+        }
+
+        .theme-select__controls {
+          width: 100%;
+        }
+
+        .dark-mode-toggle {
+          display: flex;
+          width: 100%;
+        }
+
+        .dark-mode-toggle mat-button-toggle {
+          flex: 1 1 0;
+          min-width: 0;
         }
       }
     `,
