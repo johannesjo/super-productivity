@@ -87,7 +87,7 @@ linux:
     - x-scheme-handler/superproductivity
   desktop:
     entry:
-      StartupWMClass: superproductivity
+      StartupWMClass: superproductivity-bin
   target:
     - AppImage
     - deb
