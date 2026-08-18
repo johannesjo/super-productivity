@@ -276,13 +276,19 @@ const valueToRef = (value: string): CustomThemeRef => {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        position: relative;
         max-width: 100%;
         height: var(--bar-height-small);
         vertical-align: top;
       }
 
       .dark-mode-toggle__selection {
+        position: absolute;
+        inset-inline-start: calc(-20px - var(--s-half));
+        top: 50%;
+        margin-inline-end: 0;
         opacity: 0;
+        transform: translateY(-50%);
       }
 
       .dark-mode-toggle__selection.is-selected {
