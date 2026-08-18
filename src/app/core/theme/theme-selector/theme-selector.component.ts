@@ -72,33 +72,55 @@ const valueToRef = (value: string): CustomThemeRef => {
           [attr.aria-label]="T.GCF.MISC.DARK_MODE_ARIA_LABEL | translate"
           [value]="globalThemeService.darkMode()"
           [disabled]="activeRequiredMode() !== undefined"
+          [hideSingleSelectionIndicator]="true"
           (change)="updateDarkMode($event)"
         >
           <mat-button-toggle
             value="system"
             [attr.aria-label]="T.GCF.MISC.DARK_MODE_SYSTEM | translate"
           >
-            <mat-icon>computer</mat-icon>
-            <span class="dark-mode-toggle__label">
-              {{ T.GCF.MISC.DARK_MODE_SYSTEM | translate }}
+            <span class="dark-mode-toggle__content">
+              <mat-icon
+                class="dark-mode-toggle__selection"
+                [class.is-selected]="globalThemeService.darkMode() === 'system'"
+                >check</mat-icon
+              >
+              <mat-icon>computer</mat-icon>
+              <span class="dark-mode-toggle__label">
+                {{ T.GCF.MISC.DARK_MODE_SYSTEM | translate }}
+              </span>
             </span>
           </mat-button-toggle>
           <mat-button-toggle
             value="dark"
             [attr.aria-label]="T.GCF.MISC.DARK_MODE_DARK | translate"
           >
-            <mat-icon>dark_mode</mat-icon>
-            <span class="dark-mode-toggle__label">
-              {{ T.GCF.MISC.DARK_MODE_DARK | translate }}
+            <span class="dark-mode-toggle__content">
+              <mat-icon
+                class="dark-mode-toggle__selection"
+                [class.is-selected]="globalThemeService.darkMode() === 'dark'"
+                >check</mat-icon
+              >
+              <mat-icon>dark_mode</mat-icon>
+              <span class="dark-mode-toggle__label">
+                {{ T.GCF.MISC.DARK_MODE_DARK | translate }}
+              </span>
             </span>
           </mat-button-toggle>
           <mat-button-toggle
             value="light"
             [attr.aria-label]="T.GCF.MISC.DARK_MODE_LIGHT | translate"
           >
-            <mat-icon>light_mode</mat-icon>
-            <span class="dark-mode-toggle__label">
-              {{ T.GCF.MISC.DARK_MODE_LIGHT | translate }}
+            <span class="dark-mode-toggle__content">
+              <mat-icon
+                class="dark-mode-toggle__selection"
+                [class.is-selected]="globalThemeService.darkMode() === 'light'"
+                >check</mat-icon
+              >
+              <mat-icon>light_mode</mat-icon>
+              <span class="dark-mode-toggle__label">
+                {{ T.GCF.MISC.DARK_MODE_LIGHT | translate }}
+              </span>
             </span>
           </mat-button-toggle>
         </mat-button-toggle-group>
@@ -248,6 +270,23 @@ const valueToRef = (value: string): CustomThemeRef => {
         width: 20px;
         height: 20px;
         vertical-align: middle;
+      }
+
+      .dark-mode-toggle__content {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        height: var(--bar-height-small);
+        vertical-align: top;
+      }
+
+      .dark-mode-toggle__selection {
+        opacity: 0;
+      }
+
+      .dark-mode-toggle__selection.is-selected {
+        opacity: 1;
       }
 
       .dark-mode-toggle__label {
