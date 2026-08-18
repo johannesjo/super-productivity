@@ -182,6 +182,7 @@ const valueToRef = (value: string): CustomThemeRef => {
         flex-direction: column;
         gap: var(--s2);
         padding: var(--s2);
+        container-type: inline-size;
       }
 
       .dark-mode-select,
@@ -276,7 +277,7 @@ const valueToRef = (value: string): CustomThemeRef => {
         flex: 0 0 auto;
       }
 
-      @media (max-width: 600px) {
+      @container (max-width: 600px) {
         .dark-mode-select,
         .theme-select,
         .wallpaper-select {
