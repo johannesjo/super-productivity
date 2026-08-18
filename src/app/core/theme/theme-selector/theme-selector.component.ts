@@ -165,6 +165,7 @@ const valueToRef = (value: string): CustomThemeRef => {
       <div class="wallpaper-select">
         <span class="setting-label">{{ T.GCF.MISC.WALLPAPER | translate }}</span>
         <button
+          class="wallpaper-btn"
           mat-stroked-button
           type="button"
           (click)="openWallpaperDialog()"
@@ -300,6 +301,10 @@ const valueToRef = (value: string): CustomThemeRef => {
         }
 
         .dark-mode-toggle {
+          width: 100%;
+        }
+
+        .wallpaper-btn {
           width: 100%;
         }
       }
