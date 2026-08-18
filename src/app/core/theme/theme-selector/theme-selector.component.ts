@@ -62,8 +62,10 @@ const valueToRef = (value: string): CustomThemeRef => {
   ],
   template: `
     <div class="theme-selector-container">
+      <h3 class="appearance-title">{{ T.GCF.MISC.APPEARANCE | translate }}</h3>
+
       <div class="dark-mode-select">
-        <h3>{{ T.GCF.MISC.DARK_MODE | translate }}</h3>
+        <span class="setting-label">{{ T.GCF.MISC.DARK_MODE | translate }}</span>
         <mat-button-toggle-group
           class="dark-mode-toggle"
           name="darkMode"
@@ -88,7 +90,7 @@ const valueToRef = (value: string): CustomThemeRef => {
       </div>
 
       <div class="theme-select">
-        <h3>{{ T.GCF.MISC.THEME_EXPERIMENTAL | translate }}</h3>
+        <span class="setting-label">{{ T.GCF.MISC.THEME_EXPERIMENTAL | translate }}</span>
         <div class="theme-select__controls">
           <mat-form-field
             appearance="outline"
@@ -145,7 +147,7 @@ const valueToRef = (value: string): CustomThemeRef => {
       </div>
 
       <div class="wallpaper-select">
-        <h3>{{ T.GCF.MISC.WALLPAPER | translate }}</h3>
+        <span class="setting-label">{{ T.GCF.MISC.WALLPAPER | translate }}</span>
         <button
           mat-stroked-button
           type="button"
@@ -175,10 +177,15 @@ const valueToRef = (value: string): CustomThemeRef => {
         gap: var(--s2);
       }
 
-      h3 {
+      .appearance-title {
         margin: 0;
-        font-size: var(--font-size-md);
-        font-weight: var(--font-weight-medium);
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
+      }
+
+      .setting-label {
+        font-size: var(--font-size-sm);
+        color: var(--text-color-muted);
       }
 
       mat-form-field {
