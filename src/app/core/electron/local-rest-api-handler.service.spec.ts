@@ -20,7 +20,11 @@ import {
   FocusScreen,
   TimerState,
 } from '../../features/focus-mode/focus-mode.model';
-import { initialState as initialFocusModeState } from '../../features/focus-mode/store/focus-mode.reducer';
+import * as focusModeActions from '../../features/focus-mode/store/focus-mode.actions';
+import {
+  focusModeReducer,
+  initialState as initialFocusModeState,
+} from '../../features/focus-mode/store/focus-mode.reducer';
 
 describe('LocalRestApiHandlerService', () => {
   let service: LocalRestApiHandlerService;
@@ -523,6 +527,40 @@ describe('LocalRestApiHandlerService', () => {
         timer: {
           purpose: 'work',
           status: 'paused',
+          isOvertime: false,
+          elapsedMs: 600_000,
+          remainingMs: 0,
+          durationMs: 0,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should retain the Pomodoro cycle after switching to Flowtime', async () => {
+      const flowtimeState = focusModeReducer(
+        {
+          ...initialFocusModeState,
+          mode: FocusModeMode.Pomodoro,
+          currentCycle: 5,
+          timer: {
+            isRunning: true,
+            startedAt: 1,
+            elapsed: 600_000,
+            duration: 1_500_000,
+            purpose: 'work',
+          },
+        },
+        focusModeActions.setFocusModeMode({ mode: FocusModeMode.Flowtime }),
+      );
+      store.setState({ focusMode: flowtimeState });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Flowtime,
+        cycle: 5,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'running',
           isOvertime: false,
           elapsedMs: 600_000,
           remainingMs: 0,
