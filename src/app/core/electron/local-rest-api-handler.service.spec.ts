@@ -448,6 +448,36 @@ describe('LocalRestApiHandlerService', () => {
       });
     });
 
+    it('should return a stopped Pomodoro break with time remaining as paused', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 30_000,
+          duration: 300_000,
+          purpose: 'break',
+          isLongBreak: true,
+        },
+        mode: FocusModeMode.Pomodoro,
+        currentCycle: 5,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 5,
+        isSessionDone: false,
+        timer: {
+          purpose: 'break',
+          status: 'paused',
+          isOvertime: false,
+          elapsedMs: 30_000,
+          remainingMs: 270_000,
+          durationMs: 300_000,
+          isLongBreak: true,
+        },
+      });
+    });
+
     it('should return running and paused Flowtime work timers', async () => {
       setFocusState({
         timer: {
