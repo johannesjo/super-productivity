@@ -12,7 +12,13 @@ import { DateService } from '../date/date.service';
 import { isTodayWithOffset } from '../../util/is-today.util';
 import {
   selectCurrentCycle,
+  selectIsInOvertime,
+  selectIsLongBreak,
+  selectIsRunning,
+  selectIsSessionCompleted,
+  selectIsSessionPaused,
   selectMode,
+  selectTimeRemaining,
   selectTimer,
 } from '../../features/focus-mode/store/focus-mode.selectors';
 import {
@@ -280,28 +286,47 @@ export class LocalRestApiHandlerService {
   }
 
   private async _handleGetFocus(requestId: string): Promise<LocalRestApiResponsePayload> {
-    const [timer, mode, cycle] = await Promise.all([
+    const [
+      timer,
+      mode,
+      cycle,
+      isRunning,
+      isSessionPaused,
+      isLongBreak,
+      remainingMs,
+      isSessionDone,
+      isOvertime,
+    ] = await Promise.all([
       firstValueFrom(this._store.select(selectTimer)),
       firstValueFrom(this._store.select(selectMode)),
       firstValueFrom(this._store.select(selectCurrentCycle)),
+      firstValueFrom(this._store.select(selectIsRunning)),
+      firstValueFrom(this._store.select(selectIsSessionPaused)),
+      firstValueFrom(this._store.select(selectIsLongBreak)),
+      firstValueFrom(this._store.select(selectTimeRemaining)),
+      firstValueFrom(this._store.select(selectIsSessionCompleted)),
+      firstValueFrom(this._store.select(selectIsInOvertime)),
     ]);
-    const durationMs = Math.max(0, timer.duration);
-    const elapsedMs = Math.max(0, timer.elapsed);
 
     return createSuccessResponse(requestId, 200, {
       mode,
-      cycle: Math.max(0, cycle),
+      cycle,
+      isSessionDone,
       timer:
         timer.purpose === null
           ? null
           : {
               purpose: timer.purpose,
-              isRunning: timer.isRunning,
-              isPaused: !timer.isRunning,
-              elapsedMs,
-              remainingMs: Math.max(0, durationMs - elapsedMs),
-              durationMs,
-              isLongBreak: timer.purpose === 'break' && timer.isLongBreak === true,
+              status: isRunning
+                ? 'running'
+                : isSessionPaused && timer.purpose === 'break' && remainingMs === 0
+                  ? 'done'
+                  : 'paused',
+              isOvertime,
+              isLongBreak,
+              elapsedMs: timer.elapsed,
+              remainingMs,
+              durationMs: timer.duration,
             },
     });
   }

@@ -14,8 +14,13 @@ import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
-import { FocusModeMode, TimerState } from '../../features/focus-mode/focus-mode.model';
-import * as focusSelectors from '../../features/focus-mode/store/focus-mode.selectors';
+import {
+  FocusModeMode,
+  FocusModeState,
+  FocusScreen,
+  TimerState,
+} from '../../features/focus-mode/focus-mode.model';
+import { initialState as initialFocusModeState } from '../../features/focus-mode/store/focus-mode.reducer';
 
 describe('LocalRestApiHandlerService', () => {
   let service: LocalRestApiHandlerService;
@@ -54,19 +59,19 @@ describe('LocalRestApiHandlerService', () => {
     subTasks,
   });
 
-  const setFocusState = ({
-    timer,
-    mode = FocusModeMode.Countdown,
-    cycle = 0,
-  }: {
-    timer: TimerState;
-    mode?: FocusModeMode;
-    cycle?: number;
-  }): void => {
-    store.overrideSelector(focusSelectors.selectTimer, timer);
-    store.overrideSelector(focusSelectors.selectMode, mode);
-    store.overrideSelector(focusSelectors.selectCurrentCycle, cycle);
-    store.refreshState();
+  const setFocusState = (
+    overrides: Partial<Omit<FocusModeState, 'timer'>> & {
+      timer?: Partial<TimerState>;
+    } = {},
+  ): void => {
+    const { timer: timerOverrides, ...stateOverrides } = overrides;
+    store.setState({
+      focusMode: {
+        ...initialFocusModeState,
+        ...stateOverrides,
+        timer: { ...initialFocusModeState.timer, ...timerOverrides },
+      },
+    });
   };
 
   const mockElectronApi = (): void => {
@@ -192,7 +197,7 @@ describe('LocalRestApiHandlerService', () => {
         { provide: ProjectService, useValue: projectServiceMock },
         { provide: TagService, useValue: tagServiceMock },
         { provide: DateService, useValue: dateServiceMock },
-        provideMockStore(),
+        provideMockStore({ initialState: { focusMode: initialFocusModeState } }),
       ],
     });
 
@@ -257,20 +262,12 @@ describe('LocalRestApiHandlerService', () => {
     };
 
     it('should return a null timer while focus mode is idle', async () => {
-      setFocusState({
-        timer: {
-          isRunning: false,
-          startedAt: null,
-          elapsed: 0,
-          duration: 0,
-          purpose: null,
-        },
-        mode: FocusModeMode.Countdown,
-      });
+      setFocusState({ mode: FocusModeMode.Countdown });
 
       expectFocusData(await requestFocus(), {
         mode: FocusModeMode.Countdown,
-        cycle: 0,
+        cycle: 1,
+        isSessionDone: false,
         timer: null,
       });
     });
@@ -285,16 +282,17 @@ describe('LocalRestApiHandlerService', () => {
           purpose: 'work',
         },
         mode: FocusModeMode.Pomodoro,
-        cycle: 2,
+        currentCycle: 2,
       });
 
       expectFocusData(await requestFocus(), {
         mode: FocusModeMode.Pomodoro,
         cycle: 2,
+        isSessionDone: false,
         timer: {
           purpose: 'work',
-          isRunning: true,
-          isPaused: false,
+          status: 'running',
+          isOvertime: false,
           elapsedMs: 120_000,
           remainingMs: 1_380_000,
           durationMs: 1_500_000,
@@ -313,16 +311,17 @@ describe('LocalRestApiHandlerService', () => {
           purpose: 'work',
         },
         mode: FocusModeMode.Countdown,
-        cycle: 1,
+        currentCycle: 1,
       });
 
       expectFocusData(await requestFocus(), {
         mode: FocusModeMode.Countdown,
         cycle: 1,
+        isSessionDone: false,
         timer: {
           purpose: 'work',
-          isRunning: false,
-          isPaused: true,
+          status: 'paused',
+          isOvertime: false,
           elapsedMs: 90_000,
           remainingMs: 210_000,
           durationMs: 300_000,
@@ -331,7 +330,49 @@ describe('LocalRestApiHandlerService', () => {
       });
     });
 
-    it('should return short and long Pomodoro breaks', async () => {
+    it('should return a running Countdown work timer', async () => {
+      setFocusState({
+        timer: {
+          isRunning: true,
+          startedAt: 1,
+          elapsed: 90_000,
+          duration: 300_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Countdown,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 90_000,
+          remainingMs: 210_000,
+          durationMs: 300_000,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should return a completed work session separately from the timer', async () => {
+      setFocusState({
+        currentScreen: FocusScreen.SessionDone,
+        mode: FocusModeMode.Countdown,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        isSessionDone: true,
+        timer: null,
+      });
+    });
+
+    it('should return running short and long Pomodoro breaks', async () => {
       const timer: TimerState = {
         isRunning: true,
         startedAt: 1,
@@ -340,14 +381,15 @@ describe('LocalRestApiHandlerService', () => {
         purpose: 'break',
       };
 
-      setFocusState({ timer, mode: FocusModeMode.Pomodoro, cycle: 2 });
+      setFocusState({ timer, mode: FocusModeMode.Pomodoro, currentCycle: 2 });
       expectFocusData(await requestFocus(), {
         mode: FocusModeMode.Pomodoro,
         cycle: 2,
+        isSessionDone: false,
         timer: {
           purpose: 'break',
-          isRunning: true,
-          isPaused: false,
+          status: 'running',
+          isOvertime: false,
           elapsedMs: 30_000,
           remainingMs: 270_000,
           durationMs: 300_000,
@@ -356,17 +398,18 @@ describe('LocalRestApiHandlerService', () => {
       });
 
       setFocusState({
-        timer: { ...timer, isRunning: false, isLongBreak: true },
+        timer: { ...timer, isLongBreak: true },
         mode: FocusModeMode.Pomodoro,
-        cycle: 4,
+        currentCycle: 5,
       });
       expectFocusData(await requestFocus(), {
         mode: FocusModeMode.Pomodoro,
-        cycle: 4,
+        cycle: 5,
+        isSessionDone: false,
         timer: {
           purpose: 'break',
-          isRunning: false,
-          isPaused: true,
+          status: 'running',
+          isOvertime: false,
           elapsedMs: 30_000,
           remainingMs: 270_000,
           durationMs: 300_000,
@@ -375,7 +418,37 @@ describe('LocalRestApiHandlerService', () => {
       });
     });
 
-    it('should return Flowtime state with no remaining countdown time', async () => {
+    it('should return a completed Pomodoro break as done', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 300_000,
+          duration: 300_000,
+          purpose: 'break',
+          isLongBreak: true,
+        },
+        mode: FocusModeMode.Pomodoro,
+        currentCycle: 5,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 5,
+        isSessionDone: false,
+        timer: {
+          purpose: 'break',
+          status: 'done',
+          isOvertime: false,
+          elapsedMs: 300_000,
+          remainingMs: 0,
+          durationMs: 300_000,
+          isLongBreak: true,
+        },
+      });
+    });
+
+    it('should return running and paused Flowtime work timers', async () => {
       setFocusState({
         timer: {
           isRunning: true,
@@ -385,16 +458,42 @@ describe('LocalRestApiHandlerService', () => {
           purpose: 'work',
         },
         mode: FocusModeMode.Flowtime,
-        cycle: -1,
       });
 
       expectFocusData(await requestFocus(), {
         mode: FocusModeMode.Flowtime,
-        cycle: 0,
+        cycle: 1,
+        isSessionDone: false,
         timer: {
           purpose: 'work',
-          isRunning: true,
-          isPaused: false,
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 600_000,
+          remainingMs: 0,
+          durationMs: 0,
+          isLongBreak: false,
+        },
+      });
+
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 600_000,
+          duration: 0,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Flowtime,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Flowtime,
+        cycle: 1,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'paused',
+          isOvertime: false,
           elapsedMs: 600_000,
           remainingMs: 0,
           durationMs: 0,
@@ -403,28 +502,30 @@ describe('LocalRestApiHandlerService', () => {
       });
     });
 
-    it('should normalize a work timer after a backward clock adjustment', async () => {
+    it('should preserve overtime while a work timer is paused', async () => {
       setFocusState({
         timer: {
-          isRunning: true,
+          isRunning: false,
           startedAt: 1,
-          elapsed: -1_000,
-          duration: 300_000,
+          elapsed: 1_600_000,
+          duration: 1_500_000,
           purpose: 'work',
         },
-        mode: FocusModeMode.Countdown,
+        mode: FocusModeMode.Pomodoro,
+        _isOvertimeEnabled: true,
       });
 
       expectFocusData(await requestFocus(), {
-        mode: FocusModeMode.Countdown,
-        cycle: 0,
+        mode: FocusModeMode.Pomodoro,
+        cycle: 1,
+        isSessionDone: false,
         timer: {
           purpose: 'work',
-          isRunning: true,
-          isPaused: false,
-          elapsedMs: 0,
-          remainingMs: 300_000,
-          durationMs: 300_000,
+          status: 'paused',
+          isOvertime: true,
+          elapsedMs: 1_600_000,
+          remainingMs: 0,
+          durationMs: 1_500_000,
           isLongBreak: false,
         },
       });
