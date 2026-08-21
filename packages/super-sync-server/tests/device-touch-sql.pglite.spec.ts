@@ -12,8 +12,10 @@ import { PGlite } from '@electric-sql/pglite';
  * regression that matters, since this runs on the download path of every sync
  * poll. So the statement is executed against an in-process Postgres.
  *
- * A second `DeviceService` stands in for a second server instance: its throttle
- * map is empty, so only the SQL predicate can stop it writing.
+ * `DeviceService` keeps no in-process state (see its `touchDevice` JSDoc: the
+ * throttle is deliberately not cached in-process) — the SQL `WHERE` predicate
+ * is the ONLY throttle. A second `DeviceService` stands in for a second server
+ * instance to prove the predicate alone suffices across instances.
  */
 
 const CREATE = `
@@ -104,9 +106,9 @@ describe('DeviceService.touchDevice (real Postgres)', () => {
     vi.setSystemTime(1_000_000);
     await service.touchDevice(7, 'E_abc123');
 
-    // A cold instance: the in-process throttle cannot help, so this asserts the
-    // SQL predicate itself — the part that keeps the throttle correct across
-    // instances and restarts.
+    // A separate instance (as after a restart / on another server): the
+    // service holds no in-process state, so this pins the SQL predicate —
+    // the only throttle, and why it is correct across instances and restarts.
     vi.setSystemTime(1_000_000 + DEVICE_TOUCH_THROTTLE_MS - 1);
     await new DeviceService().touchDevice(7, 'E_abc123');
 

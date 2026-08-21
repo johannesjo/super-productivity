@@ -19,7 +19,11 @@ describe('SuperSyncDevicesService', () => {
   beforeEach(() => {
     getDevices = jasmine.createSpy('getDevices');
     signOutAllOtherDevices = jasmine.createSpy('signOutAllOtherDevices');
-    providerManager = jasmine.createSpyObj('SyncProviderManager', ['getActiveProvider']);
+    providerManager = jasmine.createSpyObj('SyncProviderManager', [
+      'getActiveProvider',
+      'notifyCredentialsRotated',
+    ]);
+    providerManager.notifyCredentialsRotated.and.resolveTo(undefined);
     TestBed.configureTestingModule({
       providers: [
         SuperSyncDevicesService,
@@ -72,12 +76,33 @@ describe('SuperSyncDevicesService', () => {
     await expectAsync(service.getDevices()).toBeRejected();
   });
 
-  it('should delegate the sign-out to the provider', async () => {
+  it('should delegate the sign-out to the provider with the own clientId', async () => {
     signOutAllOtherDevices.and.resolveTo(undefined);
 
     await service.signOutAllOtherDevices();
 
-    expect(signOutAllOtherDevices).toHaveBeenCalledTimes(1);
+    // The clientId lets the server spare this device's WebSocket.
+    expect(signOutAllOtherDevices).toHaveBeenCalledOnceWith('E_mine11');
+  });
+
+  it('should refresh the provider manager state after a successful sign-out', async () => {
+    signOutAllOtherDevices.and.resolveTo(undefined);
+
+    await service.signOutAllOtherDevices();
+
+    // The provider stored the fresh token bypassing the manager — without
+    // this, currentProviderPrivateCfg$ consumers keep the revoked token.
+    expect(providerManager.notifyCredentialsRotated).toHaveBeenCalledOnceWith(
+      SyncProviderId.SuperSync,
+    );
+  });
+
+  it('should not refresh the manager state when the sign-out failed', async () => {
+    signOutAllOtherDevices.and.rejectWith(new Error('boom'));
+
+    await expectAsync(service.signOutAllOtherDevices()).toBeRejected();
+
+    expect(providerManager.notifyCredentialsRotated).not.toHaveBeenCalled();
   });
 
   it('should reject the sign-out when Super Sync is not the active provider', async () => {

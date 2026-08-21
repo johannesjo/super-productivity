@@ -397,18 +397,38 @@ export class SyncProviderManager {
       return;
     }
     await provider.clearAuthCredentials();
+    await this.notifyCredentialsRotated(providerId);
+  }
 
-    // Revoking credentials invalidates the authority a queued request captured,
-    // even though this path emits no providerConfigChanged$.
+  /**
+   * Re-syncs manager-derived state after a provider mutated its own stored
+   * credentials in place (SuperSync token rotation via
+   * `signOutAllOtherDevices`, credential clearing) — writes that bypass
+   * `setProviderConfig()`, so `currentProviderPrivateCfg$` and everything
+   * cached on it (the settings-form seed, the Android credential bridge)
+   * would keep serving the stale token until restart.
+   *
+   * Deliberately NOT a target change: same server, same account, same op
+   * stream — `notifyProviderTargetChanged()` here would bump the sync epoch
+   * and wipe the per-target cursor a token rotation just carried over.
+   */
+  async notifyCredentialsRotated(providerId: SyncProviderId): Promise<void> {
+    // Rotated/revoked credentials invalidate the authority a queued request
+    // captured, even though this path emits no providerConfigChanged$.
     this._configEpoch++;
 
-    if (this._activeProvider?.id === providerId) {
-      const ready = await provider.isReady();
-      this._isProviderReady$.next(ready);
-
-      const privateCfg = await provider.privateCfg.load();
-      this._currentProviderPrivateCfg$.next({ providerId, privateCfg });
+    if (this._activeProvider?.id !== providerId) {
+      return;
     }
+    const provider = await this.getProviderById(providerId);
+    if (!provider) {
+      return;
+    }
+    const ready = await provider.isReady();
+    this._isProviderReady$.next(ready);
+
+    const privateCfg = await provider.privateCfg.load();
+    this._currentProviderPrivateCfg$.next({ providerId, privateCfg });
   }
 
   private readonly _LAST_SYNCED_PROVIDER_KEY = 'SP_LAST_SYNCED_PROVIDER_ID';

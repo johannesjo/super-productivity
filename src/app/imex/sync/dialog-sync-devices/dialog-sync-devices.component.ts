@@ -117,6 +117,11 @@ export class DialogSyncDevicesComponent implements OnInit {
     }
 
     this.isSigningOut.set(true);
+    // Block every close path (button, ESC, backdrop) while the request is in
+    // flight: an early close completes afterClosed(), so the close(true)
+    // below could no longer tell the settings dialog the token changed and a
+    // later Save would write the revoked token back. Restored on error.
+    this._matDialogRef.disableClose = true;
     try {
       // Fenced like the other credential mutations (password change,
       // encryption toggle): a sync running while the token and cursor key
@@ -137,6 +142,7 @@ export class DialogSyncDevicesComponent implements OnInit {
         type: 'ERROR',
         msg: T.F.SYNC.D_DEVICES.ERROR_SIGN_OUT,
       });
+      this._matDialogRef.disableClose = false;
       this.isSigningOut.set(false);
     }
   }

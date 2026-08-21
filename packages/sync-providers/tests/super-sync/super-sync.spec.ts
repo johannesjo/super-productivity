@@ -734,10 +734,44 @@ describe('SuperSyncProvider', () => {
       const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
       expect(url).toBe('https://sync.example.com/api/replace-token');
       expect(options.method).toBe('POST');
+      // Fastify rejects a body-less POST with a JSON content type
+      // (FST_ERR_CTP_EMPTY_JSON_BODY) — an explicit body must be sent.
+      expect(options.body).toBe('{}');
       expect(cfgStore.setComplete).toHaveBeenCalledWith({
         ...testConfig,
         accessToken: 'fresh-token',
       });
+    });
+
+    it('sends its clientId so the server can spare this device WebSocket', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      cfgStore.setComplete.mockResolvedValue(undefined);
+      fetchMock.mockResolvedValue(okResponse(replaceTokenResponse));
+
+      await provider.signOutAllOtherDevices('E_mine11');
+
+      const [, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(JSON.parse(options.body as string)).toEqual({ clientId: 'E_mine11' });
+    });
+
+    it('sends the JSON body through the native HTTP path too', async () => {
+      const { provider, cfgStore, nativeHttpExecutor } = buildProvider({
+        isNativePlatform: true,
+      });
+      cfgStore.load.mockResolvedValue(testConfig);
+      cfgStore.setComplete.mockResolvedValue(undefined);
+      nativeHttpExecutor.mockResolvedValue({
+        status: 200,
+        data: replaceTokenResponse,
+      });
+
+      await provider.signOutAllOtherDevices('A_phone11');
+
+      const requestCfg = nativeHttpExecutor.mock.calls[0][0] as NativeHttpRequestConfig;
+      expect(requestCfg.url).toBe('https://sync.example.com/api/replace-token');
+      expect(requestCfg.method).toBe('POST');
+      expect(requestCfg.data).toBe(JSON.stringify({ clientId: 'A_phone11' }));
     });
 
     it('carries the lastServerSeq cursor over to the new token key', async () => {
@@ -759,11 +793,32 @@ describe('SuperSyncProvider', () => {
       // Same account, same op stream — but the key hashes the token, so without
       // the carry-over the swap would reset the cursor and force a full re-download.
       expect(newKey).not.toBe(oldKey);
+      // Crash-safety ordering: the cursor lands under the NEW token's key
+      // BEFORE the token is persisted — a hard kill in between leaves an
+      // orphaned entry, never a persisted token without its cursor.
+      expect(storage.setLastServerSeq.mock.invocationCallOrder[0]).toBeLessThan(
+        cfgStore.setComplete.mock.invocationCallOrder[0],
+      );
       // The old token's entry is cleaned up, and only after the new one exists.
       expect(storage.removeLastServerSeq).toHaveBeenCalledWith(oldKey);
       expect(storage.removeLastServerSeq.mock.invocationCallOrder[0]).toBeGreaterThan(
         storage.setLastServerSeq.mock.invocationCallOrder[0],
       );
+    });
+
+    it('does not delete the cursor when old and new seq keys coincide', async () => {
+      const { provider, cfgStore, fetchMock, storage } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      cfgStore.setComplete.mockResolvedValue(undefined);
+      storage.getLastServerSeq.mockReturnValue(42);
+      // Degenerate server response: the "fresh" token equals the old one, so
+      // both keys hash identically — removal would wipe the cursor just written.
+      fetchMock.mockResolvedValue(okResponse({ token: testConfig.accessToken }));
+
+      await provider.signOutAllOtherDevices();
+
+      expect(storage.setLastServerSeq).toHaveBeenCalledWith(expect.any(String), 42);
+      expect(storage.removeLastServerSeq).not.toHaveBeenCalled();
     });
 
     it('does not retry a transient failure — replace-token is not idempotent', async () => {

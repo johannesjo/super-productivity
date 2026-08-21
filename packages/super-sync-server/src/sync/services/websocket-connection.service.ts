@@ -361,21 +361,27 @@ export class WebSocketConnectionService {
     this.pendingNotifications.clear();
   }
 
-  /** Close all connections gracefully */
   /**
    * Closes every live socket of one user. Called on token revocation
    * (`POST /api/replace-token`): sockets are authenticated only at upgrade
    * and kept alive by the heartbeat, so without this a revoked device would
-   * keep receiving op notifications indefinitely. The revoking device's own
-   * socket closes too and reconnects with its fresh token.
+   * keep receiving op notifications indefinitely.
+   *
+   * `excludeClientId` spares the revoking caller's own socket — it holds
+   * the fresh, still-valid token, and clients treat the token-revoked close
+   * code as terminal (no reconnect), so closing it would silence live op
+   * notifications on the one device that stays signed in.
    */
-  closeForUser(userId: number): void {
+  closeForUser(userId: number, excludeClientId?: string): void {
     const userSet = this.connections.get(userId);
     if (!userSet) {
       return;
     }
     // removeConnection mutates the set — iterate a copy.
     for (const client of [...userSet]) {
+      if (excludeClientId !== undefined && client.clientId === excludeClientId) {
+        continue;
+      }
       this.removeConnection(userId, client, {
         code: WebSocketConnectionService.TOKEN_REVOKED_CLOSE_CODE,
         reason: 'Token revoked',
@@ -383,6 +389,7 @@ export class WebSocketConnectionService {
     }
   }
 
+  /** Close all connections gracefully */
   closeAll(): void {
     for (const [, userSet] of this.connections) {
       for (const client of userSet) {

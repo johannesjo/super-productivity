@@ -428,6 +428,29 @@ describe('WebSocketConnectionService', () => {
     it('should no-op for a user with no connections', () => {
       expect(() => service.closeForUser(99)).not.toThrow();
     });
+
+    it('should spare the excluded clientId (the revoking caller) and close the rest', () => {
+      const wsCaller = createMockWs();
+      const wsOtherDevice = createMockWs();
+      service.addConnection(1, 'client-caller', wsCaller as any);
+      service.addConnection(1, 'client-other', wsOtherDevice as any);
+
+      service.closeForUser(1, 'client-caller');
+
+      // The caller holds the fresh, still-valid token — closing it with the
+      // terminal 4003 code would stop its live notifications until restart.
+      expect(wsCaller.close).not.toHaveBeenCalled();
+      expect(wsOtherDevice.close).toHaveBeenCalledWith(4003, 'Token revoked');
+      expect(service.getConnectionCount()).toBe(1);
+
+      // The spared socket still receives notifications afterwards.
+      wsCaller.send.mockClear();
+      service.notifyNewOps(1, 'someone-else', 9);
+      vi.advanceTimersByTime(100);
+      expect(parseSendCalls(wsCaller)).toContainEqual(
+        expect.objectContaining({ type: 'new_ops', latestSeq: 9 }),
+      );
+    });
   });
 
   describe('notifyNewOps', () => {

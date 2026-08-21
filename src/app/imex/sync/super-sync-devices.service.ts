@@ -51,7 +51,15 @@ export class SuperSyncDevicesService {
    * while signed out are kept and upload after re-authenticating.
    */
   async signOutAllOtherDevices(): Promise<void> {
-    await this._superSyncProviderOrError().signOutAllOtherDevices();
+    const provider = this._superSyncProviderOrError();
+    // Sent so the server spares this device's WebSocket when it closes the
+    // account's sockets (the revoked-close code is terminal client-side).
+    const ownClientId = await this._clientIdService.loadClientId();
+    await provider.signOutAllOtherDevices(ownClientId ?? undefined);
+    // The provider stored the fresh token through its own credential store,
+    // bypassing SyncProviderManager — without this, the settings-form seed
+    // and the Android credential bridge keep the revoked token until restart.
+    await this._providerManager.notifyCredentialsRotated(SyncProviderId.SuperSync);
   }
 
   private _superSyncProviderOrError(): SuperSyncProvider {

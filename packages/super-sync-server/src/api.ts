@@ -198,8 +198,13 @@ export const apiRoutes = async (
         const result = await replaceToken(user.userId, user.email);
         // Sockets authenticate only at upgrade, so revoked tokens would keep
         // receiving op notifications through already-open connections — close
-        // them all; the caller reconnects with its fresh token.
-        getWsConnectionService().closeForUser(user.userId);
+        // them all, sparing the caller's own socket (it holds the fresh
+        // token; the revoked-close code is terminal client-side). Callers
+        // that send no clientId get closed too and reconnect on next sync.
+        const body = req.body as { clientId?: unknown } | null | undefined;
+        const callerClientId =
+          typeof body?.clientId === 'string' ? body.clientId : undefined;
+        getWsConnectionService().closeForUser(user.userId, callerClientId);
         return reply.send(result);
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : 'Unknown error';

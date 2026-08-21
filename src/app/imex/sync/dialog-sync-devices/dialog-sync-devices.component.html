@@ -49,7 +49,10 @@
   mat-dialog-actions
   align="end"
 >
-  @if (!isLoading() && !error()) {
+  <!-- Deliberately shown even when the list failed to load: sign-out only
+       needs POST /api/replace-token, and the lost-device case (#9652) is
+       exactly when it must stay reachable. -->
+  @if (!isLoading()) {
     <button
       class="sign-out-btn"
       mat-button
@@ -63,6 +66,7 @@
   <button
     mat-button
     mat-dialog-close
+    [disabled]="isSigningOut()"
   >
     {{ T.G.CLOSE | translate }}
   </button>

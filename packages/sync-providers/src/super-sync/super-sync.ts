@@ -460,8 +460,12 @@ export class SuperSyncProvider
    * `_getServerSeqKey`), so it is carried over to the new token's key —
    * same server, same account, same op stream; without this the swap would
    * force a full re-download from seq 0.
+   *
+   * `ownClientId` lets the server spare this device's WebSocket when it
+   * closes the account's sockets (older servers ignore it and close the
+   * caller's socket too — the next sync cycle reconnects).
    */
-  async signOutAllOtherDevices(): Promise<void> {
+  async signOutAllOtherDevices(ownClientId?: string): Promise<void> {
     this._deps.logger.normal(`${this._logLabel}: signOutAllOtherDevices`);
     const cfg = await this._cfgOrError();
     // Read the cursor (and its key, for cleanup) before the POST: once the
@@ -470,20 +474,30 @@ export class SuperSyncProvider
     const lastServerSeq = await this.getLastServerSeq();
     const oldSeqKey = await this._getServerSeqKey();
 
+    // An explicit JSON body is required: Fastify rejects a body-less POST
+    // carrying `Content-Type: application/json` (FST_ERR_CTP_EMPTY_JSON_BODY).
     // noRetry: the endpoint is NOT idempotent. If the bump lands but the
     // response is lost, a retry re-POSTs with the already-revoked token and
     // deterministically 401s — worse than surfacing the original failure.
     const response = await this._fetchApi<unknown>(cfg, '/api/replace-token', {
       method: 'POST',
+      body: JSON.stringify(ownClientId ? { clientId: ownClientId } : {}),
       noRetry: true,
     });
     const { token } = this._deps.responseValidators.validateReplaceToken(response);
 
+    // Cursor first, token second: a hard crash between the two writes then
+    // leaves at worst an orphaned storage entry — never a persisted token
+    // without a cursor under its key (which would silently re-download the
+    // full op stream from seq 0 on the next sync).
+    const newSeqKey = this._computeServerSeqKey(cfg.baseUrl, token);
+    this._deps.storage.setLastServerSeq(newSeqKey, lastServerSeq);
     await this.setPrivateCfg({ ...cfg, accessToken: token });
-    await this.setLastServerSeq(lastServerSeq);
-    // Old key last: a crash anywhere above leaves at worst an orphaned
-    // entry, never a lost cursor.
-    this._deps.storage.removeLastServerSeq(oldSeqKey);
+    // Guard: if the keys coincide (unchanged token, hash collision) the
+    // removal would delete the cursor just written above.
+    if (oldSeqKey !== newSeqKey) {
+      this._deps.storage.removeLastServerSeq(oldSeqKey);
+    }
   }
 
   // === WebSocket Parameters ===
@@ -582,15 +596,25 @@ export class SuperSyncProvider
       return this._cachedServerSeqKey;
     }
     const cfg = await this.privateCfg.load();
-    const baseUrl = cfg?.baseUrl || this._deps.defaultBaseUrl;
-    const accessToken = cfg?.accessToken ?? '';
-    const identifier = `${baseUrl}|${accessToken}`;
+    this._cachedServerSeqKey = this._computeServerSeqKey(
+      cfg?.baseUrl,
+      cfg?.accessToken ?? '',
+    );
+    return this._cachedServerSeqKey;
+  }
+
+  /**
+   * Pure key derivation, split from `_getServerSeqKey` so a token swap can
+   * compute the NEW token's key before persisting the token (crash-safety
+   * ordering in `signOutAllOtherDevices`).
+   */
+  private _computeServerSeqKey(baseUrl: string | undefined, accessToken: string): string {
+    const identifier = `${baseUrl || this._deps.defaultBaseUrl}|${accessToken}`;
     const hash = identifier
       .split('')
       .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
       .toString(16);
-    this._cachedServerSeqKey = `${LAST_SERVER_SEQ_KEY_PREFIX}${hash}`;
-    return this._cachedServerSeqKey;
+    return `${LAST_SERVER_SEQ_KEY_PREFIX}${hash}`;
   }
 
   /**
@@ -762,16 +786,20 @@ export class SuperSyncProvider
   private async _fetchApi<T>(
     cfg: SuperSyncPrivateCfg,
     path: string,
-    options: RequestInit & { noRetry?: boolean },
+    options: RequestInit & { noRetry?: boolean; body?: string },
   ): Promise<T> {
     const baseUrl = this._resolveBaseUrl(cfg);
     const url = `${baseUrl}${path}`;
     const sanitizedToken = this._sanitizeToken(cfg.accessToken);
 
     if (this.isNativePlatform) {
-      return this._doNativeFetch<T>(cfg, path, options.method || 'GET', undefined, {
-        noRetry: options.noRetry,
-      });
+      return this._doNativeFetch<T>(
+        cfg,
+        path,
+        options.method || 'GET',
+        options.body === undefined ? undefined : { data: options.body },
+        { noRetry: options.noRetry },
+      );
     }
 
     const headers = new Headers(options.headers as HeadersInit);
@@ -780,6 +808,7 @@ export class SuperSyncProvider
 
     return this._doWebFetch<T>(url, path, headers, {
       method: options.method || 'GET',
+      ...(options.body === undefined ? {} : { body: options.body }),
       noRetry: options.noRetry,
     });
   }
