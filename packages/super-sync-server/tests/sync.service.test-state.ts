@@ -95,43 +95,77 @@ export function hasOperationUniqueConflict(
   );
 }
 
+export type OperationWhereAlternative = {
+  opType?: string | { in?: string[] };
+  repairBaseServerSeq?: null | { not: null };
+};
+
+/**
+ * Evaluates one alternative of a `CAUSAL_FULL_STATE_OPERATION_WHERE`-shaped
+ * `OR` list against an operation row. Shared so every Prisma mock decodes the
+ * production predicate (src/sync/sync.types.ts) the same way.
+ */
+export function matchesOperationAlternative(
+  opType: string,
+  repairBaseServerSeq: number | null | undefined,
+  alternative: OperationWhereAlternative,
+): boolean {
+  const wantedOpType = alternative.opType;
+  if (typeof wantedOpType === 'string' && opType !== wantedOpType) {
+    return false;
+  }
+  if (
+    typeof wantedOpType === 'object' &&
+    wantedOpType.in &&
+    !wantedOpType.in.includes(opType)
+  ) {
+    return false;
+  }
+  if (alternative.repairBaseServerSeq === null && repairBaseServerSeq != null) {
+    return false;
+  }
+  if (alternative.repairBaseServerSeq?.not === null && repairBaseServerSeq == null) {
+    return false;
+  }
+  return true;
+}
+
 /**
  * Mocks `prisma.operation.groupBy({ by: ['userId'], _max: { serverSeq } })`
- * for the old-ops sweep's boundary query. Supports the where-shapes the sweep
- * uses: `serverSeq.gt` plus the CAUSAL_FULL_STATE_OPERATION_WHERE `OR` list
- * (opType exact / opType.in / repairBaseServerSeq null-or-not).
+ * for the old-ops sweep's boundary query: `serverSeq.gt` plus the
+ * CAUSAL_FULL_STATE_OPERATION_WHERE `OR` list. Anything else throws rather
+ * than being silently ignored — a where-clause the mock cannot decode would
+ * otherwise let the one query that authorizes DELETEs drift away from its
+ * unit-test double while every spec stayed green.
  */
 export function mockOperationGroupByMaxSeq(
   operations: Map<string, any>,
-  args: any,
+  args: {
+    where?: { serverSeq?: { gt?: number }; OR?: OperationWhereAlternative[] };
+  },
 ): Array<{ userId: number; _max: { serverSeq: number | null } }> {
-  const matchesAlternative = (op: any, alternative: any): boolean => {
-    if (typeof alternative.opType === 'string' && op.opType !== alternative.opType) {
-      return false;
-    }
-    if (alternative.opType?.in && !alternative.opType.in.includes(op.opType)) {
-      return false;
-    }
-    if (alternative.repairBaseServerSeq === null && op.repairBaseServerSeq != null) {
-      return false;
-    }
-    if (alternative.repairBaseServerSeq?.not === null && op.repairBaseServerSeq == null) {
-      return false;
-    }
-    return true;
-  };
+  const where = args.where ?? {};
+  const unsupported = Object.keys(where).filter((k) => k !== 'serverSeq' && k !== 'OR');
+  if (unsupported.length > 0) {
+    throw new Error(
+      `mockOperationGroupByMaxSeq: unsupported where keys ${unsupported.join(', ')}`,
+    );
+  }
+  if (!Array.isArray(where.OR)) {
+    throw new Error(
+      'mockOperationGroupByMaxSeq: expected a CAUSAL_FULL_STATE_OPERATION_WHERE OR list',
+    );
+  }
 
   const maxSeqByUser = new Map<number, number>();
   for (const op of operations.values()) {
-    if (
-      args.where?.serverSeq?.gt !== undefined &&
-      op.serverSeq <= args.where.serverSeq.gt
-    ) {
+    if (where.serverSeq?.gt !== undefined && op.serverSeq <= where.serverSeq.gt) {
       continue;
     }
     if (
-      Array.isArray(args.where?.OR) &&
-      !args.where.OR.some((alternative: any) => matchesAlternative(op, alternative))
+      !where.OR.some((alternative) =>
+        matchesOperationAlternative(op.opType, op.repairBaseServerSeq, alternative),
+      )
     ) {
       continue;
     }

@@ -7,7 +7,9 @@
  *   - a lapsed user (snapshot older than the retention cutoff) gets the
  *     superseded prefix pruned while the causal full-state base + replay tail
  *     survive (regression for the inverted snapshotAt >= cutoff gate),
- *   - a snapshotless user is never touched,
+ *   - snapshotless, encrypted-only and state-row-less histories are pruned
+ *     from the operation stream's own causal boundary (#9688),
+ *   - a cached-snapshot cursor caps that boundary while it exists,
  *   - a user whose only full-state op is a legacy REPAIR (no causal base
  *     cursor) is skipped entirely.
  *
@@ -105,6 +107,18 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       receivedAt: overrides.receivedAt,
     });
 
+  /** Prefix (1–3) + causal base (4) + tail (5), the shape both cap tests use. */
+  const seedPrefixBaseTail = async (userId: number): Promise<void> => {
+    await seedImportOp(userId, 1);
+    await seedOp(userId, 2);
+    await seedOp(userId, 3);
+    await seedImportOp(userId, 4);
+    await seedOp(userId, 5);
+  };
+
+  const runSweep = (): Promise<{ totalDeleted: number; affectedUserIds: number[] }> =>
+    new SyncService({}).deleteOldSyncedOpsForAllUsers(cutoffTime);
+
   const survivingSeqs = async (userId: number): Promise<number[]> => {
     const ops = await prisma.operation.findMany({
       where: { userId },
@@ -142,13 +156,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     await seedOp(LAPSED_USER_ID, 1);
     await seedOp(LAPSED_USER_ID, 2);
     await seedOp(LAPSED_USER_ID, 3);
-    await seedOp(LAPSED_USER_ID, 4, {
-      opType: 'SYNC_IMPORT',
-      actionType: 'LOAD_ALL_DATA',
-      entityType: 'ALL',
-      entityId: null,
-      payload: { appDataComplete: { TASK: {} } },
-    });
+    await seedImportOp(LAPSED_USER_ID, 4);
     await seedOp(LAPSED_USER_ID, 5);
     await prisma.userSyncState.create({
       data: {
@@ -160,7 +168,8 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       },
     });
 
-    // Snapshotless user: outside the sweep's scope, must keep everything.
+    // Plain-op-only user: no full-state op anywhere, so no boundary can
+    // authorize pruning — everything survives regardless of the snapshot.
     await seedOp(SNAPSHOTLESS_USER_ID, 1);
     await prisma.userSyncState.create({
       data: { userId: SNAPSHOTLESS_USER_ID, lastSeq: 1 },
@@ -170,12 +179,8 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     // never authorize pruning, even with a stale marker pointing at it.
     await seedOp(LEGACY_REPAIR_USER_ID, 1);
     await seedOp(LEGACY_REPAIR_USER_ID, 2);
-    await seedOp(LEGACY_REPAIR_USER_ID, 3, {
+    await seedImportOp(LEGACY_REPAIR_USER_ID, 3, {
       opType: 'REPAIR',
-      actionType: 'LOAD_ALL_DATA',
-      entityType: 'ALL',
-      entityId: null,
-      payload: { appDataComplete: { TASK: {} } },
       repairBaseServerSeq: null,
     });
     await prisma.userSyncState.create({
@@ -188,10 +193,9 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       },
     });
 
-    const service = new SyncService({});
     // The sweep runs across ALL users in this database, so assert per-user
     // outcomes rather than totals other suites' leftovers could inflate.
-    const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    const { affectedUserIds } = await runSweep();
 
     expect(await survivingSeqs(LAPSED_USER_ID)).toEqual([4, 5]);
     expect(affectedUserIds).toContain(LAPSED_USER_ID);
@@ -207,18 +211,8 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     // Ops below the boundary but received inside the retention window must
     // survive until they age out — deletion requires BOTH seq < boundary
     // AND receivedAt < cutoff.
-    await seedOp(LAPSED_USER_ID, 1);
-    await prisma.operation.update({
-      where: { id: `sweep-op-${LAPSED_USER_ID}-1` },
-      data: { receivedAt: BigInt(now - 10 * DAY_MS) },
-    });
-    await seedOp(LAPSED_USER_ID, 2, {
-      opType: 'SYNC_IMPORT',
-      actionType: 'LOAD_ALL_DATA',
-      entityType: 'ALL',
-      entityId: null,
-      payload: { appDataComplete: { TASK: {} } },
-    });
+    await seedOp(LAPSED_USER_ID, 1, { receivedAt: BigInt(now - 10 * DAY_MS) });
+    await seedImportOp(LAPSED_USER_ID, 2);
     await prisma.userSyncState.create({
       data: {
         userId: LAPSED_USER_ID,
@@ -229,8 +223,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       },
     });
 
-    const service = new SyncService({});
-    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    await runSweep();
 
     expect(await survivingSeqs(LAPSED_USER_ID)).toEqual([1, 2]);
   });
@@ -254,8 +247,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       data: { userId: SNAPSHOTLESS_IMPORT_USER_ID, lastSeq: 5 },
     });
 
-    const service = new SyncService({});
-    const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    const { affectedUserIds } = await runSweep();
 
     expect(await survivingSeqs(SNAPSHOTLESS_IMPORT_USER_ID)).toEqual([4, 5]);
     expect(affectedUserIds).toContain(SNAPSHOTLESS_IMPORT_USER_ID);
@@ -274,8 +266,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       data: { userId: ENCRYPTED_USER_ID, lastSeq: 4 },
     });
 
-    const service = new SyncService({});
-    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    await runSweep();
 
     expect(await survivingSeqs(ENCRYPTED_USER_ID)).toEqual([3, 4]);
   });
@@ -286,8 +277,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     await seedImportOp(NO_STATE_ROW_USER_ID, 3);
     await seedOp(NO_STATE_ROW_USER_ID, 4);
 
-    const service = new SyncService({});
-    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    await runSweep();
 
     expect(await survivingSeqs(NO_STATE_ROW_USER_ID)).toEqual([3, 4]);
   });
@@ -302,8 +292,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       data: { userId: SNAPSHOTLESS_IMPORT_USER_ID, lastSeq: 3 },
     });
 
-    const service = new SyncService({});
-    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    await runSweep();
 
     expect(await survivingSeqs(SNAPSHOTLESS_IMPORT_USER_ID)).toEqual([2, 3]);
   });
@@ -314,11 +303,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     // causal full-state op below the cap is seq 1, which authorizes nothing.
     // The cap lifts when the E2EE eradication sweep nulls the cached snapshot
     // (next test).
-    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 1);
-    await seedOp(STUCK_SNAPSHOT_USER_ID, 2);
-    await seedOp(STUCK_SNAPSHOT_USER_ID, 3);
-    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 4);
-    await seedOp(STUCK_SNAPSHOT_USER_ID, 5);
+    await seedPrefixBaseTail(STUCK_SNAPSHOT_USER_ID);
     await prisma.userSyncState.create({
       data: {
         userId: STUCK_SNAPSHOT_USER_ID,
@@ -329,25 +314,19 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       },
     });
 
-    const service = new SyncService({});
-    const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    const { affectedUserIds } = await runSweep();
 
     expect(await survivingSeqs(STUCK_SNAPSHOT_USER_ID)).toEqual([1, 2, 3, 4, 5]);
     expect(affectedUserIds).not.toContain(STUCK_SNAPSHOT_USER_ID);
   });
 
   it('unsticks the capped user once the snapshot cursor is cleared (post-eradication)', async () => {
-    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 1);
-    await seedOp(STUCK_SNAPSHOT_USER_ID, 2);
-    await seedOp(STUCK_SNAPSHOT_USER_ID, 3);
-    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 4);
-    await seedOp(STUCK_SNAPSHOT_USER_ID, 5);
+    await seedPrefixBaseTail(STUCK_SNAPSHOT_USER_ID);
     await prisma.userSyncState.create({
       data: { userId: STUCK_SNAPSHOT_USER_ID, lastSeq: 5 },
     });
 
-    const service = new SyncService({});
-    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    await runSweep();
 
     expect(await survivingSeqs(STUCK_SNAPSHOT_USER_ID)).toEqual([4, 5]);
   });
@@ -363,8 +342,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       data: { userId: SEQ1_IMPORT_ONLY_USER_ID, lastSeq: 3 },
     });
 
-    const service = new SyncService({});
-    const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    const { affectedUserIds } = await runSweep();
 
     expect(await survivingSeqs(SEQ1_IMPORT_ONLY_USER_ID)).toEqual([1, 2, 3]);
     expect(affectedUserIds).not.toContain(SEQ1_IMPORT_ONLY_USER_ID);
@@ -383,8 +361,7 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       data: { userId: LEGACY_REPAIR_USER_ID, lastSeq: 3 },
     });
 
-    const service = new SyncService({});
-    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+    await runSweep();
 
     expect(await survivingSeqs(LEGACY_REPAIR_USER_ID)).toEqual([1, 2, 3]);
   });

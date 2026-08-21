@@ -19,27 +19,12 @@ let requestCache: Map<string, any>;
 
 // Mock the database module with Prisma mocks
 vi.mock('../src/db', async () => {
-  const { mockOperationGroupByMaxSeq } = await import('./sync.service.test-state');
-  const applySelect = (op: any, select?: Record<string, boolean>) => {
-    if (!op || !select) {
-      return op;
-    }
-
-    return Object.fromEntries(
-      Object.entries(select)
-        .filter(([, shouldSelect]) => shouldSelect)
-        .map(([key]) => [key, op[key]]),
-    );
-  };
-
-  const hasUniqueConflict = (row: any) =>
-    Array.from(testOperations.values()).some(
-      (op) =>
-        op.id === row.id ||
-        (op.userId === row.userId &&
-          row.serverSeq !== undefined &&
-          op.serverSeq === row.serverSeq),
-    );
+  const {
+    applyOperationSelect: applySelect,
+    hasOperationUniqueConflict,
+    mockOperationGroupByMaxSeq,
+  } = await import('./sync.service.test-state');
+  const hasUniqueConflict = (row: any) => hasOperationUniqueConflict(testOperations, row);
 
   return {
     prisma: {

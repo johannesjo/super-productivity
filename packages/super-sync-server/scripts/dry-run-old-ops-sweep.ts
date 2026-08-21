@@ -87,7 +87,7 @@ const findBadBoundaries = async (
 
 /** Residual-cohort bucket for a user the sweep cannot reach. */
 const residualCategory = (r: PerUserRow): string => {
-  if (r.was_capped && (r.protected_from_seq === null || r.protected_from_seq <= 1)) {
+  if (r.was_capped) {
     return 'snapshot-capped (cursor blocks newer boundary)';
   }
   if (r.any_causal_seq === null) {
@@ -127,29 +127,25 @@ const main = async (): Promise<void> => {
       FROM per_user p
       LEFT JOIN user_sync_state s ON s.user_id = p.user_id
     ),
-    resolved AS (
+    capped AS (
       SELECT
         j.*,
-        (
-          j.causal_boundary_seq IS NOT NULL
-          AND j.last_snapshot_seq IS NOT NULL
-          AND j.last_snapshot_seq > 0
-          AND j.causal_boundary_seq > j.last_snapshot_seq
-        ) AS was_capped,
-        CASE
-          WHEN j.causal_boundary_seq IS NULL THEN NULL
-          WHEN j.last_snapshot_seq IS NOT NULL
-            AND j.last_snapshot_seq > 0
-            AND j.causal_boundary_seq > j.last_snapshot_seq
-          THEN (
-            SELECT max(o.server_seq) FROM operations o
-            WHERE o.user_id = j.user_id
-              AND o.server_seq <= j.last_snapshot_seq
-              AND ${causalFullStateSql('o')}
-          )
-          ELSE j.causal_boundary_seq
-        END AS protected_from_seq
+        COALESCE(
+          j.last_snapshot_seq > 0 AND j.causal_boundary_seq > j.last_snapshot_seq,
+          false
+        ) AS was_capped
       FROM joined j
+    ),
+    resolved AS (
+      SELECT
+        c.*,
+        CASE WHEN c.was_capped THEN (
+          SELECT max(o.server_seq) FROM operations o
+          WHERE o.user_id = c.user_id
+            AND o.server_seq <= c.last_snapshot_seq
+            AND ${causalFullStateSql('o')}
+        ) ELSE c.causal_boundary_seq END AS protected_from_seq
+      FROM capped c
     )
     SELECT
       r.user_id,
@@ -161,24 +157,23 @@ const main = async (): Promise<void> => {
       r.has_plaintext_rows,
       r.was_capped,
       r.protected_from_seq,
-      CASE WHEN r.protected_from_seq > 1 THEN (
-        SELECT count(*) FROM operations o
-        WHERE o.user_id = r.user_id
-          AND o.server_seq < r.protected_from_seq
-          AND o.received_at < ${cutoff}
-      ) ELSE 0 END AS would_delete,
-      CASE WHEN r.protected_from_seq > 1 THEN (
-        SELECT count(*) FROM operations o
-        WHERE o.user_id = r.user_id
-          AND o.server_seq < r.protected_from_seq
-          AND o.received_at >= ${cutoff}
-      ) ELSE 0 END AS fresh_prefix,
-      CASE WHEN r.protected_from_seq > 1 THEN (
-        SELECT count(*) FROM operations o
-        WHERE o.user_id = r.user_id
-          AND o.server_seq >= r.protected_from_seq
-      ) ELSE 0 END AS retained_from_boundary
+      COALESCE(prefix.would_delete, 0) AS would_delete,
+      COALESCE(prefix.fresh_prefix, 0) AS fresh_prefix,
+      -- The retained base + tail is everything the prefix scan did not cover,
+      -- so it needs no scan of its own (it is the largest of the three ranges).
+      COALESCE(
+        r.op_count - prefix.would_delete - prefix.fresh_prefix,
+        0
+      ) AS retained_from_boundary
     FROM resolved r
+    LEFT JOIN LATERAL (
+      SELECT
+        count(*) FILTER (WHERE o.received_at < ${cutoff}) AS would_delete,
+        count(*) FILTER (WHERE o.received_at >= ${cutoff}) AS fresh_prefix
+      FROM operations o
+      WHERE o.user_id = r.user_id
+        AND o.server_seq < r.protected_from_seq
+    ) prefix ON r.protected_from_seq > 1
   `;
 
   const prunable = perUser.filter(

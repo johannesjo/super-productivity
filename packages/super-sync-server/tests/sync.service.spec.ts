@@ -7,6 +7,7 @@ import {
 } from '../src/sync/conflict';
 import { CONFLICT_DETECTION_ENTITY_BATCH_SIZE } from '../src/sync/sync.types';
 import { testState, resetTestState } from './sync.service.test-state';
+import type { OperationWhereAlternative } from './sync.service.test-state';
 
 // Mock the database module with Prisma mocks
 vi.mock('../src/db', async () => {
@@ -17,33 +18,10 @@ vi.mock('../src/db', async () => {
     isEntityArrayBranchQuery,
     entityArrayBranchRows,
     mockOperationGroupByMaxSeq,
+    matchesOperationAlternative,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
-
-  type OperationWhereAlternative = {
-    opType?: string | { in?: string[] };
-    repairBaseServerSeq?: null | { not: null };
-  };
-  const matchesOperationAlternative = (
-    opType: string,
-    repairBaseServerSeq: number | null | undefined,
-    alternative: OperationWhereAlternative,
-  ): boolean => {
-    if (typeof alternative.opType === 'string' && opType !== alternative.opType) {
-      return false;
-    }
-    if (alternative.opType?.in && !alternative.opType.in.includes(opType)) {
-      return false;
-    }
-    if (alternative.repairBaseServerSeq === null && repairBaseServerSeq != null) {
-      return false;
-    }
-    if (alternative.repairBaseServerSeq?.not === null && repairBaseServerSeq == null) {
-      return false;
-    }
-    return true;
-  };
 
   const createTxMock = () => ({
     operation: {
@@ -3083,19 +3061,18 @@ describe('SyncService', () => {
       const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 
-      for (let i = 1; i <= 5; i++) {
-        const isFullState = i === 5;
+      for (let i = 1; i <= 4; i++) {
         testState.operations.set(`old-op-${i}`, {
           id: `old-op-${i}`,
           userId,
           clientId,
           serverSeq: i,
-          actionType: isFullState ? 'LOAD_ALL_DATA' : 'ADD',
-          opType: isFullState ? 'SYNC_IMPORT' : 'CRT',
-          entityType: isFullState ? 'ALL' : 'TASK',
-          entityId: isFullState ? null : `t${i}`,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
           entityIds: [],
-          payload: isFullState ? { appDataComplete: { TASK: {} } } : {},
+          payload: {},
           vectorClock: {},
           schemaVersion: 1,
           clientTimestamp: BigInt(Date.now()),
@@ -3105,6 +3082,7 @@ describe('SyncService', () => {
           repairBaseServerSeq: null,
         });
       }
+      seedFullStateOp(userId, 5, BigInt(cutoffTime - 1));
 
       testState.userSyncStates.set(userId, {
         userId,

@@ -428,6 +428,11 @@ export class StorageQuotaService {
     // `serverSeq: { gt: 1 }` skips users whose only boundary is the initial
     // import at seq 1 — nothing exists below it, so they can never authorize
     // a deletion (the stuck-snapshot cohort until a newer checkpoint lands).
+    //
+    // Fleet-wide, so it leans on the partial index
+    // `operations_user_id_full_state_server_seq_idx` (raw migration — Prisma
+    // has no partial-index syntax, see #9192). Databases provisioned with
+    // `prisma db push` never got it and will seq-scan `operations` here.
     const boundaries = await prisma.operation.groupBy({
       by: ['userId'],
       where: {
@@ -437,9 +442,10 @@ export class StorageQuotaService {
       _max: { serverSeq: true },
     });
 
-    // Sync-state rows for boundary capping and stalest-first ordering.
+    // Sync-state rows for boundary capping and stalest-first ordering. Read
+    // whole (one row per user): an `IN` list of every candidate costs bind
+    // parameters and planning time without changing the scan Postgres picks.
     const states = await prisma.userSyncState.findMany({
-      where: { userId: { in: boundaries.map((b) => b.userId) } },
       select: { userId: true, lastSnapshotSeq: true, snapshotAt: true },
     });
     const stateByUserId = new Map(states.map((s) => [s.userId, s]));
@@ -447,22 +453,19 @@ export class StorageQuotaService {
     // S1: order stalest first so when affectedUserIds.length exceeds the
     // cleanup reconcile budget (RECONCILE_INTERVAL_MS * maxScheduled per
     // hour), the most-drifted users are reconciled before fresher ones.
-    // Never-snapshotted users (snapshotAt null — the long-dormant bulk) come
-    // first; userId breaks ties deterministically.
+    // Never-snapshotted users (snapshotAt null — the long-dormant bulk) sort
+    // to -1 and come first; userId breaks ties deterministically.
     const candidates = boundaries
-      .map((b) => ({
-        userId: b.userId,
-        causalBoundarySeq: b._max.serverSeq ?? 0,
-        state: stateByUserId.get(b.userId),
-      }))
-      .sort((a, b) => {
-        const aAt = a.state?.snapshotAt ?? null;
-        const bAt = b.state?.snapshotAt ?? null;
-        if (aAt === null && bAt === null) return a.userId - b.userId;
-        if (aAt === null) return -1;
-        if (bAt === null) return 1;
-        return aAt < bAt ? -1 : aAt > bAt ? 1 : a.userId - b.userId;
-      });
+      .map((b) => {
+        const state = stateByUserId.get(b.userId);
+        return {
+          userId: b.userId,
+          causalBoundarySeq: b._max.serverSeq ?? 0,
+          snapshotCap: state?.lastSnapshotSeq ?? 0,
+          staleness: Number(state?.snapshotAt ?? -1),
+        };
+      })
+      .sort((a, b) => a.staleness - b.staleness || a.userId - b.userId);
 
     let totalDeleted = 0;
     const affectedUserIds: number[] = [];
@@ -483,8 +486,8 @@ export class StorageQuotaService {
       // servable. The cap resolves to the newest causal full-state op at or
       // below the cursor, and lifts once the E2EE eradication sweep clears
       // the cached snapshot fields.
-      let protectedFromSeq: number | null = candidate.causalBoundarySeq;
-      const snapshotCap = candidate.state?.lastSnapshotSeq ?? 0;
+      const { snapshotCap } = candidate;
+      let protectedFromSeq = candidate.causalBoundarySeq;
       if (snapshotCap > 0 && protectedFromSeq > snapshotCap) {
         const cappedFullStateOp = await prisma.operation.findFirst({
           where: {
@@ -498,13 +501,13 @@ export class StorageQuotaService {
           orderBy: { serverSeq: 'desc' },
           select: { serverSeq: true },
         });
-        protectedFromSeq = cappedFullStateOp?.serverSeq ?? null;
+        if (!cappedFullStateOp) {
+          cappedUsersWithoutReplayBase++;
+          continue;
+        }
+        protectedFromSeq = cappedFullStateOp.serverSeq;
       }
 
-      if (protectedFromSeq === null) {
-        cappedUsersWithoutReplayBase++;
-        continue;
-      }
       if (protectedFromSeq <= 1) continue;
 
       // Drain this user across multiple batches until either they're empty or
