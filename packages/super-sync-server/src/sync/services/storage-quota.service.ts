@@ -424,7 +424,6 @@ export class StorageQuotaService {
       select: {
         userId: true,
         lastSnapshotSeq: true,
-        snapshotAt: true,
         latestFullStateSeq: true,
       },
       orderBy: { snapshotAt: 'asc' },
@@ -439,14 +438,20 @@ export class StorageQuotaService {
     for (const state of states) {
       if (remainingDeleteBudget <= 0) break;
 
-      const snapshotAt = Number(state.snapshotAt);
       const lastSnapshotSeq = state.lastSnapshotSeq ?? 0;
 
       // The cached snapshot is only exposed by restore endpoints; normal sync
       // clients still bootstrap from the operation log. Therefore cleanup may
       // only remove the superseded prefix before the newest full-state op and
       // must keep that op plus its complete replay tail.
-      if (!(snapshotAt >= cutoffTime && lastSnapshotSeq > 0)) continue;
+      //
+      // Snapshot AGE is deliberately not a gate. An earlier `snapshotAt >=
+      // cutoffTime` check skipped exactly the long-lapsed cohort — inverted
+      // against deleteStaleDevices, which prunes those users' device rows
+      // unconditionally — so lapsed accounts accumulated operations forever.
+      // Safety comes from protectedFromSeq (validated causal full-state op,
+      // ≤ lastSnapshotSeq), not from snapshot recency.
+      if (lastSnapshotSeq <= 0) continue;
       let protectedFromSeq =
         typeof state.latestFullStateSeq === 'number' &&
         state.latestFullStateSeq <= lastSnapshotSeq

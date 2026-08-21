@@ -136,9 +136,11 @@ const LAPSED_LAST_SEEN_AGO = 10 * ONE_DAY;
 const LAPSED_LAST_OP_AGO = 40 * ONE_DAY;
 const NEVER_SYNCED_USER = 5; // no device, no ops, no sync state
 // The cohort daily cleanup actually produces: operations with NO sync_devices
-// row. `deleteStaleDevices` prunes every device unseen for RETENTION_DAYS, while
-// `deleteOldSyncedOpsForAllUsers` SKIPS users whose snapshot predates the same
-// cutoff -- so a long-lapsed user keeps its operations and loses its heartbeat.
+// row. `deleteStaleDevices` prunes every device unseen for RETENTION_DAYS,
+// while the old-ops sweep never empties a user's history: snapshotless users
+// (like this fixture user, seeded with last_seq only) are excluded outright,
+// and swept users keep their newest full-state op plus replay tail -- so a
+// long-lapsed user still holds operations after losing its heartbeat.
 // A fixture without this user cannot detect a window widened past retention,
 // where the device-scoped driver silently stops seeing these accounts.
 const PRUNED_DEVICE_USER = 6;
