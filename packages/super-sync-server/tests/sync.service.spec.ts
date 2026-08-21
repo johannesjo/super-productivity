@@ -3127,6 +3127,58 @@ describe('SyncService', () => {
       expect(freshClientOps.map((op) => op.serverSeq)).toEqual([4, 5]);
     });
 
+    it('prunes the superseded prefix for a lapsed user whose snapshot predates the cutoff', async () => {
+      // Regression for the inverted retention gate: the sweep used to skip any
+      // user whose snapshotAt was OLDER than the retention cutoff, so exactly
+      // the long-lapsed cohort kept its full operation history forever while
+      // deleteStaleDevices pruned the same users' device rows unconditionally.
+      // Snapshot age buys no safety here — pruning is bounded by the validated
+      // causal full-state op (protectedFromSeq ≤ lastSnapshotSeq), which keeps
+      // the replay base, its tail, and the cached snapshot's tail intact
+      // regardless of when the snapshot was taken.
+      const service = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= 5; i++) {
+        const isFullState = i === 4;
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: isFullState ? 'LOAD_ALL_DATA' : 'ADD',
+          opType: isFullState ? 'SYNC_IMPORT' : 'CRT',
+          entityType: isFullState ? 'ALL' : 'TASK',
+          entityId: isFullState ? null : `t${i}`,
+          entityIds: [],
+          payload: isFullState ? { appDataComplete: { TASK: {} } } : {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+          repairBaseServerSeq: null,
+        });
+      }
+
+      // Snapshot taken 100 days ago — well before the cutoff (lapsed user).
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 5,
+        lastSnapshotSeq: 4,
+        snapshotAt: BigInt(Date.now() - 100 * 24 * 60 * 60 * 1000),
+        latestFullStateSeq: 4,
+      });
+
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(totalDeleted).toBe(3);
+      expect(affectedUserIds).toContain(userId);
+      expect(Array.from(testState.operations.keys())).toEqual(['old-op-4', 'old-op-5']);
+    });
+
     it('does not prune history behind a stale latestFullStateSeq marker pointing at a legacy REPAIR (primary path)', async () => {
       // Regression for the primary-path gap: installs upgraded from before the
       // causal-marker migration can carry a `latestFullStateSeq` that points at a
