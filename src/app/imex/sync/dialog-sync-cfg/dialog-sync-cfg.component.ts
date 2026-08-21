@@ -909,7 +909,7 @@ export class DialogSyncCfgComponent implements AfterViewInit {
 
   showDevices(): void {
     this._matDialog
-      .open(DialogSyncDevicesComponent, {
+      .open<DialogSyncDevicesComponent, undefined, boolean>(DialogSyncDevicesComponent, {
         width: '500px',
         maxWidth: '90vw',
       })

@@ -194,6 +194,19 @@ export class SuperSyncProvider
     await this.privateCfg.setComplete(cfg);
   }
 
+  /**
+   * Drops every cache derived from the stored credentials so the next read
+   * hits the persistent store. Needed when another browser tab may have
+   * rotated the token on the shared store (sign out other devices): this
+   * tab's cached cfg would keep serving the revoked token — striking out
+   * the auth-failure tolerance and wiping the fresh token — and its cached
+   * seq key would read the wrong cursor slot for the new token.
+   */
+  invalidateCredentialCache(): void {
+    this._cachedServerSeqKey = null;
+    this.privateCfg.invalidateInMemoryCache?.();
+  }
+
   async clearAuthCredentials(): Promise<void> {
     const cfg = await this.privateCfg.load();
     if (cfg?.accessToken) {
@@ -461,11 +474,13 @@ export class SuperSyncProvider
    * same server, same account, same op stream; without this the swap would
    * force a full re-download from seq 0.
    *
-   * `ownClientId` lets the server spare this device's WebSocket when it
-   * closes the account's sockets (older servers ignore it and close the
-   * caller's socket too — the next sync cycle reconnects).
+   * The server also closes this device's own WebSocket (the revocation
+   * closes every socket of the account — a socket's clientId is
+   * self-declared and unauthenticated, so sparing "the caller's" socket by
+   * id would let a stolen-token client exempt itself by claiming this id).
+   * The next sync cycle reconnects with the fresh token.
    */
-  async signOutAllOtherDevices(ownClientId?: string): Promise<void> {
+  async signOutAllOtherDevices(): Promise<void> {
     this._deps.logger.normal(`${this._logLabel}: signOutAllOtherDevices`);
     const cfg = await this._cfgOrError();
     // Read the cursor (and its key, for cleanup) before the POST: once the
@@ -481,7 +496,7 @@ export class SuperSyncProvider
     // deterministically 401s — worse than surfacing the original failure.
     const response = await this._fetchApi<unknown>(cfg, '/api/replace-token', {
       method: 'POST',
-      body: JSON.stringify(ownClientId ? { clientId: ownClientId } : {}),
+      body: '{}',
       noRetry: true,
     });
     const { token } = this._deps.responseValidators.validateReplaceToken(response);
@@ -808,7 +823,7 @@ export class SuperSyncProvider
 
     return this._doWebFetch<T>(url, path, headers, {
       method: options.method || 'GET',
-      ...(options.body === undefined ? {} : { body: options.body }),
+      body: options.body,
       noRetry: options.noRetry,
     });
   }

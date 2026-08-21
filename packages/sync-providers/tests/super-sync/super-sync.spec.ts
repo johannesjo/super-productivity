@@ -87,6 +87,7 @@ const createCredentialStoreMock = (): CredentialStoreMock & {
     upsertPartial: vi.fn(),
     clear: vi.fn(),
     onConfigChange: vi.fn(),
+    invalidateInMemoryCache: vi.fn(),
   };
   return {
     ...mock,
@@ -429,6 +430,33 @@ describe('SuperSyncProvider', () => {
     });
   });
 
+  describe('invalidateCredentialCache', () => {
+    it('drops the cached seq key so a token rotated by another tab is picked up', async () => {
+      const { provider, cfgStore, storage } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      storage.getLastServerSeq.mockReturnValue(10);
+      await provider.getLastServerSeq();
+      const oldKey = storage.getLastServerSeq.mock.calls[0][0] as string;
+
+      // Another tab replaced the token on the shared store; the cached seq
+      // key would keep reading the OLD token's (already removed) cursor slot.
+      cfgStore.load.mockResolvedValue({ ...testConfig, accessToken: 'rotated-token' });
+      provider.invalidateCredentialCache();
+      await provider.getLastServerSeq();
+
+      const newKey = storage.getLastServerSeq.mock.calls[1][0] as string;
+      expect(newKey).not.toBe(oldKey);
+    });
+
+    it('drops the credential store in-memory cache', () => {
+      const { provider, cfgStore } = buildProvider();
+
+      provider.invalidateCredentialCache();
+
+      expect(cfgStore.invalidateInMemoryCache).toHaveBeenCalled();
+    });
+  });
+
   describe('getWebSocketParams', () => {
     it('returns null when access token is missing', async () => {
       const { provider, cfgStore } = buildProvider();
@@ -743,18 +771,6 @@ describe('SuperSyncProvider', () => {
       });
     });
 
-    it('sends its clientId so the server can spare this device WebSocket', async () => {
-      const { provider, cfgStore, fetchMock } = buildProvider();
-      cfgStore.load.mockResolvedValue(testConfig);
-      cfgStore.setComplete.mockResolvedValue(undefined);
-      fetchMock.mockResolvedValue(okResponse(replaceTokenResponse));
-
-      await provider.signOutAllOtherDevices('E_mine11');
-
-      const [, options] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect(JSON.parse(options.body as string)).toEqual({ clientId: 'E_mine11' });
-    });
-
     it('sends the JSON body through the native HTTP path too', async () => {
       const { provider, cfgStore, nativeHttpExecutor } = buildProvider({
         isNativePlatform: true,
@@ -766,12 +782,12 @@ describe('SuperSyncProvider', () => {
         data: replaceTokenResponse,
       });
 
-      await provider.signOutAllOtherDevices('A_phone11');
+      await provider.signOutAllOtherDevices();
 
       const requestCfg = nativeHttpExecutor.mock.calls[0][0] as NativeHttpRequestConfig;
       expect(requestCfg.url).toBe('https://sync.example.com/api/replace-token');
       expect(requestCfg.method).toBe('POST');
-      expect(requestCfg.data).toBe(JSON.stringify({ clientId: 'A_phone11' }));
+      expect(requestCfg.data).toBe('{}');
     });
 
     it('carries the lastServerSeq cursor over to the new token key', async () => {

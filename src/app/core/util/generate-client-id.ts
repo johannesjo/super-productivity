@@ -61,15 +61,22 @@ export const getPlatformCode = (platform: ClientPlatform): PlatformCode => {
 
 /**
  * Reads back the platform a clientId was minted on, or null when the prefix is
- * not one this app has ever produced.
+ * not one this app can decode without guessing.
  *
  * The inverse of `getPlatformCode`, kept in the same file for the reason its
  * header gives: when the two halves of an id's contract live apart, one drifts.
  *
- * Works for legacy PFAPI ids too — those were `{platform}_{Date.now()}`, so the
- * prefix is unchanged.
+ * Legacy PFAPI ids were `{getEnvironmentId()}_{Date.now()}` with multi-char
+ * environment prefixes: Electron `E_{os}_…` happens to match the current
+ * one-letter-underscore shape, and Android's fixed `AND_…` is special-cased
+ * below. Legacy browser ids (`B{browser}{os}_…`, e.g. `BCL_…`) deliberately
+ * return null — decoding them would need the full historical browser/OS code
+ * table, and "unknown" is safer than a wrong guess.
  */
 export const getClientIdPlatformCode = (clientId: string): PlatformCode | null => {
+  if (clientId.startsWith('AND_')) {
+    return 'A';
+  }
   const code = clientId.slice(0, 1);
   return clientId[1] === '_' && (PLATFORM_CODES as readonly string[]).includes(code)
     ? (code as PlatformCode)

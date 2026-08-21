@@ -18,18 +18,7 @@ import { PGlite } from '@electric-sql/pglite';
  * instance to prove the predicate alone suffices across instances.
  */
 
-const CREATE = `
-  CREATE TABLE sync_devices (
-    client_id      text NOT NULL,
-    user_id        integer NOT NULL,
-    device_name    text,
-    user_agent     text,
-    last_seen_at   bigint NOT NULL,
-    last_acked_seq integer NOT NULL DEFAULT 0,
-    created_at     bigint NOT NULL,
-    PRIMARY KEY (user_id, client_id)
-  );
-`;
+import { SYNC_DEVICES_DDL } from './sync-devices-ddl.helper';
 
 const mocks = vi.hoisted(() => {
   const state: { db: PGlite | null } = { db: null };
@@ -79,7 +68,7 @@ describe('DeviceService.touchDevice (real Postgres)', () => {
   beforeEach(async () => {
     db = new PGlite();
     mocks.state.db = db;
-    await db.exec(CREATE);
+    await db.exec(SYNC_DEVICES_DDL);
     service = new DeviceService();
     vi.useFakeTimers();
   });

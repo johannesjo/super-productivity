@@ -3,6 +3,8 @@ import { SuperSyncDeviceInfo, SuperSyncProvider } from '@sp/sync-providers/super
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
 import { ClientIdService } from '../../core/util/client-id.service';
+import { SyncWrapperService } from './sync-wrapper.service';
+import { SyncLog } from '../../core/log';
 import {
   PlatformCode,
   getClientIdPlatformCode,
@@ -29,6 +31,7 @@ export interface SyncDeviceListEntry extends SuperSyncDeviceInfo {
 export class SuperSyncDevicesService {
   private _providerManager = inject(SyncProviderManager);
   private _clientIdService = inject(ClientIdService);
+  private _syncWrapperService = inject(SyncWrapperService);
 
   async getDevices(): Promise<SyncDeviceListEntry[]> {
     const provider = this._superSyncProviderOrError();
@@ -52,14 +55,25 @@ export class SuperSyncDevicesService {
    */
   async signOutAllOtherDevices(): Promise<void> {
     const provider = this._superSyncProviderOrError();
-    // Sent so the server spares this device's WebSocket when it closes the
-    // account's sockets (the revoked-close code is terminal client-side).
-    const ownClientId = await this._clientIdService.loadClientId();
-    await provider.signOutAllOtherDevices(ownClientId ?? undefined);
-    // The provider stored the fresh token through its own credential store,
-    // bypassing SyncProviderManager — without this, the settings-form seed
-    // and the Android credential bridge keep the revoked token until restart.
-    await this._providerManager.notifyCredentialsRotated(SyncProviderId.SuperSync);
+    // Fenced HERE, not in the calling dialog, so no future caller can forget
+    // it: a sync running while the token and cursor key swap underneath it
+    // could 401 or clobber the carried-over cursor.
+    await this._syncWrapperService.runWithSyncBlocked(async () => {
+      await provider.signOutAllOtherDevices();
+      try {
+        // The provider stored the fresh token through its own credential
+        // store, bypassing SyncProviderManager — without this, the
+        // settings-form seed and the Android credential bridge keep the
+        // revoked token until restart.
+        await this._providerManager.notifyCredentialsRotated(SyncProviderId.SuperSync);
+      } catch (e) {
+        // The swap itself succeeded — the fresh token is stored. Failing the
+        // whole call now would make the dialog skip its close(true) handshake
+        // and leave the settings form armed to Save the revoked token back
+        // over the only copy of the fresh one.
+        SyncLog.err('SuperSyncDevicesService: refresh after token rotation failed', e);
+      }
+    });
   }
 
   private _superSyncProviderOrError(): SuperSyncProvider {

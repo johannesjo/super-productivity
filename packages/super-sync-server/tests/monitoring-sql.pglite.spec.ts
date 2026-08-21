@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
 import { RETENTION_DAYS } from '../src/sync/sync.types';
+import { SYNC_DEVICES_DDL } from './sync-devices-ddl.helper';
 import {
   afterAll,
   afterEach,
@@ -111,15 +112,6 @@ const SCHEMA = `
     last_snapshot_seq integer,
     snapshot_data bytea,
     snapshot_at bigint
-  );
-  CREATE TABLE sync_devices (
-    client_id text NOT NULL,
-    user_id integer NOT NULL,
-    device_name text,
-    last_seen_at bigint NOT NULL,
-    last_acked_seq integer NOT NULL DEFAULT 0,
-    created_at bigint NOT NULL,
-    PRIMARY KEY (user_id, client_id)
   );
 `;
 
@@ -323,6 +315,7 @@ describe('monitoring report SQL (PGlite)', () => {
     await db.waitReady;
     mocks.state.db = db;
     await db.exec(SCHEMA);
+    await db.exec(SYNC_DEVICES_DDL);
     await seed();
   });
 

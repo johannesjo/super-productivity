@@ -131,6 +131,12 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const { sinceSeq, limit = 500, excludeClient } = parseResult.data;
         const syncService = getSyncService();
 
+        // `excludeClient` is the caller's own id (it means "don't echo my ops
+        // back"), so a caller that omits it simply isn't recorded.
+        if (excludeClient) {
+          syncService.touchDevice(userId, excludeClient);
+        }
+
         Logger.debug(
           `[user:${userId}] Download request: sinceSeq=${sinceSeq}, limit=${limit}`,
         );

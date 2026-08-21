@@ -616,28 +616,30 @@ export class SyncService {
     latestSnapshotSeq?: number;
     snapshotVectorClock?: VectorClock;
   }> {
-    const result = await this.operationDownloadService.getOpsSinceWithSeq(
+    return this.operationDownloadService.getOpsSinceWithSeq(
       userId,
       sinceSeq,
       excludeClient,
       limit,
       includeSnapshotMetadata,
     );
+  }
 
-    // Keep the device row alive for the device list. `excludeClient` is the
-    // caller's own id (it means "don't echo my ops back"), so a caller that
-    // omits it simply isn't recorded. Fire-and-forget and deliberately outside
-    // the download transaction: this is advisory metadata for a UI list and
-    // must never fail, slow, or lengthen the lock window of a sync.
-    if (excludeClient) {
-      void this.deviceService
-        .touchDevice(userId, excludeClient)
-        .catch((err) =>
-          Logger.debug(`[user:${userId}] touchDevice failed: ${(err as Error)?.message}`),
-        );
-    }
-
-    return result;
+  /**
+   * Keeps the device row alive for the device list. Called from the download
+   * ROUTE only — not from `getOpsSinceWithSeq`, whose other callers (the
+   * upload handler's piggyback and dedup-retry reads) run right after the
+   * upload transaction already upserted `lastSeenAt`, so a touch there is a
+   * guaranteed-suppressed extra statement per upload. Fire-and-forget and
+   * deliberately outside any transaction: this is advisory metadata for a UI
+   * list and must never fail, slow, or lengthen the lock window of a sync.
+   */
+  touchDevice(userId: number, clientId: string): void {
+    void this.deviceService
+      .touchDevice(userId, clientId)
+      .catch((err) =>
+        Logger.debug(`[user:${userId}] touchDevice failed: ${(err as Error)?.message}`),
+      );
   }
 
   async getLatestSeq(userId: number): Promise<number> {

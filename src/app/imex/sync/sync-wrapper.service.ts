@@ -867,6 +867,17 @@ export class SyncWrapperService {
         let skipClear = false;
         if (error instanceof AuthFailSPError && providerId === SyncProviderId.SuperSync) {
           this._consecutiveSuperSyncAuthFailures++;
+          // The 401 may be another browser tab having rotated the token on
+          // the shared store ("sign out other devices"): this tab's cached
+          // cfg keeps serving the revoked token. Drop the cache so the next
+          // attempt reads the current token from disk — a genuine rotation
+          // then succeeds and resets the counter instead of striking out
+          // and wiping the fresh token via clearAuthCredentials below.
+          try {
+            await this._providerManager.invalidateCredentialCache(providerId);
+          } catch (invalidateError) {
+            SyncLog.err('Failed to invalidate credential cache:', invalidateError);
+          }
           if (this._consecutiveSuperSyncAuthFailures < 3) {
             skipClear = true;
           } else {

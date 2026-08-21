@@ -2,11 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { SuperSyncDevicesService } from './super-sync-devices.service';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
 import { ClientIdService } from '../../core/util/client-id.service';
+import { SyncWrapperService } from './sync-wrapper.service';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 
 describe('SuperSyncDevicesService', () => {
   let service: SuperSyncDevicesService;
   let providerManager: jasmine.SpyObj<SyncProviderManager>;
+  let syncWrapper: jasmine.SpyObj<SyncWrapperService>;
   let getDevices: jasmine.Spy;
   let signOutAllOtherDevices: jasmine.Spy;
 
@@ -24,10 +26,15 @@ describe('SuperSyncDevicesService', () => {
       'notifyCredentialsRotated',
     ]);
     providerManager.notifyCredentialsRotated.and.resolveTo(undefined);
+    syncWrapper = jasmine.createSpyObj('SyncWrapperService', ['runWithSyncBlocked']);
+    syncWrapper.runWithSyncBlocked.and.callFake(
+      (op: () => Promise<unknown>) => op() as Promise<never>,
+    );
     TestBed.configureTestingModule({
       providers: [
         SuperSyncDevicesService,
         { provide: SyncProviderManager, useValue: providerManager },
+        { provide: SyncWrapperService, useValue: syncWrapper },
         {
           provide: ClientIdService,
           useValue: { loadClientId: () => Promise.resolve('E_mine11') },
@@ -54,9 +61,9 @@ describe('SuperSyncDevicesService', () => {
     expect(result.map((d) => d.isCurrentDevice)).toEqual([true, false, false, false]);
   });
 
-  it('should keep legacy PFAPI ids, which share the prefix format', async () => {
+  it('should keep legacy PFAPI Electron ids, which share the prefix format', async () => {
     getDevices.and.resolveTo({
-      devices: [{ clientId: 'E_1699999999999', lastSeenAt: 1 }],
+      devices: [{ clientId: 'E_W_1699999999999', lastSeenAt: 1 }],
     });
 
     expect((await service.getDevices())[0].platform).toBe('E');
@@ -76,13 +83,16 @@ describe('SuperSyncDevicesService', () => {
     await expectAsync(service.getDevices()).toBeRejected();
   });
 
-  it('should delegate the sign-out to the provider with the own clientId', async () => {
+  it('should run the sign-out inside the sync fence', async () => {
     signOutAllOtherDevices.and.resolveTo(undefined);
 
     await service.signOutAllOtherDevices();
 
-    // The clientId lets the server spare this device's WebSocket.
-    expect(signOutAllOtherDevices).toHaveBeenCalledOnceWith('E_mine11');
+    // The fence lives in the service so no caller can forget it: a sync
+    // running while token and cursor key swap could 401 or clobber the
+    // carried-over cursor.
+    expect(syncWrapper.runWithSyncBlocked).toHaveBeenCalledTimes(1);
+    expect(signOutAllOtherDevices).toHaveBeenCalledOnceWith();
   });
 
   it('should refresh the provider manager state after a successful sign-out', async () => {
@@ -103,6 +113,15 @@ describe('SuperSyncDevicesService', () => {
     await expectAsync(service.signOutAllOtherDevices()).toBeRejected();
 
     expect(providerManager.notifyCredentialsRotated).not.toHaveBeenCalled();
+  });
+
+  it('should still resolve when the refresh fails after a successful swap', async () => {
+    signOutAllOtherDevices.and.resolveTo(undefined);
+    providerManager.notifyCredentialsRotated.and.rejectWith(new Error('load failed'));
+
+    // Rejecting here would make the dialog skip its close(true) handshake and
+    // leave the settings form armed to Save the revoked token back.
+    await expectAsync(service.signOutAllOtherDevices()).toBeResolved();
   });
 
   it('should reject the sign-out when Super Sync is not the active provider', async () => {

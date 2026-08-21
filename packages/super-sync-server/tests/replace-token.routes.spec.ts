@@ -66,7 +66,7 @@ describe('POST /api/replace-token (route wiring)', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json().token).toBe('fresh-token');
-    expect(mocks.closeForUser).toHaveBeenCalledWith(1, undefined);
+    expect(mocks.closeForUser).toHaveBeenCalledWith(1);
   });
 
   it('rejects a body-less JSON POST (why the client must send "{}")', async () => {
@@ -76,19 +76,14 @@ describe('POST /api/replace-token (route wiring)', () => {
     expect(mocks.replaceToken).not.toHaveBeenCalled();
   });
 
-  it('spares the caller clientId from the WebSocket close when the body names it', async () => {
+  it('ignores a clientId in the body (legacy clients sent one) and closes all sockets', async () => {
+    // A clientId is self-declared and unauthenticated — honoring it as a
+    // close exemption would let a stolen-token client spare its own socket.
     const response = await inject({
       payload: JSON.stringify({ clientId: 'E_caller11' }),
     });
 
     expect(response.statusCode).toBe(200);
-    expect(mocks.closeForUser).toHaveBeenCalledWith(1, 'E_caller11');
-  });
-
-  it('closes all sockets when the body carries a non-string clientId', async () => {
-    const response = await inject({ payload: JSON.stringify({ clientId: 42 }) });
-
-    expect(response.statusCode).toBe(200);
-    expect(mocks.closeForUser).toHaveBeenCalledWith(1, undefined);
+    expect(mocks.closeForUser).toHaveBeenCalledWith(1);
   });
 });

@@ -403,10 +403,11 @@ invalidates only the process performing that write.
 
 **Impact**: After token replacement, passkey recovery, or account deletion, a
 different replica can accept a previously cached JWT for at most the remaining
-cache TTL. Token replacement also force-closes the account's WebSocket
-connections, but only those held by the instance handling the request — on
-other replicas a revoked device's socket keeps receiving op notifications
-(metadata only, no op data) until its next reconnect attempt fails.
+cache TTL. Token replacement and passkey recovery also force-close the
+account's WebSocket connections, but only those held by the instance handling
+the request — on other replicas a revoked device's socket keeps receiving op
+notifications (metadata only, no op data) until its next reconnect attempt
+fails.
 
 **Solution for multi-instance**: Use shared invalidation or centralized
 verification. Consistent per-account routing can reduce exposure, but is not a

@@ -17,7 +17,6 @@ import { firstValueFrom } from 'rxjs';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { SnackService } from '../../../core/snack/snack.service';
 import { SyncLog } from '../../../core/log';
-import { SyncWrapperService } from '../sync-wrapper.service';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
@@ -68,9 +67,11 @@ const UNKNOWN_PLATFORM = {
 export class DialogSyncDevicesComponent implements OnInit {
   private _devicesService = inject(SuperSyncDevicesService);
   private _matDialog = inject(MatDialog);
-  private _matDialogRef = inject<MatDialogRef<DialogSyncDevicesComponent>>(MatDialogRef);
+  // Result type `boolean`: `true` = a sign-out rotated the stored token
+  // (the settings dialog underneath must not Save its stale Formly model).
+  private _matDialogRef =
+    inject<MatDialogRef<DialogSyncDevicesComponent, boolean>>(MatDialogRef);
   private _snackService = inject(SnackService);
-  private _syncWrapperService = inject(SyncWrapperService);
 
   T = T;
 
@@ -123,12 +124,7 @@ export class DialogSyncDevicesComponent implements OnInit {
     // later Save would write the revoked token back. Restored on error.
     this._matDialogRef.disableClose = true;
     try {
-      // Fenced like the other credential mutations (password change,
-      // encryption toggle): a sync running while the token and cursor key
-      // swap underneath it could 401 or clobber the carried-over cursor.
-      await this._syncWrapperService.runWithSyncBlocked(() =>
-        this._devicesService.signOutAllOtherDevices(),
-      );
+      await this._devicesService.signOutAllOtherDevices();
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.SYNC.D_DEVICES.SIGN_OUT_SUCCESS,
