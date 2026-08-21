@@ -51,6 +51,12 @@ interface CohortRow {
 
 const n = (v: bigint | number): number => Number(v);
 
+const startedAt = Date.now();
+const logPhase = (msg: string): void => {
+  const elapsedS = ((Date.now() - startedAt) / 1000).toFixed(1);
+  console.log(`[${elapsedS}s] ${msg}`);
+};
+
 /**
  * Independent re-verification: for each (userId, boundarySeq) pair, the
  * boundary must be a surviving causal full-state op. Deliberately NOT derived
@@ -87,6 +93,12 @@ const main = async (): Promise<void> => {
   // production: the latestFullStateSeq marker counts only when it is <=
   // lastSnapshotSeq AND its op row matches the causal predicate; otherwise
   // fall back to the newest causal full-state op <= lastSnapshotSeq.
+  //
+  // Deliberately two grouped passes over `operations` (`causal`, then
+  // `counts`) instead of correlated per-user subqueries: with no index on
+  // op_type, per-user probing re-walked large histories once per user and ran
+  // for hours on the 8M-row hosted table. Grouped scans finish in minutes.
+  logPhase('computing per-user prune boundaries and would-delete counts…');
   const perUser = await prisma.$queryRaw<PerUserRow[]>`
     WITH eligible AS (
       SELECT s.user_id, s.last_snapshot_seq, s.latest_full_state_seq
@@ -95,63 +107,64 @@ const main = async (): Promise<void> => {
         AND s.last_snapshot_seq > 0
         AND s.snapshot_at IS NOT NULL
     ),
-    marked AS (
+    causal AS (
       SELECT
-        e.user_id,
-        e.last_snapshot_seq,
-        CASE
-          WHEN e.latest_full_state_seq IS NOT NULL
-            AND e.latest_full_state_seq <= e.last_snapshot_seq
-            AND EXISTS (
-              SELECT 1 FROM operations o
-              WHERE o.user_id = e.user_id
-                AND o.server_seq = e.latest_full_state_seq
-                AND ${causalFullStateSql('o')}
-            )
-          THEN e.latest_full_state_seq
-        END AS marker_seq
-      FROM eligible e
+        o.user_id,
+        max(o.server_seq) FILTER (
+          WHERE o.server_seq <= e.last_snapshot_seq
+        ) AS fallback_seq,
+        bool_or(
+          e.latest_full_state_seq IS NOT NULL
+          AND e.latest_full_state_seq <= e.last_snapshot_seq
+          AND o.server_seq = e.latest_full_state_seq
+        ) AS marker_valid
+      FROM operations o
+      JOIN eligible e ON e.user_id = o.user_id
+      WHERE ${causalFullStateSql('o')}
+      GROUP BY o.user_id
     ),
     resolved AS (
       SELECT
-        m.user_id,
-        m.last_snapshot_seq,
-        m.marker_seq IS NULL AS used_fallback,
-        COALESCE(
-          m.marker_seq,
-          (
-            SELECT max(o.server_seq) FROM operations o
-            WHERE o.user_id = m.user_id
-              AND o.server_seq <= m.last_snapshot_seq
-              AND ${causalFullStateSql('o')}
-          )
-        ) AS protected_from_seq
-      FROM marked m
+        e.user_id,
+        e.last_snapshot_seq,
+        NOT COALESCE(c.marker_valid, false) AS used_fallback,
+        CASE
+          WHEN COALESCE(c.marker_valid, false) THEN e.latest_full_state_seq
+          ELSE c.fallback_seq
+        END AS protected_from_seq
+      FROM eligible e
+      LEFT JOIN causal c ON c.user_id = e.user_id
+    ),
+    counts AS (
+      SELECT
+        r.user_id,
+        count(*) FILTER (
+          WHERE o.server_seq < r.protected_from_seq AND o.received_at < ${cutoff}
+        ) AS would_delete,
+        count(*) FILTER (
+          WHERE o.server_seq < r.protected_from_seq AND o.received_at >= ${cutoff}
+        ) AS fresh_prefix,
+        count(*) FILTER (
+          WHERE o.server_seq >= r.protected_from_seq
+        ) AS retained_from_boundary
+      FROM operations o
+      JOIN resolved r
+        ON r.user_id = o.user_id
+        AND r.protected_from_seq IS NOT NULL
+      GROUP BY r.user_id
     )
     SELECT
       r.user_id,
       r.last_snapshot_seq,
       r.protected_from_seq,
       r.used_fallback,
-      (
-        SELECT count(*) FROM operations o
-        WHERE o.user_id = r.user_id
-          AND o.server_seq < r.protected_from_seq
-          AND o.received_at < ${cutoff}
-      ) AS would_delete,
-      (
-        SELECT count(*) FROM operations o
-        WHERE o.user_id = r.user_id
-          AND o.server_seq < r.protected_from_seq
-          AND o.received_at >= ${cutoff}
-      ) AS fresh_prefix,
-      (
-        SELECT count(*) FROM operations o
-        WHERE o.user_id = r.user_id
-          AND o.server_seq >= r.protected_from_seq
-      ) AS retained_from_boundary
+      COALESCE(ct.would_delete, 0) AS would_delete,
+      COALESCE(ct.fresh_prefix, 0) AS fresh_prefix,
+      COALESCE(ct.retained_from_boundary, 0) AS retained_from_boundary
     FROM resolved r
+    LEFT JOIN counts ct ON ct.user_id = r.user_id
   `;
+  logPhase(`boundaries + counts done (${perUser.length} eligible users)`);
 
   const withBoundary = perUser.filter(
     (r) => r.protected_from_seq !== null && r.protected_from_seq > 1,
@@ -165,6 +178,7 @@ const main = async (): Promise<void> => {
   // Safety check 1: boundary must be a surviving causal full-state op —
   // re-verified independently for every user the sweep would actually touch.
   const affected = withBoundary.filter((r) => n(r.would_delete) > 0);
+  logPhase(`re-verifying ${affected.length} prune boundaries…`);
   const badBoundaryUsers = await findBadBoundaries(
     affected.map((r) => ({
       userId: r.user_id,
@@ -180,6 +194,7 @@ const main = async (): Promise<void> => {
   );
 
   // Cohort: users the sweep never reaches because they hold no snapshot.
+  logPhase('counting the unswept snapshotless cohort…');
   const snapshotless = await prisma.$queryRaw<CohortRow[]>`
     SELECT o.user_id, count(*) AS op_count
     FROM operations o
@@ -193,11 +208,13 @@ const main = async (): Promise<void> => {
   `;
   const snapshotlessOps = snapshotless.reduce((sum, r) => sum + n(r.op_count), 0);
 
+  logPhase('counting the operations table…');
   const [{ total_ops }] = await prisma.$queryRaw<[{ total_ops: bigint }]>`
     SELECT count(*) AS total_ops FROM operations
   `;
+  logPhase('all queries done');
 
-  console.log('=== Old-ops sweep dry run (read-only) ===');
+  console.log('\n=== Old-ops sweep dry run (read-only) ===');
   console.log(`cutoff: received_at < ${new Date(Number(cutoff)).toISOString()}`);
   console.log(`operations table total:        ${n(total_ops)}`);
   console.log(`eligible users (snapshot > 0): ${perUser.length}`);
