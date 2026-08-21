@@ -6,6 +6,7 @@ import {
   validateRestoreSnapshotResponse,
   validateDeleteAllDataResponse,
   validateDevicesResponse,
+  validateReplaceTokenResponse,
 } from './response-validators';
 
 describe('response-validators', () => {
@@ -289,6 +290,26 @@ describe('response-validators', () => {
           devices: [{ ...device, lastSeenAt: '1700000000000' }],
         }),
       ).toThrow();
+    });
+  });
+
+  describe('validateReplaceTokenResponse', () => {
+    const response = { token: 'fresh-token', user: { id: 1, email: 'a@b.c' } };
+
+    it('should accept a valid response', () => {
+      expect(() => validateReplaceTokenResponse(response)).not.toThrow();
+    });
+
+    it('should throw if the token is missing', () => {
+      expect(() => validateReplaceTokenResponse({ user: response.user })).toThrow();
+    });
+
+    it('should throw if the token is empty', () => {
+      expect(() => validateReplaceTokenResponse({ ...response, token: '' })).toThrow();
+    });
+
+    it('should throw if not an object', () => {
+      expect(() => validateReplaceTokenResponse('fresh-token')).toThrow();
     });
   });
 

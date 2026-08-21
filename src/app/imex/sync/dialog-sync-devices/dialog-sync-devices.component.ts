@@ -6,11 +6,16 @@ import {
   signal,
 } from '@angular/core';
 import {
+  MatDialog,
   MatDialogActions,
   MatDialogClose,
   MatDialogContent,
+  MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import { firstValueFrom } from 'rxjs';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { SnackService } from '../../../core/snack/snack.service';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
@@ -60,11 +65,15 @@ const UNKNOWN_PLATFORM = {
 })
 export class DialogSyncDevicesComponent implements OnInit {
   private _devicesService = inject(SuperSyncDevicesService);
+  private _matDialog = inject(MatDialog);
+  private _matDialogRef = inject<MatDialogRef<DialogSyncDevicesComponent>>(MatDialogRef);
+  private _snackService = inject(SnackService);
 
   T = T;
 
   devices = signal<DeviceRow[]>([]);
   isLoading = signal(true);
+  isSigningOut = signal(false);
   error = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
@@ -82,6 +91,41 @@ export class DialogSyncDevicesComponent implements OnInit {
       this.error.set(T.F.SYNC.D_DEVICES.ERROR_LOADING);
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  async signOutOtherDevices(): Promise<void> {
+    const confirmed = await firstValueFrom(
+      this._matDialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: {
+            title: T.F.SYNC.D_DEVICES.SIGN_OUT_CONFIRM_TITLE,
+            message: T.F.SYNC.D_DEVICES.SIGN_OUT_CONFIRM_MSG,
+            okTxt: T.F.SYNC.D_DEVICES.SIGN_OUT_CONFIRM_OK,
+            titleIcon: 'warning',
+          },
+        })
+        .afterClosed(),
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    this.isSigningOut.set(true);
+    try {
+      await this._devicesService.signOutAllOtherDevices();
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.F.SYNC.D_DEVICES.SIGN_OUT_SUCCESS,
+      });
+      this._matDialogRef.close();
+    } catch {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.D_DEVICES.ERROR_SIGN_OUT,
+      });
+      this.isSigningOut.set(false);
     }
   }
 }

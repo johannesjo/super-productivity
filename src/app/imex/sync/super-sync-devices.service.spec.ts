@@ -8,15 +8,17 @@ describe('SuperSyncDevicesService', () => {
   let service: SuperSyncDevicesService;
   let providerManager: jasmine.SpyObj<SyncProviderManager>;
   let getDevices: jasmine.Spy;
+  let signOutAllOtherDevices: jasmine.Spy;
 
   const setUpProvider = (id: SyncProviderId | null): void => {
     providerManager.getActiveProvider.and.returnValue(
-      id === null ? null : ({ id, getDevices } as never),
+      id === null ? null : ({ id, getDevices, signOutAllOtherDevices } as never),
     );
   };
 
   beforeEach(() => {
     getDevices = jasmine.createSpy('getDevices');
+    signOutAllOtherDevices = jasmine.createSpy('signOutAllOtherDevices');
     providerManager = jasmine.createSpyObj('SyncProviderManager', ['getActiveProvider']);
     TestBed.configureTestingModule({
       providers: [
@@ -68,5 +70,19 @@ describe('SuperSyncDevicesService', () => {
 
     setUpProvider(null);
     await expectAsync(service.getDevices()).toBeRejected();
+  });
+
+  it('should delegate the sign-out to the provider', async () => {
+    signOutAllOtherDevices.and.resolveTo(undefined);
+
+    await service.signOutAllOtherDevices();
+
+    expect(signOutAllOtherDevices).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reject the sign-out when Super Sync is not the active provider', async () => {
+    setUpProvider(SyncProviderId.Dropbox);
+    await expectAsync(service.signOutAllOtherDevices()).toBeRejected();
+    expect(signOutAllOtherDevices).not.toHaveBeenCalled();
   });
 });

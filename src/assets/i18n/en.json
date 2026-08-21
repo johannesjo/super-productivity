@@ -1346,7 +1346,9 @@
         "TITLE": "Decryption Failed"
       },
       "D_DEVICES": {
+        "BTN_SIGN_OUT_OTHERS": "Sign out other devices",
         "ERROR_LOADING": "Failed to load connected devices",
+        "ERROR_SIGN_OUT": "Failed to sign out other devices",
         "LAST_SEEN": "Last sync: {{date}}",
         "NO_DEVICES": "No devices have synced with this account yet.",
         "PLATFORM_ANDROID": "Android",
@@ -1354,7 +1356,11 @@
         "PLATFORM_DESKTOP": "Desktop",
         "PLATFORM_IOS": "iOS",
         "PLATFORM_UNKNOWN": "Unknown device",
-        "REMOVE_HINT": "Devices cannot be removed individually — Super Sync grants access per account, not per device. A device that stops syncing drops off this list on its own.",
+        "REMOVE_HINT": "Super Sync grants access per account, not per device, so devices cannot be removed individually. To cut off a lost or sold device, sign out all other devices — this device stays signed in.",
+        "SIGN_OUT_CONFIRM_MSG": "Every other device is signed out of Super Sync and stops syncing. This device stays signed in. To reconnect a device, sign in on the server's page and paste the new token into its sync settings — changes made on it while signed out are kept and upload after that.",
+        "SIGN_OUT_CONFIRM_OK": "Sign out",
+        "SIGN_OUT_CONFIRM_TITLE": "Sign out all other devices?",
+        "SIGN_OUT_SUCCESS": "All other devices were signed out",
         "THIS_DEVICE": "(this device)",
         "TITLE": "Connected Devices"
       },

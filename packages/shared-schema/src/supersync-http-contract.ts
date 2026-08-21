@@ -226,6 +226,22 @@ export const SuperSyncDevicesResponseSchema = z
   })
   .passthrough();
 
+/**
+ * Response of `POST /api/replace-token`: a fresh JWT for the calling client.
+ * Issuing it bumps the account's `tokenVersion`, signing out every other device.
+ */
+export const SuperSyncReplaceTokenResponseSchema = z
+  .object({
+    token: z.string().min(1),
+    user: z
+      .object({
+        id: z.number(),
+        email: z.string(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
+
 export const SuperSyncRestorePointSchema = z
   .object({
     serverSeq: z.number(),
@@ -274,6 +290,9 @@ export type SuperSyncSnapshotUploadResponse = z.infer<
 export type SuperSyncStatusResponse = z.infer<typeof SuperSyncStatusResponseSchema>;
 export type SuperSyncDevice = z.infer<typeof SuperSyncDeviceSchema>;
 export type SuperSyncDevicesResponse = z.infer<typeof SuperSyncDevicesResponseSchema>;
+export type SuperSyncReplaceTokenResponse = z.infer<
+  typeof SuperSyncReplaceTokenResponseSchema
+>;
 export type SuperSyncRestorePoint = z.infer<typeof SuperSyncRestorePointSchema>;
 export type SuperSyncRestorePointsResponse = z.infer<
   typeof SuperSyncRestorePointsResponseSchema

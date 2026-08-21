@@ -53,6 +53,19 @@ export interface SuperSyncDevicesResponse {
 }
 
 /**
+ * Response of `POST /api/replace-token`: a fresh JWT for the calling client.
+ * Issuing it bumps the account-wide `tokenVersion`, which signs out every
+ * other device (they get 401s on their next sync).
+ */
+export interface SuperSyncReplaceTokenResponse {
+  token: string;
+  user: {
+    id: number;
+    email: string;
+  };
+}
+
+/**
  * Structural typing surface for callers that need WebSocket connection
  * parameters from a SuperSync provider. The bundled `SuperSyncProvider`
  * implements this interface, but callers should type against the

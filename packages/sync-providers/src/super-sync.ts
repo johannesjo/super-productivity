@@ -5,6 +5,7 @@ export {
   type SuperSyncDeviceInfo,
   type SuperSyncDevicesResponse,
   type SuperSyncPrivateCfg,
+  type SuperSyncReplaceTokenResponse,
   type SuperSyncWebSocketAccess,
 } from './super-sync/super-sync.model';
 export { SuperSyncProvider, type SuperSyncDeps } from './super-sync/super-sync';

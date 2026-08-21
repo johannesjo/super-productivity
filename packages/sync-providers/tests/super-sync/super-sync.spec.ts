@@ -34,6 +34,7 @@ import {
   SuperSyncProvider,
   type SuperSyncDeps,
   type SuperSyncDevicesResponse,
+  type SuperSyncReplaceTokenResponse,
   type SuperSyncPrivateCfg,
   type SuperSyncResponseValidators,
   type SuperSyncStorage,
@@ -127,6 +128,7 @@ const createValidatorsPassthrough = (): SuperSyncResponseValidators => ({
   validateRestoreSnapshot: (data) => data as RestoreSnapshotResponse,
   validateDeleteAllData: (data) => data as { success: boolean },
   validateDevices: (data) => data as SuperSyncDevicesResponse,
+  validateReplaceToken: (data) => data as SuperSyncReplaceTokenResponse,
 });
 
 const createLoggerSpy = (): {
@@ -715,6 +717,64 @@ describe('SuperSyncProvider', () => {
       expect(url).toBe('https://sync.example.com/api/sync/devices');
       // Read-only by design: the server offers no per-device revocation.
       expect(options.method).toBe('GET');
+    });
+  });
+
+  describe('signOutAllOtherDevices', () => {
+    const replaceTokenResponse = {
+      token: 'fresh-token',
+      user: { id: 1, email: 'user@example.com' },
+    };
+
+    it('posts to /api/replace-token and stores the fresh token', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      cfgStore.setComplete.mockResolvedValue(undefined);
+      fetchMock.mockResolvedValue(okResponse(replaceTokenResponse));
+
+      await provider.signOutAllOtherDevices();
+
+      const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(url).toBe('https://sync.example.com/api/replace-token');
+      expect(options.method).toBe('POST');
+      expect(cfgStore.setComplete).toHaveBeenCalledWith({
+        ...testConfig,
+        accessToken: 'fresh-token',
+      });
+    });
+
+    it('carries the lastServerSeq cursor over to the new token key', async () => {
+      const { provider, cfgStore, fetchMock, storage } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      // Mirror the real store: after setComplete, load returns the new config,
+      // so the seq key is recomputed from the fresh token.
+      cfgStore.setComplete.mockImplementation(async (cfg: SuperSyncPrivateCfg) => {
+        cfgStore.load.mockResolvedValue(cfg);
+      });
+      storage.getLastServerSeq.mockReturnValue(42);
+      fetchMock.mockResolvedValue(okResponse(replaceTokenResponse));
+
+      await provider.signOutAllOtherDevices();
+
+      const oldKey = storage.getLastServerSeq.mock.calls[0][0] as string;
+      const [newKey, seq] = storage.setLastServerSeq.mock.calls[0] as [string, number];
+      expect(seq).toBe(42);
+      // Same account, same op stream — but the key hashes the token, so without
+      // the carry-over the swap would reset the cursor and force a full re-download.
+      expect(newKey).not.toBe(oldKey);
+    });
+
+    it('keeps the stored config untouched when the response is invalid', async () => {
+      const validators = createValidatorsPassthrough();
+      validators.validateReplaceToken = () => {
+        throw new Error('invalid response');
+      };
+      const { provider, cfgStore, fetchMock } = buildProvider({ validators });
+      cfgStore.load.mockResolvedValue(testConfig);
+      fetchMock.mockResolvedValue(okResponse({ nope: true }));
+
+      await expect(provider.signOutAllOtherDevices()).rejects.toThrow('invalid response');
+      expect(cfgStore.setComplete).not.toHaveBeenCalled();
     });
   });
 

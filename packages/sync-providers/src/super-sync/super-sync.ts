@@ -449,6 +449,32 @@ export class SuperSyncProvider
     return this._deps.responseValidators.validateDevices(response);
   }
 
+  /**
+   * Signs every other device out of the account. Server-side this is
+   * `POST /api/replace-token`: the account's `tokenVersion` is bumped —
+   * invalidating all existing tokens, including legacy ones without a
+   * version claim — and a fresh token is returned for this client, which
+   * replaces the stored one so the calling device stays signed in.
+   *
+   * The `lastServerSeq` cursor is keyed on the access token (see
+   * `_getServerSeqKey`), so it is carried over to the new token's key —
+   * same server, same account, same op stream; without this the swap would
+   * force a full re-download from seq 0.
+   */
+  async signOutAllOtherDevices(): Promise<void> {
+    this._deps.logger.normal(`${this._logLabel}: signOutAllOtherDevices`);
+    const cfg = await this._cfgOrError();
+
+    const response = await this._fetchApi<unknown>(cfg, '/api/replace-token', {
+      method: 'POST',
+    });
+    const { token } = this._deps.responseValidators.validateReplaceToken(response);
+
+    const lastServerSeq = await this.getLastServerSeq();
+    await this.setPrivateCfg({ ...cfg, accessToken: token });
+    await this.setLastServerSeq(lastServerSeq);
+  }
+
   // === WebSocket Parameters ===
 
   /**

@@ -15,15 +15,15 @@ export interface SyncDeviceListEntry extends SuperSyncDeviceInfo {
 }
 
 /**
- * Read-only view of the devices syncing this SuperSync account.
+ * The devices syncing this SuperSync account, and the account-wide sign-out.
  *
- * There is deliberately no "remove device" counterpart: a SuperSync JWT is
+ * There is deliberately no "remove device" action: a SuperSync JWT is
  * account-wide (single `tokenVersion`, 365-day expiry) and nothing authorises
  * against the device table, so deleting a row would revoke no access while
  * telling the user it had. The server's only revocation primitive is
- * `POST /api/replace-token`, which invalidates every device's token at once
- * and has no client UI yet — per-device revocation needs per-device tokens
- * first. See issue #9652.
+ * `POST /api/replace-token` (`signOutAllOtherDevices()` here), which
+ * invalidates every token at once and hands this client a fresh one —
+ * per-device revocation would need per-device tokens first. See issue #9652.
  */
 @Injectable({ providedIn: 'root' })
 export class SuperSyncDevicesService {
@@ -46,5 +46,19 @@ export class SuperSyncDevicesService {
       platform: getClientIdPlatformCode(device.clientId),
       isCurrentDevice: device.clientId === ownClientId,
     }));
+  }
+
+  /**
+   * Signs every other device out of the account; this device stays signed
+   * in on a fresh token. Other devices stop syncing on their next request
+   * and need a newly issued token to reconnect. Local changes made on them
+   * while signed out are kept and upload after re-authenticating.
+   */
+  async signOutAllOtherDevices(): Promise<void> {
+    const provider = this._providerManager.getActiveProvider();
+    if (!provider || provider.id !== SyncProviderId.SuperSync) {
+      throw new Error('Super Sync is not the active sync provider');
+    }
+    await (provider as SuperSyncProvider).signOutAllOtherDevices();
   }
 }

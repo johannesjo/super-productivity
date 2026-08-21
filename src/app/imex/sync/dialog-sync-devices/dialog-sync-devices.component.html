@@ -49,6 +49,17 @@
   mat-dialog-actions
   align="end"
 >
+  @if (!isLoading()) {
+    <button
+      class="sign-out-btn"
+      mat-button
+      color="warn"
+      [disabled]="isSigningOut()"
+      (click)="signOutOtherDevices()"
+    >
+      {{ T.F.SYNC.D_DEVICES.BTN_SIGN_OUT_OTHERS | translate }}
+    </button>
+  }
   <button
     mat-button
     mat-dialog-close
