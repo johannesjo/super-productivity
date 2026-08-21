@@ -185,17 +185,15 @@ const handleConvertToMainTask = (
   // The stored entity wins over the payload snapshot; TODAY is virtual and
   // never lives in tagIds.
   const storedTask = state[TASK_FEATURE_NAME].entities[task.id];
-  const ownTagIds = (
+  const ownTagIds = filterOutTodayTag(
     Array.isArray(storedTask?.tagIds)
       ? storedTask.tagIds
       : Array.isArray(task.tagIds)
         ? task.tagIds
-        : []
-  ).filter((id) => id !== TODAY_TAG.id);
+        : [],
+  );
   const keptTagIds =
-    ownTagIds.length > 0
-      ? ownTagIds
-      : resolvedParentTagIds.filter((id) => id !== TODAY_TAG.id);
+    ownTagIds.length > 0 ? ownTagIds : filterOutTodayTag(resolvedParentTagIds);
   const positionConvertedTask = (taskIds: string[]): string[] => {
     // Dropped at the start of DONE → append to the bottom of the done list.
     if (afterTaskId == null && isDone) {

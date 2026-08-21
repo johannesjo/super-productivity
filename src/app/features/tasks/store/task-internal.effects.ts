@@ -24,6 +24,7 @@ import {
   moveProjectTaskToBacklogListAuto,
 } from '../../project/store/project.actions';
 import { DateService } from '../../../core/date/date.service';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Injectable()
 export class TaskInternalEffects {
@@ -97,11 +98,12 @@ export class TaskInternalEffects {
   /**
    * #9651 graceful degradation: this client keeps a task's own tags across
    * convertToSubTask / convertToMainTask, but clients released before that
-   * change replay these ops by wiping (to-sub) or overwriting with the
-   * parent's (to-main) tagIds. Re-asserting the kept tags as a follow-up
-   * updateTask op makes those clients converge to the same state. Fires only
-   * on the originating client (LOCAL_ACTIONS), only when the convert actually
-   * applied and the task had own tags to preserve.
+   * change (<= v18.20.1) replay these ops by wiping (to-sub) or overwriting
+   * with the parent's (to-main) tagIds. Re-asserting the kept tags as a
+   * follow-up updateTask op makes those clients converge to the same state.
+   * Fires only on the originating client (LOCAL_ACTIONS), only when the
+   * convert actually applied and old clients would end up with different
+   * tags. Removable once pre-change clients are no longer a concern.
    */
   reassertOwnTagsAfterConvert$ = createEffect(() =>
     this._actions$.pipe(
@@ -117,12 +119,25 @@ export class TaskInternalEffects {
         const isApplied = isConvertToSub
           ? task.parentId === action.targetParentId
           : !task.parentId;
-        // For to-main, re-assert only tags the task owned BEFORE the convert
-        // (payload snapshot): the inherit-parent fallback yields the same
-        // result on old clients and needs no extra op. Drag-and-drop may pass
-        // a payload stub without tagIds — then we conservatively skip.
-        const hadOwnTags = isConvertToSub ? true : !!action.task.tagIds?.length;
-        if (!isApplied || !hadOwnTags) {
+        if (!isApplied) {
+          return EMPTY;
+        }
+        // What an old client's reducer leaves in tagIds after replaying this
+        // op: [] for to-sub, the parent's tags for to-main. Emit only when
+        // the kept tags differ — otherwise both fleets already agree.
+        const parent = isConvertToSub
+          ? undefined
+          : state.entities[action.task.parentId as string];
+        const oldClientTagIds = isConvertToSub
+          ? []
+          : (Array.isArray(parent?.tagIds)
+              ? parent.tagIds
+              : (action.parentTagIds ?? [])
+            ).filter((id) => id !== TODAY_TAG.id);
+        const isSameResult =
+          task.tagIds.length === oldClientTagIds.length &&
+          task.tagIds.every((id, i) => id === oldClientTagIds[i]);
+        if (isSameResult) {
           return EMPTY;
         }
         return of(

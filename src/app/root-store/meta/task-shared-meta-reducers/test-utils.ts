@@ -186,13 +186,8 @@ export const expectTagUpdates = (updates: Record<string, Partial<Tag>>) => ({
   }),
 });
 
-export const expectTaskUpdate = (taskId: string, changes: Partial<Task>) => ({
-  [TASK_FEATURE_NAME]: jasmine.objectContaining({
-    entities: jasmine.objectContaining({
-      [taskId]: jasmine.objectContaining(changes),
-    }),
-  }),
-});
+export const expectTaskUpdate = (taskId: string, changes: Partial<Task>) =>
+  expectTaskUpdates({ [taskId]: changes });
 
 // NOTE: spreading two expectTaskUpdate() results into one expectation object
 // silently drops the first (same TASK_FEATURE_NAME key) — use this for

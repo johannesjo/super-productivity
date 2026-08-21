@@ -218,6 +218,48 @@ describe('TaskInternalEffects', () => {
       );
     });
 
+    it('should emit for convertToMainTask when the payload is a stub without tagIds (drag path)', (done) => {
+      const parentTask = createTask('parent', { tagIds: ['tag1'] });
+      const task = createTask('task1', { parentId: undefined, tagIds: ['tag2'] });
+      store.overrideSelector(selectTaskFeatureState, createTaskState([parentTask, task]));
+      store.refreshState();
+
+      effects.reassertOwnTagsAfterConvert$.subscribe((action) => {
+        expect((action as any).task.changes.tagIds).toEqual(['tag2']);
+        done();
+      });
+
+      actions$.next(
+        TaskSharedActions.convertToMainTask({
+          task: { id: 'task1', parentId: 'parent' } as Task,
+        }),
+      );
+    });
+
+    it('should NOT emit for convertToMainTask when own tags equal the parent tags', (done) => {
+      const parentTask = createTask('parent', { tagIds: ['tag1'] });
+      const task = createTask('task1', { parentId: undefined, tagIds: ['tag1'] });
+      store.overrideSelector(selectTaskFeatureState, createTaskState([parentTask, task]));
+      store.refreshState();
+
+      let emitted = false;
+      effects.reassertOwnTagsAfterConvert$.subscribe(() => {
+        emitted = true;
+      });
+
+      actions$.next(
+        TaskSharedActions.convertToMainTask({
+          task: createTask('task1', { parentId: 'parent', tagIds: ['tag1'] }),
+          parentTagIds: ['tag1'],
+        }),
+      );
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
     it('should NOT emit for convertToMainTask when the task had no own tags (inherit fallback)', (done) => {
       // Post-reducer state: promoted with inherited parent tags
       const task = createTask('task1', { parentId: undefined, tagIds: ['tag1'] });
