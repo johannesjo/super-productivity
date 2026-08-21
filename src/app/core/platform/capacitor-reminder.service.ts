@@ -334,10 +334,13 @@ export class CapacitorReminderService {
    * keep it that way — only wire this to genuinely user-initiated starts, never
    * to a cold-start/recovery path.
    *
-   * Because the request is not awaited, the notification for the session that
-   * triggered it can stay hidden until the service next re-posts (focus mode
-   * within ~5s of elapsed time; tracking only on a >5s jump or task switch,
-   * since it renders via a chronometer — #8243). Later sessions are unaffected.
+   * Because the request is not awaited, the caller's startForeground() runs
+   * while the permission is still denied, so Android drops that notification —
+   * and both foreground services render steady-state time via a native
+   * chronometer with NO per-tick update pushes (#8243), so nothing re-posts it
+   * organically. Callers must therefore re-post their own notification when
+   * this resolves true (see the _repost*AfterGrant methods in the Android
+   * effects). Later sessions are unaffected.
    */
   requestPermissionsInBackground(): Promise<boolean> {
     if (!this.isAvailable) {
