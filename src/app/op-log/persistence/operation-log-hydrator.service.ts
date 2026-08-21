@@ -113,16 +113,12 @@ export class OperationLogHydratorService {
     // worth extra plumbing to suppress; only the every-boot re-migration it
     // prevents matters.
     //
-    // Version-stamping invariant (#8770): a state-cache writer may only stamp a
-    // schemaVersion the migration chain actually produced. Stamping
-    // CURRENT_SCHEMA_VERSION onto data of unverified schema (e.g. a downloaded
-    // remote snapshot) freezes old-schema data under a current label into a
-    // cache Checkpoint B then trusts unvalidated. (sync-hydration once persisted
-    // downloaded state WITHOUT a version for exactly this reason, until
-    // 6073c2cce4 removed that writer entirely — today downloaded full state only
-    // arrives as a SYNC_IMPORT op and is never written to the cache directly.)
-    // Convergence only stamps a version AFTER the migration chain has actually
-    // run, which is safe.
+    // Version stamping (#8770): convergence writes its snapshot AFTER the
+    // migration chain has run, so stamping CURRENT_SCHEMA_VERSION is safe —
+    // see the invariant on saveStateCache(). (The last writer that persisted
+    // downloaded state unversioned was removed in 6073c2cce4; downloaded full
+    // state now only arrives as a SYNC_IMPORT op, never written to the cache
+    // directly.)
     let snapshotPersistedDuringHydration = false;
     // Set only when the try block below ran to completion; gates the startup
     // compaction check after the finally so recovery/aborted boots never prune.
