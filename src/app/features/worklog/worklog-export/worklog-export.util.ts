@@ -24,7 +24,14 @@ import {
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
 const escapeCsvField = (value: string | number | undefined): string => {
-  const field = value === undefined ? '' : String(value);
+  let field = value === undefined ? '' : String(value);
+  // Guard spreadsheet formula injection (OWASP): a task title like
+  // `=cmd|' /C calc'!A0` must not execute when the export is opened in
+  // Excel/LibreOffice. The leading apostrophe makes spreadsheets treat the
+  // cell as literal text (they hide it; plain-text consumers will see it).
+  if (/^[=+\-@\t\r]/.test(field)) {
+    field = `'${field}`;
+  }
   return /[;"\r\n]/.test(field) ? `"${field.replace(/"/g, '""')}"` : field;
 };
 

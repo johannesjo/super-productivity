@@ -506,4 +506,29 @@ describe('formatText', () => {
         '2026-07-29;"Line one\r\nLine two"',
     );
   });
+
+  it('neutralizes spreadsheet formula injection in field values', () => {
+    const csv = formatText(
+      ['Date', 'Titles'],
+      [
+        ['2026-07-26', "=cmd|' /C calc'!A0"],
+        ['2026-07-27', '+SUM(A1:A9)'],
+        ['2026-07-28', '-2+3'],
+        ['2026-07-29', '@evil'],
+      ],
+    );
+
+    expect(csv).toBe(
+      'Date;Titles\n' +
+        "2026-07-26;'=cmd|' /C calc'!A0\n" +
+        "2026-07-27;'+SUM(A1:A9)\n" +
+        "2026-07-28;'-2+3\n" +
+        "2026-07-29;'@evil",
+    );
+  });
+
+  it('does not touch ordinary numbers and times', () => {
+    const csv = formatText(['Worked', 'Start'], [[7200000, '10:00']]);
+    expect(csv).toBe('Worked;Start\n7200000;10:00');
+  });
 });
