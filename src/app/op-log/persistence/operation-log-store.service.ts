@@ -2143,7 +2143,12 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     lastAppliedOpSeq: number;
     vectorClock: VectorClock;
     compactedAt: number;
-    schemaVersion?: number;
+    // Required so no writer can forget it (#8770). Version-stamping
+    // invariant: only stamp the version the migration chain actually
+    // produced for `state` — never CURRENT_SCHEMA_VERSION onto data of
+    // unverified schema (that freezes it under a label Checkpoint B then
+    // trusts unvalidated on every later boot).
+    schemaVersion: number;
     snapshotEntityKeys?: string[];
   }): Promise<void> {
     await this._ensureInit();

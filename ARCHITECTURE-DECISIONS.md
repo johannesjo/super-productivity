@@ -332,6 +332,71 @@ recoverable via local undo, not via sync.
 
 ---
 
+### 8. Additive Data-Model Evolution over Schema Bumps
+
+**Status**: ✅ Active (since August 2026)
+
+**Decision**: Persisted and synced data evolves **additively**. Pick the change
+channel by what actually changed (table below). Do not raise
+`CURRENT_SCHEMA_VERSION` unless a change is **both** inexpressible as an additive
+or derived field **and** would be _misapplied_ — not merely ignored — by older
+clients. This is the constructive counterpart to the bump policy (sync rule 10),
+which says when not to bump but not what to do instead.
+
+| What changed                                                   | Channel                                                               | Precedent                                              |
+| -------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
+| Local storage layout (stores, indexes, derived meta)           | `DB_VERSION` ladder — local only, never transmitted                   | `db-upgrade.ts` v7 seeds the full-state-ops meta store |
+| Shape of stored state (new field, legacy key, changed default) | Read-time normalization in the `loadAllData` reducer                  | `migrateFocusModeConfig`, `migrateKeyboardConfig`      |
+| Representation of an existing **synced** field                 | Dual field — new field wins, legacy re-derived from it on every write | `normalizeStartOfNextDayConfig`                        |
+| Semantics of an operation                                      | Payload marker / envelope, inert on older clients                     | `LwwUpdatePayload`; the v4 `projectDeleteWins` marker  |
+
+**Rationale**:
+
+- A bump fences only receivers that ship _after_ it. Released v17.0.0–v18.14.0
+  clients apply ops up to schema 5 unmigrated and, at ≥ 6, block them while still
+  advancing the cursor — permanently skipping them. A bump therefore never buys
+  safety against the clients actually writing today's data.
+- It cannot be reverted once any op carries the new version, and it hard-blocks
+  every lagging post-v18.14.0 client on a frozen cursor.
+- The legacy fleet does not age out on its own: there is **no desktop
+  auto-updater** (the block in `electron/start-app.ts` is commented out) and the
+  update banner's dismissal is persisted. Any policy gated on "wait for the old
+  fleet to shrink" is a permanent no in disguise.
+- Additive fields are safe by construction here: typia uses `createValidate`
+  (excess properties are neither rejected nor stripped) and LWW patch application
+  goes through `updateOne`, a shallow merge that retains unknown keys. **Renames
+  and removals are the dangerous shape** — an old client that wins a conflict
+  re-emits the entity without the field, destroying it fleet-wide — and no bump
+  prevents that, because old clients keep writing regardless.
+
+**Evaluation record (2026-08)**: raising `CURRENT_SCHEMA_VERSION` to 5 was
+considered and **declined**. Neither candidate motivation survived: the
+accumulated optional-field/runtime-default debt needs no migration (that pattern
+_is_ the answer, per sync rule 11), and the typed RRULE recurrence model can ship
+as an additive field while the flat fields stay canonical and re-derived — see
+#9664, which also corrects that plan's inverted cross-version gate. A migration
+with no payload is pure cost.
+
+**Implementation**: no new machinery — each channel above already exists and has
+a shipped precedent.
+
+**Documentation**: [Bump Policy §A.7.11](docs/sync-and-op-log/operation-log-architecture.md#bump-policy--a-bump-does-not-protect-the-released-fleet), [`persisted-model-fields.md`](docs/sync-and-op-log/persisted-model-fields.md), `AGENTS.md` sync rules 10 and 11
+
+**Key Files**:
+
+- [`schema-version.ts`](packages/shared-schema/src/schema-version.ts) — the constant and its bump warning
+- [`normalize-start-of-next-day-config.ts`](src/app/features/config/normalize-start-of-next-day-config.ts) — the dual-field template
+- [`global-config.reducer.ts`](src/app/features/config/store/global-config.reducer.ts) — read-time normalization at `loadAllData`
+- [`db-upgrade.ts`](src/app/op-log/persistence/db-upgrade.ts) / [`db-keys.const.ts`](src/app/op-log/persistence/db-keys.const.ts) — the local-only version ladder
+
+**When to Update This Pattern**:
+
+- A change genuinely requires removing or renaming a synced field
+- `CURRENT_SCHEMA_VERSION` is raised (record what earned it)
+- A desktop auto-updater ships — it changes the fleet assumption this rests on
+
+---
+
 ## Decisions Recorded Elsewhere
 
 These carry the same authority as the numbered records above. They live outside this file because they are long enough to stand alone, or because they are enforced as contributor/agent rules that must be read before touching the subsystem. Keep this table complete — if you record a decision somewhere else, add a row here.
