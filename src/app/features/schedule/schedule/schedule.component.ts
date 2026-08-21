@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   signal,
 } from '@angular/core';
@@ -78,6 +79,7 @@ export class ScheduleComponent {
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _translate = inject(TranslateService);
   private _hiddenCalendarProviders = inject(HiddenCalendarProvidersService);
+  private _elRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly hiddenCalendarProviderIds = this._hiddenCalendarProviders.hiddenProviderIds;
   readonly enabledCalendarProviders = toSignal(
@@ -392,37 +394,26 @@ export class ScheduleComponent {
     this.isHScrolled.set(el.scrollLeft > 0);
   }
 
-  // Scroll a target element into view inside the scroll-wrapper, but pull
-  // horizontally back by the sticky time column's width (+ a bit extra) so
-  // the target doesn't end up sitting under the time column.
-  private _scrollIntoViewWithTimeColumnOffset(elementId: string): void {
-    const element = document.getElementById(elementId);
-    const scrollContainer = element?.closest('.scroll-wrapper') as HTMLElement | null;
-    if (!element || !scrollContainer) return;
+  // Scroll one of the schedule's time anchors to the top of the scroll-wrapper.
+  //
+  // The framing (lead above the target, and clearance for the sticky time
+  // column and week header) lives in CSS as scroll-padding on .scroll-wrapper,
+  // next to the row-height and column-width variables it is derived from.
+  //
+  // scrollIntoView is used rather than scrollTo with measured offsets because
+  // it resolves the target in layout coordinates: the route enter animation
+  // (warpRoute) starts this view at scale(1.2) and the scroll runs on a
+  // setTimeout(0), so anything measured from getBoundingClientRect() while that
+  // is in flight overshoots by the animation's current scale.
+  //
+  // The lookup is scoped to this component's own element: the right panel
+  // embeds a second schedule-week that renders its own #current-time.
+  private _scrollAnchorToTop(elementId: string): void {
+    const element = this._elRef.nativeElement.querySelector(
+      `#${elementId}`,
+    ) as HTMLElement | null;
 
-    const timeCol = scrollContainer.querySelector(
-      'schedule-week .time-column-bg, schedule-week .filler',
-    );
-    // `.filler` is `display:none` in side-panel mode, so a 0-width hit
-    // here means we matched the hidden one — fall back to the default.
-    const timeColWidth = timeCol?.getBoundingClientRect().width || 48;
-    const EXTRA_PX = 12;
-
-    const elRect = element.getBoundingClientRect();
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const targetTop = scrollContainer.scrollTop + elRect.top - containerRect.top;
-    const targetLeft =
-      scrollContainer.scrollLeft +
-      elRect.left -
-      containerRect.left -
-      timeColWidth -
-      EXTRA_PX;
-
-    scrollContainer.scrollTo({
-      top: Math.max(0, targetTop),
-      left: Math.max(0, targetLeft),
-      behavior: 'instant',
-    });
+    element?.scrollIntoView({ block: 'start', inline: 'start', behavior: 'instant' });
   }
 
   selectTimeView(view: 'week' | 'month' | 'day'): void {
@@ -442,8 +433,16 @@ export class ScheduleComponent {
 
     effect(() => {
       if (this.isMonthView() === false) {
-        // scroll to work start whenever view is switched to work-week
-        setTimeout(() => this._scrollIntoViewWithTimeColumnOffset('work-start'));
+        // prefer the current time when it is visible (today is in range),
+        // otherwise fall back to work start. NOTE: the signal read must stay
+        // inside the setTimeout so it is untracked — otherwise currentTimeRow's
+        // 2-minute refresh tick would re-run this effect and yank the scroll
+        // position while the user is reading the schedule.
+        setTimeout(() =>
+          this._scrollAnchorToTop(
+            this.currentTimeRow() !== null ? 'current-time' : 'work-start',
+          ),
+        );
       }
     });
   }
