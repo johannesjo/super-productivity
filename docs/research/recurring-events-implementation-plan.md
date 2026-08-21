@@ -1,5 +1,14 @@
 # Recurring Events Implementation Plan
 
+> **Read `rrule-epic-roadmap.md` on `feat/rrule-epic` first.** This plan is the
+> _design rationale_ companion to a live epic, not a greenfield proposal. Much of
+> what follows is already implemented on that branch (forward/inverse RRULE
+> converters, the old-client compatibility contract, an off-by-default per-device
+> engine flag), and the branch resolved several questions this document still
+> poses as open. Check there before planning or building anything here. Note the
+> branch's implementation uses a **raw `rrule` string**, not the typed union
+> sketched below — reconcile the two before treating either as decided.
+
 > **Revision note (verified against code 2026-06-02).** Rewritten after two rounds
 > of multi-axis review against the actual codebase. The original draft was built on
 > three false premises and several sync-unsafe steps; a later "raw RRULE string as
@@ -244,14 +253,44 @@ Migrate via the live op-log schema system:
   `remote-ops-processing.service.ts`. The conversion itself is pure O(1)
   string/struct assembly per config — cheap even for many configs; the migration
   must **not** expand occurrences per config.
-- **Cross-version story (resolve the old-client contradiction):** you cannot both
-  retire the flat fields _and_ have old clients keep computing from them. The
-  decision is to gate via **`MIN_SUPPORTED_SCHEMA_VERSION`**: pre-typed clients
-  fall below the minimum and get the existing "update required"
-  (`VERSION_UNSUPPORTED`) flow before they can apply typed-model ops. State this as
-  a deliberate, breaking, update-required step with its UX consequence — it is the
-  real safety mechanism, not "atomic flip" (op-log migration is per-op on receive,
-  not a single fleet-wide transaction).
+- **Cross-version story (resolve the old-client contradiction).** _Corrected
+  2026-08 — see #9664._ An earlier revision of this bullet named
+  **`MIN_SUPPORTED_SCHEMA_VERSION`** as a "force-update gate" that would push
+  pre-typed clients through the `VERSION_UNSUPPORTED` flow. That is backwards.
+  It is a lower bound applied to data _this_ client reads
+  (`remote-ops-processing.service.ts:177`, `operation-log-sync.service.ts:2318`,
+  `verify-decrypted-op-integrity.ts:139`, `migrate.ts:49,115`); senders stamp
+  `CURRENT_SCHEMA_VERSION` only, and no server-side client-version gate exists.
+  Raising it would wedge the **updated** client — the block halts the cycle
+  before upload (`sync-wrapper.service.ts:595-606`), the cursor is not advanced,
+  and the `VERSION_UNSUPPORTED` snack deliberately carries no remedy
+  (`remote-ops-processing.service.ts:540-546`, "updating THIS device cannot
+  help"). It never prompts the old device. **There is no version gate here.**
+
+  Nor does a `CURRENT_SCHEMA_VERSION` bump supply one for the _currently
+  released_ fleet: master is at 4, so a bump lands on 5 — inside the
+  v17.0.0–v18.14.0 tolerated band (`2 + 3`) — and those clients apply the ops
+  **unmigrated**; a bump to 6 blocks them but still advances their cursor,
+  permanently skipping the ops. (Post-v18.14.0 receivers _do_ block safely, so a
+  bump becomes a real fence once that cohort ages out.) See
+  `packages/shared-schema/src/schema-version.ts` and
+  `docs/sync-and-op-log/operation-log-architecture.md` §A.7.11.
+
+- **The mechanism that actually solves this is already built on
+  `feat/rrule-epic`** — do not re-derive it. The legacy schedule fields stay
+  populated alongside the new representation as the wire format for old clients
+  (`util/legacy-cfg-to-rrule.util.ts`), under an **exact-or-null contract**:
+  where the rule is within legacy expressiveness the legacy fields fire on the
+  same days; where it is not (`COUNT`/`UNTIL`, seasonal `BYMONTH`,
+  `BYWEEKNO`/`BYYEARDAY`, multi-day lists, out-of-union ordinals) the
+  `LEGACY_NEVER_FIRES_FALLBACK` sentinel is written instead — an all-false
+  `WEEKLY` cfg, which every released version deterministically never fires. Old
+  clients create **nothing** rather than tasks on wrong days that would sync
+  back. `getAlignedStartDate` handles `startDate`'s double duty as both the
+  monthly/yearly day encoding and the interval anchor. The off-by-default
+  per-device flag (`RRuleFeatureFlagService`, localStorage, never synced) keeps
+  the legacy engine authoritative while the epic is incomplete — that flag, not
+  a schema gate, is what makes half-built phases safe.
 - **Never rename `deletedInstanceDates` on the wire.** Keep the synced field name;
   `exDates` is the in-memory/typed name and `EXDATE` the export name. Under
   whole-entity LWW, an old client that wins a conflict re-emits the entity without
@@ -300,20 +339,20 @@ So the real risk is feeding a **wrong DTSTART/anchor**, not "wrong engine":
 
 ## Risk register
 
-| Risk                                                                    | Severity    | Mitigation                                                                     |
-| ----------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------ |
-| Occurrence dates shift on model swap → re-keyed instances               | **Blocker** | Keep the existing bounded engine; Phase-1 golden master gates migration        |
-| Cross-version sync: old client can't read typed model                   | **Blocker** | `MIN_SUPPORTED_SCHEMA_VERSION` force-update gate (not "compute from legacy")   |
-| Renaming the `deletedInstanceDates` wire key loses skip data            | High        | Do not rename the persisted key; `EXDATE` only at export                       |
-| `repeatFromCompletionDate` fed a fixed DTSTART → becomes fixed-calendar | High        | Route completion mode before any fixed-anchor path; re-anchor per cycle        |
-| Wrong migration subsystem (`pfapi-config.js`)                           | High        | Use `packages/shared-schema` migrations + `schema-migration.service.ts`        |
-| Hot-path regression from async/forward-only ical.js iteration           | High        | ical.js for string parse/serialize only; sync bounded engine stays the runtime |
-| DTSTART carries `startTime` → day rolls                                 | High        | DTSTART = local-noon of anchor day; `startTime` applied post-expansion         |
-| EXDATE never matches (instant vs noon)                                  | Medium      | Filter by `getDbDateStr` day-string                                            |
-| Bi-weekly shifts (WKST default)                                         | Medium      | Thread `firstDayOfWeek` → `WKST`                                               |
-| `UNTIL` drops final day                                                 | Medium      | Inclusive end-of-day                                                           |
-| ~~Production shadow mode cost~~                                         | n/a         | Not needed — engine unchanged; offline golden master covers parity             |
-| ~~Bundle size of new dep~~                                              | n/a         | No new dep — ical.js already present & lazy-loaded                             |
+| Risk                                                                    | Severity    | Mitigation                                                                                                                                                                                       |
+| ----------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Occurrence dates shift on model swap → re-keyed instances               | **Blocker** | Keep the existing bounded engine; Phase-1 golden master gates migration                                                                                                                          |
+| Cross-version sync: old client can't read typed model                   | **Blocker** | No version gate exists (#9664). Keep legacy fields populated on the wire under the exact-or-null contract; `LEGACY_NEVER_FIRES_FALLBACK` for inexpressible rules; per-device flag gates the epic |
+| Renaming the `deletedInstanceDates` wire key loses skip data            | High        | Do not rename the persisted key; `EXDATE` only at export                                                                                                                                         |
+| `repeatFromCompletionDate` fed a fixed DTSTART → becomes fixed-calendar | High        | Route completion mode before any fixed-anchor path; re-anchor per cycle                                                                                                                          |
+| Wrong migration subsystem (`pfapi-config.js`)                           | High        | Use `packages/shared-schema` migrations + `schema-migration.service.ts`                                                                                                                          |
+| Hot-path regression from async/forward-only ical.js iteration           | High        | ical.js for string parse/serialize only; sync bounded engine stays the runtime                                                                                                                   |
+| DTSTART carries `startTime` → day rolls                                 | High        | DTSTART = local-noon of anchor day; `startTime` applied post-expansion                                                                                                                           |
+| EXDATE never matches (instant vs noon)                                  | Medium      | Filter by `getDbDateStr` day-string                                                                                                                                                              |
+| Bi-weekly shifts (WKST default)                                         | Medium      | Thread `firstDayOfWeek` → `WKST`                                                                                                                                                                 |
+| `UNTIL` drops final day                                                 | Medium      | Inclusive end-of-day                                                                                                                                                                             |
+| ~~Production shadow mode cost~~                                         | n/a         | Not needed — engine unchanged; offline golden master covers parity                                                                                                                               |
+| ~~Bundle size of new dep~~                                              | n/a         | No new dep — ical.js already present & lazy-loaded                                                                                                                                               |
 
 ---
 
@@ -346,7 +385,8 @@ So the real risk is feeding a **wrong DTSTART/anchor**, not "wrong engine":
 | Quick settings / dialog UI                                           | `dialog-edit-task-repeat-cfg/` (form const, quick-setting updates, build options)                                                                                                                                                                                                      |
 | Human-readable text                                                  | `src/app/features/tasks/task-detail-panel/get-task-repeat-info-text.util.ts`                                                                                                                                                                                                           |
 | RRULE serialize/parse (boundary only)                                | `src/app/features/schedule/ical/ical-lazy-loader.ts` (reuse loader)                                                                                                                                                                                                                    |
-| Migration (corrected)                                                | `packages/shared-schema/src/migrations/` (+ `index.ts`), `packages/shared-schema/src/schema-version.ts` (`CURRENT_SCHEMA_VERSION`, `MIN_SUPPORTED_SCHEMA_VERSION`), `src/app/op-log/persistence/schema-migration.service.ts`                                                           |
+| Migration (corrected)                                                | `packages/shared-schema/src/migrations/` (+ `index.ts`), `packages/shared-schema/src/schema-version.ts` (`CURRENT_SCHEMA_VERSION` — note `MIN_SUPPORTED_SCHEMA_VERSION` is _not_ a cross-version gate, #9664), `src/app/op-log/persistence/schema-migration.service.ts`                |
+| Old-client wire compatibility (already built on `feat/rrule-epic`)   | `src/app/features/task-repeat-cfg/util/legacy-cfg-to-rrule.util.ts` (`legacyTaskRepeatCfgToRRule`, `rruleToLegacyTaskRepeatCfg`, `LEGACY_NEVER_FIRES_FALLBACK`, `getAlignedStartDate`), `src/app/features/config/rrule-feature-flag.service.ts`                                        |
 | Validation / repair                                                  | `src/app/op-log/validation/` (`createValidate`, `data-repair.ts`)                                                                                                                                                                                                                      |
 | Calendar roadmap (note: predates #6040/#7726/`deletedInstanceDates`) | `docs/long-term-plans/calendar-two-way-sync-technical-analysis.md` (CalDAV VEVENT expansion shipped as the `caldav-calendar-provider` plugin)                                                                                                                                          |
 
