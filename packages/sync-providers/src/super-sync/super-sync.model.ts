@@ -36,6 +36,39 @@ export interface SuperSyncPrivateCfg {
 }
 
 /**
+ * One device syncing a SuperSync account, as listed by `GET /api/sync/devices`.
+ *
+ * Carries no name or user agent by design — see `DeviceService.listDevices` on
+ * the server. Devices are told apart by the platform prefix of `clientId`
+ * (`E_`/`A_`/`I_`/`B_`) plus their activity timestamps.
+ */
+export interface SuperSyncDeviceInfo {
+  clientId: string;
+  /** Unix ms of the device's last sync activity (upload or download). */
+  lastSeenAt: number;
+}
+
+/**
+ * Named differently from shared-schema's `SuperSyncDevicesResponse` on
+ * purpose: this package cannot import shared-schema (validator-port
+ * boundary), and identical twin names across the two packages invite
+ * silently importing the wrong one.
+ */
+export interface SuperSyncDeviceListResponse {
+  devices: SuperSyncDeviceInfo[];
+}
+
+/**
+ * Validated result of `POST /api/replace-token`: a fresh JWT for the calling
+ * client. Issuing it bumps the account-wide `tokenVersion`, which signs out
+ * every other device (they get 401s on their next sync). Deliberately not
+ * named like shared-schema's response type — see `SuperSyncDeviceListResponse`.
+ */
+export interface SuperSyncReplaceTokenResult {
+  token: string;
+}
+
+/**
  * Structural typing surface for callers that need WebSocket connection
  * parameters from a SuperSync provider. The bundled `SuperSyncProvider`
  * implements this interface, but callers should type against the

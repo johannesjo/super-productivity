@@ -109,6 +109,7 @@ describe('SyncWrapperService', () => {
         'setProviderConfig',
         'getProviderById',
         'clearAuthCredentials',
+        'invalidateCredentialCache',
         'getLastSyncedProviderId',
         'setLastSyncedProviderId',
         'bumpSyncEpoch',
@@ -122,6 +123,7 @@ describe('SyncWrapperService', () => {
       },
     );
     mockProviderManager.clearAuthCredentials.and.returnValue(Promise.resolve());
+    mockProviderManager.invalidateCredentialCache.and.returnValue(Promise.resolve());
     mockProviderManager.getProviderById.and.returnValue(Promise.resolve(undefined));
     mockProviderManager.getLastSyncedProviderId.and.returnValue(null);
     mockProviderManager.getActiveProvider.and.returnValue({
@@ -1741,6 +1743,21 @@ describe('SyncWrapperService', () => {
       await service.sync();
 
       expect(mockProviderManager.clearAuthCredentials).not.toHaveBeenCalled();
+    });
+
+    it('should drop the credential cache on each AuthFailSPError — the 401 may be another tab having rotated the token', async () => {
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(new AuthFailSPError()),
+      );
+
+      await service.sync();
+
+      // Without this, a second tab keeps serving its cached revoked token,
+      // strikes out, and clearAuthCredentials wipes the fresh token another
+      // tab just stored ("sign out other devices").
+      expect(mockProviderManager.invalidateCredentialCache).toHaveBeenCalledWith(
+        SyncProviderId.SuperSync,
+      );
     });
 
     it('should NOT call clearAuthCredentials on second consecutive AuthFailSPError for SuperSync', async () => {
