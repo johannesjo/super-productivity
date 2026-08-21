@@ -424,7 +424,6 @@ export class StorageQuotaService {
       select: {
         userId: true,
         lastSnapshotSeq: true,
-        snapshotAt: true,
         latestFullStateSeq: true,
       },
       orderBy: { snapshotAt: 'asc' },
