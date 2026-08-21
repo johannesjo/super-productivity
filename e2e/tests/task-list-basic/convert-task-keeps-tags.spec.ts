@@ -110,10 +110,8 @@ test.describe('Convert task keeps own tags (#9651)', () => {
     await expect(menu).toBeVisible();
     await menu.getByRole('menuitem', { name: /convert to parent task/i }).click();
 
-    const moverTopLevel = page
-      .locator('task-list[data-level="root"] > .task-list-inner > task, task')
-      .filter({ hasText: 'DragMover' })
-      .first();
+    // Root-levelness is asserted via the sub-list toHaveCount(0) check below.
+    const moverTopLevel = page.locator('task').filter({ hasText: 'DragMover' }).first();
     await expect(moverTopLevel).toBeVisible({ timeout: 5000 });
     // Not a subtask anymore
     await expect(

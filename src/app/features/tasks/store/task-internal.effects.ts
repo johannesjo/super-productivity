@@ -24,7 +24,8 @@ import {
   moveProjectTaskToBacklogListAuto,
 } from '../../project/store/project.actions';
 import { DateService } from '../../../core/date/date.service';
-import { TODAY_TAG } from '../../tag/tag.const';
+import { filterOutTodayTag } from '../../../root-store/meta/task-shared-meta-reducers/task-shared-helpers';
+import { fastArrayCompare } from '../../../util/fast-array-compare';
 
 @Injectable()
 export class TaskInternalEffects {
@@ -113,36 +114,47 @@ export class TaskInternalEffects {
         const isConvertToSub = action.type === TaskSharedActions.convertToSubTask.type;
         const taskId = isConvertToSub ? action.taskId : action.task.id;
         const task = state.entities[taskId];
-        if (!task || !task.tagIds?.length) {
+        if (!task) {
           return EMPTY;
         }
+        // TODAY is virtual (rule 5) and must never be re-asserted into synced
+        // tagIds — legacy-dirty data may still carry it on the to-sub path
+        // (to-main already filters in the reducer).
+        const ownTagIds = filterOutTodayTag(task.tagIds ?? []);
+        if (!ownTagIds.length) {
+          return EMPTY;
+        }
+        // NOTE: for a convert the reducer guard rejected (e.g. already nested
+        // under the target), this still reads as applied and emits a redundant
+        // but idempotent op — prior state isn't available here to tell apart.
         const isApplied = isConvertToSub
           ? task.parentId === action.targetParentId
           : !task.parentId;
         if (!isApplied) {
           return EMPTY;
         }
-        // What an old client's reducer leaves in tagIds after replaying this
-        // op: [] for to-sub, the parent's tags for to-main. Emit only when
-        // the kept tags differ — otherwise both fleets already agree.
-        const parent = isConvertToSub
-          ? undefined
-          : state.entities[action.task.parentId as string];
-        const oldClientTagIds = isConvertToSub
-          ? []
-          : (Array.isArray(parent?.tagIds)
-              ? parent.tagIds
-              : (action.parentTagIds ?? [])
-            ).filter((id) => id !== TODAY_TAG.id);
-        const isSameResult =
-          task.tagIds.length === oldClientTagIds.length &&
-          task.tagIds.every((id, i) => id === oldClientTagIds[i]);
-        if (isSameResult) {
+        if (isConvertToSub) {
+          // Old clients wipe tagIds on to-sub; ownTagIds is non-empty here,
+          // so the fleets always differ — re-assert unconditionally.
+          return of(
+            TaskSharedActions.updateTask({
+              task: { id: taskId, changes: { tagIds: ownTagIds } },
+            }),
+          );
+        }
+        // To-main: an old client's reducer overwrites tagIds with its parent's
+        // tags. Emit only when the kept tags differ — otherwise both fleets
+        // already agree.
+        const parent = state.entities[action.task.parentId as string];
+        const oldClientTagIds = filterOutTodayTag(
+          Array.isArray(parent?.tagIds) ? parent.tagIds : (action.parentTagIds ?? []),
+        );
+        if (fastArrayCompare(ownTagIds, oldClientTagIds)) {
           return EMPTY;
         }
         return of(
           TaskSharedActions.updateTask({
-            task: { id: taskId, changes: { tagIds: task.tagIds } },
+            task: { id: taskId, changes: { tagIds: ownTagIds } },
           }),
         );
       }),

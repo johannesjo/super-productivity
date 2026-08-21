@@ -146,6 +146,54 @@ describe('TaskInternalEffects', () => {
       );
     });
 
+    it('should filter the virtual TODAY tag out of re-asserted tagIds (legacy-dirty data)', (done) => {
+      const parentTask = createTask('parent', { subTaskIds: ['task1'] });
+      const task = createTask('task1', {
+        parentId: 'parent',
+        tagIds: ['TODAY', 'tag1'],
+      });
+      store.overrideSelector(selectTaskFeatureState, createTaskState([parentTask, task]));
+      store.refreshState();
+
+      effects.reassertOwnTagsAfterConvert$.subscribe((action) => {
+        expect((action as any).task.changes.tagIds).toEqual(['tag1']);
+        done();
+      });
+
+      actions$.next(
+        TaskSharedActions.convertToSubTask({
+          taskId: 'task1',
+          targetParentId: 'parent',
+          afterTaskId: null,
+        }),
+      );
+    });
+
+    it('should NOT emit when tagIds contains only the virtual TODAY tag', (done) => {
+      const parentTask = createTask('parent', { subTaskIds: ['task1'] });
+      const task = createTask('task1', { parentId: 'parent', tagIds: ['TODAY'] });
+      store.overrideSelector(selectTaskFeatureState, createTaskState([parentTask, task]));
+      store.refreshState();
+
+      let emitted = false;
+      effects.reassertOwnTagsAfterConvert$.subscribe(() => {
+        emitted = true;
+      });
+
+      actions$.next(
+        TaskSharedActions.convertToSubTask({
+          taskId: 'task1',
+          targetParentId: 'parent',
+          afterTaskId: null,
+        }),
+      );
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
     it('should NOT emit for convertToSubTask when the task has no tags', (done) => {
       const parentTask = createTask('parent', { subTaskIds: ['task1'] });
       const task = createTask('task1', { parentId: 'parent', tagIds: [] });
