@@ -104,6 +104,14 @@ const remainingTimeout = (startedAt: number, total: number): number =>
   Math.max(1, total - (Date.now() - startedAt));
 
 /**
+ * How long to give one sync-button click to actually start a cycle before
+ * clicking again. Long enough to cover the op-flush + payload encryption that
+ * precede the first request, short enough to retry several times inside the
+ * caller's timeout.
+ */
+const SYNC_CLICK_RETRY_INTERVAL_MS = 3000;
+
+/**
  * Page object for SuperSync configuration and sync operations.
  * Used for E2E tests that verify multi-client sync via the super-sync-server.
  */
@@ -1916,8 +1924,12 @@ export class SuperSyncPage extends BasePage {
       request.method() !== 'OPTIONS' && isOpsUrl(request.url());
     const isArmedOpsRequest = (request: Request): boolean =>
       requestsStartedAfterArm.has(request) && isOpsRequest(request);
+    let cycleStarted = false;
     const requestHandler = (request: Request): void => {
       requestsStartedAfterArm.add(request);
+      if (isOpsRequest(request)) {
+        cycleStarted = true;
+      }
     };
     const responseHandler = (response: Response): void => {
       if (isArmedOpsRequest(response.request()) && !response.ok()) {
@@ -1935,20 +1947,52 @@ export class SuperSyncPage extends BasePage {
     this.page.on('requestfailed', requestFailedHandler);
 
     try {
-      const [response] = await Promise.all([
-        this.page.waitForResponse(
+      // Settle instead of reject so the waiter can be raced against the
+      // re-click timer below without producing an unhandled rejection.
+      const settled = this.page
+        .waitForResponse(
           (candidate) => isArmedOpsRequest(candidate.request()) && candidate.ok(),
           { timeout },
-        ),
-        this.syncBtn.click(),
-      ]);
+        )
+        .then(
+          (response) => ({ response, error: undefined }),
+          (error: unknown) => ({ response: undefined, error }),
+        );
+
+      // The app silently drops a sync-button click while another cycle is
+      // already running (`SyncWrapperService.sync()` returns HANDLED_ERROR
+      // without issuing a request) — e.g. the auto-sync that the daily-summary
+      // archive kicks off. Re-click until a cycle actually starts instead of
+      // waiting out the whole timeout on a swallowed click.
+      const deadline = Date.now() + timeout;
+      let outcome: Awaited<typeof settled> | null = null;
+      do {
+        await this.syncBtn.click();
+        outcome = await Promise.race([
+          settled,
+          this.page
+            .waitForTimeout(
+              Math.min(SYNC_CLICK_RETRY_INTERVAL_MS, Math.max(1, deadline - Date.now())),
+            )
+            .then(() => null),
+        ]);
+      } while (!outcome && !cycleStarted && Date.now() < deadline);
+
+      const { response, error: waitError } = outcome ?? (await settled);
+      if (!response) {
+        throw waitError;
+      }
       const responseFailure = await response.finished();
       if (responseFailure) {
         throw responseFailure;
       }
     } catch (error) {
       const attemptSummary =
-        failedAttempts.length > 0 ? failedAttempts.join(', ') : 'none observed';
+        failedAttempts.length > 0
+          ? failedAttempts.join(', ')
+          : cycleStarted
+            ? 'none observed'
+            : 'no cycle started — every sync click was swallowed';
       throw new Error(
         `SuperSync did not receive a completed successful /api/sync/ops response within ${timeout}ms. Failed attempts: ${attemptSummary}`,
         { cause: error },
