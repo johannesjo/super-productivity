@@ -168,6 +168,11 @@ export const moveProjectTaskToRegularListAuto = createAction(
   }),
 );
 
+// NOTE on `doneBacklogTaskIds` (here and in the three actions below): despite
+// the name, the field carries the ids of the NOT-done backlog tasks (see
+// selectUndoneBacklogTaskIdsForActiveContext). Persistent op payload — the
+// field name is wire-frozen; renaming it would break replay on released
+// clients.
 export const moveProjectTaskUpInBacklogList = createAction(
   '[Project] Move Task Up in Backlog',
   (taskProps: {

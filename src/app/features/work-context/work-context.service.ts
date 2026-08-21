@@ -52,8 +52,8 @@ import {
   selectActiveContextId,
   selectActiveContextTypeAndId,
   selectActiveWorkContext,
-  selectDoneBacklogTaskIdsForActiveContext,
-  selectDoneTaskIdsForActiveContext,
+  selectUndoneBacklogTaskIdsForActiveContext,
+  selectUndoneTaskIdsForActiveContext,
   selectStartableTasksForActiveContext,
   selectTrackableTasksForActiveContext,
 } from './store/work-context.selectors';
@@ -351,11 +351,11 @@ export class WorkContextService {
     }),
   );
 
-  doneTaskIds$: Observable<string[]> = this._store$.select(
-    selectDoneTaskIdsForActiveContext,
+  undoneTaskIds$: Observable<string[]> = this._store$.select(
+    selectUndoneTaskIdsForActiveContext,
   );
-  doneBacklogTaskIds$: Observable<string[] | undefined> = this._store$.select(
-    selectDoneBacklogTaskIdsForActiveContext,
+  undoneBacklogTaskIds$: Observable<string[] | undefined> = this._store$.select(
+    selectUndoneBacklogTaskIdsForActiveContext,
   );
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this.backlogTaskIds$.pipe(
