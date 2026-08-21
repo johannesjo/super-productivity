@@ -21,6 +21,8 @@
  * The Android background sync reads the Argon2id format independently
  * (android `crypto/OpPayloadDecryptor.kt`) — changes here must be mirrored
  * there and its fixtures regenerated (see the note in encryption/argon2.ts).
+ * CI verifies the round-trip live: tools/generate-android-crypto-fixtures.mjs
+ * feeds fresh encrypt() output to the Kotlin tests on every Android CI run.
  *
  * ## Salt and IV semantics
  *
