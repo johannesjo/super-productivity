@@ -2719,6 +2719,39 @@ describe('FileBasedSyncAdapterService', () => {
       expect(mockSnackService.open).toHaveBeenCalled();
     });
 
+    it('(b) recovers from .bak when the primary file has NO sync file prefix (#9627)', async () => {
+      // #9627: a Nextcloud user hit "Invalid sync file prefix" — the remote
+      // primary's first bytes are not `pf_...__`, so extractSyncFileStateFromPrefix
+      // throws BEFORE the decrypt/decompress/JSON stages the cases above cover.
+      // That makes a head-mangled primary (transport-mangled body, a foreign file
+      // at the path, an interrupted write that lost its head) the ONE corruption
+      // shape excluded from .bak recovery. Same recovery semantics as its
+      // siblings: local data is intact and the .bak is the only readable copy.
+      const backupData = createMockSyncData({
+        syncVersion: 5,
+        recentOps: [compactOp('recovered-from-missing-prefix') as never],
+      });
+      // Prefix-less body: valid JSON, but not a sync file (e.g. a backup export
+      // copied into the sync folder). Nothing downstream ever gets to parse it.
+      const unprefixedMain = JSON.stringify({ version: 2, syncVersion: 9 });
+      mockProvider.downloadFile.and.callFake((path: string) => {
+        if (path === FILE_BASED_SYNC_CONSTANTS.BACKUP_FILE) {
+          return Promise.resolve({
+            dataStr: addPrefix(backupData),
+            rev: 'bak-rev-prefix',
+          });
+        }
+        return Promise.resolve({ dataStr: unprefixedMain, rev: 'corrupt-prefix-rev' });
+      });
+
+      const result = await adapter.downloadOps(0);
+
+      expect(result.ops.length).toBe(1);
+      expect(result.ops[0].op.id).toBe('recovered-from-missing-prefix');
+      expect(result.latestSeq).toBe(5);
+      expect(mockSnackService.open).toHaveBeenCalled();
+    });
+
     it('(b) refuses a PLAINTEXT .bak when encryption is expected (key-suppression vector)', async () => {
       // A plaintext .bak decodes via its own prefix flags even under a
       // wrong/rotated key. Accepting it would suppress the wrong-password

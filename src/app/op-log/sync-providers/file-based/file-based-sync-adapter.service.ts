@@ -36,6 +36,7 @@ import {
   DecryptError,
   FileSyncTargetChangedError,
   InvalidDataSPError,
+  InvalidFilePrefixError,
   JsonParseError,
   LegacySyncFormatDetectedError,
   PlaintextWhenEncryptionExpectedError,
@@ -3185,7 +3186,14 @@ export class FileBasedSyncAdapterService {
       // clients. Mixed-fleet caveat: a pre-fix client's snapshot still leaves a
       // stale-key .bak behind until its first op-bearing sync refreshes it.
       e instanceof DecryptError ||
-      e instanceof DecompressError
+      e instanceof DecompressError ||
+      // #9627: the prefix is parsed FIRST, so a primary whose head is mangled
+      // (or that is not a sync file at all) throws here and never reaches the
+      // stages above — leaving the most basic corruption shape as the only one
+      // without .bak recovery. Inert when the cause is transport-side rather
+      // than a bad remote file: the .bak download is mangled the same way, so
+      // _readBakFile returns null and the original error still surfaces.
+      e instanceof InvalidFilePrefixError
     );
   }
 
