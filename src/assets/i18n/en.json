@@ -1233,6 +1233,7 @@
         "CONTENT_CONFLICT_UNTITLED": "Untitled task"
       },
       "BTN_RESTORE_FROM_HISTORY": "Restore from History",
+      "BTN_SHOW_DEVICES": "Show Connected Devices",
       "BTN_SYNC_NOW": "Sync Now",
       "C": {
         "FORCE_UPLOAD": "This will REPLACE all data on the server and on every other device with this device's local copy. Any unsynced changes on those devices will be permanently lost. Continue?",
@@ -1343,6 +1344,19 @@
         "P3_PW_CHANGED": "If you <strong>changed your password on another device</strong>, enter your new password and click <strong>Overwrite Server & Other Devices</strong>. ⚠️ This is destructive: it replaces ALL data on the server and on your other devices with this device's local copy. Any unsynced changes on those devices will be lost.",
         "PASSWORD": "Password",
         "TITLE": "Decryption Failed"
+      },
+      "D_DEVICES": {
+        "ERROR_LOADING": "Failed to load connected devices",
+        "LAST_SEEN": "Last sync: {{date}}",
+        "NO_DEVICES": "No devices have synced with this account yet.",
+        "PLATFORM_ANDROID": "Android",
+        "PLATFORM_BROWSER": "Browser",
+        "PLATFORM_DESKTOP": "Desktop",
+        "PLATFORM_IOS": "iOS",
+        "PLATFORM_UNKNOWN": "Unknown device",
+        "REMOVE_HINT": "Devices cannot be removed individually — Super Sync grants access per account, not per device. A device that stops syncing drops off this list on its own.",
+        "THIS_DEVICE": "(this device)",
+        "TITLE": "Connected Devices"
       },
       "D_ENTER_PASSWORD": {
         "BTN_FORCE_OVERWRITE": "Use Local Data",

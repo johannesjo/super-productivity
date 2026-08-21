@@ -212,6 +212,20 @@ export const SuperSyncStatusResponseSchema = z
   })
   .passthrough();
 
+export const SuperSyncDeviceSchema = z
+  .object({
+    clientId: SuperSyncClientIdSchema,
+    /** Unix ms of the device's last sync activity (upload or download). */
+    lastSeenAt: z.number(),
+  })
+  .passthrough();
+
+export const SuperSyncDevicesResponseSchema = z
+  .object({
+    devices: z.array(SuperSyncDeviceSchema),
+  })
+  .passthrough();
+
 export const SuperSyncRestorePointSchema = z
   .object({
     serverSeq: z.number(),
@@ -258,6 +272,8 @@ export type SuperSyncSnapshotUploadResponse = z.infer<
   typeof SuperSyncSnapshotUploadResponseSchema
 >;
 export type SuperSyncStatusResponse = z.infer<typeof SuperSyncStatusResponseSchema>;
+export type SuperSyncDevice = z.infer<typeof SuperSyncDeviceSchema>;
+export type SuperSyncDevicesResponse = z.infer<typeof SuperSyncDevicesResponseSchema>;
 export type SuperSyncRestorePoint = z.infer<typeof SuperSyncRestorePointSchema>;
 export type SuperSyncRestorePointsResponse = z.infer<
   typeof SuperSyncRestorePointsResponseSchema

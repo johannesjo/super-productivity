@@ -5,6 +5,7 @@ import type {
   SnapshotUploadResponse,
   SuperSyncOpDownloadResponse,
 } from '../provider-types';
+import type { SuperSyncDevicesResponse } from './super-sync.model';
 
 /**
  * Host-injected response validators. The package can't import
@@ -24,4 +25,5 @@ export interface SuperSyncResponseValidators {
   validateRestorePoints(data: unknown): RestorePointsResponse;
   validateRestoreSnapshot(data: unknown): RestoreSnapshotResponse;
   validateDeleteAllData(data: unknown): { success: boolean };
+  validateDevices(data: unknown): SuperSyncDevicesResponse;
 }

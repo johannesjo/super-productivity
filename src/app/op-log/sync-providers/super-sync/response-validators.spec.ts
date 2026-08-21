@@ -5,6 +5,7 @@ import {
   validateRestorePointsResponse,
   validateRestoreSnapshotResponse,
   validateDeleteAllDataResponse,
+  validateDevicesResponse,
 } from './response-validators';
 
 describe('response-validators', () => {
@@ -261,6 +262,32 @@ describe('response-validators', () => {
     it('should throw if generatedAt is not a number', () => {
       expect(() =>
         validateRestoreSnapshotResponse({ serverSeq: 100, generatedAt: '123' }),
+      ).toThrow();
+    });
+  });
+
+  describe('validateDevicesResponse', () => {
+    const device = { clientId: 'E_abc123', lastSeenAt: 1700000000000 };
+
+    it('should accept a valid response', () => {
+      expect(() => validateDevicesResponse({ devices: [device] })).not.toThrow();
+    });
+
+    it('should accept an account with no devices', () => {
+      expect(() => validateDevicesResponse({ devices: [] })).not.toThrow();
+    });
+
+    it('should throw if a clientId violates the SuperSync charset', () => {
+      expect(() =>
+        validateDevicesResponse({ devices: [{ ...device, clientId: 'bad id!' }] }),
+      ).toThrow();
+    });
+
+    it('should throw if a timestamp arrives as a string', () => {
+      expect(() =>
+        validateDevicesResponse({
+          devices: [{ ...device, lastSeenAt: '1700000000000' }],
+        }),
       ).toThrow();
     });
   });

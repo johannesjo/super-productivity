@@ -36,6 +36,23 @@ export interface SuperSyncPrivateCfg {
 }
 
 /**
+ * One device syncing a SuperSync account, as listed by `GET /api/sync/devices`.
+ *
+ * Carries no name or user agent by design — see `DeviceService.listDevices` on
+ * the server. Devices are told apart by the platform prefix of `clientId`
+ * (`E_`/`A_`/`I_`/`B_`) plus their activity timestamps.
+ */
+export interface SuperSyncDeviceInfo {
+  clientId: string;
+  /** Unix ms of the device's last sync activity (upload or download). */
+  lastSeenAt: number;
+}
+
+export interface SuperSyncDevicesResponse {
+  devices: SuperSyncDeviceInfo[];
+}
+
+/**
  * Structural typing surface for callers that need WebSocket connection
  * parameters from a SuperSync provider. The bundled `SuperSyncProvider`
  * implements this interface, but callers should type against the

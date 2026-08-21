@@ -1,13 +1,18 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { DeviceService } from '../src/sync/services/device.service';
-import { ONLINE_DEVICE_THRESHOLD_MS } from '../src/sync/sync.types';
+import {
+  DEVICE_TOUCH_THROTTLE_MS,
+  ONLINE_DEVICE_THRESHOLD_MS,
+} from '../src/sync/sync.types';
 
 // Mock prisma
 vi.mock('../src/db', () => ({
   prisma: {
     syncDevice: {
       count: vi.fn(),
+      findMany: vi.fn(),
     },
+    $executeRaw: vi.fn(),
     userSyncState: {
       findMany: vi.fn(),
     },
@@ -88,6 +93,55 @@ describe('DeviceService', () => {
       const result = await service.getAllUserIds();
 
       expect(result).toEqual([42]);
+    });
+  });
+
+  describe('listDevices', () => {
+    it('should map BigInt columns to numbers', async () => {
+      vi.mocked(prisma.syncDevice.findMany).mockResolvedValue([
+        { clientId: 'E_abc123', lastSeenAt: BigInt(1700000000000) },
+      ] as any);
+
+      // BigInt would serialise to a JSON error on the wire, so the mapping to
+      // number is the contract this route depends on.
+      expect(await service.listDevices(1)).toEqual([
+        { clientId: 'E_abc123', lastSeenAt: 1700000000000 },
+      ]);
+    });
+  });
+
+  describe('touchDevice', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(1700000000000);
+    });
+
+    it('should skip the database entirely for a device touched within the window', async () => {
+      await service.touchDevice(1, 'E_abc123');
+      vi.setSystemTime(1700000000000 + DEVICE_TOUCH_THROTTLE_MS - 1);
+      await service.touchDevice(1, 'E_abc123');
+
+      // Postgres locks the conflicting row before it evaluates the
+      // ON CONFLICT ... WHERE predicate, so even a suppressed update costs a
+      // connection, a row lock and a WAL-flushing commit. The in-process
+      // throttle is what keeps the common case free.
+      expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+    });
+
+    it('should hit the database again once the window has passed', async () => {
+      await service.touchDevice(1, 'E_abc123');
+      vi.setSystemTime(1700000000000 + DEVICE_TOUCH_THROTTLE_MS);
+      await service.touchDevice(1, 'E_abc123');
+
+      expect(prisma.$executeRaw).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throttle per device and per account, not globally', async () => {
+      await service.touchDevice(1, 'E_abc123');
+      await service.touchDevice(1, 'A_xyz789');
+      await service.touchDevice(2, 'E_abc123');
+
+      expect(prisma.$executeRaw).toHaveBeenCalledTimes(3);
     });
   });
 

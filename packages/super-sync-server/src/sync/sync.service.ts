@@ -8,6 +8,7 @@ import {
   VectorClock,
   SYNC_ERROR_CODES,
   createStateReplacementRequiredResults,
+  SyncDeviceInfo,
 } from './sync.types';
 import { Logger } from '../logger';
 import { Prisma } from '@prisma/client';
@@ -615,13 +616,28 @@ export class SyncService {
     latestSnapshotSeq?: number;
     snapshotVectorClock?: VectorClock;
   }> {
-    return this.operationDownloadService.getOpsSinceWithSeq(
+    const result = await this.operationDownloadService.getOpsSinceWithSeq(
       userId,
       sinceSeq,
       excludeClient,
       limit,
       includeSnapshotMetadata,
     );
+
+    // Keep the device row alive for the device list. `excludeClient` is the
+    // caller's own id (it means "don't echo my ops back"), so a caller that
+    // omits it simply isn't recorded. Fire-and-forget and deliberately outside
+    // the download transaction: this is advisory metadata for a UI list and
+    // must never fail, slow, or lengthen the lock window of a sync.
+    if (excludeClient) {
+      void this.deviceService
+        .touchDevice(userId, excludeClient)
+        .catch((err) =>
+          Logger.debug(`[user:${userId}] touchDevice failed: ${(err as Error)?.message}`),
+        );
+    }
+
+    return result;
   }
 
   async getLatestSeq(userId: number): Promise<number> {
@@ -897,6 +913,10 @@ export class SyncService {
 
   async getOnlineDeviceCount(userId: number): Promise<number> {
     return this.deviceService.getOnlineDeviceCount(userId);
+  }
+
+  async listDevices(userId: number): Promise<SyncDeviceInfo[]> {
+    return this.deviceService.listDevices(userId);
   }
 }
 

@@ -380,6 +380,17 @@ export interface DownloadOpsResponse {
   };
 }
 
+// Device types
+/** One device's sync activity, as returned by `GET /api/sync/devices`. */
+export interface SyncDeviceInfo {
+  clientId: string;
+  lastSeenAt: number;
+}
+
+export interface SyncDevicesResponse {
+  devices: SyncDeviceInfo[];
+}
+
 // Status types
 export interface SyncStatusResponse {
   latestSeq: number;
@@ -491,6 +502,16 @@ export const RETENTION_MS = RETENTION_DAYS * MS_PER_DAY;
 
 // Device thresholds
 export const ONLINE_DEVICE_THRESHOLD_MS = 5 * MS_PER_MINUTE; // 5 minutes
+
+/**
+ * Minimum age a `sync_devices` row must reach before a download refreshes it.
+ *
+ * Downloads run on every poll, so the refresh is throttled to one write per
+ * device per window. The window matches the default client sync interval
+ * (`syncInterval` in `default-global-config.const.ts`), so "last seen" stays
+ * accurate to the minute.
+ */
+export const DEVICE_TOUCH_THROTTLE_MS = MS_PER_MINUTE;
 
 export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   maxPayloadSizeBytes: 20 * 1024 * 1024, // 20MB - needed for large imports

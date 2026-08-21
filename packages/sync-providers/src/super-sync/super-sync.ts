@@ -33,6 +33,7 @@ import type { SuperSyncResponseValidators } from './response-validators';
 import type { SuperSyncStorage } from './storage';
 import {
   PROVIDER_ID_SUPER_SYNC,
+  type SuperSyncDevicesResponse,
   type SuperSyncPrivateCfg,
   type SuperSyncWebSocketAccess,
 } from './super-sync.model';
@@ -432,6 +433,20 @@ export class SuperSyncProvider
     );
 
     return this._deps.responseValidators.validateRestoreSnapshot(response);
+  }
+
+  // === Devices ===
+
+  /** Lists the devices syncing this account, newest activity first. */
+  async getDevices(): Promise<SuperSyncDevicesResponse> {
+    this._deps.logger.debug(`${this._logLabel}: getDevices`);
+    const cfg = await this._cfgOrError();
+
+    const response = await this._fetchApi<unknown>(cfg, '/api/sync/devices', {
+      method: 'GET',
+    });
+
+    return this._deps.responseValidators.validateDevices(response);
   }
 
   // === WebSocket Parameters ===

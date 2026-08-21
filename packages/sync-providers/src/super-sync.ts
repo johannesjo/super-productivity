@@ -2,6 +2,8 @@ export {
   PROVIDER_ID_SUPER_SYNC,
   SUPER_SYNC_DEFAULT_BASE_URL,
   isSuperSyncWebSocketAccess,
+  type SuperSyncDeviceInfo,
+  type SuperSyncDevicesResponse,
   type SuperSyncPrivateCfg,
   type SuperSyncWebSocketAccess,
 } from './super-sync/super-sync.model';

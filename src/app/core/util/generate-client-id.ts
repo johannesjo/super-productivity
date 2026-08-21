@@ -19,7 +19,7 @@ import { MIN_CLIENT_ID_LENGTH } from '../../op-log/core/operation-log.const';
  * same split `util/get-app-version-str.ts` uses for `distChannelSuffix()`.
  */
 
-type PlatformCode = 'B' | 'E' | 'A' | 'I';
+export type PlatformCode = 'B' | 'E' | 'A' | 'I';
 
 interface ClientPlatform {
   isElectron: boolean;
@@ -48,6 +48,26 @@ export const getPlatformCode = (platform: ClientPlatform): PlatformCode => {
     return 'I';
   }
   return 'B';
+};
+
+/**
+ * Reads back the platform a clientId was minted on, or null when the prefix is
+ * not one this app has ever produced.
+ *
+ * The inverse of `getPlatformCode`, kept in the same file for the reason its
+ * header gives: when the two halves of an id's contract live apart, one drifts.
+ * Adding a code above without handling it here is a compile error at every
+ * exhaustive consumer.
+ *
+ * Works for legacy PFAPI ids too — those were `{platform}_{Date.now()}`, so the
+ * prefix is unchanged.
+ */
+export const getClientIdPlatformCode = (clientId: string): PlatformCode | null => {
+  const code = clientId.slice(0, 1);
+  return clientId[1] === '_' &&
+    (code === 'B' || code === 'E' || code === 'A' || code === 'I')
+    ? code
+    : null;
 };
 
 const _getEnvironmentId = (): PlatformCode =>

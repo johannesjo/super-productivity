@@ -33,6 +33,7 @@ import {
   SUPER_SYNC_DEFAULT_BASE_URL,
   SuperSyncProvider,
   type SuperSyncDeps,
+  type SuperSyncDevicesResponse,
   type SuperSyncPrivateCfg,
   type SuperSyncResponseValidators,
   type SuperSyncStorage,
@@ -125,6 +126,7 @@ const createValidatorsPassthrough = (): SuperSyncResponseValidators => ({
   validateRestorePoints: (data) => data as RestorePointsResponse,
   validateRestoreSnapshot: (data) => data as RestoreSnapshotResponse,
   validateDeleteAllData: (data) => data as { success: boolean },
+  validateDevices: (data) => data as SuperSyncDevicesResponse,
 });
 
 const createLoggerSpy = (): {
@@ -694,6 +696,25 @@ describe('SuperSyncProvider', () => {
       await expect(provider.downloadOps(0)).rejects.toBeInstanceOf(
         MissingCredentialsSPError,
       );
+    });
+  });
+
+  describe('getDevices', () => {
+    it('fetches the device list from the account-scoped endpoint', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      const mockResponse = {
+        devices: [{ clientId: 'E_abc123', lastSeenAt: 1700000000000 }],
+      };
+      fetchMock.mockResolvedValue(okResponse(mockResponse));
+
+      const result = await provider.getDevices();
+
+      expect(result).toEqual(mockResponse);
+      const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(url).toBe('https://sync.example.com/api/sync/devices');
+      // Read-only by design: the server offers no per-device revocation.
+      expect(options.method).toBe('GET');
     });
   });
 
