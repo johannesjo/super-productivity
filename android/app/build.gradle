@@ -133,4 +133,15 @@ dependencies {
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
 }
 
+// The live crypto fixtures are generated outside Gradle
+// (tools/generate-android-crypto-fixtures.mjs), so declare them as a
+// unit-test input — otherwise a regenerated file leaves the test task
+// UP-TO-DATE/FROM-CACHE and LiveJsEncryptRoundTripTest silently reports
+// stale results (defeating its drift-detection purpose in CI).
+tasks.withType(Test).configureEach {
+    inputs.file(layout.buildDirectory.file('live-crypto-fixtures.tsv'))
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+        .optional()
+}
+
 apply from: 'capacitor.build.gradle'

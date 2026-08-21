@@ -152,6 +152,9 @@ export interface AndroidInterface {
   // Background sync credential bridge (for WorkManager-based reminder cancellation)
   setSuperSyncCredentials?(baseUrl: string, accessToken: string): void;
   clearSuperSyncCredentials?(): void;
+  // Mirrors the E2EE password so the background worker can decrypt op payloads;
+  // '' clears it. Optional: older APKs don't have it.
+  setSuperSyncEncryptionPassword?(password: string): void;
 }
 
 export type ForegroundServiceStartFailure = {

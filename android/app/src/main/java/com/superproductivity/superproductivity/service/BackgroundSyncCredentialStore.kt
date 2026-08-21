@@ -23,13 +23,26 @@ object BackgroundSyncCredentialStore {
     private const val KEY_BASE_URL = "BASE_URL"
     private const val KEY_ACCESS_TOKEN = "ACCESS_TOKEN"
     private const val KEY_SEQ_PREFIX = "LAST_SERVER_SEQ_"
+    private const val KEY_ENCRYPTION_PASSWORD = "ENCRYPTION_PASSWORD"
+    private const val KEY_DERIVED_KEY_CACHE = "DERIVED_KEY_CACHE"
 
     data class Credentials(
         val baseUrl: String,
         val accessToken: String
     )
 
+    // Created once per process: EncryptedSharedPreferences.create() does
+    // Keystore work on every call, which adds up now that the derived-key
+    // cache reads go through here. All access is via @Synchronized methods,
+    // so a plain field is safe.
+    private var prefs: SharedPreferences? = null
+
     private fun getPrefs(context: Context): SharedPreferences {
+        prefs?.let { return it }
+        return createPrefs(context).also { prefs = it }
+    }
+
+    private fun createPrefs(context: Context): SharedPreferences {
         return try {
             val masterKey = MasterKey.Builder(context.applicationContext)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -76,7 +89,45 @@ object BackgroundSyncCredentialStore {
         getPrefs(context).edit()
             .remove(KEY_BASE_URL)
             .remove(KEY_ACCESS_TOKEN)
+            .remove(KEY_ENCRYPTION_PASSWORD)
+            .remove(KEY_DERIVED_KEY_CACHE)
             .commit()
+    }
+
+    /**
+     * Mirrors the E2EE password so the background worker can decrypt op
+     * payloads (SuperSync encrypts payloads end-to-end since #8670); an empty
+     * password clears it. Cached derived keys are password-dependent, so any
+     * change also drops the key cache — this method is the single owner of
+     * that invariant.
+     */
+    @Synchronized
+    fun setEncryptionPassword(context: Context, password: String) {
+        val prefs = getPrefs(context)
+        if ((prefs.getString(KEY_ENCRYPTION_PASSWORD, null) ?: "") == password) return
+        val editor = prefs.edit().remove(KEY_DERIVED_KEY_CACHE)
+        if (password.isEmpty()) {
+            editor.remove(KEY_ENCRYPTION_PASSWORD)
+        } else {
+            editor.putString(KEY_ENCRYPTION_PASSWORD, password)
+        }
+        editor.commit()
+    }
+
+    @Synchronized
+    fun getEncryptionPassword(context: Context): String? {
+        return getPrefs(context).getString(KEY_ENCRYPTION_PASSWORD, null)
+    }
+
+    /** Raw persisted derived-key cache; the format is owned by [SharedPrefsDerivedKeyCache]. */
+    @Synchronized
+    fun getDerivedKeyCacheRaw(context: Context): String? {
+        return getPrefs(context).getString(KEY_DERIVED_KEY_CACHE, null)
+    }
+
+    @Synchronized
+    fun setDerivedKeyCacheRaw(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_DERIVED_KEY_CACHE, value).commit()
     }
 
     @Synchronized

@@ -46,7 +46,10 @@ jobs:
           echo "${CHANGED_FILES}"
 
           android=false
-          ANDROID_PATTERN='^(android/|capacitor\.config\.ts$|package(-lock)?\.json$|\.github/workflows/android-tests\.yml$)'
+          # packages/sync-core is included because the Kotlin op-payload
+          # decryptor must stay wire-compatible with its encrypt() — the live
+          # round-trip test below is what catches drift on sync-core PRs.
+          ANDROID_PATTERN='^(android/|packages/sync-core/|tools/generate-android-crypto-fixtures\.mjs$|capacitor\.config\.ts$|package(-lock)?\.json$|\.github/workflows/android-tests\.yml$)'
           if grep -Eq "${ANDROID_PATTERN}" <<< "${CHANGED_FILES}"; then android=true; fi
 
           echo "→ android=${android}"
@@ -93,9 +96,18 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           npx cap update android
 
+      # Fresh ciphertexts from the real sync-core encrypt() (built by npm i),
+      # decrypted by LiveJsEncryptRoundTripTest — fails the PR that changes
+      # the KDF parameters or wire format.
+      - name: Generate live crypto fixtures from sync-core
+        if: steps.changes.outputs.android == 'true'
+        run: node tools/generate-android-crypto-fixtures.mjs
+
       - name: Run Android JVM tests
         if: steps.changes.outputs.android == 'true'
         working-directory: android
+        env:
+          LIVE_CRYPTO_FIXTURES: ${{ github.workspace }}/android/app/build/live-crypto-fixtures.tsv
         run: ./gradlew :app:testPlayDebugUnitTest :app:testFdroidDebugUnitTest
 
       - name: Enable KVM
