@@ -28,14 +28,6 @@ class Blake2b(private val digestSize: Int) {
             intArrayOf(6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5),
             intArrayOf(10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0),
         )
-
-        private fun readLongLE(data: ByteArray, offset: Int): Long {
-            var result = 0L
-            for (i in 7 downTo 0) {
-                result = (result shl 8) or (data[offset + i].toLong() and 0xFF)
-            }
-            return result
-        }
     }
 
     init {
@@ -121,4 +113,12 @@ class Blake2b(private val digestSize: Int) {
         v[c] = v[c] + v[d]
         v[b] = (v[b] xor v[c]).rotateRight(63)
     }
+}
+
+internal fun readLongLE(data: ByteArray, offset: Int): Long {
+    var result = 0L
+    for (i in 7 downTo 0) {
+        result = (result shl 8) or (data[offset + i].toLong() and 0xFF)
+    }
+    return result
 }

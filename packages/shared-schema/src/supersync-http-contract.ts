@@ -76,6 +76,8 @@ export const SuperSyncOperationSchema = z.object({
   vectorClock: SuperSyncVectorClockSchema,
   timestamp: z.number(),
   schemaVersion: z.number().int().min(1).max(100),
+  /** Optional (absent on old clients) — readers must sniff the payload type
+   * instead of relying on it (android `SuperSyncBackgroundProvider` does). */
   isPayloadEncrypted: z.boolean().optional(),
   syncImportReason: z.enum(SUPER_SYNC_IMPORT_REASONS).optional(),
   /** Server cursor proven to be included in a causally accepted REPAIR snapshot. */

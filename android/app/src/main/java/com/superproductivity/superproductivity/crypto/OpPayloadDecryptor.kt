@@ -33,8 +33,7 @@ interface DerivedKeyCache {
  * salt) is deliberately unsupported: the worker only fetches freshly written
  * ops, which are always in the current format; legacy input just fails GCM
  * authentication and is skipped.
- */
-/**
+ *
  * @param deriveOnMiss when false, only cached keys are used and unknown salts
  *   fail fast — for callers on a tight deadline (BroadcastReceiver goAsync
  *   ~10s window) where a seconds-long KDF could get the process killed. The
@@ -60,6 +59,14 @@ class OpPayloadDecryptor(
         private const val ARGON2_MEMORY_KIB = 65536
     }
 
+    // Per-instance memo in front of [keyCache]: the persistent cache may sit
+    // on EncryptedSharedPreferences, where every read costs a Keystore
+    // round-trip — per op that would dwarf the AES-GCM decrypt itself. It
+    // cannot go stale: a decryptor never outlives a password change (callers
+    // build one per run).
+    private val keyMemo = HashMap<String, SecretKeySpec>()
+    private var cipher: Cipher? = null
+
     /** Returns the decrypted payload JSON, or null if this op can't be read. */
     fun decrypt(ciphertextB64: String): String? {
         val bytes = try {
@@ -75,19 +82,17 @@ class OpPayloadDecryptor(
         val salt = bytes.copyOfRange(0, SALT_LENGTH)
         val iv = bytes.copyOfRange(SALT_LENGTH, SALT_LENGTH + IV_LENGTH)
 
-        // Cache before verifying the password: a wrong password would otherwise
-        // re-run the 64 MiB KDF for every op sharing the salt. Stale entries
-        // are cleared when the password changes.
         val saltB64 = Base64.encode(salt)
-        val key = keyCache.get(saltB64)
-            ?: deriveKey(salt)?.also { keyCache.put(saltB64, it) }
+        val key = keyMemo[saltB64]
+            ?: resolveKey(saltB64, salt)?.also { keyMemo[saltB64] = it }
             ?: return null
 
         return try {
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            val cipher = this.cipher
+                ?: Cipher.getInstance("AES/GCM/NoPadding").also { this.cipher = it }
             cipher.init(
                 Cipher.DECRYPT_MODE,
-                SecretKeySpec(key, "AES"),
+                key,
                 GCMParameterSpec(GCM_TAG_LENGTH_BYTES * 8, iv),
             )
             val offset = SALT_LENGTH + IV_LENGTH
@@ -97,6 +102,16 @@ class OpPayloadDecryptor(
             logWarn("OpPayloadDecryptor: decryption failed (${e.javaClass.simpleName}), skipping op")
             null
         }
+    }
+
+    private fun resolveKey(saltB64: String, salt: ByteArray): SecretKeySpec? {
+        // Cache before verifying the password: a wrong password would otherwise
+        // re-run the 64 MiB KDF for every op sharing the salt. Stale entries
+        // are cleared when the password changes.
+        val keyBytes = keyCache.get(saltB64)
+            ?: deriveKey(salt)?.also { keyCache.put(saltB64, it) }
+            ?: return null
+        return SecretKeySpec(keyBytes, "AES")
     }
 
     private fun deriveKey(salt: ByteArray): ByteArray? {

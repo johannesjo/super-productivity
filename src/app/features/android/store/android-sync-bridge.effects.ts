@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
-import { distinctUntilChanged, filter, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { androidInterface } from '../android-interface';
 import { SyncProviderManager } from '../../../op-log/sync-providers/provider-manager.service';
@@ -12,33 +12,9 @@ import {
 import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { DroidLog } from '../../../core/log';
 import { CurrentProviderPrivateCfg } from '../../../op-log/core/types/sync.types';
+import { isShallowEqual } from '../../../util/is-shallow-equal';
 
-/**
- * Compares two provider configs for credential-relevant equality.
- *
- * Returns true (equal) when emissions should be suppressed:
- * - Provider ID changed → false (always emit)
- * - Both non-SuperSync → true (suppress, prevents repeated clearSuperSyncCredentials calls)
- * - Both SuperSync → compare accessToken, baseUrl and encryptKey
- */
-export const credentialConfigEqual = (
-  a: CurrentProviderPrivateCfg | null,
-  b: CurrentProviderPrivateCfg | null,
-): boolean => {
-  if (a?.providerId !== b?.providerId) return false;
-  if (a?.providerId !== SyncProviderId.SuperSync) return true;
-  const aCfg = a?.privateCfg as SuperSyncPrivateCfg | undefined;
-  const bCfg = b?.privateCfg as SuperSyncPrivateCfg | undefined;
-  return (
-    aCfg?.accessToken === bCfg?.accessToken &&
-    aCfg?.baseUrl === bCfg?.baseUrl &&
-    aCfg?.encryptKey === bCfg?.encryptKey
-  );
-};
-
-const isNonNull = (
-  cfg: CurrentProviderPrivateCfg | null,
-): cfg is CurrentProviderPrivateCfg => cfg !== null;
+const isNonNull = <T>(value: T | null): value is T => value !== null;
 
 export type SuperSyncCredentialBridgeCommand =
   | {
@@ -72,6 +48,16 @@ export const getSuperSyncCredentialBridgeCommand = (
 };
 
 /**
+ * Two commands are equal when replaying the second would be a no-op on the
+ * native side — comparing commands (not configs) means credential-irrelevant
+ * config changes and repeated clears are suppressed automatically.
+ */
+export const bridgeCommandEqual = (
+  a: SuperSyncCredentialBridgeCommand | null,
+  b: SuperSyncCredentialBridgeCommand | null,
+): boolean => (a === null || b === null ? a === b : isShallowEqual(a, b));
+
+/**
  * Mirrors SuperSync credentials to native SharedPreferences so the
  * background SyncReminderWorker can authenticate against the server
  * without needing the WebView.
@@ -86,10 +72,10 @@ export class AndroidSyncBridgeEffects {
       () =>
         this._providerManager.currentProviderPrivateCfg$.pipe(
           skipWhileApplyingRemoteOps(),
-          distinctUntilChanged(credentialConfigEqual),
+          map((cfg) => (cfg ? getSuperSyncCredentialBridgeCommand(cfg) : null)),
+          distinctUntilChanged(bridgeCommandEqual),
           filter(isNonNull),
-          tap((cfg) => {
-            const command = getSuperSyncCredentialBridgeCommand(cfg);
+          tap((command) => {
             if (command.type === 'set') {
               DroidLog.log('AndroidSyncBridgeEffects: Setting SuperSync credentials');
               androidInterface.setSuperSyncCredentials?.(

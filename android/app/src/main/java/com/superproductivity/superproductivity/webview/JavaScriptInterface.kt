@@ -511,11 +511,7 @@ class JavaScriptInterface(
     @JavascriptInterface
     fun setSuperSyncEncryptionPassword(password: String) {
         safeCall("Failed to set SuperSync encryption password") {
-            if (password.isEmpty()) {
-                BackgroundSyncCredentialStore.clearEncryptionPassword(activity)
-            } else {
-                BackgroundSyncCredentialStore.setEncryptionPassword(activity, password)
-            }
+            BackgroundSyncCredentialStore.setEncryptionPassword(activity, password)
         }
     }
 

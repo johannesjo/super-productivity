@@ -22,10 +22,13 @@ import kotlin.math.abs
  * payload arrives as a base64 string, not JSON. [payloadDecryptor] makes those
  * readable; without one (no E2EE password mirrored yet, e.g. old JS bundle)
  * only the plaintext envelope fields (actionType/opType/entityId) are usable —
- * cancels still work, schedules are skipped.
+ * cancels still work, schedules are skipped. The parameter has no default on
+ * purpose: passing null silently degrades to that envelope-only mode, so every
+ * construction site must make it an explicit decision (use
+ * [buildPayloadDecryptor]).
  */
 class SuperSyncBackgroundProvider(
-    private val payloadDecryptor: OpPayloadDecryptor? = null,
+    private val payloadDecryptor: OpPayloadDecryptor?,
 ) : BackgroundSyncProvider {
 
     companion object {
@@ -193,10 +196,12 @@ class SuperSyncBackgroundProvider(
      * back to the plaintext envelope fields only.
      */
     private fun resolvePayload(op: JSONObject): JSONObject? {
+        // Discriminates by JSON type (object = plaintext, string = encrypted)
+        // rather than the op's isPayloadEncrypted flag — equivalent for every
+        // shipped format and robust when the optional flag is absent.
         op.optJSONObject("payload")?.let { return it }
         val decryptor = payloadDecryptor ?: return null
         val encrypted = op.opt("payload") as? String ?: return null
-        if (encrypted.isEmpty()) return null
         val decrypted = decryptor.decrypt(encrypted) ?: return null
         return try {
             JSONObject(decrypted)

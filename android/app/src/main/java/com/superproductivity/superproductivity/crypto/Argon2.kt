@@ -358,14 +358,6 @@ object Argon2 {
         (value ushr 24).toByte(),
     )
 
-    private fun readLongLE(data: ByteArray, offset: Int): Long {
-        var result = 0L
-        for (i in 7 downTo 0) {
-            result = (result shl 8) or (data[offset + i].toLong() and 0xFF)
-        }
-        return result
-    }
-
     private fun longsToBytesLE(longs: LongArray): ByteArray {
         val out = ByteArray(longs.size * 8)
         for (i in longs.indices) {

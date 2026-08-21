@@ -11,7 +11,7 @@ import org.junit.Test
  */
 class Argon2Test {
 
-    private val salt16 = hexToBytes("000102030405060708090a0b0c0d0e0f")
+    private val salt16 = "000102030405060708090a0b0c0d0e0f".hexToByteArray()
 
     @Test
     fun `matches RFC 9106 argon2id test vector`() {
@@ -27,7 +27,7 @@ class Argon2Test {
         )
         assertEquals(
             "0d640df58d78766c08c037a34a8b53c9d01ef0452d75b65eb52520e96b01e659",
-            tag.toHex(),
+            tag.toHexString(),
         )
     }
 
@@ -43,7 +43,7 @@ class Argon2Test {
         )
         assertEquals(
             "0d786afcedf5887149009b3bf1ce23bef5769cb2dc10d058c8c40dd7f431f7f1",
-            tag.toHex(),
+            tag.toHexString(),
         )
     }
 
@@ -59,7 +59,7 @@ class Argon2Test {
         )
         assertEquals(
             "395cb724885b0d8fe5a8ed5374cc22258ffef04b5225de589c6d24700e3fc6a0",
-            tag.toHex(),
+            tag.toHexString(),
         )
     }
 
@@ -78,10 +78,7 @@ class Argon2Test {
         )
         assertEquals(
             "d72cc3369f92963baa9bc9de03be105e6c663b67ed1f085623a8f736463c20c9",
-            tag.toHex(),
+            tag.toHexString(),
         )
     }
-
-    private fun hexToBytes(hex: String): ByteArray =
-        ByteArray(hex.length / 2) { hex.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
 }

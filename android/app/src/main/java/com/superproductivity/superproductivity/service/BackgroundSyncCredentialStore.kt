@@ -5,8 +5,6 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import org.json.JSONArray
-import org.json.JSONException
 
 /**
  * EncryptedSharedPreferences-backed store for background sync credentials.
@@ -28,18 +26,23 @@ object BackgroundSyncCredentialStore {
     private const val KEY_ENCRYPTION_PASSWORD = "ENCRYPTION_PASSWORD"
     private const val KEY_DERIVED_KEY_CACHE = "DERIVED_KEY_CACHE"
 
-    /**
-     * Each remote (device, process session) contributes one salt; a handful of
-     * active devices is the realistic ceiling, so a small cap suffices.
-     */
-    private const val MAX_CACHED_KEYS = 12
-
     data class Credentials(
         val baseUrl: String,
         val accessToken: String
     )
 
+    // Created once per process: EncryptedSharedPreferences.create() does
+    // Keystore work on every call, which adds up now that the derived-key
+    // cache reads go through here. All access is via @Synchronized methods,
+    // so a plain field is safe.
+    private var prefs: SharedPreferences? = null
+
     private fun getPrefs(context: Context): SharedPreferences {
+        prefs?.let { return it }
+        return createPrefs(context).also { prefs = it }
+    }
+
+    private fun createPrefs(context: Context): SharedPreferences {
         return try {
             val masterKey = MasterKey.Builder(context.applicationContext)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -92,18 +95,23 @@ object BackgroundSyncCredentialStore {
     }
 
     /**
-     * Stores the E2EE password so the background worker can decrypt op
-     * payloads (SuperSync encrypts payloads end-to-end since #8670).
-     * Cached derived keys are password-dependent, so they are dropped on change.
+     * Mirrors the E2EE password so the background worker can decrypt op
+     * payloads (SuperSync encrypts payloads end-to-end since #8670); an empty
+     * password clears it. Cached derived keys are password-dependent, so any
+     * change also drops the key cache — this method is the single owner of
+     * that invariant.
      */
     @Synchronized
     fun setEncryptionPassword(context: Context, password: String) {
         val prefs = getPrefs(context)
-        if (prefs.getString(KEY_ENCRYPTION_PASSWORD, null) == password) return
-        prefs.edit()
-            .putString(KEY_ENCRYPTION_PASSWORD, password)
-            .remove(KEY_DERIVED_KEY_CACHE)
-            .commit()
+        if ((prefs.getString(KEY_ENCRYPTION_PASSWORD, null) ?: "") == password) return
+        val editor = prefs.edit().remove(KEY_DERIVED_KEY_CACHE)
+        if (password.isEmpty()) {
+            editor.remove(KEY_ENCRYPTION_PASSWORD)
+        } else {
+            editor.putString(KEY_ENCRYPTION_PASSWORD, password)
+        }
+        editor.commit()
     }
 
     @Synchronized
@@ -111,49 +119,15 @@ object BackgroundSyncCredentialStore {
         return getPrefs(context).getString(KEY_ENCRYPTION_PASSWORD, null)
     }
 
+    /** Raw persisted derived-key cache; the format is owned by [SharedPrefsDerivedKeyCache]. */
     @Synchronized
-    fun clearEncryptionPassword(context: Context) {
-        getPrefs(context).edit()
-            .remove(KEY_ENCRYPTION_PASSWORD)
-            .remove(KEY_DERIVED_KEY_CACHE)
-            .commit()
+    fun getDerivedKeyCacheRaw(context: Context): String? {
+        return getPrefs(context).getString(KEY_DERIVED_KEY_CACHE, null)
     }
 
-    /** @see SharedPrefsDerivedKeyCache */
     @Synchronized
-    fun getCachedDerivedKey(context: Context, saltB64: String): String? {
-        val entries = readKeyCache(getPrefs(context))
-        for (i in 0 until entries.length()) {
-            val entry = entries.optJSONArray(i) ?: continue
-            if (entry.optString(0) == saltB64) return entry.optString(1)
-        }
-        return null
-    }
-
-    /** @see SharedPrefsDerivedKeyCache */
-    @Synchronized
-    fun putCachedDerivedKey(context: Context, saltB64: String, keyB64: String) {
-        val prefs = getPrefs(context)
-        val entries = readKeyCache(prefs)
-        val updated = JSONArray()
-        // Newest first; re-adding a salt moves it to the front, oldest fall off
-        updated.put(JSONArray().put(saltB64).put(keyB64))
-        for (i in 0 until entries.length()) {
-            if (updated.length() >= MAX_CACHED_KEYS) break
-            val entry = entries.optJSONArray(i) ?: continue
-            if (entry.optString(0) != saltB64) updated.put(entry)
-        }
-        prefs.edit().putString(KEY_DERIVED_KEY_CACHE, updated.toString()).commit()
-    }
-
-    private fun readKeyCache(prefs: SharedPreferences): JSONArray {
-        val raw = prefs.getString(KEY_DERIVED_KEY_CACHE, null) ?: return JSONArray()
-        return try {
-            JSONArray(raw)
-        } catch (e: JSONException) {
-            Log.w(TAG, "Corrupt derived-key cache, resetting")
-            JSONArray()
-        }
+    fun setDerivedKeyCacheRaw(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_DERIVED_KEY_CACHE, value).commit()
     }
 
     @Synchronized
