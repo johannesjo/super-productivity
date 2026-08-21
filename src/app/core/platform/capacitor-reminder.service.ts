@@ -61,6 +61,7 @@ export class CapacitorReminderService {
   private _isAndroidWebView = inject(IS_ANDROID_WEB_VIEW_TOKEN);
   // See requestPermissionsInBackground().
   private _backgroundPermissionRequest?: Promise<boolean>;
+  private _isBackgroundPermissionRequestSettled = false;
 
   /**
    * Observable that emits when a notification action is performed (iOS).
@@ -347,9 +348,24 @@ export class CapacitorReminderService {
       return Promise.resolve(false);
     }
 
+    // Callers arriving after the request settled posted their notification
+    // with the permission already in its final state — nothing was suppressed,
+    // so never report "newly granted" again (a stale true would trigger a
+    // redundant re-post on every later timer start this session).
+    if (this._isBackgroundPermissionRequestSettled) {
+      return Promise.resolve(false);
+    }
+
     // Session-scoped: tracking and focus mode can start back-to-back, and a
-    // denial must not re-prompt for the rest of the session.
-    this._backgroundPermissionRequest ??= this._requestAndDetectGrant();
+    // denial must not re-prompt for the rest of the session. Callers that
+    // arrive while the OS dialog is still open share the pending promise —
+    // their notifications were suppressed too and need the re-post signal.
+    this._backgroundPermissionRequest ??= this._requestAndDetectGrant().then(
+      (isNewlyGranted) => {
+        this._isBackgroundPermissionRequestSettled = true;
+        return isNewlyGranted;
+      },
+    );
     return this._backgroundPermissionRequest;
   }
 

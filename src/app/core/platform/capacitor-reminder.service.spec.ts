@@ -286,6 +286,42 @@ describe('CapacitorReminderService', () => {
 
         expect(notificationServiceSpy.ensurePermissions).toHaveBeenCalledTimes(1);
       });
+
+      it('reports "newly granted" only until the request settles — later timer starts must not re-post', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('prompt'),
+        );
+        notificationServiceSpy.ensurePermissions.and.returnValue(Promise.resolve(true));
+
+        await expectAsync(nativeService.requestPermissionsInBackground()).toBeResolvedTo(
+          true,
+        );
+        // Notifications posted after the grant are not suppressed, so a stale
+        // true here would cause a redundant re-post on every later start.
+        await expectAsync(nativeService.requestPermissionsInBackground()).toBeResolvedTo(
+          false,
+        );
+        expect(notificationServiceSpy.ensurePermissions).toHaveBeenCalledTimes(1);
+      });
+
+      it('shares the pending grant with callers that start while the dialog is still open', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('prompt'),
+        );
+        let resolveDialog!: (granted: boolean) => void;
+        notificationServiceSpy.ensurePermissions.and.returnValue(
+          new Promise<boolean>((resolve) => (resolveDialog = resolve)),
+        );
+
+        // Both starts happen before the user grants — both notifications were
+        // suppressed, so both callers need the re-post signal.
+        const first = nativeService.requestPermissionsInBackground();
+        const second = nativeService.requestPermissionsInBackground();
+        resolveDialog(true);
+
+        await expectAsync(first).toBeResolvedTo(true);
+        await expectAsync(second).toBeResolvedTo(true);
+      });
     });
   });
 
