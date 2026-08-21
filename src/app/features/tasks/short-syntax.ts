@@ -575,33 +575,27 @@ const parseProjectTracked = (
       .slice()
       .sort((p1, p2) => p1.title.length - p2.title.length);
 
-    const existingProject = sortedAllProjects.find(
-      (project) =>
-        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch) ===
-        0,
-    );
+    const findProjectStartingWith = (typedTitle: string): Project | undefined => {
+      const toMatch = typedTitle.replaceAll(' ', '').toLowerCase();
+      return sortedAllProjects.find(
+        (project) =>
+          project.title.replaceAll(' ', '').toLowerCase().indexOf(toMatch) === 0,
+      );
+    };
 
-    if (existingProject) {
-      return {
-        projectId: existingProject.id,
-        ranges: consume(`${CH_PRO}${projectTitle}`),
-      };
-    }
-
-    // also try only first word after special char
-    const projectTitleFirstWordOnly = projectTitle.split(' ')[0];
-    const projectTitleToMatch2 = projectTitleFirstWordOnly.replace(' ', '').toLowerCase();
-    const existingProjectForFirstWordOnly = sortedAllProjects.find(
-      (project) =>
-        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch2) ===
-        0,
-    );
-
-    if (existingProjectForFirstWordOnly) {
-      return {
-        projectId: existingProjectForFirstWordOnly.id,
-        ranges: consume(`${CH_PRO}${projectTitleFirstWordOnly}`),
-      };
+    // The match candidate also contains whatever was typed after the project name
+    // (e.g. "+Some Project Title do the thing"), so try the longest word prefix first
+    // and only consume the words that actually belong to the project title
+    const candidateWords = projectTitle.split(' ');
+    for (let nrOfWords = candidateWords.length; nrOfWords > 0; nrOfWords--) {
+      const typedProjectTitle = candidateWords.slice(0, nrOfWords).join(' ');
+      const existingProject = findProjectStartingWith(typedProjectTitle);
+      if (existingProject) {
+        return {
+          projectId: existingProject.id,
+          ranges: consume(`${CH_PRO}${typedProjectTitle}`),
+        };
+      }
     }
   }
 

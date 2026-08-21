@@ -1274,6 +1274,82 @@ describe('shortSyntax', () => {
       });
     });
 
+    it('should keep task content typed after a multi word project title', async () => {
+      const t = {
+        ...TASK,
+        title: '+Some Project Title do the thing',
+      };
+      const r = await shortSyntax(t, CONFIG, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        repeat: null,
+        parsedRanges: expectedRanges(t.title, [['project', '+Some Project Title']]),
+        projectId: 'SomeProjectID',
+        attachments: [],
+        taskChanges: {
+          title: 'do the thing',
+        },
+      });
+    });
+
+    it('should keep task content typed after a partial multi word project title', async () => {
+      const t = {
+        ...TASK,
+        title: '+Some Pro do the thing',
+      };
+      const r = await shortSyntax(t, CONFIG, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        repeat: null,
+        parsedRanges: expectedRanges(t.title, [['project', '+Some Pro']]),
+        projectId: 'SomeProjectID',
+        attachments: [],
+        taskChanges: {
+          title: 'do the thing',
+        },
+      });
+    });
+
+    it('should keep task content typed after a single word project title', async () => {
+      const t = {
+        ...TASK,
+        title: '+ProjectEasyShort do the thing',
+      };
+      const r = await shortSyntax(t, CONFIG, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        repeat: null,
+        parsedRanges: expectedRanges(t.title, [['project', '+ProjectEasyShort']]),
+        projectId: 'ProjectEasyShortID',
+        attachments: [],
+        taskChanges: {
+          title: 'do the thing',
+        },
+      });
+    });
+
+    it('should keep task content surrounding a multi word project title', async () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title +Some Project Title and more',
+      };
+      const r = await shortSyntax(t, CONFIG, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        repeat: null,
+        parsedRanges: expectedRanges(t.title, [['project', '+Some Project Title']]),
+        projectId: 'SomeProjectID',
+        attachments: [],
+        taskChanges: {
+          title: 'Fun title and more',
+        },
+      });
+    });
+
     it('should ignore non existing', async () => {
       const t = {
         ...TASK,
