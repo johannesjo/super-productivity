@@ -87,7 +87,14 @@ linux:
     - x-scheme-handler/superproductivity
   desktop:
     entry:
-      StartupWMClass: superproductivity-bin
+      # Must equal LINUX_DESKTOP_NAME in electron/start-app.ts, which pins the
+      # XDG app id that Electron 42+ uses for both the X11 WM_CLASS and the
+      # Wayland app_id. Enforced by tools/verify-linux-wm-class.test.js.
+      # Reverts #9634: `superproductivity-bin` matched the Wayland app_id only on
+      # Electron <= 41, where it came from the renamed binary's basename (#9450).
+      # The Electron 43 bump (#9571, v18.20.0) moved it to the XDG app id, so the
+      # `-bin` value now matches nothing on either session type.
+      StartupWMClass: superproductivity
   target:
     - AppImage
     - deb
