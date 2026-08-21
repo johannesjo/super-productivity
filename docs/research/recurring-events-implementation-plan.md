@@ -22,7 +22,9 @@
 >    (`get-relevant-events-from-ical.ts`,
 >    `packages/plugin-dev/caldav-calendar-provider/src/plugin.ts`).
 >    `caldav-client.service.ts` uses ical.js only to parse VTODO — it does **not**
->    expand RRULEs. **Do not add `rrule` (rrule.js).**
+>    expand RRULEs. **Do not add `rrule` (rrule.js).** _(Superseded on this
+>    point: the epic added pinned `rrule@2.8.1` as its engine — see the
+>    Decision note.)_
 > 2. **The headline "critical gaps" already shipped.** Nth-weekday of month
 >    (#6040), last-day-of-month (#7726), EXDATE (`deletedInstanceDates`). Earlier
 >    gap-analysis/industry-standards research drafts marked these missing; that was
@@ -402,10 +404,10 @@ So the real risk is feeding a **wrong DTSTART/anchor**, not "wrong engine":
 | Hot-path regression from async/forward-only ical.js iteration           | High        | ical.js for string parse/serialize only; sync bounded engine stays the runtime                                                                                                                   |
 | DTSTART carries `startTime` → day rolls                                 | High        | DTSTART = local-noon of anchor day; `startTime` applied post-expansion                                                                                                                           |
 | EXDATE never matches (instant vs noon)                                  | Medium      | Filter by `getDbDateStr` day-string                                                                                                                                                              |
-| Bi-weekly shifts (WKST default)                                         | Medium      | Startdate-derived WKST, or omit + re-anchor — see 1.3                                                                                                                                            |
+| Bi-weekly shifts (WKST default)                                         | Medium      | startDate-derived WKST, or omit + re-anchor — see 1.3                                                                                                                                            |
 | `UNTIL` drops final day                                                 | Medium      | Inclusive end-of-day                                                                                                                                                                             |
 | ~~Production shadow mode cost~~                                         | n/a         | Not needed — engine unchanged; offline golden master covers parity                                                                                                                               |
-| ~~Bundle size of new dep~~                                              | n/a         | No new dep — ical.js already present & lazy-loaded                                                                                                                                               |
+| ~~Bundle size of new dep~~                                              | n/a         | No new dep in the typed-model plan (the epic did add pinned `rrule` — see the Decision note)                                                                                                     |
 
 ---
 
@@ -415,7 +417,8 @@ So the real risk is feeding a **wrong DTSTART/anchor**, not "wrong engine":
    config-shape corpus over a 5-year window, both CI timezones; harness green in CI.
 2. **Serializer round-trips** `typed → RRULE → typed` for every shape
    (property-tested), incl. monthly-nth-weekday and last-day.
-3. **No new runtime dependency** (ical.js only, boundary-only).
+3. **No new runtime dependency** (ical.js only, boundary-only). _(Superseded —
+   the epic deliberately added pinned `rrule`; see the Decision note.)_
 4. **No synced field key renamed** (`deletedInstanceDates` stays on the wire).
 5. **Forward-compat:** an old client reading the new fields neither errors nor
    strips them (regression spec).
