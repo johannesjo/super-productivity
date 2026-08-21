@@ -17,6 +17,8 @@ import type { KeyboardConfig } from '@sp/keyboard-config';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { getHoursFromClockString } from '../../../util/get-hours-from-clock-string';
+import { isValidSplitTime } from '../../../util/is-valid-split-time';
+import { devError } from '../../../util/dev-error';
 import { normalizeStartOfNextDayConfig } from '../normalize-start-of-next-day-config';
 import { withLocalOnlySyncSettings } from '../local-only-sync-settings.util';
 
@@ -259,6 +261,14 @@ export const selectTimelineWorkStartEndHours = createSelector(
   } | null => {
     const schedule = cfg?.schedule ?? DEFAULT_GLOBAL_CONFIG.schedule;
     if (!schedule.isWorkStartEndEnabled) {
+      return null;
+    }
+    // Same corrupt-data class as the read-side guards in
+    // create-sorted-blocker-blocks.ts (#5358): an imported/synced snapshot can
+    // carry invalid clock strings, and NaN hours would auto-place the work
+    // Start/End markers at an arbitrary grid position. Hide them instead.
+    if (!isValidSplitTime(schedule.workStart) || !isValidSplitTime(schedule.workEnd)) {
+      devError('Timeline: Invalid work start/end time in schedule config');
       return null;
     }
     return {
