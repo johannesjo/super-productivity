@@ -12,11 +12,11 @@ import { DateService } from '../date/date.service';
 import { isTodayWithOffset } from '../../util/is-today.util';
 import {
   selectCurrentCycle,
+  selectIsBreakTimeUp,
   selectIsInOvertime,
   selectIsLongBreak,
   selectIsRunning,
   selectIsSessionCompleted,
-  selectIsSessionPaused,
   selectMode,
   selectTimeRemaining,
   selectTimer,
@@ -286,27 +286,16 @@ export class LocalRestApiHandlerService {
   }
 
   private async _handleGetFocus(requestId: string): Promise<LocalRestApiResponsePayload> {
-    const [
-      timer,
-      mode,
-      cycle,
-      isRunning,
-      isSessionPaused,
-      isLongBreak,
-      remainingMs,
-      isSessionDone,
-      isOvertime,
-    ] = await Promise.all([
-      firstValueFrom(this._store.select(selectTimer)),
-      firstValueFrom(this._store.select(selectMode)),
-      firstValueFrom(this._store.select(selectCurrentCycle)),
-      firstValueFrom(this._store.select(selectIsRunning)),
-      firstValueFrom(this._store.select(selectIsSessionPaused)),
-      firstValueFrom(this._store.select(selectIsLongBreak)),
-      firstValueFrom(this._store.select(selectTimeRemaining)),
-      firstValueFrom(this._store.select(selectIsSessionCompleted)),
-      firstValueFrom(this._store.select(selectIsInOvertime)),
-    ]);
+    const state = await firstValueFrom(this._store);
+    const timer = selectTimer(state);
+    const mode = selectMode(state);
+    const cycle = selectCurrentCycle(state);
+    const isRunning = selectIsRunning(state);
+    const isBreakTimeUp = selectIsBreakTimeUp(state);
+    const isLongBreak = selectIsLongBreak(state);
+    const remainingMs = selectTimeRemaining(state);
+    const isSessionDone = selectIsSessionCompleted(state);
+    const isOvertime = selectIsInOvertime(state);
 
     return createSuccessResponse(requestId, 200, {
       mode,
@@ -317,11 +306,7 @@ export class LocalRestApiHandlerService {
           ? null
           : {
               purpose: timer.purpose,
-              status: isRunning
-                ? 'running'
-                : isSessionPaused && timer.purpose === 'break' && remainingMs === 0
-                  ? 'done'
-                  : 'paused',
+              status: isRunning ? 'running' : isBreakTimeUp ? 'done' : 'paused',
               isOvertime,
               isLongBreak,
               elapsedMs: timer.elapsed,
