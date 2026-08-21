@@ -113,16 +113,16 @@ export class OperationLogHydratorService {
     // worth extra plumbing to suppress; only the every-boot re-migration it
     // prevents matters.
     //
-    // Nor is this strictly "once per schema bump per device": sync-hydration
-    // persists its state cache WITHOUT a schemaVersion, which reads back as v1
-    // and migrates on the next boot. That omission is deliberate and
-    // load-bearing — downloaded snapshot data is never schema-migrated anywhere
-    // else on the client (migrateStateIfNeeded has exactly one call site, on the
-    // local state_cache) and the SYNC_IMPORT op carrying it is stamped
-    // CURRENT_SCHEMA_VERSION, so op migration skips it too. Do NOT "fix" that
-    // writer by stamping a version: it would freeze old-schema remote data into
-    // a cache Checkpoint B then trusts unvalidated. Convergence only stamps a
-    // version AFTER the migration chain has actually run, which is safe.
+    // Version-stamping invariant (#8770): a state-cache writer may only stamp a
+    // schemaVersion the migration chain actually produced. Stamping
+    // CURRENT_SCHEMA_VERSION onto data of unverified schema (e.g. a downloaded
+    // remote snapshot) freezes old-schema data under a current label into a
+    // cache Checkpoint B then trusts unvalidated. (sync-hydration once persisted
+    // downloaded state WITHOUT a version for exactly this reason, until
+    // 6073c2cce4 removed that writer entirely — today downloaded full state only
+    // arrives as a SYNC_IMPORT op and is never written to the cache directly.)
+    // Convergence only stamps a version AFTER the migration chain has actually
+    // run, which is safe.
     let snapshotPersistedDuringHydration = false;
     // Set only when the try block below ran to completion; gates the startup
     // compaction check after the finally so recovery/aborted boots never prune.

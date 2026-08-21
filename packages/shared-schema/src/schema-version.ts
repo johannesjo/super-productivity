@@ -24,6 +24,16 @@
  * safely (cursor frozen). Therefore new op semantics must degrade gracefully on older
  * clients (see the LwwUpdatePayload envelope pattern in packages/sync-core);
  * a change old clients would MISAPPLY must not ship behind a bump alone.
+ *
+ * PRECONDITION for the next bump — the downgrade relabel (#8770): local
+ * hydration has no future-version gate (stateNeedsMigration is
+ * `version < target`), so a vN client reading a v(N+1) state cache loads it
+ * unmigrated and the next snapshot write stamps it CURRENT — after which
+ * re-upgrading runs the N→N+1 migration a SECOND time on already-migrated
+ * state. Until #8770 ships a guard, every migration added here MUST be a
+ * no-op on already-migrated state, and the bump PR must say how downgraded
+ * clients (rollback, snap channel lag, old sideloaded APK) are handled.
+ *
  * Full policy: docs/sync-and-op-log/operation-log-architecture.md, A.7.11
  * "Bump Policy".
  */
