@@ -598,8 +598,7 @@ const ACTION_HANDLERS: Record<string, Handler> = {
       workContextType,
       workContextId,
       taskId,
-      (taskIds) =>
-        arrayMoveLeftUntil(taskIds, taskId, (id) => !doneTaskIds.includes(id)),
+      (taskIds) => arrayMoveLeftUntil(taskIds, taskId, (id) => !doneTaskIds.includes(id)),
     );
   },
   [moveTaskDownInTodayList.type]: (state, action) => {
