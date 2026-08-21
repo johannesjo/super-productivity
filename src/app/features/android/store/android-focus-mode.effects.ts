@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { createEffect } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { filter, map, pairwise, startWith, tap, withLatestFrom } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
@@ -25,6 +25,8 @@ import { HydrationStateService } from '../../../op-log/apply/hydration-state.ser
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { Task } from '../../tasks/task.model';
+import { CapacitorReminderService } from '../../../core/platform/capacitor-reminder.service';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 type FocusNotificationTask = Pick<Task, 'id' | 'title'> | null | undefined;
 
@@ -190,6 +192,28 @@ export class AndroidFocusModeEffects {
   private _hydrationState = inject(HydrationStateService);
   private _snackService = inject(SnackService);
   private _globalTrackingInterval = inject(GlobalTrackingIntervalService);
+  private _reminderService = inject(CapacitorReminderService);
+  private _actions$ = inject(LOCAL_ACTIONS);
+
+  /**
+   * Ask for notification permission when the user STARTS a focus session.
+   *
+   * Action-based on purpose: `syncFocusModeToNotification$` also reaches its
+   * start branch via `restoreFocusSessionFromNative` on cold start (see
+   * `recoverFocusSession$`), and prompting there would put an OS dialog on the
+   * launch path — the unprompted launch-time prompt #8120 removed. Only
+   * `startFocusSession` is genuinely user-initiated. See #9648.
+   */
+  requestNotificationPermissionOnFocusStart$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        this._actions$.pipe(
+          ofType(focusModeActions.startFocusSession),
+          tap(() => this._reminderService.requestPermissionsInBackground()),
+        ),
+      { dispatch: false },
+    );
 
   // Start/stop focus mode notification when timer state changes
   syncFocusModeToNotification$ =
