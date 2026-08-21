@@ -115,7 +115,11 @@ This serialization mechanism is a load-bearing decision; see
   or history pruning.
 - Default retention is 45 days. Cleanup removes stale devices and may remove
   only the old operation prefix before a proven causal full-state boundary,
-  while preserving that boundary and its replay tail. Quota recovery uses a
+  while preserving that boundary and its replay tail. The boundary comes from
+  the operation stream itself — no snapshot cursor is required (#9688), so
+  encrypted-only and snapshotless histories are pruned too. While a
+  cached-snapshot cursor exists, the boundary additionally never passes it
+  (protects the cached base's replay tail for restore). Quota recovery uses a
   separate bounded cleanup policy.
 - Server-generated restore is unavailable when the required replay range
   contains encrypted operations.

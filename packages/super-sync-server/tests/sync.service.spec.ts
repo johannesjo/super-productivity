@@ -16,6 +16,7 @@ vi.mock('../src/db', async () => {
     hasOperationUniqueConflict,
     isEntityArrayBranchQuery,
     entityArrayBranchRows,
+    mockOperationGroupByMaxSeq,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -655,6 +656,11 @@ vi.mock('../src/db', async () => {
             _max: { serverSeq: Math.max(...seqs) },
           };
         }),
+        groupBy: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockOperationGroupByMaxSeq(state.operations, args),
+          ),
         count: vi.fn().mockImplementation(async (args: any) => {
           let count = 0;
           for (const op of state.operations.values()) {
@@ -3022,7 +3028,6 @@ describe('SyncService', () => {
 
     it('should not delete old operations when no full-state base exists', async () => {
       const service = getSyncService();
-      const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
 
       // Upload operations
       for (let i = 1; i <= 5; i++) {
@@ -3049,14 +3054,63 @@ describe('SyncService', () => {
         }
       }
 
-      // Set up userSyncState with required fields for cleanup
-      // The cleanup requires lastSnapshotSeq and snapshotAt to be set
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago
       testState.userSyncStates.set(userId, {
         userId,
         lastSeq: 5,
         lastSnapshotSeq: 5, // Snapshot covers all ops up to seq 5
         snapshotAt: BigInt(Date.now()), // Snapshot taken recently (>= cutoffTime)
+      });
+
+      // No causal full-state op exists anywhere in the history, so the user
+      // never becomes a sweep candidate — nothing is deleted, snapshot or not.
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(totalDeleted).toBe(0);
+      expect(affectedUserIds).not.toContain(userId);
+
+      const remaining = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
+        .ops;
+      expect(remaining).toHaveLength(5);
+    });
+
+    it('warns and skips a snapshot-capped user with no causal base below the cursor', async () => {
+      // The causal boundary (seq 5) sits ABOVE the cached-snapshot cursor
+      // (seq 4). While the cursor exists the boundary may not pass it, and no
+      // causal full-state op exists at or below it → skip with a warning.
+      const service = getSyncService();
+      const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= 5; i++) {
+        const isFullState = i === 5;
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: isFullState ? 'LOAD_ALL_DATA' : 'ADD',
+          opType: isFullState ? 'SYNC_IMPORT' : 'CRT',
+          entityType: isFullState ? 'ALL' : 'TASK',
+          entityId: isFullState ? null : `t${i}`,
+          entityIds: [],
+          payload: isFullState ? { appDataComplete: { TASK: {} } } : {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+          repairBaseServerSeq: null,
+        });
+      }
+
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 5,
+        lastSnapshotSeq: 4,
+        snapshotAt: BigInt(Date.now()),
       });
 
       try {
@@ -3066,12 +3120,10 @@ describe('SyncService', () => {
         expect(totalDeleted).toBe(0);
         expect(affectedUserIds).not.toContain(userId);
         expect(warnSpy).toHaveBeenCalledWith(
-          'Cleanup [old-ops]: skipped 1 eligible user(s) without a full-state replay base; their operation histories were left intact.',
+          'Cleanup [old-ops]: skipped 1 snapshot-capped user(s) without a causal ' +
+            'full-state op at or below their snapshot cursor; their operation ' +
+            'histories were left intact.',
         );
-
-        const remaining = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
-          .ops;
-        expect(remaining).toHaveLength(5);
       } finally {
         warnSpy.mockRestore();
       }
@@ -3117,9 +3169,6 @@ describe('SyncService', () => {
       const { totalDeleted } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
       expect(totalDeleted).toBe(3);
-      // The primary `latestFullStateSeq` marker is no longer trusted blindly: it
-      // is validated against the causal predicate before authorizing a DELETE.
-      expect(prisma.operation.findFirst).toHaveBeenCalled();
       expect(Array.from(testState.operations.keys())).toEqual(['old-op-4', 'old-op-5']);
       const freshClientOps = (
         await operationDownloadService.getOpsSinceWithSeq(userId, 0)
@@ -3180,13 +3229,12 @@ describe('SyncService', () => {
     });
 
     it('does not prune history behind a stale latestFullStateSeq marker pointing at a legacy REPAIR (primary path)', async () => {
-      // Regression for the primary-path gap: installs upgraded from before the
-      // causal-marker migration can carry a `latestFullStateSeq` that points at a
-      // legacy REPAIR (repairBaseServerSeq NULL) — the migration added no backfill
-      // to clear it. Trusting that cached marker would prune history behind a
-      // repair the replay path refuses as a boundary. The marker must be validated
-      // causal before it can authorize a DELETE; a stale one drops to the (causal-
-      // only) fallback, which here finds no boundary → the user is skipped.
+      // Installs upgraded from before the causal-marker migration can carry a
+      // `latestFullStateSeq` pointing at a legacy REPAIR (repairBaseServerSeq
+      // NULL) — the migration added no backfill to clear it. The sweep no
+      // longer consults the marker at all: the boundary groupBy selects only
+      // causal full-state rows, so a legacy REPAIR (with or without a stale
+      // marker pointing at it) never authorizes pruning.
       const service = getSyncService();
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 
@@ -3228,7 +3276,6 @@ describe('SyncService', () => {
 
       expect(totalDeleted).toBe(0);
       expect(affectedUserIds).not.toContain(userId);
-      expect(prisma.operation.findFirst).toHaveBeenCalled();
       expect(Array.from(testState.operations.keys())).toEqual([
         'old-op-1',
         'old-op-2',
@@ -3238,15 +3285,14 @@ describe('SyncService', () => {
       ]);
     });
 
-    it('does not prune history behind a legacy REPAIR without a causal base (fallback path)', async () => {
-      // Regression guard: the fallback used when `latestFullStateSeq` is absent
-      // (legacy/pre-marker installs) must use the causal-only full-state
-      // predicate, like every other full-state query. A legacy REPAIR carries
-      // appDataComplete but no `repairBaseServerSeq` proving its state is current
-      // as of its seq, so it must NEVER authorize history pruning — ops between
-      // its logical base and its seq would be lost for a device replaying from
-      // before it. Before the fix this fallback used a raw opType filter that
-      // selected the legacy REPAIR as the prune boundary and deleted ops 1–3.
+    it('does not prune history behind a legacy REPAIR without a causal base (no marker)', async () => {
+      // The boundary query must use the causal-only full-state predicate, like
+      // every other full-state query. A legacy REPAIR carries appDataComplete
+      // but no `repairBaseServerSeq` proving its state is current as of its
+      // seq, so it must NEVER authorize history pruning — ops between its
+      // logical base and its seq would be lost for a device replaying from
+      // before it. Such a user has no causal boundary and never becomes a
+      // sweep candidate.
       const service = getSyncService();
       const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
@@ -3290,9 +3336,6 @@ describe('SyncService', () => {
 
         expect(totalDeleted).toBe(0);
         expect(affectedUserIds).not.toContain(userId);
-        // The fallback query ran (marker absent) but excluded the legacy REPAIR,
-        // so the user has no replay base and is skipped rather than pruned.
-        expect(prisma.operation.findFirst).toHaveBeenCalled();
         expect(Array.from(testState.operations.keys())).toEqual([
           'old-op-1',
           'old-op-2',
@@ -3300,9 +3343,6 @@ describe('SyncService', () => {
           'old-op-4',
           'old-op-5',
         ]);
-        expect(warnSpy).toHaveBeenCalledWith(
-          'Cleanup [old-ops]: skipped 1 eligible user(s) without a full-state replay base; their operation histories were left intact.',
-        );
       } finally {
         warnSpy.mockRestore();
       }

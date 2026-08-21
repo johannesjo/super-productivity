@@ -94,3 +94,54 @@ export function hasOperationUniqueConflict(
         op.serverSeq === row.serverSeq),
   );
 }
+
+/**
+ * Mocks `prisma.operation.groupBy({ by: ['userId'], _max: { serverSeq } })`
+ * for the old-ops sweep's boundary query. Supports the where-shapes the sweep
+ * uses: `serverSeq.gt` plus the CAUSAL_FULL_STATE_OPERATION_WHERE `OR` list
+ * (opType exact / opType.in / repairBaseServerSeq null-or-not).
+ */
+export function mockOperationGroupByMaxSeq(
+  operations: Map<string, any>,
+  args: any,
+): Array<{ userId: number; _max: { serverSeq: number | null } }> {
+  const matchesAlternative = (op: any, alternative: any): boolean => {
+    if (typeof alternative.opType === 'string' && op.opType !== alternative.opType) {
+      return false;
+    }
+    if (alternative.opType?.in && !alternative.opType.in.includes(op.opType)) {
+      return false;
+    }
+    if (alternative.repairBaseServerSeq === null && op.repairBaseServerSeq != null) {
+      return false;
+    }
+    if (alternative.repairBaseServerSeq?.not === null && op.repairBaseServerSeq == null) {
+      return false;
+    }
+    return true;
+  };
+
+  const maxSeqByUser = new Map<number, number>();
+  for (const op of operations.values()) {
+    if (
+      args.where?.serverSeq?.gt !== undefined &&
+      op.serverSeq <= args.where.serverSeq.gt
+    ) {
+      continue;
+    }
+    if (
+      Array.isArray(args.where?.OR) &&
+      !args.where.OR.some((alternative: any) => matchesAlternative(op, alternative))
+    ) {
+      continue;
+    }
+    const prev = maxSeqByUser.get(op.userId);
+    if (prev === undefined || op.serverSeq > prev) {
+      maxSeqByUser.set(op.userId, op.serverSeq);
+    }
+  }
+  return Array.from(maxSeqByUser.entries()).map(([userId, maxSeq]) => ({
+    userId,
+    _max: { serverSeq: maxSeq },
+  }));
+}

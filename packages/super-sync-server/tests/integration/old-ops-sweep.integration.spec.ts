@@ -27,7 +27,21 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const LAPSED_USER_ID = 99981;
 const SNAPSHOTLESS_USER_ID = 99982;
 const LEGACY_REPAIR_USER_ID = 99983;
-const ALL_USER_IDS = [LAPSED_USER_ID, SNAPSHOTLESS_USER_ID, LEGACY_REPAIR_USER_ID];
+const SNAPSHOTLESS_IMPORT_USER_ID = 99984;
+const ENCRYPTED_USER_ID = 99985;
+const NO_STATE_ROW_USER_ID = 99986;
+const STUCK_SNAPSHOT_USER_ID = 99987;
+const SEQ1_IMPORT_ONLY_USER_ID = 99988;
+const ALL_USER_IDS = [
+  LAPSED_USER_ID,
+  SNAPSHOTLESS_USER_ID,
+  LEGACY_REPAIR_USER_ID,
+  SNAPSHOTLESS_IMPORT_USER_ID,
+  ENCRYPTED_USER_ID,
+  NO_STATE_ROW_USER_ID,
+  STUCK_SNAPSHOT_USER_ID,
+  SEQ1_IMPORT_ONLY_USER_ID,
+];
 
 describeWithDb('Old-ops sweep (PostgreSQL)', () => {
   const now = Date.now();
@@ -44,6 +58,8 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       entityId?: string | null;
       payload?: object;
       repairBaseServerSeq?: number | null;
+      isPayloadEncrypted?: boolean;
+      receivedAt?: bigint;
     } = {},
   ): Promise<void> => {
     await prisma.operation.create({
@@ -61,11 +77,33 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
         vectorClock: { [`sweep-client-${userId}`]: serverSeq },
         schemaVersion: 1,
         clientTimestamp: oldReceivedAt,
-        receivedAt: oldReceivedAt,
+        receivedAt: overrides.receivedAt ?? oldReceivedAt,
         repairBaseServerSeq: overrides.repairBaseServerSeq ?? null,
+        isPayloadEncrypted: overrides.isPayloadEncrypted ?? false,
       },
     });
   };
+
+  const seedImportOp = async (
+    userId: number,
+    serverSeq: number,
+    overrides: {
+      opType?: string;
+      repairBaseServerSeq?: number | null;
+      isPayloadEncrypted?: boolean;
+      receivedAt?: bigint;
+    } = {},
+  ): Promise<void> =>
+    seedOp(userId, serverSeq, {
+      opType: overrides.opType ?? 'SYNC_IMPORT',
+      actionType: 'LOAD_ALL_DATA',
+      entityType: 'ALL',
+      entityId: null,
+      payload: { appDataComplete: { TASK: {} } },
+      repairBaseServerSeq: overrides.repairBaseServerSeq ?? null,
+      isPayloadEncrypted: overrides.isPayloadEncrypted,
+      receivedAt: overrides.receivedAt,
+    });
 
   const survivingSeqs = async (userId: number): Promise<number[]> => {
     const ops = await prisma.operation.findMany({
@@ -195,5 +233,159 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
     expect(await survivingSeqs(LAPSED_USER_ID)).toEqual([1, 2]);
+  });
+
+  // ——— Issue #9688: cohorts with no usable snapshot cursor ———————————————
+  // The boundary that authorizes deletion is the newest causal full-state op
+  // in the operation stream itself — the same op the download path already
+  // fast-forwards every client past, and the op `_resolveExpectedFirstSeq`
+  // accepts as a leading-gap replay base. A snapshot cursor is not required;
+  // it only CAPS the boundary while it exists (legacy cached-snapshot cohort).
+
+  it('prunes a snapshotless user below their newest causal full-state op (#9688)', async () => {
+    // No lastSnapshotSeq/snapshotAt — the pre-#9688 sweep never selected
+    // this user, so the superseded prefix accumulated forever.
+    await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 1);
+    await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 2);
+    await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 3);
+    await seedImportOp(SNAPSHOTLESS_IMPORT_USER_ID, 4);
+    await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 5);
+    await prisma.userSyncState.create({
+      data: { userId: SNAPSHOTLESS_IMPORT_USER_ID, lastSeq: 5 },
+    });
+
+    const service = new SyncService({});
+    const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(SNAPSHOTLESS_IMPORT_USER_ID)).toEqual([4, 5]);
+    expect(affectedUserIds).toContain(SNAPSHOTLESS_IMPORT_USER_ID);
+  });
+
+  it('prunes an E2EE user with no server snapshot — encrypted causal boundary (#9688)', async () => {
+    // Encrypted payloads are never cached server-side (cacheSnapshotIfReplayable
+    // skips them), so under the mandatory-E2EE gate no user can earn a snapshot
+    // cursor anymore. The opType envelope stays plaintext, so the causal
+    // full-state boundary is still provable from metadata alone.
+    await seedOp(ENCRYPTED_USER_ID, 1, { isPayloadEncrypted: true });
+    await seedOp(ENCRYPTED_USER_ID, 2, { isPayloadEncrypted: true });
+    await seedImportOp(ENCRYPTED_USER_ID, 3, { isPayloadEncrypted: true });
+    await seedOp(ENCRYPTED_USER_ID, 4, { isPayloadEncrypted: true });
+    await prisma.userSyncState.create({
+      data: { userId: ENCRYPTED_USER_ID, lastSeq: 4 },
+    });
+
+    const service = new SyncService({});
+    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(ENCRYPTED_USER_ID)).toEqual([3, 4]);
+  });
+
+  it('prunes a user holding ops but no user_sync_state row at all (#9688)', async () => {
+    await seedOp(NO_STATE_ROW_USER_ID, 1);
+    await seedOp(NO_STATE_ROW_USER_ID, 2);
+    await seedImportOp(NO_STATE_ROW_USER_ID, 3);
+    await seedOp(NO_STATE_ROW_USER_ID, 4);
+
+    const service = new SyncService({});
+    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(NO_STATE_ROW_USER_ID)).toEqual([3, 4]);
+  });
+
+  it('keeps a fresh prefix for a snapshotless user (retention still gates deletion)', async () => {
+    await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 1);
+    await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 2, {
+      receivedAt: BigInt(now - 10 * DAY_MS),
+    });
+    await seedImportOp(SNAPSHOTLESS_IMPORT_USER_ID, 3);
+    await prisma.userSyncState.create({
+      data: { userId: SNAPSHOTLESS_IMPORT_USER_ID, lastSeq: 3 },
+    });
+
+    const service = new SyncService({});
+    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(SNAPSHOTLESS_IMPORT_USER_ID)).toEqual([2, 3]);
+  });
+
+  it('caps the boundary at lastSnapshotSeq while a cached snapshot cursor exists', async () => {
+    // Stuck-snapshot cohort (e.g. issue user 1515): cached snapshot frozen at
+    // seq 1. While the cursor exists, pruning must never pass it — the newest
+    // causal full-state op below the cap is seq 1, which authorizes nothing.
+    // The cap lifts when the E2EE eradication sweep nulls the cached snapshot
+    // (next test).
+    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 1);
+    await seedOp(STUCK_SNAPSHOT_USER_ID, 2);
+    await seedOp(STUCK_SNAPSHOT_USER_ID, 3);
+    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 4);
+    await seedOp(STUCK_SNAPSHOT_USER_ID, 5);
+    await prisma.userSyncState.create({
+      data: {
+        userId: STUCK_SNAPSHOT_USER_ID,
+        lastSeq: 5,
+        lastSnapshotSeq: 1,
+        snapshotAt: BigInt(now - 100 * DAY_MS),
+        snapshotData: Buffer.from('legacy-cached-snapshot'),
+      },
+    });
+
+    const service = new SyncService({});
+    const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(STUCK_SNAPSHOT_USER_ID)).toEqual([1, 2, 3, 4, 5]);
+    expect(affectedUserIds).not.toContain(STUCK_SNAPSHOT_USER_ID);
+  });
+
+  it('unsticks the capped user once the snapshot cursor is cleared (post-eradication)', async () => {
+    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 1);
+    await seedOp(STUCK_SNAPSHOT_USER_ID, 2);
+    await seedOp(STUCK_SNAPSHOT_USER_ID, 3);
+    await seedImportOp(STUCK_SNAPSHOT_USER_ID, 4);
+    await seedOp(STUCK_SNAPSHOT_USER_ID, 5);
+    await prisma.userSyncState.create({
+      data: { userId: STUCK_SNAPSHOT_USER_ID, lastSeq: 5 },
+    });
+
+    const service = new SyncService({});
+    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(STUCK_SNAPSHOT_USER_ID)).toEqual([4, 5]);
+  });
+
+  it('never prunes a user whose only causal full-state op is the initial import at seq 1', async () => {
+    // Everything after the initial import is live history with no superseding
+    // boundary — structurally unprunable until a newer full-state op exists
+    // (issue #9688 direction 2: client checkpoint cadence).
+    await seedImportOp(SEQ1_IMPORT_ONLY_USER_ID, 1);
+    await seedOp(SEQ1_IMPORT_ONLY_USER_ID, 2);
+    await seedOp(SEQ1_IMPORT_ONLY_USER_ID, 3);
+    await prisma.userSyncState.create({
+      data: { userId: SEQ1_IMPORT_ONLY_USER_ID, lastSeq: 3 },
+    });
+
+    const service = new SyncService({});
+    const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(SEQ1_IMPORT_ONLY_USER_ID)).toEqual([1, 2, 3]);
+    expect(affectedUserIds).not.toContain(SEQ1_IMPORT_ONLY_USER_ID);
+  });
+
+  it('skips a snapshotless legacy-REPAIR-only history (no causal base)', async () => {
+    // A legacy REPAIR (repairBaseServerSeq NULL) must never authorize pruning,
+    // with or without a snapshot cursor.
+    await seedOp(LEGACY_REPAIR_USER_ID, 1);
+    await seedOp(LEGACY_REPAIR_USER_ID, 2);
+    await seedImportOp(LEGACY_REPAIR_USER_ID, 3, {
+      opType: 'REPAIR',
+      repairBaseServerSeq: null,
+    });
+    await prisma.userSyncState.create({
+      data: { userId: LEGACY_REPAIR_USER_ID, lastSeq: 3 },
+    });
+
+    const service = new SyncService({});
+    await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+    expect(await survivingSeqs(LEGACY_REPAIR_USER_ID)).toEqual([1, 2, 3]);
   });
 });

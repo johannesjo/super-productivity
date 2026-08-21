@@ -12,6 +12,7 @@ vi.mock('../src/db', async () => {
     hasOperationUniqueConflict,
     isEntityArrayBranchQuery,
     entityArrayBranchRows,
+    mockOperationGroupByMaxSeq,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -391,6 +392,11 @@ vi.mock('../src/db', async () => {
             _min: { serverSeq: Math.min(...seqs) },
           };
         }),
+        groupBy: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockOperationGroupByMaxSeq(state.operations, args),
+          ),
         deleteMany: vi.fn().mockImplementation(async (args: any) => {
           let count = 0;
           for (const [id, op] of state.operations.entries()) {

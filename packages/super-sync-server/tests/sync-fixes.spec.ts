@@ -18,7 +18,8 @@ let serverSeqCounter: number;
 let requestCache: Map<string, any>;
 
 // Mock the database module with Prisma mocks
-vi.mock('../src/db', () => {
+vi.mock('../src/db', async () => {
+  const { mockOperationGroupByMaxSeq } = await import('./sync.service.test-state');
   const applySelect = (op: any, select?: Record<string, boolean>) => {
     if (!op || !select) {
       return op;
@@ -199,6 +200,11 @@ vi.mock('../src/db', () => {
             .slice(0, args.take || 500);
         }),
         aggregate: vi.fn().mockResolvedValue({ _min: { serverSeq: 1 } }),
+        groupBy: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockOperationGroupByMaxSeq(testOperations, args),
+          ),
         findUnique: vi.fn().mockImplementation(async (args: any) => {
           if (args.where?.id) {
             return applySelect(testOperations.get(args.where.id), args.select) || null;
