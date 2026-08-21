@@ -15,8 +15,8 @@
 > the model" revision was then corrected again after review surfaced real costs in
 > this codebase. Net premises now driving the plan:
 >
-> 1. **The RRULE engine is already in the repo.** `ical.js@2.2.1` is a dependency,
->    lazy-loaded (`src/app/features/schedule/ical/ical-lazy-loader.ts`), and
+> 1. **The RRULE engine is already in the repo.** `ical.js@2.2.1` is already in
+>    `package.json` (a **devDependency**, not `dependencies`), lazy-loaded (`src/app/features/schedule/ical/ical-lazy-loader.ts`), and
 >    expands RRULEs in **two** places
 >    (`get-relevant-events-from-ical.ts`,
 >    `packages/plugin-dev/caldav-calendar-provider/src/plugin.ts`).
@@ -137,7 +137,7 @@ Verified in `src/app/features/task-repeat-cfg/`:
 | Daily / Weekly / Monthly / Yearly + `repeatEvery` interval | ✅             | `get-next-repeat-occurrence.util.ts`                                              |
 | Weekday selection (weekly)                                 | ✅             | 7 booleans, `task-repeat-cfg.model.ts`                                            |
 | **Nth weekday of month** ("2nd Tue", "last Fri")           | ✅ #6040       | `monthlyWeekOfMonth` + `monthlyWeekday`; `get-nth-weekday-of-month.util.ts`       |
-| **Last day of month**                                      | ✅ #7726       | `monthlyLastDay`; month-end clamp in `get-next-repeat-occurrence.util.ts:101-116` |
+| **Last day of month**                                      | ✅ #7726       | `monthlyLastDay`; month-end clamp in `get-next-repeat-occurrence.util.ts:125-140` |
 | First day of month                                         | ✅             | quick-setting `MONTHLY_FIRST_DAY`                                                 |
 | Skip occurrence (EXDATE)                                   | ✅             | `deletedInstanceDates: string[]`                                                  |
 | After-completion recurrence                                | ✅ (SP-unique) | `repeatFromCompletionDate` + `getEffectiveRepeatStartDate`                        |
@@ -152,8 +152,11 @@ Verified in `src/app/features/task-repeat-cfg/`:
 
 **Genuinely missing (delivered in Phase 3):** end conditions (`COUNT`/`UNTIL`),
 multiple days per month (`BYMONTHDAY=1,15`), `.ics`/CalDAV RRULE generation
-(Phase 1). Deferred / YAGNI: `RDATE`, `RECURRENCE-ID`, `BYSETPOS`, `BYWEEKNO`,
-`BYYEARDAY`, sub-daily, full two-way `.ics` import.
+(Phase 1). Deferred / YAGNI: `RDATE`, `RECURRENCE-ID`, `BYWEEKNO`, `BYYEARDAY`,
+sub-daily, full two-way `.ics` import. `BYSETPOS` is **not** wholly deferrable:
+the serializer's month-end clamp idiom `BYMONTHDAY=<d>,-1;BYSETPOS=1` (see the
+Phase-1 mapping table) needs it at the boundary; only general engine-side
+`BYSETPOS` expansion stays deferred.
 
 ---
 
@@ -173,7 +176,7 @@ Consequences:
   shape), so the deterministic-ID parity risk is small and an **offline
   golden-master test is sufficient — no production shadow mode required**.
 - New common patterns (multi-day-per-month, end conditions) are small extensions
-  to the bounded engine. Exotic RRULE parts (`BYSETPOS`, `BYWEEKNO`) are not free;
+  to the bounded engine. Exotic RRULE parts (general `BYSETPOS`, `BYWEEKNO`) are not free;
   defer them, and if ever needed, expand those rare configs via ical.js _off_ the
   hot path.
 
@@ -198,31 +201,40 @@ A pure module (e.g. `task-repeat-cfg/rrule/`). `typed → RRULE` is simple strin
 assembly (or `ICAL.Recur.fromData({...}).toString()`); `RRULE → typed` (for `.ics`
 import) uses ical.js parsing. Field mapping — must cover everything:
 
-| Typed model                                                                         | RRULE                                                                                          |
-| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `{freq, interval}`                                                                  | `FREQ=...;INTERVAL=...`                                                                        |
-| WEEKLY `byDay`                                                                      | `BYDAY=MO,WE,...` (+ `WKST` from user `firstDayOfWeek`)                                        |
-| MONTHLY `on.monthDay`                                                               | `BYMONTHDAY=<n>`                                                                               |
-| MONTHLY `on.lastDay`                                                                | `BYMONTHDAY=-1`                                                                                |
-| MONTHLY `on.{week,day}`                                                             | `BYDAY=<week><DD>` (`-1`=last)                                                                 |
-| YEARLY `{month, day}`                                                               | `BYMONTH=<m>;BYMONTHDAY=<d>` (document Feb-29 → Feb-28; no RFC equivalent)                     |
-| `end.count` / `end.until`                                                           | `COUNT=` / `UNTIL=` (end-of-day UTC)                                                           |
-| `exDates`                                                                           | `EXDATE` (export only; do not rename the wire field)                                           |
-| `repeatFromCompletionDate`                                                          | **Not expressible** — serializer refuses/flags; such configs are export-incompatible by nature |
-| `startTime`, `remindAt`, `waitForCompletion`, `skipOverdue`, subtask flags, `order` | SP extensions, out of band of RRULE — preserve                                                 |
+| Typed model                                                                         | RRULE                                                                                                                                                                                                               |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `{freq, interval}`                                                                  | `FREQ=...;INTERVAL=...`                                                                                                                                                                                             |
+| WEEKLY `byDay`                                                                      | `BYDAY=MO,WE,...`; for `INTERVAL>1`, `WKST` = weekday of the effective startDate — **never** user `firstDayOfWeek` (display-only). The epic branch instead emits no `WKST` and re-anchors via `getAlignedStartDate` |
+| MONTHLY `on.monthDay`                                                               | `BYMONTHDAY=<n>` for n ≤ 28; for 29–31 SP clamps to month-end where plain `BYMONTHDAY` skips — emit the clamp idiom `BYMONTHDAY=<n>,-1;BYSETPOS=1`                                                                  |
+| MONTHLY `on.lastDay`                                                                | `BYMONTHDAY=-1`                                                                                                                                                                                                     |
+| MONTHLY `on.{week,day}`                                                             | `BYDAY=<week><DD>` (`-1`=last)                                                                                                                                                                                      |
+| YEARLY `{month, day}`                                                               | `BYMONTH=<m>;BYMONTHDAY=<d>`; SP clamps Feb-29 → Feb-28 in non-leap years, and the clamp **has** an RFC equivalent — the same idiom (`BYMONTH=2;BYMONTHDAY=29,-1;BYSETPOS=1`)                                       |
+| `end.count` / `end.until`                                                           | `COUNT=` / `UNTIL=` (end-of-day UTC)                                                                                                                                                                                |
+| `exDates`                                                                           | `EXDATE` (export only; do not rename the wire field)                                                                                                                                                                |
+| `repeatFromCompletionDate`                                                          | **Not expressible** — serializer refuses/flags; such configs are export-incompatible by nature                                                                                                                      |
+| `startTime`, `remindAt`, `waitForCompletion`, `skipOverdue`, subtask flags, `order` | SP extensions, out of band of RRULE — preserve                                                                                                                                                                      |
 
 ### 1.3 DTSTART / date-basis correctness (the part that bites)
 
 - **DTSTART is local-noon of the anchor day, time component stripped.** The legacy
   engine never uses `startTime` for date math — it anchors at `setHours(12,…)`
-  (`get-next-repeat-occurrence.util.ts:36`). A non-noon DTSTART makes ical.js emit
+  (`get-next-repeat-occurrence.util.ts:43-45`). A non-noon DTSTART makes ical.js emit
   occurrences at a different instant that can roll to a different **calendar day**
   across a day/DST boundary → broken parity and shifted IDs. `startTime` stays a
   post-expansion task-template field, not part of DTSTART date math.
 - **EXDATE by day-string**, not instant equality: filter generated occurrences by
   `getDbDateStr(occurrence)` against `exDates`.
 - **`UNTIL` is inclusive end-of-day.**
-- **`WKST` from `firstDayOfWeek`**, or bi-weekly (`INTERVAL=2`) occurrences shift.
+- **`WKST` = weekday of the effective startDate** — or emit no `WKST` and
+  re-anchor DTSTART instead, as the epic branch does (`getAlignedStartDate`).
+  **Not** user `firstDayOfWeek`: that setting is display-only
+  (`src/app/core/date-time-format/custom-date-adapter.ts:19`). The engine counts
+  rolling 7-day blocks from the startDate's weekday
+  (`getDiffInWeeks(startDate, d) % repeatEvery`,
+  `get-next-repeat-occurrence.util.ts:88,95-96`), so a calendar-week `WKST`
+  shifts bi-weekly (`INTERVAL=2`) occurrences. Counterexample: startDate Wed
+  2026-01-07, `INTERVAL=2`, `BYDAY=MO,FR` — SP fires Mon 01-12; `WKST=MO` fires
+  Mon 01-19.
 
 ### 1.4 Occurrence-parity golden master (the gate)
 
@@ -349,7 +361,7 @@ So the real risk is feeding a **wrong DTSTART/anchor**, not "wrong engine":
 | Hot-path regression from async/forward-only ical.js iteration           | High        | ical.js for string parse/serialize only; sync bounded engine stays the runtime                                                                                                                   |
 | DTSTART carries `startTime` → day rolls                                 | High        | DTSTART = local-noon of anchor day; `startTime` applied post-expansion                                                                                                                           |
 | EXDATE never matches (instant vs noon)                                  | Medium      | Filter by `getDbDateStr` day-string                                                                                                                                                              |
-| Bi-weekly shifts (WKST default)                                         | Medium      | Thread `firstDayOfWeek` → `WKST`                                                                                                                                                                 |
+| Bi-weekly shifts (WKST default)                                         | Medium      | `WKST` = weekday of effective startDate (never display-only `firstDayOfWeek`), or omit `WKST` and re-anchor (`getAlignedStartDate`)                                                              |
 | `UNTIL` drops final day                                                 | Medium      | Inclusive end-of-day                                                                                                                                                                             |
 | ~~Production shadow mode cost~~                                         | n/a         | Not needed — engine unchanged; offline golden master covers parity                                                                                                                               |
 | ~~Bundle size of new dep~~                                              | n/a         | No new dep — ical.js already present & lazy-loaded                                                                                                                                               |
