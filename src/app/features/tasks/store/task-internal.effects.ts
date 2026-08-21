@@ -94,6 +94,46 @@ export class TaskInternalEffects {
     ),
   );
 
+  /**
+   * #9651 graceful degradation: this client keeps a task's own tags across
+   * convertToSubTask / convertToMainTask, but clients released before that
+   * change replay these ops by wiping (to-sub) or overwriting with the
+   * parent's (to-main) tagIds. Re-asserting the kept tags as a follow-up
+   * updateTask op makes those clients converge to the same state. Fires only
+   * on the originating client (LOCAL_ACTIONS), only when the convert actually
+   * applied and the task had own tags to preserve.
+   */
+  reassertOwnTagsAfterConvert$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskSharedActions.convertToSubTask, TaskSharedActions.convertToMainTask),
+      withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
+      mergeMap(([action, state]) => {
+        const isConvertToSub = action.type === TaskSharedActions.convertToSubTask.type;
+        const taskId = isConvertToSub ? action.taskId : action.task.id;
+        const task = state.entities[taskId];
+        if (!task || !task.tagIds?.length) {
+          return EMPTY;
+        }
+        const isApplied = isConvertToSub
+          ? task.parentId === action.targetParentId
+          : !task.parentId;
+        // For to-main, re-assert only tags the task owned BEFORE the convert
+        // (payload snapshot): the inherit-parent fallback yields the same
+        // result on old clients and needs no extra op. Drag-and-drop may pass
+        // a payload stub without tagIds — then we conservatively skip.
+        const hadOwnTags = isConvertToSub ? true : !!action.task.tagIds?.length;
+        if (!isApplied || !hadOwnTags) {
+          return EMPTY;
+        }
+        return of(
+          TaskSharedActions.updateTask({
+            task: { id: taskId, changes: { tagIds: task.tagIds } },
+          }),
+        );
+      }),
+    ),
+  );
+
   planStartedTaskForToday$ = createEffect(() =>
     this._actions$.pipe(
       ofType(setCurrentTask),

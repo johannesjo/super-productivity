@@ -25,6 +25,7 @@ import {
   expectTaskEntityExists,
   expectTaskEntityNotExists,
   expectTaskUpdate,
+  expectTaskUpdates,
 } from './test-utils';
 
 describe('taskSharedCrudMetaReducer', () => {
@@ -409,6 +410,71 @@ describe('taskSharedCrudMetaReducer', () => {
       );
     });
 
+    it('should keep own tags instead of inheriting the parent tags (#9651)', () => {
+      const { action, testState: baseTestState } = createConvertAction({
+        tagIds: ['tag2'],
+      });
+      const testState = {
+        ...baseTestState,
+        [TASK_FEATURE_NAME]: {
+          ...baseTestState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseTestState[TASK_FEATURE_NAME].entities,
+            task1: action.task,
+          },
+          ids: [...baseTestState[TASK_FEATURE_NAME].ids, 'task1'],
+        },
+        [TAG_FEATURE_NAME]: {
+          ...baseTestState[TAG_FEATURE_NAME],
+          ids: [...(baseTestState[TAG_FEATURE_NAME].ids as string[]), 'tag2'],
+          entities: {
+            ...baseTestState[TAG_FEATURE_NAME].entities,
+            tag2: createMockTag({ id: 'tag2', taskIds: ['task1'] }),
+          },
+        },
+      };
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskUpdate('task1', { parentId: undefined, tagIds: ['tag2'] }),
+          ...expectTagUpdates({
+            tag1: { taskIds: [] },
+            tag2: { taskIds: ['task1'] },
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should inherit the parent tags when the task has no own tags', () => {
+      const { action, testState: baseTestState } = createConvertAction({ tagIds: [] });
+      const testState = {
+        ...baseTestState,
+        [TASK_FEATURE_NAME]: {
+          ...baseTestState[TASK_FEATURE_NAME],
+          entities: {
+            ...baseTestState[TASK_FEATURE_NAME].entities,
+            task1: action.task,
+          },
+          ids: [...baseTestState[TASK_FEATURE_NAME].ids, 'task1'],
+        },
+      };
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskUpdate('task1', { parentId: undefined, tagIds: ['tag1'] }),
+          ...expectTagUpdate('tag1', { taskIds: ['task1'] }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
     it('should use captured dates when replaying on a different day', () => {
       const capturedToday = '2024-06-14';
       const capturedTimestamp = new Date(2024, 5, 14, 12, 0, 0, 0).getTime();
@@ -774,27 +840,27 @@ describe('taskSharedCrudMetaReducer', () => {
         afterTaskId,
       });
 
-    it('should move a main task under the target parent', () => {
+    it('should move a main task under the target parent and keep its own tags', () => {
       const testState = createConvertToSubTaskState();
       const action = createConvertToSubTaskAction();
 
       metaReducer(testState, action);
       expectStateUpdate(
-        {
-          ...expectTaskUpdate('task1', {
+        expectTaskUpdates({
+          task1: {
             parentId: 'parent-task',
             projectId: 'project1',
-            tagIds: [],
-          }),
-          ...expectTaskUpdate('parent-task', { subTaskIds: ['task1'] }),
-        },
+            tagIds: ['tag1'],
+          },
+          'parent-task': { subTaskIds: ['task1'] },
+        }),
         action,
         mockReducer,
         testState,
       );
     });
 
-    it('should remove converted task from project and tag top-level lists', () => {
+    it('should remove converted task from project lists and TODAY ordering but keep own tag membership', () => {
       const testState = createConvertToSubTaskState();
       const action = createConvertToSubTaskAction();
 
@@ -806,8 +872,44 @@ describe('taskSharedCrudMetaReducer', () => {
             backlogTaskIds: [],
           }),
           ...expectTagUpdates({
-            tag1: { taskIds: ['parent-task'] },
+            tag1: { taskIds: ['parent-task', 'task1'] },
             TODAY: { taskIds: [] },
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should keep a tag the target parent does not have (#9651)', () => {
+      const base = createConvertToSubTaskState({ tagIds: ['tag2'] });
+      const testState = {
+        ...base,
+        [TAG_FEATURE_NAME]: {
+          ...base[TAG_FEATURE_NAME],
+          ids: [...(base[TAG_FEATURE_NAME].ids as string[]), 'tag2'],
+          entities: {
+            ...base[TAG_FEATURE_NAME].entities,
+            tag1: {
+              ...base[TAG_FEATURE_NAME].entities.tag1,
+              taskIds: ['parent-task'],
+            } as Tag,
+            tag2: createMockTag({ id: 'tag2', taskIds: ['task1'] }),
+          },
+        },
+      };
+      const action = createConvertToSubTaskAction();
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskUpdate('task1', {
+            parentId: 'parent-task',
+            tagIds: ['tag2'],
+          }),
+          ...expectTagUpdates({
+            tag2: { taskIds: ['task1'] },
           }),
         },
         action,
@@ -834,10 +936,10 @@ describe('taskSharedCrudMetaReducer', () => {
           ...expectTaskUpdate('task1', {
             parentId: 'parent-task',
             dueDay: undefined,
-            tagIds: [],
+            tagIds: ['tag1'],
           }),
           ...expectTagUpdates({
-            tag1: { taskIds: ['parent-task'] },
+            tag1: { taskIds: ['parent-task', 'task1'] },
             TODAY: { taskIds: [] },
           }),
           planner: jasmine.objectContaining({

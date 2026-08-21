@@ -179,6 +179,23 @@ const handleConvertToMainTask = (
     : Array.isArray(parentTask.tagIds)
       ? parentTask.tagIds
       : [];
+  // #9651: a tagged sub task keeps its own tags on promotion; the parent's
+  // tags are only inherited when the task has none (a top-level task without
+  // project or tag would fail validation and vanish from every context view).
+  // The stored entity wins over the payload snapshot; TODAY is virtual and
+  // never lives in tagIds.
+  const storedTask = state[TASK_FEATURE_NAME].entities[task.id];
+  const ownTagIds = (
+    Array.isArray(storedTask?.tagIds)
+      ? storedTask.tagIds
+      : Array.isArray(task.tagIds)
+        ? task.tagIds
+        : []
+  ).filter((id) => id !== TODAY_TAG.id);
+  const keptTagIds =
+    ownTagIds.length > 0
+      ? ownTagIds
+      : resolvedParentTagIds.filter((id) => id !== TODAY_TAG.id);
   const positionConvertedTask = (taskIds: string[]): string[] => {
     // Dropped at the start of DONE → append to the bottom of the done list.
     if (afterTaskId == null && isDone) {
@@ -200,11 +217,7 @@ const handleConvertToMainTask = (
       id: task.id,
       changes: {
         parentId: undefined,
-        // Filter out TODAY_TAG.id - it's a virtual tag where membership is
-        // determined by task.dueDay, not by being in tagIds
-        tagIds: (Array.isArray(parentTask.tagIds) ? parentTask.tagIds : []).filter(
-          (id) => id !== TODAY_TAG.id,
-        ),
+        tagIds: keptTagIds,
         modified: capturedModified ?? Date.now(),
         ...(isPlanForToday && !task.dueWithTime
           ? {
@@ -250,7 +263,7 @@ const handleConvertToMainTask = (
 
   // Update tags - only update tags that exist
   const tagIdsToUpdate = [
-    ...resolvedParentTagIds,
+    ...keptTagIds,
     ...(isPlanForToday ? [TODAY_TAG.id] : []),
   ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
 
@@ -295,7 +308,18 @@ const handleConvertToSubTask = (
     });
   }
 
-  updatedState = removeTasksFromAllTags(updatedState, [task.id]);
+  // #9651: the task keeps its own tags when nested — only the stale TODAY
+  // ordering entry is dropped (dueDay is cleared below and TODAY membership
+  // is virtual, derived from dueDay).
+  const todayTag = updatedState[TAG_FEATURE_NAME].entities[TODAY_TAG.id];
+  if (todayTag && todayTag.taskIds.includes(task.id)) {
+    updatedState = updateTags(updatedState, [
+      {
+        id: TODAY_TAG.id,
+        changes: { taskIds: removeTasksFromList(todayTag.taskIds, [task.id]) },
+      },
+    ]);
+  }
   updatedState = removeTaskFromPlannerDays(updatedState, task.id);
 
   let taskState = updatedState[TASK_FEATURE_NAME];
@@ -316,7 +340,6 @@ const handleConvertToSubTask = (
         changes: {
           parentId: targetParent.id,
           projectId: targetParent.projectId,
-          tagIds: [],
           dueDay: undefined,
           modified: Date.now(),
         },
