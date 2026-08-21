@@ -5,9 +5,12 @@
 > what follows is already implemented on that branch (forward/inverse RRULE
 > converters, the old-client compatibility contract, an off-by-default per-device
 > engine flag), and the branch resolved several questions this document still
-> poses as open. Check there before planning or building anything here. Note the
-> branch's implementation uses a **raw `rrule` string**, not the typed union
-> sketched below — reconcile the two before treating either as decided.
+> poses as open. Check there before planning or building anything here.
+>
+> **Reconciled 2026-08-21: the branch's raw-`rrule`-string design stands; the
+> typed-union sketch below is superseded** (kept as rationale record). The
+> rejection reasoning below was checked against the branch and does not hold
+> against its actual design — see "Why the raw-string rejection was stale".
 
 > **Revision note (verified against code 2026-06-02).** Rewritten after two rounds
 > of multi-axis review against the actual codebase. The original draft was built on
@@ -33,42 +36,59 @@
 
 ---
 
-## Decision: a typed, RRULE-isomorphic recurrence model
+## Decision (superseded): a typed, RRULE-isomorphic recurrence model
 
-The recurrence **pattern** becomes a single typed, structured field — a
-discriminated union that maps **1:1 to RFC 5545** — replacing the ~14
-interdependent flat fields (`repeatCycle`, `repeatEvery`, the 7 weekday booleans,
-`monthlyWeekOfMonth`, `monthlyWeekday`, `monthlyLastDay`, `quickSetting`).
+> **Superseded 2026-08-21.** The standing decision is the epic branch's: a raw
+> `rrule?: string` added alongside the legacy flat fields, which stay
+> dual-written forever as the wire format. Everything from here down is the
+> superseded typed-model plan, kept because its correctness constraints
+> (DTSTART/noon anchoring, EXDATE day-string matching, `UNTIL` inclusivity,
+> WKST, monthly-anchor precedence, the parity gate, the wire-rename and
+> migration warnings) apply to the epic's serializer and engine just the same —
+> only the persisted shape differs.
+
+The superseded plan: the recurrence **pattern** becomes a single typed,
+structured field — a discriminated union that maps **1:1 to RFC 5545** —
+replacing the ~14 interdependent flat fields (`repeatCycle`, `repeatEvery`, the
+7 weekday booleans, `monthlyWeekOfMonth`, `monthlyWeekday`, `monthlyLastDay`,
+`quickSetting`).
 
 The RFC-5545 **RRULE string is produced/parsed only at the boundary** (`.ics`
-export, CalDAV). **The raw string is never the persisted/synced field.**
+export, CalDAV). **The raw string is never the persisted/synced field.** (This
+last line is precisely what the epic decided differently.)
 
-### Why typed-isomorphic instead of a raw RRULE string
+### Why the raw-string rejection was stale (reconciled 2026-08-21)
 
-A raw `rrule` string as the canonical field was considered and rejected. It is the
-worst fit for _this_ codebase:
+An earlier revision rejected a raw `rrule` string as the canonical field on
+three grounds. Checked against what `feat/rrule-epic` actually built, each
+objection is answered by a design decision the rejection did not anticipate:
 
-- **Un-queryable.** NgRx selectors (`task-repeat-cfg.selectors.ts`) read fields; a
-  string forces parsing on every projection.
-- **Un-diffable / un-repairable.** The op-log diffs fields and `data-repair.ts`
-  repairs typed shapes (`_fixTaskRepeatMissingWeekday`,
-  `_fixTaskRepeatCfgInvalidQuickSetting`); it cannot validate or repair the
-  _interior_ of an opaque string. A partially-corrupt string would sync silently.
-- **Hot-path performance.** The occurrence engine runs **synchronously**,
-  `days × configs` times, in selector projectors (`selectTaskRepeatCfgsForExactDay`,
-  `selectAllUnprocessedTaskRepeatCfgs`) consumed per displayed day by the schedule
-  (~up to a month grid) and the 14-day mobile-notification lookahead. Expanding a
-  raw string means ical.js iteration, which is **forward-only** and **async**
-  (the engine is lazy-loaded, ~76 KB) — it cannot run inside a sync selector and is
-  far heavier than today's bounded loops. To keep a raw string _and_ stay fast you
-  would maintain a parsed structured form alongside it — i.e. rebuild this typed
-  model anyway, plus a redundant string.
+- **"Un-queryable."** The branch adds `rrule?: string` _additively_ and
+  **dual-writes the legacy flat fields forever** — they are the wire format for
+  old clients (roadmap, "Dual-engine endgame" §4). Selectors and any field-level
+  consumer keep a structured representation; nothing is forced to parse the
+  string on projection.
+- **"Un-diffable / un-repairable."** Same dual-write: the op-log still diffs the
+  legacy fields, and `data-repair.ts` still repairs them. For the string itself
+  the branch has an explicit policy instead of silent corruption: the engine is
+  fail-soft (malformed `rrule` → log + `null`, never a throw), `isRRuleValid`
+  gates routing (invalid → legacy fallback), and the decided post-legacy-engine
+  behavior for an invalid string is **pause + repair prompt**, never silent
+  rescheduling.
+- **"Hot-path performance."** The objection assumed the expansion engine would
+  be ical.js (async, lazy-loaded, forward-only). The branch's engine is
+  **rrule.js (`rrule@2.8.1`, pinned exact) — synchronous** — in a dedicated
+  day-granular, UTC-based occurrence util (`store/rrule-occurrence.util.ts`)
+  with memoised validity probing. It runs inside the existing sync calculators;
+  no async dependency enters the selector path.
 
-A typed union maps onto the same `FREQ/INTERVAL/BYDAY/BYMONTHDAY/COUNT/UNTIL`
-concepts the existing engine already handles, so it stays queryable, validatable,
-diffable, and **fast** — while remaining losslessly serializable to the RRULE
-string for interop. It honors the "RRULE as the model" intent in substance (the
-model _is_ RRULE, structured) without the opaque-blob costs.
+The one cost the old reasoning weighed correctly: **`rrule` is a new root
+runtime dependency**, which the project rules normally forbid. The
+maintainer-owned epic accepted it deliberately and treats it like an engine —
+pinned to an exact version, with a differential spec battery as the upgrade
+tripwire (a parser-version drift between devices is a duplicate-task generator,
+see the roadmap's risk model). That trade is decided; do not relitigate it here,
+and do not un-pin the version.
 
 ### Honest caveats on the goals (design to them)
 
@@ -86,9 +106,14 @@ model _is_ RRULE, structured) without the opaque-blob costs.
 
 ---
 
-## The typed model
+## The typed model (superseded — kept as rationale record)
 
-Replace the flat pattern fields in `TaskRepeatCfgCopy`
+> Superseded by the epic's `rrule?: string` + legacy dual-write (see above).
+> Preserved because the invariant analysis below (what a discriminated union
+> makes unrepresentable) is the best record of the legacy fields' implicit
+> precedence rules.
+
+The sketch replaced the flat pattern fields in `TaskRepeatCfgCopy`
 (`task-repeat-cfg.model.ts` — edit `TaskRepeatCfgCopy`, not the `Readonly` alias)
 with one discriminated union plus an end condition. Sketch (final names TBD):
 
@@ -97,7 +122,7 @@ type Weekday = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
 
 type RecurrencePattern =
   | { freq: 'DAILY'; interval: number }
-  | { freq: 'WEEKLY'; interval: number; byDay: Weekday[]; wkst?: Weekday }
+  | { freq: 'WEEKLY'; interval: number; byDay: Weekday[] } // WKST is derived (weekday of effective startDate), never persisted
   | { freq: 'MONTHLY'; interval: number; on: { monthDay: number } } // BYMONTHDAY=n
   | { freq: 'MONTHLY'; interval: number; on: { lastDay: true } } // BYMONTHDAY=-1
   | { freq: 'MONTHLY'; interval: number; on: { week: 1 | 2 | 3 | 4 | -1; day: Weekday } } // BYDAY=nDD
@@ -112,7 +137,7 @@ interface RecurrenceConfigPart {
   // canonical, RRULE-isomorphic, persisted/synced:
   recurrence: RecurrencePattern;
   end: RecurrenceEnd;
-  exDates: string[]; // = today's `deletedInstanceDates`, NOT renamed on the wire
+  deletedInstanceDates: string[]; // wire name kept verbatim — `exDates` would be exactly the forbidden rename
   // SP carve-out — not expressible in RFC 5545:
   repeatFromCompletionDate?: boolean;
 }
@@ -162,6 +187,13 @@ Phase-1 mapping table) needs it at the boundary; only general engine-side
 
 ## Engine decision: keep the synchronous bounded engine
 
+> _Reconciled:_ this holds for legacy/flag-off cfgs — the branch keeps the
+> bounded loops authoritative there. For cfgs carrying an `rrule` string with
+> the flag on, the branch routes to its **synchronous** rrule.js engine
+> (`store/rrule-occurrence.util.ts`); ical.js remains boundary-only either way.
+> The paragraph below records why ical.js must never become the occurrence
+> runtime, which still stands.
+
 **The occurrence runtime stays the existing synchronous bounded loops**
 (`get-next-repeat-occurrence.util.ts`, `get-newest-possible-due-date.util.ts`),
 re-pointed to read the new typed `recurrence` field instead of the flat fields.
@@ -201,18 +233,29 @@ A pure module (e.g. `task-repeat-cfg/rrule/`). `typed → RRULE` is simple strin
 assembly (or `ICAL.Recur.fromData({...}).toString()`); `RRULE → typed` (for `.ics`
 import) uses ical.js parsing. Field mapping — must cover everything:
 
-| Typed model                                                                         | RRULE                                                                                                                                                                                                               |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `{freq, interval}`                                                                  | `FREQ=...;INTERVAL=...`                                                                                                                                                                                             |
-| WEEKLY `byDay`                                                                      | `BYDAY=MO,WE,...`; for `INTERVAL>1`, `WKST` = weekday of the effective startDate — **never** user `firstDayOfWeek` (display-only). The epic branch instead emits no `WKST` and re-anchors via `getAlignedStartDate` |
-| MONTHLY `on.monthDay`                                                               | `BYMONTHDAY=<n>` for n ≤ 28; for 29–31 SP clamps to month-end where plain `BYMONTHDAY` skips — emit the clamp idiom `BYMONTHDAY=<n>,-1;BYSETPOS=1`                                                                  |
-| MONTHLY `on.lastDay`                                                                | `BYMONTHDAY=-1`                                                                                                                                                                                                     |
-| MONTHLY `on.{week,day}`                                                             | `BYDAY=<week><DD>` (`-1`=last)                                                                                                                                                                                      |
-| YEARLY `{month, day}`                                                               | `BYMONTH=<m>;BYMONTHDAY=<d>`; SP clamps Feb-29 → Feb-28 in non-leap years, and the clamp **has** an RFC equivalent — the same idiom (`BYMONTH=2;BYMONTHDAY=29,-1;BYSETPOS=1`)                                       |
-| `end.count` / `end.until`                                                           | `COUNT=` / `UNTIL=` (end-of-day UTC)                                                                                                                                                                                |
-| `exDates`                                                                           | `EXDATE` (export only; do not rename the wire field)                                                                                                                                                                |
-| `repeatFromCompletionDate`                                                          | **Not expressible** — serializer refuses/flags; such configs are export-incompatible by nature                                                                                                                      |
-| `startTime`, `remindAt`, `waitForCompletion`, `skipOverdue`, subtask flags, `order` | SP extensions, out of band of RRULE — preserve                                                                                                                                                                      |
+| Typed model                                                                         | RRULE                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `{freq, interval}`                                                                  | `FREQ=...;INTERVAL=...`                                                                                                                                                                                                           |
+| WEEKLY `byDay`                                                                      | `BYDAY=MO,WE,...`; for `INTERVAL>1`, `WKST` = weekday of the effective startDate — **never** user `firstDayOfWeek` (display-only). The epic branch instead emits no `WKST` and re-anchors via `getAlignedStartDate`               |
+| MONTHLY `on.monthDay`                                                               | `BYMONTHDAY=<n>` for n ≤ 28; for 29–31 SP clamps to month-end where plain `BYMONTHDAY` skips — emit the clamp idiom `BYMONTHDAY=<n>,-1;BYSETPOS=1`                                                                                |
+| MONTHLY `on.lastDay`                                                                | `BYMONTHDAY=-1`                                                                                                                                                                                                                   |
+| MONTHLY `on.{week,day}`                                                             | `BYDAY=<week><DD>` (`-1`=last)                                                                                                                                                                                                    |
+| YEARLY `{month, day}`                                                               | `BYMONTH=<m>;BYMONTHDAY=<d>`; SP clamps Feb-29 → Feb-28 in non-leap years, and the clamp **has** an RFC equivalent — the same idiom (`BYMONTH=2;BYMONTHDAY=29,-1;BYSETPOS=1`)                                                     |
+| `end.count` / `end.until`                                                           | `COUNT=` / `UNTIL=` (end-of-day UTC)                                                                                                                                                                                              |
+| `deletedInstanceDates`                                                              | `EXDATE` (export only; the wire field name stays verbatim)                                                                                                                                                                        |
+| `repeatFromCompletionDate`                                                          | **Not expressible** — serializer refuses/flags; such configs are export-incompatible by nature                                                                                                                                    |
+| `startTime`, `remindAt`, `waitForCompletion`, `skipOverdue`, subtask flags, `order` | SP extensions, out of band of RRULE — preserve                                                                                                                                                                                    |
+| `isPaused`                                                                          | No RRULE equivalent. A paused cfg must **not** be exported as a live RRULE (it promises occurrences SP will never create) — serializer skips or flags it (`store/task-repeat-cfg.selectors.ts:102,142` short-circuits generation) |
+| `lastTaskCreationDay` / `lastTaskCreation`                                          | Internal creation cursor, out of band of RRULE — never exported, never derived from an imported rule                                                                                                                              |
+
+The three MONTHLY rows are **not independent** — the engine resolves one anchor
+with fixed precedence: nth-weekday (`monthlyWeekOfMonth` + `monthlyWeekday`,
+checked first at `get-next-repeat-occurrence.util.ts:110`) → `monthlyLastDay` →
+startDate's day-of-month. A row-by-row serializer that emits parts for a cfg
+carrying several anchors produces `BYMONTHDAY=-1;BYDAY=2TU` — in RFC 5545 an
+**intersection**, usually the empty set. Serialize exactly one anchor, in that
+precedence order (the epic branch's `legacyTaskRepeatCfgToRRule` switch does
+exactly this).
 
 ### 1.3 DTSTART / date-basis correctness (the part that bites)
 
