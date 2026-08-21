@@ -185,6 +185,110 @@ describe('CapacitorReminderService', () => {
     });
   });
 
+  describe('requestPermissionsInBackground (#9648)', () => {
+    it('does nothing when notifications are unavailable', () => {
+      service.requestPermissionsInBackground();
+      expect(notificationServiceSpy.ensurePermissions).not.toHaveBeenCalled();
+    });
+
+    describe('on a native (non-legacy) platform', () => {
+      let nativeService: CapacitorReminderService;
+
+      beforeEach(() => {
+        const nativePlatformSpy = jasmine.createSpyObj(
+          'CapacitorPlatformService',
+          ['hasCapability', 'isIOS', 'isAndroid'],
+          {
+            platform: 'android',
+            isNative: true,
+            isMobile: true,
+            capabilities: { scheduledNotifications: true },
+          },
+        );
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+          providers: [
+            CapacitorReminderService,
+            provideMockStore(),
+            { provide: CapacitorPlatformService, useValue: nativePlatformSpy },
+            { provide: CapacitorNotificationService, useValue: notificationServiceSpy },
+            { provide: IS_ANDROID_WEB_VIEW_TOKEN, useValue: false },
+          ],
+        });
+        nativeService = TestBed.inject(CapacitorReminderService);
+      });
+
+      it('requests the permission when it has not been granted yet', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('prompt'),
+        );
+
+        await nativeService.requestPermissionsInBackground();
+
+        expect(notificationServiceSpy.ensurePermissions).toHaveBeenCalledTimes(1);
+      });
+
+      it('resolves true when the permission was newly granted, so the caller re-posts', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('prompt'),
+        );
+        notificationServiceSpy.ensurePermissions.and.returnValue(Promise.resolve(true));
+
+        await expectAsync(nativeService.requestPermissionsInBackground()).toBeResolvedTo(
+          true,
+        );
+      });
+
+      it('resolves false when already granted — nothing was suppressed, so no re-post', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('granted'),
+        );
+
+        await expectAsync(nativeService.requestPermissionsInBackground()).toBeResolvedTo(
+          false,
+        );
+        expect(notificationServiceSpy.ensurePermissions).not.toHaveBeenCalled();
+      });
+
+      it('resolves false when the user denies, so the caller does not re-post', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('prompt'),
+        );
+        notificationServiceSpy.ensurePermissions.and.returnValue(Promise.resolve(false));
+
+        await expectAsync(nativeService.requestPermissionsInBackground()).toBeResolvedTo(
+          false,
+        );
+      });
+
+      it('asks at most once per session so back-to-back service starts cannot stack dialogs', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('prompt'),
+        );
+
+        await Promise.all([
+          nativeService.requestPermissionsInBackground(),
+          nativeService.requestPermissionsInBackground(),
+          nativeService.requestPermissionsInBackground(),
+        ]);
+
+        expect(notificationServiceSpy.ensurePermissions).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not re-prompt for the rest of the session after a denial', async () => {
+        notificationServiceSpy.getPermissionState.and.returnValue(
+          Promise.resolve('prompt'),
+        );
+        notificationServiceSpy.ensurePermissions.and.returnValue(Promise.resolve(false));
+
+        await nativeService.requestPermissionsInBackground();
+        await nativeService.requestPermissionsInBackground();
+
+        expect(notificationServiceSpy.ensurePermissions).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
   describe('getPermissionState', () => {
     it("should return 'denied' when not available, without prompting", async () => {
       const result = await service.getPermissionState();
@@ -233,6 +337,17 @@ describe('CapacitorReminderService', () => {
         ],
       });
       legacyService = TestBed.inject(CapacitorReminderService);
+    });
+
+    it('requestPermissionsInBackground short-circuits without consulting Capacitor', async () => {
+      // isAvailable is TRUE on the legacy shell (platform resolves to 'android'),
+      // so the #7408 guards are the only thing keeping us off the broken Web
+      // Notifications fallback here.
+      await expectAsync(legacyService.requestPermissionsInBackground()).toBeResolvedTo(
+        false,
+      );
+      expect(notificationServiceSpy.ensurePermissions).not.toHaveBeenCalled();
+      expect(notificationServiceSpy.getPermissionState).not.toHaveBeenCalled();
     });
 
     it('ensurePermissions short-circuits without consulting Capacitor', async () => {
