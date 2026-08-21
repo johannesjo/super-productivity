@@ -16,6 +16,7 @@ import {
   EncryptNoPasswordError,
   FileSyncTargetChangedError,
   InvalidDataSPError,
+  InvalidFilePrefixError,
   PlaintextWhenEncryptionExpectedError,
   RemoteFileNotFoundAPIError,
   SplitSyncFormatDetectedError,
@@ -2731,9 +2732,10 @@ describe('FileBasedSyncAdapterService', () => {
         syncVersion: 5,
         recentOps: [compactOp('recovered-from-missing-prefix') as never],
       });
-      // Prefix-less body: valid JSON, but not a sync file (e.g. a backup export
-      // copied into the sync folder). Nothing downstream ever gets to parse it.
-      const unprefixedMain = JSON.stringify({ version: 2, syncVersion: 9 });
+      // A TRUNCATED head — the interrupted-write shape this recovery targets. It
+      // exercises the regex's partial-match branch (`pf_` present, separator gone),
+      // which a merely prefix-less body would not.
+      const unprefixedMain = 'pf_2_' + JSON.stringify(createMockSyncData({}));
       mockProvider.downloadFile.and.callFake((path: string) => {
         if (path === FILE_BASED_SYNC_CONSTANTS.BACKUP_FILE) {
           return Promise.resolve({
@@ -2750,6 +2752,59 @@ describe('FileBasedSyncAdapterService', () => {
       expect(result.ops[0].op.id).toBe('recovered-from-missing-prefix');
       expect(result.latestSeq).toBe(5);
       expect(mockSnackService.open).toHaveBeenCalled();
+    });
+
+    it('(b) does NOT adopt .bak when the prefix failure does not reproduce (#9627 transport guard)', async () => {
+      // The dangerous asymmetric case: the STORED primary is fine, but one
+      // RESPONSE was mangled (proxy/captive-portal page, WebDAV 207 body, JSON
+      // error envelope — `isHtmlResponse` only filters three narrow shapes). The
+      // .bak is a separate request and can succeed, so adopting it would heal an
+      // intact primary with one-generation-old data at its REAL rev, silently
+      // dropping ops another device already committed and will never re-push.
+      // The re-read gate must reject this: original error, no adoption, no snack.
+      const goodPrimary = createMockSyncData({
+        syncVersion: 9,
+        recentOps: [compactOp('op-only-in-healthy-primary') as never],
+      });
+      const backupData = createMockSyncData({
+        syncVersion: 5,
+        recentOps: [compactOp('stale-op-from-bak') as never],
+      });
+      let primaryReads = 0;
+      mockProvider.downloadFile.and.callFake((path: string) => {
+        if (path === FILE_BASED_SYNC_CONSTANTS.BACKUP_FILE) {
+          return Promise.resolve({ dataStr: addPrefix(backupData), rev: 'bak-rev' });
+        }
+        primaryReads++;
+        // First read mangled, every later read fine.
+        return Promise.resolve(
+          primaryReads === 1
+            ? { dataStr: '<?xml version="1.0"?><d:multistatus/>', rev: 'primary-rev' }
+            : { dataStr: addPrefix(goodPrimary), rev: 'primary-rev' },
+        );
+      });
+
+      await expectAsync(adapter.downloadOps(0)).toBeRejectedWith(
+        jasmine.any(InvalidFilePrefixError),
+      );
+      expect(primaryReads).toBe(2); // the confirming re-read happened
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+      expect(mockProvider.uploadFile).not.toHaveBeenCalled();
+    });
+
+    it('(b) rethrows the ORIGINAL error when primary and .bak are both prefix-less (#9627)', async () => {
+      // The symmetric case the fix relies on being harmless: whatever destroyed
+      // the primary's head destroyed the .bak's too, so nothing is adoptable and
+      // the user sees the same error as before the fix.
+      const unprefixed = JSON.stringify({ version: 2, syncVersion: 9 });
+      mockProvider.downloadFile.and.returnValue(
+        Promise.resolve({ dataStr: unprefixed, rev: 'corrupt-rev' }),
+      );
+
+      await expectAsync(adapter.downloadOps(0)).toBeRejectedWith(
+        jasmine.any(InvalidFilePrefixError),
+      );
+      expect(mockSnackService.open).not.toHaveBeenCalled();
     });
 
     it('(b) refuses a PLAINTEXT .bak when encryption is expected (key-suppression vector)', async () => {
@@ -4352,6 +4407,29 @@ describe('FileBasedSyncAdapterService', () => {
       await adapter.uploadOps([createMockSyncOp()], 'client1');
       expect(opsRevToMatch).toContain('corrupt-ops-rev');
       expect(opsRevToMatch).not.toContain('ops-bak-rev');
+    });
+
+    it('(i) recovers a prefix-less sync-ops.json from .bak (#9627, split call site)', async () => {
+      // Claim 4 of the fix — both `_isRecoverableCorruption` call sites benefit —
+      // was code-reading only. This exercises the split-format one, including its
+      // own re-read gate (the primary stays prefix-less on the confirming read).
+      const bakOps = makeOpsFile({
+        syncVersion: 4,
+        recentOps: [makeCompactOp({ id: 'op-from-bak-prefixless' })],
+      });
+      const unprefixed = JSON.stringify({ version: 3, syncVersion: 9 });
+      mockProvider.downloadFile.and.callFake(async (path: string) => {
+        if (path === C.OPS_FILE) return { dataStr: unprefixed, rev: 'corrupt-ops-rev' };
+        if (path === C.OPS_BACKUP_FILE) {
+          return { dataStr: addPrefix(bakOps, 3), rev: 'ops-bak-rev' };
+        }
+        throw new RemoteFileNotFoundAPIError(path);
+      });
+
+      const result = await adapter.downloadOps(1, 'client2');
+
+      expect(result.ops.some((o) => o.op.id === 'op-from-bak-prefixless')).toBe(true);
+      expect(mockSnackService.open).toHaveBeenCalled();
     });
 
     it('(i) split .bak recovery never promotes the corrupt ops rev to last-seen (heal cannot wedge)', async () => {
