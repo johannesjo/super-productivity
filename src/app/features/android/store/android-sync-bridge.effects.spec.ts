@@ -21,9 +21,10 @@ describe('AndroidSyncBridgeEffects - credential mirroring logic', () => {
   const superSyncCfg = (
     accessToken: string,
     baseUrl?: string,
+    encryptKey?: string,
   ): CurrentProviderPrivateCfg => ({
     providerId: SyncProviderId.SuperSync,
-    privateCfg: { accessToken, baseUrl } as SuperSyncPrivateCfg,
+    privateCfg: { accessToken, baseUrl, encryptKey } as SuperSyncPrivateCfg,
   });
 
   const dropboxCfg = (): CurrentProviderPrivateCfg => ({
@@ -68,6 +69,24 @@ describe('AndroidSyncBridgeEffects - credential mirroring logic', () => {
       ).toBe(true);
     });
 
+    it('should detect encryption key change within SuperSync', () => {
+      expect(
+        credentialConfigEqual(
+          superSyncCfg('token1', 'https://a.com', 'old-pass'),
+          superSyncCfg('token1', 'https://a.com', 'new-pass'),
+        ),
+      ).toBe(false);
+    });
+
+    it('should treat same encryption key as equal', () => {
+      expect(
+        credentialConfigEqual(
+          superSyncCfg('token1', 'https://a.com', 'pass'),
+          superSyncCfg('token1', 'https://a.com', 'pass'),
+        ),
+      ).toBe(true);
+    });
+
     it('should treat all non-SuperSync emissions as equal to prevent repeated clears', () => {
       expect(credentialConfigEqual(dropboxCfg(), dropboxCfg())).toBe(true);
     });
@@ -87,6 +106,20 @@ describe('AndroidSyncBridgeEffects - credential mirroring logic', () => {
         type: 'set',
         baseUrl: 'https://sync.example.com',
         accessToken: 'my-token',
+        encryptionPassword: '',
+      });
+    });
+
+    it('should include the encryption password when configured', () => {
+      expect(
+        getSuperSyncCredentialBridgeCommand(
+          superSyncCfg('my-token', 'https://sync.example.com', 'my-e2ee-pass'),
+        ),
+      ).toEqual({
+        type: 'set',
+        baseUrl: 'https://sync.example.com',
+        accessToken: 'my-token',
+        encryptionPassword: 'my-e2ee-pass',
       });
     });
 

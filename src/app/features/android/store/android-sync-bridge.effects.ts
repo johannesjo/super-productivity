@@ -19,7 +19,7 @@ import { CurrentProviderPrivateCfg } from '../../../op-log/core/types/sync.types
  * Returns true (equal) when emissions should be suppressed:
  * - Provider ID changed → false (always emit)
  * - Both non-SuperSync → true (suppress, prevents repeated clearSuperSyncCredentials calls)
- * - Both SuperSync → compare accessToken and baseUrl
+ * - Both SuperSync → compare accessToken, baseUrl and encryptKey
  */
 export const credentialConfigEqual = (
   a: CurrentProviderPrivateCfg | null,
@@ -29,7 +29,11 @@ export const credentialConfigEqual = (
   if (a?.providerId !== SyncProviderId.SuperSync) return true;
   const aCfg = a?.privateCfg as SuperSyncPrivateCfg | undefined;
   const bCfg = b?.privateCfg as SuperSyncPrivateCfg | undefined;
-  return aCfg?.accessToken === bCfg?.accessToken && aCfg?.baseUrl === bCfg?.baseUrl;
+  return (
+    aCfg?.accessToken === bCfg?.accessToken &&
+    aCfg?.baseUrl === bCfg?.baseUrl &&
+    aCfg?.encryptKey === bCfg?.encryptKey
+  );
 };
 
 const isNonNull = (
@@ -41,6 +45,8 @@ export type SuperSyncCredentialBridgeCommand =
       type: 'set';
       baseUrl: string;
       accessToken: string;
+      /** E2EE password for decrypting op payloads natively; '' clears it */
+      encryptionPassword: string;
     }
   | {
       type: 'clear';
@@ -57,6 +63,7 @@ export const getSuperSyncCredentialBridgeCommand = (
         type: 'set',
         baseUrl: privateCfg.baseUrl || SUPER_SYNC_DEFAULT_BASE_URL,
         accessToken: privateCfg.accessToken,
+        encryptionPassword: privateCfg.encryptKey || '',
       };
     }
     return { type: 'clear', reason: 'no-token' };
@@ -88,6 +95,11 @@ export class AndroidSyncBridgeEffects {
               androidInterface.setSuperSyncCredentials?.(
                 command.baseUrl,
                 command.accessToken,
+              );
+              // Optional chaining: old APKs don't have this method yet.
+              // The password itself must never be logged.
+              androidInterface.setSuperSyncEncryptionPassword?.(
+                command.encryptionPassword,
               );
             } else if (command.reason === 'no-token') {
               DroidLog.log(

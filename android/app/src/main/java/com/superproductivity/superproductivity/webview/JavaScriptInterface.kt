@@ -500,6 +500,25 @@ class JavaScriptInterface(
         }
     }
 
+    /**
+     * Mirrors the SuperSync E2EE password so background reminder sync can
+     * decrypt op payloads (encrypted end-to-end since #8670). Separate method
+     * from [setSuperSyncCredentials] so an old JS bundle paired with a new APK
+     * (and vice versa) keeps working. Empty string clears the password.
+     * NEVER log the password.
+     */
+    @Suppress("unused")
+    @JavascriptInterface
+    fun setSuperSyncEncryptionPassword(password: String) {
+        safeCall("Failed to set SuperSync encryption password") {
+            if (password.isEmpty()) {
+                BackgroundSyncCredentialStore.clearEncryptionPassword(activity)
+            } else {
+                BackgroundSyncCredentialStore.setEncryptionPassword(activity, password)
+            }
+        }
+    }
+
     @Suppress("unused")
     @JavascriptInterface
     fun openAppNotificationSettings() {
