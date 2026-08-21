@@ -33,14 +33,7 @@
 }
 
 .title {
-  min-width: 0;
   @include truncateText();
-}
-
-// note: we use .tags-container, since we don't want margins for an empty list
-:host ::ng-deep .tags-container {
-  margin-top: var(--s-quarter);
-  margin-bottom: var(--s-quarter);
 }
 
 .info {

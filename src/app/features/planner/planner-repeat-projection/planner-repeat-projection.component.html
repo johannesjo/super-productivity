@@ -9,6 +9,7 @@
       <!--   {{event.start|date:'HH:mm'}} – {{(event.start + event.duration)|date:'HH:mm'}}-->
     </div>
     <tag-list
+      class="planner-tag-list-shared"
       [isShowProjectTagAlways]="true"
       [task]="repeatCfg()"
     ></tag-list>

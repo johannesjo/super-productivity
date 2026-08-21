@@ -22,12 +22,10 @@
     }
   }
 
-  // note: we use .tags-container, since we don't want margins for an empty list
+  // v-margins come from the global .planner-tag-list-shared rules
   ::ng-deep .tags-container {
     // to match task title padding
     margin-left: 3px;
-    margin-bottom: var(--s-quarter);
-    margin-top: var(--s-quarter);
   }
 }
 
@@ -57,12 +55,6 @@
 
   @include mq(xs) {
     padding: var(--s-quarter) 0;
-  }
-}
-
-:host ::ng-deep .tag-title {
-  @include mq(xs) {
-    font-size: var(--planner-font-size-smaller) !important;
   }
 }
 

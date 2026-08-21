@@ -38,31 +38,16 @@
 
 .wrap {
   flex-grow: 1;
-  flex-shrink: 1;
   min-width: 0;
 }
 
 .title {
   font-size: var(--planner-font-size-mobile);
-  flex-shrink: 1;
-  min-width: 0;
   overflow: hidden;
   overflow-wrap: anywhere;
 
   @include mq(xs) {
     font-size: var(--planner-font-size);
-  }
-}
-
-// note: we use .tags-container, since we don't want margins for an empty list
-:host ::ng-deep .tags-container {
-  margin-top: var(--s-quarter);
-  margin-bottom: var(--s-quarter);
-}
-
-:host ::ng-deep .tag-title {
-  @include mq(xs) {
-    font-size: var(--planner-font-size-smaller) !important;
   }
 }
 
