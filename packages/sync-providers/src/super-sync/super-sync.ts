@@ -33,7 +33,7 @@ import type { SuperSyncResponseValidators } from './response-validators';
 import type { SuperSyncStorage } from './storage';
 import {
   PROVIDER_ID_SUPER_SYNC,
-  type SuperSyncDevicesResponse,
+  type SuperSyncDeviceListResponse,
   type SuperSyncPrivateCfg,
   type SuperSyncWebSocketAccess,
 } from './super-sync.model';
@@ -438,7 +438,7 @@ export class SuperSyncProvider
   // === Devices ===
 
   /** Lists the devices syncing this account, newest activity first. */
-  async getDevices(): Promise<SuperSyncDevicesResponse> {
+  async getDevices(): Promise<SuperSyncDeviceListResponse> {
     this._deps.logger.debug(`${this._logLabel}: getDevices`);
     const cfg = await this._cfgOrError();
 
@@ -464,15 +464,26 @@ export class SuperSyncProvider
   async signOutAllOtherDevices(): Promise<void> {
     this._deps.logger.normal(`${this._logLabel}: signOutAllOtherDevices`);
     const cfg = await this._cfgOrError();
+    // Read the cursor (and its key, for cleanup) before the POST: once the
+    // server bumps `tokenVersion` the old token is dead, so nothing after
+    // that point should depend on more local steps than strictly needed.
+    const lastServerSeq = await this.getLastServerSeq();
+    const oldSeqKey = await this._getServerSeqKey();
 
+    // noRetry: the endpoint is NOT idempotent. If the bump lands but the
+    // response is lost, a retry re-POSTs with the already-revoked token and
+    // deterministically 401s — worse than surfacing the original failure.
     const response = await this._fetchApi<unknown>(cfg, '/api/replace-token', {
       method: 'POST',
+      noRetry: true,
     });
     const { token } = this._deps.responseValidators.validateReplaceToken(response);
 
-    const lastServerSeq = await this.getLastServerSeq();
     await this.setPrivateCfg({ ...cfg, accessToken: token });
     await this.setLastServerSeq(lastServerSeq);
+    // Old key last: a crash anywhere above leaves at worst an orphaned
+    // entry, never a lost cursor.
+    this._deps.storage.removeLastServerSeq(oldSeqKey);
   }
 
   // === WebSocket Parameters ===
@@ -751,21 +762,26 @@ export class SuperSyncProvider
   private async _fetchApi<T>(
     cfg: SuperSyncPrivateCfg,
     path: string,
-    options: RequestInit,
+    options: RequestInit & { noRetry?: boolean },
   ): Promise<T> {
     const baseUrl = this._resolveBaseUrl(cfg);
     const url = `${baseUrl}${path}`;
     const sanitizedToken = this._sanitizeToken(cfg.accessToken);
 
     if (this.isNativePlatform) {
-      return this._doNativeFetch<T>(cfg, path, options.method || 'GET');
+      return this._doNativeFetch<T>(cfg, path, options.method || 'GET', undefined, {
+        noRetry: options.noRetry,
+      });
     }
 
     const headers = new Headers(options.headers as HeadersInit);
     headers.set('Content-Type', 'application/json');
     headers.set('Authorization', `Bearer ${sanitizedToken}`);
 
-    return this._doWebFetch<T>(url, path, headers, { method: options.method || 'GET' });
+    return this._doWebFetch<T>(url, path, headers, {
+      method: options.method || 'GET',
+      noRetry: options.noRetry,
+    });
   }
 
   /**
@@ -834,9 +850,10 @@ export class SuperSyncProvider
     url: string,
     path: string,
     headers: Headers,
-    options: { method: string; body?: BodyInit },
+    options: { method: string; body?: BodyInit; noRetry?: boolean },
   ): Promise<T> {
-    for (let attempt = 0; attempt <= SUPERSYNC_WEB_MAX_RETRIES; attempt++) {
+    const maxRetries = options.noRetry ? 0 : SUPERSYNC_WEB_MAX_RETRIES;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       const startTime = Date.now();
       const controller = new AbortController();
       const timeoutId = setTimeout(
@@ -904,14 +921,14 @@ export class SuperSyncProvider
         }
 
         const isNetworkError = this._isRetryableWebRequestError(error);
-        if (isNetworkError && attempt < SUPERSYNC_WEB_MAX_RETRIES) {
+        if (isNetworkError && attempt < maxRetries) {
           const delayMs = 1000 * (attempt + 1);
           this._deps.logger.warn(
             `${this._logLabel}: transient SuperSync request failure, retrying in ${delayMs}ms`,
             {
               path,
               attempt: attempt + 1,
-              maxRetries: SUPERSYNC_WEB_MAX_RETRIES,
+              maxRetries,
               delayMs,
               durationMs: duration,
               ...this._getSafeErrorLogMeta(error),
@@ -952,6 +969,7 @@ export class SuperSyncProvider
     path: string,
     method: string,
     requestData?: { data: string; extraHeaders?: Record<string, string> },
+    retryOpts?: { noRetry?: boolean },
   ): Promise<T> {
     const startTime = Date.now();
     const baseUrl = this._resolveBaseUrl(cfg);
@@ -978,6 +996,7 @@ export class SuperSyncProvider
           executor: this._deps.nativeHttpExecutor,
           logger: this._deps.logger,
           label: this._logLabel,
+          ...(retryOpts?.noRetry ? { maxRetries: 0 } : {}),
         },
       );
 

@@ -294,14 +294,20 @@ describe('response-validators', () => {
   });
 
   describe('validateReplaceTokenResponse', () => {
-    const response = { token: 'fresh-token', user: { id: 1, email: 'a@b.c' } };
+    const response = { token: 'fresh-token' };
 
     it('should accept a valid response', () => {
       expect(() => validateReplaceTokenResponse(response)).not.toThrow();
     });
 
+    it('should tolerate fields the client does not consume (e.g. user)', () => {
+      expect(() =>
+        validateReplaceTokenResponse({ ...response, user: { id: 1, email: 'a@b.c' } }),
+      ).not.toThrow();
+    });
+
     it('should throw if the token is missing', () => {
-      expect(() => validateReplaceTokenResponse({ user: response.user })).toThrow();
+      expect(() => validateReplaceTokenResponse({ user: { id: 1 } })).toThrow();
     });
 
     it('should throw if the token is empty', () => {

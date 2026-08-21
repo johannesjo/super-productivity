@@ -19,7 +19,16 @@ import { MIN_CLIENT_ID_LENGTH } from '../../op-log/core/operation-log.const';
  * same split `util/get-app-version-str.ts` uses for `distChannelSuffix()`.
  */
 
-export type PlatformCode = 'B' | 'E' | 'A' | 'I';
+/**
+ * Every clientId prefix this app has ever minted. Single source for the union
+ * type and the decoder below, so a new code cannot drift between them: adding
+ * one here widens `PlatformCode`, which is a compile error at every exhaustive
+ * consumer (e.g. the `Record<PlatformCode, …>` icon map), and the decoder
+ * accepts it automatically.
+ */
+const PLATFORM_CODES = ['B', 'E', 'A', 'I'] as const;
+
+export type PlatformCode = (typeof PLATFORM_CODES)[number];
 
 interface ClientPlatform {
   isElectron: boolean;
@@ -56,17 +65,14 @@ export const getPlatformCode = (platform: ClientPlatform): PlatformCode => {
  *
  * The inverse of `getPlatformCode`, kept in the same file for the reason its
  * header gives: when the two halves of an id's contract live apart, one drifts.
- * Adding a code above without handling it here is a compile error at every
- * exhaustive consumer.
  *
  * Works for legacy PFAPI ids too — those were `{platform}_{Date.now()}`, so the
  * prefix is unchanged.
  */
 export const getClientIdPlatformCode = (clientId: string): PlatformCode | null => {
   const code = clientId.slice(0, 1);
-  return clientId[1] === '_' &&
-    (code === 'B' || code === 'E' || code === 'A' || code === 'I')
-    ? code
+  return clientId[1] === '_' && (PLATFORM_CODES as readonly string[]).includes(code)
+    ? (code as PlatformCode)
     : null;
 };
 

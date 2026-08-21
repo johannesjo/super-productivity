@@ -408,6 +408,28 @@ describe('WebSocketConnectionService', () => {
     });
   });
 
+  describe('closeForUser', () => {
+    it('should close every socket of that user only, with the token-revoked code', () => {
+      const wsA = createMockWs();
+      const wsB = createMockWs();
+      const wsOther = createMockWs();
+      service.addConnection(1, 'client-a', wsA as any);
+      service.addConnection(1, 'client-b', wsB as any);
+      service.addConnection(2, 'client-c', wsOther as any);
+
+      service.closeForUser(1);
+
+      expect(wsA.close).toHaveBeenCalledWith(4003, 'Token revoked');
+      expect(wsB.close).toHaveBeenCalledWith(4003, 'Token revoked');
+      expect(wsOther.close).not.toHaveBeenCalled();
+      expect(service.getConnectionCount()).toBe(1);
+    });
+
+    it('should no-op for a user with no connections', () => {
+      expect(() => service.closeForUser(99)).not.toThrow();
+    });
+  });
+
   describe('notifyNewOps', () => {
     it('should send to other clients and exclude sender', () => {
       const wsA = createMockWs();

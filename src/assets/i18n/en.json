@@ -1348,7 +1348,7 @@
       "D_DEVICES": {
         "BTN_SIGN_OUT_OTHERS": "Sign out other devices",
         "ERROR_LOADING": "Failed to load connected devices",
-        "ERROR_SIGN_OUT": "Failed to sign out other devices",
+        "ERROR_SIGN_OUT": "Signing out other devices failed. If the connection dropped mid-request it may still have taken effect — then this device also needs a newly issued token.",
         "LAST_SEEN": "Last sync: {{date}}",
         "NO_DEVICES": "No devices have synced with this account yet.",
         "PLATFORM_ANDROID": "Android",

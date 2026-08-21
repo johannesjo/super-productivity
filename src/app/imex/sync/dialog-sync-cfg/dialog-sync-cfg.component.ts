@@ -908,10 +908,23 @@ export class DialogSyncCfgComponent implements AfterViewInit {
   }
 
   showDevices(): void {
-    this._matDialog.open(DialogSyncDevicesComponent, {
-      width: '500px',
-      maxWidth: '90vw',
-    });
+    this._matDialog
+      .open(DialogSyncDevicesComponent, {
+        width: '500px',
+        maxWidth: '90vw',
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((didSignOut) => {
+        // A sign-out stored a fresh access token, but this dialog's Formly
+        // model was seeded with the now-revoked one and Save merges non-empty
+        // form values over saved cfg (`_updatePrivateConfig`) — a Save here
+        // would silently write the dead token back. End the settings session
+        // instead of re-seeding a live Formly model.
+        if (didSignOut === true) {
+          this._matDialogRef.close();
+        }
+      });
   }
 }
 

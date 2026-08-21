@@ -31,13 +31,9 @@ export class SuperSyncDevicesService {
   private _clientIdService = inject(ClientIdService);
 
   async getDevices(): Promise<SyncDeviceListEntry[]> {
-    const provider = this._providerManager.getActiveProvider();
-    if (!provider || provider.id !== SyncProviderId.SuperSync) {
-      throw new Error('Super Sync is not the active sync provider');
-    }
-
+    const provider = this._superSyncProviderOrError();
     const [{ devices }, ownClientId] = await Promise.all([
-      (provider as SuperSyncProvider).getDevices(),
+      provider.getDevices(),
       this._clientIdService.loadClientId(),
     ]);
 
@@ -55,10 +51,14 @@ export class SuperSyncDevicesService {
    * while signed out are kept and upload after re-authenticating.
    */
   async signOutAllOtherDevices(): Promise<void> {
+    await this._superSyncProviderOrError().signOutAllOtherDevices();
+  }
+
+  private _superSyncProviderOrError(): SuperSyncProvider {
     const provider = this._providerManager.getActiveProvider();
     if (!provider || provider.id !== SyncProviderId.SuperSync) {
       throw new Error('Super Sync is not the active sync provider');
     }
-    await (provider as SuperSyncProvider).signOutAllOtherDevices();
+    return provider as SuperSyncProvider;
   }
 }

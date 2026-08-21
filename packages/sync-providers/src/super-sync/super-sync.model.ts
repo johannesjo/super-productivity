@@ -48,21 +48,24 @@ export interface SuperSyncDeviceInfo {
   lastSeenAt: number;
 }
 
-export interface SuperSyncDevicesResponse {
+/**
+ * Named differently from shared-schema's `SuperSyncDevicesResponse` on
+ * purpose: this package cannot import shared-schema (validator-port
+ * boundary), and identical twin names across the two packages invite
+ * silently importing the wrong one.
+ */
+export interface SuperSyncDeviceListResponse {
   devices: SuperSyncDeviceInfo[];
 }
 
 /**
- * Response of `POST /api/replace-token`: a fresh JWT for the calling client.
- * Issuing it bumps the account-wide `tokenVersion`, which signs out every
- * other device (they get 401s on their next sync).
+ * Validated result of `POST /api/replace-token`: a fresh JWT for the calling
+ * client. Issuing it bumps the account-wide `tokenVersion`, which signs out
+ * every other device (they get 401s on their next sync). Deliberately not
+ * named like shared-schema's response type — see `SuperSyncDeviceListResponse`.
  */
-export interface SuperSyncReplaceTokenResponse {
+export interface SuperSyncReplaceTokenResult {
   token: string;
-  user: {
-    id: number;
-    email: string;
-  };
 }
 
 /**

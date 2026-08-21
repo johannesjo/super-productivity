@@ -33,8 +33,8 @@ import {
   SUPER_SYNC_DEFAULT_BASE_URL,
   SuperSyncProvider,
   type SuperSyncDeps,
-  type SuperSyncDevicesResponse,
-  type SuperSyncReplaceTokenResponse,
+  type SuperSyncDeviceListResponse,
+  type SuperSyncReplaceTokenResult,
   type SuperSyncPrivateCfg,
   type SuperSyncResponseValidators,
   type SuperSyncStorage,
@@ -127,8 +127,8 @@ const createValidatorsPassthrough = (): SuperSyncResponseValidators => ({
   validateRestorePoints: (data) => data as RestorePointsResponse,
   validateRestoreSnapshot: (data) => data as RestoreSnapshotResponse,
   validateDeleteAllData: (data) => data as { success: boolean },
-  validateDevices: (data) => data as SuperSyncDevicesResponse,
-  validateReplaceToken: (data) => data as SuperSyncReplaceTokenResponse,
+  validateDevices: (data) => data as SuperSyncDeviceListResponse,
+  validateReplaceToken: (data) => data as SuperSyncReplaceTokenResult,
 });
 
 const createLoggerSpy = (): {
@@ -721,10 +721,7 @@ describe('SuperSyncProvider', () => {
   });
 
   describe('signOutAllOtherDevices', () => {
-    const replaceTokenResponse = {
-      token: 'fresh-token',
-      user: { id: 1, email: 'user@example.com' },
-    };
+    const replaceTokenResponse = { token: 'fresh-token' };
 
     it('posts to /api/replace-token and stores the fresh token', async () => {
       const { provider, cfgStore, fetchMock } = buildProvider();
@@ -762,6 +759,24 @@ describe('SuperSyncProvider', () => {
       // Same account, same op stream — but the key hashes the token, so without
       // the carry-over the swap would reset the cursor and force a full re-download.
       expect(newKey).not.toBe(oldKey);
+      // The old token's entry is cleaned up, and only after the new one exists.
+      expect(storage.removeLastServerSeq).toHaveBeenCalledWith(oldKey);
+      expect(storage.removeLastServerSeq.mock.invocationCallOrder[0]).toBeGreaterThan(
+        storage.setLastServerSeq.mock.invocationCallOrder[0],
+      );
+    });
+
+    it('does not retry a transient failure — replace-token is not idempotent', async () => {
+      const { provider, cfgStore, fetchMock, webRequestRetryDelay } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      // If the bump landed server-side but the response was lost, a retry
+      // would re-POST with the already-revoked token and 401.
+      fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      await expect(provider.signOutAllOtherDevices()).rejects.toThrow();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(webRequestRetryDelay).not.toHaveBeenCalled();
+      expect(cfgStore.setComplete).not.toHaveBeenCalled();
     });
 
     it('keeps the stored config untouched when the response is invalid', async () => {

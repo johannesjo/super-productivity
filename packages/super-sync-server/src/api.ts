@@ -24,6 +24,7 @@ import { authenticate, getAuthUser } from './middleware';
 import { Logger } from './logger';
 import { prisma } from './db';
 import { authCache } from './auth-cache';
+import { getWsConnectionService } from './sync/services/websocket-connection.service';
 
 // Zod Schemas
 const VerifyEmailSchema = z.object({
@@ -195,6 +196,10 @@ export const apiRoutes = async (
       try {
         const user = getAuthUser(req);
         const result = await replaceToken(user.userId, user.email);
+        // Sockets authenticate only at upgrade, so revoked tokens would keep
+        // receiving op notifications through already-open connections — close
+        // them all; the caller reconnects with its fresh token.
+        getWsConnectionService().closeForUser(user.userId);
         return reply.send(result);
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : 'Unknown error';

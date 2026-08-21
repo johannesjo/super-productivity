@@ -16,6 +16,8 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { SnackService } from '../../../core/snack/snack.service';
+import { SyncLog } from '../../../core/log';
+import { SyncWrapperService } from '../sync-wrapper.service';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
@@ -68,6 +70,7 @@ export class DialogSyncDevicesComponent implements OnInit {
   private _matDialog = inject(MatDialog);
   private _matDialogRef = inject<MatDialogRef<DialogSyncDevicesComponent>>(MatDialogRef);
   private _snackService = inject(SnackService);
+  private _syncWrapperService = inject(SyncWrapperService);
 
   T = T;
 
@@ -87,7 +90,8 @@ export class DialogSyncDevicesComponent implements OnInit {
           ...(device.platform ? PLATFORMS[device.platform] : UNKNOWN_PLATFORM),
         })),
       );
-    } catch {
+    } catch (e) {
+      SyncLog.err('DialogSyncDevices: loading device list failed', e);
       this.error.set(T.F.SYNC.D_DEVICES.ERROR_LOADING);
     } finally {
       this.isLoading.set(false);
@@ -114,13 +118,21 @@ export class DialogSyncDevicesComponent implements OnInit {
 
     this.isSigningOut.set(true);
     try {
-      await this._devicesService.signOutAllOtherDevices();
+      // Fenced like the other credential mutations (password change,
+      // encryption toggle): a sync running while the token and cursor key
+      // swap underneath it could 401 or clobber the carried-over cursor.
+      await this._syncWrapperService.runWithSyncBlocked(() =>
+        this._devicesService.signOutAllOtherDevices(),
+      );
       this._snackService.open({
         type: 'SUCCESS',
         msg: T.F.SYNC.D_DEVICES.SIGN_OUT_SUCCESS,
       });
-      this._matDialogRef.close();
-    } catch {
+      // `true` tells the settings dialog underneath that the stored token
+      // changed — its Formly model still holds the revoked one.
+      this._matDialogRef.close(true);
+    } catch (e) {
+      SyncLog.err('DialogSyncDevices: sign-out failed', e);
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.SYNC.D_DEVICES.ERROR_SIGN_OUT,

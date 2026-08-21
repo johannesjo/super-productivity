@@ -49,7 +49,7 @@
   mat-dialog-actions
   align="end"
 >
-  @if (!isLoading()) {
+  @if (!isLoading() && !error()) {
     <button
       class="sign-out-btn"
       mat-button

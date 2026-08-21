@@ -230,15 +230,12 @@ export const SuperSyncDevicesResponseSchema = z
  * Response of `POST /api/replace-token`: a fresh JWT for the calling client.
  * Issuing it bumps the account's `tokenVersion`, signing out every other device.
  */
+// Only `token` is validated: it is the only field the client consumes, and
+// requiring more would turn a benign server-side response change into a
+// hard sign-out failure.
 export const SuperSyncReplaceTokenResponseSchema = z
   .object({
     token: z.string().min(1),
-    user: z
-      .object({
-        id: z.number(),
-        email: z.string(),
-      })
-      .passthrough(),
   })
   .passthrough();
 

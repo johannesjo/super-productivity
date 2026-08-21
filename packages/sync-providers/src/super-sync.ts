@@ -3,9 +3,9 @@ export {
   SUPER_SYNC_DEFAULT_BASE_URL,
   isSuperSyncWebSocketAccess,
   type SuperSyncDeviceInfo,
-  type SuperSyncDevicesResponse,
+  type SuperSyncDeviceListResponse,
   type SuperSyncPrivateCfg,
-  type SuperSyncReplaceTokenResponse,
+  type SuperSyncReplaceTokenResult,
   type SuperSyncWebSocketAccess,
 } from './super-sync/super-sync.model';
 export { SuperSyncProvider, type SuperSyncDeps } from './super-sync/super-sync';

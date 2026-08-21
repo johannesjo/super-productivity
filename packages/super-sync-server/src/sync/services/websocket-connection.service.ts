@@ -50,6 +50,8 @@ export class WebSocketConnectionService {
   private static readonly REPLACED_CLOSE_CODE = 4009;
   /** Close code sent to a challenger socket refused during the reconnect cooldown */
   private static readonly RECONNECT_COOLDOWN_CLOSE_CODE = 4008;
+  /** Close code sent to every socket of a user whose tokens were just revoked */
+  private static readonly TOKEN_REVOKED_CLOSE_CODE = 4003;
   /**
    * Sliding-window cooldown. While a still-OPEN incumbent's `cooldownUntil` is
    * in the future, a new socket from the same clientId is refused (the
@@ -360,6 +362,27 @@ export class WebSocketConnectionService {
   }
 
   /** Close all connections gracefully */
+  /**
+   * Closes every live socket of one user. Called on token revocation
+   * (`POST /api/replace-token`): sockets are authenticated only at upgrade
+   * and kept alive by the heartbeat, so without this a revoked device would
+   * keep receiving op notifications indefinitely. The revoking device's own
+   * socket closes too and reconnects with its fresh token.
+   */
+  closeForUser(userId: number): void {
+    const userSet = this.connections.get(userId);
+    if (!userSet) {
+      return;
+    }
+    // removeConnection mutates the set — iterate a copy.
+    for (const client of [...userSet]) {
+      this.removeConnection(userId, client, {
+        code: WebSocketConnectionService.TOKEN_REVOKED_CLOSE_CODE,
+        reason: 'Token revoked',
+      });
+    }
+  }
+
   closeAll(): void {
     for (const [, userSet] of this.connections) {
       for (const client of userSet) {
