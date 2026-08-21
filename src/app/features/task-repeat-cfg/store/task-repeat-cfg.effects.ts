@@ -57,6 +57,9 @@ const SCHEDULE_AFFECTING_FIELDS: (keyof TaskRepeatCfgCopy)[] = [
   'friday',
   'saturday',
   'sunday',
+  'monthlyWeekOfMonth',
+  'monthlyWeekday',
+  'monthlyLastDay',
   'isPaused',
 ];
 
