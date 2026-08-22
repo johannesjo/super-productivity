@@ -590,28 +590,35 @@ const ACTION_HANDLERS: Record<string, Handler> = {
     return handleTaskRemoval(state, [taskId]);
   },
   [moveTaskUpInTodayList.type]: (state, action) => {
-    const { taskId, workContextType, workContextId, doneTaskIds } = action as ReturnType<
-      typeof moveTaskUpInTodayList
-    >;
-    return handleSectionTaskReorder(
-      state,
+    const {
+      taskId,
       workContextType,
       workContextId,
-      taskId,
-      (taskIds) => arrayMoveLeftUntil(taskIds, taskId, (id) => !doneTaskIds.includes(id)),
-    );
-  },
-  [moveTaskDownInTodayList.type]: (state, action) => {
-    const { taskId, workContextType, workContextId, doneTaskIds } = action as ReturnType<
-      typeof moveTaskDownInTodayList
-    >;
+      doneTaskIds: undoneTaskIds,
+    } = action as ReturnType<typeof moveTaskUpInTodayList>;
     return handleSectionTaskReorder(
       state,
       workContextType,
       workContextId,
       taskId,
       (taskIds) =>
-        arrayMoveRightUntil(taskIds, taskId, (id) => !doneTaskIds.includes(id)),
+        arrayMoveLeftUntil(taskIds, taskId, (id) => !undoneTaskIds.includes(id)),
+    );
+  },
+  [moveTaskDownInTodayList.type]: (state, action) => {
+    const {
+      taskId,
+      workContextType,
+      workContextId,
+      doneTaskIds: undoneTaskIds,
+    } = action as ReturnType<typeof moveTaskDownInTodayList>;
+    return handleSectionTaskReorder(
+      state,
+      workContextType,
+      workContextId,
+      taskId,
+      (taskIds) =>
+        arrayMoveRightUntil(taskIds, taskId, (id) => !undoneTaskIds.includes(id)),
     );
   },
   [moveTaskToTopInTodayList.type]: (state, action) => {

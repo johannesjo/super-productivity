@@ -1206,6 +1206,30 @@ describe('GlobalConfigReducer', () => {
         const result = selectTimelineWorkStartEndHours.projector(state);
         expect(result).toBeNull();
       });
+
+      // Same corrupt-data class as the #5358 guards: an imported/synced
+      // snapshot can carry invalid clock strings; without the guard the NaN
+      // hours auto-place the Start/End markers at an arbitrary grid position.
+      // One case per side: `||` short-circuits, so a combined case would still
+      // pass with either half of the guard deleted.
+      [
+        { workStart: '', workEnd: '17:00' },
+        { workStart: '9:00', workEnd: '25:99' },
+      ].forEach(({ workStart, workEnd }) => {
+        it(`should return null instead of NaN hours for ${workStart || "''"}-${workEnd}`, () => {
+          const state: GlobalConfigState = {
+            ...initialGlobalConfigState,
+            schedule: {
+              ...initialGlobalConfigState.schedule,
+              isWorkStartEndEnabled: true,
+              workStart,
+              workEnd,
+            },
+          };
+          const result = selectTimelineWorkStartEndHours.projector(state);
+          expect(result).toBeNull();
+        });
+      });
     });
   });
 });
