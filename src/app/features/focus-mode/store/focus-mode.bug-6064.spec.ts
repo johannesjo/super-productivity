@@ -134,6 +134,11 @@ describe('FocusMode Bug #6064: Without break timer reset on break start', () => 
 
   afterEach(() => {
     actions$.complete();
+    // overrideSelector mutates the module-level selector singleton, so an
+    // un-reset override leaks into every spec that runs later. Jasmine
+    // randomizes spec order (src/karma.conf.js sets no `random: false`), which
+    // is why the leak only surfaced in the full suite and never in isolation.
+    store.resetSelectors();
   });
 
   describe('resetBreakTimerOnBreakStart$ effect', () => {
