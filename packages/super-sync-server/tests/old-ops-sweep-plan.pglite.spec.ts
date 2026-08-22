@@ -13,16 +13,36 @@ import { explainGeneric } from './explain-plan.helper';
  * of rows. So the cost is driven by MATCH DENSITY, not by `take`, and lowering
  * the batch size cannot help the sparse case at all.
  *
- * This spec measures both ends of that, because the answer decides the fix:
- *   - dense  — every row below the boundary is deletable. `LIMIT` bites.
- *   - sparse — the whole history is inside the 45-day retention window, so
- *     nothing is deletable. `LIMIT` never fills and the scan runs to the end of
- *     the user's slice.
+ * This spec measures three shapes, because the answer decides the fix:
+ *   - dense         — every row below the boundary is deletable. `LIMIT` bites.
+ *   - sparse        — the whole history is inside the 45-day retention window,
+ *     so nothing is deletable. `LIMIT` never fills and the scan runs to the end
+ *     of the user's slice.
+ *   - staleBoundary — the mirror image: the whole history is OUTSIDE retention,
+ *     but the only causal full-state op is an ancient import, so `protectedFromSeq`
+ *     is tiny and almost nothing is deletable anyway.
  *
- * The sparse expectation below pins a DEFECT, not a desired property. It is here
- * so that a fix which bounds SCANNED rows (a `server_seq` window rather than a
- * row limit) has something to flip. If you are that fix: change this assertion
- * and say so in the commit.
+ * The last two exist to stop a plausible non-fix. `ORDER BY server_seq` pins the
+ * planner to the (user_id, server_seq) btree, where `received_at < cutoff` can
+ * only be a heap filter — so the natural-looking repair is to order by
+ * `received_at` instead and let the existing (user_id, received_at) index bound
+ * the scan. Measured on these fixtures, that swaps which cohort suffers rather
+ * than fixing anything:
+ *
+ *              server_seq order          received_at order
+ *   sparse     20000 filtered / 223 blk  0 filtered /   2 blk
+ *   stale      0 filtered /   3 blk      19996 filtered / 247 blk
+ *
+ * Whichever column the sort picks becomes the index's range bound and the OTHER
+ * predicate degrades to a heap filter, so exactly one cohort always runs away.
+ * A real fix must bound the SCANNED RANGE itself — a `server_seq` window
+ * (`serverSeq >= lo AND serverSeq < min(lo + W, protectedFromSeq)`), which is
+ * bounded regardless of match density because the range is explicit rather than
+ * discovered. The sparse expectation below pins a DEFECT, not a desired
+ * property — a real fix flips it. The staleBoundary expectation is the opposite:
+ * a GUARD on behaviour that is already correct, so that a "fix" which merely
+ * moves the cost from one cohort to the other fails here instead of looking
+ * like progress.
  *
  * MEASURE WITH `force_generic_plan`, NEVER WITH LITERALS — the reasoning lives
  * with the harness in explain-plan.helper.ts. Prisma sends parameterised
@@ -81,6 +101,9 @@ const OPS_PER_USER = 20_000;
 const OTHER_USERS = 8;
 const DENSE_USER = 1;
 const SPARSE_USER = 2;
+const STALE_BOUNDARY_USER = 3;
+/** An ancient SYNC_IMPORT is this user's only causal full-state op. */
+const STALE_BOUNDARY_SEQ = 5;
 /** Production default, `OLD_OPS_CLEANUP_DELETE_BATCH_SIZE`. */
 const BATCH_LIMIT = 5_000;
 const NOW = 1_760_000_000_000;
@@ -126,8 +149,13 @@ describe('old-ops sweep batch selection — what LIMIT actually bounds', () => {
     // still visits them — they have a snapshot and a causal boundary — and finds
     // nothing to delete.
     await insert(SPARSE_USER, OPS_PER_USER, (i) => CUTOFF + i);
+    // Stale boundary: every op predates the cutoff, so `received_at` bounds
+    // nothing — but `protectedFromSeq` is ancient, so almost nothing may be
+    // deleted. The exact inverse of `sparse`, and the reason an ordering swap
+    // is not a fix.
+    await insert(STALE_BOUNDARY_USER, OPS_PER_USER, (i) => CUTOFF - OPS_PER_USER + i - 1);
     // Other tenants, so the (user_id, ...) slices are not the whole table.
-    for (let u = 3; u < 3 + OTHER_USERS; u++) {
+    for (let u = 4; u < 4 + OTHER_USERS; u++) {
       await insert(u, 2_000, (i) => CUTOFF - i);
     }
     await db.exec('ANALYZE operations');
@@ -163,15 +191,26 @@ describe('old-ops sweep batch selection — what LIMIT actually bounds', () => {
     // Zero rows returned, yet the scan walked the user's entire slice: `take`
     // cannot stop a scan that never accumulates a match. This is why lowering
     // OLD_OPS_CLEANUP_DELETE_BATCH_SIZE is not a fix on its own.
-    //
-    // The bound must come from the scan itself. `ORDER BY server_seq` pins the
-    // planner to the (user_id, server_seq) btree, where `received_at < cutoff`
-    // can only be a heap filter. Ordering by the column that carries the range
-    // predicate instead lets the existing (user_id, received_at) index bound the
-    // scan: measured on this fixture, the case below drops from 20k rows
-    // filtered / 225 blocks to 0 / 2. Confirm on real PG16 before shipping that
-    // — PGlite is PG18 and the planners disagree about this query class.
     expect(measured.rowsTouched).toBe(0);
     expect(measured.rowsFiltered).toBeGreaterThan(BATCH_LIMIT * 2);
+  });
+
+  it('GUARD: stays bounded when the replay boundary is ancient', async () => {
+    const measured = await explainGeneric(db, DOOMED_OPS_SQL, [
+      STALE_BOUNDARY_USER,
+      STALE_BOUNDARY_SEQ,
+      CUTOFF,
+      BATCH_LIMIT,
+    ]);
+
+    // The mirror of the case above, and the one an `ORDER BY received_at` fix
+    // would make worse rather than better: here `received_at < cutoff` matches
+    // everything and `server_seq < protectedFromSeq` is what rejects the rows.
+    // Under the current ordering this case is cheap; do not "fix" the sparse
+    // case by moving the cost here. Both must be bounded, which takes an
+    // explicit scanned range — see the header.
+    // x2: rowsTouched sums the Limit and Index Scan nodes, as in the dense case.
+    expect(measured.rowsTouched).toBeLessThanOrEqual(STALE_BOUNDARY_SEQ * 2);
+    expect(measured.rowsFiltered).toBe(0);
   });
 });
