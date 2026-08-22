@@ -3423,6 +3423,195 @@ describe('SyncService', () => {
       expect(testState.operations.size).toBe(totalOps + 1 - 50);
     });
 
+    it('skips a user whose batch query the database cancels and sweeps the rest', async () => {
+      // #9692: a PostgreSQL statement_timeout (57014) on ONE account's batch
+      // selection aborted the whole daily sweep, so cleanup was off fleet-wide
+      // and both summary warnings died with the throw.
+      const service = getSyncService();
+      const user2Id = 2;
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      testState.users.set(user2Id, {
+        id: user2Id,
+        email: 'test2@test.com',
+        storageQuotaBytes: BigInt(100 * 1024 * 1024),
+        storageUsedBytes: BigInt(0),
+      });
+
+      const opsPerUser = 3;
+      for (const uid of [userId, user2Id]) {
+        for (let i = 1; i <= opsPerUser; i++) {
+          testState.operations.set(`u${uid}-op-${i}`, {
+            id: `u${uid}-op-${i}`,
+            userId: uid,
+            clientId,
+            serverSeq: i,
+            actionType: 'ADD',
+            opType: 'CRT',
+            entityType: 'TASK',
+            entityId: `t${i}`,
+            payload: {},
+            vectorClock: {},
+            schemaVersion: 1,
+            clientTimestamp: BigInt(Date.now()),
+            receivedAt: BigInt(cutoffTime - 1),
+            isPayloadEncrypted: false,
+            syncImportReason: null,
+          });
+        }
+        seedFullStateOp(uid, opsPerUser + 1, BigInt(cutoffTime - 1));
+        testState.userSyncStates.set(uid, {
+          userId: uid,
+          lastSeq: opsPerUser + 1,
+          lastSnapshotSeq: opsPerUser + 1,
+          snapshotAt: BigInt(Date.now() - (uid === userId ? 1000 : 0)),
+        });
+      }
+
+      // Only the batch selection carries `receivedAt`; the boundary lookups are
+      // findFirst. Cancel it for user 1 exactly as Postgres does on timeout.
+      const originalFindMany = prisma.operation.findMany;
+      const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
+      (prisma.operation as any).findMany = vi.fn(async (args: any) => {
+        if (args?.where?.userId === userId && args?.where?.receivedAt) {
+          throw new Prisma.PrismaClientUnknownRequestError(
+            'Error occurred during query execution: canceling statement due to statement timeout',
+            { clientVersion: '5.22.0' },
+          );
+        }
+        return (originalFindMany as any)(args);
+      });
+
+      try {
+        const { totalDeleted, affectedUserIds, failedUserIds } =
+          await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+        expect(failedUserIds).toEqual([userId]);
+        expect(affectedUserIds).toEqual([user2Id]);
+        expect(totalDeleted).toBe(opsPerUser);
+        // The cancelled user keeps its history; the rest of the fleet is swept.
+        expect(testState.operations.has(`u${userId}-op-1`)).toBe(true);
+        expect(testState.operations.has(`u${user2Id}-op-1`)).toBe(false);
+      } finally {
+        (prisma.operation as any).findMany = originalFindMany;
+        warnSpy.mockRestore();
+      }
+    });
+
+    it('aborts the sweep on an engine panic instead of skipping the user', async () => {
+      // The per-user catch is a one-entry allowlist on purpose: a panicked query
+      // engine leaves the client in an undefined state, so continuing to issue
+      // per-user queries after it is not "one user failed".
+      const service = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= 3; i++) {
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+        });
+      }
+      seedFullStateOp(userId, 4, BigInt(cutoffTime - 1));
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        lastSnapshotSeq: 4,
+        snapshotAt: BigInt(Date.now()),
+      });
+
+      const originalFindMany = prisma.operation.findMany;
+      (prisma.operation as any).findMany = vi.fn(async (args: any) => {
+        if (args?.where?.receivedAt) {
+          throw new Prisma.PrismaClientRustPanicError('engine panic', '5.22.0');
+        }
+        return (originalFindMany as any)(args);
+      });
+
+      try {
+        await expect(service.deleteOldSyncedOpsForAllUsers(cutoffTime)).rejects.toThrow(
+          'engine panic',
+        );
+      } finally {
+        (prisma.operation as any).findMany = originalFindMany;
+      }
+    });
+
+    it('caps how much of the per-run budget a single user can consume', async () => {
+      // Without a per-user cap the drain loop runs until the GLOBAL budget is
+      // gone, and `orderBy: snapshotAt asc` puts the largest (lapsed) histories
+      // first — so the head of the list starves everyone behind it for months.
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_USER_PER_RUN = '100';
+      const user2Id = 2;
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      testState.users.set(user2Id, {
+        id: user2Id,
+        email: 'test2@test.com',
+        storageQuotaBytes: BigInt(100 * 1024 * 1024),
+        storageUsedBytes: BigInt(0),
+      });
+
+      const opsPerUser = 200;
+      for (const uid of [userId, user2Id]) {
+        for (let i = 1; i <= opsPerUser; i++) {
+          testState.operations.set(`u${uid}-op-${i}`, {
+            id: `u${uid}-op-${i}`,
+            userId: uid,
+            clientId,
+            serverSeq: i,
+            actionType: 'ADD',
+            opType: 'CRT',
+            entityType: 'TASK',
+            entityId: `t${i}`,
+            payload: {},
+            vectorClock: {},
+            schemaVersion: 1,
+            clientTimestamp: BigInt(Date.now()),
+            receivedAt: BigInt(cutoffTime - 1),
+            isPayloadEncrypted: false,
+            syncImportReason: null,
+          });
+        }
+        seedFullStateOp(uid, opsPerUser + 1, BigInt(cutoffTime - 1));
+        testState.userSyncStates.set(uid, {
+          userId: uid,
+          lastSeq: opsPerUser + 1,
+          lastSnapshotSeq: opsPerUser + 1,
+          snapshotAt: BigInt(Date.now() - (uid === userId ? 1000 : 0)),
+        });
+      }
+
+      try {
+        const { totalDeleted, affectedUserIds } =
+          await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+        // Uncapped this would be 200 + 50; capped both users get serviced.
+        expect(totalDeleted).toBe(200);
+        expect(affectedUserIds).toEqual([userId, user2Id]);
+        expect(testState.operations.size).toBe(2 * (opsPerUser + 1 - 100));
+      } finally {
+        delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+        delete process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN;
+        delete process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_USER_PER_RUN;
+      }
+    });
+
     it('shares the per-run budget across users; tail users wait for next pass', async () => {
       const service = getSyncService();
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';

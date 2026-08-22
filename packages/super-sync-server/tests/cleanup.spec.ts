@@ -17,6 +17,7 @@ const mockSyncService = {
   deleteOldSyncedOpsForAllUsers: vi.fn().mockResolvedValue({
     totalDeleted: 0,
     affectedUserIds: [],
+    failedUserIds: [],
   }),
   deleteStaleDevices: vi.fn().mockResolvedValue(0),
   cleanupExpiredRateLimitCounters: vi.fn().mockReturnValue(0),
@@ -104,6 +105,7 @@ describe('Cleanup Jobs', () => {
       mockSyncService.deleteOldSyncedOpsForAllUsers.mockResolvedValueOnce({
         totalDeleted: 100,
         affectedUserIds: [1, 2, 3],
+        failedUserIds: [],
       });
 
       startCleanupJobs();
@@ -123,6 +125,7 @@ describe('Cleanup Jobs', () => {
       mockSyncService.deleteOldSyncedOpsForAllUsers.mockResolvedValueOnce({
         totalDeleted: totalUsers,
         affectedUserIds: userIds,
+        failedUserIds: [],
       });
 
       startCleanupJobs();
@@ -147,6 +150,7 @@ describe('Cleanup Jobs', () => {
       mockSyncService.deleteOldSyncedOpsForAllUsers.mockResolvedValueOnce({
         totalDeleted: 3,
         affectedUserIds: [10, 20, 30],
+        failedUserIds: [],
       });
 
       startCleanupJobs();

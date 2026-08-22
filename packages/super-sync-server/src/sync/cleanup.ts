@@ -23,13 +23,15 @@ const runDailyCleanup = async (): Promise<void> => {
 
   // 1. Delete old operations (covered by snapshots)
   try {
-    const { totalDeleted, affectedUserIds } =
+    const { totalDeleted, affectedUserIds, failedUserIds } =
       await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
-    if (totalDeleted > 0) {
-      Logger.info(
-        `Cleanup [old-ops]: removed ${totalDeleted} entries (affected ${affectedUserIds.length} users)`,
-      );
-    }
+    // Logged unconditionally. A sweep that removes nothing for anyone is exactly
+    // the state #9692 left the fleet in, and the old `if (totalDeleted > 0)`
+    // guard made that indistinguishable from "nothing was due".
+    Logger.info(
+      `Cleanup [old-ops]: removed ${totalDeleted} entries ` +
+        `(affected ${affectedUserIds.length} users, ${failedUserIds.length} failed)`,
+    );
     // Storage counter is maintained incrementally on uploads. Doing one full
     // pg_column_size scan per affected user inside this loop was a DoS — but
     // skipping reconcile entirely lets counters drift stale-high forever, so
