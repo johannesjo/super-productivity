@@ -36,6 +36,7 @@ export const moveTaskUpInTodayList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /** Wire-frozen name: carries the NOT-done ids. See the file header. */
     doneTaskIds: string[];
     workContextType: WorkContextType;
   }) => ({
@@ -54,6 +55,7 @@ export const moveTaskDownInTodayList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /** Wire-frozen name: carries the NOT-done ids. See the file header. */
     doneTaskIds: string[];
     workContextType: WorkContextType;
   }) => ({
@@ -72,6 +74,7 @@ export const moveTaskToTopInTodayList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /** Wire-frozen name: carries the NOT-done ids. See the file header. */
     doneTaskIds: string[];
     workContextType: WorkContextType;
   }) => ({
@@ -90,6 +93,7 @@ export const moveTaskToBottomInTodayList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /** Wire-frozen name: carries the NOT-done ids. See the file header. */
     doneTaskIds: string[];
     workContextType: WorkContextType;
   }) => ({

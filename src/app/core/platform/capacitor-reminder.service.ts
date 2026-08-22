@@ -360,12 +360,9 @@ export class CapacitorReminderService {
     // denial must not re-prompt for the rest of the session. Callers that
     // arrive while the OS dialog is still open share the pending promise —
     // their notifications were suppressed too and need the re-post signal.
-    this._backgroundPermissionRequest ??= this._requestAndDetectGrant().then(
-      (isNewlyGranted) => {
-        this._isBackgroundPermissionRequestSettled = true;
-        return isNewlyGranted;
-      },
-    );
+    this._backgroundPermissionRequest ??= this._requestAndDetectGrant().finally(() => {
+      this._isBackgroundPermissionRequestSettled = true;
+    });
     return this._backgroundPermissionRequest;
   }
 

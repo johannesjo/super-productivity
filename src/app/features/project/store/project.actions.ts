@@ -168,13 +168,15 @@ export const moveProjectTaskToRegularListAuto = createAction(
   }),
 );
 
-// NOTE: `doneBacklogTaskIds` (here and in the three actions below) carries the
-// NOT-done ids — see the doneTaskIds note in work-context-meta.actions.ts.
 export const moveProjectTaskUpInBacklogList = createAction(
   '[Project] Move Task Up in Backlog',
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,
@@ -192,6 +194,10 @@ export const moveProjectTaskDownInBacklogList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,
@@ -209,6 +215,10 @@ export const moveProjectTaskToTopInBacklogList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,
@@ -226,6 +236,10 @@ export const moveProjectTaskToBottomInBacklogList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,
