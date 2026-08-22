@@ -131,7 +131,7 @@ const main = async (): Promise<void> => {
     return cursor !== undefined && (r.protected_from_seq as number) > cursor;
   });
 
-  console.log('=== Old-ops sweep dry run (read-only) ===');
+  console.log('\n=== Old-ops sweep dry run (read-only) ===');
   console.log(`cutoff: received_at < ${new Date(Number(cutoff)).toISOString()}`);
   const totalOps = perUser.reduce((sum, r) => sum + n(r.op_count), 0);
   console.log(`operations table total:            ${totalOps}`);

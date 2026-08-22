@@ -5,6 +5,8 @@ import {
   validateRestorePointsResponse,
   validateRestoreSnapshotResponse,
   validateDeleteAllDataResponse,
+  validateDevicesResponse,
+  validateReplaceTokenResponse,
 } from './response-validators';
 
 describe('response-validators', () => {
@@ -262,6 +264,58 @@ describe('response-validators', () => {
       expect(() =>
         validateRestoreSnapshotResponse({ serverSeq: 100, generatedAt: '123' }),
       ).toThrow();
+    });
+  });
+
+  describe('validateDevicesResponse', () => {
+    const device = { clientId: 'E_abc123', lastSeenAt: 1700000000000 };
+
+    it('should accept a valid response', () => {
+      expect(() => validateDevicesResponse({ devices: [device] })).not.toThrow();
+    });
+
+    it('should accept an account with no devices', () => {
+      expect(() => validateDevicesResponse({ devices: [] })).not.toThrow();
+    });
+
+    it('should throw if a clientId violates the SuperSync charset', () => {
+      expect(() =>
+        validateDevicesResponse({ devices: [{ ...device, clientId: 'bad id!' }] }),
+      ).toThrow();
+    });
+
+    it('should throw if a timestamp arrives as a string', () => {
+      expect(() =>
+        validateDevicesResponse({
+          devices: [{ ...device, lastSeenAt: '1700000000000' }],
+        }),
+      ).toThrow();
+    });
+  });
+
+  describe('validateReplaceTokenResponse', () => {
+    const response = { token: 'fresh-token' };
+
+    it('should accept a valid response', () => {
+      expect(() => validateReplaceTokenResponse(response)).not.toThrow();
+    });
+
+    it('should tolerate fields the client does not consume (e.g. user)', () => {
+      expect(() =>
+        validateReplaceTokenResponse({ ...response, user: { id: 1, email: 'a@b.c' } }),
+      ).not.toThrow();
+    });
+
+    it('should throw if the token is missing', () => {
+      expect(() => validateReplaceTokenResponse({ user: { id: 1 } })).toThrow();
+    });
+
+    it('should throw if the token is empty', () => {
+      expect(() => validateReplaceTokenResponse({ ...response, token: '' })).toThrow();
+    });
+
+    it('should throw if not an object', () => {
+      expect(() => validateReplaceTokenResponse('fresh-token')).toThrow();
     });
   });
 

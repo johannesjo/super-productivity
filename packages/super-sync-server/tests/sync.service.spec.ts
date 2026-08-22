@@ -3833,6 +3833,33 @@ describe('SyncService', () => {
     });
   });
 
+  describe('device touch routing', () => {
+    it('getOpsSinceWithSeq does not touch the device row — its other callers (upload piggyback, dedup retry) run right after the upload already upserted lastSeenAt', async () => {
+      const service = getSyncService();
+      const { prisma } = await import('../src/db');
+      const executeRawSpy = vi.mocked(prisma.$executeRaw);
+      executeRawSpy.mockClear();
+
+      await service.getOpsSinceWithSeq(userId, 0, clientId);
+      // The touch is fire-and-forget — give a stray one a tick to land.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(executeRawSpy).not.toHaveBeenCalled();
+    });
+
+    it('touchDevice() runs the device-row touch (wired to the download route only)', async () => {
+      const service = getSyncService();
+      const { prisma } = await import('../src/db');
+      const executeRawSpy = vi.mocked(prisma.$executeRaw);
+      executeRawSpy.mockClear();
+
+      service.touchDevice(userId, clientId);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(executeRawSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('uploadOps + DeviceService user lookup', () => {
     it('should return all users with sync state', async () => {
       const service = getSyncService();

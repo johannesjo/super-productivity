@@ -19,7 +19,12 @@ const MAX_RECONNECT_ATTEMPTS = 50;
 const JITTER_FACTOR = 0.1;
 /** Must be greater than server ping interval (30s) */
 const HEARTBEAT_TIMEOUT_MS = 45_000;
-/** Close code indicating auth failure - do not reconnect */
+/**
+ * Close code indicating auth failure - do not reconnect. Wire contract: the
+ * server sends 4003 both on upgrade rejection (`websocket.routes.ts`) and on
+ * token revocation (`TOKEN_REVOKED_CLOSE_CODE` in
+ * `websocket-connection.service.ts`) — keep the three sites in step.
+ */
 const AUTH_FAILURE_CLOSE_CODE = 4003;
 /** Close code indicating the server-side per-user connection limit is reached */
 const TOO_MANY_CONNECTIONS_CLOSE_CODE = 4008;

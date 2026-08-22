@@ -13,8 +13,10 @@ import { APP_WEB_FETCH } from '../platform/app-web-fetch';
 import { SyncProviderId } from '../provider.const';
 import {
   validateDeleteAllDataResponse,
+  validateDevicesResponse,
   validateOpDownloadResponse,
   validateOpUploadResponse,
+  validateReplaceTokenResponse,
   validateRestorePointsResponse,
   validateRestoreSnapshotResponse,
   validateSnapshotUploadResponse,
@@ -58,6 +60,8 @@ export const createSuperSyncProvider = (): PackageSuperSyncProvider => {
     validateRestorePoints: validateRestorePointsResponse,
     validateRestoreSnapshot: validateRestoreSnapshotResponse,
     validateDeleteAllData: validateDeleteAllDataResponse,
+    validateDevices: validateDevicesResponse,
+    validateReplaceToken: validateReplaceTokenResponse,
   };
 
   const deps: SuperSyncDeps = {
