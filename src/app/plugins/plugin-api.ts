@@ -265,7 +265,7 @@ export class PluginAPI implements PluginAPIInterface {
 
   async deleteProject(projectId: string): Promise<void> {
     PluginLog.log(`Plugin ${this.#pluginId} requested to delete project ${projectId}`);
-    return this.#pluginBridge.deleteProject(projectId);
+    return this.#boundMethods.deleteProject(projectId);
   }
 
   async getAllTags(): Promise<Tag[]> {

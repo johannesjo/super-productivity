@@ -43,6 +43,7 @@ import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.componen
 import { T } from '../t.const';
 import { INBOX_PROJECT } from '../features/project/project.const';
 import { Project } from '../features/project/project.model';
+import { PluginManifest } from '@super-productivity/plugin-api';
 
 describe('PluginBridgeService - Counter Methods', () => {
   let service: PluginBridgeService;
@@ -931,15 +932,15 @@ describe('PluginBridgeService - deleteProject', () => {
   });
 
   it('deletes via ProjectService so the cascade stays in one place', async () => {
-    await service.deleteProject('project-1');
+    await service.deleteProject('project-1', ['deleteProject']);
 
     expect(projectServiceSpy.remove).toHaveBeenCalledOnceWith(mockProject);
   });
 
   it('refuses to delete the Inbox', async () => {
-    await expectAsync(service.deleteProject(INBOX_PROJECT.id)).toBeRejectedWithError(
-      T.PLUGINS.CANNOT_DELETE_INBOX,
-    );
+    await expectAsync(
+      service.deleteProject(INBOX_PROJECT.id, ['deleteProject']),
+    ).toBeRejectedWithError(T.PLUGINS.CANNOT_DELETE_INBOX);
 
     expect(projectServiceSpy.remove).not.toHaveBeenCalled();
   });
@@ -947,10 +948,37 @@ describe('PluginBridgeService - deleteProject', () => {
   it('throws for an unknown project instead of removing nothing silently', async () => {
     projectServiceSpy.getByIdOnce$.and.returnValue(of(undefined as unknown as Project));
 
-    await expectAsync(service.deleteProject('does-not-exist')).toBeRejectedWithError(
-      T.PLUGINS.PROJECT_NOT_FOUND,
+    await expectAsync(
+      service.deleteProject('does-not-exist', ['deleteProject']),
+    ).toBeRejectedWithError(T.PLUGINS.PROJECT_NOT_FOUND);
+
+    expect(projectServiceSpy.remove).not.toHaveBeenCalled();
+  });
+
+  it('rejects a plugin that does not declare the deleteProject permission', async () => {
+    await expectAsync(service.deleteProject('project-1')).toBeRejectedWithError(
+      /does not declare the "deleteProject" permission/,
     );
 
     expect(projectServiceSpy.remove).not.toHaveBeenCalled();
+  });
+
+  it('passes the manifest permissions through the bound method', async () => {
+    const granted = service.createBoundMethods('plugin-a', {
+      permissions: ['deleteProject'],
+    } as PluginManifest);
+    await granted.deleteProject('project-1');
+
+    expect(projectServiceSpy.remove).toHaveBeenCalledOnceWith(mockProject);
+
+    // Same call shape, manifest without the capability: the bridge must still refuse,
+    // which is what keeps iframe plugins (routed through boundMethods) gated.
+    const ungranted = service.createBoundMethods('plugin-b', {
+      permissions: [],
+    } as unknown as PluginManifest);
+
+    await expectAsync(ungranted.deleteProject('project-1')).toBeRejectedWithError(
+      /does not declare the "deleteProject" permission/,
+    );
   });
 });

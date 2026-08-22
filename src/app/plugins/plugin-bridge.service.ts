@@ -285,6 +285,7 @@ export class PluginBridgeService implements OnDestroy {
     getSecret: (key: string) => Promise<string | null>;
     deleteSecret: (key: string) => Promise<void>;
     request: <T = unknown>(url: string, options?: PluginRequestOptions) => Promise<T>;
+    deleteProject: (projectId: string) => Promise<void>;
     translate: (key: string, params?: Record<string, string | number>) => string;
     formatDate: (date: Date | string | number, format: PluginDateFormat) => string;
     getCurrentLanguage: () => string;
@@ -388,6 +389,12 @@ export class PluginBridgeService implements OnDestroy {
         this._pluginSecretService.deleteSecret(pluginId, key),
       request: <T = unknown>(url: string, options?: PluginRequestOptions): Promise<T> =>
         this.request<T>(url, options, manifest?.allowedHosts, manifest?.permissions),
+
+      // Gated here rather than in PluginAPI: iframe plugins reach the bridge through
+      // plugin-iframe.util's boundMethods lookup, and anything without an entry there
+      // falls through to the bridge method with no plugin context at all.
+      deleteProject: (projectId: string): Promise<void> =>
+        this.deleteProject(projectId, manifest?.permissions),
 
       // i18n
       translate: (key: string, params?: Record<string, string | number>): string =>
@@ -1055,8 +1062,19 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Delete a project and the tasks it contains
    */
-  async deleteProject(projectId: string): Promise<void> {
+  async deleteProject(projectId: string, permissions?: string[]): Promise<void> {
     typia.assert<string>(projectId);
+
+    // Deleting a project is the only irreversible operation in the plugin API — the
+    // cascade takes the backlog, subtasks and notes with it, there is no
+    // restoreDeletedProject counterpart, and PROJECT_DELETE_WINS_MARKER carries it to
+    // every device. Declaring the capability is install-time disclosure, not
+    // containment, but it is worth having on this method.
+    if (!(permissions ?? []).includes('deleteProject')) {
+      throw new Error(
+        '[PluginBridge] PluginAPI.deleteProject is blocked: this plugin does not declare the "deleteProject" permission. Add "deleteProject" to the manifest "permissions".',
+      );
+    }
 
     // The Inbox is the fallback target for tasks that belong nowhere, so it is not
     // a project a caller may remove — the UI does not offer it either.
