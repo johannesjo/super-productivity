@@ -468,23 +468,20 @@ export const projectReducer = createReducer<ProjectState>(
     },
   ),
 
-  on(
-    moveProjectTaskToTopInBacklogList,
-    (state, { taskId, workContextId, doneBacklogTaskIds: undoneBacklogTaskIds }) => {
-      return projectAdapter.updateOne(
-        {
-          id: workContextId,
-          changes: {
-            backlogTaskIds: arrayMoveToStart(
-              (state.entities[workContextId] as Project).backlogTaskIds,
-              taskId,
-            ),
-          },
+  on(moveProjectTaskToTopInBacklogList, (state, { taskId, workContextId }) => {
+    return projectAdapter.updateOne(
+      {
+        id: workContextId,
+        changes: {
+          backlogTaskIds: arrayMoveToStart(
+            (state.entities[workContextId] as Project).backlogTaskIds,
+            taskId,
+          ),
         },
-        state,
-      );
-    },
-  ),
+      },
+      state,
+    );
+  }),
 
   on(moveProjectTaskToBottomInBacklogList, (state, { taskId, workContextId }) => {
     return projectAdapter.updateOne(

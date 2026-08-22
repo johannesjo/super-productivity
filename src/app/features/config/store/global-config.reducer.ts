@@ -18,7 +18,6 @@ import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { getHoursFromClockString } from '../../../util/get-hours-from-clock-string';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
-import { devError } from '../../../util/dev-error';
 import { normalizeStartOfNextDayConfig } from '../normalize-start-of-next-day-config';
 import { withLocalOnlySyncSettings } from '../local-only-sync-settings.util';
 
@@ -267,8 +266,9 @@ export const selectTimelineWorkStartEndHours = createSelector(
     // create-sorted-blocker-blocks.ts (#5358): an imported/synced snapshot can
     // carry invalid clock strings, and NaN hours would auto-place the work
     // Start/End markers at an arbitrary grid position. Hide them instead.
+    // Not a devError: createSortedBlockerBlocks already reports the same cfg,
+    // and a selector projector must stay free of side effects.
     if (!isValidSplitTime(schedule.workStart) || !isValidSplitTime(schedule.workEnd)) {
-      devError('Timeline: Invalid work start/end time in schedule config');
       return null;
     }
     return {

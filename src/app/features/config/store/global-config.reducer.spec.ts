@@ -26,7 +26,6 @@ import { AppDataComplete } from '../../../op-log/model/model-config';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { LOCAL_ONLY_SYNC_KEYS } from '../local-only-sync-settings.util';
 import { INBOX_PROJECT } from '../../project/project.const';
-import { _resetDevErrorState } from '../../../util/dev-error';
 
 describe('GlobalConfigReducer', () => {
   describe('loadAllData action', () => {
@@ -1212,20 +1211,6 @@ describe('GlobalConfigReducer', () => {
       // snapshot can carry invalid clock strings; without the guard the NaN
       // hours auto-place the Start/End markers at an arbitrary grid position.
       it('should return null instead of NaN hours for invalid clock strings', () => {
-        // test.ts stubs window.confirm to TRUE globally, which makes devError
-        // rethrow in non-production. Silence it so the guard's devError does
-        // not fail the spec.
-        _resetDevErrorState();
-        if (jasmine.isSpy(window.confirm)) {
-          (window.confirm as jasmine.Spy).and.returnValue(false);
-        } else {
-          spyOn(window, 'confirm').and.returnValue(false);
-        }
-        if (jasmine.isSpy(window.alert)) {
-          (window.alert as jasmine.Spy).and.stub();
-        } else {
-          spyOn(window, 'alert').and.stub();
-        }
         const state: GlobalConfigState = {
           ...initialGlobalConfigState,
           schedule: {
