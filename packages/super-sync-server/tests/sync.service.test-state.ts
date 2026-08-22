@@ -207,6 +207,20 @@ export function mockOperationFindFirstFreshBelowBoundary(
   if (serverSeq?.lt === undefined || receivedAt?.gte === undefined) {
     return undefined;
   }
+  // Strict like its two siblings above. Silently ignoring an unknown key makes
+  // this mock answer a NARROWER production query as though it were the probe:
+  // adding any further filter to the real `findFirst` (which in Postgres can
+  // cut the result to zero and disable the whole-or-nothing guard outright)
+  // otherwise passes the entire unit suite, leaving only the real-Postgres
+  // spec — skipped in a default `npm test` — to catch it.
+  const unsupported = Object.keys(args.where ?? {}).filter(
+    (key) => !['userId', 'serverSeq', 'receivedAt'].includes(key),
+  );
+  if (unsupported.length > 0) {
+    throw new Error(
+      `mockOperationFindFirstFreshBelowBoundary: unsupported where keys ${unsupported.join(', ')}`,
+    );
+  }
   const match = Array.from(operations.values()).find(
     (op) =>
       op.userId === userId &&
