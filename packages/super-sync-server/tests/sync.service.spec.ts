@@ -3396,6 +3396,9 @@ describe('SyncService', () => {
       const service = getSyncService();
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
+      // Raised above the batch size: the cap now defaults to one batch per
+      // user per run, and this test is about draining across several.
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_USER_PER_RUN = '250';
       const totalOps = 255;
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 
@@ -3443,6 +3446,9 @@ describe('SyncService', () => {
       const service = getSyncService();
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
+      // Raised above the batch size: the cap now defaults to one batch per
+      // user per run, and this test is about draining across several.
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_USER_PER_RUN = '250';
       const totalOps = 120;
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 
@@ -3544,7 +3550,7 @@ describe('SyncService', () => {
         );
 
         expect(warnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('whose queries the database cancelled'),
+          expect.stringContaining('were skipped mid-sweep'),
         );
       } finally {
         warnSpy.mockRestore();
@@ -3617,10 +3623,58 @@ describe('SyncService', () => {
       expect(testState.operations.size).toBe(2 * (opsPerUser + 1 - 100));
     });
 
+    it('honours a batch size raised above the compile-time default', async () => {
+      // The per-user cap defaults to the RESOLVED batch size. Tying it to the
+      // 5000 constant instead made `OLD_OPS_CLEANUP_DELETE_BATCH_SIZE=7000`
+      // delete 5000 and silently drop the rest — a documented knob that had
+      // stopped working.
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '7000';
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      seedSweepableUser(userId, 7_000, cutoffTime, Date.now());
+
+      const { totalDeleted } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(totalDeleted).toBe(7_000);
+    });
+
+    it('warns when the per-user cap, not the run budget, stopped a sweep', async () => {
+      // The cap binds long before the run budget for a concentrated backlog, so
+      // without this the run ends far under budget, the "budget exhausted"
+      // warning never fires, and nothing says why throughput stalled.
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '5000';
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      seedSweepableUser(userId, 200, cutoffTime, Date.now());
+
+      const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
+      try {
+        const { totalDeleted } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+        expect(totalDeleted).toBe(50);
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'still have deletable ops after reaching the 50/user cap',
+          ),
+        );
+        // The run budget was nowhere near exhausted, so that warning must not fire.
+        expect(warnSpy).not.toHaveBeenCalledWith(
+          expect.stringContaining('per-run budget exhausted'),
+        );
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
     it('shares the per-run budget across users; tail users wait for next pass', async () => {
       const service = getSyncService();
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
+      // Raised above the batch size on purpose: this is the case the drain loop
+      // exists for. Left at its default the cap IS the batch size, so each user
+      // would get exactly one batch and the budget would never be exhausted.
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_USER_PER_RUN = '200';
       const user2Id = 2;
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 

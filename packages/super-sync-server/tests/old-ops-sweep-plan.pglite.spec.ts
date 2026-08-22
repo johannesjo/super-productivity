@@ -114,18 +114,26 @@ describe('old-ops sweep batch selection — what LIMIT actually bounds', () => {
       await flush();
     };
 
+    // `received_at` rises with `server_seq`, as production assigns them: both come
+    // from the same per-user serialized upload transaction. That monotonicity is
+    // the property that decides whether (user_id, received_at) can serve as a
+    // RANGE bound, so a constant-per-user fixture could not tell the two
+    // candidate orderings apart.
+    //
     // Dense: every op predates the retention cutoff, so every one is deletable.
-    await insert(DENSE_USER, OPS_PER_USER, () => CUTOFF - 1_000);
+    await insert(DENSE_USER, OPS_PER_USER, (i) => CUTOFF - OPS_PER_USER + i - 1);
     // Sparse: an active user whose whole history is inside retention. The sweep
     // still visits them — they have a snapshot and a causal boundary — and finds
     // nothing to delete.
-    await insert(SPARSE_USER, OPS_PER_USER, () => CUTOFF + 1_000);
+    await insert(SPARSE_USER, OPS_PER_USER, (i) => CUTOFF + i);
     // Other tenants, so the (user_id, ...) slices are not the whole table.
     for (let u = 3; u < 3 + OTHER_USERS; u++) {
       await insert(u, 2_000, (i) => CUTOFF - i);
     }
     await db.exec('ANALYZE operations');
-  });
+    // Explicit, like the sibling plan specs: seeding a fresh PGlite instance
+    // races the 10s vitest default when several of them boot in parallel.
+  }, 120_000);
 
   afterAll(async () => {
     await db.close();
@@ -154,8 +162,15 @@ describe('old-ops sweep batch selection — what LIMIT actually bounds', () => {
 
     // Zero rows returned, yet the scan walked the user's entire slice: `take`
     // cannot stop a scan that never accumulates a match. This is why lowering
-    // OLD_OPS_CLEANUP_DELETE_BATCH_SIZE is not a fix on its own, and why the
-    // real bound has to be on the `server_seq` range that is scanned.
+    // OLD_OPS_CLEANUP_DELETE_BATCH_SIZE is not a fix on its own.
+    //
+    // The bound must come from the scan itself. `ORDER BY server_seq` pins the
+    // planner to the (user_id, server_seq) btree, where `received_at < cutoff`
+    // can only be a heap filter. Ordering by the column that carries the range
+    // predicate instead lets the existing (user_id, received_at) index bound the
+    // scan: measured on this fixture, the case below drops from 20k rows
+    // filtered / 225 blocks to 0 / 2. Confirm on real PG16 before shipping that
+    // — PGlite is PG18 and the planners disagree about this query class.
     expect(measured.rowsTouched).toBe(0);
     expect(measured.rowsFiltered).toBeGreaterThan(BATCH_LIMIT * 2);
   });

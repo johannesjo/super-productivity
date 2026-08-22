@@ -14,10 +14,32 @@ const RECONCILE_BUDGET_MS = 60 * 60 * 1000;
 const INITIAL_CLEANUP_DELAY_MS = 10_000;
 
 /**
+ * Guards against overlapping runs. A sweep whose per-user queries the database
+ * keeps cancelling costs a full `statement_timeout` per affected account and
+ * buys no progress, so a bad enough day can run past the 24h interval — and
+ * `setInterval` would then stack a second run onto the same connection pool,
+ * making the stall worse rather than draining it.
+ */
+let isCleanupRunning = false;
+
+/**
  * Runs all cleanup tasks in a single daily job.
  * Uses the unified retentionMs for all time-based cleanup.
  */
 const runDailyCleanup = async (): Promise<void> => {
+  if (isCleanupRunning) {
+    Logger.warn('Cleanup: previous run is still in progress; skipping this tick');
+    return;
+  }
+  isCleanupRunning = true;
+  try {
+    await runDailyCleanupTasks();
+  } finally {
+    isCleanupRunning = false;
+  }
+};
+
+const runDailyCleanupTasks = async (): Promise<void> => {
   const syncService = getSyncService();
   const cutoffTime = Date.now() - DEFAULT_SYNC_CONFIG.retentionMs;
 
@@ -29,8 +51,9 @@ const runDailyCleanup = async (): Promise<void> => {
     // the state #9692 left the fleet in, and the old `if (totalDeleted > 0)`
     // guard made that indistinguishable from "nothing was due".
     Logger.info(
-      `Cleanup [old-ops]: removed ${totalDeleted} entries ` +
-        `(affected ${affectedUserIds.length} users, ${failedUserIds.length} failed)`,
+      `Cleanup [old-ops]: removed ${totalDeleted} entries from ` +
+        `${affectedUserIds.length} users; ${failedUserIds.length} user(s) were ` +
+        `skipped mid-sweep by a cancelled query (the two counts can overlap)`,
     );
     // Storage counter is maintained incrementally on uploads. Doing one full
     // pg_column_size scan per affected user inside this loop was a DoS — but

@@ -68,6 +68,48 @@ describe('Cleanup Jobs', () => {
       expect(mockSyncService.cleanupExpiredRequestDedupEntries).toHaveBeenCalled();
     });
 
+    it('logs the old-ops summary even when the sweep removed nothing', async () => {
+      // A sweep that removes nothing for anyone is exactly the state #9692 left
+      // the fleet in. The old `if (totalDeleted > 0)` guard made that
+      // indistinguishable from "nothing was due", so the outage was invisible.
+      mockSyncService.deleteOldSyncedOpsForAllUsers.mockResolvedValueOnce(
+        sweepResult({ failedUserIds: [7, 9] }),
+      );
+
+      startCleanupJobs();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(Logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Cleanup [old-ops]: removed 0 entries from 0 users'),
+      );
+      expect(Logger.info).toHaveBeenCalledWith(expect.stringContaining('2 user(s)'));
+    });
+
+    it('skips a tick while the previous run is still in progress', async () => {
+      // Without this guard a sweep that overruns the 24h interval gets a second
+      // run stacked on top of it, doubling the load on the same pool.
+      let release: (() => void) | undefined;
+      mockSyncService.deleteOldSyncedOpsForAllUsers.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve(sweepResult());
+          }),
+      );
+
+      startCleanupJobs();
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).toHaveBeenCalledTimes(1);
+
+      // The daily tick fires while the first run is still awaiting the sweep.
+      await vi.advanceTimersByTimeAsync(MS_PER_DAY);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).toHaveBeenCalledTimes(1);
+      expect(Logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('previous run is still in progress'),
+      );
+
+      release?.();
+    });
+
     it('should use retentionMs for cutoff calculation', async () => {
       startCleanupJobs();
 
