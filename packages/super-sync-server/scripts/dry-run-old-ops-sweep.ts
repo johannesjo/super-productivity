@@ -113,9 +113,19 @@ const main = async (): Promise<void> => {
 
   // Safety check 2: while a cached snapshot blob exists, the boundary may
   // never exceed its cursor — pruning above it would eat into the cached
-  // snapshot's replay tail (the restore path). Re-read from user_sync_state
-  // rather than from the CTE columns: derived from `was_capped`, which is
-  // this same comparison, the check is a tautology that always prints OK.
+  // snapshot's replay tail (the restore path).
+  //
+  // Be honest about what this can and cannot catch. Re-reading from
+  // user_sync_state does NOT make it independent: `protected_from_seq` is
+  // itself derived with this same `snapshot_data IS NOT NULL AND
+  // last_snapshot_seq > 0` predicate, so for any affected user the comparison
+  // holds by construction and prints OK. What it does catch is a LIVE RACE —
+  // this query runs in a separate transaction from the plan query, so it fires
+  // if quota recovery moved a boundary underneath the plan. It is not a
+  // verification that the gate mirrors production; only the drift detector in
+  // tests/integration/old-ops-sweep.integration.spec.ts checks that, and
+  // nothing enforces the `causalFullStateSql` ↔ CAUSAL_FULL_STATE_OPERATION_WHERE
+  // lockstep that both sides depend on.
   const blobCursors = await prisma.$queryRaw<
     { user_id: number; last_snapshot_seq: number }[]
   >`

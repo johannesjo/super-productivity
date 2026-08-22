@@ -3428,7 +3428,53 @@ describe('SyncService', () => {
       expect(survivors[0].opType).toBe('SYNC_IMPORT');
     });
 
-    it('marks user for reconcile when a later batch throws mid-loop', async () => {
+    it('deletes nothing when the per-run budget is set to 0', async () => {
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '0';
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= 3; i++) {
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+        });
+      }
+      seedFullStateOp(userId, 4, BigInt(cutoffTime - 1));
+
+      const groupBySpy = vi.mocked(prisma.operation.groupBy);
+      groupBySpy.mockClear();
+      try {
+        const { totalDeleted, affectedUserIds } =
+          await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+        // The operator brake. `parsePositiveIntegerEnv` rejects 0 and falls
+        // back to the default, so without the explicit decode this knob would
+        // silently mean 25 000 — and there is no other way to stop an
+        // irreversible, default-on sweep short of patching the image.
+        expect(totalDeleted).toBe(0);
+        expect(affectedUserIds).toEqual([]);
+        expect(testState.operations.size).toBe(4);
+        // Disabled must also cost nothing: no fleet-wide scan of `operations`.
+        expect(groupBySpy).not.toHaveBeenCalled();
+      } finally {
+        delete process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN;
+      }
+    });
+
+    it('keeps draining when a concurrent delete shrinks a batch row count', async () => {
       const service = getSyncService();
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
@@ -3463,12 +3509,113 @@ describe('SyncService', () => {
         snapshotAt: BigInt(Date.now()),
       });
 
+      // Quota recovery (deleteOldestRestorePointAndOps) runs unlocked against
+      // the same user while the sweep is mid-drain — the sweep does NOT take
+      // runWithStorageUsageLock, the upload path does. Simulate it landing
+      // between the sweep's findMany (which selected 50 ids) and its
+      // deleteMany: two of those rows are already gone, so deleteMany reports
+      // 48. That is fewer rows than the batch size, but the user is NOT empty.
+      const deleteManySpy = vi.mocked(prisma.operation.deleteMany) as unknown as {
+        getMockImplementation: () => (args: any) => Promise<{ count: number }>;
+        mockImplementation: (fn: (args: any) => Promise<{ count: number }>) => void;
+      };
+      const originalDeleteMany = deleteManySpy.getMockImplementation();
+      let interceptedBatches = 0;
+      deleteManySpy.mockImplementation(async (args: any) => {
+        if (interceptedBatches === 0) {
+          interceptedBatches += 1;
+          for (const id of (args.where?.id?.in ?? []).slice(0, 2)) {
+            testState.operations.delete(id);
+          }
+        }
+        return originalDeleteMany(args);
+      });
+
+      try {
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+      } finally {
+        deleteManySpy.mockImplementation(originalDeleteMany);
+        delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+        delete process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN;
+      }
+
+      // A short row count must mean "these rows are gone", never "this user is
+      // drained". Reading it as the latter stops the loop mid-prefix and
+      // leaves a plain CRT delta as the lowest surviving row — the exact
+      // SNAPSHOT_REPLAY_INCOMPLETE state the whole-or-nothing rule exists to
+      // prevent, reached here through concurrency instead of the budget.
+      const survivors = Array.from(testState.operations.values())
+        .filter((op) => op.userId === userId)
+        .sort((a, b) => a.serverSeq - b.serverSeq);
+      expect(survivors.map((op) => op.serverSeq)).toEqual([totalOps + 1]);
+      expect(survivors[0].opType).toBe('SYNC_IMPORT');
+    });
+
+    it('marks user for reconcile and keeps going when a batch throws mid-loop', async () => {
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
+      process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
+      const totalOps = 120;
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= totalOps; i++) {
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+        });
+      }
+      seedFullStateOp(userId, totalOps + 1, BigInt(cutoffTime - 1));
+
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: totalOps + 1,
+        lastSnapshotSeq: totalOps + 1,
+        snapshotAt: BigInt(Date.now()),
+      });
+
+      // A second user, ordered after the failing one, proves one user's DB
+      // error does not cost the rest of the fleet a day of retention.
+      const otherUserId = userId + 1;
+      testState.operations.set('other-old-op-1', {
+        id: 'other-old-op-1',
+        userId: otherUserId,
+        clientId: `client-${otherUserId}`,
+        serverSeq: 1,
+        actionType: 'ADD',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: 'ot1',
+        payload: {},
+        vectorClock: {},
+        schemaVersion: 1,
+        clientTimestamp: BigInt(Date.now()),
+        receivedAt: BigInt(cutoffTime - 1),
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+      });
+      seedFullStateOp(otherUserId, 2, BigInt(cutoffTime - 1));
+
       // Let the first batch run normally, then simulate a transient DB error
       // on the second batch. Pre-fix this would leave the storage counter
       // stale-high with no reconcile signal until the next daily pass.
       const serviceWithPrivates = service as unknown as {
         storageQuotaService: {
-          deleteOldSyncedOpsBatch: (...args: unknown[]) => Promise<number>;
+          deleteOldSyncedOpsBatch: (
+            ...args: unknown[]
+          ) => Promise<{ selectedCount: number; deletedCount: number }>;
           needsReconcile: (userId: number) => boolean;
         };
       };
@@ -3480,20 +3627,30 @@ describe('SyncService', () => {
         async (...args: unknown[]) => {
           callCount += 1;
           if (callCount === 1) return originalBatch(...args);
-          throw new Error('simulated transient DB failure');
+          if (args[0] === userId) throw new Error('simulated transient DB failure');
+          return originalBatch(...args);
         },
       );
 
-      await expect(service.deleteOldSyncedOpsForAllUsers(cutoffTime)).rejects.toThrow(
-        'simulated transient DB failure',
-      );
+      const { affectedUserIds } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
       delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
       delete process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN;
+
+      // The failing user is contained, not fatal to the run: the sweep logged
+      // and moved on, so the second user was still serviced.
+      expect(affectedUserIds).toContain(otherUserId);
+      expect(
+        Array.from(testState.operations.values()).filter(
+          (op) => op.userId === otherUserId,
+        ),
+      ).toHaveLength(1);
 
       // First batch committed deletes; the user must still be marked so
       // the next request reconciles the now-stale-high counter.
       expect(storageQuotaService.needsReconcile(userId)).toBe(true);
-      expect(testState.operations.size).toBe(totalOps + 1 - 50);
+      expect(
+        Array.from(testState.operations.values()).filter((op) => op.userId === userId),
+      ).toHaveLength(totalOps + 1 - 50);
     });
 
     it('shares the per-run budget across users; tail users wait for next pass', async () => {
