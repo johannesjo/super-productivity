@@ -8,6 +8,7 @@ import {
   VectorClock,
   SYNC_ERROR_CODES,
   createStateReplacementRequiredResults,
+  SyncDeviceInfo,
 } from './sync.types';
 import { Logger } from '../logger';
 import { Prisma } from '@prisma/client';
@@ -624,6 +625,23 @@ export class SyncService {
     );
   }
 
+  /**
+   * Keeps the device row alive for the device list. Called from the download
+   * ROUTE only — not from `getOpsSinceWithSeq`, whose other callers (the
+   * upload handler's piggyback and dedup-retry reads) run right after the
+   * upload transaction already upserted `lastSeenAt`, so a touch there is a
+   * guaranteed-suppressed extra statement per upload. Fire-and-forget and
+   * deliberately outside any transaction: this is advisory metadata for a UI
+   * list and must never fail, slow, or lengthen the lock window of a sync.
+   */
+  touchDevice(userId: number, clientId: string): void {
+    void this.deviceService
+      .touchDevice(userId, clientId)
+      .catch((err) =>
+        Logger.debug(`[user:${userId}] touchDevice failed: ${(err as Error)?.message}`),
+      );
+  }
+
   async getLatestSeq(userId: number): Promise<number> {
     return this.operationDownloadService.getLatestSeq(userId);
   }
@@ -897,6 +915,10 @@ export class SyncService {
 
   async getOnlineDeviceCount(userId: number): Promise<number> {
     return this.deviceService.getOnlineDeviceCount(userId);
+  }
+
+  async listDevices(userId: number): Promise<SyncDeviceInfo[]> {
+    return this.deviceService.listDevices(userId);
   }
 }
 

@@ -1256,6 +1256,13 @@ describe('FocusModeEffects', () => {
       androidEffects = TestBed.inject(FocusModeEffects);
     });
 
+    // This describe builds its OWN MockStore, so the outer `afterEach` (which
+    // resets the shared instance) does not clear the overrides above and they
+    // would leak into later spec files.
+    afterEach(() => {
+      TestBed.inject(MockStore).resetSelectors();
+    });
+
     it('should banner but NOT notify on Android (native posts the completion notification)', (done) => {
       spyOn(document, 'hasFocus').and.returnValue(false);
       actions$ = of(actions.completeFocusSession({ isManual: false }));

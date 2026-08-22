@@ -180,10 +180,8 @@ describe('FocusMode Bug #5995: Resume paused break', () => {
 
   afterEach(() => {
     actions$.complete();
-    // overrideSelector mutates the module-level selector singleton, so an
-    // un-reset override leaks into every spec that runs later. Jasmine
-    // randomizes spec order (src/karma.conf.js sets no `random: false`), which
-    // is why the leak only surfaced in the full suite and never in isolation.
+    // `overrideSelector()` freezes the module-level memoized selector, so
+    // without this the overrides above leak into later spec FILES (#9544).
     store.resetSelectors();
   });
 

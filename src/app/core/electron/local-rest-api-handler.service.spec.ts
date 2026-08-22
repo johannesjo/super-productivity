@@ -21,6 +21,7 @@ import {
   TimerState,
 } from '../../features/focus-mode/focus-mode.model';
 import * as focusModeActions from '../../features/focus-mode/store/focus-mode.actions';
+import * as focusModeSelectors from '../../features/focus-mode/store/focus-mode.selectors';
 import {
   focusModeReducer,
   initialState as initialFocusModeState,
@@ -128,6 +129,22 @@ describe('LocalRestApiHandlerService', () => {
   };
 
   beforeEach(() => {
+    // Specs that call `store.overrideSelector()` without `resetSelectors()`
+    // leak into this file: `overrideSelector` runs `setResult()` on the
+    // memoized selector ITSELF - a module singleton shared by the whole Karma
+    // context - and `resetSelectors()` only clears what its own store instance
+    // registered. The GET /focus specs below read focus-mode state through
+    // those selectors, so a leaked result makes them assert against a frozen
+    // timer instead of the state they set (jasmine randomizes spec order, so
+    // it only fails in some runs). Release them before the store is built, so
+    // any override this file's own `provideMockStore` sets up survives.
+    Object.values(focusModeSelectors).forEach((selector) => {
+      if (typeof selector === 'function' && 'release' in selector) {
+        selector.release();
+        selector.clearResult();
+      }
+    });
+
     requestHandler = null;
     responsePromiseResolve = null;
     activeProjects = [];

@@ -51,6 +51,14 @@ export class WebSocketConnectionService {
   /** Close code sent to a challenger socket refused during the reconnect cooldown */
   private static readonly RECONNECT_COOLDOWN_CLOSE_CODE = 4008;
   /**
+   * Close code sent to every socket of a user whose tokens were just revoked.
+   * Wire contract: 4003 is the auth-failure code — it must stay in step with
+   * the upgrade rejection in `websocket.routes.ts` and the client's
+   * `AUTH_FAILURE_CLOSE_CODE` (`super-sync-websocket.service.ts`), which
+   * treats it as terminal (no auto-reconnect; the next sync reconnects).
+   */
+  private static readonly TOKEN_REVOKED_CLOSE_CODE = 4003;
+  /**
    * Sliding-window cooldown. While a still-OPEN incumbent's `cooldownUntil` is
    * in the future, a new socket from the same clientId is refused (the
    * incumbent is kept, NOT evicted) and `cooldownUntil` is extended by another
@@ -357,6 +365,32 @@ export class WebSocketConnectionService {
       clearTimeout(entry.timer);
     }
     this.pendingNotifications.clear();
+  }
+
+  /**
+   * Closes every live socket of one user. Called on token revocation
+   * (`POST /api/replace-token`, passkey recovery): sockets are authenticated
+   * only at upgrade and kept alive by the heartbeat, so without this a
+   * revoked device would keep receiving op notifications indefinitely.
+   *
+   * Deliberately no caller exemption: a socket's clientId is a self-declared
+   * query param, never bound to its token, so sparing a caller-named socket
+   * would let a stolen-token client exempt itself by claiming that id. The
+   * revoking caller's socket closes too and reconnects with its fresh token
+   * on the next sync cycle.
+   */
+  closeForUser(userId: number): void {
+    const userSet = this.connections.get(userId);
+    if (!userSet) {
+      return;
+    }
+    // removeConnection mutates the set — iterate a copy.
+    for (const client of [...userSet]) {
+      this.removeConnection(userId, client, {
+        code: WebSocketConnectionService.TOKEN_REVOKED_CLOSE_CODE,
+        reason: 'Token revoked',
+      });
+    }
   }
 
   /** Close all connections gracefully */
