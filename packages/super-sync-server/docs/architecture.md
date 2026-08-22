@@ -117,9 +117,12 @@ This serialization mechanism is a load-bearing decision; see
   only the old operation prefix before a proven causal full-state boundary,
   while preserving that boundary and its replay tail. The boundary comes from
   the operation stream itself — no snapshot cursor is required (#9688), so
-  encrypted-only and snapshotless histories are pruned too. While a
-  cached-snapshot cursor exists, the boundary additionally never passes it
-  (protects the cached base's replay tail for restore). Quota recovery uses a
+  encrypted-only and snapshotless histories are pruned too. While a cached
+  snapshot BLOB exists, the boundary additionally never passes that row's
+  cursor (protects the cached base's replay tail for restore); a cursor left
+  behind without its blob does not cap. A user's aged prefix is pruned whole
+  or not at all, so the lowest surviving op stays a full-state op. Quota
+  recovery uses a
   separate bounded cleanup policy.
 - Server-generated restore is unavailable when the required replay range
   contains encrypted operations.

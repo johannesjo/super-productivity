@@ -3332,7 +3332,7 @@ describe('SyncService', () => {
       }
     });
 
-    it('drains a single user up to the per-run budget', async () => {
+    it('drains a user past the per-run budget rather than truncating their prefix', async () => {
       const service = getSyncService();
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
@@ -3374,9 +3374,19 @@ describe('SyncService', () => {
 
       // Per-run budget is larger than one delete batch. The inner drain loop keeps
       // deleting until the budget hits zero, not just one batch.
-      expect(totalDeleted).toBe(250);
+      // Regression for the truncated-prefix bug: with a 250-op budget and a
+      // 255-op prefix, the drain used to stop at 250 and leave a plain CRT
+      // delta (seq 251) as the lowest surviving row, which makes every
+      // restore target throw SNAPSHOT_REPLAY_INCOMPLETE. The budget gates
+      // which users we start, not where we stop inside one, so this user
+      // drains whole and overshoots by 5.
+      expect(totalDeleted).toBe(255);
       expect(affectedUserIds).toEqual([userId]);
-      expect(testState.operations.size).toBe(6);
+      const survivors = Array.from(testState.operations.values())
+        .filter((op) => op.userId === userId)
+        .sort((a, b) => a.serverSeq - b.serverSeq);
+      expect(survivors.map((op) => op.serverSeq)).toEqual([totalOps + 1]);
+      expect(survivors[0].opType).toBe('SYNC_IMPORT');
     });
 
     it('marks user for reconcile when a later batch throws mid-loop', async () => {
@@ -3452,18 +3462,24 @@ describe('SyncService', () => {
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
       const user2Id = 2;
+      const user3Id = 3;
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 
-      testState.users.set(user2Id, {
-        id: user2Id,
-        email: 'test2@test.com',
-        storageQuotaBytes: BigInt(100 * 1024 * 1024),
-        storageUsedBytes: BigInt(0),
-      });
+      for (const uid of [user2Id, user3Id]) {
+        testState.users.set(uid, {
+          id: uid,
+          email: `test${uid}@test.com`,
+          storageQuotaBytes: BigInt(100 * 1024 * 1024),
+          storageUsedBytes: BigInt(0),
+        });
+      }
 
-      // Each user has 200 stale ops — more than the 250 per-run budget combined.
+      // Three users × 200 stale ops against a 250-op budget: user1 drains
+      // whole (overshooting nothing), user2 starts because 50 budget remained
+      // and also drains whole (overshooting by 150), and user3 is never
+      // started because the budget is spent. No prefix is ever truncated.
       const opsPerUser = 200;
-      for (const uid of [userId, user2Id]) {
+      for (const uid of [userId, user2Id, user3Id]) {
         for (let i = 1; i <= opsPerUser; i++) {
           testState.operations.set(`u${uid}-op-${i}`, {
             id: `u${uid}-op-${i}`,
@@ -3500,16 +3516,30 @@ describe('SyncService', () => {
         lastSnapshotSeq: opsPerUser + 1,
         snapshotAt: BigInt(Date.now()),
       });
+      testState.userSyncStates.set(user3Id, {
+        userId: user3Id,
+        lastSeq: opsPerUser + 1,
+        lastSnapshotSeq: opsPerUser + 1,
+        snapshotAt: BigInt(Date.now() + 1000),
+      });
 
       const { totalDeleted, affectedUserIds } =
         await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
       delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
       delete process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN;
 
-      // user1 drains fully, user2 only gets the remaining budget.
-      expect(totalDeleted).toBe(250);
+      expect(totalDeleted).toBe(400);
       expect(affectedUserIds).toEqual([userId, user2Id]);
-      expect(testState.operations.size).toBe(152);
+      // Every touched user is left with their full-state op as the lowest
+      // surviving row; the untouched tail user keeps their whole history.
+      const lowestSurvivorOf = (uid: number): Record<string, unknown> =>
+        Array.from(testState.operations.values())
+          .filter((op) => op.userId === uid)
+          .sort((a, b) => a.serverSeq - b.serverSeq)[0];
+      expect(lowestSurvivorOf(userId).opType).toBe('SYNC_IMPORT');
+      expect(lowestSurvivorOf(user2Id).opType).toBe('SYNC_IMPORT');
+      expect(lowestSurvivorOf(user3Id).serverSeq).toBe(1);
+      expect(testState.operations.size).toBe(2 + opsPerUser + 1);
     });
 
     it('should delete old operations from all users', async () => {

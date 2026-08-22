@@ -146,8 +146,14 @@ const main = async (): Promise<void> => {
       -- eradication sweep must not keep capping a user forever.
       SELECT
         j.*,
+        -- last_snapshot_seq > 0 mirrors production's snapshotCap > 0 check
+        -- (storage-quota.service.ts). Without it a blob row with a 0 cursor
+        -- reads as capped-and-unreachable here while the sweep would prune
+        -- it — a gate must never under-report a real deletion.
         COALESCE(
-          j.has_snapshot_blob AND j.causal_boundary_seq > j.last_snapshot_seq,
+          j.has_snapshot_blob
+            AND j.last_snapshot_seq > 0
+            AND j.causal_boundary_seq > j.last_snapshot_seq,
           false
         ) AS was_capped
       FROM joined j
@@ -223,6 +229,7 @@ const main = async (): Promise<void> => {
 
   // Safety check 1: boundary must be a surviving causal full-state op —
   // re-verified independently for every user the sweep would actually touch.
+  logPhase(`re-verifying ${affected.length} boundaries against the table…`);
   const badBoundaryUsers = await findBadBoundaries(
     affected.map((r) => ({
       userId: r.user_id,
@@ -233,21 +240,28 @@ const main = async (): Promise<void> => {
 
   // Safety check 2: while a cached snapshot blob exists, the boundary may
   // never exceed its cursor — pruning above it would eat into the cached
-  // snapshot's replay tail (the restore path).
-  const tailViolations = prunable.filter(
-    (r) =>
-      r.has_snapshot_blob &&
-      r.last_snapshot_seq !== null &&
-      (r.protected_from_seq as number) > r.last_snapshot_seq,
-  );
-
-  const [{ total_ops }] = await prisma.$queryRaw<[{ total_ops: bigint }]>`
-    SELECT count(*) AS total_ops FROM operations
+  // snapshot's replay tail (the restore path). Re-read from user_sync_state
+  // rather than from the CTE columns: derived from `was_capped`, which is
+  // this same comparison, the check is a tautology that always prints OK.
+  const blobCursors = await prisma.$queryRaw<
+    { user_id: number; last_snapshot_seq: number }[]
+  >`
+    SELECT user_id, last_snapshot_seq
+    FROM user_sync_state
+    WHERE snapshot_data IS NOT NULL AND last_snapshot_seq > 0
   `;
+  const cursorByUserId = new Map(
+    blobCursors.map((r) => [r.user_id, r.last_snapshot_seq]),
+  );
+  const tailViolations = affected.filter((r) => {
+    const cursor = cursorByUserId.get(r.user_id);
+    return cursor !== undefined && (r.protected_from_seq as number) > cursor;
+  });
 
   console.log('=== Old-ops sweep dry run (read-only) ===');
   console.log(`cutoff: received_at < ${new Date(Number(cutoff)).toISOString()}`);
-  console.log(`operations table total:            ${n(total_ops)}`);
+  const totalOps = perUser.reduce((sum, r) => sum + n(r.op_count), 0);
+  console.log(`operations table total:            ${totalOps}`);
   console.log(`users holding operations:          ${perUser.length}`);
   console.log(`  with a causal prune boundary:     ${prunable.length}`);
   console.log(

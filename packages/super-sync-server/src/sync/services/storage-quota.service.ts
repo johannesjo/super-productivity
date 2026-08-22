@@ -525,9 +525,12 @@ export class StorageQuotaService {
       // when the lowest surviving op is a causal full-state op that resets
       // state — otherwise it throws SNAPSHOT_REPLAY_INCOMPLETE, which the
       // restore route surfaces as a 500. Skipping the user keeps the whole
-      // prefix intact until it ages out, so the invariant that path documents
-      // ("the surviving lowest-seq op is guaranteed to be a full-state op")
-      // keeps holding. Costs retention lag, never over-deletion.
+      // prefix intact until it ages out, so this sweep never NEWLY breaks the
+      // invariant that path documents ("the surviving lowest-seq op is
+      // guaranteed to be a full-state op"). Costs retention lag, never
+      // over-deletion. Note the invariant is not globally true: quota
+      // recovery's deleteOldestRestorePointAndOps deletes up to a restore
+      // point and can leave a delta lowest — pre-existing, tracked separately.
       const freshOpBelowBoundary = await prisma.operation.findFirst({
         where: {
           userId: candidate.userId,
@@ -538,19 +541,21 @@ export class StorageQuotaService {
       });
       if (freshOpBelowBoundary) continue;
 
-      // Drain this user across multiple batches until either they're empty or
-      // the global per-run budget is exhausted. Without this, a single user
-      // with a large backlog would only lose `deleteBatchSize` ops per day
-      // even when budget remains — leaving small-backlog users behind it
-      // unserviced when their snapshotAt is fresher.
+      // Drain this user to completion. The budget gates which users we
+      // START, never where we stop inside one: batches delete ascending by
+      // serverSeq, so cutting a user off mid-prefix deletes ops 1..k and
+      // leaves a plain delta at k+1 as the lowest surviving row — the exact
+      // state the fresh-op probe above rejects, and one that makes every
+      // restore target 500 with SNAPSHOT_REPLAY_INCOMPLETE until a later run
+      // finishes the prefix. Overshoot is bounded by one user's backlog and
+      // costs a longer run; a truncated prefix costs that user their restore.
       let userDeleted = 0;
-      while (remainingDeleteBudget > 0) {
-        const batchLimit = Math.min(deleteBatchSize, remainingDeleteBudget);
+      for (;;) {
         const deletedCount = await this.deleteOldSyncedOpsBatch(
           candidate.userId,
           protectedFromSeq,
           cutoffTime,
-          batchLimit,
+          deleteBatchSize,
         );
         if (deletedCount === 0) break;
 
@@ -577,10 +582,12 @@ export class StorageQuotaService {
 
         userDeleted += deletedCount;
         totalDeleted += deletedCount;
+        // May go negative — the outer loop's budget check then stops the run
+        // before starting another user.
         remainingDeleteBudget -= deletedCount;
         // Short-circuit when the batch returned fewer rows than asked for: the
         // user is empty and another findMany would only confirm zero rows.
-        if (deletedCount < batchLimit) break;
+        if (deletedCount < deleteBatchSize) break;
       }
     }
 
@@ -594,7 +601,8 @@ export class StorageQuotaService {
 
     if (remainingDeleteBudget <= 0) {
       Logger.warn(
-        `Cleanup [old-ops]: per-run budget exhausted after ${totalDeleted} ops; ` +
+        `Cleanup [old-ops]: per-run budget exhausted after ${totalDeleted} ops ` +
+          `(the last user drained past the budget so their prefix stayed whole); ` +
           `some users may still have retained old ops. ` +
           `Raise OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN if this happens repeatedly.`,
       );

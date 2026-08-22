@@ -113,14 +113,16 @@ const scheduleDeferredReconciles = (userIds: number[]): void => {
     userIds.length,
     Math.floor(RECONCILE_BUDGET_MS / RECONCILE_INTERVAL_MS),
   );
-  // S1: `userIds` arrives stalest-first from `deleteOldSyncedOpsForAllUsers`
-  // (orderBy snapshotAt asc). When the budget can't cover everyone, the most
-  // drifted users are reconciled first; the fresh tail rolls over to the next
-  // pass. Deterministic, no Math.random.
+  // S1: `userIds` arrives in a deterministic order (no Math.random), so the
+  // tail rolls over to the next pass rather than being reshuffled. It is NOT
+  // stalest-first any more: since #9688 the sweep only reads snapshotAt for
+  // users still holding a cached snapshot blob, and under the mandatory-E2EE
+  // gate that is almost nobody — everyone else ties and drains in userId
+  // order. See StorageQuotaService.deleteOldSyncedOpsForAllUsers.
   if (maxScheduled < userIds.length) {
     Logger.warn(
       `Cleanup [reconcile]: budget covers ${maxScheduled}/${userIds.length} users; ` +
-        `stalest-first ordering keeps the freshest users rolling to next pass`,
+        `the remainder rolls over to the next pass`,
     );
   }
   const syncService = getSyncService();
