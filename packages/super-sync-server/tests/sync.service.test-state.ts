@@ -94,3 +94,162 @@ export function hasOperationUniqueConflict(
         op.serverSeq === row.serverSeq),
   );
 }
+
+export type OperationWhereAlternative = {
+  opType?: string | { in?: string[] };
+  repairBaseServerSeq?: null | { not: null };
+};
+
+/**
+ * Evaluates one alternative of a `CAUSAL_FULL_STATE_OPERATION_WHERE`-shaped
+ * `OR` list against an operation row. Shared so every Prisma mock decodes the
+ * production predicate (src/sync/sync.types.ts) the same way.
+ */
+export function matchesOperationAlternative(
+  opType: string,
+  repairBaseServerSeq: number | null | undefined,
+  alternative: OperationWhereAlternative,
+): boolean {
+  const wantedOpType = alternative.opType;
+  if (typeof wantedOpType === 'string' && opType !== wantedOpType) {
+    return false;
+  }
+  if (
+    typeof wantedOpType === 'object' &&
+    wantedOpType.in &&
+    !wantedOpType.in.includes(opType)
+  ) {
+    return false;
+  }
+  if (alternative.repairBaseServerSeq === null && repairBaseServerSeq != null) {
+    return false;
+  }
+  if (alternative.repairBaseServerSeq?.not === null && repairBaseServerSeq == null) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Mocks `prisma.operation.groupBy({ by: ['userId'], _max: { serverSeq } })`
+ * for the old-ops sweep's boundary query: `serverSeq.gt` plus the
+ * CAUSAL_FULL_STATE_OPERATION_WHERE `OR` list. Anything else throws rather
+ * than being silently ignored — a where-clause the mock cannot decode would
+ * otherwise let the one query that authorizes DELETEs drift away from its
+ * unit-test double while every spec stayed green.
+ */
+export function mockOperationGroupByMaxSeq(
+  operations: Map<string, any>,
+  args: {
+    where?: { serverSeq?: { gt?: number }; OR?: OperationWhereAlternative[] };
+  },
+): Array<{ userId: number; _max: { serverSeq: number | null } }> {
+  const where = args.where ?? {};
+  const unsupported = Object.keys(where).filter((k) => k !== 'serverSeq' && k !== 'OR');
+  if (unsupported.length > 0) {
+    throw new Error(
+      `mockOperationGroupByMaxSeq: unsupported where keys ${unsupported.join(', ')}`,
+    );
+  }
+  if (!Array.isArray(where.OR)) {
+    throw new Error(
+      'mockOperationGroupByMaxSeq: expected a CAUSAL_FULL_STATE_OPERATION_WHERE OR list',
+    );
+  }
+
+  const maxSeqByUser = new Map<number, number>();
+  for (const op of operations.values()) {
+    if (where.serverSeq?.gt !== undefined && op.serverSeq <= where.serverSeq.gt) {
+      continue;
+    }
+    if (
+      !where.OR.some((alternative) =>
+        matchesOperationAlternative(op.opType, op.repairBaseServerSeq, alternative),
+      )
+    ) {
+      continue;
+    }
+    const prev = maxSeqByUser.get(op.userId);
+    if (prev === undefined || op.serverSeq > prev) {
+      maxSeqByUser.set(op.userId, op.serverSeq);
+    }
+  }
+  return Array.from(maxSeqByUser.entries()).map(([userId, maxSeq]) => ({
+    userId,
+    _max: { serverSeq: maxSeq },
+  }));
+}
+
+/**
+ * Mocks the old-ops sweep's "does the prefix still hold an op inside
+ * retention?" probe:
+ * `findFirst({ where: { userId, serverSeq: { lt }, receivedAt: { gte } } })`.
+ *
+ * Returns `undefined` when `args` is not that shape so callers fall through to
+ * their own branches. Spelled out here because the hand-written findFirst mocks
+ * silently ignore filters they don't know: one would then answer this probe
+ * with an unrelated row (never prune) and another with null (always prune) —
+ * opposite wrong answers on the guard that keeps a plain delta from becoming
+ * the lowest surviving op.
+ */
+export function mockOperationFindFirstFreshBelowBoundary(
+  operations: Map<string, any>,
+  args: {
+    where?: {
+      userId?: number;
+      serverSeq?: { lt?: number };
+      receivedAt?: { gte?: bigint };
+    };
+    select?: Record<string, boolean>;
+  },
+): any | null | undefined {
+  const { userId, serverSeq, receivedAt } = args.where ?? {};
+  if (serverSeq?.lt === undefined || receivedAt?.gte === undefined) {
+    return undefined;
+  }
+  const match = Array.from(operations.values()).find(
+    (op) =>
+      op.userId === userId &&
+      op.serverSeq < serverSeq.lt! &&
+      op.receivedAt >= receivedAt.gte!,
+  );
+  return match ? applyOperationSelect(match, args.select) : null;
+}
+
+type UserSyncStateNotNullFilter = { not: null };
+
+/**
+ * Mocks `prisma.userSyncState.findMany` for the where-clauses the server
+ * actually issues, and throws on any other key rather than ignoring it.
+ *
+ * The old-ops sweep keys its snapshot cap on `snapshotData` (#9688): only a
+ * user still holding a cached snapshot BLOB may have their prune boundary
+ * pulled down to `lastSnapshotSeq`. A mock that drops the filter hands every
+ * seeded user back as a blob holder, so the uncapped path — the one almost
+ * every user takes under mandatory E2EE — is never exercised and re-keying the
+ * cap onto the cursor passes the whole unit suite.
+ */
+export function mockUserSyncStateFindMany(
+  userSyncStates: Map<number, any>,
+  args?: {
+    where?: {
+      snapshotData?: UserSyncStateNotNullFilter;
+      lastSnapshotSeq?: UserSyncStateNotNullFilter;
+      snapshotAt?: UserSyncStateNotNullFilter;
+    };
+  },
+): any[] {
+  const where = args?.where ?? {};
+  const supported = ['snapshotData', 'lastSnapshotSeq', 'snapshotAt'] as const;
+  const unsupported = Object.keys(where).filter(
+    (k) => !supported.includes(k as (typeof supported)[number]),
+  );
+  if (unsupported.length > 0) {
+    throw new Error(
+      `mockUserSyncStateFindMany: unsupported where keys ${unsupported.join(', ')}`,
+    );
+  }
+  return Array.from(userSyncStates.values()).filter((s: any) =>
+    supported.every((key) => where[key]?.not !== null || s[key] != null),
+  );
+}

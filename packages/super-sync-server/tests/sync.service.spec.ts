@@ -7,6 +7,7 @@ import {
 } from '../src/sync/conflict';
 import { CONFLICT_DETECTION_ENTITY_BATCH_SIZE } from '../src/sync/sync.types';
 import { testState, resetTestState } from './sync.service.test-state';
+import type { OperationWhereAlternative } from './sync.service.test-state';
 
 // Mock the database module with Prisma mocks
 vi.mock('../src/db', async () => {
@@ -16,33 +17,13 @@ vi.mock('../src/db', async () => {
     hasOperationUniqueConflict,
     isEntityArrayBranchQuery,
     entityArrayBranchRows,
+    mockOperationGroupByMaxSeq,
+    mockOperationFindFirstFreshBelowBoundary,
+    mockUserSyncStateFindMany,
+    matchesOperationAlternative,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
-
-  type OperationWhereAlternative = {
-    opType?: string | { in?: string[] };
-    repairBaseServerSeq?: null | { not: null };
-  };
-  const matchesOperationAlternative = (
-    opType: string,
-    repairBaseServerSeq: number | null | undefined,
-    alternative: OperationWhereAlternative,
-  ): boolean => {
-    if (typeof alternative.opType === 'string' && opType !== alternative.opType) {
-      return false;
-    }
-    if (alternative.opType?.in && !alternative.opType.in.includes(opType)) {
-      return false;
-    }
-    if (alternative.repairBaseServerSeq === null && repairBaseServerSeq != null) {
-      return false;
-    }
-    if (alternative.repairBaseServerSeq?.not === null && repairBaseServerSeq == null) {
-      return false;
-    }
-    return true;
-  };
 
   const createTxMock = () => ({
     operation: {
@@ -329,18 +310,11 @@ vi.mock('../src/db', async () => {
         }
         return null;
       }),
-      findMany: vi.fn().mockImplementation(async (args: any) => {
-        return Array.from(state.userSyncStates.values()).filter((s: any) => {
-          if (
-            args?.where?.lastSnapshotSeq?.not !== undefined &&
-            s.lastSnapshotSeq == null
-          )
-            return false;
-          if (args?.where?.snapshotAt?.not !== undefined && s.snapshotAt == null)
-            return false;
-          return true;
-        });
-      }),
+      findMany: vi
+        .fn()
+        .mockImplementation(async (args: any) =>
+          mockUserSyncStateFindMany(state.userSyncStates, args),
+        ),
       deleteMany: vi.fn().mockImplementation(async (args: any) => {
         let deleted = 0;
         for (const [key, syncState] of state.userSyncStates) {
@@ -552,6 +526,11 @@ vi.mock('../src/db', async () => {
       }),
       operation: {
         findFirst: vi.fn().mockImplementation(async (args: any) => {
+          const freshBelowBoundary = mockOperationFindFirstFreshBelowBoundary(
+            state.operations,
+            args,
+          );
+          if (freshBelowBoundary !== undefined) return freshBelowBoundary;
           if (args.where?.opType?.in) {
             const ops = Array.from(state.operations.values())
               .filter((op: any) => args.where.userId === op.userId)
@@ -655,6 +634,11 @@ vi.mock('../src/db', async () => {
             _max: { serverSeq: Math.max(...seqs) },
           };
         }),
+        groupBy: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockOperationGroupByMaxSeq(state.operations, args),
+          ),
         count: vi.fn().mockImplementation(async (args: any) => {
           let count = 0;
           for (const op of state.operations.values()) {
@@ -727,18 +711,11 @@ vi.mock('../src/db', async () => {
           return result;
         }),
         update: vi.fn().mockResolvedValue({}),
-        findMany: vi.fn().mockImplementation(async (args: any) => {
-          return Array.from(state.userSyncStates.values()).filter((s: any) => {
-            if (
-              args?.where?.lastSnapshotSeq?.not !== undefined &&
-              s.lastSnapshotSeq == null
-            )
-              return false;
-            if (args?.where?.snapshotAt?.not !== undefined && s.snapshotAt == null)
-              return false;
-            return true;
-          });
-        }),
+        findMany: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockUserSyncStateFindMany(state.userSyncStates, args),
+          ),
         updateMany: vi.fn().mockImplementation(async (args: any) => {
           let updated = 0;
           for (const [, syncState] of state.userSyncStates) {
@@ -3022,7 +2999,6 @@ describe('SyncService', () => {
 
     it('should not delete old operations when no full-state base exists', async () => {
       const service = getSyncService();
-      const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
 
       // Upload operations
       for (let i = 1; i <= 5; i++) {
@@ -3049,14 +3025,66 @@ describe('SyncService', () => {
         }
       }
 
-      // Set up userSyncState with required fields for cleanup
-      // The cleanup requires lastSnapshotSeq and snapshotAt to be set
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago
       testState.userSyncStates.set(userId, {
         userId,
         lastSeq: 5,
         lastSnapshotSeq: 5, // Snapshot covers all ops up to seq 5
         snapshotAt: BigInt(Date.now()), // Snapshot taken recently (>= cutoffTime)
+      });
+
+      // No causal full-state op exists anywhere in the history, so the user
+      // never becomes a sweep candidate — nothing is deleted, snapshot or not.
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(totalDeleted).toBe(0);
+      expect(affectedUserIds).not.toContain(userId);
+
+      const remaining = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
+        .ops;
+      expect(remaining).toHaveLength(5);
+    });
+
+    it('warns and skips a snapshot-capped user with no causal base below the cursor', async () => {
+      // The causal boundary (seq 5) sits ABOVE the cached-snapshot cursor
+      // (seq 4). While the cursor exists the boundary may not pass it, and no
+      // causal full-state op exists at or below it → skip with a warning.
+      const service = getSyncService();
+      const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= 4; i++) {
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          entityIds: [],
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+          repairBaseServerSeq: null,
+        });
+      }
+      seedFullStateOp(userId, 5, BigInt(cutoffTime - 1));
+
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 5,
+        lastSnapshotSeq: 4,
+        snapshotAt: BigInt(Date.now()),
+        // The cap keys on the cached BLOB, not on the cursor (#9688): without
+        // snapshotData this user takes the uncapped path and prunes to seq 5.
+        snapshotData: Buffer.from('legacy-cached-snapshot'),
       });
 
       try {
@@ -3066,15 +3094,62 @@ describe('SyncService', () => {
         expect(totalDeleted).toBe(0);
         expect(affectedUserIds).not.toContain(userId);
         expect(warnSpy).toHaveBeenCalledWith(
-          'Cleanup [old-ops]: skipped 1 eligible user(s) without a full-state replay base; their operation histories were left intact.',
+          'Cleanup [old-ops]: skipped 1 snapshot-capped user(s) without a causal ' +
+            'full-state op at or below their snapshot cursor; their operation ' +
+            'histories were left intact.',
         );
-
-        const remaining = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
-          .ops;
-        expect(remaining).toHaveLength(5);
       } finally {
         warnSpy.mockRestore();
       }
+    });
+
+    it('prunes past a stale snapshot cursor once the cached blob is gone', async () => {
+      // Same shape as the capped case above, minus the cached snapshot BLOB.
+      // Under mandatory E2EE the server stops caching snapshots, so
+      // lastSnapshotSeq freezes at a stale value for the whole fleet (#9688):
+      // capping on the cursor would exempt everyone from the sweep forever.
+      const service = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= 4; i++) {
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          entityIds: [],
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+          repairBaseServerSeq: null,
+        });
+      }
+      seedFullStateOp(userId, 5, BigInt(cutoffTime - 1));
+
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 5,
+        lastSnapshotSeq: 4,
+        snapshotAt: BigInt(Date.now()),
+      });
+
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(totalDeleted).toBe(4);
+      expect(affectedUserIds).toContain(userId);
+
+      const remaining = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
+        .ops;
+      expect(remaining.map((op) => op.serverSeq)).toEqual([5]);
     });
 
     it('should preserve the latest full-state operation and its replay tail', async () => {
@@ -3117,9 +3192,6 @@ describe('SyncService', () => {
       const { totalDeleted } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
       expect(totalDeleted).toBe(3);
-      // The primary `latestFullStateSeq` marker is no longer trusted blindly: it
-      // is validated against the causal predicate before authorizing a DELETE.
-      expect(prisma.operation.findFirst).toHaveBeenCalled();
       expect(Array.from(testState.operations.keys())).toEqual(['old-op-4', 'old-op-5']);
       const freshClientOps = (
         await operationDownloadService.getOpsSinceWithSeq(userId, 0)
@@ -3180,13 +3252,12 @@ describe('SyncService', () => {
     });
 
     it('does not prune history behind a stale latestFullStateSeq marker pointing at a legacy REPAIR (primary path)', async () => {
-      // Regression for the primary-path gap: installs upgraded from before the
-      // causal-marker migration can carry a `latestFullStateSeq` that points at a
-      // legacy REPAIR (repairBaseServerSeq NULL) — the migration added no backfill
-      // to clear it. Trusting that cached marker would prune history behind a
-      // repair the replay path refuses as a boundary. The marker must be validated
-      // causal before it can authorize a DELETE; a stale one drops to the (causal-
-      // only) fallback, which here finds no boundary → the user is skipped.
+      // Installs upgraded from before the causal-marker migration can carry a
+      // `latestFullStateSeq` pointing at a legacy REPAIR (repairBaseServerSeq
+      // NULL) — the migration added no backfill to clear it. The sweep no
+      // longer consults the marker at all: the boundary groupBy selects only
+      // causal full-state rows, so a legacy REPAIR (with or without a stale
+      // marker pointing at it) never authorizes pruning.
       const service = getSyncService();
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 
@@ -3228,7 +3299,6 @@ describe('SyncService', () => {
 
       expect(totalDeleted).toBe(0);
       expect(affectedUserIds).not.toContain(userId);
-      expect(prisma.operation.findFirst).toHaveBeenCalled();
       expect(Array.from(testState.operations.keys())).toEqual([
         'old-op-1',
         'old-op-2',
@@ -3238,15 +3308,14 @@ describe('SyncService', () => {
       ]);
     });
 
-    it('does not prune history behind a legacy REPAIR without a causal base (fallback path)', async () => {
-      // Regression guard: the fallback used when `latestFullStateSeq` is absent
-      // (legacy/pre-marker installs) must use the causal-only full-state
-      // predicate, like every other full-state query. A legacy REPAIR carries
-      // appDataComplete but no `repairBaseServerSeq` proving its state is current
-      // as of its seq, so it must NEVER authorize history pruning — ops between
-      // its logical base and its seq would be lost for a device replaying from
-      // before it. Before the fix this fallback used a raw opType filter that
-      // selected the legacy REPAIR as the prune boundary and deleted ops 1–3.
+    it('does not prune history behind a legacy REPAIR without a causal base (no marker)', async () => {
+      // The boundary query must use the causal-only full-state predicate, like
+      // every other full-state query. A legacy REPAIR carries appDataComplete
+      // but no `repairBaseServerSeq` proving its state is current as of its
+      // seq, so it must NEVER authorize history pruning — ops between its
+      // logical base and its seq would be lost for a device replaying from
+      // before it. Such a user has no causal boundary and never becomes a
+      // sweep candidate.
       const service = getSyncService();
       const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
@@ -3290,9 +3359,6 @@ describe('SyncService', () => {
 
         expect(totalDeleted).toBe(0);
         expect(affectedUserIds).not.toContain(userId);
-        // The fallback query ran (marker absent) but excluded the legacy REPAIR,
-        // so the user has no replay base and is skipped rather than pruned.
-        expect(prisma.operation.findFirst).toHaveBeenCalled();
         expect(Array.from(testState.operations.keys())).toEqual([
           'old-op-1',
           'old-op-2',
@@ -3300,15 +3366,12 @@ describe('SyncService', () => {
           'old-op-4',
           'old-op-5',
         ]);
-        expect(warnSpy).toHaveBeenCalledWith(
-          'Cleanup [old-ops]: skipped 1 eligible user(s) without a full-state replay base; their operation histories were left intact.',
-        );
       } finally {
         warnSpy.mockRestore();
       }
     });
 
-    it('drains a single user up to the per-run budget', async () => {
+    it('drains a user past the per-run budget rather than truncating their prefix', async () => {
       const service = getSyncService();
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
@@ -3350,9 +3413,19 @@ describe('SyncService', () => {
 
       // Per-run budget is larger than one delete batch. The inner drain loop keeps
       // deleting until the budget hits zero, not just one batch.
-      expect(totalDeleted).toBe(250);
+      // Regression for the truncated-prefix bug: with a 250-op budget and a
+      // 255-op prefix, the drain used to stop at 250 and leave a plain CRT
+      // delta (seq 251) as the lowest surviving row, which makes every
+      // restore target throw SNAPSHOT_REPLAY_INCOMPLETE. The budget gates
+      // which users we start, not where we stop inside one, so this user
+      // drains whole and overshoots by 5.
+      expect(totalDeleted).toBe(255);
       expect(affectedUserIds).toEqual([userId]);
-      expect(testState.operations.size).toBe(6);
+      const survivors = Array.from(testState.operations.values())
+        .filter((op) => op.userId === userId)
+        .sort((a, b) => a.serverSeq - b.serverSeq);
+      expect(survivors.map((op) => op.serverSeq)).toEqual([totalOps + 1]);
+      expect(survivors[0].opType).toBe('SYNC_IMPORT');
     });
 
     it('marks user for reconcile when a later batch throws mid-loop', async () => {
@@ -3428,18 +3501,24 @@ describe('SyncService', () => {
       process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '50';
       process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = '250';
       const user2Id = 2;
+      const user3Id = 3;
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
 
-      testState.users.set(user2Id, {
-        id: user2Id,
-        email: 'test2@test.com',
-        storageQuotaBytes: BigInt(100 * 1024 * 1024),
-        storageUsedBytes: BigInt(0),
-      });
+      for (const uid of [user2Id, user3Id]) {
+        testState.users.set(uid, {
+          id: uid,
+          email: `test${uid}@test.com`,
+          storageQuotaBytes: BigInt(100 * 1024 * 1024),
+          storageUsedBytes: BigInt(0),
+        });
+      }
 
-      // Each user has 200 stale ops — more than the 250 per-run budget combined.
+      // Three users × 200 stale ops against a 250-op budget: user1 drains
+      // whole (overshooting nothing), user2 starts because 50 budget remained
+      // and also drains whole (overshooting by 150), and user3 is never
+      // started because the budget is spent. No prefix is ever truncated.
       const opsPerUser = 200;
-      for (const uid of [userId, user2Id]) {
+      for (const uid of [userId, user2Id, user3Id]) {
         for (let i = 1; i <= opsPerUser; i++) {
           testState.operations.set(`u${uid}-op-${i}`, {
             id: `u${uid}-op-${i}`,
@@ -3476,16 +3555,30 @@ describe('SyncService', () => {
         lastSnapshotSeq: opsPerUser + 1,
         snapshotAt: BigInt(Date.now()),
       });
+      testState.userSyncStates.set(user3Id, {
+        userId: user3Id,
+        lastSeq: opsPerUser + 1,
+        lastSnapshotSeq: opsPerUser + 1,
+        snapshotAt: BigInt(Date.now() + 1000),
+      });
 
       const { totalDeleted, affectedUserIds } =
         await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
       delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
       delete process.env.OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN;
 
-      // user1 drains fully, user2 only gets the remaining budget.
-      expect(totalDeleted).toBe(250);
+      expect(totalDeleted).toBe(400);
       expect(affectedUserIds).toEqual([userId, user2Id]);
-      expect(testState.operations.size).toBe(152);
+      // Every touched user is left with their full-state op as the lowest
+      // surviving row; the untouched tail user keeps their whole history.
+      const lowestSurvivorOf = (uid: number): Record<string, unknown> =>
+        Array.from(testState.operations.values())
+          .filter((op) => op.userId === uid)
+          .sort((a, b) => a.serverSeq - b.serverSeq)[0];
+      expect(lowestSurvivorOf(userId).opType).toBe('SYNC_IMPORT');
+      expect(lowestSurvivorOf(user2Id).opType).toBe('SYNC_IMPORT');
+      expect(lowestSurvivorOf(user3Id).serverSeq).toBe(1);
+      expect(testState.operations.size).toBe(2 + opsPerUser + 1);
     });
 
     it('should delete old operations from all users', async () => {
