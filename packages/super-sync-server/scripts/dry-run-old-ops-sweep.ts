@@ -98,7 +98,7 @@ const findBadBoundaries = async (
 /** Residual-cohort bucket for a user the sweep cannot reach. */
 const residualCategory = (r: PerUserRow): string => {
   if (r.was_capped) {
-    return 'snapshot-capped (cursor blocks newer boundary)';
+    return 'snapshot-capped (cached blob blocks newer boundary)';
   }
   if (r.any_causal_seq === null) {
     return r.has_legacy_repair ? 'legacy-REPAIR-only' : 'no full-state op at all';
@@ -152,9 +152,9 @@ const main = async (): Promise<void> => {
         ) AS was_capped
       FROM joined j
     ),
-    -- MATERIALIZED because protected_from_seq is referenced three times
-    -- below; inlined, Postgres re-evaluates the correlated cap aggregate at
-    -- every reference site.
+    -- MATERIALIZED is already the default here (two CTE references below), so
+    -- this only pins it: an edit that leaves a single reference must not let
+    -- Postgres inline the correlated cap aggregate and re-run it per row.
     resolved AS MATERIALIZED (
       SELECT
         c.*,
@@ -166,11 +166,11 @@ const main = async (): Promise<void> => {
         ) ELSE c.causal_boundary_seq END AS protected_from_seq
       FROM capped c
     ),
-    -- One grouped pass, NOT a per-user lateral/correlated probe: with no index
-    -- on op_type, per-user probing re-walks large histories once per user and
-    -- ran for hours on the 8M-row hosted table. Grouped scans finish in
-    -- minutes. retained_from_boundary is derived from op_count so the
-    -- largest of the three ranges is never scanned at all.
+    -- Only the prefix ranges are joined, so retained_from_boundary can be
+    -- derived from op_count and the largest of the three ranges is never
+    -- scanned. Note this does NOT pin a plan: Postgres may still execute the
+    -- join as a per-user nested loop. If the gate is slow on a large table,
+    -- EXPLAIN it rather than trusting the shape.
     counts AS (
       SELECT
         r.user_id,
@@ -194,10 +194,11 @@ const main = async (): Promise<void> => {
       r.has_plaintext_rows,
       r.was_capped,
       r.protected_from_seq,
-      CASE WHEN r.protected_from_seq > 1
-        THEN COALESCE(ct.would_delete, 0) ELSE 0 END AS would_delete,
-      CASE WHEN r.protected_from_seq > 1
-        THEN COALESCE(ct.fresh_prefix, 0) ELSE 0 END AS fresh_prefix,
+      -- No CASE needed: the counts join filters protected_from_seq > 1, so a
+      -- non-prunable user has no row there and COALESCE already yields 0.
+      COALESCE(ct.would_delete, 0) AS would_delete,
+      COALESCE(ct.fresh_prefix, 0) AS fresh_prefix,
+      -- This one DOES need the CASE — op_count - 0 - 0 is op_count, not 0.
       CASE WHEN r.protected_from_seq > 1
         THEN r.op_count - COALESCE(ct.would_delete, 0) - COALESCE(ct.fresh_prefix, 0)
         ELSE 0 END AS retained_from_boundary
@@ -212,11 +213,9 @@ const main = async (): Promise<void> => {
   const residual = perUser.filter(
     (r) => r.protected_from_seq === null || r.protected_from_seq <= 1,
   );
-  // Production prunes a prefix whole or not at all: one op inside retention
-  // below the boundary skips the whole user, because pruning around it would
-  // leave a plain delta as the lowest surviving op and break replay
-  // (storage-quota.service.ts). Mirror that here or the gate over-reports.
-  const skippedForFreshPrefix = prunable.filter((r) => n(r.fresh_prefix) > 0);
+  // A prefix is pruned whole or not at all — see
+  // StorageQuotaService.deleteOldSyncedOpsForAllUsers for why. Mirror that
+  // skip here or the gate over-reports what the sweep would delete.
   const affected = prunable.filter(
     (r) => n(r.fresh_prefix) === 0 && n(r.would_delete) > 0,
   );
@@ -232,8 +231,8 @@ const main = async (): Promise<void> => {
     })),
   );
 
-  // Safety check 2: while a cached-snapshot cursor exists, the boundary may
-  // never exceed it — pruning above the cursor would eat into the cached
+  // Safety check 2: while a cached snapshot blob exists, the boundary may
+  // never exceed its cursor — pruning above it would eat into the cached
   // snapshot's replay tail (the restore path).
   const tailViolations = prunable.filter(
     (r) =>
@@ -254,7 +253,10 @@ const main = async (): Promise<void> => {
   console.log(
     `    boundary capped by snapshot:    ${prunable.filter((r) => r.was_capped).length}`,
   );
-  console.log(`    skipped, prefix not fully aged:  ${skippedForFreshPrefix.length}`);
+  console.log(
+    `    skipped, prefix not fully aged:  ` +
+      `${prunable.filter((r) => n(r.fresh_prefix) > 0).length}`,
+  );
   console.log(`  unreachable (no usable boundary): ${residual.length}`);
   console.log(`total rows the sweep would delete: ${totalWouldDelete}`);
   console.log(
@@ -269,7 +271,6 @@ const main = async (): Promise<void> => {
       user_id: r.user_id,
       boundary_seq: r.protected_from_seq,
       would_delete: n(r.would_delete),
-      fresh_prefix_kept: n(r.fresh_prefix),
       base_plus_tail_kept: n(r.retained_from_boundary),
       capped: r.was_capped,
     }));

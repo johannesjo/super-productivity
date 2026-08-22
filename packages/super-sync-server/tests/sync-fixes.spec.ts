@@ -166,13 +166,14 @@ vi.mock('../src/db', async () => {
         return callback(tx);
       }),
       operation: {
-        findFirst: vi.fn().mockImplementation(async (args: any) => {
-          const freshBelowBoundary = mockOperationFindFirstFreshBelowBoundary(
-            testOperations,
-            args,
-          );
-          return freshBelowBoundary === undefined ? null : freshBelowBoundary;
-        }),
+        // No other findFirst shape reaches this mock, so the helper's
+        // "not my query" sentinel collapses straight to null.
+        findFirst: vi
+          .fn()
+          .mockImplementation(
+            async (args: any) =>
+              mockOperationFindFirstFreshBelowBoundary(testOperations, args) ?? null,
+          ),
         findMany: vi.fn().mockImplementation(async (args: any) => {
           const ops = Array.from(testOperations.values());
           return ops

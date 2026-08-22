@@ -110,13 +110,30 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       receivedAt: overrides.receivedAt,
     });
 
-  /** Prefix (1–3) + causal base (4) + tail (5), the shape both cap tests use. */
-  const seedPrefixBaseTail = async (userId: number): Promise<void> => {
+  /**
+   * Prefix (1–3) + causal base (4) + tail (5), plus a sync-state row whose
+   * cursor is frozen at seq 1. The two cap tests must differ by exactly one
+   * thing — whether the cached snapshot blob is still there — so they share
+   * this seeder rather than each spelling the row out.
+   */
+  const seedPrefixBaseTail = async (
+    userId: number,
+    opts: { cachedBlob: boolean },
+  ): Promise<void> => {
     await seedImportOp(userId, 1);
     await seedOp(userId, 2);
     await seedOp(userId, 3);
     await seedImportOp(userId, 4);
     await seedOp(userId, 5);
+    await prisma.userSyncState.create({
+      data: {
+        userId,
+        lastSeq: 5,
+        lastSnapshotSeq: 1,
+        snapshotAt: BigInt(now - 100 * DAY_MS),
+        snapshotData: opts.cachedBlob ? Buffer.from('legacy-cached-snapshot') : undefined,
+      },
+    });
   };
 
   const runSweep = (): Promise<{ totalDeleted: number; affectedUserIds: number[] }> =>
@@ -286,11 +303,9 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
   });
 
   it('keeps a partly-fresh prefix whole rather than pruning around the fresh op', async () => {
-    // Seq 1 is past the cutoff, seq 2 is inside retention. Deleting seq 1
-    // alone would leave the plain delta at seq 2 as the lowest surviving op,
-    // and `_resolveExpectedFirstSeq` (op-replay.ts) only tolerates a leading
-    // gap when the lowest survivor is a causal full-state op — so a restore
-    // would fail with SNAPSHOT_REPLAY_INCOMPLETE. The whole prefix waits.
+    // Seq 1 is past the cutoff, seq 2 is inside retention. Pruning around
+    // seq 2 would leave a plain delta as the lowest surviving op and break
+    // replay — see StorageQuotaService.deleteOldSyncedOpsForAllUsers.
     await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 1);
     await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 2, {
       receivedAt: BigInt(now - 10 * DAY_MS),
@@ -306,22 +321,13 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     expect(affectedUserIds).not.toContain(SNAPSHOTLESS_IMPORT_USER_ID);
   });
 
-  it('caps the boundary at lastSnapshotSeq while a cached snapshot cursor exists', async () => {
+  it('caps the boundary at lastSnapshotSeq while a cached snapshot blob exists', async () => {
     // Stuck-snapshot cohort (e.g. issue user 1515): cached snapshot frozen at
-    // seq 1. While the cursor exists, pruning must never pass it — the newest
-    // causal full-state op below the cap is seq 1, which authorizes nothing.
-    // The cap lifts when the E2EE eradication sweep nulls the cached snapshot
-    // (next test).
-    await seedPrefixBaseTail(STUCK_SNAPSHOT_USER_ID);
-    await prisma.userSyncState.create({
-      data: {
-        userId: STUCK_SNAPSHOT_USER_ID,
-        lastSeq: 5,
-        lastSnapshotSeq: 1,
-        snapshotAt: BigInt(now - 100 * DAY_MS),
-        snapshotData: Buffer.from('legacy-cached-snapshot'),
-      },
-    });
+    // seq 1. While the blob exists, pruning must never pass its cursor — the
+    // newest causal full-state op below the cap is seq 1, which authorizes
+    // nothing. The cap lifts when the E2EE eradication sweep nulls the cached
+    // snapshot (next test).
+    await seedPrefixBaseTail(STUCK_SNAPSHOT_USER_ID, { cachedBlob: true });
 
     const { affectedUserIds } = await runSweep();
 
@@ -330,21 +336,13 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
   });
 
   it('unsticks the capped user once the cached snapshot blob is dropped (post-eradication)', async () => {
-    // Same row as the previous test minus `snapshotData`: the E2EE
+    // Identical to the previous test but for `cachedBlob`: the E2EE
     // eradication plan nulls the BLOB and leaves `lastSnapshotSeq` behind
     // (docs/e2ee-legacy-data-eradication-plan.md). `generateSnapshotAtSeq`
     // uses the cached base only when the blob is present, so the cap must key
     // on the blob too — keying it on the stale cursor would exempt this user
     // from retention forever, which is the #9688 failure.
-    await seedPrefixBaseTail(STUCK_SNAPSHOT_USER_ID);
-    await prisma.userSyncState.create({
-      data: {
-        userId: STUCK_SNAPSHOT_USER_ID,
-        lastSeq: 5,
-        lastSnapshotSeq: 1,
-        snapshotAt: BigInt(now - 100 * DAY_MS),
-      },
-    });
+    await seedPrefixBaseTail(STUCK_SNAPSHOT_USER_ID, { cachedBlob: false });
 
     const { affectedUserIds } = await runSweep();
 

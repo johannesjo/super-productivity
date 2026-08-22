@@ -200,18 +200,18 @@ export function mockOperationFindFirstFreshBelowBoundary(
       serverSeq?: { lt?: number };
       receivedAt?: { gte?: bigint };
     };
+    select?: Record<string, boolean>;
   },
-): { serverSeq: number } | null | undefined {
-  const serverSeqLt = args.where?.serverSeq?.lt;
-  const receivedAtGte = args.where?.receivedAt?.gte;
-  if (serverSeqLt === undefined || receivedAtGte === undefined) {
+): any | null | undefined {
+  const { userId, serverSeq, receivedAt } = args.where ?? {};
+  if (serverSeq?.lt === undefined || receivedAt?.gte === undefined) {
     return undefined;
   }
   const match = Array.from(operations.values()).find(
     (op) =>
-      op.userId === args.where?.userId &&
-      op.serverSeq < serverSeqLt &&
-      op.receivedAt >= receivedAtGte,
+      op.userId === userId &&
+      op.serverSeq < serverSeq.lt! &&
+      op.receivedAt >= receivedAt.gte!,
   );
-  return match ? { serverSeq: match.serverSeq } : null;
+  return match ? applyOperationSelect(match, args.select) : null;
 }

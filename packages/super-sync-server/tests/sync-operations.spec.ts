@@ -545,6 +545,23 @@ describe('Sync Operations', () => {
   let deviceService: DeviceService;
   let operationDownloadService: OperationDownloadService;
 
+  const createFullStateOp = (
+    opType: 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR',
+    authorClientId: string,
+    vectorClock: Record<string, number>,
+  ): Operation => ({
+    id: uuidv7(),
+    clientId: authorClientId,
+    actionType:
+      opType === 'REPAIR' ? '[Repair] Auto Repair' : '[SP_ALL] Load(import) all data',
+    opType,
+    entityType: 'ALL',
+    payload: {},
+    vectorClock,
+    timestamp: Date.now(),
+    schemaVersion: 1,
+  });
+
   const createOp = (
     entityId: string,
     opType: 'CRT' | 'UPD' | 'DEL' = 'CRT',
@@ -578,27 +595,6 @@ describe('Sync Operations', () => {
   });
 
   describe('Full-state op upload', () => {
-    const createFullStateOp = (
-      opType: 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR',
-      authorClientId: string,
-      vectorClock: Record<string, number>,
-    ): Operation => ({
-      id: uuidv7(),
-      clientId: authorClientId,
-      actionType:
-        opType === 'BACKUP_IMPORT'
-          ? '[SP_ALL] Load(import) all data'
-          : opType === 'REPAIR'
-            ? '[Repair] Auto Repair'
-            : '[SP_ALL] Load(import) all data',
-      opType,
-      entityType: 'ALL',
-      payload: {},
-      vectorClock,
-      timestamp: Date.now(),
-      schemaVersion: 1,
-    });
-
     it('persists the prior-history aggregate merged with the snapshot op clock', async () => {
       // Regression guard: a BACKUP_IMPORT uploads with a fresh `{ newClient: 1 }`
       // clock by design (see backup.service.ts). If the server persisted that
@@ -927,6 +923,12 @@ describe('Sync Operations', () => {
   });
 
   describe('Cleanup Operations', () => {
+    const survivingSeqs = (): number[] =>
+      Array.from(testState.operations.values())
+        .filter((op) => op.userId === userId)
+        .map((op) => op.serverSeq)
+        .sort((a, b) => a - b);
+
     it('should delete old synced operations', async () => {
       const service = getSyncService();
 
@@ -936,17 +938,7 @@ describe('Sync Operations', () => {
         createOp('task-2', 'CRT'),
       ]);
       await service.uploadOps(userId, clientId, [
-        {
-          id: uuidv7(),
-          clientId,
-          actionType: '[SP_ALL] Load(import) all data',
-          opType: 'SYNC_IMPORT',
-          entityType: 'ALL',
-          payload: {},
-          vectorClock: { [clientId]: 2 },
-          timestamp: Date.now(),
-          schemaVersion: 1,
-        },
+        createFullStateOp('SYNC_IMPORT', clientId, { [clientId]: 2 }),
       ]);
 
       // Set up userSyncState with snapshot info (required for cleanup logic)
@@ -978,21 +970,14 @@ describe('Sync Operations', () => {
       expect(result.affectedUserIds).toContain(userId);
 
       // Only the causal full-state boundary survives.
-      const remainingSeqs = Array.from(testState.operations.values())
-        .filter((op) => op.userId === userId)
-        .map((op) => op.serverSeq)
-        .sort((a, b) => a - b);
-      expect(remainingSeqs).toEqual([3]);
+      expect(survivingSeqs()).toEqual([3]);
     });
 
     it('skips a user whose prefix still holds an op inside retention', async () => {
-      // Regression for the partial-prefix prune: deletion filters on
-      // `receivedAt < cutoff` as well as `serverSeq < boundary`, so pruning
-      // around a still-fresh op would leave a plain delta (seq 2) as the
-      // lowest surviving row. `_resolveExpectedFirstSeq` only tolerates a
-      // leading gap when the lowest survivor is a causal full-state op, so
-      // that state makes every restore point throw
-      // SNAPSHOT_REPLAY_INCOMPLETE. The sweep must skip the user instead.
+      // Regression for the partial-prefix prune: pruning around the still-
+      // fresh seq 2 would leave a plain delta as the lowest surviving row and
+      // break every restore point — see
+      // StorageQuotaService.deleteOldSyncedOpsForAllUsers for the full why.
       const service = getSyncService();
 
       await service.uploadOps(userId, clientId, [
@@ -1000,17 +985,7 @@ describe('Sync Operations', () => {
         createOp('task-2', 'CRT'),
       ]);
       await service.uploadOps(userId, clientId, [
-        {
-          id: uuidv7(),
-          clientId,
-          actionType: '[SP_ALL] Load(import) all data',
-          opType: 'SYNC_IMPORT',
-          entityType: 'ALL',
-          payload: {},
-          vectorClock: { [clientId]: 2 },
-          timestamp: Date.now(),
-          schemaVersion: 1,
-        },
+        createFullStateOp('SYNC_IMPORT', clientId, { [clientId]: 2 }),
       ]);
 
       // seq 1 aged past the cutoff, seq 2 still inside retention.
@@ -1025,11 +1000,7 @@ describe('Sync Operations', () => {
 
       expect(result.totalDeleted).toBe(0);
       expect(result.affectedUserIds).not.toContain(userId);
-      const remainingSeqs = Array.from(testState.operations.values())
-        .filter((op) => op.userId === userId)
-        .map((op) => op.serverSeq)
-        .sort((a, b) => a - b);
-      expect(remainingSeqs).toEqual([1, 2, 3]);
+      expect(survivingSeqs()).toEqual([1, 2, 3]);
     });
 
     it('should delete stale devices', async () => {
