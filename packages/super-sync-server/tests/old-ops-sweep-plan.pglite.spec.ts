@@ -44,8 +44,7 @@ const CREATE_TABLE = `
     server_seq              integer NOT NULL,
     op_type                 text NOT NULL,
     -- bigint: production stores receivedAt as Prisma BigInt (epoch ms).
-    received_at             bigint NOT NULL,
-    repair_base_server_seq  integer
+    received_at             bigint NOT NULL
   );
 `;
 
@@ -75,6 +74,9 @@ const DOOMED_OPS_SQL = `
   LIMIT $4
 `;
 
+const INSERT_COLS =
+  'INSERT INTO operations (id,user_id,client_id,server_seq,op_type,received_at)';
+const INSERT_CHUNK = 5_000;
 const OPS_PER_USER = 20_000;
 const OTHER_USERS = 8;
 const DENSE_USER = 1;
@@ -98,24 +100,18 @@ describe('old-ops sweep batch selection — what LIMIT actually bounds', () => {
       receivedAt: (i: number) => number,
     ): Promise<void> => {
       const rows: string[] = [];
+      const flush = async (): Promise<void> => {
+        if (!rows.length) return;
+        await db.exec(`${INSERT_COLS} VALUES ${rows.join(',')}`);
+        rows.length = 0;
+      };
       for (let i = 1; i <= count; i++) {
         rows.push(
-          `('op-${userId}-${i}',${userId},'c${userId}',${i},'CRT',${receivedAt(i)},NULL)`,
+          `('op-${userId}-${i}',${userId},'c${userId}',${i},'CRT',${receivedAt(i)})`,
         );
-        if (rows.length === 5_000) {
-          await db.exec(
-            `INSERT INTO operations (id,user_id,client_id,server_seq,op_type,` +
-              `received_at,repair_base_server_seq) VALUES ${rows.join(',')}`,
-          );
-          rows.length = 0;
-        }
+        if (rows.length === INSERT_CHUNK) await flush();
       }
-      if (rows.length) {
-        await db.exec(
-          `INSERT INTO operations (id,user_id,client_id,server_seq,op_type,` +
-            `received_at,repair_base_server_seq) VALUES ${rows.join(',')}`,
-        );
-      }
+      await flush();
     };
 
     // Dense: every op predates the retention cutoff, so every one is deletable.
