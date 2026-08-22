@@ -19,6 +19,7 @@ vi.mock('../src/db', async () => {
     entityArrayBranchRows,
     mockOperationGroupByMaxSeq,
     mockOperationFindFirstFreshBelowBoundary,
+    mockUserSyncStateFindMany,
     matchesOperationAlternative,
     testState: state,
   } = await import('./sync.service.test-state');
@@ -309,18 +310,11 @@ vi.mock('../src/db', async () => {
         }
         return null;
       }),
-      findMany: vi.fn().mockImplementation(async (args: any) => {
-        return Array.from(state.userSyncStates.values()).filter((s: any) => {
-          if (
-            args?.where?.lastSnapshotSeq?.not !== undefined &&
-            s.lastSnapshotSeq == null
-          )
-            return false;
-          if (args?.where?.snapshotAt?.not !== undefined && s.snapshotAt == null)
-            return false;
-          return true;
-        });
-      }),
+      findMany: vi
+        .fn()
+        .mockImplementation(async (args: any) =>
+          mockUserSyncStateFindMany(state.userSyncStates, args),
+        ),
       deleteMany: vi.fn().mockImplementation(async (args: any) => {
         let deleted = 0;
         for (const [key, syncState] of state.userSyncStates) {
@@ -717,18 +711,11 @@ vi.mock('../src/db', async () => {
           return result;
         }),
         update: vi.fn().mockResolvedValue({}),
-        findMany: vi.fn().mockImplementation(async (args: any) => {
-          return Array.from(state.userSyncStates.values()).filter((s: any) => {
-            if (
-              args?.where?.lastSnapshotSeq?.not !== undefined &&
-              s.lastSnapshotSeq == null
-            )
-              return false;
-            if (args?.where?.snapshotAt?.not !== undefined && s.snapshotAt == null)
-              return false;
-            return true;
-          });
-        }),
+        findMany: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockUserSyncStateFindMany(state.userSyncStates, args),
+          ),
         updateMany: vi.fn().mockImplementation(async (args: any) => {
           let updated = 0;
           for (const [, syncState] of state.userSyncStates) {
@@ -3095,6 +3082,9 @@ describe('SyncService', () => {
         lastSeq: 5,
         lastSnapshotSeq: 4,
         snapshotAt: BigInt(Date.now()),
+        // The cap keys on the cached BLOB, not on the cursor (#9688): without
+        // snapshotData this user takes the uncapped path and prunes to seq 5.
+        snapshotData: Buffer.from('legacy-cached-snapshot'),
       });
 
       try {
@@ -3111,6 +3101,55 @@ describe('SyncService', () => {
       } finally {
         warnSpy.mockRestore();
       }
+    });
+
+    it('prunes past a stale snapshot cursor once the cached blob is gone', async () => {
+      // Same shape as the capped case above, minus the cached snapshot BLOB.
+      // Under mandatory E2EE the server stops caching snapshots, so
+      // lastSnapshotSeq freezes at a stale value for the whole fleet (#9688):
+      // capping on the cursor would exempt everyone from the sweep forever.
+      const service = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      for (let i = 1; i <= 4; i++) {
+        testState.operations.set(`old-op-${i}`, {
+          id: `old-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          entityIds: [],
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+          repairBaseServerSeq: null,
+        });
+      }
+      seedFullStateOp(userId, 5, BigInt(cutoffTime - 1));
+
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 5,
+        lastSnapshotSeq: 4,
+        snapshotAt: BigInt(Date.now()),
+      });
+
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(totalDeleted).toBe(4);
+      expect(affectedUserIds).toContain(userId);
+
+      const remaining = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
+        .ops;
+      expect(remaining.map((op) => op.serverSeq)).toEqual([5]);
     });
 
     it('should preserve the latest full-state operation and its replay tail', async () => {

@@ -14,6 +14,7 @@ vi.mock('../src/db', async () => {
     entityArrayBranchRows,
     mockOperationGroupByMaxSeq,
     mockOperationFindFirstFreshBelowBoundary,
+    mockUserSyncStateFindMany,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -341,9 +342,11 @@ vi.mock('../src/db', async () => {
         findUnique: vi.fn().mockImplementation(async (args: any) => {
           return state.userSyncStates.get(args.where.userId) || null;
         }),
-        findMany: vi.fn().mockImplementation(async () => {
-          return Array.from(state.userSyncStates.values());
-        }),
+        findMany: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockUserSyncStateFindMany(state.userSyncStates, args),
+          ),
       },
       operation: {
         findMany: vi.fn().mockImplementation(async (args: any) => {

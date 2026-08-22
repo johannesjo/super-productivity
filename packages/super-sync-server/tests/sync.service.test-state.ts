@@ -215,3 +215,41 @@ export function mockOperationFindFirstFreshBelowBoundary(
   );
   return match ? applyOperationSelect(match, args.select) : null;
 }
+
+type UserSyncStateNotNullFilter = { not: null };
+
+/**
+ * Mocks `prisma.userSyncState.findMany` for the where-clauses the server
+ * actually issues, and throws on any other key rather than ignoring it.
+ *
+ * The old-ops sweep keys its snapshot cap on `snapshotData` (#9688): only a
+ * user still holding a cached snapshot BLOB may have their prune boundary
+ * pulled down to `lastSnapshotSeq`. A mock that drops the filter hands every
+ * seeded user back as a blob holder, so the uncapped path — the one almost
+ * every user takes under mandatory E2EE — is never exercised and re-keying the
+ * cap onto the cursor passes the whole unit suite.
+ */
+export function mockUserSyncStateFindMany(
+  userSyncStates: Map<number, any>,
+  args?: {
+    where?: {
+      snapshotData?: UserSyncStateNotNullFilter;
+      lastSnapshotSeq?: UserSyncStateNotNullFilter;
+      snapshotAt?: UserSyncStateNotNullFilter;
+    };
+  },
+): any[] {
+  const where = args?.where ?? {};
+  const supported = ['snapshotData', 'lastSnapshotSeq', 'snapshotAt'] as const;
+  const unsupported = Object.keys(where).filter(
+    (k) => !supported.includes(k as (typeof supported)[number]),
+  );
+  if (unsupported.length > 0) {
+    throw new Error(
+      `mockUserSyncStateFindMany: unsupported where keys ${unsupported.join(', ')}`,
+    );
+  }
+  return Array.from(userSyncStates.values()).filter((s: any) =>
+    supported.every((key) => where[key]?.not !== null || s[key] != null),
+  );
+}
