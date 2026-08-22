@@ -179,3 +179,39 @@ export function mockOperationGroupByMaxSeq(
     _max: { serverSeq: maxSeq },
   }));
 }
+
+/**
+ * Mocks the old-ops sweep's "does the prefix still hold an op inside
+ * retention?" probe:
+ * `findFirst({ where: { userId, serverSeq: { lt }, receivedAt: { gte } } })`.
+ *
+ * Returns `undefined` when `args` is not that shape so callers fall through to
+ * their own branches. Spelled out here because the hand-written findFirst mocks
+ * silently ignore filters they don't know: one would then answer this probe
+ * with an unrelated row (never prune) and another with null (always prune) —
+ * opposite wrong answers on the guard that keeps a plain delta from becoming
+ * the lowest surviving op.
+ */
+export function mockOperationFindFirstFreshBelowBoundary(
+  operations: Map<string, any>,
+  args: {
+    where?: {
+      userId?: number;
+      serverSeq?: { lt?: number };
+      receivedAt?: { gte?: bigint };
+    };
+  },
+): { serverSeq: number } | null | undefined {
+  const serverSeqLt = args.where?.serverSeq?.lt;
+  const receivedAtGte = args.where?.receivedAt?.gte;
+  if (serverSeqLt === undefined || receivedAtGte === undefined) {
+    return undefined;
+  }
+  const match = Array.from(operations.values()).find(
+    (op) =>
+      op.userId === args.where?.userId &&
+      op.serverSeq < serverSeqLt &&
+      op.receivedAt >= receivedAtGte,
+  );
+  return match ? { serverSeq: match.serverSeq } : null;
+}

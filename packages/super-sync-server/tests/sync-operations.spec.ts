@@ -13,6 +13,7 @@ vi.mock('../src/db', async () => {
     isEntityArrayBranchQuery,
     entityArrayBranchRows,
     mockOperationGroupByMaxSeq,
+    mockOperationFindFirstFreshBelowBoundary,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -423,6 +424,11 @@ vi.mock('../src/db', async () => {
           return null;
         }),
         findFirst: vi.fn().mockImplementation(async (args: any) => {
+          const freshBelowBoundary = mockOperationFindFirstFreshBelowBoundary(
+            state.operations,
+            args,
+          );
+          if (freshBelowBoundary !== undefined) return freshBelowBoundary;
           const ops = Array.from(state.operations.values()).filter((op: any) => {
             if (args.where?.userId !== undefined && args.where.userId !== op.userId)
               return false;
@@ -953,10 +959,12 @@ describe('Sync Operations', () => {
         opCount: 3,
       });
 
-      // Manually set one operation to be "old" (received 100 days ago)
+      // Age the whole prefix below the SYNC_IMPORT boundary. The prefix is
+      // pruned whole or not at all, so leaving one op inside retention would
+      // skip the user entirely (covered by the next test).
       const hundredDaysMs = MS_PER_DAY * 100;
-      for (const [id, op] of testState.operations.entries()) {
-        if ((op as any).serverSeq === 1) {
+      for (const [, op] of testState.operations.entries()) {
+        if ((op as any).serverSeq < 3) {
           (op as any).receivedAt = BigInt(Date.now() - hundredDaysMs);
         }
       }
@@ -966,15 +974,62 @@ describe('Sync Operations', () => {
       const cutoff = Date.now() - ninetyDaysMs;
       const result = await service.deleteOldSyncedOpsForAllUsers(cutoff);
 
-      expect(result.totalDeleted).toBe(1);
+      expect(result.totalDeleted).toBe(2);
       expect(result.affectedUserIds).toContain(userId);
 
-      // Verify correct operation was deleted
+      // Only the causal full-state boundary survives.
       const remainingSeqs = Array.from(testState.operations.values())
         .filter((op) => op.userId === userId)
         .map((op) => op.serverSeq)
         .sort((a, b) => a - b);
-      expect(remainingSeqs).toEqual([2, 3]);
+      expect(remainingSeqs).toEqual([3]);
+    });
+
+    it('skips a user whose prefix still holds an op inside retention', async () => {
+      // Regression for the partial-prefix prune: deletion filters on
+      // `receivedAt < cutoff` as well as `serverSeq < boundary`, so pruning
+      // around a still-fresh op would leave a plain delta (seq 2) as the
+      // lowest surviving row. `_resolveExpectedFirstSeq` only tolerates a
+      // leading gap when the lowest survivor is a causal full-state op, so
+      // that state makes every restore point throw
+      // SNAPSHOT_REPLAY_INCOMPLETE. The sweep must skip the user instead.
+      const service = getSyncService();
+
+      await service.uploadOps(userId, clientId, [
+        createOp('task-1', 'CRT'),
+        createOp('task-2', 'CRT'),
+      ]);
+      await service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'SYNC_IMPORT',
+          entityType: 'ALL',
+          payload: {},
+          vectorClock: { [clientId]: 2 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      // seq 1 aged past the cutoff, seq 2 still inside retention.
+      for (const [, op] of testState.operations.entries()) {
+        if ((op as any).serverSeq === 1) {
+          (op as any).receivedAt = BigInt(Date.now() - MS_PER_DAY * 100);
+        }
+      }
+
+      const cutoff = Date.now() - MS_PER_DAY * 90;
+      const result = await service.deleteOldSyncedOpsForAllUsers(cutoff);
+
+      expect(result.totalDeleted).toBe(0);
+      expect(result.affectedUserIds).not.toContain(userId);
+      const remainingSeqs = Array.from(testState.operations.values())
+        .filter((op) => op.userId === userId)
+        .map((op) => op.serverSeq)
+        .sort((a, b) => a - b);
+      expect(remainingSeqs).toEqual([1, 2, 3]);
     });
 
     it('should delete stale devices', async () => {

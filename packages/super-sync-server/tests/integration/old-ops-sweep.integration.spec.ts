@@ -9,7 +9,10 @@
  *     survive (regression for the inverted snapshotAt >= cutoff gate),
  *   - snapshotless, encrypted-only and state-row-less histories are pruned
  *     from the operation stream's own causal boundary (#9688),
- *   - a cached-snapshot cursor caps that boundary while it exists,
+ *   - a cached snapshot BLOB caps that boundary while it exists, and the cap
+ *     lifts once the blob is dropped even if the cursor is left behind,
+ *   - a prefix holding an op inside retention is kept whole, never pruned
+ *     around,
  *   - a user whose only full-state op is a legacy REPAIR (no causal base
  *     cursor) is skipped entirely.
  *
@@ -282,7 +285,12 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     expect(await survivingSeqs(NO_STATE_ROW_USER_ID)).toEqual([3, 4]);
   });
 
-  it('keeps a fresh prefix for a snapshotless user (retention still gates deletion)', async () => {
+  it('keeps a partly-fresh prefix whole rather than pruning around the fresh op', async () => {
+    // Seq 1 is past the cutoff, seq 2 is inside retention. Deleting seq 1
+    // alone would leave the plain delta at seq 2 as the lowest surviving op,
+    // and `_resolveExpectedFirstSeq` (op-replay.ts) only tolerates a leading
+    // gap when the lowest survivor is a causal full-state op — so a restore
+    // would fail with SNAPSHOT_REPLAY_INCOMPLETE. The whole prefix waits.
     await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 1);
     await seedOp(SNAPSHOTLESS_IMPORT_USER_ID, 2, {
       receivedAt: BigInt(now - 10 * DAY_MS),
@@ -292,9 +300,10 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
       data: { userId: SNAPSHOTLESS_IMPORT_USER_ID, lastSeq: 3 },
     });
 
-    await runSweep();
+    const { affectedUserIds } = await runSweep();
 
-    expect(await survivingSeqs(SNAPSHOTLESS_IMPORT_USER_ID)).toEqual([2, 3]);
+    expect(await survivingSeqs(SNAPSHOTLESS_IMPORT_USER_ID)).toEqual([1, 2, 3]);
+    expect(affectedUserIds).not.toContain(SNAPSHOTLESS_IMPORT_USER_ID);
   });
 
   it('caps the boundary at lastSnapshotSeq while a cached snapshot cursor exists', async () => {
@@ -320,15 +329,27 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     expect(affectedUserIds).not.toContain(STUCK_SNAPSHOT_USER_ID);
   });
 
-  it('unsticks the capped user once the snapshot cursor is cleared (post-eradication)', async () => {
+  it('unsticks the capped user once the cached snapshot blob is dropped (post-eradication)', async () => {
+    // Same row as the previous test minus `snapshotData`: the E2EE
+    // eradication plan nulls the BLOB and leaves `lastSnapshotSeq` behind
+    // (docs/e2ee-legacy-data-eradication-plan.md). `generateSnapshotAtSeq`
+    // uses the cached base only when the blob is present, so the cap must key
+    // on the blob too — keying it on the stale cursor would exempt this user
+    // from retention forever, which is the #9688 failure.
     await seedPrefixBaseTail(STUCK_SNAPSHOT_USER_ID);
     await prisma.userSyncState.create({
-      data: { userId: STUCK_SNAPSHOT_USER_ID, lastSeq: 5 },
+      data: {
+        userId: STUCK_SNAPSHOT_USER_ID,
+        lastSeq: 5,
+        lastSnapshotSeq: 1,
+        snapshotAt: BigInt(now - 100 * DAY_MS),
+      },
     });
 
-    await runSweep();
+    const { affectedUserIds } = await runSweep();
 
     expect(await survivingSeqs(STUCK_SNAPSHOT_USER_ID)).toEqual([4, 5]);
+    expect(affectedUserIds).toContain(STUCK_SNAPSHOT_USER_ID);
   });
 
   it('never prunes a user whose only causal full-state op is the initial import at seq 1', async () => {

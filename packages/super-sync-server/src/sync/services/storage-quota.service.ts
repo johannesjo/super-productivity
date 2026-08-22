@@ -442,19 +442,26 @@ export class StorageQuotaService {
       _max: { serverSeq: true },
     });
 
-    // Sync-state rows for boundary capping and stalest-first ordering. Read
-    // whole (one row per user): an `IN` list of every candidate costs bind
-    // parameters and planning time without changing the scan Postgres picks.
+    // Rows that still hold a cached snapshot BLOB — the only ones the cap
+    // below applies to. Keyed on `snapshotData`, not on `lastSnapshotSeq`,
+    // because `generateSnapshotAtSeq` uses the cached base only when the blob
+    // is present (snapshot-generation.service.ts). Keying on the cursor would
+    // keep capping rows whose blob is already gone: the E2EE eradication plan
+    // nulls `snapshot_data` alone, so those users would stay exempt from
+    // retention forever — the exact #9688 failure this change removes. Reading
+    // this cohort (rather than an `IN` list of every candidate) also keeps the
+    // read bounded and shrinking as eradication proceeds.
     const states = await prisma.userSyncState.findMany({
+      where: { snapshotData: { not: null } },
       select: { userId: true, lastSnapshotSeq: true, snapshotAt: true },
     });
     const stateByUserId = new Map(states.map((s) => [s.userId, s]));
 
-    // S1: order stalest first so when affectedUserIds.length exceeds the
-    // cleanup reconcile budget (RECONCILE_INTERVAL_MS * maxScheduled per
-    // hour), the most-drifted users are reconciled before fresher ones.
-    // Never-snapshotted users (snapshotAt null — the long-dormant bulk) sort
-    // to -1 and come first; userId breaks ties deterministically.
+    // S1: deterministic order, so a run that exhausts its budget resumes from
+    // a stable point instead of an arbitrary one. Cached-snapshot holders sort
+    // by snapshotAt (stalest first); everyone else — under the mandatory-E2EE
+    // gate that is the whole fleet, since encrypted payloads are never cached
+    // — sorts to -1 and drains in userId order.
     const candidates = boundaries
       .map((b) => {
         const state = stateByUserId.get(b.userId);
@@ -509,6 +516,27 @@ export class StorageQuotaService {
       }
 
       if (protectedFromSeq <= 1) continue;
+
+      // Prune the prefix whole, or not at all. Deletion filters on `receivedAt
+      // < cutoffTime` as well as `serverSeq < protectedFromSeq`, so a prefix
+      // holding one op newer than the cutoff would be pruned around it and
+      // leave a plain delta as the lowest surviving row. Replay then breaks:
+      // `_resolveExpectedFirstSeq` (op-replay.ts) tolerates a leading gap ONLY
+      // when the lowest surviving op is a causal full-state op that resets
+      // state — otherwise it throws SNAPSHOT_REPLAY_INCOMPLETE, which the
+      // restore route surfaces as a 500. Skipping the user keeps the whole
+      // prefix intact until it ages out, so the invariant that path documents
+      // ("the surviving lowest-seq op is guaranteed to be a full-state op")
+      // keeps holding. Costs retention lag, never over-deletion.
+      const freshOpBelowBoundary = await prisma.operation.findFirst({
+        where: {
+          userId: candidate.userId,
+          serverSeq: { lt: protectedFromSeq },
+          receivedAt: { gte: BigInt(cutoffTime) },
+        },
+        select: { serverSeq: true },
+      });
+      if (freshOpBelowBoundary) continue;
 
       // Drain this user across multiple batches until either they're empty or
       // the global per-run budget is exhausted. Without this, a single user

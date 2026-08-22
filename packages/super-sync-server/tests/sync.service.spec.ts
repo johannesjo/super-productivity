@@ -18,6 +18,7 @@ vi.mock('../src/db', async () => {
     isEntityArrayBranchQuery,
     entityArrayBranchRows,
     mockOperationGroupByMaxSeq,
+    mockOperationFindFirstFreshBelowBoundary,
     matchesOperationAlternative,
     testState: state,
   } = await import('./sync.service.test-state');
@@ -531,6 +532,11 @@ vi.mock('../src/db', async () => {
       }),
       operation: {
         findFirst: vi.fn().mockImplementation(async (args: any) => {
+          const freshBelowBoundary = mockOperationFindFirstFreshBelowBoundary(
+            state.operations,
+            args,
+          );
+          if (freshBelowBoundary !== undefined) return freshBelowBoundary;
           if (args.where?.opType?.in) {
             const ops = Array.from(state.operations.values())
               .filter((op: any) => args.where.userId === op.userId)

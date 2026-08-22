@@ -23,6 +23,7 @@ vi.mock('../src/db', async () => {
     applyOperationSelect: applySelect,
     hasOperationUniqueConflict,
     mockOperationGroupByMaxSeq,
+    mockOperationFindFirstFreshBelowBoundary,
   } = await import('./sync.service.test-state');
   const hasUniqueConflict = (row: any) => hasOperationUniqueConflict(testOperations, row);
 
@@ -165,7 +166,13 @@ vi.mock('../src/db', async () => {
         return callback(tx);
       }),
       operation: {
-        findFirst: vi.fn(),
+        findFirst: vi.fn().mockImplementation(async (args: any) => {
+          const freshBelowBoundary = mockOperationFindFirstFreshBelowBoundary(
+            testOperations,
+            args,
+          );
+          return freshBelowBoundary === undefined ? null : freshBelowBoundary;
+        }),
         findMany: vi.fn().mockImplementation(async (args: any) => {
           const ops = Array.from(testOperations.values());
           return ops

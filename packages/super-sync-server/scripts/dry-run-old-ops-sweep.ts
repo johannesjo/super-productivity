@@ -7,8 +7,9 @@
  * writing anything, exactly what the next sweep would delete on THIS database:
  *   - per-user prune boundary: the newest CAUSAL full-state op in the
  *     operation stream (#9688 — no snapshot cursor required), capped at
- *     `lastSnapshotSeq` while a cached-snapshot cursor still exists
- *   - would-delete counts and the retained base + tail
+ *     `lastSnapshotSeq` while a cached snapshot BLOB still exists
+ *   - would-delete counts and the retained base + tail, with users whose
+ *     prefix is not fully aged out skipped whole (as production does)
  *   - safety checks that must come back clean before trusting the sweep
  *   - the residual unreachable cohort (no causal boundary above seq 1),
  *     segmented by history shape × dormancy × plaintext-vs-encrypted so the
@@ -44,6 +45,7 @@ interface PerUserRow {
   op_count: bigint;
   last_received_at: bigint;
   last_snapshot_seq: number | null;
+  has_snapshot_blob: boolean;
   any_causal_seq: number | null;
   has_legacy_repair: boolean;
   has_plaintext_rows: boolean;
@@ -55,6 +57,14 @@ interface PerUserRow {
 }
 
 const n = (v: bigint | number): number => Number(v);
+
+// This runs for minutes on a large table with no output otherwise; the phase
+// timings are the operator's only signal that the gate is progressing.
+const startedAt = Date.now();
+const logPhase = (msg: string): void => {
+  const elapsedS = ((Date.now() - startedAt) / 1000).toFixed(1);
+  console.log(`[${elapsedS}s] ${msg}`);
+};
 
 /**
  * Independent re-verification: for each (userId, boundarySeq) pair, the
@@ -101,11 +111,12 @@ const main = async (): Promise<void> => {
 
   // Per-user view of what the sweep would do. Boundary resolution mirrors
   // production (storage-quota.service.ts): the newest causal full-state op
-  // with server_seq > 1 authorizes pruning; while a cached-snapshot cursor
-  // exists (last_snapshot_seq > 0) the boundary may not pass it and drops to
-  // the newest causal full-state op at or below the cursor. The
+  // with server_seq > 1 authorizes pruning; while a cached snapshot blob
+  // exists the boundary may not pass `last_snapshot_seq` and drops to the
+  // newest causal full-state op at or below that cursor. The
   // `latest_full_state_seq` marker is not consulted (stale for ~90% of
   // users, no backfill in #8973).
+  logPhase('computing per-user prune boundaries and would-delete counts…');
   const perUser = await prisma.$queryRaw<PerUserRow[]>`
     WITH per_user AS (
       SELECT
@@ -123,20 +134,28 @@ const main = async (): Promise<void> => {
       GROUP BY o.user_id
     ),
     joined AS (
-      SELECT p.*, s.last_snapshot_seq
+      -- snapshot_data IS NOT NULL reads the null bitmap only, so the blob is
+      -- never detoasted here.
+      SELECT p.*, s.last_snapshot_seq, s.snapshot_data IS NOT NULL AS has_snapshot_blob
       FROM per_user p
       LEFT JOIN user_sync_state s ON s.user_id = p.user_id
     ),
     capped AS (
+      -- Keyed on the cached BLOB, not the cursor — same reason production is
+      -- (storage-quota.service.ts): a cursor left behind by the E2EE
+      -- eradication sweep must not keep capping a user forever.
       SELECT
         j.*,
         COALESCE(
-          j.last_snapshot_seq > 0 AND j.causal_boundary_seq > j.last_snapshot_seq,
+          j.has_snapshot_blob AND j.causal_boundary_seq > j.last_snapshot_seq,
           false
         ) AS was_capped
       FROM joined j
     ),
-    resolved AS (
+    -- MATERIALIZED because protected_from_seq is referenced three times
+    -- below; inlined, Postgres re-evaluates the correlated cap aggregate at
+    -- every reference site.
+    resolved AS MATERIALIZED (
       SELECT
         c.*,
         CASE WHEN c.was_capped THEN (
@@ -146,35 +165,46 @@ const main = async (): Promise<void> => {
             AND ${causalFullStateSql('o')}
         ) ELSE c.causal_boundary_seq END AS protected_from_seq
       FROM capped c
+    ),
+    -- One grouped pass, NOT a per-user lateral/correlated probe: with no index
+    -- on op_type, per-user probing re-walks large histories once per user and
+    -- ran for hours on the 8M-row hosted table. Grouped scans finish in
+    -- minutes. retained_from_boundary is derived from op_count so the
+    -- largest of the three ranges is never scanned at all.
+    counts AS (
+      SELECT
+        r.user_id,
+        count(*) FILTER (WHERE o.received_at < ${cutoff}) AS would_delete,
+        count(*) FILTER (WHERE o.received_at >= ${cutoff}) AS fresh_prefix
+      FROM operations o
+      JOIN resolved r
+        ON r.user_id = o.user_id
+        AND r.protected_from_seq > 1
+        AND o.server_seq < r.protected_from_seq
+      GROUP BY r.user_id
     )
     SELECT
       r.user_id,
       r.op_count,
       r.last_received_at,
       r.last_snapshot_seq,
+      r.has_snapshot_blob,
       r.any_causal_seq,
       r.has_legacy_repair,
       r.has_plaintext_rows,
       r.was_capped,
       r.protected_from_seq,
-      COALESCE(prefix.would_delete, 0) AS would_delete,
-      COALESCE(prefix.fresh_prefix, 0) AS fresh_prefix,
-      -- The retained base + tail is everything the prefix scan did not cover,
-      -- so it needs no scan of its own (it is the largest of the three ranges).
-      COALESCE(
-        r.op_count - prefix.would_delete - prefix.fresh_prefix,
-        0
-      ) AS retained_from_boundary
+      CASE WHEN r.protected_from_seq > 1
+        THEN COALESCE(ct.would_delete, 0) ELSE 0 END AS would_delete,
+      CASE WHEN r.protected_from_seq > 1
+        THEN COALESCE(ct.fresh_prefix, 0) ELSE 0 END AS fresh_prefix,
+      CASE WHEN r.protected_from_seq > 1
+        THEN r.op_count - COALESCE(ct.would_delete, 0) - COALESCE(ct.fresh_prefix, 0)
+        ELSE 0 END AS retained_from_boundary
     FROM resolved r
-    LEFT JOIN LATERAL (
-      SELECT
-        count(*) FILTER (WHERE o.received_at < ${cutoff}) AS would_delete,
-        count(*) FILTER (WHERE o.received_at >= ${cutoff}) AS fresh_prefix
-      FROM operations o
-      WHERE o.user_id = r.user_id
-        AND o.server_seq < r.protected_from_seq
-    ) prefix ON r.protected_from_seq > 1
+    LEFT JOIN counts ct ON ct.user_id = r.user_id
   `;
+  logPhase(`boundaries + counts done (${perUser.length} users with operations)`);
 
   const prunable = perUser.filter(
     (r) => r.protected_from_seq !== null && r.protected_from_seq > 1,
@@ -182,11 +212,18 @@ const main = async (): Promise<void> => {
   const residual = perUser.filter(
     (r) => r.protected_from_seq === null || r.protected_from_seq <= 1,
   );
-  const totalWouldDelete = prunable.reduce((sum, r) => sum + n(r.would_delete), 0);
+  // Production prunes a prefix whole or not at all: one op inside retention
+  // below the boundary skips the whole user, because pruning around it would
+  // leave a plain delta as the lowest surviving op and break replay
+  // (storage-quota.service.ts). Mirror that here or the gate over-reports.
+  const skippedForFreshPrefix = prunable.filter((r) => n(r.fresh_prefix) > 0);
+  const affected = prunable.filter(
+    (r) => n(r.fresh_prefix) === 0 && n(r.would_delete) > 0,
+  );
+  const totalWouldDelete = affected.reduce((sum, r) => sum + n(r.would_delete), 0);
 
   // Safety check 1: boundary must be a surviving causal full-state op —
   // re-verified independently for every user the sweep would actually touch.
-  const affected = prunable.filter((r) => n(r.would_delete) > 0);
   const badBoundaryUsers = await findBadBoundaries(
     affected.map((r) => ({
       userId: r.user_id,
@@ -200,8 +237,8 @@ const main = async (): Promise<void> => {
   // snapshot's replay tail (the restore path).
   const tailViolations = prunable.filter(
     (r) =>
+      r.has_snapshot_blob &&
       r.last_snapshot_seq !== null &&
-      r.last_snapshot_seq > 0 &&
       (r.protected_from_seq as number) > r.last_snapshot_seq,
   );
 
@@ -217,6 +254,7 @@ const main = async (): Promise<void> => {
   console.log(
     `    boundary capped by snapshot:    ${prunable.filter((r) => r.was_capped).length}`,
   );
+  console.log(`    skipped, prefix not fully aged:  ${skippedForFreshPrefix.length}`);
   console.log(`  unreachable (no usable boundary): ${residual.length}`);
   console.log(`total rows the sweep would delete: ${totalWouldDelete}`);
   console.log(
@@ -288,7 +326,7 @@ const main = async (): Promise<void> => {
         : `VIOLATED for users ${badBoundaryUsers.join(', ')}`),
   );
   console.log(
-    `boundary <= lastSnapshotSeq where a snapshot cursor exists: ` +
+    `boundary <= lastSnapshotSeq where a cached snapshot blob exists: ` +
       (tailViolations.length === 0
         ? 'OK'
         : `VIOLATED for users ${tailViolations.map((r) => r.user_id).join(', ')}`),
