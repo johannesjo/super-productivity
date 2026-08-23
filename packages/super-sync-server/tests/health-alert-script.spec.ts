@@ -74,7 +74,7 @@ const FAKE_MAIL = `#!/bin/sh
 printf '%s\n' "$*" >> "$FAKE_STATE/mail.args"
 printf '%s\n' '---MAIL---' >> "$FAKE_STATE/mail.log"
 cat >> "$FAKE_STATE/mail.log"
-[ -z "\${FAKE_MAIL_STDERR:-}" ] || printf '%s\n' "\$FAKE_MAIL_STDERR" >&2
+[ -z "\${FAKE_MAIL_STDERR:-}" ] || printf '%b\n' "\$FAKE_MAIL_STDERR" >&2
 exit "\${FAKE_MAIL_EXIT:-0}"
 `;
 
@@ -137,9 +137,18 @@ const runDeployMonitoringStatus = (): string => {
   const deployScript = readFileSync(DEPLOY_SCRIPT, 'utf8');
   const match = deployScript.match(/report_monitoring_status\(\) \{[\s\S]*?\n\}/);
   expect(match).not.toBeNull();
+  // The reporter calls this helper; extract it too, or the runner silently loses the
+  // sanitizing and every assertion below passes against unfiltered marker text.
+  const helper = deployScript.match(/sanitize_untrusted\(\) \{[\s\S]*?\n\}/);
+  expect(helper).not.toBeNull();
 
   const runner = join(projectDir, 'report-monitoring-status.sh');
-  writeFileSync(runner, `${match?.[0] ?? ''}\nreport_monitoring_status\n`);
+  // Same options deploy.sh sets at :16-17 — the `|| true` guards in the reporter are
+  // load-bearing only under these, so a runner without them cannot catch their loss.
+  writeFileSync(
+    runner,
+    `set -euo pipefail\nshopt -s inherit_errexit 2>/dev/null || true\n${helper?.[0] ?? ''}\n${match?.[0] ?? ''}\nreport_monitoring_status\n`,
+  );
   writeExecutable('crontab', '#!/bin/sh\nexit 1\n');
 
   const result = spawnSync('bash', [runner], {
@@ -442,6 +451,42 @@ describe('health-alert.sh state handling', () => {
     expect(text.length).toBeLessThanOrEqual(4200);
   });
 
+  it('strips UTF-8-encoded C1 controls without corrupting other UTF-8', () => {
+    // \\302\\233 is the well-formed UTF-8 encoding of U+009B (CSI). Both bytes are >= 0x80,
+    // so a plain C0 byte filter passes them through and the terminal decodes a real
+    // control. Stripping the byte RANGE 0x80-0x9F instead would corrupt every non-ASCII
+    // string, so the em-dash and CJK below must survive untouched.
+    const marker = run({
+      FAKE_LONG_Q: '1',
+      FAKE_LONGEST: '130',
+      FAKE_MAIL_EXIT: '1',
+      FAKE_MAIL_STDERR:
+        'relay \\302\\2331;31mRED said \\342\\200\\224 dash \\346\\227\\245',
+    });
+    expect(marker.output).toContain('Failed to send alert email');
+    const text = readStateFile('mail-failed');
+    expect(text).toContain('relay 1;31mRED said — dash 日');
+    expect(text).not.toContain('\u009b');
+  });
+
+  it('does not hang when the mail command forks a child that outlives it', () => {
+    // `err=$(...)` waits for pipe EOF, not for the process, so a forked delivery child
+    // keeps the run alive past `timeout 30` while it holds the flock — which silently
+    // kills every later cron run. A queuing MTA daemonizes exactly like this.
+    writeExecutable(
+      'mail',
+      `#!/bin/sh\nsh -c 'sleep 30' &\nprintf '%s\\n' 'smtp: 451 try again' >&2\nexit 1\n`,
+    );
+    const started = Date.now();
+    const result = run({ FAKE_LONG_Q: '1', FAKE_LONGEST: '130' });
+    const elapsedMs = Date.now() - started;
+
+    expect(result.output).toContain('Failed to send alert email');
+    expect(readStateFile('mail-failed')).toContain('451 try again');
+    // The forked child sleeps 30s; anything near that means the run blocked on it.
+    expect(elapsedMs).toBeLessThan(15_000);
+  });
+
   it('reports heartbeat and mail failure even without a current-user cron entry', () => {
     const stateDir = join(projectDir, '.health-alert');
     mkdirSync(stateDir);
@@ -459,5 +504,23 @@ describe('health-alert.sh state handling', () => {
     expect(output).toContain('alert email delivery FAILED at 2026-07-20T12:00:00Z.');
     expect(output).toContain('Reason: no mail binary on PATH');
     expect(output).not.toContain('will go unnoticed');
+  });
+
+  it('sanitizes a hostile marker it did not write', () => {
+    // The marker survives `git pull` and may predate the write-time filter, so the
+    // reader cannot assume it is clean. \u001b[2J clears the operator's screen and
+    // \u009b is a decoded C1 CSI; neither may reach the terminal.
+    const stateDir = join(projectDir, '.health-alert');
+    mkdirSync(stateDir);
+    writeFileSync(join(stateDir, 'last-run'), new Date().toISOString());
+    writeFileSync(
+      join(stateDir, 'mail-failed'),
+      '2026-07-20T12:00:00Z\u001b[2J\u001b[1;31mFAKE\n550 \u009b2Kdenied\u0007 here\n',
+    );
+
+    const output = runDeployMonitoringStatus();
+
+    expect(output).not.toMatch(/[\u0000-\u0008\u000b-\u001f\u007f\u009b]/);
+    expect(output).toContain('550 2Kdenied here');
   });
 });

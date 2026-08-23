@@ -254,8 +254,10 @@ is not started by `deploy.sh` and nothing else runs it:
 
 `ALERT_EMAIL` plus the crontab line above gets the _checks_ running. Delivering
 their result needs a working `mail` command, and stock Debian and Ubuntu have
-none. `mailutils` or `bsd-mailx` provides it; bare `msmtp` does **not** — msmtp is
-a transport, so pair it with `msmtp-mta`.
+none. Install `mailutils` or `bsd-mailx` — those provide `mail` itself. Neither
+`msmtp` nor `msmtp-mta` does: msmtp is a transport and `msmtp-mta` only supplies
+the `sendmail` interface underneath, so installing it alone leaves the check
+still failing. Use it _in addition to_ `bsd-mailx` if msmtp is your relay.
 
 `health-alert.sh` checks for the binary on every run and records its absence
 in `.health-alert/mail-failed`, which `deploy.sh` surfaces. Confirm delivery end
@@ -269,16 +271,21 @@ A queuing MTA exits 0 on accept, not on delivery, so check the message actually
 arrived. If it did not, `mailx` writes the undelivered body to `~/dead.letter`
 for the cron user.
 
-`deploy.sh` reports at the end of every deploy whether this exact cron exists,
+`deploy.sh` reports at the end of every successful deploy whether this exact cron exists,
 whether it is still completing, and why the last attempted email failed. If it
 says the cron is missing, nothing is watching the server.
 
-Delivery is provable while the system is healthy: the missing-binary marker
-makes the next healthy run send one `SuperSync OK: Health Check Recovered`
-message and then clear the marker. So after installing an MTA on a healthy
-server, that single mail arriving within 5 minutes is the end-to-end proof —
-and `deploy.sh` dropping its warning is the confirmation. Nothing repeats: the
-marker is gone once a send succeeds.
+If the cron was already running _before_ you installed an MTA, you get a proof
+for free: the missing-binary marker makes the next healthy run send one
+`SuperSync OK: Health Check Recovered` message and then clear the marker. That
+single mail arriving within 5 minutes is end-to-end proof, and `deploy.sh`
+dropping its warning is the confirmation. Nothing repeats — the marker is gone
+once a send succeeds. Set up in the other order (MTA first, then cron) and no
+mail is ever sent on a healthy server, so use the manual `mail` test above.
+
+Note that the `Reason:` line `deploy.sh` prints comes from your MTA and can name
+the recipient address and the relay host, so treat it like any other log excerpt
+before pasting it into an issue.
 
 ### What it checks
 

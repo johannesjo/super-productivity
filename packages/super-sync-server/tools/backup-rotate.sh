@@ -122,10 +122,11 @@ TOTAL_BACKUPS=$((AFTER_COUNT + WEEKLY_COUNT + MONTHLY_COUNT))
 if [ "$TOTAL_BACKUPS" -eq 0 ]; then
   log "ERROR: No backups remaining after rotation!"
 
-  # No default recipient, for the reason given at health-alert.sh:27-29.
+  # No default recipient on purpose — see the no-default-recipient rationale in
+  # health-alert.sh (a hardcoded address mails a self-hoster's hostname to a stranger).
   if [ -n "${ALERT_EMAIL:-}" ] && command -v mail >/dev/null 2>&1; then
     echo "CRITICAL: All backups deleted during rotation on $(hostname) at $(date)" | \
-      mail -s "ALERT: Backup Rotation Error" "${ALERT_EMAIL:-}" 2>/dev/null || true
+      mail -s "ALERT: Backup Rotation Error" -- "$ALERT_EMAIL" 2>/dev/null || true
   fi
 
   exit 1

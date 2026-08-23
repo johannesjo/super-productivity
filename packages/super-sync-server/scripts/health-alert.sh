@@ -11,8 +11,7 @@
 #
 # Configuration (set these or pass via environment):
 #   ALERT_EMAIL    - Email address to receive alerts (required)
-#   MAIL_CMD       - mail binary to use (default: mail); mainly a test seam, but also
-#                    useful for an absolute path under a thin cron PATH
+#   MAIL_CMD       - mail binary to use (default: mail); a test seam
 #   COMPOSE_DIR    - Path to docker-compose.yml directory (default: script directory's parent)
 #   HEALTH_URL     - Health endpoint URL (default: read from .env DOMAIN)
 #   MAX_QUERY_SECONDS  - Alert if any query has been active longer (default: 120)
@@ -30,6 +29,7 @@ COMPOSE_DIR="${COMPOSE_DIR:-$(dirname "$SCRIPT_DIR")}"
 # default address would silently mail a self-hoster's hostname, disk usage and container
 # state to whoever that address belongs to. Alerting is off until the operator opts in.
 ALERT_EMAIL="${ALERT_EMAIL:-}"
+MAIL_CMD="${MAIL_CMD:-mail}"
 MAX_QUERY_SECONDS="${MAX_QUERY_SECONDS:-120}"
 POOL_WARN_PCT="${POOL_WARN_PCT:-75}"
 
@@ -59,42 +59,55 @@ fi
 
 # State file in project-local directory (not /tmp — avoids symlink attacks and tmp cleanup)
 ALERT_STATE_DIR="${COMPOSE_DIR}/.health-alert"
+# umask 077 makes this 0700; deliberately not chmod'd on later runs, so an operator who
+# widens it (to let a non-root deploy.sh read the markers) is not silently overridden.
 mkdir -p "$ALERT_STATE_DIR"
-# umask 077 above only applies at creation; a .health-alert/ created earlier by anything
-# else keeps its old mode, and mail-failed can carry the recipient address and the relay
-# hostname. Enforce owner-only rather than inferring it.
-chmod 700 "$ALERT_STATE_DIR" 2>/dev/null || true
 ALERT_STATE_FILE="$ALERT_STATE_DIR/state"
 MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
 
 # Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
 # want only that (deploy.sh) can take the first line; the reason follows. Reason text can
 # originate from a remote SMTP relay and deploy.sh echoes it to a terminal, so strip
-# control characters and cap the length at write time. C1 (0x80-0x9F) is deliberately
-# NOT stripped: those bytes are also UTF-8 continuation bytes, so deleting them mangles
-# every non-ASCII message — including this script's own em-dash at the record_mail_failure
-# call below. A lone C1 byte is invalid UTF-8 and renders as a replacement character;
-# it is only a CSI in a legacy 8-bit locale, which is not worth corrupting output for.
+# control characters and cap the length at write time. Do NOT switch the tr to a byte
+# range covering 0x80-0x9F: those are UTF-8 continuation bytes and deleting them corrupts
+# every non-ASCII message, this script's own em-dash included (tried in 096c93ca, reverted
+# in bef0c160). The sed removes UTF-8-*encoded* C1 instead — \xc2 followed by \x80-\x9f
+# encodes U+0080-U+009F and nothing else, so CSI/OSC are removed exactly while em-dash,
+# NBSP and CJK survive. Written via mktemp+mv: `>` would follow a symlink planted at the
+# marker path, and mv also replaces the file atomically at the umask's 0600.
 record_mail_failure() {
+  local tmp
+  tmp=$(mktemp "$ALERT_STATE_DIR/.mail-failed.XXXXXX" 2>/dev/null) || return 0
   {
     date -u +%Y-%m-%dT%H:%M:%SZ
-    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' | head -c 4096
-  } > "$MAIL_FAILED_FILE"
-  chmod 600 "$MAIL_FAILED_FILE" 2>/dev/null || true
+    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' |
+      LC_ALL=C sed 's/\xc2[\x80-\x9f]//g' | head -c 4096
+  } > "$tmp"
+  mv -f "$tmp" "$MAIL_FAILED_FILE" 2>/dev/null || rm -f "$tmp"
 }
 
 # One send path for both call sites, so stderr capture and the failure record cannot
 # drift apart. Body on stdin; returns non-zero and records why on failure. Callers are
 # responsible for the $MAIL_AVAILABLE gate — see the two send conditions below.
 send_alert_mail() {
-  local err
-  # `2>&1 >/dev/null` captures only stderr: "not installed", "relay refused" and "auth
-  # failed" are indistinguishable once discarded. timeout 30 stays — under a 5-minute cron
-  # an MTA hanging on an unreachable relay is a process-pileup vector.
-  if err=$(timeout 30 "$MAIL_CMD" -s "$1" "$ALERT_EMAIL" 2>&1 >/dev/null); then
+  local err errfile rc
+  # stderr to a FILE, never `err=$(...)`: command substitution waits for pipe EOF, so an
+  # MTA that forks a delivery child survives `timeout 30` and hangs the run indefinitely
+  # while holding the flock — silently killing every later cron run. stdout is discarded
+  # because that is where msmtp --debug prints the SMTP dialogue, AUTH included.
+  errfile=$(mktemp "$ALERT_STATE_DIR/.mail-err.XXXXXX" 2>/dev/null) || errfile=/dev/null
+  timeout 30 "$MAIL_CMD" -s "$1" -- "$ALERT_EMAIL" >/dev/null 2>"$errfile"
+  rc=$?
+  if [ "$rc" -eq 0 ]; then
+    [ "$errfile" = /dev/null ] || rm -f "$errfile"
     return 0
   fi
-  record_mail_failure "${err:-mail exited non-zero with no error output}"
+  err=$(head -c 4096 "$errfile" 2>/dev/null || true)
+  [ "$errfile" = /dev/null ] || rm -f "$errfile"
+  if [ "$rc" -eq 124 ]; then
+    err="timed out after 30s${err:+: $err}"
+  fi
+  record_mail_failure "${err:-mail exited $rc with no error output}"
   return 1
 }
 
@@ -111,7 +124,6 @@ fi
 # not added to CONFIG_PROBLEMS: that string is the alert body and the dedupe hash input, so
 # it would report the broken channel through the broken channel and keep PROBLEMS
 # permanently non-empty, disabling the recovery branch that clears this marker.
-MAIL_CMD="${MAIL_CMD:-mail}"
 MAIL_AVAILABLE=true
 if ! command -v "$MAIL_CMD" >/dev/null 2>&1; then
   MAIL_AVAILABLE=false

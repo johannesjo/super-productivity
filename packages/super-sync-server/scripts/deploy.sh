@@ -453,6 +453,16 @@ echo "    All containers healthy"
 echo ""
 # Report whether the separately-installed alert cron is active and completing.
 # Advisory only: deploys never edit the operator's crontab. (#9191)
+# Flatten stdin to one printable line of at most $1 bytes. Used for the mail-failed
+# marker, whose reason text can originate from a remote SMTP relay.
+sanitize_untrusted() {
+    LC_ALL=C tr -d '\000-\010\013-\037\177' |
+        LC_ALL=C sed 's/\xc2[\x80-\x9f]//g' |
+        tr '\n\t' '  ' |
+        head -c "$1" |
+        sed 's/[[:space:]]*$//'
+}
+
 report_monitoring_status() {
     local state_dir="$SERVER_DIR/.health-alert"
     local script_path="$SERVER_DIR/scripts/health-alert.sh"
@@ -501,19 +511,25 @@ report_monitoring_status() {
         else
             echo "             Monitoring is not confirmed active. Install with:"
             echo "               (crontab -l 2>/dev/null; echo \"*/5 * * * * ALERT_EMAIL=you@example.com $script_path\") | crontab -"
-            echo "             Alerting also needs a working \`mail\` command (mailutils or bsd-mailx;"
-            echo "             bare msmtp needs msmtp-mta). Stock Debian/Ubuntu ship none."
+            echo "             Alerting also needs a \`mail\` command: install mailutils or"
+            echo "             bsd-mailx. Stock Debian/Ubuntu ship neither (msmtp-mta does not"
+            echo "             provide \`mail\` — it is a sendmail transport underneath them)."
         fi
     fi
 
     if [ -f "$state_dir/mail-failed" ]; then
-        # head -1: the marker gained a reason after the timestamp, and $(cat ...) strips
-        # only *trailing* newlines, so a multi-line marker would interpolate mid-sentence.
-        echo "    WARNING: alert email delivery FAILED at $(head -1 "$state_dir/mail-failed" 2>/dev/null)."
-        local mail_reason
-        mail_reason=$(tail -n +2 "$state_dir/mail-failed" 2>/dev/null | tr '\n\r\t' '   ' | head -c 200) || true
+        # This marker is operator data that survives `git pull` and may have been written
+        # by an older health-alert.sh, so sanitize on READ as well — the reason line can
+        # carry SMTP text authored by a remote relay. printf, not echo: under xpg_echo a
+        # printable \033 would be re-expanded into a real ESC after this filter ran.
+        # head -1 for the timestamp: $(cat ...) strips only *trailing* newlines, so a
+        # multi-line marker would interpolate mid-sentence.
+        local mail_ts mail_reason
+        mail_ts=$(head -1 "$state_dir/mail-failed" 2>/dev/null | sanitize_untrusted 60) || true
+        printf '    WARNING: alert email delivery FAILED at %s.\n' "$mail_ts"
+        mail_reason=$(tail -n +2 "$state_dir/mail-failed" 2>/dev/null | sanitize_untrusted 200) || true
         if [ -n "$mail_reason" ]; then
-            echo "             Reason: $mail_reason"
+            printf '             Reason: %s\n' "$mail_reason"
         fi
         echo "             Checks are running but nobody is being told. Verify \`mail\` works."
     else
