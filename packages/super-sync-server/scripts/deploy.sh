@@ -501,11 +501,20 @@ report_monitoring_status() {
         else
             echo "             Monitoring is not confirmed active. Install with:"
             echo "               (crontab -l 2>/dev/null; echo \"*/5 * * * * ALERT_EMAIL=you@example.com $script_path\") | crontab -"
+            echo "             Alerting also needs a working \`mail\` command (mailutils or bsd-mailx;"
+            echo "             bare msmtp needs msmtp-mta). Stock Debian/Ubuntu ship none."
         fi
     fi
 
     if [ -f "$state_dir/mail-failed" ]; then
-        echo "    WARNING: alert email delivery FAILED at $(cat "$state_dir/mail-failed" 2>/dev/null)."
+        # head -1: the marker gained a reason after the timestamp, and $(cat ...) strips
+        # only *trailing* newlines, so a multi-line marker would interpolate mid-sentence.
+        echo "    WARNING: alert email delivery FAILED at $(head -1 "$state_dir/mail-failed" 2>/dev/null)."
+        local mail_reason=""
+        mail_reason=$(tail -n +2 "$state_dir/mail-failed" 2>/dev/null | tr '\n\r\t' '   ' | head -c 200) || true
+        if [ -n "$mail_reason" ]; then
+            echo "             Reason: $mail_reason"
+        fi
         echo "             Checks are running but nobody is being told. Verify \`mail\` works."
     else
         echo "    alert email: no recorded failure (verified only when mail is attempted)"

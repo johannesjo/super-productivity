@@ -58,13 +58,62 @@ fi
 # State file in project-local directory (not /tmp — avoids symlink attacks and tmp cleanup)
 ALERT_STATE_DIR="${COMPOSE_DIR}/.health-alert"
 mkdir -p "$ALERT_STATE_DIR"
+# umask 077 above only applies at creation; a .health-alert/ created earlier by anything
+# else keeps its old mode, and mail-failed can carry the recipient address and the relay
+# hostname. Enforce owner-only rather than inferring it.
+chmod 700 "$ALERT_STATE_DIR" 2>/dev/null || true
 ALERT_STATE_FILE="$ALERT_STATE_DIR/state"
+MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
+
+# Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
+# want only that (deploy.sh) can take the first line; the reason follows. Reason text can
+# originate from a remote SMTP relay and deploy.sh echoes it to a terminal, so strip
+# control characters and cap the length at write time.
+record_mail_failure() {
+  {
+    date -u +%Y-%m-%dT%H:%M:%SZ
+    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' | head -c 4096
+  } > "$MAIL_FAILED_FILE"
+  chmod 600 "$MAIL_FAILED_FILE" 2>/dev/null || true
+}
+
+# One send path, so the no-transport short-circuit cannot be forgotten at one of the two
+# call sites. Body on stdin; returns non-zero and records why on failure.
+send_alert_mail() {
+  local err
+  if ! $MAIL_AVAILABLE; then
+    cat > /dev/null
+    return 1
+  fi
+  # `2>&1 >/dev/null` captures only stderr: "not installed", "relay refused" and "auth
+  # failed" are indistinguishable once discarded. timeout 30 stays — under a 5-minute cron
+  # an MTA hanging on an unreachable relay is a process-pileup vector.
+  if err=$(timeout 30 "$MAIL_CMD" -s "$1" "$ALERT_EMAIL" 2>&1 >/dev/null); then
+    return 0
+  fi
+  record_mail_failure "${err:-mail exited non-zero with no error output}"
+  return 1
+}
 
 # Prevent concurrent runs (cron overlap if a previous run hangs)
 LOCK_FILE="$ALERT_STATE_DIR/health-alert.lock"
 exec 9>"$LOCK_FILE"
 if ! flock -n 9; then
   exit 0
+fi
+
+# Alerting is only as good as its transport, and a stock Debian/Ubuntu host has no `mail`
+# binary. Without this check the first discovery of that is the first real incident, months
+# after setup. Record it now instead, in the marker deploy.sh already surfaces. Deliberately
+# not added to CONFIG_PROBLEMS: that string is the alert body and the dedupe hash input, so
+# it would report the broken channel through the broken channel and keep PROBLEMS
+# permanently non-empty, disabling the recovery branch that clears this marker.
+MAIL_CMD="${MAIL_CMD:-mail}"
+MAIL_AVAILABLE=true
+if ! command -v "$MAIL_CMD" >/dev/null 2>&1; then
+  MAIL_AVAILABLE=false
+  echo "health-alert: no '$MAIL_CMD' binary on PATH — install mailutils or bsd-mailx." >&2
+  record_mail_failure "no $MAIL_CMD binary on PATH — install mailutils or bsd-mailx"
 fi
 
 cd "$COMPOSE_DIR"
@@ -338,30 +387,28 @@ CURRENT_HASH=$(printf '%s' "$HASH_INPUT" | sha256sum | cut -d' ' -f1)
 PREVIOUS_HASH=$(cat "$ALERT_STATE_FILE" 2>/dev/null || echo "none")
 
 if [ -n "$PROBLEMS" ]; then
-  if [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ] || [ -f "$ALERT_STATE_DIR/mail-failed" ]; then
+  if $MAIL_AVAILABLE && { [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ] || [ -f "$MAIL_FAILED_FILE" ]; }; then
     # New or changed problem — send alert, only write state if mail succeeds
     if printf 'SuperSync health check failed at %s\n\nProblems found:\n%b\nServer: %s\n' \
         "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PROBLEMS" "$(hostname)" \
-        | timeout 30 mail -s "SuperSync Alert: Health Check Failed" "$ALERT_EMAIL" 2>/dev/null; then
+        | send_alert_mail "SuperSync Alert: Health Check Failed"; then
       echo "$CURRENT_HASH" > "$ALERT_STATE_FILE"
-      rm -f "$ALERT_STATE_DIR/mail-failed"
+      rm -f "$MAIL_FAILED_FILE"
     else
-      # Leave a marker deploy.sh can surface when cron cannot deliver mail.
+      # send_alert_mail already recorded the reason in the marker deploy.sh surfaces.
       echo "ERROR: Failed to send alert email" >&2
-      date -u +%Y-%m-%dT%H:%M:%SZ > "$ALERT_STATE_DIR/mail-failed"
     fi
   fi
 else
   # A healthy retry also proves mail works again and clears a sticky failure marker.
-  if [ -f "$ALERT_STATE_FILE" ] || [ -f "$ALERT_STATE_DIR/mail-failed" ]; then
+  if $MAIL_AVAILABLE && { [ -f "$ALERT_STATE_FILE" ] || [ -f "$MAIL_FAILED_FILE" ]; }; then
     if printf 'SuperSync health check recovered at %s\n\nAll checks passing.\nServer: %s\n' \
         "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(hostname)" \
-        | timeout 30 mail -s "SuperSync OK: Health Check Recovered" "$ALERT_EMAIL" 2>/dev/null; then
+        | send_alert_mail "SuperSync OK: Health Check Recovered"; then
       rm -f "$ALERT_STATE_FILE"
-      rm -f "$ALERT_STATE_DIR/mail-failed"
+      rm -f "$MAIL_FAILED_FILE"
     else
       echo "ERROR: Failed to send recovery email" >&2
-      date -u +%Y-%m-%dT%H:%M:%SZ > "$ALERT_STATE_DIR/mail-failed"
     fi
   fi
 fi

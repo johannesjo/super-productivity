@@ -118,10 +118,14 @@ TOTAL_BACKUPS=$((AFTER_COUNT + WEEKLY_COUNT + MONTHLY_COUNT))
 if [ "$TOTAL_BACKUPS" -eq 0 ]; then
   log "ERROR: No backups remaining after rotation!"
 
-  # Try to send alert if mail is available
-  if command -v mail >/dev/null 2>&1; then
+  # Try to send alert if mail is available and the operator opted in to a recipient.
+  # No default address on purpose: this script ships in the repo, so a hardcoded recipient
+  # mails a self-hoster's hostname to a stranger the moment they install an MTA. Matches
+  # health-alert.sh's ALERT_EMAIL contract.
+  ALERT_EMAIL="${ALERT_EMAIL:-}"
+  if [ -n "$ALERT_EMAIL" ] && command -v mail >/dev/null 2>&1; then
     echo "CRITICAL: All backups deleted during rotation on $(hostname) at $(date)" | \
-      mail -s "ALERT: Backup Rotation Error" admin@example.com 2>/dev/null || true
+      mail -s "ALERT: Backup Rotation Error" "$ALERT_EMAIL" 2>/dev/null || true
   fi
 
   exit 1

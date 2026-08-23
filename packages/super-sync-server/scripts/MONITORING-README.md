@@ -250,10 +250,35 @@ is not started by `deploy.sh` and nothing else runs it:
 (crontab -l 2>/dev/null; echo "*/5 * * * * ALERT_EMAIL=you@example.com /path/to/super-sync-server/scripts/health-alert.sh") | crontab -
 ```
 
+### The cron entry is not enough — you also need an MTA
+
+`ALERT_EMAIL` plus the crontab line above gets the _checks_ running. Delivering
+their result needs a working `mail` command, and stock Debian and Ubuntu have
+none. `mailutils` or `bsd-mailx` provides it; bare `msmtp` does **not** — msmtp is
+a transport, so pair it with `msmtp-mta`.
+
+`health-alert.sh` now checks for the binary on every run and records its absence
+in `.health-alert/mail-failed`, which `deploy.sh` surfaces. Confirm delivery end
+to end before trusting the setup:
+
+```bash
+echo test | mail -s 'SuperSync test' you@example.com
+```
+
+A queuing MTA exits 0 on accept, not on delivery, so check the message actually
+arrived. If it did not, `mailx` writes the undelivered body to `~/dead.letter`
+for the cron user.
+
 `deploy.sh` reports at the end of every deploy whether this exact cron exists,
-whether it is still completing, and whether the last attempted email failed. It
-cannot prove delivery while the system is healthy because no email is sent then.
-If it says the cron is missing, nothing is watching the server.
+whether it is still completing, and why the last attempted email failed. If it
+says the cron is missing, nothing is watching the server.
+
+Delivery is now provable while the system is healthy: the missing-binary marker
+makes the next healthy run send one `SuperSync OK: Health Check Recovered`
+message and then clear the marker. So after installing an MTA on a healthy
+server, that single mail arriving within 5 minutes is the end-to-end proof —
+and `deploy.sh` dropping its warning is the confirmation. Nothing repeats: the
+marker is gone once a send succeeds.
 
 ### What it checks
 
