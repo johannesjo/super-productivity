@@ -309,10 +309,14 @@ main()
 NODE
 )
 
+    # `</dev/null` is load-bearing: `docker compose exec -T` keeps stdin attached and does
+    # not exit until EOF, so an inherited stdin leaves the $(...) capture hanging until -k
+    # SIGKILLs it and compose's buffered stdout dies with it — a healthy server then reports
+    # every probe key missing. Measured live: 25s/exit 137 without it, 1s/exit 0 with.
     # Allow Prisma's 5s pool wait plus its 12s transaction bound to finish.
     DB_OUTPUT=$(timeout -k 5 20 docker compose exec -T \
       -e "HEALTH_MAX_QUERY_SECONDS=$MAX_QUERY_SECONDS" \
-      supersync timeout 18 node -e "$DB_PROBE_JS" 2>/dev/null)
+      supersync timeout 18 node -e "$DB_PROBE_JS" </dev/null 2>/dev/null)
     DB_STATUS=$?
 
     LONG_Q=""
@@ -346,7 +350,10 @@ NODE
       ! [[ "$LONGEST" =~ ^[0-9]+$ ]] ||
       ! [[ "$POOL_IN_USE" =~ ^[0-9]+$ ]]; then
       DB_RESULTS_OK=false
-      PROBLEMS="${PROBLEMS}Database monitoring checks failed\n"
+      # The status separates a timeout or kill (124/137) from a broken exec (126/127), a
+      # probe error (1) and incomplete output (0). Not the probe's stderr: PROBLEMS is the
+      # dedupe hash input, so text that varies per run would re-alert every five minutes.
+      PROBLEMS="${PROBLEMS}Database monitoring checks failed (exit ${DB_STATUS})\n"
     fi
 
     if $DB_RESULTS_OK; then

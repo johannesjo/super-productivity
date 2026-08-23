@@ -1,9 +1,11 @@
 import { spawnSync } from 'node:child_process';
 import {
   chmodSync,
+  closeSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
+  openSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -46,6 +48,8 @@ if [ "\${1:-}" = "ps" ]; then
 fi
 
 if [ "\${1:-}" = "exec" ]; then
+  # Real \`docker compose exec -T\` keeps stdin attached and does not exit until EOF.
+  cat > /dev/null
   [ "\${FAKE_DB_EXIT:-0}" = "0" ] || exit "$FAKE_DB_EXIT"
   if [ "\${FAKE_DB_MALFORMED:-0}" = "1" ]; then
     printf 'not monitor data\n'
@@ -107,13 +111,28 @@ const writeStateFile = (name: string, contents: string): void => {
 // The env pair that makes PROBLEMS non-empty, i.e. that gets a send attempted at all.
 const FAILING_PROBE = { FAKE_LONG_Q: '1', FAKE_LONGEST: '130' };
 
+// spawnSync hands the child an already-closed stdin, so a descriptor that never reaches
+// EOF is the only way to reproduce what an interactive shell gives the script. A FIFO
+// opened read-write keeps a writer around for as long as the fd is held.
+const runWithOpenStdin = (env: Record<string, string> = {}): RunResult => {
+  const fifo = join(projectDir, 'stdin.fifo');
+  spawnSync('mkfifo', [fifo]);
+  const fd = openSync(fifo, 'r+');
+  try {
+    return run(env, fd);
+  } finally {
+    closeSync(fd);
+    rmSync(fifo, { force: true });
+  }
+};
+
 const writeExecutable = (name: string, contents: string): void => {
   const path = join(binDir, name);
   writeFileSync(path, contents);
   chmodSync(path, 0o755);
 };
 
-const run = (env: Record<string, string> = {}): RunResult => {
+const run = (env: Record<string, string> = {}, stdin?: number): RunResult => {
   const childEnv: NodeJS.ProcessEnv = {
     ...process.env,
     PATH: `${binDir}:${process.env.PATH ?? ''}`,
@@ -133,6 +152,7 @@ const run = (env: Record<string, string> = {}): RunResult => {
   const result = spawnSync('bash', [SCRIPT], {
     encoding: 'utf8',
     env: childEnv,
+    stdio: [stdin ?? 'pipe', 'pipe', 'pipe'],
     timeout: 10_000,
   });
 
@@ -286,6 +306,25 @@ describe('health-alert.sh service and database monitoring', () => {
     expect(result.mailLog.match(/Database monitoring checks failed/g)).toHaveLength(1);
     expect(result.mailLog).toContain('Health endpoint returned HTTP 503');
     expect(result.mailLog).toContain('Disk usage at 90% on /');
+  });
+
+  it('completes the database probe when stdin never reaches EOF', () => {
+    // `docker compose exec -T` does not exit until stdin closes, so without `</dev/null`
+    // the $(...) capture outlives the probe, `timeout -k` SIGKILLs it, and every key goes
+    // missing — turning a healthy server into "Database monitoring checks failed".
+    const result = runWithOpenStdin();
+
+    expect(result.status).toBe(0);
+    expect(result.mailLog).not.toContain('Database monitoring checks failed');
+  });
+
+  it('names the probe exit status instead of one flat failure string', () => {
+    // 137 is SIGKILL, the signature of `timeout -k` giving up. That is a different fault
+    // from a probe that threw (1) or an exec that never started (127), and the message
+    // used to be identical for all three.
+    const result = run({ FAKE_DB_EXIT: '137' });
+
+    expect(result.mailLog).toContain('Database monitoring checks failed (exit 137)');
   });
 
   it('treats malformed probe output as a database monitoring failure', () => {
