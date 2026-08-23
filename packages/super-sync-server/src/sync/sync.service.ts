@@ -26,6 +26,45 @@ import {
   type SnapshotDedupResponse,
 } from './services';
 import type { ValidationResult } from './services/validation.service';
+
+/**
+ * Newest operation that replaced the user's full state, for the stale-cursor
+ * upload guard.
+ *
+ * Prefer a retained SYNC_IMPORT/BACKUP_IMPORT, then fall back to the newest
+ * causal REPAIR. The fallback is load-bearing: deletion can prune an import out
+ * from under a later REPAIR — quota recovery
+ * (`deleteOldestRestorePointAndOps`, which deletes up to and including the
+ * OLDEST restore point) and the daily old-ops sweep (which deletes everything
+ * below the NEWEST causal boundary) both do it. Without the fallback the
+ * remaining REPAIR is invisible here, the guard resolves to "none", and the
+ * caller PERSISTS that as 0 — permanently disarming the guard for that account
+ * and letting a client whose cursor predates the replacement upload deltas
+ * built on superseded state.
+ *
+ * The second query only runs for the rare account holding no import at all, so
+ * the ordinary upload path still costs a single indexed lookup.
+ */
+const resolveRetainedReplacementSeq = async (
+  db: Prisma.TransactionClient,
+  userId: number,
+): Promise<number | null> => {
+  const retainedImport = await db.operation.findFirst({
+    where: { userId, opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] } },
+    orderBy: { serverSeq: 'desc' },
+    select: { serverSeq: true },
+  });
+  if (retainedImport) {
+    return retainedImport.serverSeq;
+  }
+  const retainedCausalRepair = await db.operation.findFirst({
+    where: { userId, opType: 'REPAIR', repairBaseServerSeq: { not: null } },
+    orderBy: { serverSeq: 'desc' },
+    select: { serverSeq: true },
+  });
+  return retainedCausalRepair?.serverSeq ?? null;
+};
+
 const getPrismaP2002TargetTokens = (
   err: Prisma.PrismaClientKnownRequestError,
 ): string[] => {
@@ -236,18 +275,14 @@ export class SyncService {
               // while migrations run. Resolve retained replacements lazily
               // after the new process owns the write path, then persist the
               // answer for subsequent uploads.
-              const retainedReplacement = await tx.operation.findFirst({
-                where: {
-                  userId,
-                  opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] },
-                },
-                orderBy: { serverSeq: 'desc' },
-                select: { serverSeq: true },
-              });
+              const retainedReplacementSeq = await resolveRetainedReplacementSeq(
+                tx,
+                userId,
+              );
               // Zero is a resolved "no retained replacement" sentinel. Keeping
               // null exclusively for unresolved upgrade rows avoids repeating
               // this indexed lookup on every upload for ordinary accounts.
-              latestStateReplacementSeq = retainedReplacement?.serverSeq ?? 0;
+              latestStateReplacementSeq = retainedReplacementSeq ?? 0;
               await tx.userSyncState.update({
                 where: { userId },
                 data: { latestStateReplacementSeq },
@@ -749,15 +784,7 @@ export class SyncService {
     if (typeof latestStateReplacementSeq === 'number') {
       return latestStateReplacementSeq;
     }
-    const retainedReplacement = await prisma.operation.findFirst({
-      where: {
-        userId,
-        opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] },
-      },
-      orderBy: { serverSeq: 'desc' },
-      select: { serverSeq: true },
-    });
-    return retainedReplacement?.serverSeq ?? null;
+    return resolveRetainedReplacementSeq(prisma, userId);
   }
 
   cacheOpsRequestResults(
