@@ -512,7 +512,12 @@ describe('health-alert.sh state handling', () => {
     // \u009b is a decoded C1 CSI; neither may reach the terminal.
     const stateDir = join(projectDir, '.health-alert');
     mkdirSync(stateDir);
-    writeFileSync(join(stateDir, 'last-run'), new Date().toISOString());
+    // last-run lives in the same directory and is printed by the same function, so it
+    // is exactly as untrusted as mail-failed.
+    writeFileSync(
+      join(stateDir, 'last-run'),
+      `${new Date().toISOString()}\u001b[1;31m OWNED\u0007`,
+    );
     writeFileSync(
       join(stateDir, 'mail-failed'),
       '2026-07-20T12:00:00Z\u001b[2J\u001b[1;31mFAKE\n550 \u009b2Kdenied\u0007 here\n',
@@ -522,5 +527,6 @@ describe('health-alert.sh state handling', () => {
 
     expect(output).not.toMatch(/[\u0000-\u0008\u000b-\u001f\u007f\u009b]/);
     expect(output).toContain('550 2Kdenied here');
+    expect(output).toContain('[1;31m OWNED');
   });
 });

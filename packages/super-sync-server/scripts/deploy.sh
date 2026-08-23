@@ -493,13 +493,15 @@ report_monitoring_status() {
     # runs the script and the current user's crontab has no matching entry.
     if [ -f "$state_dir/last-run" ]; then
         local last_run age
-        last_run=$(cat "$state_dir/last-run" 2>/dev/null || true)
+        # Same directory, same trust boundary as mail-failed below: sanitize before
+        # printing. A bad value just fails the date parse, which the >30m branch reports.
+        last_run=$(sanitize_untrusted 40 < "$state_dir/last-run" 2>/dev/null) || true
         age=$(( $(date -u +%s) - $(date -u -d "$last_run" +%s 2>/dev/null || echo 0) ))
         if [ "$age" -gt 1800 ]; then
-            echo "    WARNING: last completed run was $last_run (>30m ago) — health-alert.sh is not completing."
+            printf '    WARNING: last completed run was %s (>30m ago) — health-alert.sh is not completing.\n' "$last_run"
         else
             recent_run=true
-            echo "    last run: $last_run"
+            printf '    last run: %s\n' "$last_run"
         fi
     else
         echo "    WARNING: health-alert.sh has no completed run recorded yet (expected within 5 minutes)."
