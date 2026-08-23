@@ -3277,6 +3277,31 @@ describe('SyncWrapperService', () => {
       expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
     });
 
+    it('should not report IN_SYNC when a full-state upload was deferred by a retryable error', async () => {
+      // Server migration whose snapshot upload hit a Postgres serialization
+      // conflict: nothing reached the server, the op stays pending for the next
+      // sync — but the wrapper used to fall through to IN_SYNC.
+      mockSyncService.downloadRemoteOps.and.resolveTo({ kind: 'no_new_ops' as const });
+      mockSyncService.uploadPendingOps.and.resolveTo({
+        kind: 'completed' as const,
+        uploadedCount: 0,
+        piggybackedOpsCount: 0,
+        localWinOpsCreated: 0,
+        permanentRejectionCount: 0,
+        hasMorePiggyback: false,
+        rejectedOps: [],
+        fullStateUploadDeferred: true,
+      });
+
+      const result = await service.sync();
+
+      expect(result).toBe(SyncStatus.UpdateRemote);
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
+        'UNKNOWN_OR_CHANGED',
+      );
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+    });
+
     it('should stop sync when an LWW re-upload reaches a rejected full-state barrier', async () => {
       mockSyncService.downloadRemoteOps.and.resolveTo({ kind: 'no_new_ops' as const });
       mockSyncService.uploadPendingOps.and.returnValues(

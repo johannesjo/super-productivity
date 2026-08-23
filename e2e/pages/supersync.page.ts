@@ -800,9 +800,14 @@ export class SuperSyncPage extends BasePage {
             );
           }
         } else {
-          // Unknown state - log and throw
-          throw new Error(
-            'Unable to determine Client A vs B - sync state unclear after timeout',
+          // No dialog, no spinner, no error, no check icon: sync is configured but
+          // idle with pending ops — the check icon only renders once nothing is
+          // pending. Seen when a full-state upload is deferred by a retryable
+          // server error (CI run 32683405598). Nothing to decide here, so fall
+          // through to the sync-completion wait below, which re-triggers sync once
+          // before failing.
+          console.log(
+            '[SuperSyncPage] Idle with pending ops - no dialog needed, waiting for sync to settle',
           );
         }
       }

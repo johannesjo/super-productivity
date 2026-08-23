@@ -777,6 +777,22 @@ export class SyncWrapperService {
         return 'HANDLED_ERROR';
       }
 
+      // A full-state op (server migration / backup restore) that hit a retryable
+      // server error leaves the WHOLE local state unsynced with no rejection to
+      // report — the one upload failure that used to fall through to IN_SYNC.
+      // Checked last so ERROR and permanent rejections keep precedence; not an
+      // ERROR itself, because the op is still pending and the next sync retries
+      // it. Mirrors the LWW-exhaustion path above, WebSocket connect included:
+      // that too is retried on the next sync.
+      if (completedUploadResults.some((result) => result.fullStateUploadDeferred)) {
+        SyncLog.warn(
+          'SyncWrapperService: Full-state upload deferred after a retryable server error. ' +
+            'Reporting UNKNOWN_OR_CHANGED (will retry on next sync).',
+        );
+        this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
+        return SyncStatus.UpdateRemote;
+      }
+
       // Mark as in-sync for all providers after successful sync
       this._providerManager.setSyncStatus('IN_SYNC');
       SyncLog.log('SyncWrapperService: Sync complete, status=IN_SYNC');

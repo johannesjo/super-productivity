@@ -535,6 +535,7 @@ export class OperationLogSyncService {
         ? { encryptionRequiredKeyMissing: true }
         : {}),
       ...(result.blockedByRejectedFullState ? { blockedByRejectedFullState: true } : {}),
+      ...(result.fullStateUploadDeferred ? { fullStateUploadDeferred: true } : {}),
     };
   }
 
