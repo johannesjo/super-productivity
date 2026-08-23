@@ -140,9 +140,15 @@ Three constraints:
      Removing the two-byte sequence is exact — `\xc2` + `\x80-\x9f` encodes U+0080-U+009F
      and nothing else — so CSI/OSC go while em-dash, NBSP and CJK survive.
 
-  Write-time is not sufficient on its own. The marker is operator data that survives
-  `git pull` and may predate the filter, so `deploy.sh` sanitizes again at the point of
-  printing, via `printf` (not `echo`, which re-expands a printable `\033` under `xpg_echo`).
+  Write-time is not sufficient on its own, but _not_ for the reason first written down here.
+  "The marker may predate the filter" is false: every shipped `health-alert.sh` wrote a bare
+  `date -u` timestamp and no reason line at all, so an old marker is 21 bytes of ASCII and
+  cannot carry relay text. The read side stays for two reasons that do hold. It **formats**
+  as well as filters — the write side deliberately keeps the newline that separates timestamp
+  from reason, and `deploy.sh` prints one line — and `.health-alert/` is 0700 only until an
+  operator widens it so a non-root `deploy.sh` can read the markers, after which the contents
+  are genuinely untrusted. It prints via `printf` (not `echo`, which re-expands a printable
+  `\033` under `xpg_echo`).
   The same applies to `last-run`, read from the same directory by the same function.
   Tab and LF are kept at write time; the reader flattens them.
 
@@ -153,8 +159,9 @@ Three constraints:
   `mail-failed` in the repo. The reason extraction is `|| true`-guarded: `deploy.sh` runs
   `set -euo pipefail` and `report_monitoring_status` is called immediately before
   `exit 0`, so a SIGPIPE'd pipeline there would turn a successful deploy into a failing
-  one. Steps 1 and 2 are one atomic change with `deploy.sh`, not two: the marker is
-  operator data that survives `git pull`, so old-reader/new-marker is reachable.
+  one. Steps 1 and 2 are one change with `deploy.sh`, not two, because the
+  marker's format is defined by the writer and consumed by the reader: shipping the writer
+  alone captures a reason that nothing surfaces.
 
 Keep the file owner-only, and enforce rather than infer it. `umask 077` at `:23` applies
 only at _creation_; a `.health-alert/` created earlier by anything else keeps its old mode.
@@ -235,9 +242,11 @@ Recorded because each was a defect the implementation introduced, not a pre-exis
 - **`chmod 700` on the state dir was removed.** It re-locked a directory an operator may
   have widened so a non-root `deploy.sh` could read it; after that `deploy.sh` cannot stat
   the marker and prints "no recorded failure" — the change manufacturing the exact
-  false-green it exists to expose. It also chmod'd through a symlink. The marker write uses
-  `mktemp` + `mv` instead, which cannot follow a planted symlink and makes `chmod 600`
-  redundant.
+  false-green it exists to expose. It also chmod'd through a symlink. A `mktemp` + `mv` marker write
+  was tried as the replacement and reverted too: it introduced a silent no-op when `mktemp`
+  failed, leaked a temp file when the run was killed, and hardened 1 of the 4 write sites in
+  the script. The marker write is a plain redirect, and the symlink residual is accepted on
+  the same terms as `state`, `last-run` and the lock file.
 - **The MTA advice was wrong.** `msmtp-mta` supplies the `sendmail` interface, not the
   `mail` command, so an operator following the first draft still failed the preflight.
 - **"Delivery is provable while healthy" was over-claimed.** The free proof exists only if
