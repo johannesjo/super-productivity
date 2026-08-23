@@ -1,5 +1,6 @@
 import { expect, test } from '../../fixtures/test.fixture';
 import type { Page } from '@playwright/test';
+import { waitForStatePersistence } from '../../utils/waits';
 
 /**
  * #9349: the Electron main process only forwards idle periods longer than 60s,
@@ -70,6 +71,11 @@ const setMinIdleTime = async (page: Page, value: string): Promise<void> => {
   }).toPass({ timeout: 5000 });
   // The field is `updateOn: 'blur'` — the value only reaches the form on blur.
   await input.blur();
+  // The save is dispatched from a `setTimeout` and written to IndexedDB outside
+  // the Angular zone, so reloading straight after blur can outrun the write.
+  // Measured under CPU throttling: the op reached disk up to ~300ms after blur,
+  // and 2/6 unwaited runs read back the default instead of the saved value.
+  await waitForStatePersistence(page);
 };
 
 /** Re-read after a full reload so the value comes from IndexedDB, not the DOM. */
