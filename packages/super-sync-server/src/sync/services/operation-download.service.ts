@@ -329,10 +329,24 @@ export class OperationDownloadService {
     // Runs outside the interactive transaction: on large histories the aggregate
     // is slow enough to trip Prisma's transaction timeout. Bounded by
     // `latestSnapshotSeq` (captured inside the transaction) so newly-appended
-    // ops can't perturb the result. Background cleanup may delete rows in this
-    // range between commit and this query; in the common case the snapshot op's
-    // own vector_clock subsumes the deltas it replaces, so the per-client max
-    // is preserved.
+    // ops can't perturb the result.
+    //
+    // Background cleanup deletes rows in this range — since #9688 the old-ops
+    // sweep prunes fleet-wide, and this legacy path is taken by exactly the
+    // cohort it prunes (a missing `latest_full_state_*` marker means the newest
+    // causal op predates the marker migration, so its prefix is cold). The
+    // aggregate therefore CAN come back smaller than it once was: a
+    // BACKUP_IMPORT mints a fresh `{ clientId: 1 }` and subsumes nothing (see
+    // operation-upload.service.ts, `persistMergedFullStateClock`), so do NOT
+    // rely on "the snapshot op's own vector_clock covers the deltas it
+    // replaces" — that assumption is false and is what #8973 exists to avoid.
+    //
+    // It is nonetheless safe: a counter can only change a comparison if an op
+    // carrying it still exists, and every surviving op's clock reaches the
+    // client independently (`allOpClocks` on the download, `existingClock` on a
+    // rejection). Both consumers of `snapshotVectorClock` merge upward only, so
+    // a smaller contribution can only fail to add information that is no longer
+    // on the server anyway.
     const clockRows = await prisma.$queryRaw<
       Array<{ client_id: string; max_counter: bigint }>
     >`

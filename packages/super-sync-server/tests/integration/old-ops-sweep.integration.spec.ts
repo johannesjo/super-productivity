@@ -28,9 +28,11 @@ import { prisma } from '../../src/db';
 import { SyncService } from '../../src/sync/sync.service';
 import {
   affectedUsers,
+  causalFullStateSql,
   fetchOldOpsSweepPlan,
   toNum,
 } from '../../scripts/old-ops-sweep-plan';
+import { CAUSAL_FULL_STATE_OPERATION_WHERE } from '../../src/sync/sync.types';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const describeWithDb = DATABASE_URL ? describe : describe.skip;
@@ -44,6 +46,8 @@ const ENCRYPTED_USER_ID = 99985;
 const NO_STATE_ROW_USER_ID = 99986;
 const STUCK_SNAPSHOT_USER_ID = 99987;
 const SEQ1_IMPORT_ONLY_USER_ID = 99988;
+const PREDICATE_MATRIX_USER_ID = 99989;
+const MULTI_BATCH_USER_ID = 99990;
 const ALL_USER_IDS = [
   LAPSED_USER_ID,
   SNAPSHOTLESS_USER_ID,
@@ -53,6 +57,8 @@ const ALL_USER_IDS = [
   NO_STATE_ROW_USER_ID,
   STUCK_SNAPSHOT_USER_ID,
   SEQ1_IMPORT_ONLY_USER_ID,
+  PREDICATE_MATRIX_USER_ID,
+  MULTI_BATCH_USER_ID,
 ];
 
 describeWithDb('Old-ops sweep (PostgreSQL)', () => {
@@ -523,5 +529,98 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
     expect(affectedUserIds.filter((id) => seededUserIds.includes(id)).sort()).toEqual(
       [LAPSED_USER_ID, NO_STATE_ROW_USER_ID].sort(),
     );
+  });
+  /**
+   * The gate re-implements the sweep's authorizing predicate in raw SQL, so the
+   * two must stay in lockstep or the read-only pre-flight measures a different
+   * sweep than the one that deletes. The fixture-based drift test above only
+   * covers the shapes it happens to seed; this walks the whole (opType x
+   * repairBaseServerSeq) matrix and checks both against a third, independent
+   * statement of the rule so a matching pair of wrong predicates still fails.
+   */
+  it('the gate SQL and the Prisma causal predicate agree on every op shape', async () => {
+    const opTypes = [
+      'CRT',
+      'UPD',
+      'DEL',
+      'MOV',
+      'SYNC_IMPORT',
+      'BACKUP_IMPORT',
+      'REPAIR',
+    ];
+    // 0 is the load-bearing base cursor: a REPAIR over an empty stream is
+    // causal, so any predicate spelled `> 0` rather than `IS NOT NULL` diverges
+    // here and nowhere else.
+    const repairBases: Array<number | null> = [null, 0, 7];
+    const expectedCausalSeqs: number[] = [];
+    let seq = 0;
+    for (const opType of opTypes) {
+      for (const repairBaseServerSeq of repairBases) {
+        seq++;
+        await seedOp(PREDICATE_MATRIX_USER_ID, seq, { opType, repairBaseServerSeq });
+        const isCausal =
+          opType === 'SYNC_IMPORT' ||
+          opType === 'BACKUP_IMPORT' ||
+          (opType === 'REPAIR' && repairBaseServerSeq !== null);
+        if (isCausal) {
+          expectedCausalSeqs.push(seq);
+        }
+      }
+    }
+
+    const viaPrisma = (
+      await prisma.operation.findMany({
+        where: { userId: PREDICATE_MATRIX_USER_ID, ...CAUSAL_FULL_STATE_OPERATION_WHERE },
+        orderBy: { serverSeq: 'asc' },
+        select: { serverSeq: true },
+      })
+    ).map((op) => op.serverSeq);
+    const viaGate = (
+      await prisma.$queryRaw<Array<{ server_seq: number }>>`
+        SELECT o.server_seq
+        FROM operations o
+        WHERE o.user_id = ${PREDICATE_MATRIX_USER_ID} AND ${causalFullStateSql('o')}
+        ORDER BY o.server_seq ASC
+      `
+    ).map((row) => row.server_seq);
+
+    expect(viaGate).toEqual(viaPrisma);
+    expect(viaPrisma).toEqual(expectedCausalSeqs);
+  });
+  /**
+   * The drain loop continues on the SELECTED row count, and it only ever
+   * continues past the first batch when a user's aged prefix is longer than
+   * OLD_OPS_CLEANUP_DELETE_BATCH_SIZE (5000 by default). Every other fixture
+   * here is a handful of rows, so that continuation — the line that decides
+   * whether a prefix is drained whole or left truncated with a plain delta
+   * lowest — has never executed against real rows. Shrink the batch instead of
+   * seeding 5000 ops.
+   */
+  it('drains a prefix longer than one delete batch whole, across batches', async () => {
+    const previousBatchSize = process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+    process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '2';
+    try {
+      for (let seq = 1; seq <= 9; seq++) {
+        await seedOp(MULTI_BATCH_USER_ID, seq);
+      }
+      await seedImportOp(MULTI_BATCH_USER_ID, 10);
+      await seedOp(MULTI_BATCH_USER_ID, 11);
+      await prisma.userSyncState.create({
+        data: { userId: MULTI_BATCH_USER_ID, lastSeq: 11 },
+      });
+
+      const result = await runSweep();
+
+      // 9 prefix ops removed over 5 batches of 2; stopping after any one of
+      // them would leave a plain delta as the lowest surviving row.
+      expect(result.totalDeleted).toBe(9);
+      expect(await survivingSeqs(MULTI_BATCH_USER_ID)).toEqual([10, 11]);
+    } finally {
+      if (previousBatchSize === undefined) {
+        delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+      } else {
+        process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = previousBatchSize;
+      }
+    }
   });
 });

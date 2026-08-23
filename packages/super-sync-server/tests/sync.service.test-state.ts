@@ -207,12 +207,62 @@ export function mockOperationFindFirstFreshBelowBoundary(
   if (serverSeq?.lt === undefined || receivedAt?.gte === undefined) {
     return undefined;
   }
+  // Strict like its two siblings above. Silently ignoring an unknown key makes
+  // this mock answer a NARROWER production query as though it were the probe:
+  // adding any further filter to the real `findFirst` (which in Postgres can
+  // cut the result to zero and disable the whole-or-nothing guard outright)
+  // otherwise passes the entire unit suite, leaving only the real-Postgres
+  // spec — skipped in a default `npm test` — to catch it.
+  const unsupported = Object.keys(args.where ?? {}).filter(
+    (key) => !['userId', 'serverSeq', 'receivedAt'].includes(key),
+  );
+  if (unsupported.length > 0) {
+    throw new Error(
+      `mockOperationFindFirstFreshBelowBoundary: unsupported where keys ${unsupported.join(', ')}`,
+    );
+  }
   const match = Array.from(operations.values()).find(
     (op) =>
       op.userId === userId &&
       op.serverSeq < serverSeq.lt! &&
       op.receivedAt >= receivedAt.gte!,
   );
+  return match ? applyOperationSelect(match, args.select) : null;
+}
+
+/**
+ * Mocks the causal-REPAIR fallback the state-replacement guard uses when no
+ * SYNC_IMPORT/BACKUP_IMPORT survives:
+ * `findFirst({ where: { userId, opType: 'REPAIR', repairBaseServerSeq: { not: null } } })`.
+ *
+ * Returns `undefined` when `args` is not that shape so callers fall through to
+ * their own branches. Spelled out because both hand-written findFirst mocks
+ * decode only `opType.in` and `OR` lists: a scalar `opType` falls through to
+ * `null`, which is indistinguishable from "no boundary survives" — precisely
+ * the wrong answer the fallback exists to prevent. The unit suite would then
+ * stay green whether the fallback works or not.
+ */
+export function mockOperationFindFirstCausalRepair(
+  operations: Map<string, any>,
+  args: {
+    where?: {
+      userId?: number;
+      opType?: unknown;
+      repairBaseServerSeq?: { not?: null };
+    };
+    select?: Record<string, boolean>;
+  },
+): any | null | undefined {
+  const { userId, opType, repairBaseServerSeq } = args.where ?? {};
+  if (opType !== 'REPAIR' || repairBaseServerSeq?.not !== null) {
+    return undefined;
+  }
+  const match = Array.from(operations.values())
+    .filter(
+      (op) =>
+        op.userId === userId && op.opType === 'REPAIR' && op.repairBaseServerSeq != null,
+    )
+    .sort((a, b) => b.serverSeq - a.serverSeq)[0];
   return match ? applyOperationSelect(match, args.select) : null;
 }
 
