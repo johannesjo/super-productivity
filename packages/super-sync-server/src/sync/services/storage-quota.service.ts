@@ -399,11 +399,26 @@ export class StorageQuotaService {
    * the CASE-WHEN fallback for legacy rows — small drift, but unnecessary
    * given the env-flag's whole purpose.
    *
-   * One indexed-probe at startup closes the trust hole. The query relies on a
-   * full table scan-with-LIMIT-1; for a fully backfilled table that is one
-   * row visit on the first encountered row (cheap), and for a partially
-   * backfilled table it returns immediately. Worst case (zero rows in
-   * `operations`, e.g. fresh deployment) is also one round-trip.
+   * One indexed probe at startup closes the trust hole, but its cost is the
+   * opposite way round from how it reads. A *partially* backfilled table is the
+   * cheap case: `operations_payload_bytes_unbackfilled_idx` still holds live
+   * entries and the scan stops at the first one. The *completed* backfill is the
+   * expensive case — proving that no row matches means reading the whole index.
+   * `payload_bytes` sits in that index's predicate, so every backfill update was
+   * non-HOT and left entries pointing at dead heap tuples, each of which must be
+   * visited until VACUUM or LP_DEAD hints clear them; and with statistics still
+   * describing the pre-backfill distribution the planner may abandon the index and
+   * sequentially scan the table instead. On a multi-GB `operations` that is minutes,
+   * not one round-trip — and it runs before `/health` is registered, so the container
+   * never reports healthy while it is happening (#9504 §2).
+   *
+   * Which of the two costs dominates has not been measured on a real instance, so
+   * neither `scripts/migrate-payload-bytes.ts` nor this probe tries to pre-empt it:
+   * refreshing statistics does nothing about dead index entries, and vice versa. The
+   * migration that creates the index makes the same wrong claim ("physically drains
+   * to empty"), but applied migrations are never edited in place
+   * (`prisma/migrations/README.md`), so this is the correction of record. Worst case
+   * (zero rows in `operations`, e.g. a fresh deployment) is still one round-trip.
    */
   async assertPayloadBytesBackfillComplete(): Promise<void> {
     const result = await prisma.$queryRaw<[{ exists: boolean }]>`
