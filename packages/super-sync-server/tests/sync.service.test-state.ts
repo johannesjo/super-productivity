@@ -216,6 +216,42 @@ export function mockOperationFindFirstFreshBelowBoundary(
   return match ? applyOperationSelect(match, args.select) : null;
 }
 
+/**
+ * Mocks the causal-REPAIR fallback the state-replacement guard uses when no
+ * SYNC_IMPORT/BACKUP_IMPORT survives:
+ * `findFirst({ where: { userId, opType: 'REPAIR', repairBaseServerSeq: { not: null } } })`.
+ *
+ * Returns `undefined` when `args` is not that shape so callers fall through to
+ * their own branches. Spelled out because both hand-written findFirst mocks
+ * decode only `opType.in` and `OR` lists: a scalar `opType` falls through to
+ * `null`, which is indistinguishable from "no boundary survives" — precisely
+ * the wrong answer the fallback exists to prevent. The unit suite would then
+ * stay green whether the fallback works or not.
+ */
+export function mockOperationFindFirstCausalRepair(
+  operations: Map<string, any>,
+  args: {
+    where?: {
+      userId?: number;
+      opType?: unknown;
+      repairBaseServerSeq?: { not?: null };
+    };
+    select?: Record<string, boolean>;
+  },
+): any | null | undefined {
+  const { userId, opType, repairBaseServerSeq } = args.where ?? {};
+  if (opType !== 'REPAIR' || repairBaseServerSeq?.not !== null) {
+    return undefined;
+  }
+  const match = Array.from(operations.values())
+    .filter(
+      (op) =>
+        op.userId === userId && op.opType === 'REPAIR' && op.repairBaseServerSeq != null,
+    )
+    .sort((a, b) => b.serverSeq - a.serverSeq)[0];
+  return match ? applyOperationSelect(match, args.select) : null;
+}
+
 type UserSyncStateNotNullFilter = { not: null };
 
 /**

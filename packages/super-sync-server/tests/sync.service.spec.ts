@@ -18,6 +18,7 @@ vi.mock('../src/db', async () => {
     isEntityArrayBranchQuery,
     entityArrayBranchRows,
     mockOperationGroupByMaxSeq,
+    mockOperationFindFirstCausalRepair,
     mockOperationFindFirstFreshBelowBoundary,
     mockUserSyncStateFindMany,
     matchesOperationAlternative,
@@ -87,6 +88,8 @@ vi.mock('../src/db', async () => {
             applyOperationSelect(state.operations.get(args.where.id), args.select) || null
           );
         }
+        const causalRepair = mockOperationFindFirstCausalRepair(state.operations, args);
+        if (causalRepair !== undefined) return causalRepair;
         if (args.where?.opType?.in) {
           const ops = Array.from(state.operations.values())
             .filter((op: any) => args.where.userId === op.userId)
@@ -531,6 +534,8 @@ vi.mock('../src/db', async () => {
             args,
           );
           if (freshBelowBoundary !== undefined) return freshBelowBoundary;
+          const causalRepair = mockOperationFindFirstCausalRepair(state.operations, args);
+          if (causalRepair !== undefined) return causalRepair;
           if (args.where?.opType?.in) {
             const ops = Array.from(state.operations.values())
               .filter((op: any) => args.where.userId === op.userId)
@@ -999,6 +1004,61 @@ describe('SyncService', () => {
 
       await expect(service.getLatestStateReplacementSeq(userId)).resolves.toBe(3);
       await expect(service.getLatestStateReplacementSeq(userId + 1)).resolves.toBeNull();
+    });
+
+    /**
+     * Both pruning paths (the daily old-ops sweep and quota recovery) can
+     * delete a SYNC_IMPORT out from under a later causal REPAIR. The resolved
+     * cursor is persisted, so an import-only lookup does not just answer one
+     * request wrong — it writes 0 down and disarms the guard for good.
+     */
+    const seedRepair = (serverSeq: number, repairBaseServerSeq: number | null): void => {
+      const repair = makeOp({
+        id: `retained-repair-${serverSeq}`,
+        opType: 'REPAIR',
+        entityType: 'ALL',
+        entityId: undefined,
+      });
+      testState.operations.set(repair.id, {
+        ...repair,
+        userId,
+        serverSeq,
+        entityId: null,
+        entityIds: [],
+        payloadBytes: BigInt(1),
+        clientTimestamp: BigInt(repair.timestamp),
+        receivedAt: BigInt(repair.timestamp),
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+        repairBaseServerSeq,
+      });
+    };
+
+    it('falls back to the newest causal REPAIR when no import is retained', async () => {
+      const service = new SyncService();
+      seedRepair(3, 2);
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: null,
+      });
+
+      await expect(service.getLatestStateReplacementSeq(userId)).resolves.toBe(3);
+    });
+
+    it('ignores a legacy REPAIR with no causal base', async () => {
+      // Legacy REPAIR rows carry no base cursor, so they are not proven to
+      // supersede their prefix and must stay invisible to the guard — the same
+      // exclusion CAUSAL_FULL_STATE_OPERATION_WHERE makes everywhere else.
+      const service = new SyncService();
+      seedRepair(3, null);
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: null,
+      });
+
+      await expect(service.getLatestStateReplacementSeq(userId)).resolves.toBeNull();
     });
 
     it('persists a resolved no-replacement sentinel on the upload path', async () => {
