@@ -15,7 +15,9 @@
 #   COMPOSE_DIR    - Path to docker-compose.yml directory (default: script directory's parent)
 #   HEALTH_URL     - Health endpoint URL (default: read from .env DOMAIN)
 #   MAX_QUERY_SECONDS  - Alert if any query has been active longer (default: 120)
-#   POOL_WARN_PCT      - Alert if connections in use exceed this % of the pool (default: 75)
+#   POOL_WARN_PCT      - Alert if this % of the pool is concurrently BUSY -- running a
+#                        query or holding a transaction (default: 75). Idle pooled
+#                        connections are not counted; see MONITORING-README.md check 7.
 #   POSTGRES_SERVICE   - Bundled database service to health-check
 #                        (default: postgres; empty: none)
 
@@ -234,7 +236,7 @@ const main = async () => {
        -- anyone -- but they still occupy a real backend, which is the resource
        -- the 2026-07-20 incident exhausted. Carrying the flag instead of
        -- filtering the CTE is what keeps them out of "longQueryCount"/"longest"
-       -- while poolInUse below still counts every session.
+       -- while poolInUse below still counts every busy session.
        application_name NOT LIKE 'supersync-migrator-%'
          AND application_name <> 'supersync-monitor' AS pageable
        FROM pg_stat_activity
@@ -299,13 +301,19 @@ const main = async () => {
 
 main()
   .catch((error) => {
+    // Set the code first: a console.error that itself throws must not lose the failure
+    // to the trailing .catch below.
+    process.exitCode = 1;
     console.error(
       'Database probe failed:',
       error instanceof Error ? error.message : String(error),
     );
-    process.exitCode = 1;
   })
-  .finally(() => prisma.$disconnect());
+  .finally(() => prisma.$disconnect())
+  // Trailing, not inside .finally: .finally RETURNS its callback's promise, so anything
+  // teardown throws becomes an unhandled rejection and exits 1 with a complete, healthy
+  // sample already printed -- a database alert on a healthy database.
+  .catch(() => {});
 NODE
 )
 
@@ -364,7 +372,7 @@ NODE
       if [[ "$POOL_LIMIT" =~ ^[1-9][0-9]*$ ]]; then
         PCT=$(( POOL_IN_USE * 100 / POOL_LIMIT ))
         if [ "$PCT" -ge "$POOL_WARN_PCT" ]; then
-          PROBLEMS="${PROBLEMS}Connection pool ${PCT}% saturated (${POOL_IN_USE} in use / ${POOL_LIMIT} limit)\n"
+          PROBLEMS="${PROBLEMS}Connection pool ${PCT}% busy (${POOL_IN_USE} of ${POOL_LIMIT} running a query or in a transaction)\n"
         fi
       fi
 
@@ -398,7 +406,7 @@ HASH_INPUT=$(printf '%s' "$PROBLEMS" | sed \
    s/at [0-9]*% on/at N% on/g
    s/HTTP [0-9]*/HTTP NNN/g
    s/[0-9]* query(s) active longer than [0-9]*s (longest: [0-9]*s)/N query(s) active longer than Ns (longest: Ns)/g
-   s/pool [0-9]*% saturated ([0-9]* in use \/ [0-9]* limit)/pool N% saturated (N in use \/ N limit)/g')
+   s/pool [0-9]*% busy ([0-9]* of [0-9]* running/pool N% busy (N of N running/g')
 CURRENT_HASH=$(printf '%s' "$HASH_INPUT" | sha256sum | cut -d' ' -f1)
 PREVIOUS_HASH=$(cat "$ALERT_STATE_FILE" 2>/dev/null || echo "none")
 

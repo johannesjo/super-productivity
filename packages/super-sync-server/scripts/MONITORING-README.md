@@ -285,14 +285,14 @@ address and the relay host — redact it before pasting into an issue.
 
 ### What it checks
 
-| #   | Check                                                            | Fires when                                                               |
-| --- | ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| 0–3 | Docker daemon, container state/health, OOM kills, restart counts | a container is down, unhealthy, OOM-killed, or crash-looping             |
-| 4   | `/health` endpoint                                               | HTTP != 200                                                              |
-| 5   | Disk usage                                                       | > 85%                                                                    |
-| 6   | Long-running queries                                             | any query `active` > `MAX_QUERY_SECONDS` (default 120)                   |
-| 7   | Pool saturation                                                  | connections in use ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit` |
-| 8   | Invalid operations indexes                                       | a non-building index is not valid/ready/live                             |
+| #   | Check                                                            | Fires when                                                                          |
+| --- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 0–3 | Docker daemon, container state/health, OOM kills, restart counts | a container is down, unhealthy, OOM-killed, or crash-looping                        |
+| 4   | `/health` endpoint                                               | HTTP != 200                                                                         |
+| 5   | Disk usage                                                       | > 85%                                                                               |
+| 6   | Long-running queries                                             | any query `active` > `MAX_QUERY_SECONDS` (default 120)                              |
+| 7   | Pool busy                                                        | connections concurrently busy ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit` |
+| 8   | Invalid operations indexes                                       | a non-building index is not valid/ready/live                                        |
 
 Checks 0–5 detect the outage once containers or `/health` fail. Checks 6–8 inspect
 the database through the app container and catch the precursor while the server
@@ -300,10 +300,21 @@ can still answer. This also works when `POSTGRES_SERVICE=` selects an external
 database. A failed/malformed probe and a missing `connection_limit` are themselves
 alertable problems, so the new checks cannot silently become inert.
 
-Check 7 is deliberately a **ratio** against `connection_limit`, not a fixed
-number: measured steady state sits the same order of magnitude below the
-pathological-query ceiling (pool size ÷ worst-case query duration), so the
-absolute margin is thin and a fixed threshold would not survive a pool resize.
+Check 7 counts connections that are **busy** — `active`, or holding an open
+transaction — not connections the pool has open. Prisma keeps its connections
+open after use, so a healthy server sits near `connection_limit` in _occupancy_
+essentially all the time while this check correctly reads low: on the hosted
+server, 57 of 60 connections were open and `idle` while the probe reported 0.
+That is why the alert says "busy" and not "saturated" — the number that moves is
+concurrency, and it is the one worth paging on. It also means an `idle in
+transaction` leak shows up here but **never** in check 6, whose age is measured
+only for `active` sessions. The count is database-wide for the sync user — a
+migrator, the monitor, or a second replica all add to it — while the limit is one
+client's pool cap, so the percentage can legitimately exceed 100. The threshold is
+deliberately a **ratio** against `connection_limit`, not a fixed number: measured steady state sits the same order
+of magnitude below the pathological-query ceiling (pool size ÷ worst-case query
+duration), so the absolute margin is thin and a fixed threshold would not survive
+a pool resize.
 
 Check 8 matters more than it looks. An interrupted `CREATE INDEX CONCURRENTLY`
 leaves an index that is **unusable for reads but still maintained on every

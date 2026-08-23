@@ -50,12 +50,23 @@ import {
 const SLOW_FULL_STATE_AGGREGATE_MS = 5_000;
 const INVALID_AUDIT_FIELD = '[invalid]';
 const SAFE_AUDIT_ID_REGEX = /^[A-Za-z0-9_-]+$/;
+// TIME_TRACKING addresses its ops by a composite `CONTEXT_TYPE:contextId:date` key, so
+// under the plain charset every time-tracking rejection audited as '[invalid]' and the
+// OP_REJECTED logs could not name the entity. The colon stays scoped to that one entity
+// type: PLUGIN_USER_DATA ids are `pluginId:key`, and `key` is plugin-authored text that
+// `assertPluginPersistenceKey` checks for type and length only -- never a charset. Those
+// must keep redacting.
+const SAFE_AUDIT_COMPOSITE_ID_REGEX = /^[A-Za-z0-9_-]+(?::[A-Za-z0-9_-]+){1,2}$/;
 
-const isSafeAuditIdentifier = (value: unknown, maxLength: number): value is string =>
+const isSafeAuditIdentifier = (
+  value: unknown,
+  maxLength: number,
+  pattern: RegExp = SAFE_AUDIT_ID_REGEX,
+): value is string =>
   typeof value === 'string' &&
   value.length > 0 &&
   value.length <= maxLength &&
-  SAFE_AUDIT_ID_REGEX.test(value);
+  pattern.test(value);
 
 const getSafeAuditOperationMetadata = (
   op: Operation,
@@ -75,7 +86,13 @@ const getSafeAuditOperationMetadata = (
     entityId:
       rawEntityId === undefined || rawEntityId === null
         ? undefined
-        : isSafeAuditIdentifier(rawEntityId, 255)
+        : isSafeAuditIdentifier(
+              rawEntityId,
+              255,
+              rawEntityType === 'TIME_TRACKING'
+                ? SAFE_AUDIT_COMPOSITE_ID_REGEX
+                : SAFE_AUDIT_ID_REGEX,
+            )
           ? rawEntityId
           : INVALID_AUDIT_FIELD,
     opType:
