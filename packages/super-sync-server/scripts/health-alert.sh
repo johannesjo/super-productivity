@@ -73,17 +73,15 @@ MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
 # every non-ASCII message, this script's own em-dash included (tried in 096c93ca, reverted
 # in bef0c160). The sed removes UTF-8-*encoded* C1 instead — \xc2 followed by \x80-\x9f
 # encodes U+0080-U+009F and nothing else, so CSI/OSC are removed exactly while em-dash,
-# NBSP and CJK survive. Written via mktemp+mv: `>` would follow a symlink planted at the
-# marker path, and mv also replaces the file atomically at the umask's 0600.
+# NBSP and CJK survive. Like `state`, `last-run` and the lock file, this write follows a
+# symlink planted at its path; hardening one of the four sites would close nothing, so the
+# residual is accepted here on the same terms as its siblings rather than papered over.
 record_mail_failure() {
-  local tmp
-  tmp=$(mktemp "$ALERT_STATE_DIR/.mail-failed.XXXXXX" 2>/dev/null) || return 0
   {
     date -u +%Y-%m-%dT%H:%M:%SZ
     printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' |
       LC_ALL=C sed 's/\xc2[\x80-\x9f]//g' | head -c 4096
-  } > "$tmp"
-  mv -f "$tmp" "$MAIL_FAILED_FILE" 2>/dev/null || rm -f "$tmp"
+  } > "$MAIL_FAILED_FILE"
 }
 
 # One send path for both call sites, so stderr capture and the failure record cannot
@@ -95,15 +93,16 @@ send_alert_mail() {
   # MTA that forks a delivery child survives `timeout 30` and hangs the run indefinitely
   # while holding the flock — silently killing every later cron run. stdout is discarded
   # because that is where msmtp --debug prints the SMTP dialogue, AUTH included.
-  errfile=$(mktemp "$ALERT_STATE_DIR/.mail-err.XXXXXX" 2>/dev/null) || errfile=/dev/null
+  # Fixed name, not mktemp: the flock means one run at a time, so there is no collision
+  # to avoid, and a fixed path cannot accumulate orphans when a run is killed mid-send.
+  errfile="$ALERT_STATE_DIR/.mail-err"
   timeout 30 "$MAIL_CMD" -s "$1" -- "$ALERT_EMAIL" >/dev/null 2>"$errfile"
   rc=$?
+  err=$(head -c 4096 "$errfile" 2>/dev/null || true)
+  rm -f "$errfile"
   if [ "$rc" -eq 0 ]; then
-    [ "$errfile" = /dev/null ] || rm -f "$errfile"
     return 0
   fi
-  err=$(head -c 4096 "$errfile" 2>/dev/null || true)
-  [ "$errfile" = /dev/null ] || rm -f "$errfile"
   if [ "$rc" -eq 124 ]; then
     err="timed out after 30s${err:+: $err}"
   fi
