@@ -11,6 +11,8 @@
 #
 # Configuration (set these or pass via environment):
 #   ALERT_EMAIL    - Email address to receive alerts (required)
+#   MAIL_CMD       - mail binary to use (default: mail); mainly a test seam, but also
+#                    useful for an absolute path under a thin cron PATH
 #   COMPOSE_DIR    - Path to docker-compose.yml directory (default: script directory's parent)
 #   HEALTH_URL     - Health endpoint URL (default: read from .env DOMAIN)
 #   MAX_QUERY_SECONDS  - Alert if any query has been active longer (default: 120)
@@ -68,25 +70,24 @@ MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
 # Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
 # want only that (deploy.sh) can take the first line; the reason follows. Reason text can
 # originate from a remote SMTP relay and deploy.sh echoes it to a terminal, so strip
-# control characters and cap the length at write time. The range covers C1 (\200-\237)
-# as well as C0: 0x9B is a single-byte CSI in an 8-bit locale, the same line-overwrite
-# trick as CR. Tab and LF are kept deliberately.
+# control characters and cap the length at write time. C1 (0x80-0x9F) is deliberately
+# NOT stripped: those bytes are also UTF-8 continuation bytes, so deleting them mangles
+# every non-ASCII message — including this script's own em-dash at the record_mail_failure
+# call below. A lone C1 byte is invalid UTF-8 and renders as a replacement character;
+# it is only a CSI in a legacy 8-bit locale, which is not worth corrupting output for.
 record_mail_failure() {
   {
     date -u +%Y-%m-%dT%H:%M:%SZ
-    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177\200-\237' | head -c 4096
+    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' | head -c 4096
   } > "$MAIL_FAILED_FILE"
   chmod 600 "$MAIL_FAILED_FILE" 2>/dev/null || true
 }
 
-# One send path, so the no-transport short-circuit cannot be forgotten at one of the two
-# call sites. Body on stdin; returns non-zero and records why on failure.
+# One send path for both call sites, so stderr capture and the failure record cannot
+# drift apart. Body on stdin; returns non-zero and records why on failure. Callers are
+# responsible for the $MAIL_AVAILABLE gate — see the two send conditions below.
 send_alert_mail() {
   local err
-  if ! $MAIL_AVAILABLE; then
-    cat > /dev/null
-    return 1
-  fi
   # `2>&1 >/dev/null` captures only stderr: "not installed", "relay refused" and "auth
   # failed" are indistinguishable once discarded. timeout 30 stays — under a 5-minute cron
   # an MTA hanging on an unreachable relay is a process-pileup vector.
@@ -397,7 +398,6 @@ if [ -n "$PROBLEMS" ]; then
       echo "$CURRENT_HASH" > "$ALERT_STATE_FILE"
       rm -f "$MAIL_FAILED_FILE"
     else
-      # send_alert_mail already recorded the reason in the marker deploy.sh surfaces.
       echo "ERROR: Failed to send alert email" >&2
     fi
   fi

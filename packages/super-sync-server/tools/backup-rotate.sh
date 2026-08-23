@@ -1,6 +1,10 @@
 #!/bin/bash
 # Backup Rotation Script for SuperSync
 # Implements retention policy: 7 daily, 4 weekly, 12 monthly
+#
+# Configuration:
+#   ALERT_EMAIL - Address to alert if rotation leaves zero backups (optional;
+#                 alerting is skipped when unset, and also needs a `mail` binary)
 
 set -e
 set -u
@@ -118,14 +122,10 @@ TOTAL_BACKUPS=$((AFTER_COUNT + WEEKLY_COUNT + MONTHLY_COUNT))
 if [ "$TOTAL_BACKUPS" -eq 0 ]; then
   log "ERROR: No backups remaining after rotation!"
 
-  # Try to send alert if mail is available and the operator opted in to a recipient.
-  # No default address on purpose: this script ships in the repo, so a hardcoded recipient
-  # mails a self-hoster's hostname to a stranger the moment they install an MTA. Matches
-  # health-alert.sh's ALERT_EMAIL contract.
-  ALERT_EMAIL="${ALERT_EMAIL:-}"
-  if [ -n "$ALERT_EMAIL" ] && command -v mail >/dev/null 2>&1; then
+  # No default recipient, for the reason given at health-alert.sh:27-29.
+  if [ -n "${ALERT_EMAIL:-}" ] && command -v mail >/dev/null 2>&1; then
     echo "CRITICAL: All backups deleted during rotation on $(hostname) at $(date)" | \
-      mail -s "ALERT: Backup Rotation Error" "$ALERT_EMAIL" 2>/dev/null || true
+      mail -s "ALERT: Backup Rotation Error" "${ALERT_EMAIL:-}" 2>/dev/null || true
   fi
 
   exit 1

@@ -74,7 +74,7 @@ const FAKE_MAIL = `#!/bin/sh
 printf '%s\n' "$*" >> "$FAKE_STATE/mail.args"
 printf '%s\n' '---MAIL---' >> "$FAKE_STATE/mail.log"
 cat >> "$FAKE_STATE/mail.log"
-[ -z "\${FAKE_MAIL_STDERR:-}" ] || printf '%b\n' "\$FAKE_MAIL_STDERR" >&2
+[ -z "\${FAKE_MAIL_STDERR:-}" ] || printf '%s\n' "\$FAKE_MAIL_STDERR" >&2
 exit "\${FAKE_MAIL_EXIT:-0}"
 `;
 
@@ -91,16 +91,6 @@ let binDir: string;
 const readStateFile = (name: string): string => {
   try {
     return readFileSync(join(projectDir, '.health-alert', name), 'utf8');
-  } catch {
-    return '';
-  }
-};
-
-// latin1, not utf8: the sanitizer works on bytes, and a surviving C1 byte would read
-// back as U+FFFD under utf8 — indistinguishable from any other mangling.
-const readStateFileBytes = (name: string): string => {
-  try {
-    return readFileSync(join(projectDir, '.health-alert', name), 'latin1');
   } catch {
     return '';
   }
@@ -442,17 +432,13 @@ describe('health-alert.sh state handling', () => {
       FAKE_LONG_Q: '1',
       FAKE_LONGEST: '130',
       FAKE_MAIL_EXIT: '1',
-      // \\233 is a literal octal escape the fake expands to a raw 0x9B byte. It cannot be
-      // passed as a JS \u009b: env vars are UTF-8, so that arrives as 0xC2 0x9B instead.
-      FAKE_MAIL_STDERR: `relay\u0007said\u001b[31mred\rCARRIAGE\u007f\\233 1mCSI${'x'.repeat(9000)}`,
+      FAKE_MAIL_STDERR: `relay\u0007said\u001b[31mred\rCARRIAGE\u007f${'x'.repeat(9000)}`,
     });
     expect(marker.output).toContain('Failed to send alert email');
-    const text = readStateFileBytes('mail-failed');
+    const text = readStateFile('mail-failed');
     // Only ESC/BEL are control characters here; the printable "[31m" correctly survives.
     expect(text).toContain('relaysaid[31mred');
-    // C1 too: 0x9B is a single-byte CSI in an 8-bit locale, the same trick as CR.
-    expect(text).toContain('CARRIAGE 1mCSI');
-    expect(text).not.toMatch(/[\u0000-\u0008\u000b-\u001f\u007f-\u009f]/);
+    expect(text).not.toMatch(/[\u0007\u001b\r\u007f]/);
     expect(text.length).toBeLessThanOrEqual(4200);
   });
 

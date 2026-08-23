@@ -257,7 +257,7 @@ their result needs a working `mail` command, and stock Debian and Ubuntu have
 none. `mailutils` or `bsd-mailx` provides it; bare `msmtp` does **not** — msmtp is
 a transport, so pair it with `msmtp-mta`.
 
-`health-alert.sh` now checks for the binary on every run and records its absence
+`health-alert.sh` checks for the binary on every run and records its absence
 in `.health-alert/mail-failed`, which `deploy.sh` surfaces. Confirm delivery end
 to end before trusting the setup:
 
@@ -273,7 +273,7 @@ for the cron user.
 whether it is still completing, and why the last attempted email failed. If it
 says the cron is missing, nothing is watching the server.
 
-Delivery is now provable while the system is healthy: the missing-binary marker
+Delivery is provable while the system is healthy: the missing-binary marker
 makes the next healthy run send one `SuperSync OK: Health Check Recovered`
 message and then clear the marker. So after installing an MTA on a healthy
 server, that single mail arriving within 5 minutes is the end-to-end proof —

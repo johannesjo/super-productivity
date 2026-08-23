@@ -510,7 +510,7 @@ report_monitoring_status() {
         # head -1: the marker gained a reason after the timestamp, and $(cat ...) strips
         # only *trailing* newlines, so a multi-line marker would interpolate mid-sentence.
         echo "    WARNING: alert email delivery FAILED at $(head -1 "$state_dir/mail-failed" 2>/dev/null)."
-        local mail_reason=""
+        local mail_reason
         mail_reason=$(tail -n +2 "$state_dir/mail-failed" 2>/dev/null | tr '\n\r\t' '   ' | head -c 200) || true
         if [ -n "$mail_reason" ]; then
             echo "             Reason: $mail_reason"
