@@ -11,6 +11,7 @@
 #
 # Configuration (set these or pass via environment):
 #   ALERT_EMAIL    - Email address to receive alerts (required)
+#   MAIL_CMD       - mail binary to use (default: mail); a test seam
 #   COMPOSE_DIR    - Path to docker-compose.yml directory (default: script directory's parent)
 #   HEALTH_URL     - Health endpoint URL (default: read from .env DOMAIN)
 #   MAX_QUERY_SECONDS  - Alert if any query has been active longer (default: 120)
@@ -28,6 +29,7 @@ COMPOSE_DIR="${COMPOSE_DIR:-$(dirname "$SCRIPT_DIR")}"
 # default address would silently mail a self-hoster's hostname, disk usage and container
 # state to whoever that address belongs to. Alerting is off until the operator opts in.
 ALERT_EMAIL="${ALERT_EMAIL:-}"
+MAIL_CMD="${MAIL_CMD:-mail}"
 MAX_QUERY_SECONDS="${MAX_QUERY_SECONDS:-120}"
 POOL_WARN_PCT="${POOL_WARN_PCT:-75}"
 
@@ -57,14 +59,70 @@ fi
 
 # State file in project-local directory (not /tmp — avoids symlink attacks and tmp cleanup)
 ALERT_STATE_DIR="${COMPOSE_DIR}/.health-alert"
+# umask 077 makes this 0700. Later runs do not re-chmod it, so an operator can widen it to
+# let a non-root deploy.sh read the markers — which is why deploy.sh sanitizes on read too.
 mkdir -p "$ALERT_STATE_DIR"
 ALERT_STATE_FILE="$ALERT_STATE_DIR/state"
+MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
+MAIL_ERR_MAX_BYTES=4096
+
+# Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
+# want only that (deploy.sh) can take the first line; the reason follows. Reason text can
+# originate from a remote SMTP relay and deploy.sh echoes it to a terminal, so strip
+# control characters and cap the length at write time. The sed matches UTF-8-*encoded* C1
+# (\xc2 followed by \x80-\x9f, which encodes U+0080-U+009F and nothing else) so CSI/OSC go
+# but em-dash, NBSP and CJK survive; a plain 0x80-0x9F byte range would instead eat UTF-8
+# continuation bytes and corrupt every non-ASCII message. Both halves are pinned by the
+# "strips UTF-8-encoded C1 controls" spec case.
+record_mail_failure() {
+  {
+    date -u +%Y-%m-%dT%H:%M:%SZ
+    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' |
+      LC_ALL=C sed 's/\xc2[\x80-\x9f]//g' | head -c "$MAIL_ERR_MAX_BYTES"
+  } > "$MAIL_FAILED_FILE"
+}
+
+# One send path for both call sites. Body on stdin; returns non-zero and records why on
+# failure. Callers gate on $MAIL_AVAILABLE — see the two send conditions below.
+send_alert_mail() {
+  local err errfile rc
+  # stderr to a FILE, never `err=$(...)`: command substitution waits for pipe EOF, so an
+  # MTA that forks a delivery child survives `timeout 30` and hangs the run indefinitely
+  # while holding the flock — silently killing every later cron run. stdout is discarded
+  # because that is where msmtp --debug prints the SMTP dialogue, AUTH included.
+  errfile="$ALERT_STATE_DIR/.mail-err"
+  timeout 30 "$MAIL_CMD" -s "$1" -- "$ALERT_EMAIL" >/dev/null 2>"$errfile"
+  rc=$?
+  if [ "$rc" -eq 0 ]; then
+    rm -f "$errfile"
+    return 0
+  fi
+  err=$(head -c "$MAIL_ERR_MAX_BYTES" "$errfile" 2>/dev/null)
+  rm -f "$errfile"
+  if [ "$rc" -eq 124 ]; then
+    err="timed out after 30s${err:+: $err}"
+  fi
+  record_mail_failure "${err:-mail exited $rc with no error output}"
+  return 1
+}
 
 # Prevent concurrent runs (cron overlap if a previous run hangs)
 LOCK_FILE="$ALERT_STATE_DIR/health-alert.lock"
 exec 9>"$LOCK_FILE"
 if ! flock -n 9; then
   exit 0
+fi
+
+# A stock Debian/Ubuntu host has no `mail` binary, and without this check the first
+# discovery of that is the first real incident, months after setup. Record it in the marker
+# deploy.sh already surfaces — never in CONFIG_PROBLEMS, which is the alert body and the
+# dedupe hash input: routing it there would report the broken channel through the broken
+# channel and keep PROBLEMS permanently non-empty, disabling the recovery branch.
+MAIL_AVAILABLE=true
+if ! command -v "$MAIL_CMD" >/dev/null 2>&1; then
+  MAIL_AVAILABLE=false
+  echo "health-alert: no '$MAIL_CMD' binary on PATH — install mailutils or bsd-mailx." >&2
+  record_mail_failure "no $MAIL_CMD binary on PATH — install mailutils or bsd-mailx"
 fi
 
 cd "$COMPOSE_DIR"
@@ -338,30 +396,27 @@ CURRENT_HASH=$(printf '%s' "$HASH_INPUT" | sha256sum | cut -d' ' -f1)
 PREVIOUS_HASH=$(cat "$ALERT_STATE_FILE" 2>/dev/null || echo "none")
 
 if [ -n "$PROBLEMS" ]; then
-  if [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ] || [ -f "$ALERT_STATE_DIR/mail-failed" ]; then
+  if $MAIL_AVAILABLE && { [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ] || [ -f "$MAIL_FAILED_FILE" ]; }; then
     # New or changed problem — send alert, only write state if mail succeeds
     if printf 'SuperSync health check failed at %s\n\nProblems found:\n%b\nServer: %s\n' \
         "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PROBLEMS" "$(hostname)" \
-        | timeout 30 mail -s "SuperSync Alert: Health Check Failed" "$ALERT_EMAIL" 2>/dev/null; then
+        | send_alert_mail "SuperSync Alert: Health Check Failed"; then
       echo "$CURRENT_HASH" > "$ALERT_STATE_FILE"
-      rm -f "$ALERT_STATE_DIR/mail-failed"
+      rm -f "$MAIL_FAILED_FILE"
     else
-      # Leave a marker deploy.sh can surface when cron cannot deliver mail.
       echo "ERROR: Failed to send alert email" >&2
-      date -u +%Y-%m-%dT%H:%M:%SZ > "$ALERT_STATE_DIR/mail-failed"
     fi
   fi
 else
   # A healthy retry also proves mail works again and clears a sticky failure marker.
-  if [ -f "$ALERT_STATE_FILE" ] || [ -f "$ALERT_STATE_DIR/mail-failed" ]; then
+  if $MAIL_AVAILABLE && { [ -f "$ALERT_STATE_FILE" ] || [ -f "$MAIL_FAILED_FILE" ]; }; then
     if printf 'SuperSync health check recovered at %s\n\nAll checks passing.\nServer: %s\n' \
         "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(hostname)" \
-        | timeout 30 mail -s "SuperSync OK: Health Check Recovered" "$ALERT_EMAIL" 2>/dev/null; then
+        | send_alert_mail "SuperSync OK: Health Check Recovered"; then
       rm -f "$ALERT_STATE_FILE"
-      rm -f "$ALERT_STATE_DIR/mail-failed"
+      rm -f "$MAIL_FAILED_FILE"
     else
       echo "ERROR: Failed to send recovery email" >&2
-      date -u +%Y-%m-%dT%H:%M:%SZ > "$ALERT_STATE_DIR/mail-failed"
     fi
   fi
 fi

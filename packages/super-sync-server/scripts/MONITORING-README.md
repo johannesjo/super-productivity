@@ -250,10 +250,38 @@ is not started by `deploy.sh` and nothing else runs it:
 (crontab -l 2>/dev/null; echo "*/5 * * * * ALERT_EMAIL=you@example.com /path/to/super-sync-server/scripts/health-alert.sh") | crontab -
 ```
 
-`deploy.sh` reports at the end of every deploy whether this exact cron exists,
-whether it is still completing, and whether the last attempted email failed. It
-cannot prove delivery while the system is healthy because no email is sent then.
-If it says the cron is missing, nothing is watching the server.
+### The cron entry is not enough — you also need an MTA
+
+`ALERT_EMAIL` plus the crontab line above gets the _checks_ running. Delivering
+their result needs a working `mail` command, and stock Debian and Ubuntu have
+none. Install `mailutils` or `bsd-mailx` — those provide `mail` itself. Neither
+`msmtp` nor `msmtp-mta` does: msmtp is a transport and `msmtp-mta` only supplies
+the `sendmail` interface underneath, so installing it alone leaves the check
+still failing. Use it _in addition to_ `bsd-mailx` if msmtp is your relay.
+
+`health-alert.sh` checks for the binary on every run and records its absence
+in `.health-alert/mail-failed`, which `deploy.sh` surfaces. Confirm delivery end
+to end before trusting the setup:
+
+```bash
+echo test | mail -s 'SuperSync test' you@example.com
+```
+
+A queuing MTA exits 0 on accept, not on delivery, so check the message actually
+arrived. If it did not, `mailx` writes the undelivered body to `~/dead.letter`
+for the cron user.
+
+`deploy.sh` reports at the end of every successful deploy whether this exact cron exists,
+whether it is still completing, and why the last attempted email failed. If it
+says the cron is missing, nothing is watching the server.
+
+If the cron was already running _before_ you installed the MTA, the missing-binary
+marker gets you that proof for free: the next healthy run sends one
+`SuperSync OK: Health Check Recovered` message and clears the marker. In the other
+order nothing is sent on a healthy server, so use the manual test above.
+
+The `Reason:` line `deploy.sh` prints comes from your MTA and can name the recipient
+address and the relay host — redact it before pasting into an issue.
 
 ### What it checks
 

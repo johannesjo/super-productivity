@@ -74,6 +74,7 @@ const FAKE_MAIL = `#!/bin/sh
 printf '%s\n' "$*" >> "$FAKE_STATE/mail.args"
 printf '%s\n' '---MAIL---' >> "$FAKE_STATE/mail.log"
 cat >> "$FAKE_STATE/mail.log"
+[ -z "\${FAKE_MAIL_STDERR:-}" ] || printf '%b\n' "\$FAKE_MAIL_STDERR" >&2
 exit "\${FAKE_MAIL_EXIT:-0}"
 `;
 
@@ -87,13 +88,24 @@ interface RunResult {
 let projectDir: string;
 let binDir: string;
 
+const stateDir = (): string => join(projectDir, '.health-alert');
+const stateFile = (name: string): string => join(stateDir(), name);
+
 const readStateFile = (name: string): string => {
   try {
-    return readFileSync(join(projectDir, '.health-alert', name), 'utf8');
+    return readFileSync(stateFile(name), 'utf8');
   } catch {
     return '';
   }
 };
+
+const writeStateFile = (name: string, contents: string): void => {
+  mkdirSync(stateDir(), { recursive: true });
+  writeFileSync(stateFile(name), contents);
+};
+
+// The env pair that makes PROBLEMS non-empty, i.e. that gets a send attempted at all.
+const FAILING_PROBE = { FAKE_LONG_Q: '1', FAKE_LONGEST: '130' };
 
 const writeExecutable = (name: string, contents: string): void => {
   const path = join(binDir, name);
@@ -108,7 +120,7 @@ const run = (env: Record<string, string> = {}): RunResult => {
     COMPOSE_DIR: projectDir,
     HEALTH_URL: 'https://health.test/health',
     ALERT_EMAIL: 'ops@example.test',
-    FAKE_STATE: join(projectDir, '.health-alert'),
+    FAKE_STATE: stateDir(),
     ...env,
   };
 
@@ -136,9 +148,18 @@ const runDeployMonitoringStatus = (): string => {
   const deployScript = readFileSync(DEPLOY_SCRIPT, 'utf8');
   const match = deployScript.match(/report_monitoring_status\(\) \{[\s\S]*?\n\}/);
   expect(match).not.toBeNull();
+  // The reporter calls this helper; extract it too, or the runner silently loses the
+  // sanitizing and every assertion below passes against unfiltered marker text.
+  const helper = deployScript.match(/sanitize_untrusted\(\) \{[\s\S]*?\n\}/);
+  expect(helper).not.toBeNull();
 
   const runner = join(projectDir, 'report-monitoring-status.sh');
-  writeFileSync(runner, `${match?.[0] ?? ''}\nreport_monitoring_status\n`);
+  // Same options deploy.sh sets at :16-17 — the `|| true` guards in the reporter are
+  // load-bearing only under these, so a runner without them cannot catch their loss.
+  writeFileSync(
+    runner,
+    `set -euo pipefail\nshopt -s inherit_errexit 2>/dev/null || true\n${helper?.[0] ?? ''}\n${match?.[0] ?? ''}\nreport_monitoring_status\n`,
+  );
   writeExecutable('crontab', '#!/bin/sh\nexit 1\n');
 
   const result = spawnSync('bash', [runner], {
@@ -348,7 +369,7 @@ describe('health-alert.sh service and database monitoring', () => {
 
 describe('health-alert.sh state handling', () => {
   it('deduplicates volatile long-query counts and durations', () => {
-    run({ FAKE_LONG_Q: '1', FAKE_LONGEST: '130' });
+    run(FAILING_PROBE);
     const second = run({ FAKE_LONG_Q: '27', FAKE_LONGEST: '240' });
 
     expect(second.mailLog.match(/SuperSync health check failed/g)).toHaveLength(1);
@@ -357,47 +378,151 @@ describe('health-alert.sh state handling', () => {
 
   it('sends recovery after mail failure and clears the sticky marker', () => {
     const failed = run({
-      FAKE_LONG_Q: '1',
-      FAKE_LONGEST: '130',
+      ...FAILING_PROBE,
       FAKE_MAIL_EXIT: '1',
     });
     expect(failed.output).toContain('Failed to send alert email');
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(true);
+    expect(existsSync(stateFile('mail-failed'))).toBe(true);
 
     const recovered = run();
     expect(recovered.mailLog).toContain('All checks passing.');
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(false);
+    expect(existsSync(stateFile('mail-failed'))).toBe(false);
   });
 
   it('retries failed delivery when an earlier problem remains active', () => {
     run({ FAKE_BAD_INDEX: 'index-a' });
     run({
       FAKE_BAD_INDEX: 'index-a',
-      FAKE_LONG_Q: '1',
-      FAKE_LONGEST: '130',
+      ...FAILING_PROBE,
       FAKE_MAIL_EXIT: '1',
     });
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(true);
+    expect(existsSync(stateFile('mail-failed'))).toBe(true);
 
     const retried = run({ FAKE_BAD_INDEX: 'index-a' });
     expect(retried.mailLog.match(/SuperSync health check failed/g)).toHaveLength(3);
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(false);
+    expect(existsSync(stateFile('mail-failed'))).toBe(false);
 
     const deduplicated = run({ FAKE_BAD_INDEX: 'index-a' });
     expect(deduplicated.mailLog.match(/SuperSync health check failed/g)).toHaveLength(3);
   });
 
+  it('records a missing mail binary without waiting for an incident', () => {
+    const result = run({ MAIL_CMD: 'supersync-mail-not-installed' });
+
+    expect(result.output).toContain("no 'supersync-mail-not-installed' binary on PATH");
+    expect(readStateFile('mail-failed')).toContain(
+      'no supersync-mail-not-installed binary on PATH',
+    );
+    // The whole point is that a monitoring script never aborts: the checks still ran.
+    expect(result.dockerLog).toContain('info');
+    expect(readStateFile('last-run')).not.toBe('');
+    // One line per run, not three: the doomed send must not be attempted as well.
+    expect(result.output).not.toContain('Failed to send');
+    expect(result.mailLog).toBe('');
+  });
+
+  it('captures why a real send failed, at both send sites', () => {
+    const failed = run({
+      ...FAILING_PROBE,
+      FAKE_MAIL_EXIT: '1',
+      FAKE_MAIL_STDERR: 'smtp: 550 relay access denied',
+    });
+    expect(failed.output).toContain('Failed to send alert email');
+    const alertMarker = readStateFile('mail-failed');
+    expect(alertMarker.split('\n')[0]).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    expect(alertMarker).toContain('550 relay access denied');
+
+    const recovery = run({
+      FAKE_MAIL_EXIT: '1',
+      FAKE_MAIL_STDERR: 'smtp: 535 authentication failed',
+    });
+    expect(recovery.output).toContain('Failed to send recovery email');
+    const recoveryMarker = readStateFile('mail-failed');
+    expect(recoveryMarker.split('\n')[0]).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
+    );
+    expect(recoveryMarker).toContain('535 authentication failed');
+  });
+
+  it('strips control characters and bounds relay-supplied failure text', () => {
+    const marker = run({
+      ...FAILING_PROBE,
+      FAKE_MAIL_EXIT: '1',
+      FAKE_MAIL_STDERR: `relay\u0007said\u001b[31mred\rCARRIAGE\u007f${'x'.repeat(9000)}`,
+    });
+    expect(marker.output).toContain('Failed to send alert email');
+    const text = readStateFile('mail-failed');
+    // Only ESC/BEL are control characters here; the printable "[31m" correctly survives.
+    expect(text).toContain('relaysaid[31mred');
+    expect(text).not.toMatch(/[\u0007\u001b\r\u007f]/);
+    expect(text.length).toBeLessThanOrEqual(4200);
+  });
+
+  it('strips UTF-8-encoded C1 controls without corrupting other UTF-8', () => {
+    // \\302\\233 is the well-formed UTF-8 encoding of U+009B (CSI). Both bytes are >= 0x80,
+    // so a plain C0 byte filter passes them through and the terminal decodes a real
+    // control. Stripping the byte RANGE 0x80-0x9F instead would corrupt every non-ASCII
+    // string, so the em-dash and CJK below must survive untouched.
+    const marker = run({
+      ...FAILING_PROBE,
+      FAKE_MAIL_EXIT: '1',
+      FAKE_MAIL_STDERR:
+        'relay \\302\\2331;31mRED said \\342\\200\\224 dash \\346\\227\\245',
+    });
+    expect(marker.output).toContain('Failed to send alert email');
+    const text = readStateFile('mail-failed');
+    expect(text).toContain('relay 1;31mRED said — dash 日');
+    expect(text).not.toContain('\u009b');
+  });
+
+  it('does not hang when the mail command forks a child that outlives it', () => {
+    // `err=$(...)` waits for pipe EOF, not for the process, so a forked delivery child
+    // keeps the run alive past `timeout 30` while it holds the flock — which silently
+    // kills every later cron run. A queuing MTA daemonizes exactly like this.
+    writeExecutable(
+      'mail',
+      `#!/bin/sh\nsh -c 'sleep 30' &\nprintf '%s\\n' 'smtp: 451 try again' >&2\nexit 1\n`,
+    );
+    const started = Date.now();
+    const result = run(FAILING_PROBE);
+    const elapsedMs = Date.now() - started;
+
+    expect(result.output).toContain('Failed to send alert email');
+    expect(readStateFile('mail-failed')).toContain('451 try again');
+    // The forked child sleeps 30s; anything near that means the run blocked on it.
+    expect(elapsedMs).toBeLessThan(15_000);
+  });
+
   it('reports heartbeat and mail failure even without a current-user cron entry', () => {
-    const stateDir = join(projectDir, '.health-alert');
-    mkdirSync(stateDir);
-    writeFileSync(join(stateDir, 'last-run'), new Date().toISOString());
-    writeFileSync(join(stateDir, 'mail-failed'), '2026-07-20T12:00:00Z\n');
+    writeStateFile('last-run', new Date().toISOString());
+    writeStateFile('mail-failed', '2026-07-20T12:00:00Z\nno mail binary on PATH\n');
 
     const output = runDeployMonitoringStatus();
 
     expect(output).toContain("not in this user's crontab");
     expect(output).toContain('recent completed run');
-    expect(output).toContain('alert email delivery FAILED');
+    // head -1, not $(cat …): a multi-line marker must not interpolate mid-sentence.
+    expect(output).toContain('alert email delivery FAILED at 2026-07-20T12:00:00Z.');
+    expect(output).toContain('Reason: no mail binary on PATH');
     expect(output).not.toContain('will go unnoticed');
+  });
+
+  it('sanitizes a hostile marker it did not write', () => {
+    // deploy.sh may run as a user who can read .health-alert but did not write it, so
+    // the reader cannot assume the write-time filter ran. \u001b[2J clears the operator's
+    // screen and \u009b is a decoded C1 CSI; neither may reach the terminal.
+    // last-run lives in the same directory and is printed by the same function, so it
+    // is exactly as untrusted as mail-failed.
+    writeStateFile('last-run', `${new Date().toISOString()}\u001b[1;31m OWNED\u0007`);
+    writeStateFile(
+      'mail-failed',
+      '2026-07-20T12:00:00Z\u001b[2J\u001b[1;31mFAKE\n550 \u009b2Kdenied\u0007 here\n',
+    );
+
+    const output = runDeployMonitoringStatus();
+
+    expect(output).not.toMatch(/[\u0000-\u0008\u000b-\u001f\u007f\u009b]/);
+    expect(output).toContain('550 2Kdenied here');
+    expect(output).toContain('[1;31m OWNED');
   });
 });
