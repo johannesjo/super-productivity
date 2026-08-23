@@ -68,11 +68,13 @@ MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
 # Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
 # want only that (deploy.sh) can take the first line; the reason follows. Reason text can
 # originate from a remote SMTP relay and deploy.sh echoes it to a terminal, so strip
-# control characters and cap the length at write time.
+# control characters and cap the length at write time. The range covers C1 (\200-\237)
+# as well as C0: 0x9B is a single-byte CSI in an 8-bit locale, the same line-overwrite
+# trick as CR. Tab and LF are kept deliberately.
 record_mail_failure() {
   {
     date -u +%Y-%m-%dT%H:%M:%SZ
-    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' | head -c 4096
+    printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177\200-\237' | head -c 4096
   } > "$MAIL_FAILED_FILE"
   chmod 600 "$MAIL_FAILED_FILE" 2>/dev/null || true
 }
