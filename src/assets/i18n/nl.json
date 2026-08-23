@@ -1839,7 +1839,7 @@
       },
       "CMP": {
         "ADD_SUB_TASK": "Subtaak toevoegen",
-        "ADD_TO_MY_DAY": "Voeg toe aan Mijn Day",
+        "ADD_TO_MY_DAY": "Voeg toe aan Mijn dag",
         "ADD_TO_PROJECT": "Voeg toe aan een project",
         "CONVERT_TO_PARENT_TASK": "Converteren naar bovenliggende taak",
         "DELETE": "Taak verwijderen",
@@ -2363,7 +2363,7 @@
     "S_ERR_TODOIST_IMPORT_OPEN": "De Todoist-importfunctie kon niet worden geopend"
   },
   "G": {
-    "ADD": "Voeg  toe",
+    "ADD": "Voeg toe",
     "ADVANCED_CFG": "Geavanceerde Configuratie",
     "APPLY": "Toepassen",
     "CANCEL": "annuleren",
