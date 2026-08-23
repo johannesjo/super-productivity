@@ -47,6 +47,7 @@ const NO_STATE_ROW_USER_ID = 99986;
 const STUCK_SNAPSHOT_USER_ID = 99987;
 const SEQ1_IMPORT_ONLY_USER_ID = 99988;
 const PREDICATE_MATRIX_USER_ID = 99989;
+const MULTI_BATCH_USER_ID = 99990;
 const ALL_USER_IDS = [
   LAPSED_USER_ID,
   SNAPSHOTLESS_USER_ID,
@@ -57,6 +58,7 @@ const ALL_USER_IDS = [
   STUCK_SNAPSHOT_USER_ID,
   SEQ1_IMPORT_ONLY_USER_ID,
   PREDICATE_MATRIX_USER_ID,
+  MULTI_BATCH_USER_ID,
 ];
 
 describeWithDb('Old-ops sweep (PostgreSQL)', () => {
@@ -584,5 +586,41 @@ describeWithDb('Old-ops sweep (PostgreSQL)', () => {
 
     expect(viaGate).toEqual(viaPrisma);
     expect(viaPrisma).toEqual(expectedCausalSeqs);
+  });
+  /**
+   * The drain loop continues on the SELECTED row count, and it only ever
+   * continues past the first batch when a user's aged prefix is longer than
+   * OLD_OPS_CLEANUP_DELETE_BATCH_SIZE (5000 by default). Every other fixture
+   * here is a handful of rows, so that continuation — the line that decides
+   * whether a prefix is drained whole or left truncated with a plain delta
+   * lowest — has never executed against real rows. Shrink the batch instead of
+   * seeding 5000 ops.
+   */
+  it('drains a prefix longer than one delete batch whole, across batches', async () => {
+    const previousBatchSize = process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+    process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '2';
+    try {
+      for (let seq = 1; seq <= 9; seq++) {
+        await seedOp(MULTI_BATCH_USER_ID, seq);
+      }
+      await seedImportOp(MULTI_BATCH_USER_ID, 10);
+      await seedOp(MULTI_BATCH_USER_ID, 11);
+      await prisma.userSyncState.create({
+        data: { userId: MULTI_BATCH_USER_ID, lastSeq: 11 },
+      });
+
+      const result = await runSweep();
+
+      // 9 prefix ops removed over 5 batches of 2; stopping after any one of
+      // them would leave a plain delta as the lowest surviving row.
+      expect(result.totalDeleted).toBe(9);
+      expect(await survivingSeqs(MULTI_BATCH_USER_ID)).toEqual([10, 11]);
+    } finally {
+      if (previousBatchSize === undefined) {
+        delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+      } else {
+        process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = previousBatchSize;
+      }
+    }
   });
 });
