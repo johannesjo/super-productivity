@@ -59,50 +59,46 @@ fi
 
 # State file in project-local directory (not /tmp — avoids symlink attacks and tmp cleanup)
 ALERT_STATE_DIR="${COMPOSE_DIR}/.health-alert"
-# umask 077 makes this 0700; deliberately not chmod'd on later runs, so an operator who
-# widens it (to let a non-root deploy.sh read the markers) is not silently overridden.
+# umask 077 makes this 0700. Later runs do not re-chmod it, so an operator can widen it to
+# let a non-root deploy.sh read the markers — which is why deploy.sh sanitizes on read too.
 mkdir -p "$ALERT_STATE_DIR"
 ALERT_STATE_FILE="$ALERT_STATE_DIR/state"
 MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
+MAIL_ERR_MAX_BYTES=4096
 
 # Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
 # want only that (deploy.sh) can take the first line; the reason follows. Reason text can
 # originate from a remote SMTP relay and deploy.sh echoes it to a terminal, so strip
-# control characters and cap the length at write time. Do NOT switch the tr to a byte
-# range covering 0x80-0x9F: those are UTF-8 continuation bytes and deleting them corrupts
-# every non-ASCII message, this script's own em-dash included (tried in 096c93ca, reverted
-# in bef0c160). The sed removes UTF-8-*encoded* C1 instead — \xc2 followed by \x80-\x9f
-# encodes U+0080-U+009F and nothing else, so CSI/OSC are removed exactly while em-dash,
-# NBSP and CJK survive. Like `state`, `last-run` and the lock file, this write follows a
-# symlink planted at its path; hardening one of the four sites would close nothing, so the
-# residual is accepted here on the same terms as its siblings rather than papered over.
+# control characters and cap the length at write time. The sed matches UTF-8-*encoded* C1
+# (\xc2 followed by \x80-\x9f, which encodes U+0080-U+009F and nothing else) so CSI/OSC go
+# but em-dash, NBSP and CJK survive; a plain 0x80-0x9F byte range would instead eat UTF-8
+# continuation bytes and corrupt every non-ASCII message. Both halves are pinned by the
+# "strips UTF-8-encoded C1 controls" spec case.
 record_mail_failure() {
   {
     date -u +%Y-%m-%dT%H:%M:%SZ
     printf '%s\n' "$1" | LC_ALL=C tr -d '\000-\010\013-\037\177' |
-      LC_ALL=C sed 's/\xc2[\x80-\x9f]//g' | head -c 4096
+      LC_ALL=C sed 's/\xc2[\x80-\x9f]//g' | head -c "$MAIL_ERR_MAX_BYTES"
   } > "$MAIL_FAILED_FILE"
 }
 
-# One send path for both call sites, so stderr capture and the failure record cannot
-# drift apart. Body on stdin; returns non-zero and records why on failure. Callers are
-# responsible for the $MAIL_AVAILABLE gate — see the two send conditions below.
+# One send path for both call sites. Body on stdin; returns non-zero and records why on
+# failure. Callers gate on $MAIL_AVAILABLE — see the two send conditions below.
 send_alert_mail() {
   local err errfile rc
   # stderr to a FILE, never `err=$(...)`: command substitution waits for pipe EOF, so an
   # MTA that forks a delivery child survives `timeout 30` and hangs the run indefinitely
   # while holding the flock — silently killing every later cron run. stdout is discarded
   # because that is where msmtp --debug prints the SMTP dialogue, AUTH included.
-  # Fixed name, not mktemp: the flock means one run at a time, so there is no collision
-  # to avoid, and a fixed path cannot accumulate orphans when a run is killed mid-send.
   errfile="$ALERT_STATE_DIR/.mail-err"
   timeout 30 "$MAIL_CMD" -s "$1" -- "$ALERT_EMAIL" >/dev/null 2>"$errfile"
   rc=$?
-  err=$(head -c 4096 "$errfile" 2>/dev/null || true)
-  rm -f "$errfile"
   if [ "$rc" -eq 0 ]; then
+    rm -f "$errfile"
     return 0
   fi
+  err=$(head -c "$MAIL_ERR_MAX_BYTES" "$errfile" 2>/dev/null)
+  rm -f "$errfile"
   if [ "$rc" -eq 124 ]; then
     err="timed out after 30s${err:+: $err}"
   fi
@@ -117,12 +113,11 @@ if ! flock -n 9; then
   exit 0
 fi
 
-# Alerting is only as good as its transport, and a stock Debian/Ubuntu host has no `mail`
-# binary. Without this check the first discovery of that is the first real incident, months
-# after setup. Record it now instead, in the marker deploy.sh already surfaces. Deliberately
-# not added to CONFIG_PROBLEMS: that string is the alert body and the dedupe hash input, so
-# it would report the broken channel through the broken channel and keep PROBLEMS
-# permanently non-empty, disabling the recovery branch that clears this marker.
+# A stock Debian/Ubuntu host has no `mail` binary, and without this check the first
+# discovery of that is the first real incident, months after setup. Record it in the marker
+# deploy.sh already surfaces — never in CONFIG_PROBLEMS, which is the alert body and the
+# dedupe hash input: routing it there would report the broken channel through the broken
+# channel and keep PROBLEMS permanently non-empty, disabling the recovery branch.
 MAIL_AVAILABLE=true
 if ! command -v "$MAIL_CMD" >/dev/null 2>&1; then
   MAIL_AVAILABLE=false

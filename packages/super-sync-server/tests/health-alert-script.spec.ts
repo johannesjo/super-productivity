@@ -88,13 +88,24 @@ interface RunResult {
 let projectDir: string;
 let binDir: string;
 
+const stateDir = (): string => join(projectDir, '.health-alert');
+const stateFile = (name: string): string => join(stateDir(), name);
+
 const readStateFile = (name: string): string => {
   try {
-    return readFileSync(join(projectDir, '.health-alert', name), 'utf8');
+    return readFileSync(stateFile(name), 'utf8');
   } catch {
     return '';
   }
 };
+
+const writeStateFile = (name: string, contents: string): void => {
+  mkdirSync(stateDir(), { recursive: true });
+  writeFileSync(stateFile(name), contents);
+};
+
+// The env pair that makes PROBLEMS non-empty, i.e. that gets a send attempted at all.
+const FAILING_PROBE = { FAKE_LONG_Q: '1', FAKE_LONGEST: '130' };
 
 const writeExecutable = (name: string, contents: string): void => {
   const path = join(binDir, name);
@@ -109,7 +120,7 @@ const run = (env: Record<string, string> = {}): RunResult => {
     COMPOSE_DIR: projectDir,
     HEALTH_URL: 'https://health.test/health',
     ALERT_EMAIL: 'ops@example.test',
-    FAKE_STATE: join(projectDir, '.health-alert'),
+    FAKE_STATE: stateDir(),
     ...env,
   };
 
@@ -358,7 +369,7 @@ describe('health-alert.sh service and database monitoring', () => {
 
 describe('health-alert.sh state handling', () => {
   it('deduplicates volatile long-query counts and durations', () => {
-    run({ FAKE_LONG_Q: '1', FAKE_LONGEST: '130' });
+    run(FAILING_PROBE);
     const second = run({ FAKE_LONG_Q: '27', FAKE_LONGEST: '240' });
 
     expect(second.mailLog.match(/SuperSync health check failed/g)).toHaveLength(1);
@@ -367,31 +378,29 @@ describe('health-alert.sh state handling', () => {
 
   it('sends recovery after mail failure and clears the sticky marker', () => {
     const failed = run({
-      FAKE_LONG_Q: '1',
-      FAKE_LONGEST: '130',
+      ...FAILING_PROBE,
       FAKE_MAIL_EXIT: '1',
     });
     expect(failed.output).toContain('Failed to send alert email');
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(true);
+    expect(existsSync(stateFile('mail-failed'))).toBe(true);
 
     const recovered = run();
     expect(recovered.mailLog).toContain('All checks passing.');
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(false);
+    expect(existsSync(stateFile('mail-failed'))).toBe(false);
   });
 
   it('retries failed delivery when an earlier problem remains active', () => {
     run({ FAKE_BAD_INDEX: 'index-a' });
     run({
       FAKE_BAD_INDEX: 'index-a',
-      FAKE_LONG_Q: '1',
-      FAKE_LONGEST: '130',
+      ...FAILING_PROBE,
       FAKE_MAIL_EXIT: '1',
     });
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(true);
+    expect(existsSync(stateFile('mail-failed'))).toBe(true);
 
     const retried = run({ FAKE_BAD_INDEX: 'index-a' });
     expect(retried.mailLog.match(/SuperSync health check failed/g)).toHaveLength(3);
-    expect(existsSync(join(projectDir, '.health-alert', 'mail-failed'))).toBe(false);
+    expect(existsSync(stateFile('mail-failed'))).toBe(false);
 
     const deduplicated = run({ FAKE_BAD_INDEX: 'index-a' });
     expect(deduplicated.mailLog.match(/SuperSync health check failed/g)).toHaveLength(3);
@@ -414,8 +423,7 @@ describe('health-alert.sh state handling', () => {
 
   it('captures why a real send failed, at both send sites', () => {
     const failed = run({
-      FAKE_LONG_Q: '1',
-      FAKE_LONGEST: '130',
+      ...FAILING_PROBE,
       FAKE_MAIL_EXIT: '1',
       FAKE_MAIL_STDERR: 'smtp: 550 relay access denied',
     });
@@ -438,8 +446,7 @@ describe('health-alert.sh state handling', () => {
 
   it('strips control characters and bounds relay-supplied failure text', () => {
     const marker = run({
-      FAKE_LONG_Q: '1',
-      FAKE_LONGEST: '130',
+      ...FAILING_PROBE,
       FAKE_MAIL_EXIT: '1',
       FAKE_MAIL_STDERR: `relay\u0007said\u001b[31mred\rCARRIAGE\u007f${'x'.repeat(9000)}`,
     });
@@ -457,8 +464,7 @@ describe('health-alert.sh state handling', () => {
     // control. Stripping the byte RANGE 0x80-0x9F instead would corrupt every non-ASCII
     // string, so the em-dash and CJK below must survive untouched.
     const marker = run({
-      FAKE_LONG_Q: '1',
-      FAKE_LONGEST: '130',
+      ...FAILING_PROBE,
       FAKE_MAIL_EXIT: '1',
       FAKE_MAIL_STDERR:
         'relay \\302\\2331;31mRED said \\342\\200\\224 dash \\346\\227\\245',
@@ -478,7 +484,7 @@ describe('health-alert.sh state handling', () => {
       `#!/bin/sh\nsh -c 'sleep 30' &\nprintf '%s\\n' 'smtp: 451 try again' >&2\nexit 1\n`,
     );
     const started = Date.now();
-    const result = run({ FAKE_LONG_Q: '1', FAKE_LONGEST: '130' });
+    const result = run(FAILING_PROBE);
     const elapsedMs = Date.now() - started;
 
     expect(result.output).toContain('Failed to send alert email');
@@ -488,13 +494,8 @@ describe('health-alert.sh state handling', () => {
   });
 
   it('reports heartbeat and mail failure even without a current-user cron entry', () => {
-    const stateDir = join(projectDir, '.health-alert');
-    mkdirSync(stateDir);
-    writeFileSync(join(stateDir, 'last-run'), new Date().toISOString());
-    writeFileSync(
-      join(stateDir, 'mail-failed'),
-      '2026-07-20T12:00:00Z\nno mail binary on PATH\n',
-    );
+    writeStateFile('last-run', new Date().toISOString());
+    writeStateFile('mail-failed', '2026-07-20T12:00:00Z\nno mail binary on PATH\n');
 
     const output = runDeployMonitoringStatus();
 
@@ -507,19 +508,14 @@ describe('health-alert.sh state handling', () => {
   });
 
   it('sanitizes a hostile marker it did not write', () => {
-    // The marker survives `git pull` and may predate the write-time filter, so the
-    // reader cannot assume it is clean. \u001b[2J clears the operator's screen and
-    // \u009b is a decoded C1 CSI; neither may reach the terminal.
-    const stateDir = join(projectDir, '.health-alert');
-    mkdirSync(stateDir);
+    // deploy.sh may run as a user who can read .health-alert but did not write it, so
+    // the reader cannot assume the write-time filter ran. \u001b[2J clears the operator's
+    // screen and \u009b is a decoded C1 CSI; neither may reach the terminal.
     // last-run lives in the same directory and is printed by the same function, so it
     // is exactly as untrusted as mail-failed.
-    writeFileSync(
-      join(stateDir, 'last-run'),
-      `${new Date().toISOString()}\u001b[1;31m OWNED\u0007`,
-    );
-    writeFileSync(
-      join(stateDir, 'mail-failed'),
+    writeStateFile('last-run', `${new Date().toISOString()}\u001b[1;31m OWNED\u0007`);
+    writeStateFile(
+      'mail-failed',
       '2026-07-20T12:00:00Z\u001b[2J\u001b[1;31mFAKE\n550 \u009b2Kdenied\u0007 here\n',
     );
 

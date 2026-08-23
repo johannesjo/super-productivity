@@ -275,17 +275,13 @@ for the cron user.
 whether it is still completing, and why the last attempted email failed. If it
 says the cron is missing, nothing is watching the server.
 
-If the cron was already running _before_ you installed an MTA, you get a proof
-for free: the missing-binary marker makes the next healthy run send one
-`SuperSync OK: Health Check Recovered` message and then clear the marker. That
-single mail arriving within 5 minutes is end-to-end proof, and `deploy.sh`
-dropping its warning is the confirmation. Nothing repeats — the marker is gone
-once a send succeeds. Set up in the other order (MTA first, then cron) and no
-mail is ever sent on a healthy server, so use the manual `mail` test above.
+If the cron was already running _before_ you installed the MTA, the missing-binary
+marker gets you that proof for free: the next healthy run sends one
+`SuperSync OK: Health Check Recovered` message and clears the marker. In the other
+order nothing is sent on a healthy server, so use the manual test above.
 
-Note that the `Reason:` line `deploy.sh` prints comes from your MTA and can name
-the recipient address and the relay host, so treat it like any other log excerpt
-before pasting it into an issue.
+The `Reason:` line `deploy.sh` prints comes from your MTA and can name the recipient
+address and the relay host — redact it before pasting into an issue.
 
 ### What it checks
 
