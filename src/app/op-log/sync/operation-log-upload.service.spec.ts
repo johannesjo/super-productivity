@@ -1507,6 +1507,49 @@ describe('OperationLogUploadService', () => {
         expect(result.blockedByRejectedFullState).toBe(true);
       });
 
+      it('should flag a deferred full-state upload when the server returns a retryable error', async () => {
+        // Observed in CI (scheduled run 32683405598): a server-migration
+        // SYNC_IMPORT was answered with a Postgres serialization conflict.
+        // Nothing was uploaded, so the caller must be able to tell the
+        // difference between this and a clean zero-op sync.
+        const syncImport = createFullStateEntry(
+          1,
+          'migration-import',
+          'client-1',
+          OpType.SyncImport,
+        );
+        const laterOp = createMockEntry(2, 'later-op', 'client-1');
+        mockOpLogStore.getUnsynced.and.resolveTo([syncImport, laterOp]);
+        mockApiProvider.uploadSnapshot.and.resolveTo({
+          accepted: false,
+          error: 'Concurrent transaction conflict - please retry',
+        });
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        expect(result.fullStateUploadDeferred).toBe(true);
+        expect(result.uploadedCount).toBe(0);
+        expect(result.rejectedCount).toBe(0);
+        expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+        expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+      });
+
+      it('should not flag a deferred full-state upload when the snapshot is accepted', async () => {
+        const syncImport = createFullStateEntry(
+          1,
+          'migration-import',
+          'client-1',
+          OpType.SyncImport,
+        );
+        mockOpLogStore.getUnsynced.and.resolveTo([syncImport]);
+        mockApiProvider.uploadSnapshot.and.resolveTo({ accepted: true, serverSeq: 1 });
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        expect(result.fullStateUploadDeferred).toBeUndefined();
+        expect(result.uploadedCount).toBe(1);
+      });
+
       it('should update server seq after snapshot upload', async () => {
         const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.SyncImport);
         mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));

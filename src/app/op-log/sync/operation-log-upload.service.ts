@@ -132,6 +132,10 @@ export class OperationLogUploadService {
     // unsynced, so the caller can report an honest not-in-sync status (not IN_SYNC).
     let encryptionRequiredKeyMissing = false;
     let blockedByRejectedFullState = false;
+    // Set when a full-state op hit a retryable server error (e.g. a Postgres
+    // serialization conflict). The op stays pending, but nothing reached the
+    // server this round, so the caller must not report IN_SYNC.
+    let fullStateUploadDeferred = false;
     let rejectedFullStateBarrierSeq: number | undefined;
 
     await this.lockService.request(LOCK_NAMES.UPLOAD, async () => {
@@ -334,6 +338,7 @@ export class OperationLogUploadService {
               `OperationLogUploadService: Full-state op ${entry.op.id} failed due to network error, will retry: ${result.error}`,
             );
             // Don't mark as rejected - leave as unsynced for retry
+            fullStateUploadDeferred = true;
           } else {
             // Keep the op pending until OperationLogSyncService has processed
             // piggybacked ops and the central rejection handler has classified
@@ -614,6 +619,7 @@ export class OperationLogUploadService {
       ...(lastServerSeqToPersist !== undefined ? { lastServerSeqToPersist } : {}),
       ...(encryptionRequiredKeyMissing ? { encryptionRequiredKeyMissing: true } : {}),
       ...(blockedByRejectedFullState ? { blockedByRejectedFullState: true } : {}),
+      ...(fullStateUploadDeferred ? { fullStateUploadDeferred: true } : {}),
       ...(options?.deferAcknowledgement
         ? { selectedPendingOps, pendingAcknowledgementSeqs }
         : {}),

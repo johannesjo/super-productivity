@@ -180,6 +180,13 @@ export interface UploadResult {
    * A newer successful full-state operation clears the barrier.
    */
   blockedByRejectedFullState?: boolean;
+  /**
+   * True when a full-state operation (SYNC_IMPORT / BACKUP_IMPORT) failed with a
+   * retryable error, so it — and every pending op after it — stayed local for the
+   * next sync. Nothing reached the server, so the caller must not claim IN_SYNC.
+   * Distinct from `blockedByRejectedFullState`, which is a permanent rejection.
+   */
+  fullStateUploadDeferred?: boolean;
 }
 
 /**
@@ -336,6 +343,8 @@ export type UploadOutcome =
       encryptionRequiredKeyMissing?: boolean;
       /** Pending ops depend on an explicit full-state baseline the server rejected. */
       blockedByRejectedFullState?: boolean;
+      /** A full-state op hit a retryable server error; nothing was uploaded this round. */
+      fullStateUploadDeferred?: boolean;
     }
   | {
       /** User cancelled a piggybacked SYNC_IMPORT conflict dialog. */
