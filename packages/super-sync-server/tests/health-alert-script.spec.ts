@@ -15,9 +15,9 @@ import { dirname, join } from 'node:path';
 import { MONITORING_APPLICATION_NAME } from '../scripts/monitoring-db';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { embeddedProbe, HEALTH_ALERT_SCRIPT } from './health-probe.helper';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const SCRIPT = join(currentDir, '../scripts/health-alert.sh');
 const DEPLOY_SCRIPT = join(currentDir, '../scripts/deploy.sh');
 
 const FAKE_DOCKER = `#!/bin/sh
@@ -149,12 +149,20 @@ const run = (env: Record<string, string> = {}, stdin?: number): RunResult => {
     }
   }
 
-  const result = spawnSync('bash', [SCRIPT], {
+  const result = spawnSync('bash', [HEALTH_ALERT_SCRIPT], {
     encoding: 'utf8',
     env: childEnv,
     stdio: [stdin ?? 'pipe', 'pipe', 'pipe'],
     timeout: 10_000,
   });
+
+  // Without this a timeout or spawn failure surfaces as status 1 and fails an unrelated
+  // assertion three lines later, hiding the fact that the script never ran to completion.
+  if (result.error || result.signal) {
+    throw new Error(
+      `health-alert.sh did not complete: signal=${result.signal} error=${result.error}`,
+    );
+  }
 
   return {
     status: result.status ?? 1,
@@ -248,15 +256,50 @@ describe('health-alert.sh configuration', () => {
 
 describe('health-alert.sh service and database monitoring', () => {
   it('keeps the embedded Node probe syntactically valid', () => {
-    const script = readFileSync(SCRIPT, 'utf8');
-    const match = script.match(/DB_PROBE_JS=\$\(cat <<'NODE'\n([\s\S]*?)\nNODE\n\)/);
-
-    expect(match).not.toBeNull();
     const result = spawnSync(process.execPath, ['--check', '-'], {
-      input: match?.[1] ?? '',
+      input: embeddedProbe(),
       encoding: 'utf8',
     });
     expect(`${result.stdout}${result.stderr}`).toBe('');
+    expect(result.status).toBe(0);
+  });
+
+  // Both shapes exit 1 with a complete, healthy sample already printed if the guard is
+  // inside .finally rather than trailing it -- the 2026-08-24 flap on the hosted server.
+  it.each([
+    ['a rejecting', `$disconnect(){ return Promise.reject(new Error('closed')); }`],
+    ['a synchronously throwing', `$disconnect(){ throw new Error('closed'); }`],
+  ])('survives %s $disconnect after a complete sample', (_label, disconnect) => {
+    const clientDir = join(projectDir, 'node_modules', '@prisma', 'client');
+    mkdirSync(clientDir, { recursive: true });
+    writeFileSync(
+      join(clientDir, 'index.js'),
+      `const tx = {
+         $executeRawUnsafe: async () => 0,
+         $queryRawUnsafe: async () => [
+           { longQueryCount: 0, longest: 0, poolInUse: 3, badIndex: '' },
+         ],
+       };
+       exports.PrismaClient = class {
+         $transaction(fn) { return fn(tx); }
+         ${disconnect}
+       };\n`,
+    );
+
+    // cwd is what makes the stub resolve: `node -e` builds its module paths from cwd, and
+    // the package's REAL @prisma/client would win from anywhere else.
+    const result = spawnSync(process.execPath, ['-e', embeddedProbe()], {
+      cwd: projectDir,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        DATABASE_URL: 'postgresql://u:p@postgres:5432/supersync?connection_limit=60',
+      },
+    });
+
+    expect(result.stdout).toContain('POOL_IN_USE=3');
+    expect(result.stdout).toContain('BAD_INDEX=');
+    expect(result.stderr).toBe('');
     expect(result.status).toBe(0);
   });
 
@@ -285,7 +328,7 @@ describe('health-alert.sh service and database monitoring', () => {
 
   it('runs probes with Prisma inside the supersync container', () => {
     const result = run({ POSTGRES_SERVICE: '' });
-    const script = readFileSync(SCRIPT, 'utf8');
+    const script = readFileSync(HEALTH_ALERT_SCRIPT, 'utf8');
 
     expect(result.dockerLog).toContain('compose exec -T');
     expect(result.dockerLog).toContain('supersync timeout 18 node -e');
@@ -345,15 +388,18 @@ describe('health-alert.sh service and database monitoring', () => {
     },
   );
 
-  it('alerts when connections in use reach the configured pool percentage', () => {
+  it('alerts when concurrently busy connections reach the configured percentage', () => {
     const result = run({
       FAKE_POOL_IN_USE: '45',
       FAKE_POOL_LIMIT: '60',
       POOL_WARN_PCT: '75',
     });
 
+    // "busy", not "saturated": the probe counts only active / in-transaction sessions,
+    // never the idle ones Prisma keeps pooled, so this is a concurrency number and an
+    // operator told "saturated" goes looking for exhaustion that is not happening.
     expect(result.mailLog).toContain(
-      'Connection pool 75% saturated (45 in use / 60 limit)',
+      'Connection pool 75% busy (45 of 60 running a query or in a transaction)',
     );
   });
 
@@ -413,6 +459,16 @@ describe('health-alert.sh state handling', () => {
 
     expect(second.mailLog.match(/SuperSync health check failed/g)).toHaveLength(1);
     expect(second.mailLog).toContain('longest: 130s');
+  });
+
+  it('deduplicates volatile busy-connection counts', () => {
+    // Pins the HASH_INPUT sed rule to the message wording: drift is silent, and its only
+    // symptom is the alert re-mailing every five minutes.
+    run({ FAKE_POOL_IN_USE: '45' });
+    const second = run({ FAKE_POOL_IN_USE: '52' });
+
+    expect(second.mailLog.match(/SuperSync health check failed/g)).toHaveLength(1);
+    expect(second.mailLog).toContain('75% busy (45 of 60');
   });
 
   it('sends recovery after mail failure and clears the sticky marker', () => {

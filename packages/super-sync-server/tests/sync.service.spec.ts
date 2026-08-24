@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  type MockInstance,
+} from 'vitest';
 import { uuidv7 } from 'uuidv7';
 import { Prisma } from '@prisma/client';
 import {
@@ -807,6 +815,11 @@ describe('SyncService', () => {
   let deviceService: DeviceService;
   let operationDownloadService: OperationDownloadService;
 
+  const findOpRejected = (
+    auditSpy: MockInstance<typeof Logger.audit>,
+  ): Parameters<typeof Logger.audit>[0] | undefined =>
+    auditSpy.mock.calls.find(([entry]) => entry.event === 'OP_REJECTED')?.[0];
+
   // Factory for the repeated Operation fixture (mirrors createOp in
   // sync-fixes.spec.ts). Override only the fields a test cares about.
   const makeOp = (overrides: Partial<Operation> = {}): Operation => ({
@@ -1476,15 +1489,44 @@ describe('SyncService', () => {
       const result = await service.uploadOps(userId, clientId, [malformed]);
 
       expect(result[0].accepted).toBe(false);
-      const rejection = auditSpy.mock.calls
-        .map(([entry]) => entry)
-        .find((entry) => entry.event === 'OP_REJECTED');
+      const rejection = findOpRejected(auditSpy);
       expect(rejection).toBeDefined();
       expect(rejection?.opId).toBe('[invalid]');
       expect(rejection?.entityType).toBe('[invalid]');
       expect(rejection?.reason).toBe(SYNC_ERROR_CODES.INVALID_ENTITY_TYPE);
       expect(JSON.stringify(rejection)).not.toContain(privateText);
     });
+
+    it('audits a composite time-tracking entityId verbatim', async () => {
+      const service = new SyncService({ batchUpload: true });
+      const auditSpy = vi.spyOn(Logger, 'audit').mockImplementation(() => undefined);
+      // Shape emitted by time-tracking.actions.ts: `CONTEXT_TYPE:contextId:date`.
+      const compositeEntityId = 'PROJECT:ctx-1:2026-08-20';
+      const op = makeOp({ entityType: 'TIME_TRACKING', entityId: compositeEntityId });
+
+      const results = await service.uploadOps(userId, clientId, [op, { ...op }]);
+
+      expect(results[1].errorCode).toBe(SYNC_ERROR_CODES.DUPLICATE_OPERATION);
+      expect(findOpRejected(auditSpy)?.entityId).toBe(compositeEntityId);
+    });
+
+    it.each([
+      // Space-free, so only the colon rule decides -- pins where the boundary now sits.
+      ['TIME_TRACKING', 'TAG:call_mom:2026-08-20:extra:extra'],
+      // `pluginId:key`, where key is plugin-authored text with no charset validation.
+      ['PLUGIN_USER_DATA', 'some-plugin:Q3_roadmap'],
+    ])(
+      'redacts a colon-bearing %s entityId that is not a known address',
+      async (entityType, entityId) => {
+        const service = new SyncService({ batchUpload: true });
+        const auditSpy = vi.spyOn(Logger, 'audit').mockImplementation(() => undefined);
+        const op = makeOp({ entityType, entityId });
+
+        await service.uploadOps(userId, clientId, [op, { ...op }]);
+
+        expect(findOpRejected(auditSpy)?.entityId).toBe('[invalid]');
+      },
+    );
 
     it.each([
       ['serial', false],
