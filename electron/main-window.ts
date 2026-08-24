@@ -5,7 +5,6 @@ import {
   BrowserWindowConstructorOptions,
   ipcMain,
   Menu,
-  MenuItemConstructorOptions,
   nativeTheme,
   shell,
 } from 'electron';
@@ -27,6 +26,7 @@ import {
 } from './task-widget/task-widget';
 import { ensureIndicator } from './indicator';
 import { getIsMinimizeToTray, getIsQuiting, setIsQuiting } from './shared-state';
+import { createMenuTemplate } from './menu';
 import { loadSimpleStoreAll } from './simple-store';
 import { SimpleStoreKey } from './shared-with-frontend/simple-store.const';
 import { markGpuStartupSuccess } from './gpu-startup-guard';
@@ -577,36 +577,17 @@ function initWinEventListeners(app: Electron.App): void {
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function createMenu(quitApp: () => void): void {
   // Create application menu to enable copy & pasting on MacOS
-  const menuTpl: MenuItemConstructorOptions[] = [
-    {
-      label: 'Super Productivity',
-      submenu: [
-        { role: 'about', label: 'About Super Productivity' },
-        { type: 'separator' },
-        { role: 'hide', label: 'Hide Super Productivity' },
-        { role: 'hideOthers' },
-        { role: 'unhide' },
-        { type: 'separator' },
-        {
-          label: 'Quit',
-          accelerator: 'CmdOrCtrl+Q',
-          click: () => closeWinAndQuit(quitApp),
-        },
-      ],
+  const menuTpl = createMenuTemplate({
+    // hide() keeps the app running in the dock; clicking the dock icon
+    // re-shows via the 'activate' handler (showOrFocus)
+    onCloseWindow: () => {
+      if (mainWin && !mainWin.isDestroyed() && mainWin.isVisible()) {
+        setWasMaximizedBeforeHide(mainWin.isMaximized());
+        mainWin.hide();
+      }
     },
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' },
-      ],
-    },
-  ];
+    onQuit: () => closeWinAndQuit(quitApp),
+  });
 
   // we need to set a menu to get copy & paste working for mac os x
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTpl));
