@@ -1119,8 +1119,8 @@
     },
     "SCHEDULE": {
       "D_INITIAL": {
-        "TEXT": "<p>Het idee van de tijdlijn is om een beter beeld te geven van hoe iemands geplande taken zich in de loop van de tijd afspelen. Het wordt automatisch gegenereerd op basis van uw taken en onderscheidt twee verschillende dingen: <strong>geplande taken</strong>, die op hun geplande tijd worden weergegeven, en <strong>gewone taken</strong> die rond die vaste gebeurtenissen zouden moeten stromen. Bij alle taken wordt rekening gehouden met de tijdschattingen die u eraan hebt toegewezen.</p><p>Daarnaast kunt u ook een begin- en eindtijd van het werk opgeven. Als geconfigureerde reguliere taken daarbuiten nooit verschijnen. Houd er rekening mee dat de tijdlijn alleen de komende 30 dagen omvat.</p>",
-        "TITLE": "Tijdlijn"
+        "TEXT": "<p>Het idee van de agenda is om een beter beeld te geven van hoe iemands geplande taken zich in de loop van de tijd afspelen. Het wordt automatisch gegenereerd op basis van uw taken en onderscheidt twee verschillende dingen: <strong>geplande taken</strong>, die op hun geplande tijd worden weergegeven, en <strong>gewone taken</strong> die rond die vaste gebeurtenissen zouden moeten stromen. Bij alle taken wordt rekening gehouden met de tijdschattingen die u eraan hebt toegewezen.</p><p>Daarnaast kunt u ook een begin- en eindtijd van het werk opgeven. Als geconfigureerde reguliere taken daarbuiten nooit verschijnen. Houd er rekening mee dat de agenda alleen de komende 30 dagen omvat.</p>",
+        "TITLE": "Agenda"
       },
       "END": "Einde van het werk",
       "INSERT_BEFORE": "Voor",
@@ -1846,7 +1846,7 @@
         "DELETE_REPEAT_INSTANCE": "Herhaalde taakinstantie verwijderen",
         "DROP_ATTACHMENT": "Zet hier neer om te koppelen aan \"{{title}}\"",
         "DUPLICATE": "Duplicaat",
-        "EDIT_SCHEDULED": "Herinnering bewerken",
+        "EDIT_SCHEDULED": "Opnieuw plannen",
         "FOCUS_SESSION": "Start focus sessie",
         "MARK_DONE": "Markeer als voltooid",
         "MOVE_TO_BACKLOG": "Verplaats naar backlog",
@@ -1918,10 +1918,10 @@
         "DISMISS_REMINDER_KEEP_TODAY": "Herinnering negeren (Blijf in Vandaag)",
         "DONE": "Gedaan",
         "DUE_SECTION": "Gepland",
-        "DUE_TASK": "Gepaste taak",
+        "DUE_TASK": "Geplande taak",
         "DUE_TASKS": "Geplande taken",
         "RESCHEDULE_EDIT": "Bewerken (opnieuw plannen)",
-        "RESCHEDULE_UNTIL_TOMORROW": "Tot morgen",
+        "RESCHEDULE_UNTIL_TOMORROW": "Verplaats naar morgen",
         "SNOOZE": "Snooze",
         "SNOOZE_ALL": "Snooze All",
         "START": "Begin",
@@ -1956,7 +1956,7 @@
         "RO_30M": "30 minuten voordat het begint",
         "RO_NEVER": "Nooit",
         "RO_START": "wanneer het begint",
-        "SCHEDULE": "Schema",
+        "SCHEDULE": "Inplannen",
         "UNSCHEDULE": "Ongepland",
         "DOES_NOT_REPEAT": "Wordt niet herhaald",
         "INFO_OUTSIDE_WORK_HOURS": "Valt buiten je ingestelde werktijden.",
@@ -2421,8 +2421,8 @@
       "ISSUES_PANEL": "Problemenpaneel",
       "PLANNER": "Planner",
       "PROJECT_NOTES": "Projectnotities",
-      "SCHEDULE": "Schema",
-      "SCHEDULE_DAY_PANEL": "Schema Dag Paneel",
+      "SCHEDULE": "Agenda",
+      "SCHEDULE_DAY_PANEL": "Agendadagpaneel",
       "SEARCH": "Zoeken",
       "SYNC_BUTTON": "Synchronisatieknop",
       "TIME_TRACKING": "Stopwatch Tijdregistratie",
@@ -2538,7 +2538,7 @@
       "GLOBAL_TOGGLE_TASK_START": "Schakel tijdregistratie in voor de laatste actieve taak",
       "GO_TO_DAILY_AGENDA": "Ga naar Agenda",
       "GO_TO_FOCUS_MODE": "Ga naar Focus Mode",
-      "GO_TO_SCHEDULE": "Ga naar de tijdlijn",
+      "GO_TO_SCHEDULE": "Ga naar de agenda",
       "GO_TO_SCHEDULED_VIEW": "Ga naar geplande taken",
       "GO_TO_SETTINGS": "Ga naar Instellingen",
       "GO_TO_WORK_VIEW": "Ga naar Work View",
@@ -2707,7 +2707,7 @@
       "USE_ALARM_STYLE_REMINDERS_DESCRIPTION": "Wanneer ingeschakeld, gebruiken herinneringen luidere alarmgeluiden en meer opdringerige meldingen. Aanbevolen voor kritieke herinneringen."
     },
     "SCHEDULE": {
-      "HELP": "De tijdlijnfunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/schedule'>'Tijdlijn'</a>.",
+      "HELP": "De agendafunctie zou u een snel overzicht moeten geven van hoe uw geplande taken in de loop van de tijd verlopen. U vindt het in het menu aan de linkerkant onder <a href='#/schedule'>'Agenda'</a>.",
       "L_IS_LUNCH_BREAK_ENABLED": "Lunchpauze inschakelen",
       "L_IS_WORK_START_END_ENABLED": "Beperk ongeplande taakstroom tot specifieke werktijden",
       "L_LUNCH_BREAK_END": "Einde lunchpauze",
@@ -2716,7 +2716,7 @@
       "L_WORK_START": "Start van de werkdag",
       "LUNCH_BREAK_START_END_DESCRIPTION": "bijv. 13:00",
       "MONTH": "Maand",
-      "TITLE": "Tijdlijn",
+      "TITLE": "Agenda",
       "WORK_START_END_DESCRIPTION": "bijv. 17:00"
     },
     "SHORT_SYNTAX": {
@@ -2888,7 +2888,7 @@
     "PROJECT_SETTINGS": "Projectinstellingen",
     "PROJECTS": "Projecten",
     "QUICK_HISTORY": "Snelle geschiedenis",
-    "SCHEDULE": "Schema",
+    "SCHEDULE": "Agenda",
     "SEARCH": "Zoeken",
     "SETTINGS": "Instellingen",
     "SHARE_TASK_LIST_MARKDOWN": "De takenlijst delen",
