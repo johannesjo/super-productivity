@@ -13,6 +13,7 @@ let nextIsLocked;
 let sharedState;
 let refreshIndicatorCalls;
 let localRestApiConfig;
+let alwaysOnTopValue;
 
 const resetModule = () => {
   delete require.cache[appControlModulePath];
@@ -62,6 +63,9 @@ const installMocks = () => {
           setProgressBar: () => {},
           flashFrame: () => {},
           once: () => {},
+          setAlwaysOnTop: (value) => {
+            alwaysOnTopValue = value;
+          },
         }),
       };
     }
@@ -153,6 +157,7 @@ test.beforeEach(() => {
   };
   refreshIndicatorCalls = 0;
   localRestApiConfig = undefined;
+  alwaysOnTopValue = undefined;
 
   installMocks();
 });
@@ -177,6 +182,7 @@ test('settings update reads current task tray setting from tasks config', async 
       isMinimizeToTray: true,
       isTrayShowCurrentTask: true,
       isTrayShowCurrentCountdown: false,
+      isAlwaysOnTop: true,
     },
   };
 
@@ -187,6 +193,25 @@ test('settings update reads current task tray setting from tasks config', async 
   assert.equal(sharedState.isTrayShowCurrentCountdown, false);
   assert.equal(refreshIndicatorCalls, 1);
   assert.equal(localRestApiConfig, cfg);
+  assert.equal(alwaysOnTopValue, true);
+});
+
+test('settings update turns off always-on-top when unset', async () => {
+  const { initAppControlIpc } = loadAppControlModule();
+  initAppControlIpc();
+
+  const updateSettings = ipcHandlers.get('TRANSFER_SETTINGS_TO_ELECTRON');
+
+  await updateSettings(
+    {},
+    {
+      misc: {
+        isMinimizeToTray: false,
+      },
+    },
+  );
+
+  assert.equal(alwaysOnTopValue, false);
 });
 
 test('settings update falls back to legacy misc tray task setting', async () => {

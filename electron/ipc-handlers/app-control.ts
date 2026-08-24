@@ -48,6 +48,7 @@ export const initAppControlIpc = (): void => {
     setIsTrayShowCurrentCountdown(!!cfg.misc.isTrayShowCurrentCountdown);
     refreshIndicator();
     updateLocalRestApiConfig(cfg);
+    getWin().setAlwaysOnTop(!!cfg.misc.isAlwaysOnTop);
 
     if (cfg.misc.isUseCustomWindowTitleBar !== undefined) {
       await saveSimpleStore(

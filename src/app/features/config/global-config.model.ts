@@ -45,6 +45,9 @@ export type MiscConfig = Readonly<{
   isShowProductivityTipLonger?: boolean;
   isTrayShowCurrentCountdown?: boolean;
   isUseCustomWindowTitleBar?: boolean;
+  // Keeps the main window above other windows (desktop only). Optional
+  // because it was added later.
+  isAlwaysOnTop?: boolean;
   customTheme?: string;
   // number: one of DefaultStartPage. string: project id.
   defaultStartPage?: number | string;
