@@ -52,8 +52,15 @@ export class EnlargeImgDirective {
         fn();
       }
     };
-    el.addEventListener('transitionend', run, { once: true });
-    setTimeout(run, ms);
+    const timeoutId = setTimeout(run, ms);
+    el.addEventListener(
+      'transitionend',
+      () => {
+        clearTimeout(timeoutId);
+        run();
+      },
+      { once: true },
+    );
   }
 
   private _hideImg(): void {
@@ -123,9 +130,14 @@ export class EnlargeImgDirective {
       if (this.zoomMode === 0) {
         this._hideImg();
       } else {
+        const wrapperElAtClick = this.enlargedImgWrapperEl;
         this._afterTransition(this.newImageEl as HTMLElement, () => {
           setTimeout(() => {
-            this._hideImg();
+            // A reopen may have replaced the wrapper while the fallback timer
+            // was pending; never hide a lightbox this click did not open.
+            if (this.enlargedImgWrapperEl === wrapperElAtClick) {
+              this._hideImg();
+            }
           });
         });
         this._zoomOutImg();
@@ -137,9 +149,14 @@ export class EnlargeImgDirective {
       if (this.zoomMode === 0) {
         this._zoomImg();
       } else {
+        const wrapperElAtClick = this.enlargedImgWrapperEl;
         this._afterTransition(this.newImageEl as HTMLElement, () => {
           setTimeout(() => {
-            this._hideImg();
+            // A reopen may have replaced the wrapper while the fallback timer
+            // was pending; never hide a lightbox this click did not open.
+            if (this.enlargedImgWrapperEl === wrapperElAtClick) {
+              this._hideImg();
+            }
           });
         });
         this._zoomOutImg();

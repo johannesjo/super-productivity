@@ -78,7 +78,9 @@ describe('EnlargeImgDirective', () => {
     const waitFor = async (
       pred: () => boolean,
       label: string,
-      timeoutMs = 4000,
+      // Below the global 2000ms in `src/test.ts`, so this helper's message
+      // wins over Jasmine's generic timeout and names the stuck stage.
+      timeoutMs = 1500,
     ): Promise<void> => {
       const start = Date.now();
       while (!pred()) {
