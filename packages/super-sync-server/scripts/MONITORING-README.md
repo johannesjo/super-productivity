@@ -260,8 +260,12 @@ the `sendmail` interface underneath, so installing it alone leaves the check
 still failing. Use it _in addition to_ `bsd-mailx` if msmtp is your relay.
 
 `health-alert.sh` checks for the binary on every run and records its absence
-in `.health-alert/mail-failed`, which `deploy.sh` surfaces. Confirm delivery end
-to end before trusting the setup:
+in `.health-alert/mail-failed`, which `deploy.sh` surfaces. The same marker
+pattern carries `.health-alert/oom-check-blind` (see the OOM section below):
+conditions that mean _a check could not run_ are reported at deploy time, never
+in the alert body, so they cannot keep `PROBLEMS` permanently non-empty and
+disable the recovery mail. Confirm delivery end to end before trusting the
+setup:
 
 ```bash
 echo test | mail -s 'SuperSync test' you@example.com
@@ -285,14 +289,18 @@ address and the relay host — redact it before pasting into an issue.
 
 ### What it checks
 
-| #   | Check                                                            | Fires when                                                                          |
-| --- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| 0–3 | Docker daemon, container state/health, OOM kills, restart counts | a container is down, unhealthy, OOM-killed, or crash-looping                        |
-| 4   | `/health` endpoint                                               | HTTP != 200                                                                         |
-| 5   | Disk usage                                                       | > 85%                                                                               |
-| 6   | Long-running queries                                             | any query `active` > `MAX_QUERY_SECONDS` (default 120)                              |
-| 7   | Pool busy                                                        | connections concurrently busy ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit` |
-| 8   | Invalid operations indexes                                       | a non-building index is not valid/ready/live                                        |
+| #     | Check                                                 | Fires when                                                                                                                                                                                                             |
+| ----- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0,1,3 | Docker daemon, container state/health, restart counts | a container is down, unhealthy, or crash-looping. A stopped container reports its exit code (`state: exited (exit 128)`)                                                                                               |
+| 2     | OOM kills (kernel log)                                | an OOM kill in the last 6 min. Needs the cron user to read the kernel log (`systemd-journal`, or `adm`); otherwise skipped and reported via the marker below, never as a health finding. Runs even when Docker is down |
+| 4     | `/health` endpoint                                    | HTTP != 200                                                                                                                                                                                                            |
+| 5     | Disk usage                                            | > 85%                                                                                                                                                                                                                  |
+| 6     | Long-running queries                                  | any query `active` > `MAX_QUERY_SECONDS` (default 120)                                                                                                                                                                 |
+| 7     | Pool busy                                             | connections concurrently busy ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit`                                                                                                                                    |
+| 8     | Invalid operations indexes                            | a non-building index is not valid/ready/live                                                                                                                                                                           |
+
+Check 2 runs outside the Docker gate on purpose: a host that just OOM-killed something
+is exactly when `docker info` is least likely to answer.
 
 Checks 0–5 detect the outage once containers or `/health` fail. Checks 6–8 inspect
 the database through the app container and catch the precursor while the server
@@ -375,6 +383,28 @@ You can set up cron jobs for regular monitoring:
 - Reduce `--limit` values
 - Run in quick mode
 - Increase Node.js heap: `NODE_OPTIONS=--max-old-space-size=4096 npm run ...`
+
+### `deploy.sh` warns "OOM detection is BLIND"
+
+The OOM check reads `journalctl -k`. A cron user outside `adm`/`systemd-journal`
+— or any host without systemd — gets no output and **exit 0**, so before
+2026-08-25 the check silently could never fire and the absence of an OOM alert
+was not evidence of no OOM. It now probes readability first.
+
+An unreadable kernel log is a broken capability, not an unhealthy service, so it
+is recorded in `.health-alert/oom-check-blind` and surfaced by `deploy.sh`
+alongside the `mail-failed` marker — deliberately **not** added to the alert
+body. Putting it there would keep `PROBLEMS` permanently non-empty, and
+`[ -n "$PROBLEMS" ]` gates the recovery branch, so `Health Check Recovered`
+could never be sent again on a host that merely lacks a group. (Alerts
+themselves would keep arriving: the dedupe key is a content hash, so a new
+problem still changes the hash and still mails.)
+
+Fix it rather than ignoring it: `sudo usermod -aG systemd-journal "$USER"`
+(re-login required). Prefer `systemd-journal` over `adm` — it grants the journal
+read and nothing else, where `adm` also opens `/var/log` broadly. Running the
+cron as root works too but grants far more than this one read needs. The marker
+clears itself on the next run once the log is readable.
 
 ### "PostgreSQL canceled this query because it exceeded statement_timeout"
 

@@ -12,6 +12,7 @@
 # Configuration (set these or pass via environment):
 #   ALERT_EMAIL    - Email address to receive alerts (required)
 #   MAIL_CMD       - mail binary to use (default: mail); a test seam
+#   JOURNAL_CMD    - journalctl binary to use (default: journalctl); a test seam
 #   COMPOSE_DIR    - Path to docker-compose.yml directory (default: script directory's parent)
 #   HEALTH_URL     - Health endpoint URL (default: read from .env DOMAIN)
 #   MAX_QUERY_SECONDS  - Alert if any query has been active longer (default: 120)
@@ -32,6 +33,7 @@ COMPOSE_DIR="${COMPOSE_DIR:-$(dirname "$SCRIPT_DIR")}"
 # state to whoever that address belongs to. Alerting is off until the operator opts in.
 ALERT_EMAIL="${ALERT_EMAIL:-}"
 MAIL_CMD="${MAIL_CMD:-mail}"
+JOURNAL_CMD="${JOURNAL_CMD:-journalctl}"
 MAX_QUERY_SECONDS="${MAX_QUERY_SECONDS:-120}"
 POOL_WARN_PCT="${POOL_WARN_PCT:-75}"
 
@@ -66,6 +68,7 @@ ALERT_STATE_DIR="${COMPOSE_DIR}/.health-alert"
 mkdir -p "$ALERT_STATE_DIR"
 ALERT_STATE_FILE="$ALERT_STATE_DIR/state"
 MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
+OOM_BLIND_FILE="$ALERT_STATE_DIR/oom-check-blind"
 MAIL_ERR_MAX_BYTES=4096
 
 # Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
@@ -163,31 +166,62 @@ if $DOCKER_OK; then
   fi
   SERVICES+=(caddy)
   for svc in "${SERVICES[@]}"; do
-    STATE=$(docker compose ps --format '{{.State}}' "$svc" 2>/dev/null || echo "missing")
-    HEALTH=$(docker compose ps --format '{{.Health}}' "$svc" 2>/dev/null || echo "")
+    # `-a` is load-bearing: without it compose lists only running containers, so a crashed
+    # one reports an EMPTY state -- the 2026-08-25 alert read "state:" with nothing after
+    # it. `{{.State}}` alone is NOT enough: it renders a bare "exited", so the (128) that
+    # named the failure still would not reach the operator. The code has its own field.
+    # (`{{.Status}}` carries it as "Exited (128) 4 minutes ago", but that relative time
+    # changes every run and HASH_INPUT does not normalize it -- it would defeat dedupe and
+    # re-alert every 5 minutes. ExitCode is stable.)
+    # All three fields in ONE call: separate calls could describe different containers.
+    # head -1: `-a` is also what admits leftover one-off `docker compose run` containers
+    # ("including those created by the run command" -- compose's own --help), and row order
+    # is undocumented. Ceiling: a crashed replica beside a healthy one reads as healthy.
+    # Accepted because deploy.sh's two `run` call sites both pass --rm, so a leftover needs
+    # a hard kill mid-migration. Upgrade path: add {{.Name}} and drop rows matching -run-.
+    PS_LINE=$(docker compose ps -a --format '{{.State}}|{{.Health}}|{{.ExitCode}}' "$svc" 2>/dev/null | head -1)
+    # A Go template naming ONE unsupported field aborts the WHOLE render: empty stdout,
+    # exit 1, no partial output (verified against compose v5.4.0). On a compose too old for
+    # {{.ExitCode}} that is byte-identical to "no such container", so every service on a
+    # healthy stack would be alerted as `missing`. Dockerfile:60 ships this to self-hosters,
+    # so retry the previously shipped template before believing the emptiness.
+    if [ -z "$PS_LINE" ]; then
+      PS_LINE=$(docker compose ps -a --format '{{.State}}|{{.Health}}' "$svc" 2>/dev/null | head -1)
+    fi
+    # `read` over ${VAR%%|*} chains: a missing field reads as empty instead of yielding the
+    # whole line, which is what `${PS_LINE#*|}` does when compose emits no delimiter at all.
+    IFS='|' read -r STATE HEALTH EXIT_CODE <<<"$PS_LINE"
+    # No output at all means there is no such container.
+    if [ -z "$PS_LINE" ]; then STATE="missing"; fi
     # Guard against "<no value>" from older Docker Compose versions
     if [ "$HEALTH" = "<no value>" ]; then HEALTH=""; fi
 
     if [ "$STATE" != "running" ]; then
-      PROBLEMS="${PROBLEMS}Container '$svc' state: ${STATE}\n"
+      # :-unknown is unconditional on purpose: the empty-state guard above only fires when
+      # the whole line is empty, so a "|healthy" line would regress to the 2026-08-25 mail.
+      # A non-zero code distinguishes "OOM-killed" (137) from "config rejected" (78) from
+      # the runc task-creation failure (128) that caused the outage. Zero and empty carry
+      # no information -- a never-started container reports 0 -- so they are left off.
+      STATE_DETAIL=""
+      if [[ "${EXIT_CODE:-0}" =~ ^[0-9]+$ ]] && [ "${EXIT_CODE:-0}" -ne 0 ]; then
+        STATE_DETAIL=" (exit ${EXIT_CODE})"
+      fi
+      PROBLEMS="${PROBLEMS}Container '$svc' state: ${STATE:-unknown}${STATE_DETAIL}\n"
     elif [ -n "$HEALTH" ] && [ "$HEALTH" != "healthy" ]; then
       PROBLEMS="${PROBLEMS}Container '$svc' health: ${HEALTH}\n"
     fi
   done
-
-  # 2. Check for OOM kills via kernel log (docker OOMKilled flag resets on restart)
-  OOM_HITS=$(journalctl -k --since "6 minutes ago" --no-pager 2>/dev/null \
-    | grep -ciE "out of memory:|oom-kill:|oom_reaper:" || true)
-  if [[ "$OOM_HITS" =~ ^[0-9]+$ ]] && [ "$OOM_HITS" -gt 0 ]; then
-    PROBLEMS="${PROBLEMS}OOM kill detected in kernel log (${OOM_HITS} entries in last 6 min)\n"
-  fi
 
   # 3. Check restart counts
   # Note: RestartCount is cumulative over the container's lifetime. It only resets on
   # docker compose down/up or --force-recreate. Threshold of 5 avoids false positives
   # from normal deploy restarts.
   for svc in "${SERVICES[@]}"; do
-    CONTAINER_ID=$(docker compose ps -q "$svc" 2>/dev/null | head -1 || true)
+    # `-a` for the same reason as check 1: without it a dead container has no id here, so
+    # RestartCount -- the value distinguishing "died once" from "crash-looped 40 times" --
+    # goes missing precisely when the operator needs it. The two checks must agree on which
+    # containers exist; disagreeing is what produced the 2026-08-25 alert.
+    CONTAINER_ID=$(docker compose ps -aq "$svc" 2>/dev/null | head -1 || true)
     if [ -n "$CONTAINER_ID" ]; then
       RESTARTS=$(docker inspect --format='{{.RestartCount}}' "$CONTAINER_ID" 2>/dev/null || echo "0")
       if [[ "$RESTARTS" =~ ^[0-9]+$ ]] && [ "$RESTARTS" -gt 5 ]; then
@@ -383,8 +417,83 @@ NODE
   fi
 fi
 
+# 2. Check for OOM kills via kernel log (docker OOMKilled flag resets on restart)
+# Deliberately OUTSIDE the $DOCKER_OK gate: reading the kernel log needs no daemon, and a
+# host that has just OOM-killed something is exactly when dockerd is least likely to
+# answer -- gating this on Docker skipped the check in its own scenario. It also keeps the
+# blind-marker lifecycle running while Docker is down, so deploy.sh cannot report a
+# stale "BLIND since <onset>" the operator already fixed.
+# For a cron user outside 'adm'/'systemd-journal' -- or on a host with no journalctl at
+# all -- `journalctl -k` emits no kernel line and exits 0, so the count below is 0
+# forever and the check silently never fires. Probe with an UNBOUNDED -n 1 first: a
+# quiet 6-minute window is also empty, so the bounded query below cannot tell "no OOM"
+# from "no access". (dmesg is no fallback: kernel.dmesg_restrict locks out the same
+# users.) A blind check is a broken capability, not a health finding: it goes to the
+# marker deploy.sh surfaces, NEVER to PROBLEMS -- same rule, and same reason, as the
+# MAIL_AVAILABLE precedent above. PROBLEMS is the dedupe hash input and its emptiness
+# gates the recovery mail, so a permanent entry there would kill "Health Check
+# Recovered" forever on any host that simply lacks the group.
+# `command -v` first, matching the MAIL_AVAILABLE probe above: an ABSENT journalctl and an
+# UNREADABLE journal both yield empty output, but only one of them is the operator's to
+# fix. On a non-systemd host (Alpine — and Dockerfile:60 ships scripts/ to self-hosters)
+# there is no journal, no 'systemd-journal' group, and nothing to repair, so telling those
+# operators to join a group forever is unactionable noise. Marker line 2 carries the
+# reason, same shape as record_mail_failure, and deploy.sh picks the advice from it.
+# Both branches write only on a TRANSITION: the condition is permanent, and cron mails
+# every line of output -- an unconditional echo is 288 mails/day into the same inbox as
+# the real alerts. A CHANGED reason counts as a transition, because the two get opposite
+# advice from deploy.sh and a stale line 2 would keep withholding the actionable one; the
+# onset in line 1 is carried over, which is what deploy.sh's "since" claims.
+# Both reads are bounded for the same reason send_alert_mail and the db probe are: this
+# runs under the flock, so a journalctl blocked on a corrupt or slow journal does not just
+# lose the OOM check -- every later cron run finds the lock held and exits 0 silently,
+# which is the "monitoring stopped and nobody noticed" failure this whole script exists to
+# prevent. A journal that cannot answer in 10s is unreadable for our purposes anyway.
+OOM_BLIND_REASON=""
+if ! command -v "$JOURNAL_CMD" >/dev/null 2>&1; then
+  OOM_BLIND_REASON="no-journalctl"
+elif [ -z "$(timeout 10 "$JOURNAL_CMD" -k -q -n 1 --no-pager 2>/dev/null)" ]; then
+  OOM_BLIND_REASON="unreadable"
+fi
+if [ -n "$OOM_BLIND_REASON" ]; then
+  PREVIOUS_REASON=""
+  if [ -f "$OOM_BLIND_FILE" ]; then
+    PREVIOUS_REASON=$(sed -n '2p' "$OOM_BLIND_FILE" 2>/dev/null || true)
+  fi
+  if [ "$PREVIOUS_REASON" != "$OOM_BLIND_REASON" ]; then
+    if [ "$OOM_BLIND_REASON" = "no-journalctl" ]; then
+      echo "health-alert: no journalctl on this host — OOM detection is unavailable (not a misconfiguration)." >&2
+    else
+      echo "health-alert: cannot read the kernel log — OOM detection is blind. Add the cron user to group 'systemd-journal' (or 'adm')." >&2
+    fi
+    ONSET=""
+    if [ -n "$PREVIOUS_REASON" ]; then
+      ONSET=$(sed -n '1p' "$OOM_BLIND_FILE" 2>/dev/null || true)
+    fi
+    {
+      printf '%s\n' "${ONSET:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+      printf '%s\n' "$OOM_BLIND_REASON"
+    } > "$OOM_BLIND_FILE"
+  fi
+else
+  # rm -f, unguarded: it is already a no-op on a missing file, and `[ -f ] &&` would
+  # make this line return 1 on the healthy path for no reason.
+  rm -f "$OOM_BLIND_FILE"
+  OOM_HITS=$(timeout 10 "$JOURNAL_CMD" -k --since "6 minutes ago" --no-pager 2>/dev/null \
+    | grep -ciE "out of memory:|oom-kill:|oom_reaper:" || true)
+  if [[ "$OOM_HITS" =~ ^[0-9]+$ ]] && [ "$OOM_HITS" -gt 0 ]; then
+    PROBLEMS="${PROBLEMS}OOM kill detected in kernel log (${OOM_HITS} entries in last 6 min)\n"
+  fi
+fi
+
 # 4. Check health endpoint (runs even if Docker is down — tests from outside)
-HTTP_CODE=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 10 "$HEALTH_URL" 2>/dev/null || echo "000")
+# No `|| echo "000"`: curl WRITES the code and THEN exits non-zero -- so a fallback
+# appended a SECOND value ("HTTP 000000" in the 2026-08-25 alert). No `-f` either: it
+# leaves %{http_code} byte-identical and only sets the exit status nothing here reads,
+# which is exactly what made the `|| echo` look reasonable. A failed connection already
+# prints 000. The regex still earns its place for an absent or killed curl (no output).
+HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$HEALTH_URL" 2>/dev/null)
+if ! [[ "$HTTP_CODE" =~ ^[0-9]{3}$ ]]; then HTTP_CODE="000"; fi
 if [ "$HTTP_CODE" != "200" ]; then
   PROBLEMS="${PROBLEMS}Health endpoint returned HTTP ${HTTP_CODE} (${HEALTH_URL})\n"
 fi
@@ -413,8 +522,16 @@ PREVIOUS_HASH=$(cat "$ALERT_STATE_FILE" 2>/dev/null || echo "none")
 if [ -n "$PROBLEMS" ]; then
   if $MAIL_AVAILABLE && { [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ] || [ -f "$MAIL_FAILED_FILE" ]; }; then
     # New or changed problem — send alert, only write state if mail succeeds
-    if printf 'SuperSync health check failed at %s\n\nProblems found:\n%b\nServer: %s\n' \
-        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PROBLEMS" "$(hostname)" \
+    # Coverage caveat, deliberately NOT part of $PROBLEMS: a mail listing problems while one
+    # check silently did not run overstates what was verified, but putting this in PROBLEMS
+    # would make it permanent there and kill the recovery branch (see check 2). Appending to
+    # the body leaves the hash at CURRENT_HASH, the dedupe, and the recovery gate untouched.
+    COVERAGE_NOTE=""
+    if [ -f "$OOM_BLIND_FILE" ]; then
+      COVERAGE_NOTE=$'\nNote: the OOM check did not run (kernel log unavailable), so an OOM kill\nwould not appear above. See scripts/MONITORING-README.md.\n'
+    fi
+    if printf 'SuperSync health check failed at %s\n\nProblems found:\n%b\n%sServer: %s\n' \
+        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PROBLEMS" "$COVERAGE_NOTE" "$(hostname)" \
         | send_alert_mail "SuperSync Alert: Health Check Failed"; then
       echo "$CURRENT_HASH" > "$ALERT_STATE_FILE"
       rm -f "$MAIL_FAILED_FILE"
