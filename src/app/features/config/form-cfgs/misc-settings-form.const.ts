@@ -43,6 +43,18 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
     ...((IS_ELECTRON
       ? [
           {
+            key: 'isAlwaysOnTop',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.GCF.MISC.IS_ALWAYS_ON_TOP,
+              description: T.GCF.MISC.IS_ALWAYS_ON_TOP_HINT,
+            },
+          },
+        ]
+      : []) as LimitedFormlyFieldConfig<MiscConfig>[]),
+    ...((IS_ELECTRON
+      ? [
+          {
             key: 'isLocalRestApiEnabled',
             type: 'checkbox',
             templateOptions: {
