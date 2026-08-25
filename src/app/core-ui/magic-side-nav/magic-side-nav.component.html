@@ -32,11 +32,10 @@
   <!-- Main Navigation Sidebar -->
   <nav
     class="nav-sidenav"
-    [@mobileNavRight]="isMobile() ? 'visible' : 'desktop'"
+    [@mobileNavLeft]="isMobile() ? 'visible' : 'desktop'"
     [class.fullMode]="isFullMode() || isMobile()"
     [class.compactMode]="!isFullMode() && !isMobile()"
     [class.mobile]="isMobile()"
-    [class.position-right]="isMobile()"
     [class.animate]="animateWidth()"
     [class.resizing]="isResizing()"
     [style.width.px]="sidenavWidth()"
@@ -44,7 +43,7 @@
     [cdkTrapFocus]="isMobile()"
     [cdkTrapFocusAutoCapture]="isMobile()"
     (keydown)="onNavKeyDown($event)"
-    (swiperight)="onMobileNavSwipeRight()"
+    (swipeleft)="onMobileNavSwipeLeft()"
     swipeGesture
     [swipeEnabled]="swipeEnabled()"
   >

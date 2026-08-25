@@ -174,6 +174,18 @@ describe('MagicSideNavComponent mobile behavior', () => {
     }
   });
 
+  it('positions the mobile drawer on the left, matching desktop', () => {
+    isXs.set(true);
+    fixture = TestBed.createComponent(MagicSideNavComponent);
+    fixture.componentInstance.showMobileMenuOverlay.set(true);
+    fixture.detectChanges();
+
+    const drawer = fixture.nativeElement.querySelector('.nav-sidenav') as HTMLElement;
+
+    expect(drawer.classList.contains('position-right')).toBe(false);
+    expect(getComputedStyle(drawer).left).toBe('0px');
+  });
+
   it('removes the mobile drawer and its focus trap while closed', () => {
     isXs.set(true);
     fixture = TestBed.createComponent(MagicSideNavComponent);

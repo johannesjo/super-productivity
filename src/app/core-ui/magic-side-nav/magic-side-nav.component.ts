@@ -332,7 +332,7 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  onMobileNavSwipeRight(): void {
+  onMobileNavSwipeLeft(): void {
     if (this.isMobile() && this.showMobileMenuOverlay()) {
       this.toggleMobileNav();
     }

@@ -211,23 +211,6 @@
     top: var(--safe-area-top);
   }
 
-  // Position right
-  &.position-right {
-    left: auto;
-    right: 0;
-    border-right: none;
-    border-left: 1px solid var(--sidenav-border-color);
-
-    .mode-toggle {
-      left: 16px;
-      right: auto;
-    }
-
-    &.mobile {
-      box-shadow: -4px 0 16px var(--c-dark-30);
-    }
-  }
-
   // Note: Theme colors are handled by CSS variables above
 }
 
