@@ -28,6 +28,13 @@
  * be instant on one server and fatal on another, or flip after a REINDEX. The second test
  * below pins that tie, because the tie IS the bug.
  *
+ * SO THE CANDIDATES ARE MEASURED ONE AT A TIME, each with the other's index dropped inside
+ * a rolled-back transaction, and no test asserts which one an unordered EXPLAIN returns.
+ * That return is the flip itself, and it really does differ between machines: the seed
+ * below yields the window index on one PostgreSQL 16 install and the prefix index on
+ * GitHub Actions' 16.15. Reading it as "the candidate the planner chose" is how the first
+ * version of this file came to fail CI while asserting something true.
+ *
  * WHAT THE ORDER BY DOES. It is not a hint and it does not "prefer" A. It changes the
  * problem so the candidates stop being equivalent: A already emits `received_at` order
  * under an equality qual on `user_id`, so it sorts for free AND keeps LIMIT-1 pushdown
@@ -132,32 +139,45 @@ const measure = async (sql: string, params: readonly unknown[]): Promise<Plan> =
 const ROLLBACK_SENTINEL = 'rollback-after-measuring';
 
 /**
- * Measures the plan the planner would have picked had the window index not existed — that
- * is, candidate B in isolation. DDL is transactional in PostgreSQL, so dropping the index
- * and then forcing a rollback leaves the schema untouched; throwing is the only way to
- * make Prisma roll an interactive transaction back.
+ * Measures ONE candidate in isolation, by dropping the index that backs the other. DDL is
+ * transactional in PostgreSQL, so dropping the index and then forcing a rollback leaves the
+ * schema untouched; throwing is the only way to make Prisma roll an interactive transaction
+ * back.
  *
  * This is how the file compares candidates without a hint extension. `pg_hint_plan` is not
  * installed on production, and installing it to test what production does would defeat the
  * purpose.
+ *
+ * Both index names below are plain indexes rather than constraint-backed ones — `@@unique`
+ * renders as `CREATE UNIQUE INDEX` in 0_init and under `prisma db push` alike — so a bare
+ * `DROP INDEX` reaches either.
  */
-const measureWithoutWindowIndex = async (
+const measureWithout = async (
+  droppedIdx: string,
   sql: string,
   params: readonly unknown[],
 ): Promise<Plan> => {
   let captured: Plan | undefined;
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe(`DROP INDEX ${WINDOW_IDX}`);
+      await tx.$executeRawUnsafe(`DROP INDEX ${droppedIdx}`);
       captured = toPlan(await explainGeneric(runnerFor(tx), sql, params));
       throw new Error(ROLLBACK_SENTINEL);
     });
   } catch (error) {
     if ((error as Error)?.message !== ROLLBACK_SENTINEL) throw error;
   }
-  if (!captured) throw new Error('the alternative plan was never captured');
+  if (!captured) throw new Error(`the plan without ${droppedIdx} was never captured`);
   return captured;
 };
+
+/** Candidate A alone — with the prefix index gone, the window index is what serves `user_id`. */
+const measureWindowCandidate = (sql: string, params: readonly unknown[]): Promise<Plan> =>
+  measureWithout(PREFIX_IDX, sql, params);
+
+/** Candidate B alone — the plan the planner would have had, had the window index not existed. */
+const measurePrefixCandidate = (sql: string, params: readonly unknown[]): Promise<Plan> =>
+  measureWithout(WINDOW_IDX, sql, params);
 
 describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
   /** The deep-prefix user: the cohort the sweep exists to prune, and the one that timed out. */
@@ -252,14 +272,14 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
   it('CANARY: the prefix-bound candidate is catastrophic on this seed', async () => {
     // If this ever comes back cheap, the seed has stopped reproducing production's shape
     // and every other assertion in this file is vacuous. Failing here is the point.
-    const alternative = await measureWithoutWindowIndex(UNORDERED_SQL, [
+    const prefixCandidate = await measurePrefixCandidate(UNORDERED_SQL, [
       deepUserId,
       BOUNDARY_SEQ,
       CUTOFF,
     ]);
 
-    expect(alternative.nodes).toContain(PREFIX_IDX);
-    expect(alternative.examined).toBeGreaterThan(AGED_PREFIX / 2);
+    expect(prefixCandidate.nodes).toContain(PREFIX_IDX);
+    expect(prefixCandidate.examined).toBeGreaterThan(AGED_PREFIX / 2);
   });
 
   it('without the ORDER BY the candidates are cost-tied, so the choice is luck', async () => {
@@ -267,33 +287,58 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
     // two apart AT ALL, while one of them is orders of magnitude more expensive to run. A
     // tie is settled by internals no version promises to keep stable, so the same
     // statement can be instant here and fatal on the production server.
-    const chosen = await measure(UNORDERED_SQL, [deepUserId, BOUNDARY_SEQ, CUTOFF]);
-    const alternative = await measureWithoutWindowIndex(UNORDERED_SQL, [
+    //
+    // BOTH CANDIDATES ARE MEASURED IN ISOLATION, and the plan the planner hands back is
+    // deliberately not treated as one of them, because that hand-back IS the coin flip:
+    // this exact seed returns the window index on one PostgreSQL 16 install and the prefix
+    // index on GitHub Actions' 16.15, where reading the winner as "the cheap candidate"
+    // made the ratio below 1 and failed the run. A spec that passes or fails by the very
+    // luck it exists to document is measuring the luck, not the tie.
+    const windowCandidate = await measureWindowCandidate(UNORDERED_SQL, [
+      deepUserId,
+      BOUNDARY_SEQ,
+      CUTOFF,
+    ]);
+    const prefixCandidate = await measurePrefixCandidate(UNORDERED_SQL, [
       deepUserId,
       BOUNDARY_SEQ,
       CUTOFF,
     ]);
 
-    expect(alternative.estimatedCost).toBeCloseTo(chosen.estimatedCost, 5);
+    expect(windowCandidate.nodes).toContain(WINDOW_IDX);
+    expect(prefixCandidate.nodes).toContain(PREFIX_IDX);
+    // Not "close enough" — bit-identical, to the planner's own precision.
+    expect(prefixCandidate.estimatedCost).toBeCloseTo(windowCandidate.estimatedCost, 5);
     // ...and the tie is emphatically not benign: same predicted cost, ~100x the work.
-    expect(alternative.examined / Math.max(chosen.examined, 1)).toBeGreaterThan(50);
+    expect(
+      prefixCandidate.examined / Math.max(windowCandidate.examined, 1),
+    ).toBeGreaterThan(50);
+
+    // The planner is choosing blind BETWEEN THESE TWO, at the tied cost — which is the
+    // claim. Which of them comes back is not asserted, only that it is one of them: pin
+    // the winner and this test starts failing on whichever machine loses the flip.
+    const chosen = await measure(UNORDERED_SQL, [deepUserId, BOUNDARY_SEQ, CUTOFF]);
+    expect(chosen.nodes).toMatch(new RegExp(`${WINDOW_IDX}|${PREFIX_IDX}`));
+    expect(chosen.estimatedCost).toBeCloseTo(windowCandidate.estimatedCost, 5);
   });
 
   it('the ORDER BY breaks that tie by making the prefix candidate pay a Sort', async () => {
     const chosen = await measure(ORDERED_SQL, [deepUserId, BOUNDARY_SEQ, CUTOFF]);
-    const alternative = await measureWithoutWindowIndex(ORDERED_SQL, [
+    const prefixCandidate = await measurePrefixCandidate(ORDERED_SQL, [
       deepUserId,
       BOUNDARY_SEQ,
       CUTOFF,
     ]);
 
     // The window index emits `received_at` order for free, so it keeps LIMIT-1 pushdown.
+    // Asserting the WINNER is legitimate here and only here: the margin below is what took
+    // the choice away from the tie-break, so there is no longer a flip to lose.
     expect(chosen.nodes).toContain(WINDOW_IDX);
     expect(chosen.nodes).not.toContain('Sort');
     // The prefix candidate cannot, so it must materialise and sort — losing the early exit
     // and, with it, the tie.
-    expect(alternative.nodes).toContain('Sort');
-    expect(alternative.estimatedCost).toBeGreaterThan(chosen.estimatedCost * 1.5);
+    expect(prefixCandidate.nodes).toContain('Sort');
+    expect(prefixCandidate.estimatedCost).toBeGreaterThan(chosen.estimatedCost * 1.5);
   });
 
   it('bounds a NO answer by the retention window, not by history depth', async () => {
