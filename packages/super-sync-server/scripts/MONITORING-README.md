@@ -220,7 +220,8 @@ and watch three signals:
   cold reads, try 500–1000 rather than the 5000 default); do not raise the timeout.
 - `N user(s) threw before their drain` — a **probe** timed out on a deep prefix, before
   anything was deleted. Lowering the batch size does not help; this is the cohort that
-  needs the index work in `docs/2026-08-25-outage-remediation-plan.md`.
+  needs a partial index covering the causal-boundary probe (see the operations
+  runbook for the outage analysis and index SQL).
 - the pool-busy health alert — the sweep is competing with real traffic.
 
 `Cleanup [old-ops]: abandoned the run after N consecutive candidate failures` means the

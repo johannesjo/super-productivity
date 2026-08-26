@@ -1196,6 +1196,10 @@ const envForRun = (run: Run): Record<string, string> => {
 };
 
 describe('health-alert.sh replaying the night of 2026-08-25', () => {
+  // Each replay spawns the script ~40 times; a single spawn may take up to 10s
+  // (spawnSync timeout above), so vitest's 5s default flakes on slow CI runners.
+  const REPLAY_TIMEOUT_MS = 60_000;
+
   const replay = (): { alerts: string[]; recoveries: number } => {
     const alerts: string[] = [];
     let recoveries = 0;
@@ -1224,40 +1228,48 @@ describe('health-alert.sh replaying the night of 2026-08-25', () => {
     return { alerts, recoveries };
   };
 
-  it('reports every distinct problem exactly once instead of storming', () => {
-    const { alerts, recoveries } = replay();
+  it(
+    'reports every distinct problem exactly once instead of storming',
+    () => {
+      const { alerts, recoveries } = replay();
 
-    // Six mails for six genuinely separate events, where the shipped script sent
-    // thirteen. The rotating 143/128 exit codes are folded into the 124 that opened the
-    // incident, and the eight repeat pool-busy runs from 07:00 to 07:40 fold into one.
-    //
-    // 00:50 is NOT a duplicate of 23:35 and must stay: with the dump's own session
-    // exempted, 00:10-00:45 are healthy runs, so that incident CLOSED (recovery below)
-    // and 00:50 opened a new one. Folding a failure into an incident that already
-    // recovered is how a monitor goes quiet on a recurring fault.
-    expect(alerts).toEqual([
-      '23:35 Database monitoring checks failed (exit 124)',
-      '00:50 Database monitoring checks failed (exit 124)',
-      '06:00 Connection pool 80% busy (48 of 60 running a query or in a transaction)',
-      '06:25 Database monitoring checks failed (exit 124)',
-      '07:00 Connection pool 100% busy (60 of 60 running a query or in a transaction)',
-      '07:45 1 query(s) active longer than 120s (longest: 233s)',
-    ]);
-    // One per incident that actually cleared, and never on a single-run blip. The 07:00
-    // incident is still open at 07:45, so it correctly gets none.
-    expect(recoveries).toBe(4);
-    // 16 mails on the shipped script, 10 here. Four of those ten are the 23:00-01:00
-    // cluster, which exists only because the dump was still taking ~112 minutes; that
-    // window goes quiet once the retention sweep runs and the dump shrinks again.
-    expect(alerts.length + recoveries).toBeLessThanOrEqual(10);
-  });
+      // Six mails for six genuinely separate events, where the shipped script sent
+      // thirteen. The rotating 143/128 exit codes are folded into the 124 that opened the
+      // incident, and the eight repeat pool-busy runs from 07:00 to 07:40 fold into one.
+      //
+      // 00:50 is NOT a duplicate of 23:35 and must stay: with the dump's own session
+      // exempted, 00:10-00:45 are healthy runs, so that incident CLOSED (recovery below)
+      // and 00:50 opened a new one. Folding a failure into an incident that already
+      // recovered is how a monitor goes quiet on a recurring fault.
+      expect(alerts).toEqual([
+        '23:35 Database monitoring checks failed (exit 124)',
+        '00:50 Database monitoring checks failed (exit 124)',
+        '06:00 Connection pool 80% busy (48 of 60 running a query or in a transaction)',
+        '06:25 Database monitoring checks failed (exit 124)',
+        '07:00 Connection pool 100% busy (60 of 60 running a query or in a transaction)',
+        '07:45 1 query(s) active longer than 120s (longest: 233s)',
+      ]);
+      // One per incident that actually cleared, and never on a single-run blip. The 07:00
+      // incident is still open at 07:45, so it correctly gets none.
+      expect(recoveries).toBe(4);
+      // 16 mails on the shipped script, 10 here. Four of those ten are the 23:00-01:00
+      // cluster, which exists only because the dump was still taking ~112 minutes; that
+      // window goes quiet once the retention sweep runs and the dump shrinks again.
+      expect(alerts.length + recoveries).toBeLessThanOrEqual(10);
+    },
+    REPLAY_TIMEOUT_MS,
+  );
 
-  it('still reports a genuinely new problem while an old one is unresolved', () => {
-    // The failure mode a naive rate-limit introduces: 07:45's long query arrives while
-    // the pool has been busy since 07:00 and the incident is still open. Suppressing it
-    // would be a silent monitoring outage, which is worse than the storm.
-    const { alerts } = replay();
+  it(
+    'still reports a genuinely new problem while an old one is unresolved',
+    () => {
+      // The failure mode a naive rate-limit introduces: 07:45's long query arrives while
+      // the pool has been busy since 07:00 and the incident is still open. Suppressing it
+      // would be a silent monitoring outage, which is worse than the storm.
+      const { alerts } = replay();
 
-    expect(alerts.at(-1)).toContain('1 query(s) active longer than 120s');
-  });
+      expect(alerts.at(-1)).toContain('1 query(s) active longer than 120s');
+    },
+    REPLAY_TIMEOUT_MS,
+  );
 });
