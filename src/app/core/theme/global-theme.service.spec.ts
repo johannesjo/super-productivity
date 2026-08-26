@@ -887,3 +887,37 @@ describe('GlobalThemeService scroll-into-view guard', () => {
     });
   });
 });
+
+describe('GlobalThemeService._initIcons()', () => {
+  interface InitIconsHarness {
+    _initIcons(): void;
+    _matIconRegistry: { addSvgIcon: jasmine.Spy };
+    _domSanitizer: { bypassSecurityTrustResourceUrl: (url: string) => string };
+    preloadIcons(icons: [string, string][]): Promise<void[]>;
+  }
+
+  const registeredNames = (): string[] => {
+    const harness = Object.create(GlobalThemeService.prototype) as InitIconsHarness;
+    harness._matIconRegistry = { addSvgIcon: jasmine.createSpy('addSvgIcon') };
+    harness._domSanitizer = { bypassSecurityTrustResourceUrl: (url: string) => url };
+    // Network fetch, irrelevant to which names get registered.
+    harness.preloadIcons = (): Promise<void[]> => Promise.resolve([]);
+    harness._initIcons();
+    return harness._matIconRegistry.addSvgIcon.calls
+      .allArgs()
+      .map(([name]) => name as string);
+  };
+
+  // Which names must be present is checked in `electron/bundled-plugin-ids.test.cjs`,
+  // which can read the plugin manifests and the asset files off disk instead of
+  // duplicating them as a list here. This side covers only what needs the class: that
+  // `_initIcons()` registers a coherent set at all.
+  it('registers a non-empty set of svg icons', () => {
+    expect(registeredNames().length).toBeGreaterThan(0);
+  });
+
+  it('registers each icon name only once', () => {
+    const names = registeredNames();
+    expect(names.length).toBe(new Set(names).size);
+  });
+});
