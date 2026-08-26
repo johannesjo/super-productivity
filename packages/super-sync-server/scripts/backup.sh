@@ -22,6 +22,10 @@
 #   3. Set RCLONE_REMOTE below
 
 set -eo pipefail
+# The full dump is the whole database and the accounts dump is users + passkeys — password
+# hashes and passkey credentials. Under root cron the default umask is 022, so without this
+# both land 0644 and every local account on the host can read them.
+umask 077
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,6 +35,21 @@ RETENTION_DAYS="${RETENTION_DAYS:-14}"
 
 # Rclone remote name (e.g., "b2:supersync-backups" or "s3:my-bucket/supersync")
 RCLONE_REMOTE="${RCLONE_REMOTE:-}"
+
+# Identifies the dump's session in pg_stat_activity. health-alert.sh exempts exactly this
+# name from its long-query check: a full dump legitimately runs for hours and would
+# otherwise page every night, on a schedule, forever. It is NOT exempt from the pool-busy
+# check, so a dump that actually starves the server still alerts, and the exemption expires
+# after 6h so a WEDGED dump still pages. Keep it in sync with the `pageable` expression in
+# scripts/health-alert.sh.
+BACKUP_APPLICATION_NAME="supersync-backup"
+
+# Every dump goes through here, so a new dump site cannot forget the session stamp that
+# the health check's exemption keys on.
+run_pg_dump() {
+  docker exec -e PGAPPNAME="$BACKUP_APPLICATION_NAME" "$DB_CONTAINER" \
+    pg_dump -U "$DB_USER" "$DB_NAME" "$@"
+}
 
 # Database container name
 DB_CONTAINER="${DB_CONTAINER:-supersync-postgres}"
@@ -45,6 +64,8 @@ fi
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
+# Fixes a directory created before the umask above.
+chmod 700 "$BACKUP_DIR"
 
 # Generate filename with timestamp
 DATE=$(date +%Y%m%d_%H%M%S)
@@ -57,7 +78,7 @@ echo ""
 
 # Step 1: Create full PostgreSQL dump
 echo "==> Creating full database dump..."
-docker exec "$DB_CONTAINER" pg_dump -U "$DB_USER" "$DB_NAME" | gzip > "$BACKUP_FILE"
+run_pg_dump | gzip > "$BACKUP_FILE"
 
 # Get file size
 SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
@@ -69,8 +90,7 @@ echo "    Full backup size: $SIZE"
 ACCOUNTS_FILE="$BACKUP_DIR/supersync_accounts_$DATE.sql.gz"
 echo ""
 echo "==> Creating accounts-only dump (users + passkeys)..."
-docker exec "$DB_CONTAINER" pg_dump -U "$DB_USER" "$DB_NAME" \
-    --table=users --table=passkeys | gzip > "$ACCOUNTS_FILE"
+run_pg_dump --table=users --table=passkeys | gzip > "$ACCOUNTS_FILE"
 
 ACCOUNTS_SIZE=$(du -h "$ACCOUNTS_FILE" | cut -f1)
 echo "    Accounts backup size: $ACCOUNTS_SIZE"

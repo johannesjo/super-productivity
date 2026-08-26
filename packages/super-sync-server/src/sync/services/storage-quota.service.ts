@@ -41,6 +41,11 @@ const OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = 25_000;
 // throttle is meant to avoid. Cap so misconfiguration can't unwind the bound.
 const OLD_OPS_CLEANUP_DELETE_BATCH_SIZE_MAX = 50_000;
 const OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN_MAX = 1_000_000;
+/**
+ * Consecutive per-candidate failures that end a sweep. Per-user containment must not turn a
+ * SYSTEMIC fault into a fleet-long run of statement_timeouts (see the loop for why).
+ */
+const MAX_CONSECUTIVE_CANDIDATE_FAILURES = 10;
 
 const getOldOpsCleanupDeleteBatchSize = (): number =>
   parsePositiveIntegerEnv(
@@ -527,138 +532,224 @@ export class StorageQuotaService {
     let skippedFreshPrefix = 0;
     let skippedBoundaryAtOne = 0;
     let drainFailures = 0;
+    let candidateFailures = 0;
+    let consecutiveCandidateFailures = 0;
 
     for (const candidate of candidates) {
       if (remainingDeleteBudget <= 0) break;
+      // Containment below turns one user's failure into a skip, which removes the only
+      // thing that used to stop a SYSTEMIC failure: a dead pool or a fleet-wide cold cache
+      // makes EVERY candidate fail, and a skipped candidate consumes no delete budget, so
+      // the loop would run the whole fleet at up to a full statement_timeout each.
+      // cleanup.ts schedules this on a bare setInterval with no re-entrancy guard, so a
+      // sweep that outran 24h would overlap itself. Consecutive, not total: isolated bad
+      // users must not abort a run that is otherwise making progress.
+      if (consecutiveCandidateFailures >= MAX_CONSECUTIVE_CANDIDATE_FAILURES) {
+        Logger.error(
+          'Cleanup [old-ops]: abandoned the run after ' +
+            `${MAX_CONSECUTIVE_CANDIDATE_FAILURES} consecutive candidate failures — ` +
+            'this looks systemic (pool, cold cache, statement_timeout), not per-user.',
+        );
+        break;
+      }
 
-      // Snapshot AGE is deliberately not a gate (see #9670): safety comes from
-      // the causal boundary plus the receivedAt cutoff, not snapshot recency.
-      //
-      // But while a cached-snapshot CURSOR exists (legacy plaintext cohort),
-      // the boundary must not pass it: `generateSnapshotAtSeq` replays the
-      // cached base forward through (lastSnapshotSeq, targetSeq], so pruning
-      // above the cursor would break historical restore points that are still
-      // servable. The cap resolves to the newest causal full-state op at or
-      // below the cursor, and lifts once the E2EE eradication sweep clears
-      // the cached snapshot fields.
-      const { snapshotCap } = candidate;
-      let protectedFromSeq = candidate.causalBoundarySeq;
-      if (snapshotCap > 0 && protectedFromSeq > snapshotCap) {
-        const cappedFullStateOp = await prisma.operation.findFirst({
-          where: {
-            userId: candidate.userId,
-            serverSeq: { lte: snapshotCap },
-            // Legacy REPAIR rows carry no causal base cursor, so they must
-            // never authorize history pruning
-            // (see CAUSAL_FULL_STATE_OPERATION_WHERE).
-            ...CAUSAL_FULL_STATE_OPERATION_WHERE,
-          },
-          orderBy: { serverSeq: 'desc' },
-          select: { serverSeq: true },
-        });
-        if (!cappedFullStateOp) {
-          cappedUsersWithoutReplayBase++;
+      let candidateFailed = false;
+      try {
+        // Snapshot AGE is deliberately not a gate (see #9670): safety comes from
+        // the causal boundary plus the receivedAt cutoff, not snapshot recency.
+        //
+        // But while a cached-snapshot CURSOR exists (legacy plaintext cohort),
+        // the boundary must not pass it: `generateSnapshotAtSeq` replays the
+        // cached base forward through (lastSnapshotSeq, targetSeq], so pruning
+        // above the cursor would break historical restore points that are still
+        // servable. The cap resolves to the newest causal full-state op at or
+        // below the cursor, and lifts once the E2EE eradication sweep clears
+        // the cached snapshot fields.
+        const { snapshotCap } = candidate;
+        let protectedFromSeq = candidate.causalBoundarySeq;
+        if (snapshotCap > 0 && protectedFromSeq > snapshotCap) {
+          const cappedFullStateOp = await prisma.operation.findFirst({
+            where: {
+              userId: candidate.userId,
+              serverSeq: { lte: snapshotCap },
+              // Legacy REPAIR rows carry no causal base cursor, so they must
+              // never authorize history pruning
+              // (see CAUSAL_FULL_STATE_OPERATION_WHERE).
+              ...CAUSAL_FULL_STATE_OPERATION_WHERE,
+            },
+            orderBy: { serverSeq: 'desc' },
+            select: { serverSeq: true },
+          });
+          if (!cappedFullStateOp) {
+            cappedUsersWithoutReplayBase++;
+            continue;
+          }
+          protectedFromSeq = cappedFullStateOp.serverSeq;
+        }
+
+        if (protectedFromSeq <= 1) {
+          skippedBoundaryAtOne++;
           continue;
         }
-        protectedFromSeq = cappedFullStateOp.serverSeq;
-      }
 
-      if (protectedFromSeq <= 1) {
-        skippedBoundaryAtOne++;
-        continue;
-      }
+        // Prune the prefix whole, or not at all. Deletion filters on `receivedAt
+        // < cutoffTime` as well as `serverSeq < protectedFromSeq`, so a prefix
+        // holding one op newer than the cutoff would be pruned around it and
+        // leave a plain delta as the lowest surviving row. Replay then breaks:
+        // `_resolveExpectedFirstSeq` (op-replay.ts) tolerates a leading gap ONLY
+        // when the lowest surviving op is a causal full-state op that resets
+        // state — otherwise it throws SNAPSHOT_REPLAY_INCOMPLETE, which the
+        // restore route surfaces as a 500. Skipping the user keeps the whole
+        // prefix intact until it ages out, so this sweep never NEWLY breaks the
+        // invariant that path documents ("the surviving lowest-seq op is
+        // guaranteed to be a full-state op"). Costs retention lag, never
+        // over-deletion. Note the invariant is not globally true: quota
+        // recovery's deleteOldestRestorePointAndOps deletes up to a restore
+        // point and can leave a delta lowest — pre-existing, tracked separately.
+        //
+        // `orderBy: receivedAt` is load-bearing, not cosmetic. The predicate is a
+        // 2D range (`server_seq <` AND `received_at >=`) and no index answers both
+        // as search bounds, so one of them is always a filter and the planner is
+        // free to pick which. Down `(user_id, server_seq)` a NO answer walks the
+        // user's ENTIRE prefix — the deepest histories, which is precisely the
+        // cohort this sweep exists to prune, so it fails worst where it matters
+        // most and gets worse every day it fails.
+        //
+        // And the planner could not tell the two apart: MEASURED on PG 16 under
+        // force_generic_plan (which is what Prisma's prepared statements get), the
+        // two candidates cost BIT-IDENTICALLY — `0.29..32.17 rows=2` each — because
+        // both are "equality on user_id plus one range at default selectivity", while
+        // one touches 9 buffers and the other 60,329. A tie is settled by internals
+        // no version promises to keep stable, so the same statement is instant on one
+        // server and fatal on another. That coin flip, not a mis-costing, is the bug.
+        //
+        // Ordering by receivedAt does not pin the `(user_id, received_at)` path and is
+        // not a hint; it removes the tie. That index already emits receivedAt order
+        // under an equality qual on user_id, so it sorts for free AND keeps LIMIT-1
+        // pushdown (16.23), while `(user_id, server_seq)` must add a blocking Sort and
+        // lose the early exit (30.86) — a ~2x margin where there was none. Its NO
+        // answer is then bounded by the user's ops inside the retention window: not
+        // free — a heavy user's window is still thousands of rows, each costing a heap
+        // fetch because server_seq is not in that index — but bounded by activity
+        // rather than history depth, which is what makes it stop growing. The full fix
+        // is a covering `(user_id, received_at, server_seq)` index (index-only scan,
+        // ordering free); left out here because that is a migration on a multi-GB
+        // table, not a code change.
+        //
+        // Guarded by tests/integration/old-ops-probe-plan.integration.spec.ts, which
+        // measures all of the above against a real PostgreSQL. Mocked Prisma cannot
+        // see any of it: delete this orderBy and every unit test still passes.
+        //
+        // The obvious O(log n) rewrite — take the newest op below the boundary and
+        // compare its receivedAt — is REJECTED: it assumes receivedAt rises with
+        // serverSeq, and concurrent uploads for one user can invert them. The
+        // delete filters on receivedAt as well, so a missed fresh op would not be
+        // deleted; it would be left as the lowest surviving row, a plain delta,
+        // which is the SNAPSHOT_REPLAY_INCOMPLETE state this probe exists to
+        // prevent. Exact semantics over a faster plan.
+        const freshOpBelowBoundary = await prisma.operation.findFirst({
+          where: {
+            userId: candidate.userId,
+            serverSeq: { lt: protectedFromSeq },
+            receivedAt: { gte: BigInt(cutoffTime) },
+          },
+          orderBy: { receivedAt: 'asc' },
+          select: { serverSeq: true },
+        });
+        if (freshOpBelowBoundary) {
+          skippedFreshPrefix++;
+          continue;
+        }
 
-      // Prune the prefix whole, or not at all. Deletion filters on `receivedAt
-      // < cutoffTime` as well as `serverSeq < protectedFromSeq`, so a prefix
-      // holding one op newer than the cutoff would be pruned around it and
-      // leave a plain delta as the lowest surviving row. Replay then breaks:
-      // `_resolveExpectedFirstSeq` (op-replay.ts) tolerates a leading gap ONLY
-      // when the lowest surviving op is a causal full-state op that resets
-      // state — otherwise it throws SNAPSHOT_REPLAY_INCOMPLETE, which the
-      // restore route surfaces as a 500. Skipping the user keeps the whole
-      // prefix intact until it ages out, so this sweep never NEWLY breaks the
-      // invariant that path documents ("the surviving lowest-seq op is
-      // guaranteed to be a full-state op"). Costs retention lag, never
-      // over-deletion. Note the invariant is not globally true: quota
-      // recovery's deleteOldestRestorePointAndOps deletes up to a restore
-      // point and can leave a delta lowest — pre-existing, tracked separately.
-      const freshOpBelowBoundary = await prisma.operation.findFirst({
-        where: {
-          userId: candidate.userId,
-          serverSeq: { lt: protectedFromSeq },
-          receivedAt: { gte: BigInt(cutoffTime) },
-        },
-        select: { serverSeq: true },
-      });
-      if (freshOpBelowBoundary) {
-        skippedFreshPrefix++;
-        continue;
-      }
+        // Drain this user to completion. The budget gates which users we
+        // START, never where we stop inside one: batches delete ascending by
+        // serverSeq, so cutting a user off mid-prefix deletes ops 1..k and
+        // leaves a plain delta at k+1 as the lowest surviving row — the exact
+        // state the fresh-op probe above rejects, and one that makes every
+        // restore target 500 with SNAPSHOT_REPLAY_INCOMPLETE until a later run
+        // finishes the prefix. Overshoot is bounded by one user's backlog and
+        // costs a longer run; a truncated prefix costs that user their restore.
+        //
+        // One user's DB error must not cost the rest of the fleet a day of
+        // retention, so the drain is scoped: log, count, move to the next user.
+        // A throw mid-drain still leaves that user's prefix truncated — the
+        // batches are separate committed statements, not one transaction — and
+        // the next run repairs it, since the surviving prefix ops are still
+        // older than the (by then later) cutoff.
+        let userDeleted = 0;
+        try {
+          for (;;) {
+            const { selectedCount, deletedCount } = await this.deleteOldSyncedOpsBatch(
+              candidate.userId,
+              protectedFromSeq,
+              cutoffTime,
+              deleteBatchSize,
+            );
+            if (selectedCount === 0) break;
 
-      // Drain this user to completion. The budget gates which users we
-      // START, never where we stop inside one: batches delete ascending by
-      // serverSeq, so cutting a user off mid-prefix deletes ops 1..k and
-      // leaves a plain delta at k+1 as the lowest surviving row — the exact
-      // state the fresh-op probe above rejects, and one that makes every
-      // restore target 500 with SNAPSHOT_REPLAY_INCOMPLETE until a later run
-      // finishes the prefix. Overshoot is bounded by one user's backlog and
-      // costs a longer run; a truncated prefix costs that user their restore.
-      //
-      // One user's DB error must not cost the rest of the fleet a day of
-      // retention, so the drain is scoped: log, count, move to the next user.
-      // A throw mid-drain still leaves that user's prefix truncated — the
-      // batches are separate committed statements, not one transaction — and
-      // the next run repairs it, since the surviving prefix ops are still
-      // older than the (by then later) cutoff.
-      let userDeleted = 0;
-      try {
-        for (;;) {
-          const { selectedCount, deletedCount } = await this.deleteOldSyncedOpsBatch(
-            candidate.userId,
-            protectedFromSeq,
-            cutoffTime,
-            deleteBatchSize,
-          );
-          if (selectedCount === 0) break;
+            // Mark on the *first* successful batch (not after the loop) so that
+            // if a later batch throws, the counter still self-heals. Without
+            // this, batch-1 commits would leave the counter stale-high until the
+            // next daily pass or process restart.
+            //
+            // Deliberately leave storageUsedBytes stale-high here. A count-based
+            // approximate decrement can undercount users with many tiny ops and
+            // let them bypass quota indefinitely. The marker tells the next
+            // request to run an exact reconcile so drift self-heals.
+            //
+            // NOTE: the marker is in-memory (process-local). A persistent
+            // `users.storage_needs_reconcile` column would survive restarts; see
+            // TODO below.
+            // TODO: persist the reconcile marker in a DB column so it survives
+            // restarts of a single-instance deployment and works correctly across
+            // a multi-instance deployment behind a load balancer.
+            if (userDeleted === 0) {
+              affectedUserIds.push(candidate.userId);
+              this.markNeedsReconcile(candidate.userId);
+            }
 
-          // Mark on the *first* successful batch (not after the loop) so that
-          // if a later batch throws, the counter still self-heals. Without
-          // this, batch-1 commits would leave the counter stale-high until the
-          // next daily pass or process restart.
-          //
-          // Deliberately leave storageUsedBytes stale-high here. A count-based
-          // approximate decrement can undercount users with many tiny ops and
-          // let them bypass quota indefinitely. The marker tells the next
-          // request to run an exact reconcile so drift self-heals.
-          //
-          // NOTE: the marker is in-memory (process-local). A persistent
-          // `users.storage_needs_reconcile` column would survive restarts; see
-          // TODO below.
-          // TODO: persist the reconcile marker in a DB column so it survives
-          // restarts of a single-instance deployment and works correctly across
-          // a multi-instance deployment behind a load balancer.
-          if (userDeleted === 0) {
-            affectedUserIds.push(candidate.userId);
-            this.markNeedsReconcile(candidate.userId);
+            userDeleted += deletedCount;
+            totalDeleted += deletedCount;
+            // May go negative — the outer loop's budget check then stops the run
+            // before starting another user.
+            remainingDeleteBudget -= deletedCount;
+            // Stop on the SELECTED count, never the deleted one. A short delete
+            // means those rows were already gone (concurrent quota recovery),
+            // not that the prefix is drained — see deleteOldSyncedOpsBatch.
+            if (selectedCount < deleteBatchSize) break;
           }
-
-          userDeleted += deletedCount;
-          totalDeleted += deletedCount;
-          // May go negative — the outer loop's budget check then stops the run
-          // before starting another user.
-          remainingDeleteBudget -= deletedCount;
-          // Stop on the SELECTED count, never the deleted one. A short delete
-          // means those rows were already gone (concurrent quota recovery),
-          // not that the prefix is drained — see deleteOldSyncedOpsBatch.
-          if (selectedCount < deleteBatchSize) break;
+        } catch (error) {
+          drainFailures++;
+          Logger.error(
+            `Cleanup [old-ops]: drain failed for user ${candidate.userId} ` +
+              `(boundary ${protectedFromSeq}, ${userDeleted} ops deleted before the ` +
+              `error); their prefix may be truncated until the next run: ${error}`,
+          );
         }
       } catch (error) {
-        drainFailures++;
+        // Scoped to ONE candidate on purpose. Every statement in this body reads or
+        // writes a single user's history and can fail on that user alone (a
+        // `statement_timeout` on a deep prefix is what production hit). Unscoped, the
+        // throw escaped the loop, aborted the whole sweep, and — because `candidates`
+        // is deterministically ordered — the same user re-blocked it every night while
+        // every user behind them silently kept their full history: a fleet-wide
+        // retention outage reported as one log line. Wrapping the whole body rather
+        // than each query keeps that true for anything added here later. The drain's
+        // own catch is nested inside and does not rethrow, so it still reports the
+        // distinct 'prefix may be truncated' case before this one is reached.
+        candidateFailed = true;
+        candidateFailures++;
         Logger.error(
-          `Cleanup [old-ops]: drain failed for user ${candidate.userId} ` +
-            `(boundary ${protectedFromSeq}, ${userDeleted} ops deleted before the ` +
-            `error); their prefix may be truncated until the next run: ${error}`,
+          `Cleanup [old-ops]: user ${candidate.userId} was skipped; their history was ` +
+            `left intact and the run continued: ${error}`,
         );
+      } finally {
+        // `finally`, not the end of the `try`: the body reaches `continue` on three
+        // ordinary skip paths (snapshot-capped with no replay base, boundary at seq 1,
+        // fresh prefix) and those are successes that must clear the streak.
+        consecutiveCandidateFailures = candidateFailed
+          ? consecutiveCandidateFailures + 1
+          : 0;
       }
     }
 
@@ -683,6 +774,14 @@ export class StorageQuotaService {
       Logger.warn(
         `Cleanup [old-ops]: ${drainFailures} user(s) failed mid-drain and were skipped; ` +
           'the run continued for the remaining users.',
+      );
+    }
+
+    if (candidateFailures > 0) {
+      Logger.warn(
+        `Cleanup [old-ops]: ${candidateFailures} user(s) threw before their drain and were ` +
+          'skipped. A count that never falls means those users are permanently exempt ' +
+          'from retention — check for a statement_timeout on a deep prefix.',
       );
     }
 

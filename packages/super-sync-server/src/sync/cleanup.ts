@@ -25,11 +25,13 @@ const runDailyCleanup = async (): Promise<void> => {
   try {
     const { totalDeleted, affectedUserIds } =
       await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
-    if (totalDeleted > 0) {
-      Logger.info(
-        `Cleanup [old-ops]: removed ${totalDeleted} entries (affected ${affectedUserIds.length} users)`,
-      );
-    }
+    // Logged unconditionally, INCLUDING zero. The 2026-08 fleet-wide retention outage was
+    // diagnosable only as an absence — an ERROR line with no accompanying "removed N" line
+    // — because this was gated on `totalDeleted > 0`, which makes "the sweep ran and had
+    // nothing to do" indistinguishable from "the sweep never got that far" in the log.
+    Logger.info(
+      `Cleanup [old-ops]: removed ${totalDeleted} entries (affected ${affectedUserIds.length} users)`,
+    );
     // Storage counter is maintained incrementally on uploads. Doing one full
     // pg_column_size scan per affected user inside this loop was a DoS — but
     // skipping reconcile entirely lets counters drift stale-high forever, so

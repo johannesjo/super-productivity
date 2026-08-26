@@ -3099,6 +3099,28 @@ describe('SyncService', () => {
       });
     };
 
+    /** A plain delta old enough to be prunable — the prefix `seedFullStateOp` protects. */
+    const seedAgedOp = (targetUserId: number, id: string, receivedAt: bigint): void => {
+      testState.operations.set(id, {
+        id,
+        userId: targetUserId,
+        clientId: `client-${targetUserId}`,
+        serverSeq: 1,
+        actionType: 'ADD',
+        opType: 'CRT',
+        entityType: 'TASK',
+        entityId: id,
+        entityIds: [],
+        payload: {},
+        vectorClock: {},
+        schemaVersion: 1,
+        clientTimestamp: BigInt(Date.now()),
+        receivedAt,
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+      });
+    };
+
     it('should not delete old operations when no full-state base exists', async () => {
       const service = getSyncService();
 
@@ -3753,6 +3775,137 @@ describe('SyncService', () => {
       expect(
         Array.from(testState.operations.values()).filter((op) => op.userId === userId),
       ).toHaveLength(totalOps + 1 - 50);
+    });
+
+    it("keeps sweeping the fleet when one user's probe throws", async () => {
+      // Production 2026-08-25: the fresh-prefix probe hit `statement_timeout` on a
+      // deep prefix, the throw escaped the per-user loop, and `Cleanup [old-ops]`
+      // aborted the WHOLE fleet's retention pass. `candidates` is deterministically
+      // ordered, so the same user re-blocked it every night and `operations` grew
+      // unbounded behind them -- visible only as one ERROR line a day.
+      const service = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => undefined);
+      const warnSpy = vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
+
+      seedAgedOp(userId, 'old-op-1', BigInt(cutoffTime - 1));
+      seedFullStateOp(userId, 2, BigInt(cutoffTime - 1));
+
+      // Ordered after the failing user, so it is only reached if the run continues.
+      const otherUserId = userId + 1;
+      seedAgedOp(otherUserId, 'other-old-op-1', BigInt(cutoffTime - 1));
+      seedFullStateOp(otherUserId, 2, BigInt(cutoffTime - 1));
+
+      const findFirstMock = prisma.operation.findFirst as unknown as {
+        getMockImplementation: () => (args: unknown) => Promise<unknown>;
+      };
+      const realFindFirst = findFirstMock.getMockImplementation();
+      // Counted, and asserted below: if the probe's `where` shape ever changes, this
+      // spy stops matching and the test would otherwise pass while proving nothing.
+      let thrownCount = 0;
+      const probeOrderBys: unknown[] = [];
+      const probeSpy = vi
+        .spyOn(prisma.operation, 'findFirst')
+        .mockImplementation(async (args: any) => {
+          if (
+            args?.where?.serverSeq?.lt !== undefined &&
+            args?.where?.receivedAt?.gte !== undefined
+          ) {
+            probeOrderBys.push(args?.orderBy);
+            if (args?.where?.userId === userId) {
+              thrownCount++;
+              throw new Error('canceling statement due to statement timeout');
+            }
+          }
+          return realFindFirst(args);
+        });
+
+      try {
+        const { affectedUserIds } =
+          await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+        expect(thrownCount).toBeGreaterThan(0);
+        // The probe's whole cost argument rests on the planner staying on
+        // `(user_id, received_at)`; without the ORDER BY a NO answer walks the user's
+        // entire aged prefix. Nothing else in the unit suite would notice it going away.
+        expect(probeOrderBys.length).toBeGreaterThan(0);
+        for (const orderBy of probeOrderBys) {
+          expect(orderBy).toEqual({ receivedAt: 'asc' });
+        }
+        expect(affectedUserIds).toEqual([otherUserId]);
+        // The failing user keeps their whole history; the rest of the fleet is pruned.
+        expect(
+          Array.from(testState.operations.values()).filter((op) => op.userId === userId),
+        ).toHaveLength(2);
+        expect(
+          Array.from(testState.operations.values()).filter(
+            (op) => op.userId === otherUserId,
+          ),
+        ).toHaveLength(1);
+        expect(
+          warnSpy.mock.calls.some(([msg]) =>
+            String(msg).includes('1 user(s) threw before their drain'),
+          ),
+        ).toBe(true);
+      } finally {
+        probeSpy.mockRestore();
+        errorSpy.mockRestore();
+        warnSpy.mockRestore();
+      }
+    });
+
+    it('abandons the run when candidate failures look systemic', async () => {
+      // Containment must not turn a fleet-wide fault (dead pool, cold cache) into one
+      // statement_timeout per user across the whole fleet: skipped candidates consume no
+      // delete budget, so nothing else would ever stop the loop, and cleanup.ts schedules
+      // this on a bare setInterval with no re-entrancy guard.
+      const service = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const errorSpy = vi.spyOn(Logger, 'error').mockImplementation(() => undefined);
+      vi.spyOn(Logger, 'warn').mockImplementation(() => undefined);
+
+      const userCount = 40;
+      for (let i = 0; i < userCount; i++) {
+        const id = userId + i;
+        seedAgedOp(id, `systemic-old-${id}`, BigInt(cutoffTime - 1));
+        seedFullStateOp(id, 2, BigInt(cutoffTime - 1));
+      }
+
+      const findFirstMock = prisma.operation.findFirst as unknown as {
+        getMockImplementation: () => (args: unknown) => Promise<unknown>;
+      };
+      const realFindFirst = findFirstMock.getMockImplementation();
+      let probeCalls = 0;
+      const probeSpy = vi
+        .spyOn(prisma.operation, 'findFirst')
+        .mockImplementation(async (args: any) => {
+          if (
+            args?.where?.serverSeq?.lt !== undefined &&
+            args?.where?.receivedAt?.gte !== undefined
+          ) {
+            probeCalls++;
+            throw new Error('canceling statement due to statement timeout');
+          }
+          return realFindFirst(args);
+        });
+
+      try {
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+        // Stops at the threshold instead of running all 40.
+        expect(probeCalls).toBeLessThan(userCount);
+        expect(probeCalls).toBe(10);
+        expect(
+          errorSpy.mock.calls.some(([msg]) =>
+            String(msg).includes(
+              'abandoned the run after 10 consecutive candidate failures',
+            ),
+          ),
+        ).toBe(true);
+      } finally {
+        probeSpy.mockRestore();
+        vi.restoreAllMocks();
+      }
     });
 
     it('shares the per-run budget across users; tail users wait for next pass', async () => {

@@ -31,6 +31,13 @@ export type Measured = {
   tempBlocks: number;
   /** Node types + index names, joined with ' -> '. */
   nodes: string;
+  /**
+   * Root-node `Total Cost` — the number the PLANNER compares, not a measurement. Use it
+   * only to reason about plan CHOICE (is one candidate cheaper than another, or are they
+   * tied?). It says nothing about what a plan actually costs to run: two plans here have
+   * been observed bit-identical in estimated cost while differing 6700x in buffers.
+   */
+  estimatedCost: number;
 };
 
 type Accumulator = {
@@ -144,6 +151,7 @@ export const explainGeneric = async (
       rowsJoinFiltered: acc.joinFiltered,
       tempBlocks: (plan['Temp Written Blocks'] as number) ?? 0,
       nodes: acc.nodes.join(' -> '),
+      estimatedCost: (plan['Total Cost'] as number) ?? 0,
     };
   } finally {
     await db.exec(`DEALLOCATE ${name}`);
