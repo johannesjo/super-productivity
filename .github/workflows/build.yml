@@ -248,9 +248,11 @@ jobs:
           exit 1
 
       # Diagnostic for the step above. Uses the public, unauthenticated endpoint
-      # rather than `snapcraft status` in the container: it needs no credentials,
-      # cannot hang the job, and answers the only question that matters here --
-      # which revision edge actually serves, and how long it has been stuck.
+      # rather than `snapcraft status` in the container: it needs no credentials
+      # and cannot hang the job. Read it correctly: on the pending path it
+      # necessarily shows the PREVIOUS revision, since the upload it just made
+      # is still in review -- it answers "has edge been moving?", never "did my
+      # upload land?". That is the freeze signal, 48h earlier than the cron.
       - name: Report snap channel map
         if: ${{ !cancelled() && (steps.snap-upload.outcome == 'failure' || steps.snap-upload.outputs.result == 'pending') }}
         continue-on-error: true
