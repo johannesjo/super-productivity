@@ -1093,6 +1093,93 @@ describe('SyncService', () => {
       expect(testState.userSyncStates.get(userId)?.latestStateReplacementSeq).toBe(0);
     });
 
+    /**
+     * The resolver treats a causal REPAIR as a full-state boundary, but it only
+     * ever runs while the column is NULL — and the very first ordinary upload
+     * that takes the row lock resolves it, to 0 for the many accounts that have
+     * never imported. So on the common account the accepted-op write is the ONLY
+     * thing that can arm the guard, and it used to ignore REPAIR entirely:
+     * a causal REPAIR left the boundary at the stale 0 and a device returning
+     * with a pre-repair cursor appended its superseded deltas above the repair
+     * (#9703). No pruning and no upgrade window needed — just a resolved column.
+     */
+    it('arms the guard on an accepted causal REPAIR', async () => {
+      const service = getSyncService();
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: 0,
+      });
+      const repair = makeOp({
+        id: 'causal-repair-boundary',
+        actionType: '[Repair] Auto Repair',
+        opType: 'REPAIR',
+        entityType: 'ALL',
+        entityId: undefined,
+        payload: { repaired: true },
+      });
+
+      const repairResults = await service.uploadOps(
+        userId,
+        clientId,
+        [repair],
+        undefined,
+        undefined,
+        4,
+        false,
+        4,
+      );
+
+      expect(repairResults[0].accepted).toBe(true);
+      expect(repairResults[0].serverSeq).toBe(5);
+      expect(testState.userSyncStates.get(userId)?.latestStateReplacementSeq).toBe(5);
+
+      const preRepairDelta = makeOp({ id: 'pre-repair-delta' });
+      const staleResults = await service.uploadOps(
+        userId,
+        clientId,
+        [preRepairDelta],
+        undefined,
+        undefined,
+        undefined,
+        false,
+        3,
+      );
+
+      expect(staleResults[0].accepted).toBe(false);
+      expect(testState.operations.has(preRepairDelta.id)).toBe(false);
+    });
+
+    it('leaves the boundary alone for a legacy REPAIR with no causal base', async () => {
+      const service = getSyncService();
+      testState.userSyncStates.set(userId, {
+        userId,
+        lastSeq: 4,
+        latestStateReplacementSeq: 0,
+      });
+      const legacyRepair = makeOp({
+        id: 'legacy-repair-boundary',
+        actionType: '[Repair] Auto Repair',
+        opType: 'REPAIR',
+        entityType: 'ALL',
+        entityId: undefined,
+        payload: { repaired: true },
+      });
+
+      const results = await service.uploadOps(
+        userId,
+        clientId,
+        [legacyRepair],
+        undefined,
+        undefined,
+        undefined,
+        true,
+      );
+
+      expect(results[0].accepted).toBe(true);
+      expect(testState.userSyncStates.get(userId)?.latestStateReplacementSeq).toBe(0);
+    });
+
     it('should correctly upload operations', async () => {
       const service = getSyncService();
       const op: Operation = makeOp();

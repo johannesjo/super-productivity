@@ -450,10 +450,25 @@ export class SyncService {
           for (let index = 0; index < ops.length; index++) {
             const op = ops[index];
             const result = results[index];
+            // A causal REPAIR is a proven full-state boundary — the same one
+            // `resolveRetainedReplacementSeq` falls back to. Recording it here
+            // is what keeps writer and resolver agreeing: the resolver only
+            // runs while the column is NULL, and the first ordinary upload that
+            // takes the row lock resolves it (to 0 for every account that never
+            // imported). So on an already-resolved account the accepted-op
+            // write is the ONLY thing that can arm the guard, and skipping
+            // REPAIR left the boundary at the stale 0 — a device returning with
+            // a pre-repair cursor then appends superseded deltas above the
+            // repair (#9703). A legacy REPAIR carries no base cursor and is not
+            // a proven boundary, so it stays excluded here as everywhere else.
+            const isStateReplacement =
+              op.opType === 'SYNC_IMPORT' ||
+              op.opType === 'BACKUP_IMPORT' ||
+              (op.opType === 'REPAIR' && !isLegacyRepairUpload);
             if (
               result?.accepted &&
               result.serverSeq !== undefined &&
-              (op.opType === 'SYNC_IMPORT' || op.opType === 'BACKUP_IMPORT')
+              isStateReplacement
             ) {
               latestAcceptedStateReplacementSeq = Math.max(
                 latestAcceptedStateReplacementSeq ?? 0,

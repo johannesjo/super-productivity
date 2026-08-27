@@ -153,9 +153,12 @@ from PostgreSQL RepeatableRead snapshot isolation alone.
   handler rejects an obviously stale base before quota cleanup, and the upload
   transaction repeats the check under `SELECT ... FOR UPDATE` before insertion
 - Regular uploads carrying `lastKnownServerSeq` use the same per-user row lock
-  to reject a batch behind the latest `SYNC_IMPORT` or `BACKUP_IMPORT` before
-  insertion. The durable replacement marker is reconciled lazily from retained
-  operations for rows created before the marker existed.
+  to reject a batch behind the latest `SYNC_IMPORT`, `BACKUP_IMPORT` or causal
+  `REPAIR` before insertion. The durable replacement marker is reconciled lazily
+  from retained operations for rows created before the marker existed, and is
+  advanced by every accepted state replacement — the lazy resolve runs only
+  while the marker is unset, so the accepted-op write is the sole way the fence
+  moves on an account whose marker is already resolved.
 - Markerless legacy repairs are compatibility records, not causal boundaries:
   they cannot drive download fast-forward, snapshot trust, history pruning, or
   server-generated restore points; snapshot replay across one fails closed
