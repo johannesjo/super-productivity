@@ -14,10 +14,16 @@ describe('sync-file-prefix app shim', () => {
       InvalidFilePrefixError,
     );
 
-    // JSON.stringify, not join(): the structured meta arg stringifies to
-    // `[object Object]` under join, so a payload leaked into it would pass
-    // unseen — and the meta is exactly where the diagnostic fields live.
-    const logText = JSON.stringify((OpLog.log as jasmine.Spy).calls.allArgs());
+    // Stringify each arg individually: a bare join() renders the structured
+    // meta as `[object Object]` (hiding a leak into the very object the
+    // diagnostic fields live in), while a single JSON.stringify over the whole
+    // array escapes the quotes in `rawPayload` so that assertion could never
+    // fail. Per-arg keeps string args verbatim and still sees inside the meta.
+    const logText = (OpLog.log as jasmine.Spy).calls
+      .allArgs()
+      .flat()
+      .map((arg) => (typeof arg === 'string' ? arg : JSON.stringify(arg)))
+      .join('\n');
     expect(logText).toContain('inputLength');
     expect(logText).not.toContain('secret task');
     expect(logText).not.toContain(rawPayload);

@@ -946,8 +946,15 @@ export class SyncWrapperService {
         // user's situation is identical to JsonParseError's: remote unreadable,
         // local intact. Without it, that error fell through to the generic
         // handler and surfaced the raw internal message (verbatim the title of
-        // #9627) with no way forward. See PR #9682 for why .bak recovery is
-        // deliberately NOT extended to it.
+        // #9627) with no way forward.
+        //
+        // #9682 initially excluded this branch, arguing that if a server-side
+        // transformation strips the header, force upload just recreates the
+        // broken state. Reversed because the #9627 reporter was in fact
+        // unblocked by force upload. That PR — which would have extended .bak
+        // auto-recovery here — is parked, not declined: a head-strip is not a
+        // shape a torn write produces, so .bak recovery is a poor fit, but it
+        // has explicit merge criteria. Revisit this branch alongside it.
         error instanceof JsonParseError ||
         error instanceof InvalidFilePrefixError
       ) {

@@ -147,6 +147,12 @@ describe('createSyncFilePrefixHelpers', () => {
       });
     });
 
+    it('rejects non-canonical base64 with padding in the middle', () => {
+      // Our writers use btoa, which pads only at the end. A body with `=`
+      // mid-string is something else (`status=failedauth`), not our payload.
+      expect(detailsFor('AAAA=BBBB=CCCC=DD').headShape).toBe('other');
+    });
+
     it('does not mistake a short plaintext error body for our ciphertext', () => {
       // Bare alphabetic bodies are valid base64 by alphabet alone. Calling them
       // `base64` would point the reader at the STORED file when the truth is a

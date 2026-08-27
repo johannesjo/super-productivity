@@ -49,8 +49,14 @@ export interface SyncFilePrefixInvalidPrefixDetails {
    * What we got instead, as a coarse shape of the body's first bytes.
    *
    * `markup` points at a bad RESPONSE (WebDAV multistatus, a proxy or
-   * captive-portal page). `base64` points at our own ciphertext or gzip with
-   * its header lost, i.e. a problem with the STORED file.
+   * captive-portal page).
+   *
+   * `base64` is CONSISTENT WITH our own ciphertext or gzip having lost its
+   * header, i.e. a problem with the STORED file — but it is not proof. Any
+   * alphanumeric body of at least `MIN_BASE64_HEAD_LENGTH` reads the same
+   * (`ServiceUnavailable`, an opaque token, a bare hex digest). Weigh it
+   * against `inputLength` and the provider before concluding the stored file
+   * is at fault; a response can produce this shape too.
    *
    * `json` is AMBIGUOUS and must not be read as "bad response" on its own:
    * compression and encryption are both opt-in and off by default, and with
@@ -89,10 +95,13 @@ export class SyncFilePrefixVersionError extends Error {
 const DEFAULT_END_SEPARATOR = '__';
 const MODEL_VERSION_PATTERN = /^\d+(?:\.\d+)?$/;
 /**
- * Enough head to classify, and bounded so classification cost does not scale
- * with a multi-MB body. It is NOT what keeps the sample out of the log — that
- * holds because `head` never leaves this function; storing it would leak user
- * data at any length.
+ * Enough head to classify, and bounded so the SHAPE test does not scan a
+ * multi-MB body (the `prefixAt` lookup beside it deliberately does — measured
+ * at ~53ms on a 100MB body, on a path that is already throwing).
+ *
+ * It is NOT what keeps the sample out of the log — that holds because the
+ * slice never leaves this function; storing it would leak user data at any
+ * length.
  */
 const HEAD_SAMPLE_LENGTH = 64;
 /** Canonical base64: padding only at the end, matching what our writers emit. */
@@ -100,8 +109,10 @@ const BASE64_ONLY = /^[A-Za-z0-9+/]+={0,2}$/;
 /**
  * Below this, ordinary words are indistinguishable from base64 — a bare
  * `Unauthorized` or `nginx` body would otherwise read as our own ciphertext,
- * i.e. the exact wrong answer to "response or stored file?". Real heads are a
- * full `HEAD_SAMPLE_LENGTH`, so nothing genuine is lost.
+ * i.e. the exact wrong answer to "response or stored file?". Our real bodies
+ * are far longer (measured: 76 chars gzip-only, 108 encrypted), so nothing
+ * genuine is lost; a body short enough to fall under this is self-evidently a
+ * stub from the `inputLength` recorded beside it.
  */
 const MIN_BASE64_HEAD_LENGTH = 16;
 
