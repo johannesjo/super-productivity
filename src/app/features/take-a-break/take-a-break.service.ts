@@ -98,23 +98,8 @@ export class TakeABreakService {
       map((tick) => tick.duration),
       filter(() => !!this._taskService.currentTaskId()),
     ),
-    this._actions$.pipe(ofType(idleDialogResult)).pipe(
-      switchMap(({ trackItems, isResetBreakTimer }) => {
-        // a requested reset is a reset event, not a measurement — it goes
-        // through _triggerReset$ so it also tears the reminder down
-        if (isResetBreakTimer) {
-          return EMPTY;
-        }
-        // without a reset, time tracked to tasks still counts as work; break
-        // items don't (but they don't reset the timer either).
-        // NOTE: only SPLIT mode sends numbers here — BREAK/TASK send the
-        // 'IDLE_TIME' placeholder, so this contributes 0 for them. See #9352.
-        const noBreakTime = trackItems
-          .filter((t) => t.type === 'TASK')
-          .reduce((acc, t) => acc + (typeof t.time === 'number' ? t.time : 0), 0);
-        return noBreakTime > 0 ? of(noBreakTime) : EMPTY;
-      }),
-    ),
+    // NOTE: idle-dialog results deliberately don't feed the counter (see #9352);
+    // the dialog's reset checkbox goes through _triggerIdleDialogReset$ instead
     this.otherNoBreakTIme$,
   ).pipe(
     // Additions only. The seedless scan below treats any value <= 0 as a reset,
