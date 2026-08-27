@@ -31,6 +31,30 @@ import { openRecurDialog, saveRecurDialog } from '../../utils/recurring-task-hel
  * around midnight.
  */
 
+/**
+ * Open a task's detail panel (mirrors TaskPage.openTaskDetail, which the
+ * SuperSync harness does not expose — SimulatedE2EClient carries only
+ * workView and sync). The panel is opened from the hover toolbar, not by
+ * clicking the row.
+ */
+const openTaskDetail = async (
+  page: SimulatedE2EClient['page'],
+  taskName: string,
+): Promise<void> => {
+  // `:not(.hasNoSubTasks)` pins this to the parent — its subtask rows are
+  // nested inside it and match :has-text() too.
+  const task = page.locator(`task:not(.hasNoSubTasks):has-text("${taskName}")`).first();
+  await task.waitFor({ state: 'visible', timeout: 10000 });
+  // Hover the parent's OWN row: subtasks render inside the parent element, so
+  // hovering the element centre lands on a subtask and opens ITS detail panel —
+  // which has no repeat button (canRepeat requires !task.parentId).
+  await task.locator('.first-line').first().hover();
+  const showDetailBtn = page.getByRole('button', { name: 'Show/hide task panel' });
+  await showDetailBtn.waitFor({ state: 'visible', timeout: 5000 });
+  await showDetailBtn.click();
+  await page.waitForTimeout(300);
+};
+
 /** Add a subtask via the 'a' keyboard shortcut (mirrors supersync-archive-subtasks). */
 const addSubtask = async (
   page: SimulatedE2EClient['page'],
@@ -55,14 +79,19 @@ const addSubtask = async (
 };
 
 /**
- * Count rendered SUBTASK rows with the given title.
- * `.hasNoSubTasks` excludes the parent, whose DOM subtree also contains the text.
+ * Locate the CURRENT (undone) instance of the recurring parent.
+ * Scoping subtask counts to it is load-bearing: the previous day's instance is
+ * still in state after the day change, so a global count sees both instances.
  */
-const countSubtaskRows = async (
+const currentInstance = (
   page: SimulatedE2EClient['page'],
-  title: string,
-): Promise<number> =>
-  page.locator(`task.hasNoSubTasks:not(.ng-animating):has-text("${title}")`).count();
+  parentName: string,
+): ReturnType<SimulatedE2EClient['page']['locator']> =>
+  page
+    .locator(
+      `task:not(.hasNoSubTasks):not(.isDone):not(.ng-animating):has-text("${parentName}")`,
+    )
+    .first();
 
 /**
  * Move a client past midnight and wait for the fresh instance to appear.
@@ -73,13 +102,22 @@ const advancePastMidnight = async (
   client: SimulatedE2EClient,
   parentName: string,
 ): Promise<void> => {
+  // Finish the current instance first, so the one created after midnight is
+  // unambiguous and the wait below cannot match the old one.
+  const prev = currentInstance(client.page, parentName);
+  await prev.locator('.first-line').first().focus();
+  await prev.press('d');
+  const confirmBtn = client.page.locator('dialog-confirm button[mat-flat-button]');
+  if (await confirmBtn.isVisible().catch(() => false)) {
+    await confirmBtn.click();
+  }
+  await expect(prev).toHaveClass(/isDone/, { timeout: 10000 });
+
   await client.page.clock.setSystemTime(new Date('2026-06-16T00:05:00'));
   await client.page.evaluate(() => window.dispatchEvent(new Event('focus')));
-  await expect(
-    client.page
-      .locator(`task:not(.hasNoSubTasks):not(.isDone):has-text("${parentName}")`)
-      .first(),
-  ).toBeVisible({ timeout: 60000 });
+  await expect(currentInstance(client.page, parentName)).toBeVisible({
+    timeout: 60000,
+  });
 };
 
 test.describe('@supersync Recurring subtask duplication (#9728)', () => {
@@ -120,7 +158,7 @@ test.describe('@supersync Recurring subtask duplication (#9728)', () => {
 
       // 2. ...and makes it a daily repeat. shouldInheritSubtasks defaults to true
       //    when the task already has subtasks (dialog-edit-task-repeat-cfg.component.ts).
-      await clientA.page.locator(`task:has-text("${parentName}")`).first().click();
+      await openTaskDetail(clientA.page, parentName);
       await openRecurDialog(clientA.page);
       await saveRecurDialog(clientA.page);
       await clientA.page.keyboard.press('Escape');
@@ -146,14 +184,19 @@ test.describe('@supersync Recurring subtask duplication (#9728)', () => {
         ['A', clientA],
         ['B', clientB],
       ] as const) {
-        expect(
-          await countSubtaskRows(client.page, sub1),
-          `client ${name}: "${sub1}" should render once`,
-        ).toBe(1);
-        expect(
-          await countSubtaskRows(client.page, sub2),
-          `client ${name}: "${sub2}" should render once`,
-        ).toBe(1);
+        const instance = currentInstance(client.page, parentName);
+        await expect(
+          instance.locator('.sub-tasks task'),
+          `client ${name}: the new instance should carry exactly 2 subtasks`,
+        ).toHaveCount(2, { timeout: 15000 });
+        await expect(
+          instance.locator(`.sub-tasks task:has-text("${sub1}")`),
+          `client ${name}: "${sub1}" should appear once`,
+        ).toHaveCount(1);
+        await expect(
+          instance.locator(`.sub-tasks task:has-text("${sub2}")`),
+          `client ${name}: "${sub2}" should appear once`,
+        ).toHaveCount(1);
       }
     } finally {
       if (clientA) await closeClient(clientA);
