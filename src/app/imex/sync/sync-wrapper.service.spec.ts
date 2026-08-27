@@ -38,6 +38,7 @@ import {
   LocalDataConflictError,
   LockAcquisitionTimeoutError,
   MissingRefreshTokenAPIError,
+  InvalidFilePrefixError,
   JsonParseError,
   SyncDataCorruptedError,
   UploadRevToMatchMismatchAPIError,
@@ -1894,6 +1895,37 @@ describe('SyncWrapperService', () => {
     it('should handle JsonParseError with force-overwrite action and corrupted-data message (#5574, #4616)', async () => {
       mockSyncService.downloadRemoteOps.and.returnValue(
         Promise.reject(new JsonParseError(new SyntaxError('Unexpected end of JSON'), '')),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.F.SYNC.S.ERROR_REMOTE_FILE_CORRUPTED,
+          type: 'ERROR',
+          actionFn: jasmine.any(Function),
+          actionStr: jasmine.any(String),
+        }),
+      );
+    });
+
+    it('should handle InvalidFilePrefixError with force-overwrite action and corrupted-data message (#9627)', async () => {
+      // The remote file's head is not `pf_...__`, so it is rejected before the
+      // decrypt/decompress/JSON stages its siblings cover. Same user-facing
+      // situation as JsonParseError and EmptyRemoteBodySPError — remote is
+      // unreadable, local data is intact — so it gets the same actionable snack
+      // instead of falling through to the generic handler, which surfaced the
+      // raw internal message that became this issue's title.
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(
+          new InvalidFilePrefixError({
+            expectedPrefix: 'pf_',
+            endSeparator: '__',
+            inputLength: 294912,
+          }),
+        ),
       );
 
       const result = await service.sync();
