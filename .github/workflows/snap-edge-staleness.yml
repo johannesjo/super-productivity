@@ -4,9 +4,10 @@ name: Snap Edge Staleness
 # binary. The automated review that actually moves edge finishes hours later,
 # out of band (rev 4501: uploaded 2026-08-26T18:29Z, released to edge
 # 2026-08-27T09:58Z), so that step cannot be the check that edge advanced.
-# This is. It queries the public, unauthenticated channel map -- no credentials,
-# nothing that can hang -- and goes red when master has work that edge has not
-# picked up for too long.
+# This is. It reads the public, unauthenticated channel map and the commits
+# API -- no clone, no credentials beyond the default token, nothing that can
+# hang -- and goes red when master has work edge has not picked up for too
+# long.
 on:
   schedule:
     - cron: '0 6 * * *' # 6 AM UTC daily
@@ -19,15 +20,11 @@ jobs:
   check-edge:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
-        with:
-          # Deep enough to find the oldest commit edge has not picked up; a
-          # freeze older than this still reads as stale, so it fails safe.
-          fetch-depth: 200
-
       - name: Compare snap edge against master
         timeout-minutes: 5
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPOSITORY: ${{ github.repository }}
         run: |
           # -f so an API error or a 502 HTML body fails here as "could not
           # check" rather than reaching python and being reported as a stuck
@@ -37,7 +34,7 @@ jobs:
             'https://api.snapcraft.io/v2/snaps/info/superproductivity' \
             -o "$RUNNER_TEMP/snap-info.json"
           python3 - "$RUNNER_TEMP/snap-info.json" <<'PY'
-          import datetime, json, subprocess, sys
+          import datetime, json, os, subprocess, sys
 
           # Absorbs the ~15.5h store review plus a slow weekend, while staying
           # far under the 13-day freeze (2026-08-14 -> 2026-08-27) this exists
@@ -81,19 +78,41 @@ jobs:
           # dates are a git clock, so a commit that predates the current edge
           # release is invisible until the next commit lands. That bounds
           # detection at MAX_STALE past the next push, which is what a backstop
-          # for a total freeze needs.
-          pending = subprocess.run(
-              ["git", "log", "--since", released_at.isoformat(), "--format=%cI", "--reverse"],
+          # for a total freeze needs. The API is used rather than a clone so
+          # this job stays two HTTP calls.
+          # `since` must be whole-second Zulu: the API silently IGNORES a value
+          # carrying microseconds or a +00:00 offset and returns the full recent
+          # history instead, which would read as a huge backlog and alarm daily.
+          # released-at always has microseconds, so normalise, then re-filter
+          # below so correctness does not rest on the API honouring it at all.
+          since = released_at.astimezone(datetime.timezone.utc).replace(microsecond=0)
+          # --paginate with --jq emits one value per line across all pages.
+          # (--slurp cannot be combined with --jq.)
+          dates = subprocess.run(
+              [
+                  "gh", "api", "--paginate",
+                  f"repos/{os.environ['GH_REPOSITORY']}/commits"
+                  f"?sha=master&since={since.strftime('%Y-%m-%dT%H:%M:%SZ')}&per_page=100",
+                  "--jq", ".[].commit.committer.date",
+              ],
               capture_output=True,
               text=True,
               check=True,
           ).stdout.split()
+          pending = sorted(
+              d
+              for d in (
+                  datetime.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                  for raw in dates
+              )
+              if d > released_at
+          )
 
           if not pending:
               print(f"{state}; no newer commits on master -- nothing pending.")
               sys.exit(0)
 
-          waiting = now - datetime.datetime.fromisoformat(pending[0])
+          waiting = now - pending[0]
           print(f"{state}; {len(pending)} newer commit(s), oldest waiting {waiting}.")
 
           if waiting > MAX_STALE:
