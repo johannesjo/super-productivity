@@ -82,6 +82,66 @@ describe('createSyncFilePrefixHelpers', () => {
       expectedPrefix: 'pf_',
       endSeparator: '__',
       inputLength: 'bad secret payload'.length,
+      prefixAt: -1,
+      headShape: 'other',
+    });
+  });
+
+  // #9627: the details said how long the body was and what we expected, but
+  // nothing about what we actually got — so a single field report cost five
+  // round-trips and still did not settle whether the failure was a bad
+  // RESPONSE or a bad STORED FILE. These pin the classification, which is the
+  // whole point of the diagnostic.
+  describe('head-shape diagnostics (#9627)', () => {
+    const detailsFor = (dataStr: string): Record<string, unknown> => {
+      let received: Record<string, unknown> = {};
+      const helpers = createSyncFilePrefixHelpers({
+        prefix: 'pf_',
+        createInvalidPrefixError: (details) => {
+          received = details as unknown as Record<string, unknown>;
+          return new Error('invalid');
+        },
+      });
+      expect(() => helpers.extractSyncFileStateFromPrefix(dataStr)).toThrow();
+      return received;
+    };
+
+    it('reads our own ciphertext with a lost header as base64 + no prefix', () => {
+      // The exact #9627 shape: encrypted payload intact, `pf_...__` head gone.
+      expect(detailsFor('41J7VJwUqK/0k436aSIRL5utdxhyV6WhXWSguANW')).toMatchObject({
+        headShape: 'base64',
+        prefixAt: -1,
+      });
+    });
+
+    it('reads a proxy page / WebDAV multistatus as markup', () => {
+      expect(detailsFor('<?xml version="1.0"?><d:multistatus/>')).toMatchObject({
+        headShape: 'markup',
+      });
+      expect(detailsFor('<!DOCTYPE html><html>login</html>')).toMatchObject({
+        headShape: 'markup',
+      });
+    });
+
+    it('reads an error envelope as json', () => {
+      expect(detailsFor('{"error":"unauthorized"}')).toMatchObject({
+        headShape: 'json',
+      });
+      expect(detailsFor('[1,2,3]')).toMatchObject({ headShape: 'json' });
+    });
+
+    it('reports the offset when the header is DAMAGED rather than missing', () => {
+      // `pf_` still there, separator gone. Different cause from a head-strip,
+      // and prefixAt is the only thing that tells them apart.
+      expect(detailsFor('pf_E2_payload')).toMatchObject({ prefixAt: 0 });
+    });
+
+    it('samples only the head, so a long body cannot bloat the diagnostic', () => {
+      const details = detailsFor('<html>' + 'x'.repeat(5000));
+      expect(details['headShape']).toBe('markup');
+      expect(details['inputLength']).toBe(5006);
+      // No field carries the payload itself.
+      expect(JSON.stringify(details)).not.toContain('xxxx');
     });
   });
 

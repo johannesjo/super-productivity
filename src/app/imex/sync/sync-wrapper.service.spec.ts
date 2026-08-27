@@ -1924,6 +1924,8 @@ describe('SyncWrapperService', () => {
             expectedPrefix: 'pf_',
             endSeparator: '__',
             inputLength: 294912,
+            prefixAt: -1,
+            headShape: 'base64',
           }),
         ),
       );

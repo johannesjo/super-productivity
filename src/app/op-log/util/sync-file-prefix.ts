@@ -20,11 +20,15 @@ const syncFilePrefixHelpers = createSyncFilePrefixHelpers({
     OpLog.log(
       `InvalidFilePrefixError (inputLength=${details.inputLength}, ` +
         `expectedPrefix="${details.expectedPrefix}", ` +
-        `endSeparator="${details.endSeparator}")`,
+        `endSeparator="${details.endSeparator}", ` +
+        `prefixAt=${details.prefixAt}, ` +
+        `headShape="${details.headShape}")`,
       {
         expectedPrefix: details.expectedPrefix,
         endSeparator: details.endSeparator,
         inputLength: details.inputLength,
+        prefixAt: details.prefixAt,
+        headShape: details.headShape,
       },
     );
     return new InvalidFilePrefixError(details);

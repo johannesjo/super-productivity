@@ -477,6 +477,8 @@ export class InvalidFilePrefixError extends AdditionalLogErrorBase {
       expectedPrefix: details.expectedPrefix,
       endSeparator: details.endSeparator,
       inputLength: details.inputLength,
+      prefixAt: details.prefixAt,
+      headShape: details.headShape,
     });
   }
 }

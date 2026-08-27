@@ -22,10 +22,32 @@ export interface SyncFilePrefixConfig {
   createInvalidPrefixError?: (details: SyncFilePrefixInvalidPrefixDetails) => Error;
 }
 
+/**
+ * Coarse character class of a rejected file's head. Deliberately an enum of
+ * shapes, never the bytes themselves — the head of a sync file is user data.
+ */
+export type SyncFileHeadShape = 'base64' | 'markup' | 'json' | 'other';
+
 export interface SyncFilePrefixInvalidPrefixDetails {
   expectedPrefix: string;
   endSeparator: string;
   inputLength: number;
+  /**
+   * Offset of `prefix` within the sampled head, or -1 when absent entirely.
+   * Separates "header damaged" (>= 0) from "header gone" (-1) — different
+   * causes, and the log could not previously tell them apart (#9627).
+   */
+  prefixAt: number;
+  /**
+   * What we got instead. `markup`/`json` point at a bad RESPONSE (proxy page,
+   * WebDAV multistatus, error envelope); `base64` points at our own ciphertext
+   * with its header lost, i.e. a problem with the STORED file. That is the
+   * distinction that decides whether a decode failure is a transport issue.
+   *
+   * It does NOT separate a head-strip from a larger fragment — both read as
+   * `base64` — since nothing local knows the file's expected size.
+   */
+  headShape: SyncFileHeadShape;
 }
 
 export class SyncFilePrefixError extends Error {
@@ -51,6 +73,16 @@ export class SyncFilePrefixVersionError extends Error {
 
 const DEFAULT_END_SEPARATOR = '__';
 const MODEL_VERSION_PATTERN = /^\d+(?:\.\d+)?$/;
+/** Enough head to classify; short enough that no sample is ever retained. */
+const HEAD_SAMPLE_LENGTH = 64;
+const BASE64_ONLY = /^[A-Za-z0-9+/=]+$/;
+
+const classifyHead = (head: string): SyncFileHeadShape => {
+  const trimmed = head.trimStart();
+  if (trimmed.startsWith('<')) return 'markup';
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
+  return BASE64_ONLY.test(head) ? 'base64' : 'other';
+};
 
 const escapeRegExp = (value: string): string =>
   value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -96,10 +128,13 @@ export const createSyncFilePrefixHelpers = ({
     extractSyncFileStateFromPrefix: (dataStr: string): SyncFilePrefixParamsOutput => {
       const match = dataStr.match(prefixRegex);
       if (!match) {
+        const head = dataStr.slice(0, HEAD_SAMPLE_LENGTH);
         const details: SyncFilePrefixInvalidPrefixDetails = {
           expectedPrefix: prefix,
           endSeparator,
           inputLength: dataStr.length,
+          prefixAt: head.indexOf(prefix),
+          headShape: classifyHead(head),
         };
         throw createInvalidPrefixError?.(details) ?? new SyncFilePrefixError(details);
       }
