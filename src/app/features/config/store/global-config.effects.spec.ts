@@ -243,7 +243,7 @@ describe('GlobalConfigEffects', () => {
         }),
       );
 
-      expect(dateServiceSpy.setStartOfNextDayDiff).toHaveBeenCalledWith('04:00', 4);
+      expect(dateServiceSpy.setStartOfNextDayDiff).toHaveBeenCalledWith('00:00', 0);
     });
   });
 
@@ -314,7 +314,7 @@ describe('GlobalConfigEffects', () => {
         }),
       );
 
-      expect(dateServiceSpy.setStartOfNextDayDiff).toHaveBeenCalledWith('04:00', 4);
+      expect(dateServiceSpy.setStartOfNextDayDiff).toHaveBeenCalledWith('00:00', 0);
     });
   });
 
