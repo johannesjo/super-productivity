@@ -105,13 +105,23 @@ const advancePastMidnight = async (
   // Finish the current instance first, so the one created after midnight is
   // unambiguous and the wait below cannot match the old one.
   const prev = currentInstance(client.page, parentName);
+  const prevId = await prev.getAttribute('data-task-id');
   await prev.locator('.first-line').first().focus();
   await prev.press('d');
   const confirmBtn = client.page.locator('dialog-confirm button[mat-flat-button]');
   if (await confirmBtn.isVisible().catch(() => false)) {
     await confirmBtn.click();
   }
-  await expect(prev).toHaveClass(/isDone/, { timeout: 10000 });
+  // Assert via the id, not `prev`: that locator excludes .isDone, so it stops
+  // matching the instant the task is done and could never satisfy the check.
+  // Poll for a done copy rather than asserting on the single element: while the
+  // list animates, the same task id is rendered twice — once animating out of
+  // the undone list, once already .isDone in the done list.
+  await expect
+    .poll(() => client.page.locator(`task[data-task-id="${prevId}"].isDone`).count(), {
+      timeout: 10000,
+    })
+    .toBeGreaterThan(0);
 
   await client.page.clock.setSystemTime(new Date('2026-06-16T00:05:00'));
   await client.page.evaluate(() => window.dispatchEvent(new Event('focus')));
@@ -140,9 +150,13 @@ test.describe('@supersync Recurring subtask duplication (#9728)', () => {
       clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
       clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
 
-      // Both devices start on the same day, shortly before midnight.
+      // Both devices start mid-afternoon on day 15. Deliberately NOT close to
+      // midnight: sync setup plus encryption takes minutes of real time, and
+      // setSystemTime lets the clock keep ticking, so a 23:55 start crosses
+      // midnight mid-setup and re-triggers the day-change machinery on top of
+      // the encryption dialog. advancePastMidnight() jumps to day 16 later.
       for (const client of [clientA, clientB]) {
-        await client.page.clock.setSystemTime(new Date('2026-06-15T23:55:00'));
+        await client.page.clock.setSystemTime(new Date('2026-06-15T15:00:00'));
         await client.page.reload();
         await client.workView.waitForTaskList();
       }
