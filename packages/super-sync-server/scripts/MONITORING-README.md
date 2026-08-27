@@ -205,7 +205,7 @@ npm run dry-run-old-ops-sweep     # read-only; predicts what would go
 ```
 
 Run it **off-peak**: it is two full aggregate passes over `operations` and will evict the
-page cache the live site depends on. It also *over*-predicts slightly — it mirrors the
+page cache the live site depends on. It also _over_-predicts slightly — it mirrors the
 sweep's skip reasons in SQL, but it cannot model a user the sweep skips on a database
 error, which is exactly the deep-prefix cohort you are digging out of. The
 `N user(s) threw before their drain` count below is that discrepancy.
@@ -341,7 +341,7 @@ address and the relay host — redact it before pasting into an issue.
 | 4     | `/health` endpoint                                    | HTTP != 200                                                                                                                                                                                                            |
 | 5     | Disk usage                                            | > 85%                                                                                                                                                                                                                  |
 | 6     | Long-running queries                                  | any query `active` > `MAX_QUERY_SECONDS` (default 120)                                                                                                                                                                 |
-| 7     | Pool busy                                             | connections concurrently busy ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit`                                                                                                                                    |
+| 7     | Pool busy                                             | connections concurrently busy ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit` in **two consecutive runs**                                                                                                        |
 | 8     | Invalid operations indexes                            | a non-building index is not valid/ready/live                                                                                                                                                                           |
 
 Check 2 runs outside the Docker gate on purpose: a host that just OOM-killed something
@@ -368,6 +368,17 @@ deliberately a **ratio** against `connection_limit`, not a fixed number: measure
 of magnitude below the pathological-query ceiling (pool size ÷ worst-case query
 duration), so the absolute margin is thin and a fixed threshold would not survive
 a pool resize.
+
+Check 7 is also the only one that pages on **persistence**: the crossing must be
+seen in two consecutive runs (~10 min). It samples an instantaneous gauge, and a
+single crossing is routinely a stampede that self-heals within one interval —
+the morning of 2026-08-27 produced three fail+recovery pairs that way
+(hourly-aligned client sync at 04:00Z/06:00Z, the reconnect herd after a deploy
+restart at 07:00Z). Sustained exhaustion still pages, one interval later. The
+pending marker (`.health-alert/pool-busy-pending`) ages out after three
+intervals, so a gap of three or more intervals cannot weld two unrelated spikes
+into a "sustained" condition (a shorter blind gap — a probe failure between two
+spikes — still can, costing one bounded false pair).
 
 Check 8 matters more than it looks. An interrupted `CREATE INDEX CONCURRENTLY`
 leaves an index that is **unusable for reads but still maintained on every

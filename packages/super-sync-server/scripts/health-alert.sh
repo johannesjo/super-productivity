@@ -79,6 +79,10 @@ ALERT_STATE_FILE="$ALERT_STATE_DIR/state"
 CLEAN_RUN_SEEN_FILE="$ALERT_STATE_DIR/clean-run-seen"
 MAIL_FAILED_FILE="$ALERT_STATE_DIR/mail-failed"
 OOM_BLIND_FILE="$ALERT_STATE_DIR/oom-check-blind"
+# The failure-side mirror of CLEAN_RUN_SEEN_FILE, for the one check that reads an
+# instantaneous gauge: pool-busy pages only when the pressure survives to the next run.
+# See the check itself for why.
+POOL_PENDING_FILE="$ALERT_STATE_DIR/pool-busy-pending"
 MAIL_ERR_MAX_BYTES=4096
 
 # Record why mail could not be delivered. Line 1 is always the timestamp, so readers that
@@ -423,7 +427,24 @@ NODE
       if [[ "$POOL_LIMIT" =~ ^[1-9][0-9]*$ ]]; then
         PCT=$(( POOL_IN_USE * 100 / POOL_LIMIT ))
         if [ "$PCT" -ge "$POOL_WARN_PCT" ]; then
-          PROBLEMS="${PROBLEMS}Connection pool ${PCT}% busy (${POOL_IN_USE} of ${POOL_LIMIT} running a query or in a transaction)\n"
+          # Page only when the pressure survives to the NEXT run. Every other check here
+          # reports something already durable (a stopped container, a query past 120s, a
+          # full disk); this one samples a gauge, and a single crossing is routinely a
+          # stampede that self-heals within one interval — the morning of 2026-08-27 was
+          # three fail+recovery pairs for exactly that (hourly-aligned client sync at
+          # 04:00Z/06:00Z, the reconnect herd after a deploy restart at 07:00Z). Sustained
+          # exhaustion — the 2026-07-20 incident — still pages, one interval later. The
+          # marker only counts while fresh (three intervals), so a gap of three or more
+          # intervals cannot weld two unrelated spikes into a "sustained" condition; a
+          # SHORTER blind gap (probe failure between two spikes) still can, at the cost
+          # of one bounded false pair — accepted. A pool-healthy run clears the marker,
+          # mirroring CLEAN_RUN_SEEN_FILE on the recovery side.
+          if [ -n "$(find "$POOL_PENDING_FILE" -mmin -15 2>/dev/null)" ]; then
+            PROBLEMS="${PROBLEMS}Connection pool ${PCT}% busy (${POOL_IN_USE} of ${POOL_LIMIT} running a query or in a transaction)\n"
+          fi
+          touch "$POOL_PENDING_FILE"
+        else
+          rm -f "$POOL_PENDING_FILE"
         fi
       fi
 

@@ -536,6 +536,9 @@ describe('health-alert.sh service and database monitoring', () => {
   it.each(['', 'not-a-number', '0'])(
     'alerts when the running DATABASE_URL connection_limit is %j',
     (poolLimit) => {
+      // Two runs: an invalid limit skips the pool check entirely, so even a sustained
+      // busy count must never surface a pool line -- only the config problem.
+      run({ FAKE_POOL_IN_USE: '120', FAKE_POOL_LIMIT: poolLimit });
       const result = run({ FAKE_POOL_IN_USE: '120', FAKE_POOL_LIMIT: poolLimit });
 
       expect(result.mailLog).toContain('DATABASE_URL has no valid connection_limit');
@@ -545,12 +548,14 @@ describe('health-alert.sh service and database monitoring', () => {
     },
   );
 
-  it('alerts when concurrently busy connections reach the configured percentage', () => {
-    const result = run({
+  it('alerts when concurrently busy connections stay at the configured percentage', () => {
+    const busy = {
       FAKE_POOL_IN_USE: '45',
       FAKE_POOL_LIMIT: '60',
       POOL_WARN_PCT: '75',
-    });
+    };
+    run(busy);
+    const result = run(busy);
 
     // "busy", not "saturated": the probe counts only active / in-transaction sessions,
     // never the idle ones Prisma keeps pooled, so this is a concurrency number and an
@@ -871,6 +876,68 @@ describe('health-alert.sh alert damping', () => {
   });
 });
 
+describe('health-alert.sh pool-busy persistence gate', () => {
+  // Pool-busy is the one check that reads an instantaneous gauge, so a single crossing
+  // is routinely a stampede that self-heals within one interval. The morning of
+  // 2026-08-27 was three fail+recovery pairs for exactly that: hourly-aligned client
+  // sync at 04:00Z/06:00Z and the reconnect herd after a deploy restart at 07:00Z,
+  // each gone by the next run. It pages only when the pressure survives to the next run.
+  it('stays quiet on a pool spike seen in a single run, recovery included', () => {
+    const spike = run({ FAKE_POOL_IN_USE: '45' });
+    expect(spike.mailLog).toBe('');
+
+    // Nothing was mailed, so the following clean runs owe no recovery either.
+    run();
+    const clean = run();
+    expect(clean.mailLog).toBe('');
+  });
+
+  it('pages a pool condition that survives to the next run, with current numbers', () => {
+    run({ FAKE_POOL_IN_USE: '45' });
+    const second = run({ FAKE_POOL_IN_USE: '60' });
+
+    expect(second.mailLog).toContain(
+      'Connection pool 100% busy (60 of 60 running a query or in a transaction)',
+    );
+  });
+
+  it('resets the pending marker on a pool-healthy run', () => {
+    run({ FAKE_POOL_IN_USE: '45' });
+    run();
+    const again = run({ FAKE_POOL_IN_USE: '45' });
+
+    expect(again.mailLog).toBe('');
+  });
+
+  it('still confirms across a realistically late second run', () => {
+    // The FLOOR of the freshness window, which the back-to-back runs everywhere else in
+    // this file cannot exercise: at the real 5-minute cadence the marker is ~5-7 minutes
+    // old at the confirming run (cron jitter included). A window tighter than that would
+    // silently un-page pool-busy forever — mutation-tested: with the window at
+    // `-mmin -1`, every other test in this file still passes.
+    run({ FAKE_POOL_IN_USE: '45' });
+    const old = Date.now() / 1000 - 7 * 60;
+    utimesSync(stateFile('pool-busy-pending'), old, old);
+    const second = run({ FAKE_POOL_IN_USE: '45' });
+
+    expect(second.mailLog).toContain('Connection pool 75% busy (45 of 60');
+  });
+
+  it('does not weld two spikes separated by a monitoring gap into one condition', () => {
+    // A crashed or lock-skipped stretch of runs must not make two unrelated spikes 20
+    // minutes apart look consecutive; the marker ages out after three intervals.
+    run({ FAKE_POOL_IN_USE: '45' });
+    const old = Date.now() / 1000 - 20 * 60;
+    utimesSync(stateFile('pool-busy-pending'), old, old);
+    const later = run({ FAKE_POOL_IN_USE: '45' });
+    expect(later.mailLog).toBe('');
+
+    // ...but the stale spike re-arms the marker, so the NEXT run still confirms.
+    const confirmed = run({ FAKE_POOL_IN_USE: '45' });
+    expect(confirmed.mailLog).toContain('Connection pool 75% busy (45 of 60');
+  });
+});
+
 describe('health-alert.sh state handling', () => {
   it('deduplicates volatile long-query counts and durations', () => {
     run(FAILING_PROBE);
@@ -882,12 +949,14 @@ describe('health-alert.sh state handling', () => {
 
   it('deduplicates volatile busy-connection counts', () => {
     // Pins the HASH_INPUT sed rule to the message wording: drift is silent, and its only
-    // symptom is the alert re-mailing every five minutes.
+    // symptom is the alert re-mailing every five minutes. First run only arms the
+    // persistence gate; the second mails; the third, with a different count, must not.
     run({ FAKE_POOL_IN_USE: '45' });
-    const second = run({ FAKE_POOL_IN_USE: '52' });
+    run({ FAKE_POOL_IN_USE: '45' });
+    const third = run({ FAKE_POOL_IN_USE: '52' });
 
-    expect(second.mailLog.match(/SuperSync health check failed/g)).toHaveLength(1);
-    expect(second.mailLog).toContain('75% busy (45 of 60');
+    expect(third.mailLog.match(/SuperSync health check failed/g)).toHaveLength(1);
+    expect(third.mailLog).toContain('75% busy (45 of 60');
   });
 
   it('sends recovery after mail failure and clears the sticky marker', () => {
@@ -1111,7 +1180,7 @@ describe('health-alert.sh state handling', () => {
  * long query is NOT the dump (it ended ~00:52) and must still be reported.
  *
  * MEASURED: the shipped script replays this timeline at 16 mails (13 alerts, 3
- * recoveries); the current one at 10 (6 alerts, 4 recoveries). The point of the test is
+ * recoveries); the current one at 8 (5 alerts, 3 recoveries). The point of the test is
  * not the number — it is that the number cannot regress without someone noticing, and
  * that every DISTINCT problem still reaches the operator, including one that recurs
  * after its incident already recovered.
@@ -1233,9 +1302,11 @@ describe('health-alert.sh replaying the night of 2026-08-25', () => {
     () => {
       const { alerts, recoveries } = replay();
 
-      // Six mails for six genuinely separate events, where the shipped script sent
+      // Five mails for five genuinely separate events, where the shipped script sent
       // thirteen. The rotating 143/128 exit codes are folded into the 124 that opened the
-      // incident, and the eight repeat pool-busy runs from 07:00 to 07:40 fold into one.
+      // incident. The 06:00 pool spike lasted a single run and self-healed, so the
+      // persistence gate sends nothing for it; the 07:00 saturation is sustained and
+      // pages one interval later, at 07:05, with the repeat runs to 07:40 folded into it.
       //
       // 00:50 is NOT a duplicate of 23:35 and must stay: with the dump's own session
       // exempted, 00:10-00:45 are healthy runs, so that incident CLOSED (recovery below)
@@ -1244,18 +1315,18 @@ describe('health-alert.sh replaying the night of 2026-08-25', () => {
       expect(alerts).toEqual([
         '23:35 Database monitoring checks failed (exit 124)',
         '00:50 Database monitoring checks failed (exit 124)',
-        '06:00 Connection pool 80% busy (48 of 60 running a query or in a transaction)',
         '06:25 Database monitoring checks failed (exit 124)',
-        '07:00 Connection pool 100% busy (60 of 60 running a query or in a transaction)',
+        '07:05 Connection pool 100% busy (60 of 60 running a query or in a transaction)',
         '07:45 1 query(s) active longer than 120s (longest: 233s)',
       ]);
-      // One per incident that actually cleared, and never on a single-run blip. The 07:00
-      // incident is still open at 07:45, so it correctly gets none.
-      expect(recoveries).toBe(4);
-      // 16 mails on the shipped script, 10 here. Four of those ten are the 23:00-01:00
+      // One per incident that actually cleared, and never on a single-run blip. The
+      // 06:00 spike never opened an incident, so it gets none; the 07:00 incident is
+      // still open at 07:45, so it correctly gets none either.
+      expect(recoveries).toBe(3);
+      // 16 mails on the shipped script, 8 here. Four of those eight are the 23:00-01:00
       // cluster, which exists only because the dump was still taking ~112 minutes; that
       // window goes quiet once the retention sweep runs and the dump shrinks again.
-      expect(alerts.length + recoveries).toBeLessThanOrEqual(10);
+      expect(alerts.length + recoveries).toBeLessThanOrEqual(8);
     },
     REPLAY_TIMEOUT_MS,
   );
