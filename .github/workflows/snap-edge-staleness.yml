@@ -1,0 +1,74 @@
+name: Snap Edge Staleness
+
+# `Upload branch snap to edge` in build.yml can only prove the store accepted a
+# binary. The automated review that actually moves edge finishes hours later,
+# out of band (rev 4501: uploaded 2026-08-26T18:29Z, released to edge
+# 2026-08-27T09:58Z), so that step cannot be the check that edge advanced.
+# This is. It queries the public, unauthenticated channel map -- no credentials,
+# nothing that can hang -- and goes red when edge has stopped moving while
+# master has not.
+on:
+  schedule:
+    - cron: '0 6 * * *' # 6 AM UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-edge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+
+      - name: Compare snap edge against master HEAD
+        timeout-minutes: 5
+        run: |
+          curl -sS --max-time 60 -H 'Snap-Device-Series: 16' \
+            'https://api.snapcraft.io/v2/snaps/info/superproductivity' \
+            -o "$RUNNER_TEMP/snap-info.json"
+          python3 - "$RUNNER_TEMP/snap-info.json" "$(git log -1 --format=%cI)" <<'PY'
+          import datetime, json, sys
+
+          # Generous enough to absorb a slow store review (~15h observed) plus a
+          # quiet weekend; short enough that a genuinely stuck review is caught
+          # before it strands days of edge builds.
+          MAX_STALE = datetime.timedelta(hours=48)
+
+          with open(sys.argv[1]) as fh:
+              channels = json.load(fh).get("channel-map", [])
+          head_committed_at = datetime.datetime.fromisoformat(sys.argv[2])
+          now = datetime.datetime.now(datetime.timezone.utc)
+
+          edge = next(
+              (
+                  entry
+                  for entry in channels
+                  if entry["channel"].get("architecture") == "amd64"
+                  and entry["channel"]["name"] == "edge"
+              ),
+              None,
+          )
+          if edge is None:
+              sys.exit("::error::no amd64 edge revision in the snap channel map")
+
+          released_at = datetime.datetime.fromisoformat(edge["channel"]["released-at"])
+          age = now - released_at
+          state = (
+              f"edge serves rev {edge['revision']} ({edge['version']}), released "
+              f"{released_at.isoformat(timespec='seconds')} ({age.days}d ago); "
+              f"master HEAD committed {head_committed_at.isoformat(timespec='seconds')}"
+          )
+          print(state)
+
+          if released_at >= head_committed_at:
+              print("edge is at or ahead of master HEAD -- nothing pending.")
+          elif age > MAX_STALE:
+              sys.exit(
+                  f"::error::edge has not advanced in {age.days}d despite newer "
+                  f"commits on master -- the snap store review is likely stuck. {state}"
+              )
+          else:
+              print(f"edge trails master HEAD but is within the {MAX_STALE} grace period.")
+          PY

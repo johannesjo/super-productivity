@@ -172,18 +172,33 @@ jobs:
       # The container runs snapcraft as a pebble service whose working-dir is
       # hard-coded to /project, so docker's -w flag is ignored — mount the
       # build dir at /project so `snapcraft upload sp.snap` resolves correctly.
-      # `upload --release edge` blocks until the store's automated review finishes
-      # and only releases the revision if it passes, so a non-zero exit or a
-      # timeout means the snap did NOT reach edge. Never soften that into a pass:
-      # edge has been frozen at rev 4441 since 2026-08-14 because review stopped
-      # terminating, and this step going red is the only signal we get for it.
-      # Retrying cannot help either -- the store rejects a re-upload of the same
-      # binary on its sha3-384, so attempts 2+ always fail (a retry wrapper here
-      # kept master red for a week while hiding that).
+      #
+      # `upload --release edge` blocks until the store's automated review
+      # finishes, and that review can take many hours: rev 4501 was created
+      # 2026-08-26T18:29:39Z -- inside the run this step then killed at 18:54
+      # on its 25-minute timeout -- and the store released it to edge at
+      # 2026-08-27T09:58Z, ~15.5h later. Waiting the review out is therefore
+      # not a release gate but a false negative; five consecutive master runs
+      # went red on it while edge advanced 4441 -> 4501 regardless.
+      #
+      # So bound the wait here and classify by what the store told us.
+      # `Status: processing` prints only once the store has accepted the
+      # binary and queued its review, which is exactly the line between
+      # "review is slow" (pending, edge will advance on its own) and "the
+      # upload never landed" (fail). Only a wait-timeout exit may be treated
+      # as pending -- a non-zero exit after processing means the review ran
+      # and rejected the snap, which must stay red. That edge really did
+      # advance is checked out of band by snap-edge-staleness.yml.
+      #
+      # Retrying an accepted upload cannot help: the store rejects a re-upload
+      # of the same binary on its sha3-384, so attempts 2+ always fail (a retry
+      # wrapper here kept master red for a week while hiding that). Re-running
+      # is only sound in the failed case, where no revision was created.
       - name: Upload branch snap to edge
         id: snap-upload
         if: false == startsWith(github.ref, 'refs/tags/v') && steps.release-tag.outputs.has_final_release_tag != 'true'
-        timeout-minutes: 25
+        # Backstop only; the inner `timeout` is what normally bounds the wait.
+        timeout-minutes: 15
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
         # The snapcraft-rocks image's wrapper already runs `snapcraft "$@"`,
@@ -192,27 +207,39 @@ jobs:
         # "no such command 'snapcraft'".
         run: |
           set -o pipefail
-          docker run --rm \
-            -v "$PWD/.tmp/app-builds:/project" \
-            -e SNAPCRAFT_STORE_CREDENTIALS \
-            -e SNAPCRAFT_HAS_TTY=true \
-            ghcr.io/canonical/snapcraft:8_core24 \
-            upload sp.snap --release edge 2>&1 \
-            | tee "$RUNNER_TEMP/snap-upload.log"
+          rc=0
+          timeout --signal=TERM --kill-after=30s 10m \
+            docker run --rm \
+              -v "$PWD/.tmp/app-builds:/project" \
+              -e SNAPCRAFT_STORE_CREDENTIALS \
+              -e SNAPCRAFT_HAS_TTY=true \
+              ghcr.io/canonical/snapcraft:8_core24 \
+              upload sp.snap --release edge 2>&1 \
+            | tee "$RUNNER_TEMP/snap-upload.log" || rc=$?
 
-          # Exit 0 is necessary but not sufficient: assert the store actually
-          # reported the release, so a green step always means edge advanced.
-          if ! grep -q "released to 'edge'" "$RUNNER_TEMP/snap-upload.log"; then
-            echo "::error::snapcraft exited 0 without reporting a release to edge"
-            exit 1
+          if [ "$rc" -eq 0 ] && grep -q "released to 'edge'" "$RUNNER_TEMP/snap-upload.log"; then
+            echo "result=released" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          # 124 = timeout sent SIGTERM, 137 = 128+SIGKILL from --kill-after.
+          if { [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; } \
+            && grep -q 'Status: processing' "$RUNNER_TEMP/snap-upload.log"; then
+            echo "result=pending" >> "$GITHUB_OUTPUT"
+            echo "::warning::Snap accepted by the store and queued for review; edge advances when that review passes. snap-edge-staleness.yml alerts if it does not."
+            exit 0
+          fi
+
+          echo "result=failed" >> "$GITHUB_OUTPUT"
+          echo "::error::snapcraft upload failed before the store accepted the binary (exit $rc); no revision was created, so re-running is safe"
+          exit 1
 
       # Diagnostic for the step above. Uses the public, unauthenticated endpoint
       # rather than `snapcraft status` in the container: it needs no credentials,
       # cannot hang the job, and answers the only question that matters here --
       # which revision edge actually serves, and how long it has been stuck.
-      - name: Report snap channel map on failure
-        if: failure() && steps.snap-upload.outcome == 'failure'
+      - name: Report snap channel map
+        if: always() && (steps.snap-upload.outcome == 'failure' || steps.snap-upload.outputs.result == 'pending')
         continue-on-error: true
         timeout-minutes: 5
         run: |
