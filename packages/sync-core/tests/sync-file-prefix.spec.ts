@@ -130,6 +130,14 @@ describe('createSyncFilePrefixHelpers', () => {
       expect(detailsFor('[1,2,3]')).toMatchObject({ headShape: 'json' });
     });
 
+    it('still recognizes ciphertext when the body has leading whitespace', () => {
+      // All three tests read the same trimmed view; classifying markup/json
+      // trimmed but base64 raw would demote this to `other`.
+      expect(detailsFor('  41J7VJwUqK/0k436aSIRL5utdxhyV6WhXWSguANW')).toMatchObject({
+        headShape: 'base64',
+      });
+    });
+
     it('reports the offset when the header is DAMAGED rather than missing', () => {
       // `pf_` still there, separator gone. Different cause from a head-strip,
       // and prefixAt is the only thing that tells them apart.

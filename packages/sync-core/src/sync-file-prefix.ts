@@ -33,9 +33,11 @@ export interface SyncFilePrefixInvalidPrefixDetails {
   endSeparator: string;
   inputLength: number;
   /**
-   * Offset of `prefix` within the sampled head, or -1 when absent entirely.
-   * Separates "header damaged" (>= 0) from "header gone" (-1) — different
-   * causes, and the log could not previously tell them apart (#9627).
+   * Offset of `prefix` within the sampled head, or -1 when it does not occur
+   * there. Separates "header damaged" (>= 0) from "header gone" (-1) —
+   * different causes, and the log could not previously tell them apart
+   * (#9627). Bounded by the sample, so a prefix pushed past
+   * `HEAD_SAMPLE_LENGTH` by prepended junk also reads as -1.
    */
   prefixAt: number;
   /**
@@ -78,10 +80,13 @@ const HEAD_SAMPLE_LENGTH = 64;
 const BASE64_ONLY = /^[A-Za-z0-9+/=]+$/;
 
 const classifyHead = (head: string): SyncFileHeadShape => {
+  // One trimmed view for all three tests: checking markup/json trimmed but
+  // base64 untrimmed would classify a whitespace-prefixed ciphertext body as
+  // `other`, which reads as "unrecognized" when we do in fact recognize it.
   const trimmed = head.trimStart();
   if (trimmed.startsWith('<')) return 'markup';
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
-  return BASE64_ONLY.test(head) ? 'base64' : 'other';
+  return BASE64_ONLY.test(trimmed) ? 'base64' : 'other';
 };
 
 const escapeRegExp = (value: string): string =>
