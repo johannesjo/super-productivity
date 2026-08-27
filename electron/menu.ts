@@ -1,4 +1,4 @@
-import type { MenuItemConstructorOptions } from 'electron';
+import type { BaseWindow, MenuItemConstructorOptions } from 'electron';
 
 // macOS-only application menu template (built by createMenu in
 // main-window.ts). Kept as a pure function so menu.test.cjs can assert on
@@ -7,7 +7,10 @@ export const createMenuTemplate = ({
   onCloseWindow,
   onQuit,
 }: {
-  onCloseWindow: () => void;
+  // receives the key window: the app-wide accelerator also fires while
+  // e.g. the break blocker or task widget is focused, and the handler
+  // must decide based on which window that is
+  onCloseWindow: (focusedWindow: BaseWindow | undefined) => void;
   onQuit: () => void;
 }): MenuItemConstructorOptions[] => [
   {
@@ -47,7 +50,7 @@ export const createMenuTemplate = ({
         // window it could destroy the task widget or the break blocker.
         label: 'Close Window',
         accelerator: 'CmdOrCtrl+W',
-        click: onCloseWindow,
+        click: (_menuItem, focusedWindow) => onCloseWindow(focusedWindow),
       },
     ],
   },

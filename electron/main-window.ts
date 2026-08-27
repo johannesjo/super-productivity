@@ -580,8 +580,13 @@ function createMenu(quitApp: () => void): void {
   const menuTpl = createMenuTemplate({
     // hide() keeps the app running in the dock; clicking the dock icon
     // re-shows via the 'activate' handler (showOrFocus)
-    onCloseWindow: () => {
-      if (mainWin && !mainWin.isDestroyed() && mainWin.isVisible()) {
+    onCloseWindow: (focusedWindow) => {
+      // only act when the main window itself is key; focusedWindow can be
+      // undefined during macOS menu tracking — treat that as "not ours"
+      if (!focusedWindow || focusedWindow !== mainWin) {
+        return;
+      }
+      if (!mainWin.isDestroyed() && mainWin.isVisible()) {
         setWasMaximizedBeforeHide(mainWin.isMaximized());
         mainWin.hide();
       }

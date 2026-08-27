@@ -6,9 +6,12 @@ require('ts-node/register/transpile-only');
 const { createMenuTemplate } = require('./menu.ts');
 
 const buildTpl = () => {
-  const calls = { close: 0, quit: 0 };
+  const calls = { close: 0, quit: 0, closeArgs: [] };
   const tpl = createMenuTemplate({
-    onCloseWindow: () => calls.close++,
+    onCloseWindow: (focusedWindow) => {
+      calls.close++;
+      calls.closeArgs.push(focusedWindow);
+    },
     onQuit: () => calls.quit++,
   });
   return { tpl, calls };
@@ -35,6 +38,18 @@ test('Cmd+W is a custom Close Window item wired to onCloseWindow', () => {
   closeItem.click();
   assert.equal(calls.close, 1);
   assert.equal(calls.quit, 0);
+});
+
+// the accelerator is app-wide, so the handler must know which window was
+// key when it fired (undefined during macOS menu tracking)
+test('Close Window forwards the focused window to onCloseWindow', () => {
+  const { tpl, calls } = buildTpl();
+  const closeItem = findMenu(tpl, 'Window').submenu[0];
+  const fakeMenuItem = { label: 'Close Window' };
+  const fakeFocusedWindow = { id: 42 };
+  closeItem.click(fakeMenuItem, fakeFocusedWindow, {});
+  closeItem.click(fakeMenuItem, undefined, {});
+  assert.deepEqual(calls.closeArgs, [fakeFocusedWindow, undefined]);
 });
 
 // role 'close' would route Cmd+W into the window close handler, which quits
