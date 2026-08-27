@@ -242,6 +242,14 @@ export const apiRoutes = async (
         // AUTH_CACHE_INVALIDATION: account deletion must not leave a ghost-token window.
         authCache.invalidate(userId);
 
+        // The cascade removed this user's sync_devices rows, but an open socket
+        // keeps answering pings, so the dead-connection branch never reaps it.
+        // Its heartbeat touch would then re-INSERT a device row for a user that
+        // no longer exists and trip the FK every throttle window. Closed after
+        // the delete, not before: with the user row already gone no reconnect
+        // can re-authenticate and re-orphan a socket.
+        getWsConnectionService().closeForUser(userId);
+
         Logger.audit({ event: 'USER_ACCOUNT_DELETED', userId });
 
         return reply.send({ success: true });
