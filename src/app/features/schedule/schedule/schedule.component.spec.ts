@@ -554,26 +554,37 @@ describe('ScheduleComponent', () => {
   });
 
   describe('_contextNow computed', () => {
-    it('should return current time when viewing today (selectedDate is null)', () => {
-      // Arrange
+    it('should return the live now while today is day 0 of the displayed range', () => {
+      // Arrange - the default getDaysToShow mock starts on the mocked today
+      // (2026-01-20), so day 0 contains the pinned clock.
+      const clock = new Date(2026, 0, 20, 9, 0, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      // Fresh array instance: the computed already ran against the real clock
+      // on init, and the default mock hands back the same cached instance, so
+      // daysToShow would otherwise not register as changed.
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-20',
+        '2026-01-21',
+        '2026-01-22',
+      ]);
+      component['_selectedDate'].set(new Date(2026, 0, 21));
       component['_selectedDate'].set(null);
 
       // Act
       const contextNow = component['_contextNow']();
 
-      // Assert - just check it's a reasonable timestamp (within last hour and next minute)
-      const now = Date.now();
-      // eslint-disable-next-line no-mixed-operators
-      const oneHourAgo = now - 60 * 60 * 1000;
-      // eslint-disable-next-line no-mixed-operators
-      const oneMinuteFromNow = now + 60 * 1000;
-      expect(contextNow).toBeGreaterThan(oneHourAgo);
-      expect(contextNow).toBeLessThan(oneMinuteFromNow);
+      // Assert
+      expect(contextNow).toBe(clock);
     });
 
-    it('should return midnight of selected date when viewing a different date', () => {
+    it('should return midnight of day 0 when viewing a different date', () => {
       // Arrange
       const selectedDate = new Date(2026, 0, 25, 14, 30, 45); // Jan 25, 2026, 2:30:45 PM
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-25',
+        '2026-01-26',
+        '2026-01-27',
+      ]);
       component['_selectedDate'].set(selectedDate);
 
       // Act
@@ -595,8 +606,15 @@ describe('ScheduleComponent', () => {
       // tick this pins the layout to whenever the view was first rendered.
       let clock = new Date(2026, 0, 20, 9, 0, 0).getTime();
       spyOn(Date, 'now').and.callFake(() => clock);
-      // Round-trip through a date: the computed already ran against the real
-      // clock on init, and re-setting null over null would not invalidate it.
+      // Fresh array instance + a date round-trip: the computed already ran
+      // against the real clock on init, and the default mock hands back the
+      // same cached instance, so daysToShow would otherwise not register as
+      // changed.
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-20',
+        '2026-01-21',
+        '2026-01-22',
+      ]);
       component['_selectedDate'].set(new Date(2026, 0, 21));
       component['_selectedDate'].set(null);
       expect(component['_contextNow']()).toBe(clock);
@@ -613,6 +631,11 @@ describe('ScheduleComponent', () => {
       const clock = new Date(2026, 0, 20, 9, 0, 0).getTime();
       spyOn(Date, 'now').and.callFake(() => clock);
 
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-19',
+        '2026-01-20',
+        '2026-01-21',
+      ]);
       component['_selectedDate'].set(new Date(2026, 0, 19));
 
       expect(component['_contextNow']()).toBe(new Date(2026, 0, 19).setHours(0, 0, 0, 0));
@@ -626,6 +649,11 @@ describe('ScheduleComponent', () => {
       const clock = new Date(2026, 0, 21, 2, 0, 0).getTime();
       spyOn(Date, 'now').and.callFake(() => clock);
 
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-20',
+        '2026-01-21',
+        '2026-01-22',
+      ]);
       component['_selectedDate'].set(new Date(2026, 0, 20));
 
       const contextNow = component['_contextNow']();
@@ -640,6 +668,11 @@ describe('ScheduleComponent', () => {
       // view does not move, so the day it shows silently becomes today.
       let clock = new Date(2026, 0, 20, 22, 0, 0).getTime();
       spyOn(Date, 'now').and.callFake(() => clock);
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-21',
+        '2026-01-22',
+        '2026-01-23',
+      ]);
       component['_selectedDate'].set(new Date(2026, 0, 21));
       expect(component['_contextNow']()).toBe(new Date(2026, 0, 21).setHours(0, 0, 0, 0));
 
@@ -650,12 +683,87 @@ describe('ScheduleComponent', () => {
 
       expect(component['_contextNow']()).toBe(clock);
     });
+
+    // Month view pads the grid back to the first day of the week containing
+    // the 1st, so day 0 is usually a cell from the previous month while the
+    // selected date stays on the 1st. The anchor has to follow the grid cell,
+    // not the selected date (#9071).
+    const monthGridFrom = (start: Date, nrOfDays: number): string[] =>
+      Array.from({ length: nrOfDays }, (_, i) => {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        return [
+          d.getFullYear(),
+          String(d.getMonth() + 1).padStart(2, '0'),
+          String(d.getDate()).padStart(2, '0'),
+        ].join('-');
+      });
+
+    it('should anchor to the month grid`s first cell, not the selected month`s 1st', () => {
+      // Viewing Feb 2026 (firstDayOfWeek=1): the grid starts on Mon Jan 26.
+      const clock = new Date(2026, 0, 10, 9, 0, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      mockLayoutService.selectedTimeView.set('month');
+      mockScheduleService.getMonthDaysToShow.and.returnValue(
+        monthGridFrom(new Date(2026, 0, 26), 42),
+      );
+      component['_selectedDate'].set(new Date(2026, 1, 1));
+
+      expect(component['_contextNow']()).toBe(new Date(2026, 0, 26).setHours(0, 0, 0, 0));
+    });
+
+    it('should anchor to the first grid cell when viewing the current month untraveled', () => {
+      // Today (Feb 15) sits mid-grid; day 0 is still the Jan 26 padding cell,
+      // so the live now must not leak into it.
+      const clock = new Date(2026, 1, 15, 10, 0, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      mockLayoutService.selectedTimeView.set('month');
+      mockScheduleService.getMonthDaysToShow.and.returnValue(
+        monthGridFrom(new Date(2026, 0, 26), 42),
+      );
+      // Round-trip to invalidate the cached computed after pinning the clock.
+      component['_selectedDate'].set(new Date(2026, 1, 1));
+      component['_selectedDate'].set(null);
+
+      expect(component['_contextNow']()).toBe(new Date(2026, 0, 26).setHours(0, 0, 0, 0));
+    });
+
+    it('should return the live now in month view when today is the first grid cell', () => {
+      // Feb 1 2026 is a Sunday: with firstDayOfWeek=0 the grid starts on
+      // today itself, so the anchor keeps tracking the wall clock.
+      const clock = new Date(2026, 1, 1, 10, 0, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      mockLayoutService.selectedTimeView.set('month');
+      mockScheduleService.getMonthDaysToShow.and.returnValue(
+        monthGridFrom(new Date(2026, 1, 1), 42),
+      );
+      component['_selectedDate'].set(new Date(2026, 1, 1));
+      component['_selectedDate'].set(null);
+
+      expect(component['_contextNow']()).toBe(clock);
+    });
+
+    it('should return the live now in day view while viewing today', () => {
+      const clock = new Date(2026, 0, 20, 9, 0, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      mockLayoutService.selectedTimeView.set('day');
+      mockScheduleService.getDaysToShow.and.returnValue(['2026-01-20']);
+      component['_selectedDate'].set(new Date(2026, 0, 21));
+      component['_selectedDate'].set(null);
+
+      expect(component['_contextNow']()).toBe(clock);
+    });
   });
 
   describe('scheduleDays computed', () => {
     it('should call createScheduleDaysWithContext with contextNow', () => {
       // Arrange
       const selectedDate = new Date(2026, 0, 25);
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-25',
+        '2026-01-26',
+        '2026-01-27',
+      ]);
       component['_selectedDate'].set(selectedDate);
       mockScheduleService.createScheduleDaysWithContext.calls.reset();
 
@@ -667,7 +775,7 @@ describe('ScheduleComponent', () => {
       const callArgs =
         mockScheduleService.createScheduleDaysWithContext.calls.mostRecent().args[0];
       expect(callArgs.contextNow).toBeDefined();
-      // Context now should be midnight of selected date
+      // Context now should be midnight of day 0 of the displayed range
       const contextDate = new Date(callArgs.contextNow);
       expect(contextDate.getHours()).toBe(0);
       expect(contextDate.getMinutes()).toBe(0);
@@ -676,6 +784,11 @@ describe('ScheduleComponent', () => {
     it('should always pass realNow as actual current time', () => {
       // Arrange
       const selectedDate = new Date(2026, 0, 25);
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-25',
+        '2026-01-26',
+        '2026-01-27',
+      ]);
       component['_selectedDate'].set(selectedDate);
       mockScheduleService.createScheduleDaysWithContext.calls.reset();
       const before = Date.now();
@@ -697,6 +810,11 @@ describe('ScheduleComponent', () => {
       // would pass for arbitrary wrong values.
       const clock = new Date(2026, 0, 20, 9, 0, 0).getTime();
       spyOn(Date, 'now').and.callFake(() => clock);
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-27',
+        '2026-01-28',
+        '2026-01-29',
+      ]);
       component['_selectedDate'].set(new Date(2026, 0, 27));
       mockScheduleService.createScheduleDaysWithContext.calls.reset();
 
@@ -730,6 +848,13 @@ describe('ScheduleComponent', () => {
         },
       ];
       mockScheduleService.createScheduleDaysWithContext.and.returnValue(scheduleDays);
+      // Fresh array instance so daysToShow registers as changed and the
+      // scheduleDays computed re-runs against the overridden mock above.
+      mockScheduleService.getDaysToShow.and.returnValue([
+        '2026-01-20',
+        '2026-01-21',
+        '2026-01-22',
+      ]);
       component['_selectedDate'].set(new Date(2026, 0, 20));
 
       const result = component.monthEvents();
