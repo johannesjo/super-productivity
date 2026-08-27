@@ -109,7 +109,6 @@ model Operation {
 
   @@unique([userId, serverSeq])
   @@index([userId, entityType, entityId, serverSeq])
-  @@index([userId, clientId])
   @@index([userId, receivedAt])
   // Multi-entity conflict lookups (#8334) probe entity_ids with @> / &&. This MUST stay
   // modelled here, not only in the 20260613000001 raw migration: `prisma db push` builds
