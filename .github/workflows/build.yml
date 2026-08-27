@@ -184,11 +184,16 @@ jobs:
       # So bound the wait here and classify by what the store told us.
       # `Status: processing` prints only once the store has accepted the
       # binary and queued its review, which is exactly the line between
-      # "review is slow" (pending, edge will advance on its own) and "the
-      # upload never landed" (fail). Only a wait-timeout exit may be treated
-      # as pending -- a non-zero exit after processing means the review ran
-      # and rejected the snap, which must stay red. That edge really did
-      # advance is checked out of band by snap-edge-staleness.yml.
+      # "review is slow" (pending) and "the upload never landed" (fail).
+      # Be honest about what that buys: against a ~15.5h review a 10m budget
+      # means pending IS the normal outcome and the `released` branch is a
+      # fast path for a healthy store -- it has not fired in the last 40
+      # master runs. So this step no longer detects a REJECTED review at all;
+      # it only answers "did the store take the binary?". Whether edge then
+      # actually advanced is snap-edge-staleness.yml's job, and a rejection
+      # surfaces there as "not advancing", not as a rejection.
+      # The 124/137 guard still matters: it keeps a fast rejection, an auth
+      # failure or a store outage red rather than folding them into pending.
       #
       # Retrying an accepted upload cannot help: the store rejects a re-upload
       # of the same binary on its sha3-384, so attempts 2+ always fail (a retry
@@ -231,7 +236,15 @@ jobs:
           fi
 
           echo "result=failed" >> "$GITHUB_OUTPUT"
-          echo "::error::snapcraft upload failed before the store accepted the binary (exit $rc); no revision was created, so re-running is safe"
+          if grep -q 'Status: processing' "$RUNNER_TEMP/snap-upload.log"; then
+            echo "::error::snapcraft failed after the store accepted the binary (exit $rc); a revision exists, so re-running is rejected on its sha3-384 -- check the store review queue instead"
+          elif [ "$rc" -eq 0 ]; then
+            echo "::error::snapcraft exited 0 without reporting a release to edge"
+          else
+            # Deliberately hedged: a duplicate-binary rejection also lands here
+            # with no 'Status: processing' line, and re-running that is futile.
+            echo "::error::snapcraft upload failed before the store accepted the binary (exit $rc); re-running is safe unless a previous attempt already uploaded this exact binary"
+          fi
           exit 1
 
       # Diagnostic for the step above. Uses the public, unauthenticated endpoint
@@ -239,7 +252,7 @@ jobs:
       # cannot hang the job, and answers the only question that matters here --
       # which revision edge actually serves, and how long it has been stuck.
       - name: Report snap channel map
-        if: always() && (steps.snap-upload.outcome == 'failure' || steps.snap-upload.outputs.result == 'pending')
+        if: ${{ !cancelled() && (steps.snap-upload.outcome == 'failure' || steps.snap-upload.outputs.result == 'pending') }}
         continue-on-error: true
         timeout-minutes: 5
         run: |

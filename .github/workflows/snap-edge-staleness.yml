@@ -5,8 +5,8 @@ name: Snap Edge Staleness
 # out of band (rev 4501: uploaded 2026-08-26T18:29Z, released to edge
 # 2026-08-27T09:58Z), so that step cannot be the check that edge advanced.
 # This is. It queries the public, unauthenticated channel map -- no credentials,
-# nothing that can hang -- and goes red when edge has stopped moving while
-# master has not.
+# nothing that can hang -- and goes red when master has work that edge has not
+# picked up for too long.
 on:
   schedule:
     - cron: '0 6 * * *' # 6 AM UTC daily
@@ -21,25 +21,39 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          # Deep enough to find the oldest commit edge has not picked up; a
+          # freeze older than this still reads as stale, so it fails safe.
+          fetch-depth: 200
 
-      - name: Compare snap edge against master HEAD
+      - name: Compare snap edge against master
         timeout-minutes: 5
         run: |
-          curl -sS --max-time 60 -H 'Snap-Device-Series: 16' \
+          # -f so an API error or a 502 HTML body fails here as "could not
+          # check" rather than reaching python and being reported as a stuck
+          # edge or a JSON traceback.
+          curl -fsS --retry 3 --retry-delay 5 --max-time 60 \
+            -H 'Snap-Device-Series: 16' \
             'https://api.snapcraft.io/v2/snaps/info/superproductivity' \
             -o "$RUNNER_TEMP/snap-info.json"
-          python3 - "$RUNNER_TEMP/snap-info.json" "$(git log -1 --format=%cI)" <<'PY'
-          import datetime, json, sys
+          python3 - "$RUNNER_TEMP/snap-info.json" <<'PY'
+          import datetime, json, subprocess, sys
 
-          # Generous enough to absorb a slow store review (~15h observed) plus a
-          # quiet weekend; short enough that a genuinely stuck review is caught
-          # before it strands days of edge builds.
+          # Absorbs the ~15.5h store review plus a slow weekend, while staying
+          # far under the 13-day freeze (2026-08-14 -> 2026-08-27) this exists
+          # to catch.
           MAX_STALE = datetime.timedelta(hours=48)
+
+
+          def fail(message):
+              # print, don't sys.exit(str): workflow commands are only reliably
+              # parsed on stdout.
+              print(message)
+              sys.exit(1)
+
 
           with open(sys.argv[1]) as fh:
               channels = json.load(fh).get("channel-map", [])
-          head_committed_at = datetime.datetime.fromisoformat(sys.argv[2])
-          now = datetime.datetime.now(datetime.timezone.utc)
 
           edge = next(
               (
@@ -51,24 +65,41 @@ jobs:
               None,
           )
           if edge is None:
-              sys.exit("::error::no amd64 edge revision in the snap channel map")
+              fail("::error::could not read an amd64 edge revision from the channel map")
 
           released_at = datetime.datetime.fromisoformat(edge["channel"]["released-at"])
-          age = now - released_at
+          now = datetime.datetime.now(datetime.timezone.utc)
           state = (
               f"edge serves rev {edge['revision']} ({edge['version']}), released "
-              f"{released_at.isoformat(timespec='seconds')} ({age.days}d ago); "
-              f"master HEAD committed {head_committed_at.isoformat(timespec='seconds')}"
+              f"{released_at.isoformat(timespec='seconds')}"
           )
-          print(state)
 
-          if released_at >= head_committed_at:
-              print("edge is at or ahead of master HEAD -- nothing pending.")
-          elif age > MAX_STALE:
-              sys.exit(
-                  f"::error::edge has not advanced in {age.days}d despite newer "
-                  f"commits on master -- the snap store review is likely stuck. {state}"
+          # Age the unreleased WORK, not edge itself. Edge legitimately sits
+          # still through a quiet weekend, so measuring staleness from its
+          # release date would alarm on the first commit back from one.
+          # This is deliberately coarse: released-at is a store clock and commit
+          # dates are a git clock, so a commit that predates the current edge
+          # release is invisible until the next commit lands. That bounds
+          # detection at MAX_STALE past the next push, which is what a backstop
+          # for a total freeze needs.
+          pending = subprocess.run(
+              ["git", "log", "--since", released_at.isoformat(), "--format=%cI", "--reverse"],
+              capture_output=True,
+              text=True,
+              check=True,
+          ).stdout.split()
+
+          if not pending:
+              print(f"{state}; no newer commits on master -- nothing pending.")
+              sys.exit(0)
+
+          waiting = now - datetime.datetime.fromisoformat(pending[0])
+          print(f"{state}; {len(pending)} newer commit(s), oldest waiting {waiting}.")
+
+          if waiting > MAX_STALE:
+              fail(
+                  f"::error::master commits have waited {waiting.days}d for edge to "
+                  f"advance -- the snap store review is likely stuck. {state}"
               )
-          else:
-              print(f"edge trails master HEAD but is within the {MAX_STALE} grace period.")
+          print(f"Within the {MAX_STALE.days}d grace period.")
           PY
