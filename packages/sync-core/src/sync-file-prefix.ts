@@ -33,18 +33,31 @@ export interface SyncFilePrefixInvalidPrefixDetails {
   endSeparator: string;
   inputLength: number;
   /**
-   * Offset of `prefix` within the sampled head, or -1 when it does not occur
-   * there. Separates "header damaged" (>= 0) from "header gone" (-1) —
-   * different causes, and the log could not previously tell them apart
-   * (#9627). Bounded by the sample, so a prefix pushed past
-   * `HEAD_SAMPLE_LENGTH` by prepended junk also reads as -1.
+   * Offset of `prefix` anywhere in the body, or -1 when it does not occur at
+   * all. Separates "header damaged" (>= 0) from "header gone" (-1) — different
+   * causes, and the log could not previously tell them apart (#9627). Searched
+   * over the whole body rather than the head sample: the result is an integer
+   * offset either way, so the bound bought no privacy and only conflated
+   * "prefix pushed past the sample by prepended junk" with "prefix absent".
+   *
+   * A heuristic, not a proof: a head that lost only its first byte reads as -1
+   * ("gone") though it is merely damaged, and any body that happens to contain
+   * `pf_` reads >= 0.
    */
   prefixAt: number;
   /**
-   * What we got instead. `markup`/`json` point at a bad RESPONSE (proxy page,
-   * WebDAV multistatus, error envelope); `base64` points at our own ciphertext
-   * with its header lost, i.e. a problem with the STORED file. That is the
-   * distinction that decides whether a decode failure is a transport issue.
+   * What we got instead, as a coarse shape of the body's first bytes.
+   *
+   * `markup` points at a bad RESPONSE (WebDAV multistatus, a proxy or
+   * captive-portal page). `base64` points at our own ciphertext or gzip with
+   * its header lost, i.e. a problem with the STORED file.
+   *
+   * `json` is AMBIGUOUS and must not be read as "bad response" on its own:
+   * compression and encryption are both opt-in and off by default, and with
+   * neither enabled our own stored body IS `JSON.stringify(data)`. So `json`
+   * means either an error envelope OR our own plaintext file with the header
+   * lost. Resolve it with the reporter's sync settings — with encryption or
+   * compression ON, our body would be `base64`, so `json` is then a response.
    *
    * It does NOT separate a head-strip from a larger fragment — both read as
    * `base64` — since nothing local knows the file's expected size.
@@ -75,9 +88,22 @@ export class SyncFilePrefixVersionError extends Error {
 
 const DEFAULT_END_SEPARATOR = '__';
 const MODEL_VERSION_PATTERN = /^\d+(?:\.\d+)?$/;
-/** Enough head to classify; short enough that no sample is ever retained. */
+/**
+ * Enough head to classify, and bounded so classification cost does not scale
+ * with a multi-MB body. It is NOT what keeps the sample out of the log — that
+ * holds because `head` never leaves this function; storing it would leak user
+ * data at any length.
+ */
 const HEAD_SAMPLE_LENGTH = 64;
-const BASE64_ONLY = /^[A-Za-z0-9+/=]+$/;
+/** Canonical base64: padding only at the end, matching what our writers emit. */
+const BASE64_ONLY = /^[A-Za-z0-9+/]+={0,2}$/;
+/**
+ * Below this, ordinary words are indistinguishable from base64 — a bare
+ * `Unauthorized` or `nginx` body would otherwise read as our own ciphertext,
+ * i.e. the exact wrong answer to "response or stored file?". Real heads are a
+ * full `HEAD_SAMPLE_LENGTH`, so nothing genuine is lost.
+ */
+const MIN_BASE64_HEAD_LENGTH = 16;
 
 const classifyHead = (head: string): SyncFileHeadShape => {
   // One trimmed view for all three tests: checking markup/json trimmed but
@@ -86,7 +112,9 @@ const classifyHead = (head: string): SyncFileHeadShape => {
   const trimmed = head.trimStart();
   if (trimmed.startsWith('<')) return 'markup';
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
-  return BASE64_ONLY.test(trimmed) ? 'base64' : 'other';
+  return trimmed.length >= MIN_BASE64_HEAD_LENGTH && BASE64_ONLY.test(trimmed)
+    ? 'base64'
+    : 'other';
 };
 
 const escapeRegExp = (value: string): string =>
@@ -133,13 +161,12 @@ export const createSyncFilePrefixHelpers = ({
     extractSyncFileStateFromPrefix: (dataStr: string): SyncFilePrefixParamsOutput => {
       const match = dataStr.match(prefixRegex);
       if (!match) {
-        const head = dataStr.slice(0, HEAD_SAMPLE_LENGTH);
         const details: SyncFilePrefixInvalidPrefixDetails = {
           expectedPrefix: prefix,
           endSeparator,
           inputLength: dataStr.length,
-          prefixAt: head.indexOf(prefix),
-          headShape: classifyHead(head),
+          prefixAt: dataStr.indexOf(prefix),
+          headShape: classifyHead(dataStr.slice(0, HEAD_SAMPLE_LENGTH)),
         };
         throw createInvalidPrefixError?.(details) ?? new SyncFilePrefixError(details);
       }

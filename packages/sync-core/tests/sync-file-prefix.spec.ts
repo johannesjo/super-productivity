@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createSyncFilePrefixHelpers } from '../src';
+import type { SyncFilePrefixInvalidPrefixDetails } from '../src';
 import { SyncFilePrefixError, SyncFilePrefixVersionError } from '../src/sync-file-prefix';
 
 describe('createSyncFilePrefixHelpers', () => {
@@ -93,22 +94,28 @@ describe('createSyncFilePrefixHelpers', () => {
   // RESPONSE or a bad STORED FILE. These pin the classification, which is the
   // whole point of the diagnostic.
   describe('head-shape diagnostics (#9627)', () => {
-    const detailsFor = (dataStr: string): Record<string, unknown> => {
-      let received: Record<string, unknown> = {};
+    // Synthetic stand-in for the reporter's ciphertext head. Same shape (plain
+    // base64, no padding, longer than MIN_BASE64_HEAD_LENGTH) without copying a
+    // user's bytes into source control.
+    const CIPHERTEXT_HEAD = 'QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWY';
+
+    const detailsFor = (dataStr: string): SyncFilePrefixInvalidPrefixDetails => {
+      let received: SyncFilePrefixInvalidPrefixDetails | undefined;
       const helpers = createSyncFilePrefixHelpers({
         prefix: 'pf_',
         createInvalidPrefixError: (details) => {
-          received = details as unknown as Record<string, unknown>;
+          received = details;
           return new Error('invalid');
         },
       });
       expect(() => helpers.extractSyncFileStateFromPrefix(dataStr)).toThrow();
-      return received;
+      expect(received).toBeDefined();
+      return received!;
     };
 
     it('reads our own ciphertext with a lost header as base64 + no prefix', () => {
-      // The exact #9627 shape: encrypted payload intact, `pf_...__` head gone.
-      expect(detailsFor('41J7VJwUqK/0k436aSIRL5utdxhyV6WhXWSguANW')).toMatchObject({
+      // The #9627 shape: encrypted payload intact, `pf_...__` head gone.
+      expect(detailsFor(CIPHERTEXT_HEAD)).toMatchObject({
         headShape: 'base64',
         prefixAt: -1,
       });
@@ -130,10 +137,28 @@ describe('createSyncFilePrefixHelpers', () => {
       expect(detailsFor('[1,2,3]')).toMatchObject({ headShape: 'json' });
     });
 
+    it('also reads our own PLAINTEXT body as json — the shape is ambiguous', () => {
+      // Compression and encryption are both off by default, so an unencrypted
+      // stored file is raw JSON and is indistinguishable here from an error
+      // envelope. Pinned so nobody reads `json` as "definitely a bad response";
+      // the interface doc says to resolve it with the reporter's sync settings.
+      expect(detailsFor('{"version":2,"lastUpdate":123,"ops":[]}')).toMatchObject({
+        headShape: 'json',
+      });
+    });
+
+    it('does not mistake a short plaintext error body for our ciphertext', () => {
+      // Bare alphabetic bodies are valid base64 by alphabet alone. Calling them
+      // `base64` would point the reader at the STORED file when the truth is a
+      // bad RESPONSE — the exact inversion the diagnostic exists to prevent.
+      expect(detailsFor('Unauthorized').headShape).toBe('other');
+      expect(detailsFor('nginx').headShape).toBe('other');
+    });
+
     it('still recognizes ciphertext when the body has leading whitespace', () => {
       // All three tests read the same trimmed view; classifying markup/json
       // trimmed but base64 raw would demote this to `other`.
-      expect(detailsFor('  41J7VJwUqK/0k436aSIRL5utdxhyV6WhXWSguANW')).toMatchObject({
+      expect(detailsFor(`  ${CIPHERTEXT_HEAD}`)).toMatchObject({
         headShape: 'base64',
       });
     });
@@ -144,10 +169,18 @@ describe('createSyncFilePrefixHelpers', () => {
       expect(detailsFor('pf_E2_payload')).toMatchObject({ prefixAt: 0 });
     });
 
+    it('finds a prefix pushed past the head sample by prepended junk', () => {
+      // prefixAt searches the whole body: bounding it to the 64-char sample
+      // reported -1 here, conflating "junk prepended" with "prefix absent".
+      expect(detailsFor(`${'x'.repeat(70)}pf_CE2__{}`)).toMatchObject({
+        prefixAt: 70,
+      });
+    });
+
     it('samples only the head, so a long body cannot bloat the diagnostic', () => {
       const details = detailsFor('<html>' + 'x'.repeat(5000));
-      expect(details['headShape']).toBe('markup');
-      expect(details['inputLength']).toBe(5006);
+      expect(details.headShape).toBe('markup');
+      expect(details.inputLength).toBe(5006);
       // No field carries the payload itself.
       expect(JSON.stringify(details)).not.toContain('xxxx');
     });

@@ -1942,6 +1942,15 @@ describe('SyncWrapperService', () => {
           actionStr: jasmine.any(String),
         }),
       );
+
+      // The branch is shared with JsonParseError, so the trigger label is the
+      // only thing distinguishing the two in the log. Invoke the action rather
+      // than asserting `jasmine.any(Function)` — otherwise a label regression
+      // (both reporting 'JsonParseError') passes silently.
+      const forceUploadSpy = spyOn(service, 'forceUpload').and.resolveTo(undefined);
+      const openedSnack = mockSnackService.open.calls.mostRecent().args[0] as SnackParams;
+      await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
+      expect(forceUploadSpy).toHaveBeenCalledWith('InvalidFilePrefixError');
     });
 
     it('should handle SyncDataCorruptedError with version-mismatch message (no force-overwrite)', async () => {
