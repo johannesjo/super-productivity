@@ -368,8 +368,8 @@ describe('BackupService', () => {
         .args[0] as Parameters<typeof mockOpLogStore.runDestructiveStateReplacement>[0];
 
       const appendedPayload = args.syncImportOp.payload as any;
-      expect(appendedPayload.globalConfig.misc.startOfNextDay).toBe(4);
-      expect(appendedPayload.globalConfig.misc.startOfNextDayTime).toBe('04:00');
+      expect(appendedPayload.globalConfig.misc.startOfNextDay).toBe(0);
+      expect(appendedPayload.globalConfig.misc.startOfNextDayTime).toBe('00:00');
     });
 
     it('should pass archiveYoung to the atomic replacement when present in backup', async () => {

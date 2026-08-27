@@ -508,12 +508,19 @@ describe('GlobalConfigReducer', () => {
       expect(result.misc.startOfNextDayTime).toBe('00:00');
     });
 
-    it('should repair invalid startOfNextDayTime with a valid legacy fallback', () => {
+    // #7645: v18.5.0-v18.6.x accepted any colon-string in the free-text
+    // "start of next day" field and clamped it to 23:59, so the whole app sat one
+    // day behind. That reducer ALSO derived the legacy hour from the same bad
+    // string -- getStartOfNextDayHourFromTimeString('24:00') returned 23 -- and
+    // persisted/synced the pair below. Trusting that derived 23 as a "valid legacy
+    // fallback" repairs the config to a 23h offset, which is still yesterday for
+    // 23 of every 24 hours. The legacy hour is poisoned, not independent intent.
+    it('should not fall back to a legacy hour derived from the invalid time string (#7645)', () => {
       const snapshotConfig: any = {
         ...DEFAULT_GLOBAL_CONFIG,
         misc: {
           ...DEFAULT_GLOBAL_CONFIG.misc,
-          startOfNextDay: 4,
+          startOfNextDay: 23,
           startOfNextDayTime: '24:00',
         },
       };
@@ -525,8 +532,8 @@ describe('GlobalConfigReducer', () => {
         }),
       );
 
-      expect(result.misc.startOfNextDay).toBe(4);
-      expect(result.misc.startOfNextDayTime).toBe('04:00');
+      expect(result.misc.startOfNextDayTime).toBe('00:00');
+      expect(result.misc.startOfNextDay).toBe(0);
     });
 
     it('should repair fully invalid startOfNextDay config to the default day boundary', () => {
