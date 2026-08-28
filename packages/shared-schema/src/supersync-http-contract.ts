@@ -40,6 +40,56 @@ export const SUPER_SYNC_SNAPSHOT_OP_TYPES = [
 ] as const;
 
 /**
+ * Structured error codes the SuperSync server attaches to responses
+ * (`errorCode` on non-2xx bodies and per-op upload results).
+ *
+ * This is the producer/comparison vocabulary shared by server and client —
+ * NOT a wire validation set. Response schemas keep `errorCode` as a loose
+ * `z.string()` so an older client never rejects an otherwise-valid response
+ * just because a newer server introduced a code it does not know yet.
+ */
+export const SUPER_SYNC_ERROR_CODES = {
+  // Validation errors (400)
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  INVALID_OP_ID: 'INVALID_OP_ID',
+  INVALID_OP_TYPE: 'INVALID_OP_TYPE',
+  INVALID_ENTITY_TYPE: 'INVALID_ENTITY_TYPE',
+  INVALID_ENTITY_ID: 'INVALID_ENTITY_ID',
+  INVALID_PAYLOAD: 'INVALID_PAYLOAD',
+  PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
+  INVALID_VECTOR_CLOCK: 'INVALID_VECTOR_CLOCK',
+  INVALID_TIMESTAMP: 'INVALID_TIMESTAMP',
+  MISSING_ENTITY_ID: 'MISSING_ENTITY_ID',
+  INVALID_SCHEMA_VERSION: 'INVALID_SCHEMA_VERSION',
+  INVALID_CLIENT_ID: 'INVALID_CLIENT_ID',
+
+  // Conflict errors (409)
+  CONFLICT_CONCURRENT: 'CONFLICT_CONCURRENT',
+  CONFLICT_SUPERSEDED: 'CONFLICT_SUPERSEDED',
+  REPAIR_STALE: 'REPAIR_STALE',
+  DUPLICATE_OPERATION: 'DUPLICATE_OPERATION',
+  SYNC_IMPORT_EXISTS: 'SYNC_IMPORT_EXISTS',
+
+  // Rate limiting (429)
+  RATE_LIMITED: 'RATE_LIMITED',
+
+  // Storage quota (413)
+  STORAGE_QUOTA_EXCEEDED: 'STORAGE_QUOTA_EXCEEDED',
+
+  // Encryption-related errors (400)
+  ENCRYPTED_OPS_NOT_SUPPORTED: 'ENCRYPTED_OPS_NOT_SUPPORTED',
+  // Encrypted-only ingress gate: upload rejected because a payload is not
+  // flagged encrypted or lacks the ciphertext transport shape.
+  E2EE_REQUIRED: 'E2EE_REQUIRED',
+
+  // Server errors (500)
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const;
+
+export type SuperSyncErrorCode =
+  (typeof SUPER_SYNC_ERROR_CODES)[keyof typeof SUPER_SYNC_ERROR_CODES];
+
+/**
  * Constrains client-generated dedup keys to URL-safe chars so they can be
  * embedded in log lines without escape risk and trivially compared on the
  * server. Length is intentionally permissive (1..64) so existing clients
@@ -168,6 +218,7 @@ export const SuperSyncUploadOpsResponseSchema = z
     newOps: z.array(SuperSyncServerOperationSchema).optional(),
     latestSeq: z.number(),
     hasMorePiggyback: z.boolean().optional(),
+    deduplicated: z.boolean().optional(),
   })
   .passthrough();
 

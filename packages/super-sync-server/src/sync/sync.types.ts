@@ -1,8 +1,10 @@
 import { Logger } from '../logger';
 import { Prisma } from '@prisma/client';
 import {
+  SUPER_SYNC_ERROR_CODES,
   SUPER_SYNC_OP_TYPES,
   SUPER_SYNC_SNAPSHOT_OP_TYPES,
+  type SuperSyncErrorCode,
   type SuperSyncOpType,
 } from '@sp/shared-schema';
 
@@ -46,48 +48,14 @@ export {
   MAX_VECTOR_CLOCK_SIZE,
 };
 
-// Structured error codes for client handling
-export const SYNC_ERROR_CODES = {
-  // Validation errors (400)
-  VALIDATION_FAILED: 'VALIDATION_FAILED',
-  INVALID_OP_ID: 'INVALID_OP_ID',
-  INVALID_OP_TYPE: 'INVALID_OP_TYPE',
-  INVALID_ENTITY_TYPE: 'INVALID_ENTITY_TYPE',
-  INVALID_ENTITY_ID: 'INVALID_ENTITY_ID',
-  INVALID_PAYLOAD: 'INVALID_PAYLOAD',
-  PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
-  INVALID_VECTOR_CLOCK: 'INVALID_VECTOR_CLOCK',
-  INVALID_TIMESTAMP: 'INVALID_TIMESTAMP',
-  MISSING_ENTITY_ID: 'MISSING_ENTITY_ID',
-  INVALID_SCHEMA_VERSION: 'INVALID_SCHEMA_VERSION',
-  INVALID_CLIENT_ID: 'INVALID_CLIENT_ID',
-
-  // Conflict errors (409)
-  CONFLICT_CONCURRENT: 'CONFLICT_CONCURRENT',
-  CONFLICT_SUPERSEDED: 'CONFLICT_SUPERSEDED',
-  REPAIR_STALE: 'REPAIR_STALE',
-  DUPLICATE_OPERATION: 'DUPLICATE_OPERATION',
-
-  // Rate limiting (429)
-  RATE_LIMITED: 'RATE_LIMITED',
-
-  // Storage quota (413)
-  STORAGE_QUOTA_EXCEEDED: 'STORAGE_QUOTA_EXCEEDED',
-
-  // Encryption-related errors (400)
-  ENCRYPTED_OPS_NOT_SUPPORTED: 'ENCRYPTED_OPS_NOT_SUPPORTED' as const,
-  // Encrypted-only ingress gate: upload rejected because a payload is not
-  // flagged encrypted or lacks the ciphertext transport shape.
-  E2EE_REQUIRED: 'E2EE_REQUIRED',
-
-  // Server errors (500)
-  INTERNAL_ERROR: 'INTERNAL_ERROR',
-} as const;
+// Structured error codes for client handling. Keep this server-local alias for
+// existing imports while sharing the vocabulary with the HTTP contract package.
+export const SYNC_ERROR_CODES = SUPER_SYNC_ERROR_CODES;
 
 export const STATE_REPLACEMENT_REQUIRED_ERROR =
   'Download the latest full-state replacement before retrying';
 
-export type SyncErrorCode = (typeof SYNC_ERROR_CODES)[keyof typeof SYNC_ERROR_CODES];
+export type SyncErrorCode = SuperSyncErrorCode;
 
 export type ConflictType =
   | 'concurrent'
