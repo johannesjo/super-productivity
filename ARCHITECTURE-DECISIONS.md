@@ -177,6 +177,12 @@ latency or transaction lock-hold time becomes a measured production problem.
   to reject an upload behind the latest `SYNC_IMPORT` or `BACKUP_IMPORT` before
   insertion. The durable replacement marker is reconciled lazily from retained
   operations for rows created before the marker existed.
+- The marker carries **import** semantics — it forces a stale client to download
+  a replacement whose concurrent ops the client then drops. Only an import
+  advances it. The lazy reconcile falls back to the newest causal `REPAIR` purely
+  as a stand-in for an import row that pruning already deleted; a repair is not a
+  fence in its own right, and the client replays concurrent work on top of one
+  rather than dropping it
 - Markerless legacy repairs are compatibility records, not causal boundaries:
   they cannot drive download fast-forward, snapshot trust, history pruning, or
   server-generated restore points; snapshot replay across one fails closed
