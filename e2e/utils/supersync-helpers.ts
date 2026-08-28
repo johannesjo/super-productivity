@@ -1332,18 +1332,29 @@ export const markTaskDoneByKey = async (
  * @param client - The simulated E2E client
  */
 export const archiveDoneTasks = async (client: SimulatedE2EClient): Promise<void> => {
-  // Click the "Finish Day" button to go to Daily Summary.
-  // The button is a routerLink inside an @if (hasDoneTasks()) / @else swap, so
-  // marking a task done re-creates the element; a single click can land in the
-  // window before Angular wires up the routerLink and silently no-ops (30s hang).
-  // Racing waitForURL against a one-shot click doesn't cover that gap, so re-issue
-  // the click until navigation actually starts.
+  // Click the "Finish Day" button to go to Daily Summary, re-issuing the click
+  // until navigation actually starts. The button itself no longer swaps on
+  // hasDoneTasks() (fixed in the finish-day-btn template), but it still sits
+  // inside work-view's own @if, so a click can land while Angular re-creates
+  // the element and silently no-op before the routerLink is wired.
   const finishDayBtn = client.page.locator('.e2e-finish-day');
   await finishDayBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
+  let finishDayAttempts = 0;
   await expect(async () => {
-    await finishDayBtn.click();
+    finishDayAttempts++;
+    // Skip the click once we are already navigating: the button is gone by
+    // then, and clicking a missing element would report a click timeout for a
+    // navigation that actually succeeded. Bound it for the same reason.
+    if (!/daily-summary/.test(client.page.url())) {
+      await finishDayBtn.click({ timeout: 2000 });
+    }
     await client.page.waitForURL(/daily-summary/, { timeout: 2000 });
-  }).toPass({ timeout: UI_VISIBLE_TIMEOUT });
+  }).toPass({ timeout: UI_VISIBLE_TIMEOUT_LONG });
+  if (finishDayAttempts > 1) {
+    // Surface the retry: the suite runs with retries: 0 so that non-determinism
+    // stays visible, and a silent in-test retry would defeat that.
+    console.warn(`[archiveDoneTasks] Finish Day took ${finishDayAttempts} attempts`);
+  }
 
   // Click "Save & Go Home" button (has sun icon wb_sunny)
   const saveAndGoHomeBtn = client.page.locator(
