@@ -17,6 +17,7 @@ import { QuickAddHudDataFacadeService } from './quick-add-hud-data-facade.servic
   imports: [AddTaskBarComponent],
   template: `
     @if (dataFacade.isReady()) {
+      <div class="hud-scrim"></div>
       <add-task-bar
         class="global"
         [isGlobalBarVariant]="true"
@@ -31,25 +32,41 @@ import { QuickAddHudDataFacadeService } from './quick-add-hud-data-facade.servic
         display: block;
       }
 
+      /* NOTE: angular.json sets no inlineStyleLanguage, so this block is parsed
+         as plain CSS — a "//" comment is not a comment here and silently eats
+         the declaration or rule that follows it. Keep every comment in this
+         block in this form. */
+
       :host(.is-fullscreen-shell) {
+        /* An opaque base for the bar to sit on. A theme is free to define its
+           surfaces translucent: inside the app they composite over the window
+           background, but this window has none, so painting the bar with a
+           theme token alone lets the desktop read straight through it. A
+           literal rather than a token, because no token is guaranteed opaque. */
+        --quick-add-hud-base-bg: #fff;
         --quick-add-hud-bg: var(--bg-lighter);
 
         min-width: 100vw;
         min-height: 100vh;
-        // Transparent until the bar is there to dim *for*: the window is
-        // created ahead of time and only shown on demand, so a scrim painted at
-        // boot would flash across the whole screen.
         background: transparent;
-        transition: background var(--transition-duration-s) ease-out;
       }
 
-      // A barely-there dim behind the bar. Without it the frameless transparent
-      // window lets the desktop read straight through the bar's own edges, and
-      // the bar looks translucent even though its background is opaque.
-      // A literal colour, not a theme token: the theme variables arrive with
-      // the snapshot, and a scrim that only resolves later is worse than none.
-      :host(.is-fullscreen-shell.is-ready) {
-        background: rgba(0, 0, 0, 0.18);
+      :host-context(.isDarkTheme) {
+        --quick-add-hud-base-bg: #1e1e1e;
+      }
+
+      /* Its own element rather than a background on the host, because the host
+         is app-root, which page.scss forces transparent with !important so the
+         frameless window does not paint the app background over the desktop.
+         Nothing painted on the host can win against that.
+
+         Rendered only once the snapshot has landed, so the dim arrives with the
+         bar: the window is created ahead of time and shown on demand, and a
+         scrim painted at boot would flash across the whole screen. */
+      :host(.is-fullscreen-shell) .hud-scrim {
+        position: fixed;
+        inset: 0;
+        background: var(--scrim, rgba(0, 0, 0, 0.4));
       }
 
       :host(.is-fullscreen-shell) add-task-bar.global {
@@ -68,11 +85,6 @@ export class QuickAddRootComponent implements OnInit {
   @HostBinding('class.is-fullscreen-shell')
   get isFullscreenShell(): boolean {
     return this._isFullscreenShell;
-  }
-
-  @HostBinding('class.is-ready')
-  get isReady(): boolean {
-    return this.dataFacade.isReady();
   }
 
   ngOnInit(): void {

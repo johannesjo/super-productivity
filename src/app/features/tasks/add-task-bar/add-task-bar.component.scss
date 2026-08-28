@@ -91,8 +91,14 @@
   }
 }
 
+// Two layers, because a theme may define its surfaces translucent (in the app
+// they composite over the window background; the Quick Add HUD is a frameless
+// transparent window with nothing behind it, so the desktop shows through the
+// bar). `background-color` paints the opaque base, `background-image` lays the
+// themed surface over it — the same result the bar has inside the app.
 :host-context(.is-fullscreen-shell) .add-task-container.isGlobalBarVariant {
-  background-color: var(--quick-add-hud-bg);
+  background-color: var(--quick-add-hud-base-bg);
+  background-image: linear-gradient(var(--quick-add-hud-bg), var(--quick-add-hud-bg));
 }
 
 .input-section {

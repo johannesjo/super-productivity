@@ -33,6 +33,13 @@
              to the end, mangling mid-text typing. Without the attribute the
              directive skips that measurement entirely; the aria-label keeps
              the accessible name stable while the placeholder is detached. -->
+        @let basePlaceholder = inputPlaceholderKey() | translate;
+        @let addedTaskTitle = successPlaceholderTaskTitle();
+        @let shownPlaceholder =
+          addedTaskTitle
+            ? (T.F.TASK.ADD_TASK_BAR.SUCCESS_ADDED
+              | translate: { taskTitle: addedTaskTitle })
+            : basePlaceholder;
         <textarea
           #inputEl
           class="main-input"
@@ -43,8 +50,8 @@
           [mentionListTemplate]="mentionListTemplate"
           (listShownChange)="updateListShown($event)"
           [matAutocomplete]="taskAutoCompleteEl"
-          [placeholder]="stateService.inputTxt() ? '' : inputPlaceholder()"
-          [attr.aria-label]="inputAriaLabel()"
+          [placeholder]="stateService.inputTxt() ? '' : shownPlaceholder"
+          [attr.aria-label]="basePlaceholder"
           cdkTextareaAutosize
           cdkAutosizeMinRows="1"
           cdkAutosizeMaxRows="4"

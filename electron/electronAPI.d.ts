@@ -29,6 +29,26 @@ import type {
 } from '../src/app/features/tasks/add-task-bar/add-task-payload-builder';
 import type { QuickAddSnapshotResult } from '../src/app/features/tasks/add-task-bar/quick-add-hud.model';
 
+/**
+ * The slice of `ElectronAPI` the Quick Add HUD preload implements for real —
+ * the platform predicates, which are the ones app modules read at import time.
+ * Derived with `Pick`, so a signature change upstream is a compile error here
+ * instead of a runtime surprise in the HUD.
+ */
+export type QuickAddElectronPlatformApi = Pick<
+  ElectronAPI,
+  | 'on'
+  | 'getDistChannel'
+  | 'isLinux'
+  | 'isMacOS'
+  | 'isGnomeDesktop'
+  | 'isGnomeWayland'
+  | 'isWayland'
+  | 'isAppleSilicon'
+  | 'isSnap'
+  | 'isFlatpak'
+>;
+
 export interface QuickAddElectronApi {
   closeQuickAdd(): void;
   submitQuickAddTask(payload: AddTaskPayload): Promise<AddTaskSubmitResult>;

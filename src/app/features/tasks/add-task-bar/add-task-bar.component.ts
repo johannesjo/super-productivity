@@ -134,19 +134,21 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
   isMentionListShown = signal(false);
   isScheduleDialogOpen = signal(false);
-  successPlaceholderMsg = signal<string | null>(null);
+  // The task title to confirm in the placeholder, not the finished sentence:
+  // the wording is translated in the template so it follows the active
+  // language, which the HUD only settles once its snapshot arrives.
+  successPlaceholderTaskTitle = signal<string | null>(null);
 
-  // Stable accessible name for the input. Kept free of the transient
-  // "task added" confirmation so screen readers keep announcing what the field
-  // is for; the confirmation is surfaced through the visible placeholder only.
-  inputAriaLabel = computed(() =>
+  // The key, translated by the template's pipe rather than here. `instant()`
+  // returns the raw key while the language file is still loading and a
+  // `computed` over it never re-runs, which left the literal
+  // "F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE" on screen in the Quick Add HUD —
+  // where translations load after the first render, and the language is
+  // switched again once the snapshot arrives.
+  inputPlaceholderKey = computed(() =>
     this.isSearchMode()
-      ? this._translateService.instant(T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH)
-      : this._translateService.instant(T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE),
-  );
-
-  inputPlaceholder = computed(
-    () => this.successPlaceholderMsg() ?? this.inputAriaLabel(),
+      ? T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH
+      : T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE,
   );
 
   private _successPlaceholderTimeout: number | undefined;
@@ -593,7 +595,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       target.value = value;
     }
     this.stateService.updateInputTxt(value);
-    if (value && this.successPlaceholderMsg()) {
+    if (value && this.successPlaceholderTaskTitle()) {
       this._clearSuccessPlaceholder();
     }
   }
@@ -736,23 +738,20 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private _showSuccessPlaceholder(taskTitle: string): void {
     const MAX_TITLE_LENGTH = 35;
-    const trimmedTitle =
+    this.successPlaceholderTaskTitle.set(
       taskTitle.length > MAX_TITLE_LENGTH
         ? taskTitle.slice(0, MAX_TITLE_LENGTH) + '…'
-        : taskTitle;
-    const msg = this._translateService.instant(T.F.TASK.ADD_TASK_BAR.SUCCESS_ADDED, {
-      taskTitle: trimmedTitle,
-    });
-    this.successPlaceholderMsg.set(msg);
+        : taskTitle,
+    );
     window.clearTimeout(this._successPlaceholderTimeout);
     this._successPlaceholderTimeout = window.setTimeout(() => {
-      this.successPlaceholderMsg.set(null);
+      this.successPlaceholderTaskTitle.set(null);
     }, 1500);
   }
 
   private _clearSuccessPlaceholder(): void {
     window.clearTimeout(this._successPlaceholderTimeout);
-    this.successPlaceholderMsg.set(null);
+    this.successPlaceholderTaskTitle.set(null);
   }
 
   private _collapseTransientPanels(): void {
