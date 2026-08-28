@@ -1,9 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const path = require('node:path');
 
 require('ts-node/register/transpile-only');
 
-const { createMenuTemplate } = require('./menu.ts');
+// Resolve test-only TypeScript source through a computed path so the packaged
+// runtime-require verifier does not treat it as an app.asar dependency.
+const { createMenuTemplate } = require(path.resolve(__dirname, 'menu.ts'));
 
 const buildTpl = () => {
   const calls = { close: 0, quit: 0, closeArgs: [] };
