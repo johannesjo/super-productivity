@@ -24,6 +24,12 @@
         [currentTask]="currentTask()"
         [currentTaskContext]="currentTaskContext()"
       ></tracked-task-pill>
+      <!-- Ambient presence chip: what ANOTHER device is tracking. Only when
+           this device is not tracking itself — one tracking surface at a
+           time, and the takeover rule guarantees a single active session. -->
+      @if (!currentTask() && remoteTrackingSession()) {
+        <remote-tracking-pill></remote-tracking-pill>
+      }
     }
   </div>
 

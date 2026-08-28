@@ -2266,6 +2266,24 @@
         "UNTRACKED_TIME": "Untracked time:"
       }
     },
+    "TRACKING_PRESENCE": {
+      "CHIP": {
+        "FALLBACK_TASK": "a recently started task",
+        "FOCUS": "Focus session · cycle {{cycle}}",
+        "LAST_SEEN": "last seen {{time}}",
+        "PAUSED_ON": "Paused on {{device}}",
+        "SINCE": "since {{time}}",
+        "STOP": "Stop tracking on {{device}}",
+        "STOPPED_ON": "Stopped on {{device}}",
+        "TRACKING_ON": "Tracking on {{device}}",
+        "WAS_TRACKING_ON": "Was tracking on {{device}}"
+      },
+      "S": {
+        "MOVED_TO": "Tracking moved to {{device}}",
+        "STOPPED_FROM": "Tracking stopped from {{device}}",
+        "TRACK_HERE_AGAIN": "Track here again"
+      }
+    },
     "WORKLOG": {
       "CMP": {
         "DAYS_WORKED": "Days, worked:",

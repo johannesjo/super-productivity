@@ -43,6 +43,8 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { PageTitleComponent } from './page-title/page-title.component';
 import { PlayButtonComponent } from './play-button/play-button.component';
 import { TrackedTaskPillComponent } from './tracked-task-pill/tracked-task-pill.component';
+import { RemoteTrackingPillComponent } from '../../features/tracking-presence/remote-tracking-pill/remote-tracking-pill.component';
+import { TrackingPresenceService } from '../../features/tracking-presence/tracking-presence.service';
 import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UserProfileButtonComponent } from '../../features/user-profile/user-profile-button/user-profile-button.component';
@@ -83,6 +85,7 @@ const ACTION_ROW_REVEAL_PIN_MS = 400;
     PageTitleComponent,
     PlayButtonComponent,
     TrackedTaskPillComponent,
+    RemoteTrackingPillComponent,
     DesktopPanelButtonsComponent,
     UserProfileButtonComponent,
     FocusButtonComponent,
@@ -145,6 +148,7 @@ export class MainHeaderComponent implements OnDestroy {
 
   currentTask = toSignal(this.taskService.currentTask$);
   currentTaskId = this.taskService.currentTaskId;
+  remoteTrackingSession = inject(TrackingPresenceService).remoteSession;
   enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
     initialValue: [],
   });

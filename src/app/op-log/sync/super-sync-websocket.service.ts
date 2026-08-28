@@ -7,10 +7,28 @@ export interface NewOpsNotification {
   latestSeq: number;
 }
 
+/**
+ * Ephemeral tracking-presence message relayed by the server between this
+ * user's devices. `payload` is the opaque string minted by the producing
+ * client (E2E-encrypted when encryption is on) — parsing/decrypting is the
+ * TrackingPresenceService's job, not this transport's.
+ */
+export interface PresenceWsMessage {
+  kind: 'state' | 'cmd';
+  payload: string;
+  /** Server-assigned per-user ordinal; only set for `state`. */
+  ordinal?: number;
+  /** False when the producing device's socket is gone; only set for `state`. */
+  producerConnected?: boolean;
+}
+
 interface WsMessage {
   type: string;
   latestSeq?: number;
   timestamp?: number;
+  payload?: unknown;
+  ordinal?: number;
+  producerConnected?: boolean;
 }
 
 const MIN_RECONNECT_DELAY_MS = 1000;
@@ -50,6 +68,10 @@ export class SuperSyncWebSocketService implements OnDestroy {
   private _newOpsNotification$ = new Subject<NewOpsNotification>();
   readonly newOpsNotification$: Observable<NewOpsNotification> =
     this._newOpsNotification$.asObservable();
+
+  private _presenceMessage$ = new Subject<PresenceWsMessage>();
+  readonly presenceMessage$: Observable<PresenceWsMessage> =
+    this._presenceMessage$.asObservable();
 
   private _ws: WebSocket | null = null;
   private _reconnectAttempts = 0;
@@ -111,6 +133,7 @@ export class SuperSyncWebSocketService implements OnDestroy {
   ngOnDestroy(): void {
     this.disconnect();
     this._newOpsNotification$.complete();
+    this._presenceMessage$.complete();
   }
 
   private _startConnect(baseUrl: string, accessToken: string): Promise<void> {
@@ -244,7 +267,35 @@ export class SuperSyncWebSocketService implements OnDestroy {
       case 'connected':
         SyncLog.log(`SuperSyncWebSocketService: Server confirmed connection`);
         break;
+      case 'presence_state':
+        if (typeof msg.payload === 'string') {
+          this._presenceMessage$.next({
+            kind: 'state',
+            payload: msg.payload,
+            ordinal: msg.ordinal,
+            producerConnected: msg.producerConnected !== false,
+          });
+        }
+        break;
+      case 'presence_cmd':
+        if (typeof msg.payload === 'string') {
+          this._presenceMessage$.next({ kind: 'cmd', payload: msg.payload });
+        }
+        break;
     }
+  }
+
+  /**
+   * Sends an ephemeral presence message to the server for relay to this
+   * user's other devices. Returns false when the socket is not open —
+   * presence is fire-and-forget, so callers simply skip until reconnect.
+   */
+  sendPresence(type: 'presence_state' | 'presence_cmd', payload: string): boolean {
+    if (this._ws?.readyState !== WebSocket.OPEN) {
+      return false;
+    }
+    this._sendMessage({ type, payload });
+    return true;
   }
 
   private _sendMessage(msg: Record<string, unknown>): void {

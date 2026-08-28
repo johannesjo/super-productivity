@@ -22,6 +22,8 @@ import { UserInputWaitStateService } from './user-input-wait-state.service';
 import { SuperSyncStatusService } from '../../op-log/sync/super-sync-status.service';
 import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocket.service';
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
+import { TrackingPresenceService } from '../../features/tracking-presence/tracking-presence.service';
+import { RemoteTrackingAndroidNotifierService } from '../../features/tracking-presence/remote-tracking-android-notifier.service';
 import {
   AuthFailSPError,
   DecryptNoPasswordError,
@@ -243,6 +245,17 @@ describe('SyncWrapperService', () => {
         { provide: SuperSyncStatusService, useValue: mockSuperSyncStatusService },
         { provide: SuperSyncWebSocketService, useValue: mockSuperSyncWsService },
         { provide: WsTriggeredDownloadService, useValue: mockWsDownloadService },
+        {
+          provide: TrackingPresenceService,
+          useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+        },
+        {
+          provide: RemoteTrackingAndroidNotifierService,
+          useValue: jasmine.createSpyObj('RemoteTrackingAndroidNotifierService', [
+            'start',
+            'stop',
+          ]),
+        },
       ],
     });
 
@@ -2901,6 +2914,17 @@ describe('SyncWrapperService', () => {
           { provide: ReminderService, useValue: mockReminderService },
           { provide: UserInputWaitStateService, useValue: mockUserInputWaitState },
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
+          {
+            provide: TrackingPresenceService,
+            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+          },
+          {
+            provide: RemoteTrackingAndroidNotifierService,
+            useValue: jasmine.createSpyObj('RemoteTrackingAndroidNotifierService', [
+              'start',
+              'stop',
+            ]),
+          },
         ],
       });
 
@@ -3029,6 +3053,17 @@ describe('SyncWrapperService', () => {
           { provide: ReminderService, useValue: mockReminderService },
           { provide: UserInputWaitStateService, useValue: mockUserInputWaitState },
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
+          {
+            provide: TrackingPresenceService,
+            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+          },
+          {
+            provide: RemoteTrackingAndroidNotifierService,
+            useValue: jasmine.createSpyObj('RemoteTrackingAndroidNotifierService', [
+              'start',
+              'stop',
+            ]),
+          },
         ],
       });
 
