@@ -86,6 +86,12 @@ type RemoteOpsProcessingResult = Awaited<
 
 type GuardedRemoteOpsProcessingResult = RemoteOpsProcessingResult & {
   preApplyFullStateConflict?: IncomingFullStateConflictGateResult;
+  /**
+   * Pending work appeared between the gate check and the apply, and the
+   * incoming full-state op was a causal REPAIR. Nothing was applied; the
+   * caller must leave the cursor behind the batch and retry (#9773).
+   */
+  preApplyRepairDeferred?: boolean;
 };
 
 /**
@@ -321,7 +327,8 @@ export class OperationLogSyncService {
           },
         );
       if (piggybackedConflict.fullStateOp) {
-        const { fullStateOp, pendingOps, dialogData } = piggybackedConflict;
+        const { fullStateOp, pendingOps, dialogData, deferredRepairOpId } =
+          piggybackedConflict;
 
         // Existing synced store data is not a conflict here. Prompt only when
         // local pending user changes would be discarded; otherwise an old client
@@ -355,6 +362,12 @@ export class OperationLogSyncService {
             hasMorePiggyback: false,
             rejectedOps: [],
           };
+        } else if (deferredRepairOpId) {
+          OpLog.normal(
+            `OperationLogSyncService: Deferring piggybacked REPAIR from client ` +
+              `${fullStateOp.clientId}; ${pendingOps.length} pending local op(s) ` +
+              `keep their place and this client repairs its own state instead.`,
+          );
         } else {
           // Known limitation (#7985, upload→piggyback path): example-task ops accepted earlier in
           // THIS same upload round were already marked synced, so they have left
@@ -384,6 +397,9 @@ export class OperationLogSyncService {
             preCapturedPendingOps: result.selectedPendingOps ?? [],
           },
           fenceEpoch: options?.fenceEpoch,
+          ...(piggybackedConflict.deferredRepairOpId
+            ? { deferredRepairOpId: piggybackedConflict.deferredRepairOpId }
+            : {}),
         },
       );
       localWinOpsCreated = processResult.localWinOpsCreated;
@@ -404,6 +420,24 @@ export class OperationLogSyncService {
         if (conflictResult === 'CANCEL') {
           return { kind: 'cancelled' };
         }
+        return {
+          kind: 'completed',
+          uploadedCount: result.uploadedCount,
+          piggybackedOpsCount: result.piggybackedOps.length,
+          localWinOpsCreated: 0,
+          permanentRejectionCount: 0,
+          hasMorePiggyback: false,
+          rejectedOps: [],
+        };
+      }
+
+      if (processResult.preApplyRepairDeferred) {
+        // Cursor stays behind the repair (the persist below is skipped), so the
+        // batch comes back next cycle and the gate defers the repair up front.
+        OpLog.normal(
+          'OperationLogSyncService: Pending work appeared before the piggybacked REPAIR apply; ' +
+            'retrying the batch next cycle.',
+        );
         return {
           kind: 'completed',
           uploadedCount: result.uploadedCount,
@@ -1095,7 +1129,8 @@ export class OperationLogSyncService {
     let startupOpIdsToDiscard: string[] = [];
     let startupCleanupFullStateOpId: string | undefined;
     if (incomingConflict.fullStateOp) {
-      const { fullStateOp, pendingOps, dialogData } = incomingConflict;
+      const { fullStateOp, pendingOps, dialogData, deferredRepairOpId } =
+        incomingConflict;
       // Existing synced store data is not a conflict here. Prompt only when
       // local pending user changes would be discarded; otherwise an old client
       // can accidentally force-upload stale state over the remote import.
@@ -1119,6 +1154,12 @@ export class OperationLogSyncService {
         // Validation failure (if any during USE_REMOTE force-download) is on
         // the session-validation latch — wrapper reads it. (#7330)
         return { kind: 'no_new_ops' };
+      } else if (deferredRepairOpId) {
+        OpLog.normal(
+          `OperationLogSyncService: Deferring incoming REPAIR from client ` +
+            `${fullStateOp.clientId}; ${pendingOps.length} pending local op(s) ` +
+            `keep their place and this client repairs its own state instead.`,
+        );
       } else {
         startupOpIdsToDiscard = incomingConflict.discardablePendingOpIds;
         startupCleanupFullStateOpId = fullStateOp.id;
@@ -1139,8 +1180,21 @@ export class OperationLogSyncService {
         ignoredLocalFullStateOpIds: options?.ignoredLocalFullStateOpIds,
         conflictRecheck: { isNeverSynced: options?.isNeverSynced },
         fenceEpoch: options?.fenceEpoch,
+        ...(incomingConflict.deferredRepairOpId
+          ? { deferredRepairOpId: incomingConflict.deferredRepairOpId }
+          : {}),
       },
     );
+
+    if (processResult.preApplyRepairDeferred) {
+      // Cursor stays behind the repair (the persist below is skipped), so the
+      // batch comes back next cycle and the gate defers the repair up front.
+      OpLog.normal(
+        'OperationLogSyncService: Pending work appeared before the incoming REPAIR apply; ' +
+          'retrying the batch next cycle.',
+      );
+      return { kind: 'no_new_ops' };
+    }
 
     if (processResult.preApplyFullStateConflict?.dialogData) {
       const { fullStateOp, pendingOps, dialogData } =
@@ -1255,10 +1309,20 @@ export class OperationLogSyncService {
       };
       /** Sync epoch captured at cycle start (#9074); fences the apply. */
       fenceEpoch?: number;
+      /** Causal REPAIR the gate deferred; dropped from this batch (#9773). */
+      deferredRepairOpId?: string;
     },
   ): Promise<GuardedRemoteOpsProcessingResult> {
     const startupOpIdsToDiscard = new Set(startupOpIds);
     let preApplyFullStateConflict: IncomingFullStateConflictGateResult | undefined;
+    let preApplyRepairDeferred = false;
+    // Drop the deferred repair, then treat the rest of the batch as ordinary
+    // remote ops. The snapshot is not lost work: this client already applies
+    // every op the repair was built from, so only the correction itself is
+    // skipped — and the post-apply validation below recomputes that locally.
+    const opsToProcess = options?.deferredRepairOpId
+      ? remoteOps.filter((op) => op.id !== options.deferredRepairOpId)
+      : remoteOps;
     try {
       const conflictRecheck = options?.conflictRecheck;
       const beforeFullStateApply = conflictRecheck
@@ -1274,6 +1338,14 @@ export class OperationLogSyncService {
             for (const opId of conflict.discardablePendingOpIds) {
               startupOpIdsToDiscard.add(opId);
             }
+            if (conflict.deferredRepairOpId) {
+              // Too late to drop the repair from this batch — it is already
+              // partitioned for a wholesale apply. Block the apply and leave
+              // the cursor behind it; the next cycle's gate check runs before
+              // partitioning and defers it properly (#9773).
+              preApplyRepairDeferred = true;
+              return false;
+            }
             if (conflict.dialogData) {
               preApplyFullStateConflict = conflict;
               return false;
@@ -1283,22 +1355,37 @@ export class OperationLogSyncService {
         : undefined;
       const result = await this.repairSyncContext.runWithBaseServerSeq(
         options?.repairBaseServerSeq,
-        () =>
-          this.remoteOpsProcessingService.processRemoteOps(remoteOps, {
-            ...(options?.ignoredLocalFullStateOpIds?.length
-              ? {
-                  ignoredLocalFullStateOpIds: options.ignoredLocalFullStateOpIds,
-                }
-              : {}),
-            ...(beforeFullStateApply ? { beforeFullStateApply } : {}),
-            ...(options?.fenceEpoch !== undefined
-              ? { fenceEpoch: options.fenceEpoch }
-              : {}),
-          }),
+        async () => {
+          const processed = await this.remoteOpsProcessingService.processRemoteOps(
+            opsToProcess,
+            {
+              ...(options?.ignoredLocalFullStateOpIds?.length
+                ? {
+                    ignoredLocalFullStateOpIds: options.ignoredLocalFullStateOpIds,
+                  }
+                : {}),
+              ...(beforeFullStateApply ? { beforeFullStateApply } : {}),
+              ...(options?.fenceEpoch !== undefined
+                ? { fenceEpoch: options.fenceEpoch }
+                : {}),
+            },
+          );
+          if (options?.deferredRepairOpId && !preApplyRepairDeferred) {
+            // The skipped snapshot carried the fix for corruption this client
+            // most likely shares (it applied the same ops). Heal it here:
+            // processRemoteOps only validates when it applied something, and a
+            // batch holding just the repair applies nothing. Inside
+            // runWithBaseServerSeq so any repair this produces is causal — a
+            // legacy one would make receivers drop concurrent ops.
+            await this.remoteOpsProcessingService.validateAfterSync();
+          }
+          return processed;
+        },
       );
       if (
         result.fullStateApplyBlockedByLocalConflict &&
-        !preApplyFullStateConflict?.dialogData
+        !preApplyFullStateConflict?.dialogData &&
+        !preApplyRepairDeferred
       ) {
         throw new Error(
           'Full-state apply was blocked without conflict data for resolution.',
@@ -1312,6 +1399,7 @@ export class OperationLogSyncService {
       return {
         ...result,
         ...(preApplyFullStateConflict ? { preApplyFullStateConflict } : {}),
+        ...(preApplyRepairDeferred ? { preApplyRepairDeferred } : {}),
       };
     } catch (error) {
       try {

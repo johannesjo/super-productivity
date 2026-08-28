@@ -511,28 +511,23 @@ test.describe('@supersync REPAIR lifecycle', () => {
 
 test.describe('@supersync REPAIR with an offline client', () => {
   /**
-   * A causal REPAIR is automatic, so its client contract is meant to be
-   * narrower than an import's: `SyncImportFilterService` drops only the ops the
-   * repair snapshot already covers, concurrent work replays on top instead of
-   * being discarded, and its own doc states that an automatic REPAIR "never
-   * opens the explicit import/restore conflict dialog".
+   * A causal REPAIR is automatic, so it must never reach the explicit
+   * import/restore conflict dialog. It used to: `SyncImportConflictGateService`
+   * matched on `FULL_STATE_OP_TYPES`, which includes REPAIR, so a device
+   * returning with pending work after another device's background repair was
+   * prompted with "replaces this device's data with the server's and discards N
+   * local change(s)" — and every answer lost something. Traced: the returning
+   * device issued no ops upload at all, so its work reached neither the server
+   * nor its own repaired state (#9773).
    *
-   * KNOWN FAILING — it does. `SyncImportConflictGateService` matches on
-   * `FULL_STATE_OP_TYPES`, which includes REPAIR, so a device returning with
-   * pending work after another device's background repair is prompted with the
-   * import conflict dialog ("replaces this device's data with the server's and
-   * discards N local change(s)") and loses that work if it accepts. Verified
-   * from the trace: the returning device issues no ops upload at all, so the
-   * work reaches neither the server nor the repaired state.
-   *
-   * Note the gate is currently the ONLY thing protecting those ops: applying a
-   * full-state op replaces the whole store, and nothing replays local unsynced
-   * ops afterwards. Simply exempting REPAIR from the gate would trade the
-   * prompt for silent divergence. Making this pass means replaying the pending
-   * ops on top of the applied repair, which is what SyncImportFilterService
-   * already promises for concurrent work. Filed as #9773.
+   * Exempting REPAIR from the gate would have been worse than the prompt:
+   * applying a full-state op replaces the whole store and nothing replays local
+   * unsynced ops afterwards, so it would trade the dialog for silent
+   * divergence. The fix defers instead — a device holding pending work skips
+   * the incoming snapshot and heals its own copy of the same corruption, which
+   * is why a second REPAIR here is expected rather than a regression.
    */
-  test.fixme('keeps an offline client’s pending work and does not resurrect what the REPAIR removed', async ({
+  test('keeps an offline client’s pending work and does not resurrect what the REPAIR removed', async ({
     browser,
     baseURL,
     testRunId,
@@ -604,11 +599,24 @@ test.describe('@supersync REPAIR with an offline client', () => {
       await waitForTask(clientA.page, offlineTaskTitle);
       await expectConvergedTask(clientA, sharedTaskTitle, ghostTagId);
 
-      // Still exactly one repair: B's return did not trigger a second one.
+      // One more round each so B's own repair — if it uploaded one after
+      // healing itself — is on the server and applied by A.
+      await clientB.sync.syncAndWait({ timeout: 60000 });
+      await clientA.sync.syncAndWait({ timeout: 60000 });
+      await expectConvergedTask(clientA, sharedTaskTitle, ghostTagId);
+      await expectConvergedTask(clientB, sharedTaskTitle, ghostTagId);
+      await waitForTask(clientA.page, offlineTaskTitle);
+      await waitForTask(clientB.page, offlineTaskTitle);
+      await waitForTask(clientA.page, sharedTaskTitle);
+      await waitForTask(clientB.page, sharedTaskTitle);
+
+      // A's repair, plus at most B's own after it healed its local copy.
+      // Anything beyond that is the two clients trading repairs.
       const repairOperations = (await getServerOperations(user.userId)).filter(
         ({ opType }) => opType === 'REPAIR',
       );
-      expect(repairOperations).toHaveLength(1);
+      expect(repairOperations.length).toBeGreaterThanOrEqual(1);
+      expect(repairOperations.length).toBeLessThanOrEqual(2);
     } finally {
       if (clientA) await closeClient(clientA);
       if (clientB) await closeClient(clientB);
