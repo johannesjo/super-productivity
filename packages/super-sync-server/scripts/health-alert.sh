@@ -244,6 +244,29 @@ if $DOCKER_OK; then
     fi
   done
 
+  # 9. PostgreSQL in-place crash-restart (#9695). When a backend dies unexpectedly the
+  # postmaster terminates every connection and re-runs WAL recovery INSIDE the running
+  # container: RestartCount stays 0, the container never leaves "running", and recovery
+  # finishes in seconds — fewer than the 5 failed probes the compose healthcheck needs —
+  # so checks 1 and 3 are structurally blind to it (45 undetected occurrences on the
+  # hosted server). The postmaster's reinitializing line is the one durable trace, and
+  # the postgres json-file log window is small (10m x 3), so only a prompt reader — this
+  # check — sees it at all. The count says "entries" on purpose: the "(N entries" rule in
+  # the normalizer below already collapses it, so a crash sitting in the one-minute
+  # overlap of two consecutive 6-min windows cannot re-mail as a new problem.
+  if [ -n "$POSTGRES_SERVICE" ]; then
+    PG_CONTAINER_ID=$(docker compose ps -aq "$POSTGRES_SERVICE" 2>/dev/null | head -1 || true)
+    if [ -n "$PG_CONTAINER_ID" ]; then
+      # 2>&1: postgres logs to stderr and `docker logs` keeps the streams apart.
+      # Bounded like every other read under the flock.
+      PG_CRASHES=$(timeout 10 docker logs --since 6m "$PG_CONTAINER_ID" 2>&1 |
+        grep -c 'all server processes terminated; reinitializing' || true)
+      if [[ "$PG_CRASHES" =~ ^[0-9]+$ ]] && [ "$PG_CRASHES" -gt 0 ]; then
+        PROBLEMS="${PROBLEMS}PostgreSQL crash-restarted in place (${PG_CRASHES} entries in last 6 min)\n"
+      fi
+    fi
+  fi
+
   # 6-8. Query the configured database from the app container so external
   # PostgreSQL deployments use the same DATABASE_URL and Prisma client as the app.
   if $DB_CONFIG_OK; then

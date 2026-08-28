@@ -4,9 +4,7 @@
 not wired. IndexedDB remains the live op-log backend on every platform.
 
 This document is the single status, rationale, and rollout contract for the
-native SQLite work associated with #7892 and #7931. The former
-[`sqlite-migration-followup.md`](./sqlite-migration-followup.md) path is only a
-compatibility pointer.
+native SQLite work associated with #7892 and #7931.
 
 ## Goal and scope
 

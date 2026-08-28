@@ -38,6 +38,11 @@ if [ "\${1:-}" = "inspect" ]; then
   exit 0
 fi
 
+if [ "\${1:-}" = "logs" ]; then
+  printf '%b\n' "\${FAKE_PG_LOG-}"
+  exit 0
+fi
+
 if [ "\${1:-}" != "compose" ]; then
   exit 99
 fi
@@ -637,6 +642,53 @@ describe('health-alert.sh service and database monitoring', () => {
     const result = run({ FAKE_LONGEST: '' });
 
     expect(result.mailLog).toContain('Database monitoring checks failed');
+  });
+});
+
+describe('health-alert.sh postgres crash-restart check', () => {
+  // An in-place crash recovery never touches container state, RestartCount, or the
+  // compose healthcheck (recovery finishes in seconds; the probe needs 5 consecutive
+  // failures), so checks 1 and 3 are structurally blind to it — 45 occurrences on the
+  // hosted server before one was noticed (#9695). The postmaster's own log line is the
+  // only durable trace, and the postgres log window rotates within days.
+  const CRASH_LINE =
+    '2026-08-22 08:05:22.841 UTC [1] LOG:  all server processes terminated; reinitializing';
+
+  it('pages when the postmaster reinitialized inside a running container', () => {
+    const result = run({ FAKE_PG_LOG: CRASH_LINE });
+
+    // --since is load-bearing: unbounded `docker logs` re-reads the whole retained
+    // window every 5 minutes and would re-page old crashes after every incident.
+    expect(result.dockerLog).toContain('logs --since 6m id-postgres');
+    expect(result.mailLog).toContain(
+      'PostgreSQL crash-restarted in place (1 entries in last 6 min)',
+    );
+  });
+
+  it('does not re-mail when the crash count changes', () => {
+    // Pins the message wording to the existing "(N entries" normalizer rule: a crash
+    // sitting in the one-minute overlap of two consecutive 6-min windows is counted by
+    // both runs, and the second sighting must dedupe, not re-page.
+    run({ FAKE_PG_LOG: CRASH_LINE });
+    const second = run({ FAKE_PG_LOG: `${CRASH_LINE}\\n${CRASH_LINE}` });
+
+    expect(countAlerts(second.mailLog)).toBe(1);
+    expect(second.mailLog).toContain('(1 entries in last 6 min)');
+  });
+
+  it('stays quiet on a normal postgres log', () => {
+    const result = run({
+      FAKE_PG_LOG: '2026-08-22 08:04:16 UTC [27737] LOG:  checkpoint starting: time',
+    });
+
+    expect(result.mailLog).toBe('');
+  });
+
+  it('skips the container log read for an external database', () => {
+    const result = run({ POSTGRES_SERVICE: '', FAKE_PG_LOG: CRASH_LINE });
+
+    expect(result.dockerLog).not.toContain('logs --since');
+    expect(result.mailLog).toBe('');
   });
 });
 

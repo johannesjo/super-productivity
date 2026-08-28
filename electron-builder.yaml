@@ -42,7 +42,7 @@ beforePack: ./tools/beforePack.js
 # Post-pack hook that installs a shell wrapper for Linux builds to force
 # --ozone-platform=x11 in Snap+Wayland sessions.
 # See tools/afterPack.js + build/linux/snap-wrapper.sh and
-# docs/research/snap-wayland-gpu-fix-research.md §18.
+# docs/research/snap-wayland-gpu-fix-research.md.
 afterPack: ./tools/afterPack.js
 
 win:

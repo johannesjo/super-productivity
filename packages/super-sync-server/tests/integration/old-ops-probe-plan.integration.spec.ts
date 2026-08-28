@@ -14,19 +14,26 @@
  *   A  operations_user_id_received_at_idx   — bounded by the RETENTION WINDOW
  *   B  operations_user_id_server_seq_key    — bounded by the user's ENTIRE AGED PREFIX
  *
+ * (A is the LEGACY 2-col index. The schema has since replaced it with the covering
+ * 3-col form — see the COVERING_IDX note below for how this file measures both worlds.)
+ *
  * B is what hit the 60s `statement_timeout` (57014) on production, and because the throw
  * escaped the per-candidate loop it cost the WHOLE FLEET its nightly retention pass. B is
  * worst precisely on the deepest histories — the cohort the sweep exists to prune — so it
  * degrades every day it fails.
  *
  * WHY IT WAS A COIN FLIP, WHICH IS THE ACTUAL DEFECT. Without the ORDER BY, A and B are
- * not merely close: on the seed below PostgreSQL 16 costs them BIT-IDENTICALLY (both
+ * not merely close: with both indexes grown organically by the same inserts (production,
+ * and the original form of this seed) PostgreSQL 16 costs them BIT-IDENTICALLY (both
  * `0.29..32.17 rows=2`), because under a generic plan each is "equality on user_id plus
  * one range with default selectivity". Measured, A touches 9 buffers and B touches
  * 60,329 — a ~6700x difference the cost model cannot see at all. Which one you get is
  * settled by tie-breaking no version promises to keep stable, so the same statement can
  * be instant on one server and fatal on another, or flip after a REINDEX. The second test
- * below pins that tie, because the tie IS the bug.
+ * below pins that tie, because the tie IS the bug. (This harness now REBUILDS the legacy
+ * index — see LEGACY_DDL — and a CREATE INDEX packs pages tighter than organic growth,
+ * so the two costs land a percent or two apart here rather than byte-equal; that gap is
+ * physical-stat noise, and the test asserts it stays inside noise.)
  *
  * SO THE CANDIDATES ARE MEASURED ONE AT A TIME, each with the other's index dropped inside
  * a rolled-back transaction, and no test asserts which one an unordered EXPLAIN returns.
@@ -86,8 +93,28 @@ const AGED_PREFIX = 30_000;
 /** Recent activity, all ABOVE the boundary, so the honest answer for that user is NO. */
 const WINDOW_OPS = 200;
 const BOUNDARY_SEQ = AGED_PREFIX + 1;
+/**
+ * The heavy-activity cohort (production's user 5002 shape): a small aged
+ * prefix, then a season of activity — every probe walks the whole window for
+ * its NO answer. Five such users' probes were cancelled at the 60s
+ * statement_timeout in the 2026-08-27 production run.
+ */
+const HEAVY_AGED_PREFIX = 1_000;
+const HEAVY_FRESH_OPS = 20_000;
+const HEAVY_BOUNDARY_SEQ = HEAVY_AGED_PREFIX + 1;
 
-const WINDOW_IDX = 'operations_user_id_received_at_idx';
+/**
+ * The schema's window index is now the COVERING 3-col form (#9692 follow-up):
+ * server_seq trails, so the probe's `server_seq < $2` is answered from the
+ * index tuple and a NO answer qualifies for an index-only scan. The LEGACY
+ * 2-col form is what the tie tests below document — it is the world every
+ * not-yet-migrated install still runs (the migration is CONCURRENTLY DDL on a
+ * multi-GB table, so self-hosters lag), and the ORDER BY's tie-break is what
+ * protects exactly those installs. Legacy measurements recreate that index
+ * inside a rolled-back transaction; nothing here assumes it exists on disk.
+ */
+const COVERING_IDX = 'operations_user_id_received_at_server_seq_idx';
+const LEGACY_WINDOW_IDX = 'operations_user_id_received_at_idx';
 const PREFIX_IDX = 'operations_user_id_server_seq_key';
 
 /**
@@ -113,6 +140,8 @@ const runnerFor = (tx: Prisma.TransactionClient): ExplainRunner => ({
 type Plan = {
   /** Rows the plan actually walked: emitted PLUS discarded by a Filter. */
   examined: number;
+  /** Root-node shared hit+read blocks — the I/O signal for heap-fetch claims. */
+  blocks: number;
   estimatedCost: number;
   nodes: string;
 };
@@ -122,6 +151,7 @@ const toPlan = (m: Measured): Plan => ({
   // node EMITS — and a NO answer emits zero down BOTH candidates, so on its own it cannot
   // tell them apart. The entire cost of the bad plan lands in `Rows Removed by Filter`.
   examined: m.rowsTouched + m.rowsFiltered + m.rowsJoinFiltered,
+  blocks: m.blocks,
   estimatedCost: m.estimatedCost,
   nodes: m.nodes,
 });
@@ -139,51 +169,77 @@ const measure = async (sql: string, params: readonly unknown[]): Promise<Plan> =
 const ROLLBACK_SENTINEL = 'rollback-after-measuring';
 
 /**
- * Measures ONE candidate in isolation, by dropping the index that backs the other. DDL is
- * transactional in PostgreSQL, so dropping the index and then forcing a rollback leaves the
- * schema untouched; throwing is the only way to make Prisma roll an interactive transaction
+ * Runs `ddl` statements, measures, then forces a rollback. DDL is transactional in
+ * PostgreSQL, so dropping or creating indexes and then rolling back leaves the schema
+ * untouched; throwing is the only way to make Prisma roll an interactive transaction
  * back.
  *
- * This is how the file compares candidates without a hint extension. `pg_hint_plan` is not
- * installed on production, and installing it to test what production does would defeat the
- * purpose.
+ * This is how the file compares candidates without a hint extension (`pg_hint_plan` is
+ * not installed on production, and installing it to test what production does would
+ * defeat the purpose) AND how it re-enters the pre-migration legacy world.
  *
- * Both index names below are plain indexes rather than constraint-backed ones — `@@unique`
- * renders as `CREATE UNIQUE INDEX` in 0_init and under `prisma db push` alike — so a bare
- * `DROP INDEX` reaches either.
+ * Every index name here is a plain index rather than a constraint-backed one —
+ * `@@unique` renders as `CREATE UNIQUE INDEX` in 0_init and under `prisma db push`
+ * alike — so a bare `DROP INDEX` reaches any of them.
  */
-const measureWithout = async (
-  droppedIdx: string,
+const measureUnderDdl = async (
+  ddl: readonly string[],
   sql: string,
   params: readonly unknown[],
 ): Promise<Plan> => {
   let captured: Plan | undefined;
   try {
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe(`DROP INDEX ${droppedIdx}`);
-      captured = toPlan(await explainGeneric(runnerFor(tx), sql, params));
-      throw new Error(ROLLBACK_SENTINEL);
-    });
+    await prisma.$transaction(
+      async (tx) => {
+        for (const statement of ddl) await tx.$executeRawUnsafe(statement);
+        captured = toPlan(await explainGeneric(runnerFor(tx), sql, params));
+        throw new Error(ROLLBACK_SENTINEL);
+      },
+      // In-txn CREATE INDEX over the whole seed takes longer than the 5s default.
+      { timeout: 60_000 },
+    );
   } catch (error) {
     if ((error as Error)?.message !== ROLLBACK_SENTINEL) throw error;
   }
-  if (!captured) throw new Error(`the plan without ${droppedIdx} was never captured`);
+  if (!captured) throw new Error('the plan under the DDL variant was never captured');
   return captured;
 };
 
-/** Candidate A alone — with the prefix index gone, the window index is what serves `user_id`. */
-const measureWindowCandidate = (sql: string, params: readonly unknown[]): Promise<Plan> =>
-  measureWithout(PREFIX_IDX, sql, params);
+/**
+ * The pre-migration world: covering index gone, legacy 2-col window index present.
+ * The tie the file documents lives HERE — the covering index would break it by
+ * width alone, so measuring the tie against today's schema would be measuring
+ * nothing (see the header note on LEGACY_WINDOW_IDX for why the legacy world
+ * still matters).
+ */
+const LEGACY_DDL = [
+  `DROP INDEX ${COVERING_IDX}`,
+  `CREATE INDEX ${LEGACY_WINDOW_IDX} ON "operations"("user_id", "received_at")`,
+] as const;
 
-/** Candidate B alone — the plan the planner would have had, had the window index not existed. */
-const measurePrefixCandidate = (sql: string, params: readonly unknown[]): Promise<Plan> =>
-  measureWithout(WINDOW_IDX, sql, params);
+const measureLegacy = (sql: string, params: readonly unknown[]): Promise<Plan> =>
+  measureUnderDdl(LEGACY_DDL, sql, params);
+
+/** Legacy candidate A alone — the 2-col window index is what serves `user_id`. */
+const measureLegacyWindowCandidate = (
+  sql: string,
+  params: readonly unknown[],
+): Promise<Plan> =>
+  measureUnderDdl([...LEGACY_DDL, `DROP INDEX ${PREFIX_IDX}`], sql, params);
+
+/** Legacy candidate B alone — the plan the planner had when no window index existed. */
+const measureLegacyPrefixCandidate = (
+  sql: string,
+  params: readonly unknown[],
+): Promise<Plan> => measureUnderDdl([`DROP INDEX ${COVERING_IDX}`], sql, params);
 
 describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
   /** The deep-prefix user: the cohort the sweep exists to prune, and the one that timed out. */
   let deepUserId = 0;
   /** A user whose prefix DOES hold an in-window op — the `skippedFreshPrefix` answer. */
   let freshUserId = 0;
+  /** The heavy-activity cohort — see HEAVY_AGED_PREFIX. */
+  let heavyUserId = 0;
 
   beforeAll(async () => {
     await prisma.$executeRawUnsafe(
@@ -193,10 +249,11 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
       `INSERT INTO "users" ("email") SELECT 'plan-' || g || '@test.invalid' FROM generate_series(1, ${USER_COUNT}) g`,
     );
     const ids = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
-      'SELECT id FROM "users" ORDER BY id LIMIT 2',
+      'SELECT id FROM "users" ORDER BY id LIMIT 3',
     );
     deepUserId = ids[0].id;
     freshUserId = ids[1].id;
+    heavyUserId = ids[2].id;
 
     const seedOps = (
       userId: number,
@@ -230,8 +287,35 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
       seedOps(freshUserId, 101, 200, `${CUTOFF} + g * 1000`),
     );
 
+    // Heavy user: same shape as the deep user but inverted proportions — the NO
+    // answer's cost is the WINDOW, and this window is a production-sized one.
+    await prisma.$executeRawUnsafe(
+      seedOps(
+        heavyUserId,
+        1,
+        HEAVY_AGED_PREFIX,
+        `${CUTOFF} - (${HEAVY_AGED_PREFIX} + 1 - g) * 1000`,
+      ),
+    );
+    // The fresh window is inserted in SCRAMBLED physical order. Production pages
+    // interleave every tenant's concurrent writes, so consecutive received_at entries
+    // for ONE user virtually never share a heap page and each probe step is its own
+    // random heap read — that per-op read is what timed out at 9.5ms cold I/O. A
+    // single-tenant seed inserted in received_at order hides this completely: the
+    // scan re-fetches the page it already holds, which ReleaseAndReadBuffer doesn't
+    // even count as a buffer access, and the legacy plan measures ~50x cheaper than
+    // production. Scrambling restores one page transition per fetched row.
+    await prisma.$executeRawUnsafe(
+      `${seedOps(
+        heavyUserId,
+        HEAVY_BOUNDARY_SEQ,
+        HEAVY_FRESH_OPS,
+        `${CUTOFF} + g * 1000`,
+      )} ORDER BY md5(g::text)`,
+    );
+
     // Every other user gets a handful of rows: n_distinct is what produces the tie, so the
-    // population has to be real even though only two users are ever probed.
+    // population has to be real even though only three users are ever probed.
     await prisma.$executeRawUnsafe(
       `INSERT INTO "operations" (
          "id","user_id","client_id","server_seq","action_type","op_type","entity_type",
@@ -239,11 +323,16 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
        )
        SELECT 'bulk-' || u || '-' || g, u, 'c-' || u, g, 'ADD', 'CRT', 'TASK', 'e' || g,
               '{}'::jsonb, '{}'::jsonb, 1, ${NOW}, ${CUTOFF} - g * 1000
-       FROM generate_series(3, ${USER_COUNT}) u, generate_series(1, 5) g`,
+       FROM generate_series(4, ${USER_COUNT}) u, generate_series(1, 5) g`,
     );
 
-    // Without this the planner works from empty statistics and every assertion is noise.
-    await prisma.$executeRawUnsafe('ANALYZE "operations"');
+    // VACUUM, not just ANALYZE: the index-only-scan claims below depend on the
+    // visibility map, which only vacuum populates. (Production's steady state:
+    // pages written since the last autovacuum still cost the IOS a heap check,
+    // so the covering index bounds the NO answer by RECENT activity — strictly
+    // tighter than the whole window, but not zero heap.) ANALYZE rides along
+    // because the planner otherwise works from empty statistics.
+    await prisma.$executeRawUnsafe('VACUUM (ANALYZE) "operations"');
 
     // The deep user's answer MUST be NO, or this file tests nothing. Assert the fixture
     // rather than trusting the arithmetic above.
@@ -260,6 +349,19 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
         `seed is wrong: deep user answers YES at serverSeq ${hit.serverSeq}`,
       );
     }
+    const heavyHit = await prisma.operation.findFirst({
+      where: {
+        userId: heavyUserId,
+        serverSeq: { lt: HEAVY_BOUNDARY_SEQ },
+        receivedAt: { gte: BigInt(CUTOFF) },
+      },
+      select: { serverSeq: true },
+    });
+    if (heavyHit) {
+      throw new Error(
+        `seed is wrong: heavy user answers YES at serverSeq ${heavyHit.serverSeq}`,
+      );
+    }
   }, 180_000);
 
   afterAll(async () => {
@@ -272,7 +374,7 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
   it('CANARY: the prefix-bound candidate is catastrophic on this seed', async () => {
     // If this ever comes back cheap, the seed has stopped reproducing production's shape
     // and every other assertion in this file is vacuous. Failing here is the point.
-    const prefixCandidate = await measurePrefixCandidate(UNORDERED_SQL, [
+    const prefixCandidate = await measureLegacyPrefixCandidate(UNORDERED_SQL, [
       deepUserId,
       BOUNDARY_SEQ,
       CUTOFF,
@@ -294,37 +396,47 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
     // index on GitHub Actions' 16.15, where reading the winner as "the cheap candidate"
     // made the ratio below 1 and failed the run. A spec that passes or fails by the very
     // luck it exists to document is measuring the luck, not the tie.
-    const windowCandidate = await measureWindowCandidate(UNORDERED_SQL, [
+    const windowCandidate = await measureLegacyWindowCandidate(UNORDERED_SQL, [
       deepUserId,
       BOUNDARY_SEQ,
       CUTOFF,
     ]);
-    const prefixCandidate = await measurePrefixCandidate(UNORDERED_SQL, [
+    const prefixCandidate = await measureLegacyPrefixCandidate(UNORDERED_SQL, [
       deepUserId,
       BOUNDARY_SEQ,
       CUTOFF,
     ]);
 
-    expect(windowCandidate.nodes).toContain(WINDOW_IDX);
+    expect(windowCandidate.nodes).toContain(LEGACY_WINDOW_IDX);
     expect(prefixCandidate.nodes).toContain(PREFIX_IDX);
-    // Not "close enough" — bit-identical, to the planner's own precision.
-    expect(prefixCandidate.estimatedCost).toBeCloseTo(windowCandidate.estimatedCost, 5);
-    // ...and the tie is emphatically not benign: same predicted cost, ~100x the work.
+    // Production's organically-grown pair costs BIT-IDENTICALLY (header). The harness
+    // rebuilds the legacy index with CREATE INDEX, which packs its pages tighter, so the
+    // costs land ~2% apart here — still physical-stat noise (a REINDEX moves it), while
+    // the true-cost spread it hides is ~100x. Asserting a noise-sized bound keeps the
+    // claim: the model cannot tell the candidates apart in any way that tracks reality.
+    const costGap =
+      Math.abs(prefixCandidate.estimatedCost - windowCandidate.estimatedCost) /
+      windowCandidate.estimatedCost;
+    expect(costGap).toBeLessThan(0.05);
+    // ...and the near-tie is emphatically not benign: same predicted cost, ~100x the work.
     expect(
       prefixCandidate.examined / Math.max(windowCandidate.examined, 1),
     ).toBeGreaterThan(50);
 
-    // The planner is choosing blind BETWEEN THESE TWO, at the tied cost — which is the
+    // The planner is choosing blind BETWEEN THESE TWO, at noise-tied cost — which is the
     // claim. Which of them comes back is not asserted, only that it is one of them: pin
     // the winner and this test starts failing on whichever machine loses the flip.
-    const chosen = await measure(UNORDERED_SQL, [deepUserId, BOUNDARY_SEQ, CUTOFF]);
-    expect(chosen.nodes).toMatch(new RegExp(`${WINDOW_IDX}|${PREFIX_IDX}`));
-    expect(chosen.estimatedCost).toBeCloseTo(windowCandidate.estimatedCost, 5);
+    const chosen = await measureLegacy(UNORDERED_SQL, [deepUserId, BOUNDARY_SEQ, CUTOFF]);
+    expect(chosen.nodes).toMatch(new RegExp(`${LEGACY_WINDOW_IDX}|${PREFIX_IDX}`));
+    expect(
+      Math.abs(chosen.estimatedCost - windowCandidate.estimatedCost) /
+        windowCandidate.estimatedCost,
+    ).toBeLessThan(0.05);
   });
 
   it('the ORDER BY breaks that tie by making the prefix candidate pay a Sort', async () => {
-    const chosen = await measure(ORDERED_SQL, [deepUserId, BOUNDARY_SEQ, CUTOFF]);
-    const prefixCandidate = await measurePrefixCandidate(ORDERED_SQL, [
+    const chosen = await measureLegacy(ORDERED_SQL, [deepUserId, BOUNDARY_SEQ, CUTOFF]);
+    const prefixCandidate = await measureLegacyPrefixCandidate(ORDERED_SQL, [
       deepUserId,
       BOUNDARY_SEQ,
       CUTOFF,
@@ -333,7 +445,7 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
     // The window index emits `received_at` order for free, so it keeps LIMIT-1 pushdown.
     // Asserting the WINNER is legitimate here and only here: the margin below is what took
     // the choice away from the tie-break, so there is no longer a flip to lose.
-    expect(chosen.nodes).toContain(WINDOW_IDX);
+    expect(chosen.nodes).toContain(LEGACY_WINDOW_IDX);
     expect(chosen.nodes).not.toContain('Sort');
     // The prefix candidate cannot, so it must materialise and sort — losing the early exit
     // and, with it, the tie.
@@ -348,11 +460,41 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
       CUTOFF,
     ]);
 
-    expect(nodes).toContain(WINDOW_IDX);
+    expect(nodes).toContain(COVERING_IDX);
     expect(examined).toBeLessThanOrEqual(WINDOW_OPS * 2);
     // Bounded by recent activity rather than by depth is the whole claim: assert the RATIO
     // too, so the test keeps meaning the same thing if the seed sizes are ever retuned.
     expect(examined).toBeLessThan(AGED_PREFIX / 10);
+  });
+
+  it('the covering index answers a heavy NO from the index alone (#9692 follow-up)', async () => {
+    // The heavy cohort is what the legacy index could NOT serve inside 60s in
+    // production: an activity-bounded NO answer is still one random heap fetch
+    // per fresh op just to evaluate `server_seq < $2`, because the 2-col index
+    // does not carry server_seq. With server_seq trailing in the covering
+    // index the same walk stays inside the index (heap checks only for
+    // not-all-visible pages), so the cost collapses from heap pages to index
+    // pages. Measured as blocks — `examined` is identical in both worlds and
+    // cannot see this defect at all.
+    const legacy = await measureLegacy(ORDERED_SQL, [
+      heavyUserId,
+      HEAVY_BOUNDARY_SEQ,
+      CUTOFF,
+    ]);
+    const covering = await measure(ORDERED_SQL, [
+      heavyUserId,
+      HEAVY_BOUNDARY_SEQ,
+      CUTOFF,
+    ]);
+
+    // CANARY half: the legacy plan must still be paying per-row heap I/O on
+    // this seed, or the comparison below is vacuous.
+    expect(legacy.nodes).toContain(LEGACY_WINDOW_IDX);
+    expect(legacy.blocks).toBeGreaterThan(HEAVY_FRESH_OPS / 4);
+    // The claim: index-only, and an order of magnitude fewer blocks.
+    expect(covering.nodes).toContain('Index Only Scan');
+    expect(covering.nodes).toContain(COVERING_IDX);
+    expect(covering.blocks).toBeLessThan(legacy.blocks / 8);
   });
 
   it('short-circuits a YES answer on the first row', async () => {

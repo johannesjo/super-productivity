@@ -78,6 +78,30 @@ describe('performance migrations', () => {
     expect(migrationSql).not.toMatch(/\bBEGIN\b|\bCOMMIT\b/i);
   });
 
+  it('drops the unused (user_id, client_id) index as a single native-apply statement', () => {
+    const migrationSql = readMigration(
+      '20260828000000_drop_unused_operations_user_id_client_id_index',
+    );
+
+    expect(migrationSql).toContain(
+      'DROP INDEX CONCURRENTLY IF EXISTS "operations_user_id_client_id_idx"',
+    );
+    // The received_at index is load-bearing for the old-ops fresh-prefix probe
+    // plan and must never be dropped here.
+    expect(migrationSql).not.toContain('"operations_user_id_received_at_idx"');
+    // Single statement so `prisma migrate deploy` applies it natively without
+    // the out-of-band CONCURRENTLY recovery.
+    const sqlWithoutComments = migrationSql
+      .split('\n')
+      .filter((line) => !line.trimStart().startsWith('--'))
+      .join('\n');
+    expect(sqlWithoutComments.match(/;/g)).toHaveLength(1);
+    expect(migrationSql).not.toMatch(/\bCREATE\b/i);
+    expect(migrationSql).not.toMatch(/\bDROP\s+TABLE\b/i);
+    expect(migrationSql).not.toMatch(/\bALTER\s+TABLE\b/i);
+    expect(migrationSql).not.toMatch(/\bBEGIN\b|\bCOMMIT\b/i);
+  });
+
   it('adds partial encrypted-op sequence index concurrently', () => {
     const migrationSql = readFileSync(
       join(
@@ -443,9 +467,6 @@ describe('performance migrations', () => {
     );
     expect(composeFile).toContain('REQUIRE_DATABASE_POOL_LIMITS=true');
     expect(composeFile).toContain('MIGRATE_RECOVERY_RUNTIME=compose');
-    expect(composeFile).toContain(
-      'SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=${SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE:-false}',
-    );
     expect(composeFile).toContain('connection_limit=60&pool_timeout=10');
     expect(composeFile).toContain(
       'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -c "SELECT 1"',

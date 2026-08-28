@@ -181,11 +181,13 @@ app/proxy services with compose dependencies disabled so the bundled Postgres
 container is not required. Prisma migrations still run against the configured
 `DATABASE_URL`.
 
-### Payload byte backfill and batch uploads
+### Payload byte backfill
 
-The `payload_bytes` column must be fully backfilled before enabling batched
-uploads in production. During a partial backfill, quota reconciles use a slower
-fallback for old operation rows with `payload_bytes = 0`.
+Backfilling is optional for startup: the incremental storage counter keeps
+working without it. But while a user still has legacy rows with
+`payload_bytes = 0`, exact quota reconciles for that user are deferred (the
+server refuses to overwrite the exact counter with an approximate sum), so run
+the backfill if you want reconciliation to work for legacy accounts.
 
 Run the backfill to completion:
 
@@ -198,16 +200,6 @@ In a source checkout before `npm run build`, use:
 ```bash
 npm run migrate-payload-bytes:dev
 ```
-
-Only then set both rollout flags:
-
-```bash
-SUPERSYNC_BATCH_UPLOAD=true
-SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=true
-```
-
-The server refuses to start with `SUPERSYNC_BATCH_UPLOAD=true` unless the
-completion flag is also set.
 
 ### Manual Setup (Development)
 

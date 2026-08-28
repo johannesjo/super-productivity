@@ -226,8 +226,8 @@ export interface DuplicateOperationCandidate {
 
 /**
  * The exact column set `isSameDuplicateOperation` needs to compare an incoming
- * op against a stored one. Shared by every duplicate-detection query (batch
- * prefetch + both legacy per-op checks) so a field added here can never be
+ * op against a stored one. Shared by every duplicate-detection query (the two
+ * per-op checks and the snapshot handler) so a field added here can never be
  * silently missed at one of the call sites.
  */
 export const DUPLICATE_OP_SELECT = {
@@ -255,28 +255,6 @@ export interface LatestEntityOperationRow {
   actionType: string;
   vectorClock: unknown;
   serverSeq?: number;
-}
-
-export interface LatestBatchEntityOperationRow extends LatestEntityOperationRow {
-  entityType: string;
-}
-
-export interface BatchUploadCandidate {
-  op: Operation;
-  resultIndex: number;
-  originalTimestamp: number;
-  fullStateVectorClock?: VectorClock;
-  /**
-   * UTF-8 byte size of `op.payload` captured during validation, reused when
-   * sizing the stored op so a large payload isn't re-stringified. See
-   * `computeOpStorageBytes`'s `cachedPayloadBytes` parameter.
-   */
-  payloadBytes?: number;
-}
-
-export interface AcceptedBatchOperation extends BatchUploadCandidate {
-  serverSeq: number;
-  storageBytes: number;
 }
 
 // Conservative enough to avoid planner-heavy BitmapOr + Sort plans on large
@@ -327,8 +305,7 @@ export const createStateReplacementRequiredResults = (
  * `UploadResult` plus the op's storage size, computed once at the persist site,
  * so the caller can accumulate `acceptedDeltaBytes` without re-measuring the
  * (potentially multi-MB) payload. `storageBytes` / `fallback` are only
- * meaningful when `result.accepted` is true. Mirrors the batch path, which
- * returns `acceptedDeltaBytes` from `processOperationBatch`.
+ * meaningful when `result.accepted` is true.
  */
 export interface ProcessOperationResult {
   result: UploadResult;
@@ -488,7 +465,6 @@ export interface SyncConfig {
   uploadRateLimit: { max: number; windowMs: number };
   retentionMs: number; // Unified retention period for stored ops and devices
   maxClockDriftMs: number;
-  batchUpload: boolean;
 }
 
 // Time constants (in milliseconds)
@@ -520,5 +496,4 @@ export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   uploadRateLimit: { max: 100, windowMs: MS_PER_MINUTE },
   retentionMs: RETENTION_MS, // 45 days - used for stored ops and devices
   maxClockDriftMs: MS_PER_MINUTE, // 60 seconds
-  batchUpload: false,
 };

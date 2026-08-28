@@ -511,8 +511,7 @@ class CapacitorMainActivity : BridgeActivity() {
      * reverted #8295 fallback). The target (`rect.bottom − webViewTop`) is read
      * from `getWindowVisibleDisplayFrame` (reliable on API 28) and does not
      * depend on the WebView's own height, so it is stable across passes — no
-     * feedback loop. See docs/android-edge-to-edge-keyboard.md and
-     * docs/plans/2026-06-22-android-systembars-migration-corrected.md.
+     * feedback loop. See docs/android-edge-to-edge-keyboard.md.
      *
      * API >= 30 and WebView >= 140 are strict no-ops.
      */

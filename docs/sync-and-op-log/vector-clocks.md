@@ -269,7 +269,7 @@ The lookups in `conflict.ts` match a requested entity as the scalar `entity_id` 
   > `packages/super-sync-server/tests/conflict-entity-lookup-plan.pglite.spec.ts` and the note
   > at `detectConflictForEntity` in `packages/super-sync-server/src/sync/conflict.ts`.
 
-- `detectConflictForEntities` / `prefetchLatestEntityOpsForBatch` (batch) — raw SQL covering the **union** of both columns: a scalar branch (a lateral top-1 per requested id on the `entity_id` btree) `UNION ALL` an array branch (per-id `entity_ids @> ARRAY[id]` probes of the `GIN(entity_ids)` index, migration `20260613000001`), deduped by `DISTINCT ON`.
+- `detectConflictForEntities` (multi-entity ops) — raw SQL covering the **union** of both columns: a scalar branch (a lateral top-1 per requested id on the `entity_id` btree) `UNION ALL` an array branch (per-id `entity_ids @> ARRAY[id]` probes of the `GIN(entity_ids)` index, migration `20260613000001`), deduped by `DISTINCT ON`.
 
   > ⚠️ The two branches must stay **separate**. They were one query with an
   > `entity_ids && ... OR entity_id = ANY(...)` prefilter, and this section used to

@@ -16,13 +16,7 @@ import { prisma, disconnectDb } from './db';
 import websocket from '@fastify/websocket';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
-import {
-  syncRoutes,
-  startCleanupJobs,
-  stopCleanupJobs,
-  initSyncService,
-  getSyncService,
-} from './sync';
+import { syncRoutes, startCleanupJobs, stopCleanupJobs, initSyncService } from './sync';
 import { wsRoutes } from './sync/websocket.routes';
 import {
   getWsConnectionService,
@@ -325,7 +319,7 @@ export const createServer = (
   stop: () => Promise<void>;
 } => {
   const fullConfig = loadConfigFromEnv(config);
-  initSyncService({ batchUpload: fullConfig.batchUpload });
+  initSyncService();
 
   // Ensure data directory exists
   if (!fs.existsSync(fullConfig.dataDir)) {
@@ -437,22 +431,6 @@ export const createServer = (
         options: { maxPayload: 8192 },
       });
 
-      // Backfill self-check: paired with the env-flag enforcement in
-      // loadConfigFromEnv. The env flag (SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE)
-      // is operator-set; if it is flipped to true before the migrate-payload-bytes
-      // script finishes, batch-upload deltas are still correct but the SUM-based
-      // reconcile in calculateStorageUsage would mix exact bytes with the
-      // CASE-WHEN fallback for legacy rows. One indexed probe at startup closes
-      // the trust hole: refuse to boot if any row still has payload_bytes = 0.
-      if (fullConfig.batchUpload) {
-        try {
-          await getSyncService().assertPayloadBytesBackfillComplete();
-        } catch (err) {
-          Logger.error('Startup self-check failed', err);
-          throw err;
-        }
-      }
-
       // Health Check - verifies database connectivity
       // Exempt from rate limiting (Kubernetes probes hit this every 5-15s)
       fastifyServer.get('/health', { config: { rateLimit: false } }, async (_, reply) => {
@@ -470,6 +448,17 @@ export const createServer = (
           });
         }
       });
+
+      // Liveness - process health only, deliberately free of dependency checks.
+      // Restarting the process cannot fix a database that is down, and the restart
+      // lands a cold start exactly when the database comes back; on this chart it
+      // also drops every client's live-sync websocket, since replicaCount > 1 is
+      // rejected and there is no failover. Answering here still proves the event
+      // loop is responsive. Exempt from rate limiting like /health, as probes are
+      // frequent.
+      fastifyServer.get('/live', { config: { rateLimit: false } }, async () => ({
+        status: 'ok',
+      }));
 
       // API Routes
       await fastifyServer.register(apiRoutes, {
@@ -495,8 +484,11 @@ export const createServer = (
       // Start cleanup jobs
       startCleanupJobs();
 
-      // Start WebSocket heartbeat
-      getWsConnectionService().startHeartbeat();
+      // Start WebSocket heartbeat. It also refreshes the device row of every live
+      // socket, so a long-lived read-only connection is not pruned as stale.
+      getWsConnectionService().startHeartbeat((userId, clientId) =>
+        getSyncService().touchDevice(userId, clientId),
+      );
 
       try {
         const address = await fastifyServer.listen(createListenOptions(fullConfig));

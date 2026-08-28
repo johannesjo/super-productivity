@@ -37,6 +37,8 @@ describe('sync errors', () => {
       expectedPrefix: 'pf_',
       endSeparator: '__',
       inputLength: 42,
+      prefixAt: -1,
+      headShape: 'base64',
     });
 
     expect((OpLog.log as jasmine.Spy).calls.count()).toBe(0);

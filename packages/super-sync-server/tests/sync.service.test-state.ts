@@ -9,6 +9,7 @@ export const testState = {
   syncDevices: new Map<string, any>(),
   userSyncStates: new Map<number, any>(),
   users: new Map<number, any>(),
+  pendingPasskeyRegistrations: new Map<string, any>(),
   serverSeqCounter: 0,
   batchConflictQueryCount: 0,
   entityConflictFindFirstCount: 0,
@@ -21,6 +22,7 @@ export function resetTestState(): void {
   testState.syncDevices = new Map();
   testState.userSyncStates = new Map();
   testState.users = new Map();
+  testState.pendingPasskeyRegistrations = new Map();
   testState.serverSeqCounter = 0;
   testState.batchConflictQueryCount = 0;
   testState.entityConflictFindFirstCount = 0;
@@ -35,13 +37,11 @@ export function resetTestState(): void {
  *
  * `AS "maxSeq"` is the load-bearing half of the discriminator: only this query
  * aggregates to a maxSeq. Keep `entity_ids @>` as well, but do not rely on it —
- * this inspects the template LITERALS, and both batch queries moved their `@>` into
+ * this inspects the template LITERALS, and the multi-entity lookup moved its `@>` into
  * an interpolated `Prisma.sql` fragment, so it is a bound VALUE there and invisible
  * here. Which is the general hazard worth remembering: every tx mock discriminates on
  * template literals, so extracting SQL into a `Prisma.sql` fragment silently removes
- * that text from all of their views. The dangerous direction is prefetch losing
- * `touched(entity_type` from its literals while `scalar_hits` survives — it would then
- * be answered by detect's branch. (Losing `scalar_hits` throws, which is loud.)
+ * that text from all of their views. (An unmatched query throws, which is loud.)
  */
 export function isEntityArrayBranchQuery(strings: unknown): boolean {
   const sql = Array.isArray(strings) ? strings.join('') : String(strings);

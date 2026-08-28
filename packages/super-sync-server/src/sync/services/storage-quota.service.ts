@@ -34,11 +34,13 @@ export const getDefaultStorageQuotaBytes = (): number =>
     'SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES',
     DEFAULT_STORAGE_QUOTA_BYTES,
   );
+// serverSeq WINDOW WIDTH per DELETE statement, which also caps the rows it can
+// delete (server_seq is unique per user) — see deleteOldSyncedOpsBatch.
 const OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = 5_000;
 const OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN = 25_000;
-// Operator-DoS guardrail: a 1M `take:` materializes 1M ids in Node memory and
-// then sends a 1M-element array param to Postgres — exactly the pressure the
-// throttle is meant to avoid. Cap so misconfiguration can't unwind the bound.
+// Operator-DoS guardrail: the window width caps the index entries one DELETE
+// statement can touch — exactly the bound that keeps a statement inside the
+// 60s statement_timeout. Cap so misconfiguration can't unwind it.
 const OLD_OPS_CLEANUP_DELETE_BATCH_SIZE_MAX = 50_000;
 const OLD_OPS_CLEANUP_MAX_DELETED_PER_RUN_MAX = 1_000_000;
 /**
@@ -395,52 +397,6 @@ export class StorageQuotaService {
     this.forcedReconciles.delete(userId);
   }
 
-  /**
-   * Backfill self-check. When SUPERSYNC_BATCH_UPLOAD=true the operator is
-   * trusted to have set SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=true only
-   * after `npm run migrate-payload-bytes` finished. If the flag was flipped
-   * too early, batch uploads still write `payload_bytes` correctly but the
-   * SUM-based reconcile in `calculateStorageUsage` would mix exact bytes with
-   * the CASE-WHEN fallback for legacy rows — small drift, but unnecessary
-   * given the env-flag's whole purpose.
-   *
-   * One indexed probe at startup closes the trust hole, but its cost is the
-   * opposite way round from how it reads. A *partially* backfilled table is the
-   * cheap case: `operations_payload_bytes_unbackfilled_idx` still holds live
-   * entries and the scan stops at the first one. The *completed* backfill is the
-   * expensive case — proving that no row matches means reading the whole index.
-   * `payload_bytes` sits in that index's predicate, so every backfill update was
-   * non-HOT and left entries pointing at dead heap tuples, each of which must be
-   * visited until VACUUM or LP_DEAD hints clear them; and with statistics still
-   * describing the pre-backfill distribution the planner may abandon the index and
-   * sequentially scan the table instead. On a multi-GB `operations` that is minutes,
-   * not one round-trip — and it runs before `/health` is registered, so the container
-   * never reports healthy while it is happening (#9504 §2).
-   *
-   * Which of the two costs dominates has not been measured on a real instance, so
-   * neither `scripts/migrate-payload-bytes.ts` nor this probe tries to pre-empt it:
-   * refreshing statistics does nothing about dead index entries, and vice versa. The
-   * migration that creates the index makes the same wrong claim ("physically drains
-   * to empty"), but applied migrations are never edited in place
-   * (`prisma/migrations/README.md`), so this is the correction of record. Worst case
-   * (zero rows in `operations`, e.g. a fresh deployment) is still one round-trip.
-   */
-  async assertPayloadBytesBackfillComplete(): Promise<void> {
-    const result = await prisma.$queryRaw<[{ exists: boolean }]>`
-      SELECT EXISTS (
-        SELECT 1 FROM operations WHERE payload_bytes = 0 LIMIT 1
-      ) AS "exists"
-    `;
-    if (result[0]?.exists) {
-      throw new Error(
-        'SUPERSYNC_BATCH_UPLOAD is enabled but the operations table still ' +
-          'contains rows with payload_bytes = 0. Run ' +
-          '`npm run migrate-payload-bytes` to complete the backfill before ' +
-          'setting SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=true.',
-      );
-    }
-  }
-
   async deleteOldSyncedOpsForAllUsers(
     cutoffTime: number,
   ): Promise<{ totalDeleted: number; affectedUserIds: number[] }> {
@@ -662,7 +618,7 @@ export class StorageQuotaService {
         }
 
         // Drain this user to completion. The budget gates which users we
-        // START, never where we stop inside one: batches delete ascending by
+        // START, never where we stop inside one: windows advance ascending by
         // serverSeq, so cutting a user off mid-prefix deletes ops 1..k and
         // leaves a plain delta at k+1 as the lowest surviving row — the exact
         // state the fresh-op probe above rejects, and one that makes every
@@ -670,26 +626,34 @@ export class StorageQuotaService {
         // finishes the prefix. Overshoot is bounded by one user's backlog and
         // costs a longer run; a truncated prefix costs that user their restore.
         //
+        // The prefix is walked in STATED serverSeq windows of deleteBatchSize —
+        // see deleteOldSyncedOpsBatch for why the range must be stated rather
+        // than discovered. An empty window proves nothing about the rest of the
+        // prefix (already pruned, or emptied concurrently by quota recovery),
+        // so the walk always runs to the boundary; a window over an already
+        // pruned range costs a few index pages.
+        //
         // One user's DB error must not cost the rest of the fleet a day of
         // retention, so the drain is scoped: log, count, move to the next user.
         // A throw mid-drain still leaves that user's prefix truncated — the
-        // batches are separate committed statements, not one transaction — and
+        // windows are separate committed statements, not one transaction — and
         // the next run repairs it, since the surviving prefix ops are still
         // older than the (by then later) cutoff.
         let userDeleted = 0;
         try {
-          for (;;) {
-            const { selectedCount, deletedCount } = await this.deleteOldSyncedOpsBatch(
+          for (let lo = 1; lo < protectedFromSeq; lo += deleteBatchSize) {
+            const hi = Math.min(lo + deleteBatchSize, protectedFromSeq);
+            const deletedCount = await this.deleteOldSyncedOpsBatch(
               candidate.userId,
-              protectedFromSeq,
+              lo,
+              hi,
               cutoffTime,
-              deleteBatchSize,
             );
-            if (selectedCount === 0) break;
+            if (deletedCount === 0) continue;
 
-            // Mark on the *first* successful batch (not after the loop) so that
-            // if a later batch throws, the counter still self-heals. Without
-            // this, batch-1 commits would leave the counter stale-high until the
+            // Mark on the *first* deleting window (not after the loop) so that
+            // if a later window throws, the counter still self-heals. Without
+            // this, window-1 commits would leave the counter stale-high until the
             // next daily pass or process restart.
             //
             // Deliberately leave storageUsedBytes stale-high here. A count-based
@@ -713,10 +677,6 @@ export class StorageQuotaService {
             // May go negative — the outer loop's budget check then stops the run
             // before starting another user.
             remainingDeleteBudget -= deletedCount;
-            // Stop on the SELECTED count, never the deleted one. A short delete
-            // means those rows were already gone (concurrent quota recovery),
-            // not that the prefix is drained — see deleteOldSyncedOpsBatch.
-            if (selectedCount < deleteBatchSize) break;
           }
         } catch (error) {
           drainFailures++;
@@ -798,51 +758,54 @@ export class StorageQuotaService {
   }
 
   /**
-   * Delete one batch of the user's aged prefix.
+   * Delete one serverSeq WINDOW of the user's aged prefix: rows in
+   * `[windowStart, windowEnd)` that are also older than the cutoff.
    *
-   * Returns BOTH counts because they answer different questions and are not
-   * interchangeable. `selectedCount` is how many doomed rows this batch found,
-   * and is the only sound basis for "is this user drained?": a short
-   * `deletedCount` means those rows were already gone (quota recovery deleted
-   * them concurrently — the sweep does not hold `runWithStorageUsageLock`,
-   * the upload path does), NOT that the prefix is exhausted. Reading a short
-   * `deletedCount` as "drained" stops the loop mid-prefix and leaves a plain
-   * delta as the lowest surviving row, which is the SNAPSHOT_REPLAY_INCOMPLETE
-   * state the whole-or-nothing rule exists to prevent. `deletedCount` is what
-   * actually left the table, so it — and only it — feeds the budget and the
-   * storage counter.
+   * The window is STATED, never discovered. The previous shape —
+   * `findMany({ serverSeq: { lt: boundary }, take: limit })` feeding a
+   * `deleteMany` by id — bounded the rows RETURNED but not the rows SCANNED,
+   * and production found three independent ways for that scan to blow the 60s
+   * `statement_timeout` (#9692):
+   *   1. low match density: when few rows below the boundary are older than
+   *      the cutoff, the LIMIT never fills and the scan heap-filters the
+   *      user's whole prefix (measured: 4x the block cost while deleting
+   *      nothing);
+   *   2. cold I/O: even at 100% density, `take: 5000` is ~5000 random heap
+   *      fetches to check `received_at` — ~48s at the host's measured ~9.5ms
+   *      cold reads;
+   *   3. dead tuples: a prefix already deleted by quota recovery leaves its
+   *      index entries behind until vacuum (autovacuum's 20% scale factor is
+   *      ~1.7M dead rows on this table), and the scan visits every one —
+   *      measured 88s / 6,787 cold pages to return zero rows.
+   * A two-sided `serverSeq` range caps the index entries a statement can touch
+   * at the window width regardless of match density, tuple liveness, or plan
+   * choice, so none of the three can recur. `server_seq` is unique per user,
+   * so the width also caps the rows deleted per statement — no `take`, no id
+   * round-trip, one statement instead of two.
+   *
+   * Returns the rows that actually left the table — a window can legitimately
+   * delete zero (already pruned, or emptied concurrently by quota recovery,
+   * which holds `runWithStorageUsageLock`; this sweep does not) and the caller
+   * just advances to the next window.
    */
   private async deleteOldSyncedOpsBatch(
     userId: number,
-    protectedFromSeq: number,
+    windowStart: number,
+    windowEnd: number,
     cutoffTime: number,
-    limit: number,
-  ): Promise<{ selectedCount: number; deletedCount: number }> {
-    const doomedOps = await prisma.operation.findMany({
+  ): Promise<number> {
+    const result = await prisma.operation.deleteMany({
       where: {
         userId,
-        serverSeq: { lt: protectedFromSeq },
+        serverSeq: { gte: windowStart, lt: windowEnd },
         // Not redundant with the caller's fresh-op probe: a concurrent
         // deleteAllUserData / clean slate resets lastSeq to 0, so the user's
         // re-import reuses low seq numbers. Only this filter stops a stale
         // protectedFromSeq from shredding that brand-new history.
         receivedAt: { lt: BigInt(cutoffTime) },
       },
-      orderBy: { serverSeq: 'asc' },
-      take: limit,
-      select: { id: true },
     });
-
-    if (doomedOps.length === 0) return { selectedCount: 0, deletedCount: 0 };
-
-    const result = await prisma.operation.deleteMany({
-      where: {
-        userId,
-        id: { in: doomedOps.map((op) => op.id) },
-      },
-    });
-
-    return { selectedCount: doomedOps.length, deletedCount: result.count };
+    return result.count;
   }
 
   /**
