@@ -343,6 +343,7 @@ address and the relay host — redact it before pasting into an issue.
 | 6     | Long-running queries                                  | any query `active` > `MAX_QUERY_SECONDS` (default 120)                                                                                                                                                                 |
 | 7     | Pool busy                                             | connections concurrently busy ≥ `POOL_WARN_PCT`% (default 75) of `connection_limit` in **two consecutive runs**                                                                                                        |
 | 8     | Invalid operations indexes                            | a non-building index is not valid/ready/live                                                                                                                                                                           |
+| 9     | PostgreSQL in-place crash-restart                     | the postmaster logged `all server processes terminated; reinitializing` in the last 6 min — a backend crash plus WAL recovery inside the still-running container                                                       |
 
 Check 2 runs outside the Docker gate on purpose: a host that just OOM-killed something
 is exactly when `docker info` is least likely to answer.
@@ -385,6 +386,18 @@ leaves an index that is **unusable for reads but still maintained on every
 insert**. If `operations_entity_ids_gin` were the invalid one, the conflict
 lookup would silently degrade to a sequential scan on every upload, permanently,
 and nothing else in the codebase would report it.
+
+Check 9 exists because PostgreSQL recovers from a backend crash **inside** the
+running container: the postmaster terminates every connection, re-runs WAL
+recovery, and is answering again within seconds. `RestartCount` stays 0, the
+container never leaves `running`, and the compose healthcheck needs five
+consecutive failed probes — so checks 0–3 are all structurally blind to it. The
+hosted server crash-restarted 45 times over three months before the first one
+was noticed ([#9695](https://github.com/super-productivity/super-productivity/issues/9695));
+users see each one only as a failed sync. The check reads the postgres container
+log directly (the app-container probe cannot: the crash kills its connection),
+so it is skipped when `POSTGRES_SERVICE=` selects an external database — an
+external database's availability still surfaces through checks 4 and 6–8.
 
 The known migrator and the nightly backup (`backup.sh`, which tags its `pg_dump`
 sessions `supersync-backup`) are excluded from the long-query check — a full dump
