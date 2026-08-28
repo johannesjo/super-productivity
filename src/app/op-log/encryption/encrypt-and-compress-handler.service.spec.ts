@@ -4,9 +4,15 @@ import {
   DecryptNoPasswordError,
   EncryptNoPasswordError,
   extractErrorMessage,
+  InvalidFilePrefixError,
   JsonParseError,
   PlaintextWhenEncryptionExpectedError,
 } from '../core/errors/sync-errors';
+import {
+  extractSyncFileStateFromPrefix,
+  getSyncFilePrefix,
+} from '../util/sync-file-prefix';
+import { clearSessionKeyCache, setArgon2ParamsForTesting } from '@sp/sync-core';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { getErrorTxt } from '../../util/get-error-text';
 
@@ -377,6 +383,88 @@ describe('JsonParseError', () => {
     expect(error.position).toBe(1000);
     // dataSample should still be set but truncated to actual data length
     expect(error.dataSample).toBeDefined();
+  });
+});
+
+// #9627: `headShape` tells a maintainer reading a log export whether a decode
+// failure was a bad RESPONSE or a bad STORED FILE. Its interface doc states what
+// OUR OWN body looks like per config — a claim about this encoder. Pin it to the
+// encoder's real output rather than to hand-written fixtures, so the doc cannot
+// drift from what we actually write.
+describe('head-shape of a real encoded body with its header stripped (#9627)', () => {
+  let service: EncryptAndCompressHandlerService;
+
+  beforeEach(() => {
+    service = new EncryptAndCompressHandlerService();
+    spyOn(OpLog, 'log').and.stub();
+    spyOn(OpLog, 'normal').and.stub();
+    // Same downshift the other real-crypto specs use: this asserts a body
+    // SHAPE, not KDF strength, and production Argon2id costs ~190ms and 64MiB
+    // per encrypted case in the browser runner.
+    setArgon2ParamsForTesting({ parallelism: 1, memorySize: 8, iterations: 1 });
+  });
+
+  afterEach(() => {
+    setArgon2ParamsForTesting();
+    clearSessionKeyCache();
+  });
+
+  /** Encodes for real, drops the `pf_…__` head, and reports what we see instead. */
+  const shapeOfHeadlessBody = async (cfg: {
+    isCompress: boolean;
+    isEncrypt: boolean;
+  }): Promise<{ headShape: unknown; prefixAt: unknown }> => {
+    const modelVersion = 1;
+    const encoded = await service.compressAndEncrypt({
+      data: { version: 2, ops: [], lastUpdate: 1 },
+      modelVersion,
+      isCompress: cfg.isCompress,
+      isEncrypt: cfg.isEncrypt,
+      encryptKey: cfg.isEncrypt ? 'the-key' : undefined,
+    });
+    // Strip exactly the prefix the writer produced. Deriving the length from
+    // getSyncFilePrefix (rather than scanning for `__`) means a change to the
+    // header format breaks this loudly instead of silently asserting the shape
+    // of the wrong bytes — which is the contract this block exists to pin.
+    const prefix = getSyncFilePrefix({
+      isCompress: cfg.isCompress,
+      isEncrypt: cfg.isEncrypt,
+      modelVersion,
+    });
+    expect(encoded.startsWith(prefix)).toBe(true);
+    const body = encoded.slice(prefix.length);
+    expect(body.length).toBeGreaterThan(0);
+
+    expect(() => extractSyncFileStateFromPrefix(body)).toThrowError(
+      InvalidFilePrefixError,
+    );
+    const meta = (OpLog.log as jasmine.Spy).calls.mostRecent().args[1];
+    return { headShape: meta.headShape, prefixAt: meta.prefixAt };
+  };
+
+  it('reads an ENCRYPTED body as base64 — the #9627 reporter shape', async () => {
+    expect(await shapeOfHeadlessBody({ isCompress: false, isEncrypt: true })).toEqual({
+      headShape: 'base64',
+      prefixAt: -1,
+    });
+  });
+
+  it('reads a COMPRESSED body as base64', async () => {
+    // compressWithGzipToString base64-encodes, so compression alone is enough.
+    expect(await shapeOfHeadlessBody({ isCompress: true, isEncrypt: false })).toEqual({
+      headShape: 'base64',
+      prefixAt: -1,
+    });
+  });
+
+  it('reads a PLAINTEXT body as json — which is why `json` is ambiguous', async () => {
+    // Both flags are off by DEFAULT, so this is the common configuration: our
+    // own stored file is raw JSON and is indistinguishable here from an error
+    // envelope. Reading `json` as "bad response" would invert the answer.
+    expect(await shapeOfHeadlessBody({ isCompress: false, isEncrypt: false })).toEqual({
+      headShape: 'json',
+      prefixAt: -1,
+    });
   });
 });
 
