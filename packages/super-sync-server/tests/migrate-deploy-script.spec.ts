@@ -772,6 +772,49 @@ CREATE INDEX CONCURRENTLY "operations_payload_bytes_unbackfilled_idx"
     expect(r.status).toBe(0);
     expect(r.resolveApplied).toEqual(expect.arrayContaining([ENCRYPTED_OPS, second]));
   });
+
+  it('terminates an orphaned CONCURRENTLY backend before the out-of-band DROP', () => {
+    // A prior interrupted deploy leaves a CREATE INDEX CONCURRENTLY backend
+    // running (PostgreSQL ignores the client disconnect mid-statement), holding
+    // the table lock. Without clearing it first, this recovery's DROP INDEX
+    // CONCURRENTLY queues behind that lock and dies on statement_timeout,
+    // wedging the deploy — exactly the incident this guards.
+    writeMigration(ENCRYPTED_OPS, ENCRYPTED_OPS_SQL);
+    const r = run({
+      FAKE_FAIL: ENCRYPTED_OPS,
+      FAKE_CODE: 'P3018',
+      MIGRATE_STEP_TIMEOUT: '7',
+      DATABASE_URL:
+        'postgresql://u:p@postgres:5432/supersync?connection_limit=60&pool_timeout=10',
+    });
+
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('orphaned CONCURRENTLY');
+    // Termination is scoped: this pipeline's own migrator identity, an ACTIVE
+    // concurrent build, and never the current session or the cleanup connection.
+    expect(r.executedSql).toContain('pg_terminate_backend');
+    expect(r.executedSql).toContain("application_name LIKE 'supersync-migrator-%'");
+    expect(r.executedSql).toContain('application_name <>');
+    expect(r.executedSql).toContain('pid <> pg_backend_pid()');
+    expect(r.executedSql).toContain("state = 'active'");
+    // The clear must run BEFORE the DROP it protects, then recovery completes.
+    expect(r.executedSql.indexOf('pg_terminate_backend')).toBeLessThan(
+      r.executedSql.indexOf('DROP INDEX CONCURRENTLY'),
+    );
+    expect(r.resolveApplied).toContain(ENCRYPTED_OPS);
+  });
+
+  it('does not attempt orphan termination when DATABASE_URL is unset', () => {
+    // No URL means no pg_stat_activity to query; the recovery must still run
+    // its own DROP+CREATE and never emit a stray terminate.
+    writeMigration(ENCRYPTED_OPS, ENCRYPTED_OPS_SQL);
+    const r = run({ FAKE_FAIL: ENCRYPTED_OPS, FAKE_CODE: 'P3018' });
+
+    expect(r.status).toBe(0);
+    expect(r.executedSql).not.toContain('pg_terminate_backend');
+    expect(r.stdout).not.toContain('orphaned CONCURRENTLY');
+    expect(r.resolveApplied).toContain(ENCRYPTED_OPS);
+  });
 });
 
 // #9191: operators may cap application statements through DATABASE_URL. Migrations

@@ -13,6 +13,10 @@ set -eu
 #
 # 1. For the transaction-block failure above, it runs a migration with the safe
 #    DROP+CREATE CONCURRENTLY shape out-of-band, marks it applied, and retries.
+#    It first terminates any orphaned CONCURRENTLY build a prior interrupted
+#    deploy left holding the table lock (see
+#    terminate_orphaned_concurrently_backends), so the DROP cannot wedge behind
+#    it on statement_timeout.
 # 2. For the two-statement SET LOCAL lock_timeout + ALTER INDEX ... SET (...)
 #    shape, it rolls back Prisma's failed record and retries a bounded number of
 #    times through Prisma. It never splits or marks that transactional migration
@@ -242,6 +246,53 @@ with_timeout() {
   return "$wt_rc"
 }
 
+# Orphaned CONCURRENTLY index builds outlive their migrator: PostgreSQL does not
+# notice that a client disconnected while a backend is mid-statement
+# (client_connection_check_interval defaults to 0), so a CREATE INDEX
+# CONCURRENTLY whose migrator container was killed, OOM'd, or timed out keeps
+# running and keeps its SHARE UPDATE EXCLUSIVE lock on the table. The out-of-band
+# DROP in recover_migration would then queue behind that lock and be cancelled by
+# statement_timeout, wedging every retry until an operator terminates the backend
+# by hand. Clear it first so a re-run (e.g. after raising MIGRATION_TIMEOUT for a
+# large table) self-heals instead.
+#
+# Scoped so this can never abort a legitimate build:
+#   * application_name LIKE 'supersync-migrator-%' — only this pipeline's own
+#     migrator identity (the app sets none; monitoring uses 'supersync-monitor'),
+#   * application_name <> the current run — never our own session,
+#   * pid <> pg_backend_pid() — nor the cleanup connection itself,
+#   * state = 'active' AND query ~ CONCURRENTLY — only a session ACTIVELY running
+#     a concurrent build/drop. The state filter is load-bearing:
+#     pg_stat_activity.query keeps showing the LAST statement on an idle session,
+#     so without it an idle migrator connection whose previous statement was a
+#     CONCURRENTLY build would be a false match.
+# Reaching recover_migration means our own `migrate deploy` already ran and
+# released Prisma's advisory lock (P3018 rejects the statement instantly and
+# starts no build), so a match is an orphan from an earlier run, never a
+# concurrently-running migrator — that would hold the advisory lock and make this
+# deploy fail P1002 instead. That is why auto-terminating is safe HERE yet the
+# P1002 path still refuses to (its lock holder may be a live build the operator
+# must adjudicate). Runs through prisma db execute, not the node cleanup used on
+# timeout, so it inherits the same finite statement_timeout and stays fake-able.
+#
+# Best-effort: on failure the DROP still runs, so warn and continue.
+terminate_orphaned_concurrently_backends() {
+  [ -n "${DATABASE_URL:-}" ] && [ -n "${MIGRATOR_APPLICATION_NAME:-}" ] || return 0
+
+  echo "    Clearing any orphaned CONCURRENTLY index build left running by an interrupted prior deploy..."
+  if ! printf '%s\n' "SELECT pg_terminate_backend(pid)
+  FROM pg_stat_activity
+ WHERE application_name LIKE 'supersync-migrator-%'
+   AND application_name <> '$MIGRATOR_APPLICATION_NAME'
+   AND pid <> pg_backend_pid()
+   AND state = 'active'
+   AND query ILIKE '%CONCURRENTLY%';" |
+    with_timeout npx prisma db execute --schema "$SCHEMA" --stdin >/dev/null 2>&1; then
+    echo "    WARNING: could not clear orphaned CONCURRENTLY builds; continuing with recovery." >&2
+  fi
+  return 0
+}
+
 # Printed manual-recovery commands re-enter through this narrow wrapper so
 # they receive the same finite bounds without printing database secrets.
 if [ "${1:-}" = "--prisma" ]; then
@@ -250,6 +301,15 @@ if [ "${1:-}" = "--prisma" ]; then
   prisma_status=0
   with_timeout npx prisma "$@" || prisma_status=$?
   exit "$prisma_status"
+fi
+
+# Test/diagnostic seam: run ONLY the orphaned-CONCURRENTLY cleanup, then exit.
+# Same tight scoping as during recovery, so it is safe to run by hand to clear a
+# wedged orphan; it also lets the integration test assert the targeting against a
+# real pg_stat_activity without provoking a full CONCURRENTLY index build.
+if [ "${1:-}" = "--terminate-orphaned-concurrently" ]; then
+  terminate_orphaned_concurrently_backends
+  exit 0
 fi
 
 MIGRATE_LOG=""
@@ -528,6 +588,11 @@ recover_migration() {
 
   echo ""
   echo "==> Recovering $name outside Prisma migrate (CONCURRENTLY cannot run in a transaction)..."
+
+  # A prior interrupted deploy can leave a CONCURRENTLY build still holding the
+  # table lock; clear it before the DROP below queues behind it and dies on
+  # statement_timeout. See terminate_orphaned_concurrently_backends.
+  terminate_orphaned_concurrently_backends
 
   set +e
   with_timeout npx prisma migrate resolve --rolled-back "$name"
