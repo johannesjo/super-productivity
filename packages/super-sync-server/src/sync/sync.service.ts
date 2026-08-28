@@ -845,6 +845,42 @@ export class SyncService {
   }
 
   /**
+   * Delete pending passkey registrations whose verification token expired
+   * before `beforeTime`. Expiry is otherwise only enforced at read time
+   * (verifyEmail), so rows for abandoned registration attempts — including
+   * their credential public keys — would linger forever.
+   */
+  async deleteExpiredPendingPasskeyRegistrations(beforeTime: number): Promise<number> {
+    const result = await prisma.pendingPasskeyRegistration.deleteMany({
+      where: { verificationTokenExpiresAt: { lt: BigInt(beforeTime) } },
+    });
+    return result.count;
+  }
+
+  /**
+   * Delete unverified users created before `createdBefore` with no registration
+   * still in flight: no pending passkey registration row and no unexpired
+   * verification token (re-registering refreshes the token on the same row).
+   * Verified users can never match, and unverified users are denied auth, so
+   * nothing of value is lost when their related rows (operations, devices,
+   * sync state, passkeys, pending registrations) cascade on delete.
+   */
+  async deleteAbandonedUnverifiedUsers(createdBefore: number): Promise<number> {
+    const result = await prisma.user.deleteMany({
+      where: {
+        isVerified: 0,
+        createdAt: { lt: new Date(createdBefore) },
+        pendingPasskeyRegistrations: { none: {} },
+        OR: [
+          { verificationTokenExpiresAt: null },
+          { verificationTokenExpiresAt: { lt: BigInt(Date.now()) } },
+        ],
+      },
+    });
+    return result.count;
+  }
+
+  /**
    * Delete ALL sync data for a user. Used for encryption password changes.
    * Deletes operations, devices, and resets sync state.
    */

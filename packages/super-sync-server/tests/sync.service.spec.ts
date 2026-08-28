@@ -750,6 +750,59 @@ vi.mock('../src/db', async () => {
           return state.users.get(args.where.id) || null;
         }),
         update: vi.fn().mockResolvedValue({}),
+        // Emulates exactly the where-shape deleteAbandonedUnverifiedUsers
+        // issues: isVerified equality, createdAt.lt, relation none, token OR.
+        deleteMany: vi.fn().mockImplementation(async (args: any) => {
+          const where = args.where ?? {};
+          let deleted = 0;
+          for (const [id, user] of state.users) {
+            if (where.isVerified !== undefined && user.isVerified !== where.isVerified) {
+              continue;
+            }
+            if (
+              where.createdAt?.lt !== undefined &&
+              !(user.createdAt instanceof Date && user.createdAt < where.createdAt.lt)
+            ) {
+              continue;
+            }
+            if (where.pendingPasskeyRegistrations?.none !== undefined) {
+              const hasPending = Array.from(
+                state.pendingPasskeyRegistrations.values(),
+              ).some((p: any) => p.userId === id);
+              if (hasPending) continue;
+            }
+            if (where.OR !== undefined) {
+              const matchesOr = where.OR.some((cond: any) => {
+                if (cond.verificationTokenExpiresAt === null) {
+                  return user.verificationTokenExpiresAt == null;
+                }
+                if (cond.verificationTokenExpiresAt?.lt !== undefined) {
+                  return (
+                    user.verificationTokenExpiresAt != null &&
+                    user.verificationTokenExpiresAt < cond.verificationTokenExpiresAt.lt
+                  );
+                }
+                return false;
+              });
+              if (!matchesOr) continue;
+            }
+            state.users.delete(id);
+            deleted++;
+          }
+          return { count: deleted };
+        }),
+      },
+      pendingPasskeyRegistration: {
+        deleteMany: vi.fn().mockImplementation(async (args: any) => {
+          const lt = args.where?.verificationTokenExpiresAt?.lt;
+          let deleted = 0;
+          for (const [id, row] of state.pendingPasskeyRegistrations) {
+            if (lt !== undefined && row.verificationTokenExpiresAt >= lt) continue;
+            state.pendingPasskeyRegistrations.delete(id);
+            deleted++;
+          }
+          return { count: deleted };
+        }),
       },
       $queryRaw: vi.fn().mockResolvedValue([{ total: BigInt(0) }]),
       $executeRaw: vi.fn().mockResolvedValue(0),
@@ -4023,6 +4076,73 @@ describe('SyncService', () => {
       );
 
       expect(deleted).toBe(0);
+    });
+
+    it('should delete expired pending passkey registrations and keep unexpired ones', async () => {
+      const service = getSyncService();
+      const hourMs = 60 * 60 * 1000;
+
+      testState.pendingPasskeyRegistrations.set('expired', {
+        id: 'expired',
+        userId: 21,
+        verificationTokenExpiresAt: BigInt(Date.now() - hourMs),
+      });
+      testState.pendingPasskeyRegistrations.set('active', {
+        id: 'active',
+        userId: 22,
+        verificationTokenExpiresAt: BigInt(Date.now() + hourMs),
+      });
+
+      const deleted = await service.deleteExpiredPendingPasskeyRegistrations(Date.now());
+
+      expect(deleted).toBe(1);
+      expect(testState.pendingPasskeyRegistrations.has('expired')).toBe(false);
+      expect(testState.pendingPasskeyRegistrations.has('active')).toBe(true);
+    });
+
+    it('should delete abandoned unverified users but never verified or in-flight ones', async () => {
+      const service = getSyncService();
+      const dayMs = 24 * 60 * 60 * 1000;
+      const addUser = (id: number, overrides: Record<string, unknown>): void => {
+        testState.users.set(id, {
+          id,
+          email: `user-${id}@test.com`,
+          isVerified: 0,
+          verificationTokenExpiresAt: BigInt(Date.now() - dayMs),
+          createdAt: new Date(Date.now() - 60 * dayMs),
+          ...overrides,
+        });
+      };
+
+      // Abandoned: old, unverified, expired token, nothing pending
+      addUser(31, {});
+      // Abandoned with the token column already cleared
+      addUser(32, { verificationTokenExpiresAt: null });
+      // Verified users are never touched, no matter how old
+      addUser(33, { isVerified: 1 });
+      // Unverified but still within the grace window
+      addUser(34, { createdAt: new Date(Date.now() - dayMs) });
+      // Unverified with a passkey registration still pending
+      addUser(35, {});
+      testState.pendingPasskeyRegistrations.set('pending-35', {
+        id: 'pending-35',
+        userId: 35,
+        verificationTokenExpiresAt: BigInt(Date.now() + dayMs),
+      });
+      // Unverified with a magic-link re-registration in flight (live token)
+      addUser(36, { verificationTokenExpiresAt: BigInt(Date.now() + dayMs) });
+
+      const deleted = await service.deleteAbandonedUnverifiedUsers(
+        Date.now() - 45 * dayMs,
+      );
+
+      expect(deleted).toBe(2);
+      expect(testState.users.has(31)).toBe(false);
+      expect(testState.users.has(32)).toBe(false);
+      expect(testState.users.has(33)).toBe(true);
+      expect(testState.users.has(34)).toBe(true);
+      expect(testState.users.has(35)).toBe(true);
+      expect(testState.users.has(36)).toBe(true);
     });
   });
 
