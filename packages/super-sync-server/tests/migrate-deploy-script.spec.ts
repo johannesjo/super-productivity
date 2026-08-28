@@ -793,6 +793,10 @@ CREATE INDEX CONCURRENTLY "operations_payload_bytes_unbackfilled_idx"
     // Termination is scoped: this pipeline's own migrator identity, an ACTIVE
     // concurrent build, and never the current session or the cleanup connection.
     expect(r.executedSql).toContain('pg_terminate_backend');
+    // Bounded to the same database + role, so a sibling environment sharing the
+    // cluster can never be touched.
+    expect(r.executedSql).toContain('datname = current_database()');
+    expect(r.executedSql).toContain('usename = current_user');
     expect(r.executedSql).toContain("application_name LIKE 'supersync-migrator-%'");
     expect(r.executedSql).toContain('application_name <>');
     expect(r.executedSql).toContain('pid <> pg_backend_pid()');

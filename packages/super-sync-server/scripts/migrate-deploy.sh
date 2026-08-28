@@ -256,25 +256,37 @@ with_timeout() {
 # by hand. Clear it first so a re-run (e.g. after raising MIGRATION_TIMEOUT for a
 # large table) self-heals instead.
 #
-# Scoped so this can never abort a legitimate build:
-#   * application_name LIKE 'supersync-migrator-%' — only this pipeline's own
-#     migrator identity (the app sets none; monitoring uses 'supersync-monitor'),
-#   * application_name <> the current run — never our own session,
-#   * pid <> pg_backend_pid() — nor the cleanup connection itself,
+# Scoped so it cannot touch the app, monitoring, another database on a shared
+# cluster, or THIS run's own connections:
+#   * datname = current_database() AND usename = current_user — the same DB+role
+#     the orphan was created under (its DATABASE_URL is ours), never a sibling
+#     environment sharing the cluster. Matches terminate_migrator_backends /
+#     health-alert.sh, and cannot cause a false negative (the orphan is same-DB).
+#   * application_name LIKE 'supersync-migrator-%' — only this pipeline's migrator
+#     identity (the app sets none; monitoring uses 'supersync-monitor'),
+#   * application_name <> the current run AND pid <> pg_backend_pid() — never our
+#     own session nor the cleanup connection itself,
 #   * state = 'active' AND query ~ CONCURRENTLY — only a session ACTIVELY running
 #     a concurrent build/drop. The state filter is load-bearing:
 #     pg_stat_activity.query keeps showing the LAST statement on an idle session,
 #     so without it an idle migrator connection whose previous statement was a
 #     CONCURRENTLY build would be a false match.
-# Reaching recover_migration means our own `migrate deploy` already ran and
-# released Prisma's advisory lock (P3018 rejects the statement instantly and
-# starts no build), so a match is an orphan from an earlier run, never a
-# concurrently-running migrator — that would hold the advisory lock and make this
-# deploy fail P1002 instead. That is why auto-terminating is safe HERE yet the
-# P1002 path still refuses to (its lock holder may be a live build the operator
-# must adjudicate). Runs through prisma db execute, not the node cleanup used on
-# timeout, so it inherits the same finite statement_timeout and stays fake-able.
 #
+# SAFE for a SINGLE active recovery — the docker-compose / host deploy that runs
+# one migrator at a time, which is the incident this fixes. IMPORTANT caveat: the
+# out-of-band recovery does NOT hold Prisma's advisory lock (it never does — that
+# is why a P3018 on a pending migration is reachable at all), so this cannot tell
+# an orphan apart from a PEER run's LIVE build. If several recoveries race on one
+# database (e.g. multiple Helm init-containers rolling out together), this can
+# terminate a peer's in-progress build. That is bounded — the peer fails loudly
+# and the fleet self-heals via the idempotent drop-then-create — and no worse in
+# outcome than the already-unserialized concurrent out-of-band recovery, but it is
+# why the P1002 path still refuses to auto-kill (its lock holder may be a live
+# build the operator must adjudicate). Serializing recovery under a dedicated
+# advisory lock would close the race and is the right follow-up.
+#
+# Runs through prisma db execute (not the node cleanup used on timeout), so it
+# inherits the same finite statement_timeout and stays fake-able in tests.
 # Best-effort: on failure the DROP still runs, so warn and continue.
 terminate_orphaned_concurrently_backends() {
   [ -n "${DATABASE_URL:-}" ] && [ -n "${MIGRATOR_APPLICATION_NAME:-}" ] || return 0
@@ -282,7 +294,9 @@ terminate_orphaned_concurrently_backends() {
   echo "    Clearing any orphaned CONCURRENTLY index build left running by an interrupted prior deploy..."
   if ! printf '%s\n' "SELECT pg_terminate_backend(pid)
   FROM pg_stat_activity
- WHERE application_name LIKE 'supersync-migrator-%'
+ WHERE datname = current_database()
+   AND usename = current_user
+   AND application_name LIKE 'supersync-migrator-%'
    AND application_name <> '$MIGRATOR_APPLICATION_NAME'
    AND pid <> pg_backend_pid()
    AND state = 'active'
@@ -304,9 +318,13 @@ if [ "${1:-}" = "--prisma" ]; then
 fi
 
 # Test/diagnostic seam: run ONLY the orphaned-CONCURRENTLY cleanup, then exit.
-# Same tight scoping as during recovery, so it is safe to run by hand to clear a
-# wedged orphan; it also lets the integration test assert the targeting against a
-# real pg_stat_activity without provoking a full CONCURRENTLY index build.
+# Do NOT run this while a migrate-deploy is in progress: each invocation gets a
+# fresh MIGRATOR_APPLICATION_NAME, so its self-exclusion protects no OTHER running
+# migrator, and on a large table a long-but-legitimate CREATE INDEX CONCURRENTLY
+# is indistinguishable from an orphan (see the caveat on
+# terminate_orphaned_concurrently_backends). Exists mainly to let the integration
+# test assert targeting against a real pg_stat_activity without provoking a full
+# CONCURRENTLY index build.
 if [ "${1:-}" = "--terminate-orphaned-concurrently" ]; then
   terminate_orphaned_concurrently_backends
   exit 0
