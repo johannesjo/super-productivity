@@ -44,6 +44,20 @@ import type { ValidationResult } from './services/validation.service';
  *
  * The second query only runs for the rare account holding no import at all, so
  * the ordinary upload path still costs a single indexed lookup.
+ *
+ * The REPAIR is a STAND-IN for a pruned import, not a boundary in its own
+ * right. The fence enforces IMPORT semantics: a client below a SYNC_IMPORT /
+ * BACKUP_IMPORT must download it so `SyncImportFilterService` drops its
+ * concurrent ops. A causal REPAIR is borrowed only as the nearest higher seq
+ * that still forces that download once the import row itself is gone. Its own
+ * client contract is the opposite — a REPAIR is automatic, and concurrent work
+ * replays on top of it instead of being dropped.
+ *
+ * That is why the accepted-op write in `uploadOps` records SYNC_IMPORT /
+ * BACKUP_IMPORT and NOT an accepted REPAIR: at that moment no import row has
+ * been pruned yet, so there is no missing fence to reconstruct. Writer and
+ * resolver answering differently is the design, not an asymmetry to close
+ * (#9703, #9755).
  */
 const resolveRetainedReplacementSeq = async (
   db: Prisma.TransactionClient,
@@ -394,6 +408,13 @@ export class SyncService {
             }
           }
 
+          // Only an import moves the fence. An accepted causal REPAIR is
+          // deliberately NOT recorded here: the fence carries import semantics
+          // (the client drops concurrent ops at one), while a repair replays
+          // concurrent work on top. `resolveRetainedReplacementSeq` treats a
+          // REPAIR as a boundary only as a stand-in for an import row that
+          // pruning already deleted — a case that cannot exist at this point in
+          // an upload. See that resolver's comment before widening this (#9703).
           let latestAcceptedStateReplacementSeq: number | undefined;
           for (let index = 0; index < ops.length; index++) {
             const op = ops[index];
