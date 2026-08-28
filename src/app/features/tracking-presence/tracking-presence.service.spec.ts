@@ -116,7 +116,7 @@ describe('TrackingPresenceService', () => {
           useValue: {
             presenceMessage$,
             sendPresence: sendPresenceSpy,
-            isConnected: true,
+            isConnected: () => true,
           },
         },
         {
@@ -155,6 +155,7 @@ describe('TrackingPresenceService', () => {
       expect(states[0].state).toBe('tracking');
       expect(states[0].taskId).toBe('task-1');
       expect(states[0].sessionId).toBeTruthy();
+      service.stop();
       flush();
     }));
 
@@ -168,6 +169,7 @@ describe('TrackingPresenceService', () => {
       expect(states.length).toBe(2);
       expect(states[1].taskId).toBe('task-2');
       expect(states[1].sessionId).not.toBe(states[0].sessionId);
+      service.stop();
       flush();
     }));
 
@@ -181,6 +183,7 @@ describe('TrackingPresenceService', () => {
       expect(states.length).toBe(2);
       expect(states[1].state).toBe('stopped');
       expect(states[1].reason).toBeUndefined();
+      service.stop();
       flush();
     }));
 
@@ -197,6 +200,7 @@ describe('TrackingPresenceService', () => {
       expect(last.state).toBe('stopped');
       expect(last.reason).toBe('idle');
       expect(last.taskId).toBe('task-1');
+      service.stop();
       flush();
     }));
   });
@@ -211,6 +215,7 @@ describe('TrackingPresenceService', () => {
       expect(session).toBeTruthy();
       expect(session!.payload.taskId).toBe('remote-task');
       expect(session!.producerConnected).toBeTrue();
+      service.stop();
       flush();
     }));
 
@@ -222,6 +227,7 @@ describe('TrackingPresenceService', () => {
       tick(PRESENCE_STOPPED_LINGER_MS);
 
       expect(sendPresenceSpy).not.toHaveBeenCalled();
+      service.stop();
       flush();
     }));
 
@@ -246,6 +252,7 @@ describe('TrackingPresenceService', () => {
       tick(PRESENCE_STOPPED_LINGER_MS + 1);
       expect(service.remoteSession()).toBeTruthy();
       expect(service.remoteSession()!.payload.reason).toBe('idle');
+      service.stop();
       flush();
     }));
 
@@ -256,6 +263,7 @@ describe('TrackingPresenceService', () => {
       receiveRemoteState({ taskId: 'older' }, { ordinal: 3 });
 
       expect(service.remoteSession()!.payload.taskId).toBe('newer');
+      service.stop();
       flush();
     }));
 
@@ -280,6 +288,7 @@ describe('TrackingPresenceService', () => {
       setLocalTaskId('task-1');
       expect(service.remoteSessionView()).toBeNull();
       expect(service.remoteSession()).toBeTruthy();
+      service.stop();
       flush();
     }));
 
@@ -297,6 +306,7 @@ describe('TrackingPresenceService', () => {
       expect((cmds[0].payload as TrackingPresenceCmd).sessionId).toBe(
         'remote-session-xyz',
       );
+      service.stop();
       flush();
     }));
   });
@@ -313,6 +323,7 @@ describe('TrackingPresenceService', () => {
 
       expect(dispatchSpy).toHaveBeenCalledWith(setCurrentTask({ id: null }));
       expect(snackOpenSpy).toHaveBeenCalled();
+      service.stop();
       flush();
     }));
 
@@ -327,6 +338,7 @@ describe('TrackingPresenceService', () => {
 
       expect(dispatchSpy).not.toHaveBeenCalled();
       expect(sentStates().length).toBe(statesBefore + 1);
+      service.stop();
       flush();
     }));
 
@@ -337,6 +349,7 @@ describe('TrackingPresenceService', () => {
 
       expect(dispatchSpy).not.toHaveBeenCalled();
       expect(sendPresenceSpy).not.toHaveBeenCalled();
+      service.stop();
       flush();
     }));
   });
@@ -359,6 +372,7 @@ describe('TrackingPresenceService', () => {
       // clobber the winner's cached state on the server
       setLocalTaskId(null);
       expect(sentStates().length).toBe(statesBefore);
+      service.stop();
       flush();
     }));
 
@@ -374,6 +388,7 @@ describe('TrackingPresenceService', () => {
       expect(dispatchSpy).not.toHaveBeenCalled();
       expect(sentStates().length).toBe(statesBefore + 1);
       expect(service.remoteSession()).toBeNull();
+      service.stop();
       flush();
     }));
   });
