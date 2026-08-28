@@ -1,15 +1,21 @@
 #!/usr/bin/env node
 /**
- * Guards the two R8 keep rules whose failure is invisible at build time.
+ * DORMANT: nothing runs this today. Release builds are built with
+ * minifyEnabled false (see android/app/build.gradle for why), so no mapping.txt
+ * is produced and no workflow invokes this tool. It is kept staged for the
+ * re-land of minification. Nothing below is currently enforcing anything.
  *
- * A minified release that drops a @JavascriptInterface method or a WorkManager
- * worker builds and installs fine — the bridge call just goes nowhere and the
- * worker never runs. Both only surface on a device, and release builds ship to
- * the Play internal track straight off master, so this reads the mapping R8
- * already produces and fails the build instead.
+ * What it was for: a minified release that drops a @JavascriptInterface method
+ * or a WorkManager worker builds and installs fine — the bridge call just goes
+ * nowhere and the worker never runs. Both only surface on a device, so this
+ * reads the mapping R8 emits and fails the build instead.
  *
  * Expectations come from the Kotlin sources, not a hardcoded list, so adding a
  * bridge method or a worker keeps the check honest without touching this file.
+ *
+ * Note for the re-land: checking the mapping is NOT sufficient. It cannot see a
+ * build that dies in onCreate, and it was only ever run against the fdroid
+ * flavor, while the APK that ships to Play is the play flavor.
  *
  * Usage: node tools/verify-r8-mapping.mjs <mapping.txt> [androidSrcRoot]
  */
