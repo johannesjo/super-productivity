@@ -132,31 +132,26 @@ copy-pasteable manual steps and is **never** auto-marked-applied.
 
 5. **No `BEGIN` / `COMMIT` / `DROP TABLE`.**
 
-Before running the out-of-band `DROP`, recovery also terminates any **orphaned**
-`CONCURRENTLY` build left running by an interrupted prior deploy. PostgreSQL does
-not notice a client disconnected while a backend is mid-statement, so a
-`CREATE INDEX CONCURRENTLY` whose migrator was killed/timed out keeps running and
-keeps its table lock; the `DROP` would otherwise queue behind it and die on
-`statement_timeout`, wedging every retry. The termination is scoped to the same
-database and role (`datname = current_database()`, `usename = current_user`),
-this pipeline's own migrator identity (`application_name LIKE
-'supersync-migrator-%'`, never the current session or cleanup connection), an
-`active` session, and a query that is a `CONCURRENTLY` build. That is safe for a
-**single active recovery** — the docker-compose/host deploy that runs one
-migrator at a time, which is the incident this fixes. It lets raising
-`MIGRATION_TIMEOUT` and re-running a deploy that timed out mid-build self-heal
-instead of needing a manual `pg_terminate_backend`.
+Before running the out-of-band `DROP`, recovery first terminates any **orphaned**
+`CONCURRENTLY` build left running by an interrupted prior deploy — PostgreSQL
+does not notice a client disconnect mid-statement, so the abandoned build keeps
+its table lock and the `DROP` would wedge on `statement_timeout` on every retry.
+The termination is scoped to this pipeline's own migrator identity in the
+current database and role, an `active` session, and a `CONCURRENTLY` query; the
+full predicate, its rationale, and its limits live on
+`terminate_orphaned_concurrently_backends` in `scripts/migrate-deploy.sh` — the
+canonical write-up, update it there first. It lets raising `MIGRATION_TIMEOUT`
+and re-running a deploy that timed out mid-build self-heal instead of needing a
+manual `pg_terminate_backend`.
 
-Caveat: the out-of-band recovery does **not** hold Prisma's advisory lock (that
-is why a P3018 on a pending migration is reachable at all), so it cannot tell an
-orphan apart from a **peer run's live build**. If several recoveries race on one
-database (e.g. multiple Helm init-containers), this can terminate a peer's
-in-progress build. It stays eventually correct (the peer fails loudly and the
-fleet self-heals via the idempotent drop-then-create) but not free — the aborted
-build's work is wasted and the index can be rebuilt more than once across the
-racing runs. That trade is why the `P1002` advisory-lock path still refuses to
-auto-kill. Serializing the out-of-band recovery under a dedicated advisory lock
-would close that race and is the intended follow-up.
+Caveat (details in that same comment): the out-of-band recovery holds no
+advisory lock, so racing recoveries (e.g. multiple Helm init-containers) can
+mistake a **peer run's live build** for an orphan and abort it — a behavior
+change: before this cleanup a racing `DROP` merely queued and timed out while
+the live build finished. The fleet still converges via the idempotent
+drop-then-create, but rebuilds can be wasted; serializing recovery under a
+dedicated advisory lock is the intended follow-up. That trade is why the `P1002`
+advisory-lock path still refuses to auto-kill.
 
 Enforced by `tests/migrate-deploy-script.spec.ts` (the termination SQL and its
 ordering) and

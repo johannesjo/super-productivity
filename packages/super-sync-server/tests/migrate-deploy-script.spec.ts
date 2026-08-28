@@ -784,6 +784,7 @@ CREATE INDEX CONCURRENTLY "operations_payload_bytes_unbackfilled_idx"
       FAKE_FAIL: ENCRYPTED_OPS,
       FAKE_CODE: 'P3018',
       MIGRATE_STEP_TIMEOUT: '7',
+      MIGRATOR_APPLICATION_NAME: 'supersync-migrator-unit-current-run',
       DATABASE_URL:
         'postgresql://u:p@postgres:5432/supersync?connection_limit=60&pool_timeout=10',
     });
@@ -798,9 +799,14 @@ CREATE INDEX CONCURRENTLY "operations_payload_bytes_unbackfilled_idx"
     expect(r.executedSql).toContain('datname = current_database()');
     expect(r.executedSql).toContain('usename = current_user');
     expect(r.executedSql).toContain("application_name LIKE 'supersync-migrator-%'");
-    expect(r.executedSql).toContain('application_name <>');
+    expect(r.executedSql).toContain(
+      "application_name <> 'supersync-migrator-unit-current-run'",
+    );
     expect(r.executedSql).toContain('pid <> pg_backend_pid()');
     expect(r.executedSql).toContain("state = 'active'");
+    // The query filter is the most load-bearing conjunct: without it ANY active
+    // migrator session — e.g. a peer deploy's resolve bookkeeping — would match.
+    expect(r.executedSql).toContain("query ILIKE '%CONCURRENTLY%'");
     // The clear must run BEFORE the DROP it protects, then recovery completes.
     expect(r.executedSql.indexOf('pg_terminate_backend')).toBeLessThan(
       r.executedSql.indexOf('DROP INDEX CONCURRENTLY'),
@@ -818,6 +824,16 @@ CREATE INDEX CONCURRENTLY "operations_payload_bytes_unbackfilled_idx"
     expect(r.executedSql).not.toContain('pg_terminate_backend');
     expect(r.stdout).not.toContain('orphaned CONCURRENTLY');
     expect(r.resolveApplied).toContain(ENCRYPTED_OPS);
+  });
+
+  it('the terminate seam fails loudly without DATABASE_URL instead of exiting 0', () => {
+    // An operator running the seam from a host shell without DATABASE_URL must
+    // get an error, not a silent success suggesting no orphan exists.
+    const r = run({}, ['--terminate-orphaned-concurrently']);
+
+    expect(r.status).toBe(2);
+    expect(r.stdout).toContain('requires DATABASE_URL');
+    expect(r.executedSql).not.toContain('pg_terminate_backend');
   });
 });
 

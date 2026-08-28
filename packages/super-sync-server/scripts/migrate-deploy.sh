@@ -140,22 +140,29 @@ fi
 # parameters so a duplicate cannot override the final settings. The
 # application_name lets health-alert.sh ignore expected long-running DDL.
 # Connection option format: https://www.postgresql.org/docs/16/libpq-connect.html
+#
+# Single source of truth for the migrator identity prefix: the generator, the
+# prefix guard, and the orphan-cleanup LIKE pattern below all key on it, so a
+# rename cannot silently turn the cleanup into a no-op. health-alert.sh
+# hardcodes the same prefix (a shell script cannot share a variable across
+# files without sourcing).
+MIGRATOR_APP_NAME_PREFIX="supersync-migrator-"
 if [ -n "${DATABASE_URL:-}" ]; then
   # Normally unset, so each run gets a fresh unique identity. An explicitly
   # exported value is honored (tests pin a known one; an operator could too), but
-  # it MUST carry the 'supersync-migrator-' prefix the recovery cleanup keys on,
+  # it MUST carry the MIGRATOR_APP_NAME_PREFIX the recovery cleanup keys on,
   # so a stray value cannot silently opt this session out of orphan termination.
   if [ -z "${MIGRATOR_APPLICATION_NAME:-}" ]; then
     if ! MIGRATOR_APPLICATION_NAME=$(node -e \
-      "process.stdout.write('supersync-migrator-' + require('node:crypto').randomUUID())"); then
+      "process.stdout.write('$MIGRATOR_APP_NAME_PREFIX' + require('node:crypto').randomUUID())"); then
       echo "ERROR: could not generate a unique database migrator identifier." >&2
       exit 1
     fi
   fi
   case "$MIGRATOR_APPLICATION_NAME" in
-    supersync-migrator-*) ;;
+    "$MIGRATOR_APP_NAME_PREFIX"*) ;;
     *)
-      echo "ERROR: MIGRATOR_APPLICATION_NAME must start with 'supersync-migrator-'." >&2
+      echo "ERROR: MIGRATOR_APPLICATION_NAME must start with '$MIGRATOR_APP_NAME_PREFIX'." >&2
       exit 1
       ;;
   esac
@@ -269,17 +276,27 @@ with_timeout() {
 # by hand. Clear it first so a re-run (e.g. after raising MIGRATION_TIMEOUT for a
 # large table) self-heals instead.
 #
+# shortcut: heal-by-kill — root-cause prevention would set
+# client_connection_check_interval through the options rewrite above so an
+# abandoned backend cancels itself, but that GUC requires PostgreSQL >= 14 on an
+# OS with POLLRDHUP (Linux); an external server without it rejects the startup
+# option with a FATAL, killing every deploy. Upgrade path: set it once a PG >= 14
+# / Linux floor is established (bundled deployments are postgres:16-alpine).
+#
 # Scoped so it cannot touch the app, monitoring, another database on a shared
 # cluster, or THIS run's own connections:
 #   * datname = current_database() AND usename = current_user — the same DB+role
 #     the orphan was created under (its DATABASE_URL is ours), never a sibling
 #     environment sharing the cluster. Matches terminate_migrator_backends /
-#     health-alert.sh, and cannot cause a false negative (the orphan is same-DB).
-#   * application_name LIKE 'supersync-migrator-%' — only this pipeline's migrator
-#     identity (the app sets none; monitoring uses 'supersync-monitor'),
+#     health-alert.sh. The role scope CAN skip an orphan created under a
+#     since-rotated credential (same DB, different role); that narrow case wedges
+#     on statement_timeout exactly as it did before this cleanup existed and
+#     still needs a manual pg_terminate_backend.
+#   * application_name LIKE '<MIGRATOR_APP_NAME_PREFIX>%' — only this pipeline's
+#     migrator identity (the app sets none; monitoring uses 'supersync-monitor'),
 #   * application_name <> the current run AND pid <> pg_backend_pid() — never our
 #     own session nor the cleanup connection itself,
-#   * state = 'active' AND query ~ CONCURRENTLY — only a session ACTIVELY running
+#   * state = 'active' AND query ILIKE '%CONCURRENTLY%' — only a session ACTIVELY running
 #     a concurrent build/drop. The state filter is load-bearing:
 #     pg_stat_activity.query keeps showing the LAST statement on an idle session,
 #     so without it an idle migrator connection whose previous statement was a
@@ -308,18 +325,22 @@ terminate_orphaned_concurrently_backends() {
   [ -n "${DATABASE_URL:-}" ] && [ -n "${MIGRATOR_APPLICATION_NAME:-}" ] || return 0
 
   echo "    Clearing any orphaned CONCURRENTLY index build left running by an interrupted prior deploy..."
+  orphan_cleanup_err="$(mktemp "${TMPDIR:-/tmp}/supersync-orphan-err.XXXXXX")"
   if ! printf '%s\n' "SELECT pg_terminate_backend(pid)
   FROM pg_stat_activity
  WHERE datname = current_database()
    AND usename = current_user
-   AND application_name LIKE 'supersync-migrator-%'
+   AND application_name LIKE '${MIGRATOR_APP_NAME_PREFIX}%'
    AND application_name <> '$MIGRATOR_APPLICATION_NAME'
    AND pid <> pg_backend_pid()
    AND state = 'active'
    AND query ILIKE '%CONCURRENTLY%';" |
-    with_timeout npx prisma db execute --schema "$SCHEMA" --stdin >/dev/null 2>&1; then
+    with_timeout npx prisma db execute --schema "$SCHEMA" --stdin \
+      >/dev/null 2>"$orphan_cleanup_err"; then
     echo "    WARNING: could not clear orphaned CONCURRENTLY builds; continuing with recovery." >&2
+    sed 's/^/      /' "$orphan_cleanup_err" >&2 || true
   fi
+  rm -f "$orphan_cleanup_err"
   return 0
 }
 
@@ -342,6 +363,13 @@ fi
 # test assert targeting against a real pg_stat_activity without provoking a full
 # CONCURRENTLY index build.
 if [ "${1:-}" = "--terminate-orphaned-concurrently" ]; then
+  # Fail loudly rather than silently exiting 0: an operator running this from a
+  # host shell without DATABASE_URL would otherwise conclude no orphan exists
+  # while the orphan still holds the table lock.
+  if [ -z "${DATABASE_URL:-}" ]; then
+    echo "ERROR: --terminate-orphaned-concurrently requires DATABASE_URL; nothing was checked or terminated." >&2
+    exit 2
+  fi
   terminate_orphaned_concurrently_backends
   exit 0
 fi
