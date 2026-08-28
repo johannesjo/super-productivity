@@ -44,21 +44,40 @@ object BackgroundSyncCredentialStore {
 
     private fun createPrefs(context: Context): SharedPreferences {
         return try {
-            val masterKey = MasterKey.Builder(context.applicationContext)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-            EncryptedSharedPreferences.create(
-                context.applicationContext,
-                PREFS_NAME,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
+            createEncryptedPrefs(context)
         } catch (e: Exception) {
-            // Fallback to standard SharedPreferences if KeyStore is broken
-            Log.w(TAG, "EncryptedSharedPreferences unavailable, falling back to standard", e)
-            context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            // The master key is device-bound and lives in the Android Keystore,
+            // which neither cloud backup nor device-to-device transfer carries
+            // over. A migrated install therefore holds a keyset it can never
+            // unwrap, and Tink throws out of create() rather than returning
+            // empty. Falling straight through to the plaintext store below
+            // would then write the access token and the E2EE password to disk
+            // in the clear, on every device the user migrates to — so discard
+            // the unreadable file and mint a fresh encrypted store first. The
+            // WebView re-supplies the credentials on the next foreground sync.
+            Log.w(TAG, "Encrypted store unreadable, discarding it", e)
+            context.applicationContext.deleteSharedPreferences(PREFS_NAME)
+            try {
+                createEncryptedPrefs(context)
+            } catch (e2: Exception) {
+                // Fallback to standard SharedPreferences if KeyStore is broken
+                Log.w(TAG, "EncryptedSharedPreferences unavailable, falling back to standard", e2)
+                context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            }
         }
+    }
+
+    private fun createEncryptedPrefs(context: Context): SharedPreferences {
+        val masterKey = MasterKey.Builder(context.applicationContext)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        return EncryptedSharedPreferences.create(
+            context.applicationContext,
+            PREFS_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
     @Synchronized

@@ -4,4 +4,13 @@
   <exclude
     domain="sharedpref"
     path="com.superproductivity.superproductivity_preferences.xml" />
+  <!--
+    BackgroundSyncCredentialStore is EncryptedSharedPreferences. Its master key
+    lives in the device-bound Android Keystore, which backup never carries over,
+    so a restored file is undecryptable ciphertext that makes every read throw.
+    Keep it device-local; the WebView re-supplies the credentials on next sync.
+  -->
+  <exclude
+    domain="sharedpref"
+    path="SuperProductivitySync.xml" />
 </full-backup-content>
