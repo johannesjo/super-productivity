@@ -16,7 +16,13 @@ import { prisma, disconnectDb } from './db';
 import websocket from '@fastify/websocket';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
-import { syncRoutes, startCleanupJobs, stopCleanupJobs, initSyncService } from './sync';
+import {
+  syncRoutes,
+  startCleanupJobs,
+  stopCleanupJobs,
+  initSyncService,
+  getSyncService,
+} from './sync';
 import { wsRoutes } from './sync/websocket.routes';
 import {
   getWsConnectionService,

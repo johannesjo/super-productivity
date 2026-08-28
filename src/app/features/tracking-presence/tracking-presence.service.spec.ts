@@ -151,6 +151,9 @@ describe('TrackingPresenceService', () => {
 
   afterEach(() => {
     service.stop();
+    // overrideSelector() mutates the real selector objects; without this the
+    // stubbed values leak into every spec that runs later (e.g. task.selectors).
+    store.resetSelectors();
   });
 
   describe('producer side', () => {
