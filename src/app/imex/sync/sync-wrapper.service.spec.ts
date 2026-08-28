@@ -22,6 +22,8 @@ import { UserInputWaitStateService } from './user-input-wait-state.service';
 import { SuperSyncStatusService } from '../../op-log/sync/super-sync-status.service';
 import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocket.service';
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
+import { TrackingPresenceService } from '../../features/tracking-presence/tracking-presence.service';
+import { RemoteTrackingAndroidNotifierService } from '../../features/tracking-presence/remote-tracking-android-notifier.service';
 import {
   AuthFailSPError,
   DecryptNoPasswordError,
@@ -244,6 +246,17 @@ describe('SyncWrapperService', () => {
         { provide: SuperSyncStatusService, useValue: mockSuperSyncStatusService },
         { provide: SuperSyncWebSocketService, useValue: mockSuperSyncWsService },
         { provide: WsTriggeredDownloadService, useValue: mockWsDownloadService },
+        {
+          provide: TrackingPresenceService,
+          useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+        },
+        {
+          provide: RemoteTrackingAndroidNotifierService,
+          useValue: jasmine.createSpyObj('RemoteTrackingAndroidNotifierService', [
+            'start',
+            'stop',
+          ]),
+        },
       ],
     });
 
@@ -713,6 +726,57 @@ describe('SyncWrapperService', () => {
       await Promise.resolve();
 
       expect(mockSuperSyncWsService.connect).not.toHaveBeenCalled();
+    });
+
+    // The gate must run on EVERY sync cycle, not only inside connectWebSocket():
+    // the socket stays connected for days, so gating there would make toggling
+    // the setting silently do nothing until a reconnect (a failed opt-out).
+    it('should start tracking presence on sync when opted in, even with WS already connected', async () => {
+      mockSuperSyncWsService.isConnected.set(true);
+      // The opt-in is a per-device flag in the provider's private config
+      // (never the synced global config), so the gate reads it from there.
+      mockProviderManager.getProviderById.and.resolveTo({
+        privateCfg: {
+          load: jasmine.createSpy('load').and.resolveTo({
+            isTrackingPresenceEnabled: true,
+          }),
+        },
+      } as any);
+      const presence = TestBed.inject(
+        TrackingPresenceService,
+      ) as jasmine.SpyObj<TrackingPresenceService>;
+
+      await service.sync();
+      // Gate is fire-and-forget with two async hops (getProviderById +
+      // privateCfg.load); drain enough microtasks for start()/stop() to run.
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+
+      expect(presence.start).toHaveBeenCalled();
+      expect(presence.stop).not.toHaveBeenCalled();
+    });
+
+    it('should stop tracking presence on sync when not opted in, even with WS already connected', async () => {
+      mockSuperSyncWsService.isConnected.set(true);
+      mockProviderManager.getProviderById.and.resolveTo({
+        privateCfg: {
+          load: jasmine.createSpy('load').and.resolveTo({
+            isTrackingPresenceEnabled: false,
+          }),
+        },
+      } as any);
+      const presence = TestBed.inject(
+        TrackingPresenceService,
+      ) as jasmine.SpyObj<TrackingPresenceService>;
+
+      await service.sync();
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+
+      expect(presence.stop).toHaveBeenCalled();
+      expect(presence.start).not.toHaveBeenCalled();
     });
   });
 
@@ -2967,6 +3031,17 @@ describe('SyncWrapperService', () => {
           { provide: ReminderService, useValue: mockReminderService },
           { provide: UserInputWaitStateService, useValue: mockUserInputWaitState },
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
+          {
+            provide: TrackingPresenceService,
+            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+          },
+          {
+            provide: RemoteTrackingAndroidNotifierService,
+            useValue: jasmine.createSpyObj('RemoteTrackingAndroidNotifierService', [
+              'start',
+              'stop',
+            ]),
+          },
         ],
       });
 
@@ -3095,6 +3170,17 @@ describe('SyncWrapperService', () => {
           { provide: ReminderService, useValue: mockReminderService },
           { provide: UserInputWaitStateService, useValue: mockUserInputWaitState },
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
+          {
+            provide: TrackingPresenceService,
+            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+          },
+          {
+            provide: RemoteTrackingAndroidNotifierService,
+            useValue: jasmine.createSpyObj('RemoteTrackingAndroidNotifierService', [
+              'start',
+              'stop',
+            ]),
+          },
         ],
       });
 

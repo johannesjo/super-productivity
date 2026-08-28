@@ -75,6 +75,8 @@ import { SYNC_WAIT_TIMEOUT_MS } from './sync.const';
 import { SuperSyncStatusService } from '../../op-log/sync/super-sync-status.service';
 import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocket.service';
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
+import { TrackingPresenceService } from '../../features/tracking-presence/tracking-presence.service';
+import { RemoteTrackingAndroidNotifierService } from '../../features/tracking-presence/remote-tracking-android-notifier.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
 import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
@@ -127,6 +129,8 @@ export class SyncWrapperService {
   private _superSyncStatusService = inject(SuperSyncStatusService);
   private _superSyncWsService = inject(SuperSyncWebSocketService);
   private _wsDownloadService = inject(WsTriggeredDownloadService);
+  private _trackingPresenceService = inject(TrackingPresenceService);
+  private _remoteTrackingNotifier = inject(RemoteTrackingAndroidNotifierService);
   private _opLogStore = inject(OperationLogStoreService);
   private _opLogSyncService = inject(OperationLogSyncService);
   private _sessionValidation = inject(SyncSessionValidationService);
@@ -488,9 +492,43 @@ export class SyncWrapperService {
   }
 
   /**
+   * Starts/stops tracking presence per the experimental opt-in. Runs after
+   * EVERY SuperSync sync cycle (not just on connect — the socket stays up for
+   * days), so toggling the setting takes effect on the next sync. Both
+   * start() and stop() are idempotent.
+   *
+   * The opt-in lives in the SuperSync provider's private config (the same
+   * per-device store the checkbox reads/writes, never uploaded), NOT the
+   * global config: it is a per-device choice — a device syncing global config
+   * from a device that opted in must not silently start broadcasting too.
+   */
+  private async _applyTrackingPresenceGate(): Promise<void> {
+    let isEnabled = false;
+    try {
+      const provider = await this._providerManager.getProviderById(
+        SyncProviderId.SuperSync,
+      );
+      const privateCfg = provider ? await provider.privateCfg.load() : null;
+      isEnabled = !!(privateCfg as { isTrackingPresenceEnabled?: boolean } | null)
+        ?.isTrackingPresenceEnabled;
+    } catch (err) {
+      SyncLog.warn('SyncWrapperService: Failed to read presence opt-in', err);
+    }
+    if (isEnabled) {
+      this._trackingPresenceService.start();
+      this._remoteTrackingNotifier.start();
+    } else {
+      this._remoteTrackingNotifier.stop();
+      this._trackingPresenceService.stop();
+    }
+  }
+
+  /**
    * Disconnects the WebSocket and stops WS-triggered downloads.
    */
   disconnectWebSocket(): void {
+    this._remoteTrackingNotifier.stop();
+    this._trackingPresenceService.stop();
     this._wsDownloadService.stop();
     this._superSyncWsService.disconnect();
   }
@@ -823,6 +861,14 @@ export class SyncWrapperService {
             'SyncWrapperService: WebSocket connection failed, will retry on next sync',
             err,
           );
+        });
+      }
+      if (providerId === SyncProviderId.SuperSync) {
+        // Must run every cycle, NOT only inside connectWebSocket(): the socket
+        // stays connected for days, so gating there would make toggling the
+        // presence setting (an opt-OUT too) silently do nothing until reconnect.
+        this._applyTrackingPresenceGate().catch((err) => {
+          SyncLog.warn('SyncWrapperService: Failed to apply presence setting', err);
         });
       }
 

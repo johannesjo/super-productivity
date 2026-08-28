@@ -22,6 +22,7 @@ import com.superproductivity.superproductivity.service.BackgroundSyncCredentialS
 import com.superproductivity.superproductivity.service.FocusModeForegroundService
 import com.superproductivity.superproductivity.service.FocusModeNotificationHelper
 import com.superproductivity.superproductivity.service.ForegroundServiceFailure
+import com.superproductivity.superproductivity.service.RemoteTrackingNotificationHelper
 import com.superproductivity.superproductivity.service.SyncReminderScheduler
 import com.superproductivity.superproductivity.service.TrackingForegroundService
 import com.superproductivity.superproductivity.util.printWebViewVersion
@@ -384,6 +385,12 @@ class CapacitorMainActivity : BridgeActivity() {
             TrackingForegroundService.ACTION_DONE -> {
                 Log.d("SP_TRACKING", "Done action received from notification")
                 callJSInterfaceFunctionIfExists("next", "onMarkTaskDone$")
+                return
+            }
+            // Stop tracking on ANOTHER device (remote tracking presence notification)
+            RemoteTrackingNotificationHelper.ACTION_REMOTE_STOP -> {
+                Log.d("SP_TRACKING", "Remote stop action received from notification")
+                callJSInterfaceFunctionIfExists("next", "onRemoteTrackingStop$")
                 return
             }
             // Handle focus mode notification actions

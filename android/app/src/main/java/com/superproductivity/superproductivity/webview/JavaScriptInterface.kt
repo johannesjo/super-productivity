@@ -20,6 +20,7 @@ import com.superproductivity.superproductivity.service.BackgroundSyncCredentialS
 import com.superproductivity.superproductivity.service.FocusModeForegroundService
 import com.superproductivity.superproductivity.service.ForegroundServiceFailure
 import com.superproductivity.superproductivity.service.ReminderNotificationHelper
+import com.superproductivity.superproductivity.service.RemoteTrackingNotificationHelper
 import com.superproductivity.superproductivity.service.SyncReminderScheduler
 import com.superproductivity.superproductivity.service.TrackingForegroundService
 import com.superproductivity.superproductivity.widget.ReminderDoneQueue
@@ -234,6 +235,26 @@ class JavaScriptInterface(
             """{"taskId":"$taskId","elapsedMs":$elapsedMs}"""
         } else {
             "null"
+        }
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun updateRemoteTrackingNotification(
+        title: String,
+        text: String,
+        showStopAction: Boolean
+    ) {
+        safeCall("Failed to update remote tracking notification") {
+            RemoteTrackingNotificationHelper.show(activity, title, text, showStopAction)
+        }
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun cancelRemoteTrackingNotification() {
+        safeCall("Failed to cancel remote tracking notification") {
+            RemoteTrackingNotificationHelper.cancel(activity)
         }
     }
 

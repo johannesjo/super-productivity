@@ -428,9 +428,13 @@ export const createServer = (
       });
 
       // WebSocket support for real-time sync notifications
-      // maxPayload: only app-level pong messages expected from clients (~20 bytes)
+      // maxPayload: clients send app-level pongs (~20 bytes) and presence
+      // messages (encrypted envelope + JSON wrapper, typically <1 KB). Must
+      // stay >= MAX_PRESENCE_PAYLOAD_BYTES in websocket-connection.service.ts —
+      // an undersized frame limit errors the WHOLE socket (sync included)
+      // instead of just dropping the presence message.
       await fastifyServer.register(websocket, {
-        options: { maxPayload: 1024 },
+        options: { maxPayload: 8192 },
       });
 
       // Health Check - verifies database connectivity

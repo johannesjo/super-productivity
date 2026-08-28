@@ -33,6 +33,13 @@ export interface SuperSyncPrivateCfg {
   expiresAt?: number;
   /** Whether E2E encryption is enabled for operation payloads. */
   isEncryptionEnabled?: boolean;
+  /**
+   * Experimental per-device opt-in for live tracking presence over the
+   * SuperSync WebSocket (header chip, Android notification, remote stop).
+   * Stored here rather than in the synced global config so each device
+   * opts in independently — it is never uploaded or shared across devices.
+   */
+  isTrackingPresenceEnabled?: boolean;
 }
 
 /**

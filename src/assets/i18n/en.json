@@ -1567,6 +1567,8 @@
           "L_CHANGE_ENCRYPTION_PASSWORD": "Change Encryption Password",
           "L_CONFIRM_PASSWORD": "Confirm Password",
           "L_ENABLE_E2E_ENCRYPTION": "Enable end-to-end encryption",
+          "L_ENABLE_TRACKING_PRESENCE": "Show live tracking on other devices (experimental)",
+          "TRACKING_PRESENCE_DESCRIPTION": "Mirrors which task this account is currently tracking to your other connected devices and lets you stop it from there. Display only \u2014 nothing is stored on the server.",
           "L_NEW_PASSWORD": "New Encryption Password",
           "L_REMOVE_ENCRYPTION": "Or Remove Encryption",
           "L_SERVER_URL": "Server URL",
@@ -2264,6 +2266,24 @@
         "TASK": "Task",
         "TRACK_TO": "Track to:",
         "UNTRACKED_TIME": "Untracked time:"
+      }
+    },
+    "TRACKING_PRESENCE": {
+      "CHIP": {
+        "FALLBACK_TASK": "a recently started task",
+        "FOCUS": "Focus session · cycle {{cycle}}",
+        "LAST_SEEN": "last seen {{time}}",
+        "PAUSED_ON": "Paused on {{device}}",
+        "SINCE": "since {{time}}",
+        "STOP": "Stop tracking on {{device}}",
+        "STOPPED_ON": "Stopped on {{device}}",
+        "TRACKING_ON": "Tracking on {{device}}",
+        "WAS_TRACKING_ON": "Was tracking on {{device}}"
+      },
+      "S": {
+        "MOVED_TO": "Tracking moved to {{device}}",
+        "STOPPED_FROM": "Tracking stopped from {{device}}",
+        "TRACK_HERE_AGAIN": "Track here again"
       }
     },
     "WORKLOG": {

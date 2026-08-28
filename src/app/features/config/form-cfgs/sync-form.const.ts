@@ -756,6 +756,16 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
                 placeholder: SUPER_SYNC_DEFAULT_BASE_URL,
               },
             },
+            {
+              // Experimental opt-in (default off): live tracking presence
+              // over the SuperSync WebSocket
+              key: 'isTrackingPresenceEnabled',
+              type: 'checkbox',
+              templateOptions: {
+                label: T.F.SYNC.FORM.SUPER_SYNC.L_ENABLE_TRACKING_PRESENCE,
+                description: T.F.SYNC.FORM.SUPER_SYNC.TRACKING_PRESENCE_DESCRIPTION,
+              },
+            },
           ],
         },
       ],

@@ -161,6 +161,10 @@ export interface SuperSyncConfig extends WebDavConfig {
   isEncryptionEnabled?: boolean;
   /** Encryption password (SuperSync-specific, stored in private config) */
   encryptKey?: string | null;
+  // NOTE: the experimental live-tracking-presence opt-in is intentionally NOT
+  // here. It is a per-device choice stored in the provider's private config
+  // (`SuperSyncPrivateCfg.isTrackingPresenceEnabled`) so it is never uploaded
+  // or shared across devices — see SyncWrapperService._applyTrackingPresenceGate.
 }
 
 export interface NextcloudConfig {
