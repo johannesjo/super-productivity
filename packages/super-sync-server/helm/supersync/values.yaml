@@ -48,11 +48,6 @@ supersync:
     oldOpsDeleteBatchSize: 5000
     # -- Max old operations deleted across all users in one cleanup pass.
     oldOpsMaxDeletedPerRun: 25000
-  batchUpload:
-    # -- Enable the batched upload implementation. Requires payloadBytesBackfillComplete=true.
-    enabled: false
-    # -- Set only after running `npm run migrate-payload-bytes` to completion.
-    payloadBytesBackfillComplete: false
   webauthn:
     # -- WebAuthn relying party display name, shown in your users' OS passkey prompt.
     # Defaults to the relying-party ID when empty — do not ship someone else's brand here.

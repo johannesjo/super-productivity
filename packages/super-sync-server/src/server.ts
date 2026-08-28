@@ -16,13 +16,7 @@ import { prisma, disconnectDb } from './db';
 import websocket from '@fastify/websocket';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
-import {
-  syncRoutes,
-  startCleanupJobs,
-  stopCleanupJobs,
-  initSyncService,
-  getSyncService,
-} from './sync';
+import { syncRoutes, startCleanupJobs, stopCleanupJobs, initSyncService } from './sync';
 import { wsRoutes } from './sync/websocket.routes';
 import {
   getWsConnectionService,
@@ -325,7 +319,7 @@ export const createServer = (
   stop: () => Promise<void>;
 } => {
   const fullConfig = loadConfigFromEnv(config);
-  initSyncService({ batchUpload: fullConfig.batchUpload });
+  initSyncService();
 
   // Ensure data directory exists
   if (!fs.existsSync(fullConfig.dataDir)) {
@@ -432,22 +426,6 @@ export const createServer = (
       await fastifyServer.register(websocket, {
         options: { maxPayload: 1024 },
       });
-
-      // Backfill self-check: paired with the env-flag enforcement in
-      // loadConfigFromEnv. The env flag (SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE)
-      // is operator-set; if it is flipped to true before the migrate-payload-bytes
-      // script finishes, batch-upload deltas are still correct but the SUM-based
-      // reconcile in calculateStorageUsage would mix exact bytes with the
-      // CASE-WHEN fallback for legacy rows. One indexed probe at startup closes
-      // the trust hole: refuse to boot if any row still has payload_bytes = 0.
-      if (fullConfig.batchUpload) {
-        try {
-          await getSyncService().assertPayloadBytesBackfillComplete();
-        } catch (err) {
-          Logger.error('Startup self-check failed', err);
-          throw err;
-        }
-      }
 
       // Health Check - verifies database connectivity
       // Exempt from rate limiting (Kubernetes probes hit this every 5-15s)

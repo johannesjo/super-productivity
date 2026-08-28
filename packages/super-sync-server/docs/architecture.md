@@ -69,9 +69,9 @@ is [`sync.routes.ts`](../src/sync/sync.routes.ts) and
 ## Per-User Ordering and Transaction Invariant
 
 `serverSeq` is a total order within one user's current sync dataset. Accepted
-uploads commit inside a PostgreSQL `RepeatableRead` transaction. In the batch
-path, one atomic update of `user_sync_state.lastSeq` reserves a contiguous
-sequence range and serializes accepted writers for that user. A concurrent
+uploads commit inside a PostgreSQL `RepeatableRead` transaction. One atomic
+update of `user_sync_state.lastSeq` per accepted operation reserves its
+sequence number and serializes accepted writers for that user. A concurrent
 transaction that read the same earlier snapshot must fail and retry rather than
 commit conflicting operations. A causal `REPAIR` additionally locks that row
 and must prove `repairBaseServerSeq === lastSeq`. Incoming vector clocks are
@@ -90,7 +90,7 @@ A clean-slate full-state upload deletes the prior dataset but preserves
 zero.
 
 This serialization mechanism is a load-bearing decision; see
-[ADR #4](../../../ARCHITECTURE-DECISIONS.md#4-batch-uploads-under-repeatableread),
+[ADR #4](../../../ARCHITECTURE-DECISIONS.md#4-upload-conflict-safety-via-the-lastseq-row-lock-under-repeatableread),
 [`sync.service.ts`](../src/sync/sync.service.ts), and
 [`operation-upload.service.ts`](../src/sync/services/operation-upload.service.ts).
 
