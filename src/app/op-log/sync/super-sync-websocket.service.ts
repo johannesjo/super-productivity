@@ -13,14 +13,16 @@ export interface NewOpsNotification {
  * client (E2E-encrypted when encryption is on) — parsing/decrypting is the
  * TrackingPresenceService's job, not this transport's.
  */
-export interface PresenceWsMessage {
-  kind: 'state' | 'cmd';
-  payload: string;
-  /** Server-assigned per-user ordinal; only set for `state`. */
-  ordinal?: number;
-  /** False when the producing device's socket is gone; only set for `state`. */
-  producerConnected?: boolean;
-}
+export type PresenceWsMessage =
+  | {
+      kind: 'state';
+      payload: string;
+      /** Server-assigned per-user ordinal. */
+      ordinal: number;
+      /** False when the producing device's socket is gone. */
+      producerConnected: boolean;
+    }
+  | { kind: 'cmd'; payload: string };
 
 interface WsMessage {
   type: string;
@@ -268,7 +270,7 @@ export class SuperSyncWebSocketService implements OnDestroy {
         SyncLog.log(`SuperSyncWebSocketService: Server confirmed connection`);
         break;
       case 'presence_state':
-        if (typeof msg.payload === 'string') {
+        if (typeof msg.payload === 'string' && typeof msg.ordinal === 'number') {
           this._presenceMessage$.next({
             kind: 'state',
             payload: msg.payload,
@@ -287,15 +289,11 @@ export class SuperSyncWebSocketService implements OnDestroy {
 
   /**
    * Sends an ephemeral presence message to the server for relay to this
-   * user's other devices. Returns false when the socket is not open —
-   * presence is fire-and-forget, so callers simply skip until reconnect.
+   * user's other devices. Fire-and-forget: silently dropped when the socket
+   * is not open — callers check `isConnected` first to skip the encoding.
    */
-  sendPresence(type: 'presence_state' | 'presence_cmd', payload: string): boolean {
-    if (this._ws?.readyState !== WebSocket.OPEN) {
-      return false;
-    }
+  sendPresence(type: 'presence_state' | 'presence_cmd', payload: string): void {
     this._sendMessage({ type, payload });
-    return true;
   }
 
   private _sendMessage(msg: Record<string, unknown>): void {

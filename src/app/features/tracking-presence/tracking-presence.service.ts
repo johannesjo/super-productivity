@@ -1,4 +1,4 @@
-import { Injectable, Injector, OnDestroy, inject, signal } from '@angular/core';
+import { Injectable, Injector, OnDestroy, computed, inject, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { lazyInject } from '../../util/lazy-inject';
 import { Subscription, combineLatest } from 'rxjs';
@@ -24,13 +24,20 @@ import { SyncLog } from '../../core/log';
 import { getDeviceLabel } from './get-device-label.util';
 import {
   PRESENCE_HEARTBEAT_MS,
+  PRESENCE_HIDE_STALE_AFTER_MS,
+  PRESENCE_STALE_AFTER_MS,
   PRESENCE_STOPPED_LINGER_MS,
+  RemoteSessionView,
   RemoteTrackingSession,
   TrackingPresenceCmd,
   TrackingPresenceEnvelope,
   TrackingPresencePayload,
   TrackingPresenceState,
 } from './tracking-presence.model';
+import { isOperationSyncCapable } from '../../op-log/sync/operation-sync.util';
+
+/** Staleness re-check cadence for viewers; display is minute-granular. */
+const VIEW_TICK_MS = 30_000;
 
 interface LocalDerivedState {
   taskId: string | null;
@@ -81,9 +88,53 @@ export class TrackingPresenceService implements OnDestroy {
   /** Last known remote tracking session, or null when there is none to show. */
   readonly remoteSession = signal<RemoteTrackingSession | null>(null);
 
+  /** Mirrors selectCurrentTaskId; feeds view suppression while WE track. */
+  private _localTaskIdView = signal<string | null>(null);
+  /** Ticks (only while a session is shown) so staleness re-evaluates. */
+  private _viewNow = signal(Date.now());
+
+  /**
+   * The single view-model every viewer surface (header pill, Android
+   * notification) renders from — null while THIS device tracks (the local
+   * surface wins) or when there is nothing to show. Centralized so the
+   * staleness rules ("past tense + no Stop when stale") cannot diverge
+   * between surfaces.
+   */
+  readonly remoteSessionView = computed<RemoteSessionView | null>(() => {
+    const session = this.remoteSession();
+    if (!session || this._localTaskIdView()) {
+      return null;
+    }
+    const isStale =
+      !session.producerConnected ||
+      this._viewNow() - session.receivedAt > PRESENCE_STALE_AFTER_MS;
+    const p = session.payload;
+    const stateKey = isStale
+      ? T.F.TRACKING_PRESENCE.CHIP.WAS_TRACKING_ON
+      : p.state === 'tracking'
+        ? T.F.TRACKING_PRESENCE.CHIP.TRACKING_ON
+        : p.reason === 'idle'
+          ? T.F.TRACKING_PRESENCE.CHIP.PAUSED_ON
+          : T.F.TRACKING_PRESENCE.CHIP.STOPPED_ON;
+    return {
+      session,
+      isStale,
+      stateKey,
+      timeKey: isStale
+        ? T.F.TRACKING_PRESENCE.CHIP.LAST_SEEN
+        : T.F.TRACKING_PRESENCE.CHIP.SINCE,
+      timeTs: isStale ? session.receivedAt : p.sinceTs,
+      // Stop against a disconnected producer would be a promise the system
+      // cannot keep — the button goes away rather than silently doing nothing.
+      showStop: p.state === 'tracking' && !isStale,
+    };
+  });
+
   private _subs: Subscription | null = null;
   private _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private _lingerTimer: ReturnType<typeof setTimeout> | null = null;
+  private _hideTimer: ReturnType<typeof setTimeout> | null = null;
+  private _viewTicker: ReturnType<typeof setInterval> | null = null;
 
   // Producer-session state
   private _current: LocalSession = { state: 'stopped', taskId: null };
@@ -91,7 +142,7 @@ export class TrackingPresenceService implements OnDestroy {
   private _seq = 0;
   private _sinceTs = 0;
   private _lastTrackedTaskId: string | null = null;
-  private _focus: { cycle: number } | undefined;
+  private _focusCycle: number | undefined;
   private _suppressNextStopBroadcast = false;
 
   // Viewer ordering state
@@ -143,8 +194,7 @@ export class TrackingPresenceService implements OnDestroy {
     this._subs?.unsubscribe();
     this._subs = null;
     this._stopHeartbeat();
-    this._clearLingerTimer();
-    this.remoteSession.set(null);
+    this._setRemoteSession(null);
     this._lastOrdinal = 0;
   }
 
@@ -179,7 +229,8 @@ export class TrackingPresenceService implements OnDestroy {
   // ----------------------------------------------------------------------
 
   private _onLocalChange(derived: LocalDerivedState): void {
-    this._focus = derived.isFocusRunning ? { cycle: derived.focusCycle } : undefined;
+    this._focusCycle = derived.isFocusRunning ? derived.focusCycle : undefined;
+    this._localTaskIdView.set(derived.taskId);
 
     if (derived.taskId) {
       const isNewSession =
@@ -216,9 +267,7 @@ export class TrackingPresenceService implements OnDestroy {
       this._suppressNextStopBroadcast = false;
       return;
     }
-    if (wasTracking || reasonChanged) {
-      this._broadcastState();
-    }
+    this._broadcastState();
   }
 
   private _broadcastState(): void {
@@ -234,11 +283,8 @@ export class TrackingPresenceService implements OnDestroy {
       ...(this._current.reason ? { reason: this._current.reason } : {}),
       taskId: this._current.taskId,
       sinceTs: this._sinceTs,
-      ...(this._current.state === 'tracking'
-        ? { elapsedMs: Date.now() - this._sinceTs }
-        : {}),
       deviceLabel: getDeviceLabel(),
-      ...(this._focus ? { focus: this._focus } : {}),
+      ...(this._focusCycle !== undefined ? { focusCycle: this._focusCycle } : {}),
     };
     this._send('presence_state', payload).catch((err) =>
       SyncLog.warn('TrackingPresenceService: Failed to broadcast state', err),
@@ -279,7 +325,10 @@ export class TrackingPresenceService implements OnDestroy {
     this._onRemoteState(parsed as TrackingPresencePayload, msg);
   }
 
-  private _onRemoteState(p: TrackingPresencePayload, msg: PresenceWsMessage): void {
+  private _onRemoteState(
+    p: TrackingPresencePayload,
+    msg: Extract<PresenceWsMessage, { kind: 'state' }>,
+  ): void {
     if (
       p.v !== 1 ||
       typeof p.sessionId !== 'string' ||
@@ -290,12 +339,10 @@ export class TrackingPresenceService implements OnDestroy {
     // Server-assigned ordinal orders states across producers without trusting
     // device clocks. Equal ordinals are re-announcements of the same state
     // (producerConnected flag flips) and must pass.
-    if (msg.ordinal !== undefined) {
-      if (msg.ordinal < this._lastOrdinal) {
-        return;
-      }
-      this._lastOrdinal = msg.ordinal;
+    if (msg.ordinal < this._lastOrdinal) {
+      return;
     }
+    this._lastOrdinal = msg.ordinal;
     const existing = this.remoteSession();
     if (
       existing &&
@@ -310,10 +357,9 @@ export class TrackingPresenceService implements OnDestroy {
       return;
     }
 
-    this._clearLingerTimer();
-    this.remoteSession.set({
+    this._setRemoteSession({
       payload: p,
-      producerConnected: msg.producerConnected !== false,
+      producerConnected: msg.producerConnected,
       receivedAt: Date.now(),
     });
 
@@ -323,7 +369,7 @@ export class TrackingPresenceService implements OnDestroy {
     if (p.state === 'stopped' && !p.reason) {
       this._lingerTimer = setTimeout(() => {
         this._lingerTimer = null;
-        this.remoteSession.set(null);
+        this._setRemoteSession(null);
       }, PRESENCE_STOPPED_LINGER_MS);
     }
   }
@@ -358,8 +404,7 @@ export class TrackingPresenceService implements OnDestroy {
         }
       },
     });
-    this._clearLingerTimer();
-    this.remoteSession.set({
+    this._setRemoteSession({
       payload: p,
       producerConnected: true,
       receivedAt: Date.now(),
@@ -386,10 +431,33 @@ export class TrackingPresenceService implements OnDestroy {
     });
   }
 
-  private _clearLingerTimer(): void {
+  /**
+   * Single write path for `remoteSession`: resets the linger/hide timers and
+   * runs the staleness ticker only while something is actually shown. The
+   * hide timer guarantees a session nobody refreshes disappears — and with
+   * it every downstream timer/effect — instead of lingering forever.
+   */
+  private _setRemoteSession(rs: RemoteTrackingSession | null): void {
     if (this._lingerTimer) {
       clearTimeout(this._lingerTimer);
       this._lingerTimer = null;
+    }
+    if (this._hideTimer) {
+      clearTimeout(this._hideTimer);
+      this._hideTimer = null;
+    }
+    this.remoteSession.set(rs);
+    if (rs) {
+      this._hideTimer = setTimeout(() => {
+        this._hideTimer = null;
+        this._setRemoteSession(null);
+      }, PRESENCE_HIDE_STALE_AFTER_MS);
+      if (!this._viewTicker) {
+        this._viewTicker = setInterval(() => this._viewNow.set(Date.now()), VIEW_TICK_MS);
+      }
+    } else if (this._viewTicker) {
+      clearInterval(this._viewTicker);
+      this._viewTicker = null;
     }
   }
 
@@ -401,6 +469,11 @@ export class TrackingPresenceService implements OnDestroy {
     type: 'presence_state' | 'presence_cmd',
     obj: TrackingPresencePayload | TrackingPresenceCmd,
   ): Promise<void> {
+    if (!this._getWs().isConnected()) {
+      // Fire-and-forget: skip the encode/encrypt work entirely while the
+      // socket is down; the next transition/heartbeat re-announces anyway.
+      return;
+    }
     const key = await this._getEncryptKey();
     const envelope: TrackingPresenceEnvelope = key
       ? { enc: true, data: await this._getEncryption().encryptPayload(obj, key) }
@@ -441,8 +514,9 @@ export class TrackingPresenceService implements OnDestroy {
       const provider = await this._getProviderManager().getProviderById(
         SyncProviderId.SuperSync,
       );
-      const p = provider as { getEncryptKey?: () => Promise<string | undefined> } | null;
-      return p?.getEncryptKey ? await p.getEncryptKey() : undefined;
+      return provider && isOperationSyncCapable(provider) && provider.getEncryptKey
+        ? await provider.getEncryptKey()
+        : undefined;
     } catch (err) {
       SyncLog.warn('TrackingPresenceService: Failed to resolve encrypt key', err);
       return undefined;

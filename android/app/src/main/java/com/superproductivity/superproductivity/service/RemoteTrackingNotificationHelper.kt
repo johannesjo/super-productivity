@@ -37,8 +37,12 @@ object RemoteTrackingNotificationHelper {
     /** Self-destruct after ~2.5 missed heartbeats (heartbeat = 60s). */
     private const val TIMEOUT_MS = 150_000L
 
+    /** Channel creation is a binder call; do it once, not per update. */
+    @Volatile
+    private var isChannelCreated = false
+
     fun createChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (!isChannelCreated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Tracking on other devices",
@@ -50,6 +54,7 @@ object RemoteTrackingNotificationHelper {
             val notificationManager =
                 context.getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
+            isChannelCreated = true
         }
     }
 

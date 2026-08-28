@@ -30,16 +30,14 @@ export interface TrackingPresencePayload {
   taskId: string | null;
   /** Wall-clock ms of the session start. Display only — never accounting. */
   sinceTs: number;
-  /** Producer-computed elapsed ms, re-anchored by heartbeats. Display only. */
-  elapsedMs?: number;
   /** Human-readable producer device label, e.g. 'Desktop', 'Android'. */
   deviceLabel: string;
   /**
-   * Present while a focus session runs on the producer. Read-only mirror —
-   * v1 offers no remote focus control (the focus flow has phases, breaks and
-   * a completion ceremony; there is no coherent single remote verb).
+   * Focus-session cycle, present while one runs on the producer. Read-only
+   * mirror — v1 offers no remote focus control (the focus flow has phases,
+   * breaks and a completion ceremony; there is no coherent single remote verb).
    */
-  focus?: { cycle: number };
+  focusCycle?: number;
 }
 
 export interface TrackingPresenceCmd {
@@ -67,6 +65,25 @@ export interface RemoteTrackingSession {
   /** False once the producing device's socket is gone (state may be stale). */
   producerConnected: boolean;
   receivedAt: number;
+}
+
+/**
+ * Derived render state shared by every viewer surface (header pill, Android
+ * notification), computed once in TrackingPresenceService so "past tense + no
+ * Stop when stale" can never diverge between surfaces.
+ */
+export interface RemoteSessionView {
+  session: RemoteTrackingSession;
+  /** Producer socket gone or no heartbeat for PRESENCE_STALE_AFTER_MS. */
+  isStale: boolean;
+  /** Translation key for the state line (TRACKING_ON / PAUSED_ON / ...). */
+  stateKey: string;
+  /** Translation key for the time part (SINCE / LAST_SEEN). */
+  timeKey: string;
+  /** Timestamp to format into `timeKey` (sinceTs, or receivedAt when stale). */
+  timeTs: number;
+  /** Stop is only offered against a live, actually-tracking producer. */
+  showStop: boolean;
 }
 
 /** Producer re-announces while tracking, so viewers can detect staleness. */

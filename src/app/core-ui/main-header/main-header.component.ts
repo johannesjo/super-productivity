@@ -148,7 +148,8 @@ export class MainHeaderComponent implements OnDestroy {
 
   currentTask = toSignal(this.taskService.currentTask$);
   currentTaskId = this.taskService.currentTaskId;
-  remoteTrackingSession = inject(TrackingPresenceService).remoteSession;
+  // Null while THIS device tracks — the local tracked-task-pill wins the slot.
+  remoteTrackingView = inject(TrackingPresenceService).remoteSessionView;
   enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
     initialValue: [],
   });

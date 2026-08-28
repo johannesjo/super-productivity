@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-  DestroyRef,
-} from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
@@ -14,16 +6,9 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { TrackingPresenceService } from '../tracking-presence.service';
-import {
-  PRESENCE_HIDE_STALE_AFTER_MS,
-  PRESENCE_STALE_AFTER_MS,
-  RemoteTrackingSession,
-} from '../tracking-presence.model';
 import { selectTaskEntities } from '../../tasks/store/task.selectors';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-
-/** Re-evaluate staleness at this cadence; display is minute-granular anyway. */
-const STALENESS_TICK_MS = 30_000;
+import { ShortTimePipe } from '../../../ui/pipes/short-time.pipe';
 
 /**
  * Ambient chip naming what ANOTHER device is tracking, shown in the header's
@@ -36,51 +21,40 @@ const STALENESS_TICK_MS = 30_000;
 @Component({
   selector: 'remote-tracking-pill',
   standalone: true,
-  imports: [MatIcon, MatTooltip, TranslatePipe, DatePipe],
+  imports: [MatIcon, MatTooltip, TranslatePipe, ShortTimePipe],
   animations: [fadeAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (visibleSession(); as session) {
+    @if (view(); as v) {
       <div
         @fade
         class="remote-pill"
-        [class.isStale]="isStale()"
+        [class.isStale]="v.isStale"
       >
         <mat-icon class="device-icon">devices</mat-icon>
         <div class="text">
           <div class="task-title">{{ taskTitle() }}</div>
           <div class="sub">
-            {{ stateLabelKey() | translate: { device: session.payload.deviceLabel } }}
+            {{ v.stateKey | translate: { device: v.session.payload.deviceLabel } }}
             ·
-            @if (isStale()) {
-              {{
-                T.F.TRACKING_PRESENCE.CHIP.LAST_SEEN
-                  | translate: { time: (session.receivedAt | date: 'shortTime') || '' }
-              }}
-            } @else {
-              {{
-                T.F.TRACKING_PRESENCE.CHIP.SINCE
-                  | translate
-                    : { time: (session.payload.sinceTs | date: 'shortTime') || '' }
-              }}
-            }
-            @if (session.payload.focus; as focus) {
-              · {{ T.F.TRACKING_PRESENCE.CHIP.FOCUS | translate: { cycle: focus.cycle } }}
+            {{ v.timeKey | translate: { time: (v.timeTs | shortTime) || '' } }}
+            @if (v.session.payload.focusCycle; as cycle) {
+              · {{ T.F.TRACKING_PRESENCE.CHIP.FOCUS | translate: { cycle: cycle } }}
             }
           </div>
         </div>
-        @if (canStop()) {
+        @if (v.showStop) {
           <button
             type="button"
             class="stop-btn"
             (click)="stopRemote()"
             [attr.aria-label]="
               T.F.TRACKING_PRESENCE.CHIP.STOP
-                | translate: { device: session.payload.deviceLabel }
+                | translate: { device: v.session.payload.deviceLabel }
             "
             matTooltip="{{
               T.F.TRACKING_PRESENCE.CHIP.STOP
-                | translate: { device: session.payload.deviceLabel }
+                | translate: { device: v.session.payload.deviceLabel }
             }}"
             matTooltipPosition="below"
           >
@@ -181,68 +155,11 @@ export class RemoteTrackingPillComponent {
 
   private _taskEntities = toSignal(this._store.select(selectTaskEntities));
 
-  /** Ticks periodically so staleness re-evaluates without any remote event. */
-  private _now = signal(Date.now());
-
-  constructor() {
-    const destroyRef = inject(DestroyRef);
-    const timer = setInterval(() => this._now.set(Date.now()), STALENESS_TICK_MS);
-    destroyRef.onDestroy(() => clearInterval(timer));
-  }
-
-  readonly isStale = computed(() => {
-    const session = this._presenceService.remoteSession();
-    if (!session) {
-      return false;
-    }
-    return (
-      !session.producerConnected ||
-      this._now() - session.receivedAt > PRESENCE_STALE_AFTER_MS
-    );
-  });
-
-  readonly visibleSession = computed<RemoteTrackingSession | null>(() => {
-    const session = this._presenceService.remoteSession();
-    if (!session) {
-      return null;
-    }
-    // A stale session disappears entirely after a while — a remote state
-    // nobody refreshes for half an hour is noise, not information.
-    if (
-      this.isStale() &&
-      this._now() - session.receivedAt > PRESENCE_HIDE_STALE_AFTER_MS
-    ) {
-      return null;
-    }
-    return session;
-  });
-
-  readonly canStop = computed(() => {
-    const session = this.visibleSession();
-    // Stop against a disconnected producer would be a promise the system
-    // cannot keep — the button goes away rather than silently doing nothing.
-    return !!session && session.payload.state === 'tracking' && !this.isStale();
-  });
-
-  readonly stateLabelKey = computed(() => {
-    const session = this.visibleSession();
-    if (!session) {
-      return T.F.TRACKING_PRESENCE.CHIP.TRACKING_ON;
-    }
-    if (this.isStale()) {
-      return T.F.TRACKING_PRESENCE.CHIP.WAS_TRACKING_ON;
-    }
-    if (session.payload.state === 'tracking') {
-      return T.F.TRACKING_PRESENCE.CHIP.TRACKING_ON;
-    }
-    return session.payload.reason === 'idle'
-      ? T.F.TRACKING_PRESENCE.CHIP.PAUSED_ON
-      : T.F.TRACKING_PRESENCE.CHIP.STOPPED_ON;
-  });
+  /** Shared view-model — staleness/label/Stop rules live in the service. */
+  readonly view = this._presenceService.remoteSessionView;
 
   readonly taskTitle = computed(() => {
-    const session = this.visibleSession();
-    const taskId = session?.payload.taskId;
+    const taskId = this.view()?.session.payload.taskId;
     if (!taskId) {
       return this._translateService.instant(T.F.TRACKING_PRESENCE.CHIP.FALLBACK_TASK);
     }

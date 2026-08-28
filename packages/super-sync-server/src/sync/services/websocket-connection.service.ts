@@ -203,24 +203,16 @@ export class WebSocketConnectionService {
     };
     userSet.add(client);
 
-    // The presence producer coming back (reconnect after a network blip or
-    // socket eviction) restores the connected flag so viewers stop rendering
-    // its state as stale; the broadcast goes out immediately rather than
-    // waiting up to a heartbeat interval for the producer's next state.
-    const ownPresence = this.presenceByUser.get(userId);
-    if (
-      ownPresence &&
-      ownPresence.producerClientId === clientId &&
-      !ownPresence.producerConnected
-    ) {
-      ownPresence.producerConnected = true;
-      this._relayPresence(userId, clientId, {
-        type: 'presence_state',
-        payload: ownPresence.payload,
-        ordinal: ownPresence.ordinal,
-        producerConnected: true,
-        timestamp: ownPresence.updatedAt,
-      });
+    const presence = this.presenceByUser.get(userId);
+    if (presence && presence.producerClientId === clientId) {
+      // The presence producer coming back (reconnect after a network blip or
+      // socket eviction) restores the connected flag so viewers stop rendering
+      // its state as stale; the broadcast goes out immediately rather than
+      // waiting up to a heartbeat interval for the producer's next state.
+      if (!presence.producerConnected) {
+        presence.producerConnected = true;
+        this._relayPresence(userId, clientId, this._presenceStateMsg(presence));
+      }
     }
 
     // Send connected message
@@ -233,15 +225,8 @@ export class WebSocketConnectionService {
     // Send the cached presence snapshot so a device connecting mid-session
     // immediately sees what another device is tracking. Skipped for the
     // producer itself — its own next state transition/heartbeat is fresher.
-    const presence = this.presenceByUser.get(userId);
     if (presence && presence.producerClientId !== clientId) {
-      this._sendMessage(ws, {
-        type: 'presence_state',
-        payload: presence.payload,
-        ordinal: presence.ordinal,
-        producerConnected: presence.producerConnected,
-        timestamp: presence.updatedAt,
-      });
+      this._sendMessage(ws, this._presenceStateMsg(presence));
     }
 
     ws.on('pong', () => {
@@ -419,13 +404,11 @@ export class WebSocketConnectionService {
         producerConnected: true,
       };
       this.presenceByUser.set(client.userId, presence);
-      this._relayPresence(client.userId, client.clientId, {
-        type: 'presence_state',
-        payload,
-        ordinal: presence.ordinal,
-        producerConnected: true,
-        timestamp: presence.updatedAt,
-      });
+      this._relayPresence(
+        client.userId,
+        client.clientId,
+        this._presenceStateMsg(presence),
+      );
     } else {
       this._relayPresence(client.userId, client.clientId, {
         type: 'presence_cmd',
@@ -433,6 +416,17 @@ export class WebSocketConnectionService {
         timestamp: Date.now(),
       });
     }
+  }
+
+  /** The one wire shape a cached presence state is announced with. */
+  private _presenceStateMsg(p: UserPresence): Record<string, unknown> {
+    return {
+      type: 'presence_state',
+      payload: p.payload,
+      ordinal: p.ordinal,
+      producerConnected: p.producerConnected,
+      timestamp: p.updatedAt,
+    };
   }
 
   private _relayPresence(
@@ -444,9 +438,15 @@ export class WebSocketConnectionService {
     if (!userSet) {
       return;
     }
+    // Serialized once — the identical string goes to every sibling socket.
+    const str = JSON.stringify(message);
     for (const c of userSet) {
-      if (c.clientId !== excludeClientId) {
-        this._sendMessage(c.ws, message);
+      if (c.clientId !== excludeClientId && c.ws.readyState === WebSocket.OPEN) {
+        try {
+          c.ws.send(str);
+        } catch (err) {
+          Logger.debug(`[ws] Failed to send message`, err);
+        }
       }
     }
   }
@@ -481,13 +481,7 @@ export class WebSocketConnectionService {
       return;
     }
     presence.producerConnected = false;
-    this._relayPresence(userId, clientId, {
-      type: 'presence_state',
-      payload: presence.payload,
-      ordinal: presence.ordinal,
-      producerConnected: false,
-      timestamp: presence.updatedAt,
-    });
+    this._relayPresence(userId, clientId, this._presenceStateMsg(presence));
   }
 
   startHeartbeat(): void {

@@ -17,6 +17,7 @@ import {
 } from '../focus-mode/store/focus-mode.selectors';
 import { setCurrentTask } from '../tasks/store/task.actions';
 import {
+  PRESENCE_HIDE_STALE_AFTER_MS,
   PRESENCE_STOPPED_LINGER_MS,
   TrackingPresenceCmd,
   TrackingPresencePayload,
@@ -96,7 +97,7 @@ describe('TrackingPresenceService', () => {
 
   beforeEach(() => {
     presenceMessage$ = new Subject<PresenceWsMessage>();
-    sendPresenceSpy = jasmine.createSpy('sendPresence').and.returnValue(true);
+    sendPresenceSpy = jasmine.createSpy('sendPresence');
     snackOpenSpy = jasmine.createSpy('open');
 
     TestBed.configureTestingModule({
@@ -112,7 +113,11 @@ describe('TrackingPresenceService', () => {
         }),
         {
           provide: SuperSyncWebSocketService,
-          useValue: { presenceMessage$, sendPresence: sendPresenceSpy },
+          useValue: {
+            presenceMessage$,
+            sendPresence: sendPresenceSpy,
+            isConnected: true,
+          },
         },
         {
           provide: SyncProviderManager,
@@ -241,6 +246,7 @@ describe('TrackingPresenceService', () => {
       tick(PRESENCE_STOPPED_LINGER_MS + 1);
       expect(service.remoteSession()).toBeTruthy();
       expect(service.remoteSession()!.payload.reason).toBe('idle');
+      flush();
     }));
 
     it('drops out-of-order server ordinals', fakeAsync(() => {
@@ -250,6 +256,30 @@ describe('TrackingPresenceService', () => {
       receiveRemoteState({ taskId: 'older' }, { ordinal: 3 });
 
       expect(service.remoteSession()!.payload.taskId).toBe('newer');
+      flush();
+    }));
+
+    it('hides a remote session entirely after the stale-hide window', fakeAsync(() => {
+      service.start();
+      tick();
+      receiveRemoteState({ state: 'tracking' });
+
+      expect(service.remoteSession()).toBeTruthy();
+      tick(PRESENCE_HIDE_STALE_AFTER_MS + 1);
+      expect(service.remoteSession()).toBeNull();
+    }));
+
+    it('exposes a view and suppresses it while this device tracks', fakeAsync(() => {
+      service.start();
+      tick();
+      receiveRemoteState({ taskId: 'remote-task' });
+      expect(service.remoteSessionView()).toBeTruthy();
+
+      // local tracking wins the surface — the view goes away, the cached
+      // session stays
+      setLocalTaskId('task-1');
+      expect(service.remoteSessionView()).toBeNull();
+      expect(service.remoteSession()).toBeTruthy();
       flush();
     }));
 
