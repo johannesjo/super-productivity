@@ -8,6 +8,7 @@ import {
   type MockInstance,
 } from 'vitest';
 import { uuidv7 } from 'uuidv7';
+import { Prisma } from '@prisma/client';
 import { testState, resetTestState } from './sync.service.test-state';
 import type { OperationWhereAlternative } from './sync.service.test-state';
 
@@ -1634,6 +1635,24 @@ describe('SyncService', () => {
 
       expect(results.every((result) => result.accepted)).toBe(true);
       expect(testState.operations.size).toBe(2);
+    });
+
+    it('runs the upload transaction at REPEATABLE READ isolation', async () => {
+      // Tripwire for the FIX 1.5 removal (ARCHITECTURE-DECISIONS.md #4): the
+      // post-allocation conflict re-check was deleted because RepeatableRead
+      // pins every statement to one snapshot and the lastSeq increment raises
+      // 40001 against concurrent writers. Lowering the isolation level makes
+      // that deletion unsound — this must fail loudly, not silently re-arm a
+      // missed-conflict race.
+      const service = new SyncService();
+      await service.uploadOps(userId, clientId, [makeOp({ entityId: 'iso-task' })]);
+
+      expect(prisma.$transaction).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+        }),
+      );
     });
 
     it('should create user sync state for first-time uploads', async () => {
