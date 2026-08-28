@@ -443,9 +443,6 @@ describe('performance migrations', () => {
     );
     expect(composeFile).toContain('REQUIRE_DATABASE_POOL_LIMITS=true');
     expect(composeFile).toContain('MIGRATE_RECOVERY_RUNTIME=compose');
-    expect(composeFile).toContain(
-      'SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=${SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE:-false}',
-    );
     expect(composeFile).toContain('connection_limit=60&pool_timeout=10');
     expect(composeFile).toContain(
       'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -c "SELECT 1"',

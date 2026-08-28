@@ -8,12 +8,6 @@ import {
   type MockInstance,
 } from 'vitest';
 import { uuidv7 } from 'uuidv7';
-import { Prisma } from '@prisma/client';
-import {
-  getEntityConflictKey,
-  prefetchLatestEntityOpsForBatch,
-} from '../src/sync/conflict';
-import { CONFLICT_DETECTION_ENTITY_BATCH_SIZE } from '../src/sync/sync.types';
 import { testState, resetTestState } from './sync.service.test-state';
 import type { OperationWhereAlternative } from './sync.service.test-state';
 
@@ -444,7 +438,7 @@ vi.mock('../src/db', async () => {
         // three mocks broke on positional params during that change.
         //
         // This mock matches stored ops by scalar entityId only and ignores entityIds,
-        // so it does not model the array branch: a future batchUpload test whose prior
+        // so it does not model the array branch: a test whose prior
         // op is multi-entity would get a false "no conflict" here.
         const txUserId = params.find((p: unknown) => typeof p === 'number') as number;
         const valuesParam = params.find(
@@ -918,7 +912,7 @@ describe('SyncService', () => {
 
   describe('uploadOps', () => {
     it('rejects a cursor behind the latest state replacement but allows its boundary', async () => {
-      const service = new SyncService({ batchUpload: true });
+      const service = new SyncService();
       const op = makeOp({ id: 'post-replacement-edit' });
       const replacement = makeOp({
         id: 'retained-state-replacement',
@@ -1075,7 +1069,7 @@ describe('SyncService', () => {
     });
 
     it('persists a resolved no-replacement sentinel on the upload path', async () => {
-      const service = new SyncService({ batchUpload: true });
+      const service = new SyncService();
       const op = makeOp({ id: 'first-upload-with-cursor' });
 
       const result = await service.uploadOps(
@@ -1196,180 +1190,140 @@ describe('SyncService', () => {
       expect(results[1].serverSeq).toBe(2);
     });
 
-    it('should batch upload operations behind the rollout flag', async () => {
-      const service = new SyncService({ batchUpload: true });
-      const ops: Operation[] = Array.from({ length: 25 }, (_, index) =>
+    it('preserves the active full-state author when pruning', async () => {
+      const service = new SyncService();
+      const fullStateAuthor = 'import-author';
+      const uploadClient = 'post-import-client';
+      const fullStateOp = makeOp({
+        clientId: fullStateAuthor,
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+        payload: { TASK: {} },
+        vectorClock: { [fullStateAuthor]: 1 },
+      });
+      const oversizedDelta = makeOp({
+        clientId: uploadClient,
+        entityId: 'post-import-task',
+        vectorClock: {
+          [fullStateAuthor]: 1,
+          [uploadClient]: 2,
+          ...Object.fromEntries(
+            Array.from({ length: 25 }, (_, index) => [
+              `old-client-${index}`,
+              100 + index,
+            ]),
+          ),
+        },
+        timestamp: fullStateOp.timestamp + 1,
+      });
+      const retryDelta = makeOp({
+        ...oversizedDelta,
+        vectorClock: { ...oversizedDelta.vectorClock },
+      });
+
+      expect(
+        (await service.uploadOps(userId, fullStateAuthor, [fullStateOp]))[0].accepted,
+      ).toBe(true);
+      expect(
+        (await service.uploadOps(userId, uploadClient, [oversizedDelta]))[0].accepted,
+      ).toBe(true);
+
+      const storedClock = testState.operations.get(oversizedDelta.id)?.vectorClock as
+        | Record<string, number>
+        | undefined;
+      expect(storedClock).toBeDefined();
+      expect(Object.keys(storedClock ?? {})).toHaveLength(20);
+      expect(storedClock?.[fullStateAuthor]).toBe(1);
+      expect(storedClock?.[uploadClient]).toBe(2);
+
+      expect((await service.uploadOps(userId, uploadClient, [retryDelta]))[0]).toEqual(
+        expect.objectContaining({
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+        }),
+      );
+    });
+
+    it('looks the full-state author up at most once per upload', async () => {
+      // The answer cannot change mid-transaction unless this upload itself
+      // accepts a full-state op, so one oversized op must not become one query.
+      const service = new SyncService();
+      const fullStateAuthor = 'import-author';
+      const uploadClient = 'post-import-client';
+      const fullStateOp = makeOp({
+        clientId: fullStateAuthor,
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        entityId: undefined,
+        payload: { TASK: {} },
+        vectorClock: { [fullStateAuthor]: 1 },
+      });
+      expect(
+        (await service.uploadOps(userId, fullStateAuthor, [fullStateOp]))[0].accepted,
+      ).toBe(true);
+
+      const oversizedDeltas = Array.from({ length: 5 }, (_, index) =>
         makeOp({
-          entityId: `task-${index}`,
-          payload: { title: `Task ${index}` },
-          vectorClock: { [clientId]: index + 1 },
-          timestamp: Date.now() + index,
+          clientId: uploadClient,
+          entityId: `post-import-task-${index}`,
+          vectorClock: {
+            [fullStateAuthor]: 1,
+            [uploadClient]: 2 + index,
+            ...Object.fromEntries(
+              Array.from({ length: 25 }, (_, old) => [`old-client-${old}`, 100 + old]),
+            ),
+          },
+          timestamp: fullStateOp.timestamp + 1 + index,
         }),
       );
 
-      const results = await service.uploadOps(userId, clientId, ops);
+      testState.fullStateAuthorLookupCount = 0;
 
-      expect(results).toHaveLength(25);
-      expect(results.every((result) => result.accepted)).toBe(true);
-      expect(results.map((result) => result.serverSeq)).toEqual(
-        Array.from({ length: 25 }, (_, index) => index + 1),
-      );
-      expect(testState.userSyncStates.get(userId)?.lastSeq).toBe(25);
-      expect(testState.operations.size).toBe(25);
-    });
+      const results = await service.uploadOps(userId, uploadClient, oversizedDeltas);
+      expect(results.every(({ accepted }) => accepted)).toBe(true);
 
-    it.each([
-      ['legacy serial', false],
-      ['batch', true],
-    ])(
-      'preserves the active full-state author when pruning in the %s path',
-      async (_label, batchUpload) => {
-        const service = new SyncService({ batchUpload });
-        const fullStateAuthor = 'import-author';
-        const uploadClient = 'post-import-client';
-        const fullStateOp = makeOp({
-          clientId: fullStateAuthor,
-          actionType: '[SP_ALL] Load(import) all data',
-          opType: 'SYNC_IMPORT',
-          entityType: 'ALL',
-          entityId: undefined,
-          payload: { TASK: {} },
-          vectorClock: { [fullStateAuthor]: 1 },
-        });
-        const oversizedDelta = makeOp({
-          clientId: uploadClient,
-          entityId: 'post-import-task',
-          vectorClock: {
-            [fullStateAuthor]: 1,
-            [uploadClient]: 2,
-            ...Object.fromEntries(
-              Array.from({ length: 25 }, (_, index) => [
-                `old-client-${index}`,
-                100 + index,
-              ]),
-            ),
-          },
-          timestamp: fullStateOp.timestamp + 1,
-        });
-        const retryDelta = makeOp({
-          ...oversizedDelta,
-          vectorClock: { ...oversizedDelta.vectorClock },
-        });
-
-        expect(
-          (await service.uploadOps(userId, fullStateAuthor, [fullStateOp]))[0].accepted,
-        ).toBe(true);
-        expect(
-          (await service.uploadOps(userId, uploadClient, [oversizedDelta]))[0].accepted,
-        ).toBe(true);
-
-        const storedClock = testState.operations.get(oversizedDelta.id)?.vectorClock as
+      expect(testState.fullStateAuthorLookupCount).toBe(1);
+      // The saved query must not cost the protection it exists for.
+      for (const delta of oversizedDeltas) {
+        const storedClock = testState.operations.get(delta.id)?.vectorClock as
           | Record<string, number>
           | undefined;
-        expect(storedClock).toBeDefined();
         expect(Object.keys(storedClock ?? {})).toHaveLength(20);
         expect(storedClock?.[fullStateAuthor]).toBe(1);
-        expect(storedClock?.[uploadClient]).toBe(2);
+      }
+    });
 
-        expect((await service.uploadOps(userId, uploadClient, [retryDelta]))[0]).toEqual(
-          expect.objectContaining({
-            accepted: false,
-            errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-          }),
-        );
-      },
-    );
+    it('rejects a request-start occupied ID after its row disappears', async () => {
+      const service = new SyncService();
+      const op = makeOp({
+        id: 'occupied-before-quota-cleanup',
+        entityId: 'new-entity-after-cleanup',
+        payload: { title: 'Must not consume unestimated storage' },
+      });
 
-    it.each([
-      ['legacy serial', false],
-      ['batch', true],
-    ])(
-      'looks the full-state author up at most once per upload in the %s path',
-      async (_label, batchUpload) => {
-        // The answer cannot change mid-transaction unless this upload itself
-        // accepts a full-state op, so one oversized op must not become one query.
-        const service = new SyncService({ batchUpload });
-        const fullStateAuthor = 'import-author';
-        const uploadClient = 'post-import-client';
-        const fullStateOp = makeOp({
-          clientId: fullStateAuthor,
-          actionType: '[SP_ALL] Load(import) all data',
-          opType: 'SYNC_IMPORT',
-          entityType: 'ALL',
-          entityId: undefined,
-          payload: { TASK: {} },
-          vectorClock: { [fullStateAuthor]: 1 },
-        });
-        expect(
-          (await service.uploadOps(userId, fullStateAuthor, [fullStateOp]))[0].accepted,
-        ).toBe(true);
+      const results = await service.uploadOps(
+        userId,
+        clientId,
+        [op],
+        undefined,
+        new Set([op.id]),
+      );
 
-        const oversizedDeltas = Array.from({ length: 5 }, (_, index) =>
-          makeOp({
-            clientId: uploadClient,
-            entityId: `post-import-task-${index}`,
-            vectorClock: {
-              [fullStateAuthor]: 1,
-              [uploadClient]: 2 + index,
-              ...Object.fromEntries(
-                Array.from({ length: 25 }, (_, old) => [`old-client-${old}`, 100 + old]),
-              ),
-            },
-            timestamp: fullStateOp.timestamp + 1 + index,
-          }),
-        );
-
-        testState.fullStateAuthorLookupCount = 0;
-
-        const results = await service.uploadOps(userId, uploadClient, oversizedDeltas);
-        expect(results.every(({ accepted }) => accepted)).toBe(true);
-
-        expect(testState.fullStateAuthorLookupCount).toBe(1);
-        // The saved query must not cost the protection it exists for.
-        for (const delta of oversizedDeltas) {
-          const storedClock = testState.operations.get(delta.id)?.vectorClock as
-            | Record<string, number>
-            | undefined;
-          expect(Object.keys(storedClock ?? {})).toHaveLength(20);
-          expect(storedClock?.[fullStateAuthor]).toBe(1);
-        }
-      },
-    );
-
-    it.each([
-      ['legacy serial', false],
-      ['batch', true],
-    ])(
-      'rejects a request-start occupied ID in the %s path after its row disappears',
-      async (_label, batchUpload) => {
-        const service = new SyncService({ batchUpload });
-        const op = makeOp({
-          id: 'occupied-before-quota-cleanup',
-          entityId: 'new-entity-after-cleanup',
-          payload: { title: 'Must not consume unestimated storage' },
-        });
-
-        const results = await service.uploadOps(
-          userId,
-          clientId,
-          [op],
-          undefined,
-          new Set([op.id]),
-        );
-
-        expect(results).toEqual([
-          expect.objectContaining({
-            opId: op.id,
-            accepted: false,
-            errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-          }),
-        ]);
-        expect(testState.operations.has(op.id)).toBe(false);
-      },
-    );
+      expect(results).toEqual([
+        expect.objectContaining({
+          opId: op.id,
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
+        }),
+      ]);
+      expect(testState.operations.has(op.id)).toBe(false);
+    });
 
     it('rejects an intra-batch same-id collision as INVALID_OP_ID', async () => {
-      const service = new SyncService({ batchUpload: true });
+      const service = new SyncService();
       const opId = uuidv7();
       const first = makeOp({
         id: opId,
@@ -1408,11 +1362,12 @@ describe('SyncService', () => {
     });
 
     it('preserves an exact intra-batch retry as DUPLICATE_OPERATION', async () => {
-      const service = new SyncService({ batchUpload: true });
+      const service = new SyncService();
+      // Single-entity on purpose: the in-memory tx mock does not model the
+      // multi-entity conflict SQL (entity-ids-conflict.pglite.spec.ts pins it).
       const retry = makeOp({
         id: uuidv7(),
         entityId: 'task-1',
-        entityIds: ['task-1', 'task-2'],
         vectorClock: { [clientId]: 1 },
       });
 
@@ -1430,7 +1385,7 @@ describe('SyncService', () => {
     });
 
     it('terminally rejects a later serial same-ID sibling when the first one conflicts', async () => {
-      const service = new SyncService({ batchUpload: false });
+      const service = new SyncService();
       const otherClientId = 'other-device';
       const existing = makeOp({
         id: 'existing-op',
@@ -1478,7 +1433,7 @@ describe('SyncService', () => {
     });
 
     it('redacts malformed operation metadata from audit logs', async () => {
-      const service = new SyncService({ batchUpload: false });
+      const service = new SyncService();
       const privateText = 'private task title that must not be logged';
       const auditSpy = vi.spyOn(Logger, 'audit').mockImplementation(() => undefined);
       const malformed = makeOp({
@@ -1498,7 +1453,7 @@ describe('SyncService', () => {
     });
 
     it('audits a composite time-tracking entityId verbatim', async () => {
-      const service = new SyncService({ batchUpload: true });
+      const service = new SyncService();
       const auditSpy = vi.spyOn(Logger, 'audit').mockImplementation(() => undefined);
       // Shape emitted by time-tracking.actions.ts: `CONTEXT_TYPE:contextId:date`.
       const compositeEntityId = 'PROJECT:ctx-1:2026-08-20';
@@ -1518,7 +1473,7 @@ describe('SyncService', () => {
     ])(
       'redacts a colon-bearing %s entityId that is not a known address',
       async (entityType, entityId) => {
-        const service = new SyncService({ batchUpload: true });
+        const service = new SyncService();
         const auditSpy = vi.spyOn(Logger, 'audit').mockImplementation(() => undefined);
         const op = makeOp({ entityType, entityId });
 
@@ -1528,46 +1483,40 @@ describe('SyncService', () => {
       },
     );
 
-    it.each([
-      ['serial', false],
-      ['batch', true],
-    ])(
-      'terminally rejects a valid %s sibling whose ID was reserved by an invalid op',
-      async (_label, batchUpload) => {
-        const service = new SyncService({ batchUpload });
-        const invalidFirst = makeOp({
-          id: 'invalid-first-shared-id',
-          entityType: 'INVALID_ENTITY_TYPE',
-        });
-        const laterLargeSibling = makeOp({
-          id: invalidFirst.id,
-          entityId: 'fresh-task',
-          payload: { data: 'x'.repeat(10_000) },
-        });
+    it('terminally rejects a valid sibling whose ID was reserved by an invalid op', async () => {
+      const service = new SyncService();
+      const invalidFirst = makeOp({
+        id: 'invalid-first-shared-id',
+        entityType: 'INVALID_ENTITY_TYPE',
+      });
+      const laterLargeSibling = makeOp({
+        id: invalidFirst.id,
+        entityId: 'fresh-task',
+        payload: { data: 'x'.repeat(10_000) },
+      });
 
-        const results = await service.uploadOps(userId, clientId, [
-          invalidFirst,
-          laterLargeSibling,
-        ]);
+      const results = await service.uploadOps(userId, clientId, [
+        invalidFirst,
+        laterLargeSibling,
+      ]);
 
-        expect(results[0]).toEqual(
-          expect.objectContaining({
-            accepted: false,
-            errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
-          }),
-        );
-        expect(results[1]).toEqual(
-          expect.objectContaining({
-            accepted: false,
-            errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-          }),
-        );
-        expect(testState.operations.has(invalidFirst.id)).toBe(false);
-      },
-    );
+      expect(results[0]).toEqual(
+        expect.objectContaining({
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
+        }),
+      );
+      expect(results[1]).toEqual(
+        expect.objectContaining({
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
+        }),
+      );
+      expect(testState.operations.has(invalidFirst.id)).toBe(false);
+    });
 
     it('should reject intra-batch entity conflicts in order', async () => {
-      const service = new SyncService({ batchUpload: true });
+      const service = new SyncService();
       const ops: Operation[] = [
         {
           id: uuidv7(),
@@ -1608,120 +1557,108 @@ describe('SyncService', () => {
       expect(testState.operations.size).toBe(1);
     });
 
-    it.each([
-      ['serial', false],
-      ['batch', true],
-    ])(
-      'rejects a v2 tasks write against an already-stored raw v1 misc row in the %s path',
-      async (_label, batchUpload) => {
-        const legacyClientId = 'legacy-client';
-        testState.userSyncStates.set(userId, { userId, lastSeq: 1 });
-        testState.serverSeqCounter = 1;
-        testState.operations.set('stored-legacy-misc', {
-          id: 'stored-legacy-misc',
-          userId,
-          clientId: legacyClientId,
-          serverSeq: 1,
-          actionType: '[GLOBAL_CONFIG] Update section',
-          opType: 'UPD',
-          entityType: 'GLOBAL_CONFIG',
-          entityId: 'misc',
-          entityIds: [],
+    it('rejects a v2 tasks write against an already-stored raw v1 misc row', async () => {
+      const legacyClientId = 'legacy-client';
+      testState.userSyncStates.set(userId, { userId, lastSeq: 1 });
+      testState.serverSeqCounter = 1;
+      testState.operations.set('stored-legacy-misc', {
+        id: 'stored-legacy-misc',
+        userId,
+        clientId: legacyClientId,
+        serverSeq: 1,
+        actionType: '[GLOBAL_CONFIG] Update section',
+        opType: 'UPD',
+        entityType: 'GLOBAL_CONFIG',
+        entityId: 'misc',
+        entityIds: [],
+        payload: {
+          sectionKey: 'misc',
+          sectionCfg: { defaultProjectId: 'legacy-project' },
+        },
+        payloadBytes: BigInt(10),
+        vectorClock: { [legacyClientId]: 1 },
+        schemaVersion: 1,
+        clientTimestamp: BigInt(Date.now() - 1_000),
+        receivedAt: BigInt(Date.now() - 1_000),
+        isPayloadEncrypted: false,
+        syncImportReason: null,
+      });
+
+      const service = new SyncService();
+      const result = await service.uploadOps(userId, clientId, [
+        makeGlobalConfigOp({
+          id: 'current-tasks-write',
+          entityId: 'tasks',
+          payload: {
+            sectionKey: 'tasks',
+            sectionCfg: { defaultProjectId: 'current-project' },
+          },
+          vectorClock: { [clientId]: 1 },
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+        }),
+      ]);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          opId: 'current-tasks-write',
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
+          existingClock: { [legacyClientId]: 1 },
+        }),
+      ]);
+      expect(testState.operations.size).toBe(1);
+    });
+
+    it('atomically rejects a new mixed v1 misc upload that conflicts with v2 tasks', async () => {
+      const currentClientId = 'current-client';
+      const service = new SyncService();
+      const currentResult = await service.uploadOps(userId, currentClientId, [
+        makeGlobalConfigOp({
+          id: 'existing-current-tasks',
+          clientId: currentClientId,
+          entityId: 'tasks',
+          payload: {
+            sectionKey: 'tasks',
+            sectionCfg: { defaultProjectId: 'current-project' },
+          },
+          vectorClock: { [currentClientId]: 1 },
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+        }),
+      ]);
+      expect(currentResult[0].accepted).toBe(true);
+
+      const sourceId = 'incoming-legacy-mixed';
+      const legacyResult = await service.uploadOps(userId, clientId, [
+        makeGlobalConfigOp({
+          id: sourceId,
           payload: {
             sectionKey: 'misc',
-            sectionCfg: { defaultProjectId: 'legacy-project' },
+            sectionCfg: {
+              defaultProjectId: 'legacy-project',
+              isMinimizeToTray: true,
+            },
           },
-          payloadBytes: BigInt(10),
-          vectorClock: { [legacyClientId]: 1 },
+          vectorClock: { [clientId]: 1 },
           schemaVersion: 1,
-          clientTimestamp: BigInt(Date.now() - 1_000),
-          receivedAt: BigInt(Date.now() - 1_000),
-          isPayloadEncrypted: false,
-          syncImportReason: null,
-        });
+        }),
+      ]);
 
-        const service = new SyncService({ batchUpload });
-        const result = await service.uploadOps(userId, clientId, [
-          makeGlobalConfigOp({
-            id: 'current-tasks-write',
-            entityId: 'tasks',
-            payload: {
-              sectionKey: 'tasks',
-              sectionCfg: { defaultProjectId: 'current-project' },
-            },
-            vectorClock: { [clientId]: 1 },
-            schemaVersion: CURRENT_SCHEMA_VERSION,
-          }),
-        ]);
-
-        expect(result).toEqual([
-          expect.objectContaining({
-            opId: 'current-tasks-write',
-            accepted: false,
-            errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
-            existingClock: { [legacyClientId]: 1 },
-          }),
-        ]);
-        expect(testState.operations.size).toBe(1);
-      },
-    );
-
-    it.each([
-      ['serial', false],
-      ['batch', true],
-    ])(
-      'atomically rejects a new mixed v1 misc upload that conflicts with v2 tasks in the %s path',
-      async (_label, batchUpload) => {
-        const currentClientId = 'current-client';
-        const service = new SyncService({ batchUpload });
-        const currentResult = await service.uploadOps(userId, currentClientId, [
-          makeGlobalConfigOp({
-            id: 'existing-current-tasks',
-            clientId: currentClientId,
-            entityId: 'tasks',
-            payload: {
-              sectionKey: 'tasks',
-              sectionCfg: { defaultProjectId: 'current-project' },
-            },
-            vectorClock: { [currentClientId]: 1 },
-            schemaVersion: CURRENT_SCHEMA_VERSION,
-          }),
-        ]);
-        expect(currentResult[0].accepted).toBe(true);
-
-        const sourceId = 'incoming-legacy-mixed';
-        const legacyResult = await service.uploadOps(userId, clientId, [
-          makeGlobalConfigOp({
-            id: sourceId,
-            payload: {
-              sectionKey: 'misc',
-              sectionCfg: {
-                defaultProjectId: 'legacy-project',
-                isMinimizeToTray: true,
-              },
-            },
-            vectorClock: { [clientId]: 1 },
-            schemaVersion: 1,
-          }),
-        ]);
-
-        expect(legacyResult).toEqual([
-          expect.objectContaining({
-            opId: sourceId,
-            accepted: false,
-            errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
-            existingClock: { [currentClientId]: 1 },
-          }),
-        ]);
-        expect(testState.operations.has(`${sourceId}_misc`)).toBe(false);
-        expect(testState.operations.has(`${sourceId}_tasks`)).toBe(false);
-        expect(testState.operations.has(sourceId)).toBe(false);
-        expect(testState.operations.size).toBe(1);
-      },
-    );
+      expect(legacyResult).toEqual([
+        expect.objectContaining({
+          opId: sourceId,
+          accepted: false,
+          errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
+          existingClock: { [currentClientId]: 1 },
+        }),
+      ]);
+      expect(testState.operations.has(`${sourceId}_misc`)).toBe(false);
+      expect(testState.operations.has(`${sourceId}_tasks`)).toBe(false);
+      expect(testState.operations.has(sourceId)).toBe(false);
+      expect(testState.operations.size).toBe(1);
+    });
 
     it('should preserve concurrent additive task-time deltas within one batch', async () => {
-      const service = new SyncService({ batchUpload: true });
+      const service = new SyncService();
       const makeTaskTimeOp = (
         id: string,
         vectorClock: Record<string, number>,
@@ -1755,112 +1692,8 @@ describe('SyncService', () => {
       expect(testState.operations.size).toBe(2);
     });
 
-    it('should use entityIds when prefetching batch conflicts', async () => {
-      const service = new SyncService({ batchUpload: true });
-      testState.userSyncStates.set(userId, { userId, lastSeq: 1 });
-      testState.operations.set('existing-op', {
-        id: 'existing-op',
-        userId,
-        clientId: 'other-client',
-        serverSeq: 1,
-        actionType: 'UPDATE_TASK',
-        opType: 'UPD',
-        entityType: 'TASK',
-        entityId: 'task-b',
-        payload: { title: 'Existing' },
-        payloadBytes: BigInt(10),
-        vectorClock: { 'other-client': 1 },
-        schemaVersion: 1,
-        clientTimestamp: BigInt(Date.now() - 1000),
-        receivedAt: BigInt(Date.now() - 1000),
-        isPayloadEncrypted: false,
-        syncImportReason: null,
-      });
-
-      const results = await service.uploadOps(userId, clientId, [
-        {
-          id: uuidv7(),
-          clientId,
-          actionType: 'BATCH_UPDATE_TASKS',
-          opType: 'BATCH',
-          entityType: 'TASK',
-          entityId: 'task-a',
-          entityIds: ['task-a', 'task-b', 'task-c'],
-          payload: { entities: { 'task-a': { title: 'A' } } },
-          vectorClock: { [clientId]: 1 },
-          timestamp: Date.now(),
-          schemaVersion: 1,
-        },
-      ]);
-
-      expect(results[0]).toEqual(
-        expect.objectContaining({
-          accepted: false,
-          errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
-        }),
-      );
-      expect(testState.userSyncStates.get(userId)?.lastSeq).toBe(1);
-    });
-
-    it.each([
-      CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
-      CONFLICT_DETECTION_ENTITY_BATCH_SIZE + 1,
-    ])(
-      'should include the boundary pair and chunk correctly for %i pairs',
-      async (pairCount) => {
-        const boundaryIndex = pairCount - 1;
-        const expectedBatchSizes =
-          pairCount > CONFLICT_DETECTION_ENTITY_BATCH_SIZE
-            ? [CONFLICT_DETECTION_ENTITY_BATCH_SIZE, 1]
-            : [CONFLICT_DETECTION_ENTITY_BATCH_SIZE];
-        const entityPairs = Array.from({ length: pairCount }, (_, index) => ({
-          entityType: 'TASK',
-          entityId: `task-${index}`,
-        }));
-        const boundaryPair = entityPairs[boundaryIndex];
-        const boundaryRow = {
-          ...boundaryPair,
-          clientId: 'other-client',
-          actionType: 'UPDATE_TASK',
-          vectorClock: { 'other-client': 1 },
-          serverSeq: 1,
-        };
-        const queriedBatchSizes: number[] = [];
-        const tx = {
-          $queryRaw: vi
-            .fn()
-            .mockImplementation(async (_strings: unknown, ...params: unknown[]) => {
-              const touchedPairValues = (params[0] as Prisma.Sql).values;
-              queriedBatchSizes.push(touchedPairValues.length / 2);
-              for (let index = 0; index < touchedPairValues.length; index += 2) {
-                if (
-                  touchedPairValues[index] === boundaryPair.entityType &&
-                  touchedPairValues[index + 1] === boundaryPair.entityId
-                ) {
-                  return [boundaryRow];
-                }
-              }
-              return [];
-            }),
-        };
-
-        const latestByEntity = await prefetchLatestEntityOpsForBatch(
-          userId,
-          entityPairs,
-          tx as unknown as Prisma.TransactionClient,
-        );
-
-        expect(
-          latestByEntity.get(
-            getEntityConflictKey(boundaryPair.entityType, boundaryPair.entityId),
-          ),
-        ).toEqual(boundaryRow);
-        expect(queriedBatchSizes).toEqual(expectedBatchSizes);
-      },
-    );
-
-    it('should create user sync state for first-time batch uploads', async () => {
-      const service = new SyncService({ batchUpload: true });
+    it('should create user sync state for first-time uploads', async () => {
+      const service = new SyncService();
       expect(testState.userSyncStates.get(userId)).toBeUndefined();
 
       const results = await service.uploadOps(userId, clientId, [
@@ -1884,8 +1717,8 @@ describe('SyncService', () => {
       expect(testState.userSyncStates.get(userId)?.lastSeq).toBe(1);
     });
 
-    it('should update device last seen for all-rejected batch uploads', async () => {
-      const service = new SyncService({ batchUpload: true });
+    it('should update device last seen for all-rejected uploads', async () => {
+      const service = new SyncService();
 
       const results = await service.uploadOps(userId, clientId, [
         {
@@ -1909,27 +1742,18 @@ describe('SyncService', () => {
         }),
       );
       expect(testState.operations.size).toBe(0);
-      expect(testState.userSyncStates.get(userId)).toBeUndefined();
+      // The serial path upserts the sync-state row before processing ops, so an
+      // all-rejected upload still leaves a row at lastSeq 0.
+      expect(testState.userSyncStates.get(userId)).toEqual(
+        expect.objectContaining({ lastSeq: 0 }),
+      );
       expect(testState.syncDevices.get(`${userId}:${clientId}`)).toEqual(
         expect.objectContaining({ userId, clientId }),
       );
     });
 
-    it('runs the prior-vector-clock aggregate exactly once per batch and last full-state op wins, even with multiple full-state ops', async () => {
-      // NEW-2: a single full-state op cannot prove the "once" invariant — it
-      // would pass even if the expensive _aggregatePriorVectorClock ran per
-      // full-state op. Use TWO full-state ops so the test catches a regression
-      // that reverts to per-op aggregation (the exact perf footgun the batch
-      // path optimizes away), and assert last-write-wins over N full-state ops.
-      const service = new SyncService({ batchUpload: true });
-      const operationUploadService = (
-        service as unknown as {
-          operationUploadService: {
-            _aggregatePriorVectorClock: (...args: unknown[]) => Promise<unknown>;
-          };
-        }
-      ).operationUploadService;
-      const aggregateSpy = vi.spyOn(operationUploadService, '_aggregatePriorVectorClock');
+    it('last full-state op wins, even with multiple full-state ops in one upload', async () => {
+      const service = new SyncService();
 
       const results = await service.uploadOps(userId, clientId, [
         {
@@ -1963,8 +1787,6 @@ describe('SyncService', () => {
       ]);
 
       expect(results.map((result) => result.accepted)).toEqual([true, true, true]);
-      // Aggregate is computed once for the batch, not once per full-state op.
-      expect(aggregateSpy).toHaveBeenCalledTimes(1);
       // Last full-state op wins: marker points at the SECOND import (seq 2),
       // not the first, with its (merged) clock.
       expect(testState.userSyncStates.get(userId)).toEqual(
@@ -1975,65 +1797,6 @@ describe('SyncService', () => {
           latestStateReplacementSeq: 2,
         }),
       );
-      aggregateSpy.mockRestore();
-    });
-
-    it('should classify batch createMany P2002 stale-prefetch races as retryable', async () => {
-      const service = new SyncService({ batchUpload: true });
-      const p2002 = new Prisma.PrismaClientKnownRequestError(
-        'Unique constraint failed on the constraint: operations_pkey',
-        {
-          code: 'P2002',
-          clientVersion: '5.0.0',
-          meta: { target: 'operations_pkey' },
-        },
-      );
-      const tx = {
-        operation: {
-          deleteMany: vi.fn(),
-          findMany: vi.fn().mockResolvedValue([]),
-          createMany: vi.fn().mockRejectedValue(p2002),
-        },
-        userSyncState: {
-          updateMany: vi.fn(),
-        },
-        syncDevice: {
-          deleteMany: vi.fn(),
-          upsert: vi.fn(),
-        },
-        user: {
-          update: vi.fn(),
-        },
-        $queryRaw: vi.fn().mockResolvedValue([{ lastSeq: 1 }]),
-        $executeRaw: vi.fn(),
-      };
-
-      vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback) =>
-        callback(tx as unknown as Prisma.TransactionClient),
-      );
-
-      const results = await service.uploadOps(userId, clientId, [
-        {
-          id: uuidv7(),
-          clientId,
-          actionType: '[SP_ALL] Load(import) all data',
-          opType: 'SYNC_IMPORT',
-          entityType: 'ALL',
-          payload: { TASK: {} },
-          vectorClock: { [clientId]: 1 },
-          timestamp: Date.now(),
-          schemaVersion: 1,
-        },
-      ]);
-
-      expect(results).toEqual([
-        expect.objectContaining({
-          accepted: false,
-          errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
-          error: 'Concurrent transaction conflict - please retry',
-        }),
-      ]);
-      expect(tx.syncDevice.upsert).not.toHaveBeenCalled();
     });
 
     it('should reject duplicate operation IDs (idempotency)', async () => {

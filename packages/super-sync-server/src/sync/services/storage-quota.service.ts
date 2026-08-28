@@ -395,52 +395,6 @@ export class StorageQuotaService {
     this.forcedReconciles.delete(userId);
   }
 
-  /**
-   * Backfill self-check. When SUPERSYNC_BATCH_UPLOAD=true the operator is
-   * trusted to have set SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=true only
-   * after `npm run migrate-payload-bytes` finished. If the flag was flipped
-   * too early, batch uploads still write `payload_bytes` correctly but the
-   * SUM-based reconcile in `calculateStorageUsage` would mix exact bytes with
-   * the CASE-WHEN fallback for legacy rows — small drift, but unnecessary
-   * given the env-flag's whole purpose.
-   *
-   * One indexed probe at startup closes the trust hole, but its cost is the
-   * opposite way round from how it reads. A *partially* backfilled table is the
-   * cheap case: `operations_payload_bytes_unbackfilled_idx` still holds live
-   * entries and the scan stops at the first one. The *completed* backfill is the
-   * expensive case — proving that no row matches means reading the whole index.
-   * `payload_bytes` sits in that index's predicate, so every backfill update was
-   * non-HOT and left entries pointing at dead heap tuples, each of which must be
-   * visited until VACUUM or LP_DEAD hints clear them; and with statistics still
-   * describing the pre-backfill distribution the planner may abandon the index and
-   * sequentially scan the table instead. On a multi-GB `operations` that is minutes,
-   * not one round-trip — and it runs before `/health` is registered, so the container
-   * never reports healthy while it is happening (#9504 §2).
-   *
-   * Which of the two costs dominates has not been measured on a real instance, so
-   * neither `scripts/migrate-payload-bytes.ts` nor this probe tries to pre-empt it:
-   * refreshing statistics does nothing about dead index entries, and vice versa. The
-   * migration that creates the index makes the same wrong claim ("physically drains
-   * to empty"), but applied migrations are never edited in place
-   * (`prisma/migrations/README.md`), so this is the correction of record. Worst case
-   * (zero rows in `operations`, e.g. a fresh deployment) is still one round-trip.
-   */
-  async assertPayloadBytesBackfillComplete(): Promise<void> {
-    const result = await prisma.$queryRaw<[{ exists: boolean }]>`
-      SELECT EXISTS (
-        SELECT 1 FROM operations WHERE payload_bytes = 0 LIMIT 1
-      ) AS "exists"
-    `;
-    if (result[0]?.exists) {
-      throw new Error(
-        'SUPERSYNC_BATCH_UPLOAD is enabled but the operations table still ' +
-          'contains rows with payload_bytes = 0. Run ' +
-          '`npm run migrate-payload-bytes` to complete the backfill before ' +
-          'setting SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=true.',
-      );
-    }
-  }
-
   async deleteOldSyncedOpsForAllUsers(
     cutoffTime: number,
   ): Promise<{ totalDeleted: number; affectedUserIds: number[] }> {
