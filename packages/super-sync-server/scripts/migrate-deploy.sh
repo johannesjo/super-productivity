@@ -13,6 +13,10 @@ set -eu
 #
 # 1. For the transaction-block failure above, it runs a migration with the safe
 #    DROP+CREATE CONCURRENTLY shape out-of-band, marks it applied, and retries.
+#    It first terminates any orphaned CONCURRENTLY build a prior interrupted
+#    deploy left holding the table lock (see
+#    terminate_orphaned_concurrently_backends), so the DROP cannot wedge behind
+#    it on statement_timeout.
 # 2. For the two-statement SET LOCAL lock_timeout + ALTER INDEX ... SET (...)
 #    shape, it rolls back Prisma's failed record and retries a bounded number of
 #    times through Prisma. It never splits or marks that transactional migration
@@ -135,13 +139,42 @@ fi
 # can leave PostgreSQL working after a killed client. Collapse protected query
 # parameters so a duplicate cannot override the final settings. The
 # application_name lets health-alert.sh ignore expected long-running DDL.
+#
+# client_connection_check_interval makes an abandoned migrator backend notice
+# its client is gone mid-statement and cancel itself within ~10s, so a killed/
+# OOM'd/timed-out deploy no longer leaves a CONCURRENTLY build holding the table
+# lock (the incident terminate_orphaned_concurrently_backends heals). It leaves
+# an INVALID index the drop-then-create recovery shape already clears. Requires
+# PostgreSQL >= 14 on a Linux-hosted server (POLLRDHUP) — a deliberate floor,
+# documented in the server README; an older server rejects the startup option
+# with FATAL, failing every migration loudly rather than degrading silently.
 # Connection option format: https://www.postgresql.org/docs/16/libpq-connect.html
+#
+# Single source of truth for the migrator identity prefix: the generator, the
+# prefix guard, and the orphan-cleanup LIKE pattern below all key on it, so a
+# rename cannot silently turn the cleanup into a no-op. health-alert.sh
+# hardcodes the same prefix (a shell script cannot share a variable across
+# files without sourcing).
+MIGRATOR_APP_NAME_PREFIX="supersync-migrator-"
 if [ -n "${DATABASE_URL:-}" ]; then
-  if ! MIGRATOR_APPLICATION_NAME=$(node -e \
-    "process.stdout.write('supersync-migrator-' + require('node:crypto').randomUUID())"); then
-    echo "ERROR: could not generate a unique database migrator identifier." >&2
-    exit 1
+  # Normally unset, so each run gets a fresh unique identity. An explicitly
+  # exported value is honored (tests pin a known one; an operator could too), but
+  # it MUST carry the MIGRATOR_APP_NAME_PREFIX the recovery cleanup keys on,
+  # so a stray value cannot silently opt this session out of orphan termination.
+  if [ -z "${MIGRATOR_APPLICATION_NAME:-}" ]; then
+    if ! MIGRATOR_APPLICATION_NAME=$(node -e \
+      "process.stdout.write('$MIGRATOR_APP_NAME_PREFIX' + require('node:crypto').randomUUID())"); then
+      echo "ERROR: could not generate a unique database migrator identifier." >&2
+      exit 1
+    fi
   fi
+  case "$MIGRATOR_APPLICATION_NAME" in
+    "$MIGRATOR_APP_NAME_PREFIX"*) ;;
+    *)
+      echo "ERROR: MIGRATOR_APPLICATION_NAME must start with '$MIGRATOR_APP_NAME_PREFIX'." >&2
+      exit 1
+      ;;
+  esac
   export MIGRATOR_APPLICATION_NAME
   if ! MIGRATOR_DATABASE_URL=$(
     MIGRATOR_SOURCE_DATABASE_URL="$DATABASE_URL" \
@@ -153,6 +186,8 @@ try {
   const options = url.searchParams.getAll('options').filter(Boolean);
   options.push(
     `-c statement_timeout=${process.env.MIGRATOR_STATEMENT_TIMEOUT_MS}`,
+    // Abandoned-backend self-cancel; PG >= 14 / Linux floor (comment above).
+    '-c client_connection_check_interval=10000',
   );
 
   url.searchParams.delete('options');
@@ -242,6 +277,84 @@ with_timeout() {
   return "$wt_rc"
 }
 
+# Orphaned CONCURRENTLY index builds outlive their migrator: PostgreSQL does not
+# notice that a client disconnected while a backend is mid-statement
+# (client_connection_check_interval defaults to 0), so a CREATE INDEX
+# CONCURRENTLY whose migrator container was killed, OOM'd, or timed out keeps
+# running and keeps its SHARE UPDATE EXCLUSIVE lock on the table. The out-of-band
+# DROP in recover_migration would then queue behind that lock and be cancelled by
+# statement_timeout, wedging every retry until an operator terminates the backend
+# by hand. Clear it first so a re-run (e.g. after raising MIGRATION_TIMEOUT for a
+# large table) self-heals instead.
+#
+# Migrator connections set client_connection_check_interval (options rewrite
+# above), so a backend whose client cleanly vanished cancels itself within ~10s
+# and new orphans of that class should be rare. This kill remains load-bearing
+# for what the GUC cannot see: orphans left by pre-GUC migrator versions, and
+# half-open connections (migrator node death, network partition) where no FIN
+# arrives and only TCP keepalives eventually reap the socket.
+#
+# Scoped so it cannot touch the app, monitoring, another database on a shared
+# cluster, or THIS run's own connections:
+#   * datname = current_database() AND usename = current_user — the same DB+role
+#     the orphan was created under (its DATABASE_URL is ours), never a sibling
+#     environment sharing the cluster. Matches terminate_migrator_backends /
+#     health-alert.sh. The role scope CAN skip an orphan created under a
+#     since-rotated credential (same DB, different role); that narrow case wedges
+#     on statement_timeout exactly as it did before this cleanup existed and
+#     still needs a manual pg_terminate_backend.
+#   * application_name LIKE '<MIGRATOR_APP_NAME_PREFIX>%' — only this pipeline's
+#     migrator identity (the app sets none; monitoring uses 'supersync-monitor'),
+#   * application_name <> the current run AND pid <> pg_backend_pid() — never our
+#     own session nor the cleanup connection itself,
+#   * state = 'active' AND query ILIKE '%CONCURRENTLY%' — only a session ACTIVELY running
+#     a concurrent build/drop. The state filter is load-bearing:
+#     pg_stat_activity.query keeps showing the LAST statement on an idle session,
+#     so without it an idle migrator connection whose previous statement was a
+#     CONCURRENTLY build would be a false match.
+#
+# SAFE for a SINGLE active recovery — the docker-compose / host deploy that runs
+# one migrator at a time, which is the incident this fixes. IMPORTANT caveat: the
+# out-of-band recovery does NOT hold Prisma's advisory lock (it never does — that
+# is why a P3018 on a pending migration is reachable at all), so this cannot tell
+# an orphan apart from a PEER run's LIVE build. If several recoveries race on one
+# database (e.g. multiple Helm init-containers rolling out together), this can
+# terminate a peer's in-progress build. It stays eventually correct — the peer
+# fails loudly and the fleet self-heals via the idempotent drop-then-create — but
+# it is not free: the aborted build's work is wasted and the index can be rebuilt
+# more than once across the racing runs (before this change a racing peer's DROP
+# merely queued and timed out while the original build finished; now it actively
+# aborts it). That trade is why the P1002 path still refuses to auto-kill (its
+# lock holder may be a live build the operator must adjudicate). Serializing the
+# out-of-band recovery under a dedicated advisory lock would close the race and is
+# the right follow-up.
+#
+# Runs through prisma db execute (not the node cleanup used on timeout), so it
+# inherits the same finite statement_timeout and stays fake-able in tests.
+# Best-effort: on failure the DROP still runs, so warn and continue.
+terminate_orphaned_concurrently_backends() {
+  [ -n "${DATABASE_URL:-}" ] && [ -n "${MIGRATOR_APPLICATION_NAME:-}" ] || return 0
+
+  echo "    Clearing any orphaned CONCURRENTLY index build left running by an interrupted prior deploy..."
+  orphan_cleanup_err="$(mktemp "${TMPDIR:-/tmp}/supersync-orphan-err.XXXXXX")"
+  if ! printf '%s\n' "SELECT pg_terminate_backend(pid)
+  FROM pg_stat_activity
+ WHERE datname = current_database()
+   AND usename = current_user
+   AND application_name LIKE '${MIGRATOR_APP_NAME_PREFIX}%'
+   AND application_name <> '$MIGRATOR_APPLICATION_NAME'
+   AND pid <> pg_backend_pid()
+   AND state = 'active'
+   AND query ILIKE '%CONCURRENTLY%';" |
+    with_timeout npx prisma db execute --schema "$SCHEMA" --stdin \
+      >/dev/null 2>"$orphan_cleanup_err"; then
+    echo "    WARNING: could not clear orphaned CONCURRENTLY builds; continuing with recovery." >&2
+    sed 's/^/      /' "$orphan_cleanup_err" >&2 || true
+  fi
+  rm -f "$orphan_cleanup_err"
+  return 0
+}
+
 # Printed manual-recovery commands re-enter through this narrow wrapper so
 # they receive the same finite bounds without printing database secrets.
 if [ "${1:-}" = "--prisma" ]; then
@@ -250,6 +363,26 @@ if [ "${1:-}" = "--prisma" ]; then
   prisma_status=0
   with_timeout npx prisma "$@" || prisma_status=$?
   exit "$prisma_status"
+fi
+
+# Test/diagnostic seam: run ONLY the orphaned-CONCURRENTLY cleanup, then exit.
+# Do NOT run this while a migrate-deploy is in progress: each invocation gets a
+# fresh MIGRATOR_APPLICATION_NAME, so its self-exclusion protects no OTHER running
+# migrator, and on a large table a long-but-legitimate CREATE INDEX CONCURRENTLY
+# is indistinguishable from an orphan (see the caveat on
+# terminate_orphaned_concurrently_backends). Exists mainly to let the integration
+# test assert targeting against a real pg_stat_activity without provoking a full
+# CONCURRENTLY index build.
+if [ "${1:-}" = "--terminate-orphaned-concurrently" ]; then
+  # Fail loudly rather than silently exiting 0: an operator running this from a
+  # host shell without DATABASE_URL would otherwise conclude no orphan exists
+  # while the orphan still holds the table lock.
+  if [ -z "${DATABASE_URL:-}" ]; then
+    echo "ERROR: --terminate-orphaned-concurrently requires DATABASE_URL; nothing was checked or terminated." >&2
+    exit 2
+  fi
+  terminate_orphaned_concurrently_backends
+  exit 0
 fi
 
 MIGRATE_LOG=""
@@ -528,6 +661,11 @@ recover_migration() {
 
   echo ""
   echo "==> Recovering $name outside Prisma migrate (CONCURRENTLY cannot run in a transaction)..."
+
+  # A prior interrupted deploy can leave a CONCURRENTLY build still holding the
+  # table lock; clear it before the DROP below queues behind it and dies on
+  # statement_timeout. See terminate_orphaned_concurrently_backends.
+  terminate_orphaned_concurrently_backends
 
   set +e
   with_timeout npx prisma migrate resolve --rolled-back "$name"

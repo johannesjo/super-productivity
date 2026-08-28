@@ -164,6 +164,9 @@ externalDatabase:
   # and pool_timeout value. A pre-upgrade hook validates both before replacing
   # a running pod, and the migration init container rechecks them, e.g.
   # postgresql://user:pass@host:5432/dbname?connection_limit=60&pool_timeout=10
+  # The server must be PostgreSQL 14+ on a Linux host: migrations set
+  # client_connection_check_interval, which an older or non-Linux server
+  # rejects at connect (see the server README).
   url: ""
   # -- Use an existing Kubernetes secret for the database URL.
   # The secret must contain a DATABASE_URL key with the same pool parameters.

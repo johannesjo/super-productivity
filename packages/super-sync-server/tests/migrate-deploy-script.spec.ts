@@ -772,6 +772,69 @@ CREATE INDEX CONCURRENTLY "operations_payload_bytes_unbackfilled_idx"
     expect(r.status).toBe(0);
     expect(r.resolveApplied).toEqual(expect.arrayContaining([ENCRYPTED_OPS, second]));
   });
+
+  it('terminates an orphaned CONCURRENTLY backend before the out-of-band DROP', () => {
+    // A prior interrupted deploy leaves a CREATE INDEX CONCURRENTLY backend
+    // running (PostgreSQL ignores the client disconnect mid-statement), holding
+    // the table lock. Without clearing it first, this recovery's DROP INDEX
+    // CONCURRENTLY queues behind that lock and dies on statement_timeout,
+    // wedging the deploy — exactly the incident this guards.
+    writeMigration(ENCRYPTED_OPS, ENCRYPTED_OPS_SQL);
+    const r = run({
+      FAKE_FAIL: ENCRYPTED_OPS,
+      FAKE_CODE: 'P3018',
+      MIGRATE_STEP_TIMEOUT: '7',
+      MIGRATOR_APPLICATION_NAME: 'supersync-migrator-unit-current-run',
+      DATABASE_URL:
+        'postgresql://u:p@postgres:5432/supersync?connection_limit=60&pool_timeout=10',
+    });
+
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('orphaned CONCURRENTLY');
+    // Termination is scoped: this pipeline's own migrator identity, an ACTIVE
+    // concurrent build, and never the current session or the cleanup connection.
+    expect(r.executedSql).toContain('pg_terminate_backend');
+    // Bounded to the same database + role, so a sibling environment sharing the
+    // cluster can never be touched.
+    expect(r.executedSql).toContain('datname = current_database()');
+    expect(r.executedSql).toContain('usename = current_user');
+    expect(r.executedSql).toContain("application_name LIKE 'supersync-migrator-%'");
+    expect(r.executedSql).toContain(
+      "application_name <> 'supersync-migrator-unit-current-run'",
+    );
+    expect(r.executedSql).toContain('pid <> pg_backend_pid()');
+    expect(r.executedSql).toContain("state = 'active'");
+    // The query filter is the most load-bearing conjunct: without it ANY active
+    // migrator session — e.g. a peer deploy's resolve bookkeeping — would match.
+    expect(r.executedSql).toContain("query ILIKE '%CONCURRENTLY%'");
+    // The clear must run BEFORE the DROP it protects, then recovery completes.
+    expect(r.executedSql.indexOf('pg_terminate_backend')).toBeLessThan(
+      r.executedSql.indexOf('DROP INDEX CONCURRENTLY'),
+    );
+    expect(r.resolveApplied).toContain(ENCRYPTED_OPS);
+  });
+
+  it('does not attempt orphan termination when DATABASE_URL is unset', () => {
+    // No URL means no pg_stat_activity to query; the recovery must still run
+    // its own DROP+CREATE and never emit a stray terminate.
+    writeMigration(ENCRYPTED_OPS, ENCRYPTED_OPS_SQL);
+    const r = run({ FAKE_FAIL: ENCRYPTED_OPS, FAKE_CODE: 'P3018' });
+
+    expect(r.status).toBe(0);
+    expect(r.executedSql).not.toContain('pg_terminate_backend');
+    expect(r.stdout).not.toContain('orphaned CONCURRENTLY');
+    expect(r.resolveApplied).toContain(ENCRYPTED_OPS);
+  });
+
+  it('the terminate seam fails loudly without DATABASE_URL instead of exiting 0', () => {
+    // An operator running the seam from a host shell without DATABASE_URL must
+    // get an error, not a silent success suggesting no orphan exists.
+    const r = run({}, ['--terminate-orphaned-concurrently']);
+
+    expect(r.status).toBe(2);
+    expect(r.stdout).toContain('requires DATABASE_URL');
+    expect(r.executedSql).not.toContain('pg_terminate_backend');
+  });
 });
 
 // #9191: operators may cap application statements through DATABASE_URL. Migrations
@@ -793,6 +856,8 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     for (const url of r.databaseUrls) {
       expect(url).toContain('statement_timeout%3D2000');
       expect(url).toMatch(/statement_timeout%3D60000.*statement_timeout%3D2000/);
+      // Abandoned-backend self-cancel rides the same options rewrite (PG >= 14).
+      expect(url).toContain('client_connection_check_interval%3D10000');
       // The pool settings are not ours to touch.
       expect(url).toContain('connection_limit=60');
       expect(url).toContain('pool_timeout=20');
@@ -962,6 +1027,38 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     );
   });
 
+  it('honors an injected MIGRATOR_APPLICATION_NAME carrying the required prefix', () => {
+    // The recovery orphan-cleanup keys on this identity; CI (and an operator) may
+    // pin it, and it must flow through to the connection's application_name.
+    const injected = 'supersync-migrator-pinned-1234';
+    const r = run({
+      FAKE_FAIL: '',
+      FAKE_CODE: 'P3018',
+      DATABASE_URL: `${BASE}?connection_limit=60`,
+      MIGRATOR_APPLICATION_NAME: injected,
+    });
+
+    expect(r.status).toBe(0);
+    expect(r.databaseUrls.length).toBeGreaterThan(0);
+    for (const url of r.databaseUrls) {
+      expect(new URL(url).searchParams.get('application_name')).toBe(injected);
+    }
+  });
+
+  it('rejects a MIGRATOR_APPLICATION_NAME without the supersync-migrator- prefix', () => {
+    // A stray value must not silently opt the session out of orphan termination.
+    const r = run({
+      FAKE_FAIL: '',
+      FAKE_CODE: 'P3018',
+      DATABASE_URL: `${BASE}?connection_limit=60`,
+      MIGRATOR_APPLICATION_NAME: 'not-a-migrator',
+    });
+
+    expect(r.status).not.toBe(0);
+    expect(r.stdout).toContain("must start with 'supersync-migrator-'");
+    expect(r.prismaCommands).toEqual([]);
+  });
+
   it('collapses duplicate protected parameters so later values cannot override them', () => {
     const r = run({
       FAKE_FAIL: '',
@@ -974,7 +1071,7 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     const options = url.searchParams.getAll('options');
     expect(options).toHaveLength(1);
     expect(options[0]).toBe(
-      '-c lock_timeout=5000 -c statement_timeout=60000 -c statement_timeout=2000',
+      '-c lock_timeout=5000 -c statement_timeout=60000 -c statement_timeout=2000 -c client_connection_check_interval=10000',
     );
     expect(url.searchParams.getAll('application_name')).toEqual([
       expect.stringMatching(/^supersync-migrator-[0-9a-f-]{36}$/),
@@ -990,7 +1087,7 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     });
 
     expect(r.databaseUrls[0]).toContain(
-      `${BASE}?connection_limit=60&options=-c%20statement_timeout%3D2000&application_name=supersync-migrator-`,
+      `${BASE}?connection_limit=60&options=-c%20statement_timeout%3D2000%20-c%20client_connection_check_interval%3D10000&application_name=supersync-migrator-`,
     );
   });
 
@@ -1003,7 +1100,7 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     });
 
     expect(r.databaseUrls[0]).toContain(
-      `${BASE}?options=-c%20statement_timeout%3D2000&application_name=supersync-migrator-`,
+      `${BASE}?options=-c%20statement_timeout%3D2000%20-c%20client_connection_check_interval%3D10000&application_name=supersync-migrator-`,
     );
   });
 
