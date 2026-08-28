@@ -141,11 +141,24 @@ fi
 # application_name lets health-alert.sh ignore expected long-running DDL.
 # Connection option format: https://www.postgresql.org/docs/16/libpq-connect.html
 if [ -n "${DATABASE_URL:-}" ]; then
-  if ! MIGRATOR_APPLICATION_NAME=$(node -e \
-    "process.stdout.write('supersync-migrator-' + require('node:crypto').randomUUID())"); then
-    echo "ERROR: could not generate a unique database migrator identifier." >&2
-    exit 1
+  # Normally unset, so each run gets a fresh unique identity. An explicitly
+  # exported value is honored (tests pin a known one; an operator could too), but
+  # it MUST carry the 'supersync-migrator-' prefix the recovery cleanup keys on,
+  # so a stray value cannot silently opt this session out of orphan termination.
+  if [ -z "${MIGRATOR_APPLICATION_NAME:-}" ]; then
+    if ! MIGRATOR_APPLICATION_NAME=$(node -e \
+      "process.stdout.write('supersync-migrator-' + require('node:crypto').randomUUID())"); then
+      echo "ERROR: could not generate a unique database migrator identifier." >&2
+      exit 1
+    fi
   fi
+  case "$MIGRATOR_APPLICATION_NAME" in
+    supersync-migrator-*) ;;
+    *)
+      echo "ERROR: MIGRATOR_APPLICATION_NAME must start with 'supersync-migrator-'." >&2
+      exit 1
+      ;;
+  esac
   export MIGRATOR_APPLICATION_NAME
   if ! MIGRATOR_DATABASE_URL=$(
     MIGRATOR_SOURCE_DATABASE_URL="$DATABASE_URL" \
@@ -278,12 +291,15 @@ with_timeout() {
 # is why a P3018 on a pending migration is reachable at all), so this cannot tell
 # an orphan apart from a PEER run's LIVE build. If several recoveries race on one
 # database (e.g. multiple Helm init-containers rolling out together), this can
-# terminate a peer's in-progress build. That is bounded — the peer fails loudly
-# and the fleet self-heals via the idempotent drop-then-create — and no worse in
-# outcome than the already-unserialized concurrent out-of-band recovery, but it is
-# why the P1002 path still refuses to auto-kill (its lock holder may be a live
-# build the operator must adjudicate). Serializing recovery under a dedicated
-# advisory lock would close the race and is the right follow-up.
+# terminate a peer's in-progress build. It stays eventually correct — the peer
+# fails loudly and the fleet self-heals via the idempotent drop-then-create — but
+# it is not free: the aborted build's work is wasted and the index can be rebuilt
+# more than once across the racing runs (before this change a racing peer's DROP
+# merely queued and timed out while the original build finished; now it actively
+# aborts it). That trade is why the P1002 path still refuses to auto-kill (its
+# lock holder may be a live build the operator must adjudicate). Serializing the
+# out-of-band recovery under a dedicated advisory lock would close the race and is
+# the right follow-up.
 #
 # Runs through prisma db execute (not the node cleanup used on timeout), so it
 # inherits the same finite statement_timeout and stays fake-able in tests.

@@ -151,11 +151,12 @@ Caveat: the out-of-band recovery does **not** hold Prisma's advisory lock (that
 is why a P3018 on a pending migration is reachable at all), so it cannot tell an
 orphan apart from a **peer run's live build**. If several recoveries race on one
 database (e.g. multiple Helm init-containers), this can terminate a peer's
-in-progress build — bounded (the peer fails loudly and the fleet self-heals via
-the idempotent drop-then-create), and no worse in outcome than the already
-unserialized concurrent out-of-band recovery, but it is why the `P1002`
-advisory-lock path still refuses to auto-kill. Serializing recovery under a
-dedicated advisory lock would close that race and is the intended follow-up.
+in-progress build. It stays eventually correct (the peer fails loudly and the
+fleet self-heals via the idempotent drop-then-create) but not free — the aborted
+build's work is wasted and the index can be rebuilt more than once across the
+racing runs. That trade is why the `P1002` advisory-lock path still refuses to
+auto-kill. Serializing the out-of-band recovery under a dedicated advisory lock
+would close that race and is the intended follow-up.
 
 Enforced by `tests/migrate-deploy-script.spec.ts` (the termination SQL and its
 ordering) and

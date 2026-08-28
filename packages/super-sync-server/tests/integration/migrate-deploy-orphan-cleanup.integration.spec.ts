@@ -9,8 +9,11 @@
  * The sibling unit spec drives a FAKE `npx prisma` and asserts the termination
  * SQL is issued with the right predicate. Only this spec proves that predicate
  * actually matches real `pg_stat_activity` rows and that `pg_terminate_backend`
- * really kills the orphan while sparing an idle migrator session (state filter)
- * and a non-migrator session (application_name filter).
+ * really kills the orphan while sparing every session it must not touch:
+ *   - an idle migrator session (state filter),
+ *   - a non-migrator session (application_name prefix filter),
+ *   - THIS run's own migrator session (application_name <> current),
+ *   - a migrator build in another database on the cluster (datname filter).
  *
  * It exercises the `--terminate-orphaned-concurrently` seam so the targeting can
  * be asserted deterministically, without provoking a full concurrent index
@@ -53,6 +56,20 @@ describeWithDb(
   () => {
     let admin: PrismaClient;
     const clients: PrismaClient[] = [];
+    const otherDbs: string[] = [];
+
+    const runCleanup = (env: Record<string, string> = {}): ReturnType<typeof spawnSync> =>
+      spawnSync('sh', [migrateScript, '--terminate-orphaned-concurrently'], {
+        cwd: packageDir,
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          DATABASE_URL: DATABASE_URL as string,
+          MIGRATE_STEP_TIMEOUT: '20',
+          ...env,
+        },
+      });
 
     const activityFor = (marker: string): Promise<Backend[]> =>
       admin.$queryRawUnsafe<Backend[]>(
@@ -65,10 +82,8 @@ describeWithDb(
     // A backend whose pg_stat_activity.query text contains "CONCURRENTLY" — a
     // comment is enough, since the cleanup keys on the query text exactly as it
     // would see a real `CREATE INDEX CONCURRENTLY`.
-    const spawnActive = (appName: string, marker: string): void => {
-      const client = new PrismaClient({
-        datasources: { db: { url: urlWithAppName(appName) } },
-      });
+    const spawnActiveUrl = (url: string, marker: string): void => {
+      const client = new PrismaClient({ datasources: { db: { url } } });
       clients.push(client);
       // Fire-and-forget: the sleep stays ACTIVE until the cleanup (or afterEach)
       // terminates it, at which point the promise rejects and is swallowed.
@@ -76,6 +91,9 @@ describeWithDb(
         .$queryRawUnsafe(`SELECT pg_sleep(60) /* CREATE INDEX CONCURRENTLY ${marker} */`)
         .catch(() => {});
     };
+
+    const spawnActive = (appName: string, marker: string): void =>
+      spawnActiveUrl(urlWithAppName(appName), marker);
 
     const spawnIdle = async (appName: string, marker: string): Promise<void> => {
       const client = new PrismaClient({
@@ -113,6 +131,12 @@ describeWithDb(
         .catch(() => {});
       await Promise.all(clients.map((c) => c.$disconnect().catch(() => {})));
       clients.length = 0;
+      for (const db of otherDbs) {
+        await admin
+          .$executeRawUnsafe(`DROP DATABASE IF EXISTS "${db}" WITH (FORCE)`)
+          .catch(() => {});
+      }
+      otherDbs.length = 0;
     });
 
     afterAll(async () => {
@@ -161,6 +185,74 @@ describeWithDb(
       expect(remaining).not.toContain(orphanApp); // active migrator build: terminated
       expect(remaining).toContain(foreignApp); // wrong application_name prefix: spared
       expect(remaining).toContain(idleApp); // idle (not actively building): spared
+    }, 60_000);
+
+    it("spares the current run's own migrator session (application_name <> current)", async () => {
+      // The cleanup connects as MIGRATOR_APPLICATION_NAME and excludes it, so a
+      // build owned by THIS run must survive while a different run's orphan dies.
+      const marker = `${MARKER_PREFIX}${randomUUID().replace(/-/g, '')}`;
+      const currentApp = `supersync-migrator-${randomUUID()}`; // this run -> spared
+      const orphanApp = `supersync-migrator-${randomUUID()}`; // other run -> killed
+
+      spawnActive(currentApp, marker);
+      spawnActive(orphanApp, marker);
+
+      await waitUntil(async () => {
+        const byApp = new Map(
+          (await activityFor(marker)).map((r) => [r.application_name, r.state]),
+        );
+        return byApp.get(currentApp) === 'active' && byApp.get(orphanApp) === 'active';
+      });
+
+      const res = runCleanup({ MIGRATOR_APPLICATION_NAME: currentApp });
+      expect(res.status, `${res.stdout}${res.stderr}`).toBe(0);
+
+      await waitUntil(
+        async () =>
+          !(await activityFor(marker)).map((r) => r.application_name).includes(orphanApp),
+      );
+
+      const remaining = (await activityFor(marker)).map((r) => r.application_name);
+      expect(remaining).toContain(currentApp); // our own run's identity: spared
+      expect(remaining).not.toContain(orphanApp); // a different run's orphan: terminated
+    }, 60_000);
+
+    it('does not touch a migrator build in another database (datname filter)', async () => {
+      // Same-role, same application_name shape, ACTIVE CONCURRENTLY build — but in
+      // a different database on the same cluster. datname = current_database()
+      // must spare it, so a shared cluster's sibling environment is never hit.
+      const marker = `${MARKER_PREFIX}${randomUUID().replace(/-/g, '')}`;
+      const otherDb = `orphan_other_${randomUUID().replace(/-/g, '')}`;
+      await admin.$executeRawUnsafe(`CREATE DATABASE "${otherDb}"`);
+      otherDbs.push(otherDb);
+
+      const otherUrl = new URL(DATABASE_URL as string);
+      otherUrl.pathname = `/${otherDb}`;
+      const foreignDbApp = `supersync-migrator-${randomUUID()}`;
+      otherUrl.searchParams.set('application_name', foreignDbApp);
+      spawnActiveUrl(otherUrl.toString(), marker); // other DB -> spared
+
+      const orphanApp = `supersync-migrator-${randomUUID()}`; // current DB -> killed
+      spawnActive(orphanApp, marker);
+
+      await waitUntil(async () => {
+        const byApp = new Map(
+          (await activityFor(marker)).map((r) => [r.application_name, r.state]),
+        );
+        return byApp.get(foreignDbApp) === 'active' && byApp.get(orphanApp) === 'active';
+      });
+
+      const res = runCleanup();
+      expect(res.status, `${res.stdout}${res.stderr}`).toBe(0);
+
+      await waitUntil(
+        async () =>
+          !(await activityFor(marker)).map((r) => r.application_name).includes(orphanApp),
+      );
+
+      const remaining = (await activityFor(marker)).map((r) => r.application_name);
+      expect(remaining).toContain(foreignDbApp); // other database: spared
+      expect(remaining).not.toContain(orphanApp); // current database: terminated
     }, 60_000);
   },
 );

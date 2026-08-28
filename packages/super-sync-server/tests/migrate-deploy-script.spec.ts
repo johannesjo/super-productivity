@@ -1009,6 +1009,38 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     );
   });
 
+  it('honors an injected MIGRATOR_APPLICATION_NAME carrying the required prefix', () => {
+    // The recovery orphan-cleanup keys on this identity; CI (and an operator) may
+    // pin it, and it must flow through to the connection's application_name.
+    const injected = 'supersync-migrator-pinned-1234';
+    const r = run({
+      FAKE_FAIL: '',
+      FAKE_CODE: 'P3018',
+      DATABASE_URL: `${BASE}?connection_limit=60`,
+      MIGRATOR_APPLICATION_NAME: injected,
+    });
+
+    expect(r.status).toBe(0);
+    expect(r.databaseUrls.length).toBeGreaterThan(0);
+    for (const url of r.databaseUrls) {
+      expect(new URL(url).searchParams.get('application_name')).toBe(injected);
+    }
+  });
+
+  it('rejects a MIGRATOR_APPLICATION_NAME without the supersync-migrator- prefix', () => {
+    // A stray value must not silently opt the session out of orphan termination.
+    const r = run({
+      FAKE_FAIL: '',
+      FAKE_CODE: 'P3018',
+      DATABASE_URL: `${BASE}?connection_limit=60`,
+      MIGRATOR_APPLICATION_NAME: 'not-a-migrator',
+    });
+
+    expect(r.status).not.toBe(0);
+    expect(r.stdout).toContain("must start with 'supersync-migrator-'");
+    expect(r.prismaCommands).toEqual([]);
+  });
+
   it('collapses duplicate protected parameters so later values cannot override them', () => {
     const r = run({
       FAKE_FAIL: '',
