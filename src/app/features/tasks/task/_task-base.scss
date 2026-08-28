@@ -219,6 +219,12 @@
   flex-grow: 1;
   flex-shrink: 1;
   flex-basis: 70%;
+  // Without this the automatic minimum size keeps the wrapper at its min-content
+  // width, which the nowrap .parent-title carries as the full untruncated parent
+  // name. On narrow screens the wrapper then outgrows .first-line and, because we
+  // center here, the overflow is split evenly left and right — pushing the start
+  // of the title off the left edge (#9750).
+  min-width: 0;
   // we cannot do this since this cuts of the box shadow of the task edit
   //overflow: hidden;
   -webkit-tap-highlight-color: transparent;
