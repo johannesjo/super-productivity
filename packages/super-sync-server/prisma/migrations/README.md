@@ -142,7 +142,11 @@ full predicate, its rationale, and its limits live on
 `terminate_orphaned_concurrently_backends` in `scripts/migrate-deploy.sh` — the
 canonical write-up, update it there first. It lets raising `MIGRATION_TIMEOUT`
 and re-running a deploy that timed out mid-build self-heal instead of needing a
-manual `pg_terminate_backend`.
+manual `pg_terminate_backend`. Migrator connections also set
+`client_connection_check_interval` (PostgreSQL 14+/Linux required, see the
+server README) so a freshly-abandoned build cancels itself within seconds; the
+termination covers pre-existing orphans and half-open connections the GUC
+cannot detect.
 
 Caveat (details in that same comment): the out-of-band recovery holds no
 advisory lock, so racing recoveries (e.g. multiple Helm init-containers) can

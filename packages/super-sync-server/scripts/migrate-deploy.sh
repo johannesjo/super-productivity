@@ -139,6 +139,15 @@ fi
 # can leave PostgreSQL working after a killed client. Collapse protected query
 # parameters so a duplicate cannot override the final settings. The
 # application_name lets health-alert.sh ignore expected long-running DDL.
+#
+# client_connection_check_interval makes an abandoned migrator backend notice
+# its client is gone mid-statement and cancel itself within ~10s, so a killed/
+# OOM'd/timed-out deploy no longer leaves a CONCURRENTLY build holding the table
+# lock (the incident terminate_orphaned_concurrently_backends heals). It leaves
+# an INVALID index the drop-then-create recovery shape already clears. Requires
+# PostgreSQL >= 14 on a Linux-hosted server (POLLRDHUP) — a deliberate floor,
+# documented in the server README; an older server rejects the startup option
+# with FATAL, failing every migration loudly rather than degrading silently.
 # Connection option format: https://www.postgresql.org/docs/16/libpq-connect.html
 #
 # Single source of truth for the migrator identity prefix: the generator, the
@@ -177,6 +186,8 @@ try {
   const options = url.searchParams.getAll('options').filter(Boolean);
   options.push(
     `-c statement_timeout=${process.env.MIGRATOR_STATEMENT_TIMEOUT_MS}`,
+    // Abandoned-backend self-cancel; PG >= 14 / Linux floor (comment above).
+    '-c client_connection_check_interval=10000',
   );
 
   url.searchParams.delete('options');
@@ -276,12 +287,12 @@ with_timeout() {
 # by hand. Clear it first so a re-run (e.g. after raising MIGRATION_TIMEOUT for a
 # large table) self-heals instead.
 #
-# shortcut: heal-by-kill — root-cause prevention would set
-# client_connection_check_interval through the options rewrite above so an
-# abandoned backend cancels itself, but that GUC requires PostgreSQL >= 14 on an
-# OS with POLLRDHUP (Linux); an external server without it rejects the startup
-# option with a FATAL, killing every deploy. Upgrade path: set it once a PG >= 14
-# / Linux floor is established (bundled deployments are postgres:16-alpine).
+# Migrator connections set client_connection_check_interval (options rewrite
+# above), so a backend whose client cleanly vanished cancels itself within ~10s
+# and new orphans of that class should be rare. This kill remains load-bearing
+# for what the GUC cannot see: orphans left by pre-GUC migrator versions, and
+# half-open connections (migrator node death, network partition) where no FIN
+# arrives and only TCP keepalives eventually reap the socket.
 #
 # Scoped so it cannot touch the app, monitoring, another database on a shared
 # cluster, or THIS run's own connections:

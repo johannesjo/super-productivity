@@ -856,6 +856,8 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     for (const url of r.databaseUrls) {
       expect(url).toContain('statement_timeout%3D2000');
       expect(url).toMatch(/statement_timeout%3D60000.*statement_timeout%3D2000/);
+      // Abandoned-backend self-cancel rides the same options rewrite (PG >= 14).
+      expect(url).toContain('client_connection_check_interval%3D10000');
       // The pool settings are not ours to touch.
       expect(url).toContain('connection_limit=60');
       expect(url).toContain('pool_timeout=20');
@@ -1069,7 +1071,7 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     const options = url.searchParams.getAll('options');
     expect(options).toHaveLength(1);
     expect(options[0]).toBe(
-      '-c lock_timeout=5000 -c statement_timeout=60000 -c statement_timeout=2000',
+      '-c lock_timeout=5000 -c statement_timeout=60000 -c statement_timeout=2000 -c client_connection_check_interval=10000',
     );
     expect(url.searchParams.getAll('application_name')).toEqual([
       expect.stringMatching(/^supersync-migrator-[0-9a-f-]{36}$/),
@@ -1085,7 +1087,7 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     });
 
     expect(r.databaseUrls[0]).toContain(
-      `${BASE}?connection_limit=60&options=-c%20statement_timeout%3D2000&application_name=supersync-migrator-`,
+      `${BASE}?connection_limit=60&options=-c%20statement_timeout%3D2000%20-c%20client_connection_check_interval%3D10000&application_name=supersync-migrator-`,
     );
   });
 
@@ -1098,7 +1100,7 @@ describe('migrate-deploy.sh statement_timeout guardrail', () => {
     });
 
     expect(r.databaseUrls[0]).toContain(
-      `${BASE}?options=-c%20statement_timeout%3D2000&application_name=supersync-migrator-`,
+      `${BASE}?options=-c%20statement_timeout%3D2000%20-c%20client_connection_check_interval%3D10000&application_name=supersync-migrator-`,
     );
   });
 
