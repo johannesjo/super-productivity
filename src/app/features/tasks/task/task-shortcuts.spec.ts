@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { DialogFullscreenMarkdownComponent } from '../../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { DateAdapter } from '@angular/material/core';
 import { PlannerActions } from '../../planner/store/planner.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { DateService } from '../../../core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -556,5 +557,219 @@ describe('TaskComponent shortcut handling', () => {
       expect(component.isAddSubtaskInputVisible()).toBe(false);
       expect(focusByIdSpy).not.toHaveBeenCalled();
     }));
+
+    it('focuses the last visible subtask on previous navigation', fakeAsync(() => {
+      const host = fixture.nativeElement as HTMLElement;
+      const firstSubtask = document.createElement('task');
+      const lastSubtask = document.createElement('task');
+      firstSubtask.tabIndex = 0;
+      lastSubtask.tabIndex = 0;
+      host.append(firstSubtask, lastSubtask);
+      component.isAddSubtaskInputVisible.set(true);
+
+      component.onAddSubtaskInputClosed('prev');
+      tick();
+
+      expect(document.activeElement).toBe(lastSubtask);
+    }));
+
+    it('focuses the parent task on previous navigation when it has no visible subtasks', fakeAsync(() => {
+      // The overridden empty test template uses a generic Angular root element,
+      // so mirror the real <task tabindex="0"> host binding explicitly.
+      (fixture.nativeElement as HTMLElement).tabIndex = 0;
+      component.isAddSubtaskInputVisible.set(true);
+
+      component.onAddSubtaskInputClosed('prev');
+      tick();
+
+      expect(document.activeElement).toBe(fixture.nativeElement);
+    }));
+
+    it('focuses the next task after the parent and its subtasks', fakeAsync(() => {
+      const host = fixture.nativeElement as HTMLElement;
+      const subtask = document.createElement('task');
+      const nextTask = document.createElement('task');
+      subtask.tabIndex = 0;
+      nextTask.tabIndex = 0;
+      host.append(subtask);
+      host.after(nextTask);
+      component.isAddSubtaskInputVisible.set(true);
+
+      component.onAddSubtaskInputClosed('next');
+      tick();
+
+      expect(document.activeElement).toBe(nextTask);
+      nextTask.remove();
+    }));
+
+    it('keeps focus on the last visible row when there is no next task', fakeAsync(() => {
+      const host = fixture.nativeElement as HTMLElement;
+      const lastSubtask = document.createElement('task');
+      lastSubtask.tabIndex = 0;
+      host.append(lastSubtask);
+      component.isAddSubtaskInputVisible.set(true);
+
+      component.onAddSubtaskInputClosed('next');
+      tick();
+
+      expect(document.activeElement).toBe(lastSubtask);
+    }));
+
+    it('does not navigate into task copies rendered in the detail panel', fakeAsync(() => {
+      const host = fixture.nativeElement as HTMLElement;
+      const lastSubtask = document.createElement('task');
+      const detailPanel = document.createElement('task-detail-panel');
+      const duplicateTask = document.createElement('task');
+      lastSubtask.tabIndex = 0;
+      duplicateTask.tabIndex = 0;
+      host.append(lastSubtask);
+      detailPanel.append(duplicateTask);
+      host.after(detailPanel);
+      component.isAddSubtaskInputVisible.set(true);
+
+      component.onAddSubtaskInputClosed('next');
+      tick();
+
+      expect(document.activeElement).toBe(lastSubtask);
+      detailPanel.remove();
+    }));
+  });
+
+  describe('scheduleForToday — Shift+T (#9563)', () => {
+    // Must match the GlobalTrackingIntervalService.todayDateStr signal above,
+    // which is what isScheduledToday() reads.
+    const TODAY = '2026-05-05';
+    let dateService: jasmine.SpyObj<DateService>;
+    let projectService: jasmine.SpyObj<ProjectService>;
+
+    const setTask = (task: Partial<TaskWithSubTasks>): void => {
+      fixture.componentRef.setInput('task', {
+        ...createTopLevelTask('Task'),
+        dueDay: undefined,
+        dueWithTime: undefined,
+        ...task,
+      });
+      storeSpy.dispatch.calls.reset();
+      projectService.moveTaskToTodayList.calls.reset();
+    };
+
+    const expectScheduledForToday = (): void =>
+      expect(storeSpy.dispatch).toHaveBeenCalledOnceWith(
+        TaskSharedActions.planTasksForToday({
+          taskIds: ['top-1'],
+          today: TODAY,
+          startOfNextDayDiffMs: 0,
+          // computed key: a quoted 'top-1' trips the naming-convention rule
+          parentTaskMap: { ['top-1']: undefined },
+        }),
+      );
+
+    beforeEach(() => {
+      dateService = TestBed.inject(DateService) as jasmine.SpyObj<DateService>;
+      projectService = TestBed.inject(ProjectService) as jasmine.SpyObj<ProjectService>;
+      (dateService as any).todayStr = jasmine
+        .createSpy('todayStr')
+        .and.returnValue(TODAY);
+      (dateService as any).getStartOfNextDayDiffMs = jasmine
+        .createSpy('getStartOfNextDayDiffMs')
+        .and.returnValue(0);
+    });
+
+    it('schedules an unscheduled task for today', () => {
+      // The #9563/#9567 regression: this did only a backlog→regular move, which
+      // the project reducer no-ops for a task already in the regular list — so
+      // the shortcut did nothing at all.
+      setTask({});
+
+      component.scheduleForToday();
+
+      expectScheduledForToday();
+    });
+
+    it('schedules an overdue task for today (#8851)', () => {
+      setTask({ dueDay: '2026-04-30' });
+
+      component.scheduleForToday();
+
+      expectScheduledForToday();
+    });
+
+    it('never moves the task between the backlog and the regular list (#8592)', () => {
+      // #8592 reported Shift+T (advertised in the "Move to regular list" menu
+      // entry) changing the schedule as a side effect of a list move. The two
+      // intents stay separate: this shortcut schedules and never repositions.
+      setTask({});
+
+      component.scheduleForToday();
+
+      expect(projectService.moveTaskToTodayList).not.toHaveBeenCalled();
+      expect(projectService.moveTaskToBacklog).not.toHaveBeenCalled();
+    });
+
+    it('leaves a task already scheduled for today untouched', () => {
+      setTask({ dueDay: TODAY });
+
+      component.scheduleForToday();
+
+      expect(storeSpy.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('keeps the reminder of a task due at a time today', () => {
+      // planTasksForToday clears remindAt unconditionally, so re-planning a task
+      // that is already on Today would silently drop its reminder.
+      // isToday is installed as a property on the DateService mock, so it has
+      // to be redefined rather than assigned.
+      Object.defineProperty(dateService, 'isToday', {
+        value: () => true,
+        configurable: true,
+      });
+      setTask({ dueWithTime: 1746453600000, remindAt: 1746452000000 });
+
+      component.scheduleForToday();
+
+      expect(storeSpy.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('does not put a done task on Today', () => {
+      // Completion never synthesizes a dueDay; done tasks reach Today's Done
+      // list via isDone. Dating one inflates the daily summary's done count.
+      setTask({ isDone: true, dueDay: '2026-04-30' });
+
+      component.scheduleForToday();
+
+      expect(storeSpy.dispatch).not.toHaveBeenCalled();
+    });
+
+    describe('scheduleForTodayWithFocus', () => {
+      it('keeps focus on the task instead of advancing to the next one', fakeAsync(() => {
+        // Both reports describe the caret moving on to the next task, because
+        // this used to call focusNext() unconditionally. Scheduling does not
+        // remove the row from a normal list, so focus must stay on the task;
+        // advancing is only the delayed fallback for a row that disappeared
+        // (the overdue panels).
+        // Asserted through the focus methods rather than document.activeElement:
+        // the TestBed host is a <div>, so focusSelfOrNextIfNotPossible's
+        // `tagName === 'task'` check can never pass here.
+        const focusSelfSpy = spyOn(component, 'focusSelf');
+        const focusNextSpy = spyOn(component, 'focusNext');
+        setTask({});
+
+        component.scheduleForTodayWithFocus();
+
+        expect(focusSelfSpy).toHaveBeenCalled();
+        expect(focusNextSpy).not.toHaveBeenCalled();
+        tick(200); // flush the fallback timer
+      }));
+
+      it('still schedules the task', fakeAsync(() => {
+        (fixture.nativeElement as HTMLElement).tabIndex = 0;
+        setTask({});
+
+        component.scheduleForTodayWithFocus();
+        tick(200);
+
+        expectScheduledForToday();
+      }));
+    });
   });
 });

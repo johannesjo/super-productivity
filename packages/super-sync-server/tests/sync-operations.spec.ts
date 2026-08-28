@@ -10,6 +10,11 @@ vi.mock('../src/db', async () => {
   const {
     applyOperationSelect,
     hasOperationUniqueConflict,
+    isEntityArrayBranchQuery,
+    entityArrayBranchRows,
+    mockOperationGroupByMaxSeq,
+    mockOperationFindFirstFreshBelowBoundary,
+    mockUserSyncStateFindMany,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -105,28 +110,6 @@ vi.mock('../src/db', async () => {
         }
         return null;
       }),
-      count: vi.fn().mockImplementation(async (args: any) => {
-        return Array.from(state.operations.values()).filter((op: any) => {
-          if (args.where?.userId !== undefined && args.where.userId !== op.userId)
-            return false;
-          if (
-            args.where?.serverSeq?.gt !== undefined &&
-            op.serverSeq <= args.where.serverSeq.gt
-          )
-            return false;
-          if (
-            args.where?.serverSeq?.lte !== undefined &&
-            op.serverSeq > args.where.serverSeq.lte
-          )
-            return false;
-          if (
-            args.where?.isPayloadEncrypted !== undefined &&
-            op.isPayloadEncrypted !== args.where.isPayloadEncrypted
-          )
-            return false;
-          return true;
-        }).length;
-      }),
       findMany: vi.fn().mockImplementation(async (args: any) => {
         const ops = Array.from(state.operations.values());
         return ops
@@ -164,6 +147,10 @@ vi.mock('../src/db', async () => {
             args.where?.isPayloadEncrypted !== undefined &&
             op.isPayloadEncrypted !== args.where.isPayloadEncrypted
           )
+            return false;
+          if (args.where?.opType !== undefined && op.opType !== args.where.opType)
+            return false;
+          if (args.where?.repairBaseServerSeq === null && op.repairBaseServerSeq != null)
             return false;
           return true;
         }).length;
@@ -308,11 +295,19 @@ vi.mock('../src/db', async () => {
     },
     // Upload transaction writes the storage counter atomically via $executeRaw.
     $executeRaw: vi.fn().mockResolvedValue(0),
-    // Full-state op uploads aggregate prior vector clocks via $queryRaw inside
-    // the same transaction. Dispatch based on the SQL text so other $queryRaw
-    // callers (storage counter, etc.) keep working.
+    // Raw queries issued inside the upload transaction. Every shape must be
+    // recognised explicitly and anything else must THROW: this mock used to fall
+    // through to a `total` row, which conflict.ts reads via
+    // `arrayBranchRows[0]?.maxSeq ?? null` as "no array-branch match". That silently
+    // disabled the array branch for every conflict assertion in this file.
     $queryRaw: vi.fn().mockImplementation(async (strings: any, ...params: any[]) => {
       const sql = Array.isArray(strings) ? strings.join('') : String(strings);
+      // Array branch of the single-entity conflict lookup: MAX(server_seq) over
+      // `entity_ids @> ARRAY[id]`, scoped to ONE entity.
+      if (isEntityArrayBranchQuery(strings)) {
+        return entityArrayBranchRows(state.operations, params);
+      }
+      // Full-state op uploads aggregate prior vector clocks in the same transaction.
       if (sql.includes('jsonb_each_text(vector_clock)')) {
         const [userId, beforeServerSeq] = params;
         const aggregate = new Map<string, number>();
@@ -334,7 +329,7 @@ vi.mock('../src/db', async () => {
           max_counter: BigInt(max_counter),
         }));
       }
-      return [{ total: BigInt(0) }];
+      throw new Error(`Unmocked raw query in upload tx: ${sql}`);
     }),
   });
 
@@ -347,9 +342,11 @@ vi.mock('../src/db', async () => {
         findUnique: vi.fn().mockImplementation(async (args: any) => {
           return state.userSyncStates.get(args.where.userId) || null;
         }),
-        findMany: vi.fn().mockImplementation(async () => {
-          return Array.from(state.userSyncStates.values());
-        }),
+        findMany: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockUserSyncStateFindMany(state.userSyncStates, args),
+          ),
       },
       operation: {
         findMany: vi.fn().mockImplementation(async (args: any) => {
@@ -370,6 +367,11 @@ vi.mock('../src/db', async () => {
               )
                 return false;
               if (
+                args.where?.serverSeq?.lt !== undefined &&
+                op.serverSeq >= args.where.serverSeq.lt
+              )
+                return false;
+              if (
                 args.where?.receivedAt?.lt !== undefined &&
                 op.receivedAt >= args.where.receivedAt.lt
               )
@@ -381,29 +383,6 @@ vi.mock('../src/db', async () => {
             .sort((a: any, b: any) => a.serverSeq - b.serverSeq)
             .slice(0, args.take || 500)
             .map((op: any) => applyOperationSelect(op, args.select));
-        }),
-        count: vi.fn().mockImplementation(async (args: any) => {
-          const ops = Array.from(state.operations.values());
-          return ops.filter((op: any) => {
-            if (args.where?.userId !== undefined && args.where.userId !== op.userId)
-              return false;
-            if (
-              args.where?.serverSeq?.gt !== undefined &&
-              op.serverSeq <= args.where.serverSeq.gt
-            )
-              return false;
-            if (
-              args.where?.serverSeq?.lte !== undefined &&
-              op.serverSeq > args.where.serverSeq.lte
-            )
-              return false;
-            if (
-              args.where?.isPayloadEncrypted !== undefined &&
-              op.isPayloadEncrypted !== args.where.isPayloadEncrypted
-            )
-              return false;
-            return true;
-          }).length;
         }),
         aggregate: vi.fn().mockImplementation(async (args: any) => {
           const ops = Array.from(state.operations.values()).filter(
@@ -417,6 +396,11 @@ vi.mock('../src/db', async () => {
             _min: { serverSeq: Math.min(...seqs) },
           };
         }),
+        groupBy: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockOperationGroupByMaxSeq(state.operations, args),
+          ),
         deleteMany: vi.fn().mockImplementation(async (args: any) => {
           let count = 0;
           for (const [id, op] of state.operations.entries()) {
@@ -443,6 +427,11 @@ vi.mock('../src/db', async () => {
           return null;
         }),
         findFirst: vi.fn().mockImplementation(async (args: any) => {
+          const freshBelowBoundary = mockOperationFindFirstFreshBelowBoundary(
+            state.operations,
+            args,
+          );
+          if (freshBelowBoundary !== undefined) return freshBelowBoundary;
           const ops = Array.from(state.operations.values()).filter((op: any) => {
             if (args.where?.userId !== undefined && args.where.userId !== op.userId)
               return false;
@@ -485,6 +474,13 @@ vi.mock('../src/db', async () => {
             if (
               args.where?.isPayloadEncrypted !== undefined &&
               op.isPayloadEncrypted !== args.where.isPayloadEncrypted
+            )
+              return false;
+            if (args.where?.opType !== undefined && op.opType !== args.where.opType)
+              return false;
+            if (
+              args.where?.repairBaseServerSeq === null &&
+              op.repairBaseServerSeq != null
             )
               return false;
             return true;
@@ -552,6 +548,23 @@ describe('Sync Operations', () => {
   let deviceService: DeviceService;
   let operationDownloadService: OperationDownloadService;
 
+  const createFullStateOp = (
+    opType: 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR',
+    authorClientId: string,
+    vectorClock: Record<string, number>,
+  ): Operation => ({
+    id: uuidv7(),
+    clientId: authorClientId,
+    actionType:
+      opType === 'REPAIR' ? '[Repair] Auto Repair' : '[SP_ALL] Load(import) all data',
+    opType,
+    entityType: 'ALL',
+    payload: {},
+    vectorClock,
+    timestamp: Date.now(),
+    schemaVersion: 1,
+  });
+
   const createOp = (
     entityId: string,
     opType: 'CRT' | 'UPD' | 'DEL' = 'CRT',
@@ -585,27 +598,6 @@ describe('Sync Operations', () => {
   });
 
   describe('Full-state op upload', () => {
-    const createFullStateOp = (
-      opType: 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR',
-      authorClientId: string,
-      vectorClock: Record<string, number>,
-    ): Operation => ({
-      id: uuidv7(),
-      clientId: authorClientId,
-      actionType:
-        opType === 'BACKUP_IMPORT'
-          ? '[SP_ALL] Load(import) all data'
-          : opType === 'REPAIR'
-            ? '[Repair] Auto Repair'
-            : '[SP_ALL] Load(import) all data',
-      opType,
-      entityType: 'ALL',
-      payload: {},
-      vectorClock,
-      timestamp: Date.now(),
-      schemaVersion: 1,
-    });
-
     it('persists the prior-history aggregate merged with the snapshot op clock', async () => {
       // Regression guard: a BACKUP_IMPORT uploads with a fresh `{ newClient: 1 }`
       // clock by design (see backup.service.ts). If the server persisted that
@@ -934,6 +926,12 @@ describe('Sync Operations', () => {
   });
 
   describe('Cleanup Operations', () => {
+    const survivingSeqs = (): number[] =>
+      Array.from(testState.operations.values())
+        .filter((op) => op.userId === userId)
+        .map((op) => op.serverSeq)
+        .sort((a, b) => a - b);
+
     it('should delete old synced operations', async () => {
       const service = getSyncService();
 
@@ -942,21 +940,26 @@ describe('Sync Operations', () => {
         createOp('task-1', 'CRT'),
         createOp('task-2', 'CRT'),
       ]);
+      await service.uploadOps(userId, clientId, [
+        createFullStateOp('SYNC_IMPORT', clientId, { [clientId]: 2 }),
+      ]);
 
       // Set up userSyncState with snapshot info (required for cleanup logic)
       const now = Date.now();
       testState.userSyncStates.set(userId, {
         userId,
-        lastSeq: 2,
-        lastSnapshotSeq: 2,
+        lastSeq: 3,
+        lastSnapshotSeq: 3,
         snapshotAt: BigInt(now),
-        opCount: 2,
+        opCount: 3,
       });
 
-      // Manually set one operation to be "old" (received 100 days ago)
+      // Age the whole prefix below the SYNC_IMPORT boundary. The prefix is
+      // pruned whole or not at all, so leaving one op inside retention would
+      // skip the user entirely (covered by the next test).
       const hundredDaysMs = MS_PER_DAY * 100;
-      for (const [id, op] of testState.operations.entries()) {
-        if ((op as any).serverSeq === 1) {
+      for (const [, op] of testState.operations.entries()) {
+        if ((op as any).serverSeq < 3) {
           (op as any).receivedAt = BigInt(Date.now() - hundredDaysMs);
         }
       }
@@ -966,13 +969,41 @@ describe('Sync Operations', () => {
       const cutoff = Date.now() - ninetyDaysMs;
       const result = await service.deleteOldSyncedOpsForAllUsers(cutoff);
 
-      expect(result.totalDeleted).toBe(1);
+      expect(result.totalDeleted).toBe(2);
       expect(result.affectedUserIds).toContain(userId);
 
-      // Verify correct operation was deleted
-      const ops = (await operationDownloadService.getOpsSinceWithSeq(userId, 0)).ops;
-      expect(ops.length).toBe(1);
-      expect(ops[0].serverSeq).toBe(2);
+      // Only the causal full-state boundary survives.
+      expect(survivingSeqs()).toEqual([3]);
+    });
+
+    it('skips a user whose prefix still holds an op inside retention', async () => {
+      // Regression for the partial-prefix prune: pruning around the still-
+      // fresh seq 2 would leave a plain delta as the lowest surviving row and
+      // break every restore point — see
+      // StorageQuotaService.deleteOldSyncedOpsForAllUsers for the full why.
+      const service = getSyncService();
+
+      await service.uploadOps(userId, clientId, [
+        createOp('task-1', 'CRT'),
+        createOp('task-2', 'CRT'),
+      ]);
+      await service.uploadOps(userId, clientId, [
+        createFullStateOp('SYNC_IMPORT', clientId, { [clientId]: 2 }),
+      ]);
+
+      // seq 1 aged past the cutoff, seq 2 still inside retention.
+      for (const [, op] of testState.operations.entries()) {
+        if ((op as any).serverSeq === 1) {
+          (op as any).receivedAt = BigInt(Date.now() - MS_PER_DAY * 100);
+        }
+      }
+
+      const cutoff = Date.now() - MS_PER_DAY * 90;
+      const result = await service.deleteOldSyncedOpsForAllUsers(cutoff);
+
+      expect(result.totalDeleted).toBe(0);
+      expect(result.affectedUserIds).not.toContain(userId);
+      expect(survivingSeqs()).toEqual([1, 2, 3]);
     });
 
     it('should delete stale devices', async () => {

@@ -156,6 +156,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   isCurrent: boolean = false;
   isBacklog: boolean = false;
+  isInSubTaskList: boolean = false;
 
   private _task$: ReplaySubject<TaskWithSubTasks | Task> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
@@ -186,8 +187,12 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _isTaskDeleteTriggered: boolean = false;
   private _isOpenedFromKeyboard = false;
+  private _restoreFocusTo?: HTMLElement;
   private _touchMenuTimeout: ReturnType<typeof setTimeout> | undefined;
   private _touchMenuRafId: number | undefined;
+  private readonly _closeContextMenu = (): void => {
+    this.contextMenuTrigger()?.closeMenu();
+  };
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
@@ -199,6 +204,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.isBacklog = !!this._elementRef.nativeElement.closest('.backlog');
+    // Subtask reorder only changes the parent's subTaskIds, so move to
+    // top/bottom is only offered where that order is on screen — a subtask
+    // rendered flat in a tag or Today list would reorder invisibly.
+    this.isInSubTaskList = !!this._elementRef.nativeElement.closest('.sub-tasks');
 
     setTimeout(() => {
       if (!this._isOpenedFromKeyboard) {
@@ -208,6 +217,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this._clearActiveContextMenu();
     this._destroy$.next(true);
     this._destroy$.complete();
     if (this._touchMenuTimeout !== undefined) {
@@ -218,7 +228,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  open(ev?: MouseEvent | KeyboardEvent | TouchEvent, isOpenedFromKeyBoard = false): void {
+  open(
+    ev?: MouseEvent | KeyboardEvent | TouchEvent,
+    isOpenedFromKeyBoard = false,
+    restoreFocusTo?: HTMLElement,
+  ): void {
+    this._restoreFocusTo = restoreFocusTo;
+
     if (ev) {
       ev.preventDefault();
       ev.stopPropagation();
@@ -243,6 +259,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
     this.contextMenuTrigger()?.openMenu();
     this._taskFocusService.isTaskContextMenuOpen.set(true);
+    this._taskFocusService.closeActiveTaskContextMenu.set(this._closeContextMenu);
 
     if (isTouchActive()) {
       this._touchMenuTimeout = setTimeout(() => {
@@ -299,9 +316,17 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   focusRelatedTaskOrNext(): void {
+    const restoreFocusTo = this._restoreFocusTo;
+    this._restoreFocusTo = undefined;
+
     // Focus the task element after context menu closes
     // Use setTimeout to ensure menu has fully closed and DOM is settled
     setTimeout(() => {
+      if (restoreFocusTo?.isConnected) {
+        restoreFocusTo.focus({ preventScroll: true });
+        return;
+      }
+
       const taskElement = document.getElementById(`t-${this.task.id}`);
       if (taskElement) {
         // Restore focus to the acted-on task (keyboard continuity) WITHOUT
@@ -319,9 +344,18 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   onClose(): void {
     // Don't manually set focusedTaskId to null here - let the task component's
     // focus/blur handlers manage it automatically to avoid race conditions
-    this._taskFocusService.isTaskContextMenuOpen.set(false);
+    this._clearActiveContextMenu();
     this.focusRelatedTaskOrNext();
     this.close.emit();
+  }
+
+  private _clearActiveContextMenu(): void {
+    if (this._taskFocusService.closeActiveTaskContextMenu() !== this._closeContextMenu) {
+      return;
+    }
+
+    this._taskFocusService.closeActiveTaskContextMenu.set(null);
+    this._taskFocusService.isTaskContextMenuOpen.set(false);
   }
 
   get kb(): KeyboardConfig {
@@ -503,7 +537,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   moveToTop(): void {
-    this._taskService.moveToTop(this.task.id, this.task.parentId, false);
+    this._taskService.moveToTop(this.task.id, this.task.parentId, this.isBacklog);
+  }
+
+  moveToBottom(): void {
+    this._taskService.moveToBottom(this.task.id, this.task.parentId, this.isBacklog);
   }
 
   @throttle(200, { leading: true, trailing: false })

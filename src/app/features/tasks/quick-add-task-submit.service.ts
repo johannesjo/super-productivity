@@ -1,4 +1,5 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { IS_ELECTRON } from '../../app.constants';
 import { Log } from '../../core/log';
@@ -17,6 +18,7 @@ import { DateService } from '../../core/date/date.service';
 import { DateTimeFormatService } from '../../core/date-time-format/date-time-format.service';
 import { MenuTreeService } from '../menu-tree/menu-tree.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { DEFAULT_LANGUAGE } from '../../core/locale.constants';
 import type {
   QuickAddHudSnapshot,
   QuickAddSnapshotResult,
@@ -35,6 +37,7 @@ export class QuickAddTaskSubmitService {
   private readonly _dateService = inject(DateService);
   private readonly _dateTimeFormatService = inject(DateTimeFormatService);
   private readonly _menuTreeService = inject(MenuTreeService);
+  private readonly _translateService = inject(TranslateService);
   private _isInitialized = false;
 
   init(): void {
@@ -136,7 +139,15 @@ export class QuickAddTaskSubmitService {
           : null,
         todayStr: this._dateService.todayStr(),
         dateTimeLocale: this._dateTimeFormatService.currentLocale(),
-        lng: this._globalConfigService.cfg()?.localization?.lng ?? 'en',
+        textLocale: this._dateTimeFormatService.textLocale(),
+        // The language actually in use, not the configured one: leaving the
+        // language on "auto" stores no `lng`, and LanguageService then resolves
+        // it from the browser locale. Reading the config alone is what made the
+        // HUD open in English while the app itself was translated.
+        lng:
+          this._translateService.currentLang ||
+          this._globalConfigService.cfg()?.localization?.lng ||
+          DEFAULT_LANGUAGE,
         folderPaths: {
           projects: _mapToRecord(this._menuTreeService.projectFolderMap()),
           tags: _mapToRecord(this._menuTreeService.tagFolderMap()),

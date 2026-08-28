@@ -13,6 +13,7 @@ import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { AddTaskPayload } from './add-task-payload-builder';
 import {
   AddTaskBarDataFacade,
+  AddTaskBarSuggestionParams,
   AddTaskBarSuggestionResult,
 } from './add-task-bar-data-facade.token';
 import {
@@ -114,6 +115,10 @@ export class QuickAddHudDataFacadeService implements AddTaskBarDataFacade {
     return this._snapshot()?.dateTimeLocale || 'en-US';
   }
 
+  textLocale(): string {
+    return this._snapshot()?.textLocale || this.currentLocale();
+  }
+
   formatTime(timestamp: number): string {
     return new Date(timestamp).toLocaleTimeString(this.currentLocale(), {
       hour: 'numeric',
@@ -155,9 +160,7 @@ export class QuickAddHudDataFacadeService implements AddTaskBarDataFacade {
 
   async handleSuggestionSelected(
     _suggestion: AddTaskSuggestion,
-    _planForDay: string | undefined,
-    _isAddToBacklog: boolean,
-    _isAddToBottom: boolean,
+    _params: AddTaskBarSuggestionParams,
   ): Promise<AddTaskBarSuggestionResult | null> {
     return null;
   }

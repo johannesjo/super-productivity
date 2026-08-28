@@ -32,7 +32,7 @@ import {
   IDB_OPEN_RETRY_BASE_DELAY_MS,
 } from '../core/operation-log.const';
 import { IndexedDBOpenError } from '../core/errors/indexed-db-open.error';
-import { isLockRelatedIdbOpenError } from './op-log-errors.const';
+import { isIdbVersionError, isLockRelatedIdbOpenError } from './op-log-errors.const';
 
 const ADAPTER_NOT_INITIALIZED =
   'IndexedDbOpLogAdapter not initialized. Ensure init() is called.';
@@ -203,6 +203,13 @@ export class IndexedDbOpLogAdapter implements OpLogDbAdapter {
    * Open with exponential backoff. Lock-related errors get the full retry
    * window (they may clear); other errors fail faster so the hydrator can
    * surface the problem. Preserves the budgets/semantics of the existing store.
+   *
+   * NOTE: dormant in production today. Both stores call `_adapter.init()` only
+   * behind `if (!this._adapter.adoptConnection)`, and this adapter defines
+   * `adoptConnection` — so it runs on the connection the store hands it and
+   * never opens the database itself. Kept in step with the two live loops
+   * (`OperationLogStoreService`, `ArchiveStoreService`) so the path is already
+   * correct if the adapter ever takes ownership of the open.
    */
   private async _openDbWithRetry(): Promise<IDBPDatabase> {
     let maxRetries = IDB_OPEN_RETRIES;
@@ -214,6 +221,10 @@ export class IndexedDbOpLogAdapter implements OpLogDbAdapter {
         return await this._openDbOnce();
       } catch (e) {
         lastError = e;
+        // Downgrade barrier: retrying can't change the on-disk version (#9187).
+        if (isIdbVersionError(e)) {
+          break;
+        }
         if (attempt === 1 && !isLockRelatedIdbOpenError(e)) {
           maxRetries = IDB_OPEN_RETRIES_NON_LOCK;
         }
@@ -231,7 +242,8 @@ export class IndexedDbOpLogAdapter implements OpLogDbAdapter {
     }
 
     const err = new IndexedDBOpenError(lastError);
-    Log.err('[OpLogAdapter] IndexedDB open failed after all retries.', err);
+    // See OperationLogStoreService: the barrier path stops retrying (#9187).
+    Log.err('[OpLogAdapter] IndexedDB open failed.', err);
     throw err;
   }
 

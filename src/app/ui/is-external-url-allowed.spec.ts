@@ -23,6 +23,15 @@ describe('isExternalUrlSchemeAllowed', () => {
       'vscode-insiders://file/home/user/x.ts',
       'zotero://select/items/0_ABCD1234',
       'logseq://graph/Notes?page=Today',
+      // Note/task-app deep-links restored proactively alongside #8859.
+      'notion://www.notion.so/myworkspace/Page-abc123def',
+      'things:///show?id=ABCD-1234',
+      'omnifocus:///task/abc123',
+      'bear://x-callback-url/open-note?id=ABC123',
+      'joplin://x-callback-url/openNote?id=abc123def456',
+      'siyuan://blocks/20240101000000-abcdefg',
+      // #8859 — Outlook desktop deep-link: opaque EntryID, no `//` authority.
+      'outlook:0000000067E6410516B83D47AC4C8EB786CE10920700A34574545A43BF41AC9C4F77801FE8E100000000010C0000A34574545A43BF41AC9C4F77801FE8E10009672045BC0000',
       'webexteams://im?space=ff135070-68f8-11f1-9229-c7e6cca7a7cd&message=f4f13440-6b50-11f1-8868-03e71232fa87',
     ];
     allowed.forEach((url) => {
@@ -44,6 +53,13 @@ describe('isExternalUrlSchemeAllowed', () => {
         'vscode-insiders:',
         'zotero:',
         'logseq:',
+        'notion:',
+        'things:',
+        'omnifocus:',
+        'bear:',
+        'joplin:',
+        'siyuan:',
+        'outlook:',
         'webexteams:',
       ]);
     });

@@ -14,6 +14,7 @@ export interface SnackParams {
   actionId?: string;
   // eslint-disable-next-line
   actionFn?: Function;
+  dismissFn?: () => void | Promise<void>;
   actionPayload?: unknown;
   config?: MatSnackBarConfig;
   isSpinner?: boolean;

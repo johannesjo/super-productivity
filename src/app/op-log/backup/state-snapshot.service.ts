@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { Selector, Store } from '@ngrx/store';
-import { combineLatest, firstValueFrom } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { selectBoardsState } from '../../features/boards/store/boards.selectors';
@@ -24,6 +23,8 @@ import { environment } from '../../../environments/environment';
 import { ArchiveModel } from '../../features/time-tracking/time-tracking.model';
 import { initialTimeTrackingState } from '../../features/time-tracking/store/time-tracking.reducer';
 import { ArchiveDbAdapter } from '../../core/persistence/archive-db-adapter.service';
+import { TaskTimeSyncService } from '../../features/tasks/task-time-sync.service';
+import { OperationCaptureService } from '../capture/operation-capture.service';
 
 import { AppStateSnapshot } from '../core/types/backup.types';
 
@@ -104,6 +105,8 @@ const SNAPSHOT_SELECTORS: readonly {
 export class StateSnapshotService {
   private _store = inject(Store);
   private _archiveDbAdapter = inject(ArchiveDbAdapter);
+  private _taskTimeSync = inject(TaskTimeSyncService);
+  private _operationCapture = inject(OperationCaptureService);
 
   /**
    * Gets all sync model data from NgRx store.
@@ -122,6 +125,17 @@ export class StateSnapshotService {
   }
 
   /**
+   * Gets a snapshot aligned with the operation log by excluding task-time deltas
+   * that are still waiting in the local batch accumulator.
+   */
+  getStateSnapshotForOperationLog(): AppStateSnapshot {
+    return this._taskTimeSync.projectSnapshot(
+      this.getStateSnapshot(),
+      this._operationCapture.getPendingTaskTimeEntries(),
+    );
+  }
+
+  /**
    * Alias for getStateSnapshot() for backward compatibility
    * @deprecated Use getStateSnapshot() instead
    */
@@ -135,27 +149,34 @@ export class StateSnapshotService {
    * ⚠️ Returns live store references — never mutate (clone first). See class doc.
    */
   async getStateSnapshotAsync(): Promise<AppStateSnapshot> {
+    // Capture NgRx synchronously before the first await. Callers that hold the
+    // operation-log barrier can now establish an exact reducer-state cutoff:
+    // actions dispatched while archive I/O is pending are not half-included in
+    // the snapshot and will be persisted after it.
+    const ngRxData = this._getNgRxDataSync();
     const [archiveYoung, archiveOld] = await Promise.all([
       this._loadArchive('archiveYoung'),
       this._loadArchive('archiveOld'),
     ]);
 
-    const ngRxValues = await firstValueFrom(
-      combineLatest(SNAPSHOT_SELECTORS.map((s) => this._store.select(s.selector))).pipe(
-        first(),
-      ),
-    );
-
-    const result: Partial<Record<NgRxModelKey, unknown>> = {};
-    for (let i = 0; i < SNAPSHOT_SELECTORS.length; i++) {
-      result[SNAPSHOT_SELECTORS[i].key] = ngRxValues[i];
-    }
-
     return {
-      ...this._normalizeNgRxData(result),
+      ...ngRxData,
       archiveYoung,
       archiveOld,
     };
+  }
+
+  /** Async archive-inclusive counterpart of getStateSnapshotForOperationLog(). */
+  async getStateSnapshotForOperationLogAsync(): Promise<AppStateSnapshot> {
+    // Capture immutable NgRx references synchronously at the operation boundary.
+    // Archive reads can await IndexedDB without allowing later reducer updates to
+    // drift into a snapshot whose operation sequence was already fixed.
+    const snapshot = this.getStateSnapshotForOperationLog();
+    const [archiveYoung, archiveOld] = await Promise.all([
+      this._loadArchive('archiveYoung'),
+      this._loadArchive('archiveOld'),
+    ]);
+    return { ...snapshot, archiveYoung, archiveOld };
   }
 
   /**

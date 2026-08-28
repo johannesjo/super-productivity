@@ -7,8 +7,17 @@ import { DataInitStateService } from '../../core/data-init/data-init-state.servi
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { SyncSessionValidationService } from './sync-session-validation.service';
 import { SyncCycleGuardService } from './sync-cycle-guard.service';
+import { WrappedProviderService } from '../sync-providers/wrapped-provider.service';
+import { SyncEpochChangedError } from '../core/errors/sync-errors';
 import { BehaviorSubject } from 'rxjs';
 import { RejectedOpInfo } from '../core/types/sync-results.types';
+import { SnackService } from '../../core/snack/snack.service';
+import {
+  ForceUploadFailedError,
+  ForceUploadPendingOpsError,
+  IncompleteRemoteOperationsError,
+} from '../core/errors/sync-errors';
+import { T } from '../../t.const';
 
 describe('ImmediateUploadService', () => {
   let service: ImmediateUploadService;
@@ -16,6 +25,7 @@ describe('ImmediateUploadService', () => {
   let mockSyncService: jasmine.SpyObj<OperationLogSyncService>;
   let mockDataInitStateService: { isAllDataLoadedInitially$: BehaviorSubject<boolean> };
   let mockSyncWrapperService: { isEncryptionOperationInProgress: boolean };
+  let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockProvider: any;
   let originalOnLineDescriptor: PropertyDescriptor | undefined;
 
@@ -27,6 +37,8 @@ describe('ImmediateUploadService', () => {
       permanentRejectionCount: number;
       hasMorePiggyback: boolean;
       rejectedOps: RejectedOpInfo[];
+      encryptionRequiredKeyMissing: boolean;
+      blockedByRejectedFullState: boolean;
     }> = {},
   ): {
     kind: 'completed';
@@ -36,6 +48,8 @@ describe('ImmediateUploadService', () => {
     permanentRejectionCount: number;
     hasMorePiggyback: boolean;
     rejectedOps: RejectedOpInfo[];
+    encryptionRequiredKeyMissing?: boolean;
+    blockedByRejectedFullState?: boolean;
   } => ({
     kind: 'completed',
     uploadedCount: 0,
@@ -95,6 +109,11 @@ describe('ImmediateUploadService', () => {
     mockSyncWrapperService = {
       isEncryptionOperationInProgress: false,
     };
+    mockSnackService = jasmine.createSpyObj('SnackService', [
+      'open',
+      'hasPendingPersistentAction',
+    ]);
+    mockSnackService.hasPendingPersistentAction.and.returnValue(false);
 
     TestBed.configureTestingModule({
       providers: [
@@ -103,6 +122,15 @@ describe('ImmediateUploadService', () => {
         { provide: OperationLogSyncService, useValue: mockSyncService },
         { provide: DataInitStateService, useValue: mockDataInitStateService },
         { provide: SyncWrapperService, useValue: mockSyncWrapperService },
+        { provide: SnackService, useValue: mockSnackService },
+        {
+          // Pass-through: the real service would wrap the provider in the
+          // #9074 epoch-guard delegate; identity keeps existing expectations.
+          provide: WrappedProviderService,
+          useValue: {
+            getOperationSyncCapable: (p: unknown) => Promise.resolve(p),
+          },
+        },
       ],
     });
 
@@ -134,6 +162,146 @@ describe('ImmediateUploadService', () => {
       flush(); // Drain the await chain inside withSession()
 
       expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('IN_SYNC');
+    }));
+
+    it('should report UNKNOWN_OR_CHANGED when the initial upload lacks a mandatory encryption key', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.resolveTo(
+        completedResult({
+          uploadedCount: 1,
+          encryptionRequiredKeyMissing: true,
+        }),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
+        'UNKNOWN_OR_CHANGED',
+      );
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+    }));
+
+    it('should report ERROR when the initial upload is blocked by a rejected full-state boundary', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.resolveTo(
+        completedResult({
+          uploadedCount: 0,
+          blockedByRejectedFullState: true,
+        }),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+    }));
+
+    it('should report incomplete remote application as a sticky translated error', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.rejectWith(
+        new IncompleteRemoteOperationsError(new Error('archive failed')),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: T.F.SYNC.S.INCOMPLETE_REMOTE_OPERATIONS,
+        type: 'ERROR',
+        config: { duration: 0 },
+      });
+    }));
+
+    it('should preserve an existing persistent recovery action for incomplete remote work', fakeAsync(() => {
+      mockSnackService.hasPendingPersistentAction.and.returnValue(true);
+      mockSyncService.uploadPendingOps.and.rejectWith(
+        new IncompleteRemoteOperationsError(new Error('archive failed')),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+    }));
+
+    it('should surface a force-upload failure raised by conflict resolution', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.rejectWith(new ForceUploadFailedError());
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        msg: T.F.SYNC.S.FORCE_UPLOAD_FAILED,
+        type: 'ERROR',
+      });
+    }));
+
+    it('should keep sync pending when force upload leaves unresolved ops', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.rejectWith(new ForceUploadPendingOpsError());
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
+        'UNKNOWN_OR_CHANGED',
+      );
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+    }));
+
+    it('should report UNKNOWN_OR_CHANGED when a local-win follow-up lacks a mandatory encryption key', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.returnValues(
+        Promise.resolve(completedResult({ uploadedCount: 1, localWinOpsCreated: 1 })),
+        Promise.resolve(
+          completedResult({
+            uploadedCount: 0,
+            encryptionRequiredKeyMissing: true,
+          }),
+        ),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
+        'UNKNOWN_OR_CHANGED',
+      );
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+    }));
+
+    it('should report ERROR when a local-win follow-up reaches a rejected full-state barrier', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.returnValues(
+        Promise.resolve(completedResult({ uploadedCount: 1, localWinOpsCreated: 1 })),
+        Promise.resolve(
+          completedResult({
+            uploadedCount: 0,
+            blockedByRejectedFullState: true,
+          }),
+        ),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
     }));
 
     it('should NOT show checkmark when piggybacked ops exist', fakeAsync(() => {
@@ -179,6 +347,19 @@ describe('ImmediateUploadService', () => {
       expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalled();
     });
 
+    it('should report ERROR when piggyback processing is blocked by an incompatible op', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.resolveTo({
+        kind: 'blocked_incompatible',
+      });
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+    }));
+
     it('should NOT show checkmark when piggybacked ops exist (multiple)', fakeAsync(() => {
       mockSyncService.uploadPendingOps.and.returnValue(
         Promise.resolve(completedResult({ uploadedCount: 5, piggybackedOpsCount: 3 })),
@@ -190,6 +371,49 @@ describe('ImmediateUploadService', () => {
       flush();
 
       // Piggybacked ops are processed internally, no checkmark shown
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalled();
+    }));
+
+    it('should report ERROR when the local-win follow-up is blocked', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.returnValues(
+        Promise.resolve(completedResult({ uploadedCount: 1, localWinOpsCreated: 1 })),
+        Promise.resolve({ kind: 'blocked_incompatible' }),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+    }));
+
+    it('should not show a checkmark when the local-win follow-up is cancelled', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.returnValues(
+        Promise.resolve(completedResult({ uploadedCount: 1, localWinOpsCreated: 1 })),
+        Promise.resolve({ kind: 'cancelled' }),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalled();
+    }));
+
+    it('should defer the checkmark when the local-win follow-up receives piggybacked ops', fakeAsync(() => {
+      mockSyncService.uploadPendingOps.and.returnValues(
+        Promise.resolve(completedResult({ uploadedCount: 1, localWinOpsCreated: 1 })),
+        Promise.resolve(completedResult({ uploadedCount: 1, piggybackedOpsCount: 1 })),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
       expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalled();
     }));
   });
@@ -373,6 +597,23 @@ describe('ImmediateUploadService', () => {
       flush();
 
       expect(mockSyncService.uploadPendingOps).not.toHaveBeenCalled();
+    }));
+
+    it('should silently abandon the cycle when the sync epoch changes mid-upload (#9074)', fakeAsync(() => {
+      // A provider switch / encryption op mid-flight surfaces as
+      // SyncEpochChangedError from a fenced write — the stale cycle must skip
+      // silently (no ERROR status), not retry.
+      mockSyncService.uploadPendingOps.and.callFake(() =>
+        Promise.reject(new SyncEpochChangedError(0, 1, 'provider.uploadOps')),
+      );
+
+      service.initialize();
+      service.trigger();
+      tick(2000);
+      flush();
+
+      expect(mockSyncService.uploadPendingOps).toHaveBeenCalled();
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('ERROR');
     }));
 
     it('should handle fresh client (syncService returns null)', fakeAsync(() => {

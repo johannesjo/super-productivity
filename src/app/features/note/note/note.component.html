@@ -58,6 +58,7 @@
       <button
         [matMenuTriggerFor]="menu"
         mat-icon-button
+        [attr.aria-label]="T.G.MORE_ACTIONS | translate"
       >
         <mat-icon>more_vert</mat-icon>
       </button>
@@ -118,7 +119,7 @@
             mat-menu-item
           >
             <mat-icon
-              [style.color]="project.theme.primary"
+              [style.color]="project.theme?.primary"
               class="tag-ico"
               >{{ project.icon || DEFAULT_PROJECT_ICON }}</mat-icon
             >

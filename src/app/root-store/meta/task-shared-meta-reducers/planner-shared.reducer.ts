@@ -13,7 +13,7 @@ import {
   getTag,
   hasInvalidTodayTag,
   removeTaskFromPlannerDays,
-  removeTasksFromPlannerDays,
+  removeTasksFromSinglePlannerDay,
   updateTags,
 } from './task-shared-helpers';
 import {
@@ -84,7 +84,8 @@ const handleTransferTask = (
       task.id,
       ...targetDays.slice(targetIndex),
     ])
-      // when moving a parent to the day, remove all sub-tasks
+      // when moving a parent to the day, collapse its sub-tasks under it on
+      // THIS day only (other days keep their own scheduling — see #9019)
       .filter((id: string) => !task.subTaskIds.includes(id));
   }
 
@@ -134,7 +135,7 @@ const handleTransferTask = (
   if (prevDay !== today && newDay === today) {
     // Moving to today - update TODAY_TAG.taskIds for ordering
     // IMPORTANT: TODAY_TAG should NEVER be in task.tagIds (virtual tag pattern)
-    // Membership is determined by task.dueDay. See: docs/ai/today-tag-architecture.md
+    // Membership is determined by task.dueDay. See: ARCHITECTURE-DECISIONS.md Decision #2
     const taskIds = [...todayTag.taskIds];
     const targetIndexToUse = targetTaskId
       ? todayTag.taskIds.findIndex((id) => id === targetTaskId)
@@ -185,7 +186,7 @@ const handlePlanTaskForDay = (
   if (day === todayStr) {
     // Adding to today - update TODAY_TAG.taskIds for ordering
     // IMPORTANT: TODAY_TAG should NEVER be in task.tagIds (virtual tag pattern)
-    // Membership is determined by task.dueDay. See: docs/ai/today-tag-architecture.md
+    // Membership is determined by task.dueDay. See: ARCHITECTURE-DECISIONS.md Decision #2
     const newTagTaskIds = unique(
       isAddToTop
         ? [task.id, ...todayTag.taskIds.filter((tid) => tid !== task.id)]
@@ -247,9 +248,12 @@ const handlePlanTaskForDay = (
   // Add to target day if not today (today's ordering is managed by TODAY_TAG.taskIds)
   if (day !== todayStr) {
     state = addTaskToPlannerDay(state, task.id, day, isAddToTop ? 0 : Infinity);
-    // When moving a parent, remove sub-tasks from the target day
+    // Collapse the parent's sub-tasks under it for THIS day only. Previously we
+    // removed them from ALL planner days, which silently erased any day the user
+    // had scheduled a sub-task for once its parent was planned anywhere (#9019).
+    // Matches the target-day-only behaviour of handleTransferTask.
     if (task.subTaskIds.length > 0) {
-      state = removeTasksFromPlannerDays(state, task.subTaskIds);
+      state = removeTasksFromSinglePlannerDay(state, task.subTaskIds, day);
     }
   }
 

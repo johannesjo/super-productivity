@@ -79,7 +79,10 @@
 .has-mobile-bottom-nav {
   @include mq(xs, max) {
     .main-content {
-      padding-bottom: calc(var(--bottom-nav-height) + var(--bottom-nav-safe-area));
+      padding-bottom: calc(
+        var(--bottom-nav-height) + var(--bottom-nav-safe-area) +
+          var(--bottom-nav-extra-offset)
+      );
     }
   }
 }
@@ -205,7 +208,7 @@ mat-sidenav {
 // Remove right border/shadow of the side nav
 
 :host ::ng-deep .mat-drawer.mat-drawer-side {
-  border-right-color: var(--sidebar-border-color);
+  border-right-color: transparent;
 }
 
 @include mq(component) {

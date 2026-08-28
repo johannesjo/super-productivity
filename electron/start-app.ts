@@ -13,7 +13,7 @@ import { CONFIG } from './CONFIG';
 import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { initIndicator } from './indicator';
 import { quitApp, showOrFocus } from './various-shared';
-import { closeWinAndQuit, createWindow } from './main-window';
+import { closeWinAndQuit, createWindow, getIsAppReady } from './main-window';
 import { IdleTimeHandler } from './idle-time-handler';
 import { destroyTaskWidget } from './task-widget/task-widget';
 import { destroyQuickAddWindow, initQuickAddWindow } from './quick-add-window';
@@ -28,6 +28,13 @@ import * as fs from 'fs';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const APP_DISPLAY_NAME = 'Super Productivity';
+// Filename of the .desktop entry electron-builder installs, i.e.
+// `${linux.executableName}.desktop`. The `.desktop` suffix is required and is
+// what Electron's own default uses: `Browser::SetAsDefaultProtocolClient` hands
+// this value straight to `g_desktop_app_info_new()`, which wants a desktop-file
+// id, while the window identity strips the suffix itself. Coupled to the
+// desktop entry by `tools/verify-linux-wm-class.test.js`.
+const LINUX_DESKTOP_NAME = 'superproductivity.desktop';
 const IS_MAC = process.platform === 'darwin';
 // const DESKTOP_ENV = process.env.DESKTOP_SESSION;
 // const IS_GNOME = DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg';
@@ -162,8 +169,21 @@ export const startApp = (): void => {
   }
 
   if (process.platform === 'linux') {
+    // Pin the .desktop filename rather than letting Electron infer it. Since
+    // Electron 42 the XDG app id derived from this value sets BOTH the X11
+    // WM_CLASS and the Wayland app_id — `native_window_views.cc` uses
+    // `GetXdgAppId().value_or(Browser::GetName())`, so the app id wins and
+    // `setName` below no longer reaches the window identity. Electron's own
+    // inference (`lib/browser/init.ts`) slugifies the app name, which happens to
+    // produce the same value today but would become `super-productivity` the
+    // moment a `productName` is added to package.json, detaching every window
+    // from `superproductivity.desktop`. Must run before the first window is
+    // created. #9674, #9450.
+    app.setDesktopName(LINUX_DESKTOP_NAME);
+
     // Preserve the historical userData path based on package.json `name`, while
-    // exposing a human-readable app name to Linux desktop environments.
+    // exposing a human-readable app name to Linux desktop environments (#8640).
+    // Safe for the window identity because of the pin above.
     const userDataPath = app.getPath('userData');
     app.setPath('userData', userDataPath);
     app.setName(APP_DISPLAY_NAME);
@@ -527,10 +547,17 @@ export const startApp = (): void => {
 
     initPluginOAuth(mainWin);
 
-    // Process any pending protocol URLs after window is created
-    setTimeout(() => {
-      processPendingProtocolUrls(mainWin);
-    }, 1000);
+    // Process pending protocol URLs once the renderer has fully booted
+    // (signaled via IPC.APP_READY, which Angular init fires) rather than
+    // guessing with a fixed timer — cold-start boot time varies with
+    // machine load and OS disk caching, and a URL delivered before the
+    // renderer subscribes would otherwise race app startup.
+    const win = mainWin;
+    if (getIsAppReady()) {
+      processPendingProtocolUrls(win);
+    } else {
+      ipcMain.once(IPC.APP_READY, () => processPendingProtocolUrls(win));
+    }
   }
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions

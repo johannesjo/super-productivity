@@ -7,6 +7,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { signal } from '@angular/core';
 import { TaskReminderOptionId } from '../../features/tasks/task.model';
+import { IS_ELECTRON_TOKEN } from '../../app.constants';
 
 describe('DateTimePickerComponent', () => {
   let component: DateTimePickerComponent;
@@ -31,6 +32,7 @@ describe('DateTimePickerComponent', () => {
       providers: [
         { provide: DateService, useValue: dateServiceSpy },
         { provide: GlobalConfigService, useValue: globalConfigServiceMock },
+        { provide: IS_ELECTRON_TOKEN, useValue: true },
         TranslateService,
         TranslateStore,
       ],
@@ -48,6 +50,27 @@ describe('DateTimePickerComponent', () => {
   it('should render the calendar by default', () => {
     const calendarEl = fixture.nativeElement.querySelector('mat-calendar');
     expect(calendarEl).toBeTruthy();
+  });
+
+  it('should keep a six-row month above the time controls at supported widths', () => {
+    fixture.componentRef.setInput('selectedDate', new Date(2026, 7, 4));
+    fixture.detectChanges();
+
+    [400, 560].forEach((pickerWidth) => {
+      fixture.nativeElement.style.width = `${pickerWidth}px`;
+
+      const weekRows = fixture.nativeElement.querySelectorAll(
+        '.mat-calendar-body > tr',
+      ) as NodeListOf<HTMLElement>;
+      const formControls = fixture.nativeElement.querySelector(
+        '.form-ctrl-wrapper',
+      ) as HTMLElement;
+
+      expect(weekRows.length).withContext(`${pickerWidth}px picker`).toBe(6);
+      expect(weekRows[5].getBoundingClientRect().bottom)
+        .withContext(`${pickerWidth}px picker`)
+        .toBeLessThanOrEqual(formControls.getBoundingClientRect().top);
+    });
   });
 
   it('should emit dateSelected when a date is selected on the calendar', () => {
@@ -99,6 +122,60 @@ describe('DateTimePickerComponent', () => {
     component.onTimeFocus();
 
     expect(component.timeChanged.emit).toHaveBeenCalledWith('09:00');
+  });
+
+  it('should open the native time picker when the time input is tapped', () => {
+    const timeInput = fixture.nativeElement.querySelector(
+      'input[type="time"]',
+    ) as HTMLInputElement;
+    const showPickerSpy = spyOn(timeInput, 'showPicker');
+
+    timeInput.dispatchEvent(
+      new PointerEvent('click', { bubbles: true, pointerType: 'touch' }),
+    );
+
+    expect(showPickerSpy).toHaveBeenCalledOnceWith();
+  });
+
+  it('should preserve native segment editing when the time input is clicked with a mouse', () => {
+    const timeInput = fixture.nativeElement.querySelector(
+      'input[type="time"]',
+    ) as HTMLInputElement;
+    const showPickerSpy = spyOn(timeInput, 'showPicker');
+
+    timeInput.dispatchEvent(
+      new PointerEvent('click', { bubbles: true, pointerType: 'mouse' }),
+    );
+
+    expect(showPickerSpy).not.toHaveBeenCalled();
+  });
+
+  it('should preserve native touch handling outside Electron', () => {
+    Object.defineProperty(component, '_isElectron', { value: false });
+    const timeInput = fixture.nativeElement.querySelector(
+      'input[type="time"]',
+    ) as HTMLInputElement;
+    const showPickerSpy = spyOn(timeInput, 'showPicker');
+
+    timeInput.dispatchEvent(
+      new PointerEvent('click', { bubbles: true, pointerType: 'touch' }),
+    );
+
+    expect(showPickerSpy).not.toHaveBeenCalled();
+  });
+
+  it('should keep the time input focused when the native picker cannot be opened', () => {
+    const timeInput = fixture.nativeElement.querySelector(
+      'input[type="time"]',
+    ) as HTMLInputElement;
+    spyOn(timeInput, 'showPicker').and.throwError('Picker unavailable');
+    timeInput.focus();
+
+    timeInput.dispatchEvent(
+      new PointerEvent('click', { bubbles: true, pointerType: 'touch' }),
+    );
+
+    expect(document.activeElement).toBe(timeInput);
   });
 
   it('should toggle isKeyboardNavigating based on keyboard navigation and mouse move', () => {

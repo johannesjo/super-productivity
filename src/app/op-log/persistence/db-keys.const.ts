@@ -11,8 +11,15 @@ import { CompleteBackup } from '../sync-exports';
 /** Database name */
 export const DB_NAME = 'SUP_OPS';
 
-/** Current database schema version */
-export const DB_VERSION = 7;
+/**
+ * Current database schema version.
+ *
+ * Versions 8–10 are deliberate downgrade barriers. Version 8 protects the
+ * `archive_pending` reducer checkpoint, version 9 protects the
+ * `reducerRejectedAt` replay quarantine, and version 10 protects schema-v3
+ * replacement LWW operations from readers that would treat them as patches.
+ */
+export const DB_VERSION = 10;
 
 /** Object store names */
 export const STORE_NAMES = {
@@ -44,6 +51,29 @@ export const BACKUP_KEY = 'backup' as const;
 
 /** Meta key for derived full-state operation refs */
 export const FULL_STATE_OPS_META_KEY = 'full_state_ops' as const;
+
+/**
+ * Meta key marking an interrupted USE_REMOTE raw rebuild: set atomically with
+ * the baseline replacement, cleared after the server-history replay commits.
+ * While set, the next sync must redo the raw (own-ops-included) rebuild —
+ * the normal download path excludes this client's own ops server-side, so an
+ * interrupted replay would otherwise silently lose them.
+ */
+export const RAW_REBUILD_INCOMPLETE_META_KEY = 'raw_rebuild_incomplete' as const;
+
+/**
+ * Meta key retaining the Undo provenance after a USE_REMOTE rebuild completed.
+ * This is separate from the incomplete/resume marker: completion atomically
+ * replaces the latter with this entry so a reload cannot strand the backup.
+ */
+export const RAW_REBUILD_RECOVERY_META_KEY = 'raw_rebuild_recovery' as const;
+
+/** Versioned marker for the one-time legacy terminal remote failure repair. */
+export const LEGACY_TERMINAL_REMOTE_FAILURES_MIGRATION_META_KEY =
+  'legacy_terminal_remote_failures_migration' as const;
+
+/** Increment when the legacy terminal remote failure repair needs to run again. */
+export const LEGACY_TERMINAL_REMOTE_FAILURES_MIGRATION_VERSION = 1;
 
 /** Index names for ops object store */
 export const OPS_INDEXES = {

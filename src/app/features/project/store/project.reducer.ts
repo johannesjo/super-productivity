@@ -333,10 +333,12 @@ export const projectReducer = createReducer<ProjectState>(
 
       const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
       // When moving to DONE section with null anchor, append to end
-      // Otherwise use standard anchor-based positioning
+      // Otherwise use standard anchor-based positioning.
+      // Filter the id out before appending (like moveItemAfterAnchor does) so an
+      // op re-replayed on top of already-applied state can't duplicate it (#8469).
       const newTodaysTaskIds =
         afterTaskId === null && target === 'DONE'
-          ? [...todaysTaskIdsBefore, taskId]
+          ? [...todaysTaskIdsBefore.filter(filterOutId(taskId)), taskId]
           : moveItemAfterAnchor(taskId, afterTaskId, todaysTaskIdsBefore);
 
       return projectAdapter.updateOne(
@@ -354,7 +356,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(
     moveTaskUpInTodayList,
-    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
+    (state, { taskId, workContextType, workContextId, doneTaskIds: undoneTaskIds }) => {
       return workContextType === WORK_CONTEXT_TYPE
         ? projectAdapter.updateOne(
             {
@@ -363,7 +365,7 @@ export const projectReducer = createReducer<ProjectState>(
                 taskIds: arrayMoveLeftUntil(
                   (state.entities[workContextId] as Project).taskIds,
                   taskId,
-                  (id) => !doneTaskIds.includes(id),
+                  (id) => !undoneTaskIds.includes(id),
                 ),
               },
             },
@@ -375,7 +377,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(
     moveTaskDownInTodayList,
-    (state, { taskId, workContextType, workContextId, doneTaskIds }) => {
+    (state, { taskId, workContextType, workContextId, doneTaskIds: undoneTaskIds }) => {
       return workContextType === WORK_CONTEXT_TYPE
         ? projectAdapter.updateOne(
             {
@@ -384,7 +386,7 @@ export const projectReducer = createReducer<ProjectState>(
                 taskIds: arrayMoveRightUntil(
                   (state.entities[workContextId] as Project).taskIds,
                   taskId,
-                  (id) => !doneTaskIds.includes(id),
+                  (id) => !undoneTaskIds.includes(id),
                 ),
               },
             },
@@ -430,7 +432,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(
     moveProjectTaskUpInBacklogList,
-    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
+    (state, { taskId, workContextId, doneBacklogTaskIds: undoneBacklogTaskIds }) => {
       return projectAdapter.updateOne(
         {
           id: workContextId,
@@ -438,7 +440,7 @@ export const projectReducer = createReducer<ProjectState>(
             backlogTaskIds: arrayMoveLeftUntil(
               (state.entities[workContextId] as Project).backlogTaskIds,
               taskId,
-              (id) => !doneBacklogTaskIds.includes(id),
+              (id) => !undoneBacklogTaskIds.includes(id),
             ),
           },
         },
@@ -449,7 +451,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(
     moveProjectTaskDownInBacklogList,
-    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
+    (state, { taskId, workContextId, doneBacklogTaskIds: undoneBacklogTaskIds }) => {
       return projectAdapter.updateOne(
         {
           id: workContextId,
@@ -457,7 +459,7 @@ export const projectReducer = createReducer<ProjectState>(
             backlogTaskIds: arrayMoveRightUntil(
               (state.entities[workContextId] as Project).backlogTaskIds,
               taskId,
-              (id) => !doneBacklogTaskIds.includes(id),
+              (id) => !undoneBacklogTaskIds.includes(id),
             ),
           },
         },
@@ -466,23 +468,20 @@ export const projectReducer = createReducer<ProjectState>(
     },
   ),
 
-  on(
-    moveProjectTaskToTopInBacklogList,
-    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
-      return projectAdapter.updateOne(
-        {
-          id: workContextId,
-          changes: {
-            backlogTaskIds: arrayMoveToStart(
-              (state.entities[workContextId] as Project).backlogTaskIds,
-              taskId,
-            ),
-          },
+  on(moveProjectTaskToTopInBacklogList, (state, { taskId, workContextId }) => {
+    return projectAdapter.updateOne(
+      {
+        id: workContextId,
+        changes: {
+          backlogTaskIds: arrayMoveToStart(
+            (state.entities[workContextId] as Project).backlogTaskIds,
+            taskId,
+          ),
         },
-        state,
-      );
-    },
-  ),
+      },
+      state,
+    );
+  }),
 
   on(moveProjectTaskToBottomInBacklogList, (state, { taskId, workContextId }) => {
     return projectAdapter.updateOne(

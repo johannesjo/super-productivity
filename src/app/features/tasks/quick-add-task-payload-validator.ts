@@ -1,6 +1,9 @@
 import { TaskReminderOptionId } from './task.model';
 import { AddTaskPayload } from './add-task-bar/add-task-payload-builder';
-import { RepeatQuickSetting } from '../task-repeat-cfg/task-repeat-cfg.model';
+import {
+  RepeatCycleOption,
+  RepeatQuickSetting,
+} from '../task-repeat-cfg/task-repeat-cfg.model';
 import { TODAY_TAG } from '../tag/tag.const';
 
 export interface QuickAddTaskPayloadValidationContext {
@@ -17,8 +20,8 @@ const MAX_TIMESTAMP_MS = Date.UTC(2100, 0, 1);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const VALID_REMIND_OPTIONS = new Set<string>(Object.values(TaskReminderOptionId));
-const VALID_REPEAT_SETTINGS = new Set<RepeatQuickSetting | null>([
-  null,
+// A `PRESET` recurrence never carries CUSTOM — that variant is `DIALOG`.
+const VALID_REPEAT_PRESETS = new Set<RepeatQuickSetting>([
   'DAILY',
   'WEEKLY_CURRENT_WEEKDAY',
   'MONTHLY_CURRENT_DATE',
@@ -27,8 +30,14 @@ const VALID_REPEAT_SETTINGS = new Set<RepeatQuickSetting | null>([
   'MONTHLY_NTH_WEEKDAY',
   'MONDAY_TO_FRIDAY',
   'YEARLY_CURRENT_DATE',
-  'CUSTOM',
 ]);
+const VALID_REPEAT_CYCLES = new Set<RepeatCycleOption>([
+  'DAILY',
+  'WEEKLY',
+  'MONTHLY',
+  'YEARLY',
+]);
+const MAX_REPEAT_EVERY = 1000;
 
 export const validateQuickAddTaskPayload = (
   payload: AddTaskPayload,
@@ -72,8 +81,9 @@ export const validateQuickAddTaskPayload = (
   if (!VALID_REMIND_OPTIONS.has(payload.remindOption)) {
     return 'Reminder is invalid';
   }
-  if (!VALID_REPEAT_SETTINGS.has(payload.repeatQuickSetting)) {
-    return 'Repeat setting is invalid';
+  const repeatValidationError = _validateRepeat(payload);
+  if (repeatValidationError) {
+    return repeatValidationError;
   }
   const repeatTagIds = payload.repeatCfg?.tagIds;
   if (repeatTagIds !== undefined && !Array.isArray(repeatTagIds)) {
@@ -90,6 +100,36 @@ export const validateQuickAddTaskPayload = (
     return 'Date is invalid';
   }
   return null;
+};
+
+const _validateRepeat = (payload: AddTaskPayload): string | null => {
+  const repeat = payload.repeat;
+  if (repeat === null || repeat === undefined) {
+    // A DIALOG recurrence carries no config; anything else must not either.
+    return payload.repeatCfg ? 'Repeat setting is invalid' : null;
+  }
+  if (typeof repeat !== 'object' || Array.isArray(repeat)) {
+    return 'Repeat setting is invalid';
+  }
+  switch (repeat.type) {
+    case 'DIALOG':
+      // The dialog builds the config in the main renderer, so the HUD must not
+      // smuggle one in alongside it.
+      return payload.repeatCfg ? 'Repeat setting is invalid' : null;
+    case 'PRESET':
+      return VALID_REPEAT_PRESETS.has(repeat.quickSetting)
+        ? null
+        : 'Repeat setting is invalid';
+    case 'INTERVAL':
+      return VALID_REPEAT_CYCLES.has(repeat.repeatCycle) &&
+        Number.isInteger(repeat.repeatEvery) &&
+        repeat.repeatEvery >= 1 &&
+        repeat.repeatEvery <= MAX_REPEAT_EVERY
+        ? null
+        : 'Repeat setting is invalid';
+    default:
+      return 'Repeat setting is invalid';
+  }
 };
 
 const _validateTagIds = (

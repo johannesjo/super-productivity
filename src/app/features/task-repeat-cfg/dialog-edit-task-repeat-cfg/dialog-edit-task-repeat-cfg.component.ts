@@ -38,6 +38,7 @@ import { formatMonthDay } from '../../../util/format-month-day.util';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { first } from 'rxjs/operators';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
+import { getDefaultSkipOverdue } from './get-default-skip-overdue';
 import { getTaskRepeatCfgChanges } from './get-task-repeat-cfg-changes';
 import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
 import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
@@ -56,6 +57,7 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { DateService } from '../../../core/date/date.service';
+import { MAT_SELECT_CONFIG } from '@angular/material/select';
 
 // Fields whose change requires offering "Update all task instances?" — covers
 // what propagates to existing tasks (vs. schedule fields, which only affect
@@ -87,6 +89,12 @@ const WEEKDAY_KEYS: (keyof TaskRepeatCfgCopy)[] = [
   templateUrl: './dialog-edit-task-repeat-cfg.component.html',
   styleUrls: ['./dialog-edit-task-repeat-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: MAT_SELECT_CONFIG,
+      useValue: { canSelectNullableOptions: true },
+    },
+  ],
   imports: [
     MatDialogTitle,
     TranslatePipe,
@@ -109,29 +117,29 @@ export class DialogEditTaskRepeatCfgComponent {
     const d = this.repeatCfg().startDate;
     if (!d) return this._translateService.instant(T.F.TASK_REPEAT.F.START_DATE);
     const date = dateStrToUtcDate(d);
-    const locale = this._dateTimeFormatService.currentLocale();
-    const time = this.repeatCfg().startTime;
-    if (time && isValidSplitTime(time)) {
-      const formattedDate = date.toLocaleDateString(locale, {
+    // Spelled-out weekday/month names follow the UI language under the ISO 8601
+    // option (the `sv` sentinel would otherwise leak Swedish, e.g. "ons 15 juli
+    // 2026"). The clock time below keeps currentLocale() so 24h is preserved.
+    const formattedDate = date.toLocaleDateString(
+      this._dateTimeFormatService.textLocale(),
+      {
         weekday: 'short',
         year: 'numeric',
         month: 'short',
         day: 'numeric',
-      });
+      },
+    );
+    const time = this.repeatCfg().startTime;
+    if (time && isValidSplitTime(time)) {
       const [hours, minutes] = time.split(':').map(Number);
       const safeTimeDate = new Date(2000, 0, 1, hours, minutes, 0, 0);
       const formattedTime = this._dateTimeFormatService.formatTime(
         safeTimeDate.getTime(),
-        locale,
+        this._dateTimeFormatService.currentLocale(),
       );
       return `${formattedDate}, ${formattedTime}`;
     }
-    return date.toLocaleDateString(locale, {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return formattedDate;
   });
 
   openScheduleDialog(): void {
@@ -210,7 +218,9 @@ export class DialogEditTaskRepeatCfgComponent {
     task?: Task;
     repeatCfg?: TaskRepeatCfg;
     targetDate?: string;
+    initialStartDate?: string;
     defaultRemindOption?: TaskReminderOptionId;
+    isRemoveConfirmationRequired?: boolean;
   }>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
@@ -321,7 +331,12 @@ export class DialogEditTaskRepeatCfgComponent {
         : undefined;
       return {
         ...DEFAULT_TASK_REPEAT_CFG,
+        // New configs open on the "Daily" quick setting, where collapsing empty
+        // overdue instances is both useful and safe; see getDefaultSkipOverdue.
+        // Re-derived from the final schedule on save in case the user switches.
+        skipOverdue: getDefaultSkipOverdue(DEFAULT_TASK_REPEAT_CFG),
         startDate:
+          this._data.initialStartDate ??
           this._data.task.dueDay ??
           getDbDateStr(this._data.task.dueWithTime || undefined),
         startTime,
@@ -348,10 +363,13 @@ export class DialogEditTaskRepeatCfgComponent {
       // Read currentLocale() reactively each time options are built so the
       // correct locale is used even when the config store hasn't emitted yet
       // at construction time (previously captured once as a const → en-GB).
+      // textLocale() localizes the spelled-out weekday name (UI language under
+      // the ISO option), while numeric day/month keep currentLocale().
       buildRepeatQuickSettingOptions(
         refDate,
         this._dateTimeFormatService.currentLocale(),
         translateService,
+        this._dateTimeFormatService.textLocale(),
       );
 
     const formConfig = TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG.map((field) => ({
@@ -378,18 +396,26 @@ export class DialogEditTaskRepeatCfgComponent {
 
     // Memoize to avoid rebuilding options on every formly change cycle
     let lastStartDate: string | undefined;
-    let lastLocale: string | undefined;
+    let lastLocaleKey: string | undefined;
     let cachedOptions: { value: string; label: string }[];
 
-    // Update options reactively when startDate or locale changes
+    // Update options when startDate or either locale changes. The key must track
+    // textLocale, not just currentLocale: under the ISO option currentLocale()
+    // stays 'sv' while textLocale() carries the UI language for the weekday
+    // label. Those move independently — applyLanguageFromState$ deliberately
+    // applies the UI language from remote sync too, so lng can change while this
+    // dialog is open, shifting textLocale() with currentLocale() frozen at 'sv'.
+    // A currentLocale-only key would serve a stale weekday label there.
     quickSettingField.expressionProperties = {
       ...quickSettingField.expressionProperties,
       ['templateOptions.options']: (model: Record<string, unknown>) => {
         const sd = model['startDate'] as string | undefined;
         const currentLocale = this._dateTimeFormatService.currentLocale();
-        if (sd !== lastStartDate || currentLocale !== lastLocale || !cachedOptions) {
+        const textLocale = this._dateTimeFormatService.textLocale();
+        const localeKey = `${currentLocale}|${textLocale}`;
+        if (sd !== lastStartDate || localeKey !== lastLocaleKey || !cachedOptions) {
           lastStartDate = sd;
-          lastLocale = currentLocale;
+          lastLocaleKey = localeKey;
           const refDate = sd ? dateStrToUtcDate(sd) : this._getReferenceDate();
           cachedOptions = buildOptions(refDate);
         }
@@ -463,12 +489,23 @@ export class DialogEditTaskRepeatCfgComponent {
       );
       this.close();
     } else {
-      this._taskRepeatCfgService.addTaskRepeatCfgToTask(
+      // Seed skipOverdue from the FINAL schedule (the initial default assumed
+      // Daily; the user may have switched to e.g. Monthly). Skip this only when
+      // the user explicitly toggled the Advanced checkbox, so an opt-in/out is
+      // honoured. For any new non-Daily config whose Advanced panel is opened
+      // but left untouched, the checkbox may visibly show the seeded ON while we
+      // persist the safe re-derived value — an accepted, conservative display
+      // gap in a rarely-opened panel (never persists the wrong value).
+      const skipOverdueTouched = this.formGroup2().get('skipOverdue')?.dirty ?? false;
+      const newRepeatCfg = skipOverdueTouched
+        ? finalRepeatCfg
+        : { ...finalRepeatCfg, skipOverdue: getDefaultSkipOverdue(finalRepeatCfg) };
+      const createdRepeatCfgId = this._taskRepeatCfgService.addTaskRepeatCfgToTask(
         (this._data.task as Task).id,
         (this._data.task as Task).projectId || null,
-        finalRepeatCfg,
+        newRepeatCfg,
       );
-      this.close();
+      this.close(createdRepeatCfgId);
     }
   }
 
@@ -499,9 +536,12 @@ export class DialogEditTaskRepeatCfgComponent {
 
   remove(): void {
     const currentRepeatCfg = this.repeatCfg();
-    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(
-      exists((currentRepeatCfg as TaskRepeatCfg).id),
-    );
+    const repeatCfgId = exists((currentRepeatCfg as TaskRepeatCfg).id);
+    if (this._data.isRemoveConfirmationRequired !== false) {
+      this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(repeatCfgId);
+    } else {
+      this._taskRepeatCfgService.deleteTaskRepeatCfg(repeatCfgId);
+    }
     this.close();
   }
 
@@ -512,13 +552,16 @@ export class DialogEditTaskRepeatCfgComponent {
 
     const currentRepeatCfg = this.repeatCfg() as TaskRepeatCfg;
     const targetDate = this._data.targetDate;
+    const confirmationDate = isDBDateStr(targetDate)
+      ? dateStrToUtcDate(targetDate)
+      : new Date(targetDate);
 
     this._matDialog
       .open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
           message: this._translateService.instant(T.F.TASK_REPEAT.D_SKIP_INSTANCE.MSG, {
-            date: new Date(targetDate).toLocaleDateString(
+            date: confirmationDate.toLocaleDateString(
               this._dateTimeFormatService.currentLocale(),
             ),
           }),
@@ -537,8 +580,8 @@ export class DialogEditTaskRepeatCfgComponent {
       });
   }
 
-  close(): void {
-    this._matDialogRef.close();
+  close(createdRepeatCfgId?: string): void {
+    this._matDialogRef.close(createdRepeatCfgId);
   }
 
   addTag(id: string): void {

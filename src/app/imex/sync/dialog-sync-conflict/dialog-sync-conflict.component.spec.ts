@@ -12,10 +12,14 @@ const buildConflictData = (overrides: {
   localVectorClock?: VectorClock;
   remoteVectorClock?: VectorClock;
   lastSyncedVectorClock?: VectorClock | null;
+  localUnsyncedOpsCount?: number;
+  remoteLastUpdate?: number | null;
 }): ConflictData => ({
   reason: ConflictReason.NoLastSync,
+  localUnsyncedOpsCount: overrides.localUnsyncedOpsCount,
   remote: {
-    lastUpdate: 1000,
+    lastUpdate:
+      overrides.remoteLastUpdate === undefined ? 1000 : overrides.remoteLastUpdate,
     lastUpdateAction: 'Remote data',
     revMap: {},
     crossModelVersion: 1,
@@ -61,6 +65,23 @@ describe('DialogSyncConflictComponent', () => {
     }).compileComponents();
   });
 
+  describe('timestamp highlighting', () => {
+    it('does not present an unknown remote timestamp as the newest write', () => {
+      const component = createComponent(buildConflictData({ remoteLastUpdate: null }));
+
+      expect(component.isHighlightRemote).toBe(false);
+      expect(component.isHighlightLocal).toBe(false);
+    });
+
+    it('does not recommend either side when timestamps are equal', () => {
+      const data = buildConflictData({ remoteLastUpdate: 2000 });
+      const component = createComponent(data);
+
+      expect(component.isHighlightRemote).toBeFalse();
+      expect(component.isHighlightLocal).toBeFalse();
+    });
+  });
+
   describe('getChangeCount()', () => {
     it('(a) returns correct per-client delta when lastSyncedVectorClock is present', () => {
       const component = createComponent(
@@ -89,6 +110,67 @@ describe('DialogSyncConflictComponent', () => {
       // Bug SPAP-7: previously summed the whole clock (3000 / 1400). Must be null now.
       expect(component.localChangeCount).toBeNull();
       expect(component.remoteChangeCount).toBeNull();
+      expect(component.isHighlightLocalChanges).toBeFalse();
+      expect(component.isHighlightRemoteChanges).toBeFalse();
+    });
+
+    it('does not recommend either side when known change counts are equal', () => {
+      const component = createComponent(
+        buildConflictData({
+          localVectorClock: { clientA: 10, clientB: 5 },
+          remoteVectorClock: { clientA: 3, clientB: 12 },
+          lastSyncedVectorClock: { clientA: 3, clientB: 5 },
+        }),
+      );
+
+      expect(component.localChangeCount).toBe(7);
+      expect(component.remoteChangeCount).toBe(7);
+      expect(component.isHighlightLocalChanges).toBeFalse();
+      expect(component.isHighlightRemoteChanges).toBeFalse();
+    });
+
+    it('shows the exact pending-op count when the clock delta under-counts (compaction fold)', () => {
+      // Compaction folded the unsynced ops into the last-synced clock, so the
+      // per-client delta computes 0 even though 3 ops are known to be pending.
+      // The measured count is what USE_REMOTE would discard — show it.
+      const component = createComponent(
+        buildConflictData({
+          localVectorClock: { clientA: 5 },
+          remoteVectorClock: { clientA: 5, clientB: 2 },
+          lastSyncedVectorClock: { clientA: 5 },
+          localUnsyncedOpsCount: 3,
+        }),
+      );
+
+      expect(component.localChangeCount).toBe(3);
+      // The remote count still comes from the clock delta.
+      expect(component.remoteChangeCount).toBe(2);
+    });
+
+    it('prefers the measured pending-op count over the clock delta whenever provided', () => {
+      const component = createComponent(
+        buildConflictData({
+          localVectorClock: { clientA: 10 },
+          remoteVectorClock: { clientA: 3 },
+          lastSyncedVectorClock: { clientA: 3 },
+          localUnsyncedOpsCount: 3,
+        }),
+      );
+
+      // delta = 7, but 3 is the exact figure for "what USE_REMOTE discards".
+      expect(component.localChangeCount).toBe(3);
+    });
+
+    it('falls back to the clock delta when no pending-op count is provided', () => {
+      const component = createComponent(
+        buildConflictData({
+          localVectorClock: { clientA: 10 },
+          remoteVectorClock: { clientA: 3 },
+          lastSyncedVectorClock: { clientA: 3 },
+        }),
+      );
+
+      expect(component.localChangeCount).toBe(7);
     });
 
     it('returns null when vector clocks are entirely absent', () => {
@@ -149,6 +231,33 @@ describe('DialogSyncConflictComponent', () => {
         component as unknown as { getConfirmationMessage(r: string): string }
       ).getConfirmationMessage('USE_REMOTE');
       expect(msg).toContain(T.F.SYNC.D_CONFLICT.OVERWRITE_WARNING_UNKNOWN);
+    });
+
+    it('confirms USE_REMOTE from the exact pending count when the clock delta reads 0', () => {
+      // Compaction folded 25 unsynced ops into the baseline clock: the delta
+      // computed local=0, remote=0 and shouldConfirmOverwrite('USE_REMOTE')
+      // returned false — no secondary confirmation despite 25 real unsynced
+      // local changes about to be discarded. The measured count restores the
+      // designed >= 20-difference confirmation.
+      const component = createComponent(
+        buildConflictData({
+          localVectorClock: { clientA: 5 },
+          remoteVectorClock: { clientA: 5 },
+          lastSyncedVectorClock: { clientA: 5 },
+          localUnsyncedOpsCount: 25,
+        }),
+      );
+
+      expect(component.localChangeCount).toBe(25);
+      const typed = component as unknown as {
+        shouldConfirmOverwrite(r: string): boolean;
+        getConfirmationMessage(r: string): string;
+      };
+      expect(typed.shouldConfirmOverwrite('USE_REMOTE')).toBe(true);
+      // The counted (not count-free) warning is used — the figure is exact.
+      expect(typed.getConfirmationMessage('USE_REMOTE')).toContain(
+        T.F.SYNC.D_CONFLICT.OVERWRITE_WARNING,
+      );
     });
   });
 });

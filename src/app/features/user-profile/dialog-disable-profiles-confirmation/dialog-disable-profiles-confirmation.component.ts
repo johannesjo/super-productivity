@@ -67,11 +67,13 @@ export interface DisableProfilesDialogData {
         </ol>
       </div>
 
-      <p class="note">
-        <mat-icon>info</mat-icon>
-        <strong>Note:</strong> No data will be deleted. You can re-enable this feature at
-        any time.
-      </p>
+      <div class="note callout callout--info">
+        <mat-icon aria-hidden="true">info</mat-icon>
+        <p>
+          <strong>Note:</strong> No data will be deleted. You can re-enable this feature
+          at any time.
+        </p>
+      </div>
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
@@ -96,7 +98,7 @@ export interface DisableProfilesDialogData {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #f57c00;
+        color: var(--color-warning);
       }
 
       .info-section,
@@ -104,7 +106,7 @@ export interface DisableProfilesDialogData {
       .recovery-info {
         margin: 16px 0;
         padding: 12px;
-        background: rgba(0, 0, 0, 0.05);
+        background: var(--state-hover);
         border-radius: 4px;
       }
 
@@ -125,29 +127,18 @@ export interface DisableProfilesDialogData {
       }
 
       code {
-        background: rgba(0, 0, 0, 0.1);
+        /* One step up the state ladder from the --state-hover panel it sits in,
+           so the chip stays legible against its own container. */
+        background: var(--state-pressed);
         padding: 2px 6px;
         border-radius: 3px;
-        font-family: 'Courier New', monospace;
         font-size: 13px;
       }
 
+      /* Box styling comes from the global .callout (src/styles/components/_callout.scss);
+         per convention the consumer only sets outer margin. */
       .note {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        margin-top: 16px;
-        padding: 12px;
-        background: rgba(33, 150, 243, 0.1);
-        border-radius: 4px;
-        border-left: 4px solid #2196f3;
-      }
-
-      .note mat-icon {
-        color: #2196f3;
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
+        margin-top: var(--s2);
       }
 
       mat-dialog-actions {

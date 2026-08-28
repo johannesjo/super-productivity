@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { CURRENT_SCHEMA_VERSION } from '../../persistence/schema-migration.service';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
 import { VectorClockService } from '../../sync/vector-clock.service';
 import {
@@ -69,7 +70,7 @@ describe('Vector Clock Sync Integration', () => {
         vectorClock: { clientA: 1 },
       });
 
-      await opLogStore.appendWithVectorClockUpdate(op, 'local');
+      await opLogStore.appendWithVectorClockOverwrite(op, 'local');
 
       // Both should be written
       const ops = await opLogStore.getOpsAfterSeq(0);
@@ -86,7 +87,7 @@ describe('Vector Clock Sync Integration', () => {
           entityId: `task-${i}`,
           vectorClock: { clientA: i },
         });
-        await opLogStore.appendWithVectorClockUpdate(op, 'local');
+        await opLogStore.appendWithVectorClockOverwrite(op, 'local');
       }
 
       const ops = await opLogStore.getOpsAfterSeq(0);
@@ -103,7 +104,7 @@ describe('Vector Clock Sync Integration', () => {
         entityId: 'task-1',
         vectorClock: { clientA: 1 },
       });
-      await opLogStore.appendWithVectorClockUpdate(opA, 'local');
+      await opLogStore.appendWithVectorClockOverwrite(opA, 'local');
 
       // Client A receives remote from B and creates new operation
       const opA2 = createTestOperation({
@@ -111,7 +112,7 @@ describe('Vector Clock Sync Integration', () => {
         entityId: 'task-2',
         vectorClock: { clientA: 2, clientB: 3 },
       });
-      await opLogStore.appendWithVectorClockUpdate(opA2, 'local');
+      await opLogStore.appendWithVectorClockOverwrite(opA2, 'local');
 
       const clock = await opLogStore.getVectorClock();
       expect(clock).toEqual({ clientA: 2, clientB: 3 });
@@ -133,6 +134,7 @@ describe('Vector Clock Sync Integration', () => {
       await opLogStore.setVectorClock({ storeClient: 50 });
 
       await opLogStore.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: { snapshotClient: 100 },
@@ -149,6 +151,7 @@ describe('Vector Clock Sync Integration', () => {
     it('should compute from snapshot when vector_clock store is empty', async () => {
       // Only snapshot exists (simulates pre-upgrade state)
       await opLogStore.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: { snapshotClient: 25 },
@@ -162,13 +165,14 @@ describe('Vector Clock Sync Integration', () => {
     it('should merge snapshot + ops when vector_clock store is empty', async () => {
       // Snapshot with initial clock
       await opLogStore.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: { clientA: 10, clientB: 5 },
         compactedAt: Date.now(),
       });
 
-      // Ops after snapshot (using regular append, not appendWithVectorClockUpdate)
+      // Ops after snapshot (using regular append, not appendWithVectorClockOverwrite)
       const op1 = createTestOperation({
         vectorClock: { clientA: 11, clientB: 5 },
       });
@@ -200,7 +204,7 @@ describe('Vector Clock Sync Integration', () => {
         clientId: 'remoteClient',
         vectorClock: { remoteClient: 50 },
       });
-      await opLogStore.appendWithVectorClockUpdate(remoteOp, 'remote');
+      await opLogStore.appendWithVectorClockOverwrite(remoteOp, 'remote');
 
       // Local clock should be unchanged
       const clock = await opLogStore.getVectorClock();
@@ -214,7 +218,7 @@ describe('Vector Clock Sync Integration', () => {
         entityId: 'task-local',
         vectorClock: { localClient: 1 },
       });
-      await opLogStore.appendWithVectorClockUpdate(localOp, 'local');
+      await opLogStore.appendWithVectorClockOverwrite(localOp, 'local');
 
       // Remote ops should be stored but not affect clock
       for (let i = 1; i <= 3; i++) {
@@ -223,7 +227,7 @@ describe('Vector Clock Sync Integration', () => {
           entityId: `task-remote-${i}`,
           vectorClock: { remoteClient: i, localClient: 1 },
         });
-        await opLogStore.appendWithVectorClockUpdate(remoteOp, 'remote');
+        await opLogStore.appendWithVectorClockOverwrite(remoteOp, 'remote');
       }
 
       // All ops should be stored
@@ -280,7 +284,7 @@ describe('Vector Clock Sync Integration', () => {
           entityId: `task-${i}`,
           vectorClock: { localClient: i },
         });
-        await opLogStore.appendWithVectorClockUpdate(op, 'local');
+        await opLogStore.appendWithVectorClockOverwrite(op, 'local');
       }
 
       // 2. Read clock for sync (simulates _syncVectorClockToPfapi reading)
@@ -323,7 +327,7 @@ describe('Vector Clock Sync Integration', () => {
         clientId: 'localClient',
         vectorClock: { remoteClient: 10, localClient: 1 },
       });
-      await opLogStore.appendWithVectorClockUpdate(localOp, 'local');
+      await opLogStore.appendWithVectorClockOverwrite(localOp, 'local');
 
       // 3. Clock should now include both clients
       const clock = await opLogStore.getVectorClock();

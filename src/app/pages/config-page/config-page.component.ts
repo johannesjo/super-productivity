@@ -4,10 +4,11 @@ import {
   Component,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { TaskWidgetSettingsService } from '../../features/config/task-widget-settings.service';
 import { FocusModeLocalSettingsService } from '../../features/config/focus-mode-local-settings.service';
@@ -25,6 +26,7 @@ import {
 } from '../../features/config/global-config-form-config.const';
 import {
   ConfigFormConfig,
+  GenericConfigFormSection,
   GlobalConfigFormSectionKey,
   GlobalConfigSectionKey,
   GlobalConfigState,
@@ -66,8 +68,26 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { NgTemplateOutlet } from '@angular/common';
 import { LocalBackupService } from '../../imex/local-backup/local-backup.service';
+import { FormsModule } from '@angular/forms';
+import {
+  MatFormField,
+  MatLabel,
+  MatPrefix,
+  MatSuffix,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import {
+  searchSettings,
+  SettingsSearchTarget,
+} from '../../features/config/settings-search.util';
+
+/** Kept in sync with `animationDuration` on the settings `mat-tab-group`. */
+const TAB_ANIMATION_DURATION_MS = 200;
 
 @Component({
   selector: 'config-page',
@@ -86,10 +106,23 @@ import { LocalBackupService } from '../../imex/local-backup/local-backup.service
     MatIcon,
     MatTooltip,
     MatButton,
+    MatIconButton,
+    RouterLink,
+    NgTemplateOutlet,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatPrefix,
+    MatSuffix,
+    MatAutocomplete,
+    MatAutocompleteTrigger,
+    MatOption,
   ],
 })
 export class ConfigPageComponent implements OnInit {
   private readonly _cd = inject(ChangeDetectorRef);
+  private readonly _elRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly _route = inject(ActivatedRoute);
   private readonly _providerManager = inject(SyncProviderManager);
   private readonly _syncWrapperService = inject(SyncWrapperService);
@@ -112,6 +145,10 @@ export class ConfigPageComponent implements OnInit {
 
   selectedTabIndex = 0;
   expandedSection: string | null = null;
+
+  searchQuery = '';
+  /** Flat, cross-tab search hits in tab order. Empty while not searching. */
+  searchResults: SettingsSearchTarget[] = [];
 
   // @todo - find better names for tabs configs forms
   // Tab-specific form configurations
@@ -417,6 +454,58 @@ export class ConfigPageComponent implements OnInit {
       },
     });
     return !!(await firstValueFrom(dialogRef.afterClosed()));
+  }
+
+  /**
+   * Recomputes the result list. Done on input rather than in a `computed()`
+   * because the per-tab configs are plain fields reassigned after construction
+   * (plugin shortcuts, the Electron backup path).
+   */
+  onSearchChange(query: unknown): void {
+    // Picking an option makes the autocomplete write the result object back
+    // into the model — ignore it, `goToSearchResult` clears the field anyway.
+    this.searchQuery = typeof query === 'string' ? query : '';
+    // Tab order must match the `mat-tab-group` — the index is what we navigate to.
+    this.searchResults = searchSettings(
+      [
+        { labelKey: T.PS.TABS.GENERAL, sections: this.generalFormCfg },
+        { labelKey: T.PS.TABS.TASKS, sections: this.globalTasksFormCfg },
+        { labelKey: T.PS.TABS.TIME_TRACKING, sections: this.timeTrackingFormCfg },
+        {
+          labelKey: T.PS.TABS.PRODUCTIVITY,
+          sections: this.globalProductivityConfigFormCfg,
+        },
+        { labelKey: T.PS.TABS.PLUGINS, sections: this.pluginsShortcutsFormCfg },
+        { labelKey: T.PS.TABS.SYNC_BACKUP, sections: this.globalImexFormCfg },
+      ],
+      this.searchQuery,
+      (key) => this._translateService.instant(key),
+    );
+  }
+
+  /** Jumps to a hit: right tab, section expanded, scrolled into view. */
+  goToSearchResult(target: SettingsSearchTarget): void {
+    this.onSearchChange('');
+    this.selectedTabIndex = target.tabIndex;
+    this.expandedSection = target.sectionKey ?? null;
+    this._cd.detectChanges();
+    // The tab body swaps in over `animationDuration`, so the element doesn't
+    // exist yet; wait it out before scrolling.
+    // shortcut: a fixed delay, not an animation-done hook. Switch to
+    // `MatTabGroup.animationDone` if the duration ever stops being a constant.
+    setTimeout(() => {
+      this._elRef.nativeElement
+        .querySelector(target.scrollSelector)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, TAB_ANIMATION_DURATION_MS);
+  }
+
+  /** Shared `[isExpanded]` check for the `config-section` repeated across every tab. */
+  isSectionExpanded(section: GenericConfigFormSection): boolean {
+    return (
+      section.key === this.expandedSection ||
+      section.customSection === this.expandedSection
+    );
   }
 
   getGlobalCfgSection(

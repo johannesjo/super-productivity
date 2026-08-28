@@ -13,8 +13,8 @@ area has regressed repeatedly (#8295, then #8508).**
 > painted by a plugin (SystemBars has no color API) — the bars are transparent
 > and the theme color shows through via `NavigationBarPlugin.setWebViewBackgroundColor`
 > (window decor + WebView surface). The #8508 sections below describe the _former_
-> `@capawesome` mechanics and are kept as history. Full rationale + device matrix:
-> [`docs/plans/2026-06-22-android-systembars-migration-corrected.md`](plans/2026-06-22-android-systembars-migration-corrected.md).
+> `@capawesome` mechanics and are kept as history. The migration and device-matrix
+> verification landed in [PR #8543](https://github.com/super-productivity/super-productivity/pull/8543).
 
 > **⚠️ Do NOT inset the WebView for the IME based on an assumption that the
 > system "doesn't resize on Android 15/16."** Real devices (incl. a Pixel-class
@@ -335,6 +335,36 @@ sources race on separate async events, the baseline gets reset to the shrunk
 `innerHeight` mid-animation, the double-count guard collapses, and the bar is
 mispositioned. It was reverted. Fix the inset at the source, and **only after
 detecting** whether the system already resized.
+
+## SystemBars inset-source risks (unconfirmed on device)
+
+Carried over from the 2026-06 SystemBars migration review. These are device-matrix
+items to **check**, not to blind-fix — a blind fix risks re-creating #8508.
+
+1. **API >= 35 + WebView < 140 double-count (narrow band).** In SystemBars'
+   non-passthrough branch (API >= 35) it `setPadding`s the WebView parent _and_
+   injects `--safe-area-inset-*`. If the web also pads via `var(--safe-area-*)`,
+   that double-counts. The common API 36 case is WebView >= 140 = passthrough (no
+   static parent padding, so no double-count), making this the stale-WebView
+   corner. This is what `--bottom-nav-safe-area` in `src/styles/_css-variables.scss`
+   halves the inset for. Verify on an API 35/36 device with an old WebView; if it
+   is real, gate the web padding off on that band rather than removing it globally.
+2. **`env(safe-area-inset-bottom)` vs `var(--safe-area-bottom)` consumers diverge
+   on API >= 35.** Some SCSS reads raw `env()`, other SCSS reads
+   `var(--safe-area-*)`. On API >= 35 SystemBars can zero the passed-through
+   insets while injecting real px into the vars, so the two families disagree.
+   Confirm bottom-nav / add-task-bar spacing on API 35/36; reconcile to one source
+   per band if it is wrong.
+3. **API 30-34 + WebView < 140 IME owner.** The native shim is gated `SDK_INT < 30`
+   deliberately (newer APIs were observed to resize the window for the IME, and
+   insetting on top of that re-creates the #8508 squash). Under SystemBars,
+   WebView < 140 gets no IME padding below API 35. Verify whether the window still
+   resizes on API 30-34: if it does, there is no gap; if it does not, extend the
+   shim to `< 35 && WebView < 140` — but only after confirming on a device.
+4. **CDK overlay / context-menu top position shifts on API >= 35.**
+   `--safe-area-inset-top` resolves to real px there (it was 0 on Android before),
+   so connected overlays clamp below the status bar. Likely more correct; re-test
+   the overlay matrix.
 
 ## Device test matrix (required before merging IME changes)
 

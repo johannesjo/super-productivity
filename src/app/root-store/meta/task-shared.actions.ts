@@ -6,6 +6,30 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { BatchOperation } from '@super-productivity/plugin-api';
 import { PersistentActionMeta } from '../../op-log/core/persistent-action.interface';
 import { OpType } from '../../op-log/core/operation.types';
+import { shouldClearDueTimeForToday } from '../../util/is-today.util';
+
+/**
+ * Payload marker stamped on every new `deleteProject` operation so the LWW
+ * conflict planner can give it delete-wins precedence. Shared with the sync
+ * classifier (`conflict-resolution.service.ts`) so a rename is compiler-checked
+ * on both ends — dropping/renaming it silently would regress to resurrecting an
+ * empty project (see ARCHITECTURE-DECISIONS.md #7).
+ */
+export const PROJECT_DELETE_WINS_MARKER = 'projectDeleteWins';
+
+export interface CalendarAutoImportDismissal {
+  issueProviderId: string;
+  issueId: string;
+}
+
+export const getCalendarAutoImportDismissals = (
+  tasks: readonly Task[],
+): CalendarAutoImportDismissal[] =>
+  tasks.flatMap((task) =>
+    task.issueType === 'ICAL' && task.issueProviderId && task.issueId
+      ? [{ issueProviderId: task.issueProviderId, issueId: task.issueId }]
+      : [],
+  );
 
 /**
  * Shared actions that affect multiple reducers (tasks, projects, tags)
@@ -42,6 +66,9 @@ export const TaskSharedActions = createActionGroup({
       isPlanForToday?: boolean;
       afterTaskId?: string | null;
       isDone?: boolean;
+      today?: string;
+      doneOn?: number;
+      modified?: number;
     }) => ({
       ...taskProps,
       meta: {
@@ -76,24 +103,32 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
-    // Issue metadata for remote issue deletion is passed via
-    // DeletedTaskIssueSidecarService to avoid serializing full Task
-    // objects into the op-log. Only taskIds are persisted.
-    deleteTasks: (taskProps: { taskIds: string[] }) => ({
-      ...taskProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'TASK',
-        entityIds: taskProps.taskIds,
-        opType: OpType.Delete,
-        isBulk: true,
-      } satisfies PersistentActionMeta,
-    }),
+    // Issue metadata for remote issue deletion still travels through
+    // DeletedTaskIssueSidecarService. Task snapshots are persisted separately
+    // so a concurrent winning update can recreate an entity after this delete.
+    deleteTasks: (taskProps: { taskIds: string[]; tasks?: Task[] }) => {
+      const calendarAutoImportDismissals = getCalendarAutoImportDismissals(
+        taskProps.tasks ?? [],
+      );
+      return {
+        ...taskProps,
+        ...(calendarAutoImportDismissals.length > 0 && {
+          calendarAutoImportDismissals,
+        }),
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityIds: taskProps.taskIds,
+          opType: OpType.Delete,
+          isBulk: true,
+        } satisfies PersistentActionMeta,
+      };
+    },
 
     // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
     // Note: Full task payload is required for sync reliability.
     // Remote clients need task data to write to their local archive.
-    // See docs/archive-operation-redesign.md for detailed analysis.
+    // See docs/sync-and-op-log/operation-log-architecture.md for detailed analysis.
     moveToArchive: (taskProps: { tasks: TaskWithSubTasks[] }) => ({
       ...taskProps,
       meta: {
@@ -105,15 +140,53 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
-    restoreTask: (taskProps: { task: Task | TaskWithSubTasks; subTasks: Task[] }) => ({
-      ...taskProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'TASK',
-        entityId: taskProps.task.id,
-        opType: OpType.Update,
-      } satisfies PersistentActionMeta,
-    }),
+    restoreTask: (taskProps: {
+      task: Task | TaskWithSubTasks;
+      subTasks: Task[];
+      restoreToToday?: {
+        today: string;
+        startOfNextDayDiffMs: number;
+      };
+    }) => {
+      const { restoreToToday } = taskProps;
+      // Materialize Today placement into the snapshot fields so a released
+      // conflict converter degrades to visible-but-unordered Today membership
+      // instead of losing the restore. Clearing rules match handlePlanTasksForToday.
+      const shouldClearTime =
+        !!restoreToToday &&
+        shouldClearDueTimeForToday(
+          taskProps.task.dueWithTime,
+          restoreToToday.today,
+          restoreToToday.startOfNextDayDiffMs,
+        );
+      const task = restoreToToday
+        ? {
+            ...taskProps.task,
+            dueDay: restoreToToday.today,
+            remindAt: undefined,
+            ...(shouldClearTime ? { dueWithTime: undefined } : {}),
+          }
+        : taskProps.task;
+      const subTasks = restoreToToday
+        ? taskProps.subTasks.map((subTask) => ({
+            ...subTask,
+            dueDay: undefined,
+            dueWithTime: undefined,
+            remindAt: undefined,
+          }))
+        : taskProps.subTasks;
+      return {
+        ...taskProps,
+        task,
+        subTasks,
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityId: task.id,
+          opType: OpType.Update,
+        } satisfies PersistentActionMeta,
+      };
+    },
 
     // Restore a deleted task (undo delete) - syncs across devices
     restoreDeletedTask: (payload: {
@@ -176,6 +249,7 @@ export const TaskSharedActions = createActionGroup({
       id: string;
       isSkipToast?: boolean;
       isLeaveInToday?: boolean;
+      today?: string;
     }) => ({
       ...taskProps,
       meta: {
@@ -250,15 +324,28 @@ export const TaskSharedActions = createActionGroup({
     }),
 
     // Task Updates
-    updateTask: (taskProps: { task: Update<Task>; isIgnoreShortSyntax?: boolean }) => ({
-      ...taskProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'TASK',
-        entityId: taskProps.task.id as string,
-        opType: OpType.Update,
-      } satisfies PersistentActionMeta,
-    }),
+    updateTask: (taskProps: {
+      task: Update<Task>;
+      isIgnoreShortSyntax?: boolean;
+      projectMoveSubTaskIds?: string[];
+    }) => {
+      const entityId = taskProps.task.id as string;
+
+      return {
+        ...taskProps,
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityId,
+          ...(taskProps.projectMoveSubTaskIds !== undefined && {
+            entityIds: Array.from(
+              new Set([entityId, ...taskProps.projectMoveSubTaskIds]),
+            ),
+          }),
+          opType: OpType.Update,
+        } satisfies PersistentActionMeta,
+      };
+    },
 
     // Bulk task update - creates single operation instead of N operations
     // Critical for repeating task config updates that affect many archived instances
@@ -293,6 +380,7 @@ export const TaskSharedActions = createActionGroup({
       allTaskIds: string[];
     }) => ({
       ...taskProps,
+      [PROJECT_DELETE_WINS_MARKER]: true as const,
       meta: {
         isPersistent: true,
         entityType: 'PROJECT',
@@ -381,6 +469,8 @@ export const TaskSharedActions = createActionGroup({
       projectId: string;
       operations: BatchOperation[];
       createdTaskIds: { [tempId: string]: string };
+      /** Captured before dispatch so replay creates identical task state. */
+      createdTaskTimestamp?: number;
     }) => ({
       ...taskProps,
       meta: {

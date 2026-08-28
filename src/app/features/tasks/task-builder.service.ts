@@ -2,10 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { first, timeout } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  DEFAULT_TASK_REPEAT_CFG,
-  TaskRepeatCfgCopy,
-} from '../task-repeat-cfg/task-repeat-cfg.model';
 import { SnackService } from '../../core/snack/snack.service';
 import { Log } from '../../core/log';
 import { T } from '../../t.const';
@@ -41,10 +37,11 @@ export class TaskBuilderService {
     );
 
     const resolvedRemindOption = payload.remindOption;
-    const isTimedRepeatTask =
-      !!payload.repeatQuickSetting &&
-      payload.repeatQuickSetting !== 'CUSTOM' &&
-      (!!taskData.dueWithTime || !!payload.repeatCfg?.startTime);
+    // Skip scheduleTask for timed repeat tasks — the addRepeatCfgToTaskUpdateTask$
+    // effect already handles scheduling via scheduleTaskWithTime, so calling both
+    // would cause double-scheduling. `repeatCfg.startTime` is set exactly when the
+    // bar carried both a non-DIALOG recurrence and a time.
+    const isTimedRepeatTask = !!payload.repeatCfg?.startTime;
 
     if (taskData.dueWithTime && !isTimedRepeatTask) {
       this._taskService
@@ -60,17 +57,14 @@ export class TaskBuilderService {
         });
     }
 
-    if (payload.repeatQuickSetting) {
-      if (payload.repeatQuickSetting === 'CUSTOM') {
-        this._openRepeatDialogForTask(taskId, resolvedRemindOption);
-      } else if (payload.repeatCfg) {
-        const repeatCfg = buildTaskRepeatCfg(payload.repeatCfg);
-        this._taskRepeatCfgService.addTaskRepeatCfgToTask(
-          taskId,
-          taskData.projectId || null,
-          repeatCfg,
-        );
-      }
+    if (payload.repeat?.type === 'DIALOG') {
+      this._openRepeatDialogForTask(taskId, resolvedRemindOption);
+    } else if (payload.repeatCfg) {
+      this._taskRepeatCfgService.addTaskRepeatCfgToTask(
+        taskId,
+        taskData.projectId || null,
+        payload.repeatCfg,
+      );
     }
 
     return taskId;
@@ -118,19 +112,3 @@ export class TaskBuilderService {
       });
   }
 }
-
-const buildTaskRepeatCfg = (
-  repeatCfg: Partial<TaskRepeatCfgCopy>,
-): Omit<TaskRepeatCfgCopy, 'id'> => ({
-  ...DEFAULT_TASK_REPEAT_CFG,
-  ...repeatCfg,
-  title: repeatCfg.title ?? DEFAULT_TASK_REPEAT_CFG.title,
-  tagIds: repeatCfg.tagIds ?? DEFAULT_TASK_REPEAT_CFG.tagIds,
-  quickSetting: repeatCfg.quickSetting ?? DEFAULT_TASK_REPEAT_CFG.quickSetting,
-  repeatCycle: repeatCfg.repeatCycle ?? DEFAULT_TASK_REPEAT_CFG.repeatCycle,
-  repeatEvery: repeatCfg.repeatEvery ?? DEFAULT_TASK_REPEAT_CFG.repeatEvery,
-  isPaused: repeatCfg.isPaused ?? DEFAULT_TASK_REPEAT_CFG.isPaused,
-  order: repeatCfg.order ?? DEFAULT_TASK_REPEAT_CFG.order,
-  projectId: repeatCfg.projectId ?? DEFAULT_TASK_REPEAT_CFG.projectId,
-  notes: repeatCfg.notes ?? DEFAULT_TASK_REPEAT_CFG.notes,
-});

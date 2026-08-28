@@ -40,6 +40,9 @@ export interface QuickAddHudSnapshot {
   activeWorkContext: QuickAddHudWorkContext | null;
   todayStr: string;
   dateTimeLocale: string;
+  /** Locale for spelled-out weekday/month names; see DateTimeFormatService. */
+  textLocale: string;
+  /** The UI language actually in use, which is not always the configured one. */
   lng: string;
   folderPaths: {
     projects: Record<string, string>;

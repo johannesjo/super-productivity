@@ -1,16 +1,19 @@
 import { Prisma } from '@prisma/client';
 import { Logger } from '../../logger';
-import { computeOpStorageBytes } from '../sync.const';
 import {
-  AcceptedBatchOperation,
-  BatchUploadCandidate,
-  CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
-  ConflictResult,
+  CLIENT_ID_REGEX,
+  computeOpStorageBytes,
+  MAX_CLIENT_ID_LENGTH,
+} from '../sync.const';
+import {
+  CAUSAL_FULL_STATE_OPERATION_WHERE,
   DEFAULT_SYNC_CONFIG,
   DUPLICATE_OP_SELECT,
-  isFullStateOpType,
+  isCausalFullStateOperation,
   limitVectorClockSize,
+  MAX_VECTOR_CLOCK_SIZE,
   Operation,
+  OP_TYPES,
   ProcessOperationResult,
   SyncConfig,
   SYNC_ERROR_CODES,
@@ -19,41 +22,79 @@ import {
 } from '../sync.types';
 import {
   detectConflict,
-  getBatchConflictEntityPairs,
-  getConflictEntityIds,
   getStoredEntityIds,
-  getEntityConflictKey,
   isSameDuplicateOperation,
-  prefetchLatestEntityOpsForBatch,
-  pruneVectorClockForStorage,
-  resolveConflictForExistingOp,
+  isSameIncomingOperation,
 } from '../conflict';
-import { ValidationService } from './validation.service';
+import {
+  ALLOWED_ENTITY_TYPES,
+  ValidationService,
+  type ValidationResult,
+} from './validation.service';
 
 // Observability threshold: log a warning when the full-state op aggregate scan
 // exceeds this duration. Mirrors the threshold used by the legacy snapshot
 // vector-clock aggregate in OperationDownloadService so production logs use a
 // consistent slow-aggregate signal.
 const SLOW_FULL_STATE_AGGREGATE_MS = 5_000;
+const INVALID_AUDIT_FIELD = '[invalid]';
+const SAFE_AUDIT_ID_REGEX = /^[A-Za-z0-9_-]+$/;
+// TIME_TRACKING addresses its ops by a composite `CONTEXT_TYPE:contextId:date` key, so
+// under the plain charset every time-tracking rejection audited as '[invalid]' and the
+// OP_REJECTED logs could not name the entity. The colon stays scoped to that one entity
+// type: PLUGIN_USER_DATA ids are `pluginId:key`, and `key` is plugin-authored text that
+// `assertPluginPersistenceKey` checks for type and length only -- never a charset. Those
+// must keep redacting.
+const SAFE_AUDIT_COMPOSITE_ID_REGEX = /^[A-Za-z0-9_-]+(?::[A-Za-z0-9_-]+){1,2}$/;
 
-const toSafeServerSeq = (value: number | bigint | undefined, userId: number): number => {
-  if (typeof value === 'bigint') {
-    if (value < BigInt(0) || value > BigInt(Number.MAX_SAFE_INTEGER)) {
-      throw new Error(`Unsafe last_seq value returned for user ${userId}`);
-    }
-    const asNumber = Number(value);
-    if (BigInt(asNumber) !== value) {
-      throw new Error(`Precision-losing last_seq value returned for user ${userId}`);
-    }
-    return asNumber;
-  }
+const isSafeAuditIdentifier = (
+  value: unknown,
+  maxLength: number,
+  pattern: RegExp = SAFE_AUDIT_ID_REGEX,
+): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  value.length <= maxLength &&
+  pattern.test(value);
 
-  if (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) {
-    return value;
-  }
+const getSafeAuditOperationMetadata = (
+  op: Operation,
+): { opId: string; entityType: string; entityId?: string; opType: string } => {
+  const rawOp = op as unknown as Record<string, unknown>;
+  const rawOpId = rawOp['id'];
+  const rawEntityType = rawOp['entityType'];
+  const rawEntityId = rawOp['entityId'];
+  const rawOpType = rawOp['opType'];
 
-  throw new Error(`Invalid last_seq value returned for user ${userId}`);
+  return {
+    opId: isSafeAuditIdentifier(rawOpId, 255) ? rawOpId : INVALID_AUDIT_FIELD,
+    entityType:
+      typeof rawEntityType === 'string' && ALLOWED_ENTITY_TYPES.has(rawEntityType)
+        ? rawEntityType
+        : INVALID_AUDIT_FIELD,
+    entityId:
+      rawEntityId === undefined || rawEntityId === null
+        ? undefined
+        : isSafeAuditIdentifier(
+              rawEntityId,
+              255,
+              rawEntityType === 'TIME_TRACKING'
+                ? SAFE_AUDIT_COMPOSITE_ID_REGEX
+                : SAFE_AUDIT_ID_REGEX,
+            )
+          ? rawEntityId
+          : INVALID_AUDIT_FIELD,
+    opType:
+      typeof rawOpType === 'string' && OP_TYPES.includes(rawOpType as Operation['opType'])
+        ? rawOpType
+        : INVALID_AUDIT_FIELD,
+  };
 };
+
+const getSafeAuditClientId = (clientId: string): string =>
+  clientId.length <= MAX_CLIENT_ID_LENGTH && CLIENT_ID_REGEX.test(clientId)
+    ? clientId
+    : INVALID_AUDIT_FIELD;
 
 export class OperationUploadService {
   constructor(
@@ -74,9 +115,8 @@ export class OperationUploadService {
       Logger.audit({
         event: 'TIMESTAMP_CLAMPED',
         userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
+        clientId: getSafeAuditClientId(clientId),
+        ...getSafeAuditOperationMetadata(op),
         originalTimestamp,
         clampedTo: maxAllowedTimestamp,
         driftMs: originalTimestamp - now,
@@ -96,13 +136,10 @@ export class OperationUploadService {
     Logger.audit({
       event: 'OP_REJECTED',
       userId,
-      clientId,
-      opId: op.id,
-      entityType: op.entityType,
-      entityId: op.entityId,
+      clientId: getSafeAuditClientId(clientId),
+      ...getSafeAuditOperationMetadata(op),
       errorCode,
-      reason: error,
-      opType: op.opType,
+      reason: errorCode ?? 'OP_REJECTED',
     });
 
     return {
@@ -158,9 +195,7 @@ export class OperationUploadService {
   /**
    * Aggregate the prior vector clock, merge the full-state op's clock into it
    * (max per client) and persist it as the user's latest-full-state marker.
-   * Shared by the batch and legacy per-op paths so the aggregate-and-merge
-   * semantics cannot drift between them. Costs 2 DB round trips (the aggregate
-   * scan + the userSyncState update).
+   * Costs 2 DB round trips (the aggregate scan + the userSyncState update).
    */
   private async persistMergedFullStateClock(
     tx: Prisma.TransactionClient,
@@ -182,414 +217,67 @@ export class OperationUploadService {
     });
   }
 
-  async processOperationBatch(
-    userId: number,
-    clientId: string,
-    ops: Operation[],
-    now: number,
+  /**
+   * Memoizes the causal full-state author per upload transaction. The answer can
+   * only change when THIS transaction accepts a causal full-state op, which
+   * {@link noteFullStateAuthor} folds back in — so one query per transaction is
+   * enough. Keyed by the `tx` client (a fresh short-lived object per
+   * `$transaction`), so entries cannot outlive the request that created them.
+   */
+  private readonly fullStateAuthorByTx = new WeakMap<
+    Prisma.TransactionClient,
+    { author: string | undefined }
+  >();
+
+  /**
+   * The latest causal full-state author remains a required clock edge for
+   * post-import operations. If pruning drops that low-counter entry, clients
+   * at the boundary classify the operation as concurrent and filter it out.
+   *
+   * Resolved lazily: only an op whose clock actually overflows pays for it.
+   */
+  private async resolveFullStateAuthor(
     tx: Prisma.TransactionClient,
-  ): Promise<{
-    results: UploadResult[];
-    acceptedDeltaBytes: number;
-    unserializableAccepted: number;
-    dbRoundtrips: number;
-  }> {
-    const results = new Array<UploadResult>(ops.length);
-    let dbRoundtrips = 0;
-
-    // Pipeline: validate+clamp -> intra-batch dedupe -> classify existing
-    // duplicates -> conflict-detect -> reserve seq + insert -> full-state
-    // clock. Each stage writes terminal rejections into `results` by index
-    // and passes the surviving candidates forward; the two empty-set guards
-    // short-circuit exactly as the original single function did.
-    const validatedCandidates = this.validateAndClampBatch(
-      userId,
-      clientId,
-      ops,
-      now,
-      results,
-    );
-
-    const uniqueCandidates = this.rejectIntraBatchDuplicates(
-      userId,
-      clientId,
-      validatedCandidates,
-      results,
-    );
-
-    if (uniqueCandidates.length === 0) {
-      return {
-        results: results as UploadResult[],
-        acceptedDeltaBytes: 0,
-        unserializableAccepted: 0,
-        dbRoundtrips,
-      };
-    }
-
-    const classified = await this.classifyExistingDuplicates(
-      userId,
-      clientId,
-      uniqueCandidates,
-      tx,
-      results,
-    );
-    dbRoundtrips += classified.dbRoundtrips;
-    const duplicateFreeCandidates = classified.duplicateFreeCandidates;
-
-    const conflictOutcome = await this.detectBatchConflicts(
-      userId,
-      clientId,
-      duplicateFreeCandidates,
-      tx,
-      results,
-    );
-    dbRoundtrips += conflictOutcome.dbRoundtrips;
-    const { accepted, acceptedDeltaBytes, unserializableAccepted } = conflictOutcome;
-
-    if (accepted.length === 0) {
-      return {
-        results: results as UploadResult[],
-        acceptedDeltaBytes: 0,
-        unserializableAccepted: 0,
-        dbRoundtrips,
-      };
-    }
-
-    dbRoundtrips += await this.reserveSeqAndInsert(userId, clientId, accepted, now, tx);
-
-    dbRoundtrips += await this.persistBatchFullStateClock(userId, accepted, tx);
-
-    for (const acceptedOp of accepted) {
-      results[acceptedOp.resultIndex] = {
-        opId: acceptedOp.op.id,
-        accepted: true,
-        serverSeq: acceptedOp.serverSeq,
-      };
-    }
-
-    return {
-      results: results as UploadResult[],
-      acceptedDeltaBytes,
-      unserializableAccepted,
-      dbRoundtrips,
-    };
-  }
-
-  /**
-   * Stage 1: clamp future timestamps and validate every op in memory (no DB).
-   * Invalid ops get a terminal rejection written into `results` by index.
-   */
-  private validateAndClampBatch(
     userId: number,
-    clientId: string,
-    ops: Operation[],
-    now: number,
-    results: UploadResult[],
-  ): BatchUploadCandidate[] {
-    const validatedCandidates: BatchUploadCandidate[] = [];
-    for (let i = 0; i < ops.length; i++) {
-      const op = ops[i];
-      const originalTimestamp = this.clampFutureTimestamp(userId, clientId, op, now);
-      const validation = this.validationService.validateOp(op, clientId);
-
-      if (!validation.valid) {
-        results[i] = this.rejectedUploadResult(
-          userId,
-          clientId,
-          op,
-          validation.error,
-          validation.errorCode,
-        );
-        continue;
-      }
-
-      validatedCandidates.push({
-        op,
-        resultIndex: i,
-        originalTimestamp,
-        fullStateVectorClock: isFullStateOpType(op.opType)
-          ? { ...op.vectorClock }
-          : undefined,
-        payloadBytes: validation.payloadBytes,
-      });
+  ): Promise<string | undefined> {
+    const memoized = this.fullStateAuthorByTx.get(tx);
+    if (memoized) {
+      return memoized.author;
     }
-    return validatedCandidates;
-  }
-
-  /**
-   * Stage 2: within a single batch, accept the first op for an id and reject
-   * every later op sharing that id as DUPLICATE_OPERATION (by id, not content
-   * — see plan §1a step 2 / the C4 divergence note). Must run before sequence
-   * reservation so a duplicate never consumes a server_seq.
-   */
-  private rejectIntraBatchDuplicates(
-    userId: number,
-    clientId: string,
-    validatedCandidates: BatchUploadCandidate[],
-    results: UploadResult[],
-  ): BatchUploadCandidate[] {
-    const seenOpIds = new Set<string>();
-    const uniqueCandidates: BatchUploadCandidate[] = [];
-    for (const candidate of validatedCandidates) {
-      if (seenOpIds.has(candidate.op.id)) {
-        results[candidate.resultIndex] = this.rejectedUploadResult(
-          userId,
-          clientId,
-          candidate.op,
-          'Duplicate operation ID',
-          SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-        );
-        continue;
-      }
-      seenOpIds.add(candidate.op.id);
-      uniqueCandidates.push(candidate);
-    }
-    return uniqueCandidates;
-  }
-
-  /**
-   * Stage 3: prefetch any already-persisted ops sharing an incoming id (one
-   * query) and classify each as an idempotent retry (DUPLICATE_OPERATION) or
-   * an id collision with different content (INVALID_OP_ID). Survivors are
-   * returned for conflict detection.
-   */
-  private async classifyExistingDuplicates(
-    userId: number,
-    clientId: string,
-    uniqueCandidates: BatchUploadCandidate[],
-    tx: Prisma.TransactionClient,
-    results: UploadResult[],
-  ): Promise<{
-    duplicateFreeCandidates: BatchUploadCandidate[];
-    dbRoundtrips: number;
-  }> {
-    const existingOps = await tx.operation.findMany({
-      where: { id: { in: uniqueCandidates.map((candidate) => candidate.op.id) } },
-      select: DUPLICATE_OP_SELECT,
+    const latestFullStateOp = await tx.operation.findFirst({
+      where: { userId, ...CAUSAL_FULL_STATE_OPERATION_WHERE },
+      orderBy: { serverSeq: 'desc' },
+      select: { clientId: true },
     });
-    const existingOpById = new Map(
-      existingOps.map((existingOp) => [existingOp.id, existingOp]),
-    );
-
-    const duplicateFreeCandidates: BatchUploadCandidate[] = [];
-    for (const candidate of uniqueCandidates) {
-      const existingOp = existingOpById.get(candidate.op.id);
-      if (!existingOp) {
-        duplicateFreeCandidates.push(candidate);
-        continue;
-      }
-
-      if (
-        !isSameDuplicateOperation(
-          existingOp,
-          userId,
-          candidate.op,
-          this.config.maxClockDriftMs,
-          candidate.originalTimestamp,
-        )
-      ) {
-        results[candidate.resultIndex] = this.rejectedUploadResult(
-          userId,
-          clientId,
-          candidate.op,
-          'Operation ID already belongs to a different operation',
-          SYNC_ERROR_CODES.INVALID_OP_ID,
-        );
-        continue;
-      }
-
-      results[candidate.resultIndex] = this.rejectedUploadResult(
-        userId,
-        clientId,
-        candidate.op,
-        'Duplicate operation ID',
-        SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-      );
-    }
-    return { duplicateFreeCandidates, dbRoundtrips: 1 };
+    const author = latestFullStateOp?.clientId;
+    this.fullStateAuthorByTx.set(tx, { author });
+    return author;
   }
 
   /**
-   * Stage 4: prefetch the latest op per touched entity and run conflict
-   * detection in memory. The prefetched map is updated as each non-full-state
-   * op is accepted so intra-batch conflicts on the same entity resolve in
-   * serial order — this must stay co-located with the conflict loop. Accepted
-   * ops are sized for the storage counter here.
+   * Records a causal full-state op accepted earlier in this same transaction, so
+   * later ops protect the new author without re-reading (and without depending on
+   * read-your-writes visibility).
    */
-  private async detectBatchConflicts(
-    userId: number,
-    clientId: string,
-    duplicateFreeCandidates: BatchUploadCandidate[],
-    tx: Prisma.TransactionClient,
-    results: UploadResult[],
-  ): Promise<{
-    accepted: AcceptedBatchOperation[];
-    acceptedDeltaBytes: number;
-    unserializableAccepted: number;
-    dbRoundtrips: number;
-  }> {
-    const entityPairs = getBatchConflictEntityPairs(duplicateFreeCandidates);
-    const dbRoundtrips = Math.ceil(
-      entityPairs.length / CONFLICT_DETECTION_ENTITY_BATCH_SIZE,
-    );
-    const latestOpByEntity = await prefetchLatestEntityOpsForBatch(
-      userId,
-      entityPairs,
-      tx,
-    );
-
-    const accepted: AcceptedBatchOperation[] = [];
-    let acceptedDeltaBytes = 0;
-    let unserializableAccepted = 0;
-
-    for (const candidate of duplicateFreeCandidates) {
-      const { op } = candidate;
-      if (!isFullStateOpType(op.opType)) {
-        let conflict: ConflictResult | null = null;
-        for (const entityId of getConflictEntityIds(op)) {
-          const existingOp = latestOpByEntity.get(
-            getEntityConflictKey(op.entityType, entityId),
-          );
-          if (!existingOp) continue;
-
-          const conflictResult = resolveConflictForExistingOp(op, entityId, existingOp);
-          if (conflictResult.hasConflict) {
-            conflict = conflictResult;
-            break;
-          }
-        }
-
-        if (conflict) {
-          const errorCode =
-            conflict.conflictType === 'concurrent' ||
-            conflict.conflictType === 'equal_different_client'
-              ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
-              : SYNC_ERROR_CODES.CONFLICT_SUPERSEDED;
-          results[candidate.resultIndex] = this.rejectedUploadResult(
-            userId,
-            clientId,
-            op,
-            conflict.reason,
-            errorCode,
-            conflict.existingClock,
-          );
-          continue;
-        }
-      }
-
-      pruneVectorClockForStorage(op);
-      // Reuse the payload byte size measured during validation; the clock is
-      // (re)measured inside computeOpStorageBytes because it was just pruned.
-      const sized = computeOpStorageBytes(op, candidate.payloadBytes);
-      acceptedDeltaBytes += sized.bytes;
-      if (sized.fallback) unserializableAccepted++;
-
-      const acceptedOperation: AcceptedBatchOperation = {
-        ...candidate,
-        serverSeq: 0,
-        storageBytes: sized.bytes,
-      };
-      accepted.push(acceptedOperation);
-
-      if (!isFullStateOpType(op.opType)) {
-        for (const entityId of getConflictEntityIds(op)) {
-          latestOpByEntity.set(getEntityConflictKey(op.entityType, entityId), {
-            entityType: op.entityType,
-            entityId,
-            clientId: op.clientId,
-            vectorClock: op.vectorClock,
-          });
-        }
-      }
-    }
-
-    return { accepted, acceptedDeltaBytes, unserializableAccepted, dbRoundtrips };
+  private noteFullStateAuthor(tx: Prisma.TransactionClient, clientId: string): void {
+    this.fullStateAuthorByTx.set(tx, { author: clientId });
   }
 
   /**
-   * Stage 5: reserve a contiguous server_seq range for the accepted ops in one
-   * INSERT ... ON CONFLICT (which also serializes concurrent batches via the
-   * user_sync_state row lock), assign each op its seq, and bulk-insert. Returns
-   * the DB round trips consumed (2).
+   * Protected clock IDs for storage: the uploader, plus the active causal
+   * full-state author when the clock is actually oversized. Under-limit clocks are
+   * never pruned, so they need no lookup at all.
    */
-  private async reserveSeqAndInsert(
-    userId: number,
-    clientId: string,
-    accepted: AcceptedBatchOperation[],
-    now: number,
+  private async getPruneProtectedIds(
     tx: Prisma.TransactionClient,
-  ): Promise<number> {
-    const syncStateRows = await tx.$queryRaw<Array<{ lastSeq: number | bigint }>>`
-      INSERT INTO user_sync_state (user_id, last_seq)
-      VALUES (${userId}, ${accepted.length})
-      ON CONFLICT (user_id) DO UPDATE
-        SET last_seq = user_sync_state.last_seq + EXCLUDED.last_seq
-      RETURNING last_seq AS "lastSeq"
-    `;
-    const lastSeq = toSafeServerSeq(syncStateRows[0]?.lastSeq, userId);
-    if (lastSeq < accepted.length) {
-      throw new Error(`Failed to reserve server sequence range for user ${userId}`);
-    }
-    const firstSeq = lastSeq - accepted.length + 1;
-    for (let i = 0; i < accepted.length; i++) {
-      accepted[i].serverSeq = firstSeq + i;
-    }
-
-    await tx.operation.createMany({
-      data: accepted.map((candidate) => ({
-        id: candidate.op.id,
-        userId,
-        clientId,
-        serverSeq: candidate.serverSeq,
-        actionType: candidate.op.actionType,
-        opType: candidate.op.opType,
-        entityType: candidate.op.entityType,
-        entityId: candidate.op.entityId ?? null,
-        // Persist the full entity set for multi-entity ops so conflict detection
-        // can match a write to any touched entity across uploads, not just
-        // entityIds[0]; single-entity ops store [] and use the scalar (#8334).
-        entityIds: getStoredEntityIds(candidate.op),
-        payload: candidate.op.payload as Prisma.InputJsonValue,
-        payloadBytes: BigInt(candidate.storageBytes),
-        vectorClock: candidate.op.vectorClock as Prisma.InputJsonValue,
-        schemaVersion: candidate.op.schemaVersion,
-        clientTimestamp: BigInt(candidate.op.timestamp),
-        receivedAt: BigInt(now),
-        isPayloadEncrypted: candidate.op.isPayloadEncrypted ?? false,
-        syncImportReason: candidate.op.syncImportReason ?? null,
-      })),
-    });
-    return 2;
-  }
-
-  /**
-   * Stage 6: if the batch accepted any full-state op, persist the merged
-   * latest-full-state vector clock once for the last such op (last write
-   * wins). Returns the DB round trips consumed (2 if a full-state op was
-   * accepted, else 0).
-   */
-  private async persistBatchFullStateClock(
     userId: number,
-    accepted: AcceptedBatchOperation[],
-    tx: Prisma.TransactionClient,
-  ): Promise<number> {
-    let lastFullStateOp: AcceptedBatchOperation | null = null;
-    for (const acceptedOp of accepted) {
-      if (acceptedOp.fullStateVectorClock) {
-        lastFullStateOp = acceptedOp;
-      }
+    op: Operation,
+  ): Promise<string[]> {
+    if (Object.keys(op.vectorClock).length <= MAX_VECTOR_CLOCK_SIZE) {
+      return [];
     }
-
-    if (lastFullStateOp?.fullStateVectorClock) {
-      await this.persistMergedFullStateClock(
-        tx,
-        userId,
-        lastFullStateOp.serverSeq,
-        lastFullStateOp.fullStateVectorClock,
-      );
-      return 2;
-    }
-    return 0;
+    const author = await this.resolveFullStateAuthor(tx, userId);
+    return author ? [author] : [];
   }
 
   /**
@@ -602,6 +290,9 @@ export class OperationUploadService {
     op: Operation,
     now: number,
     tx: Prisma.TransactionClient,
+    prevalidatedResult?: ValidationResult,
+    wasOccupiedAtRequestStart?: boolean,
+    firstRequestOperation?: { op: Operation; originalTimestamp: number },
   ): Promise<ProcessOperationResult> {
     // Rejected ops have no storage cost; the caller only reads storageBytes when
     // result.accepted is true.
@@ -612,36 +303,52 @@ export class OperationUploadService {
     });
 
     // Clamp future timestamps instead of rejecting them (prevents silent data
-    // loss). Shares the exact clamp + audit with the batch path.
+    // loss).
     const originalTimestamp = this.clampFutureTimestamp(userId, clientId, op, now);
 
     // Validate operation (including clientId match)
-    const validation = this.validationService.validateOp(op, clientId);
-    if (!validation.valid) {
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode: validation.errorCode,
-        reason: validation.error,
-        opType: op.opType,
-      });
-      return reject({
-        opId: op.id,
-        accepted: false,
-        error: validation.error,
-        errorCode: validation.errorCode,
-      });
+    const validation =
+      prevalidatedResult ?? this.validationService.validateOp(op, clientId);
+    if (firstRequestOperation) {
+      const isExactRetry = isSameIncomingOperation(
+        firstRequestOperation.op,
+        op,
+        firstRequestOperation.originalTimestamp,
+        originalTimestamp,
+      );
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          isExactRetry
+            ? 'Duplicate operation ID'
+            : 'Operation ID already belongs to a different operation',
+          isExactRetry
+            ? SYNC_ERROR_CODES.DUPLICATE_OPERATION
+            : SYNC_ERROR_CODES.INVALID_OP_ID,
+        ),
+      );
     }
+
+    if (!validation.valid) {
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          validation.error,
+          validation.errorCode,
+        ),
+      );
+    }
+
     // Capture the *unpruned* vector clock for full-state ops. The op row stores
     // the pruned clock (see `limitVectorClockSize` call below); persisting the
     // unpruned copy on `user_sync_state` lets the download path re-prune at
     // read time with knowledge of `preserveClientIds` (excludeClient, snapshot
     // author), keeping more relevant entries than a pre-pruned snapshot would.
-    const fullStateVectorClock = isFullStateOpType(op.opType)
+    const fullStateVectorClock = isCausalFullStateOperation(op)
       ? { ...op.vectorClock }
       : undefined;
 
@@ -663,42 +370,38 @@ export class OperationUploadService {
           originalTimestamp,
         )
       ) {
-        Logger.audit({
-          event: 'OP_REJECTED',
-          userId,
-          clientId,
-          opId: op.id,
-          entityType: op.entityType,
-          entityId: op.entityId,
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-          reason: 'Operation ID already belongs to a different operation',
-          opType: op.opType,
-        });
-        return reject({
-          opId: op.id,
-          accepted: false,
-          error: 'Operation ID already belongs to a different operation',
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-        });
+        return reject(
+          this.rejectedUploadResult(
+            userId,
+            clientId,
+            op,
+            'Operation ID already belongs to a different operation',
+            SYNC_ERROR_CODES.INVALID_OP_ID,
+          ),
+        );
       }
 
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-        reason: 'Duplicate operation ID (pre-check)',
-        opType: op.opType,
-      });
-      return reject({
-        opId: op.id,
-        accepted: false,
-        error: 'Duplicate operation ID',
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-      });
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          'Duplicate operation ID',
+          SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+        ),
+      );
+    }
+
+    if (wasOccupiedAtRequestStart) {
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          'Operation ID was already occupied before quota enforcement',
+          SYNC_ERROR_CODES.INVALID_OP_ID,
+        ),
+      );
     }
 
     // Check for conflicts with existing operations
@@ -709,24 +412,16 @@ export class OperationUploadService {
         conflict.conflictType === 'equal_different_client'
           ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
           : SYNC_ERROR_CODES.CONFLICT_SUPERSEDED;
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode,
-        reason: conflict.reason,
-        opType: op.opType,
-      });
-      return reject({
-        opId: op.id,
-        accepted: false,
-        error: conflict.reason,
-        errorCode,
-        existingClock: conflict.existingClock,
-      });
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          conflict.reason,
+          errorCode,
+          conflict.existingClock,
+        ),
+      );
     }
 
     // Get next sequence number
@@ -736,41 +431,16 @@ export class OperationUploadService {
     });
     const serverSeq = updatedState.lastSeq;
 
-    // FIX 1.5: Re-check for conflicts after sequence allocation.
-    // This catches races where another request inserted an operation for the same
-    // entity between our initial conflict check and now. Combined with REPEATABLE_READ
-    // isolation, this ensures no undetected concurrent modifications.
-    const finalConflict = await detectConflict(userId, op, tx);
-    if (finalConflict.hasConflict) {
-      await tx.userSyncState.update({
-        where: { userId },
-        data: { lastSeq: { decrement: 1 } },
-      });
-
-      const errorCode =
-        finalConflict.conflictType === 'concurrent' ||
-        finalConflict.conflictType === 'equal_different_client'
-          ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
-          : SYNC_ERROR_CODES.CONFLICT_SUPERSEDED;
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode,
-        reason: `[RACE] ${finalConflict.reason}`,
-        opType: op.opType,
-      });
-      return reject({
-        opId: op.id,
-        accepted: false,
-        error: finalConflict.reason,
-        errorCode,
-        existingClock: finalConflict.existingClock,
-      });
-    }
+    // No post-allocation conflict re-check is needed here. Under RepeatableRead
+    // every statement in this transaction reads one snapshot fixed at its first
+    // statement, and nothing between the conflict check above and this point
+    // writes to `operations`, so a second detectConflict would read the identical
+    // row set. Concurrent uploads are excluded by the lastSeq increment above:
+    // any committed concurrent upload for the same user wrote the same
+    // user_sync_state row, so the increment raises a serialization failure
+    // (40001) before this point is reached. See ARCHITECTURE-DECISIONS.md #4 —
+    // lowering the isolation level below REPEATABLE READ would require
+    // reinstating a post-allocation re-check.
 
     // Prune vector clock AFTER conflict detection but BEFORE storage.
     // Moved from ValidationService to here so that the full (unpruned) clock is used
@@ -780,7 +450,14 @@ export class OperationUploadService {
     // clock ID, causing the comparison to return CONCURRENT instead of GREATER_THAN,
     // leading to an infinite rejection loop.
     const beforeSize = Object.keys(op.vectorClock).length;
-    op.vectorClock = limitVectorClockSize(op.vectorClock, [op.clientId]);
+    // Note this op's own authorship first: a causal full-state op is its own
+    // active author, so the memo answers without a query (and later ops in the
+    // same transaction see it).
+    if (isCausalFullStateOperation(op)) {
+      this.noteFullStateAuthor(tx, op.clientId);
+    }
+    const protectedIds = await this.getPruneProtectedIds(tx, userId, op);
+    op.vectorClock = limitVectorClockSize(op.vectorClock, [op.clientId, ...protectedIds]);
     const afterSize = Object.keys(op.vectorClock).length;
     if (afterSize < beforeSize) {
       Logger.debug(
@@ -817,6 +494,7 @@ export class OperationUploadService {
           receivedAt: BigInt(now),
           isPayloadEncrypted: op.isPayloadEncrypted ?? false,
           syncImportReason: op.syncImportReason ?? null,
+          repairBaseServerSeq: op.repairBaseServerSeq ?? null,
         },
       ],
       skipDuplicates: true,
@@ -851,42 +529,26 @@ export class OperationUploadService {
           originalTimestamp,
         )
       ) {
-        Logger.audit({
-          event: 'OP_REJECTED',
-          userId,
-          clientId,
-          opId: op.id,
-          entityType: op.entityType,
-          entityId: op.entityId,
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-          reason: 'Operation ID already belongs to a different operation',
-          opType: op.opType,
-        });
-        return reject({
-          opId: op.id,
-          accepted: false,
-          error: 'Operation ID already belongs to a different operation',
-          errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
-        });
+        return reject(
+          this.rejectedUploadResult(
+            userId,
+            clientId,
+            op,
+            'Operation ID already belongs to a different operation',
+            SYNC_ERROR_CODES.INVALID_OP_ID,
+          ),
+        );
       }
 
-      Logger.audit({
-        event: 'OP_REJECTED',
-        userId,
-        clientId,
-        opId: op.id,
-        entityType: op.entityType,
-        entityId: op.entityId,
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-        reason: 'Duplicate operation ID (insert race)',
-        opType: op.opType,
-      });
-      return reject({
-        opId: op.id,
-        accepted: false,
-        error: 'Duplicate operation ID',
-        errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-      });
+      return reject(
+        this.rejectedUploadResult(
+          userId,
+          clientId,
+          op,
+          'Duplicate operation ID',
+          SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+        ),
+      );
     }
 
     if (fullStateVectorClock) {

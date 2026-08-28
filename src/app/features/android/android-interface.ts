@@ -13,6 +13,7 @@ export interface AndroidShareData {
 
 export interface AndroidInterface {
   getVersion?(): string;
+  getTextZoom?(): number;
 
   // Launches the native Play In-App Review card (play flavor). No-op on fdroid.
   // The outcome is intentionally opaque (Play policy) — nothing is returned.
@@ -56,6 +57,16 @@ export interface AndroidInterface {
   updateTrackingService?(timeSpentMs: number): void;
   getTrackingElapsed?(): string;
   openAppNotificationSettings?(): void;
+
+  // Silent notification mirroring tracking on ANOTHER device (SuperSync
+  // tracking presence). Strings arrive pre-translated; same id updates in
+  // place. Self-destructs natively when updates stop (dead WS honesty).
+  updateRemoteTrackingNotification?(
+    title: string,
+    text: string,
+    showStopAction: boolean,
+  ): void;
+  cancelRemoteTrackingNotification?(): void;
 
   // Foreground service methods for focus mode timer
   startFocusModeService?(
@@ -126,6 +137,7 @@ export interface AndroidInterface {
   // Notification action callbacks
   onPauseTracking$: Subject<void>;
   onMarkTaskDone$: Subject<void>;
+  onRemoteTrackingStop$: Subject<void>;
 
   // Focus mode notification action callbacks
   onFocusPause$: Subject<void>;
@@ -151,6 +163,9 @@ export interface AndroidInterface {
   // Background sync credential bridge (for WorkManager-based reminder cancellation)
   setSuperSyncCredentials?(baseUrl: string, accessToken: string): void;
   clearSuperSyncCredentials?(): void;
+  // Mirrors the E2EE password so the background worker can decrypt op payloads;
+  // '' clears it. Optional: older APKs don't have it.
+  setSuperSyncEncryptionPassword?(password: string): void;
 }
 
 export type ForegroundServiceStartFailure = {
@@ -173,6 +188,7 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onPause$ = new Subject();
   androidInterface.onPauseTracking$ = new Subject();
   androidInterface.onMarkTaskDone$ = new Subject();
+  androidInterface.onRemoteTrackingStop$ = new Subject();
   androidInterface.onFocusPause$ = new Subject();
   androidInterface.onFocusResume$ = new Subject();
   androidInterface.onFocusSkip$ = new Subject();

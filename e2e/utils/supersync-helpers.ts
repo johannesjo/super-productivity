@@ -3,8 +3,11 @@ import {
   type BrowserContext,
   type Locator,
   type Page,
+  type Request,
+  type Route,
   expect,
 } from '@playwright/test';
+import { gunzipSync } from 'zlib';
 import { SuperSyncPage, type SuperSyncConfig } from '../pages/supersync.page';
 import { WorkViewPage } from '../pages/work-view.page';
 import { waitForAppReady } from './waits';
@@ -14,7 +17,6 @@ import {
   UI_VISIBLE_TIMEOUT,
   UI_VISIBLE_TIMEOUT_LONG,
   UI_SETTLE_SMALL,
-  UI_SETTLE_MEDIUM,
   UI_SETTLE_STANDARD,
   UI_SETTLE_EXTENDED,
   RETRY_BASE_DELAY,
@@ -36,6 +38,37 @@ import {
  */
 export const SUPERSYNC_BASE_URL =
   process.env.SUPERSYNC_E2E_URL || 'http://localhost:1901';
+
+/**
+ * Matches both `/api/sync/ops` uploads and `/api/sync/ops?...` downloads.
+ * Do not add a trailing slash: the production endpoint has none.
+ */
+const SUPERSYNC_OPS_ROUTE = '**/api/sync/ops*';
+
+export const routeSuperSyncOps = async (
+  page: Page,
+  handler: (route: Route) => Promise<void>,
+): Promise<void> => page.route(SUPERSYNC_OPS_ROUTE, handler);
+
+export const unrouteSuperSyncOps = async (page: Page): Promise<void> =>
+  page.unroute(SUPERSYNC_OPS_ROUTE);
+
+/** Parse a SuperSync upload body regardless of whether the browser gzipped it. */
+export const parseSuperSyncRequestBody = <T>(request: Request): T => {
+  try {
+    return request.postDataJSON() as T;
+  } catch {
+    const rawBody = request.postDataBuffer();
+    if (!rawBody) {
+      throw new Error('SuperSync request did not contain a body');
+    }
+    try {
+      return JSON.parse(gunzipSync(rawBody).toString('utf-8')) as T;
+    } catch (error) {
+      throw new Error('Failed to parse SuperSync request body', { cause: error });
+    }
+  }
+};
 
 /**
  * Test user credentials returned from the server.
@@ -224,9 +257,19 @@ export const createSimulatedClient = async (
     viewport: { width: 1920, height: 1080 },
   });
 
+  // Install the devError/beforeunload fallback on EVERY page this context ever
+  // creates, not just the first one: several import specs close the page and
+  // re-open it via `context.newPage()`. On such a listener-less page Playwright
+  // auto-DISMISSES native dialogs, silently answering sync confirmations with
+  // "cancel" (the import dialog then never closes). The strict sync helpers
+  // also deliberately leave beforeunload/devERR dialogs to this fallback and
+  // block the renderer if it is missing.
+  context.on('page', (contextPage) => {
+    installDevErrorDialogHandler(contextPage, `Client ${clientName}`);
+  });
+
   const page = await context.newPage();
   const runtimeErrors = attachPageErrorCollector(page, `Client ${clientName}`);
-  installDevErrorDialogHandler(page, `Client ${clientName}`);
 
   // Skip onboarding, hints, and example tasks before the app boots.
   // This runs before any page JavaScript, so Angular sees the flags immediately.
@@ -693,6 +736,14 @@ export const renameTask = async (
   // Type directly into the textarea via evaluate to avoid focus/detach races
   await textarea.evaluate((el: HTMLTextAreaElement, name: string) => {
     el.focus();
+    // Dispatch focus explicitly rather than trusting el.focus() to emit it.
+    // These tests drive two clients as separate pages and only one page can hold
+    // focus, so on CI the event often never fires. TaskTitleComponent then keeps
+    // _isFocused=false, and its resetToLastExternalValueTrigger resets tmpValue
+    // to the stored title on the next task-object emission — blur therefore
+    // computes wasChanged=false, task.component skips update(), and the rename
+    // is silently dropped without ever becoming an op.
+    el.dispatchEvent(new Event('focus', { bubbles: true }));
     el.value = name;
     el.dispatchEvent(new Event('input', { bubbles: true }));
   }, newName);
@@ -700,7 +751,17 @@ export const renameTask = async (
   await textarea.evaluate((el: HTMLTextAreaElement) => {
     el.dispatchEvent(new Event('blur', { bubbles: true }));
   });
-  await client.page.waitForTimeout(UI_SETTLE_MEDIUM);
+  // Assert against the STORE, not the DOM. task-title renders tmpValue (a
+  // component-local signal) in both its editing and idle branches, so a DOM
+  // check matches as soon as the synthetic input fires and can never tell a
+  // typed title from a committed one. Only the store proves an op was captured
+  // — and an uncaptured rename is invisible until a later sync reverts it.
+  await expect
+    .poll(() => getTaskTitleFromState(client, newName), {
+      timeout: UI_VISIBLE_TIMEOUT,
+      message: `renameTask: "${newName}" never reached the store — the rename was typed but never committed as an op`,
+    })
+    .toBe(newName);
 };
 
 /**
@@ -836,6 +897,73 @@ export const waitForTaskTimeDisplay = async (
  * @param taskName - The task name
  * @returns The persisted timeSpent value in milliseconds, or null if not found
  */
+/**
+ * Read a task's title from the live NgRx store.
+ *
+ * The DOM cannot answer this: task-title renders tmpValue, a component-local
+ * signal, in both its editing and idle branches, so it shows a typed title
+ * whether or not an op was ever captured. Only the store distinguishes them.
+ *
+ * @param client - The simulated E2E client
+ * @param titleSubstring - Substring identifying the task
+ * @returns The stored title, or null when no task matches
+ */
+export const getTaskTitleFromState = async (
+  client: SimulatedE2EClient,
+  titleSubstring: string,
+): Promise<string | null> =>
+  client.page.evaluate(async (name) => {
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null;
+
+    const getTitleFromRootState = (state: Record<string, unknown>): string | null => {
+      const taskState = state.tasks ?? state.task;
+      if (!isRecord(taskState) || !isRecord(taskState.entities)) {
+        return null;
+      }
+      for (const task of Object.values(taskState.entities)) {
+        if (
+          isRecord(task) &&
+          typeof task.title === 'string' &&
+          task.title.includes(name)
+        ) {
+          return task.title;
+        }
+      }
+      return null;
+    };
+
+    type StoreSubscription = { unsubscribe: () => void };
+    type StoreLike = {
+      subscribe: (next: (state: unknown) => void) => StoreSubscription;
+    };
+
+    const helpers = (window as unknown as { __e2eTestHelpers?: { store?: StoreLike } })
+      .__e2eTestHelpers;
+
+    const store = helpers?.store;
+    if (!store) {
+      return null;
+    }
+
+    const liveState = await new Promise<Record<string, unknown> | null>((resolve) => {
+      let isDone = false;
+      const subscriptionRef: { current?: StoreSubscription } = {};
+      const finish = (state: unknown): void => {
+        if (isDone) {
+          return;
+        }
+        isDone = true;
+        window.setTimeout(() => subscriptionRef.current?.unsubscribe());
+        resolve(isRecord(state) ? state : null);
+      };
+      subscriptionRef.current = store.subscribe(finish);
+      window.setTimeout(() => finish(null), 1000);
+    });
+
+    return liveState ? getTitleFromRootState(liveState) : null;
+  }, titleSubstring);
+
 export const getTaskTimeSpentFromState = async (
   client: SimulatedE2EClient,
   taskName: string,
@@ -949,6 +1077,123 @@ export const waitForTaskTimeSpent = async (
     .toBeGreaterThan(0);
 
   return (await getTaskTimeSpentFromState(client, taskName))!;
+};
+
+/**
+ * Poll until a task's persisted timeSpent equals the exact expected value.
+ *
+ * @param client - The simulated E2E client
+ * @param taskName - The task name
+ * @param expectedTimeSpent - The expected timeSpent in milliseconds
+ */
+export const expectExactTaskTime = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+  expectedTimeSpent: number,
+): Promise<void> => {
+  await expect
+    .poll(() => getTaskTimeSpentFromState(client, taskName), {
+      timeout: 30000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(expectedTimeSpent);
+};
+
+/**
+ * Record an exact local time delta through the same two actions used by the
+ * production timer: one updates local state, the other writes the replayable op.
+ *
+ * @param client - The simulated E2E client
+ * @param taskName - The task name to record time on
+ * @param date - The worklog day string (YYYY-MM-DD) to book the time on
+ * @param duration - The time delta in milliseconds
+ */
+export const recordTaskTimeDelta = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+  date: string,
+  duration: number,
+): Promise<void> => {
+  await client.page.evaluate(
+    async ({ name, taskDate, delta }) => {
+      const isRecordInPage = (value: unknown): value is Record<string, unknown> =>
+        typeof value === 'object' && value !== null;
+
+      type StoreSubscription = { unsubscribe: () => void };
+      type StoreLike = {
+        subscribe: (next: (state: unknown) => void) => StoreSubscription;
+        dispatch: (action: unknown) => void;
+      };
+
+      const store = (
+        window as unknown as {
+          __e2eTestHelpers?: { store?: StoreLike };
+        }
+      ).__e2eTestHelpers?.store;
+
+      if (!store) {
+        throw new Error('E2E store helper is unavailable');
+      }
+
+      const rootState = await new Promise<Record<string, unknown>>((resolve, reject) => {
+        const subscriptionRef: { current?: StoreSubscription } = {};
+        let isDone = false;
+        const timeoutId = window.setTimeout(() => {
+          if (!isDone) {
+            isDone = true;
+            subscriptionRef.current?.unsubscribe();
+            reject(new Error('Timed out reading the NgRx state'));
+          }
+        }, 1000);
+
+        subscriptionRef.current = store.subscribe((state) => {
+          if (isDone || !isRecordInPage(state)) {
+            return;
+          }
+          isDone = true;
+          window.clearTimeout(timeoutId);
+          window.setTimeout(() => subscriptionRef.current?.unsubscribe());
+          resolve(state);
+        });
+      });
+
+      const taskState = rootState.tasks ?? rootState.task;
+      if (!isRecordInPage(taskState) || !isRecordInPage(taskState.entities)) {
+        throw new Error('Task state is unavailable');
+      }
+
+      const task = Object.values(taskState.entities).find(
+        (value) =>
+          isRecordInPage(value) &&
+          typeof value.title === 'string' &&
+          value.title.includes(name),
+      );
+      if (!isRecordInPage(task) || typeof task.id !== 'string') {
+        throw new Error(`Task not found: ${name}`);
+      }
+
+      store.dispatch({
+        type: '[TimeTracking] Add time spent',
+        task,
+        date: taskDate,
+        duration: delta,
+        isFromTrackingReminder: false,
+      });
+      store.dispatch({
+        type: '[TimeTracking] Sync time spent',
+        taskId: task.id,
+        date: taskDate,
+        duration: delta,
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityId: task.id,
+          opType: 'UPD',
+        },
+      });
+    },
+    { name: taskName, taskDate: date, delta: duration },
+  );
 };
 
 /**
@@ -1087,18 +1332,29 @@ export const markTaskDoneByKey = async (
  * @param client - The simulated E2E client
  */
 export const archiveDoneTasks = async (client: SimulatedE2EClient): Promise<void> => {
-  // Click the "Finish Day" button to go to Daily Summary.
-  // The button is a routerLink inside an @if (hasDoneTasks()) / @else swap, so
-  // marking a task done re-creates the element; a single click can land in the
-  // window before Angular wires up the routerLink and silently no-ops (30s hang).
-  // Racing waitForURL against a one-shot click doesn't cover that gap, so re-issue
-  // the click until navigation actually starts.
+  // Click the "Finish Day" button to go to Daily Summary, re-issuing the click
+  // until navigation actually starts. The button itself no longer swaps on
+  // hasDoneTasks() (fixed in the finish-day-btn template), but it still sits
+  // inside work-view's own @if, so a click can land while Angular re-creates
+  // the element and silently no-op before the routerLink is wired.
   const finishDayBtn = client.page.locator('.e2e-finish-day');
   await finishDayBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
+  let finishDayAttempts = 0;
   await expect(async () => {
-    await finishDayBtn.click();
+    finishDayAttempts++;
+    // Skip the click once we are already navigating: the button is gone by
+    // then, and clicking a missing element would report a click timeout for a
+    // navigation that actually succeeded. Bound it for the same reason.
+    if (!/daily-summary/.test(client.page.url())) {
+      await finishDayBtn.click({ timeout: 2000 });
+    }
     await client.page.waitForURL(/daily-summary/, { timeout: 2000 });
-  }).toPass({ timeout: UI_VISIBLE_TIMEOUT });
+  }).toPass({ timeout: UI_VISIBLE_TIMEOUT_LONG });
+  if (finishDayAttempts > 1) {
+    // Surface the retry: the suite runs with retries: 0 so that non-determinism
+    // stays visible, and a silent in-test retry would defeat that.
+    console.warn(`[archiveDoneTasks] Finish Day took ${finishDayAttempts} attempts`);
+  }
 
   // Click "Save & Go Home" button (has sun icon wb_sunny)
   const saveAndGoHomeBtn = client.page.locator(

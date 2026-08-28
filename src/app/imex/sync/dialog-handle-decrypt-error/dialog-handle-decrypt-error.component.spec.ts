@@ -39,6 +39,18 @@ describe('DialogHandleDecryptErrorComponent', () => {
   });
 
   describe('updatePwAndResync()', () => {
+    it('should do nothing when submitted with an empty password', async () => {
+      // The input has no validators, so the template's formEl.valid gate cannot
+      // stop an empty submit; the code guard must. Without it, an empty submit
+      // persists encryptKey '' with isEncryptionEnabled true.
+      component.passwordVal = '';
+
+      await component.updatePwAndResync();
+
+      expect(mockSyncConfigService.updateEncryptionPassword).not.toHaveBeenCalled();
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
+    });
+
     it('should update password, clear field, and close with isReSync', async () => {
       component.passwordVal = 'new-password';
       mockSyncConfigService.updateEncryptionPassword.and.resolveTo();

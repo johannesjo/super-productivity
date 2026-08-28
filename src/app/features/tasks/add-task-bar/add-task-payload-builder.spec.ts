@@ -73,7 +73,7 @@ describe('buildAddTaskPayload', () => {
         projectId: 'p1',
         tagIds: ['t1'],
         estimate: 15 * 60 * 1000,
-        repeatQuickSetting: 'DAILY',
+        repeat: { type: 'PRESET', quickSetting: 'DAILY' } as const,
       },
       note: '',
       isAddToBacklog: false,
@@ -92,5 +92,77 @@ describe('buildAddTaskPayload', () => {
         defaultEstimate: 15 * 60 * 1000,
       }),
     );
+  });
+
+  it('builds an interval repeat config as a CUSTOM recurrence', () => {
+    const payload = buildAddTaskPayload({
+      title: 'Every other week',
+      state: {
+        ...INITIAL_ADD_TASK_BAR_STATE,
+        projectId: 'p1',
+        repeat: { type: 'INTERVAL', repeatCycle: 'WEEKLY', repeatEvery: 2 },
+      },
+      note: '',
+      isAddToBacklog: false,
+      isAddToBottom: false,
+      todayStr: '2026-06-19',
+      defaultRemindOption: TaskReminderOptionId.AtStart,
+    });
+
+    expect(payload.repeat).toEqual({
+      type: 'INTERVAL',
+      repeatCycle: 'WEEKLY',
+      repeatEvery: 2,
+    });
+    expect(payload.repeatCfg).toEqual(
+      jasmine.objectContaining({
+        quickSetting: 'CUSTOM',
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 2,
+        startDate: '2026-06-19',
+      }),
+    );
+  });
+
+  it('rolls a weekend start day forward for a Monday-to-Friday recurrence', () => {
+    // 2026-06-20 is a Saturday; the recurrence never lands on one, so both the
+    // due day and the config start date have to move to the Monday.
+    const payload = buildAddTaskPayload({
+      title: 'Workdays',
+      state: {
+        ...INITIAL_ADD_TASK_BAR_STATE,
+        projectId: 'p1',
+        date: '2026-06-20',
+        repeat: { type: 'PRESET', quickSetting: 'MONDAY_TO_FRIDAY' } as const,
+      },
+      note: '',
+      isAddToBacklog: false,
+      isAddToBottom: false,
+      todayStr: '2026-06-19',
+      defaultRemindOption: TaskReminderOptionId.AtStart,
+    });
+
+    expect(payload.taskData.dueDay).toBe('2026-06-22');
+    expect(payload.repeatCfg?.startDate).toBe('2026-06-22');
+  });
+
+  it('carries a DIALOG recurrence without building a config for it', () => {
+    const payload = buildAddTaskPayload({
+      title: 'Custom config',
+      state: {
+        ...INITIAL_ADD_TASK_BAR_STATE,
+        projectId: 'p1',
+        repeat: { type: 'DIALOG' },
+      },
+      note: '',
+      isAddToBacklog: false,
+      isAddToBottom: false,
+      todayStr: '2026-06-19',
+      defaultRemindOption: TaskReminderOptionId.AtStart,
+    });
+
+    expect(payload.repeat).toEqual({ type: 'DIALOG' });
+    expect(payload.repeatCfg).toBeUndefined();
+    expect(payload.taskData.dueDay).toBeUndefined();
   });
 });

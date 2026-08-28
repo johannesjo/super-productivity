@@ -36,7 +36,20 @@ import { QuickAddHudDataFacadeService } from './quick-add-hud-data-facade.servic
 
         min-width: 100vw;
         min-height: 100vh;
+        // Transparent until the bar is there to dim *for*: the window is
+        // created ahead of time and only shown on demand, so a scrim painted at
+        // boot would flash across the whole screen.
         background: transparent;
+        transition: background var(--transition-duration-s) ease-out;
+      }
+
+      // A barely-there dim behind the bar. Without it the frameless transparent
+      // window lets the desktop read straight through the bar's own edges, and
+      // the bar looks translucent even though its background is opaque.
+      // A literal colour, not a theme token: the theme variables arrive with
+      // the snapshot, and a scrim that only resolves later is worse than none.
+      :host(.is-fullscreen-shell.is-ready) {
+        background: rgba(0, 0, 0, 0.18);
       }
 
       :host(.is-fullscreen-shell) add-task-bar.global {
@@ -55,6 +68,11 @@ export class QuickAddRootComponent implements OnInit {
   @HostBinding('class.is-fullscreen-shell')
   get isFullscreenShell(): boolean {
     return this._isFullscreenShell;
+  }
+
+  @HostBinding('class.is-ready')
+  get isReady(): boolean {
+    return this.dataFacade.isReady();
   }
 
   ngOnInit(): void {

@@ -23,6 +23,7 @@ describe('QuickAddHudDataFacadeService', () => {
     activeWorkContext: null,
     todayStr: '2024-01-01',
     dateTimeLocale: 'en-US',
+    textLocale: 'en-US',
     lng,
     folderPaths: {
       projects: {},

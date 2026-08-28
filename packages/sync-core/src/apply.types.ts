@@ -1,5 +1,10 @@
 import type { Operation } from './operation.types';
 
+export interface OperationApplyFailure<TOperation extends Operation<string> = Operation> {
+  op: TOperation;
+  error: Error;
+}
+
 /**
  * Result of applying a batch of operations.
  *
@@ -10,9 +15,14 @@ export interface ApplyOperationsResult<TOperation extends Operation<string> = Op
   /** Operations that were successfully applied. */
   appliedOps: TOperation[];
 
+  /** Operations skipped because their host reducer/conversion threw. */
+  reducerFailures?: OperationApplyFailure<TOperation>[];
+
   /**
    * If an error occurred, this contains the failed operation and the error.
-   * Operations after this one in the batch were NOT applied.
+   * The failed op and the successfully reducer-applied operations after it did
+   * NOT complete their archive side effects. Their reducer effects DID commit,
+   * so retry paths must use `skipReducerDispatch` to avoid double-applying them.
    */
   failedOp?: {
     op: TOperation;
@@ -27,4 +37,13 @@ export interface ApplyOperationsOptions {
    * local operations during hydration.
    */
   isLocalHydration?: boolean;
+
+  /**
+   * When true, skip the bulk reducer dispatch and run only the post-dispatch
+   * archive side effects. Used to retry operations whose reducer effects
+   * already committed in an earlier batch (see `failedOp`): re-dispatching on
+   * retry would double-apply additive reducers such as time-tracking deltas
+   * and counter increments.
+   */
+  skipReducerDispatch?: boolean;
 }

@@ -9,6 +9,7 @@
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "pretest": "prisma generate",
     "test": "vitest run",
+    "test:integration:postgres": "vitest run --config vitest.integration.config.ts --maxWorkers=1 tests/integration/registration-races.integration.spec.ts tests/integration/clean-slate-atomicity-sql.integration.spec.ts tests/integration/conflict-detection-sql.integration.spec.ts tests/integration/batch-conflict-plan.integration.spec.ts tests/integration/snapshot-vector-clock-sql.integration.spec.ts tests/integration/repair-causality.integration.spec.ts tests/integration/health-alert-db-probe.integration.spec.ts tests/integration/migrate-deploy-db-timeout.integration.spec.ts tests/integration/migrate-deploy-lock-retry.integration.spec.ts tests/integration/migrate-deploy-orphan-cleanup.integration.spec.ts tests/integration/old-ops-sweep.integration.spec.ts tests/integration/old-ops-probe-plan.integration.spec.ts tests/integration/old-ops-delete-plan.integration.spec.ts tests/integration/state-replacement-guard.integration.spec.ts",
     "docker:build": "./scripts/build-and-push.sh",
     "docker:deploy": "./scripts/deploy.sh",
     "docker:deploy:build": "./scripts/deploy.sh --build",
@@ -30,13 +31,15 @@
     "monitor:all:quick": "node dist/scripts/run-all-monitoring.js --quick",
     "monitor:all:save": "node dist/scripts/run-all-monitoring.js --save",
     "migrate-payload-bytes": "node dist/scripts/migrate-payload-bytes.js",
-    "migrate-payload-bytes:dev": "ts-node scripts/migrate-payload-bytes.ts"
+    "migrate-payload-bytes:dev": "ts-node scripts/migrate-payload-bytes.ts",
+    "dry-run-old-ops-sweep": "node dist/scripts/dry-run-old-ops-sweep.js",
+    "dry-run-old-ops-sweep:dev": "tsx scripts/dry-run-old-ops-sweep.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",
-    "@fastify/static": "^9.1.1",
+    "@fastify/static": "^10.1.2",
     "@fastify/websocket": "^11.2.0",
     "@prisma/client": "5.22.0",
     "@simplewebauthn/server": "^13.2.2",

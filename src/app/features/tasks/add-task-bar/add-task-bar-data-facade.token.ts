@@ -12,6 +12,14 @@ import type { MentionConfig } from '../../../ui/mentions/mention-config';
 export interface AddTaskBarSuggestionResult {
   taskId: string;
   isAddToBottom: boolean;
+  isNewTask: boolean;
+}
+
+export interface AddTaskBarSuggestionParams {
+  planForDay: string | undefined;
+  isAddToBacklog: boolean;
+  isAddToBottom: boolean;
+  isNoDefaults: boolean;
 }
 
 export interface AddTaskBarDataFacade {
@@ -32,6 +40,12 @@ export interface AddTaskBarDataFacade {
   todayStr(): string;
   getLogicalTodayDate(): Date;
   currentLocale(): string;
+  /**
+   * Locale for spelled-out weekday/month names. Differs from `currentLocale()`
+   * under the ISO option, where names follow the UI language instead of the
+   * `sv` sync sentinel (#8987 follow-up).
+   */
+  textLocale(): string;
   formatTime(timestamp: number): string;
   submitTask(payload: AddTaskPayload): Promise<string>;
   createNewTags(tagTitles: string[]): Promise<string[]>;
@@ -45,9 +59,7 @@ export interface AddTaskBarDataFacade {
   ): Observable<AddTaskSuggestion[]>;
   handleSuggestionSelected(
     suggestion: AddTaskSuggestion,
-    planForDay: string | undefined,
-    isAddToBacklog: boolean,
-    isAddToBottom: boolean,
+    params: AddTaskBarSuggestionParams,
   ): Promise<AddTaskBarSuggestionResult | null>;
   onHudOpened(listener: () => void): () => void;
 }

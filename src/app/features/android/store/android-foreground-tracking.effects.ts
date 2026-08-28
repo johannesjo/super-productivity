@@ -19,7 +19,6 @@ import {
   selectIsTaskDataLoaded,
 } from '../../tasks/store/task.selectors';
 import { DroidLog } from '../../../core/log';
-import { DateService } from '../../../core/date/date.service';
 import { Task } from '../../tasks/task.model';
 import { selectTimer } from '../../focus-mode/store/focus-mode.selectors';
 import { combineLatest, firstValueFrom, Subject } from 'rxjs';
@@ -28,7 +27,7 @@ import { HydrationStateService } from '../../../op-log/apply/hydration-state.ser
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { OperationWriteFlushService } from '../../../op-log/sync/operation-write-flush.service';
-import { syncTimeSpent } from '../../time-tracking/store/time-tracking.actions';
+import { CapacitorReminderService } from '../../../core/platform/capacitor-reminder.service';
 
 export type NativeTrackingData = {
   taskId: string;
@@ -174,9 +173,9 @@ export const handleAndroidResume = async (
 export class AndroidForegroundTrackingEffects {
   private _store = inject(Store);
   private _taskService = inject(TaskService);
-  private _dateService = inject(DateService);
   private _hydrationState = inject(HydrationStateService);
   private _snackService = inject(SnackService);
+  private _reminderService = inject(CapacitorReminderService);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _operationWriteFlush = inject(OperationWriteFlushService);
 
@@ -274,6 +273,20 @@ export class AndroidForegroundTrackingEffects {
                 taskId: currentTask.id,
                 timeSpent: currentTask.timeSpent,
               });
+              // The tracking notification is the user's first contact with
+              // notifications on many fresh installs; without this nothing ever
+              // requests POST_NOTIFICATIONS here and the notification is
+              // silently suppressed (#9648). Not awaited — this tap is
+              // synchronous and must not stall the service start — so the
+              // notification posted below is lost when the grant arrives late,
+              // and we re-post on grant.
+              void this._reminderService
+                .requestPermissionsInBackground()
+                .then((isNewlyGranted) => {
+                  if (isNewlyGranted) {
+                    void this._repostTrackingNotificationAfterGrant();
+                  }
+                });
               this._safeNativeCall(
                 () =>
                   androidInterface.startTrackingService?.(
@@ -500,6 +513,34 @@ export class AndroidForegroundTrackingEffects {
       { dispatch: false },
     );
 
+  /**
+   * Re-post the tracking notification after a late POST_NOTIFICATIONS grant.
+   *
+   * `startForeground()` already ran while the permission was denied, so Android
+   * dropped that notification and does not replay it. Only ACTION_UPDATE
+   * re-posts (TrackingForegroundService.updateNotification), and the regular
+   * update path suppresses deltas under 5s (isTimeSpentJumpForNotification), so
+   * a quick tap on Allow would otherwise leave the notification missing for the
+   * whole session. Verified on an API 34 emulator (#9648).
+   *
+   * Reads the CURRENT timeSpent rather than the value captured at start:
+   * updateTimeSpent() re-anchors startTimestamp/accumulatedMs, so pushing the
+   * stale start value would rewind the native counter by the dialog duration.
+   */
+  private async _repostTrackingNotificationAfterGrant(): Promise<void> {
+    const currentTask = await firstValueFrom(this._store.select(selectCurrentTask));
+    if (!currentTask) {
+      return;
+    }
+    DroidLog.log('Re-posting tracking notification after permission grant', {
+      taskId: currentTask.id,
+    });
+    this._safeNativeCall(
+      () => androidInterface.updateTrackingService?.(currentTask.timeSpent || 0),
+      'Failed to re-post tracking notification after permission grant',
+    );
+  }
+
   private _safeNativeCall(fn: () => void, errorMsg: string, showSnackbar = false): void {
     try {
       fn();
@@ -646,16 +687,7 @@ export class AndroidForegroundTrackingEffects {
       }
 
       if (duration > 0) {
-        this._taskService.addTimeSpent(task, duration, this._dateService.todayStr());
-        // Also dispatch syncTimeSpent to capture in operation log
-        // addTimeSpent only updates local state, syncTimeSpent creates the operation
-        this._store.dispatch(
-          syncTimeSpent({
-            taskId: task.id,
-            date: this._dateService.todayStr(),
-            duration,
-          }),
-        );
+        this._taskService.addTimeSpentAndSync(task, duration);
         // Reset the tracking interval to prevent double-counting
         // The native service has the authoritative time, so we reset the app's
         // interval timer to avoid adding the same time again from tick$

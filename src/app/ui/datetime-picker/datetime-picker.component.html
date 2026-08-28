@@ -55,7 +55,10 @@
 }
 
 <div class="form-ctrl-wrapper">
-  <mat-form-field class="time-form-field">
+  <mat-form-field
+    class="time-form-field"
+    subscriptSizing="dynamic"
+  >
     <mat-label>{{ timeLabel() }}</mat-label>
     <mat-icon matPrefix>schedule</mat-icon>
     <input
@@ -66,6 +69,7 @@
       (ngModelChange)="onTimeChange($event)"
       step="60"
       matInput
+      (click)="onTimeInputClick($event)"
       (keydown)="onTimeKeyDown($event)"
     />
     @if (selectedTime()) {
@@ -82,6 +86,7 @@
     <mat-form-field
       [@expandFade]
       class="reminder-form-field"
+      subscriptSizing="dynamic"
     >
       <mat-icon matPrefix>alarm</mat-icon>
       <mat-label>{{ reminderLabel() | translate }}</mat-label>

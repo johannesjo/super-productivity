@@ -15,6 +15,7 @@ import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.servic
 import { TaskService } from '../task.service';
 import { TaskBuilderService } from '../task-builder.service';
 import { SnackService } from '../../../core/snack/snack.service';
+import { Log } from '../../../core/log';
 import { DateService } from '../../../core/date/date.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { MenuTreeService } from '../../menu-tree/menu-tree.service';
@@ -24,6 +25,7 @@ import { truncate } from '../../../util/truncate';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import {
   AddTaskBarDataFacade,
+  AddTaskBarSuggestionParams,
   AddTaskBarSuggestionResult,
 } from './add-task-bar-data-facade.token';
 import { MentionConfigService } from '../mention-config.service';
@@ -85,6 +87,10 @@ export class FullAddTaskBarDataFacadeService implements AddTaskBarDataFacade {
     return this._dateTimeFormatService.currentLocale();
   }
 
+  textLocale(): string {
+    return this._dateTimeFormatService.textLocale();
+  }
+
   formatTime(timestamp: number): string {
     return this._dateTimeFormatService.formatTime(timestamp);
   }
@@ -130,14 +136,19 @@ export class FullAddTaskBarDataFacadeService implements AddTaskBarDataFacade {
 
   async handleSuggestionSelected(
     suggestion: AddTaskSuggestion,
-    planForDay: string | undefined,
-    isAddToBacklog: boolean,
-    isAddToBottom: boolean,
+    {
+      planForDay,
+      isAddToBacklog,
+      isAddToBottom,
+      isNoDefaults,
+    }: AddTaskBarSuggestionParams,
   ): Promise<AddTaskBarSuggestionResult | null> {
     let taskId: string | undefined;
     let didPlanForDay = false;
 
-    if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
+    if (suggestion.taskId && isNoDefaults && !suggestion.isArchivedTask) {
+      taskId = suggestion.taskId;
+    } else if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
       if (planForDay) {
         await this._planTaskForCurrentDay(suggestion.taskId, planForDay, isAddToBottom);
         didPlanForDay = true;
@@ -196,7 +207,9 @@ export class FullAddTaskBarDataFacadeService implements AddTaskBarDataFacade {
       await this._planTaskForCurrentDay(taskId, planForDay, isAddToBottom);
     }
 
-    return taskId ? { taskId, isAddToBottom: false } : null;
+    return taskId
+      ? { taskId, isAddToBottom: false, isNewTask: !suggestion.taskId }
+      : null;
   }
 
   onHudOpened(_listener: () => void): () => void {
@@ -210,6 +223,7 @@ export class FullAddTaskBarDataFacadeService implements AddTaskBarDataFacade {
   ): Promise<void> {
     const task = await firstValueFrom(this._taskService.getByIdOnce$(taskId));
     if (!task) {
+      Log.error('Unable to load task for planning', taskId);
       return;
     }
 

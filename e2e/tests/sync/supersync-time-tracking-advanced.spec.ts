@@ -9,10 +9,131 @@ import {
   stopTimeTracking,
   waitForTaskTimeSpent,
   markTaskDone,
+  recordTaskTimeDelta,
+  expectExactTaskTime,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
-import { expectTaskVisible } from '../../utils/supersync-assertions';
 import { waitForAppReady } from '../../utils/waits';
+
+const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const getTaskTimeEstimateFromState = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+): Promise<number | null> =>
+  client.page.evaluate((name) => {
+    type TaskLike = { title?: string; timeEstimate?: number | null };
+    type StoreState = {
+      tasks?: { entities?: Record<string, TaskLike | undefined> };
+    };
+    type StoreSubscription = { unsubscribe: () => void };
+    type StoreLike = {
+      subscribe: (next: (state: StoreState) => void) => StoreSubscription;
+    };
+
+    const store = (
+      window as unknown as {
+        __e2eTestHelpers?: { store?: StoreLike };
+      }
+    ).__e2eTestHelpers?.store;
+    if (!store) {
+      return null;
+    }
+
+    let latestState: StoreState | undefined;
+    const subscription = store.subscribe((state) => {
+      latestState = state;
+    });
+    subscription.unsubscribe();
+
+    const task = Object.values(latestState?.tasks?.entities ?? {}).find((candidate) =>
+      candidate?.title?.includes(name),
+    );
+    return typeof task?.timeEstimate === 'number' ? task.timeEstimate : null;
+  }, taskName);
+
+const expectExactTaskEstimate = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+  expectedTimeEstimate: number,
+): Promise<void> => {
+  await expect
+    .poll(() => getTaskTimeEstimateFromState(client, taskName), {
+      timeout: 30000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(expectedTimeEstimate);
+};
+
+const getArchivedTaskTimeSpent = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+): Promise<number | null> =>
+  client.page.evaluate(async (name) => {
+    const isRecordInPage = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null;
+
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('SUP_OPS');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+
+    try {
+      for (const storeName of ['archive_young', 'archive_old']) {
+        if (!db.objectStoreNames.contains(storeName)) {
+          continue;
+        }
+
+        const entry = await new Promise<unknown>((resolve, reject) => {
+          const request = db
+            .transaction(storeName, 'readonly')
+            .objectStore(storeName)
+            .get('current');
+          request.onsuccess = () => resolve(request.result as unknown);
+          request.onerror = () => reject(request.error);
+        });
+        if (!isRecordInPage(entry) || !isRecordInPage(entry.data)) {
+          continue;
+        }
+
+        const taskState = entry.data.task;
+        if (!isRecordInPage(taskState) || !isRecordInPage(taskState.entities)) {
+          continue;
+        }
+
+        for (const task of Object.values(taskState.entities)) {
+          if (
+            isRecordInPage(task) &&
+            typeof task.title === 'string' &&
+            task.title.includes(name)
+          ) {
+            return typeof task.timeSpent === 'number' ? task.timeSpent : 0;
+          }
+        }
+      }
+
+      return null;
+    } finally {
+      db.close();
+    }
+  }, taskName);
+
+const expectExactArchivedTaskTime = async (
+  client: SimulatedE2EClient,
+  taskName: string,
+  expectedTimeSpent: number,
+): Promise<void> => {
+  await expect
+    .poll(() => getArchivedTaskTimeSpent(client, taskName), {
+      timeout: 30000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(expectedTimeSpent);
+};
 
 /**
  * SuperSync Time Tracking Advanced E2E Tests
@@ -34,7 +155,7 @@ test.describe('@supersync Time Tracking Advanced Sync', () => {
    * 4. Client B archives via "Finish Day"
    * 5. Client B syncs archive
    * 6. Client A syncs
-   * 7. Both verify time in worklog
+   * 7. Both verify exact archived time; Client A also verifies the worklog entry
    */
   test('Time tracking data persists after archive', async ({
     browser,
@@ -91,6 +212,7 @@ test.describe('@supersync Time Tracking Advanced Sync', () => {
 
       // Verify task exists on B
       await waitForTask(clientB.page, taskName);
+      await expectExactTaskTime(clientB, taskName, trackedTimeMs);
 
       // Archive via Finish Day
       const finishDayBtn = clientB.page.locator('.e2e-finish-day');
@@ -113,7 +235,9 @@ test.describe('@supersync Time Tracking Advanced Sync', () => {
 
       // ============ PHASE 4: Sync Archive ============
       await clientB.sync.syncAndWait();
+      await expectExactArchivedTaskTime(clientB, taskName, trackedTimeMs);
       await clientA.sync.syncAndWait();
+      await expectExactArchivedTaskTime(clientA, taskName, trackedTimeMs);
       console.log('[Archive Time Test] Both synced archive');
 
       // ============ PHASE 5: Verify Time in Worklog ============
@@ -126,7 +250,6 @@ test.describe('@supersync Time Tracking Advanced Sync', () => {
       const weekRow = clientA.page.locator('.week-row').first();
       if (await weekRow.isVisible()) {
         await weekRow.click();
-        await clientA.page.waitForTimeout(500);
       }
 
       // Verify task with time appears in worklog
@@ -168,15 +291,11 @@ test.describe('@supersync Time Tracking Advanced Sync', () => {
       await clientA.sync.setupSuperSync(syncConfig);
 
       const taskName = `LargeTime-${uniqueId}`;
-      // Use t:8h for 8 hour estimate
-      await clientA.workView.addTask(`${taskName} t:8h`);
+      await clientA.workView.addTask(`${taskName} 8h`, false, taskName);
       console.log('[Large Time Test] Client A created task with 8h estimate');
 
       await waitForTask(clientA.page, taskName);
-
-      // Task exists on Client A (estimate is stored but may not be visible in compact view)
-      await expectTaskVisible(clientA, taskName);
-      console.log('[Large Time Test] Task visible on Client A');
+      await expectExactTaskEstimate(clientA, taskName, EIGHT_HOURS_MS);
 
       // ============ PHASE 2: Sync ============
       await clientA.sync.syncAndWait();
@@ -187,110 +306,114 @@ test.describe('@supersync Time Tracking Advanced Sync', () => {
 
       // ============ PHASE 3: Verify on Client B ============
       await waitForTask(clientB.page, taskName);
-
-      await expectTaskVisible(clientB, taskName);
-      console.log('[Large Time Test] Task visible on Client B');
-
-      // Note: Time estimate is stored as task data, UI display varies
-      // The key test is that the task synced successfully
-      console.log('[Large Time Test] Task with time estimate synced successfully');
+      await expectExactTaskEstimate(clientB, taskName, EIGHT_HOURS_MS);
     } finally {
       if (clientA) await closeClient(clientA);
       if (clientB) await closeClient(clientB);
     }
   });
 
-  /**
-   * Test: Concurrent time tracking resolves via LWW
-   *
-   * Actions:
-   * 1. Both clients have same task
-   * 2. Client A tracks 3 seconds, stops, syncs
-   * 3. Client B tracks 5 seconds concurrently (started before A sync), stops, syncs
-   * 4. Verify final time is consistent (LWW - later sync wins)
-   */
-  test('Concurrent time tracking resolves consistently', async ({
+  test('Concurrent task-time deltas survive snapshot hydration and restart', async ({
     browser,
     baseURL,
     testRunId,
   }) => {
+    test.setTimeout(240000);
+
+    const initialTime = 10000;
+    const clientADelta = 3000;
+    const clientBDelta = 5000;
+    const expectedTime = initialTime + clientADelta + clientBDelta;
+    const snapshotPassword = 'e2e-time-snapshot-pw';
+    const taskDate = '2026-07-13';
     const uniqueId = Date.now();
     let clientA: SimulatedE2EClient | null = null;
     let clientB: SimulatedE2EClient | null = null;
+    let clientC: SimulatedE2EClient | null = null;
 
     try {
       const user = await createTestUser(testRunId);
       const syncConfig = getSuperSyncConfig(user);
 
-      // ============ PHASE 1: Setup Both Clients ============
       clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
       await clientA.sync.setupSuperSync(syncConfig);
 
       const taskName = `ConcurrentTime-${uniqueId}`;
       await clientA.workView.addTask(taskName);
-      await clientA.sync.syncAndWait();
+      await waitForTask(clientA.page, taskName);
+      await recordTaskTimeDelta(clientA, taskName, taskDate, initialTime);
+      await expectExactTaskTime(clientA, taskName, initialTime);
+
+      // Password change uses the production clean-slate path: it replaces the
+      // server with a full-state snapshot. The initial time is therefore in the
+      // snapshot, while the two concurrent contributions below remain tail ops.
+      await clientA.sync.changeEncryptionPassword(snapshotPassword);
+      await expectExactTaskTime(clientA, taskName, initialTime);
+      const snapshotSyncConfig = { ...syncConfig, password: snapshotPassword };
 
       clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
-      await clientB.sync.setupSuperSync(syncConfig);
+      await clientB.sync.setupSuperSync(snapshotSyncConfig);
       await clientB.sync.syncAndWait();
 
-      await waitForTask(clientA.page, taskName);
       await waitForTask(clientB.page, taskName);
-      console.log('[Concurrent Time Test] Both clients have task');
+      await expectExactTaskTime(clientB, taskName, initialTime);
 
-      // ============ PHASE 2: Client A Tracks Time ============
-      await startTimeTracking(clientA, taskName);
-      console.log('[Concurrent Time Test] Client A started tracking');
+      // Both clients record against the same base before either sees the other delta.
+      await recordTaskTimeDelta(clientA, taskName, taskDate, clientADelta);
+      await recordTaskTimeDelta(clientB, taskName, taskDate, clientBDelta);
+      await expectExactTaskTime(clientA, taskName, initialTime + clientADelta);
+      await expectExactTaskTime(clientB, taskName, initialTime + clientBDelta);
 
-      await clientA.page.waitForTimeout(3000);
-
-      await stopTimeTracking(clientA, taskName);
-      console.log('[Concurrent Time Test] Client A stopped after 3s');
-
-      // ============ PHASE 3: Client B Tracks Time (Concurrent) ============
-      await startTimeTracking(clientB, taskName);
-      console.log('[Concurrent Time Test] Client B started tracking');
-
-      await clientB.page.waitForTimeout(2000); // Reduced from 5000ms
-
-      await stopTimeTracking(clientB, taskName);
-      console.log('[Concurrent Time Test] Client B stopped after 2s');
-
-      // ============ PHASE 4: Sync Both ============
       await clientA.sync.syncAndWait();
       await clientB.sync.syncAndWait();
-      await clientA.sync.syncAndWait(); // Converge
-      console.log('[Concurrent Time Test] All synced');
+      await clientA.sync.syncAndWait();
+      await clientB.sync.syncAndWait();
+      await expectExactTaskTime(clientA, taskName, expectedTime);
+      await expectExactTaskTime(clientB, taskName, expectedTime);
 
-      // ============ PHASE 5: Verify Consistent State ============
-      // Reload to ensure UI reflects final state (use goto instead of reload for reliability)
-      await clientA.page.goto(clientA.page.url(), {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
-      });
-      await waitForAppReady(clientA.page);
-      await waitForTask(clientA.page, taskName);
+      // C is a fresh database. Requiring the snapshot vector clock proves its
+      // first hydration used the server's latest snapshot boundary plus tail ops.
+      clientC = await createSimulatedClient(browser, baseURL!, 'C', testRunId);
+      const snapshotHydrationResponse = clientC.page.waitForResponse(
+        async (response) => {
+          if (
+            response.request().method() !== 'GET' ||
+            !response.url().includes('/api/sync/ops')
+          ) {
+            return false;
+          }
 
-      await clientB.page.goto(clientB.page.url(), {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
-      });
-      await waitForAppReady(clientB.page);
-      await waitForTask(clientB.page, taskName);
+          try {
+            const responseBody: unknown = await response.json();
+            return isRecord(responseBody) && isRecord(responseBody.snapshotVectorClock);
+          } catch {
+            return false;
+          }
+        },
+        { timeout: 60000 },
+      );
+      await clientC.sync.setupSuperSync(snapshotSyncConfig);
+      await clientC.sync.syncAndWait();
+      await snapshotHydrationResponse;
+      await waitForTask(clientC.page, taskName);
+      await expectExactTaskTime(clientC, taskName, expectedTime);
 
-      const timeA = await waitForTaskTimeSpent(clientA, taskName, 10000);
-      const timeB = await waitForTaskTimeSpent(clientB, taskName, 10000);
+      const clients = [clientA, clientB, clientC];
+      for (const client of clients) {
+        await client.page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+        await waitForAppReady(client.page);
+        await waitForTask(client.page, taskName);
+        await expectExactTaskTime(client, taskName, expectedTime);
+      }
 
-      console.log(`[Concurrent Time Test] Client A final time: ${timeA}ms`);
-      console.log(`[Concurrent Time Test] Client B final time: ${timeB}ms`);
-
-      // Times should match (LWW resolution)
-      expect(timeA).toBe(timeB);
-
-      console.log('[Concurrent Time Test] Time tracking resolved consistently');
+      for (const client of clients) {
+        await client.sync.syncAndWait();
+        await expectExactTaskTime(client, taskName, expectedTime);
+      }
     } finally {
       if (clientA) await closeClient(clientA);
       if (clientB) await closeClient(clientB);
+      if (clientC) await closeClient(clientC);
     }
   });
 });

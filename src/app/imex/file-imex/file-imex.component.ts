@@ -26,6 +26,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AppDataComplete } from '../../op-log/model/model-config';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { IS_NATIVE_PLATFORM } from '../../util/is-native-platform';
 import { ImportEncryptionHandlerService } from '../sync/import-encryption-handler.service';
 import { first } from 'rxjs/operators';
@@ -43,6 +44,9 @@ import { Log } from '../../core/log';
 import { DialogArchiveCompressionComponent } from '../../features/archive/dialog-archive-compression/dialog-archive-compression.component';
 import { DataValidationFailedError } from '../../op-log/core/errors/sync-errors';
 import { alertDialog } from '../../util/native-dialogs';
+import { PluginService } from '../../plugins/plugin.service';
+
+const TODOIST_IMPORT_PLUGIN_ID = 'todoist-import';
 
 @Component({
   selector: 'file-imex',
@@ -55,10 +59,12 @@ export class FileImexComponent implements OnInit {
   private _snackService = inject(SnackService);
   private _router = inject(Router);
   private _backupService = inject(BackupService);
+  private _localDraftService = inject(LocalDraftService);
   private _activatedRoute = inject(ActivatedRoute);
   private _matDialog = inject(MatDialog);
   private _http = inject(HttpClient);
   private _importEncryptionHandler = inject(ImportEncryptionHandlerService);
+  private _pluginService = inject(PluginService);
 
   readonly fileInputRef = viewChild<ElementRef>('fileInput');
   T: typeof T = T;
@@ -233,6 +239,10 @@ export class FileImexComponent implements OnInit {
         true,
       );
 
+      // This profile's notes were just replaced wholesale, so every draft's
+      // baseContent refers to content that no longer exists.
+      this._localDraftService.deleteDraftsForActiveProfile();
+
       // Handle encryption state change if needed (e.g., import has different encryption settings)
       // This ensures server data is wiped and fresh snapshot is uploaded with correct encryption
       const encryptionResult =
@@ -296,5 +306,29 @@ export class FileImexComponent implements OnInit {
       width: '500px',
       maxWidth: '90vw',
     });
+  }
+
+  async openTodoistImport(): Promise<void> {
+    try {
+      if (!this._pluginService.isInitialized()) {
+        await this._pluginService.initializePlugins();
+      }
+      // In-memory activation only (not persisted): the importer is a one-time
+      // tool and should be dormant again after a restart.
+      const instance = await this._pluginService.activatePlugin(
+        TODOIST_IMPORT_PLUGIN_ID,
+        true,
+      );
+      if (!instance) {
+        throw new Error('Plugin activation returned no instance');
+      }
+      await this._router.navigate(['/plugins', TODOIST_IMPORT_PLUGIN_ID, 'index']);
+    } catch (e) {
+      Log.err('Failed to open Todoist importer', e);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.FILE_IMEX.S_ERR_TODOIST_IMPORT_OPEN,
+      });
+    }
   }
 }

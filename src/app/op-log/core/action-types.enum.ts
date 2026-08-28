@@ -76,6 +76,9 @@ export enum ActionType {
   TASK_SHARED_REMOVE_DEADLINE = '[Task Shared] removeDeadline',
   TASK_SHARED_CLEAR_DEADLINE_REMINDER = '[Task Shared] clearDeadlineReminder',
 
+  // Task feature action carrying persisted _hideSubTasksMode (issue #8781)
+  TASK_UPDATE_UI = '[Task] Update Task Ui',
+
   // IssueProvider actions (I)
   ISSUE_PROVIDER_ADD = '[IssueProvider/API] Add IssueProvider',
   ISSUE_PROVIDER_UPDATE = '[IssueProvider/API] Update IssueProvider',
@@ -202,3 +205,12 @@ export enum ActionType {
   // Repair actions (Z)
   REPAIR_AUTO = '[Repair] Auto Repair',
 }
+
+/**
+ * Allowlist for action-type strings that arrive from outside this client.
+ * `actionType` is an unbounded string on the wire (see `SuperSyncOperationSchema`,
+ * and file-based targets validate nothing at all), so anything that echoes a
+ * remote op's action type into a log line or the UI must map non-members to a
+ * fixed placeholder rather than pass them through.
+ */
+export const KNOWN_ACTION_TYPES: ReadonlySet<string> = new Set(Object.values(ActionType));

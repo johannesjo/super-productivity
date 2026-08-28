@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
@@ -51,6 +52,7 @@ import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { TagComponent } from '../../tag/tag/tag.component';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
+import { ShortSyntaxSegment, splitTextByRanges } from '../short-syntax-ranges';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
@@ -61,6 +63,12 @@ import { SelectOptionRowComponent } from '../../../ui/select-option-row/select-o
 import { buildAddTaskPayload } from './add-task-payload-builder';
 import { ADD_TASK_BAR_DATA_FACADE } from './add-task-bar-data-facade.token';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+
+export interface TaskAddEvent {
+  taskId: string;
+  isAddToBottom: boolean;
+  isNewTask: boolean;
+}
 
 @Component({
   selector: 'add-task-bar',
@@ -112,7 +120,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   planForDay = input<string>();
 
   // Outputs
-  afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
+  afterTaskAdd = output<TaskAddEvent>();
   closed = output<void>();
   done = output<void>();
 
@@ -128,15 +136,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isScheduleDialogOpen = signal(false);
   successPlaceholderMsg = signal<string | null>(null);
 
-  inputPlaceholder = computed(() => {
-    const successMsg = this.successPlaceholderMsg();
-    if (successMsg) {
-      return successMsg;
-    }
-    return this.isSearchMode()
+  // Stable accessible name for the input. Kept free of the transient
+  // "task added" confirmation so screen readers keep announcing what the field
+  // is for; the confirmation is surfaced through the visible placeholder only.
+  inputAriaLabel = computed(() =>
+    this.isSearchMode()
       ? this._translateService.instant(T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH)
-      : this._translateService.instant(T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE);
-  });
+      : this._translateService.instant(T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE),
+  );
+
+  inputPlaceholder = computed(
+    () => this.successPlaceholderMsg() ?? this.inputAriaLabel(),
+  );
 
   private _successPlaceholderTimeout: number | undefined;
 
@@ -257,8 +268,59 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   // View children
   inputEl = viewChild<ElementRef<HTMLTextAreaElement>>('inputEl');
   noteEl = viewChild<ElementRef<HTMLTextAreaElement>>('noteEl');
+  highlightEl = viewChild<ElementRef<HTMLElement>>('highlightEl');
   taskAutoCompleteEl = viewChild<MatAutocomplete>('taskAutoCompleteEl');
   actionsComponent = viewChild(AddTaskBarActionsComponent);
+
+  // Segments of the raw input for the highlight overlay behind the textarea.
+  // Ranges are pinned to the text they were parsed from (the parse is async),
+  // so they are only ever applied to that exact text or to the part of a newer
+  // text they cannot have moved in.
+  highlightSegments = computed<ShortSyntaxSegment[]>(() => {
+    const txt = this.stateService.inputTxt();
+    if (!txt || this.isSearchMode()) {
+      return [];
+    }
+    const highlight = this.stateService.syntaxHighlight();
+    if (!highlight || highlight.ranges.length === 0) {
+      return [{ text: txt, type: null }];
+    }
+    if (highlight.forText === txt) {
+      return splitTextByRanges(txt, highlight.ranges);
+    }
+    // The parse is async, so every keystroke renders once with ranges from the
+    // previous text. Dropping them all blanks the highlights for a frame
+    // (visible flicker), so keep the ones the edit cannot have moved: those
+    // that end inside the unchanged common prefix. A highlight is then never
+    // mispositioned, only at most one keystroke stale.
+    let common = 0;
+    const max = Math.min(highlight.forText.length, txt.length);
+    while (common < max && highlight.forText[common] === txt[common]) {
+      common++;
+    }
+    const stillValid = highlight.ranges.filter((r) => r.end <= common);
+    return stillValid.length
+      ? splitTextByRanges(txt, stillValid)
+      : [{ text: txt, type: null }];
+  });
+
+  // The overlay must track the textarea's scroll position (cdkTextareaAutosize
+  // caps growth at 4 rows, after which the field scrolls)
+  syncHighlightScroll(): void {
+    const inputElement = this.inputEl()?.nativeElement;
+    const overlay = this.highlightEl()?.nativeElement;
+    if (inputElement && overlay) {
+      overlay.scrollTop = inputElement.scrollTop;
+    }
+  }
+
+  // Once the field scrolls, the textarea's caret-scroll happens before the
+  // overlay re-renders, so the (scroll)-listener alone would clamp against
+  // still-short overlay content — re-sync after each segments render.
+  private readonly _overlayScrollSyncEffect = afterRenderEffect(() => {
+    this.highlightSegments();
+    this.syncHighlightScroll();
+  });
 
   private _focusTimeout?: number;
   private _autocompleteTimeout?: number;
@@ -453,7 +515,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         }),
       );
 
-      this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
+      this.afterTaskAdd.emit({
+        taskId,
+        isAddToBottom: this.isAddToBottom(),
+        isNewTask: true,
+      });
       this._showSuccessPlaceholder(title);
       this._resetAfterAdd();
     } finally {
@@ -462,13 +528,22 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   onSubmitBtnClick(): void {
-    const isCustomRepeat = this.stateService.state().repeatQuickSetting === 'CUSTOM';
-    if (this.isSubmitVisible()) {
-      void this.addTask();
-    }
-    if (!isCustomRepeat) {
-      this.focusInput();
-    }
+    // Clicking the + button moves focus onto the button, which then vanishes
+    // once the input clears — refocus the input so the next task can be typed
+    // right away. (The Enter-key submit path never loses input focus.)
+    // Skip the refocus for the custom-config entry: addTask() opens the
+    // repeat-config dialog asynchronously, and refocusing would steal focus
+    // from it.
+    const willOpenRepeatDialog = this.stateService.state().repeat?.type === 'DIALOG';
+    void this.addTask().finally(() => {
+      // The submit resolves a few ticks after the click (the HUD's facade
+      // hands it to the main renderer over IPC), so the bar can already be
+      // gone by the time we get here — focusing a destroyed input re-opens
+      // the autocomplete overlay against a torn-down panel.
+      if (!willOpenRepeatDialog && !this._destroyRef.destroyed) {
+        this.focusInput();
+      }
+    });
   }
 
   onTaskSuggestionActivated(suggestion: AddTaskSuggestion | null): void {
@@ -489,17 +564,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     }, 100);
 
     const planForDay = this.planForDay();
-    const result = await this._dataFacade.handleSuggestionSelected(
-      suggestion,
+    const result = await this._dataFacade.handleSuggestionSelected(suggestion, {
       planForDay,
-      this.isAddToBacklog(),
-      this.isAddToBottom(),
-    );
+      isAddToBacklog: this.isAddToBacklog(),
+      isAddToBottom: this.isAddToBottom(),
+      isNoDefaults: this.isNoDefaults(),
+    });
 
     if (result) {
       this.afterTaskAdd.emit({
         taskId: result.taskId,
         isAddToBottom: result.isAddToBottom,
+        isNewTask: result.isNewTask,
       });
     }
 

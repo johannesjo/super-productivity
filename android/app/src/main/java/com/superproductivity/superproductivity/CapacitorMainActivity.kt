@@ -22,6 +22,7 @@ import com.superproductivity.superproductivity.service.BackgroundSyncCredentialS
 import com.superproductivity.superproductivity.service.FocusModeForegroundService
 import com.superproductivity.superproductivity.service.FocusModeNotificationHelper
 import com.superproductivity.superproductivity.service.ForegroundServiceFailure
+import com.superproductivity.superproductivity.service.RemoteTrackingNotificationHelper
 import com.superproductivity.superproductivity.service.SyncReminderScheduler
 import com.superproductivity.superproductivity.service.TrackingForegroundService
 import com.superproductivity.superproductivity.util.printWebViewVersion
@@ -303,22 +304,16 @@ class CapacitorMainActivity : BridgeActivity() {
         } else {
             Log.e("CapacitorMainActivity", "$message - finishing activity", error)
         }
+        // The block screen no longer shows the pre-flight version (it is misleading on
+        // this path), so log it — otherwise a user report carries no trace of it at all.
+        Log.w("CapacitorMainActivity", "WebView init failure preflight: $webViewCompatibility")
         webViewBlocked = true
-        WebViewBlockActivity.present(this, webViewInitFailureResult())
+        WebViewBlockActivity.present(
+            this,
+            WebViewCompatibilityChecker.initFailureResult(webViewCompatibility),
+        )
         finish()
     }
-
-    private fun webViewInitFailureResult(): WebViewCompatibilityChecker.Result =
-        (webViewCompatibility ?: WebViewCompatibilityChecker.Result(
-            status = WebViewCompatibilityChecker.Status.BLOCK,
-            majorVersion = null,
-            providerPackage = null,
-            providerVersionName = null,
-            source = WebViewCompatibilityChecker.VersionSource.INIT_FAILURE,
-        )).copy(
-            status = WebViewCompatibilityChecker.Status.BLOCK,
-            source = WebViewCompatibilityChecker.VersionSource.INIT_FAILURE,
-        )
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -352,7 +347,7 @@ class CapacitorMainActivity : BridgeActivity() {
         // tail. See pushStatusBarOverlapBelowApi30.
         lastStatusBarOverlapCssPx = -1
         pendingShareIntent?.let {
-            Log.d("SP_SHARE", "Flushing pending share intent: $it")
+            Log.d("SP_SHARE", "Flushing pending share intent")
             callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", it.toString())
             pendingShareIntent = null
             ShareIntentQueue.getAndClear(this)
@@ -392,6 +387,12 @@ class CapacitorMainActivity : BridgeActivity() {
                 callJSInterfaceFunctionIfExists("next", "onMarkTaskDone$")
                 return
             }
+            // Stop tracking on ANOTHER device (remote tracking presence notification)
+            RemoteTrackingNotificationHelper.ACTION_REMOTE_STOP -> {
+                Log.d("SP_TRACKING", "Remote stop action received from notification")
+                callJSInterfaceFunctionIfExists("next", "onRemoteTrackingStop$")
+                return
+            }
             // Handle focus mode notification actions
             FocusModeForegroundService.ACTION_PAUSE -> {
                 Log.d("SP_FOCUS", "Pause action received from focus mode notification")
@@ -426,9 +427,13 @@ class CapacitorMainActivity : BridgeActivity() {
                 // "Shared Content" here masks that derivation (issue: blank shared tasks).
                 val sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE) ?: ""
                 val sharedSubject = intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: ""
-                Log.d("SP_SHARE", "Shared text: $sharedText")
-                Log.d("SP_SHARE", "Shared title: $sharedTitle")
-                Log.d("SP_SHARE", "Shared subject: $sharedSubject")
+                // Shape only, never the content: logcat is world-readable to adb and
+                // ends up in bug reports, and this carries whatever the user shared.
+                Log.d(
+                    "SP_SHARE",
+                    "Received share: textLen=${sharedText?.length ?: 0} " +
+                        "hasTitle=${sharedTitle.isNotEmpty()} hasSubject=${sharedSubject.isNotEmpty()}",
+                )
 
                 // Ignore empty/blank shares — they only produce useless blank tasks.
                 if (!sharedText.isNullOrBlank()) {
@@ -443,12 +448,12 @@ class CapacitorMainActivity : BridgeActivity() {
                     ShareIntentQueue.setPending(this, json.toString())
 
                     if (isFrontendReady) {
-                        Log.d("SP_SHARE", "Frontend ready, sending directly: $json")
+                        Log.d("SP_SHARE", "Frontend ready, sending directly (type=$type)")
                         callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", json.toString())
                         pendingShareIntent = null
                         ShareIntentQueue.getAndClear(this)
                     } else {
-                        Log.d("SP_SHARE", "Frontend NOT ready, queueing: $json")
+                        Log.d("SP_SHARE", "Frontend NOT ready, queueing (type=$type)")
                         pendingShareIntent = json
                         Toast.makeText(this, R.string.share_received, Toast.LENGTH_SHORT).show()
                     }
@@ -506,8 +511,7 @@ class CapacitorMainActivity : BridgeActivity() {
      * reverted #8295 fallback). The target (`rect.bottom − webViewTop`) is read
      * from `getWindowVisibleDisplayFrame` (reliable on API 28) and does not
      * depend on the WebView's own height, so it is stable across passes — no
-     * feedback loop. See docs/android-edge-to-edge-keyboard.md and
-     * docs/plans/2026-06-22-android-systembars-migration-corrected.md.
+     * feedback loop. See docs/android-edge-to-edge-keyboard.md.
      *
      * API >= 30 and WebView >= 140 are strict no-ops.
      */

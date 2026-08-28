@@ -63,17 +63,50 @@ export class TaskShortcutService {
     const keys = cfg.keyboard;
     let focusedTaskId: TaskId | null = this._taskFocusService.focusedTaskId();
 
-    // Focus-tracking recovery: a `focusout` can clear focusedTaskId without a
-    // following `focusin` rebinding it (e.g. when focus stays on the task host
-    // after an inline-edit blur, the host's `.focus()` becomes a no-op and no
-    // new focusin fires). If the active element is still inside a <task>,
-    // derive the id from its data-task-id so shortcuts don't silently drop.
-    if (!focusedTaskId) {
-      const active = document.activeElement as HTMLElement | null;
-      const taskEl = active?.closest('task') as HTMLElement | null;
-      const recoveredId = taskEl?.getAttribute('data-task-id');
-      if (recoveredId) {
-        focusedTaskId = recoveredId;
+    // Make the DOM authoritative for task focus (#8851). Two problems this
+    // solves:
+    //  1. Focus-tracking recovery: a `focusout` can clear focusedTaskId without
+    //     a following `focusin` rebinding it (e.g. focus staying on the task
+    //     host after an inline-edit blur, where `.focus()` is a no-op and no new
+    //     focusin fires). If the active element is still inside a <task>, we
+    //     recover the id so shortcuts don't silently drop.
+    //  2. Stale-focus guard: navigating to a view with no live <task> (e.g. the
+    //     Planner overdue list) leaves focusedTaskId pointing at a <task> that
+    //     no longer holds focus. Acting on it would mutate the wrong task. If
+    //     the active element is not inside the <task> matching focusedTaskId,
+    //     drop it.
+    // Only the DOM actively contradicting invalidates focus, so the inline-edit
+    // recovery path above stays intact.
+    const active = document.activeElement as HTMLElement | null;
+    const domFocusedTaskId =
+      (active?.closest('task') as HTMLElement | null)?.getAttribute('data-task-id') ??
+      null;
+    if (domFocusedTaskId) {
+      focusedTaskId = domFocusedTaskId;
+    } else if (focusedTaskId) {
+      focusedTaskId = null;
+    }
+
+    // Schedule for today (Shift+T). This is the one task shortcut wired to work
+    // without a live <task> component, so it also fires from views that render
+    // <planner-task> (the Planner overdue list). When a real <task> is focused
+    // we delegate instead, because that path also keeps keyboard focus sane when
+    // scheduling removes the row from the current list. (#8851)
+    // Neither path changes the task's list position — that stays the context
+    // menu's job, so #8592 keeps holding. (#9563)
+    if (checkKeyCombo(ev, keys.taskScheduleToday)) {
+      if (focusedTaskId) {
+        this._handleTaskShortcut(focusedTaskId, 'scheduleForTodayWithFocus');
+        ev.preventDefault();
+        ev.stopPropagation();
+        return true;
+      }
+      const idBasedTaskId = this._resolveTaskIdFromDom();
+      if (idBasedTaskId) {
+        this._taskService.scheduleForTodayById(idBasedTaskId);
+        ev.preventDefault();
+        ev.stopPropagation();
+        return true;
       }
     }
 
@@ -244,13 +277,6 @@ export class TaskShortcutService {
       return true;
     }
 
-    if (checkKeyCombo(ev, keys.taskScheduleToday)) {
-      this._handleTaskShortcut(focusedTaskId, 'moveToTodayWithFocus');
-      ev.preventDefault();
-      ev.stopPropagation();
-      return true;
-    }
-
     // Navigation shortcuts - only work if context menu is not open
     if (
       !isContextMenuOpen &&
@@ -356,6 +382,18 @@ export class TaskShortcutService {
   }
 
   /**
+   * Resolves a task id straight from the focused element by walking up to the
+   * nearest host carrying `data-task-id`. Generic over the host selector (works
+   * for both `<task>` and `<planner-task>`) so the id-based shortcut path can
+   * act on a task without a live `<task>` component. (#8851)
+   */
+  private _resolveTaskIdFromDom(): TaskId | null {
+    const active = document.activeElement as HTMLElement | null;
+    const host = active?.closest('[data-task-id]') as HTMLElement | null;
+    return host?.getAttribute('data-task-id') ?? null;
+  }
+
+  /**
    * Calls a method on the currently focused task component.
    *
    * @param taskId - The ID of the task (must match lastFocusedTaskComponent;
@@ -407,7 +445,7 @@ export class TaskShortcutService {
 
       const contextMenu: TaskContextMenuComponent | undefined =
         taskComponent.taskContextMenu();
-      return contextMenu?.isShowInner ?? false;
+      return contextMenu?.isOpen() ?? false;
     } catch (error) {
       return false;
     }
@@ -423,16 +461,13 @@ export class TaskShortcutService {
       const contextMenu: TaskContextMenuComponent | undefined =
         taskComponent.taskContextMenu();
 
-      // Close the context menu if it's open
-      if (contextMenu && contextMenu.isShowInner) {
-        // Set isShowInner to false to hide the context menu
-        contextMenu.isShowInner = false;
-
-        // Also trigger onClose on the inner component if available
+      if (contextMenu?.isOpen()) {
         const innerComponent: TaskContextMenuInnerComponent | undefined =
           contextMenu.taskContextMenuInner?.();
-        if (innerComponent && typeof innerComponent.onClose === 'function') {
+        if (innerComponent) {
           innerComponent.onClose();
+        } else {
+          contextMenu.onClose();
         }
       }
     } catch (error) {

@@ -56,7 +56,10 @@ const defineStorePortContract = (
     } => {
       const applyOperationsSpy = jasmine
         .createSpy('applyOperations')
-        .and.resolveTo(result);
+        .and.callFake(async (ops: Operation[], options) => {
+          await options?.onReducersCommitted?.(ops);
+          return result;
+        });
 
       return {
         applier: { applyOperations: applyOperationsSpy },
@@ -97,7 +100,10 @@ const defineStorePortContract = (
         applier,
       });
 
-      expect(applyOperationsSpy).toHaveBeenCalledOnceWith([newOp]);
+      expect(applyOperationsSpy).toHaveBeenCalledOnceWith(
+        [newOp],
+        jasmine.objectContaining({ onReducersCommitted: jasmine.any(Function) }),
+      );
       expect(result.appendedOps).toEqual([newOp]);
       expect(result.skippedCount).toBe(1);
       expect(result.appliedOps).toEqual([newOp]);
@@ -141,7 +147,7 @@ const defineStorePortContract = (
       });
 
       expect(result.failedOp).toEqual({ op: failedOp, error });
-      expect(result.failedOpIds).toEqual([failedOp.id, remainingOp.id]);
+      expect(result.failedOpIds).toEqual([failedOp.id]);
 
       const appliedEntry = await store.getOpById(appliedOp.id);
       const failedEntry = await store.getOpById(failedOp.id);
@@ -149,12 +155,16 @@ const defineStorePortContract = (
       expect(appliedEntry?.applicationStatus).toBe('applied');
       expect(failedEntry?.applicationStatus).toBe('failed');
       expect(failedEntry?.retryCount).toBe(1);
-      expect(remainingEntry?.applicationStatus).toBe('failed');
-      expect(remainingEntry?.retryCount).toBe(1);
+      expect(remainingEntry?.applicationStatus).toBe('archive_pending');
+      expect(remainingEntry?.retryCount).toBeUndefined();
       expect(
         (await store.getFailedRemoteOps()).map((entry) => entry.op.id).sort(),
       ).toEqual([failedOp.id, remainingOp.id].sort());
-      expect(await store.getVectorClock()).toEqual({ clientA: 2 });
+      expect(await store.getVectorClock()).toEqual({
+        clientA: 2,
+        clientB: 4,
+        clientC: 6,
+      });
     });
 
     it('should clear older full-state ops and reset the vector clock after an applied remote import', async () => {
@@ -193,6 +203,109 @@ const defineStorePortContract = (
       expect(await store.getVectorClock()).toEqual({
         importClient: 10,
         testClient: 7,
+      });
+    });
+
+    it('should keep a reducer-failed full-state operation pending and recoverable', async () => {
+      const importOp = createOperation('failed-import', {
+        opType: OpType.SyncImport,
+        clientId: 'importClient',
+        vectorClock: { importClient: 9 },
+      });
+      const reducerError = new Error('full-state reducer failed');
+      const applier: OperationApplyPort<Operation> = {
+        applyOperations: async (_ops, options) => {
+          await options?.onReducersCommitted?.(
+            [],
+            [{ op: importOp, error: reducerError }],
+          );
+          return {
+            appliedOps: [],
+            reducerFailures: [{ op: importOp, error: reducerError }],
+          };
+        },
+      };
+
+      await expectAsync(
+        applyRemoteOperations({
+          ops: [importOp],
+          store,
+          applier,
+          isFullStateOperation: (op) => op.opType === OpType.SyncImport,
+        }),
+      ).toBeRejectedWithError(/full-state operation.*failed/i);
+
+      const stored = await store.getOpById(importOp.id);
+      expect(stored?.applicationStatus).toBe('pending');
+      expect(stored?.rejectedAt).toBeUndefined();
+      expect(stored?.reducerRejectedAt).toBeUndefined();
+      expect((await store.getPendingRemoteOps()).map((entry) => entry.op.id)).toEqual([
+        importOp.id,
+      ]);
+    });
+
+    it('should retain a third-client clock from an operation after a full-state import', async () => {
+      const importOp = createOperation('ordered-import', {
+        opType: OpType.SyncImport,
+        clientId: 'importClient',
+        vectorClock: { importClient: 9, obsoleteClient: 4 },
+      });
+      const postImportOp = createOperation('ordered-post-import', {
+        clientId: 'thirdClient',
+        vectorClock: { importClient: 9, thirdClient: 6 },
+      });
+      await store.setVectorClock({ staleClient: 5, testClient: 7 });
+      const { applier } = createApplier({ appliedOps: [importOp, postImportOp] });
+
+      await applyRemoteOperations({
+        ops: [importOp, postImportOp],
+        store,
+        applier,
+        isFullStateOperation: (op) => op.opType === OpType.SyncImport,
+      });
+
+      expect(await store.getVectorClock()).toEqual({
+        importClient: 9,
+        testClient: 7,
+        thirdClient: 6,
+      });
+    });
+
+    it('should reset at each full-state operation and merge only the final suffix', async () => {
+      const firstImport = createOperation('first-import', {
+        opType: OpType.SyncImport,
+        clientId: 'firstImportClient',
+        vectorClock: { firstImportClient: 1 },
+      });
+      const betweenImports = createOperation('between-imports', {
+        clientId: 'betweenClient',
+        vectorClock: { firstImportClient: 1, betweenClient: 3 },
+      });
+      const secondImport = createOperation('second-import', {
+        opType: OpType.BackupImport,
+        clientId: 'secondImportClient',
+        vectorClock: { secondImportClient: 4, obsoleteImportEntry: 8 },
+      });
+      const finalSuffix = createOperation('final-suffix', {
+        clientId: 'suffixClient',
+        vectorClock: { secondImportClient: 4, suffixClient: 6 },
+      });
+      await store.setVectorClock({ staleClient: 5, testClient: 7 });
+      const ops = [firstImport, betweenImports, secondImport, finalSuffix];
+      const { applier } = createApplier({ appliedOps: ops });
+
+      await applyRemoteOperations({
+        ops,
+        store,
+        applier,
+        isFullStateOperation: (op) =>
+          op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
+      });
+
+      expect(await store.getVectorClock()).toEqual({
+        secondImportClient: 4,
+        testClient: 7,
+        suffixClient: 6,
       });
     });
   });

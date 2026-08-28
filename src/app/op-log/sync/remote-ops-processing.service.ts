@@ -7,9 +7,9 @@ import {
   ConflictResult,
   EntityConflict,
   extractFullStateFromPayload,
+  FULL_STATE_OP_TYPES,
   isWrappedFullStatePayload,
   Operation,
-  OpType,
   VectorClock,
 } from '../core/operation.types';
 import { OpLog } from '../../core/log';
@@ -19,9 +19,9 @@ import { ValidateStateService } from '../validation/validate-state.service';
 import { SyncSessionValidationService } from './sync-session-validation.service';
 import { VectorClockService } from './vector-clock.service';
 import {
-  MAX_VERSION_SKIP,
   MIN_SUPPORTED_SCHEMA_VERSION,
   SchemaMigrationService,
+  getOperationSchemaVersion,
 } from '../persistence/schema-migration.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
@@ -31,11 +31,14 @@ import { OperationLogCompactionService } from '../persistence/operation-log-comp
 import { SyncImportFilterService } from './sync-import-filter.service';
 import { OperationWriteFlushService } from './operation-write-flush.service';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
+import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
 import { selectSyncConfig } from '../../features/config/store/global-config.reducer';
 import {
   applyLocalOnlySyncSettingsToAppData,
   LocalOnlySyncSettings,
 } from '../../features/config/local-only-sync-settings.util';
+import { HydrationStateService } from '../apply/hydration-state.service';
+import { SyncProviderManager } from '../sync-providers/provider-manager.service';
 
 /**
  * Handles the core pipeline for processing remote operations.
@@ -67,10 +70,12 @@ export class RemoteOpsProcessingService {
   private compactionService = inject(OperationLogCompactionService);
   private syncImportFilterService = inject(SyncImportFilterService);
   private writeFlushService = inject(OperationWriteFlushService);
+  private hydrationStateService = inject(HydrationStateService);
+  private providerManager = inject(SyncProviderManager);
   private injector = inject(Injector);
 
-  /** Flag to show newer version warning only once per session */
-  private _hasWarnedNewerVersionThisSession = false;
+  /** Flag to show version-incompatibility warnings only once per session */
+  private _hasWarnedVersionBlockThisSession = false;
 
   /** Flag to show migration failure warning only once per session */
   private _hasWarnedMigrationFailureThisSession = false;
@@ -93,13 +98,39 @@ export class RemoteOpsProcessingService {
    */
   async processRemoteOps(
     remoteOps: Operation[],
-    options?: { skipConflictDetection?: boolean },
+    options?: {
+      skipConflictDetection?: boolean;
+      callerHoldsOperationLogLock?: boolean;
+      ignoredLocalFullStateOpIds?: readonly string[];
+      /**
+       * Final full-state conflict check. Runs with the operation-log lock held,
+       * immediately before the destructive reducer application. Returning false
+       * aborts the apply so the caller can show UI after the lock is released.
+       */
+      beforeFullStateApply?: (fullStateOps: Operation[]) => Promise<boolean>;
+      /**
+       * Sync epoch captured at cycle start (#9074). Re-asserted INSIDE each
+       * apply-lock closure (i.e. after the lock wait), so a stale cycle that
+       * queued behind a destructive replacement (e.g. createCleanSlate) cannot
+       * apply old-epoch ops onto the fresh state.
+       */
+      fenceEpoch?: number;
+    },
   ): Promise<{
     localWinOpsCreated: number;
     allOpsFilteredBySyncImport: boolean;
     filteredOpCount: number;
     filteringImport?: Operation;
     isLocalUnsyncedImport: boolean;
+    blockedByIncompatibleOp: boolean;
+    /**
+     * Full-state operations whose application completed (or was already
+     * deduplicated as applied) before this result was returned. Populated even
+     * when a later incompatible op blocks the remaining batch suffix.
+     */
+    committedFullStateOpIds?: string[];
+    /** True when beforeFullStateApply vetoed the destructive state replacement. */
+    fullStateApplyBlockedByLocalConflict?: boolean;
   }> {
     // Validation failure surfaces via the SyncSessionValidationService latch
     // (#7330). `validateAfterSync` and the conflict-resolution validation path
@@ -109,52 +140,51 @@ export class RemoteOpsProcessingService {
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 1: Schema Migration (Receiver-Side)
     // Migrate ops from older schema versions to current version.
-    // - Ops below MIN_SUPPORTED_SCHEMA_VERSION: error, stop sync
-    // - Ops beyond MAX_VERSION_SKIP: error, stop sync
-    // - Ops from newer version (within skip): warning once per session, continue
+    //
+    // Blocking semantics: an op that cannot be terminally processed here —
+    // below MIN_SUPPORTED_SCHEMA_VERSION, from a NEWER schema version (real
+    // migrations rename/split fields, so a future op applied verbatim corrupts
+    // state), or throwing during migration — STOPS the batch at that op. Ops
+    // before the block are processed normally; the blocked op and everything
+    // after are neither stored nor applied. Callers must NOT advance the
+    // server cursor when `blockedByIncompatibleOp` is true, so the blocked op
+    // is re-downloaded and retried after an app update / migration fix instead
+    // of being skipped forever (already-processed prefix ops are deduplicated
+    // by the appliedOpIds download filter). Ops migrated to `null` are an
+    // intentional terminal drop and do NOT block.
     // ─────────────────────────────────────────────────────────────────────────
     const currentVersion = this.schemaMigrationService.getCurrentVersion();
     const migratedOps: Operation[] = [];
     const droppedEntityIds = new Set<string>();
-    const failedMigrationOpIds: string[] = [];
-    let updateRequired = false;
+    let blockReason:
+      | 'VERSION_UNSUPPORTED'
+      | 'VERSION_TOO_NEW'
+      | 'INVALID_SCHEMA_VERSION'
+      | 'MIGRATION_FAILED' = 'MIGRATION_FAILED';
+    let blockedOp: Operation | null = null;
 
     for (const op of remoteOps) {
-      const opVersion = op.schemaVersion ?? 1;
-
-      // Check if remote op is too old (below minimum supported)
-      if (opVersion < MIN_SUPPORTED_SCHEMA_VERSION) {
-        this.snackService.open({
-          type: 'ERROR',
-          msg: T.F.SYNC.S.VERSION_UNSUPPORTED,
-          actionStr: T.PS.UPDATE_APP,
-          actionFn: () =>
-            window.open('https://super-productivity.com/download', '_blank'),
-        });
-        return {
-          localWinOpsCreated: 0,
-          allOpsFilteredBySyncImport: false,
-          filteredOpCount: 0,
-          isLocalUnsyncedImport: false,
-        };
-      }
-
-      // Check if remote op is too new (exceeds supported skip)
-      if (opVersion > currentVersion + MAX_VERSION_SKIP) {
-        updateRequired = true;
+      let opVersion: number;
+      try {
+        opVersion = getOperationSchemaVersion(op as { schemaVersion?: unknown });
+      } catch {
+        blockedOp = op;
+        blockReason = 'INVALID_SCHEMA_VERSION';
         break;
       }
 
-      // Warn once per session if receiving ops from a newer version
-      if (opVersion > currentVersion && !this._hasWarnedNewerVersionThisSession) {
-        this._hasWarnedNewerVersionThisSession = true;
-        this.snackService.open({
-          type: 'WARNING',
-          msg: T.F.SYNC.S.NEWER_VERSION_AVAILABLE,
-          actionStr: T.PS.UPDATE_APP,
-          actionFn: () =>
-            window.open('https://super-productivity.com/download', '_blank'),
-        });
+      // Op below minimum supported version: no migration path exists.
+      if (opVersion < MIN_SUPPORTED_SCHEMA_VERSION) {
+        blockedOp = op;
+        blockReason = 'VERSION_UNSUPPORTED';
+        break;
+      }
+
+      // Op from a newer schema version: this client cannot interpret it safely.
+      if (opVersion > currentVersion) {
+        blockedOp = op;
+        blockReason = 'VERSION_TOO_NEW';
+        break;
       }
 
       try {
@@ -178,44 +208,23 @@ export class RemoteOpsProcessingService {
         }
       } catch (e) {
         OpLog.err(`RemoteOpsProcessingService: Migration failed for op ${op.id}`, e);
-        // Track failed migrations to notify user. If ops are from a compatible version,
-        // this indicates a bug or data corruption.
-        failedMigrationOpIds.push(op.id);
+        blockedOp = op;
+        blockReason = 'MIGRATION_FAILED';
+        break;
       }
     }
 
-    // Notify user if any migrations failed (once per session to avoid spam)
-    if (failedMigrationOpIds.length > 0) {
-      OpLog.warn(
-        `RemoteOpsProcessingService: ${failedMigrationOpIds.length} op(s) failed migration`,
-        { failedOpIds: failedMigrationOpIds },
+    if (blockedOp) {
+      OpLog.err(
+        `RemoteOpsProcessingService: Blocked at op ${blockedOp.id} (${blockReason}, ` +
+          `schemaVersion=${blockedOp.schemaVersion ?? 1}, current=${currentVersion}). ` +
+          'Processing the batch prefix only; cursor must not advance past this op.',
       );
-      if (!this._hasWarnedMigrationFailureThisSession) {
-        this._hasWarnedMigrationFailureThisSession = true;
-        this.snackService.open({
-          type: 'ERROR',
-          msg: T.F.SYNC.S.MIGRATION_FAILED,
-        });
-      }
-    }
-
-    if (updateRequired) {
-      this.snackService.open({
-        type: 'ERROR',
-        msg: T.F.SYNC.S.VERSION_TOO_OLD,
-        actionStr: T.PS.UPDATE_APP,
-        actionFn: () => window.open('https://super-productivity.com/download', '_blank'),
-      });
-      return {
-        localWinOpsCreated: 0,
-        allOpsFilteredBySyncImport: false,
-        filteredOpCount: 0,
-        isLocalUnsyncedImport: false,
-      };
+      this._notifyBlockedOp(blockReason);
     }
 
     if (migratedOps.length === 0) {
-      if (remoteOps.length > 0) {
+      if (remoteOps.length > 0 && !blockedOp) {
         OpLog.normal(
           'RemoteOpsProcessingService: All remote ops were dropped during migration.',
         );
@@ -225,8 +234,10 @@ export class RemoteOpsProcessingService {
         allOpsFilteredBySyncImport: false,
         filteredOpCount: 0,
         isLocalUnsyncedImport: false,
+        blockedByIncompatibleOp: blockedOp !== null,
       };
     }
+    const blockedByIncompatibleOp = blockedOp !== null;
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 2: Filter ops invalidated by SYNC_IMPORT
@@ -235,7 +246,9 @@ export class RemoteOpsProcessingService {
     // This also checks the LOCAL STORE for imports downloaded in previous sync cycles.
     // ─────────────────────────────────────────────────────────────────────────
     const { validOps, invalidatedOps, filteringImport, isLocalUnsyncedImport } =
-      await this.syncImportFilterService.filterOpsInvalidatedBySyncImport(migratedOps);
+      await this.syncImportFilterService.filterOpsInvalidatedBySyncImport(migratedOps, {
+        ignoredLocalFullStateOpIds: options?.ignoredLocalFullStateOpIds,
+      });
 
     if (invalidatedOps.length > 0) {
       OpLog.warn(
@@ -258,33 +271,107 @@ export class RemoteOpsProcessingService {
         filteredOpCount: invalidatedOps.length,
         filteringImport,
         isLocalUnsyncedImport,
+        blockedByIncompatibleOp,
       };
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 3: Check for full-state operations (SYNC_IMPORT / BACKUP_IMPORT)
+    // STEP 3: Check for full-state operations
     // These replace the entire state, so conflict detection doesn't apply.
     // ─────────────────────────────────────────────────────────────────────────
-    const hasFullStateOp = validOps.some(
-      (op) => op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
-    );
+    const hasFullStateOp = validOps.some((op) => FULL_STATE_OP_TYPES.has(op.opType));
 
     if (hasFullStateOp) {
       OpLog.normal(
         'RemoteOpsProcessingService: Full-state operation detected, skipping conflict detection.',
       );
-      await this.applyNonConflictingOps(validOps);
+      const callerHoldsOperationLogLock = options?.callerHoldsOperationLogLock ?? false;
+      const applyAndValidateWithOperationLogLockHeld = async (): Promise<{
+        committedFullStateOpIds: string[];
+        blockedByLocalConflict: boolean;
+      }> => {
+        // #9074: asserted AFTER the lock wait — the highest-value fence site
+        // for full-state ops (a stale SYNC_IMPORT applied wholesale after a
+        // clean-slate/switch is the worst interleave).
+        this.providerManager.assertSyncEpochUnchanged(
+          options?.fenceEpoch,
+          'full-state apply',
+        );
+        // The operation-log lock blocks cross-tab operation writes, while this
+        // hold makes same-tab reducer actions enter the deferred queue. Together
+        // they keep the final pending-work read and destructive apply stable.
+        const releaseApplyingRemoteOpsHold =
+          this.hydrationStateService.acquireApplyingRemoteOpsHold();
+        const fullStateApplyResult: {
+          committedFullStateOpIds: string[];
+          blockedByLocalConflict: boolean;
+        } = {
+          committedFullStateOpIds: [],
+          blockedByLocalConflict: false,
+        };
+        let hasPrimaryError = false;
+        try {
+          if (
+            options?.beforeFullStateApply &&
+            !(await options.beforeFullStateApply(validOps))
+          ) {
+            fullStateApplyResult.blockedByLocalConflict = true;
+          } else {
+            fullStateApplyResult.committedFullStateOpIds =
+              await this.applyNonConflictingOps(validOps, true, {
+                skipDeferredActionDrain: true,
+              });
+          }
+        } catch (error) {
+          hasPrimaryError = true;
+          throw error;
+        } finally {
+          releaseApplyingRemoteOpsHold();
+          try {
+            await processDeferredActionsAfterRemoteApply(this.injector, true);
+          } catch (deferredError) {
+            if (!hasPrimaryError) {
+              throw deferredError;
+            }
+            OpLog.err(
+              'RemoteOpsProcessingService: Deferred-action drain also failed after full-state processing error',
+              { name: (deferredError as Error | undefined)?.name },
+            );
+          }
+        }
 
-      // Clean Slate Semantics: SYNC_IMPORT/BACKUP_IMPORT replaces entire state.
-      // Local synced ops are NOT replayed - the import is an explicit user action
-      // to restore all clients to a specific point in time.
+        if (!fullStateApplyResult.blockedByLocalConflict) {
+          // Clean Slate Semantics: SYNC_IMPORT/BACKUP_IMPORT replaces entire state.
+          // Local synced ops are NOT replayed - the import is an explicit user action
+          // to restore all clients to a specific point in time. Validate after the
+          // deferred local actions, preserving the established apply pipeline order.
+          await this.validateAfterSync(true);
+        }
+        return fullStateApplyResult;
+      };
 
-      await this.validateAfterSync();
+      // Take UPLOAD before OPERATION_LOG, matching the established server-migration
+      // lock order. The outer lock prevents another tab from starting an upload
+      // selection/acknowledgement round during the cutoff; the inner lock keeps the
+      // final pending-work read, full-state reducer, deferred capture drain, and
+      // validation atomic with operation capture. Callers already inside OPERATION_LOG
+      // must not re-enter either path or flush while holding its non-reentrant lock.
+      const fullStateApplyResult = callerHoldsOperationLogLock
+        ? await applyAndValidateWithOperationLogLockHeld()
+        : await this.lockService.request(LOCK_NAMES.UPLOAD, () =>
+            this.writeFlushService.flushThenRunExclusive(
+              applyAndValidateWithOperationLogLockHeld,
+            ),
+          );
+
       return {
         localWinOpsCreated: 0,
         allOpsFilteredBySyncImport: false,
         filteredOpCount: 0,
         isLocalUnsyncedImport: false,
+        blockedByIncompatibleOp,
+        committedFullStateOpIds: fullStateApplyResult.committedFullStateOpIds,
+        fullStateApplyBlockedByLocalConflict: fullStateApplyResult.blockedByLocalConflict,
       };
     }
 
@@ -309,13 +396,18 @@ export class RemoteOpsProcessingService {
         'RemoteOpsProcessingService: Skipping conflict detection (skipConflictDetection=true). ' +
           `Applying ${validOps.length} ops directly.`,
       );
-      await this.applyNonConflictingOps(validOps);
-      await this.validateAfterSync();
+      this.providerManager.assertSyncEpochUnchanged(options?.fenceEpoch, 'direct apply');
+      await this.applyNonConflictingOps(
+        validOps,
+        options.callerHoldsOperationLogLock ?? false,
+      );
+      await this.validateAfterSync(options.callerHoldsOperationLogLock ?? false);
       return {
         localWinOpsCreated: 0,
         allOpsFilteredBySyncImport: false,
         filteredOpCount: 0,
         isLocalUnsyncedImport: false,
+        blockedByIncompatibleOp,
       };
     }
 
@@ -333,10 +425,18 @@ export class RemoteOpsProcessingService {
     // detect conflicts, AND apply resolutions.
     let localWinOpsCreated = 0;
     await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
-      const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
+      // #9074: asserted AFTER the lock wait — a stale cycle that queued behind
+      // a destructive replacement must not apply old-epoch ops onto it.
+      this.providerManager.assertSyncEpochUnchanged(
+        options?.fenceEpoch,
+        'remote-ops apply',
+      );
+      const { frontier: appliedFrontierByEntity, retainedOpsByEntity } =
+        await this.vectorClockService.getEntityFrontierWithOps();
       const conflictResult = await this.detectConflicts(
         validOps,
         appliedFrontierByEntity,
+        retainedOpsByEntity,
       );
       const { nonConflicting, conflicts } = conflictResult;
 
@@ -349,15 +449,42 @@ export class RemoteOpsProcessingService {
       if (conflicts.length > 0) {
         OpLog.warn(
           `RemoteOpsProcessingService: Detected ${conflicts.length} conflicts. Auto-resolving with LWW.`,
-          conflicts,
+          {
+            conflicts: conflicts.map((conflict) => ({
+              entityType: conflict.entityType,
+              entityId: conflict.entityId,
+              localOpIds: conflict.localOps.map((op) => op.id),
+              remoteOpIds: conflict.remoteOps.map((op) => op.id),
+              suggestedResolution: conflict.suggestedResolution,
+            })),
+          },
         );
         // Auto-resolve conflicts using Last-Write-Wins strategy.
         // Piggyback non-conflicting ops so they're applied with resolved conflicts.
         // Validation failure is surfaced via the session-validation latch.
+        //
+        // PRODUCER FREEZE (journal half) for the conflict-review rollback, set
+        // here at the only production entry point so the producer stops at the
+        // fleet boundary while the service keeps the capability intact:
+        //  - disableConflictJournal: stop persisting the discarded side of a
+        //    conflict verbatim, so that device-local data obligation does not
+        //    expand beyond the edge/internal builds that already carry it.
+        // Reverting the freeze = drop that line.
+        //
+        // The disjoint-merge half of the original #9061 freeze was UNFROZEN for
+        // #9095: with the merge disabled, concurrent edits to DIFFERENT fields
+        // of one entity resolve by whole-entity LWW and the earlier side's edit
+        // is silently and permanently lost on every client (a rename dies when
+        // another device marks the task done). The merged op is a standard LWW
+        // Update whose 'patch' payload released clients apply via updateOne, so
+        // re-enabling it ships no wire format they cannot handle.
         const lwwResult = await this.conflictResolutionService.autoResolveConflictsLWW(
           conflicts,
           nonConflicting,
-          { callerHoldsOperationLogLock: true },
+          {
+            callerHoldsOperationLogLock: true,
+            disableConflictJournal: true,
+          },
         );
         localWinOpsCreated = lwwResult.localWinOpsCreated;
         return;
@@ -376,7 +503,57 @@ export class RemoteOpsProcessingService {
       allOpsFilteredBySyncImport: false,
       filteredOpCount: 0,
       isLocalUnsyncedImport: false,
+      blockedByIncompatibleOp,
     };
+  }
+
+  /**
+   * User notification for a version/migration block, once per session per
+   * category to avoid snack spam from periodic sync retries (the block persists
+   * until an app update or migration fix, and every retry re-hits it).
+   */
+  private _notifyBlockedOp(
+    reason:
+      | 'VERSION_UNSUPPORTED'
+      | 'VERSION_TOO_NEW'
+      | 'INVALID_SCHEMA_VERSION'
+      | 'MIGRATION_FAILED',
+  ): void {
+    if (this.snackService.hasPendingPersistentAction()) {
+      // Never replace a visible persistent recovery action (e.g. the USE_REMOTE
+      // Undo — the only entry point to the pre-replace backup). The block
+      // persists, so the latch stays unset and a later retry re-warns.
+      return;
+    }
+    if (reason === 'MIGRATION_FAILED' || reason === 'INVALID_SCHEMA_VERSION') {
+      if (!this._hasWarnedMigrationFailureThisSession) {
+        this._hasWarnedMigrationFailureThisSession = true;
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.MIGRATION_FAILED,
+        });
+      }
+      return;
+    }
+    if (!this._hasWarnedVersionBlockThisSession) {
+      this._hasWarnedVersionBlockThisSession = true;
+      if (reason === 'VERSION_UNSUPPORTED') {
+        // Below-minimum data: updating THIS device cannot help, so no
+        // download action — the fix lives on the device that produced it.
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.VERSION_UNSUPPORTED,
+        });
+      } else {
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.VERSION_TOO_OLD,
+          actionStr: T.PS.UPDATE_APP,
+          actionFn: () =>
+            window.open('https://super-productivity.com/download', '_blank'),
+        });
+      }
+    }
   }
 
   /**
@@ -393,23 +570,27 @@ export class RemoteOpsProcessingService {
    * @param ops - Non-conflicting operations to apply
    * @param callerHoldsLock - If true, deferred local actions reuse the caller's
    *        sp_op_log lock after remote clocks are merged.
+   * @param options.skipDeferredActionDrain - If true, the caller owns a wider
+   *        apply window and drains deferred actions after validation or abort.
    * @throws Re-throws if application fails (ops marked as failed first)
    */
   async applyNonConflictingOps(
     ops: Operation[],
     callerHoldsLock: boolean = false,
-  ): Promise<void> {
+    options: { skipDeferredActionDrain?: boolean } = {},
+  ): Promise<string[]> {
     const locallyReplayableOps =
       await this._withLocalOnlySyncSettingsForFullStateOps(ops);
 
     await this._logFullStateApplyDiagnostics(locallyReplayableOps);
 
-    // Mirror autoResolveConflictsLWW: wrap apply in try/finally so deferred
-    // local actions are flushed whether the apply succeeded or threw.
-    // Without this, an apply-time throw (e.g. dispatcher error inside the
-    // wrapped operationApplier.applyOperations) would leave buffered actions
-    // to leak into the next sync window with stale clocks. (#7700)
-    let didApplyRemoteOps = false;
+    // Mirror autoResolveConflictsLWW: once the incoming remote clocks are
+    // durable, flush deferred local actions even if reducer dispatch or later
+    // apply bookkeeping throws. A failed pre-apply clock merge never starts
+    // the reducer/deferred-action window. (#7700)
+    let canDrainDeferredActions = false;
+    let hasPrimaryError = false;
+    let committedFullStateOpIds: string[] = [];
     try {
       // Core owns the generic crash-safety ordering. Angular diagnostics,
       // validation, and user notifications stay in this service.
@@ -417,15 +598,24 @@ export class RemoteOpsProcessingService {
         ops: locallyReplayableOps,
         store: this.opLogStore,
         applier: {
-          applyOperations: (opsToApply) =>
+          applyOperations: (opsToApply, applyOptions) =>
             this.operationApplier.applyOperations(opsToApply, {
               skipDeferredLocalActions: true,
+              onReducersCommitted: applyOptions?.onReducersCommitted,
             }),
         },
         isFullStateOperation: this._isFullStateOperation,
+        // The core invokes this before reducer application starts, after the
+        // incoming clock frontier is durable. Any subsequent failure can safely
+        // drain actions buffered by the reducer window.
+        onRemoteClocksDurable: () => {
+          canDrainDeferredActions = true;
+        },
       });
 
-      didApplyRemoteOps = result.appendedOps.length > 0;
+      committedFullStateOpIds = result.appliedOps
+        .filter((op) => FULL_STATE_OP_TYPES.has(op.opType))
+        .map((op) => op.id);
 
       if (result.skippedCount > 0) {
         OpLog.verbose(
@@ -466,13 +656,27 @@ export class RemoteOpsProcessingService {
 
         // The deferred-actions flush in the finally below runs before the
         // throw propagates.
-        throw result.failedOp.error;
+        throw new IncompleteRemoteOperationsError(result.failedOp.error);
       }
+    } catch (error) {
+      hasPrimaryError = true;
+      throw error;
     } finally {
-      if (didApplyRemoteOps) {
-        await processDeferredActionsAfterRemoteApply(this.injector, callerHoldsLock);
+      if (canDrainDeferredActions && !options.skipDeferredActionDrain) {
+        try {
+          await processDeferredActionsAfterRemoteApply(this.injector, callerHoldsLock);
+        } catch (deferredError) {
+          if (!hasPrimaryError) {
+            throw deferredError;
+          }
+          OpLog.err(
+            'RemoteOpsProcessingService: Deferred-action drain also failed after the primary remote-apply error',
+            { name: (deferredError as Error | undefined)?.name },
+          );
+        }
       }
     }
+    return committedFullStateOpIds;
   }
 
   private async _withLocalOnlySyncSettingsForFullStateOps(
@@ -516,11 +720,7 @@ export class RemoteOpsProcessingService {
   }
 
   private _isFullStateOperation(op: Operation): boolean {
-    return (
-      op.opType === OpType.SyncImport ||
-      op.opType === OpType.BackupImport ||
-      op.opType === OpType.Repair
-    );
+    return FULL_STATE_OP_TYPES.has(op.opType);
   }
 
   /**
@@ -588,11 +788,15 @@ export class RemoteOpsProcessingService {
    *
    * @param remoteOps - Remote operations to check for conflicts
    * @param appliedFrontierByEntity - Per-entity vector clocks of applied ops
+   * @param retainedOpsByEntity - Per-entity retained (non-rejected) ops from the
+   *        same scan as the frontier; reconstructs the local side of no-pending
+   *        CONCURRENT crossings (#9073)
    * @returns Object with `nonConflicting` ops to apply and `conflicts` to resolve
    */
   async detectConflicts(
     remoteOps: Operation[],
     appliedFrontierByEntity: Map<string, VectorClock>,
+    retainedOpsByEntity: Map<string, Operation[]>,
   ): Promise<ConflictResult> {
     const localPendingOpsByEntity = await this.opLogStore.getUnsyncedByEntity();
     const conflicts: EntityConflict[] = [];
@@ -616,13 +820,14 @@ export class RemoteOpsProcessingService {
       const result = await this.conflictResolutionService.checkOpForConflicts(remoteOp, {
         localPendingOpsByEntity,
         appliedFrontierByEntity,
+        retainedOpsByEntity,
         snapshotVectorClock,
         snapshotEntityKeys,
         hasNoSnapshotClock,
       });
 
-      if (result.conflict) {
-        conflicts.push(result.conflict);
+      if (result.conflicts.length > 0) {
+        conflicts.push(...result.conflicts);
       } else if (!result.isSupersededOrDuplicate) {
         nonConflicting.push(remoteOp);
       }

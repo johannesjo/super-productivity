@@ -56,11 +56,13 @@ import { Keyboard, KeyboardInfo } from '@capacitor/keyboard';
 import { PluginListenerHandle, registerPlugin } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SafeArea } from 'capacitor-plugin-safe-area';
-import { FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
+import { patchCdkViewportForSafeArea } from './cdk-safe-area-viewport.util';
 import { LS } from '../persistence/storage-keys.const';
-import { Log } from '../log';
+import { Log, PluginLog } from '../log';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { sanitizeIosKeyboardHeight } from './sanitize-ios-keyboard-height.util';
+import { sanitizeSvgIconContent } from '../../util/sanitize-svg-icon.util';
+import { CustomThemeService, getRequiredThemeMode } from './custom-theme.service';
 
 interface NavigationBarPlugin {
   setColor(options: { color: string; style: 'LIGHT' | 'DARK' }): Promise<void>;
@@ -78,7 +80,44 @@ const CSS_VAR_SAFE_AREA_TOP = '--safe-area-inset-top';
 const CSS_VAR_SAFE_AREA_BOTTOM = '--safe-area-inset-bottom';
 const CSS_VAR_SAFE_AREA_LEFT = '--safe-area-inset-left';
 const CSS_VAR_SAFE_AREA_RIGHT = '--safe-area-inset-right';
+const CSS_VAR_SYSTEM_SURFACE = '--system-surface';
 const VIEWPORT_RESIZE_EPSILON_PX = 1;
+const DEFAULT_LIGHT_SYSTEM_SURFACE = '#f8f8f7';
+const DEFAULT_DARK_SYSTEM_SURFACE = '#131314';
+
+/**
+ * Resolve a CSS theme surface to the opaque hex format Android's Color parser
+ * accepts. Transparent, gradient, unresolved, and otherwise invalid values
+ * fall back to the matching Default-theme surface.
+ */
+export const resolveSystemSurfaceColor = (
+  rawColor: string,
+  isDarkMode: boolean,
+): string => {
+  const color = rawColor.trim();
+  const fallback = isDarkMode
+    ? DEFAULT_DARK_SYSTEM_SURFACE
+    : DEFAULT_LIGHT_SYSTEM_SURFACE;
+
+  if (/^#[\da-f]{6}$/i.test(color)) {
+    return color;
+  }
+  if (/^#[\da-f]{3}$/i.test(color)) {
+    return `#${[...color.slice(1)].map((digit) => `${digit}${digit}`).join('')}`;
+  }
+  const rgbMatch = color.match(
+    /^rgb\(\s*(\d{1,3})(?:\s*,\s*|\s+)(\d{1,3})(?:\s*,\s*|\s+)(\d{1,3})\s*\)$/i,
+  );
+  if (rgbMatch) {
+    const channels = rgbMatch.slice(1).map(Number);
+    if (channels.every((channel) => channel <= 255)) {
+      return `#${channels
+        .map((channel) => channel.toString(16).padStart(2, '0'))
+        .join('')}`;
+    }
+  }
+  return fallback;
+};
 
 /** The four wallpaper fields of the app-level (global) background config. */
 export type GlobalWallpaperCfg = Pick<
@@ -158,6 +197,7 @@ export class GlobalThemeService {
   private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
   private _platformService = inject(CapacitorPlatformService);
+  private _customThemeService = inject(CustomThemeService);
   private _environmentInjector = inject(EnvironmentInjector);
   private _destroyRef = inject(DestroyRef);
   private _inputIntentService = inject(InputIntentService);
@@ -268,6 +308,7 @@ export class GlobalThemeService {
       // This is here to make web page reloads on non-work-context pages at least usable
       this._setBackgroundTint(true);
       this._initIcons();
+      this._initRequiredThemeMode();
       this._initHandlersForInitialBodyClasses();
       this._initThemeWatchers();
 
@@ -286,6 +327,20 @@ export class GlobalThemeService {
     });
     // this._materialCssVarsService.setDarkTheme(true);
     // this._materialCssVarsService.setDarkTheme(false);
+  }
+
+  private _initRequiredThemeMode(): void {
+    const enforceActiveThemeMode = (): void => {
+      const requiredMode = getRequiredThemeMode(this._customThemeService.activeRef());
+      if (requiredMode && this.darkMode() !== requiredMode) {
+        this.darkMode.set(requiredMode);
+      }
+    };
+
+    // Effects run during change detection; enforce once synchronously so the
+    // cold-start stylesheet never waits a frame for its required body class.
+    enforceActiveThemeMode();
+    effect(enforceActiveThemeMode);
   }
 
   private _setColorTheme(theme: WorkContextThemeCfg): void {
@@ -382,12 +437,21 @@ export class GlobalThemeService {
     return this._registeredPluginIcons.has(iconName);
   }
 
+  /**
+   * `svgContent` comes from a plugin, so it is untrusted. `MatIconRegistry` parses the
+   * literal with `div.innerHTML`, which makes this the trust boundary for that sink.
+   */
   registerSvgIconFromContent(iconName: string, svgContent: string): void {
     // Plugin icon is already registered, skip
     if (this._registeredPluginIcons.has(iconName)) return;
+    const safeSvgContent = sanitizeSvgIconContent(svgContent);
+    if (!safeSvgContent) {
+      PluginLog.warn(`Skipping unsafe or invalid SVG icon: ${iconName}`);
+      return;
+    }
     this._matIconRegistry.addSvgIconLiteral(
       iconName,
-      this._domSanitizer.bypassSecurityTrustHtml(svgContent),
+      this._domSanitizer.bypassSecurityTrustHtml(safeSvgContent),
     );
     this._registeredPluginIcons.add(iconName);
   }
@@ -926,54 +990,23 @@ export class GlobalThemeService {
       SafeArea.getSafeAreaInsets().then(({ insets }) => applyInsets(insets));
       SafeArea.addListener('safeAreaChanged', ({ insets }) => applyInsets(insets));
     }
-    this._patchCdkViewportForSafeArea();
-  }
-
-  /**
-   * Monkey-patch CDK's viewport rect calculation to include native mobile insets.
-   * This keeps connected overlays (menus, selects, autocomplete panels) above
-   * the safe areas and the iOS keyboard when the WebView does not shrink.
-   */
-  private _patchCdkViewportForSafeArea(): void {
-    const proto = FlexibleConnectedPositionStrategy.prototype as any;
-    const original = proto._getNarrowedViewportRect;
-    const doc = this.document;
-    proto._getNarrowedViewportRect = function (): {
-      top: number;
-      left: number;
-      right: number;
-      bottom: number;
-      width: number;
-      height: number;
-    } {
-      const rect = original.call(this);
-      const style = getComputedStyle(doc.documentElement);
-      const safeTop = parseInt(style.getPropertyValue(CSS_VAR_SAFE_AREA_TOP), 10) || 0;
-      const safeBottom =
-        parseInt(style.getPropertyValue(CSS_VAR_SAFE_AREA_BOTTOM), 10) || 0;
-      const keyboardOverlayOffset =
-        doc.body.classList.contains(BodyClass.isIOS) &&
-        doc.body.classList.contains(BodyClass.isKeyboardVisible)
-          ? parseInt(style.getPropertyValue(CSS_VAR_KEYBOARD_OVERLAY_OFFSET), 10) || 0
-          : 0;
-      const bottomInset = safeBottom + keyboardOverlayOffset;
-      return {
-        ...rect,
-        top: rect.top + safeTop,
-        bottom: rect.bottom - bottomInset,
-        height: rect.height - safeTop - bottomInset,
-      };
-    };
+    patchCdkViewportForSafeArea(this.document);
   }
 
   private _initMobileStatusBar(): void {
     effect(() => {
       const isDark = this.isDarkTheme();
+      // Re-read computed tokens only after the loader has atomically swapped
+      // the stylesheet. Theme changes do not necessarily change dark mode.
+      this._customThemeService.appliedThemeVersion();
       StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light }).catch((err) => {
         Log.warn('Failed to set status bar style', err);
       });
       if (this._platformService.isAndroid()) {
-        const bgColor = isDark ? '#131314' : '#f8f8f7';
+        const bgColor = resolveSystemSurfaceColor(
+          getComputedStyle(this.document.body).getPropertyValue(CSS_VAR_SYSTEM_SURFACE),
+          isDark,
+        );
         // The @capawesome edge-to-edge plugin (which painted opaque bar overlays
         // via EdgeToEdge.set{Status,Navigation}BarColor) was removed in favour of
         // Capacitor's built-in SystemBars. SystemBars has NO bar-color API — the

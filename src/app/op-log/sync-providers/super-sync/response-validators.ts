@@ -1,11 +1,17 @@
 import {
   SuperSyncDeleteAllDataResponseSchema,
+  SuperSyncDevicesResponseSchema,
   SuperSyncDownloadOpsResponseSchema,
+  SuperSyncReplaceTokenResponseSchema,
   SuperSyncRestorePointsResponseSchema,
   SuperSyncRestoreSnapshotResponseSchema,
   SuperSyncSnapshotUploadResponseSchema,
   SuperSyncUploadOpsResponseSchema,
 } from '@sp/shared-schema';
+import type {
+  SuperSyncDeviceListResponse,
+  SuperSyncReplaceTokenResult,
+} from '@sp/sync-providers/super-sync';
 import {
   OpUploadResponse,
   SuperSyncOpDownloadResponse,
@@ -123,8 +129,32 @@ export const validateRestoreSnapshotResponse = (data: unknown): RestoreSnapshotR
   ) as RestoreSnapshotResponse;
 
 /**
+ * Validates DevicesResponse from server.
+ * Throws InvalidDataSPError if the response structure is invalid.
+ */
+export const validateDevicesResponse = (data: unknown): SuperSyncDeviceListResponse =>
+  parseResponse(
+    SuperSyncDevicesResponseSchema,
+    data,
+    'DevicesResponse',
+  ) as SuperSyncDeviceListResponse;
+
+/**
  * Validates DeleteAllDataResponse from server.
  * Throws InvalidDataSPError if the response structure is invalid.
  */
 export const validateDeleteAllDataResponse = (data: unknown): { success: boolean } =>
   parseResponse(SuperSyncDeleteAllDataResponseSchema, data, 'DeleteAllDataResponse');
+
+/**
+ * Validates ReplaceTokenResponse from server.
+ * Throws InvalidDataSPError if the response structure is invalid.
+ */
+export const validateReplaceTokenResponse = (
+  data: unknown,
+): SuperSyncReplaceTokenResult =>
+  parseResponse(
+    SuperSyncReplaceTokenResponseSchema,
+    data,
+    'ReplaceTokenResponse',
+  ) as SuperSyncReplaceTokenResult;

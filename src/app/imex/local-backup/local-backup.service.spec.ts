@@ -1,9 +1,10 @@
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { fakeAsync, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { LocalBackupService } from './local-backup.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { StateSnapshotService } from '../../op-log/backup/state-snapshot.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ArchiveModel } from '../../features/archive/archive.model';
@@ -15,6 +16,7 @@ import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { Action } from '@ngrx/store';
 import { DEFAULT_MAX_BACKUP_FILES } from '../../../../electron/shared-with-frontend/backup-file-cleanup.util';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { Log } from '../../core/log';
 
 const BACKUP_INTERVAL = 5 * 60 * 1000;
 const DATA_CHANGE_DEBOUNCE = 30 * 1000;
@@ -40,6 +42,7 @@ describe('LocalBackupService', () => {
   let stateSnapshotServiceSpy: jasmine.SpyObj<StateSnapshotService>;
   let globalConfigServiceSpy: jasmine.SpyObj<GlobalConfigService>;
   let backupServiceSpy: jasmine.SpyObj<BackupService>;
+  let localDraftServiceSpy: jasmine.SpyObj<LocalDraftService>;
   let snackServiceSpy: jasmine.SpyObj<SnackService>;
   let translateServiceSpy: jasmine.SpyObj<TranslateService>;
   let platformServiceSpy: jasmine.SpyObj<CapacitorPlatformService>;
@@ -93,6 +96,9 @@ describe('LocalBackupService', () => {
       cfg$: of({ localBackup: { isEnabled: false } }),
     });
     backupServiceSpy = jasmine.createSpyObj('BackupService', ['importCompleteBackup']);
+    localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', [
+      'deleteDraftsForActiveProfile',
+    ]);
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     translateServiceSpy = jasmine.createSpyObj('TranslateService', ['instant']);
     platformServiceSpy = jasmine.createSpyObj('CapacitorPlatformService', ['isIOS']);
@@ -130,6 +136,7 @@ describe('LocalBackupService', () => {
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
         { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
         { provide: BackupService, useValue: backupServiceSpy },
+        { provide: LocalDraftService, useValue: localDraftServiceSpy },
         { provide: SnackService, useValue: snackServiceSpy },
         { provide: TranslateService, useValue: translateServiceSpy },
         { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -210,6 +217,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -476,6 +484,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -651,6 +660,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -705,6 +715,96 @@ describe('LocalBackupService', () => {
 
       expect(backupSpy).not.toHaveBeenCalled();
     }));
+
+    it('contains a failed backup and handles a later trigger', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      const error = new DOMException(
+        'An internal error was encountered in the Indexed Database server',
+        'UnknownError',
+      );
+      const logSpy = spyOn(Log, 'err');
+      backupSpy.and.rejectWith(error);
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(logSpy).toHaveBeenCalledWith('LocalBackupService: Backup failed', error);
+
+      backupSpy.and.resolveTo();
+      actions$.next({ type: 'SecondAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(backupSpy).toHaveBeenCalledTimes(2);
+    }));
+
+    it('drops an overlapping trigger and handles one after completion', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      let resolveFirstBackup: (() => void) | undefined;
+      backupSpy.and.returnValue(
+        new Promise<void>((resolve) => {
+          resolveFirstBackup = resolve;
+        }),
+      );
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      expect(backupSpy).toHaveBeenCalledTimes(1);
+
+      actions$.next({ type: 'OverlappingAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      expect(backupSpy).toHaveBeenCalledTimes(1);
+
+      resolveFirstBackup?.();
+      flushMicrotasks();
+
+      backupSpy.and.resolveTo();
+      actions$.next({ type: 'LaterAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(backupSpy).toHaveBeenCalledTimes(2);
+    }));
+
+    it('keeps the overlap gate closed until the Electron write completes', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      let resolveFirstWrite: (() => void) | undefined;
+      const firstWrite = new Promise<void>((resolve) => {
+        resolveFirstWrite = resolve;
+      });
+      const electronBackupSpy = jasmine
+        .createSpy('backupAppData')
+        .and.returnValues(firstWrite, Promise.resolve());
+      (window as unknown as { ea: { backupAppData: jasmine.Spy } }).ea = {
+        backupAppData: electronBackupSpy,
+      };
+      backupSpy.and.callFake(() =>
+        (service as unknown as LocalBackupServiceWithBackupElectron)._backupElectron(
+          {} as AppDataComplete,
+        ),
+      );
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(1);
+
+      // The IPC write is still pending — without awaiting it, exhaustMap's
+      // gate would already be open and this trigger would start a second write.
+      actions$.next({ type: 'OverlappingAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(1);
+
+      resolveFirstWrite?.();
+      flushMicrotasks();
+
+      actions$.next({ type: 'LaterAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(2);
+    }));
   });
 
   describe('informed mobile restore prompt (#7901)', () => {
@@ -754,6 +854,27 @@ describe('LocalBackupService', () => {
         true,
         true,
       );
+    });
+
+    it('should clear the active profiles crash-safe drafts after a restore', async () => {
+      // The restore replaced this profile's notes wholesale, so every draft's
+      // baseContent now refers to content that no longer exists and would only
+      // offer misleading recovery.
+      backupServiceSpy.importCompleteBackup.and.resolveTo();
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not clear drafts when the import fails', async () => {
+      // Nothing was replaced, so the drafts still refer to live content. Move the
+      // cleanup out of the success path (e.g. into a finally) and this goes red.
+      backupServiceSpy.importCompleteBackup.and.rejectWith(new Error('boom'));
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
     });
   });
 

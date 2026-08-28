@@ -22,7 +22,7 @@ describe('validateQuickAddTaskPayload', () => {
     isAddToBacklog: false,
     isAddToBottom: false,
     remindOption: TaskReminderOptionId.DoNotRemind,
-    repeatQuickSetting: null,
+    repeat: null,
     ...overrides,
   });
 
@@ -99,7 +99,56 @@ describe('validateQuickAddTaskPayload', () => {
     expect(
       validateQuickAddTaskPayload(
         validPayload({
-          repeatQuickSetting: 'BAD_REPEAT' as AddTaskPayload['repeatQuickSetting'],
+          repeat: { type: 'BAD_REPEAT' } as unknown as AddTaskPayload['repeat'],
+        }),
+        ctx,
+      ),
+    ).toContain('Repeat setting is invalid');
+
+    expect(
+      validateQuickAddTaskPayload(
+        validPayload({
+          repeat: {
+            type: 'PRESET',
+            quickSetting: 'CUSTOM',
+          } as unknown as AddTaskPayload['repeat'],
+        }),
+        ctx,
+      ),
+    ).toContain('Repeat setting is invalid');
+
+    expect(
+      validateQuickAddTaskPayload(
+        validPayload({
+          repeat: { type: 'INTERVAL', repeatCycle: 'WEEKLY', repeatEvery: 0 },
+        }),
+        ctx,
+      ),
+    ).toContain('Repeat setting is invalid');
+  });
+
+  it('rejects a repeat config smuggled in without a matching recurrence', () => {
+    // The main renderer builds the config for a DIALOG recurrence itself, so a
+    // HUD payload that ships one alongside must not be trusted.
+    expect(
+      validateQuickAddTaskPayload(
+        validPayload({
+          repeat: { type: 'DIALOG' },
+          repeatCfg: {
+            startDate: '2026-06-20',
+          } as unknown as AddTaskPayload['repeatCfg'],
+        }),
+        ctx,
+      ),
+    ).toContain('Repeat setting is invalid');
+
+    expect(
+      validateQuickAddTaskPayload(
+        validPayload({
+          repeat: null,
+          repeatCfg: {
+            startDate: '2026-06-20',
+          } as unknown as AddTaskPayload['repeatCfg'],
         }),
         ctx,
       ),
@@ -121,9 +170,10 @@ describe('validateQuickAddTaskPayload', () => {
       validateQuickAddTaskPayload(
         {
           ...validPayload(),
+          repeat: { type: 'PRESET', quickSetting: 'DAILY' },
           repeatCfg: {
             tagIds: 'tag-1' as unknown as string[],
-          },
+          } as unknown as AddTaskPayload['repeatCfg'],
         },
         ctx,
       ),

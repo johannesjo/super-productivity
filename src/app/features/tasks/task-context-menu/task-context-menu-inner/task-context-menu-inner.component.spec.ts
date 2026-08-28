@@ -25,6 +25,8 @@ import { AddSubtaskInputService } from '../../add-subtask-input/add-subtask-inpu
 import { Project } from '../../../project/project.model';
 import { Tag } from '../../../tag/tag.model';
 import { DEFAULT_TASK, Task } from '../../task.model';
+import { By } from '@angular/platform-browser';
+import { MatMenu } from '@angular/material/menu';
 
 const projectInTreeOrder = (id: string, title: string): Project =>
   ({
@@ -49,6 +51,8 @@ describe('TaskContextMenuInnerComponent', () => {
   let taskService: jasmine.SpyObj<TaskService>;
   let addSubtaskInputService: jasmine.SpyObj<AddSubtaskInputService>;
   let store: MockStore;
+  let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
+  let closeActiveTaskContextMenu: ReturnType<typeof signal<(() => void) | null>>;
 
   beforeEach(async () => {
     taskService = jasmine.createSpyObj('TaskService', [
@@ -64,6 +68,8 @@ describe('TaskContextMenuInnerComponent', () => {
       'AddSubtaskInputService',
       ['requestOpen'],
     );
+    isTaskContextMenuOpen = signal(false);
+    closeActiveTaskContextMenu = signal<(() => void) | null>(null);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -122,7 +128,8 @@ describe('TaskContextMenuInnerComponent', () => {
           provide: TaskFocusService,
           useValue: {
             focusedTaskId: { set: () => {} },
-            isTaskContextMenuOpen: { set: () => {} },
+            isTaskContextMenuOpen,
+            closeActiveTaskContextMenu,
           },
         },
         { provide: LocaleDatePipe, useValue: {} },
@@ -277,6 +284,39 @@ describe('TaskContextMenuInnerComponent', () => {
   });
 
   describe('getElementById for task ID lookup', () => {
+    it('registers its close callback when opened and clears it when closed', () => {
+      const closeMenu = jasmine.createSpy('closeMenu');
+      (
+        component as unknown as {
+          contextMenuTrigger: () => { closeMenu: () => void; openMenu: () => void };
+        }
+      ).contextMenuTrigger = () => ({ closeMenu, openMenu: () => {} });
+
+      component.open();
+
+      expect(closeActiveTaskContextMenu()).not.toBeNull();
+      closeActiveTaskContextMenu()?.();
+      expect(closeMenu).toHaveBeenCalled();
+
+      component.onClose();
+      expect(closeActiveTaskContextMenu()).toBeNull();
+    });
+
+    it('does not clear a newer menu registration when destroyed', () => {
+      (
+        component as unknown as {
+          contextMenuTrigger: () => { closeMenu: () => void; openMenu: () => void };
+        }
+      ).contextMenuTrigger = () => ({ closeMenu: () => {}, openMenu: () => {} });
+      component.open();
+      const newerClose = (): void => {};
+      closeActiveTaskContextMenu.set(newerClose);
+
+      component.ngOnDestroy();
+
+      expect(closeActiveTaskContextMenu()).toBe(newerClose);
+    });
+
     it('should use getElementById for task ID in focusRelatedTaskOrNext', fakeAsync(() => {
       component.task = {
         id: 'task-with-{special}-chars',
@@ -317,6 +357,39 @@ describe('TaskContextMenuInnerComponent', () => {
       tick(100);
 
       expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    }));
+
+    it('should restore external focus only after the root menu closes', fakeAsync(() => {
+      component.task = {
+        id: 'T1',
+        title: 'Test',
+        projectId: 'P1',
+        tagIds: [],
+        subTaskIds: [],
+      } as any;
+
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      const triggerFocusSpy = spyOn(trigger, 'focus');
+      const getByIdSpy = spyOn(document, 'getElementById');
+
+      component.open(undefined, false, trigger);
+      fixture.detectChanges();
+      const menus = fixture.debugElement.queryAll(By.directive(MatMenu));
+      expect(menus.length).toBeGreaterThan(1);
+
+      menus[1].injector.get(MatMenu).closed.emit();
+      tick();
+
+      expect(triggerFocusSpy).not.toHaveBeenCalled();
+      expect(getByIdSpy).not.toHaveBeenCalled();
+
+      component.onClose();
+      tick();
+
+      expect(triggerFocusSpy).toHaveBeenCalledOnceWith({ preventScroll: true });
+      expect(getByIdSpy).not.toHaveBeenCalled();
+      trigger.remove();
     }));
   });
 

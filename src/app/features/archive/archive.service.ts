@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Task, TaskWithSubTasks } from '../tasks/task.model';
+import { Task, TaskArchive, TaskWithSubTasks } from '../tasks/task.model';
 import { flattenTasks } from '../tasks/store/task.selectors';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { taskAdapter } from '../tasks/store/task.adapter';
@@ -19,6 +19,8 @@ import { first } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { selectTimeTrackingState } from '../time-tracking/store/time-tracking.selectors';
 import { isValidEntityId } from '../../op-log/validation/is-valid-entity-id';
+import { LockService } from '../../op-log/sync/lock.service';
+import { LOCK_NAMES } from '../../op-log/core/operation-log.const';
 
 /**
  * Maps tasks to archive format by:
@@ -58,6 +60,23 @@ const mapTasksToArchiveFormat = (
       doneOn,
     };
   });
+};
+
+const replaceTasksInArchive = (
+  archiveTasks: Task[],
+  taskArchiveState: TaskArchive,
+): TaskArchive => {
+  const updatedTaskArchive = taskAdapter.setMany(archiveTasks, taskArchiveState);
+  const uniqueStringIds = new Set(
+    updatedTaskArchive.ids.filter((id): id is string => typeof id === 'string'),
+  );
+
+  return {
+    ...updatedTaskArchive,
+    // Keep retry output deterministic even when an older archive already
+    // contains duplicate or unsorted IDs.
+    ids: [...uniqueStringIds].sort(),
+  };
 };
 
 export const sanitizeTasksForArchiving = (
@@ -153,10 +172,29 @@ const DEFAULT_ARCHIVE: ArchiveModel = {
 export class ArchiveService {
   private readonly _archiveDbAdapter = inject(ArchiveDbAdapter);
   private readonly _store = inject(Store);
+  private readonly _lockService = inject(LockService);
+
+  /**
+   * Serializes task archive read-modify-write cycles. Separate task actions can
+   * arrive before either IndexedDB write finishes; without one shared queue,
+   * both calls can read the same archive and the last save silently drops the
+   * other task. A failed mutation does not poison later retries.
+   */
+  private _runTaskArchiveMutation(mutation: () => Promise<void>): Promise<void> {
+    return this._lockService.request(LOCK_NAMES.TASK_ARCHIVE, mutation);
+  }
 
   // NOTE: we choose this method as trigger to check for flushing to archive, since
   // it is usually triggered every work-day once
-  async moveTasksToArchiveAndFlushArchiveIfDue(tasks: TaskWithSubTasks[]): Promise<void> {
+  moveTasksToArchiveAndFlushArchiveIfDue(tasks: TaskWithSubTasks[]): Promise<void> {
+    return this._runTaskArchiveMutation(() =>
+      this._moveTasksToArchiveAndFlushArchiveIfDue(tasks),
+    );
+  }
+
+  private async _moveTasksToArchiveAndFlushArchiveIfDue(
+    tasks: TaskWithSubTasks[],
+  ): Promise<void> {
     const now = Date.now();
     const sanitizedTasks = sanitizeTasksForArchiving(tasks, 'moveToArchive');
     const flatTasks = flattenTasks(sanitizedTasks);
@@ -178,12 +216,7 @@ export class ArchiveService {
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
     const archiveTasks = mapTasksToArchiveFormat(flatTasks, now, 'moveToArchive');
-    const newTaskArchiveUnsorted = taskAdapter.addMany(archiveTasks, taskArchiveState);
-    // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)
-    const newTaskArchive = {
-      ...newTaskArchiveUnsorted,
-      ids: [...newTaskArchiveUnsorted.ids].sort(),
-    };
+    const newTaskArchive = replaceTasksInArchive(archiveTasks, taskArchiveState);
 
     // ------------------------------------------------
     // Result A:
@@ -317,7 +350,15 @@ export class ArchiveService {
    * only on the originating client and synced via the flushYoungToOld action.
    * This ensures flushes happen exactly once, not on every receiving client.
    */
-  async writeTasksToArchiveForRemoteSync(tasks: TaskWithSubTasks[]): Promise<void> {
+  writeTasksToArchiveForRemoteSync(tasks: TaskWithSubTasks[]): Promise<void> {
+    return this._runTaskArchiveMutation(() =>
+      this._writeTasksToArchiveForRemoteSync(tasks),
+    );
+  }
+
+  private async _writeTasksToArchiveForRemoteSync(
+    tasks: TaskWithSubTasks[],
+  ): Promise<void> {
     const now = Date.now();
     const sanitizedTasks = sanitizeTasksForArchiving(tasks, 'Remote sync');
     const flatTasks = flattenTasks(sanitizedTasks);
@@ -339,12 +380,7 @@ export class ArchiveService {
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
     const archiveTasks = mapTasksToArchiveFormat(flatTasks, now, 'Remote sync');
-    const newTaskArchiveUnsorted = taskAdapter.addMany(archiveTasks, taskArchiveState);
-    // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)
-    const newTaskArchive = {
-      ...newTaskArchiveUnsorted,
-      ids: [...newTaskArchiveUnsorted.ids].sort(),
-    };
+    const newTaskArchive = replaceTasksInArchive(archiveTasks, taskArchiveState);
 
     // Also move historical time tracking data to archiveYoung
     // This ensures the remote client's archive matches the originating client

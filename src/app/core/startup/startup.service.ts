@@ -14,6 +14,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { Log } from '../log';
 import { T } from '../../t.const';
 import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
+import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
 import { LegacyPfDbService } from '../persistence/legacy-pf-db.service';
 import { BannerId } from '../banner/banner.model';
 import { isOnline$ } from '../../util/is-online';
@@ -26,7 +27,6 @@ import { selectSyncConfig } from '../../features/config/store/global-config.redu
 import { selectEnabledIssueProviders } from '../../features/issue/store/issue-provider.selectors';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
-import { IpcRendererEvent } from 'electron';
 import { environment } from '../../../environments/environment';
 import { TrackingReminderService } from '../../features/tracking-reminder/tracking-reminder.service';
 import { CapacitorPlatformService } from '../platform/capacitor-platform.service';
@@ -36,6 +36,7 @@ import { OnboardingHintService } from '../../features/onboarding/onboarding-hint
 import { LocalRestApiHandlerService } from '../electron/local-rest-api-handler.service';
 import { CustomThemeService } from '../theme/custom-theme.service';
 import { UpdateCheckService } from '../update-check/update-check.service';
+import { JiraElectronBridgeService } from '../../features/issue/providers/jira/jira-electron-bridge.service';
 
 const w = window as Window & { productivityTips?: string[][]; randomIndex?: number };
 
@@ -75,12 +76,21 @@ export class StartupService {
   private _dataInitStateService = inject(DataInitStateService);
   private _injector = inject(Injector);
   private _customThemeService = inject(CustomThemeService);
+  private _jiraElectronBridge = inject(JiraElectronBridgeService);
 
   constructor() {
+    // Claim the privileged Jira IPC capability here, in trusted startup code,
+    // before any untrusted renderer code (plugins) is loaded. This one-shot
+    // ordering — not the main-frame IPC check — is the real security boundary:
+    // same-origin plugin iframes can reach window.top.ea, so the frame check
+    // alone is bypassable. Once consumed, consumeJiraApi() returns null to
+    // everyone else. Do NOT move plugin/3rd-party loading before this call.
+    this._jiraElectronBridge.initialize();
+
     // Initialize electron error handler in an effect
     if (IS_ELECTRON) {
       effect(() => {
-        window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
+        window.ea.on(IPC.ERROR, (...args: unknown[]) => {
           const data = args[0] as {
             error: unknown;
             stack: unknown;
@@ -169,6 +179,9 @@ export class StartupService {
 
       this._ratePromptService.init();
       await this._initPlugins();
+      // Last in the deferred body: the snack it may open is persistent and the
+      // single snack slot must not be reclaimed by the productivity tip above.
+      await this._offerInterruptedRebuildRecoveryIfNeeded();
     }, DEFERRED_INIT_DELAY_MS);
 
     if (IS_ELECTRON) {
@@ -255,6 +268,32 @@ export class StartupService {
       }
       // trigger backup init after
       this._localBackupService.init();
+    }
+  }
+
+  /**
+   * An interrupted USE_REMOTE rebuild leaves the user booting into the rebuild
+   * baseline instead of their data. Sync (when it runs) resumes the rebuild by
+   * itself — but when it cannot (offline, or the user disabled sync after
+   * finding the app "emptied" by the crash), the pre-replace backup would have
+   * no visible entry point. Surfaces the persistent restore snack in that case.
+   */
+  private async _offerInterruptedRebuildRecoveryIfNeeded(): Promise<void> {
+    try {
+      const [isIncomplete, completedRecovery] = await Promise.all([
+        this._opLogStore.isRawRebuildIncomplete(),
+        this._opLogStore.loadRawRebuildRecovery(),
+      ]);
+      if (isIncomplete || completedRecovery) {
+        await this._injector
+          .get(OperationLogSyncService)
+          .offerInterruptedRebuildRecovery();
+      }
+    } catch (err) {
+      Log.err({
+        stage: 'interrupted-rebuild-recovery-check',
+        error: (err as Error)?.message,
+      });
     }
   }
 

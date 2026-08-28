@@ -1,4 +1,4 @@
-import { Operation, VectorClock } from '../operation.types';
+import { Operation, OperationLogEntry, VectorClock } from '../operation.types';
 import { OperationSyncProviderMode } from '../../sync-providers/provider.interface';
 
 /**
@@ -53,8 +53,8 @@ export interface DownloadResultBase {
   snapshotVectorClock?: VectorClock;
   /**
    * True when operations were downloaded AND ALL of them have isPayloadEncrypted: false.
-   * This indicates another client disabled encryption. The receiving client should
-   * update its local config to match (isEncryptionEnabled: false, encryptKey: undefined).
+   * This may indicate another client disabled encryption, but the signal is remotely
+   * controllable. Callers may warn; they must never disable local encryption automatically.
    *
    * False/undefined when:
    * - No operations were downloaded (cannot determine encryption state)
@@ -90,6 +90,14 @@ export interface FileSnapshotDownloadResult extends DownloadResultBase {
    * Contains the complete application state for bootstrapping a new client.
    */
   snapshotState?: unknown;
+  /** Last modification time recorded by the remote snapshot/ops file. */
+  remoteLastModified?: number;
+  /**
+   * Operation ids already represented by `snapshotState`. When omitted, all
+   * returned operations are treated as snapshot-included for compatibility
+   * with file providers that expose a fully current snapshot.
+   */
+  snapshotAppliedOpIds?: string[];
 }
 
 export type DownloadResult =
@@ -106,6 +114,13 @@ export interface UploadResult {
   piggybackedOps: Operation[];
   rejectedCount: number;
   rejectedOps: RejectedOpInfo[];
+  /** Exact in-lock pending set considered by this upload round. */
+  selectedPendingOps?: OperationLogEntry[];
+  /**
+   * Accepted/local-only operation sequences whose acknowledgement was deliberately
+   * deferred until the caller has resolved and applied piggybacked operations.
+   */
+  pendingAcknowledgementSeqs?: number[];
   /**
    * Number of local-win update ops created during LWW conflict resolution.
    * These ops need to be uploaded to propagate local state to other clients.
@@ -126,8 +141,8 @@ export interface UploadResult {
   hasMorePiggyback?: boolean;
   /**
    * True when piggybacked operations were received AND ALL of them have isPayloadEncrypted: false.
-   * This indicates another client disabled encryption. The receiving client should
-   * update its local config to match (isEncryptionEnabled: false, encryptKey: undefined).
+   * This may indicate another client disabled encryption, but the signal is remotely
+   * controllable. Callers may warn; they must never disable local encryption automatically.
    *
    * False/undefined when:
    * - No piggybacked operations were received (cannot determine encryption state)
@@ -159,6 +174,19 @@ export interface UploadResult {
    * pending ops to upload (the guard fires after the empty-ops check).
    */
   encryptionRequiredKeyMissing?: boolean;
+  /**
+   * True when pending incremental operations were kept local because the newest
+   * explicit import/restore boundary was permanently rejected by the server.
+   * A newer successful full-state operation clears the barrier.
+   */
+  blockedByRejectedFullState?: boolean;
+  /**
+   * True when a full-state operation (SYNC_IMPORT / BACKUP_IMPORT) failed with a
+   * retryable error, so it — and every pending op after it — stayed local for the
+   * next sync. Nothing reached the server, so the caller must not claim IN_SYNC.
+   * Distinct from `blockedByRejectedFullState`, which is a permanent rejection.
+   */
+  fullStateUploadDeferred?: boolean;
 }
 
 /**
@@ -166,10 +194,27 @@ export interface UploadResult {
  */
 export interface UploadOptions {
   /**
-   * Optional callback executed INSIDE the upload lock, BEFORE checking for pending ops.
-   * Use this for operations that must be atomic with the upload, such as server migration checks.
+   * Optional preparation callback executed inside upload serialization and
+   * before capturing pending operations. The callback owns any narrower
+   * operation-log transaction needed for its local mutation.
    */
   preUploadCallback?: () => Promise<void>;
+
+  /**
+   * Return accepted sequence numbers to the caller instead of marking them synced
+   * immediately. Required when piggybacked full-state operations may need user
+   * resolution before the upload round is considered committed locally.
+   */
+  deferAcknowledgement?: boolean;
+
+  /**
+   * Sync epoch captured at cycle start (#9074). Re-asserted before the local
+   * writes in the upload flow (migration append, acknowledgement persist) so a
+   * stale cycle aborts with SyncEpochChangedError after a destructive config
+   * change instead of writing against the new epoch. Provider I/O is fenced
+   * separately by the epoch-guarded provider delegate.
+   */
+  fenceEpoch?: number;
 
   /**
    * If true, instructs server to delete all existing user data before accepting uploaded operations.
@@ -200,17 +245,29 @@ export interface UploadOptions {
  * SyncSessionValidationService latch — the wrapper reads it once before
  * deciding IN_SYNC vs ERROR. (#7330)
  */
-export interface DownloadResultForRejection {
-  newOpsCount: number;
-  allOpClocks?: VectorClock[];
-  snapshotVectorClock?: VectorClock;
-}
+export type DownloadResultForRejection =
+  | {
+      kind: 'completed';
+      newOpsCount: number;
+      /** Local-win operations created while applying this nested download. */
+      localWinOpsCreated?: number;
+      allOpClocks?: VectorClock[];
+      snapshotVectorClock?: VectorClock;
+      /** Server cursor after the downloaded operations were durably applied. */
+      latestServerSeq?: number;
+    }
+  | {
+      /** User declined the nested SYNC_IMPORT conflict resolution. */
+      kind: 'cancelled';
+    };
 
 /**
  * Callback type for triggering downloads during concurrent modification resolution.
  */
 export type DownloadCallback = (options?: {
   forceFromSeq0?: boolean;
+  /** Local full-state boundaries to ignore while processing this recovery download. */
+  ignoredLocalFullStateOpIds?: string[];
 }) => Promise<DownloadResultForRejection>;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -254,6 +311,10 @@ export type DownloadOutcome =
   | {
       /** User cancelled a SYNC_IMPORT conflict dialog. */
       kind: 'cancelled';
+    }
+  | {
+      /** Processing stopped at an op this app version cannot interpret safely. */
+      kind: 'blocked_incompatible';
     };
 
 /**
@@ -280,8 +341,16 @@ export type UploadOutcome =
        * key is configured, leaving pending ops unsynced. The wrapper must not claim IN_SYNC.
        */
       encryptionRequiredKeyMissing?: boolean;
+      /** Pending ops depend on an explicit full-state baseline the server rejected. */
+      blockedByRejectedFullState?: boolean;
+      /** A full-state op hit a retryable server error; nothing was uploaded this round. */
+      fullStateUploadDeferred?: boolean;
     }
   | {
       /** User cancelled a piggybacked SYNC_IMPORT conflict dialog. */
       kind: 'cancelled';
+    }
+  | {
+      /** Piggyback processing stopped at an incompatible operation. */
+      kind: 'blocked_incompatible';
     };

@@ -2,6 +2,7 @@
 export {
   OpType,
   isMultiEntityPayload,
+  isLwwUpdatePayload,
   extractActionPayload,
   extractEntityFromPayload,
   extractUpdateChanges,
@@ -14,6 +15,8 @@ export type {
   ConflictResult,
   EntityChange,
   MultiEntityPayload,
+  LwwUpdateMode,
+  LwwUpdatePayload,
 } from './operation.types';
 
 // Vector-clock algorithms — single source of truth for client/server parity.
@@ -31,6 +34,7 @@ export { classifyOpAgainstSyncImport } from './sync-import-filter';
 // Host-configured sync file prefix helpers.
 export { createSyncFilePrefixHelpers } from './sync-file-prefix';
 export type {
+  SyncFileHeadShape,
   SyncFilePrefixInvalidPrefixDetails,
   SyncFilePrefixParams,
   SyncFilePrefixParamsOutput,
@@ -51,6 +55,7 @@ export {
   decrypt,
   encryptBatch,
   decryptBatch,
+  decryptBatchSettled,
   deriveKeyFromPassword,
   clearSessionKeyCache,
   getSessionKeyCacheStats,
@@ -59,7 +64,14 @@ export {
   setArgon2ParamsForTesting,
   setLegacyKdfWarningHandler,
 } from './encryption';
-export type { DerivedKey } from './encryption';
+export type { DerivedKey, DecryptSettledItem } from './encryption';
+
+// Structural ciphertext-transport classifier — used by the SuperSync server's
+// encrypted-only ingress gate (E2EE_REQUIRED). Shape check only, never proof.
+export {
+  isEncryptedPayloadTransportShape,
+  MIN_ENCRYPTED_PAYLOAD_TRANSPORT_BYTES,
+} from './encryption/transport-shape';
 
 // Generic error helpers.
 export { extractErrorMessage } from './error.util';
@@ -75,7 +87,11 @@ export { createLwwUpdateActionTypeHelpers } from './lww-update-action-types';
 export type { LwwUpdateActionTypeHelpers } from './lww-update-action-types';
 
 // Apply-operation result and option types.
-export type { ApplyOperationsResult, ApplyOperationsOptions } from './apply.types';
+export type {
+  ApplyOperationsResult,
+  ApplyOperationsOptions,
+  OperationApplyFailure,
+} from './apply.types';
 
 // Generic operation replay coordinator.
 export { replayOperationBatch } from './replay-coordinator';
@@ -109,6 +125,7 @@ export type {
   ConflictUiPort,
   DeferredLocalActionsPort,
   OperationApplyPort,
+  ReducerCommitAwareOperationApplyPort,
   RemoteApplyWindowPort,
   SyncActionLike,
 } from './ports';
@@ -126,6 +143,7 @@ export type {
   ConflictResolutionSuggestion,
   EntityConflictLike,
   LwwConflictResolutionPlan,
+  LwwConflictResolutionReason,
   LwwResolvedConflict,
 } from './conflict-resolution';
 

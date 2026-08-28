@@ -81,6 +81,7 @@ export type TasksConfig = Readonly<{
 export type ShortSyntaxConfig = Readonly<{
   isEnableProject: boolean;
   isEnableDue: boolean;
+  isEnableDeadline?: boolean;
   isEnableTag: boolean;
   urlBehavior?: 'keep' | 'extract' | 'keep-and-attach';
 }>;
@@ -105,6 +106,7 @@ export type IdleConfig = Readonly<{
   isEnableIdleTimeTracking: boolean;
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
+  isSuppressIdleDuringFocusMode: boolean;
 }>;
 
 export type TakeABreakConfig = Readonly<{
@@ -159,6 +161,10 @@ export interface SuperSyncConfig extends WebDavConfig {
   isEncryptionEnabled?: boolean;
   /** Encryption password (SuperSync-specific, stored in private config) */
   encryptKey?: string | null;
+  // NOTE: the experimental live-tracking-presence opt-in is intentionally NOT
+  // here. It is a per-device choice stored in the provider's private config
+  // (`SuperSyncPrivateCfg.isTrackingPresenceEnabled`) so it is never uploaded
+  // or shared across devices — see SyncWrapperService._applyTrackingPresenceGate.
 }
 
 export interface NextcloudConfig {
@@ -214,6 +220,13 @@ export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled?: boolean;
   isCompressionEnabled?: boolean;
+  /**
+   * SPAP-11: opt-in "Surgical sync" — store file-based sync as a small always-read
+   * ops file (`sync-ops.json`) plus a rarely-rewritten snapshot (`sync-state.json`)
+   * for O(delta) syncs. Default OFF. One-way per sync folder: once a client with
+   * this ON migrates the folder, other clients must also turn it on to continue.
+   */
+  isUseSplitSyncFiles?: boolean;
   syncProvider: SyncProviderId | null;
   syncInterval: number;
   isManualSyncOnly?: boolean;

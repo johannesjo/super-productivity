@@ -139,7 +139,9 @@ interface MainModelData {
   [modelId: string]: ModelBase;
 }
 
-interface RemoteMeta extends MetaFileBase {
+interface RemoteMeta extends Omit<MetaFileBase, 'lastUpdate'> {
+  /** Null when the remote format does not provide a trustworthy timestamp. */
+  lastUpdate: number | null;
   mainModelData: MainModelData;
   isFullData?: boolean;
 }
@@ -153,6 +155,15 @@ export interface ConflictData {
   reason: ConflictReason;
   remote: RemoteMeta;
   local: LocalMeta;
+  /**
+   * Exact number of unsynced local ops known at conflict time (from
+   * LocalDataConflictError.unsyncedCount). The conflict dialog prefers it over
+   * the vector-clock delta as the local change count: compaction can fold
+   * still-unsynced ops into the last-synced baseline clock, so the delta can
+   * under-count real pending local changes, while this is precisely what
+   * USE_REMOTE would discard.
+   */
+  localUnsyncedOpsCount?: number;
   additional?: unknown;
 }
 

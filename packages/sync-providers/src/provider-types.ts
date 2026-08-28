@@ -36,6 +36,13 @@ export interface SyncProviderBase<
    * hook. See issue #7616.
    */
   clearAuthCredentials?(): Promise<void>;
+  /**
+   * Drops caches derived from the stored credentials so the next read hits
+   * the persistent store. Implement when the provider caches credential
+   * state that another context sharing the store (a second browser tab)
+   * can change underneath it — e.g. SuperSync's token-derived cursor key.
+   */
+  invalidateCredentialCache?(): void;
 }
 
 export interface FileRevResponse {
@@ -54,6 +61,14 @@ export interface FileSyncProvider<
 
   getFileRev(targetPath: string, localRev: string | null): Promise<FileRevResponse>;
   downloadFile(targetPath: string): Promise<FileDownloadResponse>;
+  /**
+   * Conditionally replaces a file when `revToMatch` is a revision returned by a
+   * prior read. A `null` revision means "create only if absent"; force overwrite
+   * bypasses the condition. Network providers should enforce the comparison in
+   * the storage service itself. Providers backed by an API without atomic CAS
+   * may only offer a documented best-effort check and must not be presented as
+   * safe for concurrent multi-device writers.
+   */
   uploadFile(
     targetPath: string,
     dataStr: string,
@@ -92,6 +107,7 @@ export interface SyncOperation {
   schemaVersion: number;
   isPayloadEncrypted?: boolean;
   syncImportReason?: string;
+  repairBaseServerSeq?: number;
 }
 
 export interface ServerSyncOperation {
@@ -114,6 +130,7 @@ export interface OpUploadResponse {
   newOps?: ServerSyncOperation[];
   latestSeq: number;
   hasMorePiggyback?: boolean;
+  deduplicated?: boolean;
 }
 
 export interface OpDownloadResponseBase {
@@ -123,6 +140,9 @@ export interface OpDownloadResponseBase {
   gapDetected?: boolean;
   snapshotVectorClock?: VectorClock;
   serverTime?: number;
+  capabilities?: {
+    causalRepairSnapshots?: true;
+  };
 }
 
 export interface SuperSyncOpDownloadResponse extends OpDownloadResponseBase {
@@ -131,6 +151,14 @@ export interface SuperSyncOpDownloadResponse extends OpDownloadResponseBase {
 
 export interface FileSnapshotOpDownloadResponse extends OpDownloadResponseBase {
   snapshotState?: unknown;
+  /** Last modification time recorded by the remote snapshot/ops file. */
+  remoteLastModified?: number;
+  /**
+   * Operation ids whose effects are already represented by `snapshotState`.
+   * Operations returned alongside a snapshot but absent from this list must be
+   * applied on top of the snapshot before the download cursor is committed.
+   */
+  snapshotAppliedOpIds?: string[];
 }
 
 export type OpDownloadResponse =
@@ -146,6 +174,7 @@ export interface SnapshotUploadResponse {
   accepted: boolean;
   serverSeq?: number;
   error?: string;
+  errorCode?: string;
 }
 
 export interface OperationSyncCapable<
@@ -159,7 +188,18 @@ export interface OperationSyncCapable<
     ops: SyncOperation[],
     clientId: string,
     lastKnownServerSeq?: number,
+    /**
+     * Optional host snapshot captured atomically with `ops`. File-backed
+     * providers embed it beside their recent-op window; API providers ignore it.
+     */
+    localStateSnapshot?: unknown,
   ): Promise<OpUploadResponse>;
+  /**
+   * @param limit Best-effort page-size hint. Cursor-based providers (SuperSync)
+   * honor it and paginate; cursorless file-based providers cannot paginate (they
+   * re-download the whole file each call) and ignore it, returning their whole
+   * write-bounded ops buffer in a single page (`hasMore` is always `false`).
+   */
   downloadOps(
     sinceSeq: number,
     excludeClient?: string,
@@ -167,6 +207,8 @@ export interface OperationSyncCapable<
   ): Promise<OpDownloadResponseForMode<M>>;
   getLastServerSeq(): Promise<number>;
   setLastServerSeq(seq: number): Promise<void>;
+  /** True only after this provider has observed an explicit server capability. */
+  supportsCausalRepairSnapshots?(): boolean;
   uploadSnapshot(
     state: unknown,
     clientId: string,
@@ -178,6 +220,7 @@ export interface OperationSyncCapable<
     isCleanSlate?: boolean,
     snapshotOpType?: TRestorePointType,
     syncImportReason?: string,
+    repairBaseServerSeq?: number,
   ): Promise<SnapshotUploadResponse>;
   deleteAllData(): Promise<{ success: boolean }>;
   getEncryptKey?(): Promise<string | undefined>;

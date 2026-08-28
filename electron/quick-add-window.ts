@@ -4,6 +4,7 @@ import { error } from 'electron-log/main';
 import { IS_MAC } from './common.const';
 import { getIsAppReady, getWinSafe } from './main-window';
 import { isAppOriginUrl } from './navigation-guard';
+import { assertSecureWebPreferences } from './web-preferences-guard';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { showOrFocus } from './various-shared';
 import type {
@@ -213,6 +214,22 @@ const createQuickAddWindow = (): void => {
   }
 
   const { x, y, width, height } = _getQuickAddWindowBounds();
+  const webPreferences: Electron.BrowserWindowConstructorOptions['webPreferences'] = {
+    devTools: false,
+    scrollBounce: false,
+    backgroundThrottling: false,
+    webSecurity: true,
+    preload: join(__dirname, 'quick-add-preload.js'),
+    nodeIntegration: false,
+    contextIsolation: true,
+    // The HUD renders no sub-frames, but the flag is stated so the guard below
+    // has a concrete value rather than an Electron default to check.
+    nodeIntegrationInSubFrames: false,
+    disableDialogs: true,
+  };
+  // Same trust boundary as the main window: the HUD holds the quick-add IPC
+  // bridge, so `require`/`ipcRenderer` must stay out of its main world.
+  assertSecureWebPreferences(webPreferences, 'quick-add');
   quickAddWin = new BrowserWindow({
     width,
     height,
@@ -231,17 +248,7 @@ const createQuickAddWindow = (): void => {
     closable: true,
     show: false,
     backgroundColor: '#00000000',
-    webPreferences: {
-      devTools: false,
-      scrollBounce: false,
-      backgroundThrottling: false,
-      webSecurity: true,
-      preload: join(__dirname, 'quick-add-preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
-      sandbox: false,
-      disableDialogs: true,
-    },
+    webPreferences,
   });
 
   const quickAddUrl = _buildQuickAddUrl(loadUrl);
