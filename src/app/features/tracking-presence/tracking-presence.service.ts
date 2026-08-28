@@ -1,6 +1,14 @@
-import { Injectable, Injector, OnDestroy, computed, inject, signal } from '@angular/core';
+import {
+  EffectRef,
+  Injectable,
+  Injector,
+  OnDestroy,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
-import { lazyInject } from '../../util/lazy-inject';
 import { Subscription, combineLatest } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { nanoid } from 'nanoid';
@@ -38,6 +46,14 @@ import { isOperationSyncCapable } from '../../op-log/sync/operation-sync.util';
 
 /** Staleness re-check cadence for viewers; display is minute-granular. */
 const VIEW_TICK_MS = 30_000;
+
+/**
+ * Relayed payload fields are untrusted (with E2EE off a hostile server can
+ * inject them). The label ends up as a translate param inside an [innerHtml]
+ * snack, so strip markup-capable chars and cap length instead of trusting it.
+ */
+const sanitizeDeviceLabel = (v: unknown): string =>
+  typeof v === 'string' ? v.replace(/[<>&"'`]/g, '').slice(0, 32) : '';
 
 interface LocalDerivedState {
   taskId: string | null;
@@ -77,19 +93,16 @@ interface LocalSession {
 export class TrackingPresenceService implements OnDestroy {
   private _store = inject(Store);
   private _injector = inject(Injector);
-  // Lazily resolved: this service is constructed on every platform (via
-  // SyncWrapperService and the header), and these collaborators do real work
-  // in their constructors — they must only materialize once presence is used.
-  private _getWs = lazyInject(this._injector, SuperSyncWebSocketService);
-  private _getProviderManager = lazyInject(this._injector, SyncProviderManager);
-  private _getEncryption = lazyInject(this._injector, OperationEncryptionService);
-  private _getSnackService = lazyInject(this._injector, SnackService);
+  private _ws = inject(SuperSyncWebSocketService);
+  private _providerManager = inject(SyncProviderManager);
+  private _encryption = inject(OperationEncryptionService);
+  private _snackService = inject(SnackService);
 
   /** Last known remote tracking session, or null when there is none to show. */
   readonly remoteSession = signal<RemoteTrackingSession | null>(null);
 
-  /** Mirrors selectCurrentTaskId; feeds view suppression while WE track. */
-  private _localTaskIdView = signal<string | null>(null);
+  /** Feeds view suppression while WE track. */
+  private _localTaskIdView = this._store.selectSignal(selectCurrentTaskId);
   /** Ticks (only while a session is shown) so staleness re-evaluates. */
   private _viewNow = signal(Date.now());
 
@@ -130,6 +143,13 @@ export class TrackingPresenceService implements OnDestroy {
     };
   });
 
+  /**
+   * Boolean gate for the hot-path main header: `remoteSessionView` mints a
+   * fresh object on every staleness tick, this flips only when visibility
+   * actually changes — so the header isn't re-dirtied twice a minute.
+   */
+  readonly isRemoteSessionShown = computed(() => this.remoteSessionView() !== null);
+
   private _subs: Subscription | null = null;
   private _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private _lingerTimer: ReturnType<typeof setTimeout> | null = null;
@@ -148,11 +168,37 @@ export class TrackingPresenceService implements OnDestroy {
   // Viewer ordering state
   private _lastOrdinal = 0;
 
+  // Reconnect handling
+  private _connEffect: EffectRef | null = null;
+  private _wasConnected = false;
+  /** A state broadcast was dropped while offline and must go out on reconnect. */
+  private _pendingResend = false;
+
   start(): void {
     if (this._subs) {
       return;
     }
     this._subs = new Subscription();
+
+    this._connEffect = effect(
+      () => {
+        const isConnected = this._ws.isConnected();
+        if (isConnected && !this._wasConnected) {
+          // Fresh connection: the server's ordinal chain restarts whenever the
+          // user's last socket drops (not just on server restart) — never let
+          // yesterday's high-water mark silently drop today's states.
+          this._lastOrdinal = 0;
+          if (this._pendingResend) {
+            this._pendingResend = false;
+            // Announce the transition that was dropped while offline — else a
+            // stop made offline leaves a phantom session in the server cache.
+            this._broadcastState();
+          }
+        }
+        this._wasConnected = isConnected;
+      },
+      { injector: this._injector },
+    );
 
     this._subs.add(
       combineLatest([
@@ -182,7 +228,7 @@ export class TrackingPresenceService implements OnDestroy {
     );
 
     this._subs.add(
-      this._getWs().presenceMessage$.subscribe((msg) => {
+      this._ws.presenceMessage$.subscribe((msg) => {
         this._onPresenceMessage(msg).catch((err) =>
           SyncLog.warn('TrackingPresenceService: Failed to handle presence message', err),
         );
@@ -193,6 +239,10 @@ export class TrackingPresenceService implements OnDestroy {
   stop(): void {
     this._subs?.unsubscribe();
     this._subs = null;
+    this._connEffect?.destroy();
+    this._connEffect = null;
+    this._wasConnected = false;
+    this._pendingResend = false;
     this._stopHeartbeat();
     this._setRemoteSession(null);
     this._lastOrdinal = 0;
@@ -230,7 +280,6 @@ export class TrackingPresenceService implements OnDestroy {
 
   private _onLocalChange(derived: LocalDerivedState): void {
     this._focusCycle = derived.isFocusRunning ? derived.focusCycle : undefined;
-    this._localTaskIdView.set(derived.taskId);
 
     if (derived.taskId) {
       const isNewSession =
@@ -247,8 +296,12 @@ export class TrackingPresenceService implements OnDestroy {
     }
 
     const wasTracking = this._current.state === 'tracking';
+    const wasIdlePaused = this._current.reason === 'idle';
+    // 'idle' is only claimed when the idle event interrupted (or continues
+    // interrupting) a live session — an idle episode hours after a manual
+    // stop must not resurrect the old task on other devices.
     const reason =
-      derived.isIdle && this._lastTrackedTaskId !== null ? ('idle' as const) : undefined;
+      derived.isIdle && (wasTracking || wasIdlePaused) ? ('idle' as const) : undefined;
     const next: LocalSession = {
       state: 'stopped',
       taskId: reason ? this._lastTrackedTaskId : null,
@@ -256,7 +309,15 @@ export class TrackingPresenceService implements OnDestroy {
     };
     const reasonChanged = this._current.reason !== next.reason;
     this._current = next;
-    this._stopHeartbeat();
+    if (reason) {
+      // Keep announcing during an idle pause: real pauses run for minutes,
+      // and without a heartbeat viewers' 90s staleness window would decay
+      // "Paused" into "Was tracking" while the producer sits right there.
+      this._startHeartbeat();
+    } else {
+      this._stopHeartbeat();
+      this._lastTrackedTaskId = null;
+    }
 
     // Broadcasting `stopped` is only this device's business if it was the one
     // tracking (or its idle pause is ending/starting) — see class invariants.
@@ -296,7 +357,7 @@ export class TrackingPresenceService implements OnDestroy {
       return;
     }
     this._heartbeatTimer = setInterval(() => {
-      if (this._current.state === 'tracking') {
+      if (this._current.state === 'tracking' || this._current.reason === 'idle') {
         this._broadcastState();
       }
     }, PRESENCE_HEARTBEAT_MS);
@@ -332,9 +393,16 @@ export class TrackingPresenceService implements OnDestroy {
     if (
       p.v !== 1 ||
       typeof p.sessionId !== 'string' ||
-      (p.state !== 'tracking' && p.state !== 'stopped')
+      (p.state !== 'tracking' && p.state !== 'stopped') ||
+      typeof p.seq !== 'number' ||
+      !Number.isFinite(p.sinceTs) ||
+      (p.taskId !== null && typeof p.taskId !== 'string')
     ) {
       return;
+    }
+    p.deviceLabel = sanitizeDeviceLabel(p.deviceLabel);
+    if (!Number.isFinite(p.focusCycle as number)) {
+      delete p.focusCycle;
     }
     // Server-assigned ordinal orders states across producers without trusting
     // device clocks. Equal ordinals are re-announcements of the same state
@@ -353,7 +421,7 @@ export class TrackingPresenceService implements OnDestroy {
     }
 
     if (p.state === 'tracking' && this._current.state === 'tracking') {
-      this._resolveTakeover(p);
+      this._resolveTakeover(p, msg.producerConnected);
       return;
     }
 
@@ -381,7 +449,7 @@ export class TrackingPresenceService implements OnDestroy {
    * Losing is loud and reversible: an attributed snack with a one-tap
    * take-back — silent stops read as data-loss bugs.
    */
-  private _resolveTakeover(p: TrackingPresencePayload): void {
+  private _resolveTakeover(p: TrackingPresencePayload, producerConnected: boolean): void {
     const remoteWins =
       p.sinceTs > this._sinceTs ||
       (p.sinceTs === this._sinceTs && p.sessionId > this._sessionId);
@@ -394,7 +462,7 @@ export class TrackingPresenceService implements OnDestroy {
     const prevTaskId = this._current.taskId;
     this._suppressNextStopBroadcast = true;
     this._store.dispatch(setCurrentTask({ id: null }));
-    this._getSnackService().open({
+    this._snackService.open({
       msg: T.F.TRACKING_PRESENCE.S.MOVED_TO,
       translateParams: { device: p.deviceLabel },
       actionStr: T.F.TRACKING_PRESENCE.S.TRACK_HERE_AGAIN,
@@ -406,7 +474,7 @@ export class TrackingPresenceService implements OnDestroy {
     });
     this._setRemoteSession({
       payload: p,
-      producerConnected: true,
+      producerConnected,
       receivedAt: Date.now(),
     });
   }
@@ -425,7 +493,7 @@ export class TrackingPresenceService implements OnDestroy {
       return;
     }
     this._store.dispatch(setCurrentTask({ id: null }));
-    this._getSnackService().open({
+    this._snackService.open({
       msg: T.F.TRACKING_PRESENCE.S.STOPPED_FROM,
       translateParams: { device: cmd.deviceLabel },
     });
@@ -465,20 +533,48 @@ export class TrackingPresenceService implements OnDestroy {
   // Wire encoding — opaque envelope, E2E-encrypted when a key is configured
   // ----------------------------------------------------------------------
 
-  private async _send(
+  private _sendChain: Promise<void> = Promise.resolve();
+
+  private _send(
     type: 'presence_state' | 'presence_cmd',
     obj: TrackingPresencePayload | TrackingPresenceCmd,
   ): Promise<void> {
-    if (!this._getWs().isConnected()) {
-      // Fire-and-forget: skip the encode/encrypt work entirely while the
-      // socket is down; the next transition/heartbeat re-announces anyway.
+    // Serialized: encrypt latency varies (cold key derivation), and an older
+    // `tracking` finishing after a newer `stopped` would leave a phantom
+    // session in the single-slot server cache.
+    const next = this._sendChain.then(() => this._doSend(type, obj));
+    this._sendChain = next.catch(() => undefined);
+    return next;
+  }
+
+  private async _doSend(
+    type: 'presence_state' | 'presence_cmd',
+    obj: TrackingPresencePayload | TrackingPresenceCmd,
+  ): Promise<void> {
+    if (!this._ws.isConnected()) {
+      if (type === 'presence_state') {
+        // Remember that a transition was dropped so the reconnect handler can
+        // announce it — else a stop made offline leaves a phantom session.
+        this._pendingResend = true;
+      }
       return;
     }
-    const key = await this._getEncryptKey();
+    let key: string | undefined;
+    try {
+      key = await this._getEncryptKey();
+    } catch (err) {
+      // Fail closed: never fall back to plaintext when the key merely failed
+      // to resolve — drop the message; the next transition/heartbeat retries.
+      SyncLog.warn(
+        'TrackingPresenceService: Encrypt key unresolved — dropping send',
+        err,
+      );
+      return;
+    }
     const envelope: TrackingPresenceEnvelope = key
-      ? { enc: true, data: await this._getEncryption().encryptPayload(obj, key) }
+      ? { enc: true, data: await this._encryption.encryptPayload(obj, key) }
       : { enc: false, data: JSON.stringify(obj) };
-    this._getWs().sendPresence(type, JSON.stringify(envelope));
+    this._ws.sendPresence(type, JSON.stringify(envelope));
   }
 
   private async _decode(payloadStr: string): Promise<unknown | null> {
@@ -492,15 +588,20 @@ export class TrackingPresenceService implements OnDestroy {
       return null;
     }
     try {
+      const key = await this._getEncryptKey();
       if (envelope.enc) {
-        const key = await this._getEncryptKey();
         if (!key) {
           SyncLog.warn(
             'TrackingPresenceService: Encrypted presence received but no key configured',
           );
           return null;
         }
-        return await this._getEncryption().decryptPayload(envelope.data, key);
+        return await this._encryption.decryptPayload(envelope.data, key);
+      }
+      if (key) {
+        // Encryption is configured: refuse plaintext — a hostile server could
+        // otherwise inject fabricated presence states around the E2EE.
+        return null;
       }
       return JSON.parse(envelope.data);
     } catch (err) {
@@ -509,17 +610,13 @@ export class TrackingPresenceService implements OnDestroy {
     }
   }
 
+  /** Throws when key resolution fails — callers decide the fail-closed path. */
   private async _getEncryptKey(): Promise<string | undefined> {
-    try {
-      const provider = await this._getProviderManager().getProviderById(
-        SyncProviderId.SuperSync,
-      );
-      return provider && isOperationSyncCapable(provider) && provider.getEncryptKey
-        ? await provider.getEncryptKey()
-        : undefined;
-    } catch (err) {
-      SyncLog.warn('TrackingPresenceService: Failed to resolve encrypt key', err);
-      return undefined;
-    }
+    const provider = await this._providerManager.getProviderById(
+      SyncProviderId.SuperSync,
+    );
+    return provider && isOperationSyncCapable(provider) && provider.getEncryptKey
+      ? await provider.getEncryptKey()
+      : undefined;
   }
 }

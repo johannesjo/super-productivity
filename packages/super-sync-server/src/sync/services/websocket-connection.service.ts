@@ -25,6 +25,10 @@ interface ConnectedClient {
    * because the count remains observably truthful for the life of the object.
    */
   summaryLogged: boolean;
+  /** Start of the current presence rate-limit window (wall-clock ms). */
+  presenceWindowStart: number;
+  /** Presence messages accepted in the current window. */
+  presenceMsgCount: number;
 }
 
 /**
@@ -92,8 +96,25 @@ export class WebSocketConnectionService {
   /**
    * Upper bound for a relayed presence payload. Presence states are tiny
    * (session id + task id + labels); anything larger is dropped as abuse.
+   * Must stay <= the route-level `maxPayload` in server.ts, which errors the
+   * whole socket instead of dropping just the message.
    */
   private static readonly MAX_PRESENCE_PAYLOAD_BYTES = 8_192;
+  /**
+   * Presence relay rate limit per connection. A well-behaved producer sends
+   * transitions plus a 60s heartbeat (~1/min, short takeover bursts), so this
+   * is generous — anything sustained above it is a client bug or abuse, and
+   * relaying it would amplify to every sibling socket.
+   */
+  private static readonly PRESENCE_RATE_WINDOW_MS = 10_000;
+  private static readonly PRESENCE_RATE_MAX_PER_WINDOW = 15;
+  /**
+   * Don't send cached presence to newly connecting sockets once it is older
+   * than the viewers' own hide window (PRESENCE_HIDE_STALE_AFTER_MS client-
+   * side) — clients stamp snapshots with their local receive time, so an
+   * old snapshot would otherwise revive as "fresh" on every reconnect.
+   */
+  private static readonly PRESENCE_SNAPSHOT_MAX_AGE_MS = 30 * 60_000;
   /**
    * Sliding-window cooldown. While a still-OPEN incumbent's `cooldownUntil` is
    * in the future, a new socket from the same clientId is refused (the
@@ -200,6 +221,8 @@ export class WebSocketConnectionService {
       cooldownUntil: nowMs + WebSocketConnectionService.RECONNECT_COOLDOWN_MS,
       refusedChallengers: 0,
       summaryLogged: false,
+      presenceWindowStart: nowMs,
+      presenceMsgCount: 0,
     };
     userSet.add(client);
 
@@ -224,8 +247,14 @@ export class WebSocketConnectionService {
 
     // Send the cached presence snapshot so a device connecting mid-session
     // immediately sees what another device is tracking. Skipped for the
-    // producer itself — its own next state transition/heartbeat is fresher.
-    if (presence && presence.producerClientId !== clientId) {
+    // producer itself — its own next state transition/heartbeat is fresher —
+    // and for entries the viewer would hide as stale anyway.
+    if (
+      presence &&
+      presence.producerClientId !== clientId &&
+      Date.now() - presence.updatedAt <
+        WebSocketConnectionService.PRESENCE_SNAPSHOT_MAX_AGE_MS
+    ) {
       this._sendMessage(ws, this._presenceStateMsg(presence));
     }
 
@@ -394,6 +423,28 @@ export class WebSocketConnectionService {
       return;
     }
 
+    const now = Date.now();
+    if (
+      now - client.presenceWindowStart >
+      WebSocketConnectionService.PRESENCE_RATE_WINDOW_MS
+    ) {
+      client.presenceWindowStart = now;
+      client.presenceMsgCount = 0;
+    }
+    if (
+      ++client.presenceMsgCount > WebSocketConnectionService.PRESENCE_RATE_MAX_PER_WINDOW
+    ) {
+      if (
+        client.presenceMsgCount ===
+        WebSocketConnectionService.PRESENCE_RATE_MAX_PER_WINDOW + 1
+      ) {
+        Logger.warn(
+          `[ws:user:${client.userId}:${client.clientId}] Presence rate limit hit — dropping ${type}`,
+        );
+      }
+      return;
+    }
+
     if (type === 'presence_state') {
       const prev = this.presenceByUser.get(client.userId);
       const presence: UserPresence = {
@@ -474,9 +525,13 @@ export class WebSocketConnectionService {
     }
     // The producer may have just RE-connected: eviction removes the old
     // socket while a live replacement with the same clientId exists.
-    const stillConnected = [...(this.connections.get(userId) ?? [])].some(
-      (c) => c.clientId === clientId,
-    );
+    let stillConnected = false;
+    for (const c of this.connections.get(userId) ?? []) {
+      if (c.clientId === clientId) {
+        stillConnected = true;
+        break;
+      }
+    }
     if (stillConnected) {
       return;
     }

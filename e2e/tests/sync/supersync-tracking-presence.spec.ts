@@ -62,7 +62,9 @@ test.describe('@supersync Tracking Presence', () => {
       // A starts tracking -> B shows the remote pill with the task title
       const taskA = clientA.page.locator(`task:has-text("${taskName}")`).first();
       await taskA.hover();
-      await taskA.locator('.play-btn, .pause-btn').first().click();
+      // The in-task start button is `.start-task-btn` in the hover controls
+      // (`.play-btn` only exists on the header FAB, outside <task>).
+      await taskA.locator('.start-task-btn').first().click();
 
       const remotePillB = clientB.page.locator('remote-tracking-pill');
       await expect(remotePillB).toBeVisible({ timeout: 10000 });

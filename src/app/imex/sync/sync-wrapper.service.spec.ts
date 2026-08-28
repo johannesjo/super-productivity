@@ -726,6 +726,42 @@ describe('SyncWrapperService', () => {
 
       expect(mockSuperSyncWsService.connect).not.toHaveBeenCalled();
     });
+
+    // The gate must run on EVERY sync cycle, not only inside connectWebSocket():
+    // the socket stays connected for days, so gating there would make toggling
+    // the setting silently do nothing until a reconnect (a failed opt-out).
+    it('should start tracking presence on sync when opted in, even with WS already connected', async () => {
+      mockSuperSyncWsService.isConnected.set(true);
+      configSubject.next(
+        createMockSyncConfig(SyncProviderId.SuperSync, {
+          superSync: { isTrackingPresenceEnabled: true },
+        }),
+      );
+      const presence = TestBed.inject(
+        TrackingPresenceService,
+      ) as jasmine.SpyObj<TrackingPresenceService>;
+
+      await service.sync();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(presence.start).toHaveBeenCalled();
+      expect(presence.stop).not.toHaveBeenCalled();
+    });
+
+    it('should stop tracking presence on sync when not opted in, even with WS already connected', async () => {
+      mockSuperSyncWsService.isConnected.set(true);
+      const presence = TestBed.inject(
+        TrackingPresenceService,
+      ) as jasmine.SpyObj<TrackingPresenceService>;
+
+      await service.sync();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(presence.stop).toHaveBeenCalled();
+      expect(presence.start).not.toHaveBeenCalled();
+    });
   });
 
   describe('_sync() - Provider handling', () => {

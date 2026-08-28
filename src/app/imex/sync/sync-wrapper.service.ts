@@ -487,9 +487,15 @@ export class SyncWrapperService {
 
     await this._superSyncWsService.connect(wsParams.baseUrl, wsParams.accessToken);
     this._wsDownloadService.start();
+  }
 
-    // Experimental opt-in; re-evaluated here after every sync cycle, so
-    // toggling the setting takes effect on the next sync without a restart.
+  /**
+   * Starts/stops tracking presence per the experimental opt-in. Runs after
+   * EVERY SuperSync sync cycle (not just on connect — the socket stays up for
+   * days), so toggling the setting takes effect on the next sync. Both
+   * start() and stop() are idempotent.
+   */
+  private async _applyTrackingPresenceGate(): Promise<void> {
     const syncCfg = await firstValueFrom(this.syncCfg$);
     if (syncCfg?.superSync?.isTrackingPresenceEnabled) {
       this._trackingPresenceService.start();
@@ -838,6 +844,14 @@ export class SyncWrapperService {
             'SyncWrapperService: WebSocket connection failed, will retry on next sync',
             err,
           );
+        });
+      }
+      if (providerId === SyncProviderId.SuperSync) {
+        // Must run every cycle, NOT only inside connectWebSocket(): the socket
+        // stays connected for days, so gating there would make toggling the
+        // presence setting (an opt-OUT too) silently do nothing until reconnect.
+        this._applyTrackingPresenceGate().catch((err) => {
+          SyncLog.warn('SyncWrapperService: Failed to apply presence setting', err);
         });
       }
 

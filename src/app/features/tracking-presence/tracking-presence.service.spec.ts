@@ -1,4 +1,5 @@
 import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
+import { WritableSignal, signal } from '@angular/core';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Subject } from 'rxjs';
 import { TrackingPresenceService } from './tracking-presence.service';
@@ -17,6 +18,7 @@ import {
 } from '../focus-mode/store/focus-mode.selectors';
 import { setCurrentTask } from '../tasks/store/task.actions';
 import {
+  PRESENCE_HEARTBEAT_MS,
   PRESENCE_HIDE_STALE_AFTER_MS,
   PRESENCE_STOPPED_LINGER_MS,
   TrackingPresenceCmd,
@@ -30,6 +32,15 @@ describe('TrackingPresenceService', () => {
   let sendPresenceSpy: jasmine.Spy;
   let snackOpenSpy: jasmine.Spy;
   let dispatchSpy: jasmine.Spy;
+  let wsConnected: WritableSignal<boolean>;
+  /** What the SyncProviderManager mock resolves; null = no encryption key. */
+  let resolvedProvider: unknown;
+
+  /** Runs pending effects (the reconnect handler is an Angular effect). */
+  const flushEffects = (): void => {
+    TestBed.tick();
+    tick();
+  };
 
   const sentPayloads = (): {
     type: string;
@@ -99,6 +110,8 @@ describe('TrackingPresenceService', () => {
     presenceMessage$ = new Subject<PresenceWsMessage>();
     sendPresenceSpy = jasmine.createSpy('sendPresence');
     snackOpenSpy = jasmine.createSpy('open');
+    wsConnected = signal(true);
+    resolvedProvider = null;
 
     TestBed.configureTestingModule({
       providers: [
@@ -116,13 +129,15 @@ describe('TrackingPresenceService', () => {
           useValue: {
             presenceMessage$,
             sendPresence: sendPresenceSpy,
-            isConnected: () => true,
+            get isConnected() {
+              return wsConnected;
+            },
           },
         },
         {
           provide: SyncProviderManager,
-          // no provider -> no encryption key -> plaintext envelopes
-          useValue: { getProviderById: () => Promise.resolve(null) },
+          // default: no provider -> no encryption key -> plaintext envelopes
+          useValue: { getProviderById: () => Promise.resolve(resolvedProvider) },
         },
         { provide: OperationEncryptionService, useValue: {} },
         { provide: SnackService, useValue: { open: snackOpenSpy } },
@@ -203,6 +218,58 @@ describe('TrackingPresenceService', () => {
       service.stop();
       flush();
     }));
+
+    it('does not resurrect an old task when idle fires after a plain stop', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      setLocalTaskId(null); // plain manual stop
+      const countAfterStop = sentStates().length;
+
+      // idle fires much later, unrelated to any live session
+      setIdle(true);
+
+      expect(sentStates().length).toBe(countAfterStop);
+      service.stop();
+      flush();
+    }));
+
+    it('keeps heartbeating during an idle pause so viewers do not decay it to stale', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      setIdle(true);
+      setLocalTaskId(null); // idle pause begins
+      const countAtPause = sentStates().length;
+
+      tick(PRESENCE_HEARTBEAT_MS + 1);
+
+      const states = sentStates();
+      expect(states.length).toBe(countAtPause + 1);
+      expect(states[states.length - 1].reason).toBe('idle');
+      service.stop();
+      flush();
+    }));
+
+    it('resends a state transition dropped while offline once reconnected', fakeAsync(() => {
+      service.start();
+      flushEffects();
+      setLocalTaskId('task-1');
+
+      wsConnected.set(false);
+      flushEffects();
+      setLocalTaskId(null); // stop while offline -> broadcast dropped
+      const countWhileOffline = sentStates().length;
+
+      wsConnected.set(true);
+      flushEffects();
+
+      const states = sentStates();
+      expect(states.length).toBe(countWhileOffline + 1);
+      expect(states[states.length - 1].state).toBe('stopped');
+      service.stop();
+      flush();
+    }));
   });
 
   describe('viewer side', () => {
@@ -263,6 +330,49 @@ describe('TrackingPresenceService', () => {
       receiveRemoteState({ taskId: 'older' }, { ordinal: 3 });
 
       expect(service.remoteSession()!.payload.taskId).toBe('newer');
+      service.stop();
+      flush();
+    }));
+
+    it('accepts low ordinals again after a reconnect (server chain restarts)', fakeAsync(() => {
+      service.start();
+      flushEffects();
+      receiveRemoteState({ taskId: 'yesterday' }, { ordinal: 500 });
+
+      wsConnected.set(false);
+      flushEffects();
+      wsConnected.set(true);
+      flushEffects();
+
+      receiveRemoteState({ taskId: 'today' }, { ordinal: 1 });
+      expect(service.remoteSession()!.payload.taskId).toBe('today');
+      service.stop();
+      flush();
+    }));
+
+    it('refuses plaintext envelopes when an encryption key is configured', fakeAsync(() => {
+      resolvedProvider = {
+        supportsOperationSync: true,
+        providerMode: 'superSyncOps',
+        getEncryptKey: () => Promise.resolve('test-key'),
+      };
+      service.start();
+      tick();
+      receiveRemoteState({ taskId: 'injected' });
+
+      expect(service.remoteSession()).toBeNull();
+      service.stop();
+      flush();
+    }));
+
+    it('drops states with malformed fields and strips markup from device labels', fakeAsync(() => {
+      service.start();
+      tick();
+      receiveRemoteState({ sinceTs: 'evil' as unknown as number });
+      expect(service.remoteSession()).toBeNull();
+
+      receiveRemoteState({ deviceLabel: '<a href="https://evil">Desktop</a>' });
+      expect(service.remoteSession()!.payload.deviceLabel).not.toContain('<');
       service.stop();
       flush();
     }));

@@ -203,4 +203,54 @@ describe('WebSocketConnectionService presence relay', () => {
 
     expect(sentOfType(viewer, 'presence_state')).toHaveLength(0);
   });
+
+  it('rate-limits presence messages per connection instead of amplifying them', () => {
+    const producer = connect(USER_ID, 'client-a');
+    const viewer = connect(USER_ID, 'client-b');
+
+    for (let i = 0; i < 100; i++) {
+      sendPresenceState(producer, `state-${i}`);
+    }
+
+    const relayed = sentOfType(viewer, 'presence_state');
+    expect(relayed.length).toBeGreaterThan(0);
+    expect(relayed.length).toBeLessThan(30);
+  });
+
+  it('accepts presence again once the rate-limit window has passed', () => {
+    vi.useFakeTimers();
+    try {
+      const producer = connect(USER_ID, 'client-a');
+      const viewer = connect(USER_ID, 'client-b');
+
+      for (let i = 0; i < 100; i++) {
+        sendPresenceState(producer, `state-${i}`);
+      }
+      const countWhileLimited = sentOfType(viewer, 'presence_state').length;
+
+      vi.advanceTimersByTime(11_000);
+      sendPresenceState(producer, 'after-window');
+
+      const relayed = sentOfType(viewer, 'presence_state');
+      expect(relayed.length).toBe(countWhileLimited + 1);
+      expect(relayed[relayed.length - 1].payload).toBe('after-window');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not send a snapshot older than the client hide window to new viewers', () => {
+    vi.useFakeTimers();
+    try {
+      const producer = connect(USER_ID, 'client-a');
+      sendPresenceState(producer, 'old-state');
+
+      vi.advanceTimersByTime(31 * 60_000);
+      const lateViewer = connect(USER_ID, 'client-b');
+
+      expect(sentOfType(lateViewer, 'presence_state')).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

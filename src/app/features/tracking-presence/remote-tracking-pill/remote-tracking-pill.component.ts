@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -153,7 +152,7 @@ export class RemoteTrackingPillComponent {
   private _store = inject(Store);
   private _translateService = inject(TranslateService);
 
-  private _taskEntities = toSignal(this._store.select(selectTaskEntities));
+  private _taskEntities = this._store.selectSignal(selectTaskEntities);
 
   /** Shared view-model — staleness/label/Stop rules live in the service. */
   readonly view = this._presenceService.remoteSessionView;
