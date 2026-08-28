@@ -60,20 +60,7 @@ test.describe('@supersync Worklog Sync', () => {
       console.log('[Worklog Test] Client A marked tasks done');
 
       // ============ PHASE 2: Client A Archives ============
-      const finishDayBtn = clientA.page.locator('.e2e-finish-day');
-      await finishDayBtn.waitFor({ state: 'visible', timeout: 10000 });
-      await finishDayBtn.click();
-
-      await clientA.page.waitForURL(/daily-summary/, { timeout: 10000 });
-      await clientA.page.waitForLoadState('networkidle');
-
-      const saveBtn = clientA.page.locator(
-        'daily-summary button[mat-flat-button]:has(mat-icon:has-text("wb_sunny"))',
-      );
-      await saveBtn.waitFor({ state: 'visible', timeout: 10000 });
-      await saveBtn.click();
-
-      await clientA.page.waitForURL(/tag\/TODAY/, { timeout: 10000 });
+      await archiveDoneTasks(clientA);
       console.log('[Worklog Test] Client A archived tasks');
 
       // ============ PHASE 3: Sync ============
@@ -158,19 +145,7 @@ test.describe('@supersync Worklog Sync', () => {
       await markTaskDone(clientA, taskName);
 
       // ============ PHASE 2: Archive ============
-      const finishDayBtn = clientA.page.locator('.e2e-finish-day');
-      await finishDayBtn.waitFor({ state: 'visible', timeout: 10000 });
-      await finishDayBtn.click();
-
-      await clientA.page.waitForURL(/daily-summary/, { timeout: 10000 });
-
-      const saveBtn = clientA.page.locator(
-        'daily-summary button[mat-flat-button]:has(mat-icon:has-text("wb_sunny"))',
-      );
-      await saveBtn.waitFor({ state: 'visible', timeout: 10000 });
-      await saveBtn.click();
-
-      await clientA.page.waitForURL(/tag\/TODAY/, { timeout: 10000 });
+      await archiveDoneTasks(clientA);
 
       // ============ PHASE 3: Sync ============
       await clientA.sync.syncAndWait();

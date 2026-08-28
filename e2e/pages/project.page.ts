@@ -721,4 +721,33 @@ export class ProjectPage extends BasePage {
       .locator('.mat-mdc-menu-content')
       .waitFor({ state: 'visible', timeout: 3000 });
   }
+
+  /** The archived-projects row for a project, matched by its prefixed title. */
+  archivedProjectRow(projectName: string): Locator {
+    return this.page
+      .locator('archived-projects-page .project-row')
+      .filter({ hasText: this.applyPrefix(projectName) });
+  }
+
+  /**
+   * Reopen a completed project from the archived-projects page.
+   *
+   * A single click is not reliable here: in CI the click is delivered but the
+   * handler never runs (no `[Project] Reopen Project` is dispatched, seen in
+   * the trace of run 33189475377), most likely because the page is still
+   * mid route-transition. So re-issue it until the row actually leaves the
+   * list. The click is bounded and skipped once the row is gone so a slow
+   * store update fails on the row assertion instead of an opaque click
+   * timeout.
+   */
+  async reopenArchivedProject(projectName: string): Promise<void> {
+    const row = this.archivedProjectRow(projectName);
+    const reopenBtn = row.getByRole('button', { name: 'Reopen' });
+    await expect(async () => {
+      if (await reopenBtn.isVisible()) {
+        await reopenBtn.click({ timeout: 2000 });
+      }
+      await expect(row).toHaveCount(0, { timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+  }
 }

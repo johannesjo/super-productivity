@@ -1341,9 +1341,12 @@ export const archiveDoneTasks = async (client: SimulatedE2EClient): Promise<void
   const finishDayBtn = client.page.locator('.e2e-finish-day');
   await finishDayBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
   await expect(async () => {
-    await finishDayBtn.click();
+    // Bound the click: once navigation has started the button is gone, and an
+    // unbounded retry would block for the full actionTimeout and then report a
+    // click timeout for a navigation that actually succeeded.
+    await finishDayBtn.click({ timeout: 2000 });
     await client.page.waitForURL(/daily-summary/, { timeout: 2000 });
-  }).toPass({ timeout: UI_VISIBLE_TIMEOUT });
+  }).toPass({ timeout: UI_VISIBLE_TIMEOUT_LONG });
 
   // Click "Save & Go Home" button (has sun icon wb_sunny)
   const saveAndGoHomeBtn = client.page.locator(
