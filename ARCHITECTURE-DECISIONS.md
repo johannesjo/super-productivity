@@ -397,6 +397,106 @@ a shipped precedent.
 
 ---
 
+### 9. Calendar Integration Stays Read-Only
+
+**Status**: ✅ Active (recorded 2026-08; supersedes the 2026-03 two-way sync analysis, `git show 07511ab45c:docs/long-term-plans/calendar-two-way-sync-technical-analysis.md`)
+
+**Decision**: Calendar integration is a **one-way, read-only** feed. The app polls
+iCal/CalDAV URLs, renders events in Schedule/Planner, and lets the user convert an
+event into a task. It does not write to, update, or delete anything in the user's
+calendar, and it does not reconcile external calendar state back into task state.
+Write capability, if it ever ships, arrives as an explicit user-initiated export
+action — never as automatic bidirectional sync.
+
+**Rationale**:
+
+- **The impedance mismatch is real, not incidental.** Tasks are not events.
+  Recurring events with per-instance exceptions (`RRULE` + `EXDATE` + modified
+  instances) have no faithful task representation, and that is the single hardest
+  part of every two-way design — an entire subsystem for a shape the task model
+  does not have.
+- **Two conflict systems cannot be merged cheaply.** Op-log sync resolves
+  conflicts with vector clocks over operations the app itself emitted. External
+  calendar APIs resolve with server ETags over whole events, with no causal
+  history and no way to distinguish "the user changed this" from "our own write
+  came back". The bridge between them is a sync-loop generator: every write we
+  make returns as a remote change that looks like a user edit.
+- **Deletes are destructive and unrecoverable.** A propagated delete removes data
+  from a system we do not own and cannot restore from. Nothing in the app's
+  recovery story (op-log replay, backups) reaches a third-party calendar.
+- **Product fit.** Read-only integration already delivers the value users ask for
+  — seeing the day's commitments next to the day's tasks. Two-way sync is a
+  multi-month, high-risk build whose failure mode is corrupting the user's
+  calendar. That trade is not one this project takes (see the manifesto's
+  "avoid feature creep" and "privacy & offline first": OAuth to a cloud calendar
+  is a permanent online dependency in an offline-first app).
+
+**Implementation**:
+
+- Polling + parsing: [`src/app/features/schedule/ical/`](src/app/features/schedule/ical/) — lazily loaded iCal parser, `EXDATE` handling, feed sniffing
+- Event → task conversion and event lifecycle:
+  [`src/app/features/calendar-integration/`](src/app/features/calendar-integration/)
+- Events are **not** persisted as synced entities; a converted task is an ordinary
+  task with a derived stable id (`generate-calendar-task-id.ts`), which is what
+  keeps calendar data out of the op-log entirely.
+
+**When to Update This Pattern**:
+
+- A concrete, user-initiated one-way **export** action is proposed (allowed by this
+  decision — record it here, it does not overturn the decision)
+- Someone proposes propagating task edits or deletes back to a calendar — that
+  overturns this decision and needs the recurring-instance, sync-loop, and
+  destructive-delete answers written down before any code
+- The task model gains native recurrence-with-exceptions semantics, which removes
+  the largest of the four hurdles
+
+---
+
+### 10. Vector Clocks over Server-Side Entity Versioning
+
+**Status**: ✅ Active (recorded 2026-08; the alternative design is `git show 07511ab45c:docs/long-term-plans/server-side-entity-versioning.md`)
+
+**Decision**: Conflict detection stays **client-side, on vector clocks**, pruned to
+`MAX_VECTOR_CLOCK_SIZE = 20`. Server-side per-entity version counters (optimistic
+concurrency control, the shape every centralized API uses) were designed out in
+full and **not adopted**.
+
+**Rationale**:
+
+- **The problem it solves is not observed.** Pruning only discards causal
+  information once 21+ distinct client IDs have touched a clock. For a personal
+  deep-work tool that is not a realistic fleet, and the one edge case that did bite
+  — an import client mispruning against its own ops — is already handled by a
+  same-client check.
+- **It would make the server authoritative for correctness.** Today the server is a
+  relay: it stores and orders ops, and the clients decide what conflicts. Entity
+  versioning moves conflict semantics into the server, which breaks the properties
+  the sync stack is built on — file-based providers (WebDAV, Dropbox, local file)
+  have no server to run that logic, so the vector-clock path must survive anyway
+  and we would maintain **two** conflict systems instead of one.
+- **The migration is the expensive half.** It needs a new server table, a wire
+  protocol change, a backfill for every existing entity, and a mixed-fleet window
+  where old (clock-only) and new (version-carrying) clients edit the same entity —
+  each step a chance to lose data in exactly the way sync changes are hardest to
+  recover from.
+- **Encryption boundary.** Entity versions are non-sensitive and would ride
+  outside E2EE, which is workable but adds another plaintext channel to reason
+  about in the threat model.
+
+**Implementation**: unchanged — see
+[`docs/sync-and-op-log/vector-clocks.md`](docs/sync-and-op-log/vector-clocks.md).
+The server prunes after conflict detection, before storage.
+
+**When to Update This Pattern**:
+
+- Real fleets are observed exceeding ~20 distinct client IDs per user, or pruning
+  is traced to an actual user-visible conflict (rule: start from a reproducible
+  problem)
+- SuperSync becomes the only supported backend, removing the "file providers need
+  the clock path regardless" constraint
+
+---
+
 ## Decisions Recorded Elsewhere
 
 These carry the same authority as the numbered records above. They live outside this file because they are long enough to stand alone, or because they are enforced as contributor/agent rules that must be read before touching the subsystem. Keep this table complete — if you record a decision somewhere else, add a row here.

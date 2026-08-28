@@ -533,7 +533,8 @@ const sqlIterate = async <T>(
  *
  * The native rollout hands the op-log store and the archive store TWO separate
  * `SqliteOpLogAdapter` instances that share ONE `SqliteDb` (one file, all
- * tables — see docs/sync-and-op-log/sqlite-migration-followup.md B3). A queue
+ * tables — see docs/sync-and-op-log/sqlite-migration.md, remaining rollout
+ * gates). A queue
  * living on the adapter instance would only serialize each store against
  * itself, leaving an op-log `BEGIN` free to interleave with a concurrent
  * archive `BEGIN` on the shared connection — the exact corruption this guards

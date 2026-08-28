@@ -73,7 +73,10 @@ it wrong: any claim about which releases carry a change must be re-derived with
 any code changing.
 
 - [Recurring events implementation plan](research/recurring-events-implementation-plan.md)
-- [Snap Wayland GPU fix](research/snap-wayland-gpu-fix-research.md)
+- [Snap Wayland GPU root cause and shipped fix](research/snap-wayland-gpu-fix-research.md)
+  — kept past its research life because `tools/afterPack.js`,
+  `build/linux/snap-wrapper.sh` and `electron/start-app.ts` cite it for the
+  reason their guards exist
 
 ## Review checklist
 

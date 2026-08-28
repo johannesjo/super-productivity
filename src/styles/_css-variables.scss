@@ -75,7 +75,7 @@
   // SystemBars WebView bands. Caveat: on the narrow API >= 35 / WebView < 140
   // band the shared source can double-count vs SystemBars' native padding (a
   // cosmetic gap, not an overlap — see the device-matrix risks in
-  // docs/plans/2026-06-22-android-systembars-migration-corrected.md).
+  // docs/android-edge-to-edge-keyboard.md).
   --bottom-nav-safe-area: calc(var(--safe-area-bottom) / 2);
 
   // Keyboard height (set dynamically via JS)

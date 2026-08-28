@@ -108,6 +108,13 @@ If a task requires one of these, stop and write a separate behavior proposal wit
 
 **Size:** Small audit; blocks conflict-feature deletion
 
+> A first pass of this audit was written on 2026-07-16 and is **void**: it assumed
+> `962c5bbeb1` (PR #8874, conflict review) was unreleased, and `git tag --contains`
+> now puts it in v18.15.0, v18.15.1 and v18.16.0. Redo the audit from scratch
+> against current tags rather than recovering it
+> (`git show 07511ab45c:docs/plans/2026-07-16-conflict-review-cohort-audit.md`);
+> the numbers below that name an unreleased baseline are stale for the same reason.
+
 Record:
 
 - every distribution channel containing commits at or after 962c5bbeb1, including master edge artifacts, Android internal builds, and previews;

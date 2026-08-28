@@ -83,6 +83,5 @@ tests, or a focused contract.
 | [ARCHITECTURE-DECISIONS.md](../../ARCHITECTURE-DECISIONS.md)                                             | Load-bearing product/data decisions          |
 
 Retired diagram filenames remain as small forwarding stubs so historical links
-continue to resolve. `operation-rules.md` and `sqlite-migration-followup.md` are
-also compatibility pointers; they are not independent sources of current
-behavior or status.
+continue to resolve. `operation-rules.md` is also a compatibility pointer; it is
+not an independent source of current behavior or status.
