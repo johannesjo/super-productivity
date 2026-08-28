@@ -733,18 +733,25 @@ describe('SyncWrapperService', () => {
     // the setting silently do nothing until a reconnect (a failed opt-out).
     it('should start tracking presence on sync when opted in, even with WS already connected', async () => {
       mockSuperSyncWsService.isConnected.set(true);
-      configSubject.next(
-        createMockSyncConfig(SyncProviderId.SuperSync, {
-          superSync: { isTrackingPresenceEnabled: true },
-        }),
-      );
+      // The opt-in is a per-device flag in the provider's private config
+      // (never the synced global config), so the gate reads it from there.
+      mockProviderManager.getProviderById.and.resolveTo({
+        privateCfg: {
+          load: jasmine.createSpy('load').and.resolveTo({
+            isTrackingPresenceEnabled: true,
+          }),
+        },
+      } as any);
       const presence = TestBed.inject(
         TrackingPresenceService,
       ) as jasmine.SpyObj<TrackingPresenceService>;
 
       await service.sync();
-      await Promise.resolve();
-      await Promise.resolve();
+      // Gate is fire-and-forget with two async hops (getProviderById +
+      // privateCfg.load); drain enough microtasks for start()/stop() to run.
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
 
       expect(presence.start).toHaveBeenCalled();
       expect(presence.stop).not.toHaveBeenCalled();
@@ -752,13 +759,21 @@ describe('SyncWrapperService', () => {
 
     it('should stop tracking presence on sync when not opted in, even with WS already connected', async () => {
       mockSuperSyncWsService.isConnected.set(true);
+      mockProviderManager.getProviderById.and.resolveTo({
+        privateCfg: {
+          load: jasmine.createSpy('load').and.resolveTo({
+            isTrackingPresenceEnabled: false,
+          }),
+        },
+      } as any);
       const presence = TestBed.inject(
         TrackingPresenceService,
       ) as jasmine.SpyObj<TrackingPresenceService>;
 
       await service.sync();
-      await Promise.resolve();
-      await Promise.resolve();
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
 
       expect(presence.stop).toHaveBeenCalled();
       expect(presence.start).not.toHaveBeenCalled();

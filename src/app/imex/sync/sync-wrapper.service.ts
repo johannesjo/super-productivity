@@ -496,10 +496,25 @@ export class SyncWrapperService {
    * EVERY SuperSync sync cycle (not just on connect — the socket stays up for
    * days), so toggling the setting takes effect on the next sync. Both
    * start() and stop() are idempotent.
+   *
+   * The opt-in lives in the SuperSync provider's private config (the same
+   * per-device store the checkbox reads/writes, never uploaded), NOT the
+   * global config: it is a per-device choice — a device syncing global config
+   * from a device that opted in must not silently start broadcasting too.
    */
   private async _applyTrackingPresenceGate(): Promise<void> {
-    const syncCfg = await firstValueFrom(this.syncCfg$);
-    if (syncCfg?.superSync?.isTrackingPresenceEnabled) {
+    let isEnabled = false;
+    try {
+      const provider = await this._providerManager.getProviderById(
+        SyncProviderId.SuperSync,
+      );
+      const privateCfg = provider ? await provider.privateCfg.load() : null;
+      isEnabled = !!(privateCfg as { isTrackingPresenceEnabled?: boolean } | null)
+        ?.isTrackingPresenceEnabled;
+    } catch (err) {
+      SyncLog.warn('SyncWrapperService: Failed to read presence opt-in', err);
+    }
+    if (isEnabled) {
       this._trackingPresenceService.start();
       this._remoteTrackingNotifier.start();
     } else {
