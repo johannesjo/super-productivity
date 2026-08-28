@@ -132,6 +132,36 @@ copy-pasteable manual steps and is **never** auto-marked-applied.
 
 5. **No `BEGIN` / `COMMIT` / `DROP TABLE`.**
 
+Before running the out-of-band `DROP`, recovery first terminates any **orphaned**
+`CONCURRENTLY` build left running by an interrupted prior deploy — PostgreSQL
+does not notice a client disconnect mid-statement, so the abandoned build keeps
+its table lock and the `DROP` would wedge on `statement_timeout` on every retry.
+The termination is scoped to this pipeline's own migrator identity in the
+current database and role, an `active` session, and a `CONCURRENTLY` query; the
+full predicate, its rationale, and its limits live on
+`terminate_orphaned_concurrently_backends` in `scripts/migrate-deploy.sh` — the
+canonical write-up, update it there first. It lets raising `MIGRATION_TIMEOUT`
+and re-running a deploy that timed out mid-build self-heal instead of needing a
+manual `pg_terminate_backend`. Migrator connections also set
+`client_connection_check_interval` (PostgreSQL 14+/Linux required, see the
+server README) so a freshly-abandoned build cancels itself within seconds; the
+termination covers pre-existing orphans and half-open connections the GUC
+cannot detect.
+
+Caveat (details in that same comment): the out-of-band recovery holds no
+advisory lock, so racing recoveries (e.g. multiple Helm init-containers) can
+mistake a **peer run's live build** for an orphan and abort it — a behavior
+change: before this cleanup a racing `DROP` merely queued and timed out while
+the live build finished. The fleet still converges via the idempotent
+drop-then-create, but rebuilds can be wasted; serializing recovery under a
+dedicated advisory lock is the intended follow-up. That trade is why the `P1002`
+advisory-lock path still refuses to auto-kill.
+
+Enforced by `tests/migrate-deploy-script.spec.ts` (the termination SQL and its
+ordering) and
+`tests/integration/migrate-deploy-orphan-cleanup.integration.spec.ts` (real
+`pg_terminate_backend` targeting).
+
 ## Intentional exception: bare `CREATE INDEX CONCURRENTLY`
 
 `20260511000000_add_entity_sequence_index` is a deliberately bare

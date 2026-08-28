@@ -181,6 +181,13 @@ app/proxy services with compose dependencies disabled so the bundled Postgres
 container is not required. Prisma migrations still run against the configured
 `DATABASE_URL`.
 
+An external server must be **PostgreSQL 14+ on a Linux host** (the bundled
+service is `postgres:16-alpine`): the migration pipeline sets
+`client_connection_check_interval` on its connections so an abandoned
+`CREATE INDEX CONCURRENTLY` cancels itself instead of holding the table lock.
+An older or non-Linux server rejects that startup option with a FATAL
+`unrecognized configuration parameter` error on every migration connection.
+
 ### Payload byte backfill
 
 Backfilling is optional for startup: the incremental storage counter keeps
