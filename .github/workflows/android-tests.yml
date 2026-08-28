@@ -49,7 +49,7 @@ jobs:
           # packages/sync-core is included because the Kotlin op-payload
           # decryptor must stay wire-compatible with its encrypt() — the live
           # round-trip test below is what catches drift on sync-core PRs.
-          ANDROID_PATTERN='^(android/|packages/sync-core/|tools/generate-android-crypto-fixtures\.mjs$|capacitor\.config\.ts$|package(-lock)?\.json$|\.github/workflows/android-tests\.yml$)'
+          ANDROID_PATTERN='^(android/|packages/sync-core/|tools/(generate-android-crypto-fixtures|verify-r8-mapping)\.mjs$|capacitor\.config\.ts$|package(-lock)?\.json$|\.github/workflows/android-tests\.yml$)'
           if grep -Eq "${ANDROID_PATTERN}" <<< "${CHANGED_FILES}"; then android=true; fi
 
           echo "→ android=${android}"
@@ -109,6 +109,17 @@ jobs:
         env:
           LIVE_CRYPTO_FIXTURES: ${{ github.workspace }}/android/app/build/live-crypto-fixtures.tsv
         run: ./gradlew :app:testPlayDebugUnitTest :app:testFdroidDebugUnitTest
+
+      # Release builds are minified, and both keep-rule failures are silent: a
+      # stripped @JavascriptInterface method or WorkManager worker builds and
+      # installs fine, it just never runs. Nothing else here exercises R8 — the
+      # emulator tests below run the debug build — so check the mapping instead.
+      - name: Verify R8 keep rules survive minification
+        if: steps.changes.outputs.android == 'true'
+        run: |
+          (cd android && ./gradlew :app:minifyFdroidReleaseWithR8)
+          node tools/verify-r8-mapping.mjs \
+            android/app/build/outputs/mapping/fdroidRelease/mapping.txt
 
       - name: Enable KVM
         if: steps.changes.outputs.android == 'true'
