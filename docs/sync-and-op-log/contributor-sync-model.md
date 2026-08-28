@@ -143,6 +143,36 @@ blessed pattern is a `task-shared-meta-reducers/` reducer.
 
 ---
 
+## Clearing a field — `undefined` does not survive the wire (#9776)
+
+**Never rely on `changes: { someField: undefined }` reaching another device.**
+`JSON.stringify` drops undefined-valued keys from the op payload (SuperSync
+HTTP/E2EE, file-based providers, the SQLite op-log — everything except the
+IndexedDB structured clone), so a reducer that applies `changes` verbatim
+replays the clear as a no-op remotely. The local device looks correct, which is
+exactly why this class of bug survives testing.
+
+Safe patterns, in order of preference:
+
+1. **Set the `undefined` inside a reducer/meta-reducer** keyed off a dedicated
+   action whose payload carries only ids (e.g.
+   `TaskSharedActions.dismissReminderOnly` → `remindAt: undefined` in the
+   reducer). Deterministic on replay; nothing to serialize.
+2. **Rebuild `changes` from destructured payload fields** — a dropped key
+   destructures back to `undefined` identically (e.g. `scheduleTaskWithTime`).
+3. For generic `Update<T>` actions, **list cleared keys out-of-band**: the
+   action creator adds `clearedFields` via `clearedFieldsProps()` and the
+   reducer restores them with `applyClearedFields()`
+   (`src/app/util/cleared-update-fields.ts`; used by `updateTaskUi` and
+   `updateTaskRepeatCfg`). Old clients ignore the extra prop, so the clear
+   degrades to a no-op there instead of corrupting state — no schema bump.
+
+Do **not** invent in-band sentinels (`null`, `0`, marker strings): remote
+reducers apply payload values verbatim, so released clients would persist the
+sentinel and fail typia state validation.
+
+---
+
 ## Decision table — "I'm writing an effect"
 
 | Question                                                        | Answer                                                                                                    | Linter                                           |

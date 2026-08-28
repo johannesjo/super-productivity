@@ -53,6 +53,7 @@ import {
 import { TaskLog } from '../../../core/log';
 import { devError } from '../../../util/dev-error';
 import { moveValidIdsToFront } from '../util/move-valid-ids-to-front';
+import { applyClearedFields } from '../../../util/cleared-update-fields';
 
 export { taskAdapter };
 
@@ -363,8 +364,16 @@ export const taskReducer = createReducer<TaskState>(
     return taskAdapter.updateMany(taskUpdates, state);
   }),
 
-  on(updateTaskUi, (state, { task }) => {
-    return taskAdapter.updateOne(task, state);
+  on(updateTaskUi, (state, { task, clearedFields }) => {
+    // Restore keys that JSON serialization dropped from a replayed op's
+    // changes (`{ someField: undefined }`) — see issue #9776.
+    return taskAdapter.updateOne(
+      {
+        id: task.id as string,
+        changes: applyClearedFields(task.changes, clearedFields),
+      },
+      state,
+    );
   }),
 
   // Bulk task updates - used for archive task batch operations
