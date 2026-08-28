@@ -35,6 +35,7 @@ Rules:
 
 - **Icons:** drop generic `check`/`close` icons on OK/Cancel/Save/Submit — they add nothing. Keep icons that carry meaning (`alarm`/`today`/`event_busy` in scheduling, `wb_sunny`, `save`, `cloud_upload`, `delete_forever`).
 - **No `color` on cancel/close** — leftover `color="primary"` on a Cancel just tints it; remove it.
+- **Reactive appearance** — when a button's appearance must change at runtime, bind it on a single element (`[matButton]="cond ? 'filled' : 'outlined'"`) instead of swapping two buttons in an `@if`/`@else`. The attribute form is fixed at construction, and the swap re-creates the node, dropping focus and any click that lands mid-flip. See `finish-day-btn.component.html`.
 - **No dead classes** — the legacy Bootstrap `btn btn-primary` classes are gone; don't reintroduce them. `submit-button` is only styled inside `dialog-create-tag`.
 - **Symmetric choice dialogs** (e.g. sync "use remote" vs "use local") may use two matched `mat-stroked-button`s — there is no single primary.
 

@@ -4,7 +4,10 @@
     One element, appearance bound: an @if/@else swap between a flat and a
     stroked button re-creates the node whenever hasDoneTasks() flips, and a
     click landing in that window is dropped before the routerLink is wired.
-    matButton sets the same classes as mat-flat-button / mat-stroked-button.
+    matButton sets the same classes as mat-flat-button / mat-stroked-button —
+    but as property bindings they write no DOM attributes, so theme rules
+    keyed on button[mat-flat-button][color='primary'] do not match this one;
+    target the .mat-mdc-*-button classes those rules already list alongside.
   -->
   <button
     [matButton]="hasDoneTasks() ? 'filled' : 'outlined'"

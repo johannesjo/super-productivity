@@ -743,11 +743,23 @@ export class ProjectPage extends BasePage {
   async reopenArchivedProject(projectName: string): Promise<void> {
     const row = this.archivedProjectRow(projectName);
     const reopenBtn = row.getByRole('button', { name: 'Reopen' });
+    // Assert the button up front: without this, a project that was archived
+    // without being completed renders "Restore project" instead, the loop below
+    // would skip the click forever and report the row as merely still present.
+    await expect(reopenBtn).toBeVisible();
+
+    let attempts = 0;
     await expect(async () => {
+      attempts++;
       if (await reopenBtn.isVisible()) {
         await reopenBtn.click({ timeout: 2000 });
       }
       await expect(row).toHaveCount(0, { timeout: 2000 });
     }).toPass({ timeout: 15000 });
+    if (attempts > 1) {
+      // Surface the retry: the suite runs with retries: 0 so that
+      // non-determinism stays visible, and a silent in-test retry defeats that.
+      console.warn(`[reopenArchivedProject] took ${attempts} attempts`);
+    }
   }
 }
