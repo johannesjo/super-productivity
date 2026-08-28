@@ -1,9 +1,11 @@
 # Snap + Wayland GPU init failure — root cause and shipped fix
 
-> **Status:** Fixed and shipped. This note is the surviving rationale for guards
-> that live in `tools/afterPack.js`, `build/linux/snap-wrapper.sh` and
-> `electron/start-app.ts`; those three cite it, so it is maintained rather than
-> deleted.
+> **Status:** Fixed and shipped. Three files cite this document for why their
+> guards exist — `electron-builder.yaml`, `tools/afterPack.js` and
+> `build/linux/snap-wrapper.sh` — so it is maintained rather than deleted. (The
+> guards in `electron/start-app.ts` are covered here too but do not cite it.)
+> Before deleting, re-derive the citer list with
+> `grep -rn snap-wayland-gpu-fix-research`; do not trust this line.
 >
 > **Snapshot:** 2026-04-21. The 2026-04 investigation log (18 sections of
 > review passes, options analysis, field-data triage and multi-agent
@@ -71,10 +73,16 @@ electron-builder ignores `snap.executableArgs`
 and even if it worked it would bake the flag in for X11 sessions too. The
 wrapper is runtime-conditional.
 
-### §18.7 Mechanism — why `appendSwitch` cannot work here
+### Mechanism — why `appendSwitch` cannot work here
+
+_(Cited elsewhere as §18.7 of the original report.)_
 
 The CLI-flag-vs-`appendSwitch` divergence is **strict initialization order**, not
-timing or env interaction. Verified against Electron and Chromium source:
+timing or env interaction. Traced against Electron and Chromium source at
+2026-04-21 (~85% confidence; the residual is whether a late parent-side
+`appendSwitch` still propagates to the GPU _child_ process, which was never
+verified from source and would explain the partial-success field reports — it
+does not change the conclusion):
 
 1. Electron's C++ `ElectronBrowserMainParts::PreEarlyInitialization()` calls
    `SetOzonePlatformForLinuxIfNeeded(*base::CommandLine::ForCurrentProcess())`,
@@ -114,8 +122,21 @@ still load-bearing:
   other non-Snap Wayland hosts get no wrapper at all, so there this is the only
   thing setting it.
 
-On Snap+Wayland the wrapper makes both redundant, which is harmless — Chromium's
-argv parsing is last-wins. Removing them would regress the two cases above.
+On Snap+Wayland the wrapper makes both redundant, which is harmless: duplicate
+`--ozone-platform` resolves last-wins. Note that last-wins is **empirical, not
+documented** — it held in every Chromium version tested in 2026-04, but it is not
+a contract. **Re-verify after an Electron major bump.** Removing the two guards
+would regress the cases above regardless.
+
+## Known gap: nothing verifies the wrapper is in the build
+
+The `afterPack` hook can silently fail in CI and nobody notices until a user
+reports a crash. `tools/verify-linux-wm-class.test.js` does not close this — it
+only asserts that static strings agree (`BIN_NAME` matches `executableName`, the
+wrapper references `RENAMED`); it never inspects a real build output.
+
+The fix proposed in 2026-04 and **still unbuilt**: after `npm run dist -- -l`,
+fail the build if `superproductivity-bin` is absent from the Linux `appOutDir`.
 
 ## Removal conditions
 

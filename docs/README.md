@@ -74,9 +74,9 @@ any code changing.
 
 - [Recurring events implementation plan](research/recurring-events-implementation-plan.md)
 - [Snap Wayland GPU root cause and shipped fix](research/snap-wayland-gpu-fix-research.md)
-  — kept past its research life because `tools/afterPack.js`,
-  `build/linux/snap-wrapper.sh` and `electron/start-app.ts` cite it for the
-  reason their guards exist
+  — kept past its research life because `electron-builder.yaml`,
+  `tools/afterPack.js` and `build/linux/snap-wrapper.sh` cite it for the reason
+  their guards exist
 
 ## Review checklist
 

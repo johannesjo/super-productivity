@@ -397,58 +397,66 @@ a shipped precedent.
 
 ---
 
-### 9. Calendar Integration Stays Read-Only
+### 9. Calendar Writes Live in Plugins, Behind Per-Provider Opt-In
 
-**Status**: ✅ Active (recorded 2026-08; supersedes the 2026-03 two-way sync analysis, `git show 07511ab45c:docs/long-term-plans/calendar-two-way-sync-technical-analysis.md`)
+**Status**: ✅ Active (recorded 2026-08; describes the boundary that shipped 2026-03 in `3e2265fa57` / `020fd56504`)
 
-**Decision**: Calendar integration is a **one-way, read-only** feed. The app polls
-iCal/CalDAV URLs, renders events in Schedule/Planner, and lets the user convert an
-event into a task. It does not write to, update, or delete anything in the user's
-calendar, and it does not reconcile external calendar state back into task state.
-Write capability, if it ever ships, arrives as an explicit user-initiated export
-action — never as automatic bidirectional sync.
+**Decision**: Super Productivity is never the authority for calendar state. It
+reads calendars to show the day's commitments, and it may write a _mirror_ of a
+scheduled task back — but only through a **plugin issue provider** that opts into
+the `timeBlock` contract, and only when the user has enabled that provider's
+auto-time-blocking setting. Core code contains no calendar write path.
+
+The boundary today:
+
+| Surface                                                                                            | Writes?                           |
+| -------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Built-in iCal/CalDAV URL feeds (`src/app/features/schedule/ical/`)                                 | No — poll and parse only          |
+| Built-in issue providers (`src/app/features/issue/providers/*`)                                    | No — none implement `timeBlock`   |
+| Plugin providers implementing `timeBlock` (`google-calendar-provider`, `caldav-calendar-provider`) | Yes, when `isAutoTimeBlock` is on |
 
 **Rationale**:
 
-- **The impedance mismatch is real, not incidental.** Tasks are not events.
-  Recurring events with per-instance exceptions (`RRULE` + `EXDATE` + modified
-  instances) have no faithful task representation, and that is the single hardest
-  part of every two-way design — an entire subsystem for a shape the task model
-  does not have.
-- **Two conflict systems cannot be merged cheaply.** Op-log sync resolves
-  conflicts with vector clocks over operations the app itself emitted. External
-  calendar APIs resolve with server ETags over whole events, with no causal
-  history and no way to distinguish "the user changed this" from "our own write
-  came back". The bridge between them is a sync-loop generator: every write we
-  make returns as a remote change that looks like a user edit.
-- **Deletes are destructive and unrecoverable.** A propagated delete removes data
-  from a system we do not own and cannot restore from. Nothing in the app's
-  recovery story (op-log replay, backups) reaches a third-party calendar.
-- **Product fit.** Read-only integration already delivers the value users ask for
-  — seeing the day's commitments next to the day's tasks. Two-way sync is a
-  multi-month, high-risk build whose failure mode is corrupting the user's
-  calendar. That trade is not one this project takes (see the manifesto's
-  "avoid feature creep" and "privacy & offline first": OAuth to a cloud calendar
-  is a permanent online dependency in an offline-first app).
+- **A time block is a projection, not a synced entity.** `TimeBlockSyncEffects`
+  pushes task state one way — schedule, reschedule, title, estimate, done, delete
+  — into an event the app itself created. It never reconciles a user's edit of
+  that event back into the task, and it never touches events the app did not
+  create. That keeps the flow one-directional even though it writes, which is what
+  avoids the sync loop a true bidirectional design has to solve.
+- **Off by default, per provider.** `isAutoTimeBlock` is an unchecked box on the
+  provider's config form. Writing into someone's calendar is not something to
+  infer from an integration merely being connected (manifesto: opt-in, quiet by
+  default).
+- **Plugins are the right home.** Every write path needs OAuth, per-vendor event
+  shapes, and vendor-specific throttling. Keeping that in `packages/plugin-dev/`
+  behind the `timeBlock` contract means core carries no vendor API surface, and a
+  broken provider degrades to read-only rather than breaking the app.
+- **What is still excluded.** No reconciliation of external event edits into task
+  state, no adoption of pre-existing calendar events, and no per-occurrence
+  recurring-event editing (`RECURRENCE-ID`/`EXDATE`, #8148). These are the parts
+  that would require answering conflict resolution between vector clocks and
+  ETags, and they remain unbuilt — see #5001 for the open bidirectional request.
 
 **Implementation**:
 
-- Polling + parsing: [`src/app/features/schedule/ical/`](src/app/features/schedule/ical/) — lazily loaded iCal parser, `EXDATE` handling, feed sniffing
-- Event → task conversion and event lifecycle:
-  [`src/app/features/calendar-integration/`](src/app/features/calendar-integration/)
-- Events are **not** persisted as synced entities; a converted task is an ordinary
-  task with a derived stable id (`generate-calendar-task-id.ts`), which is what
-  keeps calendar data out of the op-log entirely.
+- Contract: `timeBlock: { upsertEvent, deleteEvent }` in
+  [`packages/plugin-api/src/issue-provider-types.ts`](packages/plugin-api/src/issue-provider-types.ts)
+- Driver: [`time-block-sync.effects.ts`](src/app/features/calendar-integration/time-block/time-block-sync.effects.ts),
+  registered in [`feature-stores.module.ts`](src/app/root-store/feature-stores.module.ts)
+- Manual per-event actions (reschedule, delete): [`calendar-event-actions.service.ts`](src/app/features/calendar-integration/calendar-event-actions.service.ts)
+- Events themselves are **not** op-log entities — a converted task is an ordinary
+  task with a derived stable id
+  ([`generate-calendar-task-id.ts`](src/app/features/calendar-integration/generate-calendar-task-id.ts)).
+  Provider _configuration_ does sync (`ISSUE_PROVIDER` in
+  [`entity-registry.ts`](src/app/op-log/core/entity-registry.ts)).
 
 **When to Update This Pattern**:
 
-- A concrete, user-initiated one-way **export** action is proposed (allowed by this
-  decision — record it here, it does not overturn the decision)
-- Someone proposes propagating task edits or deletes back to a calendar — that
-  overturns this decision and needs the recurring-instance, sync-loop, and
-  destructive-delete answers written down before any code
-- The task model gains native recurrence-with-exceptions semantics, which removes
-  the largest of the four hurdles
+- A core (non-plugin) calendar write path is proposed — that crosses the boundary
+  this record draws
+- Reconciling external event edits back into task state is proposed (#5001) — that
+  needs the ETag-vs-vector-clock conflict story written down first
+- Per-occurrence recurring edits land (#8148)
 
 ---
 
@@ -456,10 +464,12 @@ action — never as automatic bidirectional sync.
 
 **Status**: ✅ Active (recorded 2026-08; the alternative design is `git show 07511ab45c:docs/long-term-plans/server-side-entity-versioning.md`)
 
-**Decision**: Conflict detection stays **client-side, on vector clocks**, pruned to
+**Decision**: Conflict detection stays on **vector clocks**, pruned to
 `MAX_VECTOR_CLOCK_SIZE = 20`. Server-side per-entity version counters (optimistic
-concurrency control, the shape every centralized API uses) were designed out in
-full and **not adopted**.
+concurrency control, the shape every centralized API uses) were designed in full
+and are **not being built**. The design was never rejected on its merits by a
+maintainer decision — it is recorded here as declined-by-default, because nothing
+has yet justified its cost.
 
 **Rationale**:
 
@@ -468,20 +478,25 @@ full and **not adopted**.
   deep-work tool that is not a realistic fleet, and the one edge case that did bite
   — an import client mispruning against its own ops — is already handled by a
   same-client check.
-- **It would make the server authoritative for correctness.** Today the server is a
-  relay: it stores and orders ops, and the clients decide what conflicts. Entity
-  versioning moves conflict semantics into the server, which breaks the properties
-  the sync stack is built on — file-based providers (WebDAV, Dropbox, local file)
-  have no server to run that logic, so the vector-clock path must survive anyway
-  and we would maintain **two** conflict systems instead of one.
+- **It would make the server the source of truth, not just the referee.** The
+  SuperSync server already detects conflicts (`detectConflict` in
+  `packages/super-sync-server/src/sync/conflict.ts`), but it does so by comparing
+  clocks the _clients_ authored — the causal history stays client-owned. Entity
+  versioning moves that authority into the server. File-based providers (WebDAV,
+  Dropbox, local file) have no server to run it, so the vector-clock path must
+  survive regardless, and we would maintain **two** conflict systems instead of
+  one.
 - **The migration is the expensive half.** It needs a new server table, a wire
   protocol change, a backfill for every existing entity, and a mixed-fleet window
-  where old (clock-only) and new (version-carrying) clients edit the same entity —
-  each step a chance to lose data in exactly the way sync changes are hardest to
-  recover from.
-- **Encryption boundary.** Entity versions are non-sensitive and would ride
-  outside E2EE, which is workable but adds another plaintext channel to reason
-  about in the threat model.
+  where old (clock-only) and new (version-carrying) clients edit the same entity.
+  The design did address this — each step was independently deployable and
+  backward compatible — but "correct on paper, across eight steps, in the
+  subsystem where mistakes silently destroy user data" is precisely the cost being
+  weighed, and there is no failure it currently buys us out of.
+- **Encryption boundary.** The design assumed entity versions are non-sensitive
+  and would ride outside E2EE. Plausible, but it adds another plaintext channel to
+  reason about and was never re-derived against the current threat model — see
+  [`supersync-encryption-architecture.md`](docs/sync-and-op-log/supersync-encryption-architecture.md).
 
 **Implementation**: unchanged — see
 [`docs/sync-and-op-log/vector-clocks.md`](docs/sync-and-op-log/vector-clocks.md).
