@@ -35,7 +35,11 @@ test.describe('@supersync Tracking Presence', () => {
       const syncConfig = getSuperSyncConfig(user);
 
       clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
-      await clientA.sync.setupSuperSync({ ...syncConfig, enableWebSocket: true });
+      await clientA.sync.setupSuperSync({
+        ...syncConfig,
+        enableWebSocket: true,
+        enableTrackingPresence: true,
+      });
 
       const taskName = `Presence-Task-${testRunId}`;
       await clientA.workView.addTask(taskName);
@@ -43,7 +47,11 @@ test.describe('@supersync Tracking Presence', () => {
       await waitForTask(clientA.page, taskName);
 
       clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
-      await clientB.sync.setupSuperSync({ ...syncConfig, enableWebSocket: true });
+      await clientB.sync.setupSuperSync({
+        ...syncConfig,
+        enableWebSocket: true,
+        enableTrackingPresence: true,
+      });
       await clientB.sync.syncAndWait();
       await waitForTask(clientB.page, taskName);
 

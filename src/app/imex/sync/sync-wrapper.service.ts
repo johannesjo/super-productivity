@@ -487,8 +487,17 @@ export class SyncWrapperService {
 
     await this._superSyncWsService.connect(wsParams.baseUrl, wsParams.accessToken);
     this._wsDownloadService.start();
-    this._trackingPresenceService.start();
-    this._remoteTrackingNotifier.start();
+
+    // Experimental opt-in; re-evaluated here after every sync cycle, so
+    // toggling the setting takes effect on the next sync without a restart.
+    const syncCfg = await firstValueFrom(this.syncCfg$);
+    if (syncCfg?.superSync?.isTrackingPresenceEnabled) {
+      this._trackingPresenceService.start();
+      this._remoteTrackingNotifier.start();
+    } else {
+      this._remoteTrackingNotifier.stop();
+      this._trackingPresenceService.stop();
+    }
   }
 
   /**

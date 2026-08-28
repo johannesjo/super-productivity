@@ -38,6 +38,12 @@ export interface SuperSyncConfig {
    * specifically verify the WebSocket push flow.
    */
   enableWebSocket?: boolean;
+  /**
+   * If true, ticks the "Show live tracking on other devices (experimental)"
+   * checkbox in the Advanced section (default-off opt-in). Only meaningful
+   * together with enableWebSocket: true — presence rides the WS connection.
+   */
+  enableTrackingPresence?: boolean;
 }
 
 type SyncCompletionSnapshot = {
@@ -390,6 +396,16 @@ export class SuperSyncPage extends BasePage {
 
     // Fill in base URL
     await this.baseUrlInput.fill(config.baseUrl);
+
+    // Opt into the experimental tracking-presence feature (checkbox lives in
+    // the same Advanced section as baseUrl, which is expanded at this point)
+    if (config.enableTrackingPresence) {
+      const trackingPresenceCheckbox = this.page
+        .locator('dialog-sync-cfg')
+        .getByRole('checkbox', { name: /live tracking/i });
+      await trackingPresenceCheckbox.setChecked(true);
+      await expect(trackingPresenceCheckbox).toBeChecked();
+    }
 
     // Fill in access token (this field is NOT in the Advanced section)
     await this.accessTokenInput.fill(config.accessToken);

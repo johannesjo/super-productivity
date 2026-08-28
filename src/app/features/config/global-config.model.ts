@@ -161,6 +161,12 @@ export interface SuperSyncConfig extends WebDavConfig {
   isEncryptionEnabled?: boolean;
   /** Encryption password (SuperSync-specific, stored in private config) */
   encryptKey?: string | null;
+  /**
+   * Experimental opt-in: mirror live tracking state between this account's
+   * devices over the SuperSync WebSocket (header chip, Android notification,
+   * remote stop). Ephemeral display only — never persisted or synced as data.
+   */
+  isTrackingPresenceEnabled?: boolean;
 }
 
 export interface NextcloudConfig {

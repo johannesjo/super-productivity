@@ -1567,6 +1567,8 @@
           "L_CHANGE_ENCRYPTION_PASSWORD": "Change Encryption Password",
           "L_CONFIRM_PASSWORD": "Confirm Password",
           "L_ENABLE_E2E_ENCRYPTION": "Enable end-to-end encryption",
+          "L_ENABLE_TRACKING_PRESENCE": "Show live tracking on other devices (experimental)",
+          "TRACKING_PRESENCE_DESCRIPTION": "Mirrors which task this account is currently tracking to your other connected devices and lets you stop it from there. Display only \u2014 nothing is stored on the server.",
           "L_NEW_PASSWORD": "New Encryption Password",
           "L_REMOVE_ENCRYPTION": "Or Remove Encryption",
           "L_SERVER_URL": "Server URL",

@@ -258,6 +258,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
       password: null,
       accessToken: null,
       syncFolderPath: null,
+      isTrackingPresenceEnabled: false,
     },
 
     localFileSync: {
