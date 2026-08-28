@@ -893,33 +893,16 @@ export class OperationUploadService {
     });
     const serverSeq = updatedState.lastSeq;
 
-    // FIX 1.5: Re-check for conflicts after sequence allocation.
-    // This catches races where another request inserted an operation for the same
-    // entity between our initial conflict check and now. Combined with REPEATABLE_READ
-    // isolation, this ensures no undetected concurrent modifications.
-    const finalConflict = await detectConflict(userId, op, tx);
-    if (finalConflict.hasConflict) {
-      await tx.userSyncState.update({
-        where: { userId },
-        data: { lastSeq: { decrement: 1 } },
-      });
-
-      const errorCode =
-        finalConflict.conflictType === 'concurrent' ||
-        finalConflict.conflictType === 'equal_different_client'
-          ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
-          : SYNC_ERROR_CODES.CONFLICT_SUPERSEDED;
-      return reject(
-        this.rejectedUploadResult(
-          userId,
-          clientId,
-          op,
-          finalConflict.reason,
-          errorCode,
-          finalConflict.existingClock,
-        ),
-      );
-    }
+    // No post-allocation conflict re-check is needed here. Under RepeatableRead
+    // every statement in this transaction reads one snapshot fixed at its first
+    // statement, and nothing between the conflict check above and this point
+    // writes to `operations`, so a second detectConflict would read the identical
+    // row set. Concurrent uploads are excluded by the lastSeq increment above:
+    // any committed concurrent upload for the same user wrote the same
+    // user_sync_state row, so the increment raises a serialization failure
+    // (40001) before this point is reached. See ARCHITECTURE-DECISIONS.md #4 —
+    // lowering the isolation level below REPEATABLE READ would require
+    // reinstating a post-allocation re-check.
 
     // Prune vector clock AFTER conflict detection but BEFORE storage.
     // Moved from ValidationService to here so that the full (unpruned) clock is used

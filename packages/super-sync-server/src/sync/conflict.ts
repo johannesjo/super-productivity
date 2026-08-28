@@ -154,7 +154,7 @@ export const detectConflictForEntities = async (
     //
     // Trade accepted knowingly: this moves the array branch's cost from "the probing
     // user's slice" to a FIXED whole-table GIN probe, so SMALL accounts pay ~13 ms / 700
-    // blocks per call they did not pay before (and this path runs twice per upload) while
+    // blocks per call they did not pay before while
     // large ones pay far less. Accepted because the term it replaces is unbounded in
     // account history while this one cannot exceed |probe| index descents. Measurements:
     // PR #9516; the unbounded co-tenant term stacked on top of it is #9510.

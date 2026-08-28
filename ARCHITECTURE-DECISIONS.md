@@ -140,6 +140,13 @@ from PostgreSQL RepeatableRead snapshot isolation alone.
 - If two batches race, the later writer blocks on the row and the transaction
   retry path handles the serialization failure rather than silently accepting
   conflicting operations
+- The serial upload path derives its safety from the same primitive. Its
+  post-allocation conflict re-check ("FIX 1.5", removed 2026-08) was dead code:
+  under RepeatableRead both conflict checks read one snapshot fixed at the
+  transaction's first statement, and the `lastSeq` increment raises a
+  serialization failure (40001) against any committed concurrent upload before
+  a re-check could run. Lowering the isolation level below REPEATABLE READ
+  would require reinstating a post-allocation re-check.
 
 **Implementation**:
 
