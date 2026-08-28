@@ -9,6 +9,7 @@ export const testState = {
   syncDevices: new Map<string, any>(),
   userSyncStates: new Map<number, any>(),
   users: new Map<number, any>(),
+  pendingPasskeyRegistrations: new Map<string, any>(),
   serverSeqCounter: 0,
   batchConflictQueryCount: 0,
   entityConflictFindFirstCount: 0,
@@ -21,6 +22,7 @@ export function resetTestState(): void {
   testState.syncDevices = new Map();
   testState.userSyncStates = new Map();
   testState.users = new Map();
+  testState.pendingPasskeyRegistrations = new Map();
   testState.serverSeqCounter = 0;
   testState.batchConflictQueryCount = 0;
   testState.entityConflictFindFirstCount = 0;

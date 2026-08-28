@@ -12,6 +12,9 @@ const reconcileTimers: Set<NodeJS.Timeout> = new Set();
 const RECONCILE_INTERVAL_MS = 5_000;
 const RECONCILE_BUDGET_MS = 60 * 60 * 1000;
 const INITIAL_CLEANUP_DELAY_MS = 10_000;
+// Grace window before an abandoned (never-verified, nothing in flight) account is
+// deleted — reuses the unified retention period rather than adding a second knob.
+const UNVERIFIED_USER_GRACE_MS = DEFAULT_SYNC_CONFIG.retentionMs;
 
 /**
  * Runs all cleanup tasks in a single daily job.
@@ -71,6 +74,32 @@ const runDailyCleanup = async (): Promise<void> => {
     }
   } catch (error) {
     Logger.error(`Cleanup [request-dedup] failed: ${error}`);
+  }
+
+  // 5. Delete expired pending passkey registrations (expiry is otherwise only
+  // checked at read time, so abandoned rows would be retained forever)
+  try {
+    const deleted = await syncService.deleteExpiredPendingPasskeyRegistrations(
+      Date.now(),
+    );
+    if (deleted > 0) {
+      Logger.info(`Cleanup [pending-passkeys]: removed ${deleted} entries`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [pending-passkeys] failed: ${error}`);
+  }
+
+  // 6. Delete abandoned unverified users (never verified, no registration still
+  // in flight, older than the grace window; verified users can never match)
+  try {
+    const deleted = await syncService.deleteAbandonedUnverifiedUsers(
+      Date.now() - UNVERIFIED_USER_GRACE_MS,
+    );
+    if (deleted > 0) {
+      Logger.info(`Cleanup [unverified-users]: removed ${deleted} entries`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [unverified-users] failed: ${error}`);
   }
 };
 
