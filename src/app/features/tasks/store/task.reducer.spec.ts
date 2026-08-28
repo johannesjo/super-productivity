@@ -1372,5 +1372,47 @@ describe('Task Reducer', () => {
 
       expect(replayed.entities.task1?._hideSubTasksMode).toBe(HideSubTasksMode.HideAll);
     });
+
+    // Issue #9776: the EXPAND direction. Collapse round-trips fine (a real enum
+    // value), but "shown" is `undefined`, and JSON.stringify silently drops the
+    // key from the op payload — the expand then replays as a no-op on every
+    // other device, which stays collapsed forever. The action creator therefore
+    // lists cleared keys out-of-band in `clearedFields` (a string[] that
+    // survives JSON) and the reducer restores them before applying the update.
+    it('should round-trip clearing _hideSubTasksMode (expand) through capture, serialization and replay', () => {
+      const stateCollapsed: TaskState = {
+        ...initialTaskState,
+        ids: ['task1'],
+        entities: {
+          task1: createTask('task1', { _hideSubTasksMode: HideSubTasksMode.HideAll }),
+        },
+      };
+
+      const action = fromActions.updateTaskUi({
+        task: { id: 'task1', changes: { _hideSubTasksMode: undefined } },
+      });
+
+      // Mirror the capture effect exactly: everything except type/meta becomes
+      // the op's actionPayload (operation-log.effects.ts).
+      const { type, meta, ...rawActionPayload } = action;
+      const op: Operation = {
+        id: 'op-9776',
+        actionType: type as ActionType,
+        opType: meta.opType,
+        entityType: meta.entityType,
+        entityId: meta.entityId as string,
+        payload: { actionPayload: rawActionPayload, entityChanges: [] },
+        clientId: 'clientA',
+        vectorClock: { clientA: 1 },
+        timestamp: 0,
+        schemaVersion: 1,
+      };
+
+      const wireOp = JSON.parse(JSON.stringify(op)) as Operation;
+      const replayAction = convertOpToAction(wireOp);
+      const replayed = taskReducer(stateCollapsed, replayAction);
+
+      expect(replayed.entities.task1?._hideSubTasksMode).toBeUndefined();
+    });
   });
 });
