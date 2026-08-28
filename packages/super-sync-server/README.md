@@ -183,9 +183,11 @@ container is not required. Prisma migrations still run against the configured
 
 ### Payload byte backfill
 
-During a partial `payload_bytes` backfill, quota reconciles use a slower
-fallback for old operation rows with `payload_bytes = 0`. Backfilling is
-optional and only affects reconcile cost, not correctness.
+Backfilling is optional for startup: the incremental storage counter keeps
+working without it. But while a user still has legacy rows with
+`payload_bytes = 0`, exact quota reconciles for that user are deferred (the
+server refuses to overwrite the exact counter with an approximate sum), so run
+the backfill if you want reconciliation to work for legacy accounts.
 
 Run the backfill to completion:
 

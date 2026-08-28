@@ -126,8 +126,9 @@ const makeExplainingTx = (db: PGlite, measured: Measured[]): Prisma.TransactionC
       measured.push(await explainGeneric(db, query.text, query.values));
       return (await db.query(query.text, query.values)).rows as T;
     },
-    // prefetch only reaches this for a GLOBAL_CONFIG:tasks pair, which these probes
-    // never request. Present so a future probe fails loudly instead of silently.
+    // Only the legacy GLOBAL_CONFIG:tasks aliasing path reaches this, and these
+    // probes never request it. Present so a future probe fails loudly instead of
+    // silently.
     operation: {
       findFirst: async (): Promise<null> => {
         throw new Error('unexpected legacy-misc findFirst in a plan probe');
@@ -259,9 +260,10 @@ const BTREE_INDEX = 'operations_user_id_entity_type_entity_id_server_seq_idx';
 /**
  * NO BLOCK BUDGET HERE, unlike the sibling spec — tried and rejected on evidence. On the
  * all-new probe the fix reads 501 blocks against the OR form's 810 (detect) and 438
- * (prefetch): the regression reads FEWER blocks than the fix in one of the two cases, so
- * no threshold can separate them, and any budget wide enough not to flake would pass the
- * very mis-plan this file exists to catch. (The sibling's budget works because its
+ * (the since-deleted batch prefetch shape — the deciding case): the regression read FEWER
+ * blocks than the fix in one of the two cases, so no threshold could separate them, and
+ * any budget wide enough not to flake would pass the very mis-plan this file exists to
+ * catch. (The sibling's budget works because its
  * regression is 816 against a fixed 143.) `Measured.blocks` is therefore reported for
  * debugging and asserted only in the dirty-pending-list describe, where it is a RATIO
  * between two probe sizes rather than an absolute.

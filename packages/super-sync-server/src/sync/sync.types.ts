@@ -226,8 +226,8 @@ export interface DuplicateOperationCandidate {
 
 /**
  * The exact column set `isSameDuplicateOperation` needs to compare an incoming
- * op against a stored one. Shared by every duplicate-detection query (batch
- * prefetch + both legacy per-op checks) so a field added here can never be
+ * op against a stored one. Shared by every duplicate-detection query (the two
+ * per-op checks and the snapshot handler) so a field added here can never be
  * silently missed at one of the call sites.
  */
 export const DUPLICATE_OP_SELECT = {

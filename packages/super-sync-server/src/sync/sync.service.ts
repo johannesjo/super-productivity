@@ -498,7 +498,7 @@ export class SyncService {
           // Default Prisma timeout (5s) is too short for these. Use 60s to match generateSnapshot.
           timeout: 60000,
           // FIX 1.6: Set explicit isolation level for strict consistency.
-          // Both paths serialize accepted writers through the shared
+          // Accepted writers serialize through the shared
           // user_sync_state.last_seq row update; see ARCHITECTURE-DECISIONS.md #4.
           isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
         },
@@ -898,7 +898,7 @@ export const getSyncService = (): SyncService => {
   return syncServiceInstance;
 };
 
-export const initSyncService = (config?: Partial<SyncConfig>): SyncService => {
-  syncServiceInstance = new SyncService(config);
+export const initSyncService = (): SyncService => {
+  syncServiceInstance = new SyncService();
   return syncServiceInstance;
 };

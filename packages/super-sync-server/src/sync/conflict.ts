@@ -13,10 +13,10 @@ import {
 const TASK_TIME_DELTA_ACTION_TYPE = '[TimeTracking] Sync time spent';
 
 /**
- * ARRAY-branch candidates for BOTH batch conflict lookups: every stored op whose
- * `entity_ids` contains a probed id, tagged with the id that matched. Shared rather than
- * hand-copied — the #8334 "keep these two in sync" hazard is exactly what let #9503 ship
- * the same mis-plan into both queries.
+ * ARRAY-branch candidates for the multi-entity conflict lookup: every stored op whose
+ * `entity_ids` contains a probed id, tagged with the id that matched. (Until 2026-08 a
+ * second consumer existed — the batch engine's prefetch — and the #8334 "keep these two
+ * in sync" hazard is exactly what let #9503 ship the same mis-plan into both queries.)
  *
  * Three properties are load-bearing. Each is a COST property, not a correctness one, so
  * nothing here fails loudly; changing one needs the full measurements in
@@ -323,7 +323,7 @@ export const detectConflictForEntity = async (
   // statements are true and the conclusion was still wrong — "no early-exit bet to
   // lose" and "cheap" are different properties, and the SLICE SCAN does not need a
   // LIMIT. Production cancelled detectConflictForEntities by statement_timeout every
-  // 5-12 minutes until it was split the same way (#9503). Both batch queries are now
+  // 5-12 minutes until it was split the same way (#9503). The query is
   // EXPLAINed by batch-conflict-plan.pglite.spec.ts (#9205).
   //
   // Scalar branch: the (user_id, entity_type, entity_id, server_seq) btree covers all

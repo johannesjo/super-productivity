@@ -303,7 +303,7 @@ export class OperationUploadService {
     });
 
     // Clamp future timestamps instead of rejecting them (prevents silent data
-    // loss). Shares the exact clamp + audit with the batch path.
+    // loss).
     const originalTimestamp = this.clampFutureTimestamp(userId, clientId, op, now);
 
     // Validate operation (including clientId match)

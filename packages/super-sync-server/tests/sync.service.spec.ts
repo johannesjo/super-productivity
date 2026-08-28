@@ -417,62 +417,6 @@ vi.mock('../src/db', async () => {
           },
         ];
       }
-      if (sql.includes('INSERT INTO user_sync_state')) {
-        const [txUserId, delta] = params as [number, number];
-        const existing = state.userSyncStates.get(txUserId);
-        const lastSeq = (existing?.lastSeq ?? 0) + delta;
-        state.userSyncStates.set(txUserId, {
-          ...(existing ?? { userId: txUserId }),
-          lastSeq,
-        });
-        state.serverSeqCounter = Math.max(state.serverSeqCounter, lastSeq);
-        return [{ lastSeq }];
-      }
-      if (sql.includes('touched(entity_type, entity_id)')) {
-        // Params are [touchedRows (the VALUES CTE), userId, arrayBranchCte, userId]:
-        // userId is the only number, and touchedRows is the only Sql fragment with a
-        // NON-EMPTY .values (the shared array-branch CTE binds nothing), whose values
-        // hold the flattened (entity_type, entity_id) pairs. Matched on the CTE name
-        // rather than on `JOIN (VALUES` because #9503 lifted the VALUES list into a CTE
-        // and dropped the separate idArray params. Deliberately position-independent —
-        // three mocks broke on positional params during that change.
-        //
-        // This mock matches stored ops by scalar entityId only and ignores entityIds,
-        // so it does not model the array branch: a test whose prior
-        // op is multi-entity would get a false "no conflict" here.
-        const txUserId = params.find((p: unknown) => typeof p === 'number') as number;
-        const valuesParam = params.find(
-          (p: unknown) =>
-            !!p &&
-            typeof p === 'object' &&
-            Array.isArray((p as { values?: unknown[] }).values) &&
-            (p as { values: unknown[] }).values.length > 0,
-        ) as { values: unknown[] } | undefined;
-        const touchedParams = valuesParam?.values ?? [];
-        const touchedPairs = new Set<string>();
-        for (let i = 0; i < touchedParams.length; i += 2) {
-          touchedPairs.add(`${touchedParams[i]}\u0000${touchedParams[i + 1]}`);
-        }
-
-        const latestByEntity = new Map<string, any>();
-        for (const op of state.operations.values()) {
-          if (op.userId !== txUserId || !op.entityId) continue;
-          const key = `${op.entityType}\u0000${op.entityId}`;
-          if (!touchedPairs.has(key)) continue;
-          const existing = latestByEntity.get(key);
-          if (!existing || op.serverSeq > existing.serverSeq) {
-            latestByEntity.set(key, op);
-          }
-        }
-
-        return Array.from(latestByEntity.values()).map((op: any) => ({
-          entityType: op.entityType,
-          entityId: op.entityId,
-          clientId: op.clientId,
-          vectorClock: op.vectorClock,
-          serverSeq: op.serverSeq,
-        }));
-      }
       if (sql.includes('jsonb_each_text(vector_clock)')) {
         const [txUserId, beforeServerSeq] = params;
         const aggregate = new Map<string, number>();

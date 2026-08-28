@@ -221,7 +221,7 @@ vi.mock('../src/db', async () => {
       // Key on detect's own CTE (`scalar_hits`) — otherwise an unmodelled query
       // lands here, finds no bare string to read entityType from, matches no ops
       // and silently reports "no conflict".
-      if (!sql.includes('scalar_hits') || sql.includes('touched(entity_type')) {
+      if (!sql.includes('scalar_hits')) {
         throw new Error(`Unmocked raw query in tx: ${sql}`);
       }
       // Located by shape, not by position: #9503 reordered the params (and repeated
