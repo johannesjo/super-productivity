@@ -19,6 +19,7 @@ import {
   MissingRefreshTokenAPIError,
   HttpNotOkAPIError,
   EmptyRemoteBodySPError,
+  InvalidFilePrefixError,
   JsonParseError,
   LegacySyncFormatDetectedError,
   IncompleteRemoteOperationsError,
@@ -94,6 +95,7 @@ type CompletedUploadOutcome = Extract<UploadOutcome, { kind: 'completed' }>;
  */
 export type ForceUploadTriggerSource =
   | 'EmptyRemoteBodySPError'
+  | 'InvalidFilePrefixError'
   | 'JsonParseError'
   | 'LegacySyncFormatDetectedError'
   | 'DecryptError'
@@ -938,16 +940,37 @@ export class SyncWrapperService {
           actionStr: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
         });
         return 'HANDLED_ERROR';
-      } else if (error instanceof JsonParseError) {
+      } else if (
+        // InvalidFilePrefixError: the remote file's head is not `pf_[C][E]<v>__`,
+        // so it is rejected before the decrypt/decompress/JSON stages — but the
+        // user's situation is identical to JsonParseError's: remote unreadable,
+        // local intact. Without it, that error fell through to the generic
+        // handler and surfaced the raw internal message (verbatim the title of
+        // #9627) with no way forward.
+        //
+        // #9682 initially excluded this branch, arguing that if a server-side
+        // transformation strips the header, force upload just recreates the
+        // broken state. Reversed because the #9627 reporter was in fact
+        // unblocked by force upload. That PR — which would have extended .bak
+        // auto-recovery here — is parked, not declined: a head-strip is not a
+        // shape a torn write produces, so .bak recovery is a poor fit, but it
+        // has explicit merge criteria. Revisit this branch alongside it.
+        error instanceof JsonParseError ||
+        error instanceof InvalidFilePrefixError
+      ) {
         // Remote JSON is unparseable (e.g. truncated write, encoding issue).
         // Force overwrite is safe: local data is intact, remote cannot be parsed.
-        // Issues: #5574, #4616.
+        // Issues: #5574, #4616, #9627.
+        const forceUploadSource: ForceUploadTriggerSource =
+          error instanceof InvalidFilePrefixError
+            ? 'InvalidFilePrefixError'
+            : 'JsonParseError';
         this._providerManager.setSyncStatus('ERROR');
         this._snackService.open({
           msg: T.F.SYNC.S.ERROR_REMOTE_FILE_CORRUPTED,
           type: 'ERROR',
           config: { duration: 12000 },
-          actionFn: async () => this.forceUpload('JsonParseError'),
+          actionFn: async () => this.forceUpload(forceUploadSource),
           actionStr: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
         });
         return 'HANDLED_ERROR';

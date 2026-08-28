@@ -52,7 +52,7 @@ set -eu
 SCHEMA="prisma/schema.prisma"
 MIGRATIONS_DIR="prisma/migrations"
 # 4 recoverable CONCURRENTLY migrations today (20260512000000, 20260514000000,
-# 20260514000002, 20260828000000) + a final clean pass + slack. The real
+# 20260514000002, 20260828000001) + a final clean pass + slack. The real
 # infinite-loop backstop is the LAST_RECOVERED guard below; this is just a
 # tight upper bound. Overridable for emergencies.
 MAX_ATTEMPTS="${MIGRATE_MAX_ATTEMPTS:-7}"

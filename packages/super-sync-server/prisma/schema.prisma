@@ -109,7 +109,6 @@ model Operation {
 
   @@unique([userId, serverSeq])
   @@index([userId, entityType, entityId, serverSeq])
-  @@index([userId, clientId])
   // Covering: serverSeq trails so the old-ops fresh-prefix probe answers its
   // server_seq filter from the index tuple (index-only NO answers, #9692).
   @@index([userId, receivedAt, serverSeq])
