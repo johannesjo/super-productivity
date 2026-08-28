@@ -148,14 +148,19 @@ server README) so a freshly-abandoned build cancels itself within seconds; the
 termination covers pre-existing orphans and half-open connections the GUC
 cannot detect.
 
-Caveat (details in that same comment): the out-of-band recovery holds no
-advisory lock, so racing recoveries (e.g. multiple Helm init-containers) can
-mistake a **peer run's live build** for an orphan and abort it — a behavior
-change: before this cleanup a racing `DROP` merely queued and timed out while
-the live build finished. The fleet still converges via the idempotent
-drop-then-create, but rebuilds can be wasted; serializing recovery under a
-dedicated advisory lock is the intended follow-up. That trade is why the `P1002`
-advisory-lock path still refuses to auto-kill.
+Racing recoveries (e.g. multiple Helm init-containers rolling out together)
+are serialized under a **dedicated recovery advisory lock**, key `72707370` —
+distinct from Prisma's own migrate lock `72707369` (#9781). A recovery that
+finds the lock held fails loudly with diagnosis guidance instead of mistaking
+the holder's **live build** for an orphan; re-running the deploy after the
+holder finishes succeeds (orchestrator restarts do this naturally). The wait
+is `MIGRATE_RECOVERY_LOCK_TIMEOUT` seconds (default 30). Residual unlocked
+windows — a pre-lock migrator version racing a current one, an operator
+running the printed manual recovery statements, or a run that degraded to
+unlocked after a lock-helper failure (it warns loudly) — can still abort a
+live peer build; the fleet then converges via the idempotent drop-then-create
+at the cost of a wasted rebuild. That trade is why the `P1002` advisory-lock
+path still refuses to auto-kill.
 
 Enforced by `tests/migrate-deploy-script.spec.ts` (the termination SQL and its
 ordering) and
