@@ -42,7 +42,7 @@ const bridge = sources.find((s) => s.path.endsWith('JavaScriptInterface.kt'));
 if (!bridge) throw new Error('JavaScriptInterface.kt not found under ' + srcRoot);
 const bridgeClass = fqcn(bridge.text, 'JavaScriptInterface');
 const bridgeMethods = [
-  ...bridge.text.matchAll(/@JavascriptInterface\s+(?:[^\n]*\n\s*)*?fun\s+(\w+)/g),
+  ...bridge.text.matchAll(/@JavascriptInterface\s+(?:[^\n]*\n[ \t]*)*?fun\s+(\w+)/g),
 ].map((m) => m[1]);
 
 const workers = sources.flatMap(({ text }) =>
