@@ -1,14 +1,22 @@
 # R8 rules for the release build.
 #
-# Release builds are minified (see build.gradle) because Google Play requires a
-# minimum level of DEX shrinking, obfuscation and optimization from February 2027.
+# INERT RIGHT NOW: release builds run with minifyEnabled false (see build.gradle
+# for why — enabling it shipped a startup crash to the Play internal track). This
+# file is kept staged for re-enabling minification ahead of Google Play's
+# February 2027 DEX shrinking/obfuscation requirement.
+#
+# It is NOT known to be sufficient: it was only ever validated by grepping
+# mapping.txt, never by starting a minified build. Treat the rules below as a
+# starting point, and re-land minification only behind CI that actually launches
+# the minified APK.
+#
 # Everything R8 cannot see statically has to be kept here — reflection and the
 # WebView bridge both look like dead code to it.
 
 # --- WebView JS bridge ------------------------------------------------------
 # The Angular app calls these methods by name off the injected window property,
-# so R8 must neither rename nor drop them. Redundant today: the default
-# proguard-android-optimize.txt keeps @JavascriptInterface members globally.
+# so R8 must neither rename nor drop them. Redundant today: the AGP default
+# proguard file keeps @JavascriptInterface members globally.
 # Kept because it names the one class we actually depend on, and because the
 # failure is silent — a stripped bridge method builds and installs fine, the JS
 # call just goes nowhere. tools/verify-r8-mapping.mjs is what enforces it.
