@@ -56,8 +56,13 @@ android {
             }
 
             signingConfig signingConfigs.release
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // Google Play requires a minimum level of DEX shrinking, obfuscation
+            // and optimization for app uploads from February 2027. The plain
+            // "proguard-android.txt" is not enough on its own: it sets
+            // -dontoptimize, so it would satisfy neither half of that.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
 
