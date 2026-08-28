@@ -13,4 +13,14 @@
   <exclude
     domain="sharedpref"
     path="SuperProductivitySync.xml" />
+  <!--
+    Per-device WebView verdict. block_override is the user's decision to bypass
+    the block screen on THIS device; restoring it elsewhere silently disarms a
+    guard that exists because users otherwise uninstall their WebView updates,
+    which resets the Chromium profile and takes the app's local data with it.
+    last_known_good_major_version is device-specific for the same reason.
+  -->
+  <exclude
+    domain="sharedpref"
+    path="webview_compatibility.xml" />
 </full-backup-content>
