@@ -66,9 +66,15 @@ test.describe('Project completion', () => {
       .filter({ hasText: 'Test Project' });
     await expect(archivedProject).toBeVisible();
 
-    await archivedProject.getByRole('button', { name: 'Reopen' }).click();
-
-    await expect(archivedProject).toHaveCount(0);
+    // The archived-projects page renders while the previous route transition is
+    // still animating, so Angular can re-create the row right after Playwright
+    // resolves the button; the click then lands on the detached copy and
+    // silently no-ops. Re-issue it until the project actually leaves the list.
+    const reopenBtn = archivedProject.getByRole('button', { name: 'Reopen' });
+    await expect(async () => {
+      await reopenBtn.click();
+      await expect(archivedProject).toHaveCount(0, { timeout: 2000 });
+    }).toPass({ timeout: 20000 });
     await projectPage.navigateToProjectByName('Test Project');
     await expect(page).toHaveURL(/\/#\/project\/.+\/tasks/);
 
