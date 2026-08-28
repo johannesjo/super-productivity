@@ -161,7 +161,6 @@ test.describe('@migration #9139 work context with no theme', () => {
     // visible in the diff instead of buried in ~100KB of JSON.
     const themelessData = JSON.parse(JSON.stringify(legacyData.data)) as Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
     delete themelessData.tag.entities.TODAY.theme;

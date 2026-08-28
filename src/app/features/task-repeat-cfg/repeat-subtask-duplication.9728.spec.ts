@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /**
  * Reproduction for #9728 — a recurring task duplicates all of its subtasks.
  *
