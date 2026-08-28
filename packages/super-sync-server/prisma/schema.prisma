@@ -109,7 +109,9 @@ model Operation {
 
   @@unique([userId, serverSeq])
   @@index([userId, entityType, entityId, serverSeq])
-  @@index([userId, receivedAt])
+  // Covering: serverSeq trails so the old-ops fresh-prefix probe answers its
+  // server_seq filter from the index tuple (index-only NO answers, #9692).
+  @@index([userId, receivedAt, serverSeq])
   // Multi-entity conflict lookups (#8334) probe entity_ids with @> / &&. This MUST stay
   // modelled here, not only in the 20260613000001 raw migration: `prisma db push` builds
   // from this file alone, so while the GIN existed only as raw SQL the CI, E2E and

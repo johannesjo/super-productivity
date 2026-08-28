@@ -224,6 +224,21 @@ vi.mock('../src/db', async () => {
           if (args.where?.id?.in && !args.where.id.in.includes(op.id))
             shouldDelete = false;
           if (
+            args.where?.serverSeq?.gte !== undefined &&
+            op.serverSeq < args.where.serverSeq.gte
+          )
+            shouldDelete = false;
+          if (
+            args.where?.serverSeq?.lt !== undefined &&
+            op.serverSeq >= args.where.serverSeq.lt
+          )
+            shouldDelete = false;
+          if (
+            args.where?.serverSeq?.lte !== undefined &&
+            op.serverSeq > args.where.serverSeq.lte
+          )
+            shouldDelete = false;
+          if (
             args.where?.receivedAt?.lt !== undefined &&
             op.receivedAt >= args.where.receivedAt.lt
           )
@@ -696,6 +711,16 @@ vi.mock('../src/db', async () => {
             if (
               args.where?.serverSeq?.lte !== undefined &&
               op.serverSeq > args.where.serverSeq.lte
+            )
+              shouldDelete = false;
+            if (
+              args.where?.serverSeq?.gte !== undefined &&
+              op.serverSeq < args.where.serverSeq.gte
+            )
+              shouldDelete = false;
+            if (
+              args.where?.serverSeq?.lt !== undefined &&
+              op.serverSeq >= args.where.serverSeq.lt
             )
               shouldDelete = false;
             if (
@@ -3991,6 +4016,110 @@ describe('SyncService', () => {
       expect(lowestSurvivorOf(user2Id).opType).toBe('SYNC_IMPORT');
       expect(lowestSurvivorOf(user3Id).serverSeq).toBe(1);
       expect(testState.operations.size).toBe(2 + opsPerUser + 1);
+    });
+
+    it('walks the prefix in stated serverSeq windows, never a discovered row set (#9692)', async () => {
+      // The delete's scan range must be STATED (a two-sided serverSeq window),
+      // never DISCOVERED (scan-until-LIMIT-fills). Production found three ways
+      // for a discovered range to blow the 60s statement_timeout: low match
+      // density heap-filters the whole prefix, a 5000-row batch is ~5000 cold
+      // random heap fetches, and a prefix already deleted-but-unvacuumed is
+      // walked entirely without ever filling the limit (measured 88s to return
+      // zero rows). Only the call shape encodes that guarantee, so this test
+      // pins the shape, not just the outcome.
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '100';
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const boundarySeq = 250;
+
+      for (let i = 1; i < boundarySeq; i++) {
+        testState.operations.set(`w-op-${i}`, {
+          id: `w-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+        });
+      }
+      seedFullStateOp(userId, boundarySeq, BigInt(cutoffTime - 1));
+
+      const deleteManySpy = vi.mocked(prisma.operation.deleteMany);
+      deleteManySpy.mockClear();
+      const { totalDeleted } = await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+      delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+
+      const wheres = deleteManySpy.mock.calls.map(
+        ([args]) => (args as { where: Record<string, any> }).where,
+      );
+      // ceil(249 / 100) stated windows, covering [1, boundary) exactly, each no
+      // wider than the configured width and each carrying the clean-slate
+      // receivedAt guard. `id: { in }` appearing here would mean the row set
+      // was discovered by a scan again — the exact regression this pins.
+      expect(wheres.map((w) => [w.serverSeq?.gte, w.serverSeq?.lt])).toEqual([
+        [1, 101],
+        [101, 201],
+        [201, boundarySeq],
+      ]);
+      for (const where of wheres) {
+        expect(where.id).toBeUndefined();
+        expect(where.userId).toBe(userId);
+        expect(where.receivedAt?.lt).toBeDefined();
+      }
+      expect(totalDeleted).toBe(boundarySeq - 1);
+    });
+
+    it('keeps advancing windows across an already-pruned gap in the prefix (#9692)', async () => {
+      // The dead-prefix cohort: quota recovery already deleted seq 1..200, so
+      // the first windows have nothing to do. An empty window proves nothing
+      // about the rest of the prefix — the drain must advance to the boundary,
+      // not stop early, or the surviving tail is never pruned.
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '100';
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const boundarySeq = 250;
+
+      for (let i = 201; i < boundarySeq; i++) {
+        testState.operations.set(`gap-op-${i}`, {
+          id: `gap-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+        });
+      }
+      seedFullStateOp(userId, boundarySeq, BigInt(cutoffTime - 1));
+
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+      delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+
+      expect(totalDeleted).toBe(boundarySeq - 201);
+      expect(affectedUserIds).toEqual([userId]);
+      const survivors = Array.from(testState.operations.values()).filter(
+        (op) => op.userId === userId,
+      );
+      expect(survivors).toHaveLength(1);
+      expect(survivors[0].opType).toBe('SYNC_IMPORT');
     });
 
     it('should delete old operations from all users', async () => {
