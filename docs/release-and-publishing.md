@@ -102,11 +102,10 @@ For a non-prerelease release, publishing the draft starts:
 | Google Play | `.github/workflows/auto-publish-google-play-on-release.yml` | Promote `internal` to `production`              |
 | Snap Store  | `.github/workflows/build-publish-to-snap-on-release.yml`    | Publish the release Snap to `edge` and `stable` |
 | Web app     | `.github/workflows/build-update-web-app-on-release.yml`     | Build and deploy production web assets          |
-| AUR         | `.github/workflows/build-publish-to-aur-on-release.yml`     | Update `superproductivity-bin`                  |
 | Docker Hub  | `.github/workflows/publish-to-hub-docker.yml`               | Build and publish the application image         |
 
 The Docker Hub workflow runs for any published GitHub release and does not contain
-the prerelease guard used by the web, Play, Snap, and AUR workflows. Account for
+the prerelease guard used by the web, Play, and Snap workflows. Account for
 that before publishing a pre-release.
 
 The Microsoft Store upload remains manual: download the `WinStoreRelease` artifact
@@ -141,7 +140,7 @@ for secret names. The main operational groups are:
   `.github/workflows/build.yml`.
 - Snap: `SNAPCRAFT_STORE_CREDENTIALS`; see
   [credential refresh](howto-refresh-snap-credentials.md).
-- Web, Docker Hub, AUR, and Microsoft Store credentials are named at their exact
+- Web, Docker Hub, and Microsoft Store credentials are named at their exact
   use sites in the corresponding workflows.
 
 ## Store listing assets
