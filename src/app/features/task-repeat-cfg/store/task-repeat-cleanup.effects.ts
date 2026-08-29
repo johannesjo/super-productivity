@@ -47,10 +47,11 @@ const _hasTemplateSchedule = (
   dueStr: string,
 ): boolean => {
   // remindAt is deliberately NOT compared: it is app-managed, not a user edit.
-  // Firing, dismissing, snoozing or re-scheduling a reminder rewrites or clears
-  // it (dismissReminderOnly, mobile pre-scheduling), which made every timed
-  // recurring instance permanently unreapable and let skipOverdue silently pile
-  // up one leftover per occurrence. The day itself is still compared below.
+  // Dismissing a fired reminder clears it (dismissReminderOnly) and snoozing
+  // rewrites it (reScheduleTaskWithTime, which keeps dueWithTime), so comparing
+  // it made every timed recurring instance permanently unreapable and let
+  // skipOverdue silently pile up one leftover per occurrence. The day itself is
+  // still compared below.
   if (isValidSplitTime(cfg.startTime)) {
     const expectedDueWithTime = getDateTimeFromClockString(
       cfg.startTime,
