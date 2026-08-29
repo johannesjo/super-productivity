@@ -128,7 +128,14 @@ describe('TrackingPresenceService', () => {
           provide: SuperSyncWebSocketService,
           useValue: {
             presenceMessage$,
-            sendPresence: sendPresenceSpy,
+            // Mirrors the real transport: disconnect() nulls the socket, so a
+            // frame handed over afterwards is silently dropped instead of
+            // reaching the wire. The spy records DELIVERED frames only.
+            sendPresence: (type: string, payload: string): void => {
+              if (wsConnected()) {
+                sendPresenceSpy(type, payload);
+              }
+            },
             get isConnected() {
               return wsConnected;
             },
@@ -254,6 +261,104 @@ describe('TrackingPresenceService', () => {
       flush();
     }));
 
+    it('broadcasts a final stopped frame when stop() interrupts live tracking', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      const statesBefore = sentStates().length;
+
+      service.stop();
+      tick();
+
+      const states = sentStates();
+      expect(states.length).toBe(statesBefore + 1);
+      const last = states[states.length - 1];
+      expect(last.state).toBe('stopped');
+      expect(last.reason).toBeUndefined();
+      flush();
+    }));
+
+    it('broadcasts a final stopped frame when stop() interrupts an idle pause', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      setIdle(true);
+      setLocalTaskId(null); // idle pause begins — viewers show "Paused"
+      const statesBefore = sentStates().length;
+
+      service.stop();
+      tick();
+
+      const states = sentStates();
+      expect(states.length).toBe(statesBefore + 1);
+      const last = states[states.length - 1];
+      expect(last.state).toBe('stopped');
+      expect(last.reason).toBeUndefined();
+      flush();
+    }));
+
+    it('delivers the final stopped frame when the caller tears the socket down right after stop()', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      const statesBefore = sentStates().length;
+
+      // What SyncWrapperService.disconnectWebSocket() does on disable-sync /
+      // switch-provider. The frame cannot go out synchronously (key resolution
+      // + encryption are async), so stop() must hand the caller something to
+      // wait on — otherwise the socket dies first and every other device keeps
+      // a phantom "was tracking" session for up to 30min.
+      service.stop().finally(() => wsConnected.set(false));
+      tick();
+
+      const states = sentStates();
+      expect(states.length).toBe(statesBefore + 1);
+      expect(states[states.length - 1].state).toBe('stopped');
+      flush();
+    }));
+
+    it('does not re-arm the offline resend flag from a send that lands after stop()', fakeAsync(() => {
+      service.start();
+      flushEffects();
+      setLocalTaskId('task-1');
+
+      // Stop while offline: the final frame is dropped by _doSend. Nothing may
+      // survive teardown to fire a broadcast on the next start().
+      wsConnected.set(false);
+      flushEffects();
+      service.stop();
+      flush(); // the enqueued final frame reaches _doSend only now
+
+      expect(
+        (service as unknown as { _pendingResend: boolean })._pendingResend,
+      ).toBeFalse();
+
+      // and nothing fires a phantom broadcast when the service is restarted
+      setLocalTaskId(null); // the tracked task ended while presence was off
+      const countAfterStop = sentStates().length;
+      service.start();
+      wsConnected.set(true);
+      flushEffects();
+
+      expect(sentStates().length).toBe(countAfterStop);
+      service.stop();
+      flush();
+    }));
+
+    it('does not broadcast on stop() when this device was not producing', fakeAsync(() => {
+      service.start();
+      tick();
+      receiveRemoteState({ taskId: 'remote-task' });
+
+      service.stop();
+      tick();
+
+      // a viewer-only device announcing `stopped` would clobber the
+      // producer's cached state on the server — see class invariants
+      expect(sentStates().length).toBe(0);
+      flush();
+    }));
+
     it('resends a state transition dropped while offline once reconnected', fakeAsync(() => {
       service.start();
       flushEffects();
@@ -324,6 +429,19 @@ describe('TrackingPresenceService', () => {
       expect(service.remoteSession()!.payload.reason).toBe('idle');
       service.stop();
       flush();
+    }));
+
+    it('treats a fabricated stop reason as undefined so the linger clear still fires', fakeAsync(() => {
+      service.start();
+      tick();
+      receiveRemoteState({
+        state: 'stopped',
+        reason: 'fabricated' as unknown as 'idle',
+      });
+
+      expect(service.remoteSession()!.payload.reason).toBeUndefined();
+      tick(PRESENCE_STOPPED_LINGER_MS + 1);
+      expect(service.remoteSession()).toBeNull();
     }));
 
     it('drops out-of-order server ordinals', fakeAsync(() => {
@@ -436,6 +554,39 @@ describe('TrackingPresenceService', () => {
 
       expect(dispatchSpy).toHaveBeenCalledWith(setCurrentTask({ id: null }));
       expect(snackOpenSpy).toHaveBeenCalled();
+      service.stop();
+      flush();
+    }));
+
+    it('sanitizes the commanding device label shown in the snack', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      const sessionId = sentStates()[0].sessionId;
+
+      receiveRemoteCmd({
+        sessionId,
+        deviceLabel: '<img src=x onerror=alert(1)>Phone',
+      });
+      const markupParams = (
+        snackOpenSpy.calls.mostRecent().args[0] as {
+          translateParams: { device: unknown };
+        }
+      ).translateParams;
+      expect(markupParams.device).not.toContain('<');
+
+      // dispatch on the MockStore leaves the selector unchanged, so the
+      // service still considers itself tracking and handles a second cmd
+      receiveRemoteCmd({
+        sessionId,
+        deviceLabel: { evil: true } as unknown as string,
+      });
+      const nonStringParams = (
+        snackOpenSpy.calls.mostRecent().args[0] as {
+          translateParams: { device: unknown };
+        }
+      ).translateParams;
+      expect(typeof nonStringParams.device).toBe('string');
       service.stop();
       flush();
     }));

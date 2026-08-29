@@ -248,7 +248,12 @@ describe('SyncWrapperService', () => {
         { provide: WsTriggeredDownloadService, useValue: mockWsDownloadService },
         {
           provide: TrackingPresenceService,
-          useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+          // stop() returns a flush handle the wrapper waits on before
+          // closing the socket — see disconnectWebSocket().
+          useValue: jasmine.createSpyObj('TrackingPresenceService', {
+            start: undefined,
+            stop: Promise.resolve(),
+          }),
         },
         {
           provide: RemoteTrackingAndroidNotifierService,
@@ -661,6 +666,32 @@ describe('SyncWrapperService', () => {
       await Promise.resolve();
 
       expect(mockWsDownloadService.stop).toHaveBeenCalled();
+      expect(mockSuperSyncWsService.disconnect).toHaveBeenCalled();
+    });
+
+    it('should close the websocket only after the presence stop frame flushed', async () => {
+      const presence = TestBed.inject(
+        TrackingPresenceService,
+      ) as jasmine.SpyObj<TrackingPresenceService>;
+      mockSuperSyncWsService.disconnect.calls.reset();
+      let releaseFlush = (): void => undefined;
+      presence.stop.and.returnValue(
+        new Promise<void>((resolve) => {
+          releaseFlush = resolve;
+        }),
+      );
+
+      service.disconnectWebSocket();
+      await Promise.resolve();
+
+      // the final `stopped` frame needs the socket alive to reach the wire
+      expect(presence.stop).toHaveBeenCalled();
+      expect(mockSuperSyncWsService.disconnect).not.toHaveBeenCalled();
+
+      releaseFlush();
+      await Promise.resolve();
+      await Promise.resolve();
+
       expect(mockSuperSyncWsService.disconnect).toHaveBeenCalled();
     });
 
@@ -1981,7 +2012,7 @@ describe('SyncWrapperService', () => {
 
     it('should handle JsonParseError with force-overwrite action and corrupted-data message (#5574, #4616)', async () => {
       mockSyncService.downloadRemoteOps.and.returnValue(
-        Promise.reject(new JsonParseError(new SyntaxError('Unexpected end of JSON'), '')),
+        Promise.reject(new JsonParseError(new SyntaxError('Unexpected end of JSON'))),
       );
 
       const result = await service.sync();
@@ -2038,6 +2069,37 @@ describe('SyncWrapperService', () => {
       const openedSnack = mockSnackService.open.calls.mostRecent().args[0] as SnackParams;
       await (openedSnack.actionFn as (() => Promise<void>) | undefined)?.();
       expect(forceUploadSpy).toHaveBeenCalledWith('InvalidFilePrefixError');
+    });
+
+    it('should NOT offer force-overwrite for InvalidFilePrefixError with a markup head', async () => {
+      // A markup head means the download was a response page (WebDAV
+      // multistatus, proxy/captive-portal) — the stored remote file is likely
+      // intact, so offering the overwrite here would clobber healthy remote
+      // data over a transient network/login problem.
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(
+          new InvalidFilePrefixError({
+            expectedPrefix: 'pf_',
+            endSeparator: '__',
+            inputLength: 1543,
+            prefixAt: -1,
+            headShape: 'markup',
+          }),
+        ),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.F.SYNC.S.ERROR_REMOTE_RESPONSE_NOT_SYNC_DATA,
+          type: 'ERROR',
+        }),
+      );
+      const callArgs = mockSnackService.open.calls.mostRecent().args[0];
+      expect(callArgs['actionFn']).toBeUndefined();
     });
 
     it('should handle SyncDataCorruptedError with version-mismatch message (no force-overwrite)', async () => {
@@ -3033,7 +3095,12 @@ describe('SyncWrapperService', () => {
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
           {
             provide: TrackingPresenceService,
-            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+            // stop() returns a flush handle the wrapper waits on before
+            // closing the socket — see disconnectWebSocket().
+            useValue: jasmine.createSpyObj('TrackingPresenceService', {
+              start: undefined,
+              stop: Promise.resolve(),
+            }),
           },
           {
             provide: RemoteTrackingAndroidNotifierService,
@@ -3172,7 +3239,12 @@ describe('SyncWrapperService', () => {
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
           {
             provide: TrackingPresenceService,
-            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+            // stop() returns a flush handle the wrapper waits on before
+            // closing the socket — see disconnectWebSocket().
+            useValue: jasmine.createSpyObj('TrackingPresenceService', {
+              start: undefined,
+              stop: Promise.resolve(),
+            }),
           },
           {
             provide: RemoteTrackingAndroidNotifierService,

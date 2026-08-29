@@ -178,6 +178,13 @@ export class TrackingPresenceService implements OnDestroy {
     if (this._subs) {
       return;
     }
+    // A previous run's producer session is dead: its final `stopped` frame has
+    // gone out and its socket is gone. Reset so `_sessionId` really means
+    // "tracked in THIS run" (what `_broadcastState`'s guard assumes) and no
+    // frame can ever go out under the dead session's id/seq.
+    this._sessionId = '';
+    this._seq = 0;
+    this._sinceTs = 0;
     this._subs = new Subscription();
 
     this._connEffect = effect(
@@ -236,7 +243,29 @@ export class TrackingPresenceService implements OnDestroy {
     );
   }
 
-  stop(): void {
+  /**
+   * Tears the producer/viewer session down and returns a handle that settles
+   * once the final `stopped` frame has been handed to the WebSocket.
+   *
+   * Callers that also tear the socket down (SyncWrapperService
+   * .disconnectWebSocket) MUST wait for this handle: the frame cannot be sent
+   * synchronously (key resolution + WebCrypto encryption are async), so
+   * closing the socket in the same tick drops it and leaves other devices on
+   * a phantom session — "Tracking" for up to 90s, a snapshot for up to 30min.
+   * Teardown itself is synchronous and always completes.
+   */
+  stop(): Promise<void> {
+    // A live producer session must announce its end before teardown. Best-effort
+    // via the serialized send path (_broadcastState catches send errors).
+    if (this._current.state === 'tracking' || this._current.reason === 'idle') {
+      this._current = { state: 'stopped', taskId: null };
+      this._lastTrackedTaskId = null;
+      this._focusCycle = undefined;
+      this._broadcastState();
+    }
+    // The tail of the serialized send chain, i.e. the frame just enqueued.
+    // `_send` keeps this chain always-resolving, so it cannot hang teardown.
+    const flushed = this._sendChain;
     this._subs?.unsubscribe();
     this._subs = null;
     this._connEffect?.destroy();
@@ -246,10 +275,11 @@ export class TrackingPresenceService implements OnDestroy {
     this._stopHeartbeat();
     this._setRemoteSession(null);
     this._lastOrdinal = 0;
+    return flushed;
   }
 
   ngOnDestroy(): void {
-    this.stop();
+    void this.stop();
   }
 
   /**
@@ -404,6 +434,12 @@ export class TrackingPresenceService implements OnDestroy {
     if (!Number.isFinite(p.focusCycle as number)) {
       delete p.focusCycle;
     }
+    if (p.reason !== 'idle') {
+      // Only the literal 'idle' may skip the stopped-linger clear — any
+      // fabricated reason would pin a stopped session for the full 30min
+      // hide window.
+      delete p.reason;
+    }
     // Server-assigned ordinal orders states across producers without trusting
     // device clocks. Equal ordinals are re-announcements of the same state
     // (producerConnected flag flips) and must pass.
@@ -483,6 +519,7 @@ export class TrackingPresenceService implements OnDestroy {
     if (cmd.v !== 1 || cmd.cmd !== 'stop' || typeof cmd.sessionId !== 'string') {
       return;
     }
+    cmd.deviceLabel = sanitizeDeviceLabel(cmd.deviceLabel);
     if (this._current.state !== 'tracking') {
       return;
     }
@@ -552,7 +589,10 @@ export class TrackingPresenceService implements OnDestroy {
     obj: TrackingPresencePayload | TrackingPresenceCmd,
   ): Promise<void> {
     if (!this._ws.isConnected()) {
-      if (type === 'presence_state') {
+      // `_subs` is the running latch (see start()): a send enqueued before
+      // stop() can land here after it, and there is no reconnect handler left
+      // to flush the flag — it would only leak into the next start().
+      if (type === 'presence_state' && this._subs) {
         // Remember that a transition was dropped so the reconnect handler can
         // announce it — else a stop made offline leaves a phantom session.
         this._pendingResend = true;

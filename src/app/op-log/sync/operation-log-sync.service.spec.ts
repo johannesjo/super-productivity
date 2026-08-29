@@ -67,6 +67,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-conf
 import { SyncProviderId } from '../sync-providers/provider.const';
 import { stripLocalOnlySyncSettingsFromAppData } from '../../features/config/local-only-sync-settings.util';
 import { RepairSyncContextService } from '../validation/repair-sync-context.service';
+import { SyncImportConflictGateService } from './sync-import-conflict-gate.service';
 
 describe('OperationLogSyncService', () => {
   let service: OperationLogSyncService;
@@ -216,7 +217,9 @@ describe('OperationLogSyncService', () => {
 
     remoteOpsProcessingServiceSpy = jasmine.createSpyObj('RemoteOpsProcessingService', [
       'processRemoteOps',
+      'validateAfterSync',
     ]);
+    remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(true);
     conflictJournalServiceSpy = jasmine.createSpyObj('ConflictJournalService', [
       'clearAll',
     ]);
@@ -1053,6 +1056,156 @@ describe('OperationLogSyncService', () => {
           expect(rejectedOpsHandlerServiceSpy.handleRejectedOps).not.toHaveBeenCalled();
         });
 
+        it('should keep the cursor behind a deferred piggybacked REPAIR whose heal fails but STILL acknowledge uploads', async () => {
+          // The gate defers the REPAIR precisely while meaningful pending ops
+          // exist, so the deferred acknowledgement MUST still run: skipping it
+          // would keep the (server-accepted) ops pending forever and re-arm
+          // the deferral every cycle — a livelock. Only the cursor persist is
+          // skipped, so the repair is re-downloaded and applied once the
+          // pending set has drained.
+          const piggybackedRepair = {
+            id: 'repair-pb-1',
+            clientId: 'client-B',
+            actionType: '[SP_ALL] Repair' as ActionType,
+            opType: OpType.Repair,
+            entityType: 'ALL' as const,
+            entityId: 'ALL',
+            payload: {},
+            vectorClock: { clientB: 7 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+            repairBaseServerSeq: 3,
+          } as Operation;
+          uploadServiceSpy.uploadPendingOps.and.resolveTo({
+            uploadedCount: 1,
+            piggybackedOps: [piggybackedRepair],
+            rejectedCount: 0,
+            rejectedOps: [],
+            pendingAcknowledgementSeqs: [1],
+            lastServerSeqToPersist: 9,
+          });
+          const gateService = TestBed.inject(SyncImportConflictGateService);
+          spyOn(gateService, 'checkIncomingFullStateConflict').and.resolveTo({
+            fullStateOp: piggybackedRepair,
+            pendingOps: [{ op: { id: 'local-pending-1' } } as OperationLogEntry],
+            hasMeaningfulPending: true,
+            discardablePendingOpIds: [],
+            deferredRepairOpId: piggybackedRepair.id,
+          });
+          remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(false);
+          const setLastServerSeq = jasmine.createSpy('setLastServerSeq').and.resolveTo();
+          const provider = {
+            ...mockProvider,
+            setLastServerSeq,
+          } as unknown as OperationSyncCapable;
+
+          const result = await service.uploadPendingOps(provider);
+
+          expect(result.kind).toBe('completed');
+          expect(setLastServerSeq).not.toHaveBeenCalled();
+          expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([1]);
+        });
+
+        it('should recover across cycles: defer REPAIR while pending ops exist, then apply it once acks drain (no livelock)', async () => {
+          // End-to-end shape of the #9773/#9777 recovery loop with the REAL
+          // conflict gate (no gate spy):
+          //   Cycle 1 (upload): a meaningful local op is pending, the server
+          //     piggybacks a causal REPAIR → the gate defers it; the local heal
+          //     fails → cursor persist skipped, but the deferred acknowledgement
+          //     still drains the pending op.
+          //   Cycle 2 (download): pending set now empty → the gate lets the
+          //     re-downloaded REPAIR through and the cursor advances.
+          // Without the drain in cycle 1 the gate would re-defer forever.
+          const repairOp = {
+            id: 'repair-mc-1',
+            clientId: 'client-B',
+            actionType: '[SP_ALL] Repair' as ActionType,
+            opType: OpType.Repair,
+            entityType: 'ALL' as const,
+            entityId: 'ALL',
+            payload: {},
+            vectorClock: { clientB: 7 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+            repairBaseServerSeq: 3,
+          } as Operation;
+          const meaningfulPendingEntry = {
+            seq: 1,
+            op: {
+              id: 'local-task-update',
+              clientId: 'client-A',
+              actionType: 'test' as ActionType,
+              opType: OpType.Update,
+              entityType: 'TASK',
+              entityId: 'task-1',
+              payload: { title: 'user work' },
+              vectorClock: { clientA: 1 },
+              timestamp: Date.now(),
+              schemaVersion: 1,
+            },
+            appliedAt: Date.now(),
+            source: 'local',
+          } as unknown as OperationLogEntry;
+
+          // ── Cycle 1: upload with a piggybacked causal REPAIR ──
+          opLogStoreSpy.getUnsynced.and.resolveTo([meaningfulPendingEntry]);
+          // markSynced drains the pending set — mirror that in the store spy so
+          // cycle 2 sees what a real store would report.
+          opLogStoreSpy.markSynced.and.callFake(async () => {
+            opLogStoreSpy.getUnsynced.and.resolveTo([]);
+          });
+          uploadServiceSpy.uploadPendingOps.and.resolveTo({
+            uploadedCount: 1,
+            piggybackedOps: [repairOp],
+            rejectedCount: 0,
+            rejectedOps: [],
+            selectedPendingOps: [meaningfulPendingEntry],
+            pendingAcknowledgementSeqs: [1],
+            lastServerSeqToPersist: 9,
+          });
+          remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(false);
+          const setLastServerSeq = jasmine.createSpy('setLastServerSeq').and.resolveTo();
+          const provider = {
+            ...mockProvider,
+            setLastServerSeq,
+          } as unknown as OperationSyncCapable;
+
+          const uploadResult = await service.uploadPendingOps(provider);
+
+          expect(uploadResult.kind).toBe('completed');
+          // Real gate deferred the repair: it must not be applied this cycle …
+          expect(remoteOpsProcessingServiceSpy.processRemoteOps).toHaveBeenCalledWith(
+            [],
+            jasmine.anything(),
+          );
+          // … the cursor stays behind it, but the ack still drains.
+          expect(setLastServerSeq).not.toHaveBeenCalled();
+          expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([1]);
+
+          // ── Cycle 2: cursor was frozen, so the REPAIR is re-downloaded ──
+          remoteOpsProcessingServiceSpy.processRemoteOps.calls.reset();
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [repairOp],
+            hasMore: false,
+            latestServerSeq: 9,
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'superSyncOps',
+            failedFileCount: 0,
+          } as any);
+
+          const downloadResult = await service.downloadRemoteOps(provider);
+
+          // Empty pending set → the real gate no longer defers: the repair is
+          // applied as a remote op and the cursor finally advances past it.
+          expect(downloadResult.kind).toBe('ops_processed');
+          expect(remoteOpsProcessingServiceSpy.processRemoteOps).toHaveBeenCalledWith(
+            [repairOp],
+            jasmine.anything(),
+          );
+          expect(setLastServerSeq).toHaveBeenCalledWith(9);
+        });
+
         it('should not call handleRejectedOps when there are no rejected ops', async () => {
           uploadServiceSpy.uploadPendingOps.and.returnValue(
             Promise.resolve({
@@ -1611,6 +1764,79 @@ describe('OperationLogSyncService', () => {
         // after an app update instead of skipped forever.
         expect(result.kind).toBe('blocked_incompatible');
         expect(setLastServerSeqSpy).not.toHaveBeenCalled();
+      });
+
+      describe('deferred incoming REPAIR (#9773)', () => {
+        const repairOp: Operation = {
+          id: 'repair-1',
+          clientId: 'client-B',
+          actionType: '[SP_ALL] Repair' as ActionType,
+          opType: OpType.Repair,
+          entityType: 'ALL',
+          entityId: 'ALL',
+          payload: {},
+          vectorClock: { clientB: 7 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+          repairBaseServerSeq: 3,
+        } as Operation;
+
+        let setLastServerSeqSpy: jasmine.Spy;
+        let mockProvider: OperationSyncCapable;
+
+        beforeEach(() => {
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [repairOp],
+            hasMore: false,
+            latestServerSeq: 9,
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'superSyncOps',
+            failedFileCount: 0,
+          } as any);
+          const gateService = TestBed.inject(SyncImportConflictGateService);
+          spyOn(gateService, 'checkIncomingFullStateConflict').and.resolveTo({
+            fullStateOp: repairOp,
+            pendingOps: [{ op: { id: 'local-pending-1' } } as OperationLogEntry],
+            hasMeaningfulPending: true,
+            discardablePendingOpIds: [],
+            deferredRepairOpId: repairOp.id,
+          });
+          setLastServerSeqSpy = jasmine.createSpy('setLastServerSeq').and.resolveTo();
+          mockProvider = {
+            isReady: () => Promise.resolve(true),
+            setLastServerSeq: setLastServerSeqSpy,
+          } as any;
+        });
+
+        it('should NOT advance lastServerSeq when the substitute local heal fails', async () => {
+          remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(false);
+
+          const result = await service.downloadRemoteOps(mockProvider);
+
+          // The skipped REPAIR snapshot is the one known fix for the (likely
+          // shared) corruption. Keep the cursor behind it so the next cycle
+          // re-downloads it — but the rest of the cycle proceeds normally
+          // (early-returning would starve the acknowledgements that let the
+          // gate stop deferring the repair).
+          expect(result.kind).toBe('ops_processed');
+          expect(setLastServerSeqSpy).not.toHaveBeenCalled();
+          expect(remoteOpsProcessingServiceSpy.validateAfterSync).toHaveBeenCalled();
+        });
+
+        it('should advance lastServerSeq past the deferred REPAIR when the local heal succeeds', async () => {
+          remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(true);
+
+          const result = await service.downloadRemoteOps(mockProvider);
+
+          expect(result.kind).toBe('ops_processed');
+          expect(setLastServerSeqSpy).toHaveBeenCalledWith(9);
+          // The deferred repair itself must not be applied as a remote op.
+          expect(remoteOpsProcessingServiceSpy.processRemoteOps).toHaveBeenCalledWith(
+            [],
+            jasmine.anything(),
+          );
+        });
       });
 
       it('should return localWinOpsCreated: 0 and newOpsCount: 0 on server migration', async () => {

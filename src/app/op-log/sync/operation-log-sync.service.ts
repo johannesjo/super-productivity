@@ -92,6 +92,17 @@ type GuardedRemoteOpsProcessingResult = RemoteOpsProcessingResult & {
    * caller must leave the cursor behind the batch and retry (#9773).
    */
   preApplyRepairDeferred?: boolean;
+  /**
+   * A causal REPAIR was deferred but the substitute local heal FAILED —
+   * this client's state is still invalid and the skipped snapshot is the
+   * one known fix. The caller must skip ONLY the cursor persist (so the
+   * next cycle re-downloads the repair) while letting the rest of the
+   * cycle — in particular the deferred upload acknowledgement — proceed:
+   * once the pending ops are acknowledged the gate stops deferring the
+   * repair and applies it. Early-returning instead would keep the pending
+   * set non-empty and re-arm the deferral forever (#9777 follow-up).
+   */
+  deferredRepairHealFailed?: boolean;
 };
 
 /**
@@ -460,7 +471,21 @@ export class OperationLogSyncService {
       // that were never stored. Mirrors the download path's invariant.
       // A version/migration block keeps the cursor behind the blocked op so it is
       // re-downloaded and retried after an app update instead of skipped forever.
-      if (result.lastServerSeqToPersist !== undefined) {
+      if (processResult.deferredRepairHealFailed) {
+        // Heal-substitute for the deferred piggybacked REPAIR failed. Skip ONLY
+        // the cursor persist — the repair snapshot is the one known fix, so it
+        // must be re-downloadable next cycle. Everything below still runs;
+        // above all the deferred acknowledgement MUST proceed, because the gate
+        // defers the repair precisely while meaningful pending ops exist:
+        // skipping markSynced would keep those (server-accepted) ops pending
+        // forever, re-arming the deferral every cycle — a livelock with no
+        // exit. With the ack drained, the next cycle's gate lets the repair
+        // through and it heals the state the local attempt could not.
+        OpLog.err(
+          'OperationLogSyncService: Local heal after deferring a piggybacked REPAIR failed; ' +
+            'keeping the cursor behind the repair for retry.',
+        );
+      } else if (result.lastServerSeqToPersist !== undefined) {
         await syncProvider.setLastServerSeq(result.lastServerSeqToPersist);
       }
     }
@@ -1273,7 +1298,20 @@ export class OperationLogSyncService {
     // This is the correct behavior - better to re-download than to skip ops.
     // A version/migration block keeps the cursor behind the blocked op so it is
     // re-downloaded and retried after an app update instead of skipped forever.
-    if (result.latestServerSeq !== undefined) {
+    if (processResult.deferredRepairHealFailed) {
+      // The substitute local heal after deferring an incoming REPAIR failed:
+      // state is still invalid and the deferred snapshot is the one known fix.
+      // Skip ONLY the cursor persist so the next cycle re-downloads the repair
+      // — once this cycle's uploads are acknowledged the gate stops deferring
+      // it and applies it (see the piggyback-path twin). Everything else
+      // proceeds normally; re-downloaded ops are deduped by appliedOpIds, and
+      // the session-validation latch already reports the failure (sync shows
+      // ERROR).
+      OpLog.err(
+        'OperationLogSyncService: Local heal after deferring an incoming REPAIR failed; ' +
+          'keeping the cursor behind the repair for retry.',
+      );
+    } else if (result.latestServerSeq !== undefined) {
       await syncProvider.setLastServerSeq(result.latestServerSeq);
     }
 
@@ -1316,6 +1354,7 @@ export class OperationLogSyncService {
     const startupOpIdsToDiscard = new Set(startupOpIds);
     let preApplyFullStateConflict: IncomingFullStateConflictGateResult | undefined;
     let preApplyRepairDeferred = false;
+    let deferredRepairHealFailed = false;
     // Drop the deferred repair, then treat the rest of the batch as ordinary
     // remote ops. The snapshot is not lost work: this client already applies
     // every op the repair was built from, so only the correction itself is
@@ -1377,7 +1416,8 @@ export class OperationLogSyncService {
             // batch holding just the repair applies nothing. Inside
             // runWithBaseServerSeq so any repair this produces is causal — a
             // legacy one would make receivers drop concurrent ops.
-            await this.remoteOpsProcessingService.validateAfterSync();
+            deferredRepairHealFailed =
+              !(await this.remoteOpsProcessingService.validateAfterSync());
           }
           return processed;
         },
@@ -1400,6 +1440,7 @@ export class OperationLogSyncService {
         ...result,
         ...(preApplyFullStateConflict ? { preApplyFullStateConflict } : {}),
         ...(preApplyRepairDeferred ? { preApplyRepairDeferred } : {}),
+        ...(deferredRepairHealFailed ? { deferredRepairHealFailed } : {}),
       };
     } catch (error) {
       try {

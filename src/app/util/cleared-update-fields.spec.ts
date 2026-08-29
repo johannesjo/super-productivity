@@ -51,4 +51,27 @@ describe('applyClearedFields', () => {
     expect('id' in restored).toBe(false);
     expect(restored).toEqual({ b: 'x' });
   });
+
+  it('should ignore non-identifier keys and cap the list (wire hardening)', () => {
+    // A hostile/corrupt clearedFields from a plaintext provider must not
+    // inject arbitrary own keys — non-identifier keys would persist through
+    // typia (excess props pass), re-upload, and self-amplify.
+    const changes: Partial<TestEntity> = { b: 'x' };
+    const restored = applyClearedFields(changes, [
+      '__proto__x!',
+      'a b',
+      'x'.repeat(100),
+      '',
+      'a',
+    ] as unknown as (keyof TestEntity & string)[]);
+    expect(Object.keys(restored)).toEqual(['b', 'a']);
+    expect(restored.a).toBeUndefined();
+
+    const flood = Array.from(
+      { length: 200 },
+      (_, i) => `f${i}`,
+    ) as unknown as (keyof TestEntity & string)[];
+    const capped = applyClearedFields({}, flood);
+    expect(Object.keys(capped).length).toBeLessThanOrEqual(32);
+  });
 });

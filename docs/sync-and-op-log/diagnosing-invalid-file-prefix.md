@@ -34,6 +34,13 @@ against the real encoder in
 the OpLog bridge in `src/app/op-log/util/sync-file-prefix.spec.ts`.
 
 Recovery: `SyncWrapperService` surfaces the corrupted-remote snack with a
-force-overwrite action (shared with `JsonParseError`). `.bak` auto-recovery for
-this error is parked in #9682 — a head-strip is not a torn-write shape — with
-explicit merge criteria recorded there.
+force-overwrite action (shared with `JsonParseError`) — EXCEPT for
+`headShape: 'markup'`, which points at a bad response rather than a bad stored
+file: there the snack explains the likely server/proxy/login cause and offers
+no overwrite action, because force-uploading over a healthy remote file to
+"fix" a transient response would lose the other devices' data. If the markup
+really is the stored file (e.g. WebDAV persisted an error page), the manual
+escape hatch is Sync settings → Force overwrite remote
+(`DialogSyncCfgComponent`), which never re-reads the bad file. `.bak`
+auto-recovery for this error is parked in #9682 — a head-strip is not a
+torn-write shape — with explicit merge criteria recorded there.
