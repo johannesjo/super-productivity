@@ -87,14 +87,15 @@ These are responses to the constraint above, not general-purpose optimizations.
 Each one's reasoning lives at its own call site — **pointers, not summaries**, so
 this list cannot drift out of sync with the code it describes:
 
-| Mitigation                                                                                   | Where the reasoning lives                                            |
-| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Windowed retention deletes (stated two-sided `server_seq` range, not a discovered `take`)    | `storage-quota.service.ts`, #9692, #9763                             |
-| Covering `(user_id, received_at, server_seq)` index for the fresh-prefix probe               | migration `20260828000001`                                           |
-| Autovacuum **insert** scale factor at 0.02 (and why the other two are deliberately excluded) | migration `20260828000003`                                           |
-| `POSTGRES_MEM_LIMIT` / `POSTGRES_EFFECTIVE_CACHE_SIZE` kept opt-in                           | `docker-compose.yml`, `env.example`                                  |
-| Opt-in 60s `statement_timeout` — **off by default**, and only the `DATABASE_URL` form works  | `env.example`, `docker-compose.yml`                                  |
-| Query-plan integration specs against real PostgreSQL                                         | `tests/integration/old-ops-*-plan.integration.spec.ts`, #9191, #9192 |
+| Mitigation                                                                                           | Where the reasoning lives                                            |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Windowed retention deletes (stated two-sided `server_seq` range, not a discovered `take`)            | `storage-quota.service.ts`, #9692, #9763                             |
+| Covering `(user_id, received_at, server_seq)` index for the fresh-prefix probe                       | migration `20260828000001`                                           |
+| Causal partial index so the fleet-wide boundary scan runs index-only (additive; the broad one stays) | migration `20260829000000`                                           |
+| Autovacuum **insert** scale factor at 0.02 (and why the other two are deliberately excluded)         | migration `20260828000003`                                           |
+| `POSTGRES_MEM_LIMIT` / `POSTGRES_EFFECTIVE_CACHE_SIZE` kept opt-in                                   | `docker-compose.yml`, `env.example`                                  |
+| Opt-in 60s `statement_timeout` — **off by default**, and only the `DATABASE_URL` form works          | `env.example`, `docker-compose.yml`                                  |
+| Query-plan integration specs against real PostgreSQL                                                 | `tests/integration/old-ops-*-plan.integration.spec.ts`, #9191, #9192 |
 
 ### Operating the autovacuum tuning
 
@@ -122,10 +123,11 @@ here instead:
   2,000 unvacuumed rows, a 38-page map deficit, `Heap Fetches: 0`. The cost
   lands on index-only scans that **emit** rows over the same window: the same
   fixture measured ~2,014 heap fetches, 0 after a VACUUM. Both are pinned in
-  `tests/integration/old-ops-probe-plan.integration.spec.ts`. Note an audit of
-  `src/` found no production query that is both index-only-capable and emits
-  volume, so the benefit here is bounded map sag and freeze debt — not a
-  measured query win.
+  `tests/integration/old-ops-probe-plan.integration.spec.ts`. When that was
+  written no production query was both index-only-capable and emitted volume, so
+  the benefit was bounded map sag and freeze debt. Migration `20260829000000`
+  changed that: the fleet-wide boundary scan is now index-only and emits ~3,162
+  rows, so map coverage became a query cost — see below.
 - **Revisit against the monitoring report.** `npm run monitor stats` prints an
   `operations: visibility map & autovacuum` section — map coverage,
   `n_ins_since_vacuum`, `n_mod_since_analyze`, autovacuum cadence, the live
@@ -137,6 +139,52 @@ here instead:
   gets _worse_ per pass depends on which outruns which: a higher delete budget
   raises dead tuples per pass, a shorter interval lowers them. Do not assume;
   watch `n_dead_tup` and the autovacuum cadence in the monitoring report.
+
+### Operating the causal boundary index
+
+`20260829000000` is checksum-frozen once applied, so its evolving guidance lives
+here instead:
+
+- **Set `MIGRATION_TIMEOUT` explicitly for the deploy that applies it.** The
+  default is 900s (`deploy.sh`), and this is the first `CREATE INDEX
+CONCURRENTLY` on `operations` at ~7 GB. What can exceed the budget is not the
+  build — only ~3,162 rows match the predicate, and the two heap passes are
+  sequential — but the two phases where `CONCURRENTLY` **waits for every
+  transaction older than its snapshot to finish**. That wait is unbounded and has
+  nothing to do with disk speed. Check `pg_stat_activity` for long-running
+  transactions first; the sweep and snapshot generation are the usual holders.
+- **Do not size the build from autovacuum's observed rate.** A vacuum on this
+  host was measured at ~163 pages/s (2026-08-29), which would imply hours for two
+  passes over ~861k pages. That rate is `autovacuum_vacuum_cost_delay`
+  throttling, not the disk; `CREATE INDEX CONCURRENTLY` has no such throttle and
+  reads sequentially. Measured on PostgreSQL 16.15 against this schema
+  (2026-08-29): the build took 24 ms over 1,101 pages and 401 ms over 27,524 —
+  linear in pages, so ~13 s at production's ~861k on that hardware. Even an order
+  of magnitude slower leaves it far inside a 1800 s budget. **The build is not
+  the risk. The wait is.**
+- **The win does not decay as the table grows.** Same measurements: a 25x larger
+  table (60k -> 1.5M rows, 1,101 -> 27,524 pages) moved the scan from 12 to 242
+  blocks — tracking the _causal_ row count, which grew 25x too, at a flat
+  ~0.003 blocks per causal row. Production's causal ratio is ~165x _lower_ than
+  that fixture's (~3,162 causal rows in 9.1M), so its scan should land nearer the
+  12 than the 242. Cost belongs to full-state ops, not to the table.
+- **A timed-out build is recoverable, not wedged.** The migration is in
+  `migrate-deploy.sh`'s recoverable-`CONCURRENTLY` list, so a leftover INVALID
+  index is dropped and rebuilt on the next attempt. `deploy.sh` exits 124 and
+  says so. This is the shape #9783/#9787 exist to handle — verify the recovery
+  actually ran rather than assuming it.
+- **The win depends on the visibility map, so it depends on the autovacuum
+  tuning above.** The boundary scan is index-only and emits rows, so map decay
+  costs it one heap fetch per emitted tuple on a non-all-visible page. That cost
+  is proportional to **recent** full-state ops (a handful a day), not to the
+  table, because the index is partial — pinned as a test against an unvacuumed
+  tail in `tests/integration/old-ops-boundary-plan.integration.spec.ts`. If
+  `npm run monitor stats` warns on map coverage, this statement is one of the
+  things paying for it.
+- **After applying it, re-measure.** `EXPLAIN (ANALYZE, BUFFERS)` on the sweep's
+  boundary `groupBy` read 3,930 heap blocks in 33.7s before (2026-08-29, on a run
+  that did not hit the 60s cap; an earlier one did). Everything above is measured
+  on a 60k-row fixture; that one production number is what converts it.
 
 ## The open decision
 

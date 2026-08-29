@@ -120,9 +120,13 @@ model Operation {
   // EVERY tenant's rows, twice per accepted op. Worse than the outage this replaced.
   // The map name matches the raw migration, so migrate-based deployments see no drift.
   @@index([entityIds], type: Gin, map: "operations_entity_ids_gin")
-  // Restore-point opType lookups use a raw PARTIAL index (20260512000000). That one
-  // genuinely cannot be modelled — Prisma has no partial-index syntax — so db-push
-  // databases still lack it. Same trap, different index; tracked in #9192.
+  // Two raw PARTIAL indexes on op_type live outside this file, because Prisma has no
+  // partial-index syntax: the BROAD 3-value one (20260512000000) that restore-point
+  // lookups and the legacy-REPAIR queries need, and the CAUSAL one (20260829000000)
+  // whose predicate matches CAUSAL_FULL_STATE_OPERATION_WHERE verbatim so the old-ops
+  // sweep's fleet-wide boundary scan runs index-only. Both are additive and both must
+  // exist; see 20260829000000 for why the broad one must not be tightened in place.
+  // db-push databases get NEITHER. Same trap, different indexes; tracked in #9192.
   @@map("operations")
 }
 
