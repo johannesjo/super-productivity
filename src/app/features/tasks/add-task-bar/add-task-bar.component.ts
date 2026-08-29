@@ -1020,22 +1020,34 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     };
 
     document.body.focus();
-    focus();
+    this.inputEl()?.nativeElement.focus();
 
-    // A web view can drop a focus() issued while the bar is still animating in,
-    // so retry once. Only when the field really did not take focus, though:
-    // re-focusing an already-focused input re-fires the global focusin handler,
-    // which re-runs its scroll-into-view in the middle of the keyboard
-    // animation — one of the sources of the jumping in #9779.
-    this._focusTimeout = window.setTimeout(
-      () => {
+    if (IS_ANDROID_WEB_VIEW) {
+      // Unchanged: this web view needs the repeated blur → focus cycle to raise
+      // the IME reliably, and it has no iOS focusin scroll handler to disturb.
+      window.setTimeout(() => this.inputEl()?.nativeElement.focus());
+      this._focusTimeout = window.setTimeout(() => {
+        document.body.focus();
+        focus();
         this._focusTimeout = undefined;
-        if (document.activeElement !== this.inputEl()?.nativeElement) {
-          focus();
-        }
-      },
-      IS_ANDROID_WEB_VIEW ? 200 : 50,
-    );
+      }, 200);
+      return;
+    }
+
+    if (selectAll) {
+      this.inputEl()?.nativeElement.select();
+    }
+    // A web view can drop a focus() issued while the bar is still animating in,
+    // so retry once — but only when the field really did not take focus:
+    // re-focusing an already-focused input re-fires the global focusin handler,
+    // which re-runs its scroll-into-view in the middle of the iOS keyboard
+    // animation, one of the sources of the jumping in #9779.
+    this._focusTimeout = window.setTimeout(() => {
+      this._focusTimeout = undefined;
+      if (document.activeElement !== this.inputEl()?.nativeElement) {
+        focus();
+      }
+    }, 50);
   }
 
   toggleNote(): void {

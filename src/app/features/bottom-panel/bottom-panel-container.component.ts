@@ -475,6 +475,12 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     if ('visualViewport' in window && window.visualViewport) {
       window.visualViewport.addEventListener('resize', this._boundOnViewportResize);
     }
+    // Also the window event: on iOS the keyboard CSS variables can settle after
+    // the last visualViewport resize (GlobalThemeService only knows whether the
+    // web view resized once `keyboardDidShow` fired, #9779) and it announces
+    // that with a synthetic window resize. Without this the sheet would keep the
+    // offset it computed mid-animation.
+    window.addEventListener('resize', this._boundOnViewportResize);
 
     this._bodyClassObserver = new MutationObserver(() => this._onViewportResize());
     this._bodyClassObserver.observe(document.body, {
@@ -484,8 +490,9 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   }
 
   private _removeKeyboardWatcher(): void {
-    if (typeof window !== 'undefined' && window.visualViewport) {
-      window.visualViewport.removeEventListener('resize', this._boundOnViewportResize);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this._boundOnViewportResize);
+      window.visualViewport?.removeEventListener('resize', this._boundOnViewportResize);
     }
     this._bodyClassObserver?.disconnect();
     this._bodyClassObserver = null;
