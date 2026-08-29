@@ -81,6 +81,12 @@
   // Keyboard height (set dynamically via JS)
   --keyboard-height: 0px;
   --keyboard-overlay-offset: 0px;
+  // Fallback only. On iOS the live value is written on `.cdk-overlay-container`,
+  // not here, because a custom property on :root restyles every element that
+  // could inherit it — the whole task list — on each frame of the keyboard
+  // animation (#9779). Rules outside the overlay layer therefore see 100vh:
+  // anything in the app shell that needs the live height gets it from
+  // GlobalThemeService (see `iosShellHeight`), not from this variable.
   --visual-viewport-height: 100vh;
 
   // -----------------------------

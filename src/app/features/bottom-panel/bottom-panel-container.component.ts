@@ -475,6 +475,12 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     if ('visualViewport' in window && window.visualViewport) {
       window.visualViewport.addEventListener('resize', this._boundOnViewportResize);
     }
+    // Also the window event: on iOS the keyboard CSS variables can settle after
+    // the last visualViewport resize (GlobalThemeService only knows whether the
+    // web view resized once `keyboardDidShow` fired, #9779) and it announces
+    // that with a synthetic window resize. Without this the sheet would keep the
+    // offset it computed mid-animation.
+    window.addEventListener('resize', this._boundOnViewportResize);
 
     this._bodyClassObserver = new MutationObserver(() => this._onViewportResize());
     this._bodyClassObserver.observe(document.body, {
@@ -484,8 +490,9 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   }
 
   private _removeKeyboardWatcher(): void {
-    if (typeof window !== 'undefined' && window.visualViewport) {
-      window.visualViewport.removeEventListener('resize', this._boundOnViewportResize);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this._boundOnViewportResize);
+      window.visualViewport?.removeEventListener('resize', this._boundOnViewportResize);
     }
     this._bodyClassObserver?.disconnect();
     this._bodyClassObserver = null;
@@ -514,15 +521,23 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
 
     const windowHeight = window.innerHeight;
     const viewportHeight = window.visualViewport?.height ?? windowHeight;
-    const rootStyle = getComputedStyle(document.documentElement);
+
+    const container = this._getSheetContainer();
+    if (!container) return;
+
+    // Read the keyboard variables off the sheet itself, not <html>: the sheet is
+    // a CDK overlay, and --visual-viewport-height is set on the overlay
+    // container so writing it does not restyle the whole document (#9779).
+    // Inheritance makes this equivalent wherever a variable is set above.
+    const keyboardStyle = getComputedStyle(container);
     const cssVisualViewportHeight = this._parseCssPx(
-      rootStyle.getPropertyValue(CSS_VAR_VISUAL_VIEWPORT_HEIGHT),
+      keyboardStyle.getPropertyValue(CSS_VAR_VISUAL_VIEWPORT_HEIGHT),
     );
     const cssKeyboardHeight = this._parseCssPx(
-      rootStyle.getPropertyValue(CSS_VAR_KEYBOARD_HEIGHT),
+      keyboardStyle.getPropertyValue(CSS_VAR_KEYBOARD_HEIGHT),
     );
     const cssKeyboardOverlayOffset = this._parseCssPx(
-      rootStyle.getPropertyValue(CSS_VAR_KEYBOARD_OVERLAY_OFFSET),
+      keyboardStyle.getPropertyValue(CSS_VAR_KEYBOARD_OVERLAY_OFFSET),
     );
     const keyboardHeight = Math.max(windowHeight - viewportHeight, cssKeyboardHeight);
     const isIOS = document.body.classList.contains(BodyClass.isIOS);
@@ -530,9 +545,6 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     const isKeyboardVisible =
       document.body.classList.contains(BodyClass.isKeyboardVisible) ||
       keyboardHeight > KEYBOARD_DETECT_THRESHOLD;
-
-    const container = this._getSheetContainer();
-    if (!container) return;
 
     if (isKeyboardVisible) {
       this._captureKeyboardAdjustedStyles(container);

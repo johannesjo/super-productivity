@@ -46,12 +46,12 @@
   min-height: calc(100vh - var(--safe-area-top));
 }
 
-// iOS keeps 100vh tied to the layout viewport while the soft keyboard is open.
-// Use visualViewport height from JS so the app shell shrinks above the keyboard.
-:host-context(body.isIOS.isKeyboardVisible) .app-container {
-  height: calc(var(--visual-viewport-height) - var(--safe-area-top));
-  min-height: calc(var(--visual-viewport-height) - var(--safe-area-top));
-}
+// iOS keeps 100vh tied to the layout viewport while the soft keyboard is open,
+// so the shell has to be sized from the visualViewport height. That height now
+// arrives as a plain `height` bound from GlobalThemeService.iosShellHeight
+// rather than a `--visual-viewport-height` rule here: this element wraps the
+// task list, and a custom property it inherits makes WebKit restyle the whole
+// list on every frame of the keyboard animation (#9779).
 
 .main-content {
   flex: 1;
