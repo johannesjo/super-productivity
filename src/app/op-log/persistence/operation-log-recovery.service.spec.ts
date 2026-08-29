@@ -253,21 +253,6 @@ describe('OperationLogRecoveryService', () => {
       expect(snapshotState.boards).toBeDefined();
     });
 
-    // Filling defaults makes even an empty database validate, and
-    // hasUsableEntityData() lets a `pf` database through on globalConfig alone.
-    // Without a raw guard here that database is imported as an all-defaults
-    // empty store, and the RECOVERY snapshot shadows it permanently.
-    it('should refuse legacy data with no task or project state', async () => {
-      mockClientIdService.loadClientId.and.resolveTo('testClient');
-
-      await expectAsync(
-        service.recoverFromLegacyData({ globalConfig: { misc: {} } }),
-      ).toBeRejectedWithError(/no task or project state/);
-
-      expect(mockOpLogStore.appendRecoveryOperationAndSnapshot).not.toHaveBeenCalled();
-      expect(mockStore.dispatch).not.toHaveBeenCalled();
-    });
-
     it('should reject invalid legacy data before writing or dispatching it', async () => {
       mockValidateStateService.validateState.and.resolveTo({
         isValid: false,

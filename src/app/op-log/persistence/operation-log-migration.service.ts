@@ -95,7 +95,6 @@ export class OperationLogMigrationService {
     }
 
     let migrationLockAcquired = false;
-    let isBackupCreated = false;
     let startFreshRequested = false;
     let migrationError: unknown;
     let dialogRef: MatDialogRef<DialogLegacyMigrationComponent> | undefined;
@@ -151,7 +150,7 @@ export class OperationLogMigrationService {
 
           await this._ensureTranslationsLoaded();
           dialogRef = this._showMigrationDialog();
-          isBackupCreated = await this._createAutoBackup(dialogRef);
+          await this._createAutoBackup(dialogRef);
           await this._performMigration(dialogRef);
           return true;
         },
@@ -169,14 +168,8 @@ export class OperationLogMigrationService {
       OpLog.err('OperationLogMigrationService: Migration failed:', error);
       migrationError = error;
       if (dialogRef) {
-        // The message must match reality: without a backup on disk it would be
-        // false comfort to tell the user nothing is lost.
         dialogRef.componentInstance.error.set(
-          this.translateService.instant(
-            isBackupCreated
-              ? T.MIGRATE.E_MIGRATION_FAILED_MSG
-              : T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
-          ),
+          this.translateService.instant(T.MIGRATE.E_MIGRATION_FAILED_MSG),
         );
         // Always offered here: starting fresh keeps the legacy database, so
         // there is no copy to lose and nothing to gate on (#9770). Not offered
@@ -262,31 +255,24 @@ export class OperationLogMigrationService {
   }
 
   /**
-   * Downloads the pre-migration backup and reports whether it actually landed.
+   * Downloads the pre-migration backup, best-effort.
    *
-   * `download()` resolves on cancellation as well as on success — the share
-   * sheet returns `wasCanceled`, the Snap save dialog returns no `path` — so
-   * "did not throw" is not proof the user holds a copy. Nothing destructive
-   * hangs off this any more; it only decides which failure message the dialog
-   * shows, so it must not promise a backup the user does not have.
-   *
-   * The plain browser/Electron path (an anchor click) reports nothing at all,
-   * so there it stays a best-effort assumption, as everywhere else in the app.
+   * Deliberately does not try to prove the file landed: `download()` resolves
+   * on cancellation too, and the plain browser/Electron path (an anchor click)
+   * reports nothing either way. Nothing depends on the answer — the legacy
+   * database survives a failed migration now — so the failure message says
+   * where to look rather than claiming the copy exists.
    */
   private async _createAutoBackup(
     dialogRef: MatDialogRef<DialogLegacyMigrationComponent>,
-  ): Promise<boolean> {
+  ): Promise<void> {
     this._setStatus(dialogRef, 'backup');
 
     const legacyData = await this.legacyPfDb.loadAllEntityData();
     const filename = `${MIGRATION_BACKUP_PREFIX}_${getBackupTimestamp()}.json`;
 
-    const result = await download(filename, JSON.stringify(legacyData));
-    const isSaved = !result.wasCanceled && !(result.isSnap && !result.path);
-    OpLog.normal(`OperationLogMigrationService: Backup created: ${filename}`, {
-      isSaved,
-    });
-    return isSaved;
+    await download(filename, JSON.stringify(legacyData));
+    OpLog.normal(`OperationLogMigrationService: Backup downloaded: ${filename}`);
   }
 
   private async _performMigration(

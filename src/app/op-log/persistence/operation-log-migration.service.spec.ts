@@ -8,7 +8,6 @@ import { OperationLogStoreService } from './operation-log-store.service';
 import { LegacyPfDbService } from '../../core/persistence/legacy-pf-db.service';
 import { ClientIdService } from '../../core/util/client-id.service';
 import { LanguageService } from '../../core/language/language.service';
-import { T } from '../../t.const';
 import { OpLog } from '../../core/log';
 import { ActionType, OpType } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
@@ -572,9 +571,7 @@ describe('OperationLogMigrationService', () => {
         await expectAsync(service.checkAndMigrate()).toBeRejected();
       }, 10000);
 
-      // Losing the backup step is the one case where discarding the legacy data
-      // would destroy the user's only copy of it.
-      it('promises no backup but still offers to start fresh when the backup failed', async () => {
+      it('still offers to start fresh when the backup step itself failed', async () => {
         mockLegacyPfDb.loadAllEntityData.and.resolveTo({
           globalConfig: { misc: {} },
         } as any);
@@ -584,10 +581,8 @@ describe('OperationLogMigrationService', () => {
 
         await expectAsync(service.checkAndMigrate()).toBeRejected();
 
-        expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
-          T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
-        );
-        // Still offered: nothing is deleted, so there is no copy to lose.
+        // Nothing is deleted, so a missing backup is no reason to withhold the
+        // way out of the dead end.
         expect(mockDialogRef.componentInstance.canStartFresh.set).toHaveBeenCalledWith(
           true,
         );
@@ -625,22 +620,6 @@ describe('OperationLogMigrationService', () => {
         );
 
         expect(mockOpLogStore.appendOperationAndSnapshot).not.toHaveBeenCalled();
-      }, 10000);
-
-      // `download()` resolves on cancellation as well as on success, so a
-      // cancelled save must not be reported to the user as "a backup file has
-      // been downloaded".
-      it('reports that no backup was saved when the download was cancelled', async () => {
-        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
-          globalConfig: { misc: {} },
-        } as any);
-        ((service as any)._createAutoBackup as jasmine.Spy).and.resolveTo(false);
-
-        await expectAsync(service.checkAndMigrate()).toBeRejected();
-
-        expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
-          T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
-        );
       }, 10000);
     });
   });

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'fs';
 import legacyPartial from '../../../src/app/op-log/validation/test-fixtures/legacy-pf-v13-partial-models.json';
 import { MIGRATION_BACKUP_PREFIX } from '../../../electron/shared-with-frontend/get-backup-timestamp';
@@ -30,6 +30,36 @@ import {
  */
 
 type MigratedState = Record<string, { ids?: string[] } | undefined>;
+
+/** Every key still present in the legacy `pf/main` store. */
+const readLegacyKeys = (page: Page): Promise<string[]> =>
+  page.evaluate(
+    () =>
+      new Promise<string[]>((resolve, reject) => {
+        const req = indexedDB.open('pf', 1);
+        req.onsuccess = () => {
+          const db = req.result;
+          try {
+            const keysReq = db
+              .transaction('main', 'readonly')
+              .objectStore('main')
+              .getAllKeys();
+            keysReq.onsuccess = () => {
+              db.close();
+              resolve(keysReq.result.map(String));
+            };
+            keysReq.onerror = () => {
+              db.close();
+              reject(keysReq.error);
+            };
+          } catch (e) {
+            db.close();
+            reject(e);
+          }
+        };
+        req.onerror = () => reject(req.error);
+      }),
+  );
 
 test.describe('@migration #9770 legacy data missing newer model slices', () => {
   test('app migrates and starts when the pf database predates timeTracking, menuTree and boards', async ({
@@ -157,33 +187,7 @@ test.describe('@migration #9770 legacy data missing newer model slices', () => {
       await expect(page.locator('dialog-legacy-migration')).toHaveCount(0);
 
       // The load-bearing half: the legacy data is still on disk, untouched.
-      const remaining = await page.evaluate(
-        async () =>
-          new Promise<string[]>((resolve, reject) => {
-            const req = indexedDB.open('pf', 1);
-            req.onsuccess = () => {
-              const db = req.result;
-              try {
-                const keysReq = db
-                  .transaction('main', 'readonly')
-                  .objectStore('main')
-                  .getAllKeys();
-                keysReq.onsuccess = () => {
-                  db.close();
-                  resolve(keysReq.result.map(String));
-                };
-                keysReq.onerror = () => {
-                  db.close();
-                  reject(keysReq.error);
-                };
-              } catch (e) {
-                db.close();
-                reject(e);
-              }
-            };
-            req.onerror = () => reject(req.error);
-          }),
-      );
+      const remaining = await readLegacyKeys(page);
       expect(remaining).toContain('globalConfig');
       expect(remaining).toContain('_migration_skipped');
 
@@ -191,6 +195,93 @@ test.describe('@migration #9770 legacy data missing newer model slices', () => {
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 30000 });
       await expect(page.locator('dialog-legacy-migration')).toHaveCount(0);
+    } finally {
+      await context.close();
+    }
+  });
+
+  // Acknowledging the failure instead of taking the way out escalates the
+  // migration throw through the hydrator's catch into attemptRecovery(), and
+  // hasUsableEntityData() lets a `pf` database through on a `globalConfig` key
+  // alone. The globalConfig has to be a VALID one: recovery validates after
+  // filling defaults, so a malformed config is refused there anyway and never
+  // reaches the guard. With a config the app itself wrote, the filled state
+  // validates cleanly and — without the raw guard — a RECOVERY genesis snapshot
+  // of an all-defaults store is written over the user's database, permanently
+  // shadowing whatever is still on disk.
+  test('acknowledging the failure does not snapshot an empty store over the legacy data', async ({
+    browser,
+    baseURL,
+  }, testInfo) => {
+    const url = baseURL || 'http://localhost:4242';
+
+    // The config has to be one THIS build considers valid. A legacy-schema
+    // config fails validateFull for its own reasons and never reaches the
+    // guard, so take the app's own export as the source of truth.
+    const exportPath = testInfo.outputPath('current-export.json');
+    const setupContext = await browser.newContext({
+      storageState: undefined,
+      baseURL: url,
+      acceptDownloads: true,
+    });
+    let currentGlobalConfig: unknown;
+    try {
+      const setupPage = await setupContext.newPage();
+      await setupPage.addInitScript(skipOnboardingForE2E);
+      await setupPage.goto('/', { waitUntil: 'domcontentloaded' });
+      await waitForAppReady(setupPage);
+      const exportPage = new ImportPage(setupPage);
+      await exportPage.navigateToImportPage();
+      const dl = setupPage.waitForEvent('download', { timeout: 60000 });
+      await exportPage.exportBackupBtn.click();
+      await (await dl).saveAs(exportPath);
+      const exported = JSON.parse(readFileSync(exportPath, 'utf8')) as Record<
+        string,
+        any
+      >;
+      currentGlobalConfig = (exported.data ?? exported).globalConfig;
+      expect(currentGlobalConfig).toBeDefined();
+    } finally {
+      await setupContext.close();
+    }
+
+    const context = await browser.newContext({
+      storageState: undefined,
+      baseURL: url,
+      acceptDownloads: true,
+    });
+    const page = await context.newPage();
+    await page.addInitScript(skipOnboardingForE2E);
+
+    try {
+      await page.route('**/*.js', async (route) => route.abort());
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await seedLegacyDatabase(page, { globalConfig: currentGlobalConfig });
+      await page.unroute('**/*.js');
+
+      const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await downloadPromise;
+
+      const dialog = page.locator('dialog-legacy-migration');
+      await expect(dialog.locator('.error-message')).toBeVisible({ timeout: 30000 });
+      // Ok, not the escape hatch — this is the path that reaches recovery.
+      await dialog.getByRole('button', { name: 'Ok', exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+
+      // Settle window: recovery runs right after the dialog closes, so give the
+      // unguarded write a real chance to land before asserting it did not.
+      await page.waitForTimeout(5000);
+
+      // The load-bearing assertion: no genesis snapshot of an all-defaults
+      // store. Without the guard `task`/`project` come back as empty-but-present
+      // slices, because the filled state validates.
+      const state = await readMigratedState<MigratedState>(page);
+      expect(state.task).toBeUndefined();
+      expect(state.project).toBeUndefined();
+
+      // ...and the legacy database is still there to recover from.
+      expect(await readLegacyKeys(page)).toContain('globalConfig');
     } finally {
       await context.close();
     }
