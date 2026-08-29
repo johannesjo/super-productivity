@@ -67,6 +67,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-conf
 import { SyncProviderId } from '../sync-providers/provider.const';
 import { stripLocalOnlySyncSettingsFromAppData } from '../../features/config/local-only-sync-settings.util';
 import { RepairSyncContextService } from '../validation/repair-sync-context.service';
+import { SyncImportConflictGateService } from './sync-import-conflict-gate.service';
 
 describe('OperationLogSyncService', () => {
   let service: OperationLogSyncService;
@@ -216,7 +217,9 @@ describe('OperationLogSyncService', () => {
 
     remoteOpsProcessingServiceSpy = jasmine.createSpyObj('RemoteOpsProcessingService', [
       'processRemoteOps',
+      'validateAfterSync',
     ]);
+    remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(true);
     conflictJournalServiceSpy = jasmine.createSpyObj('ConflictJournalService', [
       'clearAll',
     ]);
@@ -1611,6 +1614,77 @@ describe('OperationLogSyncService', () => {
         // after an app update instead of skipped forever.
         expect(result.kind).toBe('blocked_incompatible');
         expect(setLastServerSeqSpy).not.toHaveBeenCalled();
+      });
+
+      describe('deferred incoming REPAIR (#9773)', () => {
+        const repairOp: Operation = {
+          id: 'repair-1',
+          clientId: 'client-B',
+          actionType: '[SP_ALL] Repair' as ActionType,
+          opType: OpType.Repair,
+          entityType: 'ALL',
+          entityId: 'ALL',
+          payload: {},
+          vectorClock: { clientB: 7 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+          repairBaseServerSeq: 3,
+        } as Operation;
+
+        let setLastServerSeqSpy: jasmine.Spy;
+        let mockProvider: OperationSyncCapable;
+
+        beforeEach(() => {
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [repairOp],
+            hasMore: false,
+            latestServerSeq: 9,
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'superSyncOps',
+            failedFileCount: 0,
+          } as any);
+          const gateService = TestBed.inject(SyncImportConflictGateService);
+          spyOn(gateService, 'checkIncomingFullStateConflict').and.resolveTo({
+            fullStateOp: repairOp,
+            pendingOps: [{ op: { id: 'local-pending-1' } } as OperationLogEntry],
+            hasMeaningfulPending: true,
+            discardablePendingOpIds: [],
+            deferredRepairOpId: repairOp.id,
+          });
+          setLastServerSeqSpy = jasmine.createSpy('setLastServerSeq').and.resolveTo();
+          mockProvider = {
+            isReady: () => Promise.resolve(true),
+            setLastServerSeq: setLastServerSeqSpy,
+          } as any;
+        });
+
+        it('should NOT advance lastServerSeq when the substitute local heal fails', async () => {
+          remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(false);
+
+          const result = await service.downloadRemoteOps(mockProvider);
+
+          // The skipped REPAIR snapshot is the one known fix for the (likely
+          // shared) corruption. Keep the cursor behind it so the next cycle
+          // re-downloads it and retries the heal instead of losing it forever.
+          expect(result.kind).toBe('no_new_ops');
+          expect(setLastServerSeqSpy).not.toHaveBeenCalled();
+          expect(remoteOpsProcessingServiceSpy.validateAfterSync).toHaveBeenCalled();
+        });
+
+        it('should advance lastServerSeq past the deferred REPAIR when the local heal succeeds', async () => {
+          remoteOpsProcessingServiceSpy.validateAfterSync.and.resolveTo(true);
+
+          const result = await service.downloadRemoteOps(mockProvider);
+
+          expect(result.kind).toBe('ops_processed');
+          expect(setLastServerSeqSpy).toHaveBeenCalledWith(9);
+          // The deferred repair itself must not be applied as a remote op.
+          expect(remoteOpsProcessingServiceSpy.processRemoteOps).toHaveBeenCalledWith(
+            [],
+            jasmine.anything(),
+          );
+        });
       });
 
       it('should return localWinOpsCreated: 0 and newOpsCount: 0 on server migration', async () => {

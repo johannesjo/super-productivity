@@ -92,6 +92,14 @@ type GuardedRemoteOpsProcessingResult = RemoteOpsProcessingResult & {
    * caller must leave the cursor behind the batch and retry (#9773).
    */
   preApplyRepairDeferred?: boolean;
+  /**
+   * A causal REPAIR was deferred but the substitute local heal FAILED —
+   * this client's state is still invalid and the skipped snapshot is the
+   * one known fix. The caller must leave the cursor behind the repair so
+   * the next cycle re-downloads it and retries the heal; advancing would
+   * put the only recovery permanently behind the cursor (#9777 follow-up).
+   */
+  deferredRepairHealFailed?: boolean;
 };
 
 /**
@@ -437,6 +445,25 @@ export class OperationLogSyncService {
         OpLog.normal(
           'OperationLogSyncService: Pending work appeared before the piggybacked REPAIR apply; ' +
             'retrying the batch next cycle.',
+        );
+        return {
+          kind: 'completed',
+          uploadedCount: result.uploadedCount,
+          piggybackedOpsCount: result.piggybackedOps.length,
+          localWinOpsCreated: 0,
+          permanentRejectionCount: 0,
+          hasMorePiggyback: false,
+          rejectedOps: [],
+        };
+      }
+
+      if (processResult.deferredRepairHealFailed) {
+        // Heal-substitute for the deferred piggybacked REPAIR failed; keep the
+        // cursor behind the repair so it is re-downloaded and retried instead
+        // of permanently skipped (see the download-path twin of this branch).
+        OpLog.err(
+          'OperationLogSyncService: Local heal after deferring a piggybacked REPAIR failed; ' +
+            'keeping the cursor behind the repair for retry.',
         );
         return {
           kind: 'completed',
@@ -1196,6 +1223,20 @@ export class OperationLogSyncService {
       return { kind: 'no_new_ops' };
     }
 
+    if (processResult.deferredRepairHealFailed) {
+      // The substitute local heal failed: state is still invalid and the
+      // deferred REPAIR snapshot is the one known fix. Skipping the persist
+      // below keeps the cursor behind it so the next cycle re-downloads the
+      // repair and retries the heal — advancing would put the only recovery
+      // permanently behind the cursor. The session-validation latch already
+      // reports the failure (sync shows ERROR).
+      OpLog.err(
+        'OperationLogSyncService: Local heal after deferring an incoming REPAIR failed; ' +
+          'keeping the cursor behind the repair for retry.',
+      );
+      return { kind: 'no_new_ops' };
+    }
+
     if (processResult.preApplyFullStateConflict?.dialogData) {
       const { fullStateOp, pendingOps, dialogData } =
         processResult.preApplyFullStateConflict;
@@ -1316,6 +1357,7 @@ export class OperationLogSyncService {
     const startupOpIdsToDiscard = new Set(startupOpIds);
     let preApplyFullStateConflict: IncomingFullStateConflictGateResult | undefined;
     let preApplyRepairDeferred = false;
+    let deferredRepairHealFailed = false;
     // Drop the deferred repair, then treat the rest of the batch as ordinary
     // remote ops. The snapshot is not lost work: this client already applies
     // every op the repair was built from, so only the correction itself is
@@ -1377,7 +1419,8 @@ export class OperationLogSyncService {
             // batch holding just the repair applies nothing. Inside
             // runWithBaseServerSeq so any repair this produces is causal — a
             // legacy one would make receivers drop concurrent ops.
-            await this.remoteOpsProcessingService.validateAfterSync();
+            deferredRepairHealFailed =
+              !(await this.remoteOpsProcessingService.validateAfterSync());
           }
           return processed;
         },
@@ -1400,6 +1443,7 @@ export class OperationLogSyncService {
         ...result,
         ...(preApplyFullStateConflict ? { preApplyFullStateConflict } : {}),
         ...(preApplyRepairDeferred ? { preApplyRepairDeferred } : {}),
+        ...(deferredRepairHealFailed ? { deferredRepairHealFailed } : {}),
       };
     } catch (error) {
       try {
