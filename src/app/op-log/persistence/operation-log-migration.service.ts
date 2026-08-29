@@ -28,6 +28,7 @@ import {
 } from '../../../../electron/shared-with-frontend/get-backup-timestamp';
 import { LockService } from '../sync/lock.service';
 import { LOCK_NAMES } from '../core/operation-log.const';
+import { T } from '../../t.const';
 
 /**
  * Service to check for valid operation log state during startup and migrate
@@ -167,8 +168,14 @@ export class OperationLogMigrationService {
     } catch (error) {
       OpLog.err('OperationLogMigrationService: Migration failed:', error);
       if (dialogRef) {
+        // The message must match reality: without a backup on disk it would be
+        // false comfort to tell the user nothing is lost.
         dialogRef.componentInstance.error.set(
-          'Migration failed. Your backup has been downloaded. Please restart or import the backup file.',
+          this.translateService.instant(
+            isBackupCreated
+              ? T.MIGRATE.E_MIGRATION_FAILED_MSG
+              : T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
+          ),
         );
         // Offer the way out ONLY once the backup is on the user's disk: without
         // it, starting fresh would discard the sole copy of their data (#9770).

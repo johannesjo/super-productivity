@@ -151,20 +151,39 @@ test.describe('@migration #9770 legacy data missing newer model slices', () => {
       // The dead end itself.
       const dialog = page.locator('dialog-legacy-migration');
       await expect(dialog.locator('.error-message')).toBeVisible({ timeout: 30000 });
+      // Real copy, not a raw translation key — the dialog resolves its strings
+      // before the app's normal language setup has run.
+      await expect(dialog.locator('.error-message')).not.toContainText('MIGRATE.');
+      await expect(dialog.locator('h1')).toHaveText('Migration Failed');
 
       // The escape hatch is offered only because the backup download above
       // already happened.
-      const startFreshBtn = dialog.getByRole('button', {
-        name: 'Delete old data and start fresh',
-      });
+      const startFreshBtn = dialog.getByRole('button', { name: 'Delete old data' });
       await expect(startFreshBtn).toBeVisible();
       await startFreshBtn.click();
 
       // Destructive, so it takes a second, explicit confirmation.
       await expect(dialog.locator('.start-fresh-warning')).toBeVisible();
+      // Tag this document so the wait below can tell the reloaded page apart from
+      // this one: the side nav already renders behind the dialog, so every
+      // assertion after the click would otherwise pass against the OLD page and
+      // then blow up mid-evaluate when the reload finally lands.
+      await page.evaluate(
+        () => ((window as Window & { __preReload?: true }).__preReload = true),
+      );
       await dialog.getByRole('button', { name: 'Delete and start fresh' }).click();
 
       // The app reloads itself and comes up empty instead of dead-ending again.
+      await expect
+        .poll(
+          () =>
+            page
+              .evaluate(() => !!(window as Window & { __preReload?: true }).__preReload)
+              // Thrown while the navigation is in flight — still the old document.
+              .catch(() => true),
+          { timeout: 30000 },
+        )
+        .toBe(false);
       await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 30000 });
       await expect(page.locator('dialog-legacy-migration')).toHaveCount(0);
 

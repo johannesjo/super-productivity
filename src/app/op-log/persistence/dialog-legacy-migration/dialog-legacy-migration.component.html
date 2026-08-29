@@ -1,13 +1,18 @@
-<h1 mat-dialog-title>{{ T.MIGRATE.DIALOG_TITLE | translate }}</h1>
+<h1 mat-dialog-title>
+  {{ (hasError() ? T.MIGRATE.DIALOG_TITLE_ERROR : T.MIGRATE.DIALOG_TITLE) | translate }}
+</h1>
 
 <div mat-dialog-content>
   @if (hasError()) {
-    <div class="error-state">
-      <mat-icon>error</mat-icon>
-      <p class="error-message">{{ error() }}</p>
-    </div>
+    <!-- The confirmation replaces the error rather than stacking under it: both
+         at once overflows this dialog and buries the question being asked. -->
     @if (isConfirmingStartFresh()) {
       <p class="start-fresh-warning">{{ T.MIGRATE.START_FRESH_CONFIRM | translate }}</p>
+    } @else {
+      <div class="error-state">
+        <mat-icon>error</mat-icon>
+        <p class="error-message">{{ error() }}</p>
+      </div>
     }
   } @else {
     <p class="intro">{{ T.MIGRATE.DIALOG_MESSAGE | translate }}</p>

@@ -58,6 +58,8 @@ describe('OperationLogMigrationService', () => {
       'getBrowserLang',
     ]);
     mockLanguageService = jasmine.createSpyObj('LanguageService', ['setLng']);
+    // Echo the key back so error.set() receives a string, as it does in the app.
+    mockTranslateService.instant.and.callFake((key: string | string[]) => key);
 
     // Default returns for legacy db
     mockLegacyPfDb.hasUsableEntityData.and.resolveTo(false);
