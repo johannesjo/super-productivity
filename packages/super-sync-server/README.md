@@ -10,6 +10,7 @@ A custom, high-performance synchronization server for Super Productivity.
 > - [Sync Architecture Field Guide](../../docs/sync-and-op-log/sync-architecture.html) - Whole-system maintainer overview
 > - [Server Architecture](./docs/architecture.md) - Server-only contracts and trust boundaries
 > - [Backup & Disaster Recovery](./docs/backup-and-recovery.md) - Backup setup and recovery procedures
+> - [Production Capacity](./docs/production-capacity.md) - Measured I/O limits of the hosted deployment and what they mean when you write a query
 
 ## Architecture
 
@@ -144,10 +145,19 @@ printf '%s\n' \
 >
 > - **Database created with `prisma db push`** (no migration history): its
 >   logical schema already matches the latest `schema.prisma`, but `db push`
->   cannot represent the `operations_entity_ids_gin` storage reloption. Apply
->   that database-only state and drain the old pending list before baselining
->   the whole chain. The explicit transaction keeps `SET LOCAL` scoped to the
->   `ALTER`; if its lock timeout fires, retry this off-hours.
+>   cannot represent storage reloptions — neither the
+>   `operations_entity_ids_gin` fastupdate setting nor the `operations`
+>   autovacuum factors. Apply that database-only state and drain the old pending
+>   list before baselining the whole chain, or the loop below marks those two
+>   reloption migrations applied on a database that never received them. (This
+>   closes the reloption gap only — the partial indexes in `20260512000000`,
+>   `20260514000000` and `20260514000002` are equally unrepresentable in
+>   `db push` and remain a known gap, tracked with `schema.prisma`'s partial
+>   index notes.) Each explicit transaction keeps `SET LOCAL` scoped to its
+>   statement; if a lock timeout fires, retry off-hours. The autovacuum `ALTER`
+>   takes only `SHARE UPDATE EXCLUSIVE` so it never blocks app traffic, but SUE
+>   does conflict with itself, so it is bounded too rather than left to wait
+>   behind a running `VACUUM` with no feedback.
 >
 >   ```bash
 >   (
@@ -156,6 +166,11 @@ printf '%s\n' \
 >       'BEGIN;' \
 >       "SET LOCAL lock_timeout = '1s';" \
 >       'ALTER INDEX "operations_entity_ids_gin" SET (fastupdate = off);' \
+>       'COMMIT;' | npx prisma db execute --schema prisma/schema.prisma --stdin
+>     printf '%s\n' \
+>       'BEGIN;' \
+>       "SET LOCAL lock_timeout = '5s';" \
+>       'ALTER TABLE "operations" SET (autovacuum_vacuum_insert_scale_factor = 0.02);' \
 >       'COMMIT;' | npx prisma db execute --schema prisma/schema.prisma --stdin
 >     printf '%s\n' \
 >       'BEGIN;' \
@@ -181,12 +196,21 @@ app/proxy services with compose dependencies disabled so the bundled Postgres
 container is not required. Prisma migrations still run against the configured
 `DATABASE_URL`.
 
-An external server must be **PostgreSQL 14+ on a Linux host** (the bundled
-service is `postgres:16-alpine`): the migration pipeline sets
+**PostgreSQL 16 or newer is the supported version**, and it is what CI and
+production run (the bundled compose image is `postgres:16-alpine`). PostgreSQL
+14 and 15 still work and still receive every migration — `migrate-deploy.sh`
+warns and continues — they are simply not covered by the test suite.
+
+**PostgreSQL 14 on a Linux host is the hard floor**, and it is enforced by the
+connection rather than documented: the migration pipeline sets
 `client_connection_check_interval` on its connections so an abandoned
-`CREATE INDEX CONCURRENTLY` cancels itself instead of holding the table lock.
-An older or non-Linux server rejects that startup option with a FATAL
-`unrecognized configuration parameter` error on every migration connection.
+`CREATE INDEX CONCURRENTLY` cancels itself instead of holding the table lock. An
+older or non-Linux server rejects that startup option with a FATAL
+`unrecognized configuration parameter` error on every migration connection, so
+nothing is ever applied. That also covers the chain's own PG13 requirement —
+migration `20260828000003` sets `autovacuum_vacuum_insert_scale_factor`, and on
+an older server the resulting `22023` would match no recovery gate in the
+script, leaving the migration failed and every later deploy dying on `P3009`.
 
 ### Payload byte backfill
 

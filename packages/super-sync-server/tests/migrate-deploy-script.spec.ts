@@ -36,6 +36,9 @@ const FASTUPDATE_SQL = readFileSync(
 interface RunResult {
   status: number;
   stdout: string;
+  /** The server-version preflight, separated so it does not mask recovery SQL. */
+  versionPreflightSql: string;
+  /** Out-of-band SQL the recovery paths ran — preflight excluded. */
   executedSql: string;
   resolveApplied: string[];
   resolveRolledBack: string[];
@@ -173,9 +176,38 @@ case "$sub" in
     ;;
   db)
     # db execute --schema X --stdin  (SQL on stdin)
-    cat >> "$state/executed_sql"
+    stdin_sql="$(cat)"
+    printf '%s' "$stdin_sql" >> "$state/executed_sql"
     echo "" >> "$state/executed_sql"
     echo "---STMT---" >> "$state/executed_sql"
+    # The server-version preflight is not a recovery statement, so it does not
+    # honour FAKE_EXEC_EXIT — otherwise every out-of-band-failure scenario would
+    # abort at the preflight instead of reaching the path under test.
+    case "$stdin_sql" in
+      *server_version_num*)
+        if [ "\${FAKE_PG_UNSUPPORTED:-0}" = "1" ]; then
+          # An EXCEPTION, not a WARNING, and non-zero — because that is what a
+          # real \`prisma db execute\` does. Verified against PostgreSQL 15: a
+          # RAISE WARNING is NOT surfaced at all ("Script executed successfully",
+          # exit 0), so the tier raises and is classified by its marker.
+          echo "Error: ERROR: SuperSync supports PostgreSQL 16 or newer, found 15.4" >&2
+          exit 1
+        fi
+        if [ "\${FAKE_PG_PREDATES_CONN_OPTS:-0}" = "1" ]; then
+          # What a pre-14 server really returns once the migrator connection
+          # options are in play: the preflight cannot connect either, so it never
+          # sees a version to compare. Measured against 12.22 and 13.x.
+          echo "Error: Schema engine error:" >&2
+          echo "FATAL: unrecognized configuration parameter \\"client_connection_check_interval\\"" >&2
+          exit 1
+        fi
+        if [ "\${FAKE_PG_UNREACHABLE:-0}" = "1" ]; then
+          echo "Error: P1001 Can't reach database server" >&2
+          exit 1
+        fi
+        exit 0
+        ;;
+    esac
     exit "\${FAKE_EXEC_EXIT:-0}"
     ;;
 esac
@@ -210,15 +242,43 @@ const run = (env: Record<string, string>, args: string[] = []): RunResult => {
       return '';
     }
   };
+  // The server-version preflight runs `prisma db execute` on EVERY invocation,
+  // before any migration is attempted, so it would otherwise show up in every
+  // `executedSql` assertion below and make "no recovery ran" unreadable. Split
+  // it out rather than loosening those assertions to `toContain`: they are
+  // meant to say "nothing was executed out-of-band", and that claim is only
+  // worth having while it stays exact.
+  const rawExecuted = read('executed_sql');
+  const isVersionPreflight = (stmt: string): boolean =>
+    stmt.includes('server_version_num');
+  const executedChunks = rawExecuted
+    .split('---STMT---')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const ranPreflight = executedChunks.some(isVersionPreflight);
+  // The preflight is always invocation #1, so its entry is the first line of
+  // each per-invocation log. Dropping it keeps every count assertion below
+  // meaning "how many times did RECOVERY call prisma", which is what they were
+  // written to check.
+  const withoutPreflight = (f: string): string[] => {
+    const lines = read(f).split('\n').filter(Boolean);
+    return ranPreflight ? lines.slice(1) : lines;
+  };
   return {
     status,
     stdout,
-    executedSql: read('executed_sql'),
+    versionPreflightSql: executedChunks.filter(isVersionPreflight).join('\n'),
+    executedSql: ranPreflight
+      ? executedChunks
+          .filter((s) => !isVersionPreflight(s))
+          .map((s) => `${s}\n\n---STMT---\n`)
+          .join('')
+      : rawExecuted,
     resolveApplied: read('applied_list').split('\n').filter(Boolean),
     resolveRolledBack: read('rolledback').split('\n').filter(Boolean),
-    databaseUrls: read('database_urls').split('\n').filter(Boolean),
-    prismaCommands: read('prisma_commands').split('\n').filter(Boolean),
-    timeoutCommands: read('timeout_commands').split('\n').filter(Boolean),
+    databaseUrls: withoutPreflight('database_urls'),
+    prismaCommands: withoutPreflight('prisma_commands'),
+    timeoutCommands: withoutPreflight('timeout_commands'),
     deployAttempts: read('deploy_attempts').split('\n').filter(Boolean).length,
   };
 };
@@ -238,6 +298,75 @@ afterEach(() => {
   for (const d of [projectDir, stateDir, binDir]) {
     rmSync(d, { recursive: true, force: true });
   }
+});
+
+describe('migrate-deploy.sh PostgreSQL version preflight', () => {
+  it('checks the supported floor, and only that, before migrating', () => {
+    const r = run({ FAKE_FAIL: '', FAKE_CODE: 'P3018' });
+
+    expect(r.status).toBe(0);
+    expect(r.versionPreflightSql).toContain('server_version_num');
+    expect(r.versionPreflightSql).toContain('160000');
+    // Deliberately NO second, fatal tier. The chain does require PG13, but the
+    // migrator connections set client_connection_check_interval (PG14+), which
+    // a pre-14 server rejects with FATAL at connect time — so a gate here could
+    // never fire on the versions it was meant to catch. An earlier revision
+    // shipped one at 130000; this pins its removal so it cannot creep back.
+    expect(r.versionPreflightSql).not.toContain('130000');
+  });
+
+  it('never blocks the deploy on the version it reads', () => {
+    // The preflight reports; it does not gate. The hard floor is enforced one
+    // layer down, by the connection itself.
+    const unsupported = run({
+      FAKE_FAIL: '',
+      FAKE_CODE: 'P3018',
+      FAKE_PG_UNSUPPORTED: '1',
+    });
+
+    expect(unsupported.status).toBe(0);
+    expect(unsupported.deployAttempts).toBeGreaterThan(0);
+  });
+
+  it('warns but still deploys on PG14-15, below the supported floor', () => {
+    // These servers apply every migration cleanly — they are only outside what
+    // the suite covers. Hard-blocking them would strand self-hosters who work
+    // today, on a floor this repo never declared, as a side effect of a perf
+    // tweak. So: warn, and carry on. Verified end-to-end against a live 14 and
+    // a live 15: warning printed, all migrations applied, exit 0.
+    const r = run({ FAKE_FAIL: '', FAKE_CODE: 'P3018', FAKE_PG_UNSUPPORTED: '1' });
+
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain("below SuperSync's supported floor");
+    expect(r.deployAttempts).toBeGreaterThan(0);
+  });
+
+  it('does NOT block the deploy when the version cannot be determined', () => {
+    // An unreachable or still-starting database must not be reported as a
+    // version problem: that sends an operator to upgrade PostgreSQL over what
+    // is actually a connectivity failure. Fall through and let migrate deploy
+    // report the real error in its own words.
+    const r = run({ FAKE_FAIL: '', FAKE_CODE: 'P3018', FAKE_PG_UNREACHABLE: '1' });
+
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('Could not determine the server version');
+    expect(r.deployAttempts).toBeGreaterThan(0);
+  });
+
+  it('falls through on a pre-14 server, leaving the FATAL to migrate deploy', () => {
+    // Measured against 12.22 and 13.x: the migrator connection options make the
+    // preflight itself unconnectable, so it reports "could not determine" and
+    // steps aside. The chain is still never wedged — migrate deploy dies on the
+    // FATAL before a single migration is attempted.
+    const r = run({
+      FAKE_FAIL: '',
+      FAKE_CODE: 'P3018',
+      FAKE_PG_PREDATES_CONN_OPTS: '1',
+    });
+
+    expect(r.stdout).toContain('Could not determine the server version');
+    expect(r.stdout).not.toContain("below SuperSync's supported floor");
+  });
 });
 
 describe('migrate-deploy.sh recovery', () => {
