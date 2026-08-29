@@ -262,8 +262,6 @@ export interface ElectronAPI {
 
   informQuickAddBridgeReady(): void;
 
-  informQuickAddTaskSubmitBridgeReady(): void;
-
   showQuickAdd(): void;
 
   closeQuickAdd(): void;

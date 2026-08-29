@@ -930,6 +930,61 @@ describe('AddTaskBarComponent', () => {
     });
   });
 
+  // Guards the #8812 numbering. This mapping has now been silently reverted
+  // once by a long-lived branch that predated the redesign and was merged
+  // without a conflict, and the wiki documents these exact numbers — so it is
+  // pinned here rather than left to review to catch.
+  describe('Ctrl+number shortcuts', () => {
+    const pressCtrl = (key: string): KeyboardEvent => {
+      const event = new KeyboardEvent('keydown', { key, ctrlKey: true });
+      spyOn(event, 'preventDefault');
+      spyOn(event, 'stopPropagation');
+      component.onInputKeydown(event);
+      return event;
+    };
+
+    it('maps 1-3 to the local toggles, in the order the icons are rendered', () => {
+      const searchSpy = spyOn(component, 'toggleSearchMode');
+      const noteSpy = spyOn(component, 'toggleNote');
+      const bottomSpy = spyOn(component, 'toggleIsAddToBottom');
+
+      pressCtrl('1');
+      pressCtrl('2');
+      pressCtrl('3');
+
+      expect(searchSpy).toHaveBeenCalled();
+      expect(noteSpy).toHaveBeenCalled();
+      expect(bottomSpy).toHaveBeenCalled();
+    });
+
+    it('maps 4-9 to the action chips and stops propagation for them', () => {
+      const actions = jasmine.createSpyObj('AddTaskBarActionsComponent', [
+        'openProjectMenu',
+        'openScheduleDialog',
+        'openTagsMenu',
+        'openEstimateMenu',
+        'openRepeatMenu',
+        'openDeadlineDialog',
+      ]);
+      spyOn(component, 'actionsComponent').and.returnValue(actions);
+
+      const expected: [string, string][] = [
+        ['4', 'openProjectMenu'],
+        ['5', 'openScheduleDialog'],
+        ['6', 'openTagsMenu'],
+        ['7', 'openEstimateMenu'],
+        ['8', 'openRepeatMenu'],
+        ['9', 'openDeadlineDialog'],
+      ];
+
+      expected.forEach(([key, method]) => {
+        const event = pressCtrl(key);
+        expect(actions[method]).toHaveBeenCalled();
+        expect(event.stopPropagation).toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('onSubmitBtnClick', () => {
     it('should add the task and refocus the input for rapid entry', async () => {
       mockTaskService.add.and.returnValue('task-1');

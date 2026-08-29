@@ -299,6 +299,26 @@ test('preloadQuickAddWindow creates the window hidden before first show', () => 
   assert.equal(quickAddWin.url, 'http://localhost:4200/?quickAdd=1#/quick-add');
 });
 
+test('the global shortcut toggles the HUD rather than only opening it', () => {
+  const mod = loadModule();
+  mod.initQuickAddWindow(true, 'http://localhost:4200');
+  isAppReady = true;
+  markBridgeReady();
+
+  mod.toggleQuickAddWindow();
+  const quickAddWin = createdWindows[0];
+  assert.equal(quickAddWin.isVisible(), true);
+
+  // Second press of the same key closes it, the way Spotlight behaves. A global
+  // shortcut fires without moving focus, so the HUD is still visible here.
+  mod.toggleQuickAddWindow();
+  assert.equal(quickAddWin.isVisible(), false);
+
+  mod.toggleQuickAddWindow();
+  assert.equal(quickAddWin.isVisible(), true);
+  assert.equal(createdWindows.length, 1);
+});
+
 test('quick-add close IPC is accepted only from the quick-add window sender', () => {
   const mod = loadModule();
   mod.initQuickAddWindow(true, 'http://localhost:4200');

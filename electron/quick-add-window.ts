@@ -77,13 +77,6 @@ export const initQuickAddWindow = (isDev: boolean, appUrl: string | undefined): 
     isQuickAddBridgeReady = true;
     preloadQuickAddWindow();
   });
-  ipcMain.on(IPC.QUICK_ADD_TASK_SUBMIT_BRIDGE_READY, (event) => {
-    if (!_isMainWindowSender(event.sender)) {
-      return;
-    }
-    isQuickAddBridgeReady = true;
-    preloadQuickAddWindow();
-  });
 
   ipcMain.on(IPC.QUICK_ADD_TASK_SUBMIT_RESPONSE, (event, response) => {
     if (!_isMainWindowSender(event.sender)) {
@@ -105,7 +98,6 @@ export const destroyQuickAddWindow = (): void => {
   ipcMain.removeHandler(IPC.QUICK_ADD_TASK_SUBMIT_REQUEST);
   ipcMain.removeHandler(IPC.QUICK_ADD_SNAPSHOT_REQUEST);
   ipcMain.removeAllListeners(IPC.QUICK_ADD_BRIDGE_READY);
-  ipcMain.removeAllListeners(IPC.QUICK_ADD_TASK_SUBMIT_BRIDGE_READY);
   ipcMain.removeAllListeners(IPC.QUICK_ADD_TASK_SUBMIT_RESPONSE);
   ipcMain.removeAllListeners(IPC.QUICK_ADD_SNAPSHOT_RESPONSE);
   _rejectAllPending(new Error('Quick Add window destroyed'));
@@ -176,6 +168,21 @@ export const showQuickAddWindow = (): void => {
     quickAddWin.focus();
     _sendQuickAddOpened();
   }
+};
+
+/**
+ * What the global shortcut is bound to: pressing it again closes the HUD, the
+ * way Spotlight and friends behave. A global shortcut fires without moving
+ * focus, so an open HUD is still focused and visible when the second press
+ * arrives — unlike the protocol action, where launching the URL handler blurs
+ * the HUD and the blur handler has already hidden it.
+ */
+export const toggleQuickAddWindow = (): void => {
+  if (quickAddWin && !quickAddWin.isDestroyed() && quickAddWin.isVisible()) {
+    hideQuickAddWindow(true);
+    return;
+  }
+  showQuickAddWindow();
 };
 
 export const hideQuickAddWindow = (isProgrammatic = false): void => {

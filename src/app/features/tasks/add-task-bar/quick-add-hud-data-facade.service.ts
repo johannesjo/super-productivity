@@ -91,10 +91,6 @@ export class QuickAddHudDataFacadeService implements AddTaskBarDataFacade {
     () => new Map(Object.entries(this._snapshot()?.folderPaths.tags ?? {})),
   );
 
-  constructor() {
-    void this.refreshSnapshot();
-  }
-
   defaultTaskRemindOption(): TaskReminderOptionId {
     return (
       this._snapshot()?.defaultTaskRemindOption ??

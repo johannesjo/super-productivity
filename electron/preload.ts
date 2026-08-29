@@ -181,8 +181,6 @@ const ea: ElectronAPI = {
   openSystemKeyboardSettings: () => _send(IPC.OPEN_SYSTEM_KEYBOARD_SETTINGS),
   informAboutAppReady: () => _send('APP_READY'),
   informQuickAddBridgeReady: () => _send(IPC.QUICK_ADD_BRIDGE_READY),
-  informQuickAddTaskSubmitBridgeReady: () =>
-    _send(IPC.QUICK_ADD_TASK_SUBMIT_BRIDGE_READY),
   showQuickAdd: () => _send(IPC.QUICK_ADD_SHOW),
   closeQuickAdd: () => _send(IPC.QUICK_ADD_CLOSE),
   submitQuickAddTask: (payload: AddTaskPayload) =>

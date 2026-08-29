@@ -59,6 +59,7 @@ import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { BodyClass } from '../../../app.constants';
+import { Log } from '../../../core/log';
 import { SelectOptionRowComponent } from '../../../ui/select-option-row/select-option-row.component';
 import { buildAddTaskPayload } from './add-task-payload-builder';
 import { ADD_TASK_BAR_DATA_FACADE } from './add-task-bar-data-facade.token';
@@ -134,10 +135,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
   isMentionListShown = signal(false);
   isScheduleDialogOpen = signal(false);
-  // The task title to confirm in the placeholder, not the finished sentence:
-  // the wording is translated in the template so it follows the active
-  // language, which the HUD only settles once its snapshot arrives.
-  successPlaceholderTaskTitle = signal<string | null>(null);
+  // A transient confirmation or error shown in the placeholder, held as a
+  // translation key plus params rather than a finished sentence so the
+  // template's pipe renders it in the active language — which the HUD only
+  // settles once its snapshot arrives.
+  transientPlaceholder = signal<{
+    key: string;
+    params?: Record<string, string>;
+  } | null>(null);
 
   // The key, translated by the template's pipe rather than here. `instant()`
   // returns the raw key while the language file is still loading and a
@@ -181,17 +186,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   currentProject = computed(() =>
     this.projects().find((p) => p.id === this.stateService.state().projectId),
   );
-  nrOfRightBtns = computed(() => {
-    let count = 2;
-    if (this.stateService.inputTxt().length > 0) {
-      count++;
-    }
-    if (this.currentProject()?.isEnableBacklog) {
-      count++;
-    }
-    return count;
-  });
-
   defaultProject$ = combineLatest([
     this.projects$,
     this._dataFacade.activeWorkContext$,
@@ -524,6 +518,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
       this._showSuccessPlaceholder(title);
       this._resetAfterAdd();
+    } catch (err) {
+      // The submit is an async IPC round-trip in the Quick Add HUD, where it can
+      // reject on validation, on the request timing out, or on the main window
+      // not being ready. Every call site invokes this as `void addTask()`, so
+      // without this the rejection is unhandled and the typed task simply
+      // disappears — the worst possible failure for a capture tool. The input is
+      // deliberately left untouched so nothing the user typed is lost.
+      Log.err('Add task failed', err);
+      this._showTransientPlaceholder({ key: T.F.TASK.ADD_TASK_BAR.ADD_FAILED }, 4000);
     } finally {
       this._isAddingTask = false;
     }
@@ -595,7 +598,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       target.value = value;
     }
     this.stateService.updateInputTxt(value);
-    if (value && this.successPlaceholderTaskTitle()) {
+    if (value && this.transientPlaceholder()) {
       this._clearSuccessPlaceholder();
     }
   }
@@ -652,6 +655,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Handle Escape key
     if (event.key === 'Escape') {
+      // Progressive dismissal: if the task-suggestion panel is open, let Material
+      // close it first instead of tearing down the whole bar.
+      if (this.taskAutoCompleteEl()?.isOpen) {
+        return;
+      }
       event.preventDefault();
       this.closed.emit();
       return;
@@ -686,25 +694,34 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _handleCtrlShortcut(event: KeyboardEvent): void {
-    const shortcutMap: Record<string, () => void> = {
-      ['1']: () => this.toggleIsAddToBottom(),
+    // Numbers 1-3 match the left-to-right order of the icon toggles below the
+    // input (search · note · add-to-top/bottom); these are local and harmless to
+    // let bubble.
+    const localToggles: Record<string, () => void> = {
+      ['1']: () => this.toggleSearchMode(),
       ['2']: () => this.toggleNote(),
-      ['3']: () => this._callActionMethod('openProjectMenu'),
-      ['4']: () => this._callActionMethod('openScheduleDialog'),
-      ['5']: () => this._callActionMethod('openTagsMenu'),
-      ['6']: () => this._callActionMethod('openEstimateMenu'),
-      ['7']: () => this._callActionMethod('openRepeatMenu'),
-      ['8']: () => this._callActionMethod('openDeadlineDialog'),
+      ['3']: () => this.toggleIsAddToBottom(),
+    };
+    // 4-9 open the action chips' menus/dialogs; stop propagation so the keystroke
+    // doesn't also reach a global handler.
+    const actionShortcuts: Record<string, () => void> = {
+      ['4']: () => this._callActionMethod('openProjectMenu'),
+      ['5']: () => this._callActionMethod('openScheduleDialog'),
+      ['6']: () => this._callActionMethod('openTagsMenu'),
+      ['7']: () => this._callActionMethod('openEstimateMenu'),
+      ['8']: () => this._callActionMethod('openRepeatMenu'),
+      ['9']: () => this._callActionMethod('openDeadlineDialog'),
     };
 
-    const action = shortcutMap[event.key];
-    if (action) {
+    const localToggle = localToggles[event.key];
+    const actionShortcut = actionShortcuts[event.key];
+    if (localToggle) {
       event.preventDefault();
-      // Add stopPropagation for action menu shortcuts (3-8)
-      if (['3', '4', '5', '6', '7', '8'].includes(event.key)) {
-        event.stopPropagation();
-      }
-      action();
+      localToggle();
+    } else if (actionShortcut) {
+      event.preventDefault();
+      event.stopPropagation();
+      actionShortcut();
     }
   }
 
@@ -738,20 +755,34 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private _showSuccessPlaceholder(taskTitle: string): void {
     const MAX_TITLE_LENGTH = 35;
-    this.successPlaceholderTaskTitle.set(
-      taskTitle.length > MAX_TITLE_LENGTH
-        ? taskTitle.slice(0, MAX_TITLE_LENGTH) + '…'
-        : taskTitle,
+    this._showTransientPlaceholder(
+      {
+        key: T.F.TASK.ADD_TASK_BAR.SUCCESS_ADDED,
+        params: {
+          taskTitle:
+            taskTitle.length > MAX_TITLE_LENGTH
+              ? taskTitle.slice(0, MAX_TITLE_LENGTH) + '…'
+              : taskTitle,
+        },
+      },
+      1500,
     );
+  }
+
+  private _showTransientPlaceholder(
+    message: { key: string; params?: Record<string, string> },
+    durationMs: number,
+  ): void {
+    this.transientPlaceholder.set(message);
     window.clearTimeout(this._successPlaceholderTimeout);
     this._successPlaceholderTimeout = window.setTimeout(() => {
-      this.successPlaceholderTaskTitle.set(null);
-    }, 1500);
+      this.transientPlaceholder.set(null);
+    }, durationMs);
   }
 
   private _clearSuccessPlaceholder(): void {
     window.clearTimeout(this._successPlaceholderTimeout);
-    this.successPlaceholderTaskTitle.set(null);
+    this.transientPlaceholder.set(null);
   }
 
   private _collapseTransientPanels(): void {
