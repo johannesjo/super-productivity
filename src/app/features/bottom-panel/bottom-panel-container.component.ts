@@ -521,15 +521,23 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
 
     const windowHeight = window.innerHeight;
     const viewportHeight = window.visualViewport?.height ?? windowHeight;
-    const rootStyle = getComputedStyle(document.documentElement);
+
+    const container = this._getSheetContainer();
+    if (!container) return;
+
+    // Read the keyboard variables off the sheet itself, not <html>: the sheet is
+    // a CDK overlay, and --visual-viewport-height is set on the overlay
+    // container so writing it does not restyle the whole document (#9779).
+    // Inheritance makes this equivalent wherever a variable is set above.
+    const keyboardStyle = getComputedStyle(container);
     const cssVisualViewportHeight = this._parseCssPx(
-      rootStyle.getPropertyValue(CSS_VAR_VISUAL_VIEWPORT_HEIGHT),
+      keyboardStyle.getPropertyValue(CSS_VAR_VISUAL_VIEWPORT_HEIGHT),
     );
     const cssKeyboardHeight = this._parseCssPx(
-      rootStyle.getPropertyValue(CSS_VAR_KEYBOARD_HEIGHT),
+      keyboardStyle.getPropertyValue(CSS_VAR_KEYBOARD_HEIGHT),
     );
     const cssKeyboardOverlayOffset = this._parseCssPx(
-      rootStyle.getPropertyValue(CSS_VAR_KEYBOARD_OVERLAY_OFFSET),
+      keyboardStyle.getPropertyValue(CSS_VAR_KEYBOARD_OVERLAY_OFFSET),
     );
     const keyboardHeight = Math.max(windowHeight - viewportHeight, cssKeyboardHeight);
     const isIOS = document.body.classList.contains(BodyClass.isIOS);
@@ -537,9 +545,6 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     const isKeyboardVisible =
       document.body.classList.contains(BodyClass.isKeyboardVisible) ||
       keyboardHeight > KEYBOARD_DETECT_THRESHOLD;
-
-    const container = this._getSheetContainer();
-    if (!container) return;
 
     if (isKeyboardVisible) {
       this._captureKeyboardAdjustedStyles(container);

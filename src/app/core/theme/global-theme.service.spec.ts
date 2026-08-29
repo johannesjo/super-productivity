@@ -8,6 +8,9 @@ import {
   resolveSystemSurfaceColor,
 } from './global-theme.service';
 import { CustomThemeRef } from './custom-theme.service';
+import { KeyboardInfo, KeyboardPlugin } from '@capacitor/keyboard';
+import { PluginListenerHandle } from '@capacitor/core';
+import { BodyClass } from '../../app.constants';
 
 interface GlobalThemeInitHarness {
   init(): void;
@@ -301,5 +304,312 @@ describe('GlobalThemeService.registerSvgIconFromContent()', () => {
     const rendered = renderRegisteredLiteral();
     expect(rendered.querySelector('svg')?.getAttribute('onload')).toBeNull();
     expect(rendered.querySelector('circle')?.getAttribute('r')).toBe('4');
+  });
+});
+
+describe('GlobalThemeService iOS keyboard sequencing', () => {
+  interface IosKeyboardHarness {
+    _initIOSKeyboardHandling(keyboard: KeyboardPlugin): void;
+    document: Document;
+    _destroyRef: { onDestroy(cb: () => void): void };
+    _keyboardListenerHandles: PluginListenerHandle[];
+    _focusinListener: ((event: FocusEvent) => void) | null;
+    _visualViewportResizeListener: (() => void) | null;
+    _iosKeyboardHeight: number;
+    _iosViewportHeightBeforeKeyboard: number;
+    _iosViewportChangeRaf: number | null;
+    _iosKeyboardFrameUnreliable: boolean;
+    _isIosKeyboardSettled: boolean;
+    _cssVarCache: Map<string, string>;
+    _overlayContainer: { getContainerElement(): HTMLElement };
+    _iosViewportVarTarget: HTMLElement | null;
+    _iosShellEl: HTMLElement | null;
+    _iosShellHeightCss: string;
+    _scrollActiveInputIntoView(): void;
+  }
+
+  type KeyboardHandler = (info: KeyboardInfo) => void;
+
+  const BASE_HEIGHT = 800;
+  const KEYBOARD_HEIGHT = 336;
+
+  let harness: IosKeyboardHarness;
+  let root: HTMLElement;
+  let body: HTMLElement;
+  let overlayContainer: HTMLElement;
+  let shell: HTMLElement;
+  let handlers: Record<string, KeyboardHandler>;
+  let visualViewport: { height: number; addEventListener: jasmine.Spy };
+  let setPropertySpy: jasmine.Spy;
+  let overlaySetPropertySpy: jasmine.Spy;
+  let resizeNotifications: number;
+  let scrollIntoViewSpy: jasmine.Spy;
+  let pendingFrame: FrameRequestCallback | null = null;
+  let originalInnerHeight: PropertyDescriptor | undefined;
+  let originalVisualViewport: PropertyDescriptor | undefined;
+
+  /** Stubs the window geometry the service reads; restored in afterEach. */
+  const setWindowHeights = (innerHeight: number, visualViewportHeight: number): void => {
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      get: () => innerHeight,
+    });
+    visualViewport.height = visualViewportHeight;
+  };
+
+  const rootVar = (name: string): string => root.style.getPropertyValue(name);
+  /** Set on the CDK overlay container, which every overlay inherits from. */
+  const overlayVar = (name: string): string =>
+    overlayContainer.style.getPropertyValue(name);
+
+  const flushFrame = (): void => {
+    const frame = pendingFrame;
+    pendingFrame = null;
+    frame?.(0);
+  };
+
+  const varWrites = (spy: jasmine.Spy, name: string): number =>
+    spy.calls.allArgs().filter((args) => args[0] === name).length;
+
+  /** The keyboard shrank the web view, i.e. Capacitor's `resize: 'native'`. */
+  const shrinkViewport = (height: number): void => {
+    visualViewport.height = height;
+    harness._visualViewportResizeListener?.();
+  };
+
+  beforeEach(() => {
+    root = document.createElement('div');
+    body = document.createElement('div');
+    overlayContainer = document.createElement('div');
+    shell = document.createElement('div');
+    handlers = {};
+    resizeNotifications = 0;
+    scrollIntoViewSpy = jasmine.createSpy('_scrollActiveInputIntoView');
+    setPropertySpy = spyOn(root.style, 'setProperty').and.callThrough();
+    overlaySetPropertySpy = spyOn(
+      overlayContainer.style,
+      'setProperty',
+    ).and.callThrough();
+
+    visualViewport = {
+      height: BASE_HEIGHT,
+      addEventListener: jasmine.createSpy('addEventListener'),
+    };
+    originalInnerHeight = Object.getOwnPropertyDescriptor(window, 'innerHeight');
+    originalVisualViewport = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+    Object.defineProperty(window, 'visualViewport', {
+      configurable: true,
+      get: () => visualViewport,
+    });
+    setWindowHeights(BASE_HEIGHT, BASE_HEIGHT);
+
+    // Hold the frame callback like the browser does — the service coalesces
+    // notifications until it runs — and count the resize instead of dispatching
+    // it, which would reach every listener in the karma page.
+    spyOn(window, 'requestAnimationFrame').and.callFake((cb) => {
+      pendingFrame = cb;
+      return 1;
+    });
+    spyOn(window, 'dispatchEvent').and.callFake((event: Event) => {
+      if (event.type === 'resize') {
+        resizeNotifications++;
+      }
+      return true;
+    });
+
+    harness = Object.create(GlobalThemeService.prototype) as IosKeyboardHarness;
+    harness.document = {
+      documentElement: root,
+      body,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      querySelector: (selector: string) => (selector === '.app-container' ? shell : null),
+    } as unknown as Document;
+    harness._overlayContainer = { getContainerElement: () => overlayContainer };
+    harness._iosViewportVarTarget = null;
+    harness._iosShellEl = null;
+    harness._iosShellHeightCss = '';
+    harness._destroyRef = { onDestroy: () => undefined };
+    harness._keyboardListenerHandles = [];
+    harness._focusinListener = null;
+    harness._visualViewportResizeListener = null;
+    harness._iosKeyboardHeight = 0;
+    harness._iosViewportHeightBeforeKeyboard = 0;
+    harness._iosViewportChangeRaf = null;
+    harness._iosKeyboardFrameUnreliable = false;
+    harness._isIosKeyboardSettled = false;
+    harness._cssVarCache = new Map<string, string>();
+    harness._scrollActiveInputIntoView = scrollIntoViewSpy;
+
+    const keyboard = {
+      setAccessoryBarVisible: () => Promise.resolve(),
+      addListener: (eventName: string, listenerFunc: KeyboardHandler) => {
+        handlers[eventName] = listenerFunc;
+        return Promise.resolve({ remove: () => Promise.resolve() });
+      },
+    } as unknown as KeyboardPlugin;
+    harness._initIOSKeyboardHandling(keyboard);
+    flushFrame();
+    setPropertySpy.calls.reset();
+    overlaySetPropertySpy.calls.reset();
+    resizeNotifications = 0;
+  });
+
+  afterEach(() => {
+    const restore = (name: string, descriptor?: PropertyDescriptor): void => {
+      if (descriptor) {
+        Object.defineProperty(window, name, descriptor);
+      } else {
+        delete (window as unknown as Record<string, unknown>)[name];
+      }
+    };
+    restore('innerHeight', originalInnerHeight);
+    restore('visualViewport', originalVisualViewport);
+  });
+
+  const willShow = (keyboardHeight = KEYBOARD_HEIGHT): void =>
+    handlers['keyboardWillShow']({ keyboardHeight } as KeyboardInfo);
+  const didShow = (): void => handlers['keyboardDidShow']({} as KeyboardInfo);
+  const willHide = (): void => handlers['keyboardWillHide']({} as KeyboardInfo);
+
+  it('registers a listener per keyboard event', () => {
+    expect(Object.keys(handlers).sort()).toEqual([
+      'keyboardDidShow',
+      'keyboardWillHide',
+      'keyboardWillShow',
+    ]);
+  });
+
+  // #9779: the reported frame arrives before the web view has resized, so acting
+  // on it here lifts the fixed add-task bar a keyboard height and drops it back
+  // a few frames later — the jump users see.
+  it('does not move anything on the reported frame alone', () => {
+    willShow();
+
+    expect(body.classList.contains(BodyClass.isKeyboardVisible)).toBe(true);
+    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    expect(overlayVar('--visual-viewport-height')).toBe(`${BASE_HEIGHT}px`);
+    expect(shell.style.height).toBe(`calc(${BASE_HEIGHT}px - var(--safe-area-top))`);
+  });
+
+  it('follows the web view once it shrinks around the keyboard', () => {
+    willShow();
+    shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
+    didShow();
+
+    expect(overlayVar('--visual-viewport-height')).toBe(
+      `${BASE_HEIGHT - KEYBOARD_HEIGHT}px`,
+    );
+    expect(shell.style.height).toBe(
+      `calc(${BASE_HEIGHT - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
+    );
+    // The shrunken web view already ends above the keyboard; offsetting the
+    // fixed bar again would move it twice (#8778).
+    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('offsets the overlay layer for a keyboard that never resized the web view', () => {
+    willShow();
+    didShow();
+
+    expect(rootVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(overlayVar('--visual-viewport-height')).toBe(
+      `${BASE_HEIGHT - KEYBOARD_HEIGHT}px`,
+    );
+  });
+
+  // Switching to the emoji panel or a taller keyboard re-fires willShow while the
+  // keyboard is already up. Nothing is appearing from zero here, so dropping the
+  // offset until didShow arrives would flick the bar down behind the keyboard.
+  it('keeps the overlay offset when the keyboard changes height while visible', () => {
+    willShow();
+    didShow();
+    setWindowHeights(BASE_HEIGHT, BASE_HEIGHT);
+
+    willShow(KEYBOARD_HEIGHT + 100);
+
+    expect(rootVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT + 100}px`);
+    expect(overlayVar('--visual-viewport-height')).toBe(
+      `${BASE_HEIGHT - KEYBOARD_HEIGHT - 100}px`,
+    );
+  });
+
+  it('measures the pre-keyboard height only while the keyboard is hidden', () => {
+    willShow();
+    // iOS reports the shrunken window once the keyboard is up; re-capturing it
+    // as the base height would subtract the keyboard twice.
+    setWindowHeights(BASE_HEIGHT - KEYBOARD_HEIGHT, BASE_HEIGHT - KEYBOARD_HEIGHT);
+    willShow();
+    didShow();
+
+    expect(harness._iosViewportHeightBeforeKeyboard).toBe(BASE_HEIGHT);
+    expect(overlayVar('--visual-viewport-height')).toBe(
+      `${BASE_HEIGHT - KEYBOARD_HEIGHT}px`,
+    );
+  });
+
+  it('restores the full viewport when the keyboard hides', () => {
+    willShow();
+    shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
+    didShow();
+
+    willHide();
+    shrinkViewport(BASE_HEIGHT);
+
+    expect(body.classList.contains(BodyClass.isKeyboardVisible)).toBe(false);
+    expect(rootVar('--keyboard-height')).toBe('0px');
+    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    expect(overlayVar('--visual-viewport-height')).toBe(`${BASE_HEIGHT}px`);
+    // Handed back to the stylesheet, which sizes the shell without a keyboard.
+    expect(shell.style.height).toBe('');
+    expect(shell.style.minHeight).toBe('');
+  });
+
+  // The show animation fires a burst of visualViewport resizes, most of them on
+  // a height already written. Each write costs a document-wide style recalc and
+  // each notification re-measures every autosizing textarea and CDK overlay.
+  it('writes and notifies only for values that actually changed', () => {
+    willShow();
+    flushFrame();
+    const writesAfterShow = varWrites(overlaySetPropertySpy, '--visual-viewport-height');
+    const notificationsAfterShow = resizeNotifications;
+
+    for (let i = 0; i < 3; i++) {
+      shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
+      flushFrame();
+    }
+
+    expect(varWrites(overlaySetPropertySpy, '--visual-viewport-height')).toBe(
+      writesAfterShow + 1,
+    );
+    expect(resizeNotifications).toBe(notificationsAfterShow + 1);
+  });
+
+  it('corrects a bogus keyboard frame to the measured obscured area (#8778)', () => {
+    willShow(BASE_HEIGHT - 10);
+    shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
+
+    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+  });
+
+  // The point of the split: <html> carries only variables that change once per
+  // open/close, never the one the animation drives frame by frame (#9779).
+  it('never writes the per-frame viewport height on <html>', () => {
+    willShow();
+    for (let step = 60; step <= 300; step += 60) {
+      shrinkViewport(BASE_HEIGHT - step);
+      flushFrame();
+    }
+    didShow();
+    willHide();
+    shrinkViewport(BASE_HEIGHT);
+
+    expect(varWrites(setPropertySpy, '--visual-viewport-height')).toBe(0);
+    // One per distinct height: the five shrinks plus the restore on hide.
+    expect(varWrites(overlaySetPropertySpy, '--visual-viewport-height')).toBe(6);
+    expect(varWrites(setPropertySpy, '--keyboard-height')).toBe(2);
   });
 });

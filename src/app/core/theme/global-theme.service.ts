@@ -52,8 +52,9 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { HttpClient } from '@angular/common/http';
 import { CapacitorPlatformService } from '../platform/capacitor-platform.service';
-import { Keyboard, KeyboardInfo } from '@capacitor/keyboard';
+import { Keyboard, KeyboardInfo, KeyboardPlugin } from '@capacitor/keyboard';
 import { PluginListenerHandle, registerPlugin } from '@capacitor/core';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SafeArea } from 'capacitor-plugin-safe-area';
 import { patchCdkViewportForSafeArea } from './cdk-safe-area-viewport.util';
@@ -201,6 +202,7 @@ export class GlobalThemeService {
   private _environmentInjector = inject(EnvironmentInjector);
   private _destroyRef = inject(DestroyRef);
   private _inputIntentService = inject(InputIntentService);
+  private _overlayContainer = inject(OverlayContainer);
   private _hasInitialized = false;
   private _keyboardListenerHandles: PluginListenerHandle[] = [];
   private _focusinListener: ((event: FocusEvent) => void) | null = null;
@@ -217,7 +219,11 @@ export class GlobalThemeService {
   private _isIosKeyboardSettled = false;
   // Last value written per CSS variable, so a repeated write (the keyboard
   // animation fires many identical visualViewport resizes) costs nothing.
-  private readonly _rootCssVarCache = new Map<string, string>();
+  private readonly _cssVarCache = new Map<string, string>();
+  // Where --visual-viewport-height goes; see _initIOSKeyboardHandling.
+  private _iosViewportVarTarget: HTMLElement | null = null;
+  private _iosShellEl: HTMLElement | null = null;
+  private _iosShellHeightCss = '';
 
   private _isCustomWindowTitleBarEnabled(): boolean {
     // The main process (main-window.ts) force-disables the custom title bar on
@@ -679,10 +685,14 @@ export class GlobalThemeService {
    * Initialize iOS keyboard visibility tracking using Capacitor Keyboard plugin.
    * Adds/removes CSS classes when keyboard shows/hides.
    */
-  private _initIOSKeyboardHandling(): void {
+  private _initIOSKeyboardHandling(keyboard: KeyboardPlugin = Keyboard): void {
     // Hide the native iOS accessory bar (prev/next/Done) — no multi-field forms
     // benefit from it, and Done is redundant with the system dismiss gesture.
-    Keyboard.setAccessoryBarVisible({ isVisible: false });
+    keyboard.setAccessoryBarVisible({ isVisible: false });
+    // Resolved up front (this creates the container if CDK has not yet needed
+    // it) so a dialog opened while the keyboard is already up finds the
+    // variable in place.
+    this._iosViewportVarTarget = this._overlayContainer.getContainerElement();
     this._updateIOSKeyboardViewportVars();
 
     if (window.visualViewport) {
@@ -696,51 +706,74 @@ export class GlobalThemeService {
       );
     }
 
-    Keyboard.addListener('keyboardWillShow', (info: KeyboardInfo) => {
-      Log.log('iOS keyboard will show', info);
-      if (!this.document.body.classList.contains(BodyClass.isKeyboardVisible)) {
-        this._iosViewportHeightBeforeKeyboard = window.innerHeight;
-      }
-      // Some third-party keyboards (e.g. Sogou) report a bogus near-full-screen
-      // keyboard frame here; clamp it so it can't fling the fixed add-task bar
-      // to the top of the screen (#8778).
-      const referenceHeight = this._iosViewportHeightBeforeKeyboard || window.innerHeight;
-      const keyboardHeight = sanitizeIosKeyboardHeight(
-        info.keyboardHeight,
-        referenceHeight,
-      );
-      // Only a frame the clamp had to correct opts into the measured-viewport
-      // override in _updateIOSKeyboardViewportVars; well-behaved keyboards keep
-      // the exact pre-existing behaviour, so this cannot regress them.
-      this._iosKeyboardFrameUnreliable = keyboardHeight !== info.keyboardHeight;
-      this._iosKeyboardHeight = keyboardHeight;
-      // The show animation is only starting — nothing about the web view's new
-      // size is known yet, see computeIosKeyboardViewportVars.
-      this._isIosKeyboardSettled = false;
-      this.document.body.classList.add(BodyClass.isKeyboardVisible);
-      // Set CSS variable for keyboard height to adjust layout
-      this._setRootCssVar(CSS_VAR_KEYBOARD_HEIGHT, `${keyboardHeight}px`);
-      this._updateIOSKeyboardViewportVars();
-    }).then((handle) => this._keyboardListenerHandles.push(handle));
+    keyboard
+      .addListener('keyboardWillShow', (info: KeyboardInfo) => {
+        Log.log('iOS keyboard will show', info);
+        // Switching to the emoji panel or a taller third-party keyboard re-fires
+        // this while the keyboard is already up, and iOS then reports the already
+        // shrunken window — keeping the first measurement is what stops the
+        // keyboard being subtracted twice.
+        const wasKeyboardVisible = this.document.body.classList.contains(
+          BodyClass.isKeyboardVisible,
+        );
+        if (!wasKeyboardVisible) {
+          this._iosViewportHeightBeforeKeyboard = window.innerHeight;
+        }
+        // Some third-party keyboards (e.g. Sogou) report a bogus near-full-screen
+        // keyboard frame here; clamp it so it can't fling the fixed add-task bar
+        // to the top of the screen (#8778).
+        const referenceHeight =
+          this._iosViewportHeightBeforeKeyboard || window.innerHeight;
+        const keyboardHeight = sanitizeIosKeyboardHeight(
+          info.keyboardHeight,
+          referenceHeight,
+        );
+        // Only a frame the clamp had to correct opts into the measured-viewport
+        // override in _updateIOSKeyboardViewportVars; well-behaved keyboards keep
+        // the exact pre-existing behaviour, so this cannot regress them.
+        this._iosKeyboardFrameUnreliable = keyboardHeight !== info.keyboardHeight;
+        this._iosKeyboardHeight = keyboardHeight;
+        // The show animation is only starting — nothing about the web view's new
+        // size is known yet, see computeIosKeyboardViewportVars. A keyboard that
+        // is already up is not appearing from zero, though: unsettling it there
+        // would drop the fixed bar behind the keyboard until didShow arrives.
+        if (!wasKeyboardVisible) {
+          this._isIosKeyboardSettled = false;
+        }
+        this.document.body.classList.add(BodyClass.isKeyboardVisible);
+        // Set CSS variable for keyboard height to adjust layout
+        this._setCssVar(
+          this.document.documentElement,
+          CSS_VAR_KEYBOARD_HEIGHT,
+          `${keyboardHeight}px`,
+        );
+        this._updateIOSKeyboardViewportVars();
+      })
+      .then((handle) => this._keyboardListenerHandles.push(handle));
 
     // Use keyboardDidShow for scroll (after animation completes)
-    Keyboard.addListener('keyboardDidShow', () => {
-      this._isIosKeyboardSettled = true;
-      this._updateIOSKeyboardViewportVars();
-      this._scrollActiveInputIntoView();
-    }).then((handle) => this._keyboardListenerHandles.push(handle));
+    keyboard
+      .addListener('keyboardDidShow', () => {
+        this._isIosKeyboardSettled = true;
+        this._updateIOSKeyboardViewportVars();
+        this._scrollActiveInputIntoView();
+      })
+      .then((handle) => this._keyboardListenerHandles.push(handle));
 
-    Keyboard.addListener('keyboardWillHide', () => {
-      Log.log('iOS keyboard will hide');
-      this._iosKeyboardHeight = 0;
-      this._iosViewportHeightBeforeKeyboard = 0;
-      this._iosKeyboardFrameUnreliable = false;
-      this._isIosKeyboardSettled = false;
-      this.document.body.classList.remove(BodyClass.isKeyboardVisible);
-      this._setRootCssVar(CSS_VAR_KEYBOARD_HEIGHT, '0px');
-      this._setRootCssVar(CSS_VAR_KEYBOARD_OVERLAY_OFFSET, '0px');
-      this._updateIOSKeyboardViewportVars();
-    }).then((handle) => this._keyboardListenerHandles.push(handle));
+    keyboard
+      .addListener('keyboardWillHide', () => {
+        Log.log('iOS keyboard will hide');
+        this._iosKeyboardHeight = 0;
+        this._iosViewportHeightBeforeKeyboard = 0;
+        this._iosKeyboardFrameUnreliable = false;
+        this._isIosKeyboardSettled = false;
+        this.document.body.classList.remove(BodyClass.isKeyboardVisible);
+        const root = this.document.documentElement;
+        this._setCssVar(root, CSS_VAR_KEYBOARD_HEIGHT, '0px');
+        this._setCssVar(root, CSS_VAR_KEYBOARD_OVERLAY_OFFSET, '0px');
+        this._updateIOSKeyboardViewportVars();
+      })
+      .then((handle) => this._keyboardListenerHandles.push(handle));
 
     // Also handle focus changes while keyboard is already visible
     this._focusinListener = (event: FocusEvent): void => {
@@ -786,22 +819,34 @@ export class GlobalThemeService {
       isKeyboardFrameUnreliable: this._iosKeyboardFrameUnreliable,
     });
 
-    let hasChanged = this._setRootCssVar(
+    const root = this.document.documentElement;
+    let hasChanged = this._setCssVar(
+      // Not on <html>: a custom property there invalidates every element that
+      // could inherit it, which WebKit charges per node — measured at ~390ms per
+      // write on a 200-task list, on every frame of the keyboard animation
+      // (#9779). Only overlay panes read this one, so it lives on their
+      // container; the app shell gets a plain height below.
+      this._iosViewportVarTarget ?? root,
       CSS_VAR_VISUAL_VIEWPORT_HEIGHT,
       `${vars.visualViewportHeightPx}px`,
     );
     hasChanged =
-      this._setRootCssVar(
+      this._setCssVar(
+        root,
         CSS_VAR_KEYBOARD_OVERLAY_OFFSET,
         `${vars.keyboardOverlayOffsetPx}px`,
       ) || hasChanged;
     if (vars.correctedKeyboardHeightPx !== null) {
       hasChanged =
-        this._setRootCssVar(
+        this._setCssVar(
+          root,
           CSS_VAR_KEYBOARD_HEIGHT,
           `${vars.correctedKeyboardHeightPx}px`,
         ) || hasChanged;
     }
+    this._setIosShellHeight(
+      this._iosKeyboardHeight > 0 ? vars.visualViewportHeightPx : null,
+    );
 
     // Every notification costs a synthetic window resize, and each of those makes
     // CdkTextareaAutosize drop its caches and re-measure and every connected CDK
@@ -813,13 +858,54 @@ export class GlobalThemeService {
     }
   }
 
-  /** Writes a CSS variable on <html>; returns whether the value actually changed. */
-  private _setRootCssVar(name: string, value: string): boolean {
-    if (this._rootCssVarCache.get(name) === value) {
+  /**
+   * Sizes the app shell to the space left above the keyboard.
+   *
+   * A plain height on the one element that needs it, rather than a custom
+   * property the shell reads: the shell wraps the whole task list, so a
+   * variable it inherits costs a document-wide style recalc per write, while
+   * this costs one element plus the layout that has to happen anyway (#9779).
+   * Mirrors what `.app-container`'s stylesheet rule used to compute; passing
+   * null hands the element back to the stylesheet.
+   */
+  private _setIosShellHeight(visualViewportHeightPx: number | null): void {
+    const height =
+      visualViewportHeightPx === null
+        ? ''
+        : `calc(${visualViewportHeightPx}px - var(--safe-area-top))`;
+
+    if (!this._iosShellEl?.isConnected) {
+      this._iosShellEl = this.document.querySelector<HTMLElement>('.app-container');
+      // The remembered value describes the element we were writing to, so a
+      // different shell has to be read rather than assumed (a fresh one carries
+      // no inline height).
+      this._iosShellHeightCss = this._iosShellEl?.style.height ?? '';
+    }
+    const shell = this._iosShellEl;
+    if (!shell || height === this._iosShellHeightCss) {
+      return;
+    }
+    this._iosShellHeightCss = height;
+
+    if (height) {
+      shell.style.setProperty('height', height);
+      shell.style.setProperty('min-height', height);
+    } else {
+      shell.style.removeProperty('height');
+      shell.style.removeProperty('min-height');
+    }
+  }
+
+  /**
+   * Writes a CSS variable, deduped; returns whether the value actually changed.
+   * Each variable has exactly one target, so the cache keys on the name alone.
+   */
+  private _setCssVar(target: HTMLElement, name: string, value: string): boolean {
+    if (this._cssVarCache.get(name) === value) {
       return false;
     }
-    this._rootCssVarCache.set(name, value);
-    this.document.documentElement.style.setProperty(name, value);
+    this._cssVarCache.set(name, value);
+    target.style.setProperty(name, value);
     return true;
   }
 
