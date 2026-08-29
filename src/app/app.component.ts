@@ -135,6 +135,8 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _bannerService = inject(BannerService);
   private _snackService = inject(SnackService);
   private _globalThemeService = inject(GlobalThemeService);
+  /** Sized above the iOS keyboard; null everywhere else. See GlobalThemeService. */
+  readonly iosShellHeight = this._globalThemeService.iosShellHeight;
   private _languageService = inject(LanguageService);
   private _activatedRoute = inject(ActivatedRoute);
   private _matDialog = inject(MatDialog);

@@ -222,8 +222,15 @@ export class GlobalThemeService {
   private readonly _cssVarCache = new Map<string, string>();
   // Where --visual-viewport-height goes; see _initIOSKeyboardHandling.
   private _iosViewportVarTarget: HTMLElement | null = null;
-  private _iosShellEl: HTMLElement | null = null;
-  private _iosShellHeightCss = '';
+
+  /**
+   * Height for the app shell while the iOS keyboard is open, as a CSS value, or
+   * null to leave the sizing to the stylesheet. Bound by app.component rather
+   * than published as a custom property: the shell wraps the whole task list,
+   * and a variable it inherits costs a document-wide style recalc on every
+   * frame of the keyboard animation (#9779).
+   */
+  readonly iosShellHeight = signal<string | null>(null);
 
   private _isCustomWindowTitleBarEnabled(): boolean {
     // The main process (main-window.ts) force-disables the custom title bar on
@@ -844,8 +851,10 @@ export class GlobalThemeService {
           `${vars.correctedKeyboardHeightPx}px`,
         ) || hasChanged;
     }
-    this._setIosShellHeight(
-      this._iosKeyboardHeight > 0 ? vars.visualViewportHeightPx : null,
+    this.iosShellHeight.set(
+      this._iosKeyboardHeight > 0
+        ? `calc(${vars.visualViewportHeightPx}px - var(--safe-area-top))`
+        : null,
     );
 
     // Every notification costs a synthetic window resize, and each of those makes
@@ -855,44 +864,6 @@ export class GlobalThemeService {
     // already written, so only tell the app about the ones that moved something.
     if (hasChanged) {
       this._notifyIOSViewportChange();
-    }
-  }
-
-  /**
-   * Sizes the app shell to the space left above the keyboard.
-   *
-   * A plain height on the one element that needs it, rather than a custom
-   * property the shell reads: the shell wraps the whole task list, so a
-   * variable it inherits costs a document-wide style recalc per write, while
-   * this costs one element plus the layout that has to happen anyway (#9779).
-   * Mirrors what `.app-container`'s stylesheet rule used to compute; passing
-   * null hands the element back to the stylesheet.
-   */
-  private _setIosShellHeight(visualViewportHeightPx: number | null): void {
-    const height =
-      visualViewportHeightPx === null
-        ? ''
-        : `calc(${visualViewportHeightPx}px - var(--safe-area-top))`;
-
-    if (!this._iosShellEl?.isConnected) {
-      this._iosShellEl = this.document.querySelector<HTMLElement>('.app-container');
-      // The remembered value describes the element we were writing to, so a
-      // different shell has to be read rather than assumed (a fresh one carries
-      // no inline height).
-      this._iosShellHeightCss = this._iosShellEl?.style.height ?? '';
-    }
-    const shell = this._iosShellEl;
-    if (!shell || height === this._iosShellHeightCss) {
-      return;
-    }
-    this._iosShellHeightCss = height;
-
-    if (height) {
-      shell.style.setProperty('height', height);
-      shell.style.setProperty('min-height', height);
-    } else {
-      shell.style.removeProperty('height');
-      shell.style.removeProperty('min-height');
     }
   }
 

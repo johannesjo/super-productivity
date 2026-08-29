@@ -323,8 +323,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     _cssVarCache: Map<string, string>;
     _overlayContainer: { getContainerElement(): HTMLElement };
     _iosViewportVarTarget: HTMLElement | null;
-    _iosShellEl: HTMLElement | null;
-    _iosShellHeightCss: string;
+    iosShellHeight: WritableSignal<string | null>;
     _scrollActiveInputIntoView(): void;
   }
 
@@ -337,7 +336,6 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
   let root: HTMLElement;
   let body: HTMLElement;
   let overlayContainer: HTMLElement;
-  let shell: HTMLElement;
   let handlers: Record<string, KeyboardHandler>;
   let visualViewport: { height: number; addEventListener: jasmine.Spy };
   let setPropertySpy: jasmine.Spy;
@@ -381,7 +379,6 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     root = document.createElement('div');
     body = document.createElement('div');
     overlayContainer = document.createElement('div');
-    shell = document.createElement('div');
     handlers = {};
     resizeNotifications = 0;
     scrollIntoViewSpy = jasmine.createSpy('_scrollActiveInputIntoView');
@@ -423,12 +420,10 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
       body,
       addEventListener: () => undefined,
       removeEventListener: () => undefined,
-      querySelector: (selector: string) => (selector === '.app-container' ? shell : null),
     } as unknown as Document;
     harness._overlayContainer = { getContainerElement: () => overlayContainer };
     harness._iosViewportVarTarget = null;
-    harness._iosShellEl = null;
-    harness._iosShellHeightCss = '';
+    harness.iosShellHeight = signal<string | null>(null);
     harness._destroyRef = { onDestroy: () => undefined };
     harness._keyboardListenerHandles = [];
     harness._focusinListener = null;
@@ -490,7 +485,9 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
     expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
     expect(overlayVar('--visual-viewport-height')).toBe(`${BASE_HEIGHT}px`);
-    expect(shell.style.height).toBe(`calc(${BASE_HEIGHT}px - var(--safe-area-top))`);
+    expect(harness.iosShellHeight()).toBe(
+      `calc(${BASE_HEIGHT}px - var(--safe-area-top))`,
+    );
   });
 
   it('follows the web view once it shrinks around the keyboard', () => {
@@ -501,7 +498,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     expect(overlayVar('--visual-viewport-height')).toBe(
       `${BASE_HEIGHT - KEYBOARD_HEIGHT}px`,
     );
-    expect(shell.style.height).toBe(
+    expect(harness.iosShellHeight()).toBe(
       `calc(${BASE_HEIGHT - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
     );
     // The shrunken web view already ends above the keyboard; offsetting the
@@ -563,8 +560,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
     expect(overlayVar('--visual-viewport-height')).toBe(`${BASE_HEIGHT}px`);
     // Handed back to the stylesheet, which sizes the shell without a keyboard.
-    expect(shell.style.height).toBe('');
-    expect(shell.style.minHeight).toBe('');
+    expect(harness.iosShellHeight()).toBeNull();
   });
 
   // The show animation fires a burst of visualViewport resizes, most of them on
