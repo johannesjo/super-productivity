@@ -1,4 +1,10 @@
-import { EnvironmentInjector, signal, Signal, WritableSignal } from '@angular/core';
+import {
+  ApplicationRef,
+  EnvironmentInjector,
+  signal,
+  Signal,
+  WritableSignal,
+} from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { type WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import {
@@ -325,6 +331,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     _iosViewportVarTarget: HTMLElement | null;
     iosShellHeight: WritableSignal<string | null>;
     _scrollActiveInputIntoView(): void;
+    _environmentInjector: EnvironmentInjector;
   }
 
   type KeyboardHandler = (info: KeyboardInfo) => void;
@@ -435,6 +442,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     harness._isIosKeyboardSettled = false;
     harness._cssVarCache = new Map<string, string>();
     harness._scrollActiveInputIntoView = scrollIntoViewSpy;
+    harness._environmentInjector = TestBed.inject(EnvironmentInjector);
 
     const keyboard = {
       setAccessoryBarVisible: () => Promise.resolve(),
@@ -465,6 +473,8 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
   const willShow = (keyboardHeight = KEYBOARD_HEIGHT): void =>
     handlers['keyboardWillShow']({ keyboardHeight } as KeyboardInfo);
   const didShow = (): void => handlers['keyboardDidShow']({} as KeyboardInfo);
+  /** Runs the render pass the deferred scroll waits for. */
+  const flushRender = (): void => TestBed.inject(ApplicationRef).tick();
   const willHide = (): void => handlers['keyboardWillHide']({} as KeyboardInfo);
 
   it('registers a listener per keyboard event', () => {
@@ -504,6 +514,21 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     // The shrunken web view already ends above the keyboard; offsetting the
     // fixed bar again would move it twice (#8778).
     expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    flushRender();
+    expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+  });
+
+  // The shell height is a signal binding now, so at didShow the shell is still
+  // its pre-keyboard size. Scrolling there measures the old viewport, decides
+  // the input is already visible, and leaves it under the keyboard (#9779).
+  it('waits for the shell to be resized before scrolling the input into view', () => {
+    willShow();
+    didShow();
+
+    expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+
+    flushRender();
+
     expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -587,8 +612,27 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     willShow(BASE_HEIGHT - 10);
     shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
 
+    // Mid-shrink the clamped frame stands. --keyboard-height has non-overlay
+    // consumers so it has to live on <html>, and the obscured area moves every
+    // frame — correcting here would be a root write per frame (#9779).
+    expect(rootVar('--keyboard-height')).toBe(`${BASE_HEIGHT * 0.6}px`);
+
+    didShow();
+
     expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
     expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+  });
+
+  it('does not write <html> per frame for a bogus keyboard frame either', () => {
+    willShow(BASE_HEIGHT - 10);
+    const writesAfterShow = varWrites(setPropertySpy, '--keyboard-height');
+
+    for (let step = 60; step <= 300; step += 60) {
+      shrinkViewport(BASE_HEIGHT - step);
+      flushFrame();
+    }
+
+    expect(varWrites(setPropertySpy, '--keyboard-height')).toBe(writesAfterShow);
   });
 
   // The point of the split: <html> carries only variables that change once per
@@ -619,6 +663,7 @@ describe('GlobalThemeService scroll-into-view guard', () => {
   interface ScrollGuardHarness {
     document: Document;
     _canScrollIntoView(el: HTMLElement): boolean;
+    _scrollActiveInputIntoView(): void;
   }
 
   let harness: ScrollGuardHarness;
@@ -627,6 +672,20 @@ describe('GlobalThemeService scroll-into-view guard', () => {
   const build = (html: string): HTMLElement => {
     root.innerHTML = html;
     return root.querySelector('input') as HTMLElement;
+  };
+
+  /**
+   * Focuses the input for real and stubs the scroll call on it, so the assertion
+   * covers `_scrollActiveInputIntoView` end to end rather than the predicate
+   * alone — deleting the guard's call site has to fail a test.
+   */
+  const focusAndWatch = (input: HTMLElement): jasmine.Spy => {
+    const spy = jasmine.createSpy('scrollIntoViewIfNeeded');
+    // An own property, so the branch is taken on any browser karma runs in.
+    (input as unknown as Record<string, unknown>).scrollIntoViewIfNeeded = spy;
+    input.focus();
+    expect(document.activeElement).toBe(input);
+    return spy;
   };
 
   beforeEach(() => {
@@ -676,5 +735,31 @@ describe('GlobalThemeService scroll-into-view guard', () => {
     const input = build('<div><input /></div>');
 
     expect(harness._canScrollIntoView(input)).toBe(true);
+  });
+
+  describe('applied to the focused input', () => {
+    it('does not scroll for an input in a fixed bar', () => {
+      const spy = focusAndWatch(
+        build('<div style="position: fixed; bottom: 0"><input /></div>'),
+      );
+
+      harness._scrollActiveInputIntoView();
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('scrolls for an input inside a scrollable container', () => {
+      const spy = focusAndWatch(
+        build(`
+          <div style="height: 40px; overflow-y: auto">
+            <div style="height: 400px"><input /></div>
+          </div>
+        `),
+      );
+
+      harness._scrollActiveInputIntoView();
+
+      expect(spy).toHaveBeenCalledWith(true);
+    });
   });
 });

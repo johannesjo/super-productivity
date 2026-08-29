@@ -107,6 +107,20 @@ describe('computeIosKeyboardViewportVars()', () => {
       ).toBe(BASE * 0.6);
     });
 
+    // The obscured area moves on every frame of the shrink, and --keyboard-height
+    // has to stay on :root for its non-overlay consumers — so correcting before
+    // the resize settles is a root write per animation frame (#9779).
+    it('holds the correction until the resize has settled', () => {
+      expect(
+        compute({
+          keyboardHeight: BASE * 0.6,
+          visualViewportHeight: BASE - 320,
+          isKeyboardFrameUnreliable: true,
+          isKeyboardSettled: false,
+        }).correctedKeyboardHeightPx,
+      ).toBeNull();
+    });
+
     it('leaves a well-behaved frame alone', () => {
       expect(
         compute({

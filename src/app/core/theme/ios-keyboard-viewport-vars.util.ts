@@ -79,9 +79,15 @@ export const computeIosKeyboardViewportVars = ({
       // The web view already shrank around the keyboard, so a fixed element at
       // `bottom: 0` sits above it — offsetting again would move it twice (#8778).
       keyboardOverlayOffsetPx: 0,
-      correctedKeyboardHeightPx: isKeyboardFrameUnreliable
-        ? sanitizeIosKeyboardHeight(baseHeight - visualViewportHeight, baseHeight)
-        : null,
+      // Settled only: the obscured area changes on every frame of the shrink, and
+      // `--keyboard-height` has to live on `:root` for its non-overlay consumers,
+      // so correcting mid-animation reintroduces the per-frame root write this
+      // all exists to avoid (#9779). The clamped frame from `keyboardWillShow`
+      // holds until then, which is the pre-#8778 behaviour and already safe.
+      correctedKeyboardHeightPx:
+        isKeyboardFrameUnreliable && isKeyboardSettled
+          ? sanitizeIosKeyboardHeight(baseHeight - visualViewportHeight, baseHeight)
+          : null,
     };
   }
 

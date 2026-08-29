@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   computed,
   DestroyRef,
   effect,
@@ -763,7 +764,13 @@ export class GlobalThemeService {
       .addListener('keyboardDidShow', () => {
         this._isIosKeyboardSettled = true;
         this._updateIOSKeyboardViewportVars();
-        this._scrollActiveInputIntoView();
+        // The shell height above is a signal binding, so the shell is still at
+        // its pre-keyboard height until change detection runs. Measuring here
+        // would find the input comfortably inside a viewport that is about to
+        // shrink, and skip the scroll that keeps it off the keyboard (#9779).
+        afterNextRender(() => this._scrollActiveInputIntoView(), {
+          injector: this._environmentInjector,
+        });
       })
       .then((handle) => this._keyboardListenerHandles.push(handle));
 
