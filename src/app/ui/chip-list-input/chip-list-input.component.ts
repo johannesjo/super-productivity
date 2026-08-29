@@ -35,6 +35,7 @@ import { MatOption } from '@angular/material/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
 import { TagComponent } from '../../features/tag/tag/tag.component';
+import { sortByTitle } from '../../util/sort-by-title';
 
 const DEFAULT_SEPARATOR_KEY_CODES: number[] = [ENTER, COMMA];
 
@@ -137,7 +138,8 @@ export class ChipListInputComponent implements OnDestroy {
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set suggestions(val: Suggestion[]) {
-    this.suggestionsIn = val.sort((a, b) => a.title.localeCompare(b.title));
+    // copy first: consumers pass memoized NgRx selector output, sort() mutates in place
+    this.suggestionsIn = sortByTitle(val);
     this._updateModelItems(this._modelIds);
   }
 
