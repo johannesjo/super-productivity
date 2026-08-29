@@ -628,32 +628,11 @@ export class StorageQuotaService {
         //
         // The prefix is walked in STATED serverSeq windows of deleteBatchSize —
         // see deleteOldSyncedOpsBatch for why the range must be stated rather
-        // than discovered. An empty window mid-walk proves nothing about the
-        // rest of the prefix (already pruned, or emptied concurrently by quota
-        // recovery), so the walk always runs to the boundary; a window over an
-        // already pruned range costs a few index pages.
+        // than discovered. An empty window proves nothing about the rest of the
+        // prefix (already pruned, or emptied concurrently by quota recovery),
+        // so the walk always runs to the boundary; a window over an already
+        // pruned range costs a few index pages.
         //
-        // But the walk must not START at seq 1: once a user's prefix is
-        // drained — which after the first successful run is every healthy
-        // candidate — starting at 1 re-issues ceil((protectedFromSeq - 1) /
-        // deleteBatchSize) guaranteed-empty DELETE statements on every nightly
-        // run, forever, growing with lifetime lastSeq (a 10M-seq account is
-        // ~2000 no-op statements per night). One probe bounds the walk instead:
-        // MIN(server_seq) under an equality on user_id is an ordered O(log n)
-        // seek down the (user_id, server_seq) unique index
-        // (`operations_user_id_server_seq_key`, 0_init migration — the same
-        // prefix the ops download path seeks). No new persistent state: a
-        // mid-drain crash is repaired by the next run simply re-probing.
-        const lowestPrefixSeq = (
-          await prisma.operation.aggregate({
-            where: {
-              userId: candidate.userId,
-              serverSeq: { lt: protectedFromSeq },
-            },
-            _min: { serverSeq: true },
-          })
-        )._min.serverSeq;
-
         // One user's DB error must not cost the rest of the fleet a day of
         // retention, so the drain is scoped: log, count, move to the next user.
         // A throw mid-drain still leaves that user's prefix truncated — the
@@ -662,16 +641,7 @@ export class StorageQuotaService {
         // older than the (by then later) cutoff.
         let userDeleted = 0;
         try {
-          // `null` → nothing below the boundary: the loop condition is false
-          // immediately and no DELETE is issued. Not a retention decline (no
-          // skip counter): there is nothing left to prune for this user.
-          // Otherwise windows tile [lowestPrefixSeq, protectedFromSeq) exactly
-          // — half-open, no gap or overlap.
-          for (
-            let lo = lowestPrefixSeq ?? protectedFromSeq;
-            lo < protectedFromSeq;
-            lo += deleteBatchSize
-          ) {
+          for (let lo = 1; lo < protectedFromSeq; lo += deleteBatchSize) {
             const hi = Math.min(lo + deleteBatchSize, protectedFromSeq);
             const deletedCount = await this.deleteOldSyncedOpsBatch(
               candidate.userId,
