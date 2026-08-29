@@ -132,39 +132,11 @@ jobs:
           # exists after minification. play, not fdroid: play is the flavor that
           # ships to the Play internal track on every master push.
           #
-          # Bounded and instrumented on purpose. The first r8Test run hung for
-          # 22 minutes without ever printing "Starting N tests" — the block is
-          # before test execution (install, or the instrumentation failing to
-          # come up), and the job timeout gave us a bare "operation was
-          # canceled" with no artifact. So: fail at 15 minutes instead of 30,
-          # and capture the device state either way.
-          #
-          # `--info` is diagnostic scaffolding for that hang — it is the only
-          # place AGP logs the install — and should come back out once the
-          # cause is known; logcat alone covers a hang that reaches the device.
-          script: |
-            # The action runs this with `sh -c`, i.e. dash: no `pipefail`, and
-            # no `set -e` either — the capture below has to run on failure.
-            set -u
-            DIAG=build/instrumentation-diagnostics
-            mkdir -p "$DIAG"
-            adb logcat -c || true
-
-            timeout 900 ./gradlew :app:connectedPlayR8TestAndroidTest --info
-            status=$?
-
-            # Unconditional: a hang produces no test report at all, so this is
-            # the only record of what the device and the app process were doing.
-            adb logcat -d > "$DIAG/logcat.txt" 2>&1 || true
-            adb shell dumpsys activity processes > "$DIAG/activity-processes.txt" 2>&1 || true
-            adb shell pm list instrumentation > "$DIAG/instrumentation.txt" 2>&1 || true
-            adb root > /dev/null 2>&1 || true
-            adb pull /data/anr "$DIAG/anr" > /dev/null 2>&1 || true
-
-            if [ "$status" -eq 124 ]; then
-              echo "::error::connectedPlayR8TestAndroidTest exceeded 15 minutes — see the android-instrumentation-diagnostics artifact"
-            fi
-            exit $status
+          # A script file, not an inline block: this action runs the `script:`
+          # input one line per `sh -c`, so variables, `set -u` and multi-line
+          # `if` do not survive between lines. See the script for what it does
+          # and why it is bounded.
+          script: ./run-instrumentation-tests.sh
 
       # cancelled(), not just failure(): a job that exceeds timeout-minutes
       # concludes as cancelled, which is exactly the run whose artifacts we
