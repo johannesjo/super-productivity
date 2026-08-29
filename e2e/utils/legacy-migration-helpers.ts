@@ -11,6 +11,36 @@ import { installDevErrorDialogHandler } from './runtime-errors';
  */
 
 /**
+ * Read the migrated store back out of the SUP_OPS snapshot (`state_cache/current`).
+ *
+ * Generic over the slices a given test cares about, so each caller keeps the
+ * narrow shape it asserts on without re-implementing the IndexedDB read.
+ */
+export const readMigratedState = async <T extends Record<string, unknown>>(
+  page: Page,
+): Promise<T> =>
+  page.evaluate(
+    async () =>
+      new Promise((resolve, reject) => {
+        const request = indexedDB.open('SUP_OPS');
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          const tx = db.transaction('state_cache', 'readonly');
+          const getReq = tx.objectStore('state_cache').get('current');
+          getReq.onsuccess = () => {
+            db.close();
+            resolve(getReq.result?.state || {});
+          };
+          getReq.onerror = () => {
+            db.close();
+            reject(getReq.error);
+          };
+        };
+        request.onerror = () => reject(request.error);
+      }),
+  ) as Promise<T>;
+
+/**
  * Seed the legacy 'pf' IndexedDB database with data.
  * Must be called BEFORE the Angular app initializes.
  *

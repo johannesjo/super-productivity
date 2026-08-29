@@ -1,8 +1,11 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import legacyPartial from '../../../src/app/op-log/validation/test-fixtures/legacy-pf-v13-partial-models.json';
 import { MIGRATION_BACKUP_PREFIX } from '../../../electron/shared-with-frontend/get-backup-timestamp';
 import { skipOnboardingForE2E } from '../../utils/waits';
-import { seedLegacyDatabase } from '../../utils/legacy-migration-helpers';
+import {
+  readMigratedState,
+  seedLegacyDatabase,
+} from '../../utils/legacy-migration-helpers';
 
 /**
  * Issue #9770: a `pf` database written by an older version only holds the model
@@ -24,30 +27,7 @@ import { seedLegacyDatabase } from '../../utils/legacy-migration-helpers';
  * Run: npm run e2e:file e2e/tests/migration/legacy-partial-model-slices-9770.spec.ts -- --retries=0
  */
 
-/** Read the migrated store back out of SUP_OPS. */
-const readMigratedState = async (
-  page: Page,
-): Promise<Record<string, { ids?: string[] } | undefined>> =>
-  page.evaluate(
-    async () =>
-      new Promise((resolve, reject) => {
-        const request = indexedDB.open('SUP_OPS');
-        request.onsuccess = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          const tx = db.transaction('state_cache', 'readonly');
-          const getReq = tx.objectStore('state_cache').get('current');
-          getReq.onsuccess = () => {
-            db.close();
-            resolve(getReq.result?.state || {});
-          };
-          getReq.onerror = () => {
-            db.close();
-            reject(getReq.error);
-          };
-        };
-        request.onerror = () => reject(request.error);
-      }),
-  );
+type MigratedState = Record<string, { ids?: string[] } | undefined>;
 
 test.describe('@migration #9770 legacy data missing newer model slices', () => {
   test('app migrates and starts when the pf database predates timeTracking, menuTree and boards', async ({
@@ -94,12 +74,16 @@ test.describe('@migration #9770 legacy data missing newer model slices', () => {
       // appendOperationAndSnapshot, so no snapshot is ever written and this
       // poll times out.
       await expect
-        .poll(async () => (await readMigratedState(page)).task?.ids?.length ?? 0, {
-          timeout: 30000,
-        })
+        .poll(
+          async () =>
+            (await readMigratedState<MigratedState>(page)).task?.ids?.length ?? 0,
+          {
+            timeout: 30000,
+          },
+        )
         .toBe(1);
 
-      const state = await readMigratedState(page);
+      const state = await readMigratedState<MigratedState>(page);
       expect(state.task?.ids).toEqual(['TJ-NDR6Sjc0qc0TS-tUgE']);
       // The slices the old database never had are present in the migrated store.
       expect(state.timeTracking).toBeDefined();
