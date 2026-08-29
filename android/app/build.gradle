@@ -84,7 +84,24 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+        r8Test {
+            // Keep a permanently minified release-like target for instrumentation tests.
+            // Release minification was disabled after #9784, but without exercising R8 in
+            // CI the same class of runtime-only failure could return when it is re-enabled.
+            initWith release
+            signingConfig signingConfigs.debug
+            minifyEnabled true
+            shrinkResources true
+            setProguardFiles([
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro",
+            ])
+            testProguardFiles "proguard-rules.pro"
+            matchingFallbacks = ["release"]
+        }
     }
+
+    testBuildType "r8Test"
 
     flavorDimensions "version"
     productFlavors {
