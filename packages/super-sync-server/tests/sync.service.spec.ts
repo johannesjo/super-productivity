@@ -199,9 +199,15 @@ vi.mock('../src/db', async () => {
           .slice(0, args.take || 500);
       }),
       aggregate: vi.fn().mockImplementation(async (args: any) => {
-        const ops = Array.from(state.operations.values()).filter(
-          (op: any) => args.where?.userId === op.userId,
-        );
+        const ops = Array.from(state.operations.values()).filter((op: any) => {
+          if (args.where?.userId !== op.userId) return false;
+          if (
+            args.where?.serverSeq?.lt !== undefined &&
+            op.serverSeq >= args.where.serverSeq.lt
+          )
+            return false;
+          return true;
+        });
         if (ops.length === 0)
           return { _min: { serverSeq: null }, _max: { serverSeq: null } };
         const seqs = ops.map((op: any) => op.serverSeq);
@@ -590,9 +596,15 @@ vi.mock('../src/db', async () => {
             .map((op: any) => applyOperationSelect(op, args.select));
         }),
         aggregate: vi.fn().mockImplementation(async (args: any) => {
-          const ops = Array.from(state.operations.values()).filter(
-            (op: any) => args.where?.userId === op.userId,
-          );
+          const ops = Array.from(state.operations.values()).filter((op: any) => {
+            if (args.where?.userId !== op.userId) return false;
+            if (
+              args.where?.serverSeq?.lt !== undefined &&
+              op.serverSeq >= args.where.serverSeq.lt
+            )
+              return false;
+            return true;
+          });
           if (ops.length === 0)
             return { _min: { serverSeq: null }, _max: { serverSeq: null } };
           const seqs = ops.map((op: any) => op.serverSeq);
@@ -3899,6 +3911,80 @@ describe('SyncService', () => {
       );
       expect(survivors).toHaveLength(1);
       expect(survivors[0].opType).toBe('SYNC_IMPORT');
+    });
+
+    it('starts the window walk at the probed lowest prefix seq instead of seq 1', async () => {
+      // Perf-scaling guard: quota recovery (or an earlier sweep run) already
+      // drained seq 1..20000, so every window below the surviving rows is
+      // guaranteed empty. Walking them anyway re-issues them on every nightly
+      // run forever, growing with lifetime lastSeq. The MIN(server_seq) probe
+      // must bound the walk to [probed min, boundary) — windows still tiled
+      // half-open with no gap or overlap.
+      const service = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const boundarySeq = 25000; // default delete window width is 5000
+
+      for (let i = 20001; i <= 20005; i++) {
+        testState.operations.set(`hi-op-${i}`, {
+          id: `hi-op-${i}`,
+          userId,
+          clientId,
+          serverSeq: i,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `t${i}`,
+          payload: {},
+          vectorClock: {},
+          schemaVersion: 1,
+          clientTimestamp: BigInt(Date.now()),
+          receivedAt: BigInt(cutoffTime - 1),
+          isPayloadEncrypted: false,
+          syncImportReason: null,
+        });
+      }
+      seedFullStateOp(userId, boundarySeq, BigInt(cutoffTime - 1));
+
+      const deleteManySpy = vi.mocked(prisma.operation.deleteMany);
+      deleteManySpy.mockClear();
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      // The pre-probe implementation walked lo = 1, 5001, 10001, 15001, 20001
+      // — five DELETE statements, four of them guaranteed empty. The probe
+      // collapses that to the single window actually holding rows.
+      const wheres = deleteManySpy.mock.calls.map(
+        ([args]) => (args as { where: Record<string, any> }).where,
+      );
+      expect(wheres.map((w) => [w.serverSeq?.gte, w.serverSeq?.lt])).toEqual([
+        [20001, boundarySeq],
+      ]);
+      expect(totalDeleted).toBe(5);
+      expect(affectedUserIds).toEqual([userId]);
+    });
+
+    it('issues no DELETE at all for a user whose prefix is already drained', async () => {
+      // The steady state after the first successful run: nothing below the
+      // causal boundary. The probe returns null and the walk is skipped
+      // entirely — the pre-probe implementation still issued ceil(249/100) = 3
+      // empty DELETE statements here, every night, forever.
+      const service = getSyncService();
+      process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE = '100';
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const boundarySeq = 250;
+
+      // Only the causal boundary op survives — everything below it is gone.
+      seedFullStateOp(userId, boundarySeq, BigInt(cutoffTime - 1));
+
+      const deleteManySpy = vi.mocked(prisma.operation.deleteMany);
+      deleteManySpy.mockClear();
+      const { totalDeleted, affectedUserIds } =
+        await service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+      delete process.env.OLD_OPS_CLEANUP_DELETE_BATCH_SIZE;
+
+      expect(deleteManySpy).not.toHaveBeenCalled();
+      expect(totalDeleted).toBe(0);
+      expect(affectedUserIds).toEqual([]);
     });
 
     it('should delete old operations from all users', async () => {
