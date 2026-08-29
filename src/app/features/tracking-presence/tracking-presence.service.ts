@@ -237,6 +237,17 @@ export class TrackingPresenceService implements OnDestroy {
   }
 
   stop(): void {
+    // A live producer session must announce its end before teardown — else
+    // disabling the opt-in mid-tracking (or mid-idle-pause) leaves other
+    // devices showing a phantom session: "Tracking" for up to 90s and a
+    // snapshot for up to 30min. Best-effort via the serialized send path
+    // (_broadcastState catches send errors), so teardown always proceeds.
+    if (this._current.state === 'tracking' || this._current.reason === 'idle') {
+      this._current = { state: 'stopped', taskId: null };
+      this._lastTrackedTaskId = null;
+      this._focusCycle = undefined;
+      this._broadcastState();
+    }
     this._subs?.unsubscribe();
     this._subs = null;
     this._connEffect?.destroy();
@@ -404,6 +415,12 @@ export class TrackingPresenceService implements OnDestroy {
     if (!Number.isFinite(p.focusCycle as number)) {
       delete p.focusCycle;
     }
+    if (p.reason !== 'idle') {
+      // Only the literal 'idle' may skip the stopped-linger clear — any
+      // fabricated reason would pin a stopped session for the full 30min
+      // hide window.
+      delete p.reason;
+    }
     // Server-assigned ordinal orders states across producers without trusting
     // device clocks. Equal ordinals are re-announcements of the same state
     // (producerConnected flag flips) and must pass.
@@ -483,6 +500,7 @@ export class TrackingPresenceService implements OnDestroy {
     if (cmd.v !== 1 || cmd.cmd !== 'stop' || typeof cmd.sessionId !== 'string') {
       return;
     }
+    cmd.deviceLabel = sanitizeDeviceLabel(cmd.deviceLabel);
     if (this._current.state !== 'tracking') {
       return;
     }
