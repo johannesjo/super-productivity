@@ -51,6 +51,18 @@ const getValidationErrors = (
   return undefined;
 };
 
+/**
+ * Typia's IError carries the offending `value` — a task title, note body,
+ * project name. `additionalLog` on the classes below renders into the global
+ * error alert and the prefilled GitHub issue body, so keep only the
+ * schema-derived parts (rule: never log user content). `path`/`expected` are
+ * what a maintainer needs to locate the failing field anyway.
+ */
+const stripValidationErrorValues = (
+  errors: IValidation.IError[],
+): { path: string; expected: string }[] =>
+  errors.map((e) => ({ path: e.path, expected: e.expected }));
+
 // AdditionalLogErrorBase is provided by @sp/sync-providers (without the
 // previous constructor-time logging side effect). The remaining app-only
 // errors below extend it; they MUST log at the catch site via
@@ -339,9 +351,13 @@ const buildDecompressErrorMessage = (rawMessage: string): string => {
 export class JsonParseError extends Error {
   override name = 'JsonParseError';
   position?: number;
-  dataSample?: string;
 
-  constructor(originalError: unknown, dataStr?: string) {
+  // No raw-data sample: it had zero readers, and holding ±50 chars around the
+  // parse position retains user content (task titles, notes) on an error
+  // object (rule: log history is exportable, never log user content). The
+  // position in the message plus InvalidFilePrefixError's headShape cover the
+  // triage need.
+  constructor(originalError: unknown) {
     // Extract position from SyntaxError message (e.g., "...at position 80999")
     const positionMatch =
       originalError instanceof Error
@@ -355,16 +371,6 @@ export class JsonParseError extends Error {
 
     super(message);
     this.position = position;
-
-    // Extract a sample of the data around the error position for debugging.
-    // Letters and digits are masked (rule: log history is exportable, never
-    // log user content) — the structural shape that survives is what matters:
-    // it still separates truncation, markup, and binary junk at a glance.
-    if (dataStr && position !== undefined) {
-      const start = Math.max(0, position - 50);
-      const end = Math.min(dataStr.length, position + 50);
-      this.dataSample = `...${dataStr.substring(start, end).replace(/[\p{L}\p{N}]/gu, '*')}...`;
-    }
   }
 }
 
@@ -421,7 +427,7 @@ export class ModelValidationError extends Error {
       try {
         const errors = getValidationErrors(params.validationResult);
         if (errors) {
-          const str = JSON.stringify(errors);
+          const str = JSON.stringify(stripValidationErrorValues(errors));
           this.additionalLog = `Model: ${params.id}, Errors: ${str.substring(0, 400)}`;
         }
       } catch {
@@ -442,7 +448,7 @@ export class DataValidationFailedError extends Error {
     try {
       const errors = getValidationErrors(validationResult);
       if (errors) {
-        const str = JSON.stringify(errors);
+        const str = JSON.stringify(stripValidationErrorValues(errors));
         this.additionalLog = str.substring(0, 400);
       }
     } catch {

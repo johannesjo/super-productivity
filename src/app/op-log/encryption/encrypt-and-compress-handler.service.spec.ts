@@ -302,14 +302,14 @@ describe('JsonParseError', () => {
 
   it('should extract position from SyntaxError message', () => {
     const syntaxError = new SyntaxError('Unexpected token at position 12345');
-    const error = new JsonParseError(syntaxError, 'some data');
+    const error = new JsonParseError(syntaxError);
 
     expect(error.position).toBe(12345);
   });
 
   it('should handle SyntaxError without position', () => {
     const syntaxError = new SyntaxError('Unexpected token');
-    const error = new JsonParseError(syntaxError, 'some data');
+    const error = new JsonParseError(syntaxError);
 
     expect(error.position).toBeUndefined();
     expect(error.message).toBe(
@@ -319,42 +319,29 @@ describe('JsonParseError', () => {
 
   it('should include position in message when available', () => {
     const syntaxError = new SyntaxError('Unexpected token at position 100');
-    const error = new JsonParseError(syntaxError, 'some data');
+    const error = new JsonParseError(syntaxError);
 
     expect(error.message).toContain('at position 100');
   });
 
-  it('should extract data sample around error position', () => {
-    const syntaxError = new SyntaxError('Unexpected token at position 50');
-    const longData = 'a'.repeat(100);
-    const error = new JsonParseError(syntaxError, longData);
-
-    expect(error.dataSample).toBeDefined();
-    expect(error.dataSample!.length).toBeLessThan(longData.length + 10);
-  });
-
-  it('should mask user content in the data sample but keep its structural shape', () => {
-    // Log history is exportable — the sample may not retain task titles/notes.
+  it('should not retain any of the parsed data on the error object', () => {
+    // Log history is exportable — no raw-data sample may survive on the error
+    // (it used to hold ±50 chars around the parse position, i.e. task titles).
     const syntaxError = new SyntaxError('Unexpected token at position 30');
-    const error = new JsonParseError(syntaxError, '{"title":"Fire Bob König 123"}<html>');
+    const error = new JsonParseError(syntaxError);
 
-    expect(error.dataSample).not.toContain('Fire');
-    expect(error.dataSample).not.toContain('König');
-    expect(error.dataSample).not.toContain('123');
-    // Structure survives: JSON punctuation and markup stay recognizable.
-    expect(error.dataSample).toContain('{"*****":"');
-    expect(error.dataSample).toContain('<****>');
+    expect(JSON.stringify(Object.getOwnPropertyNames(error))).not.toContain('dataSample');
   });
 
   it('should have error name set to JsonParseError', () => {
-    const error = new JsonParseError(new Error('test'), 'data');
+    const error = new JsonParseError(new Error('test'));
 
     expect(error.name).toBe('JsonParseError');
   });
 
   it('should produce human-readable error text via getErrorTxt()', () => {
     const syntaxError = new SyntaxError('Unexpected token at position 80999');
-    const error = new JsonParseError(syntaxError, 'corrupted data');
+    const error = new JsonParseError(syntaxError);
 
     const errorText = getErrorTxt(error);
 
@@ -367,35 +354,10 @@ describe('JsonParseError', () => {
   });
 
   it('should handle non-Error original error', () => {
-    const error = new JsonParseError('string error', 'data');
+    const error = new JsonParseError('string error');
 
     expect(error.position).toBeUndefined();
     expect(error.message).toContain('Failed to parse JSON data');
-  });
-
-  it('should handle undefined dataStr', () => {
-    const syntaxError = new SyntaxError('Unexpected token at position 10');
-    const error = new JsonParseError(syntaxError, undefined);
-
-    expect(error.dataSample).toBeUndefined();
-    expect(error.position).toBe(10);
-  });
-
-  it('should handle position at start of data', () => {
-    const syntaxError = new SyntaxError('Unexpected token at position 0');
-    const error = new JsonParseError(syntaxError, 'invalid json');
-
-    expect(error.position).toBe(0);
-    expect(error.dataSample).toBeDefined();
-  });
-
-  it('should handle position beyond data length', () => {
-    const syntaxError = new SyntaxError('Unexpected token at position 1000');
-    const error = new JsonParseError(syntaxError, 'short');
-
-    expect(error.position).toBe(1000);
-    // dataSample should still be set but truncated to actual data length
-    expect(error.dataSample).toBeDefined();
   });
 });
 
