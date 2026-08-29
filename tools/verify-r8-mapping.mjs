@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
- * DORMANT: nothing runs this today. Release builds are built with
- * minifyEnabled false (see android/app/build.gradle for why), so no mapping.txt
- * is produced and nothing below is currently enforcing anything. It stays
- * staged for the re-land of minification: build-android.yml runs this tool
- * whenever the release build actually emitted a mapping, so the re-land arms
- * the check without anyone having to remember this file exists.
+ * Run on every Android PR by android/run-android-checks.sh, against the
+ * playR8Test mapping — the one minified build CI produces while release keeps
+ * minifyEnabled false (see android/app/build.gradle for why). build-android.yml
+ * also runs it against the release mappings, which do not exist today, so the
+ * re-land of release minification arms that second call automatically.
  *
  * What it was for: a minified release that drops a @JavascriptInterface method
  * or a WorkManager worker builds and installs fine — the bridge call just goes
@@ -15,9 +14,11 @@
  * Expectations come from the Kotlin sources, not a hardcoded list, so adding a
  * bridge method or a worker keeps the check honest without touching this file.
  *
- * Note for the re-land: checking the mapping is NOT sufficient. It cannot see a
- * build that dies in onCreate, and it was only ever run against the fdroid
- * flavor, while the APK that ships to Play is the play flavor.
+ * Checking the mapping is NOT sufficient on its own: it cannot see a build that
+ * dies in onCreate — #9785 passed this check and still killed the process. The
+ * launch smoke in run-android-checks.sh covers that half, and this covers the
+ * half a launch cannot reach: a worker nothing enqueues, a bridge method the
+ * smoke page never calls.
  *
  * Usage: node tools/verify-r8-mapping.mjs <mapping.txt> [androidSrcRoot]
  */

@@ -2,10 +2,12 @@
 #
 # Release builds still run with minifyEnabled false (see build.gradle for why —
 # enabling it shipped a startup crash to the Play internal track), so these rules
-# do not affect anything that ships today. They are NOT inert, though: the
-# r8Test build type is minified, and android/run-android-checks.sh installs and
-# launches it on every Android PR, so every rule here is exercised against a
-# running app.
+# do not affect anything that ships today. They are NOT inert, though:
+# android/run-android-checks.sh minifies the r8Test build type on every Android
+# PR and then checks it two ways — it launches the APK, so the rules the smoke
+# page actually uses are proven on a running app, and it reads the mapping, so
+# the rules nothing at startup exercises are proven to have survived R8. Each
+# rule below names which one covers it.
 #
 # That is also the only validation they have. Treat them as a starting point for
 # the re-land ahead of Google Play's February 2027 DEX shrinking/obfuscation
@@ -20,7 +22,8 @@
 # proguard file keeps @JavascriptInterface members globally.
 # Kept because it names the one class we actually depend on, and because the
 # failure is silent — a stripped bridge method builds and installs fine, the JS
-# call just goes nowhere. tools/verify-r8-mapping.mjs is what enforces it.
+# call just goes nowhere. Covered twice: tools/verify-r8-mapping.mjs checks the
+# mapping, and the smoke page calls SUPAndroid.getVersion() on the minified APK.
 -keepclassmembers class com.superproductivity.superproductivity.webview.JavaScriptInterface {
     @android.webkit.JavascriptInterface <methods>;
 }
@@ -32,7 +35,9 @@
 # names the class through PeriodicWorkRequestBuilder<SyncReminderWorker>, so R8
 # keeps it and work-runtime's own -keepnames preserves the name. It stops being
 # redundant as soon as a worker is only ever referenced as a string: -keepnames
-# permits shrinking, so R8 would drop it. Same silent failure as above.
+# permits shrinking, so R8 would drop it. Same silent failure as above, and the
+# only one of the three with no runtime witness — nothing enqueues a worker at
+# startup, so tools/verify-r8-mapping.mjs is all that stands behind it.
 -keep class * extends androidx.work.ListenableWorker {
     public <init>(android.content.Context, androidx.work.WorkerParameters);
 }

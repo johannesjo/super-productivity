@@ -43,8 +43,12 @@
           // Proves the bridge round-trips at all before the permission call, so
           // a failure below is about permissions and not about the bridge.
           await plugins.App.getState();
+          // The app's own @JavascriptInterface bridge, kept by a rule of its
+          // own. A stripped or renamed getVersion throws here rather than
+          // failing silently the way it would in the real app.
+          const version = window.SUPAndroid.getVersion();
           const permissions = await plugins.LocalNotifications.checkPermissions();
-          report('OK display=' + permissions?.display);
+          report('OK display=' + permissions?.display + ' bridge=' + version);
         } catch (error) {
           report('FAIL ' + (error?.message || String(error)));
         }

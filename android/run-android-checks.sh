@@ -35,8 +35,11 @@ capture_diagnostics() {
 adb logcat -c || true
 
 # Bounded so a hung instrumentation fails with a report instead of consuming the
-# job's whole timeout and reporting nothing.
-timeout 900 ./gradlew :app:connectedPlayDebugAndroidTest
+# job's whole timeout and reporting nothing. 480s is ~5x the observed 1m39s
+# (run 33259362141); both bounds plus the smoke have to fit the workflow's
+# timeout-minutes with room for emulator boot, or a bound firing still shows up
+# as a cancelled job with no artifact — which is how #9804 merged blind.
+timeout 480 ./gradlew :app:connectedPlayDebugAndroidTest
 status=$?
 if [ "$status" -eq 124 ]; then
   echo "::error::connectedPlayDebugAndroidTest exceeded 15 minutes — see the android-instrumentation-diagnostics artifact"
@@ -49,11 +52,23 @@ fi
 # --- Minified launch smoke ---------------------------------------------------
 # The instrumented suite above runs on debug and says nothing about R8. This is
 # the part that would have caught #9785.
-timeout 900 ./gradlew :app:assemblePlayR8Test
+timeout 480 ./gradlew :app:assemblePlayR8Test
 status=$?
 if [ "$status" -ne 0 ]; then
   capture_diagnostics
   exit $status
+fi
+
+# What a launch cannot reach. The smoke page below exercises the PluginHandle
+# and JavaScriptInterface keep rules by using them, but nothing enqueues a
+# WorkManager worker at startup, so the ListenableWorker rule has no runtime
+# witness. Reading the mapping covers it, and it runs before install so a keep
+# rule that R8 dropped is named outright instead of surfacing as a launch
+# failure. Run from the repo root: the tool's source root defaults there.
+if ! (cd .. && node tools/verify-r8-mapping.mjs \
+    android/app/build/outputs/mapping/playR8Test/mapping.txt); then
+  echo "::error::R8 dropped or renamed something proguard-rules.pro is meant to keep"
+  exit 1
 fi
 
 adb logcat -c || true

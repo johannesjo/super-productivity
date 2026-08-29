@@ -1,20 +1,10 @@
 {
   "_comment": [
-    "CI-only Capacitor config, copied into assets/public's sibling slot next to",
-    "index.html by .github/workflows/android-tests.yml. Nothing generates this",
-    "file in CI: `npx cap update` writes capacitor.plugins.json only, and `cap",
-    "copy` — which would write the real config from capacitor.config.ts — never",
-    "runs because CI does not build the Angular app.",
-    "",
-    "It exists for one reason: loggingBehavior defaults to 'debug', which means",
-    "CapConfig sets loggingEnabled = FLAG_DEBUGGABLE. The r8Test APK is",
-    "`initWith release` and therefore not debuggable, so Capacitor drops every",
-    "console message — including the SP_SMOKE markers the smoke greps for. With",
-    "the default config the smoke could only ever time out.",
-    "",
-    "Nothing else here has to match capacitor.config.ts: plugin registration",
-    "comes from capacitor.plugins.json, and the smoke uses the default scheme",
-    "and web dir."
+    "CI-only. Capacitor ties console logging to FLAG_DEBUGGABLE unless",
+    "loggingBehavior says otherwise, and the r8Test APK is release-configured,",
+    "so without this the SP_SMOKE markers never reach logcat and the smoke can",
+    "only time out. Installed by .github/workflows/android-tests.yml; nothing",
+    "else writes this file in CI. Nothing here has to match capacitor.config.ts."
   ],
   "android": {
     "loggingBehavior": "production"
