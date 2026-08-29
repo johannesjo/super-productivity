@@ -131,15 +131,52 @@ jobs:
           # Nothing else in CI exercises R8, and #9785 was a crash that only
           # exists after minification. play, not fdroid: play is the flavor that
           # ships to the Play internal track on every master push.
-          script: ./gradlew :app:connectedPlayR8TestAndroidTest
+          #
+          # Bounded and instrumented on purpose. The first r8Test run hung for
+          # 22 minutes without ever printing "Starting N tests" — the block is
+          # before test execution (install, or the instrumentation failing to
+          # come up), and the job timeout gave us a bare "operation was
+          # canceled" with no artifact. So: fail at 15 minutes instead of 30,
+          # and capture the device state either way.
+          #
+          # `--info` is diagnostic scaffolding for that hang — it is the only
+          # place AGP logs the install — and should come back out once the
+          # cause is known; logcat alone covers a hang that reaches the device.
+          script: |
+            # The action runs this with `sh -c`, i.e. dash: no `pipefail`, and
+            # no `set -e` either — the capture below has to run on failure.
+            set -u
+            DIAG=build/instrumentation-diagnostics
+            mkdir -p "$DIAG"
+            adb logcat -c || true
 
-      - name: Upload instrumentation test results on failure
-        if: failure() && steps.changes.outputs.android == 'true'
+            timeout 900 ./gradlew :app:connectedPlayR8TestAndroidTest --info
+            status=$?
+
+            # Unconditional: a hang produces no test report at all, so this is
+            # the only record of what the device and the app process were doing.
+            adb logcat -d > "$DIAG/logcat.txt" 2>&1 || true
+            adb shell dumpsys activity processes > "$DIAG/activity-processes.txt" 2>&1 || true
+            adb shell pm list instrumentation > "$DIAG/instrumentation.txt" 2>&1 || true
+            adb root > /dev/null 2>&1 || true
+            adb pull /data/anr "$DIAG/anr" > /dev/null 2>&1 || true
+
+            if [ "$status" -eq 124 ]; then
+              echo "::error::connectedPlayR8TestAndroidTest exceeded 15 minutes — see the android-instrumentation-diagnostics artifact"
+            fi
+            exit $status
+
+      # cancelled(), not just failure(): a job that exceeds timeout-minutes
+      # concludes as cancelled, which is exactly the run whose artifacts we
+      # need. Skipped on green so a full logcat is not uploaded every PR.
+      - name: Upload instrumentation test results and diagnostics
+        if: (failure() || cancelled()) && steps.changes.outputs.android == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: android-instrumentation-test-results-${{ github.run_id }}
+          name: android-instrumentation-diagnostics-${{ github.run_id }}
           path: |
             android/app/build/reports/androidTests/connected/
             android/app/build/outputs/androidTest-results/connected/
+            android/build/instrumentation-diagnostics/
           if-no-files-found: ignore
           retention-days: 14
