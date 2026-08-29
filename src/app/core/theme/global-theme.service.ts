@@ -76,6 +76,16 @@ const NavigationBar = registerPlugin<NavigationBarPlugin>('NavigationBar');
 
 export type DarkModeCfg = 'dark' | 'light' | 'system';
 
+/**
+ * How long to wait for `keyboardDidShow` before settling anyway.
+ *
+ * Everything frame-derived — the overlay offset, the bogus-frame correction, the
+ * scroll — waits for that event, and iOS does drop it. Without this the fixed
+ * add-task bar would sit behind the keyboard for the rest of the session instead
+ * of for a few frames (#9779). Comfortably longer than the ~250ms show animation.
+ */
+const IOS_KEYBOARD_SETTLE_FALLBACK_MS = 400;
+
 const CSS_VAR_KEYBOARD_HEIGHT = '--keyboard-height';
 const CSS_VAR_KEYBOARD_OVERLAY_OFFSET = '--keyboard-overlay-offset';
 const CSS_VAR_VISUAL_VIEWPORT_HEIGHT = '--visual-viewport-height';
@@ -218,11 +228,16 @@ export class GlobalThemeService {
   // False until `keyboardDidShow`: the web view may still be resizing around the
   // keyboard, so any layout derived from the reported frame would be a guess (#9779).
   private _isIosKeyboardSettled = false;
+  private _iosKeyboardSettleTimeout: number | undefined;
   // Last value written per CSS variable, so a repeated write (the keyboard
   // animation fires many identical visualViewport resizes) costs nothing.
   private readonly _cssVarCache = new Map<string, string>();
-  // Where --visual-viewport-height goes; see _initIOSKeyboardHandling.
-  private _iosViewportVarTarget: HTMLElement | null = null;
+  // Where --visual-viewport-height goes; see _initIOSKeyboardHandling, which
+  // assigns it before the first update and before any listener is registered.
+  // Definitely assigned rather than nullable: a fallback to <html> here would be
+  // cached by _setCssVar and silently suppress the later write to the real
+  // target, leaving dialogs on the 100vh fallback for the session.
+  private _iosViewportVarTarget!: HTMLElement;
 
   /**
    * Height for the app shell while the iOS keyboard is open, as a CSS value, or
@@ -724,7 +739,10 @@ export class GlobalThemeService {
         const wasKeyboardVisible = this.document.body.classList.contains(
           BodyClass.isKeyboardVisible,
         );
-        if (!wasKeyboardVisible) {
+        // Also skipped while a baseline is still held: willHide clears the body
+        // class but not the baseline, so a focus move between two fields lands
+        // here with the web view still shrunken. Only keyboardDidHide clears it.
+        if (!wasKeyboardVisible && !this._iosViewportHeightBeforeKeyboard) {
           this._iosViewportHeightBeforeKeyboard = window.innerHeight;
         }
         // Some third-party keyboards (e.g. Sogou) report a bogus near-full-screen
@@ -747,6 +765,11 @@ export class GlobalThemeService {
         // would drop the fixed bar behind the keyboard until didShow arrives.
         if (!wasKeyboardVisible) {
           this._isIosKeyboardSettled = false;
+          window.clearTimeout(this._iosKeyboardSettleTimeout);
+          this._iosKeyboardSettleTimeout = window.setTimeout(
+            () => this._settleIosKeyboard(),
+            IOS_KEYBOARD_SETTLE_FALLBACK_MS,
+          );
         }
         this.document.body.classList.add(BodyClass.isKeyboardVisible);
         // Set CSS variable for keyboard height to adjust layout
@@ -761,30 +784,35 @@ export class GlobalThemeService {
 
     // Use keyboardDidShow for scroll (after animation completes)
     keyboard
-      .addListener('keyboardDidShow', () => {
-        this._isIosKeyboardSettled = true;
-        this._updateIOSKeyboardViewportVars();
-        // The shell height above is a signal binding, so the shell is still at
-        // its pre-keyboard height until change detection runs. Measuring here
-        // would find the input comfortably inside a viewport that is about to
-        // shrink, and skip the scroll that keeps it off the keyboard (#9779).
-        afterNextRender(() => this._scrollActiveInputIntoView(), {
-          injector: this._environmentInjector,
-        });
-      })
+      .addListener('keyboardDidShow', () => this._settleIosKeyboard())
       .then((handle) => this._keyboardListenerHandles.push(handle));
 
     keyboard
       .addListener('keyboardWillHide', () => {
         Log.log('iOS keyboard will hide');
         this._iosKeyboardHeight = 0;
-        this._iosViewportHeightBeforeKeyboard = 0;
         this._iosKeyboardFrameUnreliable = false;
         this._isIosKeyboardSettled = false;
+        window.clearTimeout(this._iosKeyboardSettleTimeout);
+        this._iosKeyboardSettleTimeout = undefined;
+        // _iosViewportHeightBeforeKeyboard deliberately survives: moving focus
+        // between two fields fires willHide then willShow, and the web view is
+        // still shrunken at that point, so re-snapshotting window.innerHeight
+        // there would subtract the keyboard a second time. keyboardDidHide,
+        // below, clears it once the web view is actually back to full size.
         this.document.body.classList.remove(BodyClass.isKeyboardVisible);
         const root = this.document.documentElement;
         this._setCssVar(root, CSS_VAR_KEYBOARD_HEIGHT, '0px');
         this._setCssVar(root, CSS_VAR_KEYBOARD_OVERLAY_OFFSET, '0px');
+        this._updateIOSKeyboardViewportVars();
+      })
+      .then((handle) => this._keyboardListenerHandles.push(handle));
+
+    keyboard
+      .addListener('keyboardDidHide', () => {
+        // The web view has finished growing back, so the next willShow can take
+        // a fresh baseline — and must, in case the device rotated meanwhile.
+        this._iosViewportHeightBeforeKeyboard = 0;
         this._updateIOSKeyboardViewportVars();
       })
       .then((handle) => this._keyboardListenerHandles.push(handle));
@@ -818,9 +846,29 @@ export class GlobalThemeService {
       if (this._iosViewportChangeRaf !== null) {
         window.cancelAnimationFrame(this._iosViewportChangeRaf);
       }
+      window.clearTimeout(this._iosKeyboardSettleTimeout);
       if (this._focusinListener) {
         this.document.removeEventListener('focusin', this._focusinListener);
       }
+    });
+  }
+
+  /**
+   * The web view has had its chance to resize around the keyboard, so everything
+   * frame-derived can act. Reached from `keyboardDidShow` or, if iOS drops it,
+   * from the fallback timer armed in `keyboardWillShow`.
+   */
+  private _settleIosKeyboard(): void {
+    window.clearTimeout(this._iosKeyboardSettleTimeout);
+    this._iosKeyboardSettleTimeout = undefined;
+    this._isIosKeyboardSettled = true;
+    this._updateIOSKeyboardViewportVars();
+    // The shell height is a signal binding, so the shell is still at its
+    // pre-keyboard height until change detection runs. Measuring here would find
+    // the input comfortably inside a viewport that is about to shrink, and skip
+    // the scroll that keeps it off the keyboard (#9779).
+    afterNextRender(() => this._scrollActiveInputIntoView(), {
+      injector: this._environmentInjector,
     });
   }
 
@@ -840,7 +888,7 @@ export class GlobalThemeService {
       // write on a 200-task list, on every frame of the keyboard animation
       // (#9779). Only overlay panes read this one, so it lives on their
       // container; the app shell gets a plain height below.
-      this._iosViewportVarTarget ?? root,
+      this._iosViewportVarTarget,
       CSS_VAR_VISUAL_VIEWPORT_HEIGHT,
       `${vars.visualViewportHeightPx}px`,
     );

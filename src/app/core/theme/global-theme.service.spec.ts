@@ -5,7 +5,7 @@ import {
   Signal,
   WritableSignal,
 } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { type WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import {
   GlobalThemeService,
@@ -328,7 +328,8 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     _isIosKeyboardSettled: boolean;
     _cssVarCache: Map<string, string>;
     _overlayContainer: { getContainerElement(): HTMLElement };
-    _iosViewportVarTarget: HTMLElement | null;
+    _iosViewportVarTarget: HTMLElement;
+    _iosKeyboardSettleTimeout: number | undefined;
     iosShellHeight: WritableSignal<string | null>;
     _scrollActiveInputIntoView(): void;
     _environmentInjector: EnvironmentInjector;
@@ -429,7 +430,6 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
       removeEventListener: () => undefined,
     } as unknown as Document;
     harness._overlayContainer = { getContainerElement: () => overlayContainer };
-    harness._iosViewportVarTarget = null;
     harness.iosShellHeight = signal<string | null>(null);
     harness._destroyRef = { onDestroy: () => undefined };
     harness._keyboardListenerHandles = [];
@@ -473,12 +473,14 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
   const willShow = (keyboardHeight = KEYBOARD_HEIGHT): void =>
     handlers['keyboardWillShow']({ keyboardHeight } as KeyboardInfo);
   const didShow = (): void => handlers['keyboardDidShow']({} as KeyboardInfo);
+  const didHide = (): void => handlers['keyboardDidHide']({} as KeyboardInfo);
   /** Runs the render pass the deferred scroll waits for. */
   const flushRender = (): void => TestBed.inject(ApplicationRef).tick();
   const willHide = (): void => handlers['keyboardWillHide']({} as KeyboardInfo);
 
   it('registers a listener per keyboard event', () => {
     expect(Object.keys(handlers).sort()).toEqual([
+      'keyboardDidHide',
       'keyboardDidShow',
       'keyboardWillHide',
       'keyboardWillShow',
@@ -633,6 +635,76 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     }
 
     expect(varWrites(setPropertySpy, '--keyboard-height')).toBe(writesAfterShow);
+  });
+
+  describe('when iOS drops keyboardDidShow', () => {
+    // Everything frame-derived waits for didShow, so without a fallback the
+    // fixed bar stays behind the keyboard for the rest of the session (#9779).
+    it('settles on a timer instead', fakeAsync(() => {
+      willShow();
+
+      expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+
+      tick(400);
+      flushRender();
+
+      expect(rootVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
+      expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+    }));
+
+    it('does not settle twice when didShow does arrive', fakeAsync(() => {
+      willShow();
+      didShow();
+      flushRender();
+      tick(400);
+      flushRender();
+
+      expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+    }));
+
+    it('drops the pending timer when the keyboard hides again', fakeAsync(() => {
+      willShow();
+      willHide();
+      tick(400);
+      flushRender();
+
+      expect(harness._isIosKeyboardSettled).toBe(false);
+      expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+    }));
+  });
+
+  // Moving between two fields fires willHide then willShow while the web view is
+  // still shrunken; re-measuring there subtracts the keyboard twice.
+  it('keeps the pre-keyboard baseline when focus moves to another field', () => {
+    willShow();
+    didShow();
+    willHide();
+    // The web view has not grown back yet — this is what iOS reports meanwhile.
+    setWindowHeights(BASE_HEIGHT - KEYBOARD_HEIGHT, BASE_HEIGHT - KEYBOARD_HEIGHT);
+    willShow();
+    didShow();
+
+    // Re-measuring at the second willShow would clamp the keyboard against the
+    // already-shrunken 464px and shrink the shell to 185.6px.
+    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(harness.iosShellHeight()).toBe(
+      `calc(${BASE_HEIGHT - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
+    );
+  });
+
+  it('takes a fresh baseline once the web view has grown back', () => {
+    willShow();
+    didShow();
+    willHide();
+    didHide();
+    // A rotation while the keyboard was down: the old baseline must not survive.
+    setWindowHeights(600, 600);
+    willShow();
+    didShow();
+
+    expect(harness.iosShellHeight()).toBe(
+      `calc(${600 - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
+    );
   });
 
   // The point of the split: <html> carries only variables that change once per
