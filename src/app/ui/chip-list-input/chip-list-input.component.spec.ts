@@ -102,4 +102,30 @@ describe('ChipListInputComponent', () => {
     keydownOnInput({ code: 'Enter', ctrlKey: true });
     expect(component.separatorKeysCodes).toEqual([ENTER, COMMA]);
   });
+
+  describe('suggestions setter', () => {
+    it('does not mutate the passed array', () => {
+      // consumers bind memoized NgRx selector output, which every other
+      // subscriber holds a reference to
+      const suggestions = [
+        { id: 'C', title: 'Cherry' },
+        { id: 'A', title: 'Apple' },
+        { id: 'B', title: 'Banana' },
+      ];
+
+      component.suggestions = suggestions;
+
+      expect(suggestions.map((s) => s.id)).toEqual(['C', 'A', 'B']);
+    });
+
+    it('sorts its own copy alphabetically by title', () => {
+      component.suggestions = [
+        { id: 'C', title: 'Cherry' },
+        { id: 'A', title: 'Apple' },
+        { id: 'B', title: 'Banana' },
+      ];
+
+      expect(component.suggestionsIn.map((s) => s.id)).toEqual(['A', 'B', 'C']);
+    });
+  });
 });
