@@ -195,9 +195,7 @@ export const getDefaultMainModelData = (): Partial<AppDataComplete> => {
  * recovery reject otherwise healthy data and the app boots into
  * "Failed to load data" (#9770).
  */
-export const withDefaultModelSlices = (
-  data: Record<string, unknown>,
-): AppDataComplete => {
+export const withDefaultModelSlices = (data: object): AppDataComplete => {
   const result: Record<string, unknown> = { ...data };
   const defaulted: string[] = [];
   for (const [key, config] of Object.entries(MODEL_CONFIGS)) {

@@ -18,6 +18,7 @@ import {
   AppDataComplete,
   CROSS_MODEL_VERSION,
   AllModelConfig,
+  withDefaultModelSlices,
 } from '../model/model-config';
 import { CompleteBackup } from '../core/types/sync.types';
 import { normalizeGlobalConfigStartOfNextDay } from '../../features/config/normalize-start-of-next-day-config';
@@ -121,6 +122,12 @@ export class BackupService {
           backupData as unknown as Record<string, unknown>,
         );
       }
+
+      // A pre-migration `pf` backup carries only the model keys that database
+      // held, so the very file the failed-migration dialog tells the user to
+      // import is missing the newer slices too. Without this the promised
+      // recovery route fails exactly the way the migration did (#9770).
+      backupData = withDefaultModelSlices(backupData);
 
       const normalizedGlobalConfig = normalizeGlobalConfigStartOfNextDay(
         backupData.globalConfig,

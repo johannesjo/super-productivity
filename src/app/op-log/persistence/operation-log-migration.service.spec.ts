@@ -17,6 +17,7 @@ import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { START_FRESH_RESULT } from './dialog-legacy-migration/dialog-legacy-migration.component';
 import { AppDataComplete } from '../model/model-config';
 import legacyPartial from '../validation/test-fixtures/legacy-pf-v13-partial-models.json';
+import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
 describe('OperationLogMigrationService', () => {
   let service: OperationLogMigrationService;
@@ -45,6 +46,7 @@ describe('OperationLogMigrationService', () => {
       'acquireMigrationLock',
       'releaseMigrationLock',
       'clearAll',
+      'markMigrationSkipped',
     ]);
 
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -368,7 +370,7 @@ describe('OperationLogMigrationService', () => {
         };
 
         // Skip auto-backup (download is a non-injectable module import)
-        spyOn(service as any, '_createAutoBackup').and.resolveTo();
+        spyOn(service as any, '_createAutoBackup').and.resolveTo(true);
 
         // Replace _performMigration to skip non-injectable validateFull/download
         // while preserving the client ID logic under test
@@ -496,7 +498,7 @@ describe('OperationLogMigrationService', () => {
         };
 
         // Skip auto-backup only (download is a non-injectable module import)
-        spyOn(service as any, '_createAutoBackup').and.resolveTo();
+        spyOn(service as any, '_createAutoBackup').and.resolveTo(true);
       });
 
       it('migrates the data instead of aborting', async () => {
@@ -527,71 +529,52 @@ describe('OperationLogMigrationService', () => {
         );
       }, 10000);
 
-      it('clears the legacy data and reloads when the user starts fresh', async () => {
+      it('records the skip and boots on without re-throwing when the user starts fresh', async () => {
         mockLegacyPfDb.loadAllEntityData.and.resolveTo({
           globalConfig: { misc: {} },
         } as any);
-        mockLegacyPfDb.clearAll.and.resolveTo();
-        // Legacy data on the way in, none left once it has been cleared.
-        mockLegacyPfDb.hasUsableEntityData.and.returnValues(
-          Promise.resolve(true),
-          Promise.resolve(false),
-        );
+        mockLegacyPfDb.markMigrationSkipped.and.resolveTo(true);
         mockDialogRef.afterClosed.and.returnValue(of(START_FRESH_RESULT));
-        const reloadSpy = spyOn(service as any, '_triggerReload');
 
         // The dead end is the bug: choosing to start fresh must not re-throw
-        // the migration error at the caller.
+        // the migration error at the caller. Returning normally lets the
+        // hydrator boot the empty store in this same load — no reload needed.
         await service.checkAndMigrate();
 
-        expect(mockLegacyPfDb.clearAll).toHaveBeenCalled();
-        expect(reloadSpy).toHaveBeenCalled();
-        expect(mockLegacyPfDb.releaseMigrationLock).toHaveBeenCalledBefore(
-          mockLegacyPfDb.clearAll,
-        );
+        expect(mockLegacyPfDb.markMigrationSkipped).toHaveBeenCalled();
+        // Nothing is deleted: the legacy database has to survive so the choice
+        // stays reversible and the sync credentials in it are not destroyed.
+        expect(mockLegacyPfDb.clearAll).not.toHaveBeenCalled();
+        expect(mockLegacyPfDb.releaseMigrationLock).toHaveBeenCalled();
       }, 10000);
 
-      it('does not clear anything when the user only acknowledges the error', async () => {
+      it('records nothing when the user only acknowledges the error', async () => {
         mockLegacyPfDb.loadAllEntityData.and.resolveTo({
           globalConfig: { misc: {} },
         } as any);
-        const reloadSpy = spyOn(service as any, '_triggerReload');
 
         await expectAsync(service.checkAndMigrate()).toBeRejected();
 
+        expect(mockLegacyPfDb.markMigrationSkipped).not.toHaveBeenCalled();
         expect(mockLegacyPfDb.clearAll).not.toHaveBeenCalled();
-        expect(reloadSpy).not.toHaveBeenCalled();
       }, 10000);
 
-      // clearAll() swallows its own failures, so an unclearable database would
-      // otherwise reload straight back into the same failed migration with the
-      // escape hatch appearing to have done nothing.
-      it('explains the failure and returns to the dialog when the data will not clear', async () => {
+      // A marker that did not stick would drop the user back onto this same
+      // dialog next boot. Nothing was touched, so escalating is no worse than
+      // never having offered the option.
+      it('escalates when the skip marker cannot be recorded', async () => {
         mockLegacyPfDb.loadAllEntityData.and.resolveTo({
           globalConfig: { misc: {} },
         } as any);
-        mockLegacyPfDb.clearAll.and.resolveTo();
-        // Still there after the clear.
-        mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
+        mockLegacyPfDb.markMigrationSkipped.and.resolveTo(false);
         mockDialogRef.afterClosed.and.returnValue(of(START_FRESH_RESULT));
-        const reloadSpy = spyOn(service as any, '_triggerReload');
 
-        // Must NOT reject: escalating drops through the hydrator into recovery
-        // and the blank "Failed to load data" screen this hatch exists to avoid.
-        await service.checkAndMigrate();
-
-        // The failure is reported on a NEW dialog: the migration one is closed
-        // by then, so setting the message there would never reach the user.
-        expect(openedDialogRefs.length).toBe(2);
-        expect(openedDialogRefs[1].componentInstance.error.set).toHaveBeenCalledWith(
-          T.MIGRATE.E_START_FRESH_FAILED_MSG,
-        );
-        expect(reloadSpy).toHaveBeenCalledTimes(1);
+        await expectAsync(service.checkAndMigrate()).toBeRejected();
       }, 10000);
 
       // Losing the backup step is the one case where discarding the legacy data
       // would destroy the user's only copy of it.
-      it('promises no backup and hides the escape hatch when the backup failed', async () => {
+      it('promises no backup but still offers to start fresh when the backup failed', async () => {
         mockLegacyPfDb.loadAllEntityData.and.resolveTo({
           globalConfig: { misc: {} },
         } as any);
@@ -604,8 +587,9 @@ describe('OperationLogMigrationService', () => {
         expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
           T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
         );
+        // Still offered: nothing is deleted, so there is no copy to lose.
         expect(mockDialogRef.componentInstance.canStartFresh.set).toHaveBeenCalledWith(
-          false,
+          true,
         );
       }, 10000);
 
@@ -623,6 +607,40 @@ describe('OperationLogMigrationService', () => {
 
         expect(mockOpLogStore.appendOperationAndSnapshot).not.toHaveBeenCalled();
         expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalled();
+      }, 10000);
+
+      // The stale globalConfig above fails typia on its own, so it reaches the
+      // guard even when the guard only runs on the validation-failure branch.
+      // A CURRENT-shaped globalConfig does not: once the missing slices are
+      // filled the whole state validates, and a guard behind `!isValid` is
+      // never consulted at all — the database migrates silently to an empty
+      // store whose genesis snapshot then shadows it forever.
+      it('refuses a legacy database whose only surviving slice is a valid globalConfig', async () => {
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: structuredClone(DEFAULT_GLOBAL_CONFIG),
+        } as any);
+
+        await expectAsync(service.checkAndMigrate()).toBeRejectedWithError(
+          /Legacy data is corrupted and cannot be repaired/,
+        );
+
+        expect(mockOpLogStore.appendOperationAndSnapshot).not.toHaveBeenCalled();
+      }, 10000);
+
+      // `download()` resolves on cancellation as well as on success, so a
+      // cancelled save must not be reported to the user as "a backup file has
+      // been downloaded".
+      it('reports that no backup was saved when the download was cancelled', async () => {
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: { misc: {} },
+        } as any);
+        ((service as any)._createAutoBackup as jasmine.Spy).and.resolveTo(false);
+
+        await expectAsync(service.checkAndMigrate()).toBeRejected();
+
+        expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
+          T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
+        );
       }, 10000);
     });
   });

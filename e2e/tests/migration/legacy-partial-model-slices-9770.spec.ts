@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'fs';
 import legacyPartial from '../../../src/app/op-log/validation/test-fixtures/legacy-pf-v13-partial-models.json';
 import { MIGRATION_BACKUP_PREFIX } from '../../../electron/shared-with-frontend/get-backup-timestamp';
-import { skipOnboardingForE2E } from '../../utils/waits';
+import { skipOnboardingForE2E, waitForAppReady } from '../../utils/waits';
+import { ImportPage } from '../../pages/import.page';
 import {
   readMigratedState,
   seedLegacyDatabase,
@@ -140,64 +142,139 @@ test.describe('@migration #9770 legacy data missing newer model slices', () => {
       await expect(dialog.locator('.error-message')).not.toContainText('MIGRATE.');
       await expect(dialog.locator('h1')).toHaveText('Migration Failed');
 
-      // The escape hatch is offered only because the backup download above
-      // already happened.
-      const startFreshBtn = dialog.getByRole('button', { name: 'Delete old data' });
+      // Offered unconditionally: the way out keeps the legacy database, so
+      // there is no copy at risk and nothing to gate on.
+      const startFreshBtn = dialog.getByRole('button', {
+        name: 'Continue without old data',
+      });
       await expect(startFreshBtn).toBeVisible();
       await startFreshBtn.click();
 
-      // Destructive, so it takes a second, explicit confirmation.
-      await expect(dialog.locator('.start-fresh-warning')).toBeVisible();
-      // Tag this document so the wait below can tell the reloaded page apart from
-      // this one: the side nav already renders behind the dialog, so every
-      // assertion after the click would otherwise pass against the OLD page and
-      // then blow up mid-evaluate when the reload finally lands.
-      await page.evaluate(
-        () => ((window as Window & { __preReload?: true }).__preReload = true),
-      );
-      await dialog.getByRole('button', { name: 'Delete and start fresh' }).click();
-
-      // The app reloads itself and comes up empty instead of dead-ending again.
-      await expect
-        .poll(
-          () =>
-            page
-              .evaluate(() => !!(window as Window & { __preReload?: true }).__preReload)
-              // Thrown while the navigation is in flight — still the old document.
-              .catch(() => true),
-          { timeout: 30000 },
-        )
-        .toBe(false);
+      // No reload and no second confirmation: the marker makes
+      // hasUsableEntityData() false from here on, so this same boot continues
+      // into the ordinary empty-store path.
       await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 30000 });
       await expect(page.locator('dialog-legacy-migration')).toHaveCount(0);
 
-      // The legacy database is really gone — otherwise the next boot would
-      // walk straight back into the same failed migration.
-      const legacyKeys = await page.evaluate(
+      // The load-bearing half: the legacy data is still on disk, untouched.
+      const remaining = await page.evaluate(
         async () =>
-          new Promise<number>((resolve, reject) => {
+          new Promise<string[]>((resolve, reject) => {
             const req = indexedDB.open('pf', 1);
             req.onsuccess = () => {
               const db = req.result;
-              const countReq = db
-                .transaction('main', 'readonly')
-                .objectStore('main')
-                .count();
-              countReq.onsuccess = () => {
+              try {
+                const keysReq = db
+                  .transaction('main', 'readonly')
+                  .objectStore('main')
+                  .getAllKeys();
+                keysReq.onsuccess = () => {
+                  db.close();
+                  resolve(keysReq.result.map(String));
+                };
+                keysReq.onerror = () => {
+                  db.close();
+                  reject(keysReq.error);
+                };
+              } catch (e) {
                 db.close();
-                resolve(countReq.result);
-              };
-              countReq.onerror = () => {
-                db.close();
-                reject(countReq.error);
-              };
+                reject(e);
+              }
             };
             req.onerror = () => reject(req.error);
           }),
       );
-      expect(legacyKeys).toBe(0);
+      expect(remaining).toContain('globalConfig');
+      expect(remaining).toContain('_migration_skipped');
+
+      // ...and the next boot does NOT walk back into the failed migration.
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 30000 });
+      await expect(page.locator('dialog-legacy-migration')).toHaveCount(0);
     } finally {
       await context.close();
+    }
+  });
+
+  // The escape hatch is only honest if the file it leaves behind can actually be
+  // read back. The auto-backup is the RAW `pf` dump, so it is missing the same
+  // newer slices that broke the migration — the import has to fill them too, or
+  // the promised recovery route fails exactly the way the migration did.
+  test('the auto-backup it leaves behind can be imported into a clean install', async ({
+    browser,
+    baseURL,
+  }, testInfo) => {
+    const partialData = JSON.parse(JSON.stringify(legacyPartial)) as Record<
+      string,
+      unknown
+    >;
+    const url = baseURL || 'http://localhost:4242';
+    const backupPath = testInfo.outputPath('pre-migration-backup.json');
+
+    // Phase 1 — the affected install: capture the file the dialog points at.
+    const legacyContext = await browser.newContext({
+      storageState: undefined,
+      baseURL: url,
+      acceptDownloads: true,
+    });
+    try {
+      const legacyPage = await legacyContext.newPage();
+      await legacyPage.addInitScript(skipOnboardingForE2E);
+      await legacyPage.route('**/*.js', async (route) => route.abort());
+      await legacyPage.goto('/', { waitUntil: 'domcontentloaded' });
+      await seedLegacyDatabase(legacyPage, partialData);
+      await legacyPage.unroute('**/*.js');
+
+      const downloadPromise = legacyPage.waitForEvent('download', { timeout: 60000 });
+      await legacyPage.reload({ waitUntil: 'domcontentloaded' });
+      const download = await downloadPromise;
+      await download.saveAs(backupPath);
+    } finally {
+      await legacyContext.close();
+    }
+
+    // Guard the premise: the captured file must really be the raw legacy dump,
+    // otherwise the import below would not exercise the missing slices at all.
+    const captured = JSON.parse(readFileSync(backupPath, 'utf8')) as Record<
+      string,
+      unknown
+    >;
+    for (const missing of ['timeTracking', 'menuTree', 'boards']) {
+      expect(missing in captured).toBe(false);
+    }
+
+    // Phase 2 — a clean install imports it, as the dialog promises.
+    const freshContext = await browser.newContext({
+      storageState: undefined,
+      baseURL: url,
+      acceptDownloads: true,
+    });
+    try {
+      const page = await freshContext.newPage();
+      await page.addInitScript(skipOnboardingForE2E);
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await waitForAppReady(page);
+
+      const importPage = new ImportPage(page);
+      await importPage.navigateToImportPage();
+      await importPage.importBackupFile(backupPath);
+
+      // The load-bearing assertion: pre-fix the import rejects this file the
+      // same way the migration did, and the task never lands.
+      await expect
+        .poll(
+          async () =>
+            (await readMigratedState<MigratedState>(page)).task?.ids?.length ?? 0,
+          { timeout: 30000 },
+        )
+        .toBe(1);
+      const state = await readMigratedState<MigratedState>(page);
+      expect(state.task?.ids).toEqual(['TJ-NDR6Sjc0qc0TS-tUgE']);
+      expect(state.timeTracking).toBeDefined();
+      expect(state.menuTree).toBeDefined();
+      expect(state.boards).toBeDefined();
+    } finally {
+      await freshContext.close();
     }
   });
 });

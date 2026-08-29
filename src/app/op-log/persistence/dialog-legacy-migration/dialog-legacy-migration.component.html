@@ -4,16 +4,10 @@
 
 <div mat-dialog-content>
   @if (hasError()) {
-    <!-- The confirmation replaces the error rather than stacking under it: both
-         at once overflows this dialog and buries the question being asked. -->
-    @if (isConfirmingStartFresh()) {
-      <p class="start-fresh-warning">{{ T.MIGRATE.START_FRESH_CONFIRM | translate }}</p>
-    } @else {
-      <div class="error-state">
-        <mat-icon>error</mat-icon>
-        <p class="error-message">{{ error() }}</p>
-      </div>
-    }
+    <div class="error-state">
+      <mat-icon>error</mat-icon>
+      <p class="error-message">{{ error() }}</p>
+    </div>
   } @else {
     <p class="intro">{{ T.MIGRATE.DIALOG_MESSAGE | translate }}</p>
 
@@ -33,36 +27,20 @@
     mat-dialog-actions
     align="end"
   >
-    @if (isConfirmingStartFresh()) {
+    @if (canStartFresh()) {
       <button
         mat-button
-        (click)="cancelStartFresh()"
+        (click)="startFresh()"
       >
-        {{ 'G.CANCEL' | translate }}
-      </button>
-      <button
-        mat-flat-button
-        color="warn"
-        (click)="confirmStartFresh()"
-      >
-        {{ T.MIGRATE.START_FRESH_CONFIRM_BTN | translate }}
-      </button>
-    } @else {
-      @if (canStartFresh()) {
-        <button
-          mat-button
-          (click)="startFresh()"
-        >
-          {{ T.MIGRATE.START_FRESH | translate }}
-        </button>
-      }
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="acknowledge()"
-      >
-        {{ 'G.OK' | translate }}
+        {{ T.MIGRATE.START_FRESH | translate }}
       </button>
     }
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="acknowledge()"
+    >
+      {{ T.G.OK | translate }}
+    </button>
   </div>
 }

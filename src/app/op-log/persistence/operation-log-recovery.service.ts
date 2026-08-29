@@ -15,6 +15,7 @@ import { SINGLETON_ENTITY_ID } from '../core/entity-registry';
 import { uuidv7 } from '../../util/uuid-v7';
 import { OpLog } from '../../core/log';
 import { AppDataComplete, withDefaultModelSlices } from '../model/model-config';
+import { isDataRepairPossible } from '../validation/is-data-repair-possible.util';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { LockService } from '../sync/lock.service';
 import { LOCK_NAMES } from '../core/operation-log.const';
@@ -97,13 +98,22 @@ export class OperationLogRecoveryService {
    * Recovers from legacy data by creating a new genesis snapshot.
    */
   async recoverFromLegacyData(rawLegacyData: Record<string, unknown>): Promise<void> {
+    // Guard the RAW data first. `hasUsableEntityData()` lets a `pf` database
+    // through on a `globalConfig` key alone, and the fill below makes even an
+    // empty database validate — so without this a database that has lost its
+    // task/project state would be imported as an all-defaults empty store, and
+    // the RECOVERY snapshot would permanently shadow whatever is still on disk.
+    // Refusing keeps the data recoverable by a later build.
+    if (!isDataRepairPossible(rawLegacyData as unknown as AppDataComplete)) {
+      throw new Error(
+        'Legacy recovery data has no task or project state - refusing to import',
+      );
+    }
+
     // An old `pf` database lacks the model slices that did not exist when it was
     // last written; fill those with defaults so healthy data is not rejected as
     // invalid (#9770).
-    const legacyData = withDefaultModelSlices(rawLegacyData) as unknown as Record<
-      string,
-      unknown
-    >;
+    const legacyData = withDefaultModelSlices(rawLegacyData);
 
     // Refuse to import legacy data that doesn't validate. Importing corrupted
     // legacy data would just propagate the corruption into SUP_OPS and the next
@@ -142,7 +152,7 @@ export class OperationLogRecoveryService {
     await this.opLogStore.appendRecoveryOperationAndSnapshot(recoveryOp, legacyData);
 
     // Dispatch to NgRx
-    this.store.dispatch(loadAllData({ appDataComplete: legacyData as AppDataComplete }));
+    this.store.dispatch(loadAllData({ appDataComplete: legacyData }));
 
     OpLog.normal(
       'OperationLogRecoveryService: Recovery complete. Data restored from legacy database.',

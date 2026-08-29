@@ -97,6 +97,7 @@ export class OperationLogMigrationService {
     let migrationLockAcquired = false;
     let isBackupCreated = false;
     let startFreshRequested = false;
+    let migrationError: unknown;
     let dialogRef: MatDialogRef<DialogLegacyMigrationComponent> | undefined;
     try {
       const migrationCompleted = await this.lockService.request(
@@ -150,8 +151,7 @@ export class OperationLogMigrationService {
 
           await this._ensureTranslationsLoaded();
           dialogRef = this._showMigrationDialog();
-          await this._createAutoBackup(dialogRef);
-          isBackupCreated = true;
+          isBackupCreated = await this._createAutoBackup(dialogRef);
           await this._performMigration(dialogRef);
           return true;
         },
@@ -167,6 +167,7 @@ export class OperationLogMigrationService {
       }
     } catch (error) {
       OpLog.err('OperationLogMigrationService: Migration failed:', error);
+      migrationError = error;
       if (dialogRef) {
         // The message must match reality: without a backup on disk it would be
         // false comfort to tell the user nothing is lost.
@@ -177,9 +178,11 @@ export class OperationLogMigrationService {
               : T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
           ),
         );
-        // Offer the way out ONLY once the backup is on the user's disk: without
-        // it, starting fresh would discard the sole copy of their data (#9770).
-        dialogRef.componentInstance.canStartFresh.set(isBackupCreated);
+        // Always offered here: starting fresh keeps the legacy database, so
+        // there is no copy to lose and nothing to gate on (#9770). Not offered
+        // on the "cannot be read" path above, where the marker write would fail
+        // for the same reason the read did.
+        dialogRef.componentInstance.canStartFresh.set(true);
         // Wait for user acknowledgment before throwing
         const dialogResult = await firstValueFrom(dialogRef.afterClosed());
         if (dialogResult === START_FRESH_RESULT) {
@@ -189,8 +192,8 @@ export class OperationLogMigrationService {
       if (!startFreshRequested) {
         throw error;
       }
-      // Otherwise handled after the finally block, so the migration lock is
-      // released and the dialog is closed before the legacy database is touched.
+      // Otherwise the marker is written after the finally block, so the
+      // migration lock is released and the dialog is closed first.
     } finally {
       if (migrationLockAcquired) {
         await this.legacyPfDb.releaseMigrationLock();
@@ -199,57 +202,36 @@ export class OperationLogMigrationService {
     }
 
     if (startFreshRequested) {
-      await this._discardLegacyDataAndReload();
+      await this._skipLegacyData(migrationError);
     }
   }
 
   /**
-   * Throws away the legacy database after the user chose to start fresh.
+   * Records the user's choice to start without the legacy data, then returns so
+   * this same boot continues into the ordinary empty-store path.
    *
-   * `LegacyPfDbService.clearAll()` swallows its own failures, so a database that
-   * refuses to clear would reload straight back into the same failed migration
-   * with the escape hatch looking like it did nothing. Confirm the data is
-   * really gone first, and say so when it is not.
+   * Nothing is deleted: the `pf` database stays exactly as it is, and the marker
+   * only stops migration and recovery from picking it up again. That is what
+   * makes this safe to offer unconditionally — there is no "is the backup really
+   * on disk?" precondition to get wrong, and a mis-click costs the user nothing.
+   *
+   * No reload either: `hasUsableEntityData()` already reports false from here
+   * on, so simply returning lets the hydrator boot the empty store now.
    */
-  private async _discardLegacyDataAndReload(): Promise<void> {
-    await this.legacyPfDb.clearAll();
-
-    let isDiscarded: boolean;
-    try {
-      // The same check that decides whether the NEXT boot migrates at all, so a
-      // false here means exactly "we would land back on this dialog".
-      isDiscarded = !(await this.legacyPfDb.hasUsableEntityData());
-    } catch (e) {
-      // Thrown when the database exists but cannot be read — which is itself
-      // proof that the clear cannot be confirmed.
-      OpLog.err('OperationLogMigrationService: Cannot verify legacy data removal:', e);
-      isDiscarded = false;
-    }
-
-    if (isDiscarded) {
+  private async _skipLegacyData(originalError: unknown): Promise<void> {
+    if (await this.legacyPfDb.markMigrationSkipped()) {
       OpLog.normal(
-        'OperationLogMigrationService: Legacy data discarded on user request. Reloading.',
+        'OperationLogMigrationService: Legacy data skipped on user request. ' +
+          'The pf database is untouched and can still be imported from the backup.',
       );
-      this._triggerReload();
       return;
     }
 
-    OpLog.err('OperationLogMigrationService: Failed to discard legacy data.');
-    const dialogRef = this._showMigrationDialog();
-    dialogRef.componentInstance.error.set(
-      this.translateService.instant(T.MIGRATE.E_START_FRESH_FAILED_MSG),
-    );
-    await firstValueFrom(dialogRef.afterClosed());
-    // Reload rather than escalate: a throw here drops through the hydrator into
-    // recovery and the blank "Failed to load data" screen — the dead end this
-    // escape hatch exists to remove. Reloading returns the user to the migration
-    // dialog, which still explains the failure and still offers a second try.
-    this._triggerReload();
-  }
-
-  /** Seam for tests — reloading the Karma page would kill the run. */
-  private _triggerReload(): void {
-    window.location.reload();
+    // The marker did not stick, so the next boot would land right back on this
+    // dialog. Escalate exactly as an acknowledged failure does — no data was
+    // touched, so this is no worse than not offering the option at all.
+    OpLog.err('OperationLogMigrationService: Could not record the skip marker.');
+    throw originalError;
   }
 
   /**
@@ -279,16 +261,32 @@ export class OperationLogMigrationService {
     });
   }
 
+  /**
+   * Downloads the pre-migration backup and reports whether it actually landed.
+   *
+   * `download()` resolves on cancellation as well as on success — the share
+   * sheet returns `wasCanceled`, the Snap save dialog returns no `path` — so
+   * "did not throw" is not proof the user holds a copy. Nothing destructive
+   * hangs off this any more; it only decides which failure message the dialog
+   * shows, so it must not promise a backup the user does not have.
+   *
+   * The plain browser/Electron path (an anchor click) reports nothing at all,
+   * so there it stays a best-effort assumption, as everywhere else in the app.
+   */
   private async _createAutoBackup(
     dialogRef: MatDialogRef<DialogLegacyMigrationComponent>,
-  ): Promise<void> {
+  ): Promise<boolean> {
     this._setStatus(dialogRef, 'backup');
 
     const legacyData = await this.legacyPfDb.loadAllEntityData();
     const filename = `${MIGRATION_BACKUP_PREFIX}_${getBackupTimestamp()}.json`;
 
-    await download(filename, JSON.stringify(legacyData));
-    OpLog.normal(`OperationLogMigrationService: Backup created: ${filename}`);
+    const result = await download(filename, JSON.stringify(legacyData));
+    const isSaved = !result.wasCanceled && !(result.isSnap && !result.path);
+    OpLog.normal(`OperationLogMigrationService: Backup created: ${filename}`, {
+      isSaved,
+    });
+    return isSaved;
   }
 
   private async _performMigration(
@@ -298,8 +296,18 @@ export class OperationLogMigrationService {
 
     // 1. Load data from legacy database, adding defaults for the model slices
     // that database is too old to contain (#9770).
-    const rawLegacyData =
-      (await this.legacyPfDb.loadAllEntityData()) as unknown as Record<string, unknown>;
+    const rawLegacyData = await this.legacyPfDb.loadAllEntityData();
+
+    // Guard the RAW data, and guard it BEFORE the fill rather than only when
+    // validation fails: withDefaultModelSlices() makes even an empty database
+    // validate, so a check on the failure branch would simply never run for a
+    // legacy database that has lost its task/project state — and that database
+    // would migrate silently to an all-defaults empty store whose genesis
+    // snapshot then shadows it forever.
+    if (!isDataRepairPossible(rawLegacyData as unknown as AppDataComplete)) {
+      throw new Error('Legacy data is corrupted and cannot be repaired');
+    }
+
     const legacyData = withDefaultModelSlices(rawLegacyData);
 
     // 2. Validate and repair if needed
@@ -313,13 +321,6 @@ export class OperationLogMigrationService {
       OpLog.warn(
         'OperationLogMigrationService: Legacy data validation failed, attempting repair',
       );
-
-      // Check the RAW data: after withDefaultModelSlices() every slice exists, so
-      // checking `legacyData` would make this guard always pass and turn a legacy
-      // database without any task/project state into a silent empty migration.
-      if (!isDataRepairPossible(rawLegacyData as unknown as AppDataComplete)) {
-        throw new Error('Legacy data is corrupted and cannot be repaired');
-      }
 
       const errors =
         'errors' in validationResult.typiaResult

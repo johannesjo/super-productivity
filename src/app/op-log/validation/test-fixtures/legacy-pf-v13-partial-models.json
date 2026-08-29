@@ -1,8 +1,6 @@
 {
   "task": {
-    "ids": [
-      "TJ-NDR6Sjc0qc0TS-tUgE"
-    ],
+    "ids": ["TJ-NDR6Sjc0qc0TS-tUgE"],
     "entities": {
       "TJ-NDR6Sjc0qc0TS-tUgE": {
         "id": "TJ-NDR6Sjc0qc0TS-tUgE",
@@ -12,9 +10,7 @@
         "timeEstimate": 3600000,
         "isDone": true,
         "title": "Example task",
-        "tagIds": [
-          "PurEWfg_KagYqPVH5Depz"
-        ],
+        "tagIds": ["PurEWfg_KagYqPVH5Depz"],
         "created": 1752159073809,
         "attachments": [],
         "projectId": "INBOX_PROJECT",
@@ -30,9 +26,7 @@
     "__modelVersion": 5.1
   },
   "project": {
-    "ids": [
-      "INBOX_PROJECT"
-    ],
+    "ids": ["INBOX_PROJECT"],
     "entities": {
       "INBOX_PROJECT": {
         "isHiddenFromMenu": false,
@@ -42,13 +36,7 @@
         "noteIds": [],
         "advancedCfg": {
           "worklogExportSettings": {
-            "cols": [
-              "DATE",
-              "START",
-              "END",
-              "TIME_CLOCK",
-              "TITLES_INCLUDING_SUB"
-            ],
+            "cols": ["DATE", "START", "END", "TIME_CLOCK", "TITLES_INCLUDING_SUB"],
             "roundWorkTimeTo": null,
             "roundStartTimeTo": null,
             "roundEndTimeTo": null,
@@ -68,9 +56,7 @@
           "backgroundImageDark": "",
           "backgroundImageLight": null
         },
-        "taskIds": [
-          "TJ-NDR6Sjc0qc0TS-tUgE"
-        ],
+        "taskIds": ["TJ-NDR6Sjc0qc0TS-tUgE"],
         "icon": "inbox",
         "id": "INBOX_PROJECT",
         "title": "Inbox"
@@ -79,23 +65,14 @@
     "__modelVersion": 8
   },
   "tag": {
-    "ids": [
-      "TODAY",
-      "PurEWfg_KagYqPVH5Depz"
-    ],
+    "ids": ["TODAY", "PurEWfg_KagYqPVH5Depz"],
     "entities": {
       "TODAY": {
         "color": null,
         "created": 1752158941621,
         "advancedCfg": {
           "worklogExportSettings": {
-            "cols": [
-              "DATE",
-              "START",
-              "END",
-              "TIME_CLOCK",
-              "TITLES_INCLUDING_SUB"
-            ],
+            "cols": ["DATE", "START", "END", "TIME_CLOCK", "TITLES_INCLUDING_SUB"],
             "roundWorkTimeTo": null,
             "roundStartTimeTo": null,
             "roundEndTimeTo": null,
@@ -115,9 +92,7 @@
           "backgroundImageDark": "",
           "backgroundImageLight": null
         },
-        "taskIds": [
-          "TJ-NDR6Sjc0qc0TS-tUgE"
-        ],
+        "taskIds": ["TJ-NDR6Sjc0qc0TS-tUgE"],
         "icon": "wb_sunny",
         "id": "TODAY",
         "title": "Today"
@@ -127,13 +102,7 @@
         "created": 1752159077300,
         "advancedCfg": {
           "worklogExportSettings": {
-            "cols": [
-              "DATE",
-              "START",
-              "END",
-              "TIME_CLOCK",
-              "TITLES_INCLUDING_SUB"
-            ],
+            "cols": ["DATE", "START", "END", "TIME_CLOCK", "TITLES_INCLUDING_SUB"],
             "roundWorkTimeTo": null,
             "roundStartTimeTo": null,
             "roundEndTimeTo": null,
@@ -153,9 +122,7 @@
           "backgroundImageDark": null,
           "backgroundImageLight": null
         },
-        "taskIds": [
-          "TJ-NDR6Sjc0qc0TS-tUgE"
-        ],
+        "taskIds": ["TJ-NDR6Sjc0qc0TS-tUgE"],
         "icon": null,
         "id": "PurEWfg_KagYqPVH5Depz",
         "title": "Example tag"
