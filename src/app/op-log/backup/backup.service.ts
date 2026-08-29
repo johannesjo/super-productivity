@@ -123,6 +123,16 @@ export class BackupService {
         );
       }
 
+      // Guard the RAW payload BEFORE filling defaults. The fill below
+      // manufactures every missing slice, including `task` and `project`, so
+      // the isDataRepairPossible() refusal further down would never fire again
+      // and a truncated backup would REPLACE the user's data with an
+      // all-defaults empty store — on every import path (JSON import,
+      // local-backup restore, SuperSync restore, profile switch).
+      if (!isDataRepairPossible(backupData)) {
+        throw new Error('Data validation failed and repair not possible');
+      }
+
       // A pre-migration `pf` backup carries only the model keys that database
       // held, so the very file the failed-migration dialog tells the user to
       // import is missing the newer slices too. Without this the promised
