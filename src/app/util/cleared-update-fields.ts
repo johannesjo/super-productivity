@@ -28,11 +28,22 @@ export const clearedFieldsProps = <T extends object>(
 };
 
 /**
+ * Every real cleared field is a model property name; anything else in a wire
+ * `clearedFields` is junk or hostile. Without this gate a corrupt list from a
+ * plaintext file-based provider injects arbitrary undefined-valued own keys
+ * onto the entity — typia tolerates excess props, so they persist, re-upload,
+ * and get re-listed by `clearedFieldsProps`, amplifying forever.
+ */
+const CLEARED_FIELD_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]{0,63}$/;
+const MAX_CLEARED_FIELDS = 32;
+
+/**
  * Restores `undefined` for the keys listed in `clearedFields` (idempotent for
  * local dispatches, where the keys are still present in `changes`).
- * `clearedFields` may come off the wire, so tolerate junk: non-arrays are
- * ignored, and `id` is skipped because clearing it would re-key the entity in
- * the adapter — entity ids are never cleared through updates.
+ * `clearedFields` may come off the wire, so tolerate junk: non-arrays and
+ * non-identifier keys are ignored, the list is capped, and `id` is skipped
+ * because clearing it would re-key the entity in the adapter — entity ids are
+ * never cleared through updates.
  */
 export const applyClearedFields = <T extends object>(
   changes: Partial<T>,
@@ -42,8 +53,8 @@ export const applyClearedFields = <T extends object>(
     return changes;
   }
   const restored: Partial<T> = { ...changes };
-  for (const key of clearedFields) {
-    if (typeof key !== 'string' || key === 'id') {
+  for (const key of clearedFields.slice(0, MAX_CLEARED_FIELDS)) {
+    if (typeof key !== 'string' || key === 'id' || !CLEARED_FIELD_KEY_PATTERN.test(key)) {
       continue;
     }
     restored[key] = undefined;

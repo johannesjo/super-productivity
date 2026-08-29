@@ -8,8 +8,11 @@
  *
  * No Angular, no I/O — deterministic, so the merge decision and the synthesized
  * changes delta are unit-testable in isolation. Determinism is the whole point:
- * both clients must arrive at the byte-identical merged delta regardless of
- * which one performs the merge (see `synthesizeMergedChanges`).
+ * both clients must arrive at the identical field/value map regardless of
+ * which one performs the merge (key insertion order may differ between the
+ * author and wire shapes of a restored clear — immaterial, since the merged
+ * ops carry separate ids and `updateOne` is order-independent). See
+ * `synthesizeMergedChanges`.
  */
 
 import { OpType } from '../core/operation.types';

@@ -352,8 +352,14 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
   // serialization dropped the undefined-valued keys on upload, so restore them
   // here — the meta-reducer's updateOne then clears the field instead of
   // silently leaving the losing value in place. `applyClearedFields` tolerates
-  // wire junk and never touches `id`.
-  if (lwwPayload?.lwwUpdateMode === 'patch' && Array.isArray(lwwPayload.clearedFields)) {
+  // wire junk and never touches `id`. The isRecord guard keeps a malformed
+  // array payload from being object-spread into `{0: …}` (same trap as the
+  // singleton normalization above).
+  if (
+    lwwPayload?.lwwUpdateMode === 'patch' &&
+    Array.isArray(lwwPayload.clearedFields) &&
+    isRecord(actionPayload)
+  ) {
     actionPayload = applyClearedFields(
       actionPayload,
       lwwPayload.clearedFields as string[],

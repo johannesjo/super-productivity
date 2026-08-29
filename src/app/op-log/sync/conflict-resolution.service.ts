@@ -526,6 +526,9 @@ export class ConflictResolutionService {
    * @param vectorClock - Merged vector clock (should dominate all conflicting ops)
    * @param timestamp - Preserved timestamp for correct LWW semantics
    * @param entityIds - Captured task-project-move footprint, when applicable
+   * @param listClearedFields - Disjoint-merge deltas ONLY: list undefined-valued
+   *   payload keys as `clearedFields` so JSON serialization cannot drop the
+   *   clears (#9776). Never enable for payloads built from live state.
    * @returns New UPDATE operation ready for upload
    */
   createLWWUpdateOp(
@@ -537,6 +540,7 @@ export class ConflictResolutionService {
     timestamp: number,
     lwwUpdateMode: LwwUpdateMode = 'replace',
     entityIds?: string[],
+    listClearedFields: boolean = false,
   ): Operation {
     // NOTE: LWW Update action types (e.g., '[TASK] LWW Update') are intentionally
     // NOT in the ActionType enum. They are dynamically constructed here and matched
@@ -589,12 +593,21 @@ export class ConflictResolutionService {
       entityChanges: [],
       lwwUpdateMode,
       ...(moveFootprint !== undefined && { projectMoveFootprint: moveFootprint }),
-      // Patch deltas can carry field CLEARS as undefined values (a disjoint
+      // Disjoint-merge deltas can carry field CLEARS as undefined values (a
       // merge of a side that cleared a field, #9776). JSON drops those keys on
       // upload, so list them out-of-band; convertOpToAction restores them on
-      // receivers. Replace snapshots don't need this: setOne makes an absent
-      // key equivalent to a cleared one.
-      ...(lwwUpdateMode === 'patch' ? clearedFieldsProps(actionPayload) : {}),
+      // receivers. Replace snapshots don't need this (setOne makes an absent
+      // key equivalent to a cleared one), and the OTHER patch producers must
+      // NOT opt in: they build payloads from live state where an
+      // undefined-valued key is an accident of the object literal, not a user
+      // intent — e.g. taskRelationshipPatch always materializes `parentId`
+      // (undefined for every root task), and broadcasting that as a clear
+      // would force-detach concurrently-created subtask links on receivers.
+      // Only the disjoint merge re-lists clears that an incoming op itself
+      // declared.
+      ...(lwwUpdateMode === 'patch' && listClearedFields
+        ? clearedFieldsProps(actionPayload)
+        : {}),
     };
     return {
       id: uuidv7(),
@@ -2743,6 +2756,10 @@ export class ConflictResolutionService {
         ...conflict.localOps,
         ...conflict.remoteOps,
       ]),
+      // The only site that lists clearedFields: the merged delta re-declares
+      // clears the conflicting ops themselves declared (#9776), keeping both
+      // clients' independently-synthesized merged ops field-identical.
+      true,
     );
   }
 

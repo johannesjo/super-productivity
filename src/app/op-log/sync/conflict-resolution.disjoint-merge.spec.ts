@@ -461,6 +461,31 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
     expect(rejected).toContain('remote-clear');
   });
 
+  // ── (a0c) clearedFields is scoped to disjoint merges ──
+  // Other patch-mode producers build payloads from live state, where an
+  // undefined-valued key is an accident of the object literal (e.g.
+  // taskRelationshipPatch materializes `parentId: undefined` for every root
+  // task), NOT a user intent. Listing those as clears would broadcast an
+  // explicit `parentId` clear on 100% of relationship patches and force-detach
+  // concurrently-created subtask links on receivers.
+  it('(a0c) does NOT list clearedFields on non-merge patch ops with accidental undefined keys', () => {
+    const opResult = service.createLWWUpdateOp(
+      'TASK',
+      'task-1',
+      // Shape of taskRelationshipPatch for a root task: parentId materialized
+      // but undefined.
+      { id: 'task-1', projectId: 'p1', parentId: undefined, subTaskIds: ['sub-1'] },
+      'clientA',
+      { clientA: 1 },
+      1000,
+      'patch',
+    );
+
+    expect(
+      (opResult.payload as { clearedFields?: string[] }).clearedFields,
+    ).toBeUndefined();
+  });
+
   it('(a1) fails closed before mutating the op log for a legacy remote bulk op', async () => {
     mockStore.select.and.returnValue(
       of({ id: 'task-2', title: 'Local title', timeSpent: 0 }),
