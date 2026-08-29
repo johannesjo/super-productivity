@@ -42,6 +42,7 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { FH } from '../schedule.const';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
+import { isTouchActive } from '../../../util/input-intent';
 
 const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
@@ -278,6 +279,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       cancelAnimationFrame(this._measureRafId);
     }
     this._resizeObserver?.disconnect();
+    this._endResizeGesture?.();
   }
 
   private _scheduleTitleLineClampUpdate(): void {
@@ -530,9 +532,19 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
   readonly _resizeHeight = signal('');
   private _startY = 0;
   private _startHeight = 0;
+  private _endResizeGesture: (() => void) | null = null;
 
   isResizable(): boolean {
     if (this.isResizeDisabled() || this.isDragPreview() || this.isMonthView()) {
+      return false;
+    }
+
+    // Not on touch. The handle is a 12px band along the bottom edge of every event —
+    // about 2mm on a phone, against a finger contact patch of 8-10mm. It cannot be hit
+    // on purpose, only by accident, which on a densely filled schedule turned every
+    // scroll swipe into a duration change (#9675). Estimates stay editable by tapping
+    // the event and using the task detail panel.
+    if (isTouchActive()) {
       return false;
     }
 
@@ -553,34 +565,36 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  onResizeStart(event: MouseEvent | TouchEvent): void {
+  onResizeStart(event: MouseEvent): void {
     if (!this.isResizable()) return;
 
+    // Keep the gesture away from the host's cdkDrag: the handle resizes, the body moves.
     event.stopPropagation();
     event.preventDefault();
 
-    this._isResizing.set(true);
-
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
-    this._startY = clientY;
+    this._endResizeGesture?.();
+    this._startY = event.clientY;
     this._startHeight = this._elRef.nativeElement.offsetHeight;
 
-    // Add event listeners for mouse/touch move and end
-    const moveHandler = (e: MouseEvent | TouchEvent): void => this._onResizeMove(e);
-    const endHandler = (): void => this._onResizeEnd(moveHandler, endHandler);
-
+    const moveHandler = (e: MouseEvent): void => this._onResizeMove(e);
+    const endHandler = (): void => this._onResizeEnd();
     document.addEventListener('mousemove', moveHandler);
     document.addEventListener('mouseup', endHandler);
-    document.addEventListener('touchmove', moveHandler);
-    document.addEventListener('touchend', endHandler);
+    this._endResizeGesture = () => {
+      document.removeEventListener('mousemove', moveHandler);
+      document.removeEventListener('mouseup', endHandler);
+      this._endResizeGesture = null;
+      this._isResizing.set(false);
+    };
+
+    this._isResizing.set(true);
   }
 
-  private _onResizeMove(event: MouseEvent | TouchEvent): void {
+  private _onResizeMove(event: MouseEvent): void {
     if (!this._isResizing()) return;
 
     event.preventDefault();
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
-    const deltaY = clientY - this._startY;
+    const deltaY = event.clientY - this._startY;
 
     // Calculate new height based on grid row height for snap-to-grid behavior
     const gridContainer = this._elRef.nativeElement.closest(
@@ -602,22 +616,16 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private _onResizeEnd(moveHandler: any, endHandler: any): void {
+  private _onResizeEnd(): void {
     if (!this._isResizing()) return;
 
-    this._isResizing.set(false);
+    this._endResizeGesture?.();
 
     // Set cooldown flag to prevent immediate click events
     this._justFinishedResizing.set(true);
     setTimeout(() => {
       this._justFinishedResizing.set(false);
     }, 200); // 200ms cooldown
-
-    // Remove event listeners
-    document.removeEventListener('mousemove', moveHandler);
-    document.removeEventListener('mouseup', endHandler);
-    document.removeEventListener('touchmove', moveHandler);
-    document.removeEventListener('touchend', endHandler);
 
     // Calculate new duration based on height change
     const currentHeight = this._elRef.nativeElement.offsetHeight;
