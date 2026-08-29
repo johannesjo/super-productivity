@@ -450,6 +450,18 @@ describe('OperationLogMigrationService', () => {
     // is stuck on "Migration Failed" / "Failed to load data" on every restart.
     describe('when legacy data predates newer model slices', () => {
       let mockDialogRef: any;
+      /** Every dialog opened during the test, in order. */
+      let openedDialogRefs: any[];
+
+      const createMockDialogRef = (): any => ({
+        componentInstance: {
+          status: { set: jasmine.createSpy('statusSet') },
+          error: { set: jasmine.createSpy('errorSet') },
+          canStartFresh: { set: jasmine.createSpy('canStartFreshSet') },
+        },
+        afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(undefined)),
+        close: jasmine.createSpy('close'),
+      });
 
       beforeEach(() => {
         mockOpLogStore.loadStateCache.and.resolveTo(null);
@@ -465,16 +477,16 @@ describe('OperationLogMigrationService', () => {
         mockLegacyPfDb.loadClientId.and.resolveTo('legacyClientId1234');
         mockClientIdService.persistClientId.and.resolveTo();
 
-        mockDialogRef = {
-          componentInstance: {
-            status: { set: jasmine.createSpy('statusSet') },
-            error: { set: jasmine.createSpy('errorSet') },
-            canStartFresh: { set: jasmine.createSpy('canStartFreshSet') },
-          },
-          afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(undefined)),
-          close: jasmine.createSpy('close'),
-        };
-        mockMatDialog.open.and.returnValue(mockDialogRef);
+        mockDialogRef = createMockDialogRef();
+        openedDialogRefs = [];
+        // A distinct ref per open(), so an assertion about the SECOND dialog
+        // cannot be satisfied by the first one that was already closed.
+        mockMatDialog.open.and.callFake(() => {
+          const ref =
+            openedDialogRefs.length === 0 ? mockDialogRef : createMockDialogRef();
+          openedDialogRefs.push(ref);
+          return ref;
+        });
 
         mockTranslateService.use = jasmine
           .createSpy('use')
@@ -568,7 +580,10 @@ describe('OperationLogMigrationService', () => {
         // and the blank "Failed to load data" screen this hatch exists to avoid.
         await service.checkAndMigrate();
 
-        expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
+        // The failure is reported on a NEW dialog: the migration one is closed
+        // by then, so setting the message there would never reach the user.
+        expect(openedDialogRefs.length).toBe(2);
+        expect(openedDialogRefs[1].componentInstance.error.set).toHaveBeenCalledWith(
           T.MIGRATE.E_START_FRESH_FAILED_MSG,
         );
         expect(reloadSpy).toHaveBeenCalledTimes(1);
