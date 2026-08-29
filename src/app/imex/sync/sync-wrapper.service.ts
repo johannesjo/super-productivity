@@ -519,7 +519,9 @@ export class SyncWrapperService {
       this._remoteTrackingNotifier.start();
     } else {
       this._remoteTrackingNotifier.stop();
-      this._trackingPresenceService.stop();
+      // Opt-out path: the socket stays up, so the final frame goes out on its
+      // own — nothing to wait for here.
+      void this._trackingPresenceService.stop();
     }
   }
 
@@ -528,9 +530,15 @@ export class SyncWrapperService {
    */
   disconnectWebSocket(): void {
     this._remoteTrackingNotifier.stop();
-    this._trackingPresenceService.stop();
+    const presenceFlushed = this._trackingPresenceService.stop();
     this._wsDownloadService.stop();
-    this._superSyncWsService.disconnect();
+    // The producer's final `stopped` frame cannot be sent synchronously (key
+    // resolution + WebCrypto encryption are async) and needs the socket alive
+    // to reach the wire. Closing in the same tick drops it and leaves the
+    // user's other devices on a phantom session for up to 30min, so close only
+    // once the frame has been handed to the WebSocket. The handle always
+    // settles (see TrackingPresenceService.stop).
+    void presenceFlushed.finally(() => this._superSyncWsService.disconnect());
   }
 
   private async _sync(

@@ -248,7 +248,12 @@ describe('SyncWrapperService', () => {
         { provide: WsTriggeredDownloadService, useValue: mockWsDownloadService },
         {
           provide: TrackingPresenceService,
-          useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+          // stop() returns a flush handle the wrapper waits on before
+          // closing the socket — see disconnectWebSocket().
+          useValue: jasmine.createSpyObj('TrackingPresenceService', {
+            start: undefined,
+            stop: Promise.resolve(),
+          }),
         },
         {
           provide: RemoteTrackingAndroidNotifierService,
@@ -661,6 +666,32 @@ describe('SyncWrapperService', () => {
       await Promise.resolve();
 
       expect(mockWsDownloadService.stop).toHaveBeenCalled();
+      expect(mockSuperSyncWsService.disconnect).toHaveBeenCalled();
+    });
+
+    it('should close the websocket only after the presence stop frame flushed', async () => {
+      const presence = TestBed.inject(
+        TrackingPresenceService,
+      ) as jasmine.SpyObj<TrackingPresenceService>;
+      mockSuperSyncWsService.disconnect.calls.reset();
+      let releaseFlush = (): void => undefined;
+      presence.stop.and.returnValue(
+        new Promise<void>((resolve) => {
+          releaseFlush = resolve;
+        }),
+      );
+
+      service.disconnectWebSocket();
+      await Promise.resolve();
+
+      // the final `stopped` frame needs the socket alive to reach the wire
+      expect(presence.stop).toHaveBeenCalled();
+      expect(mockSuperSyncWsService.disconnect).not.toHaveBeenCalled();
+
+      releaseFlush();
+      await Promise.resolve();
+      await Promise.resolve();
+
       expect(mockSuperSyncWsService.disconnect).toHaveBeenCalled();
     });
 
@@ -1981,7 +2012,7 @@ describe('SyncWrapperService', () => {
 
     it('should handle JsonParseError with force-overwrite action and corrupted-data message (#5574, #4616)', async () => {
       mockSyncService.downloadRemoteOps.and.returnValue(
-        Promise.reject(new JsonParseError(new SyntaxError('Unexpected end of JSON'), '')),
+        Promise.reject(new JsonParseError(new SyntaxError('Unexpected end of JSON'))),
       );
 
       const result = await service.sync();
@@ -3064,7 +3095,12 @@ describe('SyncWrapperService', () => {
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
           {
             provide: TrackingPresenceService,
-            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+            // stop() returns a flush handle the wrapper waits on before
+            // closing the socket — see disconnectWebSocket().
+            useValue: jasmine.createSpyObj('TrackingPresenceService', {
+              start: undefined,
+              stop: Promise.resolve(),
+            }),
           },
           {
             provide: RemoteTrackingAndroidNotifierService,
@@ -3203,7 +3239,12 @@ describe('SyncWrapperService', () => {
           { provide: SuperSyncStatusService, useValue: signalMockSuperSyncStatusService },
           {
             provide: TrackingPresenceService,
-            useValue: jasmine.createSpyObj('TrackingPresenceService', ['start', 'stop']),
+            // stop() returns a flush handle the wrapper waits on before
+            // closing the socket — see disconnectWebSocket().
+            useValue: jasmine.createSpyObj('TrackingPresenceService', {
+              start: undefined,
+              stop: Promise.resolve(),
+            }),
           },
           {
             provide: RemoteTrackingAndroidNotifierService,

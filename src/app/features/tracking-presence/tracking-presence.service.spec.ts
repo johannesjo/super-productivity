@@ -128,7 +128,14 @@ describe('TrackingPresenceService', () => {
           provide: SuperSyncWebSocketService,
           useValue: {
             presenceMessage$,
-            sendPresence: sendPresenceSpy,
+            // Mirrors the real transport: disconnect() nulls the socket, so a
+            // frame handed over afterwards is silently dropped instead of
+            // reaching the wire. The spy records DELIVERED frames only.
+            sendPresence: (type: string, payload: string): void => {
+              if (wsConnected()) {
+                sendPresenceSpy(type, payload);
+              }
+            },
             get isConnected() {
               return wsConnected;
             },
@@ -287,6 +294,54 @@ describe('TrackingPresenceService', () => {
       const last = states[states.length - 1];
       expect(last.state).toBe('stopped');
       expect(last.reason).toBeUndefined();
+      flush();
+    }));
+
+    it('delivers the final stopped frame when the caller tears the socket down right after stop()', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      const statesBefore = sentStates().length;
+
+      // What SyncWrapperService.disconnectWebSocket() does on disable-sync /
+      // switch-provider. The frame cannot go out synchronously (key resolution
+      // + encryption are async), so stop() must hand the caller something to
+      // wait on — otherwise the socket dies first and every other device keeps
+      // a phantom "was tracking" session for up to 30min.
+      service.stop().finally(() => wsConnected.set(false));
+      tick();
+
+      const states = sentStates();
+      expect(states.length).toBe(statesBefore + 1);
+      expect(states[states.length - 1].state).toBe('stopped');
+      flush();
+    }));
+
+    it('does not re-arm the offline resend flag from a send that lands after stop()', fakeAsync(() => {
+      service.start();
+      flushEffects();
+      setLocalTaskId('task-1');
+
+      // Stop while offline: the final frame is dropped by _doSend. Nothing may
+      // survive teardown to fire a broadcast on the next start().
+      wsConnected.set(false);
+      flushEffects();
+      service.stop();
+      flush(); // the enqueued final frame reaches _doSend only now
+
+      expect(
+        (service as unknown as { _pendingResend: boolean })._pendingResend,
+      ).toBeFalse();
+
+      // and nothing fires a phantom broadcast when the service is restarted
+      setLocalTaskId(null); // the tracked task ended while presence was off
+      const countAfterStop = sentStates().length;
+      service.start();
+      wsConnected.set(true);
+      flushEffects();
+
+      expect(sentStates().length).toBe(countAfterStop);
+      service.stop();
       flush();
     }));
 
