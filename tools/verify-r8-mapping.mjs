@@ -2,8 +2,10 @@
 /**
  * DORMANT: nothing runs this today. Release builds are built with
  * minifyEnabled false (see android/app/build.gradle for why), so no mapping.txt
- * is produced and no workflow invokes this tool. It is kept staged for the
- * re-land of minification. Nothing below is currently enforcing anything.
+ * is produced and nothing below is currently enforcing anything. It stays
+ * staged for the re-land of minification: build-android.yml runs this tool
+ * whenever the release build actually emitted a mapping, so the re-land arms
+ * the check without anyone having to remember this file exists.
  *
  * What it was for: a minified release that drops a @JavascriptInterface method
  * or a WorkManager worker builds and installs fine — the bridge call just goes
