@@ -167,6 +167,16 @@ Safe patterns, in order of preference:
    `updateTaskRepeatCfg`). Old clients ignore the extra prop, so the clear
    degrades to a no-op there instead of corrupting state — no schema bump.
 
+On the conflict-resolution side, `createLWWUpdateOp` never lists
+`clearedFields` unless the call site opts in via `listClearedFields` — today
+only the disjoint-merge delta does, re-declaring clears the conflicting ops
+themselves carried. Patch payloads built from **live state** (e.g.
+`taskRelationshipPatch`) materialize accidental `undefined` keys — every root
+task's `parentId` — and must never opt in: listing those would broadcast a
+real clear to receivers (pinned by tests (a0c) in
+`conflict-resolution.disjoint-merge.spec.ts` and the relationship follow-up
+pin in `conflict-resolution.service.spec.ts`).
+
 Do **not** invent in-band sentinels (`null`, `0`, marker strings): remote
 reducers apply payload values verbatim, so released clients would persist the
 sentinel and fail typia state validation.
