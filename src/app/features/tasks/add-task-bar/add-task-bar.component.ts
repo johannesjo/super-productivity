@@ -45,7 +45,7 @@ import {
   timeout,
   withLatestFrom,
 } from 'rxjs/operators';
-import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -331,6 +331,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this.highlightSegments();
     this.syncHighlightScroll();
   });
+
+  // Injected rather than read from the constant so the two focus paths below
+  // are reachable from tests (see IS_ANDROID_WEB_VIEW_TOKEN).
+  private readonly _isAndroidWebView = inject(IS_ANDROID_WEB_VIEW_TOKEN);
 
   private _focusTimeout?: number;
   private _autocompleteTimeout?: number;
@@ -1022,7 +1026,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     document.body.focus();
     this.inputEl()?.nativeElement.focus();
 
-    if (IS_ANDROID_WEB_VIEW) {
+    if (this._isAndroidWebView) {
       // Unchanged: this web view needs the repeated blur → focus cycle to raise
       // the IME reliably, and it has no iOS focusin scroll handler to disturb.
       window.setTimeout(() => this.inputEl()?.nativeElement.focus());

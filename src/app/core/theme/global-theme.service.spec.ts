@@ -609,3 +609,72 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     expect(varWrites(setPropertySpy, '--keyboard-height')).toBe(2);
   });
 });
+
+/**
+ * The guard on `_scrollActiveInputIntoView`, which runs on every iOS
+ * `keyboardDidShow`. Real elements in the document, because the decision reads
+ * computed styles and scroll geometry.
+ */
+describe('GlobalThemeService scroll-into-view guard', () => {
+  interface ScrollGuardHarness {
+    document: Document;
+    _canScrollIntoView(el: HTMLElement): boolean;
+  }
+
+  let harness: ScrollGuardHarness;
+  let root: HTMLElement;
+
+  const build = (html: string): HTMLElement => {
+    root.innerHTML = html;
+    return root.querySelector('input') as HTMLElement;
+  };
+
+  beforeEach(() => {
+    harness = Object.create(GlobalThemeService.prototype) as ScrollGuardHarness;
+    harness.document = document;
+    root = document.createElement('div');
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => root.remove());
+
+  it('scrolls an input that sits in a scrollable container', () => {
+    const input = build(`
+      <div style="height: 40px; overflow-y: auto">
+        <div style="height: 400px"><input /></div>
+      </div>
+    `);
+
+    expect(harness._canScrollIntoView(input)).toBe(true);
+  });
+
+  // The global add-task bar: scrolling it into view scrolls the list behind it
+  // instead, which is what made the page jump while the keyboard opened (#9779).
+  it('leaves an input in a fixed bar alone', () => {
+    const input = build(`
+      <div style="position: fixed; bottom: 0"><input /></div>
+    `);
+
+    expect(harness._canScrollIntoView(input)).toBe(false);
+  });
+
+  // #7388: a fullscreen dialog is fixed, but its body scrolls, so an input near
+  // the bottom still has to be brought above the keyboard.
+  it('scrolls an input in a scrollable region inside a fixed dialog', () => {
+    const input = build(`
+      <div style="position: fixed; inset: 0">
+        <div style="height: 40px; overflow-y: auto">
+          <div style="height: 400px"><input /></div>
+        </div>
+      </div>
+    `);
+
+    expect(harness._canScrollIntoView(input)).toBe(true);
+  });
+
+  it('scrolls an input with nothing special above it', () => {
+    const input = build('<div><input /></div>');
+
+    expect(harness._canScrollIntoView(input)).toBe(true);
+  });
+});

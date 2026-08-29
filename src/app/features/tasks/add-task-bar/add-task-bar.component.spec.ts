@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,6 +28,7 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { SS } from '../../../core/persistence/storage-keys.const';
 import { BodyClass } from '../../../app.constants';
+import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
 
 type ProjectServiceSignals = {
   list$: Observable<Project[]>;
@@ -1488,6 +1489,111 @@ describe('AddTaskBarComponent', () => {
 
       expect(noteEl.hasAttribute('placeholder')).toBe(false);
       expect(noteEl.getAttribute('aria-label')).toBe(emptyLabel);
+    });
+  });
+
+  // Only ever spied on elsewhere in this file, so the two paths below — one of
+  // them the blur → focus cycle the Android IME depends on — had no coverage.
+  describe('focusInput()', () => {
+    const getInput = (
+      f: ComponentFixture<AddTaskBarComponent>,
+    ): HTMLTextAreaElement =>
+      f.debugElement.nativeElement.querySelector('.main-input') as HTMLTextAreaElement;
+
+    it('focuses the field synchronously', () => {
+      fixture.detectChanges();
+      const input = getInput(fixture);
+      input.blur();
+
+      component.focusInput();
+
+      expect(document.activeElement).toBe(input);
+    });
+
+    it('selects the existing text when asked', () => {
+      fixture.detectChanges();
+      const input = getInput(fixture);
+      input.value = 'water the plants';
+      input.dispatchEvent(new Event('input'));
+
+      component.focusInput(true);
+
+      expect(input.selectionStart).toBe(0);
+      expect(input.selectionEnd).toBe('water the plants'.length);
+    });
+
+    // #9779: a second focus() on an already-focused field re-fires focusin, and
+    // the global handler scrolls it into view again mid keyboard animation.
+    it('does not re-focus a field that already took focus', fakeAsync(() => {
+      fixture.detectChanges();
+      const focusSpy = spyOn(getInput(fixture), 'focus').and.callThrough();
+
+      component.focusInput();
+      const callsBeforeRetry = focusSpy.calls.count();
+      tick(50);
+
+      expect(focusSpy.calls.count()).toBe(callsBeforeRetry);
+      flush();
+    }));
+
+    it('retries once when the web view dropped the focus', fakeAsync(() => {
+      fixture.detectChanges();
+      const input = getInput(fixture);
+
+      component.focusInput();
+      input.blur();
+      tick(50);
+
+      expect(document.activeElement).toBe(input);
+      flush();
+    }));
+
+    describe('on the Android web view', () => {
+      let androidFixture: ComponentFixture<AddTaskBarComponent>;
+
+      beforeEach(async () => {
+        TestBed.resetTestingModule();
+        await TestBed.configureTestingModule({
+          imports: [AddTaskBarComponent, NoopAnimationsModule, TranslateModule.forRoot()],
+          providers: [
+            { provide: TaskService, useValue: mockTaskService },
+            { provide: WorkContextService, useValue: mockWorkContextService },
+            { provide: ProjectService, useValue: mockProjectService },
+            { provide: TagService, useValue: mockTagService },
+            { provide: GlobalConfigService, useValue: mockGlobalConfigService },
+            { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
+            { provide: DateService, useValue: mockDateService },
+            { provide: Store, useValue: mockStore },
+            { provide: MatDialog, useValue: mockMatDialog },
+            { provide: SnackService, useValue: mockSnackService },
+            {
+              provide: AddTaskBarIssueSearchService,
+              useValue: mockAddTaskBarIssueSearchService,
+            },
+            { provide: IS_ANDROID_WEB_VIEW_TOKEN, useValue: true },
+          ],
+        }).compileComponents();
+        androidFixture = TestBed.createComponent(AddTaskBarComponent);
+        androidFixture.detectChanges();
+      });
+
+      // The IME only comes up reliably after this repeated cycle, so it stays
+      // exactly as it was while the other platforms moved to a guarded retry.
+      it('keeps the repeated blur to focus cycle that raises the IME', fakeAsync(() => {
+        const input = getInput(androidFixture);
+        const focusSpy = spyOn(input, 'focus').and.callThrough();
+
+        androidFixture.componentInstance.focusInput();
+        expect(focusSpy).toHaveBeenCalledTimes(1);
+
+        tick(0);
+        expect(focusSpy).toHaveBeenCalledTimes(2);
+
+        tick(200);
+        expect(focusSpy).toHaveBeenCalledTimes(3);
+        expect(document.activeElement).toBe(input);
+        flush();
+      }));
     });
   });
 });
