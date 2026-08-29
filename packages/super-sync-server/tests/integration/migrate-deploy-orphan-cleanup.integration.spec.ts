@@ -18,6 +18,11 @@
  * It exercises the `--terminate-orphaned-concurrently` seam so the targeting can
  * be asserted deterministically, without provoking a full concurrent index
  * build (which would additionally block on the spared sleepers' open snapshots).
+ *
+ * It also proves the recovery serialization of #9781: while a peer holds the
+ * dedicated recovery advisory lock (72707370), the cleanup must refuse to
+ * terminate anything (the "orphan" may be that peer's LIVE build) — and must
+ * release the lock it takes for itself once done.
  */
 import { PrismaClient } from '@prisma/client';
 import { spawnSync } from 'node:child_process';
@@ -40,6 +45,19 @@ const urlWithAppName = (appName: string): string => {
   const url = new URL(DATABASE_URL as string);
   url.searchParams.set('application_name', appName);
   return url.toString();
+};
+
+// The dedicated recovery advisory lock of migrate-deploy.sh (#9781), distinct
+// from Prisma's own migrate lock 72707369.
+const RECOVERY_LOCK_KEY = 72707370;
+
+// Session-level advisory locks live and die with one session, so a client that
+// takes or probes the lock must pin the pool to a single connection.
+const singleConnectionClient = (appName: string): PrismaClient => {
+  const url = new URL(DATABASE_URL as string);
+  url.searchParams.set('application_name', appName);
+  url.searchParams.set('connection_limit', '1');
+  return new PrismaClient({ datasources: { db: { url: url.toString() } } });
 };
 
 interface Backend {
@@ -253,6 +271,59 @@ describeWithDb(
       const remaining = (await activityFor(marker)).map((r) => r.application_name);
       expect(remaining).toContain(foreignDbApp); // other database: spared
       expect(remaining).not.toContain(orphanApp); // current database: terminated
+    }, 60_000);
+
+    it('refuses to kill anything while a peer holds the recovery lock, then proceeds once released', async () => {
+      // #9781: without serialization the cleanup would treat a peer recovery's
+      // LIVE build as an orphan and pg_terminate_backend it. This test fails
+      // against the pre-lock script (which killed the session and exited 0).
+      const marker = `${MARKER_PREFIX}${randomUUID().replace(/-/g, '')}`;
+      const orphanApp = `supersync-migrator-${randomUUID()}`;
+
+      const holder = singleConnectionClient('supersync-orphan-lock-holder');
+      clients.push(holder);
+      const held = await holder.$queryRawUnsafe<{ locked: boolean }[]>(
+        `SELECT pg_try_advisory_lock(${RECOVERY_LOCK_KEY}) AS locked`,
+      );
+      expect(held[0].locked).toBe(true);
+
+      spawnActive(orphanApp, marker);
+      await waitUntil(async () => {
+        const byApp = new Map(
+          (await activityFor(marker)).map((r) => [r.application_name, r.state]),
+        );
+        return byApp.get(orphanApp) === 'active';
+      });
+
+      const blocked = runCleanup({ MIGRATE_RECOVERY_LOCK_TIMEOUT: '2' });
+      expect(blocked.status, `${blocked.stdout}${blocked.stderr}`).not.toBe(0);
+      expect(`${blocked.stdout}${blocked.stderr}`).toContain('recovery advisory lock');
+
+      // From the locked peer's perspective this session is a LIVE build: spared.
+      const survivors = (await activityFor(marker)).map((r) => r.application_name);
+      expect(survivors).toContain(orphanApp);
+
+      await holder.$queryRawUnsafe(`SELECT pg_advisory_unlock(${RECOVERY_LOCK_KEY})`);
+
+      const unblocked = runCleanup();
+      expect(unblocked.status, `${unblocked.stdout}${unblocked.stderr}`).toBe(0);
+      await waitUntil(
+        async () =>
+          !(await activityFor(marker)).map((r) => r.application_name).includes(orphanApp),
+      );
+    }, 60_000);
+
+    it('releases the recovery lock when the cleanup finishes', async () => {
+      const res = runCleanup();
+      expect(res.status, `${res.stdout}${res.stderr}`).toBe(0);
+
+      const probe = singleConnectionClient('supersync-orphan-lock-probe');
+      clients.push(probe);
+      const rows = await probe.$queryRawUnsafe<{ locked: boolean }[]>(
+        `SELECT pg_try_advisory_lock(${RECOVERY_LOCK_KEY}) AS locked`,
+      );
+      expect(rows[0].locked).toBe(true); // free again — the seam's holder is gone
+      await probe.$queryRawUnsafe(`SELECT pg_advisory_unlock(${RECOVERY_LOCK_KEY})`);
     }, 60_000);
   },
 );

@@ -814,6 +814,32 @@ CREATE INDEX CONCURRENTLY "operations_payload_bytes_unbackfilled_idx"
     expect(r.resolveApplied).toContain(ENCRYPTED_OPS);
   });
 
+  it('attempts the recovery advisory lock before the orphan kill, degrading to unlocked when the helper cannot run', () => {
+    // #9781: recovery serializes under a dedicated advisory lock so the orphan
+    // kill can never hit a live peer build. The lock needs a real database
+    // session; here (fake npx, unreachable DATABASE_URL, no node_modules in
+    // cwd) the helper must fail FAST and the recovery must degrade to the
+    // pre-lock unlocked behavior with a loud warning — never wedge the deploy.
+    writeMigration(ENCRYPTED_OPS, ENCRYPTED_OPS_SQL);
+    const r = run({
+      FAKE_FAIL: ENCRYPTED_OPS,
+      FAKE_CODE: 'P3018',
+      MIGRATE_STEP_TIMEOUT: '7',
+      MIGRATOR_APPLICATION_NAME: 'supersync-migrator-unit-current-run',
+      DATABASE_URL:
+        'postgresql://u:p@postgres:5432/supersync?connection_limit=60&pool_timeout=10',
+    });
+
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('recovery advisory lock (72707370)');
+    expect(r.stdout).toContain('WARNING: could not acquire the recovery advisory lock');
+    // The lock attempt precedes the kill it exists to gate.
+    expect(r.stdout.indexOf('recovery advisory lock')).toBeLessThan(
+      r.stdout.indexOf('Clearing any orphaned CONCURRENTLY'),
+    );
+    expect(r.resolveApplied).toContain(ENCRYPTED_OPS);
+  }, 30_000);
+
   it('does not attempt orphan termination when DATABASE_URL is unset', () => {
     // No URL means no pg_stat_activity to query; the recovery must still run
     // its own DROP+CREATE and never emit a stray terminate.
