@@ -2,14 +2,16 @@
 #
 # Release builds still run with minifyEnabled false (see build.gradle for why —
 # enabling it shipped a startup crash to the Play internal track), so these rules
-# do not affect anything that ships today. They are NOT inert, though: the
-# r8Test build type is minified and is what instrumentation tests run against, so
-# every rule here is exercised on every Android PR.
+# do not affect anything that ships today. They are NOT inert, though:
+# android/run-android-checks.sh minifies the r8Test build type on every Android
+# PR and then checks it two ways — it launches the APK, so the rules the smoke
+# page actually uses are proven on a running app, and it reads the mapping, so
+# the rules nothing at startup exercises are proven to have survived R8. Each
+# rule below names which one covers it.
 #
 # That is also the only validation they have. Treat them as a starting point for
 # the re-land ahead of Google Play's February 2027 DEX shrinking/obfuscation
-# requirement, and re-land minification only once CI launches the shipped
-# variant, not just the test one.
+# requirement.
 #
 # Everything R8 cannot see statically has to be kept here — reflection and the
 # WebView bridge both look like dead code to it.
@@ -20,7 +22,8 @@
 # proguard file keeps @JavascriptInterface members globally.
 # Kept because it names the one class we actually depend on, and because the
 # failure is silent — a stripped bridge method builds and installs fine, the JS
-# call just goes nowhere. tools/verify-r8-mapping.mjs is what enforces it.
+# call just goes nowhere. Covered twice: tools/verify-r8-mapping.mjs checks the
+# mapping, and the smoke page calls SUPAndroid.getVersion() on the minified APK.
 -keepclassmembers class com.superproductivity.superproductivity.webview.JavaScriptInterface {
     @android.webkit.JavascriptInterface <methods>;
 }
@@ -32,7 +35,9 @@
 # names the class through PeriodicWorkRequestBuilder<SyncReminderWorker>, so R8
 # keeps it and work-runtime's own -keepnames preserves the name. It stops being
 # redundant as soon as a worker is only ever referenced as a string: -keepnames
-# permits shrinking, so R8 would drop it. Same silent failure as above.
+# permits shrinking, so R8 would drop it. Same silent failure as above, and the
+# only one of the three with no runtime witness — nothing enqueues a worker at
+# startup, so tools/verify-r8-mapping.mjs is all that stands behind it.
 -keep class * extends androidx.work.ListenableWorker {
     public <init>(android.content.Context, androidx.work.WorkerParameters);
 }
@@ -54,18 +59,10 @@
 #
 # Capacitor's own consumer rules keep the plugin classes but say nothing about
 # PluginHandle, so this has to live here.
-# Enforced by CapacitorLifecycleBridgeInstrumentedTest on the r8Test variant.
+# Enforced by android/run-android-checks.sh: the smoke page it serves calls
+# LocalNotifications.checkPermissions(), the exact call that killed the process
+# in #9785. Drop this rule and that smoke goes red.
 -keep class com.getcapacitor.PluginHandle { *; }
-
-# --- Instrumented-test seams ------------------------------------------------
-# `testBuildType "r8Test"` runs the instrumented suite against a minified APK,
-# so an app member that only androidTest sources call is unreachable as far as
-# R8 is concerned: it gets shrunk out of the app APK and the test dies on
-# NoSuchMethodError. Any future test-only seam needs a line here — check
-# build/outputs/mapping/<variant>/usage.txt if a test suddenly cannot find one.
--keepclassmembers class com.superproductivity.superproductivity.service.BackgroundSyncCredentialStore {
-    public void forgetCachedPrefsForTest();
-}
 
 # --- Tink (via androidx.security-crypto) ------------------------------------
 # Tink is annotated with Error Prone annotations that are compile-only and are
