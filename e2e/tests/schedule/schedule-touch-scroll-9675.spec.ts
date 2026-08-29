@@ -1,11 +1,14 @@
 import { expect, test } from '../../fixtures/test.fixture';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { waitForStatePersistence } from '../../utils/waits';
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
-// The global add-task button only exists in the wide layout, so tasks are seeded at
-// this size and the viewport shrinks to a phone before the schedule is touched.
+// The schedule grid is seeded at this size — a phone-width week column is ~50px
+// wide — and the viewport shrinks to a phone before the schedule is touched.
 const SETUP_VIEWPORT = { width: 1024, height: 900 };
 const SCROLL_WRAPPER = 'schedule .scroll-wrapper';
+// schedule-week draws two [data-day] cells per day (main + end-of-day).
+const DAY_COL = 'schedule-week .col:not(.end-of-day)[data-day]';
 // Mirrors DRAG_DELAY_FOR_TOUCH in src/app/app.constants.ts. E2E does not import from
 // src, so if the source value ever rises above the hold below, the long-press test
 // fails on its final assertion — the drag never starts.
@@ -37,29 +40,60 @@ const touchDriver = async (page: Page): Promise<TouchDriver> => {
 };
 
 /**
- * Seed a task, then open the schedule as a phone would.
+ * Put one event on the schedule, then open it as a phone would.
  *
- * The reload matters: input intent is per-session and Playwright seeds tasks with real
+ * The task is created by clicking the grid — the same way schedule-overlap and
+ * schedule-split-segment seed theirs — and not by adding a task to Today. An
+ * undated Today task only flows onto the grid while the current day still has
+ * room for it, so a suite started in the evening found an empty schedule and
+ * every test here failed on "element(s) not found". A task placed on tomorrow's
+ * column renders at a fixed row whatever hour the run starts at, and sits far
+ * enough ahead not to fire a reminder mid-test.
+ *
+ * The reload matters: input intent is per-session and the seeding above uses real
  * mouse clicks, which legitimately flips the app to mouse intent. A hash navigation
  * would keep that state, so the reload restores the touch-primary bootstrap a phone
  * actually gets — without it, `dragDelayForTouch()` is the mouse value of 0 and the
  * test proves nothing.
  */
-const seedTaskAndOpenSchedule = async (
+const seedScheduledTaskAndOpenSchedule = async (
   page: Page,
-  workViewPage: {
-    waitForTaskList: () => Promise<void>;
-    addTask: (t: string) => Promise<void>;
-  },
+  workViewPage: { waitForTaskList: () => Promise<void> },
   taskTitle: string,
-): Promise<void> => {
+): Promise<Locator> => {
   await workViewPage.waitForTaskList();
-  await workViewPage.addTask(taskTitle);
+  await page.goto('/#/schedule');
+  await expect(page.locator('schedule-week')).toBeVisible();
+
+  const tomorrowCol = page.locator(DAY_COL).nth(1);
+  await tomorrowCol.click({
+    position: {
+      x: await tomorrowCol.evaluate((el) => el.clientWidth / 2),
+      // Midday, so the event keeps grid rows above and below it to be dragged to.
+      y: await tomorrowCol.evaluate((el) => el.clientHeight / 2),
+    },
+  });
+  const newTaskInput = page.getByRole('combobox', { name: 'Schedule task...' });
+  await newTaskInput.fill(`${taskTitle} 3h`);
+  await newTaskInput.press('Enter');
+
+  // While a drag is live, CDK's clone is a second schedule-event with the same text.
+  const event = page
+    .locator('schedule-event:not(.custom-drag-preview)')
+    .filter({ hasText: taskTitle });
+  await expect(event).toBeVisible();
+  // The reload below drops anything still queued: the new task has to be on disk
+  // before it, or the schedule comes back empty.
+  await waitForStatePersistence(page);
 
   await page.setViewportSize(MOBILE_VIEWPORT);
-  await page.goto('/#/schedule');
   await page.reload();
   await expect(page.locator('schedule-week')).toBeVisible();
+  await expect(event).toBeVisible();
+  // The grid opens scrolled to the current hour, which is unrelated to where the
+  // event sits — bring it into view before anything reads its box.
+  await event.scrollIntoViewIfNeeded();
+  return event;
 };
 
 test.describe('Schedule touch scrolling (#9675)', () => {
@@ -75,16 +109,24 @@ test.describe('Schedule touch scrolling (#9675)', () => {
     page,
     workViewPage,
   }) => {
-    await seedTaskAndOpenSchedule(page, workViewPage, 'Touch scroll task /3h/');
+    const event = await seedScheduledTaskAndOpenSchedule(
+      page,
+      workViewPage,
+      'Touch scroll task',
+    );
 
     const scrollWrapper = page.locator(SCROLL_WRAPPER);
-    const event = page.locator('schedule-event').filter({ hasText: 'Touch scroll task' });
-    await expect(event).toBeVisible();
 
-    // grid-row encodes both the start row and the span, so one comparison catches a
+    // grid-area encodes both the start row and the span, so one comparison catches a
     // task that was moved to another time AND one whose duration was resized.
     const styleBefore = await event.getAttribute('style');
-    const scrollBefore = await scrollWrapper.evaluate((el) => el.scrollTop);
+    const scroll = await scrollWrapper.evaluate((el) => ({
+      top: el.scrollTop,
+      max: el.scrollHeight - el.clientHeight,
+    }));
+    // Without headroom below the current position the scroll assertion could pass
+    // for the wrong reason — or never pass at all.
+    expect(scroll.max - scroll.top).toBeGreaterThan(200);
 
     const box = await event.boundingBox();
     expect(box).not.toBeNull();
@@ -123,7 +165,7 @@ test.describe('Schedule touch scrolling (#9675)', () => {
     // schedule does not scroll and the task lands on a different grid row.
     await expect
       .poll(() => scrollWrapper.evaluate((el) => el.scrollTop))
-      .toBeGreaterThan(scrollBefore);
+      .toBeGreaterThan(scroll.top);
     expect(await event.getAttribute('style')).toBe(styleBefore);
   });
 
@@ -131,10 +173,11 @@ test.describe('Schedule touch scrolling (#9675)', () => {
     page,
     workViewPage,
   }) => {
-    await seedTaskAndOpenSchedule(page, workViewPage, 'Touch resize task /2h/');
-
-    const event = page.locator('schedule-event').filter({ hasText: 'Touch resize task' });
-    await expect(event).toBeVisible();
+    const event = await seedScheduledTaskAndOpenSchedule(
+      page,
+      workViewPage,
+      'Touch resize task',
+    );
 
     // The handle is a 12px band on the bottom edge of every event — unhittable on
     // purpose with a finger, but easy to hit by accident, which is how a scroll swipe
@@ -149,15 +192,13 @@ test.describe('Schedule touch scrolling (#9675)', () => {
     page,
     workViewPage,
   }) => {
-    await seedTaskAndOpenSchedule(page, workViewPage, 'Touch drag task /1h/');
+    const event = await seedScheduledTaskAndOpenSchedule(
+      page,
+      workViewPage,
+      'Touch drag task',
+    );
 
-    // While a drag is live, CDK's clone is a second schedule-event with the same text.
-    const event = page
-      .locator('schedule-event:not(.custom-drag-preview)')
-      .filter({ hasText: 'Touch drag task' });
-    await expect(event).toBeVisible();
-
-    // grid-row encodes the start row, so a changed style means the task landed on a
+    // grid-area encodes the start row, so a changed style means the task landed on a
     // different time. Scrolling alone never changes it.
     const styleBefore = await event.getAttribute('style');
 
