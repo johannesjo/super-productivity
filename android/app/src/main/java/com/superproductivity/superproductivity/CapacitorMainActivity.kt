@@ -133,6 +133,15 @@ class CapacitorMainActivity : BridgeActivity() {
         registerPlugin(WebDavHttpPlugin::class.java)
         registerPlugin(NavigationBarPlugin::class.java)
 
+        // On Activity recreation (config change / process death) getIntent() still
+        // holds the original launch intent and BridgeActivity.load() replays it
+        // through onNewIntent — without the LAUNCHED_FROM_HISTORY flag, so the
+        // recents guard in onNewIntent doesn't catch it. A stale VIEW data URI
+        // would re-fire appUrlOpen and duplicate the URL scheme task action;
+        // clear it (mirrors the savedInstanceState guard for share intents below).
+        if (savedInstanceState != null) {
+            intent?.data = null
+        }
         try {
             super.onCreate(savedInstanceState)
         } catch (e: Throwable) {
@@ -316,6 +325,14 @@ class CapacitorMainActivity : BridgeActivity() {
     }
 
     override fun onNewIntent(intent: Intent) {
+        // A relaunch from recents redelivers the task's base intent. Replaying a
+        // VIEW data URI would re-fire Capacitor's appUrlOpen and repeat the URL
+        // scheme task action (create-task would add the same task again, syncing
+        // a duplicate to all devices), so strip the stale URI. OAuth callback
+        // replays are equally unwanted. SEND shares carry no data URI — unaffected.
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) {
+            intent.data = null
+        }
         super.onNewIntent(intent)
         handleIntent(intent)
     }
