@@ -46,12 +46,18 @@ const _hasTemplateSchedule = (
   cfg: TaskRepeatCfg,
   dueStr: string,
 ): boolean => {
-  // remindAt is deliberately NOT compared: it is app-managed, not a user edit.
-  // Dismissing a fired reminder clears it (dismissReminderOnly) and snoozing
-  // rewrites it (reScheduleTaskWithTime, which keeps dueWithTime), so comparing
-  // it made every timed recurring instance permanently unreapable and let
-  // skipOverdue silently pile up one leftover per occurrence. The day itself is
-  // still compared below.
+  // remindAt is deliberately NOT compared, on any branch below: it is
+  // app-managed, not a user edit. Dismissing a fired reminder clears it
+  // (dismissReminderOnly — also dispatched when the reminder's task is started
+  // or "Do not remind" is picked) and snoozing rewrites it
+  // (reScheduleTaskWithTime, which keeps dueWithTime). So any instance whose
+  // reminder was dismissed, started or snoozed became permanently unreapable
+  // and skipOverdue silently piled up one leftover per occurrence.
+  // A still-pending (future) remindAt is treated the same way on purpose:
+  // keying deletion off Date.now() would let two devices disagree about what is
+  // reapable. Untimed instances cannot legitimately carry a remindAt at all
+  // (planTaskForDay clears it), so dropping the check there only ever affects
+  // legacy/imported data. The day itself is still compared below.
   if (isValidSplitTime(cfg.startTime)) {
     const expectedDueWithTime = getDateTimeFromClockString(
       cfg.startTime,
