@@ -554,7 +554,7 @@ describe('OperationLogMigrationService', () => {
       // clearAll() swallows its own failures, so an unclearable database would
       // otherwise reload straight back into the same failed migration with the
       // escape hatch appearing to have done nothing.
-      it('reports it instead of reloading when the legacy data will not clear', async () => {
+      it('explains the failure and returns to the dialog when the data will not clear', async () => {
         mockLegacyPfDb.loadAllEntityData.and.resolveTo({
           globalConfig: { misc: {} },
         } as any);
@@ -564,12 +564,14 @@ describe('OperationLogMigrationService', () => {
         mockDialogRef.afterClosed.and.returnValue(of(START_FRESH_RESULT));
         const reloadSpy = spyOn(service as any, '_triggerReload');
 
-        await expectAsync(service.checkAndMigrate()).toBeRejected();
+        // Must NOT reject: escalating drops through the hydrator into recovery
+        // and the blank "Failed to load data" screen this hatch exists to avoid.
+        await service.checkAndMigrate();
 
-        expect(reloadSpy).not.toHaveBeenCalled();
         expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
           T.MIGRATE.E_START_FRESH_FAILED_MSG,
         );
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
       }, 10000);
 
       // Losing the backup step is the one case where discarding the legacy data

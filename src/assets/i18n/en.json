@@ -2939,7 +2939,7 @@
     "E_MIGRATION_FAILED_MSG": "Your old data could not be migrated. A backup file has been downloaded, so nothing is lost. Restarting will hit the same problem — you can delete the old data to start fresh, then import the backup.",
     "E_MIGRATION_FAILED_NO_BACKUP_MSG": "Your old data could not be migrated, and the automatic backup could not be created either. Your old data has not been changed. Please restart the app, and report this if it keeps happening.",
     "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!",
-    "E_START_FRESH_FAILED_MSG": "The old data could not be deleted. Please restart the app and try again — your backup file has already been downloaded.",
+    "E_START_FRESH_FAILED_MSG": "The old data could not be deleted, so the app cannot start fresh. Your backup file has already been downloaded and is safe. Please report this if it keeps happening.",
     "START_FRESH": "Delete old data",
     "START_FRESH_CONFIRM": "This permanently deletes the old data on this device and starts the app empty. It cannot be undone — but your backup file has already been downloaded, so you can import it later. Continue?",
     "START_FRESH_CONFIRM_BTN": "Delete and start fresh",

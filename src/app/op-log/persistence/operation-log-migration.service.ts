@@ -97,7 +97,6 @@ export class OperationLogMigrationService {
     let migrationLockAcquired = false;
     let isBackupCreated = false;
     let startFreshRequested = false;
-    let startFreshError: unknown = null;
     let dialogRef: MatDialogRef<DialogLegacyMigrationComponent> | undefined;
     try {
       const migrationCompleted = await this.lockService.request(
@@ -190,9 +189,8 @@ export class OperationLogMigrationService {
       if (!startFreshRequested) {
         throw error;
       }
-      // Handled below instead of here, so the migration lock is released and the
-      // dialog is closed before the legacy database is touched.
-      startFreshError = error;
+      // Otherwise handled after the finally block, so the migration lock is
+      // released and the dialog is closed before the legacy database is touched.
     } finally {
       if (migrationLockAcquired) {
         await this.legacyPfDb.releaseMigrationLock();
@@ -201,7 +199,7 @@ export class OperationLogMigrationService {
     }
 
     if (startFreshRequested) {
-      await this._discardLegacyDataAndReload(startFreshError);
+      await this._discardLegacyDataAndReload();
     }
   }
 
@@ -213,7 +211,7 @@ export class OperationLogMigrationService {
    * with the escape hatch looking like it did nothing. Confirm the data is
    * really gone first, and say so when it is not.
    */
-  private async _discardLegacyDataAndReload(originalError: unknown): Promise<void> {
+  private async _discardLegacyDataAndReload(): Promise<void> {
     await this.legacyPfDb.clearAll();
 
     let isDiscarded: boolean;
@@ -242,7 +240,11 @@ export class OperationLogMigrationService {
       this.translateService.instant(T.MIGRATE.E_START_FRESH_FAILED_MSG),
     );
     await firstValueFrom(dialogRef.afterClosed());
-    throw originalError;
+    // Reload rather than escalate: a throw here drops through the hydrator into
+    // recovery and the blank "Failed to load data" screen — the dead end this
+    // escape hatch exists to remove. Reloading returns the user to the migration
+    // dialog, which still explains the failure and still offers a second try.
+    this._triggerReload();
   }
 
   /** Seam for tests — reloading the Karma page would kill the run. */
