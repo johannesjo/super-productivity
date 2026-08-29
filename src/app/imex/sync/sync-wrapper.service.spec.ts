@@ -2040,6 +2040,37 @@ describe('SyncWrapperService', () => {
       expect(forceUploadSpy).toHaveBeenCalledWith('InvalidFilePrefixError');
     });
 
+    it('should NOT offer force-overwrite for InvalidFilePrefixError with a markup head', async () => {
+      // A markup head means the download was a response page (WebDAV
+      // multistatus, proxy/captive-portal) — the stored remote file is likely
+      // intact, so offering the overwrite here would clobber healthy remote
+      // data over a transient network/login problem.
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(
+          new InvalidFilePrefixError({
+            expectedPrefix: 'pf_',
+            endSeparator: '__',
+            inputLength: 1543,
+            prefixAt: -1,
+            headShape: 'markup',
+          }),
+        ),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.F.SYNC.S.ERROR_REMOTE_RESPONSE_NOT_SYNC_DATA,
+          type: 'ERROR',
+        }),
+      );
+      const callArgs = mockSnackService.open.calls.mostRecent().args[0];
+      expect(callArgs['actionFn']).toBeUndefined();
+    });
+
     it('should handle SyncDataCorruptedError with version-mismatch message (no force-overwrite)', async () => {
       mockSyncService.downloadRemoteOps.and.returnValue(
         Promise.reject(

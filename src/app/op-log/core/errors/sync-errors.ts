@@ -1,5 +1,8 @@
 import { IValidation } from 'typia';
-import type { SyncFilePrefixInvalidPrefixDetails } from '@sp/sync-core';
+import type {
+  SyncFileHeadShape,
+  SyncFilePrefixInvalidPrefixDetails,
+} from '@sp/sync-core';
 import {
   AdditionalLogErrorBase as PackageAdditionalLogErrorBase,
   extractErrorMessage as packageExtractErrorMessage,
@@ -470,6 +473,14 @@ export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorB
 
 export class InvalidFilePrefixError extends AdditionalLogErrorBase {
   override name = 'InvalidFilePrefixError';
+  /**
+   * Coarse shape of what the body started with instead of the prefix.
+   * `markup` means the download was a RESPONSE page (WebDAV multistatus,
+   * proxy or captive-portal), not the stored file — handlers use this to
+   * withhold the force-overwrite offer, which would clobber a likely-intact
+   * remote file over a transient network problem.
+   */
+  readonly headShape: SyncFileHeadShape;
 
   constructor(details: SyncFilePrefixInvalidPrefixDetails) {
     super({
@@ -480,6 +491,7 @@ export class InvalidFilePrefixError extends AdditionalLogErrorBase {
       prefixAt: details.prefixAt,
       headShape: details.headShape,
     });
+    this.headShape = details.headShape;
   }
 }
 

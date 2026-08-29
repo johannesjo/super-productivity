@@ -1004,6 +1004,20 @@ export class SyncWrapperService {
         error instanceof JsonParseError ||
         error instanceof InvalidFilePrefixError
       ) {
+        // A markup head is a bad RESPONSE (WebDAV multistatus, proxy or
+        // captive-portal page), not a bad stored file: the remote file is
+        // likely intact, so offering force-overwrite would invite clobbering
+        // healthy remote data over a transient network/login problem. Surface
+        // the real cause without the overwrite action instead.
+        if (error instanceof InvalidFilePrefixError && error.headShape === 'markup') {
+          this._providerManager.setSyncStatus('ERROR');
+          this._snackService.open({
+            msg: T.F.SYNC.S.ERROR_REMOTE_RESPONSE_NOT_SYNC_DATA,
+            type: 'ERROR',
+            config: { duration: 12000 },
+          });
+          return 'HANDLED_ERROR';
+        }
         // Remote JSON is unparseable (e.g. truncated write, encoding issue).
         // Force overwrite is safe: local data is intact, remote cannot be parsed.
         // Issues: #5574, #4616, #9627.
