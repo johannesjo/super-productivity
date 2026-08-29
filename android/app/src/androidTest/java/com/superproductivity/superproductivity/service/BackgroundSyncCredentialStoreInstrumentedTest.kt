@@ -30,7 +30,7 @@ import java.security.KeyStore
  * clear from the first launch onward, and never re-encrypted, because create()
  * keeps failing on the stale keyset on every later process start.
  *
- * Run: ./gradlew :app:connectedPlayR8TestAndroidTest (emulator/device required).
+ * Run: ./gradlew :app:connectedPlayDebugAndroidTest (emulator/device required).
  */
 @RunWith(AndroidJUnit4::class)
 class BackgroundSyncCredentialStoreInstrumentedTest {

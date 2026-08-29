@@ -85,9 +85,21 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
         r8Test {
-            // Keep a permanently minified release-like target for instrumentation tests.
-            // Release minification was disabled after #9784, but without exercising R8 in
-            // CI the same class of runtime-only failure could return when it is re-enabled.
+            // A permanently minified, release-configured target so R8 is exercised
+            // in CI. Release minification was disabled after #9784; without a build
+            // that actually runs R8, the same class of runtime-only failure returns
+            // the moment it is re-enabled.
+            //
+            // This variant is NOT the instrumentation target — it is installed and
+            // launched by android/run-android-checks.sh. Pointing `testBuildType`
+            // here was tried and reverted: AGP then minifies the androidTest APK
+            // with -applymapping from the app, while kotlin-stdlib and androidx.*
+            // live in the app APK and are shrunk to what the *app* uses. Every test
+            // died in handleBindApplication on a member the app never calls
+            // (Intrinsics.checkNotNullParameter, then androidx.tracing.Trace), and
+            // UTP's am_instrument_timeout of 31536000s turned each into a hang.
+            // The keep rules to paper over that are open-ended; launching the APK
+            // needs none of them.
             initWith release
             signingConfig signingConfigs.debug
             minifyEnabled true
@@ -95,17 +107,10 @@ android {
             setProguardFiles([
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro",
-                    // Concessions to the test harness only — see the file header.
-                    // Deliberately absent from release, which must stay the config
-                    // proguard-rules.pro is actually validating.
-                    "proguard-rules-r8test.pro",
             ])
-            testProguardFiles "proguard-rules.pro"
             matchingFallbacks = ["release"]
         }
     }
-
-    testBuildType "r8Test"
 
     flavorDimensions "version"
     productFlavors {

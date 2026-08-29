@@ -95,6 +95,13 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets/public
           npx cap update android
+          # After cap update, so nothing it writes into assets can clobber them.
+          # Stand-in for the Angular app: the minified launch smoke needs a page
+          # that reaches the plugin bridge. Nothing else in CI builds the web app.
+          # The config next to it turns Capacitor logging on — see its _comment;
+          # without it the r8Test APK swallows the markers the smoke greps for.
+          cp android/smoke-page/index.html android/app/src/main/assets/public/index.html
+          cp android/smoke-page/capacitor.config.json android/app/src/main/assets/capacitor.config.json
 
       # Fresh ciphertexts from the real sync-core encrypt() (built by npm i),
       # decrypted by LiveJsEncryptRoundTripTest — fails the PR that changes
@@ -118,7 +125,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run Android instrumentation tests
+      - name: Run Android instrumentation tests and minified launch smoke
         if: steps.changes.outputs.android == 'true'
         uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
@@ -126,17 +133,15 @@ jobs:
           target: google_apis
           arch: x86_64
           working-directory: ./android
-          # r8Test, not debug: build.gradle sets `testBuildType "r8Test"` so the
-          # instrumented suite runs against a minified, release-configured APK.
-          # Nothing else in CI exercises R8, and #9785 was a crash that only
-          # exists after minification. play, not fdroid: play is the flavor that
-          # ships to the Play internal track on every master push.
+          # One emulator session for both halves: the instrumented suite on
+          # debug, then a launch smoke against the minified r8Test APK, which is
+          # the only thing in CI that exercises R8. play, not fdroid: play is the
+          # flavor that ships to the Play internal track on every master push.
           #
           # A script file, not an inline block: this action runs the `script:`
           # input one line per `sh -c`, so variables, `set -u` and multi-line
-          # `if` do not survive between lines. See the script for what it does
-          # and why it is bounded.
-          script: ./run-instrumentation-tests.sh
+          # `if` do not survive between lines.
+          script: ./run-android-checks.sh
 
       # cancelled(), not just failure(): a job that exceeds timeout-minutes
       # concludes as cancelled, which is exactly the run whose artifacts we
