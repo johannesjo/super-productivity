@@ -56,11 +56,13 @@ set -eu
 
 SCHEMA="prisma/schema.prisma"
 MIGRATIONS_DIR="prisma/migrations"
-# 4 recoverable CONCURRENTLY migrations today (20260512000000, 20260514000000,
-# 20260514000002, 20260828000001) + a final clean pass + slack. The real
+# 5 recoverable CONCURRENTLY migrations today (20260512000000, 20260514000000,
+# 20260514000002, 20260828000001, 20260829000000) + a final clean pass + slack.
+# Raise this WITH the list: each recoverable migration can cost one attempt, so
+# a stale count silently eats the slack rather than failing a check. The real
 # infinite-loop backstop is the LAST_RECOVERED guard below; this is just a
 # tight upper bound. Overridable for emergencies.
-MAX_ATTEMPTS="${MIGRATE_MAX_ATTEMPTS:-7}"
+MAX_ATTEMPTS="${MIGRATE_MAX_ATTEMPTS:-8}"
 # Validated for the same reason MAX_LOCK_ATTEMPTS is not settable at all: a
 # non-numeric value makes the `-ge` test error inside an `if`, which `set -e`
 # does not catch, so the guard silently never fires.

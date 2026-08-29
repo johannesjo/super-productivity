@@ -87,14 +87,15 @@ These are responses to the constraint above, not general-purpose optimizations.
 Each one's reasoning lives at its own call site — **pointers, not summaries**, so
 this list cannot drift out of sync with the code it describes:
 
-| Mitigation                                                                                   | Where the reasoning lives                                            |
-| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Windowed retention deletes (stated two-sided `server_seq` range, not a discovered `take`)    | `storage-quota.service.ts`, #9692, #9763                             |
-| Covering `(user_id, received_at, server_seq)` index for the fresh-prefix probe               | migration `20260828000001`                                           |
-| Autovacuum **insert** scale factor at 0.02 (and why the other two are deliberately excluded) | migration `20260828000003`                                           |
-| `POSTGRES_MEM_LIMIT` / `POSTGRES_EFFECTIVE_CACHE_SIZE` kept opt-in                           | `docker-compose.yml`, `env.example`                                  |
-| Opt-in 60s `statement_timeout` — **off by default**, and only the `DATABASE_URL` form works  | `env.example`, `docker-compose.yml`                                  |
-| Query-plan integration specs against real PostgreSQL                                         | `tests/integration/old-ops-*-plan.integration.spec.ts`, #9191, #9192 |
+| Mitigation                                                                                           | Where the reasoning lives                                            |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Windowed retention deletes (stated two-sided `server_seq` range, not a discovered `take`)            | `storage-quota.service.ts`, #9692, #9763                             |
+| Covering `(user_id, received_at, server_seq)` index for the fresh-prefix probe                       | migration `20260828000001`                                           |
+| Causal partial index so the fleet-wide boundary scan runs index-only (additive; the broad one stays) | migration `20260829000000`                                           |
+| Autovacuum **insert** scale factor at 0.02 (and why the other two are deliberately excluded)         | migration `20260828000003`                                           |
+| `POSTGRES_MEM_LIMIT` / `POSTGRES_EFFECTIVE_CACHE_SIZE` kept opt-in                                   | `docker-compose.yml`, `env.example`                                  |
+| Opt-in 60s `statement_timeout` — **off by default**, and only the `DATABASE_URL` form works          | `env.example`, `docker-compose.yml`                                  |
+| Query-plan integration specs against real PostgreSQL                                                 | `tests/integration/old-ops-*-plan.integration.spec.ts`, #9191, #9192 |
 
 ### Operating the autovacuum tuning
 

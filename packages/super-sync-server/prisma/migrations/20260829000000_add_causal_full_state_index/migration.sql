@@ -56,9 +56,17 @@
 --   without it ....... the production plan verbatim -- duplicated BitmapOr over
 --                      the broad index, Bitmap Heap Scan, Rows Removed by
 --                      Filter: 500, 1,099 buffers, cost 1,424
--- ~92x fewer buffers, and the heap access that dominated production drops to
--- zero. Scale transfers, absolute numbers do not: production's fixture-equivalent
--- is 3,930 heap blocks on a ~150 IOPS host.
+-- ~92x fewer buffers. Scale transfers, absolute numbers do not: production's
+-- fixture-equivalent is 3,930 heap blocks on a ~150 IOPS host.
+--
+-- `Heap Fetches: 0` is the FIXTURE's number and production will not match it on
+-- day one. An index-only scan still visits the heap for every tuple whose page
+-- the visibility map does not mark all-visible, and the fixture is vacuumed
+-- immediately before measuring. Production's map measured 82.8% coverage on
+-- 2026-08-25 (docs/production-capacity.md), so expect a non-zero count that
+-- falls as 20260828000003's autovacuum tuning takes effect. The saving does not
+-- depend on reaching zero -- it is bounded by map coverage instead of by the
+-- number of candidate rows, which is what stops it growing with the table.
 --
 -- WHY THE BROAD INDEX SURVIVES -- do NOT "clean up" by dropping it. Three live
 -- queries need full-state rows this predicate EXCLUDES, i.e. legacy REPAIRs

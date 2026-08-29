@@ -50,8 +50,10 @@
  *
  * THE PARTIAL INDEXES ARE CREATED BY THIS SPEC, not by the schema. Prisma has no
  * partial-index syntax, so both live only in raw migrations and a `prisma db push`
- * database has NEITHER (#9192). Creating them here keeps the file honest about which
- * world it is measuring regardless of how the test database was provisioned.
+ * database has NEITHER (#9192) — which is how CI provisions
+ * (supersync-server-tests.yml), so dropping them again in `afterAll` restores the exact
+ * starting state. Their DDL is READ OUT OF the migration files rather than copied, so
+ * this file cannot drift into measuring a world that does not ship.
  *
  * Prerequisites, as for the other *.integration.spec.ts files: a real PostgreSQL with the
  * schema applied (`prisma db push`) and DATABASE_URL set; skipped entirely when unset.
@@ -59,6 +61,9 @@
  *   DATABASE_URL=postgresql://... npx vitest run --config vitest.integration.config.ts \
  *     tests/integration/old-ops-boundary-plan.integration.spec.ts
  */
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -99,19 +104,46 @@ const CAUSAL_ROWS = USER_COUNT + (USER_COUNT - LEGACY_REPAIR_USERS);
 const CAUSAL_IDX = 'operations_user_id_causal_full_state_server_seq_idx';
 const BROAD_IDX = 'operations_user_id_full_state_server_seq_idx';
 
+const migrationsDir = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '../../prisma/migrations',
+);
+
 /**
- * The shipped partial indexes, as raw DDL. `CONCURRENTLY` is deliberately omitted: it
- * cannot run inside a transaction and buys nothing in a test. The predicates must stay
- * byte-identical to 20260512000000 (broad) and 20260829000000 (causal) — if a migration
- * changes one, this file must change with it or it measures a world that does not ship.
+ * The shipped `CREATE INDEX` for one index, READ OUT OF ITS MIGRATION rather than copied
+ * here. Copying the predicate would make this file's whole claim conditional on a comment
+ * asking future authors to keep two places in step: the specs measure what ships only for
+ * as long as the copy is accurate, and a drifted copy fails silently by measuring a world
+ * that does not exist. Extracting it means a migration whose shape changes makes this
+ * throw — loudly, at setup — instead.
+ *
+ * `CONCURRENTLY` is stripped: it cannot run inside a transaction and buys nothing here.
  */
-const CREATE_BROAD_IDX = `CREATE INDEX ${BROAD_IDX}
-   ON "operations"("user_id", "server_seq")
-   WHERE "op_type" IN ('SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR')`;
-const CREATE_CAUSAL_IDX = `CREATE INDEX ${CAUSAL_IDX}
-   ON "operations"("user_id", "server_seq")
-   WHERE "op_type" IN ('SYNC_IMPORT', 'BACKUP_IMPORT')
-      OR ("op_type" = 'REPAIR' AND "repair_base_server_seq" IS NOT NULL)`;
+const createIndexFromMigration = (migrationDir: string, indexName: string): string => {
+  const sql = readFileSync(join(migrationsDir, migrationDir, 'migration.sql'), 'utf8');
+  const statement = sql
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n')
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`CREATE INDEX CONCURRENTLY "${indexName}"`));
+  if (!statement) {
+    throw new Error(
+      `no CREATE INDEX CONCURRENTLY "${indexName}" found in ${migrationDir}/migration.sql`,
+    );
+  }
+  return statement.replace(' CONCURRENTLY', '');
+};
+
+const CREATE_BROAD_IDX = createIndexFromMigration(
+  '20260512000000_add_full_state_sequence_index_drop_redundant_indexes',
+  BROAD_IDX,
+);
+const CREATE_CAUSAL_IDX = createIndexFromMigration(
+  '20260829000000_add_causal_full_state_index',
+  CAUSAL_IDX,
+);
 
 /**
  * The statement under test. Hand-written rather than captured, because the sweep issues it
