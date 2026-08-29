@@ -20,21 +20,30 @@ export const readMigratedState = async <T extends Record<string, unknown>>(
   page: Page,
 ): Promise<T> =>
   page.evaluate(
-    async () =>
+    () =>
       new Promise((resolve, reject) => {
         const request = indexedDB.open('SUP_OPS');
         request.onsuccess = (event) => {
           const db = (event.target as IDBOpenDBRequest).result;
-          const tx = db.transaction('state_cache', 'readonly');
-          const getReq = tx.objectStore('state_cache').get('current');
-          getReq.onsuccess = () => {
+          try {
+            const tx = db.transaction('state_cache', 'readonly');
+            const getReq = tx.objectStore('state_cache').get('current');
+            getReq.onsuccess = () => {
+              db.close();
+              resolve(getReq.result?.state || {});
+            };
+            getReq.onerror = () => {
+              db.close();
+              reject(getReq.error);
+            };
+          } catch (e) {
+            // `open()` with no version CREATES an empty SUP_OPS when none
+            // exists, and `transaction()` then throws synchronously in here —
+            // without this the promise never settles and the caller hangs to
+            // the Playwright timeout instead of failing with the reason.
             db.close();
-            resolve(getReq.result?.state || {});
-          };
-          getReq.onerror = () => {
-            db.close();
-            reject(getReq.error);
-          };
+            reject(e);
+          }
         };
         request.onerror = () => reject(request.error);
       }),

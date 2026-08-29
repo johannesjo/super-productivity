@@ -3,7 +3,10 @@ import legacyData from '../../fixtures/legacy-full-migration-backup.json';
 import { MIGRATION_BACKUP_PREFIX } from '../../../electron/shared-with-frontend/get-backup-timestamp';
 import { skipOnboardingForE2E } from '../../utils/waits';
 import { cssSelectors } from '../../constants/selectors';
-import { readMigratedState } from '../../utils/legacy-migration-helpers';
+import {
+  readMigratedState,
+  seedLegacyDatabase,
+} from '../../utils/legacy-migration-helpers';
 
 /**
  * Issue #9139: a tag persisted with no `theme` at all crashed the app on
@@ -27,44 +30,8 @@ import { readMigratedState } from '../../utils/legacy-migration-helpers';
  * Run: npm run e2e:file e2e/tests/migration/legacy-themeless-tag-9139.spec.ts -- --retries=0
  */
 
-/** Read the migrated store back out of SUP_OPS. */
+/** The slices this spec asserts on, out of the migrated SUP_OPS snapshot. */
 type MigratedState = { tag?: { ids: string[]; entities: Record<string, unknown> } };
-
-const seedLegacyDatabase = async (
-  page: Page,
-  data: Record<string, unknown>,
-): Promise<void> => {
-  await page.evaluate(
-    async (entityData) =>
-      new Promise<void>((resolve, reject) => {
-        const request = indexedDB.open('pf', 1);
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          if (!db.objectStoreNames.contains('main')) {
-            db.createObjectStore('main');
-          }
-        };
-        request.onsuccess = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          const tx = db.transaction('main', 'readwrite');
-          const store = tx.objectStore('main');
-          for (const [key, value] of Object.entries(entityData)) {
-            store.put(value, key);
-          }
-          tx.oncomplete = () => {
-            db.close();
-            resolve();
-          };
-          tx.onerror = () => {
-            db.close();
-            reject(tx.error);
-          };
-        };
-        request.onerror = () => reject(request.error);
-      }),
-    data,
-  );
-};
 
 /**
  * Delete `theme` from the TODAY tag of an already-migrated store, and report

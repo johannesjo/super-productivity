@@ -2,7 +2,10 @@ import { test, expect, Page } from '@playwright/test';
 import legacyData from '../../fixtures/legacy-full-migration-backup.json';
 import { MIGRATION_BACKUP_PREFIX } from '../../../electron/shared-with-frontend/get-backup-timestamp';
 import { skipOnboardingForE2E } from '../../utils/waits';
-import { readMigratedState } from '../../utils/legacy-migration-helpers';
+import {
+  readMigratedState,
+  seedLegacyDatabase,
+} from '../../utils/legacy-migration-helpers';
 
 /**
  * Legacy Data Migration E2E Tests
@@ -16,50 +19,6 @@ import { readMigratedState } from '../../utils/legacy-migration-helpers';
  *
  * Run with: npm run e2e:file e2e/tests/migration/legacy-data-migration.spec.ts -- --retries=0
  */
-
-/**
- * Helper to seed the legacy 'pf' IndexedDB database with data
- * Must be called BEFORE navigating to the app
- */
-const seedLegacyDatabase = async (
-  page: Page,
-  data: Record<string, unknown>,
-): Promise<void> => {
-  await page.evaluate(async (entityData) => {
-    return new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open('pf', 1);
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains('main')) {
-          db.createObjectStore('main');
-        }
-      };
-
-      request.onsuccess = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        const tx = db.transaction('main', 'readwrite');
-        const store = tx.objectStore('main');
-
-        // Store each entity type
-        for (const [key, value] of Object.entries(entityData)) {
-          store.put(value, key);
-        }
-
-        tx.oncomplete = () => {
-          db.close();
-          resolve();
-        };
-        tx.onerror = () => {
-          db.close();
-          reject(tx.error);
-        };
-      };
-
-      request.onerror = () => reject(request.error);
-    });
-  }, data);
-};
 
 const readLegacyMigrationLock = async (page: Page): Promise<unknown> => {
   return page.evaluate(async () => {
