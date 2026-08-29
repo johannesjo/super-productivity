@@ -72,6 +72,7 @@ import {
   type ExplainRunner,
   type Measured,
 } from '../explain-plan.helper';
+import { CAUSAL_FULL_STATE_OPERATION_WHERE } from '../../src/sync/sync.types';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const describeWithDb = DATABASE_URL ? describe : describe.skip;
@@ -160,19 +161,61 @@ const CREATE_CAUSAL_IDX = createIndexFromMigration(
 );
 
 /**
- * The statement under test. Hand-written rather than captured, because the sweep issues it
- * through Prisma's `groupBy` (not a tagged template), so there is no production
- * `Prisma.sql` to render. Keep the WHERE identical to
- * CAUSAL_FULL_STATE_OPERATION_WHERE (sync.types.ts) as the sweep spreads it — the OR shape
- * IS the subject of this file, so "simplifying" it here would measure a different query.
+ * The statement under test is CAPTURED FROM PRISMA, not written here.
+ *
+ * The sweep issues it through `prisma.operation.groupBy` (not a tagged template), so a
+ * spec that wants to measure the real thing has to make Prisma emit it and read the query
+ * log. An earlier version of this file hand-wrote a mirror instead, and the mirror was
+ * wrong in a way review would not catch: Prisma appends `OFFSET $5` and schema-qualifies
+ * every column. The OFFSET folds away under a custom plan — but "the difference happened
+ * not to matter this time" is exactly the reasoning a captured statement makes
+ * unnecessary. A mirror can also drift silently the moment the `where` in
+ * storage-quota.service.ts changes; this cannot.
+ *
+ * Assigned in `beforeAll`, so every helper below reads it at call time.
  */
-const BOUNDARY_SQL = `SELECT "user_id", MAX("server_seq") AS "max_server_seq"
-   FROM "operations"
-  WHERE "server_seq" > $1
-    AND ( "op_type" IN ($2, $3)
-          OR ("op_type" = $4 AND "repair_base_server_seq" IS NOT NULL) )
-  GROUP BY "user_id"`;
-const BOUNDARY_PARAMS = [1, 'SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] as const;
+let boundarySql = '';
+let boundaryParams: unknown[] = [];
+
+/**
+ * Runs the sweep's OWN `groupBy` against a logging client and returns what Postgres
+ * received. The `where` is spread from CAUSAL_FULL_STATE_OPERATION_WHERE exactly as
+ * `deleteOldSyncedOpsForAllUsers` spreads it, so importing the constant is the point:
+ * a change to the causal predicate reaches this spec without anyone editing it.
+ */
+const captureBoundaryStatement = async (): Promise<void> => {
+  const seen: Array<{ query: string; params: string }> = [];
+  const logging = new PrismaClient({
+    datasources: { db: { url: DATABASE_URL ?? '' } },
+    log: [{ emit: 'event', level: 'query' }],
+  });
+  (
+    logging as unknown as {
+      $on: (event: 'query', cb: (e: { query: string; params: string }) => void) => void;
+    }
+  ).$on('query', (e) => seen.push({ query: e.query, params: e.params }));
+  try {
+    await logging.operation.groupBy({
+      by: ['userId'],
+      where: { serverSeq: { gt: 1 }, ...CAUSAL_FULL_STATE_OPERATION_WHERE },
+      _max: { serverSeq: true },
+    });
+    // The query event is emitted asynchronously, after the call resolves.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  } finally {
+    await logging.$disconnect();
+  }
+
+  const statement = seen.find((entry) => entry.query.includes('repair_base_server_seq'));
+  if (!statement) {
+    throw new Error(
+      `the boundary groupBy was not captured; saw ${seen.length} statements. ` +
+        "Prisma may have stopped emitting query events, or the sweep's where-clause changed.",
+    );
+  }
+  boundarySql = statement.query;
+  boundaryParams = JSON.parse(statement.params) as unknown[];
+};
 
 /**
  * Every row in ONE scrambled INSERT, which is load-bearing rather than tidy. Full-state
@@ -248,12 +291,12 @@ const toPlan = (m: Measured): Plan => ({
  */
 const measureCustom = async (): Promise<Plan> =>
   prisma.$transaction(async (tx) =>
-    toPlan(await explainCustom(runnerFor(tx), BOUNDARY_SQL, BOUNDARY_PARAMS)),
+    toPlan(await explainCustom(runnerFor(tx), boundarySql, boundaryParams)),
   );
 
 const measureGeneric = async (): Promise<Plan> =>
   prisma.$transaction(async (tx) =>
-    toPlan(await explainGeneric(runnerFor(tx), BOUNDARY_SQL, BOUNDARY_PARAMS)),
+    toPlan(await explainGeneric(runnerFor(tx), boundarySql, boundaryParams)),
   );
 
 const ROLLBACK_SENTINEL = 'rollback-after-measuring';
@@ -291,23 +334,31 @@ const inRolledBackTx = async <T>(
 
 const measureCustomAfter = (setup: readonly string[]): Promise<Plan> =>
   inRolledBackTx(setup, async (tx) =>
-    toPlan(await explainCustom(runnerFor(tx), BOUNDARY_SQL, BOUNDARY_PARAMS)),
+    toPlan(await explainCustom(runnerFor(tx), boundarySql, boundaryParams)),
   );
 
-type BoundaryRow = { user_id: number; max_server_seq: bigint };
+type BoundaryRow = Record<string, unknown>;
 
 /** The boundary query's ANSWER, not its plan. */
 const boundaryRowsAfter = (setup: readonly string[]): Promise<BoundaryRow[]> =>
   inRolledBackTx(setup, (tx) =>
-    tx.$queryRawUnsafe<BoundaryRow[]>(BOUNDARY_SQL, ...BOUNDARY_PARAMS),
+    tx.$queryRawUnsafe<BoundaryRow[]>(boundarySql, ...boundaryParams),
   );
 
+/**
+ * Column names come from Prisma's own SELECT list (`MAX(...)` renders as `max`), so a
+ * shape change here means the captured statement changed — worth a loud failure rather
+ * than a silent `NaN` that would make the comparison below pass on nothing.
+ */
+const boundaryOf = (row: BoundaryRow): [number, number] => {
+  if (row.user_id === undefined || row.max === undefined) {
+    throw new Error(`unexpected boundary row shape: ${JSON.stringify(Object.keys(row))}`);
+  }
+  return [Number(row.user_id), Number(row.max)];
+};
+
 const asComparable = (rows: BoundaryRow[]): string =>
-  JSON.stringify(
-    rows
-      .map((r) => [Number(r.user_id), Number(r.max_server_seq)])
-      .sort((a, b) => a[0] - b[0]),
-  );
+  JSON.stringify(rows.map(boundaryOf).sort((a, b) => a[0] - b[0]));
 
 describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
   beforeAll(async () => {
@@ -326,6 +377,8 @@ describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
     // which only vacuum populates. ANALYZE rides along because the planner otherwise
     // works from empty statistics.
     await prisma.$executeRawUnsafe('VACUUM (ANALYZE) "operations"');
+
+    await captureBoundaryStatement();
 
     // Assert the FIXTURE, not the arithmetic above: if these counts drift, every budget
     // below silently stops meaning what its comment says.
@@ -363,6 +416,12 @@ describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
 
   it('answers the boundary scan without touching the heap', async () => {
     const plan = await measureCustom();
+
+    // Measuring what the sweep SENDS, not a paraphrase of it. Both markers are load-
+    // bearing: `OFFSET` is the Prisma-ism a hand-written mirror omitted, and the causal
+    // clause is what the partial index has to be proven against.
+    expect(boundarySql).toContain('OFFSET');
+    expect(boundarySql).toContain('repair_base_server_seq" IS NOT NULL');
 
     // THE budget. `blocks` cannot carry this claim: a heap page still in shared_buffers
     // is a hit, so a fully degraded scan reads cheap here and is catastrophic on a
@@ -424,7 +483,7 @@ describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
     expect(asComparable(withIndex)).toBe(asComparable(withoutIndex));
     // Not vacuous: every user's boundary is the REPAIR where one counts and the import
     // otherwise, so a predicate that let legacy REPAIRs through would move these numbers.
-    const boundaries = new Set(withIndex.map((r) => Number(r.max_server_seq)));
+    const boundaries = new Set(withIndex.map((r) => boundaryOf(r)[1]));
     expect([...boundaries].sort((a, b) => a - b)).toEqual([IMPORT_SEQ, REPAIR_SEQ]);
   });
 

@@ -157,7 +157,17 @@ CONCURRENTLY` on `operations` at ~7 GB. What can exceed the budget is not the
   host was measured at ~163 pages/s (2026-08-29), which would imply hours for two
   passes over ~861k pages. That rate is `autovacuum_vacuum_cost_delay`
   throttling, not the disk; `CREATE INDEX CONCURRENTLY` has no such throttle and
-  reads sequentially.
+  reads sequentially. Measured on PostgreSQL 16.15 against this schema
+  (2026-08-29): the build took 24 ms over 1,101 pages and 401 ms over 27,524 —
+  linear in pages, so ~13 s at production's ~861k on that hardware. Even an order
+  of magnitude slower leaves it far inside a 1800 s budget. **The build is not
+  the risk. The wait is.**
+- **The win does not decay as the table grows.** Same measurements: a 25x larger
+  table (60k -> 1.5M rows, 1,101 -> 27,524 pages) moved the scan from 12 to 242
+  blocks — tracking the _causal_ row count, which grew 25x too, at a flat
+  ~0.003 blocks per causal row. Production's causal ratio is ~165x _lower_ than
+  that fixture's (~3,162 causal rows in 9.1M), so its scan should land nearer the
+  12 than the 242. Cost belongs to full-state ops, not to the table.
 - **A timed-out build is recoverable, not wedged.** The migration is in
   `migrate-deploy.sh`'s recoverable-`CONCURRENTLY` list, so a leftover INVALID
   index is dropped and rebuilt on the next attempt. `deploy.sh` exits 124 and
