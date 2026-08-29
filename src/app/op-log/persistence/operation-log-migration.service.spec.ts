@@ -13,6 +13,7 @@ import { ActionType, OpType } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
+import { START_FRESH_RESULT } from './dialog-legacy-migration/dialog-legacy-migration.component';
 import { AppDataComplete } from '../model/model-config';
 import legacyPartial from '../validation/test-fixtures/legacy-pf-v13-partial-models.json';
 
@@ -42,6 +43,7 @@ describe('OperationLogMigrationService', () => {
       'loadClientId',
       'acquireMigrationLock',
       'releaseMigrationLock',
+      'clearAll',
     ]);
 
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -347,6 +349,7 @@ describe('OperationLogMigrationService', () => {
           componentInstance: {
             status: { set: jasmine.createSpy('statusSet') },
             error: { set: jasmine.createSpy('errorSet') },
+            canStartFresh: { set: jasmine.createSpy('canStartFreshSet') },
           },
           afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(undefined)),
           close: jasmine.createSpy('close'),
@@ -463,6 +466,7 @@ describe('OperationLogMigrationService', () => {
           componentInstance: {
             status: { set: jasmine.createSpy('statusSet') },
             error: { set: jasmine.createSpy('errorSet') },
+            canStartFresh: { set: jasmine.createSpy('canStartFreshSet') },
           },
           afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(undefined)),
           close: jasmine.createSpy('close'),
@@ -494,6 +498,49 @@ describe('OperationLogMigrationService', () => {
         expect(op.payload.boards).toBeDefined();
         // Generous timeout: this is the only test that runs the real
         // _performMigration, whose dynamic validation/repair imports are slow.
+      }, 10000);
+
+      it('offers the start-fresh escape hatch once the backup is downloaded', async () => {
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: { misc: {} },
+        } as any);
+
+        await expectAsync(service.checkAndMigrate()).toBeRejected();
+
+        expect(mockDialogRef.componentInstance.canStartFresh.set).toHaveBeenCalledWith(
+          true,
+        );
+      }, 10000);
+
+      it('clears the legacy data and reloads when the user starts fresh', async () => {
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: { misc: {} },
+        } as any);
+        mockLegacyPfDb.clearAll.and.resolveTo();
+        mockDialogRef.afterClosed.and.returnValue(of(START_FRESH_RESULT));
+        const reloadSpy = spyOn(service as any, '_triggerReload');
+
+        // The dead end is the bug: choosing to start fresh must not re-throw
+        // the migration error at the caller.
+        await service.checkAndMigrate();
+
+        expect(mockLegacyPfDb.clearAll).toHaveBeenCalled();
+        expect(reloadSpy).toHaveBeenCalled();
+        expect(mockLegacyPfDb.releaseMigrationLock).toHaveBeenCalledBefore(
+          mockLegacyPfDb.clearAll,
+        );
+      }, 10000);
+
+      it('does not clear anything when the user only acknowledges the error', async () => {
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: { misc: {} },
+        } as any);
+        const reloadSpy = spyOn(service as any, '_triggerReload');
+
+        await expectAsync(service.checkAndMigrate()).toBeRejected();
+
+        expect(mockLegacyPfDb.clearAll).not.toHaveBeenCalled();
+        expect(reloadSpy).not.toHaveBeenCalled();
       }, 10000);
 
       it('still refuses a legacy database with no task or project state', async () => {

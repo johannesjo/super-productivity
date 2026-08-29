@@ -11,6 +11,7 @@ import { ClientIdService } from '../../core/util/client-id.service';
 import {
   DialogLegacyMigrationComponent,
   MigrationStatus,
+  START_FRESH_RESULT,
 } from './dialog-legacy-migration/dialog-legacy-migration.component';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { download } from '../../util/download';
@@ -93,6 +94,8 @@ export class OperationLogMigrationService {
     }
 
     let migrationLockAcquired = false;
+    let isBackupCreated = false;
+    let startFreshRequested = false;
     let dialogRef: MatDialogRef<DialogLegacyMigrationComponent> | undefined;
     try {
       const migrationCompleted = await this.lockService.request(
@@ -147,6 +150,7 @@ export class OperationLogMigrationService {
           await this._ensureTranslationsLoaded();
           dialogRef = this._showMigrationDialog();
           await this._createAutoBackup(dialogRef);
+          isBackupCreated = true;
           await this._performMigration(dialogRef);
           return true;
         },
@@ -166,8 +170,17 @@ export class OperationLogMigrationService {
         dialogRef.componentInstance.error.set(
           'Migration failed. Your backup has been downloaded. Please restart or import the backup file.',
         );
+        // Offer the way out ONLY once the backup is on the user's disk: without
+        // it, starting fresh would discard the sole copy of their data (#9770).
+        dialogRef.componentInstance.canStartFresh.set(isBackupCreated);
         // Wait for user acknowledgment before throwing
-        await firstValueFrom(dialogRef.afterClosed());
+        const dialogResult = await firstValueFrom(dialogRef.afterClosed());
+        if (dialogResult === START_FRESH_RESULT) {
+          startFreshRequested = true;
+        }
+      }
+      if (startFreshRequested) {
+        return;
       }
       throw error;
     } finally {
@@ -175,7 +188,21 @@ export class OperationLogMigrationService {
         await this.legacyPfDb.releaseMigrationLock();
       }
       dialogRef?.close();
+      if (startFreshRequested) {
+        // Runs after the lock is released: the next boot must find no legacy
+        // data at all, so it takes the ordinary "starting fresh" path.
+        await this.legacyPfDb.clearAll();
+        OpLog.normal(
+          'OperationLogMigrationService: Legacy data discarded on user request. Reloading.',
+        );
+        this._triggerReload();
+      }
     }
+  }
+
+  /** Seam for tests — reloading the Karma page would kill the run. */
+  private _triggerReload(): void {
+    window.location.reload();
   }
 
   /**

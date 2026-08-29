@@ -13,6 +13,9 @@ import { T } from '../../../t.const';
 
 export type MigrationStatus = 'preparing' | 'backup' | 'migrating' | 'complete' | 'error';
 
+/** afterClosed() value meaning "discard the legacy data and boot empty". */
+export const START_FRESH_RESULT = 'START_FRESH';
+
 @Component({
   selector: 'dialog-legacy-migration',
   templateUrl: './dialog-legacy-migration.component.html',
@@ -36,6 +39,14 @@ export class DialogLegacyMigrationComponent {
   status = signal<MigrationStatus>('preparing');
   error = signal<string | null>(null);
 
+  /**
+   * Only set by the caller once the pre-migration backup is safely downloaded —
+   * starting fresh throws the legacy database away, so it must never be offered
+   * for data we have not handed the user a copy of first.
+   */
+  canStartFresh = signal(false);
+  isConfirmingStartFresh = signal(false);
+
   getStatusKey(): string {
     const statusMap: Record<MigrationStatus, string> = {
       preparing: T.MIGRATE.STATUS_PREPARING,
@@ -53,5 +64,17 @@ export class DialogLegacyMigrationComponent {
 
   acknowledge(): void {
     this._dialogRef.close();
+  }
+
+  startFresh(): void {
+    this.isConfirmingStartFresh.set(true);
+  }
+
+  cancelStartFresh(): void {
+    this.isConfirmingStartFresh.set(false);
+  }
+
+  confirmStartFresh(): void {
+    this._dialogRef.close(START_FRESH_RESULT);
   }
 }

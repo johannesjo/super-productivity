@@ -118,4 +118,83 @@ test.describe('@migration #9770 legacy data missing newer model slices', () => {
       await context.close();
     }
   });
+  // The other half of #9770: when legacy data genuinely CANNOT be migrated the
+  // app used to dead-end on this dialog forever — OK was the only button and
+  // every restart landed right back here. Seeds a database with settings but no
+  // task/project state, which isDataRepairPossible() refuses by design.
+  test('offers a way out when the legacy data cannot be migrated at all', async ({
+    browser,
+    baseURL,
+  }) => {
+    const unmigratableData = {
+      globalConfig: (legacyPartial as Record<string, unknown>).globalConfig,
+    };
+
+    const context = await browser.newContext({
+      storageState: undefined,
+      baseURL: baseURL || 'http://localhost:4242',
+      acceptDownloads: true,
+    });
+    const page = await context.newPage();
+    await page.addInitScript(skipOnboardingForE2E);
+
+    try {
+      await page.route('**/*.js', async (route) => route.abort());
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await seedLegacyDatabase(page, unmigratableData);
+      await page.unroute('**/*.js');
+
+      const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await downloadPromise;
+
+      // The dead end itself.
+      const dialog = page.locator('dialog-legacy-migration');
+      await expect(dialog.locator('.error-message')).toBeVisible({ timeout: 30000 });
+
+      // The escape hatch is offered only because the backup download above
+      // already happened.
+      const startFreshBtn = dialog.getByRole('button', {
+        name: 'Delete old data and start fresh',
+      });
+      await expect(startFreshBtn).toBeVisible();
+      await startFreshBtn.click();
+
+      // Destructive, so it takes a second, explicit confirmation.
+      await expect(dialog.locator('.start-fresh-warning')).toBeVisible();
+      await dialog.getByRole('button', { name: 'Delete and start fresh' }).click();
+
+      // The app reloads itself and comes up empty instead of dead-ending again.
+      await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 30000 });
+      await expect(page.locator('dialog-legacy-migration')).toHaveCount(0);
+
+      // The legacy database is really gone — otherwise the next boot would
+      // walk straight back into the same failed migration.
+      const legacyKeys = await page.evaluate(
+        async () =>
+          new Promise<number>((resolve, reject) => {
+            const req = indexedDB.open('pf', 1);
+            req.onsuccess = () => {
+              const db = req.result;
+              const countReq = db
+                .transaction('main', 'readonly')
+                .objectStore('main')
+                .count();
+              countReq.onsuccess = () => {
+                db.close();
+                resolve(countReq.result);
+              };
+              countReq.onerror = () => {
+                db.close();
+                reject(countReq.error);
+              };
+            };
+            req.onerror = () => reject(req.error);
+          }),
+      );
+      expect(legacyKeys).toBe(0);
+    } finally {
+      await context.close();
+    }
+  });
 });
