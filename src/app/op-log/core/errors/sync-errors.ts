@@ -356,11 +356,14 @@ export class JsonParseError extends Error {
     super(message);
     this.position = position;
 
-    // Extract a sample of the data around the error position for debugging
+    // Extract a sample of the data around the error position for debugging.
+    // Letters and digits are masked (rule: log history is exportable, never
+    // log user content) — the structural shape that survives is what matters:
+    // it still separates truncation, markup, and binary junk at a glance.
     if (dataStr && position !== undefined) {
       const start = Math.max(0, position - 50);
       const end = Math.min(dataStr.length, position + 50);
-      this.dataSample = `...${dataStr.substring(start, end)}...`;
+      this.dataSample = `...${dataStr.substring(start, end).replace(/[\p{L}\p{N}]/gu, '*')}...`;
     }
   }
 }

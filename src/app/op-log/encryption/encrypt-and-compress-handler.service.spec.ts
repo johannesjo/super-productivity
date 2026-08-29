@@ -333,6 +333,19 @@ describe('JsonParseError', () => {
     expect(error.dataSample!.length).toBeLessThan(longData.length + 10);
   });
 
+  it('should mask user content in the data sample but keep its structural shape', () => {
+    // Log history is exportable — the sample may not retain task titles/notes.
+    const syntaxError = new SyntaxError('Unexpected token at position 30');
+    const error = new JsonParseError(syntaxError, '{"title":"Fire Bob König 123"}<html>');
+
+    expect(error.dataSample).not.toContain('Fire');
+    expect(error.dataSample).not.toContain('König');
+    expect(error.dataSample).not.toContain('123');
+    // Structure survives: JSON punctuation and markup stay recognizable.
+    expect(error.dataSample).toContain('{"*****":"');
+    expect(error.dataSample).toContain('<****>');
+  });
+
   it('should have error name set to JsonParseError', () => {
     const error = new JsonParseError(new Error('test'), 'data');
 
