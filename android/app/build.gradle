@@ -63,11 +63,14 @@ android {
             // anyone launched it: master auto-publishes to that track, so two
             // minified builds shipped before the crash was reported.
             //
-            // Nothing in CI ever starts a minified build. The emulator job
-            // installs the DEBUG variant, and the R8 job only checked keep rules
-            // against mapping.txt — a build that dies in onCreate passes both.
-            // That job also minified the FDROID flavor only, while the APK that
-            // ships to Play is the PLAY flavor. R8 full mode is the default
+            // At the time, nothing in CI ever started a minified build. The
+            // emulator job installed the DEBUG variant, and the R8 job only
+            // checked keep rules against mapping.txt — a build that dies in
+            // onCreate passes both. That job also minified the FDROID flavor
+            // only, while the APK that ships to Play is the PLAY flavor. That
+            // gap is closed for play: android/run-android-checks.sh launches the
+            // minified playR8Test APK on every Android PR. R8 full mode is the
+            // default
             // under AGP 8+ (android.enableR8.fullMode is unset), so obfuscation,
             // shrinking, optimization and resource shrinking all ran against
             // this app for the first time, simultaneously, in production.
@@ -76,11 +79,14 @@ android {
             // February 2027, so there is nothing to buy by carrying that risk in
             // the meantime.
             //
-            // Before re-enabling: make CI actually launch a minified release
-            // build on the emulator (android-tests.yml), so a startup crash is a
-            // red check instead of a shipped one. proguard-rules.pro and
-            // tools/verify-r8-mapping.mjs are kept ready for that; both are inert
-            // while minifyEnabled is false.
+            // Before re-enabling, one thing is still missing: the launch smoke
+            // covers the PLAY flavor only. fdroidRelease would minify too, and
+            // build-android.yml already checks both mappings on the stated
+            // reasoning that playRelease passing says nothing about
+            // fdroidRelease — the runtime half has to honour that as well.
+            // shortcut: play-only launch, because nothing minified ships today;
+            // assemble and launch fdroidR8Test in run-android-checks.sh as part
+            // of the re-land, not after it.
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

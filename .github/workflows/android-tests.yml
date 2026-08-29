@@ -155,5 +155,6 @@ jobs:
             android/app/build/reports/androidTests/connected/
             android/app/build/outputs/androidTest-results/connected/
             android/build/instrumentation-diagnostics/
+            android/app/build/outputs/mapping/
           if-no-files-found: ignore
           retention-days: 14

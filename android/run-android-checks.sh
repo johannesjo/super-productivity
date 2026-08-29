@@ -86,8 +86,13 @@ fi
 # FullscreenActivity is the real MAIN/LAUNCHER. On a fresh install LaunchDecider
 # resolves to MODE_OFFLINE, so it forwards straight into CapacitorMainActivity —
 # the path #9785 died on.
-adb shell am start -W -n "$PACKAGE/.FullscreenActivity" > /dev/null 2>&1 || true
+adb shell am start -n "$PACKAGE/.FullscreenActivity" > /dev/null 2>&1 || true
 
+# The crash arm matches "Process: <our package>", not a bare FATAL EXCEPTION:
+# AndroidRuntime prints that line directly under the exception and nothing else
+# emits it, so an unrelated process dying on the emulator inside this window
+# cannot red the job. 120s is ~17x the observed time to marker (run
+# 33262336320), so reaching the deadline means the app never got to the bridge.
 smoke_status=timeout
 deadline=$((SECONDS + 120))
 while [ "$SECONDS" -lt "$deadline" ]; do
@@ -95,7 +100,7 @@ while [ "$SECONDS" -lt "$deadline" ]; do
   case "$log" in
     *"SP_SMOKE OK"*) smoke_status=ok; break ;;
     *"SP_SMOKE FAIL"*) smoke_status=fail; break ;;
-    *"FATAL EXCEPTION"*) smoke_status=crash; break ;;
+    *"Process: $PACKAGE"*) smoke_status=crash; break ;;
   esac
   sleep 3
 done
@@ -104,7 +109,11 @@ capture_diagnostics
 
 case "$smoke_status" in
   ok)
+    # Echo the marker itself: on green the job log otherwise shows no evidence
+    # of what the app actually reported, and the marker carries the permission
+    # state and the bridge version the minified build returned.
     echo "Minified launch smoke passed."
+    adb logcat -d | grep -F 'SP_SMOKE OK' | tail -1
     ;;
   fail)
     echo "::error::minified build reached the bridge but the smoke page reported a failure"
