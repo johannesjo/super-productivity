@@ -17,6 +17,7 @@ import { CustomThemeRef } from './custom-theme.service';
 import { KeyboardInfo, KeyboardPlugin } from '@capacitor/keyboard';
 import { PluginListenerHandle } from '@capacitor/core';
 import { BodyClass } from '../../app.constants';
+import { createOneShotSettle, OneShotSettle } from './ios-keyboard-settle.util';
 
 interface GlobalThemeInitHarness {
   init(): void;
@@ -329,7 +330,8 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     _cssVarCache: Map<string, string>;
     _overlayContainer: { getContainerElement(): HTMLElement };
     _iosViewportVarTarget: HTMLElement;
-    _iosKeyboardSettleTimeout: number | undefined;
+    _iosShowSettle: OneShotSettle;
+    _iosHideSettle: OneShotSettle;
     iosShellHeight: WritableSignal<string | null>;
     _scrollActiveInputIntoView(): void;
     _environmentInjector: EnvironmentInjector;
@@ -338,6 +340,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
   type KeyboardHandler = (info: KeyboardInfo) => void;
 
   const BASE_HEIGHT = 800;
+  const SETTLE_FALLBACK_MS = 400;
   const KEYBOARD_HEIGHT = 336;
 
   let harness: IosKeyboardHarness;
@@ -441,6 +444,9 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     harness._iosKeyboardFrameUnreliable = false;
     harness._isIosKeyboardSettled = false;
     harness._cssVarCache = new Map<string, string>();
+    // Field initializers do not run on an Object.create harness.
+    harness._iosShowSettle = createOneShotSettle(SETTLE_FALLBACK_MS);
+    harness._iosHideSettle = createOneShotSettle(SETTLE_FALLBACK_MS);
     harness._scrollActiveInputIntoView = scrollIntoViewSpy;
     harness._environmentInjector = TestBed.inject(EnvironmentInjector);
 
@@ -645,7 +651,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
 
       expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
 
-      tick(400);
+      tick(SETTLE_FALLBACK_MS);
       flushRender();
 
       expect(rootVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
@@ -656,7 +662,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
       willShow();
       didShow();
       flushRender();
-      tick(400);
+      tick(SETTLE_FALLBACK_MS);
       flushRender();
 
       expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
@@ -665,7 +671,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     it('drops the pending timer when the keyboard hides again', fakeAsync(() => {
       willShow();
       willHide();
-      tick(400);
+      tick(SETTLE_FALLBACK_MS);
       flushRender();
 
       expect(harness._isIosKeyboardSettled).toBe(false);
@@ -691,6 +697,52 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
       `calc(${BASE_HEIGHT - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
     );
   });
+
+  // The mirror of the didShow fallback: without it a single dropped didHide
+  // would strand a stale baseline for the rest of the session.
+  it('takes a fresh baseline on the timer when keyboardDidHide is dropped', fakeAsync(() => {
+    willShow();
+    didShow();
+    willHide();
+    tick(SETTLE_FALLBACK_MS);
+    setWindowHeights(600, 600);
+    willShow();
+    didShow();
+    flushRender();
+
+    expect(harness.iosShellHeight()).toBe(
+      `calc(${600 - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
+    );
+  }));
+
+  it('does not scroll twice when didShow arrives after the fallback fired', fakeAsync(() => {
+    willShow();
+    tick(SETTLE_FALLBACK_MS);
+    flushRender();
+
+    didShow();
+    flushRender();
+
+    expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+  }));
+
+  // A focus move between two fields: the willHide baseline reset must not fire
+  // behind the keyboard that is already coming back.
+  it('drops the pending baseline reset when focus moves to another field', fakeAsync(() => {
+    willShow();
+    didShow();
+    willHide();
+    setWindowHeights(BASE_HEIGHT - KEYBOARD_HEIGHT, BASE_HEIGHT - KEYBOARD_HEIGHT);
+    willShow();
+    tick(SETTLE_FALLBACK_MS);
+    didShow();
+    flushRender();
+
+    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(harness.iosShellHeight()).toBe(
+      `calc(${BASE_HEIGHT - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
+    );
+  }));
 
   it('takes a fresh baseline once the web view has grown back', () => {
     willShow();
