@@ -13,6 +13,8 @@ import { ActionType, OpType } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
+import { AppDataComplete } from '../model/model-config';
+import legacyPartial from '../validation/test-fixtures/legacy-pf-v13-partial-models.json';
 
 describe('OperationLogMigrationService', () => {
   let service: OperationLogMigrationService;
@@ -434,6 +436,81 @@ describe('OperationLogMigrationService', () => {
         expect(mockClientIdService.persistClientId).not.toHaveBeenCalled();
         expect(mockOpLogStore.appendOperationAndSnapshot).toHaveBeenCalled();
       });
+    });
+
+    // #9770: a `pf` database written by an older version only holds the model
+    // slices that existed back then. Runs the REAL _performMigration — with the
+    // missing slices left unfilled it throws "Data repair failed" and the user
+    // is stuck on "Migration Failed" / "Failed to load data" on every restart.
+    describe('when legacy data predates newer model slices', () => {
+      let mockDialogRef: any;
+
+      beforeEach(() => {
+        mockOpLogStore.loadStateCache.and.resolveTo(null);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+        mockOpLogStore.appendOperationAndSnapshot.and.resolveTo(1);
+        mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
+        mockLegacyPfDb.acquireMigrationLock.and.resolveTo(true);
+        mockLegacyPfDb.releaseMigrationLock.and.resolveTo();
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo(
+          JSON.parse(JSON.stringify(legacyPartial)),
+        );
+        mockLegacyPfDb.loadMetaModel.and.resolveTo({});
+        mockLegacyPfDb.loadClientId.and.resolveTo('legacyClientId1234');
+        mockClientIdService.persistClientId.and.resolveTo();
+
+        mockDialogRef = {
+          componentInstance: {
+            status: { set: jasmine.createSpy('statusSet') },
+            error: { set: jasmine.createSpy('errorSet') },
+          },
+          afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(undefined)),
+          close: jasmine.createSpy('close'),
+        };
+        mockMatDialog.open.and.returnValue(mockDialogRef);
+
+        mockTranslateService.use = jasmine
+          .createSpy('use')
+          .and.returnValue(of(undefined));
+        (service as any).languageService = {
+          detect: jasmine.createSpy('detect').and.returnValue('en'),
+        };
+
+        // Skip auto-backup only (download is a non-injectable module import)
+        spyOn(service as any, '_createAutoBackup').and.resolveTo();
+      });
+
+      it('migrates the data instead of aborting', async () => {
+        await service.checkAndMigrate();
+
+        expect(mockDialogRef.componentInstance.error.set).not.toHaveBeenCalled();
+        expect(mockOpLogStore.appendOperationAndSnapshot).toHaveBeenCalled();
+
+        const op = mockOpLogStore.appendOperationAndSnapshot.calls.mostRecent()
+          .args[0] as { payload: AppDataComplete };
+        expect(op.payload.task.ids).toEqual(['TJ-NDR6Sjc0qc0TS-tUgE']);
+        expect(op.payload.timeTracking).toBeDefined();
+        expect(op.payload.menuTree).toBeDefined();
+        expect(op.payload.boards).toBeDefined();
+        // Generous timeout: this is the only test that runs the real
+        // _performMigration, whose dynamic validation/repair imports are slow.
+      }, 10000);
+
+      it('still refuses a legacy database with no task or project state', async () => {
+        // Filling defaults must not defeat the isDataRepairPossible() guard:
+        // an empty migration would write a genesis snapshot that permanently
+        // shadows the legacy database.
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: { misc: {} },
+        } as any);
+
+        await expectAsync(service.checkAndMigrate()).toBeRejectedWithError(
+          /Legacy data is corrupted and cannot be repaired/,
+        );
+
+        expect(mockOpLogStore.appendOperationAndSnapshot).not.toHaveBeenCalled();
+        expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalled();
+      }, 10000);
     });
   });
 });

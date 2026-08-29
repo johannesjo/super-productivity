@@ -20,7 +20,7 @@ import { uuidv7 } from '../../util/uuid-v7';
 import { ActionType, Operation, OpType } from '../core/operation.types';
 import { SINGLETON_ENTITY_ID } from '../core/entity-registry';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
-import { AppDataComplete } from '../model/model-config';
+import { AppDataComplete, withDefaultModelSlices } from '../model/model-config';
 import {
   MIGRATION_BACKUP_PREFIX,
   getBackupTimestamp,
@@ -222,14 +222,16 @@ export class OperationLogMigrationService {
   ): Promise<void> {
     this._setStatus(dialogRef, 'migrating');
 
-    // 1. Load data from legacy database
-    const legacyData = await this.legacyPfDb.loadAllEntityData();
+    // 1. Load data from legacy database, adding defaults for the model slices
+    // that database is too old to contain (#9770).
+    const rawLegacyData =
+      (await this.legacyPfDb.loadAllEntityData()) as unknown as Record<string, unknown>;
+    const legacyData = withDefaultModelSlices(rawLegacyData);
 
     // 2. Validate and repair if needed
-    // LegacyAppData has unknown-typed fields; cast through unknown for the validation pipeline
     const { validateFull } = await import('../validation/validation-fn');
-    const validationResult = validateFull(legacyData as unknown as AppDataComplete);
-    let dataToMigrate = legacyData as unknown as AppDataComplete;
+    const validationResult = validateFull(legacyData);
+    let dataToMigrate: AppDataComplete = legacyData;
 
     if (!validationResult.isValid) {
       // Damaged legacy data on migration — hold off the rating prompt.
@@ -238,7 +240,10 @@ export class OperationLogMigrationService {
         'OperationLogMigrationService: Legacy data validation failed, attempting repair',
       );
 
-      if (!isDataRepairPossible(legacyData as unknown as AppDataComplete)) {
+      // Check the RAW data: after withDefaultModelSlices() every slice exists, so
+      // checking `legacyData` would make this guard always pass and turn a legacy
+      // database without any task/project state into a silent empty migration.
+      if (!isDataRepairPossible(rawLegacyData as unknown as AppDataComplete)) {
         throw new Error('Legacy data is corrupted and cannot be repaired');
       }
 
@@ -247,7 +252,7 @@ export class OperationLogMigrationService {
           ? validationResult.typiaResult.errors
           : [];
       const { dataRepair } = await import('../validation/data-repair');
-      dataToMigrate = dataRepair(legacyData as unknown as AppDataComplete, errors).data;
+      dataToMigrate = dataRepair(legacyData, errors).data;
 
       // Re-validate after repair to ensure success
       const postRepairValidation = validateFull(dataToMigrate);
