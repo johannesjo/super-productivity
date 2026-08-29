@@ -114,6 +114,13 @@ export class BackupService {
       const { isLegacyBackupData, migrateLegacyBackup } =
         await import('./migrate-legacy-backup');
       if (isLegacyBackupData(backupData as unknown as Record<string, unknown>)) {
+        // migrateLegacyBackup() dereferences the slices it migrates, so a
+        // truncated legacy payload has to be refused here rather than inside a
+        // migration step, where it would surface as an opaque TypeError.
+        if (!isDataRepairPossible(backupData)) {
+          recordCriticalErrorTime();
+          throw new Error('Data validation failed and repair not possible');
+        }
         OpLog.normal(
           'BackupService: Detected legacy backup format, running migration...',
         );

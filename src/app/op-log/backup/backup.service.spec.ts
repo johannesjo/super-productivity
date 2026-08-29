@@ -151,6 +151,20 @@ describe('BackupService', () => {
     service = TestBed.inject(BackupService);
   });
 
+  it('should refuse a truncated legacy backup with the repair-not-possible message', async () => {
+    const truncated = createMinimalValidBackup() as any;
+    delete truncated.task;
+    delete truncated.project;
+    truncated.taskArchive = { ids: [], entities: {} };
+
+    await expectAsync(
+      service.importCompleteBackup(truncated, true, true),
+    ).toBeRejectedWithError('Data validation failed and repair not possible');
+
+    expect(mockOpLogStore.runDestructiveStateReplacement).not.toHaveBeenCalled();
+    expect(mockStore.dispatch).not.toHaveBeenCalled();
+  });
+
   it('should discard task-time accumulated against the replaced pre-import state', async () => {
     await service.importCompleteBackup(createMinimalValidBackup() as any, true, true);
 
