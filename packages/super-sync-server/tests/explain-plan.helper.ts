@@ -126,30 +126,21 @@ const toSqlLiteral = (value: unknown): string => {
 let preparedCounterId = 0;
 
 /**
- * EXPLAIN through PREPARE/EXECUTE under `force_generic_plan` — the ONLY faithful way to
- * see what production gets. The params are rendered as literals for EXECUTE, but the
- * PLAN is built at PREPARE time with the values invisible, which is exactly the
- * situation Prisma puts Postgres in.
- *
- * MEASURE WITH `force_generic_plan`, NEVER WITH LITERALS. Prisma sends parameterized
- * prepared statements; under the default `auto` Postgres plans the first ~5 executions
- * as CUSTOM, then compares the generic cost against the average custom cost and MAY
- * switch — a cost comparison, not an automatic switch, so a statement can stay on custom
- * plans indefinitely. The single-entity lookup was observed going generic on production,
- * and a generic plan cannot see parameter values, so that is the mode these specs cover.
- * Production also serves custom plans and they are NOT covered here. `EXPLAIN` with
- * literal constants is a third thing again, and is the trap: the single-entity spec once
- * tested that way and the blind spot passed two designs that were catastrophic in
- * production. If you add a shape, route it through this function.
+ * Shared PREPARE/EXECUTE core. `mode` decides which world is measured; see the two
+ * exported wrappers below for when each one is faithful. The params are rendered as
+ * literals for EXECUTE, but the PLAN is built through a prepared statement, which is
+ * exactly the situation Prisma puts Postgres in — unlike a bare `EXPLAIN` with literal
+ * constants, which is a third thing again and is the trap this harness exists to prevent.
  */
-export const explainGeneric = async (
+const explainWithPlanCacheMode = async (
   db: ExplainRunner,
   sql: string,
   params: readonly unknown[],
+  mode: 'force_generic_plan' | 'force_custom_plan',
 ): Promise<Measured> => {
   const name = `plan_probe_${preparedCounterId++}`;
   const args = params.map(toSqlLiteral).join(', ');
-  await db.exec(`SET plan_cache_mode = force_generic_plan`);
+  await db.exec(`SET plan_cache_mode = ${mode}`);
   await db.exec(`PREPARE ${name} AS ${sql}`);
   try {
     const res = await db.query(
@@ -179,3 +170,52 @@ export const explainGeneric = async (
     await db.exec(`SET plan_cache_mode = auto`);
   }
 };
+
+/**
+ * EXPLAIN under `force_generic_plan` — the faithful mode for any statement whose generic
+ * plan Postgres might actually adopt.
+ *
+ * MEASURE WITH `force_generic_plan`, NEVER WITH LITERALS. Prisma sends parameterized
+ * prepared statements; under the default `auto` Postgres plans the first ~5 executions
+ * as CUSTOM, then compares the generic cost against the average custom cost and MAY
+ * switch — a cost comparison, not an automatic switch, so a statement can stay on custom
+ * plans indefinitely. The single-entity lookup was observed going generic on production,
+ * and a generic plan cannot see parameter values, so that is the mode those specs cover.
+ * `EXPLAIN` with literal constants is a third thing again, and is the trap: the
+ * single-entity spec once tested that way and the blind spot passed two designs that were
+ * catastrophic in production. If you add a shape, route it through this function.
+ *
+ * The exception is a statement whose generic plan is so much more expensive that
+ * `choose_custom_plan` can never adopt it — see {@link explainCustom}, and measure BOTH.
+ */
+export const explainGeneric = (
+  db: ExplainRunner,
+  sql: string,
+  params: readonly unknown[],
+): Promise<Measured> => explainWithPlanCacheMode(db, sql, params, 'force_generic_plan');
+
+/**
+ * EXPLAIN under `force_custom_plan` — params folded to `Const`s at plan time.
+ *
+ * DO NOT reach for this to make a spec look healthier; that is precisely the failure
+ * {@link explainGeneric}'s header describes. It is faithful ONLY for a statement that
+ * provably cannot go generic, and "provably" means measuring the generic plan in the same
+ * spec and showing the gap.
+ *
+ * The old-ops boundary scan is such a statement, and the reason is worth stating because
+ * it is invisible in the plan: a PARTIAL index is unreachable under a generic plan at all.
+ * With `Param` nodes there are no `Const`s for `operator_predicate_proof` to evaluate, so
+ * `predOK` is false and no path into any partial index on the table is generated. Measured
+ * on production (PG 16): custom = BitmapOr, cost 22,844; generic = Parallel Seq Scan, cost
+ * 982,701. `choose_custom_plan` adopts the generic plan only when its cost is at or below
+ * the average custom cost, so a 43x margin pins the statement on custom plans.
+ *
+ * That margin is a load-bearing assumption, not a detail — so a spec using this function
+ * must ALSO assert the generic shape via {@link explainGeneric}, which is what turns the
+ * assumption into something CI re-checks rather than something a comment claims.
+ */
+export const explainCustom = (
+  db: ExplainRunner,
+  sql: string,
+  params: readonly unknown[],
+): Promise<Measured> => explainWithPlanCacheMode(db, sql, params, 'force_custom_plan');
