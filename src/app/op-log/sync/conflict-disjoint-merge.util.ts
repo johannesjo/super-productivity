@@ -15,12 +15,14 @@
 import { OpType } from '../core/operation.types';
 import type { Operation } from '../core/operation.types';
 import {
+  extractActionPayload,
   extractEntityFromPayload,
   extractUpdateChanges,
   isMultiEntityPayload,
 } from '@sp/sync-core';
 import { ConflictJournalFieldDiff, NOISE_FIELDS } from './conflict-journal.model';
 import { isMultiEntityOperation } from '../util/get-op-entity-ids.util';
+import { applyClearedFields } from '../../util/cleared-update-fields';
 
 /** Identity of one side of the conflict for the deterministic noise tiebreak. */
 export interface MergeSideMeta {
@@ -106,10 +108,35 @@ const extractOpChanges = (
   }
   const adapterChanges = extractUpdateChanges(op.payload, payloadKey, entityId);
   const safeAdapterChanges = asSafeUpdateChanges(adapterChanges);
-  if (safeAdapterChanges && Object.keys(safeAdapterChanges).length > 0) {
-    return safeAdapterChanges;
+  if (safeAdapterChanges) {
+    // Field CLEARS travel out-of-band (#9776): the author's op holds
+    // `changes: { field: undefined }` (structured clone keeps it) while the
+    // same op after a JSON wire round-trip holds `changes: {}` plus
+    // `clearedFields: ['field']`. Restoring the cleared keys here makes both
+    // clients extract the IDENTICAL field set — otherwise the author judges
+    // the conflict merge-eligible while the receiver sees an opaque op and
+    // falls back to whole-entity LWW, and the two resolve the same conflict
+    // by different strategies (silent divergence).
+    const restored = applyClearedFields(
+      safeAdapterChanges,
+      readClearedFields(op.payload),
+    );
+    if (Object.keys(restored).length > 0) {
+      return restored;
+    }
   }
   return capturedChanges;
+};
+
+/**
+ * The out-of-band cleared-keys list of a captured single-update action
+ * (`clearedFieldsProps`), living beside the adapter payload inside
+ * `actionPayload`. Junk-tolerant: anything that is not a string array reads as
+ * absent (`applyClearedFields` re-validates each key).
+ */
+const readClearedFields = (payload: unknown): string[] | undefined => {
+  const raw = extractActionPayload(payload)?.['clearedFields'];
+  return Array.isArray(raw) ? (raw as string[]) : undefined;
 };
 
 /**

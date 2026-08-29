@@ -11,6 +11,7 @@ import { getEntityConfig, isLwwPayloadIdCanonical } from '../core/entity-registr
 import { PersistentAction } from '../core/persistent-action.interface';
 import { SyncLog } from '../../core/log';
 import { isValidDBDateStr } from '../../util/get-db-date-str';
+import { applyClearedFields } from '../../util/cleared-update-fields';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -346,6 +347,18 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
   // IMPORTANT: Spread actionPayload FIRST, then set type, to prevent entity properties
   // named 'type' (like SimpleCounter.type = 'ClickCounter') from overwriting the action type.
   const lwwPayload = isLwwUpdatePayload(op.payload) ? op.payload : undefined;
+
+  // Patch-mode LWW deltas list their field CLEARS out-of-band (#9776): JSON
+  // serialization dropped the undefined-valued keys on upload, so restore them
+  // here — the meta-reducer's updateOne then clears the field instead of
+  // silently leaving the losing value in place. `applyClearedFields` tolerates
+  // wire junk and never touches `id`.
+  if (lwwPayload?.lwwUpdateMode === 'patch' && Array.isArray(lwwPayload.clearedFields)) {
+    actionPayload = applyClearedFields(
+      actionPayload,
+      lwwPayload.clearedFields as string[],
+    ) as Record<string, unknown>;
+  }
   return {
     ...actionPayload,
     type: replayActionType,

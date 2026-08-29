@@ -68,6 +68,7 @@ import {
   VectorClockComparison,
 } from '../../core/util/vector-clock';
 import { devError } from '../../util/dev-error';
+import { clearedFieldsProps } from '../../util/cleared-update-fields';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
 import {
   ENTITY_REGISTRY,
@@ -588,6 +589,12 @@ export class ConflictResolutionService {
       entityChanges: [],
       lwwUpdateMode,
       ...(moveFootprint !== undefined && { projectMoveFootprint: moveFootprint }),
+      // Patch deltas can carry field CLEARS as undefined values (a disjoint
+      // merge of a side that cleared a field, #9776). JSON drops those keys on
+      // upload, so list them out-of-band; convertOpToAction restores them on
+      // receivers. Replace snapshots don't need this: setOne makes an absent
+      // key equivalent to a cleared one.
+      ...(lwwUpdateMode === 'patch' ? clearedFieldsProps(actionPayload) : {}),
     };
     return {
       id: uuidv7(),
