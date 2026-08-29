@@ -8,6 +8,7 @@ import { OperationLogStoreService } from './operation-log-store.service';
 import { LegacyPfDbService } from '../../core/persistence/legacy-pf-db.service';
 import { ClientIdService } from '../../core/util/client-id.service';
 import { LanguageService } from '../../core/language/language.service';
+import { T } from '../../t.const';
 import { OpLog } from '../../core/log';
 import { ActionType, OpType } from '../core/operation.types';
 import { uuidv7 } from '../../util/uuid-v7';
@@ -519,6 +520,11 @@ describe('OperationLogMigrationService', () => {
           globalConfig: { misc: {} },
         } as any);
         mockLegacyPfDb.clearAll.and.resolveTo();
+        // Legacy data on the way in, none left once it has been cleared.
+        mockLegacyPfDb.hasUsableEntityData.and.returnValues(
+          Promise.resolve(true),
+          Promise.resolve(false),
+        );
         mockDialogRef.afterClosed.and.returnValue(of(START_FRESH_RESULT));
         const reloadSpy = spyOn(service as any, '_triggerReload');
 
@@ -543,6 +549,47 @@ describe('OperationLogMigrationService', () => {
 
         expect(mockLegacyPfDb.clearAll).not.toHaveBeenCalled();
         expect(reloadSpy).not.toHaveBeenCalled();
+      }, 10000);
+
+      // clearAll() swallows its own failures, so an unclearable database would
+      // otherwise reload straight back into the same failed migration with the
+      // escape hatch appearing to have done nothing.
+      it('reports it instead of reloading when the legacy data will not clear', async () => {
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: { misc: {} },
+        } as any);
+        mockLegacyPfDb.clearAll.and.resolveTo();
+        // Still there after the clear.
+        mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
+        mockDialogRef.afterClosed.and.returnValue(of(START_FRESH_RESULT));
+        const reloadSpy = spyOn(service as any, '_triggerReload');
+
+        await expectAsync(service.checkAndMigrate()).toBeRejected();
+
+        expect(reloadSpy).not.toHaveBeenCalled();
+        expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
+          T.MIGRATE.E_START_FRESH_FAILED_MSG,
+        );
+      }, 10000);
+
+      // Losing the backup step is the one case where discarding the legacy data
+      // would destroy the user's only copy of it.
+      it('promises no backup and hides the escape hatch when the backup failed', async () => {
+        mockLegacyPfDb.loadAllEntityData.and.resolveTo({
+          globalConfig: { misc: {} },
+        } as any);
+        ((service as any)._createAutoBackup as jasmine.Spy).and.rejectWith(
+          new Error('download blocked'),
+        );
+
+        await expectAsync(service.checkAndMigrate()).toBeRejected();
+
+        expect(mockDialogRef.componentInstance.error.set).toHaveBeenCalledWith(
+          T.MIGRATE.E_MIGRATION_FAILED_NO_BACKUP_MSG,
+        );
+        expect(mockDialogRef.componentInstance.canStartFresh.set).toHaveBeenCalledWith(
+          false,
+        );
       }, 10000);
 
       it('still refuses a legacy database with no task or project state', async () => {

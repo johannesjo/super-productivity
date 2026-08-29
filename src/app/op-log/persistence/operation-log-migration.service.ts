@@ -97,6 +97,7 @@ export class OperationLogMigrationService {
     let migrationLockAcquired = false;
     let isBackupCreated = false;
     let startFreshRequested = false;
+    let startFreshError: unknown = null;
     let dialogRef: MatDialogRef<DialogLegacyMigrationComponent> | undefined;
     try {
       const migrationCompleted = await this.lockService.request(
@@ -186,25 +187,62 @@ export class OperationLogMigrationService {
           startFreshRequested = true;
         }
       }
-      if (startFreshRequested) {
-        return;
+      if (!startFreshRequested) {
+        throw error;
       }
-      throw error;
+      // Handled below instead of here, so the migration lock is released and the
+      // dialog is closed before the legacy database is touched.
+      startFreshError = error;
     } finally {
       if (migrationLockAcquired) {
         await this.legacyPfDb.releaseMigrationLock();
       }
       dialogRef?.close();
-      if (startFreshRequested) {
-        // Runs after the lock is released: the next boot must find no legacy
-        // data at all, so it takes the ordinary "starting fresh" path.
-        await this.legacyPfDb.clearAll();
-        OpLog.normal(
-          'OperationLogMigrationService: Legacy data discarded on user request. Reloading.',
-        );
-        this._triggerReload();
-      }
     }
+
+    if (startFreshRequested) {
+      await this._discardLegacyDataAndReload(startFreshError);
+    }
+  }
+
+  /**
+   * Throws away the legacy database after the user chose to start fresh.
+   *
+   * `LegacyPfDbService.clearAll()` swallows its own failures, so a database that
+   * refuses to clear would reload straight back into the same failed migration
+   * with the escape hatch looking like it did nothing. Confirm the data is
+   * really gone first, and say so when it is not.
+   */
+  private async _discardLegacyDataAndReload(originalError: unknown): Promise<void> {
+    await this.legacyPfDb.clearAll();
+
+    let isDiscarded: boolean;
+    try {
+      // The same check that decides whether the NEXT boot migrates at all, so a
+      // false here means exactly "we would land back on this dialog".
+      isDiscarded = !(await this.legacyPfDb.hasUsableEntityData());
+    } catch (e) {
+      // Thrown when the database exists but cannot be read — which is itself
+      // proof that the clear cannot be confirmed.
+      OpLog.err('OperationLogMigrationService: Cannot verify legacy data removal:', e);
+      isDiscarded = false;
+    }
+
+    if (isDiscarded) {
+      OpLog.normal(
+        'OperationLogMigrationService: Legacy data discarded on user request. Reloading.',
+      );
+      this._triggerReload();
+      return;
+    }
+
+    OpLog.err('OperationLogMigrationService: Failed to discard legacy data.');
+    const dialogRef = this._showMigrationDialog();
+    dialogRef.componentInstance.error.set(
+      this.translateService.instant(T.MIGRATE.E_START_FRESH_FAILED_MSG),
+    );
+    await firstValueFrom(dialogRef.afterClosed());
+    throw originalError;
   }
 
   /** Seam for tests — reloading the Karma page would kill the run. */
