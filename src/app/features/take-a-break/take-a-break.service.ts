@@ -35,9 +35,7 @@ import { SnackService } from '../../core/snack/snack.service';
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
 const DESKTOP_NOTIFICATION_THROTTLE = 60 * 1000;
-const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
 const LOCK_SCREEN_DELAY = 30 * 1000;
-const FULLSCREEN_BLOCKER_THROTTLE = 5 * 60 * 1000;
 const FULLSCREEN_BLOCKER_DELAY = 30 * 1000;
 
 // required because typescript freaks out
@@ -174,33 +172,24 @@ export class TakeABreakService {
   );
 
   private _triggerLockScreenCounter$: Subject<boolean> = new Subject();
-  private _triggerLockScreenThrottledAndDelayed$: Observable<unknown | never> =
-    IS_ELECTRON
-      ? this._triggerLockScreenCounter$.pipe(
-          distinctUntilChanged(),
-          switchMap((v) =>
-            !!v
-              ? of(v).pipe(throttleTime(LOCK_SCREEN_THROTTLE), delay(LOCK_SCREEN_DELAY))
-              : EMPTY,
-          ),
-        )
-      : EMPTY;
+  // NOTE: no throttle here or on the fullscreen blocker below — the real
+  // spacing between triggers is distinctUntilChanged() (the subject only
+  // re-fires after a reset sets it back to false) plus the break-reminder
+  // cadence feeding it.
+  private _triggerLockScreenDelayed$: Observable<unknown | never> = IS_ELECTRON
+    ? this._triggerLockScreenCounter$.pipe(
+        distinctUntilChanged(),
+        switchMap((v) => (!!v ? of(v).pipe(delay(LOCK_SCREEN_DELAY)) : EMPTY)),
+      )
+    : EMPTY;
 
   private _triggerFullscreenBlocker$: Subject<boolean> = new Subject();
-  private _triggerFullscreenBlockerThrottledAndDelayed$: Observable<unknown | never> =
-    IS_ELECTRON
-      ? this._triggerFullscreenBlocker$.pipe(
-          distinctUntilChanged(),
-          switchMap((v) =>
-            !!v
-              ? of(v).pipe(
-                  throttleTime(FULLSCREEN_BLOCKER_THROTTLE),
-                  delay(FULLSCREEN_BLOCKER_DELAY),
-                )
-              : EMPTY,
-          ),
-        )
-      : EMPTY;
+  private _triggerFullscreenBlockerDelayed$: Observable<unknown | never> = IS_ELECTRON
+    ? this._triggerFullscreenBlocker$.pipe(
+        distinctUntilChanged(),
+        switchMap((v) => (!!v ? of(v).pipe(delay(FULLSCREEN_BLOCKER_DELAY)) : EMPTY)),
+      )
+    : EMPTY;
 
   private _triggerBanner$: Observable<[number, GlobalConfigState, boolean, boolean]> =
     this.timeWorkingWithoutABreak$.pipe(
@@ -245,11 +234,11 @@ export class TakeABreakService {
     });
 
     if (IS_ELECTRON) {
-      this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
+      this._triggerLockScreenDelayed$.subscribe(() => {
         window.ea.lockScreen();
       });
 
-      this._triggerFullscreenBlockerThrottledAndDelayed$
+      this._triggerFullscreenBlockerDelayed$
         .pipe(
           withLatestFrom(this._configService.takeABreak$, this.timeWorkingWithoutABreak$),
         )
