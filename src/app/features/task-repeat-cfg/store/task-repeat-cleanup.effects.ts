@@ -21,7 +21,6 @@ import { TODAY_TAG } from '../../tag/tag.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { TaskTimeSyncService } from '../../tasks/task-time-sync.service';
 
 const _sameStringSet = (a: readonly string[], b: readonly string[]): boolean => {
@@ -47,25 +46,25 @@ const _hasTemplateSchedule = (
   cfg: TaskRepeatCfg,
   dueStr: string,
 ): boolean => {
+  // remindAt is deliberately NOT compared: it is app-managed, not a user edit.
+  // Firing, dismissing, snoozing or re-scheduling a reminder rewrites or clears
+  // it (dismissReminderOnly, mobile pre-scheduling), which made every timed
+  // recurring instance permanently unreapable and let skipOverdue silently pile
+  // up one leftover per occurrence. The day itself is still compared below.
   if (isValidSplitTime(cfg.startTime)) {
     const expectedDueWithTime = getDateTimeFromClockString(
       cfg.startTime,
       dateStrToUtcDate(dueStr),
     );
-    const expectedRemindAt = cfg.remindAt
-      ? remindOptionToMilliseconds(expectedDueWithTime, cfg.remindAt)
-      : undefined;
     const isScheduledTemplate =
-      task.dueWithTime === expectedDueWithTime &&
-      _isNil(task.dueDay) &&
-      task.remindAt === expectedRemindAt;
+      task.dueWithTime === expectedDueWithTime && _isNil(task.dueDay);
     const isBeforeScheduleActionTemplate =
-      _isNil(task.dueWithTime) && task.dueDay === dueStr && _isNil(task.remindAt);
+      _isNil(task.dueWithTime) && task.dueDay === dueStr;
 
     return isScheduledTemplate || isBeforeScheduleActionTemplate;
   }
 
-  return _isNil(task.dueWithTime) && task.dueDay === dueStr && _isNil(task.remindAt);
+  return _isNil(task.dueWithTime) && task.dueDay === dueStr;
 };
 
 const _hasTemplateSubTasks = (task: TaskWithSubTasks, cfg: TaskRepeatCfg): boolean => {

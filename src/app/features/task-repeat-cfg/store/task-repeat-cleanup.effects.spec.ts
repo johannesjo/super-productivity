@@ -403,6 +403,105 @@ describe('TaskRepeatCleanupEffects', () => {
       sub.unsubscribe();
     }));
 
+    it("deletes yesterday's timed overdue instance after its reminder fired and cleared remindAt", fakeAsync(() => {
+      const dueWithTime = getDateTimeFromClockString('09:00', yesterdayMs);
+      repeatCfgs$.next([
+        skipOverdueCfg('cfg-dismissed', '', {
+          title: 'Morgen Routine',
+          startTime: '09:00',
+          remindAt: TaskReminderOptionId.m15,
+        }),
+      ]);
+      // The reminder fired and was dismissed -> remindAt cleared on the instance.
+      const yesterdayInstance: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'dismissed-yesterday',
+        title: 'Morgen Routine',
+        repeatCfgId: 'cfg-dismissed',
+        created: yesterdayMs,
+        dueDay: undefined,
+        dueWithTime,
+        remindAt: undefined,
+        isDone: false,
+        timeSpent: 0,
+      };
+      const todayInstance: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'dismissed-today',
+        title: 'Morgen Routine',
+        repeatCfgId: 'cfg-dismissed',
+        created: todayMs,
+        dueDay: getDbDateStr(todayMs),
+        isDone: false,
+        timeSpent: 0,
+      };
+
+      repeatableTasks$.next([
+        wrapWithSubTasks(yesterdayInstance),
+        wrapWithSubTasks(todayInstance),
+      ]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds()).toEqual(['dismissed-yesterday']);
+
+      sub.unsubscribe();
+    }));
+
+    it('deletes a weekly overdue instance whose reminder was snoozed to a new time', fakeAsync(() => {
+      const weekMs = 7 * DAY_MS;
+      const lastWeekMs = todayMs - weekMs;
+      const oneHourMs = 60 * 60 * 1000;
+      const dueWithTime = getDateTimeFromClockString('20:00', lastWeekMs);
+      repeatCfgs$.next([
+        skipOverdueCfg('cfg-snoozed', '', {
+          title: 'Export Bookmarks',
+          startTime: '20:00',
+          remindAt: TaskReminderOptionId.AtStart,
+        }),
+      ]);
+      const lastWeekInstance: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'snoozed-last-week',
+        title: 'Export Bookmarks',
+        repeatCfgId: 'cfg-snoozed',
+        created: lastWeekMs,
+        dueDay: undefined,
+        dueWithTime,
+        // snoozed by 1h from the notification -> no longer the template value
+        remindAt: dueWithTime + oneHourMs,
+        isDone: false,
+        timeSpent: 0,
+      };
+      const todayInstance: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'snoozed-today',
+        title: 'Export Bookmarks',
+        repeatCfgId: 'cfg-snoozed',
+        created: todayMs,
+        dueDay: getDbDateStr(todayMs),
+        isDone: false,
+        timeSpent: 0,
+      };
+
+      repeatableTasks$.next([
+        wrapWithSubTasks(lastWeekInstance),
+        wrapWithSubTasks(todayInstance),
+      ]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds()).toEqual(['snoozed-last-week']);
+
+      sub.unsubscribe();
+    }));
+
     it('keeps an overdue instance whose schedule differs from the template', fakeAsync(() => {
       const editedDueWithTime = getDateTimeFromClockString('10:00', yesterdayMs);
       repeatCfgs$.next([
