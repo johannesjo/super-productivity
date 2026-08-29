@@ -126,7 +126,12 @@ jobs:
           target: google_apis
           arch: x86_64
           working-directory: ./android
-          script: ./gradlew :app:connectedPlayDebugAndroidTest
+          # r8Test, not debug: build.gradle sets `testBuildType "r8Test"` so the
+          # instrumented suite runs against a minified, release-configured APK.
+          # Nothing else in CI exercises R8, and #9785 was a crash that only
+          # exists after minification. play, not fdroid: play is the flavor that
+          # ships to the Play internal track on every master push.
+          script: ./gradlew :app:connectedPlayR8TestAndroidTest
 
       - name: Upload instrumentation test results on failure
         if: failure() && steps.changes.outputs.android == 'true'

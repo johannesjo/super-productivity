@@ -3,6 +3,7 @@ package com.superproductivity.superproductivity.service
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
@@ -36,6 +37,21 @@ object BackgroundSyncCredentialStore {
     // cache reads go through here. All access is via @Synchronized methods,
     // so a plain field is safe.
     private var prefs: SharedPreferences? = null
+
+    /**
+     * Drops the process-lifetime cache so the next call re-opens the store —
+     * what the instrumented tests need to stand in for a fresh process on a
+     * migrated device.
+     *
+     * Exists because doing this by reflection does not survive minification:
+     * R8 renames the backing field, and `getDeclaredField("prefs")` is a string
+     * it never rewrites. Instrumented tests run on the minified r8Test variant.
+     */
+    @VisibleForTesting
+    @Synchronized
+    fun forgetCachedPrefsForTest() {
+        prefs = null
+    }
 
     private fun getPrefs(context: Context): SharedPreferences {
         prefs?.let { return it }

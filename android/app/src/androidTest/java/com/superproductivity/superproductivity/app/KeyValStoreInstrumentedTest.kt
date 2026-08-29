@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
  * to the WebView as "Error invoking loadFromDb: Java exception …", so the
  * eviction-recovery path (#7901) silently failed and the user lost everything.
  *
- * Run: ./gradlew :app:connectedPlayDebugAndroidTest (emulator/device required).
+ * Run: ./gradlew :app:connectedPlayR8TestAndroidTest (emulator/device required).
  */
 @RunWith(AndroidJUnit4::class)
 class KeyValStoreInstrumentedTest {
