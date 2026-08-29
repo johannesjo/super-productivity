@@ -95,6 +95,10 @@ android {
             setProguardFiles([
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro",
+                    // Concessions to the test harness only — see the file header.
+                    // Deliberately absent from release, which must stay the config
+                    // proguard-rules.pro is actually validating.
+                    "proguard-rules-r8test.pro",
             ])
             testProguardFiles "proguard-rules.pro"
             matchingFallbacks = ["release"]
