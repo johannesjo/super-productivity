@@ -174,6 +174,10 @@ const CREATE_CAUSAL_IDX = createIndexFromMigration(
  *
  * Assigned in `beforeAll`, so every helper below reads it at call time.
  */
+/** Generous: the race resolves the instant the event lands, so this is only a floor
+ * under the error message, never a cost the passing path pays. */
+const CAPTURE_TIMEOUT_MS = 10_000;
+
 let boundarySql = '';
 let boundaryParams: unknown[] = [];
 
@@ -189,28 +193,48 @@ const captureBoundaryStatement = async (): Promise<void> => {
     datasources: { db: { url: DATABASE_URL ?? '' } },
     log: [{ emit: 'event', level: 'query' }],
   });
+
+  // The query event is emitted asynchronously, AFTER the groupBy call resolves, so the
+  // capture has to wait for it. Waiting for the event itself rather than sleeping a fixed
+  // interval: a sleep is simultaneously too slow (it always pays its full cost) and too
+  // fragile (a loaded CI box can miss any interval short enough to be worth paying).
+  let arrived: (() => void) | undefined;
+  const captured = new Promise<void>((resolve) => {
+    arrived = resolve;
+  });
   (
     logging as unknown as {
       $on: (event: 'query', cb: (e: { query: string; params: string }) => void) => void;
     }
-  ).$on('query', (e) => seen.push({ query: e.query, params: e.params }));
+  ).$on('query', (e) => {
+    seen.push({ query: e.query, params: e.params });
+    if (e.query.includes('repair_base_server_seq')) arrived?.();
+  });
+
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     await logging.operation.groupBy({
       by: ['userId'],
       where: { serverSeq: { gt: 1 }, ...CAUSAL_FULL_STATE_OPERATION_WHERE },
       _max: { serverSeq: true },
     });
-    // The query event is emitted asynchronously, after the call resolves.
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await Promise.race([
+      captured,
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, CAPTURE_TIMEOUT_MS);
+      }),
+    ]);
   } finally {
+    clearTimeout(timer);
     await logging.$disconnect();
   }
 
   const statement = seen.find((entry) => entry.query.includes('repair_base_server_seq'));
   if (!statement) {
     throw new Error(
-      `the boundary groupBy was not captured; saw ${seen.length} statements. ` +
-        "Prisma may have stopped emitting query events, or the sweep's where-clause changed.",
+      `the boundary groupBy was not captured within ${CAPTURE_TIMEOUT_MS}ms; saw ` +
+        `${seen.length} statements. Prisma may have stopped emitting query events, or ` +
+        "the sweep's where-clause changed.",
     );
   }
   boundarySql = statement.query;
@@ -417,10 +441,11 @@ describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
   it('answers the boundary scan without touching the heap', async () => {
     const plan = await measureCustom();
 
-    // Measuring what the sweep SENDS, not a paraphrase of it. Both markers are load-
-    // bearing: `OFFSET` is the Prisma-ism a hand-written mirror omitted, and the causal
-    // clause is what the partial index has to be proven against.
-    expect(boundarySql).toContain('OFFSET');
+    // Measuring what the sweep SENDS, not a paraphrase of it. This one marker is the
+    // whole claim — the clause the partial index has to be proven against. Prisma-isms
+    // like the trailing `OFFSET 0` are deliberately NOT asserted: they are artifacts of
+    // a client version, so pinning them turns a dependency bump into a red build in the
+    // one file whose value is that its failures are real.
     expect(boundarySql).toContain('repair_base_server_seq" IS NOT NULL');
 
     // THE budget. `blocks` cannot carry this claim: a heap page still in shared_buffers
