@@ -29,6 +29,15 @@ export type Measured = {
   rowsFiltered: number;
   rowsJoinFiltered: number;
   tempBlocks: number;
+  /**
+   * `Heap Fetches`, summed over the tree. An Index Only Scan reports one per
+   * tuple whose page the VISIBILITY MAP does not mark all-visible — so this is
+   * the only counter that separates "index-only" as a plan shape from
+   * "index-only" as an actual saving. `blocks` cannot: a heap page still in
+   * shared_buffers is a hit, so a fully degraded scan can read cheap here and
+   * be catastrophic on a host where that page is cold.
+   */
+  heapFetches: number;
   /** Node types + index names, joined with ' -> '. */
   nodes: string;
   /**
@@ -44,6 +53,7 @@ type Accumulator = {
   touched: number;
   filtered: number;
   joinFiltered: number;
+  heapFetches: number;
   nodes: string[];
 };
 
@@ -69,6 +79,10 @@ const walk = (node: PlanNode, acc: Accumulator): void => {
   acc.touched += ((node['Actual Rows'] as number) ?? 0) * loops;
   acc.filtered += ((node['Rows Removed by Filter'] as number) ?? 0) * loops;
   acc.joinFiltered += ((node['Rows Removed by Join Filter'] as number) ?? 0) * loops;
+  // NOT multiplied by loops: unlike the Rows-Removed counters, Heap Fetches is
+  // not divided by loops on the way out of explain.c, so scaling it here would
+  // square the count inside a nested loop.
+  acc.heapFetches += (node['Heap Fetches'] as number) ?? 0;
   acc.nodes.push(
     `${node['Node Type']}${node['Scan Direction'] ? ' ' + node['Scan Direction'] : ''}` +
       `${node['Index Name'] ? ' on ' + node['Index Name'] : ''}`,
@@ -142,7 +156,13 @@ export const explainGeneric = async (
       `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) EXECUTE ${name}${args ? `(${args})` : ''}`,
     );
     const plan = (res.rows[0]['QUERY PLAN'] as PlanNode[])[0].Plan as PlanNode;
-    const acc: Accumulator = { touched: 0, filtered: 0, joinFiltered: 0, nodes: [] };
+    const acc: Accumulator = {
+      touched: 0,
+      filtered: 0,
+      joinFiltered: 0,
+      heapFetches: 0,
+      nodes: [],
+    };
     walk(plan, acc);
     return {
       blocks: rootBlocks(plan),
@@ -150,6 +170,7 @@ export const explainGeneric = async (
       rowsFiltered: acc.filtered,
       rowsJoinFiltered: acc.joinFiltered,
       tempBlocks: (plan['Temp Written Blocks'] as number) ?? 0,
+      heapFetches: acc.heapFetches,
       nodes: acc.nodes.join(' -> '),
       estimatedCost: (plan['Total Cost'] as number) ?? 0,
     };

@@ -774,9 +774,10 @@ export class StorageQuotaService {
    *      fetches to check `received_at` — ~48s at the host's measured ~9.5ms
    *      cold reads;
    *   3. dead tuples: a prefix already deleted by quota recovery leaves its
-   *      index entries behind until vacuum (autovacuum's 20% scale factor is
-   *      ~1.7M dead rows on this table), and the scan visits every one —
-   *      measured 88s / 6,787 cold pages to return zero rows.
+   *      index entries behind until vacuum, and the scan visits every one —
+   *      measured 88s / 6,787 cold pages to return zero rows. (How long that
+   *      backlog survives is an autovacuum scale factor, tuned per-table in
+   *      20260828000003; the measurement above predates it.)
    * A two-sided `serverSeq` range caps the index entries a statement can touch
    * at the window width regardless of match density, tuple liveness, or plan
    * choice, so none of the three can recur. `server_seq` is unique per user,

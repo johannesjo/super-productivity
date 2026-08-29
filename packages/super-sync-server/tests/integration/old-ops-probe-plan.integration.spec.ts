@@ -128,6 +128,40 @@ const WHERE_CLAUSE = `FROM "operations"
 const ORDERED_SQL = `SELECT "server_seq" ${WHERE_CLAUSE} ORDER BY "received_at" ASC LIMIT 1`;
 const UNORDERED_SQL = `SELECT "server_seq" ${WHERE_CLAUSE} LIMIT 1`;
 
+/**
+ * Same index, same window, but it EMITS every row instead of discarding them in
+ * the access method — which is the only way an index-only scan reaches the
+ * visibility-map check. SYNTHETIC: no query in src/ has this shape (see the
+ * test that uses it), so treat it as the mechanism behind migration
+ * 20260828000003's rationale, not as a production plan. Both columns are in the
+ * covering index, so it stays index-only.
+ */
+const WINDOW_COUNT_SQL = `SELECT count(*) FROM "operations"
+   WHERE "user_id" = $1 AND "received_at" >= $2`;
+
+/** Rows the visibility map has NOT marked all-visible, as tuples. */
+const STALE_VM_OPS = 2_000;
+
+/**
+ * One user's ops as a single INSERT ... SELECT. Module scope rather than inside
+ * `beforeAll` because the visibility-map test writes a second batch mid-run, and
+ * a divergent second seeder would compare two different row shapes.
+ */
+const seedOps = (
+  userId: number,
+  fromSeq: number,
+  count: number,
+  receivedAt: string,
+): string =>
+  `INSERT INTO "operations" (
+     "id","user_id","client_id","server_seq","action_type","op_type","entity_type",
+     "entity_id","payload","vector_clock","schema_version","client_timestamp","received_at"
+   )
+   SELECT '${userId}-' || (${fromSeq} + g - 1), ${userId}, 'c-${userId}',
+          ${fromSeq} + g - 1, 'ADD', 'CRT', 'TASK', 'e' || (${fromSeq} + g - 1),
+          '{}'::jsonb, '{}'::jsonb, 1, ${NOW}, ${receivedAt}
+   FROM generate_series(1, ${count}) g`;
+
 const prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL ?? '' } } });
 
 const runnerFor = (tx: Prisma.TransactionClient): ExplainRunner => ({
@@ -142,6 +176,8 @@ type Plan = {
   examined: number;
   /** Root-node shared hit+read blocks — the I/O signal for heap-fetch claims. */
   blocks: number;
+  /** Tuples whose page the visibility map did NOT mark all-visible. */
+  heapFetches: number;
   estimatedCost: number;
   nodes: string;
 };
@@ -152,6 +188,7 @@ const toPlan = (m: Measured): Plan => ({
   // tell them apart. The entire cost of the bad plan lands in `Rows Removed by Filter`.
   examined: m.rowsTouched + m.rowsFiltered + m.rowsJoinFiltered,
   blocks: m.blocks,
+  heapFetches: m.heapFetches,
   estimatedCost: m.estimatedCost,
   nodes: m.nodes,
 });
@@ -206,6 +243,44 @@ const measureUnderDdl = async (
 };
 
 /**
+ * Planner settings rather than DDL, but `measureUnderDdl` is the seam that runs
+ * statements inside the measured transaction and rolls them back — SET LOCAL
+ * dies with it, so nothing leaks into the tests that follow.
+ */
+const IOS_ONLY_SETTINGS = [
+  'SET LOCAL enable_seqscan = off',
+  'SET LOCAL enable_bitmapscan = off',
+] as const;
+
+/**
+ * An ordinary hour of this user's traffic, written into the window and left
+ * unvacuumed. Sequences stay above the boundary so the probe's honest answer is
+ * still NO. Scrambled for the same reason the seed is (see beforeAll).
+ */
+const seedUnvacuumedWindowBatch = async (
+  userId: number,
+  fromSeq: number,
+  count: number,
+): Promise<void> => {
+  await prisma.$executeRawUnsafe(
+    `${seedOps(userId, fromSeq, count, `${CUTOFF} + g * 1000`)} ORDER BY md5(g::text)`,
+  );
+  // ANALYZE and not VACUUM, deliberately: it refreshes the planner's statistics
+  // while leaving the visibility map untouched, isolating the map as the only
+  // variable that changed.
+  await prisma.$executeRawUnsafe('ANALYZE "operations"');
+};
+
+/** Heap pages the visibility map has not marked all-visible. */
+const notAllVisiblePages = async (): Promise<number> => {
+  const rows = await prisma.$queryRawUnsafe<Array<{ deficit: number }>>(
+    `SELECT (relpages - relallvisible)::int AS deficit
+       FROM pg_class WHERE relname = 'operations'`,
+  );
+  return rows[0]?.deficit ?? 0;
+};
+
+/**
  * The pre-migration world: covering index gone, legacy 2-col window index present.
  * The tie the file documents lives HERE — the covering index would break it by
  * width alone, so measuring the tie against today's schema would be measuring
@@ -254,21 +329,6 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
     deepUserId = ids[0].id;
     freshUserId = ids[1].id;
     heavyUserId = ids[2].id;
-
-    const seedOps = (
-      userId: number,
-      fromSeq: number,
-      count: number,
-      receivedAt: string,
-    ): string =>
-      `INSERT INTO "operations" (
-         "id","user_id","client_id","server_seq","action_type","op_type","entity_type",
-         "entity_id","payload","vector_clock","schema_version","client_timestamp","received_at"
-       )
-       SELECT '${userId}-' || (${fromSeq} + g - 1), ${userId}, 'c-${userId}',
-              ${fromSeq} + g - 1, 'ADD', 'CRT', 'TASK', 'e' || (${fromSeq} + g - 1),
-              '{}'::jsonb, '{}'::jsonb, 1, ${NOW}, ${receivedAt}
-       FROM generate_series(1, ${count}) g`;
 
     // Deep user: a long AGED prefix, then recent activity strictly ABOVE the boundary.
     // `+ 1 - g` and not `- g`: the newest aged row has to land strictly BELOW the cutoff,
@@ -496,6 +556,89 @@ describeWithDb('Old-ops fresh-prefix probe plan (PostgreSQL)', () => {
     expect(covering.nodes).toContain(COVERING_IDX);
     expect(covering.blocks).toBeLessThan(legacy.blocks / 8);
   });
+
+  it('answers the probe with zero heap fetches even when the visibility map is stale', async () => {
+    // MEASURED, and the opposite of what motivated migration 20260828000003.
+    //
+    // `server_seq < $2` is the covering index's THIRD column, so the planner
+    // puts it in the Index Cond rather than a Filter, and btree applies it in
+    // `_bt_checkkeys` — BEFORE the index-only scan consults the visibility map.
+    // A row above the boundary is discarded inside the access method and never
+    // becomes a heap-visit candidate, so a NO answer emits nothing and fetches
+    // nothing however far the map has decayed.
+    //
+    // That makes the covering index's saving UNCONDITIONAL for this query,
+    // which is a stronger guarantee than "index-only while the map is fresh".
+    // It also means this query must never be used to justify an autovacuum
+    // change: the shape that actually pays is the sibling test below.
+    const staleBatchSeqBase = HEAVY_AGED_PREFIX + HEAVY_FRESH_OPS + 1;
+    const before = await notAllVisiblePages();
+    await seedUnvacuumedWindowBatch(heavyUserId, staleBatchSeqBase, STALE_VM_OPS);
+
+    try {
+      const stale = await measure(ORDERED_SQL, [heavyUserId, HEAVY_BOUNDARY_SEQ, CUTOFF]);
+
+      // The map really is degraded — otherwise the assertion below is vacuous.
+      // Asserted as GROWTH, not as "> 0": a fully vacuumed table can still show
+      // a one-page deficit, because the last partially-filled page is never
+      // marked all-visible. The measured growth here is ~38 pages.
+      expect((await notAllVisiblePages()) - before).toBeGreaterThan(10);
+      expect(stale.nodes).toContain('Index Only Scan');
+      expect(stale.nodes).toContain(COVERING_IDX);
+      expect(stale.heapFetches).toBe(0);
+    } finally {
+      // In a `finally` so a failure here cannot leak stale rows into the next
+      // test and silently change the number it measures.
+      await prisma.$executeRawUnsafe('VACUUM "operations"');
+    }
+  }, 120_000);
+
+  it('pays one heap fetch per unvacuumed tuple once the scan actually emits rows', async () => {
+    // WHY MAP DECAY COSTS ANYTHING AT ALL — and the bound on when it does.
+    // Decay is invisible to the probe above because that query discards its
+    // rows in the access method. Only a tuple the scan EMITS reaches the map
+    // check, so an emitting index-only scan is the one shape that pays.
+    //
+    // READ THIS BEFORE CITING IT AS A REGRESSION GUARD: it is a mechanism
+    // demonstration, not a production reproduction. `SELECT count(*) ... WHERE
+    // user_id = $1 AND received_at >= $2` appears nowhere in src/, and an audit
+    // of every `operations` query found none that is both index-only-capable
+    // and emits volume. It also needs the planner forced, since this fixture is
+    // single-tenant. So it cannot fail because of a change to this codebase —
+    // it exists to pin the mechanism the migration's rationale appeals to, and
+    // to stop that rationale being restated as "the probe degrades" (it does
+    // not; see the sibling test).
+    //
+    // Measured on postgres:16-alpine against this schema: 2,000 freshly
+    // inserted unvacuumed rows produced ~2,014 heap fetches on the aggregate
+    // below and 0 after a VACUUM. The exact count varies with page packing, so
+    // the assertions are bounds, not equality.
+    //
+    // Heap Fetches is the signal, NOT blocks: every page here is in
+    // shared_buffers, so the degraded scan still reads cheap on this machine.
+    // On a host at ~9.5ms per cold random read each fetch is real I/O, which is
+    // why the assertion is on the counter and not on a timing.
+    const emitBatchSeqBase = HEAVY_AGED_PREFIX + HEAVY_FRESH_OPS + STALE_VM_OPS + 1;
+    await seedUnvacuumedWindowBatch(heavyUserId, emitBatchSeqBase, STALE_VM_OPS);
+
+    const stale = await measureUnderDdl(IOS_ONLY_SETTINGS, WINDOW_COUNT_SQL, [
+      heavyUserId,
+      CUTOFF,
+    ]);
+
+    expect(stale.nodes).toContain('Index Only Scan');
+    expect(stale.nodes).toContain(COVERING_IDX);
+    expect(stale.heapFetches).toBeGreaterThan(STALE_VM_OPS / 2);
+
+    // And vacuum is what fixes it — the whole reason an autovacuum scale factor
+    // is the right instrument. (Also restores shared state for the next test.)
+    await prisma.$executeRawUnsafe('VACUUM "operations"');
+    const revacuumed = await measureUnderDdl(IOS_ONLY_SETTINGS, WINDOW_COUNT_SQL, [
+      heavyUserId,
+      CUTOFF,
+    ]);
+    expect(revacuumed.heapFetches).toBeLessThan(stale.heapFetches / 10);
+  }, 120_000);
 
   it('short-circuits a YES answer on the first row', async () => {
     // `asc` and not `desc`: the in-window ops most likely to sit BELOW the boundary are

@@ -600,8 +600,9 @@ LAST_NATIVE_RETRY=""
 LOCK_ATTEMPTS=0
 
 STMT_FILE="$(mktemp "${TMPDIR:-/tmp}/supersync-stmts.XXXXXX")"
+PREFLIGHT_LOG=""
 cleanup() {
-  rm -f "$STMT_FILE" "$MIGRATE_LOG"
+  rm -f "$STMT_FILE" "$MIGRATE_LOG" "$PREFLIGHT_LOG"
   # Recovery error paths exit directly; make sure the lock holder never
   # outlives the script (its session closing is what releases the lock).
   release_recovery_lock
@@ -930,6 +931,83 @@ rollback_for_native_retry() {
     fail_loudly "could not mark $name rolled back; refusing to retry it." 1
   fi
 }
+
+# Preflight: warn where the server is below the supported floor of 16.
+#
+# There is deliberately NO hard block here. The migration chain does require
+# PG13 -- it sets a storage parameter older servers reject with 22023, which
+# matches none of the gates above, so the migration would land failed and every
+# later deploy would die on P3009 (under Helm, a CrashLooping migrate-db
+# initContainer). But the migrator connection options set further up already
+# include client_connection_check_interval, a PG14+ startup option that an older
+# server rejects with FATAL at connect time. 14 > 13, so no connection capable of
+# wedging the chain is ever established.
+#
+# That is measured, not assumed: on 12.22 and on 13.x this preflight cannot
+# connect either, `migrate deploy` fails loudly with the FATAL, and
+# `_prisma_migrations` is never created. An earlier revision of this preflight
+# carried a second tier that refused below 13; once the connection option landed
+# it provably never fired, so it was removed rather than left as dead code.
+#
+# PG14-15 is the case left to report: those servers apply every migration
+# cleanly, they are just outside what the project tests. Blocking them would
+# strand self-hosters who are working today, on a floor this repo never declared
+# before, as a side effect of a performance tweak. They get a warning instead.
+#
+# Deliberately generic: this script must never name a migration or a reloption.
+# That lockstep coupling is what went stale and broke a production deploy, and
+# it is guarded by tests/migration-sql.spec.ts. Details live in README.md.
+#
+# A DO block rather than parsing a version out of a query, because
+# `prisma db execute` reports no rows: RAISE makes the server do the comparison
+# and turns a wrong version into a non-zero exit with a readable message.
+#
+# RAISE EXCEPTION, not the WARNING this tier's severity would suggest, because
+# `prisma db execute` does not surface warnings at all: verified against a real
+# PostgreSQL 15, a WARNING returns "Script executed successfully" and exit 0, so
+# a grep for it could never match and the tier would silently never fire. An
+# EXCEPTION's message text IS surfaced (verified: "Error: ERROR: <message>",
+# exit 1).
+#
+# A `db execute` can also fail because the database is unreachable, still
+# starting, or too old for the migrator's connection options. Reporting any of
+# those as "your PostgreSQL is below 16" would send an operator down the wrong
+# path entirely -- so anything not carrying the marker falls through and lets
+# `migrate deploy` report the real error in its own words.
+UNSUPPORTED_MARKER='SuperSync supports PostgreSQL 16 or newer'
+
+require_supported_postgres_version() {
+  echo "==> Checking PostgreSQL version..."
+  PREFLIGHT_LOG="$(mktemp "${TMPDIR:-/tmp}/supersync-pgversion.XXXXXX")"
+  preflight_log="$PREFLIGHT_LOG"
+  set +e
+  printf '%s\n' "DO \$\$ BEGIN
+     IF current_setting('server_version_num')::int < 160000 THEN
+       RAISE EXCEPTION '$UNSUPPORTED_MARKER, found %',
+         current_setting('server_version');
+     END IF;
+   END \$\$;" | with_timeout npx prisma db execute --schema "$SCHEMA" --stdin \
+    > "$preflight_log" 2>&1
+  preflight_status=$?
+  set -e
+  if [ "$preflight_status" -eq 0 ]; then
+    return 0
+  fi
+  if grep -q "$UNSUPPORTED_MARKER" "$preflight_log"; then
+    echo ""
+    echo "WARNING: this PostgreSQL is below SuperSync's supported floor (16)."
+    echo "         Migrations still apply, and nothing here is known to break,"
+    echo "         but this version is not covered by the test suite."
+    echo "         See packages/super-sync-server/README.md."
+    echo ""
+    return 0
+  fi
+  echo "    Could not determine the server version (exit $preflight_status);"
+  echo "    continuing -- migrate deploy will report the underlying error."
+  return 0
+}
+
+require_supported_postgres_version
 
 attempt=0
 while :; do
