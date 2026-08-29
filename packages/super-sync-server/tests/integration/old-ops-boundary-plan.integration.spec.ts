@@ -101,6 +101,20 @@ const REPAIR_SEQ = 20;
 const LEGACY_REPAIR_USERS = USER_COUNT / 4;
 const CAUSAL_ROWS = USER_COUNT + (USER_COUNT - LEGACY_REPAIR_USERS);
 
+/**
+ * The unvacuumed tail. Production is 9.1M rows against this fixture's 60k, and the gap
+ * that actually matters is NOT the row count — it is that a freshly-VACUUMed fixture has a
+ * perfect visibility map and production never does. `20260828000003` holds the insert
+ * scale factor at 0.02, so between vacuums up to ~172k freshly-inserted rows sit on pages
+ * the map does not mark all-visible, and an index-only scan pays one heap fetch per
+ * EMITTED tuple on such a page (measured for the fresh-prefix probe in #9791).
+ *
+ * That cost is bounded by RECENT CAUSAL rows, not by table size, and this is the number
+ * that says so: the tail is overwhelmingly ordinary ops, and a full-state op is rare.
+ */
+const TAIL_OPS = 2_000;
+const TAIL_CAUSAL = 5;
+
 const CAUSAL_IDX = 'operations_user_id_causal_full_state_server_seq_idx';
 const BROAD_IDX = 'operations_user_id_full_state_server_seq_idx';
 
@@ -182,6 +196,21 @@ const SEED_SQL = `INSERT INTO "operations" (
    FROM generate_series(1, ${USER_COUNT}) u, generate_series(1, ${OPS_PER_USER}) g
    ORDER BY md5((u * 1000 + g)::text)`;
 
+/**
+ * Appends a fresh, uncommitted tail. Run inside the measuring transaction the rows are
+ * never marked all-visible — no vacuum can reach an open transaction's tuples — which is
+ * exactly the state production's table is in for most of the day.
+ */
+const TAIL_SQL = `INSERT INTO "operations" (
+     "id","user_id","client_id","server_seq","action_type","op_type","entity_type",
+     "entity_id","payload","vector_clock","schema_version","client_timestamp",
+     "received_at","repair_base_server_seq"
+   )
+   SELECT 'tail-' || t, ((t - 1) % ${USER_COUNT}) + 1, 'c-tail', ${OPS_PER_USER} + t, 'ADD',
+          CASE WHEN t <= ${TAIL_CAUSAL} THEN 'SYNC_IMPORT' ELSE 'CRT' END,
+          'TASK', 'e' || t, '{}'::jsonb, '{}'::jsonb, 1, ${NOW}, ${NOW}, NULL
+   FROM generate_series(1, ${TAIL_OPS}) t`;
+
 const prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL ?? '' } } });
 
 const runnerFor = (tx: Prisma.TransactionClient): ExplainRunner => ({
@@ -230,19 +259,25 @@ const measureGeneric = async (): Promise<Plan> =>
 const ROLLBACK_SENTINEL = 'rollback-after-measuring';
 
 /**
- * Runs `ddl`, measures under a custom plan, then forces a rollback. DDL is transactional
- * in PostgreSQL, so dropping an index and rolling back leaves the schema untouched;
- * throwing is the only way to make Prisma roll an interactive transaction back.
+ * Runs `setup`, hands the transaction to `observe`, then forces a rollback. Both DDL and
+ * writes are transactional in PostgreSQL, so dropping an index or appending rows and
+ * rolling back leaves the fixture untouched; throwing is the only way to make Prisma roll
+ * an interactive transaction back.
+ *
+ * The rollback is what makes the fixture reusable across variants, and for the tail
+ * variant it is also the MECHANISM: tuples written by a transaction that never commits
+ * cannot be marked all-visible by any vacuum, which is the state being measured.
  */
-const measureCustomUnderDdl = async (ddl: readonly string[]): Promise<Plan> => {
-  let captured: Plan | undefined;
+const inRolledBackTx = async <T>(
+  setup: readonly string[],
+  observe: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> => {
+  let captured: { value: T } | undefined;
   try {
     await prisma.$transaction(
       async (tx) => {
-        for (const statement of ddl) await tx.$executeRawUnsafe(statement);
-        captured = toPlan(
-          await explainCustom(runnerFor(tx), BOUNDARY_SQL, BOUNDARY_PARAMS),
-        );
+        for (const statement of setup) await tx.$executeRawUnsafe(statement);
+        captured = { value: await observe(tx) };
         throw new Error(ROLLBACK_SENTINEL);
       },
       { timeout: 60_000 },
@@ -250,9 +285,29 @@ const measureCustomUnderDdl = async (ddl: readonly string[]): Promise<Plan> => {
   } catch (error) {
     if ((error as Error)?.message !== ROLLBACK_SENTINEL) throw error;
   }
-  if (!captured) throw new Error('the plan under the DDL variant was never captured');
-  return captured;
+  if (!captured) throw new Error('the rolled-back variant produced no observation');
+  return captured.value;
 };
+
+const measureCustomAfter = (setup: readonly string[]): Promise<Plan> =>
+  inRolledBackTx(setup, async (tx) =>
+    toPlan(await explainCustom(runnerFor(tx), BOUNDARY_SQL, BOUNDARY_PARAMS)),
+  );
+
+type BoundaryRow = { user_id: number; max_server_seq: bigint };
+
+/** The boundary query's ANSWER, not its plan. */
+const boundaryRowsAfter = (setup: readonly string[]): Promise<BoundaryRow[]> =>
+  inRolledBackTx(setup, (tx) =>
+    tx.$queryRawUnsafe<BoundaryRow[]>(BOUNDARY_SQL, ...BOUNDARY_PARAMS),
+  );
+
+const asComparable = (rows: BoundaryRow[]): string =>
+  JSON.stringify(
+    rows
+      .map((r) => [Number(r.user_id), Number(r.max_server_seq)])
+      .sort((a, b) => a[0] - b[0]),
+  );
 
 describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
   beforeAll(async () => {
@@ -331,7 +386,7 @@ describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
   });
 
   it('CANARY: without the causal index the same query is heap-bound', async () => {
-    const degraded = await measureCustomUnderDdl([`DROP INDEX ${CAUSAL_IDX}`]);
+    const degraded = await measureCustomAfter([`DROP INDEX ${CAUSAL_IDX}`]);
 
     // The pre-migration world: the broad index cannot answer `repair_base_server_seq`, so
     // every candidate row costs a heap visit and the legacy REPAIRs are discarded only
@@ -340,6 +395,37 @@ describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
     expect(degraded.rowsFiltered).toBe(LEGACY_REPAIR_USERS);
     expect(degraded.blocks).toBeGreaterThan(300);
     expect(degraded.blocks).toBeGreaterThan(10 * (await measureCustom()).blocks);
+  });
+
+  it('stays index-only against an unvacuumed tail', async () => {
+    const tail = await measureCustomAfter([TAIL_SQL]);
+
+    // The bridge from this 60k fixture to production's 9.1M rows. `Heap Fetches: 0` in the
+    // first test is measured right after a VACUUM, which production's table never is —
+    // so on its own that number would be a best case dressed up as a budget.
+    //
+    // The exact count is the point: the whole tail lands on pages the visibility map
+    // cannot mark (the transaction is still open), yet only the CAUSAL few cost a
+    // fetch, because the partial index does not contain the rest. Map decay therefore
+    // costs this statement in proportion to RECENT full-state ops — a handful a day —
+    // and not in proportion to the table, which is what makes the win survive at scale.
+    expect(tail.heapFetches).toBe(TAIL_CAUSAL);
+    expect(tail.blocks).toBeLessThan(50);
+  });
+
+  it('returns the same boundaries with and without the causal index', async () => {
+    // The plan budgets above would all pass for a query that returns the WRONG rows. The
+    // sweep authorizes deletions from these boundaries, so the index has to be provably
+    // invisible in the answer, not just cheaper: same users, same MAX(server_seq).
+    const withIndex = await boundaryRowsAfter([]);
+    const withoutIndex = await boundaryRowsAfter([`DROP INDEX ${CAUSAL_IDX}`]);
+
+    expect(withIndex).toHaveLength(USER_COUNT);
+    expect(asComparable(withIndex)).toBe(asComparable(withoutIndex));
+    // Not vacuous: every user's boundary is the REPAIR where one counts and the import
+    // otherwise, so a predicate that let legacy REPAIRs through would move these numbers.
+    const boundaries = new Set(withIndex.map((r) => Number(r.max_server_seq)));
+    expect([...boundaries].sort((a, b) => a - b)).toEqual([IMPORT_SEQ, REPAIR_SEQ]);
   });
 
   it('pins the custom-plan margin the fix depends on', async () => {
