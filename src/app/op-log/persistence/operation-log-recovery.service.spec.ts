@@ -253,6 +253,25 @@ describe('OperationLogRecoveryService', () => {
       expect(snapshotState.boards).toBeDefined();
     });
 
+    // hasUsableEntityData() gets here on `globalConfig` alone, so a legacy
+    // database that has lost its task/project state reaches recovery. The #9770
+    // slice fill would make it validate as an all-defaults empty store, and the
+    // genesis snapshot written from it shadows that database forever — recovery
+    // refuses to run again once a snapshot or ops exist. Refusing keeps the
+    // database untouched and retryable on the next boot.
+    it('should refuse legacy data without task or project state', async () => {
+      mockClientIdService.loadClientId.and.resolveTo('testClient');
+      mockOpLogStore.getLastSeq.and.resolveTo(1);
+
+      await expectAsync(
+        service.recoverFromLegacyData({ globalConfig: { misc: {} } }),
+      ).toBeRejectedWithError(/corrupted and cannot be repaired/);
+
+      expect(mockOpLogStore.appendRecoveryOperationAndSnapshot).not.toHaveBeenCalled();
+      expect(mockOpLogStore.saveStateCache).not.toHaveBeenCalled();
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+    });
+
     it('should reject invalid legacy data before writing or dispatching it', async () => {
       mockValidateStateService.validateState.and.resolveTo({
         isValid: false,
