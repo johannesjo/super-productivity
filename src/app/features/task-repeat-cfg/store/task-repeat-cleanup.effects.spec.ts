@@ -403,101 +403,66 @@ describe('TaskRepeatCleanupEffects', () => {
       sub.unsubscribe();
     }));
 
-    it("deletes yesterday's timed overdue instance after its reminder fired and cleared remindAt", fakeAsync(() => {
-      const dueWithTime = getDateTimeFromClockString('09:00', yesterdayMs);
-      repeatCfgs$.next([
-        skipOverdueCfg('cfg-dismissed', '', {
-          title: 'Morgen Routine',
-          startTime: '09:00',
-          remindAt: TaskReminderOptionId.m15,
-        }),
-      ]);
-      // The reminder fired and was dismissed -> remindAt cleared on the instance.
-      const yesterdayInstance: Task = {
-        ...DEFAULT_TASK,
-        projectId: 'p1',
-        id: 'dismissed-yesterday',
-        title: 'Morgen Routine',
-        repeatCfgId: 'cfg-dismissed',
-        created: yesterdayMs,
-        dueDay: undefined,
-        dueWithTime,
-        remindAt: undefined,
-        isDone: false,
-        timeSpent: 0,
-      };
-      const todayInstance: Task = {
-        ...DEFAULT_TASK,
-        projectId: 'p1',
-        id: 'dismissed-today',
-        title: 'Morgen Routine',
-        repeatCfgId: 'cfg-dismissed',
-        created: todayMs,
-        dueDay: getDbDateStr(todayMs),
-        isDone: false,
-        timeSpent: 0,
-      };
-
-      repeatableTasks$.next([
-        wrapWithSubTasks(yesterdayInstance),
-        wrapWithSubTasks(todayInstance),
-      ]);
-
-      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
-      tick(3001);
-
-      expect(getDispatchedDeleteIds()).toEqual(['dismissed-yesterday']);
-
-      sub.unsubscribe();
-    }));
-
-    it('deletes a weekly overdue instance whose reminder was snoozed to a new time', fakeAsync(() => {
+    it('deletes timed overdue instances whose reminder was cleared or snoozed', fakeAsync(() => {
+      // remindAt is app-managed: firing + dismissing clears it, snoozing rewrites
+      // it to a new time. Neither is a user edit, so both must still be reaped.
       const weekMs = 7 * DAY_MS;
       const lastWeekMs = todayMs - weekMs;
       const oneHourMs = 60 * 60 * 1000;
-      const dueWithTime = getDateTimeFromClockString('20:00', lastWeekMs);
+      const yesterdayDue = getDateTimeFromClockString('20:00', yesterdayMs);
+      const lastWeekDue = getDateTimeFromClockString('20:00', lastWeekMs);
       repeatCfgs$.next([
-        skipOverdueCfg('cfg-snoozed', '', {
+        skipOverdueCfg('cfg-reminder', '', {
           title: 'Export Bookmarks',
           startTime: '20:00',
           remindAt: TaskReminderOptionId.AtStart,
         }),
       ]);
-      const lastWeekInstance: Task = {
+      const base = {
         ...DEFAULT_TASK,
         projectId: 'p1',
-        id: 'snoozed-last-week',
         title: 'Export Bookmarks',
-        repeatCfgId: 'cfg-snoozed',
-        created: lastWeekMs,
+        repeatCfgId: 'cfg-reminder',
         dueDay: undefined,
-        dueWithTime,
-        // snoozed by 1h from the notification -> no longer the template value
-        remindAt: dueWithTime + oneHourMs,
         isDone: false,
         timeSpent: 0,
       };
+      const dismissed: Task = {
+        ...base,
+        id: 'reminder-dismissed',
+        created: yesterdayMs,
+        dueWithTime: yesterdayDue,
+        // fired, then dismissed -> dismissReminderOnly cleared remindAt
+        remindAt: undefined,
+      };
+      const snoozed: Task = {
+        ...base,
+        id: 'reminder-snoozed',
+        created: lastWeekMs,
+        dueWithTime: lastWeekDue,
+        // snoozed 1h from the notification -> rewritten, dueWithTime untouched
+        remindAt: lastWeekDue + oneHourMs,
+      };
       const todayInstance: Task = {
-        ...DEFAULT_TASK,
-        projectId: 'p1',
-        id: 'snoozed-today',
-        title: 'Export Bookmarks',
-        repeatCfgId: 'cfg-snoozed',
+        ...base,
+        id: 'reminder-today',
         created: todayMs,
         dueDay: getDbDateStr(todayMs),
-        isDone: false,
-        timeSpent: 0,
       };
 
       repeatableTasks$.next([
-        wrapWithSubTasks(lastWeekInstance),
+        wrapWithSubTasks(dismissed),
+        wrapWithSubTasks(snoozed),
         wrapWithSubTasks(todayInstance),
       ]);
 
       const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
       tick(3001);
 
-      expect(getDispatchedDeleteIds()).toEqual(['snoozed-last-week']);
+      expect(getDispatchedDeleteIds().sort()).toEqual([
+        'reminder-dismissed',
+        'reminder-snoozed',
+      ]);
 
       sub.unsubscribe();
     }));
