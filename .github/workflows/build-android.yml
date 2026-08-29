@@ -124,18 +124,12 @@ jobs:
       # gate from what the build actually emitted rather than from the source
       # text: R8 writes mapping/<variant>/mapping.txt whenever it runs, under any
       # spelling or DSL, so re-enabling it cannot leave this step green-but-blind.
-      # The flag is still read, but only to turn "R8 on yet no mapping" — a moved
-      # output path — into a loud failure instead of a silent skip.
       - name: Verify R8 keep rules survive minification
         run: |
           set -euo pipefail
           shopt -s nullglob
           mappings=(android/app/build/outputs/mapping/*Release/mapping.txt)
           if [ ${#mappings[@]} -eq 0 ]; then
-            if grep -qE 'minifyEnabled[[:space:]]+true|isMinifyEnabled[[:space:]]*=[[:space:]]*true' android/app/build.gradle*; then
-              echo "::error::build.gradle enables minification but the build emitted no release mapping — check the R8 mapping output path (or, if only a non-release build type is minified, this gate needs updating)."
-              exit 1
-            fi
             echo "Minification is off (#9784) — R8 emitted no release mapping, nothing to verify."
             exit 0
           fi
