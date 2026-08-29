@@ -122,10 +122,19 @@ jobs:
       # WorkManager worker builds fine, it just never runs) and android-tests.yml
       # only guards PRs — this workflow ships every master push straight to the
       # Play internal track, so gate the publish on the mapping the build above
-      # already produced. Deliberately NOT continue-on-error: shipping a build
-      # with a dead JS bridge is worse than shipping nothing.
+      # already produced. assembleRelease minifies both flavors and both ship
+      # from master, so check each mapping — R8 runs per variant, so playRelease
+      # passing says nothing about fdroidRelease. Deliberately NOT
+      # continue-on-error: shipping a build with a dead JS bridge is worse than
+      # shipping nothing.
       - name: Verify R8 keep rules survive minification
-        run: node tools/verify-r8-mapping.mjs android/app/build/outputs/mapping/playRelease/mapping.txt
+        run: |
+          set -euo pipefail
+          for variant in playRelease fdroidRelease; do
+            echo "--- ${variant}"
+            node tools/verify-r8-mapping.mjs \
+              "android/app/build/outputs/mapping/${variant}/mapping.txt"
+          done
 
       # APK is now signed automatically by Gradle using signingConfig
 

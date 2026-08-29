@@ -28,9 +28,63 @@ const kotlinFiles = (dir) =>
     return statSync(p).isDirectory() ? kotlinFiles(p) : p.endsWith('.kt') ? [p] : [];
   });
 
+/**
+ * Blanks out Kotlin comments and string literals, preserving length and newlines
+ * so the scans below still see the original line structure.
+ *
+ * Without this a KDoc mentioning `@JavascriptInterface`, or a string containing
+ * `class FooWorker(...) : CoroutineWorker`, becomes an expectation R8 is free to
+ * rename — a spurious release-blocking failure.
+ */
+const stripCommentsAndStrings = (text) => {
+  const out = [...text];
+  const blank = (from, to) => {
+    for (let k = from; k < to; k++) if (out[k] !== '\n') out[k] = ' ';
+  };
+  let i = 0;
+  while (i < text.length) {
+    if (text.startsWith('//', i)) {
+      const nl = text.indexOf('\n', i);
+      const end = nl < 0 ? text.length : nl;
+      blank(i, end);
+      i = end;
+    } else if (text.startsWith('/*', i)) {
+      // Kotlin block comments (KDoc included) nest.
+      let depth = 1;
+      let j = i + 2;
+      while (j < text.length && depth > 0) {
+        if (text.startsWith('/*', j)) {
+          depth++;
+          j += 2;
+        } else if (text.startsWith('*/', j)) {
+          depth--;
+          j += 2;
+        } else j++;
+      }
+      blank(i, j);
+      i = j;
+    } else if (text.startsWith('"""', i)) {
+      const close = text.indexOf('"""', i + 3);
+      const end = close < 0 ? text.length : close + 3;
+      blank(i, end);
+      i = end;
+    } else if (text[i] === '"' || text[i] === "'") {
+      const quote = text[i];
+      let j = i + 1;
+      while (j < text.length && text[j] !== quote && text[j] !== '\n') {
+        j += text[j] === '\\' ? 2 : 1;
+      }
+      const end = Math.min(j + 1, text.length);
+      blank(i, end);
+      i = end;
+    } else i++;
+  }
+  return out.join('');
+};
+
 const sources = kotlinFiles(srcRoot).map((path) => ({
   path,
-  text: readFileSync(path, 'utf8'),
+  text: stripCommentsAndStrings(readFileSync(path, 'utf8')),
 }));
 
 /** `com.example` + `class Foo` -> `com.example.Foo`, for the mapping's left-hand side. */
@@ -41,9 +95,22 @@ const fqcn = (text, name) => `${/^package\s+([\w.]+)/m.exec(text)?.[1] ?? ''}.${
 const bridge = sources.find((s) => s.path.endsWith('JavaScriptInterface.kt'));
 if (!bridge) throw new Error('JavaScriptInterface.kt not found under ' + srcRoot);
 const bridgeClass = fqcn(bridge.text, 'JavaScriptInterface');
-const bridgeMethods = [
-  ...bridge.text.matchAll(/@JavascriptInterface[\s\S]*?\bfun\s+(\w+)/g),
-].map((m) => m[1]);
+
+/**
+ * `@JavascriptInterface` starting its own line, then only further annotations or
+ * function modifiers before `fun name`. Anchoring stops a stray mention from
+ * being attributed to whatever `fun` happens to follow it.
+ */
+const FUN_MODIFIER =
+  'public|private|protected|internal|open|final|abstract|override|inline|suspend|external|tailrec|operator|infix|synchronized|expect|actual';
+const BRIDGE_METHOD_RE = new RegExp(
+  String.raw`^[ \t]*@JavascriptInterface\b` +
+    String.raw`(?:\s*(?:@[\w.]+(?:\([^)]*\))?|(?:${FUN_MODIFIER})\b))*` +
+    String.raw`\s*\bfun\s+(\w+)`,
+  'gm',
+);
+const bridgeMethods = [...bridge.text.matchAll(BRIDGE_METHOD_RE)].map((m) => m[1]);
+const bridgeAnnotations = (bridge.text.match(/@JavascriptInterface\b/g) ?? []).length;
 
 const workers = sources.flatMap(({ text }) =>
   [
@@ -119,6 +186,16 @@ if (!bridgeMethods.length || !workers.length) {
   console.error(
     `R8 mapping check FAILED: parsed ${bridgeMethods.length} bridge methods and ${workers.length} workers ` +
       'from source. Zero means this check is silently passing — fix the source parsing.',
+  );
+  process.exit(1);
+}
+
+// Every real annotation must have produced an expectation, or the anchored
+// pattern above quietly stopped covering part of the bridge.
+if (bridgeMethods.length !== bridgeAnnotations) {
+  console.error(
+    `R8 mapping check FAILED: ${bridgeAnnotations} @JavascriptInterface annotations in source but only ` +
+      `${bridgeMethods.length} were parsed as methods — the rest went unchecked. Fix the source parsing.`,
   );
   process.exit(1);
 }
