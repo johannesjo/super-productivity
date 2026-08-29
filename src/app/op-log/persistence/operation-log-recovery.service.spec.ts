@@ -91,9 +91,9 @@ describe('OperationLogRecoveryService', () => {
           actionType: ActionType.RECOVERY_DATA_IMPORT,
           opType: OpType.Batch,
           entityType: 'RECOVERY',
-          payload: legacyData,
+          payload: jasmine.objectContaining(legacyData),
         }),
-        legacyData,
+        jasmine.objectContaining(legacyData),
       );
       expect(mockOpLogStore.append).not.toHaveBeenCalled();
       expect(mockOpLogStore.saveStateCache).not.toHaveBeenCalled();
@@ -179,11 +179,11 @@ describe('OperationLogRecoveryService', () => {
           opType: OpType.Batch,
           entityType: 'RECOVERY',
           entityId: '*',
-          payload: legacyData,
+          payload: jasmine.objectContaining(legacyData),
           clientId: 'testClient',
           vectorClock: { testClient: 1 },
         }),
-        legacyData,
+        jasmine.objectContaining(legacyData),
       );
     });
 
@@ -206,7 +206,7 @@ describe('OperationLogRecoveryService', () => {
 
       expect(mockOpLogStore.appendRecoveryOperationAndSnapshot).toHaveBeenCalledWith(
         jasmine.any(Object),
-        legacyData,
+        jasmine.objectContaining(legacyData),
       );
     });
 
@@ -221,8 +221,34 @@ describe('OperationLogRecoveryService', () => {
 
       expect(mockOpLogStore.appendRecoveryOperationAndSnapshot).toHaveBeenCalledWith(
         jasmine.objectContaining({ vectorClock: { testClient: 1 } }),
-        legacyData,
+        jasmine.objectContaining(legacyData),
       );
+    });
+
+    // #9770: an old `pf` database has no slice for models that did not exist
+    // when it was last written. Without defaults, validation refuses the import
+    // and the app is stuck on "Failed to load data".
+    it('should fill in model slices the legacy database is too old to contain', async () => {
+      const legacyData = {
+        task: { ids: ['task1'], entities: { task1: { id: 'task1' } } },
+      };
+      mockClientIdService.loadClientId.and.resolveTo('testClient');
+      mockOpLogStore.getLastSeq.and.resolveTo(1);
+
+      await service.recoverFromLegacyData(legacyData);
+
+      const [, snapshotState] = (
+        mockOpLogStore as unknown as {
+          appendRecoveryOperationAndSnapshot: jasmine.Spy;
+        }
+      ).appendRecoveryOperationAndSnapshot.calls.mostRecent().args as [
+        unknown,
+        Record<string, unknown>,
+      ];
+      expect(snapshotState.task).toEqual(legacyData.task);
+      expect(snapshotState.timeTracking).toBeDefined();
+      expect(snapshotState.menuTree).toBeDefined();
+      expect(snapshotState.boards).toBeDefined();
     });
 
     it('should reject invalid legacy data before writing or dispatching it', async () => {

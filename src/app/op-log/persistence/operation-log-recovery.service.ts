@@ -14,7 +14,7 @@ import {
 import { SINGLETON_ENTITY_ID } from '../core/entity-registry';
 import { uuidv7 } from '../../util/uuid-v7';
 import { OpLog } from '../../core/log';
-import { AppDataComplete } from '../model/model-config';
+import { AppDataComplete, withDefaultModelSlices } from '../model/model-config';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { LockService } from '../sync/lock.service';
 import { LOCK_NAMES } from '../core/operation-log.const';
@@ -96,7 +96,15 @@ export class OperationLogRecoveryService {
   /**
    * Recovers from legacy data by creating a new genesis snapshot.
    */
-  async recoverFromLegacyData(legacyData: Record<string, unknown>): Promise<void> {
+  async recoverFromLegacyData(rawLegacyData: Record<string, unknown>): Promise<void> {
+    // An old `pf` database lacks the model slices that did not exist when it was
+    // last written; fill those with defaults so healthy data is not rejected as
+    // invalid (#9770).
+    const legacyData = withDefaultModelSlices(rawLegacyData) as unknown as Record<
+      string,
+      unknown
+    >;
+
     // Refuse to import legacy data that doesn't validate. Importing corrupted
     // legacy data would just propagate the corruption into SUP_OPS and the next
     // hydration would fail validation in turn.
