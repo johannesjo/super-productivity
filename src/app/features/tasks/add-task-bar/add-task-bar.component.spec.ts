@@ -1495,9 +1495,7 @@ describe('AddTaskBarComponent', () => {
   // Only ever spied on elsewhere in this file, so the two paths below — one of
   // them the blur → focus cycle the Android IME depends on — had no coverage.
   describe('focusInput()', () => {
-    const getInput = (
-      f: ComponentFixture<AddTaskBarComponent>,
-    ): HTMLTextAreaElement =>
+    const getInput = (f: ComponentFixture<AddTaskBarComponent>): HTMLTextAreaElement =>
       f.debugElement.nativeElement.querySelector('.main-input') as HTMLTextAreaElement;
 
     it('focuses the field synchronously', () => {
