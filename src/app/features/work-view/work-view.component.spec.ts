@@ -129,6 +129,7 @@ const configureWorkViewTestBed = (
           isXs: signal(false),
           isWorkViewScrolled: { set: () => {} },
           showAddTaskBar: () => {},
+          highlightTaskBriefly: () => {},
         },
       },
       {

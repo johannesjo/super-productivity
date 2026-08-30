@@ -38,7 +38,6 @@ import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { concatMap, first, take } from 'rxjs/operators';
 
-import { IS_MOBILE } from './util/is-mobile';
 import { recordSearchNavDebug } from './util/search-nav-debug';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import {
@@ -599,12 +598,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         url: window.location.pathname + window.location.search,
         matchedElementId: el.id,
       });
-      if (el && IS_MOBILE) {
-        el.classList.add('mobile-highlight-searched-item');
-        el.addEventListener('blur', () =>
-          el.classList.remove('mobile-highlight-searched-item'),
-        );
-      }
     });
   }
 }

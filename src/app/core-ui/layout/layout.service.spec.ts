@@ -345,6 +345,7 @@ describe('LayoutService', () => {
       setTimeout(() => {
         expect(scrollContainer.scrollTop).toBe(20);
         expect(taskElement.focus).toHaveBeenCalledWith({ preventScroll: true });
+        expect(taskElement.classList.contains('highlight-searched-item')).toBeTrue();
         document.body.removeChild(scrollContainer);
         done();
       }, 400);
@@ -363,6 +364,33 @@ describe('LayoutService', () => {
 
       expect(onSuccess).not.toHaveBeenCalled();
       expect(onFailure).toHaveBeenCalledTimes(1);
+    }));
+  });
+
+  describe('highlightTaskBriefly', () => {
+    it('should add the highlight class and remove it after the duration', fakeAsync(() => {
+      const el = document.createElement('div');
+
+      service.highlightTaskBriefly(el);
+      expect(el.classList.contains('highlight-searched-item')).toBeTrue();
+
+      tick(3000);
+      expect(el.classList.contains('highlight-searched-item')).toBeFalse();
+    }));
+
+    it('should move the highlight to the latest element when re-triggered', fakeAsync(() => {
+      const first = document.createElement('div');
+      const second = document.createElement('div');
+
+      service.highlightTaskBriefly(first);
+      tick(1000);
+      service.highlightTaskBriefly(second);
+
+      expect(first.classList.contains('highlight-searched-item')).toBeFalse();
+      expect(second.classList.contains('highlight-searched-item')).toBeTrue();
+
+      tick(3000);
+      expect(second.classList.contains('highlight-searched-item')).toBeFalse();
     }));
   });
 });

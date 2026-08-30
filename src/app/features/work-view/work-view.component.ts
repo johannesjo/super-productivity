@@ -675,6 +675,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
       const centeredTop = relativeTop - containerCenterOffset + elementCenterOffset;
       container.scrollTop = Math.max(centeredTop, 0);
       el.focus({ preventScroll: true });
+      this.layoutService.highlightTaskBriefly(el);
       recordSearchNavDebug('workView:focusSuccess', {
         taskId,
         selectedTaskId: this.selectedTaskId(),

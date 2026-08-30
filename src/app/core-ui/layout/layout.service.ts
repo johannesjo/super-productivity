@@ -43,12 +43,16 @@ export class LayoutService {
   private static readonly _TASK_ACTION_DELAY = 50;
   private static readonly _TASK_FOCUS_RETRY_DELAY = 250;
   private static readonly _TASK_FOCUS_MAX_RETRIES = 16;
+  private static readonly _TASK_HIGHLIGHT_DURATION = 3000;
+  private static readonly _TASK_HIGHLIGHT_CLASS = 'highlight-searched-item';
 
   private _store$ = inject<Store<LayoutState>>(Store);
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
   private _pendingFocusTaskId: string | null = null; // store new task id until user closes the bar
   private _pendingTaskRevealTimeout?: number;
+  private _pendingTaskHighlightTimeout?: number;
+  private _highlightedTaskEl: HTMLElement | null = null;
 
   // Signal to trigger sidebar focus
   private _focusSideNavTrigger = signal(0);
@@ -195,6 +199,7 @@ export class LayoutService {
 
     const el = this.focusTaskInViewIfPossible(taskId);
     if (el) {
+      this.highlightTaskBriefly(el);
       onSuccess?.(el);
       return;
     }
@@ -208,6 +213,29 @@ export class LayoutService {
       this._pendingTaskRevealTimeout = undefined;
       this.focusTaskInViewWhenReady(taskId, onSuccess, onFailure, retriesLeft - 1);
     }, LayoutService._TASK_FOCUS_RETRY_DELAY);
+  }
+
+  /**
+   * Draws a temporary attention highlight on a task revealed by navigation
+   * (global search, notifications, tracked-task pill), so it stays findable
+   * even after the focus outline is gone. Mirrors the note reveal in
+   * NotesComponent. Only one task is highlighted at a time. (#5476)
+   */
+  highlightTaskBriefly(el: HTMLElement): void {
+    if (this._pendingTaskHighlightTimeout) {
+      window.clearTimeout(this._pendingTaskHighlightTimeout);
+      this._pendingTaskHighlightTimeout = undefined;
+    }
+    this._highlightedTaskEl?.classList.remove(LayoutService._TASK_HIGHLIGHT_CLASS);
+    el.classList.add(LayoutService._TASK_HIGHLIGHT_CLASS);
+    this._highlightedTaskEl = el;
+    this._pendingTaskHighlightTimeout = window.setTimeout(() => {
+      this._pendingTaskHighlightTimeout = undefined;
+      el.classList.remove(LayoutService._TASK_HIGHLIGHT_CLASS);
+      if (this._highlightedTaskEl === el) {
+        this._highlightedTaskEl = null;
+      }
+    }, LayoutService._TASK_HIGHLIGHT_DURATION);
   }
 
   private _runForTaskElement(
