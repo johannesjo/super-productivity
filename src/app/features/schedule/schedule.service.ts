@@ -25,6 +25,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskService } from '../tasks/task.service';
 import { startWith } from 'rxjs/operators';
 import { parseDbDateStr } from '../../util/parse-db-date-str';
+import { anchorContextNow } from './anchor-context-now';
 
 @Injectable({
   providedIn: 'root',
@@ -59,8 +60,18 @@ export class ScheduleService {
       const calendarEvents = this._calendarEvents();
       const currentTaskId = this._taskService.currentTaskId() ?? null;
 
+      // `daysToShow` here is logical today, which respects the start-of-next-day
+      // offset. Leaving `now` to its Date.now() default let the raw wall clock
+      // sit past that day's end between midnight and the offset, so every entry
+      // landed beyond the only rendered day and the panel came up empty.
+      const days = daysToShow();
+      const realNow = Date.now();
+      const now = days.length ? anchorContextNow(days[0], realNow) : realNow;
+
       return this.buildScheduleDays({
-        daysToShow: daysToShow(),
+        now,
+        realNow,
+        daysToShow: days,
         timelineTasks,
         taskRepeatCfgs,
         calendarEvents,
