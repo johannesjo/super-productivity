@@ -139,6 +139,46 @@ jobs:
               "android/app/build/outputs/mapping/${variant}/mapping.txt"
           done
 
+      # Play requires 16 KB-aligned native libraries for apps targeting Android
+      # 15+. Misalignment is silent at build time and only surfaces at upload (or
+      # as a crash on 16 KB-page devices), so gate the release on it here.
+      # `-c` is check-only and `-P 16` needs build-tools 35+; the trailing `4` is
+      # zipalign's mandatory <align> argument for everything that is not an .so.
+      #
+      # Scope, so nobody over-trusts a green run: this checks the *zip entry
+      # offset* of uncompressed .so files. A DEFLATED .so reports "OK -
+      # compressed" whatever its offset, and zipalign never parses the ELF, so a
+      # prebuilt lib with 4 KB p_align also passes (that needs Google's separate
+      # check_elf_alignment.sh). AGP stores native libs uncompressed by default,
+      # so today — with no .so in the APK at all — this is a cheap guard for the
+      # day a plugin adds one, not proof of 16 KB compliance.
+      - name: Verify 16 KB native page alignment
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          # Array form, not `ls`: under nullglob an unmatched glob vanishes from
+          # the word list, so `ls -1 <glob>` would silently list the CWD instead
+          # and hand back a bogus path that passes the -z check below.
+          candidates=("${sdk:-/nonexistent}"/build-tools/*/zipalign)
+          zipalign=""
+          if [ ${#candidates[@]} -gt 0 ]; then
+            zipalign="$(printf '%s\n' "${candidates[@]}" | sort -V | tail -1)"
+          fi
+          if [ -z "${zipalign}" ]; then
+            echo "::error::zipalign not found under ${sdk:-<unset ANDROID_HOME>}/build-tools"
+            exit 1
+          fi
+          apks=(android/app/build/outputs/apk/*/release/*.apk)
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo "::error::no release APK found to verify"
+            exit 1
+          fi
+          for apk in "${apks[@]}"; do
+            echo "--- ${apk}"
+            "${zipalign}" -c -P 16 4 "${apk}"
+          done
+
       # APK is now signed automatically by Gradle using signingConfig
 
       - name: 'Upload APK files'
