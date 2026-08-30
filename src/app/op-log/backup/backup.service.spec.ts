@@ -293,6 +293,25 @@ describe('BackupService', () => {
     });
   });
 
+  // Regression guard for the #9770 slice fill. That fill runs before validation,
+  // so it must not be allowed to manufacture the very `task`/`project` keys the
+  // isDataRepairPossible() refusal below is looking for — otherwise a truncated
+  // backup stops being refused and instead REPLACES the user's data with an
+  // all-defaults empty store, on every import path (JSON import, local-backup
+  // restore, SuperSync "Use Server Data", profile switch).
+  it('refuses a backup with no task or project state instead of importing an empty store', async () => {
+    const truncated = createMinimalValidBackup() as any;
+    delete truncated.task;
+    delete truncated.project;
+
+    await expectAsync(
+      service.importCompleteBackup(truncated, true, true),
+    ).toBeRejectedWithError(/repair not possible/);
+
+    expect(mockOpLogStore.runDestructiveStateReplacement).not.toHaveBeenCalled();
+    expect(mockStore.dispatch).not.toHaveBeenCalled();
+  });
+
   describe('importCompleteBackup', () => {
     it('should reject inconsistent skip-backup provenance arguments', async () => {
       const backup = createMinimalValidBackup() as any;
