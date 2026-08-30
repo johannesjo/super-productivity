@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -24,7 +25,7 @@ import { parseDbDateStr } from '../../../util/parse-db-date-str';
 import {
   CalendarGestureHandler,
   DAYS_IN_VIEW,
-  MIN_HEIGHT,
+  MIN_ROW_HEIGHT,
   ROW_HEIGHT,
   WEEKS_SHOWN,
 } from './planner-calendar-gesture-handler';
@@ -32,7 +33,7 @@ import {
 /** The collapse handle, which sits below the week rows and must stay tappable. */
 export const HANDLE_HEIGHT = 28;
 /** One task row of the plan list must stay visible behind an expanded calendar. */
-export const MIN_PLAN_VIEW_HEIGHT = ROW_HEIGHT;
+const MIN_PLAN_VIEW_HEIGHT = 40;
 
 interface CalendarDay {
   dateStr: string;
@@ -134,20 +135,39 @@ export class PlannerCalendarNavComponent {
   });
 
   /**
-   * Week rows the expanded grid may show. Six rows of *data* are always built
-   * (`DAYS_IN_VIEW`), so every day of the month exists, carries its task dot and
-   * stays tappable — but rendering all six needs 240px, which at XS heights
-   * pushed `planner-plan-view` to 0px and hid the collapse handle behind the
-   * bottom nav. When rows are dropped here the grid slides to keep the active
-   * week in view, so nothing becomes unreachable.
+   * Height of one week row. Six rows are always rendered, so the grid spans the
+   * whole month and every day stays tappable (#9449); where six 40px rows do
+   * not fit they shrink instead. Dropping rows would hide the tail of the month
+   * behind an edge no gesture scrolls past, which is the bug this PR is for.
    */
-  private _visibleWeekRows = computed(() => {
-    const fits = Math.floor(this._availableForRows() / ROW_HEIGHT);
-    return Math.min(WEEKS_SHOWN, Math.max(1, fits));
+  rowHeight = computed(() => {
+    const fits = Math.floor(this._availableForRows() / WEEKS_SHOWN);
+    return Math.min(ROW_HEIGHT, Math.max(MIN_ROW_HEIGHT, fits));
   });
 
+  /**
+   * Below six `MIN_ROW_HEIGHT` rows the grid no longer fits at a legible size,
+   * so it stays collapsed. Nothing is lost: the collapsed strip walks all six
+   * rows one at a time on a horizontal swipe.
+   */
+  canExpand = computed(() => this._availableForRows() >= WEEKS_SHOWN * MIN_ROW_HEIGHT);
+
+  // The planner host, not `parentElement`: it is the box whose bottom bounds
+  // the calendar, and resolving it by selector survives the nav being wrapped
+  // in planner.component.html.
   private _parentEl(): HTMLElement | null {
-    return this._elRef.nativeElement.parentElement as HTMLElement | null;
+    return this._elRef.nativeElement.closest('planner') as HTMLElement | null;
+  }
+
+  /** Distance from the top of the offset chain, which no ancestor transform scales. */
+  private _layoutTop(el: HTMLElement): number {
+    let top = 0;
+    let cur: HTMLElement | null = el;
+    while (cur) {
+      top += cur.offsetTop;
+      cur = cur.offsetParent as HTMLElement | null;
+    }
+    return top;
   }
 
   private _measureAvailableForRows(): void {
@@ -157,30 +177,27 @@ export class PlannerCalendarNavComponent {
     // the last ~44px, so measuring against window.innerHeight reserves space
     // that the plan list never gets.
     const container = this._parentEl();
-    const bottom = container
-      ? container.getBoundingClientRect().bottom
-      : window.innerHeight;
+    // Without the host there is nothing to measure against, so leave the room
+    // unbounded and render full-size rows rather than guess at a clamp.
+    if (!container) return;
+    // offsetTop/clientHeight rather than getBoundingClientRect: the route enter
+    // animation (warpRoute) starts this view at scale(1.2), and a rect read
+    // while that is in flight is 20% too generous. Measured 227px of room where
+    // there were 178, which is a whole extra row.
+    const topWithinContainer = this._layoutTop(el) - this._layoutTop(container);
     this._availableForRows.set(
-      bottom - el.getBoundingClientRect().top - HANDLE_HEIGHT - MIN_PLAN_VIEW_HEIGHT,
+      container.clientHeight - topWithinContainer - HANDLE_HEIGHT - MIN_PLAN_VIEW_HEIGHT,
     );
   }
 
-  maxHeight = computed(() => {
-    return this.isExpanded() ? this._visibleWeekRows() * ROW_HEIGHT : MIN_HEIGHT;
-  });
-
-  weekOffset = computed(() =>
-    this._weekOffsetFor(this.isExpanded(), this.activeWeekIndex()),
+  maxHeight = computed(() =>
+    this.isExpanded() ? this.rowHeight() * WEEKS_SHOWN : this.rowHeight(),
   );
 
-  // Active week at the top of the window, clamped so the last row can never sit
-  // below it. Collapsed (1 row) and unclamped expanded (6 rows) both fall out of
-  // this: -activeWeekIndex * ROW_HEIGHT and 0 respectively.
-  private _weekOffsetFor(expanded: boolean, activeIdx: number): number {
-    const rows = expanded ? this._visibleWeekRows() : 1;
-    const firstRow = Math.min(activeIdx, WEEKS_SHOWN - rows);
-    return -firstRow * ROW_HEIGHT;
-  }
+  // Expanded shows every row, so there is nothing to scroll to.
+  weekOffset = computed(() =>
+    this.isExpanded() ? 0 : -this.activeWeekIndex() * this.rowHeight(),
+  );
 
   monthLabel = computed(() => {
     // The spelled-out month name follows textLocale(): passing no locale would
@@ -241,11 +258,9 @@ export class PlannerCalendarNavComponent {
       {
         getActiveWeekIndex: () => this.activeWeekIndex(),
         getIsExpanded: () => this.isExpanded(),
-        getExpandedHeight: () => {
-          this._measureAvailableForRows();
-          return this._visibleWeekRows() * ROW_HEIGHT;
-        },
-        getWeekOffset: (expanded, activeIdx) => this._weekOffsetFor(expanded, activeIdx),
+        measure: () => this._measureAvailableForRows(),
+        getRowHeight: () => this.rowHeight(),
+        canExpand: () => this.canExpand(),
         onExpandChanged: (expanded) => this.isExpanded.set(expanded),
         onVerticalSwipe: (isDown) => this._handleVerticalSwipe(isDown),
         onHorizontalSwipe: (dir) => this._handleHorizontalSwipe(dir),
@@ -254,17 +269,16 @@ export class PlannerCalendarNavComponent {
     );
     this._destroyRef.onDestroy(() => this._gesture.destroy());
 
-    effect(() => {
-      // Observe the box the measurement is taken against, rather than the
-      // window: the route content also shrinks when a banner appears above it
-      // (`<banner>` sits above `.route-wrapper`), which fires no resize event.
-      // Expanding moves neither input, so it is deliberately not a trigger.
-      const el = this._weeksEl()?.nativeElement;
-      if (!el) return;
-      untracked(() => this._observeAvailableForRows());
-    });
+    // After the first render, not as soon as the rows exist: the month label and
+    // day labels are laid out in the same pass and push the rows down, so an
+    // earlier read measures from a top the grid no longer has.
+    afterNextRender(() => this._observeAvailableForRows());
   }
 
+  // Observes the box the measurement is taken against, rather than the window:
+  // the route content also shrinks when a banner appears above it (`<banner>`
+  // sits above `.route-wrapper`), which fires no resize event. It cannot see the
+  // rows' own top move, which is why the gesture handler re-measures too.
   private _observeAvailableForRows(): void {
     const container = this._parentEl();
     this._measureAvailableForRows();

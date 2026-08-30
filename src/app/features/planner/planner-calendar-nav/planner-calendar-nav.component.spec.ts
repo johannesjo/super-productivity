@@ -4,8 +4,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import {
   DAYS_IN_VIEW,
-  MIN_HEIGHT,
-  MAX_HEIGHT,
+  MIN_ROW_HEIGHT,
   ROW_HEIGHT,
   WEEKS_SHOWN,
 } from './planner-calendar-gesture-handler';
@@ -23,10 +22,11 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
 // pass either way if it matched the runner's browser, so it must not.
 const MOCK_TEXT_LOCALE = 'fr-FR';
 
-/** Room below the first week row: exactly enough for all six. */
-const ROOM_FOR_ALL_ROWS = MAX_HEIGHT;
-/** Room for four rows, the XS case from the #9463 review. */
+/** Room below the first week row: exactly enough for six full-size rows. */
+const ROOM_FOR_ALL_ROWS = ROW_HEIGHT * WEEKS_SHOWN;
+/** The XS case from the #9463 review, where six full-size rows do not fit. */
 const ROOM_FOR_FOUR_ROWS = 4 * ROW_HEIGHT;
+const EXPANDED_ALL_ROWS = ROW_HEIGHT * WEEKS_SHOWN;
 
 describe('PlannerCalendarNavComponent', () => {
   let fixture: ComponentFixture<PlannerCalendarNavComponent>;
@@ -40,6 +40,7 @@ describe('PlannerCalendarNavComponent', () => {
 
   let mockGlobalConfigService: jasmine.SpyObj<GlobalConfigService>;
   let mockGlobalTrackingIntervalService: jasmine.SpyObj<GlobalTrackingIntervalService>;
+  let plannerEl: HTMLElement;
 
   beforeEach(() => {
     mockTodayDateStr.set('2026-02-16');
@@ -74,6 +75,14 @@ describe('PlannerCalendarNavComponent', () => {
 
     fixture = TestBed.createComponent(PlannerCalendarNavComponent);
     component = fixture.componentInstance;
+    // The nav measures against the planner host, so the fixture has to have one:
+    // in the app it is `planner.component.html`'s own element.
+    plannerEl = document.createElement('planner');
+    // planner.component.scss gives the host `display: flex`; an unknown element
+    // is inline by default, where height and clientHeight do not apply.
+    plannerEl.style.display = 'block';
+    fixture.nativeElement.parentElement.insertBefore(plannerEl, fixture.nativeElement);
+    plannerEl.appendChild(fixture.nativeElement);
     fixture.detectChanges();
   });
 
@@ -259,17 +268,23 @@ describe('PlannerCalendarNavComponent', () => {
   // The measurement itself, which nothing else exercises: both setRoom() helpers
   // below write _availableForRows directly. Stubbing the two rects pins the
   // arithmetic, HANDLE_HEIGHT against `.handle`'s own CSS, and the assumption
-  // that the nav's parentElement is the box the plan list shares.
+  // that the planner host is the box the plan list shares.
   describe('_measureAvailableForRows', () => {
-    const stubGeometry = (weeksTop: number, parentBottom: number): void => {
+    // offsetTop/offsetParent/clientHeight, because that is what the measurement
+    // reads: layout coordinates, so an ancestor transform cannot scale them.
+    const define = (el: HTMLElement, props: Record<string, unknown>): void => {
+      for (const [k, value] of Object.entries(props)) {
+        Object.defineProperty(el, k, { value, configurable: true });
+      }
+    };
+    const stubGeometry = (weeksTop: number, containerHeight: number): void => {
       const weeksEl = component['_weeksEl']()!.nativeElement;
-      const parentEl = fixture.nativeElement.parentElement as HTMLElement;
-      spyOn(weeksEl, 'getBoundingClientRect').and.returnValue({
-        top: weeksTop,
-      } as DOMRect);
-      spyOn(parentEl, 'getBoundingClientRect').and.returnValue({
-        bottom: parentBottom,
-      } as DOMRect);
+      define(weeksEl, { offsetTop: weeksTop, offsetParent: plannerEl });
+      define(plannerEl, {
+        offsetTop: 0,
+        offsetParent: null,
+        clientHeight: containerHeight,
+      });
     };
 
     // Literals, not the constants: expressing the expectation in terms of
@@ -282,6 +297,53 @@ describe('PlannerCalendarNavComponent', () => {
       expect(component['_availableForRows']()).toBe(178);
     });
 
+    // Resolved by selector rather than parentElement, so wrapping the nav in
+    // planner.component.html cannot silently change what is measured.
+    it('should measure against the planner host through a wrapper', () => {
+      const wrapper = document.createElement('div');
+      plannerEl.insertBefore(wrapper, fixture.nativeElement);
+      wrapper.appendChild(fixture.nativeElement);
+      stubGeometry(110, 356);
+
+      component['_measureAvailableForRows']();
+
+      expect(component['_availableForRows']()).toBe(178);
+    });
+
+    // The route enter animation (warpRoute) starts the view at scale(1.2) and
+    // the first measurement lands while it is in flight. Read through
+    // getBoundingClientRect that reported 227px of room where there were 178 —
+    // a whole extra row, and the handle ended up below the route content.
+    it('should measure the same while an ancestor is being scaled', () => {
+      plannerEl.style.height = '300px';
+      plannerEl.style.overflow = 'hidden';
+
+      component['_measureAvailableForRows']();
+      const unscaled = component['_availableForRows']();
+
+      plannerEl.style.transform = 'scale(1.2)';
+      // The scale really is in effect, so this cannot pass by not applying it.
+      expect(plannerEl.getBoundingClientRect().height).toBeCloseTo(360, 0);
+
+      component['_measureAvailableForRows']();
+
+      expect(component['_availableForRows']()).toBe(unscaled);
+    });
+
+    // Guards the test above: it compares two readings, so a measurement wired to
+    // nothing at all would satisfy it.
+    it('should follow the height of the planner host', () => {
+      plannerEl.style.overflow = 'hidden';
+      plannerEl.style.height = '300px';
+      component['_measureAvailableForRows']();
+      const shorter = component['_availableForRows']();
+
+      plannerEl.style.height = '500px';
+      component['_measureAvailableForRows']();
+
+      expect(component['_availableForRows']() - shorter).toBe(200);
+    });
+
     // HANDLE_HEIGHT restates `.handle`'s own CSS (padding 12px 0 + a 4px
     // ::after). Nothing else notices if one side changes.
     it('should keep HANDLE_HEIGHT in step with the rendered handle', () => {
@@ -291,48 +353,57 @@ describe('PlannerCalendarNavComponent', () => {
     });
 
     // The XS case from the #9463 review: 400px viewport, route content ending
-    // at 356 because the bottom nav owns the rest.
-    it('should allow four rows at the reported XS geometry', () => {
+    // at 356 because the bottom nav owns the rest. 178px of room over six rows
+    // is 29px each, where dropping rows gave four full-size ones and hid the
+    // rest of the month.
+    it('should shrink the rows to fit at the reported XS geometry', () => {
       stubGeometry(110, 356);
       component['_measureAvailableForRows']();
       component.isExpanded.set(true);
 
-      expect(component.maxHeight()).toBe(4 * ROW_HEIGHT);
+      expect(component.rowHeight()).toBe(29);
+      expect(component.maxHeight()).toBe(29 * WEEKS_SHOWN);
+      expect(component.maxHeight()).toBeLessThanOrEqual(178);
     });
 
-    it('should allow all six rows when the route content is tall', () => {
+    it('should use full-size rows when the route content is tall', () => {
       stubGeometry(110, 800);
       component['_measureAvailableForRows']();
       component.isExpanded.set(true);
 
-      expect(component.maxHeight()).toBe(MAX_HEIGHT);
+      expect(component.rowHeight()).toBe(ROW_HEIGHT);
+      expect(component.maxHeight()).toBe(EXPANDED_ALL_ROWS);
     });
 
-    it('should not expand when the route content leaves room for one row', () => {
+    it('should refuse to expand when six legible rows do not fit', () => {
       stubGeometry(110, 220);
       component['_measureAvailableForRows']();
-      component.isExpanded.set(true);
 
-      expect(component.maxHeight()).toBe(MIN_HEIGHT);
+      expect(component.canExpand()).toBe(false);
     });
   });
 
   describe('maxHeight computed', () => {
-    // Stated explicitly rather than inherited from the Karma iframe: the
-    // expanded height is clamped by the room actually below the rows, so
-    // leaving it implicit would make these assertions depend on the runner.
-    const setRoom = (px: number): void => component['_availableForRows'].set(px);
+    // Stated explicitly rather than inherited from the Karma iframe: the row
+    // height is clamped by the room actually below the rows, so leaving it
+    // implicit would make these assertions depend on the runner. The observer
+    // goes first, so nothing can re-measure over the value afterwards and the
+    // test does not depend on when it would have fired.
+    const setRoom = (px: number): void => {
+      component['_resizeObserver']?.disconnect();
+      component['_availableForRows'].set(px);
+    };
 
-    it('should return MIN_HEIGHT when collapsed', () => {
+    it('should return one row when collapsed', () => {
       setRoom(ROOM_FOR_ALL_ROWS);
       component.isExpanded.set(false);
-      expect(component.maxHeight()).toBe(MIN_HEIGHT);
+      expect(component.maxHeight()).toBe(ROW_HEIGHT);
     });
 
-    it('should return MAX_HEIGHT when expanded', () => {
+    it('should return six full-size rows when expanded', () => {
       setRoom(ROOM_FOR_ALL_ROWS);
       component.isExpanded.set(true);
-      expect(component.maxHeight()).toBe(MAX_HEIGHT);
+      expect(component.maxHeight()).toBe(EXPANDED_ALL_ROWS);
     });
 
     // Review of #9463: six 40px rows overflowed the Planner at XS heights.
@@ -343,16 +414,25 @@ describe('PlannerCalendarNavComponent', () => {
       component.isExpanded.set(true);
 
       const expanded = component.maxHeight();
-      expect(expanded).toBe(4 * ROW_HEIGHT);
-      expect(expanded).toBeLessThan(MAX_HEIGHT);
+      expect(expanded).toBeLessThan(EXPANDED_ALL_ROWS);
       expect(expanded).toBeLessThanOrEqual(ROOM_FOR_FOUR_ROWS);
     });
 
-    it('should always keep at least one row when there is no room at all', () => {
-      setRoom(0);
+    // The whole point of shrinking rather than dropping rows: the grid still
+    // spans six rows, so no part of the month falls outside it.
+    it('should still show every row when the height is clamped', () => {
+      setRoom(ROOM_FOR_FOUR_ROWS);
       component.isExpanded.set(true);
 
-      expect(component.maxHeight()).toBe(ROW_HEIGHT);
+      expect(component.rowHeight()).toBeLessThan(ROW_HEIGHT);
+      expect(component.maxHeight()).toBe(component.rowHeight() * WEEKS_SHOWN);
+    });
+
+    it('should not shrink rows below MIN_ROW_HEIGHT when there is no room at all', () => {
+      setRoom(0);
+
+      expect(component.rowHeight()).toBe(MIN_ROW_HEIGHT);
+      expect(component.canExpand()).toBe(false);
     });
 
     it('should still build all six weeks of days when the height is clamped', () => {
@@ -365,7 +445,10 @@ describe('PlannerCalendarNavComponent', () => {
   });
 
   describe('weekOffset computed', () => {
-    const setRoom = (px: number): void => component['_availableForRows'].set(px);
+    const setRoom = (px: number): void => {
+      component['_resizeObserver']?.disconnect();
+      component['_availableForRows'].set(px);
+    };
 
     it('should return 0 when expanded', () => {
       setRoom(ROOM_FOR_ALL_ROWS);
@@ -373,26 +456,21 @@ describe('PlannerCalendarNavComponent', () => {
       expect(component.weekOffset()).toBe(0);
     });
 
-    // Dropping rows must not make a day unreachable — that is the bug #9449
-    // fixed, at a different viewport.
-    it('should keep the active week visible when the height is clamped', () => {
+    // #9463 review: clamping the row *count* pinned the window to rows 0..n-1
+    // when the active week was row 0, and the tail of the month rendered off
+    // screen with no gesture that scrolls within an expanded grid. Shrinking
+    // rows keeps the offset at 0, so every week stays on screen.
+    it('should stay at 0 when expanded on a viewport that clamps the rows', () => {
       const weeks = component.weeks();
-      fixture.componentRef.setInput('visibleDayDate', weeks[WEEKS_SHOWN - 1][0].dateStr);
+      fixture.componentRef.setInput('visibleDayDate', weeks[0][0].dateStr);
       component.isExpanded.set(true);
       fixture.detectChanges();
-      // Last, so the ResizeObserver's initial callback cannot land on top of it
-      // with the runner's real geometry.
       setRoom(ROOM_FOR_FOUR_ROWS);
 
-      const rows = component.maxHeight() / ROW_HEIGHT;
-      const firstVisibleRow = -component.weekOffset() / ROW_HEIGHT;
-
-      expect(component.activeWeekIndex()).toBe(WEEKS_SHOWN - 1);
-      expect(firstVisibleRow).toBeGreaterThan(0);
-      expect(component.activeWeekIndex()).toBeGreaterThanOrEqual(firstVisibleRow);
-      expect(component.activeWeekIndex()).toBeLessThan(firstVisibleRow + rows);
-      // Never scrolled past the last row.
-      expect(firstVisibleRow + rows).toBeLessThanOrEqual(WEEKS_SHOWN);
+      expect(component.activeWeekIndex()).toBe(0);
+      expect(component.weekOffset()).toBe(0);
+      // The last row's bottom edge is inside the grid, so its days are on screen.
+      expect(component.rowHeight() * WEEKS_SHOWN).toBe(component.maxHeight());
     });
 
     it('should return negative offset based on activeWeekIndex when collapsed', () => {
@@ -401,8 +479,21 @@ describe('PlannerCalendarNavComponent', () => {
       fixture.componentRef.setInput('visibleDayDate', targetDay);
       component.isExpanded.set(false);
       fixture.detectChanges();
+      setRoom(ROOM_FOR_ALL_ROWS);
 
       expect(component.weekOffset()).toBe(-2 * ROW_HEIGHT);
+    });
+
+    // One row of a shrunken grid is one shrunken row high.
+    it('should scale the collapsed offset with the row height', () => {
+      const weeks = component.weeks();
+      fixture.componentRef.setInput('visibleDayDate', weeks[2][0].dateStr);
+      component.isExpanded.set(false);
+      fixture.detectChanges();
+      setRoom(ROOM_FOR_FOUR_ROWS);
+
+      expect(component.rowHeight()).toBeLessThan(ROW_HEIGHT);
+      expect(component.weekOffset()).toBe(-2 * component.rowHeight());
     });
 
     it('should return 0 when collapsed and activeWeekIndex is 0', () => {

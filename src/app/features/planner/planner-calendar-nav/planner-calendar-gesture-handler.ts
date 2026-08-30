@@ -1,3 +1,4 @@
+/** Height of one week row where there is room for six of them. */
 export const ROW_HEIGHT = 40;
 // 6, not 5: the expanded grid anchors to the week containing the 1st, and a
 // month starting late in the week spans 6 rows (Aug 2026 starts on a Saturday).
@@ -5,8 +6,10 @@ export const ROW_HEIGHT = 40;
 // (#9449).
 export const WEEKS_SHOWN = 6;
 export const DAYS_IN_VIEW = WEEKS_SHOWN * 7;
-export const MIN_HEIGHT = ROW_HEIGHT;
-export const MAX_HEIGHT = ROW_HEIGHT * WEEKS_SHOWN;
+// Rows shrink rather than being dropped where six of them do not fit, so the
+// grid always spans the whole month. Below this a date is neither legible nor
+// reliably tappable, and the calendar stays collapsed instead (`canExpand`).
+export const MIN_ROW_HEIGHT = 24;
 
 const SNAP_VELOCITY = 0.3;
 const SNAP_DURATION = 200;
@@ -18,9 +21,16 @@ const DIRECTION_RATIO = 1.5;
 export interface CalendarGestureCallbacks {
   getActiveWeekIndex(): number;
   getIsExpanded(): boolean;
-  /** `MAX_HEIGHT`, or less where the viewport cannot fit every row. */
-  getExpandedHeight(): number;
-  getWeekOffset(expanded: boolean, activeIdx: number): number;
+  /**
+   * Re-read the layout. The component observes the box it measures against, but
+   * cannot see the rows' own top move (the month label wrapping, say), so the
+   * geometry is refreshed once at the start of anything that acts on it.
+   */
+  measure(): void;
+  /** `ROW_HEIGHT`, or less where the viewport cannot fit six of them. */
+  getRowHeight(): number;
+  /** False where not even `MIN_ROW_HEIGHT` rows fit, leaving nothing to expand into. */
+  canExpand(): boolean;
   onExpandChanged(expanded: boolean): void;
   onVerticalSwipe(isDown: boolean): void;
   onHorizontalSwipe(dir: 1 | -1): void;
@@ -38,8 +48,8 @@ export class CalendarGestureHandler {
   private _touchActive = false;
   private _dragStartHeight = 0;
   private _dragActiveIdx = 0;
-  /** Sampled once per drag: measuring per touchmove interleaves layout reads with writes. */
-  private _dragExpandedHeight = 0;
+  /** Sampled once per drag: reading it per touchmove interleaves layout reads with writes. */
+  private _dragRowHeight = ROW_HEIGHT;
   private _prefersReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -68,17 +78,18 @@ export class CalendarGestureHandler {
     const innerEl = weeksEl.firstElementChild as HTMLElement;
     if (activeIdx !== undefined) this._dragActiveIdx = activeIdx;
 
-    // A viewport with room for only one row leaves nothing to expand into.
+    // A viewport too short for six legible rows leaves nothing to expand into.
     // Reporting expanded there would desync the flag from the geometry: the
     // calendar still looks collapsed while horizontal swipes take the expanded
     // branch and jump whole months.
-    const expandedHeight = this._cb.getExpandedHeight();
-    const expanded = requestExpanded && expandedHeight > MIN_HEIGHT;
+    this._cb.measure();
+    const rowHeight = this._cb.getRowHeight();
+    const expanded = requestExpanded && this._cb.canExpand();
 
     const snapDur = this._animDuration(SNAP_DURATION);
-    const targetHeight = expanded ? expandedHeight : MIN_HEIGHT;
+    const targetHeight = expanded ? rowHeight * WEEKS_SHOWN : rowHeight;
     const idx = this._dragActiveIdx;
-    const targetOffset = this._cb.getWeekOffset(expanded, idx);
+    const targetOffset = expanded ? 0 : -idx * rowHeight;
 
     if (snapDur === 0) {
       // Apply the target rather than clearing, for the same reason the animated
@@ -238,9 +249,10 @@ export class CalendarGestureHandler {
         const deltaY = touch.clientY - this._touchStartY;
         const elapsed = Date.now() - this._touchStartTime;
         const velocity = deltaY / Math.max(elapsed, 1);
-        const expandedHeight = this._dragExpandedHeight;
+        const rowHeight = this._dragRowHeight;
+        const expandedHeight = rowHeight * WEEKS_SHOWN;
         const currentHeight = Math.max(
-          MIN_HEIGHT,
+          rowHeight,
           Math.min(expandedHeight, this._dragStartHeight + deltaY),
         );
 
@@ -248,7 +260,7 @@ export class CalendarGestureHandler {
         if (Math.abs(velocity) > SNAP_VELOCITY) {
           snapExpanded = velocity > 0;
         } else {
-          snapExpanded = currentHeight > (MIN_HEIGHT + expandedHeight) / 2;
+          snapExpanded = currentHeight > (rowHeight + expandedHeight) / 2;
         }
         this.snapTo(snapExpanded);
       }
@@ -289,31 +301,29 @@ export class CalendarGestureHandler {
   private _startDrag(): void {
     this._isDragging = true;
     this._dragActiveIdx = this._cb.getActiveWeekIndex();
-    this._dragExpandedHeight = this._cb.getExpandedHeight();
+    this._cb.measure();
+    this._dragRowHeight = this._cb.getRowHeight();
     this._dragStartHeight = this._cb.getIsExpanded()
-      ? this._dragExpandedHeight
-      : MIN_HEIGHT;
+      ? this._dragRowHeight * WEEKS_SHOWN
+      : this._dragRowHeight;
   }
 
   private _updateDrag(deltaY: number): void {
-    const expandedHeight = this._dragExpandedHeight;
+    const rowHeight = this._dragRowHeight;
+    const expandedHeight = rowHeight * WEEKS_SHOWN;
     const newHeight = Math.max(
-      MIN_HEIGHT,
+      rowHeight,
       Math.min(expandedHeight, this._dragStartHeight + deltaY),
     );
     const weeksEl = this._getWeeksEl();
     if (!weeksEl) return;
     weeksEl.style.maxHeight = newHeight + 'px';
 
-    // Guarded: with room for a single row the range is 0 and the ratio would be
-    // NaN, which renders as translateY(NaNpx).
-    const range = expandedHeight - MIN_HEIGHT;
-    const progress = range > 0 ? (newHeight - MIN_HEIGHT) / range : 0;
-    const collapsedOffset = this._cb.getWeekOffset(false, this._dragActiveIdx);
-    const expandedOffset = this._cb.getWeekOffset(true, this._dragActiveIdx);
-    const travel = expandedOffset - collapsedOffset;
-    const travelled = travel * progress;
-    const offset = collapsedOffset + travelled;
+    // The range is (WEEKS_SHOWN - 1) rows, so it is only zero if a row itself
+    // is, which MIN_ROW_HEIGHT rules out. A zero range would make this NaN and
+    // translateY(NaNpx) is dropped silently by CSSOM.
+    const progress = (newHeight - rowHeight) / (expandedHeight - rowHeight);
+    const offset = -this._dragActiveIdx * rowHeight * (1 - progress);
     const innerEl = weeksEl.firstElementChild as HTMLElement;
     if (innerEl) {
       innerEl.style.transform = `translateY(${offset}px)`;

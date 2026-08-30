@@ -1,10 +1,15 @@
 import {
   CalendarGestureHandler,
   CalendarGestureCallbacks,
+  MIN_ROW_HEIGHT,
   ROW_HEIGHT,
-  MAX_HEIGHT,
-  MIN_HEIGHT,
+  WEEKS_SHOWN,
 } from './planner-calendar-gesture-handler';
+
+// Geometry on a viewport tall enough for six full-size rows. Shrunken rows are
+// covered by the row-height cases below and in the component spec.
+const MAX_HEIGHT = ROW_HEIGHT * WEEKS_SHOWN;
+const MIN_HEIGHT = ROW_HEIGHT;
 
 // Snap/slide durations must match the source constants
 const SNAP_DURATION = 200;
@@ -50,8 +55,9 @@ const createMockCallbacks = (): jasmine.SpyObj<CalendarGestureCallbacks> =>
   jasmine.createSpyObj<CalendarGestureCallbacks>('callbacks', [
     'getActiveWeekIndex',
     'getIsExpanded',
-    'getExpandedHeight',
-    'getWeekOffset',
+    'measure',
+    'getRowHeight',
+    'canExpand',
     'onExpandChanged',
     'onVerticalSwipe',
     'onHorizontalSwipe',
@@ -80,12 +86,8 @@ describe('CalendarGestureHandler', () => {
     cb = createMockCallbacks();
     cb.getActiveWeekIndex.and.returnValue(0);
     cb.getIsExpanded.and.returnValue(false);
-    // Unclamped geometry: what the component reports on any viewport tall
-    // enough for all six rows. The clamped case is covered in the component spec.
-    cb.getExpandedHeight.and.returnValue(MAX_HEIGHT);
-    cb.getWeekOffset.and.callFake((expanded: boolean, activeIdx: number) =>
-      expanded ? 0 : -activeIdx * ROW_HEIGHT,
-    );
+    cb.getRowHeight.and.returnValue(ROW_HEIGHT);
+    cb.canExpand.and.returnValue(true);
 
     handler = new CalendarGestureHandler(el, () => weeksEl, cb);
   });
@@ -552,49 +554,69 @@ describe('CalendarGestureHandler', () => {
       expect(cb.onExpandChanged).toHaveBeenCalledWith(true);
     });
 
-    // Review round 2 of #9463: with room for a single row there is nothing to
-    // expand into, so the interpolation range is 0 and the ratio would be NaN.
-    describe('at a one-row viewport', () => {
-      beforeEach(() => {
-        cb.getExpandedHeight.and.returnValue(MIN_HEIGHT);
-      });
+    // Rows shrink instead of being dropped, so every geometry the handler sees
+    // still spans six rows. A viewport too short even for MIN_ROW_HEIGHT rows
+    // reports canExpand false rather than a degenerate height (#9463 review).
+    describe('on a shrunken grid', () => {
+      it('should snap to six shrunken rows with no offset', () => {
+        cb.getRowHeight.and.returnValue(MIN_ROW_HEIGHT);
+        cb.getActiveWeekIndex.and.returnValue(4);
 
-      // Asserting the exact offset, not merely the absence of 'NaN': the
-      // browser rejects translateY(NaNpx) outright, so the unguarded code
-      // leaves the transform empty and a not-toContain check passes on it.
-      it('should still write a usable transform while dragging', () => {
-        cb.getActiveWeekIndex.and.returnValue(2);
-
-        handleEl.dispatchEvent(makeTouchEvent('touchstart', 100, 100));
-        handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 200));
-
-        const innerEl = weeksEl.firstElementChild as HTMLElement;
-        expect(innerEl.style.transform).toBe(`translateY(${-2 * ROW_HEIGHT}px)`);
-        expect(weeksEl.style.maxHeight).toBe(MIN_HEIGHT + 'px');
-      });
-
-      it('should stay collapsed rather than report an expansion it cannot render', () => {
         handler.snapTo(true);
         jasmine.clock().tick(SNAP_DURATION + 20);
 
-        expect(cb.onExpandChanged).toHaveBeenCalledWith(false);
-        expect(cb.onExpandChanged).not.toHaveBeenCalledWith(true);
-        expect(weeksEl.style.maxHeight).toBe(MIN_HEIGHT + 'px');
+        expect(cb.onExpandChanged).toHaveBeenCalledWith(true);
+        expect(weeksEl.style.maxHeight).toBe(`${MIN_ROW_HEIGHT * WEEKS_SHOWN}px`);
+        // Every row is on screen, so nothing has to slide into view. Under the
+        // dropped-rows clamp this was -4 rows and weeks 5 and 6 were unreachable.
+        const innerEl = weeksEl.firstElementChild as HTMLElement;
+        expect(innerEl.style.transform).toBe('translateY(0px)');
+      });
+
+      describe('too short even for that', () => {
+        beforeEach(() => {
+          cb.getRowHeight.and.returnValue(MIN_ROW_HEIGHT);
+          cb.canExpand.and.returnValue(false);
+        });
+
+        it('should stay collapsed rather than report an expansion it cannot render', () => {
+          handler.snapTo(true);
+          jasmine.clock().tick(SNAP_DURATION + 20);
+
+          expect(cb.onExpandChanged).toHaveBeenCalledWith(false);
+          expect(cb.onExpandChanged).not.toHaveBeenCalledWith(true);
+          expect(weeksEl.style.maxHeight).toBe(MIN_ROW_HEIGHT + 'px');
+        });
+
+        // Asserting the exact offset, not merely the absence of 'NaN': the
+        // browser rejects translateY(NaNpx) outright, so code that produced one
+        // would leave the transform empty and a not-toContain check would pass.
+        it('should still write a usable transform while dragging', () => {
+          cb.getActiveWeekIndex.and.returnValue(2);
+
+          handleEl.dispatchEvent(makeTouchEvent('touchstart', 100, 100));
+          handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 200));
+
+          // 100px of a 120px range leaves a sixth of the collapsed offset.
+          const innerEl = weeksEl.firstElementChild as HTMLElement;
+          expect(innerEl.style.transform).toBe('translateY(-8px)');
+          expect(weeksEl.style.maxHeight).toBe(`${MIN_ROW_HEIGHT + 100}px`);
+        });
       });
     });
 
-    // The component re-measures on every getExpandedHeight() call, so reading it
-    // per touchmove interleaves layout reads with the style writes below it.
-    it('should measure the expanded height once per drag, not per touchmove', () => {
+    // The component measures layout to answer this, so reading it per touchmove
+    // would interleave layout reads with the style writes below it.
+    it('should read the row height once per drag, not per touchmove', () => {
       handleEl.dispatchEvent(makeTouchEvent('touchstart', 100, 100));
-      cb.getExpandedHeight.calls.reset();
+      cb.getRowHeight.calls.reset();
 
       handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 120));
       handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 140));
       handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 160));
 
       // Once for _startDrag, on the first move that crosses the threshold.
-      expect(cb.getExpandedHeight).toHaveBeenCalledTimes(1);
+      expect(cb.getRowHeight).toHaveBeenCalledTimes(1);
     });
   });
 
