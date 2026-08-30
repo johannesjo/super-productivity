@@ -165,6 +165,19 @@ describe('BackupService', () => {
     expect(mockStore.dispatch).not.toHaveBeenCalled();
   });
 
+  it('should refuse a legacy backup missing only the task slice', async () => {
+    const truncated = createMinimalValidBackup() as any;
+    delete truncated.task;
+    truncated.taskArchive = { ids: [], entities: {} };
+
+    await expectAsync(
+      service.importCompleteBackup(truncated, true, true),
+    ).toBeRejectedWithError('Data validation failed and repair not possible');
+
+    expect(mockOpLogStore.runDestructiveStateReplacement).not.toHaveBeenCalled();
+    expect(mockStore.dispatch).not.toHaveBeenCalled();
+  });
+
   it('should discard task-time accumulated against the replaced pre-import state', async () => {
     await service.importCompleteBackup(createMinimalValidBackup() as any, true, true);
 
