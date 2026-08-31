@@ -14,6 +14,7 @@ Update these alongside the behavior or workflow they describe:
 - [Development environment variables](ENV_SETUP.md)
 - [Plugin development](plugin-development.md)
 - [Adding an issue integration](add-new-integration.md)
+- [Feature and PR review guide](feature-review-guide.md)
 - [Styling guide](styling-guide.md) and [theming contract](theming-contract.md)
 - [Android edge-to-edge and keyboard behavior](android-edge-to-edge-keyboard.md)
 - [Android home-screen widget](android-home-screen-widget.md)
