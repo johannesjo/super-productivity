@@ -419,8 +419,31 @@ export class ScheduleComponent {
     const element = this._elRef.nativeElement.querySelector(
       `#${elementId}`,
     ) as HTMLElement | null;
+    if (!element) return;
 
-    element?.scrollIntoView({ block: 'start', inline: 'start', behavior: 'instant' });
+    const scroll = (): void =>
+      element.scrollIntoView({ block: 'start', inline: 'start', behavior: 'instant' });
+
+    // scrollIntoView resolves *this* element's target position in layout
+    // coordinates, so the scale(1.2) transform above can't skew that part.
+    // But it also walks every scrollable ancestor to bring the target into
+    // view, and a transformed element's *painted* bounds count toward its
+    // ancestors' scrollable-overflow region -- so while warpRoute is still
+    // scaling this component's host, .route-wrapper (and potentially further
+    // out) briefly reads as having real overflow to scroll, gets nudged to a
+    // transient scrollLeft/scrollTop to satisfy the 'start' alignment, and
+    // only settles back to 0 once the transform reaches scale(1). For the
+    // ~duration of the enter animation this visibly shifts the app shell
+    // (magic-side-nav included) instead of just the schedule view.
+    // Wait out any animation still running on this host before scrolling.
+    const running = this._elRef.nativeElement
+      .getAnimations()
+      .filter((a) => a.playState === 'running');
+    if (running.length === 0) {
+      scroll();
+      return;
+    }
+    Promise.all(running.map((a) => a.finished.catch(() => undefined))).then(scroll);
   }
 
   selectTimeView(view: 'week' | 'month' | 'day'): void {

@@ -1359,5 +1359,29 @@ describe('ScheduleComponent', () => {
       // hundreds of pixels. What is left here is sub-pixel rounding.
       expect(Math.abs(scaledWrapper.scrollTop - plainTop)).toBeLessThan(2);
     });
+
+    it('defers scrolling until a running animation on the host finishes', async () => {
+      const host = fixture.nativeElement as HTMLElement;
+      const scrollIntoViewSpy = spyOn(HTMLElement.prototype, 'scrollIntoView');
+
+      // A transformed element's painted bounds count toward its ancestors'
+      // scrollable-overflow region, so calling scrollIntoView while warpRoute
+      // is still scaling this host can nudge .route-wrapper (and further out)
+      // to a transient scroll offset -- setting `transform` directly (as the
+      // test above does) can't reproduce that because it creates no
+      // Animation for getAnimations() to see. This exercises the real thing
+      // via the Web Animations API instead.
+      const anim = host.animate(
+        [{ transform: 'scale(1.2)' }, { transform: 'scale(1)' }],
+        30,
+      );
+
+      component['_scrollAnchorToTop']('current-time');
+      expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+
+      await anim.finished;
+      await Promise.resolve(); // flush the .then(scroll) microtask
+      expect(scrollIntoViewSpy).toHaveBeenCalled();
+    });
   });
 });
