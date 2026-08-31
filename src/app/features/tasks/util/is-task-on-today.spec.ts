@@ -69,6 +69,27 @@ describe('isTaskOnToday', () => {
         ),
       ).toBe(true);
     });
+
+    it('is a deliberate superset: a today dueDay counts even when dueWithTime is not today', () => {
+      // The other direction of the shape above, and the one that distinguishes a
+      // disjunction from a precedence check. Canonical TODAY membership reads
+      // dueWithTime FIRST and only falls back to dueDay when it is unset
+      // (ARCHITECTURE-DECISIONS.md Decision #1), so for this legacy both-fields
+      // shape the canonical readers disagree with us:
+      //   work-context.selectors.ts:58-79  computeOrderedTaskIdsForToday -> false
+      //   planner.selectors.ts:66-74                                     -> false
+      //   task.selectors.ts:617-623        isInToday                     -> false
+      // isTaskOnToday is a strict superset on purpose — see the note on the
+      // predicate itself. Both call sites only ever use it to SUPPRESS a
+      // dispatch, and in this shape the dispatch was a no-op anyway.
+      expect(
+        isTaskOnToday(
+          createTask({ dueDay: '2026-03-15', dueWithTime: localMs('2026-03-16', 9) }),
+          TODAY_STR,
+          NO_OFFSET,
+        ),
+      ).toBe(true);
+    });
   });
 
   describe('startOfNextDayDiffMs', () => {

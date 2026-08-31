@@ -18,6 +18,19 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
  * `dueWithTime` is checked first, following the dueWithTime/dueDay
  * mutual-exclusivity pattern; because this is a disjunction the order is not
  * load-bearing, but it matches the definition this replaces.
+ *
+ * That disjunction makes this a DELIBERATE STRICT SUPERSET of canonical TODAY
+ * membership, and the difference is worth knowing before reusing it. The
+ * canonical readers — `computeOrderedTaskIdsForToday`
+ * (work-context.selectors.ts), `planner.selectors.ts` and `isInToday`
+ * (task.selectors.ts) — apply Decision #1 of ARCHITECTURE-DECISIONS.md: check
+ * `dueWithTime` first, and consult `dueDay` ONLY if `dueWithTime` is unset. So a
+ * legacy task carrying both, with `dueDay` today and `dueWithTime` tomorrow, is
+ * NOT on Today for them and IS on Today for this predicate. That is intended:
+ * both call sites use it only to suppress a `planTasksForToday` dispatch, so the
+ * superset can only ever suppress more, never plan something it should not — and
+ * in that one divergent shape the dispatch was a no-op anyway. Do not reuse this
+ * anywhere the answer decides what to SHOW; use the selectors for that.
  */
 export const isTaskOnToday = (
   task: Pick<Task, 'dueDay' | 'dueWithTime'>,

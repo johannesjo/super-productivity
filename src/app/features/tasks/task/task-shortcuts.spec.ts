@@ -169,9 +169,14 @@ describe('TaskComponent shortcut handling', () => {
           provide: DateService,
           useValue: jasmine.createSpyObj(
             'DateService',
-            ['isToday', 'getLogicalTodayDate'],
+            ['isToday', 'getLogicalTodayDate', 'getStartOfNextDayDiffMs'],
             {
               isToday: () => false,
+              // isScheduledToday() calls this and is template-bound
+              // (task.component.html:166, :192), so the first test in this file
+              // that calls detectChanges() renders those @if blocks against this
+              // mock. Stubbed here rather than only in the Shift+T beforeEach.
+              getStartOfNextDayDiffMs: () => 0,
             },
           ),
         },
