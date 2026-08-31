@@ -562,6 +562,47 @@ jobs:
           release: false
           args: '--publish never' # Explicit: don't auto-publish unsigned exe files
 
+      # The universal installer and portable are named identically whether they
+      # carry one arch or both, so a silently dropped arm64 pack is invisible in
+      # the filename alone. Reintroducing ${arch} in electron-builder.yaml is
+      # equally invisible here and doubles what we submit to SignPath, whose
+      # size-based yearly quota we already exhausted once. Inspect the payloads
+      # as well as the filenames before spending any of it.
+      - name: Verify Windows artifact set before signing
+        shell: pwsh
+        run: |
+          $exes = Get-ChildItem -Path .tmp/app-builds -Filter *.exe
+          $actual = @($exes | ForEach-Object { $_.Name } | Sort-Object)
+          $expected = @('Super-Productivity-Setup.exe', 'superProductivity.exe') | Sort-Object
+          Write-Host "Built: $($actual -join ', ')"
+          if (Compare-Object $actual $expected) {
+            Write-Error "Unexpected Windows artifact set. Expected exactly: $($expected -join ', ')"
+            exit 1
+          }
+
+          $sevenZip = (Get-Command 7z -ErrorAction Stop).Source
+          $requiredPayloads = @('$PLUGINSDIR/app-64.7z', '$PLUGINSDIR/app-arm64.7z')
+          foreach ($exe in $exes) {
+            $listing = & $sevenZip l -slt -tNsis $exe.FullName
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Could not inspect NSIS payloads in $($exe.Name)"
+              exit 1
+            }
+            $archivePaths = @(
+              $listing |
+                Where-Object { $_ -like 'Path = *' } |
+                ForEach-Object { $_.Substring(7).Replace('\', '/') }
+            )
+            $missingPayloads = @($requiredPayloads | Where-Object { $_ -notin $archivePaths })
+            if ($missingPayloads.Count -gt 0) {
+              Write-Error "$($exe.Name) is missing architecture payloads: $($missingPayloads -join ', ')"
+              exit 1
+            }
+
+            $mb = [math]::Round($exe.Length / 1MB, 1)
+            Write-Host "  $($exe.Name): $mb MiB"
+          }
+
       # --- Code signing (must succeed — we never publish unsigned exe files) ---
 
       - name: Upload unsigned executables for SignPath
@@ -620,19 +661,6 @@ jobs:
           }
           Write-Host "Final executables:"
           Get-ChildItem -Path .tmp/app-builds -Filter *.exe | Format-Table -AutoSize
-
-      - name: Verify code signatures
-        shell: pwsh
-        run: |
-          $exeFiles = Get-ChildItem -Path .tmp/app-builds -Filter *.exe
-          foreach ($exe in $exeFiles) {
-            $sig = Get-AuthenticodeSignature $exe.FullName
-            Write-Host "$($exe.Name): $($sig.Status)"
-            if ($sig.Status -ne 'Valid') {
-              Write-Error "Signature verification failed for $($exe.Name): $($sig.Status)"
-              exit 1
-            }
-          }
 
       - name: Regenerate blockmaps and generate latest.yml for signed executables
         shell: pwsh
@@ -715,7 +743,6 @@ jobs:
                 return { url: filename, ...info };
               });
               const primary = files.find(f => f.url === 'Super-Productivity-Setup.exe')
-                || files.find(f => f.url === 'Super-Productivity-Setup-x64.exe')
                 || files[0];
               const latestYml = {
                 version: pkg.version,
@@ -728,6 +755,31 @@ jobs:
               console.log('Generated latest.yml for ' + files.length + ' signed executables');
             }
           "
+
+      # Existing website and package-manager manifests still use the old
+      # architecture-specific URLs. Byte-for-byte copies preserve those public
+      # contracts without submitting duplicate executables to SignPath.
+      - name: Create legacy Windows download aliases
+        shell: pwsh
+        run: |
+          $buildDir = '.tmp/app-builds'
+          Copy-Item -Force -ErrorAction Stop "$buildDir/Super-Productivity-Setup.exe" "$buildDir/Super-Productivity-Setup-x64.exe"
+          Copy-Item -Force -ErrorAction Stop "$buildDir/Super-Productivity-Setup.exe" "$buildDir/Super-Productivity-Setup-arm64.exe"
+          Copy-Item -Force -ErrorAction Stop "$buildDir/superProductivity.exe" "$buildDir/superProductivity-x64.exe"
+          Copy-Item -Force -ErrorAction Stop "$buildDir/superProductivity.exe" "$buildDir/superProductivity-arm64.exe"
+
+      - name: Verify code signatures
+        shell: pwsh
+        run: |
+          $exeFiles = Get-ChildItem -Path .tmp/app-builds -Filter *.exe
+          foreach ($exe in $exeFiles) {
+            $sig = Get-AuthenticodeSignature $exe.FullName
+            Write-Host "$($exe.Name): $($sig.Status)"
+            if ($sig.Status -ne 'Valid') {
+              Write-Error "Signature verification failed for $($exe.Name): $($sig.Status)"
+              exit 1
+            }
+          }
 
       - name: Publish signed Windows binaries to GitHub Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
