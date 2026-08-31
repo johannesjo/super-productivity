@@ -31,6 +31,7 @@ describe('TaskShortcutService', () => {
     taskScheduleDeadline: 'Shift+S',
     taskToggleDone: 'D',
     taskAddSubTask: 'A',
+    taskDuplicate: 'Ctrl+D',
     taskAddAttachment: null,
     taskDelete: 'Backspace',
     taskMoveToProject: 'P',
@@ -350,6 +351,42 @@ describe('TaskShortcutService', () => {
       expect(result).toBe(true);
       expect(event.preventDefault).toHaveBeenCalled();
       expect(mockTaskComponent.openNotesPanel).toHaveBeenCalled();
+    });
+
+    it('should delegate taskDuplicate shortcut to the focused task component', () => {
+      const mockTaskComponent = {
+        task: () => ({ id: 'focused-task-1' }),
+        duplicateTask: jasmine.createSpy('duplicateTask'),
+        taskContextMenu: () => undefined,
+      };
+      setFocusedTask('focused-task-1');
+      mockTaskFocusService.lastFocusedTaskComponent.set(mockTaskComponent);
+
+      const event = createKeyboardEvent('d', 'KeyD', { ctrlKey: true });
+      spyOn(event, 'preventDefault');
+
+      const result = service.handleTaskShortcuts(event);
+
+      expect(result).toBe(true);
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(mockTaskComponent.duplicateTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('should keep plain D bound to toggle done', () => {
+      const mockTaskComponent = {
+        task: () => ({ id: 'focused-task-1' }),
+        toggleDoneKeyboard: jasmine.createSpy('toggleDoneKeyboard'),
+        duplicateTask: jasmine.createSpy('duplicateTask'),
+        taskContextMenu: () => undefined,
+      };
+      setFocusedTask('focused-task-1');
+      mockTaskFocusService.lastFocusedTaskComponent.set(mockTaskComponent);
+
+      const result = service.handleTaskShortcuts(createKeyboardEvent('D'));
+
+      expect(result).toBe(true);
+      expect(mockTaskComponent.toggleDoneKeyboard).toHaveBeenCalledTimes(1);
+      expect(mockTaskComponent.duplicateTask).not.toHaveBeenCalled();
     });
 
     it('should delegate taskScheduleDeadline shortcut to focused task component', () => {

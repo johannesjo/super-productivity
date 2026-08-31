@@ -25,11 +25,13 @@ import { TranslateService } from '@ngx-translate/core';
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { PlannerService } from '../../planner/planner.service';
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
+import { TaskDuplicateService } from '../task-duplicate.service';
 
 describe('TaskComponent shortcut handling', () => {
   let fixture: import('@angular/core/testing').ComponentFixture<TaskComponent>;
   let component: TaskComponent;
   let taskServiceSpy: jasmine.SpyObj<TaskService>;
+  let taskDuplicateServiceSpy: jasmine.SpyObj<TaskDuplicateService>;
   let addSubtaskInputServiceSpy: jasmine.SpyObj<AddSubtaskInputService>;
   let storeSpy: jasmine.SpyObj<Store>;
 
@@ -96,6 +98,10 @@ describe('TaskComponent shortcut handling', () => {
         subTaskIds: [],
       } as unknown as TaskWithSubTasks),
     );
+    taskDuplicateServiceSpy = jasmine.createSpyObj<TaskDuplicateService>(
+      'TaskDuplicateService',
+      ['duplicate'],
+    );
     addSubtaskInputServiceSpy = jasmine.createSpyObj<AddSubtaskInputService>(
       'AddSubtaskInputService',
       ['requestOpen', 'consume'],
@@ -110,6 +116,7 @@ describe('TaskComponent shortcut handling', () => {
       imports: [TaskComponent],
       providers: [
         { provide: TaskService, useValue: taskServiceSpy },
+        { provide: TaskDuplicateService, useValue: taskDuplicateServiceSpy },
         {
           provide: TaskRepeatCfgService,
           useValue: jasmine.createSpyObj('TaskRepeatCfgService', [
@@ -212,6 +219,15 @@ describe('TaskComponent shortcut handling', () => {
     fixture.componentRef.setInput('task', createSubTask(''));
     fixture.componentRef.setInput('isInSubTaskList', true);
     fixture.componentRef.setInput('isBacklog', false);
+  });
+
+  it('delegates duplication of the current task', () => {
+    const task = createTopLevelTask('Task to duplicate');
+    fixture.componentRef.setInput('task', task);
+
+    component.duplicateTask();
+
+    expect(taskDuplicateServiceSpy.duplicate).toHaveBeenCalledOnceWith(task);
   });
 
   it('does not delete an empty subtask on Escape', () => {

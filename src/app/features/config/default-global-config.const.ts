@@ -175,6 +175,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskUnschedule: 'U',
     taskToggleDone: 'D',
     taskAddSubTask: 'A',
+    taskDuplicate: 'Ctrl+D',
     taskAddAttachment: 'L',
     taskDelete: 'Backspace',
     taskMoveToProject: 'E',
