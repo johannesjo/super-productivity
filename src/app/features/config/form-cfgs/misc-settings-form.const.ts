@@ -40,6 +40,11 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_MINIMIZE_TO_TRAY,
       },
     },
+    // Shown on every desktop platform. Some Wayland compositors ignore the
+    // request (window stacking is compositor-only policy there), which the
+    // hint calls out rather than hiding the toggle — a Wayland *session* is
+    // frequently an X11/XWayland *client* (Snap, --ozone-platform=x11), where
+    // the request is honoured.
     ...((IS_ELECTRON
       ? [
           {

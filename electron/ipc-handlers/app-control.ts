@@ -9,6 +9,7 @@ import {
   setIsMinimizeToTray,
   setIsTrayShowCurrentTask,
   setIsTrayShowCurrentCountdown,
+  getIsAlwaysOnTop,
   setIsAlwaysOnTop,
 } from '../shared-state';
 import { refreshIndicator } from '../indicator';
@@ -50,8 +51,16 @@ export const initAppControlIpc = (): void => {
     refreshIndicator();
     updateLocalRestApiConfig(cfg);
 
-    setIsAlwaysOnTop(!!cfg.misc.isAlwaysOnTop);
-    getWin().setAlwaysOnTop(!!cfg.misc.isAlwaysOnTop);
+    // Apply only on an actual change. This handler fires on every launch and on
+    // any unrelated Misc setting edit, so calling setAlwaysOnTop() every time
+    // would clear an "always above" state the user set outside the app (KWin's
+    // "Keep Above Others", a helper tool) whenever this toggle is off. Shared
+    // state starts false, so an untouched config issues no call at all.
+    const isOnTop = !!cfg.misc.isAlwaysOnTop;
+    if (isOnTop !== getIsAlwaysOnTop()) {
+      setIsAlwaysOnTop(isOnTop);
+      getWin().setAlwaysOnTop(isOnTop);
+    }
 
     if (cfg.misc.isUseCustomWindowTitleBar !== undefined) {
       await saveSimpleStore(
