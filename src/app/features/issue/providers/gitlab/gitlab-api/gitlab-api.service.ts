@@ -111,6 +111,40 @@ export class GitlabApiService {
     );
   }
 
+  private _extractGitlabApiParams(searchText: string): {
+    params: string;
+    remainingSearch: string;
+  } {
+    // GitLab API parameters that should be passed as query params, not inside the search param.
+    // Based on: https://docs.gitlab.com/api/issues/#list-project-issues
+    // Includes: state, label(s), milestone, assignee_id/username, author_id/username,
+    // created_after/before, due_date, epic_id, health_status, iids[], in, issue_type,
+    // iteration_id/title, my_reaction_emoji, non_archived, not[...], order_by, scope,
+    // sort, updated_after/before, weight, with_labels_details, per_page, page, confidential
+    const apiParamPattern =
+      /\b(?:assignee_id|assignee_username|author_id|author_username|confidential|created_after|created_before|due_date|epic_id|health_status|iids\[\]|in|issue_type|iteration_id|iteration_title|label|labels|labels\[\]|milestone_id|milestone|my_reaction_emoji|non_archived|not[\w_\[\]]+|order_by|scope|search|sort|state|updated_after|updated_before|weight|with_labels_details|per_page|page)=[^\s&]+/g;
+    const matches: string[] = [];
+    let remainingText = searchText;
+
+    // Find all API parameter matches
+    let match;
+    while ((match = apiParamPattern.exec(searchText)) !== null) {
+      matches.push(match[0]);
+    }
+
+    // Remove the matched parameters from the search text
+    if (matches.length > 0) {
+      const escapedMatches = matches.map((m) => m.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      const pattern = new RegExp(escapedMatches.join('|'), 'g');
+      remainingText = searchText.replace(pattern, '').replace(/\s+/g, ' ').trim();
+    }
+
+    return {
+      params: matches.length > 0 ? '&' + matches.join('&') : '',
+      remainingSearch: remainingText,
+    };
+  }
+
   searchIssueInProject$(
     searchText: string,
     cfg: GitlabCfg,
@@ -124,11 +158,13 @@ export class GitlabApiService {
     // via getById$). A broad or empty search term can match thousands of issues, so
     // paginating through all of them and then firing a /notes request per issue produced a
     // burst of thousands of requests that GitLab rate-limited with a 429 — see #9034.
+    const { params: apiParams, remainingSearch } =
+      this._extractGitlabApiParams(searchText);
     return this._sendIssueRequestFirstPage$(
       {
-        url: `${this._apiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
+        url: `${this._apiLink(cfg)}/issues?${remainingSearch ? 'search=' + remainingSearch : ''}${this.getScopeParam(
           cfg,
-        )}&order_by=updated_at${this.getCustomFilterParam(cfg)}`,
+        )}&order_by=updated_at${apiParams}${this.getCustomFilterParam(cfg)}`,
       },
       cfg,
     ).pipe(map((issues) => issues.map(mapGitlabIssueToSearchResult)));
