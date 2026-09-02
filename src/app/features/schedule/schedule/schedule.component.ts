@@ -44,7 +44,7 @@ import { DEFAULT_FIRST_DAY_OF_WEEK } from '../../../core/locale.constants';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { getWeekNumber } from '../../../util/get-week-number';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
-import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { anchorContextNow } from '../anchor-context-now';
 
 @Component({
   selector: 'schedule',
@@ -271,17 +271,7 @@ export class ScheduleComponent {
     if (!firstDay) {
       return Date.now();
     }
-    const dayStart = dateStrToUtcDate(firstDay);
-    dayStart.setHours(0, 0, 0, 0);
-    // setHours(24) rather than +24h: DST-safe day advancement, and exactly how
-    // create-schedule-days derives nextDayStart for the same day string.
-    const nextDayStart = dateStrToUtcDate(firstDay);
-    nextDayStart.setHours(24, 0, 0, 0);
-
-    const now = Date.now();
-    return now >= dayStart.getTime() && now < nextDayStart.getTime()
-      ? now
-      : dayStart.getTime();
+    return anchorContextNow(firstDay, Date.now());
   });
 
   scheduleDays = computed(() => {
