@@ -1033,10 +1033,22 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (task.issueWasUpdated) {
       this._taskService.markIssueUpdatesAsRead(task.id);
     }
-    this.toggleShowDetailPanel(ev);
+    // In its plain 'chat' state the button reads as a notes indicator (it also
+    // shows for issue-linked tasks without notes, hence the notes guard), so
+    // land on the notes section — expanded and scrolled into view — rather
+    // than the collapsed accordion; on mobile that used to cost a second tap
+    // on "Note" (#9850).
+    const targetPanel =
+      this.toggleButtonIcon() === 'chat' && task.notes
+        ? TaskDetailTargetPanel.Notes
+        : TaskDetailTargetPanel.Default;
+    this.toggleShowDetailPanel(ev, targetPanel);
   }
 
-  toggleShowDetailPanel(ev?: MouseEvent): void {
+  toggleShowDetailPanel(
+    ev?: MouseEvent,
+    targetPanel: TaskDetailTargetPanel = TaskDetailTargetPanel.Default,
+  ): void {
     const isInTaskDetailPanel =
       this._elementRef.nativeElement.closest('task-detail-panel');
     if (isInTaskDetailPanel && !this._wasClickedInDoubleClickRange) {
@@ -1051,7 +1063,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (this.isSelected()) {
       this._taskService.setSelectedId(null);
     } else {
-      this._taskService.setSelectedId(this.task().id);
+      this._taskService.setSelectedId(this.task().id, targetPanel);
     }
     if (ev) {
       ev.preventDefault();
