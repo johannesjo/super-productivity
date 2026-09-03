@@ -44,6 +44,11 @@ export interface SuperSyncConfig {
    * together with enableWebSocket: true — presence rides the WS connection.
    */
   enableTrackingPresence?: boolean;
+  /**
+   * Name this client announces with tracking presence (the "Name of this
+   * device on other devices" input, shown once enableTrackingPresence is on).
+   */
+  presenceDeviceName?: string;
 }
 
 type SyncCompletionSnapshot = {
@@ -405,6 +410,11 @@ export class SuperSyncPage extends BasePage {
         .getByRole('checkbox', { name: /live tracking/i });
       await trackingPresenceCheckbox.setChecked(true);
       await expect(trackingPresenceCheckbox).toBeChecked();
+      if (config.presenceDeviceName) {
+        await this.page
+          .locator('.e2e-presenceDeviceName input')
+          .fill(config.presenceDeviceName);
+      }
     }
 
     // Fill in access token (this field is NOT in the Advanced section)

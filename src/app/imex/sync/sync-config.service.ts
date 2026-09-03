@@ -15,6 +15,14 @@ import { clearSessionKeyCache } from '@sp/sync-core';
 import { SyncWrapperService } from './sync-wrapper.service';
 import { HAS_OFFICIAL_ONEDRIVE_CLIENT_ID } from './onedrive-auth-mode.const';
 
+// Optional free-text fields where '' is a deliberate "cleared, use the
+// default" value. Every other field treats '' as "untouched" (see
+// _updatePrivateConfig) so Formly's resetOnHide cannot wipe saved credentials.
+const CLEARABLE_FIELDS: Partial<Record<SyncProviderId, readonly string[]>> = {
+  [SyncProviderId.Nextcloud]: ['loginName'],
+  [SyncProviderId.SuperSync]: ['deviceName'],
+};
+
 // Maps sync providers to their corresponding form field in SyncConfig
 // Dropbox is null because it doesn't store settings in the form (uses OAuth)
 const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
@@ -395,7 +403,7 @@ export class SyncConfigService {
     // Empty credentials should be cleared by disabling the provider, not by form state
     const nonEmptyFormValues = Object.entries(providerCfgAsRecord).reduce(
       (acc, [key, value]) => {
-        if (providerId === SyncProviderId.Nextcloud && key === 'loginName') {
+        if (CLEARABLE_FIELDS[providerId]?.includes(key)) {
           if (value !== undefined && value !== null) {
             acc[key] = typeof value === 'string' ? value : '';
           }

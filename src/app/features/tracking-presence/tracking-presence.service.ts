@@ -29,7 +29,7 @@ import { OperationEncryptionService } from '../../op-log/sync/operation-encrypti
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { SyncLog } from '../../core/log';
-import { getDeviceLabel } from './get-device-label.util';
+import { resolveDeviceLabel, sanitizeDeviceLabel } from './get-device-label.util';
 import {
   PRESENCE_HEARTBEAT_MS,
   PRESENCE_HIDE_STALE_AFTER_MS,
@@ -47,14 +47,6 @@ import { isOperationSyncCapable } from '../../op-log/sync/operation-sync.util';
 /** Staleness re-check cadence for viewers; display is minute-granular. */
 const VIEW_TICK_MS = 30_000;
 
-/**
- * Relayed payload fields are untrusted (with E2EE off a hostile server can
- * inject them). The label ends up as a translate param inside an [innerHtml]
- * snack, so strip markup-capable chars and cap length instead of trusting it.
- */
-const sanitizeDeviceLabel = (v: unknown): string =>
-  typeof v === 'string' ? v.replace(/[<>&"'`]/g, '').slice(0, 32) : '';
-
 interface LocalDerivedState {
   taskId: string | null;
   isIdle: boolean;
@@ -67,6 +59,10 @@ interface LocalSession {
   taskId: string | null;
   reason?: 'idle';
 }
+
+/** Producer-built frames; `deviceLabel` is resolved once per send in `_doSend`. */
+type OutboundPayload = Omit<TrackingPresencePayload, 'deviceLabel'>;
+type OutboundCmd = Omit<TrackingPresenceCmd, 'deviceLabel'>;
 
 /**
  * Cross-device tracking presence over the SuperSync WebSocket.
@@ -293,11 +289,10 @@ export class TrackingPresenceService implements OnDestroy {
     if (!rs || rs.payload.state !== 'tracking') {
       return;
     }
-    const cmd: TrackingPresenceCmd = {
+    const cmd: OutboundCmd = {
       v: 1,
       cmd: 'stop',
       sessionId: rs.payload.sessionId,
-      deviceLabel: getDeviceLabel(),
     };
     this._send('presence_cmd', cmd).catch((err) =>
       SyncLog.warn('TrackingPresenceService: Failed to send stop cmd', err),
@@ -366,7 +361,7 @@ export class TrackingPresenceService implements OnDestroy {
       // Never tracked on this device in this app run — nothing to announce.
       return;
     }
-    const payload: TrackingPresencePayload = {
+    const payload: OutboundPayload = {
       v: 1,
       sessionId: this._sessionId,
       seq: ++this._seq,
@@ -374,7 +369,6 @@ export class TrackingPresenceService implements OnDestroy {
       ...(this._current.reason ? { reason: this._current.reason } : {}),
       taskId: this._current.taskId,
       sinceTs: this._sinceTs,
-      deviceLabel: getDeviceLabel(),
       ...(this._focusCycle !== undefined ? { focusCycle: this._focusCycle } : {}),
     };
     this._send('presence_state', payload).catch((err) =>
@@ -574,7 +568,7 @@ export class TrackingPresenceService implements OnDestroy {
 
   private _send(
     type: 'presence_state' | 'presence_cmd',
-    obj: TrackingPresencePayload | TrackingPresenceCmd,
+    obj: OutboundPayload | OutboundCmd,
   ): Promise<void> {
     // Serialized: encrypt latency varies (cold key derivation), and an older
     // `tracking` finishing after a newer `stopped` would leave a phantom
@@ -586,7 +580,7 @@ export class TrackingPresenceService implements OnDestroy {
 
   private async _doSend(
     type: 'presence_state' | 'presence_cmd',
-    obj: TrackingPresencePayload | TrackingPresenceCmd,
+    obj: OutboundPayload | OutboundCmd,
   ): Promise<void> {
     if (!this._ws.isConnected()) {
       // `_subs` is the running latch (see start()): a send enqueued before
@@ -611,10 +605,38 @@ export class TrackingPresenceService implements OnDestroy {
       );
       return;
     }
+    // Resolved per frame, not cached: a device renamed in settings announces
+    // its new name on the next transition/heartbeat without a restart.
+    const frame: TrackingPresencePayload | TrackingPresenceCmd = {
+      ...obj,
+      deviceLabel: await this._getDeviceLabel(),
+    };
     const envelope: TrackingPresenceEnvelope = key
-      ? { enc: true, data: await this._encryption.encryptPayload(obj, key) }
-      : { enc: false, data: JSON.stringify(obj) };
+      ? { enc: true, data: await this._encryption.encryptPayload(frame, key) }
+      : { enc: false, data: JSON.stringify(frame) };
     this._ws.sendPresence(type, JSON.stringify(envelope));
+  }
+
+  /**
+   * The user's per-device name from the SuperSync private config, else the
+   * platform default. A config read failure must not drop the frame — the
+   * label is decoration, the state transition is the point — so it degrades
+   * to the platform default.
+   */
+  private async _getDeviceLabel(): Promise<string> {
+    try {
+      const provider = await this._providerManager.getProviderById(
+        SyncProviderId.SuperSync,
+      );
+      const cfg = provider ? await provider.privateCfg.load() : null;
+      return resolveDeviceLabel((cfg as { deviceName?: unknown } | null)?.deviceName);
+    } catch (err) {
+      SyncLog.warn(
+        'TrackingPresenceService: Device name unresolved — using platform label',
+        err,
+      );
+      return resolveDeviceLabel(undefined);
+    }
   }
 
   private async _decode(payloadStr: string): Promise<unknown | null> {

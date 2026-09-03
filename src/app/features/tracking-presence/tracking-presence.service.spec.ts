@@ -24,6 +24,7 @@ import {
   TrackingPresenceCmd,
   TrackingPresencePayload,
 } from './tracking-presence.model';
+import { resolveDeviceLabel } from './get-device-label.util';
 
 describe('TrackingPresenceService', () => {
   let service: TrackingPresenceService;
@@ -476,6 +477,7 @@ describe('TrackingPresenceService', () => {
         supportsOperationSync: true,
         providerMode: 'superSyncOps',
         getEncryptKey: () => Promise.resolve('test-key'),
+        privateCfg: { load: () => Promise.resolve({}) },
       };
       service.start();
       tick();
@@ -652,6 +654,60 @@ describe('TrackingPresenceService', () => {
       expect(dispatchSpy).not.toHaveBeenCalled();
       expect(sentStates().length).toBe(statesBefore + 1);
       expect(service.remoteSession()).toBeNull();
+      service.stop();
+      flush();
+    }));
+  });
+
+  describe('device label', () => {
+    const withDeviceName = (deviceName: unknown): void => {
+      resolvedProvider = {
+        privateCfg: { load: () => Promise.resolve({ deviceName }) },
+      };
+    };
+
+    it('announces the platform default when no device name is configured', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+
+      expect(sentStates()[0].deviceLabel).toBe(resolveDeviceLabel(undefined));
+      service.stop();
+      flush();
+    }));
+
+    it('announces the configured device name on states and commands', fakeAsync(() => {
+      withDeviceName('  Work laptop  ');
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      expect(sentStates()[0].deviceLabel).toBe('Work laptop');
+
+      setLocalTaskId(null);
+      receiveRemoteState({ sessionId: 'remote-1' });
+      service.requestRemoteStop();
+      tick();
+
+      const cmd = sentPayloads().find((p) => p.type === 'presence_cmd')!.payload;
+      expect((cmd as TrackingPresenceCmd).deviceLabel).toBe('Work laptop');
+      service.stop();
+      flush();
+    }));
+
+    it('falls back to the platform default for a blank name or a failing config read', fakeAsync(() => {
+      withDeviceName('   ');
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      expect(sentStates()[0].deviceLabel).toBe(resolveDeviceLabel(undefined));
+
+      // A config read failure must not drop the transition — the label is
+      // decoration, the state is the point.
+      resolvedProvider = {
+        privateCfg: { load: () => Promise.reject(new Error('cfg unavailable')) },
+      };
+      setLocalTaskId('task-2');
+      expect(sentStates()[1].deviceLabel).toBe(resolveDeviceLabel(undefined));
       service.stop();
       flush();
     }));

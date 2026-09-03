@@ -266,6 +266,40 @@ describe('SyncConfigService', () => {
       );
     });
 
+    it('should allow clearing the SuperSync presence device name to fall back to the platform label', async () => {
+      const mockProvider = {
+        id: SyncProviderId.SuperSync,
+        privateCfg: {
+          load: jasmine.createSpy('load').and.returnValue(
+            Promise.resolve({
+              accessToken: 'saved-token',
+              isTrackingPresenceEnabled: true,
+              deviceName: 'Work laptop',
+            }),
+          ),
+        },
+      };
+      (providerManager.getProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve(mockProvider),
+      );
+
+      await service.updateSettingsFromForm({
+        isEnabled: true,
+        syncProvider: SyncProviderId.SuperSync,
+        syncInterval: 300000,
+        superSync: {
+          accessToken: 'saved-token',
+          isTrackingPresenceEnabled: true,
+          deviceName: '',
+        } as SyncConfig['superSync'],
+      });
+
+      expect(providerManager.setProviderConfig).toHaveBeenCalledWith(
+        SyncProviderId.SuperSync,
+        jasmine.objectContaining({ accessToken: 'saved-token', deviceName: '' }),
+      );
+    });
+
     it('should preserve saved Nextcloud login name when form model has null', async () => {
       const mockProvider = {
         id: SyncProviderId.Nextcloud,
