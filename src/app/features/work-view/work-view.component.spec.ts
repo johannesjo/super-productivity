@@ -468,9 +468,12 @@ describe('WorkViewComponent', () => {
     // The focus retry loop keeps rescheduling for ~5s; without an explicit
     // destroy those timers outlive the spec and run against a reset MockStore.
     let fixture: ComponentFixture<WorkViewComponent> | undefined;
+    /** Containers appended to the document by the success-branch spec. */
+    const revealContainers: HTMLElement[] = [];
     afterEach(() => {
       fixture?.destroy();
       fixture = undefined;
+      revealContainers.splice(0).forEach((el) => el.remove());
       // The panel signals persist to localStorage, and the component seeds them
       // from it at construction — a spec that left one collapsed would decide
       // the starting state of every later one under randomized spec order.
@@ -853,6 +856,42 @@ describe('WorkViewComponent', () => {
       expect(toggleGroupExpansion.calls.count()).toBe(callsAfterGivingUp);
       discardPeriodicTasks();
     }));
+
+    /**
+     * The success branch of the reveal — the one that scrolls, focuses and
+     * highlights. Every spec above stops in the retry/expansion path, which
+     * never reaches it, so the highlight needs a container that actually holds
+     * a rendered row. (#5476)
+     */
+    it('scrolls to, focuses and highlights the row once it is rendered', () => {
+      const { cmp } = setup({
+        focusItem: 'wanted',
+        undone: [buildTask('wanted')],
+      });
+      const highlightTaskBriefly = spyOn(
+        TestBed.inject(LayoutService),
+        'highlightTaskBriefly',
+      );
+
+      // A real element: the reveal only accepts a row that is in the document
+      // and has a non-zero height (_isTaskElementReady).
+      const container = document.createElement('div');
+      container.style.height = '100px';
+      container.style.overflow = 'auto';
+      const row = document.createElement('div');
+      row.id = 't-wanted';
+      row.style.height = '400px';
+      container.appendChild(row);
+      document.body.appendChild(container);
+      revealContainers.push(container);
+      spyOn(row, 'focus');
+
+      // Mirrors the split pane rendering: the setter replays the pending reveal.
+      cmp.splitTopElRef = new ElementRef(container);
+
+      expect(row.focus).toHaveBeenCalledOnceWith({ preventScroll: true });
+      expect(highlightTaskBriefly).toHaveBeenCalledOnceWith(row);
+    });
 
     it('does not touch any container without a focusItem', () => {
       const { toggleGroupExpansion, updateSection } = setup({

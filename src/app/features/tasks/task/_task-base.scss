@@ -42,7 +42,7 @@
     outline: none;
   }
 
-  &.highlight-searched-item {
+  &.highlight-searched-task {
     z-index: var(--z-focus-host);
   }
 }
@@ -117,9 +117,10 @@
 
   // Temporary attention highlight for a task revealed via navigation, e.g. from
   // a search result (LayoutService.highlightTaskBriefly, #5476). An outline, so
-  // it stays clearly visible even once the focus border above is gone.
-  :host.highlight-searched-item .inner-wrapper > & {
-    border-radius: var(--task-border-radius);
+  // it stays clearly visible even once the focus border above is gone, and it
+  // traces whatever radius the box already has — no border-radius of its own, so
+  // nothing can leak into the sub-task boxes (which are deliberately square).
+  :host.highlight-searched-task .inner-wrapper > & {
     outline: 2px solid var(--c-accent);
   }
 
@@ -197,7 +198,7 @@
 
   // Same leak as above for the temporary search highlight: without this, a
   // highlighted parent would draw the outline around every subtask box too.
-  :host.highlight-searched-item & .inner-wrapper > .box {
+  :host.highlight-searched-task & .inner-wrapper > .box {
     outline: none;
   }
 }

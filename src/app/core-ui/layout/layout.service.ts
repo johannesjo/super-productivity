@@ -44,7 +44,7 @@ export class LayoutService {
   private static readonly _TASK_FOCUS_RETRY_DELAY = 250;
   private static readonly _TASK_FOCUS_MAX_RETRIES = 16;
   private static readonly _TASK_HIGHLIGHT_DURATION = 3000;
-  private static readonly _TASK_HIGHLIGHT_CLASS = 'highlight-searched-item';
+  private static readonly _TASK_HIGHLIGHT_CLASS = 'highlight-searched-task';
 
   private _store$ = inject<Store<LayoutState>>(Store);
   private _breakPointObserver = inject(BreakpointObserver);
@@ -219,7 +219,11 @@ export class LayoutService {
    * Draws a temporary attention highlight on a task revealed by navigation
    * (global search, notifications, tracked-task pill), so it stays findable
    * even after the focus outline is gone. Mirrors the note reveal in
-   * NotesComponent. Only one task is highlighted at a time. (#5476)
+   * NotesComponent, but deliberately uses its own class name: the note reveal
+   * strips `.highlight-searched-item` from every element in the document, and
+   * `focusItem` is a query param shared by tasks and notes, so a note reveal
+   * would otherwise cut a live task highlight short. Only one task is
+   * highlighted at a time. (#5476)
    */
   highlightTaskBriefly(el: HTMLElement): void {
     if (this._pendingTaskHighlightTimeout) {
