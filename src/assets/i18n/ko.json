@@ -5,7 +5,7 @@
       "INSTALL": "설치",
       "MSG": "PWA로 Super Productivity를 설치하시겠습니까?"
     },
-    "B_OFFLINE": "인터넷 연결이 끊어졌습니다. 문제 제공자 데이터 동기화 및 요청이 작동하지 않습니다.",
+    "B_OFFLINE": "인터넷 연결이 끊어졌습니다. 이슈 제공자 데이터 동기화 및 요청이 작동하지 않습니다.",
     "B_SUPER_SYNC_ENCRYPTION": {
       "ALREADY_ENCRYPTED": "이 계정은 이미 다른 기기에서 암호화되어 있습니다. 동기화를 계속하려면 기존 비밀번호를 입력하세요.",
       "ENABLE": "암호화 활성화",
@@ -466,7 +466,7 @@
         "WRITE_A_COMMENT": "의견 쓰기"
       },
       "S": {
-        "ERR_UNKNOWN": "GitLab: 알 수없는 오류 {{statusCode}} {{errorMsg}}"
+        "ERR_UNKNOWN": "GitLab: 알 수 없는 오류 {{statusCode}} {{errorMsg}}"
       }
     },
     "ISSUE": {
@@ -582,7 +582,7 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: API에서 종료되는 것을 막기 위해 Super Productivity가 액세스를 차단했습니다. 아마도 jira 설정을 확인해야합니다!",
+        "BLOCK_ACCESS_MSG": "Jira: API에서 종료되는 것을 막기 위해 Super Productivity가 액세스를 차단했습니다. 아마도 Jira 설정을 확인해야 합니다!",
         "BLOCK_ACCESS_UNBLOCK": "차단 해제"
       },
       "CFG_CMP": {
@@ -692,7 +692,7 @@
         "EXTENSION_NOT_LOADED": "Super Productivity 확장 프로그램이 로드되지 않았습니다. 페이지를 새로고침하면 해결될 수 있습니다.",
         "INSUFFICIENT_SETTINGS": "Jira에 대한 설정이 충분하지 않음",
         "INVALID_RESPONSE": "Jira: 응답에 잘못된 데이터가 포함되어 있습니다.",
-        "NO_AUTO_IMPORT_JQL": "Jira: 자동 가져오기에 대해 정의 된 검색어가 없습니다.",
+        "NO_AUTO_IMPORT_JQL": "Jira: 자동 가져오기에 대해 정의된 검색어가 없습니다.",
         "NO_VALID_TRANSITION": "Jira: 유효한 전환이 설정되지 않았습니다.",
         "TIMED_OUT": "Jira: 요청 시간이 초과되었습니다.",
         "TRANSITION": "Jira: 이슈 \"{{issueKey}}\"를 \"{{name}}\" 상태로 변경했습니다.",
@@ -709,12 +709,12 @@
       }
     },
     "MARKDOWN_PASTE": {
-      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "붙여 넣은 마크 다운 목록을 하위 작업 \"{{parentTaskTitle}}\"의 노트에 추가 하시겠습니까?",
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "붙여넣은 마크다운 목록을 하위 작업 \"{{parentTaskTitle}}\"의 노트에 추가 하시겠습니까?",
       "CONFIRM_PARENT_TASKS": "붙여넣은 마크다운 목록에서 <strong>새 작업 {{tasksCount}}개</strong>를 생성하시겠습니까?",
       "CONFIRM_PARENT_TASKS_WITH_SUBS": "붙여넣은 마크다운 목록에서 <strong>새 작업 {{tasksCount}}개와 하위 작업 {{subTasksCount}}개</strong>를 생성하시겠습니까?",
-      "CONFIRM_SUB_TASKS": "붙여 넣은 마크 다운 목록에서 {{tasksCount}}개의 새로운 하위 작업을 만드시겠습니까?",
+      "CONFIRM_SUB_TASKS": "붙여넣은 마크다운 목록에서 {{tasksCount}}개의 새로운 하위 작업을 만드시겠습니까?",
       "CONFIRM_SUB_TASKS_WITH_PARENT": "붙여넣은 마크다운 목록에서 <strong>\"{{parentTaskTitle}}\" 아래에 새 하위 작업 {{tasksCount}}개</strong>를 생성하시겠습니까?",
-      "DIALOG_TITLE": "붙여 넣은 마크 다운 목록이 감지되었습니다!"
+      "DIALOG_TITLE": "붙여넣은 마크다운 목록이 감지되었습니다!"
     },
     "METRIC": {
       "CMP": {
@@ -861,7 +861,7 @@
         "VIEW_TEXT_ONLY": "구문 분석되지 않은 텍스트로 보기"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "마크 다운 구문 분석 사용 중지",
+        "DISABLE_PARSE": "마크다운 구문 분석 사용 중지",
         "ENABLE_PARSE": "마크다운 구문 분석 사용"
       },
       "NOTES_CMP": {
@@ -1046,7 +1046,7 @@
         "DELETED": "삭제된 프로젝트",
         "REOPENED": "프로젝트를 다시 열었습니다",
         "SHOW_IN_MENU": "사이드바에 표시",
-        "UNARCHIVED": "보관되지 않은 프로젝트",
+        "UNARCHIVED": "프로젝트 보관 해제됨",
         "UNARCHIVED_HIDDEN_FROM_MENU": "프로젝트를 복원했지만 사이드바에는 여전히 표시되지 않습니다",
         "UPDATED": "프로젝트 설정 업데이트"
       },
@@ -1138,7 +1138,7 @@
       "CLICK_TO_CREATE_TASK": "클릭하여 작업 만들기",
       "D_INITIAL": {
         "TEXT": "<p>일정은 계획한 작업이 시간에 따라 어떻게 진행되는지 보여 줍니다. 작업에서 자동으로 생성되며, 표시하려면 각 작업에 <strong>예상 시간</strong>만 설정하면 됩니다.</p><p><strong>예정된 작업</strong>은 계획한 시간에 표시되고, <strong>일반 작업</strong>은 이러한 고정 일정 사이에 배치됩니다.</p><p>작업 시작과 종료 시간을 설정하면(권장) 일반 작업은 이 범위를 벗어나 배치되지 않습니다.</p>",
-        "TITLE": "타임라인"
+        "TITLE": "일정"
       },
       "DROP_TASKS_HERE_TO_SCHEDULE": "작업 일정을 지정하려면 여기에 놓으세요",
       "END": "작업 종료",
@@ -1304,7 +1304,7 @@
         "CHANGES_UNKNOWN": "알 수 없음",
         "COMPARISON_RESULT": "비교 결과",
         "DATE": "날짜",
-        "LAST_SYNC": "마지막 동기화: ",
+        "LAST_SYNC": "마지막 동기화:",
         "LAST_SYNCED": "마지막 동기화",
         "LAST_WRITE": "마지막 쓰기",
         "LOCAL": "로컬",
@@ -1338,7 +1338,7 @@
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "원격 변경 및 덮어쓰기",
-        "CHANGE_PW_AND_DECRYPT": "비밀번호 변경 후 복호화 시도",
+        "CHANGE_PW_AND_DECRYPT": "복호화 재시도",
         "P1": "데이터가 암호화되어 암호 해독에 실패했습니다. 올바른 비밀번호를 입력하세요!",
         "P2_FORGOT_PW": "<strong>비밀번호를 잊으셨다면</strong>, 올바른 비밀번호를 입력하고 \"복호화 재시도\"를 클릭하세요.",
         "P3_PW_CHANGED": "<strong>다른 기기에서 비밀번호를 변경하셨다면</strong>, 새 비밀번호를 입력하고 \"원격 덮어쓰기\"를 클릭하세요. 이렇게 하면 로컬 데이터가 서버에 업로드됩니다.",
@@ -1884,7 +1884,7 @@
         "MOVE_TO_REGULAR": "오늘의 목록으로 이동",
         "MOVE_TO_TOP": "목록 맨 위로 이동",
         "OPEN_ATTACH": "파일 또는 링크 첨부",
-        "OPEN_ISSUE": "새 브라우저 탭에서 문제 열기",
+        "OPEN_ISSUE": "새 브라우저 탭에서 이슈 열기",
         "OPEN_TIME": "시간 예측 / 소요 시간 추가",
         "REMOVE_DEADLINE": "마감일 제거",
         "REMOVE_FROM_MY_DAY": "내 날에서 제거",
@@ -1901,7 +1901,7 @@
         "TRACK_TIME": "추적 시작 시간",
         "TRACK_TIME_STOP": "추적 시간 일시 중지",
         "UNSCHEDULE_TASK": "작업 일정 취소하기",
-        "UPDATE_ISSUE_DATA": "문제 데이터 업데이트"
+        "UPDATE_ISSUE_DATA": "이슈 데이터 업데이트"
       },
       "D_CONFIRM_DELETE": {
         "MSG": "작업 \"{{title}}\"을(를) 삭제하시겠습니까?",
@@ -2018,7 +2018,7 @@
         "EMPTY_TITLE_VIA_APP_URI": "작업 제목이 비어 있어 작업을 추가하지 않았습니다",
         "FOUND_MOVE_FROM_BACKLOG": "기존 작업 <strong>{{title}}</strong> 을 (를) 현재 작업 목록으로 이동했습니다.",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 의 작업 <strong>{{title}}</strong> 을 (를) 현재 목록에 추가했습니다.",
-        "FOUND_RESTORE_FROM_ARCHIVE": "보관함의 문제와 관련된 복원 된 작업 <strong>{{title}}</strong> ",
+        "FOUND_RESTORE_FROM_ARCHIVE": "보관함의 이슈와 관련된 복원된 작업 <strong>{{title}}</strong> ",
         "GO_TO_TASK": "작업으로 이동",
         "INPUT_TOO_LONG_VIA_APP_URI": "작업 제목 또는 노트가 너무 깁니다",
         "MOVED_TO_ARCHIVE": " {{nr}} 작업을 보관으로 이동했습니다.",
@@ -2265,8 +2265,8 @@
         "CREATE_AND_TRACK": "<em>만들기</em> 후 추적할 대상",
         "NOTIFICATION_TITLE": "시간을 추적하세요!",
         "TASK": "작업",
-        "TRACK_TO": "추적 대상: ",
-        "UNTRACKED_TIME": "추적되지 않은 시간: "
+        "TRACK_TO": "추적 대상:",
+        "UNTRACKED_TIME": "추적되지 않은 시간:"
       }
     },
     "TRACKING_PRESENCE": {
@@ -2289,13 +2289,13 @@
     },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "일한 날짜: ",
+        "DAYS_WORKED": "작업한 일수:",
         "EXPORT_DATA": "데이터 내보내기",
-        "MONTH_WORKED": "월 근무일: ",
+        "MONTH_WORKED": "작업한 개월 수:",
         "REPEATING_TASK": "반복 과제",
         "RESTORE_TASK_FROM_ARCHIVE": "보관함에서 작업 복원",
         "TASKS": "할 일 목록",
-        "TOTAL_TIME": "총 소요 시간: ",
+        "TOTAL_TIME": "총 소요 시간:",
         "VIEW_TASK_DETAILS": "작업 상세 보기",
         "WEEK_NR": "주 {{nr}}",
         "WEEK_NR_SHORT": "{{nr}}주",
@@ -2317,26 +2317,26 @@
           "ENDED_WORKING": "종료 된 작업",
           "ESTIMATE_AS_CLOCK": "예상 시간 (예: 5:23)",
           "ESTIMATE_AS_MILLISECONDS": "밀리 초로 예상",
-          "ESTIMATE_AS_STRING": "문자열로 예상 (예: 5 시간 23 분)",
-          "FULL_HALF_HOURS": "반 시간 반",
-          "FULL_HOURS": "1 시간 내내",
-          "FULL_QUARTERS": "전체 분기",
+          "ESTIMATE_AS_STRING": "예상 시간을 문자열로 (예: 5 시간 23 분)",
+          "FULL_HALF_HOURS": "30분 단위",
+          "FULL_HOURS": "1시간 단위",
+          "FULL_QUARTERS": "15분 단위",
           "NOTES": "작업 설명",
-          "PARENT_TASK": "학부모 과제",
+          "PARENT_TASK": "상위 작업",
           "PARENT_TASK_TITLES_ONLY": "상위 작업 제목 만",
           "PROJECTS": "프로젝트 이름",
           "STARTED_WORKING": "작업 시작",
           "TAGS": "태그",
           "TASK_SUBTASK": "작업 / 하위 작업",
-          "TIME_AS_CLOCK": "시계와 시간 (예: 5:23)",
+          "TIME_AS_CLOCK": "시간을 시계 형식으로 (예: 5:23)",
           "TIME_AS_MILLISECONDS": "시간 (밀리 초)",
-          "TIME_AS_STRING": "문자열을 나타내는 시간 (예: 5h 23m)",
+          "TIME_AS_STRING": "시간을 문자열로 (예: 5h 23m)",
           "TITLES_AND_SUB_TASK_TITLES": "제목 및 하위 작업 제목",
           "WORKLOG": "작업 로그"
         },
         "OPTIONS": "옵션",
-        "ROUND_END_TIME_TO": "라운드 종료 시간: ",
-        "ROUND_START_TIME_TO": "라운드 시작 시간: ",
+        "ROUND_END_TIME_TO": "라운드 종료 시간:",
+        "ROUND_START_TIME_TO": "라운드 시작 시간:",
         "ROUND_TIME_WORKED_TO": "왕복 근무 시간",
         "SAVE_TO_FILE": "파일에 저장",
         "SEPARATE_TASKS_BY": "작업 분리",
@@ -2743,13 +2743,13 @@
       "L_WORK_START": "근무일 시작",
       "LUNCH_BREAK_START_END_DESCRIPTION": "예: 13:00",
       "MONTH": "월",
-      "TITLE": "타임라인",
+      "TITLE": "일정",
       "WORK_START_END_DESCRIPTION": "예: 17:00"
     },
     "SHORT_SYNTAX": {
       "HELP": "<p>작업을 만들 때 사용할 간편 문법 옵션을 설정할 수 있습니다.</p>",
       "IS_ENABLE_DEADLINE": "마감일 단축어 활성화(!<deadline time>)",
-      "IS_ENABLE_DUE": "만기 단축어 사용(@<Due time>)",
+      "IS_ENABLE_DUE": "예정 시간 단축어 사용(@<planned time>)",
       "IS_ENABLE_PROJECT": "프로젝트 단축어 사용(+<Project name>)",
       "IS_ENABLE_TAG": "태그 단축어 사용(#<Tag>)",
       "TITLE": "단축어",
@@ -2855,7 +2855,7 @@
     "UNPLANNED_TODAY_TASKS": "오늘의 모든 작업 일정이 해제되었습니다"
   },
   "GPB": {
-    "JIRA_LOAD_ISSUE": "Jira: 이슈 데이터로드 중 ...",
+    "JIRA_LOAD_ISSUE": "Jira: 이슈 데이터 로드 중 ...",
     "UNKNOWN": "원격 데이터 로드"
   },
   "MH": {
@@ -3270,7 +3270,7 @@
     "SECTION_OPTIONS": "섹션 옵션",
     "DONE_TASKS": "완료된 작업",
     "DONE_TASKS_IN_ARCHIVE": "현재 여기에는 완료된 작업이 없지만 이미 보관된 작업이 있습니다.",
-    "ESTIMATE_REMAINING": "예상 남은 시간: ",
+    "ESTIMATE_REMAINING": "예상 남은 시간:",
     "FINISH_DAY": "하루 마무리",
     "FINISH_DAY_TOOLTIP": "하루를 평가하고, 완료된 모든 작업을 보관함으로 옮기거나(선택 사항) 다음 날을 계획하세요.",
     "LATER_TODAY": "오늘 나중에",
@@ -3281,9 +3281,9 @@
     "NO_TASKS_IN_MAIN_LIST": "모든 작업이 섹션으로 정리되어 있습니다",
     "RECURRING_TASKS": "반복 작업",
     "RESET_BREAK_TIMER": "중단 타이머없이 재설정",
-    "TIME_ESTIMATED": "예상 시간: ",
+    "TIME_ESTIMATED": "예상 시간:",
     "TODAY_REMAINING": "오늘이 남았습니다:",
-    "WITHOUT_BREAK": "휴식없이: ",
+    "WITHOUT_BREAK": "휴식 없이:",
     "WORKING_TODAY": "오늘 작업:",
     "WORKING_TODAY_ARCHIVED": "보관된 작업에서 오늘 작업한 시간"
   }
