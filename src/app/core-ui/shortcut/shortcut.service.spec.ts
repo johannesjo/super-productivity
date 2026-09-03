@@ -119,7 +119,8 @@ describe('ShortcutService', () => {
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/schedule']);
     });
 
-    it('should execute a plugin shortcut bound to its key combo', async () => {
+    // Ctrl+Shift+U is the combo PLUGIN_SHORTCUT_CFG_KEY is bound to above.
+    const pressPluginCombo = async (repeat = false): Promise<void> => {
       mockPluginBridgeService.shortcuts.set([
         { pluginId: 'automations', id: 'r1', label: 'Tag as urgent', onExec: () => {} },
       ]);
@@ -127,10 +128,15 @@ describe('ShortcutService', () => {
         code: 'KeyU',
         ctrlKey: true,
         shiftKey: true,
+        repeat,
       });
       Object.defineProperty(ev, 'target', { value: document.body });
 
       await service.handleKeyDown(ev);
+    };
+
+    it('should execute a plugin shortcut bound to its key combo', async () => {
+      await pressPluginCombo();
 
       expect(mockPluginBridgeService.executeShortcut).toHaveBeenCalledWith(
         'automations:r1',
@@ -138,18 +144,7 @@ describe('ShortcutService', () => {
     });
 
     it('should NOT execute a plugin shortcut on key auto-repeat', async () => {
-      mockPluginBridgeService.shortcuts.set([
-        { pluginId: 'automations', id: 'r1', label: 'Tag as urgent', onExec: () => {} },
-      ]);
-      const ev = new KeyboardEvent('keydown', {
-        code: 'KeyU',
-        ctrlKey: true,
-        shiftKey: true,
-        repeat: true,
-      });
-      Object.defineProperty(ev, 'target', { value: document.body });
-
-      await service.handleKeyDown(ev);
+      await pressPluginCombo(true);
 
       expect(mockPluginBridgeService.executeShortcut).not.toHaveBeenCalled();
     });

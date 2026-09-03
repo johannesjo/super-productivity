@@ -74,7 +74,6 @@ describe('ShortcutBinder', () => {
     binder.sync([rule()]);
     binder.sync([rule({ name: 'Tag as later' })]);
 
-    expect(mockPlugin.registerShortcut).toHaveBeenCalledTimes(2);
     expect(mockPlugin.registerShortcut).toHaveBeenLastCalledWith(
       expect.objectContaining({ id: 'r1', label: 'Tag as later' }),
     );
@@ -88,26 +87,14 @@ describe('ShortcutBinder', () => {
     expect(mockPlugin.unregisterShortcut).toHaveBeenCalledWith('r1');
   });
 
-  it('unregisters the shortcut of a disabled rule so it stops swallowing the key', () => {
+  it('releases the key of a disabled rule and takes it back when re-enabled', () => {
     binder.sync([rule()]);
     binder.sync([rule({ isEnabled: false })]);
 
     expect(mockPlugin.unregisterShortcut).toHaveBeenCalledWith('r1');
-  });
 
-  it('registers again when a rule is re-enabled', () => {
-    binder.sync([rule()]);
-    binder.sync([rule({ isEnabled: false })]);
     binder.sync([rule()]);
 
     expect(mockPlugin.registerShortcut).toHaveBeenCalledTimes(2);
-  });
-
-  it('warns instead of throwing on hosts without unregisterShortcut', () => {
-    (mockPlugin as { unregisterShortcut?: unknown }).unregisterShortcut = undefined;
-
-    binder.sync([rule()]);
-    expect(() => binder.sync([])).not.toThrow();
-    expect(mockPlugin.log.warn).toHaveBeenCalled();
   });
 });

@@ -1659,22 +1659,22 @@ export class PluginBridgeService implements OnDestroy {
     // plugins re-register when a shortcut's label changes, and the keyboard
     // settings form keys its items by `plugin_<pluginId>:<id>`, so duplicates
     // would show up twice there and only the first would ever be executed.
+    const isSameShortcut = (shortcut: PluginShortcutCfg): boolean =>
+      shortcut.pluginId === pluginId && shortcut.id === shortcutWithPluginId.id;
     const currentShortcuts = this.shortcuts();
-    const existingIdx = currentShortcuts.findIndex(
-      (shortcut) =>
-        shortcut.pluginId === pluginId && shortcut.id === shortcutWithPluginId.id,
+    this.shortcuts.set(
+      currentShortcuts.some(isSameShortcut)
+        ? currentShortcuts.map((shortcut) =>
+            isSameShortcut(shortcut) ? shortcutWithPluginId : shortcut,
+          )
+        : [...currentShortcuts, shortcutWithPluginId],
     );
-    if (existingIdx === -1) {
-      this.shortcuts.set([...currentShortcuts, shortcutWithPluginId]);
-    } else {
-      const nextShortcuts = [...currentShortcuts];
-      nextShortcuts[existingIdx] = shortcutWithPluginId;
-      this.shortcuts.set(nextShortcuts);
-    }
 
+    // Labels are user content (a plugin may derive them from task or rule
+    // names) and the log is exportable, so only the ids go in.
     PluginLog.log('PluginBridge: Shortcut registered', {
       pluginId,
-      shortcut: shortcutWithPluginId,
+      shortcutId: shortcutWithPluginId.id,
     });
   }
 
@@ -1703,12 +1703,10 @@ export class PluginBridgeService implements OnDestroy {
     if (shortcut) {
       try {
         await Promise.resolve(shortcut.onExec());
-        PluginLog.log(
-          `Executed shortcut "${shortcut.label}" from plugin ${shortcut.pluginId}`,
-        );
+        PluginLog.log(`Executed shortcut ${shortcutId}`);
         return true;
       } catch (error) {
-        PluginLog.err(`Failed to execute shortcut "${shortcut.label}":`, error);
+        PluginLog.err(`Failed to execute shortcut ${shortcutId}:`, error);
         return false;
       }
     }

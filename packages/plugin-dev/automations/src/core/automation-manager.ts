@@ -226,8 +226,16 @@ export class AutomationManager {
         return;
       }
 
-      this.plugin.log.info(`[Automation] Shortcut rule triggered: ${rule.name}`);
-      await this.runRule(rule, { type: 'shortcut', task: await this.getFocusedTask() });
+      this.plugin.log.info(`[Automation] Shortcut rule triggered: ${rule.id}`);
+      // Loop protection off: a keypress cannot feed itself, so rapid presses
+      // must not raise the "high activity" dialog.
+      await this.runRule(
+        rule,
+        { type: 'shortcut', task: await this.getFocusedTask() },
+        {
+          applyLoopProtection: false,
+        },
+      );
     } catch (e) {
       this.plugin.log.error(`[Automation] Error running shortcut rule ${ruleId}: ${e}`);
     }
@@ -242,55 +250,69 @@ export class AutomationManager {
     }
   }
 
-  private async runRule(rule: AutomationRule, event: TaskEvent) {
+  private async runRule(
+    rule: AutomationRule,
+    event: TaskEvent,
+    { applyLoopProtection = true }: { applyLoopProtection?: boolean } = {},
+  ) {
     const matches = await this.conditionEvaluator.allConditionsMatch(rule.conditions, event);
     if (!matches) {
       return;
     }
 
-    // Check rate limit. Shortcut rules are exempt: the limiter exists to break
-    // automation loops, but a shortcut run comes from a keypress and cannot feed
-    // itself, so rapid presses must not raise the "high activity" dialog.
-    if (event.type !== 'shortcut' && !this.rateLimiter.check(rule.id)) {
-      this.plugin.log.warn(`[Automation] Rate limit exceeded for rule: ${rule.name}`);
-
-      if (!this.pendingDialogs.has(rule.id)) {
-        this.pendingDialogs.add(rule.id);
-
-        const dialogCfg: DialogCfg = {
-          htmlContent: `
-              <h3>High Automation Activity Detected</h3>
-              <p>The rule <strong>"${this.escapeHtml(rule.name)}"</strong> is triggering too frequently (infinite loop protection).</p>
-              <p>Do you want to disable this rule or continue execution?</p>
-            `,
-          buttons: [
-            {
-              label: 'Disable Rule',
-              color: 'warn',
-              onClick: async () => {
-                await this.toggleRuleStatus(rule.id, false);
-                this.plugin.showSnack({ msg: `Rule "${rule.name}" disabled`, type: 'INFO' });
-                this.pendingDialogs.delete(rule.id);
-              },
-            },
-            {
-              label: 'Continue',
-              color: 'primary',
-              onClick: () => {
-                this.rateLimiter.reset(rule.id);
-                this.pendingDialogs.delete(rule.id);
-              },
-            },
-          ],
-        };
-
-        await this.plugin.openDialog(dialogCfg);
-      }
+    if (applyLoopProtection && (await this.isRateLimited(rule))) {
       return;
     }
 
     this.plugin.log.info(`[Automation] Rule matched: ${rule.name}`);
     await this.actionExecutor.executeAll(rule.actions, event);
+  }
+
+  /**
+   * Breaks automation loops: an action can trigger the very event that runs the
+   * rule again. Returns true when the run must be skipped, offering the user a
+   * one-time dialog to disable the rule.
+   */
+  private async isRateLimited(rule: AutomationRule): Promise<boolean> {
+    if (this.rateLimiter.check(rule.id)) {
+      return false;
+    }
+
+    this.plugin.log.warn(`[Automation] Rate limit exceeded for rule: ${rule.name}`);
+
+    if (!this.pendingDialogs.has(rule.id)) {
+      this.pendingDialogs.add(rule.id);
+
+      const dialogCfg: DialogCfg = {
+        htmlContent: `
+              <h3>High Automation Activity Detected</h3>
+              <p>The rule <strong>"${this.escapeHtml(rule.name)}"</strong> is triggering too frequently (infinite loop protection).</p>
+              <p>Do you want to disable this rule or continue execution?</p>
+            `,
+        buttons: [
+          {
+            label: 'Disable Rule',
+            color: 'warn',
+            onClick: async () => {
+              await this.toggleRuleStatus(rule.id, false);
+              this.plugin.showSnack({ msg: `Rule "${rule.name}" disabled`, type: 'INFO' });
+              this.pendingDialogs.delete(rule.id);
+            },
+          },
+          {
+            label: 'Continue',
+            color: 'primary',
+            onClick: () => {
+              this.rateLimiter.reset(rule.id);
+              this.pendingDialogs.delete(rule.id);
+            },
+          },
+        ],
+      };
+
+      await this.plugin.openDialog(dialogCfg);
+    }
+    return true;
   }
 
   // Minimal HTML escape to prevent rule-provided strings from injecting markup in dialogs.
@@ -303,7 +325,7 @@ export class AutomationManager {
       .replace(/'/g, '&#039;');
   }
 
-  getRegistry(): RuleRegistry {
-    return this.ruleRegistry;
+  getRules(): Promise<AutomationRule[]> {
+    return this.ruleRegistry.getRules();
   }
 }

@@ -116,7 +116,7 @@ export class TaskShortcutService {
         !hasTextSelected
       ) {
         const taskComponent = this._taskFocusService.lastFocusedTaskComponent();
-        // Recovery path (above) can derive focusedTaskId from the DOM before
+        // getDomFocusedTaskId() can derive focusedTaskId from the DOM before
         // lastFocusedTaskComponent has caught up — fall through to native copy
         // rather than copying a stale title.
         if (taskComponent?.task().id === focusedTaskId) {
@@ -359,15 +359,12 @@ export class TaskShortcutService {
   }
 
   /**
-   * Resolves a task id straight from the focused element by walking up to the
-   * nearest host carrying `data-task-id`. Generic over the host selector (works
-   * for both `<task>` and `<planner-task>`) so the id-based shortcut path can
-   * act on a task without a live `<task>` component. (#8851)
+   * Resolves a task id from the focused element, matching `<planner-task>` as
+   * well as `<task>`, so the id-based shortcut path can act on a task without a
+   * live `<task>` component. (#8851)
    */
   private _resolveTaskIdFromDom(): TaskId | null {
-    const active = document.activeElement as HTMLElement | null;
-    const host = active?.closest('[data-task-id]') as HTMLElement | null;
-    return host?.getAttribute('data-task-id') ?? null;
+    return getDomFocusedTaskId('[data-task-id]');
   }
 
   /**

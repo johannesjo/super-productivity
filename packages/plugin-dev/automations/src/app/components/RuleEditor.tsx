@@ -186,13 +186,9 @@ export function RuleEditor(props: RuleEditorProps) {
             <p>
               <small>
                 Save the rule, then assign a key in <em>Settings &gt; Keyboard Shortcuts</em>, where
-                it is listed as
-                <strong>
-                  {' '}
-                  {localRule().name.trim() || 'Unnamed automation rule'} (automations)
-                </strong>
-                . Actions apply to the task row you currently have focused; without a focused task
-                only task-independent actions (create task, snack, dialog, webhook) do anything.
+                it is listed by its rule name under <em>automations</em>. Actions apply to the task
+                row you currently have focused; without a focused task only task-independent actions
+                (create task, snack, dialog, webhook) do anything.
               </small>
             </p>
           )}

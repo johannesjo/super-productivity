@@ -76,7 +76,7 @@ if (plugin.onMessage) {
   plugin.onMessage(async (message: any) => {
     switch (message?.type) {
       case 'getRules':
-        return await automationManager.getRegistry().getRules();
+        return await automationManager.getRules();
       case 'getDefinitions':
         return {
           triggers: globalRegistry

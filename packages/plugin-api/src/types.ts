@@ -529,10 +529,11 @@ export interface PluginAPI {
   ): void;
 
   /**
-   * Remove a shortcut this plugin registered before. Registering the same id
-   * again replaces the existing entry, so this is only needed when a shortcut
-   * disappears for good. The user's key binding is kept in the keyboard
-   * settings, so re-registering the same id restores it.
+   * Remove a shortcut this plugin registered before, by the id it was
+   * registered with (when `id` was omitted there, that is the sanitized label).
+   * Registering the same id again replaces the existing entry, so this is only
+   * needed when a shortcut disappears for good. The user's key binding is kept
+   * in the keyboard settings, so re-registering the same id restores it.
    */
   unregisterShortcut(shortcutId: string): void;
 

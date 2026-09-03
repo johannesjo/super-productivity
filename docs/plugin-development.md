@@ -476,8 +476,7 @@ PluginAPI.registerShortcut({
   },
 });
 
-// Removes it again. Registering the same id replaces the existing entry, so
-// this is only needed when a shortcut disappears for good.
+// Removes it again.
 PluginAPI.unregisterShortcut('my-shortcut');
 ```
 
@@ -797,8 +796,8 @@ navigation helpers, persistence helpers, counters, action dispatch, `registerHoo
 and `registerWorkContextHeaderButton()`. Callback-heavy registration methods such as
 `registerHeaderButton()`, `registerMenuEntry()`, `registerSidePanelButton()`,
 `registerShortcut()`/`unregisterShortcut()`, and `registerConfigHandler()` must be
-registered from host-side `plugin.js` code. APIs not injected into the iframe are unavailable, even if
-they exist on the host-side plugin bridge.
+called from host-side `plugin.js` code. APIs not injected into the iframe are
+unavailable, even if they exist on the host-side plugin bridge.
 
 `executeNodeScript()` is proxied through the host bridge for iframe plugins when
 the desktop app grants the plugin `nodeExecution` permission.

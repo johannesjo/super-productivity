@@ -1,9 +1,9 @@
 import { PluginAPI } from '@super-productivity/plugin-api';
 import { AutomationRule } from '../types';
 
-const FALLBACK_LABEL = 'Unnamed automation rule';
+const FALLBACK_SHORTCUT_LABEL = 'Unnamed automation rule';
 
-const labelFor = (rule: AutomationRule): string => rule.name.trim() || FALLBACK_LABEL;
+const labelFor = (ruleName: string): string => ruleName.trim() || FALLBACK_SHORTCUT_LABEL;
 
 /**
  * Keeps the host's plugin shortcut list in sync with the rules that use the
@@ -35,29 +35,19 @@ export class ShortcutBinder {
       }
     }
 
-    for (const rule of shortcutRules) {
-      const label = labelFor(rule);
-      if (this.registeredLabels.get(rule.id) === label) continue;
+    for (const { id, name } of shortcutRules) {
+      const label = labelFor(name);
+      if (this.registeredLabels.get(id) === label) continue;
 
-      this.plugin.registerShortcut({
-        id: rule.id,
-        label,
-        onExec: () => this.onExec(rule.id),
-      });
-      this.registeredLabels.set(rule.id, label);
+      // Capture only the id: the host holds onExec for the lifetime of the
+      // registration, so closing over the rule would pin a stale copy of it.
+      this.plugin.registerShortcut({ id, label, onExec: () => this.onExec(id) });
+      this.registeredLabels.set(id, label);
     }
   }
 
   private unregister(ruleId: string): void {
-    // Older hosts have no way to drop a single shortcut; there the entry just
-    // stays around (inert, since the rule is gone) until the next app start.
-    if (typeof this.plugin.unregisterShortcut !== 'function') {
-      this.plugin.log.warn(
-        '[Automation] Host cannot unregister shortcuts; stale entry remains until restart.',
-      );
-    } else {
-      this.plugin.unregisterShortcut(ruleId);
-    }
+    this.plugin.unregisterShortcut(ruleId);
     this.registeredLabels.delete(ruleId);
   }
 }
