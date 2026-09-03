@@ -50,6 +50,7 @@ export function RuleEditor(props: RuleEditorProps) {
     'taskStarted',
     'taskStopped',
     'timeBased',
+    'shortcut',
   ];
 
   const isTimeBased = () => localRule().trigger.type === 'timeBased';
@@ -180,6 +181,21 @@ export function RuleEditor(props: RuleEditorProps) {
               ))}
             </select>
           </label>
+
+          {localRule().trigger.type === 'shortcut' && (
+            <p>
+              <small>
+                Save the rule, then assign a key in <em>Settings &gt; Keyboard Shortcuts</em>, where
+                it is listed as
+                <strong>
+                  {' '}
+                  {localRule().name.trim() || 'Unnamed automation rule'} (automations)
+                </strong>
+                . Actions apply to the task row you currently have focused; without a focused task
+                only task-independent actions (create task, snack, dialog, webhook) do anything.
+              </small>
+            </p>
+          )}
 
           {localRule().trigger.type === 'timeBased' && (
             <>

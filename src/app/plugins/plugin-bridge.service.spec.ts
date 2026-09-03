@@ -278,6 +278,47 @@ describe('PluginBridgeService - Counter Methods', () => {
     });
   });
 
+  describe('shortcuts', () => {
+    const shortcut = (id: string, label: string): any => ({
+      pluginId: 'test-plugin',
+      id,
+      label,
+      onExec: () => {},
+    });
+
+    it('replaces an existing shortcut when the same id is registered again', () => {
+      (service as any)._registerShortcut('test-plugin', shortcut('rule-1', 'Old label'));
+      (service as any)._registerShortcut('test-plugin', shortcut('rule-1', 'New label'));
+
+      expect(service.shortcuts().length).toBe(1);
+      expect(service.shortcuts()[0].label).toBe('New label');
+    });
+
+    it('keeps shortcuts of other plugins with the same id', () => {
+      (service as any)._registerShortcut('test-plugin', shortcut('rule-1', 'Mine'));
+      (service as any)._registerShortcut('other-plugin', shortcut('rule-1', 'Theirs'));
+
+      expect(service.shortcuts().length).toBe(2);
+    });
+
+    it('unregisters a single shortcut of a plugin', () => {
+      (service as any)._registerShortcut('test-plugin', shortcut('rule-1', 'One'));
+      (service as any)._registerShortcut('test-plugin', shortcut('rule-2', 'Two'));
+
+      (service as any)._unregisterShortcut('test-plugin', 'rule-1');
+
+      expect(service.shortcuts().map((s) => s.id)).toEqual(['rule-2']);
+    });
+
+    it('does not unregister the same id of another plugin', () => {
+      (service as any)._registerShortcut('test-plugin', shortcut('rule-1', 'Mine'));
+
+      (service as any)._unregisterShortcut('other-plugin', 'rule-1');
+
+      expect(service.shortcuts().length).toBe(1);
+    });
+  });
+
   describe('reInitData', () => {
     it('should delegate to DataInitService.reInit', async () => {
       await service.reInitData();

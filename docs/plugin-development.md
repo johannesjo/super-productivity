@@ -469,13 +469,21 @@ PluginAPI.registerSidePanelButton({
 
 ```javascript
 PluginAPI.registerShortcut({
-  keys: 'ctrl+shift+p',
+  id: 'my-shortcut', // optional, derived from the label when omitted
   label: 'My Plugin Shortcut',
-  action: () => {
+  onExec: () => {
     console.log('Shortcut triggered');
   },
 });
+
+// Removes it again. Registering the same id replaces the existing entry, so
+// this is only needed when a shortcut disappears for good.
+PluginAPI.unregisterShortcut('my-shortcut');
 ```
+
+Plugins do not pick the key combination: the shortcut shows up under **Plugin
+Shortcuts** in the keyboard settings, where the user assigns one. The binding is
+stored per shortcut id, so keep the id stable across app starts.
 
 #### Hooks
 
@@ -788,8 +796,8 @@ The iframe can use the injected task/project/tag APIs, dialog and notification A
 navigation helpers, persistence helpers, counters, action dispatch, `registerHook()`,
 and `registerWorkContextHeaderButton()`. Callback-heavy registration methods such as
 `registerHeaderButton()`, `registerMenuEntry()`, `registerSidePanelButton()`,
-`registerShortcut()`, and `registerConfigHandler()` must be registered from
-host-side `plugin.js` code. APIs not injected into the iframe are unavailable, even if
+`registerShortcut()`/`unregisterShortcut()`, and `registerConfigHandler()` must be
+registered from host-side `plugin.js` code. APIs not injected into the iframe are unavailable, even if
 they exist on the host-side plugin bridge.
 
 `executeNodeScript()` is proxied through the host bridge for iframe plugins when

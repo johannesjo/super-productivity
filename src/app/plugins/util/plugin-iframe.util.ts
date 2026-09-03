@@ -454,6 +454,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           registerMenuEntry: unsupportedIframeRegistration('registerMenuEntry'),
           registerConfigHandler: unsupportedIframeRegistration('registerConfigHandler'),
           registerShortcut: unsupportedIframeRegistration('registerShortcut'),
+          unregisterShortcut: unsupportedIframeRegistration('unregisterShortcut'),
           registerSidePanelButton: unsupportedIframeRegistration('registerSidePanelButton'),
           registerWorkContextHeaderButton: (cfg) => {
             // onClick is not structured-cloneable across postMessage; keep it

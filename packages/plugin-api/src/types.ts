@@ -528,6 +528,14 @@ export interface PluginAPI {
     shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'> & { id?: string },
   ): void;
 
+  /**
+   * Remove a shortcut this plugin registered before. Registering the same id
+   * again replaces the existing entry, so this is only needed when a shortcut
+   * disappears for good. The user's key binding is kept in the keyboard
+   * settings, so re-registering the same id restores it.
+   */
+  unregisterShortcut(shortcutId: string): void;
+
   registerSidePanelButton(sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>): void;
 
   /**

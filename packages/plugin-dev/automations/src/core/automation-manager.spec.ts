@@ -59,11 +59,18 @@ describe('AutomationManager', () => {
       },
       openDialog: vi.fn(),
       showSnack: vi.fn(),
+      getFocusedTask: vi.fn().mockResolvedValue(null),
+      registerShortcut: vi.fn(),
+      unregisterShortcut: vi.fn(),
     } as unknown as PluginAPI;
 
     // Setup mocks
     mockRuleRegistry = {
+      getRules: vi.fn().mockResolvedValue([]),
       getEnabledRules: vi.fn().mockResolvedValue([]),
+      addOrUpdateRule: vi.fn(),
+      addRules: vi.fn(),
+      deleteRule: vi.fn(),
       toggleRuleStatus: vi.fn(),
     };
     (RuleRegistry as unknown as Mock).mockImplementation(function () {
@@ -282,6 +289,126 @@ describe('AutomationManager', () => {
       );
       expect(mockPlugin.openDialog).toHaveBeenCalled(); // Should ask user
       expect(mockActionExecutor.executeAll).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('shortcut trigger', () => {
+    it('should run the shortcut rule the pressed shortcut belongs to', async () => {
+      const rule = {
+        id: 'r1',
+        name: 'Tag focused task',
+        trigger: { type: 'shortcut' },
+        conditions: [],
+        actions: [{ type: 'addTag', value: 'urgent' }],
+        isEnabled: true,
+      };
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([rule]);
+      const focusedTask = { id: 't1', title: 'Focused' };
+      (mockPlugin.getFocusedTask as Mock).mockResolvedValue(focusedTask);
+
+      await manager.runShortcutRule('r1');
+
+      expect(mockActionExecutor.executeAll).toHaveBeenCalledWith(rule.actions, {
+        type: 'shortcut',
+        task: focusedTask,
+      });
+    });
+
+    it('should run a shortcut rule without a task when nothing is focused', async () => {
+      const rule = {
+        id: 'r1',
+        name: 'Ping',
+        trigger: { type: 'shortcut' },
+        conditions: [],
+        actions: [{ type: 'webhook', value: 'https://example.com' }],
+        isEnabled: true,
+      };
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([rule]);
+
+      await manager.runShortcutRule('r1');
+
+      expect(mockActionExecutor.executeAll).toHaveBeenCalledWith(rule.actions, {
+        type: 'shortcut',
+        task: undefined,
+      });
+    });
+
+    it('should still run the rule when the focused task cannot be read', async () => {
+      const rule = {
+        id: 'r1',
+        name: 'Ping',
+        trigger: { type: 'shortcut' },
+        conditions: [],
+        actions: [],
+        isEnabled: true,
+      };
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([rule]);
+      (mockPlugin.getFocusedTask as Mock).mockRejectedValue(new Error('nope'));
+
+      await manager.runShortcutRule('r1');
+
+      expect(mockPlugin.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not read the focused task'),
+      );
+      expect(mockActionExecutor.executeAll).toHaveBeenCalled();
+    });
+
+    it('should not run a rule whose trigger is not a shortcut', async () => {
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([
+        {
+          id: 'r1',
+          name: 'Other',
+          trigger: { type: 'taskCreated' },
+          conditions: [],
+          actions: [],
+          isEnabled: true,
+        },
+      ]);
+
+      await manager.runShortcutRule('r1');
+
+      expect(mockActionExecutor.executeAll).not.toHaveBeenCalled();
+      expect(mockPlugin.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('No enabled shortcut rule'),
+      );
+    });
+
+    it('should register the shortcut of a newly saved shortcut rule', async () => {
+      const rule = {
+        id: 'r1',
+        name: 'Tag focused task',
+        trigger: { type: 'shortcut' },
+        conditions: [],
+        actions: [],
+        isEnabled: true,
+      };
+      mockRuleRegistry.getRules.mockResolvedValue([rule]);
+
+      await manager.saveRule(rule);
+
+      expect(mockRuleRegistry.addOrUpdateRule).toHaveBeenCalledWith(rule);
+      expect(mockPlugin.registerShortcut).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'r1', label: 'Tag focused task' }),
+      );
+    });
+
+    it('should release the shortcut of a deleted shortcut rule', async () => {
+      const rule = {
+        id: 'r1',
+        name: 'Tag focused task',
+        trigger: { type: 'shortcut' },
+        conditions: [],
+        actions: [],
+        isEnabled: true,
+      };
+      mockRuleRegistry.getRules.mockResolvedValue([rule]);
+      await manager.saveRule(rule);
+
+      mockRuleRegistry.getRules.mockResolvedValue([]);
+      await manager.deleteRule('r1');
+
+      expect(mockRuleRegistry.deleteRule).toHaveBeenCalledWith('r1');
+      expect(mockPlugin.unregisterShortcut).toHaveBeenCalledWith('r1');
     });
   });
 });
