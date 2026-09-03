@@ -6,10 +6,11 @@ import {
   MAX_CLIENT_ID_LENGTH,
 } from '../sync.const';
 import {
-  CAUSAL_FULL_STATE_OPERATION_WHERE,
   DEFAULT_SYNC_CONFIG,
   DUPLICATE_OP_SELECT,
   isCausalFullStateOperation,
+  LatestCausalFullStateRow,
+  latestCausalFullStateSql,
   limitVectorClockSize,
   MAX_VECTOR_CLOCK_SIZE,
   Operation,
@@ -244,12 +245,17 @@ export class OperationUploadService {
     if (memoized) {
       return memoized.author;
     }
-    const latestFullStateOp = await tx.operation.findFirst({
-      where: { userId, ...CAUSAL_FULL_STATE_OPERATION_WHERE },
-      orderBy: { serverSeq: 'desc' },
-      select: { clientId: true },
-    });
-    const author = latestFullStateOp?.clientId;
+    // Raw SQL for the same reason as the download path's probe: parameterized, the
+    // op_type values are Params, `operator_predicate_proof` cannot prove the partial
+    // index's predicate, and this statement flips to a generic plan at execution 6 on
+    // every pooled connection. With no seq bound at all it then walks the user's ENTIRE
+    // history backwards — inside a write transaction — for any user with no causal
+    // full-state op. Rare (only clocks over MAX_VECTOR_CLOCK_SIZE reach here) but
+    // unbounded. See latestCausalFullStateSql; do not turn the literals back into params.
+    const latestFullStateRows = await tx.$queryRaw<LatestCausalFullStateRow[]>(
+      latestCausalFullStateSql(userId),
+    );
+    const author = latestFullStateRows[0]?.client_id;
     this.fullStateAuthorByTx.set(tx, { author });
     return author;
   }

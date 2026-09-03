@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { uuidv7 } from 'uuidv7';
 import { Prisma } from '@prisma/client';
-import { testState, resetTestState } from './sync.service.test-state';
+import {
+  testState,
+  resetTestState,
+  isLatestCausalFullStateQuery,
+  latestCausalFullStateRows,
+  rawQueryValues,
+} from './sync.service.test-state';
 
 // Mock the database module with Prisma mocks
 vi.mock('../src/db', async () => {
@@ -180,6 +186,15 @@ vi.mock('../src/db', async () => {
     // Upload transaction writes the storage counter atomically via $executeRaw.
     $executeRaw: vi.fn().mockResolvedValue(0),
     $queryRaw: vi.fn().mockImplementation(async (strings: any, ...params: unknown[]) => {
+      // The download path's newest-causal-full-state lookup ships as a pre-built
+      // `Prisma.Sql` so its op_type values stay literals, so it arrives as ONE object
+      // argument rather than a tagged template — see rawQueryText.
+      if (isLatestCausalFullStateQuery(strings)) {
+        return latestCausalFullStateRows(
+          state.operations,
+          rawQueryValues(strings, params),
+        );
+      }
       const sql = Array.isArray(strings) ? strings.join('') : String(strings);
       // Array branch of the single-entity conflict lookup: MAX(server_seq) over
       // `entity_ids @> ARRAY[id]`, kept separate from the scalar findFirst above.

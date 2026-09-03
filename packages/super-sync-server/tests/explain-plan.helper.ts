@@ -207,8 +207,17 @@ export const explainGeneric = (
  * With `Param` nodes there are no `Const`s for `operator_predicate_proof` to evaluate, so
  * `predOK` is false and no path into any partial index on the table is generated. Measured
  * on production (PG 16): custom = BitmapOr, cost 22,844; generic = Parallel Seq Scan, cost
- * 982,701. `choose_custom_plan` adopts the generic plan only when its cost is at or below
- * the average custom cost, so a 43x margin pins the statement on custom plans.
+ * 982,701, so a 43x margin pins that particular statement on custom plans.
+ *
+ * BUT THE THRESHOLD IS NOT "generic <= average custom", and reading it that way is how a
+ * statement gets left on `explainCustom` when it provably goes generic. `cached_plan_cost`
+ * adds a SYNTHETIC planning charge of `1000 * cpu_operator_cost * (nrelations + 1)` — a
+ * fixed 5.00 for a single-table query, not measured planning time — to the custom side
+ * before the comparison, and the comparison is strictly `<`. So a CHEAP statement flips
+ * unconditionally: a `LIMIT 1` lookup planning at ~1.94 carries avg_custom >= 5.29 and can
+ * never beat a generic cost of 4.85, no matter how bad the generic plan is at runtime.
+ * A large margin only protects EXPENSIVE statements. See
+ * `latestCausalFullStateSql` (sync.types.ts) for the statement this cost the fleet.
  *
  * That margin is a load-bearing assumption, not a detail — so a spec using this function
  * must ALSO assert the generic shape via {@link explainGeneric}, which is what turns the
