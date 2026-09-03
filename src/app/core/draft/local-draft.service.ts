@@ -2,7 +2,16 @@ import { Injectable } from '@angular/core';
 import { Log } from '../log';
 import { LS_LOCAL_DRAFT_PREFIX } from '../persistence/storage-keys.const';
 
-export type LocalDraftEntityType = 'NOTE';
+/**
+ * Single source of truth for the entity types drafts are keyed by. The legacy
+ * profile migration below tells an already-migrated key from a legacy one by
+ * its first segment, so the union must stay derived from this list — a second
+ * type declared only in the union would have its new-format drafts read as
+ * legacy and deleted.
+ */
+export const LOCAL_DRAFT_ENTITY_TYPES = ['NOTE'] as const;
+
+export type LocalDraftEntityType = (typeof LOCAL_DRAFT_ENTITY_TYPES)[number];
 
 export interface LocalDraft {
   content: string;
@@ -219,7 +228,11 @@ export class LocalDraftService {
     const activeDraftPrefix = `${LS_LOCAL_DRAFT_PREFIX}${activeProfileId}:`;
     let didMigrateActiveDrafts = true;
     for (const legacyKey of this._draftKeys()) {
-      if (legacyKey.startsWith(`${LS_LOCAL_DRAFT_PREFIX}NOTE:`)) {
+      if (
+        LOCAL_DRAFT_ENTITY_TYPES.some((entityType) =>
+          legacyKey.startsWith(`${LS_LOCAL_DRAFT_PREFIX}${entityType}:`),
+        )
+      ) {
         continue;
       }
 

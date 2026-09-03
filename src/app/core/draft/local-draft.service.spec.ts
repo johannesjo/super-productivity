@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import {
+  LOCAL_DRAFT_ENTITY_TYPES,
   DRAFT_MAX_CONTENT_LENGTH,
   DRAFT_RETENTION_MS,
   getDraftOpenAction,
@@ -234,6 +235,63 @@ describe('LocalDraftService', () => {
       expect(localStorage.getItem('sp_user_profiles_enabled')).toBeNull();
       expect(localStorage.getItem('sp_profile_data_p1')).toBeNull();
       expect(localStorage.getItem('sp_profile_data_p2')).toBeNull();
+    });
+
+    // The overwhelmingly common cohort: never enabled profiles, so no metadata
+    // was ever written and their drafts sit under the implicit 'default' id.
+    it('migrates the default profile drafts when no legacy metadata exists', () => {
+      const now = Date.now();
+      localStorage.setItem(legacyKeyFor('default', 'n1'), storedDraft(now));
+
+      service.pruneOnStart(now);
+
+      expect(localStorage.getItem(keyFor('n1'))).toBe(storedDraft(now));
+      expect(localStorage.getItem(legacyKeyFor('default', 'n1'))).toBeNull();
+    });
+
+    it('falls back to the default profile when legacy metadata is unparseable', () => {
+      const now = Date.now();
+      localStorage.setItem('sp_profile_meta', '{ not json');
+      localStorage.setItem(legacyKeyFor('default', 'n1'), storedDraft(now));
+
+      service.pruneOnStart(now);
+
+      expect(localStorage.getItem(keyFor('n1'))).toBe(storedDraft(now));
+      expect(localStorage.getItem('sp_profile_meta')).toBeNull();
+    });
+
+    it('lets an already-migrated draft win over its legacy twin', () => {
+      const now = Date.now();
+      const migrated = storedDraft(now);
+      const legacy = storedDraft(now - 1000);
+      localStorage.setItem(keyFor('n1'), migrated);
+      localStorage.setItem(legacyKeyFor('default', 'n1'), legacy);
+
+      service.pruneOnStart(now);
+
+      expect(localStorage.getItem(keyFor('n1'))).toBe(migrated);
+      expect(localStorage.getItem(legacyKeyFor('default', 'n1'))).toBeNull();
+    });
+
+    // Guards the drift the LOCAL_DRAFT_ENTITY_TYPES single source of truth
+    // exists to prevent: a new-format key must never be read as a legacy one
+    // and deleted, for EVERY declared entity type.
+    it('treats a new-format key for every entity type as already migrated', () => {
+      const now = Date.now();
+      LOCAL_DRAFT_ENTITY_TYPES.forEach((entityType) => {
+        localStorage.setItem(
+          `${LS_LOCAL_DRAFT_PREFIX}${entityType}:kept`,
+          storedDraft(now),
+        );
+      });
+
+      service.pruneOnStart(now);
+
+      LOCAL_DRAFT_ENTITY_TYPES.forEach((entityType) => {
+        expect(localStorage.getItem(`${LS_LOCAL_DRAFT_PREFIX}${entityType}:kept`))
+          .withContext(entityType)
+          .toBe(storedDraft(now));
+      });
     });
   });
 });
