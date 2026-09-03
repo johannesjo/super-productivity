@@ -15,7 +15,6 @@ import { HiddenCalendarProvidersService } from '../calendar-integration/hidden-c
 import { TaskService } from '../tasks/task.service';
 import { ScheduleCalendarMapEntry, ScheduleEvent } from './schedule.model';
 import { SVEType } from './schedule.const';
-import { SCHEDULE_CONSTANTS } from './schedule.constants';
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
@@ -311,20 +310,59 @@ describe('ScheduleService', () => {
       const lastDayOfMonth = (year: number, month: number): Date =>
         new Date(year, month + 1, 0);
 
+      // The derivation itself. Pinning at 6 spanned every month but left an
+      // empty row on most of them; deriving from available height is what
+      // #9449 was filed for. The month is the right input.
+      it('should derive 4 to 6 weeks, and never fewer than the month needs', () => {
+        // Feb 2027 is 28 days starting on a Monday, the only shape that fits
+        // in four rows under a Monday-first week.
+        expect(service.getMonthWeeksToShow(1, new Date(2027, 1, 15))).toBe(4);
+        // Aug 2026 starts on a Saturday: 5 leading days + 31 needs six rows.
+        expect(service.getMonthWeeksToShow(1, new Date(2026, 7, 15))).toBe(6);
+        // Sep 2026 is 30 days from a Tuesday: five rows is exact.
+        expect(service.getMonthWeeksToShow(1, new Date(2026, 8, 15))).toBe(5);
+      });
+
+      it('should never return a count that drops a day of the month', () => {
+        // The count and the grid it feeds have to agree for every pair, or a
+        // day gets no cell and therefore no events at all.
+        for (let monthOffset = 0; monthOffset < 24; monthOffset++) {
+          const reference = new Date(2027, monthOffset, 15);
+          const year = reference.getFullYear();
+          const month = reference.getMonth();
+          const last = dayStr(lastDayOfMonth(year, month));
+
+          for (let firstDayOfWeek = 0; firstDayOfWeek < 7; firstDayOfWeek++) {
+            const weeks = service.getMonthWeeksToShow(firstDayOfWeek, reference);
+            const context = `${year}-${month + 1}, firstDayOfWeek ${firstDayOfWeek}`;
+            expect(weeks).withContext(context).toBeGreaterThanOrEqual(4);
+            expect(weeks).withContext(context).toBeLessThanOrEqual(6);
+            expect(service.getMonthDaysToShow(weeks, firstDayOfWeek, reference))
+              .withContext(context)
+              .toContain(last);
+            // And not a row more than it needs.
+            expect(service.getMonthDaysToShow(weeks - 1, firstDayOfWeek, reference))
+              .withContext(context)
+              .not.toContain(last);
+          }
+        }
+      });
+
       it('should include Mon 31 Aug 2026 for every first day of week', () => {
         const aug31 = dayStr(new Date(2026, 7, 31));
 
         for (let firstDayOfWeek = 0; firstDayOfWeek < 7; firstDayOfWeek++) {
+          const reference = new Date(2026, 7, 15);
           const result = service.getMonthDaysToShow(
-            SCHEDULE_CONSTANTS.MONTH_VIEW.NR_OF_WEEKS,
+            service.getMonthWeeksToShow(firstDayOfWeek, reference),
             firstDayOfWeek,
-            new Date(2026, 7, 15),
+            reference,
           );
           expect(result).withContext(`firstDayOfWeek ${firstDayOfWeek}`).toContain(aug31);
         }
       });
 
-      it('should not reach 31 Aug 2026 with only 5 weeks — why NR_OF_WEEKS is 6', () => {
+      it('should not reach 31 Aug 2026 with only 5 weeks — why August derives 6', () => {
         // August 2026 starts on a Saturday, so the padded grid needs 6 rows.
         // This is the shape the reported bug had: a shorter window silently
         // stopped before the end of the month.
@@ -344,7 +382,7 @@ describe('ScheduleService', () => {
 
           for (let firstDayOfWeek = 0; firstDayOfWeek < 7; firstDayOfWeek++) {
             const result = service.getMonthDaysToShow(
-              SCHEDULE_CONSTANTS.MONTH_VIEW.NR_OF_WEEKS,
+              service.getMonthWeeksToShow(firstDayOfWeek, reference),
               firstDayOfWeek,
               reference,
             );

@@ -46,6 +46,7 @@ describe('ScheduleComponent', () => {
     mockScheduleService = jasmine.createSpyObj('ScheduleService', [
       'getDaysToShow',
       'getMonthDaysToShow',
+      'getMonthWeeksToShow',
       'buildScheduleDays',
       'scheduleRefreshTick',
       'getTodayStr',
@@ -64,6 +65,9 @@ describe('ScheduleComponent', () => {
       '2026-01-02',
       '2026-01-03',
     ]);
+    // The month view derives its row count from the displayed month; tests that
+    // care about the number override this.
+    mockScheduleService.getMonthWeeksToShow.and.returnValue(6);
     mockScheduleService.buildScheduleDays.and.returnValue([]);
     mockScheduleService.getTodayStr.and.callFake((timestamp?: number | Date) => {
       const date = timestamp ? new Date(timestamp) : new Date();
@@ -985,21 +989,30 @@ describe('ScheduleComponent', () => {
       expect(daysToShowCount).toBe(7);
     });
 
-    it('should return the full week count in month view', () => {
-      // Arrange
+    // The row count follows the displayed month, not a constant and not the
+    // window. `_daysToShowCount` deliberately does not answer for month view:
+    // it reads neither `selectedDate` nor `firstDayOfWeek`.
+    it("should ask the service for the displayed month's week count", () => {
+      mockScheduleService.getMonthWeeksToShow.and.returnValue(5);
       mockLayoutService.selectedTimeView.set('month');
+      fixture.detectChanges();
 
-      // Act
-      const daysToShowCount = component['_daysToShowCount']();
+      component.daysToShow();
 
-      // Assert
-      expect(daysToShowCount).toBe(SCHEDULE_CONSTANTS.MONTH_VIEW.NR_OF_WEEKS);
+      const [weeks, firstDayOfWeek] =
+        mockScheduleService.getMonthDaysToShow.calls.mostRecent().args;
+      expect(weeks).toBe(5);
+      expect(mockScheduleService.getMonthWeeksToShow).toHaveBeenCalledWith(
+        firstDayOfWeek,
+        null,
+      );
     });
 
     it('should not shrink the month grid on a short window (#9449)', () => {
       // The month grid used to be sized from the viewport, so a short window
       // dropped the tail of the month (a task on Mon 31 Aug 2026 had no cell
       // and therefore no events computed at all). Height must not influence it.
+      mockScheduleService.getMonthWeeksToShow.and.returnValue(6);
       mockLayoutService.selectedTimeView.set('month');
 
       // One signal, mutated with .set(): replacing the field instead would not
@@ -1007,13 +1020,19 @@ describe('ScheduleComponent', () => {
       // read's cached value and the test could not fail.
       const windowSize = signal({ width: 1280, height: 1400 });
       component['_windowSize'] = windowSize;
-      const onTallWindow = component['_daysToShowCount']();
+      fixture.detectChanges();
+      component.daysToShow();
+      const onTallWindow =
+        mockScheduleService.getMonthDaysToShow.calls.mostRecent().args[0];
 
       windowSize.set({ width: 1280, height: 500 });
-      const onShortWindow = component['_daysToShowCount']();
+      fixture.detectChanges();
+      component.daysToShow();
+      const onShortWindow =
+        mockScheduleService.getMonthDaysToShow.calls.mostRecent().args[0];
 
       expect(onShortWindow).toBe(onTallWindow);
-      expect(onShortWindow).toBe(SCHEDULE_CONSTANTS.MONTH_VIEW.NR_OF_WEEKS);
+      expect(onShortWindow).toBe(6);
     });
   });
 

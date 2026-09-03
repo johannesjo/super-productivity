@@ -400,6 +400,40 @@ describe('PlannerCalendarNavComponent', () => {
       expect(component.maxHeight()).toBe(ROW_HEIGHT);
     });
 
+    // The collapsed strip is one row in a viewport with room for one, so it
+    // must not shrink with the expanded grid: `.week button` is
+    // `min(36px, var(--row-height) - 4px)`, so a 29px collapsed row hands every
+    // user 25px tap targets whether or not they ever expand (#9463 review).
+    it('should keep collapsed rows full size on a viewport that shrinks the grid', () => {
+      setRoom(ROOM_FOR_FOUR_ROWS);
+      component.isExpanded.set(false);
+
+      expect(component.displayRowHeight()).toBe(ROW_HEIGHT);
+      expect(component.maxHeight()).toBe(ROW_HEIGHT);
+      // The expanded grid still shrinks; only the collapsed strip is pinned.
+      component.isExpanded.set(true);
+      expect(component.displayRowHeight()).toBeLessThan(ROW_HEIGHT);
+    });
+
+    // `canExpand()` gates entering the expanded state and nothing leaves it, so
+    // a height-only shrink (a banner above `.route-wrapper`, which fires no
+    // resize event) leaves `isExpanded` true with the room gone. Without the
+    // clamp, `rowHeight()`'s MIN_ROW_HEIGHT floor put a fixed 144px grid into
+    // whatever was left and overflowed the plan-list reserve.
+    it('should not exceed the room available while stale-expanded', () => {
+      setRoom(ROOM_FOR_ALL_ROWS);
+      component.isExpanded.set(true);
+      expect(component.maxHeight()).toBe(EXPANDED_ALL_ROWS);
+
+      // The box shrinks under it; nothing collapses the flag.
+      setRoom(100);
+
+      expect(component.canExpand()).toBe(false);
+      expect(component.isExpanded()).toBe(true);
+      expect(component.maxHeight()).toBe(100);
+      expect(component.maxHeight()).toBeLessThan(MIN_ROW_HEIGHT * WEEKS_SHOWN);
+    });
+
     it('should return six full-size rows when expanded', () => {
       setRoom(ROOM_FOR_ALL_ROWS);
       component.isExpanded.set(true);
@@ -484,8 +518,9 @@ describe('PlannerCalendarNavComponent', () => {
       expect(component.weekOffset()).toBe(-2 * ROW_HEIGHT);
     });
 
-    // One row of a shrunken grid is one shrunken row high.
-    it('should scale the collapsed offset with the row height', () => {
+    // Collapsed rows are full size whatever the room, so the offset that slides
+    // the active week into the strip is too.
+    it('should keep the collapsed offset at full rows on a shrunken viewport', () => {
       const weeks = component.weeks();
       fixture.componentRef.setInput('visibleDayDate', weeks[2][0].dateStr);
       component.isExpanded.set(false);
@@ -493,7 +528,7 @@ describe('PlannerCalendarNavComponent', () => {
       setRoom(ROOM_FOR_FOUR_ROWS);
 
       expect(component.rowHeight()).toBeLessThan(ROW_HEIGHT);
-      expect(component.weekOffset()).toBe(-2 * component.rowHeight());
+      expect(component.weekOffset()).toBe(-2 * ROW_HEIGHT);
     });
 
     it('should return 0 when collapsed and activeWeekIndex is 0', () => {

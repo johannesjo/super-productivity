@@ -56,7 +56,7 @@ const createMockCallbacks = (): jasmine.SpyObj<CalendarGestureCallbacks> =>
     'getActiveWeekIndex',
     'getIsExpanded',
     'measure',
-    'getRowHeight',
+    'getExpandedHeight',
     'canExpand',
     'onExpandChanged',
     'onVerticalSwipe',
@@ -86,7 +86,7 @@ describe('CalendarGestureHandler', () => {
     cb = createMockCallbacks();
     cb.getActiveWeekIndex.and.returnValue(0);
     cb.getIsExpanded.and.returnValue(false);
-    cb.getRowHeight.and.returnValue(ROW_HEIGHT);
+    cb.getExpandedHeight.and.returnValue(MAX_HEIGHT);
     cb.canExpand.and.returnValue(true);
 
     handler = new CalendarGestureHandler(el, () => weeksEl, cb);
@@ -555,11 +555,11 @@ describe('CalendarGestureHandler', () => {
     });
 
     // Rows shrink instead of being dropped, so every geometry the handler sees
-    // still spans six rows. A viewport too short even for MIN_ROW_HEIGHT rows
-    // reports canExpand false rather than a degenerate height (#9463 review).
+    // still spans six rows. The collapsed height is always ROW_HEIGHT; only the
+    // expanded height moves, and it arrives already clamped (#9463 review).
     describe('on a shrunken grid', () => {
       it('should snap to six shrunken rows with no offset', () => {
-        cb.getRowHeight.and.returnValue(MIN_ROW_HEIGHT);
+        cb.getExpandedHeight.and.returnValue(MIN_ROW_HEIGHT * WEEKS_SHOWN);
         cb.getActiveWeekIndex.and.returnValue(4);
 
         handler.snapTo(true);
@@ -573,9 +573,23 @@ describe('CalendarGestureHandler', () => {
         expect(innerEl.style.transform).toBe('translateY(0px)');
       });
 
-      describe('too short even for that', () => {
+      it('should collapse to a full-size row, never a shrunken one', () => {
+        cb.getExpandedHeight.and.returnValue(MIN_ROW_HEIGHT * WEEKS_SHOWN);
+
+        handler.snapTo(false);
+        jasmine.clock().tick(SNAP_DURATION + 20);
+
+        // The collapsed strip is one row in a viewport with room for one, so it
+        // does not shrink with the grid: shrinking it would give every user
+        // 25px tap targets whether or not they ever expand.
+        expect(weeksEl.style.maxHeight).toBe(`${ROW_HEIGHT}px`);
+      });
+
+      describe('too short to expand at all', () => {
         beforeEach(() => {
-          cb.getRowHeight.and.returnValue(MIN_ROW_HEIGHT);
+          // What the component reports once the room is gone: the clamped
+          // expanded height has collapsed onto the collapsed height.
+          cb.getExpandedHeight.and.returnValue(ROW_HEIGHT);
           cb.canExpand.and.returnValue(false);
         });
 
@@ -585,38 +599,41 @@ describe('CalendarGestureHandler', () => {
 
           expect(cb.onExpandChanged).toHaveBeenCalledWith(false);
           expect(cb.onExpandChanged).not.toHaveBeenCalledWith(true);
-          expect(weeksEl.style.maxHeight).toBe(MIN_ROW_HEIGHT + 'px');
+          expect(weeksEl.style.maxHeight).toBe(`${ROW_HEIGHT}px`);
         });
 
-        // Asserting the exact offset, not merely the absence of 'NaN': the
-        // browser rejects translateY(NaNpx) outright, so code that produced one
-        // would leave the transform empty and a not-toContain check would pass.
-        it('should still write a usable transform while dragging', () => {
+        // The drag ceiling is the clamped expanded height, so a rubber-band
+        // cannot open the grid into room that is not there. Previously a 100px
+        // drag opened it to 124px in a viewport with 42px to spare.
+        it('should not open past the room available while dragging', () => {
           cb.getActiveWeekIndex.and.returnValue(2);
 
           handleEl.dispatchEvent(makeTouchEvent('touchstart', 100, 100));
           handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 200));
 
-          // 100px of a 120px range leaves a sixth of the collapsed offset.
+          expect(weeksEl.style.maxHeight).toBe(`${ROW_HEIGHT}px`);
+          // Asserting the exact offset, not merely the absence of 'NaN': the
+          // browser rejects translateY(NaNpx) outright, so code that produced
+          // one would leave the transform empty and a not-toContain check would
+          // pass. The range is 0 here, which is what the guard is for.
           const innerEl = weeksEl.firstElementChild as HTMLElement;
-          expect(innerEl.style.transform).toBe('translateY(-8px)');
-          expect(weeksEl.style.maxHeight).toBe(`${MIN_ROW_HEIGHT + 100}px`);
+          expect(innerEl.style.transform).toBe(`translateY(${-2 * ROW_HEIGHT}px)`);
         });
       });
     });
 
     // The component measures layout to answer this, so reading it per touchmove
     // would interleave layout reads with the style writes below it.
-    it('should read the row height once per drag, not per touchmove', () => {
+    it('should read the expanded height once per drag, not per touchmove', () => {
       handleEl.dispatchEvent(makeTouchEvent('touchstart', 100, 100));
-      cb.getRowHeight.calls.reset();
+      cb.getExpandedHeight.calls.reset();
 
       handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 120));
       handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 140));
       handleEl.dispatchEvent(makeTouchEvent('touchmove', 100, 160));
 
       // Once for _startDrag, on the first move that crosses the threshold.
-      expect(cb.getRowHeight).toHaveBeenCalledTimes(1);
+      expect(cb.getExpandedHeight).toHaveBeenCalledTimes(1);
     });
   });
 

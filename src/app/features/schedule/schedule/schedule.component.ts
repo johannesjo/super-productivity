@@ -148,16 +148,9 @@ export class ScheduleComponent {
 
     if (selectedView === 'day') return 1;
 
-    // Month view: a fixed grid of weeks, never a function of the window height.
-    // Deriving the row count from available space used to drop the tail of the
-    // month whenever the window was short (#9449): a month whose 1st falls late
-    // in the week needs 6 rows (Aug 2026 starts on a Saturday), and a day left
-    // out of `daysToShow` gets no events computed at all, so the task vanished
-    // rather than merely being clipped. 6 rows covers every month/firstDayOfWeek
-    // combination and matches the 6 row tracks the grid already reserves.
-    if (selectedView === 'month') {
-      return SCHEDULE_CONSTANTS.MONTH_VIEW.NR_OF_WEEKS;
-    }
+    // Month view derives its own count from the displayed month, in `daysToShow`
+    // below: it needs `selectedDate` and `firstDayOfWeek`, neither of which is
+    // read here.
 
     // Week view: always 7 days
     return 7;
@@ -171,9 +164,16 @@ export class ScheduleComponent {
     this._todayDateStr();
 
     if (selectedView === 'month') {
+      // Rows follow the month, never the window height. Deriving them from
+      // available space is what #9449 was filed for: a day left out of
+      // `daysToShow` gets no events computed at all, so a task on it vanished
+      // rather than merely being clipped. 4-6 rows spans every
+      // month/firstDayOfWeek pair, and `weeksToShow` carries the same number
+      // into the grid's `--nr-of-weeks`, so the tracks follow the days.
+      const firstDayOfWeek = this.firstDayOfWeek();
       return this.scheduleService.getMonthDaysToShow(
-        count,
-        this.firstDayOfWeek(),
+        this.scheduleService.getMonthWeeksToShow(firstDayOfWeek, selectedDate),
+        firstDayOfWeek,
         selectedDate,
       );
     }

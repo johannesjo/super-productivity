@@ -27,20 +27,6 @@ export const SCHEDULE_CONSTANTS = {
   },
 
   /**
-   * Month view layout configuration.
-   */
-  MONTH_VIEW: {
-    /**
-     * Number of week rows in the month grid. Fixed at 6 so the grid always
-     * spans the whole month: a month starting late in the week (Aug 2026 starts
-     * on a Saturday) needs 6 rows, and rows are `1fr` inside a fixed-height
-     * grid, so fewer rows only ever removes days — it never makes them taller.
-     * Must stay in sync with `--nr-of-weeks` in `schedule.component.scss`.
-     */
-    NR_OF_WEEKS: 6,
-  },
-
-  /**
    * Column widths for different screen sizes.
    * These values determine the width of day columns in the schedule view.
    */

@@ -190,13 +190,43 @@ export class PlannerCalendarNavComponent {
     );
   }
 
+  /**
+   * The row height actually rendered. Collapsed rows stay full size even where
+   * an expanded grid would have to shrink: the collapsed strip is one row in a
+   * viewport with room for it, and `.week button` is
+   * `min(36px, var(--row-height) - 4px)`, so a shrunken collapsed row would
+   * hand every user 25px tap targets whether or not they ever expand. Rows
+   * resizing across the expand transition is the accepted trade.
+   */
+  displayRowHeight = computed(() => (this.isExpanded() ? this.rowHeight() : ROW_HEIGHT));
+
+  /**
+   * Clamped by the measured room, not only by `canExpand()`.
+   *
+   * `canExpand()` gates *entering* the expanded state and nothing leaves it:
+   * `isExpanded` is written only from `snapTo`, and `isXs` is a max-*width*
+   * query, so a height-only shrink (a `<banner>` appearing above
+   * `.route-wrapper`, which fires no resize event) leaves the flag true while
+   * the room is gone. Without this clamp `rowHeight()`'s `MIN_ROW_HEIGHT` floor
+   * put a fixed 144px grid into whatever space was left, overflowing into the
+   * `MIN_PLAN_VIEW_HEIGHT` reserve the clamp exists to protect. A no-op
+   * whenever `canExpand()` is true.
+   */
   maxHeight = computed(() =>
-    this.isExpanded() ? this.rowHeight() * WEEKS_SHOWN : this.rowHeight(),
+    Math.min(
+      this.isExpanded() ? this.rowHeight() * WEEKS_SHOWN : ROW_HEIGHT,
+      this._availableForRows(),
+    ),
+  );
+
+  /** What the grid opens to, clamped the same way `maxHeight` is. */
+  maxExpandedHeight = computed(() =>
+    Math.min(this.rowHeight() * WEEKS_SHOWN, this._availableForRows()),
   );
 
   // Expanded shows every row, so there is nothing to scroll to.
   weekOffset = computed(() =>
-    this.isExpanded() ? 0 : -this.activeWeekIndex() * this.rowHeight(),
+    this.isExpanded() ? 0 : -this.activeWeekIndex() * ROW_HEIGHT,
   );
 
   monthLabel = computed(() => {
@@ -259,7 +289,7 @@ export class PlannerCalendarNavComponent {
         getActiveWeekIndex: () => this.activeWeekIndex(),
         getIsExpanded: () => this.isExpanded(),
         measure: () => this._measureAvailableForRows(),
-        getRowHeight: () => this.rowHeight(),
+        getExpandedHeight: () => this.maxExpandedHeight(),
         canExpand: () => this.canExpand(),
         onExpandChanged: (expanded) => this.isExpanded.set(expanded),
         onVerticalSwipe: (isDown) => this._handleVerticalSwipe(isDown),
