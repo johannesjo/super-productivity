@@ -70,6 +70,13 @@ chmod 700 "$BACKUP_DIR"
 # Generate filename with timestamp
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/supersync_$DATE.sql.gz"
+ACCOUNTS_FILE="$BACKUP_DIR/supersync_accounts_$DATE.sql.gz"
+
+# A dump killed mid-run (e.g. a #9695 crash-restart) leaves a truncated file that still
+# passes gzip -t: gzip sees EOF and finalizes a valid archive when pg_dump dies upstream
+# (#9836, observed 2026-08-31 and 2026-09-02). Write to .tmp and rename only on success
+# so a failed night leaves no plausible-looking backup behind.
+trap 'rm -f "$BACKUP_FILE.tmp" "$ACCOUNTS_FILE.tmp"' EXIT
 
 echo "==> SuperSync Backup"
 echo "    Date: $DATE"
@@ -78,7 +85,8 @@ echo ""
 
 # Step 1: Create full PostgreSQL dump
 echo "==> Creating full database dump..."
-run_pg_dump | gzip > "$BACKUP_FILE"
+run_pg_dump | gzip > "$BACKUP_FILE.tmp"
+mv "$BACKUP_FILE.tmp" "$BACKUP_FILE"
 
 # Get file size
 SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
@@ -87,10 +95,10 @@ echo "    Full backup size: $SIZE"
 # Step 1b: Create minimal accounts-only dump (users + passkeys)
 # This is tiny and sufficient for disaster recovery when clients still have data.
 # Recovery: restore accounts, wipe sync data, let clients re-upload.
-ACCOUNTS_FILE="$BACKUP_DIR/supersync_accounts_$DATE.sql.gz"
 echo ""
 echo "==> Creating accounts-only dump (users + passkeys)..."
-run_pg_dump --table=users --table=passkeys | gzip > "$ACCOUNTS_FILE"
+run_pg_dump --table=users --table=passkeys | gzip > "$ACCOUNTS_FILE.tmp"
+mv "$ACCOUNTS_FILE.tmp" "$ACCOUNTS_FILE"
 
 ACCOUNTS_SIZE=$(du -h "$ACCOUNTS_FILE" | cut -f1)
 echo "    Accounts backup size: $ACCOUNTS_SIZE"
@@ -123,7 +131,7 @@ echo "    Deleted $DELETED old backup(s)"
 # List current backups
 echo ""
 echo "==> Current backups:"
-ls -lh "$BACKUP_DIR"/supersync_*.sql.gz "$BACKUP_DIR"/supersync_accounts_*.sql.gz 2>/dev/null | tail -10 || echo "    (none)"
+ls -lh "$BACKUP_DIR"/supersync_*.sql.gz 2>/dev/null | tail -10 || echo "    (none)"
 
 echo ""
 echo "==> Backup complete:"
