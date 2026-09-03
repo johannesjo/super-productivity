@@ -2514,7 +2514,7 @@
     },
     "FOCUS_MODE": {
       "FOCUS_MODE_SOUND_OFF": "끄기",
-      "FOCUS_MODE_SOUND_TICK": "째깍거림",
+      "FOCUS_MODE_SOUND_TICK": "째깍 소리",
       "FOCUS_MODE_SOUND_WHITE_NOISE": "화이트 노이즈",
       "HELP": "집중 모드에서는 방해 요소가 없는 화면을 열어 현재 작업에 집중할 수 있도록 도와줍니다.",
       "L_AUTO_START_FOCUS_ON_PLAY": "작업 추적을 시작할 때 집중 세션 시작",
@@ -3177,7 +3177,7 @@
     "PLUGINS": "플러그인",
     "PRIVACY_POLICY": "개인 정책",
     "PROJECT_SETTINGS": "프로젝트 별 설정",
-    "PROVIDE_FEEDBACK": "피드백을 제공하다",
+    "PROVIDE_FEEDBACK": "피드백 보내기",
     "RELOAD": "새로고침",
     "SEARCH_NO_RESULTS": "설정을 찾을 수 없습니다",
     "SEARCH_PLACEHOLDER": "설정 검색",
@@ -3255,7 +3255,7 @@
     "SAVE": "저장"
   },
   "V": {
-    "E_DATETIME": "입력 된 값은 datetime이 아닙니다!",
+    "E_DATETIME": "입력한 값이 날짜/시간 형식이 아닙니다!",
     "E_DURATION": "유효한 기간을 입력하세요(예: 1시간).",
     "E_MAX": "{{val}}보다 크면 안 됩니다.",
     "E_MAX_LENGTH": "최대 {{val}}자여야 합니다.",
@@ -3280,11 +3280,11 @@
     "NO_PLANNED_TASKS": "계획된 작업 없음",
     "NO_TASKS_IN_MAIN_LIST": "모든 작업이 섹션으로 정리되어 있습니다",
     "RECURRING_TASKS": "반복 작업",
-    "RESET_BREAK_TIMER": "중단 타이머없이 재설정",
+    "RESET_BREAK_TIMER": "휴식 없이 작업한 시간 초기화",
     "TIME_ESTIMATED": "예상 시간:",
-    "TODAY_REMAINING": "오늘이 남았습니다:",
-    "WITHOUT_BREAK": "휴식 없이:",
-    "WORKING_TODAY": "오늘 작업:",
+    "TODAY_REMAINING": "오늘 남은 시간:",
+    "WITHOUT_BREAK": "휴식 없이 작업한 시간:",
+    "WORKING_TODAY": "오늘 작업한 시간:",
     "WORKING_TODAY_ARCHIVED": "보관된 작업에서 오늘 작업한 시간"
   }
 }
