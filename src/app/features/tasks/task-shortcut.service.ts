@@ -237,6 +237,11 @@ export class TaskShortcutService {
       ev.preventDefault();
       return true;
     }
+    if (checkKeyCombo(ev, keys.taskDuplicate)) {
+      this._handleTaskShortcut(focusedTaskId, 'duplicateTask');
+      ev.preventDefault();
+      return true;
+    }
     if (checkKeyCombo(ev, keys.taskAddAttachment)) {
       this._handleTaskShortcut(focusedTaskId, 'addAttachment');
       ev.preventDefault();

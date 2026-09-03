@@ -2584,6 +2584,7 @@
       "TASK_ADD_ATTACHMENT": "Attach file or link",
       "TASK_ADD_SUB_TASK": "Add subtask",
       "TASK_DELETE": "Delete task",
+      "TASK_DUPLICATE": "Duplicate task",
       "TASK_EDIT_TAGS": "Edit tags",
       "TASK_EDIT_TITLE": "Edit title",
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",

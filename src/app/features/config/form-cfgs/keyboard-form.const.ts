@@ -92,6 +92,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
     kbField('taskUnschedule', T.GCF.KEYBOARD.TASK_UNSCHEDULE),
     kbField('taskToggleDone', T.GCF.KEYBOARD.TASK_TOGGLE_DONE),
     kbField('taskAddSubTask', T.GCF.KEYBOARD.TASK_ADD_SUB_TASK),
+    kbField('taskDuplicate', T.GCF.KEYBOARD.TASK_DUPLICATE),
     kbField('taskAddAttachment', T.GCF.KEYBOARD.TASK_ADD_ATTACHMENT),
     kbField('taskDelete', T.GCF.KEYBOARD.TASK_DELETE),
     kbField('taskMoveToProject', T.GCF.KEYBOARD.TASK_MOVE_TO_PROJECT),
