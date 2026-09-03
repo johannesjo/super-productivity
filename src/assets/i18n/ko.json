@@ -111,11 +111,11 @@
       "WIDGET_TASKS_UPDATED": "위젯에서 작업 {{count}}개를 업데이트했습니다."
     },
     "ATTACHMENT": {
-      "LOCAL_FILE_UNAVAILABLE": "이 첨부 파일은 추가된 기기에서만 사용할 수 있습니다.",
-      "COMMAND_UNSUPPORTED": "명령 첨부 파일은 더 이상 명령을 실행할 수 없습니다.",
+      "LOCAL_FILE_UNAVAILABLE": "이 첨부파일은 추가된 기기에서만 사용할 수 있습니다.",
+      "COMMAND_UNSUPPORTED": "명령 첨부파일은 더 이상 명령을 실행할 수 없습니다.",
       "DIALOG_EDIT": {
-        "ADD_ATTACHMENT": "첨부 파일 추가",
-        "EDIT_ATTACHMENT": "첨부 파일 편집",
+        "ADD_ATTACHMENT": "첨부파일 추가",
+        "EDIT_ATTACHMENT": "첨부파일 편집",
         "LABELS": {
           "FILE": "파일 경로",
           "IMG": "이미지",
@@ -387,7 +387,7 @@
       "SESSION_COMPLETED_NOTIFICATION_BODY": "{{duration}} 동안 작업했습니다.",
       "SHORT_BREAK": "짧은 휴식",
       "SHORT_BREAK_TITLE": "짧은 휴식",
-      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "작업 노트 및 첨부 파일 표시/숨기기",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "작업 노트 및 첨부파일 표시/숨기기",
       "SKIP_BREAK": "휴식 건너뛰기",
       "START_FOCUS_SESSION": "포커스 세션 시작",
       "START_NEXT_FOCUS_SESSION": "다음 포커스 세션 시작",
@@ -491,7 +491,7 @@
       "ISSUE_CONTENT": {
         "ASSIGNEE": "담당자",
         "AT": "에",
-        "ATTACHMENTS": "첨부 파일",
+        "ATTACHMENTS": "첨부파일",
         "AUTHOR": "저자",
         "CATEGORY": "범주",
         "COMPONENTS": "구성 요소",
@@ -671,7 +671,7 @@
       "ISSUE_CONTENT": {
         "ASSIGNEE": "담당자",
         "AT": "...에서",
-        "ATTACHMENTS": "첨부 파일",
+        "ATTACHMENTS": "첨부파일",
         "CHANGED": "변경된",
         "COMMENTS": "코멘트",
         "COMPONENTS": "구성 요소",
@@ -1822,7 +1822,7 @@
         "TOOLTIP_NOTE": "노트(Ctrl+2)"
       },
       "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "첨부 파일 추가",
+        "ADD_ATTACHMENT": "첨부파일 추가",
         "ADD_CHECKLIST_ITEM": "체크리스트 항목 추가",
         "CHECKLIST_ACTIONS": "체크리스트 동작",
         "CHECK_ALL": "모두 체크",
@@ -1833,7 +1833,7 @@
         "PASTE_IMAGE_HINT_MAC": "Cmd+V로 이미지 붙여넣기",
         "PASTED_IMAGE_TITLE": "붙여넣은 이미지",
         "ADD_SUB_TASK": "하위 작업 추가",
-        "ATTACHMENTS": "첨부 파일 {{nr}}",
+        "ATTACHMENTS": "첨부파일 {{nr}}",
         "CHECKLIST": "체크리스트",
         "COMPLETED_ON": "완료 날짜",
         "CREATED_ON": "생성 날짜",
@@ -1843,14 +1843,14 @@
         "DUE": "예정된 날짜",
         "FROM_PARENT": "(상위에서)",
         "ISSUE": "이슈 링크",
-        "LOCAL_ATTACHMENTS": "로컬 첨부 파일",
+        "LOCAL_ATTACHMENTS": "로컬 첨부파일",
         "NOTES": "노트",
-        "PARENT": "부모의",
+        "PARENT": "부모",
         "REMINDER": "알림",
         "REPEAT": "반복",
         "SCHEDULE_TASK": "작업 예약",
         "SUB_TASKS": "하위 작업 ({{nr}})",
-        "TIME": "시각",
+        "TIME": "작업 시간",
         "TITLE_PLACEHOLDER": "제목 입력"
       },
       "B": {
@@ -1893,7 +1893,7 @@
         "SHOW_HIDDEN_DONE_SUB_TASKS": "+ 완료된 하위 작업 {{nr}}개",
         "SHOW_HIDDEN_SUB_TASKS": "+ 하위 작업 {{nr}}개",
         "TIME_CONFLICT": "일정이 다른 작업과 겹칩니다",
-        "TOGGLE_ATTACHMENTS": "첨부 파일 표시 / 숨기기",
+        "TOGGLE_ATTACHMENTS": "첨부파일 표시 / 숨기기",
         "TOGGLE_DETAIL_PANEL": "추가 정보 표시 / 숨기기",
         "TOGGLE_DONE": "완료 / 실행 취소로 표시",
         "TOGGLE_SUB_TASK_VISIBILITY": "하위 작업 가시성 토글",
@@ -2753,9 +2753,9 @@
       "IS_ENABLE_PROJECT": "프로젝트 단축어 사용(+<Project name>)",
       "IS_ENABLE_TAG": "태그 단축어 사용(#<Tag>)",
       "TITLE": "단축어",
-      "URL_BEHAVIOR_EXTRACT": "URL을 첨부 파일로 추출",
+      "URL_BEHAVIOR_EXTRACT": "URL을 첨부파일로 추출",
       "URL_BEHAVIOR_KEEP": "작업 제목에 URL 유지",
-      "URL_BEHAVIOR_KEEP_AND_ATTACH": "작업 제목에 URL 유지 및 첨부 파일에 추가",
+      "URL_BEHAVIOR_KEEP_AND_ATTACH": "작업 제목에 URL 유지 및 첨부파일에 추가",
       "URL_BEHAVIOR_LABEL": "작업 추가 시 URL 동작"
     },
     "SOUND": {
