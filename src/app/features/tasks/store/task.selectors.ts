@@ -22,6 +22,7 @@ import {
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { isTodayWithOffset } from '../../../util/is-today.util';
 import { getTimeConflictTaskIds } from '../util/get-time-conflict-task-ids';
+import { getEndOfTodayTime, isInLaterTodayWindow } from '../later-today-window.util';
 import {
   getLogicalTodayStartMs,
   isTaskOverdueByThreshold,
@@ -596,22 +597,36 @@ export const selectCurrentTaskParentOrCurrent = createSelector(
 // DECISION runs on the snapshot only (skipped on a timeSpent tick) and emits an
 // ordered {id, subTaskIds} structure; the public selector re-maps it to live
 // TaskWithSubTasks. NOTE: like the original this reads Date.now() for the
-// "later today" cutoff; the snapshot boundary means `now` only advances when a
-// scheduling field (or todayStr/offset) changes rather than on every store tick.
+// "later today" cutoff; the snapshot boundary means `now` only advances when an
+// input changes (a scheduling field, the tracked task, todayStr/offset) rather
+// than on every store tick. A growing `now` can only ever REMOVE entries, so
+// the result stays a SUPERSET of the truth and consumers re-apply the cutoff
+// against the current clock (see work-view's laterTodayTasks).
 export const selectLaterTodayStructure = createSelector(
   selectTaskSchedulingSnapshot,
   selectTodayStr,
   selectStartOfNextDayDiffMs,
-  (snapshot, todayStr, startOfNextDayDiffMs): SnapshotStructureEntry[] => {
+  selectCurrentTaskId,
+  (snapshot, todayStr, startOfNextDayDiffMs, currentTaskId): SnapshotStructureEntry[] => {
     if (!todayStr) {
       return [];
     }
 
     const now = Date.now();
-    // End of "today" with offset: last ms of todayStr + offset
-    const todayDate = dateStrToUtcDate(todayStr);
-    todayDate.setHours(23, 59, 59, 999);
-    const todayEndTime = todayDate.getTime() + startOfNextDayDiffMs;
+    const todayEndTime = getEndOfTodayTime(todayStr, startOfNextDayDiffMs);
+
+    // The tracked task is current, not upcoming: once you work on an
+    // appointment it belongs in the main list, even if it starts later. A
+    // tracked SUBTASK takes its parent out too, since the parent is the entry
+    // this panel would render.
+    const trackedIds = new Set<string>();
+    if (currentTaskId) {
+      trackedIds.add(currentTaskId);
+      const parentId = snapshot.find((s) => s.id === currentTaskId)?.parentId;
+      if (parentId) {
+        trackedIds.add(parentId);
+      }
+    }
 
     // Helper to check if task is "in TODAY" via virtual tag pattern
     // Priority: dueWithTime takes precedence over dueDay (mutual exclusivity)
@@ -624,7 +639,7 @@ export const selectLaterTodayStructure = createSelector(
 
     // Helper to check if task is scheduled for later today
     const isScheduledLaterToday = (snap: SchedulingSnapshot): boolean =>
-      !!snap.dueWithTime && snap.dueWithTime >= now && snap.dueWithTime <= todayEndTime;
+      isInLaterTodayWindow(snap.dueWithTime, now, todayEndTime);
 
     // PERF: Single pass to categorize all tasks (was 2 passes before)
     const scheduledParentTasks: SchedulingSnapshot[] = [];
@@ -635,7 +650,7 @@ export const selectLaterTodayStructure = createSelector(
     for (const snap of snapshot) {
       dueWithTimeById.set(snap.id, snap.dueWithTime);
 
-      if (snap.isDone || !isInToday(snap)) continue;
+      if (snap.isDone || trackedIds.has(snap.id) || !isInToday(snap)) continue;
 
       if (snap.parentId) {
         // Subtask - only care about scheduled ones

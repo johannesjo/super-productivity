@@ -40,6 +40,8 @@ import {
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { getDbDateStr } from '../../util/get-db-date-str';
+import { getEndOfTodayTime } from '../tasks/later-today-window.util';
 
 /** Shape the customizer emits, narrowed to what these specs vary. */
 type CustomizedStub = {
@@ -188,7 +190,9 @@ const overrideDefaultSelectors = (store: MockStore): void => {
   store.overrideSelector(selectLaterTodayTasksWithSubTasks, []);
   store.overrideSelector(selectTaskRepeatCfgsByProjectId, []);
   store.overrideSelector(selectTaskRepeatCfgsByTagId, []);
-  store.overrideSelector(selectTodayStr, '2026-06-23');
+  // real today: the component re-applies the later-today cutoff against the
+  // live clock, so a frozen day would put every fixture in the past
+  store.overrideSelector(selectTodayStr, getDbDateStr());
   store.overrideSelector(selectStartOfNextDayDiffMs, 0);
 };
 
@@ -532,7 +536,15 @@ describe('WorkViewComponent', () => {
         store.overrideSelector(selectOverdueTasksWithSubTasks, opts.overdueTasks);
       }
       if (opts.laterTodayTasks) {
-        store.overrideSelector(selectLaterTodayTasksWithSubTasks, opts.laterTodayTasks);
+        // the component drops entries whose start time has passed, so pin the
+        // fixtures to the very end of today
+        store.overrideSelector(
+          selectLaterTodayTasksWithSubTasks,
+          opts.laterTodayTasks.map((task) => ({
+            ...task,
+            dueWithTime: getEndOfTodayTime(getDbDateStr(), 0),
+          })),
+        );
       }
 
       fixture = TestBed.createComponent(WorkViewComponent);

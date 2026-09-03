@@ -1,7 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IS_ELECTRON, TRACKING_INTERVAL } from '../../app.constants';
-import { EMPTY, fromEvent, interval, merge, Observable, Subject } from 'rxjs';
+import {
+  defer,
+  EMPTY,
+  fromEvent,
+  interval,
+  merge,
+  Observable,
+  Subject,
+  timer,
+} from 'rxjs';
 import { ipcResume$ } from '../ipc-events';
 import {
   debounceTime,
@@ -19,6 +28,8 @@ import { DateService } from 'src/app/core/date/date.service';
 import { Log } from '../log';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
+
+const MINUTE_MS = 60 * 1000;
 
 /**
  * Builds the shared 1s tick source. When a background-state stream is given
@@ -69,6 +80,19 @@ export class GlobalTrackingIntervalService {
 
   todayDateStr$: Observable<string> = this._createTodayDateStrObservable();
 
+  /**
+   * Coarse tick aligned to the wall-clock minute, for consumers whose result
+   * depends on the clock rather than on state — e.g. "Later Today", where an
+   * appointment stops being upcoming the moment its start time passes and no
+   * action is dispatched to signal it. Focus/visibility/resume are merged in
+   * for the same reason as in todayDateStr$: a throttled or suspended timer
+   * must not leave such a window stale (#5464).
+   *
+   * The emitted value is the timestamp of the emission and may be replayed to
+   * late subscribers, so read the clock yourself instead of trusting it.
+   */
+  minuteTick$: Observable<number> = this._createMinuteTickObservable();
+
   // Shared signal to avoid creating 200+ subscriptions in task components
   todayDateStr = toSignal(this.todayDateStr$, {
     initialValue: this._dateService.todayStr(),
@@ -113,6 +137,24 @@ export class GlobalTrackingIntervalService {
     };
     this._wakeUpTick$.next(tick);
     return tick;
+  }
+
+  private _createMinuteTickObservable(): Observable<number> {
+    return defer(() =>
+      merge(
+        // align to the next full minute so the tick lands right when a start
+        // time passes instead of up to a minute later
+        timer(MINUTE_MS - (Date.now() % MINUTE_MS), MINUTE_MS),
+        typeof window !== 'undefined' ? fromEvent(window, 'focus') : EMPTY,
+        typeof document !== 'undefined'
+          ? fromEvent(document, 'visibilitychange').pipe(filter(() => !document.hidden))
+          : EMPTY,
+        IS_ELECTRON ? ipcResume$ : EMPTY,
+      ).pipe(startWith(0)),
+    ).pipe(
+      map(() => Date.now()),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
   }
 
   private _createTodayDateStrObservable(): Observable<string> {
