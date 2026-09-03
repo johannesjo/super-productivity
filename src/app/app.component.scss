@@ -218,7 +218,24 @@ mat-sidenav {
 }
 
 .bg-image {
-  position: absolute;
+  // `fixed`, not `absolute`: `body` is itself `position: absolute` (page.scss),
+  // so an absolutely-positioned `.bg-image` is sized/positioned relative to
+  // it. `.is-blurred` below scales this element -- that doesn't change its
+  // layout size, but it does expand its *painted* bounds, and a transformed
+  // descendant's painted bounds count toward its containing block's
+  // scrollable-overflow region. `.app-container` (the next element down) is
+  // `overflow: visible`, so that overflow isn't clipped there and used to
+  // bubble up to `body` (`overflow: hidden`, but still scrollable) -- giving
+  // `body` real, permanent scrollable overflow for as long as a blurred
+  // background is active. Any scrollIntoView() elsewhere whose ancestor walk
+  // reached `body` could then nudge body.scrollLeft/scrollTop, and since that
+  // overflow is a static style rather than an animation, nothing ever
+  // resets it -- the whole app shell stayed visibly shifted until restart.
+  // `position: fixed` anchors this to the viewport instead, which is excluded
+  // from any ancestor's scrollable-overflow accounting (no ancestor between
+  // here and the viewport sets transform/filter/contain, which would
+  // otherwise create a new containing block for fixed descendants).
+  position: fixed;
   inset: 0;
   pointer-events: none;
   width: 100%;
