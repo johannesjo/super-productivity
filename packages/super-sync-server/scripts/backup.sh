@@ -13,8 +13,8 @@
 # Options:
 #   --upload    Upload to remote storage via rclone
 #
-# Setup for cron (daily at 3 AM):
-#   (crontab -l; echo "0 3 * * * /opt/supersync/packages/super-sync-server/scripts/backup.sh") | crontab -
+# Setup for cron: see docs/backup-and-recovery.md (use flock with a root-owned lock
+# path like /run/supersync-backup.lock so a slow dump cannot overlap the next run).
 #
 # Rclone setup for offsite backup:
 #   1. Install: curl https://rclone.org/install.sh | sudo bash
@@ -67,6 +67,12 @@ mkdir -p "$BACKUP_DIR"
 # Fixes a directory created before the umask above.
 chmod 700 "$BACKUP_DIR"
 
+# The EXIT trap below cannot fire on SIGKILL, OOM or a host reboot, and the retention
+# find only matches final names — sweep dead runs' partials here instead. -mmin checks
+# mtime and gzip touches the .tmp on every write, so a live dump — however slow — is
+# never eligible; only a partial nothing has written to for 6h is.
+find "$BACKUP_DIR" -name "supersync_*.sql.gz.tmp" -mmin +360 -delete
+
 # Generate filename with timestamp
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/supersync_$DATE.sql.gz"
@@ -83,19 +89,11 @@ echo "    Date: $DATE"
 echo "    Output: $BACKUP_FILE"
 echo ""
 
-# Step 1: Create full PostgreSQL dump
-echo "==> Creating full database dump..."
-run_pg_dump | gzip > "$BACKUP_FILE.tmp"
-mv "$BACKUP_FILE.tmp" "$BACKUP_FILE"
-
-# Get file size
-SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
-echo "    Full backup size: $SIZE"
-
-# Step 1b: Create minimal accounts-only dump (users + passkeys)
+# Step 1: Create minimal accounts-only dump (users + passkeys)
 # This is tiny and sufficient for disaster recovery when clients still have data.
 # Recovery: restore accounts, wipe sync data, let clients re-upload.
-echo ""
+# It runs BEFORE the 1-2 h full dump so a crash inside that window (#9695 hit the
+# dump window twice in five occurrences) cannot take both artifacts.
 echo "==> Creating accounts-only dump (users + passkeys)..."
 run_pg_dump --table=users --table=passkeys | gzip > "$ACCOUNTS_FILE.tmp"
 mv "$ACCOUNTS_FILE.tmp" "$ACCOUNTS_FILE"
@@ -103,7 +101,16 @@ mv "$ACCOUNTS_FILE.tmp" "$ACCOUNTS_FILE"
 ACCOUNTS_SIZE=$(du -h "$ACCOUNTS_FILE" | cut -f1)
 echo "    Accounts backup size: $ACCOUNTS_SIZE"
 
-# Step 2: Upload to remote (if enabled)
+# Step 2: Create full PostgreSQL dump
+echo ""
+echo "==> Creating full database dump..."
+run_pg_dump | gzip > "$BACKUP_FILE.tmp"
+mv "$BACKUP_FILE.tmp" "$BACKUP_FILE"
+
+SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+echo "    Full backup size: $SIZE"
+
+# Step 3: Upload to remote (if enabled)
 if [ "$UPLOAD" = true ]; then
     if [ -z "$RCLONE_REMOTE" ]; then
         echo ""
@@ -122,7 +129,7 @@ if [ "$UPLOAD" = true ]; then
     fi
 fi
 
-# Step 3: Clean up old backups
+# Step 4: Clean up old backups
 echo ""
 echo "==> Cleaning up backups older than $RETENTION_DAYS days..."
 DELETED=$(find "$BACKUP_DIR" \( -name "supersync_*.sql.gz" -o -name "supersync_accounts_*.sql.gz" \) -mtime +"$RETENTION_DAYS" -delete -print | wc -l)
