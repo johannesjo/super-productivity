@@ -44,7 +44,7 @@ import {
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
-import { TaskFocusService } from '../features/tasks/task-focus.service';
+import { getDomFocusedTaskId } from '../features/tasks/get-dom-focused-task-id';
 import { addSubTask } from '../features/tasks/store/task.actions';
 import { selectTaskFeatureState } from '../features/tasks/store/task.selectors';
 import { parseTimeSpentChanges } from '../features/tasks/short-syntax';
@@ -148,7 +148,6 @@ export class PluginBridgeService implements OnDestroy {
   private _store = inject(Store);
   private _pluginHooksService = inject(PluginHooksService);
   private _taskService = inject(TaskService);
-  private _taskFocusService = inject(TaskFocusService);
   private _workContextService = inject(WorkContextService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
@@ -1217,7 +1216,10 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   async getFocusedTask(): Promise<TaskCopy | null> {
-    const focusedTaskId = this._taskFocusService.focusedTaskId();
+    // The DOM decides, not the tracked signal: plugins act on this task (a
+    // shortcut-triggered automation rule may delete or re-tag it), so a stale
+    // id left behind by a view change must not resolve to a live task (#8851).
+    const focusedTaskId = getDomFocusedTaskId();
     if (!focusedTaskId) {
       return null;
     }

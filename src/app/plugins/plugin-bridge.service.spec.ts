@@ -430,6 +430,21 @@ describe('PluginBridgeService - iframe task selection methods', () => {
 
   let service: PluginBridgeService;
   let taskService: jasmine.SpyObj<TaskService>;
+  let taskEl: HTMLElement | null = null;
+
+  // getFocusedTask() reads the DOM, so a focused <task> has to actually exist.
+  const focusTaskEl = (taskId: string): void => {
+    taskEl = document.createElement('task');
+    taskEl.setAttribute('data-task-id', taskId);
+    taskEl.tabIndex = 0;
+    document.body.appendChild(taskEl);
+    taskEl.focus();
+  };
+
+  afterEach(() => {
+    taskEl?.remove();
+    taskEl = null;
+  });
 
   beforeEach(() => {
     taskService = jasmine.createSpyObj<TaskService>('TaskService', ['getByIdOnce$'], {
@@ -474,6 +489,7 @@ describe('PluginBridgeService - iframe task selection methods', () => {
   });
 
   it('exposes selected and focused task readers on iframe bound methods', async () => {
+    focusTaskEl(focusedTask.id);
     const bound = service.createBoundMethods('iframe-plugin');
 
     const selectedResult = await bound.getSelectedTask();
@@ -487,6 +503,7 @@ describe('PluginBridgeService - iframe task selection methods', () => {
   });
 
   it('returns null for stale focused task ids', async () => {
+    focusTaskEl(focusedTask.id);
     taskService.getByIdOnce$.and.returnValue(
       of(undefined as unknown as TaskWithSubTasks),
     );
@@ -494,6 +511,24 @@ describe('PluginBridgeService - iframe task selection methods', () => {
 
     await expectAsync(bound.getFocusedTask()).toBeResolvedTo(null);
     expect(taskService.getByIdOnce$).toHaveBeenCalledOnceWith(focusedTask.id);
+  });
+
+  // A view change can leave the tracked id pointing at a task that no longer
+  // holds focus; acting on it would mutate the wrong task (#8851).
+  it('returns null when no task row is focused, even with a tracked id', async () => {
+    const bound = service.createBoundMethods('iframe-plugin');
+
+    await expectAsync(bound.getFocusedTask()).toBeResolvedTo(null);
+    expect(taskService.getByIdOnce$).not.toHaveBeenCalled();
+  });
+
+  it('prefers the task the DOM says is focused over the tracked id', async () => {
+    focusTaskEl('other-task');
+    const bound = service.createBoundMethods('iframe-plugin');
+
+    await bound.getFocusedTask();
+
+    expect(taskService.getByIdOnce$).toHaveBeenCalledOnceWith('other-task');
   });
 });
 

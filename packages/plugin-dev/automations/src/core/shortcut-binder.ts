@@ -49,15 +49,15 @@ export class ShortcutBinder {
   }
 
   private unregister(ruleId: string): void {
-    this.registeredLabels.delete(ruleId);
     // Older hosts have no way to drop a single shortcut; there the entry just
     // stays around (inert, since the rule is gone) until the next app start.
     if (typeof this.plugin.unregisterShortcut !== 'function') {
       this.plugin.log.warn(
         '[Automation] Host cannot unregister shortcuts; stale entry remains until restart.',
       );
-      return;
+    } else {
+      this.plugin.unregisterShortcut(ruleId);
     }
-    this.plugin.unregisterShortcut(ruleId);
+    this.registeredLabels.delete(ruleId);
   }
 }

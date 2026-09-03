@@ -392,6 +392,63 @@ describe('AutomationManager', () => {
       );
     });
 
+    it('should not rate-limit shortcut rules, so rapid presses raise no dialog', async () => {
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([
+        {
+          id: 'r1',
+          name: 'Tag focused task',
+          trigger: { type: 'shortcut' },
+          conditions: [],
+          actions: [],
+          isEnabled: true,
+        },
+      ]);
+      mockRateLimiter.check.mockReturnValue(false);
+
+      await manager.runShortcutRule('r1');
+
+      expect(mockRateLimiter.check).not.toHaveBeenCalled();
+      expect(mockPlugin.openDialog).not.toHaveBeenCalled();
+      expect(mockActionExecutor.executeAll).toHaveBeenCalled();
+    });
+
+    it('should do nothing when the conditions of a shortcut rule do not match', async () => {
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([
+        {
+          id: 'r1',
+          name: 'Tag focused task',
+          trigger: { type: 'shortcut' },
+          conditions: [{ type: 'hasTag', value: 'urgent' }],
+          actions: [],
+          isEnabled: true,
+        },
+      ]);
+      mockConditionEvaluator.allConditionsMatch.mockResolvedValue(false);
+
+      await manager.runShortcutRule('r1');
+
+      expect(mockActionExecutor.executeAll).not.toHaveBeenCalled();
+    });
+
+    it('should release the shortcut of a disabled shortcut rule', async () => {
+      const rule = {
+        id: 'r1',
+        name: 'Tag focused task',
+        trigger: { type: 'shortcut' },
+        conditions: [],
+        actions: [],
+        isEnabled: true,
+      };
+      mockRuleRegistry.getRules.mockResolvedValue([rule]);
+      await manager.saveRule(rule);
+
+      mockRuleRegistry.getRules.mockResolvedValue([{ ...rule, isEnabled: false }]);
+      await manager.toggleRuleStatus('r1', false);
+
+      expect(mockRuleRegistry.toggleRuleStatus).toHaveBeenCalledWith('r1', false);
+      expect(mockPlugin.unregisterShortcut).toHaveBeenCalledWith('r1');
+    });
+
     it('should release the shortcut of a deleted shortcut rule', async () => {
       const rule = {
         id: 'r1',

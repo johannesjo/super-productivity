@@ -248,8 +248,10 @@ export class AutomationManager {
       return;
     }
 
-    // Check rate limit
-    if (!this.rateLimiter.check(rule.id)) {
+    // Check rate limit. Shortcut rules are exempt: the limiter exists to break
+    // automation loops, but a shortcut run comes from a keypress and cannot feed
+    // itself, so rapid presses must not raise the "high activity" dialog.
+    if (event.type !== 'shortcut' && !this.rateLimiter.check(rule.id)) {
       this.plugin.log.warn(`[Automation] Rate limit exceeded for rule: ${rule.name}`);
 
       if (!this.pendingDialogs.has(rule.id)) {
