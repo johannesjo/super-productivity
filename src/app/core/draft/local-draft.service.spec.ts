@@ -293,6 +293,49 @@ describe('LocalDraftService', () => {
           .toBe(storedDraft(now));
       });
     });
+
+    // The migration's only error path: if the copy to the new key fails there
+    // is nothing to fall back on, so it must leave the legacy draft AND the
+    // metadata naming the active profile in place for a later attempt.
+    describe('when the migrating write fails', () => {
+      it('keeps the legacy draft and the metadata needed to retry', () => {
+        const now = Date.now();
+        localStorage.setItem(
+          'sp_profile_meta',
+          JSON.stringify({ activeProfileId: 'p1' }),
+        );
+        localStorage.setItem('sp_user_profiles_enabled', 'true');
+        localStorage.setItem(legacyKeyFor('p1', 'n1'), storedDraft(now));
+        spyOn(Storage.prototype, 'setItem').and.throwError('QuotaExceededError');
+
+        expect(() => service.pruneOnStart(now)).not.toThrow();
+
+        expect(localStorage.getItem(legacyKeyFor('p1', 'n1'))).toBe(storedDraft(now));
+        expect(localStorage.getItem('sp_profile_meta')).not.toBeNull();
+      });
+
+      it('recovers the draft on the next start once the write succeeds', () => {
+        const now = Date.now();
+        localStorage.setItem(
+          'sp_profile_meta',
+          JSON.stringify({ activeProfileId: 'p1' }),
+        );
+        localStorage.setItem(legacyKeyFor('p1', 'n1'), storedDraft(now));
+
+        const setItem = spyOn(Storage.prototype, 'setItem').and.throwError(
+          'QuotaExceededError',
+        );
+        service.pruneOnStart(now);
+        expect(localStorage.getItem(keyFor('n1'))).toBeNull();
+
+        setItem.and.callThrough();
+        service.pruneOnStart(now);
+
+        expect(localStorage.getItem(keyFor('n1'))).toBe(storedDraft(now));
+        expect(localStorage.getItem(legacyKeyFor('p1', 'n1'))).toBeNull();
+        expect(localStorage.getItem('sp_profile_meta')).toBeNull();
+      });
+    });
   });
 });
 
