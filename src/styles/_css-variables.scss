@@ -760,10 +760,7 @@ body.isDarkTheme {
 }
 
 // -----------------------------
-// State-token demo migrations (this PR — scope per plan §3):
-//   * src/app/features/user-profile/dialog-user-profile-management — `:hover`
-//     overlay + `.active-profile` selected lift now consume `--state-hover` /
-//     `--state-selected`.
+// State-token demo migration (this PR — scope per plan §3):
 //   * src/app/imex/sync/dialog-restore-point — `:hover` overlay + `.selected`
 //     lift now consume `--state-hover` / `--state-selected`.
 // Bulk migration of remaining ~34 ad-hoc rgba state-overlay callsites is a

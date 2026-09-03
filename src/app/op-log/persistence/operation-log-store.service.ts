@@ -24,7 +24,6 @@ import {
   RAW_REBUILD_RECOVERY_META_KEY,
   OPS_INDEXES,
   ArchiveStoreEntry,
-  ProfileDataStoreEntry,
 } from './db-keys.const';
 import {
   buildFullStateOpsMeta,
@@ -308,14 +307,6 @@ interface OpLogDB extends DBSchema {
   [STORE_NAMES.ARCHIVE_OLD]: {
     key: string; // SINGLETON_KEY ('current')
     value: ArchiveStoreEntry;
-  };
-  /**
-   * Stores profile data (CompleteBackup) for user profile switching.
-   * Moved from localStorage to avoid 5-10 MB quota limits.
-   */
-  [STORE_NAMES.PROFILE_DATA]: {
-    key: string; // profile ID
-    value: ProfileDataStoreEntry;
   };
   /**
    * Stores the sync clientId (device identity). Consolidated from legacy 'pf'
@@ -2354,7 +2345,6 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       STORE_NAMES.VECTOR_CLOCK,
       STORE_NAMES.ARCHIVE_YOUNG,
       STORE_NAMES.ARCHIVE_OLD,
-      STORE_NAMES.PROFILE_DATA,
       STORE_NAMES.CLIENT_ID,
       STORE_NAMES.META,
     ];
@@ -3228,47 +3218,6 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       }
       throw e;
     }
-  }
-  // ============================================================
-  // Profile Data Storage
-  // ============================================================
-
-  /**
-   * Saves profile data (CompleteBackup) for a specific profile.
-   */
-  async saveProfileData(
-    profileId: string,
-    data: ProfileDataStoreEntry['data'],
-  ): Promise<void> {
-    await this._ensureInit();
-    await this._adapter.put(STORE_NAMES.PROFILE_DATA, {
-      id: profileId,
-      data,
-      lastModified: Date.now(),
-    });
-  }
-
-  /**
-   * Loads profile data (CompleteBackup) for a specific profile.
-   * Returns null if no data exists for the given profile ID.
-   */
-  async loadProfileData(
-    profileId: string,
-  ): Promise<ProfileDataStoreEntry['data'] | null> {
-    await this._ensureInit();
-    const entry = await this._adapter.get<ProfileDataStoreEntry>(
-      STORE_NAMES.PROFILE_DATA,
-      profileId,
-    );
-    return entry?.data ?? null;
-  }
-
-  /**
-   * Deletes profile data for a specific profile.
-   */
-  async deleteProfileData(profileId: string): Promise<void> {
-    await this._ensureInit();
-    await this._adapter.delete(STORE_NAMES.PROFILE_DATA, profileId);
   }
 }
 

@@ -29,7 +29,6 @@ import { TrackingPresenceService } from '../../features/tracking-presence/tracki
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
-import { UserProfileService } from '../../features/user-profile/user-profile.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { SyncStatus } from '../../op-log/sync-exports';
 import {
@@ -520,7 +519,6 @@ describe('MainHeaderComponent action placement', () => {
         },
         { provide: MetricService, useValue: { getFocusSummaryForDay: () => null } },
         { provide: DateService, useValue: { todayStr: () => '2026-06-09' } },
-        { provide: UserProfileService, useValue: { isInitialized: () => false } },
         { provide: ConflictJournalService, useValue: { unreviewedCount: signal(0) } },
         {
           provide: FocusModeService,

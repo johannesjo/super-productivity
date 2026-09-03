@@ -47,11 +47,9 @@ import { RemoteTrackingPillComponent } from '../../features/tracking-presence/re
 import { TrackingPresenceService } from '../../features/tracking-presence/tracking-presence.service';
 import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { UserProfileButtonComponent } from '../../features/user-profile/user-profile-button/user-profile-button.component';
 import { FocusButtonComponent } from './focus-button/focus-button.component';
 import { EmlDropDirective } from '../../core/drop-paste-input/eml-drop.directive';
 import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
-import { UserProfileService } from '../../features/user-profile/user-profile.service';
 
 /** One `DOM_DELTA_LINE` notch, in CSS pixels. Matches the row's icon metrics. */
 const WHEEL_LINE_HEIGHT_PX = 16;
@@ -87,7 +85,6 @@ const ACTION_ROW_REVEAL_PIN_MS = 400;
     TrackedTaskPillComponent,
     RemoteTrackingPillComponent,
     DesktopPanelButtonsComponent,
-    UserProfileButtonComponent,
     FocusButtonComponent,
   ],
 })
@@ -108,7 +105,6 @@ export class MainHeaderComponent implements OnDestroy {
   private readonly _configService = inject(GlobalConfigService);
   private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _conflictJournal = inject(ConflictJournalService);
-  private readonly _userProfileService = inject(UserProfileService);
 
   readonly isDataLoaded = toSignal(this._dataInitStateService.isAllDataLoadedInitially$, {
     initialValue: false,
@@ -234,12 +230,6 @@ export class MainHeaderComponent implements OnDestroy {
   readonly isSyncIconEnabled = computed(
     () => this.globalConfigService.appFeatures().isSyncIconEnabled,
   );
-  readonly isUserProfilesEnabled = computed(
-    () =>
-      this.globalConfigService.appFeatures().isEnableUserProfiles &&
-      this._userProfileService.isInitialized(),
-  );
-
   /**
    * Add-task, the desktop panel buttons and the plugin side-panel buttons are
    * absent below 600px rather than squeezed: the bottom nav owns all three

@@ -2383,7 +2383,7 @@ export class OperationLogSyncService {
     // Same reasoning for note drafts: this "Use Server Data" path replays the
     // complete server history over live state, replacing every note, and it
     // does NOT funnel through importCompleteBackup.
-    this.localDraftService.deleteDraftsForActiveProfile();
+    this.localDraftService.deleteAllDrafts();
     return hasDurableRecovery;
   }
 

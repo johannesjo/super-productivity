@@ -3,7 +3,7 @@
 // relied on the now-removed `import { IpcRendererEvent } from 'electron'` here to
 // transitively supply them. Several frontend/shared modules still probe Node globals
 // guarded at runtime (get-dist-channel's `process`/`NodeJS`,
-// create-task-placeholder's `NodeJS.Timeout`, user-profile's `require`),
+// create-task-placeholder's `NodeJS.Timeout`),
 // so re-expose them explicitly instead of by accident.
 /// <reference types="node" />
 import {
