@@ -429,13 +429,14 @@ export class ScheduleComponent {
     // But it also walks every scrollable ancestor to bring the target into
     // view, and a transformed element's *painted* bounds count toward its
     // ancestors' scrollable-overflow region -- so while warpRoute is still
-    // scaling this component's host, .route-wrapper (and potentially further
-    // out) briefly reads as having real overflow to scroll, gets nudged to a
-    // transient scrollLeft/scrollTop to satisfy the 'start' alignment, and
-    // only settles back to 0 once the transform reaches scale(1). For the
-    // ~duration of the enter animation this visibly shifts the app shell
-    // (magic-side-nav included) instead of just the schedule view.
-    // Wait out any animation still running on this host before scrolling.
+    // scaling this component's host, .route-wrapper briefly reads as having
+    // real overflow to scroll, gets nudged to a transient scrollLeft/scrollTop
+    // to satisfy the 'start' alignment, and only settles back to 0 once the
+    // transform reaches scale(1). .route-wrapper's own overflow: hidden stops
+    // that nudge from reaching .main-content or anything further out (the
+    // nav, the header), but for the ~duration of the enter animation it
+    // visibly shifts the routed view itself. Wait out any animation still
+    // running on this host before scrolling.
     const running = this._elRef.nativeElement
       .getAnimations()
       .filter((a) => a.playState === 'running');

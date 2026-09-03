@@ -1380,7 +1380,11 @@ describe('ScheduleComponent', () => {
       expect(scrollIntoViewSpy).not.toHaveBeenCalled();
 
       await anim.finished;
-      await Promise.resolve(); // flush the .then(scroll) microtask
+      // Promise.all([...catch]).then(scroll) is more than one microtask hop
+      // past `finished` resolving, and the hop count isn't a stable contract
+      // to pin a single `await Promise.resolve()` against. A macrotask
+      // flushes the whole microtask queue first regardless of hop count.
+      await new Promise((r) => setTimeout(r));
       expect(scrollIntoViewSpy).toHaveBeenCalled();
     });
   });
