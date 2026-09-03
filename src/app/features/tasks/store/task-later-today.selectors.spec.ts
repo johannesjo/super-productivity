@@ -905,6 +905,25 @@ describe('selectLaterTodayTasksWithSubTasks', () => {
       expect(runLaterToday([parent, sub], todayStr, 0, 'SUB')).toEqual([]);
     });
 
+    it('should exclude a scheduled subtask when its parent is tracked', () => {
+      const parent = createMockTask({
+        id: 'PARENT',
+        title: 'Parent',
+        dueDay: todayStr,
+        subTaskIds: ['SUB'],
+      });
+      const sub = createMockTask({
+        id: 'SUB',
+        title: 'Sub at 2 PM',
+        parentId: 'PARENT',
+        dueWithTime: todayAt(14, 0),
+      });
+
+      // Without the parent, the subtask would be promoted to a top-level entry
+      // with no parent context while the parent sits in the main list.
+      expect(runLaterToday([parent, sub], todayStr, 0, 'PARENT')).toEqual([]);
+    });
+
     it('should keep everything else when nothing is tracked', () => {
       const appointment = createMockTask({
         id: 'APPOINTMENT',

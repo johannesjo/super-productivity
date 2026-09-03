@@ -616,13 +616,20 @@ export const selectLaterTodayStructure = createSelector(
     const todayEndTime = getEndOfTodayTime(todayStr, startOfNextDayDiffMs);
 
     // The tracked task is current, not upcoming: once you work on an
-    // appointment it belongs in the main list, even if it starts later. A
-    // tracked SUBTASK takes its parent out too, since the parent is the entry
-    // this panel would render.
+    // appointment it belongs in the main list, even if it starts later. The
+    // whole subtree goes with it — a tracked SUBTASK takes its parent out,
+    // since the parent is the entry this panel would render, and a tracked
+    // PARENT takes its subtasks out, or a scheduled one would be left behind
+    // as a top-level entry with no parent context.
     const trackedParentId =
       currentTaskId && snapshot.find((s) => s.id === currentTaskId)?.parentId;
-    const isTracked = (id: string): boolean =>
-      id === currentTaskId || id === trackedParentId;
+    const isTracked = (snap: SchedulingSnapshot): boolean =>
+      // guard: with nothing tracked both ids are null, which would match every
+      // top-level task on the parentId comparison
+      !!currentTaskId &&
+      (snap.id === currentTaskId ||
+        snap.id === trackedParentId ||
+        snap.parentId === currentTaskId);
 
     // Helper to check if task is "in TODAY" via virtual tag pattern
     // Priority: dueWithTime takes precedence over dueDay (mutual exclusivity)
@@ -646,7 +653,7 @@ export const selectLaterTodayStructure = createSelector(
     for (const snap of snapshot) {
       dueWithTimeById.set(snap.id, snap.dueWithTime);
 
-      if (snap.isDone || isTracked(snap.id) || !isInToday(snap)) continue;
+      if (snap.isDone || isTracked(snap) || !isInToday(snap)) continue;
 
       if (snap.parentId) {
         // Subtask - only care about scheduled ones
