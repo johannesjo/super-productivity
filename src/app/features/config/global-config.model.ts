@@ -18,7 +18,6 @@ export type AppFeaturesConfig = Readonly<{
   isSyncIconEnabled: boolean;
   isSearchEnabled: boolean;
   isDonatePageEnabled: boolean;
-  isEnableUserProfiles: boolean;
   isHabitsEnabled: boolean;
   isFinishDayEnabled: boolean;
 }>;

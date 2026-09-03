@@ -224,9 +224,7 @@ describe('OperationLogSyncService', () => {
       'clearAll',
     ]);
     conflictJournalServiceSpy.clearAll.and.resolveTo();
-    localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', [
-      'deleteDraftsForActiveProfile',
-    ]);
+    localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', ['deleteAllDrafts']);
     remoteOpsProcessingServiceSpy.processRemoteOps.and.resolveTo({
       localWinOpsCreated: 0,
       allOpsFilteredBySyncImport: false,
@@ -5026,7 +5024,7 @@ describe('OperationLogSyncService', () => {
       expect(opLogStoreSpy.completeRawRebuild).not.toHaveBeenCalled();
     });
 
-    it('should clear the active profiles crash-safe drafts after the rebuild', async () => {
+    it('should clear crash-safe drafts after the rebuild', async () => {
       // "Use Server Data" replays the complete server history over live state,
       // replacing every note, so each draft's baseContent refers to content
       // that no longer exists. This flow does NOT funnel through
@@ -5046,7 +5044,7 @@ describe('OperationLogSyncService', () => {
 
       await service.forceDownloadRemoteState(mockProvider);
 
-      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
+      expect(localDraftServiceSpy.deleteAllDrafts).toHaveBeenCalledTimes(1);
     });
 
     it('should NOT clear drafts when the replay is blocked and no rebuild completes', async () => {
@@ -5075,7 +5073,7 @@ describe('OperationLogSyncService', () => {
 
       await expectAsync(service.forceDownloadRemoteState(mockProvider)).toBeRejected();
 
-      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
+      expect(localDraftServiceSpy.deleteAllDrafts).not.toHaveBeenCalled();
     });
 
     it('should keep the first attempt backup on crash resume instead of re-capturing', async () => {
