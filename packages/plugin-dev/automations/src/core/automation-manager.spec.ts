@@ -389,6 +389,19 @@ describe('AutomationManager', () => {
       );
     });
 
+    // The rate-limit dialog's "Disable Rule" button goes through this wrapper.
+    it('should release the shortcut when a rule is disabled', async () => {
+      const rule = shortcutRule();
+      mockRuleRegistry.getRules.mockResolvedValue([rule]);
+      await manager.saveRule(rule);
+
+      mockRuleRegistry.getRules.mockResolvedValue([{ ...rule, isEnabled: false }]);
+      await manager.toggleRuleStatus('r1', false);
+
+      expect(mockRuleRegistry.toggleRuleStatus).toHaveBeenCalledWith('r1', false);
+      expect(mockPlugin.unregisterShortcut).toHaveBeenCalledWith('r1');
+    });
+
     it('should release the shortcut when a rule mutation removes it from the list', async () => {
       const rule = shortcutRule();
       mockRuleRegistry.getRules.mockResolvedValue([rule]);
