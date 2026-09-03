@@ -121,6 +121,12 @@ body {
   width: 100%;
   height: 100%;
 
+  // Stays untransformed by design (#9874): a transform/scale added here would
+  // expand this layer's painted bounds without changing its layout size, and
+  // since `.app-container` between here and `body` is `overflow: visible`,
+  // that overflow would bubble up and give `body` real, permanent scrollable
+  // overflow -- the same bug `.bg-image` had (app.component.scss). If this
+  // ever needs a transform, give it `position: fixed` like `.bg-image` too.
   &:before {
     display: none;
     transition: 1s opacity;
