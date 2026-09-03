@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // Active tests for setCounter fix (issue #5812)
-import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { PluginBridgeService } from './plugin-bridge.service';
+import { PluginShortcutCfg } from '@super-productivity/plugin-api';
 import { selectAllSimpleCounters } from '../features/simple-counter/store/simple-counter.reducer';
 import {
   updateSimpleCounter,
@@ -20,7 +20,6 @@ import { NotifyService } from '../core/notify/notify.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
-import { TaskFocusService } from '../features/tasks/task-focus.service';
 import { DEFAULT_TASK, TaskWithSubTasks } from '../features/tasks/task.model';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
@@ -281,6 +280,60 @@ describe('PluginBridgeService - Counter Methods', () => {
     });
   });
 
+  describe('shortcuts', () => {
+    const shortcut = (
+      pluginId: string,
+      id: string,
+      label: string,
+    ): PluginShortcutCfg => ({
+      pluginId,
+      id,
+      label,
+      onExec: () => {},
+    });
+
+    it('replaces an existing shortcut when the same id is registered again', () => {
+      const bound = service.createBoundMethods('test-plugin');
+
+      bound.registerShortcut(shortcut('test-plugin', 'rule-1', 'Old label'));
+      bound.registerShortcut(shortcut('test-plugin', 'rule-1', 'New label'));
+
+      expect(service.shortcuts().length).toBe(1);
+      expect(service.shortcuts()[0].label).toBe('New label');
+    });
+
+    it('keeps shortcuts of other plugins with the same id', () => {
+      service
+        .createBoundMethods('test-plugin')
+        .registerShortcut(shortcut('test-plugin', 'rule-1', 'Mine'));
+      service
+        .createBoundMethods('other-plugin')
+        .registerShortcut(shortcut('other-plugin', 'rule-1', 'Theirs'));
+
+      expect(service.shortcuts().length).toBe(2);
+    });
+
+    it('unregisters a single shortcut of a plugin', () => {
+      const bound = service.createBoundMethods('test-plugin');
+      bound.registerShortcut(shortcut('test-plugin', 'rule-1', 'One'));
+      bound.registerShortcut(shortcut('test-plugin', 'rule-2', 'Two'));
+
+      bound.unregisterShortcut('rule-1');
+
+      expect(service.shortcuts().map((s) => s.id)).toEqual(['rule-2']);
+    });
+
+    it('does not unregister the same id of another plugin', () => {
+      service
+        .createBoundMethods('test-plugin')
+        .registerShortcut(shortcut('test-plugin', 'rule-1', 'Mine'));
+
+      service.createBoundMethods('other-plugin').unregisterShortcut('rule-1');
+
+      expect(service.shortcuts().length).toBe(1);
+    });
+  });
+
   describe('reInitData', () => {
     it('should delegate to DataInitService.reInit', async () => {
       await service.reInitData();
@@ -392,6 +445,32 @@ describe('PluginBridgeService - iframe task selection methods', () => {
 
   let service: PluginBridgeService;
   let taskService: jasmine.SpyObj<TaskService>;
+  let taskEl: HTMLElement | null = null;
+  let activeElementStubbed = false;
+
+  // getFocusedTask() reads the DOM, so a focused <task> has to actually exist.
+  // activeElement is stubbed rather than set via el.focus() — headless Chrome
+  // only updates it when the test iframe has window focus, which is not
+  // guaranteed inside a large suite (same pattern as task-shortcut.service.spec).
+  const focusTaskEl = (taskId: string): void => {
+    taskEl = document.createElement('task');
+    taskEl.setAttribute('data-task-id', taskId);
+    document.body.appendChild(taskEl);
+    Object.defineProperty(document, 'activeElement', {
+      configurable: true,
+      get: () => taskEl,
+    });
+    activeElementStubbed = true;
+  };
+
+  afterEach(() => {
+    taskEl?.remove();
+    taskEl = null;
+    if (activeElementStubbed) {
+      delete (document as unknown as { activeElement?: unknown }).activeElement;
+      activeElementStubbed = false;
+    }
+  });
 
   beforeEach(() => {
     taskService = jasmine.createSpyObj<TaskService>('TaskService', ['getByIdOnce$'], {
@@ -409,12 +488,6 @@ describe('PluginBridgeService - iframe task selection methods', () => {
         { provide: MatDialog, useValue: {} },
         { provide: PluginHooksService, useValue: {} },
         { provide: TaskService, useValue: taskService },
-        {
-          provide: TaskFocusService,
-          useValue: {
-            focusedTaskId: signal<string | null>(focusedTask.id),
-          },
-        },
         { provide: WorkContextService, useValue: { activeWorkContext$: of(null) } },
         { provide: ProjectService, useValue: {} },
         { provide: TagService, useValue: {} },
@@ -436,6 +509,7 @@ describe('PluginBridgeService - iframe task selection methods', () => {
   });
 
   it('exposes selected and focused task readers on iframe bound methods', async () => {
+    focusTaskEl(focusedTask.id);
     const bound = service.createBoundMethods('iframe-plugin');
 
     const selectedResult = await bound.getSelectedTask();
@@ -449,6 +523,7 @@ describe('PluginBridgeService - iframe task selection methods', () => {
   });
 
   it('returns null for stale focused task ids', async () => {
+    focusTaskEl(focusedTask.id);
     taskService.getByIdOnce$.and.returnValue(
       of(undefined as unknown as TaskWithSubTasks),
     );
@@ -456,6 +531,15 @@ describe('PluginBridgeService - iframe task selection methods', () => {
 
     await expectAsync(bound.getFocusedTask()).toBeResolvedTo(null);
     expect(taskService.getByIdOnce$).toHaveBeenCalledOnceWith(focusedTask.id);
+  });
+
+  // Focus tracking can keep pointing at a task that no longer holds focus after
+  // a view change; acting on it would mutate the wrong task (#8851).
+  it('returns null when no task row is focused', async () => {
+    const bound = service.createBoundMethods('iframe-plugin');
+
+    await expectAsync(bound.getFocusedTask()).toBeResolvedTo(null);
+    expect(taskService.getByIdOnce$).not.toHaveBeenCalled();
   });
 });
 

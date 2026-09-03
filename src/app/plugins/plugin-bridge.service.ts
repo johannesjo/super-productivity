@@ -44,7 +44,7 @@ import {
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
-import { TaskFocusService } from '../features/tasks/task-focus.service';
+import { getDomFocusedTaskId } from '../features/tasks/get-dom-focused-task-id';
 import { addSubTask } from '../features/tasks/store/task.actions';
 import { selectTaskFeatureState } from '../features/tasks/store/task.selectors';
 import { parseTimeSpentChanges } from '../features/tasks/short-syntax';
@@ -149,7 +149,6 @@ export class PluginBridgeService implements OnDestroy {
   private _store = inject(Store);
   private _pluginHooksService = inject(PluginHooksService);
   private _taskService = inject(TaskService);
-  private _taskFocusService = inject(TaskFocusService);
   private _workContextService = inject(WorkContextService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
@@ -250,6 +249,7 @@ export class PluginBridgeService implements OnDestroy {
       cfg: Omit<PluginWorkContextHeaderBtnCfg, 'pluginId'>,
     ) => void;
     registerShortcut: (cfg: PluginShortcutCfg) => void;
+    unregisterShortcut: (shortcutId: string) => void;
     showIndexHtmlAsView: () => void;
     showInWorkContext: () => void;
     closeWorkContextView: () => void;
@@ -311,6 +311,8 @@ export class PluginBridgeService implements OnDestroy {
         cfg: Omit<PluginWorkContextHeaderBtnCfg, 'pluginId'>,
       ) => this._registerWorkContextHeaderButton(pluginId, cfg),
       registerShortcut: (cfg: PluginShortcutCfg) => this._registerShortcut(pluginId, cfg),
+      unregisterShortcut: (shortcutId: string) =>
+        this._unregisterShortcut(pluginId, shortcutId),
       registerConfigHandler: (handler: () => void) =>
         this._configHandlers.set(pluginId, handler),
 
@@ -1263,7 +1265,10 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   async getFocusedTask(): Promise<TaskCopy | null> {
-    const focusedTaskId = this._taskFocusService.focusedTaskId();
+    // The DOM decides, not the tracked signal: plugins act on this task (a
+    // shortcut-triggered automation rule may delete or re-tag it), so a stale
+    // id left behind by a view change must not resolve to a live task (#8851).
+    const focusedTaskId = getDomFocusedTaskId();
     if (!focusedTaskId) {
       return null;
     }
@@ -1699,13 +1704,42 @@ export class PluginBridgeService implements OnDestroy {
       pluginId,
     };
 
+    // Re-registering an id replaces the previous entry instead of appending:
+    // plugins re-register when a shortcut's label changes, and the keyboard
+    // settings form keys its items by `plugin_<pluginId>:<id>`, so duplicates
+    // would show up twice there and only the first would ever be executed.
+    const isSameShortcut = (shortcut: PluginShortcutCfg): boolean =>
+      shortcut.pluginId === pluginId && shortcut.id === shortcutWithPluginId.id;
     const currentShortcuts = this.shortcuts();
-    this.shortcuts.set([...currentShortcuts, shortcutWithPluginId]);
+    this.shortcuts.set(
+      currentShortcuts.some(isSameShortcut)
+        ? currentShortcuts.map((shortcut) =>
+            isSameShortcut(shortcut) ? shortcutWithPluginId : shortcut,
+          )
+        : [...currentShortcuts, shortcutWithPluginId],
+    );
 
+    // Labels are user content (a plugin may derive them from task or rule
+    // names) and the log is exportable, so only the ids go in.
     PluginLog.log('PluginBridge: Shortcut registered', {
       pluginId,
-      shortcut: shortcutWithPluginId,
+      shortcutId: shortcutWithPluginId.id,
     });
+  }
+
+  /**
+   * Internal method to remove a single shortcut of a plugin
+   */
+  private _unregisterShortcut(pluginId: string, shortcutId: string): void {
+    const currentShortcuts = this.shortcuts();
+    const nextShortcuts = currentShortcuts.filter(
+      (shortcut) => !(shortcut.pluginId === pluginId && shortcut.id === shortcutId),
+    );
+
+    if (nextShortcuts.length !== currentShortcuts.length) {
+      this.shortcuts.set(nextShortcuts);
+      PluginLog.log('PluginBridge: Shortcut unregistered', { pluginId, shortcutId });
+    }
   }
 
   /**
@@ -1718,12 +1752,10 @@ export class PluginBridgeService implements OnDestroy {
     if (shortcut) {
       try {
         await Promise.resolve(shortcut.onExec());
-        PluginLog.log(
-          `Executed shortcut "${shortcut.label}" from plugin ${shortcut.pluginId}`,
-        );
+        PluginLog.log(`Executed shortcut ${shortcutId}`);
         return true;
       } catch (error) {
-        PluginLog.err(`Failed to execute shortcut "${shortcut.label}":`, error);
+        PluginLog.err(`Failed to execute shortcut ${shortcutId}:`, error);
         return false;
       }
     }

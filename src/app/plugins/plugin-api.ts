@@ -152,6 +152,11 @@ export class PluginAPI implements PluginAPIInterface {
     this.#boundMethods.registerShortcut(shortcut);
   }
 
+  unregisterShortcut(shortcutId: string): void {
+    PluginLog.log(`Plugin ${this.#pluginId} unregistered shortcut`);
+    this.#boundMethods.unregisterShortcut(shortcutId);
+  }
+
   registerSidePanelButton(
     sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>,
   ): void {
