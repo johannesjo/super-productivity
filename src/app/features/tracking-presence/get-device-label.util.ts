@@ -1,58 +1,48 @@
 import { PlatformCode, getCurrentPlatformCode } from '../../core/util/generate-client-id';
+import { getOsLabel } from '../../core/util/get-os-label';
 
-const LABEL_BY_PLATFORM: Record<PlatformCode, string> = {
-  E: 'Desktop',
-  A: 'Android',
-  I: 'iOS',
-  B: 'Browser',
+/**
+ * Exhaustive per platform code, so widening `PlatformCode` is a compile error
+ * here. Desktop and browser clients carry the OS family so two desktops on
+ * different OSes are told apart with no configuration; mobile platforms
+ * already name their OS.
+ */
+const PLATFORM_LABEL: Record<PlatformCode, { label: string; withOs: boolean }> = {
+  E: { label: 'Desktop', withOs: true },
+  A: { label: 'Android', withOs: false },
+  I: { label: 'iOS', withOs: false },
+  B: { label: 'Browser', withOs: true },
 };
 
 /**
  * Hard cap on any label that goes over the wire. Mirrored by the wire-size
- * spec (`tracking-presence-wire-size.spec.ts`), which pins a 32-char label
- * against the pre-18.21 server frame limit — raise both or neither.
+ * spec (`tracking-presence-wire-size.spec.ts`) and the settings input's
+ * maxLength — raise all or none.
  */
 export const MAX_DEVICE_LABEL_LENGTH = 32;
 
 /**
- * OS family from a user-agent string, or null when unrecognised. Coarse on
- * purpose: the server already sees this UA on every HTTP request, so naming
- * the OS family leaks nothing new, unlike a hostname or model name would.
- * Order matters — Android UAs also contain "Linux".
+ * Platform-derived default label for this device, shown on OTHER devices
+ * ("Tracking on Desktop (macOS)"). Deliberately coarse — no hostname or
+ * model, so nothing personally identifying transits the server when
+ * encryption is off. Composes the shared platform code rather than
+ * re-checking IS_* flags (#9353). The parameters are test seams only.
  */
-const OS_BY_UA: [RegExp, string][] = [
-  [/Android/, 'Android'],
-  [/Windows/, 'Windows'],
-  [/CrOS/, 'ChromeOS'],
-  [/Mac/, 'macOS'],
-  [/Linux/, 'Linux'],
-];
-
-export const getOsLabel = (userAgent: string): string | null =>
-  OS_BY_UA.find(([re]) => re.test(userAgent))?.[1] ?? null;
-
-/**
- * Platform-derived default label, e.g. 'Desktop (Linux)', 'Android'. Desktop
- * and browser clients carry the OS family so two desktops on different OSes
- * are told apart without any configuration; mobile platforms already name
- * their OS. Still no hostname or model — see `getDeviceLabel`.
- */
-export const getDefaultDeviceLabel = (
-  platform: PlatformCode,
-  osLabel: string | null,
+export const getDeviceLabel = (
+  platform: PlatformCode = getCurrentPlatformCode(),
+  userAgent: string = navigator.userAgent,
 ): string => {
-  const base = LABEL_BY_PLATFORM[platform];
-  return (platform === 'E' || platform === 'B') && osLabel
-    ? `${base} (${osLabel})`
-    : base;
+  const { label, withOs } = PLATFORM_LABEL[platform];
+  const os = withOs ? getOsLabel(userAgent) : null;
+  return os ? `${label} (${os})` : label;
 };
 
 /**
  * Relayed payload fields are untrusted (with E2EE off a hostile server can
- * inject them). The label ends up as a translate param inside an [innerHtml]
- * snack, so strip markup-capable chars and cap length instead of trusting it.
- * Applied on BOTH ends (producer and viewer) so what a user types as their
- * device name is exactly what their other devices show.
+ * inject them) and the label reaches an [innerHtml] snack via translate
+ * params, so it is deliberately reduced to a safe charset and capped rather
+ * than escaped. Applied on BOTH ends: the producer runs it on the user's own
+ * name too, so other devices show exactly what this device announced.
  */
 export const sanitizeDeviceLabel = (v: unknown): string =>
   typeof v === 'string'
@@ -60,24 +50,9 @@ export const sanitizeDeviceLabel = (v: unknown): string =>
     : '';
 
 /**
- * Platform-derived default label for this device, shown on OTHER devices
- * ("Tracking on Desktop (macOS)"). Deliberately coarse — no hostname or
- * model, so nothing personally identifying transits the server when
- * encryption is off and the default needs no configuration. Two same-OS
- * desktops are told apart by the optional per-device name instead
- * (`resolveDeviceLabel`).
- *
- * Derived from the shared platform code rather than re-checking IS_* flags:
- * local re-derivation of platform detection is what broke in #9353.
+ * The label this device announces: the per-device name from the SuperSync
+ * private config when set, else the platform default. Blank or markup-only
+ * names fall back too, so a device never announces an empty string.
  */
-export const getDeviceLabel = (): string =>
-  getDefaultDeviceLabel(getCurrentPlatformCode(), getOsLabel(navigator.userAgent));
-
-/**
- * The label this device announces: the user's per-device name from the
- * SuperSync private config when set, else the platform default. Blank or
- * markup-only names fall back too, so a device can never announce itself as
- * an empty string.
- */
-export const resolveDeviceLabel = (customName: unknown): string =>
-  sanitizeDeviceLabel(customName).trim() || getDeviceLabel();
+export const resolveDeviceLabel = (name?: string): string =>
+  sanitizeDeviceLabel(name).trim() || getDeviceLabel();

@@ -771,8 +771,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               },
             },
             {
-              // Per-device name announced with presence so two desktops can be
-              // told apart. Empty = the platform default shown as placeholder.
+              // Optional text field: listed in CLEARABLE_FIELDS
+              // (sync-config.service.ts) so an emptied input clears the name.
               key: 'deviceName',
               type: 'input',
               className: 'e2e-presenceDeviceName',

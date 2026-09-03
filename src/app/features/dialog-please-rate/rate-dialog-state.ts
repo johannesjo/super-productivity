@@ -3,6 +3,7 @@ import { IS_ANDROID_WEB_VIEW, IS_F_DROID_APP } from '../../util/is-android-web-v
 import { IS_IOS } from '../../util/is-ios';
 import { IS_ELECTRON } from '../../app.constants';
 import { getAppVersionStr } from '../../util/get-app-version-str';
+import { getOsLabel } from '../../core/util/get-os-label';
 
 // Device-local only. localStorage keys are implicitly excluded from sync exports.
 //
@@ -192,11 +193,8 @@ const getPlatformLabel = (): string => {
   if (IS_IOS) return 'iOS';
   if (IS_ANDROID_WEB_VIEW) return 'Android';
   if (IS_ELECTRON) {
-    const ua = navigator.userAgent;
-    if (/Mac|Macintosh/.test(ua)) return 'Electron · macOS';
-    if (/Windows/.test(ua)) return 'Electron · Windows';
-    if (/Linux/.test(ua)) return 'Electron · Linux';
-    return 'Electron';
+    const os = getOsLabel();
+    return os ? `Electron · ${os}` : 'Electron';
   }
   return 'Web';
 };

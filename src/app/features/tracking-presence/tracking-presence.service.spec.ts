@@ -24,7 +24,7 @@ import {
   TrackingPresenceCmd,
   TrackingPresencePayload,
 } from './tracking-presence.model';
-import { resolveDeviceLabel } from './get-device-label.util';
+import { getDeviceLabel } from './get-device-label.util';
 
 describe('TrackingPresenceService', () => {
   let service: TrackingPresenceService;
@@ -36,6 +36,8 @@ describe('TrackingPresenceService', () => {
   let wsConnected: WritableSignal<boolean>;
   /** What the SyncProviderManager mock resolves; null = no encryption key. */
   let resolvedProvider: unknown;
+  /** SuperSync private config as read for the device label; null = no name. */
+  let providerConfig: () => Promise<{ deviceName?: string } | null>;
 
   /** Runs pending effects (the reconnect handler is an Angular effect). */
   const flushEffects = (): void => {
@@ -113,6 +115,7 @@ describe('TrackingPresenceService', () => {
     snackOpenSpy = jasmine.createSpy('open');
     wsConnected = signal(true);
     resolvedProvider = null;
+    providerConfig = () => Promise.resolve(null);
 
     TestBed.configureTestingModule({
       providers: [
@@ -145,7 +148,10 @@ describe('TrackingPresenceService', () => {
         {
           provide: SyncProviderManager,
           // default: no provider -> no encryption key -> plaintext envelopes
-          useValue: { getProviderById: () => Promise.resolve(resolvedProvider) },
+          useValue: {
+            getProviderById: () => Promise.resolve(resolvedProvider),
+            getProviderConfig: () => providerConfig(),
+          },
         },
         { provide: OperationEncryptionService, useValue: {} },
         { provide: SnackService, useValue: { open: snackOpenSpy } },
@@ -477,7 +483,6 @@ describe('TrackingPresenceService', () => {
         supportsOperationSync: true,
         providerMode: 'superSyncOps',
         getEncryptKey: () => Promise.resolve('test-key'),
-        privateCfg: { load: () => Promise.resolve({}) },
       };
       service.start();
       tick();
@@ -660,24 +665,8 @@ describe('TrackingPresenceService', () => {
   });
 
   describe('device label', () => {
-    const withDeviceName = (deviceName: unknown): void => {
-      resolvedProvider = {
-        privateCfg: { load: () => Promise.resolve({ deviceName }) },
-      };
-    };
-
-    it('announces the platform default when no device name is configured', fakeAsync(() => {
-      service.start();
-      tick();
-      setLocalTaskId('task-1');
-
-      expect(sentStates()[0].deviceLabel).toBe(resolveDeviceLabel(undefined));
-      service.stop();
-      flush();
-    }));
-
     it('announces the configured device name on states and commands', fakeAsync(() => {
-      withDeviceName('  Work laptop  ');
+      providerConfig = () => Promise.resolve({ deviceName: '  Work laptop  ' });
       service.start();
       tick();
       setLocalTaskId('task-1');
@@ -694,20 +683,21 @@ describe('TrackingPresenceService', () => {
       flush();
     }));
 
-    it('falls back to the platform default for a blank name or a failing config read', fakeAsync(() => {
-      withDeviceName('   ');
+    it('falls back to the platform default for a missing or blank name or a failing config read', fakeAsync(() => {
       service.start();
       tick();
       setLocalTaskId('task-1');
-      expect(sentStates()[0].deviceLabel).toBe(resolveDeviceLabel(undefined));
+      expect(sentStates()[0].deviceLabel).toBe(getDeviceLabel());
+
+      providerConfig = () => Promise.resolve({ deviceName: '   ' });
+      setLocalTaskId('task-2');
+      expect(sentStates()[1].deviceLabel).toBe(getDeviceLabel());
 
       // A config read failure must not drop the transition — the label is
       // decoration, the state is the point.
-      resolvedProvider = {
-        privateCfg: { load: () => Promise.reject(new Error('cfg unavailable')) },
-      };
-      setLocalTaskId('task-2');
-      expect(sentStates()[1].deviceLabel).toBe(resolveDeviceLabel(undefined));
+      providerConfig = () => Promise.reject(new Error('cfg unavailable'));
+      setLocalTaskId('task-3');
+      expect(sentStates()[2].deviceLabel).toBe(getDeviceLabel());
       service.stop();
       flush();
     }));

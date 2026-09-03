@@ -29,7 +29,11 @@ import { OperationEncryptionService } from '../../op-log/sync/operation-encrypti
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { SyncLog } from '../../core/log';
-import { resolveDeviceLabel, sanitizeDeviceLabel } from './get-device-label.util';
+import {
+  getDeviceLabel,
+  resolveDeviceLabel,
+  sanitizeDeviceLabel,
+} from './get-device-label.util';
 import {
   PRESENCE_HEARTBEAT_MS,
   PRESENCE_HIDE_STALE_AFTER_MS,
@@ -625,17 +629,14 @@ export class TrackingPresenceService implements OnDestroy {
    */
   private async _getDeviceLabel(): Promise<string> {
     try {
-      const provider = await this._providerManager.getProviderById(
-        SyncProviderId.SuperSync,
-      );
-      const cfg = provider ? await provider.privateCfg.load() : null;
-      return resolveDeviceLabel((cfg as { deviceName?: unknown } | null)?.deviceName);
+      const cfg = await this._providerManager.getProviderConfig(SyncProviderId.SuperSync);
+      return resolveDeviceLabel(cfg?.deviceName);
     } catch (err) {
       SyncLog.warn(
         'TrackingPresenceService: Device name unresolved — using platform label',
         err,
       );
-      return resolveDeviceLabel(undefined);
+      return getDeviceLabel();
     }
   }
 
