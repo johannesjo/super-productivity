@@ -44,6 +44,8 @@ const SENSITIVE_FIELDS = [
   'refreshToken',
   'loginName',
   'userName',
+  // User-typed presence device name: log history is exportable (rule 9).
+  'deviceName',
 ];
 
 /**

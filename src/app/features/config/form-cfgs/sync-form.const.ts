@@ -778,6 +778,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               className: 'e2e-presenceDeviceName',
               hideExpression: (m: { isTrackingPresenceEnabled?: boolean }) =>
                 !m?.isTrackingPresenceEnabled,
+              // Untick → re-tick within one dialog session must show the saved
+              // name again, not an empty input that a save would silently keep.
+              resetOnHide: false,
               templateOptions: {
                 label: T.F.SYNC.FORM.SUPER_SYNC.L_PRESENCE_DEVICE_NAME,
                 description: T.F.SYNC.FORM.SUPER_SYNC.PRESENCE_DEVICE_NAME_DESCRIPTION,

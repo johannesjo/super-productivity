@@ -8,6 +8,7 @@ import {
   TrackingPresenceEnvelope,
   TrackingPresencePayload,
 } from './tracking-presence.model';
+import { MAX_DEVICE_LABEL_LENGTH } from './get-device-label.util';
 
 /**
  * Pins the wire size of a maximal presence frame against the pre-18.21
@@ -43,7 +44,7 @@ describe('tracking-presence wire size', () => {
 
   // Every field at its realistic maximum. `state`/`reason` use the longest
   // enum values (they never co-occur in practice — deliberate over-count);
-  // the label is the sanitizer's 32-char cap in 3-byte UTF-8 chars (96 bytes).
+  // the label is the sanitizer's cap in 3-byte UTF-8 chars (96 bytes at 32).
   const maximalPayload: TrackingPresencePayload = {
     v: 1,
     sessionId: 's'.repeat(21), // nanoid() default length
@@ -52,7 +53,7 @@ describe('tracking-presence wire size', () => {
     reason: 'idle',
     taskId: maxTaskId,
     sinceTs: Number.MAX_SAFE_INTEGER,
-    deviceLabel: '木'.repeat(32),
+    deviceLabel: '木'.repeat(MAX_DEVICE_LABEL_LENGTH),
     focusCycle: Number.MAX_SAFE_INTEGER,
   };
 

@@ -619,9 +619,9 @@ export class TrackingPresenceService implements OnDestroy {
 
   /**
    * The user's per-device name from the SuperSync private config, else the
-   * platform default. A config read failure must not drop the frame — the
-   * label is decoration, the state transition is the point — so it degrades
-   * to the platform default.
+   * platform default. Must not drop the frame on its own account (the key
+   * step above already fails closed): the label is decoration, the state
+   * transition is the point, so a read failure degrades to the default.
    */
   private async _getDeviceLabel(): Promise<string> {
     try {

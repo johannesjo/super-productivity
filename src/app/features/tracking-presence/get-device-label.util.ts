@@ -60,11 +60,12 @@ export const sanitizeDeviceLabel = (v: unknown): string =>
     : '';
 
 /**
- * Platform-derived label for this device, shown on OTHER devices ("Tracking
- * on Desktop (macOS)"). Deliberately coarse — no hostname or model, so
- * nothing personally identifying transits the server when encryption is off,
- * and no settings field is needed. Users with two same-OS desktops name them
- * via `resolveDeviceLabel`.
+ * Platform-derived default label for this device, shown on OTHER devices
+ * ("Tracking on Desktop (macOS)"). Deliberately coarse — no hostname or
+ * model, so nothing personally identifying transits the server when
+ * encryption is off and the default needs no configuration. Two same-OS
+ * desktops are told apart by the optional per-device name instead
+ * (`resolveDeviceLabel`).
  *
  * Derived from the shared platform code rather than re-checking IS_* flags:
  * local re-derivation of platform detection is what broke in #9353.
