@@ -259,6 +259,19 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
       expect(filteredTasks.map((t) => t.id)).toEqual(['TRACKED']);
     });
 
+    it('should keep the parent of the tracked subtask even when it starts later today', () => {
+      const laterToday = new Date();
+      laterToday.setHours(14, 0, 0, 0);
+      const parent = createMockTask({
+        id: 'PARENT',
+        dueWithTime: laterToday.getTime(),
+        subTaskIds: ['SUB'],
+      });
+
+      expect(filterTasks([parent], 'SUB').map((t) => t.id)).toEqual(['PARENT']);
+      expect(filterTasks([parent], null)).toEqual([]);
+    });
+
     it('should NOT filter out tasks scheduled for tomorrow', () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);

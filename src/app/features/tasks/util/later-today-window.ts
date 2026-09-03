@@ -1,5 +1,5 @@
-import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
-import { TaskWithSubTasks } from './task.model';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { TaskWithSubTasks } from '../task.model';
 
 /**
  * Last millisecond of `todayStr`, honoring the configurable start-of-next-day
@@ -27,8 +27,8 @@ export const isInLaterTodayWindow = (
 
 /**
  * Whether a "Later Today" entry is still upcoming. A parent is listed there for
- * its own start time OR for a scheduled subtask, so it stays as long as either
- * is ahead of `now`.
+ * its own start time OR for an undone scheduled subtask, so it stays as long as
+ * either is ahead of `now`.
  */
 export const isLaterTodayEntryUpcoming = (
   task: TaskWithSubTasks,
@@ -36,6 +36,7 @@ export const isLaterTodayEntryUpcoming = (
   endOfTodayTime: number,
 ): boolean =>
   isInLaterTodayWindow(task.dueWithTime, now, endOfTodayTime) ||
-  task.subTasks.some((subTask) =>
-    isInLaterTodayWindow(subTask.dueWithTime, now, endOfTodayTime),
+  task.subTasks.some(
+    (subTask) =>
+      !subTask.isDone && isInLaterTodayWindow(subTask.dueWithTime, now, endOfTodayTime),
   );

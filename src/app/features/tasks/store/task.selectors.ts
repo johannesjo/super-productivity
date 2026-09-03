@@ -22,7 +22,7 @@ import {
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { isTodayWithOffset } from '../../../util/is-today.util';
 import { getTimeConflictTaskIds } from '../util/get-time-conflict-task-ids';
-import { getEndOfTodayTime, isInLaterTodayWindow } from '../later-today-window.util';
+import { getEndOfTodayTime, isInLaterTodayWindow } from '../util/later-today-window';
 import {
   getLogicalTodayStartMs,
   isTaskOverdueByThreshold,
@@ -619,14 +619,10 @@ export const selectLaterTodayStructure = createSelector(
     // appointment it belongs in the main list, even if it starts later. A
     // tracked SUBTASK takes its parent out too, since the parent is the entry
     // this panel would render.
-    const trackedIds = new Set<string>();
-    if (currentTaskId) {
-      trackedIds.add(currentTaskId);
-      const parentId = snapshot.find((s) => s.id === currentTaskId)?.parentId;
-      if (parentId) {
-        trackedIds.add(parentId);
-      }
-    }
+    const trackedParentId =
+      currentTaskId && snapshot.find((s) => s.id === currentTaskId)?.parentId;
+    const isTracked = (id: string): boolean =>
+      id === currentTaskId || id === trackedParentId;
 
     // Helper to check if task is "in TODAY" via virtual tag pattern
     // Priority: dueWithTime takes precedence over dueDay (mutual exclusivity)
@@ -650,7 +646,7 @@ export const selectLaterTodayStructure = createSelector(
     for (const snap of snapshot) {
       dueWithTimeById.set(snap.id, snap.dueWithTime);
 
-      if (snap.isDone || trackedIds.has(snap.id) || !isInToday(snap)) continue;
+      if (snap.isDone || isTracked(snap.id) || !isInToday(snap)) continue;
 
       if (snap.parentId) {
         // Subtask - only care about scheduled ones

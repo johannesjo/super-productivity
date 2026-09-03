@@ -6,7 +6,7 @@ import {
 import {
   getEndOfTodayTime,
   isInLaterTodayWindow,
-} from '../tasks/later-today-window.util';
+} from '../tasks/util/later-today-window';
 
 /**
  * Timed calendar events starting between `now` and the end of `todayStr`

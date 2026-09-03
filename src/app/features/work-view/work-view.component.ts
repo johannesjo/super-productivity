@@ -81,8 +81,9 @@ import { getLaterTodayCalendarEvents } from './get-later-today-calendar-events';
 import {
   getEndOfTodayTime,
   isLaterTodayEntryUpcoming,
-} from '../tasks/later-today-window.util';
+} from '../tasks/util/later-today-window';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { fastArrayCompare } from '../../util/fast-array-compare';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -237,36 +238,38 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   // drop out of "Later Today" once they start. Nothing is dispatched when a start
   // time passes, so without this both lists would keep showing an appointment
   // that is already running (and the main list would keep hiding it).
-  private _refreshTick = toSignal(this._globalTrackingIntervalService.minuteTick$, {
-    initialValue: 0,
-  });
-  laterTodayCalendarEvents = computed(() => {
-    this._refreshTick();
-    return getLaterTodayCalendarEvents(
-      this._calendarEventEntries(),
-      this._todayStr(),
-      this._startOfNextDayDiffMs(),
-      Date.now(),
-    );
-  });
+  private _refreshTick = toSignal(this._globalTrackingIntervalService.minuteTick$);
+  // `equal: fastArrayCompare` keeps the array ref stable across ticks that
+  // change nothing, so OnPush children are not re-rendered every minute.
+  laterTodayCalendarEvents = computed(
+    () => {
+      this._refreshTick();
+      return getLaterTodayCalendarEvents(
+        this._calendarEventEntries(),
+        this._todayStr(),
+        this._startOfNextDayDiffMs(),
+        Date.now(),
+      );
+    },
+    { equal: fastArrayCompare },
+  );
   // The selector's cutoff is only as fresh as the last task-state change, so
   // re-apply it here against the current clock. It can only ever include too
   // much, which makes this filter enough to keep the panel exact.
-  laterTodayTasks = computed(() => {
-    this._refreshTick();
-    const candidates = this._laterTodayTaskCandidates();
-    const todayStr = this._todayStr();
-    if (!candidates.length || !todayStr) {
-      return candidates;
-    }
-    const endOfTodayTime = getEndOfTodayTime(todayStr, this._startOfNextDayDiffMs());
-    const now = Date.now();
-    const upcoming = candidates.filter((task) =>
-      isLaterTodayEntryUpcoming(task, now, endOfTodayTime),
-    );
-    // keep the previous array ref when nothing dropped out (OnPush children)
-    return upcoming.length === candidates.length ? candidates : upcoming;
-  });
+  laterTodayTasks = computed(
+    () => {
+      this._refreshTick();
+      const endOfTodayTime = getEndOfTodayTime(
+        this._todayStr(),
+        this._startOfNextDayDiffMs(),
+      );
+      const now = Date.now();
+      return this._laterTodayTaskCandidates().filter((task) =>
+        isLaterTodayEntryUpcoming(task, now, endOfTodayTime),
+      );
+    },
+    { equal: fastArrayCompare },
+  );
   undoneTasks = input.required<TaskWithSubTasks[]>();
   customizedUndoneTasks = toSignal(
     this.customizerService.customizeUndoneTasks(this.workContextService.undoneTasks$),

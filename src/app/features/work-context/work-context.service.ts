@@ -47,7 +47,7 @@ import {
 import {
   getEndOfTodayTime,
   isInLaterTodayWindow,
-} from '../tasks/later-today-window.util';
+} from '../tasks/util/later-today-window';
 import { ofType } from '@ngrx/effects';
 import { WorklogExportSettings } from '../worklog/worklog.model';
 import { updateProjectAdvancedCfg } from '../project/store/project.actions';
@@ -421,27 +421,6 @@ export class WorkContextService {
   // consumers should read this signal instead; the boolean stays for synchronous reads.
   readonly isTodayListSignal = toSignal(this.isTodayList$, { initialValue: false });
 
-  // "Later Today" membership changes when the clock passes a start time or when
-  // tracking starts/stops, and neither shows up as a change of the task list —
-  // so re-run the filter below on the shared minute tick and on the tracked task
-  // as well, or an appointment that already began stays hidden from the main list.
-  private _laterTodayFilterTrigger$: Observable<string | null> = combineLatest([
-    this._globalTrackingIntervalService.minuteTick$,
-    this._store$.select(selectCurrentTaskId),
-  ]).pipe(map(([, currentTaskId]) => currentTaskId));
-
-  isHasTasksToWorkOn$: Observable<boolean> = combineLatest([
-    this.mainListTasks$,
-    this.isTodayList$,
-    this._laterTodayFilterTrigger$,
-  ]).pipe(
-    map(([tasks, isToday, currentTaskId]) =>
-      isToday ? this._filterFutureScheduledTasksForToday(tasks, currentTaskId) : tasks,
-    ),
-    map(hasTasksToWorkOn),
-    distinctUntilChanged(),
-  );
-
   estimateRemainingToday$: Observable<number> = this.mainListTasks$.pipe(
     map(mapEstimateRemainingFromTasks),
     distinctUntilChanged(),
@@ -487,19 +466,29 @@ export class WorkContextService {
     distinctUntilChanged(), // Only emit when count actually changes
   );
 
+  // "Later Today" membership changes when the clock passes a start time or when
+  // tracking starts/stops, and neither shows up as a change of the task list —
+  // so re-run the filter on the shared minute tick and on the tracked task as
+  // well, or an appointment that already began stays hidden from the main list.
   undoneTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
     this.mainListTasks$,
     this.isTodayList$,
-    this._laterTodayFilterTrigger$,
+    this._globalTrackingIntervalService.minuteTick$,
+    this._store$.select(selectCurrentTaskId),
   ]).pipe(
-    map(([tasks, isTodayList, currentTaskId]) =>
+    map(([tasks, isTodayList, , currentTaskId]) =>
       (isTodayList
         ? this._filterFutureScheduledTasksForToday(tasks, currentTaskId)
         : tasks
       ).filter((task) => task && !task.isDone),
     ),
-    // the trigger above re-emits on every tick; only pass on real changes
+    // the tick above re-emits every minute; only pass on real changes
     distinctUntilChanged(fastArrayCompare),
+  );
+
+  isHasTasksToWorkOn$: Observable<boolean> = this.undoneTasks$.pipe(
+    map(hasTasksToWorkOn),
+    distinctUntilChanged(),
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this.isTodayList$.pipe(
@@ -813,7 +802,8 @@ export class WorkContextService {
   /**
    * Hides what the "Later Today" panel shows, so an upcoming appointment is not
    * listed twice. The tracked task is never hidden: working on it makes it
-   * current, so it belongs in the main list even if it starts later.
+   * current, so it belongs in the main list even if it starts later. The same
+   * goes for the parent of a tracked subtask, as the panel drops it as well.
    */
   private _filterFutureScheduledTasksForToday(
     tasks: TaskWithSubTasks[],
@@ -832,11 +822,14 @@ export class WorkContextService {
       this._dateService.getStartOfNextDayDiffMs(),
     );
 
+    const isTracked = (task: TaskWithSubTasks): boolean =>
+      !!currentTaskId &&
+      (task.id === currentTaskId || task.subTaskIds.includes(currentTaskId));
+
     return tasks.filter(
       (task) =>
         !!task &&
-        (task.id === currentTaskId ||
-          !isInLaterTodayWindow(task.dueWithTime, now, endOfTodayTime)),
+        (isTracked(task) || !isInLaterTodayWindow(task.dueWithTime, now, endOfTodayTime)),
     );
   }
 

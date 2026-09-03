@@ -41,7 +41,7 @@ import { CalendarIntegrationService } from '../calendar-integration/calendar-int
 import { TODAY_TAG } from '../tag/tag.const';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { getDbDateStr } from '../../util/get-db-date-str';
-import { getEndOfTodayTime } from '../tasks/later-today-window.util';
+import { getEndOfTodayTime } from '../tasks/util/later-today-window';
 
 /** Shape the customizer emits, narrowed to what these specs vary. */
 type CustomizedStub = {

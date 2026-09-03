@@ -84,14 +84,11 @@ export class GlobalTrackingIntervalService {
    * Coarse tick aligned to the wall-clock minute, for consumers whose result
    * depends on the clock rather than on state — e.g. "Later Today", where an
    * appointment stops being upcoming the moment its start time passes and no
-   * action is dispatched to signal it. Focus/visibility/resume are merged in
-   * for the same reason as in todayDateStr$: a throttled or suspended timer
-   * must not leave such a window stale (#5464).
-   *
-   * The emitted value is the timestamp of the emission and may be replayed to
-   * late subscribers, so read the clock yourself instead of trusting it.
+   * action is dispatched to signal it. Also fires when the app becomes active
+   * again, so a throttled or suspended timer cannot leave such a window stale
+   * (#5464). The emitted value carries no meaning; read the clock yourself.
    */
-  minuteTick$: Observable<number> = this._createMinuteTickObservable();
+  minuteTick$: Observable<unknown> = this._createMinuteTickObservable();
 
   // Shared signal to avoid creating 200+ subscriptions in task components
   todayDateStr = toSignal(this.todayDateStr$, {
@@ -139,22 +136,31 @@ export class GlobalTrackingIntervalService {
     return tick;
   }
 
-  private _createMinuteTickObservable(): Observable<number> {
+  /**
+   * Fires when the app becomes interactive again (window focus, tab visible,
+   * system resume). Chromium/Electron throttle `setInterval` for hidden tabs
+   * and pause it during sleep, so timer-driven streams go stale; merging this
+   * in re-samples them as soon as the user is back (#5464).
+   */
+  private _createAppActiveObservable(): Observable<unknown> {
+    return merge(
+      typeof window !== 'undefined' ? fromEvent(window, 'focus') : EMPTY,
+      typeof document !== 'undefined'
+        ? fromEvent(document, 'visibilitychange').pipe(filter(() => !document.hidden))
+        : EMPTY,
+      IS_ELECTRON ? ipcResume$ : EMPTY,
+    ).pipe(debounceTime(100));
+  }
+
+  private _createMinuteTickObservable(): Observable<unknown> {
     return defer(() =>
       merge(
         // align to the next full minute so the tick lands right when a start
         // time passes instead of up to a minute later
         timer(MINUTE_MS - (Date.now() % MINUTE_MS), MINUTE_MS),
-        typeof window !== 'undefined' ? fromEvent(window, 'focus') : EMPTY,
-        typeof document !== 'undefined'
-          ? fromEvent(document, 'visibilitychange').pipe(filter(() => !document.hidden))
-          : EMPTY,
-        IS_ELECTRON ? ipcResume$ : EMPTY,
+        this._createAppActiveObservable(),
       ).pipe(startWith(0)),
-    ).pipe(
-      map(() => Date.now()),
-      shareReplay({ bufferSize: 1, refCount: true }),
-    );
+    ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
   }
 
   private _createTodayDateStrObservable(): Observable<string> {
@@ -162,33 +168,10 @@ export class GlobalTrackingIntervalService {
       map(() => this._dateService.todayStr()),
     );
 
-    const focusBased$ =
-      typeof window !== 'undefined'
-        ? fromEvent(window, 'focus').pipe(
-            debounceTime(100),
-            map(() => this._dateService.todayStr()),
-          )
-        : EMPTY;
+    const appActiveBased$ = this._createAppActiveObservable().pipe(
+      map(() => this._dateService.todayStr()),
+    );
 
-    const visibilityBased$ =
-      typeof document !== 'undefined'
-        ? fromEvent(document, 'visibilitychange').pipe(
-            filter(() => !document.hidden),
-            debounceTime(100),
-            map(() => this._dateService.todayStr()),
-          )
-        : EMPTY;
-
-    const systemResumeBased$ = IS_ELECTRON
-      ? ipcResume$.pipe(map(() => this._dateService.todayStr()))
-      : EMPTY;
-
-    // NOTE:
-    // Chromium/Electron aggressively throttles `setInterval` for hidden tabs and fully pauses it while a
-    // laptop sleeps. When that happens around midnight the timerBased$ stream simply stops emitting,
-    // so consumers never receive the day change (see #5464). We therefore merge in visibility/focus/resume
-    // events – all of which fire as soon as the app becomes interactive again – to force an immediate
-    // re-sampling of todayStr() even if the regular 1s interval is still suspended.
     const startOfNextDayDiffChange$ = (
       this._dateService as {
         startOfNextDayDiffChange$?: Observable<unknown>;
@@ -198,13 +181,7 @@ export class GlobalTrackingIntervalService {
       map(() => this._dateService.todayStr()),
     );
 
-    return merge(
-      timerBased$,
-      focusBased$,
-      visibilityBased$,
-      systemResumeBased$,
-      startOfNextDayChangeBased$,
-    ).pipe(
+    return merge(timerBased$, appActiveBased$, startOfNextDayChangeBased$).pipe(
       startWith(this._dateService.todayStr()),
       distinctUntilChanged(),
       tap((v) => Log.log('DAY_CHANGE ' + v)),

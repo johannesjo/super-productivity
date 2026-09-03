@@ -2,10 +2,10 @@ import {
   getEndOfTodayTime,
   isInLaterTodayWindow,
   isLaterTodayEntryUpcoming,
-} from './later-today-window.util';
-import { TaskWithSubTasks } from './task.model';
+} from './later-today-window';
+import { TaskWithSubTasks } from '../task.model';
 
-describe('later-today-window.util', () => {
+describe('later-today-window', () => {
   const HOUR = 60 * 60 * 1000;
   const todayStr = '2023-06-13';
   const todayAt = (hours: number, minutes: number = 0): number =>
@@ -37,13 +37,14 @@ describe('later-today-window.util', () => {
       expect(isInLaterTodayWindow(todayAt(8, 0), now, endOfToday)).toBe(false);
     });
 
-    it('excludes an appointment starting exactly now', () => {
+    it('still includes an appointment starting exactly now', () => {
       expect(isInLaterTodayWindow(now, now, endOfToday)).toBe(true);
       expect(isInLaterTodayWindow(now - 1, now, endOfToday)).toBe(false);
     });
 
     it('excludes tomorrow', () => {
-      expect(isInLaterTodayWindow(todayAt(34, 0), now, endOfToday)).toBe(false);
+      const tomorrow = new Date(2023, 5, 14, 10, 0, 0, 0).getTime();
+      expect(isInLaterTodayWindow(tomorrow, now, endOfToday)).toBe(false);
     });
 
     it('excludes tasks without a start time', () => {
@@ -86,6 +87,11 @@ describe('later-today-window.util', () => {
 
     it('drops a parent once all its scheduled subtasks started', () => {
       const parent = task(null, [{ dueWithTime: todayAt(9, 0) }]);
+      expect(isLaterTodayEntryUpcoming(parent, now, endOfToday)).toBe(false);
+    });
+
+    it('ignores done subtasks like the selector does', () => {
+      const parent = task(null, [{ dueWithTime: todayAt(14, 0), isDone: true }]);
       expect(isLaterTodayEntryUpcoming(parent, now, endOfToday)).toBe(false);
     });
   });
