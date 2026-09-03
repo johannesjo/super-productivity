@@ -12,7 +12,8 @@ import {
  * SuperSync tracking-presence E2E.
  *
  * Guards the ephemeral presence relay end-to-end:
- * 1. Client A starts tracking a task -> B's header shows the remote pill
+ * 1. Client A starts tracking a task -> B's header shows the remote pill,
+ *    naming A by its configured device name
  * 2. B presses the pill's Stop -> A stops tracking, B's pill goes away
  *
  * Presence travels over the WS as opaque envelopes and never touches the
@@ -34,11 +35,13 @@ test.describe('@supersync Tracking Presence', () => {
       const user = await createTestUser(testRunId);
       const syncConfig = getSuperSyncConfig(user);
 
+      const deviceNameA = `Laptop-A-${testRunId}`;
       clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
       await clientA.sync.setupSuperSync({
         ...syncConfig,
         enableWebSocket: true,
         enableTrackingPresence: true,
+        presenceDeviceName: deviceNameA,
       });
 
       const taskName = `Presence-Task-${testRunId}`;
@@ -69,6 +72,9 @@ test.describe('@supersync Tracking Presence', () => {
       const remotePillB = clientB.page.locator('remote-tracking-pill');
       await expect(remotePillB).toBeVisible({ timeout: 10000 });
       await expect(remotePillB).toContainText(taskName);
+      // Both clients are browsers: without the per-device name they would
+      // both announce the same platform label and be indistinguishable.
+      await expect(remotePillB).toContainText(deviceNameA);
 
       // B stops the session remotely -> A's tracking ends (its own header
       // pill for the tracked task disappears), and B's remote pill clears

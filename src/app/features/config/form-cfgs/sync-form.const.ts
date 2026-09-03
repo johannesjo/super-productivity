@@ -21,6 +21,10 @@ export interface SyncCollapsibleProps extends FormlyFieldProps {
 import { IS_NATIVE_PLATFORM } from '../../../util/is-native-platform';
 import { SUPER_SYNC_DEFAULT_BASE_URL } from '@sp/sync-providers/super-sync';
 import {
+  MAX_DEVICE_LABEL_LENGTH,
+  getDeviceLabel,
+} from '../../tracking-presence/get-device-label.util';
+import {
   closeAllDialogs,
   openDisableEncryptionDialogForFileBased,
   openEnableEncryptionDialog,
@@ -764,6 +768,24 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               templateOptions: {
                 label: T.F.SYNC.FORM.SUPER_SYNC.L_ENABLE_TRACKING_PRESENCE,
                 description: T.F.SYNC.FORM.SUPER_SYNC.TRACKING_PRESENCE_DESCRIPTION,
+              },
+            },
+            {
+              // Optional text field: listed in CLEARABLE_FIELDS
+              // (sync-config.service.ts) so an emptied input clears the name.
+              key: 'deviceName',
+              type: 'input',
+              className: 'e2e-presenceDeviceName',
+              hideExpression: (m: { isTrackingPresenceEnabled?: boolean }) =>
+                !m?.isTrackingPresenceEnabled,
+              // Untick → re-tick within one dialog session must show the saved
+              // name again, not an empty input that a save would silently keep.
+              resetOnHide: false,
+              templateOptions: {
+                label: T.F.SYNC.FORM.SUPER_SYNC.L_PRESENCE_DEVICE_NAME,
+                description: T.F.SYNC.FORM.SUPER_SYNC.PRESENCE_DEVICE_NAME_DESCRIPTION,
+                placeholder: getDeviceLabel(),
+                maxLength: MAX_DEVICE_LABEL_LENGTH,
               },
             },
           ],

@@ -1569,6 +1569,8 @@
           "L_ENABLE_E2E_ENCRYPTION": "Enable end-to-end encryption",
           "L_ENABLE_TRACKING_PRESENCE": "Show live tracking on other devices (experimental)",
           "TRACKING_PRESENCE_DESCRIPTION": "Mirrors which task this account is currently tracking to your other connected devices and lets you stop it from there. Display only \u2014 never persisted on the server, though it is briefly relayed in server memory (opaque to the server when end-to-end encryption is on).",
+          "L_PRESENCE_DEVICE_NAME": "Name of this device on other devices",
+          "PRESENCE_DEVICE_NAME_DESCRIPTION": "Shown in the live tracking chip on your other devices, e.g. \u201cWork laptop\u201d, so two desktops can be told apart. Sent along with the tracking state (encrypted when sync encryption is on). Leave empty to use the platform name shown as placeholder.",
           "L_NEW_PASSWORD": "New Encryption Password",
           "L_REMOVE_ENCRYPTION": "Or Remove Encryption",
           "L_SERVER_URL": "Server URL",
