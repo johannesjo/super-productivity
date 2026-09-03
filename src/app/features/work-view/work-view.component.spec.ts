@@ -484,6 +484,8 @@ describe('WorkViewComponent', () => {
 
     const setup = (opts: {
       focusItem?: string;
+      /** Marks the `focusItem` as search-originated, as `navigate()` does. */
+      isFromSearch?: boolean;
       queryParams$?: Observable<Record<string, string>>;
       doneTasks?: TaskWithSubTasks[];
       overdueTasks?: TaskWithSubTasks[];
@@ -526,7 +528,13 @@ describe('WorkViewComponent', () => {
         },
         queryParams$:
           opts.queryParams$ ??
-          (opts.focusItem ? of({ focusItem: opts.focusItem }) : undefined),
+          (opts.focusItem
+            ? of(
+                (opts.isFromSearch
+                  ? { focusItem: opts.focusItem, isFromSearch: 'true' }
+                  : { focusItem: opts.focusItem }) as Record<string, string>,
+              )
+            : undefined),
         isTodayList: opts.isTodayList,
         embedPluginId: opts.embedPluginId,
       });
@@ -858,16 +866,14 @@ describe('WorkViewComponent', () => {
     }));
 
     /**
-     * The success branch of the reveal — the one that scrolls, focuses and
-     * highlights. Every spec above stops in the retry/expansion path, which
-     * never reaches it, so the highlight needs a container that actually holds
-     * a rendered row. (#5476)
+     * The success branch of the reveal — the one that scrolls, focuses and (for
+     * a search jump) highlights. Every spec above stops in the retry/expansion
+     * path, which never reaches it, so this needs a container that actually
+     * holds a rendered row. (#5476)
      */
-    it('scrolls to, focuses and highlights the row once it is rendered', () => {
-      const { cmp } = setup({
-        focusItem: 'wanted',
-        undone: [buildTask('wanted')],
-      });
+    const revealRenderedRow = (
+      cmp: WorkViewComponent,
+    ): { row: HTMLElement; highlightTaskBriefly: jasmine.Spy } => {
       const highlightTaskBriefly = spyOn(
         TestBed.inject(LayoutService),
         'highlightTaskBriefly',
@@ -888,9 +894,34 @@ describe('WorkViewComponent', () => {
 
       // Mirrors the split pane rendering: the setter replays the pending reveal.
       cmp.splitTopElRef = new ElementRef(container);
+      return { row, highlightTaskBriefly };
+    };
+
+    it('scrolls to, focuses and highlights the row of a search jump', () => {
+      const { cmp } = setup({
+        focusItem: 'wanted',
+        isFromSearch: true,
+        undone: [buildTask('wanted')],
+      });
+
+      const { row, highlightTaskBriefly } = revealRenderedRow(cmp);
 
       expect(row.focus).toHaveBeenCalledOnceWith({ preventScroll: true });
       expect(highlightTaskBriefly).toHaveBeenCalledOnceWith(row);
+    });
+
+    it('focuses but does not highlight a focusItem from any other caller', () => {
+      // `focusItem` is also set by reminder snacks, the tracked-task pill, issue
+      // creation and the calendar banner — none of those asked for attention.
+      const { cmp } = setup({
+        focusItem: 'wanted',
+        undone: [buildTask('wanted')],
+      });
+
+      const { row, highlightTaskBriefly } = revealRenderedRow(cmp);
+
+      expect(row.focus).toHaveBeenCalledOnceWith({ preventScroll: true });
+      expect(highlightTaskBriefly).not.toHaveBeenCalled();
     });
 
     it('does not touch any container without a focusItem', () => {

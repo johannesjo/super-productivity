@@ -269,7 +269,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
             focusItem: params.focusItem,
             url: window.location.pathname + window.location.search,
           });
-          this._focusElement(params.focusItem);
+          this._focusElement(params.focusItem, params.isFromSearch === 'true');
         }
       }),
     );
@@ -587,12 +587,19 @@ export class AppComponent implements OnDestroy, AfterViewInit {
    * since page load and animation time are not always equal
    * retrying until the rendered task row is available avoids missing focus targets
    */
-  private _focusElement(id: string): void {
+  private _focusElement(id: string, isFromSearch: boolean = false): void {
     recordSearchNavDebug('appComponent:focusElement', {
       taskId: id,
       url: window.location.pathname + window.location.search,
+      isFromSearch,
     });
     this.layoutService.focusTaskInViewWhenReady(id, (el) => {
+      // Only a search jump earns the attention highlight: `focusItem` is also set
+      // by reminder snacks, the tracked-task pill, issue creation and the calendar
+      // banner, where the user never asked "where is it". (#5476)
+      if (isFromSearch) {
+        this.layoutService.highlightTaskBriefly(el);
+      }
       recordSearchNavDebug('appComponent:focusElement:success', {
         taskId: id,
         url: window.location.pathname + window.location.search,

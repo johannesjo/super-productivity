@@ -199,7 +199,6 @@ export class LayoutService {
 
     const el = this.focusTaskInViewIfPossible(taskId);
     if (el) {
-      this.highlightTaskBriefly(el);
       onSuccess?.(el);
       return;
     }
@@ -216,14 +215,18 @@ export class LayoutService {
   }
 
   /**
-   * Draws a temporary attention highlight on a task revealed by navigation
-   * (global search, notifications, tracked-task pill), so it stays findable
-   * even after the focus outline is gone. Mirrors the note reveal in
-   * NotesComponent, but deliberately uses its own class name: the note reveal
-   * strips `.highlight-searched-item` from every element in the document, and
-   * `focusItem` is a query param shared by tasks and notes, so a note reveal
-   * would otherwise cut a live task highlight short. Only one task is
-   * highlighted at a time. (#5476)
+   * Draws a temporary attention highlight on a task revealed by a SEARCH jump,
+   * so it stays findable even after the focus outline is gone. Deliberately not
+   * called from the reveal itself: `focusItem` is set by every navigation caller
+   * (reminder snacks, tracked-task pill, issue creation, calendar banner), and
+   * only search implies the user asked where the task is — so the callers opt in
+   * via `isFromSearch`.
+   *
+   * Mirrors the note reveal in NotesComponent, but deliberately uses its own
+   * class name: the note reveal strips `.highlight-searched-item` from every
+   * element in the document, and `focusItem` is a query param shared by tasks
+   * and notes, so a note reveal would otherwise cut a live task highlight short.
+   * Only one task is highlighted at a time. (#5476)
    */
   highlightTaskBriefly(el: HTMLElement): void {
     if (this._pendingTaskHighlightTimeout) {

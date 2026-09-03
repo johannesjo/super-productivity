@@ -345,7 +345,10 @@ describe('LayoutService', () => {
       setTimeout(() => {
         expect(scrollContainer.scrollTop).toBe(20);
         expect(taskElement.focus).toHaveBeenCalledWith({ preventScroll: true });
-        expect(taskElement.classList.contains('highlight-searched-task')).toBeTrue();
+        // The reveal itself never highlights: `focusItem` is set by every
+        // navigation caller, and only a search jump earns the attention
+        // outline, so the caller opts in via `highlightTaskBriefly`. (#5476)
+        expect(taskElement.classList.contains('highlight-searched-task')).toBeFalse();
         document.body.removeChild(scrollContainer);
         done();
       }, 400);
