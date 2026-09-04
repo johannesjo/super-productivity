@@ -33,6 +33,7 @@
  */
 
 import {
+  assertExactCompoundRange,
   DbCursorAction,
   DbCursorVisitor,
   DbIterateOptions,
@@ -285,11 +286,33 @@ const whereExact = (
   return { clause, params: keys.map(toSqlValue) };
 };
 
-/** WHERE fragment for a {@link DbKeyRange} against one or more columns. */
+/**
+ * WHERE fragment excluding rows absent from an IDB index. IndexedDB only
+ * indexes a record when every keyPath component is a valid key — a record
+ * without `syncedAt` is simply not in `bySyncedAt`, and a local op (no
+ * `applicationStatus`) is not in `bySourceAndStatus`. Here those land as NULL
+ * columns, and NULL sorts FIRST under `ORDER BY … ASC`, so an unbounded index
+ * scan would visit them before any real entry (#8312: `hasSyncedOps()` true on
+ * a never-synced client). Every index read ANDs this in for parity.
+ */
+const whereIndexed = (columns: string[]): string =>
+  columns.map((c) => `${c} IS NOT NULL`).join(' AND ');
+
+/** Join non-empty WHERE fragments with AND. */
+const andClauses = (...parts: string[]): string => parts.filter(Boolean).join(' AND ');
+
+/**
+ * WHERE fragment for a {@link DbKeyRange} against one or more columns.
+ *
+ * A compound range is translated column-by-column, which only matches
+ * IndexedDB's tuple ordering for an exact-match range — enforced up front by
+ * {@link assertExactCompoundRange} (port contract on {@link DbKeyRange}).
+ */
 const whereRange = (
   columns: string[],
   range?: DbKeyRange,
 ): { clause: string; params: (string | number | null)[] } => {
+  assertExactCompoundRange(range);
   if (!range) return { clause: '', params: [] };
   const lowers = Array.isArray(range.lower)
     ? range.lower
@@ -456,13 +479,12 @@ const sqlGetAllFromIndex = async <T>(
   range?: DbKeyRange,
 ): Promise<T[]> => {
   const idx = indexPlan(plan, indexName);
-  const { clause, params } = whereRange(
-    idx.columns.map((c) => c.column),
-    range,
-  );
-  const order = idx.columns.map((c) => c.column).join(', ');
+  const columns = idx.columns.map((c) => c.column);
+  const { clause, params } = whereRange(columns, range);
+  const order = columns.join(', ');
   const rows = await db.query(
-    `SELECT ${plan.pkColumn} AS __pk, ${VALUE_COLUMN} FROM ${plan.table}${whereClause(clause)} ORDER BY ${order} ASC`,
+    `SELECT ${plan.pkColumn} AS __pk, ${VALUE_COLUMN} FROM ${plan.table}` +
+      `${whereClause(andClauses(whereIndexed(columns), clause))} ORDER BY ${order} ASC`,
     params,
   );
   return rows.map((r) => decodeRow<T>(plan, r));
@@ -487,15 +509,29 @@ const sqlIterate = async <T>(
 
   let clause = '';
   let params: (string | number | null)[] = [];
-  if (options.query !== undefined && options.index) {
-    const ex = whereExact(indexPlan(plan, options.index).columns, options.query);
-    clause = ex.clause;
-    params = ex.params;
+  if (options.index) {
+    // `col = ?` already excludes NULL; an unbounded index walk needs the
+    // explicit IS NOT NULL to skip rows the IDB index would not contain.
+    if (options.query !== undefined) {
+      const ex = whereExact(indexPlan(plan, options.index).columns, options.query);
+      clause = ex.clause;
+      params = ex.params;
+    } else {
+      clause = whereIndexed(orderCols);
+    }
+  }
+  // LIMIT pushdown (#8313): a `direction:'prev'` + `'stop'` scan such as
+  // getLastSeq() must not transfer the whole table for one row.
+  let limitClause = '';
+  if (options.limit !== undefined) {
+    limitClause = ' LIMIT ?';
+    params = [...params, options.limit];
   }
 
   const rows = await db.query(
     `SELECT ${plan.pkColumn} AS __pk, ${VALUE_COLUMN} FROM ${plan.table}` +
-      `${whereClause(clause)} ORDER BY ${orderCols.map((c) => `${c} ${dir}`).join(', ')}`,
+      `${whereClause(clause)} ORDER BY ${orderCols.map((c) => `${c} ${dir}`).join(', ')}` +
+      limitClause,
     params,
   );
 
@@ -688,15 +724,17 @@ export class SqliteOpLogAdapter implements OpLogDbAdapter {
   countFromIndex(store: string, index: string, range?: DbKeyRange): Promise<number> {
     const plan = this._plan(store);
     const idx = indexPlan(plan, index);
-    const { clause, params } = whereRange(
-      idx.columns.map((c) => c.column),
-      range,
-    );
-    return this._serialize(() =>
-      this._db
-        .query(`SELECT COUNT(*) AS n FROM ${plan.table}${whereClause(clause)}`, params)
-        .then((rows) => Number(rows[0]?.['n'] ?? 0)),
-    );
+    const columns = idx.columns.map((c) => c.column);
+    return this._serialize(async () => {
+      // Built inside the slot so a contract violation rejects (like every
+      // other method) rather than throwing synchronously.
+      const { clause, params } = whereRange(columns, range);
+      const rows = await this._db.query(
+        `SELECT COUNT(*) AS n FROM ${plan.table}${whereClause(andClauses(whereIndexed(columns), clause))}`,
+        params,
+      );
+      return Number(rows[0]?.['n'] ?? 0);
+    });
   }
 
   async iterate<T>(

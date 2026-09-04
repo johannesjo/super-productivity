@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { fakeAsync, tick } from '@angular/core/testing';
 import { IDBPDatabase, openDB } from 'idb';
 import { IndexedDbOpLogAdapter } from './indexed-db-op-log-adapter';
+import { DbKey } from './op-log-db-adapter';
 import { OP_LOG_DB_SCHEMA } from './op-log-db-schema';
 import { STORE_NAMES, OPS_INDEXES, SINGLETON_KEY } from './db-keys.const';
 import { runDbUpgrade } from './db-upgrade';
@@ -262,6 +263,34 @@ describe('IndexedDbOpLogAdapter', () => {
       { lower: ['remote', 'pending'], upper: ['remote', 'pending'] },
     );
     expect(pending.map((r) => r.op.id).sort()).toEqual(['p1', 'p2']);
+  });
+
+  it('rejects a non-exact compound-index range (port contract, parity with SQLite)', async () => {
+    await adapter.add(STORE_NAMES.OPS, makeOpEntry('p1', 'remote', 'pending'));
+    // IndexedDB would happily answer this with tuple ordering; SQLite cannot
+    // without row-value comparison. The port forbids it on both backends.
+    await expectAsync(
+      adapter.getAllFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, {
+        lower: ['local', 'applied'],
+        upper: ['remote', 'applied'],
+      }),
+    ).toBeRejectedWithError(/compound-index ranges must be exact-match/);
+  });
+
+  it('iterate honors `limit` (visits at most N entries)', async () => {
+    for (const id of ['a', 'b', 'c', 'd']) {
+      await adapter.add(STORE_NAMES.OPS, makeOpEntry(id, 'local'));
+    }
+    const seen: DbKey[] = [];
+    await adapter.iterate(
+      STORE_NAMES.OPS,
+      { direction: 'prev', limit: 2, mode: 'readonly' },
+      (_v, key) => {
+        seen.push(key);
+        return 'continue';
+      },
+    );
+    expect(seen).toEqual([4, 3]);
   });
 
   it('delete() and clear() remove entries', async () => {

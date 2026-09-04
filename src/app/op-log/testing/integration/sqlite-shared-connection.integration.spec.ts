@@ -25,8 +25,8 @@ import { ArchiveModel } from '../../../features/archive/archive.model';
  * OPERATION_LOG web lock — not just at the adapter level as in
  * `sqlite-op-log-adapter.spec.ts`.
  *
- * Scenarios 2–4 are still open. They are `xit` so this branch stays green;
- * flip each to `it` when fixing the linked issue.
+ * Scenarios 2–4 were the gaps cross-linked from the issue (#8312, #8313, and
+ * compound-range semantics); all are now guarded on both backends.
  */
 
 const mockClientIdProvider: ClientIdProvider = {
@@ -151,17 +151,20 @@ const defineRepro = (backend: Backend): void => {
 
     // ── 2. #8312: NULL-key rows leak into index scans ──────────────────────────
 
-    xit('hasSyncedOps() is false on a never-synced client with only local ops (#8312)', async () => {
+    it('hasSyncedOps() is false on a never-synced client with only local ops (#8312)', async () => {
       await opLogStore.append(makeOp('local-only'), 'local');
       // IndexedDB: a record without `syncedAt` is absent from the bySyncedAt
-      // index. SQLite: `synced_at` is NULL and NULL rows sort first in the
-      // unbounded `ORDER BY synced_at ASC` scan → visited → `true`.
+      // index. SQLite stores NULL `synced_at`, which sorts first in an
+      // unbounded `ORDER BY synced_at ASC` scan — the adapter must exclude it.
       expect(await opLogStore.hasSyncedOps()).toBeFalse();
+      // …and still true once a real remote op has been synced.
+      await opLogStore.append(makeOp('remote-op', { clientId: 'other' }), 'remote');
+      expect(await opLogStore.hasSyncedOps()).toBeTrue();
     });
 
     // ── 3. #8313: getLastSeq() is a full-table transfer ────────────────────────
 
-    xit('getLastSeq() does not transfer the whole ops table (#8313)', async () => {
+    it('getLastSeq() does not transfer the whole ops table (#8313)', async () => {
       const counter = backend.counter?.();
       if (!counter) {
         pending('row-transfer accounting only applies to the SQLite backend');
@@ -212,20 +215,19 @@ const defineRepro = (backend: Backend): void => {
       expect(rows.map((r) => r.op.id)).toEqual(['rp']);
     });
 
-    xit('a genuine compound range uses tuple (lexicographic) ordering like IndexedDB', async () => {
+    it('a genuine (non-exact) compound range is rejected on both backends', async () => {
       await adapter.add(STORE_NAMES.OPS, entry('la', 'local', 'applied'));
       await adapter.add(STORE_NAMES.OPS, entry('lp', 'local', 'pending'));
       await adapter.add(STORE_NAMES.OPS, entry('ra', 'remote', 'applied'));
-      await adapter.add(STORE_NAMES.OPS, entry('rp', 'remote', 'pending'));
-      // Tuple order: [local,applied] ≤ [local,pending] ≤ [remote,applied] < [remote,pending].
-      // Per-column AND (SQLite `whereRange`) drops [local,pending] because
-      // 'pending' > 'applied' on the second column.
-      const rows = await adapter.getAllFromIndex<{ op: { id: string } }>(
-        STORE_NAMES.OPS,
-        OPS_INDEXES.BY_SOURCE_AND_STATUS,
-        { lower: ['local', 'applied'], upper: ['remote', 'applied'] },
-      );
-      expect(rows.map((r) => r.op.id).sort()).toEqual(['la', 'lp', 'ra']);
+      // Tuple order would include [local,pending]; per-column AND (the SQLite
+      // translation) would not. Rather than diverge silently, the port
+      // contract forbids non-exact compound ranges and both adapters enforce it.
+      await expectAsync(
+        adapter.getAllFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, {
+          lower: ['local', 'applied'],
+          upper: ['remote', 'applied'],
+        }),
+      ).toBeRejectedWithError(/compound-index ranges must be exact-match/);
     });
   });
 };

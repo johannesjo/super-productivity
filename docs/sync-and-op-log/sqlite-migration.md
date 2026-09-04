@@ -42,7 +42,16 @@ reduce the blast radius but do not replace durable app-private storage.
   contract pass, and a store-level integration pass.
 - Separate adapters that share one physical `SqliteDb` also share a FIFO queue
   keyed by that connection, preventing overlapping `BEGIN` statements and
-  statements leaking into another transaction.
+  statements leaking into another transaction (#8746). The store-level race —
+  op-log appends against lock-free archive flushes over one connection — is
+  covered on both backends by
+  `src/app/op-log/testing/integration/sqlite-shared-connection.integration.spec.ts`.
+- Index-scan parity with IndexedDB: rows whose index column is NULL (a local op
+  in `bySyncedAt` / `bySourceAndStatus`) are excluded from every index read
+  (#8312), compound-index ranges must be exact-match and both backends reject
+  anything else (`assertExactCompoundRange`), and `DbIterateOptions.limit`
+  pushes "first / latest row" scans down to `LIMIT ?` so `getLastSeq()` never
+  transfers the whole ops table (#8313).
 - `migrateOpLogBackend()` copies all op-log stores into an empty destination
   transaction and verifies operation count, last sequence, and vector clock
   before commit. It is validated in CI for real IndexedDB to `sql.js`.
@@ -122,6 +131,10 @@ Complete these in order:
    termination, and representative bulk writes on Android and iOS.
 3. Provide the two persistence services separate adapters over the same
    physical connection.
+   Before this step, parameterize the composed integration specs that exercise
+   multi-store transactions (`multi-entity-atomicity`, `race-conditions`,
+   `clean-slate-interrupt`) to dual-run against `SqliteOpLogAdapter`, as
+   `remote-apply-store-port` and `sqlite-shared-connection` already do.
 4. Add the native-only, default-off provider selection.
 5. Wire startup detection, quiescence, `migrateOpLogBackend()`, the completion
    marker, retained-source fallback, and interrupted-migration recovery.
@@ -149,6 +162,7 @@ Focused CI checks:
 npm run test:file src/app/op-log/persistence/sqlite-op-log-adapter.spec.ts
 npm run test:file src/app/op-log/persistence/op-log-backend-migration.spec.ts
 npm run test:file src/app/op-log/testing/integration/remote-apply-store-port.integration.spec.ts
+npm run test:file src/app/op-log/testing/integration/sqlite-shared-connection.integration.spec.ts
 ```
 
 CI proves adapter and SQLite-engine semantics, not the Capacitor bridge or

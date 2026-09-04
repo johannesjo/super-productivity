@@ -1039,7 +1039,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
           let preAppendLastSeq = 0;
           await tx.iterate<StoredOperationLogEntry>(
             STORE_NAMES.OPS,
-            { direction: 'prev' },
+            { direction: 'prev', limit: 1 },
             (_value, key) => {
               if (typeof key !== 'number') {
                 throw new Error('Operation sequence key is not numeric');
@@ -1185,7 +1185,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
           let preAppendLastSeq = 0;
           await tx.iterate<StoredOperationLogEntry>(
             STORE_NAMES.OPS,
-            { direction: 'prev' },
+            { direction: 'prev', limit: 1 },
             (_value, key) => {
               if (typeof key !== 'number') {
                 throw new Error('Operation sequence key is not numeric');
@@ -2073,7 +2073,9 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       // so it takes no exclusive write lock. On IndexedDB it runs concurrently
       // with appends; on the single-connection SQLite backend it queues in the
       // shared serializer but holds it only for one SELECT (no BEGIN…COMMIT).
-      { direction: 'prev', mode: 'readonly' },
+      // `limit: 1` pushes the single-row bound down (SQLite `LIMIT 1`) so the
+      // hottest sync-path read never transfers the whole ops table (#8313).
+      { direction: 'prev', mode: 'readonly', limit: 1 },
       (_value, key) => {
         lastSeq = key as number;
         return 'stop';

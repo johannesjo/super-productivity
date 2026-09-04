@@ -14,6 +14,7 @@
 
 import { IDBPDatabase, openDB } from 'idb';
 import {
+  assertExactCompoundRange,
   DbCursorDirection,
   DbCursorVisitor,
   DbIterateOptions,
@@ -101,6 +102,7 @@ const walkCursor = async <T>(
 ): Promise<void> => {
   const query = options.query !== undefined ? (options.query as IDBValidKey) : null;
   let cursor = await source.openCursor(query, options.direction ?? 'next');
+  let visited = 0;
   while (cursor) {
     const action = visit(cursor.value as T, cursor.primaryKey as DbKey);
     if (action === 'delete' || action === 'delete-stop') {
@@ -109,12 +111,22 @@ const walkCursor = async <T>(
     if (action === 'stop' || action === 'delete-stop') {
       return;
     }
+    // `limit` bounds the number of entries visited (see DbIterateOptions.limit).
+    if (options.limit !== undefined && ++visited >= options.limit) {
+      return;
+    }
     cursor = await cursor.continue();
   }
 };
 
-/** Translate the engine-agnostic range into an IDBKeyRange (or undefined). */
+/**
+ * Translate the engine-agnostic range into an IDBKeyRange (or undefined).
+ * Enforces the port's compound-range contract here too, so a divergent range
+ * fails on the IndexedDB backend (where every spec runs) rather than only on
+ * SQLite.
+ */
 const toIdbKeyRange = (range?: DbKeyRange): IDBKeyRange | undefined => {
+  assertExactCompoundRange(range);
   if (!range) {
     return undefined;
   }
