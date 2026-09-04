@@ -46,6 +46,15 @@ only sees genuine local user intent.
 wrong; the linter rejects `inject(Actions)` / `Actions` imports in
 `*.effects.ts`.
 
+**The reducer-side mirror: a reducer handling a _non-persistent_ action must
+not write synced entity fields.** Capture builds operations from action
+payloads, not from state diffs, so such a write never becomes an op — the local
+device drifts from every other device with no conflict to detect, and
+`getPhantomChangeRisk()` cannot see it either. Not lint-enforced. If a
+UI-pointer action (`setCurrentTask`, `setSelectedTask`, …) needs to change task
+data, dispatch a persistent action from a `LOCAL_ACTIONS` effect instead
+(`TaskInternalEffects.reopenStartedDoneTask$`, #9904).
+
 ## Boundary 2 — The selector boundary
 
 **Selector-driven mutating effects must guard the sync window. Choose whether

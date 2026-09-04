@@ -619,6 +619,54 @@ describe('Task Reducer', () => {
       expect(state.lastCurrentTaskId).toBe('task1');
     });
 
+    // setCurrentTask is not a persistent action, so any task-entity write here
+    // would never reach the op log and would silently diverge other devices
+    // (#9904). Re-opening a started done task is emitted as its own updateTask
+    // op by TaskInternalEffects.reopenStartedDoneTask$ instead.
+    it('should not touch isDone/doneOn when starting a done task', () => {
+      const doneTask = createTask('task2', { isDone: true, doneOn: 1234 });
+      const state = taskReducer(
+        { ...stateWithTasks, entities: { ...stateWithTasks.entities, task2: doneTask } },
+        fromActions.setCurrentTask({ id: 'task2' }),
+      );
+
+      expect(state.currentTaskId).toBe('task2');
+      expect(state.entities['task2']).toBe(doneTask);
+    });
+
+    it('should start the first undone subtask when starting a parent', () => {
+      const doneSub = createTask('subTask1', { parentId: 'task1', isDone: true });
+      const state = taskReducer(
+        {
+          ...stateWithTasks,
+          entities: { ...stateWithTasks.entities, subTask1: doneSub },
+        },
+        fromActions.setCurrentTask({ id: 'task1' }),
+      );
+
+      expect(state.currentTaskId).toBe('subTask2');
+    });
+
+    it('should start the first subtask without re-opening it when all subtasks are done', () => {
+      const doneSub1 = createTask('subTask1', { parentId: 'task1', isDone: true });
+      const doneSub2 = createTask('subTask2', { parentId: 'task1', isDone: true });
+      const state = taskReducer(
+        {
+          ...stateWithTasks,
+          entities: {
+            ...stateWithTasks.entities,
+            subTask1: doneSub1,
+            subTask2: doneSub2,
+          },
+        },
+        fromActions.setCurrentTask({ id: 'task1' }),
+      );
+
+      expect(state.currentTaskId).toBe('subTask1');
+      expect(state.entities['subTask1']).toBe(doneSub1);
+      expect(state.entities['subTask2']).toBe(doneSub2);
+    });
+
     it('should preserve lastCurrentTaskId on a no-op unsetCurrentTask', () => {
       const pausedState: TaskState = {
         ...stateWithTasks,
