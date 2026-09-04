@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -311,9 +312,26 @@ export class DialogEditIssueProviderComponent {
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.ISSUE.S.CONNECTION_FAILED_WITH_ERROR,
-        translateParams: { errorMsg: getErrorTxt(error) },
+        translateParams: { errorMsg: this._connectionErrorTxt(error) },
       });
     }
+  }
+
+  /**
+   * The status the user asked for in #9635, minus the request URL Angular bakes
+   * into `HttpErrorResponse.message`. iCal and CalDAV URLs regularly carry a
+   * secret token and are masked on export (`privacy-export.ts`), so they have no
+   * business in a toast that ends up in bug-report screenshots — and the URL is
+   * the one thing the user already knows, having just typed it in this dialog.
+   *
+   * Masked via the error's own `url` rather than by matching Angular's wording,
+   * so a reworded message still can't leak it.
+   */
+  private _connectionErrorTxt(error: unknown): string {
+    const txt = getErrorTxt(error);
+    return error instanceof HttpErrorResponse && error.url
+      ? txt.split(error.url).join('…')
+      : txt;
   }
 
   remove(): void {
