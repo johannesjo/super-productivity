@@ -329,10 +329,14 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     _isIosKeyboardSettled: boolean;
     _cssVarCache: Map<string, string>;
     _overlayContainer: { getContainerElement(): HTMLElement };
-    _iosViewportVarTarget: HTMLElement;
+    _keyboardVarTargetEl: HTMLElement | null;
     _iosShowSettle: OneShotSettle;
     _iosHideSettle: OneShotSettle;
     iosShellHeight: WritableSignal<string | null>;
+    _keyboardGeometry: {
+      keyboardHeightPx: WritableSignal<number>;
+      keyboardOverlayOffsetPx: WritableSignal<number>;
+    };
     _scrollActiveInputIntoView(): void;
     _environmentInjector: EnvironmentInjector;
   }
@@ -366,7 +370,6 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     visualViewport.height = visualViewportHeight;
   };
 
-  const rootVar = (name: string): string => root.style.getPropertyValue(name);
   /** Set on the CDK overlay container, which every overlay inherits from. */
   const overlayVar = (name: string): string =>
     overlayContainer.style.getPropertyValue(name);
@@ -434,6 +437,10 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     } as unknown as Document;
     harness._overlayContainer = { getContainerElement: () => overlayContainer };
     harness.iosShellHeight = signal<string | null>(null);
+    harness._keyboardGeometry = {
+      keyboardHeightPx: signal(0),
+      keyboardOverlayOffsetPx: signal(0),
+    };
     harness._destroyRef = { onDestroy: () => undefined };
     harness._keyboardListenerHandles = [];
     harness._focusinListener = null;
@@ -500,8 +507,8 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     willShow();
 
     expect(body.classList.contains(BodyClass.isKeyboardVisible)).toBe(true);
-    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
-    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    expect(overlayVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(overlayVar('--keyboard-overlay-offset')).toBe('0px');
     expect(overlayVar('--visual-viewport-height')).toBe(`${BASE_HEIGHT}px`);
     expect(harness.iosShellHeight()).toBe(
       `calc(${BASE_HEIGHT}px - var(--safe-area-top))`,
@@ -521,7 +528,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     );
     // The shrunken web view already ends above the keyboard; offsetting the
     // fixed bar again would move it twice (#8778).
-    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    expect(overlayVar('--keyboard-overlay-offset')).toBe('0px');
     flushRender();
     expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
   });
@@ -544,7 +551,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     willShow();
     didShow();
 
-    expect(rootVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(overlayVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
     expect(overlayVar('--visual-viewport-height')).toBe(
       `${BASE_HEIGHT - KEYBOARD_HEIGHT}px`,
     );
@@ -560,7 +567,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
 
     willShow(KEYBOARD_HEIGHT + 100);
 
-    expect(rootVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT + 100}px`);
+    expect(overlayVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT + 100}px`);
     expect(overlayVar('--visual-viewport-height')).toBe(
       `${BASE_HEIGHT - KEYBOARD_HEIGHT - 100}px`,
     );
@@ -589,8 +596,8 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     shrinkViewport(BASE_HEIGHT);
 
     expect(body.classList.contains(BodyClass.isKeyboardVisible)).toBe(false);
-    expect(rootVar('--keyboard-height')).toBe('0px');
-    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    expect(overlayVar('--keyboard-height')).toBe('0px');
+    expect(overlayVar('--keyboard-overlay-offset')).toBe('0px');
     expect(overlayVar('--visual-viewport-height')).toBe(`${BASE_HEIGHT}px`);
     // Handed back to the stylesheet, which sizes the shell without a keyboard.
     expect(harness.iosShellHeight()).toBeNull();
@@ -623,24 +630,47 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     // Mid-shrink the clamped frame stands. --keyboard-height has non-overlay
     // consumers so it has to live on <html>, and the obscured area moves every
     // frame — correcting here would be a root write per frame (#9779).
-    expect(rootVar('--keyboard-height')).toBe(`${BASE_HEIGHT * 0.6}px`);
+    expect(overlayVar('--keyboard-height')).toBe(`${BASE_HEIGHT * 0.6}px`);
 
     didShow();
 
-    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
-    expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+    expect(overlayVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(overlayVar('--keyboard-overlay-offset')).toBe('0px');
   });
 
-  it('does not write <html> per frame for a bogus keyboard frame either', () => {
+  it('does not rewrite the corrected height per frame either', () => {
     willShow(BASE_HEIGHT - 10);
-    const writesAfterShow = varWrites(setPropertySpy, '--keyboard-height');
+    const writesAfterShow = varWrites(overlaySetPropertySpy, '--keyboard-height');
 
     for (let step = 60; step <= 300; step += 60) {
       shrinkViewport(BASE_HEIGHT - step);
       flushFrame();
     }
 
-    expect(varWrites(setPropertySpy, '--keyboard-height')).toBe(writesAfterShow);
+    expect(varWrites(overlaySetPropertySpy, '--keyboard-height')).toBe(writesAfterShow);
+  });
+
+  // The whole point of #9779: a custom property on <html> invalidates the
+  // computed style of everything that could inherit it, which WebKit charges per
+  // node — ~220ms for ONE write against a 201-row task list, versus ~0.1ms for
+  // the same write on an element nothing inherits from (harness in e2e/measure/).
+  // #9809 moved --visual-viewport-height off the root and left these two behind;
+  // this is what stops them, or a third, drifting back.
+  it('never publishes keyboard geometry on <html>', () => {
+    willShow();
+    shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
+    didShow();
+    willHide();
+    didHide();
+
+    const rootWrites = setPropertySpy.calls
+      .allArgs()
+      .map(([name]) => name as string)
+      .filter(
+        (name) => name.startsWith('--keyboard') || name === '--visual-viewport-height',
+      );
+
+    expect(rootWrites).toEqual([]);
   });
 
   describe('when iOS drops keyboardDidShow', () => {
@@ -649,12 +679,12 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     it('settles on a timer instead', fakeAsync(() => {
       willShow();
 
-      expect(rootVar('--keyboard-overlay-offset')).toBe('0px');
+      expect(overlayVar('--keyboard-overlay-offset')).toBe('0px');
 
       tick(SETTLE_FALLBACK_MS);
       flushRender();
 
-      expect(rootVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
+      expect(overlayVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
       expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
     }));
 
@@ -692,7 +722,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
 
     // Re-measuring at the second willShow would clamp the keyboard against the
     // already-shrunken 464px and shrink the shell to 185.6px.
-    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(overlayVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
     expect(harness.iosShellHeight()).toBe(
       `calc(${BASE_HEIGHT - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
     );
@@ -738,7 +768,7 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     didShow();
     flushRender();
 
-    expect(rootVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
+    expect(overlayVar('--keyboard-height')).toBe(`${KEYBOARD_HEIGHT}px`);
     expect(harness.iosShellHeight()).toBe(
       `calc(${BASE_HEIGHT - KEYBOARD_HEIGHT}px - var(--safe-area-top))`,
     );
@@ -759,9 +789,9 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     );
   });
 
-  // The point of the split: <html> carries only variables that change once per
-  // open/close, never the one the animation drives frame by frame (#9779).
-  it('never writes the per-frame viewport height on <html>', () => {
+  // The point of the split: <html> carries none of the keyboard geometry, least
+  // of all the variable the animation drives frame by frame (#9779).
+  it('writes the per-frame viewport height on the overlay container only', () => {
     willShow();
     for (let step = 60; step <= 300; step += 60) {
       shrinkViewport(BASE_HEIGHT - step);
@@ -774,7 +804,9 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     expect(varWrites(setPropertySpy, '--visual-viewport-height')).toBe(0);
     // One per distinct height: the five shrinks plus the restore on hide.
     expect(varWrites(overlaySetPropertySpy, '--visual-viewport-height')).toBe(6);
-    expect(varWrites(setPropertySpy, '--keyboard-height')).toBe(2);
+    // The keyboard height changes once per open/close, and lands there too.
+    expect(varWrites(setPropertySpy, '--keyboard-height')).toBe(0);
+    expect(varWrites(overlaySetPropertySpy, '--keyboard-height')).toBe(2);
   });
 });
 

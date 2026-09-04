@@ -78,15 +78,16 @@
   // docs/android-edge-to-edge-keyboard.md).
   --bottom-nav-safe-area: calc(var(--safe-area-bottom) / 2);
 
-  // Keyboard height (set dynamically via JS)
+  // Fallbacks only, for all three. The live values are written on
+  // `.cdk-overlay-container` and — for the global add-task bar, which sits
+  // outside it — on that component's own host, never here: a custom property on
+  // :root restyles every element that could inherit it, and one such write
+  // measured ~220ms against a 201-row task list (#9779). Rules outside those two
+  // subtrees therefore see the fallbacks; anything in the app shell that needs a
+  // live value takes it from GlobalThemeService (`iosShellHeight`,
+  // `keyboardHeightPx`, `keyboardOverlayOffsetPx`), not from these variables.
   --keyboard-height: 0px;
   --keyboard-overlay-offset: 0px;
-  // Fallback only. On iOS the live value is written on `.cdk-overlay-container`,
-  // not here, because a custom property on :root restyles every element that
-  // could inherit it — the whole task list — on each frame of the keyboard
-  // animation (#9779). Rules outside the overlay layer therefore see 100vh:
-  // anything in the app shell that needs the live height gets it from
-  // GlobalThemeService (see `iosShellHeight`), not from this variable.
   --visual-viewport-height: 100vh;
 
   // -----------------------------

@@ -53,6 +53,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { HttpClient } from '@angular/common/http';
 import { CapacitorPlatformService } from '../platform/capacitor-platform.service';
+import { KeyboardGeometryService } from './keyboard-geometry.service';
 import { Keyboard, KeyboardInfo, KeyboardPlugin } from '@capacitor/keyboard';
 import { PluginListenerHandle, registerPlugin } from '@capacitor/core';
 import { OverlayContainer } from '@angular/cdk/overlay';
@@ -213,6 +214,7 @@ export class GlobalThemeService {
   private _destroyRef = inject(DestroyRef);
   private _inputIntentService = inject(InputIntentService);
   private _overlayContainer = inject(OverlayContainer);
+  private _keyboardGeometry = inject(KeyboardGeometryService);
   private _hasInitialized = false;
   private _keyboardListenerHandles: PluginListenerHandle[] = [];
   private _focusinListener: ((event: FocusEvent) => void) | null = null;
@@ -234,21 +236,25 @@ export class GlobalThemeService {
   // Last value written per CSS variable, so a repeated write (the keyboard
   // animation fires many identical visualViewport resizes) costs nothing.
   private readonly _cssVarCache = new Map<string, string>();
-  // Where --visual-viewport-height goes; see _initIOSKeyboardHandling, which
-  // assigns it before the first update and before any listener is registered.
-  // Definitely assigned rather than nullable: a fallback to <html> here would be
-  // cached by _setCssVar and silently suppress the later write to the real
-  // target, leaving dialogs on the 100vh fallback for the session.
-  private _iosViewportVarTarget!: HTMLElement;
+  private _keyboardVarTargetEl: HTMLElement | null = null;
 
   /**
-   * Height for the app shell while the iOS keyboard is open, as a CSS value, or
-   * null to leave the sizing to the stylesheet. Bound by app.component rather
-   * than published as a custom property: the shell wraps the whole task list,
-   * and a variable it inherits costs a document-wide style recalc on every
-   * frame of the keyboard animation (#9779).
+   * Where every keyboard geometry variable goes — the CDK overlay container,
+   * never `<html>`: a root custom property invalidates the computed style of
+   * every element that could inherit it, measured at ~220ms for ONE write on a
+   * 201-row list against ~0.1ms on an element nothing inherits from (#9779,
+   * harness in `e2e/measure/`). Lazy so both keyboard trackers share a target.
    */
-  readonly iosShellHeight = signal<string | null>(null);
+  private get _keyboardVarTarget(): HTMLElement {
+    return (this._keyboardVarTargetEl ??= this._overlayContainer.getContainerElement());
+  }
+
+  /**
+   * Re-exported for app.component, the long-standing consumer. New readers
+   * should inject KeyboardGeometryService directly — see its doc comment for
+   * why the geometry is bound rather than published on `<html>`.
+   */
+  readonly iosShellHeight = this._keyboardGeometry.iosShellHeight;
 
   private _isCustomWindowTitleBarEnabled(): boolean {
     // The main process (main-window.ts) force-disables the custom title bar on
@@ -716,8 +722,8 @@ export class GlobalThemeService {
     keyboard.setAccessoryBarVisible({ isVisible: false });
     // Resolved up front (this creates the container if CDK has not yet needed
     // it) so a dialog opened while the keyboard is already up finds the
-    // variable in place.
-    this._iosViewportVarTarget = this._overlayContainer.getContainerElement();
+    // variables in place.
+    this._keyboardVarTargetEl = this._overlayContainer.getContainerElement();
     this._updateIOSKeyboardViewportVars();
 
     if (window.visualViewport) {
@@ -775,10 +781,11 @@ export class GlobalThemeService {
         this.document.body.classList.add(BodyClass.isKeyboardVisible);
         // Set CSS variable for keyboard height to adjust layout
         this._setCssVar(
-          this.document.documentElement,
+          this._keyboardVarTarget,
           CSS_VAR_KEYBOARD_HEIGHT,
           `${keyboardHeight}px`,
         );
+        this._keyboardGeometry.keyboardHeightPx.set(keyboardHeight);
         this._updateIOSKeyboardViewportVars();
       })
       .then((handle) => this._keyboardListenerHandles.push(handle));
@@ -802,9 +809,11 @@ export class GlobalThemeService {
         // view is actually back to full size instead.
         this._iosHideSettle.arm(() => this._clearIosKeyboardBaseline());
         this.document.body.classList.remove(BodyClass.isKeyboardVisible);
-        const root = this.document.documentElement;
-        this._setCssVar(root, CSS_VAR_KEYBOARD_HEIGHT, '0px');
-        this._setCssVar(root, CSS_VAR_KEYBOARD_OVERLAY_OFFSET, '0px');
+        const target = this._keyboardVarTarget;
+        this._setCssVar(target, CSS_VAR_KEYBOARD_HEIGHT, '0px');
+        this._setCssVar(target, CSS_VAR_KEYBOARD_OVERLAY_OFFSET, '0px');
+        this._keyboardGeometry.keyboardHeightPx.set(0);
+        this._keyboardGeometry.keyboardOverlayOffsetPx.set(0);
         this._updateIOSKeyboardViewportVars();
       })
       .then((handle) => this._keyboardListenerHandles.push(handle));
@@ -885,30 +894,27 @@ export class GlobalThemeService {
       isKeyboardFrameUnreliable: this._iosKeyboardFrameUnreliable,
     });
 
-    const root = this.document.documentElement;
+    const target = this._keyboardVarTarget;
     let hasChanged = this._setCssVar(
-      // Not on <html>: a custom property there invalidates every element that
-      // could inherit it, which WebKit charges per node — measured at ~390ms per
-      // write on a 200-task list, on every frame of the keyboard animation
-      // (#9779). Only overlay panes read this one, so it lives on their
-      // container; the app shell gets a plain height below.
-      this._iosViewportVarTarget,
+      target,
       CSS_VAR_VISUAL_VIEWPORT_HEIGHT,
       `${vars.visualViewportHeightPx}px`,
     );
     hasChanged =
       this._setCssVar(
-        root,
+        target,
         CSS_VAR_KEYBOARD_OVERLAY_OFFSET,
         `${vars.keyboardOverlayOffsetPx}px`,
       ) || hasChanged;
+    this._keyboardGeometry.keyboardOverlayOffsetPx.set(vars.keyboardOverlayOffsetPx);
     if (vars.correctedKeyboardHeightPx !== null) {
       hasChanged =
         this._setCssVar(
-          root,
+          target,
           CSS_VAR_KEYBOARD_HEIGHT,
           `${vars.correctedKeyboardHeightPx}px`,
         ) || hasChanged;
+      this._keyboardGeometry.keyboardHeightPx.set(vars.correctedKeyboardHeightPx);
     }
     this.iosShellHeight.set(
       this._iosKeyboardHeight > 0
@@ -971,7 +977,6 @@ export class GlobalThemeService {
   private _initVisualViewportKeyboardTracking(): void {
     const vv = window.visualViewport;
     if (!vv) return;
-    const root = this.document.documentElement;
     // Filter out small differences from URL bar / overlay UI rather than the
     // IME — keeps us from setting a phantom keyboard offset.
     const KEYBOARD_THRESHOLD_PX = 100;
@@ -989,7 +994,13 @@ export class GlobalThemeService {
     const commit = (): void => {
       const obscured = window.innerHeight - vv.height;
       const keyboardHeight = obscured > KEYBOARD_THRESHOLD_PX ? obscured : 0;
-      root.style.setProperty(CSS_VAR_KEYBOARD_HEIGHT, `${keyboardHeight}px`);
+      // Same target as the iOS path, for the same reason — see _keyboardVarTarget.
+      this._setCssVar(
+        this._keyboardVarTarget,
+        CSS_VAR_KEYBOARD_HEIGHT,
+        `${keyboardHeight}px`,
+      );
+      this._keyboardGeometry.keyboardHeightPx.set(keyboardHeight);
     };
 
     const onViewportResize = (): void => {

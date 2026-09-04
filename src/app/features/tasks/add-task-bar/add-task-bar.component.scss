@@ -53,6 +53,9 @@
   // #9277), so max() just picks out whichever term is live on the platform at
   // hand. `--s2` rather than `--s`, which leaves the buttons flush against the
   // obstruction and awkward to tap.
+  //
+  // `--keyboard-height` resolves off this component's own host, where the `host`
+  // block binds it — it is deliberately not published on :root (#9779).
   bottom: calc(max(var(--keyboard-height), var(--safe-area-bottom)) + var(--s2));
   transition: bottom var(--transition-duration-m) ease-out;
 }

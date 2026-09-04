@@ -18,6 +18,7 @@ import { LocalizationConfig, MiscConfig } from '../../config/global-config.model
 import { first } from 'rxjs/operators';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { signal, Signal } from '@angular/core';
+import { KeyboardGeometryService } from '../../../core/theme/keyboard-geometry.service';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskCopy, TaskReminderOptionId } from '../task.model';
@@ -340,18 +341,23 @@ describe('AddTaskBarComponent', () => {
   describe('mobile keyboard positioning', () => {
     let hadTouchPrimaryClass: boolean;
     let hadIOSClass: boolean;
+    let keyboardGeometry: KeyboardGeometryService;
 
     beforeEach(() => {
+      // Driven through the signals rather than by writing the custom properties
+      // here, because that is how they reach the host now: the bar binds them
+      // onto itself instead of reading them off `<html>` (#9779).
+      keyboardGeometry = TestBed.inject(KeyboardGeometryService);
       hadTouchPrimaryClass = document.body.classList.contains(BodyClass.isTouchPrimary);
       hadIOSClass = document.body.classList.contains(BodyClass.isIOS);
       document.body.classList.add(BodyClass.isTouchPrimary);
       document.body.classList.remove(BodyClass.isIOS);
       fixture.nativeElement.classList.add('global');
-      fixture.nativeElement.style.setProperty('--keyboard-height', '336px');
+      keyboardGeometry.keyboardHeightPx.set(336);
+      keyboardGeometry.keyboardOverlayOffsetPx.set(0);
       // Non-zero for every case in this block, so the assertions below pin
       // whether each offset stacks with the bottom inset or supersedes it.
       fixture.nativeElement.style.setProperty('--safe-area-bottom', '48px');
-      fixture.nativeElement.style.setProperty('--keyboard-overlay-offset', '0px');
       fixture.nativeElement.style.setProperty('--s', '8px');
       fixture.nativeElement.style.setProperty('--s2', '16px');
       fixture.nativeElement.style.setProperty('--transition-duration-m', '0ms');
@@ -374,7 +380,8 @@ describe('AddTaskBarComponent', () => {
 
     it('keeps the global bar above an iOS keyboard that still overlays the viewport', () => {
       document.body.classList.add(BodyClass.isIOS);
-      fixture.nativeElement.style.setProperty('--keyboard-overlay-offset', '40px');
+      keyboardGeometry.keyboardOverlayOffsetPx.set(40);
+      fixture.detectChanges();
 
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('56px');
     });
@@ -384,7 +391,8 @@ describe('AddTaskBarComponent', () => {
     });
 
     it('keeps the global bar above the bottom safe area without a keyboard', () => {
-      fixture.nativeElement.style.setProperty('--keyboard-height', '0px');
+      keyboardGeometry.keyboardHeightPx.set(0);
+      fixture.detectChanges();
       fixture.nativeElement.style.setProperty('--safe-area-bottom', '48px');
 
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('64px');

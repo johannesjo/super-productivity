@@ -9,8 +9,8 @@ import { BodyClass } from '../../app.constants';
 class KeyboardContractDialogComponent {}
 
 /**
- * The rendered half of #9779's split: GlobalThemeService writes
- * `--visual-viewport-height` on the CDK overlay container instead of `<html>`,
+ * The rendered half of #9779's split: GlobalThemeService writes the keyboard
+ * geometry variables on the CDK overlay container instead of `<html>`,
  * which only holds up if the rules that consume it sit inside that container
  * and inherit it. The service spec pins where the value is written; this pins
  * that writing it there still produces the layout the stylesheet promises.
@@ -46,7 +46,6 @@ describe('iOS keyboard CSS contract', () => {
     TestBed.inject(MatDialog).closeAll();
     TestBed.tick();
     document.querySelectorAll('.cdk-overlay-container').forEach((el) => el.remove());
-    document.documentElement.style.removeProperty('--keyboard-overlay-offset');
     document.body.classList.remove(
       BodyClass.isNativeMobile,
       BodyClass.isIOS,
@@ -85,10 +84,14 @@ describe('iOS keyboard CSS contract', () => {
     );
   });
 
-  // This one stays on <html>: it changes at most once per open/close, and the
-  // add-task bar reads it from outside the overlay layer.
-  it('reserves keyboard space in the overlay wrapper from the root variable', () => {
-    document.documentElement.style.setProperty(
+  // This used to stay on <html> on the grounds that it changes at most once per
+  // open/close. It does — and that single write measured ~220ms against a
+  // 201-row task list, because a root custom property invalidates the computed
+  // style of everything that could inherit it (#9779). It now lands here, and
+  // the add-task bar, which sits outside this container, binds it onto its own
+  // host instead.
+  it('reserves keyboard space in the overlay wrapper from the container variable', () => {
+    overlayContainer.style.setProperty(
       '--keyboard-overlay-offset',
       `${KEYBOARD_OVERLAY_OFFSET_PX}px`,
     );

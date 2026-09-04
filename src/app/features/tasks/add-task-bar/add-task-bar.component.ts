@@ -28,6 +28,7 @@ import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy, TaskReminderOptionId } from '../task.model';
 import { TaskService } from '../task.service';
+import { KeyboardGeometryService } from '../../../core/theme/keyboard-geometry.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContext, WorkContextType } from '../../work-context/work-context.model';
 import { ProjectService } from '../../project/project.service';
@@ -96,6 +97,21 @@ export interface TaskAddEvent {
   isNewTask: boolean;
 }
 
+// The bar is fixed-position outside the CDK overlay container, so it cannot
+// inherit the keyboard geometry written there — it takes the two values it
+// positions itself with straight onto its own host instead. They are NOT
+// published on `<html>`: a root custom property restyles every element that
+// could inherit it, ~220ms for one write on a 201-row task list (#9779).
+// Keys are hoisted into consts so they read as identifiers to the
+// naming-convention lint rule, as in schedule-month.component.ts.
+const HOST_KEYBOARD_HEIGHT_VAR = '[style.--keyboard-height.px]' as const;
+const HOST_KEYBOARD_OVERLAY_OFFSET_VAR = '[style.--keyboard-overlay-offset.px]' as const;
+
+const HOST_BINDINGS = {
+  [HOST_KEYBOARD_HEIGHT_VAR]: 'keyboardHeightPx()',
+  [HOST_KEYBOARD_OVERLAY_OFFSET_VAR]: 'keyboardOverlayOffsetPx()',
+} as const;
+
 @Component({
   selector: 'add-task-bar',
   templateUrl: './add-task-bar.component.html',
@@ -123,9 +139,11 @@ export interface TaskAddEvent {
     SelectOptionRowComponent,
   ],
   providers: [AddTaskBarStateService, AddTaskBarParserService],
+  host: HOST_BINDINGS,
 })
 export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _taskService = inject(TaskService);
+  private readonly _keyboardGeometry = inject(KeyboardGeometryService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _projectService = inject(ProjectService);
   private readonly _tagService = inject(TagService);
@@ -141,6 +159,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _markdownPasteService = inject(MarkdownPasteService);
   private readonly _dateService = inject(DateService);
   private readonly _menuTreeService = inject(MenuTreeService);
+  /** Bound onto the host; see the `host` block for why not `<html>`. */
+  readonly keyboardHeightPx = this._keyboardGeometry.keyboardHeightPx;
+  readonly keyboardOverlayOffsetPx = this._keyboardGeometry.keyboardOverlayOffsetPx;
+
   readonly stateService = inject(AddTaskBarStateService);
 
   T = T;
