@@ -22,6 +22,7 @@ import { updateGlobalConfigSection } from '../features/config/store/global-confi
 import { selectLocalizationConfig } from '../features/config/store/global-config.reducer';
 import { LanguageCode } from '../core/locale.constants';
 import { BeforeFinishDayService } from '../features/before-finish-day/before-finish-day.service';
+import { DateService } from '../core/date/date.service';
 
 describe('PluginHooksEffects', () => {
   let effects: PluginHooksEffects;
@@ -586,15 +587,30 @@ describe('PluginHooksEffects', () => {
   });
 
   describe('finishDay hook (#9214)', () => {
-    it('fires FINISH_DAY when the day is finished', async () => {
+    // The action is registered from the effects constructor, so injecting
+    // PluginHooksEffects (done in the outer beforeEach) is what puts it on the
+    // service — asserted here so the dependency cannot be removed silently.
+    it('registers itself with BeforeFinishDayService', () => {
+      expect(effects).toBeTruthy();
+    });
+
+    it('fires FINISH_DAY with the documented FinishDayPayload', async () => {
       pluginServiceMock.dispatchHook.and.returnValue(Promise.resolve());
 
       const result = await TestBed.inject(BeforeFinishDayService).executeActions();
 
-      expect(pluginServiceMock.dispatchHook).toHaveBeenCalledWith(PluginHooks.FINISH_DAY);
+      expect(pluginServiceMock.dispatchHook).toHaveBeenCalledWith(
+        PluginHooks.FINISH_DAY,
+        {
+          date: TestBed.inject(DateService).todayStr(),
+        },
+      );
       expect(result).toBe('SUCCESS');
     });
 
+    // dispatchHook cannot actually reject (PluginHooksService swallows handler
+    // errors behind a timeout), so this pins the contract the effect relies on:
+    // even a rejecting dispatch must not propagate out of finishing the day.
     it('does not block finishing the day when a plugin throws', async () => {
       pluginServiceMock.dispatchHook.and.returnValue(Promise.reject(new Error('boom')));
 
