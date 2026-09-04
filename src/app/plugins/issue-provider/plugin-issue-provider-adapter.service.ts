@@ -60,7 +60,10 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
         `[PluginIssueAdapter] testConnection failed for ${pluginCfg.issueProviderKey}:`,
         e,
       );
-      return false;
+      // Rethrow rather than collapsing to `false`: the only caller is the provider
+      // dialog's Test connection button, and swallowing the reason left every
+      // plugin provider with nothing to show but "Connection failed" (#9635).
+      throw e;
     }
   }
 

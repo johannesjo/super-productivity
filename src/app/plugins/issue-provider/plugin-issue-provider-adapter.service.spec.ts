@@ -170,19 +170,22 @@ describe('PluginIssueProviderAdapterService', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false when testConnection rejects', async () => {
+    // Rethrows rather than collapsing to `false`: the dialog can only show a
+    // reason if it gets one, and swallowing it left every plugin provider with a
+    // bare "Connection failed" (#9635).
+    it('should surface the reason when testConnection rejects', async () => {
       const testConnectionSpy = jasmine
         .createSpy('testConnection')
-        .and.rejectWith(new Error('Connection failed'));
+        .and.rejectWith(new Error('401 Unauthorized'));
       const provider = createMockProvider({ testConnection: testConnectionSpy });
       registrySpy.getProvider.and.returnValue(provider);
       spyOn(console, 'error');
 
-      const result = await service.testConnection(
-        mockPluginCfg as unknown as Parameters<typeof service.testConnection>[0],
-      );
-
-      expect(result).toBe(false);
+      await expectAsync(
+        service.testConnection(
+          mockPluginCfg as unknown as Parameters<typeof service.testConnection>[0],
+        ),
+      ).toBeRejectedWithError('401 Unauthorized');
       expect(console.error).toHaveBeenCalled();
     });
   });

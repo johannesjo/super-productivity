@@ -72,6 +72,7 @@ import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../common-issue-form-stuff.co
 import { TagService } from '../../tag/tag.service';
 import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
 import { unique } from '../../../util/unique';
+import { getErrorTxt } from '../../../util/get-error-text';
 import { mergeIssueProviderModelUpdates } from './issue-provider-model-merge.util';
 
 type OptionsLoadState = 'idle' | 'loading' | 'loaded' | 'empty' | 'failed';
@@ -304,9 +305,13 @@ export class DialogEditIssueProviderComponent {
       }
     } catch (error) {
       this.isConnectionWorks.set(false);
+      // Two keys, not one with an "Unknown error" placeholder: the else branch
+      // above genuinely has nothing to add, while here there is a real reason to
+      // show (#9635, #9636).
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.ISSUE.S.CONNECTION_FAILED,
+        msg: T.F.ISSUE.S.CONNECTION_FAILED_WITH_ERROR,
+        translateParams: { errorMsg: getErrorTxt(error) },
       });
     }
   }
