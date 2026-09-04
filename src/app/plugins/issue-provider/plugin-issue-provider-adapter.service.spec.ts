@@ -784,6 +784,133 @@ describe('PluginIssueProviderAdapterService', () => {
         expect(result!.taskChanges['notes' as keyof Task]).toBeUndefined();
       });
 
+      // Regression: gating the mappings was not enough. _buildBaseIssueTask
+      // emits title/isDone straight from the raw issue, and the refresh path
+      // spread it under the gated changes — so `off` still overwrote the local
+      // title, and with the RAW value, losing what toTaskValue would have added
+      // (github-issue-provider prefixes `#<number> `).
+      it('should not overwrite a local title when the title direction is off', async () => {
+        const freshIssue = {
+          id: 'ISS-1',
+          title: 'Raw remote title',
+          lastUpdated: 2000,
+        } as unknown as PluginIssue;
+        const provider = createMockProvider({
+          getById: jasmine.createSpy('getById').and.resolveTo(freshIssue),
+          fieldMappings: [
+            {
+              taskField: 'title',
+              issueField: 'title',
+              defaultDirection: 'pullOnly',
+              toIssueValue: (v: unknown) => v,
+              toTaskValue: (v: unknown) => `#1 ${v as string}`,
+            },
+          ] as PluginFieldMapping[],
+          extractSyncValues: jasmine
+            .createSpy('extractSyncValues')
+            .and.returnValue({ title: 'Raw remote title' }),
+        });
+        registrySpy.getProvider.and.returnValue(provider);
+        storeSpy.select.and.returnValue(
+          of({
+            ...mockPluginCfg,
+            pluginConfig: { ...mockPluginConfig, twoWaySync: { title: 'off' } },
+          } as IssueProviderPluginType),
+        );
+
+        const task = {
+          id: 'task-1',
+          issueId: 'ISS-1',
+          issueProviderId: PROVIDER_ID,
+          issueLastUpdated: 1000,
+          title: 'My own title',
+          issueLastSyncedValues: {},
+        } as unknown as Task;
+
+        const result = await service.getFreshDataForIssueTask(task);
+
+        expect(result).not.toBeNull();
+        expect(result!.taskChanges['title' as keyof Task]).toBeUndefined();
+      });
+
+      it('should not overwrite isDone when the status direction is off', async () => {
+        const freshIssue = {
+          id: 'ISS-1',
+          title: 'Unchanged',
+          state: 'closed',
+          lastUpdated: 2000,
+        } as unknown as PluginIssue;
+        const provider = createMockProvider({
+          getById: jasmine.createSpy('getById').and.resolveTo(freshIssue),
+          fieldMappings: [
+            {
+              taskField: 'isDone',
+              issueField: 'state',
+              defaultDirection: 'pullOnly',
+              toIssueValue: (v: unknown) => v,
+              toTaskValue: (v: unknown) => v === 'closed',
+            },
+          ] as PluginFieldMapping[],
+          extractSyncValues: jasmine
+            .createSpy('extractSyncValues')
+            .and.returnValue({ state: 'closed' }),
+        });
+        registrySpy.getProvider.and.returnValue(provider);
+        storeSpy.select.and.returnValue(
+          of({
+            ...mockPluginCfg,
+            pluginConfig: { ...mockPluginConfig, twoWaySync: { isDone: 'off' } },
+          } as IssueProviderPluginType),
+        );
+
+        const task = {
+          id: 'task-1',
+          issueId: 'ISS-1',
+          issueProviderId: PROVIDER_ID,
+          issueLastUpdated: 1000,
+          isDone: false,
+          issueLastSyncedValues: {},
+        } as unknown as Task;
+
+        const result = await service.getFreshDataForIssueTask(task);
+
+        expect(result).not.toBeNull();
+        expect(result!.taskChanges['isDone' as keyof Task]).toBeUndefined();
+      });
+
+      // _buildBaseIssueTask turns a numeric `start` into a dueDay with no
+      // mapping and no direction behind it, so a refresh must not reschedule
+      // a task the user has already planned.
+      it('should not set a due date from the raw issue on refresh', async () => {
+        const freshIssue = {
+          id: 'ISS-1',
+          title: 'Unchanged',
+          start: new Date('2026-03-20T10:00:00.000Z').getTime(),
+          lastUpdated: 2000,
+        } as unknown as PluginIssue;
+        const provider = createMockProvider({
+          getById: jasmine.createSpy('getById').and.resolveTo(freshIssue),
+          fieldMappings: [] as PluginFieldMapping[],
+          extractSyncValues: jasmine.createSpy('extractSyncValues').and.returnValue({}),
+        });
+        registrySpy.getProvider.and.returnValue(provider);
+        storeSpy.select.and.returnValue(of(mockPluginCfg));
+
+        const task = {
+          id: 'task-1',
+          issueId: 'ISS-1',
+          issueProviderId: PROVIDER_ID,
+          issueLastUpdated: 1000,
+          issueLastSyncedValues: {},
+        } as unknown as Task;
+
+        const result = await service.getFreshDataForIssueTask(task);
+
+        expect(result).not.toBeNull();
+        expect(result!.taskChanges['dueDay' as keyof Task]).toBeUndefined();
+        expect(result!.taskChanges['dueWithTime' as keyof Task]).toBeUndefined();
+      });
+
       // The direction is `both` here, so this is the local-edit guard rather
       // than the direction one: the remote did not touch the field, so whatever
       // the user changed locally must survive the refresh. Note the single

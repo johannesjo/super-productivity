@@ -24,6 +24,10 @@ import { getDbDateStr } from '../../util/get-db-date-str';
 import { T } from '../../t.const';
 import { PluginLog } from '../../core/log';
 
+// Same shape as short-syntax-shared.reducer.ts: Task's fields are readonly,
+// so a partial that fields can be deleted from needs the modifier stripped.
+type MutableTaskChanges = { -readonly [K in keyof Task]?: Task[K] };
+
 @Injectable({ providedIn: 'root' })
 export class PluginIssueProviderAdapterService implements IssueServiceInterface {
   private _registry = inject(PluginIssueProviderRegistryService);
@@ -230,15 +234,29 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
         // Compute sync values once and pass through to avoid redundant calls
         const issueLastSyncedValues = this._extractSyncValues(issue, resolved.provider);
 
-        // Only the intrinsic issue fields here — NOT the mapped ones. On the
-        // refresh path _applyFieldMappingPull is the single owner of every
-        // mapped field, because it is the only one that honours both the
-        // per-field sync direction and "the remote has not changed this since
-        // the last sync". Merging a second, unconditional pass over the same
-        // mappings on top of it is what let a field the user configured `off`
-        // (notes <- body, most commonly) — or one nobody touched remotely —
-        // overwrite what they had written locally.
-        const baseTaskData = this._buildBaseIssueTask(issue);
+        // _buildBaseIssueTask emits content fields — title, isDone, and a due
+        // date when the issue carries one — straight from the raw issue. Two
+        // of them must not survive into a refresh:
+        //
+        // A field mapping declares OWNERSHIP of its task field. Where one
+        // exists, _applyFieldMappingPull is the only writer, because it alone
+        // honours the per-field sync direction and "the remote changed this
+        // since the last sync". Letting base through underneath it is what
+        // overwrote a field the user had set to `off`/`pushOnly` — and with the
+        // RAW value, skipping the mapping's toTaskValue, so a GitHub title also
+        // lost the `#123 ` prefix it had before. Where NO mapping exists there
+        // is no direction to violate, so base stays the fallback and the task
+        // keeps following the issue as it always has.
+        //
+        // Due dates are dropped either way: they are set on task creation and
+        // never re-pulled, so a refresh cannot reschedule what the user has
+        // planned. Same rule as BaseIssueProviderService.getFreshDataForIssueTask.
+        const baseTaskData: MutableTaskChanges = this._buildBaseIssueTask(issue);
+        delete baseTaskData.dueDay;
+        delete baseTaskData.dueWithTime;
+        for (const mapping of resolved.provider.definition.fieldMappings ?? []) {
+          delete baseTaskData[mapping.taskField];
+        }
 
         // Apply field mappings to pull changes from issue to task
         const fieldChanges = this._applyFieldMappingPull(
