@@ -230,6 +230,7 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
           issue,
           resolved.provider,
           issueLastSyncedValues,
+          (cfg.pluginConfig?.['twoWaySync'] as Record<string, string>) ?? {},
         );
 
         // Apply field mappings to pull changes from issue to task
@@ -394,10 +395,19 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
     return result;
   }
 
+  /**
+   * Maps issue fields onto task fields.
+   *
+   * `twoWaySync` is passed only when refreshing an existing task, where a field
+   * the user configured as `off` or `pushOnly` must not be pulled back over what
+   * they wrote locally. On import there is no local content to protect and every
+   * mapping applies, so the caller passes nothing.
+   */
   private _extractTaskFieldsFromIssueWithSyncValues(
     issue: PluginIssue,
     provider: RegisteredPluginIssueProvider,
     syncValues: Record<string, unknown>,
+    twoWaySync?: Record<string, string>,
   ): Record<string, unknown> {
     const issueRecord = issue as Record<string, unknown>;
     const result: Record<string, unknown> = {};
@@ -408,6 +418,12 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
       return {};
     }
     for (const mapping of mappings) {
+      if (twoWaySync) {
+        const dir = twoWaySync[mapping.taskField] ?? mapping.defaultDirection;
+        if (dir !== 'pullOnly' && dir !== 'both') {
+          continue;
+        }
+      }
       const issueValue =
         syncValues[mapping.issueField] ?? issueRecord[mapping.issueField];
       if (issueValue == null) {
@@ -428,6 +444,7 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
     issueData: IssueDataReduced,
     provider: RegisteredPluginIssueProvider,
     syncValues: Record<string, unknown>,
+    twoWaySync?: Record<string, string>,
   ): IssueTask {
     const data = issueData as PluginIssue;
     const base = this._buildBaseIssueTask(data);
@@ -435,6 +452,7 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
       data,
       provider,
       syncValues,
+      twoWaySync,
     );
     return { ...base, ...fieldValues } as IssueTask;
   }
