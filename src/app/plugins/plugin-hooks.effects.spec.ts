@@ -21,6 +21,7 @@ import { PluginUserData } from './plugin-persistence.model';
 import { updateGlobalConfigSection } from '../features/config/store/global-config.actions';
 import { selectLocalizationConfig } from '../features/config/store/global-config.reducer';
 import { LanguageCode } from '../core/locale.constants';
+import { BeforeFinishDayService } from '../features/before-finish-day/before-finish-day.service';
 
 describe('PluginHooksEffects', () => {
   let effects: PluginHooksEffects;
@@ -581,6 +582,25 @@ describe('PluginHooksEffects', () => {
         sub.unsubscribe();
         done();
       }, 0);
+    });
+  });
+
+  describe('finishDay hook (#9214)', () => {
+    it('fires FINISH_DAY when the day is finished', async () => {
+      pluginServiceMock.dispatchHook.and.returnValue(Promise.resolve());
+
+      const result = await TestBed.inject(BeforeFinishDayService).executeActions();
+
+      expect(pluginServiceMock.dispatchHook).toHaveBeenCalledWith(PluginHooks.FINISH_DAY);
+      expect(result).toBe('SUCCESS');
+    });
+
+    it('does not block finishing the day when a plugin throws', async () => {
+      pluginServiceMock.dispatchHook.and.returnValue(Promise.reject(new Error('boom')));
+
+      const result = await TestBed.inject(BeforeFinishDayService).executeActions();
+
+      expect(result).toBe('ERROR');
     });
   });
 });

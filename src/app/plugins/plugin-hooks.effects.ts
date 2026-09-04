@@ -52,6 +52,8 @@ import { toActiveWorkContext } from './util/active-work-context.util';
 import { SyncTriggerService } from '../imex/sync/sync-trigger.service';
 import { selectPluginUserDataFeatureState } from './store/plugin-user-data.reducer';
 import { diffChangedPluginIds } from './util/plugin-data-diff.util';
+import { BeforeFinishDayService } from '../features/before-finish-day/before-finish-day.service';
+import { PluginLog } from '../core/log';
 
 @Injectable()
 export class PluginHooksEffects {
@@ -61,6 +63,7 @@ export class PluginHooksEffects {
   private readonly pluginI18nService = inject(PluginI18nService);
   private readonly workContextService = inject(WorkContextService);
   private readonly syncTrigger = inject(SyncTriggerService);
+  private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
 
   taskComplete$ = createEffect(
     () =>
@@ -246,16 +249,24 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  finishDay$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        filter((action) => action.type === 'FINISH_DAY'),
-        tap(() => {
-          this.pluginService.dispatchHook(PluginHooks.FINISH_DAY);
-        }),
-      ),
-    { dispatch: false },
-  );
+  constructor() {
+    // There is no FINISH_DAY action: the daily summary calls
+    // BeforeFinishDayService directly, so the effect that used to filter for one
+    // never fired and the documented finishDay hook was dead since it was added
+    // (#9214). Registering it here also means the day is not archived until every
+    // plugin listening has had its turn.
+    this._beforeFinishDayService.addAction(async () => {
+      try {
+        await this.pluginService.dispatchHook(PluginHooks.FINISH_DAY);
+        return 'SUCCESS';
+      } catch (e) {
+        // A misbehaving plugin must not stop the user finishing their day; the
+        // caller ignores the result, so this only records what happened.
+        PluginLog.err('[PluginHooks] finishDay hook failed', e);
+        return 'ERROR';
+      }
+    });
+  }
 
   // Trigger for ANY task update (add, update, delete, move subtasks)
   anyTaskUpdate$ = createEffect(

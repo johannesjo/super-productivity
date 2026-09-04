@@ -37,7 +37,6 @@ import {
 import { DateService } from 'src/app/core/date/date.service';
 
 import { EntityState } from '@ngrx/entity';
-import { Action } from '@ngrx/store';
 import { TranslatePipe, TranslateService, TranslateStore } from '@ngx-translate/core';
 
 import { IS_ELECTRON } from '../../app.constants';
@@ -262,8 +261,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   isBreakTrackingSupport$: Observable<boolean> = this.configService.idle$.pipe(
     map((cfg) => cfg && cfg.isEnableIdleTimeTracking),
   );
-
-  actionsToExecuteBeforeFinishDay: Action[] = [{ type: 'FINISH_DAY' }];
 
   cfg = toSignal(this.cfg$);
   dailySummaryNoteTxt = linkedSignal(() => this.cfg()?.dailySummaryNote?.txt);
