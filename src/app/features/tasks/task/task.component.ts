@@ -16,6 +16,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
+import { TaskDuplicateService } from '../task-duplicate.service';
 import { EMPTY, forkJoin, Subscription } from 'rxjs';
 import {
   HideSubTasksMode,
@@ -171,6 +172,7 @@ import { getSubTaskTimeLeftForDisplay } from '../util/get-sub-task-time-left-for
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _taskService = inject(TaskService);
+  private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _location = inject(Location);
@@ -942,6 +944,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this._taskService.showSubTasks(task.id);
     }
     this._addSubtaskInputService.requestOpen(parentId);
+  }
+
+  duplicateTask(): void {
+    this._taskDuplicateService.duplicate(this.task());
   }
 
   onAddSubtaskInputClosed(reason: AddSubtaskInputCloseReason): void {

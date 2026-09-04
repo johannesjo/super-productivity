@@ -96,9 +96,7 @@ describe('LocalBackupService', () => {
       cfg$: of({ localBackup: { isEnabled: false } }),
     });
     backupServiceSpy = jasmine.createSpyObj('BackupService', ['importCompleteBackup']);
-    localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', [
-      'deleteDraftsForActiveProfile',
-    ]);
+    localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', ['deleteAllDrafts']);
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     translateServiceSpy = jasmine.createSpyObj('TranslateService', ['instant']);
     platformServiceSpy = jasmine.createSpyObj('CapacitorPlatformService', ['isIOS']);
@@ -856,15 +854,15 @@ describe('LocalBackupService', () => {
       );
     });
 
-    it('should clear the active profiles crash-safe drafts after a restore', async () => {
-      // The restore replaced this profile's notes wholesale, so every draft's
+    it('should clear crash-safe drafts after a restore', async () => {
+      // The restore replaced the notes wholesale, so every draft's
       // baseContent now refers to content that no longer exists and would only
       // offer misleading recovery.
       backupServiceSpy.importCompleteBackup.and.resolveTo();
 
       await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
 
-      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).toHaveBeenCalledTimes(1);
+      expect(localDraftServiceSpy.deleteAllDrafts).toHaveBeenCalledTimes(1);
     });
 
     it('should not clear drafts when the import fails', async () => {
@@ -874,7 +872,7 @@ describe('LocalBackupService', () => {
 
       await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
 
-      expect(localDraftServiceSpy.deleteDraftsForActiveProfile).not.toHaveBeenCalled();
+      expect(localDraftServiceSpy.deleteAllDrafts).not.toHaveBeenCalled();
     });
   });
 

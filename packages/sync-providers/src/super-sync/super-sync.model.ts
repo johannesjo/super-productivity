@@ -40,6 +40,13 @@ export interface SuperSyncPrivateCfg {
    * opts in independently — it is never uploaded or shared across devices.
    */
   isTrackingPresenceEnabled?: boolean;
+  /**
+   * Optional per-device name announced with tracking presence ("Tracking on
+   * Work laptop") so two desktops can be told apart. Same per-device store
+   * as the opt-in above: never uploaded, only relayed inside presence frames
+   * (E2E-encrypted when sync encryption is on). Empty = platform default.
+   */
+  deviceName?: string;
 }
 
 /**

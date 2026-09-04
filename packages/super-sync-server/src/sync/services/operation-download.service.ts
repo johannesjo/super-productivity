@@ -6,7 +6,8 @@
  */
 import { prisma } from '../../db';
 import {
-  CAUSAL_FULL_STATE_OPERATION_WHERE,
+  LatestCausalFullStateRow,
+  latestCausalFullStateSql,
   Operation,
   ServerOperation,
   VectorClock,
@@ -165,15 +166,21 @@ export class OperationDownloadService {
 
         // Find the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
         // These operations supersede all previous operations
-        const latestFullStateOp = await tx.operation.findFirst({
-          where: {
-            userId,
-            serverSeq: { lte: latestSeq },
-            ...CAUSAL_FULL_STATE_OPERATION_WHERE,
-          },
-          orderBy: { serverSeq: 'desc' },
-          select: { serverSeq: true, clientId: true },
-        });
+        // Raw SQL rather than `findFirst` so the op_type values reach PostgreSQL as
+        // LITERALS. Parameterized, this statement flips to a generic plan at execution 6
+        // on every pooled connection, the partial index becomes unreachable, and it
+        // degrades to a backward walk of the user's entire history — cancelled at the 60s
+        // statement_timeout for any user with no causal full-state op. Full reasoning on
+        // latestCausalFullStateSql; do not turn the literals back into params.
+        const latestFullStateRows = await tx.$queryRaw<LatestCausalFullStateRow[]>(
+          latestCausalFullStateSql(userId, latestSeq),
+        );
+        const latestFullStateOp = latestFullStateRows[0]
+          ? {
+              serverSeq: latestFullStateRows[0].server_seq,
+              clientId: latestFullStateRows[0].client_id,
+            }
+          : null;
 
         const latestSnapshotSeq = latestFullStateOp?.serverSeq ?? undefined;
 

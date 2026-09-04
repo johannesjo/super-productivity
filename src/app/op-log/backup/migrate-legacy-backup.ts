@@ -731,17 +731,6 @@ function _migration44LocalizationAndAppFeatures(
     };
   }
 
-  // 5. Migrate User Profiles
-  if (typeof data.globalConfig?.misc?.isEnableUserProfiles === 'boolean') {
-    if (data.globalConfig.appFeatures) {
-      data.globalConfig.appFeatures = {
-        ...data.globalConfig.appFeatures,
-        isEnableUserProfiles: data.globalConfig.misc.isEnableUserProfiles,
-      };
-    }
-    delete data.globalConfig.misc.isEnableUserProfiles;
-  }
-
   finishOps.forEach((op) => op());
   return data;
 }

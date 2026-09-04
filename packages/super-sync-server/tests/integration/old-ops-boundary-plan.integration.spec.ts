@@ -43,10 +43,19 @@
  * unreachable under a generic plan at all: with `Param` nodes there are no `Const`s for
  * `operator_predicate_proof`, so `predOK` is false for every partial index on this table.
  * Production measured custom = BitmapOr cost 22,844 against generic = Parallel Seq Scan
- * cost 982,701, and `choose_custom_plan` adopts the generic plan only when its cost is at
- * or below the average custom cost — a 43x margin that pins this statement on custom
+ * cost 982,701, and `choose_custom_plan` adopts the generic plan only when its cost is
+ * STRICTLY BELOW the average custom cost — a 43x margin that pins this statement on custom
  * plans. That margin is a load-bearing assumption rather than a detail, so the third test
  * asserts it directly. If it ever inverts, CI fails instead of production.
+ *
+ * THE MARGIN DOES NOT GENERALISE, and migration 20260829000000's comment reads as though
+ * it does. The average custom cost includes a synthetic planning charge of
+ * `1000 * cpu_operator_cost * (nrelations + 1)` = 5.00 for a single-table query
+ * (plancache.c, `cached_plan_cost`) — a fixed constant, not measured planning time. It is
+ * noise against 22,844 and decisive for a cheap statement: the sync download's
+ * latest-full-state lookup shares this predicate, planned at 1.94 against a generic 4.85,
+ * and went generic unconditionally. That is why it now ships literals; see
+ * download-full-state-plan.integration.spec.ts.
  *
  * THE PARTIAL INDEXES ARE CREATED BY THIS SPEC, not by the schema. Prisma has no
  * partial-index syntax, so both live only in raw migrations and a `prisma db push`
@@ -61,9 +70,6 @@
  *   DATABASE_URL=postgresql://... npx vitest run --config vitest.integration.config.ts \
  *     tests/integration/old-ops-boundary-plan.integration.spec.ts
  */
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -73,6 +79,7 @@ import {
   type Measured,
 } from '../explain-plan.helper';
 import { CAUSAL_FULL_STATE_OPERATION_WHERE } from '../../src/sync/sync.types';
+import { createIndexFromMigration } from '../migration-index.helper';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const describeWithDb = DATABASE_URL ? describe : describe.skip;
@@ -118,38 +125,6 @@ const TAIL_CAUSAL = 5;
 
 const CAUSAL_IDX = 'operations_user_id_causal_full_state_server_seq_idx';
 const BROAD_IDX = 'operations_user_id_full_state_server_seq_idx';
-
-const migrationsDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../prisma/migrations',
-);
-
-/**
- * The shipped `CREATE INDEX` for one index, READ OUT OF ITS MIGRATION rather than copied
- * here. Copying the predicate would make this file's whole claim conditional on a comment
- * asking future authors to keep two places in step: the specs measure what ships only for
- * as long as the copy is accurate, and a drifted copy fails silently by measuring a world
- * that does not exist. Extracting it means a migration whose shape changes makes this
- * throw — loudly, at setup — instead.
- *
- * `CONCURRENTLY` is stripped: it cannot run inside a transaction and buys nothing here.
- */
-const createIndexFromMigration = (migrationDir: string, indexName: string): string => {
-  const sql = readFileSync(join(migrationsDir, migrationDir, 'migration.sql'), 'utf8');
-  const statement = sql
-    .split('\n')
-    .filter((line) => !line.trim().startsWith('--'))
-    .join('\n')
-    .split(';')
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`CREATE INDEX CONCURRENTLY "${indexName}"`));
-  if (!statement) {
-    throw new Error(
-      `no CREATE INDEX CONCURRENTLY "${indexName}" found in ${migrationDir}/migration.sql`,
-    );
-  }
-  return statement.replace(' CONCURRENTLY', '');
-};
 
 const CREATE_BROAD_IDX = createIndexFromMigration(
   '20260512000000_add_full_state_sequence_index_drop_redundant_indexes',
@@ -523,11 +498,12 @@ describeWithDb('Old-ops boundary scan plan (PostgreSQL)', () => {
     expect(custom.nodes).not.toContain('Seq Scan');
 
     // The load-bearing assumption, stated as an assertion. `choose_custom_plan` adopts the
-    // generic plan only when its cost is at or below the average custom cost; production
-    // measured 982,701 against 22,844. A margin this wide is why the sweep can rely on a
-    // custom plan without a $queryRaw — and why a third copy of the causal predicate was
-    // NOT added to src/. If this inverts, that reasoning is dead and the fix needs
-    // literals in the SQL.
+    // generic plan only when its cost is strictly below the average custom cost PLUS a
+    // 5.00 planning charge; production measured 982,701 against 22,844. A margin this wide
+    // is why the SWEEP can rely on a custom plan without a $queryRaw. It is specific to
+    // this statement's cost, not a property of the predicate: the download path's lookup
+    // is cheap enough that the same charge decides against it, so that one ships literals.
+    // If this inverts, the sweep needs them too.
     expect(generic.estimatedCost).toBeGreaterThan(5 * custom.estimatedCost);
   });
 });

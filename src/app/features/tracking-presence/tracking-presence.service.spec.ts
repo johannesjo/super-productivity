@@ -24,6 +24,7 @@ import {
   TrackingPresenceCmd,
   TrackingPresencePayload,
 } from './tracking-presence.model';
+import { getDeviceLabel } from './get-device-label.util';
 
 describe('TrackingPresenceService', () => {
   let service: TrackingPresenceService;
@@ -35,6 +36,8 @@ describe('TrackingPresenceService', () => {
   let wsConnected: WritableSignal<boolean>;
   /** What the SyncProviderManager mock resolves; null = no encryption key. */
   let resolvedProvider: unknown;
+  /** SuperSync private config as read for the device label; null = no name. */
+  let providerConfig: () => Promise<{ deviceName?: string } | null>;
 
   /** Runs pending effects (the reconnect handler is an Angular effect). */
   const flushEffects = (): void => {
@@ -112,6 +115,7 @@ describe('TrackingPresenceService', () => {
     snackOpenSpy = jasmine.createSpy('open');
     wsConnected = signal(true);
     resolvedProvider = null;
+    providerConfig = () => Promise.resolve(null);
 
     TestBed.configureTestingModule({
       providers: [
@@ -144,7 +148,10 @@ describe('TrackingPresenceService', () => {
         {
           provide: SyncProviderManager,
           // default: no provider -> no encryption key -> plaintext envelopes
-          useValue: { getProviderById: () => Promise.resolve(resolvedProvider) },
+          useValue: {
+            getProviderById: () => Promise.resolve(resolvedProvider),
+            getProviderConfig: () => providerConfig(),
+          },
         },
         { provide: OperationEncryptionService, useValue: {} },
         { provide: SnackService, useValue: { open: snackOpenSpy } },
@@ -652,6 +659,45 @@ describe('TrackingPresenceService', () => {
       expect(dispatchSpy).not.toHaveBeenCalled();
       expect(sentStates().length).toBe(statesBefore + 1);
       expect(service.remoteSession()).toBeNull();
+      service.stop();
+      flush();
+    }));
+  });
+
+  describe('device label', () => {
+    it('announces the configured device name on states and commands', fakeAsync(() => {
+      providerConfig = () => Promise.resolve({ deviceName: '  Work laptop  ' });
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      expect(sentStates()[0].deviceLabel).toBe('Work laptop');
+
+      setLocalTaskId(null);
+      receiveRemoteState({ sessionId: 'remote-1' });
+      service.requestRemoteStop();
+      tick();
+
+      const cmd = sentPayloads().find((p) => p.type === 'presence_cmd')!.payload;
+      expect((cmd as TrackingPresenceCmd).deviceLabel).toBe('Work laptop');
+      service.stop();
+      flush();
+    }));
+
+    it('falls back to the platform default for a missing or blank name or a failing config read', fakeAsync(() => {
+      service.start();
+      tick();
+      setLocalTaskId('task-1');
+      expect(sentStates()[0].deviceLabel).toBe(getDeviceLabel());
+
+      providerConfig = () => Promise.resolve({ deviceName: '   ' });
+      setLocalTaskId('task-2');
+      expect(sentStates()[1].deviceLabel).toBe(getDeviceLabel());
+
+      // A config read failure must not drop the transition — the label is
+      // decoration, the state is the point.
+      providerConfig = () => Promise.reject(new Error('cfg unavailable'));
+      setLocalTaskId('task-3');
+      expect(sentStates()[2].deviceLabel).toBe(getDeviceLabel());
       service.stop();
       flush();
     }));

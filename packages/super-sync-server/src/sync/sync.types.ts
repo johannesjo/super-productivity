@@ -32,6 +32,61 @@ export const CAUSAL_FULL_STATE_OPERATION_WHERE = {
 } as const satisfies Prisma.OperationWhereInput;
 
 /**
+ * The newest causal full-state op, at or below `maxServerSeq` when given (the download
+ * path's fast-forward probe) or over the user's whole history when omitted (the upload
+ * path's clock-pruning author lookup) — the SAME predicate as
+ * {@link CAUSAL_FULL_STATE_OPERATION_WHERE}, but as raw SQL.
+ *
+ * WHY A SECOND COPY EXISTS. Prisma sends `op_type` as bind parameters. A partial index is
+ * only usable when `operator_predicate_proof` can prove the query implies the index
+ * predicate, and that proof requires `Const` nodes — a `Param` fails every branch
+ * (predtest.c). A generic plan has no bound values to fold, so `predOK` is false and
+ * `operations_user_id_causal_full_state_server_seq_idx` is unreachable.
+ *
+ * Migration 20260829000000 reasoned that the cost margin keeps such statements on custom
+ * plans. That holds for the fleet-wide sweep and is FALSE here. `choose_custom_plan`
+ * compares `generic_cost` against the average custom cost PLUS a synthetic planning charge
+ * of `1000 * cpu_operator_cost * (nrelations + 1)` = 5.00 for a single-table query
+ * (plancache.c, `cached_plan_cost`). This `LIMIT 1` lookup plans at ~1.94 with a floor of
+ * 0.29, so avg_custom >= 5.29 can never beat a generic_cost of 4.85: it flips to generic
+ * at execution 6, on every pooled connection, for every user, unconditionally — and then
+ * walks the user's entire history, which production cancelled at the 60s
+ * statement_timeout on the sync download path.
+ *
+ * THE OP-TYPE VALUES MUST STAY STRING LITERALS. Interpolating them (`${...}`) turns them
+ * back into bind parameters and silently restores the pathology: same rows, same tests,
+ * full backward walk. Guarded by
+ * tests/integration/download-full-state-plan.integration.spec.ts, which measures the
+ * GENERIC plan.
+ *
+ * Built per call rather than hoisted to a module constant so importing this module does
+ * not require a live `Prisma.sql` — several specs mock `@prisma/client` with a partial
+ * stub, and an import-time call would break them for no benefit.
+ */
+export const latestCausalFullStateSql = (
+  userId: number,
+  maxServerSeq?: number,
+): Prisma.Sql => Prisma.sql`
+  SELECT server_seq, client_id
+  FROM operations
+  WHERE user_id = ${userId}
+    ${
+      maxServerSeq === undefined
+        ? Prisma.empty
+        : Prisma.sql`AND server_seq <= ${maxServerSeq}`
+    }
+    AND (
+      op_type IN ('SYNC_IMPORT', 'BACKUP_IMPORT')
+      OR (op_type = 'REPAIR' AND repair_base_server_seq IS NOT NULL)
+    )
+  ORDER BY server_seq DESC
+  LIMIT 1
+`;
+
+/** Row shape of {@link latestCausalFullStateSql}. */
+export type LatestCausalFullStateRow = { server_seq: number; client_id: string };
+
+/**
  * True when `opType` carries the user's full state (SYNC_IMPORT, BACKUP_IMPORT,
  * REPAIR). Whether it is a proven causal boundary additionally depends on the
  * REPAIR base cursor; use {@link isCausalFullStateOperation} for that decision.

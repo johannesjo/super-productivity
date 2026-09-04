@@ -17,16 +17,16 @@ import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { DateAdapter } from '@angular/material/core';
 import { of, throwError } from 'rxjs';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
-import { addSubTask } from '../../store/task.actions';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { DateService } from '../../../../core/date/date.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { AddSubtaskInputService } from '../../add-subtask-input/add-subtask-input.service';
 import { Project } from '../../../project/project.model';
 import { Tag } from '../../../tag/tag.model';
-import { DEFAULT_TASK, Task } from '../../task.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../task.model';
 import { By } from '@angular/platform-browser';
 import { MatMenu } from '@angular/material/menu';
+import { TaskDuplicateService } from '../../task-duplicate.service';
 
 const projectInTreeOrder = (id: string, title: string): Project =>
   ({
@@ -49,6 +49,7 @@ describe('TaskContextMenuInnerComponent', () => {
   let component: TaskContextMenuInnerComponent;
   let fixture: ComponentFixture<TaskContextMenuInnerComponent>;
   let taskService: jasmine.SpyObj<TaskService>;
+  let taskDuplicateService: jasmine.SpyObj<TaskDuplicateService>;
   let addSubtaskInputService: jasmine.SpyObj<AddSubtaskInputService>;
   let store: MockStore;
   let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
@@ -56,14 +57,16 @@ describe('TaskContextMenuInnerComponent', () => {
 
   beforeEach(async () => {
     taskService = jasmine.createSpyObj('TaskService', [
-      'add',
-      'createNewTaskWithDefaults',
       'currentTaskId',
       'moveToProject',
       'getTasksWithSubTasksByRepeatCfgId$',
       'getArchiveTasksForRepeatCfgId',
     ]);
     taskService.currentTaskId.and.returnValue('some-id');
+    taskDuplicateService = jasmine.createSpyObj<TaskDuplicateService>(
+      'TaskDuplicateService',
+      ['duplicate'],
+    );
     addSubtaskInputService = jasmine.createSpyObj<AddSubtaskInputService>(
       'AddSubtaskInputService',
       ['requestOpen'],
@@ -80,6 +83,7 @@ describe('TaskContextMenuInnerComponent', () => {
       providers: [
         provideMockStore(),
         { provide: TaskService, useValue: taskService },
+        { provide: TaskDuplicateService, useValue: taskDuplicateService },
         { provide: AddSubtaskInputService, useValue: addSubtaskInputService },
         {
           provide: TaskRepeatCfgService,
@@ -176,110 +180,59 @@ describe('TaskContextMenuInnerComponent', () => {
   });
 
   describe('duplicate()', () => {
-    it('should duplicate subtasks with timeEstimate and notes', fakeAsync(() => {
-      const mockTask = {
+    it('delegates a task without subtasks directly to TaskDuplicateService', async () => {
+      const mockTask: Task = {
+        ...DEFAULT_TASK,
+        id: 'PARENT_ID',
+        title: 'Parent Task',
+        projectId: 'P1',
+        tagIds: [],
+        subTaskIds: [],
+      };
+
+      component.task = mockTask;
+
+      await component.duplicate();
+
+      expect(taskDuplicateService.duplicate).toHaveBeenCalledOnceWith({
+        ...mockTask,
+        subTasks: [],
+      });
+    });
+
+    it('delegates the complete task tree to TaskDuplicateService', fakeAsync(() => {
+      const mockTask: Task = {
+        ...DEFAULT_TASK,
         id: 'PARENT_ID',
         title: 'Parent Task',
         projectId: 'P1',
         tagIds: [],
         subTaskIds: ['SUB_ID'],
-      } as any;
-
-      const mockSubTask = {
-        id: 'SUB_ID',
-        title: 'Sub Task',
-        isDone: true,
-        projectId: 'P1',
-        timeEstimate: 3600000,
-        notes: 'Some notes',
       };
-
-      const mockTaskWithSubTasks = {
+      const mockTaskWithSubTasks: TaskWithSubTasks = {
         ...mockTask,
-        subTasks: [mockSubTask],
-      };
-
-      component.task = mockTask;
-      taskService.add.and.returnValue('NEW_PARENT_ID');
-      taskService.createNewTaskWithDefaults.and.returnValue({
-        id: 'NEW_SUB_ID',
-      } as any);
-
-      store.overrideSelector(selectTaskByIdWithSubTaskData, mockTaskWithSubTasks);
-      spyOn(store, 'dispatch');
-
-      component.duplicate();
-      tick(50); // for the delay(50) in _getTaskWithSubtasks
-
-      expect(taskService.add).toHaveBeenCalledWith(
-        'Parent Task (copy)',
-        false,
-        jasmine.objectContaining({ projectId: 'P1' }),
-        false,
-      );
-
-      expect(taskService.createNewTaskWithDefaults).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          title: 'Sub Task',
-          additional: jasmine.objectContaining({
-            timeEstimate: 3600000,
-            notes: 'Some notes',
+        subTasks: [
+          {
+            ...DEFAULT_TASK,
+            id: 'SUB_ID',
+            title: 'Sub Task',
             isDone: true,
             projectId: 'P1',
-          }),
-        }),
-      );
-
-      expect(store.dispatch).toHaveBeenCalledWith(
-        addSubTask({
-          task: { id: 'NEW_SUB_ID' } as any,
-          parentId: 'NEW_PARENT_ID',
-        }),
-      );
-    }));
-
-    it('should duplicate parent task with notes', fakeAsync(() => {
-      const mockTask = {
-        id: 'PARENT_ID',
-        title: 'Parent Task',
-        projectId: 'P1',
-        tagIds: [],
-        subTaskIds: [],
-        notes: 'My important notes',
-      } as any;
+            timeEstimate: 3_600_000,
+            notes: 'Some notes',
+          },
+        ],
+      };
 
       component.task = mockTask;
-      taskService.add.and.returnValue('NEW_PARENT_ID');
+      store.overrideSelector(selectTaskByIdWithSubTaskData, mockTaskWithSubTasks);
 
-      component.duplicate();
-      tick(50);
+      void component.duplicate();
+      tick(50); // for the delay(50) in _getTaskWithSubtasks
 
-      expect(taskService.add).toHaveBeenCalledWith(
-        'Parent Task (copy)',
-        false,
-        jasmine.objectContaining({ notes: 'My important notes' }),
-        false,
+      expect(taskDuplicateService.duplicate).toHaveBeenCalledOnceWith(
+        mockTaskWithSubTasks,
       );
-    }));
-
-    it('should not include notes when parent task has no notes', fakeAsync(() => {
-      const mockTask = {
-        id: 'PARENT_ID',
-        title: 'Parent Task',
-        projectId: 'P1',
-        tagIds: [],
-        subTaskIds: [],
-        notes: '',
-      } as any;
-
-      component.task = mockTask;
-      taskService.add.and.returnValue('NEW_PARENT_ID');
-
-      component.duplicate();
-      tick(50);
-
-      const callArgs = taskService.add.calls.mostRecent().args[2] as any;
-      expect(callArgs.notes).toBeUndefined();
     }));
   });
 
