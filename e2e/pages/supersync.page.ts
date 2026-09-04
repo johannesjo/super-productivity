@@ -44,6 +44,11 @@ export interface SuperSyncConfig {
    * together with enableWebSocket: true — presence rides the WS connection.
    */
   enableTrackingPresence?: boolean;
+  /**
+   * Name this client announces with tracking presence (the "Name of this
+   * device on other devices" input, shown once enableTrackingPresence is on).
+   */
+  presenceDeviceName?: string;
 }
 
 type SyncCompletionSnapshot = {
@@ -126,6 +131,7 @@ export class SuperSyncPage extends BasePage {
   readonly providerSelect: Locator;
   readonly baseUrlInput: Locator;
   readonly accessTokenInput: Locator;
+  readonly presenceDeviceNameInput: Locator;
   readonly enableEncryptionBtn: Locator;
   readonly disableEncryptionBtn: Locator;
   readonly encryptionPasswordInput: Locator;
@@ -158,6 +164,7 @@ export class SuperSyncPage extends BasePage {
     this.providerSelect = page.locator('formly-field-mat-select mat-select');
     this.baseUrlInput = page.locator('.e2e-baseUrl input');
     this.accessTokenInput = page.locator('.e2e-accessToken textarea');
+    this.presenceDeviceNameInput = page.locator('.e2e-presenceDeviceName input');
     this.enableEncryptionBtn = page.locator('.e2e-enable-encryption-btn button');
     this.disableEncryptionBtn = page.locator('.e2e-disable-encryption-btn button');
     this.encryptionPasswordInput = page.locator('.e2e-encryptKey input[type="password"]');
@@ -405,6 +412,9 @@ export class SuperSyncPage extends BasePage {
         .getByRole('checkbox', { name: /live tracking/i });
       await trackingPresenceCheckbox.setChecked(true);
       await expect(trackingPresenceCheckbox).toBeChecked();
+      if (config.presenceDeviceName) {
+        await this.presenceDeviceNameInput.fill(config.presenceDeviceName);
+      }
     }
 
     // Fill in access token (this field is NOT in the Advanced section)

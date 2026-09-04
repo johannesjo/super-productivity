@@ -528,6 +528,15 @@ export interface PluginAPI {
     shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'> & { id?: string },
   ): void;
 
+  /**
+   * Remove a shortcut this plugin registered before, by the id it was
+   * registered with (when `id` was omitted there, that is the sanitized label).
+   * Registering the same id again replaces the existing entry, so this is only
+   * needed when a shortcut disappears for good. The user's key binding is kept
+   * in the keyboard settings, so re-registering the same id restores it.
+   */
+  unregisterShortcut(shortcutId: string): void;
+
   registerSidePanelButton(sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>): void;
 
   /**
@@ -657,6 +666,14 @@ export interface PluginAPI {
   addProject(projectData: Partial<Project>): Promise<string>;
 
   updateProject(projectId: string, updates: Partial<Project>): Promise<void>;
+
+  /**
+   * Deletes a project AND the tasks it contains, matching what the UI's own
+   * "Delete project" does — the cascade lives in ProjectService.remove().
+   * Deleting the Inbox is refused. If the deleted project is the active work
+   * context, the app falls back to Today.
+   */
+  deleteProject(projectId: string): Promise<void>;
 
   // tags
   getAllTags(): Promise<Tag[]>;

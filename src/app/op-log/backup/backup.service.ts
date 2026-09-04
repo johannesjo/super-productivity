@@ -128,7 +128,7 @@ export class BackupService {
       // the isDataRepairPossible() refusal further down would never fire again
       // and a truncated backup would REPLACE the user's data with an
       // all-defaults empty store — on every import path (JSON import,
-      // local-backup restore, SuperSync restore, profile switch).
+      // local-backup restore, SuperSync restore).
       if (!isDataRepairPossible(backupData)) {
         throw new Error('Data validation failed and repair not possible');
       }
@@ -190,7 +190,7 @@ export class BackupService {
 
         // 4b. The conflict journal is a device-local side store describing
         // conflicts in the op history that was JUST replaced — every import
-        // path (profile switch, JSON import, local-backup restore, SuperSync
+        // path (JSON import, local-backup restore, SuperSync
         // restore) funnels through here, and without this the badge keeps its
         // pre-restore count and the review page lists entries from the
         // replaced dataset. Cleared INSIDE the op-log lock: a concurrent
