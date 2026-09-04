@@ -678,6 +678,63 @@ describe('RemoteOpsProcessingService', () => {
       expect(result.blockedByIncompatibleOp).toBe(true);
     });
 
+    it('should block at an op with an unknown opType, keep the prefix, and show the update-app snack (#8764)', async () => {
+      const remoteOps: Operation[] = [
+        { id: 'op1', schemaVersion: 1, opType: OpType.Update } as Operation,
+        {
+          id: 'future-vocabulary',
+          schemaVersion: 1,
+          opType: 'FUTURE_OP' as unknown as OpType,
+        } as Operation,
+        { id: 'op3', schemaVersion: 1, opType: OpType.Update } as Operation,
+      ];
+
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+
+      const result = await service.processRemoteOps(remoteOps);
+
+      expect(result.blockedByIncompatibleOp).toBeTrue();
+      expect(opLogStoreSpy.appendBatchSkipDuplicates).toHaveBeenCalledWith(
+        [remoteOps[0]],
+        'remote',
+        { pendingApply: true },
+      );
+      expect(schemaMigrationServiceSpy.migrateOperation).not.toHaveBeenCalledWith(
+        remoteOps[1],
+      );
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.VERSION_TOO_OLD,
+          actionStr: T.PS.UPDATE_APP,
+        }),
+      );
+    });
+
+    it('should block at a full-state op with an unknown syncImportReason (#8764)', async () => {
+      const remoteOps: Operation[] = [
+        {
+          id: 'future-reason',
+          schemaVersion: 1,
+          opType: OpType.SyncImport,
+          syncImportReason: 'FUTURE_REASON',
+        } as unknown as Operation,
+      ];
+
+      const result = await service.processRemoteOps(remoteOps);
+
+      expect(result.blockedByIncompatibleOp).toBeTrue();
+      expect(schemaMigrationServiceSpy.migrateOperation).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.appendBatchSkipDuplicates).not.toHaveBeenCalled();
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: 'ERROR', msg: T.F.SYNC.S.VERSION_TOO_OLD }),
+      );
+    });
+
     it('should report a committed full-state prefix before a blocked suffix', async () => {
       const repair: Operation = {
         id: 'repair-prefix',

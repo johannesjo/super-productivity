@@ -32,6 +32,7 @@ import { SyncImportFilterService } from './sync-import-filter.service';
 import { OperationWriteFlushService } from './operation-write-flush.service';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
 import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
+import { getUnknownOpVocabulary } from './is-known-op-vocabulary.util';
 import { selectSyncConfig } from '../../features/config/store/global-config.reducer';
 import {
   applyLocalOnlySyncSettingsToAppData,
@@ -53,6 +54,17 @@ import { SyncProviderManager } from '../sync-providers/provider-manager.service'
  * This service is used by OperationLogSyncService after downloading
  * remote operations or receiving piggybacked operations from upload.
  */
+/**
+ * Why a remote batch stopped at an op it cannot terminally process. Every
+ * reason freezes the server cursor at the blocked op (see processRemoteOps).
+ */
+type RemoteOpBlockReason =
+  | 'VERSION_UNSUPPORTED'
+  | 'VERSION_TOO_NEW'
+  | 'UNKNOWN_OP_VOCABULARY'
+  | 'INVALID_SCHEMA_VERSION'
+  | 'MIGRATION_FAILED';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -156,11 +168,7 @@ export class RemoteOpsProcessingService {
     const currentVersion = this.schemaMigrationService.getCurrentVersion();
     const migratedOps: Operation[] = [];
     const droppedEntityIds = new Set<string>();
-    let blockReason:
-      | 'VERSION_UNSUPPORTED'
-      | 'VERSION_TOO_NEW'
-      | 'INVALID_SCHEMA_VERSION'
-      | 'MIGRATION_FAILED' = 'MIGRATION_FAILED';
+    let blockReason: RemoteOpBlockReason = 'MIGRATION_FAILED';
     let blockedOp: Operation | null = null;
 
     for (const op of remoteOps) {
@@ -184,6 +192,21 @@ export class RemoteOpsProcessingService {
       if (opVersion > currentVersion) {
         blockedOp = op;
         blockReason = 'VERSION_TOO_NEW';
+        break;
+      }
+
+      // Op whose type / import reason this client does not know: a newer
+      // client widened the wire vocabulary without a schema bump (the default
+      // per the bump policy). Same treatment as VERSION_TOO_NEW — block here,
+      // lossless, and surface the update-app UX — never skip: advancing the
+      // cursor past an op this client never understood is silent data loss.
+      const unknownVocabulary = getUnknownOpVocabulary(op);
+      if (unknownVocabulary !== null) {
+        OpLog.err(
+          `RemoteOpsProcessingService: Op ${op.id} carries an unknown ${unknownVocabulary}`,
+        );
+        blockedOp = op;
+        blockReason = 'UNKNOWN_OP_VOCABULARY';
         break;
       }
 
@@ -512,13 +535,7 @@ export class RemoteOpsProcessingService {
    * category to avoid snack spam from periodic sync retries (the block persists
    * until an app update or migration fix, and every retry re-hits it).
    */
-  private _notifyBlockedOp(
-    reason:
-      | 'VERSION_UNSUPPORTED'
-      | 'VERSION_TOO_NEW'
-      | 'INVALID_SCHEMA_VERSION'
-      | 'MIGRATION_FAILED',
-  ): void {
+  private _notifyBlockedOp(reason: RemoteOpBlockReason): void {
     if (this.snackService.hasPendingPersistentAction()) {
       // Never replace a visible persistent recovery action (e.g. the USE_REMOTE
       // Undo — the only entry point to the pre-replace backup). The block
