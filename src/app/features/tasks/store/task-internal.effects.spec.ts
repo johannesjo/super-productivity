@@ -625,6 +625,29 @@ describe('TaskInternalEffects', () => {
 
       actions$.next(setCurrentTask({ id: 'parent' }));
     });
+
+    it('should re-open the first subtask when a parent with only done subtasks is started', (done) => {
+      const parent = createTask('parent', {
+        subTaskIds: ['sub1', 'sub2'],
+        isDone: false,
+      });
+      const sub1 = createTask('sub1', { parentId: 'parent', isDone: true });
+      const sub2 = createTask('sub2', { parentId: 'parent', isDone: true });
+
+      // The reducer falls back to subTaskIds[0] when every subtask is done.
+      store.overrideSelector(
+        selectTaskFeatureState,
+        createTaskState([parent, sub1, sub2], 'sub1'),
+      );
+      store.refreshState();
+
+      effects.reopenStartedDoneTask$.subscribe((action) => {
+        expect(action.task).toEqual({ id: 'sub1', changes: { isDone: false } });
+        done();
+      });
+
+      actions$.next(setCurrentTask({ id: 'parent' }));
+    });
   });
 
   describe('planStartedTaskForToday$', () => {
