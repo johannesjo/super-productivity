@@ -1133,7 +1133,9 @@ export class GlobalThemeService {
       SafeArea.getSafeAreaInsets().then(({ insets }) => applyInsets(insets));
       SafeArea.addListener('safeAreaChanged', ({ insets }) => applyInsets(insets));
     }
-    patchCdkViewportForSafeArea(this.document);
+    patchCdkViewportForSafeArea(this.document, () =>
+      this._keyboardGeometry.keyboardOverlayOffsetPx(),
+    );
   }
 
   private _initMobileStatusBar(): void {

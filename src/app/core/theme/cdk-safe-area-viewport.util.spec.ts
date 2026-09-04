@@ -4,10 +4,12 @@ import { FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { patchCdkViewportForSafeArea } from './cdk-safe-area-viewport.util';
+import { BodyClass } from '../../app.constants';
 
 const SAFE_BOTTOM = 48;
 const SAFE_TOP = 48;
 const NAV_HEIGHT = 56;
+const KEYBOARD_OVERLAY_OFFSET = 120;
 
 /**
  * Mirrors the mobile bottom nav (#8792): a bar pinned to the viewport bottom
@@ -56,6 +58,7 @@ describe('patchCdkViewportForSafeArea', () => {
   >;
   let originalMarginTop: unknown;
   let originalMarginBottom: unknown;
+  let keyboardOverlayOffsetPx: number;
 
   const openMenuAndMeasure = async (
     itemLabels?: string[],
@@ -88,7 +91,8 @@ describe('patchCdkViewportForSafeArea', () => {
     TestBed.configureTestingModule({ providers: [provideNoopAnimations()] });
     originalMarginTop = proto['_getViewportMarginTop'];
     originalMarginBottom = proto['_getViewportMarginBottom'];
-    patchCdkViewportForSafeArea(document);
+    keyboardOverlayOffsetPx = 0;
+    patchCdkViewportForSafeArea(document, () => keyboardOverlayOffsetPx);
   });
 
   afterEach(() => {
@@ -100,6 +104,7 @@ describe('patchCdkViewportForSafeArea', () => {
     document.documentElement.style.removeProperty('--safe-area-top');
     document.documentElement.style.removeProperty('--safe-area-inset-bottom');
     document.querySelectorAll('.cdk-overlay-container').forEach((el) => el.remove());
+    document.body.classList.remove(BodyClass.isIOS, BodyClass.isKeyboardVisible);
   });
 
   // Android WebView >= 140: Capacitor SystemBars passes the native insets
@@ -146,10 +151,38 @@ describe('patchCdkViewportForSafeArea', () => {
     expect(twoItems.panelBottom).toBeCloseTo(oneItem.panelBottom, 0);
   });
 
+  // The offset arrives through the getter, not off <html> — it is not published
+  // as a root custom property (#9779). Reading a computed style here would
+  // silently yield the 0px :root fallback and drop the keyboard from the
+  // reserved strip, which no test caught before this one.
+  it('keeps a menu clear of an iOS keyboard that still overlays the viewport', async () => {
+    document.body.classList.add(BodyClass.isIOS, BodyClass.isKeyboardVisible);
+    keyboardOverlayOffsetPx = KEYBOARD_OVERLAY_OFFSET;
+
+    const { panelBottom } = await openMenuAndMeasure();
+
+    expect(panelBottom).toBeLessThanOrEqual(
+      document.documentElement.clientHeight - KEYBOARD_OVERLAY_OFFSET,
+    );
+  });
+
+  // Same setup, minus the class: the strip must not be reserved while the
+  // keyboard is down, or every menu on iOS floats 120px off the bottom.
+  it('ignores the keyboard offset when the keyboard is not up', async () => {
+    document.body.classList.add(BodyClass.isIOS);
+    keyboardOverlayOffsetPx = KEYBOARD_OVERLAY_OFFSET;
+
+    const { panelBottom } = await openMenuAndMeasure();
+
+    expect(panelBottom).toBeGreaterThan(
+      document.documentElement.clientHeight - KEYBOARD_OVERLAY_OFFSET,
+    );
+  });
+
   it('does not stack insets when applied more than once', async () => {
     document.documentElement.style.setProperty('--safe-area-bottom', `${SAFE_BOTTOM}px`);
-    patchCdkViewportForSafeArea(document);
-    patchCdkViewportForSafeArea(document);
+    patchCdkViewportForSafeArea(document, () => keyboardOverlayOffsetPx);
+    patchCdkViewportForSafeArea(document, () => keyboardOverlayOffsetPx);
 
     const { panelBottom, triggerTop } = await openMenuAndMeasure();
 

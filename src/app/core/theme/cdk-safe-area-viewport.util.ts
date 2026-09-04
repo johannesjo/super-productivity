@@ -12,7 +12,6 @@ import { BodyClass } from '../../app.constants';
  */
 const CSS_VAR_RESOLVED_SAFE_AREA_TOP = '--safe-area-top';
 const CSS_VAR_RESOLVED_SAFE_AREA_BOTTOM = '--safe-area-bottom';
-const CSS_VAR_KEYBOARD_OVERLAY_OFFSET = '--keyboard-overlay-offset';
 
 const readPx = (doc: Document, name: string): number =>
   parseInt(getComputedStyle(doc.documentElement).getPropertyValue(name), 10) || 0;
@@ -43,8 +42,16 @@ const readPx = (doc: Document, name: string): number =>
  * placement is then correct for any inset combination.
  *
  * Idempotent: patching twice would add the inset twice.
+ *
+ * The keyboard overlay offset comes in as a getter rather than being read off
+ * `getComputedStyle(documentElement)` like the two insets: it is deliberately
+ * not published as a root custom property, because a write there restyles every
+ * element that could inherit it (#9779). See KeyboardGeometryService.
  */
-export const patchCdkViewportForSafeArea = (doc: Document): void => {
+export const patchCdkViewportForSafeArea = (
+  doc: Document,
+  getKeyboardOverlayOffsetPx: () => number,
+): void => {
   const proto = FlexibleConnectedPositionStrategy.prototype as unknown as {
     _getViewportMarginTop: () => number;
     _getViewportMarginBottom: () => number;
@@ -65,7 +72,7 @@ export const patchCdkViewportForSafeArea = (doc: Document): void => {
     const keyboardOverlayOffset =
       doc.body.classList.contains(BodyClass.isIOS) &&
       doc.body.classList.contains(BodyClass.isKeyboardVisible)
-        ? readPx(doc, CSS_VAR_KEYBOARD_OVERLAY_OFFSET)
+        ? getKeyboardOverlayOffsetPx()
         : 0;
     return (
       originalBottom.call(this) +
