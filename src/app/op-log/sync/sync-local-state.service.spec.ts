@@ -10,32 +10,36 @@ import {
   OpType,
 } from '../core/operation.types';
 
+type StateCache = NonNullable<
+  Awaited<ReturnType<OperationLogStoreService['loadStateCache']>>
+>;
+
 describe('SyncLocalStateService', () => {
   let service: SyncLocalStateService;
   let opLogStoreSpy: jasmine.SpyObj<OperationLogStoreService>;
 
   const entry = (
     entityType: EntityType,
-    actionType: string,
+    actionType: ActionType,
     opType: OpType,
-  ): OperationLogEntry =>
-    ({
-      seq: 1,
-      op: {
-        id: `op-${entityType}`,
-        clientId: 'client-A',
-        actionType,
-        opType,
-        entityType,
-        entityId: 'SINGLETON',
-        payload: {},
-        vectorClock: { clientA: 1 },
-        timestamp: Date.now(),
-        schemaVersion: 1,
-      },
-      appliedAt: Date.now(),
-      source: 'local',
-    }) as OperationLogEntry;
+    source: 'local' | 'remote' = 'local',
+  ): OperationLogEntry => ({
+    seq: 1,
+    op: {
+      id: `op-${entityType}`,
+      clientId: 'client-A',
+      actionType,
+      opType,
+      entityType,
+      entityId: 'SINGLETON',
+      payload: {},
+      vectorClock: { clientA: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+    },
+    appliedAt: Date.now(),
+    source,
+  });
 
   const migrationGenesis = entry(
     'MIGRATION',
@@ -47,7 +51,8 @@ describe('SyncLocalStateService', () => {
     ActionType.RECOVERY_DATA_IMPORT,
     OpType.Batch,
   );
-  const regularOp = entry('TASK', '[Task] Add Task', OpType.Create);
+  const regularOp = entry('TASK', '[Task] Add Task' as ActionType, OpType.Create);
+  const syncImport = entry('ALL', ActionType.LOAD_ALL_DATA, OpType.SyncImport);
 
   beforeEach(() => {
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
@@ -59,7 +64,7 @@ describe('SyncLocalStateService', () => {
     ]);
     // Defaults describe a legacy-migrated client that has never synced: the
     // genesis wrote a state cache and one op, nothing else happened since.
-    opLogStoreSpy.loadStateCache.and.resolveTo({ state: {} } as never);
+    opLogStoreSpy.loadStateCache.and.resolveTo({ state: {} } as unknown as StateCache);
     opLogStoreSpy.getLastSeq.and.resolveTo(1);
     opLogStoreSpy.hasSyncedOps.and.resolveTo(false);
     opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
@@ -106,11 +111,16 @@ describe('SyncLocalStateService', () => {
     });
 
     it('is false once a local full-state op exists (state already ships as SYNC_IMPORT)', async () => {
-      opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(
-        entry('ALL', ActionType.LOAD_ALL_DATA, OpType.SyncImport),
-      );
+      opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(syncImport);
       expect(await service.isNeverSyncedGenesisClient()).toBe(false);
       expect(opLogStoreSpy.getOpsAfterSeq).not.toHaveBeenCalled();
+    });
+
+    it("is false when the first op is another client's genesis (raw rebuild from server history)", async () => {
+      opLogStoreSpy.getOpsAfterSeq.and.resolveTo([
+        entry('MIGRATION', ActionType.MIGRATION_GENESIS_IMPORT, OpType.Batch, 'remote'),
+      ]);
+      expect(await service.isNeverSyncedGenesisClient()).toBe(false);
     });
 
     it('is false when the first op is a regular op', async () => {
@@ -128,17 +138,30 @@ describe('SyncLocalStateService', () => {
     it('is true for a wholly fresh client without reading the log', async () => {
       opLogStoreSpy.loadStateCache.and.resolveTo(null);
       opLogStoreSpy.getLastSeq.and.resolveTo(0);
-      expect(await service.isFreshOrNeverSyncedGenesisClient()).toBe(true);
+      expect(await service.isFreshOrNeverSyncedGenesisClient([regularOp.op])).toBe(true);
       expect(opLogStoreSpy.getOpsAfterSeq).not.toHaveBeenCalled();
     });
 
-    it('is true for a never-synced genesis client', async () => {
-      expect(await service.isFreshOrNeverSyncedGenesisClient()).toBe(true);
+    it('stays true for a wholly fresh client even when a full-state op is incoming', async () => {
+      opLogStoreSpy.loadStateCache.and.resolveTo(null);
+      opLogStoreSpy.getLastSeq.and.resolveTo(0);
+      expect(await service.isFreshOrNeverSyncedGenesisClient([syncImport.op])).toBe(true);
+    });
+
+    it('is true for a never-synced genesis client receiving ordinary ops', async () => {
+      expect(await service.isFreshOrNeverSyncedGenesisClient([regularOp.op])).toBe(true);
+    });
+
+    it('defers a genesis client to the incoming-import gate when a full-state op is incoming', async () => {
+      expect(
+        await service.isFreshOrNeverSyncedGenesisClient([regularOp.op, syncImport.op]),
+      ).toBe(false);
+      expect(opLogStoreSpy.getOpsAfterSeq).not.toHaveBeenCalled();
     });
 
     it('is false for a client with ordinary history', async () => {
       opLogStoreSpy.getOpsAfterSeq.and.resolveTo([regularOp]);
-      expect(await service.isFreshOrNeverSyncedGenesisClient()).toBe(false);
+      expect(await service.isFreshOrNeverSyncedGenesisClient([regularOp.op])).toBe(false);
     });
   });
 });

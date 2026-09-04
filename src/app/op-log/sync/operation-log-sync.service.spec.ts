@@ -6449,6 +6449,33 @@ describe('OperationLogSyncService', () => {
       expect(result.kind).toBe('no_new_ops');
     });
 
+    it('defers to the incoming-import gate when the download carries a full-state op', async () => {
+      const remoteSyncImport: Operation = {
+        ...remoteTaskOp,
+        id: 'remote-sync-import',
+        actionType: ActionType.LOAD_ALL_DATA,
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: undefined,
+        payload: { task: { ids: [], entities: {} } },
+      };
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [remoteSyncImport, remoteTaskOp],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 5,
+      });
+
+      // The gate owns this case (the pending genesis op counts as meaningful
+      // work there), so the fresh-client conflict must not pre-empt it.
+      await expectAsync(
+        service.downloadRemoteOps(mockProvider()),
+      ).not.toBeRejectedWithError(LocalDataConflictError);
+      expect(opLogStoreSpy.getOpsAfterSeq).not.toHaveBeenCalled();
+    });
+
     it('does not prompt a client whose log starts with an ordinary op', async () => {
       opLogStoreSpy.getOpsAfterSeq.and.resolveTo([
         { ...genesisEntry, op: { ...remoteTaskOp, clientId: 'client-A' } },

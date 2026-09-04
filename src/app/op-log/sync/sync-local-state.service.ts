@@ -6,16 +6,18 @@ import { OpLog } from '../../core/log';
 import { T } from '../../t.const';
 import { confirmDialog } from '../../util/native-dialogs';
 import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
-import { OperationLogEntry } from '../core/operation.types';
+import { isFullStateOpType, Operation, OperationLogEntry } from '../core/operation.types';
 
 /**
  * Legacy-migration and crash-recovery genesis ops carry this client's entire
  * state as an ordinary Batch op. They upload like any other op but replay as a
  * no-op on every other client, so the state they carry never reaches the server
- * in a form another device can apply.
+ * in a form another device can apply. Only this client's own genesis counts: a
+ * raw rebuild from server history can start with another device's genesis op.
  */
-const isGenesisOp = (entry: OperationLogEntry): boolean =>
-  entry.op.entityType === 'MIGRATION' || entry.op.entityType === 'RECOVERY';
+const isOwnGenesisOp = (entry: OperationLogEntry): boolean =>
+  entry.source === 'local' &&
+  (entry.op.entityType === 'MIGRATION' || entry.op.entityType === 'RECOVERY');
 
 @Injectable({
   providedIn: 'root',
@@ -55,7 +57,7 @@ export class SyncLocalStateService {
       return false;
     }
     const [firstEntry] = await this.opLogStore.getOpsAfterSeq(0);
-    return !!firstEntry && isGenesisOp(firstEntry);
+    return !!firstEntry && isOwnGenesisOp(firstEntry);
   }
 
   /**
@@ -63,11 +65,21 @@ export class SyncLocalStateService {
    * into isWhollyFreshClient(): that one also gates the upload phase, and a
    * genesis client must still upload the SYNC_IMPORT the empty-server branch
    * creates for it.
+   *
+   * When the download carries a full-state op, the incoming-import gate already
+   * prompts a genesis client (its pending genesis op counts as meaningful work),
+   * so the genesis case defers to that gate and keeps the established dialog.
+   * Only the previously silent path — ordinary remote ops, no full-state op —
+   * is widened here.
    */
-  async isFreshOrNeverSyncedGenesisClient(): Promise<boolean> {
-    return (
-      (await this.isWhollyFreshClient()) || (await this.isNeverSyncedGenesisClient())
-    );
+  async isFreshOrNeverSyncedGenesisClient(incomingOps: Operation[]): Promise<boolean> {
+    if (await this.isWhollyFreshClient()) {
+      return true;
+    }
+    if (incomingOps.some((op) => isFullStateOpType(op.opType))) {
+      return false;
+    }
+    return this.isNeverSyncedGenesisClient();
   }
 
   /**
