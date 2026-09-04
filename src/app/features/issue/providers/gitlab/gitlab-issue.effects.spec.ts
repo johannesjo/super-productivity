@@ -91,7 +91,7 @@ describe('GitlabIssueEffects', () => {
     store.overrideSelector(selectAllTasksInActiveProjects, [gitlabTask]);
     store.refreshState();
 
-    await beforeFinishDayAction();
+    await beforeFinishDayAction('2026-09-03');
 
     expect(matDialog.open).toHaveBeenCalledWith(
       jasmine.any(Function),
@@ -114,7 +114,7 @@ describe('GitlabIssueEffects', () => {
     store.overrideSelector(selectAllTasksInActiveProjects, [oldGitlabTask]);
     store.refreshState();
 
-    await beforeFinishDayAction();
+    await beforeFinishDayAction('2026-09-03');
 
     expect(matDialog.open).not.toHaveBeenCalled();
   });

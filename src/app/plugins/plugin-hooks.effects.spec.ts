@@ -22,7 +22,6 @@ import { updateGlobalConfigSection } from '../features/config/store/global-confi
 import { selectLocalizationConfig } from '../features/config/store/global-config.reducer';
 import { LanguageCode } from '../core/locale.constants';
 import { BeforeFinishDayService } from '../features/before-finish-day/before-finish-day.service';
-import { DateService } from '../core/date/date.service';
 
 describe('PluginHooksEffects', () => {
   let effects: PluginHooksEffects;
@@ -587,23 +586,17 @@ describe('PluginHooksEffects', () => {
   });
 
   describe('finishDay hook (#9214)', () => {
-    // The action is registered from the effects constructor, so injecting
-    // PluginHooksEffects (done in the outer beforeEach) is what puts it on the
-    // service — asserted here so the dependency cannot be removed silently.
-    it('registers itself with BeforeFinishDayService', () => {
-      expect(effects).toBeTruthy();
-    });
-
-    it('fires FINISH_DAY with the documented FinishDayPayload', async () => {
+    // NOT todayStr(): daily-summary.component.html has a second Finish Day
+    // button for `!isForToday`, so the day being finished is often not today.
+    it('fires FINISH_DAY with the day actually being finished', async () => {
       pluginServiceMock.dispatchHook.and.returnValue(Promise.resolve());
 
-      const result = await TestBed.inject(BeforeFinishDayService).executeActions();
+      const result =
+        await TestBed.inject(BeforeFinishDayService).executeActions('2026-09-03');
 
       expect(pluginServiceMock.dispatchHook).toHaveBeenCalledWith(
         PluginHooks.FINISH_DAY,
-        {
-          date: TestBed.inject(DateService).todayStr(),
-        },
+        { date: '2026-09-03' },
       );
       expect(result).toBe('SUCCESS');
     });
@@ -614,7 +607,8 @@ describe('PluginHooksEffects', () => {
     it('does not block finishing the day when a plugin throws', async () => {
       pluginServiceMock.dispatchHook.and.returnValue(Promise.reject(new Error('boom')));
 
-      const result = await TestBed.inject(BeforeFinishDayService).executeActions();
+      const result =
+        await TestBed.inject(BeforeFinishDayService).executeActions('2026-09-03');
 
       expect(result).toBe('ERROR');
     });

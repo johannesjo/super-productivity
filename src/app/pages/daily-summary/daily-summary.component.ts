@@ -339,7 +339,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async finishDay(): Promise<void> {
     try {
-      await this._beforeFinishDayService.executeActions();
+      await this._beforeFinishDayService.executeActions(this.dayStr);
       // Wait for any ongoing sync to complete before archiving to avoid DB lock errors.
       // Use a 30-second timeout to prevent hanging indefinitely if sync is stuck.
       await this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$

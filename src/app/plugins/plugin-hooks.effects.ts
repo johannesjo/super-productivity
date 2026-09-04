@@ -53,7 +53,6 @@ import { SyncTriggerService } from '../imex/sync/sync-trigger.service';
 import { selectPluginUserDataFeatureState } from './store/plugin-user-data.reducer';
 import { diffChangedPluginIds } from './util/plugin-data-diff.util';
 import { BeforeFinishDayService } from '../features/before-finish-day/before-finish-day.service';
-import { DateService } from '../core/date/date.service';
 import { PluginLog } from '../core/log';
 
 @Injectable()
@@ -65,7 +64,6 @@ export class PluginHooksEffects {
   private readonly workContextService = inject(WorkContextService);
   private readonly syncTrigger = inject(SyncTriggerService);
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
-  private readonly _dateService = inject(DateService);
 
   taskComplete$ = createEffect(
     () =>
@@ -257,14 +255,15 @@ export class PluginHooksEffects {
     // never fired and the documented finishDay hook was dead since it was added
     // (#9214). Registering it here also means the day is not archived until every
     // plugin listening has had its turn.
-    this._beforeFinishDayService.addAction(async () => {
+    this._beforeFinishDayService.addAction(async (dayStr) => {
       try {
         // FinishDayPayload — the hook has always declared `{ date }` in
         // HookPayloadMap, and this is the first release where a plugin can
         // actually receive it. dispatchHook takes `payload?: unknown`, so
-        // nothing but this call site enforces the published type.
+        // nothing but this call site enforces the published type. `dayStr`, not
+        // todayStr(): the daily summary can finish a PAST day.
         await this.pluginService.dispatchHook(PluginHooks.FINISH_DAY, {
-          date: this._dateService.todayStr(),
+          date: dayStr,
         });
         return 'SUCCESS';
       } catch (e) {
