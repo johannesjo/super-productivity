@@ -37,6 +37,13 @@ const globalSetup = async (config: FullConfig): Promise<void> => {
   // TZ is picked so the run stays far from midnight — a day rollover mid-suite
   // breaks date-sensitive specs (see ./utils/test-timezone.ts). Workers are
   // forked after this, so they and the browsers they launch inherit the zone.
+  //
+  // This must stay an env var rather than Playwright's `use.timezoneId`, which
+  // would move only the browser: many specs compute a date in Node and assert it
+  // against the browser's local day (see utils/time-input-helper.ts and the note
+  // in tests/sync/supersync-round-time-conflict.spec.ts), so both sides have to
+  // move together. Specs that pin their own `timezoneId` opt out of this.
+  //
   // Set E2E_TZ to pin a specific zone when reproducing a timezone-dependent bug.
   process.env.TZ = process.env.E2E_TZ || pickTestTimezone();
   process.env.NODE_ENV = 'test';

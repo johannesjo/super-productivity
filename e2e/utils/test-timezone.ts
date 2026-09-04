@@ -14,12 +14,18 @@
 /**
  * Candidates are DST-free, so the offset cannot shift while tests run, and are
  * spaced at most 4h apart, so the picked zone always lands within 2h of midday.
+ *
+ * None of them is UTC itself, deliberately: at UTC+0 every local-vs-UTC
+ * divergence collapses, so an off-by-one-day regression in `toISOString()` or
+ * `dateStrToUtcDate` would pass silently (see
+ * tests/recurring/skip-overdue-reaps-timed-instance.spec.ts, which exists
+ * because the unit suites cannot catch that drift).
  */
 const CANDIDATE_TIMEZONES = [
   'Pacific/Honolulu', // UTC-10
   'America/Regina', // UTC-6
   'America/Sao_Paulo', // UTC-3
-  'UTC', // UTC+0
+  'Africa/Lagos', // UTC+1
   'Africa/Nairobi', // UTC+3
   'Asia/Dhaka', // UTC+6
   'Asia/Shanghai', // UTC+8
