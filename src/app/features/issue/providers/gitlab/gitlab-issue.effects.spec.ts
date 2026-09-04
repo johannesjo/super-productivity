@@ -133,6 +133,8 @@ describe('GitlabIssueEffects', () => {
       jasmine.objectContaining({
         data: jasmine.objectContaining({
           tasksForIssueProvider: [yesterdaysTask],
+          // the dialog flags "past" tracked data relative to this
+          day: PREVIOUS_DAY,
         }),
       }),
     );

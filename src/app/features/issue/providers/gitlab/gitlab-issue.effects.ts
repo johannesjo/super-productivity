@@ -64,6 +64,7 @@ export class GitlabIssueEffects {
                     gitlabCfg: gitlabCfgForProvider,
                     issueProviderId,
                     tasksForIssueProvider,
+                    day: dayStr,
                   },
                 })
                 .afterClosed()
