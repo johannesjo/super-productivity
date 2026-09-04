@@ -22,9 +22,9 @@ There is no selection model in the codebase today. `TaskState.selectedTaskId` is
 
 | App                       | Enter selection (desktop)       | Extend                        | Keyboard                                                              | Action surface                                                                          | Mobile entry                                                | After action                              |
 | ------------------------- | ------------------------------- | ----------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------- |
-| **Todoist**               | Ctrl/Cmd+click                  | Shift+click range             | —                                                                     | Bar at top of list: date, project, labels, priority, more (complete, duplicate, delete) | Long-press → "Select task", then "Select all"               | Desktop keeps selection, mobile clears it |
+| **Todoist**               | Ctrl/Cmd+click                  | Shift+click range             | —                                                                     | Bar at top of list: date, project, labels, priority, more (complete, duplicate, delete) | Context menu → "Select task", then "Select all"             | Desktop keeps selection, mobile clears it |
 | **Things 3**              | Cmd+click                       | Shift+click                   | Existing shortcuts act on selection (⇧⌘M move, ⇧⌘T tags, ⌘K complete) | No bar — context menu + shortcuts + drag to sidebar                                     | Swipe left → select mode, drag over circles for range       | —                                         |
-| **TickTick**              | Ctrl/Cmd+click, marquee         | Shift+click, Shift+↑/↓        | Shortcuts act on selection                                            | Side panel: date, priority, list, tags, complete, merge, delete                         | Long-press                                                  | —                                         |
+| **TickTick**              | Ctrl/Cmd+click, marquee         | Shift+click, Shift+↑/↓        | Shortcuts act on selection                                            | Side panel: date, priority, list, tags, complete, merge, delete                         | List ⋯ menu → "Select"                                      | —                                         |
 | **Linear**                | `X` on focused issue, Cmd+click | Shift+↑/↓, Shift+click, Cmd+A | All single-key shortcuts act on selection; Cmd+K                      | Bottom bar + right-click menu; drag whole selection                                     | —                                                           | Esc clears                                |
 | **Apple Reminders**       | Cmd+click                       | Shift+click, ⌘A               | —                                                                     | Context menu, drag to sidebar list                                                      | "Select Reminders" or two-finger drag; bottom toolbar; Done | —                                         |
 | **Asana**                 | Ctrl/Cmd+click                  | Shift+click                   | Tab+key shortcuts act on selection                                    | Bottom toolbar with count, max 50                                                       | —                                                           | —                                         |
@@ -37,7 +37,7 @@ Guidelines that agree across sources (WAI-ARIA APG listbox pattern, Material "Se
 
 - Click selects one. **Ctrl/Cmd+click toggles**, **Shift+click ranges** from an anchor, **Esc** clears. Arrow keys move focus without changing selection; **Shift+Arrow extends**.
 - Provide **select all**, a **contextual action bar** that only appears while something is selected, a visible **count**, and **feedback + undo** (or confirmation for destructive actions).
-- Mobile needs an explicit **selection mode** (long-press or a "Select" menu item) with a bottom toolbar and a Done/close. Don't show checkboxes on every row all the time.
+- Mobile needs an explicit **selection mode** entered from a menu item ("Select…"): Todoist, TickTick and Reminders all do this rather than repurposing long-press. It comes with a bottom toolbar and a Done/close. Don't show checkboxes on every row all the time.
 - Drag a multi-selection as a **stack with a count badge**.
 
 The clearest lesson for us comes from Things and Linear: **existing single-task shortcuts and menus simply start applying to the whole selection.** That reuses what the app already has instead of building a second action system.
@@ -93,22 +93,22 @@ Visual order for ranges is the DOM order of `<task>` elements, which already exi
 
 ### 4.3 Touch interaction (Android, iOS, narrow web)
 
-Long-press already starts drag, swipe-right completes, swipe-left opens the context menu. Nothing is free, so selection mode is entered explicitly, the way Reminders and Todoist/TickTick on iOS do:
+Long-press already starts drag, swipe-right completes, swipe-left opens the context menu. Nothing is free, so selection mode is entered explicitly from a menu, the way Reminders, Todoist and TickTick do (none of them repurposes long-press):
 
-| Input                                                    | Result                                                                                                |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Task context menu → **"Select…"** (new entry, top group) | Enters selection mode with that task selected.                                                        |
-| View ⋮ menu (work context menu) → **"Select tasks…"**    | Enters selection mode with nothing selected.                                                          |
-| In selection mode: **tap** a task                        | Toggles it. Rows show a leading check circle in this mode. Swipe/drag/title-edit are suspended.       |
-| Bar **✕** / Android back / Esc                           | Leave selection mode, clear selection.                                                                |
-| Later (Phase 2)                                          | Drag a finger down the check circles to range-select (Things), like the drag-over-checkboxes pattern. |
+| Input                                                    | Result                                                                                                   |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Task context menu → **"Select…"** (new entry, top group) | Enters selection mode with that task selected.                                                           |
+| View ⋮ menu (work context menu) → **"Select tasks…"**    | Enters selection mode with nothing selected.                                                             |
+| In selection mode: **tap** a task                        | Toggles it. Rows show a leading selection ring in this mode (§4.4). Swipe/drag/title-edit are suspended. |
+| Bar **✕** / Android back / Esc                           | Leave selection mode, clear selection.                                                                   |
+| Later (Phase 2)                                          | Drag a finger down the selection rings to range-select (Things).                                         |
 
 On desktop there is no explicit mode: any Ctrl+click _is_ the mode. On touch the mode is explicit because there is no modifier key.
 
 ### 4.4 Visual feedback
 
 - Selected rows get a persistent tinted background plus a left accent stripe using the existing selection/accent tokens. This must be visually distinct from the focus ring (focused) and from the detail-panel highlight (`.isSelected` today).
-- Desktop shows **no checkboxes**; the tint plus a small check icon in the leading slot of selected rows is enough (Material guidance: don't persistently show checkboxes). Touch selection mode shows a check circle on every row.
+- **No checkmarks for selection.** A check already means _done_ in this app (the done button, completed rows). Selection gets its own vocabulary: on desktop the tint and stripe carry the state and there is no leading glyph at all (Material guidance: don't persistently show checkboxes). In touch selection mode the leading slot shows an empty ring that fills solid with the accent colour when selected, with no tick inside. The check icon stays reserved for the Done action, including on the selection bar.
 - Count is shown in the selection bar ("7 tasks selected") and announced via an `aria-live` region. Lists set `aria-multiselectable="true"`, rows `aria-selected`.
 - Drag (Phase 2): the CDK drag preview of a selected task shows a stack with a count badge, per Apple HIG.
 
@@ -174,7 +174,7 @@ Dragging a task that is part of the selection drags the whole selection: the CDK
 ## 7. Performance (task component is a hot path)
 
 - `TaskSelectionService` exposes `selectedIds: Signal<ReadonlySet<string>>`. `TaskComponent` adds one `computed(() => selectedIds().has(this.task().id))` bound to a host class. When the set changes every rendered task recomputes an O(1) `Set.has`; no per-task subscriptions, no functions in templates.
-- The touch check circle and the desktop check icon render inside `@if` blocks, so unselected rows on desktop add zero DOM.
+- The touch selection ring renders inside an `@if` block and desktop selection is a host class only, so unselected rows on desktop add zero DOM.
 - Range selection uses the existing DOM query for `<task>` elements once per Shift+click, not per render.
 - Modifier-click detection lives in the existing click handlers (`titleBarClick` etc.), not in a capture-phase host listener that stops propagation (PR #7146 review flagged that as breaking normal clicks).
 
@@ -198,7 +198,7 @@ Dragging a task that is part of the selection drags the whole selection: the CDK
 - Undo snackbar for bulk delete.
 - Duplicate in bulk.
 - Relative reschedule in the bulk schedule dialog ("+1 day", "+1 week", "next Monday") — the "shift a chain of tasks" request.
-- Touch: drag over check circles to range-select.
+- Touch: drag over selection rings to range-select.
 - Plugin API: expose `selectedTaskIds` read-only and fire the existing `SetSelectedTask`-style hook (#6551 asks for the focused task; the selection can ride along).
 
 **Phase 3 — other views (separate issue)**
@@ -221,7 +221,7 @@ Change:
 - Replace the capture-phase click interception with modifier checks in the existing click handlers.
 - Mark done via per-task `updateTask` (or `TaskService.setDone`), not `updateTasks`.
 - Sequential loop with the Rule #6 flush instead of `Promise.all` on moves.
-- Drop the always-visible desktop checkboxes; keep the check circles for touch selection mode.
+- Drop the checkboxes entirely (a check means done); use tint + stripe on desktop and the filled ring in touch selection mode.
 - Route the "more" actions through the context menu in selection mode instead of a second project-picker dialog and a growing toolbar.
 - Add keyboard selection (`Shift+Arrow`, `X`, `Ctrl+A`) and make existing task shortcuts apply to the selection.
 
