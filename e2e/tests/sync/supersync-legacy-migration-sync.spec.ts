@@ -247,51 +247,34 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
       await waitForStatePersistence(clientB.page);
       console.log('[Test] Client B added task after migration');
 
-      // Setup sync - may trigger conflict dialog or auto-resolve
+      // A's setup uploaded a full-state import, so B's pending ops trigger the
+      // sync-import conflict dialog; answer it with "Use Server Data".
       console.log('[Test] Client B setting up sync...');
-
-      // Use syncImportChoice 'remote' so B adopts A's data
       await syncPageB.setupSuperSync({ ...syncConfig, syncImportChoice: 'remote' });
       console.log('[Test] Client B sync completed');
 
-      // Check which data Client B has - may have A's data or B's data depending on resolution
-      const hasAProject = await sidenavB
-        .locator('nav-item', { hasText: 'Client A Project' })
-        .isVisible()
-        .catch(() => false);
-      const hasBProject = await sidenavB
-        .locator('nav-item', { hasText: 'Client B Project' })
-        .isVisible()
-        .catch(() => false);
+      // "Use Server Data" is a full replace, not a merge: B adopts A's data and
+      // its own migrated project plus the post-migration task are gone. The
+      // previous either/or check here could not catch a regression (#9863).
+      await expect(
+        sidenavB.locator('nav-item', { hasText: 'Client A Project' }),
+      ).toBeVisible({ timeout: 10000 });
+      await expect(
+        sidenavB.locator('nav-item', { hasText: 'Client B Project' }),
+      ).not.toBeVisible();
 
-      if (hasAProject) {
-        // Client B adopted A's data (expected for "Keep remote")
-        await sidenavB.locator('nav-item', { hasText: 'Client A Project' }).click();
-        await clientB.page.waitForLoadState('networkidle').catch(() => {});
-        await workViewB.waitForTaskList();
+      await sidenavB.locator('nav-item', { hasText: 'Client A Project' }).click();
+      await clientB.page.waitForLoadState('networkidle').catch(() => {});
+      await workViewB.waitForTaskList();
 
-        await expect(clientB.page.locator('task', { hasText: 'Task A1' })).toBeVisible({
-          timeout: 10000,
-        });
-        await expect(clientB.page.locator('task', { hasText: 'Task A2' })).toBeVisible();
-        console.log('[Test] SUCCESS: Client B adopted remote (A) data');
-      } else if (hasBProject) {
-        // Client B kept its own data - this can happen if native confirm was auto-accepted
-        console.log(
-          '[Test] Client B kept local data (native confirm may have been auto-accepted)',
-        );
-        await sidenavB.locator('nav-item', { hasText: 'Client B Project' }).click();
-        await clientB.page.waitForLoadState('networkidle').catch(() => {});
-        await workViewB.waitForTaskList();
-        await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible({
-          timeout: 10000,
-        });
-        console.log(
-          '[Test] SUCCESS: Sync completed (B kept local data due to auto-resolution)',
-        );
-      } else {
-        throw new Error('Neither Client A nor Client B project found after sync');
-      }
+      await expect(clientB.page.locator('task', { hasText: 'Task A1' })).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(clientB.page.locator('task', { hasText: 'Task A2' })).toBeVisible();
+      await expect(
+        clientB.page.locator('task', { hasText: 'Task B3 - After Migration' }),
+      ).not.toBeVisible();
+      console.log('[Test] SUCCESS: Client B adopted remote (A) data');
     } finally {
       if (clientA) await closeLegacyClient(clientA).catch(() => {});
       if (clientB) await closeLegacyClient(clientB).catch(() => {});
