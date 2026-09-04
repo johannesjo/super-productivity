@@ -229,12 +229,16 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
       if (isUpdated) {
         // Compute sync values once and pass through to avoid redundant calls
         const issueLastSyncedValues = this._extractSyncValues(issue, resolved.provider);
-        const addTaskData = this._getAddTaskDataForProvider(
-          issue,
-          resolved.provider,
-          issueLastSyncedValues,
-          (cfg.pluginConfig?.['twoWaySync'] as Record<string, string>) ?? {},
-        );
+
+        // Only the intrinsic issue fields here — NOT the mapped ones. On the
+        // refresh path _applyFieldMappingPull is the single owner of every
+        // mapped field, because it is the only one that honours both the
+        // per-field sync direction and "the remote has not changed this since
+        // the last sync". Merging a second, unconditional pass over the same
+        // mappings on top of it is what let a field the user configured `off`
+        // (notes <- body, most commonly) — or one nobody touched remotely —
+        // overwrite what they had written locally.
+        const baseTaskData = this._buildBaseIssueTask(issue);
 
         // Apply field mappings to pull changes from issue to task
         const fieldChanges = this._applyFieldMappingPull(
@@ -247,7 +251,7 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
 
         return {
           taskChanges: {
-            ...addTaskData,
+            ...baseTaskData,
             ...fieldChanges,
             issueWasUpdated: true,
             issueLastSyncedValues,
@@ -399,18 +403,15 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
   }
 
   /**
-   * Maps issue fields onto task fields.
-   *
-   * `twoWaySync` is passed only when refreshing an existing task, where a field
-   * the user configured as `off` or `pushOnly` must not be pulled back over what
-   * they wrote locally. On import there is no local content to protect and every
-   * mapping applies, so the caller passes nothing.
+   * Maps issue fields onto task fields for the IMPORT path only, where there is
+   * no local content to protect and every mapping applies. Refreshing an
+   * existing task goes through `_applyFieldMappingPull` instead, which honours
+   * the per-field sync direction.
    */
   private _extractTaskFieldsFromIssueWithSyncValues(
     issue: PluginIssue,
     provider: RegisteredPluginIssueProvider,
     syncValues: Record<string, unknown>,
-    twoWaySync?: Record<string, string>,
   ): Record<string, unknown> {
     const issueRecord = issue as Record<string, unknown>;
     const result: Record<string, unknown> = {};
@@ -421,12 +422,6 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
       return {};
     }
     for (const mapping of mappings) {
-      if (twoWaySync) {
-        const dir = twoWaySync[mapping.taskField] ?? mapping.defaultDirection;
-        if (dir !== 'pullOnly' && dir !== 'both') {
-          continue;
-        }
-      }
       const issueValue =
         syncValues[mapping.issueField] ?? issueRecord[mapping.issueField];
       if (issueValue == null) {
@@ -447,7 +442,6 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
     issueData: IssueDataReduced,
     provider: RegisteredPluginIssueProvider,
     syncValues: Record<string, unknown>,
-    twoWaySync?: Record<string, string>,
   ): IssueTask {
     const data = issueData as PluginIssue;
     const base = this._buildBaseIssueTask(data);
@@ -455,7 +449,6 @@ export class PluginIssueProviderAdapterService implements IssueServiceInterface 
       data,
       provider,
       syncValues,
-      twoWaySync,
     );
     return { ...base, ...fieldValues } as IssueTask;
   }

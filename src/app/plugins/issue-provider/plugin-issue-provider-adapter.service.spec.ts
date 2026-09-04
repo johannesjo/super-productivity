@@ -784,6 +784,11 @@ describe('PluginIssueProviderAdapterService', () => {
         expect(result!.taskChanges['notes' as keyof Task]).toBeUndefined();
       });
 
+      // The direction is `both` here, so this is the local-edit guard rather
+      // than the direction one: the remote did not touch the field, so whatever
+      // the user changed locally must survive the refresh. Note the single
+      // `returnValue` — an earlier `returnValues({}, syncValues)` fed the first
+      // caller an empty object and hid a second, ungated pass over the mappings.
       it('should skip pull when fresh value equals last synced value', async () => {
         const freshIssue: PluginIssue = {
           id: 'ISS-1',
@@ -797,7 +802,7 @@ describe('PluginIssueProviderAdapterService', () => {
           fieldMappings: FIELD_MAPPINGS,
           extractSyncValues: jasmine
             .createSpy('extractSyncValues')
-            .and.returnValues({}, syncValues),
+            .and.returnValue(syncValues),
         });
         registrySpy.getProvider.and.returnValue(provider);
 
