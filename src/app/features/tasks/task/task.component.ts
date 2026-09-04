@@ -813,10 +813,26 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   moveToBacklogWithFocus(): void {
     const t = this.task();
-    if (t.projectId && !t.parentId) {
-      this.focusPrevious(true);
-      this.moveToBacklog();
+    if (!t.projectId || t.parentId) {
+      return;
     }
+    // Gated on the ACTIVE context, like the context menu's move-to-backlog item
+    // (task-context-menu-inner.component.ts). Today and tag views have no backlog,
+    // so there the menu offers nothing and the shortcut must do nothing either —
+    // moving the task out of sight of the list it was invoked from would overload
+    // a position intent with a schedule one (#9374, and the rule set in #9563).
+    // Subscribed on keypress rather than per instance: this component renders once
+    // per task in long lists. shareReplay(1) makes the emission synchronous, and
+    // first() completes it, so there is nothing to clean up.
+    this.workContextService.activeWorkContext$
+      .pipe(first())
+      .subscribe(({ isEnableBacklog }) => {
+        if (!isEnableBacklog) {
+          return;
+        }
+        this.focusPrevious(true);
+        this.moveToBacklog();
+      });
   }
 
   openProjectMenu(): void {
