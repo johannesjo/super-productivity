@@ -119,6 +119,11 @@ export class BackupService {
         // truncated legacy payload has to be refused here rather than inside a
         // migration step, where it would surface as an opaque TypeError.
         if (!isDataRepairPossible(backupData)) {
+          // The migration line below never runs on this path, so without this
+          // a refused legacy file leaves no trace in the exported log that it
+          // was legacy at all, and the thrown message is identical to the
+          // modern-path refusal. Fixed string: log history is exportable.
+          OpLog.err('BackupService: legacy backup refused, core slice missing');
           recordCriticalErrorTime();
           throw new Error('Data validation failed and repair not possible');
         }
