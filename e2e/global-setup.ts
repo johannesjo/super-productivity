@@ -3,6 +3,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { isServerHealthy } from './utils/supersync-helpers';
+import { pickTestTimezone } from './utils/test-timezone';
 
 /**
  * Warm up the dev server by fetching the app once before any tests start.
@@ -32,10 +33,14 @@ const warmUpDevServer = async (baseURL: string): Promise<void> => {
 };
 
 const globalSetup = async (config: FullConfig): Promise<void> => {
-  // Set test environment variables
-  process.env.TZ = 'Europe/Berlin';
+  // Set test environment variables.
+  // TZ is picked so the run stays far from midnight — a day rollover mid-suite
+  // breaks date-sensitive specs (see ./utils/test-timezone.ts). Workers are
+  // forked after this, so they and the browsers they launch inherit the zone.
+  // Set E2E_TZ to pin a specific zone when reproducing a timezone-dependent bug.
+  process.env.TZ = process.env.E2E_TZ || pickTestTimezone();
   process.env.NODE_ENV = 'test';
-  console.log(`Running tests with ${config.workers} workers`);
+  console.log(`Running tests with ${config.workers} workers in TZ=${process.env.TZ}`);
 
   // Build plugins before starting tests (skip if already built)
   // Check both the dev path (src/assets/) and the CI pre-built path (.tmp/angular-dist/)
