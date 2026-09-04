@@ -572,4 +572,112 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
       if (clientB) await closeClient(clientB).catch(() => {});
     }
   });
+  /**
+   * Regression for #9863: a legacy-migrated client whose ONLY op-log history is
+   * the MIGRATION genesis op joins an account that already holds ordinary ops
+   * and no full-state op. The genesis op uploads like a regular op but replays
+   * as a no-op on every other client, so before the fix no dialog appeared and
+   * both devices reported IN_SYNC while holding different tasks. The joining
+   * client must get the local-data conflict dialog; "Keep local" ships its
+   * state as a SYNC_IMPORT that the first client adopts.
+   *
+   * Unlike the tests above, Client B adds NO task after the migration (a
+   * post-migration op would already surface a dialog) and Client A is a plain
+   * client, so the server holds no SYNC_IMPORT the incoming gate could react to.
+   */
+  test('genesis-only legacy client joining an account with plain ops gets the conflict dialog', async ({
+    browser,
+    baseURL,
+    testRunId,
+  }) => {
+    test.slow();
+    const url = baseURL || 'http://localhost:4242';
+
+    const user = await createTestUser(testRunId);
+    const syncConfig = getSuperSyncConfig(user);
+
+    let clientA: SimulatedE2EClient | null = null;
+    let clientB: {
+      context: Awaited<ReturnType<typeof browser.newContext>>;
+      page: Awaited<ReturnType<typeof browser.newPage>>;
+    } | null = null;
+
+    try {
+      // === Client A: plain client seeds the account with ordinary ops only ===
+      clientA = await createSimulatedClient(browser, url, 'A', testRunId);
+      await clientA.sync.setupSuperSync(syncConfig);
+      const taskA1 = `A1-${testRunId}`;
+      await clientA.workView.addTask(taskA1);
+      await clientA.sync.syncAndWait();
+      console.log('[Test] Client A: account seeded with plain ops');
+
+      // === Client B: legacy migration, nothing edited afterwards ===
+      clientB = await createLegacyMigratedClient(
+        browser,
+        url,
+        legacyDataClientB.data,
+        'B',
+      );
+      const syncPageB = new SuperSyncPage(clientB.page);
+      const workViewB = new WorkViewPage(clientB.page);
+
+      const sidenavB = clientB.page.locator('magic-side-nav');
+      await sidenavB.locator('nav-item', { hasText: 'Client B Project' }).click();
+      await clientB.page.waitForLoadState('networkidle').catch(() => {});
+      await workViewB.waitForTaskList();
+      await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible({
+        timeout: 10000,
+      });
+      console.log('[Test] Client B verified: has migrated tasks, no further edits');
+
+      // Accept native confirms so a stray prompt never blocks the page.
+      clientB.page.on('dialog', async (dialog) => {
+        if (dialog.type() === 'confirm') {
+          console.log('[Test] Native confirm dialog: ' + dialog.message());
+          await dialog.accept();
+        }
+      });
+
+      // Setup only. The automatic first sync after save must surface the
+      // local-data conflict dialog instead of silently joining.
+      await syncPageB.setupSuperSync({ ...syncConfig, waitForInitialSync: false });
+      const conflictDialog = clientB.page.locator('dialog-sync-conflict');
+      await expect(conflictDialog).toBeVisible({ timeout: 30000 });
+      console.log('[Test] Client B: local-data conflict dialog appeared');
+
+      await conflictDialog.locator('button', { hasText: /Keep local/i }).click();
+      // A first-sync overwrite always asks for the count-free safety warning.
+      const confirmDialog = clientB.page.locator('dialog-confirm');
+      await expect(confirmDialog).toBeVisible({ timeout: 10000 });
+      await confirmDialog.locator('[e2e="confirmBtn"]').click();
+      await expect(conflictDialog).toBeHidden({ timeout: 15000 });
+
+      // Let the FORCE_UPLOAD SYNC_IMPORT land and confirm B kept its data.
+      await syncPageB.syncAndWait({ useLocal: true });
+      await sidenavB.locator('nav-item', { hasText: 'Client B Project' }).click();
+      await clientB.page.waitForLoadState('networkidle').catch(() => {});
+      await workViewB.waitForTaskList();
+      await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible();
+      await expect(clientB.page.locator('task', { hasText: 'Task B2' })).toBeVisible();
+      console.log('[Test] Client B verified: kept its legacy data');
+
+      // === Client A adopts B's SYNC_IMPORT: the legacy tasks reached the server ===
+      await clientA.sync.syncAndWait();
+      const sidenavA = clientA.page.locator('magic-side-nav');
+      await sidenavA.locator('nav-item', { hasText: 'Client B Project' }).click();
+      await clientA.page.waitForLoadState('networkidle').catch(() => {});
+      await clientA.workView.waitForTaskList();
+      await expect(clientA.page.locator('task', { hasText: 'Task B1' })).toBeVisible({
+        timeout: 15000,
+      });
+      await expect(clientA.page.locator('task', { hasText: 'Task B2' })).toBeVisible();
+      await expect(clientA.page.locator('task', { hasText: taskA1 })).toHaveCount(0);
+      console.log(
+        '[Test] PASSED: genesis-only legacy client shipped its data via Keep local',
+      );
+    } finally {
+      if (clientB) await closeLegacyClient(clientB).catch(() => {});
+      if (clientA) await closeClient(clientA).catch(() => {});
+    }
+  });
 });

@@ -6,6 +6,16 @@ import { OpLog } from '../../core/log';
 import { T } from '../../t.const';
 import { confirmDialog } from '../../util/native-dialogs';
 import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
+import { OperationLogEntry } from '../core/operation.types';
+
+/**
+ * Legacy-migration and crash-recovery genesis ops carry this client's entire
+ * state as an ordinary Batch op. They upload like any other op but replay as a
+ * no-op on every other client, so the state they carry never reaches the server
+ * in a form another device can apply.
+ */
+const isGenesisOp = (entry: OperationLogEntry): boolean =>
+  entry.op.entityType === 'MIGRATION' || entry.op.entityType === 'RECOVERY';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +30,44 @@ export class SyncLocalStateService {
     const lastSeq = await this.opLogStore.getLastSeq();
 
     return !snapshot && lastSeq === 0;
+  }
+
+  /**
+   * A client whose op-log history starts with a MIGRATION or RECOVERY genesis op
+   * and that has never completed a real sync (#9863).
+   *
+   * Such a client is NOT wholly fresh (the genesis wrote a state cache and one
+   * op), so the fresh-client protections skip it, and server migration never
+   * fires for it either (`hasSyncedOps()` ignores genesis ops). Yet its
+   * pre-migration data exists only inside the genesis payload, which no other
+   * client can replay. Callers must treat it like a fresh client that holds
+   * local data: on a non-empty server the user has to choose a side, on an empty
+   * server the state has to be seeded as a SYNC_IMPORT.
+   *
+   * Returns false once any full-state op exists locally: that op already ships
+   * (or shipped) the state, and the caller's SYNC_IMPORT creation must not loop.
+   */
+  async isNeverSyncedGenesisClient(): Promise<boolean> {
+    if (await this.opLogStore.hasSyncedOps()) {
+      return false;
+    }
+    if (await this.opLogStore.getLatestFullStateOpEntry()) {
+      return false;
+    }
+    const [firstEntry] = await this.opLogStore.getOpsAfterSeq(0);
+    return !!firstEntry && isGenesisOp(firstEntry);
+  }
+
+  /**
+   * Download-side "needs a full-state decision" check. Deliberately NOT folded
+   * into isWhollyFreshClient(): that one also gates the upload phase, and a
+   * genesis client must still upload the SYNC_IMPORT the empty-server branch
+   * creates for it.
+   */
+  async isFreshOrNeverSyncedGenesisClient(): Promise<boolean> {
+    return (
+      (await this.isWhollyFreshClient()) || (await this.isNeverSyncedGenesisClient())
+    );
   }
 
   /**

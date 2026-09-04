@@ -1050,9 +1050,13 @@ export class OperationLogSyncService {
       // (hasSyncedOps=false). With an empty server, there are no remote ops to
       // trigger a conflict dialog. Detect this case and create a SYNC_IMPORT
       // via the migration service so the client is no longer "fresh".
+      // #9863: a legacy-migrated (or recovered) client is in the same position.
+      // Its data lives only in a MIGRATION/RECOVERY genesis op that other clients
+      // replay as a no-op, so uploading it "normally" seeds nothing.
       const isEmptyServer = result.latestServerSeq === 0;
       if (isEmptyServer) {
-        const isFresh = await this.isWhollyFreshClient();
+        const isFresh =
+          await this.syncLocalStateService.isFreshOrNeverSyncedGenesisClient();
         if (isFresh && this.syncLocalStateService.hasMeaningfulStoreData()) {
           OpLog.warn(
             'OperationLogSyncService: Pre-op-log client with meaningful local data on empty server. ' +
@@ -1090,7 +1094,12 @@ export class OperationLogSyncService {
     // SAFETY: Fresh client conflict detection
     // If this is a wholly fresh client receiving remote data for the first time,
     // check if there's meaningful local data that would be overwritten.
-    const isFreshClient = await this.isWhollyFreshClient();
+    // #9863: a never-synced genesis client (legacy migration / recovery) joins
+    // here too. Without the dialog its pre-migration data stays stranded on this
+    // device: the genesis op uploads but replays as a no-op everywhere else, and
+    // both sides then report IN_SYNC while holding different tasks.
+    const isFreshClient =
+      await this.syncLocalStateService.isFreshOrNeverSyncedGenesisClient();
     if (isFreshClient && result.newOps.length > 0) {
       if (this.syncLocalStateService.hasMeaningfulStoreData()) {
         // Local data exists — throw conflict error so the full conflict dialog is shown,
