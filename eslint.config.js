@@ -270,6 +270,30 @@ module.exports = tseslint.config(
       'local-rules/require-text-locale': 'error',
     },
   },
+  // Log history is exportable (`Log.exportLogHistory()` backs the config-page
+  // download and the global error handler auto-triggers it) and exported logs
+  // are routinely attached to public bug reports, so user content must never
+  // reach a Log method (rule #9). This flags the two shapes that actually
+  // leaked in #7870 / #9112 — a bare identifier argument and a shorthand
+  // property — both of which mean "whole object, unexamined".
+  //
+  // `warn`, not `error`: it starts with a backlog of 117 pre-existing hits
+  // (measured 2026-09) across ~1470 Log call sites, paid down opportunistically
+  // like the grandfathered `max-lines` offenders. That count may shrink, never
+  // grow.
+  //
+  // Specs are excluded: a test asserting on a payload is legitimate, and the
+  // invariant is about what a shipped build writes into the export.
+  {
+    files: ['src/app/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    plugins: {
+      'local-rules': localRules,
+    },
+    rules: {
+      'local-rules/no-user-content-in-logs': 'warn',
+    },
+  },
   // Op-log persistence: inside an adapter.transaction() callback only the tx
   // handle may be used — adapter methods enqueue behind the transaction's own
   // FIFO queue slot on the SQLite backend and deadlock (see
