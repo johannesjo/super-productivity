@@ -339,14 +339,15 @@ join time: it gets the local-data conflict dialog on a non-empty server, or
 seeds an empty server with a `SYNC_IMPORT`
 (`SyncLocalStateService.isNeverSyncedGenesisClient`, #9863). Because that
 download-side decision is what actually ships the state, API-based providers
-(SuperSync) never upload the genesis op itself: once the upload guards have
-passed, `OperationLogUploadService` marks it synced locally and leaves it out
-of the pending set (`isGenesisEntityType`, #9921). While the upload is still
-blocked (no encryption key yet) the op stays pending, because a pending genesis
-op is what keeps the incoming-import gate armed. File-based providers keep
-uploading it: there the ops upload is what writes the state snapshot. Servers
-may still hold genesis ops uploaded by older clients; receivers apply them as
-no-ops as before.
+(SuperSync) never upload the genesis op itself: `OperationLogUploadService`
+leaves it out of the upload set and marks it synced locally once the round's
+full-state ops are settled (`isGenesisEntityType`, #9921). While the upload is
+still blocked (no encryption key yet), or when this client's own `SYNC_IMPORT`
+was just dropped on `SYNC_IMPORT_EXISTS`, the op stays pending, because a
+pending genesis op is what makes the incoming-import gate prompt. File-based
+providers keep uploading it: there the ops upload is what writes the state
+snapshot. Servers may still hold genesis ops uploaded by older clients;
+receivers apply them as no-ops as before.
 
 ## A.4 Compaction
 

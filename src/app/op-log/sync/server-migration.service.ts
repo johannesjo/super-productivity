@@ -128,6 +128,8 @@ export class ServerMigrationService {
       if (hasSyncedOps) {
         const confirmed = await this._confirmMigrationToNonEmptyServer();
         if (confirmed) {
+          // The user just asked for this explicitly, so a failure must be reported.
+          this._validationFailureNotified = false;
           await this.handleServerMigration(syncProvider, {
             skipServerEmptyCheck: true,
             syncImportReason: 'SERVER_MIGRATION',
@@ -267,7 +269,9 @@ export class ServerMigrationService {
             msg: T.F.SYNC.S.SERVER_MIGRATION_VALIDATION_FAILED,
           });
         }
-        this._validationFailureNotified = true;
+        if (isServerMigration) {
+          this._validationFailureNotified = true;
+        }
         return;
       }
 

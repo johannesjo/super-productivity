@@ -458,6 +458,45 @@ describe('OperationLogUploadService', () => {
           expect(result.uploadedCount).toBe(1);
         });
 
+        it('keeps the genesis op pending when its own SYNC_IMPORT is dropped on SYNC_IMPORT_EXISTS', async () => {
+          // Two legacy clients seed the same empty server at once: the loser's
+          // import is dropped, and its still-pending genesis op is what makes the
+          // next cycle's incoming-import gate prompt instead of applying the
+          // winner's import silently.
+          const genesis = createGenesisEntry(1, 'MIGRATION');
+          const ownImport: OperationLogEntry = {
+            ...createMockEntry(2, 'my-import', 'client-1'),
+            op: {
+              ...createMockEntry(2, 'my-import', 'client-1').op,
+              actionType: ActionType.LOAD_ALL_DATA,
+              opType: OpType.SyncImport,
+              entityType: 'ALL',
+              entityId: undefined,
+              payload: {
+                task: { ids: [], entities: {} },
+                project: { ids: [], entities: {} },
+                tag: { ids: [], entities: {} },
+                globalConfig: {},
+              },
+            },
+          };
+          mockOpLogStore.getUnsynced.and.resolveTo([genesis, ownImport]);
+          (mockApiProvider as any).uploadSnapshot = jasmine
+            .createSpy('uploadSnapshot')
+            .and.resolveTo({
+              accepted: false,
+              error: 'A SYNC_IMPORT already exists',
+              errorCode: 'SYNC_IMPORT_EXISTS',
+            });
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          expect(mockOpLogStore.deleteOpsWhere).toHaveBeenCalled();
+          expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+          expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+          expect(result.uploadedCount).toBe(0);
+        });
+
         it('routes the genesis acknowledgement through the deferred-ack path', async () => {
           const genesis = createGenesisEntry(1, 'MIGRATION');
           const regular = createMockEntry(2, 'op-2', 'client-1');

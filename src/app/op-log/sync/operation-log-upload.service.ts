@@ -252,30 +252,14 @@ export class OperationLogUploadService {
       }
 
       // Genesis ops (MIGRATION / RECOVERY) replay as a no-op on every other
-      // client, so on API-based providers sending them only costs server storage
-      // and download time for every later joiner: mark them synced instead. Done
-      // only here, past every abort above — while the upload is still blocked the
-      // pending genesis op is what keeps the incoming-import gate armed. File-
-      // based providers keep uploading them: there the ops upload is what writes
-      // the state snapshot, which a genesis-only client must still do. (#9921)
+      // client, so API-based providers never upload them (acknowledged below once
+      // this round's full-state ops are settled). File-based providers keep
+      // uploading them: there the ops upload is what writes the state snapshot,
+      // which a genesis-only client must still do. (#9921)
       const isGenesisToSkip = (entry: OperationLogEntry): boolean =>
         syncProvider.providerMode !== 'fileSnapshotOps' &&
         isGenesisEntityType(entry.op.entityType);
-      const genesisSeqs = pendingOps.filter(isGenesisToSkip).map((entry) => entry.seq);
-      if (genesisSeqs.length > 0) {
-        OpLog.normal(
-          `OperationLogUploadService: Marking ${genesisSeqs.length} genesis op(s) synced ` +
-            'without uploading them (no receiver on any other client).',
-        );
-        await acknowledge(genesisSeqs);
-      }
       const uploadableOps = pendingOps.filter((entry) => !isGenesisToSkip(entry));
-      if (uploadableOps.length === 0) {
-        OpLog.normal(
-          'OperationLogUploadService: Only genesis ops were pending; nothing to upload.',
-        );
-        return;
-      }
 
       // Separate full-state operations (backup imports, repairs) from regular ops
       // Full-state ops are uploaded via snapshot endpoint for better efficiency
@@ -305,6 +289,7 @@ export class OperationLogUploadService {
       // can order a post-snapshot op BEFORE the full-state op after a clock
       // rollback, which would mark it synced without ever uploading it.
       let lastUploadedFullStateOpSeq: number | undefined;
+      let droppedFullStateOnExists = false;
       for (const entry of fullStateOps) {
         // BACKUP_IMPORT is an explicit restore and intentionally wipes remote
         // history. SYNC_IMPORT only does so when explicitly requested. REPAIR
@@ -354,6 +339,7 @@ export class OperationLogUploadService {
             await this.opLogStore.deleteOpsWhere(
               (logEntry) => logEntry.op.id === entry.op.id,
             );
+            droppedFullStateOnExists = true;
             // Don't count as rejected - this is expected behavior when joining existing group
             continue;
           }
@@ -391,6 +377,25 @@ export class OperationLogUploadService {
 
       if (fullStateUploadBlocked) {
         return;
+      }
+
+      // Settle the skipped genesis ops (see isGenesisToSkip) only now: while the
+      // upload was still blocked above, or when this client's own SYNC_IMPORT was
+      // just dropped in favour of a remote one, the pending genesis op is what
+      // makes the incoming-import gate prompt on the next cycle instead of
+      // silently replacing this client's state. (#9921)
+      const genesisSeqs = pendingOps.filter(isGenesisToSkip).map((entry) => entry.seq);
+      if (genesisSeqs.length > 0 && droppedFullStateOnExists) {
+        OpLog.normal(
+          'OperationLogUploadService: Keeping genesis op(s) pending — the local SYNC_IMPORT ' +
+            'was superseded by a remote one.',
+        );
+      } else if (genesisSeqs.length > 0) {
+        OpLog.normal(
+          `OperationLogUploadService: Marking ${genesisSeqs.length} genesis op(s) synced ` +
+            'without uploading them (no receiver on any other client).',
+        );
+        await acknowledge(genesisSeqs);
       }
 
       // Skip regular ops processing if none exist

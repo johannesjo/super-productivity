@@ -570,8 +570,8 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
       await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible();
       await expect(clientB.page.locator('task', { hasText: 'Task B2' })).toBeVisible();
 
-      // B's state now ships as a SYNC_IMPORT, which settles every earlier op
-      // including the genesis (the no-upload rule itself is unit-tested).
+      // B's state now ships as a SYNC_IMPORT; the genesis op is settled locally
+      // once that upload succeeded (the no-upload rule itself is unit-tested).
       const opsBAfter = await getLocalOpLogSummary(clientB.page);
       expect(opsBAfter.find((op) => op.entityType === 'MIGRATION')?.isSynced).toBe(true);
       expect(opsBAfter.some(isFullStateOp)).toBe(true);

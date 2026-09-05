@@ -441,7 +441,7 @@ describe('ServerMigrationService', () => {
         expect(opLogStoreSpy.append).not.toHaveBeenCalled();
       });
 
-      it('always shows the snack for a user-driven force upload', async () => {
+      it('always shows the snack for a user-driven force upload and does not consume the automatic notice', async () => {
         failValidation();
 
         await service.handleServerMigration(defaultProvider, {
@@ -452,6 +452,27 @@ describe('ServerMigrationService', () => {
           skipServerEmptyCheck: true,
           syncImportReason: 'FORCE_UPLOAD',
         });
+        await service.handleServerMigration(defaultProvider);
+
+        expect(snackServiceSpy.open).toHaveBeenCalledTimes(3);
+      });
+
+      it('reports again when the user confirms a migration to a non-empty server', async () => {
+        failValidation();
+        await service.handleServerMigration(defaultProvider);
+        expect(snackServiceSpy.open).toHaveBeenCalledTimes(1);
+
+        const provider = createMockSyncProvider();
+        (provider.getLastServerSeq as jasmine.Spy).and.returnValue(Promise.resolve(0));
+        (provider.downloadOps as jasmine.Spy).and.returnValue(
+          Promise.resolve({ ops: [], latestSeq: 5, hasMore: false }),
+        );
+        opLogStoreSpy.hasSyncedOps.and.returnValue(Promise.resolve(true));
+        matDialogSpy.open.and.returnValue({
+          afterClosed: () => of(true),
+        } as MatDialogRef<unknown>);
+
+        await service.checkAndHandleMigration(provider);
 
         expect(snackServiceSpy.open).toHaveBeenCalledTimes(2);
       });
