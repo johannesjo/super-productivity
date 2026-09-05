@@ -595,8 +595,7 @@ class CapacitorMainActivity : BridgeActivity() {
      * shrank for the IME, the WebView bottom is already at `rect.bottom`, so the
      * computed height equals the current one and nothing moves. It cannot
      * re-create the squashed-WebView regression the way the reverted delta-based
-     * inset did. See docs/android-edge-to-edge-keyboard.md and
-     * docs/plans/2026-06-22-android-systembars-migration-corrected.md.
+     * inset did. See docs/android-edge-to-edge-keyboard.md.
      */
     private fun adjustWebViewHeightForKeyboard(rect: Rect, isKeyboardOpen: Boolean) {
         if (!shouldRunNativeInsetShim()) return
