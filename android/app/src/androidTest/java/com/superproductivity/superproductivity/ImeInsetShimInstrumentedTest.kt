@@ -20,6 +20,7 @@ import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.abs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -64,7 +65,7 @@ class ImeInsetShimInstrumentedTest {
         val webViewBottom: Int,
         /** `webView.layoutParams.height`: MATCH_PARENT at rest, explicit px under the shim. */
         val paramsHeight: Int,
-        /** Root window insets' IME visibility — informational on API < 30. */
+        /** Root window insets' IME visibility — diagnostic only, not asserted. */
         val imeVisible: Boolean,
     ) {
         /** Same criterion as `CapacitorMainActivity`'s `OnGlobalLayoutListener`. */
@@ -112,6 +113,21 @@ class ImeInsetShimInstrumentedTest {
                     "currentWebViewPackage=${current?.packageName}/${current?.versionName} " +
                     "expectShim=$expectShim"
             )
+            // CI pins which owner an emulator image is meant to exercise. If the
+            // image is refreshed with a WebView across the 140 boundary the gate
+            // flips branch and every assertion below would still pass — silently
+            // dropping coverage of the #9316 band. Fail loudly instead.
+            InstrumentationRegistry.getArguments().getString(EXPECT_SHIM_ARG)?.let { pinned ->
+                assertEquals(
+                    "$EXPECT_SHIM_ARG=$pinned was pinned for this emulator image but the gate " +
+                        "decided otherwise (sdk=${Build.VERSION.SDK_INT} activeMajor=$activeMajor " +
+                        "current=${current?.versionName}): the image's WebView crossed the 140 " +
+                        "boundary or the version source broke, so this run no longer covers " +
+                        "the band it was added for",
+                    pinned.toBoolean(),
+                    expectShim,
+                )
+            }
 
             val resting = awaitGeometry(activity, webView, "the keyboard to be closed before the test starts") {
                 !it.keyboardOpenPerListener
@@ -146,14 +162,15 @@ class ImeInsetShimInstrumentedTest {
                 )
             }
 
-            // Symptom, independent of owner: the WebView ends at (or above) the
-            // keyboard top, and the web layout viewport shrank with it.
+            // Symptom, independent of owner: the WebView ends AT the keyboard top —
+            // two-sided, because a WebView ending well above it is the #8508
+            // double-inset squash — and the web layout viewport shrank with it.
             val above = awaitGeometry(
                 activity,
                 webView,
-                "the WebView bottom to sit at or above the keyboard top",
+                "the WebView bottom to sit at the keyboard top (within ${TOLERANCE_PX}px)",
             ) {
-                it.keyboardOpenPerListener && it.webViewBottom <= it.rectBottom + TOLERANCE_PX
+                it.keyboardOpenPerListener && abs(it.webViewBottom - it.rectBottom) <= TOLERANCE_PX
             }
             awaitJavaScript(webView, "window.innerHeight < $innerHeightBefore")
             Log.i(TAG, "settled: $above innerHeight=${readInnerHeight(webView)}")
@@ -171,6 +188,13 @@ class ImeInsetShimInstrumentedTest {
                 above.webViewBottom,
                 later.webViewBottom,
             )
+            if (!expectShim) {
+                assertEquals(
+                    "the shim must stay off across layout passes where SystemBars owns the inset: $later",
+                    resting.paramsHeight,
+                    later.paramsHeight,
+                )
+            }
 
             hideIme(activity, webView)
             awaitGeometry(activity, webView, "the keyboard to close") { !it.keyboardOpenPerListener }
@@ -321,6 +345,8 @@ class ImeInsetShimInstrumentedTest {
 
     private companion object {
         const val TAG = "SUPKeyboardTest"
+        /** Instrumentation argument set by android/run-android-ime-check.sh. */
+        const val EXPECT_SHIM_ARG = "expectShim"
         const val DEFAULT_TIMEOUT_SECONDS = 10L
         const val SHOW_IME_FIRST_TRY_SECONDS = 5L
         const val POLL_MS = 50L
@@ -330,9 +356,10 @@ class ImeInsetShimInstrumentedTest {
 
         // The viewport meta mirrors src/index.html: SystemBars reads
         // viewport-fit=cover back from this tag at onDOMReady and only takes its
-        // WebView >= 140 passthrough branch when it is present, so the page has to
-        // carry it for the API >= 35 / WebView >= 140 run to exercise production
-        // ownership.
+        // WebView >= 140 passthrough branch when it is present. On API >= 35 it
+        // pads in both branches, so today this only matters if an image in the
+        // API < 35 / WebView >= 140 band is ever added — keep the page matching
+        // production regardless.
         val TEST_PAGE = """
             <!doctype html>
             <html>

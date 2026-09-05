@@ -593,9 +593,10 @@ class CapacitorMainActivity : BridgeActivity() {
      * That absolute target is also what makes this **resize-detecting**, the
      * hard requirement #8508 left behind: on a device where the window already
      * shrank for the IME, the WebView bottom is already at `rect.bottom`, so the
-     * computed height equals the current one and nothing moves. It cannot
-     * re-create the squashed-WebView regression the way the reverted delta-based
-     * inset did. See docs/android-edge-to-edge-keyboard.md.
+     * computed height equals the one in effect. The write still happens once
+     * (MATCH_PARENT never equals a px target) but changes nothing visible, so it
+     * cannot re-create the squashed-WebView regression the way the reverted
+     * delta-based inset did. See docs/android-edge-to-edge-keyboard.md.
      */
     private fun adjustWebViewHeightForKeyboard(rect: Rect, isKeyboardOpen: Boolean) {
         if (!shouldRunNativeInsetShim()) return
@@ -622,12 +623,6 @@ class CapacitorMainActivity : BridgeActivity() {
         if (params.height == targetHeight) return
         params.height = targetHeight
         webView.layoutParams = params
-        if (BuildConfig.DEBUG) {
-            Log.d(
-                "SUPKeyboard",
-                "webView height -> $targetHeight (kbOpen=$isKeyboardOpen rectB=${rect.bottom})"
-            )
-        }
     }
 
     /**
@@ -658,6 +653,13 @@ class CapacitorMainActivity : BridgeActivity() {
      * Shares [NativeInsetShimGate] with the keyboard shim so it never fights
      * SystemBars; on API >= 35 the injected --safe-area-inset-top wins via var()
      * precedence and the published var is ignored regardless.
+     *
+     * Known gap, pre-existing (follow-up, not #9316): SystemBars 8.4 also injects
+     * `--safe-area-inset-top: 0px` inline on its non-passthrough path at every API
+     * level, so the SCSS `var(--safe-area-inset-top, max(env(), var(--android-
+     * status-bar-overlap)))` fallback resolves to 0px and the var published here
+     * is shadowed on exactly the band this runs on. See the note under "header
+     * draws BEHIND the status bar" in docs/android-edge-to-edge-keyboard.md.
      */
     private fun pushStatusBarOverlap(rect: Rect) {
         if (!shouldRunNativeInsetShim()) return

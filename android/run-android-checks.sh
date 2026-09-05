@@ -117,10 +117,6 @@ case "$smoke_status" in
     # state and the bridge version the minified build returned.
     echo "Minified launch smoke passed."
     adb logcat -d | grep -F 'SP_SMOKE OK' | tail -1
-    # Nothing else runs on this emulator, and the action only kills it in a post
-    # step: free the CPU for the API 34 session that run-android-ime-check.sh
-    # boots next, and leave that script's newest-serial pick unambiguous.
-    adb emu kill > /dev/null 2>&1 || true
     ;;
   fail)
     echo "::error::minified build reached the bridge but the smoke page reported a failure"

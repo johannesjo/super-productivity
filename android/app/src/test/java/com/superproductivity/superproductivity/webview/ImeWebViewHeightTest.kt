@@ -10,10 +10,11 @@ class ImeWebViewHeightTest {
     fun `computes the height already in effect where the window resized itself`() {
         // The #8508 invariant, and the reason widening the gate is safe: on a
         // device that already shrank for the IME the WebView bottom is at
-        // rectBottom, so the target equals the current height. The caller's
-        // `params.height == targetHeight` check then writes nothing — no second
-        // inset stacked on the system's own, which is what squashed the WebView
-        // in #8508. A delta-based target would fail this test.
+        // rectBottom, so the target equals the current height. The caller
+        // writes that as an explicit px (replacing MATCH_PARENT), which changes
+        // nothing visible — no second inset stacked on the system's own, which
+        // is what squashed the WebView in #8508. A delta-based target would fail
+        // this test.
         val webViewTop = 100
         val rectBottom = 1800
         val currentHeight = rectBottom - webViewTop

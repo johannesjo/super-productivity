@@ -159,8 +159,9 @@ reverted #8295 formula in "What NOT to do" below**. On a device that _does_
 resize, that double-counts and floats the bar mid-screen. The web layer lacks
 the signal to disambiguate; native has it unambiguously.
 
-**Implemented fix (native, explicit WebView height while the IME is up, scoped to
-API < 30) — `CapacitorMainActivity.adjustWebViewHeightForKeyboard`.**
+**Implemented fix (native, explicit WebView height while the IME is up; originally
+scoped to API < 30, now gated by `NativeInsetShimGate` — see #9316 below) —
+`CapacitorMainActivity.adjustWebViewHeightForKeyboard`.**
 Driven from the existing keyboard `OnGlobalLayoutListener`:
 
 - while the keyboard is up: set an explicit WebView **layout height** to the
@@ -171,8 +172,10 @@ Driven from the existing keyboard `OnGlobalLayoutListener`:
 - while the keyboard is down: restore the resting height
   (`webViewLayoutHeightDefault`, captured at startup, e.g. `MATCH_PARENT`), so the
   plugin's normal margin-based layout applies unchanged.
-- gated `Build.VERSION.SDK_INT < 30`, so on API >= 30 it is a strict no-op and the
-  behavior verified in 18.12.0 is **untouched**.
+- ~~gated `Build.VERSION.SDK_INT < 30`, so on API >= 30 it is a strict no-op and
+  the behavior verified in 18.12.0 is **untouched**.~~ Gate since broadened to
+  `SDK < 35 && WebView < 140` (`NativeInsetShimGate`, #9316 below); outside that
+  band it still returns before writing anything.
 
 > **Why height, not `bottomMargin` and not the plugin's listener.** The plugin owns
 > `webView.bottomMargin` and rewrites it to 0 on every inset dispatch while the IME
@@ -248,7 +251,8 @@ This is **not** the reverted-#8295 trap above: it reads the pure VisualViewport
 `--keyboard-height`, never augments it with native data. Coverage across the
 device classes this doc tracks:
 
-- **API < 30** — the SDK 28 native fix shrinks the WebView layout height, so
+- **API < 35 + WebView < 140** (originally API < 30 for the SDK 28 report;
+  broadened for #9316) — the native shim shrinks the WebView layout height, so
   `100%` is already above the keyboard and `--keyboard-height == 0`; the rule is
   `100% - 0`. Works.
 - **API >= 30, window resizes** (verified 18.12.0) — `--keyboard-height == 0`,
@@ -296,8 +300,9 @@ the existing keyboard `OnGlobalLayoutListener`, measure the overlap
 (= status-bar height, reliable on API 28; the same frame the keyboard path reads)
 and `getLocationOnScreen` is the WebView's top (0 edge-to-edge, == status-bar
 height once inset). Publish it (physical px → CSS px, deduped) as the
-`--android-status-bar-overlap` CSS var, gated **SDK < 30 AND WebView < 140**
-(mirrors the keyboard shim, never fights SystemBars). The var is folded into the
+`--android-status-bar-overlap` CSS var, gated by `NativeInsetShimGate`
+(**SDK < 35 AND WebView < 140** since #9316; originally SDK < 30 — mirrors the
+keyboard shim, never fights SystemBars). The var is folded into the
 SCSS fallback (`_css-variables.scss`) — NOT written from JS, so it never races
 SystemBars on `--safe-area-inset-*`:
 
@@ -320,6 +325,19 @@ SystemBars on `--safe-area-inset-*`:
   env()==0 but is excluded by the SDK < 30 gate; rare (WebView auto-updates above
   API 30) — broaden the gate to WebView-only if it ever surfaces.~~ **It surfaced
   (#9316); the gate was broadened — see the section below.**
+- **Known gap, pre-existing — follow-up, not part of #9316:** SystemBars 8.4 also
+  injects `--safe-area-inset-top: 0px` _inline_ on its non-passthrough path at
+  **every** API level (`SystemBars.initWindowInsetsListener`: zeroed `newInsets` →
+  `injectSafeAreaCSS`, re-fired on `onPageCommitVisible`, `onDOMReady` and each
+  IME toggle). `var(--safe-area-inset-top, …)` therefore resolves to `0px` and the
+  `max(env(), var(--android-status-bar-overlap))` fallback is never consulted — the
+  overlap var published by `pushStatusBarOverlap` is shadowed on exactly the band
+  the shim runs on, so the header fix above is most likely inert there. Not yet
+  device-verified. To settle it: log
+  `getComputedStyle(document.documentElement).getPropertyValue('--safe-area-top')`
+  on the API 34 emulator; if `0px`, move the overlap out of the fallback, e.g.
+  `max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), var(--android-status-bar-overlap, 0px))`
+  (safe: the var is only ever written where the gate is on).
 - The var lives only as an inline style on the document, so a web-side reload
   (`window.location.reload()` — language change, PWA update, sync-conflict
   recovery) wipes it. The native dedupe (`lastStatusBarOverlapCssPx`) is reset in
@@ -348,20 +366,21 @@ the `position: fixed` bar stays at the bottom of a viewport that extends behind
 the IME. The reporters' before/after screenshots are pixel-identical, which is
 exactly this signature.
 
-**Why `adjustResize` does not save us — INFERRED, not yet observed.** This is
-read off the sources below, not measured on a device in the affected band; treat
-it as the working explanation and confirm it before building on it (an API 30–34
-emulator settles it — the window configuration does not depend on the WebView
-version, so any device in the band answers the question). The manifest declares
+**Why `adjustResize` does not save us — read off the sources, then confirmed on
+the API 34 emulator (measured 2026-09; see Validation below: the root stayed 640 px
+while the visible frame dropped to 405).** The manifest declares
 `windowSoftInputMode="adjustResize"`, so the obvious question is why the window
 does not simply shrink. Because Capacitor's StatusBar plugin runs with
 `overlaysWebView: true` (`capacitor.config.ts`), which applies
 `SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN` to the decor
-view (`StatusBar.setOverlaysWebView`) — and under layout-fullscreen `adjustResize`
-stops resizing for the IME. That is the long-standing Android behaviour the
-`getWindowVisibleDisplayFrame` + explicit-height workaround exists for, and it is
-SDK-independent below 35, which is why the symptom never depended on the API
-level the original gate keyed off.
+view (`StatusBar.setOverlaysWebView`). The operative flag is `LAYOUT_STABLE`: with
+it set the decor view skips the fits-system-windows padding that `adjustResize`
+relies on, so the window keeps its full height while the IME is up. That is the
+long-standing Android behaviour the `getWindowVisibleDisplayFrame` +
+explicit-height workaround exists for, and it is SDK-independent below 35, which
+is why the symptom never depended on the API level the original gate keyed off.
+Real-device confirmation in the band is still outstanding (the window configuration
+does not depend on the WebView version, so any device in the band answers it).
 
 **Why the old gate's assumption failed.** `SDK_INT < 30` encoded "API >= 30
 implies a current WebView, because it auto-updates." Not on a custom ROM:
@@ -402,8 +421,12 @@ be _resize-detecting_. This shim already is, structurally: it sets the WebView's
 layout height to an **absolute** target read from the visible frame
 (`rect.bottom − webViewTop`), not a delta. On a device where the window already
 shrank for the IME, the WebView bottom is already at `rect.bottom`, so the
-computed height equals the current one and nothing moves. That property is what
-makes broadening the gate safe; do not replace it with a delta-based inset.
+computed height equals the one in effect. The shim still writes it once — the
+resting value is `MATCH_PARENT`, which never equals a px target — but the write is
+a no-op in effect: same height, nothing moves, no second inset stacks on the
+system's own. That property is what makes a gate mistake harmless in the resize
+direction; what keeps the two owners from both acting is the gate itself. Do not
+replace the absolute target with a delta-based inset.
 
 **Validation — `ImeInsetShimInstrumentedTest` (CI, both inset owners).** No
 device on hand sits in the widened band, and the reporter who offered to test had
@@ -424,28 +447,33 @@ The test derives the gate's inputs the way the activity does
 and asserts the **mechanism** the gate selects — an explicit WebView height equal
 to `ImeWebViewHeight.targetHeight(rect.bottom, webViewTop)` under the shim,
 untouched layout params where SystemBars owns the inset — plus, on every API
-level, the **symptom**: WebView bottom at or above the keyboard top,
-`window.innerHeight` shrank (what lifts the `position: fixed` bar), the height
-stable across a later layout pass (no feedback loop), and the resting height
-restored on hide. Emulators report a hardware keyboard, so both scripts run
+level, the **symptom**: WebView bottom _at_ the keyboard top (within 2 px, both
+directions — a WebView ending well above it is the #8508 double-inset squash and
+fails too), `window.innerHeight` shrank (what lifts the `position: fixed` bar),
+the height stable across a later layout pass (no feedback loop, and the shim still
+off where SystemBars owns the inset), and the resting height restored on hide. The
+API 34 step also passes `expectShim=true` as an instrumentation argument, so the
+test fails rather than silently switching branch if that image is ever refreshed
+with a WebView ≥ 140. Emulators report a hardware keyboard, so both scripts run
 `settings put secure show_ime_with_hard_keyboard 1` first; without it the IME
 never opens and the test fails on its first wait rather than passing vacuously.
 
-Still open: the API 34 row also settles the "adjustResize does not resize" inference
-above — the window kept its full 640 px until the shim pinned it (had the framework
-resized, `paramsHeight` would have been a no-op write of the height already in
-effect). Not yet observed on a real device in the band; the reporters' A/B with
-WebView 151/153 remains the field evidence.
+The API 34 row is also what settled the "`adjustResize` does not resize" question
+above: the window kept its full 640 px until the shim pinned it (had the framework
+resized, `paramsHeight` would still read `target`, but `webViewHeight` would
+already have equalled it before the shim's pass). Real-device confirmation in the
+band is still outstanding; the reporters' A/B with WebView 151/153 remains the
+field evidence.
 
 **On a reporter's device, validate the mechanism, not just the symptom.** The
-shim is a strict no-op wherever the window already resizes, so "the bar looks
-fixed" cannot distinguish a working shim from one that never ran — and a
+shim's write changes nothing visible wherever the window already resizes, so "the
+bar looks fixed" cannot distinguish a working shim from one that never ran — and a
 coincidental fix would send the next regression hunt down the wrong path.
 `logImeGeometryOnTransition` prints the gate inputs and geometry once per keyboard
 transition; it is off unless enabled, so ask the reporter for:
 
 ```
-adb shell setprop log.tag.SUPKeyboard DEBUG   # then restart the app
+adb shell setprop log.tag.SUPKeyboard DEBUG   # no restart needed: read live
 adb logcat -s SUPKeyboard
 adb shell dumpsys webviewupdate | grep -i 'Current WebView package'
 ```
@@ -456,11 +484,14 @@ The line is printed **after** the shim's pass, so on a fixed device the
 
 - `shim=false` → the gate is off: compare `wvMajor=` against the `dumpsys`
   provider. The version source is wrong, not the theory.
-- `target` set but `paramsHeight` unchanged → the shim ran and bailed on a
-  degenerate frame, or the height was already correct (the device resized itself,
-  in which case the shim is a legitimate no-op — see `ImeWebViewHeight`).
+- `target` set but `paramsHeight` unchanged (still `-1`) → the shim bailed on a
+  degenerate frame on that pass. Note a device that resized itself does **not**
+  look like this: the shim still writes `paramsHeight == target` there; what tells
+  it apart is `webViewHeight` already equalling `target` _before_ the shim's pass
+  (see `ImeWebViewHeight`).
 - no line at all → the listener never saw a transition; check the tag is enabled
-  and the app was restarted after `setprop`.
+  (`Log.isLoggable` reads the property live, no restart needed) and that the
+  keyboard actually crossed the 15% threshold.
 
 `webViewHeight` lags by one layout pass — that is expected, not a failure.
 
@@ -493,12 +524,15 @@ items to **check**, not to blind-fix — a blind fix risks re-creating #8508.
    insets while injecting real px into the vars, so the two families disagree.
    Confirm bottom-nav / add-task-bar spacing on API 35/36; reconcile to one source
    per band if it is wrong.
-3. **API 30-34 + WebView < 140 IME owner.** The native shim is gated `SDK_INT < 30`
-   deliberately (newer APIs were observed to resize the window for the IME, and
-   insetting on top of that re-creates the #8508 squash). Under SystemBars,
-   WebView < 140 gets no IME padding below API 35. Verify whether the window still
-   resizes on API 30-34: if it does, there is no gap; if it does not, extend the
-   shim to `< 35 && WebView < 140` — but only after confirming on a device.
+3. ~~**API 30-34 + WebView < 140 IME owner.** The native shim is gated
+   `SDK_INT < 30` deliberately (newer APIs were observed to resize the window for
+   the IME, and insetting on top of that re-creates the #8508 squash). Under
+   SystemBars, WebView < 140 gets no IME padding below API 35. Verify whether the
+   window still resizes on API 30-34: if it does, there is no gap; if it does not,
+   extend the shim to `< 35 && WebView < 140` — but only after confirming on a
+   device.~~ **Done (#9316):** the window does not resize there; the shim is gated
+   `< 35 && WebView < 140` (`NativeInsetShimGate`) and validated on the API 34
+   emulator — see the #9316 section.
 4. **CDK overlay / context-menu top position shifts on API >= 35.**
    `--safe-area-inset-top` resolves to real px there (it was 0 on Android before),
    so connected overlays clamp below the status bar. Likely more correct; re-test

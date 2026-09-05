@@ -17,16 +17,18 @@ set -uo pipefail
 DIAG=build/instrumentation-diagnostics/api34-ime
 mkdir -p "$DIAG"
 
-# android-emulator-runner only kills its emulator in a post step, so if the
-# API 35 session above is still alive there are two devices attached and bare
-# adb (and Gradle's connected task) would refuse or fan out. Pin to the newest
-# emulator: ports are handed out ascending, so the highest serial is this one.
-ANDROID_SERIAL="$(adb devices | awk '/^emulator-/ { print $1 }' | sort | tail -n 1)"
-if [ -z "$ANDROID_SERIAL" ]; then
-  echo "::error::no emulator attached"
-  exit 1
+# android-emulator-runner exports ANDROID_SERIAL for the emulator it booted and
+# kills that emulator when its script ends, so the API 35 session is gone by the
+# time this runs and exactly one device is attached. Honour the export; only if
+# it is missing (running this by hand) fall back to the single attached device.
+if [ -z "${ANDROID_SERIAL:-}" ]; then
+  ANDROID_SERIAL="$(adb devices | awk '/^emulator-.*[[:space:]]device$/ { print $1 }')"
+  if [ "$(printf '%s\n' "$ANDROID_SERIAL" | grep -c .)" -ne 1 ]; then
+    echo "::error::expected exactly one emulator attached, got: ${ANDROID_SERIAL:-none}"
+    exit 1
+  fi
+  export ANDROID_SERIAL
 fi
-export ANDROID_SERIAL
 echo "Using $ANDROID_SERIAL"
 
 # The emulator reports a hardware keyboard; without this the system keeps the
@@ -38,8 +40,12 @@ adb shell settings put secure show_ime_with_hard_keyboard 1
 adb shell dumpsys webviewupdate | grep -i 'Current WebView package' || true
 adb logcat -c || true
 
+# expectShim=true pins the band: if this image is ever refreshed with a WebView
+# >= 140 the gate flips to the SystemBars branch and the test would stay green
+# while the #9316 band silently lost its only coverage. With the pin it fails.
 timeout 480 ./gradlew :app:connectedPlayDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest
+  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest \
+  -Pandroid.testInstrumentationRunnerArguments.expectShim=true
 status=$?
 if [ "$status" -eq 124 ]; then
   echo "::error::ImeInsetShimInstrumentedTest exceeded 8 minutes on API 34 — see the android-instrumentation-diagnostics artifact"

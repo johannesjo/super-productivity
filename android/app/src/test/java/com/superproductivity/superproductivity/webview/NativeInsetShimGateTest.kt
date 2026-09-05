@@ -71,26 +71,38 @@ class NativeInsetShimGateTest {
 
     @Test
     fun `trusts versions that describe the provider actually in use`() {
-        // getCurrentWebViewPackage() and the user-agent string both describe the
-        // active provider, which is what SystemBars branches on.
-        assertEquals(
-            124,
-            NativeInsetShimGate.activeProviderMajor(
-                result(
-                    majorVersion = 124,
-                    source = WebViewCompatibilityChecker.VersionSource.PACKAGE,
-                    providerPackageIsCurrent = true,
+        // getCurrentWebViewPackage() is what SystemBars branches on, whichever
+        // source the checker ended up reporting the number from.
+        for (source in WebViewCompatibilityChecker.VersionSource.values()) {
+            assertEquals(
+                124,
+                NativeInsetShimGate.activeProviderMajor(
+                    result(
+                        majorVersion = 124,
+                        source = source,
+                        providerPackageIsCurrent = true,
+                    )
                 )
             )
+        }
+    }
+
+    @Test
+    fun `runs on a user-agent reading because it only exists when SystemBars reads 0`() {
+        // The checker falls back to the user-agent string only when
+        // getCurrentWebViewPackage() failed — which is exactly when SystemBars
+        // treats the version as 0 and applies nothing. Trusting a UA major >= 140
+        // there would switch the shim off too and leave no inset owner at all.
+        val fromUserAgent = result(
+            majorVersion = 152,
+            source = WebViewCompatibilityChecker.VersionSource.USER_AGENT,
+            providerPackageIsCurrent = false,
         )
-        assertEquals(
-            126,
-            NativeInsetShimGate.activeProviderMajor(
-                result(
-                    majorVersion = 126,
-                    source = WebViewCompatibilityChecker.VersionSource.USER_AGENT,
-                    providerPackageIsCurrent = false,
-                )
+        assertNull(NativeInsetShimGate.activeProviderMajor(fromUserAgent))
+        assertTrue(
+            NativeInsetShimGate.shouldRunShim(
+                sdkInt = 34,
+                webViewMajor = NativeInsetShimGate.activeProviderMajor(fromUserAgent),
             )
         )
     }

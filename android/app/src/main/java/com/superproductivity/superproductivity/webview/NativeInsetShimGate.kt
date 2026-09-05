@@ -58,18 +58,17 @@ object NativeInsetShimGate {
      * `com.android.webview` 124: feeding the gate 150 would switch the shim off on
      * the one device it exists for, with `SystemBars` (seeing 0) off as well.
      *
-     * So only an authoritative reading counts — `getCurrentWebViewPackage()`
-     * ([WebViewCompatibilityChecker.Result.providerPackageIsCurrent]) or the
-     * user-agent string, both of which describe the provider actually in use.
-     * Anything else degrades to `null`, which runs the shim.
+     * So only a `getCurrentWebViewPackage()` reading counts
+     * ([WebViewCompatibilityChecker.Result.providerPackageIsCurrent]). The
+     * user-agent string also describes the active provider, but the checker only
+     * falls back to it when `getCurrentWebViewPackage()` failed — precisely the
+     * case where `SystemBars` reads 0 and is off — so trusting a UA major >= 140
+     * there would switch the shim off as well and leave the device with no inset
+     * owner: the #9316 symptom on a perfectly current WebView. Anything but the
+     * current-package reading degrades to `null`, which runs the shim.
      */
     fun activeProviderMajor(result: WebViewCompatibilityChecker.Result?): Int? =
-        result
-            ?.takeIf {
-                it.providerPackageIsCurrent ||
-                    it.source == WebViewCompatibilityChecker.VersionSource.USER_AGENT
-            }
-            ?.majorVersion
+        result?.takeIf { it.providerPackageIsCurrent }?.majorVersion
 
     fun shouldRunShim(sdkInt: Int, webViewMajor: Int?): Boolean {
         if (sdkInt >= SDK_WITH_SYSTEM_BARS_IME_PADDING) return false
